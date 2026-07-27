@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.6](https://github.com/zuohuadong/svadmin/compare/sveltekit-v0.9.5...sveltekit-v0.9.6) (2026-07-27)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** stabilize AutoTable state and search ([#195](https://github.com/zuohuadong/svadmin/issues/195)) ([24d158e](https://github.com/zuohuadong/svadmin/commit/24d158e5f6f6d5c475a9032805a277e2e4f15279))
+
 ## [0.9.5](https://github.com/zuohuadong/svadmin/compare/sveltekit-v0.9.4...sveltekit-v0.9.5) (2026-07-11)
 
 
