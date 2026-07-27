@@ -68,7 +68,7 @@
   "overrides": {
     "@sveltejs/kit": "2.70.1",
     "astro": "7.1.1",
-    "brace-expansion": "5.0.7",
+    "brace-expansion": "5.0.8",
     "cookie": "0.7.2",
     "devalue": "5.8.1",
     "dompurify": "3.4.12",
@@ -79,7 +79,7 @@
     "isomorphic-dompurify": "3.19.0",
     "joi": "17.13.4",
     "js-yaml": "4.3.0",
-    "postcss": "8.5.16",
+    "postcss": "8.5.23",
     "qs": "6.15.3",
     "starlight-llms-txt": "0.11.0",
     "svgo": "4.0.2",
@@ -87,6 +87,7 @@
     "sveltekit-superforms": "2.30.2",
     "ts-deepmerge": "8.0.0",
     "undici": "7.28.0",
+    "valibot": "1.4.2",
     "vite": "8.1.5",
     "vitest": "4.1.10",
     "ws": "8.21.0"
