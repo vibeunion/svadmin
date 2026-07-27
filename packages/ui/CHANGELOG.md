@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.38.7](https://github.com/zuohuadong/svadmin/compare/ui-v0.38.6...ui-v0.38.7) (2026-07-27)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** unblock AutoTable release verification ([#197](https://github.com/zuohuadong/svadmin/issues/197)) ([a0b55eb](https://github.com/zuohuadong/svadmin/commit/a0b55eb0043cd04c9ff6f79d47f79801762634b6))
+
 ## [0.38.6](https://github.com/zuohuadong/svadmin/compare/ui-v0.38.5...ui-v0.38.6) (2026-07-27)
 
 

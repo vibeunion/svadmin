@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/ui",
-  "version": "0.38.6",
+  "version": "0.38.7",
   "description": "Pre-built admin UI components — AdminApp, AutoTable, AutoForm, Sidebar, Layout",
   "type": "module",
   "sideEffects": [
