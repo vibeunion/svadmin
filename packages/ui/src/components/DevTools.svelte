@@ -35,11 +35,6 @@
   const colorTheme = $derived(getColorTheme());
   const locale = $derived(i18n.locale);
 
-  // Auto-trace state changes in dev mode via Svelte 5 $inspect
-  if ((import.meta as any).env?.DEV) {
-    // eslint-disable-next-line svelte/no-inspect
-    $inspect({ path, theme, colorTheme, locale, resourceCount: resources.length });
-  }
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
