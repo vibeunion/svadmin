@@ -38,7 +38,12 @@ export function createSvelteKitRouterProvider(): RouterProvider {
       const url = resolve(...runtimeResolveArgs(path));
 
       const gotoPromise = type === 'replace'
-        ? goto(url, { replaceState: true })
+        ? goto(url, {
+          replaceState: true,
+          noScroll: true,
+          keepFocus: true,
+          invalidateAll: false,
+        })
         : goto(url);
 
       gotoPromise.then(() => {

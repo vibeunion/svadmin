@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { untrack } from 'svelte';
+  import { onDestroy, untrack } from 'svelte';
   import { cn } from '../utils.js';
   import {
     createTable,
@@ -10,23 +10,21 @@
     type ColumnVisibilityState,
     type ExpandedState,
   } from '@tanstack/svelte-table';
-  import type { Column, Header, TableFeatures, Updater } from '@tanstack/table-core';
+  import type { Column, Header, TableFeatures } from '@tanstack/table-core';
+  import { createAtom, useSelector } from '@tanstack/svelte-store';
   import {
     column_getCanSort,
     column_getIsSorted,
     column_toggleSorting,
-    column_getIsVisible,
     column_toggleVisibility,
     header_getSize,
     table_getRowModel,
-    table_getHeaderGroups,
     table_getAllLeafColumns,
     table_getIsAllRowsSelected,
     table_toggleAllRowsSelected,
     row_getIsSelected,
     row_toggleSelected,
     row_getVisibleCells,
-    row_getIsExpanded,
     row_toggleExpanded,
     cell_getValue,
   } from '@tanstack/table-core/static-functions';
@@ -130,6 +128,22 @@
   );
   let filters = $state<Filter[]>([]);
   let searchText = $state(urlState.search ?? '');
+  let appliedSearchText = $state(untrack(() => searchText));
+  let searchDebounceTimer: ReturnType<typeof setTimeout> | undefined;
+
+  function scheduleSearch(event: Event) {
+    searchText = (event.currentTarget as HTMLInputElement).value;
+    if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(() => {
+      appliedSearchText = searchText;
+      pagination = { ...pagination, current: 1 };
+      searchDebounceTimer = undefined;
+    }, 300);
+  }
+
+  onDestroy(() => {
+    if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+  });
 
   // Sync external controlled state
   $effect(() => {
@@ -151,7 +165,7 @@
       pageSize: pagination.pageSize,
       sortField: sorters[0]?.field,
       sortOrder: sorters[0]?.order,
-      search: searchText || undefined,
+      search: appliedSearchText || undefined,
     }, adminContext);
   });
 
@@ -162,16 +176,16 @@
   const activeFilterCount = $derived(Object.values(filterValues).filter(v => v.trim()).length);
   const activeFilters = $derived.by(() => {
     const result: Filter[] = [...filters];
-    if (searchText.trim() && searchableFields.length > 0) {
+    if (appliedSearchText.trim() && searchableFields.length > 0) {
       if (searchableFields.length === 1) {
-        result.push({ field: searchableFields[0].key, operator: 'contains', value: searchText });
+        result.push({ field: searchableFields[0].key, operator: 'contains', value: appliedSearchText });
       } else {
         const searchFilter: LogicalFilter = {
           operator: 'or',
           value: searchableFields.map(f => ({
             field: f.key,
             operator: 'contains',
-            value: searchText
+            value: appliedSearchText
           }))
         };
         result.push(searchFilter);
@@ -251,10 +265,10 @@
   const canExport = $derived(canExportPerm.allowed);
 
   // ─── TanStack Table state ────────────────────────────────────
-  let sorting = $state<SortingState>(untrack(() =>
+  const initialSorting = untrack<SortingState>(() =>
     sorters.map(s => ({ id: s.field, desc: s.order === 'desc' }))
-  ));
-  let columnVisibility = $state<ColumnVisibilityState>((() => {
+  );
+  const initialColumnVisibility = (() => {
     // Try to restore from localStorage first
     const storageKey = `svadmin-columns-${resourceName}`;
     if (typeof window !== 'undefined') {
@@ -269,79 +283,41 @@
       if (f.showInList === false) vis[f.key] = false;
     }
     return vis;
-  })());
-  let rowSelection = $state<RowSelectionState>({});
-  let expanded = $state.raw<ExpandedState>({});
-  let columnOrder = $state<string[]>([]);
+  })();
+  const sortingAtom = createAtom(initialSorting);
+  const columnVisibilityAtom = createAtom(initialColumnVisibility);
+  const rowSelectionAtom = createAtom({} as RowSelectionState);
+  const expandedAtom = createAtom({} as ExpandedState);
+  const columnOrderAtom = createAtom([] as string[]);
 
-  function applyTableUpdater<T>(current: T, updater: Updater<T>): T {
-    return typeof updater === 'function' ? (updater as (old: T) => T)(current) : updater;
+  const tableSorting = useSelector(sortingAtom);
+  const tableColumnVisibility = useSelector(columnVisibilityAtom);
+  const tableRowSelection = useSelector(rowSelectionAtom);
+  const tableExpanded = useSelector(expandedAtom);
+  const tableColumnOrder = useSelector(columnOrderAtom);
+
+  function rowIsExpanded(rowId: string): boolean {
+    const expanded = tableExpanded.current;
+    return expanded === true || expanded[rowId] === true;
   }
 
-  const tableSorting = $derived<SortingState>(sorting.map(sorter => ({
-    id: sorter.id,
-    desc: sorter.desc,
-  })));
-  const tableColumnVisibility = $derived<ColumnVisibilityState>({ ...columnVisibility });
-  const tableRowSelection = $derived<RowSelectionState>({ ...rowSelection });
-  const tableExpanded = $derived<ExpandedState>(expanded === true ? true : { ...expanded });
-  const tableColumnOrder = $derived<string[]>([...columnOrder]);
+  $effect(() => {
+    const nextSorters: Sort[] = tableSorting.current.map((sorter) => ({
+      field: sorter.id,
+      order: sorter.desc ? 'desc' as const : 'asc' as const,
+    }));
 
-  const sortingAtom = {
-    get: () => tableSorting,
-    set: (updater: Updater<SortingState>) => {
-      const nextSorting = applyTableUpdater(tableSorting, updater);
-      sorting = nextSorting;
-
-      const nextSorters: Sort[] = nextSorting.map((s) => ({
-        field: s.id,
-        order: s.desc ? 'desc' as const : 'asc' as const,
-      }));
-
-      if (JSON.stringify(nextSorters) !== JSON.stringify(sorters)) {
-        sorters = nextSorters;
-      }
-
-      if ((pagination.current ?? 1) !== 1) {
-        pagination = { ...pagination, current: 1 };
-      }
-    },
-  };
-
-  const columnVisibilityAtom = {
-    get: () => tableColumnVisibility,
-    set: (updater: Updater<ColumnVisibilityState>) => {
-      columnVisibility = applyTableUpdater(tableColumnVisibility, updater);
-    },
-  };
-
-  const rowSelectionAtom = {
-    get: () => tableRowSelection,
-    set: (updater: Updater<RowSelectionState>) => {
-      rowSelection = applyTableUpdater(tableRowSelection, updater);
-    },
-  };
-
-  const expandedAtom = {
-    get: () => tableExpanded,
-    set: (updater: Updater<ExpandedState>) => {
-      expanded = applyTableUpdater(tableExpanded, updater);
-    },
-  };
-
-  const columnOrderAtom = {
-    get: () => tableColumnOrder,
-    set: (updater: Updater<string[]>) => {
-      columnOrder = applyTableUpdater(tableColumnOrder, updater);
-    },
-  };
+    if (JSON.stringify(nextSorters) !== JSON.stringify(sorters)) {
+      sorters = nextSorters;
+    }
+  });
 
   // Persist column visibility to localStorage
   $effect(() => {
     const storageKey = `svadmin-columns-${resourceName}`;
     if (typeof window !== 'undefined') {
       try {
-        localStorage.setItem(storageKey, JSON.stringify(columnVisibility));
+        localStorage.setItem(storageKey, JSON.stringify(tableColumnVisibility.current));
       } catch { /* ignore quota errors */ }
     }
   });
@@ -353,8 +329,8 @@
       sorters = externalSorters;
     }
     const nextSorting = externalSorters.map(s => ({ id: s.field, desc: s.order === 'desc' }));
-    if (JSON.stringify(nextSorting) !== JSON.stringify(sorting)) {
-      sorting = nextSorting;
+    if (JSON.stringify(nextSorting) !== JSON.stringify(tableSorting.current)) {
+      sortingAtom.set(nextSorting);
     }
   });
 
@@ -397,12 +373,25 @@
       enableSorting: false,
     },
   ]);
+  const orderedColumns = $derived.by(() => {
+    const columnOrder = tableColumnOrder.current;
+    if (!columnOrder.length) return columns;
+
+    const columnsById = new Map(columns.map((column) => [column.id, column]));
+    return [
+      ...columnOrder.flatMap((id) => {
+        const column = columnsById.get(id);
+        return column ? [column] : [];
+      }),
+      ...columns.filter((column) => !columnOrder.includes(column.id ?? '')),
+    ];
+  });
 
   // ─── Create TanStack Table ────────────────────────────────────
   const tbl = createTable(
     {
       get data() { return query.data?.data ?? []; },
-      get columns() { return columns; },
+      get columns() { return orderedColumns; },
       getCoreRowModel: createCoreRowModel(),
       manualPagination: true,
       manualSorting: true,
@@ -412,15 +401,36 @@
         columnVisibility: columnVisibilityAtom,
         rowSelection: rowSelectionAtom,
         expanded: expandedAtom,
-        columnOrder: columnOrderAtom,
       },
+      onSortingChange: sortingAtom.set,
+      onColumnVisibilityChange: columnVisibilityAtom.set,
+      onRowSelectionChange: rowSelectionAtom.set,
+      onExpandedChange: expandedAtom.set,
       get enableRowSelection() { return selectable && (canDelete || batchActions); },
       get enableExpanding() { return !!expandedRowRender; },
+      getRowCanExpand: () => !!expandedRowRender,
     },
-    () => undefined,
   );
 
-  const selectedCount = $derived(Object.keys(rowSelection).length);
+  $effect.pre(() => {
+    const nextColumns = orderedColumns;
+    untrack(() => {
+      tbl.setOptions({ ...tbl.options, columns: nextColumns });
+    });
+  });
+
+  const selectedCount = $derived(Object.keys(tableRowSelection.current).length);
+  const tableView = $derived.by(() => {
+    void tableSorting.current;
+    void tableColumnVisibility.current;
+    void tableRowSelection.current;
+    void tableExpanded.current;
+    void tableColumnOrder.current;
+    return {
+      headerGroups: tbl.getHeaderGroups(),
+      rows: table_getRowModel(tbl).rows,
+    };
+  });
   const totalPages = $derived(Math.ceil((query.data?.total ?? 0) / (pagination.pageSize ?? 10)));
 
   // ─── Pagination helpers ───────────────────────────────────────
@@ -456,7 +466,7 @@
   }
 
   function confirmBatchDelete() {
-    const ids = Object.keys(rowSelection);
+    const ids = Object.keys(tableRowSelection.current);
     confirmMessage = i18n.t('common.batchDeleteConfirm', { count: ids.length });
     confirmAction = async () => {
       try {
@@ -465,7 +475,7 @@
       } catch {
         notify({ type: 'error', message: i18n.t('common.batchDeletePartialFail', { failed: 1, total: ids.length }) });
       }
-      rowSelection = {};
+      rowSelectionAtom.set({});
       confirmOpen = false;
     };
     confirmOpen = true;
@@ -520,7 +530,7 @@
       {/if}
       
       {#if selectedCount > 0 && batchActions}
-        {@render batchActions({ selectedIds: Object.keys(rowSelection) })}
+        {@render batchActions({ selectedIds: Object.keys(tableRowSelection.current) })}
       {/if}
 
       <!-- Column Visibility Picker (DropdownMenu) -->
@@ -528,14 +538,14 @@
         <DropdownMenu.Trigger>
           {#snippet child({ props })}
             <Button variant="outline" size="sm" {...props}>
-              <SlidersHorizontal class="h-4 w-4" data-icon="inline-start" /> {i18n.t('common.columns') || 'Columns'}
+              <SlidersHorizontal class="h-4 w-4" data-icon="inline-start" /> {i18n.t('common.columns')}
             </Button>
           {/snippet}
         </DropdownMenu.Trigger>
         <DropdownMenu.Content align="end" class="w-48">
           {#each table_getAllLeafColumns(tbl).filter((column: Column<TableFeatures, BaseRecord, unknown>) => !column.id.startsWith('_')) as column, _i (_i)}
             <DropdownMenu.CheckboxItem
-              checked={column_getIsVisible(column)}
+              checked={tableColumnVisibility.current[column.id] ?? true}
               onCheckedChange={(v) => column_toggleVisibility(column, !!v)}
             >
               {visibleFields.find(f => f.key === column.id)?.label ?? column.id}
@@ -561,8 +571,8 @@
         <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           type="text"
-          bind:value={searchText}
-          oninput={() => { pagination = { ...pagination, current: 1 }; }}
+          value={searchText}
+          oninput={scheduleSearch}
           placeholder={i18n.t('common.search')}
           class="pl-10 h-9"
         />
@@ -656,11 +666,11 @@
         <div class="hidden md:block">
         <Table.Root>
           <Table.Header>
-            {#each table_getHeaderGroups(tbl) as headerGroup, _i (_i)}
+            {#each tableView.headerGroups as headerGroup, _i (_i)}
               <DraggableHeader
                 columns={headerGroup.headers.map((header: Header<TableFeatures, BaseRecord, unknown>) => ({ id: header.column.id, header }))}
                 resourceName={resourceName}
-                onReorder={(newOrder) => { columnOrder = newOrder.map((column) => column.id); }}
+                onReorder={(newOrder) => columnOrderAtom.set(newOrder.map((column) => column.id))}
               >
                 {#snippet header(col, _index, dragProps)}
                   {@const header = col.header as typeof headerGroup.headers[0]}
@@ -702,7 +712,7 @@
             {/each}
           </Table.Header>
           <Table.Body>
-            {#each table_getRowModel(tbl).rows as row, _i (_i)}
+            {#each tableView.rows as row, _i (_i)}
               {@const record = row.original}
               {@const id = record[primaryKey] as string | number}
               <ContextMenu.Root>
@@ -717,8 +727,8 @@
                               onCheckedChange={() => row_toggleSelected(row)}
                             />
                           {:else if cell.column.id === '_expand'}
-                            <TooltipButton tooltip={row_getIsExpanded(row) ? i18n.t('common.collapse') : i18n.t('common.expand')} variant="ghost" size="icon" class="h-7 w-7" onclick={() => row_toggleExpanded(row)}>
-                              {#if row_getIsExpanded(row)}
+                            <TooltipButton tooltip={rowIsExpanded(row.id) ? i18n.t('common.collapse') : i18n.t('common.expand')} variant="ghost" size="icon" class="h-7 w-7" onclick={() => row_toggleExpanded(row)}>
+                              {#if rowIsExpanded(row.id)}
                                 <ChevronUp class="h-4 w-4" />
                               {:else}
                                 <ChevronDown class="h-4 w-4" />
@@ -799,7 +809,7 @@
                   {/if}
                 </ContextMenu.Content>
               </ContextMenu.Root>
-              {#if expandedRowRender && row_getIsExpanded(row)}
+              {#if expandedRowRender && rowIsExpanded(row.id)}
                 <Table.Row class="bg-muted/10 border-b border-border/10 transition-all">
                   <Table.Cell colspan={row_getVisibleCells(row).length}>
                     {@render expandedRowRender({ record })}
@@ -817,7 +827,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                       </svg>
                       <p class="text-sm font-medium text-muted-foreground mb-1">{i18n.t('common.noData')}</p>
-                      <p class="text-xs text-muted-foreground/60 mb-4">{i18n.t('common.noDataHint') || 'Get started by creating your first record.'}</p>
+                      <p class="text-xs text-muted-foreground/60 mb-4">{i18n.t('common.noDataHint')}</p>
                       {#if canCreate}
                         <Button variant="outline" size="sm" class="gap-2" onclick={() => adminContext.navigate(`/${resourceName}/create`)}>
                           <Plus class="h-3.5 w-3.5" />
@@ -835,7 +845,7 @@
 
         <!-- Mobile Card View (visible only on small screens) -->
         <div class="md:hidden space-y-3 p-2">
-          {#each table_getRowModel(tbl).rows as row, _i (_i)}
+          {#each tableView.rows as row, _i (_i)}
             {@const record = row.original}
             {@const id = record[primaryKey] as string | number}
             <div

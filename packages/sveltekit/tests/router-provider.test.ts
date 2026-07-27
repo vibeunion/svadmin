@@ -1,6 +1,11 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test';
 
-const gotoMock = mock((_url: string, _options?: { replaceState?: boolean }) => Promise.resolve());
+const gotoMock = mock((_url: string, _options?: {
+  replaceState?: boolean;
+  noScroll?: boolean;
+  keepFocus?: boolean;
+  invalidateAll?: boolean;
+}) => Promise.resolve());
 const pathsState = {
   base: '/admin',
   resolvedRoot: '../../',
@@ -46,7 +51,12 @@ describe('createSvelteKitRouterProvider', () => {
 
     expect(gotoMock).toHaveBeenCalledWith(
       '/admin/posts?search=hello+world#details',
-      { replaceState: true },
+      {
+        replaceState: true,
+        noScroll: true,
+        keepFocus: true,
+        invalidateAll: false,
+      },
     );
     expect(provider.formatLink?.('posts')).toBe('/admin/posts');
   });
