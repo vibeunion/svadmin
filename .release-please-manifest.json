@@ -1,8 +1,8 @@
 {
   "packages/core": "0.32.2",
-  "packages/ui": "0.38.5",
+  "packages/ui": "0.38.6",
   "packages/editor": "0.2.2",
-  "packages/sveltekit": "0.9.5",
+  "packages/sveltekit": "0.9.6",
   "packages/drizzle": "0.11.2",
   "packages/simple-rest": "0.9.11",
   "packages/refine-adapter": "0.10.0",

@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.38.6](https://github.com/zuohuadong/svadmin/compare/ui-v0.38.5...ui-v0.38.6) (2026-07-27)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** remove DevTools $inspect that triggered state_proxy_equality_mismatch ([8b4293d](https://github.com/zuohuadong/svadmin/commit/8b4293d07c92197f2b20ce75c81a181895da729b))
+* **ui:** stabilize AutoTable state and search ([#195](https://github.com/zuohuadong/svadmin/issues/195)) ([24d158e](https://github.com/zuohuadong/svadmin/commit/24d158e5f6f6d5c475a9032805a277e2e4f15279))
+
 ## [0.38.5](https://github.com/zuohuadong/svadmin/compare/ui-v0.38.4...ui-v0.38.5) (2026-07-22)
 
 
