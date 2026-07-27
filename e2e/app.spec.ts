@@ -56,13 +56,19 @@ test.describe('CRUD Operations', () => {
     const firstRow = table.locator('tbody tr').first();
     await expect(firstRow).toBeVisible();
 
-    const firstSortableHeader = table.locator('thead button:not([role="checkbox"])').first();
-    await firstSortableHeader.click();
     await expect.poll(() => {
       const [, query = ''] = new URL(page.url()).hash.split('?');
       const params = new URLSearchParams(query);
       return { sort: params.get('sort'), order: params.get('order') };
     }).toEqual({ sort: 'name', order: 'asc' });
+
+    const idSortableHeader = table.getByRole('button', { name: /^ID/ });
+    await idSortableHeader.click();
+    await expect.poll(() => {
+      const [, query = ''] = new URL(page.url()).hash.split('?');
+      const params = new URLSearchParams(query);
+      return { sort: params.get('sort'), order: params.get('order') };
+    }).toEqual({ sort: 'id', order: 'desc' });
 
     const firstRowCheckbox = firstRow.getByRole('checkbox');
     await firstRowCheckbox.click();
