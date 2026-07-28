@@ -11,6 +11,14 @@ export { default as ConfirmDialog } from './components/ConfirmDialog.svelte';
 export { default as Sidebar } from './components/Sidebar.svelte';
 export { default as Layout } from './components/Layout.svelte';
 export { default as Header } from './components/Header.svelte';
+export {
+  defaultAdminLayoutConfig,
+  resolveAdminLayoutConfig,
+  type AdminContentPadding,
+  type AdminLayoutConfig,
+  type AdminSidebarTheme,
+  type ResolvedAdminLayoutConfig,
+} from './layout-config.js';
 export { default as ErrorBoundary } from './components/ErrorBoundary.svelte';
 export { default as Toast } from './components/Toast.svelte';
 export { default as Breadcrumbs } from './components/Breadcrumbs.svelte';

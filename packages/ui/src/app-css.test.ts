@@ -25,4 +25,13 @@ describe('src/app.css (Tailwind source)', () => {
     expect(css).toContain('@source "./components";');
     expect(css).not.toContain('@source "./src";');
   });
+
+  it('ships the compact Vben-aligned shell variables and responsive content offset', () => {
+    const css = readFileSync(join(currentDir, 'app.css'), 'utf8');
+
+    expect(css).toContain('--svadmin-sidebar-width: 224px;');
+    expect(css).toContain('--svadmin-sidebar-collapsed-width: 60px;');
+    expect(css).toContain('--svadmin-header-height: 50px;');
+    expect(css).toContain('margin-left: var(--svadmin-sidebar-width);');
+  });
 });

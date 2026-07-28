@@ -6,12 +6,15 @@
   interface Props {
     onNavigate: RouterProvider['go'];
     locale?: string;
+    selectable?: boolean;
+    total?: number;
   }
 
-  let { onNavigate, locale = 'zh-CN' }: Props = $props();
+  let { onNavigate, locale = 'zh-CN', selectable = false, total = 1 }: Props = $props();
+  let selectedIds = $state<string[]>([]);
 
   const dataProvider = {
-    getList: async () => ({ data: [{ id: 'user-1', email: 'user@example.com' }], total: 1 }),
+    getList: async () => ({ data: [{ id: 'user-1', email: 'user@example.com' }], total }),
     getOne: async () => ({ data: { id: 'user-1' } }),
     create: async () => ({ data: { id: 'user-1' } }),
     update: async () => ({ data: { id: 'user-1' } }),
@@ -43,7 +46,8 @@
     已展开：{record.email}
   {/snippet}
 
-  <AutoTable resourceName="users" selectable={false} {expandedRowRender} />
+  <AutoTable resourceName="users" {selectable} {expandedRowRender} onSelectionChange={(ids) => { selectedIds = ids; }} />
+  <output data-testid="selected-ids">{selectedIds.join(',')}</output>
 {/snippet}
 
 <AdminApp {dataProvider} {resources} {routerProvider} {locale} dashboard={dashboard} />

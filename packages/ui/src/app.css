@@ -21,8 +21,8 @@
   }
 
   :root {
-    --radius: 0.75rem;
-    --background: oklch(0.975 0.005 264);
+    --radius: 0.5rem;
+    --background: oklch(0.982 0.003 264);
     --foreground: oklch(0.13 0.02 265);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.13 0.02 265);
@@ -38,8 +38,8 @@
     --accent-foreground: oklch(0.2 0.04 265);
     --destructive: oklch(0.577 0.245 27.325);
     --destructive-foreground: oklch(0.985 0 0);
-    --border: oklch(0.935 0.005 264);
-    --input: oklch(0.935 0.005 264);
+    --border: oklch(0.91 0.006 264);
+    --input: oklch(0.91 0.006 264);
     --ring: oklch(0.488 0.243 264.376);
     --chart-1: oklch(0.488 0.243 264.376);
     --chart-2: oklch(0.6 0.118 184.704);
@@ -1158,7 +1158,7 @@ main {
   table-layout: fixed !important;
 }
 
-@media (min-width: 1024px) {
+@media (min-width: 768px) {
   .layout-clean-flat [data-svadmin-datatable] {
     min-width: 760px !important;
   }
@@ -1370,5 +1370,109 @@ main {
   .layout-clean-flat [data-svadmin-content-page="error"] [data-slot="card-content"] {
     padding-left: 1rem !important;
     padding-right: 1rem !important;
+  }
+}
+
+/* Vben-aligned admin shell -------------------------------------------------- */
+.svadmin-shell {
+  --svadmin-sidebar-width: 224px;
+  --svadmin-sidebar-collapsed-width: 60px;
+  --svadmin-header-height: 50px;
+  --svadmin-content-max-width: none;
+}
+
+.svadmin-sidebar {
+  width: var(--svadmin-sidebar-width);
+  border-color: var(--sidebar-border);
+  background: var(--sidebar);
+  color: var(--sidebar-foreground);
+}
+
+.svadmin-sidebar[data-collapsed="true"] {
+  width: var(--svadmin-sidebar-collapsed-width);
+}
+
+.svadmin-sidebar-header,
+.svadmin-header {
+  height: var(--svadmin-header-height);
+}
+
+.svadmin-header {
+  border-color: var(--color-border, var(--border));
+  background: color-mix(in oklch, var(--card) 96%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+.svadmin-shell-content {
+  min-width: 0;
+}
+
+.svadmin-content-area {
+  background: color-mix(in oklch, var(--muted) 42%, var(--background));
+  padding: 20px 24px 24px;
+}
+
+.svadmin-content-area.svadmin-content-compact {
+  padding: 12px 16px 16px;
+}
+
+.svadmin-content-container {
+  max-width: var(--svadmin-content-max-width);
+}
+
+.svadmin-shell[data-sidebar-theme="dark"] {
+  --sidebar: oklch(0.165 0.02 265);
+  --sidebar-foreground: oklch(0.9 0.01 264);
+  --sidebar-primary: oklch(0.62 0.2 259);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.25 0.03 265);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.27 0.025 265);
+}
+
+.svadmin-shell[data-sidebar-theme="light"] {
+  --sidebar: oklch(0.995 0.002 264);
+  --sidebar-foreground: oklch(0.23 0.02 265);
+  --sidebar-accent: oklch(0.955 0.012 264);
+  --sidebar-accent-foreground: oklch(0.33 0.17 264);
+  --sidebar-border: oklch(0.91 0.006 264);
+}
+
+/* The shell preference is more specific than the optional clean-flat preset. */
+.layout-clean-flat .svadmin-shell[data-sidebar-theme="dark"] .svadmin-sidebar {
+  border-color: var(--sidebar-border) !important;
+  background: var(--sidebar) !important;
+  color: var(--sidebar-foreground) !important;
+}
+
+.layout-clean-flat .svadmin-shell[data-sidebar-theme="dark"] .svadmin-sidebar .sidebar-menu-item,
+.layout-clean-flat .svadmin-shell[data-sidebar-theme="dark"] .svadmin-sidebar .text-sidebar-foreground {
+  color: var(--sidebar-foreground) !important;
+}
+
+.layout-clean-flat .svadmin-shell[data-sidebar-theme="dark"] .svadmin-sidebar .sidebar-menu-item {
+  opacity: 0.78;
+}
+
+.layout-clean-flat .svadmin-shell[data-sidebar-theme="dark"] .svadmin-sidebar .sidebar-menu-item-active,
+.layout-clean-flat .svadmin-shell[data-sidebar-theme="dark"] .svadmin-sidebar .sidebar-menu-item-active svg {
+  color: var(--sidebar-primary) !important;
+  opacity: 1;
+}
+
+@media (min-width: 768px) {
+  .svadmin-shell-content {
+    margin-left: var(--svadmin-sidebar-width);
+  }
+
+  .svadmin-shell[data-sidebar-collapsed="true"] .svadmin-shell-content {
+    margin-left: var(--svadmin-sidebar-collapsed-width);
+  }
+}
+
+@media (max-width: 767px) {
+  .svadmin-content-area,
+  .svadmin-content-area.svadmin-content-compact {
+    padding: 14px 12px calc(16px + env(safe-area-inset-bottom));
   }
 }

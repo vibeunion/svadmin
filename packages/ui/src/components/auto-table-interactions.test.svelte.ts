@@ -93,4 +93,33 @@ describe('AutoTable interactions', () => {
       expect(view.queryByText('已展开：user@example.com')).toBeNull();
     });
   });
+
+  it('keeps selectable rows usable without delete permission or batch actions', async () => {
+    const view = render(AutoTableInteractionsHarness, {
+      onNavigate: vi.fn(),
+      selectable: true,
+    });
+
+    const checkboxes = await view.findAllByRole('checkbox');
+    await fireEvent.click(checkboxes.at(-1) as HTMLElement);
+
+    expect(await view.findByText('已选择 1 项')).toBeTruthy();
+    expect(view.getByTestId('selected-ids').textContent).toBe('user-1');
+
+    await fireEvent.click(view.getByRole('button', { name: '清空选择' }));
+    await waitFor(() => {
+      expect(view.getByTestId('selected-ids').textContent).toBe('');
+    });
+  });
+
+  it('renders localized, scroll-safe pagination controls', async () => {
+    const view = render(AutoTableInteractionsHarness, {
+      onNavigate: vi.fn(),
+      total: 100,
+    });
+
+    expect(await view.findByText('第 1 页，共 10 页')).toBeTruthy();
+    expect(view.getByRole('button', { name: '上一页' }).hasAttribute('disabled')).toBe(true);
+    expect(view.getByRole('button', { name: '下一页' })).toBeTruthy();
+  });
 });

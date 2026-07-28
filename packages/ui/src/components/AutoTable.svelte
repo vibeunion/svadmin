@@ -88,6 +88,8 @@
     sorters?: Sort[];
     /** Custom batch actions to render when rows are selected */
     batchActions?: Snippet<[{ selectedIds: string[] }]>;
+    /** Called whenever the selected row ids change. */
+    onSelectionChange?: (selectedIds: string[]) => void;
   }
 
   let {
@@ -100,6 +102,7 @@
     emptyState,
     expandedRowRender,
     batchActions,
+    onSelectionChange,
     pagination: externalPagination,
     sorters: externalSorters,
   }: Props = $props();
@@ -342,7 +345,7 @@
 
   const columns = $derived<ColumnDef<TableFeatures, BaseRecord, unknown>[]>([
     // Selection column
-    ...(selectable && (canDelete || batchActions) ? [{
+    ...(selectable ? [{
       id: '_select',
       header: () => '',
       cell: () => '',
@@ -406,7 +409,7 @@
       onColumnVisibilityChange: columnVisibilityAtom.set,
       onRowSelectionChange: rowSelectionAtom.set,
       onExpandedChange: expandedAtom.set,
-      get enableRowSelection() { return selectable && (canDelete || batchActions); },
+      get enableRowSelection() { return selectable; },
       get enableExpanding() { return !!expandedRowRender; },
       getRowCanExpand: () => !!expandedRowRender,
     },
@@ -422,6 +425,9 @@
   });
 
   const selectedCount = $derived(Object.keys(tableRowSelection.current).length);
+  $effect(() => {
+    onSelectionChange?.(Object.keys(tableRowSelection.current));
+  });
   const tableView = $derived.by(() => {
     void tableSorting.current;
     void tableColumnVisibility.current;
@@ -512,9 +518,9 @@
 
 <div class="space-y-4">
   <!-- Header -->
-  <div class="flex flex-wrap items-center justify-between gap-2">
+  <div class="flex flex-wrap items-center justify-between gap-2" data-svadmin-list-header>
     <h1 class="text-lg sm:text-xl font-semibold text-foreground">{resource.label}</h1>
-    <div class="flex flex-wrap items-center gap-2">
+    <div class="flex flex-wrap items-center gap-2" data-svadmin-list-actions>
       {#if canExport}
         <Button variant="outline" size="sm" onclick={exportCSV}>
           <Download class="h-4 w-4" data-icon="inline-start" /> {i18n.t('common.export')}
@@ -567,7 +573,7 @@
   </div>
 
   <!-- Search and Advanced Filters -->
-  <div class="flex flex-wrap items-center gap-2">
+  <div class="flex flex-wrap items-center gap-2 rounded-lg border border-border/70 bg-card p-3" data-svadmin-table-toolbar>
     {#if searchableFields.length > 0}
       <div class="relative max-w-sm flex-1 sm:min-w-[250px]">
         <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -641,8 +647,17 @@
     {/if}
   </div>
 
+  {#if selectedCount > 0}
+    <div class="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-sm" role="status">
+      <span class="font-medium text-foreground">{i18n.t('common.selectedCount', { count: selectedCount })}</span>
+      <Button variant="ghost" size="sm" class="h-7 px-2" onclick={() => rowSelectionAtom.set({})}>
+        {i18n.t('common.clearSelection')}
+      </Button>
+    </div>
+  {/if}
+
   <!-- Table (TanStack-powered) -->
-  <div class="rounded-[24px] bg-card/80 backdrop-blur-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden ring-1 ring-border/30" role="region" aria-label="{resource.label} {i18n.t('common.list')}">
+  <div class="overflow-hidden rounded-lg border border-border/70 bg-card shadow-sm" data-svadmin-table-card role="region" aria-label="{resource.label} {i18n.t('common.list')}">
     {#if query.isLoading}
       <div class="p-4 space-y-3">
         <div class="flex gap-4 mb-2">
@@ -665,9 +680,9 @@
     {:else}
       <div in:fade={{ duration: 150 }}>
         <!-- Desktop Table (hidden on mobile) -->
-        <div class="hidden md:block">
-        <Table.Root>
-          <Table.Header>
+        <div class="hidden min-w-0 md:block" data-svadmin-table-scroll>
+        <Table.Root class="min-w-[760px]" data-svadmin-datatable>
+          <Table.Header data-svadmin-table-head>
             {#each tableView.headerGroups as headerGroup, _i (_i)}
               <DraggableHeader
                 columns={headerGroup.headers.map((header: Header<TableFeatures, BaseRecord, unknown>) => ({ id: header.column.id, header }))}
@@ -720,7 +735,7 @@
               <ContextMenu.Root>
                 <ContextMenu.Trigger>
                   {#snippet child({ props })}
-                    <Table.Row {...props} class="transition-all duration-300 border-b border-border/10 {row_getIsSelected(row) ? 'bg-primary/5' : 'hover:bg-muted/20'}">
+                    <Table.Row {...props} data-svadmin-table-row data-state={row_getIsSelected(row) ? 'selected' : undefined} class="border-b border-border/50 transition-colors duration-150 {row_getIsSelected(row) ? 'bg-primary/8' : 'hover:bg-muted/40'}">
                       {#each row_getVisibleCells(row) as cell, _i (_i)}
                         <Table.Cell>
                           {#if cell.column.id === '_select'}
@@ -851,12 +866,12 @@
             {@const record = row.original}
             {@const id = record[primaryKey] as string | number}
             <div
-              class="rounded-[20px] shadow-[0_4px_20px_rgb(0,0,0,0.03)] ring-1 ring-border/20 bg-card p-5 transition-all {row_getIsSelected(row) ? 'ring-2 ring-primary/50 bg-primary/5' : ''}"
+              class="rounded-lg border border-border/70 bg-card p-4 transition-colors {row_getIsSelected(row) ? 'border-primary/30 bg-primary/5' : ''}"
             >
               <!-- Card header: ID + select + actions -->
               <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2">
-                  {#if selectable && (canDelete || batchActions)}
+                  {#if selectable}
                     <Checkbox
                       checked={row_getIsSelected(row)}
                       onCheckedChange={() => row_toggleSelected(row)}
@@ -932,9 +947,10 @@
 
   <!-- Pagination (shadcn) -->
   {#if totalPages > 0}
-  <div class="flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-muted-foreground">
+  <div class="flex flex-col items-stretch justify-between gap-3 text-sm text-muted-foreground sm:flex-row sm:items-center" data-svadmin-pagination>
     <div class="flex items-center gap-2">
       <span>{i18n.t('common.total', { total: query.data?.total ?? 0 })}</span>
+      <span class="hidden text-muted-foreground/70 sm:inline">{i18n.t('common.pageOf', { page: currentPage, total: totalPages })}</span>
       <select
         class="h-8 w-[70px] px-1 py-1 flex items-center justify-between rounded-md border border-input bg-background text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         value={String(pagination.pageSize ?? 10)}
@@ -951,10 +967,12 @@
         <option value="100">100</option>
       </select>
     </div>
+    <div class="max-w-full overflow-x-auto pb-1 sm:pb-0">
     <PaginationUI.Root>
       <PaginationUI.Content>
         <PaginationUI.Item>
           <PaginationUI.Previous
+            aria-label={i18n.t('common.prev')}
             onclick={() => goToPage(Math.max(1, currentPage - 1))}
             disabled={currentPage <= 1}
           />
@@ -962,7 +980,7 @@
         {#each pages as page, _i (_i)}
           <PaginationUI.Item>
             {#if page === '...'}
-              <PaginationUI.Ellipsis />
+              <PaginationUI.Ellipsis label={i18n.t('common.morePages')} />
             {:else}
               <PaginationUI.Link
                 isActive={page === currentPage}
@@ -975,12 +993,14 @@
         {/each}
         <PaginationUI.Item>
           <PaginationUI.Next
+            aria-label={i18n.t('common.nextPage')}
             onclick={() => goToPage(Math.min(totalPages, currentPage + 1))}
             disabled={currentPage >= totalPages}
           />
         </PaginationUI.Item>
       </PaginationUI.Content>
     </PaginationUI.Root>
+    </div>
   </div>
   {/if}
 </div>

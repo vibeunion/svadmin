@@ -17,6 +17,7 @@
   import { Menu } from '@lucide/svelte';
   import { getComponentRegistry } from '../component-registry.svelte.js';
   import { Button } from './ui/button/index.js';
+  import { resolveAdminLayoutConfig, type AdminLayoutConfig } from '../layout-config.js';
 
   const i18n = useTranslation();
 
@@ -24,7 +25,8 @@
   let shortcutsOpen = $state(false);
   let mobileMenuOpen = $state(false);
 
-  let { children, title = 'Admin', menu, siteUrl, routeMode = 'auto' }: { children: Snippet; title?: string; menu?: MenuItem[]; siteUrl?: string; routeMode?: 'hash' | 'path' | 'auto' } = $props();
+  let { children, title = 'Admin', menu, siteUrl, routeMode = 'auto', layout }: { children: Snippet; title?: string; menu?: MenuItem[]; siteUrl?: string; routeMode?: 'hash' | 'path' | 'auto'; layout?: AdminLayoutConfig } = $props();
+  const shell = $derived(resolveAdminLayoutConfig(layout));
   const adminContext = captureAdminContext();
 
   let auth: ReturnType<typeof getAuthProvider> | null = null;
@@ -103,8 +105,12 @@
   ontouchend={handleTouchEnd}
 />
 {#if loading}
-  <div class="flex h-screen" in:fade={{ duration: 150 }}>
-    <div class="hidden md:block w-[252px] bg-sidebar/80 p-4 space-y-4">
+  <div
+    class="svadmin-shell flex h-screen"
+    style={`--svadmin-sidebar-width:${shell.sidebarWidth}px;--svadmin-sidebar-collapsed-width:${shell.collapsedSidebarWidth}px;--svadmin-header-height:${shell.headerHeight}px;--svadmin-content-max-width:${shell.contentMaxWidth}`}
+    in:fade={{ duration: 150 }}
+  >
+    <div class="hidden bg-sidebar/80 p-4 space-y-4 md:block" style={`width:${shell.sidebarWidth}px`}>
       <Skeleton class="h-8 w-32" />
       <div class="space-y-2 mt-6">
         {#each Array(5) as _, _i (_i)}
@@ -122,7 +128,13 @@
     </div>
   </div>
 {:else}
-  <div class="flex h-screen bg-background" in:fade={{ duration: 200, delay: 50 }}>
+  <div
+    class="svadmin-shell flex h-screen bg-background"
+    data-sidebar-collapsed={collapsed}
+    data-sidebar-theme={shell.sidebarTheme}
+    style={`--svadmin-sidebar-width:${shell.sidebarWidth}px;--svadmin-sidebar-collapsed-width:${shell.collapsedSidebarWidth}px;--svadmin-header-height:${shell.headerHeight}px;--svadmin-content-max-width:${shell.contentMaxWidth}`}
+    in:fade={{ duration: 200, delay: 50 }}
+  >
     <!-- Desktop sidebar -->
     <div class="hidden md:block">
       <Sidebar {collapsed} {identity} {title} {menu} {routeMode} onToggle={() => collapsed = !collapsed} onLogout={handleLogout} />
@@ -135,13 +147,7 @@
       </div>
     </Sheet.Root>
 
-    <div
-      class="flex-1 flex flex-col overflow-hidden transition-all duration-300"
-      class:md:ml-[252px]={!collapsed}
-      class:sidebar-content-expanded={!collapsed}
-      class:md:ml-[70px]={collapsed}
-      class:sidebar-content-collapsed={collapsed}
-    >
+    <div class="svadmin-shell-content flex min-w-0 flex-1 flex-col overflow-hidden transition-[margin] duration-200">
       <!-- Header with mobile hamburger -->
       <Header
         {siteUrl}
@@ -173,8 +179,11 @@
 
       <!-- Content area: responsive padding + centered max-width container
            so wide screens don't stretch content indefinitely (avoids sparse layouts) -->
-      <main class="flex-1 overflow-y-auto bg-muted/30 px-4 py-5 sm:px-5 md:px-7.5 md:py-7">
-        <div class="mx-auto w-full max-w-[1600px]">
+      <main
+        class="svadmin-content-area flex-1 overflow-y-auto"
+        class:svadmin-content-compact={shell.contentPadding === 'compact'}
+      >
+        <div class="svadmin-content-container mx-auto w-full">
           {#key getPath()}
             <div in:fly={{ x: 20, duration: 150 }} out:fade={{ duration: 80 }}>
               {@render children()}

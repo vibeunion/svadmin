@@ -54,6 +54,7 @@
   import { Badge } from './ui/badge/index.js';
   import { Skeleton } from './ui/skeleton/index.js';
   import { provideRouterState } from '../router-state.svelte.js';
+  import type { AdminLayoutConfig } from '../layout-config.js';
 
   interface Props {
     dataProvider: DataProvider;
@@ -93,6 +94,8 @@
     siteUrl?: string;
     /** Routing strategy for Sidebar links ('hash' | 'path' | 'auto') */
     routeMode?: 'hash' | 'path' | 'auto';
+    /** Vben-style shell dimensions, content density, and sidebar appearance. */
+    layout?: AdminLayoutConfig;
     /** Optional TanStack Query client override. */
     queryClient?: QueryClient;
     /** Optional TanStack Query default options override when QueryClient is not supplied. */
@@ -118,6 +121,7 @@
     menu,
     siteUrl,
     routeMode,
+    layout,
     queryClient: providedQueryClient,
     queryClientDefaultOptions,
   }: Props = $props();
@@ -305,7 +309,7 @@
   {:else if route === '/login' || route === '/register' || route === '/forgot-password' || route === '/update-password'}
     <ConfigErrorScreen title="{title} — {translation.t('common.configRequired')}" />
   {:else if isAuthenticated || !authProvider}
-    <Layout {title} {menu} {siteUrl} routeMode={resolvedRouteMode}>
+    <Layout {title} {menu} {siteUrl} {layout} routeMode={resolvedRouteMode}>
       {#key route + (params.resource ?? '') + (params.id ?? '') + (params.variant ?? '') + (params.columns ?? '')}
       <div class="svadmin-page-enter">
       {#if route === '/2fa' || route === '/authentication/branded/2fa'}

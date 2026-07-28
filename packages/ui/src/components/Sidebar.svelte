@@ -211,20 +211,18 @@
 
 <aside
   aria-label="Sidebar navigation"
-  class="fixed inset-y-0 left-0 z-30 flex flex-col border-r border-border/40 transition-all duration-300"
-  style="background-color: var(--sidebar);"
-  class:w-[252px]={!collapsed}
-  class:w-[70px]={collapsed}
+  class="svadmin-sidebar fixed inset-y-0 left-0 z-30 flex flex-col border-r transition-[width] duration-200"
+  data-collapsed={collapsed}
 >
-  <div class="flex h-[70px] items-center shrink-0" class:px-5={!collapsed} class:justify-center={collapsed}>
+  <div class="svadmin-sidebar-header flex shrink-0 items-center border-b border-sidebar-border/70" class:px-4={!collapsed} class:justify-center={collapsed}>
     {#if !collapsed}
       <a href={formatSidebarLink('/')} class="flex items-center gap-2.5 group" onclick={(e) => { e.preventDefault(); adminContext.navigate('/'); }}>
-        <div class="w-[34px] h-[34px] rounded-lg bg-gradient-to-tr from-primary to-purple-500 shrink-0 transition-transform group-hover:scale-105" style="box-shadow: 0 4px 12px oklch(0.488 0.243 264.376 / 20%);"></div>
+        <div class="h-8 w-8 shrink-0 rounded-md bg-sidebar-primary"></div>
         <span class="font-semibold text-[15px] tracking-[-0.01em] text-sidebar-foreground">{title}</span>
       </a>
     {:else}
       <a href={formatSidebarLink('/')} class="group" aria-label={title} onclick={(e) => { e.preventDefault(); adminContext.navigate('/'); }}>
-        <div class="w-[34px] h-[34px] rounded-lg bg-gradient-to-tr from-primary to-purple-500 shrink-0 transition-transform group-hover:scale-105" style="box-shadow: 0 4px 12px oklch(0.488 0.243 264.376 / 20%);"></div>
+        <div class="h-8 w-8 shrink-0 rounded-md bg-sidebar-primary"></div>
       </a>
     {/if}
   </div>

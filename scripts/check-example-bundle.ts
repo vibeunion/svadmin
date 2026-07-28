@@ -35,13 +35,14 @@ const emittedCss = await Promise.all(
 ).then((contents) => contents.join('\n'));
 
 for (const [label, selector] of [
-  ['expanded sidebar width', '.w-\\[252px\\]'],
-  ['collapsed sidebar width', '.w-\\[70px\\]'],
-  ['expanded content offset', '.md\\:ml-\\[252px\\]'],
-  ['collapsed content offset', '.md\\:ml-\\[70px\\]'],
-  ['table container radius', '.rounded-\\[24px\\]'],
+  ['expanded sidebar width variable', '--svadmin-sidebar-width:224px'],
+  ['collapsed sidebar width variable', '--svadmin-sidebar-collapsed-width:60px'],
+  ['header height variable', '--svadmin-header-height:50px'],
+  ['expanded content offset', 'margin-left:var(--svadmin-sidebar-width)'],
+  ['collapsed content offset', 'margin-left:var(--svadmin-sidebar-collapsed-width)'],
+  ['table shell selector', '[data-svadmin-table-card]'],
 ] as const) {
-  assert(emittedCss.includes(selector), `Example CSS is missing ${label} utility ${selector}`);
+  assert(emittedCss.includes(selector), `Example CSS is missing ${label} ${selector}`);
 }
 
 let largestChunk = { name: '', size: 0 };
