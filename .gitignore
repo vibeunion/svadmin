@@ -12,6 +12,7 @@ dist/
 
 # Build artifacts
 .svelte-kit/
+.svelte-check/
 .astro/
 packages/ui/svelte-check-output.txt
 

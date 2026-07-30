@@ -1,3 +1,7 @@
 [test]
 # Exclude Playwright e2e tests — they use @playwright/test runner, not bun:test
 pathIgnorePatterns = ["e2e/**", "docs/**", "**/dist/**"]
+
+[install]
+# Keep patched packages resolvable by Node-based build CLIs.
+linker = "hoisted"

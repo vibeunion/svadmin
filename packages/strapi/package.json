@@ -21,7 +21,7 @@
   },
   "peerDependencies": {
     "@svadmin/core": "workspace:*",
-    "@refinedev/strapi-v4": "^5.0.0"
+    "@refinedev/strapi-v4": "^7.0.1"
   },
   "license": "MIT",
   "repository": {

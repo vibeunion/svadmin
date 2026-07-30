@@ -1,0 +1,14 @@
+diff --git a/src/typescript.js b/src/typescript.js
+index 1105f935aa9827e990bf3aa53a26c7f3193420ec..fbb978d7d6ce9f512c19a53a5088b8690395a1df 100644
+--- a/src/typescript.js
++++ b/src/typescript.js
+@@ -114,7 +114,8 @@
+ async function try_load_ts() {
+ 	try {
+-		return (await import('typescript')).default;
++		const typescript = await import('typescript');
++		return typescript.default ?? typescript;
+ 	} catch {
+ 		throw new Error(
+ 			'You need to install TypeScript if you want to transpile TypeScript files and/or generate type definitions'
+ 		);

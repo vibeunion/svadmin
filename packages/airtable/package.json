@@ -21,7 +21,7 @@
   },
   "peerDependencies": {
     "@svadmin/core": "workspace:*",
-    "@refinedev/airtable": "^5.0.0"
+    "@refinedev/airtable": "^5.0.1"
   },
   "license": "MIT",
   "repository": {

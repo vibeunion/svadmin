@@ -43,7 +43,7 @@
     已展开：{record.email}
   {/snippet}
 
-  <AutoTable resourceName="users" selectable={false} {expandedRowRender} />
+  <AutoTable resourceName="users" selectable={false} expandedRowRender={expandedRowRender as never} />
 {/snippet}
 
-<AdminApp {dataProvider} {resources} {routerProvider} {locale} dashboard={dashboard} />
+<AdminApp {dataProvider} {resources} {routerProvider} {locale} dashboard={dashboard as never} />

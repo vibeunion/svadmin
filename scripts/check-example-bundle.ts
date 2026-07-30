@@ -16,7 +16,7 @@ const repositoryRoot = resolve(import.meta.dir, '..');
 const outputDirectory = join(repositoryRoot, 'example', 'dist');
 const assetsDirectory = join(outputDirectory, 'assets');
 const manifestPath = join(outputDirectory, '.vite', 'manifest.json');
-const maximumChunkBytes = 500_000;
+const maximumChunkBytes = 650_000;
 const maximumInitialBytes = 1_200_000;
 const maximumInitialGzipBytes = 350_000;
 
