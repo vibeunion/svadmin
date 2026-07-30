@@ -1,7 +1,8 @@
 import { spawnSync } from 'node:child_process';
 import { mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
-import { basename, join, relative, resolve, sep } from 'node:path';
+import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 const repositoryRoot = resolve(import.meta.dir, '..');
@@ -112,7 +113,8 @@ async function main(): Promise<void> {
 
   try {
     for (const [packageDirectory, packageTests] of [...vitestFilesByPackage.entries()].sort()) {
-      const vitestCli = join(packageDirectory, 'node_modules', 'vitest', 'vitest.mjs');
+      const packageRequire = createRequire(join(packageDirectory, 'package.json'));
+      const vitestCli = join(dirname(packageRequire.resolve('vitest')), 'vitest.mjs');
       const defaultConfig = join(packageDirectory, 'vitest.config.ts');
       run(nodeExecutable, [vitestCli, 'run', '--config', defaultConfig], packageDirectory);
 

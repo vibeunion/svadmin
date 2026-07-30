@@ -20,9 +20,9 @@
     "picocolors": "^1.1.1"
   },
   "devDependencies": {
-    "@types/node": "^26.1.1",
+    "@types/node": "^26.1.2",
     "@types/prompts": "^2.4.9",
-    "typescript": "^6.0.3"
+    "typescript": "^7.0.2"
   },
   "keywords": [
     "svadmin",

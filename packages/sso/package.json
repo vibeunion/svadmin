@@ -35,7 +35,7 @@
     "@svadmin/core": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "^6.0.3"
+    "typescript": "^7.0.2"
   },
   "scripts": {
     "build": "bun ../../scripts/build-node-package.ts"

@@ -21,7 +21,7 @@
   },
   "peerDependencies": {
     "@svadmin/core": "workspace:*",
-    "@refinedev/graphql": "^5.0.0"
+    "@refinedev/graphql": "^8.0.1"
   },
   "dependencies": {
     "graphql-request": "^7.4.0",
