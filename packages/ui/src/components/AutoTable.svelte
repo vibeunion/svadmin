@@ -3,7 +3,13 @@
   import { cn } from '../utils.js';
   import {
     createTable,
-    createCoreRowModel,
+    tableFeatures,
+    columnOrderingFeature,
+    columnSizingFeature,
+    columnVisibilityFeature,
+    rowExpandingFeature,
+    rowSelectionFeature,
+    rowSortingFeature,
     type ColumnDef,
     type SortingState,
     type RowSelectionState,
@@ -25,7 +31,6 @@
     row_getIsSelected,
     row_toggleSelected,
     row_getVisibleCells,
-    row_toggleExpanded,
     cell_getValue,
   } from '@tanstack/table-core/static-functions';
 
@@ -289,6 +294,14 @@
   const rowSelectionAtom = createAtom({} as RowSelectionState);
   const expandedAtom = createAtom({} as ExpandedState);
   const columnOrderAtom = createAtom([] as string[]);
+  const features = tableFeatures({
+    columnOrderingFeature,
+    columnSizingFeature,
+    columnVisibilityFeature,
+    rowExpandingFeature,
+    rowSelectionFeature,
+    rowSortingFeature,
+  });
 
   const tableSorting = useSelector(sortingAtom);
   const tableColumnVisibility = useSelector(columnVisibilityAtom);
@@ -388,12 +401,11 @@
   });
 
   // ─── Create TanStack Table ────────────────────────────────────
-  const tbl = createTable(
+  const tbl = createTable<TableFeatures, BaseRecord>(
     {
+      features,
       get data() { return query.data?.data ?? []; },
       get columns() { return orderedColumns; },
-      getCoreRowModel: createCoreRowModel(),
-      manualPagination: true,
       manualSorting: true,
       getRowId: (row: BaseRecord) => String(row[primaryKey]),
       atoms: {
@@ -402,16 +414,11 @@
         rowSelection: rowSelectionAtom,
         expanded: expandedAtom,
       },
-      onSortingChange: sortingAtom.set,
-      onColumnVisibilityChange: columnVisibilityAtom.set,
-      onRowSelectionChange: rowSelectionAtom.set,
-      onExpandedChange: expandedAtom.set,
-      get enableRowSelection() { return selectable && (canDelete || batchActions); },
+      autoResetExpanded: false,
+      get enableRowSelection() { return selectable && (canDelete || !!batchActions); },
       get enableExpanding() { return !!expandedRowRender; },
       getRowCanExpand: () => !!expandedRowRender,
     },
-    // AutoTable reads focused atoms directly; selecting the full state triggers Svelte proxy equality warnings.
-    () => undefined,
   );
 
   $effect.pre(() => {
@@ -433,6 +440,26 @@
       rows: table_getRowModel(tbl).rows,
     };
   });
+
+  function toggleRowExpanded(rowId: string): void {
+    const current = tableExpanded.current;
+    if (current === true) {
+      expandedAtom.set(Object.fromEntries(
+        table_getRowModel(tbl).flatRows
+          .filter((row) => row.id !== rowId)
+          .map((row) => [row.id, true])
+      ));
+      return;
+    }
+    if (current[rowId]) {
+      expandedAtom.set(Object.fromEntries(
+        Object.entries(current).filter(([id, isExpanded]) => id !== rowId && isExpanded)
+      ));
+      return;
+    }
+    expandedAtom.set({ ...current, [rowId]: true });
+  }
+
   const totalPages = $derived(Math.ceil((query.data?.total ?? 0) / (pagination.pageSize ?? 10)));
 
   // ─── Pagination helpers ───────────────────────────────────────
@@ -729,7 +756,7 @@
                               onCheckedChange={() => row_toggleSelected(row)}
                             />
                           {:else if cell.column.id === '_expand'}
-                            <TooltipButton tooltip={rowIsExpanded(row.id) ? i18n.t('common.collapse') : i18n.t('common.expand')} variant="ghost" size="icon" class="h-7 w-7" onclick={() => row_toggleExpanded(row)}>
+                            <TooltipButton tooltip={rowIsExpanded(row.id) ? i18n.t('common.collapse') : i18n.t('common.expand')} variant="ghost" size="icon" class="h-7 w-7" onclick={() => toggleRowExpanded(row.id)}>
                               {#if rowIsExpanded(row.id)}
                                 <ChevronUp class="h-4 w-4" />
                               {:else}
