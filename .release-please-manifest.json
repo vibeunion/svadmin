@@ -6,7 +6,7 @@
   "packages/drizzle": "0.11.2",
   "packages/simple-rest": "0.9.11",
   "packages/refine-adapter": "0.10.0",
-  "packages/sso": "0.11.4",
+  "packages/sso": "0.11.5",
   "packages/pocketbase": "0.9.9",
   "packages/supabase": "0.11.6",
   "packages/elysia": "0.10.9",
