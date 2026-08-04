@@ -3,7 +3,13 @@
   import { cn } from '../utils.js';
   import {
     createTable,
-    createCoreRowModel,
+    tableFeatures,
+    columnOrderingFeature,
+    columnSizingFeature,
+    columnVisibilityFeature,
+    rowExpandingFeature,
+    rowSelectionFeature,
+    rowSortingFeature,
     type ColumnDef,
     type SortingState,
     type RowSelectionState,
@@ -288,6 +294,14 @@
   const rowSelectionAtom = createAtom({} as RowSelectionState);
   const expandedAtom = createAtom({} as ExpandedState);
   const columnOrderAtom = createAtom([] as string[]);
+  const features = tableFeatures({
+    columnOrderingFeature,
+    columnSizingFeature,
+    columnVisibilityFeature,
+    rowExpandingFeature,
+    rowSelectionFeature,
+    rowSortingFeature,
+  });
 
   const tableSorting = useSelector(sortingAtom);
   const tableColumnVisibility = useSelector(columnVisibilityAtom);
@@ -387,12 +401,11 @@
   });
 
   // ─── Create TanStack Table ────────────────────────────────────
-  const tbl = createTable(
+  const tbl = createTable<TableFeatures, BaseRecord>(
     {
+      features,
       get data() { return query.data?.data ?? []; },
       get columns() { return orderedColumns; },
-      getCoreRowModel: createCoreRowModel(),
-      manualPagination: true,
       manualSorting: true,
       getRowId: (row: BaseRecord) => String(row[primaryKey]),
       atoms: {
@@ -401,12 +414,8 @@
         rowSelection: rowSelectionAtom,
         expanded: expandedAtom,
       },
-      onSortingChange: sortingAtom.set,
-      onColumnVisibilityChange: columnVisibilityAtom.set,
-      onRowSelectionChange: rowSelectionAtom.set,
-      onExpandedChange: expandedAtom.set,
       autoResetExpanded: false,
-      get enableRowSelection() { return selectable && (canDelete || batchActions); },
+      get enableRowSelection() { return selectable && (canDelete || !!batchActions); },
       get enableExpanding() { return !!expandedRowRender; },
       getRowCanExpand: () => !!expandedRowRender,
     },
