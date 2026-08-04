@@ -9,6 +9,7 @@
   import TooltipButton from './TooltipButton.svelte';
   import * as Tooltip from './ui/tooltip/index.js';
   import SidebarItem from './SidebarItem.svelte';
+  import SvadminLogo from './SvadminLogo.svelte';
 
   import { ScrollArea } from './ui/scroll-area/index.js';
   import * as Collapsible from './ui/collapsible/index.js';
@@ -218,13 +219,18 @@
 >
   <div class="flex h-[70px] items-center shrink-0" class:px-5={!collapsed} class:justify-center={collapsed}>
     {#if !collapsed}
-      <a href={formatSidebarLink('/')} class="flex items-center gap-2.5 group" onclick={(e) => { e.preventDefault(); adminContext.navigate('/'); }}>
-        <div class="w-[34px] h-[34px] rounded-lg bg-gradient-to-tr from-primary to-purple-500 shrink-0 transition-transform group-hover:scale-105" style="box-shadow: 0 4px 12px oklch(0.488 0.243 264.376 / 20%);"></div>
+      <a href={formatSidebarLink('/')} class="group flex items-center gap-2.5" onclick={(e) => { e.preventDefault(); adminContext.navigate('/'); }}>
+        <SvadminLogo />
         <span class="font-semibold text-[15px] tracking-[-0.01em] text-sidebar-foreground">{title}</span>
       </a>
     {:else}
-      <a href={formatSidebarLink('/')} class="group" aria-label={title} onclick={(e) => { e.preventDefault(); adminContext.navigate('/'); }}>
-        <div class="w-[34px] h-[34px] rounded-lg bg-gradient-to-tr from-primary to-purple-500 shrink-0 transition-transform group-hover:scale-105" style="box-shadow: 0 4px 12px oklch(0.488 0.243 264.376 / 20%);"></div>
+      <a
+        href={formatSidebarLink('/')}
+        class="group"
+        aria-label={title}
+        onclick={(e) => { e.preventDefault(); adminContext.navigate('/'); }}
+      >
+        <SvadminLogo />
       </a>
     {/if}
   </div>

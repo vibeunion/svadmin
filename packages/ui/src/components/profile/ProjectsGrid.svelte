@@ -3,7 +3,8 @@
   import * as Card from '../ui/card/index.js';
   import { Badge } from '../ui/badge/index.js';
   import { Button } from '../ui/button/index.js';
-  import { Users, CheckCircle2, ArrowRight } from '@lucide/svelte';
+  import { Input } from '../ui/input/index.js';
+  import { Users, CheckCircle2, ArrowRight, Search, Plus } from '@lucide/svelte';
 
   const i18n = useTranslation();
 
@@ -28,6 +29,13 @@
     projects = [],
   }: Props = $props();
 
+  let searchQuery = $state('');
+  const filtered = $derived(
+    searchQuery
+      ? projects.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.description.toLowerCase().includes(searchQuery.toLowerCase()) || p.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
+      : projects
+  );
+
   const statusConfig = {
     'active': { color: 'bg-green-500/10 text-green-600', label: 'Active' },
     'completed': { color: 'bg-blue-500/10 text-blue-600', label: 'Completed' },
@@ -38,20 +46,26 @@
 </script>
 
 <div class="space-y-4">
-  <div class="flex items-center justify-between">
+  <div class="flex flex-wrap items-center justify-between gap-3">
     <h3 class="text-lg font-semibold text-foreground">
-      {columns === 2 ? i18n.t('publicProfile.projects2Col') : i18n.t('publicProfile.projects3Col')}
+      {i18n.t('publicProfile.projectsCount', { count: filtered.length })}
     </h3>
-    <Badge variant="secondary">{projects.length}</Badge>
+    <div class="flex items-center gap-2">
+      <div class="relative">
+        <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input placeholder={i18n.t('publicProfile.searchProjects')} bind:value={searchQuery} class="w-48 pl-9" />
+      </div>
+      <Button size="sm"><Plus class="h-3.5 w-3.5 mr-1" />{i18n.t('common.create')}</Button>
+    </div>
   </div>
 
-  {#if projects.length === 0}
+  {#if filtered.length === 0}
     <div class="rounded-xl border border-dashed border-border/60 p-8 text-center">
       <p class="text-sm text-muted-foreground">{i18n.t('publicProfile.noProjects')}</p>
     </div>
   {:else}
     <div class="grid gap-4 sm:grid-cols-1 md:grid-cols-2 {gridCols}">
-      {#each projects as project (project.id)}
+      {#each filtered as project (project.id)}
         <Card.Card class="group overflow-hidden border-border/60 hover:border-primary/30 transition-colors">
           {#if project.image}
             <div class="h-32 overflow-hidden">

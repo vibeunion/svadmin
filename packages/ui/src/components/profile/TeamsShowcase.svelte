@@ -1,10 +1,10 @@
 <script lang="ts">
   import { useTranslation } from '@svadmin/core/i18n';
   import * as Card from '../ui/card/index.js';
-  import { Badge } from '../ui/badge/index.js';
   import { Button } from '../ui/button/index.js';
   import { Avatar } from '../ui/avatar/index.js';
-  import { Users, ArrowRight } from '@lucide/svelte';
+  import { Input } from '../ui/input/index.js';
+  import { Users, ArrowRight, Search, Star } from '@lucide/svelte';
 
   const i18n = useTranslation();
 
@@ -21,6 +21,7 @@
     members: TeamMember[];
     totalMembers: number;
     color?: string;
+    rating?: number;
   }
 
   interface Props {
@@ -29,19 +30,32 @@
 
   let { teams = [] }: Props = $props();
 
+  let searchQuery = $state('');
+  const filtered = $derived(
+    searchQuery
+      ? teams.filter(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.description.toLowerCase().includes(searchQuery.toLowerCase()))
+      : teams
+  );
+
   const initials = (name: string) => name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 </script>
 
 <div class="space-y-4">
-  <h3 class="text-lg font-semibold text-foreground">{i18n.t('publicProfile.teams')}</h3>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <h3 class="text-lg font-semibold text-foreground">{i18n.t('publicProfile.teamsCount', { count: filtered.length })}</h3>
+    <div class="relative">
+      <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <Input placeholder={i18n.t('publicProfile.searchTeams')} bind:value={searchQuery} class="w-48 pl-9" />
+    </div>
+  </div>
 
-  {#if teams.length === 0}
+  {#if filtered.length === 0}
     <div class="rounded-xl border border-dashed border-border/60 p-8 text-center">
       <p class="text-sm text-muted-foreground">{i18n.t('publicProfile.noTeams')}</p>
     </div>
   {:else}
-    <div class="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
-      {#each teams as team (team.id)}
+    <div class="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      {#each filtered as team (team.id)}
         <Card.Card class="border-border/60 hover:border-primary/30 transition-colors">
           <Card.CardContent class="p-4 space-y-3">
             <div class="flex items-start justify-between gap-2">
@@ -57,12 +71,14 @@
                 {/if}
                 <div>
                   <h4 class="font-semibold text-foreground">{team.name}</h4>
-                  <p class="text-xs text-muted-foreground">{team.totalMembers} {i18n.t('publicProfile.projectMembers', { count: team.totalMembers })}</p>
+                  <p class="text-xs text-muted-foreground">{i18n.t('publicProfile.projectMembers', { count: team.totalMembers })}</p>
                 </div>
               </div>
-              <Badge variant="secondary" class="shrink-0">
-                <Users class="h-3 w-3 mr-1" />{team.totalMembers}
-              </Badge>
+              {#if team.rating}
+                <span class="flex shrink-0 items-center gap-1 text-xs font-semibold text-amber-500">
+                  <Star class="h-3.5 w-3.5 fill-amber-400 text-amber-400" />{team.rating}
+                </span>
+              {/if}
             </div>
 
             <p class="text-sm text-muted-foreground line-clamp-2">{team.description}</p>
@@ -87,8 +103,11 @@
               {/if}
             </div>
 
-            <div class="pt-2 border-t">
-              <Button variant="ghost" size="sm" class="w-full">
+            <div class="flex gap-2 pt-2 border-t">
+              <Button variant="outline" size="sm" class="flex-1">
+                {i18n.t('publicProfile.join')}
+              </Button>
+              <Button variant="ghost" size="sm" class="flex-1">
                 {i18n.t('publicProfile.viewProfile')} <ArrowRight class="h-3.5 w-3.5 ml-1" />
               </Button>
             </div>

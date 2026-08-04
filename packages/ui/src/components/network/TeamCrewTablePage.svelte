@@ -30,7 +30,21 @@
     { id: '6', name: 'Emma Davis', email: 'emma@acme.com', role: 'Engineering Manager', department: 'Engineering', status: 'active', joinedAt: '2022-02-14', projects: 15 },
     { id: '7', name: 'James Wilson', email: 'james@acme.com', role: 'DevOps Engineer', department: 'Infrastructure', status: 'active', joinedAt: '2023-08-01', projects: 7 },
     { id: '8', name: 'Yuki Tanaka', email: 'yuki@acme.com', role: 'Frontend Engineer', department: 'Engineering', status: 'away', joinedAt: '2023-05-12', projects: 9 },
+    { id: '9', name: 'Priya Nair', email: 'priya@acme.com', role: 'Data Scientist', department: 'Data', status: 'active', joinedAt: '2023-09-18', projects: 5 },
+    { id: '10', name: 'Carlos Mendez', email: 'carlos@acme.com', role: 'Mobile Engineer', department: 'Engineering', status: 'active', joinedAt: '2022-07-25', projects: 11 },
+    { id: '11', name: 'Hana Sato', email: 'hana@acme.com', role: 'UX Researcher', department: 'Design', status: 'away', joinedAt: '2024-01-15', projects: 3 },
+    { id: '12', name: 'Oscar Lund', email: 'oscar@acme.com', role: 'Security Engineer', department: 'Infrastructure', status: 'active', joinedAt: '2023-03-30', projects: 6 },
+    { id: '13', name: 'Mia Torres', email: 'mia@acme.com', role: 'Content Strategist', department: 'Marketing', status: 'offline', joinedAt: '2024-02-11', projects: 2 },
+    { id: '14', name: 'Chen Wei', email: 'chen@acme.com', role: 'Platform Engineer', department: 'Engineering', status: 'active', joinedAt: '2022-10-08', projects: 13 },
+    { id: '15', name: 'Ava Novak', email: 'ava@acme.com', role: 'Product Designer', department: 'Design', status: 'active', joinedAt: '2023-06-19', projects: 7 },
+    { id: '16', name: 'Liam Ortiz', email: 'liam@acme.com', role: 'QA Automation', department: 'Engineering', status: 'away', joinedAt: '2024-04-02', projects: 4 },
+    { id: '17', name: 'Sofia Petrova', email: 'sofia@acme.com', role: 'Data Engineer', department: 'Data', status: 'active', joinedAt: '2023-11-27', projects: 8 },
+    { id: '18', name: 'David Kim', email: 'david@acme.com', role: 'Solutions Architect', department: 'Infrastructure', status: 'active', joinedAt: '2022-05-16', projects: 10 },
+    { id: '19', name: 'Elena Marsh', email: 'elena@acme.com', role: 'Engineering Manager', department: 'Engineering', status: 'active', joinedAt: '2021-12-06', projects: 14 },
+    { id: '20', name: 'Noah Fischer', email: 'noah@acme.com', role: 'Support Lead', department: 'Support', status: 'offline', joinedAt: '2024-05-20', projects: 1 },
   ];
+
+  const totalCrew = 34;
 
   const filtered = $derived(
     searchQuery
@@ -77,7 +91,7 @@
             <tr class="border-b bg-muted/30">
               <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">{i18n.t('account.member')}</th>
               <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">{i18n.t('account.role')}</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">Department</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">{i18n.t('account.department')}</th>
               <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">{i18n.t('account.status')}</th>
               <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">{i18n.t('publicProfile.projects')}</th>
               <th class="px-4 py-3 text-left text-xs font-semibold text-muted-foreground">{i18n.t('account.joined')}</th>
@@ -154,4 +168,6 @@
       </div>
     </Card.CardContent>
   </Card.Card>
+
+  <p class="text-sm text-muted-foreground">{i18n.t('network.showingUsersOf', { shown: filtered.length, total: totalCrew })}</p>
 </div>

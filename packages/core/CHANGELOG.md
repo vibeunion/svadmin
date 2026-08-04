@@ -49,7 +49,7 @@
 ### 🚀 Features
 
 * **core:** align refinedev auth and access edge cases ([a3df3e1](https://github.com/zuohuadong/svadmin/commit/a3df3e15607599aa4acb3b4dc90b6cfdc494cc21))
-* **example:** complete menu coverage and metronic high-value modules ([84384f2](https://github.com/zuohuadong/svadmin/commit/84384f299553c4962fbfc805a2af57478df675b6))
+* **example:** complete menu coverage and high-value admin modules ([84384f2](https://github.com/zuohuadong/svadmin/commit/84384f299553c4962fbfc805a2af57478df675b6))
 * **example:** expand reference app pages ([39ae832](https://github.com/zuohuadong/svadmin/commit/39ae8320e8a07297cd77fc0ba669cd590b3a300c))
 
 
@@ -78,7 +78,7 @@
 
 * **example:** polish admin demo shell ([65559dd](https://github.com/zuohuadong/svadmin/commit/65559dddb4531ecbe5540312864dec0f3d35ae1a))
 * **ui:** add clean-flat layout preset for high contrast modern aesthetics ([8dba20b](https://github.com/zuohuadong/svadmin/commit/8dba20b7049362ca7e4c9a3de3063660ea8f97db))
-* **ui:** add Metronic-inspired admin pages ([bfa10db](https://github.com/zuohuadong/svadmin/commit/bfa10db87a80c6781e4668340437259705ed6fdc))
+* **ui:** add reference-inspired admin pages ([bfa10db](https://github.com/zuohuadong/svadmin/commit/bfa10db87a80c6781e4668340437259705ed6fdc))
 * **ui:** add Settings sub-pages, ErrorPage, Dashboard expansion and i18n ([eb55054](https://github.com/zuohuadong/svadmin/commit/eb55054458928ae2033113e8fd577628a9261819))
 
 ## [0.27.1](https://github.com/zuohuadong/svadmin/compare/core-v0.27.0...core-v0.27.1) (2026-06-04)

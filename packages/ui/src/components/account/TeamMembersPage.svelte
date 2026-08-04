@@ -3,7 +3,8 @@
   import * as Card from '../ui/card/index.js';
   import { Button } from '../ui/button/index.js';
   import { Input } from '../ui/input/index.js';
-  import { Search, UserPlus, MoreHorizontal } from '@lucide/svelte';
+  import { Label } from '../ui/label/index.js';
+  import { Search, UserPlus, MoreHorizontal, Link2, Copy, Send } from '@lucide/svelte';
 
   const i18n = useTranslation();
 
@@ -19,6 +20,15 @@
   }
 
   let searchQuery = $state('');
+  let inviteEmail = $state('');
+  let inviteRole = $state('Viewer');
+  let linkCopied = $state(false);
+
+  function copyInviteLink() {
+    navigator.clipboard?.writeText('https://acme.com/invite/xK7fQ2').catch(() => {});
+    linkCopied = true;
+    setTimeout(() => linkCopied = false, 2000);
+  }
 
   let members = $state<TeamMember[]>([
     { id: '1', name: 'Alex Chen', email: 'alex@acme.com', role: 'Admin', department: 'Engineering', status: 'active', lastActive: 'Just now' },
@@ -27,6 +37,14 @@
     { id: '4', name: 'Lisa Wang', email: 'lisa@acme.com', role: 'Editor', department: 'Engineering', status: 'active', lastActive: '1 hour ago' },
     { id: '5', name: 'Tom Brown', email: 'tom@acme.com', role: 'Viewer', department: 'Sales', status: 'inactive', lastActive: '2 weeks ago' },
     { id: '6', name: 'Emma Davis', email: 'emma@acme.com', role: 'Admin', department: 'Engineering', status: 'active', lastActive: '10 min ago' },
+    { id: '7', name: 'James Wilson', email: 'james@acme.com', role: 'Editor', department: 'Infrastructure', status: 'active', lastActive: '30 min ago' },
+    { id: '8', name: 'Yuki Tanaka', email: 'yuki@acme.com', role: 'Editor', department: 'Engineering', status: 'invited', lastActive: 'Pending' },
+    { id: '9', name: 'Priya Nair', email: 'priya@acme.com', role: 'Viewer', department: 'Data', status: 'active', lastActive: '2 hours ago' },
+    { id: '10', name: 'Carlos Mendez', email: 'carlos@acme.com', role: 'Editor', department: 'Engineering', status: 'active', lastActive: '1 day ago' },
+    { id: '11', name: 'Hana Sato', email: 'hana@acme.com', role: 'Viewer', department: 'Design', status: 'active', lastActive: '3 hours ago' },
+    { id: '12', name: 'Oscar Lund', email: 'oscar@acme.com', role: 'Viewer', department: 'Infrastructure', status: 'inactive', lastActive: '1 month ago' },
+    { id: '13', name: 'Mia Torres', email: 'mia@acme.com', role: 'Editor', department: 'Marketing', status: 'invited', lastActive: 'Pending' },
+    { id: '14', name: 'Chen Wei', email: 'chen@acme.com', role: 'Admin', department: 'Engineering', status: 'active', lastActive: '15 min ago' },
   ]);
 
   const filtered = $derived(
@@ -59,7 +77,7 @@
 <div class="space-y-6" data-svadmin-content-page="account">
   <div class="flex items-start justify-between gap-4">
     <div>
-      <h2 class="text-xl font-semibold text-foreground">{i18n.t('account.teamMembers')}</h2>
+      <h2 class="text-xl font-semibold text-foreground">{i18n.t('account.teamMembersCount', { count: members.length })}</h2>
       <p class="mt-1 text-sm text-muted-foreground">{i18n.t('account.teamMembersDescription')}</p>
     </div>
     <Button size="sm">
@@ -70,6 +88,54 @@
   <div class="relative">
     <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
     <Input placeholder={i18n.t('common.search')} bind:value={searchQuery} class="pl-9" />
+  </div>
+
+  <!-- Invite people -->
+  <div class="grid gap-4 lg:grid-cols-2">
+    <Card.Card class="border-border/60">
+      <Card.CardHeader class="pb-3">
+        <Card.CardTitle class="text-base">{i18n.t('account.invitePeople')}</Card.CardTitle>
+        <Card.CardDescription>{i18n.t('account.invitePeopleDescription')}</Card.CardDescription>
+      </Card.CardHeader>
+      <Card.CardContent class="space-y-3">
+        <div class="grid gap-3 sm:grid-cols-[1fr_140px]">
+          <div class="space-y-1.5">
+            <Label for="invite-email">Email</Label>
+            <Input id="invite-email" type="email" placeholder="name@example.com" bind:value={inviteEmail} />
+          </div>
+          <div class="space-y-1.5">
+            <Label for="invite-role">{i18n.t('account.role')}</Label>
+            <select id="invite-role" bind:value={inviteRole} class="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring">
+              <option>Admin</option>
+              <option>Editor</option>
+              <option>Viewer</option>
+            </select>
+          </div>
+        </div>
+        <div class="flex justify-end">
+          <Button size="sm" disabled={!inviteEmail}>
+            <Send class="h-3.5 w-3.5 mr-1" />{i18n.t('account.sendInvite')}
+          </Button>
+        </div>
+      </Card.CardContent>
+    </Card.Card>
+
+    <Card.Card class="border-border/60">
+      <Card.CardHeader class="pb-3">
+        <Card.CardTitle class="flex items-center gap-2 text-base">
+          <Link2 class="h-4 w-4 text-muted-foreground" />{i18n.t('account.inviteWithLink')}
+        </Card.CardTitle>
+        <Card.CardDescription>{i18n.t('account.inviteLinkHint')}</Card.CardDescription>
+      </Card.CardHeader>
+      <Card.CardContent class="space-y-3">
+        <div class="flex items-center gap-2">
+          <Input readonly value="https://acme.com/invite/xK7fQ2" class="flex-1 font-mono text-xs" />
+          <Button size="sm" variant="outline" onclick={copyInviteLink}>
+            <Copy class="h-3.5 w-3.5 mr-1" />{linkCopied ? '✓' : ''} {i18n.t('account.copyLink')}
+          </Button>
+        </div>
+      </Card.CardContent>
+    </Card.Card>
   </div>
 
   <!-- Members grid -->

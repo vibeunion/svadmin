@@ -19,9 +19,12 @@
 
   interface Props {
     activities?: ActivityItem[];
+    showAutoRefresh?: boolean;
   }
 
-  let { activities = [] }: Props = $props();
+  let { activities = [], showAutoRefresh = true }: Props = $props();
+
+  let autoRefresh = $state(false);
 
   const typeConfig: Record<string, { icon: Component; color: string; action: string }> = {
     'posted': { icon: MessageSquare, color: 'bg-blue-500/10 text-blue-500', action: i18n.t('publicProfile.activityPosted') },
@@ -33,7 +36,26 @@
 </script>
 
 <div class="space-y-4">
-  <h3 class="text-lg font-semibold text-foreground">{i18n.t('publicProfile.activity')}</h3>
+  <div class="flex items-center justify-between gap-3">
+    <h3 class="text-lg font-semibold text-foreground">{i18n.t('publicProfile.activity')}</h3>
+    {#if showAutoRefresh}
+      <div class="flex items-center gap-2 text-xs text-muted-foreground">
+        <span>{i18n.t('publicProfile.autoRefresh')}:</span>
+        <div class="flex rounded-md border border-border/60 p-0.5">
+          <button
+            type="button"
+            class="rounded px-2 py-0.5 text-xs font-medium transition-colors {autoRefresh ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}"
+            onclick={() => autoRefresh = true}
+          >{i18n.t('common.on')}</button>
+          <button
+            type="button"
+            class="rounded px-2 py-0.5 text-xs font-medium transition-colors {autoRefresh ? 'text-muted-foreground hover:text-foreground' : 'bg-primary text-primary-foreground'}"
+            onclick={() => autoRefresh = false}
+          >{i18n.t('common.off')}</button>
+        </div>
+      </div>
+    {/if}
+  </div>
 
   {#if activities.length === 0}
     <div class="rounded-xl border border-dashed border-border/60 p-8 text-center">

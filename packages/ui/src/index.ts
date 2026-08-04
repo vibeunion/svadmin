@@ -11,6 +11,7 @@ export { default as ConfirmDialog } from './components/ConfirmDialog.svelte';
 export { default as Sidebar } from './components/Sidebar.svelte';
 export { default as Layout } from './components/Layout.svelte';
 export { default as Header } from './components/Header.svelte';
+export { default as SvadminLogo } from './components/SvadminLogo.svelte';
 export { default as ErrorBoundary } from './components/ErrorBoundary.svelte';
 export { default as Toast } from './components/Toast.svelte';
 export { default as Breadcrumbs } from './components/Breadcrumbs.svelte';
@@ -176,9 +177,11 @@ export { default as ProjectsGrid } from './components/profile/ProjectsGrid.svelt
 export { default as ActivityTimeline } from './components/profile/ActivityTimeline.svelte';
 export { default as TeamsShowcase } from './components/profile/TeamsShowcase.svelte';
 export { default as PublicProfilePage } from './components/profile/PublicProfilePage.svelte';
+export { default as ProfileVariantSections } from './components/profile/ProfileVariantSections.svelte';
 
 // Account extensions
 export { default as GetStartedPage } from './components/account/GetStartedPage.svelte';
+export { default as UserProfilePage } from './components/account/UserProfilePage.svelte';
 export { default as CompanyProfilePage } from './components/account/CompanyProfilePage.svelte';
 export { default as SettingsPlainPage } from './components/account/SettingsPlainPage.svelte';
 export { default as SettingsSidebarPage } from './components/account/SettingsSidebarPage.svelte';

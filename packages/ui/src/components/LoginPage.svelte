@@ -6,8 +6,9 @@
   import { Label } from './ui/label/index.js';
   import * as Alert from './ui/alert/index.js';
   import PasswordInput from './PasswordInput.svelte';
+  import SvadminLogo from './SvadminLogo.svelte';
   import { Separator } from './ui/separator/index.js';
-  import { User, Loader2, AlertCircle, Shield } from '@lucide/svelte';
+  import { User, Loader2, AlertCircle } from '@lucide/svelte';
 
   const i18n = useTranslation();
 
@@ -77,9 +78,7 @@
 
     <div class="relative z-10 flex flex-col justify-between p-10 xl:p-12 w-full">
       <div class="flex items-center gap-3">
-        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm">
-          <Shield class="h-5 w-5 text-white" />
-        </div>
+        <SvadminLogo size={44} onDark />
         <span class="text-xl font-semibold text-white tracking-tight">{title}</span>
       </div>
 
@@ -102,10 +101,8 @@
 
   <div class="flex-1 flex items-center justify-center bg-background p-6 sm:p-10 lg:p-14">
     <div class="w-full max-w-[460px] space-y-8">
-      <div class="flex items-center gap-3 mb-8 lg:hidden">
-        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
-          <Shield class="h-5 w-5" />
-        </div>
+      <div class="mb-8 flex items-center gap-3 lg:hidden">
+        <SvadminLogo size={44} />
         <span class="text-xl font-semibold tracking-tight text-foreground">{title}</span>
       </div>
 

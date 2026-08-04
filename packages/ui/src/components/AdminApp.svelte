@@ -1,6 +1,7 @@
 <script module lang="ts">
   const loadPublicProfilePage = () => import('./profile/PublicProfilePage.svelte');
   const loadGetStartedPage = () => import('./account/GetStartedPage.svelte');
+  const loadUserProfilePage = () => import('./account/UserProfilePage.svelte');
   const loadCompanyProfilePage = () => import('./account/CompanyProfilePage.svelte');
   const loadSettingsPlainPage = () => import('./account/SettingsPlainPage.svelte');
   const loadSettingsSidebarPage = () => import('./account/SettingsSidebarPage.svelte');
@@ -319,11 +320,11 @@
       {:else if route === '/public-profile/teams'}
         <LazyPage loader={loadPublicProfilePage} props={{ variant: 'default', initialTab: 'teams' }} />
       {:else if route === '/public-profile/profiles/:variant'}
-        <LazyPage loader={loadPublicProfilePage} props={{ variant: (params.variant === 'company' || params.variant === 'gamer' || params.variant === 'default' ? params.variant : 'default') as 'company' | 'gamer' | 'default' }} />
+        <LazyPage loader={loadPublicProfilePage} props={{ variant: (params.variant === 'company' || params.variant === 'gamer' || params.variant === 'default' ? params.variant : 'default') as 'company' | 'gamer' | 'default', showSections: true }} />
       {:else if route === '/account/get-started' || route === '/account/home/get-started'}
         <LazyPage loader={loadGetStartedPage} props={{}} />
       {:else if route === '/account/home/user-profile'}
-        <SettingsPage />
+        <LazyPage loader={loadUserProfilePage} props={{}} />
       {:else if route === '/account/company-profile' || route === '/account/home/company-profile'}
         <LazyPage loader={loadCompanyProfilePage} props={{}} />
       {:else if route === '/account/settings-plain' || route === '/account/home/settings-plain'}

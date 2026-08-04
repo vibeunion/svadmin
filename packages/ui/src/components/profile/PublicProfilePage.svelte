@@ -7,6 +7,7 @@
   import ProjectsGrid from './ProjectsGrid.svelte';
   import ActivityTimeline from './ActivityTimeline.svelte';
   import TeamsShowcase from './TeamsShowcase.svelte';
+  import ProfileVariantSections from './ProfileVariantSections.svelte';
   import { MapPin, Link, Calendar, MoreHorizontal } from '@lucide/svelte';
 
   const i18n = useTranslation();
@@ -18,9 +19,10 @@
     variant?: ProfileVariant;
     initialTab?: ProfileTab;
     columns?: 2 | 3;
+    showSections?: boolean;
   }
 
-  let { variant = 'default', initialTab = 'projects', columns = 2 }: Props = $props();
+  let { variant = 'default', initialTab = 'projects', columns = 2, showSections = false }: Props = $props();
   let activeTab = $derived<ProfileTab>(initialTab);
 
   // Demo profile data based on variant
@@ -84,6 +86,14 @@
     { id: '2', name: 'API Gateway v2', description: 'High-performance API gateway with rate limiting and circuit breaker patterns.', members: 5, tasks: 21, status: 'active' as const, tags: ['Backend', 'Infra'] },
     { id: '3', name: 'Mobile App', description: 'Cross-platform mobile application built with React Native.', members: 12, tasks: 56, status: 'completed' as const, tags: ['Mobile', 'React'] },
     { id: '4', name: 'Data Pipeline', description: 'Real-time data processing pipeline for event streaming.', members: 3, tasks: 18, status: 'on-hold' as const, tags: ['Data', 'Streaming'] },
+    { id: '5', name: 'Design System 2.0', description: 'Unified component library with tokens, theming, and accessibility built in.', members: 6, tasks: 42, status: 'active' as const, tags: ['Design', 'UI'] },
+    { id: '6', name: 'Billing Platform', description: 'Subscription billing with usage-based metering and invoicing.', members: 4, tasks: 27, status: 'active' as const, tags: ['Fintech', 'Backend'] },
+    { id: '7', name: 'Search Relevance', description: 'Ranking improvements and vector search for the product catalog.', members: 5, tasks: 19, status: 'on-hold' as const, tags: ['Search', 'ML'] },
+    { id: '8', name: 'Customer Portal', description: 'Self-service portal for account management and support tickets.', members: 9, tasks: 63, status: 'active' as const, tags: ['Web', 'Support'] },
+    { id: '9', name: 'Notification Hub', description: 'Multi-channel notification delivery with user preference controls.', members: 3, tasks: 15, status: 'completed' as const, tags: ['Infra', 'Messaging'] },
+    { id: '10', name: 'Analytics SDK', description: 'Lightweight event tracking SDK for web and mobile clients.', members: 4, tasks: 22, status: 'active' as const, tags: ['Analytics', 'SDK'] },
+    { id: '11', name: 'Docs Revamp', description: 'New documentation site with interactive examples and search.', members: 2, tasks: 31, status: 'completed' as const, tags: ['Docs', 'Content'] },
+    { id: '12', name: 'Edge Cache Layer', description: 'Distributed caching layer to cut origin latency for global users.', members: 5, tasks: 17, status: 'on-hold' as const, tags: ['Infra', 'Performance'] },
   ];
 
   const demoActivities = [
@@ -95,9 +105,15 @@
   ];
 
   const demoTeams = [
-    { id: '1', name: 'Frontend Platform', description: 'Building the core UI component library and design system.', members: [{ name: 'Alice' }, { name: 'Bob' }, { name: 'Carol' }], totalMembers: 8, color: '#3b82f6' },
-    { id: '2', name: 'Backend Services', description: 'API development, microservices architecture, and infrastructure.', members: [{ name: 'Dave' }, { name: 'Eve' }], totalMembers: 5, color: '#10b981' },
-    { id: '3', name: 'Design', description: 'User experience research and visual design.', members: [{ name: 'Frank' }, { name: 'Grace' }, { name: 'Hank' }, { name: 'Ivy' }], totalMembers: 6, color: '#f59e0b' },
+    { id: '1', name: 'Frontend Platform', description: 'Building the core UI component library and design system.', members: [{ name: 'Alice' }, { name: 'Bob' }, { name: 'Carol' }], totalMembers: 8, rating: 4.8, color: '#3b82f6' },
+    { id: '2', name: 'Backend Services', description: 'API development, microservices architecture, and infrastructure.', members: [{ name: 'Dave' }, { name: 'Eve' }], totalMembers: 5, rating: 4.5, color: '#10b981' },
+    { id: '3', name: 'Design', description: 'User experience research and visual design.', members: [{ name: 'Frank' }, { name: 'Grace' }, { name: 'Hank' }, { name: 'Ivy' }], totalMembers: 6, rating: 4.9, color: '#f59e0b' },
+    { id: '4', name: 'DevOps', description: 'CI/CD pipelines, cloud infrastructure, and reliability engineering.', members: [{ name: 'Jack' }, { name: 'Karen' }], totalMembers: 4, rating: 4.3, color: '#8b5cf6' },
+    { id: '5', name: 'Data Engineering', description: 'Data pipelines, warehousing, and analytics infrastructure.', members: [{ name: 'Leo' }, { name: 'Mona' }, { name: 'Nina' }], totalMembers: 7, rating: 4.6, color: '#ec4899' },
+    { id: '6', name: 'Mobile', description: 'iOS and Android apps with shared native modules.', members: [{ name: 'Oscar' }, { name: 'Paula' }], totalMembers: 5, rating: 4.4, color: '#14b8a6' },
+    { id: '7', name: 'QA & Release', description: 'Test automation, release management, and quality gates.', members: [{ name: 'Quinn' }, { name: 'Rosa' }, { name: 'Sam' }], totalMembers: 4, rating: 4.2, color: '#f97316' },
+    { id: '8', name: 'Security', description: 'Application security, compliance, and incident response.', members: [{ name: 'Tina' }, { name: 'Umar' }], totalMembers: 3, rating: 4.7, color: '#ef4444' },
+    { id: '9', name: 'Developer Relations', description: 'Documentation, community programs, and developer outreach.', members: [{ name: 'Vera' }, { name: 'Will' }, { name: 'Xu' }], totalMembers: 6, rating: 4.5, color: '#0ea5e9' },
   ];
 </script>
 
@@ -161,21 +177,26 @@
     </Card.CardContent>
   </Card.Card>
 
-  <!-- Tabs: Projects / Activity / Teams -->
-  <Tabs.Root value={activeTab}>
-    <Tabs.List class="w-full justify-start border-b">
-      <Tabs.Trigger value="projects" active={activeTab === 'projects'} onclick={() => activeTab = 'projects'} class="gap-1.5">{i18n.t('publicProfile.projects')}</Tabs.Trigger>
-      <Tabs.Trigger value="activity" active={activeTab === 'activity'} onclick={() => activeTab = 'activity'} class="gap-1.5">{i18n.t('publicProfile.activity')}</Tabs.Trigger>
-      <Tabs.Trigger value="teams" active={activeTab === 'teams'} onclick={() => activeTab = 'teams'} class="gap-1.5">{i18n.t('publicProfile.teams')}</Tabs.Trigger>
-    </Tabs.List>
-    <Tabs.Content value="projects" active={activeTab === 'projects'} class="mt-4">
-      <ProjectsGrid {columns} projects={demoProjects} />
-    </Tabs.Content>
-    <Tabs.Content value="activity" active={activeTab === 'activity'} class="mt-4">
-      <ActivityTimeline activities={demoActivities} />
-    </Tabs.Content>
-    <Tabs.Content value="teams" active={activeTab === 'teams'} class="mt-4">
-      <TeamsShowcase teams={demoTeams} />
-    </Tabs.Content>
-  </Tabs.Root>
+  <!-- Variant-specific sections (About / Projects table / Jobs / Games ...) -->
+  {#if showSections}
+    <ProfileVariantSections {variant} />
+  {:else}
+    <!-- Tabs: Projects / Activity / Teams -->
+    <Tabs.Root value={activeTab}>
+      <Tabs.List class="w-full justify-start border-b">
+        <Tabs.Trigger value="projects" active={activeTab === 'projects'} onclick={() => activeTab = 'projects'} class="gap-1.5">{i18n.t('publicProfile.projects')}</Tabs.Trigger>
+        <Tabs.Trigger value="activity" active={activeTab === 'activity'} onclick={() => activeTab = 'activity'} class="gap-1.5">{i18n.t('publicProfile.activity')}</Tabs.Trigger>
+        <Tabs.Trigger value="teams" active={activeTab === 'teams'} onclick={() => activeTab = 'teams'} class="gap-1.5">{i18n.t('publicProfile.teams')}</Tabs.Trigger>
+      </Tabs.List>
+      <Tabs.Content value="projects" active={activeTab === 'projects'} class="mt-4">
+        <ProjectsGrid {columns} projects={columns === 3 ? demoProjects : demoProjects.slice(0, 6)} />
+      </Tabs.Content>
+      <Tabs.Content value="activity" active={activeTab === 'activity'} class="mt-4">
+        <ActivityTimeline activities={demoActivities} />
+      </Tabs.Content>
+      <Tabs.Content value="teams" active={activeTab === 'teams'} class="mt-4">
+        <TeamsShowcase teams={demoTeams} />
+      </Tabs.Content>
+    </Tabs.Root>
+  {/if}
 </div>

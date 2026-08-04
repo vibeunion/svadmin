@@ -30,6 +30,9 @@
     { id: '4', name: 'SoundWave NFT', username: '@soundwave', bio: 'Music-backed NFTs with on-chain audio', collectionCount: 23, floorPrice: '0.3 ETH', volume: '89.4 ETH', verified: true, tags: ['Music', 'Audio'] },
     { id: '5', name: 'GameAssets DAO', username: '@gameassets', bio: 'In-game items and collectibles for Web3 gaming', collectionCount: 156, floorPrice: '0.05 ETH', volume: '412.8 ETH', verified: true, tags: ['Gaming', 'Items'] },
     { id: '6', name: 'PhotoVerse', username: '@photoverse', bio: 'Curated photography NFTs from world artists', collectionCount: 31, floorPrice: '0.15 ETH', volume: '67.2 ETH', verified: false, tags: ['Photo', 'Curated'] },
+    { id: '7', name: 'CryptoKicks', username: '@cryptokicks', bio: 'Limited-edition digital sneakers and wearables', collectionCount: 64, floorPrice: '0.4 ETH', volume: '156.9 ETH', verified: true, tags: ['Fashion', 'Wearables'] },
+    { id: '8', name: 'ChainChronicles', username: '@chainchron', bio: 'Story-driven collectible cards with on-chain lore', collectionCount: 88, floorPrice: '0.25 ETH', volume: '203.4 ETH', verified: false, tags: ['Cards', 'Story'] },
+    { id: '9', name: 'AIArtifacts', username: '@aiartifacts', bio: 'AI-generated sculptures minted as unique tokens', collectionCount: 12, floorPrice: '2.1 ETH', volume: '512.6 ETH', verified: true, tags: ['AI', '3D'] },
   ];
 
   const filtered = $derived(
@@ -63,6 +66,8 @@
     <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
     <Input placeholder={i18n.t('common.search')} bind:value={searchQuery} class="pl-9" />
   </div>
+
+  <p class="text-sm font-medium text-muted-foreground">{i18n.t('network.showingUsers', { count: filtered.length })}</p>
 
   <div class="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
     {#each filtered as user (user.id)}

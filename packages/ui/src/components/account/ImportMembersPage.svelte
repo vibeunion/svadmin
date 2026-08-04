@@ -2,6 +2,8 @@
   import { useTranslation } from '@svadmin/core/i18n';
   import * as Card from '../ui/card/index.js';
   import { Button } from '../ui/button/index.js';
+  import { Switch } from '../ui/switch/index.js';
+  import { Label } from '../ui/label/index.js';
   import { Upload, Download, FileText, CheckCircle2, Loader2 } from '@lucide/svelte';
 
   const i18n = useTranslation();
@@ -11,6 +13,15 @@
   let importState = $state<'idle' | 'uploading' | 'processing' | 'complete' | 'error'>('idle');
   let progress = $state(0);
   let importCount = $state(0);
+
+  const importOptions = [
+    { key: 'account.importCreateUsers', checked: true },
+    { key: 'account.importUpdateUsers', checked: false },
+    { key: 'account.importNotifyPassword', checked: false },
+    { key: 'account.importExternalIds', checked: false },
+    { key: 'account.importWelcomeEmail', checked: true },
+  ];
+  let optionStates = $state<boolean[]>(importOptions.map(o => o.checked));
 
   function handleDragOver(e: DragEvent) {
     e.preventDefault();
@@ -139,6 +150,26 @@
         <Button variant="outline" size="sm">
           <Download class="h-3.5 w-3.5 mr-1" />{i18n.t('account.downloadTemplate')}
         </Button>
+      </Card.CardContent>
+    </Card.Card>
+
+    <!-- Import options -->
+    <Card.Card class="border-border/60">
+      <Card.CardHeader>
+        <Card.CardTitle class="text-base">{i18n.t('account.importOptions')}</Card.CardTitle>
+      </Card.CardHeader>
+      <Card.CardContent class="space-y-4">
+        {#each importOptions as option, i (option.key)}
+          <div class="flex items-center justify-between gap-4">
+            <Label for="import-option-{i}" class="text-sm font-normal text-foreground">{i18n.t(option.key)}</Label>
+            <Switch id="import-option-{i}" bind:checked={optionStates[i]} />
+          </div>
+        {/each}
+        <div class="flex justify-end border-t pt-4">
+          <Button onclick={() => { const input = document.getElementById('file-input'); input?.click(); }}>
+            {i18n.t('account.startImport')}
+          </Button>
+        </div>
       </Card.CardContent>
     </Card.Card>
   {/if}

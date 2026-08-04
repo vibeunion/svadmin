@@ -4,7 +4,9 @@
   import { Button } from '../ui/button/index.js';
   import { Input } from '../ui/input/index.js';
   import { Label } from '../ui/label/index.js';
-  import { Upload, Loader2 } from '@lucide/svelte';
+  import { Badge } from '../ui/badge/index.js';
+  import * as Table from '../ui/table/index.js';
+  import { Upload, Loader2, ShieldCheck, ShieldOff } from '@lucide/svelte';
 
   const i18n = useTranslation();
 
@@ -15,6 +17,14 @@
   let foundedYear = $state('2015');
   let description = $state('Building the future of enterprise software with cutting-edge AI and cloud solutions.');
   let saving = $state(false);
+
+  const members = [
+    { name: 'Alex Chen', email: 'alex@acme.com', role: 'Admin', twoFactor: true, joined: '2022-03-15' },
+    { name: 'Sarah Kim', email: 'sarah@acme.com', role: 'Editor', twoFactor: true, joined: '2022-06-22' },
+    { name: 'Mike Johnson', email: 'mike@acme.com', role: 'Viewer', twoFactor: false, joined: '2023-01-10' },
+    { name: 'Emma Davis', email: 'emma@acme.com', role: 'Admin', twoFactor: true, joined: '2022-02-14' },
+    { name: 'Lisa Wang', email: 'lisa@acme.com', role: 'Editor', twoFactor: false, joined: '2023-04-05' },
+  ];
 
   async function handleSave() {
     saving = true;
@@ -96,6 +106,51 @@
           {i18n.t('common.save')}
         </Button>
       </div>
+    </Card.CardContent>
+  </Card.Card>
+
+  <!-- Members -->
+  <Card.Card class="border-border/60">
+    <Card.CardHeader>
+      <Card.CardTitle class="text-base">{i18n.t('profileSections.members')}</Card.CardTitle>
+    </Card.CardHeader>
+    <Card.CardContent class="p-0">
+      <Table.Root>
+        <Table.Header>
+          <Table.Row>
+            <Table.Head>{i18n.t('profile.name')}</Table.Head>
+            <Table.Head>{i18n.t('account.role')}</Table.Head>
+            <Table.Head>2FA</Table.Head>
+            <Table.Head class="text-right">{i18n.t('account.joined')}</Table.Head>
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
+          {#each members as member (member.email)}
+            <Table.Row>
+              <Table.Cell>
+                <div class="flex items-center gap-3">
+                  <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-semibold">
+                    {member.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                  </div>
+                  <div class="min-w-0">
+                    <p class="truncate text-sm font-medium text-foreground">{member.name}</p>
+                    <p class="truncate text-xs text-muted-foreground">{member.email}</p>
+                  </div>
+                </div>
+              </Table.Cell>
+              <Table.Cell><Badge variant="secondary" class="text-[10px]">{member.role}</Badge></Table.Cell>
+              <Table.Cell>
+                {#if member.twoFactor}
+                  <ShieldCheck class="h-4 w-4 text-green-500" />
+                {:else}
+                  <ShieldOff class="h-4 w-4 text-muted-foreground/50" />
+                {/if}
+              </Table.Cell>
+              <Table.Cell class="text-right text-muted-foreground">{member.joined}</Table.Cell>
+            </Table.Row>
+          {/each}
+        </Table.Body>
+      </Table.Root>
     </Card.CardContent>
   </Card.Card>
 </div>
