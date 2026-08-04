@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.33.0](https://github.com/zuohuadong/svadmin/compare/core-v0.32.3...core-v0.33.0) (2026-08-04)
+
+
+### 🚀 Features
+
+* **ui:** expand admin example pages ([7d7dc5e](https://github.com/zuohuadong/svadmin/commit/7d7dc5eb1039191d606bf0deea0fd87bc51772f6))
+
 ## [0.32.3](https://github.com/zuohuadong/svadmin/compare/core-v0.32.2...core-v0.32.3) (2026-07-30)
 
 
