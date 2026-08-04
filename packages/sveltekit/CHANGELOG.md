@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.9.7](https://github.com/zuohuadong/svadmin/compare/sveltekit-v0.9.6...sveltekit-v0.9.7) (2026-07-30)
+
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** upgrade workspace dependencies ([f86acb7](https://github.com/zuohuadong/svadmin/commit/f86acb7115099a9e5222da0cca9f55ce9834fe01))
+* **deps:** upgrade workspace dependencies ([7585402](https://github.com/zuohuadong/svadmin/commit/75854020b577f82f8ca0a43a0fc1f85864bec229))
+
 ## [0.9.6](https://github.com/zuohuadong/svadmin/compare/sveltekit-v0.9.5...sveltekit-v0.9.6) (2026-07-27)
 
 
