@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.5](https://github.com/zuohuadong/svadmin/compare/sso-v0.11.4...sso-v0.11.5) (2026-08-04)
+
+
+### 🔧 Miscellaneous Chores
+
+* **sso:** expand auth keywords ([94ce781](https://github.com/zuohuadong/svadmin/commit/94ce781fb3f7506734c10212b720d438aa0823de))
+
 ## [0.11.4](https://github.com/zuohuadong/svadmin/compare/sso-v0.11.3...sso-v0.11.4) (2026-07-30)
 
 
