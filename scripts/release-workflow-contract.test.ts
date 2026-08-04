@@ -34,8 +34,9 @@ describe('npm trusted-publishing workflow contract', () => {
     expect(ciWorkflow).toContain('e2e_sha:');
     expect(ciWorkflow).toContain('Invalid E2E SHA');
     expect(ciWorkflow).toContain('ref: ${{ inputs.e2e_sha || inputs.release_sha || github.sha }}');
+    expect(ciWorkflow).toContain('always() &&');
     expect(ciWorkflow).toContain(
-      "if: github.event_name == 'workflow_dispatch' && inputs.publish && inputs.release_sha != ''",
+      "github.event_name == 'workflow_dispatch' && inputs.publish && inputs.release_sha != ''",
     );
     expect(ciWorkflow).toContain('run: bun scripts/verify-release-manifest.ts');
     expect(ciWorkflow).toContain('ref: ${{ github.sha }}');
