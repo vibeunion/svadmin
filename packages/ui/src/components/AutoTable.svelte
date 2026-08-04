@@ -410,8 +410,6 @@
       get enableExpanding() { return !!expandedRowRender; },
       getRowCanExpand: () => !!expandedRowRender,
     },
-    // AutoTable reads focused atoms directly; selecting the full state triggers Svelte proxy equality warnings.
-    () => undefined,
   );
 
   $effect.pre(() => {
