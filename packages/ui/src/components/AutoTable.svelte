@@ -406,6 +406,7 @@
       onColumnVisibilityChange: columnVisibilityAtom.set,
       onRowSelectionChange: rowSelectionAtom.set,
       onExpandedChange: expandedAtom.set,
+      autoResetExpanded: false,
       get enableRowSelection() { return selectable && (canDelete || batchActions); },
       get enableExpanding() { return !!expandedRowRender; },
       getRowCanExpand: () => !!expandedRowRender,
