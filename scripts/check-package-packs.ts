@@ -397,12 +397,12 @@ async function verifyUiPnpmPeerTree(
   ).href;
   await writeFile(
     viteConfig,
-    `import { svelte } from ${JSON.stringify(sveltePluginUrl)};\nexport default { plugins: [svelte()], build: { lib: { entry: ${JSON.stringify(consumerEntry)}, formats: ['es'] } } };\n`,
+    `import { svelte } from ${JSON.stringify(sveltePluginUrl)};\nexport default { root: ${JSON.stringify(consumerDirectory)}, plugins: [svelte()], build: { lib: { entry: ${JSON.stringify(consumerEntry)}, formats: ['es'] } } };\n`,
   );
   const vitePath = join(repositoryRoot, 'node_modules', 'vite', 'bin', 'vite.js');
   const optionalPeerBuild = run(
     'node',
-    [vitePath, 'build', '--config', viteConfig, '--root', consumerDirectory],
+    [vitePath, 'build', '--config', viteConfig],
     consumerDirectory,
   );
 
