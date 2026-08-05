@@ -1,19 +1,6 @@
 <script lang="ts">
 /* eslint-disable svelte/no-at-html-tags */
-  import * as markedPkg from "marked";
-  import * as markedHighlightPkg from "marked-highlight";
-  import * as hljsPkg from "highlight.js";
-  import * as DOMPurifyPkg from "isomorphic-dompurify";
-
-  const Marked = markedPkg.Marked;
-  const markedHighlight = markedHighlightPkg.markedHighlight;
-  const hljsModule = hljsPkg.default || hljsPkg;
-  const DOMPurify = 'default' in DOMPurifyPkg ? DOMPurifyPkg.default : DOMPurifyPkg;
-
-  // Only safely import css if hljs exists
-  if (hljsModule && Object.keys(hljsModule).length > 0) {
-    import("highlight.js/styles/github-dark.css").catch(() => {});
-  }
+  import { onMount } from "svelte";
 
   interface Props {
     /** The raw markdown string to render */
@@ -26,25 +13,81 @@
 
   let { content, streaming = false, class: className = "" }: Props = $props();
 
-  const hasMarkdownDeps = typeof Marked === "function" && typeof DOMPurify?.sanitize === "function";
+  type MarkedConstructor = typeof import("marked").Marked;
+  type MarkedHighlight = typeof import("marked-highlight").markedHighlight;
+  type HighlightApi = typeof import("highlight.js").default;
+  type Sanitizer = typeof import("isomorphic-dompurify").default;
+
+  // Lazily loaded optional peer dependencies (marked, marked-highlight,
+  // highlight.js, isomorphic-dompurify). They are declared as optional peer
+  // deps; statically importing them would crash consumers that have not
+  // installed them, even when MarkdownRenderer is never rendered. Load them
+  // dynamically so the module graph resolves without them and the component
+  // degrades to escaped-text rendering when they are absent.
+  let MarkedCtor = $state<MarkedConstructor | null>(null);
+  let markedHighlightFn = $state<MarkedHighlight | null>(null);
+  let hljs = $state<HighlightApi | null>(null);
+  let DOMPurify = $state<Sanitizer | null>(null);
+
+  onMount(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [markedPkg, markedHighlightPkg, hljsPkg, DOMPurifyPkg] = await Promise.all([
+          import("marked"),
+          import("marked-highlight"),
+          import("highlight.js"),
+          import("isomorphic-dompurify"),
+        ]);
+        if (cancelled) return;
+        MarkedCtor = markedPkg.Marked;
+        markedHighlightFn = markedHighlightPkg.markedHighlight;
+        hljs = hljsPkg.default;
+        DOMPurify = DOMPurifyPkg.default;
+        // Only import the theme css when highlight.js is available
+        if (hljs && Object.keys(hljs).length > 0) {
+          import("highlight.js/styles/github-dark.css").catch(() => {});
+        }
+      } catch {
+        // Optional deps not installed; fall back to escaped-text rendering.
+        if (cancelled) return;
+      }
+    })();
+    return () => { cancelled = true; };
+  });
+
+  const hasMarkdownDeps = $derived(
+    typeof MarkedCtor === "function" &&
+      typeof DOMPurify?.sanitize === "function" &&
+      typeof markedHighlightFn === "function",
+  );
 
   // Configure marked with syntax highlighting if available
-  const markedObj = hasMarkdownDeps ? new Marked(
-    markedHighlight({
-      langPrefix: "hljs language-",
-      highlight(code: string, lang: string) {
-        const language = hljsModule.getLanguage && hljsModule.getLanguage(lang) ? lang : "plaintext";
-        return hljsModule.highlight ? hljsModule.highlight(code, { language }).value : code;
-      },
-    }),
-  ) : null;
+  const markedObj = $derived.by(() => {
+    const Constructor = MarkedCtor;
+    const highlightExtension = markedHighlightFn;
+    if (!Constructor || !highlightExtension) return null;
+
+    return new Constructor(
+      highlightExtension({
+        langPrefix: "hljs language-",
+        highlight(code: string, lang: string) {
+          const language = hljs?.getLanguage && hljs.getLanguage(lang) ? lang : "plaintext";
+          return hljs?.highlight ? hljs.highlight(code, { language }).value : code;
+        },
+      }),
+    );
+  });
 
   // Render HTML safely
-  const html = $derived(
-    hasMarkdownDeps
-      ? DOMPurify.sanitize(markedObj?.parse(content || "") as string)
-      : `<div style="white-space: pre-wrap">${String(content || "").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>`
-  );
+  const html = $derived.by(() => {
+    const purifier = DOMPurify;
+    const parser = markedObj;
+    if (hasMarkdownDeps && purifier && parser) {
+      return purifier.sanitize(parser.parse(content || ""));
+    }
+    return `<div style="white-space: pre-wrap">${String(content || "").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>`;
+  });
 
   // Handle copy code blocks
   let copiedBlock = $state<string | null>(null);

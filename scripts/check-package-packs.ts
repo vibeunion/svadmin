@@ -31,6 +31,7 @@ interface PackageManifest {
   bin?: string | Record<string, string>;
   exports?: unknown;
   dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
   peerDependencies?: Record<string, string>;
 }
 
@@ -43,6 +44,12 @@ const repositoryRoot = resolve(import.meta.dir, '..');
 const packagesRoot = join(repositoryRoot, 'packages');
 const tscPath = join(repositoryRoot, 'node_modules', 'typescript', 'bin', 'tsc');
 const pnpmVersion = '11.11.0';
+const optionalMarkdownPeers = [
+  'highlight.js',
+  'isomorphic-dompurify',
+  'marked',
+  'marked-highlight',
+] as const;
 
 const expectations: PackageExpectation[] = [
   {
@@ -291,9 +298,16 @@ async function verifyUiPnpmPeerTree(
     await readFile(join(repositoryRoot, 'package.json'), 'utf8'),
   ) as { overrides?: Record<string, string> };
   const svelteVersion = rootManifest.overrides?.svelte;
+  const viteVersion = rootManifest.overrides?.vite;
   const queryVersion = uiManifest.peerDependencies?.['@tanstack/svelte-query'];
+  const sveltePluginVersion = uiManifest.devDependencies?.['@sveltejs/vite-plugin-svelte'];
   assert(svelteVersion, 'root package.json: overrides.svelte is required for pnpm verification');
+  assert(viteVersion, 'root package.json: overrides.vite is required for pnpm verification');
   assert(queryVersion, '@svadmin/ui: @tanstack/svelte-query peer range is required for pnpm verification');
+  assert(
+    sveltePluginVersion,
+    '@svadmin/ui: @sveltejs/vite-plugin-svelte dev dependency is required for pnpm verification',
+  );
 
   const consumerDirectory = join(packDirectory, 'pnpm-peer-consumer');
   await mkdir(consumerDirectory, { recursive: true });
@@ -308,6 +322,10 @@ async function verifyUiPnpmPeerTree(
         '@svadmin/ui': `file:${join(packDirectory, uiPack.filename)}`,
         '@tanstack/svelte-query': queryVersion,
         svelte: svelteVersion,
+      },
+      devDependencies: {
+        '@sveltejs/vite-plugin-svelte': sveltePluginVersion,
+        vite: viteVersion,
       },
     }, null, 2)}\n`,
   );
@@ -352,6 +370,12 @@ async function verifyUiPnpmPeerTree(
   );
 
   const virtualStoreEntries = await readdir(join(consumerDirectory, 'node_modules', '.pnpm'));
+  for (const optionalPeer of optionalMarkdownPeers) {
+    assert(
+      !virtualStoreEntries.some((entry) => entry.startsWith(`${optionalPeer}@`)),
+      `@svadmin/ui: pnpm strict consumer unexpectedly installed optional peer ${optionalPeer}`,
+    );
+  }
   const svelteVersions = new Set(
     virtualStoreEntries
       .map((entry) => /^svelte@([^_]+)(?:_|$)/.exec(entry)?.[1])
@@ -372,7 +396,25 @@ async function verifyUiPnpmPeerTree(
     ['--yes', `pnpm@${pnpmVersion}`, 'list', 'svelte', '--depth', 'Infinity'],
     consumerDirectory,
   );
-  return `pnpm@${pnpmVersion} strict packed consumer passed\nforbidden dependencies absent: cmdk-sv, sonner-svelte, @melt-ui/svelte\n${dependencyTree.trim()}\nresolved Svelte versions: ${resolvedSvelteVersion}`;
+
+  const consumerEntry = join(consumerDirectory, 'markdown-import.ts');
+  await writeFile(
+    consumerEntry,
+    `import { MarkdownRenderer } from '@svadmin/ui';\nconsole.info(typeof MarkdownRenderer);\n`,
+  );
+  const viteConfig = join(consumerDirectory, 'vite.config.mjs');
+  await writeFile(
+    viteConfig,
+    `import { svelte } from '@sveltejs/vite-plugin-svelte';\nexport default { root: ${JSON.stringify(consumerDirectory)}, plugins: [svelte()], build: { lib: { entry: ${JSON.stringify(consumerEntry)}, formats: ['es'] } } };\n`,
+  );
+  const vitePath = join(repositoryRoot, 'node_modules', 'vite', 'bin', 'vite.js');
+  const optionalPeerBuild = run(
+    'node',
+    [vitePath, 'build', '--config', viteConfig],
+    consumerDirectory,
+  );
+
+  return `pnpm@${pnpmVersion} strict packed consumer passed\nforbidden dependencies absent: cmdk-sv, sonner-svelte, @melt-ui/svelte\noptional markdown peers absent: ${optionalMarkdownPeers.join(', ')}\n${optionalPeerBuild.trim()}\n${dependencyTree.trim()}\nresolved Svelte versions: ${resolvedSvelteVersion}`;
 }
 
 async function createConsumer(packDirectory: string, results: Map<string, PackResult>): Promise<string> {
