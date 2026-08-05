@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.34.1](https://github.com/zuohuadong/svadmin/compare/core-v0.34.0...core-v0.34.1) (2026-08-05)
+
+
+### 🐛 Bug Fixes
+
+* **auth:** combine trusted permission resolvers with UI-only hints ([#211](https://github.com/zuohuadong/svadmin/issues/211)) ([246cf3e](https://github.com/zuohuadong/svadmin/commit/246cf3e15120b933da0c23fa4eaf4a67f14acc56))
+
 ## [0.34.0](https://github.com/zuohuadong/svadmin/compare/core-v0.33.0...core-v0.34.0) (2026-08-05)
 
 

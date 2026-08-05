@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.6](https://github.com/zuohuadong/svadmin/compare/sso-v0.11.5...sso-v0.11.6) (2026-08-05)
+
+
+### 🐛 Bug Fixes
+
+* **auth:** combine trusted permission resolvers with UI-only hints ([#211](https://github.com/zuohuadong/svadmin/issues/211)) ([246cf3e](https://github.com/zuohuadong/svadmin/commit/246cf3e15120b933da0c23fa4eaf4a67f14acc56))
+
 ## [0.11.5](https://github.com/zuohuadong/svadmin/compare/sso-v0.11.4...sso-v0.11.5) (2026-08-04)
 
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.40.1](https://github.com/zuohuadong/svadmin/compare/ui-v0.40.0...ui-v0.40.1) (2026-08-05)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** lazy-load optional markdown peer deps to prevent import crashes ([#210](https://github.com/zuohuadong/svadmin/issues/210)) ([ba73f1b](https://github.com/zuohuadong/svadmin/commit/ba73f1b53ecc57544b21f7ea48c0d82526e2e79f))
+
 ## [0.40.0](https://github.com/zuohuadong/svadmin/compare/ui-v0.39.0...ui-v0.40.0) (2026-08-05)
 
 
