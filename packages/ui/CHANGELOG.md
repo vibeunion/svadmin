@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.40.0](https://github.com/zuohuadong/svadmin/compare/ui-v0.39.0...ui-v0.40.0) (2026-08-05)
+
+
+### 🚀 Features
+
+* **example:** complete reference pages and responsive styling ([#207](https://github.com/zuohuadong/svadmin/issues/207)) ([57c5af0](https://github.com/zuohuadong/svadmin/commit/57c5af05a0521b2a763b5c8d61962d11de9965ed))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** preserve expanded rows with TanStack 9 ([#206](https://github.com/zuohuadong/svadmin/issues/206)) ([cd66597](https://github.com/zuohuadong/svadmin/commit/cd66597e4e060643c848deddeef34a0cc3046d12))
+
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** upgrade TanStack Table to 9.0.0 ([#204](https://github.com/zuohuadong/svadmin/issues/204)) ([228eb47](https://github.com/zuohuadong/svadmin/commit/228eb472795f6b4b6be6f4da7c2713ee41f3f4bc))
+
 ## [0.39.0](https://github.com/zuohuadong/svadmin/compare/ui-v0.38.8...ui-v0.39.0) (2026-08-04)
 
 
