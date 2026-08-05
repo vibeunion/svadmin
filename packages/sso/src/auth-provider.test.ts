@@ -234,7 +234,11 @@ describe('createSSOAuthProvider', () => {
 
     const calls = installFetch((_url, _init) => jsonResponse({
       access_token: 'access-123',
-      id_token: jwt({ roles: ['admin'] }),
+      id_token: jwt({
+        roles: ['admin'],
+        groups: ['administrators'],
+        permissions: ['users:delete'],
+      }),
       refresh_token: 'refresh-123',
       expires_in: 3600,
       token_type: 'bearer',

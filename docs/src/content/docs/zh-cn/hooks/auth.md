@@ -39,17 +39,19 @@ const { isAuthenticated, isLoading } = useIsAuthenticated();
 `usePermissions()` 只是客户端渲染辅助。它可以隐藏或禁用 UI，但 API、DataProvider 和数据库策略必须独立执行授权。
 
 ```typescript
-const { raw, has, can, isLoading, refetch } = usePermissions<string[]>();
+const permissionHints = usePermissions<string[]>();
 
-// 检查特定权限
-if (has('admin')) { /* ... */ }
+// 使用 UI 提示调整导航或禁用控件。
+if (permissionHints.has('admin')) { /* ... */ }
 
-// 检查资源:操作权限
-if (can('posts', 'edit')) { /* ... */ }
+// 使用 resource:action 命名读取 UI 提示。
+if (permissionHints.can('posts', 'edit')) { /* ... */ }
 
-// 重新获取权限（比如角色升级后）
-await refetch();
+await permissionHints.refetch();
 ```
+
+内置 Supabase 与 SSO Provider 不提供 `getPermissions()`。自定义实现只能返回 UI 提示，绝不能
+将浏览器中的值作为 API、RLS 或动作授权决定；后端必须认证并授权每一个请求。
 
 ### `useOnError()`
 

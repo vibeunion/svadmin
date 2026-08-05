@@ -20,8 +20,9 @@ export interface CanResult {
 
 
 /**
- * Formal Access Control Provider interface.
- * Implement this to define your authorization logic.
+ * UI access-control integration point.
+ * It can mirror a backend policy decision for navigation and controls, but browser
+ * checks never authorize an API request. The backend must enforce the same policy.
  *
  * @example
  * ```ts
@@ -78,8 +79,8 @@ export function getAccessControlOptions() {
 }
 
 /**
- * Async access check. 
- * Supports both single capability requests or an array of batched checks.
+ * UI access check supporting single capabilities or a batch.
+ * Its result can change browser presentation but never authorizes the backend action.
  */
 export async function canAccessAsync(params: CanParams[]): Promise<CanResult[]>;
 export async function canAccessAsync(resource: string, action: Action, params?: Record<string, unknown>, meta?: Record<string, unknown>): Promise<CanResult>;
@@ -100,7 +101,7 @@ export async function canAccessAsync(resourceOrBatch: string | CanParams[], acti
 // ─── Feature Gate ─────────────────────────────────────────────
 
 export interface FeatureGateConfig {
-  /** 允许访问的角色列表 */
+  /** 仅用于前端展示的角色列表。 */
   roles?: string[];
   /**
    * 需要的最低角色 (含以上所有角色)。
@@ -112,18 +113,19 @@ export interface FeatureGateConfig {
    * 由调用方按自身业务定义，框架不预设任何角色。
    */
   roleHierarchy?: string[];
-  /** 需要的权限列表 (全部匹配) */
+  /** 仅用于前端展示的权限列表 (全部匹配)。 */
   permissions?: string[];
 }
 
+/** 浏览器中的角色和权限提示，不是授权凭据。 */
 export interface FeatureGateUser {
   role: string;
   permissions: string[];
 }
 
 /**
- * 创建功能门控函数 — 基于角色和权限判断用户是否可访问某功能。
- * 只做客户端 UI 门控；真实 API、数据库或 RLS 必须独立授权。
+ * 创建仅用于前端展示的功能门控函数。
+ * 只做客户端 UI 门控；输入可被篡改，后端必须独立完成令牌验证和操作授权。
  * 不预设任何角色层级，也不解释通配符权限。
  *
  * @example

@@ -118,7 +118,7 @@ const authProvider = createSSOAuthProvider({
 
 ### Trusted Permissions Resolver
 
-`getPermissions()` returns `null` unless you configure a trusted resolver. Use the resolver to call your application authorization endpoint or another backend-controlled source. ID Token claims can be useful display hints, but they are not a replacement for API or database authorization.
+`getPermissions()` returns `null` unless you configure a trusted resolver. Use the resolver to call your application authorization endpoint or another backend-controlled source. ID Token claims are not turned into browser permissions; this is a UI hint only. API endpoints must independently validate the token and enforce authorization.
 
 ```typescript
 const authProvider = createSSOAuthProvider({

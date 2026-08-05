@@ -10,6 +10,7 @@ interface AuthProvider {
   logout: (params?: Record<string, unknown>) => Promise<AuthActionResult>;
   check: (params?: Record<string, unknown>) => Promise<CheckResult>;
   getIdentity: () => Promise<Identity | null>;
+  // UI-only hints; API, RLS, and action handlers must authorize independently.
   getPermissions?: (params?: Record<string, unknown>) => Promise<unknown>;
   register?: (params: Record<string, unknown>) => Promise<AuthActionResult>;
   forgotPassword?: (params: Record<string, unknown>) => Promise<AuthActionResult>;
@@ -87,9 +88,13 @@ mutate(error); // Calls authProvider.onError → may redirect or logout
 
 ```typescript
 const { raw, has, can, isLoading, error } = usePermissions<string[]>();
-// raw: whatever trusted authProvider.getPermissions() resolver returns
+// raw: whatever trusted authProvider.getPermissions() resolver returns (UI hints only)
 // has/can: exact client-side UI checks
 ```
+
+The built-in Supabase and SSO providers deliberately do not implement `getPermissions()`.
+If an application supplies it, its value may change labels, navigation, or disabled controls
+only. API, RLS, and action handlers must independently authenticate and authorize every request.
 
 ## Auth Pages
 

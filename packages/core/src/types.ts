@@ -334,6 +334,11 @@ export interface AuthProvider {
   logout: (params?: Record<string, unknown>) => Promise<AuthActionResult>;
   check: (params?: Record<string, unknown>) => Promise<CheckResult>;
   getIdentity: () => Promise<Identity | null>;
+  /**
+   * Returns UI-only permission hints for labels, navigation, or disabled controls.
+   * Browser-visible values are not authorization evidence: API, RLS, and action
+   * handlers must authenticate and authorize the request independently.
+   */
   getPermissions?: (params?: Record<string, unknown>) => Promise<unknown>;
   register?: (params: Record<string, unknown>) => Promise<AuthActionResult>;
   forgotPassword?: (params: Record<string, unknown>) => Promise<AuthActionResult>;

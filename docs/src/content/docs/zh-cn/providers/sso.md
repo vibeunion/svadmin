@@ -102,7 +102,7 @@ const authProvider = createSSOAuthProvider({
 
 ### 可信权限 Resolver
 
-未配置可信 resolver 时，`getPermissions()` 返回 `null`。请在 resolver 中调用应用自己的授权接口或后端控制的数据源。ID Token claims 可以作为展示提示，但不能替代 API 或数据库授权。
+未配置可信 resolver 时，`getPermissions()` 返回 `null`。ID Token claims 不会自动转化为浏览器权限。请在 resolver 中调用应用自己的授权接口或后端控制的数据源。结果仅用于 UI 提示；API 端点必须独立验证令牌并强制授权。
 
 ```typescript
 const authProvider = createSSOAuthProvider({
