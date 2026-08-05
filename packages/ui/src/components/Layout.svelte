@@ -7,6 +7,7 @@
   import CommandPalette from './CommandPalette.svelte';
   import KeyboardShortcuts from './KeyboardShortcuts.svelte';
   import ChatDialog from './ChatDialog.svelte';
+  import DevTools from './DevTools.svelte';
   import { useTranslation } from '@svadmin/core/i18n';
 
   import { captureAdminContext, getAuthProvider, getTaskProvider } from '@svadmin/core';
@@ -121,6 +122,9 @@
       </div>
     </div>
   </div>
+  <div class="hidden" aria-hidden="true">
+    <DevTools docked />
+  </div>
 {:else}
   <div class="flex h-screen bg-background" in:fade={{ duration: 200, delay: 50 }}>
     <!-- Desktop sidebar -->
@@ -145,6 +149,7 @@
       <!-- Header with mobile hamburger -->
       <Header
         {siteUrl}
+        {menu}
         showSearch={true}
         onSearchClick={() => { commandOpen = true; }}
       >
@@ -182,6 +187,11 @@
           {/key}
         </div>
       </main>
+
+      <footer class="flex min-h-14 shrink-0 items-center justify-end gap-2 border-t border-border/60 bg-background px-4 empty:hidden">
+        <DevTools docked />
+        <ChatDialog docked />
+      </footer>
     </div>
   </div>
   <CommandPalette 
@@ -193,5 +203,4 @@
     }}
   />
   <KeyboardShortcuts bind:open={shortcutsOpen} />
-  <ChatDialog />
 {/if}

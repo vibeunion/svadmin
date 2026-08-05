@@ -14,6 +14,8 @@
 
   const i18n = useTranslation();
 
+  let { docked = false }: { docked?: boolean } = $props();
+
   const adminContext = captureAdminContext();
   let visible = $state(false);
   let collapsed = $state(false);
@@ -138,7 +140,7 @@
       tooltip={i18n.t('devtools.title')}
       variant="default"
       size="icon"
-      class="fixed bottom-4 right-4 z-[9999] h-9 w-9 rounded-full shadow-lg opacity-60 hover:opacity-100 hover:scale-110 transition-all"
+      class="{docked ? 'relative rounded-md shadow-sm' : 'fixed bottom-5 right-[4.75rem] rounded-full shadow-lg sm:bottom-7 sm:right-[5.5rem]'} z-[9999] h-9 w-9 opacity-60 hover:opacity-100 hover:scale-110 transition-all"
       onclick={toggle}
     >
       <Bug class="h-4 w-4" />

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { captureAdminContext } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import * as Card from '../ui/card/index.js';
   import { Button } from '../ui/button/index.js';
@@ -6,6 +7,7 @@
   import { Search, Download, UserPlus, MoreHorizontal, CheckCircle2, Clock, XCircle } from '@lucide/svelte';
 
   const i18n = useTranslation();
+  const adminContext = captureAdminContext();
 
   interface CrewMember {
     id: string;
@@ -59,6 +61,20 @@
   };
 
   const initials = (name: string) => name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+
+  function exportCrew() {
+    const rows = [
+      ['Name', 'Email', 'Role', 'Department', 'Status', 'Projects', 'Joined'],
+      ...filtered.map(member => [member.name, member.email, member.role, member.department, member.status, String(member.projects), member.joinedAt]),
+    ];
+    const csv = rows.map(row => row.map(value => `"${value.replaceAll('"', '""')}"`).join(',')).join('\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'team-crew.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+  }
 </script>
 
 <div class="space-y-6" data-svadmin-content-page="network">
@@ -68,10 +84,10 @@
       <p class="mt-1 text-sm text-muted-foreground">{i18n.t('network.teamCrewDescription')}</p>
     </div>
     <div class="flex gap-2">
-      <Button variant="outline" size="sm">
+      <Button variant="outline" size="sm" onclick={exportCrew}>
         <Download class="h-3.5 w-3.5 mr-1" />{i18n.t('common.export')}
       </Button>
-      <Button size="sm">
+      <Button size="sm" onclick={() => adminContext.navigate('/account/members/team-members')}>
         <UserPlus class="h-3.5 w-3.5 mr-1" />{i18n.t('account.inviteMember')}
       </Button>
     </div>
@@ -126,7 +142,7 @@
                 <td class="px-4 py-3 text-sm text-foreground">{member.projects}</td>
                 <td class="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">{member.joinedAt}</td>
                 <td class="px-4 py-3">
-                  <Button variant="ghost" size="icon-sm"><MoreHorizontal class="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="icon-sm" aria-label={member.name} title={member.name}><MoreHorizontal class="h-4 w-4" /></Button>
                 </td>
               </tr>
             {/each}
@@ -150,7 +166,7 @@
                   <p class="truncate text-xs text-muted-foreground">{member.email}</p>
                 </div>
               </div>
-              <Button variant="ghost" size="icon-sm" class="shrink-0"><MoreHorizontal class="h-4 w-4" /></Button>
+              <Button variant="ghost" size="icon-sm" class="shrink-0" aria-label={member.name} title={member.name}><MoreHorizontal class="h-4 w-4" /></Button>
             </div>
             <div class="grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
               <div class="min-w-0">

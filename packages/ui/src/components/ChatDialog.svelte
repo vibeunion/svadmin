@@ -13,6 +13,8 @@
   const i18n = useTranslation();
 
   interface Props {
+    /** Render the launcher inside a layout toolbar instead of as a floating action button. */
+    docked?: boolean;
     /** localStorage key for chat history persistence. Set to '' to disable. */
     persistKey?: string;
     /** Custom persistence callback — called when messages change */
@@ -24,6 +26,7 @@
   }
 
   const {
+    docked = false,
     persistKey = 'svadmin-chat',
     onPersist,
     onRestore,
@@ -420,7 +423,7 @@
         tooltip={i18n.t('chat.title') || 'AI Assistant'}
         variant="default"
         size="icon"
-        class="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[9998] h-12 w-12 rounded-full shadow-xl hover:shadow-2xl hover:scale-110 transition-all bg-primary text-primary-foreground"
+        class="{docked ? 'relative h-9 w-9 rounded-md shadow-sm' : 'fixed bottom-4 right-4 h-12 w-12 rounded-full shadow-xl hover:shadow-2xl hover:scale-110 sm:bottom-6 sm:right-6'} z-[9998] transition-all bg-primary text-primary-foreground"
         onclick={() => { open = true; minimized = false; }}
       >
         <MessageCircle class="h-5 w-5" />
@@ -607,5 +610,4 @@
     </div>
   {/if}
 {/if}
-
 

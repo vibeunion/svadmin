@@ -88,10 +88,22 @@
     },
   ];
 
-  const resolvedSections = $derived(customSections ?? defaultSections);
+  const resolvedSections = $derived.by(() => {
+    if (customSections) return customSections;
+    const accountPath = getPath().startsWith('/account/');
+    if (!accountPath) return defaultSections;
+
+    return defaultSections.map((section) => ({
+      ...section,
+      items: section.items.map((item) => ({
+        ...item,
+        path: `/account/${item.key === 'api' ? 'api-keys' : item.key}`,
+      })),
+    }));
+  });
   const sectionKeys = $derived(new Set(resolvedSections.flatMap((section) => section.items.map((item) => item.key))));
 
-  import { getParams, getRoute } from "../router-state.svelte.js";
+  import { getParams, getPath, getRoute } from "../router-state.svelte.js";
 
   const i18n = useTranslation();
 

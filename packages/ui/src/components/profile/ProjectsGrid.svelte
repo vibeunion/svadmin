@@ -4,7 +4,8 @@
   import { Badge } from '../ui/badge/index.js';
   import { Button } from '../ui/button/index.js';
   import { Input } from '../ui/input/index.js';
-  import { Users, CheckCircle2, ArrowRight, Search, Plus } from '@lucide/svelte';
+  import { Users, CheckCircle2, ArrowRight, Search, Plus, FolderKanban } from '@lucide/svelte';
+  import Progress from '../ui/progress/progress.svelte';
 
   const i18n = useTranslation();
 
@@ -17,6 +18,7 @@
     status: 'active' | 'completed' | 'on-hold';
     tags?: string[];
     image?: string;
+    progress?: number;
   }
 
   interface Props {
@@ -50,10 +52,10 @@
     <h3 class="text-lg font-semibold text-foreground">
       {i18n.t('publicProfile.projectsCount', { count: filtered.length })}
     </h3>
-    <div class="flex items-center gap-2">
-      <div class="relative">
+    <div class="flex w-full items-center gap-2 sm:w-auto">
+      <div class="relative min-w-0 flex-1 sm:flex-none">
         <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input placeholder={i18n.t('publicProfile.searchProjects')} bind:value={searchQuery} class="w-48 pl-9" />
+        <Input placeholder={i18n.t('publicProfile.searchProjects')} bind:value={searchQuery} class="w-full pl-9 sm:w-48" />
       </div>
       <Button size="sm"><Plus class="h-3.5 w-3.5 mr-1" />{i18n.t('common.create')}</Button>
     </div>
@@ -66,6 +68,7 @@
   {:else}
     <div class="grid gap-4 sm:grid-cols-1 md:grid-cols-2 {gridCols}">
       {#each filtered as project (project.id)}
+        {@const progress = project.progress ?? (project.status === 'completed' ? 100 : project.status === 'active' ? 72 : 38)}
         <Card.Card class="group overflow-hidden border-border/60 hover:border-primary/30 transition-colors">
           {#if project.image}
             <div class="h-32 overflow-hidden">
@@ -74,7 +77,12 @@
           {/if}
           <Card.CardContent class="p-4 space-y-3">
             <div class="flex items-start justify-between gap-2">
-              <h4 class="font-semibold text-foreground">{project.name}</h4>
+              <div class="flex min-w-0 items-center gap-3">
+                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border bg-muted/40 text-muted-foreground">
+                  <FolderKanban class="h-4 w-4" />
+                </span>
+                <h4 class="font-semibold text-foreground">{project.name}</h4>
+              </div>
               <span class="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold {statusConfig[project.status].color}">
                 {statusConfig[project.status].label}
               </span>
@@ -90,12 +98,20 @@
               </div>
             {/if}
 
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between text-[11px] text-muted-foreground">
+                <span>{i18n.t('common.progress')}</span>
+                <span class="font-medium text-foreground">{progress}%</span>
+              </div>
+              <Progress value={progress} class="h-1.5" />
+            </div>
+
             <div class="flex items-center justify-between pt-2 border-t">
               <div class="flex items-center gap-3 text-xs text-muted-foreground">
                 <span class="flex items-center gap-1"><Users class="h-3 w-3" />{i18n.t('publicProfile.projectMembers', { count: project.members })}</span>
                 <span class="flex items-center gap-1"><CheckCircle2 class="h-3 w-3" />{i18n.t('publicProfile.projectTasks', { count: project.tasks })}</span>
               </div>
-              <Button variant="ghost" size="icon-sm">
+              <Button variant="ghost" size="icon-sm" aria-label={project.name} title={project.name}>
                 <ArrowRight class="h-3.5 w-3.5" />
               </Button>
             </div>

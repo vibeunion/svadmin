@@ -340,32 +340,32 @@
         {isZh ? '运营驾驶舱' : 'Operations Cockpit'}
       </div>
       <h1 class="mt-3 text-3xl font-semibold tracking-tight text-foreground">
-        svadmin example
+        {isZh ? '运营工作台' : 'Operations Workspace'}
       </h1>
       <p class="mt-2 max-w-3xl text-sm text-muted-foreground">
         {isZh
-          ? '集中呈现库存、作业、权限、计划、AI 对话和通知的高密度 example。'
-          : 'A dense svadmin example for inventory, operations, access, planning, assistance, and notifications.'}
+          ? '集中掌握库存风险、履约进度、访问权限、计划任务和关键通知。'
+          : 'Monitor inventory risk, fulfillment, access, planned work, and critical notifications in one place.'}
       </p>
       <div class="mt-4 flex flex-wrap gap-2 text-xs text-muted-foreground">
-        <span class="rounded-md border bg-card px-2.5 py-1">{isZh ? '本地数据源' : 'Local data provider'}</span>
-        <span class="rounded-md border bg-card px-2.5 py-1">{isZh ? 'CRUD 闭环' : 'CRUD flows'}</span>
-        <span class="rounded-md border bg-card px-2.5 py-1">{isZh ? 'AI 助手演示' : 'AI assistant demo'}</span>
+        <span class="rounded-md border bg-card px-2.5 py-1">{isZh ? '库存管控' : 'Inventory control'}</span>
+        <span class="rounded-md border bg-card px-2.5 py-1">{isZh ? '履约协同' : 'Fulfillment'}</span>
+        <span class="rounded-md border bg-card px-2.5 py-1">{isZh ? '自动化队列' : 'Automation queue'}</span>
       </div>
     </div>
 
-    <div class="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-      <div class="rounded-lg border bg-card px-4 py-3">
+    <div class="grid grid-cols-3 gap-2 xl:grid-cols-1 xl:gap-3">
+      <div class="rounded-lg border bg-card px-2.5 py-3 sm:px-4">
         <p class="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{isZh ? '履约健康' : 'Fulfillment Health'}</p>
-        <p class="mt-2 text-2xl font-semibold text-foreground">{lowStockProducts.length === 0 ? '100%' : '91%'}</p>
-        <p class="mt-1 text-xs text-muted-foreground">{isZh ? '低库存风险已纳入队列' : 'low-stock risk is queued'}</p>
+        <p class="mt-2 text-xl font-semibold text-foreground sm:text-2xl">{lowStockProducts.length === 0 ? '100%' : '91%'}</p>
+        <p class="mt-1 hidden text-xs text-muted-foreground sm:block">{isZh ? '低库存风险已纳入队列' : 'low-stock risk is queued'}</p>
       </div>
-      <div class="rounded-lg border bg-card px-4 py-3">
+      <div class="rounded-lg border bg-card px-2.5 py-3 sm:px-4">
         <p class="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{isZh ? '待处理' : 'Open Work'}</p>
-        <p class="mt-2 text-2xl font-semibold text-foreground">{openTodos + activeTransfers + pendingAdjustments}</p>
-        <p class="mt-1 text-xs text-muted-foreground">{isZh ? '待办、调拨与审批' : 'todos, transfers, approvals'}</p>
+        <p class="mt-2 text-xl font-semibold text-foreground sm:text-2xl">{openTodos + activeTransfers + pendingAdjustments}</p>
+        <p class="mt-1 hidden text-xs text-muted-foreground sm:block">{isZh ? '待办、调拨与审批' : 'todos, transfers, approvals'}</p>
       </div>
-      <div class="rounded-lg border bg-card px-4 py-3">
+      <div class="rounded-lg border bg-card px-2.5 py-3 sm:px-4">
         <p class="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{isZh ? '刷新状态' : 'Refresh'}</p>
         <p class="mt-2 flex items-center gap-2 text-sm font-semibold text-foreground">
           {#if isLoading}
@@ -375,18 +375,18 @@
             {isZh ? '已同步' : 'Synced'}
           {/if}
         </p>
-        <p class="mt-1 text-xs text-muted-foreground">{isZh ? '示例数据实时读取' : 'example data is live'}</p>
+        <p class="mt-1 hidden text-xs text-muted-foreground sm:block">{isZh ? '运营数据实时读取' : 'operations data is live'}</p>
       </div>
     </div>
   </header>
 
   <!-- Key stats -->
-  <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+  <section class="grid grid-cols-2 gap-3 xl:grid-cols-4">
     {#each stats as stat (stat.label)}
-      <a href={stat.href} class="block rounded-lg border bg-card px-6 py-4 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md">
+      <a href={stat.href} class="block rounded-lg border bg-card px-4 py-4 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md sm:px-6">
         <div class="flex items-center justify-between gap-3">
           <div class="min-w-0">
-            <p class="truncate text-xs font-medium uppercase text-muted-foreground">{stat.label}</p>
+            <p class="min-h-7 text-[11px] font-medium uppercase leading-tight text-muted-foreground sm:min-h-0 sm:text-xs">{stat.label}</p>
             <p class="mt-2 text-2xl font-semibold text-foreground">{stat.value}</p>
           </div>
           <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border {stat.tone}">

@@ -522,8 +522,8 @@ export const exampleMenu: MenuNode[] = [
     ]),
     item('auth_2fa', 'key', '/authentication/branded/2fa'),
     item('error_pages', 'alert-triangle', undefined, [
-      item('error_404', 'alert-triangle', '/404'),
-      item('error_500', 'alert-triangle', '/500'),
+      item('error_404', 'alert-triangle', '/authentication/error-404'),
+      item('error_500', 'alert-triangle', '/authentication/error-500'),
     ]),
   ]),
   item('apps', 'folder', undefined, [
