@@ -2,7 +2,6 @@ import { spawnSync } from 'node:child_process';
 import { access, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
 
 interface PackFile {
   path: string;
@@ -32,6 +31,7 @@ interface PackageManifest {
   bin?: string | Record<string, string>;
   exports?: unknown;
   dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
   peerDependencies?: Record<string, string>;
 }
 
@@ -298,9 +298,16 @@ async function verifyUiPnpmPeerTree(
     await readFile(join(repositoryRoot, 'package.json'), 'utf8'),
   ) as { overrides?: Record<string, string> };
   const svelteVersion = rootManifest.overrides?.svelte;
+  const viteVersion = rootManifest.overrides?.vite;
   const queryVersion = uiManifest.peerDependencies?.['@tanstack/svelte-query'];
+  const sveltePluginVersion = uiManifest.devDependencies?.['@sveltejs/vite-plugin-svelte'];
   assert(svelteVersion, 'root package.json: overrides.svelte is required for pnpm verification');
+  assert(viteVersion, 'root package.json: overrides.vite is required for pnpm verification');
   assert(queryVersion, '@svadmin/ui: @tanstack/svelte-query peer range is required for pnpm verification');
+  assert(
+    sveltePluginVersion,
+    '@svadmin/ui: @sveltejs/vite-plugin-svelte dev dependency is required for pnpm verification',
+  );
 
   const consumerDirectory = join(packDirectory, 'pnpm-peer-consumer');
   await mkdir(consumerDirectory, { recursive: true });
@@ -315,6 +322,10 @@ async function verifyUiPnpmPeerTree(
         '@svadmin/ui': `file:${join(packDirectory, uiPack.filename)}`,
         '@tanstack/svelte-query': queryVersion,
         svelte: svelteVersion,
+      },
+      devDependencies: {
+        '@sveltejs/vite-plugin-svelte': sveltePluginVersion,
+        vite: viteVersion,
       },
     }, null, 2)}\n`,
   );
@@ -392,12 +403,9 @@ async function verifyUiPnpmPeerTree(
     `import { MarkdownRenderer } from '@svadmin/ui';\nconsole.info(typeof MarkdownRenderer);\n`,
   );
   const viteConfig = join(consumerDirectory, 'vite.config.mjs');
-  const sveltePluginUrl = pathToFileURL(
-    join(repositoryRoot, 'node_modules', '@sveltejs', 'vite-plugin-svelte', 'dist', 'index.js'),
-  ).href;
   await writeFile(
     viteConfig,
-    `import { svelte } from ${JSON.stringify(sveltePluginUrl)};\nexport default { root: ${JSON.stringify(consumerDirectory)}, plugins: [svelte()], build: { lib: { entry: ${JSON.stringify(consumerEntry)}, formats: ['es'] } } };\n`,
+    `import { svelte } from '@sveltejs/vite-plugin-svelte';\nexport default { root: ${JSON.stringify(consumerDirectory)}, plugins: [svelte()], build: { lib: { entry: ${JSON.stringify(consumerEntry)}, formats: ['es'] } } };\n`,
   );
   const vitePath = join(repositoryRoot, 'node_modules', 'vite', 'bin', 'vite.js');
   const optionalPeerBuild = run(
