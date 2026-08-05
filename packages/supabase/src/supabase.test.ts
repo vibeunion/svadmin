@@ -165,11 +165,23 @@ describe('Supabase AuthProvider', () => {
     expect(identity!.avatar).toBe('http://avatar');
   });
 
-  test('getPermissions surfaces role from user_metadata', async () => {
+  test('getPermissions fails closed without a trusted resolver', async () => {
     const { createSupabaseAuthProvider } = await import('./auth-provider');
     const auth = createSupabaseAuthProvider(createMockSupabaseClient());
-    const role = await auth.getPermissions?.();
-    expect(role).toBe('admin');
+    const permissions = await auth.getPermissions?.();
+    expect(permissions).toBeNull();
+  });
+
+  test('getPermissions uses the configured permission resolver', async () => {
+    const { createSupabaseAuthProvider } = await import('./auth-provider');
+    const client = createMockSupabaseClient();
+    const auth = createSupabaseAuthProvider(client, {
+      getPermissions: ({ user }) => user.email === 'admin@test.com'
+        ? ['admin', 'posts:edit']
+        : [],
+    });
+    const permissions = await auth.getPermissions?.();
+    expect(permissions).toEqual(['admin', 'posts:edit']);
   });
 
   test('getIdentity clears invalid refresh token sessions', async () => {

@@ -1,7 +1,20 @@
 // Supabase AuthProvider
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient, User } from '@supabase/supabase-js';
 import type { AuthProvider, Identity, AuthActionResult, CheckResult } from '@svadmin/core';
 import { audit } from '@svadmin/core';
+
+export interface SupabasePermissionResolverContext {
+  client: SupabaseClient;
+  user: User;
+}
+
+export type SupabasePermissionResolver = (
+  context: SupabasePermissionResolverContext,
+) => Promise<unknown> | unknown;
+
+export interface SupabaseAuthProviderOptions {
+  getPermissions?: SupabasePermissionResolver;
+}
 
 const INVALID_REFRESH_TOKEN_MESSAGES = [
   'refresh token is not valid',
@@ -23,7 +36,20 @@ async function clearInvalidSession(client: SupabaseClient): Promise<void> {
   await client.auth.signOut({ scope: 'local' });
 }
 
-export function createSupabaseAuthProvider(client: SupabaseClient): AuthProvider {
+async function currentPermissionUser(client: SupabaseClient): Promise<User | null> {
+  const { data: { user }, error } = await client.auth.getUser();
+  if (error && isInvalidRefreshTokenError(error)) {
+    await clearInvalidSession(client);
+    return null;
+  }
+  if (error) return null;
+  return user ?? null;
+}
+
+export function createSupabaseAuthProvider(
+  client: SupabaseClient,
+  options: SupabaseAuthProviderOptions = {},
+): AuthProvider {
   return {
     async login({ email, password }: Record<string, unknown>): Promise<AuthActionResult> {
       const { data, error } = await client.auth.signInWithPassword({
@@ -90,12 +116,10 @@ export function createSupabaseAuthProvider(client: SupabaseClient): AuthProvider
     },
 
     async getPermissions(): Promise<unknown> {
-      const { data: { user }, error } = await client.auth.getUser();
-      if (error && isInvalidRefreshTokenError(error)) {
-        await clearInvalidSession(client);
-        return null;
-      }
-      return user?.user_metadata?.role ?? 'user';
+      if (!options.getPermissions) return null;
+      const user = await currentPermissionUser(client);
+      if (!user) return null;
+      return options.getPermissions({ client, user });
     },
 
     async register({ email, password, ...rest }: Record<string, unknown>): Promise<AuthActionResult> {

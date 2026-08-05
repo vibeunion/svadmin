@@ -36,6 +36,8 @@ const { isAuthenticated, isLoading } = useIsAuthenticated();
 
 ### `usePermissions<T>()`
 
+`usePermissions()` 只是客户端渲染辅助。它可以隐藏或禁用 UI，但 API、DataProvider 和数据库策略必须独立执行授权。
+
 ```typescript
 const { raw, has, can, isLoading, refetch } = usePermissions<string[]>();
 

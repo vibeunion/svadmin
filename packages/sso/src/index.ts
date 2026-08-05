@@ -13,6 +13,8 @@ export type {
   AuthStateChangeEvent,
   GetAccessTokenOptions,
   RefreshLock,
+  SSOPermissionResolver,
+  SSOPermissionResolverContext,
   SSOAuthProvider,
   SSOConfig,
   SSOSession,

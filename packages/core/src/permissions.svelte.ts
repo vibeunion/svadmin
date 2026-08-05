@@ -123,7 +123,8 @@ export interface FeatureGateUser {
 
 /**
  * 创建功能门控函数 — 基于角色和权限判断用户是否可访问某功能。
- * 不预设任何角色层级，由调用方完全定义。
+ * 只做客户端 UI 门控；真实 API、数据库或 RLS 必须独立授权。
+ * 不预设任何角色层级，也不解释通配符权限。
  *
  * @example
  * ```ts
@@ -157,14 +158,7 @@ export function createFeatureGate(config: FeatureGateConfig): (user: FeatureGate
     }
 
     if (config.permissions && config.permissions.length > 0) {
-      const hasAll = config.permissions.every((permission) => {
-        if (user.permissions.includes("*")) return true;
-        if (user.permissions.includes(permission)) return true;
-        const [resource] = permission.split(":");
-        if (resource && user.permissions.includes(`${resource}:*`)) return true;
-        return false;
-      });
-      if (!hasAll) return false;
+      if (!config.permissions.every((permission) => user.permissions.includes(permission))) return false;
     }
 
     return true;

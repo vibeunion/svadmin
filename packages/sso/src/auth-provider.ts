@@ -58,6 +58,8 @@ export interface SSOConfig {
   refreshLock?: RefreshLock;
   /** Injectable fetch implementation for testing and SSR runtimes. */
   fetcher?: typeof fetch;
+  /** Trusted permission resolver. Without one, getPermissions() returns null. */
+  getPermissions?: SSOPermissionResolver;
   /**
    * Manual OAuth2 endpoints for providers that don't support OIDC discovery
    * (e.g., GitHub). When provided, OIDC auto-discovery is skipped.
@@ -75,6 +77,16 @@ export interface TokenStorage {
   setItem: (key: string, value: string) => void;
   removeItem: (key: string) => void;
 }
+
+export interface SSOPermissionResolverContext {
+  session: SSOSession;
+  getAccessToken: (options?: GetAccessTokenOptions) => Promise<string | null>;
+  createAuthenticatedFetch: (fetcher?: typeof fetch) => typeof fetch;
+}
+
+export type SSOPermissionResolver = (
+  context: SSOPermissionResolverContext,
+) => Promise<unknown> | unknown;
 
 export interface SSOAuthProvider extends AuthProvider {
   getSession: () => Promise<SSOSession | null>;
@@ -511,6 +523,13 @@ export function createSSOAuthProvider(config: SSOConfig): SSOAuthProvider {
     },
   };
 
+  function createProviderAuthenticatedFetch(fetcher?: typeof fetch): typeof fetch {
+    return buildAuthenticatedFetch(
+      authorizationSource,
+      fetcher ?? getFetcher(),
+    );
+  }
+
   const provider: SSOAuthProvider = {
     async login() {
       if (typeof window === 'undefined') {
@@ -713,25 +732,20 @@ export function createSSOAuthProvider(config: SSOConfig): SSOAuthProvider {
     },
 
     async getPermissions() {
-      const idToken = sessions.getSession()?.id_token;
-      if (!idToken) return null;
-
-      try {
-        const payload = decodeJwtPayload(idToken);
-        return payload?.roles ?? payload?.groups ?? payload?.permissions ?? null;
-      } catch {
-        return null;
-      }
+      const session = sessions.getSession();
+      if (!session || !config.getPermissions) return null;
+      return config.getPermissions({
+        session,
+        getAccessToken: (options) => sessions.getAccessToken(options),
+        createAuthenticatedFetch: createProviderAuthenticatedFetch,
+      });
     },
 
     getSession: async () => sessions.getSession(),
     refreshSession: () => sessions.refreshSession(),
     getAccessToken: (options) => sessions.getAccessToken(options),
     onAuthStateChange: (callback) => sessions.onAuthStateChange(callback),
-    createAuthenticatedFetch: (fetcher) => buildAuthenticatedFetch(
-      authorizationSource,
-      fetcher ?? getFetcher(),
-    ),
+    createAuthenticatedFetch: createProviderAuthenticatedFetch,
     destroy: () => sessions.destroy(),
 
     async onError(error) {

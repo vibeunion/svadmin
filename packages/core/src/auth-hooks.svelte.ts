@@ -270,7 +270,9 @@ export function useOnError() {
 
 /**
  * Fetches permissions from authProvider.getPermissions().
- * Returns a reactive object with convenience methods for permission checks.
+ * Returns a reactive UI helper with convenience methods for permission checks.
+ * API routes, data providers, and database policies must enforce authorization
+ * independently; this hook only gates client-side rendering.
  * 
  * Supports `refetch()` for session-level permission refresh (e.g., after role change).
  * 
