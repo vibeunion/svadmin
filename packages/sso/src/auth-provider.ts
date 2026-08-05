@@ -712,18 +712,6 @@ export function createSSOAuthProvider(config: SSOConfig): SSOAuthProvider {
       }
     },
 
-    async getPermissions() {
-      const idToken = sessions.getSession()?.id_token;
-      if (!idToken) return null;
-
-      try {
-        const payload = decodeJwtPayload(idToken);
-        return payload?.roles ?? payload?.groups ?? payload?.permissions ?? null;
-      } catch {
-        return null;
-      }
-    },
-
     getSession: async () => sessions.getSession(),
     refreshSession: () => sessions.refreshSession(),
     getAccessToken: (options) => sessions.getAccessToken(options),

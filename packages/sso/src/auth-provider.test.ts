@@ -234,7 +234,11 @@ describe('createSSOAuthProvider', () => {
 
     const calls = installFetch((_url, _init) => jsonResponse({
       access_token: 'access-123',
-      id_token: jwt({ roles: ['admin'] }),
+      id_token: jwt({
+        roles: ['admin'],
+        groups: ['administrators'],
+        permissions: ['users:delete'],
+      }),
       refresh_token: 'refresh-123',
       expires_in: 3600,
       token_type: 'bearer',
@@ -264,7 +268,7 @@ describe('createSSOAuthProvider', () => {
     expect(storage.getItem(`${STORAGE_PREFIX}state`)).toBeNull();
     expect(await provider.getAccessToken()).toBe('access-123');
     expect((await provider.getSession())?.token_type).toBe('Bearer');
-    expect(await provider.getPermissions?.()).toEqual(['admin']);
+    expect(provider.getPermissions).toBeUndefined();
   });
 
   test('does not restore a callback session after logout cancels an in-flight exchange', async () => {

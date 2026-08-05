@@ -37,17 +37,20 @@ const { isAuthenticated, isLoading } = useIsAuthenticated();
 ### `usePermissions<T>()`
 
 ```typescript
-const { raw, has, can, isLoading, refetch } = usePermissions<string[]>();
+const permissionHints = usePermissions<string[]>();
 
-// Check specific permission
-if (has('admin')) { /* ... */ }
+// Change navigation or a disabled control from a UI hint.
+if (permissionHints.has('admin')) { /* ... */ }
 
-// Check resource:action permission
-if (can('posts', 'edit')) { /* ... */ }
+// Read a UI hint using the resource:action naming convention.
+if (permissionHints.can('posts', 'edit')) { /* ... */ }
 
-// Session-level refresh (e.g. after role upgrade)
-await refetch();
+await permissionHints.refetch();
 ```
+
+The built-in Supabase and SSO providers leave `getPermissions()` undefined. A custom
+implementation can supply UI hints only; do not use these browser-visible values as an API,
+RLS, or action authorization decision. The backend must authenticate and authorize every request.
 
 ### `useOnError()`
 

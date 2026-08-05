@@ -165,11 +165,10 @@ describe('Supabase AuthProvider', () => {
     expect(identity!.avatar).toBe('http://avatar');
   });
 
-  test('getPermissions surfaces role from user_metadata', async () => {
+  test('user metadata cannot provide permissions', async () => {
     const { createSupabaseAuthProvider } = await import('./auth-provider');
     const auth = createSupabaseAuthProvider(createMockSupabaseClient());
-    const role = await auth.getPermissions?.();
-    expect(role).toBe('admin');
+    expect(auth.getPermissions).toBeUndefined();
   });
 
   test('getIdentity clears invalid refresh token sessions', async () => {

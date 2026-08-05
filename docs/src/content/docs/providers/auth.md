@@ -13,6 +13,7 @@ interface AuthProvider {
   logout: (params?: Record<string, unknown>) => Promise<AuthActionResult>;
   check: (params?: Record<string, unknown>) => Promise<CheckResult>;
   getIdentity: () => Promise<Identity | null>;
+  // UI-only hints; API, RLS, and action handlers must authorize independently.
   getPermissions?: (params?: Record<string, unknown>) => Promise<unknown>;
   register?: (params: Record<string, unknown>) => Promise<AuthActionResult>;
   forgotPassword?: (params: Record<string, unknown>) => Promise<AuthActionResult>;
@@ -33,7 +34,7 @@ interface AuthProvider {
 | `useGetIdentity()` | Get current user info |
 | `useIsAuthenticated()` | Check auth status |
 | `useOnError()` | Handle API errors (401→logout) |
-| `usePermissions()` | Get user permissions |
+| `usePermissions()` | Get UI-only permission hints |
 
 ### Usage
 
@@ -41,6 +42,10 @@ interface AuthProvider {
 const { mutate: login, isPending } = useLogin();
 await login({ email: 'user@example.com', password: 'secret' });
 ```
+
+The built-in Supabase and SSO providers intentionally leave `getPermissions()` undefined.
+An application may add it for labels, navigation, or disabled controls, but browser-visible
+values never authorize API, RLS, or action requests; the backend must enforce those separately.
 
 ## Auth Pages
 

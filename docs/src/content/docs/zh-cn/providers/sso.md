@@ -98,14 +98,12 @@ const authProvider = createSSOAuthProvider({
 });
 ```
 
-### 从 ID Token 提取权限
+### 权限提示
 
-自动从 ID Token 的 `roles`、`groups`、`permissions` claim 中提取权限信息。
-
-```typescript
-const permissions = await authProvider.getPermissions();
-// → ['admin', 'editor']（来自 ID Token claims）
-```
+默认 SSO Provider 有意不实现 `getPermissions()`，也不会把 ID Token 的 `roles`、`groups`
+或 `permissions` claim 转化为浏览器权限。应用如自行实现 `getPermissions()`，其结果也只能
+用于标签、导航或禁用控件等 UI 提示。API 端点必须独立验证令牌并强制授权；该 hook 不是 API、
+RLS 或动作授权边界。
 
 ### 调用受保护 API
 

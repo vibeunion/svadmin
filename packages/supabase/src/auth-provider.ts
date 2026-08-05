@@ -89,15 +89,6 @@ export function createSupabaseAuthProvider(client: SupabaseClient): AuthProvider
       };
     },
 
-    async getPermissions(): Promise<unknown> {
-      const { data: { user }, error } = await client.auth.getUser();
-      if (error && isInvalidRefreshTokenError(error)) {
-        await clearInvalidSession(client);
-        return null;
-      }
-      return user?.user_metadata?.role ?? 'user';
-    },
-
     async register({ email, password, ...rest }: Record<string, unknown>): Promise<AuthActionResult> {
       const { error } = await client.auth.signUp({
         email: email as string,

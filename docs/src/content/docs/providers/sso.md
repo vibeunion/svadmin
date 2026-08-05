@@ -114,14 +114,13 @@ const authProvider = createSSOAuthProvider({
 });
 ```
 
-### Permissions from ID Token
+### Permission Hints
 
-The provider automatically extracts `roles`, `groups`, or `permissions` claims from the ID token via `getPermissions()`.
-
-```typescript
-const permissions = await authProvider.getPermissions();
-// → ['admin', 'editor'] (from ID token claims)
-```
+The default SSO provider intentionally does not implement `getPermissions()` or turn ID-token
+`roles`, `groups`, or `permissions` claims into browser permissions. If an application adds a
+custom `getPermissions()` implementation, its result is a UI hint for labels, navigation, or
+disabled controls only. API endpoints must independently validate the token and enforce
+authorization; this hook is not an API, RLS, or action authorization boundary.
 
 ### Calling Protected APIs
 

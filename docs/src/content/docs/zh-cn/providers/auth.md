@@ -13,6 +13,7 @@ interface AuthProvider {
   logout: (params?: Record<string, unknown>) => Promise<AuthActionResult>;
   check: (params?: Record<string, unknown>) => Promise<CheckResult>;
   getIdentity: () => Promise<Identity | null>;
+  // 仅限 UI 提示；API、RLS 和动作处理器必须独立授权。
   getPermissions?: (params?: Record<string, unknown>) => Promise<unknown>;
   register?: (params: Record<string, unknown>) => Promise<AuthActionResult>;
   forgotPassword?: (params: Record<string, unknown>) => Promise<AuthActionResult>;
@@ -33,7 +34,7 @@ interface AuthProvider {
 | `useGetIdentity()` | 获取当前用户信息 |
 | `useIsAuthenticated()` | 检查认证状态 |
 | `useOnError()` | 处理 API 错误（401→登出） |
-| `usePermissions()` | 获取用户权限 |
+| `usePermissions()` | 获取仅限 UI 的权限提示 |
 
 ### 用法
 
@@ -41,6 +42,9 @@ interface AuthProvider {
 const { mutate: login, isPending } = useLogin();
 await login({ email: 'user@example.com', password: 'secret' });
 ```
+
+内置 Supabase 与 SSO Provider 有意不实现 `getPermissions()`。应用可自行提供它来调整标签、
+导航或禁用控件，但浏览器中的值绝不能授权 API、RLS 或动作请求；后端必须独立强制授权。
 
 ## 认证页面
 
