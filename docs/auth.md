@@ -92,9 +92,10 @@ const { raw, has, can, isLoading, error } = usePermissions<string[]>();
 // has/can: exact client-side UI checks
 ```
 
-The built-in Supabase and SSO providers deliberately do not implement `getPermissions()`.
-If an application supplies it, its value may change labels, navigation, or disabled controls
-only. API, RLS, and action handlers must independently authenticate and authorize every request.
+The built-in Supabase and SSO providers expose `getPermissions()`, but it returns `null`
+until the application configures a trusted resolver. Resolver values may change labels,
+navigation, or disabled controls only. API, RLS, and action handlers must independently
+authenticate and authorize every request.
 
 ## Auth Pages
 

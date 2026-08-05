@@ -42,7 +42,7 @@ async function currentPermissionUser(client: SupabaseClient): Promise<User | nul
     await clearInvalidSession(client);
     return null;
   }
-  if (error) return null;
+  if (error) throw error;
   return user ?? null;
 }
 

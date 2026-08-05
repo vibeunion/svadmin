@@ -50,9 +50,10 @@ if (permissionHints.can('posts', 'edit')) { /* ... */ }
 await permissionHints.refetch();
 ```
 
-The built-in Supabase and SSO providers leave `getPermissions()` undefined. A custom
-implementation can supply UI hints only; do not use these browser-visible values as an API,
-RLS, or action authorization decision. The backend must authenticate and authorize every request.
+The built-in Supabase and SSO providers expose `getPermissions()`, but it returns `null` until
+the application configures a trusted resolver. Resolver values are UI hints only; do not use
+these browser-visible values as an API, RLS, or action authorization decision. The backend must
+authenticate and authorize every request.
 
 ### `useOnError()`
 

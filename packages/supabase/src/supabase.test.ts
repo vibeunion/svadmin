@@ -184,6 +184,25 @@ describe('Supabase AuthProvider', () => {
     expect(permissions).toEqual(['admin', 'posts:edit']);
   });
 
+  test('getPermissions surfaces transient user lookup errors without calling the resolver', async () => {
+    const { createSupabaseAuthProvider } = await import('./auth-provider');
+    const resolver = mock(() => ['admin']);
+    const client = createMockSupabaseClient({
+      auth: {
+        getUser: mock(async () => ({
+          data: { user: null },
+          error: new Error('User lookup unavailable'),
+        })),
+      },
+    });
+    const auth = createSupabaseAuthProvider(client, { getPermissions: resolver });
+    if (!auth.getPermissions) throw new Error('Expected getPermissions to be available');
+
+    await expect(auth.getPermissions()).rejects.toThrow('User lookup unavailable');
+    expect(resolver).not.toHaveBeenCalled();
+    expect(client.auth.signOut).not.toHaveBeenCalled();
+  });
+
   test('getIdentity clears invalid refresh token sessions', async () => {
     const { createSupabaseAuthProvider } = await import('./auth-provider');
     const client = createMockSupabaseClient({

@@ -45,8 +45,9 @@ const { mutate: login, isPending } = useLogin();
 await login({ email: 'user@example.com', password: 'secret' });
 ```
 
-内置 Supabase 与 SSO Provider 有意不实现 `getPermissions()`。应用可自行提供它来调整标签、
-导航或禁用控件，但浏览器中的值绝不能授权 API、RLS 或动作请求；后端必须独立强制授权。
+内置 Supabase 与 SSO Provider 会提供 `getPermissions()`，但在应用配置可信 resolver 前返回
+`null`。resolver 的返回值可用于调整标签、导航或禁用控件，但浏览器中的值绝不能授权 API、
+RLS 或动作请求；后端必须独立强制授权。
 
 ## 认证页面
 

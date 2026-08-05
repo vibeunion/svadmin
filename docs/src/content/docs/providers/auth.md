@@ -45,9 +45,10 @@ const { mutate: login, isPending } = useLogin();
 await login({ email: 'user@example.com', password: 'secret' });
 ```
 
-The built-in Supabase and SSO providers intentionally leave `getPermissions()` undefined.
-An application may add it for labels, navigation, or disabled controls, but browser-visible
-values never authorize API, RLS, or action requests; the backend must enforce those separately.
+The built-in Supabase and SSO providers expose `getPermissions()`, but it returns `null` until
+the application configures a trusted resolver. Resolver values may change labels, navigation,
+or disabled controls, but browser-visible values never authorize API, RLS, or action requests;
+the backend must enforce those separately.
 
 ## Auth Pages
 

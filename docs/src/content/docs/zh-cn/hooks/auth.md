@@ -50,8 +50,9 @@ if (permissionHints.can('posts', 'edit')) { /* ... */ }
 await permissionHints.refetch();
 ```
 
-内置 Supabase 与 SSO Provider 不提供 `getPermissions()`。自定义实现只能返回 UI 提示，绝不能
-将浏览器中的值作为 API、RLS 或动作授权决定；后端必须认证并授权每一个请求。
+内置 Supabase 与 SSO Provider 会提供 `getPermissions()`，但在应用配置可信 resolver 前返回
+`null`。resolver 的返回值只能作为 UI 提示，绝不能将浏览器中的值作为 API、RLS 或动作授权
+决定；后端必须认证并授权每一个请求。
 
 ### `useOnError()`
 
