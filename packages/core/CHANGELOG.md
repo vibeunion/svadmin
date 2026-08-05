@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.34.0](https://github.com/zuohuadong/svadmin/compare/core-v0.33.0...core-v0.34.0) (2026-08-05)
+
+
+### 🚀 Features
+
+* **example:** complete reference pages and responsive styling ([#207](https://github.com/zuohuadong/svadmin/issues/207)) ([57c5af0](https://github.com/zuohuadong/svadmin/commit/57c5af05a0521b2a763b5c8d61962d11de9965ed))
+
 ## [0.33.0](https://github.com/zuohuadong/svadmin/compare/core-v0.32.3...core-v0.33.0) (2026-08-04)
 
 
