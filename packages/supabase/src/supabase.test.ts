@@ -165,11 +165,42 @@ describe('Supabase AuthProvider', () => {
     expect(identity!.avatar).toBe('http://avatar');
   });
 
-  test('getPermissions surfaces role from user_metadata', async () => {
+  test('getPermissions fails closed without a trusted resolver', async () => {
     const { createSupabaseAuthProvider } = await import('./auth-provider');
     const auth = createSupabaseAuthProvider(createMockSupabaseClient());
-    const role = await auth.getPermissions?.();
-    expect(role).toBe('admin');
+    const permissions = await auth.getPermissions?.();
+    expect(permissions).toBeNull();
+  });
+
+  test('getPermissions uses the configured permission resolver', async () => {
+    const { createSupabaseAuthProvider } = await import('./auth-provider');
+    const client = createMockSupabaseClient();
+    const auth = createSupabaseAuthProvider(client, {
+      getPermissions: ({ user }) => user.email === 'admin@test.com'
+        ? ['admin', 'posts:edit']
+        : [],
+    });
+    const permissions = await auth.getPermissions?.();
+    expect(permissions).toEqual(['admin', 'posts:edit']);
+  });
+
+  test('getPermissions surfaces transient user lookup errors without calling the resolver', async () => {
+    const { createSupabaseAuthProvider } = await import('./auth-provider');
+    const resolver = mock(() => ['admin']);
+    const client = createMockSupabaseClient({
+      auth: {
+        getUser: mock(async () => ({
+          data: { user: null },
+          error: new Error('User lookup unavailable'),
+        })),
+      },
+    });
+    const auth = createSupabaseAuthProvider(client, { getPermissions: resolver });
+    if (!auth.getPermissions) throw new Error('Expected getPermissions to be available');
+
+    await expect(auth.getPermissions()).rejects.toThrow('User lookup unavailable');
+    expect(resolver).not.toHaveBeenCalled();
+    expect(client.auth.signOut).not.toHaveBeenCalled();
   });
 
   test('getIdentity clears invalid refresh token sessions', async () => {

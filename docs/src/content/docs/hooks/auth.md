@@ -36,18 +36,24 @@ const { isAuthenticated, isLoading } = useIsAuthenticated();
 
 ### `usePermissions<T>()`
 
+`usePermissions()` is a client-side rendering helper. It can hide or disable UI, but APIs, data providers, and database policies must enforce authorization independently.
+
 ```typescript
-const { raw, has, can, isLoading, refetch } = usePermissions<string[]>();
+const permissionHints = usePermissions<string[]>();
 
-// Check specific permission
-if (has('admin')) { /* ... */ }
+// Change navigation or a disabled control from a UI hint.
+if (permissionHints.has('admin')) { /* ... */ }
 
-// Check resource:action permission
-if (can('posts', 'edit')) { /* ... */ }
+// Read a UI hint using the resource:action naming convention.
+if (permissionHints.can('posts', 'edit')) { /* ... */ }
 
-// Session-level refresh (e.g. after role upgrade)
-await refetch();
+await permissionHints.refetch();
 ```
+
+The built-in Supabase and SSO providers expose `getPermissions()`, but it returns `null` until
+the application configures a trusted resolver. Resolver values are UI hints only; do not use
+these browser-visible values as an API, RLS, or action authorization decision. The backend must
+authenticate and authorize every request.
 
 ### `useOnError()`
 

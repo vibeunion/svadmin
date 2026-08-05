@@ -1,5 +1,15 @@
-import { describe, test, expect } from 'bun:test';
-import type { CanParams, CanResult, AccessControlProvider } from './permissions.svelte';
+import { afterEach, describe, expect, test } from 'vitest';
+import {
+  canAccessAsync,
+  createFeatureGate,
+  resetAccessControlProvider,
+  setAccessControlProvider,
+  type AccessControlProvider,
+  type CanParams,
+  type CanResult,
+} from './permissions.svelte';
+
+afterEach(resetAccessControlProvider);
 
 describe('permissions', () => {
   test('canAccessAsync respects deny rule', async () => {
@@ -110,6 +120,19 @@ describe('permissions', () => {
       can: async () => ({ can: true }),
     };
     expect(provider.options).toBeUndefined();
+  });
+
+  test('a forged feature-gate hint cannot override a configured access-control decision', async () => {
+    const showAdminNavigation = createFeatureGate({ roles: ['admin'] });
+    setAccessControlProvider({
+      can: async () => ({ can: false, reason: 'Configured policy denied this action' }),
+    });
+
+    expect(showAdminNavigation({ role: 'admin', permissions: ['*'] })).toBe(true);
+    expect(await canAccessAsync('users', 'delete')).toEqual({
+      can: false,
+      reason: 'Configured policy denied this action',
+    });
   });
 });
 

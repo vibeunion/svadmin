@@ -65,6 +65,8 @@ interface SSOConfig {
   refreshBuffer?: number;
   /** 额外授权请求参数，例如 audience 或 prompt */
   authorizationParams?: Record<string, string>;
+  /** 可信权限 resolver，仅用于 UI hint */
+  getPermissions?: (context: SSOPermissionResolverContext) => Promise<unknown> | unknown;
 }
 ```
 
@@ -98,13 +100,21 @@ const authProvider = createSSOAuthProvider({
 });
 ```
 
-### 从 ID Token 提取权限
+### 可信权限 Resolver
 
-自动从 ID Token 的 `roles`、`groups`、`permissions` claim 中提取权限信息。
+未配置可信 resolver 时，`getPermissions()` 返回 `null`。ID Token claims 不会自动转化为浏览器权限。请在 resolver 中调用应用自己的授权接口或后端控制的数据源。结果仅用于 UI 提示；API 端点必须独立验证令牌并强制授权。
 
 ```typescript
-const permissions = await authProvider.getPermissions();
-// → ['admin', 'editor']（来自 ID Token claims）
+const authProvider = createSSOAuthProvider({
+  issuer: 'https://your-tenant.okta.com',
+  clientId: 'abc',
+  redirectUri: '/callback',
+  getPermissions: async ({ createAuthenticatedFetch }) => {
+    const response = await createAuthenticatedFetch()(new URL('/api/me/permissions', window.location.origin));
+    if (!response.ok) throw new Error('Failed to load permissions');
+    return response.json();
+  },
+});
 ```
 
 ### 调用受保护 API

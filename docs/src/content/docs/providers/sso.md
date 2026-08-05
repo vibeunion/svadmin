@@ -73,6 +73,8 @@ interface SSOConfig {
   refreshLock?: RefreshLock;
   /** Injectable fetch implementation for tests and SSR runtimes. */
   fetcher?: typeof fetch;
+  /** Trusted permission resolver for UI hints. */
+  getPermissions?: (context: SSOPermissionResolverContext) => Promise<unknown> | unknown;
 }
 ```
 
@@ -114,13 +116,21 @@ const authProvider = createSSOAuthProvider({
 });
 ```
 
-### Permissions from ID Token
+### Trusted Permissions Resolver
 
-The provider automatically extracts `roles`, `groups`, or `permissions` claims from the ID token via `getPermissions()`.
+`getPermissions()` returns `null` unless you configure a trusted resolver. Use the resolver to call your application authorization endpoint or another backend-controlled source. ID Token claims are not turned into browser permissions; this is a UI hint only. API endpoints must independently validate the token and enforce authorization.
 
 ```typescript
-const permissions = await authProvider.getPermissions();
-// → ['admin', 'editor'] (from ID token claims)
+const authProvider = createSSOAuthProvider({
+  issuer: 'https://your-tenant.okta.com',
+  clientId: 'abc',
+  redirectUri: '/callback',
+  getPermissions: async ({ createAuthenticatedFetch }) => {
+    const response = await createAuthenticatedFetch()(new URL('/api/me/permissions', window.location.origin));
+    if (!response.ok) throw new Error('Failed to load permissions');
+    return response.json();
+  },
+});
 ```
 
 ### Calling Protected APIs

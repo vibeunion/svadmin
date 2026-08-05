@@ -2,6 +2,11 @@
 
 export { createSupabaseDataProvider } from './data-provider';
 export { createSupabaseAuthProvider } from './auth-provider';
+export type {
+  SupabaseAuthProviderOptions,
+  SupabasePermissionResolver,
+  SupabasePermissionResolverContext,
+} from './auth-provider';
 export { createSupabaseLiveProvider } from './live-provider';
 export { createSupabaseAuditHandler } from './audit-handler';
 export {

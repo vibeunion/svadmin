@@ -10,6 +10,7 @@ interface AuthProvider {
   logout: (params?: Record<string, unknown>) => Promise<AuthActionResult>;
   check: (params?: Record<string, unknown>) => Promise<CheckResult>;
   getIdentity: () => Promise<Identity | null>;
+  // UI-only hints; API, RLS, and action handlers must authorize independently.
   getPermissions?: (params?: Record<string, unknown>) => Promise<unknown>;
   register?: (params: Record<string, unknown>) => Promise<AuthActionResult>;
   forgotPassword?: (params: Record<string, unknown>) => Promise<AuthActionResult>;
@@ -83,10 +84,18 @@ mutate(error); // Calls authProvider.onError → may redirect or logout
 
 ### `usePermissions()`
 
+`usePermissions()` is a client-side rendering helper. It can hide or disable UI, but APIs, data providers, and database policies must enforce authorization independently.
+
 ```typescript
-const { data, isLoading, error } = usePermissions<string[]>();
-// data: whatever authProvider.getPermissions() returns
+const { raw, has, can, isLoading, error } = usePermissions<string[]>();
+// raw: whatever trusted authProvider.getPermissions() resolver returns (UI hints only)
+// has/can: exact client-side UI checks
 ```
+
+The built-in Supabase and SSO providers expose `getPermissions()`, but it returns `null`
+until the application configures a trusted resolver. Resolver values may change labels,
+navigation, or disabled controls only. API, RLS, and action handlers must independently
+authenticate and authorize every request.
 
 ## Auth Pages
 

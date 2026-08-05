@@ -269,11 +269,14 @@ export function useOnError() {
 // ─── usePermissions ──────────────────────────────────────────
 
 /**
- * Fetches permissions from authProvider.getPermissions().
- * Returns a reactive object with convenience methods for permission checks.
- * 
+ * Fetches UI-only hints from authProvider.getPermissions().
+ * Returns a reactive UI helper with convenience methods for permission checks.
+ * The result can change labels, navigation, and disabled controls, but it runs
+ * in the browser and never authorizes API, RLS, or action requests. Those
+ * requests must be independently authenticated and authorized by the backend.
+ *
  * Supports `refetch()` for session-level permission refresh (e.g., after role change).
- * 
+ *
  * @example
  * ```svelte
  * <script>

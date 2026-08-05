@@ -13,6 +13,7 @@ interface AuthProvider {
   logout: (params?: Record<string, unknown>) => Promise<AuthActionResult>;
   check: (params?: Record<string, unknown>) => Promise<CheckResult>;
   getIdentity: () => Promise<Identity | null>;
+  // 仅限 UI 提示；API、RLS 和动作处理器必须独立授权。
   getPermissions?: (params?: Record<string, unknown>) => Promise<unknown>;
   register?: (params: Record<string, unknown>) => Promise<AuthActionResult>;
   forgotPassword?: (params: Record<string, unknown>) => Promise<AuthActionResult>;
@@ -20,6 +21,8 @@ interface AuthProvider {
   onError?: (error: unknown) => Promise<{ redirectTo?: string; logout?: boolean }>;
 }
 ```
+
+`getPermissions` 只作为 UI hint。只有应用提供可信 resolver 时才应返回权限；它不能替代 API、后端或数据库授权。
 
 ## 认证 Hook
 
@@ -33,7 +36,7 @@ interface AuthProvider {
 | `useGetIdentity()` | 获取当前用户信息 |
 | `useIsAuthenticated()` | 检查认证状态 |
 | `useOnError()` | 处理 API 错误（401→登出） |
-| `usePermissions()` | 获取用户权限 |
+| `usePermissions()` | 获取仅限 UI 的权限提示 |
 
 ### 用法
 
@@ -41,6 +44,10 @@ interface AuthProvider {
 const { mutate: login, isPending } = useLogin();
 await login({ email: 'user@example.com', password: 'secret' });
 ```
+
+内置 Supabase 与 SSO Provider 会提供 `getPermissions()`，但在应用配置可信 resolver 前返回
+`null`。resolver 的返回值可用于调整标签、导航或禁用控件，但浏览器中的值绝不能授权 API、
+RLS 或动作请求；后端必须独立强制授权。
 
 ## 认证页面
 
@@ -91,10 +98,19 @@ export const mockAuthProvider: AuthProvider = {
 
 ```typescript
 import { createSupabaseAuthProvider } from '@svadmin/supabase';
-const authProvider = createSupabaseAuthProvider(supabaseClient);
+const authProvider = createSupabaseAuthProvider(supabaseClient, {
+  getPermissions: async ({ client }) => {
+    const { data, error } = await client
+      .from('effective_permission_grants')
+      .select('permission');
+    if (error) throw error;
+    return data.map((grant) => grant.permission);
+  },
+});
 ```
 
 `@supacloud/js` 不会改变认证流程。认证部分仍然建议继续使用官方 Supabase 客户端配合 `createSupabaseAuthProvider()`，任务相关 API 再通过 [`@svadmin/supabase/supacloud`](/zh-cn/providers/supacloud) 单独组合接入。
+不要把用户可修改的 metadata 当成授权事实。
 
 ### Appwrite
 
