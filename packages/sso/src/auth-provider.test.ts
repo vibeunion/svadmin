@@ -264,7 +264,39 @@ describe('createSSOAuthProvider', () => {
     expect(storage.getItem(`${STORAGE_PREFIX}state`)).toBeNull();
     expect(await provider.getAccessToken()).toBe('access-123');
     expect((await provider.getSession())?.token_type).toBe('Bearer');
-    expect(await provider.getPermissions?.()).toEqual(['admin']);
+    expect(await provider.getPermissions?.()).toBeNull();
+  });
+
+  test('resolves permissions only through the configured resolver', async () => {
+    const storage = createMemoryStorage();
+    storage.setItem(`${STORAGE_PREFIX}pkce_verifier`, 'verifier-123');
+    storage.setItem(`${STORAGE_PREFIX}state`, 'state-123');
+    installWindow('http://app.test/callback?code=code-123&state=state-123');
+
+    installFetch(() => jsonResponse({
+      access_token: 'access-123',
+      id_token: jwt({ roles: ['admin'] }),
+      refresh_token: 'refresh-123',
+      expires_in: 3600,
+      token_type: 'bearer',
+    }));
+    const provider = createSSOAuthProvider({
+      issuer: 'https://idp.test',
+      clientId: 'admin-console',
+      redirectUri: 'http://app.test/callback',
+      storage,
+      autoRefresh: false,
+      manualEndpoints,
+      getPermissions: async ({ session, getAccessToken }) => {
+        expect(session.id_token).toBeDefined();
+        expect(await getAccessToken()).toBe('access-123');
+        return ['admin', 'posts:edit'];
+      },
+    });
+
+    await provider.check();
+
+    expect(await provider.getPermissions?.()).toEqual(['admin', 'posts:edit']);
   });
 
   test('does not restore a callback session after logout cancels an in-flight exchange', async () => {

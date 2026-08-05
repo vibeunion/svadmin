@@ -21,6 +21,8 @@ interface AuthProvider {
 }
 ```
 
+`getPermissions` is intentionally a UI hint hook. It should return permissions only when the application provides a trusted resolver; it must not replace API, backend, or database authorization.
+
 ## Auth Hooks
 
 | Hook | Purpose |
@@ -91,10 +93,19 @@ export const mockAuthProvider: AuthProvider = {
 
 ```typescript
 import { createSupabaseAuthProvider } from '@svadmin/supabase';
-const authProvider = createSupabaseAuthProvider(supabaseClient);
+const authProvider = createSupabaseAuthProvider(supabaseClient, {
+  getPermissions: async ({ client }) => {
+    const { data, error } = await client
+      .from('effective_permission_grants')
+      .select('permission');
+    if (error) throw error;
+    return data.map((grant) => grant.permission);
+  },
+});
 ```
 
 `@supacloud/js` does not change the auth flow. Keep using the official Supabase client with `createSupabaseAuthProvider()`, and layer any task APIs separately through [`@svadmin/supabase/supacloud`](/providers/supacloud).
+Do not use user-editable metadata as an authorization fact.
 
 ### Appwrite
 

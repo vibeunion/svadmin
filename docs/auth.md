@@ -83,9 +83,12 @@ mutate(error); // Calls authProvider.onError → may redirect or logout
 
 ### `usePermissions()`
 
+`usePermissions()` is a client-side rendering helper. It can hide or disable UI, but APIs, data providers, and database policies must enforce authorization independently.
+
 ```typescript
-const { data, isLoading, error } = usePermissions<string[]>();
-// data: whatever authProvider.getPermissions() returns
+const { raw, has, can, isLoading, error } = usePermissions<string[]>();
+// raw: whatever trusted authProvider.getPermissions() resolver returns
+// has/can: exact client-side UI checks
 ```
 
 ## Auth Pages

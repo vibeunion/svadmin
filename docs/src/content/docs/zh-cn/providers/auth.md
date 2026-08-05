@@ -21,6 +21,8 @@ interface AuthProvider {
 }
 ```
 
+`getPermissions` 只作为 UI hint。只有应用提供可信 resolver 时才应返回权限；它不能替代 API、后端或数据库授权。
+
 ## 认证 Hook
 
 | Hook | 用途 |
@@ -91,10 +93,19 @@ export const mockAuthProvider: AuthProvider = {
 
 ```typescript
 import { createSupabaseAuthProvider } from '@svadmin/supabase';
-const authProvider = createSupabaseAuthProvider(supabaseClient);
+const authProvider = createSupabaseAuthProvider(supabaseClient, {
+  getPermissions: async ({ client }) => {
+    const { data, error } = await client
+      .from('effective_permission_grants')
+      .select('permission');
+    if (error) throw error;
+    return data.map((grant) => grant.permission);
+  },
+});
 ```
 
 `@supacloud/js` 不会改变认证流程。认证部分仍然建议继续使用官方 Supabase 客户端配合 `createSupabaseAuthProvider()`，任务相关 API 再通过 [`@svadmin/supabase/supacloud`](/zh-cn/providers/supacloud) 单独组合接入。
+不要把用户可修改的 metadata 当成授权事实。
 
 ### Appwrite
 

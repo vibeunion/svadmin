@@ -36,6 +36,8 @@ const { isAuthenticated, isLoading } = useIsAuthenticated();
 
 ### `usePermissions<T>()`
 
+`usePermissions()` is a client-side rendering helper. It can hide or disable UI, but APIs, data providers, and database policies must enforce authorization independently.
+
 ```typescript
 const { raw, has, can, isLoading, refetch } = usePermissions<string[]>();
 
