@@ -1,7 +1,17 @@
-import { fireEvent, render } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import MarkdownRenderer from './MarkdownRenderer.svelte';
+
+// MarkdownRenderer loads its optional peer deps (marked, highlight.js,
+// isomorphic-dompurify) dynamically on mount, so rendering is asynchronous.
+// Wait until markdown has actually been parsed and rendered (presence of a
+// rendered <a>/<pre> element signals the deps resolved and parsing ran).
+async function waitForMarkdown(container: HTMLElement) {
+  await waitFor(() => {
+    expect(container.querySelector('a, pre, .code-block-wrapper')).not.toBeNull();
+  });
+}
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -12,7 +22,7 @@ describe('MarkdownRenderer security and enhancement', () => {
     const { container } = render(MarkdownRenderer, {
       content: '<script>globalThis.__markdownXss = 1</script><img src="x" onerror="globalThis.__markdownXss = 2"><a href="javascript:globalThis.__markdownXss=3">unsafe link</a>',
     });
-    await tick();
+    await waitForMarkdown(container);
 
     expect(container.querySelector('script')).toBeNull();
     expect(container.querySelector('[onerror]')).toBeNull();
@@ -30,7 +40,9 @@ describe('MarkdownRenderer security and enhancement', () => {
     const { container } = render(MarkdownRenderer, {
       content: '```js\nconst answer = 42;\n```',
     });
-    await tick();
+    await waitFor(() => {
+      expect(container.querySelector('.code-block-wrapper')).not.toBeNull();
+    });
 
     const wrapper = container.querySelector('.code-block-wrapper');
     const code = wrapper?.querySelector('code');
@@ -55,7 +67,7 @@ describe('MarkdownRenderer security and enhancement', () => {
     await rerender({
       content: '```"><img/src=x/onerror=globalThis.__markdownXss=1>\nunsafe\n```',
     });
-    await tick();
+    await waitForMarkdown(container);
 
     const header = container.querySelector('.code-block-wrapper > div');
     expect(header).not.toBeNull();
@@ -80,10 +92,11 @@ describe('MarkdownRenderer security and enhancement', () => {
       originalAddEventListener.call(this, type, listener, options);
     });
 
-    const { rerender } = render(MarkdownRenderer, { content: '```text\none\n```' });
+    const { container, rerender } = render(MarkdownRenderer, { content: '```text\none\n```' });
+    await waitForMarkdown(container);
     await rerender({ content: '```text\ntwo\n```' });
     await rerender({ content: '```text\nthree\n```' });
-    await tick();
+    await waitForMarkdown(container);
 
     expect(delegatedClickBindings).toBe(1);
   });
