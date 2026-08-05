@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { captureAdminContext, getResources } from '@svadmin/core';
+  import { captureAdminContext, getResources, type MenuItem } from '@svadmin/core';
   import { getPath } from '../router-state.svelte.js';
   import { useTranslation } from '@svadmin/core/i18n';
 
@@ -10,12 +10,43 @@
   const adminContext = captureAdminContext();
   const resources = $derived((() => { try { return getResources(); } catch { return []; } })());
 
-  interface Crumb { label: string; href: string; }
+  let { menu }: { menu?: MenuItem[] } = $props();
+
+  interface Crumb { label: string; href?: string; }
+
+  function normalizePath(path: string): string {
+    const normalized = path.replace(/^#/, '').split(/[?#]/)[0].replace(/\/$/, '');
+    return normalized || '/';
+  }
+
+  function findMenuTrail(items: MenuItem[], path: string, ancestors: MenuItem[] = []): MenuItem[] | undefined {
+    for (const item of items) {
+      const trail = [...ancestors, item];
+      if (item.href && normalizePath(item.href) === path) return trail;
+      if (item.children) {
+        const match = findMenuTrail(item.children, path, trail);
+        if (match) return match;
+      }
+    }
+  }
 
   const crumbs = $derived.by(() => {
     const result: Crumb[] = [{ label: i18n.t('common.home') ?? 'Home', href: adminContext.formatLink('/') }];
-    const path = getPath().replace(/^\//, ''); 
-    if (path === '') return result;
+    const currentPathname = normalizePath(getPath());
+    if (currentPathname === '/') return result;
+
+    const menuTrail = menu ? findMenuTrail(menu, currentPathname) : undefined;
+    if (menuTrail) {
+      for (const item of menuTrail) {
+        result.push({
+          label: item.label ?? item.name,
+          href: item.href ? adminContext.formatLink(normalizePath(item.href)) : undefined,
+        });
+      }
+      return result;
+    }
+
+    const path = currentPathname.replace(/^\//, '');
 
     const segments = path.split('/').filter(Boolean);
     const resourceNames = resources.map(r => r.name);
@@ -54,7 +85,7 @@
 {#if crumbs.length > 1}
   <Breadcrumb.Root class="mb-4">
     <Breadcrumb.List>
-      {#each crumbs as crumb, i (crumb.href)}
+      {#each crumbs as crumb, i (`${crumb.label}-${i}`)}
         {#if i > 0}
           <Breadcrumb.Separator />
         {/if}
@@ -62,8 +93,10 @@
           <span class="inline-flex svadmin-page-enter" style="animation-duration: 0.2s;">
           {#if i === crumbs.length - 1}
             <Breadcrumb.Page>{crumb.label}</Breadcrumb.Page>
-          {:else}
+          {:else if crumb.href}
             <Breadcrumb.Link href={crumb.href}>{crumb.label}</Breadcrumb.Link>
+          {:else}
+            <span class="text-muted-foreground">{crumb.label}</span>
           {/if}
           </span>
         </Breadcrumb.Item>

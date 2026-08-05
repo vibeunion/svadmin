@@ -23,6 +23,11 @@
   let inviteEmail = $state('');
   let inviteRole = $state('Viewer');
   let linkCopied = $state(false);
+  let inviteStatus = $state('');
+
+  function focusInvite() {
+    document.getElementById('invite-email')?.focus();
+  }
 
   function copyInviteLink() {
     navigator.clipboard?.writeText('https://acme.com/invite/xK7fQ2').catch(() => {});
@@ -46,6 +51,23 @@
     { id: '13', name: 'Mia Torres', email: 'mia@acme.com', role: 'Editor', department: 'Marketing', status: 'invited', lastActive: 'Pending' },
     { id: '14', name: 'Chen Wei', email: 'chen@acme.com', role: 'Admin', department: 'Engineering', status: 'active', lastActive: '15 min ago' },
   ]);
+
+  function sendInvite() {
+    const email = inviteEmail.trim();
+    if (!email) return;
+    const name = email.split('@')[0].split(/[._-]/).filter(Boolean).map(part => part[0]?.toUpperCase() + part.slice(1)).join(' ') || email;
+    members = [...members, {
+      id: `invite-${Date.now()}`,
+      name,
+      email,
+      role: inviteRole as TeamMember['role'],
+      department: 'Pending assignment',
+      status: 'invited',
+      lastActive: 'Pending',
+    }];
+    inviteStatus = email;
+    inviteEmail = '';
+  }
 
   const filtered = $derived(
     searchQuery
@@ -80,7 +102,7 @@
       <h2 class="text-xl font-semibold text-foreground">{i18n.t('account.teamMembersCount', { count: members.length })}</h2>
       <p class="mt-1 text-sm text-muted-foreground">{i18n.t('account.teamMembersDescription')}</p>
     </div>
-    <Button size="sm">
+    <Button size="sm" onclick={focusInvite}>
       <UserPlus class="h-4 w-4 mr-1" />{i18n.t('account.inviteMember')}
     </Button>
   </div>
@@ -113,10 +135,13 @@
           </div>
         </div>
         <div class="flex justify-end">
-          <Button size="sm" disabled={!inviteEmail}>
+          <Button size="sm" disabled={!inviteEmail} onclick={sendInvite}>
             <Send class="h-3.5 w-3.5 mr-1" />{i18n.t('account.sendInvite')}
           </Button>
         </div>
+        {#if inviteStatus}
+          <p class="text-xs text-green-600" role="status">{i18n.t('account.invited')}: {inviteStatus}</p>
+        {/if}
       </Card.CardContent>
     </Card.Card>
 
@@ -163,7 +188,7 @@
                 <span class="text-xs text-muted-foreground">{member.lastActive}</span>
               </div>
             </div>
-            <Button variant="ghost" size="icon-sm"><MoreHorizontal class="h-4 w-4" /></Button>
+            <Button variant="ghost" size="icon-sm" aria-label={member.name} title={member.name}><MoreHorizontal class="h-4 w-4" /></Button>
           </div>
         </Card.CardContent>
       </Card.Card>

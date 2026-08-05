@@ -1362,10 +1362,6 @@ main {
     padding-right: 1rem !important;
   }
 
-  .layout-clean-flat [data-svadmin-content-page] [class*="grid-cols-3"] {
-    grid-template-columns: minmax(0, 1fr) !important;
-  }
-
   .layout-clean-flat [data-svadmin-content-page="auth-2fa"] [data-slot="card-content"],
   .layout-clean-flat [data-svadmin-content-page="error"] [data-slot="card-content"] {
     padding-left: 1rem !important;

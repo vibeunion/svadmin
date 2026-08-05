@@ -43,12 +43,12 @@
   import ForgotPasswordPage from './ForgotPasswordPage.svelte';
   import UpdatePasswordPage from './UpdatePasswordPage.svelte';
   import ConfigErrorScreen from './ConfigErrorScreen.svelte';
-  import DevTools from './DevTools.svelte';
   import Sidebar from './Sidebar.svelte';
   import Header from './Header.svelte';
   import TaskQueueDrawer from './TaskQueueDrawer.svelte';
   import SettingsPage from './SettingsPage.svelte';
   import ErrorPage from './ErrorPage.svelte';
+  import SystemPageShell from './SystemPageShell.svelte';
   import LazyPage from './LazyPage.svelte';
   import { Button } from './ui/button/index.js';
   import { Input } from './ui/input/index.js';
@@ -236,6 +236,12 @@
   const resourceNames = $derived(new Set(resources.map((resource) => resource.name)));
   const hasRouteResource = $derived(!params.resource || resourceNames.has(params.resource));
   const currentResourcePages = $derived(params.resource ? resourcePages?.[params.resource] : undefined);
+  const isStandaloneTwoFactor = $derived(route === '/2fa' || route === '/authentication/branded/2fa');
+  const standaloneErrorStatus = $derived.by((): '404' | '500' | undefined => {
+    if (route === '/authentication/error-404' || route === '/404' || (route === '/:resource' && params.resource === '404')) return '404';
+    if (route === '/authentication/error-500' || route === '/500' || (route === '/:resource' && params.resource === '500')) return '500';
+    return undefined;
+  });
 
   // Auth check
   let isAuthenticated = $state(untrack(() => !authProvider));
@@ -243,6 +249,13 @@
 
   async function navigateWithinApp(path: string) {
     await adminContext.navigate(path);
+  }
+
+  function isPublicSystemRoute(currentRoute: string): boolean {
+    return currentRoute === '/authentication/error-404'
+      || currentRoute === '/authentication/error-500'
+      || currentRoute === '/404'
+      || currentRoute === '/500';
   }
 
   $effect(() => {
@@ -262,7 +275,7 @@
       if (cancelled) return;
       isAuthenticated = result.authenticated;
       authChecked = true;
-      if (!result.authenticated && _route !== '/login' && _route !== '/register' && _route !== '/forgot-password' && _route !== '/update-password') {
+      if (!result.authenticated && _route !== '/login' && _route !== '/register' && _route !== '/forgot-password' && _route !== '/update-password' && !isPublicSystemRoute(_route)) {
         void navigateWithinApp(result.redirectTo ?? '/login');
       }
     }).catch(err => {
@@ -270,7 +283,7 @@
       console.warn('Auth check failed:', err);
       isAuthenticated = false;
       authChecked = true;
-      if (_route !== '/login' && _route !== '/register' && _route !== '/forgot-password' && _route !== '/update-password') {
+      if (_route !== '/login' && _route !== '/register' && _route !== '/forgot-password' && _route !== '/update-password' && !isPublicSystemRoute(_route)) {
         void navigateWithinApp('/login');
       }
     });
@@ -305,13 +318,20 @@
     <UpdatePasswordPage {title} />
   {:else if route === '/login' || route === '/register' || route === '/forgot-password' || route === '/update-password'}
     <ConfigErrorScreen title="{title} — {translation.t('common.configRequired')}" />
+  {:else if (isAuthenticated || !authProvider) && isStandaloneTwoFactor}
+    <SystemPageShell {title}>
+      <LazyPage loader={loadTwoFactorAuthPage} props={{}} />
+    </SystemPageShell>
+  {:else if standaloneErrorStatus}
+    <SystemPageShell {title}>
+      {@const ErrorComp = mergedComponents.ErrorPage || ErrorPage}
+      <ErrorComp status={standaloneErrorStatus} />
+    </SystemPageShell>
   {:else if isAuthenticated || !authProvider}
     <Layout {title} {menu} {siteUrl} routeMode={resolvedRouteMode}>
       {#key route + (params.resource ?? '') + (params.id ?? '') + (params.variant ?? '') + (params.columns ?? '')}
       <div class="svadmin-page-enter">
-      {#if route === '/2fa' || route === '/authentication/branded/2fa'}
-        <LazyPage loader={loadTwoFactorAuthPage} props={{}} />
-      {:else if route === '/public-profile'}
+      {#if route === '/public-profile'}
         <LazyPage loader={loadPublicProfilePage} props={{ variant: 'default', initialTab: 'projects' }} />
       {:else if route === '/public-profile/projects/:columns'}
         <LazyPage loader={loadPublicProfilePage} props={{ variant: 'default', initialTab: 'projects', columns: params.columns?.includes('3') ? 3 : 2 }} />
@@ -349,9 +369,6 @@
         <LazyPage loader={loadTeamCrewTablePage} props={{}} />
       {:else if route.startsWith('/settings')}
         <SettingsPage />
-      {:else if route === '/500' || (route === '/:resource' && params.resource === '500')}
-        {@const ErrorComp = mergedComponents.ErrorPage || ErrorPage}
-        <ErrorComp status="500" />
       {:else if route === '/' || route === '' || route === '/inventory-dashboard'}
         {#if dashboard}
           {@render dashboard()}
@@ -399,5 +416,4 @@
     </div>
   {/if}
   <Toast />
-  <DevTools />
 </QueryClientProvider>

@@ -120,18 +120,18 @@
 <div class="space-y-6" data-svadmin-content-page="public-profile">
   <!-- Cover + Profile Header -->
   <Card.Card class="overflow-hidden border-border/60">
-    <div class="h-40 bg-gradient-to-r from-primary/25 via-primary/15 to-accent/20 relative">
+    <div class="h-28 bg-gradient-to-r from-primary/25 via-primary/15 to-accent/20 relative sm:h-40">
       <div class="absolute inset-0 opacity-[0.06]" style="background-image: radial-gradient(circle, currentColor 1px, transparent 1px); background-size: 24px 24px;"></div>
     </div>
     <Card.CardContent class="relative px-6 pb-5">
-      <div class="-mt-12 flex flex-col sm:flex-row sm:items-end gap-4">
+      <div class="-mt-10 flex flex-col gap-3 sm:-mt-12 sm:flex-row sm:items-end sm:gap-4">
         <div class="ring-4 ring-card rounded-2xl overflow-hidden shrink-0">
-          <div class="flex h-24 w-24 items-center justify-center bg-primary/10 text-primary text-3xl font-bold">
+          <div class="flex h-20 w-20 items-center justify-center bg-primary/10 text-2xl font-bold text-primary sm:h-24 sm:w-24 sm:text-3xl">
             {profileData.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
           </div>
         </div>
         <div class="flex-1 min-w-0">
-          <h2 class="text-2xl font-bold text-foreground">{profileData.name}</h2>
+          <h2 class="text-xl font-bold text-foreground sm:text-2xl">{profileData.name}</h2>
           {#if profileData.tagline}
             <p class="text-muted-foreground">{profileData.tagline}</p>
           {/if}
@@ -147,7 +147,7 @@
             {/if}
           </div>
         </div>
-        <div class="flex gap-2 shrink-0">
+        <div class="flex shrink-0 flex-wrap gap-2">
           <Button size="sm">{i18n.t('publicProfile.editProfile')}</Button>
           <Button size="sm" variant="outline">{i18n.t('publicProfile.sendMessage')}</Button>
           <Button size="sm" variant="ghost"><MoreHorizontal class="h-4 w-4" /></Button>
