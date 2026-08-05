@@ -13,23 +13,21 @@
 
   let { content, streaming = false, class: className = "" }: Props = $props();
 
+  type MarkedConstructor = typeof import("marked").Marked;
+  type MarkedHighlight = typeof import("marked-highlight").markedHighlight;
+  type HighlightApi = typeof import("highlight.js").default;
+  type Sanitizer = typeof import("isomorphic-dompurify").default;
+
   // Lazily loaded optional peer dependencies (marked, marked-highlight,
   // highlight.js, isomorphic-dompurify). They are declared as optional peer
   // deps; statically importing them would crash consumers that have not
   // installed them, even when MarkdownRenderer is never rendered. Load them
   // dynamically so the module graph resolves without them and the component
   // degrades to escaped-text rendering when they are absent.
-  // Hold the dynamically loaded markdown deps. Typed loosely (any) because the
-  // concrete shapes come from optional peer packages and svelte-check would
-  // otherwise narrow `$state(null)` to `never` on first render.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let MarkedCtor: any = $state(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let markedHighlightFn: any = $state(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let hljs: any = $state(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let DOMPurify: any = $state(null);
+  let MarkedCtor = $state<MarkedConstructor | null>(null);
+  let markedHighlightFn = $state<MarkedHighlight | null>(null);
+  let hljs = $state<HighlightApi | null>(null);
+  let DOMPurify = $state<Sanitizer | null>(null);
 
   onMount(() => {
     let cancelled = false;
@@ -42,13 +40,10 @@
           import("isomorphic-dompurify"),
         ]);
         if (cancelled) return;
-        MarkedCtor = (markedPkg as any).Marked ?? null;
-        markedHighlightFn = (markedHighlightPkg as any).markedHighlight ?? null;
-        hljs = (hljsPkg as any).default ?? (hljsPkg as any) ?? null;
-        DOMPurify =
-          "default" in (DOMPurifyPkg as any)
-            ? (DOMPurifyPkg as any).default
-            : (DOMPurifyPkg as any);
+        MarkedCtor = markedPkg.Marked;
+        markedHighlightFn = markedHighlightPkg.markedHighlight;
+        hljs = hljsPkg.default;
+        DOMPurify = DOMPurifyPkg.default;
         // Only import the theme css when highlight.js is available
         if (hljs && Object.keys(hljs).length > 0) {
           import("highlight.js/styles/github-dark.css").catch(() => {});
@@ -68,26 +63,31 @@
   );
 
   // Configure marked with syntax highlighting if available
-  const markedObj = $derived(
-    hasMarkdownDeps
-      ? new MarkedCtor(
-          markedHighlightFn({
-            langPrefix: "hljs language-",
-            highlight(code: string, lang: string) {
-              const language = hljs?.getLanguage && hljs.getLanguage(lang) ? lang : "plaintext";
-              return hljs?.highlight ? hljs.highlight(code, { language }).value : code;
-            },
-          }),
-        )
-      : null,
-  );
+  const markedObj = $derived.by(() => {
+    const Constructor = MarkedCtor;
+    const highlightExtension = markedHighlightFn;
+    if (!Constructor || !highlightExtension) return null;
+
+    return new Constructor(
+      highlightExtension({
+        langPrefix: "hljs language-",
+        highlight(code: string, lang: string) {
+          const language = hljs?.getLanguage && hljs.getLanguage(lang) ? lang : "plaintext";
+          return hljs?.highlight ? hljs.highlight(code, { language }).value : code;
+        },
+      }),
+    );
+  });
 
   // Render HTML safely
-  const html = $derived(
-    hasMarkdownDeps
-      ? DOMPurify!.sanitize(markedObj?.parse(content || "") as string)
-      : `<div style="white-space: pre-wrap">${String(content || "").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>`,
-  );
+  const html = $derived.by(() => {
+    const purifier = DOMPurify;
+    const parser = markedObj;
+    if (hasMarkdownDeps && purifier && parser) {
+      return purifier.sanitize(parser.parse(content || ""));
+    }
+    return `<div style="white-space: pre-wrap">${String(content || "").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>`;
+  });
 
   // Handle copy code blocks
   let copiedBlock = $state<string | null>(null);

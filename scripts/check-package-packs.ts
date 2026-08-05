@@ -2,6 +2,7 @@ import { spawnSync } from 'node:child_process';
 import { access, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 interface PackFile {
   path: string;
@@ -43,6 +44,12 @@ const repositoryRoot = resolve(import.meta.dir, '..');
 const packagesRoot = join(repositoryRoot, 'packages');
 const tscPath = join(repositoryRoot, 'node_modules', 'typescript', 'bin', 'tsc');
 const pnpmVersion = '11.11.0';
+const optionalMarkdownPeers = [
+  'highlight.js',
+  'isomorphic-dompurify',
+  'marked',
+  'marked-highlight',
+] as const;
 
 const expectations: PackageExpectation[] = [
   {
@@ -352,6 +359,12 @@ async function verifyUiPnpmPeerTree(
   );
 
   const virtualStoreEntries = await readdir(join(consumerDirectory, 'node_modules', '.pnpm'));
+  for (const optionalPeer of optionalMarkdownPeers) {
+    assert(
+      !virtualStoreEntries.some((entry) => entry.startsWith(`${optionalPeer}@`)),
+      `@svadmin/ui: pnpm strict consumer unexpectedly installed optional peer ${optionalPeer}`,
+    );
+  }
   const svelteVersions = new Set(
     virtualStoreEntries
       .map((entry) => /^svelte@([^_]+)(?:_|$)/.exec(entry)?.[1])
@@ -372,7 +385,28 @@ async function verifyUiPnpmPeerTree(
     ['--yes', `pnpm@${pnpmVersion}`, 'list', 'svelte', '--depth', 'Infinity'],
     consumerDirectory,
   );
-  return `pnpm@${pnpmVersion} strict packed consumer passed\nforbidden dependencies absent: cmdk-sv, sonner-svelte, @melt-ui/svelte\n${dependencyTree.trim()}\nresolved Svelte versions: ${resolvedSvelteVersion}`;
+
+  const consumerEntry = join(consumerDirectory, 'markdown-import.ts');
+  await writeFile(
+    consumerEntry,
+    `import { MarkdownRenderer } from '@svadmin/ui';\nconsole.info(typeof MarkdownRenderer);\n`,
+  );
+  const viteConfig = join(consumerDirectory, 'vite.config.mjs');
+  const sveltePluginUrl = pathToFileURL(
+    join(repositoryRoot, 'node_modules', '@sveltejs', 'vite-plugin-svelte', 'dist', 'index.js'),
+  ).href;
+  await writeFile(
+    viteConfig,
+    `import { svelte } from ${JSON.stringify(sveltePluginUrl)};\nexport default { plugins: [svelte()], build: { lib: { entry: ${JSON.stringify(consumerEntry)}, formats: ['es'] } } };\n`,
+  );
+  const vitePath = join(repositoryRoot, 'node_modules', 'vite', 'bin', 'vite.js');
+  const optionalPeerBuild = run(
+    'node',
+    [vitePath, 'build', '--config', viteConfig, '--root', consumerDirectory],
+    consumerDirectory,
+  );
+
+  return `pnpm@${pnpmVersion} strict packed consumer passed\nforbidden dependencies absent: cmdk-sv, sonner-svelte, @melt-ui/svelte\noptional markdown peers absent: ${optionalMarkdownPeers.join(', ')}\n${optionalPeerBuild.trim()}\n${dependencyTree.trim()}\nresolved Svelte versions: ${resolvedSvelteVersion}`;
 }
 
 async function createConsumer(packDirectory: string, results: Map<string, PackResult>): Promise<string> {
