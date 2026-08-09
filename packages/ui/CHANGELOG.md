@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.40.3](https://github.com/zuohuadong/svadmin/compare/ui-v0.40.2...ui-v0.40.3) (2026-08-09)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** filter hidden columns in AutoTable and fix pagination layout ([#215](https://github.com/zuohuadong/svadmin/issues/215)) ([11fb8e6](https://github.com/zuohuadong/svadmin/commit/11fb8e61eb03b4c31ec9e28aecea116d93548886))
+
 ## [0.40.2](https://github.com/zuohuadong/svadmin/compare/ui-v0.40.1...ui-v0.40.2) (2026-08-09)
 
 
