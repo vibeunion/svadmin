@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.40.2](https://github.com/zuohuadong/svadmin/compare/ui-v0.40.1...ui-v0.40.2) (2026-08-09)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** give the default button variant a hover state on &lt;button&gt; elements ([#213](https://github.com/zuohuadong/svadmin/issues/213)) ([ebb1b38](https://github.com/zuohuadong/svadmin/commit/ebb1b38133df9033cf650e96f0d6efc228f7280f))
+
 ## [0.40.1](https://github.com/zuohuadong/svadmin/compare/ui-v0.40.0...ui-v0.40.1) (2026-08-05)
 
 
