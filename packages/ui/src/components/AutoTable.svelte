@@ -429,6 +429,14 @@
   });
 
   const selectedCount = $derived(Object.keys(tableRowSelection.current).length);
+
+  // 列可见性：columnVisibility 仅记录被隐藏的列，默认可见。
+  // TanStack v9 standalone 函数在 manual 模式下不会自动过滤 header/cells，
+  // 需要在此显式过滤，否则隐藏列后表头/单元格仍会渲染。
+  function isColumnVisible(columnId: string): boolean {
+    return tableColumnVisibility.current[columnId] !== false;
+  }
+
   const tableView = $derived.by(() => {
     void tableSorting.current;
     void tableColumnVisibility.current;
@@ -696,8 +704,9 @@
         <Table.Root>
           <Table.Header>
             {#each tableView.headerGroups as headerGroup, _i (_i)}
+              {@const visibleHeaders = headerGroup.headers.filter((header: Header<TableFeatures, BaseRecord, unknown>) => isColumnVisible(header.column.id))}
               <DraggableHeader
-                columns={headerGroup.headers.map((header: Header<TableFeatures, BaseRecord, unknown>) => ({ id: header.column.id, header }))}
+                columns={visibleHeaders.map((header) => ({ id: header.column.id, header }))}
                 resourceName={resourceName}
                 onReorder={(newOrder) => columnOrderAtom.set(newOrder.map((column) => column.id))}
               >
@@ -744,11 +753,12 @@
             {#each tableView.rows as row, _i (_i)}
               {@const record = row.original}
               {@const id = record[primaryKey] as string | number}
+              {@const visibleCells = row_getVisibleCells(row).filter((cell) => isColumnVisible(cell.column.id))}
               <ContextMenu.Root>
                 <ContextMenu.Trigger>
                   {#snippet child({ props })}
                     <Table.Row {...props} class="transition-all duration-300 border-b border-border/10 {row_getIsSelected(row) ? 'bg-primary/5' : 'hover:bg-muted/20'}">
-                      {#each row_getVisibleCells(row) as cell, _i (_i)}
+                      {#each visibleCells as cell, _i (_i)}
                         <Table.Cell>
                           {#if cell.column.id === '_select'}
                             <Checkbox
@@ -840,7 +850,7 @@
               </ContextMenu.Root>
               {#if expandedRowRender && rowIsExpanded(row.id)}
                 <Table.Row class="bg-muted/10 border-b border-border/10 transition-all">
-                  <Table.Cell colspan={row_getVisibleCells(row).length}>
+                  <Table.Cell colspan={visibleCells.length}>
                     {@render expandedRowRender({ record })}
                   </Table.Cell>
                 </Table.Row>
@@ -913,7 +923,7 @@
               </div>
               <!-- Card fields -->
               <div class="space-y-2">
-                {#each visibleFields.slice(0, 6) as field, _i (_i)}
+                {#each visibleFields.filter((field) => isColumnVisible(field.key)).slice(0, 6) as field, _i (_i)}
                   {@const value = record[field.key]}
                   <div class="flex items-start justify-between gap-4">
                     <span class="text-xs font-medium text-muted-foreground shrink-0">{field.label}</span>
@@ -959,11 +969,11 @@
 
   <!-- Pagination (shadcn) -->
   {#if totalPages > 0}
-  <div class="flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-muted-foreground">
-    <div class="flex items-center gap-2">
-      <span>{i18n.t('common.total', { total: query.data?.total ?? 0 })}</span>
+  <div class="flex flex-col sm:flex-row items-center justify-between gap-3 px-1 py-2 text-sm text-muted-foreground">
+    <div class="flex shrink-0 items-center gap-3 leading-8">
+      <span class="shrink-0 whitespace-nowrap">{i18n.t('common.total', { total: query.data?.total ?? 0 })}</span>
       <select
-        class="h-8 w-[70px] px-1 py-1 flex items-center justify-between rounded-md border border-input bg-background text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        class="h-8 w-[70px] shrink-0 px-1 py-1 flex items-center justify-between rounded-md border border-input bg-background text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         value={String(pagination.pageSize ?? 10)}
         onchange={(e) => {
           const size = Number((e.target as HTMLSelectElement).value);
