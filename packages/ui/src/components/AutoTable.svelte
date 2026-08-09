@@ -430,9 +430,6 @@
 
   const selectedCount = $derived(Object.keys(tableRowSelection.current).length);
 
-  // 列可见性：columnVisibility 仅记录被隐藏的列，默认可见。
-  // TanStack v9 standalone 函数在 manual 模式下不会自动过滤 header/cells，
-  // 需要在此显式过滤，否则隐藏列后表头/单元格仍会渲染。
   function isColumnVisible(columnId: string): boolean {
     return tableColumnVisibility.current[columnId] !== false;
   }

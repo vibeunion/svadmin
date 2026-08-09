@@ -40,12 +40,14 @@ describe('AutoTable interactions', () => {
     await fireEvent.click(await view.findByRole('button', { name: '列' }));
     const emailColumn = await view.findByRole('menuitemcheckbox', { name: 'Email' });
     expect(emailColumn.getAttribute('aria-checked')).toBe('true');
+    expect(view.getAllByText('user@example.com')).toHaveLength(2);
 
     await fireEvent.click(emailColumn);
 
     await waitFor(() => {
       expect(view.getByRole('menuitemcheckbox', { name: 'Email' }).getAttribute('aria-checked')).toBe('false');
       expect(view.queryByRole('columnheader', { name: 'Email' })).toBeNull();
+      expect(view.queryByText('user@example.com')).toBeNull();
     });
   });
 
