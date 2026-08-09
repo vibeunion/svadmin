@@ -43,7 +43,7 @@
     "@svadmin/core": "workspace:*"
   },
   "dependencies": {
-    "@lucide/svelte": "^1.28.0",
+    "@lucide/svelte": "^1.30.0",
     "@tiptap/core": "^3.29.2",
     "@tiptap/extension-bubble-menu": "^3.29.2",
     "@tiptap/extension-character-count": "^3.29.2",
