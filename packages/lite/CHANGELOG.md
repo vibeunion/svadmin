@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.12](https://github.com/zuohuadong/svadmin/compare/lite-v0.3.11...lite-v0.3.12) (2026-08-10)
+
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** upgrade dependencies to latest ([01b5b4f](https://github.com/zuohuadong/svadmin/commit/01b5b4fe65df4bab2d409cbb4a880b14946c4fe0))
+
 ## [0.3.11](https://github.com/zuohuadong/svadmin/compare/lite-v0.3.10...lite-v0.3.11) (2026-07-30)
 
 

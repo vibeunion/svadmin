@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.4](https://github.com/zuohuadong/svadmin/compare/editor-v0.2.3...editor-v0.2.4) (2026-08-10)
+
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** upgrade dependencies to latest ([01b5b4f](https://github.com/zuohuadong/svadmin/commit/01b5b4fe65df4bab2d409cbb4a880b14946c4fe0))
+
 ## [0.2.3](https://github.com/zuohuadong/svadmin/compare/editor-v0.2.2...editor-v0.2.3) (2026-07-30)
 
 

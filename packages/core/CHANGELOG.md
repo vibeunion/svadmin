@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.34.2](https://github.com/zuohuadong/svadmin/compare/core-v0.34.1...core-v0.34.2) (2026-08-10)
+
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** upgrade dependencies to latest ([01b5b4f](https://github.com/zuohuadong/svadmin/commit/01b5b4fe65df4bab2d409cbb4a880b14946c4fe0))
+
 ## [0.34.1](https://github.com/zuohuadong/svadmin/compare/core-v0.34.0...core-v0.34.1) (2026-08-05)
 
 

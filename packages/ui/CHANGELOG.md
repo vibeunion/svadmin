@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.40.4](https://github.com/zuohuadong/svadmin/compare/ui-v0.40.3...ui-v0.40.4) (2026-08-10)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** enforce access control for custom menus ([#221](https://github.com/zuohuadong/svadmin/issues/221)) ([fbff839](https://github.com/zuohuadong/svadmin/commit/fbff839ed7c02af4abae3bd10eab750d3e05419b))
+
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** upgrade dependencies to latest ([01b5b4f](https://github.com/zuohuadong/svadmin/commit/01b5b4fe65df4bab2d409cbb4a880b14946c4fe0))
+
 ## [0.40.3](https://github.com/zuohuadong/svadmin/compare/ui-v0.40.2...ui-v0.40.3) (2026-08-09)
 
 
