@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.1](https://github.com/zuohuadong/svadmin/compare/refine-adapter-v0.10.0...refine-adapter-v0.10.1) (2026-08-10)
+
+
+### 🐛 Bug Fixes
+
+* **refine-adapter:** map current pagination to currentPage ([#219](https://github.com/zuohuadong/svadmin/issues/219)) ([c50eb79](https://github.com/zuohuadong/svadmin/commit/c50eb794fb64aaf33759cc865d70fadbcdf7d8dd))
+
 ## [0.10.0](https://github.com/zuohuadong/svadmin/compare/refine-adapter-v0.9.4...refine-adapter-v0.10.0) (2026-07-11)
 
 

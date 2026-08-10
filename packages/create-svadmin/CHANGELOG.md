@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.5](https://github.com/zuohuadong/svadmin/compare/create-svadmin-v0.12.4...create-svadmin-v0.12.5) (2026-08-10)
+
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** upgrade dependencies to latest ([01b5b4f](https://github.com/zuohuadong/svadmin/commit/01b5b4fe65df4bab2d409cbb4a880b14946c4fe0))
+
 ## [0.12.4](https://github.com/zuohuadong/svadmin/compare/create-svadmin-v0.12.3...create-svadmin-v0.12.4) (2026-07-30)
 
 
