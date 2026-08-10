@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { captureAdminContext, getResources, canAccessAsync } from '@svadmin/core';
+  import { captureAdminContext, getResources, canAccessAsync, getAccessControlProvider } from '@svadmin/core';
   import type { Identity, MenuItem } from '@svadmin/core';
   import { getPath } from '../router-state.svelte.js';
   import { useTranslation } from '@svadmin/core/i18n';
@@ -120,6 +120,14 @@
     return candidate !== null;
   }
 
+  function snapshotCustomMenuItems(menuItems: MenuItem[]): MenuItem[] {
+    return menuItems.map((menuItem) => ({
+      ...menuItem,
+      meta: menuItem.meta ? { ...menuItem.meta } : undefined,
+      children: menuItem.children ? snapshotCustomMenuItems(menuItem.children) : undefined,
+    }));
+  }
+
   async function visibleCustomMenuItem(menuItem: MenuItem): Promise<MenuItem | null> {
     if (menuItem.meta?.hidden || !await hasCustomMenuAccess(menuItem)) return null;
     if (!menuItem.children) return menuItem;
@@ -137,9 +145,11 @@
   let customMenuItems = $state.raw<MenuItem[]>([]);
 
   $effect(() => {
-    const configuredMenu = menu;
+    const configuredMenu = menu?.length ? snapshotCustomMenuItems(menu) : [];
+    // Provider swaps must invalidate checks nested below public menu groups.
+    getAccessControlProvider();
     customMenuItems = [];
-    if (!configuredMenu?.length) return;
+    if (configuredMenu.length === 0) return;
 
     let cancelled = false;
     void visibleCustomMenuItems(configuredMenu).then((visibleItems) => {

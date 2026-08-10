@@ -1,10 +1,11 @@
-import { render, screen } from '@testing-library/svelte';
+import { render, screen, waitFor } from '@testing-library/svelte';
 import {
   resetContext,
   setAccessControlProvider,
   setResources,
   type AccessControlProvider,
   type CanParams,
+  type CanResult,
   type MenuItem,
   type ResourceDefinition,
 } from '@svadmin/core';
@@ -93,11 +94,11 @@ describe('Sidebar access control', () => {
       { name: 'hidden', label: 'Hidden', href: '/hidden', meta: { hidden: true } },
     ]);
 
+    expect(await screen.findByText('Allowed')).toBeTruthy();
     expect(screen.queryByText('Denied')).toBeNull();
     expect(screen.queryByText('Default List Denied')).toBeNull();
     expect(screen.queryByText('Empty Group')).toBeNull();
     expect(screen.queryByText('Hidden')).toBeNull();
-    expect(await screen.findByText('Allowed')).toBeTruthy();
     expect(screen.getByText('Catalog')).toBeTruthy();
     expect(screen.getByText('Public')).toBeTruthy();
     expect(permissionChecks
@@ -129,5 +130,85 @@ describe('Sidebar access control', () => {
 
     expect(await screen.findByText('Visible Resource')).toBeTruthy();
     expect(screen.queryByText('Denied Resource')).toBeNull();
+  });
+
+  it('removes protected nested items when the access-control provider changes', async () => {
+    setAccessControlProvider({ can: async () => ({ can: true }) });
+    renderSidebar([
+      {
+        name: 'group',
+        label: 'Group',
+        children: [
+          {
+            name: 'protected-child',
+            label: 'Protected Child',
+            href: '/protected',
+            meta: { resource: 'protected' },
+          },
+        ],
+      },
+    ]);
+
+    expect(await screen.findByText('Protected Child')).toBeTruthy();
+
+    setAccessControlProvider({ can: async () => ({ can: false }) });
+
+    await waitFor(() => expect(screen.queryByText('Protected Child')).toBeNull());
+  });
+
+  it('ignores stale nested permission results after the provider changes', async () => {
+    let resolveInitialAccess!: (result: CanResult) => void;
+    const initialCan = vi.fn(
+      () => new Promise<CanResult>((resolve) => { resolveInitialAccess = resolve; }),
+    );
+    setAccessControlProvider({ can: initialCan });
+    renderSidebar([
+      {
+        name: 'group',
+        label: 'Group',
+        children: [
+          {
+            name: 'race-child',
+            label: 'Race Child',
+            href: '/race',
+            meta: { resource: 'protected' },
+          },
+        ],
+      },
+      { name: 'public', label: 'Public', href: '/public' },
+    ]);
+    await waitFor(() => expect(initialCan).toHaveBeenCalledTimes(1));
+
+    const denyCan = vi.fn(async () => ({ can: false }));
+    setAccessControlProvider({ can: denyCan });
+    await waitFor(() => expect(denyCan).toHaveBeenCalledTimes(1));
+    resolveInitialAccess({ can: true });
+
+    expect(await screen.findByText('Public')).toBeTruthy();
+    expect(screen.queryByText('Race Child')).toBeNull();
+  });
+
+  it('fails closed when a nested permission check rejects', async () => {
+    setAccessControlProvider({
+      can: async () => { throw new Error('permission service unavailable'); },
+    });
+    renderSidebar([
+      {
+        name: 'group',
+        label: 'Group',
+        children: [
+          {
+            name: 'protected-child',
+            label: 'Protected Child',
+            href: '/protected',
+            meta: { resource: 'protected' },
+          },
+        ],
+      },
+      { name: 'public', label: 'Public', href: '/public' },
+    ]);
+
+    expect(await screen.findByText('Public')).toBeTruthy();
+    expect(screen.queryByText('Protected Child')).toBeNull();
   });
 });
