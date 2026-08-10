@@ -45,15 +45,20 @@ function assertRefineDataProvider(value: unknown): asserts value is RefineDataPr
 
 /**
  * Adapter to consume an official @refinedev/* data provider in SvelteAdmin.
- * Refine's DataProvider interface directly matches the core interface 
- * definition of @svadmin/core.
+ * Refine's DataProvider interface mostly matches the core interface
+ * definition of @svadmin/core, except for the current page property.
  */
 export function createRefineAdapter(refineProvider: unknown): SvadminDataProvider {
   assertRefineDataProvider(refineProvider);
 
   const adapter: SvadminDataProvider = {
     getApiUrl: () => refineProvider.getApiUrl?.() ?? '',
-    getList: refineProvider.getList.bind(refineProvider),
+    getList(params) {
+      const pagination = params.pagination?.current === undefined
+        ? params.pagination
+        : { ...params.pagination, currentPage: params.pagination.current };
+      return refineProvider.getList({ ...params, pagination });
+    },
     getOne: refineProvider.getOne.bind(refineProvider),
     create: refineProvider.create.bind(refineProvider),
     update: refineProvider.update.bind(refineProvider),

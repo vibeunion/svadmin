@@ -44,6 +44,21 @@ describe('npm trusted-publishing workflow contract', () => {
     expect(ciWorkflow).toContain('group: npm-publish-${{ inputs.release_sha }}');
     expect(ciWorkflow).toContain('id-token: write');
     expect(ciWorkflow).not.toContain('secrets.NPM_TOKEN');
+    expect(ciWorkflow).toContain('bun scripts/plan-release-publication.ts');
+    expect(ciWorkflow).toContain('id: release_plan');
+    expect(ciWorkflow).toContain('RELEASE_DIRS: ${{ steps.release_plan.outputs.paths }}');
+    expect(ciWorkflow).toContain(
+      "['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies']",
+    );
+    expect(ciWorkflow).not.toContain('PUBLISH_FAILED=0');
+    expect(ciWorkflow).not.toContain('|| echo ""');
+    expect(ciWorkflow).toContain(
+      'if ! NPM_STATUS=$(bun scripts/npm-package-version.ts "$NAME" "$LOCAL_VER"); then',
+    );
+    expect(ciWorkflow).toContain('if [ "$NPM_STATUS" = "missing" ]; then');
+    expect(ciWorkflow).toContain('elif [ "$NPM_STATUS" = "published" ]; then');
+    expect(ciWorkflow).toContain('require(process.argv[1])');
+    expect(ciWorkflow).not.toContain("require('./$PKG_JSON')");
 
     const verifier = readFileSync(resolve(repositoryRoot, 'scripts', 'verify-release-manifest.ts'), 'utf8');
     expect(verifier).toContain('refs/tags/${tag}^{commit}');

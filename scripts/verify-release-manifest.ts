@@ -16,6 +16,10 @@ interface VerifyReleaseManifestOptions {
 
 type JsonRecord = Record<string, unknown>;
 
+export function isReleasePackagePath(packagePath: unknown): packagePath is string {
+  return typeof packagePath === 'string' && /^packages\/[a-z0-9][a-z0-9._-]*$/.test(packagePath);
+}
+
 function readJsonRecord(path: string): JsonRecord {
   const value: unknown = JSON.parse(readFileSync(path, 'utf8'));
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
@@ -65,7 +69,7 @@ export function verifyReleaseManifest({
     const release = rawRelease as JsonRecord;
     const packagePath = release.path;
     const tag = release.tag;
-    if (typeof packagePath !== 'string' || !/^packages\/[^/]+$/.test(packagePath)) {
+    if (!isReleasePackagePath(packagePath)) {
       throw new Error(`Invalid release package path: ${String(packagePath)}`);
     }
     if (typeof tag !== 'string' || !/^[A-Za-z0-9._-]+$/.test(tag)) {
