@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { captureAdminContext, getResources, canAccessAsync } from '@svadmin/core';
+  import { captureAdminContext, getResources, canAccessAsync, getAccessControlProvider } from '@svadmin/core';
   import type { Identity, MenuItem } from '@svadmin/core';
   import { getPath } from '../router-state.svelte.js';
   import { useTranslation } from '@svadmin/core/i18n';
@@ -102,6 +102,62 @@
     name: string | null;
     items: NavItem[];
   }
+
+  async function hasCustomMenuAccess(menuItem: MenuItem): Promise<boolean> {
+    const resource = menuItem.meta?.resource;
+    if (!resource) return true;
+
+    try {
+      const { can } = await canAccessAsync(resource, menuItem.meta?.action ?? 'list');
+      return can;
+    } catch {
+      // Permission-provider failures must not expose protected navigation.
+      return false;
+    }
+  }
+
+  function isVisibleCustomMenuItem(candidate: MenuItem | null): candidate is MenuItem {
+    return candidate !== null;
+  }
+
+  function snapshotCustomMenuItems(menuItems: MenuItem[]): MenuItem[] {
+    return menuItems.map((menuItem) => ({
+      ...menuItem,
+      meta: menuItem.meta ? { ...menuItem.meta } : undefined,
+      children: menuItem.children ? snapshotCustomMenuItems(menuItem.children) : undefined,
+    }));
+  }
+
+  async function visibleCustomMenuItem(menuItem: MenuItem): Promise<MenuItem | null> {
+    if (menuItem.meta?.hidden || !await hasCustomMenuAccess(menuItem)) return null;
+    if (!menuItem.children) return menuItem;
+
+    const children = await visibleCustomMenuItems(menuItem.children);
+    if (children.length === 0 && !menuItem.href) return null;
+    return { ...menuItem, children };
+  }
+
+  async function visibleCustomMenuItems(menuItems: MenuItem[]): Promise<MenuItem[]> {
+    const filteredItems = await Promise.all(menuItems.map(visibleCustomMenuItem));
+    return filteredItems.filter(isVisibleCustomMenuItem);
+  }
+
+  let customMenuItems = $state.raw<MenuItem[]>([]);
+
+  $effect(() => {
+    const configuredMenu = menu?.length ? snapshotCustomMenuItems(menu) : [];
+    // Provider swaps must invalidate checks nested below public menu groups.
+    getAccessControlProvider();
+    customMenuItems = [];
+    if (configuredMenu.length === 0) return;
+
+    let cancelled = false;
+    void visibleCustomMenuItems(configuredMenu).then((visibleItems) => {
+      if (!cancelled) customMenuItems = visibleItems;
+    });
+
+    return () => { cancelled = true; };
+  });
 
   let navItems = $state.raw<NavItem[]>([]);
 
@@ -239,7 +295,7 @@
   <nav aria-label="Main menu" class="pb-4" class:px-[10px]={!collapsed} class:px-2={collapsed}>
     {#if menu && menu.length > 0}
       <div class="space-y-[2px]">
-        {#each menu as item, _i (_i)}
+        {#each customMenuItems as item (item.name)}
           <SidebarItem {item} currentPath={path} {collapsed} depth={0} />
         {/each}
       </div>
