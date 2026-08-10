@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import {
   resetContext,
   setAccessControlProvider,
@@ -182,9 +183,13 @@ describe('Sidebar access control', () => {
     const denyCan = vi.fn(async () => ({ can: false }));
     setAccessControlProvider({ can: denyCan });
     await waitFor(() => expect(denyCan).toHaveBeenCalledTimes(1));
-    resolveInitialAccess({ can: true });
-
     expect(await screen.findByText('Public')).toBeTruthy();
+
+    resolveInitialAccess({ can: true });
+    // Let the superseded permission chain finish before checking that it cannot publish.
+    await new Promise<void>((resolve) => { setTimeout(resolve, 0); });
+    await tick();
+
     expect(screen.queryByText('Race Child')).toBeNull();
   });
 
