@@ -1,5 +1,10 @@
 import { describe, expect, test } from 'bun:test';
+import type { GetListParams } from '@svadmin/core';
 import { createRefineAdapter } from './index';
+
+type RefineGetListParams = Omit<GetListParams, 'pagination'> & {
+  pagination?: NonNullable<GetListParams['pagination']> & { currentPage?: number };
+};
 
 function createMockRefineProvider() {
   const provider = {
@@ -34,6 +39,28 @@ function createMockRefineProvider() {
 }
 
 describe('createRefineAdapter', () => {
+  test('maps svadmin current pagination to Refine currentPage', async () => {
+    let receivedParams: RefineGetListParams | undefined;
+    const refineProvider = {
+      ...createMockRefineProvider(),
+      async getList(params: RefineGetListParams) {
+        receivedParams = params;
+        return { data: [], total: 0 };
+      },
+    };
+    const adapter = createRefineAdapter(refineProvider);
+
+    await adapter.getList({
+      resource: 'posts',
+      pagination: { current: 2, pageSize: 25, mode: 'server' },
+    });
+
+    expect(receivedParams).toEqual({
+      resource: 'posts',
+      pagination: { current: 2, currentPage: 2, pageSize: 25, mode: 'server' },
+    });
+  });
+
   test('binds required and optional Refine data provider methods', async () => {
     const adapter = createRefineAdapter(createMockRefineProvider());
 
