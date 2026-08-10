@@ -167,6 +167,18 @@ jobs:
       - name: Build publishable packages
         run: bun run build:packages
 
+      - name: Verify dependency closure and plan publication
+        id: release_plan
+        env:
+          RELEASE_MANIFEST: ${{ inputs.release_manifest }}
+        run: |
+          set -euo pipefail
+          {
+            echo 'paths<<SVADMIN_RELEASE_PATHS'
+            bun scripts/plan-release-publication.ts
+            echo 'SVADMIN_RELEASE_PATHS'
+          } >> "$GITHUB_OUTPUT"
+
       - name: Prepare publish manifests
         run: |
           set -e
@@ -188,7 +200,7 @@ jobs:
             const raw = fs.readFileSync(pjson, 'utf8');
             const pkg = JSON.parse(raw);
             let changed = false;
-            for (const t of ['dependencies', 'devDependencies', 'peerDependencies']) {
+            for (const t of ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies']) {
               if (pkg[t]) {
                 for (const k in pkg[t]) {
                   if (pkg[t][k] === 'workspace:*' && versions[k]) {
@@ -210,48 +222,39 @@ jobs:
 
       - name: Publish released packages
         env:
-          RELEASE_MANIFEST: ${{ inputs.release_manifest }}
+          RELEASE_DIRS: ${{ steps.release_plan.outputs.paths }}
         run: |
           set -e
-          PUBLISH_FAILED=0
-          RELEASE_DIRS=$(node <<'NODE'
-          const releases = JSON.parse(process.env.RELEASE_MANIFEST || '[]');
-          if (!Array.isArray(releases) || releases.length === 0) {
-            throw new Error('release-please returned no release manifest');
-          }
-          for (const release of releases) {
-            const packagePath = release?.path;
-            if (typeof packagePath !== 'string' || !/^packages\/[^/]+$/.test(packagePath)) {
-              throw new Error(`Invalid release package path: ${String(packagePath)}`);
-            }
-            console.log(`${packagePath}/`);
-          }
-          NODE
-          )
+          if [ -z "$RELEASE_DIRS" ]; then
+            echo "::error::Release publication plan is empty"
+            exit 1
+          fi
 
           while IFS= read -r pkg_dir; do
             PKG_JSON="$pkg_dir/package.json"
             if [ -f "$PKG_JSON" ]; then
-              NAME=$(node -p "require('./$PKG_JSON').name")
-              LOCAL_VER=$(node -p "require('./$PKG_JSON').version")
-              NPM_EXISTS=$(npm view "$NAME@$LOCAL_VER" version 2>/dev/null || echo "")
+              NAME=$(node -p "require(process.argv[1]).name" "./$PKG_JSON")
+              LOCAL_VER=$(node -p "require(process.argv[1]).version" "./$PKG_JSON")
 
-              if [ -z "$NPM_EXISTS" ]; then
+              if ! NPM_STATUS=$(bun scripts/npm-package-version.ts "$NAME" "$LOCAL_VER"); then
+                echo "::error::npm registry lookup failed for $NAME@$LOCAL_VER"
+                exit 1
+              fi
+
+              if [ "$NPM_STATUS" = "missing" ]; then
                 echo "🚀 Publishing $NAME@$LOCAL_VER..."
                 if ! (cd "$pkg_dir" && npm publish --provenance --access public); then
                   echo "❌ Publish FAILED for $NAME"
-                  PUBLISH_FAILED=1
+                  exit 1
                 fi
-              else
+              elif [ "$NPM_STATUS" = "published" ]; then
                 echo "⏭️ $NAME@$LOCAL_VER already on npm, skipping"
+              else
+                echo "::error::Invalid npm registry status for $NAME@$LOCAL_VER: $NPM_STATUS"
+                exit 1
               fi
             else
               echo "::error::Release package manifest not found: $PKG_JSON"
-              PUBLISH_FAILED=1
+              exit 1
             fi
           done <<< "$RELEASE_DIRS"
-
-          if [ "$PUBLISH_FAILED" -eq 1 ]; then
-            echo "::error::One or more packages failed to publish"
-            exit 1
-          fi
