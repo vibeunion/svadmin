@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.14](https://github.com/zuohuadong/svadmin/compare/lite-v0.3.13...lite-v0.3.14) (2026-08-11)
+
+
+### 🐛 Bug Fixes
+
+* **lite:** harden compatibility edge cases ([4e4365f](https://github.com/zuohuadong/svadmin/commit/4e4365f097479c32c2631ec431c7ad14a59fab20))
+
 ## [0.3.13](https://github.com/zuohuadong/svadmin/compare/lite-v0.3.12...lite-v0.3.13) (2026-08-11)
 
 
