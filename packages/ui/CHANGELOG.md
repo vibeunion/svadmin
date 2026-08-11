@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.41.0](https://github.com/zuohuadong/svadmin/compare/ui-v0.40.6...ui-v0.41.0) (2026-08-11)
+
+
+### 🚀 Features
+
+* **admin:** align capabilities with Refine v5 ([#229](https://github.com/zuohuadong/svadmin/issues/229)) ([37b7fb9](https://github.com/zuohuadong/svadmin/commit/37b7fb9d06b367fb4ef7060f16251df5f9b97822))
+
 ## [0.40.6](https://github.com/zuohuadong/svadmin/compare/ui-v0.40.5...ui-v0.40.6) (2026-08-11)
 
 
