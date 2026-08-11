@@ -482,7 +482,7 @@
     },
     "packages/sveltekit": {
       "name": "@svadmin/sveltekit",
-      "version": "0.9.7",
+      "version": "0.9.8",
       "peerDependencies": {
         "@svadmin/core": "workspace:*",
         "@sveltejs/kit": "^2.70.2",
@@ -496,7 +496,7 @@
     },
     "packages/ui": {
       "name": "@svadmin/ui",
-      "version": "0.41.0",
+      "version": "0.41.1",
       "dependencies": {
         "@floating-ui/dom": "^1.8.0",
         "@lucide/svelte": "^1.30.0",
