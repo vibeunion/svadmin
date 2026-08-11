@@ -43,23 +43,9 @@ describe('npm trusted-publishing workflow contract', () => {
     expect(ciWorkflow).toContain('ref: ${{ inputs.release_sha }}');
     expect(ciWorkflow).toContain('group: npm-publish-${{ inputs.release_sha }}');
     expect(ciWorkflow).toContain('id-token: write');
-    expect(ciWorkflow).toContain(
-      'bootstrap_publish:\n' +
-        '        description: Use the repository NPM_TOKEN only to bootstrap a package before trusted publishing can be configured\n' +
-        '        required: false\n' +
-        '        type: boolean\n' +
-        '        default: false',
-    );
-    expect(ciWorkflow.match(/secrets\.NPM_TOKEN/g) ?? []).toHaveLength(1);
-    expect(ciWorkflow).toContain(
-      "BOOTSTRAP_NPM_TOKEN: ${{ inputs.bootstrap_publish && secrets.NPM_TOKEN || '' }}",
-    );
-    expect(ciWorkflow).toContain('NPM_TOKEN is required for bootstrap publishing');
-    expect(ciWorkflow).toContain(
-      'PUBLISH_COMMAND=(env NODE_AUTH_TOKEN="$BOOTSTRAP_NPM_TOKEN" npm publish --provenance --access public)',
-    );
-    expect(ciWorkflow).toContain('PUBLISH_COMMAND=(npm publish --provenance --access public)');
-    expect(ciWorkflow).toContain('"${PUBLISH_COMMAND[@]}"');
+    expect(ciWorkflow).not.toContain('bootstrap_publish');
+    expect(ciWorkflow).not.toContain('secrets.NPM_TOKEN');
+    expect(ciWorkflow).toContain('npm publish --provenance --access public');
     expect(ciWorkflow).toContain('bun scripts/plan-release-publication.ts');
     expect(ciWorkflow).toContain('id: release_plan');
     expect(ciWorkflow).toContain('RELEASE_DIRS: ${{ steps.release_plan.outputs.paths }}');

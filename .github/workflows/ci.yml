@@ -27,11 +27,6 @@ on:
         required: false
         type: boolean
         default: false
-      bootstrap_publish:
-        description: Use the repository NPM_TOKEN only to bootstrap a package before trusted publishing can be configured
-        required: false
-        type: boolean
-        default: false
       force_publish:
         description: Force publish a previously-tagged release even when test/e2e gates fail (for back-publishing a version whose tag already exists but whose original CI failed)
         required: false
@@ -236,23 +231,11 @@ jobs:
       - name: Publish released packages
         env:
           RELEASE_DIRS: ${{ steps.release_plan.outputs.paths }}
-          BOOTSTRAP_PUBLISH: ${{ inputs.bootstrap_publish }}
-          BOOTSTRAP_NPM_TOKEN: ${{ inputs.bootstrap_publish && secrets.NPM_TOKEN || '' }}
         run: |
           set -e
           if [ -z "$RELEASE_DIRS" ]; then
             echo "::error::Release publication plan is empty"
             exit 1
-          fi
-
-          if [ "$BOOTSTRAP_PUBLISH" = "true" ]; then
-            if [ -z "$BOOTSTRAP_NPM_TOKEN" ]; then
-              echo "::error::NPM_TOKEN is required for bootstrap publishing"
-              exit 1
-            fi
-            PUBLISH_COMMAND=(env NODE_AUTH_TOKEN="$BOOTSTRAP_NPM_TOKEN" npm publish --provenance --access public)
-          else
-            PUBLISH_COMMAND=(npm publish --provenance --access public)
           fi
 
           while IFS= read -r pkg_dir; do
@@ -268,7 +251,7 @@ jobs:
 
               if [ "$NPM_STATUS" = "missing" ]; then
                 echo "🚀 Publishing $NAME@$LOCAL_VER..."
-                if ! (cd "$pkg_dir" && "${PUBLISH_COMMAND[@]}"); then
+                if ! (cd "$pkg_dir" && npm publish --provenance --access public); then
                   echo "❌ Publish FAILED for $NAME"
                   exit 1
                 fi
