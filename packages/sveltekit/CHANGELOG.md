@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.8](https://github.com/zuohuadong/svadmin/compare/sveltekit-v0.9.7...sveltekit-v0.9.8) (2026-08-11)
+
+
+### 🐛 Bug Fixes
+
+* **admin:** unblock scoped consumers ([#231](https://github.com/zuohuadong/svadmin/issues/231)) ([4f572d9](https://github.com/zuohuadong/svadmin/commit/4f572d9dd46c2bf656383718aafdc5ef3c08573c))
+
 ## [0.9.7](https://github.com/zuohuadong/svadmin/compare/sveltekit-v0.9.6...sveltekit-v0.9.7) (2026-07-30)
 
 

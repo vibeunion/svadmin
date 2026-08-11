@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.41.1](https://github.com/zuohuadong/svadmin/compare/ui-v0.41.0...ui-v0.41.1) (2026-08-11)
+
+
+### 🐛 Bug Fixes
+
+* **admin:** unblock scoped consumers ([#231](https://github.com/zuohuadong/svadmin/issues/231)) ([4f572d9](https://github.com/zuohuadong/svadmin/commit/4f572d9dd46c2bf656383718aafdc5ef3c08573c))
+
 ## [0.41.0](https://github.com/zuohuadong/svadmin/compare/ui-v0.40.6...ui-v0.41.0) (2026-08-11)
 
 

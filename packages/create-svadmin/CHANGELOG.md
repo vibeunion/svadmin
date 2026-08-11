@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.1](https://github.com/zuohuadong/svadmin/compare/create-svadmin-v0.13.0...create-svadmin-v0.13.1) (2026-08-11)
+
+
+### 🐛 Bug Fixes
+
+* **create:** align generated projects with UI 0.41.1
+
 ## [0.13.0](https://github.com/zuohuadong/svadmin/compare/create-svadmin-v0.12.5...create-svadmin-v0.13.0) (2026-08-11)
 
 
