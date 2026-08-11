@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.13](https://github.com/zuohuadong/svadmin/compare/lite-v0.3.12...lite-v0.3.13) (2026-08-11)
+
+
+### 🐛 Bug Fixes
+
+* **lite:** align SSR components with core contracts ([4ce272e](https://github.com/zuohuadong/svadmin/commit/4ce272eacd350051b7e8a14a1f5bc70332b66b49))
+
 ## [0.3.12](https://github.com/zuohuadong/svadmin/compare/lite-v0.3.11...lite-v0.3.12) (2026-08-10)
 
 
