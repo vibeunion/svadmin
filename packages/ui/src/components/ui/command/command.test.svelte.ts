@@ -38,7 +38,7 @@ describe('Command', () => {
 	});
 
 	it('keeps the dialog, loading, separator, and selected-value API compatible', async () => {
-		render(CommandHarness, { props: { dialog: true } });
+		const { unmount } = render(CommandHarness, { props: { dialog: true } });
 
 		const input = screen.getByRole('combobox', { name: 'Dialog actions' });
 		expect(screen.getByRole('progressbar', { name: 'Loading...' }).getAttribute('aria-valuenow')).toBe('50');
@@ -52,5 +52,12 @@ describe('Command', () => {
 
 		expect(screen.getByTestId('selected-command').textContent).toBe('dialog-settings');
 		expect(screen.getByTestId('dialog-value').textContent).toBe('dialog-settings');
+
+		unmount();
+		// bits-ui restores body scroll styles on a short timer after the dialog is destroyed.
+		// Let that cleanup finish before Vitest tears down the browser environment.
+		await new Promise<void>((resolve) => {
+			setTimeout(resolve, 30);
+		});
 	});
 });
