@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.40.5](https://github.com/zuohuadong/svadmin/compare/ui-v0.40.4...ui-v0.40.5) (2026-08-11)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** avoid value binding for file inputs ([#222](https://github.com/zuohuadong/svadmin/issues/222)) ([8e180f9](https://github.com/zuohuadong/svadmin/commit/8e180f9b74d1b8beed30feb30811f819704aa9b6))
+
 ## [0.40.4](https://github.com/zuohuadong/svadmin/compare/ui-v0.40.3...ui-v0.40.4) (2026-08-10)
 
 
