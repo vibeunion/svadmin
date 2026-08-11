@@ -262,10 +262,12 @@
   const acEnabled = $derived(!!adminContext.accessControlProvider);
   const canCreatePerm = useCan(() => ({ resource: resourceName, action: 'create', queryOptions: { enabled: acEnabled } }));
   const canEditPerm = useCan(() => ({ resource: resourceName, action: 'edit', queryOptions: { enabled: acEnabled } }));
+  const canShowPerm = useCan(() => ({ resource: resourceName, action: 'show', queryOptions: { enabled: acEnabled } }));
   const canDeletePerm = useCan(() => ({ resource: resourceName, action: 'delete', queryOptions: { enabled: acEnabled } }));
   const canExportPerm = useCan(() => ({ resource: resourceName, action: 'export', queryOptions: { enabled: acEnabled } }));
   const canCreate = $derived(canCreatePerm.allowed && resource.canCreate !== false);
   const canEdit = $derived(canEditPerm.allowed && resource.canEdit !== false);
+  const canShow = $derived(canShowPerm.allowed && resource.canShow !== false);
   const canDelete = $derived(canDeletePerm.allowed && resource.canDelete !== false);
   const canExport = $derived(canExportPerm.allowed);
 
@@ -837,9 +839,11 @@
                       <Pencil class="h-4 w-4" /> {i18n.t('common.edit')}
                     </ContextMenu.Item>
                   {/if}
-                  <ContextMenu.Item onclick={() => adminContext.navigate(`/${resourceName}/show/${id}`)} class="gap-2">
-                    <Eye class="h-4 w-4" /> {i18n.t('common.detail')}
-                  </ContextMenu.Item>
+                  {#if canShow}
+                    <ContextMenu.Item onclick={() => adminContext.navigate(`/${resourceName}/show/${id}`)} class="gap-2">
+                      <Eye class="h-4 w-4" /> {i18n.t('common.detail')}
+                    </ContextMenu.Item>
+                  {/if}
                   <ContextMenu.Item onclick={() => navigator.clipboard?.writeText(String(id))} class="gap-2">
                     <Copy class="h-4 w-4" /> {i18n.t('common.copyId')}
                   </ContextMenu.Item>
@@ -913,9 +917,11 @@
                         <Pencil class="h-4 w-4" />
                       </TooltipButton>
                     {/if}
-                    <TooltipButton tooltip={i18n.t('common.detail')} variant="ghost" size="icon-sm" onclick={() => adminContext.navigate(`/${resourceName}/show/${id}`)}>
-                      <Eye class="h-4 w-4" />
-                    </TooltipButton>
+                    {#if canShow}
+                      <TooltipButton tooltip={i18n.t('common.detail')} variant="ghost" size="icon-sm" onclick={() => adminContext.navigate(`/${resourceName}/show/${id}`)}>
+                        <Eye class="h-4 w-4" />
+                      </TooltipButton>
+                    {/if}
                     {#if canDelete}
                       <TooltipButton tooltip={i18n.t('common.delete')} variant="ghost" size="icon-sm" onclick={() => confirmDelete(id)} class="hover:text-destructive">
                         <Trash2 class="h-4 w-4" />
