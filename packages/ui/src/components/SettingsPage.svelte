@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Component, Snippet } from "svelte";
-  import { captureAdminContext, getAuthProvider } from "@svadmin/core";
+  import { captureAdminContext } from "@svadmin/core";
   import { useTranslation } from "@svadmin/core/i18n";
 
   import { User, Palette, Info, Shield, FileSearch, Lock, Puzzle, Bell, Key } from "@lucide/svelte";
@@ -15,7 +15,7 @@
   import ApiSettings from "./ApiSettings.svelte";
 
   const adminContext = captureAdminContext();
-  const authProvider = getAuthProvider({ optional: true });
+  const authProvider = $derived(adminContext.authProvider);
 
   interface SettingsItem {
     key: string;
@@ -57,7 +57,7 @@
     content,
   }: Props = $props();
 
-  const defaultSections = [
+  const defaultSections = $derived.by((): SettingsSection[] => [
     {
       group: "settings.general",
       items: [
@@ -86,7 +86,7 @@
         { key: "about", path: "/settings/about", icon: Info, label: "settings.about" },
       ],
     },
-  ];
+  ]);
 
   const resolvedSections = $derived.by(() => {
     if (customSections) return customSections;

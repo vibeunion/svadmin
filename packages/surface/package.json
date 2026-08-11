@@ -33,8 +33,6 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@svadmin/core": "workspace:*",
-    "@svadmin/ui": "workspace:*",
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/svelte": "^5.4.2",

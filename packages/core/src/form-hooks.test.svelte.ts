@@ -42,6 +42,7 @@ vi.mock('./context.svelte', () => {
       getDataProviderNames: () => ['default'],
       getDataProviderForResource,
       getResource,
+      getProviderMeta: () => undefined,
       currentPath: () => '/posts',
       formatLink: (path: string) => path,
       navigate: providerMocks.navigate,

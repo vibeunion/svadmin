@@ -1,6 +1,7 @@
 import { createQuery } from '@tanstack/svelte-query';
 import { getAdminOptions } from './options.svelte';
 import { captureAdminContext } from './context.svelte';
+import { appendTenantCacheKey } from './provider-bundle';
 import { useParsed } from './useParsed.svelte';
 import {
   checkError,
@@ -109,7 +110,9 @@ export function useList<TData extends BaseRecord = BaseRecord, TError = HttpErro
     const filters = [...parentFilters, ...(explicitFilters ?? [])];
 
     return {
-      queryKey: [opts.dataProviderName, resource, 'list', pagination, sorters, filters, meta],
+      queryKey: appendTenantCacheKey([
+        opts.dataProviderName, resource, 'list', pagination, sorters, filters, meta,
+      ], adminContext.tenantCacheKey),
       queryFn: async () => provider.getList<TData>({
         resource,
         pagination,
@@ -150,12 +153,24 @@ export function useList<TData extends BaseRecord = BaseRecord, TError = HttpErro
     if (query.isSuccess && query.dataUpdatedAt > lastSuccessAt) {
       lastSuccessAt = query.dataUpdatedAt;
       if (opts.successNotification) {
-        fireSuccessNotification(opts.successNotification, '', query.data, undefined, getResource());
+        fireSuccessNotification({
+          config: opts.successNotification,
+          defaultMessage: '',
+          data: query.data,
+          resource: getResource(),
+          provider: adminContext.notificationProvider,
+        });
       }
     } else if (query.isError && query.errorUpdatedAt > lastErrorAt) {
       lastErrorAt = query.errorUpdatedAt;
       checkError(query.error, adminContext);
-      fireErrorNotification(opts.errorNotification, 'Fetch failed', query.error, getResource());
+      fireErrorNotification({
+        config: opts.errorNotification,
+        defaultMessage: 'Fetch failed',
+        error: query.error,
+        resource: getResource(),
+        provider: adminContext.notificationProvider,
+      });
     }
   });
 
@@ -195,7 +210,10 @@ export function useOne<TData extends BaseRecord = BaseRecord, TError = HttpError
     const queryOptions = opts.queryOptions;
 
     return {
-      queryKey: [opts.dataProviderName, resource, 'one', id, opts.meta],
+      queryKey: appendTenantCacheKey(
+        [opts.dataProviderName, resource, 'one', id, opts.meta],
+        adminContext.tenantCacheKey,
+      ),
       queryFn: async () => {
         if (id == null) throw new Error('useOne requires an id');
         const result = await provider.getOne<TData>({
@@ -238,12 +256,24 @@ export function useOne<TData extends BaseRecord = BaseRecord, TError = HttpError
     if (query.isSuccess && query.dataUpdatedAt > lastSuccessAt) {
       lastSuccessAt = query.dataUpdatedAt;
       if (opts.successNotification) {
-        fireSuccessNotification(opts.successNotification, '', query.data, undefined, getResource());
+        fireSuccessNotification({
+          config: opts.successNotification,
+          defaultMessage: '',
+          data: query.data,
+          resource: getResource(),
+          provider: adminContext.notificationProvider,
+        });
       }
     } else if (query.isError && query.errorUpdatedAt > lastErrorAt) {
       lastErrorAt = query.errorUpdatedAt;
       checkError(query.error, adminContext);
-      fireErrorNotification(opts.errorNotification, 'Fetch failed', query.error, getResource());
+      fireErrorNotification({
+        config: opts.errorNotification,
+        defaultMessage: 'Fetch failed',
+        error: query.error,
+        resource: getResource(),
+        provider: adminContext.notificationProvider,
+      });
     }
   });
 
@@ -300,7 +330,10 @@ export function useMany<TData extends BaseRecord = BaseRecord, TError = HttpErro
     const provider = adminContext.getDataProviderForResource(resource, dataProviderName);
 
     return {
-      queryKey: [dataProviderName, resource, 'many', ids, meta],
+      queryKey: appendTenantCacheKey(
+        [dataProviderName, resource, 'many', ids, meta],
+        adminContext.tenantCacheKey,
+      ),
       queryFn: async () => {
         if (!ids.length) return { data: [] };
         if (provider.getMany) {
@@ -341,12 +374,24 @@ export function useMany<TData extends BaseRecord = BaseRecord, TError = HttpErro
     if (query.isSuccess && query.dataUpdatedAt > lastSuccessAt) {
       lastSuccessAt = query.dataUpdatedAt;
       if (opts.successNotification) {
-        fireSuccessNotification(opts.successNotification, '', query.data, undefined, opts.resource);
+        fireSuccessNotification({
+          config: opts.successNotification,
+          defaultMessage: '',
+          data: query.data,
+          resource: opts.resource,
+          provider: adminContext.notificationProvider,
+        });
       }
     } else if (query.isError && query.errorUpdatedAt > lastErrorAt) {
       lastErrorAt = query.errorUpdatedAt;
       checkError(query.error, adminContext);
-      fireErrorNotification(opts.errorNotification, 'Fetch failed', query.error, opts.resource);
+      fireErrorNotification({
+        config: opts.errorNotification,
+        defaultMessage: 'Fetch failed',
+        error: query.error,
+        resource: opts.resource,
+        provider: adminContext.notificationProvider,
+      });
     }
   });
 

@@ -1,11 +1,12 @@
 <script lang="ts">
-  import { getAuditLogProvider, useTranslation } from '@svadmin/core';
+  import { captureAdminContext, useTranslation } from '@svadmin/core';
 
-  import type { AuditEntry } from '@svadmin/core';
+  import type { AuditEntry, AuditLogProvider } from '@svadmin/core';
   import * as Sheet from './ui/sheet/index.js';
   import { History, Loader2 } from '@lucide/svelte';
 
   const i18n = useTranslation();
+  const adminContext = captureAdminContext();
 
   let { open = $bindable(false), resource, recordId } = $props<{
     open: boolean;
@@ -15,24 +16,52 @@
 
   let logs = $state<AuditEntry[]>([]);
   let isLoading = $state(false);
+  let requestEpoch = 0;
 
   $effect(() => {
-    if (open) {
-      const provider = getAuditLogProvider();
-      if (provider) {
-        isLoading = true;
-        provider.get({ resource, meta: recordId ? { recordId } : undefined })
-          .then((data) => {
-            logs = data;
-            isLoading = false;
-          })
-          .catch((err) => {
-            console.error('[svadmin] Failed to fetch audit logs', err);
-            isLoading = false;
-          });
-      }
+    const scopedProvider = adminContext.auditLogProvider;
+    const scopedResource = resource;
+    const scopedRecordId = recordId;
+    const shouldLoad = open;
+    const providerMeta = adminContext.getProviderMeta(
+      scopedResource,
+      scopedRecordId == null ? undefined : { recordId: scopedRecordId },
+    );
+
+    clearAuditScope();
+    if (shouldLoad && scopedProvider) {
+      void loadAuditLogs(scopedProvider, scopedResource, providerMeta);
     }
+
+    return cancelAuditRequest;
   });
+
+  function cancelAuditRequest() {
+    requestEpoch += 1;
+  }
+
+  function clearAuditScope() {
+    cancelAuditRequest();
+    logs = [];
+    isLoading = false;
+  }
+
+  async function loadAuditLogs(
+    scopedProvider: AuditLogProvider,
+    scopedResource: string,
+    providerMeta: Record<string, unknown> | undefined,
+  ) {
+    const epoch = requestEpoch;
+    isLoading = true;
+    try {
+      const entries = await scopedProvider.get({ resource: scopedResource, meta: providerMeta });
+      if (epoch === requestEpoch) logs = entries;
+    } catch (error) {
+      if (epoch === requestEpoch) console.error('[svadmin] Failed to fetch audit logs', error);
+    } finally {
+      if (epoch === requestEpoch) isLoading = false;
+    }
+  }
 
   // Action semantic color mapping
   function getActionColor(action: string) {

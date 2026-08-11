@@ -1,4 +1,5 @@
 import { spawnSync } from 'node:child_process';
+import type { SpawnSyncReturns } from 'node:child_process';
 import { access, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -40,10 +41,31 @@ interface WorkspacePackage {
   manifest: PackageManifest;
 }
 
+interface PackedCliExpectation {
+  args: string[];
+  cwd: string;
+  expectedStatus: number;
+  label: string;
+  outputIncludes: string[];
+}
+
+interface PackedScaffoldDependencies {
+  dependencies: Record<string, string>;
+  devDependencies: Record<string, string>;
+}
+
+interface PackedCliFixtures {
+  cleanDirectory: string;
+  driftDirectory: string;
+  driftSource: string;
+}
+
 const repositoryRoot = resolve(import.meta.dir, '..');
 const packagesRoot = join(repositoryRoot, 'packages');
 const tscPath = join(repositoryRoot, 'node_modules', 'typescript', 'bin', 'tsc');
 const pnpmVersion = '11.11.0';
+const packedCliTimeoutMs = 15_000;
+const packedInstallTimeoutMs = 120_000;
 const optionalMarkdownPeers = [
   'highlight.js',
   'isomorphic-dompurify',
@@ -124,6 +146,16 @@ const expectations: PackageExpectation[] = [
     directory: 'packages/sso',
     name: '@svadmin/sso',
     requiredFiles: ['dist/index.js', 'dist/index.d.ts'],
+  },
+  {
+    directory: 'packages/create-svadmin',
+    name: '@svadmin/create',
+    requiredFiles: [
+      'dist/index.js',
+      'scaffold-manifest.json',
+      'template/src/App.svelte',
+      'template/vite.config.ts',
+    ],
   },
   {
     directory: 'packages/surface',
@@ -238,15 +270,264 @@ async function discoverWorkspacePackages(): Promise<WorkspacePackage[]> {
   return packages.sort((left, right) => left.manifest.name.localeCompare(right.manifest.name));
 }
 
-function run(command: string, args: string[], cwd: string): string {
-  const result = spawnSync(command, args, {
+function run(command: string, args: string[], cwd: string, timeoutMs?: number): string {
+  const execution = spawnSync(command, args, {
     cwd,
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
+    timeout: timeoutMs,
   });
+  const invocation = `${command} ${args.join(' ')}`;
+  if (execution.error !== undefined) {
+    const timedOut = (execution.error as NodeJS.ErrnoException).code === 'ETIMEDOUT';
+    const cause = timedOut
+      ? `timed out after ${timeoutMs}ms`
+      : `failed to start: ${execution.error.message}`;
+    throw new Error(`${invocation}: ${cause}`);
+  }
 
-  assert(result.status === 0, `${command} ${args.join(' ')} failed:\n${result.stderr || result.stdout}`);
-  return result.stdout;
+  assert(execution.status === 0, `${invocation} failed:\n${execution.stderr || execution.stdout}`);
+  return execution.stdout;
+}
+
+function commandOutput(execution: SpawnSyncReturns<string>): string {
+  return `${execution.stdout}\n${execution.stderr}`.trim();
+}
+
+function assertPackedCliStarted(
+  execution: SpawnSyncReturns<string>,
+  expectation: PackedCliExpectation,
+  invocation: string,
+): void {
+  if (execution.error !== undefined) {
+    const timedOut = (execution.error as NodeJS.ErrnoException).code === 'ETIMEDOUT';
+    const cause = timedOut
+      ? `timed out after ${packedCliTimeoutMs}ms`
+      : `failed to start: ${execution.error.message}`;
+    throw new Error(`${expectation.label}: ${cause}\nCommand: ${invocation}`);
+  }
+}
+
+function assertPackedCliCompleted(
+  execution: SpawnSyncReturns<string>,
+  expectation: PackedCliExpectation,
+  invocation: string,
+): string {
+  const combinedOutput = commandOutput(execution);
+  assert(
+    execution.status === expectation.expectedStatus,
+    `${expectation.label}: expected exit ${expectation.expectedStatus}, received ` +
+      `${execution.status ?? `signal ${execution.signal ?? 'unknown'}`}\nCommand: ${invocation}\n${combinedOutput}`,
+  );
+  for (const expectedText of expectation.outputIncludes) {
+    assert(
+      combinedOutput.includes(expectedText),
+      `${expectation.label}: missing ${JSON.stringify(expectedText)}\n${combinedOutput}`,
+    );
+  }
+  return combinedOutput;
+}
+
+function runPackedCli(cliEntry: string, expectation: PackedCliExpectation): string {
+  const execution = spawnSync('node', [cliEntry, ...expectation.args], {
+    cwd: expectation.cwd,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+    timeout: packedCliTimeoutMs,
+  });
+  const invocation = `node ${cliEntry} ${expectation.args.join(' ')}`;
+  assertPackedCliStarted(execution, expectation, invocation);
+  return assertPackedCliCompleted(execution, expectation, invocation);
+}
+
+function runPackedBinShim(consumerDirectory: string, cleanProjectDirectory: string): string {
+  const args = ['run', '--silent', 'packed-doctor', '--', cleanProjectDirectory];
+  const expectation: PackedCliExpectation = {
+    args,
+    cwd: consumerDirectory,
+    expectedStatus: 0,
+    label: '@svadmin/create packed bin shim (clean doctor)',
+    outputIncludes: ['Dependencies match'],
+  };
+  const execution = spawnSync('npm', args, {
+    cwd: consumerDirectory,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+    timeout: packedCliTimeoutMs,
+  });
+  const invocation = `npm ${args.join(' ')}`;
+  assertPackedCliStarted(execution, expectation, invocation);
+  return assertPackedCliCompleted(execution, expectation, invocation);
+}
+
+function requiredStringRecord(candidate: unknown, path: string): Record<string, string> {
+  assert(
+    typeof candidate === 'object' && candidate !== null && !Array.isArray(candidate),
+    `${path} must be an object`,
+  );
+  for (const [key, dependencyRange] of Object.entries(candidate)) {
+    assert(typeof dependencyRange === 'string', `${path}.${key} must be a string`);
+  }
+  return candidate as Record<string, string>;
+}
+
+async function packedScaffoldDependencies(
+  packageDirectory: string,
+): Promise<PackedScaffoldDependencies> {
+  const parsedManifest: unknown = JSON.parse(
+    await readFile(join(packageDirectory, 'scaffold-manifest.json'), 'utf8'),
+  );
+  assert(typeof parsedManifest === 'object' && parsedManifest !== null, 'packed scaffold must be an object');
+  return {
+    dependencies: requiredStringRecord(Reflect.get(parsedManifest, 'dependencies'), 'packed scaffold.dependencies'),
+    devDependencies: requiredStringRecord(
+      Reflect.get(parsedManifest, 'devDependencies'),
+      'packed scaffold.devDependencies',
+    ),
+  };
+}
+
+async function packedCreateCliEntry(packageDirectory: string): Promise<string> {
+  const parsedManifest: unknown = JSON.parse(
+    await readFile(join(packageDirectory, 'package.json'), 'utf8'),
+  );
+  assert(typeof parsedManifest === 'object' && parsedManifest !== null, 'packed package.json must be an object');
+  const binDeclaration = Reflect.get(parsedManifest, 'bin');
+  assert(
+    typeof binDeclaration === 'object' && binDeclaration !== null,
+    '@svadmin/create: packed bin must be an object',
+  );
+  const binTarget = Reflect.get(binDeclaration, 'create-svadmin');
+  assert(binTarget === './dist/index.js', '@svadmin/create: packed bin must target ./dist/index.js');
+
+  const cliEntry = resolve(packageDirectory, binTarget);
+  await access(cliEntry);
+  return cliEntry;
+}
+
+async function installPackedCreatePackage(
+  consumerDirectory: string,
+  tarballPath: string,
+): Promise<string> {
+  await writeFile(
+    join(consumerDirectory, 'package.json'),
+    `${JSON.stringify({
+      name: 'svadmin-packed-cli-consumer',
+      private: true,
+      scripts: { 'packed-doctor': 'create-svadmin doctor' },
+    }, null, 2)}\n`,
+  );
+  run('npm', [
+    'install',
+    '--ignore-scripts',
+    '--no-audit',
+    '--no-fund',
+    '--package-lock=false',
+    resolve(tarballPath),
+  ], consumerDirectory, packedInstallTimeoutMs);
+
+  const shimName = process.platform === 'win32' ? 'create-svadmin.cmd' : 'create-svadmin';
+  await access(join(consumerDirectory, 'node_modules', '.bin', shimName));
+  return join(consumerDirectory, 'node_modules', '@svadmin', 'create');
+}
+
+async function writePackedCliFixtures(
+  fixtureRoot: string,
+  scaffold: PackedScaffoldDependencies,
+): Promise<PackedCliFixtures> {
+  const cleanDirectory = join(fixtureRoot, 'clean-project');
+  const driftDirectory = join(fixtureRoot, 'drift-project');
+  await Promise.all([
+    mkdir(cleanDirectory, { recursive: true }),
+    mkdir(driftDirectory, { recursive: true }),
+  ]);
+
+  const cleanPackage = {
+    name: 'packed-cli-clean',
+    private: true,
+    dependencies: { ...scaffold.dependencies },
+    devDependencies: { ...scaffold.devDependencies },
+  };
+  assert(
+    cleanPackage.dependencies['@svadmin/core'] !== undefined,
+    'packed scaffold.dependencies must include @svadmin/core',
+  );
+  const driftPackage = {
+    ...cleanPackage,
+    name: 'packed-cli-drift',
+    dependencies: { ...cleanPackage.dependencies, '@svadmin/core': '^999.0.0' },
+  };
+  const driftSource = `${JSON.stringify(driftPackage, null, 2)}\n`;
+  await Promise.all([
+    writeFile(join(cleanDirectory, 'package.json'), `${JSON.stringify(cleanPackage, null, 2)}\n`),
+    writeFile(join(driftDirectory, 'package.json'), driftSource),
+  ]);
+  return { cleanDirectory, driftDirectory, driftSource };
+}
+
+function verifyPackedDoctors(
+  cliEntry: string,
+  fixtureRoot: string,
+  projectFixtures: PackedCliFixtures,
+): void {
+  runPackedCli(cliEntry, {
+    args: ['doctor', projectFixtures.cleanDirectory],
+    cwd: fixtureRoot,
+    expectedStatus: 0,
+    label: '@svadmin/create packed doctor (clean)',
+    outputIncludes: ['Dependencies match'],
+  });
+  runPackedCli(cliEntry, {
+    args: ['doctor', projectFixtures.driftDirectory],
+    cwd: fixtureRoot,
+    expectedStatus: 1,
+    label: '@svadmin/create packed doctor (drift)',
+    outputIncludes: ['@svadmin/core: incompatible', 'actionable issue'],
+  });
+}
+
+async function verifyPackedUpgradeDryRun(
+  cliEntry: string,
+  fixtureRoot: string,
+  projectFixtures: PackedCliFixtures,
+): Promise<void> {
+  runPackedCli(cliEntry, {
+    args: ['upgrade', projectFixtures.driftDirectory],
+    cwd: fixtureRoot,
+    expectedStatus: 0,
+    label: '@svadmin/create packed upgrade (dry-run)',
+    outputIncludes: ['Dry run only'],
+  });
+  assert(
+    await readFile(join(projectFixtures.driftDirectory, 'package.json'), 'utf8') === projectFixtures.driftSource,
+    '@svadmin/create packed upgrade dry-run changed package.json',
+  );
+  assert(
+    (await readdir(projectFixtures.driftDirectory)).sort().join(',') === 'package.json',
+    '@svadmin/create packed upgrade dry-run created an unexpected file',
+  );
+}
+
+export async function verifyCreateSvadminPackedCli(tarballPath: string): Promise<string> {
+  const fixtureRoot = await mkdtemp(join(tmpdir(), 'svadmin-create-packed-cli-'));
+  try {
+    const packageDirectory = await installPackedCreatePackage(fixtureRoot, tarballPath);
+    const cliEntry = await packedCreateCliEntry(packageDirectory);
+    const packedScaffold = await packedScaffoldDependencies(packageDirectory);
+    const projectFixtures = await writePackedCliFixtures(fixtureRoot, packedScaffold);
+    runPackedBinShim(fixtureRoot, projectFixtures.cleanDirectory);
+    verifyPackedDoctors(cliEntry, fixtureRoot, projectFixtures);
+    await verifyPackedUpgradeDryRun(cliEntry, fixtureRoot, projectFixtures);
+    return [
+      'packed npm install passed',
+      'packed bin shim doctor passed',
+      'packed doctor clean passed',
+      'packed doctor drift passed',
+      'packed upgrade dry-run passed',
+    ].join('\n');
+  } finally {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
 }
 
 async function verifyUiPeerTree(
@@ -795,6 +1076,12 @@ async function main(): Promise<void> {
 
     const consumerOutput = await createConsumer(temporaryDirectory, results);
     console.info(consumerOutput.trim());
+    const createSvadminPack = results.get('@svadmin/create');
+    assert(createSvadminPack, '@svadmin/create: missing tarball for packed CLI verification');
+    const createSvadminOutput = await verifyCreateSvadminPackedCli(
+      join(temporaryDirectory, createSvadminPack.filename),
+    );
+    console.info(createSvadminOutput.trim());
     const peerTreeOutput = await verifyUiPeerTree(temporaryDirectory, manifests);
     console.info(peerTreeOutput.trim());
     const pnpmPeerTreeOutput = await verifyUiPnpmPeerTree(temporaryDirectory, results, manifests);
@@ -810,4 +1097,4 @@ async function main(): Promise<void> {
   }
 }
 
-await main();
+if (import.meta.main) await main();

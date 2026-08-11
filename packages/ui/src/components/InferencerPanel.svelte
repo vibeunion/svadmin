@@ -1,6 +1,6 @@
 <script lang="ts">
  
-  import { getDataProvider, getResources, inferResource } from '@svadmin/core';
+  import { captureAdminContext, inferResource } from '@svadmin/core';
   import type { InferResult } from '@svadmin/core';
   import { Button } from './ui/button/index.js';
   import { Input } from './ui/input/index.js';
@@ -13,8 +13,8 @@
   import { Select } from './ui/select/index.js';
   import { Wand2, Copy, Check, RefreshCw, Loader2, AlertCircle } from '@lucide/svelte';
 
-  const dataProvider = getDataProvider();
-  const resources = getResources();
+  const adminContext = captureAdminContext();
+  const resources = $derived(adminContext.resources);
 
   let selectedResource = $state('');
   let inferResult = $state<InferResult | null>(null);
@@ -23,24 +23,42 @@
   let copied = $state(false);
   let customEndpoint = $state('');
   let copyTimer: ReturnType<typeof setTimeout> | undefined;
+  let inferenceEpoch = 0;
 
   $effect(() => {
     return () => { if (copyTimer) clearTimeout(copyTimer); };
+  });
+
+  $effect(() => {
+    void adminContext.providerBundle;
+    void adminContext.tenantCacheKey?.__svadminTenant;
+    void resources;
+    inferenceEpoch += 1;
+    inferResult = null;
+    loading = false;
+    error = null;
+
+    return () => {
+      inferenceEpoch += 1;
+    };
   });
 
   async function runInference() {
     const resourceName = customEndpoint.trim() || selectedResource;
     if (!resourceName) return;
 
+    const epoch = ++inferenceEpoch;
     loading = true;
     error = null;
     inferResult = null;
 
     try {
+      const dataProvider = adminContext.getDataProviderForResource(resourceName);
       const response = await dataProvider.getList({
         resource: resourceName,
         pagination: { current: 1, pageSize: 25 },
       });
+      if (epoch !== inferenceEpoch) return;
 
       if (!response.data || response.data.length === 0) {
         error = `No data returned from "${resourceName}". The API must return at least one record to infer fields.`;
@@ -52,9 +70,11 @@
         response.data as Record<string, unknown>[],
       );
     } catch (e: unknown) {
-      error = e instanceof Error ? e.message : 'Failed to fetch data for inference.';
+      if (epoch === inferenceEpoch) {
+        error = e instanceof Error ? e.message : 'Failed to fetch data for inference.';
+      }
     } finally {
-      loading = false;
+      if (epoch === inferenceEpoch) loading = false;
     }
   }
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getChatProvider } from '@svadmin/core';
+  import { captureAdminContext, type ChatProvider } from '@svadmin/core';
   import { Sparkles, RefreshCcw, Loader2 } from '@lucide/svelte';
   import { Button } from './ui/button/index.js';
   import MarkdownRenderer from './MarkdownRenderer.svelte';
@@ -13,54 +13,84 @@
 
   let { title = 'AI Insights', context, autoFetch = true, class: className = '' }: Props = $props();
 
-  const provider = $derived(getChatProvider());
+  const adminContext = captureAdminContext();
+  const provider = $derived(adminContext.chatProvider);
 
   let isPredicting = $state(false);
   let insightText = $state('');
   let abortController: AbortController | null = null;
-  let hasFetchedForContext = $state('');
+  let requestEpoch = 0;
 
   $effect(() => {
-    if (autoFetch && context && provider && hasFetchedForContext !== context) {
-      hasFetchedForContext = context;
-      getInsights();
+    const scopedProvider = provider;
+    const scopedContext = context;
+    const shouldFetch = autoFetch;
+    void adminContext.tenantCacheKey?.__svadminTenant;
+
+    clearInsightScope();
+    if (shouldFetch && scopedContext && scopedProvider) {
+      void requestInsights(scopedProvider, scopedContext);
     }
+
+    return cancelInsightRequest;
   });
 
   export async function getInsights() {
-    if (!provider || !context) return;
-    
+    const scopedProvider = provider;
+    if (!scopedProvider || !context) return;
+    await requestInsights(scopedProvider, context);
+  }
+
+  function cancelInsightRequest() {
+    requestEpoch += 1;
+    abortController?.abort();
+    abortController = null;
+  }
+
+  function clearInsightScope() {
+    cancelInsightRequest();
+    isPredicting = false;
+    insightText = '';
+  }
+
+  async function requestInsights(scopedProvider: ChatProvider, scopedContext: string) {
+    cancelInsightRequest();
+    const epoch = requestEpoch;
+    const controller = new AbortController();
+    abortController = controller;
     isPredicting = true;
     insightText = '';
-    
-    if (abortController) abortController.abort();
-    abortController = new AbortController();
 
     const prompt = `Based on the following data/context, generate 3 concise, highly professional insights. 
 Use bullet points. Do not include introductory text like "Here are the insights".
 
 Data Context:
-${context}`;
+${scopedContext}`;
 
     try {
-      const result = provider.sendMessage(
+      const result = scopedProvider.sendMessage(
         [{ id: 'insights', role: 'user', content: prompt, timestamp: Date.now() }],
-        { signal: abortController.signal }
+        { signal: controller.signal }
       );
 
       if (Symbol.asyncIterator in result) {
         for await (const chunk of result as AsyncIterable<string>) {
+          if (epoch !== requestEpoch) return;
           insightText += chunk;
         }
       } else {
-        insightText = await result;
+        const response = await result;
+        if (epoch === requestEpoch) insightText = response;
       }
     } catch (err: unknown) {
-      if (err instanceof Error && err.name !== 'AbortError') {
+      if (epoch === requestEpoch && err instanceof Error && err.name !== 'AbortError') {
         insightText = 'Failed to generate insights.';
       }
     } finally {
-      isPredicting = false;
+      if (epoch === requestEpoch) {
+        isPredicting = false;
+        if (abortController === controller) abortController = null;
+      }
     }
   }
 </script>

@@ -1,6 +1,16 @@
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import MarkdownRenderer from './MarkdownRenderer.svelte';
+
+beforeAll(async () => {
+  // Vitest resolves isomorphic-dompurify to its Node entry, whose jsdom cold start can block per-test timers.
+  await Promise.all([
+    import('marked'),
+    import('marked-highlight'),
+    import('highlight.js'),
+    import('isomorphic-dompurify'),
+  ]);
+}, 90_000);
 
 // MarkdownRenderer loads its optional peer deps (marked, highlight.js,
 // isomorphic-dompurify) dynamically on mount, so rendering is asynchronous.
@@ -17,8 +27,6 @@ afterEach(() => {
 });
 
 describe('MarkdownRenderer security and enhancement', () => {
-  // isomorphic-dompurify/marked/highlight.js are dynamic peer deps; first
-  // mount pays an init cost that can exceed the default 5s under parallel load.
   it('sanitizes raw HTML and dangerous URL attributes before rendering', async () => {
     const { container } = render(MarkdownRenderer, {
       content: '<script>globalThis.__markdownXss = 1</script><img src="x" onerror="globalThis.__markdownXss = 2"><a href="javascript:globalThis.__markdownXss=3">unsafe link</a>',

@@ -8,9 +8,31 @@ export {
   setLiveProvider, getLiveProvider,
   setTaskProvider, getTaskProvider,
   createAdminContext, provideAdminContext, getAdminContext, captureAdminContext,
+  provideTenantContext, getTenantContext, getProviderBundle,
   resetContext,
 } from './context.svelte';
 export type { DataProviderInput, AdminContextSource, AdminContextValue, AdminContextAccessor } from './context.svelte';
+export {
+  appendTenantCacheKey,
+  createProviderBundle,
+  createTenantCacheKey,
+  defaultTenantAdapter,
+  isTenantCacheKey,
+  queryKeyMatchesTenant,
+  resolveTenantProviderMeta,
+  withProviderMeta,
+  withTenantDataProvider,
+} from './provider-bundle';
+export type {
+  ProviderBundle,
+  ProviderMetaInput,
+  ProviderMetaResolver,
+  TenantAdapter,
+  TenantCacheIdentity,
+  TenantCacheKey,
+  TenantContext,
+  TenantId,
+} from './provider-bundle';
 export {
   useList, useInfiniteList,
   useOne, useShow,
@@ -36,10 +58,17 @@ export { readURLState, writeURLState } from './url-sync';
 export { setAccessControlProvider, getAccessControlProvider, getAccessControlOptions, canAccessAsync, createFeatureGate } from './permissions.svelte';
 export { useLive, useSubscription, usePublish } from './live.svelte';
 export { toast, getToastQueue, consumeToastQueue, getPromiseQueue, consumePromiseQueue, resetToast } from './toast.svelte';
-export { notify, closeNotification, setNotificationProvider, getNotificationProvider } from './notification.svelte';
+export {
+  notify,
+  notifyWithProvider,
+  closeNotification,
+  setNotificationProvider,
+  getNotificationProvider,
+} from './notification.svelte';
+export type { NotificationParams } from './notification.svelte';
 export { t, setLocale, getLocale, getAvailableLocales, addTranslations, useTranslation, setI18nProvider, getI18nProvider, createI18nScope, provideI18nScope, getI18nScope, resetI18n } from './i18n.svelte';
 export type { I18nProvider, I18nScope, I18nScopeOptions } from './i18n.svelte';
-export { audit, setAuditHandler, setAuditLogProvider, getAuditLogProvider } from './audit';
+export { audit, auditWithProvider, setAuditHandler, setAuditLogProvider, getAuditLogProvider } from './audit';
 export type { AuditLogProvider } from './audit';
 export { setChatProvider, getChatProvider, setChatContext, getChatContext, setAgentProvider, getAgentProvider, registerApproval, resolveApproval, hasPendingApprovals, resetChatProvider } from './chatProvider.svelte';
 export type { ChatProvider, ChatMessage, ChatContext, ChatAction, AgentProvider, AgentEvent, AgentOptions, AdminTool, AdminToolParameter, ToolResult } from './chatProvider.svelte';
@@ -67,7 +96,8 @@ export type {
   DeleteParams, DeleteResult,
   DeleteManyParams, DeleteManyResult,
   Pagination, Sort, Filter, Identity,
-  ResourceDefinition, FieldDefinition, MenuItem,
+  ResourceDefinition, ResourceProviderConfig, ResourceTransportConfig, ResourceAdapterConfig,
+  FieldDefinition, MenuItem,
   AuthActionResult, CheckResult,
   ResourceTypeMap, KnownResources, InferData,
   BaseRecord, Role, AuditLog

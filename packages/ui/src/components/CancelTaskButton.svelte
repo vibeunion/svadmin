@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getTaskProvider } from '@svadmin/core';
+  import { captureAdminContext } from '@svadmin/core';
   import { useQueryClient } from '@tanstack/svelte-query';
   import { useTranslation } from '@svadmin/core/i18n';
 
@@ -7,10 +7,11 @@
   import { Loader2, Ban } from '@lucide/svelte';
 
   const i18n = useTranslation();
+  const adminContext = captureAdminContext();
 
   let {
     taskId,
-    taskProvider = getTaskProvider({ optional: true }),
+    taskProvider = adminContext.taskProvider ?? undefined,
     onSuccess,
     onError,
     disabled = false,
@@ -37,8 +38,15 @@
     try {
       await taskProvider.cancel(taskId);
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['taskList'] }),
-        queryClient.invalidateQueries({ queryKey: ['task', taskId] }),
+        queryClient.invalidateQueries({
+          predicate: (query) => query.queryKey[0] === 'taskList'
+            && adminContext.matchesTenantQuery(query.queryKey),
+        }),
+        queryClient.invalidateQueries({
+          predicate: (query) => query.queryKey[0] === 'task'
+            && query.queryKey[1] === taskId
+            && adminContext.matchesTenantQuery(query.queryKey),
+        }),
       ]);
       onSuccess?.();
     } catch (error) {

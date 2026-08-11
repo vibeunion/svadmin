@@ -42,6 +42,7 @@ vi.mock('./context.svelte', () => ({
 
 vi.mock('./notification.svelte', () => ({
   notify: vi.fn(),
+  notifyWithProvider: vi.fn(),
 }));
 
 vi.mock('@tanstack/svelte-query', async (importOriginal) => {

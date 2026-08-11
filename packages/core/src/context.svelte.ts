@@ -5,12 +5,33 @@ import { createContext } from 'svelte';
 import type { DataProvider, AuthProvider, ResourceDefinition, TaskProvider } from './types';
 import type { RouterProvider } from './router-provider';
 import type { LiveProvider } from './live.svelte';
-import { resetNotificationProvider } from './notification.svelte';
-import { resetAuditLogProvider } from './audit';
-import { resetAccessControlProvider } from './permissions.svelte';
+import type { AccessControlProvider } from './permissions.svelte';
+import type { AuditLogProvider } from './audit';
+import type { AgentProvider, ChatProvider } from './chatProvider.svelte';
+import {
+  appendTenantCacheKey,
+  createTenantCacheKey,
+  queryKeyMatchesTenant,
+  resolveTenantProviderMeta,
+  withProviderMeta,
+} from './provider-bundle';
+import type {
+  DataProviderInput,
+  ProviderBundle,
+  TenantAdapter,
+  TenantCacheKey,
+  TenantContext,
+} from './provider-bundle';
+import { getNotificationProvider as getLegacyNotificationProvider, resetNotificationProvider } from './notification.svelte';
+import { getAuditLogProvider as getLegacyAuditLogProvider, resetAuditLogProvider } from './audit';
+import { getAccessControlProvider as getLegacyAccessControlProvider, resetAccessControlProvider } from './permissions.svelte';
 import { resetAdminOptions } from './options.svelte';
 import { resetI18n } from './i18n.svelte';
-import { resetChatProvider } from './chatProvider.svelte';
+import {
+  getAgentProvider as getLegacyAgentProvider,
+  getChatProvider as getLegacyChatProvider,
+  resetChatProvider,
+} from './chatProvider.svelte';
 import { resetToast } from './toast.svelte';
 import { resetTheme } from './theme.svelte';
 import {
@@ -29,29 +50,35 @@ import { resetSidebarCollapsed } from './hooks.svelte';
 
 // ─── DataProvider (supports single or multiple) ─────────────────
 
-/**
- * Accepts either:
- *   - A single DataProvider
- *   - A record of named providers: { default: rest, cms: graphql }
- */
-export type DataProviderInput = DataProvider | Record<string, DataProvider>;
+export type { DataProviderInput } from './provider-bundle';
 
-export interface AdminContextSource {
-  readonly dataProvider: DataProviderInput;
-  readonly authProvider?: AuthProvider | null;
+interface AdminContextSourceBase extends Omit<Partial<ProviderBundle>, 'dataProvider'> {
   readonly resources: ResourceDefinition[];
-  readonly routerProvider?: RouterProvider;
-  readonly liveProvider?: LiveProvider;
-  readonly taskProvider?: TaskProvider;
+  /** 请求树内租户；未传入时继承最近的 provideTenantContext。 */
+  readonly tenant?: TenantContext;
 }
 
+/** 必须提供旧式 dataProvider 或一等 ProviderBundle；同名顶层字段优先。 */
+export type AdminContextSource = AdminContextSourceBase & (
+  | { readonly dataProvider: DataProviderInput; readonly providerBundle?: ProviderBundle }
+  | { readonly dataProvider?: DataProviderInput; readonly providerBundle: ProviderBundle }
+);
+
 export interface AdminContextValue {
+  readonly providerBundle: ProviderBundle;
   readonly providers: Record<string, DataProvider>;
   readonly authProvider: AuthProvider | null;
   readonly resources: ResourceDefinition[];
   readonly routerProvider: RouterProvider | undefined;
   readonly liveProvider: LiveProvider | undefined;
   readonly taskProvider: TaskProvider | undefined;
+  readonly accessControlProvider: AccessControlProvider | null;
+  readonly auditLogProvider: AuditLogProvider | null;
+  readonly notificationProvider: ProviderBundle['notificationProvider'];
+  readonly chatProvider: ChatProvider | null;
+  readonly agentProvider: AgentProvider | null;
+  readonly tenant: TenantContext | undefined;
+  readonly tenantAdapter: TenantAdapter | undefined;
 }
 
 /**
@@ -63,15 +90,27 @@ export interface AdminContextValue {
  * read the module-level compatibility setters dynamically.
  */
 export interface AdminContextAccessor {
+  readonly providerBundle: ProviderBundle;
   readonly providers: Record<string, DataProvider> | null;
   readonly authProvider: AuthProvider | null;
   readonly resources: ResourceDefinition[];
   readonly routerProvider: RouterProvider | undefined;
   readonly liveProvider: LiveProvider | undefined;
   readonly taskProvider: TaskProvider | undefined;
+  readonly accessControlProvider: AccessControlProvider | null;
+  readonly auditLogProvider: AuditLogProvider | null;
+  readonly notificationProvider: ProviderBundle['notificationProvider'];
+  readonly chatProvider: ChatProvider | null;
+  readonly agentProvider: AgentProvider | null;
+  readonly tenant: TenantContext | undefined;
+  readonly tenantAdapter: TenantAdapter | undefined;
+  readonly tenantCacheKey: TenantCacheKey | undefined;
   getDataProvider(name?: string): DataProvider;
   getDataProviderNames(): string[];
   getDataProviderForResource(resourceName: string, overrideName?: string): DataProvider;
+  getProviderMeta(resourceName: string | undefined, meta?: Record<string, unknown>): Record<string, unknown> | undefined;
+  withTenantCacheKey(queryKey: readonly unknown[]): readonly unknown[];
+  matchesTenantQuery(queryKey: readonly unknown[]): boolean;
   getResource(nameOrIdentifier: string): ResourceDefinition;
   currentPath(): string;
   formatLink(path: string): string;
@@ -80,6 +119,22 @@ export interface AdminContextAccessor {
 }
 
 const [getRequiredAdminContext, setAdminContext] = createContext<AdminContextValue>();
+const [getRequiredTenantContext, setScopedTenantContext] = createContext<TenantContext>();
+
+/** Provide tenant state to a request/component subtree. No module-level fallback is created. */
+export function provideTenantContext(tenant: TenantContext): TenantContext {
+  setScopedTenantContext(tenant);
+  return tenant;
+}
+
+/** Return the nearest request/tree-scoped tenant when called during initialization. */
+export function getTenantContext(): TenantContext | undefined {
+  try {
+    return getRequiredTenantContext();
+  } catch {
+    return undefined;
+  }
+}
 
 function normalizeDataProviders(provider: DataProviderInput): Record<string, DataProvider> {
   return isDataProvider(provider)
@@ -87,14 +142,49 @@ function normalizeDataProviders(provider: DataProviderInput): Record<string, Dat
     : provider;
 }
 
-export function createAdminContext(source: AdminContextSource): AdminContextValue {
+function resolveProviderBundle(source: AdminContextSource): ProviderBundle {
+  const bundled = source.providerBundle;
+  const dataProvider = source.dataProvider ?? bundled?.dataProvider;
+  if (!dataProvider) {
+    throw new Error('ProviderBundle requires a dataProvider.');
+  }
+
   return {
-    get providers() { return normalizeDataProviders(source.dataProvider); },
-    get authProvider() { return source.authProvider ?? null; },
+    dataProvider,
+    authProvider: source.authProvider !== undefined ? source.authProvider : bundled?.authProvider,
+    accessControlProvider: source.accessControlProvider !== undefined
+      ? source.accessControlProvider
+      : bundled?.accessControlProvider,
+    liveProvider: source.liveProvider ?? bundled?.liveProvider,
+    auditLogProvider: source.auditLogProvider !== undefined ? source.auditLogProvider : bundled?.auditLogProvider,
+    notificationProvider: source.notificationProvider !== undefined
+      ? source.notificationProvider
+      : bundled?.notificationProvider,
+    chatProvider: source.chatProvider !== undefined ? source.chatProvider : bundled?.chatProvider,
+    agentProvider: source.agentProvider !== undefined ? source.agentProvider : bundled?.agentProvider,
+    taskProvider: source.taskProvider ?? bundled?.taskProvider,
+    routerProvider: source.routerProvider ?? bundled?.routerProvider,
+    tenantAdapter: source.tenantAdapter ?? bundled?.tenantAdapter,
+  };
+}
+
+export function createAdminContext(source: AdminContextSource): AdminContextValue {
+  const inheritedTenant = getTenantContext();
+  return {
+    get providerBundle() { return resolveProviderBundle(source); },
+    get providers() { return normalizeDataProviders(resolveProviderBundle(source).dataProvider); },
+    get authProvider() { return resolveProviderBundle(source).authProvider ?? null; },
     get resources() { return source.resources; },
-    get routerProvider() { return source.routerProvider; },
-    get liveProvider() { return source.liveProvider; },
-    get taskProvider() { return source.taskProvider; },
+    get routerProvider() { return resolveProviderBundle(source).routerProvider; },
+    get liveProvider() { return resolveProviderBundle(source).liveProvider; },
+    get taskProvider() { return resolveProviderBundle(source).taskProvider; },
+    get accessControlProvider() { return resolveProviderBundle(source).accessControlProvider ?? null; },
+    get auditLogProvider() { return resolveProviderBundle(source).auditLogProvider ?? null; },
+    get notificationProvider() { return resolveProviderBundle(source).notificationProvider ?? null; },
+    get chatProvider() { return resolveProviderBundle(source).chatProvider ?? null; },
+    get agentProvider() { return resolveProviderBundle(source).agentProvider ?? null; },
+    get tenant() { return source.tenant ?? inheritedTenant; },
+    get tenantAdapter() { return resolveProviderBundle(source).tenantAdapter; },
   };
 }
 
@@ -119,14 +209,55 @@ let providers = $state<Record<string, DataProvider> | null>(null);
 /** Capture the current tree once so delayed callbacks never re-enter getContext. */
 export function captureAdminContext(): AdminContextAccessor {
   const scopedContext = getAdminContext();
+  const adaptedProviders = new Map<DataProvider, DataProvider>();
+
+  function adaptProvider(provider: DataProvider): DataProvider {
+    const hasResourceMetadata = accessor.resources.some((resource) => resource.provider !== undefined);
+    if (!accessor.tenant && !hasResourceMetadata) return provider;
+    const cached = adaptedProviders.get(provider);
+    if (cached) return cached;
+    const adapted = withProviderMeta(provider, ({ resource, meta }) => accessor.getProviderMeta(resource, meta));
+    adaptedProviders.set(provider, adapted);
+    return adapted;
+  }
 
   const accessor: AdminContextAccessor = {
+    get providerBundle() {
+      if (scopedContext) return scopedContext.providerBundle;
+      if (!providers) throw new Error('DataProvider not found. Did you call setDataProvider in App.svelte?');
+      return {
+        dataProvider: providers,
+        authProvider,
+        accessControlProvider: getLegacyAccessControlProvider(),
+        liveProvider: liveProviderState,
+        auditLogProvider: getLegacyAuditLogProvider(),
+        notificationProvider: getLegacyNotificationProvider(),
+        chatProvider: getLegacyChatProvider(),
+        agentProvider: getLegacyAgentProvider(),
+        taskProvider: taskProviderState,
+        routerProvider,
+      };
+    },
     get providers() { return scopedContext ? scopedContext.providers : providers; },
     get authProvider() { return scopedContext ? scopedContext.authProvider : authProvider; },
     get resources() { return scopedContext ? scopedContext.resources : resources ?? []; },
     get routerProvider() { return scopedContext ? scopedContext.routerProvider : routerProvider; },
     get liveProvider() { return scopedContext ? scopedContext.liveProvider : liveProviderState; },
     get taskProvider() { return scopedContext ? scopedContext.taskProvider : taskProviderState; },
+    get accessControlProvider() {
+      return scopedContext ? scopedContext.accessControlProvider : getLegacyAccessControlProvider();
+    },
+    get auditLogProvider() { return scopedContext ? scopedContext.auditLogProvider : getLegacyAuditLogProvider(); },
+    get notificationProvider() {
+      return scopedContext ? scopedContext.notificationProvider : getLegacyNotificationProvider();
+    },
+    get chatProvider() { return scopedContext ? scopedContext.chatProvider : getLegacyChatProvider(); },
+    get agentProvider() { return scopedContext ? scopedContext.agentProvider : getLegacyAgentProvider(); },
+    get tenant() { return scopedContext?.tenant; },
+    get tenantAdapter() { return scopedContext?.tenantAdapter; },
+    get tenantCacheKey() {
+      return accessor.tenant ? createTenantCacheKey(accessor.tenant, accessor.tenantAdapter) : undefined;
+    },
     getDataProvider(name) {
       const activeProviders = accessor.providers;
       if (!activeProviders) throw new Error('DataProvider not found. Did you call setDataProvider in App.svelte?');
@@ -135,7 +266,7 @@ export function captureAdminContext(): AdminContextAccessor {
       if (!provider) {
         throw new Error(`DataProvider "${key}" not found. Available: ${Object.keys(activeProviders).join(', ')}`);
       }
-      return provider;
+      return adaptProvider(provider);
     },
     getDataProviderNames() {
       return accessor.providers ? Object.keys(accessor.providers) : [];
@@ -150,12 +281,34 @@ export function captureAdminContext(): AdminContextAccessor {
       }
       try {
         const resource = accessor.getResource(resourceName);
-        const dataProviderName = resource.meta?.dataProviderName as string | undefined;
+        const dataProviderName = resource.provider?.dataProviderName ?? resource.meta?.dataProviderName;
         if (dataProviderName) return accessor.getDataProvider(dataProviderName);
       } catch {
         // Preserve the historical fallback when a resource is not registered.
       }
       return accessor.getDataProvider();
+    },
+    getProviderMeta(resourceName, meta) {
+      const resource = resourceName
+        ? accessor.resources.find((candidate) => candidate.identifier === resourceName || candidate.name === resourceName)
+        : undefined;
+      const providerConfig = resource?.provider;
+      const tenant = accessor.tenant;
+      if (!providerConfig && !tenant) return meta;
+
+      return {
+        ...(providerConfig?.meta ?? {}),
+        ...(meta ?? {}),
+        ...(providerConfig?.transport === undefined ? {} : { transport: providerConfig.transport }),
+        ...(providerConfig?.adapter === undefined ? {} : { adapter: providerConfig.adapter }),
+        ...(tenant ? resolveTenantProviderMeta(tenant, accessor.tenantAdapter) : {}),
+      };
+    },
+    withTenantCacheKey(queryKey) {
+      return appendTenantCacheKey(queryKey, accessor.tenantCacheKey);
+    },
+    matchesTenantQuery(queryKey) {
+      return queryKeyMatchesTenant(queryKey, accessor.tenantCacheKey);
     },
     getResource(nameOrIdentifier) {
       const resource = accessor.resources.find(
@@ -206,6 +359,10 @@ export function getDataProviderNames(): string[] {
 
 export function getDataProviderForResource(resourceName: string, overrideName?: string): DataProvider {
   return captureAdminContext().getDataProviderForResource(resourceName, overrideName);
+}
+
+export function getProviderBundle(): ProviderBundle {
+  return captureAdminContext().providerBundle;
 }
 
 function isDataProvider(value: unknown): value is DataProvider {

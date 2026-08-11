@@ -5,7 +5,9 @@ import { useQueryClient } from '@tanstack/svelte-query';
 import type { LiveProvider, LiveEvent, LiveMode } from './live.svelte';
 import { captureAdminContext } from './context.svelte';
 import type { AdminContextAccessor } from './context.svelte';
-import { notify } from './notification.svelte';
+import { queryKeyMatchesTenant } from './provider-bundle';
+import { notifyWithProvider } from './notification.svelte';
+import type { NotificationProvider } from './types';
 
 // ─── Auth Error Delegate ────────────────────────────────────────
 // Delegate auth errors to authProvider.onError() — refine pattern
@@ -88,6 +90,7 @@ export interface LiveSubscriptionParams {
 
 export function createLiveSubscription(paramsFn: () => LiveSubscriptionParams): void {
   const queryClient = useQueryClient();
+  const adminContext = captureAdminContext();
 
   $effect(() => {
     const params = paramsFn();
@@ -106,7 +109,8 @@ export function createLiveSubscription(paramsFn: () => LiveSubscriptionParams): 
           params.onLiveEvent?.(event);
           if (liveMode === 'auto') {
             const dpN = params.dataProviderName;
-            const dpMatch = (q: { queryKey: readonly unknown[] }) => q.queryKey[0] === dpN;
+            const dpMatch = (q: { queryKey: readonly unknown[] }) =>
+              queryKeyMatchesTenant(q.queryKey, adminContext.tenantCacheKey) && q.queryKey[0] === dpN;
             queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === params.resource });
           }
         },
@@ -127,36 +131,44 @@ export type NotificationConfig =
   | ((data?: unknown, values?: unknown, resource?: string) => { message: string; description?: string; type?: 'success' | 'error' })
   | undefined;
 
-export function fireSuccessNotification(
-  config: NotificationConfig,
-  defaultMessage: string,
-  data?: unknown,
-  values?: unknown,
-  resource?: string,
-): void {
+export interface SuccessNotificationRequest {
+  config: NotificationConfig;
+  defaultMessage: string;
+  data?: unknown;
+  values?: unknown;
+  resource?: string;
+  provider?: NotificationProvider | null;
+}
+
+export interface ErrorNotificationRequest {
+  config: NotificationConfig;
+  defaultMessage: string;
+  error?: unknown;
+  resource?: string;
+  provider?: NotificationProvider | null;
+}
+
+export function fireSuccessNotification(request: SuccessNotificationRequest): void {
+  const { config, defaultMessage, data, values, resource, provider } = request;
   if (config === false) return;
   if (!config && !defaultMessage) return;
   if (typeof config === 'function') {
     const result = config(data, values, resource);
-    notify({ type: 'success', message: result.message, description: result.description });
+    notifyWithProvider({ type: 'success', message: result.message, description: result.description }, provider);
     return;
   }
-  notify({ type: 'success', message: config || defaultMessage });
+  notifyWithProvider({ type: 'success', message: config || defaultMessage }, provider);
 }
 
-export function fireErrorNotification(
-  config: NotificationConfig,
-  defaultMessage: string,
-  error?: unknown,
-  resource?: string,
-): void {
+export function fireErrorNotification(request: ErrorNotificationRequest): void {
+  const { config, defaultMessage, error, resource, provider } = request;
   if (config === false) return;
   if (!config && !defaultMessage) return;
   if (typeof config === 'function') {
     const result = config(error, undefined, resource);
-    notify({ type: 'error', message: result.message, description: result.description });
+    notifyWithProvider({ type: 'error', message: result.message, description: result.description }, provider);
     return;
   }
   const errMsg = error instanceof Error ? error.message : String(error ?? '');
-  notify({ type: 'error', message: config || `${defaultMessage}${errMsg ? ': ' + errMsg : ''}` });
+  notifyWithProvider({ type: 'error', message: config || `${defaultMessage}${errMsg ? ': ' + errMsg : ''}` }, provider);
 }

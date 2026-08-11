@@ -32,6 +32,48 @@ const dataProvider = createElysiaDataProvider({
 });
 ```
 
+## Per-Resource Transport Adapters
+
+Use a stable resource name when one backend exposes different URL, pagination,
+or response-envelope conventions. Dynamic path segments must be encoded inside
+the resolver; the complete path is intentionally left unencoded.
+
+```typescript
+const dataProvider = createElysiaDataProvider({
+  apiUrl: 'https://console.example.com',
+  resourceAdapters: [{
+    match: 'project-tables',
+    resourcePath: ({ meta }) => {
+      const projectRef = meta?.projectRef;
+      if (typeof projectRef !== 'string' || projectRef.length === 0) {
+        throw new Error('projectRef is required for project-tables');
+      }
+      return `v1/projects/${encodeURIComponent(projectRef)}/database/tables`;
+    },
+    buildListSearchParams: ({ pagination }) => new URLSearchParams({
+      page: String(pagination.current),
+      limit: String(pagination.pageSize),
+    }),
+    parseListResponse: <T>(payload: unknown) => {
+      const response = payload as { rows: T[]; total: number; nextCursor?: string };
+      return {
+        data: response.rows,
+        total: response.total,
+        nextCursor: response.nextCursor,
+      };
+    },
+  }],
+});
+
+await dataProvider.getList({
+  resource: 'project-tables',
+  meta: { projectRef: 'project-a' },
+});
+```
+
+The default `{ items, total }` and `{ data, total }` parsers also retain custom
+top-level metadata such as cursors or facets in the returned `GetListResult`.
+
 ## Expected Backend Routes
 
 The provider expects standard RESTful routes:
@@ -128,7 +170,12 @@ interface ElysiaDataProviderOptions {
   /** Custom resource-to-URL segment mapping */
   resourceUrlMap?: Record<string, string>;
   /** Custom response parser for list endpoints */
-  parseListResponse?: <T>(json: unknown, resource: string) => { data: T[]; total: number };
+  parseListResponse?: <TData extends BaseRecord = BaseRecord>(
+    json: unknown,
+    resource: string,
+  ) => GetListResult<TData>;
+  /** Ordered URL/query/envelope overrides; the first matching adapter wins */
+  resourceAdapters?: readonly ElysiaResourceAdapter[];
 }
 ```
 

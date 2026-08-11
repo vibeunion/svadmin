@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { captureAdminContext, useLogin, getAuthProvider } from '@svadmin/core';
+  import { captureAdminContext, useLogin } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { Button } from './ui/button/index.js';
   import { Input } from './ui/input/index.js';
@@ -36,7 +36,7 @@
 
   const adminContext = captureAdminContext();
   const login = useLogin({ errorMessage: false });
-  const authProvider = getAuthProvider();
+  const authProvider = $derived(adminContext.authProvider);
 
   function getInitialIdentifier() {
     return defaultIdentifier;
@@ -171,7 +171,7 @@
             <Label for="login-password" class="text-sm font-semibold text-foreground/80">
               {i18n.t('auth.password')}
             </Label>
-            {#if authProvider.forgotPassword}
+            {#if authProvider?.forgotPassword}
               <Button variant="link" class="text-xs h-auto p-0 font-medium hover:text-primary transition-colors" onclick={() => adminContext.navigate('/forgot-password')}>
                 {i18n.t('auth.forgotPasswordLink')}
               </Button>
@@ -217,7 +217,7 @@
         </div>
       {/if}
 
-      {#if authProvider.register}
+      {#if authProvider?.register}
         <div class="flex items-center justify-center gap-1.5 mt-8 pt-6 border-t border-border/60">
           <span class="text-sm text-muted-foreground">{i18n.t('auth.noAccount')}</span>
           <Button variant="link" class="text-sm h-auto p-0 font-semibold text-primary hover:underline" onclick={() => adminContext.navigate('/register')}>

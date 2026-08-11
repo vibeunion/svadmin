@@ -1,15 +1,17 @@
 <script lang="ts">
   import { useTranslation } from '@svadmin/core/i18n';
-  import { getAuthProvider, getResources } from '@svadmin/core';
+  import { captureAdminContext } from '@svadmin/core';
+  import type { AuthProvider } from '@svadmin/core';
   import PermissionMatrix from './PermissionMatrix.svelte';
   import type { RoleInfo, ResourceInfo, ActionInfo } from '../types.js';
   import { toast } from '@svadmin/core/toast';
   import { AlertCircle } from '@lucide/svelte';
 
   const i18n = useTranslation();
+  const adminContext = captureAdminContext();
 
-  const authProvider = getAuthProvider({ optional: true });
-  const rawResources = getResources();
+  const authProvider = $derived(adminContext.authProvider);
+  const rawResources = $derived(adminContext.resources);
 
   let roles = $state<RoleInfo[]>([]);
   let selectedRoleCode = $state<string>('');
@@ -21,6 +23,9 @@
   let loadingPermissions = $state(false);
   let saving = $state(false);
   let error = $state<string | null>(null);
+  let roleRequestEpoch = 0;
+  let permissionRequestEpoch = 0;
+  let mutationRequestEpoch = 0;
 
   // Convert system resources to MatrixResource format
   let matrixResources = $derived<ResourceInfo[]>(
@@ -37,36 +42,38 @@
     { code: 'delete', name: i18n.t('common.delete') ?? 'Delete' },
   ]);
 
-  async function loadRoles() {
-    if (!authProvider?.getRoles) {
+  async function loadRoles(scopedProvider: AuthProvider | null, epoch: number) {
+    if (!scopedProvider?.getRoles) {
+      if (epoch !== roleRequestEpoch) return;
       error = i18n.t('settings.rbacNotSupported') ?? 'RBAC not supported by AuthProvider';
       loadingRoles = false;
       return;
     }
     try {
-      const fetchedRoles = await authProvider.getRoles();
+      const fetchedRoles = await scopedProvider.getRoles();
+      if (epoch !== roleRequestEpoch) return;
       roles = fetchedRoles.map(r => ({ code: r.id, ...r }));
-      if (roles.length > 0 && !selectedRoleCode) {
-        selectedRoleCode = roles[0].code;
-      }
+      selectedRoleCode = roles[0]?.code ?? '';
     } catch (e) {
-      error = (e as Error).message;
+      if (epoch === roleRequestEpoch) error = (e as Error).message;
     } finally {
-      loadingRoles = false;
+      if (epoch === roleRequestEpoch) loadingRoles = false;
     }
   }
 
   async function loadPermissionsForRole(roleId: string) {
-    if (!authProvider?.getRolePermissions || permissionsCache[roleId]) return;
+    const scopedProvider = authProvider;
+    const epoch = permissionRequestEpoch;
+    if (!scopedProvider?.getRolePermissions || permissionsCache[roleId]) return;
     
     loadingPermissions = true;
     try {
-      const perms = await authProvider.getRolePermissions(roleId);
-      permissionsCache[roleId] = perms;
+      const perms = await scopedProvider.getRolePermissions(roleId);
+      if (epoch === permissionRequestEpoch) permissionsCache[roleId] = perms;
     } catch (e) {
-      toast.error((e as Error).message);
+      if (epoch === permissionRequestEpoch) toast.error((e as Error).message);
     } finally {
-      loadingPermissions = false;
+      if (epoch === permissionRequestEpoch) loadingPermissions = false;
     }
   }
 
@@ -78,7 +85,25 @@
   });
 
   $effect(() => {
-    loadRoles();
+    const scopedProvider = authProvider;
+    const epoch = ++roleRequestEpoch;
+    void adminContext.tenantCacheKey?.__svadminTenant;
+    permissionRequestEpoch += 1;
+    mutationRequestEpoch += 1;
+    roles = [];
+    selectedRoleCode = '';
+    permissionsCache = {};
+    error = null;
+    loadingRoles = true;
+    loadingPermissions = false;
+    saving = false;
+    void loadRoles(scopedProvider, epoch);
+
+    return () => {
+      roleRequestEpoch += 1;
+      permissionRequestEpoch += 1;
+      mutationRequestEpoch += 1;
+    };
   });
 
   // isGranted logic
@@ -89,7 +114,9 @@
   }
 
   async function handleToggle(roleCode: string, resourceCode: string, actionCode: string, grant: boolean) {
-    if (!authProvider?.updateRolePermissions) return;
+    const scopedProvider = authProvider;
+    if (!scopedProvider?.updateRolePermissions) return;
+    const mutationEpoch = ++mutationRequestEpoch;
     
     // Copy state
     const currentRolePerms = { ...(permissionsCache[roleCode] || {}) };
@@ -109,19 +136,21 @@
     saving = true;
     try {
       // Send the entire role's permissions back (as defined by our AuthProvider interface)
-      const result = await authProvider.updateRolePermissions(roleCode, currentRolePerms);
+      const result = await scopedProvider.updateRolePermissions(roleCode, currentRolePerms);
+      if (mutationEpoch !== mutationRequestEpoch) return;
       if (result.success) {
         // Success silently
       } else {
          throw new Error(result.error?.message ?? i18n.t('common.operationFailed'));
       }
     } catch (e) {
+      if (mutationEpoch !== mutationRequestEpoch) return;
       toast.error((e as Error).message);
       // Rollback on fail
       delete permissionsCache[roleCode]; // eslint-disable-line @typescript-eslint/no-dynamic-delete
-      loadPermissionsForRole(roleCode);
+      void loadPermissionsForRole(roleCode);
     } finally {
-      saving = false;
+      if (mutationEpoch === mutationRequestEpoch) saving = false;
     }
   }
 </script>

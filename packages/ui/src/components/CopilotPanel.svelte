@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getChatProvider, getChatContext } from '@svadmin/core';
+  import { captureAdminContext, useParsed, type ChatProvider } from '@svadmin/core';
   import { Sparkles, X, Check, RefreshCcw } from '@lucide/svelte';
   import { slide } from 'svelte/transition';
   import { Button } from './ui/button/index.js';
@@ -8,60 +8,101 @@
 
   let { open = $bindable(false) } = $props<{ open?: boolean }>();
 
-  const provider = $derived(getChatProvider());
-  const ctx = $derived(getChatContext());
+  const adminContext = captureAdminContext();
+  const provider = $derived(adminContext.chatProvider);
+  const parsed = useParsed();
+  const ctx = $derived({
+    currentResource: parsed.resource,
+    selectedRecordId: parsed.id,
+    currentView: parsed.action,
+  });
 
   let isPredicting = $state(false);
   let insightText = $state('');
   let abortController: AbortController | null = null;
-  let hasFetchedForContext = $state('');
+  let requestEpoch = 0;
 
-  // Automatically request insights when the context changes
   $effect(() => {
-    if (!open || !provider) return;
-    
-    // Create a context hash to avoid refetching for the same page
-    const currentHash = `${ctx.currentResource}-${ctx.currentView}-${ctx.selectedRecordId}`;
-    if (hasFetchedForContext === currentHash) return;
-    
-    hasFetchedForContext = currentHash;
-    getInsights();
+    const scopedProvider = provider;
+    const scopedContext = {
+      currentResource: ctx.currentResource,
+      selectedRecordId: ctx.selectedRecordId,
+      currentView: ctx.currentView,
+    };
+    const shouldFetch = open;
+    void adminContext.tenantCacheKey?.__svadminTenant;
+
+    clearCopilotScope();
+    if (shouldFetch && scopedProvider) {
+      void requestInsights(scopedProvider, scopedContext);
+    }
+
+    return cancelCopilotRequest;
   });
 
   async function getInsights() {
-    if (!provider) return;
-    
+    const scopedProvider = provider;
+    if (!scopedProvider) return;
+    await requestInsights(scopedProvider, {
+      currentResource: ctx.currentResource,
+      selectedRecordId: ctx.selectedRecordId,
+      currentView: ctx.currentView,
+    });
+  }
+
+  function cancelCopilotRequest() {
+    requestEpoch += 1;
+    abortController?.abort();
+    abortController = null;
+  }
+
+  function clearCopilotScope() {
+    cancelCopilotRequest();
+    isPredicting = false;
+    insightText = '';
+  }
+
+  async function requestInsights(
+    scopedProvider: ChatProvider,
+    scopedContext: typeof ctx,
+  ) {
+    cancelCopilotRequest();
+    const epoch = requestEpoch;
+    const controller = new AbortController();
+    abortController = controller;
     isPredicting = true;
     insightText = '';
-    
-    if (abortController) abortController.abort();
-    abortController = new AbortController();
 
     const prompt = `Analyze the current context and provide 3 quick insights or context-aware suggestions for the admin user.
-Resource: ${ctx.currentResource}
-View: ${ctx.currentView}
-Record ID: ${ctx.selectedRecordId || 'None'}
+Resource: ${scopedContext.currentResource}
+View: ${scopedContext.currentView}
+Record ID: ${scopedContext.selectedRecordId || 'None'}
 Keep it concise, professional, and use bullet points.`;
 
     try {
-      const result = provider.sendMessage(
+      const result = scopedProvider.sendMessage(
         [{ id: 'insights', role: 'system', content: prompt, timestamp: Date.now() }],
-        { signal: abortController.signal }
+        { signal: controller.signal }
       );
 
       if (Symbol.asyncIterator in result) {
         for await (const chunk of result as AsyncIterable<string>) {
+          if (epoch !== requestEpoch) return;
           insightText += chunk;
         }
       } else {
-        insightText = await result;
+        const response = await result;
+        if (epoch === requestEpoch) insightText = response;
       }
     } catch (err: unknown) {
-      if (err instanceof Error && err.name !== 'AbortError') {
+      if (epoch === requestEpoch && err instanceof Error && err.name !== 'AbortError') {
         insightText = 'Failed to generate insights for this context.';
       }
     } finally {
-      isPredicting = false;
+      if (epoch === requestEpoch) {
+        isPredicting = false;
+        if (abortController === controller) abortController = null;
+      }
     }
   }
 </script>

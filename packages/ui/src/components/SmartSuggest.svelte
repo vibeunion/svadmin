@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Input } from './ui/input/index.js';
+  import { captureAdminContext } from '@svadmin/core';
   import type { ChatProvider } from '@svadmin/core';
 
   interface Props {
@@ -29,11 +30,14 @@
     name, 
     type = 'text' 
   }: Props = $props();
+  const adminContext = captureAdminContext();
 
   let suggestion = $state('');
   let isPredicting = $state(false);
   let abortController: AbortController | null = null;
   let predictTimer: ReturnType<typeof setTimeout> | null = null;
+  let requestEpoch = 0;
+  let observedValue = value;
 
   // The ghost text shows the suggestion, but only the part *after* what the user has typed
   // It only displays if the suggestion actually starts with the current value
@@ -49,66 +53,102 @@
     return '';
   });
 
-  import { getChatProvider } from '@svadmin/core';
-
   const suffixText = $derived(ghostText ? ghostText.slice(value.length) : '');
+  const resolvedProvider = $derived(provider ?? adminContext.chatProvider);
 
-  const resolvedProvider = $derived(provider ?? (() => {
-    try {
-      return getChatProvider();
-    } catch {
-      return null;
+  $effect(() => {
+    void resolvedProvider;
+    void context;
+    void adminContext.tenantCacheKey?.__svadminTenant;
+    clearSuggestionScope();
+
+    return cancelPrediction;
+  });
+
+  $effect(() => {
+    const currentValue = value;
+    if (currentValue !== observedValue) {
+      observedValue = currentValue;
+      clearSuggestionScope();
     }
-  })());
+  });
+
+  function cancelPrediction() {
+    requestEpoch += 1;
+    abortController?.abort();
+    abortController = null;
+    if (predictTimer) clearTimeout(predictTimer);
+    predictTimer = null;
+    isPredicting = false;
+  }
+
+  function clearSuggestionScope() {
+    cancelPrediction();
+    suggestion = '';
+  }
+
+  function isCurrentPrediction(epoch: number, scopedValue: string) {
+    return epoch === requestEpoch && value === scopedValue;
+  }
 
   async function predict() {
-    if (!resolvedProvider || !value.trim()) {
+    predictTimer = null;
+    const scopedProvider = resolvedProvider;
+    const scopedValue = value;
+    const scopedContext = context;
+    if (!scopedProvider || !scopedValue.trim()) {
       suggestion = '';
       return;
     }
 
+    cancelPrediction();
+    const epoch = requestEpoch;
+    const controller = new AbortController();
+    abortController = controller;
     isPredicting = true;
-    if (abortController) {
-      abortController.abort();
-    }
-    abortController = new AbortController();
+    suggestion = '';
 
     try {
-      const prompt = `You are an autocomplete engine. The user is typing: "${value}". 
-Context: ${context}.
+      const prompt = `You are an autocomplete engine. The user is typing: "${scopedValue}".
+Context: ${scopedContext}.
 Provide ONLY the most likely completion of the exact phrase the user is typing. 
 Include the user's input in your returned string. 
 Do not include any other text, Markdown formatting, quotes, or explanations.`;
 
-      const result = resolvedProvider.sendMessage(
+      const result = scopedProvider.sendMessage(
         [{ id: 'prompt', role: 'user', content: prompt, timestamp: Date.now() }],
-        { signal: abortController.signal }
+        { signal: controller.signal }
       );
 
-      suggestion = '';
-      
-      // Handle streaming or Promise responses seamlessly
       if (Symbol.asyncIterator in result) {
         for await (const chunk of result as AsyncIterable<string>) {
+          if (!isCurrentPrediction(epoch, scopedValue)) return;
           suggestion += chunk;
         }
       } else {
-        suggestion = await result;
+        const response = await result;
+        if (isCurrentPrediction(epoch, scopedValue)) suggestion = response;
       }
-      
-      // Clean up the suggestion
-      suggestion = suggestion.trim().replace(/^["']|["']$/g, '');
+
+      if (isCurrentPrediction(epoch, scopedValue)) {
+        suggestion = suggestion.trim().replace(/^["']|["']$/g, '');
+      }
     } catch (err: unknown) {
-      if (err instanceof Error && err.name !== 'AbortError') {
+      if (isCurrentPrediction(epoch, scopedValue) && err instanceof Error && err.name !== 'AbortError') {
         suggestion = '';
       }
     } finally {
-      isPredicting = false;
+      if (isCurrentPrediction(epoch, scopedValue)) {
+        isPredicting = false;
+        if (abortController === controller) abortController = null;
+      }
     }
   }
 
   function handleInput(e: Event) {
     const target = e.target as HTMLInputElement;
+    cancelPrediction();
+    observedValue = target.value;
     value = target.value;
 
     // Reset suggestion immediately if it no longer matches
@@ -116,19 +156,18 @@ Do not include any other text, Markdown formatting, quotes, or explanations.`;
       suggestion = '';
     }
 
-    if (predictTimer) clearTimeout(predictTimer);
-    
-    // Debounce prediction
     predictTimer = setTimeout(() => {
-      predict();
+      void predict();
     }, 500);
   }
 
   function handleKeyDown(e: KeyboardEvent) {
     if (e.key === 'Tab' && suffixText) {
-      e.preventDefault(); // Prevent standard tab navigation
+      e.preventDefault();
+      cancelPrediction();
+      observedValue = ghostText;
       value = ghostText;
-      suggestion = ''; // Clear suggestion once accepted
+      suggestion = '';
     }
   }
 

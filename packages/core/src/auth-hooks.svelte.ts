@@ -4,7 +4,7 @@
 
 import { captureAdminContext } from './context.svelte';
 import type { AdminContextAccessor } from './context.svelte';
-import { notify } from './notification.svelte';
+import { notifyWithProvider } from './notification.svelte';
 import { t, useTranslation } from './i18n.svelte';
 import type { AuthActionResult, CheckResult, Identity, AuthProvider } from './types';
 import { useQueryClient } from '@tanstack/svelte-query';
@@ -26,31 +26,70 @@ function createAuthMutation(options: CreateAuthMutationOptions) {
   const adminContext = captureAdminContext();
   const i18n = useTranslation();
   let isLoading = $state(false);
+  let mutationEpoch = 0;
+
+  const activeTenantIdentity = () => adminContext.tenantCacheKey?.__svadminTenant;
+  let observedProvider = adminContext.authProvider;
+  let observedTenantIdentity = activeTenantIdentity();
+
+  function isActiveMutation(
+    epoch: number,
+    provider: AuthProvider,
+    tenantIdentity: string | number | undefined,
+  ): boolean {
+    return epoch === mutationEpoch
+      && provider === adminContext.authProvider
+      && tenantIdentity === activeTenantIdentity();
+  }
 
   async function mutate(params?: Record<string, unknown>): Promise<AuthActionResult> {
     const provider = adminContext.authProvider;
     if (!provider) throw new Error('AuthProvider not configured');
     const fn = provider[options.method] as ((params?: Record<string, unknown>) => Promise<AuthActionResult>) | undefined;
     if (!fn) throw new Error(`AuthProvider.${options.method} not implemented`);
-    
+
+    const epoch = ++mutationEpoch;
+    const tenantIdentity = activeTenantIdentity();
+    const notificationProvider = adminContext.notificationProvider;
+    const sendNotification = (notification: Parameters<typeof notifyWithProvider>[0]) =>
+      notifyWithProvider(notification, notificationProvider);
     isLoading = true;
     try {
       const result = await fn.call(provider, params);
+      if (!isActiveMutation(epoch, provider, tenantIdentity)) return result;
       if (result.success) {
-        if (options.successMessage) notify({ type: 'success', message: options.successMessage });
+        if (options.successMessage) sendNotification({ type: 'success', message: options.successMessage });
         if (options.onSuccess) await options.onSuccess(result, adminContext);
       } else {
         const msg = result.error?.message ?? (typeof options.errorMessage === 'string' ? options.errorMessage : i18n.t('common.operationFailed'));
-        if (options.errorMessage !== false) notify({ type: 'error', message: msg });
+        if (options.errorMessage !== false) sendNotification({ type: 'error', message: msg });
       }
       return result;
     } catch (err) {
       const msg = err instanceof Error ? err.message : (typeof options.errorMessage === 'string' ? options.errorMessage : i18n.t('common.operationFailed'));
-      if (options.errorMessage !== false) notify({ type: 'error', message: msg });
+      if (isActiveMutation(epoch, provider, tenantIdentity) && options.errorMessage !== false) {
+        sendNotification({ type: 'error', message: msg });
+      }
       return { success: false, error: { message: msg } };
     } finally {
-      isLoading = false;
+      if (isActiveMutation(epoch, provider, tenantIdentity)) isLoading = false;
     }
+  }
+
+  if (typeof window !== 'undefined') {
+    $effect(() => {
+      const provider = adminContext.authProvider;
+      const tenantIdentity = activeTenantIdentity();
+      if (provider !== observedProvider || tenantIdentity !== observedTenantIdentity) {
+        observedProvider = provider;
+        observedTenantIdentity = tenantIdentity;
+        mutationEpoch++;
+        isLoading = false;
+      }
+      return () => {
+        mutationEpoch++;
+      };
+    });
   }
 
   return {
@@ -152,26 +191,57 @@ export function useGetIdentity() {
   let data = $state<Identity | null>(null);
   let isLoading = $state(true);
   let error = $state<Error | null>(null);
+  let requestEpoch = 0;
+  let observedLogoutVersion = _logoutVersion;
 
-  function fetch() {
-    const provider = adminContext.authProvider;
-    if (!provider) { isLoading = false; return; }
+  function requestIdentity(provider: AuthProvider | null): void {
+    const epoch = ++requestEpoch;
+    error = null;
+    if (!provider) {
+      data = null;
+      isLoading = false;
+      return;
+    }
     isLoading = true;
     provider.getIdentity().then(identity => {
+      if (epoch !== requestEpoch) return;
       data = identity;
       isLoading = false;
     }).catch(err => {
+      if (epoch !== requestEpoch) return;
       error = err instanceof Error ? err : new Error(String(err));
       isLoading = false;
       console.warn('[svadmin] useGetIdentity failed:', err);
     });
   }
 
+  function refetchIdentity(): void {
+    requestIdentity(adminContext.authProvider);
+  }
+
+  function loadScopedIdentity(provider: AuthProvider | null): void {
+    data = null;
+    requestIdentity(provider);
+  }
+
   if (typeof window !== 'undefined') {
-    fetch();
     $effect(() => {
-      void _logoutVersion;
-      data = null;
+      const provider = adminContext.authProvider;
+      void adminContext.tenantCacheKey?.__svadminTenant;
+      const logoutVersion = _logoutVersion;
+      if (logoutVersion !== observedLogoutVersion) {
+        observedLogoutVersion = logoutVersion;
+        requestEpoch++;
+        data = null;
+        error = null;
+        isLoading = false;
+        return;
+      }
+
+      loadScopedIdentity(provider);
+      return () => {
+        requestEpoch++;
+      };
     });
   }
 
@@ -179,7 +249,7 @@ export function useGetIdentity() {
     get data() { return data; },
     get isLoading() { return isLoading; },
     get error() { return error; },
-    refetch: fetch,
+    refetch: refetchIdentity,
   };
 }
 

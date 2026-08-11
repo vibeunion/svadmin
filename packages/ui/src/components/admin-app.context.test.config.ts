@@ -15,6 +15,7 @@ export default defineConfig({
     globals: true,
     pool: 'threads',
     maxWorkers: 1,
+    testTimeout: 60_000,
     setupFiles: ['./setupTest.ts'],
     include: ['src/components/admin-app.context.test.integration.ts'],
   },

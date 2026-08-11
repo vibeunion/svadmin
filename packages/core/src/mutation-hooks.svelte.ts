@@ -2,9 +2,10 @@
 import { createMutation, useQueryClient } from '@tanstack/svelte-query';
 import { getAdminOptions } from './options.svelte';
 import { captureAdminContext } from './context.svelte';
+import { queryKeyMatchesTenant } from './provider-bundle';
 import type { AdminContextAccessor } from './context.svelte';
 import { useParsed } from './useParsed.svelte';
-import { audit } from './audit';
+import { auditWithProvider } from './audit';
 import { UndoError } from './types';
 import type { BaseRecord, HttpError, KnownResources } from './types';
 import { checkError, createOvertimeTracker, fireSuccessNotification, fireErrorNotification } from './hook-utils.svelte';
@@ -44,13 +45,14 @@ export function invalidateByScopes(
   scopes: string[] | false | undefined,
   defaults: string[],
   id?: string | number,
-  dataProviderName?: string
+  dataProviderName?: string,
+  queryMatches: (queryKey: readonly unknown[]) => boolean = () => true,
 ): void {
   if (scopes === false) return;
   const effectiveScopes = (scopes && scopes.length > 0) ? scopes : defaults;
   const dpMatch = dataProviderName === undefined
-    ? () => true
-    : (q: { queryKey: readonly unknown[] }) => q.queryKey[0] === dataProviderName;
+    ? (q: { queryKey: readonly unknown[] }) => queryMatches(q.queryKey)
+    : (q: { queryKey: readonly unknown[] }) => queryMatches(q.queryKey) && q.queryKey[0] === dataProviderName;
   for (const scope of effectiveScopes) {
     if (scope === 'list') queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === resource && (q.queryKey[2] === 'list' || q.queryKey[2] === 'infiniteList' || q.queryKey[2] === 'select' || q.queryKey[2] === 'select-defaults') });
     else if (scope === 'many') queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === resource && q.queryKey[2] === 'many' });
@@ -133,21 +135,50 @@ export function useCreate<TData extends BaseRecord = BaseRecord, TError = HttpEr
     onMutate: options.mutationOptions?.onMutate,
     onSuccess: (data, params, context) => {
       const resName = params.resource ?? defaultResource;
-      fireSuccessNotification(params.successNotification, 'Created successfully', data.data, params.variables, resName);
+      fireSuccessNotification({
+        config: params.successNotification,
+        defaultMessage: 'Created successfully',
+        data: data.data,
+        values: params.variables,
+        resource: resName,
+        provider: adminContext.notificationProvider,
+      });
       const res = adminContext.getResource(resName);
       const pk = res.primaryKey ?? 'id';
       const newId = (data.data as Record<string, unknown>)[pk];
-      audit({ action: 'create', resource: resName, recordId: String(newId) });
+      auditWithProvider(
+        {
+          action: 'create',
+          resource: resName,
+          recordId: String(newId),
+          meta: adminContext.getProviderMeta(resName),
+        },
+        adminContext.auditLogProvider,
+      );
       publishLiveEvent(resName, 'created', newId != null ? [newId as string | number] : undefined, adminContext);
       // Invalidation in onSuccess for create (refine pattern — no optimistic data to reconcile on error)
-      invalidateByScopes(queryClient, resName, params.invalidates, ['list', 'many'], undefined, params.dataProviderName);
+      invalidateByScopes(
+        queryClient,
+        resName,
+        params.invalidates,
+        ['list', 'many'],
+        undefined,
+        params.dataProviderName,
+        (queryKey) => queryKeyMatchesTenant(queryKey, adminContext.tenantCacheKey),
+      );
       if (typeof options.mutationOptions?.onSuccess === 'function') {
         (options.mutationOptions.onSuccess as (...a: unknown[]) => unknown)(data, params, context);
       }
     },
     onError: (error, params, context) => {
       checkError(error, adminContext);
-      fireErrorNotification(params.errorNotification, 'Create failed', error, params.resource ?? defaultResource);
+      fireErrorNotification({
+        config: params.errorNotification,
+        defaultMessage: 'Create failed',
+        error,
+        resource: params.resource ?? defaultResource,
+        provider: adminContext.notificationProvider,
+      });
       if (typeof options.mutationOptions?.onError === 'function') {
         (options.mutationOptions.onError as (...a: unknown[]) => unknown)(error, params, context);
       }
@@ -233,7 +264,8 @@ export function useUpdate<TData extends BaseRecord = BaseRecord, TError = HttpEr
       const resName = params.resource ?? defaultResource;
       const targetId = params.id ?? defaultId;
       const dpN = params.dataProviderName;
-      const dp = (q: { queryKey: readonly unknown[] }) => q.queryKey[0] === dpN;
+      const dp = (q: { queryKey: readonly unknown[] }) =>
+        queryKeyMatchesTenant(q.queryKey, adminContext.tenantCacheKey) && q.queryKey[0] === dpN;
       
       await queryClient.cancelQueries({ predicate: (q) => dp(q) && q.queryKey[1] === resName });
 
@@ -275,8 +307,23 @@ export function useUpdate<TData extends BaseRecord = BaseRecord, TError = HttpEr
       const extractedCtx = (context as MutationContext)?._svadmin_ctx ? (context as MutationContext).userContext : context;
       const resName = params.resource ?? defaultResource;
       const targetId = params.id ?? defaultId;
-      fireSuccessNotification(params.successNotification, 'Updated successfully', data.data, params.variables, resName);
-      audit({ action: 'update', resource: resName, recordId: String(targetId) });
+      fireSuccessNotification({
+        config: params.successNotification,
+        defaultMessage: 'Updated successfully',
+        data: data.data,
+        values: params.variables,
+        resource: resName,
+        provider: adminContext.notificationProvider,
+      });
+      auditWithProvider(
+        {
+          action: 'update',
+          resource: resName,
+          recordId: String(targetId),
+          meta: adminContext.getProviderMeta(resName),
+        },
+        adminContext.auditLogProvider,
+      );
       publishLiveEvent(resName, 'updated', targetId != null ? [targetId] : undefined, adminContext);
       if (typeof options.mutationOptions?.onSuccess === 'function') {
         (options.mutationOptions.onSuccess as (...a: unknown[]) => unknown)(data, params, extractedCtx);
@@ -286,7 +333,15 @@ export function useUpdate<TData extends BaseRecord = BaseRecord, TError = HttpEr
       if (error instanceof UndoError) return;
       const resName = params.resource ?? defaultResource;
       const targetId = params.id ?? defaultId;
-      invalidateByScopes(queryClient, resName, params.invalidates, ['list', 'many', 'detail'], targetId != null ? targetId : undefined, params.dataProviderName);
+      invalidateByScopes(
+        queryClient,
+        resName,
+        params.invalidates,
+        ['list', 'many', 'detail'],
+        targetId != null ? targetId : undefined,
+        params.dataProviderName,
+        (queryKey) => queryKeyMatchesTenant(queryKey, adminContext.tenantCacheKey),
+      );
       if (typeof options.mutationOptions?.onSettled === 'function') {
         (options.mutationOptions.onSettled as (...a: unknown[]) => unknown)(_data, error, params, undefined);
       }
@@ -301,7 +356,13 @@ export function useUpdate<TData extends BaseRecord = BaseRecord, TError = HttpEr
       if (error instanceof UndoError) return;
       checkError(error, adminContext);
       const extractedCtx = ctx?._svadmin_ctx ? ctx.userContext : context;
-      fireErrorNotification(params.errorNotification, 'Update failed', error, params.resource ?? defaultResource);
+      fireErrorNotification({
+        config: params.errorNotification,
+        defaultMessage: 'Update failed',
+        error,
+        resource: params.resource ?? defaultResource,
+        provider: adminContext.notificationProvider,
+      });
       if (typeof options.mutationOptions?.onError === 'function') {
         (options.mutationOptions.onError as (...a: unknown[]) => unknown)(error, params, extractedCtx);
       }
@@ -382,7 +443,8 @@ export function useDelete<TData extends BaseRecord = BaseRecord, TError = HttpEr
       const resName = params.resource ?? defaultResource;
       const targetId = params.id ?? defaultId;
       const dpN = params.dataProviderName;
-      const dp = (q: { queryKey: readonly unknown[] }) => q.queryKey[0] === dpN;
+      const dp = (q: { queryKey: readonly unknown[] }) =>
+        queryKeyMatchesTenant(q.queryKey, adminContext.tenantCacheKey) && q.queryKey[0] === dpN;
       
       await queryClient.cancelQueries({ predicate: (q) => dp(q) && q.queryKey[1] === resName });
 
@@ -414,11 +476,32 @@ export function useDelete<TData extends BaseRecord = BaseRecord, TError = HttpEr
 
       // Remove detail cache entry (refine pattern — no stale show page)
       if (targetId != null) {
-        queryClient.removeQueries({ predicate: (q) => q.queryKey[0] === params.dataProviderName && q.queryKey[1] === resName && q.queryKey[2] === 'one' && q.queryKey[3] === targetId });
+        queryClient.removeQueries({
+          predicate: (q) => queryKeyMatchesTenant(q.queryKey, adminContext.tenantCacheKey)
+            && q.queryKey[0] === params.dataProviderName
+            && q.queryKey[1] === resName
+            && q.queryKey[2] === 'one'
+            && q.queryKey[3] === targetId,
+        });
       }
 
-      fireSuccessNotification(params.successNotification, 'Deleted successfully', data.data, params.variables, resName);
-      audit({ action: 'delete', resource: resName, recordId: String(targetId) });
+      fireSuccessNotification({
+        config: params.successNotification,
+        defaultMessage: 'Deleted successfully',
+        data: data.data,
+        values: params.variables,
+        resource: resName,
+        provider: adminContext.notificationProvider,
+      });
+      auditWithProvider(
+        {
+          action: 'delete',
+          resource: resName,
+          recordId: String(targetId),
+          meta: adminContext.getProviderMeta(resName),
+        },
+        adminContext.auditLogProvider,
+      );
       publishLiveEvent(resName, 'deleted', targetId != null ? [targetId] : undefined, adminContext);
       if (typeof options.mutationOptions?.onSuccess === 'function') {
         (options.mutationOptions.onSuccess as (...a: unknown[]) => unknown)(data, params, extractedCtx);
@@ -428,7 +511,15 @@ export function useDelete<TData extends BaseRecord = BaseRecord, TError = HttpEr
       if (error instanceof UndoError) return;
       const resName = params.resource ?? defaultResource;
       const targetId = params.id ?? defaultId;
-      invalidateByScopes(queryClient, resName, params.invalidates, ['list', 'many'], targetId != null ? targetId : undefined, params.dataProviderName);
+      invalidateByScopes(
+        queryClient,
+        resName,
+        params.invalidates,
+        ['list', 'many'],
+        targetId != null ? targetId : undefined,
+        params.dataProviderName,
+        (queryKey) => queryKeyMatchesTenant(queryKey, adminContext.tenantCacheKey),
+      );
       if (typeof options.mutationOptions?.onSettled === 'function') {
         (options.mutationOptions.onSettled as (...a: unknown[]) => unknown)(_data, error, params, undefined);
       }
@@ -443,7 +534,13 @@ export function useDelete<TData extends BaseRecord = BaseRecord, TError = HttpEr
       if (error instanceof UndoError) return;
       checkError(error, adminContext);
       const extractedCtx = ctx?._svadmin_ctx ? ctx.userContext : context;
-      fireErrorNotification(params.errorNotification, 'Delete failed', error, params.resource ?? defaultResource);
+      fireErrorNotification({
+        config: params.errorNotification,
+        defaultMessage: 'Delete failed',
+        error,
+        resource: params.resource ?? defaultResource,
+        provider: adminContext.notificationProvider,
+      });
       if (typeof options.mutationOptions?.onError === 'function') {
         (options.mutationOptions.onError as (...a: unknown[]) => unknown)(error, params, extractedCtx);
       }

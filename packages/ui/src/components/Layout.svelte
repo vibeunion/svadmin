@@ -10,7 +10,7 @@
   import DevTools from './DevTools.svelte';
   import { useTranslation } from '@svadmin/core/i18n';
 
-  import { captureAdminContext, getAuthProvider, getTaskProvider } from '@svadmin/core';
+  import { captureAdminContext } from '@svadmin/core';
   import type { Identity, MenuItem, TaskProvider, TaskRecord } from '@svadmin/core';
   import { getPath } from '../router-state.svelte.js';
   import { Skeleton } from './ui/skeleton/index.js';
@@ -26,24 +26,26 @@
   let mobileMenuOpen = $state(false);
 
   let { children, title = 'Admin', menu, siteUrl, routeMode = 'auto' }: { children: Snippet; title?: string; menu?: MenuItem[]; siteUrl?: string; routeMode?: 'hash' | 'path' | 'auto' } = $props();
+  const layoutId = $props.id();
+  const layoutScope = `svadmin-layout-${layoutId}`;
+  const chatScope = `${layoutScope}-chat`;
   const adminContext = captureAdminContext();
 
-  let auth: ReturnType<typeof getAuthProvider> | null = null;
-  try {
-    auth = getAuthProvider();
-  } catch { /* Auth is optional for public layouts. */ }
+  const auth = $derived(adminContext.authProvider);
   let loading = $state(true);
   let identity = $state<Identity | null>(null);
-  const taskProvider = getTaskProvider({ optional: true }) as TaskProvider<TaskRecord> | undefined;
+  const taskProvider = $derived(adminContext.taskProvider as TaskProvider<TaskRecord> | undefined);
   const TaskQueueComponent = getComponentRegistry()?.TaskQueueDrawer;
 
   $effect(() => {
+    const scopedAuth = auth;
     let cancelled = false;
-    if (!auth) {
-      if (!cancelled) loading = false;
-      return;
-    }
-    auth.getIdentity().then(id => {
+
+    identity = null;
+    loading = Boolean(scopedAuth);
+    if (!scopedAuth) return;
+
+    scopedAuth.getIdentity().then(id => {
       if (!cancelled) {
         identity = id;
         loading = false;
@@ -72,7 +74,29 @@
   let touchStartX = $state(0);
   let touchEndX = $state(0);
 
+  function ownsLayoutEvent(event: Event): boolean {
+    const target = event.target instanceof HTMLElement ? event.target : document.activeElement as HTMLElement | null;
+    const owner = target
+      ?.closest<HTMLElement>('[data-svadmin-layout-scope]')
+      ?.dataset.svadminLayoutScope;
+    if (owner) return owner === layoutScope;
+    return document.querySelectorAll('[data-svadmin-layout-scope]').length === 1;
+  }
+
+  function handleGlobalKeydown(e: KeyboardEvent) {
+    if (!ownsLayoutEvent(e)) return;
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      commandOpen = true;
+    }
+    if (e.key === '?' && !['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
+      e.preventDefault();
+      shortcutsOpen = true;
+    }
+  }
+
   function handleTouchStart(e: TouchEvent) {
+    if (!ownsLayoutEvent(e)) return;
     if (e.touches.length === 1) {
       touchStartX = e.touches[0].clientX;
       touchEndX = e.touches[0].clientX;
@@ -80,12 +104,14 @@
   }
 
   function handleTouchMove(e: TouchEvent) {
+    if (!ownsLayoutEvent(e)) return;
     if (e.touches.length === 1) {
       touchEndX = e.touches[0].clientX;
     }
   }
 
-  function handleTouchEnd() {
+  function handleTouchEnd(e: TouchEvent) {
+    if (!ownsLayoutEvent(e)) return;
     // Only trigger swipe-to-open if starting near the left edge (e.g., within 30px)
     // and swiping right by at least 50px
     if (touchStartX < 30 && touchEndX - touchStartX > 50) {
@@ -95,16 +121,13 @@
 </script>
 
 <svelte:window 
-  onkeydown={(e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); commandOpen = true; }
-    if (e.key === '?' && !['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) { e.preventDefault(); shortcutsOpen = true; }
-  }}
+  onkeydown={handleGlobalKeydown}
   ontouchstart={handleTouchStart}
   ontouchmove={handleTouchMove}
   ontouchend={handleTouchEnd}
 />
 {#if loading}
-  <div class="flex h-screen" in:fade={{ duration: 150 }}>
+  <div data-svadmin-layout-scope={layoutScope} class="flex h-screen" in:fade={{ duration: 150 }}>
     <div class="hidden md:block w-[252px] bg-sidebar/80 p-4 space-y-4">
       <Skeleton class="h-8 w-32" />
       <div class="space-y-2 mt-6">
@@ -126,7 +149,7 @@
     <DevTools docked />
   </div>
 {:else}
-  <div class="flex h-screen bg-background" in:fade={{ duration: 200, delay: 50 }}>
+  <div data-svadmin-layout-scope={layoutScope} class="flex h-screen bg-background" in:fade={{ duration: 200, delay: 50 }}>
     <!-- Desktop sidebar -->
     <div class="hidden md:block">
       <Sidebar {collapsed} {identity} {title} {menu} {routeMode} onToggle={() => collapsed = !collapsed} onLogout={handleLogout} />
@@ -190,7 +213,7 @@
 
       <footer class="flex min-h-14 shrink-0 items-center justify-end gap-2 border-t border-border/60 bg-background px-4 empty:hidden">
         <DevTools docked />
-        <ChatDialog docked />
+        <ChatDialog docked scope={chatScope} ownerScope={layoutScope} />
       </footer>
     </div>
   </div>
@@ -198,7 +221,9 @@
     bind:open={commandOpen} 
     onAskAI={(q) => {
       if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('svadmin:ask-ai', { detail: q }));
+        window.dispatchEvent(new CustomEvent('svadmin:ask-ai', {
+          detail: { query: q, scope: chatScope },
+        }));
       }
     }}
   />
