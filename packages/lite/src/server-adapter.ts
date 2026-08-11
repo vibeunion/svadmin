@@ -62,10 +62,15 @@ function listRequestState(url: URL, resource: ResourceDefinition): ListRequestSt
 
 function listSearchFilters(resource: ResourceDefinition, search?: string): Filter[] {
   if (!search) return [];
-  const searchableField = resource.fields.find((field) => field.searchable);
-  return searchableField
-    ? [{ field: searchableField.key, operator: 'contains', value: search }]
-    : [];
+  const fieldFilters: Filter[] = resource.fields
+    .filter((field) => field.searchable)
+    .map((field) => ({
+      field: field.key,
+      operator: 'contains',
+      value: search,
+    }));
+  if (fieldFilters.length === 1) return fieldFilters;
+  return fieldFilters.length > 1 ? [{ operator: 'or', value: fieldFilters }] : [];
 }
 
 /**

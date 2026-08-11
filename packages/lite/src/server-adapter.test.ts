@@ -33,7 +33,7 @@ const resource: ResourceDefinition = {
 };
 
 describe('createListLoader search compatibility', () => {
-  test('uses one portable field filter when multiple fields are searchable', async () => {
+  test('searches every searchable field with one logical OR filter', async () => {
     const getList = mock(async () => ({ data: [], total: 0 }));
     const provider = { getList } as unknown as DataProvider;
     const searchableResource: ResourceDefinition = {
@@ -54,7 +54,13 @@ describe('createListLoader search compatibility', () => {
       resource: 'posts',
       pagination: { current: 1, pageSize: 10 },
       sorters: [],
-      filters: [{ field: 'title', operator: 'contains', value: 'release' }],
+      filters: [{
+        operator: 'or',
+        value: [
+          { field: 'title', operator: 'contains', value: 'release' },
+          { field: 'summary', operator: 'contains', value: 'release' },
+        ],
+      }],
     });
   });
 

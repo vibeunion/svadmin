@@ -301,7 +301,7 @@
         "vitest": "^4.1.10",
       },
       "peerDependencies": {
-        "@svadmin/core": "workspace:*",
+        "@svadmin/core": "^0.34.2",
         "@sveltejs/kit": "^2.70.2",
         "svelte": "^5.56.8",
       },
