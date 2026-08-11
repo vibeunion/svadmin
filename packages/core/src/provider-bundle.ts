@@ -159,25 +159,30 @@ export function withProviderMeta(provider: DataProvider, resolveMeta: ProviderMe
     getApiUrl: () => provider.getApiUrl(),
   };
 
-  if (provider.getMany) {
+  const getMany = provider.getMany?.bind(provider);
+  if (getMany) {
     adapted.getMany = <TData extends BaseRecord = BaseRecord>(params: GetManyParams): Promise<GetManyResult<TData>> =>
-      provider.getMany!<TData>({ ...params, meta: resolveMeta(params) });
+      getMany<TData>({ ...params, meta: resolveMeta(params) });
   }
-  if (provider.createMany) {
+  const createMany = provider.createMany?.bind(provider);
+  if (createMany) {
     adapted.createMany = <TData extends BaseRecord = BaseRecord, TVariables = unknown>(params: CreateManyParams<TVariables>): Promise<CreateManyResult<TData>> =>
-      provider.createMany!<TData, TVariables>({ ...params, meta: resolveMeta(params) });
+      createMany<TData, TVariables>({ ...params, meta: resolveMeta(params) });
   }
-  if (provider.updateMany) {
+  const updateMany = provider.updateMany?.bind(provider);
+  if (updateMany) {
     adapted.updateMany = <TData extends BaseRecord = BaseRecord, TVariables = unknown>(params: UpdateManyParams<TVariables>): Promise<UpdateManyResult<TData>> =>
-      provider.updateMany!<TData, TVariables>({ ...params, meta: resolveMeta(params) });
+      updateMany<TData, TVariables>({ ...params, meta: resolveMeta(params) });
   }
-  if (provider.deleteMany) {
+  const deleteMany = provider.deleteMany?.bind(provider);
+  if (deleteMany) {
     adapted.deleteMany = <TData extends BaseRecord = BaseRecord, TVariables = unknown>(params: DeleteManyParams<TVariables>): Promise<DeleteManyResult<TData>> =>
-      provider.deleteMany!<TData, TVariables>({ ...params, meta: resolveMeta(params) });
+      deleteMany<TData, TVariables>({ ...params, meta: resolveMeta(params) });
   }
-  if (provider.custom) {
+  const custom = provider.custom?.bind(provider);
+  if (custom) {
     adapted.custom = <TData = unknown, TVariables = unknown>(params: CustomParams<TVariables>): Promise<CustomResult<TData>> =>
-      provider.custom!<TData, TVariables>({ ...params, meta: resolveMeta(params) });
+      custom<TData, TVariables>({ ...params, meta: resolveMeta(params) });
   }
 
   return adapted;

@@ -57,9 +57,9 @@
   const resolvedProvider = $derived(provider ?? adminContext.chatProvider);
 
   $effect(() => {
-    resolvedProvider;
-    context;
-    adminContext.tenantCacheKey?.__svadminTenant;
+    void resolvedProvider;
+    void context;
+    void adminContext.tenantCacheKey?.__svadminTenant;
     clearSuggestionScope();
 
     return cancelPrediction;

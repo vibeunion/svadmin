@@ -30,9 +30,9 @@
   });
 
   $effect(() => {
-    adminContext.providerBundle;
-    adminContext.tenantCacheKey?.__svadminTenant;
-    resources;
+    void adminContext.providerBundle;
+    void adminContext.tenantCacheKey?.__svadminTenant;
+    void resources;
     inferenceEpoch += 1;
     inferResult = null;
     loading = false;

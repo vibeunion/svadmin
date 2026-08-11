@@ -28,13 +28,13 @@ function createPromiseProvider(reply: Deferred<string>) {
 
 function createControlledStream() {
   const chunk = createDeferred<string>();
-  const finalized = createDeferred<void>();
+  const finalized = createDeferred<undefined>();
 
   async function* generate() {
     try {
       yield await chunk.promise;
     } finally {
-      finalized.resolve();
+      finalized.resolve(undefined);
     }
   }
 

@@ -30,7 +30,7 @@
       currentView: ctx.currentView,
     };
     const shouldFetch = open;
-    adminContext.tenantCacheKey?.__svadminTenant;
+    void adminContext.tenantCacheKey?.__svadminTenant;
 
     clearCopilotScope();
     if (shouldFetch && scopedProvider) {

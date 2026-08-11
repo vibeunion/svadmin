@@ -162,8 +162,9 @@
       inputValue = query;
       void sendMessage();
     };
-    window.addEventListener('svadmin:ask-ai', handler as EventListener);
-    return () => window.removeEventListener('svadmin:ask-ai', handler as EventListener);
+    const eventHandler = handler as unknown as (event: globalThis.Event) => void;
+    window.addEventListener('svadmin:ask-ai', eventHandler);
+    return () => window.removeEventListener('svadmin:ask-ai', eventHandler);
   });
 
   // ─── Persist on change (debounced) ──────────────────────────

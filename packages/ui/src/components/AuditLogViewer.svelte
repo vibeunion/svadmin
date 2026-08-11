@@ -34,8 +34,8 @@
   }
 
   $effect(() => {
-    authProvider;
-    adminContext.tenantCacheKey?.__svadminTenant;
+    void authProvider;
+    void adminContext.tenantCacheKey?.__svadminTenant;
     closeSnapshot();
   });
 
@@ -65,7 +65,7 @@
   }
 
   $effect(() => {
-    adminContext.tenantCacheKey?.__svadminTenant;
+    void adminContext.tenantCacheKey?.__svadminTenant;
     void loadLogs(authProvider, page);
 
     return () => {

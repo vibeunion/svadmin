@@ -25,6 +25,26 @@ function createDeferred<T>(): Deferred<T> {
   return { promise, resolve };
 }
 
+function capturePredictionTimer() {
+  const nativeSetTimeout = globalThis.setTimeout;
+  let predictionCallback: (() => void) | null = null;
+
+  vi.spyOn(globalThis, 'setTimeout').mockImplementation(((handler: TimerHandler, delay?: number, ...args: unknown[]) => {
+    if (delay === 500 && typeof handler === 'function') {
+      predictionCallback = () => handler(...args);
+      return 1 as unknown as ReturnType<typeof setTimeout>;
+    }
+    return nativeSetTimeout(handler, delay, ...args);
+  }) as typeof setTimeout);
+
+  return () => {
+    if (!predictionCallback) throw new Error('Expected the SmartSuggest debounce timer');
+    const callback = predictionCallback;
+    predictionCallback = null;
+    callback();
+  };
+}
+
 function createControlledChatProvider(reply: Deferred<string>) {
   const signals: AbortSignal[] = [];
   const sendMessage = vi.fn((_, options) => {
@@ -41,7 +61,7 @@ function createControlledChatProvider(reply: Deferred<string>) {
 function createControlledStream() {
   const bufferedChunks: string[] = [];
   const chunkWaiters: Array<(chunk: string | null) => void> = [];
-  const finalized = createDeferred<void>();
+  const finalized = createDeferred<undefined>();
 
   function nextChunk(): Promise<string | null> {
     const buffered = bufferedChunks.shift();
@@ -57,7 +77,7 @@ function createControlledStream() {
         yield chunk;
       }
     } finally {
-      finalized.resolve();
+      finalized.resolve(undefined);
     }
   }
 
@@ -128,7 +148,6 @@ function createResource(name: string): ResourceDefinition {
 }
 
 afterEach(() => {
-  vi.useRealTimers();
   resetContext();
   vi.restoreAllMocks();
 });
@@ -341,7 +360,7 @@ describe('scoped async consumers', () => {
   });
 
   it('keeps a late SmartSuggest completion out after provider, tenant, and context change', async () => {
-    vi.useFakeTimers();
+    const runPrediction = capturePredictionTimer();
     const staleReply = createDeferred<string>();
     const freshReply = createDeferred<string>();
     const staleProvider = createControlledChatProvider(staleReply);
@@ -356,7 +375,8 @@ describe('scoped async consumers', () => {
 
     const input = view.getByRole('textbox');
     await fireEvent.input(input, { target: { value: 'old' } });
-    await vi.advanceTimersByTimeAsync(500);
+    runPrediction();
+    await tick();
     expect(staleProvider.sendMessage).toHaveBeenCalledTimes(1);
 
     await view.rerender({
@@ -368,7 +388,8 @@ describe('scoped async consumers', () => {
     });
     const freshInput = view.getByRole('textbox');
     await fireEvent.input(freshInput, { target: { value: 'fresh' } });
-    await vi.advanceTimersByTimeAsync(500);
+    runPrediction();
+    await tick();
     expect(freshProvider.sendMessage).toHaveBeenCalledTimes(1);
 
     freshReply.resolve('fresh-current');
@@ -417,7 +438,9 @@ describe('scoped async consumers', () => {
     expect(view.getByText('freshAnalytics')).not.toBeNull();
 
     const inferencer = view.getByTestId('snapshot-inferencer');
-    await fireEvent.change(inferencer.querySelector('select')!, { target: { value: 'fresh-resource' } });
+    const resourceSelect = inferencer.querySelector('select');
+    if (!resourceSelect) throw new Error('Expected the snapshot inferencer resource selector');
+    await fireEvent.change(resourceSelect, { target: { value: 'fresh-resource' } });
     await fireEvent.click(view.getByRole('button', { name: 'Infer Fields' }));
     await waitFor(() => expect(freshData.getList).toHaveBeenCalledWith({
       resource: 'fresh-resource',

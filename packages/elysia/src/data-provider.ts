@@ -286,9 +286,8 @@ function normalizeObjectListResponse<TData extends BaseRecord>(
   response: Record<string, unknown>,
   recordsKey: 'items' | 'data',
 ): GetListResult<TData> {
-  const records = response[recordsKey] as TData[];
-  const metadata = { ...response };
-  delete metadata[recordsKey];
+  const { [recordsKey]: rawRecords, ...metadata } = response;
+  const records = rawRecords as TData[];
   return {
     ...metadata,
     data: records,

@@ -211,7 +211,7 @@ describe('loadSurfaceSource', () => {
       expect(accessorInvoked).toBe(false);
     } finally {
       if (originalDescriptor) Object.defineProperty(Object.prototype, inheritedField, originalDescriptor);
-      else delete (Object.prototype as Record<string, unknown>)[inheritedField];
+      else Reflect.deleteProperty(Object.prototype, inheritedField);
     }
   });
 

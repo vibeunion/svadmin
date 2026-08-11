@@ -23,9 +23,9 @@
   let requestEpoch = 0;
 
   $effect(() => {
-    provider;
-    adminContext.tenantCacheKey?.__svadminTenant;
-    open;
+    void provider;
+    void adminContext.tenantCacheKey?.__svadminTenant;
+    void open;
     clearAIConversation();
 
     return cancelAIRequest;

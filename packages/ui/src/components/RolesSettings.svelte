@@ -87,7 +87,7 @@
   $effect(() => {
     const scopedProvider = authProvider;
     const epoch = ++roleRequestEpoch;
-    adminContext.tenantCacheKey?.__svadminTenant;
+    void adminContext.tenantCacheKey?.__svadminTenant;
     permissionRequestEpoch += 1;
     mutationRequestEpoch += 1;
     roles = [];

@@ -25,7 +25,7 @@
     const scopedProvider = provider;
     const scopedContext = context;
     const shouldFetch = autoFetch;
-    adminContext.tenantCacheKey?.__svadminTenant;
+    void adminContext.tenantCacheKey?.__svadminTenant;
 
     clearInsightScope();
     if (shouldFetch && scopedContext && scopedProvider) {

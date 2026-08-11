@@ -68,6 +68,10 @@ const mutateAsync = vi.fn(async (params: any) => ({
 }));
 
 vi.mock('@svadmin/core', () => ({
+  captureAdminContext: () => ({
+    taskProvider: mockTaskProvider,
+    matchesTenantQuery: () => true,
+  }),
   getTaskProvider: () => mockTaskProvider,
   useTaskList: ({ dlq }: { dlq?: boolean }) => ({
     data: dlq
