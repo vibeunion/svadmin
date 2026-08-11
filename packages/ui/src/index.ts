@@ -81,7 +81,7 @@ export { default as NotificationsSettings } from "./components/NotificationsSett
 export { default as ApiSettings } from "./components/ApiSettings.svelte";
 export { default as ErrorPage } from "./components/ErrorPage.svelte";
 export { default as PermissionMatrix } from "./components/PermissionMatrix.svelte";
-export type { RoleInfo, ResourceInfo, ActionInfo } from "./types.js";
+export type { AdminProviderBundle, RoleInfo, ResourceInfo, ActionInfo } from "./types.js";
 export { default as RolesSettings } from "./components/RolesSettings.svelte";
 export { default as AuditLogViewer } from "./components/AuditLogViewer.svelte";
 export { default as TenantSwitcher } from "./components/TenantSwitcher.svelte";

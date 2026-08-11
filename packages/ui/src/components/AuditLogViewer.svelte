@@ -1,8 +1,8 @@
 <script lang="ts">
   import { useTranslation } from '@svadmin/core/i18n';
 
-  import { getAuthProvider } from '@svadmin/core';
-  import type { AuditLog } from '@svadmin/core';
+  import { captureAdminContext } from '@svadmin/core';
+  import type { AuditLog, AuthProvider } from '@svadmin/core';
   import { toast } from '@svadmin/core/toast';
   import * as Table from './ui/table/index.js';
   import { Badge } from './ui/badge/index.js';
@@ -11,8 +11,8 @@
   import { Loader2, ChevronLeft, ChevronRight, Search, FileSearch, Eye, X } from '@lucide/svelte';
 
   const i18n = useTranslation();
-
-  const authProvider = getAuthProvider({ optional: true });
+  const adminContext = captureAdminContext();
+  const authProvider = $derived(adminContext.authProvider);
 
   let logs = $state<AuditLog[]>([]);
   let total = $state(0);
@@ -28,17 +28,31 @@
 
   let requestId = 0;
 
-  async function loadLogs() {
-    if (!authProvider?.getAuditLogs) {
+  function closeSnapshot() {
+    drawerOpen = false;
+    drawerLog = null;
+  }
+
+  $effect(() => {
+    authProvider;
+    adminContext.tenantCacheKey?.__svadminTenant;
+    closeSnapshot();
+  });
+
+  async function loadLogs(scopedAuthProvider: AuthProvider | null, scopedPage: number) {
+    const currentId = ++requestId;
+    logs = [];
+    total = 0;
+    loading = true;
+    error = null;
+
+    if (!scopedAuthProvider?.getAuditLogs) {
       error = i18n.t('settings.auditNotSupported') ?? 'Audit logs are not supported by the current AuthProvider';
       loading = false;
       return;
     }
-    const currentId = ++requestId;
-    loading = true;
-    error = null;
     try {
-      const result = await authProvider.getAuditLogs({ page, pageSize });
+      const result = await scopedAuthProvider.getAuditLogs({ page: scopedPage, pageSize });
       if (currentId !== requestId) return;
       logs = result.data;
       total = result.total;
@@ -51,8 +65,12 @@
   }
 
   $effect(() => {
-    void page;
-    loadLogs();
+    adminContext.tenantCacheKey?.__svadminTenant;
+    void loadLogs(authProvider, page);
+
+    return () => {
+      requestId += 1;
+    };
   });
 
   let totalPages = $derived(Math.ceil(total / pageSize) || 1);
@@ -193,7 +211,7 @@
 {#if drawerOpen && drawerLog}
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <!-- svelte-ignore a11y_click_events_have_key_events -->
-  <div class="fixed inset-0 z-[100] flex justify-end bg-black/40 backdrop-blur-sm" onclick={() => drawerOpen = false}>
+  <div class="fixed inset-0 z-[100] flex justify-end bg-black/40 backdrop-blur-sm" onclick={closeSnapshot}>
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <div class="bg-card shadow-2xl w-full max-w-2xl h-full flex flex-col animate-in slide-in-from-right duration-300" onclick={(e) => e.stopPropagation()}>
@@ -206,7 +224,7 @@
           </h2>
           <p class="text-xs text-muted-foreground mt-1">{formatDate(drawerLog.createdAt)} · {drawerLog.userName ?? drawerLog.userId}</p>
         </div>
-        <button onclick={() => drawerOpen = false} class="text-muted-foreground hover:text-foreground transition p-2 rounded-lg hover:bg-muted">
+        <button onclick={closeSnapshot} class="text-muted-foreground hover:text-foreground transition p-2 rounded-lg hover:bg-muted">
           <X class="w-5 h-5" />
         </button>
       </div>

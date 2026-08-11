@@ -32,6 +32,48 @@ const dataProvider = createElysiaDataProvider({
 });
 ```
 
+## 每资源传输适配器
+
+当同一后端存在不同的 URL、分页参数或响应 envelope 时，应保留稳定资源名，
+再用每资源适配器描述协议差异。动态路径段必须在 resolver 内编码；Provider
+不会把整条资源路径一起编码。
+
+```typescript
+const dataProvider = createElysiaDataProvider({
+  apiUrl: 'https://console.example.com',
+  resourceAdapters: [{
+    match: 'project-tables',
+    resourcePath: ({ meta }) => {
+      const projectRef = meta?.projectRef;
+      if (typeof projectRef !== 'string' || projectRef.length === 0) {
+        throw new Error('projectRef is required for project-tables');
+      }
+      return `v1/projects/${encodeURIComponent(projectRef)}/database/tables`;
+    },
+    buildListSearchParams: ({ pagination }) => new URLSearchParams({
+      page: String(pagination.current),
+      limit: String(pagination.pageSize),
+    }),
+    parseListResponse: <T>(payload: unknown) => {
+      const response = payload as { rows: T[]; total: number; nextCursor?: string };
+      return {
+        data: response.rows,
+        total: response.total,
+        nextCursor: response.nextCursor,
+      };
+    },
+  }],
+});
+
+await dataProvider.getList({
+  resource: 'project-tables',
+  meta: { projectRef: 'project-a' },
+});
+```
+
+默认的 `{ items, total }` 与 `{ data, total }` 解析器也会把游标、facets 等
+顶层自定义元数据保留在返回的 `GetListResult` 中。
+
 ## 预期后端路由
 
 Provider 期望标准的 RESTful 路由：
@@ -127,7 +169,12 @@ interface ElysiaDataProviderOptions {
   /** 自定义资源名到 URL 段的映射 */
   resourceUrlMap?: Record<string, string>;
   /** 列表端点的自定义响应解析器 */
-  parseListResponse?: <T>(json: unknown, resource: string) => { data: T[]; total: number };
+  parseListResponse?: <TData extends BaseRecord = BaseRecord>(
+    json: unknown,
+    resource: string,
+  ) => GetListResult<TData>;
+  /** 有序的 URL、查询和响应覆盖；首个匹配 adapter 生效 */
+  resourceAdapters?: readonly ElysiaResourceAdapter[];
 }
 ```
 

@@ -77,6 +77,24 @@ describe('createElysiaDataProvider', () => {
       expect(result.total).toBe(42);
     });
 
+    it('should preserve custom list response metadata', async () => {
+      setupMockFetch({
+        items: [{ id: 1 }],
+        total: 1,
+        nextCursor: 'cursor-2',
+        facets: { status: { active: 1 } },
+      });
+
+      const result = await provider.getList({ resource: 'users' });
+
+      expect(result).toEqual({
+        data: [{ id: 1 }],
+        total: 1,
+        nextCursor: 'cursor-2',
+        facets: { status: { active: 1 } },
+      });
+    });
+
     it('should fetch list with raw array format', async () => {
       const mockData = [{ id: 1 }, { id: 2 }, { id: 3 }];
       setupMockFetch(mockData);
@@ -441,6 +459,111 @@ describe('parseListResponse', () => {
     const result = await provider.getList({ resource: 'posts' });
     expect(result.data).toEqual([{ id: 1 }]);
     expect(result.total).toBe(100);
+  });
+});
+
+// ─── resourceAdapters option ───────────────────────────────
+
+describe('resourceAdapters', () => {
+  it('evaluates a function matcher once and reuses its adapter for the complete list request', async () => {
+    let matcherCalls = 0;
+    const provider = createElysiaDataProvider({
+      apiUrl: 'https://console.example.com',
+      resourceAdapters: [
+        {
+          match: () => ++matcherCalls === 1,
+          resourcePath: 'snapshot-records',
+          buildListSearchParams: () => new URLSearchParams({ dialect: 'snapshot' }),
+          parseListResponse: <T>(json: unknown) => {
+            const response = json as { rows: T[]; count: number };
+            return { data: response.rows, total: response.count };
+          },
+        },
+        { match: () => true, resourcePath: 'fallback-records' },
+      ],
+    });
+    setupMockFetch({ rows: [{ id: 1 }], count: 1 });
+
+    const result = await provider.getList({ resource: 'records' });
+
+    expect(matcherCalls).toBe(1);
+    expect(mockFetchFn.mock.calls[0]?.[0]).toBe(
+      'https://console.example.com/snapshot-records?dialect=snapshot',
+    );
+    expect(result).toEqual({ data: [{ id: 1 }], total: 1 });
+  });
+
+  it('uses the first matching adapter and resets stateful regular expressions', async () => {
+    const provider = createElysiaDataProvider({
+      apiUrl: 'https://console.example.com/',
+      resourceUrlMap: { 'project-tables': 'mapped-tables' },
+      resourceAdapters: [
+        { match: /^project-/g, resourcePath: 'adapter-tables' },
+        { match: () => true, resourcePath: 'fallback-tables' },
+      ],
+    });
+    setupMockFetch({ id: 1 });
+
+    await provider.getOne({ resource: 'project-tables', id: 1 });
+    await provider.getOne({ resource: 'project-tables', id: 2 });
+
+    expect(mockFetchFn.mock.calls.map(([url]) => url)).toEqual([
+      'https://console.example.com/adapter-tables/1',
+      'https://console.example.com/adapter-tables/2',
+    ]);
+  });
+
+  it('resolves tenant paths, custom list queries, and response metadata per resource', async () => {
+    const provider = createElysiaDataProvider({
+      apiUrl: 'https://console.example.com',
+      parseListResponse: () => {
+        throw new Error('global parser must not run for an adapted resource');
+      },
+      resourceAdapters: [
+        {
+          match: 'project-tables',
+          resourcePath: ({ meta }) => {
+            const projectRef = String(meta?.projectRef ?? '');
+            return `v1/projects/${encodeURIComponent(projectRef)}/database/tables`;
+          },
+          buildListSearchParams: ({ pagination, meta }) => new URLSearchParams({
+            page: String(pagination.current),
+            limit: String(pagination.pageSize),
+            search: String(meta?.search ?? ''),
+          }),
+          parseListResponse: <T>(json: unknown) => {
+            const response = json as { rows: T[]; total: number; nextCursor: string };
+            return {
+              data: response.rows,
+              total: response.total,
+              nextCursor: response.nextCursor,
+            };
+          },
+        },
+      ],
+    });
+
+    setupMockFetch({ rows: [{ table_name: 'orders' }], total: 41, nextCursor: 'cursor-2' });
+
+    const result = await provider.getList({
+      resource: 'project-tables',
+      pagination: { current: 2, pageSize: 25 },
+      meta: { projectRef: 'alpha/beta', search: 'order' },
+    });
+
+    const [rawUrl] = mockFetchFn.mock.calls[0] as [string, RequestInit];
+    const url = new URL(rawUrl);
+    expect(url.pathname).toBe('/v1/projects/alpha%2Fbeta/database/tables');
+    expect(Object.fromEntries(url.searchParams)).toEqual({
+      page: '2',
+      limit: '25',
+      search: 'order',
+    });
+    expect(result).toEqual({
+      data: [{ table_name: 'orders' }],
+      total: 41,
+      nextCursor: 'cursor-2',
+    });
   });
 });
 

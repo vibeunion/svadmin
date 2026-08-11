@@ -24,13 +24,14 @@ export type { OvertimeResult, OvertimeOptions, NotificationConfig } from './hook
 import { createQuery, createInfiniteQuery, createMutation, useQueryClient } from '@tanstack/svelte-query';
 import { getAdminOptions } from './options.svelte';
 import { captureAdminContext } from './context.svelte';
+import { appendTenantCacheKey, queryKeyMatchesTenant } from './provider-bundle';
 import { useParsed } from './useParsed.svelte';
 import { createOvertimeTracker, createLiveSubscription, fireSuccessNotification, fireErrorNotification, checkError } from './hook-utils.svelte';
 import { invalidateByScopes, publishLiveEvent } from './mutation-hooks.svelte';
 import type { NotificationConfig, OvertimeOptions, LiveSubscriptionParams } from './hook-utils.svelte';
 import type { BaseRecord, HttpError, Pagination, Sort, Filter, DataProvider, KnownResources } from './types';
 import type { LiveMode, LiveEvent } from './live.svelte';
-import { audit } from './audit';
+import { auditWithProvider } from './audit';
 
 // ─── useInfiniteList ────────────────────────────────────────────────
 
@@ -58,7 +59,15 @@ export function useInfiniteList<TData extends BaseRecord = BaseRecord, TError = 
     const resource = options.resource ?? parsed.resource ?? '';
     const provider = adminContext.getDataProviderForResource(resource, options.dataProviderName);
     return {
-    queryKey: [options.dataProviderName, resource, 'infiniteList', options.pagination?.pageSize, options.sorters, options.filters, options.meta],
+    queryKey: appendTenantCacheKey([
+      options.dataProviderName,
+      resource,
+      'infiniteList',
+      options.pagination?.pageSize,
+      options.sorters,
+      options.filters,
+      options.meta,
+    ], adminContext.tenantCacheKey),
     queryFn: async ({ pageParam = 1 }) => {
       const result = await provider.getList<TData>({
         resource,
@@ -99,11 +108,23 @@ export function useInfiniteList<TData extends BaseRecord = BaseRecord, TError = 
   $effect(() => {
     if (query.isSuccess && query.dataUpdatedAt > lastSuccessAt && options.successNotification) {
       lastSuccessAt = query.dataUpdatedAt;
-      fireSuccessNotification(options.successNotification, '', query.data, undefined, options.resource ?? parsed.resource ?? '');
+      fireSuccessNotification({
+        config: options.successNotification,
+        defaultMessage: '',
+        data: query.data,
+        resource: options.resource ?? parsed.resource ?? '',
+        provider: adminContext.notificationProvider,
+      });
     } else if (query.isError && query.errorUpdatedAt > lastErrorAt) {
       lastErrorAt = query.errorUpdatedAt;
       checkError(query.error, adminContext);
-      fireErrorNotification(options.errorNotification, 'Fetch failed', query.error, options.resource ?? parsed.resource ?? '');
+      fireErrorNotification({
+        config: options.errorNotification,
+        defaultMessage: 'Fetch failed',
+        error: query.error,
+        resource: options.resource ?? parsed.resource ?? '',
+        provider: adminContext.notificationProvider,
+      });
     }
   });
 
@@ -152,7 +173,9 @@ export function useSelect<TData extends BaseRecord = BaseRecord, TOption = { lab
   const query = createQuery<{ data: TData[]; total: number }>(() => {
     const provider = adminContext.getDataProviderForResource(resource, dataProviderName);
     return {
-    queryKey: [dataProviderName, resource, 'select', allFilters, sorters, pagination, meta],
+    queryKey: appendTenantCacheKey([
+      dataProviderName, resource, 'select', allFilters, sorters, pagination, meta,
+    ], adminContext.tenantCacheKey),
     queryFn: () => provider.getList<TData>({ resource, sorters, filters: allFilters, pagination: { current: 1, pageSize: effectivePageSize }, meta }),
     enabled: options.queryOptions?.enabled ?? true,
     staleTime: options.queryOptions?.staleTime ?? adminOptions.reactQuery?.staleTime,
@@ -165,7 +188,9 @@ export function useSelect<TData extends BaseRecord = BaseRecord, TOption = { lab
     ? createQuery<{ data: TData[] }>(() => {
         const provider = adminContext.getDataProviderForResource(resource, dataProviderName);
         return {
-          queryKey: [dataProviderName, resource, 'select-defaults', defaultValueIds],
+          queryKey: appendTenantCacheKey([
+            dataProviderName, resource, 'select-defaults', defaultValueIds,
+          ], adminContext.tenantCacheKey),
           queryFn: async () => {
             if (provider.getMany) return provider.getMany<TData>({ resource, ids: defaultValueIds, meta });
             const results = await Promise.all(defaultValueIds.map(id => provider.getOne<TData>({ resource, id, meta })));
@@ -203,11 +228,23 @@ export function useSelect<TData extends BaseRecord = BaseRecord, TOption = { lab
   $effect(() => {
     if (query.isSuccess && query.dataUpdatedAt > lastSuccessAt && options.successNotification) {
       lastSuccessAt = query.dataUpdatedAt;
-      fireSuccessNotification(options.successNotification, '', query.data, undefined, resource);
+      fireSuccessNotification({
+        config: options.successNotification,
+        defaultMessage: '',
+        data: query.data,
+        resource,
+        provider: adminContext.notificationProvider,
+      });
     } else if (query.isError && query.errorUpdatedAt > lastErrorAt) {
       lastErrorAt = query.errorUpdatedAt;
       checkError(query.error, adminContext);
-      fireErrorNotification(options.errorNotification, 'Fetch failed', query.error, resource);
+      fireErrorNotification({
+        config: options.errorNotification,
+        defaultMessage: 'Fetch failed',
+        error: query.error,
+        resource,
+        provider: adminContext.notificationProvider,
+      });
     }
   });
 
@@ -250,7 +287,9 @@ export function useCustom<TData = unknown, TError = HttpError>(options: UseCusto
   const query = createQuery<{ data: TData }, TError>(() => {
     const provider = adminContext.getDataProvider(options.dataProviderName);
     return {
-    queryKey: [options.dataProviderName, 'custom', options.url, options.method, options.config, options.meta],
+    queryKey: appendTenantCacheKey([
+      options.dataProviderName, 'custom', options.url, options.method, options.config, options.meta,
+    ], adminContext.tenantCacheKey),
     queryFn: async () => {
       if (!provider.custom) throw new Error('DataProvider does not support custom method');
       return provider.custom<TData>({
@@ -276,11 +315,22 @@ export function useCustom<TData = unknown, TError = HttpError>(options: UseCusto
   $effect(() => {
     if (query.isSuccess && query.dataUpdatedAt > lastSuccessAt && options.successNotification) {
       lastSuccessAt = query.dataUpdatedAt;
-      fireSuccessNotification(options.successNotification, '', query.data);
+      fireSuccessNotification({
+        config: options.successNotification,
+        defaultMessage: '',
+        data: query.data,
+        provider: adminContext.notificationProvider,
+      });
     } else if (query.isError && query.errorUpdatedAt > lastErrorAt) {
       lastErrorAt = query.errorUpdatedAt;
       checkError(query.error, adminContext);
-      fireErrorNotification(options.errorNotification, 'Custom request failed', query.error, '');
+      fireErrorNotification({
+        config: options.errorNotification,
+        defaultMessage: 'Custom request failed',
+        error: query.error,
+        resource: '',
+        provider: adminContext.notificationProvider,
+      });
     }
   });
 
@@ -301,7 +351,15 @@ export function useCustomMutation<TData = unknown, TError = HttpError, TVariable
     },
     onSuccess: (data, params) => {
       if (params.resource && params.invalidates !== false) {
-        invalidateByScopes(queryClient, params.resource, params.invalidates, ['list', 'many'], undefined, dataProviderName);
+        invalidateByScopes(
+          queryClient,
+          params.resource,
+          params.invalidates,
+          ['list', 'many'],
+          undefined,
+          dataProviderName,
+          (queryKey) => queryKeyMatchesTenant(queryKey, adminContext.tenantCacheKey),
+        );
       }
     },
     onError: (error) => {
@@ -331,17 +389,41 @@ export function useCreateMany<TData extends BaseRecord = BaseRecord, TError = Ht
     },
     onSuccess: (data, params) => {
       const resName = params.resource ?? resource;
-      fireSuccessNotification(undefined, 'Created successfully', data.data, params.variables, resName);
-      audit({ action: 'create', resource: resName });
+      fireSuccessNotification({
+        config: undefined,
+        defaultMessage: 'Created successfully',
+        data: data.data,
+        values: params.variables,
+        resource: resName,
+        provider: adminContext.notificationProvider,
+      });
+      auditWithProvider(
+        { action: 'create', resource: resName, meta: adminContext.getProviderMeta(resName) },
+        adminContext.auditLogProvider,
+      );
       publishLiveEvent(resName, 'created', undefined, adminContext);
     },
     onError: (error, params) => {
       checkError(error, adminContext);
-      fireErrorNotification(undefined, 'Create many failed', error, params.resource ?? resource);
+      fireErrorNotification({
+        config: undefined,
+        defaultMessage: 'Create many failed',
+        error,
+        resource: params.resource ?? resource,
+        provider: adminContext.notificationProvider,
+      });
     },
     onSettled: (_d, _e, params) => {
       const resName = params.resource ?? resource;
-      invalidateByScopes(queryClient, resName, undefined, ['list', 'many'], undefined, params.dataProviderName);
+      invalidateByScopes(
+        queryClient,
+        resName,
+        undefined,
+        ['list', 'many'],
+        undefined,
+        params.dataProviderName,
+        (queryKey) => queryKeyMatchesTenant(queryKey, adminContext.tenantCacheKey),
+      );
     },
   }));
 
@@ -365,19 +447,49 @@ export function useUpdateMany<TData extends BaseRecord = BaseRecord, TError = Ht
     },
     onSuccess: (data, params) => {
       const resName = params.resource ?? resource;
-      fireSuccessNotification(undefined, 'Updated successfully', data.data, params.variables, resName);
-      audit({ action: 'update', resource: resName });
+      fireSuccessNotification({
+        config: undefined,
+        defaultMessage: 'Updated successfully',
+        data: data.data,
+        values: params.variables,
+        resource: resName,
+        provider: adminContext.notificationProvider,
+      });
+      auditWithProvider(
+        { action: 'update', resource: resName, meta: adminContext.getProviderMeta(resName) },
+        adminContext.auditLogProvider,
+      );
       publishLiveEvent(resName, 'updated', params.ids, adminContext);
     },
     onError: (error, params) => {
       checkError(error, adminContext);
-      fireErrorNotification(undefined, 'Update many failed', error, params.resource ?? resource);
+      fireErrorNotification({
+        config: undefined,
+        defaultMessage: 'Update many failed',
+        error,
+        resource: params.resource ?? resource,
+        provider: adminContext.notificationProvider,
+      });
     },
     onSettled: (_d, _e, params) => {
       const resName = params.resource ?? resource;
-      invalidateByScopes(queryClient, resName, undefined, ['list', 'many', 'detail'], undefined, params.dataProviderName);
+      invalidateByScopes(
+        queryClient,
+        resName,
+        undefined,
+        ['list', 'many', 'detail'],
+        undefined,
+        params.dataProviderName,
+        (queryKey) => queryKeyMatchesTenant(queryKey, adminContext.tenantCacheKey),
+      );
       for (const id of params.ids) {
-        queryClient.invalidateQueries({ predicate: (q) => q.queryKey[0] === params.dataProviderName && q.queryKey[1] === resName && q.queryKey[2] === 'one' && q.queryKey[3] === id });
+        queryClient.invalidateQueries({
+          predicate: (q) => queryKeyMatchesTenant(q.queryKey, adminContext.tenantCacheKey)
+            && q.queryKey[0] === params.dataProviderName
+            && q.queryKey[1] === resName
+            && q.queryKey[2] === 'one'
+            && q.queryKey[3] === id,
+        });
       }
     },
   }));
@@ -402,19 +514,48 @@ export function useDeleteMany<TData extends BaseRecord = BaseRecord, TError = Ht
     },
     onSuccess: (data, params) => {
       const resName = params.resource ?? resource;
-      fireSuccessNotification(undefined, 'Deleted successfully', data.data, undefined, resName);
-      audit({ action: 'delete', resource: resName });
+      fireSuccessNotification({
+        config: undefined,
+        defaultMessage: 'Deleted successfully',
+        data: data.data,
+        resource: resName,
+        provider: adminContext.notificationProvider,
+      });
+      auditWithProvider(
+        { action: 'delete', resource: resName, meta: adminContext.getProviderMeta(resName) },
+        adminContext.auditLogProvider,
+      );
       publishLiveEvent(resName, 'deleted', params.ids, adminContext);
     },
     onError: (error, params) => {
       checkError(error, adminContext);
-      fireErrorNotification(undefined, 'Delete many failed', error, params.resource ?? resource);
+      fireErrorNotification({
+        config: undefined,
+        defaultMessage: 'Delete many failed',
+        error,
+        resource: params.resource ?? resource,
+        provider: adminContext.notificationProvider,
+      });
     },
     onSettled: (_d, _e, params) => {
       const resName = params.resource ?? resource;
-      invalidateByScopes(queryClient, resName, undefined, ['list', 'many'], undefined, params.dataProviderName);
+      invalidateByScopes(
+        queryClient,
+        resName,
+        undefined,
+        ['list', 'many'],
+        undefined,
+        params.dataProviderName,
+        (queryKey) => queryKeyMatchesTenant(queryKey, adminContext.tenantCacheKey),
+      );
       for (const id of params.ids) {
-        queryClient.removeQueries({ predicate: (q) => q.queryKey[0] === params.dataProviderName && q.queryKey[1] === resName && q.queryKey[2] === 'one' && q.queryKey[3] === id });
+        queryClient.removeQueries({
+          predicate: (q) => queryKeyMatchesTenant(q.queryKey, adminContext.tenantCacheKey)
+            && q.queryKey[0] === params.dataProviderName
+            && q.queryKey[1] === resName
+            && q.queryKey[2] === 'one'
+            && q.queryKey[3] === id,
+        });
       }
     },
   }));
@@ -426,15 +567,21 @@ export function useDeleteMany<TData extends BaseRecord = BaseRecord, TError = Ht
 
 export function useInvalidate() {
   const queryClient = useQueryClient();
+  const adminContext = captureAdminContext();
   return (params: { resource?: string; invalidates?: string[] | 'all' | false; id?: string | number; dataProviderName?: string }) => {
     if (params.invalidates === false) return;
     if (params.invalidates === 'all' || !params.resource) {
-      queryClient.invalidateQueries({ predicate: (q) => q.queryKey[0] === params.dataProviderName });
+      queryClient.invalidateQueries({
+        predicate: (q) => queryKeyMatchesTenant(q.queryKey, adminContext.tenantCacheKey)
+          && q.queryKey[0] === params.dataProviderName,
+      });
       return;
     }
     const scopes = params.invalidates || ['resourceAll'];
     const res = params.resource;
-    const dpMatch = (q: { queryKey: readonly unknown[] }) => q.queryKey[0] === params.dataProviderName;
+    const dpMatch = (q: { queryKey: readonly unknown[] }) =>
+      queryKeyMatchesTenant(q.queryKey, adminContext.tenantCacheKey)
+        && q.queryKey[0] === params.dataProviderName;
     for (const scope of scopes) {
       if (scope === 'resourceAll') queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === res });
       else if ((scope === 'detail' || scope === 'one') && params.id) queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === res && q.queryKey[2] === 'one' && q.queryKey[3] === params.id });

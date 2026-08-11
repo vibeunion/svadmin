@@ -2,6 +2,7 @@ import { useForm, type UseFormOptions } from './form-hooks.svelte';
 import { useQueryClient } from '@tanstack/svelte-query';
 import { useParsed } from './useParsed.svelte';
 import { captureAdminContext } from './context.svelte';
+import { queryKeyMatchesTenant } from './provider-bundle';
 import { getAdminOptions } from './options.svelte';
 import { t } from './i18n.svelte';
 import type { BaseRecord, HttpError, Filter, KnownResources, ResourceDefinition } from './types';
@@ -39,6 +40,7 @@ export function useModalForm<
   TError = HttpError,
 >(options: UseModalFormOptions<TVariables, TData, TError> = {} as UseModalFormOptions<TVariables, TData, TError>) {
   const queryClient = useQueryClient();
+  const adminContext = captureAdminContext();
   const formState = useForm<TVariables, TData, TError>(options);
   let visible = $state(options.defaultVisible ?? false);
 
@@ -58,7 +60,8 @@ export function useModalForm<
     formState.reset();
     if (options.autoSave?.invalidateOnClose) {
       const dpN = options.dataProviderName;
-      const dp = (q: { queryKey: readonly unknown[] }) => q.queryKey[0] === dpN;
+      const dp = (q: { queryKey: readonly unknown[] }) =>
+        queryKeyMatchesTenant(q.queryKey, adminContext.tenantCacheKey) && q.queryKey[0] === dpN;
       queryClient.invalidateQueries({ predicate: (q) => dp(q) && q.queryKey[1] === formState.resource && (q.queryKey[2] === 'list' || q.queryKey[2] === 'infiniteList' || q.queryKey[2] === 'select') });
       queryClient.invalidateQueries({ predicate: (q) => dp(q) && q.queryKey[1] === formState.resource && q.queryKey[2] === 'many' });
       queryClient.invalidateQueries({ predicate: (q) => dp(q) && q.queryKey[1] === formState.resource && q.queryKey[2] === 'one' });
@@ -182,7 +185,33 @@ export function useRelation<TData extends BaseRecord = BaseRecord, TError = Http
 
 // ─── useNotification ────────────────────────────────────────
 export function useNotification() {
-  return { open: toast.info, success: toast.success, error: toast.error, warning: toast.warning };
+  const adminContext = captureAdminContext();
+
+  function sendToast(
+    type: 'success' | 'error' | 'warning' | 'info',
+    message: string,
+    duration?: number,
+    options?: { key?: string },
+  ): void {
+    const provider = adminContext.notificationProvider;
+    if (provider) {
+      provider.open({ type, message, key: options?.key });
+      return;
+    }
+    toast[type](message, duration, options);
+  }
+
+  return {
+    open: (message: string, duration?: number, options?: { key?: string }) =>
+      sendToast('info', message, duration, options),
+    success: (message: string, duration?: number, options?: { key?: string }) =>
+      sendToast('success', message, duration, options),
+    error: (message: string, duration?: number, options?: { key?: string }) =>
+      sendToast('error', message, duration, options),
+    warning: (message: string, duration?: number, options?: { key?: string }) =>
+      sendToast('warning', message, duration, options),
+    close: (key: string) => adminContext.notificationProvider?.close(key),
+  };
 }
 
 // ─── Field-specific hooks (refine-compatible) ─────────────────────

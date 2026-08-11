@@ -66,6 +66,28 @@ Ejected files are placed in `src/components/svadmin/`. Then pass them via the `c
 
 `Layout` · `Sidebar` · `Header` · `LoginPage` · `AutoTable` · `AutoForm` · `ShowPage` · `ProfilePage` · `StatsCard` · `AuditLogDrawer` · `LiveIndicator` · `CommandPalette` · `AICommandBar` · `ChatDialog` · `PasswordInput` · `BooleanField` · `FieldRenderer` · `MarkdownRenderer` · `AnomalyBadge` · `Toast` · `ConfirmDialog` · `TooltipButton` · `Breadcrumbs` · `ConfigErrorScreen` · `DevTools`
 
+## Project Maintenance
+
+Check the current project against the dependency versions shipped with the CLI. This command is read-only and does not access the network:
+
+```bash
+npx @svadmin/create doctor
+```
+
+Preview an upgrade plan without changing `package.json`:
+
+```bash
+npx @svadmin/create upgrade
+```
+
+Apply the plan explicitly. The CLI creates a timestamped `package.json.svadmin-backup-*` file before replacing `package.json`:
+
+```bash
+npx @svadmin/create upgrade --write
+```
+
+Both commands accept an optional project-directory argument. Upgrade only manages dependencies known by the shipped scaffold; custom dependencies, scripts, and other package fields are preserved.
+
 ## Development
 
 ```bash

@@ -2,10 +2,13 @@ import { useQueryClient } from '@tanstack/svelte-query';
 import { useParsed } from './useParsed.svelte';
 import { getAdminOptions } from './options.svelte';
 import { captureAdminContext } from './context.svelte';
+import { appendTenantCacheKey, queryKeyMatchesTenant } from './provider-bundle';
 import { createQuery, createMutation } from '@tanstack/svelte-query';
-import { notify } from './notification.svelte';
+import { notifyWithProvider } from './notification.svelte';
+import type { NotificationParams } from './notification.svelte';
 import { useTranslation } from './i18n.svelte';
-import { audit } from './audit';
+import { auditWithProvider } from './audit';
+import type { AuditEntry } from './audit';
 import { HttpError, UndoError } from './types';
 import type { BaseRecord, MutationMode, KnownResources } from './types';
 import { checkError } from './hook-utils.svelte';
@@ -153,6 +156,10 @@ export function useForm<
   const queryClient = useQueryClient();
   const parsed = useParsed();
   const adminOptions = getAdminOptions();
+  const sendNotification = (params: NotificationParams) =>
+    notifyWithProvider(params, adminContext.notificationProvider);
+  const recordAudit = (entry: Omit<AuditEntry, 'timestamp'>) =>
+    auditWithProvider(entry, adminContext.auditLogProvider);
 
   const resource = $derived(options.resource ?? parsed.resource ?? '');
   let action = $state<'create' | 'edit' | 'clone' | 'show'>(options.action ?? (parsed.action === 'list' ? 'create' : parsed.action as 'create' | 'edit' | 'clone' | 'show') ?? 'create');
@@ -441,9 +448,9 @@ export function useForm<
         const msg = Array.isArray(messages) ? messages[0] : messages;
         setFieldError(field, msg);
       }
-      if (errorNotification !== false) notify({ type: 'error', message: typeof errorNotification === 'string' ? errorNotification : (error.message || i18n.t('common.operationFailed')) });
+      if (errorNotification !== false) sendNotification({ type: 'error', message: typeof errorNotification === 'string' ? errorNotification : (error.message || i18n.t('common.operationFailed')) });
     } else {
-      if (errorNotification !== false) notify({ type: 'error', message: typeof errorNotification === 'string' ? errorNotification : (i18n.t('common.operationFailed') + ': ' + error.message) });
+      if (errorNotification !== false) sendNotification({ type: 'error', message: typeof errorNotification === 'string' ? errorNotification : (i18n.t('common.operationFailed') + ': ' + error.message) });
     }
   }
 
@@ -451,7 +458,9 @@ export function useForm<
   // Always create the query — use `enabled` to conditionally activate.
   // This ensures setAction('edit') at runtime will trigger a fetch.
   const query = createQuery(() => ({
-    queryKey: [options.dataProviderName, resource, 'one', currentId, queryMeta],
+    queryKey: appendTenantCacheKey([
+      options.dataProviderName, resource, 'one', currentId, queryMeta,
+    ], adminContext.tenantCacheKey),
     queryFn: async () => {
       const result = await provider.getOne<BaseRecord>({ resource, id: currentId as string, meta: queryMeta });
       return result;
@@ -518,12 +527,25 @@ export function useForm<
     onSuccess: (data: { data: TData }, _vars: unknown, context: unknown) => {
       const ctx = context as { targetResource?: string } | undefined;
       const res = ctx?.targetResource ?? resource;
-      invalidateByScopes(queryClient, res, invalidateScopes, ['list', 'many'], undefined, options.dataProviderName);
+      invalidateByScopes(
+        queryClient,
+        res,
+        invalidateScopes,
+        ['list', 'many'],
+        undefined,
+        options.dataProviderName,
+        (queryKey) => queryKeyMatchesTenant(queryKey, adminContext.tenantCacheKey),
+      );
       if (!isManualSubmitIdentityCurrent()) return;
-      if (successNotification !== false) notify({ type: 'success', message: typeof successNotification === 'string' ? successNotification : i18n.t('common.createSuccess') });
+      if (successNotification !== false) sendNotification({ type: 'success', message: typeof successNotification === 'string' ? successNotification : i18n.t('common.createSuccess') });
       const pk = adminContext.getResource(res).primaryKey ?? 'id';
       const newId = (data.data as Record<string, unknown>)[pk];
-      audit({ action: 'create', resource: res, recordId: String(newId) });
+      recordAudit({
+        action: 'create',
+        resource: res,
+        recordId: String(newId),
+        meta: adminContext.getProviderMeta(res),
+      });
       try {
         const lp = adminContext.liveProvider;
         if (lp?.publish) lp.publish({ type: 'INSERT', resource: res, payload: { ids: newId != null ? [newId as string | number] : [] } });
@@ -563,7 +585,8 @@ export function useForm<
       const targetId = currentId;
       const targetResource = resource;
       const dpN = options.dataProviderName;
-      const dp = (q: { queryKey: readonly unknown[] }) => q.queryKey[0] === dpN;
+      const dp = (q: { queryKey: readonly unknown[] }) =>
+        queryKeyMatchesTenant(q.queryKey, adminContext.tenantCacheKey) && q.queryKey[0] === dpN;
       await queryClient.cancelQueries({ predicate: (q) => dp(q) && q.queryKey[1] === resource });
       const previousQueries = queryClient.getQueriesData({ predicate: (q) => dp(q) && q.queryKey[1] === resource });
       if (optimisticUpdateMap?.list !== false) {
@@ -584,8 +607,13 @@ export function useForm<
       const targetId = ctx?.targetId ?? currentId;
       const res = ctx?.targetResource ?? resource;
       if (!isManualSubmitIdentityCurrent()) return;
-      if (successNotification !== false) notify({ type: 'success', message: typeof successNotification === 'string' ? successNotification : i18n.t('common.updateSuccess') });
-      audit({ action: 'update', resource: res, recordId: String(targetId) });
+      if (successNotification !== false) sendNotification({ type: 'success', message: typeof successNotification === 'string' ? successNotification : i18n.t('common.updateSuccess') });
+      recordAudit({
+        action: 'update',
+        resource: res,
+        recordId: String(targetId),
+        meta: adminContext.getProviderMeta(res),
+      });
       try {
         const lp = adminContext.liveProvider;
         if (lp?.publish) lp.publish({ type: 'UPDATE', resource: res, payload: { ids: targetId != null ? [targetId] : [] } });
@@ -598,7 +626,15 @@ export function useForm<
       const ctx = context as { targetId?: string | number; targetResource?: string } | undefined;
       const targetId = ctx?.targetId ?? currentId;
       const res = ctx?.targetResource ?? resource;
-      invalidateByScopes(queryClient, res, invalidateScopes, ['list', 'many', 'detail'], targetId ?? undefined, options.dataProviderName);
+      invalidateByScopes(
+        queryClient,
+        res,
+        invalidateScopes,
+        ['list', 'many', 'detail'],
+        targetId ?? undefined,
+        options.dataProviderName,
+        (queryKey) => queryKeyMatchesTenant(queryKey, adminContext.tenantCacheKey),
+      );
     },
     onError: (error: unknown, _vars: unknown, context: unknown) => {
       const ctx = context as { previousQueries?: [unknown, unknown][] } | undefined;
@@ -649,7 +685,7 @@ export function useForm<
 
       if (!isRecordIdentityCurrent(submitIdentity)) return;
 
-      if (!runValidation()) { notify({ type: 'warning', message: i18n.t('validation.required') }); return; }
+      if (!runValidation()) { sendNotification({ type: 'warning', message: i18n.t('validation.required') }); return; }
 
       const submittedValues = createPersistenceSnapshot(values);
       if (action === 'create' || action === 'clone') await createMut.mutateAsync(submittedValues);
@@ -740,7 +776,15 @@ export function useForm<
         await provider.update<TData, TVariables>({ resource: safeResource, id: safeId as string | number, variables: submittedValues, meta: safeMeta });
         if (formDestroyed) return;
         const scopes = autoSaveOpts.invalidates ?? ['resourceAll'];
-        invalidateByScopes(queryClient, safeResource, scopes, ['resourceAll'], safeId ?? undefined, options.dataProviderName);
+        invalidateByScopes(
+          queryClient,
+          safeResource,
+          scopes,
+          ['resourceAll'],
+          safeId ?? undefined,
+          options.dataProviderName,
+          (queryKey) => queryKeyMatchesTenant(queryKey, adminContext.tenantCacheKey),
+        );
         if (!isRecordIdentityCurrent(scheduledIdentity)) return;
         autoSaveStatus = 'saved';
         lastAutoSaveData = submittedValues;
@@ -769,7 +813,11 @@ export function useForm<
 
   if (autoSaveOpts?.invalidateOnUnmount) {
     $effect(() => {
-      return () => queryClient.invalidateQueries({ predicate: (q) => q.queryKey[0] === options.dataProviderName && q.queryKey[1] === resource });
+      return () => queryClient.invalidateQueries({
+        predicate: (q) => queryKeyMatchesTenant(q.queryKey, adminContext.tenantCacheKey)
+          && q.queryKey[0] === options.dataProviderName
+          && q.queryKey[1] === resource,
+      });
     });
   }
 

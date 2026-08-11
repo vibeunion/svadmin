@@ -1,15 +1,16 @@
 <script lang="ts">
   import { useTranslation } from '@svadmin/core/i18n';
-  import { getResources, getDataProviderNames } from '@svadmin/core';
+  import { captureAdminContext } from '@svadmin/core';
   import { getResolvedTheme, getColorTheme } from '@svadmin/core';
   import * as Card from './ui/card/index.js';
   import { Badge } from './ui/badge/index.js';
   import { Info, Database, Globe, Palette, Layers } from '@lucide/svelte';
 
   const i18n = useTranslation();
+  const adminContext = captureAdminContext();
 
-  const resources = getResources();
-  const providerNames = getDataProviderNames();
+  const resources = $derived(adminContext.resources);
+  const providerNames = $derived(adminContext.getDataProviderNames());
 
   const version = '__SVADMIN_VERSION__'; // replaced at build time or shown as-is
 </script>

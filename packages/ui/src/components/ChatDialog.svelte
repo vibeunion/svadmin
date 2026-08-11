@@ -1,10 +1,12 @@
 <script lang="ts">
-/* eslint-disable no-undef, svelte/no-at-html-tags */
-  import { getChatProvider, getChatContext, setChatContext, getAgentProvider, registerApproval, resolveApproval } from '@svadmin/core';
-  import type { ChatMessage, ChatAction } from '@svadmin/core';
+/* eslint-disable svelte/no-at-html-tags */
+  import { captureAdminContext } from '@svadmin/core';
+  import type { AgentProvider, ChatMessage, ChatAction, ChatContext, ChatProvider } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
 
   import { useParsed } from '@svadmin/core';
+  import { onDestroy, untrack } from 'svelte';
+  import { SvelteMap } from 'svelte/reactivity';
   import { fly, fade, scale } from 'svelte/transition';
   import { Button } from './ui/button/index.js';
   import TooltipButton from './TooltipButton.svelte';
@@ -15,7 +17,11 @@
   interface Props {
     /** Render the launcher inside a layout toolbar instead of as a floating action button. */
     docked?: boolean;
-    /** localStorage key for chat history persistence. Set to '' to disable. */
+    /**
+     * Panel suffix for chat history persistence. Both default and explicit
+     * suffixes are scoped by backend API + typed tenant identity.
+     * Set to '' to disable persistence.
+     */
     persistKey?: string;
     /** Custom persistence callback — called when messages change */
     onPersist?: (messages: ChatMessage[]) => void;
@@ -23,15 +29,24 @@
     onRestore?: () => ChatMessage[];
     /** Callback when user clicks an action button in an assistant message */
     onAction?: (action: ChatAction, message: ChatMessage) => void;
+    /** Stable target for tree-scoped ask-ai events. */
+    scope?: string;
+    /** Owning Layout scope used to arbitrate global keyboard shortcuts. */
+    ownerScope?: string;
   }
 
   const {
     docked = false,
-    persistKey = 'svadmin-chat',
+    persistKey,
     onPersist,
     onRestore,
     onAction,
+    scope,
+    ownerScope,
   }: Props = $props();
+  const generatedId = $props.id();
+  const generatedScope = `svadmin-chat-${generatedId}`;
+  const componentScope = $derived(scope ?? generatedScope);
 
   let open = $state(false);
   let minimized = $state(false);
@@ -40,101 +55,362 @@
   let isStreaming = $state(false);
   let messagesContainer: HTMLDivElement | undefined = $state();
   let abortController: AbortController | null = null;
+  let runEpoch = 0;
+  let messageRevision = 0;
   let messageIdCounter = $state(0);
-  let initialized = $state(false);
 
-  const provider = $derived(getChatProvider());
-  const agent = $derived(getAgentProvider());
+  const adminContext = captureAdminContext();
+  const provider = $derived(adminContext.chatProvider);
+  const agent = $derived(adminContext.agentProvider);
   const parsed = useParsed();
+  const chatContext = $derived.by((): ChatContext => ({
+    currentResource: parsed.resource,
+    selectedRecordId: parsed.id,
+    currentView: parsed.action as ChatContext['currentView'],
+    pathname: `/${parsed.resource ?? ''}${parsed.action ? '/' + parsed.action : ''}${parsed.id ? '/' + parsed.id : ''}`,
+  }));
 
-  /** Track pending approval requests for UI rendering */
-  let pendingApprovalIds = $state<string[]>([]);
+  const approvalCallbacks = new SvelteMap<string, (approved: boolean) => void>();
 
-  // ─── Auto-update ChatContext from current route ─────────────
-  $effect(() => {
-    setChatContext({
-      currentResource: parsed.resource,
-      selectedRecordId: parsed.id,
-      currentView: parsed.action as 'list' | 'edit' | 'create' | 'show' | undefined,
-      pathname: `/${parsed.resource ?? ''}${parsed.action ? '/' + parsed.action : ''}${parsed.id ? '/' + parsed.id : ''}`,
+  function stripApprovalActions(persist: boolean) {
+    let changed = false;
+    const nextMessages = messages.map((message) => {
+      if (!message.actions?.some((action) => (
+        action.payload != null
+        && Object.prototype.hasOwnProperty.call(action.payload, 'approvalId')
+      ))) return message;
+      changed = true;
+      const remainingActions = message.actions.filter((action) => (
+        action.payload == null
+        || !Object.prototype.hasOwnProperty.call(action.payload, 'approvalId')
+      ));
+      return {
+        ...message,
+        actions: remainingActions.length > 0 ? remainingActions : undefined,
+      };
     });
+    if (!changed) return;
+    replaceMessages(nextMessages, persist);
+    if (persist) {
+      // User-triggered revocation must survive a remount immediately.
+      flushPendingPersist();
+    }
+  }
+
+  function invalidateActiveRun({
+    persistApprovalRevocation = true,
+  }: { persistApprovalRevocation?: boolean } = {}) {
+    runEpoch++;
+    const controller = abortController;
+    abortController = null;
+    isStreaming = false;
+    controller?.abort();
+    approvalCallbacks.clear();
+    stripApprovalActions(persistApprovalRevocation);
+  }
+
+  function isCurrentRun(epoch: number, controller: AbortController) {
+    return runEpoch === epoch
+      && abortController === controller
+      && !controller.signal.aborted;
+  }
+
+  let previousRunScope: {
+    tenantIdentity: string | number | undefined;
+    chatProvider: ChatProvider | null;
+    agentProvider: AgentProvider | null;
+  } | undefined;
+
+  const historyScopeToken = $derived.by(() => {
+    let apiUrl = 'unconfigured';
+    try {
+      apiUrl = adminContext.getDataProvider().getApiUrl();
+    } catch {
+      // Standalone legacy consumers may configure chat without a DataProvider.
+    }
+    const tenantIdentity = adminContext.tenantCacheKey?.__svadminTenant;
+    const typedTenant = tenantIdentity === undefined
+      ? null
+      : [typeof tenantIdentity, String(tenantIdentity)];
+    const baseKey = `svadmin-chat:${encodeURIComponent(JSON.stringify([apiUrl, typedTenant]))}`;
+    return persistKey === undefined
+      ? baseKey
+      : `${baseKey}:${encodeURIComponent(JSON.stringify(persistKey))}`;
   });
+  const resolvedPersistKey = $derived(persistKey === '' ? '' : historyScopeToken);
+
+  interface AskAIEventDetail {
+    query: string;
+    /** ChatDialog's data-svadmin-chat-scope value. */
+    scope?: string;
+    /** Compatibility alias for scope. */
+    target?: string;
+  }
 
   // ─── Listen for cross-component triggers ─────────────────────
   $effect(() => {
     if (typeof window === 'undefined') return;
-    const handler = (e: CustomEvent<string>) => {
+    const handler = (event: CustomEvent<string | AskAIEventDetail>) => {
+      const detail = event.detail;
+      if (typeof detail === 'string') return;
+      const query = detail?.query;
+      const target = detail?.scope ?? detail?.target;
+      if (!query?.trim() || target !== componentScope) return;
+
       open = true;
       minimized = false;
-      inputValue = e.detail;
-      sendMessage();
+      inputValue = query;
+      void sendMessage();
     };
     window.addEventListener('svadmin:ask-ai', handler as EventListener);
     return () => window.removeEventListener('svadmin:ask-ai', handler as EventListener);
   });
 
-  // ─── Restore persisted history on mount ─────────────────────
-  $effect(() => {
-    if (initialized) return;
-    initialized = true;
-    if (onRestore) {
-      messages = onRestore();
-    } else if (persistKey) {
-      try {
-        const stored = localStorage.getItem(persistKey);
-        if (stored) {
-          const parsed = JSON.parse(stored) as ChatMessage[];
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            messages = parsed;
-          }
-        }
-      } catch {
-        // ignore corrupt data
-      }
-    }
-  });
-
   // ─── Persist on change (debounced) ──────────────────────────
-  let persistTimer: ReturnType<typeof setTimeout> | null = null;
-  let lastPersistSnapshot: ChatMessage[] | null = null;
+  interface PersistSnapshotBase {
+    key: string;
+    messages: ChatMessage[];
+  }
+  type PersistSnapshot = PersistSnapshotBase & (
+    | { sink: 'callback'; callback: (messages: ChatMessage[]) => void }
+    | { sink: 'storage'; storage: Storage | null }
+  );
 
-  function flushPersist(snapshot: ChatMessage[]) {
-    if (onPersist) {
-      onPersist(snapshot);
-    } else if (persistKey) {
+  let persistTimer: ReturnType<typeof setTimeout> | null = null;
+  let lastPersistSnapshot: PersistSnapshot | null = null;
+  let restoredHistoryScope = $state<string | null>(null);
+  let restoredPersistKey = $state<string | null>(null);
+
+  function getChatStorage(): Storage | null {
+    if (typeof window === 'undefined') return null;
+    try {
+      return window.localStorage;
+    } catch {
+      return null;
+    }
+  }
+
+  function flushPersist(snapshot: PersistSnapshot) {
+    if (snapshot.sink === 'callback') {
+      snapshot.callback(snapshot.messages);
+    } else if (snapshot.key) {
       try {
-        localStorage.setItem(persistKey, JSON.stringify(snapshot));
+        snapshot.storage?.setItem(snapshot.key, JSON.stringify(snapshot.messages));
       } catch {
         // storage full or unavailable
       }
     }
   }
 
-  $effect(() => {
-    const snapshot = messages;
-    if (!initialized) return;
+  function flushPendingPersist() {
+    if (persistTimer) {
+      clearTimeout(persistTimer);
+      persistTimer = null;
+    }
+    if (lastPersistSnapshot) {
+      const snapshot = lastPersistSnapshot;
+      lastPersistSnapshot = null;
+      flushPersist(snapshot);
+    }
+  }
+
+  function cancelPendingPersist() {
+    if (persistTimer) {
+      clearTimeout(persistTimer);
+      persistTimer = null;
+    }
+    lastPersistSnapshot = null;
+  }
+
+  function schedulePersist(nextMessages: ChatMessage[]) {
+    const callback = onPersist;
+    let snapshot: PersistSnapshot;
+    if (callback) {
+      // Custom persistence owns its lifecycle and must not lose early input
+      // while the storage-backed restore path is still becoming ready.
+      snapshot = {
+        sink: 'callback',
+        key: restoredPersistKey ?? resolvedPersistKey,
+        messages: nextMessages,
+        callback,
+      };
+    } else {
+      const restoredKey = restoredPersistKey;
+      if (!restoredKey || restoredKey !== resolvedPersistKey) return;
+      snapshot = {
+        sink: 'storage',
+        key: restoredKey,
+        messages: nextMessages,
+        storage: getChatStorage(),
+      };
+    }
 
     if (persistTimer) clearTimeout(persistTimer);
     lastPersistSnapshot = snapshot;
     persistTimer = setTimeout(() => {
       persistTimer = null;
-      flushPersist(snapshot);
+      if (!lastPersistSnapshot) return;
+      const pendingSnapshot = lastPersistSnapshot;
+      lastPersistSnapshot = null;
+      flushPersist(pendingSnapshot);
     }, 300);
+  }
 
-    return () => {
-      if (persistTimer) {
-        clearTimeout(persistTimer);
-        persistTimer = null;
-      }
+  function replaceMessages(nextMessages: ChatMessage[], persist = true) {
+    messageRevision++;
+    messages = nextMessages;
+    if (persist) schedulePersist(nextMessages);
+  }
+
+  function updateMessageById(
+    messageId: string,
+    update: (current: ChatMessage) => ChatMessage,
+  ) {
+    const index = messages.findIndex((message) => message.id === messageId);
+    if (index < 0) return;
+    const nextMessages = [...messages];
+    nextMessages[index] = update(messages[index]);
+    replaceMessages(nextMessages);
+  }
+
+  function parseStoredMessage(value: unknown): ChatMessage | null {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+    const candidate = value as Record<string, unknown>;
+    if (
+      typeof candidate.id !== 'string'
+      || (candidate.role !== 'user' && candidate.role !== 'assistant')
+      || typeof candidate.content !== 'string'
+      || typeof candidate.timestamp !== 'number'
+      || !Number.isFinite(candidate.timestamp)
+    ) return null;
+
+    // Persisted actions are capability-bearing UI state. Their callbacks do
+    // not survive a reload, so never revive them from mutable localStorage.
+    return {
+      id: candidate.id,
+      role: candidate.role,
+      content: candidate.content,
+      timestamp: candidate.timestamp,
     };
+  }
+
+  function parseStoredMessages(value: unknown): ChatMessage[] {
+    if (!Array.isArray(value)) return [];
+    const seenIds = new Set<string>();
+    const restoredMessages: ChatMessage[] = [];
+    for (const candidate of value) {
+      const message = parseStoredMessage(candidate);
+      if (!message || seenIds.has(message.id)) continue;
+      seenIds.add(message.id);
+      restoredMessages.push(message);
+    }
+    return restoredMessages;
+  }
+
+  function readStoredMessages(key: string): { found: boolean; messages: ChatMessage[] } {
+    const storage = getChatStorage();
+    if (!key || !storage) return { found: false, messages: [] };
+    try {
+      const stored = storage.getItem(key);
+      if (stored === null) return { found: false, messages: [] };
+      const restored = JSON.parse(stored) as unknown;
+      return {
+        found: true,
+        messages: parseStoredMessages(restored),
+      };
+    } catch {
+      return { found: true, messages: [] };
+    }
+  }
+
+  function finishRestore(
+    scopeToken: string,
+    key: string,
+    restoredMessages: ChatMessage[],
+    persistRestoredMessages = false,
+  ) {
+    if (historyScopeToken !== scopeToken || resolvedPersistKey !== key) return;
+    replaceMessages(restoredMessages, false);
+    restoredHistoryScope = scopeToken;
+    restoredPersistKey = key;
+    if (persistRestoredMessages) schedulePersist(restoredMessages);
+  }
+
+  // ─── Restore persisted history for the current tenant/tree ──
+  $effect.pre(() => {
+    const scopeToken = historyScopeToken;
+    const key = resolvedPersistKey;
+    return untrack(() => {
+      const previousScope = restoredHistoryScope;
+      if (previousScope === scopeToken) return;
+      if (previousScope !== null) flushPendingPersist();
+      invalidateActiveRun({ persistApprovalRevocation: false });
+      restoredHistoryScope = null;
+      restoredPersistKey = null;
+      if (onRestore) {
+        finishRestore(scopeToken, key, onRestore(), true);
+        return;
+      }
+
+      const current = readStoredMessages(key);
+      finishRestore(scopeToken, key, current.messages);
+      const legacyKey = persistKey === undefined ? 'svadmin-chat' : persistKey;
+      if (
+        current.found
+        || !key
+        || !legacyKey
+        || legacyKey === key
+        || adminContext.tenantCacheKey !== undefined
+      ) return;
+
+      // Defer migration so an immediate unmount cannot persist an empty scoped
+      // key. The shared historical default is consumed only by a single dialog;
+      // explicit historical keys already identify their panel.
+      const initialRevision = messageRevision;
+      const migrationTimer = setTimeout(() => {
+        if (
+          historyScopeToken !== scopeToken
+          || resolvedPersistKey !== key
+          || restoredHistoryScope !== scopeToken
+          || restoredPersistKey !== key
+          || messageRevision !== initialRevision
+        ) return;
+        if (
+          persistKey === undefined
+          && document.querySelectorAll('[data-svadmin-chat-scope]').length !== 1
+        ) return;
+        const legacy = readStoredMessages(legacyKey);
+        if (!legacy.found || legacy.messages.length === 0) return;
+        finishRestore(scopeToken, key, legacy.messages, true);
+      }, 0);
+      return () => clearTimeout(migrationTimer);
+    });
   });
 
-  $effect(() => {
-    return () => {
-      if (lastPersistSnapshot != null) {
-        flushPersist(lastPersistSnapshot);
-      }
+  // Provider identity can change without changing the persistence scope. Keep
+  // an in-flight run and its approval capabilities bound to their origin tree.
+  $effect.pre(() => {
+    const nextRunScope = {
+      tenantIdentity: adminContext.tenantCacheKey?.__svadminTenant,
+      chatProvider: provider,
+      agentProvider: agent,
     };
+    untrack(() => {
+      const previous = previousRunScope;
+      previousRunScope = nextRunScope;
+      if (!previous) return;
+      if (
+        Object.is(previous.tenantIdentity, nextRunScope.tenantIdentity)
+        && previous.chatProvider === nextRunScope.chatProvider
+        && previous.agentProvider === nextRunScope.agentProvider
+      ) return;
+      invalidateActiveRun();
+    });
+  });
+
+  onDestroy(() => {
+    invalidateActiveRun();
+    flushPendingPersist();
   });
 
   function genId(): string {
@@ -152,7 +428,7 @@
 
   /** Build a system message with the current admin context */
   function buildContextSystemMessage(): ChatMessage | null {
-    const ctx = getChatContext();
+    const ctx = chatContext;
     if (!ctx.currentResource) return null;
 
     const parts: string[] = [];
@@ -179,13 +455,15 @@
       timestamp: Date.now(),
     };
 
-    messages = [...messages, userMsg];
+    replaceMessages([...messages, userMsg]);
     inputValue = '';
     doSend();
   }
 
   async function doSend() {
-    if (isStreaming || (!provider && !agent)) return;
+    const activeAgent = agent;
+    const activeChatProvider = provider;
+    if (isStreaming || (!activeChatProvider && !activeAgent)) return;
     
     scrollToBottom();
 
@@ -196,11 +474,12 @@
       content: '',
       timestamp: Date.now(),
     };
-    messages = [...messages, assistantMsg];
+    replaceMessages([...messages, assistantMsg]);
+    const epoch = ++runEpoch;
+    const controller = new AbortController();
+    abortController = controller;
     isStreaming = true;
     scrollToBottom();
-
-    abortController = new AbortController();
 
     try {
       // Build message list with context system message prepended
@@ -208,27 +487,31 @@
       const allMessages = messages.filter((m) => m.content);
       const messagesToSend = contextMsg ? [contextMsg, ...allMessages] : allMessages;
 
-      if (agent) {
+      if (activeAgent) {
         // ─── AgentProvider path: typed event stream ─────────
-        const stream = agent.chat(messagesToSend, {
-          signal: abortController.signal,
-          context: getChatContext(),
+        const stream = activeAgent.chat(messagesToSend, {
+          signal: controller.signal,
+          context: chatContext,
         });
 
-        const collectedActions: ChatAction[] = [];
-
         for await (const event of stream) {
-          if (!isStreaming) break;
+          if (!isCurrentRun(epoch, controller)) break;
           switch (event.type) {
             case 'text':
               assistantMsg.content += event.content;
-              messages = [...messages.slice(0, -1), { ...assistantMsg }];
+              updateMessageById(assistantMsg.id, (current) => ({
+                ...current,
+                content: assistantMsg.content,
+              }));
               scrollToBottom();
               break;
 
             case 'tool_call':
               assistantMsg.content += `\n🔧 *${event.tool}*(${JSON.stringify(event.args)})`;
-              messages = [...messages.slice(0, -1), { ...assistantMsg }];
+              updateMessageById(assistantMsg.id, (current) => ({
+                ...current,
+                content: assistantMsg.content,
+              }));
               scrollToBottom();
               break;
 
@@ -238,27 +521,28 @@
               } else {
                 assistantMsg.content += `\n❌ ${event.tool} failed: ${event.result.error ?? 'Unknown error'}`;
               }
-              messages = [...messages.slice(0, -1), { ...assistantMsg }];
+              updateMessageById(assistantMsg.id, (current) => ({
+                ...current,
+                content: assistantMsg.content,
+              }));
               scrollToBottom();
               break;
 
             case 'approval_request': {
               const reqId = event.id;
-              pendingApprovalIds = [...pendingApprovalIds, reqId];
-              
-              registerApproval(reqId, (approved) => {
-                messages = [...messages, {
+              approvalCallbacks.set(reqId, (approved) => {
+                replaceMessages([...messages, {
                   id: genId(),
                   role: 'user',
                   content: approved ? `User approved execution of tool '${event.tool}'` : `User rejected execution of tool '${event.tool}'`,
                   timestamp: Date.now()
-                }];
-                if (agent?.approveToolCall) {
-                  agent.approveToolCall(reqId, approved);
+                }]);
+                if (activeAgent.approveToolCall) {
+                  activeAgent.approveToolCall(reqId, approved);
                 }
               });
 
-              collectedActions.push(
+              const approvalActions: ChatAction[] = [
                 {
                   label: `✅ ${i18n.t('common.confirm') || 'Approve'}: ${event.description}`,
                   variant: 'default',
@@ -269,18 +553,29 @@
                   variant: 'destructive',
                   payload: { approvalId: reqId, approved: false },
                 },
-              );
+              ];
 
               assistantMsg.content += `\n⚠️ **${i18n.t('chat.approvalRequired') || 'Approval required'}**: ${event.description}`;
-              assistantMsg.actions = [...collectedActions];
-              messages = [...messages.slice(0, -1), { ...assistantMsg }];
+              updateMessageById(assistantMsg.id, (current) => ({
+                ...current,
+                content: assistantMsg.content,
+                actions: [
+                  ...(current.actions ?? []).filter((candidate) => (
+                    candidate.payload?.approvalId !== reqId
+                  )),
+                  ...approvalActions,
+                ],
+              }));
               scrollToBottom();
               break;
             }
 
             case 'component':
               assistantMsg.content += `\n📊 [${event.name}]`;
-              messages = [...messages.slice(0, -1), { ...assistantMsg }];
+              updateMessageById(assistantMsg.id, (current) => ({
+                ...current,
+                content: assistantMsg.content,
+              }));
               scrollToBottom();
               break;
 
@@ -288,56 +583,68 @@
               break;
           }
         }
-      } else if (provider) {
+      } else if (activeChatProvider) {
         // ─── ChatProvider path: raw text stream ─────────────
-        const result = provider.sendMessage(
+        const result = activeChatProvider.sendMessage(
           messagesToSend,
-          { signal: abortController.signal },
+          { signal: controller.signal },
         );
 
         if (result && typeof result === 'object' && Symbol.asyncIterator in result) {
           for await (const chunk of result as AsyncGenerator<string>) {
-            if (!isStreaming) break;
+            if (!isCurrentRun(epoch, controller)) break;
             assistantMsg.content += chunk;
-            messages = [...messages.slice(0, -1), { ...assistantMsg }];
+            updateMessageById(assistantMsg.id, (current) => ({
+              ...current,
+              content: assistantMsg.content,
+            }));
             scrollToBottom();
           }
         } else {
           const text = await (result as Promise<string>);
+          if (!isCurrentRun(epoch, controller)) return;
           assistantMsg.content = text;
-          messages = [...messages.slice(0, -1), { ...assistantMsg }];
+          updateMessageById(assistantMsg.id, (current) => ({
+            ...current,
+            content: assistantMsg.content,
+          }));
           scrollToBottom();
         }
       }
     } catch (err: unknown) {
+      if (!isCurrentRun(epoch, controller)) return;
       if (err instanceof Error && err.name === 'AbortError') return;
       assistantMsg.content = i18n.t('chat.error') || 'Sorry, something went wrong. Please try again.';
-      messages = [...messages.slice(0, -1), { ...assistantMsg }];
+      updateMessageById(assistantMsg.id, (current) => ({
+        ...current,
+        content: assistantMsg.content,
+      }));
     } finally {
-      isStreaming = false;
-      abortController = null;
-      scrollToBottom();
+      if (isCurrentRun(epoch, controller)) {
+        isStreaming = false;
+        abortController = null;
+        flushPendingPersist();
+        scrollToBottom();
+      }
     }
   }
 
   function stopStreaming() {
-    if (abortController) {
-      abortController.abort();
-      isStreaming = false;
-      abortController = null;
-    }
+    if (!abortController && !isStreaming) return;
+    invalidateActiveRun();
+    flushPendingPersist();
   }
 
   function clearChat() {
-    messages = [];
-    isStreaming = false;
-    if (abortController) {
-      abortController.abort();
-      abortController = null;
-    }
-    // Also clear persisted data
-    if (persistKey) {
-      try { localStorage.removeItem(persistKey); } catch { /* noop */ }
+    invalidateActiveRun();
+    cancelPendingPersist();
+    replaceMessages([], false);
+    const key = restoredPersistKey ?? resolvedPersistKey;
+    const callback = onPersist;
+    if (callback) {
+      flushPersist({ sink: 'callback', key, messages: [], callback });
+    } else if (key) {
+      try { getChatStorage()?.removeItem(key); } catch { /* noop */ }
     }
   }
 
@@ -350,6 +657,20 @@
 
   function handleGlobalKeydown(e: KeyboardEvent) {
     if (e.ctrlKey && e.shiftKey && e.key === 'L') {
+      const eventTarget = e.target instanceof HTMLElement ? e.target : document.activeElement as HTMLElement | null;
+      const eventLayoutScope = eventTarget
+        ?.closest<HTMLElement>('[data-svadmin-layout-scope]')
+        ?.dataset.svadminLayoutScope;
+      const layoutCount = document.querySelectorAll('[data-svadmin-layout-scope]').length;
+      const activeChatScope = eventTarget
+        ?.closest<HTMLElement>('[data-svadmin-chat-scope]')
+        ?.dataset.svadminChatScope;
+      const chatCount = document.querySelectorAll('[data-svadmin-chat-scope]').length;
+      const ownsShortcut = ownerScope
+        ? (eventLayoutScope ? eventLayoutScope === ownerScope : layoutCount === 1)
+        : (activeChatScope ? activeChatScope === componentScope : chatCount === 1);
+      if (!ownsShortcut) return;
+
       e.preventDefault();
       if (open && !minimized) {
         open = false;
@@ -365,11 +686,18 @@
     if (action.payload?.approvalId) {
       const id = action.payload.approvalId as string;
       const approved = action.payload.approved as boolean;
-      resolveApproval(id, approved);
-      pendingApprovalIds = pendingApprovalIds.filter(pid => pid !== id);
-      // Remove action buttons after resolution
-      msg.actions = undefined;
-      messages = [...messages];
+      const resolve = approvalCallbacks.get(id);
+      approvalCallbacks.delete(id);
+      updateMessageById(msg.id, (current) => {
+        const remainingActions = current.actions?.filter((candidate) => (
+          candidate.payload?.approvalId !== id
+        ));
+        return {
+          ...current,
+          actions: remainingActions?.length ? remainingActions : undefined,
+        };
+      });
+      resolve?.(approved);
       return;
     }
     if (onAction) {
@@ -416,6 +744,11 @@
 <svelte:window onkeydown={handleGlobalKeydown} />
 
 {#if provider || agent}
+  <div
+    class="contents"
+    data-svadmin-chat-scope={componentScope}
+    data-svadmin-chat-visible={open ? 'true' : 'false'}
+  >
   <!-- FAB Button -->
   {#if !open}
     <div transition:scale={{ duration: 200 }}>
@@ -609,5 +942,5 @@
       {/if}
     </div>
   {/if}
+  </div>
 {/if}
-

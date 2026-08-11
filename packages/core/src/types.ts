@@ -382,6 +382,28 @@ export type MutationMode = 'pessimistic' | 'optimistic' | 'undoable';
 
 // ─── ResourceDefinition ───────────────────────────────────────
 
+/** 声明资源使用的传输协议；具体 URL/序列化行为由对应 provider 实现。 */
+export interface ResourceTransportConfig {
+  readonly type: string;
+  readonly endpoint?: string;
+  readonly options?: Readonly<Record<string, unknown>>;
+}
+
+/** 声明资源使用的后端 adapter，不在 Core 内绑定具体运行时实现。 */
+export interface ResourceAdapterConfig {
+  readonly name: string;
+  readonly version?: string;
+  readonly options?: Readonly<Record<string, unknown>>;
+}
+
+/** 每资源的 provider 选择与声明性 transport/adapter 元数据。 */
+export interface ResourceProviderConfig {
+  readonly dataProviderName?: string;
+  readonly transport?: string | ResourceTransportConfig;
+  readonly adapter?: string | ResourceAdapterConfig;
+  readonly meta?: Readonly<Record<string, unknown>>;
+}
+
 export interface ResourceDefinition {
   name: string;
   /** Unique identifier — use when multiple resources share the same `name` but target different DataProviders */
@@ -401,6 +423,9 @@ export interface ResourceDefinition {
   menuOrder?: number;
   /** Navigation group name — resources with the same group are displayed in a collapsible section */
   group?: string;
+  /** DataProvider 选择及声明性 transport/adapter 元数据。 */
+  provider?: ResourceProviderConfig;
+  /** @deprecated 新代码优先使用 `provider.dataProviderName` 选择 DataProvider。 */
   meta?: Record<string, unknown> & { dataProviderName?: string; parent?: string };
 }
 

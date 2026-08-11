@@ -8,10 +8,13 @@
   },
   "files": [
     "dist",
-    "template"
+    "template",
+    "scaffold-manifest.json"
   ],
   "scripts": {
     "build": "bun build src/index.ts --outdir dist --target node --format esm",
+    "test": "bun test src",
+    "check:compat": "bun ../../scripts/check-create-svadmin-compat.ts",
     "sync-template": "bun src/sync-template.ts",
     "prepublishOnly": "bun run build"
   },

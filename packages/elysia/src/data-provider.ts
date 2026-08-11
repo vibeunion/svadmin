@@ -7,8 +7,43 @@ import type {
   CreateParams, CreateResult, UpdateParams, UpdateResult, DeleteParams, DeleteResult,
   GetManyParams, GetManyResult, CreateManyParams, CreateManyResult,
   UpdateManyParams, UpdateManyResult, DeleteManyParams, DeleteManyResult,
-  CustomParams, CustomResult, BaseRecord, FieldFilter, Filter, Sort,
+  CustomParams, CustomResult, BaseRecord, FieldFilter, Filter, Sort, Pagination,
 } from '@svadmin/core';
+
+export interface ElysiaResourceContext {
+  apiUrl: string;
+  resource: string;
+  meta?: Record<string, unknown>;
+}
+
+export interface ElysiaListContext extends ElysiaResourceContext {
+  pagination: {
+    current: number;
+    pageSize: number;
+    mode?: Pagination['mode'];
+  };
+  sorters: Sort[];
+  filters: Filter[];
+}
+
+export type ElysiaResourceMatcher = string | RegExp | ((resource: string) => boolean);
+
+/** Per-resource transport overrides for APIs with mixed URL/query/envelope dialects. */
+export interface ElysiaResourceAdapter {
+  match: ElysiaResourceMatcher;
+  /**
+   * Path appended to `apiUrl`. Encode dynamic path segments inside the resolver;
+   * the provider intentionally does not encode the complete resource path.
+   */
+  resourcePath?: string | ((context: ElysiaResourceContext) => string);
+  /** Build the complete query string for list requests. */
+  buildListSearchParams?: (context: ElysiaListContext) => URLSearchParams;
+  /** Normalize a resource-specific list envelope while retaining extra result metadata. */
+  parseListResponse?: <TData extends BaseRecord = BaseRecord>(
+    json: unknown,
+    context: ElysiaListContext,
+  ) => GetListResult<TData>;
+}
 
 export interface ElysiaDataProviderOptions {
   /** Base API URL, e.g. 'http://localhost:3000' */
@@ -40,7 +75,15 @@ export interface ElysiaDataProviderOptions {
    *
    * @default Handles `{ items, total }` and raw arrays automatically
    */
-  parseListResponse?: <T>(json: unknown, resource: string) => { data: T[]; total: number };
+  parseListResponse?: <TData extends BaseRecord = BaseRecord>(
+    json: unknown,
+    resource: string,
+  ) => GetListResult<TData>;
+  /**
+   * Ordered per-resource transport overrides. The first matching adapter wins.
+   * Existing global options remain the fallback for unmatched resources.
+   */
+  resourceAdapters?: readonly ElysiaResourceAdapter[];
 }
 
 const DEFAULT_JSON_HEADERS: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -67,9 +110,39 @@ function resolveHeaders(opts: ElysiaDataProviderOptions): Record<string, string>
   return mergeHeaders(DEFAULT_JSON_HEADERS, extra);
 }
 
-function resolveResourceUrl(opts: ElysiaDataProviderOptions, resource: string): string {
-  const segment = opts.resourceUrlMap?.[resource] ?? resource;
-  return `${opts.apiUrl}/${segment}`;
+function matchesResource(matcher: ElysiaResourceMatcher, resource: string): boolean {
+  if (typeof matcher === 'string') return matcher === resource;
+  if (typeof matcher === 'function') return matcher(resource);
+  matcher.lastIndex = 0;
+  return matcher.test(resource);
+}
+
+function resolveResourceAdapter(
+  opts: ElysiaDataProviderOptions,
+  resource: string,
+): ElysiaResourceAdapter | undefined {
+  return opts.resourceAdapters?.find(adapter => matchesResource(adapter.match, resource));
+}
+
+function resolveResourceUrlWithAdapter(
+  opts: ElysiaDataProviderOptions,
+  context: ElysiaResourceContext,
+  adapter: ElysiaResourceAdapter | undefined,
+): string {
+  const configuredPath = typeof adapter?.resourcePath === 'function'
+    ? adapter.resourcePath(context)
+    : adapter?.resourcePath;
+  const path = configuredPath ?? opts.resourceUrlMap?.[context.resource] ?? context.resource;
+  return `${opts.apiUrl.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
+}
+
+function resolveResourceUrl(
+  opts: ElysiaDataProviderOptions,
+  resource: string,
+  meta?: Record<string, unknown>,
+): string {
+  const context: ElysiaResourceContext = { apiUrl: opts.apiUrl, resource, meta };
+  return resolveResourceUrlWithAdapter(opts, context, resolveResourceAdapter(opts, resource));
 }
 
 function encodeIdPathSegment(id: string | number): string {
@@ -148,6 +221,15 @@ function appendFilters(params: URLSearchParams, filters?: Filter[]): void {
   if (hasLogicalFilter) params.set('_filters', JSON.stringify(filters));
 }
 
+function buildDefaultListSearchParams(context: ElysiaListContext): URLSearchParams {
+  const params = new URLSearchParams();
+  params.set('_page', String(context.pagination.current));
+  params.set('_limit', String(context.pagination.pageSize));
+  appendSorters(params, context.sorters);
+  appendFilters(params, context.filters);
+  return params;
+}
+
 function buildCustomUrl(
   url: string,
   apiUrl: string,
@@ -200,16 +282,30 @@ async function request<T>(url: string, headers: Record<string, string>, init?: R
  * - `{ data: T[], total: number }` (common alternative)
  * - `T[]` (raw array — total is inferred from array length)
  */
-function defaultParseListResponse<T>(json: unknown): { data: T[]; total: number } {
+function normalizeObjectListResponse<TData extends BaseRecord>(
+  response: Record<string, unknown>,
+  recordsKey: 'items' | 'data',
+): GetListResult<TData> {
+  const records = response[recordsKey] as TData[];
+  const metadata = { ...response };
+  delete metadata[recordsKey];
+  return {
+    ...metadata,
+    data: records,
+    total: response.total !== undefined ? Number(response.total) : records.length,
+  };
+}
+
+function defaultParseListResponse<TData extends BaseRecord>(json: unknown): GetListResult<TData> {
   if (Array.isArray(json)) {
-    return { data: json as unknown as T[], total: json.length };
+    return { data: json as TData[], total: json.length };
   }
   const obj = json as Record<string, unknown>;
   if (Array.isArray(obj.items)) {
-    return { data: obj.items as unknown as T[], total: obj.total !== undefined ? Number(obj.total) : obj.items.length };
+    return normalizeObjectListResponse<TData>(obj, 'items');
   }
   if (Array.isArray(obj.data)) {
-    return { data: obj.data as unknown as T[], total: obj.total !== undefined ? Number(obj.total) : obj.data.length };
+    return normalizeObjectListResponse<TData>(obj, 'data');
   }
   throw new Error('Unrecognized list response format. Expected { items, total }, { data, total }, or an array.');
 }
@@ -240,34 +336,41 @@ export function createElysiaDataProvider(opts: ElysiaDataProviderOptions): DataP
   return {
     getApiUrl: () => apiUrl,
 
-    async getList<TData extends BaseRecord = BaseRecord>({ resource, pagination, sorters, filters }: GetListParams): Promise<GetListResult<TData>> {
-      const params = new URLSearchParams();
+    async getList<TData extends BaseRecord = BaseRecord>({ resource, pagination, sorters, filters, meta }: GetListParams): Promise<GetListResult<TData>> {
       const { current = 1, pageSize = 10 } = pagination ?? {};
-      params.set('_page', String(current));
-      params.set('_limit', String(pageSize));
-
-      appendSorters(params, sorters);
-      appendFilters(params, filters);
-
-      const baseUrl = resolveResourceUrl(opts, resource);
-      const url = `${baseUrl}?${params.toString()}`;
+      const context: ElysiaListContext = {
+        apiUrl,
+        resource,
+        meta,
+        pagination: { current, pageSize, mode: pagination?.mode },
+        sorters: sorters ?? [],
+        filters: filters ?? [],
+      };
+      const adapter = resolveResourceAdapter(opts, resource);
+      const params = adapter?.buildListSearchParams?.(context) ?? buildDefaultListSearchParams(context);
+      const baseUrl = resolveResourceUrlWithAdapter(opts, context, adapter);
+      const query = params.toString();
+      const url = query ? `${baseUrl}?${query}` : baseUrl;
       const headers = resolveHeaders(opts);
       const json = await request<unknown>(url, headers, undefined, withCredentials);
 
+      if (adapter?.parseListResponse) {
+        return adapter.parseListResponse<TData>(json, context);
+      }
       if (opts.parseListResponse) {
         return opts.parseListResponse<TData>(json, resource);
       }
       return defaultParseListResponse<TData>(json);
     },
 
-    async getOne<TData extends BaseRecord = BaseRecord>({ resource, id }: GetOneParams): Promise<GetOneResult<TData>> {
-      const baseUrl = resolveResourceUrl(opts, resource);
+    async getOne<TData extends BaseRecord = BaseRecord>({ resource, id, meta }: GetOneParams): Promise<GetOneResult<TData>> {
+      const baseUrl = resolveResourceUrl(opts, resource, meta);
       const data = await request<TData>(`${baseUrl}/${encodeIdPathSegment(id)}`, resolveHeaders(opts), undefined, withCredentials);
       return { data };
     },
 
-    async create<TData extends BaseRecord = BaseRecord, TVariables = unknown>({ resource, variables }: CreateParams<TVariables>): Promise<CreateResult<TData>> {
-      const baseUrl = resolveResourceUrl(opts, resource);
+    async create<TData extends BaseRecord = BaseRecord, TVariables = unknown>({ resource, variables, meta }: CreateParams<TVariables>): Promise<CreateResult<TData>> {
+      const baseUrl = resolveResourceUrl(opts, resource, meta);
       const data = await request<TData>(baseUrl, resolveHeaders(opts), {
         method: 'POST',
         body: JSON.stringify(variables),
@@ -275,8 +378,8 @@ export function createElysiaDataProvider(opts: ElysiaDataProviderOptions): DataP
       return { data };
     },
 
-    async update<TData extends BaseRecord = BaseRecord, TVariables = unknown>({ resource, id, variables }: UpdateParams<TVariables>): Promise<UpdateResult<TData>> {
-      const baseUrl = resolveResourceUrl(opts, resource);
+    async update<TData extends BaseRecord = BaseRecord, TVariables = unknown>({ resource, id, variables, meta }: UpdateParams<TVariables>): Promise<UpdateResult<TData>> {
+      const baseUrl = resolveResourceUrl(opts, resource, meta);
       const data = await request<TData>(`${baseUrl}/${encodeIdPathSegment(id)}`, resolveHeaders(opts), {
         method: updateMethod,
         body: JSON.stringify(variables),
@@ -284,23 +387,23 @@ export function createElysiaDataProvider(opts: ElysiaDataProviderOptions): DataP
       return { data };
     },
 
-    async deleteOne<TData extends BaseRecord = BaseRecord, TVariables = unknown>({ resource, id }: DeleteParams<TVariables>): Promise<DeleteResult<TData>> {
-      const baseUrl = resolveResourceUrl(opts, resource);
+    async deleteOne<TData extends BaseRecord = BaseRecord, TVariables = unknown>({ resource, id, meta }: DeleteParams<TVariables>): Promise<DeleteResult<TData>> {
+      const baseUrl = resolveResourceUrl(opts, resource, meta);
       const data = await request<TData | undefined>(`${baseUrl}/${encodeIdPathSegment(id)}`, resolveHeaders(opts), {
         method: 'DELETE',
       }, withCredentials);
       return { data: data === undefined ? { id } as unknown as TData : data };
     },
 
-    async getMany<TData extends BaseRecord = BaseRecord>({ resource, ids }: GetManyParams): Promise<GetManyResult<TData>> {
-      const baseUrl = resolveResourceUrl(opts, resource);
+    async getMany<TData extends BaseRecord = BaseRecord>({ resource, ids, meta }: GetManyParams): Promise<GetManyResult<TData>> {
+      const baseUrl = resolveResourceUrl(opts, resource, meta);
       const params = ids.map(id => `id=${encodeURIComponent(String(id))}`).join('&');
       const data = await request<TData[]>(`${baseUrl}?${params}`, resolveHeaders(opts), undefined, withCredentials);
       return { data };
     },
 
-    async createMany<TData extends BaseRecord = BaseRecord, TVariables = unknown>({ resource, variables }: CreateManyParams<TVariables>): Promise<CreateManyResult<TData>> {
-      const baseUrl = resolveResourceUrl(opts, resource);
+    async createMany<TData extends BaseRecord = BaseRecord, TVariables = unknown>({ resource, variables, meta }: CreateManyParams<TVariables>): Promise<CreateManyResult<TData>> {
+      const baseUrl = resolveResourceUrl(opts, resource, meta);
       const results = await Promise.all(
         variables.map(vars =>
           request<TData>(baseUrl, resolveHeaders(opts), {
@@ -312,8 +415,8 @@ export function createElysiaDataProvider(opts: ElysiaDataProviderOptions): DataP
       return { data: results };
     },
 
-    async updateMany<TData extends BaseRecord = BaseRecord, TVariables = unknown>({ resource, ids, variables }: UpdateManyParams<TVariables>): Promise<UpdateManyResult<TData>> {
-      const baseUrl = resolveResourceUrl(opts, resource);
+    async updateMany<TData extends BaseRecord = BaseRecord, TVariables = unknown>({ resource, ids, variables, meta }: UpdateManyParams<TVariables>): Promise<UpdateManyResult<TData>> {
+      const baseUrl = resolveResourceUrl(opts, resource, meta);
       const results = await Promise.all(
         ids.map(id =>
           request<TData>(`${baseUrl}/${encodeIdPathSegment(id)}`, resolveHeaders(opts), {
@@ -325,8 +428,8 @@ export function createElysiaDataProvider(opts: ElysiaDataProviderOptions): DataP
       return { data: results };
     },
 
-    async deleteMany<TData extends BaseRecord = BaseRecord, TVariables = unknown>({ resource, ids }: DeleteManyParams<TVariables>): Promise<DeleteManyResult<TData>> {
-      const baseUrl = resolveResourceUrl(opts, resource);
+    async deleteMany<TData extends BaseRecord = BaseRecord, TVariables = unknown>({ resource, ids, meta }: DeleteManyParams<TVariables>): Promise<DeleteManyResult<TData>> {
+      const baseUrl = resolveResourceUrl(opts, resource, meta);
       const results = await Promise.all(
         ids.map(id =>
           request<TData | undefined>(`${baseUrl}/${encodeIdPathSegment(id)}`, resolveHeaders(opts), {

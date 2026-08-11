@@ -1,5 +1,10 @@
 <script lang="ts">
-  import { useGetIdentity, useUpdatePassword, getAuthProvider } from '@svadmin/core';
+  import {
+    captureAdminContext,
+    useGetIdentity,
+    useUpdatePassword,
+    type AuthProvider,
+  } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { Button } from './ui/button/index.js';
   import { Label } from './ui/label/index.js';
@@ -10,21 +15,62 @@
   import { User, Mail, Lock, Loader2, AlertCircle, CheckCircle, Camera } from '@lucide/svelte';
 
   const i18n = useTranslation();
+  const adminContext = captureAdminContext();
 
   const identity = useGetIdentity();
   const updatePw = useUpdatePassword();
 
-  // Check if auth provider supports updateProfile
-  let authProvider: ReturnType<typeof getAuthProvider> | null = null;
-  try { authProvider = getAuthProvider(); } catch { /* no auth */ }
-  const canUpdateProfile = !!authProvider?.updateProfile;
+  const authProvider = $derived(adminContext.authProvider);
+  const tenantIdentity = $derived(adminContext.tenantCacheKey?.__svadminTenant);
+  const canUpdateProfile = $derived(Boolean(authProvider?.updateProfile));
 
-  // Profile edit state
   let editingProfile = $state(false);
   let editName = $state('');
   let profileSaving = $state(false);
   let profileSuccess = $state(false);
   let profileError = $state('');
+  let avatarUploading = $state(false);
+  let fileInput = $state<HTMLInputElement>();
+  let currentPassword = $state('');
+  let newPassword = $state('');
+  let confirmPassword = $state('');
+  let pwError = $state('');
+  let pwSuccess = $state(false);
+  let scopeEpoch = 0;
+
+  function resetProfileScope(): void {
+    editingProfile = false;
+    editName = '';
+    profileSaving = false;
+    profileSuccess = false;
+    profileError = '';
+    avatarUploading = false;
+    currentPassword = '';
+    newPassword = '';
+    confirmPassword = '';
+    pwError = '';
+    pwSuccess = false;
+  }
+
+  function isActiveScope(
+    epoch: number,
+    provider: AuthProvider | null,
+    scopedTenantIdentity: string | number | undefined,
+  ): boolean {
+    return epoch === scopeEpoch
+      && provider === authProvider
+      && scopedTenantIdentity === tenantIdentity;
+  }
+
+  $effect(() => {
+    void authProvider;
+    void tenantIdentity;
+    scopeEpoch++;
+    resetProfileScope();
+    return () => {
+      scopeEpoch++;
+    };
+  });
 
   function startEditProfile() {
     editName = identity.data?.name ?? '';
@@ -34,11 +80,15 @@
   }
 
   async function saveProfile() {
-    if (!authProvider?.updateProfile) return;
+    const provider = authProvider;
+    if (!provider?.updateProfile) return;
+    const epoch = scopeEpoch;
+    const scopedTenantIdentity = tenantIdentity;
     profileSaving = true;
     profileError = '';
     try {
-      const result = await authProvider.updateProfile({ name: editName });
+      const result = await provider.updateProfile({ name: editName });
+      if (!isActiveScope(epoch, provider, scopedTenantIdentity)) return;
       if (result.success) {
         profileSuccess = true;
         editingProfile = false;
@@ -47,34 +97,28 @@
         profileError = result.error?.message ?? i18n.t('common.operationFailed');
       }
     } catch (e) {
-      profileError = (e as Error).message;
+      if (isActiveScope(epoch, provider, scopedTenantIdentity)) {
+        profileError = e instanceof Error ? e.message : String(e);
+      }
     } finally {
-      profileSaving = false;
+      if (isActiveScope(epoch, provider, scopedTenantIdentity)) profileSaving = false;
     }
   }
-
-  // Avatar upload
-  let avatarUploading = $state(false);
-  let fileInput = $state<HTMLInputElement>(null!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
 
   async function handleAvatarChange(e: Event) {
     const file = (e.target as HTMLInputElement).files?.[0];
-    if (!file || !authProvider?.updateProfile) return;
+    const provider = authProvider;
+    if (!file || !provider?.updateProfile) return;
+    const epoch = scopeEpoch;
+    const scopedTenantIdentity = tenantIdentity;
     avatarUploading = true;
     try {
-      const result = await authProvider.updateProfile({ avatar: file });
-      if (result.success) identity.refetch();
+      const result = await provider.updateProfile({ avatar: file });
+      if (isActiveScope(epoch, provider, scopedTenantIdentity) && result.success) identity.refetch();
     } finally {
-      avatarUploading = false;
+      if (isActiveScope(epoch, provider, scopedTenantIdentity)) avatarUploading = false;
     }
   }
-
-  // Password change form
-  let currentPassword = $state('');
-  let newPassword = $state('');
-  let confirmPassword = $state('');
-  let pwError = $state('');
-  let pwSuccess = $state(false);
 
   async function handlePasswordChange(e: SubmitEvent) {
     e.preventDefault();
@@ -84,11 +128,15 @@
     if (!newPassword) { pwError = i18n.t('auth.passwordRequired'); return; }
     if (newPassword !== confirmPassword) { pwError = i18n.t('auth.passwordMismatch'); return; }
 
+    const provider = authProvider;
+    const epoch = scopeEpoch;
+    const scopedTenantIdentity = tenantIdentity;
     const result = await updatePw.mutate({
       password: newPassword,
       currentPassword,
       confirmPassword,
     });
+    if (!isActiveScope(epoch, provider, scopedTenantIdentity)) return;
     if (result.success) {
       pwSuccess = true;
       currentPassword = '';
@@ -99,7 +147,6 @@
     }
   }
 
-  // Avatar initials
   const initials = $derived(
     identity.data?.name
       ? identity.data.name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
@@ -151,7 +198,7 @@
             {#if canUpdateProfile}
               <button
                 class="absolute inset-0 rounded-lg bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                onclick={() => fileInput.click()}
+                onclick={() => fileInput?.click()}
                 disabled={avatarUploading}
               >
                 {#if avatarUploading}

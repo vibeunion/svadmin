@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { captureAdminContext, getResources, canAccessAsync, getAccessControlProvider } from '@svadmin/core';
-  import type { Identity, MenuItem } from '@svadmin/core';
+  import { captureAdminContext } from '@svadmin/core';
+  import type { AccessControlProvider, Action, Identity, MenuItem } from '@svadmin/core';
   import { getPath } from '../router-state.svelte.js';
   import { useTranslation } from '@svadmin/core/i18n';
 
@@ -35,6 +35,7 @@
     routeMode?: 'hash' | 'path' | 'auto';
   } = $props();
   const adminContext = captureAdminContext();
+  const accessControlProvider = $derived(adminContext.accessControlProvider);
 
   const effectiveRouteMode = $derived(
     routeMode === 'auto'
@@ -103,13 +104,23 @@
     items: NavItem[];
   }
 
-  async function hasCustomMenuAccess(menuItem: MenuItem): Promise<boolean> {
+  async function checkAccess(provider: AccessControlProvider | null, resource: string, action: Action): Promise<boolean> {
+    if (!provider) return true;
+
+    const result = await provider.can({
+      resource,
+      action,
+      meta: adminContext.getProviderMeta(resource),
+    });
+    return Array.isArray(result) ? (result[0]?.can ?? false) : result.can;
+  }
+
+  async function hasCustomMenuAccess(menuItem: MenuItem, provider: AccessControlProvider | null): Promise<boolean> {
     const resource = menuItem.meta?.resource;
     if (!resource) return true;
 
     try {
-      const { can } = await canAccessAsync(resource, menuItem.meta?.action ?? 'list');
-      return can;
+      return await checkAccess(provider, resource, menuItem.meta?.action ?? 'list');
     } catch {
       // Permission-provider failures must not expose protected navigation.
       return false;
@@ -128,17 +139,17 @@
     }));
   }
 
-  async function visibleCustomMenuItem(menuItem: MenuItem): Promise<MenuItem | null> {
-    if (menuItem.meta?.hidden || !await hasCustomMenuAccess(menuItem)) return null;
+  async function visibleCustomMenuItem(menuItem: MenuItem, provider: AccessControlProvider | null): Promise<MenuItem | null> {
+    if (menuItem.meta?.hidden || !await hasCustomMenuAccess(menuItem, provider)) return null;
     if (!menuItem.children) return menuItem;
 
-    const children = await visibleCustomMenuItems(menuItem.children);
+    const children = await visibleCustomMenuItems(menuItem.children, provider);
     if (children.length === 0 && !menuItem.href) return null;
     return { ...menuItem, children };
   }
 
-  async function visibleCustomMenuItems(menuItems: MenuItem[]): Promise<MenuItem[]> {
-    const filteredItems = await Promise.all(menuItems.map(visibleCustomMenuItem));
+  async function visibleCustomMenuItems(menuItems: MenuItem[], provider: AccessControlProvider | null): Promise<MenuItem[]> {
+    const filteredItems = await Promise.all(menuItems.map((menuItem) => visibleCustomMenuItem(menuItem, provider)));
     return filteredItems.filter(isVisibleCustomMenuItem);
   }
 
@@ -146,13 +157,12 @@
 
   $effect(() => {
     const configuredMenu = menu?.length ? snapshotCustomMenuItems(menu) : [];
-    // Provider swaps must invalidate checks nested below public menu groups.
-    getAccessControlProvider();
+    const provider = accessControlProvider;
     customMenuItems = [];
     if (configuredMenu.length === 0) return;
 
     let cancelled = false;
-    void visibleCustomMenuItems(configuredMenu).then((visibleItems) => {
+    void visibleCustomMenuItems(configuredMenu, provider).then((visibleItems) => {
       if (!cancelled) customMenuItems = visibleItems;
     });
 
@@ -163,13 +173,13 @@
 
   $effect(() => {
     const homeLabel = i18n.t('common.home');
-    const currentResources = getResources();
+    const currentResources = adminContext.resources;
+    const provider = accessControlProvider;
     let cancelled = false;
 
     Promise.all(currentResources.map(async (r) => {
       try {
-        const { can } = await canAccessAsync(r.name, 'list');
-        return { r, can };
+        return { r, can: await checkAccess(provider, r.name, 'list') };
       } catch {
         return { r, can: false };
       }

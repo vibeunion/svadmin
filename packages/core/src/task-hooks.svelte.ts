@@ -2,6 +2,11 @@ import { createMutation, createQuery, useQueryClient } from '@tanstack/svelte-qu
 import { getAdminOptions } from './options.svelte';
 import { captureAdminContext } from './context.svelte';
 import type { AdminContextAccessor } from './context.svelte';
+import {
+  appendTenantCacheKey,
+  queryKeyMatchesTenant,
+  resolveTenantProviderMeta,
+} from './provider-bundle';
 import { checkError, createOvertimeTracker, fireErrorNotification, fireSuccessNotification } from './hook-utils.svelte';
 import type { NotificationConfig, OvertimeOptions } from './hook-utils.svelte';
 import { useTranslation } from './i18n.svelte';
@@ -54,27 +59,41 @@ export function useSubmitTask<
   const mutation = createMutation<TaskHandle<TTask>, TError, UseSubmitTaskMutateParams<TTask>>(() => ({
     mutationFn: async (params) => {
       const provider = normalizeTaskProvider<TTask>(params.taskProvider, adminContext);
-      return provider.submit(params.taskName, params.options);
+      const providerMeta = adminContext.tenant
+        ? {
+            ...(params.options?.meta ?? {}),
+            ...resolveTenantProviderMeta(adminContext.tenant, adminContext.tenantAdapter),
+          }
+        : params.options?.meta;
+      const taskOptions = providerMeta === params.options?.meta
+        ? params.options
+        : { ...params.options, meta: providerMeta };
+      return provider.submit(params.taskName, taskOptions);
     },
     onSuccess: (data, params, context) => {
-      fireSuccessNotification(
-        params.successNotification,
-        i18n.t('task.submitSuccess'),
+      fireSuccessNotification({
+        config: params.successNotification,
+        defaultMessage: i18n.t('task.submitSuccess'),
         data,
-        params.options,
-        params.taskName,
-      );
-      void queryClient.invalidateQueries({ queryKey: ['taskList'] });
+        values: params.options,
+        resource: params.taskName,
+        provider: adminContext.notificationProvider,
+      });
+      void queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey[0] === 'taskList'
+          && queryKeyMatchesTenant(query.queryKey, adminContext.tenantCacheKey),
+      });
       options.mutationOptions?.onSuccess?.(data, params, context);
     },
     onError: (error, params, context) => {
       checkError(error, adminContext);
-      fireErrorNotification(
-        params.errorNotification,
-        i18n.t('task.submitFailed'),
+      fireErrorNotification({
+        config: params.errorNotification,
+        defaultMessage: i18n.t('task.submitFailed'),
         error,
-        params.taskName,
-      );
+        resource: params.taskName,
+        provider: adminContext.notificationProvider,
+      });
       options.mutationOptions?.onError?.(error, params, context);
     },
   }));
@@ -109,7 +128,7 @@ export function useTask<TTask extends TaskRecord = TaskRecord, TError = HttpErro
     const provider = normalizeTaskProvider<TTask>(options.taskProvider, adminContext);
     const queryOptions = options.queryOptions;
     return {
-      queryKey: ['task', options.taskId],
+      queryKey: appendTenantCacheKey(['task', options.taskId], adminContext.tenantCacheKey),
       queryFn: async () => {
         if (!options.taskId) throw new Error('useTask requires a taskId');
         return provider.get(options.taskId);
@@ -131,12 +150,24 @@ export function useTask<TTask extends TaskRecord = TaskRecord, TError = HttpErro
     if (query.isSuccess && query.dataUpdatedAt > lastSuccessAt) {
       lastSuccessAt = query.dataUpdatedAt;
       if (options.successNotification) {
-        fireSuccessNotification(options.successNotification, '', query.data, undefined, options.taskId);
+        fireSuccessNotification({
+          config: options.successNotification,
+          defaultMessage: '',
+          data: query.data,
+          resource: options.taskId,
+          provider: adminContext.notificationProvider,
+        });
       }
     } else if (query.isError && query.errorUpdatedAt > lastErrorAt) {
       lastErrorAt = query.errorUpdatedAt;
       checkError(query.error, adminContext);
-      fireErrorNotification(options.errorNotification, i18n.t('task.fetchFailed'), query.error, options.taskId);
+      fireErrorNotification({
+        config: options.errorNotification,
+        defaultMessage: i18n.t('task.fetchFailed'),
+        error: query.error,
+        resource: options.taskId,
+        provider: adminContext.notificationProvider,
+      });
     }
   });
 
@@ -176,7 +207,10 @@ export function useTaskList<TTask extends TaskRecord = TaskRecord, TError = Http
     const provider = normalizeTaskProvider<TTask>(options.taskProvider, adminContext);
     const queryOptions = options.queryOptions;
     return {
-      queryKey: ['taskList', options.dlq ? 'dlq' : 'default', options.params],
+      queryKey: appendTenantCacheKey(
+        ['taskList', options.dlq ? 'dlq' : 'default', options.params],
+        adminContext.tenantCacheKey,
+      ),
       queryFn: async () => {
         if (options.dlq) {
           if (!provider.listDlq) throw new Error('TaskProvider does not implement listDlq');
@@ -202,12 +236,25 @@ export function useTaskList<TTask extends TaskRecord = TaskRecord, TError = Http
     if (query.isSuccess && query.dataUpdatedAt > lastSuccessAt) {
       lastSuccessAt = query.dataUpdatedAt;
       if (options.successNotification) {
-        fireSuccessNotification(options.successNotification, '', query.data, options.params, options.dlq ? 'taskDlq' : 'tasks');
+        fireSuccessNotification({
+          config: options.successNotification,
+          defaultMessage: '',
+          data: query.data,
+          values: options.params,
+          resource: options.dlq ? 'taskDlq' : 'tasks',
+          provider: adminContext.notificationProvider,
+        });
       }
     } else if (query.isError && query.errorUpdatedAt > lastErrorAt) {
       lastErrorAt = query.errorUpdatedAt;
       checkError(query.error, adminContext);
-      fireErrorNotification(options.errorNotification, i18n.t('task.fetchListFailed'), query.error, options.dlq ? 'taskDlq' : 'tasks');
+      fireErrorNotification({
+        config: options.errorNotification,
+        defaultMessage: i18n.t('task.fetchListFailed'),
+        error: query.error,
+        resource: options.dlq ? 'taskDlq' : 'tasks',
+        provider: adminContext.notificationProvider,
+      });
     }
   });
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { captureAdminContext, getResources, getAgentProvider, getChatProvider, toggleTheme } from '@svadmin/core';
+  import { captureAdminContext, getResources, toggleTheme } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { Command } from './ui/command/index.js';
   import * as Dialog from './ui/dialog/index.js';
@@ -18,7 +18,7 @@
   let searchValue = $state('');
 
   const resources = $derived(getResources());
-  const hasAI = $derived(!!(getAgentProvider() || getChatProvider()));
+  const hasAI = $derived(!!(adminContext.agentProvider || adminContext.chatProvider));
 
   function close() {
     open = false;

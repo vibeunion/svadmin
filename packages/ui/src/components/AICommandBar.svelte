@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { captureAdminContext, getResources, getChatProvider, toggleTheme } from '@svadmin/core';
+  import { captureAdminContext, toggleTheme } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { Command } from './ui/command/index.js';
   import * as Dialog from './ui/dialog/index.js';
@@ -12,24 +12,42 @@
   const adminContext = captureAdminContext();
   let searchValue = $state('');
   
-  const resources = getResources();
-  const provider = $derived(getChatProvider());
+  const resources = $derived(adminContext.resources);
+  const provider = $derived(adminContext.chatProvider);
 
   // AI State
   let aiMode = $state(false);
   let aiResponse = $state('');
   let isPredicting = $state(false);
   let abortController: AbortController | null = null;
+  let requestEpoch = 0;
+
+  $effect(() => {
+    provider;
+    adminContext.tenantCacheKey?.__svadminTenant;
+    open;
+    clearAIConversation();
+
+    return cancelAIRequest;
+  });
 
   function close() {
     open = false;
+    clearAIConversation();
+  }
+
+  function cancelAIRequest() {
+    requestEpoch += 1;
+    abortController?.abort();
+    abortController = null;
+  }
+
+  function clearAIConversation() {
+    cancelAIRequest();
     searchValue = '';
     aiMode = false;
     aiResponse = '';
-    if (abortController) {
-      abortController.abort();
-      abortController = null;
-    }
+    isPredicting = false;
   }
 
   function act(fn: () => void) {
@@ -38,45 +56,50 @@
   }
 
   async function askAI() {
-    if (!provider || !searchValue.trim()) return;
-    
+    const scopedProvider = provider;
+    const prompt = searchValue.trim();
+    if (!scopedProvider || !prompt) return;
+
+    cancelAIRequest();
+    const epoch = requestEpoch;
+    const controller = new AbortController();
+    abortController = controller;
     aiMode = true;
     isPredicting = true;
     aiResponse = '';
-    
-    if (abortController) abortController.abort();
-    abortController = new AbortController();
 
     try {
-      const result = provider.sendMessage(
-        [{ id: 'cmd', role: 'user', content: searchValue, timestamp: Date.now() }],
-        { signal: abortController.signal }
+      const result = scopedProvider.sendMessage(
+        [{ id: 'cmd', role: 'user', content: prompt, timestamp: Date.now() }],
+        { signal: controller.signal }
       );
 
       if (Symbol.asyncIterator in result) {
         for await (const chunk of result as AsyncIterable<string>) {
+          if (epoch !== requestEpoch) return;
           aiResponse += chunk;
         }
       } else {
-        aiResponse = await result;
+        const response = await result;
+        if (epoch === requestEpoch) aiResponse = response;
       }
     } catch (err: unknown) {
-      if (err instanceof Error && err.name !== 'AbortError') {
+      if (epoch === requestEpoch && err instanceof Error && err.name !== 'AbortError') {
         aiResponse = 'Failed to get response from AI.';
       }
     } finally {
-      isPredicting = false;
+      if (epoch === requestEpoch) {
+        isPredicting = false;
+        if (abortController === controller) abortController = null;
+      }
     }
   }
 
   function handleKeyDown(e: KeyboardEvent) {
     if (e.key === 'Enter' && searchValue.trim() && !aiMode) {
-      // If pressing enter on an active search, cmdk usually handles selection.
-      // But if there's no selection or we want to force AI, we can intercept.
-      // For simplicity, we trigger AI on Ctrl+Enter
       if (e.ctrlKey || e.metaKey) {
         e.preventDefault();
-        askAI();
+        void askAI();
       }
     }
   }
@@ -170,7 +193,7 @@
         <div class="p-2 border-t flex justify-end gap-2 bg-muted/10">
           <button 
             class="text-xs px-3 py-1.5 rounded-md hover:bg-muted transition-colors text-muted-foreground"
-            onclick={() => { aiMode = false; searchValue = ''; }}
+            onclick={clearAIConversation}
           >
             Clear & Return
           </button>

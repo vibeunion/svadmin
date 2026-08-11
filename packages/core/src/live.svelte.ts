@@ -1,6 +1,8 @@
 // LiveProvider — Real-time subscription interface + hooks
 
 import { useQueryClient } from '@tanstack/svelte-query';
+import { captureAdminContext } from './context.svelte';
+import { queryKeyMatchesTenant } from './provider-bundle';
 
 // ─── Types ──────────────────────────────────────────────────────
 
@@ -34,6 +36,7 @@ export function useLive(
   options?: { liveMode?: LiveMode | (() => LiveMode); onLiveEvent?: (event: LiveEvent) => void; liveParams?: Record<string, unknown> | (() => Record<string, unknown>); dataProviderName?: string }
 ): void {
   const queryClient = useQueryClient();
+  const adminContext = captureAdminContext();
 
   $effect(() => {
     const lp = typeof liveProvider === 'function' ? liveProvider() : liveProvider;
@@ -51,7 +54,8 @@ export function useLive(
           options?.onLiveEvent?.(event);
           if (liveMode === 'auto') {
             const dpName = options?.dataProviderName;
-            const dpMatch = (q: { queryKey: readonly unknown[] }) => q.queryKey[0] === dpName;
+            const dpMatch = (q: { queryKey: readonly unknown[] }) =>
+              queryKeyMatchesTenant(q.queryKey, adminContext.tenantCacheKey) && q.queryKey[0] === dpName;
             queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === res });
           }
         },

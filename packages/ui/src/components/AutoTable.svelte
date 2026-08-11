@@ -34,7 +34,7 @@
     cell_getValue,
   } from '@tanstack/table-core/static-functions';
 
-  import { captureAdminContext, useList, useDelete, useDeleteMany, getResource, notify } from '@svadmin/core';
+  import { captureAdminContext, useList, useDelete, useDeleteMany, getResource, notifyWithProvider } from '@svadmin/core';
   import type {
     BaseRecord,
     FieldDefinition,
@@ -43,7 +43,7 @@
     Pagination as PaginationState,
     Sort,
   } from '@svadmin/core';
-  import { useCan, getAccessControlProvider } from '@svadmin/core';
+  import { useCan } from '@svadmin/core';
   import { readURLState, writeURLState } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
 
@@ -259,7 +259,7 @@
   const deleteManyMutation = deleteManyResult.mutation;
 
   // ─── Permissions ──────────────────────────────────────────────
-  const acEnabled = $derived(!!getAccessControlProvider());
+  const acEnabled = $derived(!!adminContext.accessControlProvider);
   const canCreatePerm = useCan(() => ({ resource: resourceName, action: 'create', queryOptions: { enabled: acEnabled } }));
   const canEditPerm = useCan(() => ({ resource: resourceName, action: 'edit', queryOptions: { enabled: acEnabled } }));
   const canDeletePerm = useCan(() => ({ resource: resourceName, action: 'delete', queryOptions: { enabled: acEnabled } }));
@@ -505,9 +505,15 @@
     confirmAction = async () => {
       try {
         await deleteManyMutation.mutateAsync({ ids, resource: resourceName });
-        notify({ type: 'success', message: i18n.t('common.batchDeleteSuccess', { count: ids.length }) });
+        notifyWithProvider(
+          { type: 'success', message: i18n.t('common.batchDeleteSuccess', { count: ids.length }) },
+          adminContext.notificationProvider,
+        );
       } catch {
-        notify({ type: 'error', message: i18n.t('common.batchDeletePartialFail', { failed: 1, total: ids.length }) });
+        notifyWithProvider(
+          { type: 'error', message: i18n.t('common.batchDeletePartialFail', { failed: 1, total: ids.length }) },
+          adminContext.notificationProvider,
+        );
       }
       rowSelectionAtom.set({});
       confirmOpen = false;

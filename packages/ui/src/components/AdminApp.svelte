@@ -19,7 +19,26 @@
   // Auto-inject design tokens so consumers don't need to manually import
   import '../app.css';
   import { onDestroy, onMount, untrack, type Component, type Snippet } from 'svelte';
-  import type { DataProvider, AuthProvider, ResourceDefinition, ThemeMode, RouterProvider, ThemeConfig, MenuItem, TaskProvider, I18nProvider } from '@svadmin/core';
+  import type {
+    AccessControlProvider,
+    AgentProvider,
+    AuditLogProvider,
+    AuthProvider,
+    ChatProvider,
+    DataProviderInput,
+    I18nProvider,
+    LiveProvider,
+    MenuItem,
+    NotificationProvider,
+    ProviderBundle,
+    ResourceDefinition,
+    RouterProvider,
+    TaskProvider,
+    TenantAdapter,
+    TenantContext,
+    ThemeConfig,
+    ThemeMode,
+  } from '@svadmin/core';
   import {
     captureAdminContext,
     createHashRouterProvider,
@@ -55,12 +74,27 @@
   import { Badge } from './ui/badge/index.js';
   import { Skeleton } from './ui/skeleton/index.js';
   import { provideRouterState } from '../router-state.svelte.js';
+  import type { AdminProviderBundle } from '../types.js';
 
   interface Props {
-    dataProvider: DataProvider;
+    /** Single provider, or named providers such as `{ default, analytics }`. */
+    dataProvider?: DataProviderInput;
+    /** Core canonical provider bundle. Existing top-level props take precedence. */
+    providerBundle?: AdminProviderBundle;
+    /** Compatibility alias for providerBundle. */
+    providers?: AdminProviderBundle;
     authProvider?: AuthProvider;
+    accessControlProvider?: AccessControlProvider;
+    liveProvider?: LiveProvider;
+    auditLogProvider?: AuditLogProvider;
+    notificationProvider?: NotificationProvider;
+    chatProvider?: ChatProvider;
+    agentProvider?: AgentProvider;
     taskProvider?: TaskProvider;
     routerProvider?: RouterProvider;
+    tenantAdapter?: TenantAdapter;
+    /** Request/tree-scoped tenant. Tenant identifiers are never rendered by DevTools. */
+    tenant?: TenantContext;
     resources: ResourceDefinition[];
     /** Bindable tree-local locale; defaults to the provider locale or per-tree browser detection (English during SSR). */
     locale?: string;
@@ -102,9 +136,19 @@
 
   let {
     dataProvider,
+    providerBundle,
+    providers,
     authProvider,
+    accessControlProvider,
+    liveProvider,
+    auditLogProvider,
+    notificationProvider,
+    chatProvider,
+    agentProvider,
     taskProvider,
     routerProvider,
+    tenantAdapter,
+    tenant,
     resources,
     locale = $bindable(),
     i18nProvider,
@@ -134,10 +178,24 @@
     Skeleton: Skeleton as unknown as ComponentRegistry['Skeleton'],
   };
 
+  const resolvedProviderBundle = $derived(providerBundle ?? providers);
+  const resolvedDataProvider = $derived(dataProvider ?? resolvedProviderBundle?.dataProvider);
+  const resolvedAuthProvider = $derived(authProvider ?? resolvedProviderBundle?.authProvider ?? undefined);
+  const resolvedAccessControlProvider = $derived(accessControlProvider ?? resolvedProviderBundle?.accessControlProvider ?? undefined);
+  const resolvedLiveProvider = $derived(liveProvider ?? resolvedProviderBundle?.liveProvider);
+  const resolvedAuditLogProvider = $derived(auditLogProvider ?? resolvedProviderBundle?.auditLogProvider ?? undefined);
+  const resolvedNotificationProvider = $derived(notificationProvider ?? resolvedProviderBundle?.notificationProvider ?? undefined);
+  const resolvedChatProvider = $derived(chatProvider ?? resolvedProviderBundle?.chatProvider ?? undefined);
+  const resolvedAgentProvider = $derived(agentProvider ?? resolvedProviderBundle?.agentProvider ?? undefined);
+  const resolvedTaskProvider = $derived(taskProvider ?? resolvedProviderBundle?.taskProvider);
+  const resolvedRouterInput = $derived(routerProvider ?? resolvedProviderBundle?.routerProvider);
+  const resolvedTenantAdapter = $derived(tenantAdapter ?? resolvedProviderBundle?.tenantAdapter);
+  const resolvedI18nProvider = $derived(i18nProvider ?? resolvedProviderBundle?.i18nProvider);
+
   // Resolve router provider (default to hash)
   const mergedComponents = $derived.by((): ComponentRegistry => ({ ...defaultComponents, ...userComponents }));
-  const resolvedRouter = $derived(routerProvider ?? createHashRouterProvider());
-  const resolvedRouteMode = $derived(routeMode ?? (routerProvider ? 'auto' : 'hash'));
+  const resolvedRouter = $derived(resolvedRouterInput ?? createHashRouterProvider());
+  const resolvedRouteMode = $derived(routeMode ?? (resolvedRouterInput ? 'auto' : 'hash'));
 
   const routerState = provideRouterState(untrack(() => resolvedRouter));
   const scopedRouterProvider: RouterProvider = {
@@ -166,14 +224,14 @@
 
   const i18nScope = createI18nScope({
     locale: untrack(() => locale),
-    provider: untrack(() => i18nProvider),
+    provider: untrack(() => resolvedI18nProvider),
     onLocaleChange: updateBoundLocale,
   });
   provideI18nScope(i18nScope);
   const translation = useTranslation();
 
   $effect.pre(() => {
-    const ownerProvider = i18nProvider;
+    const ownerProvider = resolvedI18nProvider;
     const ownerLocale = locale;
     untrack(() => i18nScope.updateOwner({
       locale: ownerLocale,
@@ -210,11 +268,23 @@
   }
 
   provideAdminContext({
-    get dataProvider() { return dataProvider; },
-    get authProvider() { return authProvider ?? null; },
-    get taskProvider() { return taskProvider; },
+    get providerBundle() { return resolvedProviderBundle as ProviderBundle | undefined; },
+    get dataProvider() {
+      if (!resolvedDataProvider) throw new Error('AdminApp requires a DataProvider.');
+      return resolvedDataProvider;
+    },
+    get authProvider() { return resolvedAuthProvider ?? null; },
+    get accessControlProvider() { return resolvedAccessControlProvider ?? null; },
+    get liveProvider() { return resolvedLiveProvider; },
+    get auditLogProvider() { return resolvedAuditLogProvider ?? null; },
+    get notificationProvider() { return resolvedNotificationProvider ?? null; },
+    get chatProvider() { return resolvedChatProvider ?? null; },
+    get agentProvider() { return resolvedAgentProvider ?? null; },
+    get taskProvider() { return resolvedTaskProvider; },
     get resources() { return resources; },
     get routerProvider() { return scopedRouterProvider; },
+    get tenantAdapter() { return resolvedTenantAdapter; },
+    get tenant() { return tenant; },
   });
   const adminContext = captureAdminContext();
 
@@ -244,8 +314,8 @@
   });
 
   // Auth check
-  let isAuthenticated = $state(untrack(() => !authProvider));
-  let authChecked = $state(untrack(() => !authProvider));
+  let isAuthenticated = $state(untrack(() => !resolvedAuthProvider));
+  let authChecked = $state(untrack(() => !resolvedAuthProvider));
 
   async function navigateWithinApp(path: string) {
     await adminContext.navigate(path);
@@ -263,7 +333,7 @@
     // Explicitly track route so auth is re-checked on navigation
     const _route = route;
 
-    if (!authProvider) {
+    if (!resolvedAuthProvider) {
       if (!cancelled) {
         isAuthenticated = true;
         authChecked = true;
@@ -271,7 +341,7 @@
       return;
     }
     authChecked = false;
-    authProvider.check().then(result => {
+    resolvedAuthProvider.check().then(result => {
       if (cancelled) return;
       isAuthenticated = result.authenticated;
       authChecked = true;
@@ -293,7 +363,9 @@
 </script>
 
 <QueryClientProvider client={queryClient}>
-  {#if !authChecked}
+  {#if !resolvedDataProvider}
+    <ConfigErrorScreen title="{title} — DataProvider is required" />
+  {:else if !authChecked}
     <div class="flex h-screen items-center justify-center">
       <div class="space-y-4 text-center">
         <div class="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-primary mx-auto"></div>
@@ -302,7 +374,7 @@
     </div>
   {:else if route === '/login' && loginPage}
     {@render loginPage()}
-  {:else if route === '/login' && authProvider}
+  {:else if route === '/login' && resolvedAuthProvider}
     <LoginPage
       {title}
       defaultIdentifier={loginDefaults?.identifier}
@@ -310,15 +382,15 @@
       loginHint={loginDefaults?.hint}
       onSuccess={() => { isAuthenticated = true; void navigateWithinApp('/'); }}
     />
-  {:else if route === '/register' && authProvider?.register}
+  {:else if route === '/register' && resolvedAuthProvider?.register}
     <RegisterPage {title} />
-  {:else if route === '/forgot-password' && authProvider?.forgotPassword}
+  {:else if route === '/forgot-password' && resolvedAuthProvider?.forgotPassword}
     <ForgotPasswordPage {title} />
-  {:else if route === '/update-password' && authProvider?.updatePassword}
+  {:else if route === '/update-password' && resolvedAuthProvider?.updatePassword}
     <UpdatePasswordPage {title} />
   {:else if route === '/login' || route === '/register' || route === '/forgot-password' || route === '/update-password'}
     <ConfigErrorScreen title="{title} — {translation.t('common.configRequired')}" />
-  {:else if (isAuthenticated || !authProvider) && isStandaloneTwoFactor}
+  {:else if (isAuthenticated || !resolvedAuthProvider) && isStandaloneTwoFactor}
     <SystemPageShell {title}>
       <LazyPage loader={loadTwoFactorAuthPage} props={{}} />
     </SystemPageShell>
@@ -327,7 +399,7 @@
       {@const ErrorComp = mergedComponents.ErrorPage || ErrorPage}
       <ErrorComp status={standaloneErrorStatus} />
     </SystemPageShell>
-  {:else if isAuthenticated || !authProvider}
+  {:else if isAuthenticated || !resolvedAuthProvider}
     <Layout {title} {menu} {siteUrl} routeMode={resolvedRouteMode}>
       {#key route + (params.resource ?? '') + (params.id ?? '') + (params.variant ?? '') + (params.columns ?? '')}
       <div class="svadmin-page-enter">

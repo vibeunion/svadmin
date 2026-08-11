@@ -12,7 +12,7 @@ svadmin is a compile-time admin framework — no virtual DOM, no runtime diffing
 | **Framework** | Svelte 5 | React 18+ | React 18+ | React |
 | **Runtime** | ✅ Compiled to direct DOM ops — no VDOM | VDOM → diff → patch | VDOM → diff → patch | VDOM → diff → patch |
 | **Reactivity** | ✅ Runes — variable-level signals | Hooks — component re-renders | Hooks | Hooks |
-| **Core size** | ✅ ~15KB | ~80KB | ~200KB+ | ~150KB+ |
+| **Bundle size** | Project-dependent; measure your selected packages | Project-dependent | Project-dependent | Project-dependent |
 | **Memory** | ✅ No VDOM copy in memory | VDOM tree overhead | VDOM tree overhead | VDOM tree overhead |
 | **Headless** | ✅ | ✅ | Partial | ❌ |
 | **Query** | TanStack Query (Svelte) | TanStack Query (React) | ra-core | Custom |
@@ -61,8 +61,8 @@ svadmin is a compile-time admin framework — no virtual DOM, no runtime diffing
 |---------|-----------|-----------|----------------|
 | Optimistic updates | ✅ | ✅ | ✅ |
 | Undoable mutations | ✅ | ✅ | ✅ |
-| CSV import/export | ✅ Built-in | ❌ DIY | Community |
-| Auto-save | ✅ Component | ❌ DIY | ❌ DIY |
+| CSV import/export | ✅ Built-in | ✅ `useImport` / `useExport` | Community |
+| Auto-save | ✅ Component | ✅ `useForm` auto-save | ❌ DIY |
 | Field inferencer | ✅ Sample data + OpenAPI | ✅ Sample data | ❌ |
 | Filter operators | 16 operators | 16 operators | Backend-dependent |
 
@@ -75,10 +75,10 @@ svadmin is a compile-time admin framework — no virtual DOM, no runtime diffing
 | Field components | 16 types (incl ArrayField) | UI kit dependent | 20+ types |
 | Dark mode | ✅ 7 themes | UI kit dependent | ✅ |
 | Glassmorphism | ✅ Auth pages | ❌ | ❌ |
-| Command palette | ✅ Built-in | ❌ | ❌ |
-| 3D Permission Matrix | ✅ Free Enterprise Component | ❌ Official unspecified | ❌ DIY |
-| Audit Log Diff Viewer | ✅ Free Enterprise Component | ✅ Paid feature | ❌ DIY |
-| Zero-refresh Tenant Switch | ✅ Free Enterprise Component | ❌ DIY | ❌ DIY |
+| Command palette | ✅ Built-in | ✅ `@refinedev/kbar` | ❌ |
+| Permission Matrix | ✅ Built-in component | ❌ Official unspecified | ❌ DIY |
+| Audit JSON Snapshot Viewer | ✅ Built-in component | ✅ Paid feature | ❌ DIY |
+| Tenant switcher control | ✅ App wiring required | ❌ DIY | ❌ DIY |
 
 ### Developer Experience
 
@@ -87,7 +87,7 @@ svadmin is a compile-time admin framework — no virtual DOM, no runtime diffing
 | Resource Type Registry | ✅ Compile-time | ❌ | ❌ |
 | End-to-end type inference | ✅ via Elysia/Drizzle | ❌ | ❌ |
 | CLI scaffolding | ✅ `@svadmin/create` | ✅ `create-refine-app` | ✅ `create-react-admin` |
-| Overtime tracking | ✅ Built-in hooks | ❌ | ❌ |
+| Overtime tracking | ✅ Built-in hooks | ✅ `useLoadingOvertime` | ❌ |
 | Steps form | ✅ `useStepsForm` | ✅ | ❌ |
 
 ### AI & Intelligence
@@ -107,13 +107,13 @@ svadmin is a compile-time admin framework — no virtual DOM, no runtime diffing
 
 ## When to Choose svadmin
 
-- **You want maximum performance** — No virtual DOM, no runtime diffing. Svelte compiles components to direct DOM operations at build time, resulting in faster initial render, lower memory usage, and zero framework overhead at runtime
-- **You're using Svelte** — svadmin is the only production-grade headless admin for Svelte 5
+- **You prefer compiled Svelte rendering** — Components use Svelte 5 rather than a React virtual-DOM runtime; benchmark your own routes and data volume before choosing on performance
+- **You're using Svelte** — svadmin provides headless admin APIs and components designed for Svelte 5
 - **You want direct DB access** — `@svadmin/drizzle` lets you skip the API layer entirely
 - **You need edge deployment** — SQLite + Cloudflare D1 support via Drizzle
 - **You want full type safety** — ResourceTypeMap + Elysia/Drizzle inference
-- **Bundle size matters** — Svelte's compiled output is significantly smaller than React's runtime + virtual DOM
-- **You need fine-grained reactivity** — Svelte 5 runes update only the exact DOM nodes that changed, unlike React which re-renders entire component subtrees
+- **Bundle size matters** — You can select headless providers and UI packages independently; compare production builds with the same feature set
+- **You need fine-grained reactivity** — svadmin components use Svelte 5 runes for reactive state
 - **You want AI built into your admin** — ChatProvider + AgentProvider with tool calling, approval gates, and streaming out of the box
 
 ## When to Choose Refine

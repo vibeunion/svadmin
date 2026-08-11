@@ -50,7 +50,11 @@ export function resetAuditLogProvider(): void {
   handler = (entry) => { console.info('[audit]', entry.action, entry.resource, entry.recordId); };
 }
 
-export function audit(entry: Omit<AuditEntry, 'timestamp'>): void {
+/** Record an entry through an explicitly scoped provider and the compatibility handler. */
+export function auditWithProvider(
+  entry: Omit<AuditEntry, 'timestamp'>,
+  provider: AuditLogProvider | null | undefined,
+): void {
   const fullEntry: AuditEntry = { ...entry, timestamp: new Date().toISOString() };
   try {
     const result = handler(fullEntry);
@@ -60,8 +64,8 @@ export function audit(entry: Omit<AuditEntry, 'timestamp'>): void {
   } catch (e) {
     console.error('[audit] handler error:', e);
   }
-  if (auditLogProvider) {
-    auditLogProvider.create({
+  if (provider) {
+    provider.create({
       resource: entry.resource ?? '',
       action: entry.action,
       data: entry.data ?? entry.details,
@@ -69,4 +73,8 @@ export function audit(entry: Omit<AuditEntry, 'timestamp'>): void {
       meta: entry.meta,
     }).catch(e => console.error('[audit] provider create error:', e));
   }
+}
+
+export function audit(entry: Omit<AuditEntry, 'timestamp'>): void {
+  auditWithProvider(entry, auditLogProvider);
 }

@@ -4,8 +4,26 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
+import { spawnSync } from 'node:child_process';
 import prompts from 'prompts';
 import pc from 'picocolors';
+import {
+  createProjectPackageJson,
+  loadScaffoldManifest,
+  type AuthProviderChoice,
+  type DataProviderChoice,
+  type ScaffoldManifest,
+} from './project-manifest';
+import {
+  doctorProjectPackageJson,
+  planProjectPackageFileUpgrade,
+  readMaintainedPackageJson,
+  writeProjectPackageJsonUpgrade,
+  type DoctorIssue,
+  type DoctorReport,
+  type UpgradeChange,
+  type UpgradeResult,
+} from './project-maintenance';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,19 +31,138 @@ const __dirname = path.dirname(__filename);
 // ─── Types ─────────────────────────────────────────────────────
 interface InitResponse {
   projectName: string;
-  dataProvider: 'simple-rest' | 'supabase' | 'graphql' | 'none';
-  authProvider: 'mock' | 'jwt' | 'supabase' | 'none';
+  dataProvider: DataProviderChoice;
+  authProvider: AuthProviderChoice;
   installDeps: boolean;
 }
 
-interface PackageJson {
-  name: string;
-  version: string;
-  private: boolean;
-  type: string;
-  scripts: Record<string, string>;
-  dependencies: Record<string, string>;
-  devDependencies: Record<string, string>;
+interface UpgradeCommandArguments {
+  projectDirectory: string;
+  write: boolean;
+}
+
+function loadShippedScaffoldManifest(): ScaffoldManifest {
+  return loadScaffoldManifest(path.join(__dirname, '..', 'scaffold-manifest.json'));
+}
+
+function projectDirectoryFromArguments(positional: string[]): string {
+  if (positional.length > 1) {
+    throw new Error(`Expected at most one project directory, received: ${positional.join(', ')}`);
+  }
+  return path.resolve(process.cwd(), positional[0] ?? '.');
+}
+
+function doctorProjectDirectory(args: string[]): string {
+  const unknownOption = args.find((argument) => argument.startsWith('-'));
+  if (unknownOption !== undefined) throw new Error(`Unknown option: ${unknownOption}`);
+  return projectDirectoryFromArguments(args);
+}
+
+function parseUpgradeArguments(args: string[]): UpgradeCommandArguments {
+  let write = false;
+  const positional: string[] = [];
+  for (const argument of args) {
+    if (argument === '--write') {
+      write = true;
+    } else if (argument.startsWith('-')) {
+      throw new Error(`Unknown option: ${argument}`);
+    } else {
+      positional.push(argument);
+    }
+  }
+  return { projectDirectory: projectDirectoryFromArguments(positional), write };
+}
+
+function doctorIssueMessage(issue: DoctorIssue): string {
+  const actualDescription = issue.actualVersion === undefined
+    ? 'missing'
+    : `${issue.actualVersion}${issue.actualSection ? ` in ${issue.actualSection}` : ''}`;
+  return `${issue.packageName}: ${issue.kind}; expected ${issue.expectedVersion} in ` +
+    `${issue.expectedSection}, found ${actualDescription}`;
+}
+
+function upgradeChangeMessage(change: UpgradeChange): string {
+  if (change.action === 'add') {
+    return `add ${change.packageName}@${change.to} to ${change.section}`;
+  }
+  if (change.action === 'move') {
+    return `move ${change.packageName} to ${change.section} and set ${change.to}`;
+  }
+  return `update ${change.packageName} from ${change.from ?? 'missing'} to ${change.to}`;
+}
+
+function printDoctorIssue(issue: DoctorIssue): void {
+  const marker = issue.kind === 'drift' || issue.kind === 'section'
+    ? pc.yellow('  ⚠')
+    : pc.red('  ✗');
+  console.log(`${marker} ${doctorIssueMessage(issue)}`);
+  console.log(pc.dim(`    → ${issue.action}`));
+}
+
+function printDoctorReport(report: DoctorReport, projectDirectory: string): void {
+  console.log();
+  console.log(pc.bold(`svadmin doctor — ${projectDirectory}`));
+  if (report.status === 'clean') {
+    console.log(pc.green('  ✔ Dependencies match the shipped svadmin scaffold.'));
+  } else {
+    for (const issue of report.issues) printDoctorIssue(issue);
+    console.log();
+    console.log(pc.yellow(`  ${report.issues.length} actionable issue(s) found.`));
+  }
+  console.log();
+}
+
+function doctor(args: string[]): void {
+  const projectDirectory = doctorProjectDirectory(args);
+  const project = readMaintainedPackageJson(path.join(projectDirectory, 'package.json'));
+  const report = doctorProjectPackageJson(project, loadShippedScaffoldManifest());
+  printDoctorReport(report, projectDirectory);
+  process.exitCode = report.exitCode;
+}
+
+function printUpgradeChanges(upgradeExecution: UpgradeResult): void {
+  for (const change of upgradeExecution.plan.changes) {
+    console.log(`  ${pc.cyan('•')} ${upgradeChangeMessage(change)}`);
+  }
+  console.log();
+}
+
+function printUpgradeOutcome(upgradeExecution: UpgradeResult, packagePath: string): void {
+  if (upgradeExecution.wrote) {
+    console.log(pc.green('  ✔ package.json updated.'));
+    console.log(`  Backup: ${pc.cyan(upgradeExecution.backupPath)}`);
+    console.log(`  Restore by copying the backup over: ${pc.cyan(packagePath)}`);
+  } else {
+    console.log(pc.yellow('  Dry run only; package.json was not changed.'));
+    console.log('  Re-run this command with --write to apply the plan.');
+  }
+  console.log();
+}
+
+function printUpgradeExecution(
+  upgradeExecution: UpgradeResult,
+  projectDirectory: string,
+  packagePath: string,
+): void {
+  console.log();
+  console.log(pc.bold(`svadmin upgrade — ${projectDirectory}`));
+  if (upgradeExecution.plan.changes.length === 0) {
+    console.log(pc.green('  ✔ package.json already matches the shipped scaffold.'));
+    console.log();
+    return;
+  }
+  printUpgradeChanges(upgradeExecution);
+  printUpgradeOutcome(upgradeExecution, packagePath);
+}
+
+function upgrade(args: string[]): void {
+  const commandArguments = parseUpgradeArguments(args);
+  const packagePath = path.join(commandArguments.projectDirectory, 'package.json');
+  const scaffoldManifest = loadShippedScaffoldManifest();
+  const upgradeExecution = commandArguments.write
+    ? writeProjectPackageJsonUpgrade(packagePath, scaffoldManifest, new Date())
+    : planProjectPackageFileUpgrade(packagePath, scaffoldManifest);
+  printUpgradeExecution(upgradeExecution, commandArguments.projectDirectory, packagePath);
 }
 
 // ─── Scaffold (init) ───────────────────────────────────────────
@@ -98,6 +235,7 @@ async function init(): Promise<void> {
 
   // 1. Copy template files
   const templateDir = path.join(__dirname, '..', 'template');
+  const scaffoldManifest = loadShippedScaffoldManifest();
 
   function copyDir(src: string, dest: string): void {
     fs.mkdirSync(dest, { recursive: true });
@@ -119,57 +257,13 @@ async function init(): Promise<void> {
   }
 
   // 2. Generate package.json
-  const packageJson: PackageJson = {
-    name: response.projectName,
-    version: '0.1.0',
-    private: true,
-    type: 'module',
-    scripts: {
-      dev: 'vite',
-      build: 'vite build',
-      preview: 'vite preview',
-      check: 'svelte-check --tsconfig ./tsconfig.json'
-    },
-    dependencies: {
-      '@svadmin/core': '^0.31.0',
-      '@svadmin/ui': '^0.38.0',
-      '@tanstack/svelte-query': '^6.1.29',
-      'highlight.js': '^11.11.1',
-      '@lucide/svelte': '^1.17.0',
-    },
-    devDependencies: {
-      '@sveltejs/vite-plugin-svelte': '^7.0.0',
-      '@tailwindcss/vite': '^4.2.2',
-      'svelte': '^5.55.1',
-      'svelte-check': '^4.4.8',
-      'tailwindcss': '^4.2.2',
-      'tw-animate-css': '^1.4.0',
-      'typescript': '^6.0.0',
-      'vite': '^8.0.3',
-    }
-  };
+  const packageJson = createProjectPackageJson(scaffoldManifest, {
+    projectName: response.projectName,
+    dataProvider: response.dataProvider,
+    authProvider: response.authProvider,
+  });
 
-  // Add data provider dependency
-  const dpMap: Record<string, Record<string, string>> = {
-    'simple-rest': { '@svadmin/simple-rest': '^0.9.8', '@refinedev/simple-rest': '^5.0.0' },
-    'supabase': { '@svadmin/supabase': '^0.11.3', '@supabase/supabase-js': '^2.101.1' },
-    'graphql': { '@svadmin/graphql': '^0.9.9', 'graphql-request': '^7.4.0', 'graphql': '^16.8.0' },
-  };
-  if (dpMap[response.dataProvider]) {
-    Object.assign(packageJson.dependencies, dpMap[response.dataProvider]);
-  }
-
-  // Add auth provider dependency
-  if (response.authProvider === 'supabase' && response.dataProvider !== 'supabase') {
-    packageJson.dependencies['@svadmin/supabase'] = '^0.11.3';
-    packageJson.dependencies['@supabase/supabase-js'] = '^2.101.1';
-  }
-  if (response.authProvider === 'jwt' && response.dataProvider !== 'simple-rest') {
-    packageJson.dependencies['@svadmin/simple-rest'] = '^0.9.8';
-    packageJson.dependencies['@refinedev/simple-rest'] = '^5.0.0';
-  }
-
-  fs.writeFileSync(path.join(projectDir, 'package.json'), JSON.stringify(packageJson, null, 2));
+  fs.writeFileSync(path.join(projectDir, 'package.json'), `${JSON.stringify(packageJson, null, 2)}\n`);
   console.log(pc.green('  ✔') + ' package.json generated');
 
   // 3. Generate .gitignore
@@ -213,13 +307,10 @@ bun run dev
   // 5. Install dependencies
   if (response.installDeps) {
     console.log(`\n${pc.bold('Installing dependencies...')}\n`);
-    const { execSync } = await import('child_process');
-    try {
-      execSync('bun install', { cwd: projectDir, stdio: 'inherit' });
-    } catch {
-      try {
-        execSync('npm install', { cwd: projectDir, stdio: 'inherit' });
-      } catch {
+    const bunInstall = spawnSync('bun', ['install'], { cwd: projectDir, stdio: 'inherit' });
+    if (bunInstall.status !== 0) {
+      const npmInstall = spawnSync('npm', ['install'], { cwd: projectDir, stdio: 'inherit' });
+      if (npmInstall.status !== 0) {
         console.log(pc.yellow('\n  ⚠ Auto-install failed. Run `bun install` or `npm install` manually.'));
       }
     }
@@ -341,8 +432,22 @@ async function eject(args: string[]): Promise<void> {
 
 // ─── CLI dispatch ──────────────────────────────────────────────
 const [,, subcommand, ...rest] = process.argv;
+const runCommand = (command: () => void | Promise<void>): void => {
+  Promise.resolve()
+    .then(command)
+    .catch((error: unknown) => {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(pc.red(`\n  ✗ ${message}\n`));
+      process.exitCode = 2;
+    });
+};
+
 if (subcommand === 'eject') {
-  eject(rest).catch(console.error);
+  runCommand(() => eject(rest));
+} else if (subcommand === 'doctor') {
+  runCommand(() => doctor(rest));
+} else if (subcommand === 'upgrade') {
+  runCommand(() => upgrade(rest));
 } else {
-  init().catch(console.error);
+  runCommand(init);
 }

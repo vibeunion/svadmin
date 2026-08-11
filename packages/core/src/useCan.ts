@@ -1,7 +1,8 @@
 // useCan — reactive permission check hook with TanStack Query integration
 
 import { createQuery } from '@tanstack/svelte-query';
-import { canAccessAsync, getAccessControlProvider } from './permissions.svelte';
+import { captureAdminContext } from './context.svelte';
+import { appendTenantCacheKey } from './provider-bundle';
 import type { Action, CanResult } from './permissions.svelte';
 
 export interface UseCanOptions {
@@ -32,11 +33,24 @@ export interface UseCanResult {
  * ```
  */
 export function useCan(options: () => UseCanOptions): UseCanResult {
+  const adminContext = captureAdminContext();
   const query = createQuery<CanResult>(() => {
     const opts = options();
+    const provider = adminContext.accessControlProvider;
     return {
-      queryKey: ['useCan', opts.resource, opts.action, opts.params, opts.meta] as const,
-      queryFn: () => canAccessAsync(opts.resource, opts.action, opts.params, opts.meta),
+      queryKey: appendTenantCacheKey([
+        'useCan', opts.resource, opts.action, opts.params, opts.meta,
+      ], adminContext.tenantCacheKey),
+      queryFn: async () => {
+        if (!provider) return { can: true };
+        const result = await provider.can({
+          resource: opts.resource,
+          action: opts.action,
+          params: opts.params,
+          meta: adminContext.getProviderMeta(opts.resource, opts.meta),
+        });
+        return Array.isArray(result) ? (result[0] ?? { can: false }) : result;
+      },
       enabled: opts.queryOptions?.enabled ?? true,
       staleTime: opts.queryOptions?.staleTime ?? 5 * 60 * 1000,
     };
@@ -44,7 +58,7 @@ export function useCan(options: () => UseCanOptions): UseCanResult {
 
   return {
     get allowed() { 
-      const p = getAccessControlProvider();
+      const p = adminContext.accessControlProvider;
       if (!p) return true;
       return (query.data as CanResult | undefined)?.can ?? false; 
     },
