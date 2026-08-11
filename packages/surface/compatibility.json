@@ -1,0 +1,22 @@
+{
+  "surface": "0.1.x",
+  "minimumSupported": {
+    "@svadmin/core": "0.34.2",
+    "@svadmin/ui": "0.40.6",
+    "svelte": "5.56.8"
+  },
+  "testedCombinations": [
+    {
+      "name": "minimum-supported",
+      "core": "0.34.2",
+      "ui": "0.40.6",
+      "svelte": "5.56.8"
+    },
+    {
+      "name": "workspace-packed",
+      "core": "workspace tarball",
+      "ui": "workspace tarball",
+      "svelte": "workspace override"
+    }
+  ]
+}

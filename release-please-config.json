@@ -162,6 +162,11 @@
       "release-type": "node",
       "component": "mcp",
       "changelog-path": "CHANGELOG.md"
+    },
+    "packages/surface": {
+      "release-type": "node",
+      "component": "surface",
+      "changelog-path": "CHANGELOG.md"
     }
   },
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",

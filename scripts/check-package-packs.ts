@@ -125,6 +125,20 @@ const expectations: PackageExpectation[] = [
     name: '@svadmin/sso',
     requiredFiles: ['dist/index.js', 'dist/index.d.ts'],
   },
+  {
+    directory: 'packages/surface',
+    name: '@svadmin/surface',
+    requiredFiles: [
+      'dist/index.js',
+      'dist/index.d.ts',
+      'dist/svelte.js',
+      'dist/svelte.d.ts',
+      'dist/components/SurfaceRenderer.svelte',
+      'dist/components/SurfaceRenderer.svelte.d.ts',
+      'compatibility.json',
+      'README.md',
+    ],
+  },
 ];
 
 function assert(condition: unknown, message: string): asserts condition {
@@ -476,6 +490,8 @@ const resolvable = [
   '@svadmin/lite',
   '@svadmin/lite/lite.css',
   '@svadmin/lite/enhance.js',
+  '@svadmin/surface',
+  '@svadmin/surface/svelte',
 ];
 
 for (const specifier of resolvable) {
@@ -585,6 +601,116 @@ void publishedTypes;
   return `${runtimeOutput.trim()}\nconsumer type imports passed\n`;
 }
 
+interface SurfaceCompatibility {
+  minimumSupported: {
+    '@svadmin/core': string;
+    '@svadmin/ui': string;
+    svelte: string;
+  };
+}
+
+async function verifySurfaceCompatibility(
+  packDirectory: string,
+  results: Map<string, PackResult>,
+  manifests: Map<string, PackageManifest>,
+): Promise<string> {
+  const surfacePack = results.get('@svadmin/surface');
+  const corePack = results.get('@svadmin/core');
+  const uiPack = results.get('@svadmin/ui');
+  const uiManifest = manifests.get('@svadmin/ui');
+  assert(surfacePack, '@svadmin/surface: missing tarball for compatibility verification');
+  assert(corePack, '@svadmin/core: missing tarball for Surface compatibility verification');
+  assert(uiPack, '@svadmin/ui: missing tarball for Surface compatibility verification');
+  assert(uiManifest, '@svadmin/ui: missing manifest for Surface compatibility verification');
+
+  const compatibility = JSON.parse(await readFile(
+    join(repositoryRoot, 'packages', 'surface', 'compatibility.json'),
+    'utf8',
+  )) as SurfaceCompatibility;
+  const rootManifest = JSON.parse(await readFile(join(repositoryRoot, 'package.json'), 'utf8')) as {
+    overrides?: Record<string, string>;
+  };
+  const workspaceSvelte = rootManifest.overrides?.svelte;
+  const workspaceVite = rootManifest.overrides?.vite;
+  const queryVersion = uiManifest.peerDependencies?.['@tanstack/svelte-query'];
+  const sveltePlugin = uiManifest.devDependencies?.['@sveltejs/vite-plugin-svelte'];
+  assert(workspaceSvelte, 'root package.json: overrides.svelte is required for Surface verification');
+  assert(workspaceVite, 'root package.json: overrides.vite is required for Surface verification');
+  assert(queryVersion, '@svadmin/ui: @tanstack/svelte-query peer range is required for Surface verification');
+  assert(sveltePlugin, '@svadmin/ui: Svelte Vite plugin version is required for Surface verification');
+
+  const combinations = [
+    {
+      name: 'workspace-packed',
+      core: `file:${join(packDirectory, corePack.filename)}`,
+      ui: `file:${join(packDirectory, uiPack.filename)}`,
+      svelte: workspaceSvelte,
+    },
+    {
+      name: 'minimum-supported',
+      core: compatibility.minimumSupported['@svadmin/core'],
+      ui: compatibility.minimumSupported['@svadmin/ui'],
+      svelte: compatibility.minimumSupported.svelte,
+    },
+  ] as const;
+
+  const outputs: string[] = [];
+  for (const combination of combinations) {
+    const consumerDirectory = join(packDirectory, `surface-${combination.name}`);
+    await mkdir(consumerDirectory, { recursive: true });
+    await writeFile(join(consumerDirectory, 'package.json'), `${JSON.stringify({
+      name: `svadmin-surface-${combination.name}`,
+      private: true,
+      type: 'module',
+      packageManager: `pnpm@${pnpmVersion}`,
+      dependencies: {
+        '@svadmin/core': combination.core,
+        '@svadmin/surface': `file:${join(packDirectory, surfacePack.filename)}`,
+        '@svadmin/ui': combination.ui,
+        '@tanstack/svelte-query': queryVersion,
+        svelte: combination.svelte,
+      },
+      devDependencies: {
+        '@sveltejs/vite-plugin-svelte': sveltePlugin,
+        vite: workspaceVite,
+      },
+    }, null, 2)}\n`);
+    await writeFile(
+      join(consumerDirectory, 'entry.ts'),
+      `import { validateSurfaceSpec } from '@svadmin/surface';\n` +
+        `import { SurfaceRenderer, defaultSurfaceCatalog } from '@svadmin/surface/svelte';\n` +
+        `console.info(typeof validateSurfaceSpec, typeof SurfaceRenderer, defaultSurfaceCatalog.version);\n`,
+    );
+    await writeFile(
+      join(consumerDirectory, 'vite.config.mjs'),
+      `import { svelte } from '@sveltejs/vite-plugin-svelte';\n` +
+        `export default { plugins: [svelte()], build: { lib: { entry: 'entry.ts', formats: ['es'] } } };\n`,
+    );
+
+    run('npx', [
+      '--yes',
+      `pnpm@${pnpmVersion}`,
+      'install',
+      '--strict-peer-dependencies',
+      '--ignore-scripts',
+      '--reporter',
+      'append-only',
+      '--store-dir',
+      join(consumerDirectory, '.pnpm-store'),
+    ], consumerDirectory);
+    const nodeOutput = run(
+      'node',
+      ['--input-type=module', '-e', "import('@svadmin/surface').then((module) => console.info(typeof module.validateSurfaceSpec))"],
+      consumerDirectory,
+    );
+    const vitePath = join(repositoryRoot, 'node_modules', 'vite', 'bin', 'vite.js');
+    const buildOutput = run('node', [vitePath, 'build', '--config', 'vite.config.mjs'], consumerDirectory);
+    outputs.push(`${combination.name}: ${nodeOutput.trim()}\n${buildOutput.trim()}`);
+  }
+
+  return outputs.join('\n');
+}
+
 async function main(): Promise<void> {
   const temporaryDirectory = await mkdtemp(join(tmpdir(), 'svadmin-pack-check-'));
 
@@ -673,6 +799,8 @@ async function main(): Promise<void> {
     console.info(peerTreeOutput.trim());
     const pnpmPeerTreeOutput = await verifyUiPnpmPeerTree(temporaryDirectory, results, manifests);
     console.info(pnpmPeerTreeOutput.trim());
+    const surfaceCompatibilityOutput = await verifySurfaceCompatibility(temporaryDirectory, results, manifests);
+    console.info(surfaceCompatibilityOutput.trim());
 
     for (const result of results.values()) {
       await access(join(temporaryDirectory, result.filename));

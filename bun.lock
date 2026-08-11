@@ -48,6 +48,7 @@
         "@svadmin/core": "workspace:*",
         "@svadmin/editor": "workspace:*",
         "@svadmin/mcp": "workspace:*",
+        "@svadmin/surface": "workspace:*",
         "@svadmin/ui": "workspace:*",
         "@tanstack/svelte-query": "^6.1.38",
         "bits-ui": "^2.18.1",
@@ -286,7 +287,7 @@
     },
     "packages/lite": {
       "name": "@svadmin/lite",
-      "version": "0.3.12",
+      "version": "0.3.14",
       "dependencies": {
         "@lucide/svelte": "^1.30.0",
         "zod": "^4.4.3",
@@ -461,6 +462,28 @@
         "@supacloud/js",
         "@svadmin/core",
       ],
+    },
+    "packages/surface": {
+      "name": "@svadmin/surface",
+      "version": "0.1.0",
+      "dependencies": {
+        "zod": "^4.4.3",
+      },
+      "devDependencies": {
+        "@svadmin/core": "workspace:*",
+        "@svadmin/ui": "workspace:*",
+        "@sveltejs/vite-plugin-svelte": "^7.3.0",
+        "@testing-library/dom": "^10.4.1",
+        "@testing-library/svelte": "^5.4.2",
+        "@testing-library/user-event": "^14.6.3",
+        "happy-dom": "^20.11.2",
+        "vitest": "^4.1.10",
+      },
+      "peerDependencies": {
+        "@svadmin/core": ">=0.34.2 <0.35.0",
+        "@svadmin/ui": ">=0.40.6 <0.41.0",
+        "svelte": "^5.56.8",
+      },
     },
     "packages/sveltekit": {
       "name": "@svadmin/sveltekit",
@@ -1020,6 +1043,8 @@
     "@svadmin/strapi": ["@svadmin/strapi@workspace:packages/strapi"],
 
     "@svadmin/supabase": ["@svadmin/supabase@workspace:packages/supabase"],
+
+    "@svadmin/surface": ["@svadmin/surface@workspace:packages/surface"],
 
     "@svadmin/sveltekit": ["@svadmin/sveltekit@workspace:packages/sveltekit"],
 

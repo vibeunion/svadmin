@@ -34,7 +34,7 @@ export default defineConfig({
     conditions: ['browser'],
   },
   optimizeDeps: {
-    exclude: ['@svadmin/core', '@svadmin/ui', '@svadmin/supabase'],
+    exclude: ['@svadmin/core', '@svadmin/surface', '@svadmin/ui', '@svadmin/supabase'],
     include: ['highlight.js'],
   },
   build: {

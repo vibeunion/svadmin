@@ -15,6 +15,7 @@
     "@svadmin/core": "workspace:*",
     "@svadmin/editor": "workspace:*",
     "@svadmin/mcp": "workspace:*",
+    "@svadmin/surface": "workspace:*",
     "@svadmin/ui": "workspace:*",
     "@tanstack/svelte-query": "^6.1.38",
     "bits-ui": "^2.18.1",

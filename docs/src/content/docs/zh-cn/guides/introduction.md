@@ -25,6 +25,7 @@ svadmin 原生基于 **Svelte 5 runes** 构建，采用基于 Provider 的架构
 - 🎨 **可主题化** — 7 套配色主题、亮/暗色模式、毛玻璃效果
 - 🛡️ **访问控制** — 基于角色和属性的权限管理
 - 🔍 **推断器** — 从示例数据或 OpenAPI 3.x 规范自动生成管理界面
+- 🧱 **声明式 Surface** — 使用可信 Svelte 组件渲染经过校验和策略约束的仪表盘协议
 - 🏷️ **资源类型注册表** — 编译时资源名称检查 + 自动类型推断
 - 🔄 **变更模式** — 悲观、乐观和可撤销三种变更模式
 - 📤 **数据导入导出** — CSV 导出/导入，支持批量操作
@@ -37,6 +38,7 @@ svadmin 原生基于 **Svelte 5 runes** 构建，采用基于 Provider 的架构
 |------|------|
 | `@svadmin/core` | Hooks、Providers、类型、资源类型注册表、工具函数 |
 | `@svadmin/ui` | 预构建 Svelte 5 组件（表单、表格、16 个字段、shadcn） |
+| [`@svadmin/surface`](/zh-cn/guides/declarative-surface) | 带只读资源绑定和严格校验的声明式仪表盘 |
 | `@svadmin/simple-rest` | REST API 数据 Provider |
 | `@svadmin/supabase` | Supabase 数据 + 认证 + 实时 Provider |
 | `@svadmin/pocketbase` | PocketBase 数据 + 认证 + 实时 Provider |

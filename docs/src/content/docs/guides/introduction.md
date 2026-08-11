@@ -25,6 +25,7 @@ svadmin is built natively for **Svelte 5 runes** and uses a provider-based archi
 - 🎨 **Themeable** — 7 color themes, light/dark mode, glassmorphism
 - 🛡️ **Access Control** — Role-based and attribute-based permissions
 - 🔍 **Inferencer** — Auto-generate admin UI from sample data or OpenAPI 3.x specs
+- 🧱 **Declarative Surfaces** — Render validated, policy-constrained dashboard specs with trusted Svelte components
 - 🏷️ **Resource Type Registry** — Compile-time resource name checking + auto type inference
 - 🔄 **Mutation Modes** — Pessimistic, optimistic, and undoable mutations
 - 📤 **Data Transfer** — CSV export/import with batch support
@@ -37,6 +38,7 @@ svadmin is built natively for **Svelte 5 runes** and uses a provider-based archi
 |---------|-------------|
 | `@svadmin/core` | Hooks, providers, types, Resource Type Registry, utilities |
 | `@svadmin/ui` | Pre-built Svelte 5 components (Forms, Tables, 16 Fields, shadcn) |
+| [`@svadmin/surface`](/guides/declarative-surface) | Validated declarative dashboards with read-only resource bindings |
 | `@svadmin/simple-rest` | REST API data provider |
 | `@svadmin/supabase` | Supabase data + auth + live provider |
 | `@svadmin/pocketbase` | PocketBase data + auth + live provider |

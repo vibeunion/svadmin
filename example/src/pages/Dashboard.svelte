@@ -21,6 +21,7 @@
   } from '@lucide/svelte';
 
   const i18n = useTranslation();
+  const declarativeSurfacePromise = import('../components/DeclarativeSurfaceExample.svelte');
 
   interface Product {
     id: number;
@@ -659,4 +660,17 @@
       </div>
     </Card.Content>
   </Card.Root>
+
+  {#await declarativeSurfacePromise}
+    <section class="grid min-h-40 place-items-center rounded-xl border border-border/60 bg-muted/10" aria-live="polite">
+      <p class="text-sm text-muted-foreground">{isZh ? '正在加载声明式 Surface…' : 'Loading declarative Surface…'}</p>
+    </section>
+  {:then declarativeSurfaceModule}
+    {@const DeclarativeSurfaceExample = declarativeSurfaceModule.default}
+    <DeclarativeSurfaceExample {isZh} />
+  {:catch}
+    <section class="grid min-h-40 place-items-center rounded-xl border border-destructive/50 bg-muted/10" role="alert">
+      <p class="text-sm text-destructive">{isZh ? '声明式 Surface 加载失败。' : 'Unable to load the declarative Surface.'}</p>
+    </section>
+  {/await}
 </div>
