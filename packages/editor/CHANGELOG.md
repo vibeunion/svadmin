@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/zuohuadong/svadmin/compare/editor-v0.2.4...editor-v0.3.0) (2026-08-11)
+
+
+### 🚀 Features
+
+* **admin:** align capabilities with Refine v5 ([#229](https://github.com/zuohuadong/svadmin/issues/229)) ([37b7fb9](https://github.com/zuohuadong/svadmin/commit/37b7fb9d06b367fb4ef7060f16251df5f9b97822))
+
 ## [0.2.4](https://github.com/zuohuadong/svadmin/compare/editor-v0.2.3...editor-v0.2.4) (2026-08-10)
 
 
