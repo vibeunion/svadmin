@@ -23,9 +23,11 @@
 		"data-slot": dataSlot = "input",
 		...restProps
 	}: Props = $props();
+
+	const isFileInput = $derived(type?.toLowerCase() === "file");
 </script>
 
-{#if type === "file"}
+{#if isFileInput}
 	<input
 		bind:this={ref}
 		data-slot={dataSlot}
