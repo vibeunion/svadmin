@@ -1,12 +1,17 @@
-<script lang="ts">
+<script
+	lang="ts"
+	generics="Type extends HTMLInputTypeAttribute | undefined = undefined"
+>
 	import type { HTMLInputAttributes, HTMLInputTypeAttribute } from "svelte/elements";
 	import { cn, type WithElementRef } from "../../../utils.js";
 
-	type InputType = Exclude<HTMLInputTypeAttribute, "file">;
+	type InputValue = HTMLInputAttributes["value"];
 
 	type Props = WithElementRef<
-		Omit<HTMLInputAttributes, "type"> &
-			({ type: "file"; files?: FileList } | { type?: InputType; files?: undefined })
+		Omit<HTMLInputAttributes, "type" | "value"> &
+			(Type extends "file"
+				? { type: "file"; files?: FileList; value?: never }
+				: { type?: Type; files?: undefined; value?: InputValue })
 	>;
 
 	let {
@@ -30,7 +35,6 @@
 		)}
 		type="file"
 		bind:files
-		bind:value
 		{...restProps}
 	/>
 {:else}
