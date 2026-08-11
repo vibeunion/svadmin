@@ -1,34 +1,28 @@
 ---
 title: 声明式 Surface
-description: 使用可信 Svelte 组件渲染受策略约束的 JSON 仪表盘
+description: 对受策略约束的 JSON 仪表盘进行版本化、审查和渲染
 ---
 
-`@svadmin/surface` 是一个可选的浏览器端包，用于构建比自动 CRUD 页面更灵活的仪表盘和运营视图。它接收版本化 JSON 文档，先校验整份文档，再执行只读资源查询，并且只渲染宿主注册的可信组件。
+`@svadmin/surface` 是一个可选的浏览器端包，用于构建比自动 CRUD 页面更灵活的仪表盘和运营视图。它接收版本化 JSON Spec，先校验整份文档，再执行只读资源查询，并且只渲染宿主注册的可信组件。
 
-它不会修改 `@svadmin/core`，不会生成 Svelte 代码，也不会把 svadmin 变成通用 BI 查询引擎。
-
-## 能力边界
-
-- 根入口 `@svadmin/surface`：JSON-safe 协议类型和 `validateSurfaceSpec`。
-- Svelte 入口 `@svadmin/surface/svelte`：`SurfaceRenderer`、默认 Catalog 和 `defineSurfaceCatalog`。
-- 数据访问：仅允许 `Pick<DataProvider, 'getList' | 'getOne'>`。
-- 默认组件：`metric`、`resource-table`、`bar-chart`、`line-chart`。
-- 布局：经过校验的 12 列栅格、语义化间距和列跨度。
-
-MVP 仅支持客户端 Svelte 5 + Vite，不支持 SSR/Lite、Action、持久化、Agent 输入、自动刷新、客户端聚合、Canvas 或 iframe。
+`surface/v1` wire contract 仍然保持精简。持久化、revision、受限 Patch、可信 Action 和 Live 失效刷新都是宿主控制的独立层；带人工审批的 Agent 提案位于可选包 `@svadmin/surface-agent`。
 
 ```bash
 bun add @svadmin/surface @svadmin/core @svadmin/ui @tanstack/svelte-query svelte zod
+# 只有需要 Agent 提案时才安装：
+bun add @svadmin/surface-agent
 ```
 
-## 公开 API
+## 分层 API
 
-| 入口 | API | 用途 |
+| 入口 | API | 职责 |
 | --- | --- | --- |
-| `@svadmin/surface` | `validateSurfaceSpec`、`SURFACE_SCHEMA_VERSION`、协议与策略类型 | 不依赖 DOM 的校验和 wire contract |
-| `@svadmin/surface/svelte` | `SurfaceRenderer`、`defaultSurfaceCatalog`、`defineSurfaceCatalog` | 浏览器渲染与可信组件注册 |
+| `@svadmin/surface` | Spec 校验、Document、Store、Patch、Action | 不依赖 DOM 的协议与受控状态变更 |
+| `@svadmin/surface/svelte` | `SurfaceRenderer`、Catalog、Live 接入 | 可信浏览器渲染 |
+| `@svadmin/surface-agent` | 提案校验与工作流 | 待审提案、摘要、批准/拒绝 |
+| `@svadmin/surface-agent/svelte` | `SurfaceProposalReview` | 展示 before/after 的人工审查 UI |
 
-`validateSurfaceSpec(input, catalog, policy)` 对普通校验失败返回可序列化 Result，而不是抛出异常。Renderer 接收 `spec: unknown`，并在发送任何查询前重新校验整份文档，因此导入工具和编辑器可以提前检查文档，同时不会形成第二套安全边界。
+Renderer 仍然只使用 `Pick<DataProvider, 'getList' | 'getOne'>`。Spec 不能选择 Provider、访问 URL 或声明 Action handler。
 
 ## 渲染 Surface
 
@@ -38,12 +32,14 @@ bun add @svadmin/surface @svadmin/core @svadmin/ui @tanstack/svelte-query svelte
   import {
     DEFAULT_SURFACE_CATALOG_VERSION,
     SurfaceRenderer,
+    type SurfaceLiveProvider,
   } from '@svadmin/surface/svelte';
 
   const policy = {
     resources: {
       products: {
         readFields: ['id', 'name', 'stock'],
+        filterFields: ['stock'],
         maxPageSize: 25,
       },
     },
@@ -67,41 +63,114 @@ bun add @svadmin/surface @svadmin/core @svadmin/ui @tanstack/svelte-query svelte
     }],
   } satisfies SurfaceSpec;
 
-  let renderer = $state<{ refresh(sourceId?: string): Promise<void> }>();
+  const liveProvider: SurfaceLiveProvider = appLiveProvider;
+  let renderer = $state<{
+    refresh(sourceId?: string): Promise<void>;
+    executeAction(action: unknown): Promise<unknown>;
+  }>();
 </script>
 
 <button type="button" onclick={() => renderer?.refresh()}>刷新</button>
-<SurfaceRenderer bind:this={renderer} {spec} {policy} />
+<SurfaceRenderer bind:this={renderer} {spec} {policy} {liveProvider} liveMode="auto" />
 ```
 
-当组件位于 `AdminApp` 内部时，每个数据源会使用对应资源配置的 Provider。测试或独立嵌入时，可信宿主也可以显式传入 Provider。
+`liveMode` 默认是 `off`。设置为 `auto` 后，只为通过当前读取权限检查的资源建立订阅。Live event 仅作为失效提示，它的 payload 永远不会传给 Widget；突发事件会合并，刷新前重新检查授权，过期 generation 会被丢弃，组件或资源集合变化时会解除订阅。
 
-`refresh(sourceId?)` 是可信宿主 API。刷新能力不会进入 `SurfaceSpec`，刷新数据也不会重建 Spec 或 Widget DOM。
+`refresh(sourceId?)` 与 `executeAction(action)` 是可信宿主方法。它们不会进入 wire contract，刷新也不会重建 Widget DOM。
 
-## 字段策略与授权
+## Document、草稿、发布与回滚
 
-`SurfacePolicy` 是 Renderer 的必填参数。每个资源按需声明 `readFields`、`filterFields`、`sortFields`、`allowGetOne` 和 `maxPageSize`。只要 Spec 引用了策略外的资源或字段，整页就会被拒绝，并且不发送查询。
+`SurfaceDocument` 在有效 `SurfaceSpec` 外增加 `scopeId`、不可变 `revision`、`draft`/`published` 阶段、时间与 provenance。`SurfaceStore` 由应用注入：
 
-查询前，当前 `AccessControlProvider` 会收到 `list` 或 `show` 检查。浏览器检查只负责展示门控，后端必须对每次请求独立完成身份认证和授权。
+```ts
+interface SurfaceStore {
+  read(request: SurfaceStoreReadRequest): Promise<SurfaceDocument | null>;
+  history(request: SurfaceStoreHistoryRequest): Promise<readonly SurfaceDocument[]>;
+  append(request: SurfaceStoreAppendRequest): Promise<SurfaceStoreAppendResult>;
+}
+```
 
-Provider 记录会先投影到 `readFields`，再交给 Widget。被选中的非 JSON 值会直接失败，不会进行隐式转换。
+生产 `append()` 必须原子执行 `expectedRevision` 比较与追加。推荐数据库模型使用不可变 revision 表、`(scope_id, surface_id, revision)` 唯一约束，以及事务或条件插入。内置 `createMemorySurfaceStore()` 只适合示例和确定性测试，不是生产持久化方案。
 
-## 扩展 Catalog
+```ts
+const dependencies: SurfaceDocumentDependencies = {
+  store,
+  catalog,
+  policy,
+  authorize: async ({ scopeId, surfaceId, actorId, action }) =>
+    permissions.canChangeSurface({ scopeId, surfaceId, actorId, action }),
+};
 
-自定义 Catalog 是可信的可执行运行时配置，不是 wire data。通过 `defineSurfaceCatalog` 注册严格的 Zod v4 props schema 和可信 Svelte 组件。若列表 Widget 的 props 会选择记录字段，必须通过 `getReferencedFields` 暴露这些字段，以便校验器应用字段策略。
+const saved = await saveSurfaceDraft({
+  dependencies,
+  scopeId: 'tenant:acme',
+  spec,
+  expectedRevision: 4,
+  actorId: currentUser.id,
+  operationId: crypto.randomUUID(),
+});
+```
 
-不要注册允许 props 传入原始 HTML、CSS、class、颜色、URL、事件处理器、动态 import 或任意请求参数的组件。
+`saveSurfaceDraft`、`publishSurfaceDocument`、`rollbackSurfaceDocument`、`readSurfaceDocument` 和 `listSurfaceDocumentHistory` 都返回 Result。发布和回滚只追加新 revision；回滚会把目标历史 Spec 复制为一个新草稿，绝不改写或删除历史。后续草稿也不会覆盖“最新已发布”选择器。
 
-## 威胁模型
+## 受限 Patch
 
-所有 Spec 都应视为不可信数据，包括 AI 生成或从数据库读取的 JSON。默认边界会拒绝未知组件、重复 ID、版本不匹配、非法 props、危险 JSON Pointer、禁止的展示属性、超限节点/查询以及策略越权。校验失败时资源查询数为零。
+Surface Patch 有意小于通用 JSON Patch：
 
-MVP 上限为 8 个数据源、24 个 Widget、每页 100 条、8 个过滤条件、3 个排序字段、64 字符 ID、64 层 JSON 嵌套和 10,000 个 JSON 节点。同一数据源只请求一次；generation 检查会丢弃过期响应。
+- 只接受 `add`、`remove`、`replace`、`test`；
+- 只允许修改 `/title`、`/layout`、`/dataSources`、`/widgets`；
+- 禁止修改 schema/catalog 版本与 `surfaceId`；
+- 禁止 `move`、`copy`、`from`、原型键、非规范数组下标，以及非最终 `add` 位置的数组 `-`；
+- 最多 64 个操作，Pointer 最长 512 字符；
+- 应用后重新执行 JSON-safe、Policy、Catalog 与完整 `SurfaceSpec` 校验。
+
+`previewSurfacePatch()` 返回 `before`、`after` 与变化路径，不写入数据。`commitSurfacePatch()` 会重新读取 base revision、执行写权限检查，并通过 compare-and-swap 追加。校验失败、越权、revision 过期或 `test` 失败时写入数为零。
+
+## 可信 Action Registry
+
+Action 是宿主运行时能力，永远不会序列化进 `SurfaceSpec`。默认 Registry 提供：
+
+- `refreshSource`：刷新一个或所有数据源；
+- `setFilter`、`clearFilter`：管理经过 Policy 校验的临时过滤器；
+- `navigateResource`：只把允许的 resource 与可选 record ID 交给宿主回调。
+
+自定义 Action 通过 `defineSurfaceActionRegistry()` 注册严格 Zod schema。Handler 是可信可执行代码，因此权限应尽量窄，任何副作用仍需后端授权。不要接受原始 URL、JavaScript、Provider 选择、凭据或任意 mutation 参数。
+
+## Agent 提案与人工审批
+
+`@svadmin/surface-agent` 只接受 `AgentProvider` 输出的一个 `svadmin.surface.patch-proposal/v1` 组件；任何 tool call、approval event 或 tool result 都会被拒绝。Agent 只能给出目标 Surface、base revision、摘要和受限操作；scope、proposal ID、当前用户、Authorizer、Store、Policy 与 Catalog 全部由宿主提供。
+
+```ts
+const workflow = createSurfaceAgentWorkflow({
+  dependencies,
+  scopeId: 'tenant:acme',
+  surfaceId: 'inventory',
+});
+
+const proposed = await workflow.request(agentOutput);
+if (!proposed.ok) throw new Error(proposed.error.code);
+// 渲染 proposed.review.before 与 proposed.review.after。
+const applied = await workflow.approve({
+  proposalId: proposed.review.proposalId,
+  actorId: currentUser.id,
+  operationId: crypto.randomUUID(),
+});
+```
+
+工作流生成宿主管理的 proposal ID，把 scope/surface/base/catalog/summary/operations 绑定进 SHA-256 digest，并计算完整可见的 Preview 后进入 pending。批准是单次操作：重新检查过期时间和状态，先授权 `approve`，再重读并重校验文档、授权实际 `write`，最后通过 compare-and-swap 提交。拒绝、过期、重放、非法输出或 revision 漂移均为零写入。
+
+首个 Adapter 的 pending proposal 存在内存中。如果生产环境要求跨进程重启保留，应用应在服务端持久化提案和审计状态。绝不能向 Agent 暴露 `SurfaceStore`、`DataProvider`、Action handler、actor/scope 选择或审批凭据。
+
+## Policy 与威胁模型
+
+Spec、存储的 Document、Provider 结果、Live event、Action、Patch 文档和 Agent 输出都必须视为不可信。实现会拒绝继承/accessor/symbol 属性、循环引用、稀疏数组、超深/超量节点、危险 Pointer、未知 Widget/resource/Action、重复 ID、越权字段和非 JSON 值。普通非法输入返回可序列化错误，不依赖异常表达。
+
+浏览器读权限检查与写 Authorizer 都只是展示/工作流门控。后端必须独立认证和授权资源读取及持久化写入，不能信任浏览器提交的 Policy、scope、actor、revision 或审批状态。
 
 收入合计等聚合指标应由后端 summary resource 提供，并通过 `resource-one` 绑定；不要从浏览器拿到的一页分页数据推导业务总计。
 
-## 兼容性与后续路线
+## 兼容性与剩余边界
 
-包内 `compatibility.json` 记录了支持的 Core/UI/Svelte 范围和经过测试的最低版本组合。packed-consumer 门禁同时覆盖不依赖 DOM 的 Node ESM 根入口与 Svelte/Vite 入口。
+两个包都发布 `compatibility.json`。packed-consumer 门禁覆盖 Node ESM 根入口、Svelte/Vite 子入口，以及 release-prepared 的 `@svadmin/surface-agent` peer range。
 
-v1 wire contract 会继续保持精简。候选后续能力包括 revision 历史与 JSON Patch、由应用注入的持久化/审计接口，以及带人工确认的可选 Agent adapter。Dataset 快照、凭据、聚合计算和 Connector 调度仍归业务后端或应用负责；Canvas、iframe、任意代码和 mutation action 不会被默认纳入路线图。
+仍不包含：SSR/Lite 渲染、Canvas、iframe、任意 HTML/CSS/代码/URL、Spec 声明 Action、通用 CRUD mutation、轮询、客户端聚合、Dataset 快照、凭据、Connector 调度和生产持久化 Adapter。这些边界保证 `surface/v1` 可预测、可审计。

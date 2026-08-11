@@ -3,6 +3,11 @@ export type {
   SurfaceRendererError,
   SurfaceRendererProps,
 } from './components/SurfaceRenderer.svelte';
+export type {
+  SurfaceLiveError,
+  SurfaceLiveMode,
+  SurfaceLiveProvider,
+} from './live-refresh.js';
 export {
   DEFAULT_SURFACE_CATALOG_VERSION,
   defaultSurfaceCatalog,

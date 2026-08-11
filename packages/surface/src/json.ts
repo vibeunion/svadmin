@@ -1,5 +1,5 @@
 import { SURFACE_LIMITS } from './types.js';
-import type { JsonValue } from './types.js';
+import type { JsonObject, JsonValue } from './types.js';
 
 export interface JsonValueIssue {
   readonly path: readonly (string | number)[];
@@ -128,4 +128,35 @@ export function jsonValueIssue(input: unknown): JsonValueIssue | null {
 
 export function isJsonValue(input: unknown): input is JsonValue {
   return jsonValueIssue(input) === null;
+}
+
+export function jsonValuesEqual(left: JsonValue, right: JsonValue): boolean {
+  if (Object.is(left, right)) return true;
+  if (left === null || right === null || typeof left !== 'object' || typeof right !== 'object') return false;
+  if (Array.isArray(left) || Array.isArray(right)) {
+    if (!Array.isArray(left) || !Array.isArray(right) || left.length !== right.length) return false;
+    return left.every((entry, index) => jsonValuesEqual(entry, right[index]));
+  }
+  const leftObject = left as JsonObject;
+  const rightObject = right as JsonObject;
+  const leftKeys = Object.keys(leftObject);
+  const rightKeys = Object.keys(rightObject);
+  return leftKeys.length === rightKeys.length
+    && leftKeys.every((key) => (
+      Object.hasOwn(rightObject, key) && jsonValuesEqual(leftObject[key], rightObject[key])
+    ));
+}
+
+/** Clone an already validated JSON value without invoking JSON coercion hooks. */
+export function cloneJsonValue<T extends JsonValue>(input: T): T {
+  if (input === null || typeof input !== 'object') return input;
+  if (Array.isArray(input)) {
+    return input.map((entry) => cloneJsonValue(entry)) as unknown as T;
+  }
+
+  const clone: Record<string, JsonValue> = Object.create(null) as Record<string, JsonValue>;
+  for (const [key, entry] of Object.entries(input)) {
+    clone[key] = cloneJsonValue(entry);
+  }
+  return clone as T;
 }

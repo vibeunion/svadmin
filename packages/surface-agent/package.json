@@ -1,0 +1,70 @@
+{
+  "name": "@svadmin/surface-agent",
+  "version": "0.1.0",
+  "description": "Human-approved agent proposals for svadmin declarative surfaces",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md",
+    "compatibility.json",
+    "!dist/**/*.test.*",
+    "!dist/**/*.spec.*"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./svelte": {
+      "types": "./dist/svelte.d.ts",
+      "svelte": "./dist/svelte.js",
+      "default": "./dist/svelte.js"
+    }
+  },
+  "peerDependencies": {
+    "@svadmin/core": ">=0.34.2 <0.36.0",
+    "@svadmin/surface": "workspace:*",
+    "svelte": "^5.56.8"
+  },
+  "peerDependenciesMeta": {
+    "svelte": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@svadmin/core": "workspace:*",
+    "@svadmin/surface": "workspace:*",
+    "@sveltejs/vite-plugin-svelte": "^7.3.0",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/svelte": "^5.4.2",
+    "@testing-library/user-event": "^14.6.3",
+    "happy-dom": "^20.11.2",
+    "vitest": "^4.1.10"
+  },
+  "scripts": {
+    "build": "node ../../node_modules/@sveltejs/package/svelte-package.js -i src -o dist",
+    "check": "svelte-check --tsgo-experimental-api --tsconfig ./tsconfig.json --threshold error",
+    "test": "vitest run --config ./vitest.config.ts"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "author": "zuohuadong",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zuohuadong/svadmin.git",
+    "directory": "packages/surface-agent"
+  },
+  "homepage": "https://github.com/zuohuadong/svadmin#readme",
+  "bugs": {
+    "url": "https://github.com/zuohuadong/svadmin/issues"
+  }
+}

@@ -6,6 +6,8 @@ import type {
   GetListResult,
   GetOneParams,
   GetOneResult,
+  LiveEvent,
+  LiveProvider,
 } from '@svadmin/core';
 import { setAccessControlProvider } from '@svadmin/core';
 import { resetAccessControlProvider } from '@svadmin/core/permissions';
@@ -17,6 +19,7 @@ const policy = {
   resources: {
     products: {
       readFields: ['id', 'name', 'stock'],
+      filterFields: ['name', 'stock'],
       sortFields: ['stock'],
       maxPageSize: 25,
     },
@@ -264,5 +267,122 @@ describe('SurfaceRenderer', () => {
     await first.promise;
     await waitFor(() => expect(screen.queryByText('1')).toBeNull());
     expect(screen.getByText('2')).not.toBeNull();
+  });
+
+  test('executes trusted filter actions without recreating widget DOM', async () => {
+    const { provider, getList } = createProvider();
+    const view = render(SurfaceRenderer, {
+      spec,
+      policy,
+      catalog: defaultSurfaceCatalog,
+      dataProvider: provider,
+    });
+    const widget = await screen.findByTestId('surface-widget-product-count');
+    await waitFor(() => expect(getList).toHaveBeenCalledTimes(2));
+
+    expect(await view.component.executeAction({
+      type: 'setFilter',
+      sourceId: 'products',
+      filter: { field: 'stock', operator: 'gte', value: 10 },
+    })).toEqual({ ok: true, actionType: 'setFilter' });
+    await waitFor(() => expect(getList).toHaveBeenCalledTimes(3));
+    expect(getList.mock.calls.at(-1)?.[0]).toEqual(expect.objectContaining({
+      resource: 'products',
+      filters: [{ field: 'stock', operator: 'gte', value: 10 }],
+    }));
+    expect(screen.getByTestId('surface-widget-product-count')).toBe(widget);
+
+    expect(await view.component.executeAction({ type: 'clearFilter', sourceId: 'products' }))
+      .toEqual({ ok: true, actionType: 'clearFilter' });
+    await waitFor(() => expect(getList).toHaveBeenCalledTimes(4));
+    expect(getList.mock.calls.at(-1)?.[0]).toEqual(expect.objectContaining({ filters: [] }));
+  });
+
+  test('rejects invalid actions with zero query and navigation side effects', async () => {
+    const { provider, getList } = createProvider();
+    const onNavigateResource = vi.fn();
+    const view = render(SurfaceRenderer, {
+      spec,
+      policy,
+      catalog: defaultSurfaceCatalog,
+      dataProvider: provider,
+      onNavigateResource,
+    });
+    await waitFor(() => expect(getList).toHaveBeenCalledTimes(2));
+
+    const result = await view.component.executeAction({
+      type: 'navigateResource',
+      resource: 'products',
+      url: 'https://example.invalid',
+    });
+    expect(result).toEqual(expect.objectContaining({ ok: false }));
+    expect(getList).toHaveBeenCalledTimes(2);
+    expect(onNavigateResource).not.toHaveBeenCalled();
+  });
+
+  test('subscribes only after read access and coalesces live events by resource', async () => {
+    const { provider, getList } = createProvider();
+    const callbacks = new Map<string, (event: LiveEvent) => void>();
+    const unsubscribers: Array<ReturnType<typeof vi.fn>> = [];
+    const subscribe = vi.fn<LiveProvider['subscribe']>(({ resource, callback }) => {
+      callbacks.set(resource, callback);
+      const unsubscribe = vi.fn();
+      unsubscribers.push(unsubscribe);
+      return unsubscribe;
+    });
+    const view = render(SurfaceRenderer, {
+      spec,
+      policy,
+      catalog: defaultSurfaceCatalog,
+      dataProvider: provider,
+      liveProvider: { subscribe },
+      liveMode: 'auto',
+    });
+
+    expect(subscribe).not.toHaveBeenCalled();
+    await waitFor(() => expect(getList).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(subscribe).toHaveBeenCalledTimes(2));
+    expect(new Set(subscribe.mock.calls.map(([request]) => request.resource)))
+      .toEqual(new Set(['products', 'sales_orders']));
+
+    callbacks.get('products')?.({ type: 'UPDATE', resource: 'other', payload: {} });
+    callbacks.get('products')?.({ type: 'UPDATE', resource: 'products', payload: { id: 1 } });
+    callbacks.get('products')?.({ type: 'DELETE', resource: 'products', payload: { id: 2 } });
+    await waitFor(() => expect(getList).toHaveBeenCalledTimes(3));
+    expect(getList.mock.calls.at(-1)?.[0].resource).toBe('products');
+
+    view.unmount();
+    expect(unsubscribers).toHaveLength(2);
+    expect(unsubscribers.every((unsubscribe) => unsubscribe.mock.calls.length === 1)).toBe(true);
+  });
+
+  test('performs zero live subscriptions when validation or ACL fails', async () => {
+    const { provider, getList } = createProvider();
+    const subscribe = vi.fn<LiveProvider['subscribe']>(() => vi.fn());
+    setAccessControlProvider({ can: async () => ({ can: false }) });
+    const deniedView = render(SurfaceRenderer, {
+      spec,
+      policy,
+      catalog: defaultSurfaceCatalog,
+      dataProvider: provider,
+      liveProvider: { subscribe },
+      liveMode: 'auto',
+    });
+    await waitFor(() => expect(screen.getAllByRole('alert').length).toBeGreaterThan(0));
+    expect(getList).not.toHaveBeenCalled();
+    expect(subscribe).not.toHaveBeenCalled();
+    deniedView.unmount();
+
+    resetAccessControlProvider();
+    render(SurfaceRenderer, {
+      spec: { ...spec, schemaVersion: 'surface/v2' },
+      policy,
+      catalog: defaultSurfaceCatalog,
+      dataProvider: provider,
+      liveProvider: { subscribe },
+      liveMode: 'auto',
+    });
+    expect((await screen.findByRole('alert')).textContent).toContain('Surface could not be rendered');
+    expect(subscribe).not.toHaveBeenCalled();
   });
 });

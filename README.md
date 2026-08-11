@@ -75,6 +75,7 @@
 | `@svadmin/editor`        | Rich-text editor component / 富文本编辑器组件                |
 | `@svadmin/mcp`           | MCP (Model Context Protocol) integration / AI 工具集成       |
 | `@svadmin/surface`       | Validated declarative dashboards / 严格校验的声明式仪表盘    |
+| `@svadmin/surface-agent` | Human-approved Surface proposals / 人工审批的 Surface 提案 |
 
 ### Data Providers / 数据适配器
 

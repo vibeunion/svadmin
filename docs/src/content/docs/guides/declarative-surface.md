@@ -1,34 +1,28 @@
 ---
 title: Declarative Surface
-description: Render policy-constrained JSON dashboards with trusted Svelte components
+description: Version, review, and render policy-constrained JSON dashboards
 ---
 
-`@svadmin/surface` is an optional browser package for dashboards and operational views that are more flexible than generated CRUD pages. It accepts a versioned JSON document, validates the complete document, performs read-only resource queries, and renders only components registered by the host.
+`@svadmin/surface` is an optional browser package for dashboards and operational views that are more flexible than generated CRUD pages. It accepts a versioned JSON spec, validates the complete document, performs read-only resource queries, and renders only components registered by the host.
 
-It does not modify `@svadmin/core`, generate Svelte code, or turn svadmin into a general BI query engine.
-
-## Boundaries
-
-- Root import `@svadmin/surface`: JSON-safe protocol types and `validateSurfaceSpec`.
-- Svelte import `@svadmin/surface/svelte`: `SurfaceRenderer`, default catalog, and `defineSurfaceCatalog`.
-- Data access: `Pick<DataProvider, 'getList' | 'getOne'>` only.
-- Built-ins: `metric`, `resource-table`, `bar-chart`, and `line-chart`.
-- Layout: validated 12-column grid with semantic gaps and spans.
-
-The MVP supports client-side Svelte 5 + Vite. SSR/Lite, actions, storage, Agent input, automatic refresh, client aggregation, Canvas, and iframes are not supported.
+The `surface/v1` wire contract stays deliberately small. Storage, revisions, bounded Patch, trusted actions, and live invalidation are separate host-controlled layers. Human-approved Agent proposals live in the optional `@svadmin/surface-agent` package.
 
 ```bash
 bun add @svadmin/surface @svadmin/core @svadmin/ui @tanstack/svelte-query svelte zod
+# Only when Agent proposals are needed:
+bun add @svadmin/surface-agent
 ```
 
-## Public API
+## Layered API
 
-| Import | API | Purpose |
+| Import | API | Responsibility |
 | --- | --- | --- |
-| `@svadmin/surface` | `validateSurfaceSpec`, `SURFACE_SCHEMA_VERSION`, protocol and policy types | DOM-free validation and wire contract |
-| `@svadmin/surface/svelte` | `SurfaceRenderer`, `defaultSurfaceCatalog`, `defineSurfaceCatalog` | Browser rendering and trusted component registration |
+| `@svadmin/surface` | spec validation, documents, stores, Patch, actions | DOM-free contracts and controlled state changes |
+| `@svadmin/surface/svelte` | `SurfaceRenderer`, catalog, live integration | trusted browser rendering |
+| `@svadmin/surface-agent` | proposal validation and workflow | pending proposal, digest, approval/rejection |
+| `@svadmin/surface-agent/svelte` | `SurfaceProposalReview` | visible before/after human-review UI |
 
-`validateSurfaceSpec(input, catalog, policy)` returns a serializable result instead of throwing for ordinary validation failures. The renderer accepts `spec: unknown` and repeats the complete validation before any query, so import tools and editors can preflight a document without creating a second security boundary.
+The renderer still uses only `Pick<DataProvider, 'getList' | 'getOne'>`. A spec cannot choose a provider, execute a URL, or declare an action handler.
 
 ## Render a surface
 
@@ -38,12 +32,14 @@ bun add @svadmin/surface @svadmin/core @svadmin/ui @tanstack/svelte-query svelte
   import {
     DEFAULT_SURFACE_CATALOG_VERSION,
     SurfaceRenderer,
+    type SurfaceLiveProvider,
   } from '@svadmin/surface/svelte';
 
   const policy = {
     resources: {
       products: {
         readFields: ['id', 'name', 'stock'],
+        filterFields: ['stock'],
         maxPageSize: 25,
       },
     },
@@ -67,41 +63,114 @@ bun add @svadmin/surface @svadmin/core @svadmin/ui @tanstack/svelte-query svelte
     }],
   } satisfies SurfaceSpec;
 
-  let renderer = $state<{ refresh(sourceId?: string): Promise<void> }>();
+  const liveProvider: SurfaceLiveProvider = appLiveProvider;
+  let renderer = $state<{
+    refresh(sourceId?: string): Promise<void>;
+    executeAction(action: unknown): Promise<unknown>;
+  }>();
 </script>
 
 <button type="button" onclick={() => renderer?.refresh()}>Refresh</button>
-<SurfaceRenderer bind:this={renderer} {spec} {policy} />
+<SurfaceRenderer bind:this={renderer} {spec} {policy} {liveProvider} liveMode="auto" />
 ```
 
-Inside `AdminApp`, each source uses the provider configured for its resource. A trusted host can pass a provider explicitly for tests or standalone embedding.
+`liveMode` defaults to `off`. In `auto` mode, subscriptions start only for resources that pass the current read access check. An event is only an invalidation hint: its payload never reaches a widget. Bursts are coalesced, authorization is checked again before refresh, stale generations are discarded, and subscriptions are removed when the component or resource set changes.
 
-`refresh(sourceId?)` is a trusted host API. Refresh capability is not part of `SurfaceSpec`, and refreshing data does not recreate the spec or widget DOM.
+`refresh(sourceId?)` and `executeAction(action)` are trusted host methods. Neither capability enters the wire contract, and refreshing does not recreate widget DOM.
 
-## Policy and authorization
+## Documents, drafts, publication, and rollback
 
-`SurfacePolicy` is required. For each resource, declare `readFields`, `filterFields`, `sortFields`, `allowGetOne`, and `maxPageSize` as needed. The renderer rejects the complete surface before querying if the spec references a resource or field outside the policy.
+`SurfaceDocument` wraps a valid `SurfaceSpec` with `scopeId`, immutable `revision`, `draft` or `published` stage, timestamp, and provenance. `SurfaceStore` is application-supplied:
 
-Before a query, the current `AccessControlProvider` receives `list` or `show`. This browser check controls presentation only. The backend must independently authenticate and authorize every request.
+```ts
+interface SurfaceStore {
+  read(request: SurfaceStoreReadRequest): Promise<SurfaceDocument | null>;
+  history(request: SurfaceStoreHistoryRequest): Promise<readonly SurfaceDocument[]>;
+  append(request: SurfaceStoreAppendRequest): Promise<SurfaceStoreAppendResult>;
+}
+```
 
-Provider results are projected to `readFields` before widgets receive them. Non-JSON selected values fail without conversion.
+Production `append()` implementations must perform the `expectedRevision` comparison and append atomically. A suitable database model uses an immutable revision table, a unique `(scope_id, surface_id, revision)` constraint, and a transaction or conditional insert. The included `createMemorySurfaceStore()` is for examples and deterministic tests only.
 
-## Extend the catalog
+```ts
+const dependencies: SurfaceDocumentDependencies = {
+  store,
+  catalog,
+  policy,
+  authorize: async ({ scopeId, surfaceId, actorId, action }) =>
+    permissions.canChangeSurface({ scopeId, surfaceId, actorId, action }),
+};
 
-Custom catalogs are trusted executable configuration, not wire data. Register a strict Zod v4 props schema and a trusted Svelte component with `defineSurfaceCatalog`. Item widgets must declare any record fields selected by their props through `getReferencedFields`, so validation can apply the field policy.
+const saved = await saveSurfaceDraft({
+  dependencies,
+  scopeId: 'tenant:acme',
+  spec,
+  expectedRevision: 4,
+  actorId: currentUser.id,
+  operationId: crypto.randomUUID(),
+});
+```
 
-Never register a component that accepts raw HTML, CSS, classes, colors, URLs, event handlers, dynamic imports, or arbitrary request parameters from its props.
+`saveSurfaceDraft`, `publishSurfaceDocument`, `rollbackSurfaceDocument`, `readSurfaceDocument`, and `listSurfaceDocumentHistory` return Result values. Publication and rollback append new immutable revisions. Rollback copies the selected historical spec into a new draft; it never rewrites or deletes history. A later draft does not replace the latest published selector.
 
-## Threat model
+## Bounded Patch
 
-Treat every spec as untrusted, including AI-generated and database-loaded JSON. The default boundary rejects unknown types, duplicate IDs, mismatched versions, invalid props, dangerous JSON Pointers, forbidden presentation keys, excessive nodes or queries, and policy violations. Validation failure sends zero resource queries.
+Surface Patch is intentionally smaller than general JSON Patch:
 
-MVP limits: eight data sources, 24 widgets, 100 records per page, eight filters, three sorters, 64-character IDs, 64 levels of JSON nesting, and 10,000 JSON nodes. Sources are deduplicated by ID, and generation checks discard stale responses.
+- accepted operations: `add`, `remove`, `replace`, and `test`;
+- mutable roots: `/title`, `/layout`, `/dataSources`, and `/widgets`;
+- forbidden roots: schema/catalog versions and `surfaceId`;
+- no `move`, `copy`, `from`, prototype keys, non-canonical indexes, or array append outside a final `add` token;
+- at most 64 operations and a 512-character pointer;
+- full JSON-safety, policy, catalog, and `SurfaceSpec` validation after application.
 
-Aggregations such as revenue totals belong in a backend summary resource. Bind that resource with `resource-one`; do not calculate a business total from one paginated browser response.
+`previewSurfacePatch()` returns `before`, `after`, and changed paths without writing. `commitSurfacePatch()` re-reads the base revision, performs write authorization, and appends with compare-and-swap. Validation, authorization, stale revision, or failed `test` produces zero writes.
 
-## Compatibility and roadmap
+## Trusted Action Registry
 
-The package publishes its supported Core/UI/Svelte ranges and tested minimum combination in `compatibility.json`. Packed-consumer checks cover the DOM-free Node ESM entry and the Svelte/Vite entry.
+Actions are host runtime capabilities. They are never serialized into a `SurfaceSpec`. The default registry provides:
 
-The v1 wire contract stays deliberately small. Candidate follow-ups are revision history and JSON Patch, an application-supplied persistence/audit interface, and an opt-in Agent adapter with human approval. Dataset snapshots, credentials, aggregation, and connector scheduling remain backend or application responsibilities. Canvas, iframe, arbitrary code, and mutation actions are not implicit roadmap commitments.
+- `refreshSource` — refresh one or all sources;
+- `setFilter` and `clearFilter` — manage policy-checked transient filters;
+- `navigateResource` — send an allowed resource and optional record ID to a host callback.
+
+Use `defineSurfaceActionRegistry()` with a strict Zod schema for custom actions. The handler is trusted executable code, so keep its authority narrow and apply backend authorization to any side effect. Do not accept raw URLs, JavaScript, provider selection, credentials, or arbitrary mutation parameters.
+
+## Agent proposal and approval
+
+`@svadmin/surface-agent` accepts exactly one `svadmin.surface.patch-proposal/v1` component from an `AgentProvider`. Tool calls, approval events, and tool results are rejected. The Agent supplies only the target surface, base revision, summary, and bounded operations; the host supplies scope, proposal ID, current user, authorizer, store, policy, and catalog.
+
+```ts
+const workflow = createSurfaceAgentWorkflow({
+  dependencies,
+  scopeId: 'tenant:acme',
+  surfaceId: 'inventory',
+});
+
+const proposed = await workflow.request(agentOutput);
+if (!proposed.ok) throw new Error(proposed.error.code);
+// Render proposed.review.before and proposed.review.after.
+const applied = await workflow.approve({
+  proposalId: proposed.review.proposalId,
+  actorId: currentUser.id,
+  operationId: crypto.randomUUID(),
+});
+```
+
+The workflow creates a host-generated proposal ID, binds scope/surface/base/catalog/summary/operations into a SHA-256 digest, computes a complete visible preview, and keeps the proposal pending. Approval is single-use: it rechecks proposal expiry and status, authorizes `approve`, re-reads and revalidates the document, authorizes the actual `write`, and commits with compare-and-swap. Rejection, expiry, replay, invalid output, or revision drift writes nothing.
+
+Pending proposals are memory-backed in this first adapter. Production applications should persist proposal/audit state server-side if it must survive process restarts. Never give an Agent direct access to `SurfaceStore`, `DataProvider`, action handlers, actor/scope selection, or approval credentials.
+
+## Policy and threat model
+
+Treat specs, stored documents, Provider results, live events, actions, Patch documents, and Agent output as untrusted data. The implementation rejects inherited/accessor/symbol properties, cycles, sparse arrays, excessive depth/nodes, dangerous pointers, unknown widgets/resources/actions, duplicate IDs, forbidden fields, and non-JSON values. Invalid input produces serializable errors rather than ordinary exceptions.
+
+Browser access checks and the write authorizer are presentation/workflow gates. The backend must independently authenticate and authorize resource reads and durable document writes; it must not trust browser-provided policy, scope, actor, revision, or approval state.
+
+Aggregations such as revenue totals belong in a backend summary resource and bind through `resource-one`. Do not derive business totals from one paginated browser response.
+
+## Compatibility and remaining boundaries
+
+Both packages publish `compatibility.json`. Packed-consumer gates exercise Node ESM roots and Svelte/Vite subpaths, including the release-prepared `@svadmin/surface-agent` peer range.
+
+Still out of scope: SSR/Lite rendering, Canvas, iframe, arbitrary HTML/CSS/code/URLs, actions declared by the spec, general CRUD mutations, polling, client-side aggregation, dataset snapshots, credentials, connector scheduling, and a production persistence adapter. These boundaries keep `surface/v1` deterministic and auditable.

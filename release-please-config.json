@@ -167,6 +167,11 @@
       "release-type": "node",
       "component": "surface",
       "changelog-path": "CHANGELOG.md"
+    },
+    "packages/surface-agent": {
+      "release-type": "node",
+      "component": "surface-agent",
+      "changelog-path": "CHANGELOG.md"
     }
   },
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",

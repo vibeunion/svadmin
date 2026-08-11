@@ -26,6 +26,7 @@ interface PackageExpectation {
 
 interface PackageManifest {
   name: string;
+  version?: string;
   main?: string;
   types?: string;
   svelte?: string;
@@ -167,6 +168,20 @@ const expectations: PackageExpectation[] = [
       'dist/svelte.d.ts',
       'dist/components/SurfaceRenderer.svelte',
       'dist/components/SurfaceRenderer.svelte.d.ts',
+      'compatibility.json',
+      'README.md',
+    ],
+  },
+  {
+    directory: 'packages/surface-agent',
+    name: '@svadmin/surface-agent',
+    requiredFiles: [
+      'dist/index.js',
+      'dist/index.d.ts',
+      'dist/svelte.js',
+      'dist/svelte.d.ts',
+      'dist/components/SurfaceProposalReview.svelte',
+      'dist/components/SurfaceProposalReview.svelte.d.ts',
       'compatibility.json',
       'README.md',
     ],
@@ -773,6 +788,8 @@ const resolvable = [
   '@svadmin/lite/enhance.js',
   '@svadmin/surface',
   '@svadmin/surface/svelte',
+  '@svadmin/surface-agent',
+  '@svadmin/surface-agent/svelte',
 ];
 
 for (const specifier of resolvable) {
@@ -890,6 +907,57 @@ interface SurfaceCompatibility {
   };
 }
 
+interface SurfaceAgentCompatibility {
+  minimumSupported: {
+    '@svadmin/core': string;
+    '@svadmin/surface': string;
+    svelte: string;
+  };
+}
+
+async function prepareSurfaceAgentTarball(
+  packDirectory: string,
+  results: Map<string, PackResult>,
+  manifests: Map<string, PackageManifest>,
+): Promise<string> {
+  const agentPack = results.get('@svadmin/surface-agent');
+  const agentManifest = manifests.get('@svadmin/surface-agent');
+  const surfaceManifest = manifests.get('@svadmin/surface');
+  assert(agentPack, '@svadmin/surface-agent: missing tarball for release preparation');
+  assert(agentManifest, '@svadmin/surface-agent: missing manifest for release preparation');
+  assert(surfaceManifest?.version, '@svadmin/surface: version is required for release preparation');
+
+  const expectedPeer = `^${surfaceManifest.version}`;
+  const configuredPeer = agentManifest.peerDependencies?.['@svadmin/surface'];
+  assert(
+    configuredPeer === 'workspace:*' || configuredPeer === expectedPeer,
+    `@svadmin/surface-agent: Surface peer must be workspace:* or ${expectedPeer}`,
+  );
+  if (configuredPeer === expectedPeer) return join(packDirectory, agentPack.filename);
+
+  // Release CI performs this workspace:* rewrite before pack:check. Reproduce it
+  // locally so the strict consumer exercises the exact publish-time manifest.
+  const preparedPackageDirectory = join(packDirectory, 'surface-agent-release-prepared', 'package');
+  const preparedPackDirectory = join(packDirectory, 'surface-agent-release-prepared', 'tarball');
+  await mkdir(preparedPackageDirectory, { recursive: true });
+  await mkdir(preparedPackDirectory, { recursive: true });
+  run(
+    'tar',
+    ['-xzf', join(packDirectory, agentPack.filename), '-C', preparedPackageDirectory, '--strip-components=1'],
+    repositoryRoot,
+  );
+  const preparedManifestPath = join(preparedPackageDirectory, 'package.json');
+  const preparedManifest = JSON.parse(await readFile(preparedManifestPath, 'utf8')) as PackageManifest;
+  assert(preparedManifest.peerDependencies, '@svadmin/surface-agent: packed peer dependencies are missing');
+  preparedManifest.peerDependencies['@svadmin/surface'] = expectedPeer;
+  await writeFile(preparedManifestPath, `${JSON.stringify(preparedManifest, null, 2)}\n`);
+  const packed = parsePackResult(
+    run('npm', ['pack', '--json', '--pack-destination', preparedPackDirectory], preparedPackageDirectory),
+    '@svadmin/surface-agent release-prepared',
+  );
+  return join(preparedPackDirectory, packed.filename);
+}
+
 async function verifySurfaceCompatibility(
   packDirectory: string,
   results: Map<string, PackResult>,
@@ -992,6 +1060,102 @@ async function verifySurfaceCompatibility(
   return outputs.join('\n');
 }
 
+async function verifySurfaceAgentCompatibility(
+  packDirectory: string,
+  results: Map<string, PackResult>,
+  manifests: Map<string, PackageManifest>,
+): Promise<string> {
+  const surfacePack = results.get('@svadmin/surface');
+  const corePack = results.get('@svadmin/core');
+  const uiPack = results.get('@svadmin/ui');
+  const uiManifest = manifests.get('@svadmin/ui');
+  assert(surfacePack, '@svadmin/surface: missing tarball for Agent compatibility verification');
+  assert(corePack, '@svadmin/core: missing tarball for Agent compatibility verification');
+  assert(uiPack, '@svadmin/ui: missing tarball for Agent compatibility verification');
+  assert(uiManifest, '@svadmin/ui: missing manifest for Agent compatibility verification');
+
+  const compatibility = JSON.parse(await readFile(
+    join(repositoryRoot, 'packages', 'surface-agent', 'compatibility.json'),
+    'utf8',
+  )) as SurfaceAgentCompatibility;
+  const rootManifest = JSON.parse(await readFile(join(repositoryRoot, 'package.json'), 'utf8')) as {
+    overrides?: Record<string, string>;
+  };
+  const workspaceSvelte = rootManifest.overrides?.svelte;
+  const workspaceVite = rootManifest.overrides?.vite;
+  const queryVersion = uiManifest.peerDependencies?.['@tanstack/svelte-query'];
+  const sveltePlugin = uiManifest.devDependencies?.['@sveltejs/vite-plugin-svelte'];
+  assert(workspaceSvelte, 'root package.json: overrides.svelte is required for Agent verification');
+  assert(workspaceVite, 'root package.json: overrides.vite is required for Agent verification');
+  assert(queryVersion, '@svadmin/ui: query peer range is required for Agent verification');
+  assert(sveltePlugin, '@svadmin/ui: Svelte Vite plugin version is required for Agent verification');
+  assert(
+    compatibility.minimumSupported['@svadmin/core'] === '0.34.2',
+    '@svadmin/surface-agent: minimum Core compatibility must be explicit',
+  );
+  assert(
+    compatibility.minimumSupported['@svadmin/surface'] === '0.2.0',
+    '@svadmin/surface-agent: first supported Surface release must be 0.2.0',
+  );
+
+  const preparedAgentTarball = await prepareSurfaceAgentTarball(packDirectory, results, manifests);
+  const consumerDirectory = join(packDirectory, 'surface-agent-release-prepared');
+  await mkdir(consumerDirectory, { recursive: true });
+  await writeFile(join(consumerDirectory, 'package.json'), `${JSON.stringify({
+    name: 'svadmin-surface-agent-release-prepared',
+    private: true,
+    type: 'module',
+    packageManager: `pnpm@${pnpmVersion}`,
+    dependencies: {
+      '@svadmin/core': `file:${join(packDirectory, corePack.filename)}`,
+      '@svadmin/surface': `file:${join(packDirectory, surfacePack.filename)}`,
+      '@svadmin/surface-agent': `file:${preparedAgentTarball}`,
+      '@svadmin/ui': `file:${join(packDirectory, uiPack.filename)}`,
+      '@tanstack/svelte-query': queryVersion,
+      svelte: workspaceSvelte,
+    },
+    devDependencies: {
+      '@sveltejs/vite-plugin-svelte': sveltePlugin,
+      vite: workspaceVite,
+    },
+  }, null, 2)}\n`);
+  await writeFile(
+    join(consumerDirectory, 'entry.ts'),
+    `import { createSurfaceAgentWorkflow, SURFACE_AGENT_COMPONENT } from '@svadmin/surface-agent';\n` +
+      `import { SurfaceProposalReview } from '@svadmin/surface-agent/svelte';\n` +
+      `console.info(typeof createSurfaceAgentWorkflow, typeof SurfaceProposalReview, SURFACE_AGENT_COMPONENT);\n`,
+  );
+  await writeFile(
+    join(consumerDirectory, 'vite.config.mjs'),
+    `import { svelte } from '@sveltejs/vite-plugin-svelte';\n` +
+      `export default { plugins: [svelte()], build: { lib: { entry: 'entry.ts', formats: ['es'] } } };\n`,
+  );
+
+  run('npx', [
+    '--yes',
+    `pnpm@${pnpmVersion}`,
+    'install',
+    '--strict-peer-dependencies',
+    '--ignore-scripts',
+    '--reporter',
+    'append-only',
+    '--store-dir',
+    join(consumerDirectory, '.pnpm-store'),
+  ], consumerDirectory);
+  const nodeOutput = run(
+    'node',
+    [
+      '--input-type=module',
+      '-e',
+      "import('@svadmin/surface-agent').then((module) => console.info(typeof module.createSurfaceAgentWorkflow, module.SURFACE_AGENT_COMPONENT))",
+    ],
+    consumerDirectory,
+  );
+  const vitePath = join(repositoryRoot, 'node_modules', 'vite', 'bin', 'vite.js');
+  const buildOutput = run('node', [vitePath, 'build', '--config', 'vite.config.mjs'], consumerDirectory);
+  return `release-prepared: ${nodeOutput.trim()}\n${buildOutput.trim()}`;
+}
+
 async function main(): Promise<void> {
   const temporaryDirectory = await mkdtemp(join(tmpdir(), 'svadmin-pack-check-'));
 
@@ -1088,6 +1252,12 @@ async function main(): Promise<void> {
     console.info(pnpmPeerTreeOutput.trim());
     const surfaceCompatibilityOutput = await verifySurfaceCompatibility(temporaryDirectory, results, manifests);
     console.info(surfaceCompatibilityOutput.trim());
+    const surfaceAgentCompatibilityOutput = await verifySurfaceAgentCompatibility(
+      temporaryDirectory,
+      results,
+      manifests,
+    );
+    console.info(surfaceAgentCompatibilityOutput.trim());
 
     for (const result of results.values()) {
       await access(join(temporaryDirectory, result.filename));

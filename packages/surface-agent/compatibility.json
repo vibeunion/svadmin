@@ -1,0 +1,8 @@
+{
+  "surfaceAgent": "0.1.x",
+  "minimumSupported": {
+    "@svadmin/core": "0.34.2",
+    "@svadmin/surface": "0.2.0",
+    "svelte": "5.56.8"
+  }
+}

@@ -1,14 +1,30 @@
 <script lang="ts">
   import { canAccessAsync, captureAdminContext } from '@svadmin/core';
   import { untrack } from 'svelte';
+  import {
+    defaultSurfaceActionRegistry,
+    executeSurfaceAction,
+  } from '../actions.js';
+  import type {
+    SurfaceActionRegistry,
+    SurfaceActionResult,
+    SurfaceNavigationRequest,
+  } from '../actions.js';
   import { resolveSurfaceWidgetData } from '../binding.js';
   import { defaultSurfaceCatalog } from '../catalog.js';
   import type { SurfaceRenderCatalog } from '../catalog.js';
   import { loadSurfaceSource } from '../runtime.js';
+  import {
+    createSurfaceLiveRefreshCoordinator,
+    type SurfaceLiveError,
+    type SurfaceLiveMode,
+    type SurfaceLiveProvider,
+  } from '../live-refresh.js';
   import type {
     SurfaceDataError,
     SurfaceDataProvider,
     SurfaceDataSource,
+    SurfaceFilter,
     SurfacePolicy,
     SurfaceSourceDataState,
     SurfaceValidationIssue,
@@ -24,8 +40,13 @@
     readonly policy: SurfacePolicy;
     readonly catalog?: SurfaceRenderCatalog;
     readonly dataProvider?: SurfaceDataProvider;
+    readonly actionRegistry?: SurfaceActionRegistry;
+    readonly liveProvider?: SurfaceLiveProvider;
+    readonly liveMode?: SurfaceLiveMode;
     readonly class?: string;
     readonly onError?: (error: SurfaceRendererError) => void;
+    readonly onLiveError?: (error: SurfaceLiveError) => void;
+    readonly onNavigateResource?: (request: SurfaceNavigationRequest) => void | Promise<void>;
   }
 
   let {
@@ -33,8 +54,13 @@
     policy,
     catalog = defaultSurfaceCatalog,
     dataProvider,
+    actionRegistry = defaultSurfaceActionRegistry,
+    liveProvider,
+    liveMode = 'off',
     class: className = '',
     onError,
+    onLiveError,
+    onNavigateResource,
   }: SurfaceRendererProps = $props();
 
   const adminContext = captureAdminContext();
@@ -43,6 +69,8 @@
   const currentSpec = $derived(validation.ok ? validation.value : null);
   const sourceGenerations: Record<string, number> = Object.create(null) as Record<string, number>;
   let sourceStates = $state.raw<Record<string, SurfaceSourceDataState>>({});
+  let transientFilters = $state.raw<Record<string, readonly SurfaceFilter[]>>({});
+  let readableResources = $state.raw<readonly string[]>([]);
 
   function nextGeneration(sourceId: string): number {
     const generation = (sourceGenerations[sourceId] ?? 0) + 1;
@@ -62,6 +90,14 @@
     return canAccessAsync(resource, action);
   }
 
+  function effectiveSource(source: SurfaceDataSource): SurfaceDataSource {
+    if (source.type !== 'resource-list') return source;
+    return {
+      ...source,
+      filters: [...(source.filters ?? []), ...(transientFilters[source.id] ?? [])],
+    };
+  }
+
   function providerError(sourceId: string, failure: unknown): SurfaceSourceDataState {
     const message = failure instanceof Error ? failure.message : 'Data provider is unavailable';
     return {
@@ -71,38 +107,60 @@
     };
   }
 
-  async function loadSource(source: SurfaceDataSource): Promise<void> {
+  async function loadSource(source: SurfaceDataSource): Promise<{ resource: string; readable: boolean } | null> {
     const generation = nextGeneration(source.id);
     setSourceState(source.id, { status: 'loading', sourceId: source.id });
+    let readAllowed = false;
 
-    let result: SurfaceSourceDataState;
+    async function authorizeSource(resource: string, action: 'list' | 'show') {
+      const decision = await authorize(resource, action);
+      if (decision.can) readAllowed = true;
+      return decision;
+    }
+
+    let sourceState: SurfaceSourceDataState;
     try {
       const resourcePolicy = Object.hasOwn(policy.resources, source.resource)
         ? policy.resources[source.resource]
         : undefined;
       if (!resourcePolicy) throw new Error(`Resource "${source.resource}" is not allowed`);
-      result = await loadSurfaceSource({
-        source,
+      sourceState = await loadSurfaceSource({
+        source: effectiveSource(source),
         resourcePolicy,
         provider: providerFor(source.resource),
-        authorize,
+        authorize: authorizeSource,
       });
     } catch (failure) {
-      result = providerError(source.id, failure);
+      sourceState = providerError(source.id, failure);
     }
 
-    if (sourceGenerations[source.id] !== generation) return;
-    setSourceState(source.id, result);
-    if (result.status === 'error') onError?.({ type: 'data', error: result.error });
+    if (sourceGenerations[source.id] !== generation) return null;
+    setSourceState(source.id, sourceState);
+    if (sourceState.status === 'error') onError?.({ type: 'data', error: sourceState.error });
+    return { resource: source.resource, readable: readAllowed };
   }
 
   async function loadSources(sources: readonly SurfaceDataSource[]): Promise<void> {
-    await Promise.all(sources.map(loadSource));
+    const outcomes = (await Promise.all(sources.map(loadSource))).filter((outcome) => outcome !== null);
+    const touchedResources = new Set(outcomes.map((outcome) => outcome.resource));
+    const newlyReadable = new Set(
+      outcomes.filter((outcome) => outcome.readable).map((outcome) => outcome.resource),
+    );
+    const nextResources = readableResources.filter(
+      (resource) => !touchedResources.has(resource) || newlyReadable.has(resource),
+    );
+    for (const resource of newlyReadable) {
+      if (!nextResources.includes(resource)) nextResources.push(resource);
+    }
+    if (nextResources.join('\u0000') !== readableResources.join('\u0000')) {
+      readableResources = nextResources;
+    }
   }
 
   function invalidateCurrentSources(): void {
     for (const sourceId of Object.keys(sourceGenerations)) nextGeneration(sourceId);
     sourceStates = {};
+    readableResources = [];
   }
 
   export async function refresh(sourceId?: string): Promise<void> {
@@ -114,10 +172,41 @@
     await loadSources(sources);
   }
 
+  async function refreshResource(resource: string): Promise<void> {
+    const activeSpec = currentSpec;
+    if (!activeSpec) return;
+    await loadSources(activeSpec.dataSources.filter((source) => source.resource === resource));
+  }
+
+  function filtersFor(sourceId: string): readonly SurfaceFilter[] {
+    return transientFilters[sourceId] ?? [];
+  }
+
+  function applyFilters(sourceId: string, filters: readonly SurfaceFilter[]): void {
+    transientFilters = { ...transientFilters, [sourceId]: filters };
+  }
+
+  export async function executeAction(action: unknown): Promise<SurfaceActionResult> {
+    const activeSpec = currentSpec;
+    if (!activeSpec) {
+      return { ok: false, error: { code: 'action_unavailable', message: 'Surface action is unavailable' } };
+    }
+    return executeSurfaceAction(action, actionRegistry, {
+      spec: activeSpec,
+      catalog,
+      policy,
+      getTransientFilters: filtersFor,
+      applyTransientFilters: applyFilters,
+      refresh,
+      ...(onNavigateResource ? { navigateResource: onNavigateResource } : {}),
+    });
+  }
+
   $effect(() => {
     const validatedSpec = validation;
     void dataProvider;
     invalidateCurrentSources();
+    transientFilters = {};
     if (!validatedSpec.ok) {
       onError?.({ type: 'validation', issues: validatedSpec.issues });
       return;
@@ -126,6 +215,42 @@
     untrack(() => {
       void loadSources(validatedSpec.value.dataSources);
     });
+  });
+
+  $effect(() => {
+    const activeSpec = currentSpec;
+    const activeProvider = liveProvider ?? adminContext.liveProvider;
+    const resources = readableResources;
+    if (!activeSpec || liveMode !== 'auto' || !activeProvider || resources.length === 0) return;
+
+    const coordinator = createSurfaceLiveRefreshCoordinator(refreshResource, onLiveError);
+    const subscriptions: Array<{ resource: string; unsubscribe: () => void }> = [];
+    for (const resource of resources) {
+      try {
+        const unsubscribe = activeProvider.subscribe({
+          resource,
+          callback: (event) => coordinator.notify(resource, event),
+        });
+        subscriptions.push({ resource, unsubscribe });
+      } catch {
+        onLiveError?.({ code: 'subscribe_failed', resource, message: 'Surface live subscription failed' });
+      }
+    }
+
+    return () => {
+      coordinator.dispose();
+      for (const subscription of subscriptions) {
+        try {
+          subscription.unsubscribe();
+        } catch {
+          onLiveError?.({
+            code: 'unsubscribe_failed',
+            resource: subscription.resource,
+            message: 'Surface live unsubscribe failed',
+          });
+        }
+      }
+    };
   });
 </script>
 
