@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.40.6](https://github.com/zuohuadong/svadmin/compare/ui-v0.40.5...ui-v0.40.6) (2026-08-11)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** harden file input handling ([#224](https://github.com/zuohuadong/svadmin/issues/224)) ([83654f3](https://github.com/zuohuadong/svadmin/commit/83654f3f08e1b09edaa27707ff18d5cde16a0336))
+
 ## [0.40.5](https://github.com/zuohuadong/svadmin/compare/ui-v0.40.4...ui-v0.40.5) (2026-08-11)
 
 
