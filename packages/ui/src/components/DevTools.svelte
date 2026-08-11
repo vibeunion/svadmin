@@ -5,7 +5,6 @@
   import {
     captureAdminContext,
     getColorTheme,
-    getResources,
     getTheme,
   } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
@@ -85,13 +84,7 @@
     };
   });
 
-  const resources = $derived.by(() => {
-    try {
-      return getResources();
-    } catch {
-      return [];
-    }
-  });
+  const resources = $derived(adminContext.resources);
   const path = $derived(adminContext.currentPath());
   const theme = $derived(getTheme());
   const colorTheme = $derived(getColorTheme());

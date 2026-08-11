@@ -95,4 +95,55 @@ describe('AutoTable interactions', () => {
       expect(view.queryByText('已展开：user@example.com')).toBeNull();
     });
   });
+
+  it('does not expose detail navigation for a resource that disables show actions', async () => {
+    const onNavigate = vi.fn();
+    const view = render(AutoTableInteractionsHarness, { onNavigate, canShow: false });
+
+    const [email] = await view.findAllByText('user@example.com');
+    if (!email) throw new Error('Expected the desktop row email cell');
+    await fireEvent.contextMenu(email);
+
+    expect(await view.findByText('复制 ID')).not.toBeNull();
+    await waitFor(() => {
+      expect(view.queryByText('详情')).toBeNull();
+      expect(view.queryByRole('button', { name: '详情' })).toBeNull();
+    });
+    expect(onNavigate).not.toHaveBeenCalled();
+  });
+
+  it('fails closed when access control rejects the show action', async () => {
+    const view = render(AutoTableInteractionsHarness, {
+      onNavigate: vi.fn(),
+      canShow: true,
+      showAllowed: false,
+    });
+
+    const [email] = await view.findAllByText('user@example.com');
+    if (!email) throw new Error('Expected the desktop row email cell');
+    await fireEvent.contextMenu(email);
+
+    expect(await view.findByText('复制 ID')).not.toBeNull();
+    expect(view.queryByText('详情')).toBeNull();
+    expect(view.queryByRole('button', { name: '详情' })).toBeNull();
+  });
+
+  it('navigates to detail when both resource and access control allow show', async () => {
+    const onNavigate = vi.fn();
+    const view = render(AutoTableInteractionsHarness, {
+      onNavigate,
+      canShow: true,
+      showAllowed: true,
+    });
+
+    const [email] = await view.findAllByText('user@example.com');
+    if (!email) throw new Error('Expected the desktop row email cell');
+    await fireEvent.contextMenu(email);
+    await fireEvent.click(await view.findByText('详情'));
+
+    await waitFor(() => expect(onNavigate).toHaveBeenCalledWith({
+      to: '/users/show/user-1',
+      type: 'push',
+    }));
+  });
 });

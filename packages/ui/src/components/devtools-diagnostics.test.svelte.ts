@@ -84,4 +84,34 @@ describe('DevTools diagnostics', () => {
     queryClient.setQueryData(['default', 'second-resource', 'list'], { data: [] });
     await waitFor(() => expect(view.getByTestId('devtools-query-total').textContent).toBe('2'));
   });
+
+  it('tracks resources from the scoped AdminContext after rerender', async () => {
+    const queryClient = new QueryClient();
+    const routerProvider = createRouterProvider();
+    const dataProvider = { default: createDataProvider('scoped') };
+    const view = render(ContextHost, {
+      instance: 'resource-rerender',
+      dataProvider,
+      routerProvider,
+      resources,
+      queryClient,
+    });
+
+    await fireEvent.click(await view.findByRole('button', { name: /DevTools|开发者工具/ }));
+    expect(view.getByText('Resources (1)')).not.toBeNull();
+
+    await view.rerender({
+      instance: 'resource-rerender',
+      dataProvider,
+      routerProvider,
+      resources: [
+        ...resources,
+        { name: 'second-resource', label: 'Second resource', fields: [] },
+      ],
+      queryClient,
+    });
+
+    await waitFor(() => expect(view.getByText('Resources (2)')).not.toBeNull());
+    expect(view.getByText('second-resource')).not.toBeNull();
+  });
 });

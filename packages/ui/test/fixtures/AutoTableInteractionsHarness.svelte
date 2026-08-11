@@ -1,14 +1,16 @@
 <script lang="ts">
-  import type { DataProvider, ResourceDefinition, RouterProvider } from '@svadmin/core';
+  import type { AccessControlProvider, DataProvider, ResourceDefinition, RouterProvider } from '@svadmin/core';
   import AdminApp from '../../src/components/AdminApp.svelte';
   import AutoTable from '../../src/components/AutoTable.svelte';
 
   interface Props {
     onNavigate: RouterProvider['go'];
     locale?: string;
+    canShow?: boolean;
+    showAllowed?: boolean;
   }
 
-  let { onNavigate, locale = 'zh-CN' }: Props = $props();
+  let { onNavigate, locale = 'zh-CN', canShow = true, showAllowed }: Props = $props();
 
   const dataProvider = {
     getList: async () => ({ data: [{ id: 'user-1', email: 'user@example.com' }], total: 1 }),
@@ -25,6 +27,7 @@
     canCreate: false,
     canEdit: false,
     canDelete: false,
+    get canShow() { return canShow; },
     fields: [
       { key: 'id', label: 'ID', type: 'text' },
       { key: 'email', label: 'Email', type: 'text', searchable: true },
@@ -36,6 +39,21 @@
     back: () => {},
     parse: () => ({ pathname: '/', params: {} }),
   };
+
+  const testAccessControlProvider: AccessControlProvider = {
+    can: async (params) => {
+      if (Array.isArray(params)) {
+        return params.map((entry) => ({
+          can: entry.action === 'show' ? showAllowed === true : true,
+        }));
+      }
+      return { can: params.action === 'show' ? showAllowed === true : true };
+    },
+  };
+
+  const accessControlProvider = $derived(
+    showAllowed === undefined ? undefined : testAccessControlProvider,
+  );
 </script>
 
 {#snippet dashboard()}
@@ -46,4 +64,4 @@
   <AutoTable resourceName="users" selectable={false} expandedRowRender={expandedRowRender as never} />
 {/snippet}
 
-<AdminApp {dataProvider} {resources} {routerProvider} {locale} dashboard={dashboard as never} />
+<AdminApp {dataProvider} {resources} {routerProvider} {accessControlProvider} {locale} dashboard={dashboard as never} />
