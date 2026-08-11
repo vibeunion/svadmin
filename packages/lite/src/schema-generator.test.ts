@@ -1,6 +1,10 @@
 import { describe, expect, test } from 'bun:test';
-import type { FieldDefinition } from '@svadmin/core';
-import { fieldsToZodSchema } from './schema-generator';
+import type { FieldDefinition, ResourceDefinition } from '@svadmin/core';
+import {
+  fieldToInputType,
+  fieldsToZodSchema,
+  resourceToZodSchema,
+} from './schema-generator';
 
 const fields: FieldDefinition[] = [
   {
@@ -66,6 +70,124 @@ describe('fieldsToZodSchema numeric fields', () => {
 
     expect(result.count).toBeUndefined();
     expect(result.count).not.toBe(0);
+  });
+});
+
+describe('fieldsToZodSchema boolean fields', () => {
+  test('parses explicit native-form boolean values without treating false as truthy', () => {
+    const schema = fieldsToZodSchema([
+      { key: 'active', label: 'Active', type: 'boolean', required: true },
+    ]);
+
+    expect(schema.parse({ active: false })).toEqual({ active: false });
+    expect(schema.parse({ active: 'false' })).toEqual({ active: false });
+    expect(schema.parse({ active: '0' })).toEqual({ active: false });
+    expect(schema.parse({ active: 'off' })).toEqual({ active: false });
+    expect(schema.parse({ active: true })).toEqual({ active: true });
+    expect(schema.parse({ active: 'true' })).toEqual({ active: true });
+    expect(schema.parse({ active: '1' })).toEqual({ active: true });
+    expect(schema.parse({ active: 'on' })).toEqual({ active: true });
+    expect(schema.safeParse({ active: 'unexpected' }).success).toBe(false);
+  });
+});
+
+describe('fieldsToZodSchema custom field validation', () => {
+  test('runs FieldDefinition.validate after type coercion', () => {
+    const schema = fieldsToZodSchema([{
+      key: 'age',
+      label: 'Age',
+      type: 'number',
+      validate: (value) => typeof value === 'number' && value >= 18 ? null : 'Must be 18 or older',
+    }]);
+
+    const rejected = schema.safeParse({ age: '12' });
+    expect(rejected.success).toBe(false);
+    if (!rejected.success) {
+      expect(rejected.error.issues[0]?.message).toBe('Must be 18 or older');
+    }
+    expect(schema.parse({ age: '18' })).toEqual({ age: 18 });
+  });
+});
+
+describe('fieldsToZodSchema shared ResourceDefinition values', () => {
+  test('preserves numeric option values submitted by native forms', () => {
+    const schema = fieldsToZodSchema([
+      {
+        key: 'role',
+        label: 'Role',
+        type: 'select',
+        options: [{ label: 'Admin', value: 1 }, { label: 'Editor', value: 2 }],
+      },
+      {
+        key: 'teams',
+        label: 'Teams',
+        type: 'multiselect',
+        options: [{ label: 'Core', value: 10 }, { label: 'Docs', value: 20 }],
+      },
+    ]);
+
+    expect(schema.parse({ role: '1', teams: ['10', '20'] })).toEqual({
+      role: 1,
+      teams: [10, 20],
+    });
+    expect(schema.safeParse({ role: '999', teams: ['10'] }).success).toBe(false);
+  });
+
+  test('accepts the same URL values used by core image and images fields', () => {
+    const schema = fieldsToZodSchema([
+      { key: 'avatar', label: 'Avatar', type: 'image', required: true },
+      { key: 'gallery', label: 'Gallery', type: 'images', required: true },
+    ]);
+
+    expect(schema.parse({
+      avatar: 'https://cdn.example/avatar.png',
+      gallery: 'https://cdn.example/one.png\nhttps://cdn.example/two.png',
+    })).toEqual({
+      avatar: 'https://cdn.example/avatar.png',
+      gallery: ['https://cdn.example/one.png', 'https://cdn.example/two.png'],
+    });
+  });
+
+  test('preserves commas inside image URLs', () => {
+    const schema = fieldsToZodSchema([
+      { key: 'gallery', label: 'Gallery', type: 'images', required: true },
+    ]);
+
+    expect(schema.parse({
+      gallery: 'https://cdn.example/image.png?crop=1,2\nhttps://cdn.example/second.png',
+    })).toEqual({
+      gallery: [
+        'https://cdn.example/image.png?crop=1,2',
+        'https://cdn.example/second.png',
+      ],
+    });
+  });
+
+  test('uses portable password and markdown controls', () => {
+    expect(fieldToInputType({ key: 'password', label: 'Password', type: 'password' })).toBe('password');
+    expect(fieldToInputType({ key: 'notes', label: 'Notes', type: 'markdown' })).toBe('textarea');
+  });
+});
+
+describe('resourceToZodSchema primary key compatibility', () => {
+  test('excludes the resource primary key from create and edit variables', () => {
+    const resource = {
+      name: 'posts',
+      label: 'Posts',
+      primaryKey: 'postId',
+      fields: [
+        { key: 'postId', label: 'Post ID', type: 'text', required: true },
+        { key: 'title', label: 'Title', type: 'text', required: true },
+      ],
+    } satisfies ResourceDefinition;
+
+    expect(resourceToZodSchema(resource, 'create').parse({ title: 'Release' })).toEqual({
+      title: 'Release',
+    });
+    expect(resourceToZodSchema(resource, 'edit').parse({
+      postId: 'post-1',
+      title: 'Updated',
+    })).toEqual({ title: 'Updated' });
   });
 });
 

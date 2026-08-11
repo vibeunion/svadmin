@@ -5,6 +5,7 @@
    */
   import type { ResourceDefinition, FieldDefinition } from '@svadmin/core';
   import { t } from '@svadmin/core/i18n';
+  import { isExplicitBooleanTrue } from '../value-normalization';
 
   interface Props {
     records: Record<string, unknown>[];
@@ -14,6 +15,7 @@
     currentSearch?: string;
     basePath?: string;
     /** Show edit/delete action buttons */
+    canShow?: boolean;
     canEdit?: boolean;
     canDelete?: boolean;
   }
@@ -25,11 +27,15 @@
     currentOrder = 'asc',
     currentSearch,
     basePath = '/lite',
-    canEdit = true,
-    canDelete = true,
+    canShow,
+    canEdit,
+    canDelete,
   }: Props = $props();
 
   let pk = $derived(resource.primaryKey ?? 'id');
+  const showView = $derived(canShow ?? resource.canShow !== false);
+  const showEdit = $derived(canEdit ?? resource.canEdit !== false);
+  const showDelete = $derived(canDelete ?? resource.canDelete !== false);
   const listFields = $derived(
     resource.fields.filter(f => f.showInList !== false)
   );
@@ -53,12 +59,13 @@
       try { return new Date(value as string).toLocaleDateString(); } catch { return String(value); }
     }
     if (field.type === 'select' && field.options) {
-      const opt = field.options.find(o => o.value === value);
+      const opt = field.options.find(o => String(o.value) === String(value));
       return opt?.label ?? String(value);
     }
     if (Array.isArray(value)) return value.join(', ');
     return String(value);
   }
+
 </script>
 
 <table class="lite-table">
@@ -76,7 +83,7 @@
           {/if}
         </th>
       {/each}
-      {#if canEdit || canDelete}
+      {#if showView || showEdit || showDelete}
         <th style="text-align:right;">{t('common.actions') || 'Actions'}</th>
       {/if}
     </tr>
@@ -88,7 +95,7 @@
         {#each listFields as field, _i (_i)}
           <td>
             {#if field.type === 'boolean'}
-              <span class="lite-bool {record[field.key] ? 'lite-bool-true' : ''}"></span>
+              <span class="lite-bool {isExplicitBooleanTrue(record[field.key]) ? 'lite-bool-true' : ''}"></span>
             {:else if field.type === 'tags' && Array.isArray(record[field.key])}
               {#each (record[field.key] as string[]).slice(0, 3) as tag, _i (_i)}
                 <span class="lite-badge">{tag}</span>
@@ -100,12 +107,15 @@
             {/if}
           </td>
         {/each}
-        {#if canEdit || canDelete}
+        {#if showView || showEdit || showDelete}
           <td class="actions">
-            {#if canEdit}
+            {#if showView}
+              <a href={`${basePath}/${resource.name}/show/${id}`} class="lite-btn lite-btn-sm">{t('common.show') || 'Show'}</a>
+            {/if}
+            {#if showEdit}
               <a href={`${basePath}/${resource.name}/edit/${id}`} class="lite-btn lite-btn-sm">{t('common.edit') || 'Edit'}</a>
             {/if}
-            {#if canDelete}
+            {#if showDelete}
               <!-- Delete uses <details> for no-JS confirmation -->
               <details class="lite-confirm-details">
                 <summary class="lite-btn lite-btn-sm lite-btn-danger">{t('common.delete') || 'Delete'}</summary>
@@ -123,7 +133,7 @@
       </tr>
     {:else}
       <tr>
-        <td colspan={listFields.length + (canEdit || canDelete ? 1 : 0)} style="text-align:center;padding:40px;color:#9ca3af;">
+        <td colspan={listFields.length + (showView || showEdit || showDelete ? 1 : 0)} style="text-align:center;padding:40px;color:#9ca3af;">
           {t('common.noData') || 'No records found.'}
         </td>
       </tr>

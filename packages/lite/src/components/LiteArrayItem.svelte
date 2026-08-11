@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { FieldDefinition } from '@svadmin/core';
   import { fieldToInputType, fieldToPlaceholder } from '../schema-generator';
+  import { isExplicitBooleanTrue } from '../value-normalization';
 
   interface Props {
     subFields: FieldDefinition[];
@@ -39,6 +40,26 @@
     if (Array.isArray(value)) return value.flatMap(retainedUploadReferences);
     return [];
   }
+
+  function controlValue(field: FieldDefinition, value: unknown): unknown {
+    const resolvedValue = value === undefined ? field.defaultValue : value;
+    if (field.type === 'relation' && typeof resolvedValue === 'object' && resolvedValue !== null) {
+      return (resolvedValue as Record<string, unknown>)[field.optionValue ?? 'id'];
+    }
+    return resolvedValue;
+  }
+
+  function textareaValue(field: FieldDefinition, value: unknown): string {
+    if (field.type === 'images' && Array.isArray(value)) return value.map(String).join('\n');
+    if (field.type === 'json' && typeof value !== 'string' && value != null) {
+      try {
+        return JSON.stringify(value, null, 2);
+      } catch {
+        return String(value);
+      }
+    }
+    return displayValue(value);
+  }
 </script>
 
 <div
@@ -66,12 +87,13 @@
   </div>
 
   {#each subFields as sub (sub.key)}
+    {@const value = controlValue(sub, item[sub.key])}
     <div class="lite-array-subfield">
       <label for={fieldId(sub.key)}>
         {sub.label}
         {#if sub.required}<span class="required">*</span>{/if}
       </label>
-      {#if sub.type === 'textarea' || sub.type === 'richtext'}
+      {#if sub.type === 'textarea' || sub.type === 'richtext' || sub.type === 'markdown' || sub.type === 'images' || sub.type === 'json'}
         <textarea
           id={fieldId(sub.key)}
           name={fieldName(sub.key)}
@@ -79,7 +101,7 @@
           rows="3"
           required={sub.required && !isDraft}
           placeholder={fieldToPlaceholder(sub)}
-        >{displayValue(item[sub.key])}</textarea>
+        >{textareaValue(sub, value)}</textarea>
       {:else if sub.type === 'boolean'}
         <div class="lite-checkbox-group">
           <input
@@ -87,34 +109,34 @@
             name={fieldName(sub.key)}
             type="checkbox"
             value="1"
-            checked={Boolean(item[sub.key])}
+            checked={isExplicitBooleanTrue(value)}
           />
           <label for={fieldId(sub.key)}>{sub.label}</label>
         </div>
-      {:else if (sub.type === 'select' || sub.type === 'multiselect') && sub.options}
+      {:else if (sub.type === 'select' || sub.type === 'multiselect' || sub.type === 'relation') && sub.options}
         <select
           id={fieldId(sub.key)}
           name={fieldName(sub.key)}
           class="lite-select"
           required={sub.required && !isDraft}
           multiple={sub.type === 'multiselect'}
+          value={sub.type === 'multiselect' ? undefined : String(value ?? '')}
         >
           {#if sub.type !== 'multiselect'}
             <option value="">-- Select --</option>
           {/if}
           {#each sub.options as opt (opt.value)}
-            {@const selectedValue = item[sub.key]}
             <option
               value={String(opt.value)}
               selected={sub.type === 'multiselect'
-                ? Array.isArray(selectedValue) && selectedValue.map(String).includes(String(opt.value))
-                : String(selectedValue ?? '') === String(opt.value)}
+                ? Array.isArray(value) && value.map(String).includes(String(opt.value))
+                : undefined}
             >
               {opt.label}
             </option>
           {/each}
         </select>
-      {:else if sub.type === 'file' || sub.type === 'image' || sub.type === 'images'}
+      {:else if sub.type === 'file'}
         {#if mode === 'edit'}
           {#each retainedUploadReferences(item[sub.key]) as reference, referenceIndex (`${reference}:${referenceIndex}`)}
             <input type="hidden" name={fieldName(sub.key)} value={reference} />
@@ -128,14 +150,13 @@
           required={sub.required
             && !isDraft
             && (mode === 'create' || retainedUploadReferences(item[sub.key]).length === 0)}
-          multiple={sub.type === 'images'}
         />
       {:else}
         <input
           id={fieldId(sub.key)}
           name={fieldName(sub.key)}
           type={fieldToInputType(sub)}
-          value={displayValue(item[sub.key])}
+          value={displayValue(value)}
           class="lite-input"
           required={sub.required && !isDraft}
           placeholder={fieldToPlaceholder(sub)}

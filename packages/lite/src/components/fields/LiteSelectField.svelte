@@ -27,12 +27,13 @@
       name={field.key}
       id={field.key}
       class="lite-select {hasError ? 'lite-input-error' : ''}"
+      value={String(value ?? '')}
       {...field.required ? { required: true } : {}}
     >
       <option value="">-- {t('common.select') || 'Select'} --</option>
       {#if field.options}
         {#each field.options as opt, _i (_i)}
-          <option value={String(opt.value)} selected={String(value) === String(opt.value)}>
+          <option value={String(opt.value)}>
             {opt.label}
           </option>
         {/each}

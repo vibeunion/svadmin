@@ -26,8 +26,8 @@
   class="lite-btn {size === 'sm' ? 'lite-btn-sm' : ''} {className}"
   title={t('common.edit') || 'Edit'}
 >
-  <Pencil class="h-4 w-4" />
+  <Pencil size={16} />
   {#if !hideText}
-    <span style="marginLeft: 4px">{t('common.edit') || 'Edit'}</span>
+    <span style="margin-left: 4px">{t('common.edit') || 'Edit'}</span>
   {/if}
 </a>

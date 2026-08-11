@@ -24,8 +24,8 @@
   class="lite-btn lite-btn-primary {size === 'sm' ? 'lite-btn-sm' : ''} {className}"
   title={t('common.create') || 'Create'}
 >
-  <Plus class="h-4 w-4" />
+  <Plus size={16} />
   {#if !hideText}
-    <span style="marginLeft: 4px">{t('common.create') || 'Create'}</span>
+    <span style="margin-left: 4px">{t('common.create') || 'Create'}</span>
   {/if}
 </a>

@@ -1,5 +1,4 @@
 <script lang="ts">
-/* eslint-disable @typescript-eslint/no-explicit-any */
   import type { FieldDefinition } from '@svadmin/core';
 
   interface Props {
@@ -29,7 +28,7 @@
       id={field.key}
       value={String(value ?? '')}
       class="lite-input {hasError ? 'lite-input-error' : ''}"
-      placeholder={(field as any).placeholder ?? field.label}
+      placeholder={field.label}
       {...field.required ? { required: true } : {}}
     />
     {#if hasError}

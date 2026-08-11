@@ -6,12 +6,13 @@
  * limited to interaction affordances such as dynamic array rows.
  */
 import type {
-  DataProvider, AuthProvider,
+  DataProvider, AuthProvider, AuthActionResult,
   ResourceDefinition, FieldDefinition,
   Sort, Filter,
 } from '@svadmin/core';
 import { redirect, isRedirect, type RequestEvent } from '@sveltejs/kit';
 import { resourceToZodSchema } from './schema-generator';
+import { parseExplicitBoolean } from './value-normalization';
 
 // ─── List Loader ──────────────────────────────────────────────
 
@@ -24,7 +25,47 @@ export interface ListLoaderResult {
   sort?: string;
   order?: 'asc' | 'desc';
   search?: string;
+  /** Aliases consumed directly by LiteListPage. */
+  pagination: { page: number; perPage: number };
+  currentSort?: string;
+  currentOrder?: 'asc' | 'desc';
+  currentSearch?: string;
   resource: ResourceDefinition;
+}
+
+interface ListRequestState {
+  page: number;
+  pageSize: number;
+  sort?: string;
+  order: 'asc' | 'desc';
+  search?: string;
+}
+
+function listRequestState(url: URL, resource: ResourceDefinition): ListRequestState {
+  const requestedPage = Number(url.searchParams.get('page'));
+  const page = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  const configuredPageSize = resource.pageSize ?? 10;
+  const pageSize = Number.isSafeInteger(configuredPageSize) && configuredPageSize > 0
+    ? configuredPageSize
+    : 10;
+  const requestedSort = url.searchParams.get('sort') ?? undefined;
+  const sortableField = requestedSort
+    ? resource.fields.find((field) => field.key === requestedSort && field.sortable !== false)
+    : undefined;
+  const sort = sortableField?.key ?? resource.defaultSort?.field;
+  const requestedOrder = url.searchParams.get('order');
+  const order: 'asc' | 'desc' = sortableField
+    ? requestedOrder === 'asc' || requestedOrder === 'desc' ? requestedOrder : 'asc'
+    : resource.defaultSort?.order ?? 'asc';
+  return { page, pageSize, sort, order, search: url.searchParams.get('q') ?? undefined };
+}
+
+function listSearchFilters(resource: ResourceDefinition, search?: string): Filter[] {
+  if (!search) return [];
+  const searchableField = resource.fields.find((field) => field.searchable);
+  return searchableField
+    ? [{ field: searchableField.key, operator: 'contains', value: search }]
+    : [];
 }
 
 /**
@@ -36,39 +77,28 @@ export function createListLoader(
   resource: ResourceDefinition,
 ) {
   return async ({ url }: { url: URL }): Promise<ListLoaderResult> => {
-    const page = Math.max(1, Number(url.searchParams.get('page')) || 1);
-    const pageSize = resource.pageSize ?? 20;
-    const sort = url.searchParams.get('sort') ?? undefined;
-    const order = (url.searchParams.get('order') as 'asc' | 'desc') ?? 'asc';
-    const search = url.searchParams.get('q') ?? undefined;
-
-    const sorters: Sort[] = sort ? [{ field: sort, order }] : 
-      resource.defaultSort ? [resource.defaultSort] : [];
-
-    const filters: Filter[] = [];
-    if (search) {
-      const searchable = resource.fields.find((f: FieldDefinition) => f.searchable);
-      if (searchable) {
-        filters.push({ field: searchable.key, operator: 'contains', value: search });
-      }
-    }
-
-    const result = await dp.getList({
+    const { page, pageSize, sort, order, search } = listRequestState(url, resource);
+    const sorters: Sort[] = sort ? [{ field: sort, order }] : [];
+    const listResponse = await dp.getList({
       resource: resource.name,
       pagination: { current: page, pageSize },
       sorters,
-      filters,
+      filters: listSearchFilters(resource, search),
     });
 
     return {
-      records: result.data as Record<string, unknown>[],
-      total: result.total,
+      records: listResponse.data as Record<string, unknown>[],
+      total: listResponse.total,
       page,
       pageSize,
-      totalPages: Math.ceil(result.total / pageSize),
+      totalPages: Math.ceil(listResponse.total / pageSize),
       sort,
       order,
       search,
+      pagination: { page, perPage: pageSize },
+      currentSort: sort,
+      currentOrder: order,
+      currentSearch: search,
       resource,
     };
   };
@@ -103,6 +133,9 @@ export function createCrudActions(
 
   return {
     create: async ({ request }: RequestEvent) => {
+      if (resource.canCreate === false) {
+        return { success: false, error: 'Create is disabled for this resource' };
+      }
       const formData = await request.formData();
       const submittedValues = formDataToObject(formData, resource.fields);
       const validation = validateFormVariables(resource, 'create', submittedValues);
@@ -111,15 +144,23 @@ export function createCrudActions(
       try {
         const result = await dp.create({ resource: resource.name, variables });
         return { success: true, id: (result.data as Record<string, unknown>)[pk] };
-      } catch (e) {
-        if (isRedirect(e)) throw e;
-        return { success: false, error: (e as Error).message, values: variables };
+      } catch (caughtError) {
+        if (isRedirect(caughtError)) throw caughtError;
+        return {
+          success: false,
+          error: 'Create failed',
+          values: formValuesForResponse(resource.fields, variables),
+        };
       }
     },
 
     update: async ({ request }: RequestEvent) => {
+      if (resource.canEdit === false) {
+        return { success: false, error: 'Edit is disabled for this resource' };
+      }
       const formData = await request.formData();
-      const id = formData.get('_id') as string;
+      const id = readRecordId(formData.get('_id'));
+      if (!id) return { success: false, error: 'Missing record id' };
       formData.delete('_id');
       const submittedValues = formDataToObject(formData, resource.fields);
       const validation = validateFormVariables(resource, 'edit', submittedValues);
@@ -128,23 +169,31 @@ export function createCrudActions(
       try {
         await dp.update({ resource: resource.name, id, variables });
         return { success: true };
-      } catch (e) {
-        if (isRedirect(e)) throw e;
-        return { success: false, error: (e as Error).message, values: variables };
+      } catch (caughtError) {
+        if (isRedirect(caughtError)) throw caughtError;
+        return {
+          success: false,
+          error: 'Update failed',
+          values: formValuesForResponse(resource.fields, variables),
+        };
       }
     },
 
     delete: async ({ request }: RequestEvent) => {
+      if (resource.canDelete === false) {
+        return { success: false, error: 'Delete is disabled for this resource' };
+      }
       const formData = await request.formData();
-      const id = formData.get('id') as string;
-      const redirectTo = formData.get('redirect') as string | undefined;
+      const id = readRecordId(formData.get('id'));
+      if (!id) return { success: false, error: 'Missing record id' };
+      const redirectTo = toSafeLocalRedirect(formData.get('redirect'));
       try {
         await dp.deleteOne({ resource: resource.name, id });
         if (redirectTo) throw redirect(303, redirectTo);
         return { success: true };
-      } catch (e) {
-        if (isRedirect(e)) throw e;
-        return { success: false, error: (e as Error).message };
+      } catch (caughtError) {
+        if (isRedirect(caughtError)) throw caughtError;
+        return { success: false, error: 'Delete failed' };
       }
     },
   };
@@ -160,19 +209,20 @@ export function createAuthGuard(
   authProvider: AuthProvider,
   loginPath = '/lite/login',
 ) {
-  return async ({ event, resolve }: { event: RequestEvent; resolve: (event: RequestEvent) => Promise<Response> }) => {
-    // Skip auth check for the login page itself
-    if (event.url.pathname === loginPath) {
-      return resolve(event);
-    }
+  const loginSegmentStart = loginPath.lastIndexOf('/');
+  const authBasePath = loginSegmentStart > 0
+    ? loginPath.slice(0, loginSegmentStart)
+    : '';
+  const allowedPublicPaths = new Set([
+    loginPath,
+    `${authBasePath}/register`,
+    `${authBasePath}/forgot-password`,
+    `${authBasePath}/update-password`,
+  ]);
 
-    // Local Lite Session Verify 
-    const session = event.cookies.get('svadmin-session');
-    if (!session) {
-      return new Response(null, {
-        status: 302,
-        headers: { Location: loginPath },
-      });
+  return async ({ event, resolve }: { event: RequestEvent; resolve: (event: RequestEvent) => Promise<Response> }) => {
+    if (allowedPublicPaths.has(event.url.pathname)) {
+      return resolve(event);
     }
 
     try {
@@ -181,10 +231,11 @@ export function createAuthGuard(
         event.cookies.delete('svadmin-session', { path: '/' });
         return new Response(null, {
           status: 302,
-          headers: { Location: loginPath },
+          headers: { Location: toSafeLocalRedirect(check.redirectTo) ?? loginPath },
         });
       }
     } catch {
+      // Authentication checks fail closed so provider errors never expose a protected page.
       event.cookies.delete('svadmin-session', { path: '/' });
       return new Response(null, {
         status: 302,
@@ -196,37 +247,125 @@ export function createAuthGuard(
 }
 
 /**
- * Creates login/logout form actions using AuthProvider.
+ * Creates the form actions used by all exported Lite authentication pages.
  */
 export function createAuthActions(authProvider: AuthProvider) {
+  type AuthFormMethod = (params: Record<string, unknown>) => Promise<AuthActionResult>;
+
+  async function readAuthParams(request: Request): Promise<Record<string, unknown>> {
+    return Object.fromEntries(await request.formData());
+  }
+
+  function validatePasswordConfirmation(authParams: Record<string, unknown>):
+    | { valid: true; providerParams: Record<string, unknown> }
+    | { valid: false; error: string } {
+    const { confirmPassword, ...providerParams } = authParams;
+    const password = authParams.password;
+    if (typeof password !== 'string'
+      || password.length === 0
+      || typeof confirmPassword !== 'string'
+      || confirmPassword.length === 0) {
+      return { valid: false, error: 'Password and confirmation are required' };
+    }
+    if (password !== confirmPassword) {
+      return { valid: false, error: 'Passwords do not match' };
+    }
+    return { valid: true, providerParams };
+  }
+
+  async function runAuthFormAction(
+    providerMethod: AuthFormMethod | undefined,
+    authParams: Record<string, unknown>,
+    unsupportedMessage: string,
+    failureMessage: string,
+  ) {
+    if (!providerMethod) return { success: false, error: unsupportedMessage };
+    try {
+      const authResult = await providerMethod.call(authProvider, authParams);
+      if (!authResult.success) {
+        return { success: false, error: authResult.error?.message ?? 'Authentication action failed' };
+      }
+      if (authResult.redirectTo) throw redirect(303, authResult.redirectTo);
+      return { success: true };
+    } catch (caughtError) {
+      if (isRedirect(caughtError)) throw caughtError;
+      return { success: false, error: failureMessage };
+    }
+  }
+
   return {
-    login: async ({ request, cookies }: RequestEvent) => {
-      const formData = await request.formData();
-      const params = Object.fromEntries(formData);
+    login: async ({ request, cookies, url }: RequestEvent) => {
+      const authParams = await readAuthParams(request);
       try {
-        const result = await authProvider.login(params);
-        if (result.success) {
-          // Store a session indicator in a cookie
+        const loginResult = await authProvider.login(authParams);
+        if (loginResult.success) {
           cookies.set('svadmin-session', 'active', {
             path: '/',
             httpOnly: true,
             sameSite: 'lax',
+            secure: url.protocol === 'https:',
             maxAge: 60 * 60 * 24 * 7, // 7 days
           });
-          throw redirect(303, result.redirectTo ?? '/lite');
+          throw redirect(303, loginResult.redirectTo ?? '/lite');
         }
-        return { success: false, error: result.error?.message ?? 'Login failed' };
-      } catch (e) {
-        if (isRedirect(e)) throw e;
-        return { success: false, error: (e as Error).message };
+        return { success: false, error: loginResult.error?.message ?? 'Login failed' };
+      } catch (caughtError) {
+        if (isRedirect(caughtError)) throw caughtError;
+        return { success: false, error: 'Login failed' };
       }
     },
 
     logout: async ({ cookies }: RequestEvent) => {
-      try { await authProvider.logout(); } catch { /* ignore */ }
+      let logoutResult: AuthActionResult;
+      try {
+        logoutResult = await authProvider.logout();
+      } catch {
+        cookies.delete('svadmin-session', { path: '/' });
+        return { success: false, error: 'Logout failed' };
+      }
       cookies.delete('svadmin-session', { path: '/' });
+      if (!logoutResult.success) {
+        return { success: false, error: logoutResult.error?.message ?? 'Logout failed' };
+      }
+      if (logoutResult.redirectTo) throw redirect(303, logoutResult.redirectTo);
       return { success: true };
     },
+
+    register: async ({ request }: RequestEvent) => {
+      const confirmation = validatePasswordConfirmation(await readAuthParams(request));
+      if (!confirmation.valid) return { success: false, error: confirmation.error };
+      return runAuthFormAction(
+        authProvider.register,
+        confirmation.providerParams,
+        'Registration is not supported by this AuthProvider',
+        'Registration failed',
+      );
+    },
+
+    forgot_password: async ({ request }: RequestEvent) => runAuthFormAction(
+      authProvider.forgotPassword,
+      await readAuthParams(request),
+      'Password recovery is not supported by this AuthProvider',
+      'Password recovery failed',
+    ),
+
+    update_password: async ({ request }: RequestEvent) => {
+      const confirmation = validatePasswordConfirmation(await readAuthParams(request));
+      if (!confirmation.valid) return { success: false, error: confirmation.error };
+      return runAuthFormAction(
+        authProvider.updatePassword,
+        confirmation.providerParams,
+        'Password updates are not supported by this AuthProvider',
+        'Password update failed',
+      );
+    },
+
+    update_profile: async ({ request }: RequestEvent) => runAuthFormAction(
+      (authProvider.updateProfile ?? authProvider.updateIdentity) as AuthFormMethod | undefined,
+      await readAuthParams(request),
+      'Profile updates are not supported by this AuthProvider',
+      'Profile update failed',
+    ),
   };
 }
 
@@ -245,12 +384,24 @@ export function isLegacyBrowser(userAgent: string): boolean {
  * Consumers remain responsible for their own transpilation and browser support.
  */
 export function createLegacyRedirectHook(litePrefix = '/lite') {
+  const prefixSegments = litePrefix.split('/').filter(Boolean);
+  const normalizedPrefix = prefixSegments.length > 0 ? `/${prefixSegments.join('/')}` : '/';
+
   return async ({ event, resolve }: { event: RequestEvent; resolve: (event: RequestEvent) => Promise<Response> }) => {
     const ua = event.request.headers.get('user-agent') ?? '';
-    if (isLegacyBrowser(ua) && !event.url.pathname.startsWith(litePrefix)) {
+    const acceptsHtml = event.request.headers.get('accept')?.includes('text/html') === true;
+    const isDocumentRequest = (event.request.method === 'GET' || event.request.method === 'HEAD')
+      && acceptsHtml;
+    const isWithinLite = normalizedPrefix === '/'
+      || event.url.pathname === normalizedPrefix
+      || event.url.pathname.startsWith(`${normalizedPrefix}/`);
+    if (isLegacyBrowser(ua) && isDocumentRequest && !isWithinLite) {
+      const targetPath = normalizedPrefix === '/'
+        ? event.url.pathname
+        : `${normalizedPrefix}${event.url.pathname}`;
       return new Response(null, {
         status: 302,
-        headers: { Location: `${litePrefix}${event.url.pathname}` },
+        headers: { Location: `${targetPath}${event.url.search}` },
       });
     }
     return resolve(event);
@@ -258,6 +409,39 @@ export function createLegacyRedirectHook(litePrefix = '/lite') {
 }
 
 // ─── Utilities ────────────────────────────────────────────────
+
+function readRecordId(submittedId: FormDataEntryValue | null): string | undefined {
+  if (typeof submittedId !== 'string' || submittedId.trim().length === 0) return undefined;
+  return submittedId.trim();
+}
+
+function containsControlCharacter(untrustedRedirect: string): boolean {
+  return Array.from(untrustedRedirect).some((character) => {
+    const codePoint = character.codePointAt(0) ?? 0;
+    return codePoint <= 31 || (codePoint >= 127 && codePoint <= 159);
+  });
+}
+
+function toSafeLocalRedirect(submittedRedirect: FormDataEntryValue | null | undefined): string | undefined {
+  if (typeof submittedRedirect !== 'string'
+    || !submittedRedirect.startsWith('/')
+    || submittedRedirect.startsWith('//')) {
+    return undefined;
+  }
+  if (submittedRedirect.includes('\\') || containsControlCharacter(submittedRedirect)) {
+    return undefined;
+  }
+
+  const base = new URL('https://svadmin.local');
+  try {
+    const target = new URL(submittedRedirect, base);
+    if (target.origin !== base.origin) return undefined;
+    return `${target.pathname}${target.search}${target.hash}`;
+  } catch {
+    // Malformed untrusted redirect input is intentionally treated as no redirect.
+    return undefined;
+  }
+}
 
 interface ValidationIssue {
   path: readonly PropertyKey[];
@@ -301,7 +485,7 @@ function validateFormVariables(
     failure: {
       success: false,
       error: 'Validation failed',
-      values,
+      values: formValuesForResponse(resource.fields, values),
       errors: formatValidationErrors(result.error.issues),
     },
   };
@@ -309,6 +493,35 @@ function validateFormVariables(
 
 function isNativeFile(value: unknown): value is File {
   return typeof File !== 'undefined' && value instanceof File;
+}
+
+function formValuesForResponse(
+  fields: FieldDefinition[],
+  values: Record<string, unknown>,
+): Record<string, unknown> {
+  const responseValues: Record<string, unknown> = {};
+
+  for (const field of fields) {
+    if (field.type === 'password' || !(field.key in values)) continue;
+    const value = values[field.key];
+
+    if (field.type === 'array' && Array.isArray(value)) {
+      responseValues[field.key] = value.map((row) => {
+        if (typeof row !== 'object' || row === null || Array.isArray(row)) return row;
+        return formValuesForResponse(
+          field.subFields ?? [],
+          row as Record<string, unknown>,
+        );
+      });
+      continue;
+    }
+    if (isNativeFile(value)) continue;
+    responseValues[field.key] = Array.isArray(value)
+      ? value.filter((entry) => !isNativeFile(entry))
+      : value;
+  }
+
+  return responseValues;
 }
 
 function isNonEmptyNativeFile(value: unknown): value is File {
@@ -368,7 +581,7 @@ function formDataToObject(
         }
         break;
       case 'boolean':
-        obj[field.key] = strRaw === 'on' || strRaw === 'true' || strRaw === '1';
+        obj[field.key] = parseExplicitBoolean(strRaw) ?? strRaw;
         break;
       case 'tags':
         obj[field.key] = strRaw ? strRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
@@ -417,9 +630,12 @@ function parseArrayField(
     for (const subField of field.subFields ?? []) {
       const rawValues = entries.get(subField.key) ?? [];
       if (subField.type === 'boolean') {
-        const value = isChecked(rawValues);
+        const rawValue = rawValues.at(-1);
+        const value = rawValue === undefined
+          ? false
+          : parseExplicitBoolean(rawValue) ?? rawValue;
         item[subField.key] = value;
-        hasMeaningfulValue ||= value;
+        hasMeaningfulValue ||= value !== false;
         continue;
       }
       if (rawValues.length === 0) continue;
@@ -488,7 +704,7 @@ function coerceFieldValues(
       if (raw.trim() === '') return undefined;
       return Number.isNaN(Number(raw)) ? raw : Number(raw);
     case 'boolean':
-      return raw === 'on' || raw === 'true' || raw === '1';
+      return parseExplicitBoolean(raw) ?? raw;
     case 'tags':
       return raw ? raw.split(',').map((value) => value.trim()).filter(Boolean) : [];
     case 'json':

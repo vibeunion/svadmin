@@ -4,8 +4,9 @@
    * Pure HTML table with checkbox inputs. No client-side JS required.
    * Works with form POST actions for state changes.
    */
+  import type { ResourceDefinition, Role } from '@svadmin/core';
 
-  interface LiteRole {
+  interface LegacyLiteRole {
     code: string;
     name: string;
   }
@@ -22,11 +23,11 @@
   }
 
   interface Props {
-    roles: LiteRole[];
-    resources: LiteResource[];
+    roles: Array<Role | LegacyLiteRole>;
+    resources: Array<ResourceDefinition | LiteResource>;
     actions: LiteAction[];
-    /** Current permissions map: { "resource:action": true } */
-    permissions: Record<string, boolean>;
+    /** Core matrix ({ resource: [actions] }) or legacy flat boolean map. */
+    permissions: Record<string, string[]> | Record<string, boolean>;
     selectedRole?: string;
     /** Form POST action URL */
     actionUrl?: string;
@@ -38,13 +39,44 @@
     resources,
     actions,
     permissions,
-    selectedRole = roles[0]?.code || '',
+    selectedRole = '',
     actionUrl = '?/updatePermissions',
     disabled = false,
   }: Props = $props();
 
+  function isCoreRole(role: Role | LegacyLiteRole): role is Role {
+    return 'id' in role && typeof role.id === 'string';
+  }
+
+  function isCoreResource(resource: ResourceDefinition | LiteResource): resource is ResourceDefinition {
+    return 'fields' in resource && Array.isArray(resource.fields);
+  }
+
+  function roleId(role: Role | LegacyLiteRole | undefined): string {
+    if (!role) return '';
+    return isCoreRole(role) ? role.id : role.code;
+  }
+
+  function resourceCode(resource: ResourceDefinition | LiteResource): string {
+    return isCoreResource(resource) ? resource.name : resource.code;
+  }
+
+  function resourceLabel(resource: ResourceDefinition | LiteResource): string {
+    return isCoreResource(resource) ? resource.label : resource.name;
+  }
+
+  function resourceSection(resource: ResourceDefinition | LiteResource | undefined): string | undefined {
+    if (!resource) return undefined;
+    return isCoreResource(resource) ? resource.group : resource.section;
+  }
+
+  const activeRole = $derived(selectedRole || roleId(roles[0]));
+
   function isGranted(resource: string, action: string): boolean {
-    return permissions[`${resource}:${action}`] === true;
+    const flatPermission = permissions[`${resource}:${action}`];
+    if (typeof flatPermission === 'boolean') return flatPermission;
+    const resourcePermissions = permissions[resource];
+    return Array.isArray(resourcePermissions) && resourcePermissions.includes(action);
   }
 </script>
 
@@ -53,8 +85,8 @@
   <div class="lite-role-tabs">
     {#each roles as role, _i (_i)}
       <a
-        href="?role={role.code}"
-        class="lite-role-tab {selectedRole === role.code ? 'active' : ''}"
+        href="?role={roleId(role)}"
+        class="lite-role-tab {activeRole === roleId(role) ? 'active' : ''}"
       >
         {role.name}
       </a>
@@ -63,7 +95,7 @@
 
   <!-- Matrix Table -->
   <form method="POST" action={actionUrl}>
-    <input type="hidden" name="role" value={selectedRole} />
+    <input type="hidden" name="role" value={activeRole} />
 
     <table class="lite-table" style="margin-top:0;">
       <thead>
@@ -76,21 +108,22 @@
       </thead>
       <tbody>
         {#each resources as resource, i (i)}
-          {#if resource.section && (i === 0 || resource.section !== resources[i-1].section)}
+          {@const section = resourceSection(resource)}
+          {#if section && (i === 0 || section !== resourceSection(resources[i-1]))}
             <tr>
               <td colspan={actions.length + 1} style="background:#f1f5f9;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:0.05em;color:#475569;">
-                {resource.section}
+                {section}
               </td>
             </tr>
           {/if}
           <tr>
-            <td><strong>{resource.name}</strong><br/><small style="color:#94a3b8;">{resource.code}</small></td>
+            <td><strong>{resourceLabel(resource)}</strong><br/><small style="color:#94a3b8;">{resourceCode(resource)}</small></td>
             {#each actions as action, _i (_i)}
               <td style="text-align:center;">
                 <input
                   type="checkbox"
-                  name="perm_{resource.code}_{action.code}"
-                  checked={isGranted(resource.code, action.code)}
+                  name="perm_{resourceCode(resource)}_{action.code}"
+                  checked={isGranted(resourceCode(resource), action.code)}
                   {disabled}
                   style="width:18px;height:18px;cursor:{disabled ? 'not-allowed' : 'pointer'};"
                 />

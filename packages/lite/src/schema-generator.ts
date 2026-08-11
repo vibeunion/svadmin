@@ -2,10 +2,11 @@
  * @svadmin/lite — Schema Generator
  *
  * Auto-generates Zod schemas from @svadmin/core FieldDefinitions.
- * Used with sveltekit-superforms for server-side form validation.
+ * Used by the Lite server actions and compatible with other Zod consumers.
  */
 import { z } from 'zod';
 import type { FieldDefinition, ResourceDefinition } from '@svadmin/core';
+import { parseExplicitBoolean } from './value-normalization';
 
 function isNativeFile(value: unknown): value is File {
   return typeof File !== 'undefined' && value instanceof File;
@@ -15,12 +16,31 @@ function isNonEmptyNativeFile(value: unknown): value is File {
   return isNativeFile(value) && value.size > 0 && value.name !== '';
 }
 
+function normalizeSingleUpload(submittedUpload: unknown): unknown {
+  if (submittedUpload === undefined || submittedUpload === null || submittedUpload === '') return undefined;
+  if (isNativeFile(submittedUpload) && !isNonEmptyNativeFile(submittedUpload)) return undefined;
+  return submittedUpload;
+}
+
 function hasRequiredValue(value: unknown): boolean {
   if (value === undefined || value === null) return false;
   if (typeof value === 'string') return value.trim().length > 0;
   if (Array.isArray(value)) return value.length > 0;
   if (isNativeFile(value)) return isNonEmptyNativeFile(value);
   return true;
+}
+
+function applyCustomValidation(
+  schema: z.ZodTypeAny,
+  field: FieldDefinition,
+): z.ZodTypeAny {
+  if (!field.validate) return schema;
+
+  return schema.superRefine((parsedFieldValue, context) => {
+    if (parsedFieldValue === undefined || parsedFieldValue === null || parsedFieldValue === '') return;
+    const message = field.validate?.(parsedFieldValue);
+    if (message) context.addIssue({ code: 'custom', message });
+  });
 }
 
 function numberFieldToZod(field: FieldDefinition): z.ZodTypeAny {
@@ -34,6 +54,48 @@ function numberFieldToZod(field: FieldDefinition): z.ZodTypeAny {
   }, targetSchema);
 }
 
+function booleanFieldToZod(field: FieldDefinition): z.ZodTypeAny {
+  const booleanSchema = z.boolean();
+  const targetSchema = field.required ? booleanSchema : booleanSchema.optional();
+
+  return z.preprocess((rawBoolean) => {
+    if (rawBoolean === undefined || rawBoolean === null || rawBoolean === '') return undefined;
+    return parseExplicitBoolean(rawBoolean) ?? rawBoolean;
+  }, targetSchema);
+}
+
+function restoreOptionValue(field: FieldDefinition, submittedOption: unknown): unknown {
+  const option = field.options?.find(
+    (candidate) => String(candidate.value) === String(submittedOption),
+  );
+  return option?.value ?? submittedOption;
+}
+
+function optionValueSchema(field: FieldDefinition): z.ZodTypeAny {
+  const options = field.options ?? [];
+  return z.union([z.string(), z.number()]).refine(
+    (parsedOption) => options.length === 0
+      || options.some((option) => Object.is(option.value, parsedOption)),
+    { message: `${field.label} must be one of the options` },
+  );
+}
+
+function singleOptionFieldToZod(field: FieldDefinition): z.ZodTypeAny {
+  return z.preprocess(
+    (submittedOption) => restoreOptionValue(field, submittedOption),
+    optionValueSchema(field),
+  );
+}
+
+function multipleOptionFieldToZod(field: FieldDefinition): z.ZodTypeAny {
+  return z.preprocess(
+    (submittedOptions) => Array.isArray(submittedOptions)
+      ? submittedOptions.map((submittedOption) => restoreOptionValue(field, submittedOption))
+      : submittedOptions,
+    z.array(optionValueSchema(field)).default([]),
+  );
+}
+
 function singleFileFieldToZod(
   field: FieldDefinition,
   options: { required: boolean; allowReference: boolean },
@@ -45,44 +107,45 @@ function singleFileFieldToZod(
   const uploadSchema = options.allowReference ? z.union([fileSchema, referenceSchema]) : fileSchema;
   const targetSchema = options.required ? uploadSchema : uploadSchema.optional();
 
-  return z.preprocess((value) => {
-    if (value === undefined || value === null || value === '') return undefined;
-    if (isNativeFile(value) && !isNonEmptyNativeFile(value)) return undefined;
-    return value;
-  }, targetSchema);
+  return z.preprocess(normalizeSingleUpload, targetSchema);
 }
 
-function multipleFilesFieldToZod(
-  field: FieldDefinition,
-  options: { required: boolean; allowReference: boolean },
-): z.ZodTypeAny {
-  const fileSchema = z.custom<File>(isNonEmptyNativeFile, {
-    message: `${field.label} contains an empty or invalid file`,
-  });
-  const filesSchema = z.array(fileSchema).min(1, `${field.label} must contain at least one file`);
-  const referencesSchema = z.array(
-    z.string().trim().min(1, `${field.label} contains an empty file reference`),
-  ).min(1, `${field.label} must contain at least one file`);
-  const uploadSchema = options.allowReference ? z.union([filesSchema, referencesSchema]) : filesSchema;
-  const targetSchema = options.required ? uploadSchema : uploadSchema.optional();
+function imageFieldSchemas(field: FieldDefinition) {
+  const imageSchema = z.union([
+    z.string().trim().min(1, `${field.label} must reference an image`),
+    z.custom<File>(isNonEmptyNativeFile, {
+      message: `${field.label} must reference an image or contain a non-empty file`,
+    }),
+  ]);
+  return {
+    required: z.preprocess(normalizeSingleUpload, imageSchema),
+    optional: z.preprocess(normalizeSingleUpload, imageSchema.optional()),
+  };
+}
 
-  return z.preprocess((value) => {
-    if (value === undefined || value === null || value === '') return undefined;
-    if (!Array.isArray(value)) return value;
+function normalizeImageEntries(submittedImages: unknown): unknown {
+  if (submittedImages === undefined || submittedImages === null || submittedImages === '') return undefined;
+  const entries = Array.isArray(submittedImages) ? submittedImages : [submittedImages];
+  const normalized = entries.flatMap((entry) => {
+    if (typeof entry !== 'string') return [entry];
+    return entry.split(/[\r\n]+/u).map((reference) => reference.trim()).filter(Boolean);
+  }).filter((entry) => !isNativeFile(entry) || isNonEmptyNativeFile(entry));
+  return normalized.length > 0 ? normalized : undefined;
+}
 
-    const invalidEntries = value.filter(
-      (entry) => !isNativeFile(entry) && typeof entry !== 'string',
-    );
-    if (invalidEntries.length > 0) return value;
-
-    const uploadedFiles = value.filter(isNonEmptyNativeFile);
-    if (uploadedFiles.length > 0) return uploadedFiles;
-
-    const references = value.filter(
-      (entry): entry is string => typeof entry === 'string' && entry.trim().length > 0,
-    );
-    return references.length > 0 ? references : undefined;
-  }, targetSchema);
+function imagesFieldSchemas(field: FieldDefinition) {
+  const imageEntrySchema = z.union([
+    z.string().trim().min(1, `${field.label} contains an empty image reference`),
+    z.custom<File>(isNonEmptyNativeFile, {
+      message: `${field.label} contains an empty or invalid file`,
+    }),
+  ]);
+  const requiredImages = z.array(imageEntrySchema)
+    .min(1, `${field.label} must contain at least one image`);
+  return {
+    required: z.preprocess(normalizeImageEntries, requiredImages),
+    optional: z.preprocess(normalizeImageEntries, z.array(imageEntrySchema).optional()),
+  };
 }
 
 /**
@@ -99,8 +162,7 @@ function fieldToZod(
     case 'number':
       return numberFieldToZod(field);
     case 'boolean':
-      schema = z.coerce.boolean();
-      break;
+      return booleanFieldToZod(field);
     case 'email':
       schema = z.string().email(`${field.label} must be a valid email`);
       break;
@@ -114,22 +176,21 @@ function fieldToZod(
       );
       break;
     case 'select':
-      if (field.options?.length) {
-        schema = z.enum(
-          field.options.map((o: { value: string | number }) => String(o.value)) as [string, ...string[]],
-          { message: `${field.label} must be one of the options` },
-        );
-      } else {
-        schema = z.string();
-      }
+      schema = singleOptionFieldToZod(field);
       break;
     case 'multiselect':
-      schema = z.array(z.string()).default([]);
+      schema = multipleOptionFieldToZod(field);
+      break;
+    case 'relation':
+      schema = field.options?.length ? singleOptionFieldToZod(field) : z.string();
       break;
     case 'array': {
       const shape: Record<string, z.ZodTypeAny> = {};
       for (const subField of field.subFields ?? []) {
-        shape[subField.key] = fieldToZod(subField, mode, true);
+        shape[subField.key] = applyCustomValidation(
+          fieldToZod(subField, mode, true),
+          subField,
+        );
       }
       const arraySchema = z.array(z.object(shape));
       return field.required
@@ -144,6 +205,7 @@ function fieldToZod(
       break;
     case 'textarea':
     case 'richtext':
+    case 'markdown':
       schema = z.string().max(50000, `${field.label} is too long`);
       break;
     case 'json':
@@ -161,16 +223,22 @@ function fieldToZod(
       schema = z.string().regex(/^[+\d\s()-]*$/, `${field.label} must be a valid phone number`);
       break;
     case 'file':
-    case 'image':
       return singleFileFieldToZod(field, {
         required: field.required === true && (mode === 'create' || withinArray),
         allowReference: mode === 'edit' && withinArray,
       });
-    case 'images':
-      return multipleFilesFieldToZod(field, {
-        required: field.required === true && (mode === 'create' || withinArray),
-        allowReference: mode === 'edit' && withinArray,
-      });
+    case 'image': {
+      const imageSchemas = imageFieldSchemas(field);
+      return field.required === true && (mode === 'create' || withinArray)
+        ? imageSchemas.required
+        : imageSchemas.optional;
+    }
+    case 'images': {
+      const imagesSchemas = imagesFieldSchemas(field);
+      return field.required === true && (mode === 'create' || withinArray)
+        ? imagesSchemas.required
+        : imagesSchemas.optional;
+    }
     default:
       schema = z.string();
   }
@@ -203,7 +271,7 @@ export function fieldsToZodSchema(
     if (mode === 'create' && field.showInCreate === false) continue;
     if (mode === 'edit' && field.showInEdit === false) continue;
 
-    shape[field.key] = fieldToZod(field, mode);
+    shape[field.key] = applyCustomValidation(fieldToZod(field, mode), field);
   }
 
   return z.object(shape);
@@ -217,7 +285,11 @@ export function resourceToZodSchema(
   resource: ResourceDefinition,
   mode: 'create' | 'edit' = 'create',
 ): z.ZodObject<Record<string, z.ZodTypeAny>> {
-  return fieldsToZodSchema(resource.fields, mode);
+  const primaryKey = resource.primaryKey ?? 'id';
+  return fieldsToZodSchema(
+    resource.fields.filter((field) => field.key !== primaryKey),
+    mode,
+  );
 }
 
 /**
@@ -233,13 +305,16 @@ export function fieldToInputType(field: FieldDefinition): string {
     case 'boolean': return 'checkbox';
     case 'date': return 'text';
     case 'textarea':
-    case 'richtext': return 'textarea';
+    case 'richtext':
+    case 'markdown':
+    case 'images': return 'textarea';
+    case 'json': return 'textarea';
     case 'select':
     case 'multiselect': return 'select';
+    case 'relation': return field.options?.length ? 'select' : 'text';
     case 'array': return 'text';
-    case 'image':
-    case 'images':
     case 'file': return 'file';
+    case 'password': return 'password';
     default: return 'text';
   }
 }

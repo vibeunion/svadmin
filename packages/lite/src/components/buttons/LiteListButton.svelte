@@ -24,8 +24,8 @@
   class="lite-btn {size === 'sm' ? 'lite-btn-sm' : ''} {className}"
   title={t('common.list') || 'List'}
 >
-  <List class="h-4 w-4" />
+  <List size={16} />
   {#if !hideText}
-    <span style="marginLeft: 4px">{t('common.list') || 'List'}</span>
+    <span style="margin-left: 4px">{t('common.list') || 'List'}</span>
   {/if}
 </a>

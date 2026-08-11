@@ -13,7 +13,7 @@ export {
 } from './server-adapter';
 export type { ListLoaderResult } from './server-adapter';
 
-// Schema generator (use with sveltekit-superforms)
+// Schema generator (used by Lite actions; also reusable by other Zod consumers)
 export {
   fieldsToZodSchema,
   resourceToZodSchema,

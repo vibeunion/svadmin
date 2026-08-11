@@ -15,6 +15,7 @@
     currentOrder?: 'asc' | 'desc';
     currentSearch?: string;
     basePath?: string;
+    canShow?: boolean;
     canEdit?: boolean;
     canDelete?: boolean;
   }
@@ -26,8 +27,9 @@
     currentOrder = 'asc',
     currentSearch,
     basePath = '/lite',
-    canEdit = true,
-    canDelete = true,
+    canShow,
+    canEdit,
+    canDelete,
   }: Props = $props();
 </script>
 
@@ -39,6 +41,7 @@
   {currentOrder}
   {currentSearch}
   {basePath}
+  {canShow}
   {canEdit}
   {canDelete}
 />

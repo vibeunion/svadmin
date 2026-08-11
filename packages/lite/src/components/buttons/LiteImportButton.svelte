@@ -24,9 +24,9 @@
     class="lite-btn {size === 'sm' ? 'lite-btn-sm' : ''}"
     title={t('common.import') || 'Import'}
   >
-    <Upload class="h-4 w-4" />
+    <Upload size={16} />
     {#if !hideText}
-      <span style="marginLeft: 4px">{t('common.import') || 'Import'}</span>
+      <span style="margin-left: 4px">{t('common.import') || 'Import'}</span>
     {/if}
   </summary>
   <div class="lite-confirm-panel">

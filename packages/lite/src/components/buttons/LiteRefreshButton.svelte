@@ -14,21 +14,17 @@
     size = 'default'
   }: Props = $props();
 
-  function refreshPage() {
-    if (typeof window !== 'undefined') {
-      window.location.reload();
-    }
-  }
 </script>
 
-<button
-  type="button"
+<!-- The empty URL intentionally reloads the exact current document, including its query string. -->
+<!-- svelte-ignore a11y_invalid_attribute -->
+<a
+  href=""
   class="lite-btn {size === 'sm' ? 'lite-btn-sm' : ''} {className}"
   title={t('common.refresh') || 'Refresh'}
-  onclick={refreshPage}
 >
-  <RefreshCw class="h-4 w-4" />
+  <RefreshCw size={16} />
   {#if !hideText}
-    <span style="marginLeft: 4px">{t('common.refresh') || 'Refresh'}</span>
+    <span style="margin-left: 4px">{t('common.refresh') || 'Refresh'}</span>
   {/if}
-</button>
+</a>

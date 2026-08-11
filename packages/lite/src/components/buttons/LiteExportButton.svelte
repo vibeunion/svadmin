@@ -24,8 +24,8 @@
   class="lite-btn {size === 'sm' ? 'lite-btn-sm' : ''} {className}"
   title={t('common.export') || 'Export'}
 >
-  <Download class="h-4 w-4" />
+  <Download size={16} />
   {#if !hideText}
-    <span style="marginLeft: 4px">{t('common.export') || 'Export'}</span>
+    <span style="margin-left: 4px">{t('common.export') || 'Export'}</span>
   {/if}
 </a>

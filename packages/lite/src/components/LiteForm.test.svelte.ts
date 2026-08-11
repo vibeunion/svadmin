@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render } from '@testing-library/svelte';
-import type { FieldDefinition } from '@svadmin/core';
+import type { FieldDefinition, ResourceDefinition } from '@svadmin/core';
 import LiteForm from './LiteForm.svelte';
 
 vi.mock('@svadmin/core/i18n', () => ({
@@ -78,6 +78,33 @@ describe('LiteForm array fields', () => {
     ).toBe(true);
   });
 
+  it('applies explicit defaults to initial and enhancement-template array rows', () => {
+    const defaultsField: FieldDefinition = {
+      key: 'settings',
+      label: 'Settings',
+      type: 'array',
+      subFields: [
+        { key: 'name', label: 'Name', type: 'text', defaultValue: 'Untitled' },
+        { key: 'retries', label: 'Retries', type: 'number', defaultValue: 3 },
+        { key: 'active', label: 'Active', type: 'boolean', defaultValue: true },
+        { key: 'metadata', label: 'Metadata', type: 'json', defaultValue: { source: 'lite' } },
+      ],
+    };
+    const { container } = render(LiteForm, { fields: [defaultsField] });
+
+    expect(container.querySelector<HTMLInputElement>('[name="settings[0][name]"]')?.value).toBe('Untitled');
+    expect(container.querySelector<HTMLInputElement>('[name="settings[0][retries]"]')?.value).toBe('3');
+    expect(container.querySelector<HTMLInputElement>('[name="settings[0][active]"]')?.checked).toBe(true);
+    expect(container.querySelector<HTMLTextAreaElement>('[name="settings[0][metadata]"]')?.value)
+      .toBe('{\n  "source": "lite"\n}');
+
+    const template = container.querySelector<HTMLTemplateElement>('template[data-lite-array-template]');
+    expect(template?.content.querySelector<HTMLInputElement>('[name="settings[__INDEX__][name]"]')?.value)
+      .toBe('Untitled');
+    expect(template?.content.querySelector<HTMLInputElement>('[name="settings[__INDEX__][active]"]')?.checked)
+      .toBe(true);
+  });
+
   it('keeps required child constraints for real rows and bypasses them for no-JS removal', () => {
     const { container } = render(LiteForm, {
       fields: [optionalContactsField],
@@ -97,7 +124,7 @@ describe('LiteForm array fields', () => {
     expect(removeSubmitter && form ? new FormData(form, removeSubmitter).get('contacts[0][_delete]') : null).toBe('1');
   });
 
-  it('never writes file input values and only requires a replacement when create or edit has no stored upload', () => {
+  it('keeps file uploads native while image fields retain shared URL semantics', () => {
     const createView = render(LiteForm, {
       fields: uploadFields,
       mode: 'create',
@@ -108,10 +135,11 @@ describe('LiteForm array fields', () => {
       },
     });
     const createInputs = createView.container.querySelectorAll<HTMLInputElement>('input[type="file"]');
-    expect(createInputs).toHaveLength(3);
+    expect(createInputs).toHaveLength(1);
     expect(Array.from(createInputs).every((input) => input.required)).toBe(true);
     expect(Array.from(createInputs).every((input) => !input.hasAttribute('value'))).toBe(true);
-    expect(createInputs[2]?.multiple).toBe(true);
+    expect(createView.container.querySelector<HTMLInputElement>('[name="avatar"]')?.value).toBe('/stored/avatar.png');
+    expect(createView.container.querySelector<HTMLTextAreaElement>('[name="gallery"]')?.value).toBe('/stored/first.png');
     createView.unmount();
 
     const editView = render(LiteForm, {
@@ -155,10 +183,8 @@ describe('LiteForm array fields', () => {
     expect(
       editView.container.querySelector<HTMLInputElement>('[type="hidden"][name="documents[0][attachment]"]')?.value,
     ).toBe('/stored/report.pdf');
-    expect(
-      Array.from(editView.container.querySelectorAll<HTMLInputElement>('[type="hidden"][name="documents[0][gallery]"]'))
-        .map((input) => input.value),
-    ).toEqual(['/stored/first.png']);
+    expect(editView.container.querySelector<HTMLTextAreaElement>('[name="documents[0][gallery]"]')?.value)
+      .toBe('/stored/first.png');
     const editTemplateInputs = editView.container
       .querySelector<HTMLTemplateElement>('template[data-lite-array-template]')
       ?.content.querySelectorAll<HTMLInputElement>('input[type="file"]');
@@ -179,5 +205,109 @@ describe('LiteForm array fields', () => {
       Array.from(createView.container.querySelectorAll<HTMLInputElement>('[data-lite-array-item] input[type="file"]'))
         .every((input) => input.required),
     ).toBe(true);
+    expect(createView.container.querySelector<HTMLTextAreaElement>('[name="documents[0][gallery]"]')?.value)
+      .toBe('/stored/first.png');
+  });
+});
+
+describe('LiteForm ResourceDefinition compatibility', () => {
+  it('excludes the primary key and applies create defaults with option type parity', () => {
+    const resource = {
+      name: 'members',
+      label: 'Members',
+      primaryKey: 'memberId',
+      fields: [
+        { key: 'memberId', label: 'Member ID', type: 'text', required: true },
+        { key: 'name', label: 'Name', type: 'text', defaultValue: 'New member' },
+        {
+          key: 'role',
+          label: 'Role',
+          type: 'select',
+          defaultValue: 1,
+          options: [{ label: 'Admin', value: 1 }, { label: 'Editor', value: 2 }],
+        },
+      ],
+    } satisfies ResourceDefinition;
+
+    const view = render(LiteForm, {
+      fields: resource.fields,
+      resource,
+      mode: 'create',
+    });
+    const { container } = view;
+
+    expect(container.querySelector('[name="memberId"]')).toBeNull();
+    expect(container.querySelector<HTMLInputElement>('[name="name"]')?.value).toBe('New member');
+    expect(container.querySelector<HTMLSelectElement>('[name="role"]')?.value).toBe('1');
+  });
+
+  it('retains numeric option values returned after server validation fails', () => {
+    const fields: FieldDefinition[] = [{
+      key: 'role',
+      label: 'Role',
+      type: 'select',
+      options: [{ label: 'Admin', value: 1 }, { label: 'Editor', value: 2 }],
+    }, {
+      key: 'teams',
+      label: 'Teams',
+      type: 'multiselect',
+      options: [{ label: 'Core', value: 10 }, { label: 'Docs', value: 20 }],
+    }];
+    const { container } = render(LiteForm, {
+      fields,
+      values: { role: '2', teams: ['10', 20] },
+    });
+
+    const select = container.querySelector<HTMLSelectElement>('[name="role"]');
+    expect(Array.from(select?.options ?? []).map((option) => [option.value, option.selected])).toEqual([
+      ['', false],
+      ['1', false],
+      ['2', true],
+    ]);
+    expect(Array.from(container.querySelectorAll<HTMLOptionElement>('[name="teams"] option'))
+      .filter((option) => option.selected)
+      .map((option) => option.value)).toEqual(['10', '20']);
+  });
+
+  it('renders password and shared image values as native text controls', () => {
+    const fields: FieldDefinition[] = [
+      { key: 'password', label: 'Password', type: 'password' },
+      { key: 'avatar', label: 'Avatar', type: 'image', required: true },
+      { key: 'gallery', label: 'Gallery', type: 'images', required: true },
+    ];
+    const { container } = render(LiteForm, {
+      fields,
+      values: {
+        avatar: 'https://cdn.example/avatar.png',
+        gallery: ['https://cdn.example/one.png', 'https://cdn.example/two.png'],
+      },
+    });
+
+    expect(container.querySelector<HTMLInputElement>('[name="password"]')?.type).toBe('password');
+    expect(container.querySelector<HTMLInputElement>('[name="avatar"]')?.value).toBe('https://cdn.example/avatar.png');
+    expect(container.querySelector<HTMLTextAreaElement>('[name="gallery"]')?.value).toBe(
+      'https://cdn.example/one.png\nhttps://cdn.example/two.png',
+    );
+  });
+
+  it('round-trips JSON objects and populated relation records', () => {
+    const fields: FieldDefinition[] = [
+      { key: 'metadata', label: 'Metadata', type: 'json', defaultValue: { active: true } },
+      {
+        key: 'owner',
+        label: 'Owner',
+        type: 'relation',
+        optionValue: 'userId',
+        options: [{ label: 'Alice', value: 7 }],
+      },
+    ];
+    const { container } = render(LiteForm, {
+      fields,
+      values: { owner: { userId: 7, name: 'Alice' } },
+    });
+
+    expect(container.querySelector<HTMLTextAreaElement>('[name="metadata"]')?.value)
+      .toBe('{\n  "active": true\n}');
+    expect(container.querySelector<HTMLSelectElement>('[name="owner"]')?.value).toBe('7');
   });
 });

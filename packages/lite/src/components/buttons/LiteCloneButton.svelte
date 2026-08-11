@@ -26,8 +26,8 @@
   class="lite-btn {size === 'sm' ? 'lite-btn-sm' : ''} {className}"
   title={t('common.clone') || 'Clone'}
 >
-  <Copy class="h-4 w-4" />
+  <Copy size={16} />
   {#if !hideText}
-    <span style="marginLeft: 4px">{t('common.clone') || 'Clone'}</span>
+    <span style="margin-left: 4px">{t('common.clone') || 'Clone'}</span>
   {/if}
 </a>

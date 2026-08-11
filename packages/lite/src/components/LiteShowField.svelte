@@ -5,6 +5,7 @@
   */
   import type { FieldDefinition } from '@svadmin/core';
   import { toSafeHref, toSafeText } from '../security';
+  import { isExplicitBooleanTrue } from '../value-normalization';
 
   interface Props {
     field: FieldDefinition;
@@ -19,7 +20,7 @@
       try { return new Date(v as string).toLocaleString(); } catch { return String(v); }
     }
     if (f.type === 'select' && f.options) {
-      const opt = f.options.find(o => o.value === v);
+      const opt = f.options.find(o => String(o.value) === String(v));
       return opt?.label ?? String(v);
     }
     if (f.type === 'url') return String(v);
@@ -33,8 +34,9 @@
 </script>
 
 {#if field.type === 'boolean'}
-  <span class="lite-bool {value ? 'lite-bool-true' : ''}"></span>
-  {value ? '✓ Yes' : '✗ No'}
+  {@const checked = isExplicitBooleanTrue(value)}
+  <span class="lite-bool {checked ? 'lite-bool-true' : ''}"></span>
+  {checked ? '✓ Yes' : '✗ No'}
 {:else if field.type === 'url' && value}
   {@const href = toSafeHref(value)}
   {#if href}

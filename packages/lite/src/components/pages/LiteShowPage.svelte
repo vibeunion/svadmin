@@ -18,12 +18,14 @@
     resource,
     record,
     basePath = '/lite',
-    canEdit = true,
-    canDelete = true,
+    canEdit,
+    canDelete,
   }: Props = $props();
 
   let pk = $derived(resource.primaryKey ?? 'id');
   let idStr = $derived(String(record[pk]));
+  const showEdit = $derived(canEdit ?? resource.canEdit !== false);
+  const showDelete = $derived(canDelete ?? resource.canDelete !== false);
   
   const showFields = $derived(
     resource.fields.filter(f => f.showInShow !== false)
@@ -34,11 +36,11 @@
   <div class="lite-page-header">
     <h1 class="lite-page-title">{t('common.show') || 'Show'} {resource.label || resource.name} #{idStr}</h1>
     <div class="lite-page-actions">
-      {#if canEdit}
+      {#if showEdit}
         <LiteEditButton resource={resource.name} recordItemId={idStr} {basePath} />
       {/if}
       <LiteListButton resource={resource.name} {basePath} />
-      {#if canDelete}
+      {#if showDelete}
         <LiteDeleteButton resource={resource.name} recordItemId={idStr} redirectUrl={`${basePath}/${resource.name}`} {basePath} />
       {/if}
     </div>

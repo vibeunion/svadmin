@@ -20,8 +20,8 @@
   class="lite-btn lite-btn-primary {size === 'sm' ? 'lite-btn-sm' : ''} {className}"
   title={t('common.save') || 'Save'}
 >
-  <Save class="h-4 w-4" />
+  <Save size={16} />
   {#if !hideText}
-    <span style="marginLeft: 4px">{t('common.save') || 'Save'}</span>
+    <span style="margin-left: 4px">{t('common.save') || 'Save'}</span>
   {/if}
 </button>

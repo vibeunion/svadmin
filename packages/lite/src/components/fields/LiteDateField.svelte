@@ -14,7 +14,7 @@
   function formatDate(v: unknown): string {
     if (!v) return '';
     try {
-      return new Date(v as string).toISOString().substring(0, 16); // Formats for html datetime-local
+      return new Date(v as string).toISOString().substring(0, 16);
     } catch {
       return '';
     }
@@ -23,7 +23,7 @@
   function displayDate(v: unknown): string {
     if (!v) return '—';
     try {
-      return new Date(v as string).toLocaleString();
+      return new Date(v as string).toLocaleDateString();
     } catch {
       return String(v);
     }

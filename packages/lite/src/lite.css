@@ -802,7 +802,8 @@ textarea.lite-input {
   .lite-search,
   .lite-pagination,
   .lite-btn,
-  .lite-confirm {
+  .lite-confirm,
+  .lite-confirm-details {
     display: none !important;
   }
   .lite-main {

@@ -86,7 +86,6 @@
     "starlight-llms-txt": "0.11.0",
     "svgo": "4.0.2",
     "svelte": "5.56.8",
-    "sveltekit-superforms": "2.30.2",
     "ts-deepmerge": "8.0.0",
     "undici": "8.10.0",
     "valibot": "1.4.2",

@@ -20,23 +20,25 @@
     record,
     errors = {},
     basePath = '/lite',
-    canDelete = true,
-    canShow = true,
+    canDelete,
+    canShow,
   }: Props = $props();
 
   let pk = $derived(resource.primaryKey ?? 'id');
   let idStr = $derived(String(record[pk]));
+  const showDelete = $derived(canDelete ?? resource.canDelete !== false);
+  const showView = $derived(canShow ?? resource.canShow !== false);
 </script>
 
 <div class="lite-page">
   <div class="lite-page-header">
     <h1 class="lite-page-title">{t('common.edit') || 'Edit'} {resource.label || resource.name} #{idStr}</h1>
     <div class="lite-page-actions">
-      {#if canShow}
+      {#if showView}
         <LiteShowButton resource={resource.name} recordItemId={idStr} {basePath} />
       {/if}
       <LiteListButton resource={resource.name} {basePath} />
-      {#if canDelete}
+      {#if showDelete}
         <LiteDeleteButton resource={resource.name} recordItemId={idStr} redirectUrl={`${basePath}/${resource.name}`} {basePath} />
       {/if}
     </div>

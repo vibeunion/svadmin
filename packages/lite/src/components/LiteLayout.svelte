@@ -5,6 +5,7 @@
    */
   import type { ResourceDefinition, MenuItem } from '@svadmin/core';
   import type { Snippet } from 'svelte';
+  import { filterVisibleMenu, filterVisibleResources } from '../menu-visibility';
 
   interface Props {
     resources: ResourceDefinition[];
@@ -14,6 +15,8 @@
     basePath?: string;
     /** Optional multi-level menu configuration */
     menu?: MenuItem[];
+    /** Optional server-computed permission check for menu metadata. */
+    canAccess?: (resource: string, action: string) => boolean;
     children: Snippet;
   }
 
@@ -24,15 +27,17 @@
     userName = '',
     basePath = '/lite',
     menu,
+    canAccess,
     children,
   }: Props = $props();
 
-  const menuResources = $derived(
-    resources.filter((r: ResourceDefinition) => r.showInMenu !== false)
-  );
+  const menuResources = $derived(filterVisibleResources(resources, canAccess));
+
+  const hasCustomMenu = $derived(menu !== undefined);
+  const visibleMenu = $derived(menu ? filterVisibleMenu(menu, canAccess) : []);
 
   const mobileItems = $derived.by(() => {
-    if (!menu?.length) {
+    if (!hasCustomMenu) {
       return menuResources.map((resource): MenuItem => ({
         name: resource.name,
         label: resource.label,
@@ -47,7 +52,7 @@
         if (item.children?.length) visit(item.children);
       }
     };
-    visit(menu);
+    visit(visibleMenu);
     return result;
   });
 
@@ -61,8 +66,8 @@
   <!-- Sidebar -->
   <nav class="lite-sidebar">
     <div class="lite-sidebar-brand">{brandName}</div>
-    {#if menu && menu.length > 0}
-      {#each menu as item, _i (_i)}
+    {#if hasCustomMenu}
+      {#each visibleMenu as item, _i (_i)}
         {#if item.children && item.children.length > 0}
           <details class="lite-menu-group">
             <summary class="lite-menu-parent">{item.label ?? item.name}</summary>

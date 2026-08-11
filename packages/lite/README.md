@@ -22,7 +22,7 @@ The main `@svadmin/ui` package delivers a premium SPA experience using Svelte 5,
 | **Delete** | `<details>` confirmation, no JS needed |
 | **Search** | `<form method="GET">` with `?q=` parameter |
 | **Pagination** | Pure `<a>` page links |
-| **Login/Logout** | Cookie-based auth via SvelteKit Form Actions |
+| **Authentication pages** | Login/logout plus optional provider-delegating account actions |
 | **Auth Guard** | Server hook redirects unauthenticated users |
 | **UA Detection** | Optional legacy-browser detection hook redirects users to `/lite/` routes |
 | **i18n** | Uses `@svadmin/core` `t()` translations |
@@ -34,8 +34,11 @@ The main `@svadmin/ui` package delivers a premium SPA experience using Svelte 5,
 ### 1. Install
 
 ```bash
-bun add @svadmin/lite
+bun add @svadmin/lite @svadmin/core
 ```
+
+Use this inside a Svelte 5/SvelteKit application; those runtimes and `@svadmin/core`
+are required peers rather than optional dependencies.
 
 ### 2. Create a list page
 
@@ -125,6 +128,10 @@ Pass a `menu` prop to `LiteLayout` to replace the auto-generated flat resource l
 </LiteLayout>
 ```
 
+`meta.hidden` is honored recursively. For `meta.resource` / `meta.action`, pass a
+server-computed synchronous `canAccess(resource, action)` callback; permission checks
+that fail or throw are hidden. API and server actions must still enforce authorization.
+
 ### 3. Optionally route legacy browsers to Lite pages
 
 ```typescript
@@ -166,9 +173,9 @@ export const handle = createLegacyRedirectHook('/lite');
 | `createDetailLoader(dp, resource)` | SvelteKit `load` function for detail pages |
 | `createCrudActions(dp, resource)` | SvelteKit form actions for create/update/delete |
 | `createAuthGuard(authProvider)` | Server hook for authentication |
-| `createAuthActions(authProvider)` | Login/logout form actions |
+| `createAuthActions(authProvider)` | Login/logout actions plus optional provider-delegating account actions |
 | `createLegacyRedirectHook()` | Auto-redirect IE11 to `/lite/` |
-| `fieldsToZodSchema(fields)` | Auto-generate Zod schema for superforms |
+| `fieldsToZodSchema(fields)` | Generate the Zod schema used by Lite actions or other Zod consumers |
 
 ## CSS
 
@@ -180,7 +187,7 @@ Import `@svadmin/lite/lite.css` in your layout. It's fully self-contained:
 - Smooth transitions on all interactive elements
 - Multi-layer translucent shadows
 - Print-optimized styles
-- ~500 lines, ~14KB unminified
+- ~800 lines, ~19KB unminified
 
 This CSS baseline helps older browsers, but the generated Svelte/SvelteKit application and any Tailwind v4 UI used alongside Lite still require the browser targets configured by those tools (Tailwind v4 itself targets modern browsers).
 
@@ -192,6 +199,24 @@ Copy the exported `@svadmin/lite/enhance.js` asset to your application's static 
 - Unsaved changes warning
 
 The asset is optional for core server-rendered navigation and form submission; the conveniences listed above require it.
+
+## Compatibility notes
+
+- Registration, recovery, password, and profile actions delegate the submitted form
+  fields to the corresponding optional `AuthProvider` method. Provider-specific recovery
+  flows that require tokens, user IDs, secrets, old passwords, or callback URLs need a
+  custom route/form; Lite does not infer those values from callback query parameters.
+- `createListLoader` returns both flat URL-state fields (`page`, `pageSize`, `sort`,
+  `order`, `search`) and the aliases accepted by `LiteListPage` (`pagination`,
+  `currentSort`, `currentOrder`, `currentSearch`). The default page size matches Core: 10.
+- `image` and `images` use the same URL-string values as `@svadmin/ui`; `file` is the
+  native upload field. Server validation continues to accept existing Lite image-file
+  submissions for migration compatibility.
+- Buttons such as import/export/chat provide SSR UI and route contracts only. Consumers
+  must implement the corresponding loader or form action for their backend.
+- IE11 can consume server-rendered HTML and the optional ES5 enhancement layer, with
+  graceful CSS/native-element fallbacks. Svelte 5 hydration/runtime execution in IE11
+  is not supported or promised by this package.
 
 ## License
 

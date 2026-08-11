@@ -28,9 +28,9 @@
     class="lite-btn lite-btn-danger {size === 'sm' ? 'lite-btn-sm' : ''}"
     title={t('common.delete') || 'Delete'}
   >
-    <Trash2 class="h-4 w-4" />
+    <Trash2 size={16} />
     {#if !hideText}
-      <span style="marginLeft: 4px">{t('common.delete') || 'Delete'}</span>
+      <span style="margin-left: 4px">{t('common.delete') || 'Delete'}</span>
     {/if}
   </summary>
   <div class="lite-confirm-panel" style="right: 0; left: auto;">

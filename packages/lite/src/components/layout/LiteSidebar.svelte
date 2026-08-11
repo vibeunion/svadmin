@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { ResourceDefinition, MenuItem } from '@svadmin/core';
+  import { filterVisibleMenu, filterVisibleResources } from '../../menu-visibility';
 
   interface Props {
     resources: ResourceDefinition[];
@@ -8,6 +9,7 @@
     userName?: string;
     basePath?: string;
     menu?: MenuItem[];
+    canAccess?: (resource: string, action: string) => boolean;
   }
 
   let {
@@ -17,11 +19,13 @@
     userName = '',
     basePath = '/lite',
     menu,
+    canAccess,
   }: Props = $props();
 
-  const menuResources = $derived(
-    resources.filter((r: ResourceDefinition) => r.showInMenu !== false)
-  );
+  const menuResources = $derived(filterVisibleResources(resources, canAccess));
+
+  const hasCustomMenu = $derived(menu !== undefined);
+  const visibleMenu = $derived(menu ? filterVisibleMenu(menu, canAccess) : []);
 
   function isActive(href: string | undefined): boolean {
     if (!href) return false;
@@ -36,8 +40,8 @@
 
 <nav class="lite-sidebar">
   <div class="lite-sidebar-brand">{brandName}</div>
-  {#if menu && menu.length > 0}
-    {#each menu as item, _i (_i)}
+  {#if hasCustomMenu}
+    {#each visibleMenu as item, _i (_i)}
       {#if item.children && item.children.length > 0}
         <details class="lite-menu-group" open={hasActiveChild(item.children)}>
           <summary class="lite-menu-parent">{item.label ?? item.name}</summary>

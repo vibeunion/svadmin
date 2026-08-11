@@ -17,6 +17,7 @@
     currentSearch?: string;
     basePath?: string;
     canCreate?: boolean;
+    canShow?: boolean;
     canEdit?: boolean;
     canDelete?: boolean;
   }
@@ -30,17 +31,23 @@
     currentOrder = 'asc',
     currentSearch,
     basePath = '/lite',
-    canCreate = true,
-    canEdit = true,
-    canDelete = true,
+    canCreate,
+    canShow,
+    canEdit,
+    canDelete,
   }: Props = $props();
+
+  const showCreate = $derived(canCreate ?? resource.canCreate !== false);
+  const showView = $derived(canShow ?? resource.canShow !== false);
+  const showEdit = $derived(canEdit ?? resource.canEdit !== false);
+  const showDelete = $derived(canDelete ?? resource.canDelete !== false);
 </script>
 
 <div class="lite-page">
   <div class="lite-page-header">
     <h1 class="lite-page-title">{resource.label || resource.name} {t('common.list') || 'List'}</h1>
     <div class="lite-page-actions">
-      {#if canCreate}
+      {#if showCreate}
         <LiteCreateButton resource={resource.name} {basePath} />
       {/if}
       <LiteRefreshButton hideText />
@@ -62,8 +69,9 @@
       {currentOrder}
       {currentSearch}
       {basePath}
-      {canEdit}
-      {canDelete}
+      canShow={showView}
+      canEdit={showEdit}
+      canDelete={showDelete}
     />
     
     {#if total > pagination.perPage}

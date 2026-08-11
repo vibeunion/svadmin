@@ -13,11 +13,7 @@
   let hasError = $derived(error.length > 0);
   let displayValue = $derived(toSafeText(value));
   let safeHref = $derived(toSafeHref(value));
-  const placeholder = $derived(
-    'placeholder' in field && typeof field.placeholder === 'string'
-      ? field.placeholder
-      : field.label
-  );
+  const placeholder = $derived(field.label);
 </script>
 
 {#if mode === 'show'}

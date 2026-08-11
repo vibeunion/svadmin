@@ -20,7 +20,11 @@
     lowerIsBetter = false,
   }: Props = $props();
 
-  const diff = $derived(baseline === 0 ? 0 : (value - baseline) / Math.abs(baseline));
+  const diff = $derived(
+    baseline === 0
+      ? value === 0 ? 0 : value > 0 ? Infinity : -Infinity
+      : (value - baseline) / Math.abs(baseline),
+  );
   const isAnomaly = $derived(Math.abs(diff) >= threshold);
   const isGood = $derived(!isAnomaly ? null : (lowerIsBetter ? diff < 0 : diff > 0));
   const percentLabel = $derived(`${Math.abs(diff * 100).toFixed(1)}%`);

@@ -2,11 +2,12 @@
   /**
    * LiteForm — Server-rendered form driven by FieldDefinitions.
    * Uses a native <form> with method="POST" for no-JavaScript submission.
-   * Integrates with sveltekit-superforms for server-side validation.
+   * Uses the generated Zod schema for server-side validation.
    */
   import type { FieldDefinition, ResourceDefinition } from '@svadmin/core';
   import { t } from '@svadmin/core/i18n';
   import { fieldToInputType, fieldToPlaceholder } from '../schema-generator';
+  import { isExplicitBooleanTrue } from '../value-normalization';
   import LiteArrayField from './LiteArrayField.svelte';
 
   interface Props {
@@ -40,6 +41,7 @@
 
   const formFields = $derived(
     fields.filter(f => {
+      if (f.key === (resource?.primaryKey ?? 'id')) return false;
       if (f.showInForm === false) return false;
       if (mode === 'create' && f.showInCreate === false) return false;
       if (mode === 'edit' && f.showInEdit === false) return false;
@@ -55,6 +57,29 @@
       && value.size > 0
       && value.name !== '';
   }
+
+  function fieldValue(field: FieldDefinition): unknown {
+    const value = Object.prototype.hasOwnProperty.call(values, field.key)
+      ? values[field.key]
+      : field.defaultValue;
+    if (field.type === 'relation' && typeof value === 'object' && value !== null) {
+      return (value as Record<string, unknown>)[field.optionValue ?? 'id'];
+    }
+    return value;
+  }
+
+  function textareaValue(field: FieldDefinition, value: unknown): string {
+    if (field.type === 'images' && Array.isArray(value)) return value.map(String).join('\n');
+    if (field.type === 'json' && typeof value !== 'string' && value != null) {
+      try {
+        return JSON.stringify(value, null, 2);
+      } catch {
+        return String(value);
+      }
+    }
+    return String(value ?? '');
+  }
+
 </script>
 
 <form method="POST" action={action || undefined} class="lite-card" enctype="multipart/form-data">
@@ -68,7 +93,7 @@
   {#each formFields as field, _i (_i)}
     {@const inputType = fieldToInputType(field)}
     {@const placeholder = fieldToPlaceholder(field)}
-    {@const value = values[field.key]}
+    {@const value = fieldValue(field)}
     {@const fieldErrors = errors[field.key]}
     {@const hasError = fieldErrors && fieldErrors.length > 0}
 
@@ -87,7 +112,7 @@
             type="checkbox"
             name={field.key}
             id={field.key}
-            checked={!!value}
+            checked={isExplicitBooleanTrue(value)}
           />
           <label for={field.key}>{field.label}</label>
         </div>
@@ -103,12 +128,15 @@
             id={field.key}
             class="lite-input {hasError ? 'lite-input-error' : ''}"
             placeholder={placeholder}
-          >{value ?? ''}</textarea>
+            required={field.required}
+          >{textareaValue(field, value)}</textarea>
         {:else if inputType === 'select'}
           <select
             name={field.key}
             id={field.key}
             class="lite-select {hasError ? 'lite-input-error' : ''}"
+            required={field.required}
+            value={field.type === 'multiselect' ? undefined : String(value ?? '')}
             {...field.type === 'multiselect' ? { multiple: true } : {}}
           >
             {#if field.type !== 'multiselect'}
@@ -116,9 +144,11 @@
             {/if}
             {#if field.options}
               {#each field.options as opt, _i (_i)}
-                <option 
-                  value={String(opt.value)} 
-                  selected={field.type === 'multiselect' ? (Array.isArray(value) && value.includes(opt.value)) : value === opt.value}
+                <option
+                  value={String(opt.value)}
+                  selected={field.type === 'multiselect'
+                    ? Array.isArray(value) && value.map(String).includes(String(opt.value))
+                    : undefined}
                 >
                   {opt.label}
                 </option>

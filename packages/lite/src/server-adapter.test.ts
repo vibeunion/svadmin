@@ -1,6 +1,17 @@
 import { describe, expect, mock, test } from 'bun:test';
-import type { DataProvider, FieldDefinition, ResourceDefinition } from '@svadmin/core';
-import { createCrudActions } from './server-adapter';
+import type {
+  AuthProvider,
+  DataProvider,
+  FieldDefinition,
+  ResourceDefinition,
+} from '@svadmin/core';
+import {
+  createAuthActions,
+  createAuthGuard,
+  createCrudActions,
+  createLegacyRedirectHook,
+  createListLoader,
+} from './server-adapter';
 
 const fields: FieldDefinition[] = [
   {
@@ -21,7 +32,542 @@ const resource: ResourceDefinition = {
   fields,
 };
 
+describe('createListLoader search compatibility', () => {
+  test('uses one portable field filter when multiple fields are searchable', async () => {
+    const getList = mock(async () => ({ data: [], total: 0 }));
+    const provider = { getList } as unknown as DataProvider;
+    const searchableResource: ResourceDefinition = {
+      name: 'posts',
+      label: 'Posts',
+      fields: [
+        { key: 'title', label: 'Title', type: 'text', searchable: true },
+        { key: 'summary', label: 'Summary', type: 'textarea', searchable: true },
+        { key: 'status', label: 'Status', type: 'text' },
+      ],
+    };
+
+    await createListLoader(provider, searchableResource)({
+      url: new URL('https://admin.example/lite/posts?q=release'),
+    });
+
+    expect(getList).toHaveBeenCalledWith({
+      resource: 'posts',
+      pagination: { current: 1, pageSize: 10 },
+      sorters: [],
+      filters: [{ field: 'title', operator: 'contains', value: 'release' }],
+    });
+  });
+
+  test('falls back to finite pagination and trusted resource sorting', async () => {
+    const getList = mock(async () => ({ data: [], total: 0 }));
+    const provider = { getList } as unknown as DataProvider;
+    const sortableResource: ResourceDefinition = {
+      name: 'posts',
+      label: 'Posts',
+      pageSize: 0,
+      defaultSort: { field: 'title', order: 'desc' },
+      fields: [
+        { key: 'title', label: 'Title', type: 'text', sortable: true },
+        { key: 'internal', label: 'Internal', type: 'text', sortable: false },
+      ],
+    };
+
+    const result = await createListLoader(provider, sortableResource)({
+      url: new URL('https://admin.example/lite/posts?page=Infinity&sort=internal&order=asc'),
+    });
+
+    expect(getList).toHaveBeenCalledWith({
+      resource: 'posts',
+      pagination: { current: 1, pageSize: 10 },
+      sorters: [{ field: 'title', order: 'desc' }],
+      filters: [],
+    });
+    expect(result).toMatchObject({
+      page: 1,
+      pageSize: 10,
+      sort: 'title',
+      order: 'desc',
+      pagination: { page: 1, perPage: 10 },
+      currentSort: 'title',
+      currentOrder: 'desc',
+    });
+  });
+});
+
+describe('createAuthGuard AuthProvider compatibility', () => {
+  function authProvider(check: AuthProvider['check']): AuthProvider {
+    return {
+      login: mock(async () => ({ success: true })),
+      logout: mock(async () => ({ success: true })),
+      check,
+      getIdentity: mock(async () => null),
+    };
+  }
+
+  function guardEvent(pathname: string) {
+    const url = new URL(pathname, 'https://admin.example');
+    return {
+      url,
+      request: new Request(url),
+      cookies: {
+        get: mock(() => undefined),
+        delete: mock(() => undefined),
+      },
+    };
+  }
+
+  test('trusts AuthProvider.check without requiring a Lite-only marker cookie', async () => {
+    const check = mock(async () => ({ authenticated: true }));
+    const resolve = mock(async () => new Response('protected content'));
+    const event = guardEvent('/lite/posts');
+
+    const response = await createAuthGuard(authProvider(check))({ event: event as never, resolve });
+
+    expect(await response.text()).toBe('protected content');
+    expect(check).toHaveBeenCalledTimes(1);
+    expect(resolve).toHaveBeenCalledTimes(1);
+  });
+
+  test('allows exported public auth pages and honors a safe provider redirect', async () => {
+    const check = mock(async () => ({ authenticated: false, redirectTo: '/sign-in?expired=1' }));
+    const resolve = mock(async () => new Response('public content'));
+    const guard = createAuthGuard(authProvider(check));
+
+    const publicEvent = guardEvent('/lite/forgot-password');
+    expect(await (await guard({ event: publicEvent as never, resolve })).text()).toBe('public content');
+    expect(check).not.toHaveBeenCalled();
+
+    const protectedEvent = guardEvent('/lite/posts');
+    const response = await guard({ event: protectedEvent as never, resolve });
+    expect(response.status).toBe(302);
+    expect(response.headers.get('location')).toBe('/sign-in?expired=1');
+    expect(protectedEvent.cookies.delete).toHaveBeenCalled();
+  });
+
+  test('keeps root auth routes protected when a custom login page uses another name', async () => {
+    const check = mock(async () => ({ authenticated: false }));
+    const resolve = mock(async () => new Response('public content'));
+    const guard = createAuthGuard(authProvider(check), '/auth/sign-in');
+
+    const rootRegisterEvent = guardEvent('/register');
+    const response = await guard({ event: rootRegisterEvent as never, resolve });
+    expect(response.status).toBe(302);
+    expect(response.headers.get('location')).toBe('/auth/sign-in');
+    expect(check).toHaveBeenCalledTimes(1);
+
+    const siblingRegisterEvent = guardEvent('/auth/register');
+    expect(await (await guard({ event: siblingRegisterEvent as never, resolve })).text())
+      .toBe('public content');
+    expect(check).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('createAuthActions exported page compatibility', () => {
+  const cookies = {
+    set: mock(() => undefined),
+    delete: mock(() => undefined),
+  };
+
+  function authRequest(pathname: string, values: Record<string, string>) {
+    const formData = new FormData();
+    for (const [key, value] of Object.entries(values)) formData.set(key, value);
+    const url = new URL(pathname, 'https://admin.example');
+    return {
+      url,
+      request: new Request(url, { method: 'POST', body: formData }),
+      cookies,
+    };
+  }
+
+  test('exposes actions used by every exported authentication page', () => {
+    const provider = {
+      login: mock(async () => ({ success: true })),
+      logout: mock(async () => ({ success: true })),
+      check: mock(async () => ({ authenticated: true })),
+      getIdentity: mock(async () => null),
+    } satisfies AuthProvider;
+
+    expect(Object.keys(createAuthActions(provider)).sort()).toEqual([
+      'forgot_password',
+      'login',
+      'logout',
+      'register',
+      'update_password',
+      'update_profile',
+    ]);
+  });
+
+  test('validates confirmed passwords and delegates optional provider methods', async () => {
+    const register = mock(async () => ({ success: true }));
+    const forgotPassword = mock(async () => ({ success: true }));
+    const updatePassword = mock(async () => ({ success: true }));
+    const updateProfile = mock(async () => ({ success: true }));
+    const provider = {
+      login: mock(async () => ({ success: true })),
+      logout: mock(async () => ({ success: true })),
+      check: mock(async () => ({ authenticated: true })),
+      getIdentity: mock(async () => null),
+      register,
+      forgotPassword,
+      updatePassword,
+      updateProfile,
+    } satisfies AuthProvider;
+    const actions = createAuthActions(provider);
+
+    await expect(actions.register(authRequest('/lite/register', {
+      email: 'user@example.com',
+      password: 'secret1',
+      confirmPassword: 'different',
+    }) as never)).resolves.toEqual({ success: false, error: 'Passwords do not match' });
+    expect(register).not.toHaveBeenCalled();
+
+    await expect(actions.forgot_password(authRequest('/lite/forgot-password', {
+      email: 'user@example.com',
+    }) as never)).resolves.toEqual({ success: true });
+    await expect(actions.update_password(authRequest('/lite/update-password', {
+      password: 'secret1',
+      confirmPassword: 'secret1',
+    }) as never)).resolves.toEqual({ success: true });
+    await expect(actions.update_profile(authRequest('/lite/profile', {
+      name: 'Alice',
+      email: 'alice@example.com',
+    }) as never)).resolves.toEqual({ success: true });
+
+    expect(forgotPassword).toHaveBeenCalledWith({ email: 'user@example.com' });
+    expect(updatePassword).toHaveBeenCalledWith({ password: 'secret1' });
+    expect(updateProfile).toHaveBeenCalledWith({ name: 'Alice', email: 'alice@example.com' });
+  });
+
+  test('rejects missing password confirmation before invoking providers', async () => {
+    const register = mock(async () => ({ success: true }));
+    const updatePassword = mock(async () => ({ success: true }));
+    const provider = {
+      login: mock(async () => ({ success: true })),
+      logout: mock(async () => ({ success: true })),
+      check: mock(async () => ({ authenticated: true })),
+      getIdentity: mock(async () => null),
+      register,
+      updatePassword,
+    } satisfies AuthProvider;
+    const actions = createAuthActions(provider);
+
+    await expect(actions.register(authRequest('/lite/register', {
+      email: 'user@example.com',
+      password: 'secret1',
+    }) as never)).resolves.toEqual({
+      success: false,
+      error: 'Password and confirmation are required',
+    });
+    await expect(actions.update_password(authRequest('/lite/update-password', {
+      password: 'secret1',
+    }) as never)).resolves.toEqual({
+      success: false,
+      error: 'Password and confirmation are required',
+    });
+    expect(register).not.toHaveBeenCalled();
+    expect(updatePassword).not.toHaveBeenCalled();
+  });
+
+  test('preserves the AuthProvider receiver for class-style methods', async () => {
+    const provider = {
+      marker: 'provider-context',
+      login: mock(async () => ({ success: true })),
+      logout: mock(async () => ({ success: true })),
+      check: mock(async () => ({ authenticated: true })),
+      getIdentity: mock(async () => null),
+      async register(this: { marker: string }, params: Record<string, unknown>) {
+        if (this.marker !== 'provider-context') throw new Error('AuthProvider context was lost');
+        return { success: params.email === 'user@example.com' };
+      },
+    } as unknown as AuthProvider;
+
+    await expect(createAuthActions(provider).register(authRequest('/lite/register', {
+      email: 'user@example.com',
+      password: 'secret1',
+      confirmPassword: 'secret1',
+      error: 'client-form-state',
+    }) as never)).resolves.toEqual({ success: true });
+  });
+
+  test('does not expose unexpected logout exception details', async () => {
+    const deleteCookie = mock(() => undefined);
+    const provider = {
+      login: mock(async () => ({ success: true })),
+      logout: mock(async () => { throw new Error('postgres://user:secret@db.internal'); }),
+      check: mock(async () => ({ authenticated: true })),
+      getIdentity: mock(async () => null),
+    } satisfies AuthProvider;
+
+    await expect(createAuthActions(provider).logout({
+      cookies: { delete: deleteCookie },
+    } as never)).resolves.toEqual({ success: false, error: 'Logout failed' });
+    expect(deleteCookie).toHaveBeenCalledWith('svadmin-session', { path: '/' });
+  });
+
+  test('does not expose unexpected registration exception details', async () => {
+    const provider = {
+      login: mock(async () => ({ success: true })),
+      logout: mock(async () => ({ success: true })),
+      check: mock(async () => ({ authenticated: true })),
+      getIdentity: mock(async () => null),
+      register: mock(async () => { throw 'api-key=secret'; }),
+    } satisfies AuthProvider;
+
+    await expect(createAuthActions(provider).register(authRequest('/lite/register', {
+      email: 'user@example.com',
+      password: 'secret1',
+      confirmPassword: 'secret1',
+    }) as never)).resolves.toEqual({ success: false, error: 'Registration failed' });
+  });
+
+  test('does not expose unexpected login exception details', async () => {
+    const provider = {
+      login: mock(async () => { throw 'api-key=secret'; }),
+      logout: mock(async () => ({ success: true })),
+      check: mock(async () => ({ authenticated: true })),
+      getIdentity: mock(async () => null),
+    } satisfies AuthProvider;
+
+    await expect(createAuthActions(provider).login(authRequest('/lite/login', {
+      email: 'user@example.com',
+      password: 'secret1',
+    }) as never)).resolves.toEqual({ success: false, error: 'Login failed' });
+  });
+
+  test('honors logout action failures and successful provider redirects', async () => {
+    const deleteCookie = mock(() => undefined);
+    const failedProvider = {
+      login: mock(async () => ({ success: true })),
+      logout: mock(async () => ({
+        success: false,
+        error: { message: 'Session could not be revoked' },
+      })),
+      check: mock(async () => ({ authenticated: true })),
+      getIdentity: mock(async () => null),
+    } satisfies AuthProvider;
+
+    await expect(createAuthActions(failedProvider).logout({
+      cookies: { delete: deleteCookie },
+    } as never)).resolves.toEqual({ success: false, error: 'Session could not be revoked' });
+
+    const redirectedProvider = {
+      ...failedProvider,
+      logout: mock(async () => ({ success: true, redirectTo: '/signed-out' })),
+    } satisfies AuthProvider;
+    await expect(createAuthActions(redirectedProvider).logout({
+      cookies: { delete: deleteCookie },
+    } as never)).rejects.toMatchObject({ status: 303, location: '/signed-out' });
+    expect(deleteCookie).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('createLegacyRedirectHook navigation compatibility', () => {
+  test('preserves query state, respects path segments, and leaves mutations untouched', async () => {
+    const hook = createLegacyRedirectHook('/lite/');
+    const resolve = mock(async () => new Response('resolved'));
+    const legacyHeaders = {
+      accept: 'text/html,application/xhtml+xml',
+      'user-agent': 'Mozilla/5.0 Trident/7.0; rv:11.0',
+    };
+
+    const postsUrl = new URL('https://admin.example/posts?page=3&q=release');
+    const postsResponse = await hook({
+      event: {
+        url: postsUrl,
+        request: new Request(postsUrl, { headers: legacyHeaders }),
+      } as never,
+      resolve,
+    });
+    expect(postsResponse.headers.get('location')).toBe('/lite/posts?page=3&q=release');
+
+    const similarPrefixUrl = new URL('https://admin.example/litefoo?page=2');
+    const similarPrefixResponse = await hook({
+      event: {
+        url: similarPrefixUrl,
+        request: new Request(similarPrefixUrl, { headers: legacyHeaders }),
+      } as never,
+      resolve,
+    });
+    expect(similarPrefixResponse.headers.get('location')).toBe('/lite/litefoo?page=2');
+
+    const mutationUrl = new URL('https://admin.example/posts?/delete');
+    const mutationResponse = await hook({
+      event: {
+        url: mutationUrl,
+        request: new Request(mutationUrl, { method: 'POST', headers: legacyHeaders }),
+      } as never,
+      resolve,
+    });
+    expect(await mutationResponse.text()).toBe('resolved');
+    expect(resolve).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('createCrudActions array form parsing', () => {
+  test('rejects invalid top-level boolean tokens before calling the provider', async () => {
+    const create = mock(async () => ({ data: { id: 'unexpected' } }));
+    const provider = { create } as unknown as DataProvider;
+    const booleanResource: ResourceDefinition = {
+      name: 'settings',
+      label: 'Settings',
+      fields: [{ key: 'active', label: 'Active', type: 'boolean', required: true }],
+    };
+    const formData = new FormData();
+    formData.set('active', 'garbage');
+
+    const result = await createCrudActions(provider, booleanResource).create({
+      request: new Request('https://admin.example/lite/settings', { method: 'POST', body: formData }),
+    } as never);
+
+    expect(result).toMatchObject({ success: false, error: 'Validation failed' });
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  test('rejects invalid nested boolean tokens before calling the provider', async () => {
+    const create = mock(async () => ({ data: { id: 'unexpected' } }));
+    const provider = { create } as unknown as DataProvider;
+    const nestedBooleanResource: ResourceDefinition = {
+      name: 'accounts',
+      label: 'Accounts',
+      fields: [{
+        key: 'contacts',
+        label: 'Contacts',
+        type: 'array',
+        subFields: [
+          { key: 'name', label: 'Name', type: 'text', required: true },
+          { key: 'active', label: 'Active', type: 'boolean', required: true },
+        ],
+      }],
+    };
+    const formData = new FormData();
+    formData.set('contacts[0][_present]', '1');
+    formData.set('contacts[0][name]', 'Alice');
+    formData.set('contacts[0][active]', 'garbage');
+
+    const result = await createCrudActions(provider, nestedBooleanResource).create({
+      request: new Request('https://admin.example/lite/accounts', { method: 'POST', body: formData }),
+    } as never);
+
+    expect(result).toMatchObject({ success: false, error: 'Validation failed' });
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  test('does not expose unexpected provider exception details', async () => {
+    const create = mock(async () => { throw new Error('postgres://user:secret@db.internal'); });
+    const update = mock(async () => { throw 'api-key=secret'; });
+    const deleteOne = mock(async () => { throw new Error('internal-table-name'); });
+    const provider = { create, update, deleteOne } as unknown as DataProvider;
+    const simpleResource: ResourceDefinition = {
+      name: 'posts',
+      label: 'Posts',
+      fields: [
+        { key: 'title', label: 'Title', type: 'text' },
+        { key: 'password', label: 'Password', type: 'password' },
+        {
+          key: 'credentials',
+          label: 'Credentials',
+          type: 'array',
+          subFields: [
+            { key: 'username', label: 'Username', type: 'text' },
+            { key: 'password', label: 'Password', type: 'password' },
+          ],
+        },
+      ],
+    };
+    const actions = createCrudActions(provider, simpleResource);
+    const createForm = new FormData();
+    createForm.set('title', 'Release');
+    createForm.set('password', 'Sup3rSecret!');
+    createForm.set('credentials[0][_present]', '1');
+    createForm.set('credentials[0][username]', 'alice');
+    createForm.set('credentials[0][password]', 'NestedSecret!');
+    const updateForm = new FormData();
+    updateForm.set('_id', 'post-1');
+    updateForm.set('title', 'Updated release');
+    const deleteForm = new FormData();
+    deleteForm.set('id', 'post-1');
+
+    await expect(actions.create({
+      request: new Request('https://admin.example/lite/posts', { method: 'POST', body: createForm }),
+    } as never)).resolves.toEqual({
+      success: false,
+      error: 'Create failed',
+      values: { title: 'Release', credentials: [{ username: 'alice' }] },
+    });
+    await expect(actions.update({
+      request: new Request('https://admin.example/lite/posts/post-1', { method: 'POST', body: updateForm }),
+    } as never)).resolves.toEqual({
+      success: false,
+      error: 'Update failed',
+      values: { title: 'Updated release', credentials: [] },
+    });
+    await expect(actions.delete({
+      request: new Request('https://admin.example/lite/posts/post-1', { method: 'POST', body: deleteForm }),
+    } as never)).resolves.toEqual({ success: false, error: 'Delete failed' });
+  });
+
+  test('enforces ResourceDefinition CRUD flags before invoking the provider', async () => {
+    const create = mock(async () => ({ data: { id: 'unexpected' } }));
+    const update = mock(async () => ({ data: { id: 'unexpected' } }));
+    const deleteOne = mock(async () => ({ data: { id: 'unexpected' } }));
+    const provider = { create, update, deleteOne } as unknown as DataProvider;
+    const lockedResource: ResourceDefinition = {
+      name: 'locked',
+      label: 'Locked',
+      canCreate: false,
+      canEdit: false,
+      canDelete: false,
+      fields: [{ key: 'title', label: 'Title', type: 'text' }],
+    };
+    const createForm = new FormData();
+    createForm.set('title', 'Blocked');
+    const updateForm = new FormData();
+    updateForm.set('_id', 'locked-1');
+    updateForm.set('title', 'Blocked');
+    const deleteForm = new FormData();
+    deleteForm.set('id', 'locked-1');
+
+    await expect(createCrudActions(provider, lockedResource).create({
+      request: new Request('https://admin.example/lite/locked', { method: 'POST', body: createForm }),
+    } as never)).resolves.toEqual({ success: false, error: 'Create is disabled for this resource' });
+    await expect(createCrudActions(provider, lockedResource).update({
+      request: new Request('https://admin.example/lite/locked', { method: 'POST', body: updateForm }),
+    } as never)).resolves.toEqual({ success: false, error: 'Edit is disabled for this resource' });
+    await expect(createCrudActions(provider, lockedResource).delete({
+      request: new Request('https://admin.example/lite/locked', { method: 'POST', body: deleteForm }),
+    } as never)).resolves.toEqual({ success: false, error: 'Delete is disabled for this resource' });
+
+    expect(create).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
+    expect(deleteOne).not.toHaveBeenCalled();
+  });
+
+  test('restores numeric select values before calling create', async () => {
+    const create = mock(async ({ variables }: { variables: Record<string, unknown> }) => ({
+      data: { id: 1, ...variables },
+    }));
+    const provider = { create } as unknown as DataProvider;
+    const optionResource: ResourceDefinition = {
+      name: 'members',
+      label: 'Members',
+      fields: [
+        { key: 'role', label: 'Role', type: 'select', options: [{ label: 'Admin', value: 1 }] },
+        { key: 'teams', label: 'Teams', type: 'multiselect', options: [{ label: 'Core', value: 10 }] },
+      ],
+    };
+    const formData = new FormData();
+    formData.set('role', '1');
+    formData.append('teams', '10');
+
+    await createCrudActions(provider, optionResource).create({
+      request: new Request('https://admin.example/lite/members', { method: 'POST', body: formData }),
+    } as never);
+
+    expect(create).toHaveBeenCalledWith({
+      resource: 'members',
+      variables: { role: 1, teams: [10] },
+    });
+  });
   test('parses sparse bracketed rows, coerces sub-fields, and removes checked rows', async () => {
     const create = mock(async ({ variables }: { variables: Record<string, unknown> }) => ({
       data: { id: 1, ...variables },
@@ -274,5 +820,68 @@ describe('createCrudActions array form parsing', () => {
 
     expect(result).toEqual({ success: true });
     expect(deleteOne).toHaveBeenCalledWith({ resource: 'accounts', id: 'account-1' });
+  });
+
+  test('only follows same-origin absolute paths after delete', async () => {
+    const deleteOne = mock(async () => ({ data: { id: 'account-1' } }));
+    const provider = { deleteOne } as unknown as DataProvider;
+    const externalForm = new FormData();
+    externalForm.set('id', 'account-1');
+    externalForm.set('redirect', 'https://evil.example/landing');
+    const externalRequest = new Request('https://admin.example/lite/accounts', {
+      method: 'POST',
+      body: externalForm,
+    });
+
+    await expect(
+      createCrudActions(provider, resource).delete({ request: externalRequest } as never),
+    ).resolves.toEqual({ success: true });
+
+    const controlCharacterForm = new FormData();
+    controlCharacterForm.set('id', 'account-1');
+    controlCharacterForm.set('redirect', '/lite/accounts\nlocation:https://evil.example');
+    const controlCharacterRequest = new Request('https://admin.example/lite/accounts', {
+      method: 'POST',
+      body: controlCharacterForm,
+    });
+
+    await expect(
+      createCrudActions(provider, resource).delete({ request: controlCharacterRequest } as never),
+    ).resolves.toEqual({ success: true });
+
+    const localForm = new FormData();
+    localForm.set('id', 'account-1');
+    localForm.set('redirect', '/lite/accounts?page=2');
+    const localRequest = new Request('https://admin.example/lite/accounts', {
+      method: 'POST',
+      body: localForm,
+    });
+
+    await expect(
+      createCrudActions(provider, resource).delete({ request: localRequest } as never),
+    ).rejects.toMatchObject({ status: 303, location: '/lite/accounts?page=2' });
+  });
+
+  test('rejects update and delete submissions without a record id', async () => {
+    const update = mock(async () => ({ data: { id: 'unexpected' } }));
+    const deleteOne = mock(async () => ({ data: { id: 'unexpected' } }));
+    const provider = { update, deleteOne } as unknown as DataProvider;
+    const updateRequest = new Request('https://admin.example/lite/accounts', {
+      method: 'POST',
+      body: new FormData(),
+    });
+    const deleteRequest = new Request('https://admin.example/lite/accounts', {
+      method: 'POST',
+      body: new FormData(),
+    });
+
+    await expect(
+      createCrudActions(provider, resource).update({ request: updateRequest } as never),
+    ).resolves.toEqual({ success: false, error: 'Missing record id' });
+    await expect(
+      createCrudActions(provider, resource).delete({ request: deleteRequest } as never),
+    ).resolves.toEqual({ success: false, error: 'Missing record id' });
+    expect(update).not.toHaveBeenCalled();
+    expect(deleteOne).not.toHaveBeenCalled();
   });
 });

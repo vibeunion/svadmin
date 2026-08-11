@@ -18,11 +18,12 @@
     record,
     resource,
     basePath = '/lite',
-    canEdit = true,
+    canEdit,
   }: Props = $props();
 
   let pk = $derived(resource.primaryKey ?? 'id');
   let id = $derived(record[pk]);
+  const showEdit = $derived(canEdit ?? resource.canEdit !== false);
   const showFields = $derived(
     resource.fields.filter(f => f.showInShow !== false)
   );
@@ -32,7 +33,7 @@
   <div class="lite-header">
     <h1>{resource.label} #{id}</h1>
     <div>
-      {#if canEdit}
+      {#if showEdit}
         <a href={`${basePath}/${resource.name}/edit/${id}`} class="lite-btn lite-btn-primary">
           {t('common.edit') || 'Edit'}
         </a>

@@ -3,19 +3,10 @@
    * LiteAuditLog — SSR-compatible audit log viewer.
    * Pure HTML table with pagination links. No client-side JS required.
    */
-
-  interface AuditEntry {
-    id: string | number;
-    userName?: string;
-    action: string;
-    resource?: string;
-    createdAt: string;
-    ipAddress?: string;
-    details?: string;
-  }
+  import type { AuditLog } from '@svadmin/core';
 
   interface Props {
-    logs: AuditEntry[];
+    logs: AuditLog[];
     total?: number;
     page?: number;
     pageSize?: number;
@@ -32,15 +23,15 @@
 
   const totalPages = $derived(Math.ceil(total / pageSize) || 1);
 
-  function formatDate(d: string) {
-    return new Date(d).toLocaleString();
+  function formatDate(auditTimestamp: string | Date) {
+    return new Date(auditTimestamp).toLocaleString();
   }
 
   function actionClass(action: string): string {
-    const a = action.toLowerCase();
-    if (a.includes('delete') || a.includes('remove')) return 'lite-badge-danger';
-    if (a.includes('create') || a.includes('add')) return 'lite-badge-success';
-    if (a.includes('update') || a.includes('edit')) return 'lite-badge-warning';
+    const normalizedAction = action.toLowerCase();
+    if (normalizedAction.includes('delete') || normalizedAction.includes('remove')) return 'lite-badge-danger';
+    if (normalizedAction.includes('create') || normalizedAction.includes('add')) return 'lite-badge-success';
+    if (normalizedAction.includes('update') || normalizedAction.includes('edit')) return 'lite-badge-warning';
     return 'lite-badge-default';
   }
 </script>

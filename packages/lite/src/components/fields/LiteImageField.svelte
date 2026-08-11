@@ -31,23 +31,32 @@
 {:else}
   {@const urls = getUrls(value)}
   <div>
-    {#if urls.length > 0 && mode === 'edit'}
+    {#if urls.length > 0}
       <div style="margin-bottom: 8px; display:flex; gap: 8px;">
         {#each urls as url, _i (_i)}
           <img src={url} alt="Current" style="height: 60px; border-radius: 4px; border: 1px solid #e5e7eb; opacity: 0.6;" />
         {/each}
       </div>
-      <p style="font-size: 11px; color:#6b7280; margin: 0 0 4px;">Uploading new ones will overwrite.</p>
     {/if}
-    <input
-      type="file"
-      name={field.key}
-      id={field.key}
-      accept="image/*"
-      class="lite-input {hasError ? 'lite-input-error' : ''}"
-      {...(field.type as string) === 'images' ? { multiple: true } : {}}
-      {...field.required && !urls.length ? { required: true } : {}}
-    />
+    {#if field.type === 'images'}
+      <textarea
+        name={field.key}
+        id={field.key}
+        class="lite-input {hasError ? 'lite-input-error' : ''}"
+        placeholder="One image URL per line"
+        required={field.required}
+      >{urls.join('\n')}</textarea>
+    {:else}
+      <input
+        type="text"
+        name={field.key}
+        id={field.key}
+        value={urls[0] ?? ''}
+        placeholder="https://example.com/image.jpg"
+        class="lite-input {hasError ? 'lite-input-error' : ''}"
+        required={field.required}
+      />
+    {/if}
     {#if hasError}
       {#each error as err, _i (_i)}
         <div class="lite-error-text">{err}</div>
