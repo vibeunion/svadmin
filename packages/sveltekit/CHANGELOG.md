@@ -1,5 +1,69 @@
 # Changelog
 
+## [0.10.0](https://github.com/zuohuadong/svadmin/compare/sveltekit-v0.9.8...sveltekit-v0.10.0) (2026-08-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* **core:** trigger major release for removed deprecated APIs
+
+### 🚀 Features
+
+* **ui:** refine AutoTable to fluid borderless design and Sidebar to pill-style elevated states ([de92adc](https://github.com/zuohuadong/svadmin/commit/de92adc3fbf0077fb68c5a49009b546397916786))
+
+
+### 🐛 Bug Fixes
+
+* **admin:** unblock scoped consumers ([#231](https://github.com/zuohuadong/svadmin/issues/231)) ([4f572d9](https://github.com/zuohuadong/svadmin/commit/4f572d9dd46c2bf656383718aafdc5ef3c08573c))
+* **build:** resolve playwright error and preserve semver strings for npm publish using node-workspace ([67e71d4](https://github.com/zuohuadong/svadmin/commit/67e71d4946430122fe1eea7ac06bc40cf9441a85))
+* **ci:** e2e selectors, publish hygiene, MarkdownField XSS, eslint ignores ([d922639](https://github.com/zuohuadong/svadmin/commit/d9226399d120b326c7161055f93d3594ce299b57))
+* **core:** improve query caching and optimistic update recovery ([a18356e](https://github.com/zuohuadong/svadmin/commit/a18356e0f777b8d21e5f58bee8d9d2250a64f1ef))
+* **core:** resolve data provider regressions and type errors ([8728fcc](https://github.com/zuohuadong/svadmin/commit/8728fcc737cbf6ece7400de7282984e3f2dce9f0))
+* **core:** resolve P2 lifecycle and routing bugs ([f9e3969](https://github.com/zuohuadong/svadmin/commit/f9e3969cb30b6ff94ef69a66ba19d939ef4998bb))
+* **core:** router formatting, breadcrumb parsing, and hook caching ([2b31b0b](https://github.com/zuohuadong/svadmin/commit/2b31b0bc1587514c030bb6788116deb3f7269f34))
+* **ui:** fix unclosed string literal in ConfigErrorScreen ternary ([#85](https://github.com/zuohuadong/svadmin/issues/85)) ([cee2db1](https://github.com/zuohuadong/svadmin/commit/cee2db17c87b314f8cbf7f1822b63bb57645f87d))
+* **ui:** stabilize AutoTable state and search ([#195](https://github.com/zuohuadong/svadmin/issues/195)) ([24d158e](https://github.com/zuohuadong/svadmin/commit/24d158e5f6f6d5c475a9032805a277e2e4f15279))
+
+
+### 💅 Elegance & Refactoring
+
+* **core:** migrate permissions and core utilities to Svelte 5 runes ([8e3ed99](https://github.com/zuohuadong/svadmin/commit/8e3ed9950b56ffcbe4877f46987bd8eb69ef21f1))
+* **core:** trigger major release for removed deprecated APIs ([d84d348](https://github.com/zuohuadong/svadmin/commit/d84d34862d0151ac30b52dd4a9371f5f449a2e68))
+
+
+### 🔧 Miscellaneous Chores
+
+* **all:** sync all packages ([f1c5115](https://github.com/zuohuadong/svadmin/commit/f1c5115d190e7168bb4ae2a588f16a452ccf1ced))
+* **deps:** mark peer dependencies as optional to fix bun workspace resolution lock ([e928690](https://github.com/zuohuadong/svadmin/commit/e928690734161b133eb5227fb0454b92d1887149))
+* **deps:** upgrade all dependencies and fix lint errors ([509f285](https://github.com/zuohuadong/svadmin/commit/509f28531f9f61d019f15aeb555160c24f64b48b))
+* **deps:** upgrade workspace dependencies ([f86acb7](https://github.com/zuohuadong/svadmin/commit/f86acb7115099a9e5222da0cca9f55ce9834fe01))
+* **deps:** upgrade workspace dependencies ([7585402](https://github.com/zuohuadong/svadmin/commit/75854020b577f82f8ca0a43a0fc1f85864bec229))
+* release main ([732049c](https://github.com/zuohuadong/svadmin/commit/732049cc0e8ef842f5a789b398dab16aca8b9ec7))
+* release main ([d0f3d8a](https://github.com/zuohuadong/svadmin/commit/d0f3d8ab328a430f7727db0544d49e514a069504))
+* release main ([874c1f6](https://github.com/zuohuadong/svadmin/commit/874c1f6d36ac62c59fb59ced8ef54afd5076bee8))
+* release main ([f54fc17](https://github.com/zuohuadong/svadmin/commit/f54fc17f39a22ef3a886badcb84d252150b133c8))
+* release main ([252f1ac](https://github.com/zuohuadong/svadmin/commit/252f1ac613e6ebc4245602a52397592aeb02c218))
+* release main ([c8a0a4a](https://github.com/zuohuadong/svadmin/commit/c8a0a4a8aee4433828016746262bbc9ccd8d27b4))
+* release main ([cf14a58](https://github.com/zuohuadong/svadmin/commit/cf14a5842cdbfe24fb126c78493da3bfced894e4))
+* release main ([01c3f66](https://github.com/zuohuadong/svadmin/commit/01c3f660b457ec36e18fc68d1d05eb07c0b64290))
+* release main ([b1b2f19](https://github.com/zuohuadong/svadmin/commit/b1b2f19a6fdb2754266d6f06903ee20090c369f4))
+* release main ([a77f3dc](https://github.com/zuohuadong/svadmin/commit/a77f3dc2e37da76ebe3139ea0c5c6d4aeecfd35f))
+* release main ([0f87dd9](https://github.com/zuohuadong/svadmin/commit/0f87dd92d411963dfd2cbf4173b0f4556e8a689f))
+* release main ([#108](https://github.com/zuohuadong/svadmin/issues/108)) ([cf85315](https://github.com/zuohuadong/svadmin/commit/cf8531528b84c0fa35a3e85c112e168173e36698))
+* release main ([#109](https://github.com/zuohuadong/svadmin/issues/109)) ([6c11dcb](https://github.com/zuohuadong/svadmin/commit/6c11dcb01ad0c068bbceafd51eb0f486b2d41e21))
+* release main ([#112](https://github.com/zuohuadong/svadmin/issues/112)) ([c930b57](https://github.com/zuohuadong/svadmin/commit/c930b578509f69cd05d299838b4ca55aa28ee59e))
+* release main ([#113](https://github.com/zuohuadong/svadmin/issues/113)) ([fdeee44](https://github.com/zuohuadong/svadmin/commit/fdeee4460c3467fa069fdd5219b343464aa04f1e))
+* release main ([#115](https://github.com/zuohuadong/svadmin/issues/115)) ([ca3402f](https://github.com/zuohuadong/svadmin/commit/ca3402f1a17fff02b7cd7b6e2768817f95834eb3))
+* release main ([#116](https://github.com/zuohuadong/svadmin/issues/116)) ([7124de0](https://github.com/zuohuadong/svadmin/commit/7124de09dadbc424674bd7b4d490c298ac768e79))
+* release main ([#152](https://github.com/zuohuadong/svadmin/issues/152)) ([b1e260f](https://github.com/zuohuadong/svadmin/commit/b1e260fb5f40d8048f689e2930f49a7e4d495a19))
+* release main ([#181](https://github.com/zuohuadong/svadmin/issues/181)) ([e9a401b](https://github.com/zuohuadong/svadmin/commit/e9a401bfe2c225c2799264a374b35d1ea3f7a679))
+* release main ([#196](https://github.com/zuohuadong/svadmin/issues/196)) ([61d8f49](https://github.com/zuohuadong/svadmin/commit/61d8f49f2096981b5bf533a83a1ddf4dd97ca982))
+* release main ([#201](https://github.com/zuohuadong/svadmin/issues/201)) ([925fd58](https://github.com/zuohuadong/svadmin/commit/925fd5831dea6320daad1ee7cf0e7c2ae69d8f34))
+* release main ([#232](https://github.com/zuohuadong/svadmin/issues/232)) ([bce07f3](https://github.com/zuohuadong/svadmin/commit/bce07f3c3cbf493ad689478a541f0bde97c8f2d4))
+* release main ([#87](https://github.com/zuohuadong/svadmin/issues/87)) ([56581db](https://github.com/zuohuadong/svadmin/commit/56581dba457486dad2e2a4a5a0662e174a89790d))
+* **release:** decouple workspace versions for local dev and use dynamic npm publishing ([a54fbe7](https://github.com/zuohuadong/svadmin/commit/a54fbe7270a1afd2b482bdae2684de3139379784))
+* **workspace:** formatting and lockfile sync ([4939f3e](https://github.com/zuohuadong/svadmin/commit/4939f3ec24f599a66dc40c5680c3485dbb34605d))
+
 ## [0.9.8](https://github.com/zuohuadong/svadmin/compare/sveltekit-v0.9.7...sveltekit-v0.9.8) (2026-08-11)
 
 
