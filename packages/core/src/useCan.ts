@@ -2,7 +2,6 @@
 
 import { createQuery } from '@tanstack/svelte-query';
 import { captureAdminContext } from './context.svelte';
-import { appendTenantCacheKey } from './provider-bundle';
 import type { Action, CanResult } from './permissions.svelte';
 
 export interface UseCanOptions {
@@ -38,9 +37,11 @@ export function useCan(options: () => UseCanOptions): UseCanResult {
     const opts = options();
     const provider = adminContext.accessControlProvider;
     return {
-      queryKey: appendTenantCacheKey([
-        'useCan', opts.resource, opts.action, opts.params, opts.meta,
-      ], adminContext.tenantCacheKey),
+      queryKey: adminContext.queryKeys(opts.resource).access.can(opts.resource, {
+        action: opts.action,
+        params: opts.params,
+        meta: opts.meta,
+      }),
       queryFn: async () => {
         if (!provider) return { can: true };
         const result = await provider.can({

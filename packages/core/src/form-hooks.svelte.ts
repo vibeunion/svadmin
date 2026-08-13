@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/svelte-query';
 import { useParsed } from './useParsed.svelte';
 import { getAdminOptions } from './options.svelte';
 import { captureAdminContext } from './context.svelte';
-import { appendTenantCacheKey, queryKeyMatchesTenant } from './provider-bundle';
+import { queryKeyMatches } from './query-keys';
 import { createQuery, createMutation } from '@tanstack/svelte-query';
 import { notifyWithProvider } from './notification.svelte';
 import type { NotificationParams } from './notification.svelte';
@@ -458,9 +458,9 @@ export function useForm<
   // Always create the query — use `enabled` to conditionally activate.
   // This ensures setAction('edit') at runtime will trigger a fetch.
   const query = createQuery(() => ({
-    queryKey: appendTenantCacheKey([
-      options.dataProviderName, resource, 'one', currentId, queryMeta,
-    ], adminContext.tenantCacheKey),
+    queryKey: adminContext.queryKeys(resource, options.dataProviderName).data.one(resource, currentId ?? '', {
+      meta: queryMeta,
+    }),
     queryFn: async () => {
       const result = await provider.getOne<BaseRecord>({ resource, id: currentId as string, meta: queryMeta });
       return result;
@@ -527,15 +527,13 @@ export function useForm<
     onSuccess: (data: { data: TData }, _vars: unknown, context: unknown) => {
       const ctx = context as { targetResource?: string } | undefined;
       const res = ctx?.targetResource ?? resource;
-      invalidateByScopes(
+      invalidateByScopes({
         queryClient,
-        res,
-        invalidateScopes,
-        ['list', 'many'],
-        undefined,
-        options.dataProviderName,
-        (queryKey) => queryKeyMatchesTenant(queryKey, adminContext.tenantCacheKey),
-      );
+        resource: res,
+        scopes: invalidateScopes,
+        defaults: ['list', 'many'],
+        matcher: adminContext.queryKeyMatcher(res, options.dataProviderName),
+      });
       if (!isManualSubmitIdentityCurrent()) return;
       if (successNotification !== false) sendNotification({ type: 'success', message: typeof successNotification === 'string' ? successNotification : i18n.t('common.createSuccess') });
       const pk = adminContext.getResource(res).primaryKey ?? 'id';
@@ -584,13 +582,17 @@ export function useForm<
       if (mutationMode === 'pessimistic') return { targetId: currentId, targetResource: resource };
       const targetId = currentId;
       const targetResource = resource;
-      const dpN = options.dataProviderName;
-      const dp = (q: { queryKey: readonly unknown[] }) =>
-        queryKeyMatchesTenant(q.queryKey, adminContext.tenantCacheKey) && q.queryKey[0] === dpN;
-      await queryClient.cancelQueries({ predicate: (q) => dp(q) && q.queryKey[1] === resource });
-      const previousQueries = queryClient.getQueriesData({ predicate: (q) => dp(q) && q.queryKey[1] === resource });
+      const matcher = adminContext.queryKeyMatcher(resource, options.dataProviderName);
+      const dataMatch = (queryKey: readonly unknown[], fields: { action?: string; id?: string | number } = {}) => queryKeyMatches(queryKey, {
+        ...matcher,
+        kind: 'data',
+        resource,
+        ...fields,
+      });
+      await queryClient.cancelQueries({ predicate: (q) => dataMatch(q.queryKey) });
+      const previousQueries = queryClient.getQueriesData({ predicate: (q) => dataMatch(q.queryKey) });
       if (optimisticUpdateMap?.list !== false) {
-        queryClient.setQueriesData({ predicate: (q) => dp(q) && q.queryKey[1] === resource && q.queryKey[2] === 'list' }, (old: unknown) => {
+        queryClient.setQueriesData({ predicate: (q) => dataMatch(q.queryKey, { action: 'list' }) }, (old: unknown) => {
           if (!old || typeof old !== 'object' || !('data' in old)) return old;
           const o = old as { data: Record<string, unknown>[] };
           const pk = adminContext.getResource(resource).primaryKey ?? 'id';
@@ -598,7 +600,7 @@ export function useForm<
         });
       }
       if (optimisticUpdateMap?.detail !== false && targetId != null) {
-        queryClient.setQueriesData({ predicate: (q) => dp(q) && q.queryKey[1] === resource && q.queryKey[2] === 'one' && q.queryKey[3] === targetId }, (old: Record<string, unknown> | undefined) => old ? { ...old, data: deepMerge((old as Record<string, unknown>).data || {}, variables) } : old);
+        queryClient.setQueriesData({ predicate: (q) => dataMatch(q.queryKey, { action: 'one', id: targetId }) }, (old: Record<string, unknown> | undefined) => old ? { ...old, data: deepMerge((old as Record<string, unknown>).data || {}, variables) } : old);
       }
       return { previousQueries, targetId, targetResource };
     },
@@ -626,15 +628,14 @@ export function useForm<
       const ctx = context as { targetId?: string | number; targetResource?: string } | undefined;
       const targetId = ctx?.targetId ?? currentId;
       const res = ctx?.targetResource ?? resource;
-      invalidateByScopes(
+      invalidateByScopes({
         queryClient,
-        res,
-        invalidateScopes,
-        ['list', 'many', 'detail'],
-        targetId ?? undefined,
-        options.dataProviderName,
-        (queryKey) => queryKeyMatchesTenant(queryKey, adminContext.tenantCacheKey),
-      );
+        resource: res,
+        scopes: invalidateScopes,
+        defaults: ['list', 'many', 'detail'],
+        id: targetId ?? undefined,
+        matcher: adminContext.queryKeyMatcher(res, options.dataProviderName),
+      });
     },
     onError: (error: unknown, _vars: unknown, context: unknown) => {
       const ctx = context as { previousQueries?: [unknown, unknown][] } | undefined;
@@ -776,15 +777,14 @@ export function useForm<
         await provider.update<TData, TVariables>({ resource: safeResource, id: safeId as string | number, variables: submittedValues, meta: safeMeta });
         if (formDestroyed) return;
         const scopes = autoSaveOpts.invalidates ?? ['resourceAll'];
-        invalidateByScopes(
+        invalidateByScopes({
           queryClient,
-          safeResource,
+          resource: safeResource,
           scopes,
-          ['resourceAll'],
-          safeId ?? undefined,
-          options.dataProviderName,
-          (queryKey) => queryKeyMatchesTenant(queryKey, adminContext.tenantCacheKey),
-        );
+          defaults: ['resourceAll'],
+          id: safeId ?? undefined,
+          matcher: adminContext.queryKeyMatcher(safeResource, options.dataProviderName),
+        });
         if (!isRecordIdentityCurrent(scheduledIdentity)) return;
         autoSaveStatus = 'saved';
         lastAutoSaveData = submittedValues;
@@ -814,9 +814,11 @@ export function useForm<
   if (autoSaveOpts?.invalidateOnUnmount) {
     $effect(() => {
       return () => queryClient.invalidateQueries({
-        predicate: (q) => queryKeyMatchesTenant(q.queryKey, adminContext.tenantCacheKey)
-          && q.queryKey[0] === options.dataProviderName
-          && q.queryKey[1] === resource,
+        predicate: (q) => queryKeyMatches(q.queryKey, {
+          ...adminContext.queryKeyMatcher(resource, options.dataProviderName),
+          kind: 'data',
+          resource,
+        }),
       });
     });
   }

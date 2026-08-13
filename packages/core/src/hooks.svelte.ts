@@ -17,14 +17,12 @@ export type { InvalidateScope, OvertimeConfig } from './options.svelte';
 export { createOvertimeTracker, createLiveSubscription } from './hook-utils.svelte';
 export type { OvertimeResult, OvertimeOptions, NotificationConfig } from './hook-utils.svelte';
 
-// ─── Missing hooks stubs ───────────────────────────────────────────
-// These hooks were in the original monolithic file. They are re-created
-// here as thin wrappers or stubs until they get their own modular files.
+// ─── Additional core hooks ─────────────────────────────────────────
 
 import { createQuery, createInfiniteQuery, createMutation, useQueryClient } from '@tanstack/svelte-query';
 import { getAdminOptions } from './options.svelte';
 import { captureAdminContext } from './context.svelte';
-import { appendTenantCacheKey, queryKeyMatchesTenant } from './provider-bundle';
+import { queryKeyMatches } from './query-keys';
 import { useParsed } from './useParsed.svelte';
 import { createOvertimeTracker, createLiveSubscription, fireSuccessNotification, fireErrorNotification, checkError } from './hook-utils.svelte';
 import { invalidateByScopes, publishLiveEvent } from './mutation-hooks.svelte';
@@ -59,15 +57,12 @@ export function useInfiniteList<TData extends BaseRecord = BaseRecord, TError = 
     const resource = options.resource ?? parsed.resource ?? '';
     const provider = adminContext.getDataProviderForResource(resource, options.dataProviderName);
     return {
-    queryKey: appendTenantCacheKey([
-      options.dataProviderName,
-      resource,
-      'infiniteList',
-      options.pagination?.pageSize,
-      options.sorters,
-      options.filters,
-      options.meta,
-    ], adminContext.tenantCacheKey),
+    queryKey: adminContext.queryKeys(resource, options.dataProviderName).data.infiniteList(resource, {
+      pageSize: options.pagination?.pageSize,
+      sorters: options.sorters,
+      filters: options.filters,
+      meta: options.meta,
+    }),
     queryFn: async ({ pageParam = 1 }) => {
       const result = await provider.getList<TData>({
         resource,
@@ -173,9 +168,12 @@ export function useSelect<TData extends BaseRecord = BaseRecord, TOption = { lab
   const query = createQuery<{ data: TData[]; total: number }>(() => {
     const provider = adminContext.getDataProviderForResource(resource, dataProviderName);
     return {
-    queryKey: appendTenantCacheKey([
-      dataProviderName, resource, 'select', allFilters, sorters, pagination, meta,
-    ], adminContext.tenantCacheKey),
+    queryKey: adminContext.queryKeys(resource, dataProviderName).data.select(resource, {
+      filters: allFilters,
+      sorters,
+      pagination,
+      meta,
+    }),
     queryFn: () => provider.getList<TData>({ resource, sorters, filters: allFilters, pagination: { current: 1, pageSize: effectivePageSize }, meta }),
     enabled: options.queryOptions?.enabled ?? true,
     staleTime: options.queryOptions?.staleTime ?? adminOptions.reactQuery?.staleTime,
@@ -188,9 +186,10 @@ export function useSelect<TData extends BaseRecord = BaseRecord, TOption = { lab
     ? createQuery<{ data: TData[] }>(() => {
         const provider = adminContext.getDataProviderForResource(resource, dataProviderName);
         return {
-          queryKey: appendTenantCacheKey([
-            dataProviderName, resource, 'select-defaults', defaultValueIds,
-          ], adminContext.tenantCacheKey),
+          queryKey: adminContext.queryKeys(resource, dataProviderName).data.selectDefaults(resource, {
+            ids: defaultValueIds,
+            meta,
+          }),
           queryFn: async () => {
             if (provider.getMany) return provider.getMany<TData>({ resource, ids: defaultValueIds, meta });
             const results = await Promise.all(defaultValueIds.map(id => provider.getOne<TData>({ resource, id, meta })));
@@ -287,9 +286,12 @@ export function useCustom<TData = unknown, TError = HttpError>(options: UseCusto
   const query = createQuery<{ data: TData }, TError>(() => {
     const provider = adminContext.getDataProvider(options.dataProviderName);
     return {
-    queryKey: appendTenantCacheKey([
-      options.dataProviderName, 'custom', options.url, options.method, options.config, options.meta,
-    ], adminContext.tenantCacheKey),
+    queryKey: adminContext.queryKeys(undefined, options.dataProviderName).custom.call(
+      options.url,
+      options.url,
+      options.method,
+      { config: options.config, meta: options.meta },
+    ),
     queryFn: async () => {
       if (!provider.custom) throw new Error('DataProvider does not support custom method');
       return provider.custom<TData>({
@@ -351,15 +353,13 @@ export function useCustomMutation<TData = unknown, TError = HttpError, TVariable
     },
     onSuccess: (data, params) => {
       if (params.resource && params.invalidates !== false) {
-        invalidateByScopes(
+        invalidateByScopes({
           queryClient,
-          params.resource,
-          params.invalidates,
-          ['list', 'many'],
-          undefined,
-          dataProviderName,
-          (queryKey) => queryKeyMatchesTenant(queryKey, adminContext.tenantCacheKey),
-        );
+          resource: params.resource,
+          scopes: params.invalidates,
+          defaults: ['list', 'many'],
+          matcher: adminContext.queryKeyMatcher(params.resource, dataProviderName),
+        });
       }
     },
     onError: (error) => {
@@ -415,15 +415,12 @@ export function useCreateMany<TData extends BaseRecord = BaseRecord, TError = Ht
     },
     onSettled: (_d, _e, params) => {
       const resName = params.resource ?? resource;
-      invalidateByScopes(
+      invalidateByScopes({
         queryClient,
-        resName,
-        undefined,
-        ['list', 'many'],
-        undefined,
-        params.dataProviderName,
-        (queryKey) => queryKeyMatchesTenant(queryKey, adminContext.tenantCacheKey),
-      );
+        resource: resName,
+        defaults: ['list', 'many'],
+        matcher: adminContext.queryKeyMatcher(resName, params.dataProviderName),
+      });
     },
   }));
 
@@ -473,22 +470,21 @@ export function useUpdateMany<TData extends BaseRecord = BaseRecord, TError = Ht
     },
     onSettled: (_d, _e, params) => {
       const resName = params.resource ?? resource;
-      invalidateByScopes(
+      invalidateByScopes({
         queryClient,
-        resName,
-        undefined,
-        ['list', 'many', 'detail'],
-        undefined,
-        params.dataProviderName,
-        (queryKey) => queryKeyMatchesTenant(queryKey, adminContext.tenantCacheKey),
-      );
+        resource: resName,
+        defaults: ['list', 'many', 'detail'],
+        matcher: adminContext.queryKeyMatcher(resName, params.dataProviderName),
+      });
       for (const id of params.ids) {
         queryClient.invalidateQueries({
-          predicate: (q) => queryKeyMatchesTenant(q.queryKey, adminContext.tenantCacheKey)
-            && q.queryKey[0] === params.dataProviderName
-            && q.queryKey[1] === resName
-            && q.queryKey[2] === 'one'
-            && q.queryKey[3] === id,
+          predicate: (q) => queryKeyMatches(q.queryKey, {
+            ...adminContext.queryKeyMatcher(resName, params.dataProviderName),
+            kind: 'data',
+            resource: resName,
+            action: 'one',
+            id,
+          }),
         });
       }
     },
@@ -539,22 +535,21 @@ export function useDeleteMany<TData extends BaseRecord = BaseRecord, TError = Ht
     },
     onSettled: (_d, _e, params) => {
       const resName = params.resource ?? resource;
-      invalidateByScopes(
+      invalidateByScopes({
         queryClient,
-        resName,
-        undefined,
-        ['list', 'many'],
-        undefined,
-        params.dataProviderName,
-        (queryKey) => queryKeyMatchesTenant(queryKey, adminContext.tenantCacheKey),
-      );
+        resource: resName,
+        defaults: ['list', 'many'],
+        matcher: adminContext.queryKeyMatcher(resName, params.dataProviderName),
+      });
       for (const id of params.ids) {
         queryClient.removeQueries({
-          predicate: (q) => queryKeyMatchesTenant(q.queryKey, adminContext.tenantCacheKey)
-            && q.queryKey[0] === params.dataProviderName
-            && q.queryKey[1] === resName
-            && q.queryKey[2] === 'one'
-            && q.queryKey[3] === id,
+          predicate: (q) => queryKeyMatches(q.queryKey, {
+            ...adminContext.queryKeyMatcher(resName, params.dataProviderName),
+            kind: 'data',
+            resource: resName,
+            action: 'one',
+            id,
+          }),
         });
       }
     },
@@ -572,23 +567,22 @@ export function useInvalidate() {
     if (params.invalidates === false) return;
     if (params.invalidates === 'all' || !params.resource) {
       queryClient.invalidateQueries({
-        predicate: (q) => queryKeyMatchesTenant(q.queryKey, adminContext.tenantCacheKey)
-          && q.queryKey[0] === params.dataProviderName,
+        predicate: (q) => queryKeyMatches(q.queryKey, {
+          ...adminContext.queryKeyMatcher(undefined, params.dataProviderName),
+          kind: 'data',
+        }),
       });
       return;
     }
-    const scopes = params.invalidates || ['resourceAll'];
     const res = params.resource;
-    const dpMatch = (q: { queryKey: readonly unknown[] }) =>
-      queryKeyMatchesTenant(q.queryKey, adminContext.tenantCacheKey)
-        && q.queryKey[0] === params.dataProviderName;
-    for (const scope of scopes) {
-      if (scope === 'resourceAll') queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === res });
-      else if ((scope === 'detail' || scope === 'one') && params.id) queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === res && q.queryKey[2] === 'one' && q.queryKey[3] === params.id });
-      else if (scope === 'detail' || scope === 'one') queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === res && q.queryKey[2] === 'one' });
-      else if (scope === 'list') queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === res && (q.queryKey[2] === 'list' || q.queryKey[2] === 'infiniteList' || q.queryKey[2] === 'select') });
-      else if (scope === 'many') queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === res && q.queryKey[2] === 'many' });
-    }
+    invalidateByScopes({
+      queryClient,
+      resource: res,
+      scopes: params.invalidates || ['resourceAll'],
+      defaults: ['resourceAll'],
+      id: params.id,
+      matcher: adminContext.queryKeyMatcher(res, params.dataProviderName),
+    });
   };
 }
 

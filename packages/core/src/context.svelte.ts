@@ -9,12 +9,12 @@ import type { AccessControlProvider } from './permissions.svelte';
 import type { AuditLogProvider } from './audit';
 import type { AgentProvider, ChatProvider } from './chatProvider.svelte';
 import {
-  appendTenantCacheKey,
   createTenantCacheKey,
-  queryKeyMatchesTenant,
   resolveTenantProviderMeta,
   withProviderMeta,
 } from './provider-bundle';
+import { keys } from './query-keys';
+import type { QueryMatcher } from './query-keys';
 import type {
   DataProviderInput,
   ProviderBundle,
@@ -107,10 +107,11 @@ export interface AdminContextAccessor {
   readonly tenantCacheKey: TenantCacheKey | undefined;
   getDataProvider(name?: string): DataProvider;
   getDataProviderNames(): string[];
+  resolveDataProviderName(resourceName: string, overrideName?: string): string;
   getDataProviderForResource(resourceName: string, overrideName?: string): DataProvider;
+  queryKeys(resourceName?: string, overrideName?: string): ReturnType<typeof keys>;
+  queryKeyMatcher(resourceName?: string, overrideName?: string): Pick<QueryMatcher, 'provider' | 'tenant'>;
   getProviderMeta(resourceName: string | undefined, meta?: Record<string, unknown>): Record<string, unknown> | undefined;
-  withTenantCacheKey(queryKey: readonly unknown[]): readonly unknown[];
-  matchesTenantQuery(queryKey: readonly unknown[]): boolean;
   getResource(nameOrIdentifier: string): ResourceDefinition;
   currentPath(): string;
   formatLink(path: string): string;
@@ -271,22 +272,43 @@ export function captureAdminContext(): AdminContextAccessor {
     getDataProviderNames() {
       return accessor.providers ? Object.keys(accessor.providers) : [];
     },
-    getDataProviderForResource(resourceName, overrideName) {
+    resolveDataProviderName(resourceName, overrideName) {
       if (overrideName) {
         try {
-          return accessor.getDataProvider(overrideName);
+          accessor.getDataProvider(overrideName);
+          return overrideName;
         } catch {
-          // Preserve the historical fallback to the resource/default provider.
+          // Fallback to resource/default provider as before.
         }
       }
+
       try {
         const resource = accessor.getResource(resourceName);
-        const dataProviderName = resource.provider?.dataProviderName ?? resource.meta?.dataProviderName;
-        if (dataProviderName) return accessor.getDataProvider(dataProviderName);
+        const providerName = resource.provider?.dataProviderName ?? resource.meta?.dataProviderName;
+        if (providerName) {
+          accessor.getDataProvider(providerName);
+          return providerName;
+        }
       } catch {
-        // Preserve the historical fallback when a resource is not registered.
+        // Preserve fallback when a resource is not found or malformed.
       }
-      return accessor.getDataProvider();
+
+      return 'default';
+    },
+    getDataProviderForResource(resourceName, overrideName) {
+      return accessor.getDataProvider(accessor.resolveDataProviderName(resourceName, overrideName));
+    },
+    queryKeys(resourceName, overrideName) {
+      return keys({
+        provider: accessor.resolveDataProviderName(resourceName ?? '', overrideName),
+        tenant: accessor.tenantCacheKey?.__svadminTenant,
+      });
+    },
+    queryKeyMatcher(resourceName, overrideName) {
+      return {
+        provider: accessor.resolveDataProviderName(resourceName ?? '', overrideName),
+        tenant: accessor.tenantCacheKey?.__svadminTenant,
+      };
     },
     getProviderMeta(resourceName, meta) {
       const resource = resourceName
@@ -303,12 +325,6 @@ export function captureAdminContext(): AdminContextAccessor {
         ...(providerConfig?.adapter === undefined ? {} : { adapter: providerConfig.adapter }),
         ...(tenant ? resolveTenantProviderMeta(tenant, accessor.tenantAdapter) : {}),
       };
-    },
-    withTenantCacheKey(queryKey) {
-      return appendTenantCacheKey(queryKey, accessor.tenantCacheKey);
-    },
-    matchesTenantQuery(queryKey) {
-      return queryKeyMatchesTenant(queryKey, accessor.tenantCacheKey);
     },
     getResource(nameOrIdentifier) {
       const resource = accessor.resources.find(

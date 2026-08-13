@@ -1,5 +1,5 @@
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
-import { appendTenantCacheKey, createTenantCacheKey, resetContext } from '@svadmin/core';
+import { keys, resetContext } from '@svadmin/core';
 import type { TaskProvider, TaskRecord } from '@svadmin/core';
 import { QueryClient } from '@tanstack/svelte-query';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -68,13 +68,11 @@ describe('tenant-scoped task buttons', () => {
     expect(secondProvider.cancel).not.toHaveBeenCalled();
     expect(invalidateQueries).toHaveBeenCalledTimes(4);
 
-    const tenantA = createTenantCacheKey({ tenantId: 'tenant-a' });
-    const tenantB = createTenantCacheKey({ tenantId: 'tenant-b' });
-    const tenantAList = appendTenantCacheKey(['taskList', 'default'], tenantA);
-    const tenantBList = appendTenantCacheKey(['taskList', 'default'], tenantB);
-    const tenantATask = appendTenantCacheKey(['task', 'shared-task'], tenantA);
-    const tenantBTask = appendTenantCacheKey(['task', 'shared-task'], tenantB);
-    const tenantAOtherTask = appendTenantCacheKey(['task', 'other-task'], tenantA);
+    const tenantAList = keys({ tenant: 'tenant-a' }).task.list();
+    const tenantBList = keys({ tenant: 'tenant-b' }).task.list();
+    const tenantATask = keys({ tenant: 'tenant-a' }).task.one('shared-task');
+    const tenantBTask = keys({ tenant: 'tenant-b' }).task.one('shared-task');
+    const tenantAOtherTask = keys({ tenant: 'tenant-a' }).task.one('other-task');
 
     expect(matchesQuery(invalidateQueries.mock.calls[0]?.[0], tenantAList)).toBe(true);
     expect(matchesQuery(invalidateQueries.mock.calls[0]?.[0], tenantBList)).toBe(false);

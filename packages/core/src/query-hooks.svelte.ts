@@ -1,7 +1,6 @@
 import { createQuery } from '@tanstack/svelte-query';
 import { getAdminOptions } from './options.svelte';
 import { captureAdminContext } from './context.svelte';
-import { appendTenantCacheKey } from './provider-bundle';
 import { useParsed } from './useParsed.svelte';
 import {
   checkError,
@@ -110,9 +109,12 @@ export function useList<TData extends BaseRecord = BaseRecord, TError = HttpErro
     const filters = [...parentFilters, ...(explicitFilters ?? [])];
 
     return {
-      queryKey: appendTenantCacheKey([
-        opts.dataProviderName, resource, 'list', pagination, sorters, filters, meta,
-      ], adminContext.tenantCacheKey),
+      queryKey: adminContext.queryKeys(resource, opts.dataProviderName).data.list(resource, {
+        pagination,
+        sorters,
+        filters,
+        meta,
+      }),
       queryFn: async () => provider.getList<TData>({
         resource,
         pagination,
@@ -210,10 +212,9 @@ export function useOne<TData extends BaseRecord = BaseRecord, TError = HttpError
     const queryOptions = opts.queryOptions;
 
     return {
-      queryKey: appendTenantCacheKey(
-        [opts.dataProviderName, resource, 'one', id, opts.meta],
-        adminContext.tenantCacheKey,
-      ),
+      queryKey: adminContext.queryKeys(resource, opts.dataProviderName).data.one(resource, id ?? '', {
+        meta: cloneQueryKeyPart(opts.meta),
+      }),
       queryFn: async () => {
         if (id == null) throw new Error('useOne requires an id');
         const result = await provider.getOne<TData>({
@@ -330,10 +331,10 @@ export function useMany<TData extends BaseRecord = BaseRecord, TError = HttpErro
     const provider = adminContext.getDataProviderForResource(resource, dataProviderName);
 
     return {
-      queryKey: appendTenantCacheKey(
-        [dataProviderName, resource, 'many', ids, meta],
-        adminContext.tenantCacheKey,
-      ),
+      queryKey: adminContext.queryKeys(resource, dataProviderName).data.many(resource, {
+        ids: cloneQueryKeyPart(ids),
+        meta: cloneQueryKeyPart(meta),
+      }),
       queryFn: async () => {
         if (!ids.length) return { data: [] };
         if (provider.getMany) {

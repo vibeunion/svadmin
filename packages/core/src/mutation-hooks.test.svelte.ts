@@ -4,6 +4,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { useCreate, useUpdate, invalidateByScopes } from './mutation-hooks.svelte';
 import { flushSync } from 'svelte';
 import { QueryClient } from '@tanstack/svelte-query';
+import { keys } from './query-keys';
 
 vi.mock('./context.svelte', () => {
   const dataProvider = {
@@ -24,6 +25,11 @@ vi.mock('./context.svelte', () => {
       getDataProvider: () => dataProvider,
       getDataProviderNames: () => ['default'],
       getDataProviderForResource: () => dataProvider,
+      queryKeyMatcher: (resource: string, provider?: string) => ({
+        provider: provider ?? 'default',
+        tenant: undefined,
+        resource,
+      }),
       getResource,
       currentPath: () => '/posts',
       formatLink: (path: string) => path,
@@ -98,7 +104,13 @@ describe('mutation-hooks', () => {
       const providerName = 'secondaryProvider';
       
       // Act
-      invalidateByScopes(queryClient, resource, ['list'], ['list'], undefined, providerName);
+      invalidateByScopes({
+        queryClient,
+        resource,
+        scopes: ['list'],
+        defaults: ['list'],
+        matcher: { provider: providerName, tenant: undefined },
+      });
       
       expect(queryClient.invalidateQueries).toHaveBeenCalled();
       
@@ -108,28 +120,52 @@ describe('mutation-hooks', () => {
       // Using arbitrary mock objects simulating Query keys
       const predicateFn = calls[0][0].predicate;
       
-      const shouldPass = predicateFn({ queryKey: ['secondaryProvider', 'posts', 'list'] });
-      const shouldFail = predicateFn({ queryKey: ['default', 'posts', 'list'] });
-      const shouldFailResource = predicateFn({ queryKey: ['secondaryProvider', 'users', 'list'] });
+      const shouldPass = predicateFn({ queryKey: keys({ provider: 'secondaryProvider' }).data.list('posts') });
+      const shouldFail = predicateFn({ queryKey: keys({ provider: 'default' }).data.list('posts') });
+      const shouldFailResource = predicateFn({ queryKey: keys({ provider: 'secondaryProvider' }).data.list('users') });
 
       expect(shouldPass).toBe(true);
       expect(shouldFail).toBe(false);
       expect(shouldFailResource).toBe(false);
     });
     
-    it('falls back to all providers when NO provider is specified', () => {
+    it('uses the resolved default provider when no override is specified', () => {
       const queryClient = new QueryClient();
       queryClient.invalidateQueries = vi.fn(async () => {});
 
       // Act without providerName
-      invalidateByScopes(queryClient, 'posts', ['list'], ['list']);
+      invalidateByScopes({
+        queryClient,
+        resource: 'posts',
+        scopes: ['list'],
+        defaults: ['list'],
+        matcher: { provider: 'default', tenant: undefined },
+      });
       
       const predicateFn = (queryClient.invalidateQueries as ReturnType<typeof vi.fn>).mock.calls[0][0].predicate;
       
-      const pass1 = predicateFn({ queryKey: ['default', 'posts', 'list'] });
-      const pass2 = predicateFn({ queryKey: ['custom', 'posts', 'list'] });
+      const pass1 = predicateFn({ queryKey: keys().data.list('posts') });
+      const pass2 = predicateFn({ queryKey: keys({ provider: 'custom' }).data.list('posts') });
       expect(pass1).toBe(true);
-      expect(pass2).toBe(true);
+      expect(pass2).toBe(false);
+    });
+
+    it('isolates invalidation by provider and tenant', () => {
+      const queryClient = new QueryClient();
+      queryClient.invalidateQueries = vi.fn(async () => {});
+
+      invalidateByScopes({
+        queryClient,
+        resource: 'posts',
+        scopes: ['resourceAll'],
+        defaults: ['resourceAll'],
+        matcher: { provider: 'cms', tenant: 'tenant-a' },
+      });
+
+      const predicate = (queryClient.invalidateQueries as ReturnType<typeof vi.fn>).mock.calls[0][0].predicate;
+      expect(predicate({ queryKey: keys({ provider: 'cms', tenant: 'tenant-a' }).data.list('posts') })).toBe(true);
+      expect(predicate({ queryKey: keys({ provider: 'cms', tenant: 'tenant-b' }).data.list('posts') })).toBe(false);
+      expect(predicate({ queryKey: keys({ provider: 'default', tenant: 'tenant-a' }).data.list('posts') })).toBe(false);
     });
   });
 

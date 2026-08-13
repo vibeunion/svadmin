@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createMutation, useQueryClient } from '@tanstack/svelte-query';
 import { getAdminOptions } from './options.svelte';
 import { captureAdminContext } from './context.svelte';
-import { queryKeyMatchesTenant } from './provider-bundle';
+import { dataQueryMatches } from './query-keys';
+import type { QueryMatcher } from './query-keys';
 import type { AdminContextAccessor } from './context.svelte';
 import { useParsed } from './useParsed.svelte';
 import { auditWithProvider } from './audit';
@@ -39,39 +39,45 @@ export function publishLiveEvent(
  *   - update: ['list', 'many', 'detail']
  *   - delete: ['list', 'many']
  */
-export function invalidateByScopes(
-  queryClient: ReturnType<typeof useQueryClient>,
-  resource: string,
-  scopes: string[] | false | undefined,
-  defaults: string[],
-  id?: string | number,
-  dataProviderName?: string,
-  queryMatches: (queryKey: readonly unknown[]) => boolean = () => true,
-): void {
+export interface InvalidateByScopesRequest {
+  queryClient: ReturnType<typeof useQueryClient>;
+  resource: string;
+  scopes?: string[] | false;
+  defaults: string[];
+  id?: string | number;
+  matcher: Pick<QueryMatcher, 'provider' | 'tenant'>;
+}
+
+export function invalidateByScopes(request: InvalidateByScopesRequest): void {
+  const { queryClient, resource, scopes, defaults, id, matcher } = request;
   if (scopes === false) return;
   const effectiveScopes = (scopes && scopes.length > 0) ? scopes : defaults;
-  const dpMatch = dataProviderName === undefined
-    ? (q: { queryKey: readonly unknown[] }) => queryMatches(q.queryKey)
-    : (q: { queryKey: readonly unknown[] }) => queryMatches(q.queryKey) && q.queryKey[0] === dataProviderName;
+  const dataMatch = (queryKey: readonly unknown[], fields: QueryMatcher = {}) => dataQueryMatches(queryKey, {
+    ...matcher,
+    resource,
+    ...fields,
+  });
   for (const scope of effectiveScopes) {
-    if (scope === 'list') queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === resource && (q.queryKey[2] === 'list' || q.queryKey[2] === 'infiniteList' || q.queryKey[2] === 'select' || q.queryKey[2] === 'select-defaults') });
-    else if (scope === 'many') queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === resource && q.queryKey[2] === 'many' });
-    else if ((scope === 'detail' || scope === 'one') && id != null) queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === resource && q.queryKey[2] === 'one' && q.queryKey[3] === id });
-    else if (scope === 'detail' || scope === 'one') queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === resource && q.queryKey[2] === 'one' });
-    else if (scope === 'resourceAll') queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === resource });
+    if (scope === 'list') queryClient.invalidateQueries({ predicate: (q) => ['list', 'infiniteList', 'select', 'selectDefaults'].some((action) => dataMatch(q.queryKey, { action })) });
+    else if (scope === 'many') queryClient.invalidateQueries({ predicate: (q) => dataMatch(q.queryKey, { action: 'many' }) });
+    else if ((scope === 'detail' || scope === 'one') && id != null) queryClient.invalidateQueries({ predicate: (q) => dataMatch(q.queryKey, { action: 'one', id }) });
+    else if (scope === 'detail' || scope === 'one') queryClient.invalidateQueries({ predicate: (q) => dataMatch(q.queryKey, { action: 'one' }) });
+    else if (scope === 'resourceAll') queryClient.invalidateQueries({ predicate: (q) => dataMatch(q.queryKey) });
   }
 }
 
-export function deepMerge(target: any, source: any): any {
+export function deepMerge(target: unknown, source: unknown): unknown {
   if (!target || typeof target !== 'object') return source;
   if (!source || typeof source !== 'object') return target;
   if (Array.isArray(source) || source instanceof Date) return source;
-  const result = { ...target };
-  for (const key in source) {
-    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key]) && !(source[key] instanceof Date)) {
-      result[key] = deepMerge(result[key] || {}, source[key]);
+  const targetRecord = target as Record<string, unknown>;
+  const sourceRecord = source as Record<string, unknown>;
+  const result: Record<string, unknown> = { ...targetRecord };
+  for (const [key, value] of Object.entries(sourceRecord)) {
+    if (value && typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date)) {
+      result[key] = deepMerge(targetRecord[key] ?? {}, value);
     } else {
-      result[key] = source[key];
+      result[key] = value;
     }
   }
   return result;
@@ -157,15 +163,13 @@ export function useCreate<TData extends BaseRecord = BaseRecord, TError = HttpEr
       );
       publishLiveEvent(resName, 'created', newId != null ? [newId as string | number] : undefined, adminContext);
       // Invalidation in onSuccess for create (refine pattern — no optimistic data to reconcile on error)
-      invalidateByScopes(
+      invalidateByScopes({
         queryClient,
-        resName,
-        params.invalidates,
-        ['list', 'many'],
-        undefined,
-        params.dataProviderName,
-        (queryKey) => queryKeyMatchesTenant(queryKey, adminContext.tenantCacheKey),
-      );
+        resource: resName,
+        scopes: params.invalidates,
+        defaults: ['list', 'many'],
+        matcher: adminContext.queryKeyMatcher(resName, params.dataProviderName),
+      });
       if (typeof options.mutationOptions?.onSuccess === 'function') {
         (options.mutationOptions.onSuccess as (...a: unknown[]) => unknown)(data, params, context);
       }
@@ -263,13 +267,16 @@ export function useUpdate<TData extends BaseRecord = BaseRecord, TError = HttpEr
       if (mutationMode === 'pessimistic') return { _svadmin_ctx: true, userContext };
       const resName = params.resource ?? defaultResource;
       const targetId = params.id ?? defaultId;
-      const dpN = params.dataProviderName;
-      const dp = (q: { queryKey: readonly unknown[] }) =>
-        queryKeyMatchesTenant(q.queryKey, adminContext.tenantCacheKey) && q.queryKey[0] === dpN;
+      const matcher = adminContext.queryKeyMatcher(resName, params.dataProviderName);
+      const dataMatch = (queryKey: readonly unknown[], fields: QueryMatcher = {}) => dataQueryMatches(queryKey, {
+        ...matcher,
+        resource: resName,
+        ...fields,
+      });
       
-      await queryClient.cancelQueries({ predicate: (q) => dp(q) && q.queryKey[1] === resName });
+      await queryClient.cancelQueries({ predicate: (q) => dataMatch(q.queryKey) });
 
-      const previousQueries = queryClient.getQueriesData({ predicate: (q) => dp(q) && q.queryKey[1] === resName });
+      const previousQueries = queryClient.getQueriesData({ predicate: (q) => dataMatch(q.queryKey) });
       
       const pk = adminContext.getResource(resName).primaryKey ?? 'id';
       const updater = params.optimisticUpdateMap ?? { list: true, many: true, detail: true };
@@ -277,14 +284,17 @@ export function useUpdate<TData extends BaseRecord = BaseRecord, TError = HttpEr
       if (updater.detail !== false) {
         const detailFn = updater.detail;
         if (typeof detailFn === 'function') {
-          queryClient.setQueriesData({ predicate: (q) => dp(q) && q.queryKey[1] === resName && q.queryKey[2] === 'one' && q.queryKey[3] === targetId }, (old: unknown) => detailFn(old, params.variables, targetId));
+          queryClient.setQueriesData(
+            { predicate: (q) => dataMatch(q.queryKey, { action: 'one', id: targetId }) },
+            (old: unknown) => detailFn(old, params.variables, targetId),
+          );
         } else {
-          queryClient.setQueriesData({ predicate: (q) => dp(q) && q.queryKey[1] === resName && q.queryKey[2] === 'one' && q.queryKey[3] === targetId }, (old: Record<string, unknown> | undefined) => old ? { ...old, data: deepMerge((old as Record<string, unknown>).data || {}, params.variables) } : old);
+          queryClient.setQueriesData({ predicate: (q) => dataMatch(q.queryKey, { action: 'one', id: targetId }) }, (old: Record<string, unknown> | undefined) => old ? { ...old, data: deepMerge((old as Record<string, unknown>).data || {}, params.variables) } : old);
         }
       }
       
       if (updater.list !== false) {
-        queryClient.setQueriesData({ predicate: (q) => dp(q) && q.queryKey[1] === resName && q.queryKey[2] === 'list' }, (old: unknown) => {
+        queryClient.setQueriesData({ predicate: (q) => dataMatch(q.queryKey, { action: 'list' }) }, (old: unknown) => {
           if (typeof updater.list === 'function') return updater.list(old, params.variables, targetId);
           if (!old || typeof old !== 'object' || !('data' in old)) return old;
           const o = old as { data: Record<string, unknown>[] };
@@ -293,7 +303,7 @@ export function useUpdate<TData extends BaseRecord = BaseRecord, TError = HttpEr
       }
 
       if (updater.many !== false) {
-        queryClient.setQueriesData({ predicate: (q) => dp(q) && q.queryKey[1] === resName && q.queryKey[2] === 'many' }, (old: unknown) => {
+        queryClient.setQueriesData({ predicate: (q) => dataMatch(q.queryKey, { action: 'many' }) }, (old: unknown) => {
           if (typeof updater.many === 'function') return updater.many(old, params.variables, targetId);
           if (!old || typeof old !== 'object' || !('data' in old)) return old;
           const o = old as { data: Record<string, unknown>[] };
@@ -333,15 +343,14 @@ export function useUpdate<TData extends BaseRecord = BaseRecord, TError = HttpEr
       if (error instanceof UndoError) return;
       const resName = params.resource ?? defaultResource;
       const targetId = params.id ?? defaultId;
-      invalidateByScopes(
+      invalidateByScopes({
         queryClient,
-        resName,
-        params.invalidates,
-        ['list', 'many', 'detail'],
-        targetId != null ? targetId : undefined,
-        params.dataProviderName,
-        (queryKey) => queryKeyMatchesTenant(queryKey, adminContext.tenantCacheKey),
-      );
+        resource: resName,
+        scopes: params.invalidates,
+        defaults: ['list', 'many', 'detail'],
+        id: targetId != null ? targetId : undefined,
+        matcher: adminContext.queryKeyMatcher(resName, params.dataProviderName),
+      });
       if (typeof options.mutationOptions?.onSettled === 'function') {
         (options.mutationOptions.onSettled as (...a: unknown[]) => unknown)(_data, error, params, undefined);
       }
@@ -442,26 +451,29 @@ export function useDelete<TData extends BaseRecord = BaseRecord, TError = HttpEr
       if (mutationMode === 'pessimistic') return { _svadmin_ctx: true, userContext };
       const resName = params.resource ?? defaultResource;
       const targetId = params.id ?? defaultId;
-      const dpN = params.dataProviderName;
-      const dp = (q: { queryKey: readonly unknown[] }) =>
-        queryKeyMatchesTenant(q.queryKey, adminContext.tenantCacheKey) && q.queryKey[0] === dpN;
+      const matcher = adminContext.queryKeyMatcher(resName, params.dataProviderName);
+      const dataMatch = (queryKey: readonly unknown[], fields: QueryMatcher = {}) => dataQueryMatches(queryKey, {
+        ...matcher,
+        resource: resName,
+        ...fields,
+      });
       
-      await queryClient.cancelQueries({ predicate: (q) => dp(q) && q.queryKey[1] === resName });
+      await queryClient.cancelQueries({ predicate: (q) => dataMatch(q.queryKey) });
 
-      const previousQueries = queryClient.getQueriesData({ predicate: (q) => dp(q) && q.queryKey[1] === resName });
+      const previousQueries = queryClient.getQueriesData({ predicate: (q) => dataMatch(q.queryKey) });
       
       const pk = adminContext.getResource(resName).primaryKey ?? 'id';
       
-      if (targetId != null) queryClient.removeQueries({ predicate: (q) => dp(q) && q.queryKey[1] === resName && q.queryKey[2] === 'one' && q.queryKey[3] === targetId });
+      if (targetId != null) queryClient.removeQueries({ predicate: (q) => dataMatch(q.queryKey, { action: 'one', id: targetId }) });
 
-      queryClient.setQueriesData({ predicate: (q) => dp(q) && q.queryKey[1] === resName && q.queryKey[2] === 'list' }, (old: unknown) => {
+      queryClient.setQueriesData({ predicate: (q) => dataMatch(q.queryKey, { action: 'list' }) }, (old: unknown) => {
         if (!old || typeof old !== 'object' || !('data' in old)) return old;
         const o = old as { data: Record<string, unknown>[]; total?: number };
         const filtered = o.data.filter((item) => String(item[pk]) !== String(targetId));
         return { ...o, data: filtered, total: (o.total ?? o.data.length) - (o.data.length - filtered.length) };
       });
 
-      queryClient.setQueriesData({ predicate: (q) => dp(q) && q.queryKey[1] === resName && q.queryKey[2] === 'many' }, (old: unknown) => {
+      queryClient.setQueriesData({ predicate: (q) => dataMatch(q.queryKey, { action: 'many' }) }, (old: unknown) => {
         if (!old || typeof old !== 'object' || !('data' in old)) return old;
         const o = old as { data: Record<string, unknown>[] };
         return { ...o, data: o.data.filter((item) => String(item[pk]) !== String(targetId)) };
@@ -477,11 +489,12 @@ export function useDelete<TData extends BaseRecord = BaseRecord, TError = HttpEr
       // Remove detail cache entry (refine pattern — no stale show page)
       if (targetId != null) {
         queryClient.removeQueries({
-          predicate: (q) => queryKeyMatchesTenant(q.queryKey, adminContext.tenantCacheKey)
-            && q.queryKey[0] === params.dataProviderName
-            && q.queryKey[1] === resName
-            && q.queryKey[2] === 'one'
-            && q.queryKey[3] === targetId,
+          predicate: (q) => dataQueryMatches(q.queryKey, {
+            ...adminContext.queryKeyMatcher(resName, params.dataProviderName),
+            resource: resName,
+            action: 'one',
+            id: targetId,
+          }),
         });
       }
 
@@ -511,15 +524,14 @@ export function useDelete<TData extends BaseRecord = BaseRecord, TError = HttpEr
       if (error instanceof UndoError) return;
       const resName = params.resource ?? defaultResource;
       const targetId = params.id ?? defaultId;
-      invalidateByScopes(
+      invalidateByScopes({
         queryClient,
-        resName,
-        params.invalidates,
-        ['list', 'many'],
-        targetId != null ? targetId : undefined,
-        params.dataProviderName,
-        (queryKey) => queryKeyMatchesTenant(queryKey, adminContext.tenantCacheKey),
-      );
+        resource: resName,
+        scopes: params.invalidates,
+        defaults: ['list', 'many'],
+        id: targetId != null ? targetId : undefined,
+        matcher: adminContext.queryKeyMatcher(resName, params.dataProviderName),
+      });
       if (typeof options.mutationOptions?.onSettled === 'function') {
         (options.mutationOptions.onSettled as (...a: unknown[]) => unknown)(_data, error, params, undefined);
       }

@@ -116,23 +116,6 @@ export function isTenantCacheKey(value: unknown): value is TenantCacheKey {
   );
 }
 
-export function appendTenantCacheKey(
-  queryKey: readonly unknown[],
-  tenantCacheKey: TenantCacheKey | undefined,
-): readonly unknown[] {
-  return tenantCacheKey ? [...queryKey, tenantCacheKey] : queryKey;
-}
-
-export function queryKeyMatchesTenant(
-  queryKey: readonly unknown[],
-  tenantCacheKey: TenantCacheKey | undefined,
-): boolean {
-  const candidate = queryKey.at(-1);
-  const keyTenant = isTenantCacheKey(candidate) ? candidate : undefined;
-  if (!tenantCacheKey) return keyTenant === undefined;
-  return keyTenant?.__svadminTenant === tenantCacheKey.__svadminTenant;
-}
-
 export interface ProviderMetaInput {
   readonly resource?: string;
   readonly meta?: Record<string, unknown>;

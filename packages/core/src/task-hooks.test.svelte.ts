@@ -4,6 +4,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { flushSync } from 'svelte';
 import { QueryClient } from '@tanstack/svelte-query';
 import { useSubmitTask, useTask, useTaskList, useTaskSubscription } from './task-hooks.svelte';
+import { keys, parseQueryKey } from './query-keys';
 
 const mockTaskProvider = {
   submit: vi.fn(async () => ({
@@ -30,6 +31,8 @@ vi.mock('./context.svelte', () => ({
     getDataProvider: vi.fn(),
     getDataProviderNames: () => [],
     getDataProviderForResource: vi.fn(),
+    queryKeys: () => keys(),
+    queryKeyMatcher: () => ({ provider: 'default', tenant: undefined }),
     getResource: vi.fn(),
     currentPath: () => '/',
     formatLink: (path: string) => path,
@@ -61,7 +64,7 @@ vi.mock('@tanstack/svelte-query', async (importOriginal) => {
     createQuery: (factory: any) => {
       const config = factory();
       return {
-        data: config.queryKey[0] === 'taskList'
+        data: parseQueryKey(config.queryKey)?.action === 'list'
           ? { data: [{ id: 'task-1', status: 'queued' }], total: 1 }
           : { id: 'task-1', status: 'running' },
         isLoading: false,

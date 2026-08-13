@@ -3,12 +3,10 @@ import { QueryClient } from '@tanstack/svelte-query';
 import { describe, expect, it, vi } from 'vitest';
 import ProviderBundleTestHost from './provider-bundle.test-host.svelte';
 import {
-  appendTenantCacheKey,
   createProviderBundle,
-  createTenantCacheKey,
-  queryKeyMatchesTenant,
   withTenantDataProvider,
 } from './provider-bundle';
+import { keys, parseQueryKey, queryKeyMatches } from './query-keys';
 import type { AuditEntry, AuditLogProvider } from './audit';
 import type { ChatProvider } from './chatProvider.svelte';
 import type { AccessControlProvider } from './permissions.svelte';
@@ -217,33 +215,20 @@ describe('ProviderBundle and tenant context', () => {
       expect(screen.getByTestId('query-second-task').textContent).toBe('query-second-task');
     });
 
-    const tenantIdentities = queryClient.getQueryCache().getAll().map((query) => {
-      const marker = query.queryKey.find((part) => (
-        part !== null && typeof part === 'object' && '__svadminTenant' in part
-      ));
-      return marker && typeof marker === 'object' && '__svadminTenant' in marker
-        ? marker.__svadminTenant
-        : undefined;
-    });
+    const tenantIdentities = queryClient.getQueryCache().getAll().map((query) => (
+      parseQueryKey(query.queryKey)?.tenant
+    ));
 
     expect(tenantIdentities).toEqual(expect.arrayContaining(['tenant:alpha', 'tenant:beta']));
     expect(queryClient.getQueryCache().getAll()).toHaveLength(4);
   });
 
-  it('marks and matches tenant-specific cache keys without changing legacy keys', () => {
-    const legacyKey = ['default', 'posts', 'list'] as const;
-    const alpha = createTenantCacheKey({ tenantId: 'alpha' });
-    const beta = createTenantCacheKey({ tenantId: 'beta' });
-    const alphaKey = appendTenantCacheKey(legacyKey, alpha);
-    const spoofedMetaKey = [...legacyKey, { __svadminTenant: 'beta', request: 'caller-meta' }];
-    const tenantKeyWithSpoofedMeta = appendTenantCacheKey(spoofedMetaKey, alpha);
+  it('matches tenant-specific v2 keys and rejects legacy tuples', () => {
+    const alphaKey = keys({ tenant: 'alpha' }).data.list('posts');
 
-    expect(appendTenantCacheKey(legacyKey, undefined)).toBe(legacyKey);
-    expect(queryKeyMatchesTenant(legacyKey, undefined)).toBe(true);
-    expect(queryKeyMatchesTenant(alphaKey, alpha)).toBe(true);
-    expect(queryKeyMatchesTenant(alphaKey, beta)).toBe(false);
-    expect(queryKeyMatchesTenant(alphaKey, undefined)).toBe(false);
-    expect(queryKeyMatchesTenant(spoofedMetaKey, undefined)).toBe(true);
-    expect(queryKeyMatchesTenant(tenantKeyWithSpoofedMeta, alpha)).toBe(true);
+    expect(queryKeyMatches(alphaKey, { tenant: 'alpha' })).toBe(true);
+    expect(queryKeyMatches(alphaKey, { tenant: 'beta' })).toBe(false);
+    expect(queryKeyMatches(alphaKey, { tenant: undefined })).toBe(false);
+    expect(queryKeyMatches(['default', 'posts', 'list'], {})).toBe(false);
   });
 });

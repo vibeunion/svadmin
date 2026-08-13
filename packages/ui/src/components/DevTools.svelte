@@ -1,11 +1,13 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { SvelteMap } from 'svelte/reactivity';
   import { fly } from 'svelte/transition';
   import { useQueryClient } from '@tanstack/svelte-query';
   import {
     captureAdminContext,
     getColorTheme,
     getTheme,
+    parseQueryKey,
   } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
 
@@ -28,6 +30,17 @@
     capabilities: string;
   };
 
+  type SafeQueryDiagnostic = {
+    provider: string;
+    resource: string;
+    operation: string;
+    status: string;
+    retries: number;
+    duration: string;
+    cacheAge: string;
+    invalidation: string;
+  };
+
   const EMPTY_CACHE_DIAGNOSTICS: CacheDiagnostics = {
     queries: { total: 0, fetching: 0, stale: 0, errors: 0 },
     mutations: { total: 0, pending: 0, paused: 0, errors: 0 },
@@ -42,6 +55,8 @@
   let visible = $state(false);
   let collapsed = $state(false);
   let cacheDiagnostics = $state.raw<CacheDiagnostics>(EMPTY_CACHE_DIAGNOSTICS);
+  let safeQueryDiagnostics = $state.raw<SafeQueryDiagnostic[]>([]);
+  const queryTimings = new SvelteMap<string, { startedAt?: number; duration?: number }>();
 
   function toggle() {
     visible = !visible;
@@ -57,6 +72,7 @@
   function refreshCacheDiagnostics() {
     const queries = queryClient.getQueryCache().getAll();
     const mutations = queryClient.getMutationCache().getAll();
+    const now = Date.now();
     cacheDiagnostics = {
       queries: {
         total: queries.length,
@@ -71,12 +87,44 @@
         errors: mutations.filter((mutation) => mutation.state.status === 'error').length,
       },
     };
+    safeQueryDiagnostics = queries.flatMap((query) => {
+      const descriptor = parseQueryKey(query.queryKey);
+      if (!descriptor) return [];
+      return [{
+        provider: descriptor.provider,
+        resource: descriptor.kind === 'custom' ? '[custom]' : (descriptor.resource ?? '—'),
+        operation: `${descriptor.kind}:${descriptor.action ?? 'call'}`,
+        status: query.state.fetchStatus === 'fetching' ? 'fetching' : query.state.status,
+        retries: query.state.fetchFailureCount,
+        duration: queryTimings.get(query.queryHash)?.duration === undefined
+          ? '—'
+          : `${queryTimings.get(query.queryHash)?.duration}ms`,
+        cacheAge: query.state.dataUpdatedAt > 0
+          ? `${Math.max(0, Math.floor((now - query.state.dataUpdatedAt) / 1000))}s`
+          : '—',
+        invalidation: query.state.isInvalidated ? 'cache invalidation' : '—',
+      }];
+    });
   }
 
   onMount(() => {
     if (!isDev) return;
     refreshCacheDiagnostics();
-    const unsubscribeQueries = queryClient.getQueryCache().subscribe(refreshCacheDiagnostics);
+    const unsubscribeQueries = queryClient.getQueryCache().subscribe((event) => {
+      if (event.type === 'removed') {
+        queryTimings.delete(event.query.queryHash);
+      } else if (event.type === 'updated') {
+        const current = queryTimings.get(event.query.queryHash) ?? {};
+        if (event.action.type === 'fetch') {
+          queryTimings.set(event.query.queryHash, { startedAt: Date.now() });
+        } else if ((event.action.type === 'success' || event.action.type === 'error') && current.startedAt !== undefined) {
+          queryTimings.set(event.query.queryHash, {
+            duration: Math.max(0, Date.now() - current.startedAt),
+          });
+        }
+      }
+      refreshCacheDiagnostics();
+    });
     const unsubscribeMutations = queryClient.getMutationCache().subscribe(refreshCacheDiagnostics);
     return () => {
       unsubscribeQueries();
@@ -340,6 +388,34 @@
                     <div class="flex justify-between"><dt class="text-muted-foreground">Paused</dt><dd>{cacheDiagnostics.mutations.paused}</dd></div>
                     <div class="flex justify-between"><dt class="text-muted-foreground">Errors</dt><dd>{cacheDiagnostics.mutations.errors}</dd></div>
                   </dl>
+                </section>
+
+                <section class="space-y-1.5 sm:col-span-2">
+                  <div class="flex items-center justify-between">
+                    <h4 class="text-xs font-semibold text-foreground">Safe query operations</h4>
+                    <span class="text-[0.6875rem] text-muted-foreground">IDs, tenant and params hidden</span>
+                  </div>
+                  {#if safeQueryDiagnostics.length === 0}
+                    <div class="rounded-md border px-2.5 py-2 text-[0.6875rem] text-muted-foreground">
+                      No Query Key v2 operations in cache.
+                    </div>
+                  {:else}
+                    {#each safeQueryDiagnostics as query, index (`${query.provider}:${query.resource}:${query.operation}:${index}`)}
+                      <div class="rounded-md border px-2.5 py-2" data-testid="devtools-query-operation">
+                        <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+                          <span class="font-medium text-foreground">{query.provider} · {query.resource}</span>
+                          <Badge variant="outline">{query.operation}</Badge>
+                        </div>
+                        <dl class="mt-1 grid grid-cols-5 gap-2 text-[0.6875rem] text-muted-foreground">
+                          <div><dt>Status</dt><dd class="text-foreground">{query.status}</dd></div>
+                          <div><dt>Retries</dt><dd class="text-foreground">{query.retries}</dd></div>
+                          <div><dt>Duration</dt><dd class="text-foreground">{query.duration}</dd></div>
+                          <div><dt>Cache age</dt><dd class="text-foreground">{query.cacheAge}</dd></div>
+                          <div><dt>Invalidation</dt><dd class="text-foreground">{query.invalidation}</dd></div>
+                        </dl>
+                      </div>
+                    {/each}
+                  {/if}
                 </section>
 
                 <p class="text-[0.6875rem] text-muted-foreground sm:col-span-2">

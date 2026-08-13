@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
 import { useForm } from './form-hooks.svelte';
 import { flushSync } from 'svelte';
+import { keys } from './query-keys';
 
 interface MockMutationOptions {
   onMutate?: (variables: unknown) => unknown | Promise<unknown>;
@@ -41,6 +42,8 @@ vi.mock('./context.svelte', () => {
       getDataProvider: () => getDataProviderForResource(),
       getDataProviderNames: () => ['default'],
       getDataProviderForResource,
+      queryKeys: () => keys(),
+      queryKeyMatcher: () => ({ provider: 'default', tenant: undefined }),
       getResource,
       getProviderMeta: () => undefined,
       currentPath: () => '/posts',
@@ -594,8 +597,8 @@ describe('useForm - Headless Svelte 5 Compatibility', () => {
     const invalidation = providerMocks.invalidateQueries.mock.calls[0]?.[0] as {
       predicate: (query: { queryKey: readonly unknown[] }) => boolean;
     };
-    expect(invalidation.predicate({ queryKey: [undefined, 'posts', 'list'] })).toBe(true);
-    expect(invalidation.predicate({ queryKey: [undefined, 'users', 'list'] })).toBe(false);
+    expect(invalidation.predicate({ queryKey: keys().data.list('posts') })).toBe(true);
+    expect(invalidation.predicate({ queryKey: keys().data.list('users') })).toBe(false);
     cleanup();
   });
 

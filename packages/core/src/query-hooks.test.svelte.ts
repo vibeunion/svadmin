@@ -4,6 +4,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { useList, useOne } from './query-hooks.svelte';
 import { flushSync } from 'svelte';
 import { QueryClient } from '@tanstack/svelte-query';
+import { keys, parseQueryKey } from './query-keys';
 
 vi.mock('./context.svelte', () => {
   const dataProvider = {
@@ -21,6 +22,7 @@ vi.mock('./context.svelte', () => {
       taskProvider: undefined,
       getDataProvider: () => dataProvider,
       getDataProviderNames: () => ['default'],
+      queryKeys: () => keys(),
       getDataProviderForResource: () => dataProvider,
       getResource,
       currentPath: () => '/posts',
@@ -44,7 +46,7 @@ vi.mock('@tanstack/svelte-query', async (importOriginal) => {
     ...actual as any,
     useQueryClient: () => new QueryClient(),
     createQuery: (factory: any) => ({
-      data: factory().queryKey[2] === 'one'
+      data: parseQueryKey(factory().queryKey)?.action === 'one'
         ? { data: { id: 1, title: 'One' } }
         : { data: [{ id: 1, title: 'One' }], total: 1 },
       isPending: false,

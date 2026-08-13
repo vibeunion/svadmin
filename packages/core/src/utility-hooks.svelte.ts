@@ -2,7 +2,7 @@ import { useForm, type UseFormOptions } from './form-hooks.svelte';
 import { useQueryClient } from '@tanstack/svelte-query';
 import { useParsed } from './useParsed.svelte';
 import { captureAdminContext } from './context.svelte';
-import { queryKeyMatchesTenant } from './provider-bundle';
+import { dataQueryMatches } from './query-keys';
 import { getAdminOptions } from './options.svelte';
 import { t } from './i18n.svelte';
 import type { BaseRecord, HttpError, Filter, KnownResources, ResourceDefinition } from './types';
@@ -59,12 +59,11 @@ export function useModalForm<
     visible = false;
     formState.reset();
     if (options.autoSave?.invalidateOnClose) {
-      const dpN = options.dataProviderName;
-      const dp = (q: { queryKey: readonly unknown[] }) =>
-        queryKeyMatchesTenant(q.queryKey, adminContext.tenantCacheKey) && q.queryKey[0] === dpN;
-      queryClient.invalidateQueries({ predicate: (q) => dp(q) && q.queryKey[1] === formState.resource && (q.queryKey[2] === 'list' || q.queryKey[2] === 'infiniteList' || q.queryKey[2] === 'select') });
-      queryClient.invalidateQueries({ predicate: (q) => dp(q) && q.queryKey[1] === formState.resource && q.queryKey[2] === 'many' });
-      queryClient.invalidateQueries({ predicate: (q) => dp(q) && q.queryKey[1] === formState.resource && q.queryKey[2] === 'one' });
+      const resource = formState.resource;
+      const matcher = adminContext.queryKeyMatcher(resource, options.dataProviderName);
+      queryClient.invalidateQueries({
+        predicate: (q) => dataQueryMatches(q.queryKey, { ...matcher, resource }),
+      });
     }
   }
 

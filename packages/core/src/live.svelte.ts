@@ -2,7 +2,7 @@
 
 import { useQueryClient } from '@tanstack/svelte-query';
 import { captureAdminContext } from './context.svelte';
-import { queryKeyMatchesTenant } from './provider-bundle';
+import { dataQueryMatches } from './query-keys';
 
 // ─── Types ──────────────────────────────────────────────────────
 
@@ -53,10 +53,10 @@ export function useLive(
         callback: (event) => {
           options?.onLiveEvent?.(event);
           if (liveMode === 'auto') {
-            const dpName = options?.dataProviderName;
-            const dpMatch = (q: { queryKey: readonly unknown[] }) =>
-              queryKeyMatchesTenant(q.queryKey, adminContext.tenantCacheKey) && q.queryKey[0] === dpName;
-            queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === res });
+            const matcher = adminContext.queryKeyMatcher(res, options?.dataProviderName);
+            queryClient.invalidateQueries({
+              predicate: (q) => dataQueryMatches(q.queryKey, { ...matcher, resource: res }),
+            });
           }
         },
       });

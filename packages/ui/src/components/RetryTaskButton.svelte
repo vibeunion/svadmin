@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { captureAdminContext } from '@svadmin/core';
+  import { captureAdminContext, queryKeyMatches } from '@svadmin/core';
   import { useQueryClient } from '@tanstack/svelte-query';
   import { useTranslation } from '@svadmin/core/i18n';
 
@@ -39,13 +39,19 @@
       await taskProvider.retry(taskId);
       await Promise.all([
         queryClient.invalidateQueries({
-          predicate: (query) => query.queryKey[0] === 'taskList'
-            && adminContext.matchesTenantQuery(query.queryKey),
+          predicate: (query) => queryKeyMatches(query.queryKey, {
+            ...adminContext.queryKeyMatcher(),
+            kind: 'task',
+            action: 'list',
+          }),
         }),
         queryClient.invalidateQueries({
-          predicate: (query) => query.queryKey[0] === 'task'
-            && query.queryKey[1] === taskId
-            && adminContext.matchesTenantQuery(query.queryKey),
+          predicate: (query) => queryKeyMatches(query.queryKey, {
+            ...adminContext.queryKeyMatcher(),
+            kind: 'task',
+            action: 'one',
+            id: taskId,
+          }),
         }),
       ]);
       onSuccess?.();

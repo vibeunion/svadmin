@@ -3,10 +3,9 @@ import { getAdminOptions } from './options.svelte';
 import { captureAdminContext } from './context.svelte';
 import type { AdminContextAccessor } from './context.svelte';
 import {
-  appendTenantCacheKey,
-  queryKeyMatchesTenant,
   resolveTenantProviderMeta,
 } from './provider-bundle';
+import { queryKeyMatches } from './query-keys';
 import { checkError, createOvertimeTracker, fireErrorNotification, fireSuccessNotification } from './hook-utils.svelte';
 import type { NotificationConfig, OvertimeOptions } from './hook-utils.svelte';
 import { useTranslation } from './i18n.svelte';
@@ -80,8 +79,11 @@ export function useSubmitTask<
         provider: adminContext.notificationProvider,
       });
       void queryClient.invalidateQueries({
-        predicate: (query) => query.queryKey[0] === 'taskList'
-          && queryKeyMatchesTenant(query.queryKey, adminContext.tenantCacheKey),
+        predicate: (query) => queryKeyMatches(query.queryKey, {
+          ...adminContext.queryKeyMatcher(),
+          kind: 'task',
+          action: 'list',
+        }),
       });
       options.mutationOptions?.onSuccess?.(data, params, context);
     },
@@ -128,7 +130,7 @@ export function useTask<TTask extends TaskRecord = TaskRecord, TError = HttpErro
     const provider = normalizeTaskProvider<TTask>(options.taskProvider, adminContext);
     const queryOptions = options.queryOptions;
     return {
-      queryKey: appendTenantCacheKey(['task', options.taskId], adminContext.tenantCacheKey),
+      queryKey: adminContext.queryKeys().task.one(options.taskId ?? ''),
       queryFn: async () => {
         if (!options.taskId) throw new Error('useTask requires a taskId');
         return provider.get(options.taskId);
@@ -207,10 +209,10 @@ export function useTaskList<TTask extends TaskRecord = TaskRecord, TError = Http
     const provider = normalizeTaskProvider<TTask>(options.taskProvider, adminContext);
     const queryOptions = options.queryOptions;
     return {
-      queryKey: appendTenantCacheKey(
-        ['taskList', options.dlq ? 'dlq' : 'default', options.params],
-        adminContext.tenantCacheKey,
-      ),
+      queryKey: adminContext.queryKeys().task.list({
+        list: options.dlq ? 'dlq' : 'default',
+        params: options.params,
+      }),
       queryFn: async () => {
         if (options.dlq) {
           if (!provider.listDlq) throw new Error('TaskProvider does not implement listDlq');

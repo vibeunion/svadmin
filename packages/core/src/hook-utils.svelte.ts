@@ -5,7 +5,7 @@ import { useQueryClient } from '@tanstack/svelte-query';
 import type { LiveProvider, LiveEvent, LiveMode } from './live.svelte';
 import { captureAdminContext } from './context.svelte';
 import type { AdminContextAccessor } from './context.svelte';
-import { queryKeyMatchesTenant } from './provider-bundle';
+import { dataQueryMatches } from './query-keys';
 import { notifyWithProvider } from './notification.svelte';
 import type { NotificationProvider } from './types';
 
@@ -108,10 +108,10 @@ export function createLiveSubscription(paramsFn: () => LiveSubscriptionParams): 
         callback: (event: LiveEvent) => {
           params.onLiveEvent?.(event);
           if (liveMode === 'auto') {
-            const dpN = params.dataProviderName;
-            const dpMatch = (q: { queryKey: readonly unknown[] }) =>
-              queryKeyMatchesTenant(q.queryKey, adminContext.tenantCacheKey) && q.queryKey[0] === dpN;
-            queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === params.resource });
+            const matcher = adminContext.queryKeyMatcher(params.resource, params.dataProviderName);
+            queryClient.invalidateQueries({
+              predicate: (q) => dataQueryMatches(q.queryKey, { ...matcher, resource: params.resource }),
+            });
           }
         },
       });

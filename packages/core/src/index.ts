@@ -13,16 +13,30 @@ export {
 } from './context.svelte';
 export type { DataProviderInput, AdminContextSource, AdminContextValue, AdminContextAccessor } from './context.svelte';
 export {
-  appendTenantCacheKey,
   createProviderBundle,
   createTenantCacheKey,
   defaultTenantAdapter,
   isTenantCacheKey,
-  queryKeyMatchesTenant,
   resolveTenantProviderMeta,
   withProviderMeta,
   withTenantDataProvider,
 } from './provider-bundle';
+export {
+  dataQueryMatches,
+  isQueryKey,
+  keys,
+  parseQueryKey,
+  queryKeyMatches,
+  queryKeys,
+} from './query-keys';
+export type {
+  DataQueryMatcher,
+  QueryDescriptor,
+  QueryKey,
+  QueryKeysBuilder,
+  QueryKeysContext,
+  QueryMatcher,
+} from './query-keys';
 export type {
   ProviderBundle,
   ProviderMetaInput,
@@ -80,7 +94,6 @@ export type { AdminOptions, TextTransformers, OvertimeConfig } from './options.s
 export { checkError } from './hook-utils.svelte';
 export type { NotificationConfig, OvertimeOptions, OvertimeResult, LiveSubscriptionParams } from './hook-utils.svelte';
 
-export * from './query-keys';
 export { HttpError, UndoError } from './types';
 export type {
   DataProvider, AuthProvider, NotificationProvider, MutationMode,
