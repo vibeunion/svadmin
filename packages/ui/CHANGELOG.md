@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.42.0](https://github.com/zuohuadong/svadmin/compare/ui-v0.41.1...ui-v0.42.0) (2026-08-13)
+
+
+### 🚀 Features
+
+* **core:** freeze Svelte hook contracts ([b76cb4a](https://github.com/zuohuadong/svadmin/commit/b76cb4a9a72f3340a381111c44ea7b2980ed796b))
+
 ## [0.41.1](https://github.com/zuohuadong/svadmin/compare/ui-v0.41.0...ui-v0.41.1) (2026-08-11)
 
 

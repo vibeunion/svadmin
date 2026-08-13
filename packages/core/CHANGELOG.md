@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.36.0](https://github.com/zuohuadong/svadmin/compare/core-v0.35.0...core-v0.36.0) (2026-08-13)
+
+
+### 🚀 Features
+
+* **core:** freeze Svelte hook contracts ([b76cb4a](https://github.com/zuohuadong/svadmin/commit/b76cb4a9a72f3340a381111c44ea7b2980ed796b))
+
 ## [0.35.0](https://github.com/zuohuadong/svadmin/compare/core-v0.34.2...core-v0.35.0) (2026-08-11)
 
 
