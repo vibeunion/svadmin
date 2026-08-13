@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.9](https://github.com/zuohuadong/svadmin/compare/sveltekit-v0.9.8...sveltekit-v0.9.9) (2026-08-14)
+
+
+### 🐛 Bug Fixes
+
+* **sveltekit:** support Core 0.36.0
+
 ## [0.9.8](https://github.com/zuohuadong/svadmin/compare/sveltekit-v0.9.7...sveltekit-v0.9.8) (2026-08-11)
 
 

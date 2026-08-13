@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/zuohuadong/svadmin/compare/surface-v0.2.0...surface-v0.2.1) (2026-08-14)
+
+
+### 🐛 Bug Fixes
+
+* **surface:** support Core 0.36.0 and UI 0.42.0
+
 ## [0.2.0](https://github.com/zuohuadong/svadmin/compare/surface-v0.1.0...surface-v0.2.0) (2026-08-11)
 
 

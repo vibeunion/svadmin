@@ -80,7 +80,7 @@
     "isomorphic-dompurify": "3.22.0",
     "joi": "18.2.3",
     "js-yaml": "4.3.1",
-    "nanoid": "3.3.17",
+    "nanoid": "3.3.18",
     "postcss": "8.5.26",
     "qs": "6.15.3",
     "starlight-llms-txt": "0.11.0",
