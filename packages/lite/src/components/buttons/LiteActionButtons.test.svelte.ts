@@ -16,7 +16,13 @@ describe('Lite action button routes', () => {
       basePath: '/backoffice',
     });
 
-    expect(container.querySelector('form')?.getAttribute('action')).toBe('/backoffice/posts?/delete');
+    expect(container.querySelector('details')).toBeNull();
+    const confirmation = container.querySelector('.lite-confirm-target');
+    expect(confirmation?.id).toBeTruthy();
+    expect(container.querySelector(`a[href="#${confirmation?.id}"]`)).not.toBeNull();
+    expect(confirmation?.querySelector('form')?.getAttribute('action')).toBe('/backoffice/posts?/delete');
+    expect(confirmation?.querySelector(`a[href="#${confirmation?.id}-closed"]`)).not.toBeNull();
+    expect(confirmation?.getAttribute('role')).toBe('dialog');
   });
 
   it('links exports to the configured resource route', () => {
@@ -34,6 +40,12 @@ describe('Lite action button routes', () => {
       basePath: '/backoffice',
     });
 
-    expect(container.querySelector('form')?.getAttribute('action')).toBe('/backoffice/posts?/posts_import');
+    expect(container.querySelector('details')).toBeNull();
+    const importPanel = container.querySelector('.lite-confirm-target');
+    expect(importPanel?.id).toBeTruthy();
+    expect(container.querySelector(`a[href="#${importPanel?.id}"]`)).not.toBeNull();
+    expect(importPanel?.querySelector('form')?.getAttribute('action')).toBe('/backoffice/posts?/posts_import');
+    expect(importPanel?.querySelector(`a[href="#${importPanel?.id}-closed"]`)).not.toBeNull();
+    expect(importPanel?.getAttribute('aria-labelledby')).toBe(`${importPanel?.id}-title`);
   });
 });

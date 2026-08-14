@@ -62,7 +62,7 @@ a:hover {
   border-bottom: 1px solid #e2e8f0;
 }
 
-.lite-mobile-nav summary {
+.lite-mobile-nav-brand {
   cursor: pointer;
   padding: 14px 16px;
   font-weight: 700;
@@ -137,37 +137,34 @@ a:hover {
   background: #4f46e5;
 }
 
-/* ─── Multi-Level Menu (details/summary) ──────────────────── */
-.lite-menu-group {
-  margin: 0;
-  border: none;
-}
-.lite-menu-group summary {
+/* ─── Multi-Level Menu ───────────────────────────────────── */
+.lite-menu-list {
   list-style: none;
-  cursor: pointer;
+  margin: 0;
+  padding: 0;
+}
+.lite-menu-list .lite-menu-list {
+  margin-left: 12px;
+}
+.lite-menu-parent {
+  display: block;
   padding: 8px 16px;
   color: #64748b;
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  transition: color 0.15s ease, background 0.15s ease;
 }
-.lite-menu-group summary::-webkit-details-marker {
-  display: none;
-}
-.lite-menu-group summary:hover {
-  color: #0f172a;
-  background: #f8fafc;
-}
-.lite-menu-group[open] > summary {
-  color: #0f172a;
-}
-.lite-menu-group[open] > summary::after {
+.lite-menu-parent::after {
   content: " \25BE";
 }
-.lite-menu-group:not([open]) > summary::after {
-  content: " \25B8";
+.lite-menu-depth-1 > li > a,
+.lite-menu-depth-1 > li > .lite-menu-parent {
+  padding-left: 28px;
+}
+.lite-menu-depth-2 > li > a,
+.lite-menu-depth-2 > li > .lite-menu-parent {
+  padding-left: 40px;
 }
 
 .lite-main {
@@ -669,18 +666,8 @@ textarea.lite-input {
 
 /* ─── Delete Confirmation ──────────────────────────────────── */
 .lite-confirm {
-  display: inline;
-}
-.lite-confirm-details {
   position: relative;
   display: inline-block;
-}
-.lite-confirm-details summary {
-  cursor: pointer;
-  list-style: none;
-}
-.lite-confirm-details summary::-webkit-details-marker {
-  display: none;
 }
 .lite-confirm-panel {
   position: absolute;
@@ -696,6 +683,68 @@ textarea.lite-input {
     0 10px 20px rgba(15, 23, 42, 0.08);
   white-space: nowrap;
   margin-top: 4px;
+}
+.lite-confirm-target {
+  display: none;
+}
+.lite-confirm-target:target {
+  display: block;
+}
+.lite-confirm-cancel-target {
+  display: none;
+}
+.lite-inline-actions {
+  display: inline-flex;
+  margin: 0;
+}
+.lite-inline-actions > * + * {
+  margin-left: 8px;
+}
+.lite-stack-sm {
+  display: flex;
+  flex-direction: column;
+}
+.lite-stack-sm > * + * {
+  margin-top: 8px;
+}
+.lite-stack-xs,
+.lite-stack-md,
+.lite-stack-lg {
+  display: flex;
+  flex-direction: column;
+}
+.lite-stack-xs > * + * {
+  margin-top: 4px;
+}
+.lite-stack-md > * + * {
+  margin-top: 12px;
+}
+.lite-stack-lg > * + * {
+  margin-top: 16px;
+}
+.lite-inline-xs,
+.lite-inline-sm,
+.lite-inline-md,
+.lite-inline-lg {
+  display: flex;
+}
+.lite-inline-xs > * + * {
+  margin-left: 4px;
+}
+.lite-inline-sm > * + * {
+  margin-left: 6px;
+}
+.lite-inline-md > * + * {
+  margin-left: 8px;
+}
+.lite-inline-lg > * + * {
+  margin-left: 12px;
+}
+.lite-flex-wrap {
+  flex-wrap: wrap;
+}
+.lite-justify-end {
+  justify-content: flex-end;
 }
 
 /* ─── Login Page ───────────────────────────────────────────── */
@@ -802,8 +851,7 @@ textarea.lite-input {
   .lite-search,
   .lite-pagination,
   .lite-btn,
-  .lite-confirm,
-  .lite-confirm-details {
+  .lite-confirm {
     display: none !important;
   }
   .lite-main {

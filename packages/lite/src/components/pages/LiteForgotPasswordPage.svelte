@@ -25,8 +25,7 @@
       <p style="font-size: 14px; color: #64748b; margin: 0;">{description}</p>
     </div>
 
-    <!-- Native form action -->
-    <form method="POST" {action} style="display: flex; flex-direction: column; gap: 16px;">
+    <form method="POST" {action} class="lite-stack-lg">
       <div class="lite-form-group">
         <label for="email">Email</label>
         <input type="email" id="email" name="email" class="lite-input" required />

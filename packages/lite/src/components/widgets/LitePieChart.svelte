@@ -27,10 +27,10 @@
       {title}
     </div>
   {/if}
-  <div style="padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+  <div class="lite-stack-md" style="padding: 16px;">
     {#each data as point, i (i)}
       {@const pct = total > 0 ? ((point.value / total) * 100).toFixed(1) : '0.0'}
-      <div style="display: flex; align-items: center; gap: 10px; font-size: 13px;">
+      <div class="lite-inline-lg" style="align-items: center; font-size: 13px;">
         <span style="width: 12px; height: 12px; border-radius: 50%; background: {point.color ?? defaultColors[i % defaultColors.length]}; flex-shrink: 0;"></span>
         <span style="flex: 1; color: #334155;">{point.label}</span>
         <span style="color: #64748b; font-weight: 500;">{point.value}</span>

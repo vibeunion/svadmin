@@ -6,6 +6,7 @@
   import type { ResourceDefinition, FieldDefinition } from '@svadmin/core';
   import { t } from '@svadmin/core/i18n';
   import { isExplicitBooleanTrue } from '../value-normalization';
+  import { liteFragmentId } from '../fragment-id';
 
   interface Props {
     records: Record<string, unknown>[];
@@ -31,6 +32,8 @@
     canEdit,
     canDelete,
   }: Props = $props();
+
+  const tableId = $props.id();
 
   let pk = $derived(resource.primaryKey ?? 'id');
   const showView = $derived(canShow ?? resource.canShow !== false);
@@ -116,17 +119,25 @@
               <a href={`${basePath}/${resource.name}/edit/${id}`} class="lite-btn lite-btn-sm">{t('common.edit') || 'Edit'}</a>
             {/if}
             {#if showDelete}
-              <!-- Delete uses <details> for no-JS confirmation -->
-              <details class="lite-confirm-details">
-                <summary class="lite-btn lite-btn-sm lite-btn-danger">{t('common.delete') || 'Delete'}</summary>
-                <div class="lite-confirm-panel">
-                  <p style="margin:0 0 8px;font-size:13px;">{t('common.areYouSure') || 'Are you sure?'}</p>
-                  <form method="POST" action="?/delete" style="display:inline;">
+              {@const confirmationId = liteFragmentId('delete', tableId, resource.name, String(id))}
+              {@const confirmationTitleId = `${confirmationId}-title`}
+              <div class="lite-confirm">
+                <span id={`${confirmationId}-closed`} class="lite-confirm-cancel-target" aria-hidden="true"></span>
+                <a
+                  href={`#${confirmationId}`}
+                  class="lite-btn lite-btn-sm lite-btn-danger"
+                  aria-controls={confirmationId}
+                  aria-haspopup="dialog"
+                >{t('common.delete') || 'Delete'}</a>
+                <div id={confirmationId} class="lite-confirm-panel lite-confirm-target" role="dialog" aria-labelledby={confirmationTitleId} tabindex="-1">
+                  <p id={confirmationTitleId} style="margin:0 0 8px;font-size:13px;">{t('common.areYouSure') || 'Are you sure?'}</p>
+                  <form method="POST" action="?/delete" class="lite-inline-actions">
                     <input type="hidden" name="id" value={String(id)} />
+                    <a href={`#${confirmationId}-closed`} class="lite-btn lite-btn-sm">{t('common.cancel') || 'Cancel'}</a>
                     <button type="submit" class="lite-btn lite-btn-sm lite-btn-danger">{t('common.confirm') || 'Confirm'}</button>
                   </form>
                 </div>
-              </details>
+              </div>
             {/if}
           </td>
         {/if}

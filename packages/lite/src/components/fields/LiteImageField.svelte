@@ -21,7 +21,7 @@
 
 {#if mode === 'show'}
   {@const urls = getUrls(value)}
-  <div style="display:flex; gap: 8px; flex-wrap: wrap;">
+  <div class="lite-inline-md lite-flex-wrap">
     {#each urls as url, _i (_i)}
       <img src={url} alt={field.label} style="max-height: 100px; border-radius: 4px; border: 1px solid #e5e7eb;" />
     {:else}
@@ -32,7 +32,7 @@
   {@const urls = getUrls(value)}
   <div>
     {#if urls.length > 0}
-      <div style="margin-bottom: 8px; display:flex; gap: 8px;">
+      <div class="lite-inline-md lite-flex-wrap" style="margin-bottom: 8px;">
         {#each urls as url, _i (_i)}
           <img src={url} alt="Current" style="height: 60px; border-radius: 4px; border: 1px solid #e5e7eb; opacity: 0.6;" />
         {/each}

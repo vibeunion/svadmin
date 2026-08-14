@@ -14,7 +14,7 @@
 </script>
 
 {#if mode === 'show'}
-  <div style="display:flex; gap: 4px; flex-wrap: wrap;">
+  <div class="lite-inline-xs lite-flex-wrap">
     {#each tags as tag, _i (_i)}
       <span class="lite-badge">{tag}</span>
     {:else}

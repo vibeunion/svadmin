@@ -20,7 +20,7 @@
   );
 </script>
 
-<span style="display: inline-flex; align-items: center; gap: 6px;">
+<span class="lite-inline-sm" style="display: inline-flex; align-items: center;">
   <span>{displayValue}</span>
   {#if editUrl}
     <a

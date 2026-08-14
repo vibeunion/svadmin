@@ -22,7 +22,7 @@
   </div>
 
   <div class="lite-card" style="max-width: 600px; margin: 0 auto; padding: 24px;">
-    <form method="POST" {action} style="display: flex; flex-direction: column; gap: 16px;">
+    <form method="POST" {action} class="lite-stack-lg">
       <div class="lite-form-group">
         <label for="name">Name</label>
         <input type="text" id="name" name="name" class="lite-input" value={user?.name ?? ''} />

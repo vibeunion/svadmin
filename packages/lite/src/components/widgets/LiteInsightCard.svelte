@@ -17,7 +17,7 @@
 </script>
 
 <div class="lite-card" style="margin-bottom: 16px;">
-  <div style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; font-weight: 600; font-size: 14px; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+  <div class="lite-inline-md" style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; font-weight: 600; font-size: 14px; color: #0f172a; align-items: center;">
     <span style="color: #f59e0b;">✦</span>
     {title}
   </div>

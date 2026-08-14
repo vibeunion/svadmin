@@ -20,7 +20,7 @@
   const cfg = $derived(statusConfig[status] ?? statusConfig.idle);
 </script>
 
-<span style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: {cfg.color};">
+<span class="lite-inline-sm" style="display: inline-flex; align-items: center; font-size: 13px; color: {cfg.color};">
   <span>{cfg.icon}</span>
   <span>{message ?? cfg.text}</span>
 </span>

@@ -20,4 +20,28 @@ describe('LiteLayout responsive navigation', () => {
     expect(mobileNav?.querySelector('a[href="/lite/products"]')?.textContent).toContain('Products');
     expect(mobileNav?.querySelector('a[href="/lite/users"]')?.textContent).toContain('Users');
   });
+
+  it('renders nested navigation as always-available links without details elements', () => {
+    const { container } = render(LiteLayout, {
+      resources: [],
+      menu: [{
+        name: 'content',
+        label: 'Content',
+        children: [
+          { name: 'posts', label: 'Posts', href: '/lite/posts' },
+          {
+            name: 'settings',
+            label: 'Settings',
+            children: [{ name: 'seo', label: 'SEO', href: '/lite/settings/seo' }],
+          },
+        ],
+      }],
+      children: (() => ({ render: () => '<p>Main content</p>' })) as never,
+    });
+
+    expect(container.querySelector('details')).toBeNull();
+    expect(container.querySelector('summary')).toBeNull();
+    expect(container.querySelector('.lite-menu-list a[href="/lite/posts"]')).not.toBeNull();
+    expect(container.querySelector('.lite-menu-list a[href="/lite/settings/seo"]')).not.toBeNull();
+  });
 });

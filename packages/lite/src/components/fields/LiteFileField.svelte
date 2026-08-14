@@ -22,7 +22,7 @@
 
 {#if mode === 'show'}
   {@const files = getFiles(value)}
-  <div style="display:flex; flex-direction: column; gap: 4px;">
+  <div class="lite-stack-xs">
     {#each files as f, _i (_i)}
       {@const href = toSafeHref(f)}
       {#if href}

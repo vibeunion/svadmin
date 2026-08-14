@@ -6,6 +6,7 @@
   import type { ResourceDefinition, MenuItem } from '@svadmin/core';
   import type { Snippet } from 'svelte';
   import { filterVisibleMenu, filterVisibleResources } from '../menu-visibility';
+  import LiteMenuList from './layout/LiteMenuList.svelte';
 
   interface Props {
     resources: ResourceDefinition[];
@@ -67,41 +68,7 @@
   <nav class="lite-sidebar">
     <div class="lite-sidebar-brand">{brandName}</div>
     {#if hasCustomMenu}
-      {#each visibleMenu as item, _i (_i)}
-        {#if item.children && item.children.length > 0}
-          <details class="lite-menu-group">
-            <summary class="lite-menu-parent">{item.label ?? item.name}</summary>
-            {#each item.children as child, _i (_i)}
-              {#if child.children && child.children.length > 0}
-                <details class="lite-menu-group" style="margin-left:12px">
-                  <summary class="lite-menu-parent">{child.label ?? child.name}</summary>
-                  {#each child.children as grandchild, _i (_i)}
-                    <a
-                      href={grandchild.href ?? `${basePath}/${grandchild.name}`}
-                      class={isActive(grandchild.href ?? `${basePath}/${grandchild.name}`) ? 'active' : ''}
-                      target={grandchild.target === '_blank' ? '_blank' : undefined}
-                      style="padding-left:40px"
-                    >{grandchild.label ?? grandchild.name}</a>
-                  {/each}
-                </details>
-              {:else}
-                <a
-                  href={child.href ?? `${basePath}/${child.name}`}
-                  class={isActive(child.href ?? `${basePath}/${child.name}`) ? 'active' : ''}
-                  target={child.target === '_blank' ? '_blank' : undefined}
-                  style="padding-left:28px"
-                >{child.label ?? child.name}</a>
-              {/if}
-            {/each}
-          </details>
-        {:else}
-          <a
-            href={item.href ?? `${basePath}/${item.name}`}
-            class={isActive(item.href ?? `${basePath}/${item.name}`) ? 'active' : ''}
-            target={item.target === '_blank' ? '_blank' : undefined}
-          >{item.label ?? item.name}</a>
-        {/if}
-      {/each}
+      <LiteMenuList items={visibleMenu} {basePath} {currentResource} />
     {:else}
       {#each menuResources as res, _i (_i)}
         <a
@@ -123,26 +90,25 @@
   </nav>
 
   <nav class="lite-mobile-nav" aria-label="Mobile navigation">
-    <details>
-      <summary>{brandName}</summary>
-      <div class="lite-mobile-nav-links">
-        {#each mobileItems as item (item.name)}
-          <a
-            href={item.href ?? `${basePath}/${item.name}`}
-            class={isActive(item.href ?? `${basePath}/${item.name}`) ? 'active' : ''}
-            target={item.target === '_blank' ? '_blank' : undefined}
-          >{item.label ?? item.name}</a>
-        {/each}
-        {#if userName}
-          <div class="lite-mobile-user">
-            <span>{userName}</span>
-            <form method="POST" action={`${basePath}/login?/logout`}>
-              <button type="submit" class="lite-btn lite-btn-sm">Logout</button>
-            </form>
-          </div>
-        {/if}
-      </div>
-    </details>
+    <div class="lite-mobile-nav-brand">{brandName}</div>
+    <div class="lite-mobile-nav-links">
+      {#each mobileItems as item (item.name)}
+        <a
+          href={item.href ?? `${basePath}/${item.name}`}
+          class={isActive(item.href ?? `${basePath}/${item.name}`) ? 'active' : ''}
+          target={item.target === '_blank' ? '_blank' : undefined}
+          rel={item.target === '_blank' ? 'noreferrer' : undefined}
+        >{item.label ?? item.name}</a>
+      {/each}
+      {#if userName}
+        <div class="lite-mobile-user">
+          <span>{userName}</span>
+          <form method="POST" action={`${basePath}/login?/logout`}>
+            <button type="submit" class="lite-btn lite-btn-sm">Logout</button>
+          </form>
+        </div>
+      {/if}
+    </div>
   </nav>
 
   <!-- Main Content -->

@@ -19,14 +19,14 @@ The main `@svadmin/ui` package delivers a premium SPA experience using Svelte 5,
 | **List page** | Server-rendered `<table>` with `<a>` sort links |
 | **Detail page** | Key-value layout with type-aware formatting |
 | **Create/Edit** | Native `<form method="POST">` with server-side validation |
-| **Delete** | `<details>` confirmation, no JS needed |
+| **Delete** | Fragment-target confirmation + native POST form, no JS needed |
 | **Search** | `<form method="GET">` with `?q=` parameter |
 | **Pagination** | Pure `<a>` page links |
 | **Authentication pages** | Login/logout plus optional provider-delegating account actions |
 | **Auth Guard** | Server hook redirects unauthenticated users |
 | **UA Detection** | Optional legacy-browser detection hook redirects users to `/lite/` routes |
 | **i18n** | Uses `@svadmin/core` `t()` translations |
-| **Multi-level Menu** | Config-driven 2/3 level menus via `MenuItem[]` |
+| **Multi-level Menu** | Always-expanded, config-driven nested links via `MenuItem[]` |
 | **Print** | `@media print` optimized styles |
 
 ## Quick Start
@@ -54,9 +54,15 @@ export const actions = createCrudActions(dataProvider, postsResource);
 ```
 
 ```typescript
-// src/routes/lite/posts/+page.ts
+// src/routes/lite/+layout.ts
+export const ssr = true;
 export const csr = false;
 ```
+
+Put these options on the `/lite` layout so every child route returns server-rendered
+HTML without shipping or executing the Svelte runtime in IE11. See the runnable
+[SSR example](https://github.com/zuohuadong/svadmin/tree/main/packages/lite/example)
+for the complete contract and its real-response check.
 
 ```svelte
 <!-- src/routes/lite/posts/+page.svelte -->
@@ -130,7 +136,44 @@ Pass a `menu` prop to `LiteLayout` to replace the auto-generated flat resource l
 
 `meta.hidden` is honored recursively. For `meta.resource` / `meta.action`, pass a
 server-computed synchronous `canAccess(resource, action)` callback; permission checks
-that fail or throw are hidden. API and server actions must still enforce authorization.
+that fail or throw are hidden. Nested groups stay expanded so their links remain usable
+without JavaScript or native disclosure-element support. API and server actions must
+still enforce authorization.
+
+### 2c. Request-scoped providers and tenants
+
+Lite's server utilities consume the same `DataProvider` contract as Core, but they do
+not use client hooks. Build tenant-aware providers inside each SvelteKit request so SSR
+requests never share tenant state through a module-level mutable variable:
+
+```typescript
+// src/routes/lite/posts/+page.server.ts
+import { withTenantDataProvider } from '@svadmin/core';
+import { createListLoader, createCrudActions } from '@svadmin/lite';
+import { dataProvider, postsResource } from '$lib/admin';
+import type { Actions, PageServerLoad } from './$types';
+
+function scopedProvider(tenantId: string) {
+  return withTenantDataProvider(dataProvider, { tenantId });
+}
+
+export const load = ((event) =>
+  createListLoader(scopedProvider(event.locals.tenantId), postsResource)(event)
+) satisfies PageServerLoad;
+
+function scopedActions(tenantId: string) {
+  return createCrudActions(scopedProvider(tenantId), postsResource);
+}
+
+export const actions = {
+  create: (event) => scopedActions(event.locals.tenantId).create(event),
+  update: (event) => scopedActions(event.locals.tenantId).update(event),
+  delete: (event) => scopedActions(event.locals.tenantId).delete(event),
+} satisfies Actions;
+```
+
+Authorization and tenant isolation must still be enforced by the provider/backend; UI
+visibility is not an authorization boundary.
 
 ### 3. Optionally route legacy browsers to Lite pages
 
@@ -180,7 +223,7 @@ export const handle = createLegacyRedirectHook('/lite');
 ## CSS
 
 Import `@svadmin/lite/lite.css` in your layout. It's fully self-contained:
-- IE11-oriented CSS baseline (standard flexbox, no CSS variables)
+- IE11-oriented CSS baseline (standard flexbox, no CSS variables, Grid, or `gap`)
 - Custom-styled checkboxes, radios, and selects (no `appearance: none` needed)
 - Indigo/Slate color system aligned with `@svadmin/ui`
 - Modern focus rings (`box-shadow` based)
@@ -194,7 +237,7 @@ This CSS baseline helps older browsers, but the generated Svelte/SvelteKit appli
 ## Optional: Progressive Enhancement
 
 Copy the exported `@svadmin/lite/enhance.js` asset to your application's static folder. This ES5 script adds:
-- Auto-close delete confirmation when clicking outside
+- Auto-close fragment-target confirmations when clicking outside
 - Auto-focus first form input
 - Unsaved changes warning
 
@@ -215,8 +258,9 @@ The asset is optional for core server-rendered navigation and form submission; t
 - Buttons such as import/export/chat provide SSR UI and route contracts only. Consumers
   must implement the corresponding loader or form action for their backend.
 - IE11 can consume server-rendered HTML and the optional ES5 enhancement layer, with
-  graceful CSS/native-element fallbacks. Svelte 5 hydration/runtime execution in IE11
-  is not supported or promised by this package.
+  native links/forms and the IE11-safe Lite CSS contract. Keep the entire Lite route
+  subtree on `ssr = true` and `csr = false`; Svelte 5 hydration/runtime execution in
+  IE11 is not supported or promised by this package.
 
 ## License
 

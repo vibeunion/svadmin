@@ -23,7 +23,7 @@
 </script>
 
 {#if mode === 'show'}
-  <div style="display:flex; gap: 4px; flex-wrap: wrap;">
+  <div class="lite-inline-xs lite-flex-wrap">
     {#each displayOptions(value) as opt, _i (_i)}
       <span class="lite-badge">{opt}</span>
     {:else}

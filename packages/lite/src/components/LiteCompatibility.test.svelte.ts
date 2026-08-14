@@ -59,6 +59,25 @@ describe('Lite no-JavaScript navigation', () => {
       .toBe('0; url=/backoffice/users');
     expect(catchAllView.container.querySelector('a')?.getAttribute('href')).toBe('/backoffice/users');
   });
+
+  it('opens row deletion confirmation through an IE11-compatible fragment', () => {
+    const { container } = render(LiteTable, {
+      records: [{ id: 7 }],
+      resource: {
+        ...resource,
+        canShow: false,
+        canEdit: false,
+      },
+    });
+
+    expect(container.querySelector('details')).toBeNull();
+    const confirmation = container.querySelector('.lite-confirm-target');
+    expect(confirmation?.id).toBeTruthy();
+    expect(container.querySelector(`a[href="#${confirmation?.id}"]`)).not.toBeNull();
+    expect(confirmation?.querySelector('form')?.getAttribute('action')).toBe('?/delete');
+    expect(confirmation?.querySelector(`a[href="#${confirmation?.id}-closed"]`)).not.toBeNull();
+    expect(confirmation?.getAttribute('role')).toBe('dialog');
+  });
 });
 
 describe('Lite ResourceDefinition permissions', () => {

@@ -3,6 +3,24 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 describe('optional lite enhancement', () => {
+  it('closes a fragment confirmation when the user clicks outside it', () => {
+    document.body.innerHTML = `
+      <span id="lite-delete-posts-7-closed"></span>
+      <span id="lite-delete-posts-7" class="lite-confirm-target">
+        <button type="button">Inside</button>
+      </span>
+      <button type="button" id="outside">Outside</button>
+    `;
+    window.location.hash = '#lite-delete-posts-7';
+
+    const script = readFileSync(resolve(process.cwd(), 'static/enhance.js'), 'utf8');
+    window.eval(script);
+    document.dispatchEvent(new Event('DOMContentLoaded'));
+    document.querySelector<HTMLButtonElement>('#outside')?.click();
+
+    expect(window.location.hash).toBe('#lite-delete-posts-7-closed');
+  });
+
   it('adds uniquely indexed array rows and binds removal controls', () => {
     document.body.innerHTML = `
       <fieldset data-lite-array data-next-index="1">

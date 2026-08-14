@@ -54,20 +54,29 @@
     });
   }
 
+  function hasClass(element, className) {
+    return (' ' + element.className + ' ').indexOf(' ' + className + ' ') !== -1;
+  }
+
+  function closeActiveConfirmation(clickedNode) {
+    var targetId = window.location.hash.slice(1);
+    if (!targetId) return;
+
+    var confirmation = document.getElementById(targetId);
+    if (!confirmation || !hasClass(confirmation, 'lite-confirm-target')) return;
+    if (clickedNode && confirmation.contains(clickedNode)) return;
+
+    var closedTarget = document.getElementById(targetId + '-closed');
+    if (closedTarget) window.location.hash = closedTarget.id;
+  }
+
   function init() {
     document.documentElement.className += ' lite-js';
 
-  // 1. Delete confirmation — close <details> when clicking outside
   document.addEventListener('click', function(e) {
-    var details = document.querySelectorAll('details.lite-confirm-details');
-    for (var i = 0; i < details.length; i++) {
-      if (!details[i].contains(e.target)) {
-        details[i].removeAttribute('open');
-      }
-    }
+    closeActiveConfirmation(e.target);
   });
 
-  // 2. Highlight current table row on hover (for older browsers without :hover)
   var rows = document.querySelectorAll('.lite-table tbody tr');
   for (var j = 0; j < rows.length; j++) {
     rows[j].addEventListener('mouseenter', function() {

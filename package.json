@@ -24,6 +24,7 @@
     "prepare": "husky",
     "build:packages": "bun run --cwd packages/ui build && bun run --cwd packages/surface build && bun run --cwd packages/editor build && bun run --cwd packages/lite build && bun run --cwd packages/auth-utils build && bun run --cwd packages/sso build && bun run --cwd packages/create-svadmin build",
     "bundle:check": "bun scripts/check-example-bundle.ts",
+    "check:lite:ssr": "bun run --cwd packages/lite/example check && bun run --cwd packages/lite/example verify:ssr",
     "pack:check": "bun scripts/check-package-packs.ts"
   },
   "keywords": [
@@ -70,7 +71,7 @@
     "@sveltejs/kit": "2.70.2",
     "astro": "7.2.0",
     "brace-expansion": "5.0.9",
-    "cookie": "2.0.1",
+    "cookie": "1.1.1",
     "devalue": "5.9.0",
     "dompurify": "3.4.13",
     "esbuild": "0.28.2",

@@ -21,7 +21,7 @@
   </div>
 {:else}
   <div class="lite-markdown-editor">
-    <div style="padding: 8px 12px; border: 1px solid #cbd5e1; border-bottom: none; border-radius: 6px 6px 0 0; background: #f8fafc; color: #64748b; font-size: 12px; display: flex; gap: 12px; font-weight: 500;">
+    <div class="lite-inline-lg lite-flex-wrap" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-bottom: none; border-radius: 6px 6px 0 0; background: #f8fafc; color: #64748b; font-size: 12px; font-weight: 500;">
       <span>Markdown is supported</span>
       <span style="color: #94a3b8;">**bold**</span>
       <span style="color: #94a3b8; font-style: italic;">*italic*</span>

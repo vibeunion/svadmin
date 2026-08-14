@@ -124,8 +124,29 @@ const expectations: PackageExpectation[] = [
       'dist/index.d.ts',
       'dist/components/LiteForm.svelte',
       'dist/components/LiteForm.svelte.d.ts',
+      'dist/components/layout/LiteMenuList.svelte',
+      'dist/components/layout/LiteMenuList.svelte.d.ts',
+      'dist/fragment-id.js',
+      'dist/fragment-id.d.ts',
       'dist/lite.css',
       'dist/enhance.js',
+    ],
+    contentAssertions: [
+      {
+        path: 'dist/lite.css',
+        includes: ['.lite-confirm-target:target'],
+        excludes: ['display: grid', 'gap:', '.lite-confirm-details'],
+      },
+      {
+        path: 'dist/components/LiteTable.svelte',
+        includes: ['lite-confirm-target', 'method="POST"'],
+        excludes: ['<details', '<summary', 'onclick='],
+      },
+      {
+        path: 'dist/enhance.js',
+        includes: ['window.location.hash = closedTarget.id'],
+        excludes: ['=>', 'const ', 'let ', 'onclick='],
+      },
     ],
   },
   {

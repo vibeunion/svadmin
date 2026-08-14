@@ -1,0 +1,18 @@
+{
+  "name": "@svadmin/lite-ssr-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "check": "svelte-kit sync && svelte-check --tsgo-experimental-api --tsconfig ./tsconfig.json",
+    "dev": "vite dev",
+    "verify:ssr": "vite build && bun ./scripts/verify-ssr.ts"
+  },
+  "dependencies": {
+    "@svadmin/core": "workspace:*",
+    "@svadmin/lite": "workspace:*",
+    "@sveltejs/kit": "^2.70.2",
+    "svelte": "^5.56.8",
+    "vite": "^8.2.1"
+  }
+}
