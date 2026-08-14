@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.16](https://github.com/zuohuadong/svadmin/compare/lite-v0.3.15...lite-v0.3.16) (2026-08-14)
+
+
+### 🐛 Bug Fixes
+
+* **lite:** replace details/summary with IE11-compatible SSR fragment pattern ([66bb981](https://github.com/zuohuadong/svadmin/commit/66bb981c52392860e9eb392addee02e496e1bffb))
+
 ## [0.3.15](https://github.com/zuohuadong/svadmin/compare/lite-v0.3.14...lite-v0.3.15) (2026-08-14)
 
 
