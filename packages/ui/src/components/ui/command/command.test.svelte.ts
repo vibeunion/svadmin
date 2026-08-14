@@ -54,10 +54,5 @@ describe('Command', () => {
 		expect(screen.getByTestId('dialog-value').textContent).toBe('dialog-settings');
 
 		unmount();
-		// bits-ui restores body scroll styles on a short timer after the dialog is destroyed.
-		// Let that cleanup finish before Vitest tears down the browser environment.
-		await new Promise<void>((resolve) => {
-			setTimeout(resolve, 30);
-		});
 	});
 });

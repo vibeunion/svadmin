@@ -111,6 +111,9 @@
     if (!isDev) return;
     refreshCacheDiagnostics();
     const unsubscribeQueries = queryClient.getQueryCache().subscribe((event) => {
+      // 观察器事件会在组件重渲染时成对出现。刷新诊断状态会再次触发渲染，
+      // 因此这里只响应真正改变缓存内容或请求状态的事件。
+      if (event.type.startsWith('observer')) return;
       if (event.type === 'removed') {
         queryTimings.delete(event.query.queryHash);
       } else if (event.type === 'updated') {

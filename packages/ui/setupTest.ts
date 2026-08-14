@@ -28,6 +28,10 @@ beforeEach(() => {
   testLocalStorage.clear();
 });
 
-afterEach(() => {
+afterEach(async () => {
   cleanup();
+  // bits-ui 会延迟恢复 body 滚动样式；需在 Happy DOM 销毁前等它完成。
+  await new Promise<void>((resolve) => {
+    setTimeout(resolve, 30);
+  });
 });

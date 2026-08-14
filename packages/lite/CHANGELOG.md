@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.15](https://github.com/zuohuadong/svadmin/compare/lite-v0.3.14...lite-v0.3.15) (2026-08-14)
+
+
+### 🐛 Bug Fixes
+
+* **lite:** support Core 0.36.0
+
 ## [0.3.14](https://github.com/zuohuadong/svadmin/compare/lite-v0.3.13...lite-v0.3.14) (2026-08-11)
 
 
