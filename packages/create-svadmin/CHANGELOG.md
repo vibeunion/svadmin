@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.13.3](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.13.2...create-svadmin-v0.13.3) (2026-08-16)
+
+
+### 🐛 Bug Fixes
+
+* **create-svadmin:** sync updated dependency ranges ([2431a29](https://github.com/vibeunion/svadmin/commit/2431a29ac489401e755308c7bd93a5c5950aa8e0))
+
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** bump the bun-minor-and-patch group across 3 directories with 35 updates ([71d0419](https://github.com/vibeunion/svadmin/commit/71d0419922a11379b8e89bdc5295ec24d2af71a5))
+* **repo:** transfer to vibeunion org ([0fbdf8b](https://github.com/vibeunion/svadmin/commit/0fbdf8bdd6b0559135d1c3636323e963d688dda3))
+* **repo:** transfer to vibeunion org ([78f26be](https://github.com/vibeunion/svadmin/commit/78f26be1b53d0fbe74e1c3a6c6c21547833c2334))
+* **repo:** transfer to vibeunion org ([a2fdf96](https://github.com/vibeunion/svadmin/commit/a2fdf966a822dfe7f3de6990567a5689e6732857))
+
 ## [0.13.2](https://github.com/zuohuadong/svadmin/compare/create-svadmin-v0.13.1...create-svadmin-v0.13.2) (2026-08-14)
 
 

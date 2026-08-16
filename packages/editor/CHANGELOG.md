@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.1](https://github.com/vibeunion/svadmin/compare/editor-v0.3.0...editor-v0.3.1) (2026-08-16)
+
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** bump the bun-minor-and-patch group across 3 directories with 35 updates ([71d0419](https://github.com/vibeunion/svadmin/commit/71d0419922a11379b8e89bdc5295ec24d2af71a5))
+* **deps:** bump the bun-minor-and-patch group across 3 directories with 35 updates ([9c8337a](https://github.com/vibeunion/svadmin/commit/9c8337a9c0a7eb4b566caa4670691b965f699cb5))
+* **repo:** transfer to vibeunion org ([0fbdf8b](https://github.com/vibeunion/svadmin/commit/0fbdf8bdd6b0559135d1c3636323e963d688dda3))
+* **repo:** transfer to vibeunion org ([78f26be](https://github.com/vibeunion/svadmin/commit/78f26be1b53d0fbe74e1c3a6c6c21547833c2334))
+* **repo:** transfer to vibeunion org ([a2fdf96](https://github.com/vibeunion/svadmin/commit/a2fdf966a822dfe7f3de6990567a5689e6732857))
+
 ## [0.3.0](https://github.com/zuohuadong/svadmin/compare/editor-v0.2.4...editor-v0.3.0) (2026-08-11)
 
 

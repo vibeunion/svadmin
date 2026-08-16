@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.8](https://github.com/vibeunion/svadmin/compare/mcp-v0.2.7...mcp-v0.2.8) (2026-08-16)
+
+
+### 🔧 Miscellaneous Chores
+
+* **repo:** transfer to vibeunion org ([0fbdf8b](https://github.com/vibeunion/svadmin/commit/0fbdf8bdd6b0559135d1c3636323e963d688dda3))
+* **repo:** transfer to vibeunion org ([78f26be](https://github.com/vibeunion/svadmin/commit/78f26be1b53d0fbe74e1c3a6c6c21547833c2334))
+* **repo:** transfer to vibeunion org ([a2fdf96](https://github.com/vibeunion/svadmin/commit/a2fdf966a822dfe7f3de6990567a5689e6732857))
+
 ## [0.2.7](https://github.com/zuohuadong/svadmin/compare/mcp-v0.2.6...mcp-v0.2.7) (2026-06-04)
 
 
