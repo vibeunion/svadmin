@@ -14,7 +14,7 @@
     "@svadmin/ui": "^0.42.0",
     "@tanstack/svelte-query": "^6.1.38",
     "highlight.js": "^11.11.1",
-    "@lucide/svelte": "^1.30.0"
+    "@lucide/svelte": "^1.31.0"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
@@ -37,7 +37,7 @@
       },
       "supabase": {
         "@svadmin/supabase": "^0.11.8",
-        "@supabase/supabase-js": "^2.112.2",
+        "@supabase/supabase-js": "^2.112.3",
         "@refinedev/supabase": "^6.0.2"
       },
       "graphql": {

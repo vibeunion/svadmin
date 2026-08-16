@@ -25,7 +25,7 @@
   },
   "peerDependencies": {
     "@svadmin/core": "workspace:*",
-    "@supabase/supabase-js": "^2.112.2",
+    "@supabase/supabase-js": "^2.112.3",
     "@refinedev/supabase": "^6.0.2",
     "@supacloud/js": "^0.21.1"
   },
@@ -58,6 +58,6 @@
     "@svadmin/refine-adapter": "workspace:*"
   },
   "devDependencies": {
-    "@supabase/supabase-js": "^2.112.2"
+    "@supabase/supabase-js": "^2.112.3"
   }
 }
