@@ -53,7 +53,7 @@
     "@sveltejs/kit": "^2.70.2"
   },
   "dependencies": {
-    "@lucide/svelte": "^1.30.0",
+    "@lucide/svelte": "^1.31.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
