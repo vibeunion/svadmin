@@ -42,11 +42,11 @@
   "author": "zuohuadong",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zuohuadong/svadmin.git"
+    "url": "git+https://github.com/vibeunion/svadmin.git"
   },
-  "homepage": "https://github.com/zuohuadong/svadmin#readme",
+  "homepage": "https://github.com/vibeunion/svadmin#readme",
   "bugs": {
-    "url": "https://github.com/zuohuadong/svadmin/issues"
+    "url": "https://github.com/vibeunion/svadmin/issues"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.1",

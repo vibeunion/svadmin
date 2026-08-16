@@ -45,10 +45,10 @@ export default defineConfig({
         'zh-cn': { label: '简体中文', lang: 'zh-CN' },
       },
       social: [
-        { icon: 'github', label: 'GitHub', href: 'https://github.com/zuohuadong/svadmin' },
+        { icon: 'github', label: 'GitHub', href: 'https://github.com/vibeunion/svadmin' },
       ],
       editLink: {
-        baseUrl: 'https://github.com/zuohuadong/svadmin/edit/main/docs/',
+        baseUrl: 'https://github.com/vibeunion/svadmin/edit/main/docs/',
       },
       sidebar: [
         {
