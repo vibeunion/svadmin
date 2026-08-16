@@ -18,16 +18,16 @@ const FROZEN_CORE_HOOKS = [
   'useExport', 'useImport', 'useParsed', 'useTranslation',
 ] as const;
 
-describe('0.39 core hook contract', () => {
+describe('0.36 core hook contract (deprecated helpers retained until 0.39)', () => {
   it.each(FROZEN_CORE_HOOKS)('keeps %s as a public function', (hookName) => {
     expect(core[hookName]).toBeTypeOf('function');
   });
 
-  it('does not expose the removed positional Query Key compatibility helpers', () => {
+  it('keeps deprecated positional Query Key helpers until 0.39', () => {
     const exports = core as Record<string, unknown>;
 
-    expect(exports.appendTenantCacheKey).toBeUndefined();
-    expect(exports.queryKeyMatchesTenant).toBeUndefined();
+    expect(exports.appendTenantCacheKey).toBeTypeOf('function');
+    expect(exports.queryKeyMatchesTenant).toBeTypeOf('function');
     expect(core.parseQueryKey(['default', 'posts', 'list'])).toBeUndefined();
     expect(core.parseQueryKey(keys().data.list('posts'))).toBeDefined();
   });

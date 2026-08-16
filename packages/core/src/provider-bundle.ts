@@ -116,6 +116,31 @@ export function isTenantCacheKey(value: unknown): value is TenantCacheKey {
   );
 }
 
+/**
+ * @deprecated 0.36 — Query Key v2 replaces positional tenant cache-key appending.
+ * Use `keys({ tenant })` instead. Removed in 0.39.
+ */
+export function appendTenantCacheKey(
+  queryKey: readonly unknown[],
+  tenantCacheKey: TenantCacheKey | undefined,
+): readonly unknown[] {
+  return tenantCacheKey ? [...queryKey, tenantCacheKey] : queryKey;
+}
+
+/**
+ * @deprecated 0.36 — Query Key v2 replaces positional tenant cache-key matching.
+ * Use `queryKeyMatches(queryKey, { tenant })` instead. Removed in 0.39.
+ */
+export function queryKeyMatchesTenant(
+  queryKey: readonly unknown[],
+  tenantCacheKey: TenantCacheKey | undefined,
+): boolean {
+  const candidate = queryKey.at(-1);
+  const keyTenant = isTenantCacheKey(candidate) ? candidate : undefined;
+  if (!tenantCacheKey) return keyTenant === undefined;
+  return keyTenant?.__svadminTenant === tenantCacheKey.__svadminTenant;
+}
+
 export interface ProviderMetaInput {
   readonly resource?: string;
   readonly meta?: Record<string, unknown>;
