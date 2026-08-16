@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/auth-utils",
-  "version": "0.7.8",
+  "version": "0.7.9",
   "type": "module",
   "description": "Zero-dependency auth utility functions — password hashing, session management, TOTP for svadmin",
   "license": "MIT",

@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.9.12](https://github.com/vibeunion/svadmin/compare/simple-rest-v0.9.11...simple-rest-v0.9.12) (2026-08-16)
+
+
+### 🔧 Miscellaneous Chores
+
+* **repo:** transfer to vibeunion org ([0fbdf8b](https://github.com/vibeunion/svadmin/commit/0fbdf8bdd6b0559135d1c3636323e963d688dda3))
+* **repo:** transfer to vibeunion org ([78f26be](https://github.com/vibeunion/svadmin/commit/78f26be1b53d0fbe74e1c3a6c6c21547833c2334))
+* **repo:** transfer to vibeunion org ([a2fdf96](https://github.com/vibeunion/svadmin/commit/a2fdf966a822dfe7f3de6990567a5689e6732857))
+
 ## [0.9.11](https://github.com/zuohuadong/svadmin/compare/simple-rest-v0.9.10...simple-rest-v0.9.11) (2026-07-22)
 
 
