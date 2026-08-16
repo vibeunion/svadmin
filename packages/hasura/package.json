@@ -27,7 +27,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/zuohuadong/svadmin.git",
+    "url": "https://github.com/vibeunion/svadmin.git",
     "directory": "packages/hasura"
   },
   "peerDependenciesMeta": {

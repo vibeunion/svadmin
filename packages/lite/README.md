@@ -1,6 +1,6 @@
 # @svadmin/lite
 
-**Lightweight, SSR-compatible admin UI for [@svadmin](https://github.com/zuohuadong/svadmin).**
+**Lightweight, SSR-compatible admin UI for [@svadmin](https://github.com/vibeunion/svadmin).**
 
 Core server-driven CRUD flows can run without hydration. An optional `enhance.js` asset adds progressive client-side conveniences.
 
@@ -61,7 +61,7 @@ export const csr = false;
 
 Put these options on the `/lite` layout so every child route returns server-rendered
 HTML without shipping or executing the Svelte runtime in IE11. See the runnable
-[SSR example](https://github.com/zuohuadong/svadmin/tree/main/packages/lite/example)
+[SSR example](https://github.com/vibeunion/svadmin/tree/main/packages/lite/example)
 for the complete contract and its real-response check.
 
 ```svelte

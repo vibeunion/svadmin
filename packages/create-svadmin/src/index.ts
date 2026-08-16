@@ -286,7 +286,7 @@ dist
 
   fs.writeFileSync(path.join(projectDir, 'README.md'), `# ${response.projectName}
 
-Built with [svadmin](https://github.com/zuohuadong/svadmin) — Headless Admin Framework for Svelte 5.
+Built with [svadmin](https://github.com/vibeunion/svadmin) — Headless Admin Framework for Svelte 5.
 
 ## Getting Started
 
@@ -327,7 +327,7 @@ bun run dev
   }
   console.log(`    ${pc.cyan('bun run dev')}`);
   console.log();
-  console.log(`  Docs: ${pc.blue('https://github.com/zuohuadong/svadmin')}`);
+  console.log(`  Docs: ${pc.blue('https://github.com/vibeunion/svadmin')}`);
   console.log();
 }
 
