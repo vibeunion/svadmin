@@ -36,7 +36,14 @@
     "packages/core": {
       "release-type": "node",
       "component": "core",
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "packages/create-svadmin/scaffold-manifest.json",
+          "jsonpath": "$.dependencies[\"@svadmin/core\"]"
+        }
+      ]
     },
     "packages/ui": {
       "release-type": "node",

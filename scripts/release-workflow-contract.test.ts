@@ -10,6 +10,12 @@ function readWorkflow(name: string): string {
   return readFileSync(resolve(repositoryRoot, '.github', 'workflows', name), 'utf8');
 }
 
+function readReleasePleaseConfig(): {
+  packages: Record<string, { 'extra-files'?: unknown[] }>;
+} {
+  return JSON.parse(readFileSync(resolve(repositoryRoot, 'release-please-config.json'), 'utf8'));
+}
+
 describe('npm trusted-publishing workflow contract', () => {
   test('dispatches ci.yml as the top-level publishing workflow', () => {
     const releaseWorkflow = readWorkflow('release.yml');
@@ -75,6 +81,18 @@ describe('npm trusted-publishing workflow contract', () => {
     expect(ciWorkflow).not.toContain('bun install --frozen-lockfile');
     expect(guardedInstalls).toHaveLength(3);
     expect(allInstalls).toHaveLength(guardedInstalls.length);
+  });
+});
+
+describe('release-please scaffold synchronization', () => {
+  test('updates the create-svadmin core range with each core release', () => {
+    const coreRelease = readReleasePleaseConfig().packages['packages/core'];
+
+    expect(coreRelease['extra-files']).toContainEqual({
+      type: 'json',
+      path: 'packages/create-svadmin/scaffold-manifest.json',
+      jsonpath: '$.dependencies["@svadmin/core"]',
+    });
   });
 });
 
