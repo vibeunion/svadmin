@@ -39,6 +39,7 @@ svadmin is built natively for **Svelte 5 runes** and uses a provider-based archi
 | `@svadmin/core` | Hooks, providers, types, Resource Type Registry, utilities |
 | `@svadmin/ui` | Pre-built Svelte 5 components (Forms, Tables, 16 Fields, shadcn) |
 | [`@svadmin/surface`](/guides/declarative-surface) | Validated declarative dashboards with read-only resource bindings |
+| [`@svadmin/flow`](/guides/flow) | Optional draggable node canvas for client-side graph editors |
 | `@svadmin/simple-rest` | REST API data provider |
 | `@svadmin/supabase` | Supabase data + auth + live provider |
 | `@svadmin/pocketbase` | PocketBase data + auth + live provider |

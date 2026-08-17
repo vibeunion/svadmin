@@ -117,6 +117,26 @@ const expectations: PackageExpectation[] = [
     ],
   },
   {
+    directory: 'packages/flow',
+    name: '@svadmin/flow',
+    requiredFiles: [
+      'dist/index.js',
+      'dist/index.d.ts',
+      'dist/components/FlowCanvas.svelte',
+      'dist/components/FlowCanvas.svelte.d.ts',
+      'dist/components/FlowPalette.svelte',
+      'dist/components/FlowPalette.svelte.d.ts',
+      'dist/flow.css',
+      'README.md',
+    ],
+    contentAssertions: [
+      {
+        path: 'dist/flow.css',
+        includes: ["@import '@xyflow/svelte/dist/style.css';"],
+      },
+    ],
+  },
+  {
     directory: 'packages/lite',
     name: '@svadmin/lite',
     requiredFiles: [
@@ -789,6 +809,10 @@ const resolvable = [
   '@svadmin/editor',
   '@svadmin/editor/components/Editor.svelte',
   '@svadmin/editor/editor.css',
+  '@svadmin/flow',
+  '@svadmin/flow/components/FlowCanvas.svelte',
+  '@svadmin/flow/components/FlowPalette.svelte',
+  '@svadmin/flow/flow.css',
   '@svadmin/lite',
   '@svadmin/lite/lite.css',
   '@svadmin/lite/enhance.js',

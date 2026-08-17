@@ -59,6 +59,7 @@ export default defineConfig({
             { slug: 'guides/quick-start' },
             { slug: 'guides/resource-type-registry' },
             { slug: 'guides/declarative-surface' },
+            { slug: 'guides/flow' },
             { slug: 'guides/core-hooks-contract' },
             { slug: 'guides/comparison' },
           ],
