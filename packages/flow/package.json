@@ -1,0 +1,79 @@
+{
+  "name": "@svadmin/flow",
+  "version": "0.1.0",
+  "description": "Optional node-based canvas components for Svelte 5 admin applications",
+  "type": "module",
+  "sideEffects": [
+    "./dist/flow.css"
+  ],
+  "files": [
+    "dist",
+    "README.md",
+    "!dist/**/*.test.*",
+    "!dist/**/*.test-*",
+    "!dist/**/*.spec.*",
+    "!dist/**/*.spec-*"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "svelte": "./dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "svelte": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./flow.css": {
+      "svelte": "./dist/flow.css",
+      "style": "./dist/flow.css",
+      "import": "./dist/flow.css",
+      "default": "./dist/flow.css"
+    },
+    "./components/*.svelte": {
+      "types": "./dist/components/*.svelte.d.ts",
+      "svelte": "./dist/components/*.svelte",
+      "default": "./dist/components/*.svelte"
+    },
+    "./components/*": "./dist/components/*"
+  },
+  "peerDependencies": {
+    "svelte": "^5.56.8"
+  },
+  "peerDependenciesMeta": {
+    "svelte": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@xyflow/svelte": "^1.6.3"
+  },
+  "devDependencies": {
+    "@happy-dom/global-registrator": "^20.11.2",
+    "@sveltejs/vite-plugin-svelte": "^7.3.0",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/svelte": "^5.4.2",
+    "@testing-library/user-event": "^14.6.4",
+    "happy-dom": "^20.11.2",
+    "vitest": "^4.1.10"
+  },
+  "scripts": {
+    "build": "node ../../node_modules/@sveltejs/package/svelte-package.js -i src -o dist",
+    "check": "svelte-check --tsgo-experimental-api --tsconfig ./tsconfig.json --threshold error",
+    "test": "vitest run --config ./vitest.config.ts"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "author": "zuohuadong",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vibeunion/svadmin.git",
+    "directory": "packages/flow"
+  },
+  "homepage": "https://github.com/vibeunion/svadmin#readme",
+  "bugs": {
+    "url": "https://github.com/vibeunion/svadmin/issues"
+  }
+}
