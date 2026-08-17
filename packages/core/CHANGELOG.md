@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.36.2](https://github.com/vibeunion/svadmin/compare/core-v0.36.1...core-v0.36.2) (2026-08-17)
+
+
+### 🐛 Bug Fixes
+
+* **core:** complete Query Key v2 cache restoration ([b2cacb4](https://github.com/vibeunion/svadmin/commit/b2cacb45660578739437ebf466f8ed79b81dbb73))
+
 ## [0.36.1](https://github.com/vibeunion/svadmin/compare/core-v0.36.0...core-v0.36.1) (2026-08-16)
 
 
