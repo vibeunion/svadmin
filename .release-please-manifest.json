@@ -1,5 +1,5 @@
 {
-  "packages/core": "0.36.1",
+  "packages/core": "0.36.2",
   "packages/ui": "0.42.1",
   "packages/editor": "0.3.1",
   "packages/sveltekit": "0.9.10",
