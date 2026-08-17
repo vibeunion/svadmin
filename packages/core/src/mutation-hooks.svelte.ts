@@ -88,7 +88,7 @@ export function deepMerge(target: unknown, source: unknown): unknown {
 interface MutationContext {
   _svadmin_ctx?: boolean;
   userContext?: unknown;
-  previousQueries?: [unknown, unknown][];
+  previousQueries?: [readonly unknown[], unknown][];
 }
 
 interface MutationCallbacks {
@@ -359,7 +359,7 @@ export function useUpdate<TData extends BaseRecord = BaseRecord, TError = HttpEr
       const ctx = context as MutationContext | undefined;
       if (ctx?.previousQueries) {
         for (const [queryKey, data] of ctx.previousQueries) {
-          queryClient.setQueryData(queryKey as string[], data);
+          queryClient.setQueryData(queryKey, data);
         }
       }
       if (error instanceof UndoError) return;
@@ -540,7 +540,7 @@ export function useDelete<TData extends BaseRecord = BaseRecord, TError = HttpEr
       const ctx = context as MutationContext | undefined;
       if (ctx?.previousQueries) {
         for (const [queryKey, data] of ctx.previousQueries) {
-          queryClient.setQueryData(queryKey as string[], data);
+          queryClient.setQueryData(queryKey, data);
         }
       }
       if (error instanceof UndoError) return;

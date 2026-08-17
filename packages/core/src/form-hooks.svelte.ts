@@ -638,10 +638,10 @@ export function useForm<
       });
     },
     onError: (error: unknown, _vars: unknown, context: unknown) => {
-      const ctx = context as { previousQueries?: [unknown, unknown][] } | undefined;
+      const ctx = context as { previousQueries?: [readonly unknown[], unknown][] } | undefined;
       if (ctx?.previousQueries) {
         for (const [queryKey, data] of ctx.previousQueries) {
-          queryClient.setQueryData(queryKey as string[], data);
+          queryClient.setQueryData(queryKey, data);
         }
       }
       if (error instanceof UndoError) return;
