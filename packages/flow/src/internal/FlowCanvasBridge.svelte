@@ -1,13 +1,13 @@
-<script lang="ts" generics="NodeType extends Node = Node, EdgeType extends Edge = Edge">
+<script lang="ts">
+  import { onMount } from 'svelte';
   import { useSvelteFlow } from '@xyflow/svelte';
-  import type { Edge, Node } from '@xyflow/svelte';
   import type { FlowCanvasApi } from '../types.js';
 
   let { onready }: { onready: (api: FlowCanvasApi) => void } = $props();
 
-  const instance = useSvelteFlow<NodeType, EdgeType>();
+  const instance = useSvelteFlow();
 
-  $effect(() => {
+  onMount(() => {
     onready({
       fitView: () => instance.fitView(),
       screenToFlowPosition: instance.screenToFlowPosition,
