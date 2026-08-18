@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.5](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.13.4...create-svadmin-v0.13.5) (2026-08-18)
+
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** update Bun patch dependencies ([#245](https://github.com/vibeunion/svadmin/issues/245)) ([6480f18](https://github.com/vibeunion/svadmin/commit/6480f18e942513f975c33714dcb09dbe0e7c6bc6))
+
 ## [0.13.4](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.13.3...create-svadmin-v0.13.4) (2026-08-17)
 
 

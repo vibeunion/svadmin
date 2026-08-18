@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.18](https://github.com/vibeunion/svadmin/compare/lite-v0.3.17...lite-v0.3.18) (2026-08-18)
+
+
+### 🐛 Bug Fixes
+
+* **lite:** resolve Code Quality FormData finding ([#246](https://github.com/vibeunion/svadmin/issues/246)) ([11f44e7](https://github.com/vibeunion/svadmin/commit/11f44e7d0cb9265fd85b902190f14f5d7df7adf9))
+
 ## [0.3.17](https://github.com/vibeunion/svadmin/compare/lite-v0.3.16...lite-v0.3.17) (2026-08-16)
 
 
