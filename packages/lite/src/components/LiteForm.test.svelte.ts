@@ -121,7 +121,8 @@ describe('LiteForm array fields', () => {
     expect(removeSubmitter?.type).toBe('submit');
     expect(removeSubmitter?.formNoValidate).toBe(true);
     expect(removeSubmitter?.textContent?.trim()).toBe('Remove item');
-    expect(removeSubmitter && form ? new FormData(form, removeSubmitter).get('contacts[0][_delete]') : null).toBe('1');
+    expect(removeSubmitter?.name).toBe('contacts[0][_delete]');
+    expect(removeSubmitter?.value).toBe('1');
   });
 
   it('keeps file uploads native while image fields retain shared URL semantics', () => {
