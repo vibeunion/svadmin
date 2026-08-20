@@ -94,6 +94,30 @@ describe('release-please scaffold synchronization', () => {
       jsonpath: '$.dependencies["@svadmin/core"]',
     });
   });
+
+  test('updates create-svadmin provider ranges with each provider release', () => {
+    const config = readReleasePleaseConfig();
+    expect(config.packages['packages/ui']['extra-files']).toContainEqual({
+      type: 'json',
+      path: 'packages/create-svadmin/scaffold-manifest.json',
+      jsonpath: '$.dependencies["@svadmin/ui"]',
+    });
+    expect(config.packages['packages/simple-rest']['extra-files']).toContainEqual({
+      type: 'json',
+      path: 'packages/create-svadmin/scaffold-manifest.json',
+      jsonpath: '$.svadmin.dependencyPacks["simple-rest"]["@svadmin/simple-rest"]',
+    });
+    expect(config.packages['packages/supabase']['extra-files']).toContainEqual({
+      type: 'json',
+      path: 'packages/create-svadmin/scaffold-manifest.json',
+      jsonpath: '$.svadmin.dependencyPacks["supabase"]["@svadmin/supabase"]',
+    });
+    expect(config.packages['packages/graphql']['extra-files']).toContainEqual({
+      type: 'json',
+      path: 'packages/create-svadmin/scaffold-manifest.json',
+      jsonpath: '$.svadmin.dependencyPacks["graphql"]["@svadmin/graphql"]',
+    });
+  });
 });
 
 describe('release manifest verification', () => {

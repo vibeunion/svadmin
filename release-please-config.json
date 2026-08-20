@@ -48,7 +48,14 @@
     "packages/ui": {
       "release-type": "node",
       "component": "ui",
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "packages/create-svadmin/scaffold-manifest.json",
+          "jsonpath": "$.dependencies[\"@svadmin/ui\"]"
+        }
+      ]
     },
     "packages/editor": {
       "release-type": "node",
@@ -68,7 +75,14 @@
     "packages/simple-rest": {
       "release-type": "node",
       "component": "simple-rest",
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "packages/create-svadmin/scaffold-manifest.json",
+          "jsonpath": "$.svadmin.dependencyPacks[\"simple-rest\"][\"@svadmin/simple-rest\"]"
+        }
+      ]
     },
     "packages/refine-adapter": {
       "release-type": "node",
@@ -88,7 +102,14 @@
     "packages/supabase": {
       "release-type": "node",
       "component": "supabase",
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "packages/create-svadmin/scaffold-manifest.json",
+          "jsonpath": "$.svadmin.dependencyPacks[\"supabase\"][\"@svadmin/supabase\"]"
+        }
+      ]
     },
     "packages/elysia": {
       "release-type": "node",
@@ -128,7 +149,14 @@
     "packages/graphql": {
       "release-type": "node",
       "component": "graphql",
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "packages/create-svadmin/scaffold-manifest.json",
+          "jsonpath": "$.svadmin.dependencyPacks[\"graphql\"][\"@svadmin/graphql\"]"
+        }
+      ]
     },
     "packages/hasura": {
       "release-type": "node",
