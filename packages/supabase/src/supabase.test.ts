@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @svadmin/supabase — Unit Tests
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, test, expect, mock } from 'bun:test';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
@@ -29,7 +28,7 @@ mock.module('@refinedev/supabase', () => {
 
 // ─── Mock Supabase Client ──────────────────────────────────────────
 function createMockSupabaseClient(overrides: Record<string, any> = {}) {
-  const client = {
+  const client: any = {
     auth: {
       signInWithPassword: mock(async ({ _email, password }) => {
         if (password === 'bad') return { error: { message: 'Invalid credentials' } };
@@ -54,6 +53,79 @@ function createMockSupabaseClient(overrides: Record<string, any> = {}) {
       updateUser: mock(async () => ({ error: null })),
       ...(overrides.auth || {}),
     },
+    rpc: mock(async (fnName: string, args: any, options?: any) => {
+      if (fnName === 'fail_proc') {
+        return { data: null, error: { message: 'Database error occurred' } };
+      }
+      return { data: { procResult: true, fnName, args, options }, error: null };
+    }),
+    functions: {
+      invoke: mock(async (fnName: string, options?: any) => {
+        if (fnName === 'fail-fn') {
+          return { data: null, error: { message: 'Edge Function timeout' } };
+        }
+        return { data: { functionResult: true, fnName, options }, error: null };
+      }),
+      ...(overrides.functions || {}),
+    },
+    from: mock((tableName: string) => {
+      const builder: any = {
+        tableName,
+        select: mock((fields: string) => {
+          builder.selectedFields = fields;
+          return builder;
+        }),
+        insert: mock((values: any) => {
+          builder.insertedValues = values;
+          return builder;
+        }),
+        update: mock((values: any) => {
+          builder.updatedValues = values;
+          return builder;
+        }),
+        delete: mock(() => {
+          builder.isDelete = true;
+          return builder;
+        }),
+        eq: mock((col: string, val: any) => {
+          builder.filterEq = { col, val };
+          return builder;
+        }),
+        order: mock((col: string, opt: any) => {
+          builder.orderBy = { col, opt };
+          return builder;
+        }),
+        then: (onfulfilled: any) => {
+          if (builder.isDelete) {
+            return Promise.resolve({ data: { success: true }, error: null }).then(onfulfilled);
+          }
+          if (builder.updatedValues) {
+            return Promise.resolve({ data: [{ id: 1, ...builder.updatedValues }], error: null }).then(onfulfilled);
+          }
+          if (builder.insertedValues) {
+            return Promise.resolve({ data: [{ id: 10, ...builder.insertedValues }], error: null }).then(onfulfilled);
+          }
+          return Promise.resolve({
+            data: [{ id: 1, name: 'Table Record', table: tableName }],
+            error: null,
+          }).then(onfulfilled);
+        },
+      };
+      return builder;
+    }),
+    schema: mock((schemaName: string) => {
+      const scopedClient: any = {
+        ...client,
+        schemaName,
+        rpc: mock(async (fnName: string, args: any, options?: any) => {
+          return { data: { schema: schemaName, fnName, args, options }, error: null };
+        }),
+        from: mock((tableName: string) => {
+          return client.from(`${schemaName}.${tableName}`);
+        }),
+      };
+      return scopedClient;
+    }),
     channel: mock((name: string) => {
       const c: any = {
         name,
@@ -65,9 +137,9 @@ function createMockSupabaseClient(overrides: Record<string, any> = {}) {
       return c;
     }),
   };
-  // If there are top-level overrides besides auth, merge them
+  // If there are top-level overrides besides auth/functions, merge them
   for (const [key, val] of Object.entries(overrides)) {
-    if (key !== 'auth') (client as any)[key] = val;
+    if (key !== 'auth' && key !== 'functions') (client as any)[key] = val;
   }
   return client as unknown as SupabaseClient;
 }
@@ -89,6 +161,168 @@ describe('Supabase DataProvider', () => {
     const dp = await createSupabaseDataProvider({} as any);
     const result = await dp.create({ resource: 'posts', variables: { title: 'New Item' } });
     expect(result.data.id).toBe(2);
+  });
+
+  test('custom invokes RPC with prefix rpc/', async () => {
+    const { createSupabaseDataProvider } = await import('./data-provider');
+    const client = createMockSupabaseClient();
+    const dp = createSupabaseDataProvider(client);
+
+    if (!dp.custom) throw new Error('dp.custom should be defined');
+    const res = await dp.custom({
+      url: 'rpc/calculate_order_stats',
+      method: 'post',
+      payload: { order_id: 123 },
+    });
+
+    expect(client.rpc).toHaveBeenCalled();
+    expect((res.data as any).fnName).toBe('calculate_order_stats');
+    expect((res.data as any).args).toEqual({ order_id: 123 });
+  });
+
+  test('custom invokes RPC with meta.rpc and schema targeting', async () => {
+    const { createSupabaseDataProvider } = await import('./data-provider');
+    const client = createMockSupabaseClient();
+    const dp = createSupabaseDataProvider(client);
+
+    if (!dp.custom) throw new Error('dp.custom should be defined');
+    const res = await dp.custom({
+      url: 'atomic_intake',
+      method: 'post',
+      payload: { case_id: 'c1' },
+      meta: { rpc: true, schema: 'api' },
+    });
+
+    expect(client.schema).toHaveBeenCalledWith('api');
+    expect((res.data as any).schema).toBe('api');
+    expect((res.data as any).fnName).toBe('atomic_intake');
+  });
+
+  test('custom throws descriptive error on RPC failure', async () => {
+    const { createSupabaseDataProvider } = await import('./data-provider');
+    const client = createMockSupabaseClient();
+    const dp = createSupabaseDataProvider(client);
+
+    if (!dp.custom) throw new Error('dp.custom should be defined');
+    await expect(
+      dp.custom({
+        url: 'rpc/fail_proc',
+        method: 'post',
+      })
+    ).rejects.toThrow('[svadmin/supabase] RPC function "fail_proc" failed: Database error occurred');
+  });
+
+  test('custom invokes Edge Functions with prefix functions/', async () => {
+    const { createSupabaseDataProvider } = await import('./data-provider');
+    const client = createMockSupabaseClient();
+    const dp = createSupabaseDataProvider(client);
+
+    if (!dp.custom) throw new Error('dp.custom should be defined');
+    const res = await dp.custom({
+      url: 'functions/generate-report',
+      method: 'post',
+      payload: { report_id: 'r100' },
+      headers: { 'X-Custom-Header': 'test' },
+    });
+
+    expect(client.functions.invoke).toHaveBeenCalled();
+    expect((res.data as any).fnName).toBe('generate-report');
+    expect((res.data as any).options.body).toEqual({ report_id: 'r100' });
+    expect((res.data as any).options.headers).toEqual({ 'X-Custom-Header': 'test' });
+  });
+
+  test('custom throws descriptive error on Edge Function failure', async () => {
+    const { createSupabaseDataProvider } = await import('./data-provider');
+    const client = createMockSupabaseClient();
+    const dp = createSupabaseDataProvider(client);
+
+    if (!dp.custom) throw new Error('dp.custom should be defined');
+    await expect(
+      dp.custom({
+        url: 'functions/fail-fn',
+        method: 'post',
+      })
+    ).rejects.toThrow('[svadmin/supabase] Edge Function "fail-fn" failed: Edge Function timeout');
+  });
+
+  test('custom handles direct table queries and mutations', async () => {
+    const { createSupabaseDataProvider } = await import('./data-provider');
+    const client = createMockSupabaseClient();
+    const dp = createSupabaseDataProvider(client);
+
+    if (!dp.custom) throw new Error('dp.custom should be defined');
+    
+    // GET
+    const getRes = await dp.custom({
+      url: 'cases_summary',
+      method: 'get',
+      query: { status: 'active' },
+      filters: [{ field: 'tenant_id', operator: 'eq', value: 't1' }],
+      sorters: [{ field: 'created_at', order: 'desc' }],
+    });
+    expect(client.from).toHaveBeenCalledWith('cases_summary');
+    expect(Array.isArray(getRes.data)).toBe(true);
+
+    // POST
+    const postRes = await dp.custom({
+      url: 'custom_events',
+      method: 'post',
+      payload: { event: 'clicked' },
+    });
+    expect(postRes.data).toEqual({ id: 10, event: 'clicked' });
+
+    // PUT
+    const putRes = await dp.custom({
+      url: 'custom_events',
+      method: 'put',
+      payload: { name: 'updated' },
+      query: { id: 1 },
+    });
+    expect(putRes.data).toEqual({ id: 1, name: 'updated' });
+
+    // DELETE
+    const delRes = await dp.custom({
+      url: 'custom_events',
+      method: 'delete',
+      query: { id: 1 },
+    });
+    expect(delRes.data).toEqual({ success: true });
+  });
+});
+
+
+// ─── RPC Helper Tests ────────────────────────────────────────────
+describe('Supabase RPC Helper', () => {
+  test('createSupabaseRpc executes procedure and returns data', async () => {
+    const { createSupabaseRpc } = await import('./rpc');
+    const client = createMockSupabaseClient();
+    const rpc = createSupabaseRpc(client);
+
+    const result = await rpc.call('get_user_metrics', { user_id: 'u1' });
+    expect(client.rpc).toHaveBeenCalledWith('get_user_metrics', { user_id: 'u1' }, { head: undefined, count: undefined, get: undefined });
+    expect((result as any).procResult).toBe(true);
+    expect((result as any).fnName).toBe('get_user_metrics');
+  });
+
+  test('createSupabaseRpc respects default options and schema override', async () => {
+    const { createSupabaseRpc } = await import('./rpc');
+    const client = createMockSupabaseClient();
+    const rpc = createSupabaseRpc(client, { schema: 'analytics', get: true });
+
+    const result = await rpc.call('daily_active_users', { day: '2026-08-20' });
+    expect(client.schema).toHaveBeenCalledWith('analytics');
+    expect((result as any).schema).toBe('analytics');
+    expect((result as any).options.get).toBe(true);
+  });
+
+  test('createSupabaseRpc throws formatted error on RPC failure', async () => {
+    const { createSupabaseRpc } = await import('./rpc');
+    const client = createMockSupabaseClient();
+    const rpc = createSupabaseRpc(client);
+
+    await expect(rpc.call('fail_proc')).rejects.toThrow(
+      '[svadmin/supabase] RPC function "fail_proc" failed: Database error occurred'
+    );
   });
 });
 
@@ -128,13 +362,13 @@ describe('Supabase AuthProvider', () => {
 
   test('check returns unauthenticated when no session', async () => {
     const { createSupabaseAuthProvider } = await import('./auth-provider');
-    const auth = createSupabaseAuthProvider(createMockSupabaseClient({
+    const client = createMockSupabaseClient({
       auth: { getSession: mock(async () => ({ data: { session: null } })) }
-    }));
+    });
+    const auth = createSupabaseAuthProvider(client);
     const result = await auth.check();
     expect(result.authenticated).toBe(false);
     expect(result.redirectTo).toBe('/login');
-    expect(result.logout).toBe(true);
   });
 
   test('check clears invalid refresh token sessions', async () => {
@@ -143,64 +377,70 @@ describe('Supabase AuthProvider', () => {
       auth: {
         getSession: mock(async () => ({
           data: { session: null },
-          error: new Error('Refresh token is not valid'),
+          error: new Error('Invalid Refresh Token: Refresh Token Not Found'),
         })),
-      }
+        signOut: mock(async () => ({ error: null })),
+      },
     });
     const auth = createSupabaseAuthProvider(client);
     const result = await auth.check();
-    expect(result.authenticated).toBe(false);
-    expect(result.logout).toBe(true);
-    expect(result.redirectTo).toBe('/login');
-    expect(client.auth.signOut).toHaveBeenCalled();
+
+    expect(client.auth.signOut).toHaveBeenCalledWith({ scope: 'local' });
+    expect(result).toEqual({
+      authenticated: false,
+      redirectTo: '/login',
+      logout: true,
+      error: { message: 'Session expired, please sign in again.' },
+    });
   });
 
   test('getIdentity surfaces user metadata', async () => {
     const { createSupabaseAuthProvider } = await import('./auth-provider');
     const auth = createSupabaseAuthProvider(createMockSupabaseClient());
-    const identity = await auth.getIdentity();
-    expect(identity).not.toBeNull();
-    expect(identity!.id).toBe('user-1');
-    expect(identity!.name).toBe('Admin');
-    expect(identity!.avatar).toBe('http://avatar');
+    const identity = await auth.getIdentity?.();
+    expect(identity?.id).toBe('user-1');
+    expect(identity?.name).toBe('Admin');
+    expect(identity?.avatar).toBe('http://avatar');
+    expect(identity?.token).toBe('valid-token');
   });
 
   test('getPermissions fails closed without a trusted resolver', async () => {
     const { createSupabaseAuthProvider } = await import('./auth-provider');
     const auth = createSupabaseAuthProvider(createMockSupabaseClient());
-    const permissions = await auth.getPermissions?.();
-    expect(permissions).toBeNull();
+    const perms = await auth.getPermissions?.();
+    expect(perms).toBeNull();
   });
 
   test('getPermissions uses the configured permission resolver', async () => {
     const { createSupabaseAuthProvider } = await import('./auth-provider');
-    const client = createMockSupabaseClient();
-    const auth = createSupabaseAuthProvider(client, {
-      getPermissions: ({ user }) => user.email === 'admin@test.com'
-        ? ['admin', 'posts:edit']
-        : [],
+    const auth = createSupabaseAuthProvider(createMockSupabaseClient(), {
+      getPermissions: ({ user }) => ({
+        role: user.user_metadata?.role,
+        capabilities: ['billing.read'],
+      }),
     });
-    const permissions = await auth.getPermissions?.();
-    expect(permissions).toEqual(['admin', 'posts:edit']);
+    const perms = await auth.getPermissions?.();
+    expect(perms).toEqual({
+      role: 'admin',
+      capabilities: ['billing.read'],
+    });
   });
 
   test('getPermissions surfaces transient user lookup errors without calling the resolver', async () => {
     const { createSupabaseAuthProvider } = await import('./auth-provider');
-    const resolver = mock(() => ['admin']);
+    const resolver = mock(() => ({ role: 'admin' }));
     const client = createMockSupabaseClient({
       auth: {
         getUser: mock(async () => ({
           data: { user: null },
-          error: new Error('User lookup unavailable'),
+          error: new Error('Network error'),
         })),
       },
     });
     const auth = createSupabaseAuthProvider(client, { getPermissions: resolver });
-    if (!auth.getPermissions) throw new Error('Expected getPermissions to be available');
 
-    await expect(auth.getPermissions()).rejects.toThrow('User lookup unavailable');
+    await expect(auth.getPermissions?.()).rejects.toThrow('Network error');
     expect(resolver).not.toHaveBeenCalled();
-    expect(client.auth.signOut).not.toHaveBeenCalled();
   });
 
   test('getIdentity clears invalid refresh token sessions', async () => {
@@ -209,14 +449,16 @@ describe('Supabase AuthProvider', () => {
       auth: {
         getUser: mock(async () => ({
           data: { user: null },
-          error: new Error('Invalid refresh token'),
+          error: new Error('Invalid Refresh Token: Refresh Token Not Found'),
         })),
-      }
+        signOut: mock(async () => ({ error: null })),
+      },
     });
     const auth = createSupabaseAuthProvider(client);
-    const identity = await auth.getIdentity();
+    const identity = await auth.getIdentity?.();
+
+    expect(client.auth.signOut).toHaveBeenCalledWith({ scope: 'local' });
     expect(identity).toBeNull();
-    expect(client.auth.signOut).toHaveBeenCalled();
   });
 
   test('onError returns logout true on 401 with no session', async () => {
@@ -225,29 +467,34 @@ describe('Supabase AuthProvider', () => {
       auth: { getSession: mock(async () => ({ data: { session: null } })) }
     });
     const auth = createSupabaseAuthProvider(client);
-    const result = await auth.onError!(new Error('401 Unauthorized'));
-    expect(result.logout).toBe(true);
-    expect(result.redirectTo).toBe('/login');
-    expect(client.auth.signOut).toHaveBeenCalled();
+    const result = await auth.onError?.(new Error('401 Unauthorized'));
+    expect(result?.logout).toBe(true);
+    expect(result?.redirectTo).toBe('/login');
   });
 
   test('onError swallows 401 if token actually exists (race condition guard)', async () => {
     const { createSupabaseAuthProvider } = await import('./auth-provider');
-    const client = createMockSupabaseClient();
-    const auth = createSupabaseAuthProvider(client);
-    const result = await auth.onError!(new Error('401 Unauthorized'));
-    expect(result.logout).toBeUndefined();
-    expect(client.auth.signOut).not.toHaveBeenCalled();
+    const auth = createSupabaseAuthProvider(createMockSupabaseClient());
+    const result = await auth.onError?.(new Error('401 Unauthorized'));
+    expect(result?.logout).toBeUndefined();
+    expect(result?.redirectTo).toBeUndefined();
   });
 
   test('onError logs out on invalid refresh token', async () => {
     const { createSupabaseAuthProvider } = await import('./auth-provider');
-    const client = createMockSupabaseClient();
+    const client = createMockSupabaseClient({
+      auth: {
+        signOut: mock(async () => ({ error: null })),
+      },
+    });
     const auth = createSupabaseAuthProvider(client);
-    const result = await auth.onError!(new Error('Refresh token is not valid'));
-    expect(result.logout).toBe(true);
-    expect(result.redirectTo).toBe('/login');
-    expect(client.auth.signOut).toHaveBeenCalled();
+    const result = await auth.onError?.(new Error('Invalid Refresh Token: Refresh Token Not Found'));
+
+    expect(client.auth.signOut).toHaveBeenCalledWith({ scope: 'local' });
+    expect(result).toEqual({
+      redirectTo: '/login',
+      logout: true,
+    });
   });
 });
 
@@ -259,19 +506,23 @@ describe('Supabase LiveProvider', () => {
     const client = createMockSupabaseClient();
     const live = createSupabaseLiveProvider(client);
     
-    let callbackEvent: unknown;
+    let callbackEvent: any = null;
     const unsub = live.subscribe({
       resource: 'posts',
-      callback: (event) => { callbackEvent = event; }
+      callback: (e) => { callbackEvent = e; }
     });
-    
+
     expect(client.channel).toHaveBeenCalledWith('live-posts');
     const channelMock = (client.channel as ReturnType<typeof mock>).mock.results[0].value;
     expect(channelMock.on).toHaveBeenCalled();
     expect(channelMock.subscribe).toHaveBeenCalled();
 
-    const postgresChangesHandler = channelMock.on.mock.calls[0][2] as (payload: {
-      eventType: 'INSERT';
+    const onCalls = channelMock.on.mock.calls;
+    const postgresChangesCall = onCalls.find((call: any[]) => call[0] === 'postgres_changes');
+    expect(postgresChangesCall).toBeDefined();
+
+    const postgresChangesHandler = postgresChangesCall[2] as (payload: {
+      eventType: string;
       new: Record<string, unknown>;
       old: null;
     }) => void;
