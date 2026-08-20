@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/vibeunion/svadmin/compare/supabase-v0.11.9...supabase-v0.12.0) (2026-08-20)
+
+
+### 🚀 Features
+
+* **supabase:** implement custom method with rpc and edge function support ([#248](https://github.com/vibeunion/svadmin/issues/248)) ([79c5065](https://github.com/vibeunion/svadmin/commit/79c50651a718dc5c6251116fc5cebc00f124ca02))
+
 ## [0.11.9](https://github.com/vibeunion/svadmin/compare/supabase-v0.11.8...supabase-v0.11.9) (2026-08-16)
 
 
