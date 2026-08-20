@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.6](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.13.5...create-svadmin-v0.13.6) (2026-08-20)
+
+
+### 🔧 Miscellaneous Chores
+
+* release main ([#249](https://github.com/vibeunion/svadmin/issues/249)) ([fe9921b](https://github.com/vibeunion/svadmin/commit/fe9921b7d3a14ba8a790e9f100a06fc5484e298f))
+
 ## [0.13.5](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.13.4...create-svadmin-v0.13.5) (2026-08-18)
 
 
