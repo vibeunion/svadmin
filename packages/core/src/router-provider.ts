@@ -1,5 +1,7 @@
 // Router Provider — abstracts routing strategy (hash, history, SvelteKit, etc.)
 
+export type RouterNavigationResult = false | ReturnType<() => void>;
+
 export interface RouterProvider {
   /** Navigate to a path */
   go: (options: {
@@ -7,7 +9,7 @@ export interface RouterProvider {
     query?: Record<string, string>;
     hash?: string;
     type?: 'push' | 'replace';
-  }) => void;
+  }) => RouterNavigationResult | Promise<RouterNavigationResult>;
   /** Navigate back */
   back: () => void;
   /** Parse current URL into structured route info */
