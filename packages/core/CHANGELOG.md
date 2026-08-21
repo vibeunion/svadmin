@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.36.3](https://github.com/vibeunion/svadmin/compare/core-v0.36.2...core-v0.36.3) (2026-08-21)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** keep layout mounted during auth rechecks ([#251](https://github.com/vibeunion/svadmin/issues/251)) ([3984bf2](https://github.com/vibeunion/svadmin/commit/3984bf2422ae100ba1249bad09fc0f57ddbc952d))
+
 ## [0.36.2](https://github.com/vibeunion/svadmin/compare/core-v0.36.1...core-v0.36.2) (2026-08-17)
 
 
