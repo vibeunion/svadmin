@@ -145,7 +145,7 @@ export {
 export { useParsed, resetGlobalPath, syncGlobalPath } from './useParsed.svelte';
 export * from './useStepsForm.svelte';
 export { createHashRouterProvider, createHistoryRouterProvider } from './router-provider';
-export type { RouterProvider } from './router-provider';
+export type { RouterNavigationResult, RouterProvider } from './router-provider';
 export { inferFieldType, inferResource } from './inferencer';
 export type { InferResult } from './inferencer';
 export { createWebSocketLiveProvider } from './live-websocket';

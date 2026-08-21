@@ -200,8 +200,7 @@
   const routerState = provideRouterState(untrack(() => resolvedRouter));
   const scopedRouterProvider: RouterProvider = {
     go(options) {
-      resolvedRouter.go(options);
-      routerState.sync();
+      return navigateAfterAuthCheck(options);
     },
     back() {
       resolvedRouter.back();
@@ -303,9 +302,8 @@
   // Reactive getters for route state
   const route = $derived(routerState.route);
   const params = $derived(routerState.params);
+  const path = $derived(routerState.path);
   const resourceNames = $derived(new Set(resources.map((resource) => resource.name)));
-  const hasRouteResource = $derived(!params.resource || resourceNames.has(params.resource));
-  const currentResourcePages = $derived(params.resource ? resourcePages?.[params.resource] : undefined);
   const isStandaloneTwoFactor = $derived(route === '/2fa' || route === '/authentication/branded/2fa');
   const standaloneErrorStatus = $derived.by((): '404' | '500' | undefined => {
     if (route === '/authentication/error-404' || route === '/404' || (route === '/:resource' && params.resource === '404')) return '404';
@@ -316,9 +314,82 @@
   // Auth check
   let isAuthenticated = $state(untrack(() => !resolvedAuthProvider));
   let authChecked = $state(untrack(() => !resolvedAuthProvider));
+  let checkedAuthProvider = $state.raw<AuthProvider | null>(null);
+  let checkedAuthPath = $state<string | null>(null);
+  let navigationAuthPending = $state(false);
+  let navigationCheckId = 0;
+  const authProviderPending = $derived(!!resolvedAuthProvider && checkedAuthProvider !== resolvedAuthProvider);
+  const authRechecking = $derived(
+    navigationAuthPending
+      || (!!resolvedAuthProvider
+        && !authProviderPending
+        && authChecked
+        && isAuthenticated
+        && checkedAuthPath !== path),
+  );
+  const renderedRoute = $derived(route);
+  const renderedParams = $derived(params);
+  const renderedHasRouteResource = $derived(!renderedParams.resource || resourceNames.has(renderedParams.resource));
+  const renderedResourcePages = $derived(renderedParams.resource ? resourcePages?.[renderedParams.resource] : undefined);
 
-  async function navigateWithinApp(path: string) {
-    await adminContext.navigate(path);
+  async function navigateWithinApp(path: string, options?: { replaceState?: boolean }) {
+    await adminContext.navigate(path, options);
+  }
+
+  async function commitNavigation(options: Parameters<RouterProvider['go']>[0]): Promise<Awaited<ReturnType<RouterProvider['go']>>> {
+    const navigated = await resolvedRouter.go(options);
+    if (navigated === false) return false;
+    routerState.sync();
+    return navigated;
+  }
+
+  function recordCheckedRoute(provider: AuthProvider) {
+    checkedAuthProvider = provider;
+    checkedAuthPath = routerState.path;
+  }
+
+  async function navigateAfterAuthCheck(options: Parameters<RouterProvider['go']>[0]): Promise<Awaited<ReturnType<RouterProvider['go']>>> {
+    const provider = resolvedAuthProvider;
+    if (!provider || checkedAuthProvider !== provider || !authChecked || !isAuthenticated) {
+      return commitNavigation(options);
+    }
+
+    const checkId = ++navigationCheckId;
+    navigationAuthPending = true;
+    let result: Awaited<ReturnType<AuthProvider['check']>>;
+    try {
+      result = await provider.check();
+    } catch (err) {
+      if (checkId !== navigationCheckId || provider !== resolvedAuthProvider) return false;
+      console.warn('Auth check failed:', err);
+      isAuthenticated = false;
+      authChecked = true;
+      try {
+        await navigateWithinApp('/login', { replaceState: true });
+        recordCheckedRoute(provider);
+        return false;
+      } finally {
+        if (checkId === navigationCheckId) navigationAuthPending = false;
+      }
+    }
+
+    if (checkId !== navigationCheckId || provider !== resolvedAuthProvider) return false;
+    try {
+      if (!result.authenticated) {
+        isAuthenticated = false;
+        authChecked = true;
+        await navigateWithinApp(result.redirectTo ?? '/login', { replaceState: true });
+        recordCheckedRoute(provider);
+        return false;
+      }
+      const navigated = await commitNavigation(options);
+      if (navigated === false) return false;
+      if (checkId !== navigationCheckId || provider !== resolvedAuthProvider) return false;
+      recordCheckedRoute(provider);
+      return navigated;
+    } finally {
+      if (checkId === navigationCheckId) navigationAuthPending = false;
+    }
   }
 
   function isPublicSystemRoute(currentRoute: string): boolean {
@@ -332,19 +403,35 @@
     let cancelled = false;
     // Explicitly track route so auth is re-checked on navigation
     const _route = route;
+    const _path = path;
+    const provider = resolvedAuthProvider;
+    navigationCheckId += 1;
+    navigationAuthPending = false;
 
-    if (!resolvedAuthProvider) {
+    if (!provider) {
       if (!cancelled) {
         isAuthenticated = true;
         authChecked = true;
+        checkedAuthProvider = null;
+        checkedAuthPath = _path;
       }
       return;
     }
-    authChecked = false;
-    resolvedAuthProvider.check().then(result => {
+    if (
+      untrack(() => checkedAuthProvider) === provider
+      && untrack(() => checkedAuthPath) === _path
+    ) return;
+    const providerChanged = untrack(() => checkedAuthProvider) !== provider;
+    if (providerChanged) {
+      isAuthenticated = false;
+      authChecked = false;
+    }
+    provider.check().then(result => {
       if (cancelled) return;
       isAuthenticated = result.authenticated;
       authChecked = true;
+      checkedAuthProvider = provider;
+      checkedAuthPath = _path;
       if (!result.authenticated && _route !== '/login' && _route !== '/register' && _route !== '/forgot-password' && _route !== '/update-password' && !isPublicSystemRoute(_route)) {
         void navigateWithinApp(result.redirectTo ?? '/login');
       }
@@ -353,6 +440,8 @@
       console.warn('Auth check failed:', err);
       isAuthenticated = false;
       authChecked = true;
+      checkedAuthProvider = provider;
+      checkedAuthPath = _path;
       if (_route !== '/login' && _route !== '/register' && _route !== '/forgot-password' && _route !== '/update-password' && !isPublicSystemRoute(_route)) {
         void navigateWithinApp('/login');
       }
@@ -365,7 +454,7 @@
 <QueryClientProvider client={queryClient}>
   {#if !resolvedDataProvider}
     <ConfigErrorScreen title="{title} — DataProvider is required" />
-  {:else if !authChecked}
+  {:else if !authChecked || authProviderPending}
     <div class="flex h-screen items-center justify-center">
       <div class="space-y-4 text-center">
         <div class="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-primary mx-auto"></div>
@@ -390,7 +479,7 @@
     <UpdatePasswordPage {title} />
   {:else if route === '/login' || route === '/register' || route === '/forgot-password' || route === '/update-password'}
     <ConfigErrorScreen title="{title} — {translation.t('common.configRequired')}" />
-  {:else if (isAuthenticated || !resolvedAuthProvider) && isStandaloneTwoFactor}
+  {:else if (isAuthenticated || !resolvedAuthProvider) && isStandaloneTwoFactor && !authRechecking}
     <SystemPageShell {title}>
       <LazyPage loader={loadTwoFactorAuthPage} props={{}} />
     </SystemPageShell>
@@ -401,47 +490,56 @@
     </SystemPageShell>
   {:else if isAuthenticated || !resolvedAuthProvider}
     <Layout {title} {menu} {siteUrl} routeMode={resolvedRouteMode}>
-      {#key route + (params.resource ?? '') + (params.id ?? '') + (params.variant ?? '') + (params.columns ?? '')}
+      <div class="relative min-h-40" aria-busy={authRechecking}>
+        {#if authRechecking}
+          <div class="absolute inset-0 z-10 flex min-h-40 items-center justify-center bg-background/80" role="status" aria-live="polite">
+            <div class="space-y-3 text-center">
+              <div class="h-6 w-6 animate-spin rounded-full border-4 border-muted border-t-primary mx-auto"></div>
+              <p class="text-sm text-muted-foreground">Loading...</p>
+            </div>
+          </div>
+        {:else}
+      {#key renderedRoute + (renderedParams.resource ?? '') + (renderedParams.id ?? '') + (renderedParams.variant ?? '') + (renderedParams.columns ?? '')}
       <div class="svadmin-page-enter">
-      {#if route === '/public-profile'}
+      {#if renderedRoute === '/public-profile'}
         <LazyPage loader={loadPublicProfilePage} props={{ variant: 'default', initialTab: 'projects' }} />
-      {:else if route === '/public-profile/projects/:columns'}
-        <LazyPage loader={loadPublicProfilePage} props={{ variant: 'default', initialTab: 'projects', columns: params.columns?.includes('3') ? 3 : 2 }} />
-      {:else if route === '/public-profile/activity'}
+      {:else if renderedRoute === '/public-profile/projects/:columns'}
+        <LazyPage loader={loadPublicProfilePage} props={{ variant: 'default', initialTab: 'projects', columns: renderedParams.columns?.includes('3') ? 3 : 2 }} />
+      {:else if renderedRoute === '/public-profile/activity'}
         <LazyPage loader={loadPublicProfilePage} props={{ variant: 'default', initialTab: 'activity' }} />
-      {:else if route === '/public-profile/teams'}
+      {:else if renderedRoute === '/public-profile/teams'}
         <LazyPage loader={loadPublicProfilePage} props={{ variant: 'default', initialTab: 'teams' }} />
-      {:else if route === '/public-profile/profiles/:variant'}
-        <LazyPage loader={loadPublicProfilePage} props={{ variant: (params.variant === 'company' || params.variant === 'gamer' || params.variant === 'default' ? params.variant : 'default') as 'company' | 'gamer' | 'default', showSections: true }} />
-      {:else if route === '/account/get-started' || route === '/account/home/get-started'}
+      {:else if renderedRoute === '/public-profile/profiles/:variant'}
+        <LazyPage loader={loadPublicProfilePage} props={{ variant: (renderedParams.variant === 'company' || renderedParams.variant === 'gamer' || renderedParams.variant === 'default' ? renderedParams.variant : 'default') as 'company' | 'gamer' | 'default', showSections: true }} />
+      {:else if renderedRoute === '/account/get-started' || renderedRoute === '/account/home/get-started'}
         <LazyPage loader={loadGetStartedPage} props={{}} />
-      {:else if route === '/account/home/user-profile'}
+      {:else if renderedRoute === '/account/home/user-profile'}
         <LazyPage loader={loadUserProfilePage} props={{}} />
-      {:else if route === '/account/company-profile' || route === '/account/home/company-profile'}
+      {:else if renderedRoute === '/account/company-profile' || renderedRoute === '/account/home/company-profile'}
         <LazyPage loader={loadCompanyProfilePage} props={{}} />
-      {:else if route === '/account/settings-plain' || route === '/account/home/settings-plain'}
+      {:else if renderedRoute === '/account/settings-plain' || renderedRoute === '/account/home/settings-plain'}
         <LazyPage loader={loadSettingsPlainPage} props={{}} />
-      {:else if route === '/account/settings-sidebar' || route === '/account/home/settings-sidebar'}
+      {:else if renderedRoute === '/account/settings-sidebar' || renderedRoute === '/account/home/settings-sidebar'}
         <LazyPage loader={loadSettingsSidebarPage} props={{}} />
-      {:else if route === '/account/settings-enterprise' || route === '/account/home/settings-enterprise'}
+      {:else if renderedRoute === '/account/settings-enterprise' || renderedRoute === '/account/home/settings-enterprise'}
         <LazyPage loader={loadSettingsEnterprisePage} props={{}} />
-      {:else if route === '/account/:tab'}
+      {:else if renderedRoute === '/account/:tab'}
         <SettingsPage />
-      {:else if route === '/account/import-members' || route === '/account/members/import-members'}
+      {:else if renderedRoute === '/account/import-members' || renderedRoute === '/account/members/import-members'}
         <LazyPage loader={loadImportMembersPage} props={{}} />
-      {:else if route === '/account/members-starter' || route === '/account/members/members-starter'}
+      {:else if renderedRoute === '/account/members-starter' || renderedRoute === '/account/members/members-starter'}
         <LazyPage loader={loadMembersStarterPage} props={{}} />
-      {:else if route === '/account/team-members' || route === '/account/members/team-members'}
+      {:else if renderedRoute === '/account/team-members' || renderedRoute === '/account/members/team-members'}
         <LazyPage loader={loadTeamMembersPage} props={{}} />
-      {:else if route === '/account/security-log' || route === '/account/security/security-log'}
+      {:else if renderedRoute === '/account/security-log' || renderedRoute === '/account/security/security-log'}
         <LazyPage loader={loadSecurityLogPage} props={{}} />
-      {:else if route === '/network/user-cards' || route === '/network/user-cards/nft'}
+      {:else if renderedRoute === '/network/user-cards' || renderedRoute === '/network/user-cards/nft'}
         <LazyPage loader={loadUserCardsNFTPage} props={{}} />
-      {:else if route === '/network/team-crew' || route === '/network/user-table/team-crew'}
+      {:else if renderedRoute === '/network/team-crew' || renderedRoute === '/network/user-table/team-crew'}
         <LazyPage loader={loadTeamCrewTablePage} props={{}} />
-      {:else if route.startsWith('/settings')}
+      {:else if renderedRoute.startsWith('/settings')}
         <SettingsPage />
-      {:else if route === '/' || route === '' || route === '/inventory-dashboard'}
+      {:else if renderedRoute === '/' || renderedRoute === '' || renderedRoute === '/inventory-dashboard'}
         {#if dashboard}
           {@render dashboard()}
         {:else}
@@ -450,30 +548,30 @@
             <p class="text-muted-foreground">{translation.t('common.dashboardHint')}</p>
           </div>
         {/if}
-      {:else if (route === '/:resource' || route === '/:parent/:parentId/:resource') && hasRouteResource}
-        {#key params.resource}
-          {@const Comp = currentResourcePages?.list ?? mergedComponents.AutoTable}
-          <Comp resourceName={params.resource} />
+      {:else if (renderedRoute === '/:resource' || renderedRoute === '/:parent/:parentId/:resource') && renderedHasRouteResource}
+        {#key renderedParams.resource}
+          {@const Comp = renderedResourcePages?.list ?? mergedComponents.AutoTable}
+          <Comp resourceName={renderedParams.resource} />
         {/key}
-      {:else if (route === '/:resource/create' || route === '/:parent/:parentId/:resource/create') && hasRouteResource}
-        {#key params.resource}
-          {@const Comp = currentResourcePages?.create ?? mergedComponents.AutoForm}
-          <Comp resourceName={params.resource} mode="create" />
+      {:else if (renderedRoute === '/:resource/create' || renderedRoute === '/:parent/:parentId/:resource/create') && renderedHasRouteResource}
+        {#key renderedParams.resource}
+          {@const Comp = renderedResourcePages?.create ?? mergedComponents.AutoForm}
+          <Comp resourceName={renderedParams.resource} mode="create" />
         {/key}
-      {:else if (route === '/:resource/edit/:id' || route === '/:parent/:parentId/:resource/edit/:id') && hasRouteResource}
-        {#key `${params.resource}-${params.id}`}
-          {@const Comp = currentResourcePages?.edit ?? mergedComponents.AutoForm}
-          <Comp resourceName={params.resource} mode="edit" id={params.id} />
+      {:else if (renderedRoute === '/:resource/edit/:id' || renderedRoute === '/:parent/:parentId/:resource/edit/:id') && renderedHasRouteResource}
+        {#key `${renderedParams.resource}-${renderedParams.id}`}
+          {@const Comp = renderedResourcePages?.edit ?? mergedComponents.AutoForm}
+          <Comp resourceName={renderedParams.resource} mode="edit" id={renderedParams.id} />
         {/key}
-      {:else if (route === '/:resource/show/:id' || route === '/:parent/:parentId/:resource/show/:id') && hasRouteResource}
-        {#key `${params.resource}-${params.id}`}
-          {@const Comp = currentResourcePages?.show ?? mergedComponents.ShowPage}
-          <Comp resourceName={params.resource} id={params.id} />
+      {:else if (renderedRoute === '/:resource/show/:id' || renderedRoute === '/:parent/:parentId/:resource/show/:id') && renderedHasRouteResource}
+        {#key `${renderedParams.resource}-${renderedParams.id}`}
+          {@const Comp = renderedResourcePages?.show ?? mergedComponents.ShowPage}
+          <Comp resourceName={renderedParams.resource} id={renderedParams.id} />
         {/key}
-      {:else if (route === '/:resource/clone/:id' || route === '/:parent/:parentId/:resource/clone/:id') && hasRouteResource}
-        {#key `${params.resource}-clone-${params.id}`}
-          {@const Comp = currentResourcePages?.clone ?? mergedComponents.AutoForm}
-          <Comp resourceName={params.resource} mode="clone" id={params.id} />
+      {:else if (renderedRoute === '/:resource/clone/:id' || renderedRoute === '/:parent/:parentId/:resource/clone/:id') && renderedHasRouteResource}
+        {#key `${renderedParams.resource}-clone-${renderedParams.id}`}
+          {@const Comp = renderedResourcePages?.clone ?? mergedComponents.AutoForm}
+          <Comp resourceName={renderedParams.resource} mode="clone" id={renderedParams.id} />
         {/key}
       {:else}
         {@const ErrorComp = mergedComponents.ErrorPage || ErrorPage}
@@ -481,6 +579,8 @@
       {/if}
       </div>
       {/key}
+        {/if}
+      </div>
     </Layout>
   {:else}
     <div class="flex h-screen items-center justify-center">

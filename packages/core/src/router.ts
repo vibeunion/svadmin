@@ -82,7 +82,8 @@ export async function navigateWithProvider(
     if (!allowed) return;
   }
   if (provider) {
-    provider.go({ to: path, type: options?.replaceState ? 'replace' : 'push' });
+    const navigated = await provider.go({ to: path, type: options?.replaceState ? 'replace' : 'push' });
+    if (navigated === false) return;
   } else if (typeof window !== 'undefined') {
     window.location.hash = '#' + path.replace(/^#/, '');
   }
