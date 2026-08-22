@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.13.7](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.13.6...create-svadmin-v0.13.7) (2026-08-22)
+
+
+### 🐛 Bug Fixes
+
+* **release:** sync create-svadmin ranges ([db32ad0](https://github.com/vibeunion/svadmin/commit/db32ad008546476eedbaeedf4e08bdb40c8d9f66))
+* **release:** sync create-svadmin ranges for 0.42.2/0.36.3 ([99bafcf](https://github.com/vibeunion/svadmin/commit/99bafcf92731520890fc3dcdc8b1f09e7e752b7d))
+
 ## [0.13.6](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.13.5...create-svadmin-v0.13.6) (2026-08-20)
 
 
