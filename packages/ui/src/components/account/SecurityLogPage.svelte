@@ -7,7 +7,7 @@
   import FilterToolbar from '../content/FilterToolbar.svelte';
   import SecurityEventTable from '../content/SecurityEventTable.svelte';
   import type { SecurityEvent } from '../content/SecurityEventTable.svelte';
-  import { referenceDemoData } from '../reference-data.js';
+  import { referenceDemoData } from '../../reference-data.js';
   const i18n = useTranslation();
   let query = $state('');
   const events: SecurityEvent[] = referenceDemoData.securityEvents;

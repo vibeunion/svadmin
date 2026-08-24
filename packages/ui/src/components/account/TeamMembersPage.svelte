@@ -10,7 +10,7 @@
   import FilterToolbar from '../content/FilterToolbar.svelte';
   import MemberList from '../content/MemberList.svelte';
   import type { MemberSummary } from '../content/MemberList.svelte';
-  import { referenceDemoData } from '../reference-data.js';
+  import { referenceDemoData } from '../../reference-data.js';
   const i18n = useTranslation();
   let query = $state('');
   let inviteEmail = $state('');

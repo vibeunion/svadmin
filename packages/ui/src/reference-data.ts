@@ -1,6 +1,6 @@
 export interface DemoMember { id: string; name: string; email: string; role: string; department: string; status: 'active' | 'invited' | 'inactive'; }
 export interface DemoProject { id: string; name: string; description: string; status: 'active' | 'completed' | 'on-hold'; members: number; tasks: number; progress: number; tags: string[]; }
-export interface DemoTeam { id: string; name: string; description: string; totalMembers: number; members: Array<{ name: string }> }
+export interface DemoTeam { id: string; name: string; description: string; totalMembers: number; members: Array<{ name: string; role?: string }>; color?: string; rating?: number }
 export interface DemoIntegration { id: string; name: string; description: string; account: string; connected: boolean; }
 export interface DemoApiKey { id: string; name: string; prefix: string; createdAt: string; lastUsedAt: string; }
 export interface DemoSecurityEvent { id: string; event: string; actor: string; location: string; createdAt: string; severity: 'info' | 'warning' | 'danger'; }

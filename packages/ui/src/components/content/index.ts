@@ -26,7 +26,7 @@ export { default as ImportDropzone } from './ImportDropzone.svelte';
 export { default as NetworkUserCard } from './NetworkUserCard.svelte';
 export type { NetworkUser } from './NetworkUserCard.svelte';
 export { default as NetworkTable } from './NetworkTable.svelte';
-export type { NetworkColumn } from './NetworkTable.svelte';
+export type { NetworkColumn } from './NetworkTable.types.js';
 export { default as OtpInput } from './OtpInput.svelte';
 export { default as TwoFactorStepper } from './TwoFactorStepper.svelte';
 export { default as SystemErrorState } from './SystemErrorState.svelte';
