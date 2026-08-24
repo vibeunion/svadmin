@@ -277,6 +277,7 @@
 
 
 <aside
+  data-svadmin-sidebar
   aria-label="Sidebar navigation"
   class="fixed inset-y-0 left-0 z-30 flex flex-col border-r border-border/40 transition-all duration-300"
   style="background-color: var(--sidebar);"

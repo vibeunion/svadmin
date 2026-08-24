@@ -62,6 +62,17 @@ afterEach(() => {
 });
 
 describe('Layout auth scope', () => {
+  it('marks the content main as an svadmin-owned style scope', async () => {
+    const view = render(LayoutAuthScopeHost, {
+      authProvider: undefined,
+      tenant: { tenantId: 'tenant-layout-style-scope' },
+    });
+
+    await waitFor(() => expect(view.getByTestId('layout-auth-content')).not.toBeNull());
+
+    expect(view.container.querySelector('main[data-svadmin-main]')).not.toBeNull();
+  });
+
   it('clears the previous identity while the next auth provider is pending', async () => {
     const pendingIdentity = createDeferred<{ id: string; name: string }>();
     const firstAuth = createLayoutAuthProvider(Promise.resolve({ id: 'first', name: 'first layout user' }));
