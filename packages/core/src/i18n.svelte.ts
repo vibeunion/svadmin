@@ -326,6 +326,7 @@ const baseLocales: Record<string, Record<string, string>> = {
     'profile.winRate': '胜率',
     'profile.rank': '段位',
     // Public profile
+    'publicProfile.title': '公开资料',
     'publicProfile.projects': '项目',
     'publicProfile.projects2Col': '两栏项目',
     'publicProfile.projects3Col': '三栏项目',
@@ -954,6 +955,7 @@ const baseLocales: Record<string, Record<string, string>> = {
     'profile.winRate': 'Win Rate',
     'profile.rank': 'Rank',
     // Public profile
+    'publicProfile.title': 'Public profile',
     'publicProfile.projects': 'Projects',
     'publicProfile.projects2Col': 'Projects - 2 Columns',
     'publicProfile.projects3Col': 'Projects - 3 Columns',

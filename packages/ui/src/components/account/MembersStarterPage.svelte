@@ -1,106 +1,63 @@
 <script lang="ts">
   import { useTranslation } from '@svadmin/core/i18n';
+  import { ArrowRight, Check, Download, Mail, Upload, UserPlus, Users } from '@lucide/svelte';
   import * as Card from '../ui/card/index.js';
   import { Button } from '../ui/button/index.js';
-  import { Badge } from '../ui/badge/index.js';
-  import { Avatar } from '../ui/avatar/index.js';
   import { Input } from '../ui/input/index.js';
-  import { Search, UserPlus, MoreHorizontal, Clock, CheckCircle2, XCircle } from '@lucide/svelte';
+  import { Badge } from '../ui/badge/index.js';
+  import ContentPageShell from '../content/ContentPageShell.svelte';
+  import ContentPageHeader from '../content/ContentPageHeader.svelte';
 
   const i18n = useTranslation();
+  let inviteOpen = $state(false);
+  let email = $state('');
+  let invited = $state<string[]>([]);
+  const isZh = $derived(i18n.locale === 'zh-CN');
 
-  interface Member {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-    status: 'active' | 'invited' | 'inactive';
-    avatar?: string;
-    joinedAt: string;
+  function sendInvite() {
+    const normalized = email.trim();
+    if (!normalized || invited.includes(normalized)) return;
+    invited = [...invited, normalized];
+    email = '';
   }
-
-  let searchQuery = $state('');
-
-  let members = $state<Member[]>([
-    { id: '1', name: 'Alex Chen', email: 'alex@acme.com', role: 'Admin', status: 'active', joinedAt: '2023-01-15' },
-    { id: '2', name: 'Sarah Kim', email: 'sarah@acme.com', role: 'Editor', status: 'active', joinedAt: '2023-03-22' },
-    { id: '3', name: 'Mike Johnson', email: 'mike@acme.com', role: 'Viewer', status: 'invited', joinedAt: '2024-01-10' },
-    { id: '4', name: 'Lisa Wang', email: 'lisa@acme.com', role: 'Editor', status: 'active', joinedAt: '2023-06-05' },
-    { id: '5', name: 'Tom Brown', email: 'tom@acme.com', role: 'Viewer', status: 'inactive', joinedAt: '2022-11-20' },
-    { id: '6', name: 'Emma Davis', email: 'emma@acme.com', role: 'Admin', status: 'active', joinedAt: '2023-02-14' },
-  ]);
-
-  const filteredMembers = $derived(
-    searchQuery
-      ? members.filter(m => m.name.toLowerCase().includes(searchQuery.toLowerCase()) || m.email.toLowerCase().includes(searchQuery.toLowerCase()))
-      : members
-  );
-
-  const statusConfig = {
-    'active': { icon: CheckCircle2, color: 'text-green-500', label: i18n.t('account.active') },
-    'invited': { icon: Clock, color: 'text-amber-500', label: i18n.t('account.invited') },
-    'inactive': { icon: XCircle, color: 'text-muted-foreground', label: i18n.t('account.inactive') },
-  };
-
-  const initials = (name: string) => name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 </script>
 
-<div class="space-y-6" data-svadmin-content-page="account">
-  <div class="flex items-start justify-between gap-4">
-    <div>
-      <h2 class="text-xl font-semibold text-foreground">{i18n.t('account.membersStarter')}</h2>
-      <p class="mt-1 text-sm text-muted-foreground">{i18n.t('account.membersStarterDescription')}</p>
+<ContentPageShell pageId="account-members-starter" width="wide">
+  <ContentPageHeader title={isZh ? '开始组建团队' : 'Start building your team'} description={isZh ? '这是零成员工作区的起始页。邀请第一位成员，或通过 CSV 批量导入。' : 'This is the starting state for a workspace with no members. Invite the first teammate or import a CSV roster.'} />
+
+  <section class="grid min-h-[28rem] overflow-hidden rounded-lg border border-border bg-card lg:grid-cols-[minmax(0,1fr)_21rem]">
+    <div class="flex flex-col items-center justify-center px-6 py-12 text-center">
+      <span class="flex size-14 items-center justify-center rounded-lg bg-primary/10 text-primary"><Users class="size-6" /></span>
+      <Badge variant="outline" class="mt-5">0 {isZh ? '名成员' : 'members'}</Badge>
+      <h2 class="mt-4 text-xl font-semibold text-foreground">{isZh ? '邀请你的第一位团队成员' : 'Invite your first team member'}</h2>
+      <p class="mt-2 max-w-lg text-sm leading-6 text-muted-foreground">{isZh ? '成员加入后，你可以继续分配角色、设置权限、查看活动状态，并在团队成员页批量管理。' : 'After members join, assign roles, configure access, review activity, and manage them in the full team member table.'}</p>
+      <div class="mt-6 flex flex-wrap justify-center gap-2"><Button onclick={() => inviteOpen = true}><UserPlus class="size-4" />{isZh ? '邀请成员' : 'Invite member'}</Button><Button href="#/account/members/import-members" variant="outline"><Upload class="size-4" />{isZh ? '导入 CSV' : 'Import CSV'}</Button></div>
     </div>
-    <Button size="sm">
-      <UserPlus class="h-4 w-4 mr-1" />{i18n.t('account.inviteMember')}
-    </Button>
-  </div>
 
-  <!-- Search -->
-  <div class="relative">
-    <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-    <Input
-      placeholder={i18n.t('common.search')}
-      bind:value={searchQuery}
-      class="pl-9"
-    />
-  </div>
-
-  <!-- Members list -->
-  <Card.Card class="border-border/60">
-    <Card.CardContent class="p-0">
-      <div class="divide-y">
-        {#each filteredMembers as member (member.id)}
-          {@const sc = statusConfig[member.status]}
-          <div class="flex items-center gap-3 p-4 hover:bg-accent/30 transition-colors">
-            <div class="shrink-0">
-              {#if member.avatar}
-                <Avatar class="h-9 w-9"><img src={member.avatar} alt={member.name} /></Avatar>
-              {:else}
-                <div class="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-semibold">
-                  {initials(member.name)}
-                </div>
-              {/if}
-            </div>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-2">
-                <span class="text-sm font-medium text-foreground truncate">{member.name}</span>
-                <Badge variant="outline" class="text-[10px] shrink-0">{member.role}</Badge>
-              </div>
-              <p class="text-xs text-muted-foreground truncate">{member.email}</p>
-            </div>
-            <div class="shrink-0 flex items-center gap-3">
-              <span class="flex items-center gap-1 text-xs {sc.color}">
-                <sc.icon class="h-3 w-3" />
-                {sc.label}
-              </span>
-              <Button variant="ghost" size="icon-sm">
-                <MoreHorizontal class="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+    <aside class="border-t border-border bg-muted/15 p-5 lg:border-l lg:border-t-0">
+      <h2 class="text-sm font-semibold text-foreground">{isZh ? '团队准备清单' : 'Team setup checklist'}</h2>
+      <div class="mt-4 space-y-4">
+        {#each [isZh ? '邀请至少一名管理员' : 'Invite at least one admin', isZh ? '确认默认成员角色' : 'Confirm the default member role', isZh ? '准备成员 CSV 模板' : 'Prepare the member CSV template'] as item, index (item)}
+          {@const completed = index === 0 && invited.length > 0}
+          <div class="flex items-start gap-3" data-checklist-status={completed ? 'complete' : 'pending'}><span class={'mt-0.5 flex size-6 items-center justify-center rounded-md border ' + (completed ? 'border-success/30 bg-success/10 text-success' : 'border-border text-muted-foreground')}>{#if completed}<Check class="size-3.5" />{:else}<span class="text-xs">{index + 1}</span>{/if}</span><p class="text-sm leading-5 text-muted-foreground">{item}</p></div>
         {/each}
       </div>
-    </Card.CardContent>
-  </Card.Card>
-</div>
+      <a href="#/account/members/team-members" class="mt-6 flex items-center gap-1 border-t border-border pt-4 text-sm font-medium text-primary">{isZh ? '查看完整成员管理' : 'Open full member management'}<ArrowRight class="size-3.5" /></a>
+      <Button variant="outline" size="sm" class="mt-3 w-full"><Download class="size-3.5" />{isZh ? '下载 CSV 模板' : 'Download CSV template'}</Button>
+    </aside>
+  </section>
+
+  {#if inviteOpen}
+    <Card.Card data-member-invite-panel>
+      <Card.CardContent class="grid gap-4 p-5 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-end">
+        <span class="flex size-10 items-center justify-center rounded-md bg-primary/10 text-primary"><Mail class="size-4" /></span>
+        <label><span class="text-sm font-medium text-foreground">{isZh ? '成员邮箱' : 'Member email'}</span><Input class="mt-2" type="email" bind:value={email} placeholder="teammate@example.com" /></label>
+        <div class="flex gap-2"><Button variant="outline" onclick={() => inviteOpen = false}>{i18n.t('common.cancel')}</Button><Button onclick={sendInvite}>{isZh ? '发送邀请' : 'Send invite'}</Button></div>
+      </Card.CardContent>
+    </Card.Card>
+  {/if}
+
+  {#if invited.length > 0}
+    <section class="rounded-lg border border-border bg-card"><div class="border-b border-border px-4 py-3"><h2 class="text-sm font-semibold text-foreground">{isZh ? '待接受邀请' : 'Pending invitations'}</h2></div><div class="divide-y divide-border">{#each invited as invite (invite)}<div class="flex items-center justify-between gap-3 px-4 py-3"><div><p class="text-sm font-medium text-foreground">{invite}</p><p class="text-xs text-muted-foreground">{isZh ? '刚刚发送' : 'Sent just now'}</p></div><Badge variant="outline">{isZh ? '已邀请' : 'Invited'}</Badge></div>{/each}</div></section>
+  {/if}
+</ContentPageShell>

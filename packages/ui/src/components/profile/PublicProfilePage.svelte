@@ -1,6 +1,6 @@
 <script lang="ts">
   import { useTranslation } from '@svadmin/core/i18n';
-  import * as Tabs from '../ui/tabs/index.js';
+  import { Badge } from '../ui/badge/index.js';
   import ProfileCard from './ProfileCard.svelte';
   import ProjectsGrid from './ProjectsGrid.svelte';
   import ActivityTimeline from './ActivityTimeline.svelte';
@@ -14,8 +14,9 @@
   type ProfileTab = 'projects' | 'activity' | 'teams';
   interface Props { variant?: ProfileVariant; initialTab?: ProfileTab; columns?: 2 | 3; showSections?: boolean; }
   let { variant = 'default', initialTab = 'projects', columns = 2, showSections = false }: Props = $props();
-  let activeTab = $derived<ProfileTab>(initialTab);
   const i18n = useTranslation();
+  const columnLabel = $derived(i18n.locale === 'zh-CN' ? '栏' : 'columns');
+  const pageId = $derived(showSections ? `public-profile-${variant}` : `public-profile-${initialTab}-${initialTab === 'projects' ? columns : 'view'}`);
 
   const profileData = $derived.by(() => variant === 'company'
     ? { name: 'Acme Corporation', tagline: 'Building the future of enterprise software', industry: 'Technology', employees: 1250, founded: '2015', website: 'acme.com', location: 'San Francisco, CA', followers: 8420, following: 312, tags: ['SaaS', 'Enterprise', 'Cloud'], stats: [{ label: i18n.t('profile.employees'), value: '1,250' }, { label: i18n.t('publicProfile.projects'), value: '48' }, { label: i18n.t('publicProfile.teams'), value: '12' }] }
@@ -24,6 +25,7 @@
       : { name: 'Alex Chen', tagline: 'Full-stack developer & open source enthusiast', location: 'Shanghai, CN', website: 'alexchen.dev', joinedDate: '2023', followers: 1234, following: 567, tags: ['TypeScript', 'Svelte', 'Open Source'], stats: [{ label: i18n.t('publicProfile.projects'), value: '24' }, { label: i18n.t('publicProfile.followers'), value: '1.2K' }, { label: i18n.t('publicProfile.following'), value: '567' }] });
 
   const projects = referenceDemoData.projects;
+  const visibleProjects = $derived(columns === 2 ? projects.slice(0, 6) : projects);
   const activities = $derived.by(() => [
     { id: '1', type: 'posted' as const, user: profileData.name, content: 'Shipped the new dashboard redesign with real-time analytics support.', timestamp: '2 hours ago' },
     { id: '2', type: 'commented' as const, user: profileData.name, target: 'API Gateway PR #42', content: 'Looks great, with a few minor suggestions on error handling.', timestamp: '5 hours ago' },
@@ -32,21 +34,17 @@
   const teams = referenceDemoData.teams;
 </script>
 
-<ContentPageShell pageId="public-profile" width="wide">
+<ContentPageShell {pageId} width="wide">
   <ContentPageHeader title={profileData.name} eyebrow={i18n.t('publicProfile.title')} description={profileData.tagline} />
-  <ProfileCard {...profileData} {variant} />
   {#if showSections}
-    <ProfileVariantSections {variant} />
+    <div class="grid gap-6 xl:grid-cols-[20rem_minmax(0,1fr)]"><ProfileCard {...profileData} {variant} /><ProfileVariantSections {variant} /></div>
+  {:else if initialTab === 'projects'}
+    <div class="flex flex-wrap items-center justify-between gap-3 border-y border-border py-3"><div class="flex items-center gap-2"><Badge variant="outline">{columns} {columnLabel}</Badge><span class="text-sm text-muted-foreground">{visibleProjects.length} {i18n.t('publicProfile.projects')}</span></div><div class="flex gap-3 text-sm"><a class="text-primary" href="#/public-profile/projects/2-columns">2 {columnLabel}</a><a class="text-primary" href="#/public-profile/projects/3-columns">3 {columnLabel}</a></div></div>
+    <div class={columns === 2 ? 'grid gap-6 xl:grid-cols-[20rem_minmax(0,1fr)]' : 'space-y-5'}>{#if columns === 2}<ProfileCard {...profileData} {variant} />{/if}<ProjectsGrid projects={visibleProjects} {columns} /></div>
+  {:else if initialTab === 'activity'}
+    <div class="grid gap-6 xl:grid-cols-[20rem_minmax(0,1fr)]"><ProfileCard {...profileData} {variant} /><div class="space-y-4"><div class="flex items-center justify-between border-b border-border pb-3"><h2 class="text-base font-semibold text-foreground">{i18n.t('publicProfile.activity')}</h2><Badge variant="outline">{activities.length}</Badge></div><ActivityTimeline activities={activities} /></div></div>
   {:else}
-    <Tabs.Root value={activeTab} onValueChange={(value) => activeTab = value as ProfileTab}>
-      <Tabs.List class="w-full justify-start overflow-x-auto">
-        <Tabs.Trigger value="projects">{i18n.t('publicProfile.projects')}</Tabs.Trigger>
-        <Tabs.Trigger value="activity">{i18n.t('publicProfile.activity')}</Tabs.Trigger>
-        <Tabs.Trigger value="teams">{i18n.t('publicProfile.teams')}</Tabs.Trigger>
-      </Tabs.List>
-      <Tabs.Content value="projects" class="mt-5"><ProjectsGrid {projects} {columns} /></Tabs.Content>
-      <Tabs.Content value="activity" class="mt-5"><ActivityTimeline activities={activities} /></Tabs.Content>
-      <Tabs.Content value="teams" class="mt-5"><TeamsShowcase {teams} /></Tabs.Content>
-    </Tabs.Root>
+    <div class="grid gap-4 sm:grid-cols-3">{#each profileData.stats as stat (stat.label)}<div class="border-l-2 border-primary pl-3"><p class="text-sm text-muted-foreground">{stat.label}</p><p class="mt-1 text-xl font-semibold text-foreground">{stat.value}</p></div>{/each}</div>
+    <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]"><TeamsShowcase {teams} /><ProfileCard {...profileData} {variant} /></div>
   {/if}
 </ContentPageShell>

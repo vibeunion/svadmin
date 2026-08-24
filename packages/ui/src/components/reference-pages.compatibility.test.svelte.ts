@@ -2,21 +2,35 @@ import { fireEvent, render } from '@testing-library/svelte';
 import { describe, expect, it } from 'vitest';
 import ProjectsGrid from './profile/ProjectsGrid.svelte';
 import PublicProfilePage from './profile/PublicProfilePage.svelte';
+import MembersStarterPage from './account/MembersStarterPage.svelte';
 import TeamsShowcase from './profile/TeamsShowcase.svelte';
 import TwoFactorAuthPage from './TwoFactorAuthPage.svelte';
 import NetworkTableCompatibilityFixture from './NetworkTable.compatibility.test.svelte';
 
 describe('reference page compatibility', () => {
   it('keeps initialTab reactive and showSections on the variant sections view', async () => {
-    const profile = render(PublicProfilePage, { initialTab: 'projects' });
+    const profile = render(PublicProfilePage, { initialTab: 'projects', columns: 2 });
 
     expect(profile.getByText('Dashboard Redesign')).not.toBeNull();
+    expect(profile.getAllByText('6 Projects').length).toBeGreaterThan(0);
+    expect(profile.queryByText('Warehouse Console')).toBeNull();
+    await profile.rerender({ initialTab: 'projects', columns: 3 });
+    expect(profile.getAllByText('12 Projects').length).toBeGreaterThan(0);
+    expect(profile.getByText('Warehouse Console')).not.toBeNull();
     await profile.rerender({ initialTab: 'activity' });
     expect(profile.getByText(/Shipped the new dashboard redesign/)).not.toBeNull();
 
     await profile.rerender({ variant: 'default', showSections: true });
     expect(profile.getByText('About')).not.toBeNull();
     expect(profile.queryByRole('tab', { name: 'Projects' })).toBeNull();
+  });
+
+  it('keeps every starter checklist item pending while the workspace has zero members', () => {
+    const starter = render(MembersStarterPage);
+
+    expect(starter.getByText('0 members')).not.toBeNull();
+    expect(starter.container.querySelectorAll('[data-checklist-status="complete"]')).toHaveLength(0);
+    expect(starter.container.querySelectorAll('[data-checklist-status="pending"]')).toHaveLength(3);
   });
 
   it('shows the enabled state after setup and allows disabling 2FA', async () => {

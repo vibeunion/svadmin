@@ -9,12 +9,14 @@
     Building2,
     CalendarDays,
     ClipboardList,
+    FileText,
     Mail,
     Package,
     ShoppingBag,
     Users,
   } from '@lucide/svelte';
   import { readHashView } from '../utils/hashView';
+  import { resolveApplicationLayout, type SpecializedApplicationLayout } from '../applicationLayouts';
 
   const i18n = useTranslation();
 
@@ -30,7 +32,7 @@
 
   interface PageConfig {
     icon: Component<{ class?: string }>;
-    workspaceStyle: 'inventory' | 'operations' | 'people' | 'calendar' | 'communications' | 'crm' | 'property' | 'ai' | 'store';
+    workspaceStyle: SpecializedApplicationLayout | 'people' | 'calendar' | 'crm' | 'property';
     en: PageCopy;
     zh: PageCopy;
     metrics: Array<{ label: string; value: string | number; hint?: string }>;
@@ -404,8 +406,77 @@
         { label: 'Delivered', value: 1, hint: 'completed order' },
       ],
       highlights: [
-        { title: 'Field Laptop Bundle', description: 'Strongest demand in the demo catalog.', meta: '4.8 rating', badge: 'Top' },
+        { title: 'Field Laptop Bundle', description: 'Strongest demand in the demo catalog.', meta: '$1,499 · 4.8 rating', badge: 'Top' },
+        { title: 'Ergonomic Work Kit', description: 'Workspace bundle with stable repeat demand.', meta: '$389 · 4.6 rating', badge: 'Popular' },
+        { title: 'Packing Starter Pack', description: 'Fast-moving supply pack for new locations.', meta: '$42 · 72 in stock', badge: 'Stocked' },
       ],
+    },
+    orders: {
+      ...fallbackConfig,
+      icon: ClipboardList,
+      workspaceStyle: 'orders',
+      en: { eyebrow: 'Orders', title: 'Order fulfillment workspace', description: 'Review commercial demand, approvals, receiving, shipment state, and exceptions.', actionLabel: 'New order', tableLabel: 'Order records', tableDescription: 'Operational order data with customer or supplier context.', highlightsLabel: 'Fulfillment timeline' },
+      zh: { eyebrow: '订单', title: '订单履约工作区', description: '查看业务需求、审批、到货、发货状态和异常。', actionLabel: '新建订单', tableLabel: '订单记录', tableDescription: '包含客户或供应商上下文的订单数据。', highlightsLabel: '履约时间线' },
+      metrics: [{ label: 'Open', value: 4, hint: 'needs action' }, { label: 'In transit', value: 2, hint: 'moving now' }, { label: 'Value', value: '$18.4K', hint: 'active orders' }],
+      lanes: [{ label: 'Draft', value: 2, hint: 'awaiting release' }, { label: 'Processing', value: 3, hint: 'owned work' }, { label: 'Completed', value: 8, hint: 'recent closure' }],
+      highlights: [{ title: 'Approval', description: 'Commercial and budget checks completed.', meta: '09:10', badge: 'Done' }, { title: 'Fulfillment', description: 'Warehouse assignment and picking in progress.', meta: '11:30', badge: 'Active' }, { title: 'Delivery', description: 'Carrier handoff scheduled for the next window.', meta: 'Tomorrow', badge: 'Next' }],
+    },
+    planning: {
+      ...fallbackConfig,
+      icon: CalendarDays,
+      workspaceStyle: 'planning',
+      en: { eyebrow: 'Planning tools', title: 'Planning and generation workspace', description: 'Coordinate milestones, reusable AI prompts, and scheduled document generation.', actionLabel: 'New item', tableLabel: 'Planning records', tableDescription: 'Structured work items for repeatable planning and generation flows.', highlightsLabel: 'Active work' },
+      zh: { eyebrow: '计划工具', title: '计划与生成工作区', description: '协调里程碑、可复用 AI 提示词和定时文档生成。', actionLabel: '新建事项', tableLabel: '计划记录', tableDescription: '用于重复计划与生成流程的结构化工作项。', highlightsLabel: '当前工作' },
+      metrics: [{ label: 'On track', value: '82%', hint: 'delivery confidence' }, { label: 'In review', value: 3, hint: 'decision points' }, { label: 'Next run', value: 'Jun 18', hint: 'scheduled output' }],
+      lanes: [{ label: 'Planned', value: 3, hint: 'ready to start' }, { label: 'In progress', value: 4, hint: 'actively owned' }, { label: 'Review', value: 2, hint: 'awaiting decision' }],
+      highlights: [
+        { title: 'Workspace launch checklist', description: 'Finalize navigation and sample-data coverage.', meta: 'Due Jun 21', badge: '82%' },
+        { title: 'Mobile evidence pack', description: 'Collect compact route screenshots and smoke logs.', meta: 'Due Jun 24', badge: '76%' },
+        { title: 'Release readiness review', description: 'Confirm approvals, changelog, and rollback notes.', meta: 'Due Jun 25', badge: 'Review' },
+        { title: 'Navigation inventory', description: 'Map the remaining routes to their intended page families.', meta: 'Due Jun 18', badge: 'Ready' },
+        { title: 'Prompt governance set', description: 'Review reusable prompts and owner metadata.', meta: 'Due Jun 22', badge: '64%' },
+        { title: 'Acceptance summary', description: 'Publish route-level evidence and remaining follow-ups.', meta: 'Due Jun 26', badge: 'Draft' },
+      ],
+    },
+    generation: {
+      ...fallbackConfig,
+      icon: FileText,
+      workspaceStyle: 'generation',
+      en: { eyebrow: 'Document operations', title: 'Invoice generation workspace', description: 'Prepare billable details, review calculated totals, and track generated document delivery.', actionLabel: 'Generate invoice', tableLabel: 'Generated invoices', tableDescription: 'Invoice drafts and generated documents connected to the example provider.', highlightsLabel: 'Generation inputs' },
+      zh: { eyebrow: '文档运营', title: '发票生成工作区', description: '准备计费明细、复核计算合计并跟踪生成文档的投递状态。', actionLabel: '生成发票', tableLabel: '已生成发票', tableDescription: '连接示例数据源的发票草稿和已生成文档。', highlightsLabel: '生成输入' },
+      metrics: [{ label: 'Draft invoices', value: 4, hint: 'needs completion' }, { label: 'Awaiting approval', value: 2, hint: 'finance review' }, { label: 'Ready to send', value: 7, hint: 'generated documents' }],
+      lanes: [{ label: 'Input', value: 4, hint: 'customer and line items' }, { label: 'Preview', value: 2, hint: 'tax and total review' }, { label: 'Delivery', value: 7, hint: 'email or download' }],
+      highlights: [{ title: 'Customer and line items', description: 'Confirm billing identity, currency, quantities, and rates.', badge: 'Required' }, { title: 'Tax and totals', description: 'Review discounts, tax treatment, and final amount.', badge: 'Review' }, { title: 'Delivery settings', description: 'Choose document format and delivery channel.', badge: 'Output' }],
+    },
+    billing: {
+      ...fallbackConfig,
+      icon: Briefcase,
+      workspaceStyle: 'billing',
+      en: { eyebrow: 'Billing', title: 'Plans and billing workspace', description: 'Compare plans, review invoice health, and manage subscription renewal risk.', actionLabel: 'Manage billing', tableLabel: 'Billing records', tableDescription: 'Plans, invoices, and subscriptions connected to the example provider.', highlightsLabel: 'Available plans' },
+      zh: { eyebrow: '账单', title: '套餐与账单工作区', description: '比较套餐、查看账单健康度并管理订阅续费风险。', actionLabel: '管理账单', tableLabel: '账单记录', tableDescription: '连接示例数据源的套餐、账单和订阅记录。', highlightsLabel: '可用套餐' },
+      metrics: [{ label: 'Monthly recurring', value: '$217', hint: 'active subscriptions' }, { label: 'Paid', value: 2, hint: 'current invoices' }, { label: 'At risk', value: 1, hint: 'payment follow-up' }],
+      lanes: [{ label: 'Active', value: 2, hint: 'healthy renewals' }, { label: 'Trialing', value: 1, hint: 'decision due' }, { label: 'Past due', value: 1, hint: 'payment retry' }],
+      highlights: [{ title: 'Starter', description: 'For small teams getting started.', meta: '$19 / month', badge: '3 seats' }, { title: 'Pro', description: 'Advanced operations and reporting.', meta: '$49 / month', badge: '10 seats' }, { title: 'Enterprise', description: 'SSO, audit logs, and dedicated support.', meta: '$149 / month', badge: '50 seats' }],
+    },
+    security: {
+      ...fallbackConfig,
+      icon: Building2,
+      workspaceStyle: 'security',
+      en: { eyebrow: 'Security operations', title: 'Session and device trust center', description: 'Review active sessions, enrolled devices, and network allowlist posture.', actionLabel: 'Add policy', tableLabel: 'Security records', tableDescription: 'Operational identity and network controls.', highlightsLabel: 'Items requiring attention' },
+      zh: { eyebrow: '安全运营', title: '会话与设备信任中心', description: '查看活跃会话、已登记设备和网络白名单状态。', actionLabel: '新增策略', tableLabel: '安全记录', tableDescription: '身份和网络控制的运营记录。', highlightsLabel: '需要关注' },
+      metrics: [{ label: 'Trust score', value: '92%', hint: 'healthy posture' }, { label: 'Active sessions', value: 2, hint: 'currently signed in' }, { label: 'Pending devices', value: 1, hint: 'needs approval' }],
+      lanes: [{ label: 'Trusted', value: 4, hint: 'managed endpoints' }, { label: 'Idle', value: 1, hint: 'review session' }, { label: 'Restricted', value: 1, hint: 'limited network' }],
+      highlights: [{ title: 'Unknown Android', description: 'New device enrollment is waiting for approval.', meta: 'Added Jun 10', badge: 'Pending' }, { title: 'Legacy printer IP', description: 'Restricted allowlist rule only permits business hours.', meta: '198.51.100.42', badge: 'Review' }],
+    },
+    referral: {
+      ...fallbackConfig,
+      icon: Users,
+      workspaceStyle: 'referral',
+      en: { eyebrow: 'Referrals', title: 'Invitation campaign workspace', description: 'Create referral links, track invite status, and understand activation outcomes.', actionLabel: 'Send invite', tableLabel: 'Referral invites', tableDescription: 'Invitation delivery and acceptance records.', highlightsLabel: 'Shareable invitation links' },
+      zh: { eyebrow: '推荐邀请', title: '邀请活动工作区', description: '创建推荐链接、跟踪邀请状态并了解激活结果。', actionLabel: '发送邀请', tableLabel: '推荐邀请', tableDescription: '邀请投递和接受记录。', highlightsLabel: '可分享邀请链接' },
+      metrics: [{ label: 'Sent', value: 3, hint: 'total invites' }, { label: 'Accepted', value: 1, hint: 'activated' }, { label: 'Conversion', value: '33%', hint: 'acceptance rate' }],
+      lanes: [{ label: 'Sent', value: 1, hint: 'waiting' }, { label: 'Accepted', value: 1, hint: 'completed' }, { label: 'Expired', value: 1, hint: 'needs resend' }],
+      highlights: [{ title: 'Operations referral', description: 'Invite operators into the shared workspace.', meta: 'OPS-2026-A', badge: 'Accepted' }, { title: 'Team referral', description: 'Reusable campaign link for internal teams.', meta: 'OPS-2026-B', badge: 'Active' }],
     },
   };
 
@@ -477,6 +548,14 @@
     ai_conversations: {
       en: 'Review AI assistant conversations, prompt status, and operational follow-up.',
       zh: '查看 AI 助手对话、提示词状态和运营跟进。',
+    },
+    ai_prompt: {
+      en: 'Maintain reusable AI prompts, ownership, review state, and operational usage guidance.',
+      zh: '维护可复用 AI 提示词、负责人、复核状态和运营使用说明。',
+    },
+    invoice_generator: {
+      en: 'Generate invoice documents from customer, line-item, tax, and delivery inputs.',
+      zh: '根据客户、明细、税费和投递设置生成发票文档。',
     },
     notifications: {
       en: 'Triage notification priority, read status, owners, and operational alerts.',
@@ -576,6 +655,114 @@
     Accounts: '客户账户',
     'At risk': '风险项',
     Leads: '线索',
+    Orders: '订单',
+    Open: '待处理',
+    'In transit': '运输中',
+    Value: '金额',
+    Processing: '处理中',
+    'Monthly recurring': '月度经常性收入',
+    Paid: '已付',
+    'Past due': '逾期',
+    Trialing: '试用中',
+    'Trust score': '信任分',
+    'Active sessions': '活跃会话',
+    'Pending devices': '待处理设备',
+    Trusted: '已信任',
+    Idle: '闲置',
+    Restricted: '受限',
+    Pending: '待审批',
+    Conversion: '转化率',
+    Expired: '已过期',
+    Accepted: '已接受',
+    'On track': '按计划',
+    'In review': '待审核',
+    'Next run': '下次运行',
+    Planned: '已计划',
+    Next: '下一步',
+    'needs action': '需要处理',
+    'moving now': '当前运输',
+    'active orders': '活跃订单',
+    'awaiting release': '等待发布',
+    'owned work': '已分配工作',
+    'healthy renewals': '续费健康',
+    'decision due': '待决策',
+    'payment retry': '等待重试支付',
+    'delivery confidence': '交付信心度',
+    'scheduled output': '定时输出',
+    'actively owned': '当前负责',
+    'awaiting decision': '等待决策',
+    'currently signed in': '当前已登录',
+    'managed endpoints': '已管理端点',
+    'review session': '待复核会话',
+    'limited network': '受限网络',
+    'total invites': '邀请总数',
+    activated: '已激活',
+    'acceptance rate': '接受率',
+    waiting: '等待中',
+    completed: '已完成',
+    'Draft invoices': '发票草稿',
+    'Awaiting approval': '等待审批',
+    'Ready to send': '可发送',
+    Input: '输入',
+    Preview: '预览',
+    Required: '必填',
+    Output: '输出',
+    'needs completion': '需要完善',
+    'finance review': '财务复核',
+    'generated documents': '已生成文档',
+    'customer and line items': '客户与明细',
+    'tax and total review': '税费与合计复核',
+    'email or download': '邮件或下载',
+    'Customer and line items': '客户与计费明细',
+    'Confirm billing identity, currency, quantities, and rates.': '确认账单主体、币种、数量和费率。',
+    'Tax and totals': '税费与合计',
+    'Review discounts, tax treatment, and final amount.': '复核折扣、税务处理和最终金额。',
+    'Delivery settings': '投递设置',
+    'Choose document format and delivery channel.': '选择文档格式和投递渠道。',
+    'For small teams getting started.': '适合初创团队。',
+    'Advanced operations and reporting.': '提供高级运营与报表。',
+    'SSO, audit logs, and dedicated support.': '支持 SSO、审计日志和专属支持。',
+    'Commercial and budget checks completed.': '商务与预算检查已完成。',
+    'Warehouse assignment and picking in progress.': '仓库分配与拣货正在进行。',
+    'Carrier handoff scheduled for the next window.': '已安排下一个时段与承运商交接。',
+    'Due Jun 21': '6 月 21 日截止',
+    'Due Jun 24': '6 月 24 日截止',
+    'Due Jun 25': '6 月 25 日截止',
+    'Due Jun 18': '6 月 18 日截止',
+    'Due Jun 22': '6 月 22 日截止',
+    'Due Jun 26': '6 月 26 日截止',
+    'Tomorrow': '明天',
+    '3 seats': '3 个席位',
+    '10 seats': '10 个席位',
+    '50 seats': '50 个席位',
+    '$19 / month': '19 美元 / 月',
+    '$49 / month': '49 美元 / 月',
+    '$149 / month': '149 美元 / 月',
+    Approval: '审批',
+    Fulfillment: '履约',
+    Delivery: '交付',
+    Done: '已完成',
+    'Workspace launch checklist': '工作区上线清单',
+    'Finalize navigation and sample-data coverage.': '完成导航与示例数据覆盖。',
+    'Mobile evidence pack': '移动端验收证据',
+    'Collect compact route screenshots and smoke logs.': '收集紧凑路由截图和冒烟日志。',
+    'Release readiness review': '发布准备度复核',
+    'Confirm approvals, changelog, and rollback notes.': '确认审批、变更日志和回滚说明。',
+    'Navigation inventory': '导航盘点',
+    'Map the remaining routes to their intended page families.': '将剩余路由映射到对应页面族。',
+    'Prompt governance set': '提示词治理集',
+    'Review reusable prompts and owner metadata.': '复核可复用提示词和负责人元数据。',
+    'Acceptance summary': '验收摘要',
+    'Publish route-level evidence and remaining follow-ups.': '发布路由级证据与剩余跟进项。',
+    'Unknown Android': '未知 Android 设备',
+    'New device enrollment is waiting for approval.': '新设备登记正在等待审批。',
+    'Added Jun 10': '6 月 10 日添加',
+    'Legacy printer IP': '旧版打印机 IP',
+    'Restricted allowlist rule only permits business hours.': '受限白名单规则仅允许工作时间访问。',
+    'Operations referral': '运营推荐邀请',
+    'Invite operators into the shared workspace.': '邀请运营人员加入共享工作区。',
+    'Team referral': '团队推荐邀请',
+    'Reusable campaign link for internal teams.': '面向内部团队的可复用活动链接。',
     'active chats': '活跃对话',
     'active demand': '活跃需求',
     'active portfolio': '活跃组合',
@@ -664,24 +851,14 @@
   };
 
   function configFor(resource: string): PageConfig {
-    if (['products', 'skus', 'categories', 'suppliers', 'warehouses'].includes(resource)) return appConfigs.inventory;
-    if ([
-      'stock_movements',
-      'stock_transfers',
-      'cycle_counts',
-      'inventory_adjustments',
-      'reorder_rules',
-      'purchase_orders',
-      'sales_orders',
-      'todos',
-    ].includes(resource)) return appConfigs.operations;
+    const applicationLayout = resolveApplicationLayout(resource);
+    if (applicationLayout !== 'default') return appConfigs[applicationLayout];
     if (['users', 'roles'].includes(resource)) return appConfigs.people;
     if (resource === 'calendar_events') return appConfigs.calendar;
     if (resource === 'ai_conversations') return appConfigs.ai;
-    if (resource === 'notifications' || resource.startsWith('mail_')) return appConfigs.communications;
+    if (resource.startsWith('mail_')) return appConfigs.communications;
     if (resource.startsWith('crm_')) return appConfigs.crm;
     if (resource.startsWith('property') || resource === 'properties') return appConfigs.property;
-    if (resource.startsWith('store_client_')) return appConfigs.store;
     return fallbackConfig;
   }
 

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { setChatProvider } from '@svadmin/core';
+  import { useTranslation } from '@svadmin/core/i18n';
   import { AdminApp, setRichTextEditor } from '@svadmin/ui';
   import '@svadmin/ui/app.theme.css';
   import { inMemoryDataProvider } from './providers/inMemoryDb';
@@ -15,7 +16,9 @@
   registerExampleMenuTranslations();
   setRichTextEditor(LazyRichTextEditor);
 
-  let currentLocale = $state('en');
+  const i18n = useTranslation();
+  // Keep the example's derived resources in sync with AdminApp's browser-detected locale.
+  let currentLocale = $state(i18n.locale);
   const resources = $derived.by(() => createResources(currentLocale));
   const menu = $derived.by(() => createExampleMenu(currentLocale));
   const appTitle = 'svadmin example';
