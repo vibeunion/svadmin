@@ -25,5 +25,5 @@
   "packages/strapi": "0.9.11",
   "packages/lite": "0.3.18",
   "packages/mcp": "0.2.8",
-  "packages/surface": "0.2.2"
+  "packages/surface": "0.2.3"
 }
