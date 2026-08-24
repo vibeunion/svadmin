@@ -1,18 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* Base design tokens & Tailwind mappings from the UI package */
-@import "@svadmin/ui/app.css";
+/* Tailwind source tokens and component discovery are owned by @svadmin/ui. */
+@import "@svadmin/ui/app.theme.css";
 
 @custom-variant dark (&:is(.dark *));
-
-/* ╔═══════════════════════════════════════════════════════════╗
-   ║  Color presets are now managed by @svadmin/core.          ║
-   ║  Use AdminApp's themeConfig prop to select a preset:      ║
-   ║                                                           ║
-   ║    themeConfig={{ colorPreset: 'blue' }}                  ║
-   ║                                                           ║
-   ║  Available presets: neutral, indigo, blue, green,         ║
-   ║  rose, orange, violet. Custom presets can be registered   ║
-   ║  via registerColorPreset() from @svadmin/core.            ║
-   ╚═══════════════════════════════════════════════════════════╝ */

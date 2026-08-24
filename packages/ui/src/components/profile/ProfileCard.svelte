@@ -69,24 +69,24 @@
 
 <Card.Card class="overflow-hidden border-border/60">
   {#if coverImage}
-    <div class="h-32 bg-gradient-to-r from-primary/20 via-primary/10 to-accent/20 relative">
+    <div class="h-32 bg-muted relative">
       <img src={coverImage} alt="" class="h-full w-full object-cover" />
     </div>
   {:else}
-    <div class="h-32 bg-gradient-to-r from-primary/20 via-primary/10 to-accent/20 relative">
+    <div class="h-32 bg-muted relative">
       <div class="absolute inset-0 opacity-[0.06]" style="background-image: radial-gradient(circle, currentColor 1px, transparent 1px); background-size: 20px 20px;"></div>
     </div>
   {/if}
 
   <Card.CardContent class="relative px-5 pb-5">
     <div class="-mt-10 mb-3 flex items-end gap-4">
-      <div class="ring-4 ring-card rounded-xl overflow-hidden shrink-0">
+      <div class="ring-4 ring-card rounded-lg overflow-hidden shrink-0">
         {#if avatar}
           <Avatar class="h-20 w-20">
             <img src={avatar} alt={name} />
           </Avatar>
         {:else}
-          <div class="flex h-20 w-20 items-center justify-center rounded-xl bg-primary/10 text-primary text-2xl font-bold">
+          <div class="flex h-20 w-20 items-center justify-center rounded-lg bg-primary/10 text-primary text-2xl font-bold">
             {initials}
           </div>
         {/if}

@@ -38,7 +38,7 @@
   {menu}
   title={appTitle}
   bind:locale={currentLocale}
-  themeConfig={{ layoutPreset: 'clean-flat' }}
+  themeConfig={{ layoutPreset: 'clean-flat', colorPreset: 'indigo' }}
   loginDefaults={{
     identifier: 'demo@example.com',
     password: 'demo',

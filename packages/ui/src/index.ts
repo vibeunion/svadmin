@@ -197,3 +197,39 @@ export { default as TeamCrewTablePage } from './components/network/TeamCrewTable
 
 // Auth extensions
 export { default as TwoFactorAuthPage } from './components/TwoFactorAuthPage.svelte';
+
+// Stripe-first content page and domain primitives
+export { default as ContentPageShell } from './components/content/ContentPageShell.svelte';
+export { default as ContentPageHeader } from './components/content/ContentPageHeader.svelte';
+export { default as SectionHeader } from './components/content/SectionHeader.svelte';
+export { default as PageToolbar } from './components/content/PageToolbar.svelte';
+export { default as MetricBlock } from './components/content/MetricBlock.svelte';
+export { default as DescriptionList } from './components/content/DescriptionList.svelte';
+export { default as StatusBadge } from './components/content/StatusBadge.svelte';
+export { default as FilterToolbar } from './components/content/FilterToolbar.svelte';
+export { default as DataState } from './components/content/DataState.svelte';
+export type { DataStateKind } from './components/content/DataState.svelte';
+export { default as ProjectCard } from './components/content/ProjectCard.svelte';
+export type { ProjectSummary, ProjectStatus } from './components/content/ProjectCard.svelte';
+export { default as TeamCard } from './components/content/TeamCard.svelte';
+export type { TeamSummary } from './components/content/TeamCard.svelte';
+export { default as FileList } from './components/content/FileList.svelte';
+export type { FileItem } from './components/content/FileList.svelte';
+export { default as IntegrationCard } from './components/content/IntegrationCard.svelte';
+export type { IntegrationSummary } from './components/content/IntegrationCard.svelte';
+export { default as ApiKeyList } from './components/content/ApiKeyList.svelte';
+export type { ApiKeySummary } from './components/content/ApiKeyList.svelte';
+export { default as SecurityEventTable } from './components/content/SecurityEventTable.svelte';
+export type { SecurityEvent } from './components/content/SecurityEventTable.svelte';
+export { default as MemberList } from './components/content/MemberList.svelte';
+export type { MemberSummary } from './components/content/MemberList.svelte';
+export { default as ImportDropzone } from './components/content/ImportDropzone.svelte';
+export { default as NetworkUserCard } from './components/content/NetworkUserCard.svelte';
+export type { NetworkUser } from './components/content/NetworkUserCard.svelte';
+export { default as NetworkTable } from './components/content/NetworkTable.svelte';
+export type { NetworkColumn } from './components/content/NetworkTable.svelte';
+export { default as OtpInput } from './components/content/OtpInput.svelte';
+export { default as TwoFactorStepper } from './components/content/TwoFactorStepper.svelte';
+export { default as SystemErrorState } from './components/content/SystemErrorState.svelte';
+export { referenceDemoData } from './reference-data.js';
+export type { DemoMember, DemoProject, DemoTeam, DemoIntegration, DemoApiKey, DemoSecurityEvent, DemoNotification } from './reference-data.js';

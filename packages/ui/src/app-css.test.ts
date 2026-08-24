@@ -5,45 +5,78 @@ import { describe, expect, it } from 'vitest';
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 
+function readAppCss(): string {
+  return readFileSync(join(currentDir, 'app.css'), 'utf8');
+}
+
+function readCleanFlatCss(): string {
+  const css = readAppCss();
+  const marker = '/* --- Stripe-first layout preset (clean-flat) --- */';
+  const markerIndex = css.indexOf(marker);
+
+  expect(markerIndex).toBeGreaterThanOrEqual(0);
+  return css.slice(markerIndex);
+}
+
+function readSidebar(): string {
+  return readFileSync(join(currentDir, 'components', 'Sidebar.svelte'), 'utf8');
+}
+
 describe('src/app.css (Tailwind source)', () => {
   it('keeps @theme block so Tailwind v4 generates utility classes', () => {
-    const css = readFileSync(join(currentDir, 'app.css'), 'utf8');
+    const css = readAppCss();
 
     expect(css).toContain('@theme');
   });
 
   it('uses the semantic border token in the global reset', () => {
-    const css = readFileSync(join(currentDir, 'app.css'), 'utf8');
+    const css = readAppCss();
 
     expect(css).toContain('border-color: var(--color-border, var(--border));');
     expect(css).not.toMatch(/border-color:\s*var\(--border\);/);
   });
 
   it('registers the published component directory as its own Tailwind source', () => {
-    const css = readFileSync(join(currentDir, 'app.css'), 'utf8');
+    const css = readAppCss();
 
     expect(css).toContain('@source "./components";');
     expect(css).not.toContain('@source "./src";');
   });
 
-  it('scopes clean-flat structural selectors to svadmin-owned nodes', () => {
-    const css = readFileSync(join(currentDir, 'app.css'), 'utf8');
-    const sidebar = readFileSync(join(currentDir, 'components', 'Sidebar.svelte'), 'utf8');
+  it('keeps clean-flat as a semantic Stripe-first compatibility preset', () => {
+    const cleanFlatCss = readCleanFlatCss();
 
-    expect(css).not.toMatch(/\.layout-clean-flat\s+(?:aside|main|th|td|tr)(?=[\s:>,.{])/);
-    expect(css).not.toMatch(/\.layout-clean-flat\s+(?:\[data-svadmin-layout-scope\]\s+)?\.bg-card/);
-    expect(css).toContain('.layout-clean-flat [data-svadmin-main]');
-    expect(css).toContain('.layout-clean-flat [data-svadmin-sidebar]');
-    expect(css).toContain('.layout-clean-flat [data-slot="table-head"]');
-    expect(css).toContain('.layout-clean-flat [data-slot="table-cell"]');
-    expect(css).toContain('.layout-clean-flat [data-slot="table-row"]:hover [data-slot="table-cell"]');
-    expect(css).toContain('.layout-clean-flat [data-svadmin-content-page] .bg-card');
-    expect(sidebar).toMatch(/<aside\s+data-svadmin-sidebar/);
+    expect(cleanFlatCss).toContain('--svadmin-surface: var(--card);');
+    expect(cleanFlatCss).toContain('--svadmin-surface-shadow: var(--shadow-surface);');
+    expect(cleanFlatCss).toContain('background: var(--primary);');
+    expect(cleanFlatCss).toContain('--svadmin-focus-ring: var(--ring);');
+    expect(cleanFlatCss).not.toMatch(/#[\da-f]{3,8}\b/i);
+    expect(cleanFlatCss).not.toMatch(/\b(?:rgb|rgba|hsl|hsla|oklab|oklch)\(/i);
+    expect(cleanFlatCss).not.toContain('!important');
+    expect(cleanFlatCss).not.toContain('linear-gradient(');
+    expect(cleanFlatCss).not.toContain('[class*=');
+    expect(cleanFlatCss).not.toContain(':has(');
+    expect(cleanFlatCss).not.toMatch(/letter-spacing:\s*-/);
+  });
+
+  it('scopes clean-flat structural selectors to svadmin-owned nodes', () => {
+    const cleanFlatCss = readCleanFlatCss();
+
+    expect(cleanFlatCss).not.toMatch(/\.layout-clean-flat\s+(?:aside|main|th|td|tr)(?=[\s:>,.{])/);
+    expect(cleanFlatCss).not.toMatch(/\.layout-clean-flat\s+(?:\[data-svadmin-layout-scope\]\s+)?\.bg-card/);
+    expect(cleanFlatCss).toContain('.layout-clean-flat [data-svadmin-main]');
+    expect(cleanFlatCss).toContain('.layout-clean-flat [data-svadmin-sidebar]');
+    expect(cleanFlatCss).toContain('.layout-clean-flat [data-svadmin-table-head] [data-slot="table-head"]');
+    expect(cleanFlatCss).toContain('.layout-clean-flat [data-svadmin-table-row] [data-slot="table-cell"]');
+    expect(cleanFlatCss).toContain(
+      '.layout-clean-flat [data-svadmin-table-row]:hover [data-slot="table-cell"]',
+    );
+    expect(cleanFlatCss).toContain('.layout-clean-flat [data-svadmin-content-page] .bg-card');
+    expect(readSidebar()).toMatch(/<aside\s+data-svadmin-sidebar/);
   });
 
   it('keeps clean-flat svadmin surface rules behind the layout preset', () => {
-    const css = readFileSync(join(currentDir, 'app.css'), 'utf8');
-    const cleanFlatCss = css.slice(css.indexOf('.layout-clean-flat {'));
+    const cleanFlatCss = readCleanFlatCss();
 
     expect(cleanFlatCss).not.toMatch(/^\s*\[data-svadmin-/m);
     expect(cleanFlatCss).not.toMatch(/^\.dark \[data-svadmin-/m);
@@ -54,8 +87,14 @@ describe('src/app.css (Tailwind source)', () => {
       '[data-svadmin-table-row]:hover [data-slot="table-cell"]',
       '[data-svadmin-form-row]',
     ]) {
-      expect(cleanFlatCss).toContain(`.dark.layout-clean-flat ${selector}`);
-      expect(cleanFlatCss).toContain(`.dark .layout-clean-flat ${selector}`);
+      expect(cleanFlatCss).toContain(`.layout-clean-flat ${selector}`);
     }
+  });
+
+  it('documents Stripe as the visual authority and Metronic as capability reference only', () => {
+    const designContract = readFileSync(join(currentDir, '../../../DESIGN.md'), 'utf8');
+
+    expect(designContract).toContain('Stripe-first');
+    expect(designContract).toContain('Metronic is a capability reference only');
   });
 });

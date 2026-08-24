@@ -1,125 +1,43 @@
 <script lang="ts">
   import { useTranslation } from '@svadmin/core/i18n';
+  import { ArrowRight, Camera, Check, Puzzle, UserPlus, Users } from '@lucide/svelte';
   import * as Card from '../ui/card/index.js';
-  import { Button } from '../ui/button/index.js';
   import { Badge } from '../ui/badge/index.js';
-  import { Camera, UserPlus, Puzzle, Users, CheckCircle2, ArrowRight, Sparkles } from '@lucide/svelte';
-  import type { Component } from 'svelte';
+  import { Button } from '../ui/button/index.js';
+  import ContentPageShell from '../content/ContentPageShell.svelte';
+  import ContentPageHeader from '../content/ContentPageHeader.svelte';
+  import TwoFactorStepper from '../content/TwoFactorStepper.svelte';
 
   const i18n = useTranslation();
-
-  interface Step {
-    key: string;
-    title: string;
-    description: string;
-    icon: Component;
-    completed: boolean;
-  }
-
-  let currentStep = $state(0);
-
-  let steps = $state<Step[]>([
-    { key: 'avatar', title: i18n.t('account.uploadAvatar'), description: i18n.t('account.getStartedDescription'), icon: Camera, completed: false },
-    { key: 'profile', title: i18n.t('account.setupProfile'), description: i18n.t('account.getStartedDescription'), icon: UserPlus, completed: false },
-    { key: 'connect', title: i18n.t('account.connectProvider'), description: i18n.t('account.getStartedDescription'), icon: Puzzle, completed: false },
-    { key: 'team', title: i18n.t('account.setupTeam'), description: i18n.t('account.getStartedDescription'), icon: Users, completed: false },
-  ]);
-
-  const completedCount = $derived(steps.filter(s => s.completed).length);
-  const progressPercent = $derived(Math.round((completedCount / steps.length) * 100));
-  const allCompleted = $derived(completedCount === steps.length);
-
-  function markComplete(index: number) {
-    steps[index] = { ...steps[index], completed: true };
-    if (currentStep < steps.length - 1) {
-      currentStep = index + 1;
-    }
-  }
-
-  function goToStep(index: number) {
-    if (index <= completedCount) {
-      currentStep = index;
-    }
-  }
-
-  function skipStep() {
-    if (currentStep < steps.length - 1) {
-      currentStep++;
-    }
+  const steps = [
+    { title: i18n.t('account.uploadAvatar'), description: 'Add a recognizable profile image for your workspace.', icon: Camera },
+    { title: i18n.t('account.setupProfile'), description: 'Complete your contact details and working preferences.', icon: UserPlus },
+    { title: i18n.t('account.connectProvider'), description: 'Connect the services your team uses every day.', icon: Puzzle },
+    { title: i18n.t('account.setupTeam'), description: 'Invite teammates and set the right access level.', icon: Users },
+  ];
+  let completed = $state<boolean[]>(steps.map(() => false));
+  let current = $state(0);
+  const completedCount = $derived(completed.filter(Boolean).length);
+  const progress = $derived(Math.round(completedCount / steps.length * 100));
+  function complete(index: number) {
+    completed[index] = true;
+    current = Math.min(index + 1, steps.length - 1);
   }
 </script>
 
-<div class="space-y-6" data-svadmin-content-page="account">
-  <div class="flex items-start justify-between gap-4">
-    <div>
-      <h2 class="text-xl font-semibold text-foreground">{i18n.t('account.getStarted')}</h2>
-      <p class="mt-1 text-sm text-muted-foreground">{i18n.t('account.getStartedDescription')}</p>
-    </div>
-    <Badge variant="secondary">{progressPercent}%</Badge>
+<ContentPageShell pageId="account-get-started" width="narrow">
+  <div class="flex items-center justify-between gap-3"><ContentPageHeader title={i18n.t('account.getStarted')} description={i18n.t('account.getStartedDescription')} /><Badge variant="secondary">{progress}%</Badge></div>
+  <TwoFactorStepper current={completedCount} steps={steps.map((step) => step.title)} />
+  <div class="space-y-3">
+    {#each steps as step, index (step.title)}
+      <Card.Card class={current === index && !completed[index] ? 'border-primary/40' : ''}>
+        <Card.CardContent class="flex items-start gap-4 p-4">
+          <span class={'flex size-10 shrink-0 items-center justify-center rounded-md ' + (completed[index] ? 'bg-success/10 text-success' : current === index ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground')}>
+            {#if completed[index]}<Check class="size-5" />{:else}<step.icon class="size-5" />{/if}
+          </span>
+          <div class="min-w-0 flex-1"><h2 class="text-sm font-semibold text-foreground">{step.title}</h2><p class="mt-1 text-sm text-muted-foreground">{step.description}</p>{#if current === index && !completed[index]}<Button class="mt-3" size="sm" onclick={() => complete(index)}>{i18n.t('account.completeSetup')}<ArrowRight class="size-3.5" /></Button>{/if}</div>
+        </Card.CardContent>
+      </Card.Card>
+    {/each}
   </div>
-
-  <!-- Progress bar -->
-  <div class="space-y-1.5">
-    <div class="h-2 rounded-full bg-muted overflow-hidden">
-      <div class="h-full rounded-full bg-primary transition-all duration-500" style="width: {progressPercent}%"></div>
-    </div>
-    <p class="text-xs text-muted-foreground">{i18n.t('account.step', { current: completedCount, total: steps.length })}</p>
-  </div>
-
-  {#if allCompleted}
-    <Card.Card class="border-success/30 bg-success/5">
-      <Card.CardContent class="flex items-center gap-4 p-6">
-        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-success/10 text-success">
-          <Sparkles class="h-6 w-6" />
-        </div>
-        <div>
-          <h3 class="font-semibold text-success">{i18n.t('account.completeSetup')}</h3>
-          <p class="text-sm text-success/70">{i18n.t('account.getStartedDescription')}</p>
-        </div>
-      </Card.CardContent>
-    </Card.Card>
-  {:else}
-    <!-- Step cards -->
-    <div class="space-y-3">
-      {#each steps as step, i (i)}
-        <Card.Card class="border-border/60 transition-all {currentStep === i ? 'border-primary/40 shadow-sm' : ''} {step.completed ? 'opacity-60' : ''}">
-          <Card.CardContent class="p-4">
-            <div class="flex items-start gap-4">
-              <button
-                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors
-                  {step.completed ? 'bg-success/10 text-success' : currentStep === i ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}"
-                onclick={() => goToStep(i)}
-              >
-                {#if step.completed}
-                  <CheckCircle2 class="h-5 w-5" />
-                {:else}
-                  <step.icon class="h-5 w-5" />
-                {/if}
-              </button>
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2">
-                  <h4 class="font-medium text-foreground">{step.title}</h4>
-                  {#if currentStep === i && !step.completed}
-                    <Badge variant="outline" class="text-[10px]">{i18n.t('account.step', { current: i + 1, total: steps.length })}</Badge>
-                  {/if}
-                </div>
-                <p class="text-sm text-muted-foreground mt-0.5">{step.description}</p>
-
-                {#if currentStep === i && !step.completed}
-                  <div class="mt-3 flex gap-2">
-                    <Button size="sm" onclick={() => markComplete(i)}>
-                      {i18n.t('account.completeSetup')} <ArrowRight class="h-3.5 w-3.5 ml-1" />
-                    </Button>
-                    <Button size="sm" variant="ghost" onclick={skipStep}>
-                      {i18n.t('account.skipSetup')}
-                    </Button>
-                  </div>
-                {/if}
-              </div>
-            </div>
-          </Card.CardContent>
-        </Card.Card>
-      {/each}
-    </div>
-  {/if}
-</div>
+</ContentPageShell>
