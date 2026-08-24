@@ -85,38 +85,25 @@ describe('npm trusted-publishing workflow contract', () => {
 });
 
 describe('release-please scaffold synchronization', () => {
-  test('updates the create-svadmin core range with each core release', () => {
-    const coreRelease = readReleasePleaseConfig().packages['packages/core'];
+  const scaffoldManifestPath = '/packages/create-svadmin/scaffold-manifest.json';
 
-    expect(coreRelease['extra-files']).toContainEqual({
-      type: 'json',
-      path: 'packages/create-svadmin/scaffold-manifest.json',
-      jsonpath: '$.dependencies["@svadmin/core"]',
-    });
-  });
-
-  test('updates create-svadmin provider ranges with each provider release', () => {
+  test('updates root-level create-svadmin ranges with each dependent package release', () => {
     const config = readReleasePleaseConfig();
-    expect(config.packages['packages/ui']['extra-files']).toContainEqual({
-      type: 'json',
-      path: 'packages/create-svadmin/scaffold-manifest.json',
-      jsonpath: '$.dependencies["@svadmin/ui"]',
-    });
-    expect(config.packages['packages/simple-rest']['extra-files']).toContainEqual({
-      type: 'json',
-      path: 'packages/create-svadmin/scaffold-manifest.json',
-      jsonpath: '$.svadmin.dependencyPacks["simple-rest"]["@svadmin/simple-rest"]',
-    });
-    expect(config.packages['packages/supabase']['extra-files']).toContainEqual({
-      type: 'json',
-      path: 'packages/create-svadmin/scaffold-manifest.json',
-      jsonpath: '$.svadmin.dependencyPacks["supabase"]["@svadmin/supabase"]',
-    });
-    expect(config.packages['packages/graphql']['extra-files']).toContainEqual({
-      type: 'json',
-      path: 'packages/create-svadmin/scaffold-manifest.json',
-      jsonpath: '$.svadmin.dependencyPacks["graphql"]["@svadmin/graphql"]',
-    });
+    const expectedExtraFiles = [
+      ['packages/core', '$.dependencies["@svadmin/core"]'],
+      ['packages/ui', '$.dependencies["@svadmin/ui"]'],
+      ['packages/simple-rest', '$.svadmin.dependencyPacks["simple-rest"]["@svadmin/simple-rest"]'],
+      ['packages/supabase', '$.svadmin.dependencyPacks["supabase"]["@svadmin/supabase"]'],
+      ['packages/graphql', '$.svadmin.dependencyPacks["graphql"]["@svadmin/graphql"]'],
+    ] as const;
+
+    for (const [packagePath, jsonpath] of expectedExtraFiles) {
+      expect(config.packages[packagePath]['extra-files']).toContainEqual({
+        type: 'json',
+        path: scaffoldManifestPath,
+        jsonpath,
+      });
+    }
   });
 });
 

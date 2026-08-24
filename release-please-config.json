@@ -40,7 +40,7 @@
       "extra-files": [
         {
           "type": "json",
-          "path": "packages/create-svadmin/scaffold-manifest.json",
+          "path": "/packages/create-svadmin/scaffold-manifest.json",
           "jsonpath": "$.dependencies[\"@svadmin/core\"]"
         }
       ]
@@ -52,7 +52,7 @@
       "extra-files": [
         {
           "type": "json",
-          "path": "packages/create-svadmin/scaffold-manifest.json",
+          "path": "/packages/create-svadmin/scaffold-manifest.json",
           "jsonpath": "$.dependencies[\"@svadmin/ui\"]"
         }
       ]
@@ -79,7 +79,7 @@
       "extra-files": [
         {
           "type": "json",
-          "path": "packages/create-svadmin/scaffold-manifest.json",
+          "path": "/packages/create-svadmin/scaffold-manifest.json",
           "jsonpath": "$.svadmin.dependencyPacks[\"simple-rest\"][\"@svadmin/simple-rest\"]"
         }
       ]
@@ -106,7 +106,7 @@
       "extra-files": [
         {
           "type": "json",
-          "path": "packages/create-svadmin/scaffold-manifest.json",
+          "path": "/packages/create-svadmin/scaffold-manifest.json",
           "jsonpath": "$.svadmin.dependencyPacks[\"supabase\"][\"@svadmin/supabase\"]"
         }
       ]
@@ -153,7 +153,7 @@
       "extra-files": [
         {
           "type": "json",
-          "path": "packages/create-svadmin/scaffold-manifest.json",
+          "path": "/packages/create-svadmin/scaffold-manifest.json",
           "jsonpath": "$.svadmin.dependencyPacks[\"graphql\"][\"@svadmin/graphql\"]"
         }
       ]
