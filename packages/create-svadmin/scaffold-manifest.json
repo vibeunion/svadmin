@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@svadmin/core": "^0.36.3",
-    "@svadmin/ui": "^0.42.2",
+    "@svadmin/ui": "^0.42.3",
     "@tanstack/svelte-query": "^6.1.38",
     "highlight.js": "^11.11.1",
     "@lucide/svelte": "^1.31.0"
