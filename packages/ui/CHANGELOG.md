@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.42.3](https://github.com/vibeunion/svadmin/compare/ui-v0.42.2...ui-v0.42.3) (2026-08-24)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** scope clean-flat styles to svadmin nodes ([7a26f53](https://github.com/vibeunion/svadmin/commit/7a26f53e3c2e8656103c7c6e84298ee1c1b3d93c))
+* **ui:** scope clean-flat styles to svadmin nodes ([4acde6b](https://github.com/vibeunion/svadmin/commit/4acde6b102dc562f9454df29254f5b3c4835b03e))
+
 ## [0.42.2](https://github.com/vibeunion/svadmin/compare/ui-v0.42.1...ui-v0.42.2) (2026-08-21)
 
 
