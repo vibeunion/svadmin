@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Table } from '../ui/table/index.js';
+  import * as Table from '../ui/table/index.js';
   import StatusBadge from './StatusBadge.svelte';
   export interface SecurityEvent { id: string; event: string; actor?: string; location?: string; createdAt: string; severity: 'info' | 'warning' | 'danger'; }
   interface Props { events?: SecurityEvent[]; class?: string; }

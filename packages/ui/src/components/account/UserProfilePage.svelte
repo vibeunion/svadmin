@@ -10,7 +10,7 @@
   import FileList from '../content/FileList.svelte';
   import IntegrationCard from '../content/IntegrationCard.svelte';
   import type { IntegrationSummary } from '../content/IntegrationCard.svelte';
-  import { referenceDemoData } from '../reference-data.js';
+  import { referenceDemoData } from '../../reference-data.js';
   const i18n = useTranslation();
   let availableToHire = $state(true);
   let saving = $state(false);

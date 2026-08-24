@@ -6,10 +6,9 @@
   import ContentPageHeader from '../content/ContentPageHeader.svelte';
   import FilterToolbar from '../content/FilterToolbar.svelte';
   import NetworkTable from '../content/NetworkTable.svelte';
-  import type { NetworkColumn } from '../content/NetworkTable.svelte';
+  import type { NetworkColumn } from '../content/NetworkTable.types.js';
   import { Avatar } from '../ui/avatar/index.js';
   import { Badge } from '../ui/badge/index.js';
-  import type { Snippet } from 'svelte';
 
   interface CrewMember { id: string; name: string; email: string; role: string; department: string; status: 'active' | 'away' | 'offline'; projects: number; }
   const i18n = useTranslation();

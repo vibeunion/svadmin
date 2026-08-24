@@ -28,6 +28,9 @@ describe('Stripe-first content component contract', () => {
     for (const name of components.map((entry) => entry.replace('.svelte', ''))) {
       expect(index).toContain('./components/content/' + name + '.svelte');
     }
+    expect(index).toContain("export type { DescriptionItem } from './components/content/DescriptionList.svelte';");
+    expect(index).toContain("export type { Status } from './components/content/StatusBadge.svelte';");
+    expect(index).toContain("export type { NetworkColumn } from './components/content/NetworkTable.types.js';");
   });
 
   it('uses semantic tokens and bounded primitives instead of a second palette', () => {

@@ -7,6 +7,11 @@
 
 * **ui:** unify stripe-first reference pages ([9378ab1](https://github.com/vibeunion/svadmin/commit/9378ab16875ce339bd6928733fa4585059b3ffb6))
 
+
+### 🐛 Bug Fixes
+
+* **ui:** preserve public reference-page behavior, rich card props, and typed exports
+
 ## [0.42.3](https://github.com/vibeunion/svadmin/compare/ui-v0.42.2...ui-v0.42.3) (2026-08-24)
 
 

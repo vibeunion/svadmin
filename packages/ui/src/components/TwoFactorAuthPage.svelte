@@ -1,6 +1,6 @@
 <script lang="ts">
   import { useTranslation } from '@svadmin/core/i18n';
-  import { ArrowLeft, ArrowRight, Check, Copy, Shield } from '@lucide/svelte';
+  import { ArrowLeft, ArrowRight, Check, CheckCircle2, Copy, Shield } from '@lucide/svelte';
   import { Button } from './ui/button/index.js';
   import * as Card from './ui/card/index.js';
   import * as Alert from './ui/alert/index.js';
@@ -8,6 +8,8 @@
   import ContentPageHeader from './content/ContentPageHeader.svelte';
   import OtpInput from './content/OtpInput.svelte';
   import TwoFactorStepper from './content/TwoFactorStepper.svelte';
+  import { Badge } from './ui/badge/index.js';
+  import { Separator } from './ui/separator/index.js';
 
   type Step = 'intro' | 'scan' | 'verify' | 'recovery';
   const i18n = useTranslation();
@@ -24,9 +26,9 @@
 
 <ContentPageShell pageId="auth-2fa" width="narrow">
   <ContentPageHeader title={i18n.t('auth.twoFactorSetup')} description={i18n.t('security.twoFactorDescription')} />
-  <TwoFactorStepper current={currentIndex} steps={[i18n.t('auth.twoFactorSetup'), i18n.t('auth.twoFactorScanQR'), i18n.t('auth.twoFactorVerify'), i18n.t('auth.twoFactorRecovery')]} />
+  {#if !enabled}<TwoFactorStepper current={currentIndex} steps={[i18n.t('auth.twoFactorSetup'), i18n.t('auth.twoFactorScanQR'), i18n.t('auth.twoFactorVerify'), i18n.t('auth.twoFactorRecovery')]} />{/if}
   <Card.Card><Card.CardContent class="space-y-6 p-6">
-    {#if currentStep === 'intro'}
+    {#if currentStep === 'intro' && !enabled}
       <div class="flex items-start gap-3"><span class="flex size-10 items-center justify-center rounded-md bg-primary/10 text-primary"><Shield class="size-5" /></span><div><h2 class="text-base font-semibold text-foreground">{i18n.t('auth.twoFactorSetup')}</h2><p class="mt-1 text-sm text-muted-foreground">{i18n.t('security.twoFactorDescription')}</p></div></div>
       <ol class="space-y-2 text-sm text-muted-foreground"><li class="rounded-md border border-border p-3">1. {i18n.t('auth.twoFactorScanQR')}</li><li class="rounded-md border border-border p-3">2. {i18n.t('auth.twoFactorEnterCode')}</li><li class="rounded-md border border-border p-3">3. {i18n.t('auth.twoFactorSaveRecovery')}</li></ol>
       <Button class="w-full" onclick={() => currentStep = 'scan'}>{i18n.t('common.next')}<ArrowRight class="size-4" /></Button>
@@ -35,8 +37,25 @@
       <div class="flex justify-between gap-2"><Button variant="outline" onclick={() => currentStep = 'intro'}><ArrowLeft class="size-4" />{i18n.t('common.back')}</Button><Button onclick={() => currentStep = 'verify'}>{i18n.t('common.next')}<ArrowRight class="size-4" /></Button></div>
     {:else if currentStep === 'verify'}
       <div class="space-y-4"><div><h2 class="text-base font-semibold text-foreground">{i18n.t('auth.twoFactorVerify')}</h2><p class="mt-1 text-sm text-muted-foreground">{i18n.t('auth.twoFactorEnterCode')}</p></div>{#if error}<Alert.Root variant="destructive"><Alert.Description>{error}</Alert.Description></Alert.Root>{/if}<OtpInput bind:value={codeDigits} /><div class="flex justify-between gap-2"><Button variant="outline" onclick={() => currentStep = 'scan'}><ArrowLeft class="size-4" />{i18n.t('common.back')}</Button><Button onclick={verify}>{i18n.t('common.next')}<ArrowRight class="size-4" /></Button></div></div>
-    {:else}
+    {:else if currentStep === 'recovery'}
       <div class="space-y-4"><div><h2 class="text-base font-semibold text-foreground">{i18n.t('auth.twoFactorRecovery')}</h2><p class="mt-1 text-sm text-muted-foreground">{i18n.t('auth.twoFactorRecoveryHint')}</p></div><div class="grid grid-cols-2 gap-2 rounded-md border border-border bg-muted p-4 font-mono text-sm">{#each recoveryCodes as code (code)}<span>{code}</span>{/each}</div><div class="flex justify-end gap-2"><Button variant="outline" onclick={copyCodes}>{#if copied}<Check class="size-4" />{:else}<Copy class="size-4" />{/if}{i18n.t('common.copy')}</Button><Button onclick={() => { enabled = true; currentStep = 'intro'; }}>{i18n.t('account.completeSetup')}</Button></div>{#if enabled}<p class="text-sm text-success">{i18n.t('security.twoFactorActive')}</p>{/if}</div>
+    {:else}
+      <div class="space-y-6 p-6 text-center">
+        <div class="mx-auto flex size-12 items-center justify-center rounded-xl bg-success/10 text-success">
+          <Shield class="size-6" />
+        </div>
+        <div>
+          <h2 class="text-xl font-semibold text-foreground">{i18n.t('auth.twoFactorVerifySuccess')}</h2>
+          <p class="mt-1 text-sm text-muted-foreground">{i18n.t('security.twoFactorActive')}</p>
+        </div>
+        <Badge variant="secondary" class="mx-auto w-fit bg-success/10 text-success">
+          <CheckCircle2 class="size-3.5" />{i18n.t('securityLog.twoFactorEnabled')}
+        </Badge>
+        <Separator />
+        <Button variant="destructive" onclick={() => { enabled = false; currentStep = 'intro'; }}>
+          {i18n.t('auth.twoFactorDisable')}
+        </Button>
+      </div>
     {/if}
   </Card.CardContent></Card.Card>
 </ContentPageShell>

@@ -205,7 +205,9 @@ export { default as SectionHeader } from './components/content/SectionHeader.sve
 export { default as PageToolbar } from './components/content/PageToolbar.svelte';
 export { default as MetricBlock } from './components/content/MetricBlock.svelte';
 export { default as DescriptionList } from './components/content/DescriptionList.svelte';
+export type { DescriptionItem } from './components/content/DescriptionList.svelte';
 export { default as StatusBadge } from './components/content/StatusBadge.svelte';
+export type { Status } from './components/content/StatusBadge.svelte';
 export { default as FilterToolbar } from './components/content/FilterToolbar.svelte';
 export { default as DataState } from './components/content/DataState.svelte';
 export type { DataStateKind } from './components/content/DataState.svelte';
@@ -227,7 +229,7 @@ export { default as ImportDropzone } from './components/content/ImportDropzone.s
 export { default as NetworkUserCard } from './components/content/NetworkUserCard.svelte';
 export type { NetworkUser } from './components/content/NetworkUserCard.svelte';
 export { default as NetworkTable } from './components/content/NetworkTable.svelte';
-export type { NetworkColumn } from './components/content/NetworkTable.svelte';
+export type { NetworkColumn } from './components/content/NetworkTable.types.js';
 export { default as OtpInput } from './components/content/OtpInput.svelte';
 export { default as TwoFactorStepper } from './components/content/TwoFactorStepper.svelte';
 export { default as SystemErrorState } from './components/content/SystemErrorState.svelte';

@@ -15,12 +15,14 @@
     tasks?: number;
     progress?: number;
     tags?: string[];
+    image?: string;
   }
   interface Props { project: ProjectSummary; onclick?: () => void; class?: string; }
   let { project, onclick, class: className = '' }: Props = $props();
   const progress = $derived(project.progress ?? (project.status === 'completed' ? 100 : project.status === 'active' ? 72 : 0));
 </script>
 <Card.Card data-interactive={onclick ? 'true' : undefined} class={'h-full ' + className}>
+  {#if project.image}<img src={project.image} alt={project.name} class="h-32 w-full object-cover" />{/if}
   <Card.CardContent class="flex h-full flex-col gap-4 p-4">
     <div class="flex items-start justify-between gap-3">
       <div class="flex min-w-0 items-center gap-3"><span class="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-muted/50 text-muted-foreground"><FolderKanban class="size-4" /></span><h3 class="truncate text-sm font-semibold text-foreground">{project.name}</h3></div>
