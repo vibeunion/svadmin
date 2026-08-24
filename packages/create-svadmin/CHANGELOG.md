@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.13.8...create-svadmin-v0.14.0) (2026-08-24)
+
+
+### 🚀 Features
+
+* **ui:** unify stripe-first reference pages ([9378ab1](https://github.com/vibeunion/svadmin/commit/9378ab16875ce339bd6928733fa4585059b3ffb6))
+
 ## [0.13.8](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.13.7...create-svadmin-v0.13.8) (2026-08-24)
 
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.43.0](https://github.com/vibeunion/svadmin/compare/ui-v0.42.3...ui-v0.43.0) (2026-08-24)
+
+
+### 🚀 Features
+
+* **ui:** unify stripe-first reference pages ([9378ab1](https://github.com/vibeunion/svadmin/commit/9378ab16875ce339bd6928733fa4585059b3ffb6))
+
 ## [0.42.3](https://github.com/vibeunion/svadmin/compare/ui-v0.42.2...ui-v0.42.3) (2026-08-24)
 
 
