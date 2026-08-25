@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.46.0](https://github.com/vibeunion/svadmin/compare/ui-v0.45.0...ui-v0.46.0) (2026-08-25)
+
+
+### 🚀 Features
+
+* **ui:** adopt Stripe-first design system ([eee648c](https://github.com/vibeunion/svadmin/commit/eee648ca9ac83576f8dcf9ef86c969c09a882d48))
+
 ## [0.45.0](https://github.com/vibeunion/svadmin/compare/ui-v0.44.0...ui-v0.45.0) (2026-08-25)
 
 
