@@ -39,7 +39,7 @@ for (const [label, selector] of [
   ['collapsed sidebar width', '.w-\\[70px\\]'],
   ['expanded content offset', '.md\\:ml-\\[252px\\]'],
   ['collapsed content offset', '.md\\:ml-\\[70px\\]'],
-  ['table container radius', '.rounded-\\[24px\\]'],
+  ['table container radius', '.rounded-lg'],
 ] as const) {
   assert(emittedCss.includes(selector), `Example CSS is missing ${label} utility ${selector}`);
 }

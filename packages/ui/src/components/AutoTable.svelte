@@ -75,6 +75,7 @@
   interface Props {
     resourceName: string;
     selectable?: boolean;
+    density?: 'compact' | 'comfortable';
     /** Custom header actions (right side) */
     headerActions?: Snippet;
     /** Custom cell renderers by field key */
@@ -98,6 +99,7 @@
   let {
     resourceName,
     selectable = true,
+    density = 'comfortable',
     headerActions,
     columns: customColumns,
     defaultCellRenderer,
@@ -109,6 +111,8 @@
     sorters: externalSorters,
   }: Props = $props();
   const adminContext = captureAdminContext();
+  const headerDensityClass = $derived(density === 'compact' ? 'h-8 py-1.5 text-[0.6875rem]' : 'h-9 py-2.5 text-xs');
+  const cellDensityClass = $derived(density === 'compact' ? 'h-8 px-2 py-1 text-xs' : 'h-10 p-2 text-sm');
 
   const resource = $derived(getResource(resourceName));
   const primaryKey = $derived(resource.primaryKey ?? 'id');
@@ -682,7 +686,7 @@
   </div>
 
   <!-- Table (TanStack-powered) -->
-  <div class="rounded-[24px] bg-card/80 backdrop-blur-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden ring-1 ring-border/30" role="region" aria-label="{resource.label} {i18n.t('common.list')}">
+  <div class="overflow-hidden rounded-lg border border-border bg-card shadow-sm" role="region" aria-label="{resource.label} {i18n.t('common.list')}" data-table-density={density}>
     {#if query.isLoading}
       <div class="p-4 space-y-3">
         <div class="flex gap-4 mb-2">
@@ -719,7 +723,7 @@
                   {@const header = col.header as typeof headerGroup.headers[0]}
                   <Table.Head
                     {...dragProps}
-                    class={cn("bg-transparent hover:bg-muted/10 border-b border-border/20 uppercase tracking-[0.12em] text-[10px] text-muted-foreground/70 font-semibold py-4", dragProps.class)}
+                    class={cn('border-b border-border bg-muted/25 font-medium tracking-normal text-muted-foreground hover:bg-muted/40', headerDensityClass, dragProps.class)}
                     style={header_getSize(header) != null && header_getSize(header) !== 150 ? `width:${header_getSize(header)}px` : undefined}
                   >
                     {#if header.id === '_select'}
@@ -764,7 +768,7 @@
                   {#snippet child({ props })}
                     <Table.Row {...props} class="transition-all duration-300 border-b border-border/10 {row_getIsSelected(row) ? 'bg-primary/5' : 'hover:bg-muted/20'}">
                       {#each visibleCells as cell, _i (_i)}
-                        <Table.Cell>
+                        <Table.Cell class={cellDensityClass}>
                           {#if cell.column.id === '_select'}
                             <Checkbox
                               checked={row_getIsSelected(row)}

@@ -210,6 +210,11 @@ export { default as ContentPageHeader } from './components/content/ContentPageHe
 export { default as SectionHeader } from './components/content/SectionHeader.svelte';
 export { default as PageToolbar } from './components/content/PageToolbar.svelte';
 export { default as WorkspaceLayout } from './components/content/WorkspaceLayout.svelte';
+export { default as WorkspaceStageStepper } from './components/content/WorkspaceStageStepper.svelte';
+export type { WorkspaceStage, WorkspaceStageStatus } from './components/content/WorkspaceStageStepper.svelte';
+export { default as WorkspaceActionBar } from './components/content/WorkspaceActionBar.svelte';
+export { default as WorkspaceInspector } from './components/content/WorkspaceInspector.svelte';
+export { default as WorkspaceSplitPane } from './components/content/WorkspaceSplitPane.svelte';
 export { default as SettingsGroup } from './components/content/SettingsGroup.svelte';
 export { default as SettingsFieldRow } from './components/content/SettingsFieldRow.svelte';
 export { default as MetricBlock } from './components/content/MetricBlock.svelte';

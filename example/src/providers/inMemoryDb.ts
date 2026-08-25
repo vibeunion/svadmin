@@ -29,6 +29,7 @@ import type {
 const STORAGE_KEY = 'svadmin_inventory_demo_db_v5';
 
 type ResourceName =
+  | 'case_workspace'
   | 'products'
   | 'skus'
   | 'categories'
@@ -83,6 +84,7 @@ type ResourceName =
 type DbState = Record<ResourceName, BaseRecord[]>;
 
 const initialDbState: DbState = {
+  case_workspace: [],
   categories: [
     { id: 1, name: 'Electronics', code: 'ELEC', description: 'Devices and accessories' },
     { id: 2, name: 'Furniture', code: 'FURN', description: 'Workspace furniture' },

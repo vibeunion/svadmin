@@ -6,7 +6,8 @@ const root = resolve(import.meta.dir, '..');
 const contentDir = join(root, 'packages/ui/src/components/content');
 const components = [
   'ContentPageShell.svelte', 'ContentPageHeader.svelte', 'SectionHeader.svelte',
-  'PageToolbar.svelte', 'WorkspaceLayout.svelte', 'SettingsGroup.svelte',
+  'PageToolbar.svelte', 'WorkspaceLayout.svelte', 'WorkspaceStageStepper.svelte',
+  'WorkspaceActionBar.svelte', 'WorkspaceInspector.svelte', 'WorkspaceSplitPane.svelte', 'SettingsGroup.svelte',
   'SettingsFieldRow.svelte', 'MetricBlock.svelte', 'DescriptionList.svelte',
   'StatusBadge.svelte', 'FilterToolbar.svelte', 'DataState.svelte',
   'ProjectCard.svelte', 'TeamCard.svelte', 'FileList.svelte',

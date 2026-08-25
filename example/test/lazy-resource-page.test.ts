@@ -23,7 +23,21 @@ vi.mock('../src/pages/DomainWorkspacePage.svelte', async () => {
   return { default: page.default };
 });
 
+vi.mock('../src/pages/CaseWorkspacePage.svelte', async () => {
+  const page = await import('./fixtures/LazyResourceCaseWorkspaceDouble.svelte');
+  return { default: page.default };
+});
+
 describe('LazyResourcePage', () => {
+  it('loads the case workspace vertical slice', async () => {
+    const target = document.createElement('div');
+    const page = mount(LazyResourcePage, { target, props: { resourceName: 'case_workspace' } });
+
+    await vi.waitFor(() => expect(target.textContent).toContain('case-workspace:case_workspace'));
+
+    await unmount(page);
+  });
+
   it('loads the dedicated workspace page for a specialized resource', async () => {
     const target = document.createElement('div');
     const page = mount(LazyResourcePage, { target, props: { resourceName: 'todos' } });

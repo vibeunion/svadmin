@@ -22,6 +22,13 @@ export const resources: ResourceDefinition[] = [
     showInMenu: false,
   },
   {
+    name: 'case_workspace',
+    label: 'Case Workspace',
+    icon: 'flask-conical',
+    fields: [],
+    showInMenu: false,
+  },
+  {
     name: 'products',
     label: 'Products',
     icon: 'folder',
@@ -1493,6 +1500,7 @@ const zhGroupLabels: Record<string, string> = {
 };
 
 const zhResourceLabels: Record<string, string> = {
+  'Case Workspace': '案件工作台',
   Products: '商品档案',
   SKUs: 'SKU 管理',
   Categories: '品类管理',

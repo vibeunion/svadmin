@@ -10,8 +10,10 @@
   const loadDesignPrinciplesPage = () => import('../pages/DesignPrinciplesPage.svelte');
   const loadOperationsWorkspacePage = () => import('../pages/OperationsWorkspacePage.svelte');
   const loadDomainWorkspacePage = () => import('../pages/DomainWorkspacePage.svelte');
+  const loadCaseWorkspacePage = () => import('../pages/CaseWorkspacePage.svelte');
 
   const resourcePageLoaders = {
+    case_workspace: loadCaseWorkspacePage,
     todos: loadTodoWorkspacePage,
     users: loadUserManagementPage,
     roles: loadUserManagementPage,
