@@ -1,6 +1,7 @@
 "key","en","zh","app","level","soon","href","path"
 "dashboards","Dashboards","仪表盘","Dashboards","1","false","",""
 "dashboard","Operations Dashboard","运营首页","Dashboards","2","false","/","Dashboards"
+"design_principles","Design Principles","设计原则","Dashboards","2","false","/design_principles","Dashboards"
 "public_profile","Public Profile","个人资料","Public Profile","1","false","",""
 "public_profile_overview","Overview","资料概览","Public Profile","2","false","/public-profile","Public Profile"
 "public_profile_projects","Projects","项目","Public Profile","2","false","","Public Profile"

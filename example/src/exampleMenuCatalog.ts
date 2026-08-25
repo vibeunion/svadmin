@@ -22,6 +22,7 @@ export interface ReferenceMenuCatalogRow {
 export const referenceMenuCatalogRows: ReferenceMenuCatalogRow[] = [
   { zh: '仪表盘', en: 'Dashboards', app: 'Dashboards', level: 1, soon: false },
   { zh: '运营首页', en: 'Operations Dashboard', app: 'Dashboards', level: 2, soon: false },
+  { zh: '设计原则', en: 'Design Principles', app: 'Dashboards', level: 2, soon: false },
   { zh: '个人资料', en: 'Public Profile', app: 'Public Profile', level: 1, soon: false },
   { zh: '资料概览', en: 'Overview', app: 'Public Profile', level: 2, soon: false },
   { zh: '项目', en: 'Projects', app: 'Public Profile', level: 2, soon: false },
@@ -151,6 +152,7 @@ const menuLabels = {
   en: {
     dashboards: 'Dashboards',
     dashboard: 'Operations Dashboard',
+    design_principles: 'Design Principles',
     public_profile: 'Public Profile',
     public_profile_overview: 'Overview',
     public_profile_projects: 'Projects',
@@ -295,6 +297,7 @@ const menuLabels = {
   'zh-CN': {
     dashboards: '仪表盘',
     dashboard: '运营首页',
+    design_principles: '设计原则',
     public_profile: '个人资料',
     public_profile_overview: '资料概览',
     public_profile_projects: '项目',
@@ -456,6 +459,7 @@ function localize(items: MenuNode[], locale: string): MenuItem[] {
 export const exampleMenu: MenuNode[] = [
   item('dashboards', 'dashboard', undefined, [
     item('dashboard', 'dashboard', '/'),
+    item('design_principles', 'layers', '/design_principles'),
   ]),
   item('public_profile', 'users', undefined, [
     item('public_profile_overview', 'home', '/public-profile'),

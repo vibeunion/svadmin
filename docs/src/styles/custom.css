@@ -1,13 +1,13 @@
-/* Stripe-style modern tables */
+/* Stripe-first documentation tables */
 .sl-markdown-content table:not(.not-content) {
-  display: table !important;
+  display: table;
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  border-radius: 12px;
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.02);
-  border: none !important;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 1px 3px rgb(15 23 42 / 0.025);
   margin-top: 2rem;
   margin-bottom: 2rem;
   font-size: 0.875rem;
@@ -15,29 +15,29 @@
 
 .sl-markdown-content table:not(.not-content) th,
 .sl-markdown-content table:not(.not-content) td {
-  border: none !important;
-  border-bottom: none !important;
-  padding: 12px 16px !important;
+  border: 0;
+  border-bottom: 1px solid var(--sl-color-gray-5);
+  padding: 12px 16px;
   text-align: left;
   vertical-align: middle;
 }
 
 .sl-markdown-content table:not(.not-content) tbody tr:last-child td {
-  border-bottom: none !important;
+  border-bottom: 0;
 }
 
 .sl-markdown-content table:not(.not-content) th {
-  background-color: var(--sl-color-bg-nav, var(--sl-color-gray-6)) !important;
-  font-weight: 600 !important;
+  background-color: var(--sl-color-bg-nav, var(--sl-color-gray-6));
+  font-weight: 600;
   color: var(--sl-color-text-accent, var(--sl-color-text));
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
 }
 
 .sl-markdown-content table:not(.not-content) tbody tr {
   transition: background-color 0.15s ease;
-  border-bottom: none !important;
+  border-bottom: 0;
 }
 
 .sl-markdown-content table:not(.not-content) tbody tr:hover {
-  background-color: var(--sl-color-bg-inline-code, rgba(128, 128, 128, 0.05)) !important;
+  background-color: var(--sl-color-bg-inline-code, rgb(128 128 128 / 0.05));
 }

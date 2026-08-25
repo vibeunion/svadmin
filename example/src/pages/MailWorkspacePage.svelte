@@ -1,9 +1,9 @@
 <script lang="ts">
   import { useList } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
-  import { Badge, Button } from '@svadmin/ui';
+  import { Badge, Button, ContentPageHeader, ContentPageShell, MetricBlock, SectionHeader } from '@svadmin/ui';
   import * as Card from '@svadmin/ui/components/ui/card/index.js';
-  import { Archive, Clock, FileText, Inbox, Mail, Paperclip, Plus, Send, ShieldAlert, Tag, Trash2 } from '@lucide/svelte';
+  import { Archive, Clock, FileText, Inbox, Mail, Paperclip, Plus, Send, ShieldAlert, Trash2 } from '@lucide/svelte';
   import { readHashView } from '../utils/hashView';
 
   const i18n = useTranslation();
@@ -100,37 +100,22 @@
 
 <svelte:window onhashchange={syncView} onpopstate={syncView} />
 
-<div class="space-y-6" data-app-page="mail-workspace" data-mail-view={normalizedView}>
-  <section class="grid gap-4 lg:grid-cols-[1fr_0.72fr]">
-    <Card.Root class="overflow-hidden border-primary/20">
-      <Card.Header class="border-b">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <Badge>{viewCopy.badge}</Badge>
-            <Card.Title class="mt-3 text-2xl">{viewCopy.title}</Card.Title>
-            <Card.Description>{viewCopy.description}</Card.Description>
-          </div>
-          <Button onclick={() => composerOpen = !composerOpen}><Plus class="mr-2 h-4 w-4" />{isZh ? '写信 / Compose' : 'Compose'}</Button>
-        </div>
-      </Card.Header>
-      <Card.Content class="grid gap-3 p-5 sm:grid-cols-3">
-        <div class="rounded-xl border bg-card p-4"><p class="text-xs text-muted-foreground">{isZh ? '未读' : 'Unread'}</p><p class="mt-2 text-2xl font-semibold">{unread}</p></div>
-        <div class="rounded-xl border bg-card p-4"><p class="text-xs text-muted-foreground">{isZh ? '草稿' : 'Drafts'}</p><p class="mt-2 text-2xl font-semibold">{draftQuery.data?.total ?? 0}</p></div>
-        <div class="rounded-xl border bg-card p-4"><p class="text-xs text-muted-foreground">{isZh ? '已归档' : 'Archived'}</p><p class="mt-2 text-2xl font-semibold">{archiveQuery.data?.total ?? 0}</p></div>
-      </Card.Content>
-    </Card.Root>
-    <Card.Root>
-      <Card.Header><Card.Title class="flex items-center gap-2 text-base"><Tag class="h-4 w-4 text-primary" />{isZh ? '标签' : 'Labels'}</Card.Title></Card.Header>
-      <Card.Content class="space-y-2">
-        {#each labels as label (label.name)}
-          <div class="flex items-center justify-between rounded-xl border px-3 py-2 text-sm"><span>{label.name}</span><Badge variant="outline">{label.count}</Badge></div>
-        {/each}
-      </Card.Content>
-    </Card.Root>
+{#snippet headerActions()}
+  <Button size="sm" onclick={() => composerOpen = !composerOpen}><Plus class="h-4 w-4" />{isZh ? '写信' : 'Compose'}</Button>
+{/snippet}
+
+<div data-app-page="mail-workspace" data-mail-view={normalizedView}>
+<ContentPageShell pageId="mail-workspace" width="wide">
+  <ContentPageHeader eyebrow={viewCopy.badge} title={viewCopy.title} description={viewCopy.description} actions={headerActions} />
+  <section class="grid gap-3 sm:grid-cols-3">
+    <MetricBlock label={isZh ? '未读' : 'Unread'} value={unread} detail={isZh ? '需要处理' : 'Need attention'} trendTone={unread > 0 ? 'warning' : 'positive'} />
+    <MetricBlock label={isZh ? '草稿' : 'Drafts'} value={draftQuery.data?.total ?? 0} detail={isZh ? '尚未发送' : 'Not sent'} />
+    <MetricBlock label={isZh ? '已归档' : 'Archived'} value={archiveQuery.data?.total ?? 0} detail={isZh ? '已完成归档' : 'Completed'} />
   </section>
+  <section class="space-y-3"><SectionHeader title={isZh ? '标签' : 'Labels'} description={isZh ? '标签只用于筛选和归属，不重复消息状态。' : 'Labels organize ownership without duplicating message state.'} /><div class="flex flex-wrap gap-2">{#each labels as label (label.name)}<Button variant="outline" size="sm">{label.name}<Badge variant="secondary">{label.count}</Badge></Button>{/each}</div></section>
 
   {#if composerOpen}
-    <section class="rounded-2xl border bg-card shadow-sm" data-mail-composer>
+    <section class="rounded-lg border bg-card shadow-sm" data-mail-composer>
       <div class="flex flex-col gap-3 border-b p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <Badge>{isZh ? '撰写邮件' : 'Compose Mail'}</Badge>
@@ -155,8 +140,8 @@
             {/each}
           </div>
         </div>
-        <div class="rounded-xl border bg-background p-4">
-          <p class="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{isZh ? '正文草稿' : 'Draft body'}</p>
+        <div class="rounded-lg border bg-background p-4">
+          <p class="text-xs font-semibold text-muted-foreground">{isZh ? '正文草稿' : 'Draft body'}</p>
           <p class="mt-3 text-sm leading-6 text-muted-foreground">
             {isZh ? '团队好，今天请优先关注低库存 SKU、待确认看房和未读客户消息。我已经把相关任务同步到待办和日历。' : 'Hi team, please prioritize low-stock SKUs, pending tours, and unread customer messages today. I have synced the related work into Todo and Calendar.'}
           </p>
@@ -183,7 +168,7 @@
           </a>
         {/each}
         <div class="my-3 border-t"></div>
-        <p class="px-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{isZh ? '协作' : 'Collaboration'}</p>
+        <p class="px-3 text-xs font-semibold text-muted-foreground">{isZh ? '协作' : 'Collaboration'}</p>
         {#each mailUtilities as item (item.key)}
           <a href={item.href} class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition hover:bg-muted/50">
             <span>
@@ -230,25 +215,25 @@
         <Card.Description>{selected ? `${selected.sender ?? selected.to} · ${messageDate(selected)}` : ''}</Card.Description>
       </Card.Header>
       <Card.Content class="space-y-4 p-5">
-        <p class="rounded-xl border bg-muted/25 p-4 text-sm leading-6 text-muted-foreground">
+        <p class="rounded-lg border bg-muted/25 p-4 text-sm leading-6 text-muted-foreground">
           {selected?.body ?? (isZh ? '当前文件夹暂无可读消息。' : 'There is no readable message in this folder.')}
         </p>
-        <div class="rounded-xl border bg-background p-3">
-          <p class="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{isZh ? '快速回复' : 'Quick reply'}</p>
+        <div class="rounded-lg border bg-background p-3">
+          <p class="text-xs font-semibold text-muted-foreground">{isZh ? '快速回复' : 'Quick reply'}</p>
           <p class="mt-2 text-sm text-muted-foreground">{isZh ? '收到，我会在今天的运营复盘前处理。' : 'Received. I will handle this before today\'s operations review.'}</p>
         </div>
         <div class="grid gap-3 sm:grid-cols-2">
-          <div class="rounded-xl border bg-background p-3">
-            <p class="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground"><Paperclip class="h-3.5 w-3.5" />{isZh ? '附件' : 'Attachments'}</p>
+          <div class="rounded-lg border bg-background p-3">
+            <p class="flex items-center gap-2 text-xs font-semibold text-muted-foreground"><Paperclip class="h-3.5 w-3.5" />{isZh ? '附件' : 'Attachments'}</p>
             <p class="mt-2 text-sm text-muted-foreground">{isZh ? '本地示例：对账包、看房确认、盘点表。' : 'Demo metadata: reconciliation packet, tour confirmation, count sheet.'}</p>
           </div>
-          <div class="rounded-xl border bg-background p-3">
-            <p class="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{isZh ? '邮件元信息' : 'Mail metadata'}</p>
+          <div class="rounded-lg border bg-background p-3">
+            <p class="text-xs font-semibold text-muted-foreground">{isZh ? '邮件元信息' : 'Mail metadata'}</p>
             <p class="mt-2 text-sm text-muted-foreground">{resourceName.replace('mail_', '')} · {selected?.unread ? (isZh ? '未读' : 'unread') : (isZh ? '已读' : 'read')}</p>
           </div>
         </div>
-        <div class="rounded-xl border bg-background p-3">
-            <p class="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{viewCopy.badge}</p>
+        <div class="rounded-lg border bg-background p-3">
+            <p class="text-xs font-semibold text-muted-foreground">{viewCopy.badge}</p>
           <div class="mt-3 flex flex-wrap gap-2">
             {#each categories as category (category.label)}
               <span class={`rounded-full px-2.5 py-1 text-xs font-medium ${category.tone}`}>{category.label}</span>
@@ -263,4 +248,5 @@
       </Card.Content>
     </Card.Root>
   </section>
+</ContentPageShell>
 </div>

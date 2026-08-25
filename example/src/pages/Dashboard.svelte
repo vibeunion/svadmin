@@ -1,6 +1,7 @@
 <script lang="ts">
   import { useList } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
+  import { ContentPageHeader, ContentPageShell, DataState, MetricBlock } from '@svadmin/ui';
   import * as Card from '@svadmin/ui/components/ui/card/index.js';
   import {
     AlertTriangle,
@@ -10,7 +11,6 @@
     ClipboardCheck,
     CreditCard,
     Home,
-    Loader2,
     Package,
     Settings,
     Shuffle,
@@ -334,60 +334,22 @@
   }
 </script>
 
-<div class="space-y-6">
-  <header class="grid gap-4 border-b border-border/60 pb-5 xl:grid-cols-[1fr_0.82fr]">
-    <div class="min-w-0">
-      <div class="inline-flex items-center rounded-md border border-primary/20 bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
-        {isZh ? '运营驾驶舱' : 'Operations Cockpit'}
-      </div>
-      <h1 class="mt-3 text-3xl font-semibold tracking-tight text-foreground">
-        {isZh ? '运营工作台' : 'Operations Workspace'}
-      </h1>
-      <p class="mt-2 max-w-3xl text-sm text-muted-foreground">
-        {isZh
-          ? '集中掌握库存风险、履约进度、访问权限、计划任务和关键通知。'
-          : 'Monitor inventory risk, fulfillment, access, planned work, and critical notifications in one place.'}
-      </p>
-      <div class="mt-4 flex flex-wrap gap-2 text-xs text-muted-foreground">
-        <span class="rounded-md border bg-card px-2.5 py-1">{isZh ? '库存管控' : 'Inventory control'}</span>
-        <span class="rounded-md border bg-card px-2.5 py-1">{isZh ? '履约协同' : 'Fulfillment'}</span>
-        <span class="rounded-md border bg-card px-2.5 py-1">{isZh ? '自动化队列' : 'Automation queue'}</span>
-      </div>
-    </div>
+<ContentPageShell pageId="operations-dashboard" width="wide">
+  <ContentPageHeader eyebrow={isZh ? '运营驾驶舱' : 'Operations cockpit'} title={isZh ? '运营工作台' : 'Operations workspace'} description={isZh ? '集中掌握库存风险、履约进度、访问权限、计划任务和关键通知。' : 'Monitor inventory risk, fulfillment, access, planned work, and critical notifications in one place.'} />
 
-    <div class="grid grid-cols-3 gap-2 xl:grid-cols-1 xl:gap-3">
-      <div class="rounded-lg border bg-card px-2.5 py-3 sm:px-4">
-        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{isZh ? '履约健康' : 'Fulfillment Health'}</p>
-        <p class="mt-2 text-xl font-semibold text-foreground sm:text-2xl">{lowStockProducts.length === 0 ? '100%' : '91%'}</p>
-        <p class="mt-1 hidden text-xs text-muted-foreground sm:block">{isZh ? '低库存风险已纳入队列' : 'low-stock risk is queued'}</p>
-      </div>
-      <div class="rounded-lg border bg-card px-2.5 py-3 sm:px-4">
-        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{isZh ? '待处理' : 'Open Work'}</p>
-        <p class="mt-2 text-xl font-semibold text-foreground sm:text-2xl">{openTodos + activeTransfers + pendingAdjustments}</p>
-        <p class="mt-1 hidden text-xs text-muted-foreground sm:block">{isZh ? '待办、调拨与审批' : 'todos, transfers, approvals'}</p>
-      </div>
-      <div class="rounded-lg border bg-card px-2.5 py-3 sm:px-4">
-        <p class="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{isZh ? '刷新状态' : 'Refresh'}</p>
-        <p class="mt-2 flex items-center gap-2 text-sm font-semibold text-foreground">
-          {#if isLoading}
-            <Loader2 class="h-4 w-4 animate-spin" />
-            {isZh ? '同步中' : 'Refreshing'}
-          {:else}
-            {isZh ? '已同步' : 'Synced'}
-          {/if}
-        </p>
-        <p class="mt-1 hidden text-xs text-muted-foreground sm:block">{isZh ? '运营数据实时读取' : 'operations data is live'}</p>
-      </div>
-    </div>
-  </header>
+  <section class="grid gap-3 sm:grid-cols-3">
+    <MetricBlock label={isZh ? '履约健康' : 'Fulfillment health'} value={lowStockProducts.length === 0 ? '100%' : '91%'} detail={isZh ? '低库存风险已纳入队列' : 'Low-stock risk is queued'} trend={isZh ? '稳定' : 'Stable'} trendTone="positive" />
+    <MetricBlock label={isZh ? '待处理' : 'Open work'} value={openTodos + activeTransfers + pendingAdjustments} detail={isZh ? '待办、调拨与审批' : 'Todos, transfers, approvals'} />
+    <MetricBlock label={isZh ? '刷新状态' : 'Refresh status'} value={isLoading ? (isZh ? '同步中' : 'Refreshing') : (isZh ? '已同步' : 'Synced')} detail={isZh ? '运营数据实时读取' : 'Operations data is live'} loading={isLoading} />
+  </section>
 
   <!-- Key stats -->
   <section class="grid grid-cols-2 gap-3 xl:grid-cols-4">
     {#each stats as stat (stat.label)}
-      <a href={stat.href} class="block rounded-lg border bg-card px-4 py-4 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md sm:px-6">
+      <a href={stat.href} class="block rounded-lg border bg-card px-4 py-4 shadow-sm transition hover:border-primary/40 sm:px-6">
         <div class="flex items-center justify-between gap-3">
           <div class="min-w-0">
-            <p class="min-h-7 text-[11px] font-medium uppercase leading-tight text-muted-foreground sm:min-h-0 sm:text-xs">{stat.label}</p>
+            <p class="min-h-7 text-xs font-medium leading-tight text-muted-foreground sm:min-h-0">{stat.label}</p>
             <p class="mt-2 text-2xl font-semibold text-foreground">{stat.value}</p>
           </div>
           <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border {stat.tone}">
@@ -590,8 +552,8 @@
         <Card.Title class="text-sm font-semibold">{isZh ? '销售活动' : 'Sales Activity'}</Card.Title>
       </Card.Header>
       <Card.Content class="space-y-4 p-6">
-        <div class="rounded-xl border bg-muted/20 p-4">
-          <p class="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{isZh ? '今日履约节奏' : 'Today flow'}</p>
+        <div class="rounded-lg border bg-muted/20 p-4">
+          <p class="text-xs font-semibold text-muted-foreground">{isZh ? '今日履约节奏' : 'Today flow'}</p>
           <p class="mt-2 text-3xl font-semibold text-foreground">{salesOrders.length + movements.length}</p>
           <p class="mt-1 text-xs text-muted-foreground">{isZh ? '订单与库存动作合计' : 'orders and inventory actions'}</p>
         </div>
@@ -662,15 +624,11 @@
   </Card.Root>
 
   {#await declarativeSurfacePromise}
-    <section class="grid min-h-40 place-items-center rounded-xl border border-border/60 bg-muted/10" aria-live="polite">
-      <p class="text-sm text-muted-foreground">{isZh ? '正在加载声明式 Surface…' : 'Loading declarative Surface…'}</p>
-    </section>
+    <DataState state="loading" title={isZh ? '正在加载声明式 Surface' : 'Loading declarative Surface'} />
   {:then declarativeSurfaceModule}
     {@const DeclarativeSurfaceExample = declarativeSurfaceModule.default}
     <DeclarativeSurfaceExample {isZh} />
   {:catch}
-    <section class="grid min-h-40 place-items-center rounded-xl border border-destructive/50 bg-muted/10" role="alert">
-      <p class="text-sm text-destructive">{isZh ? '声明式 Surface 加载失败。' : 'Unable to load the declarative Surface.'}</p>
-    </section>
+    <DataState state="error" title={isZh ? '声明式 Surface 加载失败' : 'Unable to load the declarative Surface'} />
   {/await}
-</div>
+</ContentPageShell>

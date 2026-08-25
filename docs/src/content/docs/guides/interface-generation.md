@@ -6,6 +6,9 @@ description: Information budgets, feedback ownership, page states, and AI accept
 svadmin uses a **Stripe-first visual language**. External systems fill specific
 behavior and coverage gaps; they are not mixed into a new visual theme.
 
+Start with the seven [Design Principles](/guides/design-principles/), then use
+this standard for state ownership and AI acceptance details.
+
 ## Reference stack
 
 | Reference | Use it for | Do not copy |

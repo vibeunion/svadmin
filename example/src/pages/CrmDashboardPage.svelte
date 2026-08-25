@@ -1,9 +1,9 @@
 <script lang="ts">
   import { useList } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
-  import { Badge } from '@svadmin/ui';
+  import { Badge, ContentPageHeader, ContentPageShell, MetricBlock, SectionHeader } from '@svadmin/ui';
   import * as Card from '@svadmin/ui/components/ui/card/index.js';
-  import { BarChart3, BriefcaseBusiness, Building2, CircleDollarSign, ClipboardList, FileText, PhoneCall, Star, TrendingUp, Users } from '@lucide/svelte';
+  import { BarChart3, Building2, ClipboardList, FileText, Star, TrendingUp, Users } from '@lucide/svelte';
   import { readHashView } from '../utils/hashView';
 
   const i18n = useTranslation();
@@ -120,40 +120,36 @@
 
 <svelte:window onhashchange={syncView} onpopstate={syncView} />
 
-<div class="space-y-6" data-app-page="crm-dashboard" data-crm-view={normalizedView} data-resource-name={resourceName}>
+<div data-app-page="crm-dashboard" data-crm-view={normalizedView} data-resource-name={resourceName}>
+<ContentPageShell pageId="crm-dashboard" width="wide">
+  <ContentPageHeader eyebrow={viewCopy.badge} title={viewCopy.title} description={viewCopy.description} />
+  <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <MetricBlock label={isZh ? '客户账户' : 'Accounts'} value={accounts.length} detail={isZh ? '统一关系归属' : 'Owned relationships'} />
+    <MetricBlock label={isZh ? '活跃联系人' : 'Active contacts'} value={activeContacts} detail={isZh ? '近期可跟进' : 'Ready for follow-up'} />
+    <MetricBlock label={isZh ? '管线金额' : 'Pipeline'} value={money(pipeline)} detail={isZh ? '全部商机' : 'All opportunities'} />
+    <MetricBlock label={isZh ? '加权预测' : 'Weighted forecast'} value={money(weighted)} detail={isZh ? '按成交概率' : 'Probability adjusted'} trend={isZh ? '可信状态' : 'Trusted state'} />
+  </section>
   <section class="grid gap-4 xl:grid-cols-[1fr_0.38fr]">
-    <Card.Root class="overflow-hidden border-primary/20">
-      <Card.Header class="border-b">
-        <Badge>{viewCopy.badge}</Badge>
-        <Card.Title class="mt-3 flex items-center gap-2 text-2xl"><BriefcaseBusiness class="h-6 w-6 text-primary" />{viewCopy.title}</Card.Title>
-        <Card.Description>{viewCopy.description}</Card.Description>
-      </Card.Header>
-      <Card.Content class="space-y-5 p-5">
-        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <div class="rounded-xl border bg-card p-4"><p class="text-xs text-muted-foreground">{isZh ? '客户账户' : 'Accounts'}</p><p class="mt-2 text-2xl font-semibold">{accounts.length}</p></div>
-          <div class="rounded-xl border bg-card p-4"><p class="text-xs text-muted-foreground">{isZh ? '活跃联系人' : 'Active Contacts'}</p><p class="mt-2 text-2xl font-semibold">{activeContacts}</p></div>
-          <div class="rounded-xl border bg-card p-4"><p class="text-xs text-muted-foreground">{isZh ? '管线金额' : 'Pipeline'}</p><p class="mt-2 text-2xl font-semibold">{money(pipeline)}</p></div>
-          <div class="rounded-xl border bg-card p-4"><p class="text-xs text-muted-foreground">{isZh ? '加权预测' : 'Weighted'}</p><p class="mt-2 text-2xl font-semibold">{money(weighted)}</p></div>
-        </div>
+    <section class="space-y-3">
+      <SectionHeader title={viewCopy.focusTitle} description={viewCopy.description} />
         <div class="grid gap-3 md:grid-cols-4">
           {#each stages as stage (stage)}
-            <div class="rounded-xl border bg-muted/25 p-4">
+            <div class="rounded-lg border bg-card p-4 shadow-sm">
               <div class="flex items-center justify-between"><p class="text-sm font-semibold">{stageLabel(stage)}</p><Badge variant="outline">{deals.filter((deal) => deal.stage === stage).length}</Badge></div>
               <div class="mt-4 h-2 rounded-full bg-muted"><div class="h-2 rounded-full bg-primary" style:width={`${Math.max(12, deals.filter((deal) => deal.stage === stage).length * 28)}%`}></div></div>
             </div>
           {/each}
         </div>
-      </Card.Content>
-    </Card.Root>
+    </section>
 
     <div class="grid gap-4 content-start">
-      <Card.Root><Card.Content class="p-5"><CircleDollarSign class="h-5 w-5 text-primary" /><p class="mt-3 text-sm text-muted-foreground">{isZh ? '高价值商机' : 'Top opportunity'}</p><p class="mt-1 text-xl font-semibold">{deals[0]?.dealName ?? '-'}</p></Card.Content></Card.Root>
-      <Card.Root><Card.Content class="p-5"><PhoneCall class="h-5 w-5 text-primary" /><p class="mt-3 text-sm text-muted-foreground">{isZh ? '待跟进活动' : 'Follow-ups'}</p><p class="mt-1 text-xl font-semibold">{plannedActivities}</p></Card.Content></Card.Root>
+      <MetricBlock label={isZh ? '高价值商机' : 'Top opportunity'} value={deals[0]?.dealName ?? '-'} icon={undefined} />
+      <MetricBlock label={isZh ? '待跟进活动' : 'Follow-ups'} value={plannedActivities} detail={isZh ? '需要下一步' : 'Need a next step'} />
       <Card.Root>
         <Card.Header class="pb-3"><Card.Title class="text-base">{isZh ? '快捷导航' : 'Quick Navigation'}</Card.Title></Card.Header>
         <Card.Content class="grid gap-2">
           {#each crmNav as item (item.key)}
-            <a href={item.href} class={`flex items-center justify-between rounded-xl border px-3 py-2 text-left text-sm transition ${normalizedView === item.key ? 'border-primary bg-primary text-primary-foreground' : 'bg-card hover:border-primary/40'}`}>
+            <a href={item.href} class={`flex items-center justify-between rounded-lg border px-3 py-2 text-left text-sm transition ${normalizedView === item.key ? 'border-primary bg-primary text-primary-foreground' : 'bg-card hover:border-primary/40'}`}>
               <span class="flex items-center gap-2"><item.Icon class="h-4 w-4 text-muted-foreground" />{item.label}</span>
               <Badge variant="outline">{item.value}</Badge>
             </a>
@@ -171,7 +167,7 @@
     <Card.Content class="grid gap-3 md:grid-cols-3">
       {#if normalizedView === 'tasks'}
         {#each activities as activity (activity.id)}
-          <div class="rounded-xl border bg-card p-4">
+          <div class="rounded-lg border bg-card p-4">
             <p class="font-semibold">{activity.subject}</p>
             <p class="mt-1 text-xs text-muted-foreground">{activity.type} · {activity.dueDate}</p>
             <Badge variant="outline" class="mt-3">{activity.status.replace('_', ' ')}</Badge>
@@ -179,19 +175,19 @@
         {/each}
       {:else if normalizedView === 'notes'}
         {#each recentNotes as note (note.title)}
-          <div class="rounded-xl border bg-card p-4">
+          <div class="rounded-lg border bg-card p-4">
             <p class="font-semibold">{note.title}</p>
             <p class="mt-1 text-xs text-muted-foreground">{note.source}</p>
             <Badge variant="outline" class="mt-3">{note.meta}</Badge>
           </div>
         {/each}
       {:else if normalizedView === 'reports'}
-        <div class="rounded-xl border bg-card p-4"><p class="text-xs text-muted-foreground">{isZh ? '管线报表' : 'Pipeline report'}</p><p class="mt-2 text-2xl font-semibold">{money(weighted)}</p></div>
-        <div class="rounded-xl border bg-card p-4"><p class="text-xs text-muted-foreground">{isZh ? '公司报表' : 'Company report'}</p><p class="mt-2 text-2xl font-semibold">{accounts.length}</p></div>
-        <div class="rounded-xl border bg-card p-4"><p class="text-xs text-muted-foreground">{isZh ? '活动报表' : 'Activity report'}</p><p class="mt-2 text-2xl font-semibold">{activities.length}</p></div>
+        <div class="rounded-lg border bg-card p-4"><p class="text-xs text-muted-foreground">{isZh ? '管线报表' : 'Pipeline report'}</p><p class="mt-2 text-2xl font-semibold">{money(weighted)}</p></div>
+        <div class="rounded-lg border bg-card p-4"><p class="text-xs text-muted-foreground">{isZh ? '公司报表' : 'Company report'}</p><p class="mt-2 text-2xl font-semibold">{accounts.length}</p></div>
+        <div class="rounded-lg border bg-card p-4"><p class="text-xs text-muted-foreground">{isZh ? '活动报表' : 'Activity report'}</p><p class="mt-2 text-2xl font-semibold">{activities.length}</p></div>
       {:else}
         {#each accounts.slice(0, 3) as account (account.id)}
-          <div class="rounded-xl border bg-card p-4">
+          <div class="rounded-lg border bg-card p-4">
             <p class="font-semibold">{account.accountName}</p>
             <p class="mt-1 text-xs text-muted-foreground">{account.nextStep}</p>
             <Badge variant="outline" class="mt-3">{healthLabel(account.health)}</Badge>
@@ -202,9 +198,9 @@
   </Card.Root>
 
   <section class="grid gap-4 xl:grid-cols-3">
-    <Card.Root><Card.Header><Card.Title class="text-base">{isZh ? '重点客户' : 'Priority Accounts'}</Card.Title></Card.Header><Card.Content class="space-y-3">{#each accounts.slice(0, 4) as account (account.id)}<div class="rounded-xl border p-3"><div class="flex items-center justify-between"><p class="font-semibold">{account.accountName}</p><Badge variant="outline">{healthLabel(account.health)}</Badge></div><p class="mt-1 text-xs text-muted-foreground">{account.nextStep}</p></div>{/each}</Card.Content></Card.Root>
-    <Card.Root><Card.Header><Card.Title class="flex items-center gap-2 text-base"><TrendingUp class="h-4 w-4 text-primary" />{isZh ? '商机列表' : 'Deals'}</Card.Title></Card.Header><Card.Content class="space-y-3">{#each deals.slice(0, 4) as deal (deal.id)}<div class="rounded-xl border p-3"><div class="flex items-center justify-between"><p class="font-semibold">{deal.dealName}</p><Badge>{money(deal.amount)}</Badge></div><p class="mt-1 text-xs text-muted-foreground">{stageLabel(deal.stage)} · {deal.probability}% · {deal.closeDate}</p></div>{/each}</Card.Content></Card.Root>
-    <Card.Root><Card.Header><Card.Title class="flex items-center gap-2 text-base"><Users class="h-4 w-4 text-primary" />{isZh ? '联系人雷达' : 'Contact Radar'}</Card.Title></Card.Header><Card.Content class="space-y-3">{#each contacts.slice(0, 4) as contact (contact.id)}<div class="rounded-xl border p-3"><div class="flex items-center justify-between gap-3"><div><p class="font-semibold">{contact.fullName}</p><p class="mt-1 text-xs text-muted-foreground">{contact.roleTitle}</p></div><Badge variant="outline">{influenceLabel(contact.influence)}</Badge></div><p class="mt-2 text-xs text-primary">{isZh ? '最近触达' : 'Last touch'} · {contact.lastTouchDate}</p></div>{/each}</Card.Content></Card.Root>
+    <Card.Root><Card.Header><Card.Title class="text-base">{isZh ? '重点客户' : 'Priority Accounts'}</Card.Title></Card.Header><Card.Content class="space-y-3">{#each accounts.slice(0, 4) as account (account.id)}<div class="rounded-lg border p-3"><div class="flex items-center justify-between"><p class="font-semibold">{account.accountName}</p><Badge variant="outline">{healthLabel(account.health)}</Badge></div><p class="mt-1 text-xs text-muted-foreground">{account.nextStep}</p></div>{/each}</Card.Content></Card.Root>
+    <Card.Root><Card.Header><Card.Title class="flex items-center gap-2 text-base"><TrendingUp class="h-4 w-4 text-primary" />{isZh ? '商机列表' : 'Deals'}</Card.Title></Card.Header><Card.Content class="space-y-3">{#each deals.slice(0, 4) as deal (deal.id)}<div class="rounded-lg border p-3"><div class="flex items-center justify-between"><p class="font-semibold">{deal.dealName}</p><Badge>{money(deal.amount)}</Badge></div><p class="mt-1 text-xs text-muted-foreground">{stageLabel(deal.stage)} · {deal.probability}% · {deal.closeDate}</p></div>{/each}</Card.Content></Card.Root>
+    <Card.Root><Card.Header><Card.Title class="flex items-center gap-2 text-base"><Users class="h-4 w-4 text-primary" />{isZh ? '联系人雷达' : 'Contact Radar'}</Card.Title></Card.Header><Card.Content class="space-y-3">{#each contacts.slice(0, 4) as contact (contact.id)}<div class="rounded-lg border p-3"><div class="flex items-center justify-between gap-3"><div><p class="font-semibold">{contact.fullName}</p><p class="mt-1 text-xs text-muted-foreground">{contact.roleTitle}</p></div><Badge variant="outline">{influenceLabel(contact.influence)}</Badge></div><p class="mt-2 text-xs text-primary">{isZh ? '最近触达' : 'Last touch'} · {contact.lastTouchDate}</p></div>{/each}</Card.Content></Card.Root>
   </section>
 
   <section class="grid gap-4 xl:grid-cols-[0.92fr_1.08fr]">
@@ -212,7 +208,7 @@
       <Card.Header><Card.Title class="flex items-center gap-2 text-base"><ClipboardList class="h-4 w-4 text-primary" />{isZh ? '任务概览' : 'Tasks Overview'}</Card.Title><Card.Description>{isZh ? '按状态跟进客户动作，避免商机停滞。' : 'Track customer actions by status to keep deals moving.'}</Card.Description></Card.Header>
       <Card.Content class="space-y-3">
         {#each activities as activity (activity.id)}
-          <div class="grid gap-3 rounded-xl border p-3 sm:grid-cols-[1fr_auto] sm:items-center">
+          <div class="grid gap-3 rounded-lg border p-3 sm:grid-cols-[1fr_auto] sm:items-center">
             <div>
               <p class="font-semibold">{activity.subject}</p>
               <p class="mt-1 text-xs text-muted-foreground">{activity.type} · {activity.dueDate}</p>
@@ -243,7 +239,7 @@
       </Card.Header>
       <Card.Content class="space-y-3">
         {#each recentNotes as note (note.title)}
-          <div class="rounded-xl border p-3">
+          <div class="rounded-lg border p-3">
             <div class="flex items-center justify-between gap-3">
               <p class="font-semibold">{note.title}</p>
               <Badge variant="outline">{note.meta}</Badge>
@@ -259,10 +255,11 @@
         <Card.Description>{isZh ? '补齐客户经营参考页中的 Reports 入口，以管线、公司和活动维度呈现。' : 'Surface the reports entry with pipeline, company, and activity dimensions.'}</Card.Description>
       </Card.Header>
       <Card.Content class="grid gap-3 md:grid-cols-3">
-        <div class="rounded-xl border bg-muted/20 p-4"><p class="text-xs text-muted-foreground">{isZh ? '管线报表' : 'Pipeline report'}</p><p class="mt-2 text-2xl font-semibold">{money(weighted)}</p></div>
-        <div class="rounded-xl border bg-muted/20 p-4"><p class="text-xs text-muted-foreground">{isZh ? '公司报表' : 'Company report'}</p><p class="mt-2 text-2xl font-semibold">{accounts.length}</p></div>
-        <div class="rounded-xl border bg-muted/20 p-4"><p class="text-xs text-muted-foreground">{isZh ? '活动报表' : 'Activity report'}</p><p class="mt-2 text-2xl font-semibold">{activities.length}</p></div>
+        <div class="rounded-lg border bg-muted/20 p-4"><p class="text-xs text-muted-foreground">{isZh ? '管线报表' : 'Pipeline report'}</p><p class="mt-2 text-2xl font-semibold">{money(weighted)}</p></div>
+        <div class="rounded-lg border bg-muted/20 p-4"><p class="text-xs text-muted-foreground">{isZh ? '公司报表' : 'Company report'}</p><p class="mt-2 text-2xl font-semibold">{accounts.length}</p></div>
+        <div class="rounded-lg border bg-muted/20 p-4"><p class="text-xs text-muted-foreground">{isZh ? '活动报表' : 'Activity report'}</p><p class="mt-2 text-2xl font-semibold">{activities.length}</p></div>
       </Card.Content>
     </Card.Root>
   </section>
+</ContentPageShell>
 </div>

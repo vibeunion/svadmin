@@ -1,13 +1,10 @@
 <script lang="ts">
   import { useTranslation } from '@svadmin/core/i18n';
-  import { Check, Plus } from '@lucide/svelte';
-  import { Button } from '../ui/button/index.js';
-  import { Badge } from '../ui/badge/index.js';
-  import * as Card from '../ui/card/index.js';
   import ContentPageShell from '../content/ContentPageShell.svelte';
   import ContentPageHeader from '../content/ContentPageHeader.svelte';
   import FilterToolbar from '../content/FilterToolbar.svelte';
   import DataState from '../content/DataState.svelte';
+  import NetworkUserCard from '../content/NetworkUserCard.svelte';
   import type { NetworkUser } from '../content/NetworkUserCard.svelte';
 
   const i18n = useTranslation();
@@ -28,6 +25,28 @@
 
 <ContentPageShell pageId="network-user-cards" width="wide">
   <ContentPageHeader title={i18n.t('network.userCards')} description={i18n.t('network.userCardsDescription')} />
-  <FilterToolbar bind:query placeholder={i18n.t('common.search')} />
-  {#if filtered.length === 0}<DataState state="empty" title={i18n.t('network.userCards')} />{:else}<div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{#each filtered as user (user.id)}<Card.Card><Card.CardContent class="space-y-4 p-4"><div class="flex items-start gap-3"><span class="flex size-10 items-center justify-center rounded-md bg-muted text-sm font-semibold text-muted-foreground">{user.name.slice(0, 2).toUpperCase()}</span><div class="min-w-0 flex-1"><div class="flex items-center gap-1.5"><h2 class="truncate text-sm font-semibold text-foreground">{user.name}</h2>{#if user.verified}<Check class="size-3.5 text-primary" />{/if}</div><p class="text-xs text-muted-foreground">{user.handle}</p></div></div><p class="text-sm text-muted-foreground">{user.summary}</p><div class="flex flex-wrap gap-1.5">{#each user.tags as tag (tag)}<Badge variant="outline">{tag}</Badge>{/each}</div><div class="grid grid-cols-3 gap-2 border-t border-border pt-3 text-center"><div><p class="text-sm font-semibold text-foreground">{user.collectionCount}</p><p class="text-xs text-muted-foreground">{i18n.t('network.nftCollection')}</p></div><div><p class="text-sm font-semibold text-foreground">{user.floorPrice}</p><p class="text-xs text-muted-foreground">{i18n.t('network.floorPrice')}</p></div><div><p class="text-sm font-semibold text-foreground">{user.volume}</p><p class="text-xs text-muted-foreground">{i18n.t('network.volume')}</p></div></div><Button size="sm" variant={connected.includes(user.id) ? 'outline' : 'default'} class="w-full" onclick={() => toggle(user.id)}>{#if connected.includes(user.id)}<Check class="size-3.5" />{i18n.t('network.connected')}{:else}<Plus class="size-3.5" />{i18n.t('network.connect')}{/if}</Button></Card.CardContent></Card.Card>{/each}</div>{/if}
+  <FilterToolbar bind:query placeholder={i18n.t('common.search')} clearLabel={i18n.locale === 'zh-CN' ? '清除搜索' : 'Clear search'} />
+  {#if filtered.length === 0}
+    <DataState state="empty" title={i18n.t('network.userCards')} />
+  {:else}
+    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      {#each filtered as user (user.id)}
+        <NetworkUserCard
+          {user}
+          tags={user.tags}
+          verified={user.verified}
+          verifiedLabel={i18n.locale === 'zh-CN' ? '已验证' : 'Verified'}
+          metrics={[
+            { label: i18n.t('network.nftCollection'), value: user.collectionCount },
+            { label: i18n.t('network.floorPrice'), value: user.floorPrice },
+            { label: i18n.t('network.volume'), value: user.volume },
+          ]}
+          connected={connected.includes(user.id)}
+          connectLabel={i18n.t('network.connect')}
+          connectedLabel={i18n.t('network.connected')}
+          onconnect={() => toggle(user.id)}
+        />
+      {/each}
+    </div>
+  {/if}
 </ContentPageShell>

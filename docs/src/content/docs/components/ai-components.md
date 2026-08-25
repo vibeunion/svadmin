@@ -7,6 +7,12 @@ description: Pre-built, AI-centric components powered by ChatProvider for 10x fa
 
 Headless Admin Svelte supports multiple high-level AI UI components out-of-the-box. These components utilize the core `ChatProvider` interface to instantly turn your admin dashboard into a smart, conversational copilot application.
 
+AI components remain inside the current tenant, resource, permission, and audit
+boundaries. Suggestions and read-only summaries must be visibly distinct from
+actions that mutate data. Destructive, billing, permission, and bulk operations
+always require explicit user confirmation, and server-side authorization remains
+the source of truth.
+
 ## Prerequisites
 
 Before using the AI components, you must configure a `ChatProvider` in your application layout:

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { useList } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
-  import { Badge, Button } from '@svadmin/ui';
+  import { Badge, Button, ContentPageHeader, ContentPageShell, MetricBlock } from '@svadmin/ui';
   import * as Card from '@svadmin/ui/components/ui/card/index.js';
   import { Bot, Boxes, BrainCircuit, BriefcaseBusiness, Code2, GraduationCap, Heart, History, MessageSquare, Palette, Pin, Send, Settings, Share2, Sparkles, Trash2 } from '@lucide/svelte';
   import { readHashView } from '../utils/hashView';
@@ -236,22 +236,13 @@
 
 <svelte:window onhashchange={syncView} onpopstate={syncView} />
 
-<div class="space-y-6" data-app-page="ai-workspace" data-ai-view={normalizedView} data-resource-name={resourceName}>
-  <section class="rounded-2xl border bg-card p-5 shadow-sm">
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div>
-        <Badge>{viewCopy.badge}</Badge>
-        <h2 class="mt-3 flex items-center gap-2 text-2xl font-semibold text-foreground">
-          <BrainCircuit class="h-6 w-6 text-primary" />
-          {viewCopy.title}
-        </h2>
-        <p class="mt-2 text-sm text-muted-foreground">
-          {viewCopy.description}
-        </p>
-      </div>
-      <a href="#/ai_conversations?view=new"><Button><Sparkles class="mr-2 h-4 w-4" />{isZh ? '新建对话' : 'New chat'}</Button></a>
-    </div>
-  </section>
+{#snippet headerActions()}
+  <a href="#/ai_conversations?view=new"><Button size="sm"><Sparkles class="h-4 w-4" />{isZh ? '新建对话' : 'New chat'}</Button></a>
+{/snippet}
+
+<div data-app-page="ai-workspace" data-ai-view={normalizedView} data-resource-name={resourceName}>
+<ContentPageShell pageId="ai-workspace" width="wide">
+  <ContentPageHeader eyebrow={viewCopy.badge} title={viewCopy.title} description={viewCopy.description} actions={headerActions} />
 
   {#if normalizedView !== 'threads'}
     <section class="grid gap-4 lg:grid-cols-[1fr_0.72fr]">
@@ -264,7 +255,7 @@
         <Card.Content class="grid gap-3 p-5 md:grid-cols-2">
           {#if normalizedView === 'settings'}
             {#each modelChoices as item (item.name)}
-              <div class="rounded-xl border bg-card p-4">
+              <div class="rounded-lg border bg-card p-4">
                 <p class="font-semibold">{item.name}</p>
                 <p class="mt-2 text-sm text-muted-foreground">{item.hint}</p>
                 {#if item.active}<Badge class="mt-3">{isZh ? '当前路由' : 'Active route'}</Badge>{/if}
@@ -272,8 +263,8 @@
             {/each}
           {:else}
             {#each templates as item (item.key)}
-              <div class="rounded-xl border bg-card p-4">
-                <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary"><item.Icon class="h-5 w-5" /></span>
+              <div class="rounded-lg border bg-card p-4">
+                <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary"><item.Icon class="h-5 w-5" /></span>
                 <p class="mt-3 font-semibold">{item.title}</p>
                 <p class="mt-2 text-sm text-muted-foreground">{item.description}</p>
               </div>
@@ -285,7 +276,7 @@
         <Card.Header><Card.Title class="text-base">{isZh ? '本次上下文' : 'Session Context'}</Card.Title></Card.Header>
         <Card.Content class="space-y-3">
           {#each promptFocus as item (item.label)}
-            <div class="flex items-center justify-between rounded-xl border px-3 py-2 text-sm">
+            <div class="flex items-center justify-between rounded-lg border px-3 py-2 text-sm">
               <span>{item.label}</span>
               <Badge variant="outline">{item.value}</Badge>
             </div>
@@ -298,14 +289,7 @@
 
   <section class="grid gap-3 md:grid-cols-3">
     {#each threadStats as stat (stat.label)}
-      <Card.Root>
-        <Card.Content class="p-5">
-          <p class="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{stat.code}</p>
-          <p class="mt-1 text-xs text-muted-foreground">{stat.label}</p>
-          <p class="mt-2 text-3xl font-semibold">{stat.value}</p>
-          <p class="mt-1 text-xs text-muted-foreground">{stat.hint}</p>
-        </Card.Content>
-      </Card.Root>
+      <MetricBlock label={stat.label} value={stat.value} detail={stat.hint} trend={stat.code} />
     {/each}
   </section>
 
@@ -317,10 +301,10 @@
       </Card.Header>
       <Card.Content class="p-0">
         <div class="border-b bg-muted/20 p-4">
-          <p class="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{isZh ? '模型' : 'AI Model'}</p>
+          <p class="text-xs font-semibold text-muted-foreground">{isZh ? '模型' : 'AI Model'}</p>
           <div class="mt-3 grid gap-2">
             {#each modelChoices as model (model.name)}
-              <button class="flex items-center justify-between rounded-xl border bg-card px-3 py-2 text-left text-sm transition hover:border-primary/40">
+              <button class="flex items-center justify-between rounded-lg border bg-card px-3 py-2 text-left text-sm transition hover:border-primary/40">
                 <span>
                   <span class="block font-medium">{model.name}</span>
                   <span class="text-xs text-muted-foreground">{model.hint}</span>
@@ -331,16 +315,16 @@
           </div>
         </div>
         <div class="border-b p-4">
-          <p class="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground"><Pin class="h-3.5 w-3.5" />{isZh ? '置顶' : 'Pinned'}</p>
+          <p class="flex items-center gap-2 text-xs font-semibold text-muted-foreground"><Pin class="h-3.5 w-3.5" />{isZh ? '置顶' : 'Pinned'}</p>
           {#each pinnedThreads as thread (thread.id)}
-            <div class="mt-3 rounded-xl border bg-primary/5 p-3">
+            <div class="mt-3 rounded-lg border bg-primary/5 p-3">
               <p class="truncate text-sm font-semibold">{thread.title}</p>
               <p class="mt-1 text-xs text-muted-foreground">{thread.meta}</p>
             </div>
           {/each}
         </div>
         <div class="border-b p-4">
-          <p class="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground"><History class="h-3.5 w-3.5" />{isZh ? '最近' : 'Recent'}</p>
+          <p class="flex items-center gap-2 text-xs font-semibold text-muted-foreground"><History class="h-3.5 w-3.5" />{isZh ? '最近' : 'Recent'}</p>
           <div class="mt-3 space-y-2">
             {#each recentThreads as thread (thread.id)}
               <p class="truncate rounded-lg bg-muted/30 px-3 py-2 text-xs text-muted-foreground">{thread.title}</p>
@@ -367,7 +351,7 @@
       </Card.Content>
     </Card.Root>
 
-    <Card.Root class="overflow-hidden border-primary/25 bg-gradient-to-br from-primary/8 via-card to-card">
+    <Card.Root class="overflow-hidden border-primary/25 bg-card">
       <Card.Header class="border-b">
         <div class="flex items-center justify-between gap-3">
           <div>
@@ -375,14 +359,14 @@
             <Card.Title class="mt-3 text-2xl">{viewCopy.panelTitle}</Card.Title>
             <Card.Description class="mt-2">{isZh ? '示例助手只读取本地 mock 数据，不需要外部密钥。' : 'The demo assistant reads local mock data only and requires no external key.'}</Card.Description>
           </div>
-          <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary"><Sparkles class="h-6 w-6" /></span>
+          <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary"><Sparkles class="h-6 w-6" /></span>
         </div>
       </Card.Header>
       <Card.Content class="space-y-4 p-5">
-        <div class="max-h-[360px] space-y-3 overflow-y-auto rounded-2xl border bg-background p-4" data-ai-chat-panel>
+        <div class="max-h-[360px] space-y-3 overflow-y-auto rounded-lg border bg-background p-4" data-ai-chat-panel>
           {#each chatMessages as message (message.id)}
             <div class={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div class={`max-w-[82%] rounded-2xl px-4 py-3 text-sm shadow-sm ${message.role === 'user' ? 'rounded-br-sm bg-primary text-primary-foreground' : 'rounded-tl-sm border bg-card text-card-foreground'}`}>
+              <div class={`max-w-[82%] rounded-lg px-4 py-3 text-sm shadow-sm ${message.role === 'user' ? 'rounded-br-sm bg-primary text-primary-foreground' : 'rounded-tl-sm border bg-card text-card-foreground'}`}>
                 <div class="mb-1 flex items-center gap-2 text-[11px] opacity-80">
                   <span>{message.role === 'user' ? (isZh ? '你' : 'You') : (isZh ? '助手' : 'Assistant')}</span>
                   <span>{message.time}</span>
@@ -397,13 +381,13 @@
         </div>
         <div class="grid gap-2 sm:grid-cols-2">
           {#each prompts as prompt (prompt)}
-            <button class="rounded-xl border bg-card px-3 py-2 text-left text-sm transition hover:border-primary/50 hover:bg-primary/5" onclick={() => usePrompt(prompt)}>{prompt}</button>
+            <button class="rounded-lg border bg-card px-3 py-2 text-left text-sm transition hover:border-primary/50 hover:bg-primary/5" onclick={() => usePrompt(prompt)}>{prompt}</button>
           {/each}
         </div>
-        <div class="flex flex-col gap-2 rounded-2xl border bg-background p-2 sm:flex-row" data-ai-composer>
+        <div class="flex flex-col gap-2 rounded-lg border bg-background p-2 sm:flex-row" data-ai-composer>
           <textarea
             bind:value={draftMessage}
-            class="min-h-16 flex-1 resize-none rounded-xl bg-muted/35 px-4 py-3 text-sm outline-none focus:bg-background focus:ring-2 focus:ring-primary/15"
+            class="min-h-16 flex-1 resize-none rounded-lg bg-muted/35 px-4 py-3 text-sm outline-none focus:bg-background focus:ring-2 focus:ring-primary/15"
             placeholder={isZh ? '输入一个运营问题，例如：哪些商品需要补货？' : 'Ask an operations question, for example: what needs replenishment?'}
           ></textarea>
           <Button onclick={sendMessage} disabled={!draftMessage.trim()}><Send class="mr-2 h-4 w-4" />{isZh ? '发送' : 'Send'}</Button>
@@ -414,7 +398,7 @@
     <div class="grid gap-4">
       <Card.Root>
         <Card.Content class="p-5">
-          <p class="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{isZh ? '模型路由' : 'Model route'}</p>
+          <p class="text-xs font-semibold text-muted-foreground">{isZh ? '模型路由' : 'Model route'}</p>
           <p class="mt-2 text-2xl font-semibold">svadmin local</p>
           <p class="mt-1 text-xs text-muted-foreground">{isZh ? '只读、安全、可替换 provider' : 'read-only, safe, swappable provider'}</p>
         </Card.Content>
@@ -432,7 +416,7 @@
         </Card.Header>
         <Card.Content class="grid gap-2">
           {#each quickActions as action (action.label)}
-            <button class="flex items-center justify-between rounded-xl border bg-card px-3 py-2 text-left text-sm transition hover:border-primary/40">
+            <button class="flex items-center justify-between rounded-lg border bg-card px-3 py-2 text-left text-sm transition hover:border-primary/40">
               <span class="flex items-center gap-2"><action.Icon class="h-4 w-4 text-muted-foreground" />{action.label}</span>
               <Badge variant="outline">{action.value}</Badge>
             </button>
@@ -447,7 +431,7 @@
     {#each templates as template (template.key)}
       <Card.Root class="overflow-hidden">
         <Card.Content class="space-y-4 p-5">
-          <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary"><template.Icon class="h-5 w-5" /></span>
+          <span class="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary"><template.Icon class="h-5 w-5" /></span>
           <div>
             <h2 class="text-base font-semibold">{template.title}</h2>
             <p class="mt-2 text-sm leading-6 text-muted-foreground">{template.description}</p>
@@ -466,7 +450,7 @@
       </Card.Header>
       <Card.Content class="space-y-3">
         {#each promptFocus as item (item.label)}
-          <div class="rounded-xl border bg-card p-3">
+          <div class="rounded-lg border bg-card p-3">
             <div class="flex items-center justify-between gap-3">
               <div>
                 <p class="text-sm font-semibold">{item.label}</p>
@@ -499,4 +483,5 @@
       </Card.Content>
     </Card.Root>
   </section>
+</ContentPageShell>
 </div>

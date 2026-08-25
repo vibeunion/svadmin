@@ -80,8 +80,8 @@
 
   <div class="flex flex-col md:flex-row gap-6 flex-1 min-h-[500px]">
     <!-- Left: Role Selector Sidebar -->
-    <div class="w-full md:w-64 flex-shrink-0 bg-card rounded-xl shadow-sm border border-border p-4 flex flex-col">
-      <h2 class="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 px-2">{i18n.t('permissions.roles') || 'Roles'}</h2>
+    <div class="w-full md:w-64 flex-shrink-0 bg-card rounded-lg shadow-sm border border-border p-4 flex flex-col">
+      <h2 class="text-sm font-semibold text-muted-foregroundr mb-4 px-2">{i18n.t('permissions.roles') || 'Roles'}</h2>
       <div class="space-y-1 flex-1 overflow-y-auto">
         {#each roles as role, _i (_i)}
           <button 
@@ -89,7 +89,7 @@
             class="w-full text-left px-3 py-2.5 rounded-lg text-sm transition-all duration-200 {selectedRole === role.code ? 'bg-primary/10 text-primary font-medium shadow-sm ring-1 ring-primary/20' : 'text-foreground hover:bg-muted'}"
           >
             {role.name}
-            <div class="text-[10px] mt-0.5 opacity-60 font-mono tracking-tighter">{role.code}</div>
+            <div class="text-[10px] mt-0.5 opacity-60 font-monoer">{role.code}</div>
           </button>
         {/each}
         {#if roles.length === 0}
@@ -106,7 +106,7 @@
     </div>
 
     <!-- Right: Matrix Grid -->
-    <div class="flex-1 bg-card rounded-xl shadow-sm border border-border overflow-hidden flex flex-col">
+    <div class="flex-1 bg-card rounded-lg shadow-sm border border-border overflow-hidden flex flex-col">
       <!-- Matrix Header -->
       <div class="p-5 border-b border-border bg-muted/30 flex items-center justify-between">
         <div class="flex items-center gap-4">
@@ -156,7 +156,7 @@
               <!-- Section Grouping Header -->
               {#if resource.section && (i === 0 || resource.section !== resources[i-1].section)}
                 <tr class="bg-primary/5">
-                  <td colspan="{actions.length + 1}" class="px-4 py-2 text-xs font-bold text-primary uppercase tracking-wider">{resource.section}</td>
+                  <td colspan="{actions.length + 1}" class="px-4 py-2 text-xs font-bold text-primaryr">{resource.section}</td>
                 </tr>
               {/if}
               

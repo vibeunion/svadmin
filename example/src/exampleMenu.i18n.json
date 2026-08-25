@@ -2,6 +2,7 @@
   "en": {
     "dashboards": "Dashboards",
     "dashboard": "Operations Dashboard",
+    "design_principles": "Design Principles",
     "public_profile": "Public Profile",
     "public_profile_overview": "Overview",
     "public_profile_projects": "Projects",
@@ -146,6 +147,7 @@
   "zh-CN": {
     "dashboards": "仪表盘",
     "dashboard": "运营首页",
+    "design_principles": "设计原则",
     "public_profile": "个人资料",
     "public_profile_overview": "资料概览",
     "public_profile_projects": "项目",

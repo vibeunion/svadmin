@@ -15,6 +15,13 @@ const securityOpsGroup = 'Security Operations';
 const referralGroup = 'Referrals';
 export const resources: ResourceDefinition[] = [
   {
+    name: 'design_principles',
+    label: 'Design Principles',
+    icon: 'layers',
+    fields: [],
+    showInMenu: false,
+  },
+  {
     name: 'products',
     label: 'Products',
     icon: 'folder',

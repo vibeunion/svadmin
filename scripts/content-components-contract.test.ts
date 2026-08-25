@@ -6,7 +6,8 @@ const root = resolve(import.meta.dir, '..');
 const contentDir = join(root, 'packages/ui/src/components/content');
 const components = [
   'ContentPageShell.svelte', 'ContentPageHeader.svelte', 'SectionHeader.svelte',
-  'PageToolbar.svelte', 'MetricBlock.svelte', 'DescriptionList.svelte',
+  'PageToolbar.svelte', 'WorkspaceLayout.svelte', 'SettingsGroup.svelte',
+  'SettingsFieldRow.svelte', 'MetricBlock.svelte', 'DescriptionList.svelte',
   'StatusBadge.svelte', 'FilterToolbar.svelte', 'DataState.svelte',
   'ProjectCard.svelte', 'TeamCard.svelte', 'FileList.svelte',
   'IntegrationCard.svelte', 'ApiKeyList.svelte', 'SecurityEventTable.svelte',
@@ -30,7 +31,23 @@ describe('Stripe-first content component contract', () => {
     }
     expect(index).toContain("export type { DescriptionItem } from './components/content/DescriptionList.svelte';");
     expect(index).toContain("export type { Status } from './components/content/StatusBadge.svelte';");
+    expect(index).toContain("export type { MetricTrendTone } from './components/content/MetricBlock.svelte';");
+    expect(index).toContain("export type { NetworkUser, NetworkMetric } from './components/content/NetworkUserCard.svelte';");
     expect(index).toContain("export type { NetworkColumn } from './components/content/NetworkTable.types.js';");
+  });
+
+  it('keeps reusable copy and metric meaning explicit for localized examples', () => {
+    const dataState = readFileSync(join(contentDir, 'DataState.svelte'), 'utf8');
+    const filterToolbar = readFileSync(join(contentDir, 'FilterToolbar.svelte'), 'utf8');
+    const metricBlock = readFileSync(join(contentDir, 'MetricBlock.svelte'), 'utf8');
+    const dataLists = ['ApiKeyList.svelte', 'MemberList.svelte', 'FileList.svelte', 'SecurityEventTable.svelte', 'NetworkTable.svelte'];
+
+    expect(dataState).toContain('retryLabel');
+    expect(dataState).toContain('loadingLabel');
+    expect(filterToolbar).toContain('clearLabel');
+    expect(metricBlock).toContain('MetricTrendTone');
+    expect(metricBlock).toContain("negative: 'text-destructive'");
+    for (const name of dataLists) expect(readFileSync(join(contentDir, name), 'utf8')).toContain('<DataState');
   });
 
   it('uses semantic tokens and bounded primitives instead of a second palette', () => {

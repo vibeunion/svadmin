@@ -9,6 +9,7 @@
   import { createExampleMenu, registerExampleMenuTranslations } from './exampleMenuCatalog';
   import { mockAuthProvider } from './providers/mockAuth';
   import Dashboard from './pages/Dashboard.svelte';
+  import DesignPrinciplesPage from './pages/DesignPrinciplesPage.svelte';
   import LazyResourcePage from './components/LazyResourcePage.svelte';
   import LazyRichTextEditor from './components/LazyRichTextEditor.svelte';
 
@@ -28,9 +29,10 @@
     setChatProvider(createInventoryChatProvider(inMemoryDataProvider, resources));
   });
 
-  const resourcePages = $derived.by(() => Object.fromEntries(
-    resources.map((resource) => [resource.name, { list: LazyResourcePage }]),
-  ));
+  const resourcePages = $derived.by(() => ({
+    ...Object.fromEntries(resources.map((resource) => [resource.name, { list: LazyResourcePage }])),
+    design_principles: { list: DesignPrinciplesPage },
+  }));
 </script>
 
 <AdminApp

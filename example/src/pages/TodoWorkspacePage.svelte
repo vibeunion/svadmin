@@ -1,9 +1,9 @@
 <script lang="ts">
   import { useList } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
-  import { Badge, Button } from '@svadmin/ui';
+  import { Badge, Button, ContentPageHeader, ContentPageShell, MetricBlock } from '@svadmin/ui';
   import * as Card from '@svadmin/ui/components/ui/card/index.js';
-  import { BarChart3, Bot, CalendarDays, CheckCircle2, Circle, Flag, ListTodo, Tag } from '@lucide/svelte';
+  import { Bot, CalendarDays, CheckCircle2, Circle, Flag, ListTodo, Tag } from '@lucide/svelte';
   import { readHashView } from '../utils/hashView';
 
   const i18n = useTranslation();
@@ -144,21 +144,17 @@
 
 <svelte:window onhashchange={syncView} onpopstate={syncView} />
 
-<div class="space-y-6" data-app-page="todo-workspace" data-todo-view={normalizedView} data-resource-name={resourceName}>
-  <section class="grid gap-4 lg:grid-cols-[1fr_0.78fr_0.78fr]">
-    <Card.Root class="overflow-hidden border-primary/20">
-      <Card.Header class="border-b">
-        <Badge>{viewCopy.badge}</Badge>
-        <Card.Title class="mt-3 flex items-center gap-2 text-2xl"><ListTodo class="h-6 w-6 text-primary" />{viewCopy.title}</Card.Title>
-        <Card.Description>{viewCopy.description}</Card.Description>
-      </Card.Header>
-      <Card.Content class="space-y-4 p-5">
-        <div class="flex items-end justify-between gap-4"><p class="text-4xl font-semibold">{progress}%</p><p class="text-sm text-muted-foreground">{completedCount}/{boardTodos.length} {isZh ? '已完成' : 'completed'}</p></div>
-        <div class="h-2 rounded-full bg-muted"><div class="h-2 rounded-full bg-primary" style:width={`${progress}%`}></div></div>
-      </Card.Content>
-    </Card.Root>
-    <Card.Root><Card.Content class="p-5"><Flag class="h-5 w-5 text-primary" /><p class="mt-3 text-sm text-muted-foreground">{isZh ? '高优先级' : 'High Priority'}</p><p class="mt-1 text-3xl font-semibold">{highPriorityCount}</p><p class="mt-1 text-xs text-muted-foreground">{isZh ? '个任务需要当天处理' : 'tasks need same-day attention'}</p></Card.Content></Card.Root>
-    <Card.Root><Card.Content class="p-5"><BarChart3 class="h-5 w-5 text-primary" /><p class="mt-3 text-sm text-muted-foreground">{isZh ? '优先级分布' : 'Priority Mix'}</p><div class="mt-4 space-y-2">{#each priorityGroups as group (group.priority)}<div class="flex items-center justify-between text-sm"><span>{priorityLabel(group.priority)}</span><Badge variant="outline">{group.count}</Badge></div>{/each}</div></Card.Content></Card.Root>
+{#snippet headerActions()}
+  <Button size="sm">{isZh ? '新建任务' : 'New task'}</Button>
+{/snippet}
+
+<div data-app-page="todo-workspace" data-todo-view={normalizedView} data-resource-name={resourceName}>
+<ContentPageShell pageId="todo-workspace" width="wide">
+  <ContentPageHeader eyebrow={viewCopy.badge} title={viewCopy.title} description={viewCopy.description} actions={headerActions} />
+  <section class="grid gap-3 sm:grid-cols-3">
+    <MetricBlock label={isZh ? '完成进度' : 'Progress'} value={`${progress}%`} detail={`${completedCount}/${boardTodos.length} ${isZh ? '已完成' : 'completed'}`} trendTone={progress >= 70 ? 'positive' : 'warning'} />
+    <MetricBlock label={isZh ? '高优先级' : 'High priority'} value={highPriorityCount} detail={isZh ? '需要当天处理' : 'Need same-day attention'} trendTone={highPriorityCount > 0 ? 'warning' : 'positive'} />
+    <MetricBlock label={isZh ? '优先级分布' : 'Priority mix'} value={priorityGroups.map((group) => `${priorityLabel(group.priority)} ${group.count}`).join(' · ')} />
   </section>
 
   <section class="grid gap-4 xl:grid-cols-[0.72fr_1.28fr_0.72fr]">
@@ -175,7 +171,7 @@
           </a>
         {/each}
         <div class="my-3 border-t"></div>
-        <p class="px-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{isZh ? '标签' : 'Tags'}</p>
+        <p class="px-3 text-xs font-semibold text-muted-foreground">{isZh ? '标签' : 'Tags'}</p>
         {#each tags as tag (tag.label)}
           <a href="#/todos?view=tags" class={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition ${normalizedView === 'tags' ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-muted/45'}`}>
             <span class="flex items-center gap-2"><Tag class="h-4 w-4 text-muted-foreground" />{tag.label}</span>
@@ -205,7 +201,7 @@
           >
             {#each laneTodos(lane.key) as todo (todo.id)}
               <article
-                class="rounded-xl border bg-card p-3 shadow-sm transition hover:border-primary/40 hover:shadow-md"
+                class="rounded-lg border bg-card p-3 shadow-sm transition hover:border-primary/40 hover:shadow-md"
                 draggable="true"
                 ondragstart={() => draggedTodoId = todo.id}
                 ondragend={() => draggedTodoId = null}
@@ -237,7 +233,7 @@
                 </div>
               </article>
             {:else}
-              <div class="rounded-xl border border-dashed p-4 text-center text-xs text-muted-foreground">
+              <div class="rounded-lg border border-dashed p-4 text-center text-xs text-muted-foreground">
                 {isZh ? '拖动任务到这里' : 'Drop tasks here'}
               </div>
             {/each}
@@ -249,15 +245,15 @@
     <Card.Root class="overflow-hidden border-primary/20">
       <Card.Header class="border-b"><Card.Title class="flex items-center gap-2 text-base"><Bot class="h-5 w-5 text-primary" />{isZh ? '任务助手' : 'Task Assistant'}</Card.Title></Card.Header>
       <Card.Content class="space-y-4 p-4">
-        <div class="rounded-2xl border bg-background p-4">
-          <p class="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{isZh ? '专注进度' : 'Focus progress'}</p>
+        <div class="rounded-lg border bg-background p-4">
+          <p class="text-xs font-semibold text-muted-foreground">{isZh ? '专注进度' : 'Focus progress'}</p>
           <div class="mt-3 flex items-end justify-between gap-3">
             <p class="text-2xl font-semibold">{completedCount} / {boardTodos.length}</p>
             <Badge variant="outline">{isZh ? '今日节奏' : 'today pace'}</Badge>
           </div>
           <div class="mt-3 h-2 rounded-full bg-muted"><div class="h-2 rounded-full bg-primary" style:width={`${progress}%`}></div></div>
         </div>
-        <p class="rounded-2xl rounded-tl-sm border bg-muted/25 p-4 text-sm text-muted-foreground">{isZh ? '建议先处理高优先级库存告警，再确认供应商到货窗口。' : 'Start with high-priority stock alerts, then confirm supplier delivery windows.'}</p>
+        <p class="rounded-lg rounded-tl-sm border bg-muted/25 p-4 text-sm text-muted-foreground">{isZh ? '建议先处理高优先级库存告警，再确认供应商到货窗口。' : 'Start with high-priority stock alerts, then confirm supplier delivery windows.'}</p>
         <Button class="w-full" onclick={() => activeView = 'priority'}>{isZh ? '生成今日计划' : 'Generate day plan'}</Button>
       </Card.Content>
     </Card.Root>
@@ -276,7 +272,7 @@
     <Card.Content class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
       {#if normalizedView === 'tags'}
         {#each tags as item (item.label)}
-          <div class="rounded-xl border bg-muted/20 p-4">
+          <div class="rounded-lg border bg-muted/20 p-4">
             <p class="font-semibold">{item.label}</p>
             <p class="mt-2 text-2xl font-semibold">{item.count}</p>
             <p class="mt-1 text-xs text-muted-foreground">{isZh ? '关联任务' : 'linked tasks'}</p>
@@ -284,7 +280,7 @@
         {/each}
       {:else}
         {#each focusedTodos.slice(0, 6) as item (item.id)}
-          <article class="rounded-xl border bg-card p-4">
+          <article class="rounded-lg border bg-card p-4">
             <div class="flex items-start gap-3">
               {#if item.completed}<CheckCircle2 class="mt-0.5 h-4 w-4 text-success" />{:else}<Circle class="mt-0.5 h-4 w-4 text-muted-foreground" />{/if}
               <div class="min-w-0">
@@ -301,4 +297,5 @@
       {/if}
     </Card.Content>
   </Card.Root>
+</ContentPageShell>
 </div>

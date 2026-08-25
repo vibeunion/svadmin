@@ -5,8 +5,8 @@
   import { Input } from './ui/input/index.js';
   import { Label } from './ui/label/index.js';
   import * as Alert from './ui/alert/index.js';
+  import AuthPageShell from './AuthPageShell.svelte';
   import PasswordInput from './PasswordInput.svelte';
-  import SvadminLogo from './SvadminLogo.svelte';
   import { Separator } from './ui/separator/index.js';
   import { User, Loader2, AlertCircle } from '@lucide/svelte';
 
@@ -66,113 +66,67 @@
   }
 </script>
 
-<div class="min-h-screen flex flex-col lg:flex-row">
-  <div class="hidden lg:flex lg:w-[500px] xl:w-[560px] relative overflow-hidden bg-gradient-to-br from-primary/95 via-primary to-primary/85 shrink-0">
-    <div class="absolute inset-0">
-      <div class="absolute top-[12%] left-[8%] h-32 w-32 rounded-3xl border border-white/10 bg-white/5 rotate-12 backdrop-blur-sm"></div>
-      <div class="absolute top-[54%] left-[54%] h-44 w-44 rounded-full border border-white/10 bg-white/5 -rotate-6 backdrop-blur-sm"></div>
-      <div class="absolute bottom-[14%] left-[13%] h-28 w-28 rounded-2xl border border-white/10 bg-white/5 -rotate-12 backdrop-blur-sm"></div>
-      <div class="absolute top-[30%] right-[10%] h-20 w-20 rounded-xl border border-white/10 bg-white/5 rotate-45 backdrop-blur-sm"></div>
-      <div class="absolute inset-0 opacity-[0.04]" style="background-image: radial-gradient(circle, white 1px, transparent 1px); background-size: 24px 24px;"></div>
-    </div>
+{#snippet footer()}
+  {#if authProvider?.register}
+    <div class="flex items-center justify-center gap-1.5"><span class="text-sm text-muted-foreground">{i18n.t('auth.noAccount')}</span><Button variant="link" class="h-auto p-0 text-sm font-semibold" onclick={() => adminContext.navigate('/register')}>{i18n.t('auth.register')}</Button></div>
+  {/if}
+{/snippet}
 
-    <div class="relative z-10 flex flex-col justify-between p-10 xl:p-12 w-full">
-      <div class="flex items-center gap-3">
-        <SvadminLogo size={44} onDark />
-        <span class="text-xl font-semibold text-white tracking-tight">{title}</span>
-      </div>
-
-      <div class="max-w-[360px] space-y-4">
-        <h2 class="text-4xl font-bold text-white leading-tight">
-          {i18n.t('auth.welcomeBack')}
-        </h2>
-        <p class="text-lg text-white/75 leading-relaxed">
-          {i18n.t('auth.welcomeMessage')}
-        </p>
-      </div>
-
-      <div class="flex items-center gap-3">
-        <div class="h-1.5 w-10 rounded-full bg-white/40"></div>
-        <div class="h-1.5 w-5 rounded-full bg-white/20"></div>
-        <div class="h-1.5 w-2 rounded-full bg-white/15"></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="flex-1 flex items-center justify-center bg-background p-6 sm:p-10 lg:p-14">
-    <div class="w-full max-w-[460px] space-y-8">
-      <div class="mb-8 flex items-center gap-3 lg:hidden">
-        <SvadminLogo size={44} />
-        <span class="text-xl font-semibold tracking-tight text-foreground">{title}</span>
-      </div>
-
-      <div class="space-y-2.5">
-        <h1 class="text-3xl font-semibold tracking-tight text-foreground">
-          {i18n.t('auth.welcomeBack')}
-        </h1>
-        <p class="text-base text-muted-foreground leading-relaxed">
-          {i18n.t('auth.welcomeMessage')}
-        </p>
-      </div>
-
+<AuthPageShell brand={title} title={i18n.t('auth.welcomeBack')} description={i18n.t('auth.welcomeMessage')} {footer}>
       {#if loginHint || defaultIdentifier || defaultPassword}
-        <div class="rounded-2xl border border-primary/15 bg-primary/[0.06] p-4 shadow-sm">
+        <aside class="mb-5 rounded-md border border-border bg-muted/35 p-3">
           {#if loginHint}
-            <p class="text-sm font-medium text-primary">{loginHint}</p>
+            <p class="text-sm font-medium text-foreground">{loginHint}</p>
           {/if}
-          <div class="mt-3 grid gap-2 sm:grid-cols-2">
+          <dl class="mt-3 grid gap-2 sm:grid-cols-2">
             {#if defaultIdentifier}
-              <div class="rounded-xl border border-border/70 bg-background/80 px-3 py-2">
-                <p class="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  {i18n.t('auth.usernameOrEmail')}
-                </p>
-                <p class="mt-1 font-mono text-sm font-semibold text-foreground">{defaultIdentifier}</p>
+              <div class="rounded-md border border-border bg-background px-3 py-2">
+                <dt class="text-xs font-medium text-muted-foreground">{i18n.t('auth.usernameOrEmail')}</dt>
+                <dd class="mt-1 truncate font-mono text-sm text-foreground">{defaultIdentifier}</dd>
               </div>
             {/if}
             {#if defaultPassword}
-              <div class="rounded-xl border border-border/70 bg-background/80 px-3 py-2">
-                <p class="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                  {i18n.t('auth.password')}
-                </p>
-                <p class="mt-1 font-mono text-sm font-semibold text-foreground">{defaultPassword}</p>
+              <div class="rounded-md border border-border bg-background px-3 py-2">
+                <dt class="text-xs font-medium text-muted-foreground">{i18n.t('auth.password')}</dt>
+                <dd class="mt-1 font-mono text-sm text-foreground">{defaultPassword}</dd>
               </div>
             {/if}
-          </div>
-        </div>
+          </dl>
+        </aside>
       {/if}
 
-      <form onsubmit={handleSubmit} class="space-y-6 login-form">
+      <form onsubmit={handleSubmit} class="space-y-5">
         {#if error}
-          <Alert.Root variant="destructive" class="rounded-xl border border-destructive/20 bg-destructive/5">
+          <Alert.Root variant="destructive">
             <AlertCircle class="h-4 w-4" />
             <Alert.Description class="text-sm font-medium">{error}</Alert.Description>
           </Alert.Root>
         {/if}
 
-        <div class="space-y-2.5">
-          <Label for="login-identifier" class="text-sm font-semibold text-foreground/80 pl-0.5">
+        <div class="space-y-2">
+          <Label for="login-identifier">
             {i18n.t('auth.usernameOrEmail')}
           </Label>
           <div class="relative">
-            <User class="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none z-[1]" />
+            <User class="pointer-events-none absolute left-3 top-1/2 z-[1] h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               id="login-identifier"
               type="text"
               placeholder={i18n.t('auth.identifierPlaceholder')}
               bind:value={identifier}
-              class="pl-12"
+              class="pl-9"
               autocomplete="username"
             />
           </div>
         </div>
 
-        <div class="space-y-2.5">
-          <div class="flex items-center justify-between pl-0.5">
-            <Label for="login-password" class="text-sm font-semibold text-foreground/80">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <Label for="login-password">
               {i18n.t('auth.password')}
             </Label>
             {#if authProvider?.forgotPassword}
-              <Button variant="link" class="text-xs h-auto p-0 font-medium hover:text-primary transition-colors" onclick={() => adminContext.navigate('/forgot-password')}>
+              <Button variant="link" class="h-auto p-0 text-xs font-medium" onclick={() => adminContext.navigate('/forgot-password')}>
                 {i18n.t('auth.forgotPasswordLink')}
               </Button>
             {/if}
@@ -185,7 +139,7 @@
           />
         </div>
 
-        <Button type="submit" class="w-full h-14 rounded-xl text-base font-semibold shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 mt-2" disabled={login.isLoading}>
+        <Button type="submit" class="h-10 w-full" disabled={login.isLoading}>
           {#if login.isLoading}
             <Loader2 class="h-5 w-5 animate-spin mr-2" />
           {/if}
@@ -194,9 +148,9 @@
       </form>
 
       {#if socialProviders.length > 0}
-        <div class="relative my-8">
+        <div class="relative my-6">
           <Separator />
-          <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-4 text-xs font-semibold text-muted-foreground tracking-wider uppercase">
+          <span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-4 text-xs font-medium text-muted-foreground">
             {i18n.t('auth.orContinueWith')}
           </span>
         </div>
@@ -205,7 +159,7 @@
           {#each socialProviders as provider (provider.name)}
             <Button
               variant="outline"
-              class="w-full h-12 rounded-xl font-semibold border-input/60 hover:bg-muted/50 hover:text-accent-foreground transition-all duration-200"
+              class="h-10 w-full"
               onclick={provider.onClick}
             >
               {#if provider.icon}
@@ -216,49 +170,4 @@
           {/each}
         </div>
       {/if}
-
-      {#if authProvider?.register}
-        <div class="flex items-center justify-center gap-1.5 mt-8 pt-6 border-t border-border/60">
-          <span class="text-sm text-muted-foreground">{i18n.t('auth.noAccount')}</span>
-          <Button variant="link" class="text-sm h-auto p-0 font-semibold text-primary hover:underline" onclick={() => adminContext.navigate('/register')}>
-            {i18n.t('auth.register')}
-          </Button>
-        </div>
-      {/if}
-
-      <p class="text-xs text-muted-foreground/50 mt-8 text-center tracking-wide font-medium">
-        Powered by {title}
-      </p>
-    </div>
-  </div>
-</div>
-
-<style>
-  .login-form :global(input[data-slot='input']) {
-    height: 3.5rem;
-    border-radius: 0.75rem;
-    border-color: color-mix(in oklch, var(--border) 88%, var(--foreground));
-    background-color: var(--background);
-    font-size: 0.975rem;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-  }
-
-  .login-form :global(input[data-slot='input']:focus-visible) {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px color-mix(in oklch, var(--primary) 18%, transparent);
-  }
-
-  .login-form :global(.relative > svg:first-of-type) {
-    left: 1rem;
-    height: 1.25rem;
-    width: 1.25rem;
-    color: color-mix(in oklch, var(--muted-foreground) 82%, var(--foreground));
-  }
-
-  .login-form :global(.relative > button) {
-    right: 0.625rem;
-    height: 2.25rem;
-    width: 2.25rem;
-    border-radius: 0.5rem;
-  }
-</style>
+</AuthPageShell>

@@ -1,20 +1,17 @@
 <script lang="ts">
   import { useList } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
-  import { AutoTable, Badge, Button } from '@svadmin/ui';
+  import { AutoTable, Badge, Button, ContentPageHeader, ContentPageShell, MetricBlock } from '@svadmin/ui';
   import * as Card from '@svadmin/ui/components/ui/card/index.js';
   import {
-    Activity,
     CheckCircle2,
     Clock3,
     KeyRound,
-    LockKeyhole,
     Search,
     ShieldCheck,
     SlidersHorizontal,
     UserCog,
     UserPlus,
-    Users,
   } from '@lucide/svelte';
   import { readHashParam, readHashView } from '../utils/hashView';
 
@@ -326,46 +323,19 @@
 
 <svelte:window onhashchange={syncView} onpopstate={syncView} />
 
-<div class="space-y-6" data-app-page="user-management" data-user-management-resource={activeResource} data-user-management-view={activeView}>
-  {#if activeResource !== 'roles'}
-  <section class="grid gap-4 xl:grid-cols-[1fr_0.36fr]">
-    <Card.Root class="overflow-hidden border-primary/20">
-      <Card.Header class="border-b">
-        <Badge>{pageCopy.badge}</Badge>
-        <Card.Title class="mt-3 flex items-center gap-2 text-2xl">
-          {#if activeResource === 'permissions'}
-            <KeyRound class="h-6 w-6 text-primary" />
-          {:else if activeResource === 'user_accounts'}
-            <LockKeyhole class="h-6 w-6 text-primary" />
-          {:else if activeResource === 'user_logs'}
-            <Activity class="h-6 w-6 text-primary" />
-          {:else if activeResource === 'user_settings'}
-            <SlidersHorizontal class="h-6 w-6 text-primary" />
-          {:else}
-            <Users class="h-6 w-6 text-primary" />
-          {/if}
-          {pageCopy.title}
-        </Card.Title>
-        <Card.Description>{pageCopy.description}</Card.Description>
-      </Card.Header>
-      <Card.Content class="grid grid-cols-2 gap-3 p-5 sm:grid-cols-4">
-        <div class="rounded-xl border bg-card p-4"><p class="text-xs text-muted-foreground">{isZh ? '成员总数' : 'Members'}</p><p class="mt-2 text-2xl font-semibold">{users.length}</p></div>
-        <div class="rounded-xl border bg-card p-4"><p class="text-xs text-muted-foreground">{isZh ? '角色数量' : 'Roles'}</p><p class="mt-2 text-2xl font-semibold">{roles.length}</p></div>
-        <div class="rounded-xl border bg-card p-4"><p class="text-xs text-muted-foreground">{isZh ? '权限策略' : 'Policies'}</p><p class="mt-2 text-2xl font-semibold">{permissions.length}</p></div>
-        <div class="rounded-xl border bg-card p-4"><p class="text-xs text-muted-foreground">{isZh ? '风险事件' : 'Risk events'}</p><p class="mt-2 text-2xl font-semibold">{criticalLogs}</p></div>
-      </Card.Content>
-    </Card.Root>
+{#snippet headerActions()}
+  <Button size="sm">{pageCopy.action}</Button>
+{/snippet}
 
-    <Card.Root>
-      <Card.Content class="space-y-4 p-5">
-        <UserPlus class="h-5 w-5 text-primary" />
-        <div>
-          <p class="font-semibold">{pageCopy.focus}</p>
-          <p class="mt-2 text-sm text-muted-foreground">{isZh ? '用户、角色、权限、账户、日志和策略保持在一个可演示闭环。' : 'Users, roles, permissions, accounts, logs, and policies stay in one demo loop.'}</p>
-        </div>
-        <Button class="w-full">{pageCopy.action}</Button>
-      </Card.Content>
-    </Card.Root>
+<div data-app-page="user-management" data-user-management-resource={activeResource} data-user-management-view={activeView}>
+<ContentPageShell pageId="user-management" width="wide">
+  <ContentPageHeader eyebrow={pageCopy.badge} title={pageCopy.title} description={pageCopy.description} actions={headerActions} />
+  {#if activeResource !== 'roles'}
+  <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <MetricBlock label={isZh ? '成员总数' : 'Members'} value={users.length} detail={isZh ? '当前组织成员' : 'Current organization'} />
+    <MetricBlock label={isZh ? '角色数量' : 'Roles'} value={roles.length} detail={isZh ? '权限边界' : 'Permission boundaries'} />
+    <MetricBlock label={isZh ? '权限策略' : 'Policies'} value={permissions.length} detail={isZh ? '可审计规则' : 'Auditable rules'} />
+    <MetricBlock label={isZh ? '风险事件' : 'Risk events'} value={criticalLogs} detail={pageCopy.focus} trendTone={criticalLogs > 0 ? 'warning' : 'positive'} />
   </section>
   {/if}
 
@@ -375,11 +345,11 @@
         <div class="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
           {#each roleCards as role (role.id)}
             <button
-              class={`rounded-2xl border bg-card p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md ${selectedRole?.id === role.id ? 'border-primary/45 ring-2 ring-primary/10' : 'border-border'}`}
+              class={`rounded-lg border bg-card p-4 text-left shadow-sm transition hover:border-primary/40 hover:shadow-md ${selectedRole?.id === role.id ? 'border-primary/45 ring-2 ring-primary/10' : 'border-border'}`}
               onclick={() => selectRole(role.id)}
             >
               <div class="flex items-start justify-between gap-3">
-                <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-sm font-semibold text-primary">
+                <span class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-sm font-semibold text-primary">
                   {initials(role.name)}
                 </span>
                 <Badge variant="outline">{roleLevelLabel(role.level)}</Badge>
@@ -388,7 +358,7 @@
                 <p class="font-semibold">{role.name}</p>
                 <p class="mt-1 line-clamp-2 text-sm text-muted-foreground">{role.description}</p>
               </div>
-              <div class="mt-4 flex items-center justify-between rounded-xl border bg-muted/20 px-3 py-2 text-sm">
+              <div class="mt-4 flex items-center justify-between rounded-lg border bg-muted/20 px-3 py-2 text-sm">
                 <span class="text-muted-foreground">{isZh ? '成员' : 'Members'}</span>
                 <span class="font-semibold">{role.assignedUsers.length}</span>
               </div>
@@ -412,8 +382,8 @@
               </div>
             </button>
           {/each}
-          <a href="#/roles/create" class="flex min-h-[250px] flex-col items-center justify-center rounded-2xl border border-dashed bg-muted/10 p-5 text-center transition hover:border-primary/60 hover:bg-primary/5">
-            <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+          <a href="#/roles/create" class="flex min-h-[250px] flex-col items-center justify-center rounded-lg border border-dashed bg-muted/10 p-5 text-center transition hover:border-primary/60 hover:bg-primary/5">
+            <span class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <ShieldCheck class="h-5 w-5" />
             </span>
             <span class="mt-4 font-semibold">{isZh ? '新增角色' : 'Add New Role'}</span>
@@ -429,18 +399,18 @@
           </Card.Header>
           <Card.Content class="space-y-4">
             <div class="grid grid-cols-2 gap-3">
-              <div class="rounded-xl border bg-card p-3">
+              <div class="rounded-lg border bg-card p-3">
                 <p class="text-xs text-muted-foreground">{isZh ? '成员' : 'Members'}</p>
                 <p class="mt-1 text-2xl font-semibold">{selectedRole?.assignedUsers.length ?? 0}</p>
               </div>
-              <div class="rounded-xl border bg-card p-3">
+              <div class="rounded-lg border bg-card p-3">
                 <p class="text-xs text-muted-foreground">{isZh ? '权限' : 'Permissions'}</p>
                 <p class="mt-1 text-2xl font-semibold">{selectedRole?.permissionCount ?? 0}</p>
               </div>
             </div>
             <div class="space-y-2">
               {#each selectedPermissionDomains as domain (domain.module)}
-                <div class="rounded-xl border bg-card p-3">
+                <div class="rounded-lg border bg-card p-3">
                   <div class="flex items-center justify-between gap-3">
                     <p class="text-sm font-semibold">{permissionDomainLabel(domain.module)}</p>
                     <Badge variant="outline">{domain.permissions.length}</Badge>
@@ -453,7 +423,7 @@
                 </div>
               {/each}
               {#if selectedPermissionDomains.length === 0}
-                <p class="rounded-xl border bg-card p-3 text-sm text-muted-foreground">{isZh ? '该角色暂无权限，可通过下方表格进入配置。' : 'This role has no permissions yet; use the table below to configure it.'}</p>
+                <p class="rounded-lg border bg-card p-3 text-sm text-muted-foreground">{isZh ? '该角色暂无权限，可通过下方表格进入配置。' : 'This role has no permissions yet; use the table below to configure it.'}</p>
               {/if}
             </div>
             <div class="flex flex-wrap gap-2">
@@ -497,7 +467,7 @@
           </div>
           <div class="overflow-x-auto">
             <table class="w-full min-w-[720px] text-sm">
-              <thead class="border-b bg-muted/35 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+              <thead class="border-b bg-muted/35 text-xs font-semibold text-muted-foreground">
                 <tr>
                   <th class="px-5 py-3 text-left">{isZh ? '角色' : 'Role'}</th>
                   <th class="px-5 py-3 text-left">Slug</th>
@@ -593,13 +563,13 @@
     </section>
   {:else if activeResource === 'user_accounts'}
     <section class="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
-      <Card.Root><Card.Header><Card.Title class="text-base">{isZh ? '账户风险概览' : 'Account Risk Overview'}</Card.Title></Card.Header><Card.Content class="grid gap-3 sm:grid-cols-3 xl:grid-cols-1"><div class="rounded-xl border p-3"><p class="text-xs text-muted-foreground">{isZh ? '账户' : 'Accounts'}</p><p class="text-2xl font-semibold">{accounts.length}</p></div><div class="rounded-xl border p-3"><p class="text-xs text-muted-foreground">{isZh ? '锁定' : 'Locked'}</p><p class="text-2xl font-semibold">{lockedAccounts}</p></div><div class="rounded-xl border p-3"><p class="text-xs text-muted-foreground">{isZh ? '活跃成员' : 'Active members'}</p><p class="text-2xl font-semibold">{activeUsers}</p></div></Card.Content></Card.Root>
+      <Card.Root><Card.Header><Card.Title class="text-base">{isZh ? '账户风险概览' : 'Account Risk Overview'}</Card.Title></Card.Header><Card.Content class="grid gap-3 sm:grid-cols-3 xl:grid-cols-1"><div class="rounded-lg border p-3"><p class="text-xs text-muted-foreground">{isZh ? '账户' : 'Accounts'}</p><p class="text-2xl font-semibold">{accounts.length}</p></div><div class="rounded-lg border p-3"><p class="text-xs text-muted-foreground">{isZh ? '锁定' : 'Locked'}</p><p class="text-2xl font-semibold">{lockedAccounts}</p></div><div class="rounded-lg border p-3"><p class="text-xs text-muted-foreground">{isZh ? '活跃成员' : 'Active members'}</p><p class="text-2xl font-semibold">{activeUsers}</p></div></Card.Content></Card.Root>
       <Card.Root class="overflow-hidden"><Card.Header class="border-b"><Card.Title class="text-base">{isZh ? '登录状态' : 'Sign-in Status'}</Card.Title></Card.Header><Card.Content class="divide-y p-0">{#each accounts as account (account.id)}<div class="grid gap-2 px-5 py-4 md:grid-cols-[1fr_auto_auto]"><div><p class="font-medium">{userName(account.userId)}</p><p class="text-xs text-muted-foreground">{account.notes}</p></div><Badge variant="outline">{statusLabel(account.accountType)}</Badge><span class="text-xs text-muted-foreground">{account.lastSignInAt}</span></div>{/each}</Card.Content></Card.Root>
     </section>
   {:else if activeResource === 'user_logs'}
     <section class="grid gap-4 xl:grid-cols-[1fr_0.42fr]">
       <Card.Root class="overflow-hidden"><Card.Header class="border-b"><Card.Title class="text-base">{isZh ? '安全时间线' : 'Security Timeline'}</Card.Title></Card.Header><Card.Content class="divide-y p-0">{#each logs as log (log.id)}<div class="grid gap-3 px-5 py-4 md:grid-cols-[auto_1fr_auto]"><span class="mt-1 flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary"><Clock3 class="h-4 w-4" /></span><div><p class="font-medium">{log.event}</p><p class="text-xs text-muted-foreground">{userName(log.userId)} · {log.ipAddress} · {log.details}</p></div><Badge variant="outline">{statusLabel(log.severity)}</Badge></div>{/each}</Card.Content></Card.Root>
-      <Card.Root><Card.Header><Card.Title class="text-base">{isZh ? '审计摘要' : 'Audit Summary'}</Card.Title></Card.Header><Card.Content class="space-y-3"><div class="rounded-xl border p-3"><p class="text-xs text-muted-foreground">{isZh ? '日志总数' : 'Logs'}</p><p class="text-2xl font-semibold">{logs.length}</p></div><div class="rounded-xl border p-3"><p class="text-xs text-muted-foreground">{isZh ? '需关注' : 'Needs attention'}</p><p class="text-2xl font-semibold">{criticalLogs}</p></div></Card.Content></Card.Root>
+      <Card.Root><Card.Header><Card.Title class="text-base">{isZh ? '审计摘要' : 'Audit Summary'}</Card.Title></Card.Header><Card.Content class="space-y-3"><div class="rounded-lg border p-3"><p class="text-xs text-muted-foreground">{isZh ? '日志总数' : 'Logs'}</p><p class="text-2xl font-semibold">{logs.length}</p></div><div class="rounded-lg border p-3"><p class="text-xs text-muted-foreground">{isZh ? '需关注' : 'Needs attention'}</p><p class="text-2xl font-semibold">{criticalLogs}</p></div></Card.Content></Card.Root>
     </section>
   {:else if activeResource === 'user_settings'}
     <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -629,7 +599,7 @@
       <Card.Content class="p-0">
         <div class="overflow-x-auto">
           <table class="w-full min-w-[760px] text-sm">
-            <thead class="border-b bg-muted/35 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+            <thead class="border-b bg-muted/35 text-xs font-semibold text-muted-foreground">
               <tr><th class="px-5 py-3 text-left">{isZh ? '用户' : 'User'}</th><th class="px-5 py-3 text-left">{isZh ? '角色' : 'Role'}</th><th class="px-5 py-3 text-left">{isZh ? '状态' : 'Status'}</th><th class="px-5 py-3 text-left">{isZh ? '加入日期' : 'Joined'}</th><th class="px-5 py-3 text-left">{isZh ? '最近登录' : 'Last Sign In'}</th></tr>
             </thead>
             <tbody class="divide-y">
@@ -663,10 +633,10 @@
         <Card.Root>
           <Card.Header><Card.Title class="flex items-center gap-2 text-base"><UserCog class="h-4 w-4 text-primary" />{isZh ? '管理摘要' : 'Management Summary'}</Card.Title></Card.Header>
           <Card.Content class="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-            <div class="rounded-xl border p-3"><p class="text-xs text-muted-foreground">{isZh ? '角色' : 'Roles'}</p><p class="mt-1 text-xl font-semibold">{roles.length}</p></div>
-            <div class="rounded-xl border p-3"><p class="text-xs text-muted-foreground">{isZh ? '账户' : 'Accounts'}</p><p class="mt-1 text-xl font-semibold">{accounts.length}</p></div>
-            <div class="rounded-xl border p-3"><p class="text-xs text-muted-foreground">{isZh ? '日志' : 'Logs'}</p><p class="mt-1 text-xl font-semibold">{logs.length}</p></div>
-            <div class="rounded-xl border p-3"><p class="text-xs text-muted-foreground">{isZh ? '设置' : 'Settings'}</p><p class="mt-1 text-xl font-semibold">{settings.length}</p></div>
+            <div class="rounded-lg border p-3"><p class="text-xs text-muted-foreground">{isZh ? '角色' : 'Roles'}</p><p class="mt-1 text-xl font-semibold">{roles.length}</p></div>
+            <div class="rounded-lg border p-3"><p class="text-xs text-muted-foreground">{isZh ? '账户' : 'Accounts'}</p><p class="mt-1 text-xl font-semibold">{accounts.length}</p></div>
+            <div class="rounded-lg border p-3"><p class="text-xs text-muted-foreground">{isZh ? '日志' : 'Logs'}</p><p class="mt-1 text-xl font-semibold">{logs.length}</p></div>
+            <div class="rounded-lg border p-3"><p class="text-xs text-muted-foreground">{isZh ? '设置' : 'Settings'}</p><p class="mt-1 text-xl font-semibold">{settings.length}</p></div>
           </Card.Content>
         </Card.Root>
         <Card.Root><Card.Content class="p-5"><KeyRound class="h-5 w-5 text-primary" /><p class="mt-3 text-sm text-muted-foreground">{isZh ? '账户、日志与策略页都保留独立信息结构，并共享底部 CRUD 表格。' : 'Accounts, logs, and policies keep distinct structures while sharing the CRUD table below.'}</p></Card.Content></Card.Root>
@@ -675,4 +645,5 @@
 
     <AutoTable {resourceName} />
   {/if}
+</ContentPageShell>
 </div>

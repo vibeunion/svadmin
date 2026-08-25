@@ -102,6 +102,40 @@ architecture, and scenario coverage may expose missing components or examples,
 but its palette, decoration, card treatment, typography, and branding are not
 visual authority.
 
+### Design principles
+
+Seven principles turn the Stripe-first direction into reviewable product
+decisions. They apply to built-in components, examples, generated applications,
+and documentation:
+
+1. **Clear by default:** every page has one primary job, one dominant next
+   action, and one owner for every visible fact. Supporting copy adds a
+   constraint, consequence, scope, or recovery path instead of repeating UI.
+2. **Efficient in the loop:** preserve filters, selection, navigation context,
+   and keyboard reachability across repeated work. Loading and feedback must not
+   move the primary action or force an unnecessary page transition.
+3. **Consistent by contract:** semantic tokens, component variants, state names,
+   page skeletons, and feedback lifecycles remain stable across products. Layout
+   presets may change density and composition, not interaction meaning.
+4. **Trustworthy in every state:** loading, empty, partial, error, forbidden,
+   destructive, reversible, and completed states expose their scope and next
+   step. Data freshness, permission boundaries, and action consequences must be
+   visible when they affect a decision.
+5. **Restrained like Stripe:** neutral surfaces and precise hierarchy carry the
+   interface. Accent, elevation, radius, animation, and decoration are used only
+   when they clarify priority or interaction.
+6. **Accessible by construction:** keyboard access, visible focus, semantic
+   structure, non-color status cues, readable contrast, stable targets, and
+   responsive behavior are component defaults rather than page-level repairs.
+7. **AI-ready and auditable:** generated UI declares its primary workflow,
+   information owners, state owners, and feedback removal conditions; it uses
+   the trusted component catalog and passes deterministic and visual gates.
+
+Use these principles as an ordered review: first verify the task and state are
+clear, then efficiency and consistency, then trust, restraint, accessibility,
+and generation evidence. A visually polished page still fails when its state or
+action ownership is ambiguous.
+
 ## Colors
 
 Neutrals carry the interface. Primary is a single controlled interaction accent,

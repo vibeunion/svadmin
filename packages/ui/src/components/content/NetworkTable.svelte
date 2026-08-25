@@ -1,10 +1,16 @@
 <script lang="ts" generics="T extends object">
   import type { Snippet } from 'svelte';
   import * as Table from '../ui/table/index.js';
+  import DataState from './DataState.svelte';
+  import type { DataStateKind } from './DataState.svelte';
   import type { NetworkColumn } from './NetworkTable.types.js';
-  interface Props { rows?: T[]; columns: NetworkColumn<T>[]; row?: Snippet<[T]>; class?: string; }
-  let { rows = [], columns, row, class: className = '' }: Props = $props();
+  interface Props { rows?: T[]; columns: NetworkColumn<T>[]; row?: Snippet<[T]>; state?: DataStateKind; stateTitle?: string; stateDescription?: string; emptyTitle?: string; emptyDescription?: string; retry?: () => void; retryLabel?: string; loadingLabel?: string; class?: string; }
+  let { rows = [], columns, row, state, stateTitle, stateDescription, emptyTitle, emptyDescription, retry, retryLabel, loadingLabel, class: className = '' }: Props = $props();
+  const resolvedState = $derived(state ?? (rows.length === 0 ? 'empty' : undefined));
 </script>
+{#if resolvedState}
+  <DataState state={resolvedState} title={stateTitle ?? emptyTitle} description={stateDescription ?? emptyDescription} {retry} {retryLabel} {loadingLabel} class={className} />
+{:else}
 <div class={'overflow-x-auto rounded-lg border border-border bg-card ' + className}>
   <Table.Root data-svadmin-datatable>
     <Table.Header data-svadmin-table-head><Table.Row>{#each columns as column (String(column.key))}<Table.Head>{column.label}</Table.Head>{/each}</Table.Row></Table.Header>
@@ -14,5 +20,5 @@
       {/each}
     </Table.Body>
   </Table.Root>
-  {#if rows.length === 0}<div class="p-6 text-center text-sm text-muted-foreground">No records</div>{/if}
 </div>
+{/if}

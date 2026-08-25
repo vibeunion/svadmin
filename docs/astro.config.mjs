@@ -61,6 +61,7 @@ export default defineConfig({
             { slug: 'guides/declarative-surface' },
             { slug: 'guides/flow' },
             { slug: 'guides/core-hooks-contract' },
+            { slug: 'guides/design-principles' },
             { slug: 'guides/interface-generation' },
             { slug: 'guides/comparison' },
           ],
@@ -94,6 +95,7 @@ export default defineConfig({
           translations: { 'zh-CN': '组件' },
           items: [
             { slug: 'components/crud-pages' },
+            { slug: 'components/content-components' },
             { slug: 'components/buttons' },
             { slug: 'components/autosave' },
             { slug: 'components/feedback' },

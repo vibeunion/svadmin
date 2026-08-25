@@ -1,9 +1,9 @@
 <script lang="ts">
   import { useList } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
-  import { Badge, Button } from '@svadmin/ui';
+  import { Badge, Button, ContentPageHeader, ContentPageShell, MetricBlock, SectionHeader } from '@svadmin/ui';
   import * as Card from '@svadmin/ui/components/ui/card/index.js';
-  import { CalendarDays, ChevronLeft, ChevronRight, Clock, Filter, ListChecks, Plus } from '@lucide/svelte';
+  import { CalendarDays, ChevronLeft, ChevronRight, Clock, Filter, Plus } from '@lucide/svelte';
 
   const i18n = useTranslation();
 
@@ -85,55 +85,20 @@
   }
 </script>
 
-<div class="space-y-6" data-app-page="calendar-workspace" data-resource-name={resourceName}>
-  <section class="grid gap-4 xl:grid-cols-[1fr_0.72fr]">
-    <Card.Root class="overflow-hidden border-primary/20">
-      <Card.Header class="border-b">
-        <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <Badge>{isZh ? '日程应用' : 'Calendar App'}</Badge>
-            <Card.Title class="mt-3 flex items-center gap-2 text-2xl"><CalendarDays class="h-6 w-6 text-primary" />{isZh ? '运营日程控制台' : 'Operations Schedule Console'}</Card.Title>
-            <Card.Description>{isZh ? '用月视图、议程列表、类型过滤和状态摘要管理计划作业。' : 'Manage planned work with month view, agenda, type filters, and status summaries.'}</Card.Description>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <Button variant="outline" onclick={() => selectedType = selectedType ? null : 'purchase'}><Filter class="mr-2 h-4 w-4" />{selectedType ? typeLabel(selectedType) : (isZh ? '筛选' : 'Filter')}</Button>
-            <Button><Plus class="mr-2 h-4 w-4" />{isZh ? '新建日程' : 'New event'}</Button>
-          </div>
-        </div>
-      </Card.Header>
-      <Card.Content class="grid gap-3 p-5 sm:grid-cols-3">
-        <div class="rounded-xl border bg-card p-4">
-          <p class="text-xs text-muted-foreground">{isZh ? '日程总数' : 'Total Events'}</p>
-          <p class="mt-2 text-2xl font-semibold">{events.length}</p>
-        </div>
-        <div class="rounded-xl border bg-card p-4">
-          <p class="text-xs text-muted-foreground">{isZh ? '下一项' : 'Next Event'}</p>
-          <p class="mt-2 truncate text-lg font-semibold">{nextEvent?.title ?? '-'}</p>
-        </div>
-        <div class="rounded-xl border bg-card p-4">
-          <p class="text-xs text-muted-foreground">{isZh ? '视图' : 'View'}</p>
-          <div class="mt-2 flex gap-2">
-            <button onclick={() => viewMode = 'month'}><Badge variant={viewMode === 'month' ? 'default' : 'outline'}>{isZh ? '月' : 'Month'}</Badge></button>
-            <button onclick={() => viewMode = 'agenda'}><Badge variant={viewMode === 'agenda' ? 'default' : 'outline'}>{isZh ? '议程' : 'Agenda'}</Badge></button>
-          </div>
-        </div>
-      </Card.Content>
-    </Card.Root>
-    <Card.Root>
-      <Card.Header><Card.Title class="flex items-center gap-2 text-base"><ListChecks class="h-4 w-4 text-primary" />{isZh ? '类型过滤' : 'Type Filters'}</Card.Title></Card.Header>
-      <Card.Content class="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
-        {#each typeStats as item (item.type)}
-          <button
-            class={`flex items-center justify-between rounded-xl border px-3 py-2 text-left text-sm transition ${selectedType === item.type ? 'border-primary bg-primary/10 text-primary' : 'hover:bg-muted/40'}`}
-            onclick={() => selectedType = selectedType === item.type ? null : item.type}
-          >
-            <span>{typeLabel(item.type)}</span>
-            <Badge variant="outline">{item.count}</Badge>
-          </button>
-        {/each}
-      </Card.Content>
-    </Card.Root>
+{#snippet headerActions()}
+  <Button variant="outline" size="sm" onclick={() => selectedType = selectedType ? null : 'purchase'}><Filter class="h-4 w-4" />{selectedType ? typeLabel(selectedType) : (isZh ? '筛选' : 'Filter')}</Button>
+  <Button size="sm"><Plus class="h-4 w-4" />{isZh ? '新建日程' : 'New event'}</Button>
+{/snippet}
+
+<div data-app-page="calendar-workspace" data-resource-name={resourceName}>
+<ContentPageShell pageId="calendar-workspace" width="wide">
+  <ContentPageHeader eyebrow={isZh ? '日程应用' : 'Calendar app'} title={isZh ? '运营日程控制台' : 'Operations schedule console'} description={isZh ? '用月视图、议程列表、类型过滤和状态摘要管理计划作业。' : 'Manage planned work with month view, agenda, type filters, and status summaries.'} actions={headerActions} />
+  <section class="grid gap-3 sm:grid-cols-3">
+    <MetricBlock label={isZh ? '日程总数' : 'Total events'} value={events.length} detail={isZh ? '当前计划作业' : 'Planned work'} />
+    <MetricBlock label={isZh ? '下一项' : 'Next event'} value={nextEvent?.title ?? '-'} detail={nextEvent?.startDate} />
+    <MetricBlock label={isZh ? '当前视图' : 'Current view'} value={viewMode === 'month' ? (isZh ? '月' : 'Month') : (isZh ? '议程' : 'Agenda')} detail={selectedType ? typeLabel(selectedType) : (isZh ? '全部类型' : 'All types')} />
   </section>
+  <section class="space-y-3"><SectionHeader title={isZh ? '类型过滤' : 'Type filters'} /><div class="flex flex-wrap gap-2">{#each typeStats as item (item.type)}<Button size="sm" variant={selectedType === item.type ? 'default' : 'outline'} onclick={() => selectedType = selectedType === item.type ? null : item.type}>{typeLabel(item.type)}<Badge variant="secondary">{item.count}</Badge></Button>{/each}<Button size="sm" variant={viewMode === 'month' ? 'default' : 'outline'} onclick={() => viewMode = 'month'}>{isZh ? '月视图' : 'Month'}</Button><Button size="sm" variant={viewMode === 'agenda' ? 'default' : 'outline'} onclick={() => viewMode = 'agenda'}>{isZh ? '议程' : 'Agenda'}</Button></div></section>
 
   <section class="grid gap-4 xl:grid-cols-[1fr_0.36fr]">
     <Card.Root class="overflow-hidden">
@@ -187,12 +152,12 @@
         <Card.Header><Card.Title class="text-base">{isZh ? '选中日期' : 'Selected Day'}</Card.Title></Card.Header>
         <Card.Content class="space-y-3">
           {#each selectedDayEvents as event (event.id)}
-            <div class="rounded-xl border bg-card p-3">
+            <div class="rounded-lg border bg-card p-3">
               <div class="flex items-center justify-between gap-3"><p class="text-sm font-semibold">{event.title}</p><Badge variant="outline">{typeLabel(event.type)}</Badge></div>
               <p class="mt-1 text-xs text-muted-foreground">{event.startDate} · {statusLabel(event.status)}</p>
             </div>
           {:else}
-            <div class="rounded-xl border bg-card p-3 text-sm text-muted-foreground">
+            <div class="rounded-lg border bg-card p-3 text-sm text-muted-foreground">
               {selectedDate} · {isZh ? '暂无日程' : 'No events'}
             </div>
           {/each}
@@ -200,7 +165,7 @@
       </Card.Root>
       <Card.Root>
         <Card.Content class="p-5">
-          <p class="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{isZh ? '本周焦点' : 'This week'}</p>
+          <p class="text-xs font-semibold text-muted-foreground">{isZh ? '本周焦点' : 'This week'}</p>
           <p class="mt-2 text-3xl font-semibold">{visibleEvents.length}</p>
           <p class="mt-1 text-xs text-muted-foreground">{isZh ? '个当前月份日程需要跟进' : 'events in the current month to follow'}</p>
         </Card.Content>
@@ -209,7 +174,7 @@
         <Card.Header><Card.Title class="flex items-center gap-2 text-base"><Clock class="h-4 w-4 text-primary" />{isZh ? '状态摘要' : 'Status Summary'}</Card.Title></Card.Header>
         <Card.Content class="space-y-2">
           {#each statusStats as item (item.status)}
-            <div class="flex items-center justify-between rounded-xl border px-3 py-2 text-sm">
+            <div class="flex items-center justify-between rounded-lg border px-3 py-2 text-sm">
               <span>{statusLabel(item.status)}</span>
               <Badge variant="outline">{item.count}</Badge>
             </div>
@@ -218,4 +183,5 @@
       </Card.Root>
     </div>
   </section>
+</ContentPageShell>
 </div>
