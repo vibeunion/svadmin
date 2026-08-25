@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.7](https://github.com/vibeunion/svadmin/compare/surface-v0.2.6...surface-v0.2.7) (2026-08-25)
+
+
+### 🐛 Bug Fixes
+
+* **surface:** broaden @svadmin/ui peer dependency range for 0.47.0 ([ccaffef](https://github.com/vibeunion/svadmin/commit/ccaffef787423f55f5ed9b58e4e4ea15f10436ac))
+
 ## [0.2.6](https://github.com/vibeunion/svadmin/compare/surface-v0.2.5...surface-v0.2.6) (2026-08-25)
 
 

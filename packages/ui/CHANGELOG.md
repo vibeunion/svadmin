@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.47.1](https://github.com/vibeunion/svadmin/compare/ui-v0.47.0...ui-v0.47.1) (2026-08-25)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** declare public npm access ([#272](https://github.com/vibeunion/svadmin/issues/272)) ([579c9f5](https://github.com/vibeunion/svadmin/commit/579c9f56dd0d9f8ed9cbbdd25465c0d3ad51ddec))
+
 ## [0.47.0](https://github.com/vibeunion/svadmin/compare/ui-v0.46.0...ui-v0.47.0) (2026-08-25)
 
 
