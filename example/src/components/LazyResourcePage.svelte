@@ -7,6 +7,7 @@
   const loadMailWorkspacePage = () => import('../pages/MailWorkspacePage.svelte');
   const loadCrmDashboardPage = () => import('../pages/CrmDashboardPage.svelte');
   const loadRealEstateWorkspacePage = () => import('../pages/RealEstateWorkspacePage.svelte');
+  const loadDesignPrinciplesPage = () => import('../pages/DesignPrinciplesPage.svelte');
 
   const resourcePageLoaders = {
     todos: loadTodoWorkspacePage,
@@ -33,6 +34,7 @@
     property_agents: loadRealEstateWorkspacePage,
     property_leads: loadRealEstateWorkspacePage,
     property_showings: loadRealEstateWorkspacePage,
+    design_principles: loadDesignPrinciplesPage,
   } as const;
 
   function getResourcePageLoader(resourceName: string) {

@@ -245,3 +245,7 @@ export { default as TwoFactorStepper } from './components/content/TwoFactorStepp
 export { default as SystemErrorState } from './components/content/SystemErrorState.svelte';
 export { referenceDemoData } from './reference-data.js';
 export type { DemoMember, DemoProject, DemoTeam, DemoIntegration, DemoApiKey, DemoSecurityEvent, DemoNotification } from './reference-data.js';
+
+export { default as RowActions } from './components/RowActions.svelte';
+export type { RowActionItem } from './components/RowActions.svelte';
+export { default as DetailDrawer } from './components/DetailDrawer.svelte';
