@@ -4,7 +4,7 @@
   "type": "module",
   "version": "0.5.14",
   "description": "Headless admin framework for Svelte 5 — bring your own backend",
-  "packageManager": "bun@1.3.14",
+  "packageManager": "bun@1.4.0",
   "workspaces": [
     "packages/*",
     "example",

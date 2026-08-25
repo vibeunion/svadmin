@@ -10,6 +10,13 @@ function readWorkflow(name: string): string {
   return readFileSync(resolve(repositoryRoot, '.github', 'workflows', name), 'utf8');
 }
 
+function readPackageJson(path = 'package.json'): {
+  packageManager?: string;
+  devDependencies?: Record<string, string>;
+} {
+  return JSON.parse(readFileSync(resolve(repositoryRoot, path), 'utf8'));
+}
+
 function readReleasePleaseConfig(): {
   packages: Record<string, { 'extra-files'?: unknown[] }>;
 } {
@@ -17,6 +24,22 @@ function readReleasePleaseConfig(): {
 }
 
 describe('npm trusted-publishing workflow contract', () => {
+  test('pins one Bun toolchain version across local development and CI', () => {
+    const rootPackage = readPackageJson();
+    const bunVersion = rootPackage.packageManager?.match(/^bun@(.+)$/)?.[1];
+    expect(bunVersion).toBeDefined();
+
+    const ciWorkflow = readWorkflow('ci.yml');
+    const ciVersions = [...ciWorkflow.matchAll(/bun-version: "([^"]+)"/g)].map(
+      ([, version]) => version,
+    );
+    expect(ciVersions).toEqual([bunVersion, bunVersion, bunVersion]);
+
+    for (const packagePath of ['packages/core/package.json', 'packages/lite/package.json']) {
+      expect(readPackageJson(packagePath).devDependencies?.['@types/bun']).toBe(`^${bunVersion}`);
+    }
+  });
+
   test('dispatches ci.yml as the top-level publishing workflow', () => {
     const releaseWorkflow = readWorkflow('release.yml');
 
