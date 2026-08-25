@@ -6,7 +6,7 @@
 
   export type RowActionItem = {
     label: string;
-    icon?: Component<any>;
+    icon?: Component<{ class?: string }>;
     href?: string;
     onclick?: (e: MouseEvent) => void;
     variant?: "default" | "outline" | "ghost" | "destructive" | "secondary";
@@ -52,7 +52,7 @@
     {@render children()}
   {/if}
 
-  {#each visibleActions as action}
+  {#each visibleActions as action, idx (idx)}
     {#if action.href}
       <Button
         variant={action.variant || "ghost"}
@@ -113,7 +113,7 @@
         </Button>
       </DropdownMenu.Trigger>
       <DropdownMenu.Content align="end" class="min-w-[8rem]">
-        {#each overflowActions as action}
+        {#each overflowActions as action, idx (idx)}
           {#if action.href}
             <a
               href={action.href}
