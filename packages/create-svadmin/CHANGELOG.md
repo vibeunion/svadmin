@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.14.1...create-svadmin-v0.15.0) (2026-08-25)
+
+
+### 🚀 Features
+
+* **ui:** formalize feedback and generation guidance ([26db9da](https://github.com/vibeunion/svadmin/commit/26db9da44f8b9961a6d59c70e41a64bc51f11ad1))
+
 ## [0.14.1](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.14.0...create-svadmin-v0.14.1) (2026-08-25)
 
 

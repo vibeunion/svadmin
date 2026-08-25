@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.45.0](https://github.com/vibeunion/svadmin/compare/ui-v0.44.0...ui-v0.45.0) (2026-08-25)
+
+
+### 🚀 Features
+
+* **ui:** formalize feedback and generation guidance ([26db9da](https://github.com/vibeunion/svadmin/commit/26db9da44f8b9961a6d59c70e41a64bc51f11ad1))
+
 ## [0.44.0](https://github.com/vibeunion/svadmin/compare/ui-v0.43.0...ui-v0.44.0) (2026-08-25)
 
 
