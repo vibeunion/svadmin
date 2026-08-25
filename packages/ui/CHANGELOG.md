@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.48.0](https://github.com/vibeunion/svadmin/compare/ui-v0.47.1...ui-v0.48.0) (2026-08-25)
+
+
+### 🚀 Features
+
+* **enterprise:** add production provider contracts ([4555e3e](https://github.com/vibeunion/svadmin/commit/4555e3e5d74d33d60f82e692fa14d26d97bfa1d1))
+* **ui:** add layout skip-to-content control ([#275](https://github.com/vibeunion/svadmin/issues/275)) ([2e2d0a7](https://github.com/vibeunion/svadmin/commit/2e2d0a76a4b34109fb11ff3ce1cf489058e21c5b))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** harden sheet focus lifecycle ([#274](https://github.com/vibeunion/svadmin/issues/274)) ([8e162c8](https://github.com/vibeunion/svadmin/commit/8e162c81261e4c27534d6926b3d5c575b8613ad7))
+
 ## [0.47.1](https://github.com/vibeunion/svadmin/compare/ui-v0.47.0...ui-v0.47.1) (2026-08-25)
 
 
