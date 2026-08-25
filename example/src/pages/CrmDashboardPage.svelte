@@ -12,6 +12,7 @@
   interface Contact { id: number; fullName: string; roleTitle: string; influence: string; status: string; lastTouchDate: string; notes: string; }
   interface Deal { id: number; dealName: string; stage: string; amount: number; probability: number; closeDate: string; }
   interface Activity { id: number; subject: string; type: string; dueDate: string; status: string; }
+  type CrmResource = 'crm_accounts' | 'crm_contacts' | 'crm_deals' | 'crm_activities';
 
   let { resourceName = 'crm_accounts' } = $props<{ resourceName?: string }>();
   let activeView = $state(readHashView('default'));
@@ -31,6 +32,7 @@
   const activeContacts = $derived(contacts.filter((contact) => contact.status === 'active').length);
   const plannedActivities = $derived(activities.filter((activity) => activity.status !== 'completed').length);
   const stages = $derived(['discovery', 'proposal', 'negotiation', 'won']);
+  const activeResource = $derived((['crm_accounts', 'crm_contacts', 'crm_deals', 'crm_activities'].includes(resourceName) ? resourceName : 'crm_accounts') as CrmResource);
   const normalizedView = $derived(['dashboard', 'companies', 'tasks', 'notes', 'reports'].includes(activeView) ? activeView : 'default');
   const crmNav = $derived([
     { key: 'tasks', label: isZh ? '任务' : 'Tasks', href: '#/crm_activities?view=tasks', value: plannedActivities, Icon: ClipboardList },
@@ -45,13 +47,36 @@
     { title: isZh ? '新增线索' : 'Lead added', source: contacts[0]?.fullName ?? 'Nina Wallace', meta: isZh ? '需要回访' : 'needs follow-up' },
     { title: isZh ? '公司动态' : 'Company update', source: accounts[1]?.accountName ?? 'Summit Field Services', meta: isZh ? '采购窗口' : 'buying window' },
   ]);
+  const resourceCopy = $derived.by(() => ({
+    crm_accounts: {
+      badge: isZh ? '客户账户' : 'Accounts',
+      title: isZh ? '客户账户组合' : 'Customer Account Portfolio',
+      description: isZh ? '按健康度、负责人和下一步动作管理重点客户。' : 'Manage priority customers by health, owner, and next action.',
+      focusTitle: isZh ? '账户健康与行动' : 'Account Health and Actions',
+    },
+    crm_contacts: {
+      badge: isZh ? '客户联系人' : 'Contacts',
+      title: isZh ? '客户关系网络' : 'Customer Relationship Network',
+      description: isZh ? '按角色、影响力、最近触达和状态维护联系人。' : 'Maintain contacts by role, influence, last touch, and status.',
+      focusTitle: isZh ? '联系人影响力' : 'Contact Influence',
+    },
+    crm_deals: {
+      badge: isZh ? '收入机会' : 'Deals',
+      title: isZh ? '收入机会管线' : 'Revenue Opportunity Pipeline',
+      description: isZh ? '按阶段、金额、成交概率和关闭日期推进商机。' : 'Advance opportunities by stage, value, probability, and close date.',
+      focusTitle: isZh ? '商机阶段' : 'Deal Stages',
+    },
+    crm_activities: {
+      badge: isZh ? '客户活动' : 'Activities',
+      title: isZh ? '客户行动队列' : 'Customer Activity Queue',
+      description: isZh ? '按类型、到期日和完成状态安排客户跟进。' : 'Schedule customer follow-up by type, due date, and completion state.',
+      focusTitle: isZh ? '到期活动' : 'Due Activities',
+    },
+  }[activeResource]));
   const viewCopy = $derived.by(() => {
     const copies = {
       default: {
-        badge: isZh ? '客户经营' : 'CRM',
-        title: isZh ? '收入管线仪表盘' : 'Revenue Pipeline Dashboard',
-        description: isZh ? '聚合客户账户、商机、任务和关系健康度。' : 'Unify accounts, opportunities, tasks, and relationship health.',
-        focusTitle: isZh ? '客户经营焦点' : 'CRM Focus',
+        ...resourceCopy,
       },
       dashboard: {
         badge: isZh ? 'CRM 仪表盘' : 'CRM Dashboard',
@@ -85,6 +110,32 @@
       },
     } satisfies Record<string, { badge: string; title: string; description: string; focusTitle: string }>;
     return copies[normalizedView as keyof typeof copies];
+  });
+  const resourceMetrics = $derived.by(() => {
+    if (activeResource === 'crm_contacts') return [
+      [isZh ? '联系人' : 'Contacts', contacts.length, isZh ? '关系网络' : 'Relationship network'],
+      [isZh ? '活跃' : 'Active', activeContacts, isZh ? '近期可跟进' : 'Ready for follow-up'],
+      [isZh ? '决策人' : 'Decision makers', contacts.filter((contact) => contact.influence === 'decision_maker').length, isZh ? '关键影响力' : 'Key influence'],
+      [isZh ? '待回访' : 'Needs touch', contacts.filter((contact) => contact.status !== 'active').length, isZh ? '非活跃状态' : 'Inactive status'],
+    ];
+    if (activeResource === 'crm_deals') return [
+      [isZh ? '商机' : 'Deals', deals.length, isZh ? '全部机会' : 'All opportunities'],
+      [isZh ? '管线金额' : 'Pipeline', money(pipeline), isZh ? '未加权金额' : 'Unweighted value'],
+      [isZh ? '加权预测' : 'Weighted', money(weighted), isZh ? '按成交概率' : 'Probability adjusted'],
+      [isZh ? '后期商机' : 'Late stage', deals.filter((deal) => ['negotiation', 'won'].includes(deal.stage)).length, isZh ? '谈判或赢单' : 'Negotiation or won'],
+    ];
+    if (activeResource === 'crm_activities') return [
+      [isZh ? '活动' : 'Activities', activities.length, isZh ? '全部跟进' : 'All follow-ups'],
+      [isZh ? '待完成' : 'Open', plannedActivities, isZh ? '需要下一步' : 'Needs a next step'],
+      [isZh ? '已完成' : 'Completed', activities.filter((activity) => activity.status === 'completed').length, isZh ? '已关闭动作' : 'Closed actions'],
+      [isZh ? '活动类型' : 'Activity types', new Set(activities.map((activity) => activity.type)).size, isZh ? '触达方式' : 'Touch channels'],
+    ];
+    return [
+      [isZh ? '客户账户' : 'Accounts', accounts.length, isZh ? '统一关系归属' : 'Owned relationships'],
+      [isZh ? '健康账户' : 'Healthy', accounts.filter((account) => account.health === 'healthy').length, isZh ? '关系稳定' : 'Stable relationships'],
+      [isZh ? '风险账户' : 'At risk', accounts.filter((account) => account.health === 'at_risk').length, isZh ? '需要负责人介入' : 'Needs owner attention'],
+      [isZh ? '待跟进活动' : 'Follow-ups', plannedActivities, isZh ? '跨账户行动' : 'Cross-account actions'],
+    ];
   });
 
   function syncView(): void {
@@ -123,23 +174,23 @@
 <div data-app-page="crm-dashboard" data-crm-view={normalizedView} data-resource-name={resourceName}>
 <ContentPageShell pageId="crm-dashboard" width="wide">
   <ContentPageHeader eyebrow={viewCopy.badge} title={viewCopy.title} description={viewCopy.description} />
-  <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-    <MetricBlock label={isZh ? '客户账户' : 'Accounts'} value={accounts.length} detail={isZh ? '统一关系归属' : 'Owned relationships'} />
-    <MetricBlock label={isZh ? '活跃联系人' : 'Active contacts'} value={activeContacts} detail={isZh ? '近期可跟进' : 'Ready for follow-up'} />
-    <MetricBlock label={isZh ? '管线金额' : 'Pipeline'} value={money(pipeline)} detail={isZh ? '全部商机' : 'All opportunities'} />
-    <MetricBlock label={isZh ? '加权预测' : 'Weighted forecast'} value={money(weighted)} detail={isZh ? '按成交概率' : 'Probability adjusted'} trend={isZh ? '可信状态' : 'Trusted state'} />
+  <section class="grid grid-cols-2 gap-3 xl:grid-cols-4" data-crm-resource-metrics>
+    {#each resourceMetrics as metric (String(metric[0]))}
+      <MetricBlock label={String(metric[0])} value={metric[1]} detail={String(metric[2])} />
+    {/each}
   </section>
   <section class="grid gap-4 xl:grid-cols-[1fr_0.38fr]">
     <section class="space-y-3">
       <SectionHeader title={viewCopy.focusTitle} description={viewCopy.description} />
-        <div class="grid gap-3 md:grid-cols-4">
-          {#each stages as stage (stage)}
-            <div class="rounded-lg border bg-card p-4 shadow-sm">
-              <div class="flex items-center justify-between"><p class="text-sm font-semibold">{stageLabel(stage)}</p><Badge variant="outline">{deals.filter((deal) => deal.stage === stage).length}</Badge></div>
-              <div class="mt-4 h-2 rounded-full bg-muted"><div class="h-2 rounded-full bg-primary" style:width={`${Math.max(12, deals.filter((deal) => deal.stage === stage).length * 28)}%`}></div></div>
-            </div>
-          {/each}
-        </div>
+        {#if activeResource === 'crm_contacts'}
+          <div class="grid gap-3 md:grid-cols-2" data-crm-contact-layout>{#each contacts as contact (contact.id)}<article class="rounded-lg border bg-card p-4"><div class="flex items-start justify-between gap-3"><div><p class="text-sm font-semibold">{contact.fullName}</p><p class="mt-1 text-xs text-muted-foreground">{contact.roleTitle}</p></div><Badge variant="outline">{influenceLabel(contact.influence)}</Badge></div><p class="mt-3 text-xs text-muted-foreground">{isZh ? '最近触达' : 'Last touch'} · {contact.lastTouchDate}</p></article>{/each}</div>
+        {:else if activeResource === 'crm_deals'}
+          <div class="grid gap-3 md:grid-cols-4" data-crm-deal-layout>{#each stages as stage (stage)}<div class="rounded-lg border bg-card p-4"><div class="flex items-center justify-between"><p class="text-sm font-semibold">{stageLabel(stage)}</p><Badge variant="outline">{deals.filter((deal) => deal.stage === stage).length}</Badge></div><div class="mt-4 h-2 rounded-full bg-muted"><div class="h-2 rounded-full bg-primary" style:width={`${Math.max(12, deals.filter((deal) => deal.stage === stage).length * 28)}%`}></div></div><p class="mt-3 text-xs text-muted-foreground">{money(deals.filter((deal) => deal.stage === stage).reduce((sum, deal) => sum + deal.amount, 0))}</p></div>{/each}</div>
+        {:else if activeResource === 'crm_activities'}
+          <div class="divide-y divide-border rounded-lg border bg-card" data-crm-activity-layout>{#each activities as activity (activity.id)}<article class="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"><div><p class="text-sm font-semibold">{activity.subject}</p><p class="mt-1 text-xs text-muted-foreground">{activity.type} · {activity.dueDate}</p></div><Badge variant="outline">{activity.status.replace('_', ' ')}</Badge></article>{/each}</div>
+        {:else}
+          <div class="grid gap-3 md:grid-cols-2" data-crm-account-layout>{#each accounts as account (account.id)}<article class="rounded-lg border bg-card p-4"><div class="flex items-start justify-between gap-3"><p class="text-sm font-semibold">{account.accountName}</p><Badge variant="outline">{healthLabel(account.health)}</Badge></div><p class="mt-3 text-sm text-muted-foreground">{account.nextStep}</p></article>{/each}</div>
+        {/if}
     </section>
 
     <div class="grid gap-4 content-start">

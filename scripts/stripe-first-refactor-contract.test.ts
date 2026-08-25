@@ -26,6 +26,58 @@ describe('Stripe-first refactor contract', () => {
     }
   });
 
+  it('keeps operations pages data-driven, layout-specific, and Stripe-first', () => {
+    const source = read('example/src/pages/OperationsWorkspacePage.svelte');
+    expect(source).toContain('ContentPageShell');
+    expect(source).toContain('MetricBlock');
+    expect(source).toContain('useList');
+    for (const layout of [
+      'data-stock-movement-layout',
+      'data-stock-transfer-layout',
+      'data-cycle-count-layout',
+      'data-adjustment-layout',
+      'data-reorder-layout',
+      'data-order-layout',
+    ]) expect(source).toContain(layout);
+    expect(source).not.toMatch(/bg-gradient|backdrop-blur/);
+    expect(source).not.toMatch(/tracking-(?:tight|wide|wider|\[[^\]]+\])/);
+    expect(source).not.toMatch(/rounded-(?:xl|2xl|3xl)/);
+  });
+
+  it('keeps domain pages resource-specific, data-driven, and Stripe-first', () => {
+    const source = read('example/src/pages/DomainWorkspacePage.svelte');
+    expect(source).toContain('ContentPageShell');
+    expect(source).toContain('MetricBlock');
+    expect(source).toContain('useList');
+    for (const layout of [
+      'data-product-catalog-layout',
+      'data-sku-directory-layout',
+      'data-category-structure-layout',
+      'data-supplier-directory-layout',
+      'data-warehouse-capacity-layout',
+      'data-store-order-layout',
+      'data-billing-invoice-layout',
+      'data-session-monitor-layout',
+      'data-notification-center-layout',
+      'data-project-plan-layout',
+      'data-referral-invite-layout',
+    ]) expect(source).toContain(layout);
+    expect(source).not.toMatch(/bg-gradient|backdrop-blur/);
+    expect(source).not.toMatch(/tracking-(?:tight|wide|wider|\[[^\]]+\])/);
+    expect(source).not.toMatch(/rounded-(?:xl|2xl|3xl)/);
+  });
+
+  it('keeps CRM and property entity routes focused on their own workflows', () => {
+    const crm = read('example/src/pages/CrmDashboardPage.svelte');
+    for (const layout of ['data-crm-account-layout', 'data-crm-contact-layout', 'data-crm-deal-layout', 'data-crm-activity-layout']) {
+      expect(crm).toContain(layout);
+    }
+    const property = read('example/src/pages/RealEstateWorkspacePage.svelte');
+    for (const layout of ['data-property-agent-layout', 'data-property-lead-layout', 'data-property-showing-layout']) {
+      expect(property).toContain(layout);
+    }
+  });
+
   it('keeps auth flows on one restrained shell', () => {
     expect(read('packages/ui/src/index.ts')).toContain("export { default as AuthPageShell }");
     expect(read('packages/ui/src/components/SvadminLogo.svelte')).not.toMatch(/gradient|purple-/);

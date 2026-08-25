@@ -8,6 +8,8 @@
   const loadCrmDashboardPage = () => import('../pages/CrmDashboardPage.svelte');
   const loadRealEstateWorkspacePage = () => import('../pages/RealEstateWorkspacePage.svelte');
   const loadDesignPrinciplesPage = () => import('../pages/DesignPrinciplesPage.svelte');
+  const loadOperationsWorkspacePage = () => import('../pages/OperationsWorkspacePage.svelte');
+  const loadDomainWorkspacePage = () => import('../pages/DomainWorkspacePage.svelte');
 
   const resourcePageLoaders = {
     todos: loadTodoWorkspacePage,
@@ -34,6 +36,33 @@
     property_agents: loadRealEstateWorkspacePage,
     property_leads: loadRealEstateWorkspacePage,
     property_showings: loadRealEstateWorkspacePage,
+    stock_movements: loadOperationsWorkspacePage,
+    stock_transfers: loadOperationsWorkspacePage,
+    cycle_counts: loadOperationsWorkspacePage,
+    inventory_adjustments: loadOperationsWorkspacePage,
+    reorder_rules: loadOperationsWorkspacePage,
+    purchase_orders: loadOperationsWorkspacePage,
+    sales_orders: loadOperationsWorkspacePage,
+    products: loadDomainWorkspacePage,
+    skus: loadDomainWorkspacePage,
+    categories: loadDomainWorkspacePage,
+    suppliers: loadDomainWorkspacePage,
+    warehouses: loadDomainWorkspacePage,
+    notifications: loadDomainWorkspacePage,
+    store_client_products: loadDomainWorkspacePage,
+    store_client_orders: loadDomainWorkspacePage,
+    project_planning: loadDomainWorkspacePage,
+    store_admin: loadDomainWorkspacePage,
+    store_services: loadDomainWorkspacePage,
+    ai_prompt: loadDomainWorkspacePage,
+    invoice_generator: loadDomainWorkspacePage,
+    billing_plans: loadDomainWorkspacePage,
+    billing_invoices: loadDomainWorkspacePage,
+    billing_subscriptions: loadDomainWorkspacePage,
+    security_sessions: loadDomainWorkspacePage,
+    security_devices: loadDomainWorkspacePage,
+    security_allowed_ips: loadDomainWorkspacePage,
+    referral_invites: loadDomainWorkspacePage,
     design_principles: loadDesignPrinciplesPage,
   } as const;
 

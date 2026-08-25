@@ -12,6 +12,7 @@
   interface Property { id: number; propertyName: string; market: string; assetType: string; askingPrice: number; status: string; units: number; occupancy: number; notes: string; }
   interface Lead { id: number; leadName: string; budget: number; status: string; }
   interface Showing { id: number; showingNumber: string; scheduledDate: string; status: string; feedbackScore: number | null; notes: string; }
+  type PropertyResource = 'properties' | 'property_agents' | 'property_leads' | 'property_showings';
 
   let { resourceName = 'properties' } = $props<{ resourceName?: string }>();
   let activeView = $state(readHashView('portfolio'));
@@ -30,7 +31,9 @@
   const filteredProperties = $derived(searchQuery.trim() ? properties.filter((property) => `${property.propertyName} ${property.market} ${property.assetType}`.toLowerCase().includes(searchQuery.trim().toLowerCase())) : properties);
   const showingCount = $derived(showings.length);
   const avgOccupancy = $derived(properties.length ? Math.round(properties.reduce((sum, property) => sum + property.occupancy, 0) / properties.length) : 0);
-  const normalizedView = $derived(['buy', 'rent', 'sell', 'commercial', 'saved', 'map', 'filters'].includes(activeView) ? activeView : 'portfolio');
+  const activeResource = $derived((['properties', 'property_agents', 'property_leads', 'property_showings'].includes(resourceName) ? resourceName : 'properties') as PropertyResource);
+  const resourceDefaultView = $derived({ properties: 'portfolio', property_agents: 'advisors', property_leads: 'leads', property_showings: 'tours' }[activeResource]);
+  const normalizedView = $derived(['buy', 'rent', 'sell', 'commercial', 'saved', 'map', 'filters', 'advisors', 'leads', 'tours'].includes(activeView) ? activeView : resourceDefaultView);
   const marketTabs = $derived([
     { key: 'buy', label: isZh ? '购买' : 'Buy', href: '#/properties?view=buy' },
     { key: 'rent', label: isZh ? '租赁' : 'Rent', href: '#/properties?view=rent' },
@@ -46,7 +49,11 @@
     { label: isZh ? '时间' : 'When', value: isZh ? '本周看房' : 'this week tours' },
   ]);
 
-  function money(value: number): string { return `$${Math.round(value / 1000)}K`; }
+  function money(value: number): string {
+    if (Math.abs(value) >= 1_000_000) return `$${Number((value / 1_000_000).toFixed(1))}M`;
+    if (Math.abs(value) >= 1_000) return `$${Number((value / 1_000).toFixed(1))}K`;
+    return `$${value}`;
+  }
   function statusLabel(status: string): string {
     if (!isZh) return status.replace('_', ' ');
     if (status === 'listed') return '挂牌';
@@ -113,8 +120,52 @@
         description: isZh ? '按类型、状态、位置、价格和时间窗口组合筛选条件。' : 'Combine type, condition, location, price, and timing filters.',
         action: isZh ? '保存筛选' : 'Save filters',
       },
+      advisors: {
+        badge: isZh ? '资产顾问' : 'Advisors',
+        title: isZh ? '顾问区域与容量' : 'Advisor Territory and Capacity',
+        description: isZh ? '按区域、状态和容量分数分配新线索与看房。' : 'Assign new leads and tours by territory, status, and capacity score.',
+        action: isZh ? '新增顾问' : 'New advisor',
+      },
+      leads: {
+        badge: isZh ? '资产线索' : 'Property Leads',
+        title: isZh ? '资产需求与预算队列' : 'Property Demand and Budget Queue',
+        description: isZh ? '按预算、阶段和后续动作推进资产线索。' : 'Advance property leads by budget, stage, and next action.',
+        action: isZh ? '新增线索' : 'New lead',
+      },
+      tours: {
+        badge: isZh ? '看房排期' : 'Showings',
+        title: isZh ? '看房日程与反馈' : 'Tour Schedule and Feedback',
+        description: isZh ? '按日期、状态和反馈分数协调看房履约。' : 'Coordinate tours by date, state, and feedback score.',
+        action: isZh ? '新增看房' : 'New showing',
+      },
     } satisfies Record<string, { badge: string; title: string; description: string; action: string }>;
     return copies[normalizedView as keyof typeof copies];
+  });
+  const resourceMetrics = $derived.by(() => {
+    if (activeResource === 'property_agents') return [
+      [isZh ? '顾问' : 'Advisors', agents.length, isZh ? '当前团队' : 'Current team'],
+      [isZh ? '可接单' : 'Available', agents.filter((agent) => agent.status === 'active').length, isZh ? '活跃状态' : 'Active status'],
+      [isZh ? '平均容量' : 'Avg capacity', agents.length ? Math.round(agents.reduce((sum, agent) => sum + agent.capacityScore, 0) / agents.length) : 0, isZh ? '负载分数' : 'Load score'],
+      [isZh ? '覆盖区域' : 'Territories', new Set(agents.map((agent) => agent.territory)).size, isZh ? '服务市场' : 'Service markets'],
+    ];
+    if (activeResource === 'property_leads') return [
+      [isZh ? '线索' : 'Leads', leads.length, isZh ? '全部需求' : 'All demand'],
+      [isZh ? '预算总额' : 'Total budget', money(leads.reduce((sum, lead) => sum + lead.budget, 0)), isZh ? '需求规模' : 'Demand value'],
+      [isZh ? '已合格' : 'Qualified', leads.filter((lead) => lead.status === 'qualified').length, isZh ? '可推进线索' : 'Ready to advance'],
+      [isZh ? '新线索' : 'New', leads.filter((lead) => lead.status === 'new').length, isZh ? '需要首次触达' : 'Needs first touch'],
+    ];
+    if (activeResource === 'property_showings') return [
+      [isZh ? '看房' : 'Tours', showings.length, isZh ? '全部排期' : 'All schedules'],
+      [isZh ? '已排期' : 'Scheduled', showings.filter((showing) => showing.status === 'scheduled').length, isZh ? '等待执行' : 'Awaiting tour'],
+      [isZh ? '已完成' : 'Completed', showings.filter((showing) => showing.status === 'completed').length, isZh ? '已有结果' : 'Result available'],
+      [isZh ? '平均反馈' : 'Avg feedback', showings.filter((showing) => showing.feedbackScore).length ? (showings.reduce((sum, showing) => sum + (showing.feedbackScore ?? 0), 0) / showings.filter((showing) => showing.feedbackScore).length).toFixed(1) : '—', isZh ? '满分 10' : 'Out of 10'],
+    ];
+    return [
+      [isZh ? '资产' : 'Assets', properties.length, isZh ? '当前组合' : 'Current portfolio'],
+      [isZh ? '挂牌' : 'Listed', properties.filter((property) => property.status === 'listed').length, isZh ? '市场供应' : 'Market supply'],
+      [isZh ? '出租率' : 'Occupancy', `${avgOccupancy}%`, isZh ? '组合平均值' : 'Portfolio average'],
+      [isZh ? '组合价值' : 'Portfolio value', money(properties.reduce((sum, property) => sum + property.askingPrice, 0)), isZh ? '挂牌价格合计' : 'Combined asking price'],
+    ];
   });
 
   function syncView(): void {
@@ -132,11 +183,22 @@
 <div data-app-page="real-estate-workspace" data-property-view={normalizedView} data-resource-name={resourceName}>
 <ContentPageShell pageId="real-estate-workspace" width="wide">
   <ContentPageHeader eyebrow={viewCopy.badge} title={viewCopy.title} description={viewCopy.description} actions={headerActions} />
-  <section class="grid gap-3 sm:grid-cols-3">
-    <MetricBlock label={isZh ? '资产' : 'Assets'} value={properties.length} detail={isZh ? '当前组合' : 'Current portfolio'} />
-    <MetricBlock label={isZh ? '线索' : 'Leads'} value={leads.length} detail={isZh ? '待跟进需求' : 'Open demand'} />
-    <MetricBlock label={isZh ? '出租率' : 'Occupancy'} value={`${avgOccupancy}%`} detail={isZh ? '组合平均值' : 'Portfolio average'} />
+  <section class="grid grid-cols-2 gap-3 xl:grid-cols-4" data-property-resource-metrics>
+    {#each resourceMetrics as metric (String(metric[0]))}
+      <MetricBlock label={String(metric[0])} value={metric[1]} detail={String(metric[2])} />
+    {/each}
   </section>
+  {#if activeResource === 'property_agents'}
+    <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-3" data-property-agent-layout>
+      {#each agents as agent (agent.id)}
+        <article class="rounded-lg border bg-card p-4"><div class="flex items-start justify-between gap-3"><div class="flex items-center gap-3"><UserRoundCheck class="size-5 text-muted-foreground" /><div><p class="text-sm font-semibold">{agent.name}</p><p class="mt-1 text-xs text-muted-foreground">{agent.territory}</p></div></div><Badge variant="outline">{statusLabel(agent.status)}</Badge></div><div class="mt-5 flex items-center justify-between text-xs text-muted-foreground"><span>{isZh ? '可用容量' : 'Available capacity'}</span><span>{agent.capacityScore}%</span></div><div class="mt-2 h-2 rounded-full bg-muted"><div class="h-2 rounded-full bg-primary" style:width={`${agent.capacityScore}%`}></div></div><p class="mt-4 text-sm text-muted-foreground">{agent.notes}</p></article>
+      {/each}
+    </section>
+  {:else if activeResource === 'property_leads'}
+    <section class="grid gap-5 xl:grid-cols-[minmax(0,1.3fr)_18rem]" data-property-lead-layout><div class="divide-y divide-border rounded-lg border bg-card">{#each leads as lead (lead.id)}<article class="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"><div><p class="text-sm font-semibold">{lead.leadName}</p><p class="mt-1 text-xs text-muted-foreground">{isZh ? '需求预算' : 'Demand budget'} · {money(lead.budget)}</p></div><Badge variant="outline">{statusLabel(lead.status)}</Badge></article>{/each}</div><aside class="rounded-lg border bg-card p-4"><p class="text-sm font-semibold">{isZh ? '线索阶段' : 'Lead stages'}</p><div class="mt-4 space-y-3">{#each ['new', 'qualified', 'offer'] as status (status)}<div class="flex items-center justify-between"><span class="text-sm text-muted-foreground">{statusLabel(status)}</span><Badge variant="outline">{leads.filter((lead) => lead.status === status).length}</Badge></div>{/each}</div></aside></section>
+  {:else if activeResource === 'property_showings'}
+    <section class="rounded-lg border bg-card" data-property-showing-layout><div class="border-b border-border p-4"><p class="text-sm font-semibold">{isZh ? '看房执行队列' : 'Tour execution queue'}</p></div><div class="divide-y divide-border">{#each showings as showing (showing.id)}<article class="grid gap-3 p-4 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center"><CalendarClock class="size-5 text-muted-foreground" /><div><p class="text-sm font-semibold">{showing.showingNumber}</p><p class="mt-1 text-xs text-muted-foreground">{showing.scheduledDate} · {showing.notes}</p></div><div class="flex items-center gap-2"><Badge variant="outline">{statusLabel(showing.status)}</Badge>{#if showing.feedbackScore}<Badge>{showing.feedbackScore}/10</Badge>{/if}</div></article>{/each}</div></section>
+  {:else}
   <section class="space-y-3">
     <div class="flex flex-wrap items-center gap-2">
       {#each marketTabs as tab (tab.key)}
@@ -239,5 +301,6 @@
       </Card.Content>
     </Card.Root>
   </section>
+  {/if}
 </ContentPageShell>
 </div>
