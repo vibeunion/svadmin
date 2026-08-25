@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.47.0](https://github.com/vibeunion/svadmin/compare/ui-v0.46.0...ui-v0.47.0) (2026-08-25)
+
+
+### 🚀 Features
+
+* **ui:** improve auto form accessibility ([11c486b](https://github.com/vibeunion/svadmin/commit/11c486b9a935ab3105c870e21bf0ec092072ed47))
+* **ui:** introduce RowActions and DetailDrawer components for table-first workflows ([902187d](https://github.com/vibeunion/svadmin/commit/902187dcfdd177a720ff7ecf0c76a79100c27edc))
+* **ui:** refine settings layout hierarchy ([#268](https://github.com/vibeunion/svadmin/issues/268)) ([bcb1b7e](https://github.com/vibeunion/svadmin/commit/bcb1b7e41de4c6765813dd0888844846e950dbcd))
+
 ## [0.46.0](https://github.com/vibeunion/svadmin/compare/ui-v0.45.0...ui-v0.46.0) (2026-08-25)
 
 
