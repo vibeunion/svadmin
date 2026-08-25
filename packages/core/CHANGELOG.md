@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.38.0](https://github.com/vibeunion/svadmin/compare/core-v0.37.0...core-v0.38.0) (2026-08-25)
+
+
+### 🚀 Features
+
+* **ui:** formalize feedback and generation guidance ([26db9da](https://github.com/vibeunion/svadmin/commit/26db9da44f8b9961a6d59c70e41a64bc51f11ad1))
+
+
+### 🐛 Bug Fixes
+
+* **surface:** support core 0.38 and ui 0.45 ([#264](https://github.com/vibeunion/svadmin/issues/264)) ([59e7644](https://github.com/vibeunion/svadmin/commit/59e7644d92088474e66e871133ff8b8d79e2480d))
+
 ## [0.37.0](https://github.com/vibeunion/svadmin/compare/core-v0.36.3...core-v0.37.0) (2026-08-25)
 
 
