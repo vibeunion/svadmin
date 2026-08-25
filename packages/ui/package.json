@@ -96,6 +96,9 @@
   "bugs": {
     "url": "https://github.com/vibeunion/svadmin/issues"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "@happy-dom/global-registrator": "^20.11.2",
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
