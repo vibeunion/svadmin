@@ -9,11 +9,10 @@
   import { createExampleMenu, registerExampleMenuTranslations } from './exampleMenuCatalog';
   import { mockAuthProvider } from './providers/mockAuth';
   import Dashboard from './pages/Dashboard.svelte';
-  import DesignPrinciplesPage from './pages/DesignPrinciplesPage.svelte';
   import LazyResourcePage from './components/LazyResourcePage.svelte';
   import LazyRichTextEditor from './components/LazyRichTextEditor.svelte';
 
-  // Register the optional Rich Text Editor plugin globally
+  // DesignPrinciplesPage and other showcase resources are lazy-loaded via LazyResourcePage
   registerExampleMenuTranslations();
   setRichTextEditor(LazyRichTextEditor);
 
@@ -31,7 +30,7 @@
 
   const resourcePages = $derived.by(() => ({
     ...Object.fromEntries(resources.map((resource) => [resource.name, { list: LazyResourcePage }])),
-    design_principles: { list: DesignPrinciplesPage },
+    design_principles: { list: LazyResourcePage },
   }));
 </script>
 
