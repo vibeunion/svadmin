@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/sveltekit",
-  "version": "0.9.12",
+  "version": "0.9.13",
   "description": "SvelteKit integration for svadmin",
   "type": "module",
   "sideEffects": false,
