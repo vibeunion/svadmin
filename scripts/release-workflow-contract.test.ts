@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { verifyReleaseManifest } from './verify-release-manifest';
@@ -11,10 +11,27 @@ function readWorkflow(name: string): string {
 }
 
 function readPackageJson(path = 'package.json'): {
+  name?: string;
+  version?: string;
   packageManager?: string;
   devDependencies?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
 } {
   return JSON.parse(readFileSync(resolve(repositoryRoot, path), 'utf8'));
+}
+
+function findIncompatibleWorkspacePeers(dependencyName: string, dependencyVersion: string): string[] {
+  return readdirSync(resolve(repositoryRoot, 'packages'), { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .flatMap((entry) => {
+      const packageJson = readPackageJson(`packages/${entry.name}/package.json`);
+      const peerRange = packageJson.peerDependencies?.[dependencyName];
+      if (!peerRange || peerRange.startsWith('workspace:')) return [];
+
+      return Bun.semver.satisfies(dependencyVersion, peerRange)
+        ? []
+        : [`${packageJson.name ?? entry.name}: ${peerRange}`];
+    });
 }
 
 function readReleasePleaseConfig(): {
@@ -37,6 +54,19 @@ describe('npm trusted-publishing workflow contract', () => {
 
     for (const packagePath of ['packages/core/package.json', 'packages/lite/package.json']) {
       expect(readPackageJson(packagePath).devDependencies?.['@types/bun']).toBe(`^${bunVersion}`);
+    }
+  });
+
+  test('keeps current svadmin releases inside explicit workspace peer ranges', () => {
+    for (const packagePath of ['packages/core/package.json', 'packages/ui/package.json']) {
+      const dependencyPackage = readPackageJson(packagePath);
+      if (!dependencyPackage.name || !dependencyPackage.version) {
+        throw new Error(`${packagePath} must define a package name and version`);
+      }
+
+      expect(
+        findIncompatibleWorkspacePeers(dependencyPackage.name, dependencyPackage.version),
+      ).toEqual([]);
     }
   });
 
