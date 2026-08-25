@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { DataProvider, ResourceDefinition, RouterProvider } from '@svadmin/core';
   import AdminApp from '../../src/components/AdminApp.svelte';
+  import AutoFormSuccessProbe from './AutoFormSuccessProbe.svelte';
 
   const dataProvider = {
     getList: async () => ({ data: [], total: 0 }),
@@ -30,6 +31,10 @@
       params: {},
     }),
   };
+
+  const resourcePages = {
+    products: { create: AutoFormSuccessProbe },
+  };
 </script>
 
-<AdminApp {dataProvider} {resources} {routerProvider} locale="en" />
+<AdminApp {dataProvider} {resources} {routerProvider} {resourcePages} locale="en" />

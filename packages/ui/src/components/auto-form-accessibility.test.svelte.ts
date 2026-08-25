@@ -29,5 +29,22 @@ describe('AutoForm accessibility', () => {
     });
 
     expect(view.getByText('This field is required', { selector: '#products-name-error' })).toBeTruthy();
+    expect(view.getByTestId('success-count').textContent).toBe('0');
+  });
+
+  it('calls the success callback only after valid submission', async () => {
+    const view = render(AutoFormAccessibilityHarness);
+    await fireEvent.input(await view.findByRole('textbox', { name: /^Name/ }), {
+      target: { value: 'Validated product' },
+    });
+    await fireEvent.input(await view.findByRole('textbox', { name: /^Description/ }), {
+      target: { value: 'Ready to create' },
+    });
+
+    await fireEvent.click(view.getByRole('button', { name: 'Save' }));
+
+    await waitFor(() => {
+      expect(view.getByTestId('success-count').textContent).toBe('1');
+    });
   });
 });
