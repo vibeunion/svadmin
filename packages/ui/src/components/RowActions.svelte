@@ -1,49 +1,68 @@
 <script lang="ts">
-  import type { Snippet, Component } from "svelte";
-  import { cn, type WithElementRef } from "../utils.js";
-  import * as DropdownMenu from "./ui/dropdown-menu/index.js";
-  import { Button } from "./ui/button/index.js";
+  import { Ellipsis } from '@lucide/svelte';
+  import type { Component, Snippet } from 'svelte';
+  import type { HTMLAttributes } from 'svelte/elements';
+  import { cn, type WithElementRef } from '../utils.js';
+  import * as DropdownMenu from './ui/dropdown-menu/index.js';
+  import { Button } from './ui/button/index.js';
 
   export type RowActionItem = {
     label: string;
     icon?: Component<{ class?: string }>;
     href?: string;
     onclick?: (e: MouseEvent) => void;
-    variant?: "default" | "outline" | "ghost" | "destructive" | "secondary";
+    variant?: 'default' | 'outline' | 'ghost' | 'destructive' | 'secondary';
     disabled?: boolean;
     title?: string;
     danger?: boolean;
     hidden?: boolean;
   };
 
-  type Props = WithElementRef<{
+  type Props = WithElementRef<HTMLAttributes<HTMLDivElement>, HTMLDivElement> & {
     actions?: RowActionItem[];
     maxVisible?: number;
     moreLabel?: string;
-    class?: string;
     children?: Snippet;
     moreContent?: Snippet;
-  }>;
+  };
 
   let {
     actions = [],
     maxVisible = 2,
-    moreLabel = "更多",
+    moreLabel = 'More actions',
+    ref = $bindable(null),
     class: className,
     children,
     moreContent,
     ...restProps
   }: Props = $props();
 
-  const visibleActions = $derived(
-    actions.filter((a) => !a.hidden).slice(0, maxVisible)
+  let overflowOpen = $state(false);
+  const availableActions = $derived(actions.filter((action) => !action.hidden));
+  const visibleLimit = $derived(
+    Number.isFinite(maxVisible)
+      ? Math.max(0, Math.floor(maxVisible))
+      : availableActions.length
   );
-  const overflowActions = $derived(
-    actions.filter((a) => !a.hidden).slice(maxVisible)
-  );
+  const visibleActions = $derived(availableActions.slice(0, visibleLimit));
+  const overflowActions = $derived(availableActions.slice(visibleLimit));
+
+  function resolvedVariant(action: RowActionItem): RowActionItem['variant'] {
+    return action.variant ?? (action.danger ? 'destructive' : 'ghost');
+  }
+
+  function handleOverflowAction(action: RowActionItem, event: MouseEvent): void {
+    if (action.disabled) {
+      event.preventDefault();
+      return;
+    }
+    overflowOpen = false;
+    action.onclick?.(event);
+  }
 </script>
 
 <div
+  bind:this={ref}
   data-slot="row-actions"
   class={cn("inline-flex items-center gap-1.5", className)}
   {...restProps}
@@ -52,10 +71,10 @@
     {@render children()}
   {/if}
 
-  {#each visibleActions as action, idx (idx)}
+  {#each visibleActions as action (action)}
     {#if action.href}
       <Button
-        variant={action.variant || "ghost"}
+        variant={resolvedVariant(action)}
         size="sm"
         href={action.href}
         disabled={action.disabled}
@@ -63,13 +82,14 @@
         class="h-8 px-2 text-xs"
       >
         {#if action.icon}
-          <action.icon class="size-3.5 mr-1" />
+          {@const Icon = action.icon}
+          <Icon class="mr-1 size-3.5" />
         {/if}
         {action.label}
       </Button>
     {:else}
       <Button
-        variant={action.variant || "ghost"}
+        variant={resolvedVariant(action)}
         size="sm"
         onclick={action.onclick}
         disabled={action.disabled}
@@ -77,7 +97,8 @@
         class="h-8 px-2 text-xs"
       >
         {#if action.icon}
-          <action.icon class="size-3.5 mr-1" />
+          {@const Icon = action.icon}
+          <Icon class="mr-1 size-3.5" />
         {/if}
         {action.label}
       </Button>
@@ -85,58 +106,40 @@
   {/each}
 
   {#if overflowActions.length > 0 || moreContent}
-    <DropdownMenu.Root>
+    <DropdownMenu.Root bind:open={overflowOpen}>
       <DropdownMenu.Trigger>
-        <Button
-          variant="ghost"
-          size="sm"
-          class="h-8 px-2 text-xs"
-          title={moreLabel}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="size-4"
-          >
-            <circle cx="12" cy="12" r="1" />
-            <circle cx="19" cy="12" r="1" />
-            <circle cx="5" cy="12" r="1" />
-          </svg>
-          <span class="sr-only">{moreLabel}</span>
-        </Button>
+        {#snippet child({ props })}
+          <Button {...props} variant="ghost" size="icon-sm" title={moreLabel} aria-label={moreLabel}>
+            <Ellipsis class="size-4" />
+          </Button>
+        {/snippet}
       </DropdownMenu.Trigger>
       <DropdownMenu.Content align="end" class="min-w-[8rem]">
-        {#each overflowActions as action, idx (idx)}
+        {#each overflowActions as action (action)}
           {#if action.href}
-            <a
+            <Button
               href={action.href}
-              class="block w-full text-inherit no-underline"
-            >
-              <DropdownMenu.Item
-                disabled={action.disabled}
-                destructive={action.danger}
-              >
-                {#if action.icon}
-                  <action.icon class="size-3.5 mr-1" />
-                {/if}
-                {action.label}
-              </DropdownMenu.Item>
-            </a>
-          {:else}
-            <DropdownMenu.Item
-              onclick={action.onclick}
+              variant={resolvedVariant(action)}
+              size="sm"
               disabled={action.disabled}
-              destructive={action.danger}
+              onclick={(event) => handleOverflowAction(action, event)}
+              class="h-auto w-full justify-start rounded-md px-2 py-1.5 text-sm font-normal"
             >
               {#if action.icon}
-                <action.icon class="size-3.5 mr-1" />
+                {@const Icon = action.icon}
+                <Icon class="size-3.5" />
+              {/if}
+              {action.label}
+            </Button>
+          {:else}
+            <DropdownMenu.Item
+              onclick={(event) => handleOverflowAction(action, event)}
+              disabled={action.disabled}
+              destructive={action.danger || action.variant === 'destructive'}
+            >
+              {#if action.icon}
+                {@const Icon = action.icon}
+                <Icon class="size-3.5" />
               {/if}
               {action.label}
             </DropdownMenu.Item>

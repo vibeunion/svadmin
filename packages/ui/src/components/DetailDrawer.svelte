@@ -1,27 +1,29 @@
 <script lang="ts">
-  import type { Snippet } from "svelte";
-  import { cn, type WithElementRef } from "../utils.js";
-  import * as Sheet from "./ui/sheet/index.js";
+  import type { Snippet } from 'svelte';
+  import type { HTMLAttributes } from 'svelte/elements';
+  import { cn, type WithElementRef } from '../utils.js';
+  import * as Sheet from './ui/sheet/index.js';
 
-  type Props = WithElementRef<{
+  type Props = WithElementRef<HTMLAttributes<HTMLDivElement>, HTMLDivElement> & {
     open?: boolean;
     title?: string;
     description?: string;
-    side?: "left" | "right";
+    side?: 'left' | 'right';
     width?: string;
-    class?: string;
     onClose?: () => void;
     children?: Snippet;
     footer?: Snippet;
-  }>;
+  };
 
   let {
     open = $bindable(false),
-    title = "",
-    description = "",
-    side = "right",
-    width = "max-w-md w-full sm:max-w-lg",
+    title = '',
+    description = '',
+    side = 'right',
+    width = 'max-w-md w-full sm:max-w-lg',
+    ref = $bindable(null),
     class: className,
+    'aria-label': ariaLabel,
     onClose,
     children,
     footer,
@@ -34,8 +36,18 @@
   }
 </script>
 
-<Sheet.Root bind:open {side} onClose={handleClose} class={cn("overflow-y-auto", width, className)} {...restProps}>
-  <Sheet.Content class="flex flex-col h-full">
+<Sheet.Root
+  bind:ref
+  bind:open
+  {side}
+  onClose={handleClose}
+  class={cn('overflow-y-auto', width, className)}
+  role="dialog"
+  aria-modal="true"
+  aria-label={ariaLabel || title || 'Details'}
+  {...restProps}
+>
+  <Sheet.Content class="flex h-full flex-col">
     {#if title || description}
       <Sheet.Header>
         {#if title}
