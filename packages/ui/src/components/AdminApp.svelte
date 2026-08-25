@@ -25,14 +25,18 @@
     AuditLogProvider,
     AuthProvider,
     ChatProvider,
+    CredentialProvider,
     DataProviderInput,
+    IdentityGovernanceProvider,
     I18nProvider,
     LiveProvider,
     MenuItem,
     NotificationProvider,
+    OrganizationProvider,
     ProviderBundle,
     ResourceDefinition,
     RouterProvider,
+    SessionProvider,
     TaskProvider,
     TenantAdapter,
     TenantContext,
@@ -93,6 +97,10 @@
     taskProvider?: TaskProvider;
     routerProvider?: RouterProvider;
     tenantAdapter?: TenantAdapter;
+    organizationProvider?: OrganizationProvider;
+    identityGovernanceProvider?: IdentityGovernanceProvider;
+    sessionProvider?: SessionProvider;
+    credentialProvider?: CredentialProvider;
     /** Request/tree-scoped tenant. Tenant identifiers are never rendered by DevTools. */
     tenant?: TenantContext;
     resources: ResourceDefinition[];
@@ -148,6 +156,10 @@
     taskProvider,
     routerProvider,
     tenantAdapter,
+    organizationProvider,
+    identityGovernanceProvider,
+    sessionProvider,
+    credentialProvider,
     tenant,
     resources,
     locale = $bindable(),
@@ -190,6 +202,10 @@
   const resolvedTaskProvider = $derived(taskProvider ?? resolvedProviderBundle?.taskProvider);
   const resolvedRouterInput = $derived(routerProvider ?? resolvedProviderBundle?.routerProvider);
   const resolvedTenantAdapter = $derived(tenantAdapter ?? resolvedProviderBundle?.tenantAdapter);
+  const resolvedOrganizationProvider = $derived(organizationProvider ?? resolvedProviderBundle?.organizationProvider ?? undefined);
+  const resolvedIdentityGovernanceProvider = $derived(identityGovernanceProvider ?? resolvedProviderBundle?.identityGovernanceProvider ?? undefined);
+  const resolvedSessionProvider = $derived(sessionProvider ?? resolvedProviderBundle?.sessionProvider ?? undefined);
+  const resolvedCredentialProvider = $derived(credentialProvider ?? resolvedProviderBundle?.credentialProvider ?? undefined);
   const resolvedI18nProvider = $derived(i18nProvider ?? resolvedProviderBundle?.i18nProvider);
 
   // Resolve router provider (default to hash)
@@ -280,6 +296,10 @@
     get chatProvider() { return resolvedChatProvider ?? null; },
     get agentProvider() { return resolvedAgentProvider ?? null; },
     get taskProvider() { return resolvedTaskProvider; },
+    get organizationProvider() { return resolvedOrganizationProvider ?? null; },
+    get identityGovernanceProvider() { return resolvedIdentityGovernanceProvider ?? null; },
+    get sessionProvider() { return resolvedSessionProvider ?? null; },
+    get credentialProvider() { return resolvedCredentialProvider ?? null; },
     get resources() { return resources; },
     get routerProvider() { return scopedRouterProvider; },
     get tenantAdapter() { return resolvedTenantAdapter; },

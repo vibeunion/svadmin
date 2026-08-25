@@ -1,14 +1,44 @@
 ---
 title: Enterprise Components
-description: RBAC Permission Matrix, Audit Logs, Tenant Switcher, Task Queue, and more enterprise-grade UI components.
+description: Enterprise admin building blocks for RBAC, audit views, tenant switching, task queues, identity governance, sessions, and credentials.
 ---
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-svadmin ships with a comprehensive suite of **enterprise-grade components** designed for real-world admin systems. All components follow the **Headless + Wrapper** pattern:
+svadmin ships reusable **enterprise admin building blocks** for real-world back offices. The components and provider contracts are not, by themselves, a compliance certification or a complete identity platform. Most components follow the **Headless + Wrapper** pattern:
 
 - **Layer A (Headless)**: Pure UI components driven by Props + Callbacks — zero backend coupling
 - **Layer B (Wrapper)**: Optional integration with `AuthProvider` for out-of-the-box experience
+
+## Production boundary
+
+`AdminApp` accepts a typed `ProviderBundle` for tree-scoped backend capabilities:
+
+```svelte
+<script lang="ts">
+  import { createProviderBundle } from '@svadmin/core';
+  import { AdminApp } from '@svadmin/ui';
+
+  const providerBundle = createProviderBundle({
+    dataProvider,
+    authProvider,
+    accessControlProvider,
+    auditLogProvider,
+    organizationProvider,
+    identityGovernanceProvider,
+    sessionProvider,
+    credentialProvider,
+  });
+</script>
+
+<AdminApp {providerBundle} {resources} />
+```
+
+The built-in enterprise settings pages fail closed when their provider is absent. They do not generate browser-only API keys, fake sessions, or simulated persistence. `CredentialProvider` secrets are returned only by `createApiCredential`; list operations expose metadata only.
+
+Every organization, identity-governance, session, and credential provider method receives an `EnterpriseRequestContext`. It contains the active tree's `tenantId` plus optional `requestId`, `traceId`, and tenant metadata. Providers must use that context to scope every backend request; a singleton provider may safely serve multiple `AdminApp` tenant contexts only when its adapter enforces this parameter.
+
+The trusted backend remains responsible for authentication, authorization, tenant isolation, secret hashing and rotation, webhook delivery, idempotency, rate limiting, retention enforcement, and durable audit storage. Credential, session, identity-policy, and role mutations should write their business change and audit record in one backend transaction or equivalent atomic workflow. UI callbacks and `writeAuditEntry()` cannot make two independent remote writes atomic.
 
 ---
 
@@ -82,7 +112,7 @@ const authProvider: AuthProvider = {
 
 ## AuditLogViewer
 
-A compliance-ready audit log viewer with search filtering, action badges, and an integrated snapshot drawer for viewing JSON diffs.
+An audit log viewer with search filtering, action badges, and an integrated snapshot drawer for viewing JSON diffs. Compliance depends on the backend's append-only storage, access controls, retention enforcement, integrity protection, and operational evidence.
 
 ### AuthProvider Integration
 

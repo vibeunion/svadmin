@@ -8,6 +8,7 @@ import type { LiveProvider } from './live.svelte';
 import type { AccessControlProvider } from './permissions.svelte';
 import type { AuditLogProvider } from './audit';
 import type { AgentProvider, ChatProvider } from './chatProvider.svelte';
+import type { EnterpriseRequestContext } from './enterprise';
 import {
   createTenantCacheKey,
   resolveTenantProviderMeta,
@@ -77,6 +78,10 @@ export interface AdminContextValue {
   readonly notificationProvider: ProviderBundle['notificationProvider'];
   readonly chatProvider: ChatProvider | null;
   readonly agentProvider: AgentProvider | null;
+  readonly organizationProvider: ProviderBundle['organizationProvider'];
+  readonly identityGovernanceProvider: ProviderBundle['identityGovernanceProvider'];
+  readonly sessionProvider: ProviderBundle['sessionProvider'];
+  readonly credentialProvider: ProviderBundle['credentialProvider'];
   readonly tenant: TenantContext | undefined;
   readonly tenantAdapter: TenantAdapter | undefined;
 }
@@ -102,9 +107,14 @@ export interface AdminContextAccessor {
   readonly notificationProvider: ProviderBundle['notificationProvider'];
   readonly chatProvider: ChatProvider | null;
   readonly agentProvider: AgentProvider | null;
+  readonly organizationProvider: ProviderBundle['organizationProvider'];
+  readonly identityGovernanceProvider: ProviderBundle['identityGovernanceProvider'];
+  readonly sessionProvider: ProviderBundle['sessionProvider'];
+  readonly credentialProvider: ProviderBundle['credentialProvider'];
   readonly tenant: TenantContext | undefined;
   readonly tenantAdapter: TenantAdapter | undefined;
   readonly tenantCacheKey: TenantCacheKey | undefined;
+  readonly enterpriseRequestContext: EnterpriseRequestContext;
   getDataProvider(name?: string): DataProvider;
   getDataProviderNames(): string[];
   resolveDataProviderName(resourceName: string, overrideName?: string): string;
@@ -166,6 +176,18 @@ function resolveProviderBundle(source: AdminContextSource): ProviderBundle {
     taskProvider: source.taskProvider ?? bundled?.taskProvider,
     routerProvider: source.routerProvider ?? bundled?.routerProvider,
     tenantAdapter: source.tenantAdapter ?? bundled?.tenantAdapter,
+    organizationProvider: source.organizationProvider !== undefined
+      ? source.organizationProvider
+      : bundled?.organizationProvider,
+    identityGovernanceProvider: source.identityGovernanceProvider !== undefined
+      ? source.identityGovernanceProvider
+      : bundled?.identityGovernanceProvider,
+    sessionProvider: source.sessionProvider !== undefined
+      ? source.sessionProvider
+      : bundled?.sessionProvider,
+    credentialProvider: source.credentialProvider !== undefined
+      ? source.credentialProvider
+      : bundled?.credentialProvider,
   };
 }
 
@@ -184,6 +206,10 @@ export function createAdminContext(source: AdminContextSource): AdminContextValu
     get notificationProvider() { return resolveProviderBundle(source).notificationProvider ?? null; },
     get chatProvider() { return resolveProviderBundle(source).chatProvider ?? null; },
     get agentProvider() { return resolveProviderBundle(source).agentProvider ?? null; },
+    get organizationProvider() { return resolveProviderBundle(source).organizationProvider ?? null; },
+    get identityGovernanceProvider() { return resolveProviderBundle(source).identityGovernanceProvider ?? null; },
+    get sessionProvider() { return resolveProviderBundle(source).sessionProvider ?? null; },
+    get credentialProvider() { return resolveProviderBundle(source).credentialProvider ?? null; },
     get tenant() { return source.tenant ?? inheritedTenant; },
     get tenantAdapter() { return resolveProviderBundle(source).tenantAdapter; },
   };
@@ -254,10 +280,23 @@ export function captureAdminContext(): AdminContextAccessor {
     },
     get chatProvider() { return scopedContext ? scopedContext.chatProvider : getLegacyChatProvider(); },
     get agentProvider() { return scopedContext ? scopedContext.agentProvider : getLegacyAgentProvider(); },
+    get organizationProvider() { return scopedContext?.organizationProvider ?? null; },
+    get identityGovernanceProvider() { return scopedContext?.identityGovernanceProvider ?? null; },
+    get sessionProvider() { return scopedContext?.sessionProvider ?? null; },
+    get credentialProvider() { return scopedContext?.credentialProvider ?? null; },
     get tenant() { return scopedContext?.tenant; },
     get tenantAdapter() { return scopedContext?.tenantAdapter; },
     get tenantCacheKey() {
       return accessor.tenant ? createTenantCacheKey(accessor.tenant, accessor.tenantAdapter) : undefined;
+    },
+    get enterpriseRequestContext() {
+      const tenant = accessor.tenant;
+      return {
+        tenantId: tenant?.tenantId,
+        requestId: typeof tenant?.meta?.requestId === 'string' ? tenant.meta.requestId : undefined,
+        traceId: typeof tenant?.meta?.traceId === 'string' ? tenant.meta.traceId : undefined,
+        meta: tenant?.meta,
+      };
     },
     getDataProvider(name) {
       const activeProviders = accessor.providers;

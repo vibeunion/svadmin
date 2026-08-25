@@ -8,11 +8,24 @@ description: Complete configuration reference for svadmin
 | Prop | Type | Required | Default |
 |------|------|----------|---------|
 | `dataProvider` | `DataProvider \| Record<string, DataProvider>` | ✅ | — |
+| `providerBundle` | `ProviderBundle` | — | — |
 | `authProvider` | `AuthProvider` | — | — |
+| `accessControlProvider` | `AccessControlProvider` | — | — |
+| `auditLogProvider` | `AuditLogProvider` | — | — |
+| `organizationProvider` | `OrganizationProvider` | — | — |
+| `identityGovernanceProvider` | `IdentityGovernanceProvider` | — | — |
+| `sessionProvider` | `SessionProvider` | — | — |
+| `credentialProvider` | `CredentialProvider` | — | — |
 | `resources` | `ResourceDefinition[]` | ✅ | — |
 | `routerProvider` | `RouterProvider` | — | Hash router |
 | `title` | `string` | — | `'Admin'` |
 | `colorTheme` | `ColorTheme` | — | `'blue'` |
+
+`providerBundle.dataProvider` satisfies the required data provider when the top-level `dataProvider` prop is omitted. For incremental migration, top-level provider props override fields with the same name in `providerBundle`. Enterprise providers are tree-scoped; missing providers leave the corresponding built-in settings controls unavailable rather than using demo persistence.
+
+Provider contracts define the UI/backend boundary. The backend must still enforce authorization and tenant scope for every call. Sensitive mutations should implement business persistence and audit persistence atomically on the server; calling `writeAuditEntry()` separately from a remote mutation does not create a distributed transaction.
+
+Enterprise provider methods receive `EnterpriseRequestContext` from the active `AdminApp` tree. `writeAuditEntry()` is fail-closed and requires an `AuditLogProvider`; it is not a replacement for a backend transaction that commits the sensitive mutation and its audit record together.
 
 ## Resource Definition
 

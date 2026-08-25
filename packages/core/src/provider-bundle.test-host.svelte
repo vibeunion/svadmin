@@ -58,6 +58,18 @@
 <output data-testid={`${instance}-chat`}>
   {adminContext.chatProvider === providerBundle.chatProvider ? 'scoped' : 'missing'}
 </output>
+<output data-testid={`${instance}-organization`}>
+  {adminContext.organizationProvider === providerBundle.organizationProvider ? 'scoped' : 'missing'}
+</output>
+<output data-testid={`${instance}-identity-governance`}>
+  {adminContext.identityGovernanceProvider === providerBundle.identityGovernanceProvider ? 'scoped' : 'missing'}
+</output>
+<output data-testid={`${instance}-session`}>
+  {adminContext.sessionProvider === providerBundle.sessionProvider ? 'scoped' : 'missing'}
+</output>
+<output data-testid={`${instance}-credential`}>
+  {adminContext.credentialProvider === providerBundle.credentialProvider ? 'scoped' : 'missing'}
+</output>
 <QueryClientProvider client={activeQueryClient}>
   <ProviderBundleQueryTestProbe {instance} enabled={queryEnabled} />
 </QueryClientProvider>

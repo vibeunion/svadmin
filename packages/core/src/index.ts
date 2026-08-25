@@ -84,8 +84,28 @@ export {
 export type { NotificationParams } from './notification.svelte';
 export { t, setLocale, getLocale, getAvailableLocales, addTranslations, useTranslation, setI18nProvider, getI18nProvider, createI18nScope, provideI18nScope, getI18nScope, resetI18n } from './i18n.svelte';
 export type { I18nProvider, I18nScope, I18nScopeOptions } from './i18n.svelte';
-export { audit, auditWithProvider, setAuditHandler, setAuditLogProvider, getAuditLogProvider } from './audit';
+export { audit, auditWithProvider, writeAuditEntry, setAuditHandler, setAuditLogProvider, getAuditLogProvider } from './audit';
 export type { AuditLogProvider } from './audit';
+export type {
+  ApiCredentialSummary,
+  CreatedApiCredential,
+  CredentialProvider,
+  EnterpriseActionError,
+  EnterpriseActionResult,
+  EnterpriseRequestContext,
+  EnterpriseSecurityEvent,
+  EnterpriseSecurityPolicy,
+  IdentityGovernanceProvider,
+  IdentityProviderProtocol,
+  IdentityProviderStatus,
+  IdentityProviderSummary,
+  MfaState,
+  Organization,
+  OrganizationProvider,
+  SessionInfo,
+  SessionProvider,
+  WebhookSummary,
+} from './enterprise';
 export { setChatProvider, getChatProvider, setChatContext, getChatContext, setAgentProvider, getAgentProvider, registerApproval, resolveApproval, hasPendingApprovals, resetChatProvider } from './chatProvider.svelte';
 export type { ChatProvider, ChatMessage, ChatContext, ChatAction, AgentProvider, AgentEvent, AgentOptions, AdminTool, AdminToolParameter, ToolResult } from './chatProvider.svelte';
 export { getTheme, setTheme, toggleTheme, getResolvedTheme, getColorTheme, setColorTheme, getColorThemes, configureTheme, getThemeConfig, clearCssOverrides, builtinPresets, registerColorPreset, getColorPresets, registerThemeOwner, updateThemeOwner, unregisterThemeOwner, resetTheme } from './theme.svelte';

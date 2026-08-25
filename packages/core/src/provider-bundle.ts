@@ -7,6 +7,12 @@ import type { AccessControlProvider } from './permissions.svelte';
 import type { LiveProvider } from './live.svelte';
 import type { RouterProvider } from './router-provider';
 import type {
+  CredentialProvider,
+  IdentityGovernanceProvider,
+  OrganizationProvider,
+  SessionProvider,
+} from './enterprise';
+import type {
   AuthProvider,
   BaseRecord,
   CreateManyParams,
@@ -52,6 +58,10 @@ export interface ProviderBundle {
   readonly taskProvider?: TaskProvider;
   readonly routerProvider?: RouterProvider;
   readonly tenantAdapter?: TenantAdapter;
+  readonly organizationProvider?: OrganizationProvider | null;
+  readonly identityGovernanceProvider?: IdentityGovernanceProvider | null;
+  readonly sessionProvider?: SessionProvider | null;
+  readonly credentialProvider?: CredentialProvider | null;
 }
 
 /** 保留传入对象的精确类型，同时执行 ProviderBundle 的编译期校验。 */

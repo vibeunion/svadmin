@@ -22,6 +22,6 @@ describe('built-in feedback ownership contract', () => {
     expect(profile).not.toContain('pwSuccess');
     expect(security).not.toContain('passwordSuccessMessage');
     expect(profile).toContain('notification.success');
-    expect(security).toContain('notification.success');
+    expect(security).toMatch(/notification\.success|notifyWithProvider\(\{ type: 'success'/);
   });
 });

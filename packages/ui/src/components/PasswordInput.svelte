@@ -15,6 +15,7 @@
     placeholder?: string;
     autocomplete?: string;
     showStrength?: boolean;
+    disabled?: boolean;
     class?: string;
   }
 
@@ -25,6 +26,7 @@
     placeholder = '••••••••',
     autocomplete = 'current-password',
     showStrength = false,
+    disabled = false,
     class: className = '',
   }: Props = $props();
 
@@ -66,6 +68,7 @@
       bind:value
       class="pl-9 pr-9"
       autocomplete={autocomplete as any}
+      {disabled}
     />
     <TooltipButton
       tooltip={showPassword ? i18n.t('common.hidePassword') : i18n.t('common.showPassword')}
@@ -74,6 +77,7 @@
       type="button"
       class="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 z-[1]"
       onclick={(e) => { e.preventDefault(); showPassword = !showPassword; }}
+      {disabled}
       tabindex={-1}
     >
       {#if showPassword}

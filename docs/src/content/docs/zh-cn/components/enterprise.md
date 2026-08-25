@@ -1,14 +1,44 @@
 ---
 title: 企业级组件
-description: RBAC 权限矩阵、审计日志、多租户切换器、任务队列等企业级 UI 组件。
+description: 面向 RBAC、审计查看、多租户、任务、身份治理、会话与凭据管理的企业后台构建块。
 ---
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-svadmin 提供了一套完整的**企业级组件**，专为真实的后台管理系统设计。所有组件遵循 **Headless + Wrapper** 双层架构：
+svadmin 提供面向真实管理后台的**企业能力构建块**。组件和 Provider 契约本身不等于合规认证，也不是完整的身份平台。大多数组件遵循 **Headless + Wrapper** 双层架构：
 
 - **Layer A（无头层）**：纯 UI 组件，通过 Props + Callbacks 驱动 — 不耦合任何后端
 - **Layer B（封装层）**：可选的 `AuthProvider` 集成，实现开箱即用
+
+## 生产边界
+
+`AdminApp` 支持通过有类型的 `ProviderBundle` 向当前组件树注入后端能力：
+
+```svelte
+<script lang="ts">
+  import { createProviderBundle } from '@svadmin/core';
+  import { AdminApp } from '@svadmin/ui';
+
+  const providerBundle = createProviderBundle({
+    dataProvider,
+    authProvider,
+    accessControlProvider,
+    auditLogProvider,
+    organizationProvider,
+    identityGovernanceProvider,
+    sessionProvider,
+    credentialProvider,
+  });
+</script>
+
+<AdminApp {providerBundle} {resources} />
+```
+
+内置企业设置页在对应 Provider 缺失时会关闭操作，不会在浏览器生成伪 API Key、虚假会话或伪造保存结果。`CredentialProvider` 的 secret 仅能由 `createApiCredential` 创建时返回一次，列表接口只暴露元数据。
+
+所有组织、身份治理、会话和凭据 Provider 方法都会收到 `EnterpriseRequestContext`，其中包含当前组件树的 `tenantId`，以及可选的 `requestId`、`traceId` 和租户元数据。Provider 必须使用该上下文约束每一次后端请求；只有 adapter 强制执行这个参数时，同一个 Provider 实例才能为多个 `AdminApp` 租户上下文服务。
+
+可信后端仍必须负责认证、授权、租户隔离、密钥哈希与轮换、Webhook 投递、幂等、限流、保留策略执行和持久审计存储。凭据、会话、身份策略和角色权限变更，应由后端在同一事务或等价的原子流程中同时写入业务结果与审计记录。UI 回调和 `writeAuditEntry()` 无法让两个独立的远程写入自动获得事务性。
 
 ---
 
@@ -82,7 +112,7 @@ const authProvider: AuthProvider = {
 
 ## AuditLogViewer 审计日志
 
-合规级审计日志查看器，内置搜索过滤、操作徽章以及 JSON 变更快照抽屉。
+审计日志查看器，内置搜索过滤、操作徽章以及 JSON 变更快照抽屉。是否达到合规要求，取决于后端的追加写存储、访问控制、保留策略、完整性保护和运维证据。
 
 ### AuthProvider 集成
 

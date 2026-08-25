@@ -8,11 +8,24 @@ description: svadmin 完整配置参考
 | 属性 | 类型 | 必填 | 默认值 |
 |------|------|------|--------|
 | `dataProvider` | `DataProvider \| Record<string, DataProvider>` | ✅ | — |
+| `providerBundle` | `ProviderBundle` | — | — |
 | `authProvider` | `AuthProvider` | — | — |
+| `accessControlProvider` | `AccessControlProvider` | — | — |
+| `auditLogProvider` | `AuditLogProvider` | — | — |
+| `organizationProvider` | `OrganizationProvider` | — | — |
+| `identityGovernanceProvider` | `IdentityGovernanceProvider` | — | — |
+| `sessionProvider` | `SessionProvider` | — | — |
+| `credentialProvider` | `CredentialProvider` | — | — |
 | `resources` | `ResourceDefinition[]` | ✅ | — |
 | `routerProvider` | `RouterProvider` | — | Hash 路由 |
 | `title` | `string` | — | `'Admin'` |
 | `colorTheme` | `ColorTheme` | — | `'blue'` |
+
+顶层未传 `dataProvider` 时，`providerBundle.dataProvider` 可满足必填数据源。为便于渐进迁移，顶层 Provider 属性会覆盖 `providerBundle` 内同名字段。企业 Provider 按组件树隔离；缺失时，对应的内置设置操作保持不可用，不会使用演示数据伪造持久化。
+
+Provider 契约只定义 UI 与后端的边界。后端仍必须对每次调用强制执行授权和租户范围。敏感变更应在服务端原子地完成业务持久化与审计持久化；将 `writeAuditEntry()` 与远程业务调用分开执行，不会自动获得分布式事务能力。
+
+企业 Provider 方法会收到当前 `AdminApp` 组件树的 `EnterpriseRequestContext`。`writeAuditEntry()` 会严格失败关闭，必须配置 `AuditLogProvider`；它不能替代在同一后端事务中同时提交敏感变更和审计记录。
 
 ## 资源定义
 

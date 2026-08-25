@@ -9,6 +9,12 @@ import {
 import { keys, parseQueryKey, queryKeyMatches } from './query-keys';
 import type { AuditEntry, AuditLogProvider } from './audit';
 import type { ChatProvider } from './chatProvider.svelte';
+import type {
+  CredentialProvider,
+  IdentityGovernanceProvider,
+  OrganizationProvider,
+  SessionProvider,
+} from './enterprise';
 import type { AccessControlProvider } from './permissions.svelte';
 import type { GetListParams, DataProvider, NotificationProvider, ResourceDefinition } from './types';
 
@@ -57,6 +63,31 @@ function createBundle(instance: string, calls: GetListParams[]) {
     })),
     get: vi.fn(async () => ({ id: `${instance}-task`, status: 'running' })),
   };
+  const organizationProvider: OrganizationProvider = {
+    getCurrentOrganization: vi.fn(async () => ({ id: instance, name: `${instance} organization` })),
+  };
+  const identityGovernanceProvider: IdentityGovernanceProvider = {
+    getSecurityPolicy: vi.fn(async () => ({ sessionTimeoutMinutes: 30, auditRetentionDays: 365, auditLoggingEnabled: true, requireSso: false })),
+    updateSecurityPolicy: vi.fn(async (policy) => policy),
+    listIdentityProviders: vi.fn(async () => []),
+    testIdentityProvider: vi.fn(async () => ({ success: true })),
+  };
+  const sessionProvider: SessionProvider = {
+    listSessions: vi.fn(async () => []),
+    revokeSession: vi.fn(async () => ({ success: true })),
+    revokeOtherSessions: vi.fn(async () => ({ success: true })),
+  };
+  const credentialProvider: CredentialProvider = {
+    listApiCredentials: vi.fn(async () => []),
+    createApiCredential: vi.fn(async () => ({
+      credential: { id: instance, name: instance, prefix: 'sv_', createdAt: '2026-08-25', permissions: [] },
+      secret: 'one-time-secret',
+    })),
+    revokeApiCredential: vi.fn(async () => ({ success: true })),
+    listWebhooks: vi.fn(async () => []),
+    createWebhook: vi.fn(async (params) => ({ id: instance, ...params })),
+    deleteWebhook: vi.fn(async () => ({ success: true })),
+  };
 
   return createProviderBundle({
     dataProvider: {
@@ -68,6 +99,10 @@ function createBundle(instance: string, calls: GetListParams[]) {
     notificationProvider,
     chatProvider,
     taskProvider,
+    organizationProvider,
+    identityGovernanceProvider,
+    sessionProvider,
+    credentialProvider,
     tenantAdapter: {
       getProviderMeta: (tenant) => ({ organizationId: tenant.tenantId, tenantId: 'adapter-spoof' }),
       getCacheIdentity: (tenant) => `tenant:${tenant.tenantId}`,
@@ -142,6 +177,10 @@ describe('ProviderBundle and tenant context', () => {
       expect(screen.getByTestId('first-audit').textContent?.trim()).toBe('scoped');
       expect(screen.getByTestId('first-notification').textContent?.trim()).toBe('scoped');
       expect(screen.getByTestId('first-chat').textContent?.trim()).toBe('scoped');
+      expect(screen.getByTestId('first-organization').textContent?.trim()).toBe('scoped');
+      expect(screen.getByTestId('first-identity-governance').textContent?.trim()).toBe('scoped');
+      expect(screen.getByTestId('first-session').textContent?.trim()).toBe('scoped');
+      expect(screen.getByTestId('first-credential').textContent?.trim()).toBe('scoped');
       expect(firstBundle.notificationProvider.open).toHaveBeenCalledTimes(2);
       expect(secondBundle.notificationProvider.open).toHaveBeenCalledTimes(2);
       expect(firstBundle.notificationProvider.open).toHaveBeenLastCalledWith({

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { captureAdminContext } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { Button } from '../ui/button/index.js';
   import { Input } from '../ui/input/index.js';
@@ -7,7 +8,11 @@
   import ContentPageHeader from '../content/ContentPageHeader.svelte';
   import SettingsGroup from '../content/SettingsGroup.svelte';
   import SettingsFieldRow from '../content/SettingsFieldRow.svelte';
+  import FeedbackNotice from '../content/FeedbackNotice.svelte';
   const i18n = useTranslation();
+  const adminContext = captureAdminContext();
+  const credentialProvider = $derived(adminContext.credentialProvider);
+  const isZh = $derived(i18n.locale === 'zh-CN');
   const sections = [{ id: 'profile', title: i18n.t('account.basicSettings') }, { id: 'signin', title: i18n.t('account.socialSignIn') }, { id: 'preferences', title: i18n.t('account.preferences') }, { id: 'api', title: i18n.t('account.manageApi') }];
   let active = $state('profile');
   let visible = $state(true);
@@ -41,7 +46,13 @@
       {:else if active === 'preferences'}
         <SettingsGroup title={i18n.t('account.preferences')} bodyClass="grid gap-4 sm:grid-cols-3"><Input value="English" aria-label={i18n.t('account.language')} /><Input value="Asia/Shanghai" aria-label={i18n.t('account.timezone')} /><Input value="CNY" aria-label={i18n.t('account.currency')} /></SettingsGroup>
       {:else}
-        <SettingsGroup title={i18n.t('account.manageApi')} description="Use scoped credentials and rotate them when access changes." bodyClass="flex flex-col gap-3 sm:flex-row"><Input readonly value="sv_demo_pub_9f3e********41ab" aria-label="API key" /><Button variant="outline">{i18n.t('common.copy')}</Button></SettingsGroup>
+        <SettingsGroup title={i18n.t('account.manageApi')} description={isZh ? '使用有作用域的真实凭据，并在权限变更时轮换。' : 'Use scoped credentials and rotate them when access changes.'} bodyClass="space-y-3">
+          {#if credentialProvider}
+            <Button variant="outline" onclick={() => void adminContext.navigate('/settings/api')}>{isZh ? '打开 API 凭据管理' : 'Open API credential management'}</Button>
+          {:else}
+            <FeedbackNotice tone="warning" message={isZh ? '未配置 CredentialProvider，不会显示或生成演示密钥。' : 'CredentialProvider is not configured. No demo credential is displayed or generated.'} />
+          {/if}
+        </SettingsGroup>
       {/if}
     </div>
   </div>
