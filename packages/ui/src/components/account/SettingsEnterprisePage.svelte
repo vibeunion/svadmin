@@ -30,7 +30,7 @@
 
 <ContentPageShell pageId="account-settings-enterprise" width="wide">
   <ContentPageHeader title={i18n.t('account.settingsEnterprise')} description={i18n.t('account.settingsEnterpriseDescription')} />
-  <div class="grid gap-4 lg:grid-cols-2">
+  <div class="grid items-start gap-4 lg:grid-cols-2">
     <SettingsGroup title={i18n.t('account.securityPolicy')} description="Set organization-wide controls for authentication and sessions." bodyClass="space-y-4">
       <div class="grid gap-4 sm:grid-cols-2"><div class="space-y-2"><Label for="session-timeout">{i18n.t('account.sessionTimeout')}</Label><Input id="session-timeout" value="30" /></div><div class="space-y-2"><Label for="retention">{i18n.t('account.dataRetention')}</Label><Input id="retention" value="365" /></div></div>
       <SettingsFieldRow label={i18n.t('account.auditLogging')} description="Preserve an auditable record of organization-level changes." control={auditControl} separated />
