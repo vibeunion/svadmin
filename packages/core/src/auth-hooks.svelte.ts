@@ -10,6 +10,7 @@ import type { AuthActionResult, CheckResult, Identity, AuthProvider } from './ty
 import { useQueryClient } from '@tanstack/svelte-query';
 
 let _logoutVersion = $state(0);
+let nextAuthMutationInstanceId = 0;
 export function getLogoutVersion() { return _logoutVersion; }
 export function resetLogoutVersion() { _logoutVersion = 0; }
 
@@ -22,7 +23,21 @@ interface CreateAuthMutationOptions {
   onSuccess?: (result: AuthActionResult, adminContext: AdminContextAccessor) => void | Promise<void>;
 }
 
+export interface AuthNotificationOptions {
+  /** Set to false when the page owns the success state. */
+  successNotification?: string | false;
+  errorNotification?: string | false;
+}
+
+function resolveSuccessMessage(
+  configured: string | false | undefined,
+  defaultMessage: string,
+): string | null {
+  return configured === false ? null : configured ?? defaultMessage;
+}
+
 function createAuthMutation(options: CreateAuthMutationOptions) {
+  const mutationInstanceId = nextAuthMutationInstanceId++;
   const adminContext = captureAdminContext();
   const i18n = useTranslation();
   let isLoading = $state(false);
@@ -57,18 +72,31 @@ function createAuthMutation(options: CreateAuthMutationOptions) {
     try {
       const result = await fn.call(provider, params);
       if (!isActiveMutation(epoch, provider, tenantIdentity)) return result;
+      const eventKey = `auth:${mutationInstanceId}:${String(options.method)}:${epoch}`;
       if (result.success) {
-        if (options.successMessage) sendNotification({ type: 'success', message: options.successMessage });
+        if (options.successMessage) {
+          sendNotification({
+            type: 'success',
+            message: options.successMessage,
+            key: `${eventKey}:success`,
+          });
+        }
         if (options.onSuccess) await options.onSuccess(result, adminContext);
       } else {
         const msg = result.error?.message ?? (typeof options.errorMessage === 'string' ? options.errorMessage : i18n.t('common.operationFailed'));
-        if (options.errorMessage !== false) sendNotification({ type: 'error', message: msg });
+        if (options.errorMessage !== false) {
+          sendNotification({ type: 'error', message: msg, key: `${eventKey}:error` });
+        }
       }
       return result;
     } catch (err) {
       const msg = err instanceof Error ? err.message : (typeof options.errorMessage === 'string' ? options.errorMessage : i18n.t('common.operationFailed'));
       if (isActiveMutation(epoch, provider, tenantIdentity) && options.errorMessage !== false) {
-        sendNotification({ type: 'error', message: msg });
+        sendNotification({
+          type: 'error',
+          message: msg,
+          key: `auth:${mutationInstanceId}:${String(options.method)}:${epoch}:error`,
+        });
       }
       return { success: false, error: { message: msg } };
     } finally {
@@ -100,11 +128,11 @@ function createAuthMutation(options: CreateAuthMutationOptions) {
 
 // ─── useLogin ─────────────────────────────────────────────────
 
-export function useLogin(opts?: { errorMessage?: string | false }) {
+export function useLogin(opts?: AuthNotificationOptions & { errorMessage?: string | false }) {
   return createAuthMutation({
     method: 'login',
-    successMessage: t('common.operationSuccess'),
-    errorMessage: opts?.errorMessage ?? t('common.loginFailed'),
+    successMessage: resolveSuccessMessage(opts?.successNotification, t('common.operationSuccess')),
+    errorMessage: opts?.errorNotification ?? opts?.errorMessage ?? t('common.loginFailed'),
     onSuccess: async (result, adminContext) => { await adminContext.navigate(result.redirectTo ?? '/'); }
   });
 }
@@ -131,10 +159,11 @@ export function useLogout() {
 
 // ─── useRegister ──────────────────────────────────────────────
 
-export function useRegister() {
+export function useRegister(opts?: AuthNotificationOptions) {
   return createAuthMutation({
     method: 'register',
-    successMessage: t('auth.registerSuccess'),
+    successMessage: resolveSuccessMessage(opts?.successNotification, t('auth.registerSuccess')),
+    errorMessage: opts?.errorNotification,
     onSuccess: async (result, adminContext) => {
       if (result.redirectTo) await adminContext.navigate(result.redirectTo);
     }
@@ -143,19 +172,21 @@ export function useRegister() {
 
 // ─── useForgotPassword ───────────────────────────────────────
 
-export function useForgotPassword() {
+export function useForgotPassword(opts?: AuthNotificationOptions) {
   return createAuthMutation({
     method: 'forgotPassword',
-    successMessage: t('auth.resetLinkSent')
+    successMessage: resolveSuccessMessage(opts?.successNotification, t('auth.resetLinkSent')),
+    errorMessage: opts?.errorNotification,
   });
 }
 
 // ─── useUpdatePassword ───────────────────────────────────────
 
-export function useUpdatePassword() {
+export function useUpdatePassword(opts?: AuthNotificationOptions) {
   return createAuthMutation({
     method: 'updatePassword',
-    successMessage: t('common.operationSuccess'),
+    successMessage: resolveSuccessMessage(opts?.successNotification, t('common.operationSuccess')),
+    errorMessage: opts?.errorNotification,
     onSuccess: async (result, adminContext) => {
       if (result.redirectTo) await adminContext.navigate(result.redirectTo);
     }
@@ -164,20 +195,22 @@ export function useUpdatePassword() {
 
 // ─── useUpdateIdentity / useUpdateProfile ────────────────────
 
-export function useUpdateIdentity() {
+export function useUpdateIdentity(opts?: AuthNotificationOptions) {
   return createAuthMutation({
     method: 'updateIdentity',
-    successMessage: t('common.operationSuccess'),
+    successMessage: resolveSuccessMessage(opts?.successNotification, t('common.operationSuccess')),
+    errorMessage: opts?.errorNotification,
     onSuccess: async (result, adminContext) => {
       if (result.redirectTo) await adminContext.navigate(result.redirectTo);
     }
   });
 }
 
-export function useUpdateProfile() {
+export function useUpdateProfile(opts?: AuthNotificationOptions) {
   return createAuthMutation({
     method: 'updateProfile',
-    successMessage: t('common.operationSuccess'),
+    successMessage: resolveSuccessMessage(opts?.successNotification, t('common.operationSuccess')),
+    errorMessage: opts?.errorNotification,
     onSuccess: async (result, adminContext) => {
       if (result.redirectTo) await adminContext.navigate(result.redirectTo);
     }

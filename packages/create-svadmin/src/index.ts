@@ -165,6 +165,58 @@ function upgrade(args: string[]): void {
   printUpgradeExecution(upgradeExecution, commandArguments.projectDirectory, packagePath);
 }
 
+const GUIDANCE_FILES = ['DESIGN.md', 'AGENTS.md'] as const;
+type GuidanceFile = (typeof GUIDANCE_FILES)[number];
+
+function missingGuidanceFiles(projectDirectory: string): GuidanceFile[] {
+  return GUIDANCE_FILES.filter(
+    (fileName) => !fs.existsSync(path.join(projectDirectory, fileName)),
+  );
+}
+
+function printGuidancePlan(projectDirectory: string, missingFiles: readonly string[]): void {
+  console.log();
+  console.log(pc.bold(`svadmin guidance — ${projectDirectory}`));
+  for (const fileName of missingFiles) {
+    console.log(`  ${pc.cyan('•')} add ${fileName}`);
+  }
+  console.log();
+}
+
+function installMissingGuidanceFiles(
+  guidanceDirectory: string,
+  projectDirectory: string,
+  missingFiles: readonly string[],
+): void {
+  for (const fileName of missingFiles) {
+    fs.copyFileSync(
+      path.join(guidanceDirectory, fileName),
+      path.join(projectDirectory, fileName),
+    );
+  }
+}
+
+function guidance(args: string[]): void {
+  const { projectDirectory, write } = parseUpgradeArguments(args);
+  const guidanceDirectory = path.join(__dirname, '..', 'guidance');
+  if (!fs.existsSync(projectDirectory)) throw new Error(`Project directory does not exist: ${projectDirectory}`);
+  if (!fs.existsSync(guidanceDirectory)) throw new Error('Shipped svadmin guidance files are missing');
+
+  const missingFiles = missingGuidanceFiles(projectDirectory);
+  if (missingFiles.length === 0) {
+    console.log(pc.green('\n  ✔ DESIGN.md and AGENTS.md already exist; nothing was changed.\n'));
+    return;
+  }
+  printGuidancePlan(projectDirectory, missingFiles);
+  if (!write) {
+    console.log(pc.yellow('  Dry run only; re-run with --write to add missing guidance files.\n'));
+    return;
+  }
+  installMissingGuidanceFiles(guidanceDirectory, projectDirectory, missingFiles);
+  console.log(pc.green(`  ✔ Added ${missingFiles.length} guidance file(s); existing files were preserved.`));
+  console.log();
+}
+
 // ─── Scaffold (init) ───────────────────────────────────────────
 async function init(): Promise<void> {
   console.log();
@@ -235,6 +287,7 @@ async function init(): Promise<void> {
 
   // 1. Copy template files
   const templateDir = path.join(__dirname, '..', 'template');
+  const guidanceDir = path.join(__dirname, '..', 'guidance');
   const scaffoldManifest = loadShippedScaffoldManifest();
 
   function copyDir(src: string, dest: string): void {
@@ -254,6 +307,11 @@ async function init(): Promise<void> {
   if (fs.existsSync(templateDir)) {
     copyDir(templateDir, projectDir);
     console.log(pc.green('  ✔') + ' Template files copied');
+  }
+
+  if (fs.existsSync(guidanceDir)) {
+    copyDir(guidanceDir, projectDir);
+    console.log(pc.green('  ✔') + ' AI and design guidance copied');
   }
 
   // 2. Generate package.json
@@ -448,6 +506,8 @@ if (subcommand === 'eject') {
   runCommand(() => doctor(rest));
 } else if (subcommand === 'upgrade') {
   runCommand(() => upgrade(rest));
+} else if (subcommand === 'guidance') {
+  runCommand(() => guidance(rest));
 } else {
   runCommand(init);
 }

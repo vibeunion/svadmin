@@ -136,6 +136,7 @@ export {
   useOnError, usePermissions,
   getLogoutVersion, resetLogoutVersion,
 } from './auth-hooks.svelte';
+export type { AuthNotificationOptions } from './auth-hooks.svelte';
 export {
   useSubmitTask,
   useTask,

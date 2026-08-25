@@ -128,7 +128,12 @@ export function createLiveSubscription(paramsFn: () => LiveSubscriptionParams): 
 export type NotificationConfig =
   | string
   | false
-  | ((data?: unknown, values?: unknown, resource?: string) => { message: string; description?: string; type?: 'success' | 'error' })
+  | ((data?: unknown, values?: unknown, resource?: string) => {
+      message: string;
+      description?: string;
+      type?: 'success' | 'error';
+      key?: string;
+    })
   | undefined;
 
 export interface SuccessNotificationRequest {
@@ -154,7 +159,12 @@ export function fireSuccessNotification(request: SuccessNotificationRequest): vo
   if (!config && !defaultMessage) return;
   if (typeof config === 'function') {
     const result = config(data, values, resource);
-    notifyWithProvider({ type: 'success', message: result.message, description: result.description }, provider);
+    notifyWithProvider({
+      type: 'success',
+      message: result.message,
+      description: result.description,
+      key: result.key,
+    }, provider);
     return;
   }
   notifyWithProvider({ type: 'success', message: config || defaultMessage }, provider);
@@ -166,7 +176,12 @@ export function fireErrorNotification(request: ErrorNotificationRequest): void {
   if (!config && !defaultMessage) return;
   if (typeof config === 'function') {
     const result = config(error, undefined, resource);
-    notifyWithProvider({ type: 'error', message: result.message, description: result.description }, provider);
+    notifyWithProvider({
+      type: 'error',
+      message: result.message,
+      description: result.description,
+      key: result.key,
+    }, provider);
     return;
   }
   const errMsg = error instanceof Error ? error.message : String(error ?? '');

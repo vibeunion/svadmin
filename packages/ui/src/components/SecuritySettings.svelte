@@ -1,7 +1,8 @@
 <script lang="ts">
+  import { useNotification } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
 
-  import { AlertTriangle, CheckCircle2, KeyRound, Monitor, Shield, ShieldAlert, ShieldCheck, Smartphone, Trash2 } from '@lucide/svelte';
+  import { AlertTriangle, KeyRound, Monitor, Shield, ShieldAlert, ShieldCheck, Smartphone, Trash2 } from '@lucide/svelte';
   import type { Component } from 'svelte';
   import * as Alert from './ui/alert/index.js';
   import * as Card from './ui/card/index.js';
@@ -11,6 +12,7 @@
   import PasswordInput from './PasswordInput.svelte';
 
   const i18n = useTranslation();
+  const notification = useNotification();
 
   interface SessionInfo {
     id: string;
@@ -32,13 +34,11 @@
   let currentPassword = $state('');
   let newPassword = $state('');
   let confirmPassword = $state('');
-  let passwordSuccessMessage = $state('');
   let passwordErrorMessage = $state('');
   let lastChanged = $state('3 months ago');
 
   function handlePasswordChange(event: SubmitEvent) {
     event.preventDefault();
-    passwordSuccessMessage = '';
     passwordErrorMessage = '';
 
     if (!currentPassword) {
@@ -54,7 +54,7 @@
       return;
     }
 
-    passwordSuccessMessage = i18n.t('profile.passwordChanged');
+    notification.success(i18n.t('profile.passwordChanged'), 3000);
     lastChanged = 'Just now';
     currentPassword = '';
     newPassword = '';
@@ -111,12 +111,6 @@
     </Card.CardHeader>
     <Card.CardContent>
       <form onsubmit={handlePasswordChange} class="max-w-sm space-y-4">
-        {#if passwordSuccessMessage}
-          <Alert.Root class="border-success/30 bg-success/5 text-success">
-            <CheckCircle2 class="h-4 w-4" />
-            <Alert.Description>{passwordSuccessMessage}</Alert.Description>
-          </Alert.Root>
-        {/if}
         {#if passwordErrorMessage}
           <Alert.Root variant="destructive">
             <AlertTriangle class="h-4 w-4" />

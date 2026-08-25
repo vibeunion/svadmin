@@ -30,3 +30,5 @@ export type { NetworkColumn } from './NetworkTable.types.js';
 export { default as OtpInput } from './OtpInput.svelte';
 export { default as TwoFactorStepper } from './TwoFactorStepper.svelte';
 export { default as SystemErrorState } from './SystemErrorState.svelte';
+export { default as FeedbackNotice } from './FeedbackNotice.svelte';
+export type { FeedbackNoticeTone, FeedbackNoticePriority } from './FeedbackNotice.svelte';

@@ -34,6 +34,8 @@ const form = useForm();
 | `autoSave` | `{ enabled, debounce? }` | — | 自动保存 |
 | `mutationMode` | `MutationMode` | `'pessimistic'` | 变更策略 |
 | `undoableTimeout` | `number` | `5000` | 撤销超时（毫秒） |
+| `successNotification` | `string \| false` | 自动消息 | 页面自行展示完成状态时设为 `false` |
+| `errorNotification` | `string \| false` | Provider 错误 | 覆盖或关闭全局错误通知 |
 
 ### 返回值
 

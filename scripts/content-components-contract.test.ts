@@ -12,7 +12,7 @@ const components = [
   'IntegrationCard.svelte', 'ApiKeyList.svelte', 'SecurityEventTable.svelte',
   'MemberList.svelte', 'ImportDropzone.svelte', 'NetworkUserCard.svelte',
   'NetworkTable.svelte', 'OtpInput.svelte', 'TwoFactorStepper.svelte',
-  'SystemErrorState.svelte',
+  'SystemErrorState.svelte', 'FeedbackNotice.svelte',
 ];
 
 describe('Stripe-first content component contract', () => {
@@ -40,5 +40,13 @@ describe('Stripe-first content component contract', () => {
       expect(source).not.toMatch(/\b(?:rgb|rgba|hsl|hsla|oklab|oklch)\(/i);
       expect(source).not.toContain('!important');
     }
+  });
+
+  it('keeps persistent feedback actionable and excludes success banners', () => {
+    const source = readFileSync(join(contentDir, 'FeedbackNotice.svelte'), 'utf8');
+    expect(source).toContain("export type FeedbackNoticeTone = 'info' | 'warning' | 'danger';");
+    expect(source).not.toContain("'success'");
+    expect(source).toContain("priority === 'blocking'");
+    expect(source).toContain('role={isBlocking');
   });
 });

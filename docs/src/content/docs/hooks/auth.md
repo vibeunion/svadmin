@@ -65,3 +65,10 @@ mutate(error); // Calls authProvider.onError → may logout or redirect
 ### `useRegister()`, `useForgotPassword()`, `useUpdatePassword()`
 
 Same mutation pattern as `useLogin()`.
+
+Mutation auth hooks accept `successNotification` and `errorNotification`.
+Disable automatic success feedback when the page renders a completed state:
+
+```typescript
+const forgot = useForgotPassword({ successNotification: false });
+```

@@ -107,6 +107,11 @@ import {
 
 ## Alert
 
+`Alert` is a low-level inline primitive. Routine mutation success belongs in a
+3-second Toast. Persistent page feedback is limited to unresolved context,
+required action, or blocking failures; use `FeedbackNotice` for that layer.
+Never show the same event in both Alert and Toast.
+
 ```svelte
 <Alert.Alert>
   <Alert.Title>Heads up!</Alert.Title>

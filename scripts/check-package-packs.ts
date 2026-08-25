@@ -194,6 +194,8 @@ const expectations: PackageExpectation[] = [
     requiredFiles: [
       'dist/index.js',
       'scaffold-manifest.json',
+      'guidance/AGENTS.md',
+      'guidance/DESIGN.md',
       'template/src/App.svelte',
       'template/vite.config.ts',
     ],
@@ -549,6 +551,46 @@ async function verifyPackedUpgradeDryRun(
   );
 }
 
+async function verifyPackedGuidance(
+  cliEntry: string,
+  fixtureRoot: string,
+): Promise<void> {
+  const projectDirectory = join(fixtureRoot, 'guidance-project');
+  const customerDesign = '# Customer design\n';
+  await mkdir(projectDirectory, { recursive: true });
+  await writeFile(join(projectDirectory, 'DESIGN.md'), customerDesign);
+
+  runPackedCli(cliEntry, {
+    args: ['guidance', projectDirectory],
+    cwd: fixtureRoot,
+    expectedStatus: 0,
+    label: '@svadmin/create packed guidance (dry-run)',
+    outputIncludes: ['Dry run only'],
+  });
+  assert(
+    (await readdir(projectDirectory)).sort().join(',') === 'DESIGN.md',
+    '@svadmin/create packed guidance dry-run created an unexpected file',
+  );
+
+  runPackedCli(cliEntry, {
+    args: ['guidance', projectDirectory, '--write'],
+    cwd: fixtureRoot,
+    expectedStatus: 0,
+    label: '@svadmin/create packed guidance (write)',
+    outputIncludes: ['existing files were preserved'],
+  });
+  assert(
+    await readFile(join(projectDirectory, 'DESIGN.md'), 'utf8') === customerDesign,
+    '@svadmin/create packed guidance overwrote customer DESIGN.md',
+  );
+  assert(
+    (await readFile(join(projectDirectory, 'AGENTS.md'), 'utf8')).includes(
+      'one event -> one primary feedback surface',
+    ),
+    '@svadmin/create packed guidance did not install the feedback invariant',
+  );
+}
+
 export async function verifyCreateSvadminPackedCli(tarballPath: string): Promise<string> {
   const fixtureRoot = await mkdtemp(join(tmpdir(), 'svadmin-create-packed-cli-'));
   try {
@@ -559,12 +601,14 @@ export async function verifyCreateSvadminPackedCli(tarballPath: string): Promise
     runPackedBinShim(fixtureRoot, projectFixtures.cleanDirectory);
     verifyPackedDoctors(cliEntry, fixtureRoot, projectFixtures);
     await verifyPackedUpgradeDryRun(cliEntry, fixtureRoot, projectFixtures);
+    await verifyPackedGuidance(cliEntry, fixtureRoot);
     return [
       'packed npm install passed',
       'packed bin shim doctor passed',
       'packed doctor clean passed',
       'packed doctor drift passed',
       'packed upgrade dry-run passed',
+      'packed guidance migration passed',
     ].join('\n');
   } finally {
     await rm(fixtureRoot, { recursive: true, force: true });

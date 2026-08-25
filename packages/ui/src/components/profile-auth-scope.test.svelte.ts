@@ -1,6 +1,7 @@
 import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
 import {
   resetContext,
+  getToastQueue,
   type AuthActionResult,
   type AuthProvider,
   type Identity,
@@ -85,7 +86,10 @@ describe('Profile auth scope', () => {
     await fireEvent.input(view.getByLabelText('Name'), { target: { value: 'Tenant A Draft' } });
     await fireEvent.click(view.getByRole('button', { name: 'Save' }));
     await waitFor(() => expect(scopedGetIdentity).toHaveBeenCalledTimes(2));
-    await waitFor(() => expect(view.getByText('Updated successfully')).not.toBeNull());
+    await waitFor(() => expect(
+      getToastQueue().some((item) => item.message === 'Updated successfully'),
+    ).toBe(true));
+    expect(view.queryByText('Updated successfully')).toBeNull();
 
     const firstPasswords = passwordInputs(view.container);
     await fireEvent.input(firstPasswords.current, { target: { value: 'tenant-a-current' } });

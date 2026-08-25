@@ -112,6 +112,34 @@ test('upgrade CLI stays read-only until --write and then preserves custom fields
   }
 });
 
+test('guidance CLI previews changes and only adds missing project standards', async () => {
+  const projectDirectory = await mkdtemp(join(tmpdir(), 'create-svadmin-guidance-cli-'));
+  const customDesign = '# Customer design\n';
+
+  try {
+    await writeFile(join(projectDirectory, 'DESIGN.md'), customDesign);
+
+    const dryRun = runCli(['guidance', projectDirectory]);
+    expect(dryRun.status).toBe(0);
+    expect(dryRun.stdout).toContain('Dry run only');
+    expect(await readdir(projectDirectory)).toEqual(['DESIGN.md']);
+
+    const write = runCli(['guidance', projectDirectory, '--write']);
+    expect(write.status).toBe(0);
+    expect(write.stdout).toContain('existing files were preserved');
+    expect(await readFile(join(projectDirectory, 'DESIGN.md'), 'utf8')).toBe(customDesign);
+    expect(await readFile(join(projectDirectory, 'AGENTS.md'), 'utf8')).toContain(
+      'one event -> one primary feedback surface',
+    );
+
+    const repeat = runCli(['guidance', projectDirectory, '--write']);
+    expect(repeat.status).toBe(0);
+    expect(repeat.stdout).toContain('nothing was changed');
+  } finally {
+    await rm(projectDirectory, { recursive: true, force: true });
+  }
+});
+
 test('release pack gate runs maintenance commands from the packed Node CLI', async () => {
   const packageDirectory = resolve(import.meta.dir, '..');
   const packDirectory = await mkdtemp(join(tmpdir(), 'create-svadmin-packed-cli-test-'));
@@ -142,6 +170,7 @@ test('release pack gate runs maintenance commands from the packed Node CLI', asy
     expect(smokeOutput).toContain('packed doctor clean passed');
     expect(smokeOutput).toContain('packed doctor drift passed');
     expect(smokeOutput).toContain('packed upgrade dry-run passed');
+    expect(smokeOutput).toContain('packed guidance migration passed');
   } finally {
     await rm(packDirectory, { recursive: true, force: true });
   }

@@ -68,6 +68,11 @@ export { default as InlineEdit } from "./components/InlineEdit.svelte";
 export { default as VirtualTable } from "./components/VirtualTable.svelte";
 export { default as DraggableHeader } from "./components/DraggableHeader.svelte";
 export { default as SettingsPage } from "./components/SettingsPage.svelte";
+export { default as FeedbackNotice } from './components/content/FeedbackNotice.svelte';
+export type {
+  FeedbackNoticeTone,
+  FeedbackNoticePriority,
+} from './components/content/FeedbackNotice.svelte';
 
 // Editor Registry
 export { setRichTextEditor, getRichTextEditor } from "./editor-config.svelte.js";

@@ -64,3 +64,10 @@ mutate(error); // 调用 authProvider.onError → 可能登出或重定向
 ### `useRegister()`、`useForgotPassword()`、`useUpdatePassword()`
 
 与 `useLogin()` 相同的变更模式。
+
+认证变更 Hook 支持 `successNotification` 和 `errorNotification`。页面自行
+展示完成状态时，应关闭自动成功反馈：
+
+```typescript
+const forgot = useForgotPassword({ successNotification: false });
+```

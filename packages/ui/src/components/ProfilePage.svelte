@@ -2,6 +2,7 @@
   import {
     captureAdminContext,
     useGetIdentity,
+    useNotification,
     useUpdatePassword,
     type AuthProvider,
   } from '@svadmin/core';
@@ -12,12 +13,13 @@
   import * as Card from './ui/card/index.js';
   import * as Alert from './ui/alert/index.js';
   import PasswordInput from './PasswordInput.svelte';
-  import { User, Mail, Lock, Loader2, AlertCircle, CheckCircle, Camera } from '@lucide/svelte';
+  import { User, Mail, Lock, Loader2, AlertCircle, Camera } from '@lucide/svelte';
 
   const i18n = useTranslation();
   const adminContext = captureAdminContext();
 
   const identity = useGetIdentity();
+  const notification = useNotification();
   const updatePw = useUpdatePassword();
 
   const authProvider = $derived(adminContext.authProvider);
@@ -27,7 +29,6 @@
   let editingProfile = $state(false);
   let editName = $state('');
   let profileSaving = $state(false);
-  let profileSuccess = $state(false);
   let profileError = $state('');
   let avatarUploading = $state(false);
   let fileInput = $state<HTMLInputElement>();
@@ -35,21 +36,18 @@
   let newPassword = $state('');
   let confirmPassword = $state('');
   let pwError = $state('');
-  let pwSuccess = $state(false);
   let scopeEpoch = 0;
 
   function resetProfileScope(): void {
     editingProfile = false;
     editName = '';
     profileSaving = false;
-    profileSuccess = false;
     profileError = '';
     avatarUploading = false;
     currentPassword = '';
     newPassword = '';
     confirmPassword = '';
     pwError = '';
-    pwSuccess = false;
   }
 
   function isActiveScope(
@@ -75,7 +73,6 @@
   function startEditProfile() {
     editName = identity.data?.name ?? '';
     editingProfile = true;
-    profileSuccess = false;
     profileError = '';
   }
 
@@ -90,9 +87,9 @@
       const result = await provider.updateProfile({ name: editName });
       if (!isActiveScope(epoch, provider, scopedTenantIdentity)) return;
       if (result.success) {
-        profileSuccess = true;
         editingProfile = false;
         identity.refetch();
+        notification.success(i18n.t('common.updateSuccess'), 3000);
       } else {
         profileError = result.error?.message ?? i18n.t('common.operationFailed');
       }
@@ -123,7 +120,6 @@
   async function handlePasswordChange(e: SubmitEvent) {
     e.preventDefault();
     pwError = '';
-    pwSuccess = false;
 
     if (!newPassword) { pwError = i18n.t('auth.passwordRequired'); return; }
     if (newPassword !== confirmPassword) { pwError = i18n.t('auth.passwordMismatch'); return; }
@@ -138,7 +134,6 @@
     });
     if (!isActiveScope(epoch, provider, scopedTenantIdentity)) return;
     if (result.success) {
-      pwSuccess = true;
       currentPassword = '';
       newPassword = '';
       confirmPassword = '';
@@ -174,13 +169,6 @@
           {i18n.t('common.loading')}
         </div>
       {:else if identity.data}
-        {#if profileSuccess}
-          <Alert.Root class="border-success/30 bg-success/5 text-success mb-4">
-            <CheckCircle class="h-4 w-4" />
-            <Alert.Description>{i18n.t('common.updateSuccess')}</Alert.Description>
-          </Alert.Root>
-        {/if}
-
         <div class="flex items-start gap-6">
           <!-- Avatar -->
           <div class="shrink-0 relative group">
@@ -289,13 +277,6 @@
           <Alert.Root variant="destructive">
             <AlertCircle class="h-4 w-4" />
             <Alert.Description>{pwError}</Alert.Description>
-          </Alert.Root>
-        {/if}
-
-        {#if pwSuccess}
-          <Alert.Root class="border-success/30 bg-success/5 text-success">
-            <CheckCircle class="h-4 w-4" />
-            <Alert.Description>{i18n.t('profile.passwordChanged')}</Alert.Description>
           </Alert.Root>
         {/if}
 

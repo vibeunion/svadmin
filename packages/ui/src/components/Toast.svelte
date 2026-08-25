@@ -20,11 +20,12 @@
     const queue = getToastQueue();
     if (queue.length > 0) {
       for (const t of queue) {
+        const options = { duration: t.duration, id: t.key ?? t.id };
         switch (t.type) {
-          case 'success': sonner.success(t.message, { duration: t.duration }); break;
-          case 'error': sonner.error(t.message, { duration: t.duration }); break;
-          case 'warning': sonner.warning(t.message, { duration: t.duration }); break;
-          case 'info': sonner.info(t.message, { duration: t.duration }); break;
+          case 'success': sonner.success(t.message, options); break;
+          case 'error': sonner.error(t.message, options); break;
+          case 'warning': sonner.warning(t.message, options); break;
+          case 'info': sonner.info(t.message, options); break;
         }
       }
       consumeToastQueue();
@@ -46,7 +47,8 @@
     position: "top-right",
     richColors: true,
     closeButton: true,
-    expand: true,
+    expand: false,
+    visibleToasts: 3,
     theme,
     toastOptions: {
       classes: {

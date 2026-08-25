@@ -9,6 +9,7 @@
   "files": [
     "dist",
     "template",
+    "guidance",
     "scaffold-manifest.json"
   ],
   "scripts": {

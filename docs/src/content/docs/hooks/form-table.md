@@ -34,6 +34,8 @@ const form = useForm();
 | `autoSave` | `{ enabled, debounce? }` | — | Auto-save on change |
 | `mutationMode` | `MutationMode` | `'pessimistic'` | Mutation strategy |
 | `undoableTimeout` | `number` | `5000` | Undo timeout (ms) |
+| `successNotification` | `string \| false` | generated message | Set `false` when the page renders the completed state |
+| `errorNotification` | `string \| false` | provider error | Override or disable the global error notification |
 
 ### Return Value
 

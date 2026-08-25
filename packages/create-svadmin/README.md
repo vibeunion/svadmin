@@ -97,3 +97,14 @@ bun src/sync-template.ts
 # Build CLI (for npm publishing)
 bun run build
 ```
+Generated projects include root-level `DESIGN.md` and `AGENTS.md` files. They
+define the Stripe-first visual language, page information budget, feedback
+ownership, and AI generation acceptance rules.
+
+Existing projects can preview and install any missing guidance files without
+overwriting local standards:
+
+```bash
+bunx @svadmin/create guidance .
+bunx @svadmin/create guidance . --write
+```

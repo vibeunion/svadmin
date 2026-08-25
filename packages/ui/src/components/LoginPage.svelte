@@ -35,7 +35,7 @@
   }>();
 
   const adminContext = captureAdminContext();
-  const login = useLogin({ errorMessage: false });
+  const login = useLogin({ successNotification: false, errorMessage: false });
   const authProvider = $derived(adminContext.authProvider);
 
   function getInitialIdentifier() {

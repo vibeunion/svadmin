@@ -7,7 +7,7 @@
   import { Label } from './ui/label/index.js';
   import * as Alert from './ui/alert/index.js';
   import SvadminLogo from './SvadminLogo.svelte';
-  import { User, ArrowLeft, CheckCircle, Loader2, AlertCircle } from '@lucide/svelte';
+  import { User, ArrowLeft, Loader2, AlertCircle } from '@lucide/svelte';
 
   const i18n = useTranslation();
 
@@ -16,7 +16,7 @@
   }>();
 
   const adminContext = captureAdminContext();
-  const forgot = useForgotPassword();
+  const forgot = useForgotPassword({ successNotification: false });
 
   let identifier = $state('');
   let error = $state('');
@@ -82,14 +82,14 @@
       <div class="space-y-1 mb-8">
         <h1 class="text-2xl font-semibold tracking-tight">
           {#if sent}
-            {i18n.t('auth.resetLinkSent')}
+            {i18n.t('auth.resetLinkSentTitle')}
           {:else}
             {i18n.t('auth.forgotPassword')}
           {/if}
         </h1>
         <p class="text-sm text-muted-foreground">
           {#if sent}
-            {i18n.t('auth.resetLinkSent')}
+            {i18n.t('auth.resetLinkSentDescription')}
           {:else}
             {i18n.t('auth.forgotPasswordDescription')}
           {/if}
@@ -98,10 +98,6 @@
 
       {#if sent}
         <div class="space-y-4">
-          <div class="flex items-center gap-3 rounded-lg border bg-muted/50 p-4">
-            <CheckCircle class="h-5 w-5 text-primary shrink-0" />
-            <p class="text-sm text-muted-foreground">{i18n.t('auth.resetLinkSent')}</p>
-          </div>
           <Button variant="outline" class="w-full" onclick={() => adminContext.navigate('/login')}>
             <ArrowLeft class="h-4 w-4 mr-2" />
             {i18n.t('auth.backToLogin')}

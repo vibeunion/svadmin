@@ -5,8 +5,10 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const sourceDir = path.resolve(__dirname, '../../example');
+const repositoryRoot = path.resolve(__dirname, '../../..');
+const sourceDir = path.join(repositoryRoot, 'example');
 const targetDir = path.resolve(__dirname, '../template');
+const guidanceDir = path.resolve(__dirname, '../guidance');
 
 function copyRecursiveSync(src: string, dest: string): void {
   const exists = fs.existsSync(src);
@@ -38,6 +40,10 @@ fs.mkdirSync(targetDir, { recursive: true });
 // Copy example source
 copyRecursiveSync(sourceDir, targetDir);
 
+// Keep the customer-facing design contract synchronized with the repository source.
+fs.mkdirSync(guidanceDir, { recursive: true });
+fs.copyFileSync(path.join(repositoryRoot, 'DESIGN.md'), path.join(guidanceDir, 'DESIGN.md'));
+
 // Rename .gitignore to _gitignore because npm publish ignores .gitignore
 const gitignoreSrc = path.join(targetDir, '.gitignore');
 const gitignoreDest = path.join(targetDir, '_gitignore');
@@ -45,4 +51,4 @@ if (fs.existsSync(gitignoreSrc)) {
   fs.renameSync(gitignoreSrc, gitignoreDest);
 }
 
-console.log('Template synced successfully from /example!');
+console.log('Template and design guidance synced successfully from the repository!');

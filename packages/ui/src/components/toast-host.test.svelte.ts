@@ -28,6 +28,24 @@ describe('Toast host coordination', () => {
     await waitFor(() => {
       expect(screen.getAllByTestId('sonner-toaster')).toHaveLength(1);
     });
+
+    const toaster = screen.getByTestId('sonner-toaster');
+    expect(toaster.getAttribute('data-expand')).toBe('false');
+    expect(toaster.getAttribute('data-visible-toasts')).toBe('3');
+  });
+
+  it('deduplicates a keyed event and forwards the key as the Sonner id', async () => {
+    render(ToastHostHarness);
+    await waitFor(() => expect(screen.getAllByTestId('sonner-toaster')).toHaveLength(1));
+
+    toast.success('Saved', 3000, { key: 'record:42:save:7' });
+    toast.success('Saved again', 3000, { key: 'record:42:save:7' });
+
+    await waitFor(() => expect(sonner.success).toHaveBeenCalledTimes(1));
+    expect(sonner.success).toHaveBeenCalledWith('Saved', {
+      duration: 3000,
+      id: 'record:42:save:7',
+    });
   });
 
   it('fails over the active host and drains each queue item exactly once', async () => {
