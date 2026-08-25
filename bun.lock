@@ -498,7 +498,7 @@
       },
       "peerDependencies": {
         "@svadmin/core": ">=0.34.2 <0.39.0",
-        "@svadmin/ui": ">=0.40.6 <0.47.0",
+        "@svadmin/ui": ">=0.40.6 <0.48.0",
         "svelte": "^5.56.8",
       },
     },
