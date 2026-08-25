@@ -3,6 +3,7 @@
   import { useTranslation } from '@svadmin/core/i18n';
   import { AutoTable, Badge, Button, ContentPageHeader, ContentPageShell, MetricBlock } from '@svadmin/ui';
   import * as Card from '@svadmin/ui/components/ui/card/index.js';
+  import * as DropdownMenu from '@svadmin/ui/components/ui/dropdown-menu/index.js';
   import {
     CheckCircle2,
     Clock3,
@@ -82,6 +83,8 @@
   let sortOrder = $state(readHashParam('order') ?? 'asc');
   let roleSearch = $state('');
   let selectedRoleId = $state<number | null>(null);
+  let userRoleFilter = $state<number | null>(null);
+  let userStatusFilter = $state('');
 
   const locale = $derived(i18n.locale);
   const isZh = $derived(locale === 'zh-CN');
@@ -100,6 +103,10 @@
   const accounts = $derived((accountsQuery.data?.data ?? []) as unknown as UserAccount[]);
   const logs = $derived((logsQuery.data?.data ?? []) as unknown as UserLog[]);
   const settings = $derived((settingsQuery.data?.data ?? []) as unknown as UserSetting[]);
+  const filteredUsers = $derived(users.filter((user) =>
+    (userRoleFilter === null || user.roleId === userRoleFilter)
+    && (!userStatusFilter || user.status === userStatusFilter)
+  ));
 
   const activeUsers = $derived(users.filter((user) => user.status === 'active').length);
   const lockedAccounts = $derived(accounts.filter((account) => account.status === 'locked').length);
@@ -273,6 +280,11 @@
 
   function roleName(roleId: number): string {
     return roles.find((role) => role.id === roleId)?.name ?? `#${roleId}`;
+  }
+
+  function userStatusLabel(status: string): string {
+    if (!isZh) return status.charAt(0).toUpperCase() + status.slice(1);
+    return statusLabel(status);
   }
 
   function roleSlug(name: string): string {
@@ -590,21 +602,59 @@
             <Card.Description>{isZh ? '按用户、角色、状态、加入日期和最近登录查看成员。' : 'Review members by user, role, status, joined date, and last sign-in.'}</Card.Description>
           </div>
           <div class="flex flex-wrap gap-2">
-            <Button variant="outline">{isZh ? '所有角色' : 'All roles'}</Button>
-            <Button variant="outline">{isZh ? '所有用户' : 'All users'}</Button>
+            <DropdownMenu.Root>
+              <DropdownMenu.Trigger>
+                {#snippet child({ props })}
+                  <Button variant="outline" {...props}>
+                    {userRoleFilter === null ? (isZh ? '所有角色' : 'All roles') : roleName(userRoleFilter)}
+                  </Button>
+                {/snippet}
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Content align="end" class="w-52">
+                <DropdownMenu.CheckboxItem checked={userRoleFilter === null} onCheckedChange={() => userRoleFilter = null}>
+                  {isZh ? '所有角色' : 'All roles'}
+                </DropdownMenu.CheckboxItem>
+                {#each roles as role (role.id)}
+                  <DropdownMenu.CheckboxItem checked={userRoleFilter === role.id} onCheckedChange={() => userRoleFilter = role.id}>
+                    {role.name}
+                  </DropdownMenu.CheckboxItem>
+                {/each}
+              </DropdownMenu.Content>
+            </DropdownMenu.Root>
+            <DropdownMenu.Root>
+              <DropdownMenu.Trigger>
+                {#snippet child({ props })}
+                  <Button variant="outline" {...props}>
+                    {userStatusFilter ? userStatusLabel(userStatusFilter) : (isZh ? '所有用户' : 'All users')}
+                  </Button>
+                {/snippet}
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Content align="end" class="w-44">
+                <DropdownMenu.CheckboxItem checked={!userStatusFilter} onCheckedChange={() => userStatusFilter = ''}>
+                  {isZh ? '所有用户' : 'All users'}
+                </DropdownMenu.CheckboxItem>
+                {#each ['active', 'invited', 'suspended'] as status (status)}
+                  <DropdownMenu.CheckboxItem checked={userStatusFilter === status} onCheckedChange={() => userStatusFilter = status}>
+                    {userStatusLabel(status)}
+                  </DropdownMenu.CheckboxItem>
+                {/each}
+              </DropdownMenu.Content>
+            </DropdownMenu.Root>
             <Button><UserPlus class="mr-2 h-4 w-4" />{pageCopy.action}</Button>
           </div>
         </div>
       </Card.Header>
       <Card.Content class="p-0">
         <div class="overflow-x-auto">
-          <table class="w-full min-w-[760px] text-sm">
+          <table class="w-full min-w-[760px] text-sm" aria-label={isZh ? '用户目录' : 'User directory'}>
             <thead class="border-b bg-muted/35 text-xs font-semibold text-muted-foreground">
               <tr><th class="px-5 py-3 text-left">{isZh ? '用户' : 'User'}</th><th class="px-5 py-3 text-left">{isZh ? '角色' : 'Role'}</th><th class="px-5 py-3 text-left">{isZh ? '状态' : 'Status'}</th><th class="px-5 py-3 text-left">{isZh ? '加入日期' : 'Joined'}</th><th class="px-5 py-3 text-left">{isZh ? '最近登录' : 'Last Sign In'}</th></tr>
             </thead>
             <tbody class="divide-y">
-              {#each users as user (user.id)}
+              {#each filteredUsers as user (user.id)}
                 <tr class="transition hover:bg-muted/25"><td class="px-5 py-4"><div class="flex min-w-0 items-center gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{initials(user.name)}</span><div class="min-w-0"><p class="truncate font-semibold">{user.name}</p><p class="truncate text-xs text-muted-foreground">{user.email}</p></div></div></td><td class="px-5 py-4 text-muted-foreground">{roleName(user.roleId)}</td><td class="px-5 py-4"><Badge variant="outline">{statusLabel(user.status)}</Badge></td><td class="px-5 py-4 text-muted-foreground">2026-06-{String(8 + user.id).padStart(2, '0')}</td><td class="px-5 py-4 text-muted-foreground">{user.lastActiveAt}</td></tr>
+              {:else}
+                <tr><td colspan="5" class="px-5 py-10 text-center text-sm text-muted-foreground">{isZh ? '没有匹配的用户。' : 'No users match the selected filters.'}</td></tr>
               {/each}
             </tbody>
           </table>
