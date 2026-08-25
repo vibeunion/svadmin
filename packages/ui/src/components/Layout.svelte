@@ -28,6 +28,7 @@
   let { children, title = 'Admin', menu, siteUrl, routeMode = 'auto' }: { children: Snippet; title?: string; menu?: MenuItem[]; siteUrl?: string; routeMode?: 'hash' | 'path' | 'auto' } = $props();
   const layoutId = $props.id();
   const layoutScope = `svadmin-layout-${layoutId}`;
+  const mainContentId = `${layoutScope}-main`;
   const chatScope = `${layoutScope}-chat`;
   const adminContext = captureAdminContext();
 
@@ -66,6 +67,10 @@
     } catch {
       await adminContext.navigate('/login');
     }
+  }
+
+  function focusMainContent() {
+    document.getElementById(mainContentId)?.focus();
   }
 
   let collapsed = $state(false);
@@ -150,6 +155,15 @@
   </div>
 {:else}
   <div data-svadmin-layout-scope={layoutScope} class="flex h-screen bg-background" in:fade={{ duration: 200, delay: 50 }}>
+    <button
+      type="button"
+      data-svadmin-skip-link={mainContentId}
+      class="absolute left-3 top-3 z-[100] -translate-y-16 rounded-md border border-border bg-background px-3 py-2 text-sm font-medium text-foreground shadow-sm transition-transform focus:translate-y-0 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+      onclick={focusMainContent}
+    >
+      {i18n.t('common.skipToMainContent')}
+    </button>
+
     <!-- Desktop sidebar -->
     <div class="hidden md:block">
       <Sidebar {collapsed} {identity} {title} {menu} {routeMode} onToggle={() => collapsed = !collapsed} onLogout={handleLogout} />
@@ -201,7 +215,7 @@
 
       <!-- Content area: responsive padding + centered max-width container
            so wide screens don't stretch content indefinitely (avoids sparse layouts) -->
-      <main data-svadmin-main class="flex-1 overflow-y-auto bg-muted/30 px-4 py-5 sm:px-5 md:px-7.5 md:py-7">
+      <main id={mainContentId} tabindex="-1" data-svadmin-main class="flex-1 overflow-y-auto bg-muted/30 px-4 py-5 sm:px-5 md:px-7.5 md:py-7">
         <div class="mx-auto w-full max-w-[1600px]">
           {#key getPath()}
             <div in:fly={{ x: 20, duration: 150 }} out:fade={{ duration: 80 }}>
