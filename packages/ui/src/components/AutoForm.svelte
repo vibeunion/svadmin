@@ -91,11 +91,25 @@
 
   // ─── Submission error (non-field, e.g. network error) ─────────────
   let submitError = $state<string | null>(null);
+  let formElement = $state.raw<HTMLFormElement>();
+
+  function fieldErrorId(fieldKey: string): string {
+    return `${resourceName}-${fieldKey}-error`;
+  }
+
+  function focusFirstInvalidField(): void {
+    const firstInvalid = formElement?.querySelector<HTMLElement>('[aria-invalid="true"]');
+    firstInvalid?.focus();
+  }
 
   async function handleSubmit() {
     submitError = null;
     try {
       await form.submit();
+      if (Object.keys(form.errors).length > 0) {
+        queueMicrotask(focusFirstInvalidField);
+        return;
+      }
       onSuccess?.();
     } catch (e) {
       submitError = e instanceof Error ? e.message : i18n.t('common.operationFailed');
@@ -164,7 +178,7 @@
       </div>
     </div>
   {:else}
-    <form onsubmit={(e: Event) => { e.preventDefault(); handleSubmit(); }} class="max-w-3xl space-y-6">
+    <form bind:this={formElement} onsubmit={(e: Event) => { e.preventDefault(); handleSubmit(); }} class="max-w-3xl space-y-6" novalidate>
       {#if submitError}
         <div transition:slide={{ duration: 300, axis: 'y' }} class="svadmin-shake">
           <Alert.Root variant="destructive">
@@ -192,11 +206,13 @@
                       {field}
                       value={form.values[field.key]}
                       onchange={(val: unknown) => form.setFieldValue(field.key, val)}
+                      invalid={!!form.errors[field.key]}
+                      errorId={form.errors[field.key] ? fieldErrorId(field.key) : undefined}
                       disabled={isReadonly}
                     />
                   {/if}
                   {#if form.errors[field.key]}
-                    <p class="text-destructive text-[0.8125rem] mt-1" role="alert" aria-live="polite">{form.errors[field.key]}</p>
+                    <p id={fieldErrorId(field.key)} class="text-destructive text-[0.8125rem] mt-1" role="alert" aria-live="polite">{form.errors[field.key]}</p>
                   {/if}
                 </div>
               {/each}
@@ -215,11 +231,13 @@
                     {field}
                     value={form.values[field.key]}
                     onchange={(val: unknown) => form.setFieldValue(field.key, val)}
+                    invalid={!!form.errors[field.key]}
+                    errorId={form.errors[field.key] ? fieldErrorId(field.key) : undefined}
                     disabled={isReadonly}
                   />
                 {/if}
                 {#if form.errors[field.key]}
-                  <p class="text-destructive text-[0.8125rem] mt-1" role="alert" aria-live="polite">{form.errors[field.key]}</p>
+                  <p id={fieldErrorId(field.key)} class="text-destructive text-[0.8125rem] mt-1" role="alert" aria-live="polite">{form.errors[field.key]}</p>
                 {/if}
               </div>
             {/each}
