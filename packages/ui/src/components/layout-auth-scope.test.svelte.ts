@@ -1,4 +1,4 @@
-import { render, waitFor } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { resetContext, type AuthProvider } from '@svadmin/core';
 import { tick } from 'svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -24,6 +24,7 @@ vi.mock('./DevTools.svelte', async () => ({
 }));
 
 import LayoutAuthScopeHost from './layout-auth-scope.test-host.svelte';
+import LayoutSkipLinkHost from './layout-skip-link.test-host.svelte';
 
 interface Deferred<T> {
   promise: Promise<T>;
@@ -57,6 +58,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  window.location.hash = '';
   resetContext();
   vi.restoreAllMocks();
 });
@@ -71,6 +73,28 @@ describe('Layout auth scope', () => {
     await waitFor(() => expect(view.getByTestId('layout-auth-content')).not.toBeNull());
 
     expect(view.container.querySelector('main[data-svadmin-main]')).not.toBeNull();
+  });
+
+  it('focuses each layout main without changing the hash route', async () => {
+    window.location.hash = '#/records';
+    const view = render(LayoutSkipLinkHost);
+    await waitFor(() => expect(view.getAllByTestId('layout-auth-content')).toHaveLength(2));
+
+    const mainIds = new Set<string>();
+    for (const layoutHost of view.getAllByTestId('layout-skip-host')) {
+      const skipLink = layoutHost.querySelector<HTMLButtonElement>('button[data-svadmin-skip-link]');
+      const main = layoutHost.querySelector<HTMLElement>('main[data-svadmin-main]');
+      if (!skipLink || !main) throw new Error('Expected each Layout to render its skip control and main content');
+      expect(skipLink.dataset.svadminSkipLink).toBe(main.id);
+      mainIds.add(main.id);
+
+      const hashBeforeFocus = window.location.hash;
+      await fireEvent.click(skipLink);
+      expect(document.activeElement).toBe(main);
+      expect(window.location.hash).toBe(hashBeforeFocus);
+    }
+
+    expect(mainIds.size).toBe(2);
   });
 
   it('clears the previous identity while the next auth provider is pending', async () => {

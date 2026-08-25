@@ -90,6 +90,7 @@ const baseLocales: Record<string, Record<string, string>> = {
     'common.toggleSidebar': '切换侧边栏',
     'common.configRequired': '需要配置',
     'common.removeImage': '移除图片',
+    'common.skipToMainContent': '跳到主要内容',
     // Field
     'field.enterValue': '输入{label}',
     'field.selectPlaceholder': '请选择',
@@ -721,6 +722,7 @@ const baseLocales: Record<string, Record<string, string>> = {
     'common.toggleSidebar': 'Toggle sidebar',
     'common.configRequired': 'Configuration Required',
     'common.removeImage': 'Remove image',
+    'common.skipToMainContent': 'Skip to main content',
     // Field
     'field.enterValue': 'Enter {label}',
     'field.selectPlaceholder': 'Select...',
