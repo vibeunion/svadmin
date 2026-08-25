@@ -2,14 +2,15 @@
   import { useNotification } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
 
-  import { AlertTriangle, KeyRound, Monitor, Shield, ShieldAlert, ShieldCheck, Smartphone, Trash2 } from '@lucide/svelte';
+  import { AlertTriangle, Monitor, Smartphone, Trash2 } from '@lucide/svelte';
   import type { Component } from 'svelte';
   import * as Alert from './ui/alert/index.js';
-  import * as Card from './ui/card/index.js';
   import { Button } from './ui/button/index.js';
-  import { Label } from './ui/label/index.js';
   import { Switch } from './ui/switch/index.js';
   import PasswordInput from './PasswordInput.svelte';
+  import SettingsGroup from './content/SettingsGroup.svelte';
+  import SettingsFieldRow from './content/SettingsFieldRow.svelte';
+  import DataState from './content/DataState.svelte';
 
   const i18n = useTranslation();
   const notification = useNotification();
@@ -76,41 +77,14 @@
     <p class="mt-1 text-sm text-muted-foreground">{i18n.t('settings.securityDescription')}</p>
   </div>
 
-  <Card.Card>
-    <Card.CardHeader>
-      <Card.CardTitle class="flex items-center gap-2 text-base">
-        {#if is2faEnabled}
-          <ShieldCheck class="h-5 w-5 text-green-500" />
-        {:else}
-          <ShieldAlert class="h-5 w-5 text-amber-500" />
-        {/if}
-        {i18n.t('security.twoFactorAuth')}
-      </Card.CardTitle>
-      <Card.CardDescription>{i18n.t('security.twoFactorDescription')}</Card.CardDescription>
-    </Card.CardHeader>
-    <Card.CardContent>
-      <div class="flex items-center justify-between gap-4 border-t pt-4">
-        <div class="space-y-1">
-          <Label for="two-factor" class="text-sm font-medium">{i18n.t('security.enable2fa')}</Label>
-          <p class="text-xs text-muted-foreground">
-            {is2faEnabled ? i18n.t('security.twoFactorActive') : i18n.t('security.twoFactorInactive')}
-          </p>
-        </div>
-        <Switch id="two-factor" bind:checked={is2faEnabled} />
-      </div>
-    </Card.CardContent>
-  </Card.Card>
+  <SettingsGroup title={i18n.t('security.twoFactorAuth')} description={i18n.t('security.twoFactorDescription')}>
+      <SettingsFieldRow label={i18n.t('security.enable2fa')} description={is2faEnabled ? i18n.t('security.twoFactorActive') : i18n.t('security.twoFactorInactive')}>
+        {#snippet control()}<Switch id="two-factor" bind:checked={is2faEnabled} />{/snippet}
+      </SettingsFieldRow>
+  </SettingsGroup>
 
-  <Card.Card>
-    <Card.CardHeader>
-      <Card.CardTitle class="flex items-center gap-2 text-base">
-        <KeyRound class="h-4 w-4 text-muted-foreground" />
-        {i18n.t('profile.changePassword')}
-      </Card.CardTitle>
-      <Card.CardDescription>{i18n.t('security.passwordLastChanged', { time: lastChanged })}</Card.CardDescription>
-    </Card.CardHeader>
-    <Card.CardContent>
-      <form onsubmit={handlePasswordChange} class="max-w-sm space-y-4">
+  <SettingsGroup title={i18n.t('profile.changePassword')} description={i18n.t('security.passwordLastChanged', { time: lastChanged })}>
+      <form onsubmit={handlePasswordChange} class="max-w-lg space-y-4">
         {#if passwordErrorMessage}
           <Alert.Root variant="destructive">
             <AlertTriangle class="h-4 w-4" />
@@ -124,23 +98,10 @@
 
         <Button type="submit">{i18n.t('profile.updatePassword')}</Button>
       </form>
-    </Card.CardContent>
-  </Card.Card>
+  </SettingsGroup>
 
-  <Card.Card>
-    <Card.CardHeader class="flex flex-row items-start justify-between gap-4">
-      <div class="space-y-1">
-        <Card.CardTitle class="flex items-center gap-2 text-base">
-          <Shield class="h-4 w-4 text-muted-foreground" />
-          {i18n.t('security.activeSessions')}
-        </Card.CardTitle>
-        <Card.CardDescription>{i18n.t('security.sessionsDescription')}</Card.CardDescription>
-      </div>
-      {#if sessions.length > 1}
-        <Button variant="outline" size="sm" onclick={revokeAllOthers}>{i18n.t('security.revokeOthers')}</Button>
-      {/if}
-    </Card.CardHeader>
-    <Card.CardContent>
+  <SettingsGroup title={i18n.t('security.activeSessions')} description={i18n.t('security.sessionsDescription')}>
+    {#snippet actions()}{#if sessions.length > 1}<Button variant="outline" size="sm" onclick={revokeAllOthers}>{i18n.t('security.revokeOthers')}</Button>{/if}{/snippet}
       <div class="divide-y">
         {#each sessions as session (session.id)}
           <div class="flex items-center justify-between gap-4 py-3">
@@ -168,9 +129,8 @@
             {/if}
           </div>
         {:else}
-          <div class="py-6 text-center text-sm text-muted-foreground">{i18n.t('security.noSessions')}</div>
+          <DataState state="empty" title={i18n.t('security.noSessions')} />
         {/each}
       </div>
-    </Card.CardContent>
-  </Card.Card>
+  </SettingsGroup>
 </div>

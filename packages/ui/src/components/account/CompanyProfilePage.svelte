@@ -11,6 +11,7 @@
   import MemberList from '../content/MemberList.svelte';
   import SectionHeader from '../content/SectionHeader.svelte';
   import SettingsGroup from '../content/SettingsGroup.svelte';
+  import WorkspaceLayout from '../content/WorkspaceLayout.svelte';
   import type { MemberSummary } from '../content/MemberList.svelte';
   const i18n = useTranslation();
   let companyName = $state('Acme Corporation');
@@ -31,11 +32,16 @@
   <Button onclick={save} disabled={saving} size="sm">{#if saving}<Loader2 class="size-3.5 animate-spin" />{/if}{i18n.t('common.save')}</Button>
 {/snippet}
 
+{#snippet primary()}
+  <SettingsGroup title={i18n.t('account.basicSettings')} description={i18n.t('account.companyProfileDescription')} bodyClass="space-y-4"><div class="grid gap-4 sm:grid-cols-2"><div class="space-y-2"><Label for="company-name">{i18n.t('profile.companyName')}</Label><Input id="company-name" bind:value={companyName} /></div><div class="space-y-2"><Label for="company-industry">{i18n.t('profile.industry')}</Label><Input id="company-industry" bind:value={industry} /></div><div class="space-y-2 sm:col-span-2"><Label for="company-website">{i18n.t('profile.website')}</Label><Input id="company-website" bind:value={website} type="url" /></div></div><div class="space-y-2"><Label for="company-description">{i18n.t('profile.companyDescription')}</Label><Textarea id="company-description" bind:value={description} rows={4} /></div></SettingsGroup>
+{/snippet}
+
+{#snippet secondary()}
+  <SettingsGroup title={i18n.t('profile.companyName')} description={industry} bodyClass="space-y-4"><p class="text-lg font-semibold text-foreground">{companyName}</p><DescriptionList columns={1} items={[{ label: i18n.t('profile.website'), value: website, href: website }, { label: i18n.t('profile.employees'), value: '1,250' }, { label: i18n.t('profile.founded'), value: '2015' }]} /></SettingsGroup>
+{/snippet}
+
 <ContentPageShell pageId="account-company-profile" width="wide">
   <ContentPageHeader title={i18n.t('account.companyProfile')} description={i18n.t('account.companyProfileDescription')} actions={headerActions} />
-  <div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_20rem]">
-    <SettingsGroup title={i18n.t('account.basicSettings')} description={i18n.t('account.companyProfileDescription')} bodyClass="space-y-4"><div class="grid gap-4 sm:grid-cols-2"><div class="space-y-2"><Label for="company-name">{i18n.t('profile.companyName')}</Label><Input id="company-name" bind:value={companyName} /></div><div class="space-y-2"><Label for="company-industry">{i18n.t('profile.industry')}</Label><Input id="company-industry" bind:value={industry} /></div><div class="space-y-2 sm:col-span-2"><Label for="company-website">{i18n.t('profile.website')}</Label><Input id="company-website" bind:value={website} type="url" /></div></div><div class="space-y-2"><Label for="company-description">{i18n.t('profile.companyDescription')}</Label><Textarea id="company-description" bind:value={description} rows={4} /></div></SettingsGroup>
-    <SettingsGroup title={i18n.t('profile.companyName')} description={industry} bodyClass="space-y-4"><p class="text-lg font-semibold text-foreground">{companyName}</p><DescriptionList columns={1} items={[{ label: i18n.t('profile.website'), value: website, href: website }, { label: i18n.t('profile.employees'), value: '1,250' }, { label: i18n.t('profile.founded'), value: '2015' }]} /></SettingsGroup>
-  </div>
+  <WorkspaceLayout {primary} {secondary} secondaryWidth="20rem" />
   <section class="space-y-3"><SectionHeader title={i18n.t('profileSections.members')} /><MemberList {members} emptyTitle={i18n.t('common.noData')} emptyDescription={i18n.t('empty.description')} /></section>
 </ContentPageShell>

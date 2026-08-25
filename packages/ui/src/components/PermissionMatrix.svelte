@@ -56,7 +56,7 @@
 
 <div class="h-full flex flex-col pt-2">
   <!-- Header Title -->
-  <div class="mb-6 flex items-center justify-between">
+  <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
     <div>
       <h1 class="text-2xl font-bold text-foreground flex items-center gap-2">
         <Shield class="w-6 h-6 text-primary" />
@@ -78,10 +78,19 @@
     {/if}
   </div>
 
-  <div class="flex flex-col md:flex-row gap-6 flex-1 min-h-[500px]">
+  <div class="flex flex-col lg:flex-row gap-6 flex-1 min-h-[500px]">
+    <div class="w-full rounded-lg border border-border bg-card p-4 shadow-sm lg:hidden">
+      <label for="permission-role-select" class="mb-2 block text-sm font-medium text-foreground">{i18n.t('permissions.roles') || 'Roles'}</label>
+      <select id="permission-role-select" bind:value={selectedRole} class="h-9 w-full rounded-md border border-input bg-background px-3 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" disabled={roles.length === 0}>
+        {#each roles as role (role.code)}<option value={role.code}>{role.name}</option>{/each}
+      </select>
+      {#if roles.length === 0}<p class="mt-2 text-sm text-muted-foreground">{i18n.t('permissions.noRoles') || 'No roles available'}</p>{/if}
+      {#if sidebarExtra}<div class="mt-4 border-t border-border pt-4">{@render sidebarExtra()}</div>{/if}
+    </div>
+
     <!-- Left: Role Selector Sidebar -->
-    <div class="w-full md:w-64 flex-shrink-0 bg-card rounded-lg shadow-sm border border-border p-4 flex flex-col">
-      <h2 class="text-sm font-semibold text-muted-foregroundr mb-4 px-2">{i18n.t('permissions.roles') || 'Roles'}</h2>
+    <div class="hidden w-full flex-shrink-0 flex-col rounded-lg border border-border bg-card p-4 shadow-sm lg:flex lg:w-64">
+      <h2 class="mb-4 px-2 text-sm font-semibold text-muted-foreground">{i18n.t('permissions.roles') || 'Roles'}</h2>
       <div class="space-y-1 flex-1 overflow-y-auto">
         {#each roles as role, _i (_i)}
           <button 
@@ -89,7 +98,7 @@
             class="w-full text-left px-3 py-2.5 rounded-lg text-sm transition-all duration-200 {selectedRole === role.code ? 'bg-primary/10 text-primary font-medium shadow-sm ring-1 ring-primary/20' : 'text-foreground hover:bg-muted'}"
           >
             {role.name}
-            <div class="text-[10px] mt-0.5 opacity-60 font-monoer">{role.code}</div>
+            <div class="mt-0.5 font-mono text-[10px] opacity-60">{role.code}</div>
           </button>
         {/each}
         {#if roles.length === 0}
@@ -108,8 +117,8 @@
     <!-- Right: Matrix Grid -->
     <div class="flex-1 bg-card rounded-lg shadow-sm border border-border overflow-hidden flex flex-col">
       <!-- Matrix Header -->
-      <div class="p-5 border-b border-border bg-muted/30 flex items-center justify-between">
-        <div class="flex items-center gap-4">
+      <div class="p-5 border-b border-border bg-muted/30 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div class="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
           <div>
             <h2 class="text-lg font-bold text-foreground">{i18n.t('permissions.currentRole') || 'Current role'}:
               <span class="text-primary">{roles.find(r => r.code === selectedRole)?.name || (i18n.t('permissions.noneSelected') || 'None selected')}</span>
@@ -156,7 +165,7 @@
               <!-- Section Grouping Header -->
               {#if resource.section && (i === 0 || resource.section !== resources[i-1].section)}
                 <tr class="bg-primary/5">
-                  <td colspan="{actions.length + 1}" class="px-4 py-2 text-xs font-bold text-primaryr">{resource.section}</td>
+                  <td colspan="{actions.length + 1}" class="px-4 py-2 text-xs font-bold text-primary">{resource.section}</td>
                 </tr>
               {/if}
               

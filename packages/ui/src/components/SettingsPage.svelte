@@ -115,6 +115,16 @@
     return content ? alias : "profile";
   });
 
+  const contentWidth = $derived(
+    activeKey === 'roles' || activeKey === 'audit'
+      ? 'max-w-[92rem]'
+      : activeKey === 'api'
+        ? 'max-w-[78rem]'
+        : activeKey === 'integrations'
+          ? 'max-w-[64rem]'
+          : 'max-w-3xl',
+  );
+
   // Default redirect to profile
   $effect(() => {
     if (getRoute() === "/settings") {
@@ -151,7 +161,7 @@
       </div>
       {#each resolvedSections as section, _i (_i)}
         <div>
-          <h3 class="px-3 mb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+          <h3 class="px-3 mb-1 text-xs font-medium text-muted-foreground">
             {i18n.t(section.group)}
           </h3>
           <div class="space-y-0.5">
@@ -175,7 +185,7 @@
   </nav>
 
   <!-- Right content area -->
-  <div class="flex-1 p-6 lg:p-8 {activeKey === 'roles' || activeKey === 'audit' || activeKey === 'integrations' || activeKey === 'api' ? 'max-w-6xl' : 'max-w-3xl'}">
+  <div class="min-w-0 w-full flex-1 p-6 lg:p-8 {contentWidth}">
     {#if activeKey === "profile"}
       {#if profile}{@render profile()}{:else}<ProfilePage />{/if}
     {:else if activeKey === "appearance"}

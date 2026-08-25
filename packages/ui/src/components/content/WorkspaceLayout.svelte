@@ -7,6 +7,7 @@
     secondary?: Snippet;
     summary?: Snippet;
     secondaryWidth?: string;
+    mobileOrder?: 'primary-first' | 'secondary-first';
     class?: string;
   }
 
@@ -15,14 +16,16 @@
     secondary,
     summary,
     secondaryWidth = '22rem',
+    mobileOrder = 'primary-first',
     class: className = '',
   }: Props = $props();
 </script>
 
 <div class={cn('flex flex-col gap-6', className)} data-svadmin-workspace-layout style:--workspace-secondary-width={secondaryWidth}>
-  {#if summary}<div class="order-2 sm:order-1">{@render summary()}</div>{/if}
-  <div class="order-1 grid min-w-0 gap-6 sm:order-2 lg:grid-cols-[minmax(0,1fr)_var(--workspace-secondary-width)]">
-    <div class="min-w-0" data-svadmin-workspace-primary>{@render primary()}</div>
-    {#if secondary}<aside class="min-w-0">{@render secondary()}</aside>{/if}
+  {#if summary}<div data-svadmin-workspace-summary>{@render summary()}</div>{/if}
+  <div class={cn('grid min-w-0 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_var(--workspace-secondary-width)]', mobileOrder === 'secondary-first' && 'grid-rows-[auto_auto]')}>
+    {#if mobileOrder === 'secondary-first' && secondary}<aside class="order-1 min-w-0 xl:order-2">{@render secondary()}</aside>{/if}
+    <div class={cn('min-w-0', mobileOrder === 'secondary-first' ? 'order-2 xl:order-1' : 'order-1')} data-svadmin-workspace-primary>{@render primary()}</div>
+    {#if mobileOrder !== 'secondary-first' && secondary}<aside class="order-2 min-w-0 xl:order-2">{@render secondary()}</aside>{/if}
   </div>
 </div>

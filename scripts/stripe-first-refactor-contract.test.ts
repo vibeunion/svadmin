@@ -46,4 +46,28 @@ describe('Stripe-first refactor contract', () => {
     }
     expect(read('packages/ui/src/components/network/UserCardsNFTPage.svelte')).toContain('<NetworkUserCard');
   });
+
+  it('keeps built-in settings pages on the shared hierarchy and responsive workspace contract', () => {
+    const apiSettings = read('packages/ui/src/components/ApiSettings.svelte');
+    expect(apiSettings).toContain('<WorkspaceLayout');
+    expect(apiSettings).toContain('<ApiKeyList');
+    expect(apiSettings).toContain('<DataState');
+    expect(apiSettings).not.toContain('lg:grid-cols-3');
+    expect(apiSettings.indexOf('{#snippet primary()}')).toBeLessThan(apiSettings.indexOf('{#snippet secondary()}'));
+    expect(apiSettings.indexOf("title={i18n.t('api.webhooks')}")).toBeLessThan(apiSettings.indexOf('{#snippet secondary()}'));
+
+    for (const page of ['SecuritySettings.svelte', 'NotificationsSettings.svelte', 'AppearanceSettings.svelte', 'IntegrationsSettings.svelte']) {
+      const source = read(`packages/ui/src/components/${page}`);
+      expect(source).toContain('<SettingsGroup');
+      expect(source).toContain('<SettingsFieldRow');
+      expect(source).not.toMatch(/tracking-(?:tight|wide|wider|\[[^\]]+\])/);
+      expect(source).not.toMatch(/rounded-(?:xl|2xl|3xl)/);
+    }
+    expect(read('packages/ui/src/components/AboutSettings.svelte')).toContain('<SettingsGroup');
+    expect(read('packages/ui/src/components/SettingsPage.svelte')).not.toContain('tracking-wider');
+    expect(read('packages/ui/src/components/content/WorkspaceLayout.svelte')).toContain('items-start');
+    expect(read('packages/ui/src/components/account/CompanyProfilePage.svelte')).toContain('<WorkspaceLayout');
+    expect(read('packages/ui/src/components/account/UserProfilePage.svelte')).toContain('<WorkspaceLayout');
+    expect(read('packages/ui/src/components/account/SettingsEnterprisePage.svelte')).toContain('grid items-start');
+  });
 });
