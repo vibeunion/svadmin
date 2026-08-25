@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.37.0](https://github.com/vibeunion/svadmin/compare/core-v0.36.3...core-v0.37.0) (2026-08-25)
+
+
+### 🚀 Features
+
+* **ui:** diversify example application layouts ([f74f47b](https://github.com/vibeunion/svadmin/commit/f74f47b855f5640899e203bf9181fafcb399a689))
+
 ## [0.36.3](https://github.com/vibeunion/svadmin/compare/core-v0.36.2...core-v0.36.3) (2026-08-21)
 
 

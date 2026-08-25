@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.44.0](https://github.com/vibeunion/svadmin/compare/ui-v0.43.0...ui-v0.44.0) (2026-08-25)
+
+
+### 🚀 Features
+
+* **ui:** diversify example application layouts ([f74f47b](https://github.com/vibeunion/svadmin/commit/f74f47b855f5640899e203bf9181fafcb399a689))
+
 ## [0.43.0](https://github.com/vibeunion/svadmin/compare/ui-v0.42.3...ui-v0.43.0) (2026-08-24)
 
 
