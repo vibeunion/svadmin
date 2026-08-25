@@ -1,7 +1,50 @@
+<script lang="ts" module>
+	let bodyScrollLockDepth = 0;
+	let bodyOverflowBeforeLock = "";
+	const openSheets: HTMLElement[] = [];
+
+	function lockBodyScroll() {
+		if (bodyScrollLockDepth === 0) bodyOverflowBeforeLock = document.body.style.overflow;
+		bodyScrollLockDepth += 1;
+		document.body.style.overflow = "hidden";
+	}
+
+	function unlockBodyScroll() {
+		bodyScrollLockDepth = Math.max(0, bodyScrollLockDepth - 1);
+		if (bodyScrollLockDepth > 0) return;
+		document.body.style.overflow = bodyOverflowBeforeLock;
+		bodyOverflowBeforeLock = "";
+	}
+
+	function registerSheet(panel: HTMLElement) {
+		openSheets.push(panel);
+	}
+
+	function unregisterSheet(panel: HTMLElement) {
+		const index = openSheets.lastIndexOf(panel);
+		if (index >= 0) openSheets.splice(index, 1);
+	}
+
+	function isTopmostSheet(panel: HTMLElement) {
+		return openSheets.at(-1) === panel;
+	}
+</script>
+
 <script lang="ts">
 /* eslint-disable svelte/no-unused-svelte-ignore */
+	import { tick } from "svelte";
 	import { cn, type WithElementRef } from "../../../utils.js";
 	import type { HTMLAttributes } from "svelte/elements";
+
+	const focusableSelector = [
+		'a[href]',
+		'button',
+		'input',
+		'select',
+		'textarea',
+		'[tabindex]:not([tabindex="-1"])',
+		'[contenteditable]:not([contenteditable="false"])',
+	].join(",");
 
 	type Props = WithElementRef<HTMLAttributes<HTMLDivElement>> & {
 		open?: boolean;
@@ -15,6 +58,7 @@
 		side = "right",
 		onClose,
 		class: className,
+		tabindex = -1,
 		children,
 		...restProps
 	}: Props = $props();
@@ -24,21 +68,87 @@
 		onClose?.();
 	}
 
-	function handleKeydown(e: KeyboardEvent) {
-		if (e.key === "Escape") close();
+	function isContentEditableHost(element: HTMLElement) {
+		const contentEditable = element.getAttribute("contenteditable");
+		const isEditable = element.isContentEditable || (contentEditable !== null && contentEditable.toLowerCase() !== "false");
+		return isEditable && !element.parentElement?.isContentEditable;
+	}
+
+	function isVisible(element: HTMLElement) {
+		for (let current: HTMLElement | null = element; current; current = current.parentElement) {
+			const style = getComputedStyle(current);
+			if (style.display === "none" || style.visibility === "hidden") return false;
+			if (current === ref) break;
+		}
+		return true;
+	}
+
+	function isTabbable(element: HTMLElement) {
+		if (element.matches(":disabled, [aria-disabled='true']")) return false;
+		if (element.closest("[hidden], [inert], [aria-hidden='true']")) return false;
+		if (element.hasAttribute("tabindex") && element.tabIndex < 0) return false;
+		if (!element.hasAttribute("tabindex") && !isContentEditableHost(element) && element.tabIndex < 0) return false;
+		return isVisible(element);
+	}
+
+	function tabbableElements() {
+		return ref ? [...ref.querySelectorAll<HTMLElement>(focusableSelector)].filter(isTabbable) : [];
+	}
+
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.defaultPrevented || !open || !ref || !isTopmostSheet(ref)) return;
+		if (event.key === "Escape") {
+			event.preventDefault();
+			close();
+			return;
+		}
+		if (event.key !== "Tab") return;
+
+		const tabbable = tabbableElements();
+		if (tabbable.length === 0) {
+			event.preventDefault();
+			ref.focus();
+			return;
+		}
+
+		const first = tabbable[0];
+		const last = tabbable.at(-1);
+		const activeIndex = tabbable.indexOf(document.activeElement as HTMLElement);
+		if (!ref.contains(document.activeElement) || activeIndex === -1) {
+			event.preventDefault();
+			(event.shiftKey ? last : first)?.focus();
+		} else if (event.shiftKey && activeIndex === 0) {
+			event.preventDefault();
+			last?.focus();
+		} else if (!event.shiftKey && activeIndex === tabbable.length - 1) {
+			event.preventDefault();
+			first.focus();
+		}
 	}
 
 	$effect(() => {
-		if (open) {
-			document.addEventListener("keydown", handleKeydown);
-			document.body.style.overflow = "hidden";
-			return () => {
-				document.removeEventListener("keydown", handleKeydown);
-				document.body.style.overflow = "";
-			};
-		}
+		if (!open || !ref) return;
+		const panel = ref;
+		const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+		registerSheet(panel);
+		lockBodyScroll();
+		void tick().then(() => {
+			if (open && ref === panel && isTopmostSheet(panel)) {
+				(tabbableElements()[0] ?? panel).focus();
+			}
+		});
+		return () => {
+			unregisterSheet(panel);
+			unlockBodyScroll();
+			const remainingSheet = openSheets.at(-1);
+			if (!remainingSheet || (previousFocus && remainingSheet.contains(previousFocus))) {
+				previousFocus?.focus();
+			}
+		};
 	});
 </script>
+
+<svelte:document onkeydown={handleKeydown} />
 
 {#if open}
 	<!-- Overlay -->
@@ -50,9 +160,11 @@
 	></div>
 
 	<!-- Sheet panel -->
+	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 	<div
 		bind:this={ref}
 		data-slot="sheet"
+		{tabindex}
 		class={cn(
 			"fixed z-50 flex translate-x-0 flex-col gap-4 bg-background p-6 shadow-lg",
 			side === "right"
