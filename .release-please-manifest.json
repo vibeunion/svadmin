@@ -1,8 +1,8 @@
 {
-  "packages/core": "0.36.3",
-  "packages/ui": "0.43.0",
+  "packages/core": "0.37.0",
+  "packages/ui": "0.44.0",
   "packages/editor": "0.3.1",
-  "packages/sveltekit": "0.9.10",
+  "packages/sveltekit": "0.9.11",
   "packages/drizzle": "0.11.3",
   "packages/simple-rest": "0.9.12",
   "packages/refine-adapter": "0.10.2",
@@ -23,7 +23,7 @@
   "packages/nestjsx-crud": "0.9.12",
   "packages/sanity": "0.9.7",
   "packages/strapi": "0.9.11",
-  "packages/lite": "0.3.18",
+  "packages/lite": "0.3.19",
   "packages/mcp": "0.2.8",
-  "packages/surface": "0.2.3"
+  "packages/surface": "0.2.4"
 }

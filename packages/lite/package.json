@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/lite",
-  "version": "0.3.18",
+  "version": "0.3.19",
   "description": "SSR-first lightweight admin UI for @svadmin with optional progressive enhancement",
   "type": "module",
   "sideEffects": [

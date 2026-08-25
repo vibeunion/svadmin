@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.4](https://github.com/vibeunion/svadmin/compare/surface-v0.2.3...surface-v0.2.4) (2026-08-25)
+
+
+### 🐛 Bug Fixes
+
+* **surface:** support core 0.37 and ui 0.44 ([9003e00](https://github.com/vibeunion/svadmin/commit/9003e00070310e897ddafba2866f6c57d2040b2e))
+
 ## [0.2.3](https://github.com/vibeunion/svadmin/compare/surface-v0.2.2...surface-v0.2.3) (2026-08-24)
 
 
