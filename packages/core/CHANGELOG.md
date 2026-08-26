@@ -1,6 +1,11 @@
 # Changelog
 
-## [0.39.1](https://github.com/vibeunion/svadmin/compare/core-v0.39.0...core-v0.39.1) (2026-08-26)
+## [0.40.0](https://github.com/vibeunion/svadmin/compare/core-v0.39.0...core-v0.40.0) (2026-08-26)
+
+
+### 🚀 Features
+
+* **core:** add strict enterprise request contexts ([#281](https://github.com/vibeunion/svadmin/issues/281)) ([ce51952](https://github.com/vibeunion/svadmin/commit/ce519522203cbf7536e23f82d44564ece68afa29))
 
 
 ### 🐛 Bug Fixes
