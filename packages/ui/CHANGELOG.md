@@ -6,6 +6,7 @@
 ### 🐛 Bug Fixes
 
 * **ui:** close svadmin issue regressions ([cd31431](https://github.com/vibeunion/svadmin/commit/cd314312191393f71ebf1ff6d8dcfd319bc9fc3e))
+* **ui:** improve workspace accessibility contracts ([#282](https://github.com/vibeunion/svadmin/issues/282)) ([396b466](https://github.com/vibeunion/svadmin/commit/396b46618b2b5cc23300feaa4e2ed73a41409dc8))
 
 ## [0.49.0](https://github.com/vibeunion/svadmin/compare/ui-v0.48.0...ui-v0.49.0) (2026-08-25)
 
