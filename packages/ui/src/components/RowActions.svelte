@@ -25,6 +25,9 @@
     children?: Snippet;
     moreContent?: Snippet;
   };
+  type RowActionsKeyboardEvent = KeyboardEvent & {
+    currentTarget: EventTarget & HTMLDivElement;
+  };
 
   let {
     actions = [],
@@ -88,7 +91,7 @@
     elements[boundary === 'first' ? 0 : elements.length - 1]?.focus();
   }
 
-  function manageMenuKeyboard(event: KeyboardEvent): void {
+  function manageMenuKeyboard(event: RowActionsKeyboardEvent): void {
     onkeydown?.(event);
     if (event.defaultPrevented) return;
     const target = event.target instanceof HTMLElement ? event.target : null;
