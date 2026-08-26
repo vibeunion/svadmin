@@ -20,7 +20,10 @@
 <DetailDrawer
   bind:open={drawerOpen}
   title="Record details"
+  titleId="record-details-title"
   description="Review the selected record."
+  descriptionId="record-details-description"
+  closeLabel="Close record details"
   onClose={() => { closeCount += 1; }}
 >
   <p>Record content</p>

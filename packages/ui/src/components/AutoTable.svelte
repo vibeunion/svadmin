@@ -111,8 +111,6 @@
     sorters: externalSorters,
   }: Props = $props();
   const adminContext = captureAdminContext();
-  const headerDensityClass = $derived(density === 'compact' ? 'h-8 py-1.5 text-[0.6875rem]' : 'h-9 py-2.5 text-xs');
-  const cellDensityClass = $derived(density === 'compact' ? 'h-8 px-2 py-1 text-xs' : 'h-10 p-2 text-sm');
 
   const resource = $derived(getResource(resourceName));
   const primaryKey = $derived(resource.primaryKey ?? 'id');
@@ -710,7 +708,7 @@
       <div in:fade={{ duration: 150 }}>
         <!-- Desktop Table (hidden on mobile) -->
         <div class="hidden md:block">
-        <Table.Root>
+        <Table.Root {density}>
           <Table.Header>
             {#each tableView.headerGroups as headerGroup, _i (_i)}
               {@const visibleHeaders = headerGroup.headers.filter((header: Header<TableFeatures, BaseRecord, unknown>) => isColumnVisible(header.column.id))}
@@ -723,7 +721,7 @@
                   {@const header = col.header as typeof headerGroup.headers[0]}
                   <Table.Head
                     {...dragProps}
-                    class={cn('border-b border-border bg-muted/25 font-medium tracking-normal text-muted-foreground hover:bg-muted/40', headerDensityClass, dragProps.class)}
+                    class={cn('border-b border-border bg-muted/25 font-medium tracking-normal text-muted-foreground hover:bg-muted/40', dragProps.class)}
                     style={header_getSize(header) != null && header_getSize(header) !== 150 ? `width:${header_getSize(header)}px` : undefined}
                   >
                     {#if header.id === '_select'}
@@ -768,7 +766,7 @@
                   {#snippet child({ props })}
                     <Table.Row {...props} class="transition-all duration-300 border-b border-border/10 {row_getIsSelected(row) ? 'bg-primary/5' : 'hover:bg-muted/20'}">
                       {#each visibleCells as cell, _i (_i)}
-                        <Table.Cell class={cellDensityClass}>
+                        <Table.Cell>
                           {#if cell.column.id === '_select'}
                             <Checkbox
                               checked={row_getIsSelected(row)}

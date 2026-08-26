@@ -6,6 +6,7 @@ import Footer from "./table-footer.svelte";
 import Head from "./table-head.svelte";
 import Header from "./table-header.svelte";
 import Row from "./table-row.svelte";
+export type { TableDensity } from "./table.svelte";
 
 export {
 	Root,

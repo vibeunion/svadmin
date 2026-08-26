@@ -10,8 +10,8 @@ describe('workspace primitives', () => {
     expect(screen.getByText('Secondary pane')).toBeTruthy();
     expect(screen.getByText('Inspector content')).toBeTruthy();
 
-    await fireEvent.click(screen.getByRole('button', { name: 'Report: pending' }));
-    expect(screen.getByRole('button', { name: 'Report: pending' }).getAttribute('aria-current')).toBe('step');
+    await fireEvent.click(screen.getByRole('button', { name: 'Report: Awaiting review' }));
+    expect(screen.getByRole('button', { name: 'Report: Awaiting review' }).getAttribute('aria-current')).toBe('step');
 
     await fireEvent.click(screen.getByRole('button', { name: 'Advance' }));
     expect(page.container.querySelector('[data-action-count]')?.textContent).toBe('1');

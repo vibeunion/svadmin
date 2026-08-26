@@ -34,6 +34,22 @@ describe('AutoTable interactions', () => {
     expect(await view.findByPlaceholderText('Search...')).toBeTruthy();
   });
 
+  it('propagates compact density to the base table primitives', async () => {
+    const view = render(AutoTableInteractionsHarness, {
+      density: 'compact',
+      onNavigate: vi.fn(),
+    });
+
+    await view.findAllByText('user@example.com');
+    const tableContainer = [...view.container.querySelectorAll<HTMLElement>('[data-slot="table-container"]')]
+      .find((candidate) => candidate.getAttribute('data-table-density') === 'compact');
+    expect(tableContainer).toBeTruthy();
+    const heading = tableContainer?.querySelector('[data-slot="table-head"]');
+    const cell = tableContainer?.querySelector('[data-slot="table-cell"]');
+    expect(heading?.className).toContain('h-8');
+    expect(cell?.className).toContain('text-xs');
+  });
+
   it('updates external column visibility state after a picker click', async () => {
     const view = render(AutoTableInteractionsHarness, { onNavigate: vi.fn() });
 

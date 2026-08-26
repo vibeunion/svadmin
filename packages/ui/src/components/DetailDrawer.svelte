@@ -7,7 +7,10 @@
   type Props = WithElementRef<HTMLAttributes<HTMLDivElement>, HTMLDivElement> & {
     open?: boolean;
     title?: string;
+    titleId?: string;
     description?: string;
+    descriptionId?: string;
+    closeLabel?: string;
     side?: 'left' | 'right';
     width?: string;
     onClose?: () => void;
@@ -24,6 +27,11 @@
     ref = $bindable(null),
     class: className,
     'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledby,
+    'aria-describedby': ariaDescribedby,
+    titleId,
+    descriptionId,
+    closeLabel = 'Close',
     onClose,
     children,
     footer,
@@ -41,20 +49,23 @@
   bind:open
   {side}
   onClose={handleClose}
+  {closeLabel}
   class={cn('overflow-y-auto', width, className)}
   role="dialog"
   aria-modal="true"
-  aria-label={ariaLabel || title || 'Details'}
+  aria-label={(ariaLabelledby || titleId) ? ariaLabel : (ariaLabel || title || 'Details')}
+  aria-labelledby={ariaLabelledby || (titleId ? titleId : undefined)}
+  aria-describedby={ariaDescribedby || (descriptionId ? descriptionId : undefined)}
   {...restProps}
 >
   <Sheet.Content class="flex h-full flex-col">
     {#if title || description}
       <Sheet.Header>
         {#if title}
-          <Sheet.Title>{title}</Sheet.Title>
+          <Sheet.Title id={titleId}>{title}</Sheet.Title>
         {/if}
         {#if description}
-          <Sheet.Description>{description}</Sheet.Description>
+          <Sheet.Description id={descriptionId}>{description}</Sheet.Description>
         {/if}
       </Sheet.Header>
     {/if}
