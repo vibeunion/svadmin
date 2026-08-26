@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.49.0](https://github.com/vibeunion/svadmin/compare/ui-v0.48.0...ui-v0.49.0) (2026-08-25)
+
+
+### 🚀 Features
+
+* **ui:** add case workspace primitives ([da8b6f1](https://github.com/vibeunion/svadmin/commit/da8b6f1ef8916b074c00492ff27a1b77c733b19e))
+
 ## [0.48.0](https://github.com/vibeunion/svadmin/compare/ui-v0.47.1...ui-v0.48.0) (2026-08-25)
 
 
