@@ -18,6 +18,8 @@
     activeId: string;
     onselect?: (stage: WorkspaceStage) => void;
     ariaLabel?: string;
+    statusLabels?: Partial<Record<WorkspaceStageStatus, string>>;
+    getStageAriaLabel?: (stage: WorkspaceStage) => string;
     class?: string;
   }
 
@@ -26,6 +28,8 @@
     activeId,
     onselect,
     ariaLabel = 'Workflow stages',
+    statusLabels = {},
+    getStageAriaLabel,
     class: className = '',
   }: Props = $props();
 
@@ -35,6 +39,14 @@
     blocked: 'border-warning/40 bg-warning/15 text-warning-foreground',
     pending: 'border-border bg-background text-muted-foreground',
   };
+
+  const resolvedStatusLabels = $derived<Record<WorkspaceStageStatus, string>>({
+    complete: 'Complete',
+    current: 'Current stage',
+    blocked: 'Blocked',
+    pending: 'Pending',
+    ...statusLabels,
+  });
 </script>
 
 <nav aria-label={ariaLabel} class={cn('overflow-x-auto', className)} data-svadmin-workspace-stages>
@@ -45,7 +57,7 @@
           type="button"
           class="group grid min-w-28 grid-cols-[auto_minmax(0,1fr)] gap-x-2 rounded-md px-2 py-1.5 text-left outline-none transition-colors hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring sm:min-w-36"
           aria-current={stage.id === activeId ? 'step' : undefined}
-          aria-label={`${stage.label}: ${stage.status}`}
+          aria-label={getStageAriaLabel?.(stage) || `${stage.label}: ${resolvedStatusLabels[stage.status]}`}
           onclick={() => onselect?.(stage)}
         >
           <span class={cn('flex size-7 items-center justify-center rounded-full border', markerClass[stage.status])}>

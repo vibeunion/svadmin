@@ -24,23 +24,50 @@ describe('RowActions and DetailDrawer', () => {
     expect(view.getByTestId('last-action').textContent).toBe('view');
 
     await fireEvent.click(within(rowActions).getByRole('button', { name: 'More actions' }));
-    const docsLink = within(rowActions).getByRole('link', { name: 'Docs' });
+    const menu = within(rowActions).getByRole('menu', { name: 'More actions' });
+    const docsLink = within(menu).getByRole('menuitem', { name: 'Docs' });
     expect(docsLink.getAttribute('href')).toBe('/records/42');
     expect(docsLink.querySelector('button')).toBeNull();
 
-    await fireEvent.click(within(rowActions).getByRole('button', { name: 'Delete' }));
+    await fireEvent.click(within(rowActions).getByRole('menuitem', { name: 'Delete' }));
     expect(view.getByTestId('last-action').textContent).toBe('delete');
-    expect(within(rowActions).queryByRole('button', { name: 'Delete' })).toBeNull();
+    expect(within(rowActions).queryByRole('menuitem', { name: 'Delete' })).toBeNull();
+  });
+
+  it('supports menu keyboard navigation and restores trigger focus', async () => {
+    const view = render(RowActionsDetailDrawerHarness);
+    const rowActions = view.getByTestId('row-actions');
+    const trigger = within(rowActions).getByRole('button', { name: 'More actions' });
+
+    trigger.focus();
+    await fireEvent.keyDown(trigger, { key: 'ArrowDown' });
+    const menu = within(rowActions).getByRole('menu', { name: 'More actions' });
+    const items = within(menu).getAllByRole('menuitem');
+    await waitFor(() => expect(document.activeElement).toBe(items[0]));
+
+    await fireEvent.keyDown(items[0], { key: 'End' });
+    expect(document.activeElement).toBe(items.at(-1));
+    await fireEvent.keyDown(items.at(-1) as HTMLElement, { key: 'ArrowDown' });
+    expect(document.activeElement).toBe(items[0]);
+    await fireEvent.keyDown(items[0], { key: 'Escape' });
+
+    await waitFor(() => {
+      expect(within(rowActions).queryByRole('menu')).toBeNull();
+      expect(document.activeElement).toBe(trigger);
+    });
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
   });
 
   it('exposes an accessible dialog and synchronizes close state', async () => {
     const view = render(RowActionsDetailDrawerHarness);
     const dialog = view.getByRole('dialog', { name: 'Record details' });
 
+    expect(dialog.getAttribute('aria-labelledby')).toBe('record-details-title');
+    expect(dialog.getAttribute('aria-describedby')).toBe('record-details-description');
     expect(within(dialog).getByText('Record content')).toBeTruthy();
     expect(within(dialog).getByText('Save changes')).toBeTruthy();
 
-    await fireEvent.click(within(dialog).getByRole('button', { name: 'Close' }));
+    await fireEvent.click(within(dialog).getByRole('button', { name: 'Close record details' }));
     await waitFor(() => {
       expect(view.queryByRole('dialog', { name: 'Record details' })).toBeNull();
       expect(view.getByTestId('drawer-state').textContent).toBe('closed:1');

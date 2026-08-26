@@ -18,7 +18,12 @@
 </script>
 
 {#snippet summary()}
-  <WorkspaceStageStepper {stages} {activeId} onselect={(stage) => { activeId = stage.id; }} />
+  <WorkspaceStageStepper
+    {stages}
+    {activeId}
+    statusLabels={{ complete: 'Done', current: 'In progress', pending: 'Awaiting review' }}
+    onselect={(stage) => { activeId = stage.id; }}
+  />
 {/snippet}
 
 {#snippet primaryAction()}

@@ -8,9 +8,10 @@
     locale?: string;
     canShow?: boolean;
     showAllowed?: boolean;
+    density?: 'compact' | 'comfortable';
   }
 
-  let { onNavigate, locale = 'zh-CN', canShow = true, showAllowed }: Props = $props();
+  let { onNavigate, locale = 'zh-CN', canShow = true, showAllowed, density = 'comfortable' }: Props = $props();
 
   const dataProvider = {
     getList: async () => ({ data: [{ id: 'user-1', email: 'user@example.com' }], total: 1 }),
@@ -61,7 +62,7 @@
     已展开：{record.email}
   {/snippet}
 
-  <AutoTable resourceName="users" selectable={false} expandedRowRender={expandedRowRender as never} />
+  <AutoTable resourceName="users" selectable={false} {density} expandedRowRender={expandedRowRender as never} />
 {/snippet}
 
 <AdminApp {dataProvider} {resources} {routerProvider} {accessControlProvider} {locale} dashboard={dashboard as never} />
