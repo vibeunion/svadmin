@@ -8,6 +8,12 @@ async function login(page: import('@playwright/test').Page) {
   await expect(page).toHaveURL(/#\/$/, { timeout: 10000 });
 }
 
+async function openRecords(page: import('@playwright/test').Page) {
+  const recordsButton = page.getByRole('button', { name: /view records|查看记录/i }).first();
+  await expect(recordsButton).toBeVisible({ timeout: 10000 });
+  await recordsButton.click();
+}
+
 test.describe('Edit form persistence', () => {
   test.beforeEach(async ({ page }) => {
     await login(page);
@@ -15,6 +21,7 @@ test.describe('Edit form persistence', () => {
 
   test('persists the latest value after rapid edits', async ({ page }) => {
     await page.goto('/#/products');
+    await openRecords(page);
     await expect(page.locator('table tbody tr').first()).toBeVisible({ timeout: 10000 });
 
     const editButton = page.getByRole('button', { name: /edit/i }).first();

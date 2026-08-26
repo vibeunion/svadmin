@@ -14,6 +14,12 @@ async function login(page: import('@playwright/test').Page) {
   await expect(page).toHaveURL(/#\/$/, { timeout: 10000 });
 }
 
+async function openRecords(page: import('@playwright/test').Page) {
+  const recordsButton = page.getByRole('button', { name: /view records|查看记录/i }).first();
+  await expect(recordsButton).toBeVisible({ timeout: 10000 });
+  await recordsButton.click();
+}
+
 test.describe('Auth Flow', () => {
   test('shows login page when not authenticated', async ({ page }) => {
     await page.goto('/');
@@ -50,6 +56,7 @@ test.describe('CRUD Operations', () => {
     });
 
     await page.goto('/#/products');
+    await openRecords(page);
     const table = page.locator('table').first();
     await expect(table).toBeVisible({ timeout: 10000 });
 
@@ -87,6 +94,7 @@ test.describe('CRUD Operations', () => {
 
   test('navigate to edit page', async ({ page }) => {
     await page.goto('/#/products');
+    await openRecords(page);
     await expect(page.locator('table tbody tr').first()).toBeVisible({ timeout: 10000 });
     const editBtn = page.getByRole('button', { name: /edit/i }).first();
     await expect(editBtn).toBeVisible({ timeout: 5000 });
@@ -97,6 +105,7 @@ test.describe('CRUD Operations', () => {
   test('tooltip layers stay bounded across repeated list-to-edit navigation', async ({ page }) => {
     for (let iteration = 0; iteration < 5; iteration += 1) {
       await page.goto('/#/products');
+      await openRecords(page);
       await expect(page.locator('table tbody tr').first()).toBeVisible({ timeout: 10000 });
 
       const editBtn = page.getByRole('button', { name: /edit/i }).first();
