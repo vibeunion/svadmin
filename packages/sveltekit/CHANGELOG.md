@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.14](https://github.com/vibeunion/svadmin/compare/sveltekit-v0.9.13...sveltekit-v0.9.14) (2026-08-26)
+
+
+### 🐛 Bug Fixes
+
+* **release:** support core 0.40 peer ranges ([6e18d39](https://github.com/vibeunion/svadmin/commit/6e18d3939f54f1d20ce79b3935707002d5b28a9d))
+
 ## [0.9.13](https://github.com/vibeunion/svadmin/compare/sveltekit-v0.9.12...sveltekit-v0.9.13) (2026-08-25)
 
 

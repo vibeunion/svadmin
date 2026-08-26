@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.40.1](https://github.com/vibeunion/svadmin/compare/core-v0.40.0...core-v0.40.1) (2026-08-26)
+
+
+### 🐛 Bug Fixes
+
+* **core:** reject explicit blank request identifiers ([06aff89](https://github.com/vibeunion/svadmin/commit/06aff89873d2484d950ccf1d2a0b3cc1ae179564))
+
 ## [0.40.0](https://github.com/vibeunion/svadmin/compare/core-v0.39.0...core-v0.40.0) (2026-08-26)
 
 

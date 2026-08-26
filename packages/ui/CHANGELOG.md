@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.49.2](https://github.com/vibeunion/svadmin/compare/ui-v0.49.1...ui-v0.49.2) (2026-08-26)
+
+
+### 🔧 Miscellaneous Chores
+
+* release main ([#283](https://github.com/vibeunion/svadmin/issues/283)) ([e610389](https://github.com/vibeunion/svadmin/commit/e610389402a656160b76a5288c92c845428b9e96))
+
 ## [0.49.1](https://github.com/vibeunion/svadmin/compare/ui-v0.49.0...ui-v0.49.1) (2026-08-26)
 
 
