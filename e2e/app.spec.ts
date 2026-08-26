@@ -86,6 +86,7 @@ test.describe('CRUD Operations', () => {
 
   test('navigate to create page', async ({ page }) => {
     await page.goto('/#/products');
+    await openRecords(page);
     const createBtn = page.getByRole('button', { name: /new products|create/i }).first();
     await expect(createBtn).toBeVisible({ timeout: 10000 });
     await createBtn.click();
