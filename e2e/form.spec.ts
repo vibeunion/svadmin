@@ -36,6 +36,7 @@ test.describe('Edit form persistence', () => {
 
     await page.getByRole('button', { name: /save/i }).click();
     await expect(page).toHaveURL(/#\/products(?:\?|$)/, { timeout: 10000 });
+    await openRecords(page);
     await expect(page.getByRole('cell', { name: 'Race Condition Payload 2', exact: true })).toBeVisible({ timeout: 10000 });
   });
 });
