@@ -93,6 +93,9 @@ export type {
   EnterpriseActionError,
   EnterpriseActionResult,
   EnterpriseRequestContext,
+  EnterpriseRequestContextInput,
+  EnterpriseProviderRequestContext,
+  StrictEnterpriseRequestContext,
   EnterpriseSecurityEvent,
   EnterpriseSecurityPolicy,
   IdentityGovernanceProvider,
@@ -106,6 +109,7 @@ export type {
   SessionProvider,
   WebhookSummary,
 } from './enterprise';
+export { assertEnterpriseRequestContext, createEnterpriseRequestContext } from './enterprise';
 export { setChatProvider, getChatProvider, setChatContext, getChatContext, setAgentProvider, getAgentProvider, registerApproval, resolveApproval, hasPendingApprovals, resetChatProvider } from './chatProvider.svelte';
 export type { ChatProvider, ChatMessage, ChatContext, ChatAction, AgentProvider, AgentEvent, AgentOptions, AdminTool, AdminToolParameter, ToolResult } from './chatProvider.svelte';
 export { getTheme, setTheme, toggleTheme, getResolvedTheme, getColorTheme, setColorTheme, getColorThemes, configureTheme, getThemeConfig, clearCssOverrides, builtinPresets, registerColorPreset, getColorPresets, registerThemeOwner, updateThemeOwner, unregisterThemeOwner, resetTheme } from './theme.svelte';

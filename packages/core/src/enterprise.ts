@@ -18,6 +18,66 @@ export interface EnterpriseRequestContext {
   meta?: Readonly<Record<string, unknown>>;
 }
 
+/** Provider 调用使用的严格请求上下文；三项边界标识不可省略。 */
+export interface StrictEnterpriseRequestContext {
+  tenantId: string | number;
+  requestId: string;
+  traceId: string;
+  meta?: Readonly<Record<string, unknown>>;
+}
+
+export interface EnterpriseRequestContextInput {
+  tenantId: string | number;
+  requestId?: string;
+  traceId?: string;
+  meta?: Readonly<Record<string, unknown>>;
+}
+
+function nonEmpty(value: string, field: string): string {
+  const normalized = value.trim();
+  if (!normalized) throw new Error(`${field} must not be empty.`);
+  return normalized;
+}
+
+function validatedTenantId(tenantId: string | number): string | number {
+  if (typeof tenantId === 'string') return nonEmpty(tenantId, 'tenantId');
+  if (!Number.isFinite(tenantId)) throw new Error('tenantId must be a finite number.');
+  return tenantId;
+}
+
+function createRequestId(): string {
+  const randomUUID = globalThis.crypto?.randomUUID;
+  if (!randomUUID) throw new Error('crypto.randomUUID is required to create an enterprise request context.');
+  return randomUUID.call(globalThis.crypto);
+}
+
+/** Create a validated provider context while preserving one trace across the request tree. */
+export function createEnterpriseRequestContext(
+  input: EnterpriseRequestContextInput,
+): StrictEnterpriseRequestContext {
+  const requestId = nonEmpty(input.requestId || createRequestId(), 'requestId');
+  return {
+    tenantId: validatedTenantId(input.tenantId),
+    requestId,
+    traceId: nonEmpty(input.traceId || requestId, 'traceId'),
+    ...(input.meta ? { meta: input.meta } : {}),
+  };
+}
+
+/** Narrow a legacy optional context at the provider boundary and fail closed on missing identity. */
+export function assertEnterpriseRequestContext(
+  context: EnterpriseRequestContext,
+): asserts context is StrictEnterpriseRequestContext {
+  if (context.tenantId === undefined || context.tenantId === null) {
+    throw new Error('tenantId must not be empty.');
+  }
+  validatedTenantId(context.tenantId);
+  nonEmpty(context.requestId ?? '', 'requestId');
+  nonEmpty(context.traceId ?? '', 'traceId');
+}
+
+export type EnterpriseProviderRequestContext = StrictEnterpriseRequestContext;
+
 export interface Organization {
   id: string;
   name: string;
