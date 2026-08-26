@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/surface",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "description": "Validated declarative surfaces for svadmin dashboards",
   "type": "module",
   "sideEffects": false,
