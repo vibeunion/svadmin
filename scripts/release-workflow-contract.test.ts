@@ -70,6 +70,17 @@ describe('npm trusted-publishing workflow contract', () => {
     }
   });
 
+  test('keeps the published surface compatibility line aligned with its package version', () => {
+    const surfacePackage = readPackageJson('packages/surface/package.json');
+    const compatibility = JSON.parse(
+      readFileSync(resolve(repositoryRoot, 'packages/surface/compatibility.json'), 'utf8'),
+    ) as { surface?: string };
+    const releaseLine = surfacePackage.version?.match(/^(\d+\.\d+)\./)?.[1];
+
+    expect(releaseLine).toBeDefined();
+    expect(compatibility.surface).toBe(`${releaseLine}.x`);
+  });
+
   test('dispatches ci.yml as the top-level publishing workflow', () => {
     const releaseWorkflow = readWorkflow('release.yml');
 
