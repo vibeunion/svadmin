@@ -65,6 +65,34 @@ afterEach(() => {
 });
 
 describe('Profile auth scope', () => {
+  it('reports a successful password update and clears sensitive fields', async () => {
+    const updatePassword = vi.fn(async () => ({ success: true }));
+    const authProvider: AuthProvider = {
+      ...baseAuthProvider(async () => ({ id: 'user-a', name: 'Tenant A User' })),
+      updatePassword,
+    };
+    const view = render(ProfileAuthScopeHost, {
+      authProvider,
+      tenant: { tenantId: 'tenant-a' },
+    });
+
+    await waitFor(() => expect(view.getByText('Tenant A User')).not.toBeNull());
+    const passwords = passwordInputs(view.container);
+    await fireEvent.input(passwords.current, { target: { value: 'current-password' } });
+    await fireEvent.input(passwords.next, { target: { value: 'next-password' } });
+    await fireEvent.input(passwords.confirm, { target: { value: 'next-password' } });
+    await fireEvent.submit(enclosingForm(passwords.confirm));
+
+    await waitFor(() => expect(updatePassword).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(
+      getToastQueue().some((item) => item.message === 'Password updated successfully'),
+    ).toBe(true));
+    expect(getToastQueue()).toHaveLength(1);
+    expect(passwords.current.value).toBe('');
+    expect(passwords.next.value).toBe('');
+    expect(passwords.confirm.value).toBe('');
+  });
+
   it('clears identity status and sensitive drafts when the tenant changes under one auth provider', async () => {
     const pendingFreshIdentity = createDeferred<Identity | null>();
     const scopedGetIdentity = vi.fn()

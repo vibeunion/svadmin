@@ -3,6 +3,7 @@
 
 import { registerRouterSync } from './router';
 import { captureAdminContext } from './context.svelte';
+import { parseResourceActionSegments } from './route-parsing';
 
 interface ParsedRoute {
   resource?: string;
@@ -107,47 +108,13 @@ export function useParsed(): ParsedRoute {
         }
       }
 
-      const restSegments = segments.slice(resourceIndex + 1);
-      if (restSegments.length === 0) {
-        result.action = 'list';
-      } else if (restSegments[0] === 'create') {
-        result.action = 'create';
-      } else if (restSegments[0] === 'edit' && restSegments[1]) {
-        result.action = 'edit';
-        result.id = restSegments[1];
-      } else if (restSegments[0] === 'show' && restSegments[1]) {
-        result.action = 'show';
-        result.id = restSegments[1];
-      } else if (restSegments[0] === 'clone' && restSegments[1]) {
-        result.action = 'clone';
-        result.id = restSegments[1];
-      } else if (restSegments[0]) {
-        // Legacy: /:resource/:id
-        result.action = 'show';
-        result.id = restSegments[0];
-      }
+      Object.assign(result, parseResourceActionSegments(segments.slice(resourceIndex + 1)));
     } else {
       // Fallback if resource definitions are not loaded yet
       result.resource = segments[0];
       result.resourcePath = segments[0];
 
-      if (segments.length === 1) {
-        result.action = 'list';
-      } else if (segments[1] === 'create') {
-        result.action = 'create';
-      } else if (segments[1] === 'edit' && segments[2]) {
-        result.action = 'edit';
-        result.id = segments[2];
-      } else if (segments[1] === 'show' && segments[2]) {
-        result.action = 'show';
-        result.id = segments[2];
-      } else if (segments[1] === 'clone' && segments[2]) {
-        result.action = 'clone';
-        result.id = segments[2];
-      } else if (segments[1]) {
-        result.action = 'show';
-        result.id = segments[1];
-      }
+      Object.assign(result, parseResourceActionSegments(segments.slice(1)));
     }
 
     return result;

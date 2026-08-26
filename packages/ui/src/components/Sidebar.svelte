@@ -202,15 +202,26 @@
     return () => { cancelled = true; };
   });
 
-  function toggleLocale() {
-    const locales = i18n.getAvailableLocales();
-    const current = i18n.locale;
-    const idx = locales.indexOf(current);
-    const next = locales[(idx + 1) % locales.length];
-    i18n.setLocale(next);
+  const LOCALE_STORAGE_KEY = 'svadmin-locale';
+
+  function localeName(locale: string): string {
+    if (locale === 'zh-CN') return '简体中文';
+    if (locale === 'en') return 'English';
+    return locale;
   }
 
-  const localeLabel = $derived(i18n.locale === 'zh-CN' ? '中' : 'EN');
+  function selectLocale(locale: string): void {
+    i18n.setLocale(locale);
+    if (typeof window !== 'undefined') localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+  }
+
+  $effect(() => {
+    if (typeof window === 'undefined') return;
+    const storedLocale = localStorage.getItem(LOCALE_STORAGE_KEY);
+    if (storedLocale && i18n.getAvailableLocales().includes(storedLocale)) {
+      i18n.setLocale(storedLocale);
+    }
+  });
 
   const path = $derived(getPath());
 
@@ -273,6 +284,19 @@
     };
   });
 </script>
+
+{#snippet languageMenu()}
+  <select
+    aria-label={i18n.t('common.switchLanguage')}
+    value={i18n.locale}
+    onchange={(event) => selectLocale((event.target as HTMLSelectElement).value)}
+    class="h-8 w-14 rounded-md border border-border bg-sidebar px-1 text-[11px] font-semibold text-sidebar-foreground/70 outline-none focus:ring-2 focus:ring-ring"
+  >
+    {#each i18n.getAvailableLocales() as locale (locale)}
+      <option value={locale}>{localeName(locale)}</option>
+    {/each}
+  </select>
+{/snippet}
 
 
 
@@ -444,9 +468,7 @@
         </div>
         <div class="mt-1 flex items-center justify-between px-1">
           <div class="flex items-center gap-0.5">
-            <TooltipButton tooltip={i18n.t('common.switchLanguage')} variant="ghost" size="icon-sm" onclick={toggleLocale} class="h-8 w-8 rounded-md text-sidebar-foreground/50 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground">
-              <span class="text-[11px] font-semibold">{localeLabel}</span>
-            </TooltipButton>
+            {@render languageMenu()}
             <TooltipButton tooltip={i18n.t('common.toggleTheme')} variant="ghost" size="icon-sm" onclick={toggleTheme} class="h-8 w-8 rounded-md text-sidebar-foreground/50 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground">
               {#if getResolvedTheme() === 'dark'}
                 <Sun class="h-3.5 w-3.5" />
@@ -465,16 +487,7 @@
       </div>
     {:else if collapsed}
       <div class="flex flex-col items-center gap-0.5 px-2 py-3">
-        <Tooltip.Root>
-          <Tooltip.Trigger>
-            {#snippet child({ props }: { props: Record<string, unknown> })}
-              <Button {...props} variant="ghost" size="icon" onclick={toggleLocale} class="h-8 w-8 rounded-md text-sidebar-foreground/50 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground">
-                <span class="text-[11px] font-semibold">{localeLabel}</span>
-              </Button>
-            {/snippet}
-          </Tooltip.Trigger>
-          <Tooltip.Content side="right">{i18n.t('common.switchLanguage')}</Tooltip.Content>
-        </Tooltip.Root>
+        {@render languageMenu()}
         <Tooltip.Root>
           <Tooltip.Trigger>
             {#snippet child({ props }: { props: Record<string, unknown> })}
@@ -512,9 +525,7 @@
       </div>
     {:else}
       <div class="flex justify-center gap-1 p-3">
-        <TooltipButton tooltip={i18n.t('common.switchLanguage')} variant="ghost" size="icon" onclick={toggleLocale} class="h-8 w-8 rounded-md text-sidebar-foreground/50 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground">
-          <span class="text-[11px] font-semibold">{localeLabel}</span>
-        </TooltipButton>
+        {@render languageMenu()}
         <TooltipButton tooltip={i18n.t('common.toggleTheme')} variant="ghost" size="icon" onclick={toggleTheme} class="h-8 w-8 rounded-md text-sidebar-foreground/50 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground">
           {#if getResolvedTheme() === 'dark'}
             <Sun class="h-3.5 w-3.5" />

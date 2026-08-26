@@ -188,6 +188,7 @@
         {siteUrl}
         {menu}
         showSearch={true}
+        showThemeToggle={true}
         onSearchClick={() => { commandOpen = true; }}
       >
         {#snippet children()}

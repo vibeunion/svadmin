@@ -28,4 +28,22 @@ describe('createRouterState', () => {
     });
     state.destroy();
   });
+
+  it.each([
+    ['/products/1/edit', '/:resource/:id/edit'],
+    ['/products/1', '/:resource/:id'],
+  ])('supports legacy resource routes: %s', (pathname, expectedRoute) => {
+    const provider: RouterProvider = {
+      go: () => {},
+      back: () => {},
+      parse: () => ({ pathname, params: {} }),
+    };
+    const state = createRouterState();
+
+    state.init(provider);
+
+    expect(state.route).toBe(expectedRoute);
+    expect(state.params).toMatchObject({ resource: 'products', id: '1' });
+    state.destroy();
+  });
 });

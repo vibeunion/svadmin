@@ -52,6 +52,14 @@ async function chooseFilter(triggerName: string, optionName: string) {
 }
 
 describe('UserManagementPage filters', () => {
+  it('offers view and edit actions from the primary user directory', async () => {
+    const directory = await renderPage();
+    const firstRow = rows(directory)[0];
+
+    expect(firstRow?.querySelector('a[href="#/users/show/1"]')).not.toBeNull();
+    expect(firstRow?.querySelector('a[href="#/users/edit/1"]')).not.toBeNull();
+  });
+
   it('filters the user directory by role', async () => {
     const directory = await renderPage();
     expect(rows(directory)).toHaveLength(4);

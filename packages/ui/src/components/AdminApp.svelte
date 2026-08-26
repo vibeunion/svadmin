@@ -351,6 +351,44 @@
   const renderedParams = $derived(params);
   const renderedHasRouteResource = $derived(!renderedParams.resource || resourceNames.has(renderedParams.resource));
   const renderedResourcePages = $derived(renderedParams.resource ? resourcePages?.[renderedParams.resource] : undefined);
+  const documentTitle = $derived.by(() => {
+    const resource = renderedParams.resource
+      ? resources.find((candidate) => candidate.name === renderedParams.resource)
+      : undefined;
+    let pageLabel = '';
+
+    if (resource) {
+      pageLabel = resource.label || resource.name;
+    } else if (renderedRoute.startsWith('/settings') || renderedRoute === '/account/:tab') {
+      const tab = renderedParams.tab === 'api-keys'
+        ? 'api'
+        : renderedParams.tab === 'audit-logs'
+          ? 'audit'
+          : renderedParams.tab ?? 'profile';
+      const labels: Record<string, string> = {
+        profile: translation.t('settings.profile'),
+        appearance: translation.t('settings.appearance'),
+        notifications: translation.t('settings.notifications'),
+        security: translation.t('settings.security'),
+        roles: translation.t('settings.rolesAndPermissions'),
+        integrations: translation.t('settings.integrations'),
+        api: translation.t('settings.api'),
+        audit: translation.t('settings.auditLogs'),
+        about: translation.t('settings.about'),
+      };
+      pageLabel = labels[tab] ?? translation.t('settings.title');
+    } else if (renderedRoute === '/login') {
+      pageLabel = translation.t('auth.login');
+    } else if (renderedRoute === '/' || renderedRoute === '/inventory-dashboard') {
+      pageLabel = translation.t('common.dashboard');
+    }
+
+    return pageLabel && pageLabel !== title ? `${pageLabel} - ${title}` : title;
+  });
+
+  $effect(() => {
+    if (typeof document !== 'undefined') document.title = documentTitle;
+  });
 
   async function navigateWithinApp(path: string, options?: { replaceState?: boolean }) {
     await adminContext.navigate(path, options);
@@ -578,12 +616,12 @@
           {@const Comp = renderedResourcePages?.create ?? mergedComponents.AutoForm}
           <Comp resourceName={renderedParams.resource} mode="create" />
         {/key}
-      {:else if (renderedRoute === '/:resource/edit/:id' || renderedRoute === '/:parent/:parentId/:resource/edit/:id') && renderedHasRouteResource}
+      {:else if (renderedRoute === '/:resource/edit/:id' || renderedRoute === '/:resource/:id/edit' || renderedRoute === '/:parent/:parentId/:resource/edit/:id') && renderedHasRouteResource}
         {#key `${renderedParams.resource}-${renderedParams.id}`}
           {@const Comp = renderedResourcePages?.edit ?? mergedComponents.AutoForm}
           <Comp resourceName={renderedParams.resource} mode="edit" id={renderedParams.id} />
         {/key}
-      {:else if (renderedRoute === '/:resource/show/:id' || renderedRoute === '/:parent/:parentId/:resource/show/:id') && renderedHasRouteResource}
+      {:else if (renderedRoute === '/:resource/show/:id' || renderedRoute === '/:resource/:id' || renderedRoute === '/:parent/:parentId/:resource/show/:id') && renderedHasRouteResource}
         {#key `${renderedParams.resource}-${renderedParams.id}`}
           {@const Comp = renderedResourcePages?.show ?? mergedComponents.ShowPage}
           <Comp resourceName={renderedParams.resource} id={renderedParams.id} />

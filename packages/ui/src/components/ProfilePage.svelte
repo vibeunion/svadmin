@@ -20,7 +20,7 @@
 
   const identity = useGetIdentity();
   const notification = useNotification();
-  const updatePw = useUpdatePassword();
+  const updatePw = useUpdatePassword({ successNotification: i18n.t('profile.passwordChanged') });
 
   const authProvider = $derived(adminContext.authProvider);
   const tenantIdentity = $derived(adminContext.tenantCacheKey?.__svadminTenant);

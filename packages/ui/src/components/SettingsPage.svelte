@@ -110,7 +110,7 @@
   let activeKey = $derived.by(() => {
     const tab = getParams().tab;
     if (!tab) return "profile";
-    const alias = tab === "api-keys" ? "api" : tab;
+    const alias = tab === "api-keys" ? "api" : tab === "audit-logs" ? "audit" : tab;
     if (sectionKeys.has(alias)) return alias;
     return content ? alias : "profile";
   });

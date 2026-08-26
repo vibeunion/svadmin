@@ -1070,9 +1070,9 @@ const initialDbState: DbState = {
     { id: 3, subscriber: 'Finance Dept', planId: 3, billingCycle: 'annual', status: 'past_due', renewsOn: '2026-06-05', notes: 'Payment retry scheduled.' },
   ],
   security_sessions: [
-    { id: 1, device: 'MacBook Pro', ipAddress: '10.0.1.24', location: 'Shanghai', lastActive: '2026-06-18', status: 'active' },
-    { id: 2, device: 'iPhone 15', ipAddress: '114.88.20.3', location: 'Shanghai', lastActive: '2026-06-18', status: 'idle' },
-    { id: 3, device: 'Chrome on Windows', ipAddress: '203.0.113.7', location: 'Beijing', lastActive: '2026-06-15', status: 'revoked' },
+    { id: 1, device: 'MacBook Pro', ipAddress: '10.0.1.24', location: 'Shanghai', lastActive: '2026-06-18', status: 'active', current: true },
+    { id: 2, device: 'iPhone 15', ipAddress: '114.88.20.3', location: 'Shanghai', lastActive: '2026-06-18', status: 'idle', current: false },
+    { id: 3, device: 'Chrome on Windows', ipAddress: '203.0.113.7', location: 'Beijing', lastActive: '2026-06-15', status: 'revoked', current: false },
   ],
   security_devices: [
     { id: 1, deviceName: 'Jordan MacBook', ownerId: 1, platform: 'macos', status: 'trusted', enrolledAt: '2026-01-12', notes: 'Primary work laptop.' },

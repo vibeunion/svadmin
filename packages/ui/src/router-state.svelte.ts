@@ -51,6 +51,8 @@ const ROUTES = [
   '/:resource/edit/:id',
   '/:resource/show/:id',
   '/:resource/clone/:id',
+  '/:resource/:id/edit',
+  '/:resource/:id',
   '/:parent/:parentId/:resource',
   '/:parent/:parentId/:resource/create',
   '/:parent/:parentId/:resource/edit/:id',

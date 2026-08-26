@@ -1375,6 +1375,7 @@ export const resources: ResourceDefinition[] = [
       { key: 'ipAddress', label: 'IP Address', type: 'text', required: true, searchable: true, width: '140px' },
       { key: 'location', label: 'Location', type: 'text', searchable: true },
       { key: 'lastActive', label: 'Last Active', type: 'date', required: true },
+      { key: 'current', label: 'Current', type: 'boolean', showInForm: false, showInList: false },
       {
         key: 'status',
         label: 'Status',

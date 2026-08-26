@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { captureAdminContext, useList } from '@svadmin/core';
+  import { captureAdminContext, useList, useUpdate } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import {
     AutoTable,
     Badge,
     Button,
+    ConfirmDialog,
     ContentPageShell,
     DataState,
     MetricBlock,
@@ -50,6 +51,10 @@
   const suppliersQuery = useList({ resource: 'suppliers', pagination: { mode: 'off' } });
   const usersQuery = useList({ resource: 'users', pagination: { mode: 'off' } });
   const plansQuery = useList({ resource: 'billing_plans', pagination: { mode: 'off' } });
+  const sessionUpdate = useUpdate({ resource: 'security_sessions' });
+  let revokingSessionId = $state<string | number | null>(null);
+  let revokeConfirmOpen = $state(false);
+  let pendingSessionRevoke = $state<Row | 'others' | null>(null);
 
   const isZh = $derived(i18n.locale === 'zh-CN');
   const rows = $derived((currentQuery.data?.data ?? []) as Row[]);
@@ -251,6 +256,32 @@
   function createRecord(): void {
     adminContext.navigate(`/${resourceName}/create`);
   }
+
+  function requestSessionRevoke(target: Row | 'others'): void {
+    pendingSessionRevoke = target;
+    revokeConfirmOpen = true;
+  }
+
+  async function confirmSessionRevoke(): Promise<void> {
+    const target = pendingSessionRevoke;
+    pendingSessionRevoke = null;
+    if (!target) return;
+    const sessions = target === 'others'
+      ? rows.filter((row) => !row.current && row.status !== 'revoked')
+      : [target];
+    revokingSessionId = target === 'others' ? '*' : target.id as string | number;
+    try {
+      for (const row of sessions) {
+        await sessionUpdate.mutation.mutateAsync({
+          resource: 'security_sessions',
+          id: row.id as string | number,
+          variables: { status: 'revoked' },
+        });
+      }
+    } finally {
+      revokingSessionId = null;
+    }
+  }
 </script>
 
 {#snippet actions()}
@@ -293,7 +324,35 @@
     {:else if domainResource === 'billing_subscriptions'}
       <section class="rounded-lg border border-border bg-card" data-subscription-portfolio-layout><div class="border-b border-border p-4"><SectionHeader title={isZh ? '续费组合' : 'Renewal portfolio'} description={isZh ? '按套餐、周期和风险状态安排续费动作。' : 'Schedule renewal work by plan, cycle, and risk state.'} /></div><div class="divide-y divide-border">{#each rows as row (String(row.id))}<article class="grid gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_minmax(10rem,0.6fr)_auto] lg:items-center"><div><p class="text-sm font-semibold">{valueText(row, 'subscriber')}</p><p class="mt-1 text-xs text-muted-foreground">{findName(plans, row.planId, 'planName')} · {valueText(row, 'billingCycle')}</p></div><div><p class="text-xs text-muted-foreground">{isZh ? '续费日期' : 'Renews on'}</p><p class="mt-1 text-sm">{valueText(row, 'renewsOn')}</p></div><Badge variant={badgeVariant(row.status)}>{statusLabel(row.status)}</Badge></article>{/each}</div></section>
     {:else if domainResource === 'security_sessions'}
-      <section class="rounded-lg border border-border bg-card" data-session-monitor-layout><div class="border-b border-border p-4"><SectionHeader title={isZh ? '会话活动' : 'Session activity'} description={isZh ? '按设备、地点和最近活动识别异常会话。' : 'Identify unusual sessions by device, location, and recency.'} /></div><div class="divide-y divide-border">{#each rows as row (String(row.id))}<article class="grid gap-3 p-4 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center"><span class="flex size-9 items-center justify-center rounded-md border border-border"><Activity class="size-4 text-muted-foreground" /></span><div><p class="text-sm font-semibold">{valueText(row, 'device')}</p><p class="mt-1 font-mono text-xs text-muted-foreground">{valueText(row, 'ipAddress')} · {valueText(row, 'location')} · {valueText(row, 'lastActive')}</p></div><Badge variant={badgeVariant(row.status)}>{statusLabel(row.status)}</Badge></article>{/each}</div></section>
+      <section class="rounded-lg border border-border bg-card" data-session-monitor-layout>
+        <div class="flex flex-wrap items-start justify-between gap-3 border-b border-border p-4">
+          <SectionHeader title={isZh ? '会话活动' : 'Session activity'} description={isZh ? '按设备、地点和最近活动识别异常会话。' : 'Identify unusual sessions by device, location, and recency.'} />
+          {#if rows.some((row) => !row.current && row.status !== 'revoked')}
+            <Button variant="outline" size="sm" disabled={revokingSessionId !== null} onclick={() => requestSessionRevoke('others')}>
+              {revokingSessionId === '*' ? (isZh ? '撤销中...' : 'Revoking...') : (isZh ? '撤销其他会话' : 'Revoke other sessions')}
+            </Button>
+          {/if}
+        </div>
+        <div class="divide-y divide-border">
+          {#each rows as row (String(row.id))}
+            <article class="grid gap-3 p-4 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
+              <span class="flex size-9 items-center justify-center rounded-md border border-border"><Activity class="size-4 text-muted-foreground" /></span>
+              <div><div class="flex flex-wrap items-center gap-2"><p class="text-sm font-semibold">{valueText(row, 'device')}</p>{#if row.current}<Badge>{isZh ? '当前' : 'Current'}</Badge>{/if}</div><p class="mt-1 font-mono text-xs text-muted-foreground">{valueText(row, 'ipAddress')} · {valueText(row, 'location')} · {valueText(row, 'lastActive')}</p></div>
+              <div class="flex items-center gap-2"><Badge variant={badgeVariant(row.status)}>{statusLabel(row.status)}</Badge>{#if !row.current && row.status !== 'revoked'}<Button variant="outline" size="sm" disabled={revokingSessionId !== null} onclick={() => requestSessionRevoke(row)} aria-label={`${isZh ? '撤销' : 'Revoke'} ${valueText(row, 'device')}`}>{revokingSessionId === row.id ? (isZh ? '撤销中...' : 'Revoking...') : (isZh ? '撤销' : 'Revoke')}</Button>{/if}</div>
+            </article>
+          {/each}
+        </div>
+      </section>
+      <ConfirmDialog
+        bind:open={revokeConfirmOpen}
+        title={isZh ? '确认撤销会话' : 'Confirm session revocation'}
+        message={pendingSessionRevoke === 'others'
+          ? (isZh ? '将撤销除当前设备外的所有会话。' : 'This will revoke every session except the current device.')
+          : (isZh ? '此设备需要重新登录才能继续访问。' : 'This device will need to sign in again.')}
+        confirmText={isZh ? '撤销' : 'Revoke'}
+        onconfirm={() => void confirmSessionRevoke()}
+        oncancel={() => { pendingSessionRevoke = null; }}
+      />
     {:else if domainResource === 'security_devices'}
       <section class="grid gap-4 md:grid-cols-3" data-device-trust-layout>{#each rows as row (String(row.id))}<article class="rounded-lg border border-border bg-card p-4"><div class="flex items-center justify-between"><ShieldCheck class="size-5 text-muted-foreground" /><Badge variant={badgeVariant(row.status)}>{statusLabel(row.status)}</Badge></div><h2 class="mt-4 text-sm font-semibold">{valueText(row, 'deviceName')}</h2><p class="mt-1 text-xs text-muted-foreground">{findName(users, row.ownerId)} · {valueText(row, 'platform')}</p><p class="mt-4 border-t border-border pt-3 text-xs text-muted-foreground">{isZh ? '登记时间' : 'Enrolled'}: {valueText(row, 'enrolledAt')}</p></article>{/each}</section>
     {:else if domainResource === 'security_allowed_ips'}
