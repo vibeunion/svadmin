@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.39.1](https://github.com/vibeunion/svadmin/compare/core-v0.39.0...core-v0.39.1) (2026-08-26)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** close svadmin issue regressions ([cd31431](https://github.com/vibeunion/svadmin/commit/cd314312191393f71ebf1ff6d8dcfd319bc9fc3e))
+
 ## [0.39.0](https://github.com/vibeunion/svadmin/compare/core-v0.38.0...core-v0.39.0) (2026-08-25)
 
 
