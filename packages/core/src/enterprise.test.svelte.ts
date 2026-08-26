@@ -35,6 +35,8 @@ describe('enterprise request context', () => {
     expect(() => createEnterpriseRequestContext({ tenantId: Number.NaN })).toThrow('tenantId must be a finite number');
     expect(() => createEnterpriseRequestContext({ tenantId: 'tenant-a', requestId: ' ' })).toThrow('requestId must not be empty');
     expect(() => createEnterpriseRequestContext({ tenantId: 'tenant-a', traceId: ' ' })).toThrow('traceId must not be empty');
+    expect(() => createEnterpriseRequestContext({ tenantId: 'tenant-a', requestId: '' })).toThrow('requestId must not be empty');
+    expect(() => createEnterpriseRequestContext({ tenantId: 'tenant-a', traceId: '' })).toThrow('traceId must not be empty');
 
     const incomplete: EnterpriseRequestContext = { tenantId: 'tenant-a' };
     expect(() => assertEnterpriseRequestContext(incomplete)).toThrow('requestId must not be empty');
