@@ -35,9 +35,13 @@ function findIncompatibleWorkspacePeers(dependencyName: string, dependencyVersio
 }
 
 function readReleasePleaseConfig(): {
-  packages: Record<string, { 'extra-files'?: unknown[] }>;
+  packages: Record<string, { component?: string; 'extra-files'?: unknown[] }>;
 } {
   return JSON.parse(readFileSync(resolve(repositoryRoot, 'release-please-config.json'), 'utf8'));
+}
+
+function readReleasePleaseManifest(): Record<string, string> {
+  return JSON.parse(readFileSync(resolve(repositoryRoot, '.release-please-manifest.json'), 'utf8'));
 }
 
 describe('npm trusted-publishing workflow contract', () => {
@@ -79,6 +83,15 @@ describe('npm trusted-publishing workflow contract', () => {
 
     expect(releaseLine).toBeDefined();
     expect(compatibility.surface).toBe(`${releaseLine}.x`);
+  });
+
+  test('keeps the optional flow package in the release and publication chain', () => {
+    const flowPackage = readPackageJson('packages/flow/package.json');
+    const releaseConfig = readReleasePleaseConfig();
+    const releaseManifest = readReleasePleaseManifest();
+
+    expect(releaseConfig.packages['packages/flow']?.component).toBe('flow');
+    expect(releaseManifest['packages/flow']).toBe(flowPackage.version);
   });
 
   test('dispatches ci.yml as the top-level publishing workflow', () => {

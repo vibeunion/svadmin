@@ -2,6 +2,7 @@
   "packages/core": "0.40.1",
   "packages/ui": "0.49.2",
   "packages/editor": "0.3.1",
+  "packages/flow": "0.1.0",
   "packages/sveltekit": "0.9.14",
   "packages/drizzle": "0.11.3",
   "packages/simple-rest": "0.9.12",
