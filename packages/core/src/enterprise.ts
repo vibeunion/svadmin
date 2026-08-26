@@ -55,11 +55,13 @@ function createRequestId(): string {
 export function createEnterpriseRequestContext(
   input: EnterpriseRequestContextInput,
 ): StrictEnterpriseRequestContext {
-  const requestId = nonEmpty(input.requestId || createRequestId(), 'requestId');
+  const requestId = input.requestId === undefined
+    ? createRequestId()
+    : nonEmpty(input.requestId, 'requestId');
   return {
     tenantId: validatedTenantId(input.tenantId),
     requestId,
-    traceId: nonEmpty(input.traceId || requestId, 'traceId'),
+    traceId: input.traceId === undefined ? requestId : nonEmpty(input.traceId, 'traceId'),
     ...(input.meta ? { meta: input.meta } : {}),
   };
 }
