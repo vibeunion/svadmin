@@ -21,9 +21,10 @@
     PackageCheck,
     Repeat2,
     Settings2,
+    Table2,
     Truck,
   } from '@lucide/svelte';
-  import { readHashView } from '../utils/hashView';
+  import { readHashParam, readHashView, replaceHashParam } from '../utils/hashView';
 
   type Row = Record<string, unknown>;
   type OperationsResource =
@@ -44,6 +45,7 @@
 
   let { resourceName }: { resourceName: string } = $props();
   let activeView = $state(readHashView('default'));
+  let showRecords = $state(readHashParam('records') === '1');
 
   const i18n = useTranslation();
   const adminContext = captureAdminContext();
@@ -166,6 +168,11 @@
     adminContext.navigate(`/${resourceName}/create`);
   }
 
+  function toggleRecords(): void {
+    showRecords = !showRecords;
+    replaceHashParam('records', showRecords ? '1' : null);
+  }
+
   function syncView(): void {
     activeView = readHashView('default');
   }
@@ -174,7 +181,13 @@
 <svelte:window onhashchange={syncView} onpopstate={syncView} />
 
 {#snippet actions()}
-  <Button size="sm" onclick={createRecord}>{copy(profile.action)}</Button>
+  <div class="flex flex-wrap items-center justify-end gap-2">
+    <Button data-operations-record-toggle variant="outline" size="sm" aria-expanded={showRecords} onclick={toggleRecords}>
+      <Table2 class="size-4" />
+      {showRecords ? (isZh ? '收起记录' : 'Hide records') : (isZh ? '查看记录' : 'View records')}
+    </Button>
+    <Button size="sm" onclick={createRecord}>{copy(profile.action)}</Button>
+  </div>
 {/snippet}
 
 <ContentPageShell
@@ -346,7 +359,7 @@
     </section>
   {/if}
 
-  {#if !hasError && !isLoading}
+  {#if !hasError && !isLoading && showRecords}
     <section class="space-y-3" data-operations-table>
       <SectionHeader title={isZh ? '完整记录' : 'All records'} description={isZh ? '保留 svadmin 的筛选、排序、新建、编辑、详情和删除流程。' : 'Keep the complete svadmin filter, sort, create, edit, show, and delete workflow.'} />
       <AutoTable {resourceName} />

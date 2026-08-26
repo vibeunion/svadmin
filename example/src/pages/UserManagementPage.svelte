@@ -11,10 +11,11 @@
     Search,
     ShieldCheck,
     SlidersHorizontal,
+    Table2,
     UserCog,
     UserPlus,
   } from '@lucide/svelte';
-  import { readHashParam, readHashView } from '../utils/hashView';
+  import { readHashParam, readHashView, replaceHashParam } from '../utils/hashView';
 
   const i18n = useTranslation();
 
@@ -85,6 +86,7 @@
   let selectedRoleId = $state<number | null>(null);
   let userRoleFilter = $state<number | null>(null);
   let userStatusFilter = $state('');
+  let showRecords = $state(readHashParam('records') === '1');
 
   const locale = $derived(i18n.locale);
   const isZh = $derived(locale === 'zh-CN');
@@ -331,12 +333,25 @@
     };
     return labels[module] ?? module;
   }
+
+  function toggleRecords(): void {
+    showRecords = !showRecords;
+    replaceHashParam('records', showRecords ? '1' : null);
+  }
 </script>
 
 <svelte:window onhashchange={syncView} onpopstate={syncView} />
 
 {#snippet headerActions()}
-  <Button size="sm">{pageCopy.action}</Button>
+  <div class="flex flex-wrap items-center justify-end gap-2">
+    {#if activeResource !== 'roles'}
+      <Button data-user-record-toggle variant="outline" size="sm" aria-expanded={showRecords} onclick={toggleRecords}>
+        <Table2 class="size-4" />
+        {showRecords ? (isZh ? '收起记录' : 'Hide records') : (isZh ? '查看记录' : 'View records')}
+      </Button>
+    {/if}
+    <Button size="sm">{pageCopy.action}</Button>
+  </div>
 {/snippet}
 
 <div data-app-page="user-management" data-user-management-resource={activeResource} data-user-management-view={activeView}>
@@ -689,11 +704,15 @@
             <div class="rounded-lg border p-3"><p class="text-xs text-muted-foreground">{isZh ? '设置' : 'Settings'}</p><p class="mt-1 text-xl font-semibold">{settings.length}</p></div>
           </Card.Content>
         </Card.Root>
-        <Card.Root><Card.Content class="p-5"><KeyRound class="h-5 w-5 text-primary" /><p class="mt-3 text-sm text-muted-foreground">{isZh ? '账户、日志与策略页都保留独立信息结构，并共享底部 CRUD 表格。' : 'Accounts, logs, and policies keep distinct structures while sharing the CRUD table below.'}</p></Card.Content></Card.Root>
+        <Card.Root><Card.Content class="p-5"><KeyRound class="h-5 w-5 text-primary" /><p class="mt-3 text-sm text-muted-foreground">{isZh ? '账户、日志与策略按各自任务组织；需要批量筛选或编辑时再打开记录视图。' : 'Accounts, logs, and policies follow their own tasks; open records only for bulk filtering or editing.'}</p></Card.Content></Card.Root>
       </div>
     </section>
 
-    <AutoTable {resourceName} />
+    {#if showRecords}
+      <section data-user-records>
+        <AutoTable {resourceName} />
+      </section>
+    {/if}
   {/if}
 </ContentPageShell>
 </div>

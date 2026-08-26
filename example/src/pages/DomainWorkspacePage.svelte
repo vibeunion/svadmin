@@ -24,9 +24,11 @@
     ServerCog,
     ShieldCheck,
     Sparkles,
+    Table2,
     Truck,
     Users,
   } from '@lucide/svelte';
+  import { readHashParam, replaceHashParam } from '../utils/hashView';
 
   type Row = Record<string, unknown>;
   type CopyPair = readonly [string, string];
@@ -55,6 +57,7 @@
   let revokingSessionId = $state<string | number | null>(null);
   let revokeConfirmOpen = $state(false);
   let pendingSessionRevoke = $state<Row | 'others' | null>(null);
+  let showRecords = $state(readHashParam('records') === '1');
 
   const isZh = $derived(i18n.locale === 'zh-CN');
   const rows = $derived((currentQuery.data?.data ?? []) as Row[]);
@@ -257,6 +260,11 @@
     adminContext.navigate(`/${resourceName}/create`);
   }
 
+  function toggleRecords(): void {
+    showRecords = !showRecords;
+    replaceHashParam('records', showRecords ? '1' : null);
+  }
+
   function requestSessionRevoke(target: Row | 'others'): void {
     pendingSessionRevoke = target;
     revokeConfirmOpen = true;
@@ -285,7 +293,13 @@
 </script>
 
 {#snippet actions()}
-  <Button size="sm" onclick={createRecord}>{copy(profile.action)}</Button>
+  <div class="flex flex-wrap items-center justify-end gap-2">
+    <Button data-domain-record-toggle variant="outline" size="sm" aria-expanded={showRecords} onclick={toggleRecords}>
+      <Table2 class="size-4" />
+      {showRecords ? (isZh ? '收起记录' : 'Hide records') : (isZh ? '查看记录' : 'View records')}
+    </Button>
+    <Button size="sm" onclick={createRecord}>{copy(profile.action)}</Button>
+  </div>
 {/snippet}
 
 <ContentPageShell pageId={`domain-${resourceName}`} width="wide" eyebrow={copy(profile.eyebrow)} title={copy(profile.title)} description={copy(profile.description)} {actions}>
@@ -375,9 +389,11 @@
       <section class="rounded-lg border border-border bg-card" data-domain-work-queue><div class="border-b border-border p-4"><SectionHeader title={isZh ? '工作队列' : 'Work queue'} /></div><div class="divide-y divide-border">{#each rows as row (String(row.id))}<article class="grid gap-3 p-4 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center"><Boxes class="size-5 text-muted-foreground" /><div><p class="text-sm font-semibold">{valueText(row, 'name') !== '—' ? valueText(row, 'name') : valueText(row, 'module')}</p><p class="mt-1 text-xs text-muted-foreground">{valueText(row, 'notes')}</p></div><Badge variant={badgeVariant(row.status)}>{statusLabel(row.status)}</Badge></article>{/each}</div></section>
     {/if}
 
-    <section class="space-y-3" data-domain-table>
-      <SectionHeader title={isZh ? '完整记录' : 'All records'} description={isZh ? '保留筛选、排序、新建、编辑、详情和删除流程。' : 'Keep filtering, sorting, create, edit, show, and delete workflows.'} />
-      <AutoTable {resourceName} />
-    </section>
+    {#if showRecords}
+      <section class="space-y-3" data-domain-table>
+        <SectionHeader title={isZh ? '完整记录' : 'All records'} description={isZh ? '保留筛选、排序、新建、编辑、详情和删除流程。' : 'Keep filtering, sorting, create, edit, show, and delete workflows.'} />
+        <AutoTable {resourceName} />
+      </section>
+    {/if}
   {/if}
 </ContentPageShell>

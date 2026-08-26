@@ -8,6 +8,7 @@ let target: HTMLDivElement | undefined;
 
 beforeEach(() => {
   localStorage.clear();
+  window.location.hash = '#/';
   Object.defineProperty(Element.prototype, 'animate', {
     configurable: true,
     value: () => ({ cancel: () => {}, finished: Promise.resolve() }),
@@ -88,5 +89,15 @@ describe('UserManagementPage filters', () => {
       expect(directory()?.textContent).toContain('No users match the selected filters.');
       expect(directory()?.textContent).not.toContain('Mateo Silva');
     });
+  });
+
+  it('keeps the generic CRUD table out of the default workspace until requested', async () => {
+    await renderPage();
+    expect(document.querySelector('[data-user-records]')).toBeNull();
+
+    button('View records').click();
+
+    await vi.waitFor(() => expect(document.querySelector('[data-user-records]')).not.toBeNull());
+    expect(button('Hide records').getAttribute('aria-expanded')).toBe('true');
   });
 });
