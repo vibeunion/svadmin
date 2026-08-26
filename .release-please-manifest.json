@@ -1,8 +1,8 @@
 {
-  "packages/core": "0.40.0",
-  "packages/ui": "0.49.1",
+  "packages/core": "0.40.1",
+  "packages/ui": "0.49.2",
   "packages/editor": "0.3.1",
-  "packages/sveltekit": "0.9.13",
+  "packages/sveltekit": "0.9.14",
   "packages/drizzle": "0.11.3",
   "packages/simple-rest": "0.9.12",
   "packages/refine-adapter": "0.10.2",
@@ -10,7 +10,7 @@
   "packages/pocketbase": "0.9.10",
   "packages/supabase": "0.12.0",
   "packages/elysia": "0.11.1",
-  "packages/create-svadmin": "0.16.3",
+  "packages/create-svadmin": "0.16.4",
   "packages/airtable": "0.9.11",
   "packages/appwrite": "0.8.12",
   "packages/auth-utils": "0.7.9",
@@ -23,7 +23,7 @@
   "packages/nestjsx-crud": "0.9.12",
   "packages/sanity": "0.9.7",
   "packages/strapi": "0.9.11",
-  "packages/lite": "0.3.21",
+  "packages/lite": "0.3.22",
   "packages/mcp": "0.2.8",
-  "packages/surface": "0.3.0"
+  "packages/surface": "0.3.1"
 }
