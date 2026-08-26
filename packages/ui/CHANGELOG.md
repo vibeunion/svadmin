@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.49.3](https://github.com/vibeunion/svadmin/compare/ui-v0.49.2...ui-v0.49.3) (2026-08-26)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** add explicit boolean parameter type to WorkspaceInspector ontoggle ([#290](https://github.com/vibeunion/svadmin/issues/290)) ([5c43898](https://github.com/vibeunion/svadmin/commit/5c438988d2ff0c94e0d5930eb43e3b140d43eda0))
+
 ## [0.49.2](https://github.com/vibeunion/svadmin/compare/ui-v0.49.1...ui-v0.49.2) (2026-08-26)
 
 
