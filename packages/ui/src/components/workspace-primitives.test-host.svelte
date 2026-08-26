@@ -40,7 +40,7 @@
 {/snippet}
 
 {#snippet secondary()}
-  <WorkspaceInspector title="Context" open={inspectorOpen} ontoggle={(open) => { inspectorOpen = open; }}>
+  <WorkspaceInspector title="Context" open={inspectorOpen} ontoggle={(open: boolean) => { inspectorOpen = open; }}>
     <p>Inspector content</p>
   </WorkspaceInspector>
 {/snippet}
