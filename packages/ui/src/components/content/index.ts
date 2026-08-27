@@ -12,6 +12,8 @@ export { default as SettingsFieldRow } from './SettingsFieldRow.svelte';
 export { default as MetricBlock } from './MetricBlock.svelte';
 export { default as DescriptionList } from './DescriptionList.svelte';
 export { default as StatusBadge } from './StatusBadge.svelte';
+export { default as StatusTabs } from './StatusTabs.svelte';
+export type { StatusTabItem } from './StatusTabs.svelte';
 export { default as FilterToolbar } from './FilterToolbar.svelte';
 export { default as DataState } from './DataState.svelte';
 export type { DataStateKind } from './DataState.svelte';

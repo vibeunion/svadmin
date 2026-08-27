@@ -32,7 +32,7 @@
       </Sheet.Title>
     </Sheet.Header>
     <div class="flex-1 overflow-y-auto">
-      <AutoForm {resourceName} {mode} {id} onSuccess={handleSuccess} />
+      <AutoForm {resourceName} {mode} {id} showHeader={false} onSuccess={handleSuccess} />
     </div>
   </Sheet.Content>
 </Sheet.Root>

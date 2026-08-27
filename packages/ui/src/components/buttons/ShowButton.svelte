@@ -7,11 +7,12 @@
 
   const i18n = useTranslation();
 
-  let { resource, recordItemId, hideText = false, accessControl = { enabled: true, hideIfUnauthorized: true }, class: className = '' } = $props<{
+  let { resource, recordItemId, hideText = false, accessControl = { enabled: true, hideIfUnauthorized: true }, onBeforeNavigate, class: className = '' } = $props<{
     resource: string;
     recordItemId: string | number;
     hideText?: boolean;
     accessControl?: ButtonAccessControl;
+    onBeforeNavigate?: (navigate: () => void) => void;
     class?: string;
   }>();
 
@@ -24,6 +25,12 @@
     queryOptions: { enabled: accessControl?.enabled ?? true }
   }));
   const hidden = $derived(accessControl?.hideIfUnauthorized && !can.allowed);
+
+  function navigateToRecord() {
+    const navigate = () => nav.show(resource, recordItemId);
+    if (onBeforeNavigate) onBeforeNavigate(navigate);
+    else navigate();
+  }
 </script>
 
 {#if !hidden}
@@ -33,7 +40,7 @@
     size={hideText ? 'icon' : 'sm'}
     class={className}
     disabled={!can.allowed}
-    onclick={() => nav.show(resource, recordItemId)}
+    onclick={navigateToRecord}
   >
     <Eye class="h-4 w-4" />
     {#if !hideText}<span class="ml-1">{i18n.t('common.detail')}</span>{/if}

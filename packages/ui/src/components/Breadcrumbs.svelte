@@ -2,6 +2,7 @@
   import { captureAdminContext, getResources, type MenuItem } from '@svadmin/core';
   import { getPath } from '../router-state.svelte.js';
   import { useTranslation } from '@svadmin/core/i18n';
+  import { cn } from '../utils.js';
 
   import * as Breadcrumb from './ui/breadcrumb/index.js';
 
@@ -10,7 +11,7 @@
   const adminContext = captureAdminContext();
   const resources = $derived((() => { try { return getResources(); } catch { return []; } })());
 
-  let { menu }: { menu?: MenuItem[] } = $props();
+  let { menu, class: className = 'mb-4' }: { menu?: MenuItem[]; class?: string } = $props();
 
   interface Crumb { label: string; href?: string; }
 
@@ -83,7 +84,7 @@
 </script>
 
 {#if crumbs.length > 1}
-  <Breadcrumb.Root class="mb-4">
+  <Breadcrumb.Root class={cn(className)}>
     <Breadcrumb.List>
       {#each crumbs as crumb, i (`${crumb.label}-${i}`)}
         {#if i > 0}
