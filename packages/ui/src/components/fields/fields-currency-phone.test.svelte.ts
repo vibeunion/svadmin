@@ -56,6 +56,14 @@ describe('CurrencyField enterprise capabilities', () => {
     expect(negView.container.querySelector('.text-destructive')).not.toBeNull();
   });
 
+  it('infers positive and negative colors when tone=auto', () => {
+    const posView = render(CurrencyField, { value: 500, tone: 'auto' });
+    expect(posView.container.querySelector('.text-success')).not.toBeNull();
+
+    const negView = render(CurrencyField, { value: -250, tone: 'auto' });
+    expect(negView.container.querySelector('.text-destructive')).not.toBeNull();
+  });
+
   it('renders nullLabel when value is empty or invalid', () => {
     const view = render(CurrencyField, { value: null, nullLabel: 'N/A' });
     expect(view.container.textContent).toContain('N/A');
@@ -92,5 +100,18 @@ describe('PhoneField enterprise capabilities', () => {
   it('renders nullLabel when value is empty', () => {
     const view = render(PhoneField, { value: '', nullLabel: 'No Phone' });
     expect(view.container.textContent).toContain('No Phone');
+  });
+
+  it('does not create an invalid tel link for non-numeric values', () => {
+    const view = render(PhoneField, { value: 'extension abc' });
+    expect(view.container.querySelector('a')).toBeNull();
+  });
+
+  it('normalizes a custom phone href and rejects non-tel schemes', () => {
+    const telView = render(PhoneField, { value: 'Support', href: 'tel:+1 (212) 555-0142' });
+    expect(telView.container.querySelector('a')?.getAttribute('href')).toBe('tel:+12125550142');
+
+    const unsafeView = render(PhoneField, { value: 'Support', href: 'javascript:alert(1)' });
+    expect(unsafeView.container.querySelector('a')).toBeNull();
   });
 });

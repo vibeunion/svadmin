@@ -32,7 +32,7 @@ jobs:
 
       - name: Resolve release pull request branch
         id: release-pr
-        if: steps.release.outputs.prs_created == 'true'
+        if: steps.release.outputs.pr != ''
         env:
           RELEASE_PR: ${{ steps.release.outputs.pr }}
         run: |
@@ -46,19 +46,19 @@ jobs:
           NODE
 
       - uses: actions/checkout@v7
-        if: steps.release.outputs.prs_created == 'true'
+        if: steps.release.outputs.pr != ''
         with:
           ref: ${{ steps.release-pr.outputs.branch }}
           fetch-depth: 0
           persist-credentials: false
 
       - uses: oven-sh/setup-bun@v2
-        if: steps.release.outputs.prs_created == 'true'
+        if: steps.release.outputs.pr != ''
         with:
           bun-version: "1.4.0"
 
       - name: Synchronize release peer ranges and lockfile
-        if: steps.release.outputs.prs_created == 'true'
+        if: steps.release.outputs.pr != ''
         run: |
           git fetch origin main
           git diff --exit-code origin/main -- scripts/sync-release-pr.ts
@@ -68,7 +68,7 @@ jobs:
 
       - name: Commit synchronized release artifacts
         id: release-sync
-        if: steps.release.outputs.prs_created == 'true'
+        if: steps.release.outputs.pr != ''
         run: |
           if git diff --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
@@ -81,7 +81,7 @@ jobs:
           echo "changed=true" >> "$GITHUB_OUTPUT"
 
       - name: Push synchronized release artifacts
-        if: steps.release.outputs.prs_created == 'true' && steps.release-sync.outputs.changed == 'true'
+        if: steps.release.outputs.pr != '' && steps.release-sync.outputs.changed == 'true'
         env:
           RELEASE_PAT: ${{ secrets.RELEASE_PAT }}
           RELEASE_BRANCH: ${{ steps.release-pr.outputs.branch }}

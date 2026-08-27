@@ -458,7 +458,7 @@ export interface FieldDefinition {
   label: string;
   type: 'text' | 'number' | 'boolean' | 'date' | 'select' | 'multiselect' | 'tags'
     | 'textarea' | 'richtext' | 'image' | 'images' | 'json' | 'relation' | 'color'
-    | 'url' | 'email' | 'phone' | 'file' | 'markdown' | 'password' | 'array';
+    | 'url' | 'email' | 'phone' | 'currency' | 'file' | 'markdown' | 'password' | 'array';
   required?: boolean;
   searchable?: boolean;
   sortable?: boolean;

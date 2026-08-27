@@ -32,9 +32,10 @@
 
   const telHref = $derived.by(() => {
     if (!stringValue) return undefined;
-    if (href) return href;
-    const cleaned = stringValue.replace(/[^\d+]/g, '');
-    return `tel:${cleaned}`;
+    const candidate = (href ?? stringValue).replace(/^tel:/i, '');
+    const normalized = candidate.replace(/[\s().-]/g, '');
+    if (!/^\+?\d+$/.test(normalized)) return undefined;
+    return `tel:${normalized}`;
   });
 
   async function handleCopy(e: MouseEvent) {
