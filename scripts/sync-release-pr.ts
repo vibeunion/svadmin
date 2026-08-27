@@ -233,9 +233,11 @@ export function syncReleasePr(options: SyncReleasePrOptions): SyncReleasePrResul
         const generatedNote =
           `* ${rewrite.dependencyName} bumped from ${rewrite.fromRange} ` +
           `to ${rewrite.generatedRange}`;
-        const synchronizedNote =
-          `* ${rewrite.dependencyName} bumped from ${rewrite.fromRange} ` +
-          `to ${rewrite.synchronizedRange}`;
+        const synchronizedNote = rewrite.synchronizedRange === rewrite.fromRange
+          ? `* ${rewrite.dependencyName} remains compatible with ${rewrite.synchronizedRange}`
+          :
+            `* ${rewrite.dependencyName} bumped from ${rewrite.fromRange} ` +
+            `to ${rewrite.synchronizedRange}`;
         if (!changelog.includes(generatedNote)) {
           throw new Error(`Missing generated changelog note for ${name}: ${generatedNote}`);
         }
