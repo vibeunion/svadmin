@@ -256,3 +256,8 @@ export type { DemoMember, DemoProject, DemoTeam, DemoIntegration, DemoApiKey, De
 export { default as RowActions } from './components/RowActions.svelte';
 export type { RowActionItem } from './components/RowActions.svelte';
 export { default as DetailDrawer } from './components/DetailDrawer.svelte';
+export { default as AuditTimeline } from './components/content/AuditTimeline.svelte';
+export type { TimelineItem } from './components/content/AuditTimeline.svelte';
+export type { TagTone } from './components/fields/TagField.svelte';
+export type { BooleanTone } from './components/fields/BooleanField.svelte';
+export type { DateFieldFormat } from './components/fields/DateField.svelte';

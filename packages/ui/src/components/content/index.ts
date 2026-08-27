@@ -41,3 +41,5 @@ export { default as TwoFactorStepper } from './TwoFactorStepper.svelte';
 export { default as SystemErrorState } from './SystemErrorState.svelte';
 export { default as FeedbackNotice } from './FeedbackNotice.svelte';
 export type { FeedbackNoticeTone, FeedbackNoticePriority } from './FeedbackNotice.svelte';
+export { default as AuditTimeline } from './AuditTimeline.svelte';
+export type { TimelineItem } from './AuditTimeline.svelte';
