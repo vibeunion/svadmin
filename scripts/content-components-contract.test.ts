@@ -15,6 +15,7 @@ const components = [
   'MemberList.svelte', 'ImportDropzone.svelte', 'NetworkUserCard.svelte',
   'NetworkTable.svelte', 'OtpInput.svelte', 'TwoFactorStepper.svelte',
   'SystemErrorState.svelte', 'FeedbackNotice.svelte', 'StatusTabs.svelte',
+  'AuditTimeline.svelte',
 ];
 
 describe('Stripe-first content component contract', () => {
@@ -36,6 +37,7 @@ describe('Stripe-first content component contract', () => {
     expect(index).toContain("export type { MetricTrendTone } from './components/content/MetricBlock.svelte';");
     expect(index).toContain("export type { NetworkUser, NetworkMetric } from './components/content/NetworkUserCard.svelte';");
     expect(index).toContain("export type { NetworkColumn } from './components/content/NetworkTable.types.js';");
+    expect(index).toContain("export type { TimelineItem } from './components/content/AuditTimeline.svelte';");
   });
 
   it('keeps reusable copy and metric meaning explicit for localized examples', () => {
