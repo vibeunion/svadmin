@@ -126,6 +126,8 @@ export { default as AvatarField } from './components/fields/AvatarField.svelte';
 export { default as CodeField } from './components/fields/CodeField.svelte';
 export { default as PercentField } from './components/fields/PercentField.svelte';
 export { default as RatingField } from './components/fields/RatingField.svelte';
+export { default as CurrencyField } from './components/fields/CurrencyField.svelte';
+export { default as PhoneField } from './components/fields/PhoneField.svelte';
 
 // Rich text editor (requires @svadmin/editor) as a direct import in consumer app
 
@@ -274,3 +276,4 @@ export { default as BatchActionBar } from './components/BatchActionBar.svelte';
 export type { DateRangeFormat, DateRangeValue } from './components/fields/DateRangeField.svelte';
 export type { PercentTone } from './components/fields/PercentField.svelte';
 export type { RatingSize } from './components/fields/RatingField.svelte';
+export type { CurrencyTone } from './components/fields/CurrencyField.svelte';
