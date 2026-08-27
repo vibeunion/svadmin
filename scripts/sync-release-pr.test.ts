@@ -209,7 +209,7 @@ test("synchronizes surface compatibility line when surface package version chang
   }
 });
 
-test('synchronizes Bun lockfile workspace versions with release package manifests', () => {
+test('synchronizes Bun lockfile workspace versions and peers with package manifests', () => {
   const root = mkdtempSync(join(tmpdir(), 'svadmin-release-pr-lockfile-'));
   try {
     mkdirSync(join(root, 'packages/ui'), { recursive: true });
@@ -219,6 +219,8 @@ test('synchronizes Bun lockfile workspace versions with release package manifest
     writeJson(join(root, 'packages/ui/package.json'), {
       name: '@svadmin/ui',
       version: '0.55.0',
+      peerDependencies: { svelte: '^5.56.8', '@svadmin/core': 'workspace:*' },
+      peerDependenciesMeta: { '@svadmin/editor': { optional: true } },
     });
     writeFileSync(
       join(root, 'bun.lock'),
@@ -228,6 +230,10 @@ test('synchronizes Bun lockfile workspace versions with release package manifest
         '    "packages/ui": {',
         '      "name": "@svadmin/ui",',
         '      "version": "0.49.1",',
+        '      "peerDependencies": {',
+        '        "svelte": "^5.50.0",',
+        '        "removed-peer": "*",',
+        '      },',
         '    },',
         '  },',
         '}',
@@ -242,7 +248,12 @@ test('synchronizes Bun lockfile workspace versions with release package manifest
     });
 
     expect(result.changedFiles).toContain('bun.lock');
-    expect(readFileSync(join(root, 'bun.lock'), 'utf8')).toContain('      "version": "0.55.0"');
+    const lockfile = readFileSync(join(root, 'bun.lock'), 'utf8');
+    expect(lockfile).toContain('      "version": "0.55.0"');
+    expect(lockfile).toContain('        "svelte": "^5.56.8",');
+    expect(lockfile).toContain('        "@svadmin/core": "workspace:*",');
+    expect(lockfile).toContain('        "@svadmin/editor": "*",');
+    expect(lockfile).not.toContain('removed-peer');
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
@@ -285,6 +296,19 @@ test('preserves CRLF lockfile formatting and fails closed on incomplete workspac
     writeFileSync(join(root, 'bun.lock'), '{\n  "workspaces": {},\n}\n');
     expect(() => syncReleasePr(options)).toThrow(
       'bun.lock is missing release workspaces: packages/ui',
+    );
+
+    writeJson(join(root, 'packages/ui/package.json'), {
+      name: '@svadmin/ui',
+      version: '0.55.0',
+      peerDependencies: { svelte: '^5.56.8' },
+    });
+    writeFileSync(
+      join(root, 'bun.lock'),
+      '{\n  "workspaces": {\n    "packages/ui": {\n      "version": "0.55.0",\n    },\n  },\n}\n',
+    );
+    expect(() => syncReleasePr(options)).toThrow(
+      'bun.lock workspaces are missing peerDependencies: packages/ui',
     );
   } finally {
     rmSync(root, { recursive: true, force: true });

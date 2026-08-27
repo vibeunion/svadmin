@@ -5,6 +5,7 @@ interface PackageManifest {
   name?: string;
   version?: string;
   peerDependencies?: Record<string, string>;
+  peerDependenciesMeta?: Record<string, { optional?: boolean }>;
 }
 
 interface ReleasePleaseConfig {
@@ -97,7 +98,7 @@ function writeJson(path: string, value: unknown): void {
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`);
 }
 
-function synchronizeLockfileWorkspaceVersions(
+function synchronizeLockfileWorkspaceMetadata(
   repositoryRoot: string,
   packages: Iterable<{ path: string; manifest: PackageManifest }>,
   changedFiles: Set<string>,
@@ -112,34 +113,80 @@ function synchronizeLockfileWorkspaceVersions(
 
   const packagesByPath = new Map([...packages].map((pkg) => [pkg.path, pkg]));
   const lines = lockfile.split('\n');
-  let currentWorkspacePath: string | undefined;
-  const foundWorkspacePaths = new Set<string>();
-  const synchronizedWorkspacePaths = new Set<string>();
-  let changed = false;
+  const workspaceStarts = new Map<string, number>();
   for (let index = 0; index < lines.length; index += 1) {
     const workspaceMatch = lines[index].match(/^(?:\x20){4}("(?:[^"\\]|\\.)+"): \{\r?$/);
-    if (workspaceMatch) {
-      const workspacePath = JSON.parse(workspaceMatch[1]) as string;
-      currentWorkspacePath = packagesByPath.has(workspacePath) ? workspacePath : undefined;
-      if (currentWorkspacePath) foundWorkspacePaths.add(currentWorkspacePath);
-      continue;
-    }
-    if (!currentWorkspacePath) continue;
+    if (!workspaceMatch) continue;
+    const workspacePath = JSON.parse(workspaceMatch[1]) as string;
+    if (packagesByPath.has(workspacePath)) workspaceStarts.set(workspacePath, index);
+  }
 
-    const versionMatch = lines[index].match(
-      /^(?:\x20){6}("version": ")[^"]+(",?)(\r?)$/,
+  const foundWorkspacePaths = new Set(workspaceStarts.keys());
+  const synchronizedWorkspaceVersions = new Set<string>();
+  const synchronizedWorkspacePeers = new Set<string>();
+  let changed = false;
+  const orderedWorkspaces = [...workspaceStarts.entries()].sort((left, right) => right[1] - left[1]);
+  for (const [packagePath, workspaceStart] of orderedWorkspaces) {
+    const current = packagesByPath.get(packagePath);
+    if (!current?.manifest.version) continue;
+    const nextWorkspaceStart = lines.findIndex(
+      (line, index) => index > workspaceStart && /^(?:\x20){4}"(?:[^"\\]|\\.)+": \{\r?$/.test(line),
     );
-    const current = packagesByPath.get(currentWorkspacePath);
-    if (!versionMatch || !current?.manifest.version) continue;
-    const nextLine =
-      `${' '.repeat(6)}${versionMatch[1]}${current.manifest.version}` +
-      `${versionMatch[2]}${versionMatch[3]}`;
-    if (lines[index] !== nextLine) {
-      lines[index] = nextLine;
+    const workspaceEnd = nextWorkspaceStart < 0 ? lines.length : nextWorkspaceStart;
+    const versionIndex = lines.findIndex(
+      (line, index) => index > workspaceStart && index < workspaceEnd &&
+        /^(?:\x20){6}"version": "[^"]+",?\r?$/.test(line),
+    );
+    if (versionIndex >= 0) {
+      const versionMatch = lines[versionIndex].match(
+        /^(?:\x20){6}("version": ")[^"]+(",?)(\r?)$/,
+      );
+      if (!versionMatch) throw new Error(`bun.lock workspace version is malformed: ${packagePath}`);
+      const nextLine =
+        `${' '.repeat(6)}${versionMatch[1]}${current.manifest.version}` +
+        `${versionMatch[2]}${versionMatch[3]}`;
+      if (lines[versionIndex] !== nextLine) {
+        lines[versionIndex] = nextLine;
+        changed = true;
+      }
+      synchronizedWorkspaceVersions.add(packagePath);
+    }
+
+    const peerStart = lines.findIndex(
+      (line, index) => index > workspaceStart && index < workspaceEnd &&
+        /^(?:\x20){6}"peerDependencies": \{\r?$/.test(line),
+    );
+    if (peerStart < 0) continue;
+    const peerEnd = lines.findIndex(
+      (line, index) => index > peerStart && index < workspaceEnd && /^(?:\x20){6}\},?\r?$/.test(line),
+    );
+    if (peerEnd < 0) throw new Error(`bun.lock workspace peerDependencies are malformed: ${packagePath}`);
+    const lineEnding = lines[peerStart].endsWith('\r') ? '\r' : '';
+    const peers = { ...(current.manifest.peerDependencies ?? {}) };
+    for (const [name, metadata] of Object.entries(current.manifest.peerDependenciesMeta ?? {})) {
+      if (!(name in peers) && metadata?.optional === true) peers[name] = '*';
+    }
+    const existingPeerNames = lines.slice(peerStart + 1, peerEnd).flatMap((line) => {
+      const match = line.match(/^(?:\x20){8}("(?:[^"\\]|\\.)+"): "[^"]*",?\r?$/);
+      return match ? [JSON.parse(match[1]) as string] : [];
+    });
+    const orderedPeerNames = [
+      ...existingPeerNames.filter((name) => name in peers),
+      ...Object.keys(peers).filter((name) => !existingPeerNames.includes(name)),
+    ];
+    const replacement = [
+      `      "peerDependencies": {${lineEnding}`,
+      ...orderedPeerNames.map(
+        (name) => `        ${JSON.stringify(name)}: ${JSON.stringify(peers[name])},${lineEnding}`,
+      ),
+      `      },${lineEnding}`,
+    ];
+    const existing = lines.slice(peerStart, peerEnd + 1);
+    if (existing.join('\n') !== replacement.join('\n')) {
+      lines.splice(peerStart, peerEnd - peerStart + 1, ...replacement);
       changed = true;
     }
-    synchronizedWorkspacePaths.add(currentWorkspacePath);
-    currentWorkspacePath = undefined;
+    synchronizedWorkspacePeers.add(packagePath);
   }
 
   const missingWorkspaces = [...packagesByPath.keys()].filter(
@@ -149,10 +196,18 @@ function synchronizeLockfileWorkspaceVersions(
     throw new Error(`bun.lock is missing release workspaces: ${missingWorkspaces.join(', ')}`);
   }
   const missingVersions = [...foundWorkspacePaths].filter(
-    (packagePath) => !synchronizedWorkspacePaths.has(packagePath),
+    (packagePath) => !synchronizedWorkspaceVersions.has(packagePath),
   );
   if (missingVersions.length > 0) {
     throw new Error(`bun.lock workspaces are missing versions: ${missingVersions.join(', ')}`);
+  }
+
+  const missingPeerMetadata = [...foundWorkspacePaths].filter(
+    (packagePath) => packagesByPath.get(packagePath)?.manifest.peerDependencies &&
+      !synchronizedWorkspacePeers.has(packagePath),
+  );
+  if (missingPeerMetadata.length > 0) {
+    throw new Error(`bun.lock workspaces are missing peerDependencies: ${missingPeerMetadata.join(', ')}`);
   }
 
   if (changed) {
@@ -261,7 +316,7 @@ export function syncReleasePr(options: SyncReleasePrOptions): SyncReleasePrResul
     changedFiles.add(packageJsonPath);
   }
 
-  synchronizeLockfileWorkspaceVersions(repositoryRoot, currentPackages.values(), changedFiles);
+  synchronizeLockfileWorkspaceMetadata(repositoryRoot, currentPackages.values(), changedFiles);
 
   const bumpedPackages: string[] = [];
   for (const [name, dependencies] of changedPeers) {
