@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte';
   import { Copy, Check } from '@lucide/svelte';
   import { cn } from '../../utils.js';
 
@@ -30,12 +31,16 @@
 
   let copied = $state(false);
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
+  let destroyed = false;
+
+  onDestroy(() => {
+    destroyed = true;
+    if (timeoutId) clearTimeout(timeoutId);
+  });
 
   function maskText(str: string): string {
     if (str.length <= 8) return '****';
-    const start = str.slice(0, 4);
-    const end = str.slice(-4);
-    return `${start}...${end}`;
+    return `${str.slice(0, 4)}...${str.slice(-4)}`;
   }
 
   const rawString = $derived(value != null && value !== '' ? String(value) : '');
@@ -46,24 +51,27 @@
     return rawString;
   });
 
-  async function handleCopy(e: MouseEvent) {
-    e.stopPropagation();
+  async function handleCopy(event: MouseEvent) {
+    event.stopPropagation();
     if (!rawString || !copyable) return;
 
+    const writeText = globalThis.navigator?.clipboard?.writeText;
+    if (!writeText) return;
+
     try {
-      if (typeof navigator !== 'undefined' && navigator.clipboard) {
-        await navigator.clipboard.writeText(rawString);
-      }
+      await writeText.call(globalThis.navigator.clipboard, rawString);
     } catch {
-      // Fallback for environments where navigator.clipboard might be restricted
+      return;
     }
 
+    if (destroyed) return;
     copied = true;
     oncopy?.(rawString);
 
     if (timeoutId) clearTimeout(timeoutId);
     timeoutId = setTimeout(() => {
       copied = false;
+      timeoutId = null;
     }, 1500);
   }
 </script>
