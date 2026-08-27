@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { Snippet } from 'svelte';
   import { useImport, useCan, useTranslation } from '@svadmin/core';
   import { Button } from '../ui/button/index.js';
   import { Upload } from '@lucide/svelte';
@@ -6,8 +7,18 @@
 
   const i18n = useTranslation();
 
-  let { resource, hideText = false, onFinish, accessControl = { enabled: true, hideIfUnauthorized: true }, class: className = '' } = $props<{
+  let {
+    resource,
+    label,
+    children,
+    hideText = false,
+    onFinish,
+    accessControl = { enabled: true, hideIfUnauthorized: true },
+    class: className = '',
+  } = $props<{
     resource: string;
+    label?: string;
+    children?: Snippet;
     hideText?: boolean;
     onFinish?: (result: { succeeded: unknown[]; errored: { request: unknown; error: unknown }[] }) => void;
     accessControl?: ButtonAccessControl;
@@ -20,6 +31,15 @@
     get resource() { return resource; },
     onFinish: (result) => onFinish?.(result),
   });
+
+  const can = useCan(() => ({
+    resource,
+    action: 'import',
+    params: accessControl?.params,
+    meta: accessControl?.meta,
+    queryOptions: { enabled: accessControl?.enabled ?? true },
+  }));
+  const hidden = $derived(accessControl?.hideIfUnauthorized && !can.allowed);
 
   function triggerImport() {
     fileInput?.click();
@@ -34,24 +54,17 @@
     }
   }
 
-  const can = useCan(() => ({
-    resource,
-    action: 'import',
-    params: accessControl?.params,
-    meta: accessControl?.meta,
-    queryOptions: { enabled: accessControl?.enabled ?? true }
-  }));
-  const hidden = $derived(accessControl?.hideIfUnauthorized && !can.allowed);
+  const displayText = $derived(label ?? i18n.t('common.import'));
 </script>
 
 {#if !hidden}
-<input
-  bind:this={fileInput}
-  type="file"
-  accept=".csv"
-  style="display:none"
-  onchange={handleFileChange}
-/>
+  <input
+    type="file"
+    accept=".csv,.json,.xlsx"
+    class="hidden"
+    bind:this={fileInput}
+    onchange={handleFileChange}
+  />
   <Button
     variant="outline"
     size={hideText ? 'icon' : 'sm'}
@@ -60,6 +73,14 @@
     onclick={triggerImport}
   >
     <Upload class="h-4 w-4" />
-    {#if !hideText}<span class="ml-1">{i18n.t('common.import')}</span>{/if}
+    {#if !hideText}
+      <span class="ml-1">
+        {#if children}
+          {@render children()}
+        {:else}
+          {displayText}
+        {/if}
+      </span>
+    {/if}
   </Button>
 {/if}

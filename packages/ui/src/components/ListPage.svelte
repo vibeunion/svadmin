@@ -20,8 +20,12 @@
     selectable?: boolean;
     /** Passthrough: custom header actions */
     headerActions?: Snippet;
-    /** Optional status tabs or filter slot above table */
+    /** Optional status tabs slot above filter/table */
     statusTabs?: Snippet;
+    /** Optional filter toolbar slot between status tabs and table */
+    filterToolbar?: Snippet;
+    /** Passthrough: custom batch actions to render when rows are selected */
+    batchActions?: Snippet<[{ selectedIds: string[] }]>;
     /** Passthrough: custom cell renderer per field */
     cellRenderer?: Snippet<[{ field: FieldDefinition; value: unknown; record: Record<string, unknown> }]>;
     /** Passthrough: custom row actions */
@@ -41,6 +45,8 @@
     selectable,
     headerActions,
     statusTabs,
+    filterToolbar,
+    batchActions,
     cellRenderer,
     rowActions,
     emptyState,
@@ -54,7 +60,7 @@
   const showCreate = $derived(canCreate ?? resource.canCreate !== false);
 </script>
 
-<div class="{density === 'compact' ? 'space-y-4' : 'space-y-6'} {className}">
+<div class="{density === 'compact' ? 'space-y-3' : 'space-y-4'} {className}">
   <PageHeader title={pageTitle} {density}>
     {#snippet actions()}
       {#if showCreate}
@@ -74,10 +80,18 @@
     </div>
   {/if}
 
+  {#if filterToolbar}
+    <div>
+      {@render filterToolbar()}
+    </div>
+  {/if}
+
   <AutoTable
     {resourceName}
+    showHeader={false}
     {density}
     {selectable}
+    {batchActions}
     defaultCellRenderer={cellRenderer}
     {rowActions}
     {emptyState}

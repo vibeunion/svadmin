@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { Snippet } from 'svelte';
   import { useExport, useCan, useTranslation } from '@svadmin/core';
   import { Button } from '../ui/button/index.js';
   import { Download } from '@lucide/svelte';
@@ -6,8 +7,17 @@
 
   const i18n = useTranslation();
 
-  let { resource, hideText = false, accessControl = { enabled: true, hideIfUnauthorized: true }, class: className = '' } = $props<{
+  let {
+    resource,
+    label,
+    children,
+    hideText = false,
+    accessControl = { enabled: true, hideIfUnauthorized: true },
+    class: className = '',
+  } = $props<{
     resource: string;
+    label?: string;
+    children?: Snippet;
     hideText?: boolean;
     accessControl?: ButtonAccessControl;
     class?: string;
@@ -22,10 +32,10 @@
     queryOptions: { enabled: accessControl?.enabled ?? true }
   }));
   const hidden = $derived(accessControl?.hideIfUnauthorized && !can.allowed);
+  const displayText = $derived(label ?? i18n.t('common.export'));
 </script>
 
 {#if !hidden}
-
   <Button
     variant="outline"
     size={hideText ? 'icon' : 'sm'}
@@ -34,6 +44,14 @@
     onclick={triggerExport}
   >
     <Download class="h-4 w-4" />
-    {#if !hideText}<span class="ml-1">{i18n.t('common.export')}</span>{/if}
+    {#if !hideText}
+      <span class="ml-1">
+        {#if children}
+          {@render children()}
+        {:else}
+          {displayText}
+        {/if}
+      </span>
+    {/if}
   </Button>
 {/if}

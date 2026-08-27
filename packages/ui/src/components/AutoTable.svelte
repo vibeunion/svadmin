@@ -61,7 +61,7 @@
   import {
     Plus, Pencil, Trash2,
     Search, Download, ChevronDown, ChevronUp, SlidersHorizontal, Filter as FilterIcon,
-    Eye, Copy
+    Eye, Copy, RefreshCw, Rows, X
   } from '@lucide/svelte';
   import ConfirmDialog from './ConfirmDialog.svelte';
   import TooltipButton from './TooltipButton.svelte';
@@ -76,6 +76,11 @@
     resourceName: string;
     selectable?: boolean;
     density?: 'compact' | 'comfortable';
+    showHeader?: boolean;
+    title?: string;
+    showFilterTags?: boolean;
+    showDensitySwitcher?: boolean;
+    showRefresh?: boolean;
     /** Custom header actions (right side) */
     headerActions?: Snippet;
     /** Custom cell renderers by field key */
@@ -100,6 +105,11 @@
     resourceName,
     selectable = true,
     density = 'comfortable',
+    showHeader = true,
+    title,
+    showFilterTags = true,
+    showDensitySwitcher = true,
+    showRefresh = true,
     headerActions,
     columns: customColumns,
     defaultCellRenderer,
@@ -110,6 +120,9 @@
     pagination: externalPagination,
     sorters: externalSorters,
   }: Props = $props();
+
+  let densityOverride = $state<'compact' | 'comfortable' | undefined>(undefined);
+  const currentDensity = $derived(densityOverride ?? density);
   const adminContext = captureAdminContext();
 
   const resource = $derived(getResource(resourceName));
@@ -205,6 +218,12 @@
     }
     return result;
   });
+
+  function removeFilterKey(key: string): void {
+    const { [key]: _removed, ...rest } = filterValues;
+    filterValues = rest;
+    pagination = { ...pagination, current: 1 };
+  }
 
   function clonePlainValue(value: unknown): unknown {
     if (Array.isArray(value)) return value.map(clonePlainValue);
@@ -552,38 +571,173 @@
   }
 </script>
 
-<div class="space-y-4">
-  <!-- Header -->
-  <div class="flex flex-wrap items-center justify-between gap-2">
-    <h1 class="text-lg sm:text-xl font-semibold text-foreground">{resource.label}</h1>
-    <div class="flex flex-wrap items-center gap-2">
-      {#if canExport}
-        <Button variant="outline" size="sm" onclick={exportCSV}>
-          <Download class="h-4 w-4" data-icon="inline-start" /> {i18n.t('common.export')}
-        </Button>
-      {/if}
-      {#if selectedCount > 0 && canDelete}
+<div class="space-y-3">
+  {#if showHeader}
+    <!-- Header -->
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <h1 class="text-lg sm:text-xl font-semibold text-foreground">{title ?? resource.label}</h1>
+      <div class="flex flex-wrap items-center gap-2">
+        {#if canExport}
+          <Button variant="outline" size="sm" onclick={exportCSV}>
+            <Download class="h-4 w-4" data-icon="inline-start" /> {i18n.t('common.export')}
+          </Button>
+        {/if}
+        {#if headerActions}
+          {@render headerActions()}
+        {/if}
+        {#if canCreate}
+          <Button onclick={() => adminContext.navigate(`/${resourceName}/create`)}>
+            <Plus class="h-4 w-4" data-icon="inline-start" /> {i18n.t('common.create')}
+          </Button>
+        {/if}
+      </div>
+    </div>
+  {/if}
+
+  <!-- Selection Banner (Enterprise Batch Actions) -->
+  {#if selectedCount > 0}
+    <div class="flex flex-wrap items-center justify-between gap-3 px-3.5 py-2 bg-primary/10 border border-primary/20 rounded-lg text-sm text-foreground animate-in fade-in duration-200">
+      <div class="flex items-center gap-2">
+        <span class="font-medium text-xs sm:text-sm">{i18n.t('common.selectedItems', { count: selectedCount })}</span>
+      </div>
+      <div class="flex items-center gap-2">
+        {#if canDelete}
+          <Button
+            variant="destructive"
+            size="sm"
+            class="h-8 text-xs whitespace-nowrap"
+            onclick={confirmBatchDelete}
+          >
+            <Trash2 class="h-3.5 w-3.5" data-icon="inline-start" /> {i18n.t('common.batchDelete', { count: selectedCount })}
+          </Button>
+        {/if}
+        {#if batchActions}
+          {@render batchActions({ selectedIds: Object.keys(tableRowSelection.current) })}
+        {/if}
         <Button
-          variant="destructive"
+          variant="ghost"
           size="sm"
-          class="h-9 whitespace-nowrap"
-          onclick={confirmBatchDelete}
+          class="h-8 text-xs text-muted-foreground hover:text-foreground"
+          onclick={() => rowSelectionAtom.set({})}
         >
-          <Trash2 class="h-4 w-4" data-icon="inline-start" /> {i18n.t('common.batchDelete', { count: selectedCount })}
+          {i18n.t('common.clearSelection')}
         </Button>
-      {/if}
-      
-      {#if selectedCount > 0 && batchActions}
-        {@render batchActions({ selectedIds: Object.keys(tableRowSelection.current) })}
+      </div>
+    </div>
+  {/if}
+
+  <!-- Search, Filter & Table Utility Toolbar -->
+  <div class="flex flex-wrap items-center justify-between gap-2">
+    <!-- Left: Search and Advanced Filters -->
+    <div class="flex flex-wrap items-center gap-2 flex-1 min-w-[200px]">
+      {#if searchableFields.length > 0}
+        <div class="relative max-w-sm flex-1 sm:min-w-[220px]">
+          <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="text"
+            value={searchText}
+            oninput={scheduleSearch}
+            placeholder={i18n.t('common.search')}
+            class="pl-9 h-9 text-sm"
+          />
+        </div>
       {/if}
 
-      <!-- Column Visibility Picker (DropdownMenu) -->
+      {#if filterableFields.length > 0}
+        <Popover.Root>
+          <Popover.Trigger>
+            {#snippet child({ props })}
+              <Button variant="outline" size="sm" class="h-9 px-3" {...props}>
+                <FilterIcon class="h-4 w-4" data-icon="inline-start" />
+                {i18n.t('common.filter')}
+                {#if activeFilterCount > 0}
+                  <Badge variant="secondary" class="ml-1 h-5 min-w-5 px-1">{activeFilterCount}</Badge>
+                {/if}
+              </Button>
+            {/snippet}
+          </Popover.Trigger>
+          <Popover.Content class="w-80">
+            <div class="space-y-3">
+              <h4 class="font-medium text-sm">{i18n.t('common.filter')}</h4>
+              {#each filterableFields as field, _i (_i)}
+                <div class="space-y-1">
+                  <label class="text-xs text-muted-foreground" for="filter-{field.key}">{field.label}</label>
+                  {#if field.type === 'select' && field.options}
+                    <select
+                      id="filter-{field.key}"
+                      class="h-9 text-sm w-full font-normal flex w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      value={filterValues[field.key] ?? ''}
+                      onchange={(e) => filterValues[field.key] = (e.currentTarget as HTMLSelectElement).value}
+                    >
+                      <option value="">{i18n.t('common.all')}</option>
+                      {#each field.options as opt, _i (_i)}
+                        <option value={opt.value}>{opt.label}</option>
+                      {/each}
+                    </select>
+                  {:else}
+                    <Input
+                      id="filter-{field.key}"
+                      type="text"
+                      value={filterValues[field.key] ?? ''}
+                      oninput={(e) => filterValues[field.key] = (e.currentTarget as HTMLInputElement).value}
+                      placeholder={field.label}
+                      class="h-9 text-sm"
+                    />
+                  {/if}
+                </div>
+              {/each}
+              <div class="flex gap-2 pt-2">
+                <Button size="sm" class="flex-1" onclick={() => { pagination = { ...pagination, current: 1 }; }}>
+                  {i18n.t('common.confirm')}
+                </Button>
+                <Button variant="outline" size="sm" onclick={() => {
+                  filterValues = {};
+                  pagination = { ...pagination, current: 1 };
+                }}>
+                  {i18n.t('common.reset')}
+                </Button>
+              </div>
+            </div>
+          </Popover.Content>
+        </Popover.Root>
+      {/if}
+    </div>
+
+    <!-- Right: Table Controls (Density, Columns, Refresh, Export if !showHeader) -->
+    <div class="flex items-center gap-1.5 shrink-0">
+      {#if !showHeader && canExport}
+        <TooltipButton tooltip={i18n.t('common.export')} variant="outline" size="sm" class="h-9 px-2.5" onclick={exportCSV}>
+          <Download class="h-4 w-4" />
+        </TooltipButton>
+      {/if}
+
+      {#if showDensitySwitcher}
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger>
+            {#snippet child({ props })}
+              <TooltipButton tooltip={i18n.t('common.density')} variant="outline" size="sm" class="h-9 px-2.5" {...props}>
+                <Rows class="h-4 w-4" />
+              </TooltipButton>
+            {/snippet}
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Content align="end" class="w-36">
+            <DropdownMenu.Item onclick={() => { densityOverride = 'comfortable'; }} class={currentDensity === 'comfortable' ? 'font-semibold text-primary' : ''}>
+              {i18n.t('common.densityComfortable')}
+            </DropdownMenu.Item>
+            <DropdownMenu.Item onclick={() => { densityOverride = 'compact'; }} class={currentDensity === 'compact' ? 'font-semibold text-primary' : ''}>
+              {i18n.t('common.densityCompact')}
+            </DropdownMenu.Item>
+          </DropdownMenu.Content>
+        </DropdownMenu.Root>
+      {/if}
+
+      <!-- Column Visibility Picker -->
       <DropdownMenu.Root>
         <DropdownMenu.Trigger>
           {#snippet child({ props })}
-            <Button variant="outline" size="sm" {...props}>
-              <SlidersHorizontal class="h-4 w-4" data-icon="inline-start" /> {i18n.t('common.columns')}
-            </Button>
+            <TooltipButton tooltip={i18n.t('common.columns')} variant="outline" size="sm" class="h-9 px-2.5" {...props}>
+              <SlidersHorizontal class="h-4 w-4" />
+            </TooltipButton>
           {/snippet}
         </DropdownMenu.Trigger>
         <DropdownMenu.Content align="end" class="w-48">
@@ -597,94 +751,57 @@
           {/each}
         </DropdownMenu.Content>
       </DropdownMenu.Root>
-      {#if headerActions}
-        {@render headerActions()}
-      {/if}
-      {#if canCreate}
-        <Button onclick={() => adminContext.navigate(`/${resourceName}/create`)}>
-          <Plus class="h-4 w-4" data-icon="inline-start" /> {i18n.t('common.create')}
-        </Button>
+
+      {#if showRefresh}
+        <TooltipButton
+          tooltip={i18n.t('common.refresh')}
+          variant="outline"
+          size="sm"
+          class="h-9 px-2.5"
+          onclick={() => listResult.refetch()}
+        >
+          <RefreshCw class="h-4 w-4 {query.isFetching ? 'animate-spin' : ''}" />
+        </TooltipButton>
       {/if}
     </div>
   </div>
 
-  <!-- Search and Advanced Filters -->
-  <div class="flex flex-wrap items-center gap-2">
-    {#if searchableFields.length > 0}
-      <div class="relative max-w-sm flex-1 sm:min-w-[250px]">
-        <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          type="text"
-          value={searchText}
-          oninput={scheduleSearch}
-          placeholder={i18n.t('common.search')}
-          class="pl-10 h-9"
-        />
-      </div>
-    {/if}
-
-    {#if filterableFields.length > 0}
-      <Popover.Root>
-        <Popover.Trigger>
-          {#snippet child({ props })}
-            <Button variant="outline" size="sm" class="h-9 px-3" {...props}>
-              <FilterIcon class="h-4 w-4" data-icon="inline-start" />
-              {i18n.t('common.filter')}
-              {#if activeFilterCount > 0}
-                <Badge variant="secondary" class="ml-1 h-5 min-w-5 px-1">{activeFilterCount}</Badge>
-              {/if}
-            </Button>
-          {/snippet}
-        </Popover.Trigger>
-        <Popover.Content class="w-80">
-          <div class="space-y-3">
-            <h4 class="font-medium text-sm">{i18n.t('common.filter')}</h4>
-            {#each filterableFields as field, _i (_i)}
-              <div class="space-y-1">
-                <label class="text-xs text-muted-foreground" for="filter-{field.key}">{field.label}</label>
-                {#if field.type === 'select' && field.options}
-                  <select
-                    id="filter-{field.key}"
-                    class="h-9 text-sm w-full font-normal flex w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    value={filterValues[field.key] ?? ''}
-                    onchange={(e) => filterValues[field.key] = (e.currentTarget as HTMLSelectElement).value}
-                  >
-                    <option value="">{i18n.t('common.all')}</option>
-                    {#each field.options as opt, _i (_i)}
-                      <option value={opt.value}>{opt.label}</option>
-                    {/each}
-                  </select>
-                {:else}
-                  <Input
-                    id="filter-{field.key}"
-                    type="text"
-                    value={filterValues[field.key] ?? ''}
-                    oninput={(e) => filterValues[field.key] = (e.currentTarget as HTMLInputElement).value}
-                    placeholder={field.label}
-                    class="h-9 text-sm"
-                  />
-                {/if}
-              </div>
-            {/each}
-            <div class="flex gap-2 pt-2">
-              <Button size="sm" class="flex-1" onclick={() => { pagination = { ...pagination, current: 1 }; }}>
-                {i18n.t('common.confirm')}
-              </Button>
-              <Button variant="outline" size="sm" onclick={() => {
-                filterValues = {};
-                pagination = { ...pagination, current: 1 };
-              }}>
-                {i18n.t('common.reset')}
-              </Button>
-            </div>
-          </div>
-        </Popover.Content>
-      </Popover.Root>
-    {/if}
-  </div>
+  <!-- Active Filter Tags -->
+  {#if showFilterTags && (appliedSearchText.trim() || activeFilterCount > 0)}
+    <div class="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground pt-0.5">
+      <span class="font-medium text-foreground">{i18n.t('common.filterTags')}:</span>
+      {#if appliedSearchText.trim()}
+        <Badge variant="secondary" class="gap-1 pr-1 font-normal text-xs">
+          <span>{i18n.t('common.search')}: "{appliedSearchText}"</span>
+          <button type="button" class="hover:text-foreground cursor-pointer" onclick={() => { searchText = ''; appliedSearchText = ''; pagination = { ...pagination, current: 1 }; }}>
+            <X class="h-3 w-3" />
+          </button>
+        </Badge>
+      {/if}
+      {#each Object.entries(filterValues) as [key, val] (key)}
+        {#if val.trim()}
+          {@const field = filterableFields.find(f => f.key === key)}
+          <Badge variant="secondary" class="gap-1 pr-1 font-normal text-xs">
+            <span>{field?.label ?? key}: {val}</span>
+            <button type="button" class="hover:text-foreground cursor-pointer" onclick={() => removeFilterKey(key)}>
+              <X class="h-3 w-3" />
+            </button>
+          </Badge>
+        {/if}
+      {/each}
+      <Button variant="ghost" size="sm" class="h-6 px-2 text-xs text-muted-foreground hover:text-foreground" onclick={() => {
+        searchText = '';
+        appliedSearchText = '';
+        filterValues = {};
+        pagination = { ...pagination, current: 1 };
+      }}>
+        {i18n.t('common.clearAllFilters')}
+      </Button>
+    </div>
+  {/if}
 
   <!-- Table (TanStack-powered) -->
-  <div class="overflow-hidden rounded-lg border border-border bg-card shadow-sm" role="region" aria-label="{resource.label} {i18n.t('common.list')}" data-table-density={density}>
+  <div class="overflow-hidden rounded-lg border border-border bg-card shadow-sm" role="region" aria-label="{resource.label} {i18n.t('common.list')}" data-table-density={currentDensity}>
     {#if query.isLoading}
       <div class="p-4 space-y-3">
         <div class="flex gap-4 mb-2">
@@ -708,7 +825,7 @@
       <div in:fade={{ duration: 150 }}>
         <!-- Desktop Table (hidden on mobile) -->
         <div class="hidden md:block">
-        <Table.Root {density}>
+        <Table.Root density={currentDensity}>
           <Table.Header>
             {#each tableView.headerGroups as headerGroup, _i (_i)}
               {@const visibleHeaders = headerGroup.headers.filter((header: Header<TableFeatures, BaseRecord, unknown>) => isColumnVisible(header.column.id))}

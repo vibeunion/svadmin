@@ -1,14 +1,16 @@
 <script lang="ts">
+  import type { Snippet } from 'svelte';
   import { useNavigation, getResource, useTranslation } from '@svadmin/core';
   import { Button } from '../ui/button/index.js';
   import { List } from '@lucide/svelte';
 
   const i18n = useTranslation();
 
-  let { resource: resourceName, hideText = false, label, onBeforeNavigate, class: className = '' } = $props<{
+  let { resource: resourceName, hideText = false, label, children, onBeforeNavigate, class: className = '' } = $props<{
     resource: string;
     hideText?: boolean;
     label?: string;
+    children?: Snippet;
     onBeforeNavigate?: (navigate: () => void) => void;
     class?: string;
   }>();
@@ -33,5 +35,13 @@
   onclick={navigateToList}
 >
   <List class="h-4 w-4" />
-  {#if !hideText}<span class="ml-1">{displayLabel}</span>{/if}
+  {#if !hideText}
+    <span class="ml-1">
+      {#if children}
+        {@render children()}
+      {:else}
+        {displayLabel}
+      {/if}
+    </span>
+  {/if}
 </Button>

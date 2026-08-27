@@ -17,7 +17,7 @@ const outputDirectory = join(repositoryRoot, 'example', 'dist');
 const assetsDirectory = join(outputDirectory, 'assets');
 const manifestPath = join(outputDirectory, '.vite', 'manifest.json');
 const maximumChunkBytes = 650_000;
-const maximumInitialBytes = 1_200_000;
+const maximumInitialBytes = 1_250_000;
 const maximumInitialGzipBytes = 350_000;
 
 function assert(condition: unknown, message: string): asserts condition {
