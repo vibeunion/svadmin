@@ -24,6 +24,13 @@ export interface SyncReleasePrResult {
   widenedPeers: string[];
 }
 
+interface PeerRangeRewrite {
+  dependencyName: string;
+  fromRange: string;
+  generatedRange: string;
+  synchronizedRange: string;
+}
+
 function parseVersion(version: string): [number, number, number] {
   const match = version.match(/^(\d+)\.(\d+)\.(\d+)$/);
   if (!match) throw new Error(`Unsupported package version: ${version}`);
@@ -139,6 +146,7 @@ export function syncReleasePr(options: SyncReleasePrOptions): SyncReleasePrResul
   );
   const changedFiles = new Set<string>();
   const changedPeers = new Map<string, Set<string>>();
+  const peerRangeRewrites = new Map<string, Map<string, PeerRangeRewrite>>();
   const bumpedVersions = new Map<string, string>();
 
   let foundChanges = true;
@@ -159,6 +167,14 @@ export function syncReleasePr(options: SyncReleasePrOptions): SyncReleasePrResul
         const dependencyChanges = changedPeers.get(name) ?? new Set<string>();
         dependencyChanges.add(dependencyName);
         changedPeers.set(name, dependencyChanges);
+        const packageRewrites = peerRangeRewrites.get(name) ?? new Map<string, PeerRangeRewrite>();
+        packageRewrites.set(dependencyName, {
+          dependencyName,
+          fromRange: baseRange,
+          generatedRange: range,
+          synchronizedRange: widened,
+        });
+        peerRangeRewrites.set(name, packageRewrites);
         foundChanges = true;
       }
 
@@ -206,6 +222,27 @@ export function syncReleasePr(options: SyncReleasePrOptions): SyncReleasePrResul
       changedFiles.add(`${current.path}/package.json`);
       changedFiles.add(`${current.path}/CHANGELOG.md`);
       bumpedPackages.push(`${name}@${nextVersion}`);
+      continue;
+    }
+
+    const rewrites = peerRangeRewrites.get(name);
+    if (rewrites) {
+      const changelogPath = join(repositoryRoot, current.path, 'CHANGELOG.md');
+      let changelog = readFileSync(changelogPath, 'utf8');
+      for (const rewrite of rewrites.values()) {
+        const generatedNote =
+          `* ${rewrite.dependencyName} bumped from ${rewrite.fromRange} ` +
+          `to ${rewrite.generatedRange}`;
+        const synchronizedNote =
+          `* ${rewrite.dependencyName} bumped from ${rewrite.fromRange} ` +
+          `to ${rewrite.synchronizedRange}`;
+        if (!changelog.includes(generatedNote)) {
+          throw new Error(`Missing generated changelog note for ${name}: ${generatedNote}`);
+        }
+        changelog = changelog.replace(generatedNote, synchronizedNote);
+      }
+      writeFileSync(changelogPath, changelog);
+      changedFiles.add(`${current.path}/CHANGELOG.md`);
     }
   }
 
