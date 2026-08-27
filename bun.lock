@@ -484,7 +484,7 @@
     },
     "packages/surface": {
       "name": "@svadmin/surface",
-      "version": "0.4.0",
+      "version": "0.4.1",
       "dependencies": {
         "zod": "^4.4.3",
       },
@@ -518,7 +518,7 @@
     },
     "packages/ui": {
       "name": "@svadmin/ui",
-      "version": "0.55.0",
+      "version": "0.55.1",
       "dependencies": {
         "@floating-ui/dom": "^1.8.0",
         "@lucide/svelte": "^1.31.0",
