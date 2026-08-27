@@ -64,6 +64,7 @@ describe('RowActions and DetailDrawer', () => {
 
     expect(dialog.getAttribute('aria-labelledby')).toBe('record-details-title');
     expect(dialog.getAttribute('aria-describedby')).toBe('record-details-description');
+    expect(within(dialog).getByTestId('drawer-extra-badge').textContent).toBe('Active');
     expect(within(dialog).getByText('Record content')).toBeTruthy();
     expect(within(dialog).getByText('Save changes')).toBeTruthy();
 
