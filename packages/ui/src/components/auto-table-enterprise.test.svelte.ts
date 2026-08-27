@@ -101,6 +101,17 @@ describe('AutoTable enterprise enhancements', () => {
     expect(await view.findAllByText('user2@example.com')).toHaveLength(2);
   });
 
+  it('gives active-filter clear buttons accessible names', async () => {
+    const view = render(AutoTableEnterpriseHarness, { viewMode: 'table' });
+    const search = await view.findByPlaceholderText('搜索...');
+    await fireEvent.input(search, { target: { value: 'user1' } });
+
+    const clearSearch = await view.findByRole('button', { name: '清除: 搜索...' });
+    expect(clearSearch).toBeTruthy();
+    await fireEvent.click(clearSearch);
+    await waitFor(() => expect(view.queryByRole('button', { name: '清除: 搜索...' })).toBeNull());
+  });
+
   it('ShowPage renders in grid layout with multi-column descriptions', async () => {
     const view = render(AutoTableEnterpriseHarness, {
       viewMode: 'show-page-grid',
@@ -132,5 +143,15 @@ describe('AutoTable enterprise enhancements', () => {
     expect(view.getByText('西谷科技')).toBeTruthy();
     expect(view.getByText('分析中')).toBeTruthy();
     expect(view.getByText('¥12,800')).toBeTruthy();
+  });
+
+  it('DescriptionList maps item spans to statically discoverable grid classes', () => {
+    const view = render(DescriptionList, {
+      items: [{ label: '跨列字段', value: '内容', span: 3 }],
+      columns: 4,
+      bordered: true,
+    });
+
+    expect(view.getByText('跨列字段').closest('div')?.classList.contains('sm:col-span-3')).toBe(true);
   });
 });

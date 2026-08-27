@@ -35,13 +35,14 @@
     spinTimer = setTimeout(() => { spinning = false; }, 600);
   }
 
-  const displayText = $derived(label ?? i18n.t('common.retry'));
+  const displayText = $derived(label ?? i18n.t('common.refresh'));
 </script>
 
 <Button
   variant="ghost"
   size={hideText ? 'icon' : 'sm'}
   class={className}
+  aria-label={hideText ? displayText : undefined}
   onclick={refresh}
 >
   <RefreshCw class="h-4 w-4 {spinning ? 'animate-spin' : ''}" />

@@ -30,6 +30,13 @@
   const isCompact = $derived(density === 'compact');
   const isHorizontal = $derived(layout === 'horizontal');
 
+  function spanClass(span: number | undefined): string {
+    if (!span || span <= 1) return '';
+    if (span >= 4) return 'sm:col-span-4';
+    if (span === 3) return 'sm:col-span-3';
+    return 'sm:col-span-2';
+  }
+
   const columnClass = $derived.by(() => {
     switch (columns) {
       case 4:
@@ -52,7 +59,7 @@
           class={cn(
             'flex flex-col border-b border-r border-border/40 last:border-b-0',
             isHorizontal ? 'sm:flex-row' : '',
-            item.span && item.span > 1 ? `sm:col-span-${Math.min(item.span, columns)}` : '',
+            spanClass(Math.min(item.span ?? 1, columns)),
           )}
         >
           <dt
@@ -97,7 +104,7 @@
         class={cn(
           'min-w-0',
           isHorizontal ? 'flex items-baseline gap-2' : '',
-          item.span && item.span > 1 ? `sm:col-span-${Math.min(item.span, columns)}` : '',
+          spanClass(Math.min(item.span ?? 1, columns)),
         )}
       >
         <dt

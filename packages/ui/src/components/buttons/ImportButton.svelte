@@ -60,7 +60,7 @@
 {#if !hidden}
   <input
     type="file"
-    accept=".csv,.json,.xlsx"
+    accept={importHook.inputProps.accept}
     class="hidden"
     bind:this={fileInput}
     onchange={handleFileChange}
@@ -69,6 +69,7 @@
     variant="outline"
     size={hideText ? 'icon' : 'sm'}
     class={className}
+    aria-label={hideText ? displayText : undefined}
     disabled={importHook.isLoading || !can.allowed}
     onclick={triggerImport}
   >

@@ -32,6 +32,7 @@
   variant="outline"
   size={hideText ? 'icon' : 'sm'}
   class={className}
+  aria-label={hideText ? displayLabel : undefined}
   onclick={navigateToList}
 >
   <List class="h-4 w-4" />

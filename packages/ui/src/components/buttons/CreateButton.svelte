@@ -40,6 +40,7 @@
     variant="default"
     size={hideText ? 'icon' : 'default'}
     class={className}
+    aria-label={hideText ? displayText : undefined}
     disabled={!can.allowed}
     onclick={() => nav.create(resource)}
   >

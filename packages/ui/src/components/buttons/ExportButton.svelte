@@ -40,6 +40,7 @@
     variant="outline"
     size={hideText ? 'icon' : 'sm'}
     class={className}
+    aria-label={hideText ? displayText : undefined}
     disabled={isLoading || !can.allowed}
     onclick={triggerExport}
   >

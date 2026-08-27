@@ -70,6 +70,7 @@
       variant="ghost"
       size={hideText ? 'icon' : 'sm'}
       class="text-destructive hover:text-destructive {className}"
+      aria-label={hideText ? displayText : undefined}
       disabled={!can.allowed}
       onclick={handleDelete}
     >

@@ -30,6 +30,7 @@
   variant="default"
   size={hideText ? 'icon' : 'default'}
   class={className}
+  aria-label={hideText ? displayText : undefined}
   disabled={loading}
 >
   {#if loading}

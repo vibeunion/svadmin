@@ -773,7 +773,7 @@
       {#if appliedSearchText.trim()}
         <Badge variant="secondary" class="gap-1 pr-1 font-normal text-xs">
           <span>{i18n.t('common.search')}: "{appliedSearchText}"</span>
-          <button type="button" class="hover:text-foreground cursor-pointer" onclick={() => { searchText = ''; appliedSearchText = ''; pagination = { ...pagination, current: 1 }; }}>
+          <button type="button" class="hover:text-foreground cursor-pointer" aria-label={`${i18n.t('common.clear')}: ${i18n.t('common.search')}`} onclick={() => { searchText = ''; appliedSearchText = ''; pagination = { ...pagination, current: 1 }; }}>
             <X class="h-3 w-3" />
           </button>
         </Badge>
@@ -783,7 +783,7 @@
           {@const field = filterableFields.find(f => f.key === key)}
           <Badge variant="secondary" class="gap-1 pr-1 font-normal text-xs">
             <span>{field?.label ?? key}: {val}</span>
-            <button type="button" class="hover:text-foreground cursor-pointer" onclick={() => removeFilterKey(key)}>
+            <button type="button" class="hover:text-foreground cursor-pointer" aria-label={`${i18n.t('common.clear')}: ${field?.label ?? key}`} onclick={() => removeFilterKey(key)}>
               <X class="h-3 w-3" />
             </button>
           </Badge>

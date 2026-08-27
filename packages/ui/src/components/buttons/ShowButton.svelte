@@ -51,6 +51,7 @@
     variant="ghost"
     size={hideText ? 'icon' : 'sm'}
     class={className}
+    aria-label={hideText ? displayText : undefined}
     disabled={!can.allowed}
     onclick={navigateToRecord}
   >
