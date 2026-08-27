@@ -32,6 +32,11 @@
 
   let imgError = $state(false);
 
+  $effect(() => {
+    void src;
+    imgError = false;
+  });
+
   const sizeClasses: Record<AvatarSize, { container: string; text: string; dot: string }> = {
     xs: { container: 'h-5 w-5', text: 'text-[10px]', dot: 'h-1.5 w-1.5' },
     sm: { container: 'h-7 w-7', text: 'text-xs', dot: 'h-2 w-2' },
@@ -50,19 +55,19 @@
     neutral: 'bg-slate-400',
   };
 
-  function getInitials(n?: string | null): string {
-    if (!n) return '?';
-    const trimmed = n.trim();
+  function getInitials(value?: string | null): string {
+    const trimmed = value?.trim();
     if (!trimmed) return '?';
+
     const parts = trimmed.split(/\s+/);
     if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
+      return `${parts[0][0]}${parts.at(-1)?.[0] ?? ''}`.toUpperCase();
     }
     return trimmed.slice(0, 2).toUpperCase();
   }
 
   const initials = $derived(getInitials(name));
-  const hasContent = $derived(Boolean(src || name));
+  const hasContent = $derived(Boolean(src || name?.trim()));
 </script>
 
 {#if !hasContent}
@@ -81,7 +86,7 @@
         {#if src && !imgError}
           <img
             {src}
-            alt={name ?? 'Avatar'}
+            alt={name?.trim() || 'Avatar'}
             class="h-full w-full object-cover"
             onerror={() => { imgError = true; }}
           />
@@ -97,6 +102,8 @@
             statusColors[status],
             sizeClasses[size].dot
           )}
+          role="img"
+          aria-label={`Status: ${status}`}
           title={`Status: ${status}`}
         ></span>
       {/if}
