@@ -6,6 +6,7 @@
   import type { FieldDefinition } from '@svadmin/core';
   import { toSafeHref, toSafeText } from '../security';
   import { isExplicitBooleanTrue } from '../value-normalization';
+  import LiteMediaThumbnail from './LiteMediaThumbnail.svelte';
 
   interface Props {
     field: FieldDefinition;
@@ -52,7 +53,7 @@
     {toSafeText(value)}
   {/if}
 {:else if field.type === 'image' && value}
-  <img src={String(value)} alt={field.label} style="max-width:300px;max-height:200px;border-radius:6px;border:1px solid #e2e8f0;" />
+  <LiteMediaThumbnail src={String(value)} alt={field.label} height={200} />
 {:else if field.type === 'tags' && Array.isArray(value)}
   {#each value as tag, _i (_i)}
     <span class="lite-badge">{tag}</span>

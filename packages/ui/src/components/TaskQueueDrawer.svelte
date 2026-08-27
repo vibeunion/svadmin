@@ -362,7 +362,7 @@
                   }}
                 />
               {:else}
-                <div class="flex h-full min-h-[280px] items-center justify-center rounded-lg border border-dashed border-border/60 bg-background/70 text-center text-sm text-muted-foreground">
+                <div class="flex h-full items-center justify-center rounded-lg border border-dashed border-border/60 bg-background/70 p-8 text-center text-sm text-muted-foreground">
                   {i18n.t('task.selectHint')}
                 </div>
               {/if}

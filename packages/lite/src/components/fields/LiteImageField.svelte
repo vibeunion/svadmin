@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { FieldDefinition } from '@svadmin/core';
+  import LiteMediaThumbnail from '../LiteMediaThumbnail.svelte';
 
   interface Props {
     field: FieldDefinition;
@@ -23,7 +24,7 @@
   {@const urls = getUrls(value)}
   <div class="lite-inline-md lite-flex-wrap">
     {#each urls as url, _i (_i)}
-      <img src={url} alt={field.label} style="max-height: 100px; border-radius: 4px; border: 1px solid #e5e7eb;" />
+      <LiteMediaThumbnail src={url} alt={field.label} height={100} />
     {:else}
       <span>—</span>
     {/each}
@@ -34,7 +35,7 @@
     {#if urls.length > 0}
       <div class="lite-inline-md lite-flex-wrap" style="margin-bottom: 8px;">
         {#each urls as url, _i (_i)}
-          <img src={url} alt="Current" style="height: 60px; border-radius: 4px; border: 1px solid #e5e7eb; opacity: 0.6;" />
+          <LiteMediaThumbnail src={url} alt="Current" height={60} muted />
         {/each}
       </div>
     {/if}

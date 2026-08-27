@@ -409,7 +409,7 @@
               </div>
             </button>
           {/each}
-          <a href="#/roles/create" class="flex min-h-[250px] flex-col items-center justify-center rounded-lg border border-dashed bg-muted/10 p-5 text-center transition hover:border-primary/60 hover:bg-primary/5">
+          <a href="#/roles/create" class="flex flex-col items-center justify-center rounded-lg border border-dashed bg-muted/10 p-5 text-center transition hover:border-primary/60 hover:bg-primary/5">
             <span class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <ShieldCheck class="h-5 w-5" />
             </span>
