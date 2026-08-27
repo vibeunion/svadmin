@@ -128,3 +128,44 @@ describe('UrlField enterprise capabilities', () => {
     expect(link?.textContent).toContain('View Specification');
   });
 });
+
+import DateRangeField from './DateRangeField.svelte';
+
+describe('DateRangeField enterprise capabilities', () => {
+  it('formats array range [start, end]', () => {
+    const view = render(DateRangeField, {
+      value: ['2026-08-01T00:00:00Z', '2026-08-15T00:00:00Z'],
+      separator: '至',
+      locale: 'en-US',
+    });
+    expect(view.container.textContent).toContain('至');
+    expect(view.container.textContent).toContain('2026');
+  });
+
+  it('formats object range with start and end', () => {
+    const view = render(DateRangeField, {
+      value: { start: '2026-01-01T00:00:00Z', end: '2026-01-31T00:00:00Z' },
+      separator: '→',
+    });
+    expect(view.container.textContent).toContain('→');
+  });
+
+  it('handles half-open range safely', () => {
+    const view = render(DateRangeField, {
+      startDate: '2026-08-01T00:00:00Z',
+      endDate: null,
+      nullLabel: 'Open',
+      separator: '~',
+    });
+    expect(view.container.textContent).toContain('~');
+    expect(view.container.textContent).toContain('Open');
+  });
+
+  it('returns nullLabel when both dates are empty', () => {
+    const view = render(DateRangeField, {
+      value: null,
+      nullLabel: 'No Date Range',
+    });
+    expect(view.container.textContent).toContain('No Date Range');
+  });
+});
