@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.11](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.16.10...create-svadmin-v0.16.11) (2026-08-27)
+
+
+### Dependencies
+
+* Synchronize generated project dependencies with current workspace releases.
+
 ## [0.16.10](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.16.9...create-svadmin-v0.16.10) (2026-08-27)
 
 
