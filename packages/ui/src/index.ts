@@ -118,6 +118,7 @@ export { default as ImageField } from './components/fields/ImageField.svelte';
 export { default as SelectField } from './components/fields/SelectField.svelte';
 export { default as MultiSelectField } from './components/fields/MultiSelectField.svelte';
 export { default as RelationField } from './components/fields/RelationField.svelte';
+export { default as DateRangeField } from './components/fields/DateRangeField.svelte';
 export { default as JsonField } from './components/fields/JsonField.svelte';
 export { default as RichTextField } from './components/fields/RichTextField.svelte';
 export { default as CopyField } from './components/fields/CopyField.svelte';
@@ -263,5 +264,8 @@ export type { TimelineItem } from './components/content/AuditTimeline.svelte';
 export type { TagTone } from './components/fields/TagField.svelte';
 export type { BooleanTone } from './components/fields/BooleanField.svelte';
 export type { DateFieldFormat } from './components/fields/DateField.svelte';
-
 export type { AvatarStatus, AvatarSize } from './components/fields/AvatarField.svelte';
+
+export { default as FilterDropdown } from './components/FilterDropdown.svelte';
+export { default as BatchActionBar } from './components/BatchActionBar.svelte';
+export type { DateRangeFormat, DateRangeValue } from './components/fields/DateRangeField.svelte';
