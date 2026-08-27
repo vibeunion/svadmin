@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.53.1](https://github.com/vibeunion/svadmin/compare/ui-v0.53.0...ui-v0.53.1) (2026-08-27)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** harden enterprise field edge cases ([#311](https://github.com/vibeunion/svadmin/issues/311)) ([32a1509](https://github.com/vibeunion/svadmin/commit/32a15096a8d07956c6a06e25e178a14ac7f98549))
+
 ## [0.53.0](https://github.com/vibeunion/svadmin/compare/ui-v0.52.0...ui-v0.53.0) (2026-08-27)
 
 
