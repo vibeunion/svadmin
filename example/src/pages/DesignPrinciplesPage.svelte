@@ -20,6 +20,7 @@
     DataState,
     FeedbackNotice,
     FilterToolbar,
+    MediaThumbnail,
     MetricBlock,
     PageToolbar,
     SectionHeader,
@@ -39,6 +40,7 @@
   let viewState = $state<ViewState>('empty');
   let compact = $state(false);
   let showWarning = $state(true);
+  const successImage = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="160" height="96" viewBox="0 0 160 96"%3E%3Crect width="160" height="96" fill="%23e0e7ff"/%3E%3Ccircle cx="42" cy="36" r="16" fill="%236366f1"/%3E%3Cpath d="M12 82 58 50l24 18 20-14 46 28H12Z" fill="%234f46e5"/%3E%3C/svg%3E';
 
   const principles = $derived([
     {
@@ -158,7 +160,26 @@
       <SectionHeader title={isZh ? '七条原则' : 'Seven principles'} description={isZh ? '每一条都能落到组件 API、页面状态或验收证据。' : 'Each principle maps to a component API, page state, or acceptance evidence.'} />
       <PageToolbar>
         {#snippet leading()}
-          <FilterToolbar bind:query placeholder={isZh ? '搜索原则' : 'Search principles'} clearLabel={isZh ? '清除搜索' : 'Clear search'} />
+          <FilterToolbar bind:query placeholder={isZh ? '搜索原则' : 'Search principles'} clearLabel={isZh ? '清除搜索' : 'Clear search'} advancedLabel={isZh ? '高级筛选' : 'Advanced filters'} activeFilterCount={1}>
+            {#snippet advanced()}
+              <div class="grid gap-3 sm:grid-cols-2" data-filter-advanced-content>
+                <label class="grid gap-1 text-xs font-medium text-muted-foreground">
+                  {isZh ? '状态' : 'State'}
+                  <select class="h-8 rounded-md border border-input bg-background px-2 text-xs text-foreground" aria-label={isZh ? '状态' : 'State'}>
+                    <option>{isZh ? '全部状态' : 'All states'}</option>
+                    <option>{isZh ? '已覆盖' : 'Covered'}</option>
+                  </select>
+                </label>
+                <label class="grid gap-1 text-xs font-medium text-muted-foreground">
+                  {isZh ? '负责人' : 'Owner'}
+                  <select class="h-8 rounded-md border border-input bg-background px-2 text-xs text-foreground" aria-label={isZh ? '负责人' : 'Owner'}>
+                    <option>{isZh ? '全部负责人' : 'All owners'}</option>
+                    <option>Design system</option>
+                  </select>
+                </label>
+              </div>
+            {/snippet}
+          </FilterToolbar>
         {/snippet}
         {#snippet trailing()}
           <Button variant={compact ? 'default' : 'outline'} size="sm" onclick={() => compact = !compact}>
@@ -210,6 +231,14 @@
           {/if}
         {/snippet}
       </DataState>
+      <section class="space-y-3" aria-labelledby="media-state-heading" data-ui-state-fixture>
+        <SectionHeader id="media-state-heading" title={isZh ? '媒体状态矩阵' : 'Media state matrix'} description={isZh ? '成功、失败和空态共用同一缩略预览组件。' : 'Loaded, error, and empty states share one thumbnail component.'} />
+        <div class="flex flex-wrap items-start gap-3">
+          <div class="grid gap-1 text-xs text-muted-foreground"><div class="h-16 w-24"><MediaThumbnail src={successImage} alt="Loaded evidence" size="full" fit="cover" /></div><span>{isZh ? '成功' : 'Loaded'}</span></div>
+          <div class="grid gap-1 text-xs text-muted-foreground"><div class="h-16 w-24"><MediaThumbnail src="/missing-ui-state-image.png" alt="Failed evidence" size="full" fit="cover" errorLabel={isZh ? '图片不可用' : 'Image unavailable'} /></div><span>{isZh ? '失败' : 'Error'}</span></div>
+          <div class="grid gap-1 text-xs text-muted-foreground"><MediaThumbnail src={null} emptyLabel={isZh ? '暂无媒体' : 'No media'} showOverlay={false} /><span>{isZh ? '空态' : 'Empty'}</span></div>
+        </div>
+      </section>
       <div class="rounded-lg border border-border bg-card p-4 shadow-sm">
         <div class="flex items-center justify-between gap-3"><div><p class="text-sm font-semibold text-foreground">{isZh ? '验收清单' : 'Acceptance checklist'}</p><p class="mt-1 text-xs text-muted-foreground">{isZh ? '示例页本身也是规范的可运行证明。' : 'The example is a runnable proof of the standard.'}</p></div><StatusBadge status="success" label={isZh ? '通过' : 'Pass'} /></div>
         <ul class="mt-4 space-y-3 text-sm text-muted-foreground">

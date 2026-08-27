@@ -17,6 +17,7 @@
   import TooltipButton from './TooltipButton.svelte';
   import ComboboxField from './ComboboxField.svelte';
   import ArrayField from './fields/ArrayField.svelte';
+  import MediaThumbnail from './content/MediaThumbnail.svelte';
   import { Plus, X } from '@lucide/svelte';
   import type { Snippet } from 'svelte';
   import { getRichTextEditor } from '../editor-config.svelte.js';
@@ -429,7 +430,7 @@
             {disabled}
           />
           {#if url}
-            <img src={url} alt="preview" class="h-9 w-9 rounded object-cover border" />
+            <div class="size-9 shrink-0"><MediaThumbnail src={url} alt="preview" size="full" fit="cover" showOverlay={false} /></div>
           {/if}
           <TooltipButton tooltip={i18n.t('common.removeImage')} variant="ghost" size="icon" class="h-8 w-8 shrink-0" onclick={() => removeImage(i)}>
             <X class="h-3.5 w-3.5" />

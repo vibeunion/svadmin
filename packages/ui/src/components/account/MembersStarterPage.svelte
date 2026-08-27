@@ -25,7 +25,7 @@
 <ContentPageShell pageId="account-members-starter" width="wide">
   <ContentPageHeader title={isZh ? '开始组建团队' : 'Start building your team'} description={isZh ? '这是零成员工作区的起始页。邀请第一位成员，或通过 CSV 批量导入。' : 'This is the starting state for a workspace with no members. Invite the first teammate or import a CSV roster.'} />
 
-  <section class="grid min-h-[28rem] overflow-hidden rounded-lg border border-border bg-card lg:grid-cols-[minmax(0,1fr)_21rem]">
+  <section class="grid overflow-hidden rounded-lg border border-border bg-card lg:grid-cols-[minmax(0,1fr)_21rem]">
     <div class="flex flex-col items-center justify-center px-6 py-12 text-center">
       <span class="flex size-14 items-center justify-center rounded-lg bg-primary/10 text-primary"><Users class="size-6" /></span>
       <Badge variant="outline" class="mt-5">0 {isZh ? '名成员' : 'members'}</Badge>

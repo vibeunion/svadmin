@@ -43,6 +43,15 @@ describe('src/app.css (Tailwind source)', () => {
     expect(css).not.toContain('@source "./src";');
   });
 
+  it('scopes collapsed container defenses to svadmin-owned state hooks', () => {
+    const css = readAppCss();
+
+    expect(css).toContain('details.svadmin-collapsible:not([open])');
+    expect(css).toContain('[data-svadmin-collapsible]:not([data-open="true"])');
+    expect(css).toContain('[data-svadmin-filter-toolbar] .svadmin-filter-toolbar-advanced[hidden]');
+    expect(css).not.toMatch(/^\s*details:not\(\[open\]\)/m);
+  });
+
   it('keeps clean-flat as a semantic Stripe-first compatibility preset', () => {
     const cleanFlatCss = readCleanFlatCss();
 
@@ -100,7 +109,8 @@ describe('src/app.css (Tailwind source)', () => {
 
   it('normalizes collapsible details and filter containers', () => {
     const css = readAppCss();
-    expect(css).toContain('details:not([open]) > :not(summary)');
+    expect(css).not.toMatch(/^details:not\(\[open\]\)/m);
+    expect(css).toContain('details[data-svadmin-filter]:not([open]) > :not(summary)');
     expect(css).toContain('details.svadmin-collapsible-filter:not([open]) > :not(summary)');
   });
 });

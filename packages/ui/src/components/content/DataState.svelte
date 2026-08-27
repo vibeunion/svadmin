@@ -53,7 +53,7 @@
     {#if action}<div class="mt-3">{@render action()}</div>{/if}
   </Alert.Root>
 {:else}
-  <div class={'flex min-h-40 flex-col items-center justify-center rounded-lg border border-dashed border-border bg-card p-6 text-center ' + className}>
+  <div class={'flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-card px-6 py-8 text-center ' + className}>
     <Inbox class="size-8 text-muted-foreground" /><h3 class="mt-3 text-sm font-semibold text-foreground">{resolvedTitle}</h3><p class="mt-1 max-w-sm text-sm text-muted-foreground">{resolvedDescription}</p>
     {#if action}<div class="mt-4">{@render action()}</div>{/if}
   </div>

@@ -19,7 +19,7 @@
   }>();
 </script>
 
-<div class="flex flex-col items-center justify-center p-8 text-center min-h-[300px]">
+<div class="flex flex-col items-center justify-center px-8 py-10 text-center">
   <Alert.Root variant="destructive" class="max-w-md text-left">
     <AlertTriangle class="h-5 w-5" />
     <Alert.Title>{title}</Alert.Title>

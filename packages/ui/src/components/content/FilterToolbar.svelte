@@ -6,6 +6,8 @@
   import { Badge } from '../ui/badge/index.js';
   import { cn } from '../../utils.js';
 
+  const uid = $props.id();
+
   interface Props {
     query?: string;
     placeholder?: string;
@@ -37,9 +39,10 @@
   }: Props = $props();
 
   const isCompact = $derived(density === 'compact');
+  const advancedPanelId = `svadmin-filter-toolbar-advanced-${uid}`;
 </script>
 
-<div class={cn('space-y-2', className)}>
+<div class={cn('space-y-2', className)} data-svadmin-filter-toolbar data-advanced-open={advanced && advancedOpen ? 'true' : 'false'}>
   <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
     {#if showSearch}
       <div class="relative min-w-0 flex-1">
@@ -76,6 +79,7 @@
         class={cn('gap-1.5 shrink-0', isCompact ? 'h-8 text-xs px-2.5' : '')}
         onclick={() => advancedOpen = !advancedOpen}
         aria-expanded={advancedOpen}
+        aria-controls={advancedPanelId}
       >
         <SlidersHorizontal class="size-3.5" />
         <span>{advancedLabel}</span>
@@ -98,7 +102,7 @@
     {/if}
   </div>
   {#if advanced && advancedOpen}
-    <div class="rounded-lg border border-border/60 bg-muted/20 p-3">
+    <div id={advancedPanelId} class="svadmin-filter-toolbar-advanced rounded-lg border border-border/60 bg-muted/20 p-3" aria-hidden="false">
       {@render advanced()}
     </div>
   {/if}
