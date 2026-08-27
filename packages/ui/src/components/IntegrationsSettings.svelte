@@ -8,24 +8,47 @@
   import StatusBadge from './content/StatusBadge.svelte';
 
   const i18n = useTranslation();
-  interface Integration { id: string; name: string; description: string; connected: boolean; Icon: Component; }
-  let integrations = $state<Integration[]>([
-    { id: 'source-control', name: 'Source Control', description: 'Sync repository metadata, deployments, and commit activity.', connected: true, Icon: FolderGit },
-    { id: 'chatops', name: 'ChatOps', description: 'Send operational alerts and audit summaries to workspace channels.', connected: false, Icon: MessageCircle },
-    { id: 'identity-cloud', name: 'Identity Cloud', description: 'Configure SSO and workspace identity handoff.', connected: true, Icon: Cloud },
-    { id: 'webhooks', name: 'Webhooks', description: 'Register outbound webhooks for internal tools and monitors.', connected: false, Icon: Plug },
+
+  interface Integration {
+    id: string;
+    name: string;
+    description: string;
+    connected?: boolean;
+    Icon: Component;
+  }
+
+  interface Props {
+    integrations?: Integration[];
+    onConnectionChange?: (id: string, connected: boolean) => void | Promise<void>;
+  }
+
+  let { integrations, onConnectionChange }: Props = $props();
+  const defaultIntegrations = $derived<Integration[]>([
+    { id: 'source-control', name: i18n.t('integrations.sourceControl'), description: i18n.t('integrations.sourceControlDescription'), Icon: FolderGit },
+    { id: 'chatops', name: 'ChatOps', description: i18n.t('integrations.chatOpsDescription'), Icon: MessageCircle },
+    { id: 'identity-cloud', name: i18n.t('integrations.identityCloud'), description: i18n.t('integrations.identityCloudDescription'), Icon: Cloud },
+    { id: 'webhooks', name: 'Webhooks', description: i18n.t('integrations.webhooksDescription'), Icon: Plug },
   ]);
-  function toggleConnection(id: string, connected: boolean) { integrations = integrations.map((item) => item.id === id ? { ...item, connected } : item); }
+  const displayedIntegrations = $derived(integrations ?? defaultIntegrations);
 </script>
 
 <div class="space-y-6">
   <div><h2 class="text-xl font-semibold text-foreground">{i18n.t('settings.integrations')}</h2><p class="mt-1 text-sm text-muted-foreground">{i18n.t('settings.integrationsDescription')}</p></div>
   <SettingsGroup title={i18n.t('settings.integrations')} description={i18n.t('integrations.addMoreHint')}>
     <div class="divide-y divide-border">
-      {#each integrations as integration (integration.id)}
+      {#each displayedIntegrations as integration (integration.id)}
         <SettingsFieldRow label={integration.name} description={integration.description}>
           {#snippet control()}
-            <div class="flex items-center gap-3"><StatusBadge status={integration.connected ? 'success' : 'neutral'} label={integration.connected ? i18n.t('integrations.statusConnected') : i18n.t('integrations.statusDisconnected')} /><Switch checked={integration.connected} onCheckedChange={(checked) => toggleConnection(integration.id, checked)} aria-label={integration.name} /></div>
+            <div class="flex items-center gap-3">
+              {#if integration.connected !== undefined}
+                <StatusBadge status={integration.connected ? 'success' : 'neutral'} label={integration.connected ? i18n.t('integrations.statusConnected') : i18n.t('integrations.statusDisconnected')} />
+                {#if onConnectionChange}
+                  <Switch checked={integration.connected} onCheckedChange={(checked) => onConnectionChange?.(integration.id, checked)} aria-label={integration.name} />
+                {/if}
+              {:else}
+                <span class="text-xs text-muted-foreground">{i18n.t('integrations.statusProvidedByHost')}</span>
+              {/if}
+            </div>
           {/snippet}
         </SettingsFieldRow>
       {/each}

@@ -125,6 +125,12 @@ describe('Stripe-first refactor contract', () => {
       expect(source).not.toMatch(/tracking-(?:tight|wide|wider|\[[^\]]+\])/);
       expect(source).not.toMatch(/rounded-(?:xl|2xl|3xl)/);
     }
+    const integrations = read('packages/ui/src/components/IntegrationsSettings.svelte');
+    expect(integrations).toContain('onConnectionChange?: (id: string, connected: boolean)');
+    expect(integrations).toContain("i18n.t('integrations.statusProvidedByHost')");
+    expect(integrations).not.toContain('toggleConnection');
+    expect(integrations).not.toContain("connected: true");
+    expect(integrations).not.toContain("connected: false");
     expect(read('packages/ui/src/components/AboutSettings.svelte')).toContain('<SettingsGroup');
     expect(read('packages/ui/src/components/SettingsPage.svelte')).not.toContain('tracking-wider');
     expect(read('packages/ui/src/components/content/WorkspaceLayout.svelte')).toContain('items-start');
