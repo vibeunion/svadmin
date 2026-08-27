@@ -32,6 +32,7 @@ import CodeField from './fields/CodeField.svelte';
 import AvatarField from './fields/AvatarField.svelte';
 import CopyField from './fields/CopyField.svelte';
 import FileField from './fields/FileField.svelte';
+import MarkdownField from './fields/MarkdownField.svelte';
 
 /**
  * Built-in display components for show/detail pages.
@@ -63,6 +64,7 @@ export const builtinDisplayComponents: FieldComponentMap = {
   avatar: AvatarField,
   copy: CopyField,
   file: FileField,
+  markdown: MarkdownField,
 };
 
 // ─── Custom component registry ─────────────────────────────────

@@ -31,10 +31,16 @@
     class: className = '',
   }: Props = $props();
 
+  const normalizedPrecision = $derived(
+    precision != null && Number.isFinite(precision)
+      ? Math.min(20, Math.max(0, Math.trunc(precision)))
+      : undefined
+  );
+
   const formatted = $derived.by(() => {
     if (value == null || value === '') return nullLabel;
     const num = Number(value);
-    if (isNaN(num)) return nullLabel;
+    if (!Number.isFinite(num)) return nullLabel;
 
     const opts: Intl.NumberFormatOptions = { ...options };
 
@@ -46,9 +52,9 @@
       opts.notation = 'compact';
       opts.compactDisplay = 'short';
     }
-    if (precision != null) {
-      opts.minimumFractionDigits = precision;
-      opts.maximumFractionDigits = precision;
+    if (normalizedPrecision !== undefined) {
+      opts.minimumFractionDigits = normalizedPrecision;
+      opts.maximumFractionDigits = normalizedPrecision;
     }
     if (signed && num > 0 && !currency) {
       opts.signDisplay = 'always';
