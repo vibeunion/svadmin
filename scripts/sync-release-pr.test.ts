@@ -165,6 +165,92 @@ test('bumps peer dependents transitively and records each package exactly once',
   }
 });
 
+test('publishes create-svadmin when its packed scaffold manifest changes', () => {
+  const root = mkdtempSync(join(tmpdir(), 'svadmin-release-pr-create-'));
+  try {
+    for (const packagePath of ['packages/core', 'packages/create-svadmin']) {
+      mkdirSync(join(root, packagePath), { recursive: true });
+      writeFileSync(join(root, packagePath, 'CHANGELOG.md'), '# Changelog\n');
+    }
+    writeJson(join(root, 'release-please-config.json'), {
+      packages: { 'packages/core': {}, 'packages/create-svadmin': {} },
+    });
+    writeJson(join(root, '.release-please-manifest.json'), {
+      'packages/core': '0.42.0',
+      'packages/create-svadmin': '0.16.10',
+    });
+    writeJson(join(root, 'packages/core/package.json'), {
+      name: '@svadmin/core',
+      version: '0.42.0',
+    });
+    writeJson(join(root, 'packages/create-svadmin/package.json'), {
+      name: '@svadmin/create',
+      version: '0.16.10',
+    });
+    writeJson(join(root, 'packages/create-svadmin/scaffold-manifest.json'), {
+      dependencies: { '@svadmin/core': '^0.42.0' },
+    });
+    writeFileSync(
+      join(root, 'bun.lock'),
+      [
+        '{',
+        '  "workspaces": {',
+        '    "packages/core": {',
+        '      "version": "0.42.0",',
+        '    },',
+        '    "packages/create-svadmin": {',
+        '      "version": "0.16.10",',
+        '    },',
+        '  },',
+        '}',
+        '',
+      ].join('\n'),
+    );
+
+    const baseFiles: Record<string, string> = {
+      'packages/core/package.json': JSON.stringify({
+        name: '@svadmin/core',
+        version: '0.41.1',
+      }),
+      'packages/create-svadmin/package.json': JSON.stringify({
+        name: '@svadmin/create',
+        version: '0.16.10',
+      }),
+      'packages/create-svadmin/scaffold-manifest.json': JSON.stringify({
+        dependencies: { '@svadmin/core': '^0.41.1' },
+      }),
+    };
+    const result = syncReleasePr({
+      repositoryRoot: root,
+      baseRef: 'origin/main',
+      releaseDate: '2026-08-27',
+      readBaseFile: (path: string) => baseFiles[path],
+    });
+
+    expect(result.bumpedPackages).toEqual(['@svadmin/create@0.16.11']);
+    expect(result.widenedPeers).toEqual([]);
+    expect(result.changedFiles).toEqual([
+      '.release-please-manifest.json',
+      'bun.lock',
+      'packages/create-svadmin/CHANGELOG.md',
+      'packages/create-svadmin/package.json',
+    ]);
+    expect(
+      JSON.parse(readFileSync(join(root, 'packages/create-svadmin/package.json'), 'utf8')).version,
+    ).toBe('0.16.11');
+    expect(
+      JSON.parse(readFileSync(join(root, '.release-please-manifest.json'), 'utf8'))[
+        'packages/create-svadmin'
+      ],
+    ).toBe('0.16.11');
+    expect(readFileSync(join(root, 'packages/create-svadmin/CHANGELOG.md'), 'utf8')).toContain(
+      'Synchronize generated project dependencies with current workspace releases.',
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test("synchronizes surface compatibility line when surface package version changes", () => {
   const root = mkdtempSync(join(tmpdir(), "svadmin-release-pr-surface-line-"));
   try {
