@@ -29,7 +29,7 @@
   }: Props = $props();
 
   let copied = $state(false);
-  let timeoutId: any = null;
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
   function maskText(str: string): string {
     if (str.length <= 8) return '****';
