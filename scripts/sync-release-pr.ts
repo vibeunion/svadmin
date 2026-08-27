@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
 
 interface PackageManifest {
@@ -86,6 +86,28 @@ function releaseChangelogEntry(
     '### Dependencies',
     '',
     `* Expand the verified peer compatibility range for ${dependencyList}.`,
+    '',
+  ].join('\n');
+}
+
+function packagedArtifactChangelogEntry(
+  packagePath: string,
+  previousVersion: string,
+  nextVersion: string,
+  releaseDate: string,
+): string {
+  const component = basename(packagePath);
+  const compareUrl =
+    `https://github.com/vibeunion/svadmin/compare/` +
+    `${component}-v${previousVersion}...${component}-v${nextVersion}`;
+
+  return [
+    `## [${nextVersion}](${compareUrl}) (${releaseDate})`,
+    '',
+    '',
+    '### Dependencies',
+    '',
+    '* Synchronize generated project dependencies with current workspace releases.',
     '',
   ].join('\n');
 }
@@ -267,6 +289,7 @@ export function syncReleasePr(options: SyncReleasePrOptions): SyncReleasePrResul
   const changedPeers = new Map<string, Set<string>>();
   const peerRangeRewrites = new Map<string, Map<string, PeerRangeRewrite>>();
   const bumpedVersions = new Map<string, string>();
+  const packagedArtifactBumps = new Set<string>();
 
   let foundChanges = true;
   while (foundChanges) {
@@ -308,7 +331,31 @@ export function syncReleasePr(options: SyncReleasePrOptions): SyncReleasePrResul
     }
   }
 
-  for (const [name] of changedPeers) {
+  const createPackageName = '@svadmin/create';
+  const scaffoldManifestPath = 'packages/create-svadmin/scaffold-manifest.json';
+  const createPackage = currentPackages.get(createPackageName);
+  if (createPackage && existsSync(join(repositoryRoot, scaffoldManifestPath))) {
+    const currentScaffoldManifest = readFileSync(
+      join(repositoryRoot, scaffoldManifestPath),
+      'utf8',
+    );
+    const baseScaffoldManifest = readBaseFile(scaffoldManifestPath);
+    const baseVersion = basePackages.get(createPackageName)?.version;
+
+    if (
+      currentScaffoldManifest !== baseScaffoldManifest &&
+      baseVersion &&
+      createPackage.manifest.version === baseVersion
+    ) {
+      const nextVersion = bumpPatch(baseVersion);
+      createPackage.manifest.version = nextVersion;
+      releasedVersions.set(createPackageName, nextVersion);
+      bumpedVersions.set(createPackageName, nextVersion);
+      packagedArtifactBumps.add(createPackageName);
+    }
+  }
+
+  for (const name of new Set([...changedPeers.keys(), ...packagedArtifactBumps])) {
     const current = currentPackages.get(name);
     if (!current) throw new Error(`Missing current package for ${name}`);
     const packageJsonPath = `${current.path}/package.json`;
@@ -367,6 +414,30 @@ export function syncReleasePr(options: SyncReleasePrOptions): SyncReleasePrResul
       writeFileSync(changelogPath, changelog);
       changedFiles.add(`${current.path}/CHANGELOG.md`);
     }
+  }
+
+  for (const name of packagedArtifactBumps) {
+    const current = currentPackages.get(name);
+    if (!current) throw new Error(`Missing current package for ${name}`);
+    const baseVersion = basePackages.get(name)?.version;
+    const nextVersion = bumpedVersions.get(name);
+    if (!baseVersion || !nextVersion) {
+      throw new Error(`Missing packaged artifact bump metadata for ${name}`);
+    }
+
+    releaseManifest[current.path] = nextVersion;
+    const changelogPath = join(repositoryRoot, current.path, 'CHANGELOG.md');
+    const changelog = readFileSync(changelogPath, 'utf8');
+    const entry = packagedArtifactChangelogEntry(
+      current.path,
+      baseVersion,
+      nextVersion,
+      releaseDate,
+    );
+    writeFileSync(changelogPath, changelog.replace('# Changelog\n', `# Changelog\n\n${entry}`));
+
+    changedFiles.add(`${current.path}/CHANGELOG.md`);
+    bumpedPackages.push(`${name}@${nextVersion}`);
   }
 
   const surfaceCurrent = currentPackages.get("@svadmin/surface");
