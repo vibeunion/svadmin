@@ -33,6 +33,34 @@
     onchange?.(key);
   }
 
+  type TabKeyboardEvent = KeyboardEvent & { currentTarget: EventTarget & HTMLButtonElement };
+
+  function handleKeydown(event: TabKeyboardEvent) {
+    const keys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'];
+    if (!keys.includes(event.key)) return;
+
+    const tabList = event.currentTarget.closest('[role="tablist"]');
+    if (!tabList) return;
+
+    const tabs = Array.from(
+      tabList.querySelectorAll<HTMLButtonElement>('[role="tab"]:not(:disabled)')
+    );
+    const currentIndex = tabs.indexOf(event.currentTarget);
+    if (currentIndex === -1 || tabs.length === 0) return;
+
+    const nextIndex = event.key === 'Home'
+      ? 0
+      : event.key === 'End'
+        ? tabs.length - 1
+        : event.key === 'ArrowRight' || event.key === 'ArrowDown'
+          ? (currentIndex + 1) % tabs.length
+          : (currentIndex - 1 + tabs.length) % tabs.length;
+
+    event.preventDefault();
+    tabs[nextIndex]?.focus();
+    tabs[nextIndex]?.click();
+  }
+
   const isCompact = $derived(density === 'compact');
 
   const toneClasses: Record<string, { activeBadge: string; inactiveBadge: string }> = {
@@ -65,6 +93,7 @@
 
 <div
   role="tablist"
+  aria-orientation="horizontal"
   data-svadmin-status-tabs
   data-density={density}
   data-variant={variant}
@@ -83,8 +112,10 @@
       type="button"
       role="tab"
       aria-selected={active}
+      tabindex={active ? 0 : -1}
       disabled={item.disabled}
       onclick={() => selectTab(item.key, item.disabled)}
+      onkeydown={handleKeydown}
       class={cn(
         'inline-flex items-center gap-1.5 whitespace-nowrap font-medium transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50',
         isCompact ? 'text-xs px-2.5 py-1' : 'text-sm px-3 py-1.5',
