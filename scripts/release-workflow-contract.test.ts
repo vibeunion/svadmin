@@ -77,13 +77,26 @@ describe('npm trusted-publishing workflow contract', () => {
 
   test('keeps the published surface compatibility line aligned with its package version', () => {
     const surfacePackage = readPackageJson('packages/surface/package.json');
+    const uiPackage = readPackageJson('packages/ui/package.json');
     const compatibility = JSON.parse(
       readFileSync(resolve(repositoryRoot, 'packages/surface/compatibility.json'), 'utf8'),
-    ) as { surface?: string };
+    ) as { surface?: string; minimumSupported?: { '@svadmin/ui'?: string } };
     const releaseLine = surfacePackage.version?.match(/^(\d+\.\d+)\./)?.[1];
+    const uiVersion = uiPackage.version;
+    const uiPeerRange = surfacePackage.peerDependencies?.['@svadmin/ui'];
+    const minimumUiVersion = compatibility.minimumSupported?.['@svadmin/ui'];
+
+    if (!uiVersion || !uiPeerRange || !minimumUiVersion) {
+      throw new Error('Surface compatibility requires current, minimum, and peer UI versions');
+    }
+    const [uiMajor, uiMinor] = uiVersion.split('.').map(Number);
+    const nextUiMinor = `${uiMajor}.${uiMinor + 1}.0`;
 
     expect(releaseLine).toBeDefined();
     expect(compatibility.surface).toBe(`${releaseLine}.x`);
+    expect(Bun.semver.satisfies(minimumUiVersion, uiPeerRange)).toBe(true);
+    expect(Bun.semver.satisfies(uiVersion, uiPeerRange)).toBe(true);
+    expect(Bun.semver.satisfies(nextUiMinor, uiPeerRange)).toBe(false);
   });
 
   test('keeps the optional flow package in the release and publication chain', () => {
@@ -115,7 +128,8 @@ describe('npm trusted-publishing workflow contract', () => {
 
     expect(releaseWorkflow).toContain('group: release-please-${{ github.repository }}');
     expect(releaseWorkflow).toContain('cancel-in-progress: false');
-    expect(releaseWorkflow).toContain("if: steps.release.outputs.prs_created == 'true'");
+    expect(releaseWorkflow).toContain("if: steps.release.outputs.pr != ''");
+    expect(releaseWorkflow).not.toContain("if: steps.release.outputs.prs_created == 'true'");
     expect(releaseWorkflow).toContain('RELEASE_PR: ${{ steps.release.outputs.pr }}');
     expect(releaseWorkflow).toContain('bun-version: "1.4.0"');
     expect(releaseWorkflow).toContain('persist-credentials: false');

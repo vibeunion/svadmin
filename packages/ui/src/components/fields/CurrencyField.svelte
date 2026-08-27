@@ -66,8 +66,8 @@
   });
 
   const resolvedTone = $derived.by(() => {
-    if (tone !== 'neutral') return tone;
-    if (!colored || numericValue === null) return 'neutral';
+    if (tone !== 'auto' && tone !== 'neutral') return tone;
+    if ((!colored && tone !== 'auto') || numericValue === null) return 'neutral';
     if (numericValue > 0) return 'success';
     if (numericValue < 0) return 'destructive';
     return 'neutral';
