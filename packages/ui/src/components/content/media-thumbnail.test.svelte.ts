@@ -1,0 +1,87 @@
+import { fireEvent, render } from '@testing-library/svelte';
+import { describe, expect, it, vi } from 'vitest';
+import MediaThumbnail from './MediaThumbnail.svelte';
+import ImageField from '../fields/ImageField.svelte';
+
+describe('MediaThumbnail and ImageField components', () => {
+  it('renders image thumbnail with valid src and alt', () => {
+    const view = render(MediaThumbnail, {
+      src: 'https://example.com/photo.png',
+      alt: 'Test photo',
+      title: 'Photo title',
+    });
+
+    const img = view.container.querySelector('img');
+    expect(img).not.toBeNull();
+    expect(img?.getAttribute('src')).toBe('https://example.com/photo.png');
+    expect(img?.getAttribute('alt')).toBe('Test photo');
+    expect(view.container.querySelector('[data-slot="media-thumbnail"]')).not.toBeNull();
+  });
+
+  it('triggers onopen from a native button', async () => {
+    const onopen = vi.fn();
+    const view = render(MediaThumbnail, {
+      src: 'https://example.com/sample.jpg',
+      alt: 'Sample',
+      onopen,
+    });
+
+    const trigger = view.container.querySelector('button');
+    expect(trigger).not.toBeNull();
+    if (!trigger) throw new Error('Expected an interactive thumbnail trigger');
+
+    await fireEvent.click(trigger);
+    expect(onopen).toHaveBeenCalledTimes(1);
+    expect(trigger.getAttribute('type')).toBe('button');
+  });
+
+  it('does not expose open behavior when the overlay is disabled', async () => {
+    const onopen = vi.fn();
+    const view = render(MediaThumbnail, {
+      src: 'https://example.com/non-previewable.jpg',
+      showOverlay: false,
+      onopen,
+    });
+
+    const thumbnail = view.container.querySelector('[data-slot="media-thumbnail"] > div');
+    expect(thumbnail).not.toBeNull();
+    if (!thumbnail) throw new Error('Expected a thumbnail container');
+
+    expect(thumbnail.getAttribute('role')).toBeNull();
+    expect(thumbnail.getAttribute('tabindex')).toBeNull();
+    await fireEvent.click(thumbnail);
+    expect(onopen).not.toHaveBeenCalled();
+  });
+
+  it('renders document fallback when non-image mimeType or fileName is passed', () => {
+    const view = render(MediaThumbnail, {
+      src: 'https://example.com/doc.pdf',
+      fileName: 'report-analysis.pdf',
+      mimeType: 'application/pdf',
+    });
+
+    expect(view.container.querySelector('img')).toBeNull();
+    const docSlot = view.container.querySelector('[data-slot="media-thumbnail-document"]');
+    expect(docSlot).not.toBeNull();
+    expect(docSlot?.textContent).toContain('report-analysis.pdf');
+  });
+
+  it('renders empty placeholder when no src or fileName is provided', () => {
+    const view = render(MediaThumbnail, {});
+    expect(view.container.textContent?.trim()).toBe('—');
+  });
+
+  it('renders ImageField with enhanced MediaThumbnail and fallback', () => {
+    const populated = render(ImageField, {
+      value: 'https://example.com/avatar.webp',
+      alt: 'User avatar',
+      width: 64,
+      height: 64,
+    });
+    expect(populated.container.querySelector('img')?.getAttribute('src')).toBe('https://example.com/avatar.webp');
+    populated.unmount();
+
+    const empty = render(ImageField, { value: null });
+    expect(empty.container.textContent?.trim()).toBe('—');
+  });
+});
