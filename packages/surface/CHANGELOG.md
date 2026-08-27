@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.7](https://github.com/vibeunion/svadmin/compare/surface-v0.3.6...surface-v0.3.7) (2026-08-27)
+
+
+### 📝 Documentation
+
+* **surface:** correct peer compatibility release notes ([#314](https://github.com/vibeunion/svadmin/issues/314)) ([bbfbf0f](https://github.com/vibeunion/svadmin/commit/bbfbf0f5d1f602762dc8ec02faa4ebe6ad4fca6f))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/ui bumped from >=0.40.6 <0.54.0 to >=0.54.0
+
 ## [0.3.6](https://github.com/vibeunion/svadmin/compare/surface-v0.3.5...surface-v0.3.6) (2026-08-27)
 
 
