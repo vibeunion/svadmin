@@ -208,3 +208,42 @@ test("synchronizes surface compatibility line when surface package version chang
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+test('synchronizes Bun lockfile workspace versions with release package manifests', () => {
+  const root = mkdtempSync(join(tmpdir(), 'svadmin-release-pr-lockfile-'));
+  try {
+    mkdirSync(join(root, 'packages/ui'), { recursive: true });
+    writeFileSync(join(root, 'packages/ui/CHANGELOG.md'), '# Changelog\n');
+    writeJson(join(root, 'release-please-config.json'), { packages: { 'packages/ui': {} } });
+    writeJson(join(root, '.release-please-manifest.json'), { 'packages/ui': '0.55.0' });
+    writeJson(join(root, 'packages/ui/package.json'), {
+      name: '@svadmin/ui',
+      version: '0.55.0',
+    });
+    writeFileSync(
+      join(root, 'bun.lock'),
+      [
+        '{',
+        '  "workspaces": {',
+        '    "packages/ui": {',
+        '      "name": "@svadmin/ui",',
+        '      "version": "0.49.1",',
+        '    },',
+        '  },',
+        '}',
+        '',
+      ].join('\n'),
+    );
+
+    const result = syncReleasePr({
+      repositoryRoot: root,
+      baseRef: 'origin/main',
+      readBaseFile: () => JSON.stringify({ name: '@svadmin/ui', version: '0.54.0' }),
+    });
+
+    expect(result.changedFiles).toContain('bun.lock');
+    expect(readFileSync(join(root, 'bun.lock'), 'utf8')).toContain('"version": "0.55.0"');
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});

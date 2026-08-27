@@ -97,6 +97,52 @@ function writeJson(path: string, value: unknown): void {
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`);
 }
 
+function synchronizeLockfileWorkspaceVersions(
+  repositoryRoot: string,
+  packages: Iterable<{ path: string; manifest: PackageManifest }>,
+  changedFiles: Set<string>,
+): void {
+  const lockfilePath = join(repositoryRoot, 'bun.lock');
+  let lockfile: string;
+  try {
+    lockfile = readFileSync(lockfilePath, 'utf8');
+  } catch {
+    return;
+  }
+
+  const packagesByPath = new Map([...packages].map((pkg) => [pkg.path, pkg]));
+  const lines = lockfile.split('\n');
+  let currentWorkspacePath: string | undefined;
+  let changed = false;
+  for (let index = 0; index < lines.length; index += 1) {
+    const workspaceMatch = lines[index].match(/^    ("(?:packages\/[^"\\]+|docs|example)"\s*): \{$/);
+    if (workspaceMatch) {
+      currentWorkspacePath = JSON.parse(workspaceMatch[1]) as string;
+      continue;
+    }
+    if (/^    "[^"\\]+": \{$/.test(lines[index])) {
+      currentWorkspacePath = undefined;
+      continue;
+    }
+    if (!currentWorkspacePath) continue;
+
+    const versionMatch = lines[index].match(/^(      "version": ")[^"]+(",?)$/);
+    const current = packagesByPath.get(currentWorkspacePath);
+    if (!versionMatch || !current?.manifest.version) continue;
+    const nextLine = `${versionMatch[1]}${current.manifest.version}${versionMatch[2]}`;
+    if (lines[index] !== nextLine) {
+      lines[index] = nextLine;
+      changed = true;
+    }
+    currentWorkspacePath = undefined;
+  }
+
+  if (changed) {
+    writeFileSync(lockfilePath, lines.join('\n'));
+    changedFiles.add('bun.lock');
+  }
+}
+
 export function syncReleasePr(options: SyncReleasePrOptions): SyncReleasePrResult {
   const repositoryRoot = resolve(options.repositoryRoot);
   const config = readJson<ReleasePleaseConfig>(join(repositoryRoot, 'release-please-config.json'));
@@ -196,6 +242,8 @@ export function syncReleasePr(options: SyncReleasePrOptions): SyncReleasePrResul
     writeJson(join(repositoryRoot, packageJsonPath), current.manifest);
     changedFiles.add(packageJsonPath);
   }
+
+  synchronizeLockfileWorkspaceVersions(repositoryRoot, currentPackages.values(), changedFiles);
 
   const bumpedPackages: string[] = [];
   for (const [name, dependencies] of changedPeers) {
