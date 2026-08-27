@@ -5,11 +5,18 @@ import PhoneField from './PhoneField.svelte';
 
 const originalClipboard = Object.getOwnPropertyDescriptor(globalThis.navigator, 'clipboard');
 
-function setClipboard(writeText: (value: string) => Promise<void>): void {
-  Object.defineProperty(globalThis.navigator, 'clipboard', {
-    configurable: true,
-    value: { writeText },
-  });
+function setClipboard(writeText?: (value: string) => Promise<void>): void {
+  if (writeText) {
+    Object.defineProperty(globalThis.navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    });
+  } else {
+    Object.defineProperty(globalThis.navigator, 'clipboard', {
+      configurable: true,
+      value: undefined,
+    });
+  }
 }
 
 afterEach(() => {
@@ -62,11 +69,29 @@ describe('CurrencyField enterprise capabilities', () => {
 
     const negView = render(CurrencyField, { value: -250, tone: 'auto' });
     expect(negView.container.querySelector('.text-destructive')).not.toBeNull();
+
+    const zeroView = render(CurrencyField, { value: 0, tone: 'auto' });
+    expect(zeroView.container.querySelector('.text-success')).toBeNull();
+    expect(zeroView.container.querySelector('.text-destructive')).toBeNull();
   });
 
-  it('renders nullLabel when value is empty or invalid', () => {
-    const view = render(CurrencyField, { value: null, nullLabel: 'N/A' });
-    expect(view.container.textContent).toContain('N/A');
+  it('handles whitespace, NaN, and non-finite values by falling back to nullLabel', () => {
+    const nullView = render(CurrencyField, { value: null, nullLabel: 'N/A' });
+    expect(nullView.container.textContent).toContain('N/A');
+
+    const spaceView = render(CurrencyField, { value: '   ', nullLabel: 'Empty' });
+    expect(spaceView.container.textContent).toContain('Empty');
+
+    const infView = render(CurrencyField, { value: Infinity, nullLabel: 'Unbounded' });
+    expect(infView.container.textContent).toContain('Unbounded');
+  });
+
+  it('bounds extreme precision safely without throwing', () => {
+    const negPrecView = render(CurrencyField, { value: 42.5, precision: -3, locale: 'en-US' });
+    expect(negPrecView.container.textContent).toContain('$43');
+
+    const largePrecView = render(CurrencyField, { value: 42.5, precision: 99, locale: 'en-US' });
+    expect(largePrecView.container.textContent).toContain('$42.50');
   });
 });
 
@@ -85,16 +110,49 @@ describe('PhoneField enterprise capabilities', () => {
     expect(view.container.textContent).toContain('010-88888888');
   });
 
-  it('supports copy action when copyable=true', async () => {
+  it('supports copy action and triggers oncopy callback', async () => {
     const writeText = vi.fn(async () => undefined);
+    const oncopy = vi.fn();
     setClipboard(writeText);
-    const view = render(PhoneField, { value: '18600001111', copyable: true });
+    const view = render(PhoneField, { value: '18600001111', copyable: true, oncopy });
 
     const copyBtn = view.container.querySelector<HTMLButtonElement>('[aria-label="Copy phone number"]');
     expect(copyBtn).not.toBeNull();
     if (copyBtn) await fireEvent.click(copyBtn);
 
     await waitFor(() => expect(writeText).toHaveBeenCalledWith('18600001111'));
+    expect(oncopy).toHaveBeenCalledWith('18600001111');
+    expect(copyBtn?.getAttribute('aria-label')).toBe('Copied');
+  });
+
+  it('does not set copied state when clipboard write fails', async () => {
+    const writeText = vi.fn(async () => {
+      throw new Error('clipboard failure');
+    });
+    const oncopy = vi.fn();
+    setClipboard(writeText);
+    const view = render(PhoneField, { value: '18600001111', copyable: true, oncopy });
+
+    const copyBtn = view.container.querySelector<HTMLButtonElement>('[aria-label="Copy phone number"]');
+    expect(copyBtn).not.toBeNull();
+    if (copyBtn) await fireEvent.click(copyBtn);
+
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith('18600001111'));
+    expect(oncopy).not.toHaveBeenCalled();
+    expect(copyBtn?.getAttribute('aria-label')).toBe('Copy phone number');
+  });
+
+  it('safely handles missing clipboard in SSR environment', async () => {
+    setClipboard(undefined);
+    const oncopy = vi.fn();
+    const view = render(PhoneField, { value: '18600001111', copyable: true, oncopy });
+
+    const copyBtn = view.container.querySelector<HTMLButtonElement>('[aria-label="Copy phone number"]');
+    expect(copyBtn).not.toBeNull();
+    if (copyBtn) await fireEvent.click(copyBtn);
+
+    expect(oncopy).not.toHaveBeenCalled();
+    expect(copyBtn?.getAttribute('aria-label')).toBe('Copy phone number');
   });
 
   it('renders nullLabel when value is empty', () => {
