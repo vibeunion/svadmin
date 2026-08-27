@@ -1,16 +1,16 @@
 <script lang="ts">
-  import DetailDrawer from '../../src/components/DetailDrawer.svelte';
-  import RowActions, { type RowActionItem } from '../../src/components/RowActions.svelte';
+  import DetailDrawer from "../../src/components/DetailDrawer.svelte";
+  import RowActions, { type RowActionItem } from "../../src/components/RowActions.svelte";
 
-  let lastAction = $state('none');
+  let lastAction = $state("none");
   let drawerOpen = $state(true);
   let closeCount = $state(0);
 
   const actions: RowActionItem[] = [
-    { label: 'View', onclick: () => { lastAction = 'view'; } },
-    { label: 'Docs', href: '/records/42' },
-    { label: 'Delete', danger: true, onclick: () => { lastAction = 'delete'; } },
-    { label: 'Hidden', hidden: true },
+    { label: "View", onclick: () => { lastAction = "view"; } },
+    { label: "Docs", href: "/records/42" },
+    { label: "Delete", danger: true, onclick: () => { lastAction = "delete"; } },
+    { label: "Hidden", hidden: true },
   ];
 </script>
 
@@ -26,9 +26,12 @@
   closeLabel="Close record details"
   onClose={() => { closeCount += 1; }}
 >
+  {#snippet extra()}
+    <span data-testid="drawer-extra-badge">Active</span>
+  {/snippet}
   <p>Record content</p>
   {#snippet footer()}
     <button type="button">Save changes</button>
   {/snippet}
 </DetailDrawer>
-<p data-testid="drawer-state">{drawerOpen ? 'open' : 'closed'}:{closeCount}</p>
+<p data-testid="drawer-state">{drawerOpen ? "open" : "closed"}:{closeCount}</p>
