@@ -1,6 +1,6 @@
 {
   "packages/core": "0.41.1",
-  "packages/ui": "0.56.0",
+  "packages/ui": "0.57.0",
   "packages/editor": "0.3.2",
   "packages/flow": "0.2.0",
   "packages/sveltekit": "0.9.16",
@@ -24,7 +24,7 @@
   "packages/nestjsx-crud": "0.9.13",
   "packages/sanity": "0.9.8",
   "packages/strapi": "0.9.12",
-  "packages/lite": "0.3.24",
+  "packages/lite": "0.3.25",
   "packages/mcp": "0.2.9",
-  "packages/surface": "0.4.2"
+  "packages/surface": "0.4.3"
 }
