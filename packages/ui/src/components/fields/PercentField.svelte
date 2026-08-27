@@ -25,23 +25,28 @@
     class: className = '',
   }: Props = $props();
 
+  const normalizedPrecision = $derived(
+    Math.min(20, Math.max(0, Math.trunc(Number.isFinite(precision) ? precision : 1)))
+  );
+
   const numericValue = $derived.by(() => {
-    if (value == null || value === '') return null;
-    const num = typeof value === 'number' ? value : Number(value);
-    return isNaN(num) ? null : num;
+    if (value == null) return null;
+    if (typeof value === 'string' && value.trim() === '') return null;
+    const parsed = typeof value === 'number' ? value : Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
   });
 
   const percentNumber = $derived.by(() => {
     if (numericValue === null) return null;
-    return scale === '1' ? numericValue * 100 : numericValue;
+    const scaled = scale === '1' ? numericValue * 100 : numericValue;
+    return Number.isFinite(scaled) ? scaled : null;
   });
 
-  const formatted = $derived.by(() => {
-    if (percentNumber === null) return nullLabel;
-    return `${percentNumber.toFixed(precision)}%`;
-  });
+  const formatted = $derived(
+    percentNumber === null ? nullLabel : `${percentNumber.toFixed(normalizedPrecision)}%`
+  );
 
-  const resolvedTone = $derived.by(() => {
+  const resolvedTone = $derived.by((): PercentTone => {
     if (tone !== 'auto') return tone;
     if (percentNumber === null) return 'neutral';
     if (percentNumber >= 80) return 'success';
@@ -67,13 +72,12 @@
     neutral: 'bg-primary',
   };
 
-  const clampedProgress = $derived.by(() => {
-    if (percentNumber === null) return 0;
-    return Math.min(100, Math.max(0, percentNumber));
-  });
+  const clampedProgress = $derived(
+    percentNumber === null ? 0 : Math.min(100, Math.max(0, percentNumber))
+  );
 </script>
 
-{#if numericValue === null}
+{#if percentNumber === null}
   <span class={cn('field-percent text-muted-foreground text-sm', className)}>{nullLabel}</span>
 {:else}
   <div class={cn('field-percent inline-flex items-center gap-2 text-sm', className)}>
@@ -81,7 +85,14 @@
       {formatted}
     </span>
     {#if showProgress}
-      <div class="h-1.5 w-16 overflow-hidden rounded-full bg-muted">
+      <div
+        class="h-1.5 w-16 overflow-hidden rounded-full bg-muted"
+        role="progressbar"
+        aria-label="Percentage"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow={clampedProgress}
+      >
         <div
           class={cn('h-full transition-all duration-300', toneBarClass[resolvedTone])}
           style="width: {clampedProgress}%"

@@ -24,10 +24,16 @@
     class: className = '',
   }: Props = $props();
 
+  const normalizedMax = $derived(
+    Number.isFinite(max) ? Math.min(100, Math.max(1, Math.trunc(max))) : 5
+  );
+
   const numericValue = $derived.by(() => {
-    if (value == null || value === '') return null;
-    const num = typeof value === 'number' ? value : Number(value);
-    return isNaN(num) ? null : Math.max(0, Math.min(max, num));
+    if (value == null) return null;
+    if (typeof value === 'string' && value.trim() === '') return null;
+    const parsed = typeof value === 'number' ? value : Number(value);
+    if (!Number.isFinite(parsed)) return null;
+    return Math.max(0, Math.min(normalizedMax, parsed));
   });
 
   const sizeClasses: Record<RatingSize, { icon: string; text: string }> = {
@@ -39,10 +45,10 @@
   const stars = $derived.by(() => {
     if (numericValue === null) return [];
     const result: ('full' | 'half' | 'empty')[] = [];
-    for (let i = 1; i <= max; i++) {
-      if (numericValue >= i) {
+    for (let index = 1; index <= normalizedMax; index += 1) {
+      if (numericValue >= index) {
         result.push('full');
-      } else if (numericValue >= i - 0.5) {
+      } else if (numericValue >= index - 0.5) {
         result.push('half');
       } else {
         result.push('empty');
@@ -56,14 +62,18 @@
   <span class={cn('field-rating text-muted-foreground text-sm', className)}>{nullLabel}</span>
 {:else}
   <div class={cn('field-rating inline-flex items-center gap-1.5', className)}>
-    <div class="inline-flex items-center gap-0.5 text-amber-500">
+    <div
+      class="inline-flex items-center gap-0.5 text-amber-500"
+      role="img"
+      aria-label={`${numericValue} out of ${normalizedMax}`}
+    >
       {#each stars as starType, idx (idx)}
         {#if starType === 'full'}
-          <Star class={cn(sizeClasses[size].icon, 'fill-amber-500 text-amber-500')} />
+          <Star aria-hidden="true" class={cn(sizeClasses[size].icon, 'fill-amber-500 text-amber-500')} />
         {:else if starType === 'half'}
-          <StarHalf class={cn(sizeClasses[size].icon, 'fill-amber-500 text-amber-500')} />
+          <StarHalf aria-hidden="true" class={cn(sizeClasses[size].icon, 'fill-amber-500 text-amber-500')} />
         {:else}
-          <Star class={cn(sizeClasses[size].icon, 'text-muted-foreground/30')} />
+          <Star aria-hidden="true" class={cn(sizeClasses[size].icon, 'text-muted-foreground/30')} />
         {/if}
       {/each}
     </div>
