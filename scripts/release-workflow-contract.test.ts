@@ -108,8 +108,11 @@ function findIncompatibleWorkspacePeers(dependencyName: string, dependencyVersio
 }
 
 function readReleasePleaseConfig(): {
+  'changelog-sections': Array<{ type: string; hidden?: boolean }>;
   packages: Record<string, { component?: string; 'extra-files'?: unknown[] }>;
   plugins?: Array<{ type?: string; updatePeerDependencies?: boolean }>;
+  'group-pull-request-title-pattern'?: string;
+  'pull-request-title-pattern'?: string;
 } {
   return JSON.parse(readFileSync(resolve(repositoryRoot, 'release-please-config.json'), 'utf8'));
 }
@@ -353,6 +356,14 @@ describe('npm trusted-publishing workflow contract', () => {
 
 describe('release-please scaffold synchronization', () => {
   const scaffoldManifestPath = '/packages/create-svadmin/scaffold-manifest.json';
+
+  test('uses a non-releasable commit type for merged release pull requests', () => {
+    const config = readReleasePleaseConfig();
+
+    expect(config['group-pull-request-title-pattern']).toBe('release: release ${branch}');
+    expect(config['pull-request-title-pattern']).toStartWith('release${scope}:');
+    expect(config['changelog-sections'].some((section) => section.type === 'release' && !section.hidden)).toBe(false);
+  });
 
   test('updates root-level create-svadmin ranges with each dependent package release', () => {
     const config = readReleasePleaseConfig();
