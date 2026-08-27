@@ -211,7 +211,7 @@ describe('npm trusted-publishing workflow contract', () => {
     expect(releaseWorkflow).toContain('bun-version: "1.4.0"');
     expect(releaseWorkflow).toContain('persist-credentials: false');
     expect(releaseWorkflow).toContain(
-      'git diff --exit-code origin/main -- scripts/sync-release-pr.ts',
+      'git checkout origin/main -- scripts/sync-release-pr.ts',
     );
     expect(releaseWorkflow).toContain('git checkout origin/main -- bun.lock');
     expect(releaseWorkflow).toContain(

@@ -83,7 +83,7 @@ jobs:
         if: steps.release-pr.outputs.branch != ''
         run: |
           git fetch origin main
-          git diff --exit-code origin/main -- scripts/sync-release-pr.ts
+          git checkout origin/main -- scripts/sync-release-pr.ts
           git checkout origin/main -- bun.lock
           bun scripts/sync-release-pr.ts --base-ref origin/main
           bun install --ignore-scripts
