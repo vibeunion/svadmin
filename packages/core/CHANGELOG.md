@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.42.0](https://github.com/vibeunion/svadmin/compare/core-v0.41.1...core-v0.42.0) (2026-08-27)
+
+
+### 🚀 Features
+
+* **ui:** complete resource CRUD workflows ([1880dda](https://github.com/vibeunion/svadmin/commit/1880ddab509d2b314809bbd6e1a3346acd7ece8c))
+
 ## [0.41.1](https://github.com/vibeunion/svadmin/compare/core-v0.41.0...core-v0.41.1) (2026-08-27)
 
 

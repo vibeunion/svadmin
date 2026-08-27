@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.58.0](https://github.com/vibeunion/svadmin/compare/ui-v0.57.0...ui-v0.58.0) (2026-08-27)
+
+
+### 🚀 Features
+
+* **ui:** complete resource CRUD workflows ([1880dda](https://github.com/vibeunion/svadmin/commit/1880ddab509d2b314809bbd6e1a3346acd7ece8c))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** resolve lint warnings and calibrate bundle size baseline ([72423e2](https://github.com/vibeunion/svadmin/commit/72423e28fa7a071059e65731290e8f60c51cc58a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.42.0
+
 ## [0.57.0](https://github.com/vibeunion/svadmin/compare/ui-v0.56.0...ui-v0.57.0) (2026-08-27)
 
 
