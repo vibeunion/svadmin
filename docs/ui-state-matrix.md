@@ -30,6 +30,8 @@
 
 `e2e/ui-state-contracts.spec.ts` 固定覆盖 `1440x900` 和 `1920x1080`，并验证媒体成功/失败/空态、预览关闭、筛选器展开/折叠、横向溢出和空态高度。测试始终在 `test-results/**/screenshots/` 生成按视口命名的截图产物。
 
+当前基线证据保存在 `docs/evidence/ui-state/ui-state-matrix-1440x900.png` 和 `docs/evidence/ui-state/ui-state-matrix-1920x1080.png`，用于 PR 正文引用和后续人工对比。
+
 ## Repository audit
 
 `scripts/ui-state-evidence-check.ts` 扫描 `example/src/pages`、`packages/ui/src/components` 和 `packages/lite/src/components`：不得直接拼装无所有者的 `<img>` 预览、不得出现未限定作用域的 `<details>`，也不得使用 160px 以上的固定最小高度制造空入口或空数据占位。看板、权限矩阵、对话框和可滚动编辑器等固定格式控件通过显式白名单保留尺寸约束；新增例外必须先说明交互所有权。
