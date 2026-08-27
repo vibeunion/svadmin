@@ -37,6 +37,17 @@ test('restores a compound peer range rewritten by the workspace plugin', () => {
       version: '0.3.4',
       peerDependencies: { '@svadmin/ui': '>=0.52.0' },
     });
+    writeFileSync(
+      join(root, 'packages/surface/CHANGELOG.md'),
+      [
+        '# Changelog',
+        '',
+        '* The following workspace dependencies were updated',
+        '  * peerDependencies',
+        '    * @svadmin/ui bumped from >=0.40.6 <0.52.0 to >=0.52.0',
+        '',
+      ].join('\n'),
+    );
 
     const baseFiles: Record<string, string> = {
       'packages/ui/package.json': JSON.stringify({ name: '@svadmin/ui', version: '0.51.0' }),
@@ -55,10 +66,17 @@ test('restores a compound peer range rewritten by the workspace plugin', () => {
 
     expect(result.bumpedPackages).toEqual([]);
     expect(result.widenedPeers).toEqual(['@svadmin/surface -> @svadmin/ui']);
+    expect(result.changedFiles).toEqual([
+      'packages/surface/CHANGELOG.md',
+      'packages/surface/package.json',
+    ]);
     expect(
       JSON.parse(readFileSync(join(root, 'packages/surface/package.json'), 'utf8'))
         .peerDependencies['@svadmin/ui'],
     ).toBe('>=0.40.6 <0.53.0');
+    expect(readFileSync(join(root, 'packages/surface/CHANGELOG.md'), 'utf8')).toContain(
+      '@svadmin/ui bumped from >=0.40.6 <0.52.0 to >=0.40.6 <0.53.0',
+    );
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
