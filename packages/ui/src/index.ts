@@ -121,6 +121,8 @@ export { default as RelationField } from './components/fields/RelationField.svel
 export { default as DateRangeField } from './components/fields/DateRangeField.svelte';
 export { default as JsonField } from './components/fields/JsonField.svelte';
 export { default as RichTextField } from './components/fields/RichTextField.svelte';
+export { default as CopyField } from './components/fields/CopyField.svelte';
+export { default as AvatarField } from './components/fields/AvatarField.svelte';
 
 // Rich text editor (requires @svadmin/editor) as a direct import in consumer app
 
@@ -262,6 +264,7 @@ export type { TimelineItem } from './components/content/AuditTimeline.svelte';
 export type { TagTone } from './components/fields/TagField.svelte';
 export type { BooleanTone } from './components/fields/BooleanField.svelte';
 export type { DateFieldFormat } from './components/fields/DateField.svelte';
+export type { AvatarStatus, AvatarSize } from './components/fields/AvatarField.svelte';
 
 export { default as FilterDropdown } from './components/FilterDropdown.svelte';
 export { default as BatchActionBar } from './components/BatchActionBar.svelte';

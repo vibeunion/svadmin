@@ -1,10 +1,31 @@
-import { describe, expect, it } from 'vitest';
-import { render } from '@testing-library/svelte';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import TagField from './TagField.svelte';
 import BooleanField from './BooleanField.svelte';
 import DateField from './DateField.svelte';
 import NumberField from './NumberField.svelte';
 import UrlField from './UrlField.svelte';
+import DateRangeField from './DateRangeField.svelte';
+import CopyField from './CopyField.svelte';
+import AvatarField from './AvatarField.svelte';
+
+const originalClipboard = Object.getOwnPropertyDescriptor(globalThis.navigator, 'clipboard');
+
+function setClipboard(writeText: (value: string) => Promise<void>): void {
+  Object.defineProperty(globalThis.navigator, 'clipboard', {
+    configurable: true,
+    value: { writeText },
+  });
+}
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  if (originalClipboard) {
+    Object.defineProperty(globalThis.navigator, 'clipboard', originalClipboard);
+  } else {
+    Reflect.deleteProperty(globalThis.navigator, 'clipboard');
+  }
+});
 
 describe('TagField enterprise capabilities', () => {
   it('renders single string and array tags', () => {
@@ -129,8 +150,6 @@ describe('UrlField enterprise capabilities', () => {
   });
 });
 
-import DateRangeField from './DateRangeField.svelte';
-
 describe('DateRangeField enterprise capabilities', () => {
   it('formats array range [start, end]', () => {
     const view = render(DateRangeField, {
@@ -167,5 +186,102 @@ describe('DateRangeField enterprise capabilities', () => {
       nullLabel: 'No Date Range',
     });
     expect(view.container.textContent).toContain('No Date Range');
+  });
+});
+
+describe('CopyField enterprise capabilities', () => {
+  it('renders copyable text and copy button', () => {
+    const view = render(CopyField, { value: 'tracking-123456789' });
+    expect(view.container.textContent).toContain('tracking-123456789');
+    expect(view.container.querySelector('button')).not.toBeNull();
+  });
+
+  it('renders masked text when masked=true', () => {
+    const view = render(CopyField, { value: 'reference-secret-value-9999', masked: true });
+    expect(view.container.textContent).toContain('refe...9999');
+  });
+
+  it('reports success only after the clipboard write resolves', async () => {
+    const writeText = vi.fn(async () => undefined);
+    const oncopy = vi.fn();
+    setClipboard(writeText);
+    const view = render(CopyField, { value: 'record-42', oncopy });
+
+    const button = view.container.querySelector<HTMLButtonElement>('[aria-label="Copy"]');
+    expect(button).not.toBeNull();
+    if (button) await fireEvent.click(button);
+
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith('record-42'));
+    expect(oncopy).toHaveBeenCalledWith('record-42');
+    expect(button?.getAttribute('aria-label')).toBe('Copied!');
+  });
+
+  it('does not report success when the clipboard write fails', async () => {
+    const writeText = vi.fn(async () => {
+      throw new Error('clipboard unavailable');
+    });
+    const oncopy = vi.fn();
+    setClipboard(writeText);
+    const view = render(CopyField, { value: 'record-42', oncopy });
+
+    const button = view.container.querySelector<HTMLButtonElement>('[aria-label="Copy"]');
+    expect(button).not.toBeNull();
+    if (button) await fireEvent.click(button);
+
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith('record-42'));
+    expect(oncopy).not.toHaveBeenCalled();
+    expect(button?.getAttribute('aria-label')).toBe('Copy');
+  });
+
+  it('renders fallback when value is empty', () => {
+    const view = render(CopyField, { value: null, nullLabel: 'No Value' });
+    expect(view.container.textContent).toContain('No Value');
+  });
+});
+
+describe('AvatarField enterprise capabilities', () => {
+  it('renders name initials when src is not provided', () => {
+    const view = render(AvatarField, { name: 'John Doe' });
+    expect(view.container.textContent).toContain('JD');
+  });
+
+  it('uses first and last names for multi-part initials', () => {
+    const view = render(AvatarField, { name: 'Ada Lovelace Byron' });
+    expect(view.container.textContent).toContain('AB');
+  });
+
+  it('retries image rendering after src changes', async () => {
+    const view = render(AvatarField, { src: '/broken.png', name: 'John Doe' });
+    const initialImage = view.container.querySelector('img');
+    expect(initialImage).not.toBeNull();
+    if (initialImage) await fireEvent.error(initialImage);
+    expect(view.container.querySelector('img')).toBeNull();
+    expect(view.container.textContent).toContain('JD');
+
+    await view.rerender({ src: '/working.png', name: 'John Doe' });
+    await waitFor(() => {
+      expect(view.container.querySelector('img')?.getAttribute('src')).toBe('/working.png');
+    });
+  });
+
+  it('renders status dot badge with an accessible label', () => {
+    const view = render(AvatarField, { name: 'Alice', status: 'online' });
+    expect(view.container.querySelector('.bg-emerald-500')).not.toBeNull();
+    expect(view.container.querySelector('[aria-label="Status: online"]')).not.toBeNull();
+  });
+
+  it('renders label and subtitle when showName is true', () => {
+    const view = render(AvatarField, {
+      name: 'Bob Smith',
+      subtitle: 'Administrator',
+      showName: true,
+    });
+    expect(view.container.textContent).toContain('Bob Smith');
+    expect(view.container.textContent).toContain('Administrator');
+  });
+
+  it('renders fallback when no meaningful name or src is given', () => {
+    const view = render(AvatarField, { name: '   ', nullLabel: 'Unknown User' });
+    expect(view.container.textContent).toContain('Unknown User');
   });
 });
