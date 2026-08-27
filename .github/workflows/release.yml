@@ -10,6 +10,10 @@ permissions:
   pull-requests: write
   actions: write
 
+concurrency:
+  group: release-please-${{ github.repository }}
+  cancel-in-progress: false
+
 jobs:
   release-please:
     if: github.ref == 'refs/heads/main'
@@ -25,6 +29,52 @@ jobs:
           token: ${{ secrets.RELEASE_PAT }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+      - name: Resolve release pull request branch
+        id: release-pr
+        if: steps.release.outputs.prs_created == 'true'
+        env:
+          RELEASE_PR: ${{ steps.release.outputs.pr }}
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const pullRequest = JSON.parse(process.env.RELEASE_PR || '{}');
+          if (!/^release-please--branches--/.test(pullRequest.headBranchName || '')) {
+            throw new Error(`Invalid release pull request branch: ${pullRequest.headBranchName}`);
+          }
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `branch=${pullRequest.headBranchName}\n`);
+          NODE
+
+      - uses: actions/checkout@v7
+        if: steps.release.outputs.prs_created == 'true'
+        with:
+          ref: ${{ steps.release-pr.outputs.branch }}
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_PAT }}
+
+      - uses: oven-sh/setup-bun@v2
+        if: steps.release.outputs.prs_created == 'true'
+        with:
+          bun-version: "1.4.0"
+
+      - name: Synchronize release peer ranges and lockfile
+        if: steps.release.outputs.prs_created == 'true'
+        run: |
+          git fetch origin main
+          bun scripts/sync-release-pr.ts --base-ref origin/main
+          bun install
+
+      - name: Commit synchronized release artifacts
+        if: steps.release.outputs.prs_created == 'true'
+        run: |
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .release-please-manifest.json bun.lock packages/*/package.json packages/*/CHANGELOG.md
+          git commit -m "chore(release): synchronize workspace metadata"
+          git push origin HEAD:${{ steps.release-pr.outputs.branch }}
 
       - name: Resolve immutable release SHA
         id: release-ref
