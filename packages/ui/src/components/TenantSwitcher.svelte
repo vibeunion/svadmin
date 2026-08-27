@@ -32,7 +32,7 @@
       {#snippet child({ props }: { props: Record<string, unknown> })}
         <button
           type="button"
-          {...props as any}
+          {...props}
           class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-sidebar-accent/50
             {collapsed ? 'justify-center' : ''}"
         >

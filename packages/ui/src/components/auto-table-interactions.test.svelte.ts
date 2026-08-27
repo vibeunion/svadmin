@@ -644,7 +644,9 @@ describe('AutoTable interactions', () => {
     });
 
     const emptyCreateButtons = await emptyView.findAllByRole('button', { name: '新建' });
-    await fireEvent.click(emptyCreateButtons.at(-1)!);
+    const targetCreateButton = emptyCreateButtons.at(-1);
+    if (!targetCreateButton) throw new Error('Expected create button');
+    await fireEvent.click(targetCreateButton);
     expect(createNavigate).toHaveBeenLastCalledWith({
       to: '/users/create?q=user&records=1',
       type: 'push',

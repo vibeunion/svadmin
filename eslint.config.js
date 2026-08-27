@@ -134,6 +134,9 @@ export default ts.config(
       'playwright-report/**',
       'docs/.astro/**',
       'tsconfig.tsbuildinfo',
+      '.agents/**',
+      'output/**',
+      'private/**',
     ],
   },
 );
