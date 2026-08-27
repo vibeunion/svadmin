@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.50.0](https://github.com/vibeunion/svadmin/compare/ui-v0.49.3...ui-v0.50.0) (2026-08-27)
+
+
+### 🚀 Features
+
+* **ui:** add high-density enterprise page components and filter toolbar ([#294](https://github.com/vibeunion/svadmin/issues/294)) ([a83a111](https://github.com/vibeunion/svadmin/commit/a83a111540f5678db319ae7ce40ae73374b92193))
+
 ## [0.49.3](https://github.com/vibeunion/svadmin/compare/ui-v0.49.2...ui-v0.49.3) (2026-08-26)
 
 
