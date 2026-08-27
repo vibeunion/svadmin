@@ -115,18 +115,18 @@ function synchronizeLockfileWorkspaceVersions(
   let currentWorkspacePath: string | undefined;
   let changed = false;
   for (let index = 0; index < lines.length; index += 1) {
-    const workspaceMatch = lines[index].match(/^    ("(?:packages\/[^"\\]+|docs|example)"\s*): \{$/);
+    const workspaceMatch = lines[index].match(/^(?:\x20){4}("(?:packages\/[^"\\]+|docs|example)"\s*): \{$/);
     if (workspaceMatch) {
       currentWorkspacePath = JSON.parse(workspaceMatch[1]) as string;
       continue;
     }
-    if (/^    "[^"\\]+": \{$/.test(lines[index])) {
+    if (/^(?:\x20){4}"[^"\\]+": \{$/.test(lines[index])) {
       currentWorkspacePath = undefined;
       continue;
     }
     if (!currentWorkspacePath) continue;
 
-    const versionMatch = lines[index].match(/^(      "version": ")[^"]+(",?)$/);
+    const versionMatch = lines[index].match(/^(?:\x20){6}("version": ")[^"]+(",?)$/);
     const current = packagesByPath.get(currentWorkspacePath);
     if (!versionMatch || !current?.manifest.version) continue;
     const nextLine = `${versionMatch[1]}${current.manifest.version}${versionMatch[2]}`;
