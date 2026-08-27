@@ -1,5 +1,10 @@
 <script module lang="ts">
   export type DateRangeFormat = 'date' | 'time' | 'datetime' | 'iso';
+  export type DateRangeValue =
+    | [string | number | Date | null | undefined, string | number | Date | null | undefined]
+    | { start?: string | number | Date | null; end?: string | number | Date | null; from?: string | number | Date | null; to?: string | number | Date | null }
+    | null
+    | undefined;
 </script>
 
 <script lang="ts">
@@ -7,7 +12,7 @@
   import { cn } from '../../utils.js';
 
   interface Props {
-    value?: [string | number | Date | null | undefined, string | number | Date | null | undefined] | { start?: any; end?: any; from?: any; to?: any } | null | undefined;
+    value?: DateRangeValue;
     startDate?: string | number | Date | null | undefined;
     endDate?: string | number | Date | null | undefined;
     separator?: string;
@@ -36,7 +41,8 @@
     if (startDate !== undefined) return startDate;
     if (Array.isArray(value)) return value[0];
     if (value && typeof value === 'object') {
-      return (value as any).start ?? (value as any).from;
+      const obj = value as Record<string, unknown>;
+      return (obj.start ?? obj.from) as string | number | Date | null | undefined;
     }
     return undefined;
   });
@@ -45,7 +51,8 @@
     if (endDate !== undefined) return endDate;
     if (Array.isArray(value)) return value[1];
     if (value && typeof value === 'object') {
-      return (value as any).end ?? (value as any).to;
+      const obj = value as Record<string, unknown>;
+      return (obj.end ?? obj.to) as string | number | Date | null | undefined;
     }
     return undefined;
   });

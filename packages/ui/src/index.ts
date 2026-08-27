@@ -265,4 +265,4 @@ export type { DateFieldFormat } from './components/fields/DateField.svelte';
 
 export { default as FilterDropdown } from './components/FilterDropdown.svelte';
 export { default as BatchActionBar } from './components/BatchActionBar.svelte';
-export type { DateRangeFormat } from './components/fields/DateRangeField.svelte';
+export type { DateRangeFormat, DateRangeValue } from './components/fields/DateRangeField.svelte';

@@ -1,10 +1,8 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import { Filter, X, Check, Search } from '@lucide/svelte';
+  import { Filter, X, Search } from '@lucide/svelte';
   import { Button } from './ui/button/index.js';
   import { Input } from './ui/input/index.js';
-  import { Badge } from './ui/badge/index.js';
-  import { Checkbox } from './ui/checkbox/index.js';
   import { clickOutside } from '../actions.js';
   import { cn } from '../utils.js';
 
@@ -17,13 +15,13 @@
     title?: string;
     open?: boolean;
     active?: boolean;
-    value?: any;
+    value?: unknown;
     options?: OptionItem[];
     placeholder?: string;
     applyLabel?: string;
     resetLabel?: string;
     align?: 'left' | 'right';
-    onapply?: (value: any) => void;
+    onapply?: (value: unknown) => void;
     onreset?: () => void;
     children?: Snippet;
     trigger?: Snippet;
@@ -49,7 +47,7 @@
 
   let internalTextValue = $state(typeof value === 'string' ? value : '');
   let internalSelectedValues = $state<(string | number)[]>(
-    Array.isArray(value) ? [...value] : value != null && value !== '' ? [value] : []
+    Array.isArray(value) ? [...value] : value != null && value !== '' ? [value as string | number] : []
   );
   let optionSearch = $state('');
 
@@ -61,11 +59,7 @@
     if (Array.isArray(value)) {
       internalSelectedValues = [...value];
     } else if (value != null && value !== '') {
-      internalSelectedValues = [value];
-    } else if (value == null) {
-      if (typeof internalTextValue === 'string' && value === undefined) {
-        // preserve or clear
-      }
+      internalSelectedValues = [value as string | number];
     }
   });
 
