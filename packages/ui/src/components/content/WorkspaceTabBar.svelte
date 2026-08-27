@@ -4,7 +4,7 @@
   export interface WorkspaceTabItem {
     id: string;
     label: string;
-    icon?: Component<any>;
+    icon?: Component<{ class?: string; 'aria-hidden'?: string | boolean }>;
     badge?: string | number;
     disabled?: boolean;
     description?: string;

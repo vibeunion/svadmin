@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/svelte';
+import { createRawSnippet } from 'svelte';
 import { describe, expect, it, vi } from 'vitest';
 import WorkspaceTabBar from './WorkspaceTabBar.svelte';
 import WorkspaceActionBar from './WorkspaceActionBar.svelte';
@@ -59,7 +60,7 @@ describe('WorkspaceActionBar status tones', () => {
       title: 'Action required',
       status: 'Signed',
       statusTone: 'success',
-      primaryAction: () => null as any,
+      primaryAction: createRawSnippet(() => ({ render: () => '<button type="button">Continue</button>' })),
     });
 
     const badge = container.querySelector('span.text-success');
