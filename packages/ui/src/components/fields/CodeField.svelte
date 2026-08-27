@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte';
   import { Copy, Check } from '@lucide/svelte';
   import { Badge } from '../ui/badge/index.js';
   import { cn } from '../../utils.js';
@@ -27,6 +28,12 @@
 
   let copied = $state(false);
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
+  let destroyed = false;
+
+  onDestroy(() => {
+    destroyed = true;
+    if (timeoutId) clearTimeout(timeoutId);
+  });
 
   const formattedCode = $derived.by(() => {
     if (value == null || value === '') return '';
@@ -39,20 +46,25 @@
     }
   });
 
-  async function handleCopy() {
+  async function handleCopy(event: MouseEvent) {
+    event.stopPropagation();
     if (!formattedCode || !copyable) return;
+
+    const writeText = globalThis.navigator?.clipboard?.writeText;
+    if (!writeText) return;
+
     try {
-      if (typeof navigator !== 'undefined' && navigator.clipboard) {
-        await navigator.clipboard.writeText(formattedCode);
-      }
+      await writeText.call(globalThis.navigator.clipboard, formattedCode);
     } catch {
-      // Fallback
+      return;
     }
 
+    if (destroyed) return;
     copied = true;
     if (timeoutId) clearTimeout(timeoutId);
     timeoutId = setTimeout(() => {
       copied = false;
+      timeoutId = null;
     }, 1500);
   }
 </script>

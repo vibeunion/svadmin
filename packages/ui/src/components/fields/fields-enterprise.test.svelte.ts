@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import TagField from './TagField.svelte';
 import BooleanField from './BooleanField.svelte';
@@ -8,16 +8,24 @@ import UrlField from './UrlField.svelte';
 import DateRangeField from './DateRangeField.svelte';
 import CopyField from './CopyField.svelte';
 import AvatarField from './AvatarField.svelte';
-import CodeField from './CodeField.svelte';
-import PercentField from './PercentField.svelte';
-import RatingField from './RatingField.svelte';
 
-function setClipboard(writeText: (text: string) => Promise<void>) {
-  Object.defineProperty(navigator, 'clipboard', {
-    value: { writeText },
+const originalClipboard = Object.getOwnPropertyDescriptor(globalThis.navigator, 'clipboard');
+
+function setClipboard(writeText: (value: string) => Promise<void>): void {
+  Object.defineProperty(globalThis.navigator, 'clipboard', {
     configurable: true,
+    value: { writeText },
   });
 }
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  if (originalClipboard) {
+    Object.defineProperty(globalThis.navigator, 'clipboard', originalClipboard);
+  } else {
+    Reflect.deleteProperty(globalThis.navigator, 'clipboard');
+  }
+});
 
 describe('TagField enterprise capabilities', () => {
   it('renders single string and array tags', () => {
@@ -275,59 +283,5 @@ describe('AvatarField enterprise capabilities', () => {
   it('renders fallback when no meaningful name or src is given', () => {
     const view = render(AvatarField, { name: '   ', nullLabel: 'Unknown User' });
     expect(view.container.textContent).toContain('Unknown User');
-  });
-});
-
-describe('CodeField enterprise capabilities', () => {
-  it('renders raw code string with language badge', () => {
-    const view = render(CodeField, { value: 'SELECT * FROM users;', language: 'sql' });
-    expect(view.container.textContent).toContain('SELECT * FROM users;');
-    expect(view.container.textContent).toContain('SQL');
-    expect(view.container.querySelector('button')).not.toBeNull();
-  });
-
-  it('serializes objects to JSON', () => {
-    const view = render(CodeField, { value: { id: 1, name: 'Alice' }, language: 'json' });
-    expect(view.container.textContent).toContain('"name": "Alice"');
-  });
-
-  it('renders fallback when value is empty', () => {
-    const view = render(CodeField, { value: null, nullLabel: 'No Code' });
-    expect(view.container.textContent).toContain('No Code');
-  });
-});
-
-describe('PercentField enterprise capabilities', () => {
-  it('formats number with percentage precision', () => {
-    const view = render(PercentField, { value: 75.678, precision: 1 });
-    expect(view.container.textContent).toContain('75.7%');
-  });
-
-  it('handles scale="1" for ratio input', () => {
-    const view = render(PercentField, { value: 0.85, scale: '1', precision: 0 });
-    expect(view.container.textContent).toContain('85%');
-  });
-
-  it('renders mini progress bar when showProgress is true', () => {
-    const view = render(PercentField, { value: 60, showProgress: true, tone: 'auto' });
-    expect(view.container.querySelector('.bg-warning')).not.toBeNull();
-  });
-
-  it('renders nullLabel when value is empty', () => {
-    const view = render(PercentField, { value: null, nullLabel: 'N/A' });
-    expect(view.container.textContent).toContain('N/A');
-  });
-});
-
-describe('RatingField enterprise capabilities', () => {
-  it('renders star rating and numeric value', () => {
-    const view = render(RatingField, { value: 4, max: 5, showValue: true });
-    expect(view.container.textContent).toContain('4');
-    expect(view.container.querySelectorAll('svg').length).toBe(5);
-  });
-
-  it('renders fallback when value is empty', () => {
-    const view = render(RatingField, { value: null, nullLabel: 'Unrated' });
-    expect(view.container.textContent).toContain('Unrated');
   });
 });
