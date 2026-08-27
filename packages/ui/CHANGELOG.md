@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.56.0](https://github.com/vibeunion/svadmin/compare/ui-v0.55.1...ui-v0.56.0) (2026-08-27)
+
+
+### 🚀 Features
+
+* **ui:** add WorkspaceTabBar and support semantic status tones in WorkspaceActionBar ([c37a8a9](https://github.com/vibeunion/svadmin/commit/c37a8a9c85dd856f280aafca93ca712ce4fda7c8))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** normalize DetailDrawer layout, edge padding and header extra slot ([2251388](https://github.com/vibeunion/svadmin/commit/2251388632e814962d3d169089b73b36d9d2230d))
+
 ## [0.55.1](https://github.com/vibeunion/svadmin/compare/ui-v0.55.0...ui-v0.55.1) (2026-08-27)
 
 
