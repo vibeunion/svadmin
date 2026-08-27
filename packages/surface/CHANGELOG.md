@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/vibeunion/svadmin/compare/surface-v0.3.1...surface-v0.3.2) (2026-08-27)
+
+
+### 🐛 Bug Fixes
+
+* **surface:** allow ui 0.50 releases ([#296](https://github.com/vibeunion/svadmin/issues/296)) ([7d69dd1](https://github.com/vibeunion/svadmin/commit/7d69dd19fb74e1ba1fcb6fde5d6ac40702f28d12))
+
 ## [0.3.1](https://github.com/vibeunion/svadmin/compare/surface-v0.3.0...surface-v0.3.1) (2026-08-26)
 
 
