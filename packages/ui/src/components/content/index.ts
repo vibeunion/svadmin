@@ -46,3 +46,5 @@ export { default as FeedbackNotice } from './FeedbackNotice.svelte';
 export type { FeedbackNoticeTone, FeedbackNoticePriority } from './FeedbackNotice.svelte';
 export { default as AuditTimeline } from './AuditTimeline.svelte';
 export type { TimelineItem } from './AuditTimeline.svelte';
+export { default as MediaThumbnail } from './MediaThumbnail.svelte';
+export type { MediaThumbnailSize, MediaThumbnailFit } from './MediaThumbnail.svelte';

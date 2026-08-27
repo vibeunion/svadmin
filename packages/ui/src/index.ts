@@ -280,3 +280,5 @@ export type { DateRangeFormat, DateRangeValue } from './components/fields/DateRa
 export type { PercentTone } from './components/fields/PercentField.svelte';
 export type { RatingSize } from './components/fields/RatingField.svelte';
 export type { CurrencyTone } from './components/fields/CurrencyField.svelte';
+export { default as MediaThumbnail } from './components/content/MediaThumbnail.svelte';
+export type { MediaThumbnailSize, MediaThumbnailFit } from './components/content/MediaThumbnail.svelte';

@@ -604,6 +604,16 @@ main {
   font-weight: 600;
 }
 
+/* Collapsible details & filter normalization */
+details:not([open]) > :not(summary) {
+  display: none !important;
+}
+
+details[data-svadmin-filter]:not([open]),
+details.svadmin-collapsible-filter:not([open]) {
+  display: none;
+}
+
 /* --- Stripe-first layout preset (clean-flat) --- */
 /* Keep this public class for layoutPreset API compatibility. The preset only
  * adjusts density and composition; color, focus, and elevation stay semantic. */
