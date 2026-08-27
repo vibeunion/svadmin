@@ -1,6 +1,6 @@
-import { cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
+import { cleanup, fireEvent, render, waitFor, within } from '@testing-library/svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { AuthProvider, CheckResult, DataProvider, ResourceDefinition, RouterProvider } from '@svadmin/core';
+import type { AccessControlProvider, AuthProvider, CheckResult, DataProvider, ResourceDefinition, RouterProvider } from '@svadmin/core';
 import { resetContext } from '@svadmin/core';
 import AdminApp from './AdminApp.svelte';
 import TestPage from './admin-app-auth-navigation.test-page.svelte';
@@ -93,6 +93,142 @@ afterEach(() => {
 });
 
 describe('AdminApp authenticated navigation', () => {
+  it.each([
+    ['#/posts', 'list', undefined, 'list'],
+    ['#/posts/create', 'create', undefined, 'create'],
+    ['#/posts/edit/blocked', 'edit', 'blocked', 'edit'],
+    ['#/posts/show/blocked', 'show', 'blocked', 'show'],
+  ] as const)('does not mount the %s resource page when %s access is denied', async (hash, _label, id, action) => {
+    window.location.hash = hash;
+    const mounted = vi.fn();
+    pageMountedListener = mounted;
+    window.addEventListener('svadmin:test-page-mounted', pageMountedListener);
+    const can = vi.fn<AccessControlProvider['can']>(async () => ({ can: false, reason: 'Blocked by policy' }));
+
+    const view = render(AdminApp, {
+      dataProvider: createDataProvider(),
+      accessControlProvider: { can },
+      resources,
+      resourcePages: {
+        posts: { list: TestPage, create: TestPage, edit: TestPage, show: TestPage },
+      },
+    });
+
+    expect(await view.findByText('Blocked by policy')).not.toBeNull();
+    expect(view.queryByRole('region', { name: 'Posts page' })).toBeNull();
+    expect(mounted).not.toHaveBeenCalled();
+    expect(can).toHaveBeenCalledWith({
+      resource: 'posts',
+      action,
+      params: id === undefined ? undefined : { id },
+      meta: undefined,
+    });
+  });
+
+  it('requires create and source-record show access before mounting a clone page', async () => {
+    window.location.hash = '#/posts/clone/blocked';
+    const mounted = vi.fn();
+    pageMountedListener = mounted;
+    window.addEventListener('svadmin:test-page-mounted', pageMountedListener);
+    const can = vi.fn<AccessControlProvider['can']>(async (request) => {
+      if (Array.isArray(request)) return request.map(() => ({ can: false }));
+      return { can: request.action === 'create' };
+    });
+
+    const view = render(AdminApp, {
+      dataProvider: createDataProvider(),
+      accessControlProvider: { can },
+      resources,
+      resourcePages: { posts: { clone: TestPage } },
+    });
+
+    expect(await view.findByText('You do not have permission to view this content.')).not.toBeNull();
+    expect(mounted).not.toHaveBeenCalled();
+    expect(can).toHaveBeenCalledWith(expect.objectContaining({ resource: 'posts', action: 'create', params: { id: 'blocked' } }));
+    expect(can).toHaveBeenCalledWith(expect.objectContaining({ resource: 'posts', action: 'show', params: { id: 'blocked' } }));
+  });
+
+  it('does not fetch a denied record through a direct show route', async () => {
+    window.location.hash = '#/posts/show/blocked';
+    const dataProvider = createDataProvider();
+    const getOne = vi.spyOn(dataProvider, 'getOne');
+    const view = render(AdminApp, {
+      dataProvider,
+      accessControlProvider: { can: async () => ({ can: false }) },
+      resources,
+    });
+
+    expect(await view.findByText('You do not have permission to view this content.')).not.toBeNull();
+    expect(getOne).not.toHaveBeenCalled();
+  });
+
+  it('hides denied resource navigation and create actions from the command palette', async () => {
+    const can = vi.fn<AccessControlProvider['can']>(async (request) => {
+      if (Array.isArray(request)) return request.map(() => ({ can: false }));
+      return { can: request.action !== 'list' && request.action !== 'create' };
+    });
+    const view = render(AdminApp, {
+      dataProvider: createDataProvider(),
+      accessControlProvider: { can },
+      resources,
+    });
+
+    await fireEvent.keyDown(window, { key: 'k', ctrlKey: true });
+    const dialog = await view.findByRole('dialog');
+
+    await waitFor(() => {
+      expect(within(dialog).queryByText('Posts')).toBeNull();
+      expect(within(dialog).queryByText(/Create Posts|新建 Posts/)).toBeNull();
+    });
+    expect(can).toHaveBeenCalledWith(expect.objectContaining({ resource: 'posts', action: 'list' }));
+    expect(can).toHaveBeenCalledWith(expect.objectContaining({ resource: 'posts', action: 'create' }));
+  });
+
+  it.each([
+    ['#/posts/create', { canCreate: false }, 'create'],
+    ['#/posts/edit/blocked', { canEdit: false }, 'edit'],
+    ['#/posts/show/blocked', { canShow: false }, 'show'],
+  ] as const)('honors resource-level flags on the %s deep link', async (hash, resourceFlags, page) => {
+    window.location.hash = hash;
+    const mounted = vi.fn();
+    pageMountedListener = mounted;
+    window.addEventListener('svadmin:test-page-mounted', pageMountedListener);
+    const guardedResources: ResourceDefinition[] = [{ ...resources[0], ...resourceFlags }];
+
+    const view = render(AdminApp, {
+      dataProvider: createDataProvider(),
+      resources: guardedResources,
+      resourcePages: { posts: { [page]: TestPage } },
+    });
+
+    expect(await view.findByText('You do not have permission to view this content.')).not.toBeNull();
+    expect(mounted).not.toHaveBeenCalled();
+  });
+
+  it('restores safe list state from the show page return action', async () => {
+    window.location.hash = '#/posts/show/blocked?q=review&page=2&detail=blocked&token=secret';
+    const view = render(AdminApp, {
+      dataProvider: createDataProvider(),
+      resources,
+    });
+
+    await fireEvent.click(await view.findByRole('button', { name: 'Back to List' }));
+
+    await waitFor(() => expect(window.location.hash).toBe('#/posts?page=2&q=review'));
+  });
+
+  it('restores safe list state from the edit form back action', async () => {
+    window.location.hash = '#/posts/edit/blocked?q=review&page=2&detail=blocked&tenantId=private';
+    const view = render(AdminApp, {
+      dataProvider: createDataProvider(),
+      resources,
+    });
+
+    await fireEvent.click(await view.findByRole('button', { name: 'Back' }));
+
+    await waitFor(() => expect(window.location.hash).toBe('#/posts?page=2&q=review'));
+  });
+
   it('blocks the layout until the initial auth check completes', async () => {
     const initialCheck = deferredCheck();
 

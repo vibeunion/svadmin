@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { captureAdminContext } from '@svadmin/core';
+  import { getResource, useCan, useNavigation } from '@svadmin/core';
   import type { Component } from 'svelte';
   import AutoTable from './AutoTable.svelte';
   import { Badge } from './ui/badge/index.js';
@@ -75,7 +75,10 @@
     highlightsLabel = 'Focus queue',
     workspaceStyle = 'operations',
   }: Props = $props();
-  const adminContext = captureAdminContext();
+  const navigation = useNavigation();
+  const resource = $derived(getResource(resourceName));
+  const createPermission = useCan(() => ({ resource: resourceName, action: 'create' }));
+  const showCreate = $derived(resource.canCreate !== false && createPermission.allowed);
 </script>
 
 <div class="space-y-6" data-svadmin-resource-operations={resourceName} data-svadmin-workspace-style={workspaceStyle} data-svadmin-layout-identity={workspaceStyle}>
@@ -84,7 +87,9 @@
       {#if Icon}<span class="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-card text-primary"><Icon class="size-4" /></span>{/if}
       <div class="min-w-0"><Badge variant="outline">{eyebrow}</Badge><h1 class="mt-2 text-xl font-semibold text-foreground">{title}</h1><p class="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">{description}</p></div>
     </div>
-    <Button class="shrink-0" size="sm" onclick={() => adminContext.navigate(`/${resourceName}/create`)}>{actionLabel}</Button>
+    {#if showCreate}
+      <Button class="shrink-0" size="sm" onclick={() => navigation.create(resourceName)}>{actionLabel}</Button>
+    {/if}
   </header>
 
   {#if workspaceStyle === 'inventory'}

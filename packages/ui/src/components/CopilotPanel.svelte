@@ -181,16 +181,16 @@ Keep it concise, professional, and use bullet points.`;
         </h4>
         <div class="space-y-2">
           {#if ctx.currentView === 'list'}
-            <button class="w-full flex items-center gap-2 text-left p-2 rounded-lg hover:bg-muted border border-transparent hover:border-border transition-colors text-sm">
+            <button type="button" class="w-full flex items-center gap-2 text-left p-2 rounded-lg hover:bg-muted border border-transparent hover:border-border transition-colors text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               <div class="bg-background rounded shadow-sm p-1"><Check class="h-3.5 w-3.5 text-muted-foreground" /></div>
               <span>Generate monthly report</span>
             </button>
-            <button class="w-full flex items-center gap-2 text-left p-2 rounded-lg hover:bg-muted border border-transparent hover:border-border transition-colors text-sm">
+            <button type="button" class="w-full flex items-center gap-2 text-left p-2 rounded-lg hover:bg-muted border border-transparent hover:border-border transition-colors text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               <div class="bg-background rounded shadow-sm p-1"><Check class="h-3.5 w-3.5 text-muted-foreground" /></div>
               <span>Find anomalies in {ctx.currentResource}</span>
             </button>
           {:else if ctx.currentView === 'edit' || ctx.currentView === 'create'}
-            <button class="w-full flex items-center gap-2 text-left p-2 rounded-lg hover:bg-muted border border-transparent hover:border-border transition-colors text-sm">
+            <button type="button" class="w-full flex items-center gap-2 text-left p-2 rounded-lg hover:bg-muted border border-transparent hover:border-border transition-colors text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               <div class="bg-background rounded shadow-sm p-1"><Check class="h-3.5 w-3.5 text-muted-foreground" /></div>
               <span>Auto-fill form from context</span>
             </button>

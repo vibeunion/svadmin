@@ -19,7 +19,7 @@
   const res = $derived((() => {
     try { return getResource(resourceName); } catch { return null; }
   })());
-  const displayLabel = $derived(label ?? res?.label ?? i18n.t('common.list') ?? resourceName);
+  const displayLabel = $derived(label ?? (hideText ? i18n.t('common.backToList') : (res?.label ?? i18n.t('common.list') ?? resourceName)));
 
   function navigateToList() {
     const navigate = () => nav.list(resourceName);

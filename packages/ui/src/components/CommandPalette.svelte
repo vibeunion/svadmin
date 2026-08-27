@@ -1,9 +1,10 @@
 <script lang="ts">
-  import { captureAdminContext, getResources, toggleTheme } from '@svadmin/core';
+  import { captureAdminContext, getResources, toggleTheme, useNavigation } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { Command } from './ui/command/index.js';
   import * as Dialog from './ui/dialog/index.js';
   import { Search, LayoutDashboard, Plus, Sun, FileText, Sparkles } from '@lucide/svelte';
+  import CanAccess from './CanAccess.svelte';
 
   const i18n = useTranslation();
 
@@ -15,6 +16,7 @@
 
   let { open = $bindable(false), onAskAI }: Props = $props();
   const adminContext = captureAdminContext();
+  const navigation = useNavigation();
   let searchValue = $state('');
 
   const resources = $derived(getResources());
@@ -95,14 +97,27 @@
             {i18n.t('common.home')}
           </Command.Item>
           {#each resources as r, _i (_i)}
-            <Command.Item
-              value={r.name}
-              onSelect={() => act(() => adminContext.navigate(`/${r.name}`))}
-              class={itemClass}
-            >
-              <FileText class="h-4 w-4 text-muted-foreground" />
-              {r.label}
-            </Command.Item>
+            {#if adminContext.accessControlProvider}
+              <CanAccess resource={r.name} action="list">
+                <Command.Item
+                  value={r.name}
+                  onSelect={() => act(() => navigation.list(r.name))}
+                  class={itemClass}
+                >
+                  <FileText class="h-4 w-4 text-muted-foreground" />
+                  {r.label}
+                </Command.Item>
+              </CanAccess>
+            {:else}
+              <Command.Item
+                value={r.name}
+                onSelect={() => act(() => navigation.list(r.name))}
+                class={itemClass}
+              >
+                <FileText class="h-4 w-4 text-muted-foreground" />
+                {r.label}
+              </Command.Item>
+            {/if}
           {/each}
         </Command.Group>
 
@@ -111,14 +126,21 @@
         <!-- Actions -->
         <Command.Group heading={i18n.t('common.actions')}>
           {#each resources as r, _i (_i)}
-            <Command.Item
-              value={"create-" + r.name}
-              onSelect={() => act(() => adminContext.navigate(`/${r.name}/create`))}
-              class={itemClass}
-            >
-              <Plus class="h-4 w-4 text-muted-foreground" />
-              {i18n.t('common.create')} {r.label}
-            </Command.Item>
+            {#if r.canCreate !== false}
+              {#if adminContext.accessControlProvider}
+                <CanAccess resource={r.name} action="create">
+                  <Command.Item value={"create-" + r.name} onSelect={() => act(() => navigation.create(r.name))} class={itemClass}>
+                    <Plus class="h-4 w-4 text-muted-foreground" />
+                    {i18n.t('common.create')} {r.label}
+                  </Command.Item>
+                </CanAccess>
+              {:else}
+                <Command.Item value={"create-" + r.name} onSelect={() => act(() => navigation.create(r.name))} class={itemClass}>
+                  <Plus class="h-4 w-4 text-muted-foreground" />
+                  {i18n.t('common.create')} {r.label}
+                </Command.Item>
+              {/if}
+            {/if}
           {/each}
           <Command.Item
             value="toggle-theme"

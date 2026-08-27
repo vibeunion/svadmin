@@ -1,8 +1,17 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { Toaster, toast as sonner, type ToasterProps } from 'svelte-sonner';
-  import { getResolvedTheme, getToastQueue, consumeToastQueue, getPromiseQueue, consumePromiseQueue } from '@svadmin/core';
+  import {
+    consumePromiseQueue,
+    consumeToastQueue,
+    getPromiseQueue,
+    getResolvedTheme,
+    getToastQueue,
+    getToasts,
+    removeToast,
+  } from '@svadmin/core';
   import { registerToastHost, type ToastHostRegistration } from './toast-host.svelte.js';
+  import UndoableNotification from './UndoableNotification.svelte';
 
   let host = $state<ToastHostRegistration | null>(null);
   const isActiveHost = $derived(host?.isActive() ?? false);
@@ -56,8 +65,33 @@
       },
     }
   } satisfies ToasterProps);
+
+  function undo(id: number, callback?: () => void): void {
+    removeToast(id);
+    callback?.();
+  }
+
+  function commit(id: number, callback?: () => void): void {
+    removeToast(id);
+    callback?.();
+  }
 </script>
 
 {#if isActiveHost}
   <Toaster {...toasterProps} />
+  <div
+    class="pointer-events-none fixed bottom-4 left-4 right-4 z-[100] flex flex-col-reverse gap-2 sm:bottom-6 sm:left-1/2 sm:right-auto sm:w-[min(32rem,calc(100vw-3rem))] sm:-translate-x-1/2"
+    data-svadmin-undo-stack
+  >
+    {#each getToasts().slice(-3) as item (item.id)}
+      <UndoableNotification
+        message={item.message}
+        duration={item.duration}
+        embedded
+        managedExternally
+        onUndo={() => undo(item.id, item.onUndo)}
+        onTimeout={() => commit(item.id, item.onTimeout)}
+      />
+    {/each}
+  </div>
 {/if}

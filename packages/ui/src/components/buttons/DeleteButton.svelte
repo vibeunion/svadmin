@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import { useDelete, useCan, useTranslation } from '@svadmin/core';
+  import { getResource, useDelete, useCan, useTranslation } from '@svadmin/core';
   import { Button } from '../ui/button/index.js';
   import { Trash2 } from '@lucide/svelte';
   import type { ButtonAccessControl } from './access-control';
@@ -31,6 +31,13 @@
   }>();
 
   const deleteMut = useDelete({ get resource() { return resource; }, get mutationMode() { return undoable ? 'undoable' as const : 'pessimistic' as const; } });
+  const resourceDefinition = $derived.by(() => {
+    try {
+      return getResource(resource);
+    } catch {
+      return null;
+    }
+  });
   const can = useCan(() => ({
     resource,
     action: 'delete',
@@ -38,8 +45,8 @@
     meta: accessControl?.meta,
     queryOptions: { enabled: accessControl?.enabled ?? true }
   }));
-  const hidden = $derived(accessControl?.hideIfUnauthorized && !can.allowed);
   const displayText = $derived(label ?? i18n.t('common.delete'));
+  const hidden = $derived(resourceDefinition?.canDelete === false || (accessControl?.hideIfUnauthorized && !can.allowed));
   let confirming = $state(false);
 
   async function handleDelete() {

@@ -83,4 +83,37 @@ describe('Toast host coordination', () => {
       expect(sonner.warning).toHaveBeenCalledTimes(1);
     });
   });
+
+  it('renders undoable mutations through the active host and cancels the timeout', async () => {
+    const onUndo = vi.fn();
+    const onTimeout = vi.fn();
+    render(ToastHostHarness);
+    await waitFor(() => expect(screen.getAllByTestId('sonner-toaster')).toHaveLength(1));
+
+    toast.undoable('Delete can be undone', 60_000, onUndo, onTimeout);
+
+    const notification = await screen.findByRole('status');
+    expect(within(notification).getByText('Delete can be undone')).toBeTruthy();
+    await fireEvent.click(within(notification).getByRole('button', { name: /撤销|Undo/ }));
+
+    expect(onUndo).toHaveBeenCalledTimes(1);
+    expect(onTimeout).not.toHaveBeenCalled();
+    await waitFor(() => expect(screen.queryByRole('status')).toBeNull());
+  });
+
+  it('lets users dismiss an undoable notification to commit immediately', async () => {
+    const onUndo = vi.fn();
+    const onTimeout = vi.fn();
+    render(ToastHostHarness);
+    await waitFor(() => expect(screen.getAllByTestId('sonner-toaster')).toHaveLength(1));
+
+    toast.undoable('Commit pending delete', 60_000, onUndo, onTimeout);
+
+    const notification = await screen.findByRole('status');
+    await fireEvent.click(within(notification).getByRole('button', { name: /关闭|Close/ }));
+
+    expect(onTimeout).toHaveBeenCalledTimes(1);
+    expect(onUndo).not.toHaveBeenCalled();
+    await waitFor(() => expect(screen.queryByRole('status')).toBeNull());
+  });
 });

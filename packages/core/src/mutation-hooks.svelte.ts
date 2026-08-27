@@ -91,7 +91,7 @@ interface MutationContext {
   previousQueries?: [readonly unknown[], unknown][];
 }
 
-interface MutationCallbacks {
+export interface MutationCallbacks {
   onMutate?: (variables: unknown) => unknown | Promise<unknown>;
   onSuccess?: (data: unknown, variables: unknown, context: unknown) => void;
   onError?: (error: unknown, variables: unknown, context: unknown) => void;
@@ -464,8 +464,6 @@ export function useDelete<TData extends BaseRecord = BaseRecord, TError = HttpEr
       
       const pk = adminContext.getResource(resName).primaryKey ?? 'id';
       
-      if (targetId != null) queryClient.removeQueries({ predicate: (q) => dataMatch(q.queryKey, { action: 'one', id: targetId }) });
-
       queryClient.setQueriesData({ predicate: (q) => dataMatch(q.queryKey, { action: 'list' }) }, (old: unknown) => {
         if (!old || typeof old !== 'object' || !('data' in old)) return old;
         const o = old as { data: Record<string, unknown>[]; total?: number };

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { captureAdminContext, getResource } from '@svadmin/core';
+  import { getResource, useNavigation } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
 
   import type { Snippet } from 'svelte';
@@ -35,7 +35,7 @@
     onSuccess,
     class: className = '',
   }: Props = $props();
-  const adminContext = captureAdminContext();
+  const navigation = useNavigation();
   let navigateGuard = $state<(fn: () => void) => void>((fn) => fn());
 
   const resource = $derived(getResource(resourceName));
@@ -47,14 +47,14 @@
   <PageHeader
     title={pageTitle}
     {density}
-    onBack={() => navigateGuard(() => adminContext.navigate(`/${resourceName}`))}
+    onBack={() => navigateGuard(() => navigation.list(resourceName))}
   >
     {#snippet actions()}
       <ListButton resource={resourceName} hideText onBeforeNavigate={navigateGuard} />
       <ShowButton resource={resourceName} recordItemId={id} hideText onBeforeNavigate={navigateGuard} />
       <RefreshButton resource={resourceName} hideText />
       {#if showDelete !== false}
-        <DeleteButton resource={resourceName} recordItemId={id} hideText onSuccess={() => adminContext.navigate(`/${resourceName}`)} />
+        <DeleteButton resource={resourceName} recordItemId={id} hideText onSuccess={() => navigation.list(resourceName)} />
       {/if}
       {#if headerActions}
         {@render headerActions()}

@@ -4,6 +4,9 @@ import ResourceOperationsPage from './ResourceOperationsPage.svelte';
 
 vi.mock('@svadmin/core', () => ({
   captureAdminContext: () => ({ navigate: vi.fn() }),
+  getResource: () => ({ canCreate: true }),
+  useNavigation: () => ({ create: vi.fn() }),
+  useCan: () => ({ allowed: true, isLoading: false, reason: undefined }),
 }));
 
 vi.mock('./AutoTable.svelte', async () => {

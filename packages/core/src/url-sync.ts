@@ -39,6 +39,49 @@ function parseFilters(value: string): Filter[] | undefined {
   }
 }
 
+function positiveIntegerParam(value: string | undefined, max: number): string | undefined {
+  if (!value || !/^\d+$/.test(value)) return undefined;
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) && parsed > 0 && parsed <= max ? String(parsed) : undefined;
+}
+
+/**
+ * 保留从列表进入 CRUD 页面时可安全恢复的查询状态。
+ * 未知参数不会跨页面传播，避免把 detail、tenantId 或敏感参数带入记录路由。
+ */
+export function sanitizeListQueryParams(params: Record<string, string>): Record<string, string> {
+  const result: Record<string, string> = {};
+  const page = positiveIntegerParam(params['page'], 1_000_000);
+  const pageSize = positiveIntegerParam(params['pageSize'], 1_000);
+  const sort = params['sort']?.trim();
+  const search = params['q'];
+  const filters = params['filters'] ? parseFilters(params['filters']) : undefined;
+
+  if (page) result['page'] = page;
+  if (pageSize) result['pageSize'] = pageSize;
+  if (sort && sort.length <= 256) {
+    result['sort'] = sort;
+    if (params['order'] === 'asc' || params['order'] === 'desc') result['order'] = params['order'];
+  }
+  if (search && search.length <= 1_000) result['q'] = search;
+  if (filters) result['filters'] = JSON.stringify(filters);
+  if (params['records'] === '1') result['records'] = '1';
+
+  return result;
+}
+
+export function appendListQuery(path: string, params: Record<string, string>): string {
+  const query = new URLSearchParams(sanitizeListQueryParams(params)).toString();
+  if (!query) return path;
+  return `${path}${path.includes('?') ? '&' : '?'}${query}`;
+}
+
+export function appendListQueryFromPath(path: string, currentPath: string): string {
+  const queryString = currentPath.split('?')[1];
+  if (!queryString) return path;
+  return appendListQuery(path, Object.fromEntries(new URLSearchParams(queryString)));
+}
+
 export interface URLState {
   page?: number;
   pageSize?: number;
@@ -46,6 +89,7 @@ export interface URLState {
   sortOrder?: 'asc' | 'desc';
   search?: string;
   filters?: Filter[];
+  detailId?: string;
 }
 
 export function readURLState(adminContext: AdminContextAccessor = captureAdminContext()): URLState {
@@ -77,12 +121,16 @@ export function readURLState(adminContext: AdminContextAccessor = captureAdminCo
     if (filters) state.filters = filters;
   }
 
+  const detailId = params['detail'];
+  if (detailId) state.detailId = detailId;
+
   return state;
 }
 
 export function writeURLState(
   state: URLState,
   adminContext: AdminContextAccessor = captureAdminContext(),
+  type: 'push' | 'replace' = 'replace',
 ): void {
   if (typeof window === 'undefined') return;
   const rp = adminContext.routerProvider;
@@ -124,6 +172,11 @@ export function writeURLState(
     }
   }
 
+  if ('detailId' in state) {
+    if (state.detailId) params['detail'] = state.detailId;
+    else delete params['detail'];
+  }
+
   // Prevent redundant navigation if nothing actually changed
   const qsOld = new URLSearchParams(current.params).toString();
   const qsNew = new URLSearchParams(params).toString();
@@ -132,7 +185,7 @@ export function writeURLState(
     rp.go({
       to: current.pathname,
       query: params,
-      type: 'replace'
+      type,
     });
   }
 }

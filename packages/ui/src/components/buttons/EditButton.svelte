@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import { useNavigation, useCan, useTranslation } from '@svadmin/core';
+  import { getResource, useNavigation, useCan, useTranslation } from '@svadmin/core';
   import { Button } from '../ui/button/index.js';
   import { Pencil } from '@lucide/svelte';
   import type { ButtonAccessControl } from './access-control';
@@ -27,6 +27,13 @@
   }>();
 
   const nav = useNavigation();
+  const resourceDefinition = $derived.by(() => {
+    try {
+      return getResource(resource);
+    } catch {
+      return null;
+    }
+  });
   const can = useCan(() => ({
     resource,
     action: 'edit',
@@ -34,8 +41,8 @@
     meta: accessControl?.meta,
     queryOptions: { enabled: accessControl?.enabled ?? true }
   }));
-  const hidden = $derived(accessControl?.hideIfUnauthorized && !can.allowed);
   const displayText = $derived(label ?? i18n.t('common.edit'));
+  const hidden = $derived(resourceDefinition?.canEdit === false || (accessControl?.hideIfUnauthorized && !can.allowed));
 </script>
 
 {#if !hidden}

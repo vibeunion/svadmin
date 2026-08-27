@@ -69,13 +69,13 @@ describe('AutoTable enterprise enhancements', () => {
     await fireEvent.click(checkboxes[1]); // first row checkbox
 
     await waitFor(async () => {
-      expect(await view.findByText(/已选择 1 项/)).toBeTruthy();
+      expect(await view.findByText('已选择 1 条记录')).toBeTruthy();
       expect(await view.findByRole('button', { name: /批量删除/ })).toBeTruthy();
-      expect(await view.findByRole('button', { name: '取消选择' })).toBeTruthy();
+      expect(await view.findByRole('button', { name: '清除选择' })).toBeTruthy();
     });
 
     // Clicking clear selection dismisses the banner
-    await fireEvent.click(await view.findByRole('button', { name: '取消选择' }));
+    await fireEvent.click(await view.findByRole('button', { name: '清除选择' }));
     await waitFor(() => {
       expect(view.queryByText(/已选择/)).toBeNull();
     });
@@ -106,10 +106,10 @@ describe('AutoTable enterprise enhancements', () => {
     const search = await view.findByPlaceholderText('搜索...');
     await fireEvent.input(search, { target: { value: 'user1' } });
 
-    const clearSearch = await view.findByRole('button', { name: '清除: 搜索...' });
+    const clearSearch = await view.findByRole('button', { name: /^清除: 搜索/ });
     expect(clearSearch).toBeTruthy();
     await fireEvent.click(clearSearch);
-    await waitFor(() => expect(view.queryByRole('button', { name: '清除: 搜索...' })).toBeNull());
+    await waitFor(() => expect(view.queryByRole('button', { name: /^清除: 搜索/ })).toBeNull());
   });
 
   it('ShowPage renders in grid layout with multi-column descriptions', async () => {

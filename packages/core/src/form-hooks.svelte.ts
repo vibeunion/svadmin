@@ -14,6 +14,7 @@ import type { BaseRecord, MutationMode, KnownResources } from './types';
 import { checkError } from './hook-utils.svelte';
 import { toast } from './toast.svelte';
 import { deepMerge, invalidateByScopes } from './mutation-hooks.svelte';
+import { appendListQueryFromPath } from './url-sync';
 
 // ─── Types ───────────────────────────────────────────────────────────
 
@@ -652,14 +653,15 @@ export function useForm<
   }));
 
   function doRedirect(to: 'list' | 'edit' | 'show' | false) {
-    const path = adminContext.currentPath().split('?')[0];
+    const currentPath = adminContext.currentPath();
+    const path = currentPath.split('?')[0];
     const parts = path.split('/');
     const resIdx = parts.lastIndexOf(String(resource));
     const base = resIdx >= 0 ? parts.slice(0, resIdx + 1).join('/') : `/${resource}`;
 
-    if (to === 'list') void adminContext.navigate(base);
-    else if (to === 'edit' && currentId) void adminContext.navigate(`${base}/edit/${currentId}`);
-    else if (to === 'show' && currentId) void adminContext.navigate(`${base}/show/${currentId}`);
+    if (to === 'list') void adminContext.navigate(appendListQueryFromPath(base, currentPath));
+    else if (to === 'edit' && currentId) void adminContext.navigate(appendListQueryFromPath(`${base}/edit/${currentId}`, currentPath));
+    else if (to === 'show' && currentId) void adminContext.navigate(appendListQueryFromPath(`${base}/show/${currentId}`, currentPath));
   }
 
   // ─── Submit ─────────────────────────────────────────────────────

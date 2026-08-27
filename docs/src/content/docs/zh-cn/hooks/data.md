@@ -147,7 +147,7 @@ invalidate({ resource: 'posts', invalidates: ['list', 'one'] });
 
 ## 变更模式
 
-所有变更 Hook 通过 `mutationMode` 支持三种模式：
+`useUpdate`、`useDelete` 和 `useDeleteMany` 通过 `mutationMode` 支持三种模式：
 
 | 模式 | 行为 |
 |------|------|
@@ -158,3 +158,19 @@ invalidate({ resource: 'posts', invalidates: ['list', 'one'] });
 ```typescript
 const mutation = useUpdate({ mutationMode: 'undoable', undoableTimeout: 5000 });
 ```
+
+`useDeleteMany` 可以为单次批量操作覆盖模式、超时和通知，无需重新创建 Hook：
+
+```typescript
+const { mutation } = useDeleteMany({ resource: 'posts', mutationMode: 'pessimistic' });
+
+mutation.mutate({
+  ids: [1, 2, 3],
+  mutationMode: 'undoable',
+  undoableTimeout: 10_000,
+  successNotification: '文章已删除',
+  onCancel: () => restoreSelection(),
+});
+```
+
+在 Hook 上通过 `mutationOptions` 配置 `onMutate`、`onSuccess`、`onError` 和 `onSettled` 等生命周期回调。

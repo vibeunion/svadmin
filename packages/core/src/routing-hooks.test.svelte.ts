@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, it, expect, vi } from 'vitest';
-import { useGo, useBack } from './routing-hooks.svelte';
+import { useGo, useBack, useNavigation } from './routing-hooks.svelte';
 import { useParsed } from './useParsed.svelte';
 import { flushSync } from 'svelte';
+
+const { navigate } = vi.hoisted(() => ({ navigate: vi.fn(async () => {}) }));
 
 vi.mock('./context.svelte', () => {
   const routerContext = {
@@ -26,7 +28,7 @@ vi.mock('./context.svelte', () => {
       getResource: vi.fn(),
       currentPath: () => '/posts/1/edit',
       formatLink: (path: string) => path,
-      navigate: vi.fn(async () => {}),
+      navigate,
       back: vi.fn(),
     }),
     useRouterContext: () => routerContext,
@@ -35,7 +37,15 @@ vi.mock('./context.svelte', () => {
 });
 
 vi.mock('./useParsed.svelte', () => ({
-  useParsed: () => ({ resource: 'posts', action: 'edit', id: '1' })
+  useParsed: () => ({
+    resource: 'posts',
+    resourcePath: 'posts',
+    action: 'edit',
+    id: '1',
+    params: {
+      page: '2', q: 'open', detail: '1', tenantId: 'tenant-a', token: 'secret',
+    },
+  })
 }));
 
 describe('routing-hooks - Headless Svelte 5 Compatibility', () => {
@@ -70,6 +80,23 @@ describe('routing-hooks - Headless Svelte 5 Compatibility', () => {
     expect(typeof go).toBe('function');
     expect(typeof back).toBe('function');
 
+    cleanup();
+  });
+
+  it('preserves only safe list state across same-resource CRUD navigation', () => {
+    navigate.mockClear();
+    let navigation!: ReturnType<typeof useNavigation>;
+    const cleanup = $effect.root(() => {
+      navigation = useNavigation();
+    });
+
+    navigation.show('posts', '1');
+    navigation.list('posts');
+    navigation.show('users', '2');
+
+    expect(navigate).toHaveBeenNthCalledWith(1, '/posts/show/1?page=2&q=open', undefined);
+    expect(navigate).toHaveBeenNthCalledWith(2, '/posts?page=2&q=open', undefined);
+    expect(navigate).toHaveBeenNthCalledWith(3, '/users/show/2', undefined);
     cleanup();
   });
 });

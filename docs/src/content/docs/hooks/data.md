@@ -147,7 +147,7 @@ invalidate({ resource: 'posts', invalidates: ['list', 'one'] });
 
 ## Mutation Modes
 
-All mutation hooks support three modes via `mutationMode`:
+`useUpdate`, `useDelete`, and `useDeleteMany` support three modes via `mutationMode`:
 
 | Mode | Behavior |
 |------|----------|
@@ -158,3 +158,19 @@ All mutation hooks support three modes via `mutationMode`:
 ```typescript
 const mutation = useUpdate({ mutationMode: 'undoable', undoableTimeout: 5000 });
 ```
+
+`useDeleteMany` can override the mode, timeout, and notifications for an individual batch without creating another hook instance:
+
+```typescript
+const { mutation } = useDeleteMany({ resource: 'posts', mutationMode: 'pessimistic' });
+
+mutation.mutate({
+  ids: [1, 2, 3],
+  mutationMode: 'undoable',
+  undoableTimeout: 10_000,
+  successNotification: 'Posts deleted',
+  onCancel: () => restoreSelection(),
+});
+```
+
+Use `mutationOptions` on the hook for lifecycle callbacks such as `onMutate`, `onSuccess`, `onError`, and `onSettled`.

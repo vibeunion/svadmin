@@ -1,15 +1,17 @@
 <script lang="ts">
-  import { captureAdminContext, toggleTheme } from '@svadmin/core';
+  import { captureAdminContext, toggleTheme, useNavigation } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { Command } from './ui/command/index.js';
   import * as Dialog from './ui/dialog/index.js';
   import { Search, LayoutDashboard, Plus, Sun, FileText, Sparkles, Loader2 } from '@lucide/svelte';
   import MarkdownRenderer from './MarkdownRenderer.svelte';
+  import CanAccess from './CanAccess.svelte';
 
   const i18n = useTranslation();
 
   let { open = $bindable(false) } = $props<{ open?: boolean }>();
   const adminContext = captureAdminContext();
+  const navigation = useNavigation();
   let searchValue = $state('');
   
   const resources = $derived(adminContext.resources);
@@ -127,7 +129,8 @@
         />
         {#if searchValue.trim() && !aiMode}
           <button 
-            class="absolute right-3 flex items-center gap-1 text-[10px] font-medium text-warning bg-warning/10 hover:bg-warning/20 px-2 py-1 rounded transition-colors"
+            type="button"
+            class="absolute right-3 flex items-center gap-1 text-[10px] font-medium text-warning bg-warning/10 hover:bg-warning/20 px-2 py-1 rounded transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             onclick={askAI}
           >
             <Sparkles class="h-3 w-3" />
@@ -149,10 +152,19 @@
               {i18n.t('common.home')}
             </Command.Item>
             {#each resources as r, _i (_i)}
-              <Command.Item value={r.name} onSelect={() => act(() => adminContext.navigate(`/${r.name}`))} class={itemClass}>
-                <FileText class="h-4 w-4 text-muted-foreground" />
-                {r.label}
-              </Command.Item>
+              {#if adminContext.accessControlProvider}
+                <CanAccess resource={r.name} action="list">
+                  <Command.Item value={r.name} onSelect={() => act(() => navigation.list(r.name))} class={itemClass}>
+                    <FileText class="h-4 w-4 text-muted-foreground" />
+                    {r.label}
+                  </Command.Item>
+                </CanAccess>
+              {:else}
+                <Command.Item value={r.name} onSelect={() => act(() => navigation.list(r.name))} class={itemClass}>
+                  <FileText class="h-4 w-4 text-muted-foreground" />
+                  {r.label}
+                </Command.Item>
+              {/if}
             {/each}
           </Command.Group>
 
@@ -161,10 +173,21 @@
           <!-- Actions -->
           <Command.Group heading={i18n.t('common.actions')}>
             {#each resources as r, _i (_i)}
-              <Command.Item value={`create-${r.name}`} onSelect={() => act(() => adminContext.navigate(`/${r.name}/create`))} class={itemClass}>
-                <Plus class="h-4 w-4 text-muted-foreground" />
-                {i18n.t('common.create')} {r.label}
-              </Command.Item>
+              {#if r.canCreate !== false}
+                {#if adminContext.accessControlProvider}
+                  <CanAccess resource={r.name} action="create">
+                    <Command.Item value={`create-${r.name}`} onSelect={() => act(() => navigation.create(r.name))} class={itemClass}>
+                      <Plus class="h-4 w-4 text-muted-foreground" />
+                      {i18n.t('common.create')} {r.label}
+                    </Command.Item>
+                  </CanAccess>
+                {:else}
+                  <Command.Item value={`create-${r.name}`} onSelect={() => act(() => navigation.create(r.name))} class={itemClass}>
+                    <Plus class="h-4 w-4 text-muted-foreground" />
+                    {i18n.t('common.create')} {r.label}
+                  </Command.Item>
+                {/if}
+              {/if}
             {/each}
             <Command.Item value="toggle-theme" onSelect={() => act(() => toggleTheme())} class={itemClass}>
               <Sun class="h-4 w-4 text-muted-foreground" />

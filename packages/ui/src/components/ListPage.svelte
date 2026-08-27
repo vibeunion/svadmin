@@ -1,15 +1,11 @@
 <script lang="ts">
-  import { captureAdminContext, getResource } from '@svadmin/core';
-  import { useTranslation } from '@svadmin/core/i18n';
+  import { getResource } from '@svadmin/core';
 
   import type { Snippet } from 'svelte';
   import type { FieldDefinition } from '@svadmin/core';
   import PageHeader from './PageHeader.svelte';
   import AutoTable from './AutoTable.svelte';
-  import { Button } from './ui/button/index.js';
-  import { Plus } from '@lucide/svelte';
-
-  const i18n = useTranslation();
+  import CreateButton from './buttons/CreateButton.svelte';
 
   interface Props {
     resourceName: string;
@@ -25,7 +21,7 @@
     /** Optional filter toolbar slot between status tabs and table */
     filterToolbar?: Snippet;
     /** Passthrough: custom batch actions to render when rows are selected */
-    batchActions?: Snippet<[{ selectedIds: string[] }]>;
+    batchActions?: Snippet<[{ selectedIds: (string | number)[] }]>;
     /** Passthrough: custom cell renderer per field */
     cellRenderer?: Snippet<[{ field: FieldDefinition; value: unknown; record: Record<string, unknown> }]>;
     /** Passthrough: custom row actions */
@@ -53,8 +49,6 @@
     expandedRowRender,
     class: className = '',
   }: Props = $props();
-  const adminContext = captureAdminContext();
-
   const resource = $derived(getResource(resourceName));
   const pageTitle = $derived(title ?? resource.label);
   const showCreate = $derived(canCreate ?? resource.canCreate !== false);
@@ -64,9 +58,7 @@
   <PageHeader title={pageTitle} {density}>
     {#snippet actions()}
       {#if showCreate}
-        <Button size={density === 'compact' ? 'sm' : 'default'} onclick={() => adminContext.navigate(`/${resourceName}/create`)}>
-          <Plus class="h-4 w-4" data-icon="inline-start" /> {i18n.t('common.create')}
-        </Button>
+        <CreateButton resource={resourceName} />
       {/if}
       {#if headerActions}
         {@render headerActions()}

@@ -14,7 +14,7 @@ mock.module('./options.svelte', () => ({
   getAdminOptions: () => ({ defaultPageSize: 10 }),
 }));
 
-const { readURLState, writeURLState } = await import('./url-sync');
+const { appendListQueryFromPath, readURLState, sanitizeListQueryParams, writeURLState } = await import('./url-sync');
 
 function installMockWindow() {
   let href = 'http://localhost/#/posts';
@@ -84,6 +84,22 @@ describe('url-sync', () => {
     expect(readURLState().filters).toEqual(filters);
   });
 
+  test('round-trips a detail drawer id without discarding other resource state', () => {
+    mockWindow.setHash('#/posts?q=active&records=1');
+
+    writeURLState({ detailId: 'post-42' }, undefined, 'push');
+
+    expect(mockWindow.getHash()).toContain('q=active');
+    expect(mockWindow.getHash()).toContain('records=1');
+    expect(readURLState().detailId).toBe('post-42');
+
+    writeURLState({ detailId: undefined });
+
+    expect(readURLState().detailId).toBeUndefined();
+    expect(mockWindow.getHash()).toContain('q=active');
+    expect(mockWindow.getHash()).toContain('records=1');
+  });
+
   test('ignores invalid serialized filters', () => {
     mockWindow.setHash('#/posts?filters=%7Bbad-json');
     expect(readURLState().filters).toBeUndefined();
@@ -104,5 +120,22 @@ describe('url-sync', () => {
     mockWindow.setHash(`#/posts?filters=${encodeURIComponent(JSON.stringify(invalidFilters))}`);
 
     expect(readURLState().filters).toBeUndefined();
+  });
+
+  test('sanitizes list query state and drops non-list parameters', () => {
+    const filters = [{ field: 'status', operator: 'eq', value: 'open' }];
+    expect(sanitizeListQueryParams({
+      page: '2', pageSize: '50', sort: 'createdAt', order: 'desc', q: 'open',
+      filters: JSON.stringify(filters), records: '1', detail: 'post-1', tenantId: 'tenant-a', token: 'secret',
+    })).toEqual({
+      page: '2', pageSize: '50', sort: 'createdAt', order: 'desc', q: 'open',
+      filters: JSON.stringify(filters), records: '1',
+    });
+  });
+
+  test('appends only validated list state to a CRUD path', () => {
+    const filters = [{ field: 'status', operator: 'eq', value: 'open' }];
+    expect(appendListQueryFromPath('/posts/show/1', `/posts?q=open&page=2&filters=${encodeURIComponent(JSON.stringify(filters))}&detail=1`))
+      .toBe(`/posts/show/1?page=2&q=open&filters=${encodeURIComponent(JSON.stringify(filters))}`);
   });
 });

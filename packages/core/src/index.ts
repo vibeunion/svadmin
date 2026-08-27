@@ -70,10 +70,16 @@ export {
 } from './hooks.svelte';
 export { matchRoute, navigate, currentPath, setActiveRouterProvider, beforeEach, afterEach, resetRouter } from './router';
 export type { RouteGuard } from './router';
-export { readURLState, writeURLState } from './url-sync';
+export {
+  appendListQuery,
+  appendListQueryFromPath,
+  readURLState,
+  sanitizeListQueryParams,
+  writeURLState,
+} from './url-sync';
 export { setAccessControlProvider, getAccessControlProvider, getAccessControlOptions, canAccessAsync, createFeatureGate } from './permissions.svelte';
 export { useLive, useSubscription, usePublish } from './live.svelte';
-export { toast, getToastQueue, consumeToastQueue, getPromiseQueue, consumePromiseQueue, resetToast } from './toast.svelte';
+export { toast, getToastQueue, consumeToastQueue, getPromiseQueue, consumePromiseQueue, getToasts, removeToast, resetToast } from './toast.svelte';
 export {
   notify,
   notifyWithProvider,
@@ -120,7 +126,7 @@ export type { AdminOptions, TextTransformers, OvertimeConfig } from './options.s
 export { checkError } from './hook-utils.svelte';
 export type { NotificationConfig, OvertimeOptions, OvertimeResult, LiveSubscriptionParams } from './hook-utils.svelte';
 
-export { HttpError, UndoError } from './types';
+export { DeleteManyPartialError, HttpError, UndoError } from './types';
 export type {
   DataProvider, AuthProvider, NotificationProvider, MutationMode,
   ValidationErrors, HttpErrorOptions, CrudOperator, LogicalFilter, FieldFilter,
@@ -189,6 +195,7 @@ export { TableState } from './table-state.svelte';
 export type { TableStateOptions } from './table-state.svelte';
 export type { UseInfiniteListOptions } from './hooks.svelte';
 export type { UseSelectOptions } from './hooks.svelte';
+export type { UseDeleteManyOptions, UseDeleteManyMutateParams } from './hooks.svelte';
 export type { UseFormReturn } from './form-hooks.svelte';
 export type {
   TaskProvider,

@@ -7,13 +7,14 @@
 
   let { open = $bindable(false), title, message = '',
     confirmText, cancelText, variant = 'danger',
-    onconfirm, oncancel } = $props<{
+    confirming = false, onconfirm, oncancel } = $props<{
     open?: boolean;
     title?: string;
     message?: string;
     confirmText?: string;
     cancelText?: string;
     variant?: 'danger' | 'warning' | 'info';
+    confirming?: boolean;
     onconfirm: () => void;
     oncancel: () => void;
   }>();
@@ -52,14 +53,14 @@
     <AlertDialog.Footer>
       <AlertDialog.Cancel>
         {#snippet child({ props })}
-          <Button variant="outline" {...props}>
+          <Button variant="outline" {...props} disabled={confirming}>
             {resolvedCancelText}
           </Button>
         {/snippet}
       </AlertDialog.Cancel>
       <AlertDialog.Action>
         {#snippet child({ props })}
-          <Button variant={variantMap[variant as keyof typeof variantMap]} {...props} onclick={handleConfirm}>
+          <Button variant={variantMap[variant as keyof typeof variantMap]} {...props} disabled={confirming} onclick={handleConfirm}>
             {resolvedConfirmText}
           </Button>
         {/snippet}

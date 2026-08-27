@@ -1,12 +1,11 @@
 <script lang="ts">
-  import { captureAdminContext, useShow, getResource } from '@svadmin/core';
+  import { useNavigation, useShow, getResource } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import type { Snippet } from 'svelte';
   import * as Card from './ui/card/index.js';
   import { Skeleton } from './ui/skeleton/index.js';
   import PageHeader from './PageHeader.svelte';
   import { getDisplayComponent } from './fieldComponentMap.js';
-  import ListButton from './buttons/ListButton.svelte';
   import EditButton from './buttons/EditButton.svelte';
   import DeleteButton from './buttons/DeleteButton.svelte';
   import CloneButton from './buttons/CloneButton.svelte';
@@ -38,7 +37,7 @@
     class: className = '',
   }: Props = $props();
 
-  const adminContext = captureAdminContext();
+  const navigation = useNavigation();
   const isCompact = $derived(density === 'compact');
 
   const resource = $derived(getResource(resourceName));
@@ -60,10 +59,10 @@
   <PageHeader
     title="{resource.label} {i18n.t('common.detail')} #{id}"
     {density}
-    onBack={() => adminContext.navigate(`/${resourceName}`)}
+    onBack={() => navigation.list(resourceName)}
+    backLabel={i18n.t('common.backToList')}
   >
     {#snippet actions()}
-      <ListButton resource={resourceName} hideText />
       {#if resource.canEdit !== false}
         <EditButton resource={resourceName} recordItemId={id} hideText />
       {/if}
@@ -71,7 +70,7 @@
         <CloneButton resource={resourceName} recordItemId={id} hideText />
       {/if}
       {#if resource.canDelete !== false}
-        <DeleteButton resource={resourceName} recordItemId={id} hideText onSuccess={() => adminContext.navigate(`/${resourceName}`)} />
+        <DeleteButton resource={resourceName} recordItemId={id} hideText onSuccess={() => navigation.list(resourceName)} />
       {/if}
       <RefreshButton resource={resourceName} hideText />
       {#if headerActions}

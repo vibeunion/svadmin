@@ -22,14 +22,19 @@ export type { OvertimeResult, OvertimeOptions, NotificationConfig } from './hook
 import { createQuery, createInfiniteQuery, createMutation, useQueryClient } from '@tanstack/svelte-query';
 import { getAdminOptions } from './options.svelte';
 import { captureAdminContext } from './context.svelte';
-import { queryKeyMatches } from './query-keys';
+import { dataQueryMatches, queryKeyMatches } from './query-keys';
+import type { QueryMatcher } from './query-keys';
 import { useParsed } from './useParsed.svelte';
 import { createOvertimeTracker, createLiveSubscription, fireSuccessNotification, fireErrorNotification, checkError } from './hook-utils.svelte';
 import { invalidateByScopes, publishLiveEvent } from './mutation-hooks.svelte';
 import type { NotificationConfig, OvertimeOptions, LiveSubscriptionParams } from './hook-utils.svelte';
-import type { BaseRecord, HttpError, Pagination, Sort, Filter, DataProvider, KnownResources } from './types';
+import { DeleteManyPartialError, UndoError } from './types';
+import type { BaseRecord, HttpError, Pagination, Sort, Filter, DataProvider, KnownResources, MutationMode } from './types';
 import type { LiveMode, LiveEvent } from './live.svelte';
 import { auditWithProvider } from './audit';
+import { useTranslation } from './i18n.svelte';
+import { toast } from './toast.svelte';
+import type { MutationCallbacks } from './mutation-hooks.svelte';
 
 // ─── useInfiniteList ────────────────────────────────────────────────
 
@@ -493,25 +498,175 @@ export function useUpdateMany<TData extends BaseRecord = BaseRecord, TError = Ht
   return { mutation, get overtime() { return createOvertimeTracker(() => mutation.isPending, options.overtimeOptions ?? adminOptions.overtime); } };
 }
 
-export function useDeleteMany<TData extends BaseRecord = BaseRecord, TError = HttpError>(options: { resource?: KnownResources; overtimeOptions?: OvertimeOptions } = {}) {
+export interface UseDeleteManyOptions {
+  resource?: KnownResources;
+  mutationMode?: MutationMode;
+  undoableTimeout?: number;
+  mutationOptions?: MutationCallbacks;
+  overtimeOptions?: OvertimeOptions;
+  successNotification?: NotificationConfig;
+  errorNotification?: NotificationConfig;
+}
+
+export interface UseDeleteManyMutateParams {
+  resource?: KnownResources;
+  ids: (string | number)[];
+  mutationMode?: MutationMode;
+  undoableTimeout?: number;
+  meta?: Record<string, unknown>;
+  dataProviderName?: string;
+  invalidates?: string[] | false;
+  onCancel?: () => void;
+  successNotification?: NotificationConfig;
+  errorNotification?: NotificationConfig;
+}
+
+interface DeleteManyMutationContext {
+  _svadmin_ctx?: boolean;
+  userContext?: unknown;
+  previousQueries?: [readonly unknown[], unknown][];
+}
+
+export function useDeleteMany<TData extends BaseRecord = BaseRecord, TError = HttpError>(options: UseDeleteManyOptions = {}) {
   const adminContext = captureAdminContext();
   const parsed = useParsed();
   const resource = options.resource ?? parsed.resource ?? '';
   const adminOptions = getAdminOptions();
   const queryClient = useQueryClient();
+  const i18n = useTranslation();
+  const mutationMode = options.mutationMode ?? adminOptions.mutationMode ?? 'pessimistic';
+  const undoableTimeout = options.undoableTimeout ?? adminOptions.undoableTimeout ?? 5000;
 
-  const mutation = createMutation<{ data: TData[] }, TError, { resource?: KnownResources; ids: (string | number)[]; meta?: Record<string, unknown>; dataProviderName?: string }>(() => ({
+  const removeIdsFromCache = (
+    resName: string,
+    ids: (string | number)[],
+    dataProviderName?: string,
+  ) => {
+    const matcher = adminContext.queryKeyMatcher(resName, dataProviderName);
+    const dataMatch = (queryKey: readonly unknown[], fields: QueryMatcher = {}) => dataQueryMatches(queryKey, {
+      ...matcher,
+      resource: resName,
+      ...fields,
+    });
+    const primaryKey = adminContext.getResource(resName).primaryKey ?? 'id';
+    const deletedIds = new Set(ids.map(String));
+    const removeFromCollection = (old: unknown): unknown => {
+      if (!old || typeof old !== 'object' || !('data' in old)) return old;
+      const current = old as { data: Record<string, unknown>[]; total?: number };
+      if (!Array.isArray(current.data)) return old;
+      const filtered = current.data.filter((item) => !deletedIds.has(String(item[primaryKey])));
+      const removedCount = current.data.length - filtered.length;
+      return {
+        ...current,
+        data: filtered,
+        total: current.total == null ? current.total : Math.max(0, current.total - removedCount),
+      };
+    };
+    const removeFromInfiniteCollection = (old: unknown): unknown => {
+      if (!old || typeof old !== 'object' || !('pages' in old)) return old;
+      const current = old as {
+        pages: { data: Record<string, unknown>[]; total?: number }[];
+        pageParams?: unknown[];
+      };
+      if (!Array.isArray(current.pages)) return old;
+
+      const removedIds = new Set<string>();
+      for (const page of current.pages) {
+        if (!Array.isArray(page.data)) continue;
+        for (const item of page.data) {
+          const itemId = String(item[primaryKey]);
+          if (deletedIds.has(itemId)) removedIds.add(itemId);
+        }
+      }
+
+      return {
+        ...current,
+        pages: current.pages.map((page) => ({
+          ...page,
+          data: Array.isArray(page.data)
+            ? page.data.filter((item) => !deletedIds.has(String(item[primaryKey])))
+            : page.data,
+          total: page.total == null ? page.total : Math.max(0, page.total - removedIds.size),
+        })),
+      };
+    };
+
+    queryClient.setQueriesData({
+      predicate: (query) => ['list', 'select', 'selectDefaults'].some((action) => dataMatch(query.queryKey, { action })),
+    }, removeFromCollection);
+    queryClient.setQueriesData({
+      predicate: (query) => dataMatch(query.queryKey, { action: 'infiniteList' }),
+    }, removeFromInfiniteCollection);
+    queryClient.setQueriesData({
+      predicate: (query) => dataMatch(query.queryKey, { action: 'many' }),
+    }, removeFromCollection);
+  };
+
+  const mutation = createMutation<{ data: TData[] }, TError | DeleteManyPartialError, UseDeleteManyMutateParams, DeleteManyMutationContext>(() => ({
     mutationFn: async (params) => {
       const resName = params.resource ?? resource;
+      const effectiveMutationMode = params.mutationMode ?? mutationMode;
+      const effectiveUndoableTimeout = params.undoableTimeout ?? undoableTimeout;
+      if (effectiveMutationMode === 'undoable') {
+        await new Promise<void>((resolve, reject) => {
+          toast.undoable(i18n.t('common.actionCanBeUndone'), effectiveUndoableTimeout, () => {
+            params.onCancel?.();
+            reject(new UndoError());
+          }, resolve);
+        });
+      }
       const provider = adminContext.getDataProviderForResource(resName, params.dataProviderName);
       if (provider.deleteMany) return await provider.deleteMany<TData>({ resource: resName, ids: params.ids, meta: params.meta });
-      const results = await Promise.all(params.ids.map(id => provider.deleteOne<TData>({ resource: resName, id, meta: params.meta })));
-      return { data: results.map(r => r.data) };
+      const settled = await Promise.allSettled(
+        params.ids.map(id => provider.deleteOne<TData>({ resource: resName, id, meta: params.meta })),
+      );
+      const succeededIds: (string | number)[] = [];
+      const failedIds: (string | number)[] = [];
+      const causes: unknown[] = [];
+      const data: TData[] = [];
+      settled.forEach((result, index) => {
+        const id = params.ids[index];
+        if (result.status === 'fulfilled') {
+          succeededIds.push(id);
+          data.push(result.value.data);
+        } else {
+          failedIds.push(id);
+          causes.push(result.reason);
+        }
+      });
+      if (failedIds.length > 0) {
+        if (succeededIds.length > 0) {
+          throw new DeleteManyPartialError(succeededIds, failedIds, causes);
+        }
+        throw causes[0] ?? new Error('Delete many failed');
+      }
+      return { data };
     },
-    onSuccess: (data, params) => {
+    onMutate: async (params) => {
+      const userContext = typeof options.mutationOptions?.onMutate === 'function'
+        ? await options.mutationOptions.onMutate(params)
+        : undefined;
+      const effectiveMutationMode = params.mutationMode ?? mutationMode;
+      if (effectiveMutationMode === 'pessimistic') return { _svadmin_ctx: true, userContext };
       const resName = params.resource ?? resource;
+      const matcher = adminContext.queryKeyMatcher(resName, params.dataProviderName);
+      const dataMatch = (queryKey: readonly unknown[], fields: QueryMatcher = {}) => dataQueryMatches(queryKey, {
+        ...matcher,
+        resource: resName,
+        ...fields,
+      });
+
+      await queryClient.cancelQueries({ predicate: (query) => dataMatch(query.queryKey) });
+      const previousQueries = queryClient.getQueriesData({ predicate: (query) => dataMatch(query.queryKey) });
+      removeIdsFromCache(resName, params.ids, params.dataProviderName);
+
+      return { _svadmin_ctx: true, userContext, previousQueries };
+    },
+    onSuccess: (data, params, context) => {
+      const resName = params.resource ?? resource;
+      const extractedContext = context?._svadmin_ctx ? context.userContext : context;
       fireSuccessNotification({
-        config: undefined,
+        config: params.successNotification ?? options.successNotification,
         defaultMessage: 'Deleted successfully',
         data: data.data,
         resource: resName,
@@ -522,28 +677,9 @@ export function useDeleteMany<TData extends BaseRecord = BaseRecord, TError = Ht
         adminContext.auditLogProvider,
       );
       publishLiveEvent(resName, 'deleted', params.ids, adminContext);
-    },
-    onError: (error, params) => {
-      checkError(error, adminContext);
-      fireErrorNotification({
-        config: undefined,
-        defaultMessage: 'Delete many failed',
-        error,
-        resource: params.resource ?? resource,
-        provider: adminContext.notificationProvider,
-      });
-    },
-    onSettled: (_d, _e, params) => {
-      const resName = params.resource ?? resource;
-      invalidateByScopes({
-        queryClient,
-        resource: resName,
-        defaults: ['list', 'many'],
-        matcher: adminContext.queryKeyMatcher(resName, params.dataProviderName),
-      });
       for (const id of params.ids) {
         queryClient.removeQueries({
-          predicate: (q) => queryKeyMatches(q.queryKey, {
+          predicate: (query) => queryKeyMatches(query.queryKey, {
             ...adminContext.queryKeyMatcher(resName, params.dataProviderName),
             kind: 'data',
             resource: resName,
@@ -551,6 +687,71 @@ export function useDeleteMany<TData extends BaseRecord = BaseRecord, TError = Ht
             id,
           }),
         });
+      }
+      if (typeof options.mutationOptions?.onSuccess === 'function') {
+        options.mutationOptions.onSuccess(data, params, extractedContext);
+      }
+    },
+    onError: (error, params, context) => {
+      if (context?.previousQueries) {
+        for (const [queryKey, data] of context.previousQueries) queryClient.setQueryData(queryKey, data);
+      }
+      if (error instanceof UndoError) return;
+      const resName = params.resource ?? resource;
+      if (error instanceof DeleteManyPartialError) {
+        removeIdsFromCache(resName, error.succeededIds, params.dataProviderName);
+        for (const id of error.succeededIds) {
+          queryClient.removeQueries({
+            predicate: (query) => queryKeyMatches(query.queryKey, {
+              ...adminContext.queryKeyMatcher(resName, params.dataProviderName),
+              kind: 'data',
+              resource: resName,
+              action: 'one',
+              id,
+            }),
+          });
+        }
+        auditWithProvider(
+          {
+            action: 'delete',
+            resource: resName,
+            outcome: 'failure',
+            details: { succeededIds: error.succeededIds, failedIds: error.failedIds },
+            meta: adminContext.getProviderMeta(resName),
+          },
+          adminContext.auditLogProvider,
+        );
+        publishLiveEvent(resName, 'deleted', error.succeededIds, adminContext);
+      }
+      const authError = error instanceof DeleteManyPartialError
+        ? (error.causes[0] ?? error)
+        : error;
+      checkError(authError, adminContext);
+      fireErrorNotification({
+        config: params.errorNotification ?? options.errorNotification,
+        defaultMessage: 'Delete many failed',
+        error,
+        resource: resName,
+        provider: adminContext.notificationProvider,
+      });
+      const extractedContext = context?._svadmin_ctx ? context.userContext : context;
+      if (typeof options.mutationOptions?.onError === 'function') {
+        options.mutationOptions.onError(error, params, extractedContext);
+      }
+    },
+    onSettled: (_data, error, params, context) => {
+      if (error instanceof UndoError) return;
+      const resName = params.resource ?? resource;
+      invalidateByScopes({
+        queryClient,
+        resource: resName,
+        scopes: params.invalidates,
+        defaults: ['list', 'many'],
+        matcher: adminContext.queryKeyMatcher(resName, params.dataProviderName),
+      });
+      const extractedContext = context?._svadmin_ctx ? context.userContext : context;
+      if (typeof options.mutationOptions?.onSettled === 'function') {
+        options.mutationOptions.onSettled(_data, error, params, extractedContext);
       }
     },
   }));

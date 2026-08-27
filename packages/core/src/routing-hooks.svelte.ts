@@ -1,5 +1,6 @@
 import { captureAdminContext } from './context.svelte';
 import { useParsed } from './useParsed.svelte';
+import { sanitizeListQueryParams } from './url-sync';
 
 // ─── routing-hooks.svelte.ts ───────────────────────────────────
 
@@ -118,13 +119,19 @@ export function useResource(resourceName?: string) {
 export function useNavigation() {
   const go = useGo();
   const parsed = useParsed();
+  const listQuery = (resource?: string) => {
+    const target = resource ?? parsed.resourcePath ?? parsed.resource;
+    const targetResource = target?.split('/').filter(Boolean).at(-1);
+    if (targetResource && parsed.resource && targetResource !== parsed.resource) return {};
+    return sanitizeListQueryParams(parsed.params ?? {});
+  };
 
   return {
-    create: (resource?: string) => go({ type: 'push', resource: resource ?? parsed.resourcePath ?? parsed.resource, action: 'create' }),
-    edit: (resource?: string, id?: string | number) => go({ type: 'push', resource: resource ?? parsed.resourcePath ?? parsed.resource, action: 'edit', id: id ?? parsed.id }),
-    clone: (resource?: string, id?: string | number) => go({ type: 'push', resource: resource ?? parsed.resourcePath ?? parsed.resource, action: 'clone', id: id ?? parsed.id }),
-    show: (resource?: string, id?: string | number) => go({ type: 'push', resource: resource ?? parsed.resourcePath ?? parsed.resource, action: 'show', id: id ?? parsed.id }),
-    list: (resource?: string) => go({ type: 'push', resource: resource ?? parsed.resourcePath ?? parsed.resource, action: 'list' }),
+    create: (resource?: string) => go({ type: 'push', resource: resource ?? parsed.resourcePath ?? parsed.resource, action: 'create', query: listQuery(resource) }),
+    edit: (resource?: string, id?: string | number) => go({ type: 'push', resource: resource ?? parsed.resourcePath ?? parsed.resource, action: 'edit', id: id ?? parsed.id, query: listQuery(resource) }),
+    clone: (resource?: string, id?: string | number) => go({ type: 'push', resource: resource ?? parsed.resourcePath ?? parsed.resource, action: 'clone', id: id ?? parsed.id, query: listQuery(resource) }),
+    show: (resource?: string, id?: string | number) => go({ type: 'push', resource: resource ?? parsed.resourcePath ?? parsed.resource, action: 'show', id: id ?? parsed.id, query: listQuery(resource) }),
+    list: (resource?: string) => go({ type: 'push', resource: resource ?? parsed.resourcePath ?? parsed.resource, action: 'list', query: listQuery(resource) }),
     push: (url: string) => go({ to: url, type: 'push' }),
     replace: (url: string) => go({ to: url, type: 'replace' }),
     goBack: useBack(),

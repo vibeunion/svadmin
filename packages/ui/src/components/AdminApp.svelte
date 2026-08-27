@@ -73,6 +73,7 @@
   import ErrorPage from './ErrorPage.svelte';
   import SystemPageShell from './SystemPageShell.svelte';
   import LazyPage from './LazyPage.svelte';
+  import ResourceAccessGuard from './ResourceAccessGuard.svelte';
   import { Button } from './ui/button/index.js';
   import { Input } from './ui/input/index.js';
   import { Badge } from './ui/badge/index.js';
@@ -609,27 +610,37 @@
       {:else if (renderedRoute === '/:resource' || renderedRoute === '/:parent/:parentId/:resource') && renderedHasRouteResource}
         {#key renderedParams.resource}
           {@const Comp = renderedResourcePages?.list ?? mergedComponents.AutoTable}
-          <Comp resourceName={renderedParams.resource} />
+          <ResourceAccessGuard resourceName={renderedParams.resource} action="list">
+            <Comp resourceName={renderedParams.resource} />
+          </ResourceAccessGuard>
         {/key}
       {:else if (renderedRoute === '/:resource/create' || renderedRoute === '/:parent/:parentId/:resource/create') && renderedHasRouteResource}
         {#key renderedParams.resource}
           {@const Comp = renderedResourcePages?.create ?? mergedComponents.AutoForm}
-          <Comp resourceName={renderedParams.resource} mode="create" />
+          <ResourceAccessGuard resourceName={renderedParams.resource} action="create">
+            <Comp resourceName={renderedParams.resource} mode="create" />
+          </ResourceAccessGuard>
         {/key}
       {:else if (renderedRoute === '/:resource/edit/:id' || renderedRoute === '/:resource/:id/edit' || renderedRoute === '/:parent/:parentId/:resource/edit/:id') && renderedHasRouteResource}
         {#key `${renderedParams.resource}-${renderedParams.id}`}
           {@const Comp = renderedResourcePages?.edit ?? mergedComponents.AutoForm}
-          <Comp resourceName={renderedParams.resource} mode="edit" id={renderedParams.id} />
+          <ResourceAccessGuard resourceName={renderedParams.resource} action="edit" id={renderedParams.id}>
+            <Comp resourceName={renderedParams.resource} mode="edit" id={renderedParams.id} />
+          </ResourceAccessGuard>
         {/key}
       {:else if (renderedRoute === '/:resource/show/:id' || renderedRoute === '/:resource/:id' || renderedRoute === '/:parent/:parentId/:resource/show/:id') && renderedHasRouteResource}
         {#key `${renderedParams.resource}-${renderedParams.id}`}
           {@const Comp = renderedResourcePages?.show ?? mergedComponents.ShowPage}
-          <Comp resourceName={renderedParams.resource} id={renderedParams.id} />
+          <ResourceAccessGuard resourceName={renderedParams.resource} action="show" id={renderedParams.id}>
+            <Comp resourceName={renderedParams.resource} id={renderedParams.id} />
+          </ResourceAccessGuard>
         {/key}
       {:else if (renderedRoute === '/:resource/clone/:id' || renderedRoute === '/:parent/:parentId/:resource/clone/:id') && renderedHasRouteResource}
         {#key `${renderedParams.resource}-clone-${renderedParams.id}`}
           {@const Comp = renderedResourcePages?.clone ?? mergedComponents.AutoForm}
-          <Comp resourceName={renderedParams.resource} mode="clone" id={renderedParams.id} />
+          <ResourceAccessGuard resourceName={renderedParams.resource} action="create" id={renderedParams.id} requireSourceRead>
+            <Comp resourceName={renderedParams.resource} mode="clone" id={renderedParams.id} />
+          </ResourceAccessGuard>
         {/key}
       {:else}
         {@const ErrorComp = mergedComponents.ErrorPage || ErrorPage}

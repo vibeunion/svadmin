@@ -45,6 +45,25 @@ export class UndoError extends Error {
   }
 }
 
+/** Raised when a delete-many fallback removed some records but not all. */
+export class DeleteManyPartialError extends Error {
+  readonly succeededIds: (string | number)[];
+  readonly failedIds: (string | number)[];
+  readonly causes: unknown[];
+
+  constructor(
+    succeededIds: (string | number)[],
+    failedIds: (string | number)[],
+    causes: unknown[] = [],
+  ) {
+    super(`Delete many partially failed: ${failedIds.length}/${succeededIds.length + failedIds.length} failed`);
+    this.name = 'DeleteManyPartialError';
+    this.succeededIds = [...succeededIds];
+    this.failedIds = [...failedIds];
+    this.causes = [...causes];
+  }
+}
+
 // ─── Base Types ───────────────────────────────────────────────
 
 export type BaseRecord = Record<string, unknown>;

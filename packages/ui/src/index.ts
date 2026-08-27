@@ -20,6 +20,8 @@ export { default as EmptyState } from './components/EmptyState.svelte';
 export { default as StatsCard } from './components/StatsCard.svelte';
 export { default as PageHeader } from './components/PageHeader.svelte';
 export { default as ResourceOperationsPage } from './components/ResourceOperationsPage.svelte';
+export { default as RecordDetailDrawer } from './components/RecordDetailDrawer.svelte';
+export { default as ResourceAccessGuard } from './components/ResourceAccessGuard.svelte';
 export { default as LoginPage } from './components/LoginPage.svelte';
 export { default as AuthPageShell } from './components/AuthPageShell.svelte';
 export { default as RegisterPage } from './components/RegisterPage.svelte';

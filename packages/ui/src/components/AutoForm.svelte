@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { captureAdminContext, useForm, getResource, deriveValidator } from '@svadmin/core';
+  import { useForm, getResource, deriveValidator, useNavigation } from '@svadmin/core';
   import { slide } from 'svelte/transition';
   import type { FieldDefinition } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
@@ -45,7 +45,7 @@
     onSuccess,
     onNavigationGuardReady,
   }: Props = $props();
-  const adminContext = captureAdminContext();
+  const navigation = useNavigation();
   const isReadonly = $derived(mode === 'show');
   const isCompact = $derived(density === 'compact');
 
@@ -196,7 +196,7 @@
     <div class="flex items-center gap-4">
       <TooltipButton
         tooltip={i18n.t('common.back')}
-        onclick={() => guardNavigate(() => adminContext.navigate(`/${resourceName}`))}
+        onclick={() => guardNavigate(() => navigation.list(resourceName))}
       >
         <ArrowLeft class="h-5 w-5" />
       </TooltipButton>
@@ -311,7 +311,7 @@
             type="button"
             variant="outline"
             size={isCompact ? 'sm' : 'default'}
-            onclick={() => guardNavigate(() => adminContext.navigate(`/${resourceName}`))}
+            onclick={() => guardNavigate(() => navigation.list(resourceName))}
           >
             {i18n.t('common.cancel')}
           </Button>

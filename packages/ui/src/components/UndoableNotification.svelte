@@ -8,9 +8,11 @@
 
   const i18n = useTranslation();
 
-  let { message, duration = 5000, onUndo, onTimeout } = $props<{
+  let { message, duration = 5000, embedded = false, managedExternally = false, onUndo, onTimeout } = $props<{
     message: string;
     duration?: number;
+    embedded?: boolean;
+    managedExternally?: boolean;
     onUndo: () => void;
     onTimeout: () => void;
   }>();
@@ -27,7 +29,7 @@
       if (remaining <= 0) {
         remaining = 0;
         clearInterval(interval);
-        if (!dismissed) {
+        if (!dismissed && !managedExternally) {
           dismissed = true;
           onTimeout();
         }
@@ -51,17 +53,21 @@
 
 {#if !dismissed}
   <div
-    class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] min-w-80 max-w-lg rounded-lg border bg-card shadow-lg overflow-hidden"
+    class={embedded
+      ? 'pointer-events-auto relative w-full overflow-hidden rounded-lg border bg-card shadow-lg'
+      : 'fixed bottom-4 left-4 right-4 z-[100] overflow-hidden rounded-lg border bg-card shadow-lg sm:bottom-6 sm:left-1/2 sm:right-auto sm:w-[min(32rem,calc(100vw-3rem))] sm:-translate-x-1/2'}
+    role="status"
+    aria-live="polite"
     transition:slide={{ duration: 250 }}
   >
-    <div class="flex items-center justify-between px-4 py-3 gap-3">
-      <p class="text-sm text-foreground">{message}</p>
+    <div class="flex items-center justify-between gap-3 px-4 py-3">
+      <p class="min-w-0 break-words text-sm text-foreground">{message}</p>
       <div class="flex items-center gap-1 flex-shrink-0">
         <Button variant="ghost" size="sm" onclick={handleUndo} class="font-semibold text-primary">
           <Undo2 class="h-3.5 w-3.5 mr-1" />
           {i18n.t('common.undo')}
         </Button>
-        <Button variant="ghost" size="icon" class="h-7 w-7" onclick={handleDismiss}>
+        <Button variant="ghost" size="icon" class="h-7 w-7" onclick={handleDismiss} aria-label={i18n.t('common.close')}>
           <X class="h-3.5 w-3.5" />
         </Button>
       </div>

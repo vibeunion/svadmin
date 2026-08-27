@@ -1,11 +1,10 @@
 <script lang="ts">
-/* eslint-disable @typescript-eslint/no-explicit-any */
   /**
    * DraggableHeader — Wraps table header cells with HTML5 Drag and Drop
-   * to enable column reorder. Persists order to localStorage.
+   * to enable column reorder. The parent owns persistence and restoration.
    *
    * Usage:
-   *   <DraggableHeader columns={columns} resourceName="posts" onReorder={handleReorder}>
+   *   <DraggableHeader columns={columns} onReorder={handleReorder}>
    *     {#snippet header(column, index)}
    *       <th>...</th>
    *     {/snippet}
@@ -18,39 +17,27 @@
     [key: string]: unknown;
   }
 
-  interface Props {
-    columns: Column[];
-    resourceName: string;
-    onReorder: (newOrder: Column[]) => void;
-    header: Snippet<[Column, number, Record<string, any>]>;
+  interface DragHeaderProps {
+    draggable: true;
+    ondragstart: (event: DragEvent) => void;
+    ondragover: (event: DragEvent) => void;
+    ondrop: (event: DragEvent) => void;
+    ondragend: () => void;
+    'data-dragging': boolean;
+    'data-drop-target': boolean;
+    class: string;
   }
 
-  let { columns, resourceName, onReorder, header }: Props = $props();
+  interface Props {
+    columns: Column[];
+    onReorder: (newOrder: Column[]) => void;
+    header: Snippet<[Column, number, DragHeaderProps]>;
+  }
+
+  let { columns, onReorder, header }: Props = $props();
 
   let dragIndex = $state<number | null>(null);
   let dropIndex = $state<number | null>(null);
-
-  let _restored = false;
-  $effect(() => {
-    if (_restored || columns.length === 0) return;
-    const storageKey = `svadmin-colorder-${resourceName}`;
-    if (typeof window === 'undefined') return;
-    _restored = true;
-    try {
-      const saved = localStorage.getItem(storageKey);
-      if (saved) {
-        const savedOrder: string[] = JSON.parse(saved);
-        const reordered = savedOrder
-          .map(id => columns.find(c => c.id === id))
-          .filter((c): c is Column => c !== undefined);
-        // Add any new columns not in saved order
-        const remaining = columns.filter(c => !savedOrder.includes(c.id));
-        if (reordered.length > 0) {
-          onReorder([...reordered, ...remaining]);
-        }
-      }
-    } catch { /* ignore */ }
-  });
 
   function handleDragStart(e: DragEvent, index: number) {
     dragIndex = index;
@@ -79,14 +66,6 @@
     const newColumns = [...columns];
     const [moved] = newColumns.splice(dragIndex, 1);
     newColumns.splice(index, 0, moved);
-
-    // Persist to localStorage
-    const storageKey = `svadmin-colorder-${resourceName}`;
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem(storageKey, JSON.stringify(newColumns.map(c => c.id)));
-      } catch { /* ignore */ }
-    }
 
     onReorder(newColumns);
     dragIndex = null;
