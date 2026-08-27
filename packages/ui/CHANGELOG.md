@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.54.0](https://github.com/vibeunion/svadmin/compare/ui-v0.53.1...ui-v0.54.0) (2026-08-27)
+
+
+### 🚀 Features
+
+* **ui:** add CurrencyField and PhoneField enterprise components ([#313](https://github.com/vibeunion/svadmin/issues/313)) ([6f1f8eb](https://github.com/vibeunion/svadmin/commit/6f1f8ebb13c0e1f5cda4fdf67e0156e481729872))
+
 ## [0.53.1](https://github.com/vibeunion/svadmin/compare/ui-v0.53.0...ui-v0.53.1) (2026-08-27)
 
 
