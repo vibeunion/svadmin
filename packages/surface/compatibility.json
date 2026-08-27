@@ -1,5 +1,5 @@
 {
-  "surface": "0.3.x",
+  "surface": "0.4.x",
   "minimumSupported": {
     "@svadmin/core": "0.34.2",
     "@svadmin/ui": "0.40.6",
