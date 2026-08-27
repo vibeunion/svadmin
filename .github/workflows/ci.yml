@@ -233,12 +233,13 @@ jobs:
         env:
           RELEASE_DIRS: ${{ steps.release_plan.outputs.paths }}
         run: |
-          set -e
+          set -u
           if [ -z "$RELEASE_DIRS" ]; then
             echo "::error::Release publication plan is empty"
             exit 1
           fi
 
+          failed=0
           while IFS= read -r pkg_dir; do
             PKG_JSON="$pkg_dir/package.json"
             if [ -f "$PKG_JSON" ]; then
@@ -247,23 +248,31 @@ jobs:
 
               if ! NPM_STATUS=$(bun scripts/npm-package-version.ts "$NAME" "$LOCAL_VER"); then
                 echo "::error::npm registry lookup failed for $NAME@$LOCAL_VER"
-                exit 1
+                failed=1
+                continue
               fi
 
               if [ "$NPM_STATUS" = "missing" ]; then
                 echo "🚀 Publishing $NAME@$LOCAL_VER..."
                 if ! (cd "$pkg_dir" && npm publish --provenance --access public); then
                   echo "❌ Publish FAILED for $NAME"
-                  exit 1
+                  failed=1
+                  continue
                 fi
               elif [ "$NPM_STATUS" = "published" ]; then
                 echo "⏭️ $NAME@$LOCAL_VER already on npm, skipping"
               else
                 echo "::error::Invalid npm registry status for $NAME@$LOCAL_VER: $NPM_STATUS"
-                exit 1
+                failed=1
+                continue
               fi
             else
               echo "::error::Release package manifest not found: $PKG_JSON"
-              exit 1
+              failed=1
             fi
           done <<< "$RELEASE_DIRS"
+
+          if [ "$failed" -ne 0 ]; then
+            echo "::error::One or more release packages failed to publish; see the complete package list above"
+            exit 1
+          fi

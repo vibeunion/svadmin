@@ -181,6 +181,17 @@ describe('npm trusted-publishing workflow contract', () => {
     expect(releaseManifest['packages/flow']).toBe(flowPackage.version);
   });
 
+  test('continues publishing after a package failure and reports the aggregate result', () => {
+    const ciWorkflow = readWorkflow('ci.yml');
+    const publishStep = ciWorkflow.slice(ciWorkflow.indexOf('      - name: Publish released packages'));
+
+    expect(publishStep).toContain('set -u');
+    expect(publishStep).toContain('failed=0');
+    expect(publishStep).toContain('failed=1');
+    expect(publishStep).toContain('continue');
+    expect(publishStep).toContain('One or more release packages failed to publish');
+  });
+
   test('dispatches ci.yml as the top-level publishing workflow', () => {
     const releaseWorkflow = readWorkflow('release.yml');
 
