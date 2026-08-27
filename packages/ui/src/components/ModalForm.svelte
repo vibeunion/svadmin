@@ -32,7 +32,7 @@
           {mode === 'create' ? `${i18n.t('common.create')}${resource.label}` : `${i18n.t('common.edit')}${resource.label}`}
         </Dialog.DialogTitle>
       </Dialog.DialogHeader>
-      <AutoForm {resourceName} {mode} {id} onSuccess={handleSuccess} />
+      <AutoForm {resourceName} {mode} {id} showHeader={false} onSuccess={handleSuccess} />
     </Dialog.DialogContent>
   </Dialog.Dialog>
 {/if}

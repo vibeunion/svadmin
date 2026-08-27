@@ -16,8 +16,11 @@
     resourceName: string;
     id: string | number;
     title?: string;
+    density?: 'compact' | 'comfortable';
+    columns?: 1 | 2 | 3 | 4;
     canDelete?: boolean;
     headerActions?: Snippet;
+    onSuccess?: () => void;
     class?: string;
   }
 
@@ -25,8 +28,11 @@
     resourceName,
     id,
     title,
+    density = 'comfortable',
+    columns = 1,
     canDelete,
     headerActions,
+    onSuccess,
     class: className = '',
   }: Props = $props();
   const adminContext = captureAdminContext();
@@ -36,8 +42,12 @@
   const showDelete = $derived(canDelete ?? resource.canDelete !== false);
 </script>
 
-<div class="space-y-6 {className}">
-  <PageHeader title={pageTitle}>
+<div class="{density === 'compact' ? 'space-y-4' : 'space-y-6'} {className}">
+  <PageHeader
+    title={pageTitle}
+    {density}
+    onBack={() => adminContext.navigate(`/${resourceName}`)}
+  >
     {#snippet actions()}
       <ListButton resource={resourceName} hideText />
       <ShowButton resource={resourceName} recordItemId={id} hideText />
@@ -51,5 +61,13 @@
     {/snippet}
   </PageHeader>
 
-  <AutoForm {resourceName} mode="edit" {id} />
+  <AutoForm
+    {resourceName}
+    mode="edit"
+    {id}
+    {density}
+    {columns}
+    showHeader={false}
+    {onSuccess}
+  />
 </div>
