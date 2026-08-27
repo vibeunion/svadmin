@@ -223,6 +223,8 @@ export { default as DescriptionList } from './components/content/DescriptionList
 export type { DescriptionItem } from './components/content/DescriptionList.svelte';
 export { default as StatusBadge } from './components/content/StatusBadge.svelte';
 export type { Status } from './components/content/StatusBadge.svelte';
+export { default as StatusTabs } from './components/content/StatusTabs.svelte';
+export type { StatusTabItem } from './components/content/StatusTabs.svelte';
 export { default as FilterToolbar } from './components/content/FilterToolbar.svelte';
 export { default as DataState } from './components/content/DataState.svelte';
 export type { DataStateKind } from './components/content/DataState.svelte';

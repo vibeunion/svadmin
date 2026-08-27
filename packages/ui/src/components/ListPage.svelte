@@ -15,10 +15,13 @@
     resourceName: string;
     title?: string;
     canCreate?: boolean;
+    density?: 'compact' | 'comfortable';
     /** Passthrough: enable row selection checkboxes */
     selectable?: boolean;
     /** Passthrough: custom header actions */
     headerActions?: Snippet;
+    /** Optional status tabs or filter slot above table */
+    statusTabs?: Snippet;
     /** Passthrough: custom cell renderer per field */
     cellRenderer?: Snippet<[{ field: FieldDefinition; value: unknown; record: Record<string, unknown> }]>;
     /** Passthrough: custom row actions */
@@ -34,8 +37,10 @@
     resourceName,
     title,
     canCreate,
+    density = 'comfortable',
     selectable,
     headerActions,
+    statusTabs,
     cellRenderer,
     rowActions,
     emptyState,
@@ -49,11 +54,11 @@
   const showCreate = $derived(canCreate ?? resource.canCreate !== false);
 </script>
 
-<div class="space-y-6 {className}">
-  <PageHeader title={pageTitle}>
+<div class="{density === 'compact' ? 'space-y-4' : 'space-y-6'} {className}">
+  <PageHeader title={pageTitle} {density}>
     {#snippet actions()}
       {#if showCreate}
-        <Button onclick={() => adminContext.navigate(`/${resourceName}/create`)}>
+        <Button size={density === 'compact' ? 'sm' : 'default'} onclick={() => adminContext.navigate(`/${resourceName}/create`)}>
           <Plus class="h-4 w-4" data-icon="inline-start" /> {i18n.t('common.create')}
         </Button>
       {/if}
@@ -63,8 +68,15 @@
     {/snippet}
   </PageHeader>
 
+  {#if statusTabs}
+    <div>
+      {@render statusTabs()}
+    </div>
+  {/if}
+
   <AutoTable
     {resourceName}
+    {density}
     {selectable}
     defaultCellRenderer={cellRenderer}
     {rowActions}

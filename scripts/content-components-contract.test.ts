@@ -14,7 +14,7 @@ const components = [
   'IntegrationCard.svelte', 'ApiKeyList.svelte', 'SecurityEventTable.svelte',
   'MemberList.svelte', 'ImportDropzone.svelte', 'NetworkUserCard.svelte',
   'NetworkTable.svelte', 'OtpInput.svelte', 'TwoFactorStepper.svelte',
-  'SystemErrorState.svelte', 'FeedbackNotice.svelte',
+  'SystemErrorState.svelte', 'FeedbackNotice.svelte', 'StatusTabs.svelte',
 ];
 
 describe('Stripe-first content component contract', () => {
@@ -32,6 +32,7 @@ describe('Stripe-first content component contract', () => {
     }
     expect(index).toContain("export type { DescriptionItem } from './components/content/DescriptionList.svelte';");
     expect(index).toContain("export type { Status } from './components/content/StatusBadge.svelte';");
+    expect(index).toContain("export type { StatusTabItem } from './components/content/StatusTabs.svelte';");
     expect(index).toContain("export type { MetricTrendTone } from './components/content/MetricBlock.svelte';");
     expect(index).toContain("export type { NetworkUser, NetworkMetric } from './components/content/NetworkUserCard.svelte';");
     expect(index).toContain("export type { NetworkColumn } from './components/content/NetworkTable.types.js';");
