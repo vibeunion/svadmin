@@ -221,6 +221,9 @@ export { default as WorkspaceLayout } from './components/content/WorkspaceLayout
 export { default as WorkspaceStageStepper } from './components/content/WorkspaceStageStepper.svelte';
 export type { WorkspaceStage, WorkspaceStageStatus } from './components/content/WorkspaceStageStepper.svelte';
 export { default as WorkspaceActionBar } from './components/content/WorkspaceActionBar.svelte';
+export type { WorkspaceActionBarTone } from './components/content/WorkspaceActionBar.svelte';
+export { default as WorkspaceTabBar } from './components/content/WorkspaceTabBar.svelte';
+export type { WorkspaceTabItem } from './components/content/WorkspaceTabBar.svelte';
 export { default as WorkspaceInspector } from './components/content/WorkspaceInspector.svelte';
 export { default as WorkspaceSplitPane } from './components/content/WorkspaceSplitPane.svelte';
 export { default as SettingsGroup } from './components/content/SettingsGroup.svelte';

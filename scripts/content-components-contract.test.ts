@@ -7,7 +7,7 @@ const contentDir = join(root, 'packages/ui/src/components/content');
 const components = [
   'ContentPageShell.svelte', 'ContentPageHeader.svelte', 'SectionHeader.svelte',
   'PageToolbar.svelte', 'WorkspaceLayout.svelte', 'WorkspaceStageStepper.svelte',
-  'WorkspaceActionBar.svelte', 'WorkspaceInspector.svelte', 'WorkspaceSplitPane.svelte', 'SettingsGroup.svelte',
+  'WorkspaceActionBar.svelte', 'WorkspaceTabBar.svelte', 'WorkspaceInspector.svelte', 'WorkspaceSplitPane.svelte', 'SettingsGroup.svelte',
   'SettingsFieldRow.svelte', 'MetricBlock.svelte', 'DescriptionList.svelte',
   'StatusBadge.svelte', 'FilterToolbar.svelte', 'DataState.svelte',
   'ProjectCard.svelte', 'TeamCard.svelte', 'FileList.svelte',
@@ -31,6 +31,8 @@ describe('Stripe-first content component contract', () => {
     for (const name of components.map((entry) => entry.replace('.svelte', ''))) {
       expect(index).toContain('./components/content/' + name + '.svelte');
     }
+    expect(index).toContain("export type { WorkspaceActionBarTone } from './components/content/WorkspaceActionBar.svelte';");
+    expect(index).toContain("export type { WorkspaceTabItem } from './components/content/WorkspaceTabBar.svelte';");
     expect(index).toContain("export type { DescriptionItem } from './components/content/DescriptionList.svelte';");
     expect(index).toContain("export type { Status } from './components/content/StatusBadge.svelte';");
     expect(index).toContain("export type { StatusTabItem } from './components/content/StatusTabs.svelte';");
