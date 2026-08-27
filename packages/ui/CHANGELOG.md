@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.52.0](https://github.com/vibeunion/svadmin/compare/ui-v0.51.0...ui-v0.52.0) (2026-08-27)
+
+
+### 🚀 Features
+
+* **ui:** add enhanced enterprise field components and audit timeline ([#302](https://github.com/vibeunion/svadmin/issues/302)) ([136daeb](https://github.com/vibeunion/svadmin/commit/136daeb4836a5d5ff7e1b9d200f48584c1aa1937))
+
 ## [0.51.0](https://github.com/vibeunion/svadmin/compare/ui-v0.50.0...ui-v0.51.0) (2026-08-27)
 
 
