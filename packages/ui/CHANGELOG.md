@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.51.0](https://github.com/vibeunion/svadmin/compare/ui-v0.50.0...ui-v0.51.0) (2026-08-27)
+
+
+### 🚀 Features
+
+* **ui:** add enterprise table toolbars, action button slots, and description list grids ([#297](https://github.com/vibeunion/svadmin/issues/297)) ([bf15c15](https://github.com/vibeunion/svadmin/commit/bf15c15658017561b006f976d2b3820a078c9720))
+
 ## [0.50.0](https://github.com/vibeunion/svadmin/compare/ui-v0.49.3...ui-v0.50.0) (2026-08-27)
 
 

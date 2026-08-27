@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.23](https://github.com/vibeunion/svadmin/compare/lite-v0.3.22...lite-v0.3.23) (2026-08-27)
+
+
+### 🐛 Bug Fixes
+
+* **release:** support core 0.41 peer ranges ([#300](https://github.com/vibeunion/svadmin/issues/300)) ([0ab3301](https://github.com/vibeunion/svadmin/commit/0ab330141e02ee35d7c9d2c2a42a4d0fdb8dd071))
+
 ## [0.3.22](https://github.com/vibeunion/svadmin/compare/lite-v0.3.21...lite-v0.3.22) (2026-08-26)
 
 

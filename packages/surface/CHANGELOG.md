@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.3](https://github.com/vibeunion/svadmin/compare/surface-v0.3.2...surface-v0.3.3) (2026-08-27)
+
+
+### 🐛 Bug Fixes
+
+* **release:** support core 0.41 peer ranges ([#300](https://github.com/vibeunion/svadmin/issues/300)) ([0ab3301](https://github.com/vibeunion/svadmin/commit/0ab330141e02ee35d7c9d2c2a42a4d0fdb8dd071))
+
 ## [0.3.2](https://github.com/vibeunion/svadmin/compare/surface-v0.3.1...surface-v0.3.2) (2026-08-27)
 
 

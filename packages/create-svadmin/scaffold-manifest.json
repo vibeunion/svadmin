@@ -10,8 +10,8 @@
     "check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "dependencies": {
-    "@svadmin/core": "^0.40.1",
-    "@svadmin/ui": "^0.50.0",
+    "@svadmin/core": "^0.41.0",
+    "@svadmin/ui": "^0.51.0",
     "@tanstack/svelte-query": "^6.1.38",
     "highlight.js": "^11.11.1",
     "@lucide/svelte": "^1.31.0"
