@@ -113,13 +113,13 @@
         <span class="text-[11px] truncate max-w-[12rem]">{alt || fileName || 'Image unavailable'}</span>
       </div>
     {:else}
-      {#snippet imageContent(interactive: boolean)}
+      {#snippet imageContent()}
         <img
           {src}
           alt={alt || title || fileName || 'Thumbnail'}
           class={cn(
             'block max-h-full max-w-full transition-transform duration-200',
-            interactive && 'group-hover:scale-[1.02]',
+            showOverlay && 'group-hover:scale-[1.02]',
             fitClasses[fit],
             loading ? 'opacity-0' : 'opacity-100'
           )}
@@ -142,14 +142,14 @@
           onclick={handleAction}
           title={title || alt || fileName || 'Click to view'}
         >
-          {@render imageContent(true)}
+          {@render imageContent()}
         </button>
       {:else}
         <div
           class="relative flex size-full items-center justify-center bg-[repeating-conic-gradient(theme(colors.muted.DEFAULT)_0%_25%,theme(colors.card.DEFAULT)_0%_50%)] bg-[length:16px_16px]"
           title={title || alt || fileName}
         >
-          {@render imageContent(false)}
+          {@render imageContent()}
         </div>
       {/if}
     {/if}
