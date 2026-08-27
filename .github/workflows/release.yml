@@ -44,15 +44,25 @@ jobs:
               head: `${context.repo.owner}:${branch}`,
               per_page: 100,
             });
-            const matching = pulls.filter((pull) => pull.head.ref === branch);
-            if (matching.length > 1) {
-              core.setFailed(`Expected at most one open release PR, found ${matching.length}`);
+            const repository = `${context.repo.owner}/${context.repo.repo}`;
+            const unexpected = pulls.filter(
+              (pull) =>
+                pull.base.ref !== 'main' ||
+                pull.head.ref !== branch ||
+                pull.head.repo?.full_name !== repository,
+            );
+            if (unexpected.length > 0) {
+              core.setFailed(`Release PR query returned ${unexpected.length} non-canonical result(s)`);
               return;
             }
-            if (matching.length === 1) {
+            if (pulls.length > 1) {
+              core.setFailed(`Expected at most one open release PR, found ${pulls.length}`);
+              return;
+            }
+            if (pulls.length === 1) {
               core.setOutput('branch', branch);
-              core.setOutput('number', String(matching[0].number));
-              core.info(`Found open release PR #${matching[0].number}`);
+              core.setOutput('number', String(pulls[0].number));
+              core.info(`Found open release PR #${pulls[0].number}`);
             } else {
               core.info('No open release PR found');
             }

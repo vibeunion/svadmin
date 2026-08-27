@@ -10,6 +10,79 @@ function readWorkflow(name: string): string {
   return readFileSync(resolve(repositoryRoot, '.github', 'workflows', name), 'utf8');
 }
 
+interface ReleasePullRequest {
+  number: number;
+  base: { ref: string };
+  head: { ref: string; repo?: { full_name: string } | null };
+}
+
+interface ReleasePrResolverResult {
+  failures: string[];
+  infos: string[];
+  outputs: Record<string, string>;
+  query?: Record<string, unknown>;
+}
+
+function readReleasePrResolverScript(): string {
+  const workflow = Bun.YAML.parse(readWorkflow('release.yml')) as {
+    jobs?: {
+      'release-please'?: {
+        steps?: Array<{ id?: string; with?: { script?: string } }>;
+      };
+    };
+  };
+  const script = workflow.jobs?.['release-please']?.steps?.find(
+    (step) => step.id === 'release-pr',
+  )?.with?.script;
+
+  if (!script) throw new Error('release.yml must define the release-pr github-script step');
+  return script;
+}
+
+async function runReleasePrResolver(
+  pulls: ReleasePullRequest[],
+): Promise<ReleasePrResolverResult> {
+  const result: ReleasePrResolverResult = { failures: [], infos: [], outputs: {} };
+  const list = () => undefined;
+  const github = {
+    rest: { pulls: { list } },
+    paginate: async (endpoint: unknown, query: Record<string, unknown>) => {
+      expect(endpoint).toBe(list);
+      result.query = query;
+      return pulls;
+    },
+  };
+  const context = { repo: { owner: 'vibeunion', repo: 'svadmin' } };
+  const core = {
+    setFailed: (message: string) => result.failures.push(message),
+    setOutput: (name: string, value: string) => {
+      result.outputs[name] = value;
+    },
+    info: (message: string) => result.infos.push(message),
+  };
+  const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor as new (
+    ...args: string[]
+  ) => (...values: unknown[]) => Promise<void>;
+
+  await new AsyncFunction('github', 'context', 'core', readReleasePrResolverScript())(
+    github,
+    context,
+    core,
+  );
+  return result;
+}
+
+function canonicalReleasePull(number: number): ReleasePullRequest {
+  return {
+    number,
+    base: { ref: 'main' },
+    head: {
+      ref: 'release-please--branches--main',
+      repo: { full_name: 'vibeunion/svadmin' },
+    },
+  };
+}
+
 function readPackageJson(path = 'package.json'): {
   name?: string;
   version?: string;
@@ -152,6 +225,67 @@ describe('npm trusted-publishing workflow contract', () => {
     expect(releaseWorkflow).toContain('core.hooksPath=/dev/null');
     expect(releaseWorkflow).toContain('push --no-verify');
     expect(releaseWorkflow).toContain('HEAD:${RELEASE_BRANCH}');
+  });
+
+  test('queries and resolves the only canonical open release pull request', async () => {
+    const result = await runReleasePrResolver([canonicalReleasePull(316)]);
+
+    expect(result.query).toEqual({
+      owner: 'vibeunion',
+      repo: 'svadmin',
+      state: 'open',
+      base: 'main',
+      head: 'vibeunion:release-please--branches--main',
+      per_page: 100,
+    });
+    expect(result.failures).toEqual([]);
+    expect(result.outputs).toEqual({
+      branch: 'release-please--branches--main',
+      number: '316',
+    });
+  });
+
+  test('leaves synchronization disabled when there is no open release pull request', async () => {
+    const result = await runReleasePrResolver([]);
+
+    expect(result.failures).toEqual([]);
+    expect(result.outputs).toEqual({});
+    expect(result.infos).toContain('No open release PR found');
+  });
+
+  test('fails closed when the release pull request query is ambiguous', async () => {
+    const result = await runReleasePrResolver([
+      canonicalReleasePull(316),
+      canonicalReleasePull(319),
+    ]);
+
+    expect(result.failures).toEqual(['Expected at most one open release PR, found 2']);
+    expect(result.outputs).toEqual({});
+  });
+
+  test('fails closed when the release pull request query returns a non-canonical result', async () => {
+    const invalidPulls: ReleasePullRequest[] = [
+      { ...canonicalReleasePull(316), base: { ref: 'next' } },
+      {
+        ...canonicalReleasePull(317),
+        head: { ...canonicalReleasePull(317).head, ref: 'release-please--branches--next' },
+      },
+      {
+        ...canonicalReleasePull(318),
+        head: {
+          ...canonicalReleasePull(318).head,
+          repo: { full_name: 'someone/svadmin' },
+        },
+      },
+    ];
+
+    for (const pull of invalidPulls) {
+      const result = await runReleasePrResolver([pull]);
+      expect(result.failures).toEqual([
+        'Release PR query returned 1 non-canonical result(s)',
+      ]);
+      expect(result.outputs).toEqual({});
+    }
   });
 
   test('publishes only from an explicit ci.yml workflow dispatch using OIDC', () => {
