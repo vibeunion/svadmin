@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/editor",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Modern Tiptap-based rich text editor for Svelte 5 — headless, modular, production-ready",
   "type": "module",
   "sideEffects": [

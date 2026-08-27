@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.41.1](https://github.com/vibeunion/svadmin/compare/core-v0.41.0...core-v0.41.1) (2026-08-27)
+
+
+### 🐛 Bug Fixes
+
+* **release:** synchronize existing release PRs reliably ([#317](https://github.com/vibeunion/svadmin/issues/317)) ([4c55c79](https://github.com/vibeunion/svadmin/commit/4c55c7925be2288e002fe99fe2474f975bdb0032))
+* **ui:** remove fake integration connection toggles ([#322](https://github.com/vibeunion/svadmin/issues/322)) ([c41e901](https://github.com/vibeunion/svadmin/commit/c41e901f53fc641b10c39c85df64f7d1da5c2cad))
+
 ## [0.41.0](https://github.com/vibeunion/svadmin/compare/core-v0.40.1...core-v0.41.0) (2026-08-27)
 
 
