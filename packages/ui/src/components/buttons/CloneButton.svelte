@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { Snippet } from 'svelte';
   import { useNavigation, useCan, useTranslation } from '@svadmin/core';
   import { Button } from '../ui/button/index.js';
   import { Copy } from '@lucide/svelte';
@@ -7,9 +8,19 @@
 
   const i18n = useTranslation();
 
-  let { resource, recordItemId, hideText = false, accessControl = { enabled: true, hideIfUnauthorized: true }, class: className = '' } = $props<{
+  let {
+    resource,
+    recordItemId,
+    label,
+    children,
+    hideText = false,
+    accessControl = { enabled: true, hideIfUnauthorized: true },
+    class: className = '',
+  } = $props<{
     resource: string;
     recordItemId: string | number;
+    label?: string;
+    children?: Snippet;
     hideText?: boolean;
     accessControl?: ButtonAccessControl;
     class?: string;
@@ -24,6 +35,7 @@
     queryOptions: { enabled: accessControl?.enabled ?? true }
   }));
   const hidden = $derived(accessControl?.hideIfUnauthorized && !can.allowed);
+  const displayText = $derived(label ?? i18n.t('common.clone'));
 </script>
 
 {#if !hidden}
@@ -31,10 +43,19 @@
     variant="outline"
     size={hideText ? 'icon' : 'sm'}
     class={className}
+    aria-label={hideText ? displayText : undefined}
     disabled={!can.allowed}
     onclick={() => nav.clone(resource, recordItemId)}
   >
     <Copy class="h-4 w-4" />
-    {#if !hideText}<span class="ml-1">{i18n.t('common.clone')}</span>{/if}
+    {#if !hideText}
+      <span class="ml-1">
+        {#if children}
+          {@render children()}
+        {:else}
+          {displayText}
+        {/if}
+      </span>
+    {/if}
   </Button>
 {/if}

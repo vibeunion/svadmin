@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { Snippet } from 'svelte';
   import { useNavigation, useCan, useTranslation } from '@svadmin/core';
   import { Button } from '../ui/button/index.js';
   import { Eye } from '@lucide/svelte';
@@ -7,9 +8,20 @@
 
   const i18n = useTranslation();
 
-  let { resource, recordItemId, hideText = false, accessControl = { enabled: true, hideIfUnauthorized: true }, onBeforeNavigate, class: className = '' } = $props<{
+  let {
+    resource,
+    recordItemId,
+    label,
+    children,
+    hideText = false,
+    accessControl = { enabled: true, hideIfUnauthorized: true },
+    onBeforeNavigate,
+    class: className = '',
+  } = $props<{
     resource: string;
     recordItemId: string | number;
+    label?: string;
+    children?: Snippet;
     hideText?: boolean;
     accessControl?: ButtonAccessControl;
     onBeforeNavigate?: (navigate: () => void) => void;
@@ -25,6 +37,7 @@
     queryOptions: { enabled: accessControl?.enabled ?? true }
   }));
   const hidden = $derived(accessControl?.hideIfUnauthorized && !can.allowed);
+  const displayText = $derived(label ?? i18n.t('common.detail'));
 
   function navigateToRecord() {
     const navigate = () => nav.show(resource, recordItemId);
@@ -34,15 +47,23 @@
 </script>
 
 {#if !hidden}
-
   <Button
     variant="ghost"
     size={hideText ? 'icon' : 'sm'}
     class={className}
+    aria-label={hideText ? displayText : undefined}
     disabled={!can.allowed}
     onclick={navigateToRecord}
   >
     <Eye class="h-4 w-4" />
-    {#if !hideText}<span class="ml-1">{i18n.t('common.detail')}</span>{/if}
+    {#if !hideText}
+      <span class="ml-1">
+        {#if children}
+          {@render children()}
+        {:else}
+          {displayText}
+        {/if}
+      </span>
+    {/if}
   </Button>
 {/if}

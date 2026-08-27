@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { Snippet } from 'svelte';
   import { useDelete, useCan, useTranslation } from '@svadmin/core';
   import { Button } from '../ui/button/index.js';
   import { Trash2 } from '@lucide/svelte';
@@ -8,11 +9,20 @@
   const i18n = useTranslation();
 
   let {
-    resource, recordItemId, hideText = false,
-    accessControl = { enabled: true, hideIfUnauthorized: true }, onSuccess, undoable = false, class: className = '',
+    resource,
+    recordItemId,
+    label,
+    children,
+    hideText = false,
+    accessControl = { enabled: true, hideIfUnauthorized: true },
+    onSuccess,
+    undoable = false,
+    class: className = '',
   } = $props<{
     resource: string;
     recordItemId: string | number;
+    label?: string;
+    children?: Snippet;
     hideText?: boolean;
     accessControl?: ButtonAccessControl;
     onSuccess?: () => void;
@@ -29,6 +39,7 @@
     queryOptions: { enabled: accessControl?.enabled ?? true }
   }));
   const hidden = $derived(accessControl?.hideIfUnauthorized && !can.allowed);
+  const displayText = $derived(label ?? i18n.t('common.delete'));
   let confirming = $state(false);
 
   async function handleDelete() {
@@ -59,11 +70,20 @@
       variant="ghost"
       size={hideText ? 'icon' : 'sm'}
       class="text-destructive hover:text-destructive {className}"
+      aria-label={hideText ? displayText : undefined}
       disabled={!can.allowed}
       onclick={handleDelete}
     >
       <Trash2 class="h-4 w-4" />
-      {#if !hideText}<span class="ml-1">{i18n.t('common.delete')}</span>{/if}
+      {#if !hideText}
+        <span class="ml-1">
+          {#if children}
+            {@render children()}
+          {:else}
+            {displayText}
+          {/if}
+        </span>
+      {/if}
     </Button>
   {/if}
 {/if}
