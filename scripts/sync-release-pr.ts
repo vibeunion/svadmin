@@ -97,6 +97,70 @@ function writeJson(path: string, value: unknown): void {
   writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`);
 }
 
+function synchronizeLockfileWorkspaceVersions(
+  repositoryRoot: string,
+  packages: Iterable<{ path: string; manifest: PackageManifest }>,
+  changedFiles: Set<string>,
+): void {
+  const lockfilePath = join(repositoryRoot, 'bun.lock');
+  let lockfile: string;
+  try {
+    lockfile = readFileSync(lockfilePath, 'utf8');
+  } catch {
+    return;
+  }
+
+  const packagesByPath = new Map([...packages].map((pkg) => [pkg.path, pkg]));
+  const lines = lockfile.split('\n');
+  let currentWorkspacePath: string | undefined;
+  const foundWorkspacePaths = new Set<string>();
+  const synchronizedWorkspacePaths = new Set<string>();
+  let changed = false;
+  for (let index = 0; index < lines.length; index += 1) {
+    const workspaceMatch = lines[index].match(/^(?:\x20){4}("(?:[^"\\]|\\.)+"): \{\r?$/);
+    if (workspaceMatch) {
+      const workspacePath = JSON.parse(workspaceMatch[1]) as string;
+      currentWorkspacePath = packagesByPath.has(workspacePath) ? workspacePath : undefined;
+      if (currentWorkspacePath) foundWorkspacePaths.add(currentWorkspacePath);
+      continue;
+    }
+    if (!currentWorkspacePath) continue;
+
+    const versionMatch = lines[index].match(
+      /^(?:\x20){6}("version": ")[^"]+(",?)(\r?)$/,
+    );
+    const current = packagesByPath.get(currentWorkspacePath);
+    if (!versionMatch || !current?.manifest.version) continue;
+    const nextLine =
+      `${' '.repeat(6)}${versionMatch[1]}${current.manifest.version}` +
+      `${versionMatch[2]}${versionMatch[3]}`;
+    if (lines[index] !== nextLine) {
+      lines[index] = nextLine;
+      changed = true;
+    }
+    synchronizedWorkspacePaths.add(currentWorkspacePath);
+    currentWorkspacePath = undefined;
+  }
+
+  const missingWorkspaces = [...packagesByPath.keys()].filter(
+    (packagePath) => !foundWorkspacePaths.has(packagePath),
+  );
+  if (missingWorkspaces.length > 0) {
+    throw new Error(`bun.lock is missing release workspaces: ${missingWorkspaces.join(', ')}`);
+  }
+  const missingVersions = [...foundWorkspacePaths].filter(
+    (packagePath) => !synchronizedWorkspacePaths.has(packagePath),
+  );
+  if (missingVersions.length > 0) {
+    throw new Error(`bun.lock workspaces are missing versions: ${missingVersions.join(', ')}`);
+  }
+
+  if (changed) {
+    writeFileSync(lockfilePath, lines.join('\n'));
+    changedFiles.add('bun.lock');
+  }
+}
+
 export function syncReleasePr(options: SyncReleasePrOptions): SyncReleasePrResult {
   const repositoryRoot = resolve(options.repositoryRoot);
   const config = readJson<ReleasePleaseConfig>(join(repositoryRoot, 'release-please-config.json'));
@@ -196,6 +260,8 @@ export function syncReleasePr(options: SyncReleasePrOptions): SyncReleasePrResul
     writeJson(join(repositoryRoot, packageJsonPath), current.manifest);
     changedFiles.add(packageJsonPath);
   }
+
+  synchronizeLockfileWorkspaceVersions(repositoryRoot, currentPackages.values(), changedFiles);
 
   const bumpedPackages: string[] = [];
   for (const [name, dependencies] of changedPeers) {
