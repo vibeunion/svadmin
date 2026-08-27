@@ -128,3 +128,51 @@ describe('UrlField enterprise capabilities', () => {
     expect(link?.textContent).toContain('View Specification');
   });
 });
+
+import CopyField from './CopyField.svelte';
+import AvatarField from './AvatarField.svelte';
+
+describe('CopyField enterprise capabilities', () => {
+  it('renders copyable text and copy button', () => {
+    const view = render(CopyField, { value: 'sk_live_123456789' });
+    expect(view.container.textContent).toContain('sk_live_123456789');
+    expect(view.container.querySelector('button')).not.toBeNull();
+  });
+
+  it('renders masked text when masked=true', () => {
+    const view = render(CopyField, { value: 'sk_live_secret_key_9999', masked: true });
+    expect(view.container.textContent).toContain('sk_l...9999');
+  });
+
+  it('renders fallback when value is empty', () => {
+    const view = render(CopyField, { value: null, nullLabel: 'No Key' });
+    expect(view.container.textContent).toContain('No Key');
+  });
+});
+
+describe('AvatarField enterprise capabilities', () => {
+  it('renders name initials when src is not provided', () => {
+    const view = render(AvatarField, { name: 'John Doe' });
+    expect(view.container.textContent).toContain('JD');
+  });
+
+  it('renders status dot badge when status is specified', () => {
+    const view = render(AvatarField, { name: 'Alice', status: 'online' });
+    expect(view.container.querySelector('.bg-emerald-500')).not.toBeNull();
+  });
+
+  it('renders label and subtitle when showName is true', () => {
+    const view = render(AvatarField, {
+      name: 'Bob Smith',
+      subtitle: 'Administrator',
+      showName: true,
+    });
+    expect(view.container.textContent).toContain('Bob Smith');
+    expect(view.container.textContent).toContain('Administrator');
+  });
+
+  it('renders fallback when no name or src given', () => {
+    const view = render(AvatarField, { nullLabel: 'Unknown User' });
+    expect(view.container.textContent).toContain('Unknown User');
+  });
+});

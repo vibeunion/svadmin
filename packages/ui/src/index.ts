@@ -120,6 +120,8 @@ export { default as MultiSelectField } from './components/fields/MultiSelectFiel
 export { default as RelationField } from './components/fields/RelationField.svelte';
 export { default as JsonField } from './components/fields/JsonField.svelte';
 export { default as RichTextField } from './components/fields/RichTextField.svelte';
+export { default as CopyField } from './components/fields/CopyField.svelte';
+export { default as AvatarField } from './components/fields/AvatarField.svelte';
 
 // Rich text editor (requires @svadmin/editor) as a direct import in consumer app
 
@@ -261,3 +263,5 @@ export type { TimelineItem } from './components/content/AuditTimeline.svelte';
 export type { TagTone } from './components/fields/TagField.svelte';
 export type { BooleanTone } from './components/fields/BooleanField.svelte';
 export type { DateFieldFormat } from './components/fields/DateField.svelte';
+
+export type { AvatarStatus, AvatarSize } from './components/fields/AvatarField.svelte';
