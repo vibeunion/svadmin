@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.53.0](https://github.com/vibeunion/svadmin/compare/ui-v0.52.0...ui-v0.53.0) (2026-08-27)
+
+
+### 🚀 Features
+
+* **ui:** add CopyField and AvatarField enterprise components ([#305](https://github.com/vibeunion/svadmin/issues/305)) ([641e839](https://github.com/vibeunion/svadmin/commit/641e839a7e9e43084b0f6778280396aeec469f8e))
+* **ui:** add FilterDropdown, BatchActionBar, and DateRangeField components ([#304](https://github.com/vibeunion/svadmin/issues/304)) ([bda24cf](https://github.com/vibeunion/svadmin/commit/bda24cf0efcb4dd96f1e461a6c9a84f95e5e951e))
+
 ## [0.52.0](https://github.com/vibeunion/svadmin/compare/ui-v0.51.0...ui-v0.52.0) (2026-08-27)
 
 
