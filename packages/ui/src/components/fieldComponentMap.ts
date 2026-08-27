@@ -14,6 +14,7 @@ import BooleanField from './fields/BooleanField.svelte';
 import ImageField from './fields/ImageField.svelte';
 import TagField from './fields/TagField.svelte';
 import DateField from './fields/DateField.svelte';
+import DateRangeField from './fields/DateRangeField.svelte';
 import EmailField from './fields/EmailField.svelte';
 import UrlField from './fields/UrlField.svelte';
 import SelectField from './fields/SelectField.svelte';
@@ -22,6 +23,13 @@ import RelationField from './fields/RelationField.svelte';
 import JsonField from './fields/JsonField.svelte';
 import RichTextField from './fields/RichTextField.svelte';
 import NumberField from './fields/NumberField.svelte';
+import CurrencyField from './fields/CurrencyField.svelte';
+import PhoneField from './fields/PhoneField.svelte';
+import PercentField from './fields/PercentField.svelte';
+import RatingField from './fields/RatingField.svelte';
+import CodeField from './fields/CodeField.svelte';
+import AvatarField from './fields/AvatarField.svelte';
+import CopyField from './fields/CopyField.svelte';
 import FileField from './fields/FileField.svelte';
 
 /**
@@ -34,6 +42,7 @@ export const builtinDisplayComponents: FieldComponentMap = {
   images: ImageField,
   tags: TagField,
   date: DateField,
+  daterange: DateRangeField,
   email: EmailField,
   url: UrlField,
   select: SelectField,
@@ -43,6 +52,13 @@ export const builtinDisplayComponents: FieldComponentMap = {
   richtext: RichTextField,
   textarea: RichTextField,
   number: NumberField,
+  currency: CurrencyField,
+  phone: PhoneField,
+  percent: PercentField,
+  rating: RatingField,
+  code: CodeField,
+  avatar: AvatarField,
+  copy: CopyField,
   file: FileField,
 };
 
