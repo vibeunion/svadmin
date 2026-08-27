@@ -36,6 +36,7 @@ function findIncompatibleWorkspacePeers(dependencyName: string, dependencyVersio
 
 function readReleasePleaseConfig(): {
   packages: Record<string, { component?: string; 'extra-files'?: unknown[] }>;
+  plugins?: Array<{ type?: string; updatePeerDependencies?: boolean }>;
 } {
   return JSON.parse(readFileSync(resolve(repositoryRoot, 'release-please-config.json'), 'utf8'));
 }
@@ -107,6 +108,32 @@ describe('npm trusted-publishing workflow contract', () => {
     expect(releaseWorkflow).toContain('release_manifest: releaseManifest');
     expect(releaseWorkflow).toContain("publish: 'true'");
     expect(releaseWorkflow).not.toContain('uses: ./.github/workflows/ci.yml');
+  });
+
+  test('synchronizes generated release pull request metadata without exposing the PAT to branch code', () => {
+    const releaseWorkflow = readWorkflow('release.yml');
+
+    expect(releaseWorkflow).toContain('group: release-please-${{ github.repository }}');
+    expect(releaseWorkflow).toContain('cancel-in-progress: false');
+    expect(releaseWorkflow).toContain("if: steps.release.outputs.prs_created == 'true'");
+    expect(releaseWorkflow).toContain('RELEASE_PR: ${{ steps.release.outputs.pr }}');
+    expect(releaseWorkflow).toContain('bun-version: "1.4.0"');
+    expect(releaseWorkflow).toContain('persist-credentials: false');
+    expect(releaseWorkflow).toContain(
+      'git diff --exit-code origin/main -- scripts/sync-release-pr.ts',
+    );
+    expect(releaseWorkflow).toContain('git checkout origin/main -- bun.lock');
+    expect(releaseWorkflow).toContain(
+      'bun scripts/sync-release-pr.ts --base-ref origin/main',
+    );
+    expect(releaseWorkflow).toContain('bun install --ignore-scripts');
+    expect(releaseWorkflow).toContain('git add .release-please-manifest.json bun.lock');
+    expect(releaseWorkflow).toContain('git commit --no-verify');
+    expect(releaseWorkflow).toContain("steps.release-sync.outputs.changed == 'true'");
+    expect(releaseWorkflow).toContain('RELEASE_PAT: ${{ secrets.RELEASE_PAT }}');
+    expect(releaseWorkflow).toContain('core.hooksPath=/dev/null');
+    expect(releaseWorkflow).toContain('push --no-verify');
+    expect(releaseWorkflow).toContain('HEAD:${RELEASE_BRANCH}');
   });
 
   test('publishes only from an explicit ci.yml workflow dispatch using OIDC', () => {
@@ -231,5 +258,14 @@ describe('release manifest verification', () => {
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
+  });
+
+  test('propagates workspace dependency releases through the node package graph', () => {
+    const config = readReleasePleaseConfig();
+
+    expect(config.plugins).toContainEqual({
+      type: 'node-workspace',
+      updatePeerDependencies: true,
+    });
   });
 });
