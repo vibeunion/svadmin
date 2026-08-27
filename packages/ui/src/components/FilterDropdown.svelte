@@ -45,22 +45,29 @@
     class: className = '',
   }: Props = $props();
 
-  let internalTextValue = $state(typeof value === 'string' ? value : '');
-  let internalSelectedValues = $state<(string | number)[]>(
-    Array.isArray(value) ? [...value] : value != null && value !== '' ? [value as string | number] : []
-  );
+  type OptionValue = OptionItem['value'];
+
+  function isOptionValue(candidate: unknown): candidate is OptionValue {
+    return typeof candidate === 'string' || typeof candidate === 'number';
+  }
+
+  function getTextValue(candidate: unknown): string {
+    return typeof candidate === 'string' ? candidate : '';
+  }
+
+  function getSelectedValues(candidate: unknown): OptionValue[] {
+    if (Array.isArray(candidate)) return candidate.filter(isOptionValue);
+    return isOptionValue(candidate) && candidate !== '' ? [candidate] : [];
+  }
+
+  let internalTextValue = $state(getTextValue(value));
+  let internalSelectedValues = $state<OptionValue[]>(getSelectedValues(value));
   let optionSearch = $state('');
 
-  // Sync internal states when value changes from outside
+  // Keep the editable draft aligned with controlled value changes.
   $effect(() => {
-    if (typeof value === 'string') {
-      internalTextValue = value;
-    }
-    if (Array.isArray(value)) {
-      internalSelectedValues = [...value];
-    } else if (value != null && value !== '') {
-      internalSelectedValues = [value as string | number];
-    }
+    internalTextValue = getTextValue(value);
+    internalSelectedValues = getSelectedValues(value);
   });
 
   const isFilterActive = $derived(
@@ -79,7 +86,30 @@
       : []
   );
 
-  function toggleOption(optValue: string | number) {
+  function restoreDraft() {
+    internalTextValue = getTextValue(value);
+    internalSelectedValues = getSelectedValues(value);
+    optionSearch = '';
+  }
+
+  function handleClose() {
+    restoreDraft();
+    open = false;
+  }
+
+  function handleClickOutside() {
+    if (open) handleClose();
+  }
+
+  function handleTriggerClick() {
+    if (open) {
+      handleClose();
+    } else {
+      open = true;
+    }
+  }
+
+  function toggleOption(optValue: OptionValue) {
     if (internalSelectedValues.includes(optValue)) {
       internalSelectedValues = internalSelectedValues.filter((v) => v !== optValue);
     } else {
@@ -89,14 +119,16 @@
 
   function handleApply() {
     if (options && options.length > 0) {
-      value = internalSelectedValues;
-      onapply?.(internalSelectedValues);
+      const nextValue = [...internalSelectedValues];
+      value = nextValue;
+      onapply?.(nextValue);
     } else if (!children) {
       value = internalTextValue;
       onapply?.(internalTextValue);
     } else {
       onapply?.(value);
     }
+    optionSearch = '';
     open = false;
   }
 
@@ -104,13 +136,13 @@
     internalTextValue = '';
     internalSelectedValues = [];
     optionSearch = '';
-    value = Array.isArray(value) ? [] : undefined;
+    value = options && options.length > 0 ? [] : undefined;
     onreset?.();
     open = false;
   }
 </script>
 
-<div class={cn('relative inline-block text-left', className)} use:clickOutside={() => open = false}>
+<div class={cn('relative inline-block text-left', className)} use:clickOutside={handleClickOutside}>
   {#if trigger}
     {@render trigger()}
   {:else}
@@ -121,8 +153,10 @@
         'relative h-7 w-7 rounded-sm p-0 transition-colors',
         isFilterActive ? 'text-primary bg-primary/10 border border-primary/20 hover:bg-primary/20' : 'text-muted-foreground hover:text-foreground'
       )}
-      onclick={() => open = !open}
+      onclick={handleTriggerClick}
       aria-label={title}
+      aria-expanded={open}
+      aria-haspopup="dialog"
       title={title}
     >
       <Filter class="h-3.5 w-3.5" />
@@ -141,13 +175,15 @@
         'absolute z-50 mt-1.5 w-64 rounded-md border border-border bg-popover text-popover-foreground shadow-lg outline-none animate-in fade-in-0 zoom-in-95',
         align === 'right' ? 'right-0 origin-top-right' : 'left-0 origin-top-left'
       )}
+      role="dialog"
+      aria-label={title}
     >
       <div class="flex items-center justify-between border-b border-border/60 px-3 py-2">
         <span class="text-xs font-semibold text-foreground">{title}</span>
         <button
           type="button"
           class="rounded p-0.5 text-muted-foreground hover:bg-accent hover:text-foreground"
-          onclick={() => open = false}
+          onclick={handleClose}
           aria-label="Close"
         >
           <X class="h-3.5 w-3.5" />
