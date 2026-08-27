@@ -113,28 +113,46 @@ function synchronizeLockfileWorkspaceVersions(
   const packagesByPath = new Map([...packages].map((pkg) => [pkg.path, pkg]));
   const lines = lockfile.split('\n');
   let currentWorkspacePath: string | undefined;
+  const foundWorkspacePaths = new Set<string>();
+  const synchronizedWorkspacePaths = new Set<string>();
   let changed = false;
   for (let index = 0; index < lines.length; index += 1) {
-    const workspaceMatch = lines[index].match(/^(?:\x20){4}("(?:packages\/[^"\\]+|docs|example)"\s*): \{$/);
+    const workspaceMatch = lines[index].match(/^(?:\x20){4}("(?:[^"\\]|\\.)+"): \{\r?$/);
     if (workspaceMatch) {
-      currentWorkspacePath = JSON.parse(workspaceMatch[1]) as string;
-      continue;
-    }
-    if (/^(?:\x20){4}"[^"\\]+": \{$/.test(lines[index])) {
-      currentWorkspacePath = undefined;
+      const workspacePath = JSON.parse(workspaceMatch[1]) as string;
+      currentWorkspacePath = packagesByPath.has(workspacePath) ? workspacePath : undefined;
+      if (currentWorkspacePath) foundWorkspacePaths.add(currentWorkspacePath);
       continue;
     }
     if (!currentWorkspacePath) continue;
 
-    const versionMatch = lines[index].match(/^(?:\x20){6}("version": ")[^"]+(",?)$/);
+    const versionMatch = lines[index].match(
+      /^(?:\x20){6}("version": ")[^"]+(",?)(\r?)$/,
+    );
     const current = packagesByPath.get(currentWorkspacePath);
     if (!versionMatch || !current?.manifest.version) continue;
-    const nextLine = `${versionMatch[1]}${current.manifest.version}${versionMatch[2]}`;
+    const nextLine =
+      `${' '.repeat(6)}${versionMatch[1]}${current.manifest.version}` +
+      `${versionMatch[2]}${versionMatch[3]}`;
     if (lines[index] !== nextLine) {
       lines[index] = nextLine;
       changed = true;
     }
+    synchronizedWorkspacePaths.add(currentWorkspacePath);
     currentWorkspacePath = undefined;
+  }
+
+  const missingWorkspaces = [...packagesByPath.keys()].filter(
+    (packagePath) => !foundWorkspacePaths.has(packagePath),
+  );
+  if (missingWorkspaces.length > 0) {
+    throw new Error(`bun.lock is missing release workspaces: ${missingWorkspaces.join(', ')}`);
+  }
+  const missingVersions = [...foundWorkspacePaths].filter(
+    (packagePath) => !synchronizedWorkspacePaths.has(packagePath),
+  );
+  if (missingVersions.length > 0) {
+    throw new Error(`bun.lock workspaces are missing versions: ${missingVersions.join(', ')}`);
   }
 
   if (changed) {
