@@ -164,3 +164,47 @@ test('bumps peer dependents transitively and records each package exactly once',
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+test("synchronizes surface compatibility line when surface package version changes", () => {
+  const root = mkdtempSync(join(tmpdir(), "svadmin-release-pr-surface-line-"));
+  try {
+    for (const packagePath of ["packages/surface"]) {
+      mkdirSync(join(root, packagePath), { recursive: true });
+      writeFileSync(join(root, packagePath, "CHANGELOG.md"), "# Changelog\n");
+    }
+    writeJson(join(root, "release-please-config.json"), {
+      packages: { "packages/surface": {} },
+    });
+    writeJson(join(root, ".release-please-manifest.json"), {
+      "packages/surface": "0.4.0",
+    });
+    writeJson(join(root, "packages/surface/package.json"), {
+      name: "@svadmin/surface",
+      version: "0.4.0",
+    });
+    writeJson(join(root, "packages/surface/compatibility.json"), {
+      surface: "0.3.x",
+      minimumSupported: { "@svadmin/ui": "0.40.6" },
+    });
+
+    const baseFiles: Record<string, string> = {
+      "packages/surface/package.json": JSON.stringify({
+        name: "@svadmin/surface",
+        version: "0.3.7",
+      }),
+    };
+    const result = syncReleasePr({
+      repositoryRoot: root,
+      baseRef: "origin/main",
+      releaseDate: "2026-08-27",
+      readBaseFile: (path: string) => baseFiles[path],
+    });
+
+    expect(result.changedFiles).toContain("packages/surface/compatibility.json");
+    expect(
+      JSON.parse(readFileSync(join(root, "packages/surface/compatibility.json"), "utf8")).surface,
+    ).toBe("0.4.x");
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});

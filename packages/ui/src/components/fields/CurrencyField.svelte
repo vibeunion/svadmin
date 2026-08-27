@@ -33,10 +33,15 @@
     class: className = '',
   }: Props = $props();
 
+  const normalizedPrecision = $derived(
+    Number.isFinite(precision) ? Math.min(20, Math.max(0, Math.trunc(precision))) : 2
+  );
+
   const numericValue = $derived.by(() => {
-    if (value == null || value === '') return null;
+    if (value == null) return null;
+    if (typeof value === 'string' && value.trim() === '') return null;
     const num = typeof value === 'number' ? value : Number(value);
-    return isNaN(num) ? null : num;
+    return Number.isFinite(num) ? num : null;
   });
 
   const formatted = $derived.by(() => {
@@ -45,8 +50,8 @@
     const opts: Intl.NumberFormatOptions = {
       style: symbol ? 'decimal' : 'currency',
       currency: symbol ? undefined : currency,
-      minimumFractionDigits: precision,
-      maximumFractionDigits: precision,
+      minimumFractionDigits: normalizedPrecision,
+      maximumFractionDigits: normalizedPrecision,
     };
 
     if (compact) {

@@ -248,6 +248,23 @@ export function syncReleasePr(options: SyncReleasePrOptions): SyncReleasePrResul
     }
   }
 
+  const surfaceCurrent = currentPackages.get("@svadmin/surface");
+  if (surfaceCurrent?.manifest.version) {
+    const [surfaceMajor, surfaceMinor] = parseVersion(surfaceCurrent.manifest.version);
+    const expectedSurfaceLine = `${surfaceMajor}.${surfaceMinor}.x`;
+    const compatibilityPath = join(repositoryRoot, "packages/surface/compatibility.json");
+    try {
+      const compatibility = readJson<{ surface?: string }>(compatibilityPath);
+      if (compatibility.surface !== expectedSurfaceLine) {
+        compatibility.surface = expectedSurfaceLine;
+        writeJson(compatibilityPath, compatibility);
+        changedFiles.add("packages/surface/compatibility.json");
+      }
+    } catch {
+      // compatibility.json may not exist in synthetic test trees
+    }
+  }
+
   if (bumpedPackages.length > 0) {
     writeJson(join(repositoryRoot, releaseManifestPath), releaseManifest);
     changedFiles.add(releaseManifestPath);

@@ -10,6 +10,7 @@ export interface FieldComponentMap {
 }
 
 // Pre-import all field display components (tree-shaken by bundler)
+import TextField from './fields/TextField.svelte';
 import BooleanField from './fields/BooleanField.svelte';
 import ImageField from './fields/ImageField.svelte';
 import TagField from './fields/TagField.svelte';
@@ -37,6 +38,8 @@ import FileField from './fields/FileField.svelte';
  * Keys match FieldDefinition.type values.
  */
 export const builtinDisplayComponents: FieldComponentMap = {
+  text: TextField,
+  string: TextField,
   boolean: BooleanField,
   image: ImageField,
   images: ImageField,

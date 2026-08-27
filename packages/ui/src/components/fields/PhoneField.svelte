@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte';
   import { Phone, Copy, Check } from '@lucide/svelte';
   import { cn } from '../../utils.js';
 
@@ -9,6 +10,7 @@
     clickable?: boolean;
     copyable?: boolean;
     nullLabel?: string;
+    oncopy?: (value: string) => void;
     class?: string;
   }
 
@@ -19,10 +21,18 @@
     clickable = true,
     copyable = false,
     nullLabel = '—',
+    oncopy,
     class: className = '',
   }: Props = $props();
 
   let copied = $state(false);
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
+  let destroyed = false;
+
+  onDestroy(() => {
+    destroyed = true;
+    if (timeoutId) clearTimeout(timeoutId);
+  });
 
   const stringValue = $derived.by(() => {
     if (value == null || value === '') return null;
@@ -41,16 +51,26 @@
   async function handleCopy(e: MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
-    if (!stringValue) return;
+    if (!stringValue || !copyable) return;
+
+    const writeText = globalThis.navigator?.clipboard?.writeText;
+    if (!writeText) return;
+
     try {
-      await navigator.clipboard.writeText(stringValue);
-      copied = true;
-      setTimeout(() => {
-        copied = false;
-      }, 2000);
+      await writeText.call(globalThis.navigator.clipboard, stringValue);
     } catch {
-      // ignore
+      return;
     }
+
+    if (destroyed) return;
+    copied = true;
+    oncopy?.(stringValue);
+
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      copied = false;
+      timeoutId = null;
+    }, 2000);
   }
 </script>
 

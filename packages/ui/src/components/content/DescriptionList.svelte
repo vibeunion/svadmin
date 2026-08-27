@@ -54,7 +54,7 @@
 {#if bordered}
   <div class={cn('overflow-hidden rounded-lg border border-border bg-card text-foreground', className)}>
     <dl class={cn('grid divide-y divide-border/60 sm:divide-y-0', columnClass)}>
-      {#each items as item (item.label)}
+      {#each items as item, idx (item.label ? `${item.label}-${idx}` : idx)}
         <div
           class={cn(
             'flex flex-col border-b border-r border-border/40 last:border-b-0',
@@ -99,7 +99,7 @@
       className,
     )}
   >
-    {#each items as item (item.label)}
+    {#each items as item, idx (item.label ? `${item.label}-${idx}` : idx)}
       <div
         class={cn(
           'min-w-0',
