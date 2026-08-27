@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.57.0](https://github.com/vibeunion/svadmin/compare/ui-v0.56.0...ui-v0.57.0) (2026-08-27)
+
+
+### 🚀 Features
+
+* **ui:** add MediaThumbnail component and normalize collapsible filter details ([#331](https://github.com/vibeunion/svadmin/issues/331)) ([e7604d8](https://github.com/vibeunion/svadmin/commit/e7604d8beba46ffe31769176ac3871be9f76c5a9))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** close component state and visual evidence gaps ([#334](https://github.com/vibeunion/svadmin/issues/334)) ([92c7d4a](https://github.com/vibeunion/svadmin/commit/92c7d4aab451ec4ace50d289a71eb299561321ba))
+
 ## [0.56.0](https://github.com/vibeunion/svadmin/compare/ui-v0.55.1...ui-v0.56.0) (2026-08-27)
 
 

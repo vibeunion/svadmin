@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.25](https://github.com/vibeunion/svadmin/compare/lite-v0.3.24...lite-v0.3.25) (2026-08-27)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** close component state and visual evidence gaps ([#334](https://github.com/vibeunion/svadmin/issues/334)) ([92c7d4a](https://github.com/vibeunion/svadmin/commit/92c7d4aab451ec4ace50d289a71eb299561321ba))
+
 ## [0.3.24](https://github.com/vibeunion/svadmin/compare/lite-v0.3.23...lite-v0.3.24) (2026-08-27)
 
 
