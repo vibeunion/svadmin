@@ -123,6 +123,9 @@ export { default as JsonField } from './components/fields/JsonField.svelte';
 export { default as RichTextField } from './components/fields/RichTextField.svelte';
 export { default as CopyField } from './components/fields/CopyField.svelte';
 export { default as AvatarField } from './components/fields/AvatarField.svelte';
+export { default as CodeField } from './components/fields/CodeField.svelte';
+export { default as PercentField } from './components/fields/PercentField.svelte';
+export { default as RatingField } from './components/fields/RatingField.svelte';
 
 // Rich text editor (requires @svadmin/editor) as a direct import in consumer app
 
@@ -269,3 +272,5 @@ export type { AvatarStatus, AvatarSize } from './components/fields/AvatarField.s
 export { default as FilterDropdown } from './components/FilterDropdown.svelte';
 export { default as BatchActionBar } from './components/BatchActionBar.svelte';
 export type { DateRangeFormat, DateRangeValue } from './components/fields/DateRangeField.svelte';
+export type { PercentTone } from './components/fields/PercentField.svelte';
+export type { RatingSize } from './components/fields/RatingField.svelte';
