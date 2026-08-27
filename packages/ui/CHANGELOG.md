@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.55.1](https://github.com/vibeunion/svadmin/compare/ui-v0.55.0...ui-v0.55.1) (2026-08-27)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** complete markdown display mapping and harden enterprise field components ([#323](https://github.com/vibeunion/svadmin/issues/323)) ([932d076](https://github.com/vibeunion/svadmin/commit/932d07621f424d1a572889059695020dc3474a7e))
+
 ## [0.55.0](https://github.com/vibeunion/svadmin/compare/ui-v0.54.0...ui-v0.55.0) (2026-08-27)
 
 
