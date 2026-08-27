@@ -28,6 +28,7 @@
     class: className = '',
   }: Props = $props();
   const adminContext = captureAdminContext();
+  let navigateGuard = $state<(fn: () => void) => void>((fn) => fn());
 
   const resource = $derived(getResource(resourceName));
   const pageTitle = $derived(title ?? `${i18n.t('common.create')}${resource.label}`);
@@ -37,10 +38,10 @@
   <PageHeader
     title={pageTitle}
     {density}
-    onBack={() => adminContext.navigate(`/${resourceName}`)}
+    onBack={() => navigateGuard(() => adminContext.navigate(`/${resourceName}`))}
   >
     {#snippet actions()}
-      <ListButton resource={resourceName} hideText />
+      <ListButton resource={resourceName} hideText onBeforeNavigate={navigateGuard} />
       {#if headerActions}
         {@render headerActions()}
       {/if}
@@ -53,6 +54,7 @@
     {density}
     {columns}
     showHeader={false}
+    onNavigationGuardReady={(guard) => navigateGuard = guard}
     {onSuccess}
   />
 </div>

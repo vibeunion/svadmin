@@ -20,18 +20,22 @@
   import { Plus, X } from '@lucide/svelte';
   import type { Snippet } from 'svelte';
   import { getRichTextEditor } from '../editor-config.svelte.js';
+  import { cn } from '../utils.js';
 
   const i18n = useTranslation();
 
-  let { field, value, onchange, disabled, invalid = false, errorId, children } = $props<{
+  let { field, value, onchange, disabled, invalid = false, errorId, density = 'comfortable', children } = $props<{
     field: FieldDefinition;
     value: unknown;
     onchange: (val: unknown) => void;
     disabled?: boolean;
     invalid?: boolean;
     errorId?: string;
+    density?: 'compact' | 'comfortable';
     children?: Snippet;
   }>();
+
+  const isCompact = $derived(density === 'compact');
 
   // Typed accessors
   const strVal = $derived((value as string) ?? '');
@@ -89,7 +93,15 @@
   }
 </script>
 
-<div class="space-y-1.5" data-svadmin-field data-svadmin-field-key={field.key}>
+<div
+  class={cn(
+    'space-y-1.5',
+    isCompact && 'space-y-1 [&_[data-slot=input]]:h-8 [&_[data-slot=input]]:px-2.5 [&_[data-slot=input]]:py-1 [&_[data-slot=input]]:text-xs [&_[data-slot=select]]:h-8 [&_[data-slot=select]]:px-2.5 [&_[data-slot=select]]:py-1 [&_[data-slot=select]]:text-xs [&_[data-slot=textarea]]:min-h-16 [&_[data-slot=textarea]]:px-2.5 [&_[data-slot=textarea]]:py-1.5 [&_[data-slot=textarea]]:text-xs [&_[data-slot=button]]:h-8 [&_[data-slot=button]]:text-xs'
+  )}
+  data-svadmin-field
+  data-svadmin-field-key={field.key}
+  data-density={density}
+>
   <Label for={field.key} id="label-{field.key}" data-svadmin-field-label>
     {field.label}
     {#if field.required}
@@ -270,6 +282,7 @@
       <select
         id={field.key}
         name={field.key}
+        data-slot="select"
         class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         value={strVal}
         onchange={(e) => onchange((e.target as HTMLSelectElement).value)}

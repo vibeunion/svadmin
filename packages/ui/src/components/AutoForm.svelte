@@ -29,6 +29,7 @@
     formActions?: Snippet<[{ isLoading: boolean; onSubmit: () => void }]>;
     headerContent?: Snippet;
     onSuccess?: () => void;
+    onNavigationGuardReady?: (guard: (fn: () => void) => void) => void;
   }
 
   let {
@@ -42,6 +43,7 @@
     formActions,
     headerContent,
     onSuccess,
+    onNavigationGuardReady,
   }: Props = $props();
   const adminContext = captureAdminContext();
   const isReadonly = $derived(mode === 'show');
@@ -173,6 +175,10 @@
     }
   }
 
+  $effect(() => {
+    onNavigationGuardReady?.(guardNavigate);
+  });
+
   function confirmNavigate() {
     confirmOpen = false;
     pendingNavigation?.();
@@ -245,6 +251,7 @@
                         {field}
                         value={form.values[field.key]}
                         onchange={(val: unknown) => form.setFieldValue(field.key, val)}
+                        {density}
                         invalid={!!form.errors[field.key]}
                         errorId={form.errors[field.key] ? fieldErrorId(field.key) : undefined}
                         disabled={isReadonly}
@@ -262,17 +269,18 @@
       {:else}
         <Card.Root class="border-border/40 shadow-sm">
           <Card.Content class={isCompact ? 'p-4' : 'px-4 pt-5 pb-4 sm:px-6 sm:pt-6 sm:pb-6'}>
-            <div class={gridClass}>
+              <div class={gridClass} data-svadmin-form-grid data-columns={columns} data-density={density}>
               {#each formFields as field (field.key)}
                 <div class={cn(columns > 1 && isFullWidthField(field) && 'col-span-full', !!form.errors[field.key] && 'border-destructive')}>
                   {#if fieldRenderer}
                     {@render fieldRenderer({ field, value: form.values[field.key], onchange: (val: unknown) => form.setFieldValue(field.key, val) })}
                   {:else}
-                    <FieldRenderer
-                      {field}
-                      value={form.values[field.key]}
-                      onchange={(val: unknown) => form.setFieldValue(field.key, val)}
-                      invalid={!!form.errors[field.key]}
+                  <FieldRenderer
+                    {field}
+                    value={form.values[field.key]}
+                    onchange={(val: unknown) => form.setFieldValue(field.key, val)}
+                    {density}
+                    invalid={!!form.errors[field.key]}
                       errorId={form.errors[field.key] ? fieldErrorId(field.key) : undefined}
                       disabled={isReadonly}
                     />

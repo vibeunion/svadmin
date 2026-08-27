@@ -36,6 +36,7 @@
     class: className = '',
   }: Props = $props();
   const adminContext = captureAdminContext();
+  let navigateGuard = $state<(fn: () => void) => void>((fn) => fn());
 
   const resource = $derived(getResource(resourceName));
   const pageTitle = $derived(title ?? `${i18n.t('common.edit')} ${resource.label} #${id}`);
@@ -46,11 +47,11 @@
   <PageHeader
     title={pageTitle}
     {density}
-    onBack={() => adminContext.navigate(`/${resourceName}`)}
+    onBack={() => navigateGuard(() => adminContext.navigate(`/${resourceName}`))}
   >
     {#snippet actions()}
-      <ListButton resource={resourceName} hideText />
-      <ShowButton resource={resourceName} recordItemId={id} hideText />
+      <ListButton resource={resourceName} hideText onBeforeNavigate={navigateGuard} />
+      <ShowButton resource={resourceName} recordItemId={id} hideText onBeforeNavigate={navigateGuard} />
       <RefreshButton resource={resourceName} hideText />
       {#if showDelete !== false}
         <DeleteButton resource={resourceName} recordItemId={id} hideText onSuccess={() => adminContext.navigate(`/${resourceName}`)} />
@@ -68,6 +69,7 @@
     {density}
     {columns}
     showHeader={false}
+    onNavigationGuardReady={(guard) => navigateGuard = guard}
     {onSuccess}
   />
 </div>
