@@ -128,9 +128,13 @@ describe('npm trusted-publishing workflow contract', () => {
 
     expect(releaseWorkflow).toContain('group: release-please-${{ github.repository }}');
     expect(releaseWorkflow).toContain('cancel-in-progress: false');
-    expect(releaseWorkflow).toContain("if: steps.release.outputs.pr != ''");
-    expect(releaseWorkflow).not.toContain("if: steps.release.outputs.prs_created == 'true'");
-    expect(releaseWorkflow).toContain('RELEASE_PR: ${{ steps.release.outputs.pr }}');
+    expect(releaseWorkflow).toContain('id: release-pr');
+    expect(releaseWorkflow).toContain('uses: actions/github-script@v9');
+    expect(releaseWorkflow).toContain("const branch = 'release-please--branches--main';");
+    expect(releaseWorkflow).toContain('github.rest.pulls.list');
+    expect(releaseWorkflow).toContain("if: steps.release-pr.outputs.branch != ''");
+    expect(releaseWorkflow).not.toContain('steps.release.outputs.prs_created');
+    expect(releaseWorkflow).not.toContain('steps.release.outputs.pr');
     expect(releaseWorkflow).toContain('bun-version: "1.4.0"');
     expect(releaseWorkflow).toContain('persist-credentials: false');
     expect(releaseWorkflow).toContain(
