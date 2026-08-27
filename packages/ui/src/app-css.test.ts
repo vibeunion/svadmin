@@ -101,6 +101,6 @@ describe('src/app.css (Tailwind source)', () => {
   it('normalizes collapsible details and filter containers', () => {
     const css = readAppCss();
     expect(css).toContain('details:not([open]) > :not(summary)');
-    expect(css).toContain('details.svadmin-collapsible-filter:not([open])');
+    expect(css).toContain('details.svadmin-collapsible-filter:not([open]) > :not(summary)');
   });
 });

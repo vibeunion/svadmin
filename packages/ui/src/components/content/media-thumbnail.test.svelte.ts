@@ -18,7 +18,7 @@ describe('MediaThumbnail and ImageField components', () => {
     expect(view.container.querySelector('[data-slot="media-thumbnail"]')).not.toBeNull();
   });
 
-  it('triggers onopen when clicked or Enter key is pressed', async () => {
+  it('triggers onopen from a native button', async () => {
     const onopen = vi.fn();
     const view = render(MediaThumbnail, {
       src: 'https://example.com/sample.jpg',
@@ -26,14 +26,31 @@ describe('MediaThumbnail and ImageField components', () => {
       onopen,
     });
 
-    const trigger = view.container.querySelector('[role="button"]');
+    const trigger = view.container.querySelector('button');
     expect(trigger).not.toBeNull();
+    if (!trigger) throw new Error('Expected an interactive thumbnail trigger');
 
-    await fireEvent.click(trigger!);
+    await fireEvent.click(trigger);
     expect(onopen).toHaveBeenCalledTimes(1);
+    expect(trigger.getAttribute('type')).toBe('button');
+  });
 
-    await fireEvent.keyDown(trigger!, { key: 'Enter' });
-    expect(onopen).toHaveBeenCalledTimes(2);
+  it('does not expose open behavior when the overlay is disabled', async () => {
+    const onopen = vi.fn();
+    const view = render(MediaThumbnail, {
+      src: 'https://example.com/non-previewable.jpg',
+      showOverlay: false,
+      onopen,
+    });
+
+    const thumbnail = view.container.querySelector('[data-slot="media-thumbnail"] > div');
+    expect(thumbnail).not.toBeNull();
+    if (!thumbnail) throw new Error('Expected a thumbnail container');
+
+    expect(thumbnail.getAttribute('role')).toBeNull();
+    expect(thumbnail.getAttribute('tabindex')).toBeNull();
+    await fireEvent.click(thumbnail);
+    expect(onopen).not.toHaveBeenCalled();
   });
 
   it('renders document fallback when non-image mimeType or fileName is passed', () => {

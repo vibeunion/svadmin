@@ -113,19 +113,13 @@
         <span class="text-[11px] truncate max-w-[12rem]">{alt || fileName || 'Image unavailable'}</span>
       </div>
     {:else}
-      <div
-        class="group relative flex size-full items-center justify-center cursor-pointer bg-[repeating-conic-gradient(theme(colors.muted.DEFAULT)_0%_25%,theme(colors.card.DEFAULT)_0%_50%)] bg-[length:16px_16px]"
-        role="button"
-        tabindex="0"
-        onclick={handleAction}
-        onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleAction(); } }}
-        title={title || alt || fileName || 'Click to view'}
-      >
+      {#snippet imageContent(interactive: boolean)}
         <img
           {src}
           alt={alt || title || fileName || 'Thumbnail'}
           class={cn(
-            'block max-h-full max-w-full transition-transform duration-200 group-hover:scale-[1.02]',
+            'block max-h-full max-w-full transition-transform duration-200',
+            interactive && 'group-hover:scale-[1.02]',
             fitClasses[fit],
             loading ? 'opacity-0' : 'opacity-100'
           )}
@@ -139,7 +133,25 @@
             <span class="text-xs font-semibold">{overlayText}</span>
           </div>
         {/if}
-      </div>
+      {/snippet}
+
+      {#if showOverlay}
+        <button
+          type="button"
+          class="group relative flex size-full cursor-pointer items-center justify-center bg-[repeating-conic-gradient(theme(colors.muted.DEFAULT)_0%_25%,theme(colors.card.DEFAULT)_0%_50%)] bg-[length:16px_16px]"
+          onclick={handleAction}
+          title={title || alt || fileName || 'Click to view'}
+        >
+          {@render imageContent(true)}
+        </button>
+      {:else}
+        <div
+          class="relative flex size-full items-center justify-center bg-[repeating-conic-gradient(theme(colors.muted.DEFAULT)_0%_25%,theme(colors.card.DEFAULT)_0%_50%)] bg-[length:16px_16px]"
+          title={title || alt || fileName}
+        >
+          {@render imageContent(false)}
+        </div>
+      {/if}
     {/if}
   </div>
 {:else if src || fileName}

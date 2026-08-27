@@ -609,9 +609,9 @@ details:not([open]) > :not(summary) {
   display: none !important;
 }
 
-details[data-svadmin-filter]:not([open]),
-details.svadmin-collapsible-filter:not([open]) {
-  display: none;
+details[data-svadmin-filter]:not([open]) > :not(summary),
+details.svadmin-collapsible-filter:not([open]) > :not(summary) {
+  display: none !important;
 }
 
 /* --- Stripe-first layout preset (clean-flat) --- */
