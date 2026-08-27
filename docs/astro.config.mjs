@@ -106,7 +106,7 @@ export default defineConfig({
         {
           label: 'Reference',
           translations: { 'zh-CN': '参考' },
-          items: [{ autogenerate: { directory: 'reference' } }],
+          items: [{ slug: 'reference/configuration' }],
         },
       ],
     }),

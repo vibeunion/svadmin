@@ -1,3 +1,11 @@
+import { builtinDisplayComponents, getDisplayComponent, hasDisplayComponent } from '../fieldComponentMap.js';
+import TextField from './TextField.svelte';
+import MarkdownField from './MarkdownField.svelte';
+import CurrencyField from './CurrencyField.svelte';
+import PhoneField from './PhoneField.svelte';
+import CodeField from './CodeField.svelte';
+import PercentField from './PercentField.svelte';
+import RatingField from './RatingField.svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import TagField from './TagField.svelte';
@@ -283,5 +291,45 @@ describe('AvatarField enterprise capabilities', () => {
   it('renders fallback when no meaningful name or src is given', () => {
     const view = render(AvatarField, { name: '   ', nullLabel: 'Unknown User' });
     expect(view.container.textContent).toContain('Unknown User');
+  });
+});
+
+describe('MarkdownField enterprise capabilities', () => {
+  it('renders fallback when value is empty or null', () => {
+    const nullView = render(MarkdownField, { value: null });
+    expect(nullView.container.textContent).toContain('—');
+
+    const emptyView = render(MarkdownField, { value: '' });
+    expect(emptyView.container.textContent).toContain('—');
+  });
+
+  it('renders markdown html output', async () => {
+    const view = render(MarkdownField, { value: '<p>Formatted <strong>text</strong></p>' });
+    await waitFor(() => {
+      expect(view.container.querySelector('strong')?.textContent).toBe('text');
+      expect(view.container.textContent).toContain('Formatted');
+    });
+  });
+});
+
+describe('builtinDisplayComponents field registry mappings', () => {
+  it('maps enterprise and built-in field types correctly', () => {
+    expect(builtinDisplayComponents.markdown).toBe(MarkdownField);
+    expect(builtinDisplayComponents.currency).toBe(CurrencyField);
+    expect(builtinDisplayComponents.phone).toBe(PhoneField);
+    expect(builtinDisplayComponents.code).toBe(CodeField);
+    expect(builtinDisplayComponents.percent).toBe(PercentField);
+    expect(builtinDisplayComponents.rating).toBe(RatingField);
+    expect(getDisplayComponent('text')).toBe(TextField);
+    expect(getDisplayComponent('string')).toBe(TextField);
+    expect(getDisplayComponent('markdown')).toBe(MarkdownField);
+    expect(getDisplayComponent('currency')).toBe(CurrencyField);
+    expect(getDisplayComponent('phone')).toBe(PhoneField);
+    expect(getDisplayComponent('code')).toBe(CodeField);
+    expect(getDisplayComponent('percent')).toBe(PercentField);
+    expect(getDisplayComponent('rating')).toBe(RatingField);
+    expect(hasDisplayComponent('markdown')).toBe(true);
+    expect(hasDisplayComponent('text')).toBe(true);
+    expect(hasDisplayComponent('nonexistent_type')).toBe(false);
   });
 });

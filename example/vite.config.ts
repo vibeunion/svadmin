@@ -11,7 +11,7 @@ function manualChunks(id: string): string | undefined {
   if (/\/node_modules\/prosemirror-[^/]+\//.test(normalizedId)) return 'editor-prosemirror';
   if (normalizedId.includes('/node_modules/@floating-ui/')) return 'ui-primitives';
   if (normalizedId.includes('/node_modules/@tiptap/')) return 'editor-tiptap';
-  if (/\/node_modules\/(?:highlight\.js|lowlight|linkifyjs|rope-sequence)\//.test(normalizedId)) return 'editor-support';
+  if (/\/node_modules\/(?:highlight\.js|lowlight|linkifyjs|rope-sequence|dompurify|isomorphic-dompurify)\//.test(normalizedId)) return 'editor-support';
   if (normalizedId.includes('/node_modules/@lucide/svelte/')) return 'icons';
   if (normalizedId.includes('/node_modules/@tanstack/')) return 'tanstack';
   if (/\/node_modules\/(?:bits-ui|svelte-sonner|svelte-toolbelt|runed|tabbable)\//.test(normalizedId)) {
