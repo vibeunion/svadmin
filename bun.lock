@@ -307,7 +307,7 @@
     },
     "packages/lite": {
       "name": "@svadmin/lite",
-      "version": "0.5.0",
+      "version": "0.6.0",
       "dependencies": {
         "@lucide/svelte": "^1.35.0",
         "@sinclair/typebox": "^0.34.52",
