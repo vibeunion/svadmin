@@ -1,7 +1,7 @@
 # @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵
 
-> 自动生成时间：`2026-08-28T22:41:50.619Z`
-> 总体适配覆盖率：**100%**（79/79 组件）
+> 自动生成时间：`2026-08-28T23:01:03.870Z`
+> 总体适配覆盖率：**100%**（82/82 组件）
 
 ## 进度总览
 
@@ -12,7 +12,7 @@
 | **pages** | 9 | 9 | 0 | 0 | 0 | **100%** |
 | **layout** | 7 | 6 | 0 | 1 | 0 | **100%** |
 | **widgets** | 6 | 3 | 3 | 0 | 0 | **100%** |
-| **advanced** | 18 | 9 | 7 | 2 | 0 | **100%** |
+| **advanced** | 21 | 15 | 4 | 2 | 0 | **100%** |
 
 ---
 
@@ -110,9 +110,9 @@
 |---|---|:---:|---|
 | `ConfirmDialog` | `LiteConfirmDialog.svelte` | ✅ 1:1 对齐 | CSS :target 锚点模态框 |
 | `FilterBuilder` | `LiteFilterBuilder.svelte` | ✅ 1:1 对齐 | 可视化多条件原生筛选表单与 CRUD 运算符解析 |
-| `DrawerForm` | `advanced/LiteDrawerForm.svelte` | ⚡ 语义降级 | 降级为原生独立编辑页或卡片表单 |
-| `ModalForm` | `advanced/LiteModalForm.svelte` | ⚡ 语义降级 | 降级为原生独立新建/编辑页 |
-| `VirtualTable` | `advanced/LiteVirtualTable.svelte` | ⚡ 语义降级 | 降级为服务端分页 Table |
+| `DrawerForm` | `LiteDrawerForm.svelte` | ✅ 1:1 对齐 | 原生独立编辑抽屉卡片表单 |
+| `ModalForm` | `LiteModalForm.svelte` | ✅ 1:1 对齐 | 原生独立模态弹窗表单 |
+| `VirtualTable` | `LiteVirtualTable.svelte` | ✅ 1:1 对齐 | 固定表头与超长数据表格展示 |
 | `InlineEdit` | `advanced/LiteInlineEdit.svelte` | ⚡ 语义降级 | 降级为行内单独提交按钮或跳转编辑 |
 | `AutoSaveIndicator` | `advanced/LiteAutoSaveIndicator.svelte` | ⚡ 语义降级 | 服务端保存时间戳展示 |
 | `Toast` | `advanced/LiteToast.svelte` | ⚡ 语义降级 | 降级为页面顶部 Alert 通知条 |
@@ -124,6 +124,9 @@
 | `TreeTable` | `LiteTreeTable.svelte` | ✅ 1:1 对齐 | 递归层级缩进表格展示 |
 | `SensitiveDataMask` | `LiteSensitiveDataMask.svelte` | ✅ 1:1 对齐 | 服务端掩码字符展示 |
 | `ApprovalActionCard` | `LiteApprovalActionCard.svelte` | ✅ 1:1 对齐 | 原生审批 POST 表单与意见输入 |
+| `StepForm` | `LiteStepForm.svelte` | ✅ 1:1 对齐 | 分步向导与原生 POST 步骤表单 |
+| `TableSummary` | `LiteTableSummary.svelte` | ✅ 1:1 对齐 | 表格底部统计聚合行 |
+| `VersionDiffViewer` | `LiteVersionDiffViewer.svelte` | ✅ 1:1 对齐 | 版本字段变更对比表格 |
 | `DevTools` | — | 🚫 免适配 | 免适配 (SPA 调试器) |
 | `CopilotPanel` | — | 🚫 免适配 | 免适配 (AI Copilot 客户端浮窗) |
 

@@ -29,8 +29,6 @@ export { default as ForgotPasswordPage } from './components/ForgotPasswordPage.s
 export { default as CanAccess } from './components/CanAccess.svelte';
 export { default as Can } from './components/CanAccess.svelte';
 export { default as UndoableNotification } from './components/UndoableNotification.svelte';
-export { default as ModalForm } from './components/ModalForm.svelte';
-export { default as DrawerForm } from './components/DrawerForm.svelte';
 export { default as DevTools } from './components/DevTools.svelte';
 export { default as Authenticated } from './components/Authenticated.svelte';
 export { default as UpdatePasswordPage } from './components/UpdatePasswordPage.svelte';
@@ -76,6 +74,15 @@ export { default as SensitiveDataMask } from './components/SensitiveDataMask.sve
 export type { MaskType } from './components/SensitiveDataMask.svelte';
 export { default as ApprovalActionCard } from './components/ApprovalActionCard.svelte';
 export type { ApprovalStatus } from './components/ApprovalActionCard.svelte';
+export { default as StepForm } from './components/StepForm.svelte';
+export type { FormStep } from './components/StepForm.svelte';
+export { default as ModalForm } from './components/ModalForm.svelte';
+export { default as DrawerForm } from './components/DrawerForm.svelte';
+export { default as TableSummary } from './components/TableSummary.svelte';
+export type { TableSummaryColumn, AggregationType } from './components/TableSummary.svelte';
+export { default as VersionDiffViewer } from './components/VersionDiffViewer.svelte';
+export { default as VirtualTable } from './components/VirtualTable.svelte';
+export type { VirtualTableColumn } from './components/VirtualTable.svelte';
 
 export { default as InfiniteList } from './components/InfiniteList.svelte';
 export { default as ComboboxField } from './components/ComboboxField.svelte';
@@ -91,7 +98,6 @@ export { default as VoiceInput } from "./components/VoiceInput.svelte";
 export { default as AnimatedCounter } from "./components/AnimatedCounter.svelte";
 export { default as KeyboardShortcuts } from "./components/KeyboardShortcuts.svelte";
 export { default as InlineEdit } from "./components/InlineEdit.svelte";
-export { default as VirtualTable } from "./components/VirtualTable.svelte";
 export { default as DraggableHeader } from "./components/DraggableHeader.svelte";
 export { default as SettingsPage } from "./components/SettingsPage.svelte";
 export { default as FeedbackNotice } from './components/content/FeedbackNotice.svelte';

@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-08-28T22:41:50.619Z",
-  "totalComponents": 79,
-  "adaptedCount": 62,
-  "fallbackCount": 13,
+  "timestamp": "2026-08-28T23:01:03.870Z",
+  "totalComponents": 82,
+  "adaptedCount": 68,
+  "fallbackCount": 10,
   "spaOnlyCount": 4,
   "missingCount": 0,
   "overallCoveragePercentage": 100,
@@ -54,9 +54,9 @@
     },
     "advanced": {
       "category": "advanced",
-      "total": 18,
-      "adapted": 9,
-      "fallback": 7,
+      "total": 21,
+      "adapted": 15,
+      "fallback": 4,
       "spaOnly": 2,
       "missing": 0,
       "percentage": 100
@@ -554,26 +554,26 @@
     {
       "name": "DrawerForm",
       "uiComponent": "DrawerForm.svelte",
-      "liteComponent": "advanced/LiteDrawerForm.svelte",
+      "liteComponent": "LiteDrawerForm.svelte",
       "category": "advanced",
-      "status": "fallback",
-      "strategy": "降级为原生独立编辑页或卡片表单"
+      "status": "exact",
+      "strategy": "原生独立编辑抽屉卡片表单"
     },
     {
       "name": "ModalForm",
       "uiComponent": "ModalForm.svelte",
-      "liteComponent": "advanced/LiteModalForm.svelte",
+      "liteComponent": "LiteModalForm.svelte",
       "category": "advanced",
-      "status": "fallback",
-      "strategy": "降级为原生独立新建/编辑页"
+      "status": "exact",
+      "strategy": "原生独立模态弹窗表单"
     },
     {
       "name": "VirtualTable",
       "uiComponent": "VirtualTable.svelte",
-      "liteComponent": "advanced/LiteVirtualTable.svelte",
+      "liteComponent": "LiteVirtualTable.svelte",
       "category": "advanced",
-      "status": "fallback",
-      "strategy": "降级为服务端分页 Table"
+      "status": "exact",
+      "strategy": "固定表头与超长数据表格展示"
     },
     {
       "name": "InlineEdit",
@@ -662,6 +662,30 @@
       "category": "advanced",
       "status": "exact",
       "strategy": "原生审批 POST 表单与意见输入"
+    },
+    {
+      "name": "StepForm",
+      "uiComponent": "StepForm.svelte",
+      "liteComponent": "LiteStepForm.svelte",
+      "category": "advanced",
+      "status": "exact",
+      "strategy": "分步向导与原生 POST 步骤表单"
+    },
+    {
+      "name": "TableSummary",
+      "uiComponent": "TableSummary.svelte",
+      "liteComponent": "LiteTableSummary.svelte",
+      "category": "advanced",
+      "status": "exact",
+      "strategy": "表格底部统计聚合行"
+    },
+    {
+      "name": "VersionDiffViewer",
+      "uiComponent": "VersionDiffViewer.svelte",
+      "liteComponent": "LiteVersionDiffViewer.svelte",
+      "category": "advanced",
+      "status": "exact",
+      "strategy": "版本字段变更对比表格"
     },
     {
       "name": "ThemeToggle",

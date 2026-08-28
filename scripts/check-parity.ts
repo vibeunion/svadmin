@@ -115,9 +115,9 @@ const PARITY_ITEMS: ParityItem[] = [
   // ─── Advanced & Interactivity Fallbacks ─────────────────────────────────
   { name: 'ConfirmDialog', uiComponent: 'ConfirmDialog.svelte', liteComponent: 'LiteConfirmDialog.svelte', category: 'advanced', status: 'exact', strategy: 'CSS :target 锚点模态框' },
   { name: 'FilterBuilder', uiComponent: 'FilterBuilder.svelte', liteComponent: 'LiteFilterBuilder.svelte', category: 'advanced', status: 'exact', strategy: '可视化多条件原生筛选表单与 CRUD 运算符解析' },
-  { name: 'DrawerForm', uiComponent: 'DrawerForm.svelte', liteComponent: 'advanced/LiteDrawerForm.svelte', category: 'advanced', status: 'fallback', strategy: '降级为原生独立编辑页或卡片表单' },
-  { name: 'ModalForm', uiComponent: 'ModalForm.svelte', liteComponent: 'advanced/LiteModalForm.svelte', category: 'advanced', status: 'fallback', strategy: '降级为原生独立新建/编辑页' },
-  { name: 'VirtualTable', uiComponent: 'VirtualTable.svelte', liteComponent: 'advanced/LiteVirtualTable.svelte', category: 'advanced', status: 'fallback', strategy: '降级为服务端分页 Table' },
+  { name: 'DrawerForm', uiComponent: 'DrawerForm.svelte', liteComponent: 'LiteDrawerForm.svelte', category: 'advanced', status: 'exact', strategy: '原生独立编辑抽屉卡片表单' },
+  { name: 'ModalForm', uiComponent: 'ModalForm.svelte', liteComponent: 'LiteModalForm.svelte', category: 'advanced', status: 'exact', strategy: '原生独立模态弹窗表单' },
+  { name: 'VirtualTable', uiComponent: 'VirtualTable.svelte', liteComponent: 'LiteVirtualTable.svelte', category: 'advanced', status: 'exact', strategy: '固定表头与超长数据表格展示' },
   { name: 'InlineEdit', uiComponent: 'InlineEdit.svelte', liteComponent: 'advanced/LiteInlineEdit.svelte', category: 'advanced', status: 'fallback', strategy: '降级为行内单独提交按钮或跳转编辑' },
   { name: 'AutoSaveIndicator', uiComponent: 'AutoSaveIndicator.svelte', liteComponent: 'advanced/LiteAutoSaveIndicator.svelte', category: 'advanced', status: 'fallback', strategy: '服务端保存时间戳展示' },
   { name: 'Toast', uiComponent: 'Toast.svelte', liteComponent: 'advanced/LiteToast.svelte', category: 'advanced', status: 'fallback', strategy: '降级为页面顶部 Alert 通知条' },
@@ -129,6 +129,9 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'TreeTable', uiComponent: 'TreeTable.svelte', liteComponent: 'LiteTreeTable.svelte', category: 'advanced', status: 'exact', strategy: '递归层级缩进表格展示' },
   { name: 'SensitiveDataMask', uiComponent: 'SensitiveDataMask.svelte', liteComponent: 'LiteSensitiveDataMask.svelte', category: 'advanced', status: 'exact', strategy: '服务端掩码字符展示' },
   { name: 'ApprovalActionCard', uiComponent: 'ApprovalActionCard.svelte', liteComponent: 'LiteApprovalActionCard.svelte', category: 'advanced', status: 'exact', strategy: '原生审批 POST 表单与意见输入' },
+  { name: 'StepForm', uiComponent: 'StepForm.svelte', liteComponent: 'LiteStepForm.svelte', category: 'advanced', status: 'exact', strategy: '分步向导与原生 POST 步骤表单' },
+  { name: 'TableSummary', uiComponent: 'TableSummary.svelte', liteComponent: 'LiteTableSummary.svelte', category: 'advanced', status: 'exact', strategy: '表格底部统计聚合行' },
+  { name: 'VersionDiffViewer', uiComponent: 'VersionDiffViewer.svelte', liteComponent: 'LiteVersionDiffViewer.svelte', category: 'advanced', status: 'exact', strategy: '版本字段变更对比表格' },
 
   // ─── SPA Only (No SSR counterpart needed) ───────────────────────────────
   { name: 'ThemeToggle', uiComponent: 'ThemeToggle.svelte', category: 'layout', status: 'spa_only', strategy: '免适配 (Lite 为固定 Slate/Indigo 配色)', note: 'IE11 不支持 CSS 变量与客户端主题即时切换' },

@@ -72,6 +72,12 @@ export { default as LiteColumnHeaderFilter } from './components/LiteColumnHeader
 export { default as LiteTreeTable } from './components/LiteTreeTable.svelte';
 export { default as LiteSensitiveDataMask } from './components/LiteSensitiveDataMask.svelte';
 export { default as LiteApprovalActionCard } from './components/LiteApprovalActionCard.svelte';
+export { default as LiteStepForm } from './components/LiteStepForm.svelte';
+export { default as LiteModalForm } from './components/LiteModalForm.svelte';
+export { default as LiteDrawerForm } from './components/LiteDrawerForm.svelte';
+export { default as LiteTableSummary } from './components/LiteTableSummary.svelte';
+export { default as LiteVersionDiffViewer } from './components/LiteVersionDiffViewer.svelte';
+export { default as LiteVirtualTable } from './components/LiteVirtualTable.svelte';
 
 // Compatibility fallbacks for browser-only and third-party UI capabilities.
 export * from './components/compatibility/index';

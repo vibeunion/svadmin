@@ -12,7 +12,12 @@ import LiteColumnHeaderFilter from './LiteColumnHeaderFilter.svelte';
 import LiteTreeTable from './LiteTreeTable.svelte';
 import LiteSensitiveDataMask from './LiteSensitiveDataMask.svelte';
 import LiteApprovalActionCard from './LiteApprovalActionCard.svelte';
-
+import LiteStepForm from './LiteStepForm.svelte';
+import LiteModalForm from './LiteModalForm.svelte';
+import LiteDrawerForm from './LiteDrawerForm.svelte';
+import LiteTableSummary from './LiteTableSummary.svelte';
+import LiteVersionDiffViewer from './LiteVersionDiffViewer.svelte';
+import LiteVirtualTable from './LiteVirtualTable.svelte';
 
 describe('Lite Enterprise Components SSR rendering', () => {
   it('renders LiteTreeSelect in show and edit mode', () => {
@@ -159,6 +164,7 @@ describe('Lite Enterprise Components SSR rendering', () => {
     expect(view.container.textContent).toContain('Role');
     expect(view.container.querySelectorAll('input[type="checkbox"]')).toHaveLength(2);
   });
+
   it('renders LiteImportWizard with file input and schema tags', () => {
     const view = render(LiteImportWizard, {
       resourceName: 'orders',
@@ -203,5 +209,82 @@ describe('Lite Enterprise Components SSR rendering', () => {
     expect(view.container.textContent).toContain('Contract Approval');
     expect(view.container.textContent).toContain('Approve');
     expect(view.container.textContent).toContain('Reject');
+  });
+
+  it('renders LiteStepForm with step navigation headers', () => {
+    const steps = [
+      { title: 'Account Details' },
+      { title: 'Payment Method' },
+      { title: 'Confirmation' },
+    ];
+    const view = render(LiteStepForm, {
+      steps,
+      currentStep: 1,
+    });
+    expect(view.container.textContent).toContain('Account Details');
+    expect(view.container.textContent).toContain('Payment Method');
+    expect(view.container.textContent).toContain('Confirmation');
+  });
+
+  it('renders LiteModalForm and LiteDrawerForm with form headers', () => {
+    const modalView = render(LiteModalForm, {
+      title: 'Quick Create User',
+      description: 'Fill in user details',
+    });
+    expect(modalView.container.textContent).toContain('Quick Create User');
+    expect(modalView.container.textContent).toContain('Fill in user details');
+
+    const drawerView = render(LiteDrawerForm, {
+      title: 'Edit Preferences',
+    });
+    expect(drawerView.container.textContent).toContain('Edit Preferences');
+  });
+
+  it('renders LiteTableSummary with calculated aggregation values', () => {
+    const data = [
+      { id: 1, amount: 100 },
+      { id: 2, amount: 250 },
+    ];
+    const columns = [
+      { key: 'id', label: 'ID' },
+      { key: 'amount', label: 'Amount' },
+    ];
+    const view = render(LiteTableSummary, {
+      columns,
+      data,
+      aggregations: { amount: 'sum' },
+      title: 'Total',
+    });
+    expect(view.container.textContent).toContain('Total');
+    expect(view.container.textContent).toContain('350');
+  });
+
+  it('renders LiteVersionDiffViewer with added and modified fields', () => {
+    const oldValue = { name: 'Alpha', status: 'draft' };
+    const newValue = { name: 'Alpha v2', status: 'published', tag: 'new' };
+    const view = render(LiteVersionDiffViewer, {
+      oldValue,
+      newValue,
+    });
+    expect(view.container.textContent).toContain('Alpha');
+    expect(view.container.textContent).toContain('Alpha v2');
+    expect(view.container.textContent).toContain('Record Comparison');
+  });
+
+  it('renders LiteVirtualTable with data rows', () => {
+    const items = [
+      { id: 1, code: 'A001', name: 'Item 1' },
+      { id: 2, code: 'A002', name: 'Item 2' },
+    ];
+    const columns = [
+      { key: 'code', label: 'Code' },
+      { key: 'name', label: 'Name' },
+    ];
+    const view = render(LiteVirtualTable, {
+      items,
+      columns,
+    });
+    expect(view.container.textContent).toContain('A001');
+    expect(view.container.textContent).toContain('Item 2');
   });
 });
