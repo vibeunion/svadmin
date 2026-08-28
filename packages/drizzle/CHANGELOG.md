@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.11.10](https://github.com/vibeunion/svadmin/compare/drizzle-v0.11.9...drizzle-v0.11.10) (2026-08-28)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.46.0
+
 ## [0.11.9](https://github.com/vibeunion/svadmin/compare/drizzle-v0.11.8...drizzle-v0.11.9) (2026-08-28)
 
 

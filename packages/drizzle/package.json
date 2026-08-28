@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/drizzle",
-  "version": "0.11.9",
+  "version": "0.11.10",
   "description": "Drizzle ORM DataProvider — SQLite, PostgreSQL, MySQL, Cloudflare D1 via refine-sqlx",
   "type": "module",
   "sideEffects": false,

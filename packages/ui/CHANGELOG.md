@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.64.0](https://github.com/vibeunion/svadmin/compare/ui-v0.63.0...ui-v0.64.0) (2026-08-28)
+
+
+### 🚀 Features
+
+* **lite,ui:** add enterprise components, complete lite parity tracking, and update docs ([cbc7649](https://github.com/vibeunion/svadmin/commit/cbc7649ab61f2c7df4a4bff4e8c093aed0257767))
+* **ui,create-svadmin:** add navigation menu component and lite init command ([745b86f](https://github.com/vibeunion/svadmin/commit/745b86f772f82d2f9929e7f0bdcb95d3d10dbb64))
+
+
+### 🐛 Bug Fixes
+
+* **lite,ui:** refine field type annotations, a11y labels, and test assertions ([6af6a2c](https://github.com/vibeunion/svadmin/commit/6af6a2c3d3a22a57a7c3e27fdb5440af521bead5))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.46.0
+
 ## [0.63.0](https://github.com/vibeunion/svadmin/compare/ui-v0.62.0...ui-v0.63.0) (2026-08-28)
 
 
