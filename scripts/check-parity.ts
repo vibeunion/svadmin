@@ -130,6 +130,16 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'VoiceInput', uiComponent: 'VoiceInput.svelte', category: 'fields', status: 'spa_only', strategy: '免适配 (Web Speech API)', note: '受限浏览器无麦克风与 Speech Recognition API' },
 ];
 
+export function parityOutputPaths(repositoryRoot = resolve(import.meta.dir, '..')): {
+  markdownPath: string;
+  jsonPath: string;
+} {
+  return {
+    markdownPath: resolve(repositoryRoot, 'packages/lite/PARITY.md'),
+    jsonPath: resolve(repositoryRoot, 'packages/lite/parity.json'),
+  };
+}
+
 export function buildParityReport(): ParityReport {
   const categories: Record<string, ParityCategorySummary> = {};
 
@@ -258,8 +268,7 @@ if (import.meta.main) {
 
   if (isWrite) {
     const mdContent = generateMarkdownReport(report);
-    const mdPath = resolve(process.cwd(), 'packages/lite/PARITY.md');
-    const jsonPath = resolve(process.cwd(), 'packages/lite/parity.json');
+    const { markdownPath: mdPath, jsonPath } = parityOutputPaths();
     writeFileSync(mdPath, mdContent, 'utf8');
     writeFileSync(jsonPath, JSON.stringify(report, null, 2), 'utf8');
     console.info(`[OK] Generated ${mdPath} and ${jsonPath}`);

@@ -73,8 +73,8 @@ try {
   assert.match(compatibilityHtml, /ZIP archive fallback/u);
   checkedRoutes += 1;
 
-  const parityHtml = await assertServerRenderedPage(baseUrl, '/lite/parity', /72\/72/u);
-  assert.match(parityHtml, /72\/72/u);
+  const parityHtml = await assertServerRenderedPage(baseUrl, '/lite/parity', /72\s*\/\s*72/u);
+  assert.match(parityHtml, /72\s*\/\s*72/u);
   checkedRoutes += 1;
 
   for (const path of ['/lite/compatibility/flow.json', '/lite/compatibility/result.json']) {

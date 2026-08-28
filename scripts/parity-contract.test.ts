@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'bun:test';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { buildParityReport, generateMarkdownReport } from './check-parity';
+import { buildParityReport, generateMarkdownReport, parityOutputPaths } from './check-parity';
 
 describe('UI/Lite Parity Tracking Contract', () => {
   it('computes complete component parity without missing items', () => {
@@ -41,5 +41,11 @@ describe('UI/Lite Parity Tracking Contract', () => {
 
     expect(rootPkg.scripts['check:parity']).toContain('scripts/check-parity.ts');
     expect(litePkg.scripts['check:parity']).toContain('scripts/check-parity.ts');
+  });
+
+  it('writes parity artifacts relative to the repository, not the caller cwd', () => {
+    const paths = parityOutputPaths('/tmp/caller-cwd');
+    expect(paths.markdownPath).toBe('/tmp/caller-cwd/packages/lite/PARITY.md');
+    expect(paths.jsonPath).toBe('/tmp/caller-cwd/packages/lite/parity.json');
   });
 });
