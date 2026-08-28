@@ -99,6 +99,16 @@ export type { PresenceUser } from './components/PresenceAvatarGroup.svelte';
 export { default as PrintableBill } from './components/PrintableBill.svelte';
 export type { BillItem } from './components/PrintableBill.svelte';
 export { default as JsonSchemaForm } from './components/JsonSchemaForm.svelte';
+export { default as MentionsInput } from './components/MentionsInput.svelte';
+export type { MentionOption } from './components/MentionsInput.svelte';
+export { default as KanbanBoard } from './components/KanbanBoard.svelte';
+export type { KanbanCard, KanbanColumn } from './components/KanbanBoard.svelte';
+export { default as PivotTable } from './components/PivotTable.svelte';
+export type { AggregationFn } from './components/PivotTable.svelte';
+export { default as MultiTabKeepAlive } from './components/MultiTabKeepAlive.svelte';
+export type { WorkspaceTab } from './components/MultiTabKeepAlive.svelte';
+export { default as GanttChart } from './components/GanttChart.svelte';
+export type { GanttTask } from './components/GanttChart.svelte';
 
 export { default as InfiniteList } from './components/InfiniteList.svelte';
 export { default as ComboboxField } from './components/ComboboxField.svelte';

@@ -1,18 +1,18 @@
 # @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵
 
-> 自动生成时间：`2026-08-28T23:12:41.757Z`
-> 总体适配覆盖率：**100%**（92/92 组件）
+> 自动生成时间：`2026-08-28T23:30:11.945Z`
+> 总体适配覆盖率：**100%**（97/97 组件）
 
 ## 进度总览
 
 | 模块分类 | 组件总数 | 1:1 对齐 (Exact) | 语义降级 (Fallback) | 免适配 (SPA Only) | 待补齐 (Missing) | 覆盖率 |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
-| **fields** | 31 | 27 | 3 | 1 | 0 | **100%** |
+| **fields** | 32 | 28 | 3 | 1 | 0 | **100%** |
 | **buttons** | 10 | 10 | 0 | 0 | 0 | **100%** |
 | **pages** | 11 | 11 | 0 | 0 | 0 | **100%** |
-| **layout** | 8 | 7 | 0 | 1 | 0 | **100%** |
-| **widgets** | 7 | 4 | 3 | 0 | 0 | **100%** |
-| **advanced** | 25 | 19 | 4 | 2 | 0 | **100%** |
+| **layout** | 9 | 8 | 0 | 1 | 0 | **100%** |
+| **widgets** | 8 | 5 | 3 | 0 | 0 | **100%** |
+| **advanced** | 27 | 21 | 4 | 2 | 0 | **100%** |
 
 ---
 
@@ -52,6 +52,7 @@
 | `DynamicFormList` | `LiteDynamicFormList.svelte` | ✅ 1:1 对齐 | 子表单卡片/表格与服务端索引数组解析 |
 | `ImageCropper` | `LiteImageCropper.svelte` | ✅ 1:1 对齐 | 图片缩放与裁剪参数表单 |
 | `JsonSchemaForm` | `LiteJsonSchemaForm.svelte` | ✅ 1:1 对齐 | JSON Schema 动态表单生成 |
+| `MentionsInput` | `LiteMentionsInput.svelte` | ✅ 1:1 对齐 | @与#智能提及输入框 |
 | `VoiceInput` | — | 🚫 免适配 | 免适配 (Web Speech API) |
 
 ### BUTTONS
@@ -96,6 +97,7 @@
 | `CanAccess` | `layout/LiteCanAccess.svelte` | ✅ 1:1 对齐 | 服务端同步权限判定容器 |
 | `ErrorBoundary` | `layout/LiteErrorBoundary.svelte` | ✅ 1:1 对齐 | 受限环境错误提示面板 |
 | `SplitPaneLayout` | `LiteSplitPaneLayout.svelte` | ✅ 1:1 对齐 | 双栏弹性比例分屏布局 |
+| `MultiTabKeepAlive` | `LiteMultiTabKeepAlive.svelte` | ✅ 1:1 对齐 | 工作台多标签页导航 |
 | `ThemeToggle` | — | 🚫 免适配 | 免适配 (Lite 为固定 Slate/Indigo 配色) |
 
 ### WIDGETS
@@ -109,6 +111,7 @@
 | `LineChart` | `widgets/LiteLineChart.svelte` | ⚡ 语义降级 | 降级为折线数据点表格与趋势指示 |
 | `PieChart` | `widgets/LitePieChart.svelte` | ⚡ 语义降级 | 降级为占比条与结构化表格 |
 | `PresenceAvatarGroup` | `LitePresenceAvatarGroup.svelte` | ✅ 1:1 对齐 | 多人在线协同感知状态 |
+| `GanttChart` | `LiteGanttChart.svelte` | ✅ 1:1 对齐 | 项目甘特图排期进度表 |
 
 ### ADVANCED
 
@@ -137,6 +140,8 @@
 | `DraggableRowTable` | `LiteDraggableRowTable.svelte` | ✅ 1:1 对齐 | 行顺序数值表单与上下移动 |
 | `MediaLibraryModal` | `LiteMediaLibraryModal.svelte` | ✅ 1:1 对齐 | 媒体库文件选择与上传表单 |
 | `ActivityFeed` | `LiteActivityFeed.svelte` | ✅ 1:1 对齐 | 时间线动态与评论流 |
+| `KanbanBoard` | `LiteKanbanBoard.svelte` | ✅ 1:1 对齐 | 多列任务看板与泳道视图 |
+| `PivotTable` | `LitePivotTable.svelte` | ✅ 1:1 对齐 | 多维交叉透视分析表 |
 | `DevTools` | — | 🚫 免适配 | 免适配 (SPA 调试器) |
 | `CopilotPanel` | — | 🚫 免适配 | 免适配 (AI Copilot 客户端浮窗) |
 

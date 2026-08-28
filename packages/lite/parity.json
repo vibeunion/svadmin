@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-08-28T23:12:41.757Z",
-  "totalComponents": 92,
-  "adaptedCount": 78,
+  "timestamp": "2026-08-28T23:30:11.945Z",
+  "totalComponents": 97,
+  "adaptedCount": 83,
   "fallbackCount": 10,
   "spaOnlyCount": 4,
   "missingCount": 0,
@@ -9,8 +9,8 @@
   "categories": {
     "fields": {
       "category": "fields",
-      "total": 31,
-      "adapted": 27,
+      "total": 32,
+      "adapted": 28,
       "fallback": 3,
       "spaOnly": 1,
       "missing": 0,
@@ -36,8 +36,8 @@
     },
     "layout": {
       "category": "layout",
-      "total": 8,
-      "adapted": 7,
+      "total": 9,
+      "adapted": 8,
       "fallback": 0,
       "spaOnly": 1,
       "missing": 0,
@@ -45,8 +45,8 @@
     },
     "widgets": {
       "category": "widgets",
-      "total": 7,
-      "adapted": 4,
+      "total": 8,
+      "adapted": 5,
       "fallback": 3,
       "spaOnly": 0,
       "missing": 0,
@@ -54,8 +54,8 @@
     },
     "advanced": {
       "category": "advanced",
-      "total": 25,
-      "adapted": 19,
+      "total": 27,
+      "adapted": 21,
       "fallback": 4,
       "spaOnly": 2,
       "missing": 0,
@@ -766,6 +766,46 @@
       "category": "fields",
       "status": "exact",
       "strategy": "JSON Schema 动态表单生成"
+    },
+    {
+      "name": "MentionsInput",
+      "uiComponent": "MentionsInput.svelte",
+      "liteComponent": "LiteMentionsInput.svelte",
+      "category": "fields",
+      "status": "exact",
+      "strategy": "@与#智能提及输入框"
+    },
+    {
+      "name": "KanbanBoard",
+      "uiComponent": "KanbanBoard.svelte",
+      "liteComponent": "LiteKanbanBoard.svelte",
+      "category": "advanced",
+      "status": "exact",
+      "strategy": "多列任务看板与泳道视图"
+    },
+    {
+      "name": "PivotTable",
+      "uiComponent": "PivotTable.svelte",
+      "liteComponent": "LitePivotTable.svelte",
+      "category": "advanced",
+      "status": "exact",
+      "strategy": "多维交叉透视分析表"
+    },
+    {
+      "name": "MultiTabKeepAlive",
+      "uiComponent": "MultiTabKeepAlive.svelte",
+      "liteComponent": "LiteMultiTabKeepAlive.svelte",
+      "category": "layout",
+      "status": "exact",
+      "strategy": "工作台多标签页导航"
+    },
+    {
+      "name": "GanttChart",
+      "uiComponent": "GanttChart.svelte",
+      "liteComponent": "LiteGanttChart.svelte",
+      "category": "widgets",
+      "status": "exact",
+      "strategy": "项目甘特图排期进度表"
     },
     {
       "name": "ThemeToggle",

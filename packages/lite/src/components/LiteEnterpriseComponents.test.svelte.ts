@@ -28,6 +28,11 @@ import LiteActivityFeed from './LiteActivityFeed.svelte';
 import LitePresenceAvatarGroup from './LitePresenceAvatarGroup.svelte';
 import LitePrintableBill from './LitePrintableBill.svelte';
 import LiteJsonSchemaForm from './LiteJsonSchemaForm.svelte';
+import LiteMentionsInput from './LiteMentionsInput.svelte';
+import LiteKanbanBoard from './LiteKanbanBoard.svelte';
+import LitePivotTable from './LitePivotTable.svelte';
+import LiteMultiTabKeepAlive from './LiteMultiTabKeepAlive.svelte';
+import LiteGanttChart from './LiteGanttChart.svelte';
 
 describe('Lite Enterprise Components SSR rendering', () => {
   it('renders LiteTreeSelect in show and edit mode', () => {
@@ -367,5 +372,42 @@ describe('Lite Enterprise Components SSR rendering', () => {
     });
     expect(schemaView.container.textContent).toContain('Project Form');
     expect(schemaView.container.textContent).toContain('Project Name');
+  });
+
+  it('renders LiteMentionsInput, LiteKanbanBoard, LitePivotTable, LiteMultiTabKeepAlive, and LiteGanttChart', () => {
+    const mentionsView = render(LiteMentionsInput, {
+      users: [{ id: '1', label: 'Bob' }],
+      tags: [{ id: 't1', label: 'Frontend' }],
+    });
+    expect(mentionsView.container.querySelector('textarea')).toBeTruthy();
+    expect(mentionsView.container.textContent).toContain('@Bob');
+
+    const kanbanView = render(LiteKanbanBoard, {
+      columns: [{ id: 'col1', title: 'In Progress' }],
+      cards: [{ id: 'c1', title: 'Implement Kanban', columnId: 'col1' }],
+    });
+    expect(kanbanView.container.textContent).toContain('In Progress');
+    expect(kanbanView.container.textContent).toContain('Implement Kanban');
+
+    const pivotView = render(LitePivotTable, {
+      data: [{ dept: 'Sales', product: 'Cloud', rev: 500 }],
+      rowField: 'dept',
+      columnField: 'product',
+      valueField: 'rev',
+    });
+    expect(pivotView.container.textContent).toContain('Pivot Analysis');
+    expect(pivotView.container.textContent).toContain('Sales');
+
+    const tabView = render(LiteMultiTabKeepAlive, {
+      tabs: [{ id: 'tab1', title: 'Overview', path: '/overview' }],
+      activeTabId: 'tab1',
+    });
+    expect(tabView.container.textContent).toContain('Overview');
+
+    const ganttView = render(LiteGanttChart, {
+      tasks: [{ id: 'gt1', title: 'Sprint 1', startDay: 0, durationDays: 5 }],
+    });
+    expect(ganttView.container.textContent).toContain('Project Schedule');
+    expect(ganttView.container.textContent).toContain('Sprint 1');
   });
 });

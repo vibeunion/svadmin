@@ -88,6 +88,11 @@ export { default as LiteActivityFeed } from './components/LiteActivityFeed.svelt
 export { default as LitePresenceAvatarGroup } from './components/LitePresenceAvatarGroup.svelte';
 export { default as LitePrintableBill } from './components/LitePrintableBill.svelte';
 export { default as LiteJsonSchemaForm } from './components/LiteJsonSchemaForm.svelte';
+export { default as LiteMentionsInput } from './components/LiteMentionsInput.svelte';
+export { default as LiteKanbanBoard } from './components/LiteKanbanBoard.svelte';
+export { default as LitePivotTable } from './components/LitePivotTable.svelte';
+export { default as LiteMultiTabKeepAlive } from './components/LiteMultiTabKeepAlive.svelte';
+export { default as LiteGanttChart } from './components/LiteGanttChart.svelte';
 
 // Compatibility fallbacks for browser-only and third-party UI capabilities.
 export * from './components/compatibility/index';

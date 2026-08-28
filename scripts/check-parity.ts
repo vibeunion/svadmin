@@ -142,6 +142,11 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'PresenceAvatarGroup', uiComponent: 'PresenceAvatarGroup.svelte', liteComponent: 'LitePresenceAvatarGroup.svelte', category: 'widgets', status: 'exact', strategy: '多人在线协同感知状态' },
   { name: 'PrintableBill', uiComponent: 'PrintableBill.svelte', liteComponent: 'LitePrintableBill.svelte', category: 'pages', status: 'exact', strategy: '受控单据凭证 A4 打印排版' },
   { name: 'JsonSchemaForm', uiComponent: 'JsonSchemaForm.svelte', liteComponent: 'LiteJsonSchemaForm.svelte', category: 'fields', status: 'exact', strategy: 'JSON Schema 动态表单生成' },
+  { name: 'MentionsInput', uiComponent: 'MentionsInput.svelte', liteComponent: 'LiteMentionsInput.svelte', category: 'fields', status: 'exact', strategy: '@与#智能提及输入框' },
+  { name: 'KanbanBoard', uiComponent: 'KanbanBoard.svelte', liteComponent: 'LiteKanbanBoard.svelte', category: 'advanced', status: 'exact', strategy: '多列任务看板与泳道视图' },
+  { name: 'PivotTable', uiComponent: 'PivotTable.svelte', liteComponent: 'LitePivotTable.svelte', category: 'advanced', status: 'exact', strategy: '多维交叉透视分析表' },
+  { name: 'MultiTabKeepAlive', uiComponent: 'MultiTabKeepAlive.svelte', liteComponent: 'LiteMultiTabKeepAlive.svelte', category: 'layout', status: 'exact', strategy: '工作台多标签页导航' },
+  { name: 'GanttChart', uiComponent: 'GanttChart.svelte', liteComponent: 'LiteGanttChart.svelte', category: 'widgets', status: 'exact', strategy: '项目甘特图排期进度表' },
 
   // ─── SPA Only (No SSR counterpart needed) ───────────────────────────────
   { name: 'ThemeToggle', uiComponent: 'ThemeToggle.svelte', category: 'layout', status: 'spa_only', strategy: '免适配 (Lite 为固定 Slate/Indigo 配色)', note: 'IE11 不支持 CSS 变量与客户端主题即时切换' },
