@@ -69,7 +69,7 @@
     "build": "node ../../node_modules/@sveltejs/package/svelte-package.js -i src -o dist && bun ../../scripts/copy-package-assets.ts static/enhance.js dist/enhance.js",
     "test": "bun run test:components && bun run test:server && bun run test:security",
     "test:components": "vitest run --config ./vitest.config.ts",
-    "test:server": "bun test ./src/schema-generator.test.ts ./src/server-adapter.test.ts ./src/fragment-id.test.ts ./src/ie11-ssr-contract.test.ts",
+    "test:server": "bun test ./src/schema-generator.test.ts ./src/server-adapter.test.ts ./src/fragment-id.test.ts ./src/compatibility.test.ts ./src/ie11-ssr-contract.test.ts",
     "test:security": "vitest run --config ./src/security.test.config.ts"
   },
   "license": "MIT",

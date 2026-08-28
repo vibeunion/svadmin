@@ -25,6 +25,8 @@ The main `@svadmin/ui` package delivers a premium SPA experience using Svelte 5,
 | **Authentication pages** | Login/logout plus optional provider-delegating account actions |
 | **Auth Guard** | Server hook redirects unauthenticated users |
 | **UA Detection** | Optional legacy-browser detection hook redirects users to `/lite/` routes |
+| **SPA + IE11 split** | Modern browsers keep the existing SPA; IE11 is redirected before the SPA route is rendered |
+| **Capability fallbacks** | Canvas, WASM, realtime, directory upload, observers, storage, media, and other browser-only features have server-safe alternatives |
 | **i18n** | Uses `@svadmin/core` `t()` translations |
 | **Multi-level Menu** | Always-expanded, config-driven nested links via `MenuItem[]` |
 | **Print** | `@media print` optimized styles |
@@ -195,6 +197,32 @@ export const handle = createLegacyRedirectHook('/lite');
 </head>
 ```
 
+### 5. Keep the SPA untouched while routing IE11 to Lite
+
+The redirect belongs to the server hook or reverse proxy. It does not add a
+compatibility branch, polyfill, or user-agent check to the SPA bundle:
+
+```typescript
+// src/hooks.server.ts
+import { createLegacyRedirectHook } from '@svadmin/lite';
+
+export const handle = createLegacyRedirectHook({
+  litePrefix: '/lite',
+  spaPrefix: '/admin',
+  // Static assets, health checks, and API routes stay outside document routing.
+  exclude: ['/api', '/_app', '/health'],
+});
+```
+
+For a request such as `/admin/orders/show/7`, an IE11 user receives a 302 to
+`/lite/orders/show/7`. Modern browsers continue to the existing SPA route.
+The Lite subtree must remain `ssr = true` and `csr = false`; the browser never
+executes Svelte 5 there.
+
+If the application is behind a reverse proxy, the same rule can be implemented
+there instead. The important property is that the SPA JavaScript is not sent to
+IE11 before the decision is made.
+
 ## Components
 
 | Component | Description |
@@ -207,6 +235,13 @@ export const handle = createLegacyRedirectHook('/lite');
 | `LiteShow` | Record detail/view page |
 | `LiteLogin` | Login form |
 | `LiteAlert` | Success/error notification banner |
+| `LiteCapabilityBoundary` | Documents and selects a server-safe fallback for an optional browser capability |
+| `LiteVisualFallback` | Snapshot plus accessible table for Canvas, WebGL, map, chart, and flow UIs |
+| `LiteDirectoryUpload` | Directory enhancement with multiple-file and ZIP upload fallbacks |
+| `LiteRealtimeStatus` | Snapshot timestamp and native refresh/meta-refresh fallback for live data |
+| `LiteComputeFallback` | Native POST action for WASM, Worker, and long-running compute fallback |
+| `LiteOrderedList` | Up/down POST actions for drag-and-drop ordering fallback |
+| `LiteClipboardFallback` | Selectable textarea when Clipboard API is unavailable |
 
 ## Server Utilities
 
@@ -243,6 +278,68 @@ Copy the exported `@svadmin/lite/enhance.js` asset to your application's static 
 
 The asset is optional for core server-rendered navigation and form submission; the conveniences listed above require it.
 
+## Capability compatibility
+
+The compatibility catalog is exported as `LITE_COMPATIBILITY_CATALOG`, with
+`detectLiteCapabilities()` and `resolveLiteCompatibility()` for explicit client
+enhancement entries. The detector accepts an injected environment, so SSR tests
+do not need browser globals:
+
+```typescript
+import {
+  detectLiteCapabilities,
+  resolveLiteCompatibility,
+} from '@svadmin/lite';
+
+const support = detectLiteCapabilities(globalThis);
+const realtime = resolveLiteCompatibility('websocket', support);
+```
+
+Do not import this detector into the modern SPA just to make IE11 work. The SPA
+stays modern. Use it only in an optional Lite enhancement entry or a modern-only
+Lite page. The normal Lite route requires no detector and no hydration.
+
+Recommended fallback contract:
+
+| Modern capability | Required Lite fallback |
+|---|---|
+| Canvas/WebGL/flow/map/chart | Static image or SVG plus a structured data table and download |
+| WASM/Worker | Server action or background job with status and downloadable result |
+| WebSocket/SSE | Snapshot timestamp, refresh link, optional polling or meta refresh |
+| Directory/File System Access | Multiple files, relative paths where available, or ZIP upload |
+| Virtual scrolling/IntersectionObserver | Server pagination or eager server rendering |
+| Drag and drop | Ordered list with up/down POST actions |
+| Clipboard API | Selectable text area and normal browser copy command |
+| IndexedDB/localStorage | Server persistence for authoritative data; local cache only for preferences |
+| Notifications/Media Capture/WebRTC | In-page status, file upload, or server-managed workflow |
+
+These fallbacks preserve the business operation, submitted data, read access,
+download, and auditability. They do not attempt to reproduce every modern
+interaction pixel-for-pixel.
+
+### Third-party library boundaries
+
+Do not patch these libraries into the IE11 document. Keep them in the modern SPA
+and render the matching Lite fallback from shared records or server projections:
+
+| Modern library family | Examples | Lite boundary |
+|---|---|---|
+| Flow/canvas/3D | `@xyflow/svelte`, Three.js, Fabric.js | `LiteVisualFallback` with nodes, edges, properties, snapshot, and export |
+| Charts | ECharts, Chart.js, Vega | Lite chart components or `LiteVisualFallback` with a data table |
+| Maps | MapLibre, Leaflet | Address/coordinate table, static map image, and external navigation link |
+| Editors | Monaco, CodeMirror, TipTap | `textarea`, Markdown, source download, and server validation |
+| Realtime clients | native WebSocket/EventSource, Socket.IO | `LiteRealtimeStatus`, refresh, polling endpoint, or server status page |
+| File-system helpers | `browser-fs-access` | `LiteDirectoryUpload` and normal download links |
+| Browser storage | `idb`, `idb-keyval`, localForage | Server persistence; browser cache only for drafts and preferences |
+| Virtual table/drag libraries | TanStack Virtual, SortableJS | Server pagination and `LiteOrderedList` actions |
+| PDF/media terminals | PDF.js, MediaRecorder, WebRTC, xterm.js | Download/upload, transcript/log view, and server workflow |
+
+Dependency patch systems such as Bun `patchedDependencies` or `patch-package`
+should only repair a reproducible package defect, such as an eager `window`
+reference or incorrect package export. They must not be used to pretend that an
+unavailable browser capability exists. Every retained patch needs an exact
+package version, a regression test, and a documented removal condition.
+
 ## Compatibility notes
 
 - Registration, recovery, password, and profile actions delegate the submitted form
@@ -261,6 +358,14 @@ The asset is optional for core server-rendered navigation and form submission; t
   native links/forms and the IE11-safe Lite CSS contract. Keep the entire Lite route
   subtree on `ssr = true` and `csr = false`; Svelte 5 hydration/runtime execution in
   IE11 is not supported or promised by this package.
+- The SPA is not an IE11 target. The supported architecture is `modern SPA +
+  server-routed Lite`, where server middleware decides which document bundle is
+  returned before the browser executes application JavaScript.
+- Third-party polyfills are optional host concerns. `@vitejs/plugin-legacy`,
+  `core-js`, Fetch/EventSource polyfills, and `browser-fs-access` can improve a
+  modern-only enhancement entry, but they are not Lite core dependencies and do
+  not replace a server fallback for Canvas, WebSocket protocol support, WASM, or
+  File System Access.
 
 ## License
 

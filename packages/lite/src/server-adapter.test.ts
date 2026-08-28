@@ -407,6 +407,44 @@ describe('createLegacyRedirectHook navigation compatibility', () => {
     expect(await mutationResponse.text()).toBe('resolved');
     expect(resolve).toHaveBeenCalledTimes(1);
   });
+
+  test('maps a modern SPA prefix to the standalone Lite route without changing SPA code', async () => {
+    const hook = createLegacyRedirectHook({ litePrefix: '/lite', spaPrefix: '/admin' });
+    const resolve = mock(async () => new Response('resolved'));
+    const url = new URL('https://admin.example/admin/orders/show/7?tab=history');
+    const response = await hook({
+      event: {
+        url,
+        request: new Request(url, {
+          headers: {
+            accept: 'text/html',
+            'user-agent': 'Mozilla/5.0 Trident/7.0; rv:11.0',
+          },
+        }),
+      } as never,
+      resolve,
+    });
+
+    expect(response.status).toBe(302);
+    expect(response.headers.get('location')).toBe('/lite/orders/show/7?tab=history');
+    expect(response.headers.get('vary')).toBe('User-Agent');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+
+    const outsideUrl = new URL('https://admin.example/docs');
+    const outsideResponse = await hook({
+      event: {
+        url: outsideUrl,
+        request: new Request(outsideUrl, {
+          headers: {
+            accept: 'text/html',
+            'user-agent': 'Mozilla/5.0 Trident/7.0; rv:11.0',
+          },
+        }),
+      } as never,
+      resolve,
+    });
+    expect(await outsideResponse.text()).toBe('resolved');
+  });
 });
 
 describe('createCrudActions array form parsing', () => {

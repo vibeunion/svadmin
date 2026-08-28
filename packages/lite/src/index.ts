@@ -9,9 +9,24 @@ export {
   createAuthGuard,
   createAuthActions,
   createLegacyRedirectHook,
+  getLegacyRedirectLocation,
   isLegacyBrowser,
 } from './server-adapter';
-export type { ListLoaderResult } from './server-adapter';
+export type { LegacyRedirectOptions, ListLoaderResult } from './server-adapter';
+
+// Optional browser capabilities. The SSR baseline does not import browser globals.
+export {
+  LITE_COMPATIBILITY_CATALOG,
+  detectLiteCapabilities,
+  resolveLiteCompatibility,
+} from './compatibility';
+export type {
+  LiteCapability,
+  LiteCapabilitySupport,
+  LiteCompatibilityDescriptor,
+  LiteCompatibilityResolution,
+  LiteFallbackKind,
+} from './compatibility';
 
 // Schema generator (TypeBox schemas used by Lite actions and client forms)
 export {
@@ -45,6 +60,9 @@ export { default as LiteTabs } from './components/LiteTabs.svelte';
 export { default as LiteShowField } from './components/LiteShowField.svelte';
 export { default as LiteMediaThumbnail } from './components/LiteMediaThumbnail.svelte';
 export { default as LiteChatDialog } from './components/LiteChatDialog.svelte';
+
+// Compatibility fallbacks for browser-only and third-party UI capabilities.
+export * from './components/compatibility/index';
 
 // Action Buttons
 export * from './components/buttons/index';

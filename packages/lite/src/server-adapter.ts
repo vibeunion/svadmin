@@ -438,29 +438,91 @@ export function isLegacyBrowser(userAgent: string): boolean {
   return /MSIE|Trident|rv:11/.test(userAgent);
 }
 
+export interface LegacyRedirectOptions {
+  /** Route prefix that contains the standalone SSR Lite application. */
+  litePrefix?: string;
+  /** Optional route prefix occupied by the modern SPA, for example `/admin`. */
+  spaPrefix?: string;
+  /** Paths that must remain outside automatic legacy routing. */
+  exclude?: string[];
+  /** Override the SPA-to-Lite path mapping without changing SPA code. */
+  mapPath?: (pathname: string) => string;
+  status?: 302 | 307;
+}
+
+function normalizeRoutePrefix(prefix: string): string {
+  const segments = prefix.split('/').filter(Boolean);
+  return segments.length > 0 ? `/${segments.join('/')}` : '/';
+}
+
+function pathWithinPrefix(pathname: string, prefix: string): boolean {
+  return prefix === '/' || pathname === prefix || pathname.startsWith(`${prefix}/`);
+}
+
+function redirectOptions(options: string | LegacyRedirectOptions): Required<
+  Pick<LegacyRedirectOptions, 'litePrefix' | 'spaPrefix' | 'exclude' | 'status'>
+> & Pick<LegacyRedirectOptions, 'mapPath'> {
+  const configured = typeof options === 'string' ? { litePrefix: options } : options;
+  return {
+    litePrefix: normalizeRoutePrefix(configured.litePrefix ?? '/lite'),
+    spaPrefix: normalizeRoutePrefix(configured.spaPrefix ?? '/'),
+    exclude: (configured.exclude ?? []).map(normalizeRoutePrefix),
+    mapPath: configured.mapPath,
+    status: configured.status ?? 302,
+  };
+}
+
+/**
+ * Computes a legacy redirect without importing or modifying the modern SPA.
+ * This pure helper can be used from non-SvelteKit server middleware.
+ */
+export function getLegacyRedirectLocation(
+  request: Pick<Request, 'method' | 'headers'>,
+  url: URL,
+  options: string | LegacyRedirectOptions = '/lite',
+): string | undefined {
+  const configured = redirectOptions(options);
+  const userAgent = request.headers.get('user-agent') ?? '';
+  const acceptsHtml = request.headers.get('accept')?.includes('text/html') === true;
+  const isDocumentRequest = (request.method === 'GET' || request.method === 'HEAD') && acceptsHtml;
+  if (!isLegacyBrowser(userAgent) || !isDocumentRequest) return undefined;
+  if (pathWithinPrefix(url.pathname, configured.litePrefix)) return undefined;
+  if (configured.exclude.some((prefix) => pathWithinPrefix(url.pathname, prefix))) return undefined;
+  if (!configured.mapPath
+    && configured.spaPrefix !== '/'
+    && !pathWithinPrefix(url.pathname, configured.spaPrefix)) return undefined;
+
+  let mappedPath: string;
+  if (configured.mapPath) {
+    mappedPath = configured.mapPath(url.pathname);
+  } else if (configured.spaPrefix !== '/' && pathWithinPrefix(url.pathname, configured.spaPrefix)) {
+    mappedPath = url.pathname.slice(configured.spaPrefix.length) || '/';
+  } else {
+    mappedPath = url.pathname;
+  }
+  const normalizedMappedPath = mappedPath.startsWith('/') ? mappedPath : `/${mappedPath}`;
+  const location = configured.litePrefix === '/'
+    ? normalizedMappedPath
+    : `${configured.litePrefix}${normalizedMappedPath === '/' ? '' : normalizedMappedPath}`;
+  return `${location}${url.search}`;
+}
+
 /**
  * Creates an opt-in SvelteKit hook that redirects detected IE11 user agents.
  * Consumers remain responsible for their own transpilation and browser support.
  */
-export function createLegacyRedirectHook(litePrefix = '/lite') {
-  const prefixSegments = litePrefix.split('/').filter(Boolean);
-  const normalizedPrefix = prefixSegments.length > 0 ? `/${prefixSegments.join('/')}` : '/';
-
+export function createLegacyRedirectHook(options: string | LegacyRedirectOptions = '/lite') {
+  const configured = redirectOptions(options);
   return async ({ event, resolve }: { event: RequestEvent; resolve: (event: RequestEvent) => Promise<Response> }) => {
-    const ua = event.request.headers.get('user-agent') ?? '';
-    const acceptsHtml = event.request.headers.get('accept')?.includes('text/html') === true;
-    const isDocumentRequest = (event.request.method === 'GET' || event.request.method === 'HEAD')
-      && acceptsHtml;
-    const isWithinLite = normalizedPrefix === '/'
-      || event.url.pathname === normalizedPrefix
-      || event.url.pathname.startsWith(`${normalizedPrefix}/`);
-    if (isLegacyBrowser(ua) && isDocumentRequest && !isWithinLite) {
-      const targetPath = normalizedPrefix === '/'
-        ? event.url.pathname
-        : `${normalizedPrefix}${event.url.pathname}`;
+    const location = getLegacyRedirectLocation(event.request, event.url, configured);
+    if (location) {
       return new Response(null, {
-        status: 302,
-        headers: { Location: `${targetPath}${event.url.search}` },
+        status: configured.status,
+        headers: {
+          Location: location,
+          'Cache-Control': 'private, no-store',
+          Vary: 'User-Agent',
+        },
       });
     }
     return resolve(event);

@@ -280,6 +280,7 @@ export const menu: MenuItem[] = [
     name: "content",
     label: "SSR Verification",
     children: [
+      { name: "compatibility", label: "Compatibility Fallbacks", href: "/lite/compatibility" },
       { name: "posts", label: "Posts (IE11 SSR Test)", href: "/lite/posts" },
     ],
   },

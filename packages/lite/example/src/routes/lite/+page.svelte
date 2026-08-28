@@ -30,6 +30,7 @@
         Zero JavaScript • High Performance Server Rendering • Native HTML Forms
       </p>
     </div>
+    <a href="/lite/compatibility" class="lite-btn lite-btn-sm">Compatibility matrix</a>
   </div>
 
   {#if form?.success}
@@ -39,7 +40,7 @@
   {/if}
 
   <!-- KPI Cards -->
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
+  <div class="lite-dashboard-stats">
     <LiteStatsCard
       label="Total Revenue"
       value={"$" + Number(data.stats.totalRevenue).toLocaleString()}
@@ -67,7 +68,7 @@
   </div>
 
   <!-- Analytics & Breakdown Section -->
-  <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px;">
+  <div class="lite-dashboard-split">
     <LiteBarChart
       title="Revenue Distribution by Category ($)"
       data={revenueChartData}
@@ -147,7 +148,7 @@
       <h2 style="font-size: 16px; font-weight: 600; margin: 0 0 4px 0;">Domain Resource Modules</h2>
       <p style="font-size: 12px; color: #64748b; margin: 0;">Instant CRUD access across all business domains</p>
     </div>
-    <div style="padding: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+    <div class="lite-resource-links">
       <a href="/lite/products" class="lite-btn" style="text-align: left; padding: 12px;">
         <strong style="display: block; font-size: 14px; margin-bottom: 2px;">📦 Products</strong>
         <span style="font-size: 12px; color: #64748b;">Manage catalog & inventory</span>

@@ -36,10 +36,31 @@ describe('IE11 SSR source contract', () => {
       resolve(import.meta.dir, '../example/src/app.html'),
       'utf8',
     );
+    const exampleRouteRoot = resolve(import.meta.dir, '../example/src/routes/lite');
+    const exampleRouteFiles = Array.fromAsync(
+      new Bun.Glob('**/*.svelte').scan({ cwd: exampleRouteRoot, absolute: true }),
+    );
+    const incompatibleExampleRoutes: string[] = [];
+    for (const routeFile of await exampleRouteFiles) {
+      const routeSource = await readFile(routeFile, 'utf8');
+      if (/display\s*:\s*grid\b/u.test(routeSource) || /\bgap\s*:/u.test(routeSource)) {
+        incompatibleExampleRoutes.push(routeFile.slice(exampleRouteRoot.length + 1));
+      }
+    }
 
     expect(routeOptions).toContain('export const ssr = true');
     expect(routeOptions).toContain('export const csr = false');
     expect(appTemplate).not.toContain('display: contents');
+    expect(incompatibleExampleRoutes).toEqual([]);
+  });
+
+  test('keeps compatibility helpers free of eager browser globals', async () => {
+    const compatibilitySource = await readFile(
+      resolve(import.meta.dir, 'compatibility.ts'),
+      'utf8',
+    );
+    expect(compatibilitySource).not.toMatch(/\b(?:window|document)\s*\./u);
+    expect(compatibilitySource).not.toMatch(/\bglobalThis\s*\./u);
   });
 
   test('keeps the real SSR response check in the default CI gate', async () => {
