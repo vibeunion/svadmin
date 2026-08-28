@@ -46,15 +46,15 @@
   </div>
 {:else if state === 'error' || state === 'forbidden'}
   <Alert.Root variant={state === 'error' ? 'destructive' : 'warning'} class={className}>
-    {#if state === 'error'}<AlertTriangle class="size-4" />{:else}<LockKeyhole class="size-4" />{/if}
+    {#if state === 'error'}<AlertTriangle class="size-4" aria-hidden="true" />{:else}<LockKeyhole class="size-4" aria-hidden="true" />{/if}
     <Alert.Title>{resolvedTitle}</Alert.Title>
     <Alert.Description>{resolvedDescription}</Alert.Description>
-    {#if retry}<Button variant="outline" size="sm" class="mt-3" onclick={retry}><RefreshCw class="size-3.5" />{resolvedRetryLabel}</Button>{/if}
+    {#if retry}<Button variant="outline" size="sm" class="mt-3" onclick={retry}><RefreshCw class="size-3.5" aria-hidden="true" />{resolvedRetryLabel}</Button>{/if}
     {#if action}<div class="mt-3">{@render action()}</div>{/if}
   </Alert.Root>
 {:else}
-  <div class={'flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-card px-6 py-8 text-center ' + className}>
-    <Inbox class="size-8 text-muted-foreground" /><h3 class="mt-3 text-sm font-semibold text-foreground">{resolvedTitle}</h3><p class="mt-1 max-w-sm text-sm text-muted-foreground">{resolvedDescription}</p>
+  <div class={'flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-card px-6 py-8 text-center ' + className} role="status" aria-live="polite">
+    <Inbox class="size-8 text-muted-foreground" aria-hidden="true" /><h3 class="mt-3 text-sm font-semibold text-foreground">{resolvedTitle}</h3><p class="mt-1 max-w-sm text-sm text-muted-foreground">{resolvedDescription}</p>
     {#if action}<div class="mt-4">{@render action()}</div>{/if}
   </div>
 {/if}

@@ -1099,12 +1099,12 @@
   <!-- Selection Banner (Enterprise Batch Actions) -->
   {#if selectedCount > 0}
     <div
-      class="flex flex-col gap-3 border border-primary/20 bg-primary/10 px-3.5 py-2 rounded-lg text-sm text-foreground animate-in fade-in duration-200 sm:flex-row sm:items-center sm:justify-between"
+      class="flex flex-col gap-3 border border-primary/20 bg-primary/10 px-3.5 py-2 rounded-lg text-sm text-foreground animate-in fade-in duration-200 motion-reduce:animate-none sm:flex-row sm:items-center sm:justify-between"
       aria-label={i18n.t("common.selectedCount", { count: selectedCount })}
       data-svadmin-batch-toolbar
     >
       <div class="flex min-w-0 items-center gap-2 text-sm">
-        <span class="font-medium text-foreground">{i18n.t("common.selectedCount", { count: selectedCount })}</span>
+        <span class="font-medium text-foreground tabular-nums">{i18n.t("common.selectedCount", { count: selectedCount })}</span>
         {#if deleteManyMutation.isPending}
           <span class="text-muted-foreground" role="status">{i18n.t("common.processing")}</span>
         {/if}
@@ -1121,7 +1121,7 @@
             disabled={deleteManyMutation.isPending}
             onclick={confirmBatchDelete}
           >
-            <Trash2 class="h-3.5 w-3.5" data-icon="inline-start" /> {i18n.t("common.batchDelete", { count: selectedCount })}
+            <Trash2 class="h-3.5 w-3.5" data-icon="inline-start" aria-hidden="true" /> {i18n.t("common.batchDelete", { count: selectedCount })}
           </Button>
         {/if}
         <Button
@@ -1143,7 +1143,7 @@
     <div class="flex flex-wrap items-center gap-2 flex-1 min-w-[200px]">
       {#if searchableFields.length > 0}
         <div class="relative max-w-sm flex-1 sm:min-w-[220px]">
-          <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
           <Input
             type="text"
             value={searchText}
@@ -1159,10 +1159,10 @@
           <Popover.Trigger>
             {#snippet child({ props })}
               <Button variant="outline" size="sm" class="h-9 px-3" {...props}>
-                <FilterIcon class="h-4 w-4" data-icon="inline-start" />
+                <FilterIcon class="h-4 w-4" data-icon="inline-start" aria-hidden="true" />
                 {i18n.t("common.filter")}
                 {#if activeFilterCount > 0}
-                  <Badge variant="secondary" class="ml-1 h-5 min-w-5 px-1">{activeFilterCount}</Badge>
+                  <Badge variant="secondary" class="ml-1 h-5 min-w-5 px-1 tabular-nums">{activeFilterCount}</Badge>
                 {/if}
               </Button>
             {/snippet}
@@ -1215,7 +1215,7 @@
     <div class="flex items-center gap-1.5 shrink-0">
       {#if !showHeader && canExport}
         <TooltipButton tooltip={i18n.t("common.export")} variant="outline" size="sm" class="h-9 px-2.5" onclick={exportCSV}>
-          <Download class="h-4 w-4" />
+          <Download class="h-4 w-4" aria-hidden="true" />
         </TooltipButton>
       {/if}
 
@@ -1224,7 +1224,7 @@
           <DropdownMenu.Trigger>
             {#snippet child({ props })}
               <TooltipButton tooltip={i18n.t("common.density")} variant="outline" size="sm" class="h-9 px-2.5" {...props}>
-                <Rows class="h-4 w-4" />
+                <Rows class="h-4 w-4" aria-hidden="true" />
               </TooltipButton>
             {/snippet}
           </DropdownMenu.Trigger>
@@ -1754,10 +1754,10 @@
   {#if totalPages > 0}
   <div class="flex flex-col sm:flex-row items-center justify-between gap-3 px-1 py-2 text-sm text-muted-foreground">
     <div class="flex shrink-0 items-center gap-3 leading-8">
-      <span class="shrink-0 whitespace-nowrap">{i18n.t('common.total', { total: query.data?.total ?? 0 })}</span>
+      <span class="shrink-0 whitespace-nowrap tabular-nums">{i18n.t('common.total', { total: query.data?.total ?? 0 })}</span>
       <Select.Root
         aria-label={i18n.t('common.perPage')}
-        class="h-8 w-[78px] shrink-0"
+        class="h-8 w-[78px] shrink-0 tabular-nums"
         value={String(pagination.pageSize ?? 10)}
         onchange={(e) => {
           const size = Number((e.currentTarget as HTMLSelectElement).value);
@@ -1787,6 +1787,7 @@
               <PaginationUI.Ellipsis />
             {:else}
               <PaginationUI.Link
+                class="tabular-nums"
                 isActive={page === currentPage}
                 onclick={() => goToPage(page as number)}
               >

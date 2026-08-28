@@ -1,6 +1,7 @@
 <script lang="ts">
   import * as AlertDialog from './ui/alert-dialog/index.js';
   import { Button } from './ui/button/index.js';
+  import { Loader2 } from '@lucide/svelte';
   import { useTranslation } from '@svadmin/core/i18n';
 
   const i18n = useTranslation();
@@ -61,6 +62,9 @@
       <AlertDialog.Action>
         {#snippet child({ props })}
           <Button variant={variantMap[variant as keyof typeof variantMap]} {...props} disabled={confirming} onclick={handleConfirm}>
+            {#if confirming}
+              <Loader2 class="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+            {/if}
             {resolvedConfirmText}
           </Button>
         {/snippet}

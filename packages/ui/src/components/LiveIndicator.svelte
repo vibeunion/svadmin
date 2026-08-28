@@ -38,11 +38,17 @@
 
 {#key status}
   <div transition:fade={{ duration: 200 }}>
-    <Badge variant={cfg.variant} class="gap-1.5 select-none" title={cfg.label}>
-      <span class="relative flex h-2 w-2">
+    <Badge
+      variant={cfg.variant}
+      class="gap-1.5 select-none"
+      title={cfg.label}
+      role="status"
+      aria-label={`Connection status: ${cfg.label}${resource ? ` for ${resource}` : ''}`}
+    >
+      <span class="relative flex h-2 w-2" aria-hidden="true">
         <span class="{cfg.dotClass} rounded-full h-2 w-2"></span>
         {#if status === 'connected'}
-          <span class="absolute inset-0 rounded-full {cfg.dotClass} opacity-40 animate-ping"></span>
+          <span class="absolute inset-0 rounded-full {cfg.dotClass} opacity-40 animate-ping motion-reduce:animate-none"></span>
         {/if}
       </span>
       <span class="text-[0.6875rem] font-semibold uppercase tracking-wide">{cfg.label}</span>
@@ -55,7 +61,7 @@
         <span class="text-[0.625rem] opacity-70">
           {lastEvent.type}
           {#if timeSinceEvent !== null && timeSinceEvent < 60}
-            <span class="opacity-60">{timeSinceEvent}s ago</span>
+            <span class="opacity-60 tabular-nums">{timeSinceEvent}s ago</span>
           {/if}
         </span>
       {/if}

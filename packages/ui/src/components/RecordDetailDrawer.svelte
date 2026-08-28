@@ -61,7 +61,7 @@
   data-svadmin-record-detail
 >
   {#if permissionPending || (canReadRecord && query.isLoading)}
-    <div class="divide-y divide-border/60" aria-label={i18n.t('common.loading')}>
+    <div class="divide-y divide-border/60" role="status" aria-live="polite" aria-label={i18n.t('common.loading')} aria-busy="true">
       {#each showFields.slice(0, 6) as field (field.key)}
         <div class="grid gap-2 py-4 sm:grid-cols-[minmax(8rem,1fr)_2fr] sm:gap-6">
           <Skeleton class="h-4 w-24" />
@@ -104,7 +104,7 @@
     {#if canReadRecord && recordId != null && resource.canShow !== false}
       <CanAccess resource={resourceName} action="show" params={{ id: recordId }}>
         <Button variant="outline" onclick={() => navigateTo('show')}>
-          <Eye class="h-4 w-4" data-icon="inline-start" />
+          <Eye class="h-4 w-4" data-icon="inline-start" aria-hidden="true" />
           {i18n.t('common.openFullDetail')}
         </Button>
       </CanAccess>
@@ -112,7 +112,7 @@
     {#if canReadRecord && recordId != null && resource.canEdit !== false}
       <CanAccess resource={resourceName} action="edit" params={{ id: recordId }}>
         <Button onclick={() => navigateTo('edit')}>
-          <Pencil class="h-4 w-4" data-icon="inline-start" />
+          <Pencil class="h-4 w-4" data-icon="inline-start" aria-hidden="true" />
           {i18n.t('common.edit')}
         </Button>
       </CanAccess>

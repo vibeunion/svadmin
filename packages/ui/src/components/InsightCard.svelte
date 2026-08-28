@@ -95,25 +95,36 @@ ${scopedContext}`;
   }
 </script>
 
-<div class="rounded-xl border bg-card text-card-foreground shadow-sm flex flex-col {className}">
+<div
+  class="rounded-xl border bg-card text-card-foreground shadow-sm flex flex-col {className}"
+  role="region"
+  aria-label={title}
+>
   <div class="flex items-center justify-between p-4 border-b">
     <div class="flex items-center gap-2 font-medium">
-      <Sparkles class="h-4 w-4 text-amber-500" />
+      <Sparkles class="h-4 w-4 text-amber-500" aria-hidden="true" />
       {title}
     </div>
-    <Button variant="ghost" size="icon-sm" class="h-6 w-6" onclick={getInsights} disabled={isPredicting || !provider}>
-      <RefreshCcw class="h-3 w-3 {isPredicting ? 'animate-spin' : ''}" />
+    <Button
+      variant="ghost"
+      size="icon-sm"
+      class="h-6 w-6"
+      onclick={getInsights}
+      disabled={isPredicting || !provider}
+      aria-label="Refresh AI Insights"
+    >
+      <RefreshCcw class="h-3 w-3 {isPredicting ? 'animate-spin' : ''}" aria-hidden="true" />
     </Button>
   </div>
   
-  <div class="p-4 flex-1">
+  <div class="p-4 flex-1" role="status" aria-live="polite" aria-busy={isPredicting}>
     {#if !provider}
       <div class="text-sm text-muted-foreground italic flex items-center justify-center h-full">
         ChatProvider not configured.
       </div>
     {:else if isPredicting && !insightText}
       <div class="flex items-center justify-center gap-2 text-sm text-muted-foreground h-full py-4">
-        <Loader2 class="h-4 w-4 animate-spin" /> Analyzing data...
+        <Loader2 class="h-4 w-4 animate-spin" aria-hidden="true" /> Analyzing data...
       </div>
     {:else if !insightText}
       <div class="text-sm text-muted-foreground italic flex items-center justify-center h-full">

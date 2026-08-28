@@ -46,7 +46,7 @@
   <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
     {#if showSearch}
       <div class="relative min-w-0 flex-1">
-        <Search class={cn('pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground', isCompact ? 'size-3.5' : 'size-4')} />
+        <Search class={cn('pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground', isCompact ? 'size-3.5' : 'size-4')} aria-hidden="true" />
         <Input
           bind:value={query}
           {placeholder}
@@ -62,7 +62,7 @@
             title={clearLabel}
             onclick={() => query = ''}
           >
-            <X class="size-3.5" />
+            <X class="size-3.5" aria-hidden="true" />
           </Button>
         {/if}
       </div>
@@ -81,17 +81,17 @@
         aria-expanded={advancedOpen}
         aria-controls={advancedPanelId}
       >
-        <SlidersHorizontal class="size-3.5" />
+        <SlidersHorizontal class="size-3.5" aria-hidden="true" />
         <span>{advancedLabel}</span>
         {#if activeFilterCount > 0}
-          <Badge variant="secondary" class="ml-0.5 h-4 min-w-4 px-1 text-[10px] leading-none font-semibold">
+          <Badge variant="secondary" class="ml-0.5 h-4 min-w-4 px-1 text-[10px] leading-none font-semibold tabular-nums">
             {activeFilterCount}
           </Badge>
         {/if}
         {#if advancedOpen}
-          <ChevronUp class="size-3 text-muted-foreground ml-0.5" />
+          <ChevronUp class="size-3 text-muted-foreground ml-0.5" aria-hidden="true" />
         {:else}
-          <ChevronDown class="size-3 text-muted-foreground ml-0.5" />
+          <ChevronDown class="size-3 text-muted-foreground ml-0.5" aria-hidden="true" />
         {/if}
       </Button>
     {/if}
@@ -102,7 +102,7 @@
     {/if}
   </div>
   {#if advanced && advancedOpen}
-    <div id={advancedPanelId} class="svadmin-filter-toolbar-advanced rounded-lg border border-border/60 bg-muted/20 p-3" aria-hidden="false">
+    <div id={advancedPanelId} role="region" aria-label={advancedLabel} class="svadmin-filter-toolbar-advanced rounded-lg border border-border/60 bg-muted/20 p-3" aria-hidden="false">
       {@render advanced()}
     </div>
   {/if}

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { useUpdate } from '@svadmin/core';
   import type { FieldDefinition } from '@svadmin/core';
+  import { Loader2 } from '@lucide/svelte';
 
   interface Props {
     resourceName: string;
@@ -19,6 +20,7 @@
   let saving = $state(false);
   let savePending = false;
   const displayValue = $derived(String(value ?? ''));
+  const fieldLabel = $derived(field.label || field.key);
 
   const { mutation } = useUpdate({ get resource() { return resourceName; } });
 
@@ -75,24 +77,33 @@
 </script>
 
 {#if editing}
-  <input
-    bind:this={inputRef}
-    type={field.type === 'number' ? 'number' : 'text'}
-    bind:value={editValue}
-    onkeydown={handleKeydown}
-    onblur={handleBlur}
-    disabled={saving}
-    class="h-7 w-full rounded border bg-background px-2 text-sm outline-none ring-1 ring-primary/50 focus:ring-2 focus:ring-primary transition-all"
-  />
+  <div class="relative flex items-center w-full">
+    <input
+      bind:this={inputRef}
+      type={field.type === 'number' ? 'number' : 'text'}
+      bind:value={editValue}
+      onkeydown={handleKeydown}
+      onblur={handleBlur}
+      disabled={saving}
+      aria-label={`Edit ${fieldLabel}`}
+      class="h-7 w-full rounded border bg-background px-2 text-sm outline-none ring-1 ring-primary/50 focus:ring-2 focus:ring-primary transition-all disabled:opacity-60"
+    />
+    {#if saving}
+      <span class="absolute right-2 flex items-center pointer-events-none" role="status" aria-label="Saving...">
+        <Loader2 class="size-3.5 animate-spin text-muted-foreground" aria-hidden="true" />
+      </span>
+    {/if}
+  </div>
 {:else}
   <span
-    class="inline-block cursor-pointer rounded px-1 py-0.5 -mx-1 hover:bg-accent/50 transition-colors"
+    class="inline-flex items-center cursor-pointer rounded px-1.5 py-0.5 -mx-1 text-sm text-foreground hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 transition-colors"
     ondblclick={startEdit}
-    title="Double-click to edit"
+    title={`Double-click or press Enter to edit ${fieldLabel}`}
     role="button"
     tabindex="0"
-    onkeydown={(e) => { if (e.key === 'Enter' || e.key === 'F2') startEdit(); }}
+    aria-label={`Edit ${fieldLabel}: ${value != null && value !== '' ? String(value) : 'empty'}`}
+    onkeydown={(e) => { if (e.key === 'Enter' || e.key === 'F2' || e.key === ' ') { e.preventDefault(); startEdit(); } }}
   >
-    {value ?? '—'}
+    {value != null && value !== '' ? String(value) : '—'}
   </span>
 {/if}

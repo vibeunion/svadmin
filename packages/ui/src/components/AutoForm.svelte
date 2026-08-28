@@ -198,14 +198,14 @@
         tooltip={i18n.t('common.back')}
         onclick={() => guardNavigate(() => navigation.list(resourceName))}
       >
-        <ArrowLeft class="h-5 w-5" />
+        <ArrowLeft class="h-5 w-5" aria-hidden="true" />
       </TooltipButton>
       <h1 class="text-xl font-semibold text-foreground">{pageTitle}</h1>
       {#if headerContent}
         {@render headerContent()}
       {/if}
       {#if form.isTainted()}
-        <Badge variant="outline" class="border-warning/30 bg-warning/10 text-warning-foreground">{i18n.t('common.unsaved')}</Badge>
+        <Badge variant="outline" role="status" aria-live="polite" class="border-warning/30 bg-warning/10 text-warning-foreground">{i18n.t('common.unsaved')}</Badge>
       {/if}
     </div>
   {/if}
@@ -226,7 +226,7 @@
       {#if submitError}
         <div transition:slide={{ duration: 300, axis: 'y' }} class="svadmin-shake">
           <Alert.Root variant="destructive">
-            <AlertCircle class="h-4 w-4" />
+            <AlertCircle class="h-4 w-4" aria-hidden="true" />
             <Alert.Description>{submitError}</Alert.Description>
           </Alert.Root>
         </div>
@@ -301,9 +301,9 @@
         {:else if !isReadonly}
           <Button type="submit" size={isCompact ? 'sm' : 'default'} disabled={form.submitting}>
             {#if form.submitting}
-              <Loader2 class="h-4 w-4 animate-spin" data-icon="inline-start" />
+              <Loader2 class="h-4 w-4 animate-spin" data-icon="inline-start" aria-hidden="true" />
             {:else}
-              <Save class="h-4 w-4" data-icon="inline-start" />
+              <Save class="h-4 w-4" data-icon="inline-start" aria-hidden="true" />
             {/if}
             {i18n.t('common.save')}
           </Button>

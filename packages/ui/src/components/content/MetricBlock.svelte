@@ -30,15 +30,15 @@
   };
 </script>
 
-<div data-svadmin-metric-card class={'min-w-0 rounded-lg border border-border bg-card p-4 shadow-sm ' + className}>
+<div data-svadmin-metric-card role="region" aria-label={label} class={'min-w-0 rounded-lg border border-border bg-card p-4 shadow-sm ' + className}>
   <div class="flex items-start justify-between gap-3">
     <p class="text-sm text-muted-foreground">{label}</p>
-    {#if icon}<span class="text-muted-foreground">{@render icon()}</span>{/if}
+    {#if icon}<span class="text-muted-foreground" aria-hidden="true">{@render icon()}</span>{/if}
   </div>
   {#if loading}
     <Skeleton class="mt-3 h-8 w-24" />
   {:else}
-    <p class="mt-2 truncate text-2xl font-semibold tracking-normal text-foreground">{value}</p>
-    {#if detail || trend}<div class="mt-2 flex flex-wrap gap-2 text-xs">{#if trend}<span class={'font-medium ' + trendClass[trendTone]}>{trend}</span>{/if}{#if detail}<span class="text-muted-foreground">{detail}</span>{/if}</div>{/if}
+    <p class="mt-2 truncate text-2xl font-semibold tracking-normal text-foreground tabular-nums">{value}</p>
+    {#if detail || trend}<div class="mt-2 flex flex-wrap gap-2 text-xs">{#if trend}<span class={'font-medium tabular-nums ' + trendClass[trendTone]}>{trend}</span>{/if}{#if detail}<span class="text-muted-foreground">{detail}</span>{/if}</div>{/if}
   {/if}
 </div>

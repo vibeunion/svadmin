@@ -156,6 +156,10 @@ Use Inter or the consumer's compatible system sans. Product pages use compact
 headings and normal letter spacing. Uppercase table labels, negative tracking,
 and oversized dashboard numerals are not defaults.
 
+- **Tabular Figures**: All data tables, numeric metrics, counters, and
+  timestamps use `tabular-nums` (monospaced figures) to guarantee stable column
+  alignment and avoid visual jitter during live updates.
+
 ## Layout
 
 Use an 8px spacing rhythm with 4px for tight internal alignment. Pages are
@@ -211,6 +215,12 @@ Transitions provide clear state confirmation without delaying user action:
   ring and a 2px offset.
 - **Accessibility**: All transitions and keyframe animations collapse to 0.01ms
   when `prefers-reduced-motion: reduce` is active.
+- **Accessible Authentication & OTP**: One-time passwords, 2FA codes, and
+  security tokens must support multi-digit paste distribution, keyboard navigation,
+  and `autocomplete="one-time-code"` without cognitive barriers (WCAG 2.2 AA).
+- **Destructive Action Defenses**: Irreversible operations (such as deleting
+  records or revoking keys) require confirmation with clear loading states and
+  accidental submission defense.
 
 ### Reference responsibilities
 

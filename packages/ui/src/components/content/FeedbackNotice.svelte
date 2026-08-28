@@ -47,11 +47,11 @@
 >
   <div class="flex min-w-0 flex-1 items-start gap-2.5">
     {#if tone === 'danger'}
-      <CircleAlert class="mt-0.5 size-4 shrink-0" />
+      <CircleAlert class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
     {:else if tone === 'warning'}
-      <TriangleAlert class="mt-0.5 size-4 shrink-0" />
+      <TriangleAlert class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
     {:else}
-      <Info class="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+      <Info class="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
     {/if}
     <p class="min-w-0 leading-5">{message}</p>
   </div>
