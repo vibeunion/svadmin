@@ -149,6 +149,10 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'GanttChart', uiComponent: 'GanttChart.svelte', liteComponent: 'LiteGanttChart.svelte', category: 'widgets', status: 'exact', strategy: '项目甘特图排期进度表' },
   { name: 'CanvasAnnotation', uiComponent: 'CanvasAnnotation.svelte', liteComponent: 'LiteCanvasAnnotation.svelte', category: 'advanced', status: 'exact', strategy: '底图展示与交互式标注画板' },
   { name: 'SignaturePad', uiComponent: 'SignaturePad.svelte', liteComponent: 'LiteSignaturePad.svelte', category: 'fields', status: 'exact', strategy: '电子签名画板与文件上传降级' },
+  { name: 'PdfDocumentViewer', uiComponent: 'PdfDocumentViewer.svelte', liteComponent: 'LitePdfDocumentViewer.svelte', category: 'pages', status: 'exact', strategy: '嵌入式 PDF 文档与电子盖章批注' },
+  { name: 'SpreadsheetView', uiComponent: 'SpreadsheetView.svelte', liteComponent: 'LiteSpreadsheetView.svelte', category: 'advanced', status: 'exact', strategy: '多页签在线电子表格与公式计算' },
+  { name: 'DecisionTable', uiComponent: 'DecisionTable.svelte', liteComponent: 'LiteDecisionTable.svelte', category: 'advanced', status: 'exact', strategy: '业务决策表与规则执行矩阵' },
+  { name: 'OfflineSyncBanner', uiComponent: 'OfflineSyncBanner.svelte', liteComponent: 'LiteOfflineSyncBanner.svelte', category: 'widgets', status: 'exact', strategy: '离线状态感知与变更队列同步栏' },
 
   // ─── SPA Only (No SSR counterpart needed) ───────────────────────────────
   { name: 'ThemeToggle', uiComponent: 'ThemeToggle.svelte', category: 'layout', status: 'spa_only', strategy: '免适配 (Lite 为固定 Slate/Indigo 配色)', note: 'IE11 不支持 CSS 变量与客户端主题即时切换' },

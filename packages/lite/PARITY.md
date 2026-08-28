@@ -1,7 +1,7 @@
 # @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵
 
-> 自动生成时间：`2026-08-28T23:35:05.613Z`
-> 总体适配覆盖率：**100%**（99/99 组件）
+> 自动生成时间：`2026-08-28T23:44:19.132Z`
+> 总体适配覆盖率：**100%**（103/103 组件）
 
 ## 进度总览
 
@@ -9,10 +9,10 @@
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
 | **fields** | 33 | 29 | 3 | 1 | 0 | **100%** |
 | **buttons** | 10 | 10 | 0 | 0 | 0 | **100%** |
-| **pages** | 11 | 11 | 0 | 0 | 0 | **100%** |
+| **pages** | 12 | 12 | 0 | 0 | 0 | **100%** |
 | **layout** | 9 | 8 | 0 | 1 | 0 | **100%** |
-| **widgets** | 8 | 5 | 3 | 0 | 0 | **100%** |
-| **advanced** | 28 | 22 | 4 | 2 | 0 | **100%** |
+| **widgets** | 9 | 6 | 3 | 0 | 0 | **100%** |
+| **advanced** | 30 | 24 | 4 | 2 | 0 | **100%** |
 
 ---
 
@@ -86,6 +86,7 @@
 | `ProfilePage` | `pages/LiteProfilePage.svelte` | ✅ 1:1 对齐 | 个人资料与安全选项卡 |
 | `MasterDetailView` | `LiteMasterDetailView.svelte` | ✅ 1:1 对齐 | 主从数据联动视图与 URL 同步 |
 | `PrintableBill` | `LitePrintableBill.svelte` | ✅ 1:1 对齐 | 受控单据凭证 A4 打印排版 |
+| `PdfDocumentViewer` | `LitePdfDocumentViewer.svelte` | ✅ 1:1 对齐 | 嵌入式 PDF 文档与电子盖章批注 |
 
 ### LAYOUT
 
@@ -113,6 +114,7 @@
 | `PieChart` | `widgets/LitePieChart.svelte` | ⚡ 语义降级 | 降级为占比条与结构化表格 |
 | `PresenceAvatarGroup` | `LitePresenceAvatarGroup.svelte` | ✅ 1:1 对齐 | 多人在线协同感知状态 |
 | `GanttChart` | `LiteGanttChart.svelte` | ✅ 1:1 对齐 | 项目甘特图排期进度表 |
+| `OfflineSyncBanner` | `LiteOfflineSyncBanner.svelte` | ✅ 1:1 对齐 | 离线状态感知与变更队列同步栏 |
 
 ### ADVANCED
 
@@ -144,6 +146,8 @@
 | `KanbanBoard` | `LiteKanbanBoard.svelte` | ✅ 1:1 对齐 | 多列任务看板与泳道视图 |
 | `PivotTable` | `LitePivotTable.svelte` | ✅ 1:1 对齐 | 多维交叉透视分析表 |
 | `CanvasAnnotation` | `LiteCanvasAnnotation.svelte` | ✅ 1:1 对齐 | 底图展示与交互式标注画板 |
+| `SpreadsheetView` | `LiteSpreadsheetView.svelte` | ✅ 1:1 对齐 | 多页签在线电子表格与公式计算 |
+| `DecisionTable` | `LiteDecisionTable.svelte` | ✅ 1:1 对齐 | 业务决策表与规则执行矩阵 |
 | `DevTools` | — | 🚫 免适配 | 免适配 (SPA 调试器) |
 | `CopilotPanel` | — | 🚫 免适配 | 免适配 (AI Copilot 客户端浮窗) |
 

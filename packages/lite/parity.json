@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-08-28T23:35:05.613Z",
-  "totalComponents": 99,
-  "adaptedCount": 85,
+  "timestamp": "2026-08-28T23:44:19.132Z",
+  "totalComponents": 103,
+  "adaptedCount": 89,
   "fallbackCount": 10,
   "spaOnlyCount": 4,
   "missingCount": 0,
@@ -27,8 +27,8 @@
     },
     "pages": {
       "category": "pages",
-      "total": 11,
-      "adapted": 11,
+      "total": 12,
+      "adapted": 12,
       "fallback": 0,
       "spaOnly": 0,
       "missing": 0,
@@ -45,8 +45,8 @@
     },
     "widgets": {
       "category": "widgets",
-      "total": 8,
-      "adapted": 5,
+      "total": 9,
+      "adapted": 6,
       "fallback": 3,
       "spaOnly": 0,
       "missing": 0,
@@ -54,8 +54,8 @@
     },
     "advanced": {
       "category": "advanced",
-      "total": 28,
-      "adapted": 22,
+      "total": 30,
+      "adapted": 24,
       "fallback": 4,
       "spaOnly": 2,
       "missing": 0,
@@ -822,6 +822,38 @@
       "category": "fields",
       "status": "exact",
       "strategy": "电子签名画板与文件上传降级"
+    },
+    {
+      "name": "PdfDocumentViewer",
+      "uiComponent": "PdfDocumentViewer.svelte",
+      "liteComponent": "LitePdfDocumentViewer.svelte",
+      "category": "pages",
+      "status": "exact",
+      "strategy": "嵌入式 PDF 文档与电子盖章批注"
+    },
+    {
+      "name": "SpreadsheetView",
+      "uiComponent": "SpreadsheetView.svelte",
+      "liteComponent": "LiteSpreadsheetView.svelte",
+      "category": "advanced",
+      "status": "exact",
+      "strategy": "多页签在线电子表格与公式计算"
+    },
+    {
+      "name": "DecisionTable",
+      "uiComponent": "DecisionTable.svelte",
+      "liteComponent": "LiteDecisionTable.svelte",
+      "category": "advanced",
+      "status": "exact",
+      "strategy": "业务决策表与规则执行矩阵"
+    },
+    {
+      "name": "OfflineSyncBanner",
+      "uiComponent": "OfflineSyncBanner.svelte",
+      "liteComponent": "LiteOfflineSyncBanner.svelte",
+      "category": "widgets",
+      "status": "exact",
+      "strategy": "离线状态感知与变更队列同步栏"
     },
     {
       "name": "ThemeToggle",

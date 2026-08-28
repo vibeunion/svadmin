@@ -96,6 +96,10 @@ export { default as LiteGanttChart } from './components/LiteGanttChart.svelte';
 export { default as LiteCanvasAnnotation } from './components/LiteCanvasAnnotation.svelte';
 export type { AnnotationItem } from './components/LiteCanvasAnnotation.svelte';
 export { default as LiteSignaturePad } from './components/LiteSignaturePad.svelte';
+export { default as LitePdfDocumentViewer } from './components/LitePdfDocumentViewer.svelte';
+export { default as LiteSpreadsheetView } from './components/LiteSpreadsheetView.svelte';
+export { default as LiteDecisionTable } from './components/LiteDecisionTable.svelte';
+export { default as LiteOfflineSyncBanner } from './components/LiteOfflineSyncBanner.svelte';
 
 // Compatibility fallbacks for browser-only and third-party UI capabilities.
 export * from './components/compatibility/index';

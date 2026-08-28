@@ -35,6 +35,10 @@ import LiteMultiTabKeepAlive from './LiteMultiTabKeepAlive.svelte';
 import LiteGanttChart from './LiteGanttChart.svelte';
 import LiteCanvasAnnotation from './LiteCanvasAnnotation.svelte';
 import LiteSignaturePad from './LiteSignaturePad.svelte';
+import LitePdfDocumentViewer from './LitePdfDocumentViewer.svelte';
+import LiteSpreadsheetView from './LiteSpreadsheetView.svelte';
+import LiteDecisionTable from './LiteDecisionTable.svelte';
+import LiteOfflineSyncBanner from './LiteOfflineSyncBanner.svelte';
 
 describe('Lite Enterprise Components SSR rendering', () => {
   it('renders LiteTreeSelect in show and edit mode', () => {
@@ -424,5 +428,28 @@ describe('Lite Enterprise Components SSR rendering', () => {
     });
     expect(sigView.container.textContent).toContain('Electronic Signature');
     expect(sigView.container.querySelector('img')).toBeTruthy();
+
+    const pdfView = render(LitePdfDocumentViewer, {
+      fileName: 'Doc.pdf',
+      totalPages: 3,
+    });
+    expect(pdfView.container.textContent).toContain('Doc.pdf');
+    expect(pdfView.container.textContent).toContain('Page 1 of 3');
+
+    const sheetView = render(LiteSpreadsheetView, {
+      sheets: [{ id: 's1', name: 'Lite Sheet', rows: 2, cols: 2, cells: { A1: 'Data' } }],
+    });
+    expect(sheetView.container.textContent).toContain('Lite Sheet');
+
+    const decView = render(LiteDecisionTable, {
+      title: 'Lite Policy',
+      rules: [{ id: 'r1', values: { tier: 'A', discount: '5%' } }],
+    });
+    expect(decView.container.textContent).toContain('Lite Policy');
+
+    const syncView = render(LiteOfflineSyncBanner, {
+      isOnline: false,
+    });
+    expect(syncView.container.textContent).toContain('Offline Connection');
   });
 });

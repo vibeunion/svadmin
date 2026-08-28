@@ -112,6 +112,14 @@ export type { GanttTask } from './components/GanttChart.svelte';
 export { default as CanvasAnnotation } from './components/CanvasAnnotation.svelte';
 export type { AnnotationTool } from './components/CanvasAnnotation.svelte';
 export { default as SignaturePad } from './components/SignaturePad.svelte';
+export { default as PdfDocumentViewer } from './components/PdfDocumentViewer.svelte';
+export type { DocumentStamp } from './components/PdfDocumentViewer.svelte';
+export { default as SpreadsheetView } from './components/SpreadsheetView.svelte';
+export type { SheetData } from './components/SpreadsheetView.svelte';
+export { default as DecisionTable } from './components/DecisionTable.svelte';
+export type { DecisionColumn, DecisionRule } from './components/DecisionTable.svelte';
+export { default as OfflineSyncBanner } from './components/OfflineSyncBanner.svelte';
+export type { PendingMutation } from './components/OfflineSyncBanner.svelte';
 
 export { default as InfiniteList } from './components/InfiniteList.svelte';
 export { default as ComboboxField } from './components/ComboboxField.svelte';
