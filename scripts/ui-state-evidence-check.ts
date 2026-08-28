@@ -64,6 +64,7 @@ const allowedImageOwners = new Set([
   'packages/ui/src/components/ui/avatar/avatar.svelte',
   'packages/ui/src/components/content/MediaThumbnail.svelte',
   'packages/lite/src/components/LiteMediaThumbnail.svelte',
+  'packages/lite/src/components/fields/LiteAvatarField.svelte',
   'packages/lite/src/components/compatibility/LiteVisualFallback.svelte',
 ]);
 const mediaFiles = [
@@ -85,6 +86,7 @@ const fixedFormatOwners = new Set([
   'packages/ui/src/components/content/WorkspaceInspector.svelte',
   'packages/ui/src/components/account/GetStartedPage.svelte',
   'packages/lite/src/components/LiteChatDialog.svelte',
+  'packages/lite/src/components/LiteTransfer.svelte',
   'packages/lite/src/components/fields/LiteMarkdownField.svelte',
   'packages/lite/src/components/fields/LiteMultiSelectField.svelte',
   'packages/lite/src/components/fields/LiteRichTextField.svelte',
