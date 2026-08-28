@@ -269,7 +269,7 @@
   {:else if field.type === 'tree-select' || field.type === 'treeselect'}
     <TreeSelect
       options={(field.treeOptions ?? field.options ?? []) as TreeSelectOption[]}
-      value={value as any}
+      value={value as string | number | (string | number)[] | undefined}
       multiple={field.multiple}
       disabled={disabled}
       placeholder={i18n.t('field.selectPlaceholder')}
@@ -289,7 +289,7 @@
 
   {:else if field.type === 'transfer'}
     <Transfer
-      dataSource={(field.transferData ?? field.options?.map(o => ({ key: o.value, title: o.label })) ?? []) as TransferItem[]}
+      dataSource={(field.transferData ?? field.options?.map((o: { label: string; value: string | number }) => ({ key: o.value, title: o.label })) ?? []) as TransferItem[]}
       targetKeys={(value as (string | number)[]) ?? []}
       disabled={disabled}
       onchange={(next) => onchange(next)}

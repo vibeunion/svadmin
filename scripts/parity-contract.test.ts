@@ -11,7 +11,7 @@ describe('UI/Lite Parity Tracking Contract', () => {
     expect(report.overallCoveragePercentage).toBe(100);
 
     // Verify all categories have 100% coverage (adapted + fallback + spaOnly)
-    for (const [categoryName, categorySummary] of Object.entries(report.categories)) {
+    for (const [, categorySummary] of Object.entries(report.categories)) {
       expect(categorySummary.missing).toBe(0);
       expect(categorySummary.percentage).toBe(100);
     }

@@ -204,32 +204,32 @@
       <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 rounded-md bg-muted/20 p-2 border border-border/40">
         <!-- Field select -->
         <div class="w-36 shrink-0">
-          <Select.Root
+          <Select
             class="h-8 text-xs"
             value={rule.field}
-            onchange={(e) => {
+            onchange={(e: Event) => {
               rule.field = (e.currentTarget as HTMLSelectElement).value;
             }}
           >
             {#each availableFields as f (f.key)}
               <option value={f.key}>{f.label || f.key}</option>
             {/each}
-          </Select.Root>
+          </Select>
         </div>
 
         <!-- Operator select -->
         <div class="w-36 shrink-0">
-          <Select.Root
+          <Select
             class="h-8 text-xs"
             value={rule.operator}
-            onchange={(e) => {
+            onchange={(e: Event) => {
               rule.operator = (e.currentTarget as HTMLSelectElement).value as CrudOperator;
             }}
           >
             {#each operatorOptions as op (op.value)}
               <option value={op.value}>{op.label}</option>
             {/each}
-          </Select.Root>
+          </Select>
         </div>
 
         <!-- Value input -->
@@ -239,10 +239,10 @@
               无需填值
             </div>
           {:else if fieldDef?.type === 'select' && fieldDef.options}
-            <Select.Root
+            <Select
               class="h-8 text-xs"
               value={String(rule.value ?? '')}
-              onchange={(e) => {
+              onchange={(e: Event) => {
                 rule.value = (e.currentTarget as HTMLSelectElement).value;
               }}
             >
@@ -250,12 +250,12 @@
               {#each fieldDef.options as opt (opt.value)}
                 <option value={String(opt.value)}>{opt.label}</option>
               {/each}
-            </Select.Root>
+            </Select>
           {:else if fieldDef?.type === 'boolean'}
-            <Select.Root
+            <Select
               class="h-8 text-xs"
               value={String(rule.value ?? '')}
-              onchange={(e) => {
+              onchange={(e: Event) => {
                 const val = (e.currentTarget as HTMLSelectElement).value;
                 rule.value = val === 'true' ? true : val === 'false' ? false : '';
               }}
@@ -263,14 +263,14 @@
               <option value="">{i18n.t('field.selectPlaceholder', undefined) ?? '请选择'}</option>
               <option value="true">{i18n.t('common.yes', undefined) ?? '是 (true)'}</option>
               <option value="false">{i18n.t('common.no', undefined) ?? '否 (false)'}</option>
-            </Select.Root>
+            </Select>
           {:else}
             <Input
               type={fieldDef?.type === 'number' ? 'number' : 'text'}
               class="h-8 text-xs"
               placeholder="输入筛选值..."
               value={String(rule.value ?? '')}
-              oninput={(e) => {
+              oninput={(e: Event) => {
                 const val = (e.currentTarget as HTMLInputElement).value;
                 rule.value = fieldDef?.type === 'number' && val !== '' ? Number(val) : val;
               }}

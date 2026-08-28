@@ -221,9 +221,9 @@ export function generateMarkdownReport(report: ParityReport): string {
 }
 
 export function printCliDashboard(report: ParityReport): void {
-  console.log('\n===============================================================');
-  console.log('       @svadmin/ui ↔ @svadmin/lite 组件对齐进度看板');
-  console.log('===============================================================');
+  console.info('\n===============================================================');
+  console.info('       @svadmin/ui ↔ @svadmin/lite 组件对齐进度看板');
+  console.info('===============================================================');
 
   for (const [name, cat] of Object.entries(report.categories)) {
     const barWidth = 14;
@@ -231,16 +231,16 @@ export function printCliDashboard(report: ParityReport): void {
     const bar = '█'.repeat(filled) + '░'.repeat(Math.max(0, barWidth - filled));
     const padName = `[${name}]`.padEnd(14, ' ');
     const countStr = `${cat.adapted + cat.fallback + cat.spaOnly}/${cat.total}`.padStart(6, ' ');
-    console.log(`  ${padName} ${countStr} (${cat.percentage.toFixed(1).padStart(5, ' ')}%)  [${bar}]`);
+    console.info(`  ${padName} ${countStr} (${cat.percentage.toFixed(1).padStart(5, ' ')}%)  [${bar}]`);
   }
 
-  console.log('---------------------------------------------------------------');
-  console.log(`  总体覆盖率: ${report.overallCoveragePercentage}% (${report.adaptedCount + report.fallbackCount + report.spaOnlyCount}/${report.totalComponents})`);
-  console.log(`  - 1:1 对齐: ${report.adaptedCount}`);
-  console.log(`  - 语义降级: ${report.fallbackCount}`);
-  console.log(`  - 免适配(SPA): ${report.spaOnlyCount}`);
-  console.log(`  - 待补齐: ${report.missingCount}`);
-  console.log('===============================================================\n');
+  console.info('---------------------------------------------------------------');
+  console.info(`  总体覆盖率: ${report.overallCoveragePercentage}% (${report.adaptedCount + report.fallbackCount + report.spaOnlyCount}/${report.totalComponents})`);
+  console.info(`  - 1:1 对齐: ${report.adaptedCount}`);
+  console.info(`  - 语义降级: ${report.fallbackCount}`);
+  console.info(`  - 免适配(SPA): ${report.spaOnlyCount}`);
+  console.info(`  - 待补齐: ${report.missingCount}`);
+  console.info('===============================================================\n');
 }
 
 // ─── Main Execution ──────────────────────────────────────────────────────────
@@ -251,7 +251,7 @@ if (import.meta.main) {
   const isCheck = process.argv.includes('--check');
 
   if (isJson) {
-    console.log(JSON.stringify(report, null, 2));
+    console.info(JSON.stringify(report, null, 2));
   } else {
     printCliDashboard(report);
   }
@@ -262,7 +262,7 @@ if (import.meta.main) {
     const jsonPath = resolve(process.cwd(), 'packages/lite/parity.json');
     writeFileSync(mdPath, mdContent, 'utf8');
     writeFileSync(jsonPath, JSON.stringify(report, null, 2), 'utf8');
-    console.log(`[OK] Generated ${mdPath} and ${jsonPath}`);
+    console.info(`[OK] Generated ${mdPath} and ${jsonPath}`);
   }
 
   if (isCheck && report.missingCount > 0) {

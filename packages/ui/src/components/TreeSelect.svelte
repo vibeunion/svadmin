@@ -170,11 +170,13 @@
         node.disabled && 'opacity-50 cursor-not-allowed pointer-events-none'
       )}
       style="padding-left: {level * 16 + 8}px;"
-      onclick={() => handleSelect(node)}
+      onclick={() => {
+        if (selectable) handleSelect(node);
+      }}
       onkeydown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          handleSelect(node);
+          if (selectable) handleSelect(node);
         }
       }}
     >

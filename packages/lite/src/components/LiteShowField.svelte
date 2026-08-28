@@ -47,10 +47,16 @@
   {@const checked = isExplicitBooleanTrue(value)}
   <span class="lite-bool {checked ? "lite-bool-true" : ""}"></span>
   {checked ? "✓ Yes" : "✗ No"}
+{:else if field.type === "avatar"}
+  <LiteAvatarField {field} {value} mode="show" />
+{:else if field.type === "rating"}
+  <LiteRatingField {field} {value} mode="show" />
+{:else if field.type === "code"}
+  <LiteCodeField {field} {value} mode="show" />
 {:else if field.type === "currency"}
-  <LiteCurrencyField {field} {value} mode="show" />
+  <LiteCurrencyField {field} value={value as string | number | null | undefined} mode="show" />
 {:else if field.type === "phone"}
-  <LitePhoneField {field} {value} mode="show" />
+  <LitePhoneField {field} value={value as string | number | null | undefined} mode="show" />
 {:else if field.type === "password"}
   <span>••••••••</span>
 {:else if field.type === "color" && value}

@@ -141,7 +141,7 @@ describe('Lite Fields SSR rendering', () => {
       value: '+15552345678',
       mode: 'edit',
     });
-    expect(editView.container.querySelector('input[type="tel"]')?.value).toBe('+15552345678');
+    expect((editView.container.querySelector('input[type="tel"]') as HTMLInputElement)?.value).toBe('+15552345678');
   });
 
   it('renders LiteRatingField with star symbols in show mode and number input in edit mode', () => {

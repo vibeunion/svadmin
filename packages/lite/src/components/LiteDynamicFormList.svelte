@@ -30,7 +30,6 @@
     addButtonLabel = '+ Add Item',
     minItems = 0,
     maxItems = Infinity,
-    defaultItem,
     disabled = false,
     emptyText = 'No items yet',
     children,
@@ -90,7 +89,7 @@
               })}
             {:else}
               <div class="lite-form-row">
-                {#each Object.entries(item) as [k, v] (k)}
+                {#each Object.entries((item as Record<string, unknown>) ?? {}) as [k, v] (k)}
                   <div class="lite-form-group" style="flex: 1; min-width: 140px;">
                     <label class="lite-label" for="{name}_{idx}_{k}">{k}</label>
                     <input
