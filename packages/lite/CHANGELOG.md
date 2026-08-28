@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.8.0](https://github.com/vibeunion/svadmin/compare/lite-v0.7.0...lite-v0.8.0) (2026-08-28)
+
+
+### 🚀 Features
+
+* **ui,lite,cli:** add enterprise data interaction components and generate command ([41c233e](https://github.com/vibeunion/svadmin/commit/41c233e1a9a313eaf0cc58d66801d90a649b0b34))
+* **ui,lite:** add StepForm, ModalForm, DrawerForm, TableSummary, VersionDiffViewer, VirtualTable ([2c0692b](https://github.com/vibeunion/svadmin/commit/2c0692b184d564c5ffed5bd9183e9ca8146cb07c))
+* **ui,lite:** implement CanvasAnnotation drawing board and SignaturePad electronic signature ([bc92160](https://github.com/vibeunion/svadmin/commit/bc921601c09e48b56a2bae222d5ea9dc273a3a89))
+* **ui,lite:** implement full enterprise parity suite and ssr counterparts ([8365dfe](https://github.com/vibeunion/svadmin/commit/8365dfed1b971feeb1bfcf79f26a821e60001ef2))
+* **ui,lite:** implement MentionsInput, KanbanBoard, PivotTable, MultiTabKeepAlive, GanttChart ([c9242b0](https://github.com/vibeunion/svadmin/commit/c9242b00bf545e3d9956f440e44243a6e61c5e6e))
+* **ui,lite:** implement PdfDocumentViewer, SpreadsheetView, DecisionTable, and OfflineSyncBanner ([62ac055](https://github.com/vibeunion/svadmin/commit/62ac055112a2739fb04391967ac5511a69bb7cab))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.34.2 <0.47.0 to >=0.47.0
+
 ## [0.7.0](https://github.com/vibeunion/svadmin/compare/lite-v0.6.0...lite-v0.7.0) (2026-08-28)
 
 
