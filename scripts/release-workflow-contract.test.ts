@@ -210,6 +210,22 @@ describe('npm trusted-publishing workflow contract', () => {
     expect(releaseWorkflow).not.toContain('uses: ./.github/workflows/ci.yml');
   });
 
+  test('reconciles version deltas before dispatching the immutable release manifest', () => {
+    const releaseWorkflow = readWorkflow('release.yml');
+
+    expect(releaseWorkflow).toContain('id: release-manifest');
+    expect(releaseWorkflow).toContain('ref: ${{ steps.release-ref.outputs.sha }}');
+    expect(releaseWorkflow).toContain('fetch-tags: true');
+    expect(releaseWorkflow).toContain('bun scripts/reconcile-release-manifest.ts');
+    expect(releaseWorkflow).toContain('steps.release-manifest.outputs.release_manifest');
+    expect(releaseWorkflow).toContain('steps.release-manifest.outputs.missing_releases');
+    expect(releaseWorkflow).toContain('github.rest.git.createRef');
+    expect(releaseWorkflow).toContain("existingRef.data.object.type !== 'commit'");
+    expect(releaseWorkflow).toContain('existingRef.data.object.sha !== releaseSha');
+    expect(releaseWorkflow).toContain('github.rest.repos.createRelease');
+    expect(releaseWorkflow).toContain('target_commitish: releaseSha');
+  });
+
   test('synchronizes generated release pull request metadata without exposing the PAT to branch code', () => {
     const releaseWorkflow = readWorkflow('release.yml');
 
