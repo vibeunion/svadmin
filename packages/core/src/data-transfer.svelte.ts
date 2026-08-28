@@ -4,6 +4,7 @@ import type { Sort, Filter, BaseRecord } from './types';
 import { downloadData } from './export-format';
 import type { ExportFormat } from './export-format';
 import { parseCSV } from './helpers-pure';
+export { parseCSV } from './helpers-pure';
 export { downloadData, toCsv, toJson, toXlsx, escapeCsvField } from './export-format';
 export type { ExportFormat } from './export-format';
 

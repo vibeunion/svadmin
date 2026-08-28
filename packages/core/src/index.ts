@@ -156,7 +156,7 @@ export type { UseCanOptions, UseCanResult } from './useCan';
 export { createCaslAccessControl } from './adapters/casl';
 export { createCasbinAccessControl } from './adapters/casbin';
 export type { CasbinAdapterOptions } from './adapters/casbin';
-export { useExport, useImport, downloadData } from './data-transfer.svelte';
+export { useExport, useImport, downloadData, toCsv, toJson, toXlsx, parseCSV } from './data-transfer.svelte';
 export type { UseExportOptions, UseImportOptions, ExportFormat } from './data-transfer.svelte';
 export {
   useLogin, useLogout,

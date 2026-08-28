@@ -122,6 +122,13 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'AutoSaveIndicator', uiComponent: 'AutoSaveIndicator.svelte', liteComponent: 'advanced/LiteAutoSaveIndicator.svelte', category: 'advanced', status: 'fallback', strategy: '服务端保存时间戳展示' },
   { name: 'Toast', uiComponent: 'Toast.svelte', liteComponent: 'advanced/LiteToast.svelte', category: 'advanced', status: 'fallback', strategy: '降级为页面顶部 Alert 通知条' },
   { name: 'UndoableNotification', uiComponent: 'UndoableNotification.svelte', liteComponent: 'advanced/LiteUndoableNotification.svelte', category: 'advanced', status: 'fallback', strategy: '降级为带撤销表单的通知条' },
+  { name: 'Watermark', uiComponent: 'Watermark.svelte', liteComponent: 'LiteWatermark.svelte', category: 'advanced', status: 'exact', strategy: '纯 CSS / SVG 矢量背景水印' },
+  { name: 'ColumnSettings', uiComponent: 'ColumnSettings.svelte', liteComponent: 'LiteColumnSettings.svelte', category: 'advanced', status: 'exact', strategy: '原生多选表单与查询参数列过滤' },
+  { name: 'ImportWizard', uiComponent: 'ImportWizard.svelte', liteComponent: 'LiteImportWizard.svelte', category: 'advanced', status: 'exact', strategy: '原生 Multipart 文件上传与映射提示' },
+  { name: 'ColumnHeaderFilter', uiComponent: 'ColumnHeaderFilter.svelte', liteComponent: 'LiteColumnHeaderFilter.svelte', category: 'advanced', status: 'exact', strategy: '原生 GET 查询参数列过滤链接' },
+  { name: 'TreeTable', uiComponent: 'TreeTable.svelte', liteComponent: 'LiteTreeTable.svelte', category: 'advanced', status: 'exact', strategy: '递归层级缩进表格展示' },
+  { name: 'SensitiveDataMask', uiComponent: 'SensitiveDataMask.svelte', liteComponent: 'LiteSensitiveDataMask.svelte', category: 'advanced', status: 'exact', strategy: '服务端掩码字符展示' },
+  { name: 'ApprovalActionCard', uiComponent: 'ApprovalActionCard.svelte', liteComponent: 'LiteApprovalActionCard.svelte', category: 'advanced', status: 'exact', strategy: '原生审批 POST 表单与意见输入' },
 
   // ─── SPA Only (No SSR counterpart needed) ───────────────────────────────
   { name: 'ThemeToggle', uiComponent: 'ThemeToggle.svelte', category: 'layout', status: 'spa_only', strategy: '免适配 (Lite 为固定 Slate/Indigo 配色)', note: 'IE11 不支持 CSS 变量与客户端主题即时切换' },

@@ -15,6 +15,7 @@ import {
   type ScaffoldManifest,
 } from './project-manifest';
 import { inferCommand } from "./infer-command";
+import { generateCommand } from './generate-command';
 import { liteInitCommand } from './lite-init';
 import {
   doctorProjectPackageJson,
@@ -512,6 +513,8 @@ if (subcommand === 'eject') {
   runCommand(() => guidance(rest));
 } else if (subcommand === 'infer') {
   runCommand(() => inferCommand(rest));
+} else if (subcommand === 'generate' || subcommand === 'gen') {
+  runCommand(() => generateCommand(rest));
 } else if (subcommand === 'lite') {
   if (rest[0] !== 'init') {
     runCommand(() => {

@@ -22,6 +22,7 @@ export interface InferCommandOptions {
   headers?: Record<string, string>;
   method?: string;
   body?: string;
+  fields?: string;
   write?: boolean;
   format?: 'all' | 'resource' | 'typebox' | 'components';
 }
@@ -84,6 +85,10 @@ export function parseInferArguments(args: string[]): InferCommandOptions {
       options.primaryKey = args[++i];
     } else if (arg.startsWith('--primary-key=')) {
       options.primaryKey = arg.slice(14);
+    } else if (arg === '--fields') {
+      options.fields = args[++i];
+    } else if (arg.startsWith('--fields=')) {
+      options.fields = arg.slice(9);
     } else if (arg === '--header' || arg === '-H') {
       const headerLine = args[++i] ?? '';
       const colonIndex = headerLine.indexOf(':');

@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-08-28T21:45:18.582Z",
-  "totalComponents": 72,
-  "adaptedCount": 55,
+  "timestamp": "2026-08-28T22:41:50.619Z",
+  "totalComponents": 79,
+  "adaptedCount": 62,
   "fallbackCount": 13,
   "spaOnlyCount": 4,
   "missingCount": 0,
@@ -54,8 +54,8 @@
     },
     "advanced": {
       "category": "advanced",
-      "total": 11,
-      "adapted": 2,
+      "total": 18,
+      "adapted": 9,
       "fallback": 7,
       "spaOnly": 2,
       "missing": 0,
@@ -606,6 +606,62 @@
       "category": "advanced",
       "status": "fallback",
       "strategy": "降级为带撤销表单的通知条"
+    },
+    {
+      "name": "Watermark",
+      "uiComponent": "Watermark.svelte",
+      "liteComponent": "LiteWatermark.svelte",
+      "category": "advanced",
+      "status": "exact",
+      "strategy": "纯 CSS / SVG 矢量背景水印"
+    },
+    {
+      "name": "ColumnSettings",
+      "uiComponent": "ColumnSettings.svelte",
+      "liteComponent": "LiteColumnSettings.svelte",
+      "category": "advanced",
+      "status": "exact",
+      "strategy": "原生多选表单与查询参数列过滤"
+    },
+    {
+      "name": "ImportWizard",
+      "uiComponent": "ImportWizard.svelte",
+      "liteComponent": "LiteImportWizard.svelte",
+      "category": "advanced",
+      "status": "exact",
+      "strategy": "原生 Multipart 文件上传与映射提示"
+    },
+    {
+      "name": "ColumnHeaderFilter",
+      "uiComponent": "ColumnHeaderFilter.svelte",
+      "liteComponent": "LiteColumnHeaderFilter.svelte",
+      "category": "advanced",
+      "status": "exact",
+      "strategy": "原生 GET 查询参数列过滤链接"
+    },
+    {
+      "name": "TreeTable",
+      "uiComponent": "TreeTable.svelte",
+      "liteComponent": "LiteTreeTable.svelte",
+      "category": "advanced",
+      "status": "exact",
+      "strategy": "递归层级缩进表格展示"
+    },
+    {
+      "name": "SensitiveDataMask",
+      "uiComponent": "SensitiveDataMask.svelte",
+      "liteComponent": "LiteSensitiveDataMask.svelte",
+      "category": "advanced",
+      "status": "exact",
+      "strategy": "服务端掩码字符展示"
+    },
+    {
+      "name": "ApprovalActionCard",
+      "uiComponent": "ApprovalActionCard.svelte",
+      "liteComponent": "LiteApprovalActionCard.svelte",
+      "category": "advanced",
+      "status": "exact",
+      "strategy": "原生审批 POST 表单与意见输入"
     },
     {
       "name": "ThemeToggle",

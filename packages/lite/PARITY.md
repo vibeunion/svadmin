@@ -1,7 +1,7 @@
 # @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵
 
-> 自动生成时间：`2026-08-28T21:45:18.582Z`
-> 总体适配覆盖率：**100%**（72/72 组件）
+> 自动生成时间：`2026-08-28T22:41:50.619Z`
+> 总体适配覆盖率：**100%**（79/79 组件）
 
 ## 进度总览
 
@@ -12,7 +12,7 @@
 | **pages** | 9 | 9 | 0 | 0 | 0 | **100%** |
 | **layout** | 7 | 6 | 0 | 1 | 0 | **100%** |
 | **widgets** | 6 | 3 | 3 | 0 | 0 | **100%** |
-| **advanced** | 11 | 2 | 7 | 2 | 0 | **100%** |
+| **advanced** | 18 | 9 | 7 | 2 | 0 | **100%** |
 
 ---
 
@@ -117,6 +117,13 @@
 | `AutoSaveIndicator` | `advanced/LiteAutoSaveIndicator.svelte` | ⚡ 语义降级 | 服务端保存时间戳展示 |
 | `Toast` | `advanced/LiteToast.svelte` | ⚡ 语义降级 | 降级为页面顶部 Alert 通知条 |
 | `UndoableNotification` | `advanced/LiteUndoableNotification.svelte` | ⚡ 语义降级 | 降级为带撤销表单的通知条 |
+| `Watermark` | `LiteWatermark.svelte` | ✅ 1:1 对齐 | 纯 CSS / SVG 矢量背景水印 |
+| `ColumnSettings` | `LiteColumnSettings.svelte` | ✅ 1:1 对齐 | 原生多选表单与查询参数列过滤 |
+| `ImportWizard` | `LiteImportWizard.svelte` | ✅ 1:1 对齐 | 原生 Multipart 文件上传与映射提示 |
+| `ColumnHeaderFilter` | `LiteColumnHeaderFilter.svelte` | ✅ 1:1 对齐 | 原生 GET 查询参数列过滤链接 |
+| `TreeTable` | `LiteTreeTable.svelte` | ✅ 1:1 对齐 | 递归层级缩进表格展示 |
+| `SensitiveDataMask` | `LiteSensitiveDataMask.svelte` | ✅ 1:1 对齐 | 服务端掩码字符展示 |
+| `ApprovalActionCard` | `LiteApprovalActionCard.svelte` | ✅ 1:1 对齐 | 原生审批 POST 表单与意见输入 |
 | `DevTools` | — | 🚫 免适配 | 免适配 (SPA 调试器) |
 | `CopilotPanel` | — | 🚫 免适配 | 免适配 (AI Copilot 客户端浮窗) |
 

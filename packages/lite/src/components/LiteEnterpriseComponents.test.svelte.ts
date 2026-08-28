@@ -5,6 +5,14 @@ import LiteCascader from './fields/LiteCascader.svelte';
 import LiteTransfer from './LiteTransfer.svelte';
 import LiteFilterBuilder from './LiteFilterBuilder.svelte';
 import LiteDynamicFormList from './LiteDynamicFormList.svelte';
+import LiteWatermark from './LiteWatermark.svelte';
+import LiteColumnSettings from './LiteColumnSettings.svelte';
+import LiteImportWizard from './LiteImportWizard.svelte';
+import LiteColumnHeaderFilter from './LiteColumnHeaderFilter.svelte';
+import LiteTreeTable from './LiteTreeTable.svelte';
+import LiteSensitiveDataMask from './LiteSensitiveDataMask.svelte';
+import LiteApprovalActionCard from './LiteApprovalActionCard.svelte';
+
 
 describe('Lite Enterprise Components SSR rendering', () => {
   it('renders LiteTreeSelect in show and edit mode', () => {
@@ -128,5 +136,72 @@ describe('Lite Enterprise Components SSR rendering', () => {
     expect(view.container.textContent).toContain('#1');
     expect(view.container.textContent).toContain('#2');
     expect(view.container.querySelectorAll('.lite-dynamic-item-card')).toHaveLength(2);
+  });
+
+  it('renders LiteWatermark with SVG background pattern', () => {
+    const view = render(LiteWatermark, {
+      content: 'CONFIDENTIAL SSR',
+      opacity: 0.15,
+    });
+    expect(view.container.querySelector('.lite-watermark-wrapper')).toBeTruthy();
+  });
+
+  it('renders LiteColumnSettings with checkbox options', () => {
+    const columns = [
+      { key: 'name', label: 'Name', visible: true },
+      { key: 'role', label: 'Role', visible: false },
+    ];
+    const view = render(LiteColumnSettings, {
+      columns,
+      title: 'Columns',
+    });
+    expect(view.container.textContent).toContain('Name');
+    expect(view.container.textContent).toContain('Role');
+    expect(view.container.querySelectorAll('input[type="checkbox"]')).toHaveLength(2);
+  });
+  it('renders LiteImportWizard with file input and schema tags', () => {
+    const view = render(LiteImportWizard, {
+      resourceName: 'orders',
+      fields: [{ key: 'total', label: 'Total', type: 'number' as const }],
+    });
+    expect(view.container.textContent).toContain('Import orders');
+    expect(view.container.querySelector('input[type="file"]')).toBeTruthy();
+  });
+
+  it('renders LiteColumnHeaderFilter with filter link', () => {
+    const view = render(LiteColumnHeaderFilter, {
+      field: { key: 'status', label: 'Status', type: 'select' as const },
+    });
+    expect(view.container.querySelector('.lite-filter-icon')).toBeTruthy();
+  });
+
+  it('renders LiteTreeTable with hierarchical indentation', () => {
+    const data = [
+      { id: 1, name: 'Parent', children: [{ id: 2, name: 'Child' }] },
+    ];
+    const view = render(LiteTreeTable, {
+      data,
+      columns: [{ key: 'name', label: 'Name' }],
+    });
+    expect(view.container.textContent).toContain('Parent');
+    expect(view.container.textContent).toContain('Child');
+  });
+
+  it('renders LiteSensitiveDataMask with masked format', () => {
+    const view = render(LiteSensitiveDataMask, {
+      value: '13812345678',
+      type: 'phone',
+    });
+    expect(view.container.textContent).toContain('138****5678');
+  });
+
+  it('renders LiteApprovalActionCard with approve and reject actions', () => {
+    const view = render(LiteApprovalActionCard, {
+      title: 'Contract Approval',
+      status: 'pending',
+    });
+    expect(view.container.textContent).toContain('Contract Approval');
+    expect(view.container.textContent).toContain('Approve');
+    expect(view.container.textContent).toContain('Reject');
   });
 });

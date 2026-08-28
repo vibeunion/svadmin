@@ -65,6 +65,13 @@ export { default as LiteTabs } from './components/LiteTabs.svelte';
 export { default as LiteShowField } from './components/LiteShowField.svelte';
 export { default as LiteMediaThumbnail } from './components/LiteMediaThumbnail.svelte';
 export { default as LiteChatDialog } from './components/LiteChatDialog.svelte';
+export { default as LiteWatermark } from './components/LiteWatermark.svelte';
+export { default as LiteColumnSettings } from './components/LiteColumnSettings.svelte';
+export { default as LiteImportWizard } from './components/LiteImportWizard.svelte';
+export { default as LiteColumnHeaderFilter } from './components/LiteColumnHeaderFilter.svelte';
+export { default as LiteTreeTable } from './components/LiteTreeTable.svelte';
+export { default as LiteSensitiveDataMask } from './components/LiteSensitiveDataMask.svelte';
+export { default as LiteApprovalActionCard } from './components/LiteApprovalActionCard.svelte';
 
 // Compatibility fallbacks for browser-only and third-party UI capabilities.
 export * from './components/compatibility/index';

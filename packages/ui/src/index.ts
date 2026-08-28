@@ -64,6 +64,18 @@ export { default as Transfer } from './components/Transfer.svelte';
 export type { TransferItem } from './components/Transfer.svelte';
 export { default as FilterBuilder } from './components/FilterBuilder.svelte';
 export type { FilterRuleItem } from './components/FilterBuilder.svelte';
+export { default as Watermark } from './components/Watermark.svelte';
+export { default as ColumnSettings } from './components/ColumnSettings.svelte';
+export type { ColumnItem } from './components/ColumnSettings.svelte';
+export { default as UnsavedChangesPrompt } from './components/UnsavedChangesPrompt.svelte';
+export { default as ImportWizard } from './components/ImportWizard.svelte';
+export { default as ColumnHeaderFilter } from './components/ColumnHeaderFilter.svelte';
+export { default as TreeTable } from './components/TreeTable.svelte';
+export type { TreeTableColumn } from './components/TreeTable.svelte';
+export { default as SensitiveDataMask } from './components/SensitiveDataMask.svelte';
+export type { MaskType } from './components/SensitiveDataMask.svelte';
+export { default as ApprovalActionCard } from './components/ApprovalActionCard.svelte';
+export type { ApprovalStatus } from './components/ApprovalActionCard.svelte';
 
 export { default as InfiniteList } from './components/InfiniteList.svelte';
 export { default as ComboboxField } from './components/ComboboxField.svelte';
