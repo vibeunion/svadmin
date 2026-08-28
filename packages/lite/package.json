@@ -54,7 +54,7 @@
   },
   "dependencies": {
     "@lucide/svelte": "^1.31.0",
-    "zod": "^4.4.3"
+    "@sinclair/typebox": "^0.34.51"
   },
   "devDependencies": {
     "@types/bun": "^1.4.0",

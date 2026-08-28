@@ -1,47 +1,110 @@
-import { z } from 'zod';
+import { Type, type Static, type TSchema } from "@sinclair/typebox";
+import { TypeCompiler } from "@sinclair/typebox/compiler";
 
-const catalogFieldSchema = z.string().min(1).max(64).regex(/^[A-Za-z][A-Za-z0-9_-]*$/u);
+export function createParsedSchema<T extends TSchema>(schema: T): T & {
+  parse: (value: unknown) => Static<T>;
+  safeParse: (value: unknown) => { success: true; data: Static<T> } | { success: false; error: { issues: Array<{ path: string[]; message: string }> } };
+  Check: (value: unknown) => boolean;
+} {
+  const compiled = TypeCompiler.Compile(schema);
+  const parse = (value: unknown): Static<T> => {
+    if (compiled.Check(value)) return value as Static<T>;
+    const errors = [...compiled.Errors(value)];
+    const message = errors.map((e) => (e.path ? e.path + ": " : "") + e.message).join(", ") || "Validation error";
+    const err = new Error(message) as Error & { issues: Array<{ path: string[]; message: string }> };
+    err.issues = errors.map((e) => ({
+      path: e.path ? (e.path.startsWith("/") ? e.path.slice(1) : e.path).split("/") : [],
+      message: e.message,
+    }));
+    throw err;
+  };
+  const safeParse = (value: unknown) => {
+    if (compiled.Check(value)) {
+      return { success: true as const, data: value as Static<T> };
+    }
+    const errors = [...compiled.Errors(value)];
+    return {
+      success: false as const,
+      error: {
+        issues: errors.map((e) => ({
+          path: e.path ? (e.path.startsWith("/") ? e.path.slice(1) : e.path).split("/") : [],
+          message: e.message,
+        })),
+      },
+    };
+  };
 
-export const metricPropsSchema = z.object({
-  label: z.string().min(1).max(80),
-  format: z.enum(['number', 'currency', 'percent']),
-  currency: z.string().regex(/^[A-Z]{3}$/u).optional(),
-  description: z.string().min(1).max(160).optional(),
-}).strict().superRefine((props, context) => {
-  if (props.format === 'currency' && !props.currency) {
-    context.addIssue({ code: 'custom', path: ['currency'], message: 'Currency format requires an ISO currency code' });
-  }
-  if (props.format !== 'currency' && props.currency) {
-    context.addIssue({ code: 'custom', path: ['currency'], message: 'Currency is only valid with currency format' });
-  }
+  return Object.assign(schema, {
+    parse,
+    safeParse,
+    Check: (val: unknown) => compiled.Check(val),
+  });
+}
+
+const catalogFieldSchema = Type.String({
+  minLength: 1,
+  maxLength: 64,
+  pattern: "^[A-Za-z][A-Za-z0-9_-]*$",
 });
 
-export const resourceTablePropsSchema = z.object({
-  title: z.string().min(1).max(80),
-  emptyLabel: z.string().min(1).max(80).optional(),
-  columns: z.array(z.object({
-    field: catalogFieldSchema,
-    label: z.string().min(1).max(60),
-    format: z.enum(['text', 'number', 'date', 'boolean']).optional(),
-  }).strict()).min(1).max(8),
-}).strict();
+const currencyMetric = Type.Object({
+  label: Type.String({ minLength: 1, maxLength: 80 }),
+  format: Type.Literal("currency"),
+  currency: Type.String({ pattern: "^[A-Z]{3}$" }),
+  description: Type.Optional(Type.String({ minLength: 1, maxLength: 160 })),
+}, { additionalProperties: false });
 
-export const barChartPropsSchema = z.object({
-  title: z.string().min(1).max(80),
-  labelField: catalogFieldSchema,
-  valueField: catalogFieldSchema,
-  showValues: z.boolean().optional(),
-}).strict();
+const otherMetric = Type.Object({
+  label: Type.String({ minLength: 1, maxLength: 80 }),
+  format: Type.Union([Type.Literal("number"), Type.Literal("percent")]),
+  currency: Type.Optional(Type.Never()),
+  description: Type.Optional(Type.String({ minLength: 1, maxLength: 160 })),
+}, { additionalProperties: false });
 
-export const lineChartPropsSchema = z.object({
-  title: z.string().min(1).max(80),
-  labelField: catalogFieldSchema,
-  valueField: catalogFieldSchema,
-  showDots: z.boolean().optional(),
-  fill: z.boolean().optional(),
-}).strict();
+export const metricPropsSchema = createParsedSchema(
+  Type.Union([currencyMetric, otherMetric])
+);
 
-export type MetricProps = z.infer<typeof metricPropsSchema>;
-export type ResourceTableProps = z.infer<typeof resourceTablePropsSchema>;
-export type BarChartProps = z.infer<typeof barChartPropsSchema>;
-export type LineChartProps = z.infer<typeof lineChartPropsSchema>;
+export const resourceTablePropsSchema = createParsedSchema(
+  Type.Object({
+    title: Type.String({ minLength: 1, maxLength: 80 }),
+    emptyLabel: Type.Optional(Type.String({ minLength: 1, maxLength: 80 })),
+    columns: Type.Array(
+      Type.Object({
+        field: catalogFieldSchema,
+        label: Type.String({ minLength: 1, maxLength: 60 }),
+        format: Type.Optional(Type.Union([
+          Type.Literal("text"),
+          Type.Literal("number"),
+          Type.Literal("date"),
+          Type.Literal("boolean"),
+        ])),
+      }, { additionalProperties: false }),
+      { minItems: 1, maxItems: 8 },
+    ),
+  }, { additionalProperties: false })
+);
+
+export const barChartPropsSchema = createParsedSchema(
+  Type.Object({
+    title: Type.String({ minLength: 1, maxLength: 80 }),
+    labelField: catalogFieldSchema,
+    valueField: catalogFieldSchema,
+    showValues: Type.Optional(Type.Boolean()),
+  }, { additionalProperties: false })
+);
+
+export const lineChartPropsSchema = createParsedSchema(
+  Type.Object({
+    title: Type.String({ minLength: 1, maxLength: 80 }),
+    labelField: catalogFieldSchema,
+    valueField: catalogFieldSchema,
+    showDots: Type.Optional(Type.Boolean()),
+    fill: Type.Optional(Type.Boolean()),
+  }, { additionalProperties: false })
+);
+
+export type MetricProps = Static<typeof metricPropsSchema>;
+export type ResourceTableProps = Static<typeof resourceTablePropsSchema>;
+export type BarChartProps = Static<typeof barChartPropsSchema>;
+export type LineChartProps = Static<typeof lineChartPropsSchema>;

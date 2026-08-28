@@ -180,6 +180,7 @@ export type { RouterNavigationResult, RouterProvider } from './router-provider';
 export {
   inferFieldType,
   inferResource,
+  generateTypeBoxSchemaCode,
   generateListPageCode,
   generateCreatePageCode,
   generateEditPageCode,
@@ -200,8 +201,9 @@ export {
   file2Base64, generateDefaultDocumentTitle,
   deriveValidator,
   createSchemaValidator,
+  createTypeBoxValidator,
 } from './helpers';
-export type { SchemaValidatorLike } from './helpers';
+export type { SchemaValidatorLike, TypeBoxValidatorLike } from './helpers';
 export { TableState } from './table-state.svelte';
 export type { TableStateOptions } from './table-state.svelte';
 export type { UseInfiniteListOptions } from './hooks.svelte';

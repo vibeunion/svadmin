@@ -4,6 +4,7 @@ import { describe, test, expect } from 'bun:test';
 import {
   inferFieldType,
   inferResource,
+  generateTypeBoxSchemaCode,
   generateListPageCode,
   generateCreatePageCode,
   generateEditPageCode,
@@ -210,9 +211,22 @@ describe('inferResource', () => {
   test('generateComponentCode helper produces matching code for each kind', () => {
     const resource = { name: 'users', label: 'Users', primaryKey: 'id', fields: [] };
     expect(generateComponentCode(resource, 'list')).toBe(generateListPageCode(resource));
+    expect(generateComponentCode(resource, 'typebox')).toBe(generateTypeBoxSchemaCode(resource));
     expect(generateComponentCode(resource, 'create')).toBe(generateCreatePageCode(resource));
     expect(generateComponentCode(resource, 'edit')).toBe(generateEditPageCode(resource));
     expect(generateComponentCode(resource, 'show')).toBe(generateShowPageCode(resource));
     expect(generateComponentCode(resource, 'resource')).toContain("export const usersResource");
+  });
+
+  test('generates valid TypeBox schema code with Static type inference', () => {
+    const result = inferResource('posts', sampleData);
+    expect(result.typeboxCode).toBeDefined();
+    expect(result.typeboxCode).toContain("import { Type, type Static } from '@sinclair/typebox';");
+    expect(result.typeboxCode).toContain('export const PostSchema = Type.Object({');
+    expect(result.typeboxCode).toContain('export type Post = Static<typeof PostSchema>;');
+    expect(result.typeboxCode).toContain('views: Type.Optional(Type.Number())');
+    expect(result.typeboxCode).toContain('is_featured: Type.Optional(Type.Boolean())');
+    expect(result.typeboxCode).toContain("email: Type.Optional(Type.String({ format: 'email' }))");
+    expect(result.typeboxCode).toContain('tags: Type.Optional(Type.Array(Type.String()))');
   });
 });

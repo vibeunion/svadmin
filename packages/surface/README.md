@@ -7,7 +7,7 @@ The MVP supports Svelte 5 + Vite, a fixed 12-column grid, four built-in widgets,
 ## Install
 
 ```bash
-bun add @svadmin/surface @svadmin/core @svadmin/ui @tanstack/svelte-query svelte zod
+bun add @svadmin/surface @svadmin/core @svadmin/ui @tanstack/svelte-query svelte @sinclair/typebox
 ```
 
 Import protocol types and validation from the DOM-free root entry. Import rendering code from the Svelte subpath.
@@ -89,7 +89,7 @@ When rendered inside `AdminApp`, the renderer resolves the configured provider f
 
 The catalog version is `svadmin/v1`. `catalogVersion` must match exactly.
 
-Custom catalogs are trusted runtime configuration. Every registration must use a strict Zod v4 object schema and a trusted Svelte component. Item widgets that read record fields must expose those fields through `getReferencedFields`; validation then checks them against `SurfacePolicy.readFields`.
+Custom catalogs are trusted runtime configuration. Every registration must use a strict TypeBox object schema and a trusted Svelte component. Item widgets that read record fields must expose those fields through `getReferencedFields`; validation then checks them against `SurfacePolicy.readFields`.
 
 ```ts
 const catalog = defineSurfaceCatalog({

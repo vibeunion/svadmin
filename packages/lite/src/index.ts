@@ -13,8 +13,10 @@ export {
 } from './server-adapter';
 export type { ListLoaderResult } from './server-adapter';
 
-// Schema generator (used by Lite actions; also reusable by other Zod consumers)
+// Schema generator (TypeBox schemas used by Lite actions and client forms)
 export {
+  fieldsToTypeBoxSchema,
+  resourceToTypeBoxSchema,
   fieldsToZodSchema,
   resourceToZodSchema,
   fieldToInputType,

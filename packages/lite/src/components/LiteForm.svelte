@@ -2,7 +2,7 @@
   /**
    * LiteForm — Server-rendered form driven by FieldDefinitions.
    * Uses a native <form> with method="POST" for no-JavaScript submission.
-   * Uses the generated Zod schema for server-side validation.
+   * Uses the generated TypeBox schema for server-side validation.
    */
   import type { FieldDefinition, ResourceDefinition } from '@svadmin/core';
   import { t } from '@svadmin/core/i18n';

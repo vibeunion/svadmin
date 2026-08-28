@@ -218,7 +218,7 @@ export const handle = createLegacyRedirectHook('/lite');
 | `createAuthGuard(authProvider)` | Server hook for authentication |
 | `createAuthActions(authProvider)` | Login/logout actions plus optional provider-delegating account actions |
 | `createLegacyRedirectHook()` | Auto-redirect IE11 to `/lite/` |
-| `fieldsToZodSchema(fields)` | Generate the Zod schema used by Lite actions or other Zod consumers |
+| `fieldsToTypeBoxSchema(fields)` | Generate the TypeBox schema used by Lite actions or other consumers (with `fieldsToZodSchema` alias) |
 
 ## CSS
 

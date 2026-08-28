@@ -172,6 +172,8 @@ export function parseCSV(text: string): string[][] {
  * Yup, Joi, etc.
  */
 export interface SchemaValidatorLike {
+  Check?: (value: unknown) => boolean;
+  Errors?: (value: unknown) => Iterable<{ path?: string; message: string; schema?: unknown }>;
   safeParse?: (data: unknown) => {
     success: boolean;
     data?: unknown;
@@ -193,8 +195,16 @@ export interface SchemaValidatorLike {
 }
 
 /**
+ * TypeBox validator interface matching TypeCompiler.Compile or Value.Errors
+ */
+export type TypeBoxValidatorLike = {
+  Check?: (value: unknown) => boolean;
+  Errors: (value: unknown) => Iterable<{ path?: string; message: string }>;
+};
+
+/**
  * Creates a synchronous form validator function from any Zod, Valibot, Yup, Joi,
- * or Standard Schema v1 object.
+ * TypeBox, or Standard Schema v1 object.
  *
  * @example
  * ```ts
@@ -223,6 +233,29 @@ export function createSchemaValidator(
 
   return (values: Record<string, unknown>) => {
     const errors: Record<string, string> = {};
+
+    // 0. TypeBox TypeCompiler compiled validator (.Check & .Errors)
+    if (typeof s.Check === 'function' && typeof s.Errors === 'function') {
+      if (s.Check(values)) return null;
+      for (const err of s.Errors(values)) {
+        const rawPath = err.path || '';
+        const cleanPath = rawPath.replace(/^\//, '').replace(/\//g, '.');
+        const key = cleanPath || '_root';
+        if (!errors[key]) errors[key] = err.message;
+      }
+      return Object.keys(errors).length > 0 ? errors : null;
+    }
+
+    // 0b. TypeBox Value.Errors iterator provider
+    if (typeof s.Errors === 'function') {
+      for (const err of s.Errors(values)) {
+        const rawPath = err.path || '';
+        const cleanPath = rawPath.replace(/^\//, '').replace(/\//g, '.');
+        const key = cleanPath || '_root';
+        if (!errors[key]) errors[key] = err.message;
+      }
+      return Object.keys(errors).length > 0 ? errors : null;
+    }
 
     // 1. Standard Schema v1 (~standard)
     if (s['~standard'] && typeof s['~standard'].validate === 'function') {
@@ -294,4 +327,33 @@ export function createSchemaValidator(
 
     return null;
   };
+}
+
+/**
+ * Creates a synchronous form validator function specifically optimized for TypeBox
+ * compiled validators (from TypeCompiler.Compile) or TypeBox value checks.
+ *
+ * @example
+ * ```ts
+ * import { Type } from '@sinclair/typebox';
+ * import { TypeCompiler } from '@sinclair/typebox/compiler';
+ * import { createTypeBoxValidator, useForm } from '@svadmin/core';
+ *
+ * const userSchema = Type.Object({
+ *   name: Type.String({ minLength: 2 }),
+ *   email: Type.String({ format: 'email' }),
+ * });
+ *
+ * const compiledUser = TypeCompiler.Compile(userSchema);
+ *
+ * const form = useForm({
+ *   resource: 'users',
+ *   validate: createTypeBoxValidator(compiledUser),
+ * });
+ * ```
+ */
+export function createTypeBoxValidator(
+  compiledOrSchema: TypeBoxValidatorLike | SchemaValidatorLike | unknown
+): (values: Record<string, unknown>) => Record<string, string> | null {
+  return createSchemaValidator(compiledOrSchema);
 }
