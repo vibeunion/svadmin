@@ -24,6 +24,8 @@ export {
 } from './schema-generator';
 
 // UI Components (use in +page.svelte with csr = false)
+export { getStatusBadgeClass, parseExplicitBoolean, isExplicitBooleanTrue } from './value-normalization';
+
 export { default as LiteLayout } from './components/LiteLayout.svelte';
 export { default as LiteTable } from './components/LiteTable.svelte';
 export { default as LitePagination } from './components/LitePagination.svelte';

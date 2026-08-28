@@ -5,7 +5,7 @@
    */
   import type { ResourceDefinition, FieldDefinition } from '@svadmin/core';
   import { t } from '@svadmin/core/i18n';
-  import { isExplicitBooleanTrue } from '../value-normalization';
+  import { isExplicitBooleanTrue, getStatusBadgeClass } from '../value-normalization';
   import { liteFragmentId } from '../fragment-id';
 
   interface Props {
@@ -104,7 +104,7 @@
                 <span class="lite-badge">{tag}</span>
               {/each}
             {:else if field.type === 'select' && field.options}
-              <span class="lite-badge">{formatValue(record[field.key], field)}</span>
+              <span class={getStatusBadgeClass(record[field.key])}>{formatValue(record[field.key], field)}</span>
             {:else}
               {formatValue(record[field.key], field)}
             {/if}

@@ -791,6 +791,36 @@ textarea.lite-input {
   border-color: #fecaca;
 }
 
+.lite-badge-info {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+
+.lite-badge-indigo {
+  background: #eef2ff;
+  color: #4338ca;
+  border-color: #c7d2fe;
+}
+
+.lite-filter-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.lite-filter-bar > * + * {
+  margin-left: 8px;
+}
+
+.lite-batch-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+}
+
 .lite-badge-warning {
   background: #fffbeb;
   color: #92400e;

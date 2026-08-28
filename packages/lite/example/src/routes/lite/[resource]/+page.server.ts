@@ -19,4 +19,11 @@ export const actions = {
     }
     return createCrudActions(dataProvider, resource).delete(event);
   },
+  batchDelete: async (event) => {
+    const resource = getResource(event.params.resource);
+    if (!resource) {
+      throw error(404, `Resource "${event.params.resource}" not found`);
+    }
+    return createCrudActions(dataProvider, resource).batchDelete(event);
+  },
 } satisfies Actions;

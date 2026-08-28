@@ -60,17 +60,36 @@ function listRequestState(url: URL, resource: ResourceDefinition): ListRequestSt
   return { page, pageSize, sort, order, search: url.searchParams.get('q') ?? undefined };
 }
 
-function listSearchFilters(resource: ResourceDefinition, search?: string): Filter[] {
-  if (!search) return [];
-  const fieldFilters: Filter[] = resource.fields
-    .filter((field) => field.searchable)
-    .map((field) => ({
-      field: field.key,
-      operator: 'contains',
-      value: search,
-    }));
-  if (fieldFilters.length === 1) return fieldFilters;
-  return fieldFilters.length > 1 ? [{ operator: 'or', value: fieldFilters }] : [];
+function listRequestFilters(resource: ResourceDefinition, url: URL): Filter[] {
+  const filters: Filter[] = [];
+  const search = url.searchParams.get('q') ?? undefined;
+  if (search) {
+    const searchFilters: Filter[] = resource.fields
+      .filter((field) => field.searchable)
+      .map((field) => ({
+        field: field.key,
+        operator: 'contains',
+        value: search,
+      }));
+    if (searchFilters.length === 1) {
+      filters.push(searchFilters[0]);
+    } else if (searchFilters.length > 1) {
+      filters.push({ operator: 'or', value: searchFilters });
+    }
+  }
+
+  for (const field of resource.fields) {
+    const rawVal = url.searchParams.get(`filter_${field.key}`) ?? (field.key !== 'q' && field.key !== 'sort' && field.key !== 'order' && field.key !== 'page' ? url.searchParams.get(field.key) : null);
+    if (rawVal != null && rawVal.trim() !== '') {
+      filters.push({
+        field: field.key,
+        operator: 'eq',
+        value: field.type === 'number' && !Number.isNaN(Number(rawVal)) ? Number(rawVal) : rawVal,
+      });
+    }
+  }
+
+  return filters;
 }
 
 /**
@@ -88,7 +107,7 @@ export function createListLoader(
       resource: resource.name,
       pagination: { current: page, pageSize },
       sorters,
-      filters: listSearchFilters(resource, search),
+      filters: listRequestFilters(resource, url),
     });
 
     return {
@@ -199,6 +218,28 @@ export function createCrudActions(
       } catch (caughtError) {
         if (isRedirect(caughtError)) throw caughtError;
         return { success: false, error: 'Delete failed' };
+      }
+    },
+
+    batchDelete: async ({ request }: RequestEvent) => {
+      if (resource.canDelete === false) {
+        return { success: false, error: 'Delete is disabled for this resource' };
+      }
+      const formData = await request.formData();
+      const ids = formData.getAll('ids').map(v => String(v).trim()).filter(Boolean);
+      if (ids.length === 0) return { success: false, error: 'No records selected' };
+      const redirectTo = toSafeLocalRedirect(formData.get('redirect'));
+      try {
+        if (dp.deleteMany) {
+          await dp.deleteMany({ resource: resource.name, ids });
+        } else {
+          await Promise.all(ids.map(id => dp.deleteOne({ resource: resource.name, id })));
+        }
+        if (redirectTo) throw redirect(303, redirectTo);
+        return { success: true };
+      } catch (caughtError) {
+        if (isRedirect(caughtError)) throw caughtError;
+        return { success: false, error: 'Batch delete failed' };
       }
     },
   };

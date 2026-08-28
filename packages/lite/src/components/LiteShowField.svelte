@@ -5,7 +5,7 @@
   */
   import type { FieldDefinition } from '@svadmin/core';
   import { toSafeHref, toSafeText } from '../security';
-  import { isExplicitBooleanTrue } from '../value-normalization';
+  import { isExplicitBooleanTrue, getStatusBadgeClass } from '../value-normalization';
   import LiteMediaThumbnail from './LiteMediaThumbnail.svelte';
 
   interface Props {
@@ -60,6 +60,8 @@
   {/each}
 {:else if field.type === 'json' && value}
   <pre style="margin:0;font-size:12px;background:#f8fafc;padding:12px;border-radius:6px;border:1px solid #e2e8f0;overflow-x:auto;">{typeof value === 'string' ? value : JSON.stringify(value, null, 2)}</pre>
+{:else if field.type === "select" && field.options}
+  <span class={getStatusBadgeClass(value)}>{formatValue(value, field)}</span>
 {:else}
   {formatValue(value, field)}
 {/if}
