@@ -44,7 +44,7 @@ test('lite init plans one dynamic route tree without touching the SPA', async ()
       console.log = originalLog;
     }
     expect(dryRunOutput.join('\n')).toContain('Dry run only');
-    expect(await readdir(join(projectDirectory, 'src'))).toEqual(['routes']);
+    expect(await readdir(join(projectDirectory, 'src'))).toEqual(['lib', 'routes']);
 
     const result = writeLiteInit(plan);
     expect(result.written).toHaveLength(13);
