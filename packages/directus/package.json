@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/directus",
-  "version": "0.9.12",
+  "version": "0.9.13",
   "description": "Directus DataProvider for svadmin",
   "type": "module",
   "sideEffects": false,

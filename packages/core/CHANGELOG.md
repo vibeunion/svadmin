@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.43.0](https://github.com/vibeunion/svadmin/compare/core-v0.42.1...core-v0.43.0) (2026-08-28)
+
+
+### 🚀 Features
+
+* **core:** add schema validator adapter and component code inferencer ([2b6b5aa](https://github.com/vibeunion/svadmin/commit/2b6b5aa295fa54910edad6cb5c54bc248a773389))
+
 ## [0.42.1](https://github.com/vibeunion/svadmin/compare/core-v0.42.0...core-v0.42.1) (2026-08-28)
 
 
