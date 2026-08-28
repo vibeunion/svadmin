@@ -580,8 +580,12 @@ function formDataToObject(
 
     switch (field.type) {
       case 'number':
+      case 'currency':
+      case 'percent':
+      case 'rating':
         if (strRaw.trim() !== '') {
-          const numberValue = Number(strRaw);
+          const cleanNumStr = strRaw.trim().replace(/^[$€£¥]/, '').replace(/%$/, '');
+          const numberValue = Number(cleanNumStr);
           obj[field.key] = Number.isNaN(numberValue) ? strRaw : numberValue;
         }
         break;
@@ -706,8 +710,13 @@ function coerceFieldValues(
 
   switch (field.type) {
     case 'number':
+    case 'currency':
+    case 'percent':
+    case 'rating': {
       if (raw.trim() === '') return undefined;
-      return Number.isNaN(Number(raw)) ? raw : Number(raw);
+      const clean = raw.trim().replace(/^[$€£¥]/, '').replace(/%$/, '');
+      return Number.isNaN(Number(clean)) ? raw : Number(clean);
+    }
     case 'boolean':
       return parseExplicitBoolean(raw) ?? raw;
     case 'tags':

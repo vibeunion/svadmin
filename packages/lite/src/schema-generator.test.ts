@@ -288,3 +288,35 @@ describe('fieldsToZodSchema file fields', () => {
     }).success).toBe(false);
   });
 });
+
+describe('fieldsToZodSchema enterprise field types', () => {
+  test('coerces currency and percent formatted strings to numbers', () => {
+    const schema = fieldsToZodSchema([
+      { key: 'price', label: 'Price', type: 'currency', required: true },
+      { key: 'discount', label: 'Discount', type: 'percent' },
+    ]);
+
+    expect(schema.parse({ price: '$129.99', discount: '15%' })).toEqual({
+      price: 129.99,
+      discount: 15,
+    });
+  });
+
+  test('validates phone numbers and code lengths', () => {
+    const schema = fieldsToZodSchema([
+      { key: 'phone', label: 'Phone', type: 'phone' },
+      { key: 'code', label: 'Code', type: 'code' },
+    ]);
+
+    expect(schema.safeParse({ phone: '+1 (555) 123-4567' }).success).toBe(true);
+    expect(schema.safeParse({ phone: 'invalid-letters-phone!' }).success).toBe(false);
+  });
+
+  test('generates input types and placeholders for enterprise fields', () => {
+    expect(fieldToInputType({ key: 'price', label: 'Price', type: 'currency' })).toBe('number');
+    expect(fieldToInputType({ key: 'ratio', label: 'Ratio', type: 'percent' })).toBe('number');
+    expect(fieldToInputType({ key: 'stars', label: 'Stars', type: 'rating' })).toBe('number');
+    expect(fieldToInputType({ key: 'phone', label: 'Phone', type: 'phone' })).toBe('tel');
+    expect(fieldToInputType({ key: 'snippet', label: 'Snippet', type: 'code' })).toBe('textarea');
+  });
+});

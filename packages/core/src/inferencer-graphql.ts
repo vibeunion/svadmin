@@ -227,7 +227,8 @@ function parseGraphQLSDL(sdl: string): GraphQLSchemaBody {
 
     for (const line of fieldLines) {
       // fieldName(args): TypeName!
-      const fieldMatch = /^([A-Za-z0-9_]+)(?:\([^)]*\))?\s*:\s*([[\]A-Za-z0-9_!]+)/.exec(line);
+      const fieldMatch = /^([A-Za-z0-9_]+)(?:\([^)]*\))?\s*:\s*([[\]A-Za-z0-9_!]+)/u.exec(line);
+
       if (!fieldMatch) continue;
 
       const fName = fieldMatch[1];

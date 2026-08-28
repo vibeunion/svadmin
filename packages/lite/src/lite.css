@@ -864,3 +864,116 @@ textarea.lite-input {
     background: #eee !important;
   }
 }
+
+/* ─── Code Block ───────────────────────────────────────────── */
+.lite-code {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  background: #f8fafc;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  color: #0f172a;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+textarea.lite-textarea-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 12px;
+}
+
+/* ─── Avatar ───────────────────────────────────────────────── */
+.lite-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: #e2e8f0;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+  overflow: hidden;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.lite-avatar-circle {
+  border-radius: 50%;
+}
+.lite-avatar-square {
+  border-radius: 6px;
+}
+.lite-avatar-sm {
+  width: 24px;
+  height: 24px;
+  font-size: 10px;
+}
+.lite-avatar-default {
+  width: 32px;
+  height: 32px;
+  font-size: 12px;
+}
+.lite-avatar-lg {
+  width: 40px;
+  height: 40px;
+  font-size: 14px;
+}
+.lite-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.lite-avatar-text {
+  line-height: 1;
+}
+
+/* ─── Rating ───────────────────────────────────────────────── */
+.lite-rating {
+  display: inline-flex;
+  align-items: center;
+}
+.lite-rating-stars {
+  color: #f59e0b;            /* amber-500 */
+  font-size: 14px;
+  letter-spacing: 2px;
+}
+.lite-rating-val {
+  margin-left: 6px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* ─── Numeric & Monospace Formatting ──────────────────────── */
+.lite-currency,
+.lite-percent,
+.lite-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.lite-progress-bar {
+  display: inline-block;
+  width: 60px;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+  vertical-align: middle;
+  margin-left: 8px;
+}
+.lite-progress-fill {
+  height: 100%;
+  background: #4f46e5;
+  border-radius: 3px;
+}
+
+.lite-phone-link {
+  color: #0f172a;
+  text-decoration: underline;
+}
+.lite-phone-link:hover {
+  color: #4f46e5;
+}

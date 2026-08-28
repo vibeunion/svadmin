@@ -79,14 +79,17 @@ function coerceAndValidateField(
   let coerced: unknown = value;
 
   switch (field.type) {
-    case "number": {
+    case "number":
+    case "currency":
+    case "percent":
+    case "rating": {
       if (coerced === undefined || coerced === null || coerced === "") {
         coerced = undefined;
         if (field.required) {
           issues.push({ path, message: `${field.label} is required` });
         }
       } else if (typeof coerced === "string") {
-        const trimmed = coerced.trim();
+        const trimmed = coerced.trim().replace(/^[$€£¥]/, "").replace(/%$/, "");
         if (trimmed === "") {
           coerced = undefined;
           if (field.required) {
@@ -258,7 +261,8 @@ function coerceAndValidateField(
 
     case "textarea":
     case "richtext":
-    case "markdown": {
+    case "markdown":
+    case "code": {
       if (typeof coerced === "string" && coerced.length > 50000) {
         issues.push({ path, message: `${field.label} is too long` });
       }
@@ -341,7 +345,17 @@ function coerceAndValidateField(
   }
 
   // Check required
-  if (field.type !== "number" && field.type !== "boolean" && field.type !== "array" && field.type !== "file" && field.type !== "image" && field.type !== "images") {
+  if (
+    field.type !== "number" &&
+    field.type !== "currency" &&
+    field.type !== "percent" &&
+    field.type !== "rating" &&
+    field.type !== "boolean" &&
+    field.type !== "array" &&
+    field.type !== "file" &&
+    field.type !== "image" &&
+    field.type !== "images"
+  ) {
     if (field.required && !hasRequiredValue(coerced)) {
       issues.push({ path, message: `${field.label} is required` });
     }
@@ -377,6 +391,9 @@ export function fieldsToTypeBoxSchema(
 
     switch (field.type) {
       case "number":
+      case "currency":
+      case "percent":
+      case "rating":
         shape[field.key] = field.required ? Type.Number() : Type.Optional(Type.Number());
         break;
       case "boolean":
@@ -492,15 +509,20 @@ export const resourceToZodSchema = resourceToTypeBoxSchema;
  */
 export function fieldToInputType(field: FieldDefinition): string {
   switch (field.type) {
-    case "number": return "text";
-    case "email": return "text";
-    case "url": return "text";
+    case "number":
+    case "currency":
+    case "percent":
+    case "rating": return "number";
+    case "email": return "email";
+    case "url": return "url";
     case "phone": return "tel";
+    case "color": return "color";
     case "boolean": return "checkbox";
-    case "date": return "text";
+    case "date": return "date";
     case "textarea":
     case "richtext":
     case "markdown":
+    case "code":
     case "images": return "textarea";
     case "json": return "textarea";
     case "select":
@@ -519,10 +541,15 @@ export function fieldToInputType(field: FieldDefinition): string {
 export function fieldToPlaceholder(field: FieldDefinition): string {
   switch (field.type) {
     case "date": return "YYYY-MM-DD";
+    case "daterange": return "YYYY-MM-DD ~ YYYY-MM-DD";
     case "email": return "user@example.com";
     case "url": return "https://example.com";
     case "phone": return "+1 (555) 000-0000";
     case "number": return "0";
+    case "currency": return "0.00";
+    case "percent": return "0";
+    case "rating": return "5";
+    case "color": return "#000000";
     default: return "";
   }
 }

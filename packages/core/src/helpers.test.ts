@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // Unit tests for helpers-pure.ts — pure functions, no Svelte runtime
 import { describe, test, expect } from 'bun:test';
 import {
@@ -263,7 +262,7 @@ describe('createSchemaValidator', () => {
         const values = input as Record<string, unknown>;
         if (!values.token) {
           const err = new Error('Token is missing');
-          (err as any).issues = [{ path: ['token'], message: 'Token is missing' }];
+          (err as Error & { issues: unknown[] }).issues = [{ path: ['token'], message: 'Token is missing' }];
           throw err;
         }
         return values;

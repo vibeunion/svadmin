@@ -475,9 +475,9 @@ export interface MenuItem {
 export interface FieldDefinition {
   key: string;
   label: string;
-  type: 'text' | 'number' | 'boolean' | 'date' | 'select' | 'multiselect' | 'tags'
+  type: 'text' | 'number' | 'boolean' | 'date' | 'daterange' | 'select' | 'multiselect' | 'tags'
     | 'textarea' | 'richtext' | 'image' | 'images' | 'json' | 'relation' | 'color'
-    | 'url' | 'email' | 'phone' | 'currency' | 'file' | 'markdown' | 'password' | 'array';
+    | 'url' | 'email' | 'phone' | 'currency' | 'percent' | 'rating' | 'code' | 'avatar' | 'copy' | 'file' | 'markdown' | 'password' | 'array';
   required?: boolean;
   searchable?: boolean;
   sortable?: boolean;

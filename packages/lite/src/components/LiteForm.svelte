@@ -70,7 +70,7 @@
 
   function textareaValue(field: FieldDefinition, value: unknown): string {
     if (field.type === 'images' && Array.isArray(value)) return value.map(String).join('\n');
-    if (field.type === 'json' && typeof value !== 'string' && value != null) {
+    if ((field.type === 'json' || field.type === 'code') && typeof value !== 'string' && value != null) {
       try {
         return JSON.stringify(value, null, 2);
       } catch {
@@ -126,7 +126,7 @@
           <textarea
             name={field.key}
             id={field.key}
-            class="lite-input {hasError ? 'lite-input-error' : ''}"
+            class="lite-input {field.type === 'code' ? 'lite-textarea-code' : ''} {hasError ? 'lite-input-error' : ''}"
             placeholder={placeholder}
             required={field.required}
           >{textareaValue(field, value)}</textarea>
@@ -172,6 +172,8 @@
             value={String(value ?? '')}
             class="lite-input {hasError ? 'lite-input-error' : ''}"
             placeholder={placeholder}
+            {...(field.type === 'currency' || field.type === 'percent' ? { step: 'any' } : {})}
+            {...(field.type === 'rating' ? { min: '0', max: '5', step: '0.5' } : {})}
             {... field.required ? { required: true } : {}}
           />
         {/if}

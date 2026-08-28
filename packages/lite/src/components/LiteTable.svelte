@@ -7,6 +7,7 @@
   import { t } from '@svadmin/core/i18n';
   import { isExplicitBooleanTrue } from '../value-normalization';
   import { liteFragmentId } from '../fragment-id';
+  import LiteMediaThumbnail from './LiteMediaThumbnail.svelte';
 
   interface Props {
     records: Record<string, unknown>[];
@@ -56,10 +57,34 @@
   }
 
   function formatValue(value: unknown, field: FieldDefinition): string {
-    if (value == null) return '—';
+    if (value == null || value === '') return '—';
     if (field.type === 'boolean') return '';  // handled in template
     if (field.type === 'date') {
       try { return new Date(value as string).toLocaleDateString(); } catch { return String(value); }
+    }
+    if (field.type === 'currency') {
+      const num = typeof value === 'number' ? value : Number(String(value).replace(/^[$€£¥]/, ''));
+      if (Number.isFinite(num)) {
+        try {
+          return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
+        } catch {
+          return `$${num.toFixed(2)}`;
+        }
+      }
+      return String(value);
+    }
+    if (field.type === 'percent') {
+      const num = typeof value === 'number' ? value : Number(String(value).replace(/%$/, ''));
+      if (Number.isFinite(num)) return `${num.toFixed(1)}%`;
+      return String(value);
+    }
+    if (field.type === 'rating') {
+      const num = typeof value === 'number' ? value : Number(value);
+      if (Number.isFinite(num)) {
+        const full = Math.floor(Math.max(0, Math.min(5, num)));
+        return '★'.repeat(full) + '☆'.repeat(5 - full);
+      }
+      return String(value);
     }
     if (field.type === 'select' && field.options) {
       const opt = field.options.find(o => String(o.value) === String(value));
@@ -105,6 +130,21 @@
               {/each}
             {:else if field.type === 'select' && field.options}
               <span class="lite-badge">{formatValue(record[field.key], field)}</span>
+            {:else if field.type === 'currency'}
+              <span class="lite-currency">{formatValue(record[field.key], field)}</span>
+            {:else if field.type === 'percent'}
+              <span class="lite-percent">{formatValue(record[field.key], field)}</span>
+            {:else if field.type === 'image' && record[field.key]}
+              <LiteMediaThumbnail src={String(record[field.key])} alt={field.label} height={32} />
+            {:else if field.type === 'avatar' && record[field.key]}
+              {@const val = record[field.key]}
+              <div class="lite-avatar lite-avatar-circle lite-avatar-sm">
+                {#if typeof val === 'string' && (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('/'))}
+                  <img src={val} alt={field.label} class="lite-avatar-img" />
+                {:else}
+                  <span class="lite-avatar-text">{String(val).slice(0, 2).toUpperCase()}</span>
+                {/if}
+              </div>
             {:else}
               {formatValue(record[field.key], field)}
             {/if}

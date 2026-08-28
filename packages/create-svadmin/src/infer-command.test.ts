@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, test, expect } from 'bun:test';
+import type { FieldDefinition } from '@svadmin/core';
 import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -84,10 +84,10 @@ describe('planGeneratedFiles', () => {
       'index.ts',
     ]);
 
-    const indexFile = files.find(f => f.relativePath === 'index.ts')!;
-    expect(indexFile.content).toContain("export * from './articles.resource.js';");
-    expect(indexFile.content).toContain("export * from './articles.schema.js';");
-    expect(indexFile.content).toContain("export { default as ArticleListPage } from './articles/ListPage.svelte';");
+    const indexFile = files.find(f => f.relativePath === 'index.ts');
+    expect(indexFile?.content).toContain("export * from './articles.resource.js';");
+    expect(indexFile?.content).toContain("export * from './articles.schema.js';");
+    expect(indexFile?.content).toContain("export { default as ArticleListPage } from './articles/ListPage.svelte';");
   });
 });
 
@@ -185,7 +185,7 @@ describe('executeInfer with mock fetch & files', () => {
 
     expect(result.resources.length).toBe(1);
     expect(result.resources[0].name).toBe('tasks');
-    expect(result.resources[0].fields.find((f: { key: string }) => f.key === 'completed')?.type).toBe('boolean');
+    expect(result.resources[0].fields.find((f: FieldDefinition) => f.key === 'completed')?.type).toBe('boolean');
   });
 
   test('infers from GraphQL endpoint mock URL using introspection query', async () => {
@@ -236,7 +236,7 @@ describe('executeInfer with mock fetch & files', () => {
     expect(sentQuery).toContain('__schema');
     expect(result.resources.length).toBe(1);
     expect(result.resources[0].name).toBe('members');
-    const emailField = result.resources[0].fields.find((f: { key: string }) => f.key === 'email');
+    const emailField = result.resources[0].fields.find((f: FieldDefinition) => f.key === 'email');
     expect(emailField?.type).toBe('email');
     expect(emailField?.required).toBe(true);
   });
