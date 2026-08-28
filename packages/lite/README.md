@@ -10,6 +10,12 @@ The bundled CSS follows an IE11-oriented baseline, but Svelte 5, SvelteKit, Tail
 
 The main `@svadmin/ui` package delivers a premium SPA experience using Svelte 5, Tailwind CSS v4, and TanStack. Those tools target modern browsers. Some enterprise/government environments instead prefer server-driven navigation, native forms, and a smaller client-side runtime.
 
+**What Lite is:**
+- A **Zero-JS SSR-first admin component suite** designed with an IE11-safe CSS baseline.
+- 100% interoperable with `@svadmin/core` — sharing the same `DataProvider`, `AuthProvider`, `Resource`, and `FieldDefinition` contracts.
+- An architectural companion to `@svadmin/ui` achieving **100% component parity (72/72 components)** through 1:1 server-rendered matches or deliberate semantic fallbacks.
+- **Not** a generic Tailwind-to-IE11 compiler or a full client-side port of shadcn-svelte (which depends on modern browser JS runtimes and CSS custom properties).
+
 `@svadmin/lite` provides a server-rendered fallback that **shares the same DataProvider, AuthProvider, and Resource definitions** — only the rendering layer is different.
 
 ## Features
@@ -29,6 +35,7 @@ The main `@svadmin/ui` package delivers a premium SPA experience using Svelte 5,
 | **Capability fallbacks** | Canvas, WASM, realtime, directory upload, observers, storage, media, and other browser-only features have server-safe alternatives |
 | **i18n** | Uses `@svadmin/core` `t()` translations |
 | **Multi-level Menu** | Always-expanded, config-driven nested links via `MenuItem[]` |
+| **Parity Tracking** | Built-in CLI matrix, CI parity verification gate, and live interactive visual showroom |
 | **Print** | `@media print` optimized styles |
 
 ## Quick Start
@@ -223,18 +230,56 @@ If the application is behind a reverse proxy, the same rule can be implemented
 there instead. The important property is that the SPA JavaScript is not sent to
 IE11 before the decision is made.
 
-## Components
+## Components & Parity (100% Coverage)
+
+`@svadmin/lite` provides **100% component parity** (72/72 components) corresponding to `@svadmin/ui`. See [PARITY.md](./PARITY.md) for the complete matrix.
+
+### Core Pages & Layout
 
 | Component | Description |
 |-----------|-------------|
-| `LiteLayout` | Sidebar + main area layout (supports `menu` prop for multi-level menus) |
-| `LiteTable` | HTML table with sort links and delete confirmation |
-| `LiteSearch` | GET-based search form |
-| `LitePagination` | Page number links |
-| `LiteForm` | Auto-generated form from `FieldDefinition[]` |
-| `LiteShow` | Record detail/view page |
-| `LiteLogin` | Login form |
-| `LiteAlert` | Success/error notification banner |
+| `LiteLayout` | Responsive sidebar + header + main shell (supports nested `menu` links) |
+| `LiteSidebar` / `LiteHeader` | Discrete layout primitives |
+| `LiteListPage` | Full-featured list view with search, table, bulk actions, and pagination |
+| `LiteCreatePage` / `LiteEditPage` | Auto-generated CRUD form pages |
+| `LiteShowPage` | Key-value record view with typed field renderers |
+| `LiteProfilePage` | User profile management page with avatar and info |
+| `LiteRegisterPage` | User registration page with server-side validation |
+| `LiteForgotPasswordPage` / `LiteUpdatePasswordPage` | Password recovery and credential rotation flows |
+| `LiteTable` | HTML table with sort links, selectable rows, and delete confirmation |
+| `LiteForm` | Schema-driven form renderer supporting all field definitions |
+| `LiteShow` | Detailed field-by-field record viewer |
+| `LitePagination` / `LiteSearch` | URL-driven pagination and GET search controls |
+| `LiteAlert` | Inline notification banner for success/error/warning states |
+| `LiteBreadcrumbs` / `LiteTabs` / `LiteEmptyState` | Semantic navigation and placeholder primitives |
+
+### Field Components (23 Fields)
+
+| Category | Components |
+|----------|------------|
+| **Text & Numeric** | `LiteTextField`, `LiteNumberField`, `LiteCurrencyField`, `LitePercentField`, `LitePhoneField`, `LiteEmailField`, `LiteUrlField`, `LiteRatingField`, `LiteCopyField` |
+| **Date & Choice** | `LiteDateField`, `LiteDateRangeField`, `LiteBooleanField`, `LiteSelectField`, `LiteMultiSelectField`, `LiteTreeSelect`, `LiteCascader`, `LiteTagField`, `LiteRelationField` |
+| **Media & Rich & Array** | `LiteAvatarField`, `LiteImageField`, `LiteFileField`, `LiteCodeField`, `LiteMarkdownField`, `LiteRichTextField`, `LiteJsonField`, `LiteArrayField`, `LiteDynamicFormList`, `LiteTransfer` |
+
+### Action Buttons (10 Buttons)
+
+| Component | Description |
+|-----------|-------------|
+| `LiteListButton`, `LiteCreateButton`, `LiteEditButton`, `LiteShowButton`, `LiteCloneButton` | Server-rendered `<a>` navigation buttons |
+| `LiteDeleteButton` | Fragment-target modal confirmation with native POST form action |
+| `LiteSaveButton`, `LiteRefreshButton`, `LiteExportButton`, `LiteImportButton` | Form submission, page refresh, and file action buttons |
+
+### Widgets & Charts (SSR-Safe)
+
+| Component | Description |
+|-----------|-------------|
+| `LiteStatsCard`, `LiteInsightCard`, `LiteAnomalyBadge` | Metric KPI cards and status badges |
+| `LiteBarChart`, `LiteLineChart`, `LitePieChart` | Server-rendered SVG/HTML charts with fallback data tables |
+
+### Compatibility & Degradation Primitives
+
+| Component | Description |
+|-----------|-------------|
 | `LiteCapabilityBoundary` | Documents and selects a server-safe fallback for an optional browser capability |
 | `LiteVisualFallback` | Snapshot plus accessible table for Canvas, WebGL, map, chart, and flow UIs |
 | `LiteDirectoryUpload` | Directory enhancement with multiple-file and ZIP upload fallbacks |
@@ -242,6 +287,23 @@ IE11 before the decision is made.
 | `LiteComputeFallback` | Native POST action for WASM, Worker, and long-running compute fallback |
 | `LiteOrderedList` | Up/down POST actions for drag-and-drop ordering fallback |
 | `LiteClipboardFallback` | Selectable textarea when Clipboard API is unavailable |
+| `LiteAutoSaveIndicator` | Server persistence timestamp indicator |
+| `LiteInlineEdit` | Non-JS inline edit modal fallback |
+| `LiteModalForm` / `LiteDrawerForm` | Fragment-target `#modal` forms for zero-JS popups |
+| `LiteVirtualTable` | Graceful fallback to server-paginated table |
+| `LiteDraggableHeader` | Static column header with URL sorter links |
+| `LiteToast` / `LiteUndoableNotification` | Server-driven flash messages and undo actions |
+| `LiteFilterBuilder` | Native multi-rule CRUD filter builder with AND/OR logical operators |
+
+## Parity Tracking & Visualization
+
+To monitor and maintain 100% component parity between `@svadmin/ui` and `@svadmin/lite`:
+
+- **CLI Dashboard**: Run `bun run check:parity` to inspect the live coverage matrix in terminal.
+- **Parity Matrix Document**: [PARITY.md](./PARITY.md) is auto-generated with exhaustive module-by-module tables.
+- **Machine-Readable JSON**: `packages/lite/parity.json` provides structured data for automation.
+- **Interactive Showroom**: Visit `/lite/parity` in the example app to interactively preview all 72 components and live metrics.
+- **CI Contract Test**: `scripts/parity-contract.test.ts` runs in CI to prevent regression and ensure every new UI component has a documented Lite counterpart.
 
 ## Server Utilities
 

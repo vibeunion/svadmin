@@ -64,6 +64,7 @@ export default defineConfig({
             { slug: 'guides/design-principles' },
             { slug: 'guides/interface-generation' },
             { slug: 'guides/comparison' },
+            { slug: 'guides/lite' },
           ],
         },
         {

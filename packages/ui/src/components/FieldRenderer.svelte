@@ -16,6 +16,9 @@
   import { Button } from './ui/button/index.js';
   import TooltipButton from './TooltipButton.svelte';
   import ComboboxField from './ComboboxField.svelte';
+  import TreeSelect, { type TreeSelectOption } from './TreeSelect.svelte';
+  import Cascader, { type CascaderOption } from './Cascader.svelte';
+  import Transfer, { type TransferItem } from './Transfer.svelte';
   import ArrayField from './fields/ArrayField.svelte';
   import MediaThumbnail from './content/MediaThumbnail.svelte';
   import { Plus, X } from '@lucide/svelte';
@@ -261,6 +264,35 @@
       rows={4}
       placeholder={i18n.t('field.enterValue', { label: field.label })}
       class="resize-y"
+    />
+
+  {:else if field.type === 'tree-select' || field.type === 'treeselect'}
+    <TreeSelect
+      options={(field.treeOptions ?? field.options ?? []) as TreeSelectOption[]}
+      value={value as any}
+      multiple={field.multiple}
+      disabled={disabled}
+      placeholder={i18n.t('field.selectPlaceholder')}
+      onchange={(v) => onchange(v)}
+    />
+
+  {:else if field.type === 'cascader'}
+    <Cascader
+      options={(field.cascaderOptions ?? field.options ?? []) as CascaderOption[]}
+      value={value as (string | number)[]}
+      separator={field.separator}
+      changeOnSelect={field.changeOnSelect}
+      disabled={disabled}
+      placeholder={i18n.t('field.selectPlaceholder')}
+      onchange={(v) => onchange(v)}
+    />
+
+  {:else if field.type === 'transfer'}
+    <Transfer
+      dataSource={(field.transferData ?? field.options?.map(o => ({ key: o.value, title: o.label })) ?? []) as TransferItem[]}
+      targetKeys={(value as (string | number)[]) ?? []}
+      disabled={disabled}
+      onchange={(next) => onchange(next)}
     />
 
   {:else if field.type === 'relation' && field.resource}

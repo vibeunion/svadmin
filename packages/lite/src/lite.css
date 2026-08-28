@@ -1066,6 +1066,211 @@ textarea.lite-input {
 .lite-mt-0 { margin-top: 0; }
 .lite-mb-lg { margin-bottom: 24px; }
 
+/* ─── Avatar ───────────────────────────────────────────────── */
+.lite-avatar-wrapper {
+  display: inline-flex;
+  align-items: center;
+}
+.lite-avatar-container {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.lite-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  color: #64748b;
+  font-weight: 500;
+  overflow: hidden;
+  vertical-align: middle;
+}
+.lite-avatar-circle { border-radius: 50%; }
+.lite-avatar-square { border-radius: 6px; }
+
+.lite-avatar-xs { width: 20px; height: 20px; font-size: 10px; }
+.lite-avatar-sm { width: 28px; height: 28px; font-size: 12px; }
+.lite-avatar-default { width: 36px; height: 36px; font-size: 14px; }
+.lite-avatar-lg { width: 44px; height: 44px; font-size: 16px; }
+
+.lite-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.lite-avatar-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+}
+.lite-avatar-dot-xs { width: 6px; height: 6px; }
+.lite-avatar-dot-sm { width: 8px; height: 8px; }
+.lite-avatar-dot-default { width: 10px; height: 10px; }
+.lite-avatar-dot-lg { width: 12px; height: 12px; }
+
+.lite-avatar-status-online, .lite-avatar-status-success { background: #22c55e; }
+.lite-avatar-status-busy, .lite-avatar-status-error { background: #ef4444; }
+.lite-avatar-status-warning, .lite-avatar-status-away { background: #f59e0b; }
+.lite-avatar-status-offline, .lite-avatar-status-neutral { background: #94a3b8; }
+
+.lite-avatar-text-block {
+  display: inline-flex;
+  flex-direction: column;
+  margin-left: 10px;
+  text-align: left;
+  vertical-align: middle;
+}
+.lite-avatar-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #0f172a;
+  line-height: 1.2;
+}
+.lite-avatar-subtitle {
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.2;
+  margin-top: 2px;
+}
+
+/* ─── Code Block ───────────────────────────────────────────── */
+.lite-code-block {
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #f8fafc;
+  overflow: hidden;
+  margin: 4px 0;
+}
+.lite-code-header {
+  padding: 4px 10px;
+  background: #f1f5f9;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 11px;
+}
+.lite-code-pre {
+  margin: 0;
+  padding: 10px 12px;
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-x: auto;
+  overflow-y: auto;
+  color: #0f172a;
+}
+
+/* ─── Copy Field ───────────────────────────────────────────── */
+.lite-copy-field {
+  display: inline-flex;
+  align-items: center;
+}
+.lite-copy-text {
+  font-size: 13px;
+  color: #0f172a;
+}
+
+/* ─── Currency & Numbers ───────────────────────────────────── */
+.lite-currency-field {
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+}
+
+/* ─── Date Range ───────────────────────────────────────────── */
+.lite-date-range {
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+}
+
+/* ─── Percentage & Progress ────────────────────────────────── */
+.lite-percent-container {
+  display: inline-flex;
+  align-items: center;
+}
+.lite-progress-track {
+  display: inline-block;
+  width: 64px;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+.lite-progress-fill {
+  display: block;
+  height: 100%;
+  background: #4f46e5;
+  border-radius: 3px;
+}
+.lite-progress-success { background: #22c55e; }
+.lite-progress-warning { background: #f59e0b; }
+.lite-progress-danger { background: #ef4444; }
+.lite-progress-info { background: #3b82f6; }
+
+/* ─── Phone Field ──────────────────────────────────────────── */
+.lite-phone-container {
+  display: inline-flex;
+  align-items: center;
+  font-size: 13px;
+}
+.lite-phone-icon {
+  margin-right: 6px;
+  font-size: 12px;
+}
+.lite-phone-link {
+  color: #4f46e5;
+  font-weight: 500;
+  text-decoration: none;
+}
+.lite-phone-link:hover {
+  text-decoration: underline;
+}
+
+/* ─── Rating Field ─────────────────────────────────────────── */
+.lite-rating-container {
+  display: inline-flex;
+  align-items: center;
+}
+.lite-rating {
+  display: inline-flex;
+  align-items: center;
+}
+.lite-rating-star {
+  display: inline-block;
+  margin-right: 2px;
+  line-height: 1;
+}
+.lite-rating-star-full, .lite-rating-star-half {
+  color: #f59e0b;
+}
+.lite-rating-star-empty {
+  color: #cbd5e1;
+}
+.lite-rating-sm { font-size: 12px; }
+.lite-rating-default { font-size: 14px; }
+.lite-rating-lg { font-size: 18px; }
+.lite-rating-value {
+  margin-left: 6px;
+  font-size: 13px;
+  color: #0f172a;
+  font-weight: 500;
+}
+
+/* ─── Semantic Tone Utilities ──────────────────────────────── */
+.lite-font-mono {
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+.lite-text-success { color: #16a34a; font-weight: 500; }
+.lite-text-warning { color: #d97706; font-weight: 500; }
+.lite-text-danger { color: #dc2626; font-weight: 500; }
+.lite-text-info { color: #2563eb; font-weight: 500; }
+.lite-text-primary { color: #4f46e5; font-weight: 500; }
+
 /* ─── Responsive ───────────────────────────────────────────── */
 @media (max-width: 768px) {
   .lite-wrapper {

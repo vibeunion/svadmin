@@ -54,6 +54,17 @@ export { default as CatchAllNavigate } from './components/CatchAllNavigate.svelt
 export { default as ThemedTitle } from './components/ThemedTitle.svelte';
 export { default as CommandPalette } from './components/CommandPalette.svelte';
 export { default as StepsForm } from './components/StepsForm.svelte';
+// Advanced Form & Data Controls (Refine/Antd Parity)
+export { default as DynamicFormList } from './components/DynamicFormList.svelte';
+export { default as TreeSelect } from './components/TreeSelect.svelte';
+export type { TreeSelectOption } from './components/TreeSelect.svelte';
+export { default as Cascader } from './components/Cascader.svelte';
+export type { CascaderOption } from './components/Cascader.svelte';
+export { default as Transfer } from './components/Transfer.svelte';
+export type { TransferItem } from './components/Transfer.svelte';
+export { default as FilterBuilder } from './components/FilterBuilder.svelte';
+export type { FilterRuleItem } from './components/FilterBuilder.svelte';
+
 export { default as InfiniteList } from './components/InfiniteList.svelte';
 export { default as ComboboxField } from './components/ComboboxField.svelte';
 export { default as PasswordInput } from './components/PasswordInput.svelte';

@@ -477,7 +477,8 @@ export interface FieldDefinition {
   label: string;
   type: 'text' | 'number' | 'boolean' | 'date' | 'select' | 'multiselect' | 'tags'
     | 'textarea' | 'richtext' | 'image' | 'images' | 'json' | 'relation' | 'color'
-    | 'url' | 'email' | 'phone' | 'currency' | 'file' | 'markdown' | 'password' | 'array';
+    | 'url' | 'email' | 'phone' | 'currency' | 'file' | 'markdown' | 'password' | 'array'
+    | 'tree-select' | 'treeselect' | 'cascader' | 'transfer' | 'rate' | 'code';
   required?: boolean;
   searchable?: boolean;
   sortable?: boolean;
@@ -488,7 +489,13 @@ export interface FieldDefinition {
   showInCreate?: boolean;
   showInEdit?: boolean;
   showInShow?: boolean;
-  options?: { label: string; value: string | number }[];
+  options?: { label: string; value: string | number; children?: unknown[]; disabled?: boolean }[];
+  treeOptions?: { label: string; value: string | number; children?: unknown[]; disabled?: boolean }[];
+  cascaderOptions?: { label: string; value: string | number; children?: unknown[]; disabled?: boolean }[];
+  transferData?: { key: string | number; title: string; description?: string; disabled?: boolean }[];
+  multiple?: boolean;
+  changeOnSelect?: boolean;
+  separator?: string;
   defaultValue?: unknown;
   // Relation support
   resource?: string;       // related resource name

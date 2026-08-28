@@ -27,7 +27,8 @@
     "bundle:check": "bun scripts/check-example-bundle.ts",
     "check:lite:ssr": "bun run --cwd packages/lite/example check && bun run --cwd packages/lite/example verify:ssr",
     "pack:check": "bun scripts/check-package-packs.ts",
-    "doc:sync": "bun scripts/check-doc-sync.ts"
+    "doc:sync": "bun scripts/check-doc-sync.ts",
+    "check:parity": "bun scripts/check-parity.ts --write"
   },
   "keywords": [
     "svelte",

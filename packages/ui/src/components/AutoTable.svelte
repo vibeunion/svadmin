@@ -121,6 +121,8 @@
     sorters?: Sort[];
     /** Custom batch actions to render when rows are selected */
     batchActions?: Snippet<[{ selectedIds: (string | number)[] }]>;
+    /** Summary row rendered at table footer */
+    summary?: Snippet<[{ data: BaseRecord[]; total: number; visibleColumnsCount: number }]>;
   }
 
   let {
@@ -139,6 +141,7 @@
     emptyState,
     expandedRowRender,
     batchActions,
+    summary,
     pagination: externalPagination,
     sorters: externalSorters,
   }: Props = $props();
@@ -1643,6 +1646,11 @@
               </Table.Row>
             {/each}
           </Table.Body>
+          {#if summary}
+            <Table.Footer class="bg-muted/30 font-medium">
+              {@render summary({ data: (query.data?.data as BaseRecord[]) ?? [], total: query.data?.total ?? 0, visibleColumnsCount: columns.filter((c) => c.id != null && isColumnVisible(c.id)).length })}
+            </Table.Footer>
+          {/if}
         </Table.Root>
         </div>
 

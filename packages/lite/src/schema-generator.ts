@@ -79,6 +79,7 @@ function coerceAndValidateField(
   let coerced: unknown = value;
 
   switch (field.type) {
+    case "currency":
     case "number": {
       if (coerced === undefined || coerced === null || coerced === "") {
         coerced = undefined;
@@ -86,7 +87,7 @@ function coerceAndValidateField(
           issues.push({ path, message: `${field.label} is required` });
         }
       } else if (typeof coerced === "string") {
-        const trimmed = coerced.trim();
+        const trimmed = coerced.trim().replace(/^[$€£¥₹]/u, "");
         if (trimmed === "") {
           coerced = undefined;
           if (field.required) {
@@ -278,7 +279,7 @@ function coerceAndValidateField(
 
     case "phone": {
       if (typeof coerced === "string" && coerced.length > 0) {
-        if (!/^[+\d\s()-]*$/.test(coerced)) {
+        if (!/^[+\d\s()-]*$/u.test(coerced)) {
           issues.push({ path, message: `${field.label} must be a valid phone number` });
         }
       }
@@ -341,7 +342,15 @@ function coerceAndValidateField(
   }
 
   // Check required
-  if (field.type !== "number" && field.type !== "boolean" && field.type !== "array" && field.type !== "file" && field.type !== "image" && field.type !== "images") {
+  if (
+    field.type !== "number"
+    && field.type !== "currency"
+    && field.type !== "boolean"
+    && field.type !== "array"
+    && field.type !== "file"
+    && field.type !== "image"
+    && field.type !== "images"
+  ) {
     if (field.required && !hasRequiredValue(coerced)) {
       issues.push({ path, message: `${field.label} is required` });
     }
@@ -377,6 +386,7 @@ export function fieldsToTypeBoxSchema(
 
     switch (field.type) {
       case "number":
+      case "currency":
         shape[field.key] = field.required ? Type.Number() : Type.Optional(Type.Number());
         break;
       case "boolean":
@@ -492,7 +502,9 @@ export const resourceToZodSchema = resourceToTypeBoxSchema;
  */
 export function fieldToInputType(field: FieldDefinition): string {
   switch (field.type) {
-    case "number": return "text";
+    case "number":
+    case "currency": return "text";
+    case "color": return "color";
     case "email": return "text";
     case "url": return "text";
     case "phone": return "tel";
@@ -523,6 +535,7 @@ export function fieldToPlaceholder(field: FieldDefinition): string {
     case "url": return "https://example.com";
     case "phone": return "+1 (555) 000-0000";
     case "number": return "0";
+    case "currency": return "0.00";
     default: return "";
   }
 }

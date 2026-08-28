@@ -70,7 +70,8 @@
     "test": "bun run test:components && bun run test:server && bun run test:security",
     "test:components": "vitest run --config ./vitest.config.ts",
     "test:server": "bun test ./src/schema-generator.test.ts ./src/server-adapter.test.ts ./src/fragment-id.test.ts ./src/compatibility.test.ts ./src/ie11-ssr-contract.test.ts",
-    "test:security": "vitest run --config ./src/security.test.config.ts"
+    "test:security": "vitest run --config ./src/security.test.config.ts",
+    "check:parity": "bun ../../scripts/check-parity.ts --write"
   },
   "license": "MIT",
   "publishConfig": {
