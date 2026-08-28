@@ -1,10 +1,11 @@
 <script lang="ts">
-  import type { ResourceDefinition } from '@svadmin/core';
-  import { t } from '@svadmin/core/i18n';
-  import LiteShowField from '../LiteShowField.svelte';
-  import LiteListButton from '../buttons/LiteListButton.svelte';
-  import LiteEditButton from '../buttons/LiteEditButton.svelte';
-  import LiteDeleteButton from '../buttons/LiteDeleteButton.svelte';
+  import type { ResourceDefinition } from "@svadmin/core";
+  import { t } from "@svadmin/core/i18n";
+  import LiteShowField from "../LiteShowField.svelte";
+  import LiteBreadcrumbs from "../LiteBreadcrumbs.svelte";
+  import LiteListButton from "../buttons/LiteListButton.svelte";
+  import LiteEditButton from "../buttons/LiteEditButton.svelte";
+  import LiteDeleteButton from "../buttons/LiteDeleteButton.svelte";
 
   interface Props {
     resource: ResourceDefinition;
@@ -17,12 +18,12 @@
   let {
     resource,
     record,
-    basePath = '/lite',
+    basePath = "/lite",
     canEdit,
     canDelete,
   }: Props = $props();
 
-  let pk = $derived(resource.primaryKey ?? 'id');
+  let pk = $derived(resource.primaryKey ?? "id");
   let idStr = $derived(String(record[pk]));
   const showEdit = $derived(canEdit ?? resource.canEdit !== false);
   const showDelete = $derived(canDelete ?? resource.canDelete !== false);
@@ -33,8 +34,16 @@
 </script>
 
 <div class="lite-page">
+  <LiteBreadcrumbs
+    items={[
+      { label: t("common.dashboard") || "Dashboard", href: basePath },
+      { label: resource.label || resource.name, href: `${basePath}/${resource.name}` },
+      { label: `#${idStr}` },
+    ]}
+  />
+
   <div class="lite-page-header">
-    <h1 class="lite-page-title">{t('common.show') || 'Show'} {resource.label || resource.name} #{idStr}</h1>
+    <h1 class="lite-page-title">{t("common.show") || "Show"} {resource.label || resource.name} #{idStr}</h1>
     <div class="lite-page-actions">
       {#if showEdit}
         <LiteEditButton resource={resource.name} recordItemId={idStr} {basePath} />
@@ -54,7 +63,7 @@
             {field.label}
           </div>
           <div style="color: #0f172a; font-size: 14px;">
-            <LiteShowField {field} value={record[field.key]} />
+            <LiteShowField {field} value={record[field.key]} {basePath} />
           </div>
         </div>
       {/each}

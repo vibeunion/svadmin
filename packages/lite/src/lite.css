@@ -189,6 +189,40 @@ a:hover {
   letter-spacing: -0.025em;
 }
 
+
+/* ─── Breadcrumbs ──────────────────────────────────────────── */
+.lite-breadcrumbs {
+  margin-bottom: 16px;
+}
+.lite-breadcrumbs ol {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.lite-breadcrumbs li {
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  color: #64748b;
+}
+.lite-breadcrumbs a {
+  color: #64748b;
+}
+.lite-breadcrumbs a:hover {
+  color: #0f172a;
+}
+.lite-breadcrumbs .current {
+  color: #0f172a;
+  font-weight: 500;
+}
+.lite-breadcrumb-sep {
+  margin: 0 8px;
+  color: #cbd5e1;
+}
+
 /* ─── Cards ────────────────────────────────────────────────── */
 .lite-card {
   background: #fff;

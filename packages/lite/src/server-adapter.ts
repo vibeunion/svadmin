@@ -30,6 +30,7 @@ export interface ListLoaderResult {
   currentSort?: string;
   currentOrder?: 'asc' | 'desc';
   currentSearch?: string;
+  currentFilters?: Record<string, string>;
   resource: ResourceDefinition;
 }
 
@@ -58,6 +59,17 @@ function listRequestState(url: URL, resource: ResourceDefinition): ListRequestSt
     ? requestedOrder === 'asc' || requestedOrder === 'desc' ? requestedOrder : 'asc'
     : resource.defaultSort?.order ?? 'asc';
   return { page, pageSize, sort, order, search: url.searchParams.get('q') ?? undefined };
+}
+
+function listRequestFilterValues(resource: ResourceDefinition, url: URL): Record<string, string> {
+  const values: Record<string, string> = {};
+  for (const field of resource.fields) {
+    const raw = url.searchParams.get(`filter_${field.key}`) ?? (field.key !== "q" && field.key !== "sort" && field.key !== "order" && field.key !== "page" ? url.searchParams.get(field.key) : null);
+    if (raw != null && raw.trim() !== "") {
+      values[field.key] = raw.trim();
+    }
+  }
+  return values;
 }
 
 function listRequestFilters(resource: ResourceDefinition, url: URL): Filter[] {
@@ -123,6 +135,7 @@ export function createListLoader(
       currentSort: sort,
       currentOrder: order,
       currentSearch: search,
+      currentFilters: listRequestFilterValues(resource, url),
       resource,
     };
   };
