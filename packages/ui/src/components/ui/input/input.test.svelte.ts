@@ -37,6 +37,15 @@ describe("Input", () => {
 		expect(input.value).toBe("");
 	});
 
+	it("applies file selector button styling for file inputs", () => {
+		render(Input, { type: "file", "aria-label": "File input" });
+		const input = screen.getByLabelText<HTMLInputElement>("File input");
+		expect(input.className).toContain("file:bg-muted");
+		expect(input.className).toContain("file:rounded-md");
+		expect(input.className).toContain("file:mr-3");
+		expect(input.className).toContain("cursor-pointer");
+	});
+
 	it("keeps value binding for non-file inputs", async () => {
 		render(InputHarness, { props: { mode: "text" } });
 
