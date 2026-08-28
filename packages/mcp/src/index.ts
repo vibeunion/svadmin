@@ -51,6 +51,12 @@ export interface MCPTool {
     properties: Record<string, MCPPropertySchema>;
     required?: string[];
   };
+  /** 显式声明是否为只读操作（只读操作可并发执行，无持久化副作用） */
+  readOnly?: boolean;
+  /** 显式声明是否支持并发调用 */
+  concurrent?: boolean;
+  /** 显式声明是否具有高风险/破坏性 */
+  destructive?: boolean;
 }
 
 export interface MCPPropertySchema {
@@ -105,6 +111,9 @@ function generateTools(options: MCPServerOptions): MCPTool[] {
   tools.push({
     name: 'svadmin_getList',
     description: 'Fetch a paginated list of records from a resource. Supports filtering and sorting.',
+    readOnly: true,
+    concurrent: true,
+    destructive: false,
     inputSchema: {
       type: 'object',
       properties: {
@@ -123,6 +132,9 @@ function generateTools(options: MCPServerOptions): MCPTool[] {
   tools.push({
     name: 'svadmin_getOne',
     description: 'Fetch a single record by ID from a resource.',
+    readOnly: true,
+    concurrent: true,
+    destructive: false,
     inputSchema: {
       type: 'object',
       properties: {
@@ -137,6 +149,9 @@ function generateTools(options: MCPServerOptions): MCPTool[] {
   tools.push({
     name: 'svadmin_getMany',
     description: 'Fetch multiple records by their IDs from a resource.',
+    readOnly: true,
+    concurrent: true,
+    destructive: false,
     inputSchema: {
       type: 'object',
       properties: {
@@ -152,6 +167,9 @@ function generateTools(options: MCPServerOptions): MCPTool[] {
     tools.push({
       name: 'svadmin_create',
       description: 'Create a new record in a resource.',
+      readOnly: false,
+      concurrent: false,
+      destructive: false,
       inputSchema: {
         type: 'object',
         properties: {
@@ -166,6 +184,9 @@ function generateTools(options: MCPServerOptions): MCPTool[] {
     tools.push({
       name: 'svadmin_update',
       description: 'Update an existing record by ID in a resource.',
+      readOnly: false,
+      concurrent: false,
+      destructive: false,
       inputSchema: {
         type: 'object',
         properties: {
@@ -181,6 +202,9 @@ function generateTools(options: MCPServerOptions): MCPTool[] {
     tools.push({
       name: 'svadmin_delete',
       description: 'Delete a record by ID from a resource.',
+      readOnly: false,
+      concurrent: false,
+      destructive: true,
       inputSchema: {
         type: 'object',
         properties: {
@@ -298,6 +322,24 @@ async function handleToolCall(
  * });
  * ```
  */
+/**
+ * 投影 MCP 工具为标准白名单 Schema，确保元数据与安全标记正确保留。
+ */
+export function projectMCPToolSchema(tool: MCPTool): MCPTool {
+  return {
+    name: tool.name,
+    description: tool.description,
+    inputSchema: {
+      type: tool.inputSchema.type,
+      properties: { ...tool.inputSchema.properties },
+      ...(tool.inputSchema.required ? { required: [...tool.inputSchema.required] } : {}),
+    },
+    ...(tool.readOnly !== undefined ? { readOnly: tool.readOnly } : {}),
+    ...(tool.concurrent !== undefined ? { concurrent: tool.concurrent } : {}),
+    ...(tool.destructive !== undefined ? { destructive: tool.destructive } : {}),
+  };
+}
+
 export function createMCPServer(options: MCPServerOptions): MCPServer {
   const serverName = options.name ?? '@svadmin/mcp';
   const serverVersion = options.version ?? '0.1.0';

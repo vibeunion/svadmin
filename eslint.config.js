@@ -85,6 +85,7 @@ export default ts.config(
       'example/src/**/*.svelte',
       'packages/ui/src/**/*.svelte',
       'packages/lite/src/**/*.svelte',
+      'packages/lite/example/src/**/*.svelte',
     ],
     rules: {
       'svelte/no-navigation-without-resolve': 'off',

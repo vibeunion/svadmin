@@ -3,6 +3,7 @@ import {
   resetAuditLogProvider,
   setAuditHandler,
   writeAuditEntry,
+  recordMutationRollback,
   type AuditEntry,
   type AuditLogProvider,
 } from './audit';
@@ -69,5 +70,49 @@ describe('writeAuditEntry', () => {
 
     await expect(writeAuditEntry({ action: 'update', resource: 'enterprise-policy' }))
       .rejects.toThrow('Strict audit logging requires an AuditLogProvider.');
+  });
+});
+
+describe("recordMutationRollback", () => {
+  test("records mutation rollback event with snapshot and reason", async () => {
+    const provider: AuditLogProvider = {
+      create: mock(async (params): Promise<AuditEntry> => {
+        return {
+          timestamp: "2026-08-25T00:00:00.000Z",
+          action: "rollback",
+          resource: params.resource,
+          previousData: params.previousData,
+          data: params.data,
+          meta: params.meta,
+        };
+      }),
+      get: mock(async () => []),
+    };
+
+    const entry = await recordMutationRollback({
+      resource: "orders",
+      recordId: "order-42",
+      mutationId: "mut-99",
+      previousData: { status: "pending" },
+      currentData: { status: "canceled" },
+      reason: "Network timeout during optimistic commit",
+      userId: "user-admin",
+    }, provider);
+
+    expect(entry.action).toBe("rollback");
+    expect(provider.create).toHaveBeenCalledWith(expect.objectContaining({
+      resource: "orders",
+      action: "rollback",
+      recordId: "order-42",
+      userId: "user-admin",
+      outcome: "success",
+      previousData: { status: "pending" },
+      data: { status: "canceled" },
+      meta: expect.objectContaining({
+        actionType: "mutation_rollback",
+        mutationId: "mut-99",
+        reason: "Network timeout during optimistic commit",
+      }),
+    }));
   });
 });

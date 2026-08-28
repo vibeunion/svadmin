@@ -426,7 +426,7 @@ export async function executeInfer(
 ): Promise<InferExecutionResult> {
   const loaded = await loadSourceData(options, customFetch);
   const primaryKey = options.primaryKey ?? 'id';
-  let resources: ResourceDefinition[] = [];
+  let resources: ResourceDefinition[];
   const bundles = new Map<string, InferResult>();
 
   if (loaded.sourceType === 'openapi') {

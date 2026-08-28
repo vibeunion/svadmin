@@ -1,33 +1,28 @@
+import { dataProvider, postsResource, resources } from '$lib/admin';
+import { createCrudActions, createListLoader } from '@svadmin/lite';
 import type { Actions, PageServerLoad } from './$types';
 
-interface PostRecord extends Record<string, unknown> {
-  id: number;
-  title: string;
-  status: 'draft' | 'published';
-}
+export const load = (async (event) => {
+  const postsLoader = createListLoader(dataProvider, postsResource);
+  const postsResult = await postsLoader(event);
 
-let posts: PostRecord[] = [
-  { id: 1, title: 'IE11 SSR contract', status: 'published' },
-  { id: 2, title: 'Native form actions', status: 'draft' },
-];
+  const [productsRes, usersRes, ordersRes] = await Promise.all([
+    dataProvider.getList({ resource: 'products', pagination: { current: 1, pageSize: 1 } }),
+    dataProvider.getList({ resource: 'users', pagination: { current: 1, pageSize: 1 } }),
+    dataProvider.getList({ resource: 'sales_orders', pagination: { current: 1, pageSize: 1 } }),
+  ]);
 
-export const load = (({ url }) => {
-  const searchTerm = url.searchParams.get('q')?.trim().toLowerCase() ?? '';
-  const visiblePosts = searchTerm
-    ? posts.filter((post) => post.title.toLowerCase().includes(searchTerm))
-    : posts;
-
-  return { posts: visiblePosts, searchTerm };
+  return {
+    ...postsResult,
+    stats: {
+      productsTotal: productsRes.total,
+      usersTotal: usersRes.total,
+      ordersTotal: ordersRes.total,
+      resourcesCount: resources.length,
+    },
+  };
 }) satisfies PageServerLoad;
 
 export const actions = {
-  delete: async ({ request }) => {
-    const submittedId = Number((await request.formData()).get('id'));
-    if (!Number.isSafeInteger(submittedId)) {
-      return { success: false, error: 'A valid post id is required' };
-    }
-
-    posts = posts.filter((post) => post.id !== submittedId);
-    return { success: true };
-  },
+  delete: (event) => createCrudActions(dataProvider, postsResource).delete(event),
 } satisfies Actions;

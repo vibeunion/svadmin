@@ -277,7 +277,7 @@ function assertUiDependencyContract(manifest: PackageManifest): void {
   const dependencies = manifest.dependencies ?? {};
 
   assert(
-    dependencies['svelte-sonner'] === '^1.1.1',
+    dependencies['svelte-sonner'] === '^1.2.1' || dependencies['svelte-sonner'] === '^1.1.1',
     '@svadmin/ui: toast runtime must use the Svelte 5-compatible svelte-sonner@^1.1.1',
   );
   assert(
@@ -289,7 +289,7 @@ function assertUiDependencyContract(manifest: PackageManifest): void {
     '@svadmin/ui: cmdk-sv must not reintroduce the Svelte 4-only @melt-ui/svelte dependency chain',
   );
   assert(
-    manifest.peerDependencies?.svelte === '^5.56.8',
+    manifest.peerDependencies?.svelte === '^5.56.10',
     '@svadmin/ui: Svelte peer range must match the supported Svelte 5 release line',
   );
 }

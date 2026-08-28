@@ -1,8 +1,18 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import { LiteLayout } from '@svadmin/lite';
   import '@svadmin/lite/lite.css';
+  import type { LayoutData } from './$types';
 
-  let { children }: { children: Snippet } = $props();
+  let { data, children }: { data: LayoutData; children: Snippet } = $props();
 </script>
 
-{@render children()}
+<LiteLayout
+  resources={data.resources}
+  menu={data.menu}
+  currentResource={data.currentResource}
+  brandName="Lite SSR"
+  basePath="/lite"
+>
+  {@render children()}
+</LiteLayout>

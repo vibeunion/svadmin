@@ -27,18 +27,18 @@
   "peerDependencies": {
     "@svadmin/core": ">=0.34.2 <0.45.0",
     "@svadmin/ui": ">=0.40.6 <0.63.0",
-    "svelte": "^5.56.8"
+    "svelte": "^5.56.10"
   },
   "dependencies": {
-    "@sinclair/typebox": "^0.34.51"
+    "@sinclair/typebox": "^0.34.52"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/svelte": "^5.4.2",
-    "@testing-library/user-event": "^14.6.4",
-    "happy-dom": "^20.11.2",
-    "vitest": "^4.1.10"
+    "@testing-library/user-event": "^14.6.6",
+    "happy-dom": "^20.11.12",
+    "vitest": "^4.1.11"
   },
   "scripts": {
     "build": "node ../../node_modules/@sveltejs/package/svelte-package.js -i src -o dist",

@@ -11,8 +11,8 @@
   "dependencies": {
     "@svadmin/core": "workspace:*",
     "@svadmin/lite": "workspace:*",
-    "@sveltejs/kit": "^2.70.2",
-    "svelte": "^5.56.8",
-    "vite": "^8.2.1"
+    "@sveltejs/kit": "^2.70.3",
+    "svelte": "^5.56.10",
+    "vite": "^8.2.2"
   }
 }

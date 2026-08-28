@@ -387,3 +387,66 @@ describe('Approval flow', () => {
     expect(wasApproved).toEqual(false);
   });
 });
+
+describe("projectAdminToolSchema", () => {
+  function projectAdminToolSchema(tool: {
+    name: string;
+    description: string;
+    parameters: Record<string, AdminToolParameter>;
+    readOnly?: boolean;
+    destructive?: boolean;
+    concurrent?: boolean;
+    needsApproval?: boolean;
+    execute?: (args: Record<string, unknown>) => Promise<unknown>;
+  }) {
+    return {
+      name: tool.name,
+      description: tool.description,
+      parameters: { ...tool.parameters },
+      ...(tool.readOnly !== undefined ? { readOnly: tool.readOnly } : {}),
+      ...(tool.destructive !== undefined ? { destructive: tool.destructive } : {}),
+      ...(tool.concurrent !== undefined ? { concurrent: tool.concurrent } : {}),
+      ...(tool.needsApproval !== undefined ? { needsApproval: tool.needsApproval } : {}),
+    };
+  }
+
+  test("projects tool whitelist and strips execution implementation", () => {
+    const rawTool = {
+      name: "deleteUser",
+      description: "Delete a user by id",
+      parameters: { id: { type: "string" as const, required: true } },
+      readOnly: false,
+      destructive: true,
+      concurrent: false,
+      needsApproval: true,
+      execute: async () => ({ success: true }),
+      internalState: "secret",
+    };
+
+    const projected = projectAdminToolSchema(rawTool);
+    expect(projected.name).toBe("deleteUser");
+    expect(projected.readOnly).toBe(false);
+    expect(projected.destructive).toBe(true);
+    expect(projected.concurrent).toBe(false);
+    expect(projected.needsApproval).toBe(true);
+    expect((projected as Record<string, unknown>).execute).toBeUndefined();
+    expect((projected as Record<string, unknown>).internalState).toBeUndefined();
+  });
+
+  test("read-only tool projection preserves concurrency flag", () => {
+    const rawTool = {
+      name: "getUser",
+      description: "Fetch a user by id",
+      parameters: { id: { type: "string" as const } },
+      readOnly: true,
+      concurrent: true,
+      destructive: false,
+    };
+
+    const projected = projectAdminToolSchema(rawTool);
+    expect(projected.readOnly).toBe(true);
+    expect(projected.concurrent).toBe(true);
+    expect(projected.destructive).toBe(false);
+    expect(projected.needsApproval).toBeUndefined();
+  });
+});

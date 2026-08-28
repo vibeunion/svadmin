@@ -220,7 +220,7 @@ export function inferResource(
 
 function generateCode(resource: ResourceDefinition): string {
   const esc = (s: string) => s.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-  const fieldsCode = resource.fields.map(f => {
+  const fieldsCode = resource.fields.map((f: FieldDefinition) => {
     const lines = [
       `    { key: '${esc(f.key)}', label: '${esc(f.label)}', type: '${f.type}'`,
     ];
@@ -337,8 +337,8 @@ export function generateResourceCode(resource: ResourceDefinition): string {
  */
 export function generateTypeBoxSchemaCode(resource: ResourceDefinition): string {
   const esc = (s: string) => s.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-  const schemaProps = resource.fields.map(f => {
-    let typeDef = 'Type.String()';
+  const schemaProps = resource.fields.map((f: FieldDefinition) => {
+    let typeDef: string;
     const isRequired = f.required === true;
 
     switch (f.type) {
@@ -466,3 +466,5 @@ export { inferFromOpenAPI } from './inferencer-openapi';
 export type { InferFromOpenAPIOptions } from './inferencer-openapi';
 export { inferFromGraphQL, GRAPHQL_INTROSPECTION_QUERY } from './inferencer-graphql';
 export type { InferFromGraphQLOptions, GraphQLIntrospectionSchema, GraphQLTypeDescriptor } from './inferencer-graphql';
+
+export type { FieldDefinition, ResourceDefinition } from './types';

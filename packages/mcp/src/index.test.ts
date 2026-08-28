@@ -249,3 +249,40 @@ describe('MCP JSON-RPC handling', () => {
     expect(res.error!.code).toBe(-32602);
   });
 });
+
+describe('Tool safety and concurrency metadata', () => {
+  const server = createMCPServer({
+    dataProvider: mockDataProvider as Parameters<typeof createMCPServer>[0]['dataProvider'],
+    resources: ['posts', 'users'],
+  });
+
+  test('read-only tools are marked concurrent and non-destructive', () => {
+    const tools = server.getTools();
+    const readTools = tools.filter(t => ['svadmin_getList', 'svadmin_getOne', 'svadmin_getMany'].includes(t.name));
+    expect(readTools).toHaveLength(3);
+    for (const tool of readTools) {
+      expect(tool.readOnly).toBe(true);
+      expect(tool.concurrent).toBe(true);
+      expect(tool.destructive).toBe(false);
+    }
+  });
+
+  test('mutation tools are marked non-concurrent, and delete is marked destructive', () => {
+    const tools = server.getTools();
+    const createTool = tools.find(t => t.name === 'svadmin_create')!;
+    const updateTool = tools.find(t => t.name === 'svadmin_update')!;
+    const deleteTool = tools.find(t => t.name === 'svadmin_delete')!;
+
+    expect(createTool.readOnly).toBe(false);
+    expect(createTool.concurrent).toBe(false);
+    expect(createTool.destructive).toBe(false);
+
+    expect(updateTool.readOnly).toBe(false);
+    expect(updateTool.concurrent).toBe(false);
+    expect(updateTool.destructive).toBe(false);
+
+    expect(deleteTool.readOnly).toBe(false);
+    expect(deleteTool.concurrent).toBe(false);
+    expect(deleteTool.destructive).toBe(true);
+  });
+});

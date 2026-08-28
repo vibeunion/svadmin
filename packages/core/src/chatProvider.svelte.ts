@@ -92,6 +92,12 @@ export interface AdminTool {
    * The agent emits an `approval_request` event and waits for `approveToolCall()`.
    */
   needsApproval?: boolean;
+  /** 显式声明是否为只读操作（只读操作可并发执行，无副作用） */
+  readOnly?: boolean;
+  /** 显式声明是否为破坏性/高风险操作（默认触发 Approval Gate） */
+  destructive?: boolean;
+  /** 显式声明是否支持并发调用 */
+  concurrent?: boolean;
   /** Execute the tool with the given arguments. */
   execute(args: Record<string, unknown>): Promise<ToolResult>;
 }
@@ -222,6 +228,30 @@ export function setChatContext(ctx: ChatContext): void {
 
 export function getChatContext(): ChatContext {
   return chatContext;
+}
+
+/**
+ * 将 AdminTool 投影为发给 LLM / MCP 客户端的白名单 Schema。
+ * 剥离底层执行逻辑（execute）与宿主私有状态，保留 name、description、parameters 及并发/安全声明。
+ */
+export function projectAdminToolSchema(tool: AdminTool): {
+  name: string;
+  description: string;
+  parameters: Record<string, AdminToolParameter>;
+  readOnly?: boolean;
+  destructive?: boolean;
+  concurrent?: boolean;
+  needsApproval?: boolean;
+} {
+  return {
+    name: tool.name,
+    description: tool.description,
+    parameters: { ...tool.parameters },
+    ...(tool.readOnly !== undefined ? { readOnly: tool.readOnly } : {}),
+    ...(tool.destructive !== undefined ? { destructive: tool.destructive } : {}),
+    ...(tool.concurrent !== undefined ? { concurrent: tool.concurrent } : {}),
+    ...(tool.needsApproval !== undefined ? { needsApproval: tool.needsApproval } : {}),
+  };
 }
 
 export function resetChatProvider(): void {

@@ -4,7 +4,7 @@
  * Auto-generates TypeBox schemas from @svadmin/core FieldDefinitions.
  * Used by Lite server actions and high-speed JIT form validation.
  */
-import { Type, type TSchema, type Static, type TObject } from "@sinclair/typebox";
+import { Type, type TSchema, type TObject } from "@sinclair/typebox";
 import type { FieldDefinition, ResourceDefinition } from "@svadmin/core";
 import { parseExplicitBoolean } from "./value-normalization";
 
@@ -436,7 +436,7 @@ export function fieldsToTypeBoxSchema(
       err.issues = res.error?.issues ?? [];
       throw err;
     }
-    return res.data!;
+    return res.data ?? {};
   };
 
   return Object.assign(baseSchema, {
@@ -449,7 +449,7 @@ export function fieldsToTypeBoxSchema(
       validate: (val: unknown) => {
         const res = safeParse(val);
         if (res.success) {
-          return { value: res.data! };
+          return { value: res.data ?? {} };
         }
         return {
           issues: (res.error?.issues ?? []).map((iss) => ({

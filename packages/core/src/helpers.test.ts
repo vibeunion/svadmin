@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Unit tests for helpers-pure.ts — pure functions, no Svelte runtime
 import { describe, test, expect } from 'bun:test';
 import {

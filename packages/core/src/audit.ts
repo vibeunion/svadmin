@@ -1,10 +1,13 @@
 // Audit logging — record admin operations
 // Full AuditLogProvider interface
 
+export type AuditAction = 'create' | 'update' | 'delete' | 'login' | 'logout' | 'rollback' | 'undo' | (string & {});
+
 export interface AuditEntry {
   id?: string | number;
   timestamp: string;
-  action: 'create' | 'update' | 'delete' | 'login' | 'logout';
+  action: AuditAction;
+  mutationId?: string;
   resource?: string;
   recordId?: string | number;
   userId?: string;
@@ -135,4 +138,42 @@ export async function writeAuditEntry(
       ...(entry.error === undefined ? {} : { error: entry.error }),
     },
   });
+}
+
+/**
+ * 记录乐观变更回滚或撤回事件至审计流。
+ * 将前序状态快照与回滚原因作为不可变事实写入审计。
+ */
+export async function recordMutationRollback(
+  params: {
+    resource: string;
+    recordId?: string | number;
+    mutationId?: string;
+    previousData?: Record<string, unknown>;
+    currentData?: Record<string, unknown>;
+    reason?: string;
+    userId?: string;
+    tenantId?: string | number;
+    requestId?: string;
+    traceId?: string;
+  },
+  provider: AuditLogProvider | null | undefined = auditLogProvider,
+): Promise<AuditEntry> {
+  return writeAuditEntry({
+    action: 'rollback',
+    resource: params.resource,
+    recordId: params.recordId,
+    userId: params.userId,
+    tenantId: params.tenantId,
+    requestId: params.requestId,
+    traceId: params.traceId,
+    outcome: 'success',
+    previousData: params.previousData,
+    data: params.currentData,
+    meta: {
+      actionType: 'mutation_rollback',
+      mutationId: params.mutationId,
+      reason: params.reason,
+    },
+  }, provider);
 }
