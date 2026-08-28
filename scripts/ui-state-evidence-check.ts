@@ -64,6 +64,7 @@ const allowedImageOwners = new Set([
   'packages/ui/src/components/ui/avatar/avatar.svelte',
   'packages/ui/src/components/content/MediaThumbnail.svelte',
   'packages/lite/src/components/LiteMediaThumbnail.svelte',
+  'packages/lite/src/components/compatibility/LiteVisualFallback.svelte',
 ]);
 const mediaFiles = [
   ...readdirSync('packages/ui/src/components', { recursive: true }).map((name) => join('packages/ui/src/components', String(name))),
