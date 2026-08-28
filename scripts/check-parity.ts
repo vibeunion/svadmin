@@ -147,6 +147,8 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'PivotTable', uiComponent: 'PivotTable.svelte', liteComponent: 'LitePivotTable.svelte', category: 'advanced', status: 'exact', strategy: '多维交叉透视分析表' },
   { name: 'MultiTabKeepAlive', uiComponent: 'MultiTabKeepAlive.svelte', liteComponent: 'LiteMultiTabKeepAlive.svelte', category: 'layout', status: 'exact', strategy: '工作台多标签页导航' },
   { name: 'GanttChart', uiComponent: 'GanttChart.svelte', liteComponent: 'LiteGanttChart.svelte', category: 'widgets', status: 'exact', strategy: '项目甘特图排期进度表' },
+  { name: 'CanvasAnnotation', uiComponent: 'CanvasAnnotation.svelte', liteComponent: 'LiteCanvasAnnotation.svelte', category: 'advanced', status: 'exact', strategy: '底图展示与交互式标注画板' },
+  { name: 'SignaturePad', uiComponent: 'SignaturePad.svelte', liteComponent: 'LiteSignaturePad.svelte', category: 'fields', status: 'exact', strategy: '电子签名画板与文件上传降级' },
 
   // ─── SPA Only (No SSR counterpart needed) ───────────────────────────────
   { name: 'ThemeToggle', uiComponent: 'ThemeToggle.svelte', category: 'layout', status: 'spa_only', strategy: '免适配 (Lite 为固定 Slate/Indigo 配色)', note: 'IE11 不支持 CSS 变量与客户端主题即时切换' },

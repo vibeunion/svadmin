@@ -1,18 +1,18 @@
 # @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵
 
-> 自动生成时间：`2026-08-28T23:30:11.945Z`
-> 总体适配覆盖率：**100%**（97/97 组件）
+> 自动生成时间：`2026-08-28T23:35:05.613Z`
+> 总体适配覆盖率：**100%**（99/99 组件）
 
 ## 进度总览
 
 | 模块分类 | 组件总数 | 1:1 对齐 (Exact) | 语义降级 (Fallback) | 免适配 (SPA Only) | 待补齐 (Missing) | 覆盖率 |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
-| **fields** | 32 | 28 | 3 | 1 | 0 | **100%** |
+| **fields** | 33 | 29 | 3 | 1 | 0 | **100%** |
 | **buttons** | 10 | 10 | 0 | 0 | 0 | **100%** |
 | **pages** | 11 | 11 | 0 | 0 | 0 | **100%** |
 | **layout** | 9 | 8 | 0 | 1 | 0 | **100%** |
 | **widgets** | 8 | 5 | 3 | 0 | 0 | **100%** |
-| **advanced** | 27 | 21 | 4 | 2 | 0 | **100%** |
+| **advanced** | 28 | 22 | 4 | 2 | 0 | **100%** |
 
 ---
 
@@ -53,6 +53,7 @@
 | `ImageCropper` | `LiteImageCropper.svelte` | ✅ 1:1 对齐 | 图片缩放与裁剪参数表单 |
 | `JsonSchemaForm` | `LiteJsonSchemaForm.svelte` | ✅ 1:1 对齐 | JSON Schema 动态表单生成 |
 | `MentionsInput` | `LiteMentionsInput.svelte` | ✅ 1:1 对齐 | @与#智能提及输入框 |
+| `SignaturePad` | `LiteSignaturePad.svelte` | ✅ 1:1 对齐 | 电子签名画板与文件上传降级 |
 | `VoiceInput` | — | 🚫 免适配 | 免适配 (Web Speech API) |
 
 ### BUTTONS
@@ -142,6 +143,7 @@
 | `ActivityFeed` | `LiteActivityFeed.svelte` | ✅ 1:1 对齐 | 时间线动态与评论流 |
 | `KanbanBoard` | `LiteKanbanBoard.svelte` | ✅ 1:1 对齐 | 多列任务看板与泳道视图 |
 | `PivotTable` | `LitePivotTable.svelte` | ✅ 1:1 对齐 | 多维交叉透视分析表 |
+| `CanvasAnnotation` | `LiteCanvasAnnotation.svelte` | ✅ 1:1 对齐 | 底图展示与交互式标注画板 |
 | `DevTools` | — | 🚫 免适配 | 免适配 (SPA 调试器) |
 | `CopilotPanel` | — | 🚫 免适配 | 免适配 (AI Copilot 客户端浮窗) |
 

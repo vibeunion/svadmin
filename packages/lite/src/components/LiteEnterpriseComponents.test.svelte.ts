@@ -33,6 +33,8 @@ import LiteKanbanBoard from './LiteKanbanBoard.svelte';
 import LitePivotTable from './LitePivotTable.svelte';
 import LiteMultiTabKeepAlive from './LiteMultiTabKeepAlive.svelte';
 import LiteGanttChart from './LiteGanttChart.svelte';
+import LiteCanvasAnnotation from './LiteCanvasAnnotation.svelte';
+import LiteSignaturePad from './LiteSignaturePad.svelte';
 
 describe('Lite Enterprise Components SSR rendering', () => {
   it('renders LiteTreeSelect in show and edit mode', () => {
@@ -409,5 +411,18 @@ describe('Lite Enterprise Components SSR rendering', () => {
     });
     expect(ganttView.container.textContent).toContain('Project Schedule');
     expect(ganttView.container.textContent).toContain('Sprint 1');
+
+    const annoView = render(LiteCanvasAnnotation, {
+      imageUrl: '/diagram.png',
+      annotations: [{ id: '1', type: 'defect', text: 'Misaligned bolt' }],
+    });
+    expect(annoView.container.textContent).toContain('Image Annotation & Markings');
+    expect(annoView.container.textContent).toContain('Misaligned bolt');
+
+    const sigView = render(LiteSignaturePad, {
+      value: '/sig.png',
+    });
+    expect(sigView.container.textContent).toContain('Electronic Signature');
+    expect(sigView.container.querySelector('img')).toBeTruthy();
   });
 });

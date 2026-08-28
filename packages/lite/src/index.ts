@@ -93,6 +93,9 @@ export { default as LiteKanbanBoard } from './components/LiteKanbanBoard.svelte'
 export { default as LitePivotTable } from './components/LitePivotTable.svelte';
 export { default as LiteMultiTabKeepAlive } from './components/LiteMultiTabKeepAlive.svelte';
 export { default as LiteGanttChart } from './components/LiteGanttChart.svelte';
+export { default as LiteCanvasAnnotation } from './components/LiteCanvasAnnotation.svelte';
+export type { AnnotationItem } from './components/LiteCanvasAnnotation.svelte';
+export { default as LiteSignaturePad } from './components/LiteSignaturePad.svelte';
 
 // Compatibility fallbacks for browser-only and third-party UI capabilities.
 export * from './components/compatibility/index';

@@ -109,6 +109,9 @@ export { default as MultiTabKeepAlive } from './components/MultiTabKeepAlive.sve
 export type { WorkspaceTab } from './components/MultiTabKeepAlive.svelte';
 export { default as GanttChart } from './components/GanttChart.svelte';
 export type { GanttTask } from './components/GanttChart.svelte';
+export { default as CanvasAnnotation } from './components/CanvasAnnotation.svelte';
+export type { AnnotationTool } from './components/CanvasAnnotation.svelte';
+export { default as SignaturePad } from './components/SignaturePad.svelte';
 
 export { default as InfiniteList } from './components/InfiniteList.svelte';
 export { default as ComboboxField } from './components/ComboboxField.svelte';

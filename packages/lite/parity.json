@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-08-28T23:30:11.945Z",
-  "totalComponents": 97,
-  "adaptedCount": 83,
+  "timestamp": "2026-08-28T23:35:05.613Z",
+  "totalComponents": 99,
+  "adaptedCount": 85,
   "fallbackCount": 10,
   "spaOnlyCount": 4,
   "missingCount": 0,
@@ -9,8 +9,8 @@
   "categories": {
     "fields": {
       "category": "fields",
-      "total": 32,
-      "adapted": 28,
+      "total": 33,
+      "adapted": 29,
       "fallback": 3,
       "spaOnly": 1,
       "missing": 0,
@@ -54,8 +54,8 @@
     },
     "advanced": {
       "category": "advanced",
-      "total": 27,
-      "adapted": 21,
+      "total": 28,
+      "adapted": 22,
       "fallback": 4,
       "spaOnly": 2,
       "missing": 0,
@@ -806,6 +806,22 @@
       "category": "widgets",
       "status": "exact",
       "strategy": "项目甘特图排期进度表"
+    },
+    {
+      "name": "CanvasAnnotation",
+      "uiComponent": "CanvasAnnotation.svelte",
+      "liteComponent": "LiteCanvasAnnotation.svelte",
+      "category": "advanced",
+      "status": "exact",
+      "strategy": "底图展示与交互式标注画板"
+    },
+    {
+      "name": "SignaturePad",
+      "uiComponent": "SignaturePad.svelte",
+      "liteComponent": "LiteSignaturePad.svelte",
+      "category": "fields",
+      "status": "exact",
+      "strategy": "电子签名画板与文件上传降级"
     },
     {
       "name": "ThemeToggle",
