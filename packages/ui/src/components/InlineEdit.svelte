@@ -85,7 +85,7 @@
       onkeydown={handleKeydown}
       onblur={handleBlur}
       disabled={saving}
-      aria-label={`Edit ${fieldLabel}`}
+      aria-label={fieldLabel}
       class="h-7 w-full rounded border bg-background px-2 text-sm outline-none ring-1 ring-primary/50 focus:ring-2 focus:ring-primary transition-all disabled:opacity-60"
     />
     {#if saving}
@@ -98,11 +98,10 @@
   <span
     class="inline-flex items-center cursor-pointer rounded px-1.5 py-0.5 -mx-1 text-sm text-foreground hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 transition-colors"
     ondblclick={startEdit}
-    title={`Double-click or press Enter to edit ${fieldLabel}`}
+    title={`Double-click to edit ${fieldLabel}`}
     role="button"
     tabindex="0"
-    aria-label={`Edit ${fieldLabel}: ${value != null && value !== '' ? String(value) : 'empty'}`}
-    onkeydown={(e) => { if (e.key === 'Enter' || e.key === 'F2' || e.key === ' ') { e.preventDefault(); startEdit(); } }}
+    onkeydown={(e) => { if (e.key === 'Enter' || e.key === 'F2') { e.preventDefault(); startEdit(); } }}
   >
     {value != null && value !== '' ? String(value) : '—'}
   </span>
