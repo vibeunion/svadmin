@@ -1,6 +1,7 @@
 import { strict as assert } from 'node:assert';
 import { preview } from 'vite';
 import { dataProvider, resources } from '../src/lib/admin';
+import parityReport from '../../parity.json';
 
 async function assertServerRenderedPage(baseUrl: string, path: string, expected?: string | RegExp) {
   const response = await fetch(new URL(path, baseUrl));
@@ -73,8 +74,11 @@ try {
   assert.match(compatibilityHtml, /ZIP archive fallback/u);
   checkedRoutes += 1;
 
-  const parityHtml = await assertServerRenderedPage(baseUrl, '/lite/parity', /72\s*\/\s*72/u);
-  assert.match(parityHtml, /72\s*\/\s*72/u);
+  const parityCovered = parityReport.adaptedCount + parityReport.fallbackCount + parityReport.spaOnlyCount;
+  const parityTotal = parityReport.totalComponents;
+  const parityCount = new RegExp(`${parityCovered}\\s*\\/\\s*${parityTotal}`, 'u');
+  const parityHtml = await assertServerRenderedPage(baseUrl, '/lite/parity', parityCount);
+  assert.match(parityHtml, parityCount);
   checkedRoutes += 1;
 
   for (const path of ['/lite/compatibility/flow.json', '/lite/compatibility/result.json']) {
