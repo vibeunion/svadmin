@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.16.11...create-svadmin-v0.17.0) (2026-08-28)
+
+
+### 🚀 Features
+
+* **ui:** implement design system density dials and accessible components polish ([4297429](https://github.com/vibeunion/svadmin/commit/429742940d17771a440b668cc8f83dd9399a6422))
+
 ## [0.16.11](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.16.10...create-svadmin-v0.16.11) (2026-08-27)
 
 

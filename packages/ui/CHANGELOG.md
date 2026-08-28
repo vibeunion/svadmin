@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.59.0](https://github.com/vibeunion/svadmin/compare/ui-v0.58.0...ui-v0.59.0) (2026-08-28)
+
+
+### 🚀 Features
+
+* **ui:** implement design system density dials and accessible components polish ([4297429](https://github.com/vibeunion/svadmin/commit/429742940d17771a440b668cc8f83dd9399a6422))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** normalize file input button styling and container framing ([7337529](https://github.com/vibeunion/svadmin/commit/733752938872b285a6740a7d78dd99794631c8a5))
+
 ## [0.58.0](https://github.com/vibeunion/svadmin/compare/ui-v0.57.0...ui-v0.58.0) (2026-08-27)
 
 
