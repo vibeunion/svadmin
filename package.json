@@ -12,6 +12,7 @@
   ],
   "scripts": {
     "dev": "cd example && bun run dev",
+    "dev:lite": "cd packages/lite/example && bun run dev",
     "build": "bun run build:packages && bun run --cwd example build && bun run bundle:check",
     "check": "bun run typecheck",
     "lint": "eslint . --max-warnings 0",
@@ -25,7 +26,8 @@
     "build:packages": "bun run --cwd packages/ui build && bun run --cwd packages/flow build && bun run --cwd packages/surface build && bun run --cwd packages/editor build && bun run --cwd packages/lite build && bun run --cwd packages/auth-utils build && bun run --cwd packages/sso build && bun run --cwd packages/create-svadmin build",
     "bundle:check": "bun scripts/check-example-bundle.ts",
     "check:lite:ssr": "bun run --cwd packages/lite/example check && bun run --cwd packages/lite/example verify:ssr",
-    "pack:check": "bun scripts/check-package-packs.ts"
+    "pack:check": "bun scripts/check-package-packs.ts",
+    "doc:sync": "bun scripts/check-doc-sync.ts"
   },
   "keywords": [
     "svelte",

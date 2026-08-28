@@ -72,6 +72,7 @@
 | `@svadmin/sveltekit`     | SvelteKit router integration / SvelteKit 路由集成            |
 | `@svadmin/lite`          | SSR-first variant with optional progressive enhancement / SSR 优先，可选渐进增强 |
 | `@svadmin/sso`           | OIDC/OAuth2 SSO plugin / 单点登录插件                        |
+| `@svadmin/auth-utils`    | Zero-dep auth utilities (password, session, TOTP) / 零依赖认证工具库 |
 | `@svadmin/editor`        | Rich-text editor component / 富文本编辑器组件                |
 | `@svadmin/mcp`           | MCP (Model Context Protocol) integration / AI 工具集成       |
 | `@svadmin/surface`       | Validated declarative dashboards / 严格校验的声明式仪表盘    |
