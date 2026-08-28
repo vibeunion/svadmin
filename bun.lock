@@ -309,7 +309,7 @@
       "version": "0.3.28",
       "dependencies": {
         "@lucide/svelte": "^1.31.0",
-        "zod": "^4.4.3",
+        "@sinclair/typebox": "^0.34.51",
       },
       "devDependencies": {
         "@happy-dom/global-registrator": "^20.11.2",
@@ -486,7 +486,7 @@
       "name": "@svadmin/surface",
       "version": "0.4.8",
       "dependencies": {
-        "zod": "^4.4.3",
+        "@sinclair/typebox": "^0.34.51",
       },
       "devDependencies": {
         "@sveltejs/vite-plugin-svelte": "^7.3.0",
@@ -542,13 +542,13 @@
       },
       "peerDependencies": {
         "@svadmin/core": "workspace:*",
+        "@svadmin/editor": "*",
         "@tanstack/svelte-query": "^6.1.38",
         "highlight.js": "^11.11.1",
         "isomorphic-dompurify": "^3.22.0",
         "marked": "^18.0.9",
         "marked-highlight": "^2.2.4",
         "svelte": "^5.56.8",
-        "@svadmin/editor": "*",
       },
       "optionalPeers": [
         "@svadmin/core",
