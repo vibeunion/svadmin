@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.45.0](https://github.com/vibeunion/svadmin/compare/core-v0.44.0...core-v0.45.0) (2026-08-28)
+
+
+### 🚀 Features
+
+* **lite:** implement dynamic catch-all routes and example resources support ([d94a481](https://github.com/vibeunion/svadmin/commit/d94a481da67c1ae6440e7c360afe901d6d23313d))
+
 ## [0.44.0](https://github.com/vibeunion/svadmin/compare/core-v0.43.0...core-v0.44.0) (2026-08-28)
 
 
