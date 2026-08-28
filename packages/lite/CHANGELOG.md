@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.4.0](https://github.com/vibeunion/svadmin/compare/lite-v0.3.28...lite-v0.4.0) (2026-08-28)
+
+
+### 🚀 Features
+
+* **core,surface,lite:** complete full monorepo migration to typebox ([#344](https://github.com/vibeunion/svadmin/issues/344)) ([9ba73bb](https://github.com/vibeunion/svadmin/commit/9ba73bb06e5e7b1f0bf0ac37167ff97c968c7ad0))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.34.2 <0.44.0 to >=0.44.0
+
 ## [0.3.28](https://github.com/vibeunion/svadmin/compare/lite-v0.3.27...lite-v0.3.28) (2026-08-28)
 
 
