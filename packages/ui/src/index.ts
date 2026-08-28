@@ -83,6 +83,22 @@ export type { TableSummaryColumn, AggregationType } from './components/TableSumm
 export { default as VersionDiffViewer } from './components/VersionDiffViewer.svelte';
 export { default as VirtualTable } from './components/VirtualTable.svelte';
 export type { VirtualTableColumn } from './components/VirtualTable.svelte';
+export { default as EditableTable } from './components/EditableTable.svelte';
+export type { EditableTableColumn } from './components/EditableTable.svelte';
+export { default as DraggableRowTable } from './components/DraggableRowTable.svelte';
+export type { DraggableTableColumn } from './components/DraggableRowTable.svelte';
+export { default as SplitPaneLayout } from './components/SplitPaneLayout.svelte';
+export { default as MasterDetailView } from './components/MasterDetailView.svelte';
+export { default as MediaLibraryModal } from './components/MediaLibraryModal.svelte';
+export type { MediaItem } from './components/MediaLibraryModal.svelte';
+export { default as ImageCropper } from './components/ImageCropper.svelte';
+export { default as ActivityFeed } from './components/ActivityFeed.svelte';
+export type { ActivityItem } from './components/ActivityFeed.svelte';
+export { default as PresenceAvatarGroup } from './components/PresenceAvatarGroup.svelte';
+export type { PresenceUser } from './components/PresenceAvatarGroup.svelte';
+export { default as PrintableBill } from './components/PrintableBill.svelte';
+export type { BillItem } from './components/PrintableBill.svelte';
+export { default as JsonSchemaForm } from './components/JsonSchemaForm.svelte';
 
 export { default as InfiniteList } from './components/InfiniteList.svelte';
 export { default as ComboboxField } from './components/ComboboxField.svelte';

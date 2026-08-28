@@ -18,6 +18,16 @@ import LiteDrawerForm from './LiteDrawerForm.svelte';
 import LiteTableSummary from './LiteTableSummary.svelte';
 import LiteVersionDiffViewer from './LiteVersionDiffViewer.svelte';
 import LiteVirtualTable from './LiteVirtualTable.svelte';
+import LiteEditableTable from './LiteEditableTable.svelte';
+import LiteDraggableRowTable from './LiteDraggableRowTable.svelte';
+import LiteSplitPaneLayout from './LiteSplitPaneLayout.svelte';
+import LiteMasterDetailView from './LiteMasterDetailView.svelte';
+import LiteMediaLibraryModal from './LiteMediaLibraryModal.svelte';
+import LiteImageCropper from './LiteImageCropper.svelte';
+import LiteActivityFeed from './LiteActivityFeed.svelte';
+import LitePresenceAvatarGroup from './LitePresenceAvatarGroup.svelte';
+import LitePrintableBill from './LitePrintableBill.svelte';
+import LiteJsonSchemaForm from './LiteJsonSchemaForm.svelte';
 
 describe('Lite Enterprise Components SSR rendering', () => {
   it('renders LiteTreeSelect in show and edit mode', () => {
@@ -286,5 +296,76 @@ describe('Lite Enterprise Components SSR rendering', () => {
     });
     expect(view.container.textContent).toContain('A001');
     expect(view.container.textContent).toContain('Item 2');
+  });
+
+  it('renders LiteEditableTable and LiteDraggableRowTable', () => {
+    const editView = render(LiteEditableTable, {
+      columns: [{ key: 'title', label: 'Title' }],
+      data: [{ id: 1, title: 'Test Task' }],
+    });
+    expect(editView.container.querySelector('input[type="text"]')).toBeTruthy();
+
+    const dragView = render(LiteDraggableRowTable, {
+      columns: [{ key: 'name', label: 'Name' }],
+      items: [{ id: 1, name: 'First' }],
+    });
+    expect(dragView.container.textContent).toContain('First');
+  });
+
+  it('renders LiteSplitPaneLayout and LiteMasterDetailView', () => {
+    const splitView = render(LiteSplitPaneLayout);
+    expect(splitView.container.querySelector('.lite-split-layout')).toBeTruthy();
+
+    const masterView = render(LiteMasterDetailView, {
+      items: [{ id: 1, title: 'Master 1' }],
+    });
+    expect(masterView.container.textContent).toContain('Master 1');
+  });
+
+  it('renders LiteMediaLibraryModal and LiteImageCropper', () => {
+    const mediaView = render(LiteMediaLibraryModal, {
+      mediaItems: [{ id: '1', name: 'Banner.jpg', url: '/banner.jpg' }],
+    });
+    expect(mediaView.container.textContent).toContain('Banner.jpg');
+
+    const cropView = render(LiteImageCropper, {
+      imageUrl: '/avatar.png',
+      aspectRatio: 1,
+    });
+    expect(cropView.container.textContent).toContain('Image Crop');
+  });
+
+  it('renders LiteActivityFeed and LitePresenceAvatarGroup', () => {
+    const actView = render(LiteActivityFeed, {
+      activities: [{ id: '1', action: 'approved order', timestamp: '10:00' }],
+    });
+    expect(actView.container.textContent).toContain('approved order');
+
+    const presView = render(LitePresenceAvatarGroup, {
+      users: [{ id: '1', name: 'Alice' }],
+    });
+    expect(presView.container.textContent).toContain('Alice');
+  });
+
+  it('renders LitePrintableBill and LiteJsonSchemaForm', () => {
+    const billView = render(LitePrintableBill, {
+      billNumber: 'INV-2026-001',
+      date: '2026-08-29',
+      customerName: 'Acme Corp',
+      items: [{ name: 'SaaS License', quantity: 1, unitPrice: 999 }],
+    });
+    expect(billView.container.textContent).toContain('INV-2026-001');
+    expect(billView.container.textContent).toContain('Acme Corp');
+
+    const schemaView = render(LiteJsonSchemaForm, {
+      schema: {
+        title: 'Project Form',
+        properties: {
+          projectName: { type: 'string', title: 'Project Name' },
+        },
+      },
+    });
+    expect(schemaView.container.textContent).toContain('Project Form');
+    expect(schemaView.container.textContent).toContain('Project Name');
   });
 });

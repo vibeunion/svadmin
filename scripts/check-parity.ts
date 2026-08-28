@@ -132,6 +132,16 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'StepForm', uiComponent: 'StepForm.svelte', liteComponent: 'LiteStepForm.svelte', category: 'advanced', status: 'exact', strategy: '分步向导与原生 POST 步骤表单' },
   { name: 'TableSummary', uiComponent: 'TableSummary.svelte', liteComponent: 'LiteTableSummary.svelte', category: 'advanced', status: 'exact', strategy: '表格底部统计聚合行' },
   { name: 'VersionDiffViewer', uiComponent: 'VersionDiffViewer.svelte', liteComponent: 'LiteVersionDiffViewer.svelte', category: 'advanced', status: 'exact', strategy: '版本字段变更对比表格' },
+  { name: 'EditableTable', uiComponent: 'EditableTable.svelte', liteComponent: 'LiteEditableTable.svelte', category: 'advanced', status: 'exact', strategy: '行内与单元格批量编辑表格表单' },
+  { name: 'DraggableRowTable', uiComponent: 'DraggableRowTable.svelte', liteComponent: 'LiteDraggableRowTable.svelte', category: 'advanced', status: 'exact', strategy: '行顺序数值表单与上下移动' },
+  { name: 'SplitPaneLayout', uiComponent: 'SplitPaneLayout.svelte', liteComponent: 'LiteSplitPaneLayout.svelte', category: 'layout', status: 'exact', strategy: '双栏弹性比例分屏布局' },
+  { name: 'MasterDetailView', uiComponent: 'MasterDetailView.svelte', liteComponent: 'LiteMasterDetailView.svelte', category: 'pages', status: 'exact', strategy: '主从数据联动视图与 URL 同步' },
+  { name: 'MediaLibraryModal', uiComponent: 'MediaLibraryModal.svelte', liteComponent: 'LiteMediaLibraryModal.svelte', category: 'advanced', status: 'exact', strategy: '媒体库文件选择与上传表单' },
+  { name: 'ImageCropper', uiComponent: 'ImageCropper.svelte', liteComponent: 'LiteImageCropper.svelte', category: 'fields', status: 'exact', strategy: '图片缩放与裁剪参数表单' },
+  { name: 'ActivityFeed', uiComponent: 'ActivityFeed.svelte', liteComponent: 'LiteActivityFeed.svelte', category: 'advanced', status: 'exact', strategy: '时间线动态与评论流' },
+  { name: 'PresenceAvatarGroup', uiComponent: 'PresenceAvatarGroup.svelte', liteComponent: 'LitePresenceAvatarGroup.svelte', category: 'widgets', status: 'exact', strategy: '多人在线协同感知状态' },
+  { name: 'PrintableBill', uiComponent: 'PrintableBill.svelte', liteComponent: 'LitePrintableBill.svelte', category: 'pages', status: 'exact', strategy: '受控单据凭证 A4 打印排版' },
+  { name: 'JsonSchemaForm', uiComponent: 'JsonSchemaForm.svelte', liteComponent: 'LiteJsonSchemaForm.svelte', category: 'fields', status: 'exact', strategy: 'JSON Schema 动态表单生成' },
 
   // ─── SPA Only (No SSR counterpart needed) ───────────────────────────────
   { name: 'ThemeToggle', uiComponent: 'ThemeToggle.svelte', category: 'layout', status: 'spa_only', strategy: '免适配 (Lite 为固定 Slate/Indigo 配色)', note: 'IE11 不支持 CSS 变量与客户端主题即时切换' },

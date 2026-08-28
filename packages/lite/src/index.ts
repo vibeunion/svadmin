@@ -78,6 +78,16 @@ export { default as LiteDrawerForm } from './components/LiteDrawerForm.svelte';
 export { default as LiteTableSummary } from './components/LiteTableSummary.svelte';
 export { default as LiteVersionDiffViewer } from './components/LiteVersionDiffViewer.svelte';
 export { default as LiteVirtualTable } from './components/LiteVirtualTable.svelte';
+export { default as LiteEditableTable } from './components/LiteEditableTable.svelte';
+export { default as LiteDraggableRowTable } from './components/LiteDraggableRowTable.svelte';
+export { default as LiteSplitPaneLayout } from './components/LiteSplitPaneLayout.svelte';
+export { default as LiteMasterDetailView } from './components/LiteMasterDetailView.svelte';
+export { default as LiteMediaLibraryModal } from './components/LiteMediaLibraryModal.svelte';
+export { default as LiteImageCropper } from './components/LiteImageCropper.svelte';
+export { default as LiteActivityFeed } from './components/LiteActivityFeed.svelte';
+export { default as LitePresenceAvatarGroup } from './components/LitePresenceAvatarGroup.svelte';
+export { default as LitePrintableBill } from './components/LitePrintableBill.svelte';
+export { default as LiteJsonSchemaForm } from './components/LiteJsonSchemaForm.svelte';
 
 // Compatibility fallbacks for browser-only and third-party UI capabilities.
 export * from './components/compatibility/index';

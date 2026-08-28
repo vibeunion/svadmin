@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-08-28T23:01:03.870Z",
-  "totalComponents": 82,
-  "adaptedCount": 68,
+  "timestamp": "2026-08-28T23:12:41.757Z",
+  "totalComponents": 92,
+  "adaptedCount": 78,
   "fallbackCount": 10,
   "spaOnlyCount": 4,
   "missingCount": 0,
@@ -9,8 +9,8 @@
   "categories": {
     "fields": {
       "category": "fields",
-      "total": 29,
-      "adapted": 25,
+      "total": 31,
+      "adapted": 27,
       "fallback": 3,
       "spaOnly": 1,
       "missing": 0,
@@ -27,8 +27,8 @@
     },
     "pages": {
       "category": "pages",
-      "total": 9,
-      "adapted": 9,
+      "total": 11,
+      "adapted": 11,
       "fallback": 0,
       "spaOnly": 0,
       "missing": 0,
@@ -36,8 +36,8 @@
     },
     "layout": {
       "category": "layout",
-      "total": 7,
-      "adapted": 6,
+      "total": 8,
+      "adapted": 7,
       "fallback": 0,
       "spaOnly": 1,
       "missing": 0,
@@ -45,8 +45,8 @@
     },
     "widgets": {
       "category": "widgets",
-      "total": 6,
-      "adapted": 3,
+      "total": 7,
+      "adapted": 4,
       "fallback": 3,
       "spaOnly": 0,
       "missing": 0,
@@ -54,8 +54,8 @@
     },
     "advanced": {
       "category": "advanced",
-      "total": 21,
-      "adapted": 15,
+      "total": 25,
+      "adapted": 19,
       "fallback": 4,
       "spaOnly": 2,
       "missing": 0,
@@ -686,6 +686,86 @@
       "category": "advanced",
       "status": "exact",
       "strategy": "版本字段变更对比表格"
+    },
+    {
+      "name": "EditableTable",
+      "uiComponent": "EditableTable.svelte",
+      "liteComponent": "LiteEditableTable.svelte",
+      "category": "advanced",
+      "status": "exact",
+      "strategy": "行内与单元格批量编辑表格表单"
+    },
+    {
+      "name": "DraggableRowTable",
+      "uiComponent": "DraggableRowTable.svelte",
+      "liteComponent": "LiteDraggableRowTable.svelte",
+      "category": "advanced",
+      "status": "exact",
+      "strategy": "行顺序数值表单与上下移动"
+    },
+    {
+      "name": "SplitPaneLayout",
+      "uiComponent": "SplitPaneLayout.svelte",
+      "liteComponent": "LiteSplitPaneLayout.svelte",
+      "category": "layout",
+      "status": "exact",
+      "strategy": "双栏弹性比例分屏布局"
+    },
+    {
+      "name": "MasterDetailView",
+      "uiComponent": "MasterDetailView.svelte",
+      "liteComponent": "LiteMasterDetailView.svelte",
+      "category": "pages",
+      "status": "exact",
+      "strategy": "主从数据联动视图与 URL 同步"
+    },
+    {
+      "name": "MediaLibraryModal",
+      "uiComponent": "MediaLibraryModal.svelte",
+      "liteComponent": "LiteMediaLibraryModal.svelte",
+      "category": "advanced",
+      "status": "exact",
+      "strategy": "媒体库文件选择与上传表单"
+    },
+    {
+      "name": "ImageCropper",
+      "uiComponent": "ImageCropper.svelte",
+      "liteComponent": "LiteImageCropper.svelte",
+      "category": "fields",
+      "status": "exact",
+      "strategy": "图片缩放与裁剪参数表单"
+    },
+    {
+      "name": "ActivityFeed",
+      "uiComponent": "ActivityFeed.svelte",
+      "liteComponent": "LiteActivityFeed.svelte",
+      "category": "advanced",
+      "status": "exact",
+      "strategy": "时间线动态与评论流"
+    },
+    {
+      "name": "PresenceAvatarGroup",
+      "uiComponent": "PresenceAvatarGroup.svelte",
+      "liteComponent": "LitePresenceAvatarGroup.svelte",
+      "category": "widgets",
+      "status": "exact",
+      "strategy": "多人在线协同感知状态"
+    },
+    {
+      "name": "PrintableBill",
+      "uiComponent": "PrintableBill.svelte",
+      "liteComponent": "LitePrintableBill.svelte",
+      "category": "pages",
+      "status": "exact",
+      "strategy": "受控单据凭证 A4 打印排版"
+    },
+    {
+      "name": "JsonSchemaForm",
+      "uiComponent": "JsonSchemaForm.svelte",
+      "liteComponent": "LiteJsonSchemaForm.svelte",
+      "category": "fields",
+      "status": "exact",
+      "strategy": "JSON Schema 动态表单生成"
     },
     {
       "name": "ThemeToggle",
