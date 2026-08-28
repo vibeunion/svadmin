@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test';
-import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
@@ -14,6 +14,8 @@ test('lite init plans one dynamic route tree without touching the SPA', async ()
   try {
     await writeFile(join(projectDirectory, 'package.json'), '{"private":true}\n');
     await writeFile(join(projectDirectory, 'src-placeholder'), 'spa stays here\n');
+    await mkdir(join(projectDirectory, 'src', 'lib'), { recursive: true });
+    await mkdir(join(projectDirectory, 'src', 'routes'), { recursive: true });
     await Bun.write(join(projectDirectory, 'src/lib/admin.ts'), 'export const resources = []; export const dataProvider = {};\n');
     await Bun.write(join(projectDirectory, 'src/routes/.keep'), '');
 
