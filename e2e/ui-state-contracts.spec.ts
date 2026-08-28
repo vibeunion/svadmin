@@ -73,5 +73,80 @@ test.describe('UI state contracts', () => {
 
       await page.screenshot({ path: join(screenshotDirectory, `case-empty-media-${viewport.width}x${viewport.height}.png`), fullPage: false });
     });
+
+    test(`api keys layout remains bounded at ${viewport.width}x${viewport.height}`, async ({ page }, testInfo) => {
+      await page.setViewportSize(viewport);
+      await login(page);
+      await page.goto('/#/account/api-keys');
+
+      // The page runs without a CredentialProvider in the example app: the
+      // webhook form is disabled but must still render untruncated.
+      const urlInput = page.locator('#webhook-url');
+      await expect(urlInput).toBeVisible();
+      await expect(page.getByRole('heading', { name: /API Settings|API 设置/ })).toBeVisible();
+      // Let the lazy page chunk settle so the evidence screenshot is complete.
+      await page.waitForTimeout(500);
+
+      const languageSelect = page.locator('[data-svadmin-sidebar] select').first();
+      await expect(languageSelect).toBeVisible();
+
+      const metrics = await page.evaluate(() => {
+        const measure = (text: string, style: CSSStyleDeclaration) => {
+          const context = document.createElement('canvas').getContext('2d');
+          if (!context) return 0;
+          context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+          return context.measureText(text).width;
+        };
+
+        const input = document.querySelector<HTMLInputElement>('#webhook-url');
+        const inputStyle = input ? getComputedStyle(input) : null;
+        const placeholder = input && inputStyle
+          ? {
+              text: measure(input.placeholder, inputStyle),
+              available: input.clientWidth - parseFloat(inputStyle.paddingLeft) - parseFloat(inputStyle.paddingRight),
+            }
+          : null;
+
+        const select = document.querySelector<HTMLSelectElement>('[data-svadmin-sidebar] select');
+        const selectStyle = select ? getComputedStyle(select) : null;
+        const selectedText = select?.selectedOptions[0]?.textContent ?? '';
+        const locale = select && selectStyle
+          ? {
+              text: measure(selectedText, selectStyle),
+              available: select.clientWidth - parseFloat(selectStyle.paddingLeft) - parseFloat(selectStyle.paddingRight),
+            }
+          : null;
+
+        const content = document.querySelector<HTMLElement>('[data-svadmin-content-page]');
+        return {
+          placeholder,
+          locale,
+          contentOverflow: content ? content.scrollWidth > content.clientWidth + 1 : false,
+          documentOverflow: document.documentElement.scrollWidth > window.innerWidth + 1,
+        };
+      });
+
+      expect(metrics.contentOverflow).toBe(false);
+      expect(metrics.documentOverflow).toBe(false);
+      // URL placeholder (https://api.example.com/hooks) fits the input width.
+      expect(metrics.placeholder).not.toBeNull();
+      expect(metrics.placeholder!.text).toBeLessThanOrEqual(metrics.placeholder!.available + 1);
+      // Sidebar language select shows the full locale name (e.g. "English").
+      expect(metrics.locale).not.toBeNull();
+      expect(metrics.locale!.text).toBeLessThanOrEqual(metrics.locale!.available + 1);
+
+      const screenshotDirectory = process.env.UI_SCREENSHOT_DIR ?? testInfo.outputPath('screenshots');
+      await mkdir(screenshotDirectory, { recursive: true });
+      await page.screenshot({ path: join(screenshotDirectory, `api-keys-${viewport.width}x${viewport.height}.png`), fullPage: false });
+
+      const sidebar = page.locator('[data-svadmin-sidebar]');
+      const box = await sidebar.boundingBox();
+      if (box) {
+        await page.screenshot({
+          path: join(screenshotDirectory, `sidebar-footer-${viewport.width}x${viewport.height}.png`),
+          clip: { x: box.x, y: box.y + box.height - 140, width: box.width, height: 140 },
+        });
+      }
+    });
   }
 });

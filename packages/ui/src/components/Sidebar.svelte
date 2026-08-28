@@ -285,12 +285,14 @@
   });
 </script>
 
-{#snippet languageMenu()}
+{#snippet languageMenu(collapsed: boolean)}
   <select
     aria-label={i18n.t('common.switchLanguage')}
     value={i18n.locale}
     onchange={(event) => selectLocale((event.target as HTMLSelectElement).value)}
-    class="h-8 w-14 rounded-md border border-border bg-sidebar px-1 text-[11px] font-semibold text-sidebar-foreground/70 outline-none focus:ring-2 focus:ring-ring"
+    class={collapsed
+      ? 'h-8 w-auto min-w-0 max-w-full appearance-none rounded-md border border-border bg-sidebar px-1 text-center text-[10px] font-semibold text-sidebar-foreground/70 outline-none focus:ring-2 focus:ring-ring'
+      : 'h-8 w-auto min-w-0 max-w-full rounded-md border border-border bg-sidebar px-1.5 text-[11px] font-semibold text-sidebar-foreground/70 outline-none focus:ring-2 focus:ring-ring'}
   >
     {#each i18n.getAvailableLocales() as locale (locale)}
       <option value={locale}>{localeName(locale)}</option>
@@ -468,7 +470,7 @@
         </div>
         <div class="mt-1 flex items-center justify-between px-1">
           <div class="flex items-center gap-0.5">
-            {@render languageMenu()}
+            {@render languageMenu(false)}
             <TooltipButton tooltip={i18n.t('common.toggleTheme')} variant="ghost" size="icon-sm" onclick={toggleTheme} class="h-8 w-8 rounded-md text-sidebar-foreground/50 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground">
               {#if getResolvedTheme() === 'dark'}
                 <Sun class="h-3.5 w-3.5" />
@@ -486,8 +488,8 @@
         </div>
       </div>
     {:else if collapsed}
-      <div class="flex flex-col items-center gap-0.5 px-2 py-3">
-        {@render languageMenu()}
+      <div class="flex flex-col items-center gap-0.5 px-1 py-3">
+        {@render languageMenu(true)}
         <Tooltip.Root>
           <Tooltip.Trigger>
             {#snippet child({ props }: { props: Record<string, unknown> })}
@@ -525,7 +527,7 @@
       </div>
     {:else}
       <div class="flex justify-center gap-1 p-3">
-        {@render languageMenu()}
+        {@render languageMenu(false)}
         <TooltipButton tooltip={i18n.t('common.toggleTheme')} variant="ghost" size="icon" onclick={toggleTheme} class="h-8 w-8 rounded-md text-sidebar-foreground/50 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground">
           {#if getResolvedTheme() === 'dark'}
             <Sun class="h-3.5 w-3.5" />
