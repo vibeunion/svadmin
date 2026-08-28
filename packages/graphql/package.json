@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/graphql",
-  "version": "0.9.14",
+  "version": "0.9.15",
   "description": "GraphQL DataProvider for svadmin",
   "type": "module",
   "sideEffects": false,

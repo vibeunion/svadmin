@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.60.1](https://github.com/vibeunion/svadmin/compare/ui-v0.60.0...ui-v0.60.1) (2026-08-28)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** replace hardcoded palette colors with semantic tokens ([36cff77](https://github.com/vibeunion/svadmin/commit/36cff779ec9b3d15a9e298dfb2ee3a91be5ae11f))
+* **ui:** stop language select and webhook URL input truncation ([1a4f652](https://github.com/vibeunion/svadmin/commit/1a4f652248f871c606dae7bac060b7b960084fb0))
+
+
+### 🔧 Miscellaneous Chores
+
+* **ui:** merge file input styling fix and semantic color token convergence ([8fc4d91](https://github.com/vibeunion/svadmin/commit/8fc4d9196e728d35a875fc83a0d7727b5deb6f57))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.42.1
+
 ## [0.60.0](https://github.com/vibeunion/svadmin/compare/ui-v0.59.0...ui-v0.60.0) (2026-08-28)
 
 

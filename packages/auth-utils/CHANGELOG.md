@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.10](https://github.com/vibeunion/svadmin/compare/auth-utils-v0.7.9...auth-utils-v0.7.10) (2026-08-28)
+
+
+### 🔧 Miscellaneous Chores
+
+* refresh PR evidence ([f9b928b](https://github.com/vibeunion/svadmin/commit/f9b928b57be04e33f136859a903ccf1d827b958f))
+
 ## [0.7.9](https://github.com/vibeunion/svadmin/compare/auth-utils-v0.7.8...auth-utils-v0.7.9) (2026-08-16)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/create",
-  "version": "0.18.0",
+  "version": "0.18.1",
   "description": "Scaffolding tool for svadmin projects",
   "type": "module",
   "bin": {
