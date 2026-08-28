@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.17.0...create-svadmin-v0.18.0) (2026-08-28)
+
+
+### 🚀 Features
+
+* **ui:** apply ui-ux-pro-max design guidelines and accessibility standards ([02badd4](https://github.com/vibeunion/svadmin/commit/02badd45374df1b8913786fc9241315fbc07cdcd))
+
 ## [0.17.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.16.11...create-svadmin-v0.17.0) (2026-08-28)
 
 

@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.60.0](https://github.com/vibeunion/svadmin/compare/ui-v0.59.0...ui-v0.60.0) (2026-08-28)
+
+
+### 🚀 Features
+
+* **ui:** apply ui-ux-pro-max design guidelines and accessibility standards ([02badd4](https://github.com/vibeunion/svadmin/commit/02badd45374df1b8913786fc9241315fbc07cdcd))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** keep inline edit accessible label scoped to field content ([9bd6ddd](https://github.com/vibeunion/svadmin/commit/9bd6ddd4a6bcb23dfdebf682c9aaf284f359cf6e))
+
 ## [0.59.0](https://github.com/vibeunion/svadmin/compare/ui-v0.58.0...ui-v0.59.0) (2026-08-28)
 
 
