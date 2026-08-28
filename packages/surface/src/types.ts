@@ -1,5 +1,5 @@
 import type { DataProvider } from '@svadmin/core';
-import type { ZodType } from 'zod';
+import type { TSchema } from '@sinclair/typebox';
 
 export const SURFACE_SCHEMA_VERSION = 'surface/v1' as const;
 
@@ -112,7 +112,7 @@ export type SurfaceCatalogDataKind = 'none' | 'scalar' | 'items';
 export interface SurfaceWidgetDefinition {
   readonly type: string;
   readonly dataKind: SurfaceCatalogDataKind;
-  readonly propsSchema: ZodType<unknown>;
+  readonly propsSchema: TSchema | { Check?: (data: unknown) => boolean; safeParse?: (data: unknown) => { success: boolean } };
   /** 组件从绑定记录中读取的字段，由可信 Catalog 提供。 */
   readonly getReferencedFields?: (props: JsonObject) => readonly string[];
 }

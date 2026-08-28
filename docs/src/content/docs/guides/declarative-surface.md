@@ -18,7 +18,7 @@ It does not modify `@svadmin/core`, generate Svelte code, or turn svadmin into a
 The MVP supports client-side Svelte 5 + Vite. SSR/Lite, actions, storage, Agent input, automatic refresh, client aggregation, Canvas, and iframes are not supported.
 
 ```bash
-bun add @svadmin/surface @svadmin/core @svadmin/ui @tanstack/svelte-query svelte zod
+bun add @svadmin/surface @svadmin/core @svadmin/ui @tanstack/svelte-query svelte @sinclair/typebox
 ```
 
 ## Public API
@@ -88,7 +88,7 @@ Provider results are projected to `readFields` before widgets receive them. Non-
 
 ## Extend the catalog
 
-Custom catalogs are trusted executable configuration, not wire data. Register a strict Zod v4 props schema and a trusted Svelte component with `defineSurfaceCatalog`. Item widgets must declare any record fields selected by their props through `getReferencedFields`, so validation can apply the field policy.
+Custom catalogs are trusted executable configuration, not wire data. Register a strict TypeBox props schema and a trusted Svelte component with `defineSurfaceCatalog`. Item widgets must declare any record fields selected by their props through `getReferencedFields`, so validation can apply the field policy.
 
 Never register a component that accepts raw HTML, CSS, classes, colors, URLs, event handlers, dynamic imports, or arbitrary request parameters from its props.
 

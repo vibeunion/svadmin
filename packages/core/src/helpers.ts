@@ -9,8 +9,9 @@ export {
   unionFilters, unionSorters,
   file2Base64, parseCSV,
   createSchemaValidator,
+  createTypeBoxValidator,
 } from './helpers-pure';
-export type { SchemaValidatorLike } from './helpers-pure';
+export type { SchemaValidatorLike, TypeBoxValidatorLike } from './helpers-pure';
 
 
 // ─── Document Title Helper ────────────────────────────────────

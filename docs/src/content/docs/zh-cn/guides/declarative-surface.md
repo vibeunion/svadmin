@@ -18,7 +18,7 @@ description: 使用可信 Svelte 组件渲染受策略约束的 JSON 仪表盘
 MVP 仅支持客户端 Svelte 5 + Vite，不支持 SSR/Lite、Action、持久化、Agent 输入、自动刷新、客户端聚合、Canvas 或 iframe。
 
 ```bash
-bun add @svadmin/surface @svadmin/core @svadmin/ui @tanstack/svelte-query svelte zod
+bun add @svadmin/surface @svadmin/core @svadmin/ui @tanstack/svelte-query svelte @sinclair/typebox
 ```
 
 ## 公开 API
@@ -88,7 +88,7 @@ Provider 记录会先投影到 `readFields`，再交给 Widget。被选中的非
 
 ## 扩展 Catalog
 
-自定义 Catalog 是可信的可执行运行时配置，不是 wire data。通过 `defineSurfaceCatalog` 注册严格的 Zod v4 props schema 和可信 Svelte 组件。若列表 Widget 的 props 会选择记录字段，必须通过 `getReferencedFields` 暴露这些字段，以便校验器应用字段策略。
+自定义 Catalog 是可信的可执行运行时配置，不是 wire data。通过 `defineSurfaceCatalog` 注册严格的 TypeBox props schema 和可信 Svelte 组件。若列表 Widget 的 props 会选择记录字段，必须通过 `getReferencedFields` 暴露这些字段，以便校验器应用字段策略。
 
 不要注册允许 props 传入原始 HTML、CSS、class、颜色、URL、事件处理器、动态 import 或任意请求参数的组件。
 

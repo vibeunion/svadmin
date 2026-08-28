@@ -5,8 +5,16 @@ import {
   unionFilters, unionSorters,
   parseCSV,
   createSchemaValidator,
+  createTypeBoxValidator,
 } from './helpers-pure';
+import { Type, FormatRegistry } from '@sinclair/typebox';
+import { TypeCompiler } from '@sinclair/typebox/compiler';
 import type { Filter, Sort } from './types';
+
+// Register format helpers for TypeBox tests
+if (!FormatRegistry.Has('email')) {
+  FormatRegistry.Set('email', (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
+}
 
 // ─── getDefaultFilter ─────────────────────────────────────────
 
@@ -269,5 +277,44 @@ describe('createSchemaValidator', () => {
   test('returns null for non-schema inputs', () => {
     const validate = createSchemaValidator(null);
     expect(validate({ any: 'value' })).toBeNull();
+  });
+
+  test('validates real TypeBox TypeCompiler compiled schemas', () => {
+    const UserSchema = Type.Object({
+      username: Type.String({ minLength: 3, errorMessage: 'Username too short' }),
+      email: Type.String({ format: 'email' }),
+      age: Type.Optional(Type.Integer({ minimum: 18 })),
+    });
+
+    const compiled = TypeCompiler.Compile(UserSchema);
+    const validate = createTypeBoxValidator(compiled);
+
+    // Invalid: missing username and email
+    const errors1 = validate({});
+    expect(errors1).not.toBeNull();
+    expect(errors1?.username).toBeDefined();
+    expect(errors1?.email).toBeDefined();
+
+    // Invalid: underage
+    const errors2 = validate({ username: 'alice', email: 'alice@example.com', age: 16 });
+    expect(errors2?.age).toBeDefined();
+
+    // Valid
+    const validResult = validate({ username: 'alice', email: 'alice@example.com', age: 25 });
+    expect(validResult).toBeNull();
+  });
+
+  test('validates nested fields with clean dot-separated path names in TypeBox', () => {
+    const OrgSchema = Type.Object({
+      profile: Type.Object({
+        orgName: Type.String({ minLength: 1 }),
+      }),
+    });
+    const compiled = TypeCompiler.Compile(OrgSchema);
+    const validate = createTypeBoxValidator(compiled);
+
+    const errors = validate({ profile: { orgName: '' } });
+    expect(errors).not.toBeNull();
+    expect(errors?.['profile.orgName']).toBeDefined();
   });
 });

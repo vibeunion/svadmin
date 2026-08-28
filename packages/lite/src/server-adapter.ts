@@ -11,7 +11,7 @@ import type {
   Sort, Filter,
 } from '@svadmin/core';
 import { redirect, isRedirect, type RequestEvent } from '@sveltejs/kit';
-import { resourceToZodSchema } from './schema-generator';
+import { resourceToTypeBoxSchema } from './schema-generator';
 import { parseExplicitBoolean } from './value-normalization';
 
 // ─── List Loader ──────────────────────────────────────────────
@@ -482,7 +482,7 @@ function validateFormVariables(
         errors: Record<string, string[]>;
       };
     } {
-  const result = resourceToZodSchema(resource, mode).safeParse(values);
+  const result = resourceToTypeBoxSchema(resource, mode).safeParse(values);
   if (result.success) return { success: true, data: result.data };
 
   return {
@@ -595,7 +595,7 @@ function formDataToObject(
         try {
           obj[field.key] = strRaw ? JSON.parse(strRaw) : null;
         } catch {
-          obj[field.key] = strRaw; // Let Zod handle validation errors
+          obj[field.key] = strRaw; // Let TypeBox handle validation errors
         }
         break;
       default:

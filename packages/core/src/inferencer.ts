@@ -83,6 +83,7 @@ export interface InferResult {
   fields: FieldDefinition[];
   resource: ResourceDefinition;
   code: string;
+  typeboxCode: string;
   componentCode: {
     list: string;
     create: string;
@@ -114,6 +115,7 @@ export function inferResource(
       fields: [],
       resource: emptyResource,
       code: `// No data available to infer fields for "${resourceName}".`,
+      typeboxCode: generateTypeBoxSchemaCode(emptyResource),
       componentCode: {
         list: generateListPageCode(emptyResource),
         create: generateCreatePageCode(emptyResource),
@@ -203,6 +205,7 @@ export function inferResource(
   };
 
   const code = generateCode(resource);
+  const typeboxCode = generateTypeBoxSchemaCode(resource);
   const componentCode = {
     list: generateListPageCode(resource),
     create: generateCreatePageCode(resource),
@@ -210,7 +213,7 @@ export function inferResource(
     show: generateShowPageCode(resource),
   };
 
-  return { fields, resource, code, componentCode };
+  return { fields, resource, code, typeboxCode, componentCode };
 }
 
 // ─── Code Generation ─────────────────────────────────────────
@@ -330,15 +333,93 @@ export function generateResourceCode(resource: ResourceDefinition): string {
 }
 
 /**
+ * Generate TypeScript code for TypeBox schema definition.
+ */
+export function generateTypeBoxSchemaCode(resource: ResourceDefinition): string {
+  const esc = (s: string) => s.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  const schemaProps = resource.fields.map(f => {
+    let typeDef = 'Type.String()';
+    const isRequired = f.required === true;
+
+    switch (f.type) {
+      case 'number':
+        typeDef = 'Type.Number()';
+        break;
+      case 'boolean':
+        typeDef = 'Type.Boolean()';
+        break;
+      case 'date':
+        typeDef = "Type.String({ format: 'date-time' })";
+        break;
+      case 'email':
+        typeDef = "Type.String({ format: 'email' })";
+        break;
+      case 'url':
+        typeDef = "Type.String({ format: 'uri' })";
+        break;
+      case 'phone':
+        typeDef = "Type.String({ pattern: '^\\\\+?[\\\\d\\\\s\\\\-()]{7,}$' })";
+        break;
+      case 'tags':
+        typeDef = 'Type.Array(Type.String())';
+        break;
+      case 'images':
+        typeDef = "Type.Array(Type.String({ format: 'uri' }))";
+        break;
+      case 'json':
+        typeDef = 'Type.Record(Type.String(), Type.Unknown())';
+        break;
+      case 'select':
+        if (f.options && f.options.length > 0) {
+          const literals = f.options.map(o => `Type.Literal('${esc(String(o.value))}')`).join(', ');
+          typeDef = `Type.Union([${literals}])`;
+        } else {
+          typeDef = 'Type.String()';
+        }
+        break;
+      case 'relation':
+        typeDef = 'Type.Union([Type.String(), Type.Number()])';
+        break;
+      case 'textarea':
+      case 'richtext':
+      case 'text':
+      default:
+        typeDef = 'Type.String()';
+        break;
+    }
+
+    if (!isRequired && f.key !== (resource.primaryKey ?? 'id')) {
+      typeDef = `Type.Optional(${typeDef})`;
+    }
+
+    return `  ${f.key}: ${typeDef},`;
+  }).join('\n');
+
+  const baseName = resource.name.endsWith('s') ? resource.name.slice(0, -1) : resource.name;
+  const typeName = capitalize(baseName);
+
+  return `import { Type, type Static } from '@sinclair/typebox';
+
+export const ${typeName}Schema = Type.Object({
+${schemaProps}
+});
+
+export type ${typeName} = Static<typeof ${typeName}Schema>;
+`;
+}
+
+/**
  * Universal code generator for resource definition or Svelte page components.
  */
 export function generateComponentCode(
   resource: ResourceDefinition,
-  kind: 'resource' | 'list' | 'create' | 'edit' | 'show'
+  kind: 'resource' | 'typebox' | 'list' | 'create' | 'edit' | 'show'
 ): string {
   switch (kind) {
     case 'resource':
       return generateResourceCode(resource);
+    case 'typebox':
+      return generateTypeBoxSchemaCode(resource);
     case 'list':
       return generateListPageCode(resource);
     case 'create':

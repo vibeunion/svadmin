@@ -18,7 +18,7 @@
 
   let selectedResource = $state('');
   let inferResult = $state<InferResult | null>(null);
-  let codeTarget = $state<'resource' | 'list' | 'create' | 'edit' | 'show'>('resource');
+  let codeTarget = $state<'resource' | 'typebox' | 'list' | 'create' | 'edit' | 'show'>('resource');
   let loading = $state(false);
   let error = $state<string | null>(null);
   let copied = $state(false);
@@ -81,6 +81,7 @@
 
   const activeCode = $derived.by(() => {
     if (!inferResult) return '';
+    if (codeTarget === 'typebox') return inferResult.typeboxCode;
     if (codeTarget === 'list') return inferResult.componentCode.list;
     if (codeTarget === 'create') return inferResult.componentCode.create;
     if (codeTarget === 'edit') return inferResult.componentCode.edit;
@@ -209,6 +210,14 @@
               onclick={() => { codeTarget = 'resource'; }}
             >
               Resource (TS)
+            </Button>
+            <Button
+              variant={codeTarget === 'typebox' ? 'secondary' : 'ghost'}
+              size="sm"
+              class="h-6 text-xs px-2"
+              onclick={() => { codeTarget = 'typebox'; }}
+            >
+              TypeBox Schema
             </Button>
             <Button
               variant={codeTarget === 'list' ? 'secondary' : 'ghost'}
