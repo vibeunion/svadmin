@@ -101,5 +101,5 @@ critic/verifier 子智能体应把以上作为标准审查项。发现过度设�
 ## Notes
 - For complex tasks: decompose into sub-tasks and use focused subagents for independent work
 - For simple tasks: just do it directly, don't over-engineer the process
-- In coordination DB v2 projects, use `agmesh context` / `agmesh automation status`; check `progress.md` only for legacy multi-agent projects
+- Always check `progress.md` at project root if working in multi-agent mode
 - Apply Reasoning Effort tiers: LOW for simple lookups, STANDARD for features, HIGH for architecture

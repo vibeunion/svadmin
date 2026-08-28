@@ -96,5 +96,10 @@
   },
   "patchedDependencies": {
     "@sveltejs/package@2.5.8": "patches/@sveltejs%2Fpackage@2.5.8.patch"
+  },
+  "main": "eslint.config.js",
+  "directories": {
+    "doc": "docs",
+    "example": "example"
   }
 }

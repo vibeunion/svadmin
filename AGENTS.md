@@ -7,8 +7,8 @@
 ## Language
 
 - Reply to the user in Simplified Chinese.
-- Use Chinese for important code comments or code explanations when it fits the surrounding codebase.
-- Keep status concise; do not paste large raw logs, files, base64, or screenshots into chat.
+- Use Chinese for important code comments or explanations.
+- Keep status concise; do not paste logs, files, base64, or screenshots into chat.
 
 ## Startup Loop
 
@@ -16,10 +16,12 @@
 - If `.agents/state/coordination.json` exists, use `agmesh context . --task <id>` or `agmesh automation status .` for bounded task, event, and mailbox context.
 - Legacy projects only: read the smallest needed slices of `tasks.md`, `progress.md`, and `.mailbox/`.
 - Prefer `rg`, focused `sed` ranges, `jq`, `git diff --stat`, `agmesh memory recall "<query>" --token-budget <n>`, and `agmesh automation context-pack . --type <kind>` over loading broad files.
-- If `agmesh automation doctor .` reports context warnings, run the suggested archive/prune command before broad exploration.
+- `agmesh automation status|doctor|orchestrate .` automatically maintains coordination context when it reaches 75% of budget; use `--suggest` only for a read-only preview.
 
 ## Task Rules
 
+- Direct user instructions unblock safe local work from stale locks; they do not override safety, destructive/production writes, or writer ownership.
+- Local checks need no release-gate/candidate-SHA precondition; they are not release acceptance.
 - Do not silently shrink scope. Stop and state the tradeoff if the work exceeds the request.
 - Never hardcode secrets, tokens, API keys, credentials, or sensitive URLs in code, logs, templates, or durable memory.
 - Do not auto-commit, push, publish, deploy, or write production state unless the user explicitly requested it.
@@ -35,6 +37,8 @@
 - Pure explanation, read-only review, simple shell queries, formatting-only edits, and documentation-only tasks may skip the Delegation Gate with `safe_skip_reason`.
 - Host tool policy is not a valid `safe_skip_reason`. When the resolved plan requires a lane and runtime can spawn it, dispatch it; otherwise record `interruption_recovery` and mark the result `blocked` or `PARTIAL`. Native low-risk external=0 is not a runtime gap.
 - Post-edit evidence/review gate: behavior-affecting changes require current diff inspection and deterministic verification; medium risk may add at most one independent verifier, high risk uses panel, and human-loop waits for a human decision.
+- PARTIAL terminal gate: when every remaining acceptance item depends on production authorization, real credentials, external accounts, deployment, or human permission, record `PARTIAL` with exact blockers and at least one evidence reference, set the task `blocked`, and end the current task cycle. Do not auto-expand the same goal into acceptance-tool or framework work.
+- Scope/continuation gate: claim freezes goal, non-goals, acceptance, risk, and orchestration. Material changes or resuming after `PARTIAL` require a follow-up Task Contract with `parent` / `source` / `reason`, or auditable human confirmation. Keep coordination status/risk, Contract execution state/scope hash, and effective orchestration consistent. Default project WIP is four `running` tasks; writer scope, DAG, high-risk capacity, verifier capacity, and exclusive-resource gates decide which tasks may run concurrently.
 
 ## Progressive Context
 
