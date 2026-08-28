@@ -67,10 +67,10 @@ function hasFunction(record: UnknownRecord | undefined, key: string): boolean {
 
 function supportsCanvas(documentValue: unknown, context: '2d' | 'webgl'): boolean {
   const documentRecord = asRecord(documentValue);
-  if (!hasFunction(documentRecord, 'createElement')) return false;
+  if (!documentRecord || typeof documentRecord.createElement !== 'function') return false;
   const canvas = (documentRecord.createElement as (name: string) => unknown)('canvas');
   const canvasRecord = asRecord(canvas);
-  if (!hasFunction(canvasRecord, 'getContext')) return false;
+  if (!canvasRecord || typeof canvasRecord.getContext !== 'function') return false;
   return Boolean((canvasRecord.getContext as (name: string) => unknown)(context));
 }
 
