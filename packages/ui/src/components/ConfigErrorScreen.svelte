@@ -81,7 +81,7 @@
                   onclick={() => copyToClipboard(`${v.key}=`, v.key)}
                 >
                   {#if copied[v.key]}
-                    <CheckCircle class="h-3.5 w-3.5 text-green-500" />
+                    <CheckCircle class="h-3.5 w-3.5 text-success" />
                   {:else}
                     <Copy class="h-3.5 w-3.5" />
                   {/if}
@@ -103,7 +103,7 @@
                 onclick={copyAll}
               >
                 {#if copied['__all__']}
-                  <CheckCircle class="h-3.5 w-3.5 text-green-500" />
+                  <CheckCircle class="h-3.5 w-3.5 text-success" />
                   <span class="text-xs">{i18n.t('common.copied')}</span>
                 {:else}
                   <Copy class="h-3.5 w-3.5" />

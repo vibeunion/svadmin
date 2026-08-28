@@ -425,6 +425,8 @@
               class="h-3 w-3 rounded-full ring-1 ring-offset-1 ring-offset-sidebar"
               style="background-color: {getColorThemes().find(c => c.id === getColorTheme())?.color ?? '#6366f1'}; --tw-ring-color: {getColorThemes().find(c => c.id === getColorTheme())?.color ?? '#6366f1'}"
             ></span>
+            <!-- The dot previews the user-selected runtime theme swatch; the hex
+                 fallback only covers the case where no registered theme matches. -->
           </button>
           {#if colorPickerOpen}
             <div class="absolute bottom-full left-0 mb-1 z-50 w-40 rounded-lg border bg-popover p-1 text-popover-foreground shadow-lg animate-in fade-in-0 zoom-in-95">

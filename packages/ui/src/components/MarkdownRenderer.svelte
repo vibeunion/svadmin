@@ -106,10 +106,33 @@
     const id = Math.random().toString(36);
     copiedBlock = id;
     button.setAttribute("data-copied-id", id);
+    // Swap to a semantic check icon; color comes from the .copy-btn CSS token.
+    button.querySelector("svg")?.replaceWith(createCheckIcon());
 
     setTimeout(() => {
       if (copiedBlock === id) copiedBlock = null;
     }, 2000);
+  }
+
+  function createCheckIcon(): SVGSVGElement {
+    const svgNamespace = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgNamespace, "svg");
+    svg.setAttribute("width", "14");
+    svg.setAttribute("height", "14");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "2");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+    svg.setAttribute("aria-hidden", "true");
+    svg.classList.add("lucide", "lucide-check");
+
+    const polyline = document.createElementNS(svgNamespace, "polyline");
+    polyline.setAttribute("points", "20 6 9 17 4 12");
+    svg.appendChild(polyline);
+
+    return svg;
   }
 
   function createCopyIcon(): SVGSVGElement {
@@ -161,7 +184,7 @@
 
         const header = document.createElement("div");
         header.className =
-          "flex items-center justify-between px-4 py-2 text-xs text-zinc-400 border-b border-zinc-800";
+          "flex items-center justify-between px-4 py-2 text-xs text-background/70 border-b border-background/15";
 
         const lang =
           Array.from(pre.querySelector("code")?.classList || [])
@@ -173,7 +196,7 @@
         const copyButton = document.createElement("button");
         copyButton.type = "button";
         copyButton.className =
-          "copy-btn hover:text-white transition-colors flex items-center gap-1";
+          "copy-btn hover:text-background transition-colors flex items-center gap-1";
         copyButton.setAttribute("aria-label", "Copy code");
         copyButton.appendChild(createCopyIcon());
 

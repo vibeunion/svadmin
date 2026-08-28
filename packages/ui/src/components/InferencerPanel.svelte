@@ -194,8 +194,8 @@
           <span>Generated ResourceDefinition</span>
           <Button variant="ghost" size="sm" class="h-6 text-xs gap-1" onclick={copyCode}>
             {#if copied}
-              <Check class="h-3 w-3 text-emerald-500" />
-              <span class="text-emerald-500">Copied!</span>
+              <Check class="h-3 w-3 text-success" />
+              <span class="text-success">Copied!</span>
             {:else}
               <Copy class="h-3 w-3" />
               Copy

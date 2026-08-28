@@ -274,7 +274,7 @@ describe('AvatarField enterprise capabilities', () => {
 
   it('renders status dot badge with an accessible label', () => {
     const view = render(AvatarField, { name: 'Alice', status: 'online' });
-    expect(view.container.querySelector('.bg-emerald-500')).not.toBeNull();
+    expect(view.container.querySelector('.bg-success')).not.toBeNull();
     expect(view.container.querySelector('[aria-label="Status: online"]')).not.toBeNull();
   });
 

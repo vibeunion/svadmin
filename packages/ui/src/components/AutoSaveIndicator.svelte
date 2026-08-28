@@ -26,8 +26,8 @@
         <Loader2 class="h-4 w-4 animate-spin text-primary" />
         <span>{i18n.t('autoSave.saving')}</span>
       {:else if status === 'success'}
-        <Check class="h-4 w-4 text-green-500" />
-        <span class="text-green-500">{i18n.t('autoSave.saved')}</span>
+        <Check class="h-4 w-4 text-success" />
+        <span class="text-success">{i18n.t('autoSave.saved')}</span>
       {:else if status === 'error'}
         <X class="h-4 w-4 text-destructive" />
         <span class="text-destructive" title={error}>{i18n.t('autoSave.error')}</span>

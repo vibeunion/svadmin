@@ -32,15 +32,16 @@
   ];
   const skills = ['TypeScript', 'Svelte', 'Node.js', 'GraphQL', 'Design Systems', 'Accessibility'];
   const badges: { name: string; Icon: Component; tone: string }[] = [
-    { name: 'Top Contributor', Icon: Medal, tone: 'bg-amber-500/10 text-amber-600' },
-    { name: 'Early Adopter', Icon: Star, tone: 'bg-blue-500/10 text-blue-600' },
-    { name: 'Community Mentor', Icon: Award, tone: 'bg-violet-500/10 text-violet-600' },
-    { name: 'Launch Partner', Icon: Crown, tone: 'bg-emerald-500/10 text-emerald-600' },
+    // Decorative demo tones — use the chart palette, not status tokens.
+    { name: 'Top Contributor', Icon: Medal, tone: 'bg-chart-1/10 text-chart-1' },
+    { name: 'Early Adopter', Icon: Star, tone: 'bg-chart-2/10 text-chart-2' },
+    { name: 'Community Mentor', Icon: Award, tone: 'bg-chart-3/10 text-chart-3' },
+    { name: 'Launch Partner', Icon: Crown, tone: 'bg-chart-4/10 text-chart-4' },
   ];
   const recentUploads: { name: string; size: string; Icon: Component; tone: string }[] = [
-    { name: 'dashboard-spec.fig', size: '4.2 MB', Icon: Image, tone: 'bg-pink-500/10 text-pink-600' },
-    { name: 'release-notes.md', size: '18 KB', Icon: FileText, tone: 'bg-blue-500/10 text-blue-600' },
-    { name: 'assets-bundle.zip', size: '24 MB', Icon: FileArchive, tone: 'bg-amber-500/10 text-amber-600' },
+    { name: 'dashboard-spec.fig', size: '4.2 MB', Icon: Image, tone: 'bg-chart-5/10 text-chart-5' },
+    { name: 'release-notes.md', size: '18 KB', Icon: FileText, tone: 'bg-chart-2/10 text-chart-2' },
+    { name: 'assets-bundle.zip', size: '24 MB', Icon: FileArchive, tone: 'bg-chart-3/10 text-chart-3' },
   ];
   const contributors = ['Mia Torres', 'Chen Wei', 'Ava Novak', 'Liam Ortiz', 'Sofia Petrova', '+8'];
 
@@ -252,7 +253,7 @@
             <p class="text-xs text-muted-foreground">{item.label}</p>
             <div class="mt-1 flex items-baseline gap-2">
               <span class="text-xl font-bold text-foreground">{item.value}</span>
-              <span class="flex items-center gap-0.5 text-xs font-medium text-green-600"><TrendingUp class="h-3 w-3" />{item.delta}</span>
+              <span class="flex items-center gap-0.5 text-xs font-medium text-success"><TrendingUp class="h-3 w-3" />{item.delta}</span>
             </div>
           </Card.CardContent>
         </Card.Card>

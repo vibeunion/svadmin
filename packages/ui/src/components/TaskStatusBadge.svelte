@@ -41,7 +41,7 @@
           label: translateStatus(normalizedStatus),
           variant: 'secondary' as const,
           icon: CheckCircle2,
-          iconClass: 'text-green-600 dark:text-green-400',
+          iconClass: 'text-success',
         };
       case 'failed':
         return {
