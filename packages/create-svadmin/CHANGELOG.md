@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.20.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.19.0...create-svadmin-v0.20.0) (2026-08-28)
+
+
+### 🚀 Features
+
+* **lite:** implement dynamic catch-all routes and example resources support ([d94a481](https://github.com/vibeunion/svadmin/commit/d94a481da67c1ae6440e7c360afe901d6d23313d))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/core bumped to 0.45.0
+
 ## [0.19.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.18.2...create-svadmin-v0.19.0) (2026-08-28)
 
 

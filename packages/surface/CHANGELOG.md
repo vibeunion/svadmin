@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.6.0](https://github.com/vibeunion/svadmin/compare/surface-v0.5.0...surface-v0.6.0) (2026-08-28)
+
+
+### 🚀 Features
+
+* **lite,surface:** upgrade dashboard, badges, filters and batch actions ([8e519c9](https://github.com/vibeunion/svadmin/commit/8e519c919cc24e0a3589b812f34c55aa2834eefc))
+* **lite:** implement dynamic catch-all routes and example resources support ([d94a481](https://github.com/vibeunion/svadmin/commit/d94a481da67c1ae6440e7c360afe901d6d23313d))
+* **surface,scripts:** add zero-key fixture replay tests and doc-sync gate ([edc1977](https://github.com/vibeunion/svadmin/commit/edc197762867c993a05ad724e21afe936567631c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.34.2 <0.45.0 to >=0.34.2 <0.46.0
+    * @svadmin/ui bumped from >=0.40.6 <0.63.0 to >=0.40.6 <0.64.0
+
 ## [0.5.0](https://github.com/vibeunion/svadmin/compare/surface-v0.4.8...surface-v0.5.0) (2026-08-28)
 
 

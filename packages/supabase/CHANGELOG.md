@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.13.0](https://github.com/vibeunion/svadmin/compare/supabase-v0.12.5...supabase-v0.13.0) (2026-08-28)
+
+
+### 🚀 Features
+
+* **lite:** implement dynamic catch-all routes and example resources support ([d94a481](https://github.com/vibeunion/svadmin/commit/d94a481da67c1ae6440e7c360afe901d6d23313d))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.10.8
+  * peerDependencies
+    * @svadmin/core bumped to 0.45.0
+
 ## [0.12.5](https://github.com/vibeunion/svadmin/compare/supabase-v0.12.4...supabase-v0.12.5) (2026-08-28)
 
 

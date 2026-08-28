@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.63.0](https://github.com/vibeunion/svadmin/compare/ui-v0.62.0...ui-v0.63.0) (2026-08-28)
+
+
+### 🚀 Features
+
+* **lite:** implement dynamic catch-all routes and example resources support ([d94a481](https://github.com/vibeunion/svadmin/commit/d94a481da67c1ae6440e7c360afe901d6d23313d))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.45.0
+
 ## [0.62.0](https://github.com/vibeunion/svadmin/compare/ui-v0.61.0...ui-v0.62.0) (2026-08-28)
 
 
