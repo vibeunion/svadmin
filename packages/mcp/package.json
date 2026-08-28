@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/mcp",
-  "version": "0.2.12",
+  "version": "0.2.13",
   "description": "MCP (Model Context Protocol) server — expose svadmin DataProvider as tools for AI agents",
   "type": "module",
   "sideEffects": false,

@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.44.0](https://github.com/vibeunion/svadmin/compare/core-v0.43.0...core-v0.44.0) (2026-08-28)
+
+
+### 🚀 Features
+
+* **core,create:** add graphql inferencer and automated inference cli ([6512c94](https://github.com/vibeunion/svadmin/commit/6512c9435ad91bdc83c13bd0e874db82b7cb6ac4))
+* **core,surface,lite:** complete full monorepo migration to typebox ([#344](https://github.com/vibeunion/svadmin/issues/344)) ([9ba73bb](https://github.com/vibeunion/svadmin/commit/9ba73bb06e5e7b1f0bf0ac37167ff97c968c7ad0))
+
+
+### 🔧 Miscellaneous Chores
+
+* **lockfile,core:** prune zod from lockfile and update doc examples to typebox ([#345](https://github.com/vibeunion/svadmin/issues/345)) ([3ed64f0](https://github.com/vibeunion/svadmin/commit/3ed64f09bfbf367ee88d7a2c3a51a18914b9f780))
+
 ## [0.43.0](https://github.com/vibeunion/svadmin/compare/core-v0.42.1...core-v0.43.0) (2026-08-28)
 
 

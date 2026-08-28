@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.5.0](https://github.com/vibeunion/svadmin/compare/surface-v0.4.8...surface-v0.5.0) (2026-08-28)
+
+
+### 🚀 Features
+
+* **core,surface,lite:** complete full monorepo migration to typebox ([#344](https://github.com/vibeunion/svadmin/issues/344)) ([9ba73bb](https://github.com/vibeunion/svadmin/commit/9ba73bb06e5e7b1f0bf0ac37167ff97c968c7ad0))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.34.2 <0.44.0 to >=0.34.2 <0.45.0
+    * @svadmin/ui bumped from >=0.40.6 <0.62.0 to >=0.40.6 <0.63.0
+
 ## [0.4.8](https://github.com/vibeunion/svadmin/compare/surface-v0.4.7...surface-v0.4.8) (2026-08-28)
 
 

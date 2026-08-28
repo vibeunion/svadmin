@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.19.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.18.2...create-svadmin-v0.19.0) (2026-08-28)
+
+
+### 🚀 Features
+
+* **core,create:** add graphql inferencer and automated inference cli ([6512c94](https://github.com/vibeunion/svadmin/commit/6512c9435ad91bdc83c13bd0e874db82b7cb6ac4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/core bumped to 0.44.0
+
 ## [0.18.2](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.18.1...create-svadmin-v0.18.2) (2026-08-28)
 
 
