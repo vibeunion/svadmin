@@ -45,6 +45,7 @@
 
 <Dialog.Dialog bind:open>
   <Dialog.DialogContent class="overflow-hidden p-0 sm:max-w-[560px]">
+    <Dialog.DialogTitle class="sr-only">{i18n.t('common.search')}</Dialog.DialogTitle>
     <Command.Root class="flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground [&_[data-command-group-heading]]:text-muted-foreground [&_[data-command-group-heading]]:px-2 [&_[data-command-group-heading]]:py-1.5 [&_[data-command-group-heading]]:text-xs [&_[data-command-group-heading]]:font-semibold [&_[data-command-group-heading]]:uppercase [&_[data-command-group-heading]]:tracking-wider">
       <div class="flex items-center border-b px-3" data-cmdk-input-wrapper="">
         <Search class="mr-2 h-4 w-4 shrink-0 opacity-50" />

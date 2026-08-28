@@ -17,8 +17,10 @@
 </script>
 
 <div
-  class="flex flex-col items-center justify-center rounded-lg bg-card/50 px-8 py-10 text-center shadow-sm"
-  in:scale={{ start: 0.95, duration: 250, opacity: 0 }}
+  class="flex flex-col items-center justify-center rounded-lg bg-card/50 px-8 py-10 text-center shadow-xs"
+  in:scale={{ start: 0.95, duration: 200, opacity: 0 }}
+  role="status"
+  aria-live="polite"
 >
   <div class="h-20 w-20 rounded-full bg-muted flex items-center justify-center mb-4">
     <PackageOpen class="h-10 w-10 text-muted-foreground" />

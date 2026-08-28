@@ -139,6 +139,15 @@ describe('resource permission visibility', () => {
     },
   );
 
+  it.each([
+    ['command-palette', 'Search'],
+    ['ai-command-bar', 'Actions'],
+  ] as const)('gives the %s dialog an accessible name', async (surface, name) => {
+    const view = render(ResourcePermissionVisibilityHost, { surface });
+
+    expect(await view.findByRole('dialog', { name })).not.toBeNull();
+  });
+
   it('hides every built-in CRUD button disabled by its resource definition', async () => {
     Object.assign(mocks.resource, {
       canCreate: false,

@@ -111,6 +111,7 @@
 
 <Dialog.Dialog bind:open onOpenChange={(v: boolean) => !v && close()}>
   <Dialog.DialogContent class="overflow-hidden p-0 sm:max-w-[600px] border-none shadow-2xl">
+    <Dialog.DialogTitle class="sr-only">{i18n.t('common.actions')}</Dialog.DialogTitle>
     <Command.Root
       shouldFilter={!aiMode}
       class="flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground [&_[data-command-group-heading]]:text-muted-foreground [&_[data-command-group-heading]]:px-2 [&_[data-command-group-heading]]:py-1.5 [&_[data-command-group-heading]]:text-xs [&_[data-command-group-heading]]:font-semibold [&_[data-command-group-heading]]:uppercase [&_[data-command-group-heading]]:tracking-wider"

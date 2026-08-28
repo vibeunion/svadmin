@@ -60,11 +60,13 @@
         <p class="text-xl font-mono font-semibold text-foreground tracking-tight">{value}</p>
         {#if trend}
           <span
-            class="text-xs font-medium {trend.value >= 0 ? 'text-success' : 'text-destructive'}"
+            class="text-xs font-medium inline-flex items-center gap-0.5 {trend.value >= 0 ? 'text-success' : 'text-destructive'}"
+            aria-label="{trend.value >= 0 ? '上升' : '下降'} {Math.abs(trend.value)}%"
           >
-            {trend.value >= 0 ? '↑' : '↓'}{Math.abs(trend.value)}%
+            <span aria-hidden="true">{trend.value >= 0 ? '↑' : '↓'}</span>
+            <span>{Math.abs(trend.value)}%</span>
             {#if trend.label}
-              <span class="text-muted-foreground">{trend.label}</span>
+              <span class="text-muted-foreground ml-0.5">{trend.label}</span>
             {/if}
           </span>
         {/if}

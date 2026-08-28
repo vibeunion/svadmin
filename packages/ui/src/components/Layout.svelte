@@ -170,7 +170,14 @@
     </div>
 
     <!-- Mobile sidebar via Sheet -->
-    <Sheet.Root bind:open={mobileMenuOpen} side="left">
+    <Sheet.Root
+      bind:open={mobileMenuOpen}
+      side="left"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={`${layoutScope}-mobile-navigation-title`}
+    >
+      <Sheet.Title id={`${layoutScope}-mobile-navigation-title`} class="sr-only">{title}</Sheet.Title>
       <div class="md:hidden">
         <Sidebar collapsed={false} {identity} {title} {menu} {routeMode} onToggle={() => { mobileMenuOpen = false; }} onLogout={handleLogout} />
       </div>

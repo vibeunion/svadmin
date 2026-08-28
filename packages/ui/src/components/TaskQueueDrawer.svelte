@@ -227,10 +227,19 @@
   {/if}
 </Button>
 
-<Sheet.Root bind:open side="right" class="w-full max-w-6xl border-l border-border bg-card p-0" onClose={() => open = false}>
+<Sheet.Root
+  bind:open
+  side="right"
+  class="w-full max-w-6xl border-l border-border bg-card p-0"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="svadmin-task-queue-title"
+  onClose={() => open = false}
+>
   <Sheet.Content class="h-full gap-0 p-0">
     <div class="flex h-full flex-col">
       <div class="border-b border-border bg-muted/30 px-4 py-3">
+        <Sheet.Title id="svadmin-task-queue-title" class="sr-only">{resolvedTitle}</Sheet.Title>
         <div class="flex flex-wrap items-center gap-2">
           <ListTodo class="h-5 w-5 text-muted-foreground" />
           <h2 class="text-sm font-semibold">{resolvedTitle}</h2>

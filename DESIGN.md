@@ -143,6 +143,13 @@ not a page background. Success, warning, and danger are reserved for semantic
 status and feedback. Consumer themes may replace the primary hue while keeping
 the neutral hierarchy and contrast relationships intact.
 
+- **WCAG 2.2 AA Contrast**: Normal text maintains at least 4.5:1 against its
+  canvas; large text, icons, and focus rings maintain at least 3:1. Enhanced AAA
+  screens target 7:1 for normal text.
+- **Palette Discipline**: Avoid one-note palettes dominated by a single hue
+  family. Functional states (success, warning, destructive) must use distinct
+  chroma and hue angles, never tints of the primary accent.
+
 ## Typography
 
 Use Inter or the consumer's compatible system sans. Product pages use compact
@@ -156,12 +163,30 @@ unframed layouts with a stable content width. Cards represent individual
 objects or bounded tools; page sections are not decorative floating cards and
 cards are not nested for visual effect.
 
+### Visual Density Dials
+
+svadmin components support systematic density levels to balance scanning speed
+and operational throughput:
+
+- **Density 8–10 (Dense / Dashboard)**: 2px/4px/8px rhythm with 28px–32px row
+  heights. Used for `AutoTable`, `FilterToolbar`, `RecordDetailDrawer`, and
+  operations work areas.
+- **Density 4–6 (Comfortable / Standard)**: 4px/8px/16px rhythm with 40px–44px
+  control heights. Used for settings forms, account profiles, and overview cards.
+- **Density 1–3 (Spacious / Onboarding)**: 16px/24px/32px rhythm for public
+  portals and introductory workflows.
+
 ## Elevation & Depth
 
 Surfaces use a one-pixel border plus a subtle two-layer shadow. Hover elevation
 may increase slightly for genuinely clickable items, without translation or
 glow. Dialogs and menus receive stronger depth because they are floating
 layers. Dark mode keeps the same hierarchy with low-chroma surfaces.
+
+- **Control Shadow**: `0 1px 2px rgb(15 23 42 / 0.05), 0 0 0 1px rgb(15 23 42 / 0.025)`
+- **Surface Shadow**: `0 1px 2px rgb(15 23 42 / 0.035), 0 1px 3px rgb(15 23 42 / 0.025)`
+- **Surface Hover Shadow**: `0 2px 5px rgb(15 23 42 / 0.055), 0 1px 2px rgb(15 23 42 / 0.035)`
+- **Overlay Shadow**: `0 18px 48px rgb(15 23 42 / 0.14), 0 4px 12px rgb(15 23 42 / 0.08)`
 
 ## Shapes
 
@@ -174,6 +199,18 @@ Buttons, fields, tabs, tables, badges, empty states, skeletons, alerts, and
 feedback use shared components and semantic tokens. Layout presets may adjust
 density and composition, but they must not replace component color, typography,
 focus, or elevation with hard-coded values.
+
+
+## Micro-interactions & Motion
+
+Transitions provide clear state confirmation without delaying user action:
+
+- **Timing**: Micro-transitions use 140ms–250ms with `cubic-bezier(0.16, 1, 0.3, 1)`
+  or standard ease-out curves.
+- **Focus Rings**: Operable controls declare `:focus-visible` with a 2px solid
+  ring and a 2px offset.
+- **Accessibility**: All transitions and keyframe animations collapse to 0.01ms
+  when `prefers-reduced-motion: reduce` is active.
 
 ### Reference responsibilities
 

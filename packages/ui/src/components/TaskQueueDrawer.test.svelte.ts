@@ -113,7 +113,7 @@ describe('TaskQueueDrawer', () => {
   it('supports tab switching, filtering, and detail selection', async () => {
     render(TaskQueueDrawer, { open: true, taskProvider: mockTaskProvider });
 
-    expect(screen.getByText('Task Center')).toBeTruthy();
+    expect(screen.getByRole('dialog', { name: 'Task Center' })).toBeTruthy();
     expect(screen.getAllByText('Generate poster').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Rendering hero artwork').length).toBeGreaterThan(0);
 
