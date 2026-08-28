@@ -56,6 +56,18 @@
     "./theme": {
       "types": "./src/theme.svelte.ts",
       "default": "./src/theme.svelte.ts"
+    },
+    "./inferencer": {
+      "types": "./src/inferencer.ts",
+      "default": "./src/inferencer.ts"
+    },
+    "./inferencer-openapi": {
+      "types": "./src/inferencer-openapi.ts",
+      "default": "./src/inferencer-openapi.ts"
+    },
+    "./inferencer-graphql": {
+      "types": "./src/inferencer-graphql.ts",
+      "default": "./src/inferencer-graphql.ts"
     }
   },
   "bugs": {

@@ -10,6 +10,7 @@ import {
   generateEditPageCode,
   generateShowPageCode,
   generateComponentCode,
+  generateResourceBundle,
 } from './inferencer';
 
 describe('inferFieldType', () => {
@@ -228,5 +229,28 @@ describe('inferResource', () => {
     expect(result.typeboxCode).toContain('is_featured: Type.Optional(Type.Boolean())');
     expect(result.typeboxCode).toContain("email: Type.Optional(Type.String({ format: 'email' }))");
     expect(result.typeboxCode).toContain('tags: Type.Optional(Type.Array(Type.String()))');
+  });
+});
+
+describe('generateResourceBundle', () => {
+  test('generates full bundle with code, typeboxCode, and componentCode', () => {
+    const resource = {
+      name: 'categories',
+      label: 'Categories',
+      primaryKey: 'id',
+      fields: [
+        { key: 'id', label: 'ID', type: 'text' as const },
+        { key: 'name', label: 'Name', type: 'text' as const, required: true },
+      ],
+    };
+    const bundle = generateResourceBundle(resource);
+    expect(bundle.resource).toBe(resource);
+    expect(bundle.fields).toBe(resource.fields);
+    expect(bundle.code).toContain('export const categoriesResource');
+    expect(bundle.typeboxCode).toContain('export const CategorieSchema = Type.Object({');
+    expect(bundle.componentCode.list).toContain('<ListPage resourceName="categories">');
+    expect(bundle.componentCode.create).toContain('<CreatePage resourceName="categories">');
+    expect(bundle.componentCode.edit).toContain('<EditPage resourceName="categories" {id}>');
+    expect(bundle.componentCode.show).toContain('<ShowPage resourceName="categories" {id}>');
   });
 });

@@ -171,7 +171,51 @@ test('release pack gate runs maintenance commands from the packed Node CLI', asy
     expect(smokeOutput).toContain('packed doctor drift passed');
     expect(smokeOutput).toContain('packed upgrade dry-run passed');
     expect(smokeOutput).toContain('packed guidance migration passed');
+    expect(smokeOutput).toContain('packed infer generation passed');
   } finally {
     await rm(packDirectory, { recursive: true, force: true });
   }
 }, 180_000);
+
+test('infer CLI previews in dry-run and generates files on --write', async () => {
+  const tempDir = await mkdtemp(join(tmpdir(), 'create-svadmin-infer-cli-'));
+  const schemaPath = join(tempDir, 'schema.graphql');
+  const outDir = join(tempDir, 'src/resources');
+
+  const sdl = `
+    type Customer {
+      id: ID!
+      name: String!
+      email: String!
+      active: Boolean
+    }
+  `;
+
+  try {
+    await writeFile(schemaPath, sdl);
+
+    // Dry run
+    const dryRun = runCli(['infer', '--file', schemaPath, '--out-dir', outDir]);
+    expect(dryRun.status).toBe(0);
+    expect(dryRun.stdout).toContain('Dry run plan');
+    expect(dryRun.stdout).toContain('customers.resource.ts');
+    expect(dryRun.stdout).toContain('customers.schema.ts');
+
+    // Write mode
+    const writeRun = runCli(['infer', '--file', schemaPath, '--out-dir', outDir, '--write']);
+    expect(writeRun.status).toBe(0);
+    expect(writeRun.stdout).toContain('Written');
+
+    const generatedResource = await readFile(join(outDir, 'customers.resource.ts'), 'utf8');
+    expect(generatedResource).toContain("name: 'customers'");
+    expect(generatedResource).toContain("key: 'email'");
+
+    const generatedSchema = await readFile(join(outDir, 'customers.schema.ts'), 'utf8');
+    expect(generatedSchema).toContain('export const CustomerSchema = Type.Object({');
+
+    const generatedList = await readFile(join(outDir, 'customers/ListPage.svelte'), 'utf8');
+    expect(generatedList).toContain('<ListPage resourceName="customers">');
+  } finally {
+    await rm(tempDir, { recursive: true, force: true });
+  }
+});

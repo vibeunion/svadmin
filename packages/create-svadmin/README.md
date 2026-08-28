@@ -36,6 +36,32 @@ bun install
 bun run dev
 ```
 
+## Automated Inference CLI / 接口代码推断器
+
+Automatically infer ResourceDefinitions, TypeBox schemas, and Svelte 5 CRUD components from REST endpoints, OpenAPI / Swagger specs, GraphQL endpoints (introspection), or local schema/sample files:
+
+根据 REST 接口、OpenAPI 规范、GraphQL 端点或本地样本数据自动推导资源定义、TypeBox Schema 及 Svelte 5 完整 CRUD 页面：
+
+```bash
+# Infer from OpenAPI JSON spec URL
+npx @svadmin/create infer --url https://api.example.com/openapi.json --out-dir src/resources --write
+
+# Infer from GraphQL endpoint (automatic introspection)
+npx @svadmin/create infer --url https://api.example.com/graphql --out-dir src/resources --write
+
+# Infer from REST sample data endpoint
+npx @svadmin/create infer --url https://api.example.com/api/v1/posts --resource posts --out-dir src/resources --write
+
+# Infer from local GraphQL SDL or OpenAPI file
+npx @svadmin/create infer --file schema.graphql --out-dir src/resources --write
+```
+
+Generated artifacts include:
+- `<resource>.resource.ts`: ResourceDefinition with field types, relations, and CRUD capabilities
+- `<resource>.schema.ts`: Sinclair TypeBox schema and static TypeScript types
+- `<resource>/ListPage.svelte`, `<resource>/CreatePage.svelte`, `<resource>/EditPage.svelte`, `<resource>/ShowPage.svelte`: Svelte 5 page components
+- `index.ts`: Barrel export file
+
 ## Eject Components / 组件弹出
 
 Extract internal `@svadmin/ui` components into your project for deep customization:

@@ -26,7 +26,8 @@
   "devDependencies": {
     "@types/node": "^26.2.0",
     "@types/prompts": "^2.4.9",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "@svadmin/core": "workspace:*"
   },
   "keywords": [
     "svadmin",

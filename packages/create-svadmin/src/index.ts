@@ -14,6 +14,7 @@ import {
   type DataProviderChoice,
   type ScaffoldManifest,
 } from './project-manifest';
+import { inferCommand } from "./infer-command";
 import {
   doctorProjectPackageJson,
   planProjectPackageFileUpgrade,
@@ -508,6 +509,8 @@ if (subcommand === 'eject') {
   runCommand(() => upgrade(rest));
 } else if (subcommand === 'guidance') {
   runCommand(() => guidance(rest));
+} else if (subcommand === 'infer') {
+  runCommand(() => inferCommand(rest));
 } else {
   runCommand(init);
 }

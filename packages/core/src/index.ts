@@ -187,6 +187,7 @@ export {
   generateShowPageCode,
   generateResourceCode,
   generateComponentCode,
+  generateResourceBundle,
 } from './inferencer';
 export type { InferResult } from './inferencer';
 export { createWebSocketLiveProvider } from './live-websocket';
@@ -195,6 +196,8 @@ export { createSSELiveProvider } from './live-sse';
 export type { SSELiveProviderOptions } from './live-sse';
 export { inferFromOpenAPI } from './inferencer-openapi';
 export type { InferFromOpenAPIOptions } from './inferencer-openapi';
+export { inferFromGraphQL, GRAPHQL_INTROSPECTION_QUERY } from './inferencer-graphql';
+export type { InferFromGraphQLOptions, GraphQLIntrospectionSchema, GraphQLTypeDescriptor } from './inferencer-graphql';
 export {
   getDefaultFilter, getDefaultSortOrder,
   unionFilters, unionSorters,

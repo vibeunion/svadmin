@@ -591,6 +591,29 @@ async function verifyPackedGuidance(
   );
 }
 
+async function verifyPackedInfer(
+  cliEntry: string,
+  fixtureRoot: string,
+): Promise<void> {
+  const inferDirectory = join(fixtureRoot, "infer-project");
+  const sampleDataPath = join(fixtureRoot, "sample.json");
+  const outDir = join(inferDirectory, "resources");
+  await mkdir(inferDirectory, { recursive: true });
+  await writeFile(sampleDataPath, JSON.stringify([{ id: 1, name: "Sample Item", active: true }]));
+
+  runPackedCli(cliEntry, {
+    args: ["infer", "--file", sampleDataPath, "--resource", "items", "--out-dir", outDir, "--write"],
+    cwd: fixtureRoot,
+    expectedStatus: 0,
+    label: "@svadmin/create packed infer (write)",
+    outputIncludes: ["Written", "items.resource.ts", "items.schema.ts"],
+  });
+  assert(
+    await access(join(outDir, "items.resource.ts")).then(() => true).catch(() => false),
+    "@svadmin/create packed infer did not generate items.resource.ts",
+  );
+}
+
 export async function verifyCreateSvadminPackedCli(tarballPath: string): Promise<string> {
   const fixtureRoot = await mkdtemp(join(tmpdir(), 'svadmin-create-packed-cli-'));
   try {
@@ -602,6 +625,7 @@ export async function verifyCreateSvadminPackedCli(tarballPath: string): Promise
     verifyPackedDoctors(cliEntry, fixtureRoot, projectFixtures);
     await verifyPackedUpgradeDryRun(cliEntry, fixtureRoot, projectFixtures);
     await verifyPackedGuidance(cliEntry, fixtureRoot);
+    await verifyPackedInfer(cliEntry, fixtureRoot);
     return [
       'packed npm install passed',
       'packed bin shim doctor passed',
@@ -609,6 +633,7 @@ export async function verifyCreateSvadminPackedCli(tarballPath: string): Promise
       'packed doctor drift passed',
       'packed upgrade dry-run passed',
       'packed guidance migration passed',
+      'packed infer generation passed',
     ].join('\n');
   } finally {
     await rm(fixtureRoot, { recursive: true, force: true });

@@ -4,7 +4,7 @@
  * Analyzes API response data and infers ResourceDefinition + FieldDefinition[].
  * Can also generate copy-paste-ready Svelte component code.
  */
-import type { FieldDefinition, ResourceDefinition } from '@svadmin/core';
+import type { FieldDefinition, ResourceDefinition } from './types';
 
 // ─── Field Type Inference ────────────────────────────────────
 
@@ -443,3 +443,26 @@ function humanize(key: string): string {
     .replace(/([a-z])([A-Z])/g, '$1 $2')
     .replace(/\b\w/g, c => c.toUpperCase());
 }
+
+/**
+ * Generate a complete InferResult bundle from an existing ResourceDefinition.
+ */
+export function generateResourceBundle(resource: ResourceDefinition): InferResult {
+  return {
+    fields: resource.fields,
+    resource,
+    code: generateResourceCode(resource),
+    typeboxCode: generateTypeBoxSchemaCode(resource),
+    componentCode: {
+      list: generateListPageCode(resource),
+      create: generateCreatePageCode(resource),
+      edit: generateEditPageCode(resource),
+      show: generateShowPageCode(resource),
+    },
+  };
+}
+
+export { inferFromOpenAPI } from './inferencer-openapi';
+export type { InferFromOpenAPIOptions } from './inferencer-openapi';
+export { inferFromGraphQL, GRAPHQL_INTROSPECTION_QUERY } from './inferencer-graphql';
+export type { InferFromGraphQLOptions, GraphQLIntrospectionSchema, GraphQLTypeDescriptor } from './inferencer-graphql';
