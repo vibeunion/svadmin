@@ -177,7 +177,16 @@ export { useParsed, resetGlobalPath, syncGlobalPath } from './useParsed.svelte';
 export * from './useStepsForm.svelte';
 export { createHashRouterProvider, createHistoryRouterProvider } from './router-provider';
 export type { RouterNavigationResult, RouterProvider } from './router-provider';
-export { inferFieldType, inferResource } from './inferencer';
+export {
+  inferFieldType,
+  inferResource,
+  generateListPageCode,
+  generateCreatePageCode,
+  generateEditPageCode,
+  generateShowPageCode,
+  generateResourceCode,
+  generateComponentCode,
+} from './inferencer';
 export type { InferResult } from './inferencer';
 export { createWebSocketLiveProvider } from './live-websocket';
 export type { WebSocketLiveProviderOptions } from './live-websocket';
@@ -190,7 +199,9 @@ export {
   unionFilters, unionSorters,
   file2Base64, generateDefaultDocumentTitle,
   deriveValidator,
+  createSchemaValidator,
 } from './helpers';
+export type { SchemaValidatorLike } from './helpers';
 export { TableState } from './table-state.svelte';
 export type { TableStateOptions } from './table-state.svelte';
 export type { UseInfiniteListOptions } from './hooks.svelte';

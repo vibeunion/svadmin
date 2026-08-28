@@ -18,6 +18,7 @@
 
   let selectedResource = $state('');
   let inferResult = $state<InferResult | null>(null);
+  let codeTarget = $state<'resource' | 'list' | 'create' | 'edit' | 'show'>('resource');
   let loading = $state(false);
   let error = $state<string | null>(null);
   let copied = $state(false);
@@ -78,9 +79,18 @@
     }
   }
 
+  const activeCode = $derived.by(() => {
+    if (!inferResult) return '';
+    if (codeTarget === 'list') return inferResult.componentCode.list;
+    if (codeTarget === 'create') return inferResult.componentCode.create;
+    if (codeTarget === 'edit') return inferResult.componentCode.edit;
+    if (codeTarget === 'show') return inferResult.componentCode.show;
+    return inferResult.code;
+  });
+
   function copyCode() {
-    if (!inferResult) return;
-    navigator.clipboard.writeText(inferResult.code);
+    if (!activeCode) return;
+    navigator.clipboard.writeText(activeCode);
     copied = true;
     if (copyTimer) clearTimeout(copyTimer);
     copyTimer = setTimeout(() => { copied = false; }, 2000);
@@ -190,8 +200,49 @@
 
       <!-- Generated code -->
       <div class="rounded-lg border overflow-hidden">
-        <div class="flex items-center justify-between bg-muted px-3 py-1.5 text-xs text-muted-foreground">
-          <span>Generated ResourceDefinition</span>
+        <div class="flex flex-wrap items-center justify-between gap-1 bg-muted px-3 py-1.5 text-xs text-muted-foreground border-b">
+          <div class="flex items-center gap-1">
+            <Button
+              variant={codeTarget === 'resource' ? 'secondary' : 'ghost'}
+              size="sm"
+              class="h-6 text-xs px-2"
+              onclick={() => { codeTarget = 'resource'; }}
+            >
+              Resource (TS)
+            </Button>
+            <Button
+              variant={codeTarget === 'list' ? 'secondary' : 'ghost'}
+              size="sm"
+              class="h-6 text-xs px-2"
+              onclick={() => { codeTarget = 'list'; }}
+            >
+              List Page
+            </Button>
+            <Button
+              variant={codeTarget === 'create' ? 'secondary' : 'ghost'}
+              size="sm"
+              class="h-6 text-xs px-2"
+              onclick={() => { codeTarget = 'create'; }}
+            >
+              Create Form
+            </Button>
+            <Button
+              variant={codeTarget === 'edit' ? 'secondary' : 'ghost'}
+              size="sm"
+              class="h-6 text-xs px-2"
+              onclick={() => { codeTarget = 'edit'; }}
+            >
+              Edit Form
+            </Button>
+            <Button
+              variant={codeTarget === 'show' ? 'secondary' : 'ghost'}
+              size="sm"
+              class="h-6 text-xs px-2"
+              onclick={() => { codeTarget = 'show'; }}
+            >
+              Show Page
+            </Button>
+          </div>
           <Button variant="ghost" size="sm" class="h-6 text-xs gap-1" onclick={copyCode}>
             {#if copied}
               <Check class="h-3 w-3 text-success" />
@@ -202,11 +253,11 @@
             {/if}
           </Button>
         </div>
-        <pre class="max-h-64 overflow-auto bg-muted/30 p-3 text-xs text-foreground font-mono">{inferResult.code}</pre>
+        <pre class="max-h-64 overflow-auto bg-muted/30 p-3 text-xs text-foreground font-mono">{activeCode}</pre>
       </div>
 
       <p class="text-xs text-muted-foreground">
-        Inferred {inferResult.fields.length} fields from sample data. Copy the code above into your <code class="bg-muted px-1 rounded text-foreground">resources.ts</code> file.
+        Inferred {inferResult.fields.length} fields from sample data. Copy the code above into your Svelte 5 application files.
       </p>
     {/if}
   </Card.CardContent>

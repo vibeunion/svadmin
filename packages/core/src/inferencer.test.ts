@@ -1,7 +1,15 @@
 // Unit tests for Inferencer
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, test, expect } from 'bun:test';
-import { inferFieldType, inferResource } from './inferencer';
+import {
+  inferFieldType,
+  inferResource,
+  generateListPageCode,
+  generateCreatePageCode,
+  generateEditPageCode,
+  generateShowPageCode,
+  generateComponentCode,
+} from './inferencer';
 
 describe('inferFieldType', () => {
   test('detects boolean', () => {
@@ -186,5 +194,25 @@ describe('inferResource', () => {
     expect(result.resource.primaryKey).toBe('_id');
     const pkField = result.fields.find(f => f.key === '_id');
     expect(pkField!.showInForm).toBe(false);
+  });
+
+  test('generates complete Svelte 5 component code for list, create, edit, show', () => {
+    const result = inferResource('posts', sampleData);
+    expect(result.componentCode).toBeDefined();
+    expect(result.componentCode.list).toContain('<ListPage resourceName="posts">');
+    expect(result.componentCode.list).toContain('<AutoTable resourceName="posts" />');
+    expect(result.componentCode.create).toContain('<CreatePage resourceName="posts">');
+    expect(result.componentCode.create).toContain('<AutoForm resourceName="posts" mode="create" />');
+    expect(result.componentCode.edit).toContain('<EditPage resourceName="posts" {id}>');
+    expect(result.componentCode.show).toContain('<ShowPage resourceName="posts" {id}>');
+  });
+
+  test('generateComponentCode helper produces matching code for each kind', () => {
+    const resource = { name: 'users', label: 'Users', primaryKey: 'id', fields: [] };
+    expect(generateComponentCode(resource, 'list')).toBe(generateListPageCode(resource));
+    expect(generateComponentCode(resource, 'create')).toBe(generateCreatePageCode(resource));
+    expect(generateComponentCode(resource, 'edit')).toBe(generateEditPageCode(resource));
+    expect(generateComponentCode(resource, 'show')).toBe(generateShowPageCode(resource));
+    expect(generateComponentCode(resource, 'resource')).toContain("export const usersResource");
   });
 });

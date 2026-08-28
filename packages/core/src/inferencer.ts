@@ -83,6 +83,12 @@ export interface InferResult {
   fields: FieldDefinition[];
   resource: ResourceDefinition;
   code: string;
+  componentCode: {
+    list: string;
+    create: string;
+    edit: string;
+    show: string;
+  };
 }
 
 /**
@@ -103,10 +109,17 @@ export function inferResource(
   const label = options.label ?? capitalize(resourceName);
 
   if (!sampleData.length) {
+    const emptyResource: ResourceDefinition = { name: resourceName, label, fields: [], primaryKey };
     return {
       fields: [],
-      resource: { name: resourceName, label, fields: [], primaryKey },
+      resource: emptyResource,
       code: `// No data available to infer fields for "${resourceName}".`,
+      componentCode: {
+        list: generateListPageCode(emptyResource),
+        create: generateCreatePageCode(emptyResource),
+        edit: generateEditPageCode(emptyResource),
+        show: generateShowPageCode(emptyResource),
+      },
     };
   }
 
@@ -190,8 +203,14 @@ export function inferResource(
   };
 
   const code = generateCode(resource);
+  const componentCode = {
+    list: generateListPageCode(resource),
+    create: generateCreatePageCode(resource),
+    edit: generateEditPageCode(resource),
+    show: generateShowPageCode(resource),
+  };
 
-  return { fields, resource, code };
+  return { fields, resource, code, componentCode };
 }
 
 // ─── Code Generation ─────────────────────────────────────────
@@ -233,6 +252,102 @@ ${fieldsCode}
   ],
 };
 `;
+}
+
+/**
+ * Generate Svelte 5 ListPage component code for a resource.
+ */
+export function generateListPageCode(resource: ResourceDefinition): string {
+  return `<script lang="ts">
+  import { ListPage, AutoTable } from '@svadmin/ui';
+</script>
+
+<ListPage resourceName="${resource.name}">
+  <AutoTable resourceName="${resource.name}" />
+</ListPage>
+`;
+}
+
+/**
+ * Generate Svelte 5 CreatePage component code for a resource.
+ */
+export function generateCreatePageCode(resource: ResourceDefinition): string {
+  return `<script lang="ts">
+  import { CreatePage, AutoForm } from '@svadmin/ui';
+</script>
+
+<CreatePage resourceName="${resource.name}">
+  <AutoForm resourceName="${resource.name}" mode="create" />
+</CreatePage>
+`;
+}
+
+/**
+ * Generate Svelte 5 EditPage component code for a resource.
+ */
+export function generateEditPageCode(resource: ResourceDefinition): string {
+  return `<script lang="ts">
+  import { EditPage, AutoForm } from '@svadmin/ui';
+
+  interface Props {
+    id?: string | number;
+  }
+
+  let { id }: Props = $props();
+</script>
+
+<EditPage resourceName="${resource.name}" {id}>
+  <AutoForm resourceName="${resource.name}" {id} mode="edit" />
+</EditPage>
+`;
+}
+
+/**
+ * Generate Svelte 5 ShowPage component code for a resource.
+ */
+export function generateShowPageCode(resource: ResourceDefinition): string {
+  return `<script lang="ts">
+  import { ShowPage, AutoForm } from '@svadmin/ui';
+
+  interface Props {
+    id?: string | number;
+  }
+
+  let { id }: Props = $props();
+</script>
+
+<ShowPage resourceName="${resource.name}" {id}>
+  <AutoForm resourceName="${resource.name}" {id} mode="show" />
+</ShowPage>
+`;
+}
+
+/**
+ * Generate TypeScript code for ResourceDefinition.
+ */
+export function generateResourceCode(resource: ResourceDefinition): string {
+  return generateCode(resource);
+}
+
+/**
+ * Universal code generator for resource definition or Svelte page components.
+ */
+export function generateComponentCode(
+  resource: ResourceDefinition,
+  kind: 'resource' | 'list' | 'create' | 'edit' | 'show'
+): string {
+  switch (kind) {
+    case 'resource':
+      return generateResourceCode(resource);
+    case 'list':
+      return generateListPageCode(resource);
+    case 'create':
+      return generateCreatePageCode(resource);
+    case 'edit':
+      return generateEditPageCode(resource);
+    case 'show':
+      return generateShowPageCode(resource);
+  }
 }
 
 // ─── Utilities ───────────────────────────────────────────────

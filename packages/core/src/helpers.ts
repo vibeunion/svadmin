@@ -8,7 +8,9 @@ export {
   getDefaultFilter, getDefaultSortOrder,
   unionFilters, unionSorters,
   file2Base64, parseCSV,
+  createSchemaValidator,
 } from './helpers-pure';
+export type { SchemaValidatorLike } from './helpers-pure';
 
 
 // ─── Document Title Helper ────────────────────────────────────

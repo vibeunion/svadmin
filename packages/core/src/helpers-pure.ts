@@ -164,3 +164,134 @@ export function parseCSV(text: string): string[][] {
   }
   return rows;
 }
+
+// ─── Universal Schema Validator Helper ──────────────────────────
+
+/**
+ * Universal schema interface compatible with Zod, Valibot, Standard Schema (v1),
+ * Yup, Joi, etc.
+ */
+export interface SchemaValidatorLike {
+  safeParse?: (data: unknown) => {
+    success: boolean;
+    data?: unknown;
+    error?: {
+      issues?: Array<{ path?: Array<string | number>; message: string }>;
+      errors?: Array<{ path?: Array<string | number>; message: string }>;
+    };
+  };
+  parse?: (data: unknown) => unknown;
+  validate?: (data: unknown) => {
+    error?: {
+      details?: Array<{ path?: Array<string | number>; message: string }>;
+      message?: string;
+    };
+  };
+  '~standard'?: {
+    validate: (data: unknown) => unknown | Promise<unknown>;
+  };
+}
+
+/**
+ * Creates a synchronous form validator function from any Zod, Valibot, Yup, Joi,
+ * or Standard Schema v1 object.
+ *
+ * @example
+ * ```ts
+ * import { z } from 'zod';
+ * import { createSchemaValidator, useForm } from '@svadmin/core';
+ *
+ * const userSchema = z.object({
+ *   name: z.string().min(2, 'Name must be at least 2 chars'),
+ *   email: z.string().email('Invalid email address'),
+ * });
+ *
+ * const form = useForm({
+ *   resource: 'users',
+ *   validate: createSchemaValidator(userSchema),
+ * });
+ * ```
+ */
+export function createSchemaValidator(
+  schema: SchemaValidatorLike | unknown
+): (values: Record<string, unknown>) => Record<string, string> | null {
+  if (!schema || typeof schema !== 'object') {
+    return () => null;
+  }
+
+  const s = schema as SchemaValidatorLike;
+
+  return (values: Record<string, unknown>) => {
+    const errors: Record<string, string> = {};
+
+    // 1. Standard Schema v1 (~standard)
+    if (s['~standard'] && typeof s['~standard'].validate === 'function') {
+      const res = s['~standard'].validate(values);
+      if (res && typeof res === 'object' && 'issues' in res && Array.isArray((res as { issues?: Array<{ path?: Array<unknown>; message: string }> }).issues)) {
+        for (const issue of (res as { issues: Array<{ path?: Array<unknown>; message: string }> }).issues) {
+          const rawPath = issue.path?.[0];
+          const key = typeof rawPath === 'object' && rawPath !== null && 'key' in rawPath
+            ? String((rawPath as { key: unknown }).key)
+            : rawPath != null
+              ? String(rawPath)
+              : '_root';
+          if (!errors[key]) errors[key] = issue.message;
+        }
+      }
+      return Object.keys(errors).length > 0 ? errors : null;
+    }
+
+    // 2. Zod / Valibot safeParse
+    if (typeof s.safeParse === 'function') {
+      const res = s.safeParse(values);
+      if (!res.success && res.error) {
+        const issues = res.error.issues ?? res.error.errors ?? [];
+        for (const issue of issues) {
+          const key = issue.path?.[0] != null ? String(issue.path[0]) : '_root';
+          if (!errors[key]) errors[key] = issue.message;
+        }
+      }
+      return Object.keys(errors).length > 0 ? errors : null;
+    }
+
+    // 3. Joi / generic .validate()
+    if (typeof s.validate === 'function') {
+      const res = s.validate(values);
+      if (res && typeof res === 'object' && res.error) {
+        const details = res.error.details;
+        if (Array.isArray(details) && details.length > 0) {
+          for (const d of details) {
+            const key = d.path?.[0] != null ? String(d.path[0]) : '_root';
+            if (!errors[key]) errors[key] = d.message;
+          }
+        } else if (res.error.message) {
+          errors._root = res.error.message;
+        }
+      }
+      return Object.keys(errors).length > 0 ? errors : null;
+    }
+
+    // 4. Synchronous .parse() that throws (e.g. standard Zod parse or Yup validateSync)
+    if (typeof s.parse === 'function') {
+      try {
+        s.parse(values);
+      } catch (err: unknown) {
+        if (err && typeof err === 'object') {
+          const issues = (err as { issues?: Array<{ path?: Array<string | number>; message: string }>; errors?: Array<{ path?: Array<string | number>; message: string }> }).issues ??
+            (err as { errors?: Array<{ path?: Array<string | number>; message: string }> }).errors;
+          if (Array.isArray(issues)) {
+            for (const issue of issues) {
+              const key = issue.path?.[0] != null ? String(issue.path[0]) : '_root';
+              if (!errors[key]) errors[key] = issue.message;
+            }
+          } else if ('message' in err && typeof (err as { message: unknown }).message === 'string') {
+            errors._root = (err as { message: string }).message;
+          }
+        }
+      }
+      return Object.keys(errors).length > 0 ? errors : null;
+    }
+
+    return null;
+  };
+}
