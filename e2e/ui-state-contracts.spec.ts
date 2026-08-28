@@ -130,10 +130,14 @@ test.describe('UI state contracts', () => {
       expect(metrics.documentOverflow).toBe(false);
       // URL placeholder (https://api.example.com/hooks) fits the input width.
       expect(metrics.placeholder).not.toBeNull();
-      expect(metrics.placeholder!.text).toBeLessThanOrEqual(metrics.placeholder!.available + 1);
+      if (metrics.placeholder) {
+        expect(metrics.placeholder.text).toBeLessThanOrEqual(metrics.placeholder.available + 1);
+      }
       // Sidebar language select shows the full locale name (e.g. "English").
       expect(metrics.locale).not.toBeNull();
-      expect(metrics.locale!.text).toBeLessThanOrEqual(metrics.locale!.available + 1);
+      if (metrics.locale) {
+        expect(metrics.locale.text).toBeLessThanOrEqual(metrics.locale.available + 1);
+      }
 
       const screenshotDirectory = process.env.UI_SCREENSHOT_DIR ?? testInfo.outputPath('screenshots');
       await mkdir(screenshotDirectory, { recursive: true });
