@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.0](https://github.com/vibeunion/svadmin/compare/lite-v0.5.0...lite-v0.6.0) (2026-08-28)
+
+
+### 🚀 Features
+
+* **lite:** add full domain menus, filter bars, batch selection, and breadcrumbs ([fe749fe](https://github.com/vibeunion/svadmin/commit/fe749fe459e7853d9486b944466544193df67266))
+* **lite:** add IE11 compatibility fallbacks ([f0667d3](https://github.com/vibeunion/svadmin/commit/f0667d30a379ad73ebfcc7d39868471626817183))
+
+
+### 🐛 Bug Fixes
+
+* **lite:** narrow capability detection types ([d10faff](https://github.com/vibeunion/svadmin/commit/d10faffc898b69d50b38cc8bfe6d0e1933c749b3))
+
 ## [0.5.0](https://github.com/vibeunion/svadmin/compare/lite-v0.4.0...lite-v0.5.0) (2026-08-28)
 
 
