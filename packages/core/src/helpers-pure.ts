@@ -168,7 +168,7 @@ export function parseCSV(text: string): string[][] {
 // ─── Universal Schema Validator Helper ──────────────────────────
 
 /**
- * Universal schema interface compatible with Zod, Valibot, Standard Schema (v1),
+ * Universal schema interface compatible with TypeBox, Standard Schema (v1), Valibot, Zod,
  * Yup, Joi, etc.
  */
 export interface SchemaValidatorLike {
@@ -203,22 +203,23 @@ export type TypeBoxValidatorLike = {
 };
 
 /**
- * Creates a synchronous form validator function from any Zod, Valibot, Yup, Joi,
- * TypeBox, or Standard Schema v1 object.
+ * Creates a synchronous form validator function from any TypeBox, Standard Schema v1,
+ * Valibot, Zod, Yup, or Joi object.
  *
  * @example
  * ```ts
- * import { z } from 'zod';
+ * import { Type } from '@sinclair/typebox';
+ * import { TypeCompiler } from '@sinclair/typebox/compiler';
  * import { createSchemaValidator, useForm } from '@svadmin/core';
  *
- * const userSchema = z.object({
- *   name: z.string().min(2, 'Name must be at least 2 chars'),
- *   email: z.string().email('Invalid email address'),
+ * const userSchema = Type.Object({
+ *   name: Type.String({ minLength: 2 }),
+ *   email: Type.String({ format: 'email' }),
  * });
  *
  * const form = useForm({
  *   resource: 'users',
- *   validate: createSchemaValidator(userSchema),
+ *   validate: createSchemaValidator(TypeCompiler.Compile(userSchema)),
  * });
  * ```
  */
