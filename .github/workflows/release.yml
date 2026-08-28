@@ -21,7 +21,7 @@ jobs:
     outputs:
       releases_created: ${{ steps.release.outputs.releases_created }}
       release_sha: ${{ steps.release-ref.outputs.sha }}
-      release_manifest: ${{ steps.release-ref.outputs.release_manifest }}
+      release_manifest: ${{ steps.release-manifest.outputs.release_manifest }}
     steps:
       - uses: googleapis/release-please-action@v5
         id: release
@@ -75,7 +75,7 @@ jobs:
           persist-credentials: false
 
       - uses: oven-sh/setup-bun@v2
-        if: steps.release-pr.outputs.branch != ''
+        if: steps.release-pr.outputs.branch != '' || steps.release.outputs.releases_created == 'true'
         with:
           bun-version: "1.4.0"
 
@@ -153,6 +153,110 @@ jobs:
             `release_manifest=${JSON.stringify(releaseManifest)}\n`,
           );
           NODE
+
+      - uses: actions/checkout@v7
+        if: steps.release.outputs.releases_created == 'true'
+        with:
+          ref: ${{ steps.release-ref.outputs.sha }}
+          fetch-depth: 0
+          fetch-tags: true
+          persist-credentials: false
+
+      - name: Reconcile version-changed release packages
+        id: release-manifest
+        if: steps.release.outputs.releases_created == 'true'
+        env:
+          RELEASE_SHA: ${{ steps.release-ref.outputs.sha }}
+          RELEASE_MANIFEST: ${{ steps.release-ref.outputs.release_manifest }}
+        run: |
+          bun scripts/reconcile-release-manifest.ts > "$RUNNER_TEMP/reconciled-release.json"
+          node <<'NODE'
+          const fs = require('fs');
+          const result = JSON.parse(fs.readFileSync(`${process.env.RUNNER_TEMP}/reconciled-release.json`, 'utf8'));
+          if (!Array.isArray(result.releaseManifest) || result.releaseManifest.length === 0) {
+            throw new Error('Reconciled release manifest is empty');
+          }
+          if (!Array.isArray(result.missingReleases)) {
+            throw new Error('Reconciled missing release list is invalid');
+          }
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `release_manifest=${JSON.stringify(result.releaseManifest)}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `missing_releases=${JSON.stringify(result.missingReleases)}\n`);
+          NODE
+
+      - name: Create reconciled tags and GitHub releases
+        if: steps.release.outputs.releases_created == 'true' && steps.release-manifest.outputs.missing_releases != '[]'
+        uses: actions/github-script@v9
+        env:
+          RELEASE_SHA: ${{ steps.release-ref.outputs.sha }}
+          MISSING_RELEASES: ${{ steps.release-manifest.outputs.missing_releases }}
+        with:
+          github-token: ${{ secrets.RELEASE_PAT }}
+          script: |
+            const fs = require('fs');
+            const releaseSha = process.env.RELEASE_SHA;
+            const releases = JSON.parse(process.env.MISSING_RELEASES || '[]');
+
+            for (const release of releases) {
+              const suffix = `-v${release.version}`;
+              if (!release.tag.endsWith(suffix)) {
+                core.setFailed(`Release tag ${release.tag} does not match version ${release.version}`);
+                return;
+              }
+
+              try {
+                const existingRef = await github.rest.git.getRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: `tags/${release.tag}`,
+                });
+                if (existingRef.data.object.type !== 'commit' || existingRef.data.object.sha !== releaseSha) {
+                  core.setFailed(
+                    `Release tag ${release.tag} appeared at ${existingRef.data.object.sha}, expected ${releaseSha}`,
+                  );
+                  return;
+                }
+              } catch (error) {
+                if (error.status !== 404) throw error;
+                await github.rest.git.createRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: `refs/tags/${release.tag}`,
+                  sha: releaseSha,
+                });
+              }
+
+              try {
+                await github.rest.repos.getReleaseByTag({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  tag: release.tag,
+                });
+                core.info(`GitHub release already exists for ${release.tag}`);
+                continue;
+              } catch (error) {
+                if (error.status !== 404) throw error;
+              }
+
+              const changelog = fs.readFileSync(`${release.path}/CHANGELOG.md`, 'utf8');
+              const marker = `## [${release.version}](`;
+              const start = changelog.indexOf(marker);
+              const end = changelog.indexOf('\n## [', start + marker.length);
+              if (start < 0) {
+                core.setFailed(`Missing changelog entry for ${release.tag}`);
+                return;
+              }
+              const body = changelog.slice(start, end < 0 ? undefined : end).trim();
+              const component = release.tag.slice(0, -suffix.length);
+              await github.rest.repos.createRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag_name: release.tag,
+                target_commitish: releaseSha,
+                name: `${component}: v${release.version}`,
+                body,
+              });
+              core.info(`Created reconciled GitHub release for ${release.tag}`);
+            }
 
   trigger-publish:
     needs: release-please
