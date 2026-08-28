@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.7.0](https://github.com/vibeunion/svadmin/compare/lite-v0.6.0...lite-v0.7.0) (2026-08-28)
+
+
+### 🚀 Features
+
+* **lite,ui:** add enterprise components, complete lite parity tracking, and update docs ([cbc7649](https://github.com/vibeunion/svadmin/commit/cbc7649ab61f2c7df4a4bff4e8c093aed0257767))
+* **ui,create-svadmin:** add navigation menu component and lite init command ([745b86f](https://github.com/vibeunion/svadmin/commit/745b86f772f82d2f9929e7f0bdcb95d3d10dbb64))
+
+
+### 🐛 Bug Fixes
+
+* **core,lite:** expand field type union and refine show field type assertions ([6ecc24b](https://github.com/vibeunion/svadmin/commit/6ecc24bb294db9452183cbc2e534f99ffbd7627a))
+* **lite,ui:** refine field type annotations, a11y labels, and test assertions ([6af6a2c](https://github.com/vibeunion/svadmin/commit/6af6a2c3d3a22a57a7c3e27fdb5440af521bead5))
+* **lite:** make parity checks independent of cwd ([e4fcbbf](https://github.com/vibeunion/svadmin/commit/e4fcbbfd66089a979ffbd58024899f44d8ebf8d4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.34.2 <0.46.0 to >=0.46.0
+
 ## [0.6.0](https://github.com/vibeunion/svadmin/compare/lite-v0.5.0...lite-v0.6.0) (2026-08-28)
 
 

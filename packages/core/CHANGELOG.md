@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.46.0](https://github.com/vibeunion/svadmin/compare/core-v0.45.0...core-v0.46.0) (2026-08-28)
+
+
+### 🚀 Features
+
+* **lite,ui:** add enterprise components, complete lite parity tracking, and update docs ([cbc7649](https://github.com/vibeunion/svadmin/commit/cbc7649ab61f2c7df4a4bff4e8c093aed0257767))
+
+
+### 🐛 Bug Fixes
+
+* **core,lite:** expand field type union and refine show field type assertions ([6ecc24b](https://github.com/vibeunion/svadmin/commit/6ecc24bb294db9452183cbc2e534f99ffbd7627a))
+
 ## [0.45.0](https://github.com/vibeunion/svadmin/compare/core-v0.44.0...core-v0.45.0) (2026-08-28)
 
 

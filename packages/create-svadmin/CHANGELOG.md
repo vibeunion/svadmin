@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.21.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.20.0...create-svadmin-v0.21.0) (2026-08-28)
+
+
+### 🚀 Features
+
+* **ui,create-svadmin:** add navigation menu component and lite init command ([745b86f](https://github.com/vibeunion/svadmin/commit/745b86f772f82d2f9929e7f0bdcb95d3d10dbb64))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/core bumped to 0.46.0
+
 ## [0.20.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.19.0...create-svadmin-v0.20.0) (2026-08-28)
 
 
