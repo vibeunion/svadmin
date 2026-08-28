@@ -1,5 +1,6 @@
 import { expect, test } from 'bun:test';
-import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
@@ -46,7 +47,9 @@ test('lite init plans one dynamic route tree without touching the SPA', async ()
       console.log = originalLog;
     }
     expect(dryRunOutput.join('\n')).toContain('Dry run only');
-    expect(await readdir(join(projectDirectory, 'src'))).toEqual(['lib', 'routes']);
+    expect((await stat(join(projectDirectory, 'src', 'routes'))).isDirectory()).toBe(true);
+    expect(existsSync(join(projectDirectory, 'src', 'routes', 'lite'))).toBe(false);
+    expect(await readFile(join(projectDirectory, 'src-placeholder'), 'utf8')).toBe('spa stays here\n');
 
     const result = writeLiteInit(plan);
     expect(result.written).toHaveLength(13);
