@@ -51,6 +51,20 @@ are required peers rather than optional dependencies.
 
 ### 2. Create a list page
 
+For an existing SvelteKit project, the route tree can be generated once instead
+of being handwritten for every resource:
+
+```bash
+bunx @svadmin/create lite init .
+bunx @svadmin/create lite init . --write
+```
+
+The generator adds a shared `$lib/svadmin-lite.ts` adapter and dynamic
+`[resource]` list/create/show/edit routes. `$lib/admin` only needs to export
+`resources` and `dataProvider`; the existing SPA files are not changed. The
+generated Lite subtree is `ssr = true` and `csr = false`, and existing files are
+preserved on repeat runs.
+
 ```typescript
 // src/routes/lite/posts/+page.server.ts
 import { createListLoader, createCrudActions } from '@svadmin/lite';

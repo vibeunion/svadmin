@@ -130,18 +130,20 @@
       </span>
     </div>
 
-    <LiteTable
-      {records}
-      {resource}
-      {currentSort}
-      {currentOrder}
-      {currentSearch}
-      {basePath}
-      canShow={showView}
-      canEdit={showEdit}
-      canDelete={showDelete}
-      {enableBatch}
-    />
+    <div class="lite-table-scroll">
+      <LiteTable
+        {records}
+        {resource}
+        {currentSort}
+        {currentOrder}
+        {currentSearch}
+        {basePath}
+        canShow={showView}
+        canEdit={showEdit}
+        canDelete={showDelete}
+        {enableBatch}
+      />
+    </div>
 
     {#if total > pagination.perPage}
       <LitePagination

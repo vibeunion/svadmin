@@ -134,3 +134,22 @@ overwriting local standards:
 bunx @svadmin/create guidance .
 bunx @svadmin/create guidance . --write
 ```
+
+## Add Lite routes to an existing SPA
+
+Lite is an optional SvelteKit server-rendered route tree. It does not modify the
+existing SPA or add IE11 branches to the SPA bundle. In a project that already
+has a SvelteKit `src/routes` directory, run:
+
+```bash
+# Preview the files first; nothing is written
+bunx @svadmin/create lite init .
+
+# Generate the shared adapter and dynamic CRUD routes
+bunx @svadmin/create lite init . --write
+```
+
+The generator creates one `[resource]` route for all resources plus the shared
+`src/lib/svadmin-lite.ts` adapter. Your existing `$lib/admin` module only needs
+to export `resources` and `dataProvider`; resources are resolved dynamically at
+request time. Existing files are preserved, so rerunning the command is safe.

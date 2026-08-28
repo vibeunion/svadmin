@@ -73,6 +73,10 @@ try {
   assert.match(compatibilityHtml, /ZIP archive fallback/u);
   checkedRoutes += 1;
 
+  const parityHtml = await assertServerRenderedPage(baseUrl, '/lite/parity', /72\/72/u);
+  assert.match(parityHtml, /72\/72/u);
+  checkedRoutes += 1;
+
   for (const path of ['/lite/compatibility/flow.json', '/lite/compatibility/result.json']) {
     const response = await fetch(new URL(path, baseUrl));
     assert.equal(response.status, 200, `GET ${path} returned ${response.status}`);

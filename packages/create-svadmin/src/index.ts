@@ -15,6 +15,7 @@ import {
   type ScaffoldManifest,
 } from './project-manifest';
 import { inferCommand } from "./infer-command";
+import { liteInitCommand } from './lite-init';
 import {
   doctorProjectPackageJson,
   planProjectPackageFileUpgrade,
@@ -511,6 +512,14 @@ if (subcommand === 'eject') {
   runCommand(() => guidance(rest));
 } else if (subcommand === 'infer') {
   runCommand(() => inferCommand(rest));
+} else if (subcommand === 'lite') {
+  if (rest[0] !== 'init') {
+    runCommand(() => {
+      throw new Error('Usage: create-svadmin lite init [project-directory] [--write]');
+    });
+  } else {
+    runCommand(() => liteInitCommand(rest.slice(1)));
+  }
 } else {
   runCommand(init);
 }

@@ -157,6 +157,7 @@ describe('Lite ResourceDefinition permissions', () => {
     expect(listView.container.querySelector('a[href*="/show/"]')).toBeNull();
     expect(listView.container.querySelector('a[href*="/edit/"]')).toBeNull();
     expect(listView.container.querySelector('details')).toBeNull();
+    expect(listView.container.querySelector('.lite-table-scroll')).not.toBeNull();
     listView.unmount();
 
     const editView = render(LiteEditPage, {

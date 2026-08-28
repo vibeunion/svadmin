@@ -35,7 +35,8 @@ export interface ParityReportData {
 }
 
 export const load = (() => {
-  const parityJsonPath = resolve(process.cwd(), '../../packages/lite/parity.json');
+  // Resolve from this route module so the page works from any process cwd.
+  const parityJsonPath = resolve(import.meta.dirname, '../../../../../parity.json');
   let parityReport: ParityReportData | undefined;
 
   if (existsSync(parityJsonPath)) {
