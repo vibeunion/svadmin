@@ -67,7 +67,7 @@
     
     <!-- Toast Feedback -->
     {#if message}
-      <div class={`px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-all flex items-center gap-2 ${messageType === 'success' ? 'bg-green-500/10 text-green-600 dark:text-green-400 ring-1 ring-green-500/20' : 'bg-destructive/10 text-destructive ring-1 ring-destructive/20'}`}>
+      <div class={`px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-all flex items-center gap-2 ${messageType === 'success' ? 'bg-success/10 text-success ring-1 ring-success/20' : 'bg-destructive/10 text-destructive ring-1 ring-destructive/20'}`}>
         {#if messageType === 'success'}
            <Check class="w-4 h-4" />
         {:else}

@@ -45,14 +45,14 @@
   };
 
   const statusColors: Record<AvatarStatus, string> = {
-    online: 'bg-emerald-500',
-    success: 'bg-emerald-500',
-    busy: 'bg-rose-500',
-    error: 'bg-rose-500',
-    warning: 'bg-amber-500',
-    away: 'bg-amber-500',
-    offline: 'bg-slate-400',
-    neutral: 'bg-slate-400',
+    online: 'bg-success',
+    success: 'bg-success',
+    busy: 'bg-destructive',
+    error: 'bg-destructive',
+    warning: 'bg-warning',
+    away: 'bg-warning',
+    offline: 'bg-muted-foreground',
+    neutral: 'bg-muted-foreground',
   };
 
   function getInitials(value?: string | null): string {

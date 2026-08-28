@@ -63,15 +63,15 @@
 {:else}
   <div class={cn('field-rating inline-flex items-center gap-1.5', className)}>
     <div
-      class="inline-flex items-center gap-0.5 text-amber-500"
+      class="inline-flex items-center gap-0.5 text-warning"
       role="img"
       aria-label={`${numericValue} out of ${normalizedMax}`}
     >
       {#each stars as starType, idx (idx)}
         {#if starType === 'full'}
-          <Star aria-hidden="true" class={cn(sizeClasses[size].icon, 'fill-amber-500 text-amber-500')} />
+          <Star aria-hidden="true" class={cn(sizeClasses[size].icon, 'fill-warning text-warning')} />
         {:else if starType === 'half'}
-          <StarHalf aria-hidden="true" class={cn(sizeClasses[size].icon, 'fill-amber-500 text-amber-500')} />
+          <StarHalf aria-hidden="true" class={cn(sizeClasses[size].icon, 'fill-warning text-warning')} />
         {:else}
           <Star aria-hidden="true" class={cn(sizeClasses[size].icon, 'text-muted-foreground/30')} />
         {/if}

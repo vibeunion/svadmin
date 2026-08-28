@@ -102,7 +102,7 @@ ${scopedContext}`;
 >
   <div class="flex items-center justify-between p-4 border-b">
     <div class="flex items-center gap-2 font-medium">
-      <Sparkles class="h-4 w-4 text-amber-500" aria-hidden="true" />
+      <Sparkles class="h-4 w-4 text-warning" aria-hidden="true" />
       {title}
     </div>
     <Button

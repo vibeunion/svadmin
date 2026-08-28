@@ -59,7 +59,7 @@
         aria-label={i18n.t('common.copy')}
       >
         {#if copied}
-          <Check class="h-3 w-3 text-emerald-500" />
+          <Check class="h-3 w-3 text-success" />
         {:else}
           <Copy class="h-3 w-3" />
         {/if}

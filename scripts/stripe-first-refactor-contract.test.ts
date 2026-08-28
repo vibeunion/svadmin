@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { readdirSync, readFileSync } from 'node:fs';
+import { relative, resolve } from 'node:path';
 
 const root = resolve(import.meta.dir, '..');
 const read = (path: string) => readFileSync(resolve(root, path), 'utf8');
@@ -137,5 +137,40 @@ describe('Stripe-first refactor contract', () => {
     expect(read('packages/ui/src/components/account/CompanyProfilePage.svelte')).toContain('<WorkspaceLayout');
     expect(read('packages/ui/src/components/account/UserProfilePage.svelte')).toContain('<WorkspaceLayout');
     expect(read('packages/ui/src/components/account/SettingsEnterprisePage.svelte')).toContain('grid items-start');
+  });
+
+  it('keeps example sources on semantic color tokens (no bare palette utilities or hex)', () => {
+    // Bare Tailwind palette utilities, e.g. text-green-500, dark:bg-emerald-600.
+    const paletteUtility =
+      /\b(?:text|bg|border|ring|fill|stroke|from|via|to|divide|outline|decoration|caret|accent|placeholder)-(?:green|emerald|teal|cyan|sky|amber|red|rose|orange|yellow|lime|blue|indigo|violet|fuchsia|purple|pink|zinc|gray|slate|neutral|stone)-(?:50|[1-9]00|950)\b/;
+    // Bare #hex colors; the lookbehind skips HTML entities (&#039;) and
+    // non-color strings embedding `#` after a word character (tag#1234).
+    const bareHex = /(?<![\w&])#[0-9a-fA-F]{3,8}\b/;
+
+    const violations: string[] = [];
+    const walk = (dir: string): void => {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        const path = resolve(dir, entry.name);
+        if (entry.isDirectory()) {
+          walk(path);
+        } else if (/\.(?:svelte|ts|css)$/.test(entry.name)) {
+          const rel = relative(root, path);
+          readFileSync(path, 'utf8')
+            .split('\n')
+            .forEach((line, index) => {
+              if (paletteUtility.test(line)) violations.push(`${rel}:${index + 1} bare palette utility: ${line.trim()}`);
+              if (bareHex.test(line)) violations.push(`${rel}:${index + 1} bare hex color: ${line.trim()}`);
+            });
+        }
+      }
+    };
+    walk(resolve(root, 'example/src'));
+
+    // Semantic utilities (text-success, bg-warning/10, text-muted-foreground,
+    // …), chart-* decorative tokens, and var() references are allowed —
+    // including behind variant prefixes like dark:. Demo data colors that must
+    // be concrete (e.g. user-provided values) need an explicit allowlist entry
+    // here with a reason; keep it empty unless one is genuinely required.
+    expect(violations).toEqual([]);
   });
 });
