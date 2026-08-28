@@ -24,7 +24,6 @@
     filters = [],
     logicalOperator = 'and',
     action = '',
-    method: _method = "GET",
     disabled = false,
   }: Props = $props();
 

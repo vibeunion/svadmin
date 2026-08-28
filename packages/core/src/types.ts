@@ -478,7 +478,7 @@ export interface FieldDefinition {
   type: 'text' | 'number' | 'boolean' | 'date' | 'select' | 'multiselect' | 'tags'
     | 'textarea' | 'richtext' | 'image' | 'images' | 'json' | 'relation' | 'color'
     | 'url' | 'email' | 'phone' | 'currency' | 'file' | 'markdown' | 'password' | 'array'
-    | 'tree-select' | 'treeselect' | 'cascader' | 'transfer' | 'rate' | 'code';
+    | 'tree-select' | 'treeselect' | 'cascader' | 'transfer' | 'rate' | 'rating' | 'avatar' | 'copy' | 'code';
   required?: boolean;
   searchable?: boolean;
   sortable?: boolean;

@@ -48,11 +48,11 @@
   <span class="lite-bool {checked ? "lite-bool-true" : ""}"></span>
   {checked ? "✓ Yes" : "✗ No"}
 {:else if field.type === "avatar"}
-  <LiteAvatarField {field} {value} mode="show" />
+  <LiteAvatarField {field} value={value as unknown} mode="show" />
 {:else if field.type === "rating"}
-  <LiteRatingField {field} {value} mode="show" />
+  <LiteRatingField {field} value={value as string | number | null | undefined} mode="show" />
 {:else if field.type === "code"}
-  <LiteCodeField {field} {value} mode="show" />
+  <LiteCodeField {field} value={value as string | number | Record<string, unknown> | unknown[] | null | undefined} mode="show" />
 {:else if field.type === "currency"}
   <LiteCurrencyField {field} value={value as string | number | null | undefined} mode="show" />
 {:else if field.type === "phone"}
