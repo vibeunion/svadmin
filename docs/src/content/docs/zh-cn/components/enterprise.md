@@ -40,6 +40,26 @@ svadmin 提供面向真实管理后台的**企业能力构建块**。组件和 P
 
 可信后端仍必须负责认证、授权、租户隔离、密钥哈希与轮换、Webhook 投递、幂等、限流、保留策略执行和持久审计存储。凭据、会话、身份策略和角色权限变更，应由后端在同一事务或等价的原子流程中同时写入业务结果与审计记录。UI 回调和 `writeAuditEntry()` 无法让两个独立的远程写入自动获得事务性。
 
+## 企业交互组件目录
+
+当前 UI 与 Lite 版本包含以下企业后台构建块。表中 Lite 组件均可安全用于 SSR，并且要么是直接的服务端对应实现，要么是已明确记录的语义降级方案。完整状态矩阵由 `packages/lite/PARITY.md` 自动生成。
+
+| 领域 | SPA 组件 | Lite 对应组件 | 适用场景 |
+|---|---|---|---|
+| 数据录入 | `StepForm`、`ModalForm`、`DrawerForm` | 对应的 `Lite*` 组件 | 分步、模态框和抽屉式业务流程 |
+| 数据表格 | `VirtualTable`、`EditableTable`、`DraggableRowTable`、`TableSummary`、`TreeTable` | 对应的 `Lite*` 组件 | 大数据量、行内编辑、排序、汇总和层级数据 |
+| 查询与导入 | `ColumnSettings`、`ColumnHeaderFilter`、`ImportWizard`、`JsonSchemaForm` | 对应的 `Lite*` 组件 | 列选择、服务端过滤、批量导入和 Schema 表单 |
+| 治理与留痕 | `ApprovalActionCard`、`SensitiveDataMask`、`VersionDiffViewer`、`Watermark` | 对应的 `Lite*` 组件 | 审批、敏感数据脱敏、版本复核和文档标记 |
+| 工作管理 | `ActivityFeed`、`KanbanBoard`、`GanttChart`、`MultiTabKeepAlive` | 对应的 `Lite*` 组件 | 动态流、看板、排期和多工作区导航 |
+| 媒体与文档 | `MediaLibraryModal`、`ImageCropper`、`PdfDocumentViewer`、`PrintableBill` | 对应的 `Lite*` 组件 | 素材选择、图片处理、PDF 审阅和可打印单据 |
+| 协作状态 | `MentionsInput`、`PresenceAvatarGroup`、`OfflineSyncBanner` | 对应的 `Lite*` 组件 | 提及、在线状态和离线待同步变更 |
+| 分析与规则 | `PivotTable`、`DecisionTable`、`CanvasAnnotation`、`SpreadsheetView`、`SignaturePad` | 对应的 `Lite*` 组件 | 多维分析、规则执行、标注、表格计算和签名 |
+| 布局 | `SplitPaneLayout` | `LiteSplitPaneLayout` | 详情检查器和高密度双栏后台页面 |
+
+`DevTools` 与 `CopilotPanel` 明确为仅 SPA 组件，因为它们依赖浏览器端开发者工具或 AI 交互。它们在对齐矩阵中标记为 SPA-only，不提供容易误导的服务端替代品。
+
+上述组件只是无头构建块。组件回调必须接入经过认证、按租户隔离的后端操作；渲染按钮或表单本身不会完成授权，也不会自动持久化业务变更。
+
 ---
 
 ## PermissionMatrix 权限矩阵

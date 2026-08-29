@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+
+### Features
+
+* **ui,lite:** expand the enterprise component parity catalog to 103/103 components across fields, buttons, pages, layout, widgets, and advanced workflows.
+* **ui,lite:** add server-rendered counterparts for forms, tables, workflow views, media tools, annotations, spreadsheets, decision tables, and offline status.
+* **cli:** add enterprise data interaction generation support and keep Lite parity checks synchronized with exported UI components.
+
+### Documentation
+
+* Update the English and Chinese Lite guides and package README to match the current 103-component parity matrix.
+* Document the current enterprise UI component catalog and the SPA-only boundaries for `DevTools` and `CopilotPanel`.
+
 ## [0.5.14](https://github.com/zuohuadong/svadmin/compare/svadmin-v0.5.13...svadmin-v0.5.14) (2026-03-26)
 
 

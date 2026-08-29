@@ -24,7 +24,7 @@ description: 零 JS 服务端渲染降级方案、IE11 兼容纯 CSS 基线与 1
 
 ## 组件体系与 100% 对齐覆盖
 
-`@svadmin/lite` 实现了与 `@svadmin/ui` **100% 的组件对齐（72/72 个组件）**。现代 SPA 中的每一个 UI 组件，在 Lite 中均有严格对应的 1:1 服务端渲染组件或明确的语义降级方案。
+`@svadmin/lite` 实现了与 `@svadmin/ui` **100% 的组件对齐（103/103 个组件）**。现代 SPA 中的每一个 UI 组件，都有 1:1 服务端渲染组件、明确的语义降级方案，或明确标记为仅适用于 SPA。
 
 ### 模块对齐看板
 
@@ -32,16 +32,16 @@ description: 零 JS 服务端渲染降级方案、IE11 兼容纯 CSS 基线与 1
 ===============================================================
        @svadmin/ui ↔ @svadmin/lite 组件对齐进度看板
 ===============================================================
-  [fields]        29/29 (100.0%)  [██████████████]
+  [fields]        33/33 (100.0%)  [██████████████]
   [buttons]       10/10 (100.0%)  [██████████████]
-  [pages]           9/9 (100.0%)  [██████████████]
-  [layout]          7/7 (100.0%)  [██████████████]
-  [widgets]         6/6 (100.0%)  [██████████████]
-  [advanced]      11/11 (100.0%)  [██████████████]
+  [pages]          12/12 (100.0%)  [██████████████]
+  [layout]          9/9 (100.0%)  [██████████████]
+  [widgets]         9/9 (100.0%)  [██████████████]
+  [advanced]      30/30 (100.0%)  [██████████████]
 ---------------------------------------------------------------
-  总体覆盖率: 100% (72/72)
-  - 1:1 对齐 (Exact): 55
-  - 语义降级 (Fallback): 13
+  总体覆盖率: 100% (103/103)
+  - 1:1 对齐 (Exact): 89
+  - 语义降级 (Fallback): 10
   - 免适配 (SPA Only): 4
   - 待补齐 (Missing): 0
 ===============================================================
@@ -49,30 +49,31 @@ description: 零 JS 服务端渲染降级方案、IE11 兼容纯 CSS 基线与 1
 
 ### 组件分类清单
 
-1. **核心页面 (Pages - 9 个)**:
-   - `LiteListPage`: 列表页（服务端分页、排序链接、GET 搜索、批量删除）。
-   - `LiteCreatePage` / `LiteEditPage`: 新建/编辑页（基于 TypeBox 的服务端表单校验）。
-   - `LiteShowPage`: 详情查看页（键值结构展示与类型化字段渲染）。
-   - `LiteProfilePage` / `LiteRegisterPage`: 用户资料与注册页。
-   - `LiteForgotPasswordPage` / `LiteUpdatePasswordPage`: 密码找回与重置页。
-2. **字段与复合选择器组件 (Fields - 29 个)**:
-   - **文本与数值类**: `LiteTextField`、`LiteNumberField`、`LiteCurrencyField`（金额格式化）、`LitePercentField`（百分比与 CSS 进度条）、`LitePhoneField`（`tel:` 协议）、`LiteEmailField`、`LiteUrlField`、`LiteRatingField`（Unicode 星级）、`LiteCopyField`。
-   - **选项与关联类**: `LiteBooleanField`、`LiteDateField`、`LiteDateRangeField`（区间与双日期输入）、`LiteSelectField`、`LiteMultiSelectField`、`LiteTreeSelect`（树形下拉）、`LiteCascader`（级联选择）、`LiteTagField`、`LiteRelationField`（外键关联）。
-   - **媒体与复杂数据**: `LiteAvatarField`（首字母头像与状态点）、`LiteImageField`、`LiteFileField`、`LiteJsonField`、`LiteArrayField`（嵌套字段解析）、`LiteDynamicFormList`（动态子表单列表）、`LiteTransfer`（穿梭框）。
-   - **语义降级字段**: `LiteCodeField`（降级为 `<pre><code>` 语法容器与 Textarea）、`LiteMarkdownField`（纯 HTML 渲染与 Textarea）、`LiteRichTextField`（安全过滤纯文本与只读展示）。
+1. **核心页面 (Pages - 12 个)**:
+   - `LiteListPage`、`LiteCreatePage`、`LiteEditPage`、`LiteShowPage`、`LiteLogin`、`LiteRegisterPage`、`LiteForgotPasswordPage`、`LiteUpdatePasswordPage`、`LiteProfilePage`、`LiteMasterDetailView`、`LitePrintableBill`、`LitePdfDocumentViewer`。
+2. **字段与复合选择器组件 (Fields - 33 个)**:
+   - **文本与数值类**: `LiteTextField`、`LiteNumberField`、`LiteCurrencyField`、`LitePercentField`、`LitePhoneField`、`LiteEmailField`、`LiteUrlField`、`LiteRatingField`、`LiteCopyField`。
+   - **选项与关联类**: `LiteBooleanField`、`LiteDateField`、`LiteDateRangeField`、`LiteSelectField`、`LiteMultiSelectField`、`LiteTreeSelect`、`LiteCascader`、`LiteTagField`、`LiteRelationField`。
+   - **媒体与复杂数据**: `LiteAvatarField`、`LiteImageField`、`LiteFileField`、`LiteJsonField`、`LiteArrayField`、`LiteDynamicFormList`、`LiteTransfer`、`LiteImageCropper`、`LiteJsonSchemaForm`、`LiteMentionsInput`、`LiteSignaturePad`。
+   - **语义降级字段**: `LiteCodeField`、`LiteMarkdownField`、`LiteRichTextField`。
+   - `VoiceInput` 明确为仅 SPA 组件，因为它依赖 Web Speech API。
 3. **操作按钮 (Buttons - 10 个)**:
    - `LiteListButton`、`LiteCreateButton`、`LiteEditButton`、`LiteShowButton`、`LiteCloneButton`（原生 `<a>` 链接）。
    - `LiteDeleteButton`（纯 CSS 锚点弹窗确认 + 原生 POST 表单）。
    - `LiteSaveButton`、`LiteRefreshButton`、`LiteExportButton`、`LiteImportButton`。
-4. **布局与导航 (Layout - 7 个)**:
-   - `LiteLayout`（响应式侧边栏+顶部栏+主容器，支持多级菜单）、`LiteSidebar`、`LiteHeader`、`LiteBreadcrumbs`、`LiteTabs`、`LiteEmptyState`。
-5. **挂件与图表 (Widgets & Charts - 6 个)**:
+4. **布局与导航 (Layout - 9 个)**:
+   - `LiteLayout`、`LiteSidebar`、`LiteHeader`、`LiteBreadcrumbs`、`LiteCanAccess`、`LiteErrorBoundary`、`LiteSplitPaneLayout`、`LiteMultiTabKeepAlive`。
+   - `ThemeToggle` 明确为仅 SPA 组件；`LiteTabs` 与 `LiteEmptyState` 仍作为 SSR 基础组件提供，但不计入对齐矩阵条目。
+5. **挂件与图表 (Widgets & Charts - 9 个)**:
    - `LiteStatsCard`、`LiteInsightCard`、`LiteAnomalyBadge`（KPI 指标卡与异常状态徽章）。
-   - `LiteBarChart`、`LiteLineChart`、`LitePieChart`（纯 SVG/HTML 服务端渲染图表，附带纯文本数据降级表格）。
-6. **高级交互与查询构造器 (Advanced UX - 11 个)**:
-   - `LiteModalForm` / `LiteDrawerForm`: 纯 CSS Fragment Target (`#modal`) 无 JS 弹窗表单。
-   - `LiteVirtualTable`: 优雅降级为服务端分页表格。
-   - `LiteAutoSaveIndicator`、`LiteInlineEdit`、`LiteDraggableHeader`、`LiteToast`、`LiteFilterBuilder`（可视化多条件筛选构造器）。
+   - `LiteBarChart`、`LiteLineChart`、`LitePieChart`、`LitePresenceAvatarGroup`、`LiteGanttChart`、`LiteOfflineSyncBanner`（服务端 SVG/HTML 或状态降级方案）。
+6. **高级交互与查询构造器 (Advanced UX - 30 个)**:
+   - `LiteConfirmDialog`、`LiteFilterBuilder`、`LiteDrawerForm`、`LiteModalForm`、`LiteVirtualTable`。
+   - `LiteInlineEdit`、`LiteAutoSaveIndicator`、`LiteToast`、`LiteUndoableNotification`（服务端语义降级）。
+   - `LiteWatermark`、`LiteColumnSettings`、`LiteImportWizard`、`LiteColumnHeaderFilter`、`LiteTreeTable`、`LiteSensitiveDataMask`、`LiteApprovalActionCard`。
+   - `LiteStepForm`、`LiteTableSummary`、`LiteVersionDiffViewer`、`LiteEditableTable`、`LiteDraggableRowTable`、`LiteMediaLibraryModal`、`LiteActivityFeed`。
+   - `LiteKanbanBoard`、`LitePivotTable`、`LiteCanvasAnnotation`、`LiteSpreadsheetView`、`LiteDecisionTable`。
+   - `DevTools` 与 `CopilotPanel` 明确为仅 SPA 组件，不提供 Lite 对应物。
 
 ---
 
@@ -191,5 +192,5 @@ export const handle = createLegacyRedirectHook({
    ```
    终端直接输出分类覆盖率条形图与统计数据，并自动同步更新 `PARITY.md` 与 `parity.json`。
 2. **静态全量矩阵文档**: 查看 [packages/lite/PARITY.md](https://github.com/vibeunion/svadmin/blob/main/packages/lite/PARITY.md) 了解每个组件的详细承接方案。
-3. **交互式可视化 Showroom**: 启动 Demo 项目访问 `/lite/parity` 路由，可以在线交互预览全部 72 个组件的真实渲染效果、切换亮色/暗色主题并查看模块级覆盖率。
+3. **交互式可视化 Showroom**: 启动 Demo 项目访问 `/lite/parity` 路由，可以在线交互预览全部 103 个组件的真实渲染效果、切换亮色/暗色主题并查看模块级覆盖率。
 4. **自动化 CI 合约测试**: `scripts/parity-contract.test.ts` 已纳入 Monorepo 根目录 `bun run test`，当有未在矩阵中声明的 UI 组件时会自动阻断 CI，杜绝隐式遗漏。

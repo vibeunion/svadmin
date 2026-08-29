@@ -40,6 +40,26 @@ Every organization, identity-governance, session, and credential provider method
 
 The trusted backend remains responsible for authentication, authorization, tenant isolation, secret hashing and rotation, webhook delivery, idempotency, rate limiting, retention enforcement, and durable audit storage. Credential, session, identity-policy, and role mutations should write their business change and audit record in one backend transaction or equivalent atomic workflow. UI callbacks and `writeAuditEntry()` cannot make two independent remote writes atomic.
 
+## Enterprise Interaction Catalog
+
+The current UI and Lite releases include the following enterprise-oriented building blocks. Each listed Lite component is SSR-safe and is either a direct server-rendered counterpart or an explicitly documented semantic fallback. The full status matrix is generated in `packages/lite/PARITY.md`.
+
+| Area | SPA component | Lite counterpart | Intended use |
+|---|---|---|---|
+| Data entry | `StepForm`, `ModalForm`, `DrawerForm` | `LiteStepForm`, `LiteModalForm`, `LiteDrawerForm` | Multi-step, modal, and drawer-based workflows |
+| Data tables | `VirtualTable`, `EditableTable`, `DraggableRowTable`, `TableSummary`, `TreeTable` | Matching `Lite*` components | Large datasets, inline editing, ordering, summaries, and hierarchy |
+| Query and import | `ColumnSettings`, `ColumnHeaderFilter`, `ImportWizard`, `JsonSchemaForm` | Matching `Lite*` components | Column selection, server-side filters, imports, and schema-driven forms |
+| Governance | `ApprovalActionCard`, `SensitiveDataMask`, `VersionDiffViewer`, `Watermark` | Matching `Lite*` components | Approval actions, redaction, version review, and document marking |
+| Work management | `ActivityFeed`, `KanbanBoard`, `GanttChart`, `MultiTabKeepAlive` | Matching `Lite*` components | Activity streams, boards, schedules, and multi-workspace navigation |
+| Media and documents | `MediaLibraryModal`, `ImageCropper`, `PdfDocumentViewer`, `PrintableBill` | Matching `Lite*` components | Asset selection, image preparation, PDF review, and printable records |
+| Collaboration | `MentionsInput`, `PresenceAvatarGroup`, `OfflineSyncBanner` | Matching `Lite*` components | Mentions, presence state, and pending offline mutations |
+| Analysis and rules | `PivotTable`, `DecisionTable`, `CanvasAnnotation`, `SpreadsheetView`, `SignaturePad` | Matching `Lite*` components | Analysis, rule evaluation, annotations, spreadsheets, and signatures |
+| Layout | `SplitPaneLayout` | `LiteSplitPaneLayout` | Detail inspectors and dense two-pane admin screens |
+
+`DevTools` and `CopilotPanel` remain explicitly SPA-only because they depend on browser-side developer or AI interaction. They are tracked as SPA-only in the parity matrix rather than represented by a misleading server fallback.
+
+The components above are headless building blocks. Their callbacks must be connected to authenticated, tenant-scoped backend operations; rendering a button or form does not itself authorize or persist a business mutation.
+
 ---
 
 ## PermissionMatrix
