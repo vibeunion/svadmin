@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.22.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.21.0...create-svadmin-v0.22.0) (2026-08-28)
+
+
+### 🚀 Features
+
+* **ui,lite,cli:** add enterprise data interaction components and generate command ([41c233e](https://github.com/vibeunion/svadmin/commit/41c233e1a9a313eaf0cc58d66801d90a649b0b34))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/core bumped to 0.47.0
+
 ## [0.21.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.20.0...create-svadmin-v0.21.0) (2026-08-28)
 
 

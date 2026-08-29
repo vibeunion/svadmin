@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.47.0](https://github.com/vibeunion/svadmin/compare/core-v0.46.0...core-v0.47.0) (2026-08-28)
+
+
+### 🚀 Features
+
+* **ui,lite,cli:** add enterprise data interaction components and generate command ([41c233e](https://github.com/vibeunion/svadmin/commit/41c233e1a9a313eaf0cc58d66801d90a649b0b34))
+
 ## [0.46.0](https://github.com/vibeunion/svadmin/compare/core-v0.45.0...core-v0.46.0) (2026-08-28)
 
 
