@@ -1,11 +1,12 @@
 <script lang="ts">
+  import { Value } from '@sinclair/typebox/value';
   import StatsCard from '@svadmin/ui/components/StatsCard.svelte';
   import { metricPropsSchema } from '../builtin-schemas.js';
   import type { SurfaceWidgetRendererProps } from '../catalog.js';
 
   let { widgetId, props, data }: SurfaceWidgetRendererProps = $props();
 
-  const metricProps = $derived(metricPropsSchema.parse(props));
+  const metricProps = $derived(Value.Decode(metricPropsSchema, props));
   const formattedValue = $derived.by(() => {
     if (data.status !== 'ready') return '—';
     const value = data.value;

@@ -344,6 +344,8 @@ To monitor and maintain 100% component parity between `@svadmin/ui` and `@svadmi
 | `createLegacyRedirectHook()` | Auto-redirect IE11 to `/lite/` |
 | `fieldsToTypeBoxSchema(fields)` | Generate the TypeBox schema used by Lite actions or other consumers |
 
+Schema generation is TypeBox-only. The former Zod-named exports and parser-compatible methods were removed; use `Check`, `Errors`, and `Decode` on the returned schema.
+
 ## CSS
 
 Import `@svadmin/lite/lite.css` in your layout. It's fully self-contained:

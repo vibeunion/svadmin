@@ -275,9 +275,6 @@ function checkPropsSchema(schema: unknown, data: unknown): boolean {
   if ("Check" in schema && typeof (schema as { Check: (d: unknown) => boolean }).Check === "function") {
     return (schema as { Check: (d: unknown) => boolean }).Check(data);
   }
-  if ("safeParse" in schema && typeof (schema as { safeParse: (d: unknown) => { success: boolean } }).safeParse === "function") {
-    return (schema as { safeParse: (d: unknown) => { success: boolean } }).safeParse(data).success;
-  }
   return Value.Check(schema as TSchema, data);
 }
 
