@@ -10,8 +10,8 @@
     "check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "dependencies": {
-    "@svadmin/core": "^0.47.0",
-    "@svadmin/ui": "^0.65.0",
+    "@svadmin/core": "^0.47.1",
+    "@svadmin/ui": "^0.65.1",
     "@tanstack/svelte-query": "^6.1.48",
     "highlight.js": "^11.12.0",
     "@lucide/svelte": "^1.35.0"
@@ -32,16 +32,16 @@
         "@refinedev/core": "^5.0.12"
       },
       "simple-rest": {
-        "@svadmin/simple-rest": "^0.9.20",
+        "@svadmin/simple-rest": "^0.9.21",
         "@refinedev/simple-rest": "^6.0.1"
       },
       "supabase": {
-        "@svadmin/supabase": "^0.13.2",
+        "@svadmin/supabase": "^0.13.3",
         "@supabase/supabase-js": "^2.112.4",
         "@refinedev/supabase": "^6.0.2"
       },
       "graphql": {
-        "@svadmin/graphql": "^0.9.20",
+        "@svadmin/graphql": "^0.9.21",
         "@refinedev/graphql": "^8.0.1",
         "graphql-request": "^7.4.0",
         "graphql": "^16.8.0"

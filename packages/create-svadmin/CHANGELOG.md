@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.22.1](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.22.0...create-svadmin-v0.22.1) (2026-08-30)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/core bumped to 0.47.1
+
 ## [0.22.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.21.0...create-svadmin-v0.22.0) (2026-08-28)
 
 
