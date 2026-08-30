@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.7.0](https://github.com/vibeunion/svadmin/compare/surface-v0.6.2...surface-v0.7.0) (2026-08-30)
+
+
+### 🚀 Features
+
+* **surface:** add validated agent proposals ([310d1e2](https://github.com/vibeunion/svadmin/commit/310d1e258ad5117e2bb3f392eea5ff4652c2a6b3))
+
+
+### 🐛 Bug Fixes
+
+* **surface:** use TypeBox for agent validation ([b1a8ce4](https://github.com/vibeunion/svadmin/commit/b1a8ce4e5f4d9fe701e45ed5e19535efa461fb5a))
+
 ## [0.6.2](https://github.com/vibeunion/svadmin/compare/surface-v0.6.1...surface-v0.6.2) (2026-08-28)
 
 
