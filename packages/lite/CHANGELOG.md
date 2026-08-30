@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/vibeunion/svadmin/compare/lite-v0.8.0...lite-v0.8.1) (2026-08-30)
+
+
+### 📝 Documentation
+
+* **lite:** sync enterprise and parity documentation ([598224d](https://github.com/vibeunion/svadmin/commit/598224dcef192562da99e156c4fcbac5b7d73234))
+
 ## [0.8.0](https://github.com/vibeunion/svadmin/compare/lite-v0.7.0...lite-v0.8.0) (2026-08-28)
 
 
