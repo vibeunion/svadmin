@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.47.1](https://github.com/vibeunion/svadmin/compare/core-v0.47.0...core-v0.47.1) (2026-08-30)
+
+
+### 💅 Elegance & Refactoring
+
+* **core:** standardize validation on TypeBox ([4bccaf1](https://github.com/vibeunion/svadmin/commit/4bccaf182be23c458ba5d992805a063660dbaa1e))
+
 ## [0.47.0](https://github.com/vibeunion/svadmin/compare/core-v0.46.0...core-v0.47.0) (2026-08-28)
 
 

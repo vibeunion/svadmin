@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.7.1](https://github.com/vibeunion/svadmin/compare/surface-v0.7.0...surface-v0.7.1) (2026-08-30)
+
+
+### 💅 Elegance & Refactoring
+
+* **schema:** enforce typebox-only validation ([#355](https://github.com/vibeunion/svadmin/issues/355)) ([34898de](https://github.com/vibeunion/svadmin/commit/34898dea702b1a6e70f5e625e0d1b225dc1c9b65))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core remains compatible with >=0.34.2 <0.48.0
+    * @svadmin/ui remains compatible with >=0.40.6 <0.66.0
+
 ## [0.7.0](https://github.com/vibeunion/svadmin/compare/surface-v0.6.2...surface-v0.7.0) (2026-08-30)
 
 

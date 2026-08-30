@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.8.2](https://github.com/vibeunion/svadmin/compare/lite-v0.8.1...lite-v0.8.2) (2026-08-30)
+
+
+### 💅 Elegance & Refactoring
+
+* **core:** standardize validation on TypeBox ([4bccaf1](https://github.com/vibeunion/svadmin/commit/4bccaf182be23c458ba5d992805a063660dbaa1e))
+* **schema:** enforce typebox-only validation ([#355](https://github.com/vibeunion/svadmin/issues/355)) ([34898de](https://github.com/vibeunion/svadmin/commit/34898dea702b1a6e70f5e625e0d1b225dc1c9b65))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core remains compatible with >=0.34.2 <0.48.0
+
 ## [0.8.1](https://github.com/vibeunion/svadmin/compare/lite-v0.8.0...lite-v0.8.1) (2026-08-30)
 
 
