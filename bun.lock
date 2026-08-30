@@ -488,6 +488,7 @@
       "version": "0.6.2",
       "dependencies": {
         "@sinclair/typebox": "^0.34.52",
+        "zod": "^4.4.3",
       },
       "devDependencies": {
         "@sveltejs/vite-plugin-svelte": "^7.3.0",
