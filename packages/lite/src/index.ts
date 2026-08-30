@@ -32,8 +32,6 @@ export type {
 export {
   fieldsToTypeBoxSchema,
   resourceToTypeBoxSchema,
-  fieldsToZodSchema,
-  resourceToZodSchema,
   fieldToInputType,
   fieldToPlaceholder,
 } from './schema-generator';

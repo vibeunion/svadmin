@@ -52,19 +52,15 @@ export interface SchemaValidationIssue {
   message: string;
 }
 
-export type SchemaValidationResult<T = Record<string, unknown>> =
-  | { success: true; data: T; error?: never }
-  | { success: false; error: { issues: SchemaValidationIssue[] }; data?: never };
+export interface TypeBoxValidationError {
+  path: string;
+  message: string;
+}
 
 export type TypeBoxEnhancedSchema<T = Record<string, unknown>> = TObject & {
-  parse: (values: unknown) => T;
-  safeParse: (values: unknown) => SchemaValidationResult<T>;
   Check: (values: unknown) => boolean;
-  "~standard": {
-    version: 1;
-    vendor: "svadmin";
-    validate: (values: unknown) => { value: T } | { issues: Array<{ message: string; path?: (string | number)[] }> };
-  };
+  Errors: (values: unknown) => Iterable<TypeBoxValidationError>;
+  Decode: (values: unknown) => T;
 };
 
 function coerceAndValidateField(
@@ -403,11 +399,10 @@ export function fieldsToTypeBoxSchema(
 
   const baseSchema = Type.Object(shape, { additionalProperties: true });
 
-  const safeParse = (values: unknown): SchemaValidationResult => {
+  const validateAndNormalize = (values: unknown): { data?: Record<string, unknown>; issues: SchemaValidationIssue[] } => {
     if (typeof values !== "object" || values === null) {
       return {
-        success: false,
-        error: { issues: [{ path: ["_root"], message: "Values must be an object" }] },
+        issues: [{ path: ["_root"], message: "Values must be an object" }],
       };
     }
 
@@ -425,50 +420,31 @@ export function fieldsToTypeBoxSchema(
     }
 
     if (allIssues.length > 0) {
-      return {
-        success: false,
-        error: { issues: allIssues },
-      };
+      return { issues: allIssues };
     }
 
-    return {
-      success: true,
-      data: resultData,
-    };
+    return { data: resultData, issues: [] };
   };
 
-  const parse = (values: unknown): Record<string, unknown> => {
-    const res = safeParse(values);
-    if (!res.success) {
-      const err = new Error(res.error?.issues[0]?.message || "Validation failed") as Error & {
-        issues: SchemaValidationIssue[];
+  const decode = (values: unknown): Record<string, unknown> => {
+    const validation = validateAndNormalize(values);
+    if (validation.issues.length > 0) {
+      const err = new Error(validation.issues[0]?.message || "Validation failed") as Error & {
+        errors: SchemaValidationIssue[];
       };
-      err.issues = res.error?.issues ?? [];
+      err.errors = validation.issues;
       throw err;
     }
-    return res.data ?? {};
+    return validation.data ?? {};
   };
 
   return Object.assign(baseSchema, {
-    parse,
-    safeParse,
-    Check: (val: unknown) => safeParse(val).success,
-    "~standard": {
-      version: 1 as const,
-      vendor: "svadmin" as const,
-      validate: (val: unknown) => {
-        const res = safeParse(val);
-        if (res.success) {
-          return { value: res.data ?? {} };
-        }
-        return {
-          issues: (res.error?.issues ?? []).map((iss) => ({
-            message: iss.message,
-            path: iss.path,
-          })),
-        };
-      },
-    },
+    Check: (val: unknown) => validateAndNormalize(val).issues.length === 0,
+    Errors: (val: unknown): TypeBoxValidationError[] => validateAndNormalize(val).issues.map((issue) => ({
+      path: issue.path.length > 0 ? `/${issue.path.map(String).join("/")}` : "",
+      message: issue.message,
+    })),
+    Decode: decode,
   });
 }
 
@@ -486,12 +462,6 @@ export function resourceToTypeBoxSchema(
     mode,
   );
 }
-
-/** @deprecated Use fieldsToTypeBoxSchema instead. */
-export const fieldsToZodSchema = fieldsToTypeBoxSchema;
-
-/** @deprecated Use resourceToTypeBoxSchema instead. */
-export const resourceToZodSchema = resourceToTypeBoxSchema;
 
 /**
  * Determine a conservative HTML input type for server-rendered forms.

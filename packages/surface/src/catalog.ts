@@ -1,4 +1,5 @@
 import type { Component } from 'svelte';
+import { Value } from '@sinclair/typebox/value';
 import BarChartWidget from './components/BarChartWidget.svelte';
 import LineChartWidget from './components/LineChartWidget.svelte';
 import MetricWidget from './components/MetricWidget.svelte';
@@ -43,16 +44,16 @@ export function defineSurfaceCatalog<const TCatalog extends SurfaceRenderCatalog
 }
 
 function tableFields(props: JsonObject): readonly string[] {
-  return resourceTablePropsSchema.parse(props).columns.map((column) => column.field);
+  return Value.Decode(resourceTablePropsSchema, props).columns.map((column) => column.field);
 }
 
 function barChartFields(props: JsonObject): readonly string[] {
-  const chartProps = barChartPropsSchema.parse(props);
+  const chartProps = Value.Decode(barChartPropsSchema, props);
   return [chartProps.labelField, chartProps.valueField];
 }
 
 function lineChartFields(props: JsonObject): readonly string[] {
-  const chartProps = lineChartPropsSchema.parse(props);
+  const chartProps = Value.Decode(lineChartPropsSchema, props);
   return [chartProps.labelField, chartProps.valueField];
 }
 

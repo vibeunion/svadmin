@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { Value } from '@sinclair/typebox/value';
   import CardContent from '@svadmin/ui/components/ui/card/card-content.svelte';
   import CardHeader from '@svadmin/ui/components/ui/card/card-header.svelte';
   import CardTitle from '@svadmin/ui/components/ui/card/card-title.svelte';
@@ -15,7 +16,7 @@
 
   let { props, data }: SurfaceWidgetRendererProps = $props();
 
-  const tableProps = $derived(resourceTablePropsSchema.parse(props));
+  const tableProps = $derived(Value.Decode(resourceTablePropsSchema, props));
   const records = $derived(data.status === 'ready' ? asRecordArray(data.value) : null);
 </script>
 

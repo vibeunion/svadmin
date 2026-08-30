@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { Value } from '@sinclair/typebox/value';
   import LineChart from '@svadmin/ui/components/charts/LineChart.svelte';
   import CardContent from '@svadmin/ui/components/ui/card/card-content.svelte';
   import CardHeader from '@svadmin/ui/components/ui/card/card-header.svelte';
@@ -10,7 +11,7 @@
 
   let { props, data }: SurfaceWidgetRendererProps = $props();
 
-  const chartProps = $derived(lineChartPropsSchema.parse(props));
+  const chartProps = $derived(Value.Decode(lineChartPropsSchema, props));
   const points = $derived(data.status === 'ready'
     ? asChartPoints(data.value, chartProps.labelField, chartProps.valueField)
     : null);

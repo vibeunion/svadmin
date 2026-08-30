@@ -598,8 +598,8 @@ function validateFormVariables(
         errors: Record<string, string[]>;
       };
     } {
-  const result = resourceToTypeBoxSchema(resource, mode).safeParse(values);
-  if (result.success) return { success: true, data: result.data };
+  const schema = resourceToTypeBoxSchema(resource, mode);
+  if (schema.Check(values)) return { success: true, data: schema.Decode(values) };
 
   return {
     success: false,
@@ -607,7 +607,10 @@ function validateFormVariables(
       success: false,
       error: 'Validation failed',
       values: formValuesForResponse(resource.fields, values),
-      errors: formatValidationErrors(result.error.issues),
+      errors: formatValidationErrors([...schema.Errors(values)].map((issue) => ({
+        path: issue.path.split('/').filter(Boolean),
+        message: issue.message,
+      }))),
     },
   };
 }

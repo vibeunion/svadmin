@@ -23,18 +23,18 @@ const fields: FieldDefinition[] = [
 describe('fieldsToTypeBoxSchema array fields', () => {
   test('validates nested rows using each sub-field definition', () => {
     const schema = fieldsToTypeBoxSchema(fields);
-    const result = schema.safeParse({
+    const valid = schema.Check({
       contacts: [{ name: 'Alice', age: 42, active: true }],
     });
 
-    expect(result.success).toBe(true);
+    expect(valid).toBe(true);
   });
 
   test('rejects invalid nested values and missing required arrays', () => {
     const schema = fieldsToTypeBoxSchema(fields);
 
-    expect(schema.safeParse({ contacts: [{ name: 'Alice', age: 'not-a-number' }] }).success).toBe(false);
-    expect(schema.safeParse({}).success).toBe(false);
+    expect(schema.Check({ contacts: [{ name: 'Alice', age: 'not-a-number' }] })).toBe(false);
+    expect(schema.Check({})).toBe(false);
   });
 
   test('accepts a zero-item optional array but rejects a real row with an empty required child', () => {
@@ -43,8 +43,8 @@ describe('fieldsToTypeBoxSchema array fields', () => {
     const optionalFields: FieldDefinition[] = [{ ...contacts, required: false }];
     const schema = fieldsToTypeBoxSchema(optionalFields);
 
-    expect(schema.safeParse({ contacts: [] }).success).toBe(true);
-    expect(schema.safeParse({ contacts: [{ name: '' }] }).success).toBe(false);
+    expect(schema.Check({ contacts: [] })).toBe(true);
+    expect(schema.Check({ contacts: [{ name: '' }] })).toBe(false);
   });
 });
 
@@ -59,14 +59,14 @@ describe('fieldsToTypeBoxSchema numeric fields', () => {
   test('rejects a required blank number and coerces valid strings or numbers', () => {
     const schema = fieldsToTypeBoxSchema([requiredNumber]);
 
-    expect(schema.safeParse({ count: '' }).success).toBe(false);
-    expect(schema.parse({ count: '42.5' })).toEqual({ count: 42.5 });
-    expect(schema.parse({ count: 7 })).toEqual({ count: 7 });
+    expect(schema.Check({ count: '' })).toBe(false);
+    expect(schema.Decode({ count: '42.5' })).toEqual({ count: 42.5 });
+    expect(schema.Decode({ count: 7 })).toEqual({ count: 7 });
   });
 
   test('normalizes an optional blank number without coercing it to zero', () => {
     const schema = fieldsToTypeBoxSchema([{ ...requiredNumber, required: false }]);
-    const result = schema.parse({ count: '' });
+    const result = schema.Decode({ count: '' });
 
     expect(result.count).toBeUndefined();
     expect(result.count).not.toBe(0);
@@ -79,15 +79,15 @@ describe('fieldsToTypeBoxSchema boolean fields', () => {
       { key: 'active', label: 'Active', type: 'boolean', required: true },
     ]);
 
-    expect(schema.parse({ active: false })).toEqual({ active: false });
-    expect(schema.parse({ active: 'false' })).toEqual({ active: false });
-    expect(schema.parse({ active: '0' })).toEqual({ active: false });
-    expect(schema.parse({ active: 'off' })).toEqual({ active: false });
-    expect(schema.parse({ active: true })).toEqual({ active: true });
-    expect(schema.parse({ active: 'true' })).toEqual({ active: true });
-    expect(schema.parse({ active: '1' })).toEqual({ active: true });
-    expect(schema.parse({ active: 'on' })).toEqual({ active: true });
-    expect(schema.safeParse({ active: 'unexpected' }).success).toBe(false);
+    expect(schema.Decode({ active: false })).toEqual({ active: false });
+    expect(schema.Decode({ active: 'false' })).toEqual({ active: false });
+    expect(schema.Decode({ active: '0' })).toEqual({ active: false });
+    expect(schema.Decode({ active: 'off' })).toEqual({ active: false });
+    expect(schema.Decode({ active: true })).toEqual({ active: true });
+    expect(schema.Decode({ active: 'true' })).toEqual({ active: true });
+    expect(schema.Decode({ active: '1' })).toEqual({ active: true });
+    expect(schema.Decode({ active: 'on' })).toEqual({ active: true });
+    expect(schema.Check({ active: 'unexpected' })).toBe(false);
   });
 });
 
@@ -100,12 +100,9 @@ describe('fieldsToTypeBoxSchema custom field validation', () => {
       validate: (value) => typeof value === 'number' && value >= 18 ? null : 'Must be 18 or older',
     }]);
 
-    const rejected = schema.safeParse({ age: '12' });
-    expect(rejected.success).toBe(false);
-    if (!rejected.success) {
-      expect(rejected.error.issues[0]?.message).toBe('Must be 18 or older');
-    }
-    expect(schema.parse({ age: '18' })).toEqual({ age: 18 });
+    const errors = [...schema.Errors({ age: '12' })];
+    expect(errors[0]?.message).toBe('Must be 18 or older');
+    expect(schema.Decode({ age: '18' })).toEqual({ age: 18 });
   });
 });
 
@@ -126,11 +123,11 @@ describe('fieldsToTypeBoxSchema shared ResourceDefinition values', () => {
       },
     ]);
 
-    expect(schema.parse({ role: '1', teams: ['10', '20'] })).toEqual({
+    expect(schema.Decode({ role: '1', teams: ['10', '20'] })).toEqual({
       role: 1,
       teams: [10, 20],
     });
-    expect(schema.safeParse({ role: '999', teams: ['10'] }).success).toBe(false);
+    expect(schema.Check({ role: '999', teams: ['10'] })).toBe(false);
   });
 
   test('accepts the same URL values used by core image and images fields', () => {
@@ -139,7 +136,7 @@ describe('fieldsToTypeBoxSchema shared ResourceDefinition values', () => {
       { key: 'gallery', label: 'Gallery', type: 'images', required: true },
     ]);
 
-    expect(schema.parse({
+    expect(schema.Decode({
       avatar: 'https://cdn.example/avatar.png',
       gallery: 'https://cdn.example/one.png\nhttps://cdn.example/two.png',
     })).toEqual({
@@ -153,7 +150,7 @@ describe('fieldsToTypeBoxSchema shared ResourceDefinition values', () => {
       { key: 'gallery', label: 'Gallery', type: 'images', required: true },
     ]);
 
-    expect(schema.parse({
+    expect(schema.Decode({
       gallery: 'https://cdn.example/image.png?crop=1,2\nhttps://cdn.example/second.png',
     })).toEqual({
       gallery: [
@@ -181,10 +178,10 @@ describe('resourceToTypeBoxSchema primary key compatibility', () => {
       ],
     } satisfies ResourceDefinition;
 
-    expect(resourceToTypeBoxSchema(resource, 'create').parse({ title: 'Release' })).toEqual({
+    expect(resourceToTypeBoxSchema(resource, 'create').Decode({ title: 'Release' })).toEqual({
       title: 'Release',
     });
-    expect(resourceToTypeBoxSchema(resource, 'edit').parse({
+    expect(resourceToTypeBoxSchema(resource, 'edit').Decode({
       postId: 'post-1',
       title: 'Updated',
     })).toEqual({ title: 'Updated' });
@@ -205,7 +202,7 @@ describe('fieldsToTypeBoxSchema file fields', () => {
     const secondImage = new File(['second'], 'second.png', { type: 'image/png' });
     const schema = fieldsToTypeBoxSchema(requiredFileFields);
 
-    const result = schema.parse({
+    const result = schema.Decode({
       attachment,
       avatar,
       gallery: [firstImage, secondImage],
@@ -221,13 +218,13 @@ describe('fieldsToTypeBoxSchema file fields', () => {
       requiredFileFields.map((field) => ({ ...field, required: false })),
     );
 
-    expect(requiredSchema.safeParse({
+    expect(requiredSchema.Check({
       attachment: emptyFile,
       avatar: emptyFile,
       gallery: [emptyFile],
-    }).success).toBe(false);
+    })).toBe(false);
 
-    const optionalResult = optionalSchema.parse({
+    const optionalResult = optionalSchema.Decode({
       attachment: emptyFile,
       avatar: emptyFile,
       gallery: [emptyFile],
@@ -249,8 +246,8 @@ describe('fieldsToTypeBoxSchema file fields', () => {
         { key: 'attachment', label: 'Attachment', type: 'file', required: true },
       ]);
 
-      expect(optionalSchema.safeParse({}).success).toBe(true);
-      expect(requiredSchema.safeParse({ attachment: {} }).success).toBe(false);
+      expect(optionalSchema.Check({})).toBe(true);
+      expect(requiredSchema.Check({ attachment: {} })).toBe(false);
     } finally {
       if (descriptor) Object.defineProperty(globalThis, 'File', descriptor);
     }
@@ -259,8 +256,8 @@ describe('fieldsToTypeBoxSchema file fields', () => {
   test('does not require re-uploading stored files during edit but still rejects invalid replacements', () => {
     const editSchema = fieldsToTypeBoxSchema(requiredFileFields, 'edit');
 
-    expect(editSchema.parse({})).toEqual({});
-    expect(editSchema.safeParse({ attachment: 'not-a-file' }).success).toBe(false);
+    expect(editSchema.Decode({})).toEqual({});
+    expect(editSchema.Check({ attachment: 'not-a-file' })).toBe(false);
   });
 
   test('accepts retained upload references for edit array rows but not for create', () => {
@@ -281,10 +278,10 @@ describe('fieldsToTypeBoxSchema file fields', () => {
       }],
     };
 
-    expect(fieldsToTypeBoxSchema([documentArray], 'edit').parse(retained)).toEqual(retained);
-    expect(fieldsToTypeBoxSchema([documentArray], 'create').safeParse(retained).success).toBe(false);
-    expect(fieldsToTypeBoxSchema([documentArray], 'edit').safeParse({
+    expect(fieldsToTypeBoxSchema([documentArray], 'edit').Decode(retained)).toEqual(retained);
+    expect(fieldsToTypeBoxSchema([documentArray], 'create').Check(retained)).toBe(false);
+    expect(fieldsToTypeBoxSchema([documentArray], 'edit').Check({
       documents: [{ gallery: ['/stored/first.png'] }],
-    }).success).toBe(false);
+    })).toBe(false);
   });
 });
