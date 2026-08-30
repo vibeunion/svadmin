@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { z } from 'zod';
+import { Type } from '@sinclair/typebox';
 import {
   buildSurfaceAgentPrompt,
   parseSurfaceAgentProposal,
@@ -12,7 +12,10 @@ const catalog = {
   widgets: [{
     type: 'metric',
     dataKind: 'scalar',
-    propsSchema: z.object({ label: z.string(), format: z.enum(['number', 'currency', 'percent']) }).strict(),
+    propsSchema: Type.Object({
+      label: Type.String(),
+      format: Type.Union([Type.Literal('number'), Type.Literal('currency'), Type.Literal('percent')]),
+    }, { additionalProperties: false }),
   }],
 } satisfies SurfaceCatalog;
 

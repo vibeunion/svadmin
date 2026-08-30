@@ -1,4 +1,5 @@
-import { z } from 'zod';
+import { Type } from '@sinclair/typebox';
+import { TypeCompiler } from '@sinclair/typebox/compiler';
 import { jsonPointer } from './json.js';
 import { validateSurfaceSpec } from './validation.js';
 import type {
@@ -12,12 +13,13 @@ import type {
 /** Wire version for model-produced, human-reviewable Surface proposals. */
 export const SURFACE_AGENT_SCHEMA_VERSION = 'surface-agent/v1' as const;
 
-const proposalSchema = z.object({
-  schemaVersion: z.literal(SURFACE_AGENT_SCHEMA_VERSION),
-  action: z.literal('propose'),
-  summary: z.string().min(1).max(240).optional(),
-  spec: z.unknown(),
-}).strict();
+const proposalSchema = Type.Object({
+  schemaVersion: Type.Literal(SURFACE_AGENT_SCHEMA_VERSION),
+  action: Type.Literal('propose'),
+  summary: Type.Optional(Type.String({ minLength: 1, maxLength: 240 })),
+  spec: Type.Unknown(),
+}, { additionalProperties: false });
+const compiledProposalSchema = TypeCompiler.Compile(proposalSchema);
 
 export interface SurfaceAgentProposal {
   readonly schemaVersion: typeof SURFACE_AGENT_SCHEMA_VERSION;
@@ -45,10 +47,10 @@ function proposalIssue(message: string): SurfaceValidationIssue {
   };
 }
 
-function proposalSchemaIssues(error: z.ZodError): SurfaceValidationIssue[] {
-  return error.issues.map((issue) => ({
+function proposalSchemaIssues(errors: Iterable<{ path: string; message: string }>): SurfaceValidationIssue[] {
+  return [...errors].map((issue) => ({
     code: 'invalid_json',
-    path: jsonPointer(issue.path.map((segment) => typeof segment === 'symbol' ? String(segment) : segment)),
+    path: issue.path || jsonPointer([]),
     message: issue.message,
   }));
 }
@@ -69,12 +71,17 @@ export function parseSurfaceAgentProposal(
     return { ok: false, issues: [proposalIssue('Agent proposal must be valid JSON')] };
   }
 
-  const parsed = proposalSchema.safeParse(candidate);
-  if (!parsed.success) {
-    return { ok: false, issues: proposalSchemaIssues(parsed.error) };
+  if (!compiledProposalSchema.Check(candidate)) {
+    return { ok: false, issues: proposalSchemaIssues(compiledProposalSchema.Errors(candidate)) };
   }
+  const parsed = candidate as {
+    schemaVersion: typeof SURFACE_AGENT_SCHEMA_VERSION;
+    action: 'propose';
+    summary?: string;
+    spec: unknown;
+  };
 
-  const surface: SurfaceValidationResult = validateSurfaceSpec(parsed.data.spec, catalog, policy);
+  const surface: SurfaceValidationResult = validateSurfaceSpec(parsed.spec, catalog, policy);
   if (!surface.ok) return surface;
 
   return {
@@ -82,7 +89,7 @@ export function parseSurfaceAgentProposal(
     value: {
       schemaVersion: SURFACE_AGENT_SCHEMA_VERSION,
       action: 'propose',
-      ...(parsed.data.summary === undefined ? {} : { summary: parsed.data.summary }),
+      ...(parsed.summary === undefined ? {} : { summary: parsed.summary }),
       spec: surface.value,
     },
   };
