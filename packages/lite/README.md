@@ -342,7 +342,7 @@ To monitor and maintain 100% component parity between `@svadmin/ui` and `@svadmi
 | `createAuthGuard(authProvider)` | Server hook for authentication |
 | `createAuthActions(authProvider)` | Login/logout actions plus optional provider-delegating account actions |
 | `createLegacyRedirectHook()` | Auto-redirect IE11 to `/lite/` |
-| `fieldsToTypeBoxSchema(fields)` | Generate the TypeBox schema used by Lite actions or other consumers (with `fieldsToZodSchema` alias) |
+| `fieldsToTypeBoxSchema(fields)` | Generate the TypeBox schema used by Lite actions or other consumers |
 
 ## CSS
 

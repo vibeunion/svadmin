@@ -8,10 +8,9 @@ export {
   getDefaultFilter, getDefaultSortOrder,
   unionFilters, unionSorters,
   file2Base64, parseCSV,
-  createSchemaValidator,
   createTypeBoxValidator,
 } from './helpers-pure';
-export type { SchemaValidatorLike, TypeBoxValidatorLike } from './helpers-pure';
+export type { TypeBoxValidatorLike } from './helpers-pure';
 
 
 // ─── Document Title Helper ────────────────────────────────────
@@ -61,7 +60,7 @@ export function generateDefaultDocumentTitle(options?: {
  * - `type === 'number'` fields (must be a valid number)
  * - Custom per-field `field.validate()` callback
  *
- * This eliminates the need for hand-written Zod schemas in most CRUD scenarios.
+ * This eliminates the need for hand-written schemas in most CRUD scenarios.
  *
  * @example
  * ```ts
