@@ -487,14 +487,10 @@ export function resourceToTypeBoxSchema(
   );
 }
 
-/**
- * Backward compatibility alias for fieldsToTypeBoxSchema
- */
+/** @deprecated Use fieldsToTypeBoxSchema instead. */
 export const fieldsToZodSchema = fieldsToTypeBoxSchema;
 
-/**
- * Backward compatibility alias for resourceToTypeBoxSchema
- */
+/** @deprecated Use resourceToTypeBoxSchema instead. */
 export const resourceToZodSchema = resourceToTypeBoxSchema;
 
 /**

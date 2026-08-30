@@ -1,11 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // Unit tests for helpers-pure.ts — pure functions, no Svelte runtime
 import { describe, test, expect } from 'bun:test';
 import {
   getDefaultFilter, getDefaultSortOrder,
   unionFilters, unionSorters,
   parseCSV,
-  createSchemaValidator,
   createTypeBoxValidator,
 } from './helpers-pure';
 import { Type, FormatRegistry } from '@sinclair/typebox';
@@ -186,100 +184,9 @@ describe('parseCSV', () => {
   });
 });
 
-// ─── createSchemaValidator ────────────────────────────────────
+// ─── createTypeBoxValidator ──────────────────────────────────
 
-describe('createSchemaValidator', () => {
-  test('validates standard schema v1 (~standard)', () => {
-    const mockStandardSchema = {
-      '~standard': {
-        version: 1,
-        vendor: 'mock',
-        validate: (input: unknown) => {
-          const values = input as Record<string, unknown>;
-          if (!values.email || typeof values.email !== 'string' || !values.email.includes('@')) {
-            return {
-              issues: [{ path: ['email'], message: 'Must be a valid email' }],
-            };
-          }
-          return { value: values };
-        },
-      },
-    };
-
-    const validate = createSchemaValidator(mockStandardSchema);
-    expect(validate({ email: 'bad-email' })).toEqual({ email: 'Must be a valid email' });
-    expect(validate({ email: 'good@example.com' })).toBeNull();
-  });
-
-  test('validates Zod / Valibot safeParse style schemas', () => {
-    const mockZodSchema = {
-      safeParse: (input: unknown) => {
-        const values = input as Record<string, unknown>;
-        const issues = [];
-        if (!values.username) {
-          issues.push({ path: ['username'], message: 'Username is required' });
-        }
-        if (typeof values.age === 'number' && values.age < 18) {
-          issues.push({ path: ['age'], message: 'Must be 18+' });
-        }
-        if (issues.length > 0) {
-          return { success: false, error: { issues } };
-        }
-        return { success: true, data: values };
-      },
-    };
-
-    const validate = createSchemaValidator(mockZodSchema);
-    expect(validate({ age: 16 })).toEqual({
-      username: 'Username is required',
-      age: 'Must be 18+',
-    });
-    expect(validate({ username: 'alice', age: 20 })).toBeNull();
-  });
-
-  test('validates Joi-like validate schema', () => {
-    const mockJoiSchema = {
-      validate: (input: unknown) => {
-        const values = input as Record<string, unknown>;
-        if (!values.title) {
-          return {
-            error: {
-              details: [{ path: ['title'], message: 'Title cannot be empty' }],
-            },
-          };
-        }
-        return { value: values };
-      },
-    };
-
-    const validate = createSchemaValidator(mockJoiSchema);
-    expect(validate({})).toEqual({ title: 'Title cannot be empty' });
-    expect(validate({ title: 'My Post' })).toBeNull();
-  });
-
-  test('validates throwing parse schemas', () => {
-    const mockThrowingSchema = {
-      parse: (input: unknown) => {
-        const values = input as Record<string, unknown>;
-        if (!values.token) {
-          const err = new Error('Token is missing');
-          (err as any).issues = [{ path: ['token'], message: 'Token is missing' }];
-          throw err;
-        }
-        return values;
-      },
-    };
-
-    const validate = createSchemaValidator(mockThrowingSchema);
-    expect(validate({})).toEqual({ token: 'Token is missing' });
-    expect(validate({ token: 'abc' })).toBeNull();
-  });
-
-  test('returns null for non-schema inputs', () => {
-    const validate = createSchemaValidator(null);
-    expect(validate({ any: 'value' })).toBeNull();
-  });
-
+describe('createTypeBoxValidator', () => {
   test('validates real TypeBox TypeCompiler compiled schemas', () => {
     const UserSchema = Type.Object({
       username: Type.String({ minLength: 3, errorMessage: 'Username too short' }),
@@ -317,5 +224,19 @@ describe('createSchemaValidator', () => {
     const errors = validate({ profile: { orgName: '' } });
     expect(errors).not.toBeNull();
     expect(errors?.['profile.orgName']).toBeDefined();
+  });
+
+  test('supports TypeBox Errors providers without Check', () => {
+    const validate = createTypeBoxValidator({
+      Errors: (value) => {
+        const values = value as Record<string, unknown>;
+        return values.name
+          ? []
+          : [{ path: '/name', message: 'Name is required' }];
+      },
+    });
+
+    expect(validate({})).toEqual({ name: 'Name is required' });
+    expect(validate({ name: 'Alice' })).toBeNull();
   });
 });

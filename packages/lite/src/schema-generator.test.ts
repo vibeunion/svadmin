@@ -2,8 +2,8 @@ import { describe, expect, test } from 'bun:test';
 import type { FieldDefinition, ResourceDefinition } from '@svadmin/core';
 import {
   fieldToInputType,
-  fieldsToZodSchema,
-  resourceToZodSchema,
+  fieldsToTypeBoxSchema,
+  resourceToTypeBoxSchema,
 } from './schema-generator';
 
 const fields: FieldDefinition[] = [
@@ -20,9 +20,9 @@ const fields: FieldDefinition[] = [
   },
 ];
 
-describe('fieldsToZodSchema array fields', () => {
+describe('fieldsToTypeBoxSchema array fields', () => {
   test('validates nested rows using each sub-field definition', () => {
-    const schema = fieldsToZodSchema(fields);
+    const schema = fieldsToTypeBoxSchema(fields);
     const result = schema.safeParse({
       contacts: [{ name: 'Alice', age: 42, active: true }],
     });
@@ -31,7 +31,7 @@ describe('fieldsToZodSchema array fields', () => {
   });
 
   test('rejects invalid nested values and missing required arrays', () => {
-    const schema = fieldsToZodSchema(fields);
+    const schema = fieldsToTypeBoxSchema(fields);
 
     expect(schema.safeParse({ contacts: [{ name: 'Alice', age: 'not-a-number' }] }).success).toBe(false);
     expect(schema.safeParse({}).success).toBe(false);
@@ -41,14 +41,14 @@ describe('fieldsToZodSchema array fields', () => {
     const contacts = fields[0];
     if (!contacts) throw new Error('contacts field fixture is missing');
     const optionalFields: FieldDefinition[] = [{ ...contacts, required: false }];
-    const schema = fieldsToZodSchema(optionalFields);
+    const schema = fieldsToTypeBoxSchema(optionalFields);
 
     expect(schema.safeParse({ contacts: [] }).success).toBe(true);
     expect(schema.safeParse({ contacts: [{ name: '' }] }).success).toBe(false);
   });
 });
 
-describe('fieldsToZodSchema numeric fields', () => {
+describe('fieldsToTypeBoxSchema numeric fields', () => {
   const requiredNumber: FieldDefinition = {
     key: 'count',
     label: 'Count',
@@ -57,7 +57,7 @@ describe('fieldsToZodSchema numeric fields', () => {
   };
 
   test('rejects a required blank number and coerces valid strings or numbers', () => {
-    const schema = fieldsToZodSchema([requiredNumber]);
+    const schema = fieldsToTypeBoxSchema([requiredNumber]);
 
     expect(schema.safeParse({ count: '' }).success).toBe(false);
     expect(schema.parse({ count: '42.5' })).toEqual({ count: 42.5 });
@@ -65,7 +65,7 @@ describe('fieldsToZodSchema numeric fields', () => {
   });
 
   test('normalizes an optional blank number without coercing it to zero', () => {
-    const schema = fieldsToZodSchema([{ ...requiredNumber, required: false }]);
+    const schema = fieldsToTypeBoxSchema([{ ...requiredNumber, required: false }]);
     const result = schema.parse({ count: '' });
 
     expect(result.count).toBeUndefined();
@@ -73,9 +73,9 @@ describe('fieldsToZodSchema numeric fields', () => {
   });
 });
 
-describe('fieldsToZodSchema boolean fields', () => {
+describe('fieldsToTypeBoxSchema boolean fields', () => {
   test('parses explicit native-form boolean values without treating false as truthy', () => {
-    const schema = fieldsToZodSchema([
+    const schema = fieldsToTypeBoxSchema([
       { key: 'active', label: 'Active', type: 'boolean', required: true },
     ]);
 
@@ -91,9 +91,9 @@ describe('fieldsToZodSchema boolean fields', () => {
   });
 });
 
-describe('fieldsToZodSchema custom field validation', () => {
+describe('fieldsToTypeBoxSchema custom field validation', () => {
   test('runs FieldDefinition.validate after type coercion', () => {
-    const schema = fieldsToZodSchema([{
+    const schema = fieldsToTypeBoxSchema([{
       key: 'age',
       label: 'Age',
       type: 'number',
@@ -109,9 +109,9 @@ describe('fieldsToZodSchema custom field validation', () => {
   });
 });
 
-describe('fieldsToZodSchema shared ResourceDefinition values', () => {
+describe('fieldsToTypeBoxSchema shared ResourceDefinition values', () => {
   test('preserves numeric option values submitted by native forms', () => {
-    const schema = fieldsToZodSchema([
+    const schema = fieldsToTypeBoxSchema([
       {
         key: 'role',
         label: 'Role',
@@ -134,7 +134,7 @@ describe('fieldsToZodSchema shared ResourceDefinition values', () => {
   });
 
   test('accepts the same URL values used by core image and images fields', () => {
-    const schema = fieldsToZodSchema([
+    const schema = fieldsToTypeBoxSchema([
       { key: 'avatar', label: 'Avatar', type: 'image', required: true },
       { key: 'gallery', label: 'Gallery', type: 'images', required: true },
     ]);
@@ -149,7 +149,7 @@ describe('fieldsToZodSchema shared ResourceDefinition values', () => {
   });
 
   test('preserves commas inside image URLs', () => {
-    const schema = fieldsToZodSchema([
+    const schema = fieldsToTypeBoxSchema([
       { key: 'gallery', label: 'Gallery', type: 'images', required: true },
     ]);
 
@@ -169,7 +169,7 @@ describe('fieldsToZodSchema shared ResourceDefinition values', () => {
   });
 });
 
-describe('resourceToZodSchema primary key compatibility', () => {
+describe('resourceToTypeBoxSchema primary key compatibility', () => {
   test('excludes the resource primary key from create and edit variables', () => {
     const resource = {
       name: 'posts',
@@ -181,17 +181,17 @@ describe('resourceToZodSchema primary key compatibility', () => {
       ],
     } satisfies ResourceDefinition;
 
-    expect(resourceToZodSchema(resource, 'create').parse({ title: 'Release' })).toEqual({
+    expect(resourceToTypeBoxSchema(resource, 'create').parse({ title: 'Release' })).toEqual({
       title: 'Release',
     });
-    expect(resourceToZodSchema(resource, 'edit').parse({
+    expect(resourceToTypeBoxSchema(resource, 'edit').parse({
       postId: 'post-1',
       title: 'Updated',
     })).toEqual({ title: 'Updated' });
   });
 });
 
-describe('fieldsToZodSchema file fields', () => {
+describe('fieldsToTypeBoxSchema file fields', () => {
   const requiredFileFields: FieldDefinition[] = [
     { key: 'attachment', label: 'Attachment', type: 'file', required: true },
     { key: 'avatar', label: 'Avatar', type: 'image', required: true },
@@ -203,7 +203,7 @@ describe('fieldsToZodSchema file fields', () => {
     const avatar = new File(['avatar'], 'avatar.png', { type: 'image/png' });
     const firstImage = new File(['first'], 'first.png', { type: 'image/png' });
     const secondImage = new File(['second'], 'second.png', { type: 'image/png' });
-    const schema = fieldsToZodSchema(requiredFileFields);
+    const schema = fieldsToTypeBoxSchema(requiredFileFields);
 
     const result = schema.parse({
       attachment,
@@ -216,8 +216,8 @@ describe('fieldsToZodSchema file fields', () => {
 
   test('rejects required empty native files and normalizes optional empty uploads', () => {
     const emptyFile = new File([], '');
-    const requiredSchema = fieldsToZodSchema(requiredFileFields);
-    const optionalSchema = fieldsToZodSchema(
+    const requiredSchema = fieldsToTypeBoxSchema(requiredFileFields);
+    const optionalSchema = fieldsToTypeBoxSchema(
       requiredFileFields.map((field) => ({ ...field, required: false })),
     );
 
@@ -242,10 +242,10 @@ describe('fieldsToZodSchema file fields', () => {
     Object.defineProperty(globalThis, 'File', { configurable: true, value: undefined });
 
     try {
-      const optionalSchema = fieldsToZodSchema([
+      const optionalSchema = fieldsToTypeBoxSchema([
         { key: 'attachment', label: 'Attachment', type: 'file' },
       ]);
-      const requiredSchema = fieldsToZodSchema([
+      const requiredSchema = fieldsToTypeBoxSchema([
         { key: 'attachment', label: 'Attachment', type: 'file', required: true },
       ]);
 
@@ -257,7 +257,7 @@ describe('fieldsToZodSchema file fields', () => {
   });
 
   test('does not require re-uploading stored files during edit but still rejects invalid replacements', () => {
-    const editSchema = fieldsToZodSchema(requiredFileFields, 'edit');
+    const editSchema = fieldsToTypeBoxSchema(requiredFileFields, 'edit');
 
     expect(editSchema.parse({})).toEqual({});
     expect(editSchema.safeParse({ attachment: 'not-a-file' }).success).toBe(false);
@@ -281,9 +281,9 @@ describe('fieldsToZodSchema file fields', () => {
       }],
     };
 
-    expect(fieldsToZodSchema([documentArray], 'edit').parse(retained)).toEqual(retained);
-    expect(fieldsToZodSchema([documentArray], 'create').safeParse(retained).success).toBe(false);
-    expect(fieldsToZodSchema([documentArray], 'edit').safeParse({
+    expect(fieldsToTypeBoxSchema([documentArray], 'edit').parse(retained)).toEqual(retained);
+    expect(fieldsToTypeBoxSchema([documentArray], 'create').safeParse(retained).success).toBe(false);
+    expect(fieldsToTypeBoxSchema([documentArray], 'edit').safeParse({
       documents: [{ gallery: ['/stored/first.png'] }],
     }).success).toBe(false);
   });
