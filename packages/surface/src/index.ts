@@ -28,3 +28,12 @@ export type {
   SurfaceWidgetDefinition,
 } from './types.js';
 export { validateSurfaceSpec } from './validation.js';
+export {
+  SURFACE_AGENT_SCHEMA_VERSION,
+  buildSurfaceAgentPrompt,
+  parseSurfaceAgentProposal,
+} from './agent.js';
+export type {
+  SurfaceAgentProposal,
+  SurfaceAgentValidationResult,
+} from './agent.js';

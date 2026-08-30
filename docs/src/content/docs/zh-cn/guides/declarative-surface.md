@@ -82,6 +82,10 @@ bun add @svadmin/surface @svadmin/core @svadmin/ui @tanstack/svelte-query svelte
 
 `SurfacePolicy` 是 Renderer 的必填参数。每个资源按需声明 `readFields`、`filterFields`、`sortFields`、`allowGetOne` 和 `maxPageSize`。只要 Spec 引用了策略外的资源或字段，整页就会被拒绝，并且不发送查询。
 
+### AI proposal 适配器
+
+根入口提供可选、无副作用的对话生成适配器。`buildSurfaceAgentPrompt(request, catalog, policy)` 约束模型只返回 proposal envelope，并携带宿主允许的 widget、resource 与 field 白名单；`parseSurfaceAgentProposal(input, catalog, policy)` 会在 Renderer 或 Provider 被调用前解析并完整校验内嵌 Surface spec。宿主应先预览校验后的 spec，再要求用户明确确认后渲染或持久化。该适配器不会执行生成代码、mutation 或持久化。
+
 查询前，当前 `AccessControlProvider` 会收到 `list` 或 `show` 检查。浏览器检查只负责展示门控，后端必须对每次请求独立完成身份认证和授权。
 
 Provider 记录会先投影到 `readFields`，再交给 Widget。被选中的非 JSON 值会直接失败，不会进行隐式转换。
@@ -104,4 +108,4 @@ MVP 上限为 8 个数据源、24 个 Widget、每页 100 条、8 个过滤条�
 
 包内 `compatibility.json` 记录了支持的 Core/UI/Svelte 范围和经过测试的最低版本组合。packed-consumer 门禁同时覆盖不依赖 DOM 的 Node ESM 根入口与 Svelte/Vite 入口。
 
-v1 wire contract 会继续保持精简。候选后续能力包括 revision 历史与 JSON Patch、由应用注入的持久化/审计接口，以及带人工确认的可选 Agent adapter。Dataset 快照、凭据、聚合计算和 Connector 调度仍归业务后端或应用负责；Canvas、iframe、任意代码和 mutation action 不会被默认纳入路线图。
+v1 wire contract 会继续保持精简。后续仍可由应用注入 revision 历史、JSON Patch、持久化和审计接口。Dataset 快照、凭据、聚合计算和 Connector 调度仍归业务后端或应用负责；Canvas、iframe、任意代码和 mutation action 不会被默认纳入路线图。

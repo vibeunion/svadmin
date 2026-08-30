@@ -78,6 +78,25 @@ import {
 
 When rendered inside `AdminApp`, the renderer resolves the configured provider for each resource. A trusted host may instead pass `dataProvider`, which is still narrowed to `getList` and `getOne`.
 
+## AI proposals
+
+The DOM-free root entry also exposes an opt-in Agent protocol. `buildSurfaceAgentPrompt()` constrains a model to return a proposal envelope and includes the host's widget/resource/field allowlists. `parseSurfaceAgentProposal()` parses and validates the complete `SurfaceSpec` against the same catalog and policy without querying a provider:
+
+```ts
+import {
+  buildSurfaceAgentPrompt,
+  parseSurfaceAgentProposal,
+} from '@svadmin/surface';
+
+const prompt = buildSurfaceAgentPrompt('Generate an inventory dashboard', catalog, policy);
+const proposal = parseSurfaceAgentProposal(modelText, catalog, policy);
+if (proposal.ok) {
+  // Preview proposal.value.spec, then require explicit user approval before rendering.
+}
+```
+
+The adapter is deliberately proposal-only. Persistence, revision history, audit records, and the final apply decision belong to the host application. It never executes generated code or mutation actions.
+
 ## Built-in catalog
 
 | Type | Binding | Purpose |

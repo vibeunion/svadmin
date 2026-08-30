@@ -82,6 +82,10 @@ Inside `AdminApp`, each source uses the provider configured for its resource. A 
 
 `SurfacePolicy` is required. For each resource, declare `readFields`, `filterFields`, `sortFields`, `allowGetOne`, and `maxPageSize` as needed. The renderer rejects the complete surface before querying if the spec references a resource or field outside the policy.
 
+### AI proposal adapter
+
+The root entry provides an optional, side-effect-free adapter for conversational generation. `buildSurfaceAgentPrompt(request, catalog, policy)` constrains the model to a proposal envelope and includes the host's widget/resource/field allowlists, while `parseSurfaceAgentProposal(input, catalog, policy)` parses and fully validates the embedded Surface spec before any renderer or provider is invoked. Hosts should preview the validated spec and require explicit user approval before rendering or persisting it. The adapter does not execute generated code, mutation actions, or persistence.
+
 Before a query, the current `AccessControlProvider` receives `list` or `show`. This browser check controls presentation only. The backend must independently authenticate and authorize every request.
 
 Provider results are projected to `readFields` before widgets receive them. Non-JSON selected values fail without conversion.
@@ -104,4 +108,4 @@ Aggregations such as revenue totals belong in a backend summary resource. Bind t
 
 The package publishes its supported Core/UI/Svelte ranges and tested minimum combination in `compatibility.json`. Packed-consumer checks cover the DOM-free Node ESM entry and the Svelte/Vite entry.
 
-The v1 wire contract stays deliberately small. Candidate follow-ups are revision history and JSON Patch, an application-supplied persistence/audit interface, and an opt-in Agent adapter with human approval. Dataset snapshots, credentials, aggregation, and connector scheduling remain backend or application responsibilities. Canvas, iframe, arbitrary code, and mutation actions are not implicit roadmap commitments.
+The v1 wire contract stays deliberately small. Candidate follow-ups are revision history and JSON Patch, plus an application-supplied persistence/audit interface. Dataset snapshots, credentials, aggregation, and connector scheduling remain backend or application responsibilities. Canvas, iframe, arbitrary code, and mutation actions are not implicit roadmap commitments.
