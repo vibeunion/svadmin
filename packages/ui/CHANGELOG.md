@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.66.0](https://github.com/vibeunion/svadmin/compare/ui-v0.65.1...ui-v0.66.0) (2026-08-31)
+
+
+### 🚀 Features
+
+* **ui:** add MetricStrip component, Badge subtle variants, and Table sticky action columns ([#358](https://github.com/vibeunion/svadmin/issues/358)) ([edfe47a](https://github.com/vibeunion/svadmin/commit/edfe47aef74900ca18c0bcb8bd6a911774f72c1e))
+
 ## [0.65.1](https://github.com/vibeunion/svadmin/compare/ui-v0.65.0...ui-v0.65.1) (2026-08-30)
 
 
