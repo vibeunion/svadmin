@@ -3,14 +3,14 @@ import { render } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 import MetricStrip, { type MetricStripItem } from './MetricStrip.svelte';
 import { Badge } from './ui/badge/index.js';
-import { Table, TableRow, TableCell, TableHead } from './ui/table/index.js';
+import { TableCell, TableHead } from './ui/table/index.js';
 
 describe('MetricStrip Component', () => {
   it('renders grouped metric items with labels, values, and badges', () => {
     const items: MetricStripItem[] = [
       { label: '待受理委托', value: 12, tone: 'primary', href: '#/orders' },
       { label: '超期项目', value: 3, tone: 'danger', badge: { text: '超期', tone: 'danger' } },
-      { label: '完成率', value: '98.5%', tone: 'success', trend: { value: 4.2 } },
+      { label: '完成率', value: '98.5%', tone: 'success', trend: { value: 4.2, label: '较上周' } },
     ];
 
     const view = render(MetricStrip, { items, columns: 3 });
@@ -23,6 +23,7 @@ describe('MetricStrip Component', () => {
     expect(view.container.textContent).toContain('完成率');
     expect(view.container.textContent).toContain('98.5%');
     expect(view.container.textContent).toContain('4.2%');
+    expect(view.container.textContent).toContain('较上周');
 
     const link = view.container.querySelector('a[href="#/orders"]');
     expect(link).not.toBeNull();
