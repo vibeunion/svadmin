@@ -4,7 +4,8 @@
     LiteSearch,
     LiteTable,
     LitePagination,
-    LiteStatsCard,
+    LiteMetricStrip,
+    LiteBadge,
     LiteBarChart,
     getStatusBadgeClass,
   } from "@svadmin/lite";
@@ -26,7 +27,7 @@
     <div>
       <h1 class="lite-page-title">Operations & Analytics Dashboard</h1>
       <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b;">
-        <span class="lite-badge lite-badge-info">Lite SSR</span>
+        <LiteBadge variant="info">Lite SSR</LiteBadge>
         Zero JavaScript • High Performance Server Rendering • Native HTML Forms
       </p>
     </div>
@@ -39,34 +40,36 @@
     <LiteAlert type="error" message={String(form.error)} />
   {/if}
 
-  <!-- KPI Cards -->
-  <div class="lite-dashboard-stats">
-    <LiteStatsCard
-      label="Total Revenue"
-      value={"$" + Number(data.stats.totalRevenue).toLocaleString()}
-      trendValue="+14.2% MoM"
-      trend="up"
-    />
-    <LiteStatsCard
-      label="Active Products"
-      value={data.stats.productsTotal}
-      trendValue="In inventory"
-      trend="up"
-    />
-    <LiteStatsCard
-      label="Sales Orders"
-      value={data.stats.ordersTotal}
-      trendValue="100% fulfillment"
-      trend="neutral"
-    />
-    <LiteStatsCard
-      label="Connected Resources"
-      value={data.stats.resourcesCount}
-      trendValue="Dynamic routes"
-      trend="up"
-    />
-  </div>
-
+  <!-- KPI metrics -->
+  <LiteMetricStrip
+    ariaLabel="Operations metrics"
+    columns={4}
+    items={[
+      {
+        label: "Total Revenue",
+        value: "$" + Number(data.stats.totalRevenue).toLocaleString(),
+        tone: "primary",
+        trend: { value: 14.2, label: "MoM" },
+      },
+      {
+        label: "Active Products",
+        value: data.stats.productsTotal,
+        tone: "success",
+        badge: { text: "In inventory", tone: "success" },
+      },
+      {
+        label: "Sales Orders",
+        value: data.stats.ordersTotal,
+        trend: { value: 0, label: "fulfillment" },
+      },
+      {
+        label: "Connected Resources",
+        value: data.stats.resourcesCount,
+        tone: "info",
+        href: "/lite/parity",
+      },
+    ]}
+  />
   <!-- Analytics & Breakdown Section -->
   <div class="lite-dashboard-split">
     <LiteBarChart
@@ -186,16 +189,20 @@
       <LiteSearch value={data.currentSearch} placeholder="Search posts..." />
     </div>
 
-    <LiteTable
-      records={data.records}
-      resource={postsResource}
-      currentSearch={data.currentSearch}
-      currentSort={data.currentSort}
-      currentOrder={data.currentOrder}
-      basePath="/lite"
-      canShow={false}
-      canEdit={false}
-    />
+    <div class="lite-table-scroll">
+      <LiteTable
+        records={data.records}
+        resource={postsResource}
+        currentSearch={data.currentSearch}
+        currentSort={data.currentSort}
+        currentOrder={data.currentOrder}
+        basePath="/lite"
+        canShow={false}
+        canEdit={false}
+        stickyColumns={{ left: "id" }}
+        stickyActions
+      />
+    </div>
 
     {#if data.total > data.pageSize}
       <LitePagination

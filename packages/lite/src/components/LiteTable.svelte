@@ -20,6 +20,10 @@
     canEdit?: boolean;
     canDelete?: boolean;
     enableBatch?: boolean;
+    /** One field key per edge; left is ignored while batch selection is active. */
+    stickyColumns?: { left?: string; right?: string };
+    /** Pin actions on the right; this takes precedence over stickyColumns.right. */
+    stickyActions?: boolean;
   }
 
   let {
@@ -33,6 +37,8 @@
     canEdit,
     canDelete,
     enableBatch = false,
+    stickyColumns = {},
+    stickyActions = false,
   }: Props = $props();
 
   const tableId = $props.id();
@@ -45,6 +51,8 @@
   const listFields = $derived(
     resource.fields.filter(f => f.showInList !== false)
   );
+  const stickyLeft = $derived(showBatch ? undefined : stickyColumns.left);
+  const stickyRight = $derived(stickyActions ? undefined : stickyColumns.right);
 
   function sortUrl(field: FieldDefinition): string {
     const newOrder = currentSort === field.key && currentOrder === "asc" ? "desc" : "asc";
@@ -103,7 +111,7 @@
         </th>
       {/if}
       {#each listFields as field, _i (_i)}
-        <th>
+        <th class={stickyLeft === field.key ? 'lite-table-sticky-left' : stickyRight === field.key ? 'lite-table-sticky-right' : undefined} data-sticky={stickyLeft === field.key ? 'left' : stickyRight === field.key ? 'right' : undefined}>
           {#if field.sortable !== false}
             <a href={sortUrl(field)}>
               {field.label}
@@ -115,7 +123,7 @@
         </th>
       {/each}
       {#if showView || showEdit || showDelete}
-        <th style="text-align:right;">{t("common.actions") || "Actions"}</th>
+        <th class={stickyActions ? 'lite-table-sticky-right' : undefined} data-sticky={stickyActions ? 'right' : undefined} style="text-align:right;">{t("common.actions") || "Actions"}</th>
       {/if}
     </tr>
   </thead>
@@ -129,7 +137,7 @@
           </td>
         {/if}
         {#each listFields as field, _i (_i)}
-          <td>
+          <td class={stickyLeft === field.key ? 'lite-table-sticky-left' : stickyRight === field.key ? 'lite-table-sticky-right' : undefined} data-sticky={stickyLeft === field.key ? 'left' : stickyRight === field.key ? 'right' : undefined}>
             {#if field.type === "boolean"}
               <span class="lite-bool {isExplicitBooleanTrue(record[field.key]) ? "lite-bool-true" : ""}"></span>
             {:else if field.type === "tags" && Array.isArray(record[field.key])}
@@ -148,7 +156,7 @@
           </td>
         {/each}
         {#if showView || showEdit || showDelete}
-          <td class="actions">
+          <td class={'actions' + (stickyActions ? ' lite-table-sticky-right' : '')} data-sticky={stickyActions ? 'right' : undefined}>
             {#if showView}
               <a href={basePath + "/" + resource.name + "/show/" + id} class="lite-btn lite-btn-sm">{t("common.show") || "Show"}</a>
             {/if}

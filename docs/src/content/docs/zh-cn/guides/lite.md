@@ -24,7 +24,7 @@ description: 零 JS 服务端渲染降级方案、IE11 兼容纯 CSS 基线与 1
 
 ## 组件体系与 100% 对齐覆盖
 
-`@svadmin/lite` 实现了与 `@svadmin/ui` **100% 的组件对齐（103/103 个组件）**。现代 SPA 中的每一个 UI 组件，都有 1:1 服务端渲染组件、明确的语义降级方案，或明确标记为仅适用于 SPA。
+`@svadmin/lite` 实现了与 `@svadmin/ui` **100% 的组件对齐（106/106 个组件）**。现代 SPA 中的每一个 UI 组件，都有 1:1 服务端渲染组件、明确的语义降级方案，或明确标记为仅适用于 SPA。
 
 ### 模块对齐看板
 
@@ -36,11 +36,11 @@ description: 零 JS 服务端渲染降级方案、IE11 兼容纯 CSS 基线与 1
   [buttons]       10/10 (100.0%)  [██████████████]
   [pages]          12/12 (100.0%)  [██████████████]
   [layout]          9/9 (100.0%)  [██████████████]
-  [widgets]         9/9 (100.0%)  [██████████████]
-  [advanced]      30/30 (100.0%)  [██████████████]
+  [widgets]       11/11 (100.0%)  [██████████████]
+  [advanced]      31/31 (100.0%)  [██████████████]
 ---------------------------------------------------------------
-  总体覆盖率: 100% (103/103)
-  - 1:1 对齐 (Exact): 89
+  总体覆盖率: 100% (106/106)
+  - 1:1 对齐 (Exact): 92
   - 语义降级 (Fallback): 10
   - 免适配 (SPA Only): 4
   - 待补齐 (Missing): 0
@@ -64,10 +64,11 @@ description: 零 JS 服务端渲染降级方案、IE11 兼容纯 CSS 基线与 1
 4. **布局与导航 (Layout - 9 个)**:
    - `LiteLayout`、`LiteSidebar`、`LiteHeader`、`LiteBreadcrumbs`、`LiteCanAccess`、`LiteErrorBoundary`、`LiteSplitPaneLayout`、`LiteMultiTabKeepAlive`。
    - `ThemeToggle` 明确为仅 SPA 组件；`LiteTabs` 与 `LiteEmptyState` 仍作为 SSR 基础组件提供，但不计入对齐矩阵条目。
-5. **挂件与图表 (Widgets & Charts - 9 个)**:
-   - `LiteStatsCard`、`LiteInsightCard`、`LiteAnomalyBadge`（KPI 指标卡与异常状态徽章）。
+5. **挂件与图表 (Widgets & Charts - 11 个)**:
+   - `LiteStatsCard`、`LiteMetricStrip`、`LiteInsightCard`、`LiteAnomalyBadge`、`LiteBadge`（KPI 指标卡、指标条与语义状态徽章）。
    - `LiteBarChart`、`LiteLineChart`、`LitePieChart`、`LitePresenceAvatarGroup`、`LiteGanttChart`、`LiteOfflineSyncBanner`（服务端 SVG/HTML 或状态降级方案）。
-6. **高级交互与查询构造器 (Advanced UX - 30 个)**:
+6. **高级交互与查询构造器 (Advanced UX - 31 个)**:
+   - `LiteTable`（原生排序表格、横向滚动与可选固定边缘/操作列）。
    - `LiteConfirmDialog`、`LiteFilterBuilder`、`LiteDrawerForm`、`LiteModalForm`、`LiteVirtualTable`。
    - `LiteInlineEdit`、`LiteAutoSaveIndicator`、`LiteToast`、`LiteUndoableNotification`（服务端语义降级）。
    - `LiteWatermark`、`LiteColumnSettings`、`LiteImportWizard`、`LiteColumnHeaderFilter`、`LiteTreeTable`、`LiteSensitiveDataMask`、`LiteApprovalActionCard`。
@@ -192,5 +193,5 @@ export const handle = createLegacyRedirectHook({
    ```
    终端直接输出分类覆盖率条形图与统计数据，并自动同步更新 `PARITY.md` 与 `parity.json`。
 2. **静态全量矩阵文档**: 查看 [packages/lite/PARITY.md](https://github.com/vibeunion/svadmin/blob/main/packages/lite/PARITY.md) 了解每个组件的详细承接方案。
-3. **交互式可视化 Showroom**: 启动 Demo 项目访问 `/lite/parity` 路由，可以在线交互预览全部 103 个组件的真实渲染效果、切换亮色/暗色主题并查看模块级覆盖率。
+3. **交互式可视化 Showroom**: 启动 Demo 项目访问 `/lite/parity` 路由，可以在线交互预览全部 106 个组件的真实渲染效果、切换亮色/暗色主题并查看模块级覆盖率。
 4. **自动化 CI 合约测试**: `scripts/parity-contract.test.ts` 已纳入 Monorepo 根目录 `bun run test`，当有未在矩阵中声明的 UI 组件时会自动阻断 CI，杜绝隐式遗漏。
