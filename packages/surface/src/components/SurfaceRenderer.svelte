@@ -1,10 +1,13 @@
 <script lang="ts">
   import { canAccessAsync, captureAdminContext } from '@svadmin/core';
+  import { useTranslation } from '@svadmin/core/i18n';
   import { untrack } from 'svelte';
   import { resolveSurfaceWidgetData } from '../binding.js';
   import { defaultSurfaceCatalog } from '../catalog.js';
   import type { SurfaceRenderCatalog } from '../catalog.js';
   import { loadSurfaceSource } from '../runtime.js';
+  import { resolveSurfaceMessages } from '../localization.js';
+  import type { SurfaceMessages } from '../localization.js';
   import type {
     SurfaceDataError,
     SurfaceDataProvider,
@@ -24,6 +27,8 @@
     readonly policy: SurfacePolicy;
     readonly catalog?: SurfaceRenderCatalog;
     readonly dataProvider?: SurfaceDataProvider;
+    readonly locale?: string;
+    readonly messages?: Partial<SurfaceMessages>;
     readonly class?: string;
     readonly onError?: (error: SurfaceRendererError) => void;
   }
@@ -33,11 +38,16 @@
     policy,
     catalog = defaultSurfaceCatalog,
     dataProvider,
+    locale,
+    messages,
     class: className = '',
     onError,
   }: SurfaceRendererProps = $props();
 
   const adminContext = captureAdminContext();
+  const i18n = useTranslation();
+  const activeLocale = $derived(locale ?? i18n.locale);
+  const activeMessages = $derived(resolveSurfaceMessages(activeLocale, messages));
   const validation = $derived(validateSurfaceSpec(spec, catalog, policy));
   const widgetRegistrations = $derived(new Map(catalog.widgets.map((widget) => [widget.type, widget])));
   const currentSpec = $derived(validation.ok ? validation.value : null);
@@ -63,7 +73,7 @@
   }
 
   function providerError(sourceId: string, failure: unknown): SurfaceSourceDataState {
-    const message = failure instanceof Error ? failure.message : 'Data provider is unavailable';
+    const message = failure instanceof Error ? failure.message : activeMessages.providerUnavailable;
     return {
       status: 'error',
       sourceId,
@@ -151,6 +161,8 @@
               widgetId={widget.id}
               props={widget.props}
               data={resolveSurfaceWidgetData(widget, sourceStates)}
+              locale={activeLocale}
+              messages={activeMessages}
             />
           {/if}
         </div>
@@ -159,7 +171,7 @@
   </section>
 {:else}
   <section class="surface-error {className}" role="alert" data-surface-error>
-    <h2>Surface could not be rendered</h2>
+    <h2>{activeMessages.renderErrorTitle}</h2>
     <ul>
       {#each validation.issues as issue, issueIndex (`${issue.code}:${issue.path}:${issueIndex}`)}
         <li><code>{issue.code}</code>: {issue.message}</li>

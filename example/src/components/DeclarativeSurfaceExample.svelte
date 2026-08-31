@@ -21,11 +21,11 @@
     },
   } satisfies SurfacePolicy;
 
-  const spec = {
+  const spec = $derived.by(() => ({
     schemaVersion: 'surface/v1',
     catalogVersion: DEFAULT_SURFACE_CATALOG_VERSION,
     surfaceId: 'dashboard-declarative-surface',
-    title: 'Declarative Surface',
+    title: isZh ? '声明式 Surface' : 'Declarative Surface',
     layout: { type: 'grid', columns: 12, gap: 'md' },
     dataSources: [
       { id: 'surface-products', type: 'resource-list', resource: 'products', pageSize: 10 },
@@ -41,21 +41,25 @@
       {
         id: 'surface-product-count',
         type: 'metric',
-        props: { label: 'Products', format: 'number', description: 'Read from the list total' },
+        props: {
+          label: isZh ? '商品' : 'Products',
+          format: 'number',
+          description: isZh ? '从列表总数读取' : 'Read from the list total',
+        },
         binding: { sourceId: 'surface-products', pointer: '/total' },
         placement: { columnSpan: 3 },
       },
       {
         id: 'surface-inventory-chart',
         type: 'bar-chart',
-        props: { title: 'Inventory by product', labelField: 'name', valueField: 'stock' },
+        props: { title: isZh ? '各商品库存' : 'Inventory by product', labelField: 'name', valueField: 'stock' },
         binding: { sourceId: 'surface-products', pointer: '/items' },
         placement: { columnSpan: 9 },
       },
       {
         id: 'surface-orders-chart',
         type: 'line-chart',
-        props: { title: 'Order value over time', labelField: 'orderDate', valueField: 'totalAmount' },
+        props: { title: isZh ? '订单金额趋势' : 'Order value over time', labelField: 'orderDate', valueField: 'totalAmount' },
         binding: { sourceId: 'surface-sales-orders', pointer: '/items' },
         placement: { columnSpan: 6 },
       },
@@ -63,19 +67,19 @@
         id: 'surface-orders-table',
         type: 'resource-table',
         props: {
-          title: 'Read-only sales orders',
+          title: isZh ? '只读销售订单' : 'Read-only sales orders',
           columns: [
-            { field: 'orderNumber', label: 'Order' },
-            { field: 'customerName', label: 'Customer' },
-            { field: 'status', label: 'Status' },
-            { field: 'totalAmount', label: 'Amount', format: 'number' },
+            { field: 'orderNumber', label: isZh ? '订单号' : 'Order' },
+            { field: 'customerName', label: isZh ? '客户' : 'Customer' },
+            { field: 'status', label: isZh ? '状态' : 'Status' },
+            { field: 'totalAmount', label: isZh ? '金额' : 'Amount', format: 'number' },
           ],
         },
         binding: { sourceId: 'surface-sales-orders', pointer: '/items' },
         placement: { columnSpan: 6 },
       },
     ],
-  } satisfies SurfaceSpec;
+  }) satisfies SurfaceSpec);
 
   let renderer = $state<{ refresh(sourceId?: string): Promise<void> }>();
   let refreshing = $state(false);

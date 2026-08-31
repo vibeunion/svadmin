@@ -28,6 +28,7 @@ export type {
   SurfaceWidgetDefinition,
 } from './types.js';
 export { validateSurfaceSpec } from './validation.js';
+export type { SurfaceMessages } from './localization.js';
 export {
   SURFACE_AGENT_SCHEMA_VERSION,
   buildSurfaceAgentPrompt,

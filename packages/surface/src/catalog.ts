@@ -16,6 +16,7 @@ import type {
   SurfaceWidgetDataState,
   SurfaceWidgetDefinition,
 } from './types.js';
+import type { SurfaceMessages } from './localization.js';
 
 export const DEFAULT_SURFACE_CATALOG_VERSION = 'svadmin/v1' as const;
 
@@ -23,6 +24,8 @@ export interface SurfaceWidgetRendererProps {
   readonly widgetId: string;
   readonly props: JsonObject;
   readonly data: SurfaceWidgetDataState;
+  readonly locale?: string;
+  readonly messages?: SurfaceMessages;
 }
 
 export interface SurfaceWidgetRegistration extends SurfaceWidgetDefinition {

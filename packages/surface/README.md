@@ -78,6 +78,17 @@ import {
 
 When rendered inside `AdminApp`, the renderer resolves the configured provider for each resource. A trusted host may instead pass `dataProvider`, which is still narrowed to `getList` and `getOne`.
 
+The renderer also follows the active `AdminApp` i18n locale. Built-in loading, empty, error, boolean, number, currency, percent, and date presentation updates automatically. A standalone host can pass `locale`, and can override individual built-in strings with `messages`. Business copy such as the surface title, widget titles, labels, and column headers remains part of the JSON spec; build or select a localized spec when the host locale changes.
+
+```svelte
+<SurfaceRenderer
+  {spec}
+  {policy}
+  locale="zh-CN"
+  messages={{ tableNoRecords: '没有符合条件的记录' }}
+/>
+```
+
 ## AI proposals
 
 The DOM-free root entry also exposes an opt-in Agent protocol. `buildSurfaceAgentPrompt()` constrains a model to return a proposal envelope and includes the host's widget/resource/field allowlists. `parseSurfaceAgentProposal()` parses and validates the complete `SurfaceSpec` against the same catalog and policy without querying a provider:

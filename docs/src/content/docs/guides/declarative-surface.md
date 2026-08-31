@@ -78,6 +78,8 @@ Inside `AdminApp`, each source uses the provider configured for its resource. A 
 
 `refresh(sourceId?)` is a trusted host API. Refresh capability is not part of `SurfaceSpec`, and refreshing data does not recreate the spec or widget DOM.
 
+`SurfaceRenderer` follows the current `AdminApp` i18n locale for its built-in loading, empty, error, boolean, number, currency, percent, and date presentation. Standalone hosts can pass `locale` explicitly and override individual built-in strings through `messages`. Business copy remains JSON data: surface titles, widget labels, descriptions, and table headers must be localized when the host builds or selects the active spec.
+
 ## Policy and authorization
 
 `SurfacePolicy` is required. For each resource, declare `readFields`, `filterFields`, `sortFields`, `allowGetOne`, and `maxPageSize` as needed. The renderer rejects the complete surface before querying if the spec references a resource or field outside the policy.

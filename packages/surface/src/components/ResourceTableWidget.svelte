@@ -12,9 +12,11 @@
   import Table from '@svadmin/ui/components/ui/table/table.svelte';
   import { resourceTablePropsSchema } from '../builtin-schemas.js';
   import type { SurfaceWidgetRendererProps } from '../catalog.js';
+  import { resolveSurfaceMessages } from '../localization.js';
   import { asRecordArray, displayTableValue } from '../widget-data.js';
 
-  let { props, data }: SurfaceWidgetRendererProps = $props();
+  let { props, data, locale = 'en-US', messages }: SurfaceWidgetRendererProps = $props();
+  const activeMessages = $derived(resolveSurfaceMessages(locale, messages));
 
   const tableProps = $derived(Value.Decode(resourceTablePropsSchema, props));
   const records = $derived(data.status === 'ready' ? asRecordArray(data.value) : null);
@@ -26,9 +28,9 @@
   </CardHeader>
   <CardContent>
     {#if data.status === 'loading'}
-      <div class="table-state table-loading" role="status">Loading table</div>
+      <div class="table-state table-loading" role="status">{activeMessages.tableLoading}</div>
     {:else if data.status === 'empty'}
-      <p class="table-state" role="status">{tableProps.emptyLabel ?? 'No records'}</p>
+      <p class="table-state" role="status">{tableProps.emptyLabel ?? activeMessages.tableNoRecords}</p>
     {:else if data.status === 'error'}
       <p class="table-state" role="alert">{data.error.message}</p>
     {:else if data.status === 'ready' && records?.ok}
@@ -45,7 +47,11 @@
             {#each records.value as record, index (index)}
               <TableRow>
                 {#each tableProps.columns as column (column.field)}
-                  <TableCell>{displayTableValue(record[column.field], column.format)}</TableCell>
+                  <TableCell>{displayTableValue(record[column.field], {
+                    format: column.format,
+                    locale,
+                    messages: activeMessages,
+                  })}</TableCell>
                 {/each}
               </TableRow>
             {/each}
@@ -53,7 +59,7 @@
         </Table>
       </div>
     {:else}
-      <p class="table-state" role="alert">{records && !records.ok ? records.message : 'Table data is unavailable'}</p>
+      <p class="table-state" role="alert">{records && !records.ok ? activeMessages.tableInvalidData : activeMessages.tableUnavailable}</p>
     {/if}
   </CardContent>
 </Card>

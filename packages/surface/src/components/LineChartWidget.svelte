@@ -7,16 +7,18 @@
   import Card from '@svadmin/ui/components/ui/card/card.svelte';
   import { lineChartPropsSchema } from '../builtin-schemas.js';
   import type { SurfaceWidgetRendererProps } from '../catalog.js';
+  import { formatSurfaceMessage, resolveSurfaceMessages } from '../localization.js';
   import { asChartPoints, compactChartLabel } from '../widget-data.js';
 
-  let { props, data }: SurfaceWidgetRendererProps = $props();
+  let { props, data, locale = 'en-US', messages }: SurfaceWidgetRendererProps = $props();
+  const activeMessages = $derived(resolveSurfaceMessages(locale, messages));
 
   const chartProps = $derived(Value.Decode(lineChartPropsSchema, props));
   const points = $derived(data.status === 'ready'
     ? asChartPoints(data.value, chartProps.labelField, chartProps.valueField)
     : null);
   const chartData = $derived(points?.ok
-    ? points.value.map((point) => ({ ...point, label: compactChartLabel(point.label, 8) }))
+    ? points.value.map((point) => ({ ...point, label: compactChartLabel(point.label, 8, locale) }))
     : []);
 </script>
 
@@ -26,9 +28,9 @@
   </CardHeader>
   <CardContent>
     {#if data.status === 'loading'}
-      <div class="chart-state chart-loading" role="status" aria-label="Loading {chartProps.title}"></div>
+      <div class="chart-state chart-loading" role="status" aria-label={formatSurfaceMessage(activeMessages.chartLoading, { title: chartProps.title })}></div>
     {:else if data.status === 'empty'}
-      <p class="chart-state" role="status">No chart data</p>
+      <p class="chart-state" role="status">{activeMessages.chartNoData}</p>
     {:else if data.status === 'error'}
       <p class="chart-state" role="alert">{data.error.message}</p>
     {:else if data.status === 'ready' && points?.ok}
@@ -40,7 +42,7 @@
         />
       </div>
     {:else}
-      <p class="chart-state" role="alert">{points && !points.ok ? points.message : 'Chart data is unavailable'}</p>
+      <p class="chart-state" role="alert">{points && !points.ok ? activeMessages.chartInvalidData : activeMessages.chartUnavailable}</p>
     {/if}
   </CardContent>
 </Card>

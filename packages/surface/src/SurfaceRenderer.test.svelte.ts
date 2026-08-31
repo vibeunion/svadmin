@@ -8,6 +8,7 @@ import type {
   GetOneResult,
 } from '@svadmin/core';
 import { setAccessControlProvider } from '@svadmin/core';
+import { resetI18n, setLocale } from '@svadmin/core/i18n';
 import { resetAccessControlProvider } from '@svadmin/core/permissions';
 import SurfaceRenderer from './components/SurfaceRenderer.svelte';
 import { DEFAULT_SURFACE_CATALOG_VERSION, defaultSurfaceCatalog } from './catalog.js';
@@ -99,6 +100,7 @@ const tableSpec = {
 
 afterEach(() => {
   resetAccessControlProvider();
+  resetI18n();
 });
 
 function createProvider() {
@@ -192,6 +194,28 @@ describe('SurfaceRenderer', () => {
 
     response.resolve({ data: [], total: 0 });
     expect(await screen.findByText('No records')).not.toBeNull();
+  });
+
+  test('follows the active i18n locale for built-in widget states', async () => {
+    const response = deferred<{ data: BaseRecord[]; total: number }>();
+    const provider: SurfaceDataProvider = {
+      async getList<TData extends BaseRecord = BaseRecord>(): Promise<GetListResult<TData>> {
+        return response.promise as Promise<GetListResult<TData>>;
+      },
+      async getOne<TData extends BaseRecord = BaseRecord>(): Promise<GetOneResult<TData>> {
+        return { data: { id: 1 } as unknown as TData };
+      },
+    };
+
+    setLocale('en');
+    render(SurfaceRenderer, { spec: tableSpec, policy, catalog: defaultSurfaceCatalog, dataProvider: provider });
+    expect(await screen.findByText('Loading table')).not.toBeNull();
+
+    setLocale('zh-CN');
+    expect(await screen.findByText('正在加载表格')).not.toBeNull();
+
+    response.resolve({ data: [], total: 0 });
+    expect(await screen.findByText('暂无记录')).not.toBeNull();
   });
 
   test('renders a provider failure as a widget error state', async () => {
