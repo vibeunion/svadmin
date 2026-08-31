@@ -22,9 +22,9 @@
 		: "p-2");
 	const stickyClass = $derived(
 		sticky === "right" || sticky === true
-			? "sticky right-0 z-10 bg-background shadow-[-1px_0_0_var(--border)] group-hover/row:bg-muted/50 data-[state=selected]:bg-muted"
+			? "sticky right-0 z-10 bg-background shadow-[-1px_0_0_var(--border)] group-hover/row:bg-muted/50 group-data-[state=selected]/row:bg-muted"
 			: sticky === "left"
-			? "sticky left-0 z-10 bg-background shadow-[1px_0_0_var(--border)] group-hover/row:bg-muted/50 data-[state=selected]:bg-muted"
+			? "sticky left-0 z-10 bg-background shadow-[1px_0_0_var(--border)] group-hover/row:bg-muted/50 group-data-[state=selected]/row:bg-muted"
 			: ""
 	);
 </script>

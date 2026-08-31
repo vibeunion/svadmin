@@ -13,7 +13,7 @@ describe('MetricStrip Component', () => {
       { label: '完成率', value: '98.5%', tone: 'success', trend: { value: 4.2, label: '较上周' } },
     ];
 
-    const view = render(MetricStrip, { items, columns: 3 });
+    const view = render(MetricStrip, { items, columns: 3, ariaLabel: '委托指标' });
 
     expect(view.container.textContent).toContain('待受理委托');
     expect(view.container.textContent).toContain('12');
@@ -24,6 +24,7 @@ describe('MetricStrip Component', () => {
     expect(view.container.textContent).toContain('98.5%');
     expect(view.container.textContent).toContain('4.2%');
     expect(view.container.textContent).toContain('较上周');
+    expect(view.getByRole('region', { name: '委托指标' })).not.toBeNull();
 
     const link = view.container.querySelector('a[href="#/orders"]');
     expect(link).not.toBeNull();
@@ -69,6 +70,7 @@ describe('Table sticky action column support', () => {
     expect(cell?.getAttribute('data-sticky')).toBe('right');
     expect(cell?.className).toContain('sticky');
     expect(cell?.className).toContain('right-0');
+    expect(cell?.className).toContain('group-data-[state=selected]/row:bg-muted');
 
     const headView = render(TableHead, {
       sticky: 'right',

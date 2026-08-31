@@ -21,12 +21,13 @@
     FeedbackNotice,
     FilterToolbar,
     MediaThumbnail,
-    MetricBlock,
+    MetricStrip,
     PageToolbar,
     SectionHeader,
     StatusBadge,
   } from '@svadmin/ui';
   import { Badge } from '@svadmin/ui/components/ui/badge/index.js';
+  import * as Table from '@svadmin/ui/components/ui/table/index.js';
 
   interface Props {
     resourceName?: string;
@@ -112,6 +113,13 @@
     principles.filter((principle) => `${principle.title} ${principle.summary} ${principle.rule}`.toLowerCase().includes(query.toLowerCase().trim())),
   );
 
+  const operationalMetrics = $derived([
+    { label: isZh ? '待审核提案' : 'Proposals pending', value: 12, tone: 'primary' as const, badge: { text: isZh ? '需关注' : 'Review', tone: 'warning' as const } },
+    { label: isZh ? '今日完成' : 'Completed today', value: 38, tone: 'success' as const, trend: { value: 8.4, label: isZh ? '较昨日' : 'vs yesterday' } },
+    { label: isZh ? '超时任务' : 'Overdue tasks', value: 3, tone: 'danger' as const, badge: { text: isZh ? '超时' : 'Overdue', tone: 'danger' as const } },
+    { label: isZh ? '自动化成功率' : 'Automation success', value: '99.2%', tone: 'default' as const, trend: { value: 0.6, label: isZh ? '近 7 日' : '7 days' } },
+  ]);
+
   function resetState() {
     viewState = 'empty';
     showWarning = false;
@@ -147,11 +155,56 @@
   {/if}
 
   <div class="flex flex-col gap-6">
-    <div class="order-2 grid gap-3 sm:order-1 sm:grid-cols-2 xl:grid-cols-4">
-      <MetricBlock label={isZh ? '设计原则' : 'Principles'} value={principles.length} detail={isZh ? '可审查契约' : 'reviewable contracts'} trend={isZh ? '稳定' : 'Stable'} />
-      <MetricBlock label={isZh ? '状态覆盖' : 'State coverage'} value="4/4" detail={isZh ? '加载、空、错、权限' : 'loading, empty, error, forbidden'} trend={isZh ? '完整' : 'Complete'} />
-      <MetricBlock label={isZh ? '反馈归属' : 'Feedback ownership'} value="1 → 1" detail={isZh ? '一个事件一个主反馈面' : 'one event, one primary surface'} />
-      <MetricBlock label={isZh ? '目标尺寸' : 'Target size'} value="44px" detail={isZh ? '粗指针最小触达' : 'coarse-pointer minimum'} trend={isZh ? '可访问' : 'Accessible'} />
+    <div class="order-2 space-y-4 sm:order-1">
+      <MetricStrip
+        items={operationalMetrics}
+        columns={4}
+        ariaLabel={isZh ? '运营指标概览' : 'Operational metrics overview'}
+      />
+
+      <section class="space-y-3" aria-labelledby="dense-table-heading">
+        <SectionHeader
+          id="dense-table-heading"
+          title={isZh ? '高密度表格' : 'Dense operations table'}
+          description={isZh ? '滚动时保留操作列，并同步悬停和选中状态。' : 'Keep actions visible while scrolling and synchronize hover and selected states.'}
+        />
+        <div class="overflow-x-auto rounded-lg border border-border">
+          <Table.Root class="min-w-[64rem]" density="compact">
+            <Table.Header>
+              <Table.Row>
+                <Table.Head>{isZh ? '工作项' : 'Work item'}</Table.Head>
+                <Table.Head>{isZh ? '负责人' : 'Owner'}</Table.Head>
+                <Table.Head>{isZh ? '优先级' : 'Priority'}</Table.Head>
+                <Table.Head>{isZh ? '更新时间' : 'Updated'}</Table.Head>
+                <Table.Head sticky="right" class="w-24 text-right">{isZh ? '操作' : 'Actions'}</Table.Head>
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
+              <Table.Row data-state="selected">
+                <Table.Cell>{isZh ? '收款风险复核' : 'Payment risk review'}</Table.Cell>
+                <Table.Cell>Finance Ops</Table.Cell>
+                <Table.Cell><Badge variant="subtle-warning">P1</Badge></Table.Cell>
+                <Table.Cell>11:24</Table.Cell>
+                <Table.Cell sticky="right" class="text-right"><Button variant="ghost" size="sm">{isZh ? '查看' : 'View'}</Button></Table.Cell>
+              </Table.Row>
+              <Table.Row>
+                <Table.Cell>{isZh ? '客户资料待补齐' : 'Customer profile incomplete'}</Table.Cell>
+                <Table.Cell>Trust</Table.Cell>
+                <Table.Cell><Badge variant="subtle-pill">P2</Badge></Table.Cell>
+                <Table.Cell>10:48</Table.Cell>
+                <Table.Cell sticky="right" class="text-right"><Button variant="ghost" size="sm">{isZh ? '查看' : 'View'}</Button></Table.Cell>
+              </Table.Row>
+              <Table.Row>
+                <Table.Cell>{isZh ? '导出任务已完成' : 'Export job completed'}</Table.Cell>
+                <Table.Cell>Platform</Table.Cell>
+                <Table.Cell><Badge variant="subtle-success">{isZh ? '已完成' : 'Done'}</Badge></Table.Cell>
+                <Table.Cell>09:16</Table.Cell>
+                <Table.Cell sticky="right" class="text-right"><Button variant="ghost" size="sm">{isZh ? '查看' : 'View'}</Button></Table.Cell>
+              </Table.Row>
+            </Table.Body>
+          </Table.Root>
+        </div>
+      </section>
     </div>
 
     <div class="order-1 grid gap-6 sm:order-2 xl:grid-cols-[minmax(0,1.25fr)_minmax(18rem,0.75fr)]">

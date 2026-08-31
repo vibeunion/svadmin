@@ -27,6 +27,7 @@
   interface Props {
     items?: MetricStripItem[];
     columns?: 2 | 3 | 4 | 5 | 6 | 'auto';
+    ariaLabel?: string;
     class?: string;
     children?: Snippet;
   }
@@ -34,6 +35,7 @@
   let {
     items = [],
     columns = 'auto',
+    ariaLabel = 'Metrics overview',
     class: className = '',
     children,
   }: Props = $props();
@@ -51,7 +53,7 @@
     default: 'text-foreground',
     primary: 'text-primary',
     success: 'text-success',
-    warning: 'text-warning-foreground',
+    warning: 'text-warning',
     danger: 'text-destructive',
     info: 'text-info',
   };
@@ -62,7 +64,7 @@
   > = {
     default: 'bg-muted text-muted-foreground border-border',
     success: 'bg-success/10 text-success border-success/20',
-    warning: 'bg-warning/10 text-warning-foreground border-warning/20',
+    warning: 'bg-warning/10 text-warning border-warning/20',
     danger: 'bg-destructive/10 text-destructive border-destructive/20',
     info: 'bg-info/10 text-info border-info/20',
   };
@@ -70,9 +72,9 @@
 
 <div
   role="region"
-  aria-label="业务指标概览"
+  aria-label={ariaLabel}
   class={cn(
-    'grid divide-y divide-border overflow-hidden rounded-lg border border-border bg-card shadow-xs sm:divide-y-0',
+    'grid gap-px overflow-hidden rounded-lg border border-border bg-border shadow-xs',
     columnClassMap[columns] || columnClassMap.auto,
     className
   )}
@@ -86,7 +88,7 @@
         this={isInteractive ? 'a' : 'div'}
         href={item.href}
         class={cn(
-          'group relative flex flex-col justify-between gap-1 border-border p-3.5 text-left transition-colors duration-150 first:border-l-0 sm:border-l sm:p-4',
+          'group relative flex flex-col justify-between gap-1 bg-card p-3.5 text-left transition-colors duration-150 sm:p-4',
           isInteractive && 'cursor-pointer text-inherit no-underline hover:bg-muted/40',
           item.class
         )}

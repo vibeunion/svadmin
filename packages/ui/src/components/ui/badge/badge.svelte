@@ -10,7 +10,7 @@
 				destructive: "bg-destructive/10 [a]:hover:bg-destructive/20 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 text-destructive dark:bg-destructive/20",
 				subtle: "bg-primary/10 text-primary border-primary/20 [a]:hover:bg-primary/15",
 				"subtle-success": "bg-success/10 text-success border-success/20 [a]:hover:bg-success/15",
-				"subtle-warning": "bg-warning/10 text-warning-foreground border-warning/20 [a]:hover:bg-warning/15",
+				"subtle-warning": "bg-warning/10 text-warning border-warning/20 [a]:hover:bg-warning/15",
 				"subtle-destructive": "bg-destructive/10 text-destructive border-destructive/20 [a]:hover:bg-destructive/15",
 				"subtle-pill": "rounded-full bg-muted/70 text-muted-foreground border-border/80 font-medium",
 				outline: "border-border text-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground",
