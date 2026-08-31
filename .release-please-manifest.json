@@ -1,6 +1,6 @@
 {
   "packages/core": "0.47.1",
-  "packages/ui": "0.65.1",
+  "packages/ui": "0.66.0",
   "packages/editor": "0.4.3",
   "packages/flow": "0.3.0",
   "packages/sveltekit": "0.10.3",
@@ -26,5 +26,5 @@
   "packages/strapi": "0.9.20",
   "packages/lite": "0.8.2",
   "packages/mcp": "0.3.3",
-  "packages/surface": "0.7.1"
+  "packages/surface": "0.7.2"
 }
