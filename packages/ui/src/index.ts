@@ -18,6 +18,8 @@ export { default as Breadcrumbs } from './components/Breadcrumbs.svelte';
 export { default as FieldRenderer } from './components/FieldRenderer.svelte';
 export { default as EmptyState } from './components/EmptyState.svelte';
 export { default as StatsCard } from './components/StatsCard.svelte';
+export { default as MetricStrip } from './components/MetricStrip.svelte';
+export type { MetricStripItem, MetricTone } from './components/MetricStrip.svelte';
 export { default as PageHeader } from './components/PageHeader.svelte';
 export { default as ResourceOperationsPage } from './components/ResourceOperationsPage.svelte';
 export { default as RecordDetailDrawer } from './components/RecordDetailDrawer.svelte';
