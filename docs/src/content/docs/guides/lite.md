@@ -24,7 +24,7 @@ To maintain clarity across modern SPA and fallback boundaries, it is crucial to 
 
 ## Component System & 100% Parity
 
-`@svadmin/lite` achieves **100% component parity (103/103 components)** with `@svadmin/ui`. Every component in the modern SPA has either a 1:1 server-rendered equivalent, a defined semantic fallback, or an explicit SPA-only classification.
+`@svadmin/lite` achieves **100% component parity (106/106 components)** with `@svadmin/ui`. Every component in the modern SPA has either a 1:1 server-rendered equivalent, a defined semantic fallback, or an explicit SPA-only classification.
 
 ### Parity Breakdown by Module
 
@@ -36,11 +36,11 @@ To maintain clarity across modern SPA and fallback boundaries, it is crucial to 
   [buttons]       10/10 (100.0%)  [##############]
   [pages]          12/12 (100.0%)  [##############]
   [layout]          9/9 (100.0%)  [##############]
-  [widgets]         9/9 (100.0%)  [##############]
-  [advanced]      30/30 (100.0%)  [##############]
+  [widgets]       11/11 (100.0%)  [##############]
+  [advanced]      31/31 (100.0%)  [##############]
 ---------------------------------------------------------------
-  Overall Coverage: 100% (103/103)
-  - 1:1 Exact Matches: 89
+  Overall Coverage: 100% (106/106)
+  - 1:1 Exact Matches: 92
   - Semantic Fallbacks: 10
   - SPA-Only (No SSR Needed): 4
   - Missing: 0
@@ -64,10 +64,11 @@ To maintain clarity across modern SPA and fallback boundaries, it is crucial to 
 4. **Layout & Navigation (9 Components)**:
    - `LiteLayout`, `LiteSidebar`, `LiteHeader`, `LiteBreadcrumbs`, `LiteCanAccess`, `LiteErrorBoundary`, `LiteSplitPaneLayout`, `LiteMultiTabKeepAlive`.
    - `ThemeToggle` is explicitly SPA-only; `LiteTabs` and `LiteEmptyState` remain available as SSR primitives but are not counted as parity entries.
-5. **Widgets & Charts (9 Components)**:
-   - `LiteStatsCard`, `LiteInsightCard`, `LiteAnomalyBadge`.
+5. **Widgets & Charts (11 Components)**:
+   - `LiteStatsCard`, `LiteMetricStrip`, `LiteInsightCard`, `LiteAnomalyBadge`, `LiteBadge`.
    - `LiteBarChart`, `LiteLineChart`, `LitePieChart`, `LitePresenceAvatarGroup`, `LiteGanttChart`, `LiteOfflineSyncBanner` (server-rendered SVG/HTML or status fallbacks where required).
-6. **Advanced UX Degradations & Query (30 Components)**:
+6. **Advanced UX Degradations & Query (31 Components)**:
+   - `LiteTable` with optional sticky edge/action columns.
    - `LiteConfirmDialog`, `LiteFilterBuilder`, `LiteDrawerForm`, `LiteModalForm`, `LiteVirtualTable`.
    - `LiteInlineEdit`, `LiteAutoSaveIndicator`, `LiteToast`, `LiteUndoableNotification` (semantic server-driven fallbacks).
    - `LiteWatermark`, `LiteColumnSettings`, `LiteImportWizard`, `LiteColumnHeaderFilter`, `LiteTreeTable`, `LiteSensitiveDataMask`, `LiteApprovalActionCard`.
@@ -191,5 +192,5 @@ To guarantee that future development never introduces feature gaps between `@sva
    bun run check:parity
    ```
 2. **Matrix Documentation**: Check [packages/lite/PARITY.md](https://github.com/vibeunion/svadmin/blob/main/packages/lite/PARITY.md) for live per-component mapping and status notes.
-3. **Interactive Showroom**: Run the example app and navigate to `/lite/parity` to preview all 103 components live in both Light and Dark themes.
+3. **Interactive Showroom**: Run the example app and navigate to `/lite/parity` to preview all 106 components live in both Light and Dark themes.
 4. **Automated CI Contract Test**: `scripts/parity-contract.test.ts` validates that all exported UI components are tracked in the parity matrix during `bun run test`.

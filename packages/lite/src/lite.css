@@ -862,6 +862,22 @@ textarea.lite-input {
   overflow-x: auto;
 }
 
+.lite-table .lite-table-sticky-left,
+.lite-table .lite-table-sticky-right {
+  position: sticky;
+  z-index: 2;
+  background: #fff;
+}
+.lite-table th.lite-table-sticky-left,
+.lite-table th.lite-table-sticky-right {
+  z-index: 3;
+  background: #f8fafc;
+}
+.lite-table .lite-table-sticky-left { left: 0; box-shadow: 1px 0 0 #e2e8f0; }
+.lite-table .lite-table-sticky-right { right: 0; box-shadow: -1px 0 0 #e2e8f0; }
+.lite-table tr:hover .lite-table-sticky-left,
+.lite-table tr:hover .lite-table-sticky-right { background: #f8f7fd; }
+
 .lite-muted {
   color: #64748b;
   font-size: 12px;
@@ -1043,6 +1059,70 @@ textarea.lite-input {
   color: #92400e;
   border-color: #fde68a;
 }
+
+.lite-badge-subtle {
+  background: #eef2ff;
+  color: #4338ca;
+  border-color: #c7d2fe;
+}
+.lite-badge-default { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+.lite-badge-secondary { background: #f1f5f9; color: #334155; border-color: #e2e8f0; }
+.lite-badge-destructive,
+.lite-badge-subtle-destructive { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+.lite-badge-subtle-success { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
+.lite-badge-subtle-warning { background: #fffbeb; color: #92400e; border-color: #fde68a; }
+.lite-badge-subtle-pill {
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 500;
+}
+.lite-badge-outline { background: transparent; color: #0f172a; }
+.lite-badge-ghost { background: transparent; border-color: transparent; color: #475569; }
+.lite-badge-link { padding-left: 0; padding-right: 0; background: transparent; border-color: transparent; color: #4f46e5; text-decoration: underline; }
+
+/* ─── Metric strip ────────────────────────────────────────── */
+.lite-metric-strip {
+  display: flex;
+  flex-wrap: wrap;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #e2e8f0;
+}
+.lite-metric-item {
+  flex: 1 1 160px;
+  min-width: 0;
+  padding: 14px 16px;
+  background: #fff;
+  color: #0f172a;
+  text-decoration: none;
+  border-right: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+}
+.lite-metric-item-link:hover { background: #f8fafc; text-decoration: none; }
+.lite-metric-label,
+.lite-metric-value-row { display: flex; align-items: center; justify-content: space-between; }
+.lite-metric-label { color: #64748b; font-size: 12px; font-weight: 600; }
+.lite-metric-icon { margin-left: 8px; color: #94a3b8; }
+.lite-metric-icon-svg { width: 14px; height: 14px; }
+.lite-metric-value { margin-top: 4px; font-size: 23px; line-height: 1.2; color: #0f172a; }
+.lite-metric-value-primary { color: #4f46e5; }
+.lite-metric-value-success { color: #16a34a; }
+.lite-metric-value-warning { color: #d97706; }
+.lite-metric-value-danger { color: #dc2626; }
+.lite-metric-value-info { color: #2563eb; }
+.lite-metric-loading { display: block; width: 64px; height: 24px; margin-top: 6px; background: #e2e8f0; border-radius: 4px; }
+.lite-metric-trend { margin-left: 8px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.lite-metric-trend-up { color: #16a34a; }
+.lite-metric-trend-down { color: #dc2626; }
+.lite-metric-trend-label { margin-left: 4px; color: #64748b; font-weight: 400; }
+.lite-metric-strip-2 .lite-metric-item { flex-basis: 45%; }
+.lite-metric-strip-3 .lite-metric-item { flex-basis: 30%; }
+.lite-metric-strip-4 .lite-metric-item { flex-basis: 22%; }
+.lite-metric-strip-5 .lite-metric-item { flex-basis: 18%; }
+.lite-metric-strip-6 .lite-metric-item,
+.lite-metric-strip-auto .lite-metric-item { flex-basis: 15%; }
 
 /* ─── Boolean indicator ────────────────────────────────────── */
 .lite-bool {
@@ -1317,6 +1397,17 @@ textarea.lite-input {
   .lite-realtime-status > .lite-btn {
     margin-top: 10px;
   }
+  .lite-metric-strip-3 .lite-metric-item,
+  .lite-metric-strip-4 .lite-metric-item,
+  .lite-metric-strip-5 .lite-metric-item,
+  .lite-metric-strip-6 .lite-metric-item,
+  .lite-metric-strip-auto .lite-metric-item {
+    flex-basis: 45%;
+  }
+}
+
+@media (max-width: 420px) {
+  .lite-metric-strip .lite-metric-item { flex-basis: 100%; }
 }
 
 /* ─── Print ────────────────────────────────────────────────── */

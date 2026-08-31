@@ -1,7 +1,7 @@
 # @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵
 
-> 自动生成时间：`2026-08-28T23:44:19.132Z`
-> 总体适配覆盖率：**100%**（103/103 组件）
+> 自动生成时间：`2026-08-31T06:09:32.472Z`
+> 总体适配覆盖率：**100%**（106/106 组件）
 
 ## 进度总览
 
@@ -11,8 +11,8 @@
 | **buttons** | 10 | 10 | 0 | 0 | 0 | **100%** |
 | **pages** | 12 | 12 | 0 | 0 | 0 | **100%** |
 | **layout** | 9 | 8 | 0 | 1 | 0 | **100%** |
-| **widgets** | 9 | 6 | 3 | 0 | 0 | **100%** |
-| **advanced** | 30 | 24 | 4 | 2 | 0 | **100%** |
+| **widgets** | 11 | 8 | 3 | 0 | 0 | **100%** |
+| **advanced** | 31 | 25 | 4 | 2 | 0 | **100%** |
 
 ---
 
@@ -107,8 +107,10 @@
 | UI 组件 (SPA) | Lite 对应组件 (SSR) | 对齐状态 | 降级策略 / 承接方案 |
 |---|---|:---:|---|
 | `StatsCard` | `LiteStatsCard.svelte` | ✅ 1:1 对齐 | 指标卡片与趋势徽章 |
+| `MetricStrip` | `LiteMetricStrip.svelte` | ✅ 1:1 对齐 | 服务端指标条、趋势与原生链接 |
 | `InsightCard` | `widgets/LiteInsightCard.svelte` | ✅ 1:1 对齐 | 业务洞察指标容器 |
 | `AnomalyBadge` | `widgets/LiteAnomalyBadge.svelte` | ✅ 1:1 对齐 | 异常状态高亮徽章 |
+| `Badge` | `LiteBadge.svelte` | ✅ 1:1 对齐 | 语义状态徽章与原生链接承接 |
 | `BarChart` | `widgets/LiteBarChart.svelte` | ⚡ 语义降级 | 降级为 CSS 柱状图或数据明细表格 |
 | `LineChart` | `widgets/LiteLineChart.svelte` | ⚡ 语义降级 | 降级为折线数据点表格与趋势指示 |
 | `PieChart` | `widgets/LitePieChart.svelte` | ⚡ 语义降级 | 降级为占比条与结构化表格 |
@@ -125,6 +127,7 @@
 | `DrawerForm` | `LiteDrawerForm.svelte` | ✅ 1:1 对齐 | 原生独立编辑抽屉卡片表单 |
 | `ModalForm` | `LiteModalForm.svelte` | ✅ 1:1 对齐 | 原生独立模态弹窗表单 |
 | `VirtualTable` | `LiteVirtualTable.svelte` | ✅ 1:1 对齐 | 固定表头与超长数据表格展示 |
+| `Table` | `LiteTable.svelte` | ✅ 1:1 对齐 | 原生表格、横向滚动与可选固定边缘列 |
 | `InlineEdit` | `advanced/LiteInlineEdit.svelte` | ⚡ 语义降级 | 降级为行内单独提交按钮或跳转编辑 |
 | `AutoSaveIndicator` | `advanced/LiteAutoSaveIndicator.svelte` | ⚡ 语义降级 | 服务端保存时间戳展示 |
 | `Toast` | `advanced/LiteToast.svelte` | ⚡ 语义降级 | 降级为页面顶部 Alert 通知条 |

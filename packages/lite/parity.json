@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-08-28T23:44:19.132Z",
-  "totalComponents": 103,
-  "adaptedCount": 89,
+  "timestamp": "2026-08-31T06:09:32.472Z",
+  "totalComponents": 106,
+  "adaptedCount": 92,
   "fallbackCount": 10,
   "spaOnlyCount": 4,
   "missingCount": 0,
@@ -45,8 +45,8 @@
     },
     "widgets": {
       "category": "widgets",
-      "total": 9,
-      "adapted": 6,
+      "total": 11,
+      "adapted": 8,
       "fallback": 3,
       "spaOnly": 0,
       "missing": 0,
@@ -54,8 +54,8 @@
     },
     "advanced": {
       "category": "advanced",
-      "total": 30,
-      "adapted": 24,
+      "total": 31,
+      "adapted": 25,
       "fallback": 4,
       "spaOnly": 2,
       "missing": 0,
@@ -496,6 +496,14 @@
       "strategy": "指标卡片与趋势徽章"
     },
     {
+      "name": "MetricStrip",
+      "uiComponent": "MetricStrip.svelte",
+      "liteComponent": "LiteMetricStrip.svelte",
+      "category": "widgets",
+      "status": "exact",
+      "strategy": "服务端指标条、趋势与原生链接"
+    },
+    {
       "name": "InsightCard",
       "uiComponent": "InsightCard.svelte",
       "liteComponent": "widgets/LiteInsightCard.svelte",
@@ -510,6 +518,14 @@
       "category": "widgets",
       "status": "exact",
       "strategy": "异常状态高亮徽章"
+    },
+    {
+      "name": "Badge",
+      "uiComponent": "ui/badge/badge.svelte",
+      "liteComponent": "LiteBadge.svelte",
+      "category": "widgets",
+      "status": "exact",
+      "strategy": "语义状态徽章与原生链接承接"
     },
     {
       "name": "BarChart",
@@ -574,6 +590,14 @@
       "category": "advanced",
       "status": "exact",
       "strategy": "固定表头与超长数据表格展示"
+    },
+    {
+      "name": "Table",
+      "uiComponent": "ui/table/table.svelte",
+      "liteComponent": "LiteTable.svelte",
+      "category": "advanced",
+      "status": "exact",
+      "strategy": "原生表格、横向滚动与可选固定边缘列"
     },
     {
       "name": "InlineEdit",

@@ -106,8 +106,10 @@ const PARITY_ITEMS: ParityItem[] = [
 
   // ─── Widgets & Charts ───────────────────────────────────────────────────
   { name: 'StatsCard', uiComponent: 'StatsCard.svelte', liteComponent: 'LiteStatsCard.svelte', category: 'widgets', status: 'exact', strategy: '指标卡片与趋势徽章' },
+  { name: 'MetricStrip', uiComponent: 'MetricStrip.svelte', liteComponent: 'LiteMetricStrip.svelte', category: 'widgets', status: 'exact', strategy: '服务端指标条、趋势与原生链接' },
   { name: 'InsightCard', uiComponent: 'InsightCard.svelte', liteComponent: 'widgets/LiteInsightCard.svelte', category: 'widgets', status: 'exact', strategy: '业务洞察指标容器' },
   { name: 'AnomalyBadge', uiComponent: 'AnomalyBadge.svelte', liteComponent: 'widgets/LiteAnomalyBadge.svelte', category: 'widgets', status: 'exact', strategy: '异常状态高亮徽章' },
+  { name: 'Badge', uiComponent: 'ui/badge/badge.svelte', liteComponent: 'LiteBadge.svelte', category: 'widgets', status: 'exact', strategy: '语义状态徽章与原生链接承接' },
   { name: 'BarChart', uiComponent: 'charts/BarChart.svelte', liteComponent: 'widgets/LiteBarChart.svelte', category: 'widgets', status: 'fallback', strategy: '降级为 CSS 柱状图或数据明细表格' },
   { name: 'LineChart', uiComponent: 'charts/LineChart.svelte', liteComponent: 'widgets/LiteLineChart.svelte', category: 'widgets', status: 'fallback', strategy: '降级为折线数据点表格与趋势指示' },
   { name: 'PieChart', uiComponent: 'charts/PieChart.svelte', liteComponent: 'widgets/LitePieChart.svelte', category: 'widgets', status: 'fallback', strategy: '降级为占比条与结构化表格' },
@@ -118,6 +120,7 @@ const PARITY_ITEMS: ParityItem[] = [
   { name: 'DrawerForm', uiComponent: 'DrawerForm.svelte', liteComponent: 'LiteDrawerForm.svelte', category: 'advanced', status: 'exact', strategy: '原生独立编辑抽屉卡片表单' },
   { name: 'ModalForm', uiComponent: 'ModalForm.svelte', liteComponent: 'LiteModalForm.svelte', category: 'advanced', status: 'exact', strategy: '原生独立模态弹窗表单' },
   { name: 'VirtualTable', uiComponent: 'VirtualTable.svelte', liteComponent: 'LiteVirtualTable.svelte', category: 'advanced', status: 'exact', strategy: '固定表头与超长数据表格展示' },
+  { name: 'Table', uiComponent: 'ui/table/table.svelte', liteComponent: 'LiteTable.svelte', category: 'advanced', status: 'exact', strategy: '原生表格、横向滚动与可选固定边缘列' },
   { name: 'InlineEdit', uiComponent: 'InlineEdit.svelte', liteComponent: 'advanced/LiteInlineEdit.svelte', category: 'advanced', status: 'fallback', strategy: '降级为行内单独提交按钮或跳转编辑' },
   { name: 'AutoSaveIndicator', uiComponent: 'AutoSaveIndicator.svelte', liteComponent: 'advanced/LiteAutoSaveIndicator.svelte', category: 'advanced', status: 'fallback', strategy: '服务端保存时间戳展示' },
   { name: 'Toast', uiComponent: 'Toast.svelte', liteComponent: 'advanced/LiteToast.svelte', category: 'advanced', status: 'fallback', strategy: '降级为页面顶部 Alert 通知条' },

@@ -57,6 +57,14 @@ export { default as LiteFilterBuilder } from './components/LiteFilterBuilder.sve
 export type { FilterRuleItem } from './components/LiteFilterBuilder.svelte';
 export { default as LiteBreadcrumbs } from './components/LiteBreadcrumbs.svelte';
 export { default as LiteStatsCard } from './components/LiteStatsCard.svelte';
+export { default as LiteMetricStrip } from './components/LiteMetricStrip.svelte';
+export type {
+  LiteMetricStripItem,
+  LiteMetricTone,
+  LiteMetricBadgeTone,
+} from './components/LiteMetricStrip.svelte';
+export { default as LiteBadge } from './components/LiteBadge.svelte';
+export type { LiteBadgeVariant } from './components/LiteBadge.svelte';
 export { default as LiteConfirmDialog } from './components/LiteConfirmDialog.svelte';
 export { default as LiteEmptyState } from './components/LiteEmptyState.svelte';
 export { default as LiteTabs } from './components/LiteTabs.svelte';
