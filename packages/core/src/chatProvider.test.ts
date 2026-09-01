@@ -1,11 +1,13 @@
 import { describe, expect, test } from 'bun:test';
-import type {
-  AdminTool,
-  AdminToolParameter,
-  AgentEvent,
-  ChatMessage,
-  ChatMessagePart,
-} from './chatProvider.svelte';
+import { Type } from '@sinclair/typebox';
+import { TypeCompiler } from '@sinclair/typebox/compiler';
+import type { AdminTool, AgentEvent, ChatMessage, ChatMessagePart } from './chatProvider.svelte';
+import {
+  decodeAdminToolArgs,
+  defineAdminTool,
+  executeAdminTool,
+  projectAdminToolSchema,
+} from './admin-tool';
 
 function textPart(text: string): ChatMessagePart {
   return { type: 'text', text };
@@ -73,18 +75,16 @@ describe('ChatMessage parts', () => {
 
 describe('AdminTool', () => {
   test('executes with declared safety metadata', async () => {
-    const tool: AdminTool = {
+    const tool = defineAdminTool({
       name: 'deletePosts',
       description: 'Delete posts matching a filter',
-      parameters: {
-        ids: { type: 'array', description: 'Post ids', required: true },
-      },
+      parameters: Type.Object({ ids: Type.Array(Type.String()) }, { additionalProperties: false }),
       needsApproval: true,
       destructive: true,
       execute: async (args) => ({ success: true, data: { deleted: args.ids } }),
-    };
+    });
 
-    expect(await tool.execute({ ids: ['1', '2'] })).toEqual({
+    expect(await executeAdminTool(tool, { ids: ['1', '2'] })).toEqual({
       success: true,
       data: { deleted: ['1', '2'] },
     });
@@ -94,11 +94,31 @@ describe('AdminTool', () => {
     const tool: AdminTool = {
       name: 'failingTool',
       description: 'A tool that fails',
-      parameters: {},
+      parameters: Type.Object({}, { additionalProperties: false }),
       execute: async () => ({ success: false, error: 'Permission denied' }),
     };
 
-    expect(await tool.execute({})).toEqual({ success: false, error: 'Permission denied' });
+    expect(await executeAdminTool(tool, {})).toEqual({ success: false, error: 'Permission denied' });
+  });
+
+  test('decodes transforms and rejects undeclared properties before execution', async () => {
+    const parameters = Type.Object(
+      {
+        limit: Type.Optional(Type.Transform(Type.String()).Decode(Number).Encode(String)),
+        query: Type.String(),
+      },
+    );
+    const tool = defineAdminTool({
+      name: 'search',
+      description: 'Search records',
+      parameters,
+      execute: async (args) => ({ success: true, data: args }),
+    });
+
+    expect(decodeAdminToolArgs(tool, { query: 'open', limit: '10' })).toEqual({ query: 'open', limit: 10 });
+    expect(() => decodeAdminToolArgs(tool, { query: 'open', privateScope: true })).toThrow();
+    expect(TypeCompiler.Compile(tool.parameters).Check({ query: 'open', limit: '10' })).toBe(true);
+    expect(tool.parameters.additionalProperties).toBe(false);
   });
 });
 
@@ -158,47 +178,28 @@ describe('approval flow', () => {
 });
 
 describe('projectAdminToolSchema shape', () => {
-  function projectTool(tool: {
-    name: string;
-    description: string;
-    parameters: Record<string, AdminToolParameter>;
-    readOnly?: boolean;
-    destructive?: boolean;
-    concurrent?: boolean;
-    needsApproval?: boolean;
-    execute?: (args: Record<string, unknown>) => Promise<unknown>;
-  }) {
-    return {
-      name: tool.name,
-      description: tool.description,
-      parameters: { ...tool.parameters },
-      ...(tool.readOnly !== undefined ? { readOnly: tool.readOnly } : {}),
-      ...(tool.destructive !== undefined ? { destructive: tool.destructive } : {}),
-      ...(tool.concurrent !== undefined ? { concurrent: tool.concurrent } : {}),
-      ...(tool.needsApproval !== undefined ? { needsApproval: tool.needsApproval } : {}),
-    };
-  }
-
   test('keeps only the public schema', () => {
-    const projected = projectTool({
+    const parameters = Type.Object({ id: Type.String() }, { additionalProperties: false });
+    const projected = projectAdminToolSchema(defineAdminTool({
       name: 'deleteUser',
       description: 'Delete a user by id',
-      parameters: { id: { type: 'string', required: true } },
+      parameters,
       readOnly: false,
       destructive: true,
       concurrent: false,
       needsApproval: true,
-      execute: async () => ({ success: true }),
-    });
+      execute: async ({ id }) => ({ success: true, data: id }),
+    }));
 
     expect(projected).toEqual({
       name: 'deleteUser',
       description: 'Delete a user by id',
-      parameters: { id: { type: 'string', required: true } },
+      parameters,
       readOnly: false,
       destructive: true,
       concurrent: false,
       needsApproval: true,
     });
+    expect(projected.parameters.additionalProperties).toBe(false);
   });
 });

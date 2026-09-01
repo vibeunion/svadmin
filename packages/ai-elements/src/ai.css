@@ -56,6 +56,39 @@
   border-color: var(--border, currentColor);
 }
 
+.svadmin-ai__icon-button {
+  display: inline-flex;
+  width: 2rem;
+  height: 2rem;
+  min-height: 2rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: min(var(--radius, 0.5rem), 0.375rem);
+  padding: 0;
+  background: transparent;
+  color: var(--muted-foreground, currentColor);
+  font: inherit;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.svadmin-ai__icon-button:hover:not(:disabled) {
+  border-color: var(--border, currentColor);
+  background: var(--muted, transparent);
+  color: var(--foreground, currentColor);
+}
+
+.svadmin-ai__icon-button:focus-visible {
+  outline: 2px solid var(--ring, currentColor);
+  outline-offset: 2px;
+}
+
+.svadmin-ai__icon-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .svadmin-ai__button--danger {
   background: var(--destructive, currentColor);
   color: var(--destructive-foreground, Canvas);
@@ -102,5 +135,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .svadmin-ai__button { transition: none; }
+  .svadmin-ai__button,
+  .svadmin-ai__icon-button { transition: none; }
 }

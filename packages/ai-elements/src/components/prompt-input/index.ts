@@ -5,6 +5,10 @@ export { default as Textarea, default as PromptInputTextarea } from './PromptInp
 export { default as Header, default as PromptInputHeader } from './PromptInputHeader.svelte';
 export { default as Footer, default as PromptInputFooter } from './PromptInputFooter.svelte';
 export { default as Tools, default as PromptInputTools } from './PromptInputTools.svelte';
+export { default as Toolbar, default as PromptInputToolbar } from './PromptInputToolbar.svelte';
+export { default as Attachment, default as PromptInputAttachment } from './PromptInputAttachment.svelte';
+export { default as AttachmentImagePreview, default as PromptInputAttachmentImagePreview } from './PromptInputAttachmentImagePreview.svelte';
+export { default as Attachments, default as PromptInputAttachments } from './PromptInputAttachments.svelte';
 export { default as Button, default as PromptInputButton } from './PromptInputButton.svelte';
 export { default as ActionAddAttachments, default as PromptInputActionAddAttachments } from './PromptInputActionAddAttachments.svelte';
 export { default as ActionAddScreenshot, default as PromptInputActionAddScreenshot } from './PromptInputActionAddScreenshot.svelte';
@@ -44,5 +48,9 @@ export {
 export type { PromptInputMessage, PromptInputProps, PromptInputSubmitDetail } from './PromptInput.svelte';
 export type { PromptInputProviderProps } from './PromptInputProvider.svelte';
 export type { PromptInputButtonProps, PromptInputButtonTooltip } from './PromptInputButton.svelte';
+export type { PromptInputToolbarProps } from './PromptInputToolbar.svelte';
+export type { PromptInputAttachmentProps } from './PromptInputAttachment.svelte';
+export type { PromptInputAttachmentImagePreviewProps } from './PromptInputAttachmentImagePreview.svelte';
+export type { PromptInputAttachmentsProps } from './PromptInputAttachments.svelte';
 export type { PromptInputSpeechButtonProps } from './PromptInputSpeechButton.svelte';
 export type { PromptInputAttachmentsContext, PromptInputController, PromptInputFile, PromptInputReferencedSourcesContext } from './context.svelte.js';

@@ -1173,14 +1173,14 @@
         aria-label="AI assistant"
         aria-busy={isStreaming}
       >
-        <header class="flex shrink-0 items-center justify-between gap-3 border-b border-border/70 bg-primary px-4 py-3 text-primary-foreground">
+        <header class="flex shrink-0 items-center justify-between gap-3 border-b border-border/70 bg-card px-4 py-3 text-card-foreground">
           <div class="flex min-w-0 items-center gap-2">
-            <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary-foreground/15" aria-hidden="true">
-              <Bot size={17} />
+            <span class="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground" aria-hidden="true">
+              <Bot size={16} />
             </span>
             <div class="min-w-0">
               <h2 class="truncate text-sm font-semibold">AI assistant</h2>
-              <p class="truncate text-xs opacity-80" aria-live="polite">
+              <p class="svadmin-ai__muted truncate text-xs" aria-live="polite">
                 {isStreaming ? 'Generating response' : (chatContext.currentResource ?? 'Workspace')}
               </p>
             </div>
@@ -1189,8 +1189,9 @@
             {#if messages.length > 0}
               <button
                 type="button"
-                class="svadmin-ai__button svadmin-ai__button--ghost size-8 min-h-8 border-primary-foreground/25 p-0 text-primary-foreground"
+                class="svadmin-ai__icon-button"
                 aria-label="Clear conversation"
+                title="Clear conversation"
                 onclick={clearChat}
               >
                 <Trash2 size={15} aria-hidden="true" />
@@ -1198,8 +1199,9 @@
             {/if}
             <button
               type="button"
-              class="svadmin-ai__button svadmin-ai__button--ghost size-8 min-h-8 border-primary-foreground/25 p-0 text-primary-foreground"
+              class="svadmin-ai__icon-button"
               aria-label={minimized ? 'Expand AI assistant' : 'Minimize AI assistant'}
+              title={minimized ? 'Expand AI assistant' : 'Minimize AI assistant'}
               aria-expanded={!minimized}
               onclick={() => { minimized = !minimized; }}
             >
@@ -1211,8 +1213,9 @@
             </button>
             <button
               type="button"
-              class="svadmin-ai__button svadmin-ai__button--ghost size-8 min-h-8 border-primary-foreground/25 p-0 text-primary-foreground"
+              class="svadmin-ai__icon-button"
               aria-label="Close AI assistant"
+              title="Close AI assistant"
               onclick={closeDialog}
             >
               <X size={15} aria-hidden="true" />

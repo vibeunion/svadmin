@@ -6,6 +6,7 @@ export { default as Title, default as CodeBlockTitle } from './CodeBlockTitle.sv
 export { default as Filename, default as CodeBlockFilename } from './CodeBlockFilename.svelte';
 export { default as Actions, default as CodeBlockActions } from './CodeBlockActions.svelte';
 export { default as CopyButton, default as CodeBlockCopyButton } from './CodeBlockCopyButton.svelte';
+export { default as Overflow, default as CodeBlockOverflow } from './CodeBlockOverflow.svelte';
 export { default as LanguageSelector, default as CodeBlockLanguageSelector } from './CodeBlockLanguageSelector.svelte';
 export { default as LanguageSelectorTrigger, default as CodeBlockLanguageSelectorTrigger } from './CodeBlockLanguageSelectorTrigger.svelte';
 export { default as LanguageSelectorValue, default as CodeBlockLanguageSelectorValue } from './CodeBlockLanguageSelectorValue.svelte';
@@ -13,3 +14,5 @@ export { default as LanguageSelectorContent, default as CodeBlockLanguageSelecto
 export { default as LanguageSelectorItem, default as CodeBlockLanguageSelectorItem } from './CodeBlockLanguageSelectorItem.svelte';
 export { createRawTokens, highlightCode } from './highlight.js';
 export type { CodeToken, TokenizedCode } from './highlight.js';
+export type { CodeBlockProps } from './CodeBlock.svelte';
+export type { CodeBlockOverflowProps } from './CodeBlockOverflow.svelte';

@@ -116,11 +116,11 @@ export type {
   WebhookSummary,
 } from './enterprise';
 export { assertEnterpriseRequestContext, createEnterpriseRequestContext } from './enterprise';
-export { setChatProvider, getChatProvider, setChatContext, getChatContext, setAgentProvider, getAgentProvider, registerApproval, resolveApproval, hasPendingApprovals, resetChatProvider, projectAdminToolSchema } from './chatProvider.svelte';
+export { setChatProvider, getChatProvider, setChatContext, getChatContext, setAgentProvider, getAgentProvider, registerApproval, resolveApproval, hasPendingApprovals, resetChatProvider, defineAdminTool, decodeAdminToolArgs, executeAdminTool, projectAdminToolSchema } from './chatProvider.svelte';
 export type {
   ChatProvider, ChatMessage, ChatMessagePart, ChatContext, ChatAttachment, ChatSource,
   MessageStatus, ToolState, AgentProvider, AgentEvent, AgentOptions, ApprovalResponseOptions,
-  AdminTool, AdminToolParameter, ToolResult,
+  AdminTool, ToolResult,
 } from './chatProvider.svelte';
 export { getTheme, setTheme, toggleTheme, getResolvedTheme, getColorTheme, setColorTheme, getColorThemes, configureTheme, getThemeConfig, clearCssOverrides, builtinPresets, registerColorPreset, getColorPresets, registerThemeOwner, updateThemeOwner, unregisterThemeOwner, resetTheme } from './theme.svelte';
 export type { ThemeMode, ColorTheme, ThemeStrategy, ThemeConfig, ColorPreset, ThemeOwnerOptions, ThemeOwnerToken } from './theme.svelte';

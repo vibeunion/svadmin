@@ -7,11 +7,13 @@
     code,
     language,
     showLineNumbers = false,
+    highlight = [],
     class: className = '',
   }: {
     code: string;
     language: string;
     showLineNumbers?: boolean;
+    highlight?: Array<number | [number, number]>;
     class?: string;
   } = $props();
 
@@ -21,6 +23,10 @@
     highlightedResult?.key === requestKey ? highlightedResult.value : createRawTokens(code),
   );
   const highlighted = $derived(highlightedResult?.key === requestKey);
+
+  function isLineHighlighted(line: number): boolean {
+    return highlight.some((entry) => typeof entry === 'number' ? entry === line : entry[0] <= line && line <= entry[1]);
+  }
 
   $effect(() => {
     const requestedCode = code;
@@ -45,5 +51,5 @@
   <pre
     class={cn('m-0 min-w-max bg-muted/30 p-4 text-sm text-foreground', className)}
     data-highlighted={highlighted}
-  ><code class="font-mono text-sm">{#each tokenized.tokens as line, lineIndex (lineIndex)}<CodeBlockLine tokens={line} lineNumber={lineIndex + 1} {showLineNumbers} />{/each}</code></pre>
+  ><code class="font-mono text-sm">{#each tokenized.tokens as line, lineIndex (lineIndex)}<CodeBlockLine tokens={line} lineNumber={lineIndex + 1} {showLineNumbers} highlighted={isLineHighlighted(lineIndex + 1)} />{/each}</code></pre>
 </div>
