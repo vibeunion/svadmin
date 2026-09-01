@@ -1,6 +1,5 @@
 export type {
   AdminTool,
-  AdminToolParameter,
   AgentEvent,
   AgentProvider,
   ApprovalResponseOptions,

@@ -1,4 +1,7 @@
 export { default, default as Root, default as Message } from '../Message.svelte';
+export { default as MessageAttachments, default as Attachments } from './MessageAttachments.svelte';
+export { default as MessageAttachment, default as Attachment } from './MessageAttachment.svelte';
+export { default as MessageAttachmentPreview, default as AttachmentPreview } from './MessageAttachmentPreview.svelte';
 export { default as Content, default as MessageContent } from '../MessageContent.svelte';
 export { default as Avatar, default as MessageAvatar } from '../MessageAvatar.svelte';
 export { default as Actions, default as MessageActions } from '../MessageActions.svelte';
@@ -16,3 +19,6 @@ export type { MessageContentProps } from '../MessageContent.svelte';
 export type { MessageActionProps } from './MessageAction.svelte';
 export type { MessageBranchContentProps } from './MessageBranchContent.svelte';
 export type { MessageResponseProps } from './MessageResponse.svelte';
+export type { MessageAttachmentsProps } from './MessageAttachments.svelte';
+export type { MessageAttachmentData, MessageAttachmentProps } from './MessageAttachment.svelte';
+export type { MessageAttachmentPreviewProps } from './MessageAttachmentPreview.svelte';

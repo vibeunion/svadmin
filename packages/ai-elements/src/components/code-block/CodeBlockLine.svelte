@@ -8,14 +8,16 @@
     tokens,
     lineNumber,
     showLineNumbers,
+    highlighted = false,
   }: {
     tokens: CodeToken[];
     lineNumber: number;
     showLineNumbers: boolean;
+    highlighted?: boolean;
   } = $props();
 </script>
 
-<span class="block"><span class={cn('mr-4 inline-block w-8 select-none text-right text-muted-foreground opacity-60', !showLineNumbers && 'hidden')} aria-hidden="true">{lineNumber}</span>{#if tokens.length === 0}{EMPTY_LINE}{:else}{#each tokens as token, tokenIndex (tokenIndex)}<span class="svadmin-ai-code-token" style:--shiki-light={token.color} style:--shiki-light-bg={token.backgroundColor} style:--shiki-dark={token.darkColor} style:--shiki-dark-bg={token.darkBackgroundColor} style:--shiki-light-font-style={token.fontStyle} style:--shiki-light-font-weight={token.fontWeight} style:--shiki-light-text-decoration={token.textDecoration} style:--shiki-dark-font-style={token.darkFontStyle} style:--shiki-dark-font-weight={token.darkFontWeight} style:--shiki-dark-text-decoration={token.darkTextDecoration}>{token.content}</span>{/each}{/if}</span>
+<span class={cn('block px-1', highlighted && 'bg-secondary')} data-highlighted={highlighted}><span class={cn('mr-4 inline-block w-8 select-none text-right text-muted-foreground opacity-60', !showLineNumbers && 'hidden')} aria-hidden="true">{lineNumber}</span>{#if tokens.length === 0}{EMPTY_LINE}{:else}{#each tokens as token, tokenIndex (tokenIndex)}<span class="svadmin-ai-code-token" style:--shiki-light={token.color} style:--shiki-light-bg={token.backgroundColor} style:--shiki-dark={token.darkColor} style:--shiki-dark-bg={token.darkBackgroundColor} style:--shiki-light-font-style={token.fontStyle} style:--shiki-light-font-weight={token.fontWeight} style:--shiki-light-text-decoration={token.textDecoration} style:--shiki-dark-font-style={token.darkFontStyle} style:--shiki-dark-font-weight={token.darkFontWeight} style:--shiki-dark-text-decoration={token.darkTextDecoration}>{token.content}</span>{/each}{/if}</span>
 
 <style>
   .svadmin-ai-code-token {

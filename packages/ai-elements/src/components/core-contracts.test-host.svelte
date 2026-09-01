@@ -20,15 +20,18 @@
   <span data-testid="empty-state-icon">Empty icon</span>
 {/snippet}
 
-<Message.Root from="assistant" id="message-contract" data-contract="message">
-  <Message.Content>
-    <Message.Response isAnimating={streaming}>Composed response</Message.Response>
-    <Message.Response content="**Markdown response**" />
-  </Message.Content>
-  <Message.Actions>
-    <Message.Action tooltip="Copy response" data-testid="message-action">Copy</Message.Action>
-  </Message.Actions>
-</Message.Root>
+<div data-testid="tooltip-scroll-container" style="overflow: auto">
+  <Message.Root from="assistant" id="message-contract" data-contract="message">
+    <Message.Content>
+      <Message.Response isAnimating={streaming}>Composed response</Message.Response>
+      <Message.Response children="**Explicit markdown**" />
+      <Message.Response content="**Markdown response**" />
+    </Message.Content>
+    <Message.Actions>
+      <Message.Action tooltip="Copy response" data-testid="message-action">Copy</Message.Action>
+    </Message.Actions>
+  </Message.Root>
+</div>
 
 <Conversation.Root aria-label="Contract conversation">
   <Conversation.Content>

@@ -134,6 +134,27 @@ export default defineConfig({
 <ChatDialog {componentRegistry} />
 ```
 
+Agent 工具使用同一套 TypeBox 边界。必须通过 `executeAdminTool` 执行来自模型的参数，
+确保工具实现接收到的是已经过 `Value.Decode` 校验和转换的数据：
+
+```ts
+import { Type } from '@sinclair/typebox';
+import { defineAdminTool, executeAdminTool } from '@svadmin/core';
+
+const searchInventory = defineAdminTool({
+  name: 'searchInventory',
+  description: '按仓库查询库存',
+  parameters: Type.Object({
+    warehouse: Type.String(),
+    limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 100 })),
+  }),
+  readOnly: true,
+  execute: async ({ warehouse, limit }) => inventory.search({ warehouse, limit }),
+});
+
+await executeAdminTool(searchInventory, modelArguments);
+```
+
 导出的 `AI_ELEMENT_PARITY` 清单会分别记录固定上游提交的包导出面、行为验证和
 视觉验证状态。导出名称为 exact 并不自动代表交互或像素级 1:1。`JSXPreview`
 使用受限且经过 TypeBox 校验的解析器；`Tool.getStatusBadge` 返回供 Svelte 渲染的

@@ -16,6 +16,8 @@ export { default as SmartSuggest } from "./components/SmartSuggest.svelte";
 export { default as VoiceInput } from "./components/VoiceInput.svelte";
 export { default as Response } from "./components/Response.svelte";
 export { default as AIButton } from "./components/Primitive.svelte";
+export { Action, Actions } from './components/action/index.js';
+export { Code, CodeOverflow, CodeCopyButton, codeVariants } from './components/code/index.js';
 
 // Vercel AI Elements parity surface (49 component families).
 export {
@@ -90,6 +92,7 @@ export {
   CodeBlockContent,
   CodeBlock,
   CodeBlockCopyButton,
+  CodeBlockOverflow,
   CodeBlockLanguageSelector,
   CodeBlockLanguageSelectorTrigger,
   CodeBlockLanguageSelectorValue,
@@ -218,6 +221,9 @@ export {
   MessageBranchPage,
   MessageResponse,
   MessageToolbar,
+  MessageAttachments,
+  MessageAttachment,
+  MessageAttachmentPreview,
 } from "./components/message/index.js";
 export {
   useAudioDevices,
@@ -308,6 +314,10 @@ export {
   PromptInputHeader,
   PromptInputFooter,
   PromptInputTools,
+  PromptInputToolbar,
+  PromptInputAttachment,
+  PromptInputAttachmentImagePreview,
+  PromptInputAttachments,
   PromptInputButton,
   PromptInputActionMenu,
   PromptInputActionMenuTrigger,
@@ -618,6 +628,8 @@ export type { VoiceOption } from "./components/voice-selector/index.js";
 export type { WebPreviewDevice } from "./components/web-preview/index.js";
 
 export * as AgentParts from "./components/agent/index.js";
+export * as ActionParts from './components/action/index.js';
+export * as CodeParts from './components/code/index.js';
 export * as ArtifactParts from "./components/artifact/index.js";
 export * as AttachmentsParts from "./components/attachments/index.js";
 export * as AudioPlayerParts from "./components/audio-player/index.js";

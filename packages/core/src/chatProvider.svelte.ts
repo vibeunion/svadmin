@@ -1,5 +1,15 @@
 // Headless AI contracts. Rendering lives in @svadmin/ai-elements.
 
+import type { AdminTool, ToolResult } from './admin-tool';
+
+export type { AdminTool, ToolResult } from './admin-tool';
+export {
+  decodeAdminToolArgs,
+  defineAdminTool,
+  executeAdminTool,
+  projectAdminToolSchema,
+} from './admin-tool';
+
 export type ToolState =
   | 'input-streaming'
   | 'input-available'
@@ -86,62 +96,6 @@ export interface ChatProvider {
 //   • Tool calling — Agent invokes admin operations (CRUD, custom)
 //   • Approval gates — Dangerous tools require user confirmation before execution
 //   • Generative UI — Agent returns component name + props for dynamic rendering
-
-/** JSON-Schema-compatible parameter definition for an admin tool. */
-export interface AdminToolParameter {
-  type: 'string' | 'number' | 'boolean' | 'object' | 'array';
-  description?: string;
-  enum?: string[];
-  required?: boolean;
-}
-
-/**
- * A tool that the Agent can invoke within the admin panel.
- *
- * @example
- * ```ts
- * const deletePostTool: AdminTool = {
- *   name: 'deletePosts',
- *   description: 'Delete posts matching a filter',
- *   parameters: {
- *     status: { type: 'string', description: 'Filter by status', enum: ['draft', 'archived'] },
- *   },
- *   needsApproval: true,
- *   execute: async (params) => {
- *     const result = await dataProvider.deleteMany({ resource: 'posts', ids: params.ids });
- *     return { success: true, data: result };
- *   },
- * };
- * ```
- */
-export interface AdminTool {
-  /** Unique tool name (e.g. 'getList', 'deleteRecords', 'generateReport') */
-  name: string;
-  /** Human-readable description for LLM tool-use prompting */
-  description: string;
-  /** JSON-Schema-style parameter definitions */
-  parameters: Record<string, AdminToolParameter>;
-  /**
-   * When `true`, execution is paused until the user explicitly approves.
-   * The agent emits an `approval_request` event and waits for `approveToolCall()`.
-   */
-  needsApproval?: boolean;
-  /** 显式声明是否为只读操作（只读操作可并发执行，无副作用） */
-  readOnly?: boolean;
-  /** 显式声明是否为破坏性/高风险操作（默认触发 Approval Gate） */
-  destructive?: boolean;
-  /** 显式声明是否支持并发调用 */
-  concurrent?: boolean;
-  /** Execute the tool with the given arguments. */
-  execute(args: Record<string, unknown>): Promise<ToolResult>;
-}
-
-/** Result returned by a tool execution. */
-export interface ToolResult {
-  success: boolean;
-  data?: unknown;
-  error?: string;
-}
 
 /** Discriminated union of events emitted by an AgentProvider. */
 export type AgentEvent =
@@ -278,30 +232,6 @@ export function setChatContext(ctx: ChatContext): void {
 
 export function getChatContext(): ChatContext {
   return chatContext;
-}
-
-/**
- * 将 AdminTool 投影为发给 LLM / MCP 客户端的白名单 Schema。
- * 剥离底层执行逻辑（execute）与宿主私有状态，保留 name、description、parameters 及并发/安全声明。
- */
-export function projectAdminToolSchema(tool: AdminTool): {
-  name: string;
-  description: string;
-  parameters: Record<string, AdminToolParameter>;
-  readOnly?: boolean;
-  destructive?: boolean;
-  concurrent?: boolean;
-  needsApproval?: boolean;
-} {
-  return {
-    name: tool.name,
-    description: tool.description,
-    parameters: { ...tool.parameters },
-    ...(tool.readOnly !== undefined ? { readOnly: tool.readOnly } : {}),
-    ...(tool.destructive !== undefined ? { destructive: tool.destructive } : {}),
-    ...(tool.concurrent !== undefined ? { concurrent: tool.concurrent } : {}),
-    ...(tool.needsApproval !== undefined ? { needsApproval: tool.needsApproval } : {}),
-  };
 }
 
 export function resetChatProvider(): void {

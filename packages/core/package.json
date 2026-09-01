@@ -68,6 +68,10 @@
     "./inferencer-graphql": {
       "types": "./src/inferencer-graphql.ts",
       "default": "./src/inferencer-graphql.ts"
+    },
+    "./admin-tool": {
+      "types": "./src/admin-tool.ts",
+      "default": "./src/admin-tool.ts"
     }
   },
   "bugs": {
@@ -86,7 +90,9 @@
   "sideEffects": false,
   "type": "module",
   "types": "src/index.ts",
-  "dependencies": {},
+  "dependencies": {
+    "@sinclair/typebox": "^0.34.52"
+  },
   "peerDependenciesMeta": {
     "svelte": {
       "optional": true

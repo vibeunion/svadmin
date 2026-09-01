@@ -10,17 +10,59 @@ afterEach(() => {
 });
 
 describe('official composition contracts', () => {
-  it('accepts from-based messages and renders response children', async () => {
+  it('accepts from-based messages and renders markdown responses', async () => {
     const { container } = render(Host);
 
     const message = container.querySelector('[data-message-id="message-contract"]');
     expect(message?.getAttribute('data-role')).toBe('assistant');
     expect(message?.getAttribute('data-contract')).toBe('message');
     await waitFor(() => expect(screen.getByText('Composed response')).not.toBeNull());
+    await waitFor(() => expect(screen.getByText('Explicit markdown').closest('[data-streamdown-strong]')).not.toBeNull());
     await waitFor(() => expect(screen.getByText('Markdown response').closest('[data-streamdown-strong]')).not.toBeNull());
     const action = screen.getByTestId('message-action');
     expect(action.getAttribute('data-size')).toBe('icon-sm');
-    expect(action.parentElement?.querySelector('[role="tooltip"]')?.textContent).toBe('Copy response');
+    action.focus();
+    await waitFor(() => expect(screen.getByRole('tooltip').textContent).toBe('Copy response'));
+    await fireEvent.keyDown(window, { key: 'Escape' });
+    expect(screen.queryByRole('tooltip', { name: 'Copy response' })).toBeNull();
+  });
+
+  it('repositions a portal tooltip when an overflow ancestor scrolls', async () => {
+    render(Host);
+    const action = screen.getByTestId('message-action');
+    const anchor = action.closest('.svadmin-ai-tooltip__anchor') as HTMLElement;
+    let anchorLeft = 40;
+    vi.spyOn(anchor, 'getBoundingClientRect').mockImplementation(() => ({
+      x: anchorLeft,
+      y: 40,
+      left: anchorLeft,
+      top: 40,
+      right: anchorLeft + 20,
+      bottom: 60,
+      width: 20,
+      height: 20,
+      toJSON: () => ({}),
+    }));
+
+    action.focus();
+    const tooltip = await screen.findByRole('tooltip');
+    vi.spyOn(tooltip, 'getBoundingClientRect').mockImplementation(() => ({
+      x: 0,
+      y: 0,
+      left: 0,
+      top: 0,
+      right: 40,
+      bottom: 20,
+      width: 40,
+      height: 20,
+      toJSON: () => ({}),
+    }));
+    await fireEvent.resize(window);
+    await waitFor(() => expect(tooltip.style.left).toBe('30px'));
+
+    anchorLeft = 140;
+    await fireEvent.scroll(screen.getByTestId('tooltip-scroll-container'));
+    await waitFor(() => expect(tooltip.style.left).toBe('130px'));
   });
 
   it('only renders the explicit conversation scroll button away from the bottom', async () => {
@@ -77,7 +119,8 @@ describe('official composition contracts', () => {
     expect(artifactAction.getAttribute('data-size')).toBe('icon-sm');
     expect(artifactAction.getAttribute('data-variant')).toBe('outline');
     expect(artifactAction.querySelector('svg')).not.toBeNull();
-    expect(artifactAction.parentElement?.querySelector('[role="tooltip"]')?.textContent).toBe('Copy artifact');
+    artifactAction.focus();
+    await waitFor(() => expect(screen.getByRole('tooltip').textContent).toBe('Copy artifact'));
     expect(screen.getByTestId('artifact-close').getAttribute('data-size')).toBe('lg');
   });
 });

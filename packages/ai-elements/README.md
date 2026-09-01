@@ -58,7 +58,8 @@ The packed-package verification loads the root entry through `vite.ssrLoadModule
   import {
     Conversation,
     Message,
-    MessageParts,
+    MessageContent,
+    MessageResponse,
     messageText,
     PromptInput,
   } from '@svadmin/ai-elements';
@@ -75,9 +76,9 @@ The packed-package verification loads the root entry through `vite.ssrLoadModule
 
 <Conversation>
   <Message from={message.role} data-message-id={message.id}>
-    <MessageParts.Content>
-      <MessageParts.Response content={messageText(message)} />
-    </MessageParts.Content>
+    <MessageContent>
+      <MessageResponse content={messageText(message)} />
+    </MessageContent>
   </Message>
 </Conversation>
 
@@ -105,6 +106,28 @@ export const componentRegistry = {
     }),
   }),
 };
+```
+
+Admin tools use the same TypeBox boundary. Call tools through
+`executeAdminTool` so untrusted model arguments are decoded before the tool
+implementation runs:
+
+```ts
+import { Type } from '@sinclair/typebox';
+import { defineAdminTool, executeAdminTool } from '@svadmin/core';
+
+const searchInventory = defineAdminTool({
+  name: 'searchInventory',
+  description: 'Search inventory by warehouse',
+  parameters: Type.Object({
+    warehouse: Type.String(),
+    limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 100 })),
+  }),
+  readOnly: true,
+  execute: async ({ warehouse, limit }) => inventory.search({ warehouse, limit }),
+});
+
+await executeAdminTool(searchInventory, modelArguments);
 ```
 
 ## Upstream parity

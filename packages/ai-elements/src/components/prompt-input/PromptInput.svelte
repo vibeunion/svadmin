@@ -369,7 +369,7 @@
 >
   <input bind:this={inputElement} class="svadmin-ai__sr-only" type="file" {accept} {multiple} disabled={disabled} aria-label="Upload files" onchange={(event) => addFiles((event.currentTarget as HTMLInputElement).files ?? [])} />
   {#if syncHiddenInput}<input type="hidden" name="message" value={activeText} />{/if}
-  {#if activeFiles.length > 0}
+  {#if activeFiles.length > 0 && !children}
     <ul class="flex flex-wrap gap-2" aria-label="Attachments">
       {#each activeFiles as file, index (file.id)}
         <li class="flex min-w-0 items-center gap-1 rounded border border-border px-2 py-1 text-xs">
