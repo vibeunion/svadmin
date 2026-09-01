@@ -1185,40 +1185,43 @@
               </p>
             </div>
           </div>
-          <div class="flex shrink-0 items-center gap-1">
-            {#if messages.length > 0}
+          <div class="flex shrink-0 items-center" role="toolbar" aria-label="AI assistant controls">
+            <div class="flex items-center gap-0.5">
+              {#if messages.length > 0}
+                <button
+                  type="button"
+                  class="svadmin-ai__icon-button"
+                  aria-label="Clear conversation"
+                  title="Clear conversation"
+                  onclick={clearChat}
+                >
+                  <Trash2 size={14} strokeWidth={1.75} aria-hidden="true" />
+                </button>
+              {/if}
               <button
                 type="button"
                 class="svadmin-ai__icon-button"
-                aria-label="Clear conversation"
-                title="Clear conversation"
-                onclick={clearChat}
+                aria-label={minimized ? 'Expand AI assistant' : 'Minimize AI assistant'}
+                title={minimized ? 'Expand AI assistant' : 'Minimize AI assistant'}
+                aria-expanded={!minimized}
+                onclick={() => { minimized = !minimized; }}
               >
-                <Trash2 size={15} aria-hidden="true" />
+                {#if minimized}
+                  <Maximize2 size={14} strokeWidth={1.75} aria-hidden="true" />
+                {:else}
+                  <Minus size={14} strokeWidth={1.75} aria-hidden="true" />
+                {/if}
               </button>
-            {/if}
+            </div>
+            <span class="mx-1.5 h-4 w-px bg-border/70" aria-hidden="true"></span>
             <button
               type="button"
-              class="svadmin-ai__icon-button"
-              aria-label={minimized ? 'Expand AI assistant' : 'Minimize AI assistant'}
-              title={minimized ? 'Expand AI assistant' : 'Minimize AI assistant'}
-              aria-expanded={!minimized}
-              onclick={() => { minimized = !minimized; }}
-            >
-              {#if minimized}
-                <Maximize2 size={15} aria-hidden="true" />
-              {:else}
-                <Minus size={15} aria-hidden="true" />
-              {/if}
-            </button>
-            <button
-              type="button"
-              class="svadmin-ai__icon-button"
+              class="svadmin-ai__icon-button svadmin-ai__icon-button--close"
               aria-label="Close AI assistant"
               title="Close AI assistant"
               onclick={closeDialog}
             >
-              <X size={15} aria-hidden="true" />
+              <X size={14} strokeWidth={1.75} aria-hidden="true" />
             </button>
           </div>
         </header>
