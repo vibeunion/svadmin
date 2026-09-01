@@ -10,7 +10,7 @@
   "packages/refine-adapter": "0.10.12",
   "packages/sso": "0.11.17",
   "packages/pocketbase": "0.10.4",
-  "packages/supabase": "0.13.4",
+  "packages/supabase": "0.13.5",
   "packages/elysia": "0.12.4",
   "packages/create-svadmin": "0.23.0",
   "packages/airtable": "0.9.21",

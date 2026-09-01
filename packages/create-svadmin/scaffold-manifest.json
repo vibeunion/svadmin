@@ -37,7 +37,7 @@
         "@refinedev/simple-rest": "^6.0.1"
       },
       "supabase": {
-        "@svadmin/supabase": "^0.13.4",
+        "@svadmin/supabase": "^0.13.5",
         "@supabase/supabase-js": "^2.112.4",
         "@refinedev/supabase": "^6.0.2"
       },
