@@ -663,3 +663,101 @@ describe('SupaCloud Task LiveProvider', () => {
     expect(unsubscribe).toHaveBeenCalled();
   });
 });
+
+describe('SupaCloud Task Provider SDK bridge', () => {
+  test('submit maps meta to metadata and wraps sdk receipts', async () => {
+    const { createSupaCloudTaskProvider } = await import('./supacloud');
+    const receiptUnsubscribe = mock(() => {});
+    const receipt = {
+      taskId: 'task-99',
+      wait: mock(async () => ({ id: 'task-99', status: 'queued' })),
+      cancel: mock(async () => ({ id: 'task-99', status: 'cancelled' })),
+      retry: mock(async () => ({ id: 'task-99', status: 'retry_scheduled' })),
+      subscribe: mock(({ onUpdate }: { onUpdate: (task: { id: string; status: string }) => void }) => {
+        onUpdate({ id: 'task-99', status: 'running' });
+        return { unsubscribe: receiptUnsubscribe };
+      }),
+    };
+    const tasks = {
+      submit: mock(async (_taskName: string, options: Record<string, unknown>) => {
+        expect(options).toEqual({
+          body: { prompt: 'poster' },
+          headers: { 'x-trace': '1' },
+          idempotencyKey: 'job-1',
+          metadata: { tenant: 'acme' },
+        });
+        return receipt;
+      }),
+      get: mock(async () => ({ id: 'task-99', status: 'queued' })),
+      list: mock(async () => [{ id: 'task-1', status: 'queued' }]),
+      listDlq: mock(async (limit?: number) => [{ id: 'dlq-1', status: 'failed', limit } as any]),
+      cancel: mock(async () => ({ id: 'task-99', status: 'cancelled' })),
+      retry: mock(async () => ({ id: 'task-99', status: 'retry_scheduled' })),
+      subscribe: mock(
+        (_taskId: string, options: { onUpdate: (task: { id: string; status: string }) => void }) => {
+          options.onUpdate({ id: 'task-99', status: 'running' });
+          return { unsubscribe: receiptUnsubscribe };
+        },
+      ),
+    };
+
+    const provider = createSupaCloudTaskProvider({ supacloud: { tasks } as any });
+    const handle = await provider.submit('image.generate', {
+      body: { prompt: 'poster' },
+      headers: { 'x-trace': '1' },
+      idempotencyKey: 'job-1',
+      meta: { tenant: 'acme' },
+    });
+
+    expect(handle.id).toBe('task-99');
+    expect(await handle.wait()).toEqual({ id: 'task-99', status: 'queued' });
+
+    const handleCallback = mock(() => {});
+    const handleStop = handle.subscribe?.(handleCallback);
+    expect(handleCallback).toHaveBeenCalledWith({ id: 'task-99', status: 'running' });
+    if (typeof handleStop === 'function') {
+      handleStop();
+    } else {
+      handleStop?.unsubscribe();
+    }
+    expect(receiptUnsubscribe).toHaveBeenCalledTimes(1);
+
+    const providerCallback = mock(() => {});
+    const providerStop = provider.subscribe?.('task-99', providerCallback);
+    expect(tasks.subscribe).toHaveBeenCalledWith('task-99', {
+      onUpdate: expect.any(Function),
+    });
+    expect(providerCallback).toHaveBeenCalledWith({
+      id: 'task-99',
+      status: 'running',
+    });
+    if (typeof providerStop === 'function') {
+      providerStop();
+    } else {
+      providerStop?.unsubscribe();
+    }
+    expect(receiptUnsubscribe).toHaveBeenCalledTimes(2);
+
+    const listResult = await provider.listDlq?.({ limit: 7 });
+    expect(tasks.listDlq).toHaveBeenCalledWith(7);
+    expect(listResult).toEqual({
+      data: [{ id: 'dlq-1', status: 'failed', limit: 7 }],
+      total: 1,
+    });
+  });
+
+  test('list fails closed on invalid sdk list payload', async () => {
+    const { createSupaCloudTaskProvider } = await import('./supacloud');
+    const provider = createSupaCloudTaskProvider({
+      supacloud: {
+        tasks: {
+          submit: mock(async () => ({ taskId: 'task-1', wait: async () => ({ id: 'task-1' }) })),
+          get: mock(async () => ({ id: 'task-1' })),
+          list: mock(async () => ({ status: 'ok' })),
+        },
+      } as any,
+    });
+
+    await expect(provider.list?.()).rejects.toThrow('invalid task list response');
+  });
+});
