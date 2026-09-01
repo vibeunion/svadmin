@@ -93,7 +93,8 @@
     "undici": "8.10.0",
     "vite": "8.2.2",
     "vitest": "4.1.11",
-    "ws": "8.21.3"
+    "ws": "8.21.3",
+    "decode-uri-component": "0.5.0"
   },
   "patchedDependencies": {
     "@sveltejs/package@2.5.8": "patches/@sveltejs%2Fpackage@2.5.8.patch"
