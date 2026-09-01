@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/sso",
-  "version": "0.11.17",
+  "version": "0.11.18",
   "type": "module",
   "description": "OIDC/OAuth2 SSO AuthProvider plugin for svadmin — supports Okta, Azure AD, Cognito, Keycloak, Google",
   "license": "MIT",
