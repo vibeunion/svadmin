@@ -34,7 +34,9 @@ describe('Sikandar-compatible Svelte composition extensions', () => {
   it('supports code aliases, line ranges, line numbers, and bindable overflow', async () => {
     const view = render(Host);
     await waitFor(() => expect(view.container.querySelector('pre')?.getAttribute('data-highlighted')).toBe('true'));
-    expect(view.container.querySelector('span[data-highlighted="true"]')?.textContent).toContain('2const second = 2;');
+    await waitFor(() => expect(
+      view.container.querySelector('span[data-line-number="2"][data-highlighted="true"]')?.textContent,
+    ).toContain('2const second = 2;'));
     expect(screen.getByTestId('code-collapsed').textContent).toBe('true');
     await fireEvent.click(screen.getByRole('button', { name: 'Expand' }));
     expect(screen.getByTestId('code-collapsed').textContent).toBe('false');

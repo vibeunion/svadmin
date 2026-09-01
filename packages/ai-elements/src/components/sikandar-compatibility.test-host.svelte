@@ -10,6 +10,7 @@
     { id: 'prompt-file', name: 'report.pdf', mediaType: 'application/pdf', url: 'https://example.test/report.pdf' },
   ]);
   let collapsed = $state(true);
+  const sampleCode = 'const first = 1;\nconst second = 2;';
 </script>
 
 <Actions data-testid="generic-actions">
@@ -37,6 +38,6 @@
 </PromptInput.Root>
 
 <Code.Overflow bind:collapsed maxHeight={64}>
-  <Code.Root code="const first = 1;\nconst second = 2;" lang="typescript" highlight={[2]} />
+  <Code.Root code={sampleCode} lang="typescript" highlight={[2]} />
 </Code.Overflow>
 <output data-testid="code-collapsed">{collapsed}</output>
