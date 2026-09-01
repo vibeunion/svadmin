@@ -596,6 +596,7 @@
     "astro": "7.2.8",
     "brace-expansion": "5.0.9",
     "cookie": "1.1.1",
+    "decode-uri-component": "0.5.0",
     "devalue": "5.9.2",
     "dompurify": "3.4.14",
     "esbuild": "0.28.2",
@@ -1701,7 +1702,7 @@
 
     "decode-named-character-reference": ["decode-named-character-reference@1.3.0", "https://registry.npmmirror.com/decode-named-character-reference/-/decode-named-character-reference-1.3.0.tgz", { "dependencies": { "character-entities": "^2.0.0" } }, "sha512-GtpQYB283KrPp6nRw50q3U9/VfOutZOe103qlN7BPP6Ad27xYnOIWv4lPzo8HCAL+mMZofJ9KEy30fq6MfaK6Q=="],
 
-    "decode-uri-component": ["decode-uri-component@0.2.2", "https://registry.npmmirror.com/decode-uri-component/-/decode-uri-component-0.2.2.tgz", {}, "sha512-FqUYQ+8o158GyGTrMFJms9qh3CqTKvAqgqsTnkLI8sKu0028orqBhxNMFkFen0zGyg6epACD32pjVk58ngIErQ=="],
+    "decode-uri-component": ["decode-uri-component@0.5.0", "https://registry.npmmirror.com/decode-uri-component/-/decode-uri-component-0.5.0.tgz", {}, "sha512-1BiQVoK8C9gUbQU6NzAtO/tkz2qOFpEObMWpcFvhx4fYnj4Oc5yzaJN/LD36ihkVUdXyh5ZekzX+yM+ty/SrPg=="],
 
     "dedent-js": ["dedent-js@1.0.1", "https://registry.npmmirror.com/dedent-js/-/dedent-js-1.0.1.tgz", {}, "sha512-OUepMozQULMLUmhxS95Vudo0jb0UchLimi3+pQ2plj61Fcy8axbP9hbiD4Sz6DPqn6XG3kfmziVfQ1rSys5AJQ=="],
 
