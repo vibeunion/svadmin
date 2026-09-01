@@ -13,13 +13,13 @@
     ThemeMode,
     I18nProvider,
   } from '@svadmin/core';
+  import { ChatDialog, InsightCard } from '@svadmin/ai-elements';
   import type { AdminProviderBundle } from '../types.js';
   import type { QueryClient } from '@tanstack/svelte-query';
   import AdminApp from './AdminApp.svelte';
   import AuditLogDrawer from './AuditLogDrawer.svelte';
-  import ChatDialog from './ChatDialog.svelte';
   import ContextProbe from './admin-app.context.test-probe.svelte';
-  import InsightCard from './InsightCard.svelte';
+  import type { LayoutAIAssistantProps } from './Layout.svelte';
 
   interface Props {
     instance: string;
@@ -108,6 +108,10 @@
   {/if}
 {/snippet}
 
+{#snippet aiAssistant({ docked, scope, ownerScope }: LayoutAIAssistantProps)}
+  <ChatDialog {docked} {scope} {ownerScope} persistKey={`${instance}-auth:assistant`} />
+{/snippet}
+
 <AdminApp
   {dataProvider}
   {providers}
@@ -123,6 +127,7 @@
   {themeConfig}
   {queryClient}
   {tenant}
+  aiAssistant={aiAssistant as never}
   dashboard={dashboard as never}
 />
 

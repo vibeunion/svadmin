@@ -1,5 +1,6 @@
 {
   "packages/core": "0.47.1",
+  "packages/ai-elements": "0.1.0",
   "packages/ui": "0.66.0",
   "packages/editor": "0.4.3",
   "packages/flow": "0.3.0",

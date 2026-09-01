@@ -1,0 +1,5 @@
+<script lang="ts">
+  import type { Snippet } from 'svelte'; import { cn } from '../../utils.js'; import { useQuestionContext } from './context.svelte.js';
+  let { value, class: className = '', children, disabled = false, onclick, ...rest }: { value: string; class?: string; children?: Snippet; disabled?: boolean; onclick?: (event: MouseEvent) => void; [key: string]: unknown } = $props(); const context = useQuestionContext(); const selected = $derived(context.value.selectedValues.includes(value));
+</script>
+<button type="button" role={context.selectionMode === 'single' ? 'radio' : 'checkbox'} aria-checked={selected} class={cn('inline-flex min-h-9 items-center justify-center rounded-md border px-3 py-2 text-sm whitespace-normal focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:opacity-50', selected ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-background text-foreground hover:bg-muted', className)} disabled={context.disabled || disabled || context.busy} onclick={(event) => { context.toggleValue(value); onclick?.(event); }} {...rest}>{#if children}{@render children()}{:else}{value}{/if}</button>

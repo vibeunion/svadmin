@@ -1,49 +1,83 @@
-// Chat & Agent provider — headless interface for AI integration
-//
-// Two abstraction levels:
-//   1. ChatProvider  — simple message-in / text-out  (backward compatible)
-//   2. AgentProvider — tool calling, approval gates, generative UI events
-//
-// Inspired by Vercel AI SDK 6 agent abstractions.
+// Headless AI contracts. Rendering lives in @svadmin/ai-elements.
 
-/** Describes an actionable button rendered in assistant messages (tool-call UX). */
-export interface ChatAction {
-  label: string;
-  /** Optional variant for styling (e.g. 'destructive' renders red) */
-  variant?: 'default' | 'destructive' | 'outline';
-  /** Arbitrary payload forwarded to the onAction handler */
-  payload?: Record<string, unknown>;
+export type ToolState =
+  | 'input-streaming'
+  | 'input-available'
+  | 'approval-requested'
+  | 'approval-responded'
+  | 'output-available'
+  | 'output-denied'
+  | 'output-error';
+
+export type MessageStatus = 'submitted' | 'streaming' | 'complete' | 'aborted' | 'error';
+
+export interface ChatAttachment {
+  id: string;
+  name: string;
+  mediaType?: string;
+  url?: string;
+  size?: number;
+  /** 原始浏览器文件，供上传适配器直接读取；持久化恢复时不会保留。 */
+  file?: File;
 }
+
+export interface ChatSource {
+  id?: string;
+  title: string;
+  url?: string;
+  quote?: string;
+  description?: string;
+}
+
+export type ChatMessagePart =
+  | { id?: string; type: 'text'; text: string }
+  | { id?: string; type: 'reasoning'; text: string; streaming?: boolean }
+  | { id?: string; type: 'tool-call'; tool: string; input: unknown; state: ToolState; callId?: string }
+  | { id?: string; type: 'tool-result'; tool: string; output: unknown; error?: string; callId?: string }
+  | { id?: string; type: 'source'; source: ChatSource }
+  | { id?: string; type: 'image'; src: string; alt?: string; width?: number; height?: number }
+  | { id?: string; type: 'file'; file: ChatAttachment }
+  | {
+      id?: string;
+      type: 'approval';
+      approvalId: string;
+      tool: string;
+      input: Record<string, unknown>;
+      description: string;
+      approved?: boolean;
+    }
+  | { id?: string; type: 'component'; name: string; props: Record<string, unknown> };
 
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant' | 'system';
-  content: string;
-  timestamp: number;
-  /** Tool-call action buttons rendered below the message bubble */
-  actions?: ChatAction[];
+  parts: ChatMessagePart[];
+  status?: MessageStatus;
+  createdAt: number;
+  attachments?: ChatAttachment[];
 }
 
-/** Admin context automatically injected into chat system messages. */
+/** Admin context passed separately from untrusted conversation messages. */
 export interface ChatContext {
   currentResource?: string;
-  selectedRecordId?: string;
-  currentView?: 'list' | 'edit' | 'create' | 'show';
+  selectedRecordId?: string | number;
+  currentView?: 'list' | 'edit' | 'create' | 'show' | string;
   pathname?: string;
+  metadata?: Record<string, unknown>;
 }
 
 /**
  * ChatProvider interface for integrating AI chat into admin panels.
  * Implement `sendMessage` to connect to any AI backend (OpenAI, self-hosted, etc.)
  *
- * Return a `string` for non-streaming responses, or an `AsyncGenerator<string>`
- * for streaming (SSE / chunked) responses.
+ * Return text or structured parts for non-streaming responses. For streaming
+ * transports, yield text chunks and/or structured parts from an async generator.
  */
 export interface ChatProvider {
   sendMessage(
     messages: ChatMessage[],
-    options?: { signal?: AbortSignal },
-  ): Promise<string> | AsyncGenerator<string, void, unknown>;
+    options?: { signal?: AbortSignal; context?: ChatContext },
+  ): Promise<ChatMessagePart[] | string> | AsyncGenerator<ChatMessagePart | string, void, unknown>;
 }
 
 // ─── Agent Provider (extends ChatProvider concept) ─────────────
@@ -113,12 +147,16 @@ export interface ToolResult {
 export type AgentEvent =
   /** Streaming text chunk */
   | { type: 'text'; content: string }
+  /** Streaming reasoning chunk */
+  | { type: 'reasoning'; content: string; streaming?: boolean }
   /** Agent wants to call a tool (informational — execution is handled internally) */
-  | { type: 'tool_call'; tool: string; args: Record<string, unknown> }
+  | { type: 'tool_call'; tool: string; args: Record<string, unknown>; callId?: string }
   /** Agent wants to call a tool that requires user approval before execution */
   | { type: 'approval_request'; id: string; tool: string; args: Record<string, unknown>; description: string }
   /** Tool execution completed */
-  | { type: 'tool_result'; tool: string; result: ToolResult }
+  | { type: 'tool_result'; tool: string; result: ToolResult; callId?: string }
+  /** Source attribution emitted by a retrieval step */
+  | { type: 'source'; source: ChatSource }
   /** Agent wants to render a named component (Generative UI) */
   | { type: 'component'; name: string; props: Record<string, unknown> }
   /** Stream finished */
@@ -129,6 +167,14 @@ export interface AgentOptions {
   signal?: AbortSignal;
   /** Admin context is injected automatically by the framework */
   context?: ChatContext;
+}
+
+/**
+ * Cancellation signal supplied while an approval decision is being submitted.
+ * Providers must stop before committing tool execution when this signal aborts.
+ */
+export interface ApprovalResponseOptions {
+  signal: AbortSignal;
 }
 
 /**
@@ -159,7 +205,11 @@ export interface AgentProvider {
     messages: ChatMessage[],
     options?: AgentOptions,
   ): AsyncGenerator<AgentEvent, void, unknown>;
-  approveToolCall?(id: string, approved: boolean): void;
+  approveToolCall?(
+    id: string,
+    approved: boolean,
+    options: ApprovalResponseOptions,
+  ): void | Promise<void>;
 }
 
 // ─── Chat Provider singleton ───────────────────────────────────

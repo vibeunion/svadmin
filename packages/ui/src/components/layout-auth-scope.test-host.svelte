@@ -7,14 +7,17 @@
     type TenantContext,
   } from '@svadmin/core';
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
+  import type { LayoutAIAssistantProps } from './Layout.svelte';
   import Layout from './Layout.svelte';
 
   let {
     authProvider,
     tenant,
+    withAIAssistant = false,
   }: {
     authProvider?: AuthProvider;
     tenant: TenantContext;
+    withAIAssistant?: boolean;
   } = $props();
 
   const fallbackDataProvider = {
@@ -45,6 +48,14 @@
   <span data-testid="layout-auth-content">layout auth content</span>
 {/snippet}
 
+{#snippet aiAssistant({ scope, ownerScope }: LayoutAIAssistantProps)}
+  <output
+    data-testid="layout-ai-assistant"
+    data-scope={scope}
+    data-owner-scope={ownerScope}
+  >assistant</output>
+{/snippet}
+
 <QueryClientProvider client={queryClient}>
-  <Layout children={content} />
+  <Layout children={content} aiAssistant={withAIAssistant ? aiAssistant : undefined} />
 </QueryClientProvider>

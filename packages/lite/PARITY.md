@@ -1,18 +1,18 @@
 # @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵
 
-> 自动生成时间：`2026-08-31T06:09:32.472Z`
-> 总体适配覆盖率：**100%**（106/106 组件）
+> 自动生成时间：`2026-09-01T03:07:50.023Z`
+> 总体适配覆盖率：**100%**（103/103 组件）
 
 ## 进度总览
 
 | 模块分类 | 组件总数 | 1:1 对齐 (Exact) | 语义降级 (Fallback) | 免适配 (SPA Only) | 待补齐 (Missing) | 覆盖率 |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
-| **fields** | 33 | 29 | 3 | 1 | 0 | **100%** |
+| **fields** | 32 | 29 | 3 | 0 | 0 | **100%** |
 | **buttons** | 10 | 10 | 0 | 0 | 0 | **100%** |
 | **pages** | 12 | 12 | 0 | 0 | 0 | **100%** |
 | **layout** | 9 | 8 | 0 | 1 | 0 | **100%** |
-| **widgets** | 11 | 8 | 3 | 0 | 0 | **100%** |
-| **advanced** | 31 | 25 | 4 | 2 | 0 | **100%** |
+| **widgets** | 10 | 7 | 3 | 0 | 0 | **100%** |
+| **advanced** | 30 | 25 | 4 | 1 | 0 | **100%** |
 
 ---
 
@@ -54,7 +54,6 @@
 | `JsonSchemaForm` | `LiteJsonSchemaForm.svelte` | ✅ 1:1 对齐 | JSON Schema 动态表单生成 |
 | `MentionsInput` | `LiteMentionsInput.svelte` | ✅ 1:1 对齐 | @与#智能提及输入框 |
 | `SignaturePad` | `LiteSignaturePad.svelte` | ✅ 1:1 对齐 | 电子签名画板与文件上传降级 |
-| `VoiceInput` | — | 🚫 免适配 | 免适配 (Web Speech API) |
 
 ### BUTTONS
 
@@ -108,7 +107,6 @@
 |---|---|:---:|---|
 | `StatsCard` | `LiteStatsCard.svelte` | ✅ 1:1 对齐 | 指标卡片与趋势徽章 |
 | `MetricStrip` | `LiteMetricStrip.svelte` | ✅ 1:1 对齐 | 服务端指标条、趋势与原生链接 |
-| `InsightCard` | `widgets/LiteInsightCard.svelte` | ✅ 1:1 对齐 | 业务洞察指标容器 |
 | `AnomalyBadge` | `widgets/LiteAnomalyBadge.svelte` | ✅ 1:1 对齐 | 异常状态高亮徽章 |
 | `Badge` | `LiteBadge.svelte` | ✅ 1:1 对齐 | 语义状态徽章与原生链接承接 |
 | `BarChart` | `widgets/LiteBarChart.svelte` | ⚡ 语义降级 | 降级为 CSS 柱状图或数据明细表格 |
@@ -152,5 +150,4 @@
 | `SpreadsheetView` | `LiteSpreadsheetView.svelte` | ✅ 1:1 对齐 | 多页签在线电子表格与公式计算 |
 | `DecisionTable` | `LiteDecisionTable.svelte` | ✅ 1:1 对齐 | 业务决策表与规则执行矩阵 |
 | `DevTools` | — | 🚫 免适配 | 免适配 (SPA 调试器) |
-| `CopilotPanel` | — | 🚫 免适配 | 免适配 (AI Copilot 客户端浮窗) |
 

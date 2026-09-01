@@ -11,12 +11,9 @@ vi.mock('./Header.svelte', async () => ({
   default: (await import('./layout-auth-scope.test-empty-child.svelte')).default,
 }));
 vi.mock('./CommandPalette.svelte', async () => ({
-  default: (await import('./layout-auth-scope.test-empty-child.svelte')).default,
+  default: (await import('./layout-command-palette.test-child.svelte')).default,
 }));
 vi.mock('./KeyboardShortcuts.svelte', async () => ({
-  default: (await import('./layout-auth-scope.test-empty-child.svelte')).default,
-}));
-vi.mock('./ChatDialog.svelte', async () => ({
   default: (await import('./layout-auth-scope.test-empty-child.svelte')).default,
 }));
 vi.mock('./DevTools.svelte', async () => ({
@@ -64,6 +61,49 @@ afterEach(() => {
 });
 
 describe('Layout auth scope', () => {
+  it('only exposes Ask AI when an assistant snippet is injected', async () => {
+    const withoutAssistant = render(LayoutAuthScopeHost, {
+      authProvider: undefined,
+      tenant: { tenantId: 'tenant-layout-without-ai' },
+    });
+
+    await waitFor(() => {
+      expect(withoutAssistant.getByTestId('layout-command-ai-state').textContent).toBe('disabled');
+    });
+    expect(withoutAssistant.queryByTestId('layout-ai-assistant')).toBeNull();
+    withoutAssistant.unmount();
+
+    const askAIEvents: Array<{ query: string; scope: string }> = [];
+    const handleAskAI = (event: Event) => {
+      askAIEvents.push((event as CustomEvent<{ query: string; scope: string }>).detail);
+    };
+    window.addEventListener('svadmin:ask-ai', handleAskAI);
+
+    try {
+      const withAssistant = render(LayoutAuthScopeHost, {
+        authProvider: undefined,
+        tenant: { tenantId: 'tenant-layout-with-ai' },
+        withAIAssistant: true,
+      });
+
+      await waitFor(() => {
+        expect(withAssistant.getByTestId('layout-command-ai-state').textContent).toBe('enabled');
+      });
+      const assistant = withAssistant.getByTestId('layout-ai-assistant');
+      await fireEvent.click(withAssistant.getByTestId('layout-command-ask-ai'));
+
+      expect(askAIEvents).toEqual([{
+        query: 'scoped question',
+        scope: assistant.dataset.scope,
+      }]);
+      expect(assistant.dataset.ownerScope).toBe(
+        assistant.closest<HTMLElement>('[data-svadmin-layout-scope]')?.dataset.svadminLayoutScope,
+      );
+    } finally {
+      window.removeEventListener('svadmin:ask-ai', handleAskAI);
+    }
+  });
+
   it('marks the content main as an svadmin-owned style scope', async () => {
     const view = render(LayoutAuthScopeHost, {
       authProvider: undefined,

@@ -13,7 +13,7 @@ The main `@svadmin/ui` package delivers a premium SPA experience using Svelte 5,
 **What Lite is:**
 - A **Zero-JS SSR-first admin component suite** designed with an IE11-safe CSS baseline.
 - 100% interoperable with `@svadmin/core` — sharing the same `DataProvider`, `AuthProvider`, `Resource`, and `FieldDefinition` contracts.
-- An architectural companion to `@svadmin/ui` achieving **100% component parity (106/106 components)** through 1:1 server-rendered matches, deliberate semantic fallbacks, or explicit SPA-only classification.
+- An architectural companion to `@svadmin/ui` achieving **100% component parity (103/103 components)** through 1:1 server-rendered matches, deliberate semantic fallbacks, or explicit SPA-only classification.
 - **Not** a generic Tailwind-to-IE11 compiler or a full client-side port of shadcn-svelte (which depends on modern browser JS runtimes and CSS custom properties).
 
 `@svadmin/lite` provides a server-rendered fallback that **shares the same DataProvider, AuthProvider, and Resource definitions** — only the rendering layer is different.
@@ -246,7 +246,7 @@ IE11 before the decision is made.
 
 ## Components & Parity (100% Coverage)
 
-`@svadmin/lite` provides **100% component parity** (106/106 components) corresponding to `@svadmin/ui`. See [PARITY.md](./PARITY.md) for the generated complete matrix and status details.
+`@svadmin/lite` provides **100% component parity** (103/103 components) corresponding to `@svadmin/ui`. See [PARITY.md](./PARITY.md) for the generated complete matrix and status details.
 
 ### Core Pages & Layout
 
@@ -272,14 +272,13 @@ IE11 before the decision is made.
 | `LiteCanAccess` / `LiteErrorBoundary` | Server-side access gate and constrained-environment error boundary |
 | `LiteSplitPaneLayout` / `LiteMultiTabKeepAlive` | Dense two-pane layouts and multi-workspace navigation |
 
-### Field Components (33 Fields)
+### Field Components (32 Fields)
 
 | Category | Components |
 |----------|------------|
 | **Text & Numeric** | `LiteTextField`, `LiteNumberField`, `LiteCurrencyField`, `LitePercentField`, `LitePhoneField`, `LiteEmailField`, `LiteUrlField`, `LiteRatingField`, `LiteCopyField` |
 | **Date & Choice** | `LiteDateField`, `LiteDateRangeField`, `LiteBooleanField`, `LiteSelectField`, `LiteMultiSelectField`, `LiteTreeSelect`, `LiteCascader`, `LiteTagField`, `LiteRelationField` |
 | **Media & Rich & Array** | `LiteAvatarField`, `LiteImageField`, `LiteFileField`, `LiteCodeField`, `LiteMarkdownField`, `LiteRichTextField`, `LiteJsonField`, `LiteArrayField`, `LiteDynamicFormList`, `LiteTransfer`, `LiteImageCropper`, `LiteJsonSchemaForm`, `LiteMentionsInput`, `LiteSignaturePad` |
-| **SPA-only** | `VoiceInput` (Web Speech API; no SSR counterpart) |
 
 ### Action Buttons (10 Buttons)
 
@@ -320,7 +319,7 @@ IE11 before the decision is made.
 | `LiteStepForm`, `LiteTableSummary`, `LiteVersionDiffViewer`, `LiteEditableTable`, `LiteDraggableRowTable` | Server-driven enterprise data interaction components |
 | `LiteMediaLibraryModal`, `LiteActivityFeed`, `LiteKanbanBoard`, `LitePivotTable` | Media, activity, workflow, and analysis views |
 | `LiteCanvasAnnotation`, `LiteSpreadsheetView`, `LiteDecisionTable` | SSR-compatible annotation, spreadsheet, and rules views |
-| `DevTools`, `CopilotPanel` | SPA-only components with no Lite counterpart |
+| `DevTools` | SPA-only component with no Lite counterpart |
 
 ## Parity Tracking & Visualization
 
@@ -329,7 +328,7 @@ To monitor and maintain 100% component parity between `@svadmin/ui` and `@svadmi
 - **CLI Dashboard**: Run `bun run check:parity` to inspect the live coverage matrix in terminal.
 - **Parity Matrix Document**: [PARITY.md](./PARITY.md) is auto-generated with exhaustive module-by-module tables.
 - **Machine-Readable JSON**: `packages/lite/parity.json` provides structured data for automation.
-- **Interactive Showroom**: Visit `/lite/parity` in the example app to interactively preview all 106 components and live metrics.
+- **Interactive Showroom**: Visit `/lite/parity` in the example app to interactively preview all 103 components and live metrics.
 - **CI Contract Test**: `scripts/parity-contract.test.ts` runs in CI to prevent regression and ensure every new UI component has a documented Lite counterpart.
 
 ## Server Utilities

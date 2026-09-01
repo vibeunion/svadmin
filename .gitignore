@@ -32,6 +32,8 @@ progress.md
 playwright-report/
 .playwright-cli/
 test-results/
+!packages/ai-elements/src/components/test-results/
+!packages/ai-elements/src/components/test-results/**
 
 servers.local.md
 .agents/

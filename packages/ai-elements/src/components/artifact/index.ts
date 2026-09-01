@@ -1,0 +1,11 @@
+export { default, default as Root, default as Artifact } from './Artifact.svelte';
+export { default as Header, default as ArtifactHeader } from './ArtifactHeader.svelte';
+export { default as Close, default as ArtifactClose } from './ArtifactClose.svelte';
+export { default as Title, default as ArtifactTitle } from './ArtifactTitle.svelte';
+export { default as Description, default as ArtifactDescription } from './ArtifactDescription.svelte';
+export { default as Actions, default as ArtifactActions } from './ArtifactActions.svelte';
+export { default as Action, default as ArtifactAction } from './ArtifactAction.svelte';
+export { default as Content, default as ArtifactContent } from './ArtifactContent.svelte';
+export type { ArtifactKind } from './Artifact.svelte';
+export type { ArtifactActionProps } from './ArtifactAction.svelte';
+export type { ArtifactCloseProps } from './ArtifactClose.svelte';

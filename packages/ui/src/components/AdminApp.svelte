@@ -56,7 +56,7 @@
   import { useTranslation } from '@svadmin/core/i18n';
   import { QueryClient, QueryClientProvider, type DefaultOptions } from '@tanstack/svelte-query';
   import { setComponentRegistry, type ComponentRegistry } from '../component-registry.svelte.js';
-  import Layout from './Layout.svelte';
+  import Layout, { type LayoutAIAssistantProps } from './Layout.svelte';
   import AutoTable from './AutoTable.svelte';
   import AutoForm from './AutoForm.svelte';
   import ShowPage from './ShowPage.svelte';
@@ -114,6 +114,8 @@
     /** Theme configuration for dark-first mode, CSS overrides, etc. */
     themeConfig?: ThemeConfig;
     dashboard?: Snippet;
+    /** Optional AI assistant rendered by Layout. Keep AI UI in @svadmin/ai-elements. */
+    aiAssistant?: Snippet<[LayoutAIAssistantProps]>;
     loginPage?: Snippet;
     /** Prefill and display credentials on the default login page, useful for demos/examples. */
     loginDefaults?: {
@@ -169,6 +171,7 @@
     defaultTheme,
     themeConfig: userThemeConfig,
     dashboard,
+    aiAssistant,
     loginPage,
     loginDefaults,
     components: userComponents,
@@ -548,7 +551,7 @@
       <ErrorComp status={standaloneErrorStatus} />
     </SystemPageShell>
   {:else if isAuthenticated || !resolvedAuthProvider}
-    <Layout {title} {menu} {siteUrl} routeMode={resolvedRouteMode}>
+    <Layout {title} {menu} {siteUrl} routeMode={resolvedRouteMode} {aiAssistant}>
       <div class="relative min-h-40" aria-busy={authRechecking}>
         {#if authRechecking}
           <div class="absolute inset-0 z-10 flex min-h-40 items-center justify-center bg-background/80" role="status" aria-live="polite">

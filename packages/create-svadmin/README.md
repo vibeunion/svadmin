@@ -23,6 +23,7 @@ The generated project is pre-configured with:
 - **Svelte 5** + **Vite**
 - **Tailwind CSS** + **Shadcn Svelte** UI components
 - **@svadmin/core**: The headless business logic and hooks (useTable, useForm, useAuth, etc.)
+- **@svadmin/ai-elements**: Composable Svelte 5 AI conversation, tool, reasoning, and source components.
 - **@svadmin/ui**: Beautiful default dashboard UI, standalone CRUD buttons, and data tables.
 - Pre-wired **TanStack Query** for client-state management.
 
@@ -64,9 +65,9 @@ Generated artifacts include:
 
 ## Eject Components / 组件弹出
 
-Extract internal `@svadmin/ui` components into your project for deep customization:
+Extract internal `@svadmin/ui` components into your project for deep customization. AI components are published separately in `@svadmin/ai-elements`:
 
-将 `@svadmin/ui` 内部组件提取到你的项目中，实现深度定制：
+将 `@svadmin/ui` 内部组件提取到你的项目中，实现深度定制；AI 组件单独发布在 `@svadmin/ai-elements`：
 
 ```bash
 # Eject all components / 弹出全部组件
@@ -90,7 +91,9 @@ Ejected files are placed in `src/components/svadmin/`. Then pass them via the `c
 
 ### Available Components / 可弹出的组件
 
-`Layout` · `Sidebar` · `Header` · `LoginPage` · `AutoTable` · `AutoForm` · `ShowPage` · `ProfilePage` · `StatsCard` · `AuditLogDrawer` · `LiveIndicator` · `CommandPalette` · `AICommandBar` · `ChatDialog` · `PasswordInput` · `BooleanField` · `FieldRenderer` · `MarkdownRenderer` · `AnomalyBadge` · `Toast` · `ConfirmDialog` · `TooltipButton` · `Breadcrumbs` · `ConfigErrorScreen` · `DevTools`
+`Layout` · `Sidebar` · `Header` · `LoginPage` · `AutoTable` · `AutoForm` · `ShowPage` · `ProfilePage` · `StatsCard` · `AuditLogDrawer` · `LiveIndicator` · `CommandPalette` · `PasswordInput` · `BooleanField` · `FieldRenderer` · `AnomalyBadge` · `Toast` · `ConfirmDialog` · `TooltipButton` · `Breadcrumbs` · `ConfigErrorScreen` · `DevTools`
+
+AI 组件请直接从 `@svadmin/ai-elements` 导入，例如 `ChatDialog`、`Conversation`、`Message`、`Response`、`PromptInput`、`Reasoning`、`Tool`、`Sources` 和 `InlineCitation`。
 
 ## Project Maintenance
 

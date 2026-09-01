@@ -1,0 +1,2 @@
+<script lang="ts">import type { Snippet } from 'svelte'; import { cn } from '../../utils.js'; import { useQuestionContext } from './context.svelte.js'; let { class: className = '', children, ...rest }: { class?: string; children?: Snippet; [key: string]: unknown } = $props(); const context = useQuestionContext();</script>
+<div class={cn('flex flex-wrap gap-2', className)} role={context.selectionMode === 'single' ? 'radiogroup' : 'group'} aria-label="Answer options" {...rest}>{@render children?.()}</div>

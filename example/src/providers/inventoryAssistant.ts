@@ -1,4 +1,5 @@
 import type { BaseRecord, ChatMessage, ChatProvider, DataProvider, ResourceDefinition } from '@svadmin/core';
+import { messageText } from '@svadmin/ai-elements/contracts';
 import { createMCPServer } from '@svadmin/mcp';
 
 type InventoryResource =
@@ -56,7 +57,8 @@ const helpText = [
 ].join('\n');
 
 function latestUserMessage(messages: ChatMessage[]): string {
-  return [...messages].reverse().find((message) => message.role === 'user')?.content ?? '';
+  const latest = [...messages].reverse().find((message) => message.role === 'user');
+  return latest ? messageText(latest) : '';
 }
 
 function hasAny(text: string, terms: string[]): boolean {

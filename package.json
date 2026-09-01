@@ -23,7 +23,7 @@
     "docs:dev": "cd docs && bun run dev",
     "docs:build": "cd docs && bun run build",
     "prepare": "husky",
-    "build:packages": "bun run --cwd packages/ui build && bun run --cwd packages/flow build && bun run --cwd packages/surface build && bun run --cwd packages/editor build && bun run --cwd packages/lite build && bun run --cwd packages/auth-utils build && bun run --cwd packages/sso build && bun run --cwd packages/create-svadmin build",
+    "build:packages": "bun run --cwd packages/ai-elements build && bun run --cwd packages/ui build && bun run --cwd packages/flow build && bun run --cwd packages/surface build && bun run --cwd packages/editor build && bun run --cwd packages/lite build && bun run --cwd packages/auth-utils build && bun run --cwd packages/sso build && bun run --cwd packages/create-svadmin build",
     "bundle:check": "bun scripts/check-example-bundle.ts",
     "check:lite:ssr": "bun run --cwd packages/lite/example check && bun run --cwd packages/lite/example verify:ssr",
     "pack:check": "bun scripts/check-package-packs.ts",

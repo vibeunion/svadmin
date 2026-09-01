@@ -1,0 +1,8 @@
+<script lang="ts">
+  import type { Snippet } from 'svelte'; import { onMount } from 'svelte'; import type { HTMLButtonAttributes } from 'svelte/elements'; import { Check } from '@lucide/svelte'; import { cn } from '../../utils.js'; import { useVoiceSelector } from './context.svelte.js';
+  interface Props extends Omit<HTMLButtonAttributes, 'children' | 'class' | 'value'> { value: string; searchValue?: string; class?: string; children?: Snippet; }
+  let { value, searchValue = value, class: className = '', children, disabled = false, onclick, ...rest }: Props = $props(); const selector = useVoiceSelector(); const id = $props.id(); let element = $state<HTMLButtonElement | null>(null);
+  onMount(() => selector.register({ id, value, searchValue, disabled: Boolean(disabled), select: () => element?.click() })); const visible = $derived(selector.isVisible(searchValue));
+  function click(event: MouseEvent & { currentTarget: EventTarget & HTMLButtonElement }): void { onclick?.(event); if (!event.defaultPrevented) selector.setValue(value); }
+</script>
+{#if visible}<button bind:this={element} {...rest} type="button" role="option" aria-selected={selector.value === value} class={cn('flex min-h-10 w-full items-center gap-2 rounded px-4 py-2 text-left text-sm hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring', selector.activeId === id && 'bg-muted', className)} data-slot="voice-selector-item" {disabled} onclick={click}>{#if selector.value === value}<Check size={14} aria-hidden="true" />{:else}<span class="size-3" aria-hidden="true"></span>{/if}{@render children?.()}</button>{/if}

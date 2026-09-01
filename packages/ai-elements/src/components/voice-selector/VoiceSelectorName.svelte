@@ -1,0 +1,2 @@
+<script lang="ts">import type { Snippet } from 'svelte'; import type { HTMLAttributes } from 'svelte/elements'; import { cn } from '../../utils.js'; interface Props extends Omit<HTMLAttributes<HTMLSpanElement>, 'children' | 'class'> { class?: string; children?: Snippet; } let { class: className = '', children, ...rest }: Props = $props();</script>
+<span {...rest} class={cn('min-w-0 flex-1 truncate text-left font-medium', className)} data-slot="voice-selector-name">{@render children?.()}</span>

@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { setChatProvider } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { AdminApp, setRichTextEditor } from '@svadmin/ui';
   import '@svadmin/ui/app.theme.css';
+  import '@svadmin/ai-elements/ai.css';
   import { inMemoryDataProvider } from './providers/inMemoryDb';
   import { createInventoryChatProvider } from './providers/inventoryAssistant';
   import { createResources } from './resources';
@@ -11,6 +11,7 @@
   import Dashboard from './pages/Dashboard.svelte';
   import LazyResourcePage from './components/LazyResourcePage.svelte';
   import LazyRichTextEditor from './components/LazyRichTextEditor.svelte';
+  import LazyChatDialog from './components/LazyChatDialog.svelte';
 
   // DesignPrinciplesPage and other showcase resources are lazy-loaded via LazyResourcePage
   registerExampleMenuTranslations();
@@ -24,9 +25,7 @@
   const appTitle = 'svadmin example';
   const loginHint = $derived(currentLocale === 'zh-CN' ? '已预填演示账号，方便快速测试。' : 'Demo credentials are prefilled for quick testing.');
 
-  $effect(() => {
-    setChatProvider(createInventoryChatProvider(inMemoryDataProvider, resources));
-  });
+  const chatProvider = $derived.by(() => createInventoryChatProvider(inMemoryDataProvider, resources));
 
   const resourcePages = $derived.by(() => ({
     ...Object.fromEntries(resources.map((resource) => [resource.name, { list: LazyResourcePage }])),
@@ -38,6 +37,7 @@
   dataProvider={inMemoryDataProvider}
   {resources}
   authProvider={mockAuthProvider}
+  {chatProvider}
   {resourcePages}
   {menu}
   title={appTitle}
@@ -48,7 +48,10 @@
     password: 'demo',
     hint: loginHint,
   }}
->
+  >
+  {#snippet aiAssistant({ docked, scope, ownerScope })}
+    <LazyChatDialog {docked} {scope} {ownerScope} />
+  {/snippet}
   {#snippet dashboard()}
     <Dashboard />
   {/snippet}

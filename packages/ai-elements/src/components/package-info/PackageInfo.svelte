@@ -1,0 +1,6 @@
+<script lang="ts">
+  import type { Snippet } from 'svelte'; import type { PackageChangeType } from './context.svelte.js'; import { cn } from '../../utils.js'; import { providePackageInfoContext } from './context.svelte.js'; import PackageInfoHeader from './PackageInfoHeader.svelte'; import PackageInfoName from './PackageInfoName.svelte'; import PackageInfoChangeType from './PackageInfoChangeType.svelte'; import PackageInfoVersion from './PackageInfoVersion.svelte';
+  let { name, currentVersion, newVersion, changeType, class: className = '', children, ...rest }: { name: string; currentVersion?: string; newVersion?: string; changeType?: PackageChangeType; class?: string; children?: Snippet; [key: string]: unknown } = $props();
+  providePackageInfoContext({ get name() { return name; }, get currentVersion() { return currentVersion; }, get newVersion() { return newVersion; }, get changeType() { return changeType; } });
+</script>
+<div class={cn('svadmin-ai rounded-lg border border-border bg-background p-4 text-foreground', className)} {...rest}>{#if children}{@render children()}{:else}<PackageInfoHeader><PackageInfoName />{#if changeType}<PackageInfoChangeType />{/if}</PackageInfoHeader>{#if currentVersion || newVersion}<PackageInfoVersion />{/if}{/if}</div>

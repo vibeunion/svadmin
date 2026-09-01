@@ -1,8 +1,9 @@
 import { spawnSync } from 'node:child_process';
 import type { SpawnSyncReturns } from 'node:child_process';
-import { access, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { access, cp, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { basename, join, resolve } from 'node:path';
+import { AI_ELEMENT_PARITY } from '../packages/ai-elements/src/parity-manifest.js';
 
 interface PackFile {
   path: string;
@@ -34,6 +35,7 @@ interface PackageManifest {
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   peerDependencies?: Record<string, string>;
+  peerDependenciesMeta?: Record<string, { optional?: boolean }>;
 }
 
 interface WorkspacePackage {
@@ -63,6 +65,12 @@ interface PackedCliFixtures {
 const repositoryRoot = resolve(import.meta.dir, '..');
 const packagesRoot = join(repositoryRoot, 'packages');
 const tscPath = join(repositoryRoot, 'node_modules', 'typescript', 'bin', 'tsc');
+const aiElementsConsumerFixture = join(
+  repositoryRoot,
+  'scripts',
+  'fixtures',
+  'ai-elements-packed-consumer',
+);
 const pnpmVersion = '11.11.0';
 const packedCliTimeoutMs = 15_000;
 const packedInstallTimeoutMs = 120_000;
@@ -72,8 +80,47 @@ const optionalMarkdownPeers = [
   'marked',
   'marked-highlight',
 ] as const;
-
 const expectations: PackageExpectation[] = [
+  {
+    directory: 'packages/ai-elements',
+    name: '@svadmin/ai-elements',
+    requiredFiles: [
+      'dist/index.js',
+      'dist/index.d.ts',
+      'dist/contracts.js',
+      'dist/contracts.d.ts',
+      'dist/generated-components.js',
+      'dist/generated-components.d.ts',
+      'dist/parity-manifest.js',
+      'dist/parity-manifest.d.ts',
+      'dist/components/context/index.js',
+      'dist/components/context/index.d.ts',
+      'dist/components/context/Context.svelte',
+      'dist/components/context/Context.svelte.d.ts',
+      'dist/components/context/context-state.svelte.js',
+      'dist/components/context/context-state.svelte.d.ts',
+      'dist/components/loader/index.js',
+      'dist/components/loader/index.d.ts',
+      'dist/components/copy-button/index.js',
+      'dist/components/copy-button/index.d.ts',
+      'dist/components/Response.svelte',
+      'dist/components/Response.svelte.d.ts',
+      'dist/ai.css',
+    ],
+    contentAssertions: [
+      {
+        path: 'dist/ai.css',
+        includes: [
+          '@source "./components";',
+          '@source "../node_modules/streamdown-svelte/dist/**/*.{js,svelte,ts}";',
+          '@source "../../../node_modules/streamdown-svelte/dist/**/*.{js,svelte,ts}";',
+          '@source "../../../streamdown-svelte/dist/**/*.{js,svelte,ts}";',
+          '.svadmin-ai',
+        ],
+        excludes: ['@source "./src";'],
+      },
+    ],
+  },
   {
     directory: 'packages/ui',
     name: '@svadmin/ui',
@@ -222,6 +269,17 @@ function assert(condition: unknown, message: string): asserts condition {
   }
 }
 
+function isTestArtifactPath(path: string): boolean {
+  const fileName = basename(path);
+
+  return (
+    /[.-](?:test|spec)(?:[.-]|$)/i.test(fileName) ||
+    /(?:^|[.-])test-host(?:[.-]|$)/i.test(fileName) ||
+    /TestHost(?:[.-]|$)/.test(fileName) ||
+    /^setupTest(?:[.-]|$)/.test(fileName)
+  );
+}
+
 function parsePackResult(output: string, packageName: string): PackResult {
   const parsed: unknown = JSON.parse(output);
   assert(Array.isArray(parsed) && parsed.length === 1, `${packageName}: npm pack did not return one result`);
@@ -292,6 +350,64 @@ function assertUiDependencyContract(manifest: PackageManifest): void {
     manifest.peerDependencies?.svelte === '^5.56.10',
     '@svadmin/ui: Svelte peer range must match the supported Svelte 5 release line',
   );
+}
+
+async function assertAiElementsPackageSurface(
+  packageDirectory: string,
+  manifest: PackageManifest,
+  filePaths: Set<string>,
+): Promise<void> {
+  const exportsMap = manifest.exports;
+  assert(
+    typeof exportsMap === 'object' && exportsMap !== null && !Array.isArray(exportsMap),
+    '@svadmin/ai-elements: exports must be an object',
+  );
+  assert(
+    Reflect.has(exportsMap, './components/*'),
+    '@svadmin/ai-elements: component-family wildcard export is missing',
+  );
+  assert(
+    Reflect.has(exportsMap, './components/*.svelte'),
+    '@svadmin/ai-elements: top-level Svelte component wildcard export is missing',
+  );
+
+  const sourceComponents = await readdir(join(packageDirectory, 'src', 'components'), {
+    withFileTypes: true,
+  });
+  const familyEntries = sourceComponents.filter((entry) => entry.isDirectory());
+  const parityFamilyDirectories = new Set(
+    AI_ELEMENT_PARITY.map(({ localDirectory }) => localDirectory),
+  );
+  assert(
+    parityFamilyDirectories.size === 49,
+    `@svadmin/ai-elements: expected 49 parity families, found ${parityFamilyDirectories.size}`,
+  );
+  const sourceFamilyDirectories = new Set(familyEntries.map(({ name }) => name));
+  const missingParityFamilies = [...parityFamilyDirectories].filter(
+    (directory) => !sourceFamilyDirectories.has(directory),
+  );
+  assert(
+    missingParityFamilies.length === 0,
+    `@svadmin/ai-elements: missing parity component families: ${missingParityFamilies.join(', ')}`,
+  );
+  for (const entry of sourceComponents) {
+    if (entry.isDirectory()) {
+      const prefix = `dist/components/${entry.name}/index`;
+      assert(
+        filePaths.has(`${prefix}.js`) && filePaths.has(`${prefix}.d.ts`),
+        `@svadmin/ai-elements: tarball is missing the ${entry.name} component-family subpath`,
+      );
+      continue;
+    }
+
+    if (!entry.isFile() || !entry.name.endsWith('.svelte')) continue;
+    if (isTestArtifactPath(entry.name)) continue;
+    const target = `dist/components/${entry.name}`;
+    assert(
+      filePaths.has(target) && filePaths.has(`${target}.d.ts`),
+      `@svadmin/ai-elements: tarball is missing the ${entry.name} component subpath`,
+    );
+  }
 }
 
 async function discoverWorkspacePackages(): Promise<WorkspacePackage[]> {
@@ -802,10 +918,10 @@ async function verifyUiPnpmPeerTree(
     consumerDirectory,
   );
 
-  const consumerEntry = join(consumerDirectory, 'markdown-import.ts');
+  const consumerEntry = join(consumerDirectory, 'ui-import.ts');
   await writeFile(
     consumerEntry,
-    `import { MarkdownRenderer } from '@svadmin/ui';\nconsole.info(typeof MarkdownRenderer);\n`,
+    `import { AdminApp } from '@svadmin/ui';\nconsole.info(typeof AdminApp);\n`,
   );
   const viteConfig = join(consumerDirectory, 'vite.config.mjs');
   await writeFile(
@@ -822,11 +938,154 @@ async function verifyUiPnpmPeerTree(
   return `pnpm@${pnpmVersion} strict packed consumer passed\nforbidden dependencies absent: cmdk-sv, sonner-svelte, @melt-ui/svelte\noptional markdown peers absent: ${optionalMarkdownPeers.join(', ')}\n${optionalPeerBuild.trim()}\n${dependencyTree.trim()}\nresolved Svelte versions: ${resolvedSvelteVersion}`;
 }
 
+async function verifyAiElementsPnpmConsumer(
+  packDirectory: string,
+  results: Map<string, PackResult>,
+  manifests: Map<string, PackageManifest>,
+): Promise<string> {
+  const aiElementsManifest = manifests.get('@svadmin/ai-elements');
+  const aiElementsPack = results.get('@svadmin/ai-elements');
+  const coreManifest = manifests.get('@svadmin/core');
+  const corePack = results.get('@svadmin/core');
+  assert(aiElementsManifest, '@svadmin/ai-elements: missing manifest for pnpm verification');
+  assert(aiElementsPack, '@svadmin/ai-elements: missing tarball for pnpm verification');
+  assert(coreManifest, '@svadmin/core: missing manifest for AI Elements pnpm verification');
+  assert(corePack, '@svadmin/core: missing tarball for AI Elements pnpm verification');
+
+  const rootManifest = JSON.parse(
+    await readFile(join(repositoryRoot, 'package.json'), 'utf8'),
+  ) as { overrides?: Record<string, string> };
+  const svelteVersion = rootManifest.overrides?.svelte;
+  const viteVersion = rootManifest.overrides?.vite;
+  const queryVersion = aiElementsManifest.peerDependencies?.['@tanstack/svelte-query'];
+  const sveltePluginVersion = aiElementsManifest.devDependencies?.['@sveltejs/vite-plugin-svelte'];
+  assert(svelteVersion, 'root package.json: overrides.svelte is required for AI Elements pnpm verification');
+  assert(viteVersion, 'root package.json: overrides.vite is required for AI Elements pnpm verification');
+  assert(
+    queryVersion,
+    '@svadmin/ai-elements: @tanstack/svelte-query peer range is required for pnpm verification',
+  );
+  assert(
+    aiElementsManifest.peerDependenciesMeta?.['@tanstack/svelte-query']?.optional !== true,
+    '@svadmin/ai-elements: @tanstack/svelte-query must be a non-optional peer dependency',
+  );
+  assert(
+    sveltePluginVersion,
+    '@svadmin/ai-elements: @sveltejs/vite-plugin-svelte dev dependency is required for pnpm verification',
+  );
+
+  const consumerDirectory = join(packDirectory, 'pnpm-ai-elements-consumer');
+  await mkdir(consumerDirectory, { recursive: true });
+  await writeFile(
+    join(consumerDirectory, 'package.json'),
+    `${JSON.stringify({
+      name: 'svadmin-pnpm-ai-elements-consumer',
+      private: true,
+      packageManager: `pnpm@${pnpmVersion}`,
+      dependencies: {
+        '@svadmin/core': `file:${join(packDirectory, corePack.filename)}`,
+        '@svadmin/ai-elements': `file:${join(packDirectory, aiElementsPack.filename)}`,
+        '@tanstack/svelte-query': queryVersion,
+        svelte: svelteVersion,
+      },
+      devDependencies: {
+        '@sveltejs/vite-plugin-svelte': sveltePluginVersion,
+        vite: viteVersion,
+      },
+    }, null, 2)}\n`,
+  );
+
+  run(
+    'npx',
+    [
+      '--yes',
+      `pnpm@${pnpmVersion}`,
+      'install',
+      '--strict-peer-dependencies',
+      '--ignore-scripts',
+      '--reporter',
+      'append-only',
+      '--store-dir',
+      join(consumerDirectory, '.pnpm-store'),
+    ],
+    consumerDirectory,
+  );
+
+  const installedCoreManifest = JSON.parse(
+    await readFile(join(consumerDirectory, 'node_modules', '@svadmin', 'core', 'package.json'), 'utf8'),
+  ) as PackageManifest;
+  assert(
+    installedCoreManifest.name === '@svadmin/core',
+    '@svadmin/core: pnpm strict consumer did not install the packed core tarball',
+  );
+  const installedAiElementsManifest = JSON.parse(
+    await readFile(join(consumerDirectory, 'node_modules', '@svadmin', 'ai-elements', 'package.json'), 'utf8'),
+  ) as PackageManifest;
+  assert(
+    installedAiElementsManifest.name === '@svadmin/ai-elements',
+    '@svadmin/ai-elements: pnpm strict consumer did not install the packed tarball',
+  );
+  assert(
+    installedAiElementsManifest.peerDependencies?.['@tanstack/svelte-query'] === queryVersion,
+    '@svadmin/ai-elements: packed manifest lost the @tanstack/svelte-query peer range',
+  );
+  assert(
+    installedAiElementsManifest.peerDependenciesMeta?.['@tanstack/svelte-query']?.optional !== true,
+    '@svadmin/ai-elements: packed manifest marks @tanstack/svelte-query as optional',
+  );
+
+  const virtualStoreEntries = await readdir(join(consumerDirectory, 'node_modules', '.pnpm'));
+  const svelteVersions = new Set(
+    virtualStoreEntries
+      .map((entry) => /^svelte@([^_]+)(?:_|$)/.exec(entry)?.[1])
+      .filter((version): version is string => version !== undefined),
+  );
+  assert(
+    svelteVersions.size === 1,
+    `@svadmin/ai-elements: pnpm strict consumer resolved multiple Svelte versions: ${[...svelteVersions].join(', ')}`,
+  );
+  const [resolvedSvelteVersion] = svelteVersions;
+  assert(
+    resolvedSvelteVersion?.startsWith('5.'),
+    `@svadmin/ai-elements: pnpm strict consumer did not resolve Svelte 5: ${resolvedSvelteVersion ?? 'none'}`,
+  );
+
+  const dependencyTree = run(
+    'npx',
+    ['--yes', `pnpm@${pnpmVersion}`, 'list', 'svelte', '--depth', 'Infinity'],
+    consumerDirectory,
+  );
+
+  await cp(aiElementsConsumerFixture, consumerDirectory, { recursive: true });
+  run('node', [tscPath, '--project', 'tsconfig.json'], consumerDirectory);
+
+  const vitePath = join(repositoryRoot, 'node_modules', 'vite', 'bin', 'vite.js');
+  const optionalPeerBuild = run(
+    'node',
+    [vitePath, 'build', '--config', 'vite.config.mjs'],
+    consumerDirectory,
+  );
+  const ssrOutput = run('node', ['ssr-smoke.mjs'], consumerDirectory);
+
+  return `@svadmin/ai-elements pnpm@${pnpmVersion} strict packed consumer passed\nContextUsage strict type consumer passed\n${ssrOutput.trim()}\n${optionalPeerBuild.trim()}\n${dependencyTree.trim()}\nresolved Svelte versions: ${resolvedSvelteVersion}`;
+}
+
 async function createConsumer(packDirectory: string, results: Map<string, PackResult>): Promise<string> {
   const consumerDirectory = join(packDirectory, 'consumer');
   const nodeModules = join(consumerDirectory, 'node_modules');
   await mkdir(nodeModules, { recursive: true });
   await writeFile(join(consumerDirectory, 'package.json'), '{"private":true,"type":"module"}\n');
+
+  const aiElementsPack = results.get('@svadmin/ai-elements');
+  assert(aiElementsPack, '@svadmin/ai-elements: missing pack result for consumer verification');
+  const aiElementComponentSpecifiers = aiElementsPack.files
+    .flatMap(({ path }) => {
+      const family = /^dist\/components\/([^/]+)\/index\.js$/.exec(path)?.[1];
+      if (family) return [`@svadmin/ai-elements/components/${family}`];
+      const component = /^dist\/components\/([^/]+\.svelte)$/.exec(path)?.[1];
+      return component ? [`@svadmin/ai-elements/components/${component}`] : [];
+    })
+    .sort();
 
   for (const expectation of expectations) {
     const result = results.get(expectation.name);
@@ -871,6 +1130,11 @@ export interface Identity { [key: string]: unknown }
 import { fileURLToPath } from 'node:url';
 
 const resolvable = [
+  '@svadmin/ai-elements',
+  '@svadmin/ai-elements/contracts',
+  '@svadmin/ai-elements/parity',
+  '@svadmin/ai-elements/ai.css',
+  ...${JSON.stringify(aiElementComponentSpecifiers)},
   '@svadmin/ui',
   '@svadmin/ui/components/AdminApp.svelte',
   '@svadmin/ui/app.css',
@@ -1136,7 +1400,7 @@ async function main(): Promise<void> {
       }
 
       assert(
-        !result.files.some((file) => /(?:^|\/)[^/]*\.(?:test|spec)(?:[.-]|$)/.test(file.path)),
+        !result.files.some((file) => isTestArtifactPath(file.path)),
         `${manifest.name}: tarball unexpectedly publishes test or fixture files`,
       );
 
@@ -1173,6 +1437,10 @@ async function main(): Promise<void> {
 
       }
 
+      if (manifest.name === '@svadmin/ai-elements') {
+        await assertAiElementsPackageSurface(packageDirectory, manifest, filePaths);
+      }
+
       results.set(manifest.name, result);
       manifests.set(manifest.name, manifest);
 
@@ -1200,6 +1468,12 @@ async function main(): Promise<void> {
     console.info(peerTreeOutput.trim());
     const pnpmPeerTreeOutput = await verifyUiPnpmPeerTree(temporaryDirectory, results, manifests);
     console.info(pnpmPeerTreeOutput.trim());
+    const aiElementsConsumerOutput = await verifyAiElementsPnpmConsumer(
+      temporaryDirectory,
+      results,
+      manifests,
+    );
+    console.info(aiElementsConsumerOutput.trim());
     const surfaceCompatibilityOutput = await verifySurfaceCompatibility(temporaryDirectory, results, manifests);
     console.info(surfaceCompatibilityOutput.trim());
 

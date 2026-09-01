@@ -1,0 +1,2 @@
+<script lang="ts">import type { Snippet } from 'svelte'; import { cn } from '../../utils.js'; import { useEnvironmentVariableContext } from './context.svelte.js'; let { class: className = '', children, ...rest }: { class?: string; children?: Snippet<[string]>; [key: string]: unknown } = $props(); const context = useEnvironmentVariableContext();</script>
+<span class={cn('truncate font-mono text-sm', className)} {...rest}>{#if children}{@render children(context.name)}{:else}{context.name}{/if}</span>

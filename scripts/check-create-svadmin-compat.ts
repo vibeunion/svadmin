@@ -31,6 +31,7 @@ interface GeneratedProject {
 interface WorkspaceManifests {
   byName: Map<string, PackageManifest>;
   core: PackageManifest;
+  aiElements: PackageManifest;
   ui: PackageManifest;
   simpleRest: PackageManifest;
   supabase: PackageManifest;
@@ -209,8 +210,9 @@ function generateProjects(repositoryRoot: string, scaffoldManifestPath?: string)
 
 async function loadCompatibilityContext(repositoryRoot: string): Promise<CompatibilityContext> {
   const packagePath = (directory: string) => join(repositoryRoot, 'packages', directory, 'package.json');
-  const [core, ui, simpleRest, supabase, graphql, rootManifest, exampleManifest] = await Promise.all([
+  const [core, aiElements, ui, simpleRest, supabase, graphql, rootManifest, exampleManifest] = await Promise.all([
     readPackageManifest(packagePath('core')),
+    readPackageManifest(packagePath('ai-elements')),
     readPackageManifest(packagePath('ui')),
     readPackageManifest(packagePath('simple-rest')),
     readPackageManifest(packagePath('supabase')),
@@ -218,7 +220,7 @@ async function loadCompatibilityContext(repositoryRoot: string): Promise<Compati
     readPackageManifest(join(repositoryRoot, 'package.json')),
     readPackageManifest(join(repositoryRoot, 'example', 'package.json')),
   ]);
-  const workspacePackages = [core, ui, simpleRest, supabase, graphql];
+  const workspacePackages = [core, aiElements, ui, simpleRest, supabase, graphql];
   return {
     repositoryRoot,
     rootManifest,
@@ -226,6 +228,7 @@ async function loadCompatibilityContext(repositoryRoot: string): Promise<Compati
     workspace: {
       byName: new Map(workspacePackages.map((manifest) => [manifest.name, manifest])),
       core,
+      aiElements,
       ui,
       simpleRest,
       supabase,
@@ -257,6 +260,7 @@ function baseRuntimeIssues(
 ): string[] {
   return compactIssues([
     workspaceVersionIssue(project, workspace.core),
+    workspaceVersionIssue(project, workspace.aiElements),
     workspaceVersionIssue(project, workspace.ui),
     exactDependencyIssue({
       label: project.label,
@@ -268,19 +272,13 @@ function baseRuntimeIssues(
       label: project.label,
       dependencies: project.manifest.dependencies,
       packageName: '@tanstack/svelte-query',
-      expectedVersion: workspace.core.peerDependencies['@tanstack/svelte-query'],
+      expectedVersion: workspace.aiElements.peerDependencies['@tanstack/svelte-query'],
     }),
     exactDependencyIssue({
       label: project.label,
       dependencies: project.manifest.dependencies,
       packageName: '@lucide/svelte',
       expectedVersion: workspace.ui.dependencies['@lucide/svelte'],
-    }),
-    exactDependencyIssue({
-      label: project.label,
-      dependencies: project.manifest.dependencies,
-      packageName: 'highlight.js',
-      expectedVersion: workspace.ui.peerDependencies['highlight.js'],
     }),
   ]);
 }
@@ -412,7 +410,12 @@ async function projectCompatibilityIssues(
   installedManifestCache: Map<string, PackageManifest | null>,
 ): Promise<string[]> {
   const selectedProviders = selectedWorkspaceProviderManifests(project, context.workspace);
-  const workspacePeerSources = [context.workspace.core, context.workspace.ui, ...selectedProviders];
+  const workspacePeerSources = [
+    context.workspace.core,
+    context.workspace.aiElements,
+    context.workspace.ui,
+    ...selectedProviders,
+  ];
   return [
     ...baseRuntimeIssues(project, context.workspace),
     ...selectedProviders

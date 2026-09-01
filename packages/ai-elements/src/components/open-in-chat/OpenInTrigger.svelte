@@ -1,0 +1,4 @@
+<script lang="ts">
+  import type { Snippet } from 'svelte'; import { ChevronDown } from '@lucide/svelte'; import { cn } from '../../utils.js'; import { useOpenInContext } from './context.svelte.js'; let { class: className = '', children, ...rest }: { class?: string; children?: Snippet; [key: string]: unknown } = $props(); const context = useOpenInContext();
+</script>
+<button type="button" class={cn('inline-flex min-h-9 items-center justify-center gap-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring', className)} aria-haspopup="menu" aria-expanded={context.open} onclick={() => context.setOpen(!context.open)} {...rest}>{#if children}{@render children()}{:else}Open in chat{/if}<ChevronDown size={16} aria-hidden="true" /></button>

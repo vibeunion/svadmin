@@ -1,0 +1,2 @@
+<script lang="ts">import type { Snippet } from 'svelte'; import { cn } from '../../utils.js'; let { class: className = '', children, ...rest }: { class?: string; children?: Snippet; [key: string]: unknown } = $props();</script>
+<span class={cn('inline-flex rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground', className)} {...rest}>{#if children}{@render children()}{:else}Required{/if}</span>

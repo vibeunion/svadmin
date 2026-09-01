@@ -56,7 +56,8 @@ svadmin 提供面向真实管理后台的**企业能力构建块**。组件和 P
 | 分析与规则 | `PivotTable`、`DecisionTable`、`CanvasAnnotation`、`SpreadsheetView`、`SignaturePad` | 对应的 `Lite*` 组件 | 多维分析、规则执行、标注、表格计算和签名 |
 | 布局 | `SplitPaneLayout` | `LiteSplitPaneLayout` | 详情检查器和高密度双栏后台页面 |
 
-`DevTools` 与 `CopilotPanel` 明确为仅 SPA 组件，因为它们依赖浏览器端开发者工具或 AI 交互。它们在对齐矩阵中标记为 SPA-only，不提供容易误导的服务端替代品。
+`DevTools` 明确为仅 SPA 组件，因为它依赖浏览器端开发者工具。AI 交互组件现已归入
+`@svadmin/ai-elements`，不计入 `@svadmin/ui` ↔ `@svadmin/lite` 对齐矩阵。
 
 上述组件只是无头构建块。组件回调必须接入经过认证、按租户隔离的后端操作；渲染按钮或表单本身不会完成授权，也不会自动持久化业务变更。
 

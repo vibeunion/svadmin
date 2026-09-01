@@ -55,6 +55,7 @@ vi.mock('@svadmin/core', () => ({
     accessControlProvider: { can: vi.fn() },
     agentProvider: undefined,
     chatProvider: undefined,
+    currentPath: () => '/users',
     formatLink: (path: string) => path,
     navigate: vi.fn(),
     resources: [mocks.resource],
@@ -74,6 +75,7 @@ vi.mock('@svadmin/core', () => ({
   },
   useDelete: () => ({ mutation: { mutateAsync: vi.fn() } }),
   useNavigation: () => mocks.navigation,
+  useParsed: () => ({ resource: 'users', action: 'list', id: undefined }),
   useTranslation,
 }));
 

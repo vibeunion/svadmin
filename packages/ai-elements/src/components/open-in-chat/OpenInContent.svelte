@@ -1,0 +1,2 @@
+<script lang="ts">import type { Snippet } from 'svelte'; import { cn } from '../../utils.js'; import { useOpenInContext } from './context.svelte.js'; let { class: className = '', children, ...rest }: { class?: string; children?: Snippet; [key: string]: unknown } = $props(); const context = useOpenInContext();</script>
+{#if context.open}<div class={cn('absolute left-0 top-full z-50 mt-1 grid w-60 gap-0.5 rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md', className)} role="menu" {...rest}>{@render children?.()}</div>{/if}

@@ -1,0 +1,2 @@
+<script lang="ts">import type { Snippet } from 'svelte'; import { cn } from '../../utils.js'; import { useSandboxContext } from './context.svelte.js'; let { class: className = '', children, ...rest }: { class?: string; children?: Snippet; [key: string]: unknown } = $props(); const context = useSandboxContext();</script>
+{#if context.open}<div class={cn('border-t border-border', className)} data-state="open" {...rest}>{@render children?.()}</div>{/if}

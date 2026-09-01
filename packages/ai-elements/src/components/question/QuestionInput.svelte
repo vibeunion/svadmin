@@ -1,0 +1,4 @@
+<script lang="ts">
+  import { cn } from '../../utils.js'; import { useQuestionContext } from './context.svelte.js'; let { class: className = '', disabled = false, oninput, ...rest }: { class?: string; disabled?: boolean; oninput?: (event: Event & { currentTarget: HTMLTextAreaElement }) => void; [key: string]: unknown } = $props(); const context = useQuestionContext();
+</script>
+<textarea class={cn('min-h-20 w-full resize-y rounded-md border border-input bg-background p-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:opacity-50', className)} value={context.value.text} disabled={context.disabled || disabled || context.busy} oninput={(event) => { context.setText(event.currentTarget.value); oninput?.(event); }} {...rest}></textarea>

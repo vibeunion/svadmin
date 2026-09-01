@@ -1,0 +1,3 @@
+<script lang="ts">import type { Snippet } from 'svelte'; import type { HTMLAttributes } from 'svelte/elements'; import { cn } from '../../utils.js'; interface Props extends Omit<HTMLAttributes<HTMLPreElement>, 'children' | 'class'> { class?: string; children?: Snippet; } let { class: className = '', children, ...rest }: Props = $props();</script>
+<pre {...rest} class={cn('svadmin-ai-tests-part__error-stack', className)} data-slot="test-error-stack">{@render children?.()}</pre>
+<style>.svadmin-ai-tests-part__error-stack { margin: .45rem 0 0; overflow: auto; color: var(--destructive, currentColor); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .68rem; line-height: 1.5; }</style>

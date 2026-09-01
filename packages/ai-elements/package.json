@@ -1,0 +1,95 @@
+{
+  "name": "@svadmin/ai-elements",
+  "version": "0.1.0",
+  "description": "Composable Svelte 5 AI interaction components for SVAdmin",
+  "type": "module",
+  "sideEffects": ["./dist/ai.css"],
+  "files": [
+    "dist",
+    "README.md",
+    "THIRD_PARTY_NOTICES.md",
+    "!dist/**/*.test.*",
+    "!dist/**/*.test-*",
+    "!dist/**/*.spec.*",
+    "!dist/**/*.spec-*"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "svelte": "./dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "svelte": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./ai.css": {
+      "svelte": "./dist/ai.css",
+      "style": "./dist/ai.css",
+      "import": "./dist/ai.css",
+      "default": "./dist/ai.css"
+    },
+    "./components/*.svelte": {
+      "types": "./dist/components/*.svelte.d.ts",
+      "svelte": "./dist/components/*.svelte",
+      "default": "./dist/components/*.svelte"
+    },
+    "./components/*": {
+      "types": "./dist/components/*/index.d.ts",
+      "svelte": "./dist/components/*/index.js",
+      "default": "./dist/components/*/index.js"
+    },
+    "./contracts": {
+      "types": "./dist/contracts.d.ts",
+      "default": "./dist/contracts.js"
+    },
+    "./parity": {
+      "types": "./dist/parity-manifest.d.ts",
+      "default": "./dist/parity-manifest.js"
+    }
+  },
+  "peerDependencies": {
+    "@svadmin/core": "workspace:*",
+    "@tanstack/svelte-query": "^6.1.48",
+    "svelte": "^5.56.10"
+  },
+  "peerDependenciesMeta": {
+    "svelte": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@lucide/svelte": "^1.35.0",
+    "@rive-app/webgl2": "^2.41.0",
+    "@sinclair/typebox": "^0.34.52",
+    "@xyflow/svelte": "^1.6.5",
+    "clsx": "^2.1.1",
+    "streamdown-svelte": "^3.0.6",
+    "tailwind-merge": "^3.6.0",
+    "tailwind-variants": "^3.3.1"
+  },
+  "devDependencies": {
+    "@happy-dom/global-registrator": "^20.11.12",
+    "@sveltejs/vite-plugin-svelte": "^7.3.0",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/svelte": "^5.4.2",
+    "@testing-library/user-event": "^14.6.6",
+    "@types/bun": "^1.4.0",
+    "happy-dom": "^20.11.12",
+    "vitest": "^4.1.11"
+  },
+  "scripts": {
+    "build": "node ../../node_modules/@sveltejs/package/svelte-package.js -i src -o dist && bun scripts/clean-dist.ts",
+    "check": "svelte-check --tsgo-experimental-api --tsconfig ./tsconfig.json --threshold error",
+    "test": "vitest run --config ./vitest.config.ts && bun test scripts/clean-dist.test.ts"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "zuohuadong",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vibeunion/svadmin.git",
+    "directory": "packages/ai-elements"
+  }
+}

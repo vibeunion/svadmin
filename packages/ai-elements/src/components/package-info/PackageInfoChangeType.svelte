@@ -1,0 +1,5 @@
+<script lang="ts">
+  import type { Snippet } from 'svelte'; import { ArrowRight, Minus, Plus } from '@lucide/svelte'; import { cn } from '../../utils.js'; import { usePackageInfoContext } from './context.svelte.js';
+  let { class: className = '', children, ...rest }: { class?: string; children?: Snippet<[string]>; [key: string]: unknown } = $props(); const context = usePackageInfoContext(); const changeType = $derived(context.changeType);
+</script>
+{#if changeType}<span class={cn('inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs capitalize', changeType === 'patch' && 'bg-success/10 text-success', changeType === 'minor' && 'bg-warning/10 text-warning', changeType === 'major' && 'bg-destructive/10 text-destructive', changeType === 'added' && 'bg-info/10 text-info', changeType === 'removed' && 'bg-muted text-muted-foreground', className)} data-change-type={changeType} {...rest}>{#if changeType === 'added'}<Plus size={12} aria-hidden="true" />{:else if changeType === 'removed'}<Minus size={12} aria-hidden="true" />{:else}<ArrowRight size={12} aria-hidden="true" />{/if}{#if children}{@render children(changeType)}{:else}{changeType}{/if}</span>{/if}

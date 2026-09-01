@@ -45,6 +45,18 @@
         }
       ]
     },
+    "packages/ai-elements": {
+      "release-type": "node",
+      "component": "ai-elements",
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "/packages/create-svadmin/scaffold-manifest.json",
+          "jsonpath": "$.dependencies[\"@svadmin/ai-elements\"]"
+        }
+      ]
+    },
     "packages/ui": {
       "release-type": "node",
       "component": "ui",

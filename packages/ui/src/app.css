@@ -572,57 +572,6 @@ main {
 /* ─── svadmin UI Components CSS ─────────────────────────────── */
 /* These rules were moved from .svelte files to eliminate <style> tags */
 
-/* MarkdownRenderer Styles */
-.prose {
-  line-height: 1.6;
-}
-.prose p {
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
-}
-
-/* Streaming cursor effect */
-.streaming > *:last-child::after {
-  content: '▋';
-  display: inline-block;
-  animation: svadmin-blink 1s step-start infinite;
-  margin-left: 2px;
-  vertical-align: baseline;
-  color: currentColor;
-}
-
-@keyframes svadmin-blink {
-  50% { opacity: 0; }
-}
-
-/* Handle copied state for dynamically injected buttons.
- * The check icon itself is swapped in by MarkdownRenderer (createCheckIcon)
- * with stroke="currentColor" so it inherits this semantic token color. */
-.copy-btn[data-copied-id] {
-  color: var(--success);
-}
-
-/* ChatDialog Styles */
-.chat-markdown pre.chat-code-block {
-  background: var(--color-muted, hsl(var(--muted)));
-  border-radius: 0.5rem;
-  padding: 0.75rem;
-  margin: 0.5rem 0;
-  overflow-x: auto;
-  font-size: 0.75rem;
-  line-height: 1.5;
-}
-.chat-markdown code.chat-inline-code {
-  background: var(--color-muted, hsl(var(--muted)));
-  padding: 0.125rem 0.375rem;
-  border-radius: 0.25rem;
-  font-size: 0.8125em;
-  font-family: ui-monospace, monospace;
-}
-.chat-markdown strong {
-  font-weight: 600;
-}
-
 /* Collapsible details normalization stays scoped to svadmin-owned hooks. */
 details[data-svadmin-filter]:not([open]) > :not(summary),
 details.svadmin-collapsible-filter:not([open]) > :not(summary),

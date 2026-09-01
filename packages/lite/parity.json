@@ -1,18 +1,18 @@
 {
-  "timestamp": "2026-08-31T06:09:32.472Z",
-  "totalComponents": 106,
-  "adaptedCount": 92,
+  "timestamp": "2026-09-01T03:07:50.023Z",
+  "totalComponents": 103,
+  "adaptedCount": 91,
   "fallbackCount": 10,
-  "spaOnlyCount": 4,
+  "spaOnlyCount": 2,
   "missingCount": 0,
   "overallCoveragePercentage": 100,
   "categories": {
     "fields": {
       "category": "fields",
-      "total": 33,
+      "total": 32,
       "adapted": 29,
       "fallback": 3,
-      "spaOnly": 1,
+      "spaOnly": 0,
       "missing": 0,
       "percentage": 100
     },
@@ -45,8 +45,8 @@
     },
     "widgets": {
       "category": "widgets",
-      "total": 11,
-      "adapted": 8,
+      "total": 10,
+      "adapted": 7,
       "fallback": 3,
       "spaOnly": 0,
       "missing": 0,
@@ -54,10 +54,10 @@
     },
     "advanced": {
       "category": "advanced",
-      "total": 31,
+      "total": 30,
       "adapted": 25,
       "fallback": 4,
-      "spaOnly": 2,
+      "spaOnly": 1,
       "missing": 0,
       "percentage": 100
     }
@@ -504,14 +504,6 @@
       "strategy": "服务端指标条、趋势与原生链接"
     },
     {
-      "name": "InsightCard",
-      "uiComponent": "InsightCard.svelte",
-      "liteComponent": "widgets/LiteInsightCard.svelte",
-      "category": "widgets",
-      "status": "exact",
-      "strategy": "业务洞察指标容器"
-    },
-    {
       "name": "AnomalyBadge",
       "uiComponent": "AnomalyBadge.svelte",
       "liteComponent": "widgets/LiteAnomalyBadge.svelte",
@@ -894,22 +886,6 @@
       "status": "spa_only",
       "strategy": "免适配 (SPA 调试器)",
       "note": "受限环境不需要客户端 DevTools 悬浮球"
-    },
-    {
-      "name": "CopilotPanel",
-      "uiComponent": "CopilotPanel.svelte",
-      "category": "advanced",
-      "status": "spa_only",
-      "strategy": "免适配 (AI Copilot 客户端浮窗)",
-      "note": "AI 交互通过 ChatDialog 服务端页面承接"
-    },
-    {
-      "name": "VoiceInput",
-      "uiComponent": "VoiceInput.svelte",
-      "category": "fields",
-      "status": "spa_only",
-      "strategy": "免适配 (Web Speech API)",
-      "note": "受限浏览器无麦克风与 Speech Recognition API"
     }
   ]
 }

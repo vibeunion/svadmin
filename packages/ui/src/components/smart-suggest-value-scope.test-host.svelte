@@ -5,7 +5,7 @@
     type DataProvider,
     type TenantContext,
   } from '@svadmin/core';
-  import SmartSuggest from './SmartSuggest.svelte';
+  import { SmartSuggest } from '@svadmin/ai-elements';
 
   let {
     chatProvider,

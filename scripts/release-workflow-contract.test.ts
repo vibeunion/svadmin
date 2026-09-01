@@ -184,6 +184,15 @@ describe('npm trusted-publishing workflow contract', () => {
     expect(releaseManifest['packages/flow']).toBe(flowPackage.version);
   });
 
+  test('keeps the AI Elements package in the release and scaffold chain', () => {
+    const aiElementsPackage = readPackageJson('packages/ai-elements/package.json');
+    const releaseConfig = readReleasePleaseConfig();
+    const releaseManifest = readReleasePleaseManifest();
+
+    expect(releaseConfig.packages['packages/ai-elements']?.component).toBe('ai-elements');
+    expect(releaseManifest['packages/ai-elements']).toBe(aiElementsPackage.version);
+  });
+
   test('continues publishing after a package failure and reports the aggregate result', () => {
     const ciWorkflow = readWorkflow('ci.yml');
     const publishStep = ciWorkflow.slice(ciWorkflow.indexOf('      - name: Publish released packages'));
@@ -385,6 +394,7 @@ describe('release-please scaffold synchronization', () => {
     const config = readReleasePleaseConfig();
     const expectedExtraFiles = [
       ['packages/core', '$.dependencies["@svadmin/core"]'],
+      ['packages/ai-elements', '$.dependencies["@svadmin/ai-elements"]'],
       ['packages/ui', '$.dependencies["@svadmin/ui"]'],
       ['packages/simple-rest', '$.svadmin.dependencyPacks["simple-rest"]["@svadmin/simple-rest"]'],
       ['packages/supabase', '$.svadmin.dependencyPacks["supabase"]["@svadmin/supabase"]'],
