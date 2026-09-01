@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.9.0](https://github.com/vibeunion/svadmin/compare/lite-v0.8.2...lite-v0.9.0) (2026-09-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* **ai-elements:** remove legacy AI component exports from @svadmin/ui.
+
+### 🚀 Features
+
+* **ai-elements:** add Svelte 5 AI component library ([#362](https://github.com/vibeunion/svadmin/issues/362)) ([6ae760d](https://github.com/vibeunion/svadmin/commit/6ae760dba8da58052654326b51ae4673bf2da385))
+* **lite:** complete metric badge and table parity ([#361](https://github.com/vibeunion/svadmin/issues/361)) ([d4158fd](https://github.com/vibeunion/svadmin/commit/d4158fda97091089cc87619e0aa6b31fc4210d75))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.34.2 <0.48.0 to >=0.48.0
+
 ## [0.8.2](https://github.com/vibeunion/svadmin/compare/lite-v0.8.1...lite-v0.8.2) (2026-08-30)
 
 
