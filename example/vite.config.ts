@@ -19,7 +19,7 @@ function manualChunks(id: string): string | undefined {
   }
   if (/\/node_modules\/(?:tailwind-merge|tailwind-variants|clsx)\//.test(normalizedId)) return 'styling';
   if (normalizedId.includes('/node_modules/svelte/')) return 'svelte-runtime';
-  return 'vendor';
+  return undefined;
 }
 
 export default defineConfig({

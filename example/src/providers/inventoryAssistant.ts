@@ -1,5 +1,5 @@
 import type { BaseRecord, ChatMessage, ChatProvider, DataProvider, ResourceDefinition } from '@svadmin/core';
-import { messageText } from '@svadmin/ai-elements';
+import { messageText } from '@svadmin/ai-elements/contracts';
 import { createMCPServer } from '@svadmin/mcp';
 
 type InventoryResource =

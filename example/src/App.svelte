@@ -1,7 +1,6 @@
 <script lang="ts">
   import { useTranslation } from '@svadmin/core/i18n';
   import { AdminApp, setRichTextEditor } from '@svadmin/ui';
-  import { ChatDialog } from '@svadmin/ai-elements';
   import '@svadmin/ui/app.theme.css';
   import '@svadmin/ai-elements/ai.css';
   import { inMemoryDataProvider } from './providers/inMemoryDb';
@@ -12,6 +11,7 @@
   import Dashboard from './pages/Dashboard.svelte';
   import LazyResourcePage from './components/LazyResourcePage.svelte';
   import LazyRichTextEditor from './components/LazyRichTextEditor.svelte';
+  import LazyChatDialog from './components/LazyChatDialog.svelte';
 
   // DesignPrinciplesPage and other showcase resources are lazy-loaded via LazyResourcePage
   registerExampleMenuTranslations();
@@ -50,7 +50,7 @@
   }}
   >
   {#snippet aiAssistant({ docked, scope, ownerScope })}
-    <ChatDialog {docked} {scope} {ownerScope} />
+    <LazyChatDialog {docked} {scope} {ownerScope} />
   {/snippet}
   {#snippet dashboard()}
     <Dashboard />
