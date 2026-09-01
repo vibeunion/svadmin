@@ -127,8 +127,8 @@ Use bullet points and do not include introductory text.`;
         <Sparkles class="size-4 text-primary" aria-hidden="true" />
         Copilot
       </h2>
-      <button type="button" class="svadmin-ai__button svadmin-ai__button--ghost min-h-8 px-2" aria-label="Close copilot" onclick={close}>
-        <X class="size-4" aria-hidden="true" />
+      <button type="button" class="svadmin-ai__icon-button svadmin-ai__icon-button--close" aria-label="Close copilot" title="Close copilot" onclick={close}>
+        <X size={14} strokeWidth={1.75} aria-hidden="true" />
       </button>
     </header>
 
