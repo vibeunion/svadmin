@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.49.0](https://github.com/vibeunion/svadmin/compare/core-v0.48.0...core-v0.49.0) (2026-09-01)
+
+
+### 🚀 Features
+
+* **ai-elements:** align Svelte AI component ecosystem ([#367](https://github.com/vibeunion/svadmin/issues/367)) ([b495a93](https://github.com/vibeunion/svadmin/commit/b495a934456c4f6fb34f8325bcb270bff194f66c))
+
 ## [0.48.0](https://github.com/vibeunion/svadmin/compare/core-v0.47.1...core-v0.48.0) (2026-09-01)
 
 
