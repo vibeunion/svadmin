@@ -138,6 +138,7 @@ export default ts.config(
       '.agents/**',
       'output/**',
       'private/**',
+      'xigu-fa/**',
     ],
   },
 );

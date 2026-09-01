@@ -299,6 +299,7 @@ jobs:
 
           failed=0
           while IFS= read -r pkg_dir; do
+            [ -z "$pkg_dir" ] && continue
             PKG_JSON="$pkg_dir/package.json"
             if [ -f "$PKG_JSON" ]; then
               NAME=$(node -p "require(process.argv[1]).name" "./$PKG_JSON")
