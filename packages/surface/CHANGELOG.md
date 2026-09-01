@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.8.0](https://github.com/vibeunion/svadmin/compare/surface-v0.7.2...surface-v0.8.0) (2026-09-01)
+
+
+### 🚀 Features
+
+* **surface:** follow application locale ([d0f12cb](https://github.com/vibeunion/svadmin/commit/d0f12cbf1a8dca3b6f37f14ac69919b9e777afac))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.34.2 <0.48.0 to >=0.34.2 <0.49.0
+    * @svadmin/ui bumped from >=0.40.6 <0.67.0 to >=0.40.6 <0.68.0
+
 ## [0.7.2](https://github.com/vibeunion/svadmin/compare/surface-v0.7.1...surface-v0.7.2) (2026-08-31)
 
 

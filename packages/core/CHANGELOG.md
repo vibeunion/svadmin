@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.48.0](https://github.com/vibeunion/svadmin/compare/core-v0.47.1...core-v0.48.0) (2026-09-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* **ai-elements:** remove legacy AI component exports from @svadmin/ui.
+
+### 🚀 Features
+
+* **ai-elements:** add Svelte 5 AI component library ([#362](https://github.com/vibeunion/svadmin/issues/362)) ([6ae760d](https://github.com/vibeunion/svadmin/commit/6ae760dba8da58052654326b51ae4673bf2da385))
+
 ## [0.47.1](https://github.com/vibeunion/svadmin/compare/core-v0.47.0...core-v0.47.1) (2026-08-30)
 
 
