@@ -21,7 +21,17 @@ export {
 } from './supacloud';
 export type {
   SupaCloudTaskClient,
+  SupaCloudTaskLegacyClient,
+  SupaCloudTaskSdkClient,
   SupaCloudTaskRecord,
+  SupaCloudSdkTaskRecord,
+  SupaCloudSdkTaskSubmitOptions,
+  SupaCloudTaskReceipt,
+  SupaCloudTaskSnapshot,
+  SupaCloudTaskSubscribeState,
+  SupaCloudTaskSubscribeOptions,
+  SupaCloudSdkTaskWaitOptions,
+  SupaCloudSdkTaskClient,
   CreateSupaCloudTaskProviderOptions,
   CreateSupaCloudTaskLiveProviderOptions,
 } from './supacloud';

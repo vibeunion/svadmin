@@ -1,8 +1,52 @@
 /**
  * @svadmin/sso — Presets Unit Tests
  */
-import { describe, test, expect } from 'bun:test';
+import { afterEach, describe, test, expect } from 'bun:test';
 import type { TokenStorage } from './auth-provider';
+
+const originalFetch = globalThis.fetch;
+
+function installWindow(href = 'http://app.test/'): { location: { href: string; origin: string } } {
+  const testWindow = {
+    location: {
+      href,
+      origin: new URL(href).origin,
+    },
+    history: {
+      replaceState: (_state: unknown, _title: string, url: string) => {
+        testWindow.location.href = new URL(url, testWindow.location.href).href;
+      },
+    },
+  };
+  Object.defineProperty(globalThis, 'window', {
+    value: testWindow,
+    configurable: true,
+    writable: true,
+  });
+  return testWindow;
+}
+
+function jsonResponse(data: unknown): Response {
+  return new Response(JSON.stringify(data), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+function asFetcher(
+  handler: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
+): typeof fetch {
+  return handler as typeof fetch;
+}
+
+afterEach(() => {
+  Reflect.deleteProperty(globalThis, 'window');
+  Object.defineProperty(globalThis, 'fetch', {
+    value: originalFetch,
+    configurable: true,
+    writable: true,
+  });
+});
 
 // In-memory storage for tests (localStorage not available in Bun test)
 function createMemoryStorage(): TokenStorage {
@@ -89,6 +133,158 @@ describe('SSO presets', () => {
     });
     expect(provider).toBeTruthy();
     expect(typeof provider.login).toBe('function');
+  });
+
+  test('normalizes a Supauth public root for discovery and PKCE authorization', async () => {
+    const { createSupauthAuth } = await import('./presets');
+    const testWindow = installWindow();
+    const calls: string[] = [];
+    const provider = createSupauthAuth('admin-console', {
+      issuer: 'https://auth.example.test/',
+      redirectUri: 'http://app.test/callback',
+      storage: createMemoryStorage(),
+      autoRefresh: false,
+      fetcher: asFetcher(async (input) => {
+        calls.push(input instanceof Request ? input.url : String(input));
+        return jsonResponse({
+          authorization_endpoint: 'https://auth.example.test/auth/v1/oauth/authorize',
+          token_endpoint: 'https://auth.example.test/auth/v1/oauth/token',
+          userinfo_endpoint: 'https://auth.example.test/auth/v1/oauth/userinfo',
+        });
+      }),
+    });
+
+    expect(await provider.login({})).toEqual({ success: true });
+    expect(calls).toEqual([
+      'https://auth.example.test/auth/v1/.well-known/openid-configuration',
+    ]);
+    const redirect = new URL(testWindow.location.href);
+    expect(`${redirect.origin}${redirect.pathname}`).toBe(
+      'https://auth.example.test/auth/v1/oauth/authorize',
+    );
+    expect(redirect.searchParams.get('client_id')).toBe('admin-console');
+    expect(redirect.searchParams.get('code_challenge_method')).toBe('S256');
+    expect(redirect.searchParams.get('code_challenge')).toBeTruthy();
+    provider.destroy();
+  });
+
+  test('does not duplicate an existing Supauth auth API path', async () => {
+    const { createSupauthAuth } = await import('./presets');
+    installWindow();
+    const calls: string[] = [];
+    const provider = createSupauthAuth('admin-console', {
+      issuer: 'https://auth.example.test/auth/v1/',
+      redirectUri: 'http://app.test/callback',
+      storage: createMemoryStorage(),
+      autoRefresh: false,
+      fetcher: asFetcher(async (input) => {
+        calls.push(input instanceof Request ? input.url : String(input));
+        return jsonResponse({
+          authorization_endpoint: 'https://auth.example.test/auth/v1/oauth/authorize',
+          token_endpoint: 'https://auth.example.test/auth/v1/oauth/token',
+          userinfo_endpoint: 'https://auth.example.test/auth/v1/oauth/userinfo',
+        });
+      }),
+    });
+
+    expect(await provider.login({})).toEqual({ success: true });
+    expect(calls).toEqual([
+      'https://auth.example.test/auth/v1/.well-known/openid-configuration',
+    ]);
+    provider.destroy();
+  });
+
+  test('uses the Supauth hosted logout endpoint without discovery', async () => {
+    const { createSupauthAuth } = await import('./presets');
+    const storage = createMemoryStorage();
+    const storageKey = `svadmin_sso:${encodeURIComponent('https://auth.example.test')}:${encodeURIComponent('admin-console')}`;
+    storage.setItem(`${storageKey}_tokens`, JSON.stringify({
+      access_token: 'access-token',
+      id_token: 'id-token',
+      token_type: 'Bearer',
+    }));
+    const testWindow = installWindow();
+    let discoveryCalls = 0;
+    const provider = createSupauthAuth('admin-console', {
+      issuer: 'https://auth.example.test',
+      redirectUri: 'http://app.test/callback',
+      postLogoutRedirectUri: 'http://app.test/signed-out',
+      storage,
+      autoRefresh: false,
+      fetcher: asFetcher(async () => {
+        discoveryCalls += 1;
+        throw new TypeError('discovery should not run');
+      }),
+    });
+
+    expect(await provider.logout()).toEqual({ success: true });
+    const logout = new URL(testWindow.location.href);
+    expect(`${logout.origin}${logout.pathname}`).toBe('https://auth.example.test/logout');
+    expect(logout.searchParams.get('client_id')).toBe('admin-console');
+    expect(logout.searchParams.get('id_token_hint')).toBe('id-token');
+    expect(logout.searchParams.get('post_logout_redirect_uri')).toBe(
+      'http://app.test/signed-out',
+    );
+    expect(discoveryCalls).toBe(0);
+    expect(storage.getItem(`${storageKey}_tokens`)).toBeNull();
+    provider.destroy();
+  });
+
+  test('maps a canonical Supauth auth issuer to the hosted root logout', async () => {
+    const { createSupauthAuth } = await import('./presets');
+    const testWindow = installWindow();
+    const provider = createSupauthAuth('admin-console', {
+      issuer: 'https://auth.example.test/auth/v1/',
+      redirectUri: 'http://app.test/callback',
+      storage: createMemoryStorage(),
+      autoRefresh: false,
+    });
+
+    expect(await provider.logout()).toEqual({ success: true });
+    const logout = new URL(testWindow.location.href);
+    expect(`${logout.origin}${logout.pathname}`).toBe('https://auth.example.test/logout');
+    provider.destroy();
+  });
+
+  test('preserves an explicit Supauth logout endpoint override', async () => {
+    const { createSupauthAuth } = await import('./presets');
+    const testWindow = installWindow();
+    const provider = createSupauthAuth('admin-console', {
+      issuer: 'https://auth.example.test',
+      redirectUri: 'http://app.test/callback',
+      endSessionEndpoint: 'https://gateway.example.test/sign-out?tenant=acme',
+      storage: createMemoryStorage(),
+      autoRefresh: false,
+    });
+
+    expect(await provider.logout()).toEqual({ success: true });
+    const logout = new URL(testWindow.location.href);
+    expect(`${logout.origin}${logout.pathname}`).toBe('https://gateway.example.test/sign-out');
+    expect(logout.searchParams.get('tenant')).toBe('acme');
+    provider.destroy();
+  });
+
+  test('preserves a manual Supauth logout endpoint over the hosted default', async () => {
+    const { createSupauthAuth } = await import('./presets');
+    const testWindow = installWindow();
+    const provider = createSupauthAuth('admin-console', {
+      issuer: 'https://auth.example.test',
+      redirectUri: 'http://app.test/callback',
+      manualEndpoints: {
+        authorization_endpoint: 'https://gateway.example.test/authorize',
+        token_endpoint: 'https://gateway.example.test/token',
+        userinfo_endpoint: 'https://gateway.example.test/userinfo',
+        end_session_endpoint: 'https://gateway.example.test/sign-out?tenant=acme',
+      },
+      storage: createMemoryStorage(),
+      autoRefresh: false,
+    });
+
+    expect(await provider.logout()).toEqual({ success: true });
+    const logout = new URL(testWindow.location.href);
+    expect(`${logout.origin}${logout.pathname}`).toBe('https://gateway.example.test/sign-out');
+    expect(logout.searchParams.get('tenant')).toBe('acme');
+    provider.destroy();
   });
 
   test('derives isolated storage namespaces for Supauth clients', async () => {
