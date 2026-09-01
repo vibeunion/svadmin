@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.5](https://github.com/vibeunion/svadmin/compare/supabase-v0.13.4...supabase-v0.13.5) (2026-09-01)
+
+
+### 🐛 Bug Fixes
+
+* **supabase:** bridge supacloud task sdk and fix release publication loop ([#364](https://github.com/vibeunion/svadmin/issues/364)) ([93730f3](https://github.com/vibeunion/svadmin/commit/93730f36fecd054eabd4b9450f802f71cbb693fc))
+
 ## [0.13.4](https://github.com/vibeunion/svadmin/compare/supabase-v0.13.3...supabase-v0.13.4) (2026-09-01)
 
 
