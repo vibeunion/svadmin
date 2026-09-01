@@ -1,0 +1,4 @@
+<script lang="ts">
+  import type { Snippet } from 'svelte'; import { ArrowRight } from '@lucide/svelte'; import { cn } from '../../utils.js'; import { usePackageInfoContext } from './context.svelte.js'; let { class: className = '', children, ...rest }: { class?: string; children?: Snippet<[string | undefined, string | undefined]>; [key: string]: unknown } = $props(); const context = usePackageInfoContext();
+</script>
+{#if context.currentVersion || context.newVersion}<div class={cn('mt-2 flex items-center gap-2 font-mono text-sm text-muted-foreground', className)} {...rest}>{#if children}{@render children(context.currentVersion, context.newVersion)}{:else}{#if context.currentVersion}<span>{context.currentVersion}</span>{/if}{#if context.currentVersion && context.newVersion}<ArrowRight size={12} aria-hidden="true" />{/if}{#if context.newVersion}<span class="font-medium text-foreground">{context.newVersion}</span>{/if}{/if}</div>{/if}

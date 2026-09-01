@@ -47,9 +47,9 @@ import {
   afterEach as registerAfterEach,
   beforeEach as registerBeforeEach,
 } from '@svadmin/core/router';
+import { InsightCard } from '@svadmin/ai-elements';
 import ContextHost from './admin-app.context.test-host.svelte';
 import AuditLogDrawer from './AuditLogDrawer.svelte';
-import InsightCard from './InsightCard.svelte';
 import Sidebar from './Sidebar.svelte';
 
 function createDataProvider(instance: string): DataProvider {
@@ -214,6 +214,26 @@ function createApprovalAgent(instance: string) {
     chat,
     approveToolCall,
   };
+}
+
+function messageText(message: Pick<ChatMessage, 'parts'>): string {
+  return message.parts
+    .filter((part): part is Extract<ChatMessage['parts'][number], { type: 'text' }> => part.type === 'text')
+    .map(part => part.text)
+    .join('');
+}
+
+function textMessage(
+  id: string,
+  role: ChatMessage['role'],
+  text: string,
+  createdAt: number,
+): ChatMessage {
+  return { id, role, parts: [{ type: 'text', text }], createdAt };
+}
+
+function hasApproval(message: Pick<ChatMessage, 'parts'>, approvalId: string): boolean {
+  return message.parts.some(part => part.type === 'approval' && part.approvalId === approvalId);
 }
 
 async function findScopedElement(container: HTMLElement, selector: string): Promise<HTMLElement> {
@@ -620,7 +640,7 @@ describe('AdminApp context isolation', () => {
   it('routes real access, audit, and chat consumers through each mounted provider bundle', async () => {
     const firstProviders = createConsumerProviderBundle('consumer-first');
     const secondProviders = createConsumerProviderBundle('consumer-second');
-    const persistCallback = vi.fn();
+    const persistCallback = vi.fn((_messages: ChatMessage[]) => undefined);
     const firstPanelAKey = scopedChatStorageKey(
       'https://consumer-first.example.test',
       'tenant-first',
@@ -631,18 +651,12 @@ describe('AdminApp context isolation', () => {
       'tenant-first',
       'consumer-first-panel-b',
     );
-    testLocalStorage.setItem(firstPanelAKey, JSON.stringify([{
-      id: 'panel-a-seed',
-      role: 'user',
-      content: 'panel a seed',
-      timestamp: 1,
-    }]));
-    testLocalStorage.setItem(firstPanelBKey, JSON.stringify([{
-      id: 'panel-b-seed',
-      role: 'user',
-      content: 'panel b seed',
-      timestamp: 1,
-    }]));
+    testLocalStorage.setItem(firstPanelAKey, JSON.stringify([
+      textMessage('panel-a-seed', 'user', 'panel a seed', 1),
+    ]));
+    testLocalStorage.setItem(firstPanelBKey, JSON.stringify([
+      textMessage('panel-b-seed', 'user', 'panel b seed', 1),
+    ]));
     const directChatSend = vi.fn(async (
       _messages: Parameters<ChatProvider['sendMessage']>[0],
       _options?: Parameters<ChatProvider['sendMessage']>[1],
@@ -717,8 +731,8 @@ describe('AdminApp context isolation', () => {
       expect(secondProviders.chatSend).toHaveBeenCalledTimes(1);
     });
     expect(firstProviders.chatSend).not.toHaveBeenCalled();
-    expect(directChatSend.mock.calls[0]?.[0]?.[0]?.content).toContain('consumer-first-context');
-    expect(secondProviders.chatSend.mock.calls[0]?.[0]?.[0]?.content).toContain('consumer-second-context');
+    expect(messageText(directChatSend.mock.calls[0]?.[0]?.[0] as ChatMessage)).toContain('consumer-first-context');
+    expect(messageText(secondProviders.chatSend.mock.calls[0]?.[0]?.[0] as ChatMessage)).toContain('consumer-second-context');
 
     let firstPanel = await findScopedElement(
       first.getByTestId('explicit-chat-consumer-first-first'),
@@ -789,9 +803,9 @@ describe('AdminApp context isolation', () => {
     await fireEvent.input(callbackInput, { target: { value: 'callback panel history' } });
     await fireEvent.keyDown(callbackInput, { key: 'Enter' });
     await waitFor(() => {
-      expect(persistCallback).toHaveBeenCalledWith(expect.arrayContaining([
-        expect.objectContaining({ content: 'callback panel history' }),
-      ]));
+      expect(persistCallback.mock.calls.some(([persistedMessages]) => (
+        persistedMessages.some(message => messageText(message) === 'callback panel history')
+      ))).toBe(true);
     }, { timeout: 2_000 });
     await fireEvent.click(within(callbackPanel).getByRole('button', { name: /clear/i }));
     expect(persistCallback).toHaveBeenLastCalledWith([]);
@@ -849,11 +863,11 @@ describe('AdminApp context isolation', () => {
     expect(await within(delayedPanel).findByText('fresh delayed reply')).toBeTruthy();
     expect(delayedInput.disabled).toBe(false);
     await waitFor(() => {
-      expect(delayedPersistCallback).toHaveBeenCalledWith(expect.arrayContaining([
-        expect.objectContaining({ content: 'fresh delayed reply' }),
-      ]));
+      expect(delayedPersistCallback.mock.calls.some(([persistedMessages]) => (
+        persistedMessages.some(message => messageText(message) === 'fresh delayed reply')
+      ))).toBe(true);
       expect(delayedPersistCallback.mock.calls.every(([persistedMessages]) => (
-        persistedMessages.every(({ content }) => content !== 'stale delayed reply')
+        persistedMessages.every(message => messageText(message) !== 'stale delayed reply')
       ))).toBe(true);
     }, { timeout: 2_000 });
   });
@@ -895,7 +909,7 @@ describe('AdminApp context isolation', () => {
     await fireEvent.input(panelInput, { target: { value: 'pending for callback a' } });
     await fireEvent.keyDown(panelInput, { key: 'Enter' });
     expect(persistA.mock.calls.some(([messages]) => (
-      messages.some(({ content }) => content === 'pending for callback a')
+      messages.some(message => messageText(message) === 'pending for callback a')
     ))).toBe(false);
 
     await view.rerender({
@@ -908,12 +922,12 @@ describe('AdminApp context isolation', () => {
       chatPersistProbe: { key: 'persist-key-b', onPersist: persistB },
     });
     await waitFor(() => {
-      expect(persistA).toHaveBeenCalledWith(expect.arrayContaining([
-        expect.objectContaining({ content: 'pending for callback a' }),
-      ]));
+      expect(persistA.mock.calls.some(([messages]) => (
+        messages.some(message => messageText(message) === 'pending for callback a')
+      ))).toBe(true);
     });
     expect(persistB.mock.calls.every(([messages]) => (
-      messages.every(({ content }) => content !== 'pending for callback a')
+      messages.every(message => messageText(message) !== 'pending for callback a')
     ))).toBe(true);
 
     const rerenderedPanel = await findScopedElement(
@@ -925,12 +939,12 @@ describe('AdminApp context isolation', () => {
     await fireEvent.input(panelInput, { target: { value: 'pending for callback b' } });
     await fireEvent.keyDown(panelInput, { key: 'Enter' });
     await waitFor(() => {
-      expect(persistB).toHaveBeenCalledWith(expect.arrayContaining([
-        expect.objectContaining({ content: 'pending for callback b' }),
-      ]));
+      expect(persistB.mock.calls.some(([messages]) => (
+        messages.some(message => messageText(message) === 'pending for callback b')
+      ))).toBe(true);
     }, { timeout: 2_000 });
     expect(persistA.mock.calls.every(([messages]) => (
-      messages.every(({ content }) => content !== 'pending for callback b')
+      messages.every(message => messageText(message) !== 'pending for callback b')
     ))).toBe(true);
 
     await waitFor(() => expect(chatSend).toHaveBeenCalledTimes(2));
@@ -980,10 +994,10 @@ describe('AdminApp context isolation', () => {
     const input = await within(panel).findByRole('textbox');
     await fireEvent.input(input, { target: { value: 'approval history owned by scope a' } });
     await fireEvent.keyDown(input, { key: 'Enter' });
-    expect(await within(panel).findByRole('button', { name: /scope-sink approval/ })).toBeTruthy();
+    expect(await within(panel).findByRole('button', { name: 'Approve: scope-sink approval' })).toBeTruthy();
     await waitFor(() => {
       expect(persistA.mock.calls.some(([messages]) => (
-        messages.some(({ content }) => content === 'approval history owned by scope a')
+        messages.some(message => messageText(message) === 'approval history owned by scope a')
       ))).toBe(true);
     });
 
@@ -995,7 +1009,7 @@ describe('AdminApp context isolation', () => {
     view.unmount();
 
     expect(persistB.mock.calls.every(([messages]) => (
-      messages.every(({ content }) => content !== 'approval history owned by scope a')
+      messages.every(message => messageText(message) !== 'approval history owned by scope a')
     ))).toBe(true);
     expect(agent.approveToolCall).not.toHaveBeenCalled();
   });
@@ -1112,7 +1126,7 @@ describe('AdminApp context isolation', () => {
     }, { timeout: 2_000 });
   });
 
-  it('restores the default chat history after remounting the same API and tenant', async () => {
+  it('restores explicitly scoped chat history after remounting the same API and tenant', async () => {
     const providers = createConsumerProviderBundle('persist-remount');
     const bundle = { ...providers.bundle, agentProvider: null };
     const renderPersistentHost = () => renderComponent(ContextHost, {
@@ -1138,6 +1152,7 @@ describe('AdminApp context isolation', () => {
       expect(keys[0]).toBe(scopedChatStorageKey(
         'https://persist-remount.example.test',
         'stable-tenant',
+        'persist-remount-auth:assistant',
       ));
       expect(testLocalStorage.getItem(keys[0])).toContain('restore this conversation');
     }, { timeout: 2_000 });
@@ -1240,26 +1255,20 @@ describe('AdminApp context isolation', () => {
     await fireEvent.input(input, { target: { value: 'scope b question' } });
     await fireEvent.keyDown(input, { key: 'Enter' });
     await waitFor(() => expect(providers.chatSend).toHaveBeenCalledTimes(2));
-    expect(providers.chatSend.mock.calls[1]?.[0]?.some(({ content }) => (
-      content === 'private scope a history'
+    expect(providers.chatSend.mock.calls[1]?.[0]?.some(message => (
+      messageText(message) === 'private scope a history'
     ))).toBe(false);
   });
 
   it('reruns a custom restore callback when an explicit panel changes tenant scope', async () => {
     const providers = createConsumerProviderBundle('custom-restore-scope');
     const providerBundle = { ...providers.bundle, agentProvider: null };
-    const restoreA = vi.fn((): ChatMessage[] => [{
-      id: 'custom-restore-a',
-      role: 'user',
-      content: 'custom tenant a history',
-      timestamp: 1,
-    }]);
-    const restoreB = vi.fn((): ChatMessage[] => [{
-      id: 'custom-restore-b',
-      role: 'user',
-      content: 'custom tenant b history',
-      timestamp: 2,
-    }]);
+    const restoreA = vi.fn((): ChatMessage[] => [
+      textMessage('custom-restore-a', 'user', 'custom tenant a history', 1),
+    ]);
+    const restoreB = vi.fn((): ChatMessage[] => [
+      textMessage('custom-restore-b', 'user', 'custom tenant b history', 2),
+    ]);
     const baseProps = {
       instance: 'custom-restore-scope',
       providerBundle,
@@ -1306,12 +1315,9 @@ describe('AdminApp context isolation', () => {
   });
 
   it('does not migrate an old exact panel key into a tenant scope', async () => {
-    testLocalStorage.setItem('tenant-legacy-panel', JSON.stringify([{
-      id: 'tenant-legacy-message',
-      role: 'user',
-      content: 'must not enter tenant history',
-      timestamp: 1,
-    }]));
+    testLocalStorage.setItem('tenant-legacy-panel', JSON.stringify([
+      textMessage('tenant-legacy-message', 'user', 'must not enter tenant history', 1),
+    ]));
     const providers = createConsumerProviderBundle('tenant-legacy-migration');
     const view = renderComponent(ContextHost, {
       instance: 'tenant-legacy-migration',
@@ -1329,13 +1335,10 @@ describe('AdminApp context isolation', () => {
     expect(within(panel).queryByText('must not enter tenant history')).toBeNull();
   });
 
-  it('migrates an old exact panel key only when no tenant is configured', async () => {
-    testLocalStorage.setItem('legacy-explicit-panel', JSON.stringify([{
-      id: 'legacy-explicit-message',
-      role: 'user',
-      content: 'legacy explicit panel history',
-      timestamp: 1,
-    }]));
+  it('ignores an old exact panel key when no tenant is configured', async () => {
+    testLocalStorage.setItem('legacy-explicit-panel', JSON.stringify([
+      textMessage('legacy-explicit-message', 'user', 'legacy explicit panel history', 1),
+    ]));
     const providers = createConsumerProviderBundle('legacy-explicit-migration');
     const view = renderComponent(ContextHost, {
       instance: 'legacy-explicit-migration',
@@ -1349,19 +1352,17 @@ describe('AdminApp context isolation', () => {
       '[data-svadmin-chat-scope]',
     );
     await fireEvent.click(within(panel).getByRole('button'));
-    expect(await within(panel).findByText('legacy explicit panel history')).toBeTruthy();
+    expect(within(panel).queryByText('legacy explicit panel history')).toBeNull();
     const physicalKey = scopedChatStorageKey(
       'https://legacy-explicit-migration.example.test',
       undefined,
       'legacy-explicit-panel',
     );
-    await waitFor(() => {
-      expect(testLocalStorage.getItem(physicalKey)).toContain('legacy explicit panel history');
-    }, { timeout: 2_000 });
+    expect(testLocalStorage.getItem(physicalKey)).toBeNull();
     expect(testLocalStorage.getItem('legacy-explicit-panel')).toContain('legacy explicit panel history');
   });
 
-  it('filters malformed persisted messages and drops stale persisted actions', async () => {
+  it('filters malformed persisted messages and drops stale persisted approvals', async () => {
     const physicalKey = scopedChatStorageKey(
       'https://malformed-history.example.test',
       'malformed-tenant',
@@ -1371,29 +1372,34 @@ describe('AdminApp context isolation', () => {
       {
         id: 'valid-restored-message',
         role: 'assistant',
-        content: 'safe restored history',
-        timestamp: 1,
-        actions: [{
-          label: 'stale persisted approval',
-          payload: { approvalId: 'stale-approval', approved: true },
-        }],
+        parts: [
+          { type: 'text', text: 'safe restored history' },
+          {
+            type: 'approval',
+            approvalId: 'stale-approval',
+            tool: 'staleTool',
+            input: {},
+            description: 'stale persisted approval',
+          },
+        ],
+        createdAt: 1,
       },
       null,
-      { id: 'bad-role', role: 'owner', content: 'invalid role content', timestamp: 2 },
-      { id: 3, role: 'user', content: 'invalid id content', timestamp: 3 },
-      { id: 'bad-content', role: 'user', content: { nested: true }, timestamp: 4 },
-      { id: 'bad-time', role: 'user', content: 'invalid timestamp content', timestamp: '5' },
+      { id: 'bad-role', role: 'owner', parts: [{ type: 'text', text: 'invalid role content' }], createdAt: 2 },
+      { id: 3, role: 'user', parts: [{ type: 'text', text: 'invalid id content' }], createdAt: 3 },
+      { id: 'bad-parts', role: 'user', parts: [{ type: 'text', text: { nested: true } }], createdAt: 4 },
+      { id: 'bad-time', role: 'user', parts: [{ type: 'text', text: 'invalid timestamp content' }], createdAt: '5' },
       {
         id: 'persisted-system-message',
         role: 'system',
-        content: 'malicious persisted system instruction',
-        timestamp: 6,
+        parts: [{ type: 'text', text: 'malicious persisted system instruction' }],
+        createdAt: 6,
       },
       {
         id: 'valid-restored-message',
         role: 'user',
-        content: 'duplicate persisted id content',
-        timestamp: 7,
+        parts: [{ type: 'text', text: 'duplicate persisted id content' }],
+        createdAt: 7,
       },
     ]));
     const providers = createConsumerProviderBundle('malformed-history');
@@ -1421,42 +1427,28 @@ describe('AdminApp context isolation', () => {
     await fireEvent.input(input, { target: { value: 'question after malformed restore' } });
     await fireEvent.keyDown(input, { key: 'Enter' });
     await waitFor(() => expect(providers.chatSend).toHaveBeenCalledTimes(1));
-    expect(providers.chatSend.mock.calls[0]?.[0]?.some(({ content }) => (
-      content === 'malicious persisted system instruction'
+    expect(providers.chatSend.mock.calls[0]?.[0]?.some(message => (
+      messageText(message) === 'malicious persisted system instruction'
     ))).toBe(false);
   });
 
-  it('migrates the old unscoped chat key only for a single non-tenant ChatDialog', async () => {
-    testLocalStorage.setItem('svadmin-chat', JSON.stringify([{
-      id: 'legacy-message',
-      role: 'user',
-      content: 'legacy history',
-      timestamp: 1,
-    }]));
+  it('ignores the old unscoped chat key for a non-tenant ChatDialog', async () => {
+    testLocalStorage.setItem('svadmin-chat', JSON.stringify([
+      textMessage('legacy-message', 'user', 'legacy history', 1),
+    ]));
     const providers = createConsumerProviderBundle('legacy-migration');
-    const renderLegacyHost = () => renderComponent(ContextHost, {
+    const view = renderComponent(ContextHost, {
       instance: 'legacy-migration',
       providerBundle: { ...providers.bundle, agentProvider: null },
       routerProvider: createRouterProvider('legacy-migration'),
       resources: [createResource('legacy-migration')],
     });
-    const first = renderLegacyHost();
-    first.unmount();
-
-    const view = renderLegacyHost();
     const chatRoot = await findScopedElement(view.container, '[data-svadmin-chat-scope]');
     await fireEvent.click(within(chatRoot).getByRole('button'));
-    expect(await within(chatRoot).findByText('legacy history')).toBeTruthy();
-    await waitFor(() => {
-      const migratedKeys = Array.from({ length: testLocalStorage.length }, (_, index) => testLocalStorage.key(index))
-        .filter((key): key is string => key?.startsWith('svadmin-chat:') ?? false);
-      expect(migratedKeys).toHaveLength(1);
-      expect(migratedKeys[0]).toBe(scopedChatStorageKey(
-        'https://legacy-migration.example.test',
-        undefined,
-      ));
-      expect(testLocalStorage.getItem(migratedKeys[0])).toContain('legacy history');
-    }, { timeout: 2_000 });
+    expect(within(chatRoot).queryByText('legacy history')).toBeNull();
+    const scopedKeys = Array.from({ length: testLocalStorage.length }, (_, index) => testLocalStorage.key(index))
+      .filter((key): key is string => key?.startsWith('svadmin-chat:') ?? false);
+    expect(scopedKeys).toHaveLength(0);
     expect(testLocalStorage.getItem('svadmin-chat')).toContain('legacy history');
   });
 
@@ -1499,14 +1491,22 @@ describe('AdminApp context isolation', () => {
     await fireEvent.input(secondInput, { target: { value: 'approve second' } });
     await fireEvent.keyDown(secondInput, { key: 'Enter' });
 
-    const firstApprove = await within(firstChatRoot).findByRole('button', { name: /first-agent approval/ });
-    const secondApprove = await within(secondChatRoot).findByRole('button', { name: /second-agent approval/ });
+    const firstApprove = await within(firstChatRoot).findByRole('button', { name: 'Approve: first-agent approval' });
+    const secondApprove = await within(secondChatRoot).findByRole('button', { name: 'Approve: second-agent approval' });
     await fireEvent.click(firstApprove);
-    expect(firstAgent.approveToolCall).toHaveBeenCalledWith('shared-approval-id', true);
+    expect(firstAgent.approveToolCall).toHaveBeenCalledWith(
+      'shared-approval-id',
+      true,
+      { signal: expect.any(AbortSignal) },
+    );
     expect(secondAgent.approveToolCall).not.toHaveBeenCalled();
 
     await fireEvent.click(secondApprove);
-    expect(secondAgent.approveToolCall).toHaveBeenCalledWith('shared-approval-id', true);
+    expect(secondAgent.approveToolCall).toHaveBeenCalledWith(
+      'shared-approval-id',
+      true,
+      { signal: expect.any(AbortSignal) },
+    );
     expect(firstAgent.approveToolCall).toHaveBeenCalledTimes(1);
   });
 
@@ -1561,25 +1561,34 @@ describe('AdminApp context isolation', () => {
     await fireEvent.input(input, { target: { value: 'run controlled approvals' } });
     await fireEvent.keyDown(input, { key: 'Enter' });
 
-    const firstApprove = await within(chatRoot).findByRole('button', { name: /first controlled approval/ });
-    expect(within(chatRoot).getByRole('button', { name: /second controlled approval/ })).toBeTruthy();
+    const firstApprove = await within(chatRoot).findByRole('button', { name: 'Approve: first controlled approval' });
+    expect(within(chatRoot).getByRole('button', { name: 'Approve: second controlled approval' })).toBeTruthy();
     await fireEvent.click(firstApprove);
 
     await waitFor(() => {
-      expect(approveToolCall).toHaveBeenCalledWith('controlled-approval-1', true);
+      expect(approveToolCall).toHaveBeenCalledWith(
+        'controlled-approval-1',
+        true,
+        { signal: expect.any(AbortSignal) },
+      );
       expect(within(chatRoot).getByText("User approved execution of tool 'controlled-tool-one'")).toBeTruthy();
       expect(within(chatRoot).getByText(/Continued after first approval/)).toBeTruthy();
     });
-    expect(within(chatRoot).queryByRole('button', { name: /first controlled approval/ })).toBeNull();
+    expect(within(chatRoot).queryByRole('button', { name: 'Approve: first controlled approval' })).toBeNull();
 
-    const secondApprove = within(chatRoot).getByRole('button', { name: /second controlled approval/ });
+    const secondApprove = within(chatRoot).getByRole('button', { name: 'Approve: second controlled approval' });
     await fireEvent.click(secondApprove);
     await waitFor(() => {
-      expect(approveToolCall).toHaveBeenNthCalledWith(2, 'controlled-approval-2', true);
+      expect(approveToolCall).toHaveBeenNthCalledWith(
+        2,
+        'controlled-approval-2',
+        true,
+        { signal: expect.any(AbortSignal) },
+      );
       expect(within(chatRoot).getByText("User approved execution of tool 'controlled-tool-two'")).toBeTruthy();
       expect(within(chatRoot).getByText(/Finished after second approval/)).toBeTruthy();
     });
-    expect(within(chatRoot).queryByRole('button', { name: /controlled approval/ })).toBeNull();
+    expect(within(chatRoot).queryByRole('button', { name: /^Approve: .*controlled approval$/ })).toBeNull();
   });
 
   it('revokes pending approvals when a stopped agent ignores its AbortSignal', async () => {
@@ -1634,18 +1643,15 @@ describe('AdminApp context isolation', () => {
     const input = await within(panel).findByRole('textbox') as HTMLTextAreaElement;
     await fireEvent.input(input, { target: { value: 'start stoppable approval' } });
     await fireEvent.keyDown(input, { key: 'Enter' });
-    const approvalButton = await within(panel).findByRole('button', { name: /stoppable approval action/ });
-    const stopButton = input.parentElement?.querySelector<HTMLButtonElement>('button');
-    expect(stopButton).not.toBeNull();
-    await fireEvent.click(stopButton as HTMLButtonElement);
+    const approvalButton = await within(panel).findByRole('button', { name: 'Approve: stoppable approval action' });
+    const stopButton = within(panel).getByRole('button', { name: 'Stop' });
+    await fireEvent.click(stopButton);
 
     await waitFor(() => {
       expect(input.disabled).toBe(false);
-      expect(within(panel).queryByRole('button', { name: /stoppable approval action/ })).toBeNull();
+      expect(within(panel).queryByRole('button', { name: 'Approve: stoppable approval action' })).toBeNull();
       const latestPersisted = persistedMessages.mock.calls.at(-1)?.[0] ?? [];
-      expect(latestPersisted.every((message) => (
-        message.actions?.every((action) => action.payload?.approvalId !== 'stoppable-approval') ?? true
-      ))).toBe(true);
+      expect(latestPersisted.every(message => !hasApproval(message, 'stoppable-approval'))).toBe(true);
     });
     await fireEvent.click(approvalButton);
     expect(approveToolCall).not.toHaveBeenCalled();
@@ -1654,7 +1660,7 @@ describe('AdminApp context isolation', () => {
     await tick();
     await tick();
     expect(within(panel).queryByText(/late text after stop/)).toBeNull();
-    expect(within(panel).queryByRole('button', { name: /late approval after stop/ })).toBeNull();
+    expect(within(panel).queryByRole('button', { name: 'Approve: late approval after stop' })).toBeNull();
     expect(approveToolCall).not.toHaveBeenCalled();
   });
 
@@ -1696,12 +1702,11 @@ describe('AdminApp context isolation', () => {
     await fireEvent.input(input, { target: { value: 'start plain stream' } });
     await fireEvent.keyDown(input, { key: 'Enter' });
     expect(await within(panel).findByText(/durable chunk before stop/)).toBeTruthy();
-    const stopButton = input.parentElement?.querySelector<HTMLButtonElement>('button');
-    expect(stopButton).not.toBeNull();
-    await fireEvent.click(stopButton as HTMLButtonElement);
+    const stopButton = within(panel).getByRole('button', { name: 'Stop' });
+    await fireEvent.click(stopButton);
 
     const latestPersisted = persistedMessages.mock.calls.at(-1)?.[0] ?? [];
-    expect(latestPersisted.some(({ content }) => content.includes('durable chunk before stop'))).toBe(true);
+    expect(latestPersisted.some(message => messageText(message).includes('durable chunk before stop'))).toBe(true);
     expect(chatSend.mock.calls[0]?.[1]?.signal?.aborted).toBe(true);
 
     continueLateStream();

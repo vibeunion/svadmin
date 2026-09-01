@@ -1,0 +1,12 @@
+export { default, default as Root, default as StackTrace } from './StackTrace.svelte';
+export { default as Header, default as StackTraceHeader } from './StackTraceHeader.svelte';
+export { default as Error, default as StackTraceError } from './StackTraceError.svelte';
+export { default as ErrorType, default as StackTraceErrorType } from './StackTraceErrorType.svelte';
+export { default as ErrorMessage, default as StackTraceErrorMessage } from './StackTraceErrorMessage.svelte';
+export { default as Actions, default as StackTraceActions } from './StackTraceActions.svelte';
+export { default as CopyButton, default as StackTraceCopyButton } from './StackTraceCopyButton.svelte';
+export { default as ExpandButton, default as StackTraceExpandButton } from './StackTraceExpandButton.svelte';
+export { default as Content, default as StackTraceContent } from './StackTraceContent.svelte';
+export { default as Frames, default as StackTraceFrames } from './StackTraceFrames.svelte';
+export type { StackTraceErrorData, StackTraceFrame } from './StackTrace.svelte';
+export type { ParsedStackFrame, ParsedStackTrace } from './context.svelte.js';

@@ -1,0 +1,1 @@
+<script lang="ts">import type { Snippet } from 'svelte'; import OpenInProviderLink from './OpenInProviderLink.svelte'; let { class: className = '', children, ...rest }: { class?: string; children?: Snippet; [key: string]: unknown } = $props();</script><OpenInProviderLink provider="chatgpt" class={className} {children} {...rest} />

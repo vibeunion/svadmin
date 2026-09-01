@@ -397,9 +397,9 @@ const EJECT_COMPONENTS = [
   'Layout', 'Sidebar', 'Header', 'LoginPage',
   'AutoTable', 'AutoForm', 'ShowPage', 'ProfilePage',
   'StatsCard', 'AuditLogDrawer', 'LiveIndicator',
-  'CommandPalette', 'AICommandBar', 'ChatDialog',
+  'CommandPalette',
   'PasswordInput', 'BooleanField', 'FieldRenderer',
-  'MarkdownRenderer', 'AnomalyBadge', 'Toast',
+  'AnomalyBadge', 'Toast',
   'ConfirmDialog', 'TooltipButton', 'Breadcrumbs',
   'ConfigErrorScreen', 'DevTools',
 ] as const;

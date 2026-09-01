@@ -1,3 +1,11 @@
+<script module lang="ts">
+  export interface LayoutAIAssistantProps {
+    docked: boolean;
+    scope: string;
+    ownerScope: string;
+  }
+</script>
+
 <script lang="ts">
 /* eslint-disable svelte/no-useless-children-snippet */
   import type { Snippet } from 'svelte';
@@ -6,7 +14,6 @@
   import Header from './Header.svelte';
   import CommandPalette from './CommandPalette.svelte';
   import KeyboardShortcuts from './KeyboardShortcuts.svelte';
-  import ChatDialog from './ChatDialog.svelte';
   import DevTools from './DevTools.svelte';
   import { useTranslation } from '@svadmin/core/i18n';
 
@@ -25,7 +32,7 @@
   let shortcutsOpen = $state(false);
   let mobileMenuOpen = $state(false);
 
-  let { children, title = 'Admin', menu, siteUrl, routeMode = 'auto' }: { children: Snippet; title?: string; menu?: MenuItem[]; siteUrl?: string; routeMode?: 'hash' | 'path' | 'auto' } = $props();
+  let { children, title = 'Admin', menu, siteUrl, routeMode = 'auto', aiAssistant }: { children: Snippet; title?: string; menu?: MenuItem[]; siteUrl?: string; routeMode?: 'hash' | 'path' | 'auto'; aiAssistant?: Snippet<[LayoutAIAssistantProps]> } = $props();
   const layoutId = $props.id();
   const layoutScope = `svadmin-layout-${layoutId}`;
   const mainContentId = `${layoutScope}-main`;
@@ -71,6 +78,13 @@
 
   function focusMainContent() {
     document.getElementById(mainContentId)?.focus();
+  }
+
+  function handleAskAI(query: string) {
+    if (!aiAssistant || typeof window === 'undefined') return;
+    window.dispatchEvent(new CustomEvent('svadmin:ask-ai', {
+      detail: { query, scope: chatScope },
+    }));
   }
 
   let collapsed = $state(false);
@@ -235,19 +249,13 @@
 
       <footer class="flex min-h-14 shrink-0 items-center justify-end gap-2 border-t border-border/60 bg-background px-4 empty:hidden">
         <DevTools docked />
-        <ChatDialog docked scope={chatScope} ownerScope={layoutScope} />
+        {@render aiAssistant?.({ docked: true, scope: chatScope, ownerScope: layoutScope })}
       </footer>
     </div>
   </div>
-  <CommandPalette 
-    bind:open={commandOpen} 
-    onAskAI={(q) => {
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('svadmin:ask-ai', {
-          detail: { query: q, scope: chatScope },
-        }));
-      }
-    }}
+  <CommandPalette
+    bind:open={commandOpen}
+    onAskAI={aiAssistant ? handleAskAI : undefined}
   />
   <KeyboardShortcuts bind:open={shortcutsOpen} />
 {/if}

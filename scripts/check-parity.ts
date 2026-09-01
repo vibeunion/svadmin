@@ -107,7 +107,6 @@ const PARITY_ITEMS: ParityItem[] = [
   // ─── Widgets & Charts ───────────────────────────────────────────────────
   { name: 'StatsCard', uiComponent: 'StatsCard.svelte', liteComponent: 'LiteStatsCard.svelte', category: 'widgets', status: 'exact', strategy: '指标卡片与趋势徽章' },
   { name: 'MetricStrip', uiComponent: 'MetricStrip.svelte', liteComponent: 'LiteMetricStrip.svelte', category: 'widgets', status: 'exact', strategy: '服务端指标条、趋势与原生链接' },
-  { name: 'InsightCard', uiComponent: 'InsightCard.svelte', liteComponent: 'widgets/LiteInsightCard.svelte', category: 'widgets', status: 'exact', strategy: '业务洞察指标容器' },
   { name: 'AnomalyBadge', uiComponent: 'AnomalyBadge.svelte', liteComponent: 'widgets/LiteAnomalyBadge.svelte', category: 'widgets', status: 'exact', strategy: '异常状态高亮徽章' },
   { name: 'Badge', uiComponent: 'ui/badge/badge.svelte', liteComponent: 'LiteBadge.svelte', category: 'widgets', status: 'exact', strategy: '语义状态徽章与原生链接承接' },
   { name: 'BarChart', uiComponent: 'charts/BarChart.svelte', liteComponent: 'widgets/LiteBarChart.svelte', category: 'widgets', status: 'fallback', strategy: '降级为 CSS 柱状图或数据明细表格' },
@@ -160,8 +159,6 @@ const PARITY_ITEMS: ParityItem[] = [
   // ─── SPA Only (No SSR counterpart needed) ───────────────────────────────
   { name: 'ThemeToggle', uiComponent: 'ThemeToggle.svelte', category: 'layout', status: 'spa_only', strategy: '免适配 (Lite 为固定 Slate/Indigo 配色)', note: 'IE11 不支持 CSS 变量与客户端主题即时切换' },
   { name: 'DevTools', uiComponent: 'DevTools.svelte', category: 'advanced', status: 'spa_only', strategy: '免适配 (SPA 调试器)', note: '受限环境不需要客户端 DevTools 悬浮球' },
-  { name: 'CopilotPanel', uiComponent: 'CopilotPanel.svelte', category: 'advanced', status: 'spa_only', strategy: '免适配 (AI Copilot 客户端浮窗)', note: 'AI 交互通过 ChatDialog 服务端页面承接' },
-  { name: 'VoiceInput', uiComponent: 'VoiceInput.svelte', category: 'fields', status: 'spa_only', strategy: '免适配 (Web Speech API)', note: '受限浏览器无麦克风与 Speech Recognition API' },
 ];
 
 export function parityOutputPaths(repositoryRoot = resolve(import.meta.dir, '..')): {

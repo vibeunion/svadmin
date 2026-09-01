@@ -11,10 +11,7 @@
     type TenantContext,
   } from '@svadmin/core';
   import AuditLogDrawer from './AuditLogDrawer.svelte';
-  import AICommandBar from './AICommandBar.svelte';
-  import CopilotPanel from './CopilotPanel.svelte';
-  import InsightCard from './InsightCard.svelte';
-  import SmartSuggest from './SmartSuggest.svelte';
+  import { AICommandBar, CopilotPanel, InsightCard, SmartSuggest } from '@svadmin/ai-elements';
   import AboutSettings from './AboutSettings.svelte';
   import InferencerPanel from './InferencerPanel.svelte';
   import ProfilePage from './ProfilePage.svelte';

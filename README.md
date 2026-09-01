@@ -66,6 +66,7 @@
 | Package                  | Description / 描述                                           |
 | ------------------------ | ------------------------------------------------------------ |
 | `@svadmin/core`          | Hooks, providers, types, utilities, Resource Type Registry   |
+| `@svadmin/ai-elements`   | Composable Svelte 5 AI conversation and agent UI components |
 | `@svadmin/ui`            | Pre-built admin components / 预构建管理组件（shadcn-svelte） |
 | `@svadmin/create`        | CLI scaffolding tool / CLI 脚手架工具                        |
 | `@svadmin/refine-adapter`| Bridge any @refinedev/* data provider to svadmin / 桥接 Refine 生态数据源 |
@@ -103,7 +104,7 @@
 
 ```bash
 # Install
-bun add @svadmin/core @svadmin/ui @svadmin/simple-rest
+bun add @svadmin/core @svadmin/ui @svadmin/ai-elements @svadmin/simple-rest @tanstack/svelte-query
 ```
 
 ### One-Line Setup / 一行配置
@@ -274,6 +275,7 @@ const dataProvider = createElysiaDataProvider<App>("http://localhost:3000");
 /* app.css */
 @import "tailwindcss";
 @import "@svadmin/ui/app.theme.css";
+@import "@svadmin/ai-elements/ai.css";
 ```
 
 If an existing app still contains `@source "../node_modules/@svadmin/ui/src";`, remove that line or point it at `dist`; the published package contains `dist`, not the workspace-only `src` directory.
@@ -290,16 +292,13 @@ If an existing app still contains `@source "../node_modules/@svadmin/ui/src";`, 
 // vite.config.ts
 export default defineConfig({
   optimizeDeps: {
-    exclude: ["@svadmin/core", "@svadmin/ui", "@svadmin/supabase"],
+    exclude: ["@svadmin/core", "@svadmin/ai-elements", "@svadmin/ui", "@svadmin/supabase"],
     include: [
       "@svadmin/core > @tanstack/svelte-query",
       "@svadmin/ui > svelte-sonner",
       "@svadmin/ui > bits-ui",
       "@svadmin/ui > @tanstack/svelte-table",
       "@svadmin/ui > @lucide/svelte",
-      "highlight.js",
-      "marked",
-      "marked-highlight",
       "isomorphic-dompurify",
     ],
   },

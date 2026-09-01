@@ -21,6 +21,7 @@ describe('create-svadmin project manifest', () => {
 
         expect(generated.name).toBe('generated-admin');
         expect(generated.dependencies['@svadmin/core']).toBeDefined();
+        expect(generated.dependencies['@svadmin/ai-elements']).toBeDefined();
         expect(generated.dependencies['@svadmin/ui']).toBeDefined();
         expect(generated.devDependencies.svelte).toBeDefined();
         expect(generated.devDependencies.typescript).toBeDefined();

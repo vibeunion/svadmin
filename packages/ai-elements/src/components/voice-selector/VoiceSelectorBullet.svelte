@@ -1,0 +1,2 @@
+<script lang="ts">import type { Snippet } from 'svelte'; import type { HTMLAttributes } from 'svelte/elements'; import { cn } from '../../utils.js'; interface Props extends Omit<HTMLAttributes<HTMLSpanElement>, 'children' | 'class'> { class?: string; children?: Snippet; } let { class: className = '', children, ...rest }: Props = $props();</script>
+<span {...rest} class={cn('select-none text-border', className)} aria-hidden="true" data-slot="voice-selector-bullet">{#if children}{@render children()}{:else}•{/if}</span>

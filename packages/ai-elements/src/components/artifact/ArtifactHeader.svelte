@@ -1,0 +1,20 @@
+<script lang="ts">
+  import type { Snippet } from 'svelte';
+  import type { HTMLAttributes } from 'svelte/elements';
+  import { cn } from '../../utils.js';
+
+  interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'class'> {
+    class?: string;
+    children?: Snippet;
+  }
+
+  let { class: className = '', children, ...rest }: Props = $props();
+</script>
+
+<div {...rest} class={cn('svadmin-ai-artifact-part__header', className)} data-slot="artifact-header">
+  {@render children?.()}
+</div>
+
+<style>
+  .svadmin-ai-artifact-part__header { display: flex; align-items: center; justify-content: space-between; gap: .75rem; border-bottom: 1px solid var(--border, currentColor); padding: .75rem 1rem; background: var(--muted, transparent); }
+</style>

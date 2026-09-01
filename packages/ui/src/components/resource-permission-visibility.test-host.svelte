@@ -1,5 +1,5 @@
 <script lang="ts">
-  import AICommandBar from './AICommandBar.svelte';
+  import { AICommandBar } from '@svadmin/ai-elements';
   import CommandPalette from './CommandPalette.svelte';
   import ListPage from './ListPage.svelte';
   import ResourceOperationsPage from './ResourceOperationsPage.svelte';

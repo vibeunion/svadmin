@@ -32,6 +32,13 @@
     return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
+  function messageText(message: ChatMessage): string {
+    return message.parts
+      .filter((part): part is Extract<ChatMessage['parts'][number], { type: 'text' }> => part.type === 'text')
+      .map((part) => part.text)
+      .join('');
+  }
+
   // Auto-scroll anchor logic: pure HTML way to scroll to bottom after page load
   // User should include "#latest-msg" in the form action if possible
 </script>
@@ -66,10 +73,10 @@
               ? 'background:#4f46e5;color:#fff;border-bottom-right-radius:2px;'
               : 'background:#e2e8f0;color:#0f172a;border-bottom-left-radius:2px;'}"
           >
-            <div style="white-space:pre-wrap;word-break:break-word;">{msg.content}</div>
+            <div style="white-space:pre-wrap;word-break:break-word;">{messageText(msg)}</div>
           </div>
           <div style="font-size:11px;color:#94a3b8;margin-top:4px;">
-            {msg.role === 'user' ? 'You' : 'Assistant'} • {formatDate(msg.timestamp)}
+            {msg.role === 'user' ? 'You' : 'Assistant'} · {formatDate(msg.createdAt)}
           </div>
         </div>
       {/if}

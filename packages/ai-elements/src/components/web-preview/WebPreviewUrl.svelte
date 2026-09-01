@@ -1,0 +1,10 @@
+<script lang="ts">
+  import type { HTMLInputAttributes } from 'svelte/elements'; import { cn } from '../../utils.js'; import { sanitizePreviewUrl, useWebPreviewContext } from './context.svelte.js';
+  interface Props extends Omit<HTMLInputAttributes, 'class' | 'value'> { value?: string; class?: string; onnavigate?: (url: string) => void; }
+  let { value = $bindable(), class: className = '', onnavigate, oninput, onkeydown, ...rest }: Props = $props(); const preview = useWebPreviewContext('WebPreviewUrl'); let draft = $state(value ?? preview.url); let lastContextUrl = $state(''); const invalid = $derived(Boolean(draft.trim()) && !sanitizePreviewUrl(draft));
+  $effect(() => { const currentUrl = preview.url; if (currentUrl !== lastContextUrl) { lastContextUrl = currentUrl; draft = currentUrl; value = currentUrl; } });
+  function handleInput(event: Event & { currentTarget: EventTarget & HTMLInputElement }): void { draft = event.currentTarget.value; value = draft; oninput?.(event); }
+  function handleKeydown(event: KeyboardEvent & { currentTarget: EventTarget & HTMLInputElement }): void { if (event.key === 'Enter' && preview.navigate(draft)) { value = draft.trim(); onnavigate?.(value); } onkeydown?.(event); }
+</script>
+<input {...rest} class={cn('svadmin-ai-web-part__url', className)} value={draft} inputmode="url" placeholder="Enter URL..." aria-invalid={invalid} data-slot="web-preview-url" oninput={handleInput} onkeydown={handleKeydown} />
+<style>.svadmin-ai-web-part__url { min-width: 0; min-height: 2rem; flex: 1; padding: .35rem .55rem; border: 1px solid var(--input, var(--border, currentColor)); border-radius: min(var(--radius, .5rem), .5rem); background: var(--background, transparent); color: var(--foreground, currentColor); font: inherit; font-size: .75rem; }.svadmin-ai-web-part__url:focus-visible { outline: 2px solid var(--ring, currentColor); outline-offset: 2px; }.svadmin-ai-web-part__url[aria-invalid='true'] { border-color: var(--destructive, currentColor); }</style>

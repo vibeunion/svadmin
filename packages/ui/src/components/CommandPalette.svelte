@@ -20,7 +20,9 @@
   let searchValue = $state('');
 
   const resources = $derived(getResources());
-  const hasAI = $derived(!!(adminContext.agentProvider || adminContext.chatProvider));
+  const hasAI = $derived(
+    !!(adminContext.agentProvider || adminContext.chatProvider) && typeof onAskAI === 'function',
+  );
 
   function close() {
     open = false;

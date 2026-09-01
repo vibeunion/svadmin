@@ -37,6 +37,7 @@ svadmin 原生基于 **Svelte 5 runes** 构建，采用基于 Provider 的架构
 | 包名 | 说明 |
 |------|------|
 | `@svadmin/core` | Hooks、Providers、类型、资源类型注册表、工具函数 |
+| [`@svadmin/ai-elements`](/zh-cn/components/ai-components) | 可组合的 Svelte 5 AI 对话与 Agent 组件 |
 | `@svadmin/ui` | 预构建 Svelte 5 组件（表单、表格、16 个字段、shadcn） |
 | [`@svadmin/surface`](/zh-cn/guides/declarative-surface) | 带只读资源绑定和严格校验的声明式仪表盘 |
 | [`@svadmin/flow`](/zh-cn/guides/flow) | 面向客户端图编辑器的可选拖拽节点画布 |

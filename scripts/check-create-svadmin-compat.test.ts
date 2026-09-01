@@ -35,3 +35,21 @@ test('compatibility check rejects a shipped scaffold that drifts from workspace 
     await rm(temporaryDirectory, { recursive: true, force: true });
   }
 });
+
+test('compatibility check rejects an AI Elements version that drifts from the workspace', async () => {
+  const repositoryRoot = resolve(import.meta.dir, '..');
+  const scaffold = loadScaffoldManifest(
+    join(repositoryRoot, 'packages', 'create-svadmin', 'scaffold-manifest.json'),
+  );
+  scaffold.dependencies['@svadmin/ai-elements'] = '^999.0.0';
+
+  const temporaryDirectory = await mkdtemp(join(tmpdir(), 'svadmin-ai-elements-compat-'));
+  const scaffoldManifestPath = join(temporaryDirectory, 'scaffold-manifest.json');
+  try {
+    await writeFile(scaffoldManifestPath, `${JSON.stringify(scaffold, null, 2)}\n`);
+    const issues = await checkCreateSvadminCompatibility(repositoryRoot, { scaffoldManifestPath });
+    expect(issues.some((issue) => issue.includes('@svadmin/ai-elements must be'))).toBe(true);
+  } finally {
+    await rm(temporaryDirectory, { recursive: true, force: true });
+  }
+});

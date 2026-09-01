@@ -1,0 +1,6 @@
+<script lang="ts">
+  import type { Snippet } from 'svelte'; import type { HTMLAttributes } from 'svelte/elements'; import { ExternalLink } from '@lucide/svelte'; import { cn, safeResourceUrl } from '../../utils.js';
+  interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'class' | 'title'> { class?: string; children?: Snippet; title?: string; url?: string; description?: string; }
+  let { class: className = '', children, title, url, description, ...rest }: Props = $props(); const href = $derived(safeResourceUrl(url));
+</script>
+<div {...rest} class={cn('grid gap-1', className)} data-slot="inline-citation-source">{#if title}<h4 class="m-0 truncate text-sm font-medium leading-tight">{title}</h4>{/if}{#if href}<a class="inline-flex min-w-0 items-center gap-1 truncate text-xs text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring" href={href} target="_blank" rel="external noreferrer"><span class="truncate">{url}</span><ExternalLink class="shrink-0" size={12} aria-hidden="true" /></a>{:else if url}<p class="m-0 text-xs text-muted-foreground [overflow-wrap:anywhere]">{url}</p>{/if}{#if description}<p class="m-0 text-sm leading-relaxed text-muted-foreground">{description}</p>{/if}{@render children?.()}</div>

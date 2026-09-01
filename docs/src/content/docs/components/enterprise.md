@@ -56,7 +56,7 @@ The current UI and Lite releases include the following enterprise-oriented build
 | Analysis and rules | `PivotTable`, `DecisionTable`, `CanvasAnnotation`, `SpreadsheetView`, `SignaturePad` | Matching `Lite*` components | Analysis, rule evaluation, annotations, spreadsheets, and signatures |
 | Layout | `SplitPaneLayout` | `LiteSplitPaneLayout` | Detail inspectors and dense two-pane admin screens |
 
-`DevTools` and `CopilotPanel` remain explicitly SPA-only because they depend on browser-side developer or AI interaction. They are tracked as SPA-only in the parity matrix rather than represented by a misleading server fallback.
+`DevTools` remains explicitly SPA-only because it depends on browser-side developer interaction. AI interaction components now live in `@svadmin/ai-elements` and are outside the `@svadmin/ui` ↔ `@svadmin/lite` matrix.
 
 The components above are headless building blocks. Their callbacks must be connected to authenticated, tenant-scoped backend operations; rendering a button or form does not itself authorize or persist a business mutation.
 

@@ -1,0 +1,2 @@
+<script lang="ts">import type { Snippet } from 'svelte'; import { Minus } from '@lucide/svelte'; import { cn } from '../../utils.js'; let { count, class: className = '', children, ...rest }: { count: number; class?: string; children?: Snippet<[number]>; [key: string]: unknown } = $props();</script>
+{#if count > 0}<span class={cn('inline-flex items-center text-destructive', className)} {...rest}>{#if children}{@render children(count)}{:else}<Minus size={12} aria-hidden="true" />{count}{/if}</span>{/if}

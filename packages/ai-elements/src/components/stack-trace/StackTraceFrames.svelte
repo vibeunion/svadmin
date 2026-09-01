@@ -1,0 +1,13 @@
+<script lang="ts">
+  import type { Snippet } from 'svelte'; import type { HTMLAttributes } from 'svelte/elements'; import { cn } from '../../utils.js'; import type { ParsedStackFrame } from './context.svelte.js'; import { useStackTraceContext } from './context.svelte.js';
+  interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'class'> { class?: string; children?: Snippet<[ParsedStackFrame, number]>; showInternalFrames?: boolean; }
+  let { class: className = '', children, showInternalFrames = true, ...rest }: Props = $props(); const stack = useStackTraceContext('StackTraceFrames'); const frames = $derived(showInternalFrames ? stack.trace.frames : stack.trace.frames.filter((frame) => !frame.isInternal));
+  function location(frame: ParsedStackFrame): string { return `${frame.filePath ?? ''}${frame.lineNumber === null ? '' : `:${frame.lineNumber}`}${frame.columnNumber === null ? '' : `:${frame.columnNumber}`}`; }
+  function selectFrame(frame: ParsedStackFrame): void { if (!frame.filePath) return; stack.onFilePathClick?.(frame.filePath, frame.lineNumber ?? undefined, frame.columnNumber ?? undefined); }
+</script>
+<div {...rest} class={cn('svadmin-ai-stack-part__frames', className)} data-slot="stack-trace-frames">
+  {#each frames as frame, index (frame.raw)}
+    {#if children}{@render children(frame, index)}{:else}<div class:svadmin-ai-stack-part__frame--internal={frame.isInternal} class="svadmin-ai-stack-part__frame"><span>at</span>{#if frame.functionName}<strong>{frame.functionName}</strong>{/if}{#if frame.filePath}{#if stack.onFilePathClick}<button type="button" onclick={() => selectFrame(frame)}>{location(frame)}</button>{:else}<code>{location(frame)}</code>{/if}{:else}<code>{frame.raw.replace(/^at\s+/, '')}</code>{/if}</div>{/if}
+  {:else}<p>No stack frames</p>{/each}
+</div>
+<style>.svadmin-ai-stack-part__frames { display: grid; gap: .2rem; padding: .75rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .72rem; }.svadmin-ai-stack-part__frame { display: flex; min-width: 0; align-items: baseline; gap: .4rem; }.svadmin-ai-stack-part__frame > span, .svadmin-ai-stack-part__frame > code { color: var(--muted-foreground, currentColor); }.svadmin-ai-stack-part__frame > strong { font-weight: 550; }.svadmin-ai-stack-part__frame > button { min-width: 0; overflow: hidden; padding: 0; border: 0; background: transparent; color: var(--primary, currentColor); font: inherit; text-decoration: underline dotted; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }.svadmin-ai-stack-part__frame--internal { opacity: .55; }.svadmin-ai-stack-part__frames p { margin: 0; color: var(--muted-foreground, currentColor); }</style>
