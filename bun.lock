@@ -501,7 +501,9 @@
         "@svadmin/refine-adapter": "workspace:*",
       },
       "devDependencies": {
+        "@refinedev/supabase": "^6.0.2",
         "@supabase/supabase-js": "^2.112.4",
+        "@supacloud/js": "^0.23.1",
       },
       "peerDependencies": {
         "@refinedev/supabase": "^6.0.2",
@@ -977,6 +979,8 @@
 
     "@refinedev/simple-rest": ["@refinedev/simple-rest@6.0.1", "https://registry.npmmirror.com/@refinedev/simple-rest/-/simple-rest-6.0.1.tgz", { "dependencies": { "axios": "^1.11.0", "query-string": "^7.1.1" }, "peerDependencies": { "@refinedev/core": "^5.0.0" } }, "sha512-/xx/SiZ2aaA3KJO7PWFxWXvgG5n8roEay6BBdRHhwCMYFuHIOob82pl5KBGbRi+KLuFLUj+nSt9Q76D0uyIOlg=="],
 
+    "@refinedev/supabase": ["@refinedev/supabase@6.0.2", "https://registry.npmmirror.com/@refinedev/supabase/-/supabase-6.0.2.tgz", { "dependencies": { "@supabase/supabase-js": "^2.7.0" }, "peerDependencies": { "@refinedev/core": "^5.0.0" } }, "sha512-D3pPI8by8gNAOU9zyfC7a/r76ZSE1fkEJz0CXophwn1LU1/oOUsacoJz28kNsXUKiX6JB0FJiu83VNkr5a4t/Q=="],
+
     "@rive-app/webgl2": ["@rive-app/webgl2@2.41.0", "https://registry.npmmirror.com/@rive-app/webgl2/-/webgl2-2.41.0.tgz", {}, "sha512-SCfy5u2q6SCyyH6H2pWYU2iEqkrQVlItxpVKks2Nk9RXQAoaFYQTTkfJHCfcrpyew/o2QxEk43HYTnQNlSMIGw=="],
 
     "@rolldown/binding-android-arm-eabi": ["@rolldown/binding-android-arm-eabi@1.2.6", "https://registry.npmmirror.com/@rolldown/binding-android-arm-eabi/-/binding-android-arm-eabi-1.2.6.tgz", { "os": "android", "cpu": "arm" }, "sha512-b+jTcARdTiFLI6jB4a5XjTm0RWd6KcRfQj/I2356fxUZemiho9zQLxo0RtCuMDAyKcLo6cEltkgbQp6d1+sjjQ=="],
@@ -1052,6 +1056,8 @@
     "@supabase/storage-js": ["@supabase/storage-js@2.112.4", "https://registry.npmmirror.com/@supabase/storage-js/-/storage-js-2.112.4.tgz", { "dependencies": { "iceberg-js": "^0.8.1", "tslib": "2.8.1" } }, "sha512-lQ0JemuTlMIXVKgSci1qez8yPnM5hyDngeAfEBjZS2Om4D+Cus0EE5BE6glFobrxdyii1OF4UzWfF0zcQgDq5A=="],
 
     "@supabase/supabase-js": ["@supabase/supabase-js@2.112.4", "https://registry.npmmirror.com/@supabase/supabase-js/-/supabase-js-2.112.4.tgz", { "dependencies": { "@supabase/auth-js": "2.112.4", "@supabase/functions-js": "2.112.4", "@supabase/postgrest-js": "2.112.4", "@supabase/realtime-js": "2.112.4", "@supabase/storage-js": "2.112.4" }, "peerDependencies": { "@opentelemetry/api": ">=1.0.0" }, "optionalPeers": ["@opentelemetry/api"] }, "sha512-UiCX1udlFY1fQQrO7Z3GU7obQsju0w5Vk9mOOwalfo/+Gy+tahWVenSSuu5E/GTy/q//HxvGv2IrCdW66/61kw=="],
+
+    "@supacloud/js": ["@supacloud/js@0.23.2", "https://registry.npmmirror.com/@supacloud/js/-/js-0.23.2.tgz", { "peerDependencies": { "@supabase/supabase-js": "^2.112.4" } }, "sha512-Kdb6fOgFX0YBnYHRFJqw0+4wQjNIMOxnuhHgzLujTswdrLVCM4FqAQUQ9K1Mhf1bAk4vC5RGtyf2S+653/OEEg=="],
 
     "@svadmin/ai-elements": ["@svadmin/ai-elements@workspace:packages/ai-elements"],
 
@@ -2371,7 +2377,7 @@
 
     "postcss-scss": ["postcss-scss@4.0.9", "https://registry.npmmirror.com/postcss-scss/-/postcss-scss-4.0.9.tgz", { "peerDependencies": { "postcss": "^8.4.29" } }, "sha512-AjKOeiwAitL/MXxQW2DliT28EKukvvbEWx3LBmJIRN8KfBGZbRTxNYW0kSqi1COiTZ57nZ9NW06S6ux//N1c9A=="],
 
-    "postcss-selector-parser": ["postcss-selector-parser@7.1.1", "https://registry.npmmirror.com/postcss-selector-parser/-/postcss-selector-parser-7.1.1.tgz", { "dependencies": { "cssesc": "^3.0.0", "util-deprecate": "^1.0.2" } }, "sha512-orRsuYpJVw8LdAwqqLykBj9ecS5/cRHlI5+nvTo8LcCKmzDmqVORXtOIYEEQuL9D4BxtA1lm5isAqzQZCoQ6Eg=="],
+    "postcss-selector-parser": ["postcss-selector-parser@7.1.5", "https://registry.npmmirror.com/postcss-selector-parser/-/postcss-selector-parser-7.1.5.tgz", { "dependencies": { "cssesc": "^3.0.0", "util-deprecate": "^1.0.2" } }, "sha512-KvvtD7SrlBP7dlgkBghEE3r84CABm5SmV2aNcG4oCA+qDnJ/tvKonFVvwWAyyWUEwxuNawdfEAZKP9zM3oZ2Uw=="],
 
     "prelude-ls": ["prelude-ls@1.2.1", "https://registry.npmmirror.com/prelude-ls/-/prelude-ls-1.2.1.tgz", {}, "sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g=="],
 
@@ -2923,7 +2929,7 @@
 
     "postcss-load-config/yaml": ["yaml@1.10.3", "https://registry.npmmirror.com/yaml/-/yaml-1.10.3.tgz", {}, "sha512-vIYeF1u3CjlhAFekPPAk2h/Kv4T3mAkMox5OymRiJQB0spDP10LHvt+K7G9Ny6NuuMAb25/6n1qyUjAcGNf/AA=="],
 
-    "postcss-nested/postcss-selector-parser": ["postcss-selector-parser@6.1.2", "https://registry.npmmirror.com/postcss-selector-parser/-/postcss-selector-parser-6.1.2.tgz", { "dependencies": { "cssesc": "^3.0.0", "util-deprecate": "^1.0.2" } }, "sha512-Q8qQfPiZ+THO/3ZrOrO0cJJKfpYCagtMUkXbnEfmgUjwXg6z/WBeOyS9APBBPCTSiDV+s4SwQGu8yFsiMRIudg=="],
+    "postcss-nested/postcss-selector-parser": ["postcss-selector-parser@6.1.4", "https://registry.npmmirror.com/postcss-selector-parser/-/postcss-selector-parser-6.1.4.tgz", { "dependencies": { "cssesc": "^3.0.0", "util-deprecate": "^1.0.2" } }, "sha512-bIoJLOmjCO1S9XdY/DcnR5hJxvrDir1PbGChrzXG3vw0/FOliy/fA3dmdhQ441kah4gKv+TwckGzex6wNS5cnQ=="],
 
     "prompts/kleur": ["kleur@3.0.3", "https://registry.npmmirror.com/kleur/-/kleur-3.0.3.tgz", {}, "sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w=="],
 
