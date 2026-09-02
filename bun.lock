@@ -171,7 +171,7 @@
     },
     "packages/create-svadmin": {
       "name": "@svadmin/create",
-      "version": "0.24.1",
+      "version": "0.24.2",
       "bin": {
         "create-svadmin": "./dist/index.js",
       },
@@ -468,7 +468,7 @@
     },
     "packages/sso": {
       "name": "@svadmin/sso",
-      "version": "0.11.18",
+      "version": "0.11.19",
       "devDependencies": {
         "typescript": "^7.0.2",
       },
@@ -496,7 +496,7 @@
     },
     "packages/supabase": {
       "name": "@svadmin/supabase",
-      "version": "0.13.6",
+      "version": "0.13.7",
       "dependencies": {
         "@svadmin/refine-adapter": "workspace:*",
       },
