@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.19](https://github.com/vibeunion/svadmin/compare/sso-v0.11.18...sso-v0.11.19) (2026-09-02)
+
+
+### 🐛 Bug Fixes
+
+* **supabase:** align SupaCloud SDK and SupAuth consumers ([#371](https://github.com/vibeunion/svadmin/issues/371)) ([a7429b3](https://github.com/vibeunion/svadmin/commit/a7429b3d5b153c55795c1bcdfff24de236ce6dea))
+
 ## [0.11.18](https://github.com/vibeunion/svadmin/compare/sso-v0.11.17...sso-v0.11.18) (2026-09-01)
 
 
