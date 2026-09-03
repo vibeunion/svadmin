@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.0](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.3.0...ai-elements-v0.4.0) (2026-09-03)
+
+
+### 🚀 Features
+
+* **ai-elements:** refine assistant panel controls ([13e7d9c](https://github.com/vibeunion/svadmin/commit/13e7d9c23b558f6f31e0f1b0d636d48e15a67742))
+
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** replace clsx+tailwind-merge cn() with cn package ([e65f4e3](https://github.com/vibeunion/svadmin/commit/e65f4e373bf188f9decf70500d14585a94159cbf))
+
 ## [0.3.0](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.2.0...ai-elements-v0.3.0) (2026-09-01)
 
 
