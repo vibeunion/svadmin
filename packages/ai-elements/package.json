@@ -64,7 +64,7 @@
     "@rive-app/webgl2": "^2.41.0",
     "@sinclair/typebox": "^0.34.52",
     "@xyflow/svelte": "^1.6.5",
-    "clsx": "^2.1.1",
+    "cn": "^0.2.4",
     "streamdown-svelte": "^3.0.6",
     "tailwind-merge": "^3.6.0",
     "tailwind-variants": "^3.3.1"

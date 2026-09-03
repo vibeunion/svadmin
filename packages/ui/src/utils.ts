@@ -1,13 +1,8 @@
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
-
-export function cn(...inputs: ClassValue[]) {
-	return twMerge(clsx(inputs));
-}
+export { cn } from "cn";
 
 /**
- * A utility type that makes the `ref` prop optional and adds it to the given props type.
- */
+* A utility type that makes the `ref` prop optional and adds it to the given props type.
+*/
 export type WithElementRef<T, E extends HTMLElement = HTMLElement> = T & {
 	ref?: E | null;
 };
