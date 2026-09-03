@@ -147,6 +147,36 @@ describe('ChatDialog', () => {
     expect(within(chat).queryByText('Stale reply.')).toBeNull();
   });
 
+  it('minimizes and restores the conversation panel', async () => {
+    const view = render(ChatDialogHost, {
+      chatProvider: { sendMessage: async () => 'Reply.' },
+    });
+    const chat = await openChat(view.container);
+
+    const minimize = within(chat).getByRole('button', { name: 'Minimize AI assistant' });
+    expect(minimize.getAttribute('aria-expanded')).toBe('true');
+    await fireEvent.click(minimize);
+
+    expect(within(chat).getByRole('button', { name: 'Expand AI assistant' })).not.toBeNull();
+    expect(within(chat).queryByRole('textbox')).toBeNull();
+
+    await fireEvent.click(within(chat).getByRole('button', { name: 'Expand AI assistant' }));
+    expect(within(chat).getByRole('button', { name: 'Minimize AI assistant' })).not.toBeNull();
+    expect(within(chat).getByRole('textbox')).not.toBeNull();
+  });
+
+  it('closes the conversation panel and restores the launcher', async () => {
+    const view = render(ChatDialogHost, {
+      chatProvider: { sendMessage: async () => 'Reply.' },
+    });
+    const chat = await openChat(view.container);
+
+    await fireEvent.click(within(chat).getByRole('button', { name: 'Close AI assistant' }));
+
+    expect(chat.querySelector('section[aria-label="AI assistant"]')).toBeNull();
+    expect(within(chat).getByRole('button', { name: 'Open AI assistant' })).not.toBeNull();
+  });
+
   it('keeps approvals scoped to the active agent instance', async () => {
     const approveToolCall = vi.fn();
     const chat = vi.fn((..._args: Parameters<AgentProvider['chat']>) => (async function* () {

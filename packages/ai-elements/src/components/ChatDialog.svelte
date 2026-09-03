@@ -52,18 +52,18 @@
   };
 
   type Props = {
-    /** 在布局工具栏内渲染紧凑启动按钮。 */
+    /** Renders a compact launcher button in the layout toolbar. */
     docked?: boolean;
-    /** 启用 localStorage 的隔离键。必须包含稳定用户身份；未传或空字符串时不持久化。 */
+    /** Enables an isolated localStorage key; persistence requires a stable user identity. */
     persistKey?: string;
     onPersist?: (messages: ChatMessage[]) => void;
     onRestore?: () => ChatMessage[];
     onPersistenceError?: (detail: ChatPersistenceErrorDetail) => void;
-    /** 定向接收 `svadmin:ask-ai` 事件的稳定作用域。 */
+    /** Stable scope for targeted `svadmin:ask-ai` events. */
     scope?: string;
-    /** 所属 Layout 作用域，用于仲裁全局快捷键。 */
+    /** Owning Layout scope used to arbitrate global shortcuts. */
     ownerScope?: string;
-    /** Agent 可渲染的受控组件注册表。未注册名称不会动态加载。 */
+    /** Controlled component registry available to Agent rendering; unregistered names are never loaded dynamically. */
     componentRegistry?: ComponentRegistry;
     class?: string;
   };
@@ -171,7 +171,7 @@
     try {
       apiUrl = adminContext.getDataProvider().getApiUrl();
     } catch {
-      // 允许仅配置 AI provider 的独立使用场景。
+      // Allow standalone usage with only an AI provider configured.
     }
     const tenantIdentity = adminContext.tenantCacheKey?.__svadminTenant;
     const typedTenant = tenantIdentity === undefined
@@ -477,10 +477,10 @@
         return file ? { id, type: 'file', file } : null;
       }
       case 'approval':
-        // 审批依赖运行时能力，已处理与未处理状态都不能从存储中复活。
+        // Approvals depend on runtime capabilities; neither resolved nor pending states can be restored from storage.
         return null;
       case 'component':
-        // generated component 可能承载宿主动作，恢复时按能力状态丢弃。
+        // Generated components may carry host actions; discard them during restore based on capability state.
         return null;
       default:
         return null;
@@ -639,7 +639,7 @@
     return () => window.removeEventListener('svadmin:ask-ai', handler);
   });
 
-  // 延迟快照必须写回创建它时捕获的 callback，不能被 rerender 后的新 callback 接管。
+  // A delayed snapshot must use the callback captured at creation, not a newer callback after rerender.
   $effect.pre(() => {
     const callback = onPersist;
     untrack(() => {
@@ -654,7 +654,7 @@
     });
   });
 
-  // 每个 API + 类型化租户 + 显式用户键拥有独立历史和运行作用域。
+  // Each API, typed tenant, and explicit user key has an isolated history and run scope.
   $effect.pre(() => {
     const scopeToken = historyScopeToken;
     const key = resolvedPersistKey;
@@ -694,7 +694,7 @@
     });
   });
 
-  // provider 身份可以在持久化 key 不变时变化，迟到结果仍必须失效。
+  // The provider identity may change while the persistence key stays stable; late results must still be invalidated.
   $effect.pre(() => {
     const nextRunScope = {
       tenantIdentity: adminContext.tenantCacheKey?.__svadminTenant,
@@ -871,7 +871,7 @@
     const activeProvider = provider;
     if ((value.length === 0 && attachments.length === 0) || isStreaming || (!activeAgent && !activeProvider)) return;
 
-    // 新运行会撤销上一轮仍未解决的审批能力。
+    // A new run revokes unresolved approval capabilities from the previous run.
     if (approvalEntries.size > 0 || abortController) invalidateActiveRun();
     approvalIds.clear();
 
@@ -1185,40 +1185,43 @@
               </p>
             </div>
           </div>
-          <div class="flex shrink-0 items-center gap-1">
-            {#if messages.length > 0}
+          <div class="flex shrink-0 items-center" role="toolbar" aria-label="AI assistant controls">
+            <div class="flex items-center gap-0.5">
+              {#if messages.length > 0}
+                <button
+                  type="button"
+                  class="svadmin-ai__icon-button"
+                  aria-label="Clear conversation"
+                  title="Clear conversation"
+                  onclick={clearChat}
+                >
+                  <Trash2 size={14} strokeWidth={1.75} aria-hidden="true" />
+                </button>
+              {/if}
               <button
                 type="button"
                 class="svadmin-ai__icon-button"
-                aria-label="Clear conversation"
-                title="Clear conversation"
-                onclick={clearChat}
+                aria-label={minimized ? 'Expand AI assistant' : 'Minimize AI assistant'}
+                title={minimized ? 'Expand AI assistant' : 'Minimize AI assistant'}
+                aria-expanded={!minimized}
+                onclick={() => { minimized = !minimized; }}
               >
-                <Trash2 size={15} aria-hidden="true" />
+                {#if minimized}
+                  <Maximize2 size={14} strokeWidth={1.75} aria-hidden="true" />
+                {:else}
+                  <Minus size={14} strokeWidth={1.75} aria-hidden="true" />
+                {/if}
               </button>
-            {/if}
+            </div>
+            <span class="mx-1.5 h-4 w-px bg-border/70" aria-hidden="true"></span>
             <button
               type="button"
-              class="svadmin-ai__icon-button"
-              aria-label={minimized ? 'Expand AI assistant' : 'Minimize AI assistant'}
-              title={minimized ? 'Expand AI assistant' : 'Minimize AI assistant'}
-              aria-expanded={!minimized}
-              onclick={() => { minimized = !minimized; }}
-            >
-              {#if minimized}
-                <Maximize2 size={15} aria-hidden="true" />
-              {:else}
-                <Minus size={15} aria-hidden="true" />
-              {/if}
-            </button>
-            <button
-              type="button"
-              class="svadmin-ai__icon-button"
+              class="svadmin-ai__icon-button svadmin-ai__icon-button--close"
               aria-label="Close AI assistant"
               title="Close AI assistant"
               onclick={closeDialog}
             >
-              <X size={15} aria-hidden="true" />
+              <X size={14} strokeWidth={1.75} aria-hidden="true" />
             </button>
           </div>
         </header>

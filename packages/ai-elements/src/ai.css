@@ -58,9 +58,9 @@
 
 .svadmin-ai__icon-button {
   display: inline-flex;
-  width: 2rem;
-  height: 2rem;
-  min-height: 2rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  min-height: 1.75rem;
   align-items: center;
   justify-content: center;
   border: 1px solid transparent;
@@ -70,18 +70,32 @@
   color: var(--muted-foreground, currentColor);
   font: inherit;
   cursor: pointer;
-  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+  transition: background-color 120ms ease, color 120ms ease, box-shadow 120ms ease, transform 80ms ease;
 }
 
 .svadmin-ai__icon-button:hover:not(:disabled) {
-  border-color: var(--border, currentColor);
-  background: var(--muted, transparent);
+  background: color-mix(in oklch, var(--muted, transparent) 72%, transparent);
   color: var(--foreground, currentColor);
 }
 
 .svadmin-ai__icon-button:focus-visible {
-  outline: 2px solid var(--ring, currentColor);
-  outline-offset: 2px;
+  outline: 0;
+  box-shadow:
+    0 0 0 1px var(--card, Canvas),
+    0 0 0 3px var(--ring, currentColor);
+}
+
+.svadmin-ai__icon-button:active:not(:disabled) {
+  background: var(--muted, transparent);
+  transform: translateY(1px);
+}
+
+.svadmin-ai__icon-button--close {
+  color: color-mix(in oklch, var(--muted-foreground, currentColor) 88%, transparent);
+}
+
+.svadmin-ai__icon-button--close:hover:not(:disabled) {
+  background: var(--muted, transparent);
 }
 
 .svadmin-ai__icon-button:disabled {

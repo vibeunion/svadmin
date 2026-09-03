@@ -9,8 +9,35 @@ import {
   type ResourceDefinition,
 } from '@svadmin/core';
 import { tick } from 'svelte';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import ScopedAsyncConsumersHost from './scoped-async-consumers.test-host.svelte';
+
+beforeEach(() => {
+  Object.defineProperty(Element.prototype, 'animate', {
+    configurable: true,
+    value: () => {
+      const animation = {
+        cancel: () => {},
+        effect: null,
+        finished: Promise.resolve(),
+        playState: 'finished',
+      } as {
+        cancel: () => void;
+        effect: unknown;
+        finished: Promise<void>;
+        onfinish?: (() => void) | null;
+        playState: string;
+      };
+      Object.defineProperty(animation, 'onfinish', {
+        configurable: true,
+        set: (callback: (() => void) | null) => {
+          if (callback) queueMicrotask(callback);
+        },
+      });
+      return animation;
+    },
+  });
+});
 
 interface Deferred<T> {
   promise: Promise<T>;
@@ -302,6 +329,17 @@ describe('scoped async consumers', () => {
     expect(view.queryByText('stale copilot insight')).toBeNull();
     expect(view.getByText('fresh copilot insight')).not.toBeNull();
     expect(view.getByText('new-resource')).not.toBeNull();
+  });
+
+  it('closes CopilotPanel from its header control', async () => {
+    const view = render(ScopedAsyncConsumersHost, {
+      consumer: 'copilot',
+      tenant: { tenantId: 'tenant-current' },
+      requestContext: 'current-resource',
+    });
+
+    await fireEvent.click(view.getByRole('button', { name: 'Close copilot' }));
+    await waitFor(() => expect(view.queryByRole('complementary', { name: 'Copilot panel' })).toBeNull());
   });
 
   it('keeps a late AICommandBar reply out after closing and reopening in a new scope', async () => {

@@ -45,6 +45,8 @@
     inputValue = '',
   }: Props = $props();
 
+  let copilotOpen = $state(true);
+
   const fallbackDataProvider = {
     getList: async () => ({ data: [], total: 0 }),
     getOne: async () => ({ data: { id: 'test' } }),
@@ -80,7 +82,7 @@
 {:else if consumer === 'audit'}
   <AuditLogDrawer open={true} resource={requestContext} recordId="shared-record" />
 {:else if consumer === 'copilot'}
-  <CopilotPanel open={true} />
+  <CopilotPanel bind:open={copilotOpen} />
 {:else if consumer === 'command'}
   <AICommandBar open={consumerOpen} />
 {:else if consumer === 'suggest'}
