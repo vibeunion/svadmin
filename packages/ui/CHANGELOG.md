@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.68.0](https://github.com/vibeunion/svadmin/compare/ui-v0.67.1...ui-v0.68.0) (2026-09-03)
+
+
+### 🚀 Features
+
+* **ai-elements:** refine assistant panel controls ([13e7d9c](https://github.com/vibeunion/svadmin/commit/13e7d9c23b558f6f31e0f1b0d636d48e15a67742))
+
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** replace clsx+tailwind-merge cn() with cn package ([e65f4e3](https://github.com/vibeunion/svadmin/commit/e65f4e373bf188f9decf70500d14585a94159cbf))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.4.0
+
 ## [0.67.1](https://github.com/vibeunion/svadmin/compare/ui-v0.67.0...ui-v0.67.1) (2026-09-01)
 
 
