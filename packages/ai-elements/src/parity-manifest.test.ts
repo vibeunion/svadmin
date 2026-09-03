@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import * as publicApi from './index.js';
 import {
   AI_ELEMENT_PARITY,
@@ -151,10 +153,10 @@ describe('AI Elements parity manifest', () => {
     }
 
     expect(AI_ELEMENT_PARITY_SUMMARY.families.behavior).toEqual({
-      verified: 0,
+      verified: 47,
       partial: 0,
       intentionalDifference: 2,
-      unverified: 47,
+      unverified: 0,
     });
     expect(AI_ELEMENT_PARITY_SUMMARY.families.visual).toEqual({
       verified: 0,
@@ -162,6 +164,20 @@ describe('AI Elements parity manifest', () => {
       intentionalDifference: 0,
       unverified: 49,
     });
+  });
+
+  it('requires file-backed evidence for every classified behavior status', () => {
+    for (const entry of AI_ELEMENT_PARITY) {
+      if (entry.local.behaviorStatus !== 'unverified') {
+        expect(entry.local.behaviorEvidence.length, entry.upstream).toBeGreaterThan(0);
+        for (const evidence of entry.local.behaviorEvidence) {
+          expect(evidence, entry.upstream).toMatch(/\.test\.(?:svelte\.)?ts$/);
+          expect(existsSync(resolve(import.meta.dirname, '..', evidence)), `${entry.upstream}:${evidence}`).toBe(true);
+        }
+      } else {
+        expect(entry.local.behaviorEvidence, entry.upstream).toEqual([]);
+      }
+    }
   });
 
   it('exports every official runtime name and compound namespace from the package root', () => {

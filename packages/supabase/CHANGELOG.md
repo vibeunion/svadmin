@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.7](https://github.com/vibeunion/svadmin/compare/supabase-v0.13.6...supabase-v0.13.7) (2026-09-02)
+
+
+### 🐛 Bug Fixes
+
+* **supabase:** align SupaCloud SDK and SupAuth consumers ([#371](https://github.com/vibeunion/svadmin/issues/371)) ([a7429b3](https://github.com/vibeunion/svadmin/commit/a7429b3d5b153c55795c1bcdfff24de236ce6dea))
+
 ## [0.13.6](https://github.com/vibeunion/svadmin/compare/supabase-v0.13.5...supabase-v0.13.6) (2026-09-01)
 
 

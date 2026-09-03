@@ -48,7 +48,10 @@ Use `createSupaCloudTaskProvider()` when you want a thin, task-focused API surfa
 ```ts
 import { createSupaCloudTaskProvider } from '@svadmin/supabase/supacloud';
 
-const taskProvider = createSupaCloudTaskProvider({ supacloud });
+const taskProvider = createSupaCloudTaskProvider({
+  supacloud: supacloud.tasks,
+  clientKind: 'sdk',
+});
 ```
 
 ### Supported Methods
@@ -95,7 +98,10 @@ Use `createSupaCloudTaskLiveProvider()` when you want to bridge `tasks.subscribe
 ```ts
 import { createSupaCloudTaskLiveProvider } from '@svadmin/supabase/supacloud';
 
-const taskLiveProvider = createSupaCloudTaskLiveProvider({ supacloud });
+const taskLiveProvider = createSupaCloudTaskLiveProvider({
+  supacloud: supacloud.tasks,
+  clientKind: 'sdk',
+});
 ```
 
 This provider expects `liveParams.taskId` when subscribing:
@@ -127,7 +133,8 @@ You can override this behavior with `mapTaskToEvent`:
 
 ```ts
 const taskLiveProvider = createSupaCloudTaskLiveProvider({
-  supacloud,
+  supacloud: supacloud.tasks,
+  clientKind: 'sdk',
   resource: 'jobs',
   mapTaskToEvent: (task, resource) => ({
     type: task.status === 'queued' ? 'INSERT' : 'UPDATE',
@@ -156,8 +163,14 @@ const dataProvider = createSupabaseDataProvider(supabase);
 const authProvider = createSupabaseAuthProvider(supabase);
 const liveProvider = createSupabaseLiveProvider(supabase);
 
-const taskProvider = createSupaCloudTaskProvider({ supacloud });
-const taskLiveProvider = createSupaCloudTaskLiveProvider({ supacloud });
+const taskProvider = createSupaCloudTaskProvider({
+  supacloud: supacloud.tasks,
+  clientKind: 'sdk',
+});
+const taskLiveProvider = createSupaCloudTaskLiveProvider({
+  supacloud: supacloud.tasks,
+  clientKind: 'sdk',
+});
 ```
 
 Use the standard providers for your admin CRUD flows, and use the SupaCloud helpers only where you need platform task semantics.

@@ -186,25 +186,56 @@ export type { PresetOptions };
 
 // ─── Supauth / GoTrue ────────────────────────────────────────
 
+function normalizeSupauthIssuer(configuredIssuer: string): {
+  issuer: string;
+  publicRoot: string;
+} {
+  const normalizedIssuer = configuredIssuer.replace(/\/+$/, '');
+  if (!normalizedIssuer || normalizedIssuer.endsWith('/auth/v1')) {
+    return {
+      issuer: normalizedIssuer,
+      publicRoot: normalizedIssuer.slice(0, -'/auth/v1'.length),
+    };
+  }
+  return { issuer: `${normalizedIssuer}/auth/v1`, publicRoot: normalizedIssuer };
+}
+
 /**
- * Supauth OIDC Sign-In (GoTrue-compatible identity provider).
+ * Supauth hosted OIDC Sign-In.
  *
- * Compatible with SupaCloud, SupaOAuth, and any GoTrue-based auth backend.
- * Uses standard OIDC Authorization Code Flow with PKCE.
+ * Targets the SupAuth contract hosted by SupaCloud or SupaOAuth: OIDC endpoints
+ * live below `/auth/v1`, while browser sign-out lives at the public root
+ * `/logout`. Other GoTrue deployments should provide explicit endpoints or use
+ * `createSSOAuthProvider()` directly.
  *
- * @param issuer - Supauth issuer URL (e.g., 'https://auth.example.com')
  * @param clientId - OAuth2 Client ID
+ * @param opts - SSO options. `opts.issuer` accepts a Supauth public root or `/auth/v1` issuer URL.
  */
 export function createSupauthAuth(
   clientId: string,
   opts?: PresetOptions & { issuer?: string },
 ) {
-  const issuer = opts?.issuer ?? '';
+  const manualLogoutEndpoint = opts?.manualEndpoints?.end_session_endpoint;
+  const {
+    issuer: configuredIssuer = '',
+    endSessionEndpoint: configuredLogoutEndpoint,
+    storageKey: configuredStorageKey,
+    ...providerOptions
+  } = opts ?? {};
+  const { issuer, publicRoot } = normalizeSupauthIssuer(configuredIssuer);
+  const storageKey = configuredStorageKey
+    ?? `svadmin_sso:${encodeURIComponent(configuredIssuer)}:${encodeURIComponent(clientId)}`;
+  const endSessionEndpoint = configuredLogoutEndpoint
+    ?? manualLogoutEndpoint
+    ?? (publicRoot ? `${publicRoot}/logout` : undefined);
+
   return createSSOAuthProvider({
     issuer,
     clientId,
     scopes: ['openid', 'profile', 'email'],
     redirectUri: resolveRedirectUri(opts),
-    ...opts,
+    storageKey,
+    ...(endSessionEndpoint === undefined ? {} : { endSessionEndpoint }),
+    ...providerOptions,
   });
 }

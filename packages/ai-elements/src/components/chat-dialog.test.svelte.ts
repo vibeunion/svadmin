@@ -29,6 +29,20 @@ async function submitText(chat: HTMLElement, text: string): Promise<HTMLTextArea
 }
 
 describe('ChatDialog', () => {
+  it('groups compact window controls and visually separates the close action', async () => {
+    const view = render(ChatDialogHost, { chatProvider: { sendMessage: async () => 'Ready.' } });
+    const chat = await openChat(view.container);
+    const toolbar = within(chat).getByRole('toolbar', { name: 'AI assistant controls' });
+    const minimize = within(toolbar).getByRole('button', { name: 'Minimize AI assistant' });
+    const close = within(toolbar).getByRole('button', { name: 'Close AI assistant' });
+
+    expect(minimize.classList.contains('svadmin-ai__icon-button')).toBe(true);
+    expect(close.classList.contains('svadmin-ai__icon-button--close')).toBe(true);
+    expect(
+      Array.from(toolbar.querySelectorAll('[aria-hidden="true"]')).some((element) => element.classList.contains('bg-border/70')),
+    ).toBe(true);
+  });
+
   it('streams structured parts and filters unsafe source links', async () => {
     const sendMessage = vi.fn((..._args: Parameters<ChatProvider['sendMessage']>) => (async function* () {
       yield { type: 'reasoning' as const, text: 'Checking records.', streaming: true };

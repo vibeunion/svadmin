@@ -216,8 +216,14 @@ const supacloud = createSupaCloudClient({
   projectRef: import.meta.env.VITE_SUPACLOUD_PROJECT_REF,
 });
 
-const taskProvider = createSupaCloudTaskProvider({ supacloud });
-const taskLiveProvider = createSupaCloudTaskLiveProvider({ supacloud });
+const taskProvider = createSupaCloudTaskProvider({
+  supacloud: supacloud.tasks,
+  clientKind: 'sdk',
+});
+const taskLiveProvider = createSupaCloudTaskLiveProvider({
+  supacloud: supacloud.tasks,
+  clientKind: 'sdk',
+});
 ```
 
 ```ts
