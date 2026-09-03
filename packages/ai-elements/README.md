@@ -139,6 +139,11 @@ interaction or pixel parity. `JSXPreview` intentionally uses a restricted,
 TypeBox-validated parser instead of executing arbitrary JSX. `Tool.getStatusBadge`
 returns Svelte-renderable status metadata instead of a React element.
 
+The architecture comparison, adopted Sikandar patterns, component counts, and
+intentional framework differences are documented in
+[`UPSTREAM_PARITY.md`](./UPSTREAM_PARITY.md). Behavior classifications must be
+backed by an existing test file in the parity manifest.
+
 ## AdminApp Integration
 
 Pass providers through the owning Svelte tree and render the assistant through

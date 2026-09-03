@@ -9,6 +9,7 @@
   "files": [
     "dist",
     "README.md",
+    "UPSTREAM_PARITY.md",
     "THIRD_PARTY_NOTICES.md",
     "!dist/**/*.test.*",
     "!dist/**/*.test-*",

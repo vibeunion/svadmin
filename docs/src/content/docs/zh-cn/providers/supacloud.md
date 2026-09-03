@@ -52,7 +52,10 @@ const supacloud = createSupaCloudClient({
 ```ts
 import { createSupaCloudTaskProvider } from '@svadmin/supabase/supacloud';
 
-const taskProvider = createSupaCloudTaskProvider({ supacloud });
+const taskProvider = createSupaCloudTaskProvider({
+  supacloud: supacloud.tasks,
+  clientKind: 'sdk',
+});
 ```
 
 ### 支持的方法
@@ -99,7 +102,10 @@ await taskProvider.retry('task_123');
 ```ts
 import { createSupaCloudTaskLiveProvider } from '@svadmin/supabase/supacloud';
 
-const taskLiveProvider = createSupaCloudTaskLiveProvider({ supacloud });
+const taskLiveProvider = createSupaCloudTaskLiveProvider({
+  supacloud: supacloud.tasks,
+  clientKind: 'sdk',
+});
 ```
 
 这个 provider 在订阅时要求提供 `liveParams.taskId`：
@@ -131,7 +137,8 @@ stop();
 
 ```ts
 const taskLiveProvider = createSupaCloudTaskLiveProvider({
-  supacloud,
+  supacloud: supacloud.tasks,
+  clientKind: 'sdk',
   resource: 'jobs',
   mapTaskToEvent: (task, resource) => ({
     type: task.status === 'queued' ? 'INSERT' : 'UPDATE',
@@ -160,8 +167,14 @@ const dataProvider = createSupabaseDataProvider(supabase);
 const authProvider = createSupabaseAuthProvider(supabase);
 const liveProvider = createSupabaseLiveProvider(supabase);
 
-const taskProvider = createSupaCloudTaskProvider({ supacloud });
-const taskLiveProvider = createSupaCloudTaskLiveProvider({ supacloud });
+const taskProvider = createSupaCloudTaskProvider({
+  supacloud: supacloud.tasks,
+  clientKind: 'sdk',
+});
+const taskLiveProvider = createSupaCloudTaskLiveProvider({
+  supacloud: supacloud.tasks,
+  clientKind: 'sdk',
+});
 ```
 
 日常管理后台 CRUD 继续走标准 Supabase Provider；只有在需要平台任务语义时，再使用 SupaCloud 这层增强。

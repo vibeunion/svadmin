@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/supabase",
-  "version": "0.13.6",
+  "version": "0.13.7",
   "description": "Supabase adapters — DataProvider, AuthProvider, LiveProvider, AuditHandler",
   "type": "module",
   "sideEffects": false,
@@ -58,6 +58,8 @@
     "@svadmin/refine-adapter": "workspace:*"
   },
   "devDependencies": {
-    "@supabase/supabase-js": "^2.112.4"
+    "@refinedev/supabase": "^6.0.2",
+    "@supabase/supabase-js": "^2.112.4",
+    "@supacloud/js": "^0.23.1"
   }
 }
