@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.49.1](https://github.com/vibeunion/svadmin/compare/core-v0.49.0...core-v0.49.1) (2026-09-06)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** drop bun test --isolate, harden window restore instead ([#378](https://github.com/vibeunion/svadmin/issues/378)) ([2442b0f](https://github.com/vibeunion/svadmin/commit/2442b0f6062583da805a53c24bd5fdbf2d52b5a0))
+
 ## [0.49.0](https://github.com/vibeunion/svadmin/compare/core-v0.48.0...core-v0.49.0) (2026-09-01)
 
 
