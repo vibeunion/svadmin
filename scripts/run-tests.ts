@@ -30,9 +30,32 @@ async function collectFiles(directory: string): Promise<string[]> {
   return files;
 }
 
-function run(command: string, args: string[], cwd: string): void {
+interface RunOptions {
+  /** Kill the command if it hangs; spawnSync reports ETIMEDOUT and the given signal. */
+  timeoutMs?: number;
+}
+
+function run(command: string, args: string[], cwd: string, options: RunOptions = {}): void {
   console.info(`Running: ${command} ${args.join(' ')}`);
-  const result = spawnSync(command, args, { cwd, stdio: 'inherit' });
+  const timeoutMs = options.timeoutMs ?? 15 * 60_000;
+  const result = spawnSync(command, args, {
+    cwd,
+    stdio: 'inherit',
+    timeout: timeoutMs,
+    killSignal: 'SIGKILL',
+  });
+
+  if (result.error) {
+    console.error(`Failed to run ${command}: ${result.error.message}`);
+    process.exit(1);
+  }
+
+  if (result.signal) {
+    console.error(
+      `${command} ${args[0] ?? ''} was killed with ${result.signal} after ${Math.round(timeoutMs / 60_000)}m (likely hung); re-run to confirm, then investigate the offending test file`,
+    );
+    process.exit(1);
+  }
 
   if (result.status !== 0) {
     process.exit(result.status ?? 1);
