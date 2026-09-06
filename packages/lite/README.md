@@ -207,6 +207,24 @@ import { createLegacyRedirectHook } from '@svadmin/lite';
 export const handle = createLegacyRedirectHook('/lite');
 ```
 
+### 3b. Optional IE11 polyfill and enhancement
+
+The Lite SSR baseline does not require a polyfill: native links, native forms,
+server actions, and full-page navigation work without browser JavaScript. If
+you enable `enhance.js`, load the small ES5 DOM baseline first:
+
+```html
+<script src="/polyfill.js"></script>
+<script src="/enhance.js"></script>
+```
+
+Copy both assets from the package exports `@svadmin/lite/polyfill.js` and
+`@svadmin/lite/enhance.js` into the application's static directory. The
+published polyfill bundles `core-js/stable` and `whatwg-fetch` for the legacy
+enhancement layer. It does not polyfill WebSocket, WASM, Canvas, or the Svelte
+runtime. Those capabilities must continue to use the documented server
+fallback.
+
 ### 4. Optional legacy-browser metadata
 
 ```html

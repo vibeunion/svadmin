@@ -5,7 +5,8 @@
   "type": "module",
   "sideEffects": [
     "./dist/lite.css",
-    "./dist/enhance.js"
+    "./dist/enhance.js",
+    "./dist/polyfill.js"
   ],
   "files": [
     "dist",
@@ -34,6 +35,10 @@
       "import": "./dist/enhance.js",
       "default": "./dist/enhance.js"
     },
+    "./polyfill.js": {
+      "import": "./dist/polyfill.js",
+      "default": "./dist/polyfill.js"
+    },
     "./lite.css": {
       "svelte": "./dist/lite.css",
       "style": "./dist/lite.css",
@@ -54,7 +59,9 @@
   },
   "dependencies": {
     "@lucide/svelte": "^1.35.0",
-    "@sinclair/typebox": "^0.34.52"
+    "@sinclair/typebox": "^0.34.52",
+    "core-js": "^3.50.0",
+    "whatwg-fetch": "^3.6.20"
   },
   "devDependencies": {
     "@types/bun": "^1.4.0",
@@ -66,7 +73,7 @@
     "vitest": "^4.1.11"
   },
   "scripts": {
-    "build": "node ../../node_modules/@sveltejs/package/svelte-package.js -i src -o dist && bun ../../scripts/copy-package-assets.ts static/enhance.js dist/enhance.js",
+    "build": "node ../../node_modules/@sveltejs/package/svelte-package.js -i src -o dist && node ../../node_modules/esbuild/bin/esbuild --bundle src/polyfill-entry.ts --target=es5 --outfile=dist/polyfill.js && bun ../../scripts/copy-package-assets.ts static/enhance.js dist/enhance.js",
     "test": "bun run test:components && bun run test:server && bun run test:security",
     "test:components": "vitest run --config ./vitest.config.ts",
     "test:server": "bun test ./src/schema-generator.test.ts ./src/server-adapter.test.ts ./src/fragment-id.test.ts ./src/compatibility.test.ts ./src/ie11-ssr-contract.test.ts",
