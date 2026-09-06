@@ -107,7 +107,7 @@ async function main(): Promise<void> {
   }
 
   bunTestFiles.sort();
-  run(process.execPath, ['test', ...bunTestFiles], repositoryRoot);
+  run(process.execPath, ['test', '--isolate', ...bunTestFiles], repositoryRoot);
 
   const temporaryDirectory = await mkdtemp(join(tmpdir(), 'svadmin-test-config-'));
 
