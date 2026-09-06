@@ -14,10 +14,20 @@ interface TestWindow {
 const originalWindow = (globalThis as { window?: TestWindow }).window;
 
 afterEach(() => {
+  const globalScope = globalThis as { window?: TestWindow };
   if (originalWindow) {
-    (globalThis as { window?: TestWindow }).window = originalWindow;
+    // Another test file may have defined `window` as a non-writable global
+    // (e.g. via defineProperty without configurable), so plain assignment
+    // throws "Attempted to assign to readonly property". Restore through
+    // defineProperty so the descriptor is always writable again.
+    Object.defineProperty(globalScope, 'window', {
+      value: originalWindow,
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    });
   } else {
-    delete (globalThis as { window?: TestWindow }).window;
+    Reflect.deleteProperty(globalScope, 'window');
   }
 });
 

@@ -107,7 +107,11 @@ async function main(): Promise<void> {
   }
 
   bunTestFiles.sort();
-  run(process.execPath, ['test', '--isolate', ...bunTestFiles], repositoryRoot);
+  // NOTE: no `--isolate` here. Isolated per-file processes deadlock randomly
+  // on 2-core hosted runners right after the bun banner (zero test output,
+  // observed ~5 times in one day); the global-state clash this flag guarded
+  // against is fixed at the source in packages/core/src/http.test.ts.
+  run(process.execPath, ['test', ...bunTestFiles], repositoryRoot);
 
   const temporaryDirectory = await mkdtemp(join(tmpdir(), 'svadmin-test-config-'));
 
