@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.0](https://github.com/vibeunion/svadmin/compare/lite-v0.9.2...lite-v0.10.0) (2026-09-06)
+
+
+### 🚀 Features
+
+* **lite:** add IE11 polyfill bundle ([5e94747](https://github.com/vibeunion/svadmin/commit/5e9474715627e38d136168fbeabc8c3ee79f1e22))
+
 ## [0.9.2](https://github.com/vibeunion/svadmin/compare/lite-v0.9.1...lite-v0.9.2) (2026-09-06)
 
 
