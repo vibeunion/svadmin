@@ -106,18 +106,22 @@ const expectations: PackageExpectation[] = [
       'dist/components/Response.svelte',
       'dist/components/Response.svelte.d.ts',
       'dist/ai.css',
+      'dist/ai.theme.css',
     ],
     contentAssertions: [
       {
         path: 'dist/ai.css',
         includes: [
-          '@source "./components";',
-          '@source "../node_modules/streamdown-svelte/dist/**/*.{js,svelte,ts}";',
-          '@source "../../../node_modules/streamdown-svelte/dist/**/*.{js,svelte,ts}";',
-          '@source "../../../streamdown-svelte/dist/**/*.{js,svelte,ts}";',
           '.svadmin-ai',
+          '.svadmin-ai-code--secondary',
+          '.flex',
         ],
-        excludes: ['@source "./src";'],
+        excludes: ['@source', '@theme', '@import'],
+      },
+      {
+        path: 'dist/ai.theme.css',
+        includes: ['@theme', '.svadmin-ai-code--secondary', '.flex'],
+        excludes: ['@source', '@import'],
       },
     ],
   },

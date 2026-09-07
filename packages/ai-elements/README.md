@@ -14,6 +14,30 @@ Import the package stylesheet once in your application CSS:
 @import '@svadmin/ai-elements/ai.css';
 ```
 
+This entry is precompiled: the host needs neither a Tailwind plugin nor
+dependency source scanning. It includes the utility styles used by the package
+and its Streamdown renderer, without injecting a global reset.
+
+Tailwind v4 hosts can instead use the theme entry:
+
+```css
+@import 'tailwindcss';
+@import '@svadmin/ai-elements/ai.theme.css';
+```
+
+Import one AI stylesheet entry, not both. Semantic colors read host CSS
+variables such as `--background`, `--foreground`, and `--primary`, with system
+color fallbacks. Nested themes use `.svadmin-theme`.
+For a non-Tailwind host, define global typography/reset styles in the host
+application; this package does not reset unrelated content.
+
+Tailwind remains a build-time dependency. The package no longer declares
+`tailwind-variants` or `tailwind-merge` as runtime dependencies, although Streamdown still
+uses the latter transitively. SvelteFlow keeps its component-owned stylesheet.
+No `@svadmin/ui` dependency is required.
+The public `codeVariants` helper retains extension metadata; `tailwind-variants`
+is used only in development to verify consumer extension compatibility.
+
 ## Vite SSR
 
 Vite SSR consumers must bundle the Svelte and ESM dependency boundary used by the complete package entry:
