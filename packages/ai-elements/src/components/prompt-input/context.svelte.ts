@@ -26,6 +26,13 @@ export interface PromptInputTextContext {
 export interface PromptInputController {
   readonly textInput: PromptInputTextContext;
   readonly attachments: PromptInputAttachmentsContext;
+  readonly form?: {
+    readonly disabled: boolean;
+    readonly busy: boolean;
+    readonly status: 'submitted' | 'streaming' | 'error' | 'ready';
+    readonly canSubmit: boolean;
+    readonly onstop?: () => void;
+  };
   readonly syncHiddenInput?: boolean;
   registerFileInput(input: HTMLInputElement | null, open?: () => void): void;
 }

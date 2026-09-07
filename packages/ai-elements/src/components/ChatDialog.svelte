@@ -1,6 +1,6 @@
 <script lang="ts">
   import { captureAdminContext, useParsed } from '@svadmin/core';
-  import { Bot, Maximize2, MessageCircle, Minus, Trash2, X } from '@lucide/svelte';
+  import { Bot, Maximize2, MessageCircle, Minus, RotateCcw, Trash2, X } from '@lucide/svelte';
   import { onDestroy, tick, untrack, type Component } from 'svelte';
   import { SvelteMap } from 'svelte/reactivity';
   import type {
@@ -8,7 +8,7 @@
     AgentProvider,
     ChatAttachment,
     ChatContext,
-    ChatMessage,
+    ChatMessage as ProviderMessage,
     ChatMessagePart,
     ChatProvider,
     ChatSource,
@@ -17,6 +17,7 @@
   import Conversation from './Conversation.svelte';
   import ConversationContent from './ConversationContent.svelte';
   import ConversationEmptyState from './ConversationEmptyState.svelte';
+  import ConversationScrollButton from './ConversationScrollButton.svelte';
   import Message from './Message.svelte';
   import MessageContent from './MessageContent.svelte';
   import MessageToolbar from './MessageToolbar.svelte';
@@ -102,6 +103,8 @@
   };
 
   type ApprovalDecision = 'approved' | 'rejected';
+  // Display-only provenance survives restore; it never grants approval capability.
+  type ChatMessage = ProviderMessage & { approvalConfirmationFor?: string };
 
   let {
     docked = false,
@@ -134,6 +137,27 @@
   let inputValue = $state('');
   let inputAttachments = $state<ChatAttachment[]>([]);
   let messages = $state<ChatMessage[]>([]);
+  const retryCandidate = $derived.by(() => {
+    let index = messages.length - 1;
+    while (index >= 0 && messages[index].role !== 'assistant') index -= 1;
+    const response = messages[index];
+    const request = messages[index - 1];
+    if (!response || request?.role !== 'user' ||
+        (response.status !== 'error' && response.status !== 'aborted')) return;
+    // Approval confirmations belong to this run; never discard a later draft message.
+    if (!messages.slice(index + 1).every((message) =>
+      message.role === 'user' && message.parts.length === 1 &&
+      message.parts[0].type === 'text' && message.approvalConfirmationFor === response.id,
+    )) return;
+    const files = [
+      ...(request.attachments ?? []),
+      ...request.parts.flatMap((part) => part.type === 'file' ? [part.file] : []),
+    ];
+    const missingFiles = files.some((file) =>
+      !file.file && (!safeResourceUrl(file.url) || file.url?.startsWith('blob:')),
+    );
+    return { id: response.id, index, missingFiles };
+  });
   let isStreaming = $state(false);
   let chatRoot = $state<HTMLElement | null>(null);
   let launcherButton = $state<HTMLButtonElement | null>(null);
@@ -262,24 +286,6 @@
     }));
   }
 
-  function getConversationLog(): HTMLElement | null {
-    return chatRoot?.querySelector<HTMLElement>('[role="log"]') ?? null;
-  }
-
-  function shouldStickToBottom(): boolean {
-    const log = getConversationLog();
-    if (!log) return true;
-    return log.scrollHeight - log.scrollTop - log.clientHeight <= 64;
-  }
-
-  function scrollToBottomAfterUpdate(shouldScroll: boolean): void {
-    if (!shouldScroll || typeof window === 'undefined') return;
-    window.requestAnimationFrame(() => {
-      const log = getConversationLog();
-      log?.scrollTo({ top: log.scrollHeight, behavior: 'smooth' });
-    });
-  }
-
   function getChatStorage(): Storage | null {
     if (typeof window === 'undefined') return null;
     return window.localStorage;
@@ -373,10 +379,8 @@
   }
 
   function replaceMessages(nextMessages: ChatMessage[], persist = true): void {
-    const shouldScroll = shouldStickToBottom();
     messages = nextMessages;
     if (persist) schedulePersist(nextMessages);
-    scrollToBottomAfterUpdate(shouldScroll);
   }
 
   function updateMessageById(
@@ -513,6 +517,9 @@
       parts,
       status: value.status === 'error' || value.status === 'aborted' ? value.status : 'complete',
       createdAt: value.createdAt,
+      ...(value.role === 'user' && typeof value.approvalConfirmationFor === 'string'
+        ? { approvalConfirmationFor: value.approvalConfirmationFor }
+        : {}),
       ...(attachments.length > 0 ? { attachments } : {}),
     };
   }
@@ -865,11 +872,15 @@
   async function sendMessage(
     rawValue = inputValue,
     attachments = inputAttachments,
+    retryId?: string,
   ): Promise<void> {
     const value = rawValue.trim();
     const activeAgent = agent;
     const activeProvider = provider;
-    if ((value.length === 0 && attachments.length === 0) || isStreaming || (!activeAgent && !activeProvider)) return;
+    if (isStreaming || (!activeAgent && !activeProvider)) return;
+    const retry = retryId ? retryCandidate : undefined;
+    if (retryId && (retry?.id !== retryId || retry.missingFiles)) return;
+    if (!retryId && value.length === 0 && attachments.length === 0) return;
 
     // A new run revokes unresolved approval capabilities from the previous run.
     if (approvalEntries.size > 0 || abortController) invalidateActiveRun();
@@ -899,11 +910,17 @@
       status: 'streaming',
       createdAt: Date.now(),
     };
-    const nextMessages = [...messages, userMessage, assistantMessage];
-    const sentMessages = nextMessages.filter((message) => message.parts.length > 0);
+    const nextMessages = retry
+      ? [...messages.slice(0, retry.index), assistantMessage]
+      : [...messages, userMessage, assistantMessage];
+    const sentMessages = nextMessages
+      .filter((message) => message.parts.length > 0)
+      .map(({ approvalConfirmationFor: _provenance, ...message }) => message);
 
-    inputValue = '';
-    inputAttachments = [];
+    if (!retryId) {
+      inputValue = '';
+      inputAttachments = [];
+    }
     replaceMessages(nextMessages);
 
     const controller = new AbortController();
@@ -983,6 +1000,7 @@
     return {
       id: createId('user'),
       role: 'user',
+      approvalConfirmationFor: entry.messageId,
       parts: [textPart(
         `User ${decision} execution of tool '${entry.tool}'`,
       )],
@@ -1383,10 +1401,22 @@
                   </MessageContent>
                   <MessageToolbar>
                     <span>{message.status ?? 'complete'}</span>
+                    {#if message.id === retryCandidate?.id}
+                      <button
+                        type="button"
+                        class="svadmin-ai__button svadmin-ai__button--ghost size-8 min-h-8 p-0"
+                        aria-label="Retry response"
+                        title={retryCandidate.missingFiles ? 'Reattach files to send this request again.' : 'Retry response'}
+                        disabled={isStreaming || retryCandidate.missingFiles}
+                        onclick={() => { void sendMessage('', [], message.id); }}
+                      ><RotateCcw size={14} aria-hidden="true" /></button>
+                      {#if retryCandidate.missingFiles}<span role="status">Reattach files to send this request again.</span>{/if}
+                    {/if}
                   </MessageToolbar>
                 </Message>
               {/each}
             </ConversationContent>
+            <ConversationScrollButton />
           </Conversation>
 
           <footer class="shrink-0 border-t border-border/70 bg-card p-3">

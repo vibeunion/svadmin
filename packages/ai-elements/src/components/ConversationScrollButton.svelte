@@ -39,6 +39,7 @@
       className,
     )}
     aria-label={ariaLabel}
+    title={ariaLabel}
     data-slot="conversation-scroll-button"
     onclick={click}
   >

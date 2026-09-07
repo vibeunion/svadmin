@@ -13,6 +13,7 @@
   import type { GeneratedComponentRegistry } from '../generated-components.js';
 
   interface Props {
+    docked?: boolean;
     chatProvider?: ChatProvider | null;
     agentProvider?: AgentProvider | null;
     tenant?: TenantContext;
@@ -24,6 +25,7 @@
   }
 
   let {
+    docked = false,
     chatProvider = null,
     agentProvider = null,
     tenant,
@@ -64,4 +66,4 @@
   });
 </script>
 
-<ChatDialog {persistKey} {onPersist} {onRestore} {onPersistenceError} {componentRegistry} />
+<ChatDialog {docked} {persistKey} {onPersist} {onRestore} {onPersistenceError} {componentRegistry} />
