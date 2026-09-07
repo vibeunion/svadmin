@@ -32,7 +32,7 @@
 <div
   {...rest}
   bind:this={contentElement}
-  class={cn('flex min-h-0 flex-1 flex-col gap-8 overflow-y-auto p-4', className)}
+  class={cn('flex min-h-0 min-w-0 flex-1 flex-col gap-8 overflow-x-hidden overflow-y-auto overscroll-contain p-4', className)}
   {role}
   aria-live={ariaLive ?? (conversation.isStreaming ? 'off' : 'polite')}
   aria-busy={ariaBusy ?? conversation.isStreaming}

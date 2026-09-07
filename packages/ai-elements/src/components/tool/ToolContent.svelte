@@ -16,5 +16,5 @@
 {/if}
 
 <style>
-  .svadmin-ai-tool-content { display: grid; gap: 1rem; border-top: 1px solid var(--border, currentColor); padding: 1rem; color: var(--foreground, currentColor); }
+  .svadmin-ai-tool-content { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; max-width: 100%; gap: 1rem; border-top: 1px solid var(--border, currentColor); padding: 1rem; color: var(--foreground, currentColor); overflow-wrap: anywhere; }
 </style>

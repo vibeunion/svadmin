@@ -131,6 +131,7 @@
   }
 
   function addFiles(incoming: File[] | FileList): PromptInputFile[] {
+    if (disabled) return [];
     const files = Array.from(incoming);
     if (files.length === 0) return [];
     const accepted = files.filter(matchesAccept);
@@ -173,6 +174,7 @@
   }
 
   function removeFile(id: string, index: number): void {
+    if (disabled) return;
     const removed = activeFiles.find((item) => item.id === id);
     if (usingProvider) parentController?.attachments.remove(id);
     else {
@@ -199,6 +201,7 @@
   }
 
   function clearFiles(): void {
+    if (disabled) return;
     if (parentController) {
       parentController.attachments.clear();
       return;
@@ -268,9 +271,10 @@
   }
 
   function handleKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Enter' && !event.shiftKey && !composition && !event.isComposing) {
+    if (event.defaultPrevented || disabled || composition || event.isComposing || event.keyCode === 229) return;
+    if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
-      (event.currentTarget as HTMLTextAreaElement).form?.requestSubmit();
+      if (canSubmit) (event.currentTarget as HTMLTextAreaElement).form?.requestSubmit();
     }
     if (event.key === 'Backspace' && activeText === '' && activeFiles.length > 0) {
       event.preventDefault();
@@ -280,6 +284,7 @@
   }
 
   function handlePaste(event: ClipboardEvent): void {
+    if (event.defaultPrevented || disabled || composition) return;
     const files = Array.from(event.clipboardData?.files ?? []);
     if (files.length > 0) { event.preventDefault(); addFiles(files); }
   }
@@ -289,6 +294,13 @@
   }
 
   const localController = {
+    form: {
+      get disabled() { return disabled; },
+      get busy() { return busy; },
+      get status() { return status === 'streaming' ? status : busy ? 'submitted' as const : status ?? 'ready'; },
+      get canSubmit() { return canSubmit; },
+      get onstop() { return onstop; },
+    },
     textInput: {
       get value() { return activeText; },
       setInput: setValue,
@@ -325,8 +337,8 @@
 
   $effect(() => {
     if (!globalDrop || typeof document === 'undefined') return;
-    const onDragOver = (event: DragEvent) => { if (event.dataTransfer?.types.includes('Files')) event.preventDefault(); };
-    const onDrop = (event: DragEvent) => { if (event.dataTransfer?.files.length) { event.preventDefault(); addFiles(event.dataTransfer.files); } };
+    const onDragOver = (event: DragEvent) => { if (!disabled && event.dataTransfer?.types.includes('Files')) event.preventDefault(); };
+    const onDrop = (event: DragEvent) => { if (!disabled && !event.defaultPrevented && event.dataTransfer?.files.length) { event.preventDefault(); addFiles(event.dataTransfer.files); } };
     document.addEventListener('dragover', onDragOver);
     document.addEventListener('drop', onDrop);
     return () => { document.removeEventListener('dragover', onDragOver); document.removeEventListener('drop', onDrop); };
@@ -374,7 +386,7 @@
       {#each activeFiles as file, index (file.id)}
         <li class="flex min-w-0 items-center gap-1 rounded border border-border px-2 py-1 text-xs">
           <span class="max-w-48 truncate" title={file.name}>{file.name}</span>
-          <button type="button" class="svadmin-ai__button svadmin-ai__button--ghost size-6 min-h-6 p-0" aria-label={`Remove ${file.name}`} title={`Remove ${file.name}`} onclick={() => removeFile(file.id, index)}><X size={13} aria-hidden="true" /></button>
+          <button type="button" class="svadmin-ai__button svadmin-ai__button--ghost size-6 min-h-6 p-0" aria-label={`Remove ${file.name}`} title={`Remove ${file.name}`} {disabled} onclick={() => removeFile(file.id, index)}><X size={13} aria-hidden="true" /></button>
         </li>
       {/each}
     </ul>
