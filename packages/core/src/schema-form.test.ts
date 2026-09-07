@@ -30,8 +30,10 @@ test('supports references and custom field paths without passing private values'
 test('handles root and prototype-like fields safely and keeps first message', () => {
   const validate = createSchemaFormValidator(Type.Object({ constructor: Type.Integer() }));
   const errors = validate({ constructor: 'private' });
-  expect(Object.hasOwn(errors!, 'constructor')).toBe(true);
-  expect(Object.values(errors!)).toEqual(['Invalid value']);
+  expect(errors).not.toBeNull();
+  if (!errors) throw new Error('expected validation errors');
+  expect(Object.hasOwn(errors, 'constructor')).toBe(true);
+  expect(Object.values(errors)).toEqual(['Invalid value']);
   expect(Object.getPrototypeOf(errors)).toBeNull();
   expect(validate(null)).toEqual({ _form: 'Invalid value' });
 });
