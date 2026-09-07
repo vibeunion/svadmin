@@ -115,7 +115,8 @@ export function useList<TData extends BaseRecord = BaseRecord, TError = HttpErro
         filters,
         meta,
       }),
-      queryFn: async () => provider.getList<TData>({
+      queryFn: async ({ signal }) => provider.getList<TData>({
+        signal,
         resource,
         pagination,
         sorters,
@@ -215,9 +216,10 @@ export function useOne<TData extends BaseRecord = BaseRecord, TError = HttpError
       queryKey: adminContext.queryKeys(resource, opts.dataProviderName).data.one(resource, id ?? '', {
         meta: cloneQueryKeyPart(opts.meta),
       }),
-      queryFn: async () => {
+      queryFn: async ({ signal }) => {
         if (id == null) throw new Error('useOne requires an id');
         const result = await provider.getOne<TData>({
+          signal,
           resource,
           id,
           meta: opts.meta,
@@ -335,12 +337,12 @@ export function useMany<TData extends BaseRecord = BaseRecord, TError = HttpErro
         ids: cloneQueryKeyPart(ids),
         meta: cloneQueryKeyPart(meta),
       }),
-      queryFn: async () => {
+      queryFn: async ({ signal }) => {
         if (!ids.length) return { data: [] };
         if (provider.getMany) {
-          return provider.getMany<TData>({ resource, ids, meta });
+          return provider.getMany<TData>({ resource, ids, meta, signal });
         }
-        const results = await Promise.all(ids.map(id => provider.getOne<TData>({ resource, id, meta })));
+        const results = await Promise.all(ids.map(id => provider.getOne<TData>({ resource, id, meta, signal })));
         return { data: results.map(r => r.data) };
       },
       enabled: (queryOptions?.enabled ?? true) && ids.length > 0,

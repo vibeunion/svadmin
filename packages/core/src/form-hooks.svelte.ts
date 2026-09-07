@@ -462,8 +462,8 @@ export function useForm<
     queryKey: adminContext.queryKeys(resource, options.dataProviderName).data.one(resource, currentId ?? '', {
       meta: queryMeta,
     }),
-    queryFn: async () => {
-      const result = await provider.getOne<BaseRecord>({ resource, id: currentId as string, meta: queryMeta });
+    queryFn: async ({ signal }) => {
+      const result = await provider.getOne<BaseRecord>({ resource, id: currentId as string, meta: queryMeta, signal });
       return result;
     },
     enabled: (queryOptions?.enabled ?? true) && (action === 'edit' || action === 'clone' || action === 'show') && currentId != null,

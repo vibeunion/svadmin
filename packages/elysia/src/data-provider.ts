@@ -263,6 +263,7 @@ async function parseResponse<T>(response: Response): Promise<T> {
 }
 
 async function request<T>(url: string, headers: Record<string, string>, init?: RequestOptions, withCredentials?: boolean): Promise<T> {
+  init?.signal?.throwIfAborted();
   const fetchInit: RequestInit = { ...init, headers: mergeHeaders(headers, init?.headers) };
   if (withCredentials) {
     fetchInit.credentials = 'include';
@@ -335,7 +336,7 @@ export function createElysiaDataProvider(opts: ElysiaDataProviderOptions): DataP
   return {
     getApiUrl: () => apiUrl,
 
-    async getList<TData extends BaseRecord = BaseRecord>({ resource, pagination, sorters, filters, meta }: GetListParams): Promise<GetListResult<TData>> {
+    async getList<TData extends BaseRecord = BaseRecord>({ resource, pagination, sorters, filters, meta, signal }: GetListParams): Promise<GetListResult<TData>> {
       const { current = 1, pageSize = 10 } = pagination ?? {};
       const context: ElysiaListContext = {
         apiUrl,
@@ -351,7 +352,7 @@ export function createElysiaDataProvider(opts: ElysiaDataProviderOptions): DataP
       const query = params.toString();
       const url = query ? `${baseUrl}?${query}` : baseUrl;
       const headers = resolveHeaders(opts);
-      const json = await request<unknown>(url, headers, undefined, withCredentials);
+      const json = await request<unknown>(url, headers, { signal }, withCredentials);
 
       if (adapter?.parseListResponse) {
         return adapter.parseListResponse<TData>(json, context);
@@ -362,9 +363,9 @@ export function createElysiaDataProvider(opts: ElysiaDataProviderOptions): DataP
       return defaultParseListResponse<TData>(json);
     },
 
-    async getOne<TData extends BaseRecord = BaseRecord>({ resource, id, meta }: GetOneParams): Promise<GetOneResult<TData>> {
+    async getOne<TData extends BaseRecord = BaseRecord>({ resource, id, meta, signal }: GetOneParams): Promise<GetOneResult<TData>> {
       const baseUrl = resolveResourceUrl(opts, resource, meta);
-      const data = await request<TData>(`${baseUrl}/${encodeIdPathSegment(id)}`, resolveHeaders(opts), undefined, withCredentials);
+      const data = await request<TData>(`${baseUrl}/${encodeIdPathSegment(id)}`, resolveHeaders(opts), { signal }, withCredentials);
       return { data };
     },
 
@@ -394,10 +395,10 @@ export function createElysiaDataProvider(opts: ElysiaDataProviderOptions): DataP
       return { data: data === undefined ? { id } as unknown as TData : data };
     },
 
-    async getMany<TData extends BaseRecord = BaseRecord>({ resource, ids, meta }: GetManyParams): Promise<GetManyResult<TData>> {
+    async getMany<TData extends BaseRecord = BaseRecord>({ resource, ids, meta, signal }: GetManyParams): Promise<GetManyResult<TData>> {
       const baseUrl = resolveResourceUrl(opts, resource, meta);
       const params = ids.map(id => `id=${encodeURIComponent(String(id))}`).join('&');
-      const data = await request<TData[]>(`${baseUrl}?${params}`, resolveHeaders(opts), undefined, withCredentials);
+      const data = await request<TData[]>(`${baseUrl}?${params}`, resolveHeaders(opts), { signal }, withCredentials);
       return { data };
     },
 
@@ -439,7 +440,7 @@ export function createElysiaDataProvider(opts: ElysiaDataProviderOptions): DataP
       return { data: results };
     },
 
-    async custom<TData = unknown, TVariables = unknown>({ url, method, payload, query, headers, sorters, filters }: CustomParams<TVariables>): Promise<CustomResult<TData>> {
+    async custom<TData = unknown, TVariables = unknown>({ url, method, payload, query, headers, sorters, filters, signal }: CustomParams<TVariables>): Promise<CustomResult<TData>> {
       const requestUrl = buildCustomUrl(url, apiUrl, query, sorters, filters);
       const sameOrigin = isSameOrigin(apiUrl, requestUrl);
       const providerHeaders = resolveHeaders(opts);
@@ -451,6 +452,7 @@ export function createElysiaDataProvider(opts: ElysiaDataProviderOptions): DataP
         headers,
       );
       const data = await request<TData>(requestUrl, requestHeaders, {
+        signal,
         method: method.toUpperCase(),
         body: payload === undefined ? undefined : JSON.stringify(payload),
       }, withCredentials && sameOrigin);

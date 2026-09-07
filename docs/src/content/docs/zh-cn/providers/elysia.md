@@ -21,6 +21,19 @@ const dataProvider = createElysiaDataProvider({
 });
 ```
 
+## 查询取消
+
+Core 读取 Hook 会把 TanStack Query 的 `AbortSignal` 传给 `getList`、`getOne`、
+`getMany`（包括逐条 `getOne` 回退）和 `custom`，覆盖无限列表、选择器默认值
+及表单记录加载。Elysia Provider 将其转发给 `fetch`；已取消的 signal 不会启动请求。
+
+signal 不进入缓存键、查询参数或 `meta`。共享中的请求不会因单个观察者退出而取消，
+只有最后一个观察者卸载或显式取消查询时才取消。直接调用 Provider 时也可以传入
+顶层 `signal`。
+
+其他 Provider 因 `signal` 可选而保持源码兼容，但仍需自行转发 signal 才能取消网络请求。
+本次不改变 Mutation Hook；取消请求不代表回滚服务器已经接收的命令。
+
 ## 带认证头
 
 ```typescript
