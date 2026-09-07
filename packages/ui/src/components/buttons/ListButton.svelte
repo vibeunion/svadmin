@@ -35,9 +35,9 @@
   aria-label={hideText ? displayLabel : undefined}
   onclick={navigateToList}
 >
-  <List class="h-4 w-4" />
+  <List class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
   {#if !hideText}
-    <span class="ml-1">
+    <span class="svadmin-u-f58b02572ab2">
       {#if children}
         {@render children()}
       {:else}

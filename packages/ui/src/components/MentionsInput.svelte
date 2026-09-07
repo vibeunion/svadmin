@@ -127,45 +127,45 @@
   }
 </script>
 
-<div class={cn('relative w-full text-xs', className)}>
+<div class={cn('svadmin-u-d89972fe17d6 svadmin-u-6da6a3c3f741 svadmin-u-359090c2d529', className)}>
   <textarea
     bind:this={textareaEl}
     {value}
     {placeholder}
     {rows}
     {disabled}
-    class="w-full rounded-md border border-input bg-background p-2.5 text-xs text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 resize-y"
+    class="svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-9fe52d5d506c svadmin-u-359090c2d529 svadmin-u-d4108abe6359 svadmin-u-9c24ab70af61 svadmin-u-f10f771f87e9 svadmin-u-3e94a98e1466 svadmin-u-9c1295a6914a svadmin-u-5f533b3a7de7 svadmin-u-b29d8adbad2e svadmin-u-5bd7b080992c"
     oninput={handleInput}
     onkeydown={handleKeyDown}
   ></textarea>
 
   {#if showDropdown && activeOptions.length > 0}
     <div
-      class="absolute left-0 top-full mt-1 z-50 min-w-48 max-h-56 overflow-y-auto rounded-lg border border-border bg-popover text-popover-foreground shadow-md p-1 animate-in fade-in-0 zoom-in-95"
+      class="svadmin-u-da4dbfbc4fdc svadmin-u-c78facc7a0a6 svadmin-u-5e8a03e061f9 svadmin-u-b6b02c0ebef6 svadmin-u-181b286668b5 svadmin-u-4bdb6700d16a svadmin-u-520bb7118c41 svadmin-u-92bf82f493b1 svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-e541d86d1ec8 svadmin-u-9b13e8ae5c9c svadmin-u-febc34e471df svadmin-u-eb6a3cef9686 svadmin-u-40137e897961 fade-in-0 zoom-in-95"
     >
-      <div class="px-2 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+      <div class="svadmin-u-d5eab218aa34 svadmin-u-660d2effb880 svadmin-u-1dc571a3609f svadmin-u-e83a7042bc91 svadmin-u-bfa603190748 uppercase svadmin-u-09ace3a4d9f5">
         {activeTrigger === '#' ? 'Select Tag' : 'Mention Member'}
       </div>
       {#each activeOptions as opt, idx (opt.id)}
         <button
           type="button"
           class={cn(
-            'w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded-md text-left text-xs transition-colors cursor-pointer border-0',
-            idx === selectedIndex ? 'bg-accent text-accent-foreground font-medium' : 'bg-transparent text-foreground hover:bg-muted/60'
+            'svadmin-u-6da6a3c3f741 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4 svadmin-u-d5eab218aa34 svadmin-u-ec0091ee009b svadmin-u-421ac2be5045 svadmin-u-2eba0d65d059 svadmin-u-359090c2d529 svadmin-u-ceb69a6b0e5f svadmin-u-34516836730d svadmin-u-119b2aa0b8f6',
+            idx === selectedIndex ? 'svadmin-u-f1669c2d7424 svadmin-u-6032d46445ba svadmin-u-2689f3958069' : 'svadmin-u-7f19cdf4c5bb svadmin-u-d4108abe6359 svadmin-u-68646cdcc246'
           )}
           onclick={() => insertMention(opt)}
         >
-          <div class="flex items-center gap-2 truncate">
+          <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-f283ea9bea0e">
             {#if activeTrigger === '#'}
-              <Hash class="h-3.5 w-3.5 text-primary shrink-0" />
+              <Hash class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-20aaf08a7ed1 svadmin-u-012fbd121f37" />
             {:else}
-              <User class="h-3.5 w-3.5 text-primary shrink-0" />
+              <User class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-20aaf08a7ed1 svadmin-u-012fbd121f37" />
             {/if}
-            <span class="truncate">{opt.label}</span>
+            <span class="svadmin-u-f283ea9bea0e">{opt.label}</span>
           </div>
 
           {#if opt.subtitle}
-            <Badge variant="secondary" class="text-[10px] px-1 py-0">{opt.subtitle}</Badge>
+            <Badge variant="secondary" class="svadmin-u-1dc571a3609f svadmin-u-d8e0e382c67b svadmin-u-68ecb30dbec6">{opt.subtitle}</Badge>
           {/if}
         </button>
       {/each}

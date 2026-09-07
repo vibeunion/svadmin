@@ -1,65 +1,29 @@
-/**
- * 构建后处理：
- * 1. 保留 dist/app.theme.css（含 @theme，供 Tailwind v4 消费者生成工具类）
- * 2. 将 dist/app.css 中的 @theme 块转换为标准 CSS :root + .svadmin-theme
- *    （供非 Tailwind 环境直接消费，避免 Lightning CSS 报错）
- */
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import postcss from 'postcss';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const distDir = join(__dirname, '..', 'dist');
-const cssPath = join(distDir, 'app.css');
-const themePath = join(distDir, 'app.theme.css');
+const distDir = new URL('../dist/', import.meta.url);
+const themePath = fileURLToPath(new URL('app.theme.css', distDir));
+const theme = postcss.parse(readFileSync(themePath, 'utf8'));
+const aliases = postcss.rule({ selector: ':where(:root, .svadmin-theme)' });
+theme.walkAtRules('theme', (rule) => {
+  rule.walkDecls((declaration) => aliases.append(declaration.clone()));
+});
+if (!aliases.nodes.length) throw new Error('Missing semantic @theme declarations');
 
-if (!existsSync(cssPath)) {
-  console.warn('[postbuild-css] dist/app.css not found, skipping');
-  process.exit(0);
+// Rebind aliases at nested theme roots instead of inheriting resolved root colors.
+for (const name of ['app.css', 'app.theme.css']) {
+  const path = fileURLToPath(new URL(name, distDir));
+  const root = postcss.parse(readFileSync(path, 'utf8'));
+  root.walkRules((rule) => {
+    if (rule.selector === aliases.selector) rule.remove();
+  });
+  root.walkAtRules('layer', (rule) => {
+    if (rule.nodes?.length === 0) rule.remove();
+  });
+  const layer = postcss.atRule({ name: 'layer', params: 'theme' });
+  layer.append(aliases.clone());
+  root.append(layer);
+  writeFileSync(path, `${root.toString().trim()}\n`, 'utf8');
 }
-
-const original = readFileSync(cssPath, 'utf8');
-
-// 1. 保留含 @theme 的副本
-writeFileSync(themePath, original, 'utf8');
-console.log('[postbuild-css] wrote dist/app.theme.css (Tailwind source with @theme)');
-
-// 2. 如果没有 @theme 则无需转换
-if (!original.includes('@theme')) {
-  console.log('[postbuild-css] no @theme block in dist/app.css, skipping conversion');
-  process.exit(0);
-}
-
-let css = original;
-const themeStart = css.indexOf('@theme');
-
-// 找到 @theme 后的匹配大括号
-let depth = 0;
-let braceStart = -1;
-let braceEnd = -1;
-for (let i = themeStart; i < css.length; i++) {
-  if (css[i] === '{') {
-    if (depth === 0) braceStart = i;
-    depth++;
-  } else if (css[i] === '}') {
-    depth--;
-    if (depth === 0) {
-      braceEnd = i;
-      break;
-    }
-  }
-}
-
-if (braceStart === -1 || braceEnd === -1) {
-  console.warn('[postbuild-css] could not parse @theme block, skipping conversion');
-  process.exit(0);
-}
-
-const declarations = css.slice(braceStart + 1, braceEnd);
-
-// 用 :root + .svadmin-theme 替换 @theme 块
-const replacement = `:root,\n.svadmin-theme {${declarations}}`;
-css = css.slice(0, themeStart) + replacement + css.slice(braceEnd + 1);
-
-writeFileSync(cssPath, css, 'utf8');
-console.log('[postbuild-css] converted @theme to standard CSS in dist/app.css');
+console.info('[postbuild-css] preserved semantic aliases in both CSS entry points');

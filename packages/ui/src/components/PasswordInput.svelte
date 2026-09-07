@@ -57,16 +57,16 @@
   );
 </script>
 
-<div class="space-y-2 {className}">
+<div class="svadmin-u-6f7e013d6499 {className}">
   <Label for={id}>{label}</Label>
-  <div class="relative">
-    <Lock class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-[1]" />
+  <div class="svadmin-u-d89972fe17d6">
+    <Lock class="svadmin-u-da4dbfbc4fdc svadmin-u-22e59b722111 svadmin-u-d694ba66e322 svadmin-u-36b381be4df3 svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-bfa603190748 svadmin-u-a4326536b8f5 svadmin-u-536a7530a44f" />
     <Input
       {id}
       type={showPassword ? 'text' : 'password'}
       {placeholder}
       bind:value
-      class="pl-9 pr-9"
+      class="svadmin-u-9e83b2412bc9 svadmin-u-1b1df78e4d0a"
       autocomplete={autocomplete as any}
       {disabled}
     />
@@ -75,27 +75,27 @@
       variant="ghost"
       size="icon"
       type="button"
-      class="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 z-[1]"
+      class="svadmin-u-da4dbfbc4fdc svadmin-u-68d3fc190004 svadmin-u-d694ba66e322 svadmin-u-36b381be4df3 svadmin-u-d0a52b312f7d svadmin-u-cbbf90f9a828 svadmin-u-536a7530a44f"
       onclick={(e) => { e.preventDefault(); showPassword = !showPassword; }}
       {disabled}
       tabindex={-1}
     >
       {#if showPassword}
-        <EyeOff class="h-4 w-4" />
+        <EyeOff class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
       {:else}
-        <Eye class="h-4 w-4" />
+        <Eye class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
       {/if}
     </TooltipButton>
   </div>
   {#if showStrength && value}
-    <div class="flex items-center gap-2">
-      <div class="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
+    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
+      <div class="svadmin-u-36e579c0b41c svadmin-u-095acb275581 svadmin-u-ac204c108886 svadmin-u-2ef11f1cb219 svadmin-u-2cd02d11d1af">
         <div
-          class="h-full rounded-full transition-all duration-300 {strengthColor}"
+          class="svadmin-u-668b21aa5409 svadmin-u-ac204c108886 svadmin-u-0fe7d7d814d0 svadmin-u-7890552ecd63 {strengthColor}"
           style="width: {strength}%"
         ></div>
       </div>
-      <span class="text-xs text-muted-foreground w-12 text-right">{strengthLabel}</span>
+      <span class="svadmin-u-359090c2d529 svadmin-u-bfa603190748 svadmin-u-e7e371071bc5 svadmin-u-308fc069e46e">{strengthLabel}</span>
     </div>
   {/if}
 </div>

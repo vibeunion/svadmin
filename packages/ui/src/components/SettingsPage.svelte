@@ -133,20 +133,20 @@
   });
 </script>
 
-<div class="flex flex-col lg:flex-row gap-0 min-h-full">
+<div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-2adea12c41f3 svadmin-u-63a285be6490 svadmin-u-7a09f4b2d159">
   <!-- Left sidebar navigation -->
-  <nav class="w-full lg:w-56 shrink-0 bg-muted/10 shadow-[inset_0_-1px_0_rgba(0,0,0,0.05)] lg:shadow-[inset_-1px_0_0_rgba(0,0,0,0.05)] dark:shadow-[inset_-1px_0_0_rgba(255,255,255,0.05)]">
+  <nav class="svadmin-u-6da6a3c3f741 svadmin-u-de96100841e6 svadmin-u-012fbd121f37 svadmin-u-8a25a995eb8e svadmin-u-7f044b149379 svadmin-u-2b64ecb90ede svadmin-u-18f4ce4080f9">
     <!-- Mobile: horizontal scroll tabs -->
-    <div class="flex lg:hidden overflow-x-auto px-4 py-2 gap-1">
+    <div class="svadmin-u-60fbb7713999 svadmin-u-a327049cac5b svadmin-u-1384f66f41d0 svadmin-u-f0faeb26d656 svadmin-u-03b4dd7f172b svadmin-u-44ee8ba0a421">
       {#each resolvedSections as section, _i (_i)}
         {#each section.items as item, _j (_j)}
           {@const active = activeKey === item.key}
           <button
-            class="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md whitespace-nowrap transition-colors
-              {active ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-background/50'}"
+            class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-421ac2be5045 svadmin-u-e82ae8be04aa svadmin-u-ceb69a6b0e5f
+              {active ? 'svadmin-u-e6f9e383a762 svadmin-u-d4108abe6359 svadmin-u-438b2237b8d6' : 'svadmin-u-bfa603190748 svadmin-u-ea7b2e9e070e svadmin-u-d01723c1dc46'}"
             onclick={() => adminContext.navigate(item.path)}
           >
-            <item.icon class="h-4 w-4" />
+            <item.icon class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
             {i18n.t(item.label)}
           </button>
         {/each}
@@ -154,27 +154,27 @@
     </div>
 
     <!-- Desktop: vertical nav with groups -->
-    <div class="hidden lg:block py-6 px-3 space-y-6">
-      <div class="px-3">
-        <h2 class="text-lg font-semibold text-foreground">{i18n.t("settings.title")}</h2>
-        <p class="text-xs text-muted-foreground mt-1">{i18n.t("settings.settingsDescription")}</p>
+    <div class="svadmin-u-99d72c7fc3e2 svadmin-u-d0ce7c24d9dd svadmin-u-940911bf310c svadmin-u-0e17f2bd9074 svadmin-u-b3542e058833">
+      <div class="svadmin-u-0e17f2bd9074">
+        <h2 class="svadmin-u-42536e69e639 svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{i18n.t("settings.title")}</h2>
+        <p class="svadmin-u-359090c2d529 svadmin-u-bfa603190748 svadmin-u-b6b02c0ebef6">{i18n.t("settings.settingsDescription")}</p>
       </div>
       {#each resolvedSections as section, _i (_i)}
         <div>
-          <h3 class="px-3 mb-1 text-xs font-medium text-muted-foreground">
+          <h3 class="svadmin-u-0e17f2bd9074 svadmin-u-65281709dacf svadmin-u-359090c2d529 svadmin-u-2689f3958069 svadmin-u-bfa603190748">
             {i18n.t(section.group)}
           </h3>
-          <div class="space-y-0.5">
+          <div class="svadmin-u-e2eedc5718f0">
             {#each section.items as item, _j (_j)}
               {@const active = activeKey === item.key}
               <button
-                class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all
+                class="svadmin-u-60fbb7713999 svadmin-u-6da6a3c3f741 svadmin-u-3960ffc248d9 svadmin-u-1004c0c3954c svadmin-u-5f22e64f2282 svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b svadmin-u-fc7473ca09eb svadmin-u-0fe7d7d814d0
                   {active
-                    ? 'bg-primary/10 text-primary font-medium'
-                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'}"
+                    ? 'svadmin-u-375dc44df6e9 svadmin-u-20aaf08a7ed1 svadmin-u-2689f3958069'
+                    : 'svadmin-u-bfa603190748 svadmin-u-0557b88819cd svadmin-u-3a99b2b8fbbe'}"
                 onclick={() => adminContext.navigate(item.path)}
               >
-                <item.icon class="h-4 w-4 shrink-0" />
+                <item.icon class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-012fbd121f37" />
                 {i18n.t(item.label)}
               </button>
             {/each}
@@ -185,7 +185,7 @@
   </nav>
 
   <!-- Right content area -->
-  <div class="min-w-0 w-full flex-1 p-6 lg:p-8 {contentWidth}">
+  <div class="svadmin-u-7e0b7cdf1a94 svadmin-u-6da6a3c3f741 svadmin-u-36e579c0b41c svadmin-u-0478c89a150f svadmin-u-793c2275b157 {contentWidth}">
     {#if activeKey === "profile"}
       {#if profile}{@render profile()}{:else}<ProfilePage />{/if}
     {:else if activeKey === "appearance"}

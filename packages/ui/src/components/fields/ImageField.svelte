@@ -16,7 +16,7 @@
 </script>
 
 {#if value}
-  <div style={`width: ${width}px; height: ${height}px;`} class="inline-block shrink-0">
+  <div style={`width: ${width}px; height: ${height}px;`} class="svadmin-u-bb0c4bfc52bd svadmin-u-012fbd121f37">
     <MediaThumbnail src={value} {alt} {title} size="full" fit="cover" showOverlay={previewable} class={className} />
   </div>
 {:else}

@@ -11,7 +11,7 @@
   const adminContext = captureAdminContext();
   const resources = $derived((() => { try { return getResources(); } catch { return []; } })());
 
-  let { menu, class: className = 'mb-4' }: { menu?: MenuItem[]; class?: string } = $props();
+  let { menu, class: className = 'svadmin-breadcrumbs--spaced' }: { menu?: MenuItem[]; class?: string } = $props();
 
   interface Crumb { label: string; href?: string; }
 
@@ -84,20 +84,20 @@
 </script>
 
 {#if crumbs.length > 1}
-  <Breadcrumb.Root class={cn(className)}>
+  <Breadcrumb.Root class={cn('svadmin-breadcrumbs', className)}>
     <Breadcrumb.List>
       {#each crumbs as crumb, i (`${crumb.label}-${i}`)}
         {#if i > 0}
           <Breadcrumb.Separator />
         {/if}
         <Breadcrumb.Item>
-          <span class="inline-flex svadmin-page-enter" style="animation-duration: 0.2s;">
+          <span class="svadmin-breadcrumbs__item svadmin-page-enter" style="animation-duration: 0.2s;">
           {#if i === crumbs.length - 1}
             <Breadcrumb.Page>{crumb.label}</Breadcrumb.Page>
           {:else if crumb.href}
             <Breadcrumb.Link href={crumb.href}>{crumb.label}</Breadcrumb.Link>
           {:else}
-            <span class="text-muted-foreground">{crumb.label}</span>
+            <span class="svadmin-breadcrumbs__label">{crumb.label}</span>
           {/if}
           </span>
         </Breadcrumb.Item>

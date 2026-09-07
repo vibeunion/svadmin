@@ -30,10 +30,7 @@
 	bind:ref
 	data-slot="command-item"
 	data-cmdk-item=""
-	class={cn(
-		"relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none data-[selected]:bg-accent data-[selected]:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-		className
-	)}
+	class={cn("svadmin-command-item", className)}
 	{value}
 	forceMount={alwaysRender ?? forceMount}
 	onSelect={handleSelect}

@@ -45,7 +45,6 @@ describe('BatchActionBar component', () => {
       variant: 'floating',
     });
     const region = view.container.querySelector('[role="region"]');
-    expect(region?.className).toContain('fixed');
-    expect(region?.className).toContain('bottom-6');
+    expect(region?.className).toContain('svadmin-batch-action-bar--floating');
   });
 });

@@ -10,13 +10,16 @@
 
 <button
   aria-label="Go to next page"
+  data-svadmin-button
+  data-variant="ghost"
+  data-size="icon-sm"
   data-slot="pagination-next"
-  class={cn(buttonVariants({ variant: 'ghost', size: 'icon-sm' }), "gap-1", className)}
+  class={cn(buttonVariants({ variant: 'ghost', size: 'icon-sm' }), "svadmin-pagination-control", className)}
   {...restProps}
 >
   {#if children}
     {@render children()}
   {:else}
-    <ChevronRight class="size-4" />
+    <ChevronRight class="svadmin-pagination-icon" />
   {/if}
 </button>

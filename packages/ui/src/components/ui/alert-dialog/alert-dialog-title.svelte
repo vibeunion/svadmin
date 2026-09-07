@@ -11,6 +11,6 @@
 
 <AlertDialogPrimitive.Title
 	bind:ref
-	class={cn("text-lg font-semibold", className)}
+	class={cn("svadmin-alert-dialog-title", className)}
 	{...restProps}
 />

@@ -103,76 +103,76 @@
   }
 </script>
 
-<div class="h-full flex flex-col">
+<div class="svadmin-u-668b21aa5409 svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed">
   <!-- Header -->
-  <div class="mb-6">
-    <h2 class="text-xl font-semibold text-foreground flex items-center gap-2">
-      <FileSearch class="h-5 w-5 text-muted-foreground" />
+  <div class="svadmin-u-b6777c6db914">
+    <h2 class="svadmin-u-d5c9b0001e7e svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
+      <FileSearch class="svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e svadmin-u-bfa603190748" />
       {i18n.t('settings.auditLogs') ?? 'Audit Logs'}
     </h2>
-    <p class="text-sm text-muted-foreground mt-1">
+    <p class="svadmin-u-fc7473ca09eb svadmin-u-bfa603190748 svadmin-u-b6b02c0ebef6">
       {i18n.t('settings.auditDescription') ?? 'Track and review all system operations for compliance and debugging.'}
     </p>
   </div>
 
   {#if error}
-    <div class="p-6 border border-destructive/20 bg-destructive/5 text-destructive rounded-lg text-center">
+    <div class="svadmin-u-0478c89a150f svadmin-u-ca6bcd4b6f3f svadmin-u-f0c1e65bd6f2 svadmin-u-7a0854fdbc30 svadmin-u-811148b13d1e svadmin-u-5f22e64f2282 svadmin-u-ca6bf63030aa">
       <p>{error}</p>
     </div>
   {:else}
     <!-- Search Bar -->
-    <div class="mb-4 relative">
-      <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+    <div class="svadmin-u-da019856f2cc svadmin-u-d89972fe17d6">
+      <Search class="svadmin-u-da4dbfbc4fdc svadmin-u-22e59b722111 svadmin-u-d694ba66e322 svadmin-u-36b381be4df3 svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-bfa603190748" />
       <Input
         bind:value={searchQuery}
         placeholder={i18n.t('settings.searchLogs') ?? 'Search by user, action, or resource...'}
-        class="pl-9"
+        class="svadmin-u-9e83b2412bc9"
       />
     </div>
 
     <!-- Table -->
-    <div class="flex-1 shadow-sm ring-1 ring-border/10 rounded-lg bg-card overflow-hidden">
+    <div class="svadmin-u-36e579c0b41c svadmin-u-438b2237b8d6 svadmin-u-3daca9af0861 svadmin-u-a10fdd7667ee svadmin-u-5f22e64f2282 svadmin-u-cd0ad9a56558 svadmin-u-2cd02d11d1af">
       {#if loading}
-        <div class="flex items-center justify-center h-48 text-muted-foreground">
-          <Loader2 class="h-5 w-5 animate-spin mr-2" />
+        <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-3c8ea328c09e svadmin-u-bfa603190748">
+          <Loader2 class="svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e svadmin-u-afbdd13a380e svadmin-u-d2347e8497a9" />
           {i18n.t('common.loading')}
         </div>
       {:else}
-        <div class="overflow-auto">
+        <div class="svadmin-u-73fc3fb18ceb">
           <Table.Root>
             <Table.Header>
               <Table.Row>
-                <Table.Head class="w-[160px]">{i18n.t('settings.auditTime') ?? 'Time'}</Table.Head>
+                <Table.Head class="svadmin-u-1e3de5ebbb2f">{i18n.t('settings.auditTime') ?? 'Time'}</Table.Head>
                 <Table.Head>{i18n.t('settings.auditUser') ?? 'User'}</Table.Head>
                 <Table.Head>{i18n.t('settings.auditAction') ?? 'Action'}</Table.Head>
                 <Table.Head>{i18n.t('settings.auditResource') ?? 'Resource'}</Table.Head>
-                <Table.Head class="w-[120px]">{i18n.t('settings.auditIp') ?? 'IP Address'}</Table.Head>
-                <Table.Head class="w-[60px] text-center">{i18n.t('common.detail') ?? 'Detail'}</Table.Head>
+                <Table.Head class="svadmin-u-c1ca66f139f6">{i18n.t('settings.auditIp') ?? 'IP Address'}</Table.Head>
+                <Table.Head class="svadmin-u-4f98da6f3301 svadmin-u-ca6bf63030aa">{i18n.t('common.detail') ?? 'Detail'}</Table.Head>
               </Table.Row>
             </Table.Header>
             <Table.Body>
               {#each filteredLogs as log, _i (_i)}
-                <Table.Row class="border-0 even:bg-muted/20 hover:bg-muted/40 transition-colors">
-                  <Table.Cell class="text-xs text-muted-foreground font-mono">
+                <Table.Row class="svadmin-u-119b2aa0b8f6 svadmin-u-83afbb7f41b3 svadmin-u-f6e31b39b8e4 svadmin-u-ceb69a6b0e5f">
+                  <Table.Cell class="svadmin-u-359090c2d529 svadmin-u-bfa603190748 svadmin-u-0e65706bcccd">
                     {formatDate(log.createdAt)}
                   </Table.Cell>
-                  <Table.Cell class="text-sm font-medium">{log.userName ?? log.userId ?? '—'}</Table.Cell>
+                  <Table.Cell class="svadmin-u-fc7473ca09eb svadmin-u-2689f3958069">{log.userName ?? log.userId ?? '—'}</Table.Cell>
                   <Table.Cell>
                     <Badge variant={getActionColor(log.action)}>{log.action}</Badge>
                   </Table.Cell>
-                  <Table.Cell class="text-sm text-muted-foreground">{log.resource ?? '—'}</Table.Cell>
-                  <Table.Cell class="text-xs text-muted-foreground font-mono">{log.ipAddress ?? '—'}</Table.Cell>
-                  <Table.Cell class="text-center">
+                  <Table.Cell class="svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">{log.resource ?? '—'}</Table.Cell>
+                  <Table.Cell class="svadmin-u-359090c2d529 svadmin-u-bfa603190748 svadmin-u-0e65706bcccd">{log.ipAddress ?? '—'}</Table.Cell>
+                  <Table.Cell class="svadmin-u-ca6bf63030aa">
                     {#if log.details}
-                      <Button variant="ghost" size="icon" class="h-7 w-7" onclick={() => openSnapshot(log)}>
-                        <Eye class="h-3.5 w-3.5" />
+                      <Button variant="ghost" size="icon" class="svadmin-u-d0a52b312f7d svadmin-u-cbbf90f9a828" onclick={() => openSnapshot(log)}>
+                        <Eye class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
                       </Button>
                     {/if}
                   </Table.Cell>
                 </Table.Row>
               {:else}
                 <Table.Row>
-                  <Table.Cell colspan={6} class="h-24 text-center text-muted-foreground">
+                  <Table.Cell colspan={6} class="svadmin-u-9678c61eaac3 svadmin-u-ca6bf63030aa svadmin-u-bfa603190748">
                     {i18n.t('common.noData')}
                   </Table.Cell>
                 </Table.Row>
@@ -184,15 +184,15 @@
     </div>
 
     <!-- Pagination -->
-    <div class="mt-4 flex items-center justify-between text-sm text-muted-foreground">
+    <div class="svadmin-u-0ab8667228fd svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">
       <span>{total} {i18n.t('settings.auditTotal') ?? 'total records'}</span>
-      <div class="flex items-center gap-2">
+      <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
         <Button
           variant="outline" size="sm"
           disabled={page <= 1}
           onclick={() => { page--; }}
         >
-          <ChevronLeft class="h-4 w-4" />
+          <ChevronLeft class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
         </Button>
         <span>{page} / {totalPages}</span>
         <Button
@@ -200,7 +200,7 @@
           disabled={page >= totalPages}
           onclick={() => { page++; }}
         >
-          <ChevronRight class="h-4 w-4" />
+          <ChevronRight class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
         </Button>
       </div>
     </div>
@@ -211,42 +211,42 @@
 {#if drawerOpen && drawerLog}
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <!-- svelte-ignore a11y_click_events_have_key_events -->
-  <div class="fixed inset-0 z-[100] flex justify-end bg-black/40 backdrop-blur-sm" onclick={closeSnapshot}>
+  <div class="svadmin-u-7bc555991dba svadmin-u-7b7df0449b80 svadmin-u-db5a366a0e21 svadmin-u-60fbb7713999 svadmin-u-77c08e015d14 svadmin-u-fd9dca32f483 svadmin-u-1ca6dd1e47c4" onclick={closeSnapshot}>
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <!-- svelte-ignore a11y_click_events_have_key_events -->
-    <div class="bg-card shadow-2xl w-full max-w-2xl h-full flex flex-col animate-in slide-in-from-right duration-300" onclick={(e) => e.stopPropagation()}>
+    <div class="svadmin-u-cd0ad9a56558 svadmin-u-14e46609fd68 svadmin-u-6da6a3c3f741 svadmin-u-2cc8041eca99 svadmin-u-668b21aa5409 svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-40137e897961 slide-in-from-right svadmin-u-7890552ecd63" onclick={(e) => e.stopPropagation()}>
       <!-- Drawer Header -->
-      <div class="p-6 shadow-[0_1px_0_rgba(0,0,0,0.05)] dark:shadow-[0_1px_0_rgba(255,255,255,0.05)] flex items-center justify-between bg-muted/30">
+      <div class="svadmin-u-0478c89a150f svadmin-u-a4ba1a079087 svadmin-u-dd90176a46af svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-2859c861d7de">
         <div>
-          <h2 class="text-lg font-bold text-foreground flex items-center gap-2">
-            <FileSearch class="h-5 w-5 text-primary" />
+          <h2 class="svadmin-u-42536e69e639 svadmin-u-69450ef1487e svadmin-u-d4108abe6359 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
+            <FileSearch class="svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e svadmin-u-20aaf08a7ed1" />
             {i18n.t('settings.auditSnapshot') ?? 'Change Snapshot'}
           </h2>
-          <p class="text-xs text-muted-foreground mt-1">{formatDate(drawerLog.createdAt)} · {drawerLog.userName ?? drawerLog.userId}</p>
+          <p class="svadmin-u-359090c2d529 svadmin-u-bfa603190748 svadmin-u-b6b02c0ebef6">{formatDate(drawerLog.createdAt)} · {drawerLog.userName ?? drawerLog.userId}</p>
         </div>
-        <button onclick={closeSnapshot} class="text-muted-foreground hover:text-foreground transition p-2 rounded-lg hover:bg-muted">
-          <X class="w-5 h-5" />
+        <button onclick={closeSnapshot} class="svadmin-u-bfa603190748 svadmin-u-ea7b2e9e070e svadmin-u-56bf8ae82a10 svadmin-u-7660b450905a svadmin-u-5f22e64f2282 svadmin-u-8e551981c8d7">
+          <X class="svadmin-u-72470489ff4e svadmin-u-cd0d9c512cdc" />
         </button>
       </div>
 
       <!-- Meta Tags -->
-      <div class="px-6 py-3 shadow-[0_1px_0_rgba(0,0,0,0.05)] dark:shadow-[0_1px_0_rgba(255,255,255,0.05)] flex items-center gap-2 flex-wrap">
+      <div class="svadmin-u-f92d02360b8f svadmin-u-1b2d54a3fd12 svadmin-u-a4ba1a079087 svadmin-u-dd90176a46af svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-1eb5c6df38c1">
         <Badge variant="outline">{drawerLog.action}</Badge>
         {#if drawerLog.resource}
           <Badge variant="secondary">{drawerLog.resource}</Badge>
         {/if}
         {#if drawerLog.ipAddress}
-          <Badge variant="outline" class="font-mono text-xs">{drawerLog.ipAddress}</Badge>
+          <Badge variant="outline" class="svadmin-u-0e65706bcccd svadmin-u-359090c2d529">{drawerLog.ipAddress}</Badge>
         {/if}
       </div>
 
       <!-- JSON Diff Viewer -->
-      <div class="flex-1 p-6 overflow-y-auto bg-foreground/[0.03] dark:bg-background/50">
-        <pre class="whitespace-pre-wrap text-xs font-mono leading-relaxed text-foreground/80 bg-muted/30 rounded-lg p-4 border border-border">{typeof drawerLog.details === 'object' ? JSON.stringify(drawerLog.details, null, 2) : drawerLog.details}</pre>
+      <div class="svadmin-u-36e579c0b41c svadmin-u-0478c89a150f svadmin-u-92bf82f493b1 svadmin-u-ba1dab71e35e svadmin-u-22a0a8a25f55">
+        <pre class="svadmin-u-a2edcb1a3a6b svadmin-u-359090c2d529 svadmin-u-0e65706bcccd svadmin-u-6b189c6edadb svadmin-u-f93148569c39 svadmin-u-2859c861d7de svadmin-u-5f22e64f2282 svadmin-u-8e63407b5ceb svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af">{typeof drawerLog.details === 'object' ? JSON.stringify(drawerLog.details, null, 2) : drawerLog.details}</pre>
       </div>
 
       <!-- Footer -->
-      <div class="p-4 shadow-[0_-1px_0_rgba(0,0,0,0.05)] dark:shadow-[0_-1px_0_rgba(255,255,255,0.05)] bg-muted/20 text-right text-[11px] text-muted-foreground font-medium">
+      <div class="svadmin-u-8e63407b5ceb svadmin-u-7b32fba79b0f svadmin-u-33787152c8e8 svadmin-u-967d113a1451 svadmin-u-308fc069e46e svadmin-u-d058ca6de60f svadmin-u-bfa603190748 svadmin-u-2689f3958069">
         System audit snapshot · Read-only
       </div>
     </div>

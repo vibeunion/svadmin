@@ -111,8 +111,8 @@
     if (!isDev) return;
     refreshCacheDiagnostics();
     const unsubscribeQueries = queryClient.getQueryCache().subscribe((event) => {
-      // 观察器事件会在组件重渲染时成对出现。刷新诊断状态会再次触发渲染，
-      // 因此这里只响应真正改变缓存内容或请求状态的事件。
+      // Observer events arrive in pairs during component rerenders. Refreshing diagnostics triggers another render,
+      // so respond only to events that actually change cached content or request state.
       if (event.type.startsWith('observer')) return;
       if (event.type === 'removed') {
         queryTimings.delete(event.query.queryHash);
@@ -240,84 +240,84 @@
 {#if isDev}
   {#if visible}
     <div
-      class="fixed bottom-0 right-4 z-[9999] w-[560px] max-w-[95vw] rounded-t-xl border border-b-0 bg-card shadow-2xl text-[0.8125rem] overflow-hidden"
+      class="svadmin-u-7bc555991dba svadmin-u-189f036c335c svadmin-u-5a438c30beec svadmin-u-f50571addf44 svadmin-u-11863ecc32e7 svadmin-u-c69e21ff5804 svadmin-u-1301e5c1ce71 svadmin-u-ca6bcd4b6f3f svadmin-u-d5e98261a758 svadmin-u-cd0ad9a56558 svadmin-u-14e46609fd68 svadmin-u-1d5904e7e755 svadmin-u-2cd02d11d1af"
       class:w-auto={collapsed}
       class:min-w-[200px]={collapsed}
       transition:fly={{ y: 400, duration: 300 }}
     >
-      <div class="flex items-center justify-between px-3 py-2 bg-muted border-b">
-        <div class="flex items-center gap-1.5 font-semibold text-xs uppercase tracking-wider text-foreground">
-          <Bug class="h-4 w-4" />
+      <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b svadmin-u-2ef11f1cb219 svadmin-u-65fdbade2025">
+        <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-58284b4ea568 svadmin-u-e83a7042bc91 svadmin-u-359090c2d529 uppercase svadmin-u-09ace3a4d9f5 svadmin-u-d4108abe6359">
+          <Bug class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
           <span>svadmin DevTools</span>
         </div>
-        <div class="flex gap-1">
-          <TooltipButton tooltip={collapsed ? i18n.t('common.expand') : i18n.t('common.collapse')} variant="ghost" size="icon" class="h-6 w-6" onclick={() => collapsed = !collapsed}>
+        <div class="svadmin-u-60fbb7713999 svadmin-u-44ee8ba0a421">
+          <TooltipButton tooltip={collapsed ? i18n.t('common.expand') : i18n.t('common.collapse')} variant="ghost" size="icon" class="svadmin-u-f6fe902450dc svadmin-u-7ec10f86d9b1" onclick={() => collapsed = !collapsed}>
             {#if collapsed}
-              <ChevronUp class="h-3.5 w-3.5" />
+              <ChevronUp class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
             {:else}
-              <ChevronDown class="h-3.5 w-3.5" />
+              <ChevronDown class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
             {/if}
           </TooltipButton>
-          <TooltipButton tooltip={i18n.t('common.close')} variant="ghost" size="icon" class="h-6 w-6" onclick={toggle}>
-            <X class="h-3.5 w-3.5" />
+          <TooltipButton tooltip={i18n.t('common.close')} variant="ghost" size="icon" class="svadmin-u-f6fe902450dc svadmin-u-7ec10f86d9b1" onclick={toggle}>
+            <X class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
           </TooltipButton>
         </div>
       </div>
 
       {#if !collapsed}
-        <Tabs.Root value="state" class="w-full">
-          <Tabs.List class="grid w-full grid-cols-4 h-8 rounded-none border-b">
-            <Tabs.Trigger value="state" class="text-xs data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary">State</Tabs.Trigger>
-            <Tabs.Trigger value="providers" class="text-xs data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary">Providers</Tabs.Trigger>
-            <Tabs.Trigger value="cache" class="text-xs data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary">Cache</Tabs.Trigger>
-            <Tabs.Trigger value="inferencer" class="text-xs data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-primary">
-              <Wand2 class="h-3 w-3 mr-1" /> Inferencer
+        <Tabs.Root value="state" class="svadmin-u-6da6a3c3f741">
+          <Tabs.List class="svadmin-u-f3c543ad5fe9 svadmin-u-6da6a3c3f741 svadmin-u-32aac21b02c8 svadmin-u-ed8a5df7b2fb svadmin-u-0c5e9137c7de svadmin-u-65fdbade2025">
+            <Tabs.Trigger value="state" class="svadmin-u-359090c2d529 svadmin-u-9147fe04c981 svadmin-u-0c5e9137c7de svadmin-u-65ac0c49a5d5 svadmin-u-521fa0c7c407 svadmin-u-f28d099256d8">State</Tabs.Trigger>
+            <Tabs.Trigger value="providers" class="svadmin-u-359090c2d529 svadmin-u-9147fe04c981 svadmin-u-0c5e9137c7de svadmin-u-65ac0c49a5d5 svadmin-u-521fa0c7c407 svadmin-u-f28d099256d8">Providers</Tabs.Trigger>
+            <Tabs.Trigger value="cache" class="svadmin-u-359090c2d529 svadmin-u-9147fe04c981 svadmin-u-0c5e9137c7de svadmin-u-65ac0c49a5d5 svadmin-u-521fa0c7c407 svadmin-u-f28d099256d8">Cache</Tabs.Trigger>
+            <Tabs.Trigger value="inferencer" class="svadmin-u-359090c2d529 svadmin-u-9147fe04c981 svadmin-u-0c5e9137c7de svadmin-u-65ac0c49a5d5 svadmin-u-521fa0c7c407 svadmin-u-f28d099256d8">
+              <Wand2 class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29 svadmin-u-618162408e7a" /> Inferencer
             </Tabs.Trigger>
           </Tabs.List>
 
-          <Tabs.Content value="state" class="p-0">
-            <ScrollArea class="max-h-[420px]">
-              <div class="p-2 space-y-1">
-                <div class="py-1">
-                  <h4 class="text-[0.6875rem] font-bold uppercase tracking-widest text-muted-foreground mb-1 px-1">Router</h4>
-                  <div class="flex items-center justify-between px-1 py-0.5 rounded hover:bg-muted/50">
-                    <span class="text-xs text-foreground">Path</span>
-                    <Badge variant="secondary" class="font-mono text-[0.6875rem]">{path}</Badge>
+          <Tabs.Content value="state" class="svadmin-u-8a539c7fe216">
+            <ScrollArea class="svadmin-u-c6a5b7446421">
+              <div class="svadmin-u-7660b450905a svadmin-u-da7c36cd8867">
+                <div class="svadmin-u-660d2effb880">
+                  <h4 class="svadmin-u-76067d04e222 svadmin-u-69450ef1487e uppercase svadmin-u-08cc9b1d44f8 svadmin-u-bfa603190748 svadmin-u-65281709dacf svadmin-u-d8e0e382c67b">Router</h4>
+                  <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-d8e0e382c67b svadmin-u-465609a240a8 svadmin-u-07389a777c1f svadmin-u-39f703dbe296">
+                    <span class="svadmin-u-359090c2d529 svadmin-u-d4108abe6359">Path</span>
+                    <Badge variant="secondary" class="svadmin-u-0e65706bcccd svadmin-u-76067d04e222">{path}</Badge>
                   </div>
                 </div>
 
                 <Separator />
 
-                <div class="py-1">
-                  <h4 class="text-[0.6875rem] font-bold uppercase tracking-widest text-muted-foreground mb-1 px-1">Theme</h4>
-                  <div class="flex items-center justify-between px-1 py-0.5 rounded hover:bg-muted/50">
-                    <span class="text-xs text-foreground">Mode</span>
-                    <Badge variant="secondary" class="font-mono text-[0.6875rem]">{theme}</Badge>
+                <div class="svadmin-u-660d2effb880">
+                  <h4 class="svadmin-u-76067d04e222 svadmin-u-69450ef1487e uppercase svadmin-u-08cc9b1d44f8 svadmin-u-bfa603190748 svadmin-u-65281709dacf svadmin-u-d8e0e382c67b">Theme</h4>
+                  <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-d8e0e382c67b svadmin-u-465609a240a8 svadmin-u-07389a777c1f svadmin-u-39f703dbe296">
+                    <span class="svadmin-u-359090c2d529 svadmin-u-d4108abe6359">Mode</span>
+                    <Badge variant="secondary" class="svadmin-u-0e65706bcccd svadmin-u-76067d04e222">{theme}</Badge>
                   </div>
-                  <div class="flex items-center justify-between px-1 py-0.5 rounded hover:bg-muted/50">
-                    <span class="text-xs text-foreground">Color</span>
-                    <Badge variant="secondary" class="font-mono text-[0.6875rem]">{colorTheme}</Badge>
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div class="py-1">
-                  <h4 class="text-[0.6875rem] font-bold uppercase tracking-widest text-muted-foreground mb-1 px-1">i18n</h4>
-                  <div class="flex items-center justify-between px-1 py-0.5 rounded hover:bg-muted/50">
-                    <span class="text-xs text-foreground">Locale</span>
-                    <Badge variant="secondary" class="font-mono text-[0.6875rem]">{locale}</Badge>
+                  <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-d8e0e382c67b svadmin-u-465609a240a8 svadmin-u-07389a777c1f svadmin-u-39f703dbe296">
+                    <span class="svadmin-u-359090c2d529 svadmin-u-d4108abe6359">Color</span>
+                    <Badge variant="secondary" class="svadmin-u-0e65706bcccd svadmin-u-76067d04e222">{colorTheme}</Badge>
                   </div>
                 </div>
 
                 <Separator />
 
-                <div class="py-1">
-                  <h4 class="text-[0.6875rem] font-bold uppercase tracking-widest text-muted-foreground mb-1 px-1">Resources ({resources.length})</h4>
+                <div class="svadmin-u-660d2effb880">
+                  <h4 class="svadmin-u-76067d04e222 svadmin-u-69450ef1487e uppercase svadmin-u-08cc9b1d44f8 svadmin-u-bfa603190748 svadmin-u-65281709dacf svadmin-u-d8e0e382c67b">i18n</h4>
+                  <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-d8e0e382c67b svadmin-u-465609a240a8 svadmin-u-07389a777c1f svadmin-u-39f703dbe296">
+                    <span class="svadmin-u-359090c2d529 svadmin-u-d4108abe6359">Locale</span>
+                    <Badge variant="secondary" class="svadmin-u-0e65706bcccd svadmin-u-76067d04e222">{locale}</Badge>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div class="svadmin-u-660d2effb880">
+                  <h4 class="svadmin-u-76067d04e222 svadmin-u-69450ef1487e uppercase svadmin-u-08cc9b1d44f8 svadmin-u-bfa603190748 svadmin-u-65281709dacf svadmin-u-d8e0e382c67b">Resources ({resources.length})</h4>
                   {#each resources as resource (resource.identifier ?? resource.name)}
-                    <div class="flex items-center justify-between px-1 py-0.5 rounded hover:bg-muted/50">
-                      <span class="text-xs text-foreground">{resource.name}</span>
-                      <Badge variant="outline" class="font-mono text-[0.6875rem]">{resource.fields.length} fields</Badge>
+                    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-d8e0e382c67b svadmin-u-465609a240a8 svadmin-u-07389a777c1f svadmin-u-39f703dbe296">
+                      <span class="svadmin-u-359090c2d529 svadmin-u-d4108abe6359">{resource.name}</span>
+                      <Badge variant="outline" class="svadmin-u-0e65706bcccd svadmin-u-76067d04e222">{resource.fields.length} fields</Badge>
                     </div>
                   {/each}
                 </div>
@@ -325,22 +325,22 @@
             </ScrollArea>
           </Tabs.Content>
 
-          <Tabs.Content value="providers" class="p-0">
-            <ScrollArea class="max-h-[420px]">
-              <div class="p-3 space-y-3">
-                <div class="rounded-md border bg-muted/20 p-2 text-[0.6875rem] text-muted-foreground">
+          <Tabs.Content value="providers" class="svadmin-u-8a539c7fe216">
+            <ScrollArea class="svadmin-u-c6a5b7446421">
+              <div class="svadmin-u-eb6e8b881acd svadmin-u-6ed543e2fbbb">
+                <div class="svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-967d113a1451 svadmin-u-7660b450905a svadmin-u-76067d04e222 svadmin-u-bfa603190748">
                   Sensitive values are hidden: endpoints, credentials, record data, messages, and live/audit payloads.
                 </div>
 
-                <section class="space-y-1.5">
-                  <h4 class="text-[0.6875rem] font-bold uppercase tracking-widest text-muted-foreground">Data providers ({dataProviders.length})</h4>
+                <section class="svadmin-u-5a2508227c6a">
+                  <h4 class="svadmin-u-76067d04e222 svadmin-u-69450ef1487e uppercase svadmin-u-08cc9b1d44f8 svadmin-u-bfa603190748">Data providers ({dataProviders.length})</h4>
                   {#each dataProviders as provider (provider.name)}
-                    <div class="rounded-md border px-2.5 py-2">
-                      <div class="flex items-center justify-between gap-2">
-                        <span class="font-medium text-foreground">{provider.name}</span>
+                    <div class="svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-0b91436debbd svadmin-u-03b4dd7f172b">
+                      <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4">
+                        <span class="svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{provider.name}</span>
                         <Badge variant="outline">{provider.resourceCount} resources</Badge>
                       </div>
-                      <div class="mt-1 flex items-center justify-between gap-2 text-[0.6875rem] text-muted-foreground">
+                      <div class="svadmin-u-b6b02c0ebef6 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4 svadmin-u-76067d04e222 svadmin-u-bfa603190748">
                         <span>{provider.capabilities}</span>
                         <span>Endpoint hidden</span>
                       </div>
@@ -350,13 +350,13 @@
 
                 <Separator />
 
-                <section class="space-y-1">
-                  <h4 class="text-[0.6875rem] font-bold uppercase tracking-widest text-muted-foreground">Framework providers</h4>
+                <section class="svadmin-u-da7c36cd8867">
+                  <h4 class="svadmin-u-76067d04e222 svadmin-u-69450ef1487e uppercase svadmin-u-08cc9b1d44f8 svadmin-u-bfa603190748">Framework providers</h4>
                   {#each frameworkProviders as provider (provider.name)}
-                    <div class="flex items-center justify-between gap-3 rounded px-1 py-1 hover:bg-muted/50">
-                      <div class="min-w-0">
-                        <div class="text-xs text-foreground">{provider.name}</div>
-                        <div class="truncate text-[0.6875rem] text-muted-foreground">{provider.capabilities}</div>
+                    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-1004c0c3954c svadmin-u-07389a777c1f svadmin-u-d8e0e382c67b svadmin-u-660d2effb880 svadmin-u-39f703dbe296">
+                      <div class="svadmin-u-7e0b7cdf1a94">
+                        <div class="svadmin-u-359090c2d529 svadmin-u-d4108abe6359">{provider.name}</div>
+                        <div class="svadmin-u-f283ea9bea0e svadmin-u-76067d04e222 svadmin-u-bfa603190748">{provider.capabilities}</div>
                       </div>
                       <Badge variant={provider.configured ? 'secondary' : 'outline'}>{provider.configured ? 'configured' : 'fallback'}</Badge>
                     </div>
@@ -366,69 +366,69 @@
             </ScrollArea>
           </Tabs.Content>
 
-          <Tabs.Content value="cache" class="p-0">
-            <ScrollArea class="max-h-[420px]">
-              <div class="grid gap-3 p-3 sm:grid-cols-2">
-                <section class="rounded-md border p-3">
-                  <div class="mb-2 flex items-center justify-between">
-                    <h4 class="text-xs font-semibold text-foreground">Queries</h4>
+          <Tabs.Content value="cache" class="svadmin-u-8a539c7fe216">
+            <ScrollArea class="svadmin-u-c6a5b7446421">
+              <div class="svadmin-u-f3c543ad5fe9 svadmin-u-1004c0c3954c svadmin-u-eb6e8b881acd svadmin-u-e00ad81645a2">
+                <section class="svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-eb6e8b881acd">
+                  <div class="svadmin-u-a77ed4d908c0 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc">
+                    <h4 class="svadmin-u-359090c2d529 svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">Queries</h4>
                     <Badge variant="secondary" data-testid="devtools-query-total">{cacheDiagnostics.queries.total}</Badge>
                   </div>
-                  <dl class="space-y-1 text-xs">
-                    <div class="flex justify-between"><dt class="text-muted-foreground">Fetching</dt><dd>{cacheDiagnostics.queries.fetching}</dd></div>
-                    <div class="flex justify-between"><dt class="text-muted-foreground">Stale</dt><dd>{cacheDiagnostics.queries.stale}</dd></div>
-                    <div class="flex justify-between"><dt class="text-muted-foreground">Errors</dt><dd>{cacheDiagnostics.queries.errors}</dd></div>
+                  <dl class="svadmin-u-da7c36cd8867 svadmin-u-359090c2d529">
+                    <div class="svadmin-u-60fbb7713999 svadmin-u-8ef2268efbbc"><dt class="svadmin-u-bfa603190748">Fetching</dt><dd>{cacheDiagnostics.queries.fetching}</dd></div>
+                    <div class="svadmin-u-60fbb7713999 svadmin-u-8ef2268efbbc"><dt class="svadmin-u-bfa603190748">Stale</dt><dd>{cacheDiagnostics.queries.stale}</dd></div>
+                    <div class="svadmin-u-60fbb7713999 svadmin-u-8ef2268efbbc"><dt class="svadmin-u-bfa603190748">Errors</dt><dd>{cacheDiagnostics.queries.errors}</dd></div>
                   </dl>
                 </section>
 
-                <section class="rounded-md border p-3">
-                  <div class="mb-2 flex items-center justify-between">
-                    <h4 class="text-xs font-semibold text-foreground">Mutations</h4>
+                <section class="svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-eb6e8b881acd">
+                  <div class="svadmin-u-a77ed4d908c0 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc">
+                    <h4 class="svadmin-u-359090c2d529 svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">Mutations</h4>
                     <Badge variant="secondary" data-testid="devtools-mutation-total">{cacheDiagnostics.mutations.total}</Badge>
                   </div>
-                  <dl class="space-y-1 text-xs">
-                    <div class="flex justify-between"><dt class="text-muted-foreground">Pending</dt><dd>{cacheDiagnostics.mutations.pending}</dd></div>
-                    <div class="flex justify-between"><dt class="text-muted-foreground">Paused</dt><dd>{cacheDiagnostics.mutations.paused}</dd></div>
-                    <div class="flex justify-between"><dt class="text-muted-foreground">Errors</dt><dd>{cacheDiagnostics.mutations.errors}</dd></div>
+                  <dl class="svadmin-u-da7c36cd8867 svadmin-u-359090c2d529">
+                    <div class="svadmin-u-60fbb7713999 svadmin-u-8ef2268efbbc"><dt class="svadmin-u-bfa603190748">Pending</dt><dd>{cacheDiagnostics.mutations.pending}</dd></div>
+                    <div class="svadmin-u-60fbb7713999 svadmin-u-8ef2268efbbc"><dt class="svadmin-u-bfa603190748">Paused</dt><dd>{cacheDiagnostics.mutations.paused}</dd></div>
+                    <div class="svadmin-u-60fbb7713999 svadmin-u-8ef2268efbbc"><dt class="svadmin-u-bfa603190748">Errors</dt><dd>{cacheDiagnostics.mutations.errors}</dd></div>
                   </dl>
                 </section>
 
-                <section class="space-y-1.5 sm:col-span-2">
-                  <div class="flex items-center justify-between">
-                    <h4 class="text-xs font-semibold text-foreground">Safe query operations</h4>
-                    <span class="text-[0.6875rem] text-muted-foreground">IDs, tenant and params hidden</span>
+                <section class="svadmin-u-5a2508227c6a svadmin-u-d378a2461dc3">
+                  <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc">
+                    <h4 class="svadmin-u-359090c2d529 svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">Safe query operations</h4>
+                    <span class="svadmin-u-76067d04e222 svadmin-u-bfa603190748">IDs, tenant and params hidden</span>
                   </div>
                   {#if safeQueryDiagnostics.length === 0}
-                    <div class="rounded-md border px-2.5 py-2 text-[0.6875rem] text-muted-foreground">
+                    <div class="svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-0b91436debbd svadmin-u-03b4dd7f172b svadmin-u-76067d04e222 svadmin-u-bfa603190748">
                       No Query Key v2 operations in cache.
                     </div>
                   {:else}
                     {#each safeQueryDiagnostics as query, index (`${query.provider}:${query.resource}:${query.operation}:${index}`)}
-                      <div class="rounded-md border px-2.5 py-2" data-testid="devtools-query-operation">
-                        <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
-                          <span class="font-medium text-foreground">{query.provider} · {query.resource}</span>
+                      <div class="svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-0b91436debbd svadmin-u-03b4dd7f172b" data-testid="devtools-query-operation">
+                        <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4 svadmin-u-359090c2d529">
+                          <span class="svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{query.provider} · {query.resource}</span>
                           <Badge variant="outline">{query.operation}</Badge>
                         </div>
-                        <dl class="mt-1 grid grid-cols-5 gap-2 text-[0.6875rem] text-muted-foreground">
-                          <div><dt>Status</dt><dd class="text-foreground">{query.status}</dd></div>
-                          <div><dt>Retries</dt><dd class="text-foreground">{query.retries}</dd></div>
-                          <div><dt>Duration</dt><dd class="text-foreground">{query.duration}</dd></div>
-                          <div><dt>Cache age</dt><dd class="text-foreground">{query.cacheAge}</dd></div>
-                          <div><dt>Invalidation</dt><dd class="text-foreground">{query.invalidation}</dd></div>
+                        <dl class="svadmin-u-b6b02c0ebef6 svadmin-u-f3c543ad5fe9 svadmin-u-931228bbb579 svadmin-u-77a2a20e90d4 svadmin-u-76067d04e222 svadmin-u-bfa603190748">
+                          <div><dt>Status</dt><dd class="svadmin-u-d4108abe6359">{query.status}</dd></div>
+                          <div><dt>Retries</dt><dd class="svadmin-u-d4108abe6359">{query.retries}</dd></div>
+                          <div><dt>Duration</dt><dd class="svadmin-u-d4108abe6359">{query.duration}</dd></div>
+                          <div><dt>Cache age</dt><dd class="svadmin-u-d4108abe6359">{query.cacheAge}</dd></div>
+                          <div><dt>Invalidation</dt><dd class="svadmin-u-d4108abe6359">{query.invalidation}</dd></div>
                         </dl>
                       </div>
                     {/each}
                   {/if}
                 </section>
 
-                <p class="text-[0.6875rem] text-muted-foreground sm:col-span-2">
+                <p class="svadmin-u-76067d04e222 svadmin-u-bfa603190748 svadmin-u-d378a2461dc3">
                   Query keys, variables, cached records, mutation payloads, and error bodies are intentionally hidden.
                 </p>
               </div>
             </ScrollArea>
           </Tabs.Content>
 
-          <Tabs.Content value="inferencer" class="p-0">
+          <Tabs.Content value="inferencer" class="svadmin-u-8a539c7fe216">
             <InferencerPanel />
           </Tabs.Content>
         </Tabs.Root>
@@ -439,10 +439,10 @@
       tooltip={i18n.t('devtools.title')}
       variant="default"
       size="icon"
-      class="{docked ? 'relative rounded-md shadow-sm' : 'fixed bottom-5 right-[4.75rem] rounded-full shadow-lg sm:bottom-7 sm:right-[5.5rem]'} z-[9999] h-9 w-9 opacity-60 hover:opacity-100 hover:scale-110 transition-all"
+      class="{docked ? 'svadmin-u-d89972fe17d6 svadmin-u-421ac2be5045 svadmin-u-438b2237b8d6' : 'svadmin-u-7bc555991dba svadmin-u-6c32e8173349 svadmin-u-24546591650c svadmin-u-ac204c108886 svadmin-u-06bbb43166db svadmin-u-319548b23f75 svadmin-u-c4b15df0fe95'} svadmin-u-f50571addf44 svadmin-u-e7a768f922d2 svadmin-u-ae2181c7b10f svadmin-u-f2868c227fcd svadmin-u-5da1d5250e75 svadmin-u-7abf679f0725 svadmin-u-0fe7d7d814d0"
       onclick={toggle}
     >
-      <Bug class="h-4 w-4" />
+      <Bug class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
     </TooltipButton>
   {/if}
 {/if}

@@ -57,10 +57,10 @@
   }
 </script>
 
-<div class={'flex justify-center gap-2 ' + className} role="group" aria-label={ariaLabel}>
+<div class={'svadmin-u-60fbb7713999 svadmin-u-86843cf1e227 svadmin-u-77a2a20e90d4 ' + className} role="group" aria-label={ariaLabel}>
   {#each slots as index (index)}
     <Input
-      class="size-12 text-center text-lg font-semibold tabular-nums"
+      class="svadmin-u-9939b97359ce svadmin-u-ca6bf63030aa svadmin-u-42536e69e639 svadmin-u-e83a7042bc91 svadmin-u-3032cae0badb"
       value={value[index] ?? ''}
       maxlength={1}
       inputmode="numeric"

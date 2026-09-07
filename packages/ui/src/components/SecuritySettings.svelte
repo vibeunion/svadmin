@@ -159,8 +159,8 @@
   }
 </script>
 
-<div class="space-y-6">
-  <div><h2 class="text-xl font-semibold text-foreground">{i18n.t('settings.security')}</h2><p class="mt-1 text-sm text-muted-foreground">{i18n.t('settings.securityDescription')}</p></div>
+<div class="svadmin-u-b3542e058833">
+  <div><h2 class="svadmin-u-d5c9b0001e7e svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{i18n.t('settings.security')}</h2><p class="svadmin-u-b6b02c0ebef6 svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">{i18n.t('settings.securityDescription')}</p></div>
   {#if !sessionProvider}
     <FeedbackNotice tone="warning" message={isZh ? '未配置 SessionProvider。会话和 MFA 设置不会使用模拟数据。' : 'SessionProvider is not configured. Session and MFA controls do not use simulated data.'} />
   {/if}
@@ -171,8 +171,8 @@
   </SettingsGroup>
   <SettingsGroup title={i18n.t('profile.changePassword')} description={isZh ? '密码修改由 AuthProvider 持久化。' : 'Password changes are persisted by AuthProvider.'}>
     {#if !authProvider?.updatePassword}<FeedbackNotice tone="warning" message={isZh ? '当前 AuthProvider 不支持修改密码。' : 'The current AuthProvider does not support password updates.'} />{/if}
-    <form onsubmit={handlePasswordChange} class="max-w-lg space-y-4">
-      {#if passwordErrorMessage}<Alert.Root variant="destructive"><AlertTriangle class="h-4 w-4" /><Alert.Description>{passwordErrorMessage}</Alert.Description></Alert.Root>{/if}
+    <form onsubmit={handlePasswordChange} class="svadmin-u-6199866f612f svadmin-u-3e7ce58d64fa">
+      {#if passwordErrorMessage}<Alert.Root variant="destructive"><AlertTriangle class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" /><Alert.Description>{passwordErrorMessage}</Alert.Description></Alert.Root>{/if}
       <PasswordInput id="security-current-password" label={i18n.t('profile.currentPassword')} bind:value={currentPassword} autocomplete="current-password" disabled={!authProvider?.updatePassword || changingPassword} />
       <PasswordInput id="security-new-password" label={i18n.t('profile.newPassword')} bind:value={newPassword} autocomplete="new-password" showStrength disabled={!authProvider?.updatePassword || changingPassword} />
       <PasswordInput id="security-confirm-password" label={i18n.t('auth.confirmPassword')} bind:value={confirmPassword} autocomplete="new-password" disabled={!authProvider?.updatePassword || changingPassword} />
@@ -188,11 +188,11 @@
     {:else if sessions.length === 0}
       <DataState state="empty" title={i18n.t('security.noSessions')} description={sessionProvider ? (isZh ? 'Provider 未返回活跃会话。' : 'The provider returned no active sessions.') : (isZh ? '配置 SessionProvider 后可管理真实会话。' : 'Configure SessionProvider to manage real sessions.')} />
     {:else}
-      <div class="divide-y">
+      <div class="svadmin-u-fa6acbf81d74">
         {#each sessions as session (session.id)}
-          <div class="flex items-center justify-between gap-4 py-3">
-            <div class="flex min-w-0 items-center gap-3"><div class="rounded-lg bg-muted p-2 text-muted-foreground">{#if (session.os ?? '').toLowerCase().includes('ios') || (session.os ?? '').toLowerCase().includes('android')}<Smartphone class="h-5 w-5" />{:else}<Monitor class="h-5 w-5" />{/if}</div><div class="min-w-0 space-y-1"><div class="flex flex-wrap items-center gap-2"><span class="text-sm font-medium">{session.os ?? (isZh ? '未知系统' : 'Unknown OS')} - {session.browser ?? (isZh ? '未知浏览器' : 'Unknown browser')}</span>{#if session.current}<span class="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold text-primary">{i18n.t('security.currentSession')}</span>{/if}</div><div class="flex flex-wrap items-center gap-2 text-xs text-muted-foreground"><span>{session.ipAddress ?? '-'}</span><span>{session.lastActiveAt ? new Date(session.lastActiveAt).toLocaleString() : '-'}</span></div></div></div>
-            {#if !session.current}<Button variant="ghost" size="icon-sm" disabled={revoking !== null} onclick={() => revokeSession(session.id)} title={i18n.t('security.revokeSession')}><Trash2 class="h-4 w-4" /></Button>{/if}
+          <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-0c3bc98565dd svadmin-u-1b2d54a3fd12">
+            <div class="svadmin-u-60fbb7713999 svadmin-u-7e0b7cdf1a94 svadmin-u-3960ffc248d9 svadmin-u-1004c0c3954c"><div class="svadmin-u-5f22e64f2282 svadmin-u-2ef11f1cb219 svadmin-u-7660b450905a svadmin-u-bfa603190748">{#if (session.os ?? '').toLowerCase().includes('ios') || (session.os ?? '').toLowerCase().includes('android')}<Smartphone class="svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e" />{:else}<Monitor class="svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e" />{/if}</div><div class="svadmin-u-7e0b7cdf1a94 svadmin-u-da7c36cd8867"><div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4"><span class="svadmin-u-fc7473ca09eb svadmin-u-2689f3958069">{session.os ?? (isZh ? '未知系统' : 'Unknown OS')} - {session.browser ?? (isZh ? '未知浏览器' : 'Unknown browser')}</span>{#if session.current}<span class="svadmin-u-07389a777c1f svadmin-u-375dc44df6e9 svadmin-u-45d828117213 svadmin-u-465609a240a8 svadmin-u-1dc571a3609f svadmin-u-e83a7042bc91 svadmin-u-20aaf08a7ed1">{i18n.t('security.currentSession')}</span>{/if}</div><div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-359090c2d529 svadmin-u-bfa603190748"><span>{session.ipAddress ?? '-'}</span><span>{session.lastActiveAt ? new Date(session.lastActiveAt).toLocaleString() : '-'}</span></div></div></div>
+            {#if !session.current}<Button variant="ghost" size="icon-sm" disabled={revoking !== null} onclick={() => revokeSession(session.id)} title={i18n.t('security.revokeSession')}><Trash2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" /></Button>{/if}
           </div>
         {/each}
       </div>

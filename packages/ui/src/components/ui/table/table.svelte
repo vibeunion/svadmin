@@ -20,8 +20,8 @@
 	setContext("svadmin-table-density", () => density);
 </script>
 
-<div data-slot="table-container" data-table-density={density} class="relative w-full overflow-x-auto">
-	<table bind:this={ref} data-slot="table" class={cn("w-full caption-bottom text-sm", className)} {...restProps}>
+<div data-slot="table-container" data-table-density={density} class="svadmin-table-container">
+	<table bind:this={ref} data-slot="table" class={cn("svadmin-table", className)} {...restProps}>
 		{@render children?.()}
 	</table>
 </div>

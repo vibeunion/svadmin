@@ -6,6 +6,6 @@
   let { class: className, children, ...restProps }: HTMLAttributes<HTMLElement> & { children?: Snippet } = $props();
 </script>
 
-<nav aria-label="pagination" data-slot="pagination" class={cn("mx-auto flex w-full justify-center", className)} {...restProps}>
+<nav aria-label="pagination" data-slot="pagination" class={cn("svadmin-pagination", className)} {...restProps}>
   {@render children?.()}
 </nav>

@@ -33,7 +33,7 @@
     triggerSize = 'sm',
     submitText = 'Confirm',
     cancelText = 'Cancel',
-    widthClass = 'sm:max-w-lg',
+    widthClass = 'svadmin-u-a09a722d3ce4',
     isSubmitting = false,
     disabled = false,
     onsubmit,
@@ -66,7 +66,7 @@
   {#if triggerSnippet}
     <Dialog.Trigger>
       {#snippet child({ props })}
-        <div {...props} class="inline-flex">
+        <div {...props} class="svadmin-u-52083e7da442">
           {@render triggerSnippet()}
         </div>
       {/snippet}
@@ -81,8 +81,8 @@
     </Dialog.Trigger>
   {/if}
 
-  <Dialog.Content class={cn(widthClass, 'max-h-[90vh] overflow-y-auto', className)}>
-    <form onsubmit={handleSubmit} class="space-y-4">
+  <Dialog.Content class={cn(widthClass, 'svadmin-u-b4168890eac6 svadmin-u-92bf82f493b1', className)}>
+    <form onsubmit={handleSubmit} class="svadmin-u-3e7ce58d64fa">
       <Dialog.Header>
         <Dialog.Title>{title}</Dialog.Title>
         {#if description}
@@ -90,13 +90,13 @@
         {/if}
       </Dialog.Header>
 
-      <div class="py-2 text-sm text-foreground">
+      <div class="svadmin-u-03b4dd7f172b svadmin-u-fc7473ca09eb svadmin-u-d4108abe6359">
         {#if children}
           {@render children()}
         {/if}
       </div>
 
-      <Dialog.Footer class="gap-2 pt-2 border-t border-border/50">
+      <Dialog.Footer class="svadmin-u-77a2a20e90d4 svadmin-u-f46b61a9b310 svadmin-u-b950dda299d3 svadmin-u-591f378e24a1">
         <Button
           type="button"
           variant="outline"
@@ -110,10 +110,10 @@
           type="submit"
           size="sm"
           disabled={loading || isSubmitting || disabled}
-          class="gap-1.5 min-w-20"
+          class="svadmin-u-58284b4ea568 svadmin-u-2e7a6d18a20d"
         >
           {#if loading || isSubmitting}
-            <Loader2 class="h-4 w-4 animate-spin" />
+            <Loader2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-afbdd13a380e" />
           {/if}
           {submitText}
         </Button>

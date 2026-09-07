@@ -11,7 +11,7 @@
   aria-disabled="true"
   aria-current="page"
   data-slot="breadcrumb-page"
-  class={cn("text-foreground font-normal", className)}
+  class={cn("svadmin-breadcrumb-page", className)}
   {...restProps}
 >
   {@render children?.()}

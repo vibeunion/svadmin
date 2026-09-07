@@ -317,7 +317,7 @@
 					aria-hidden="true"
 					data-side={resolvedSide}
 					style={arrowStyle}
-					class={cn("absolute size-2.5 rotate-45 rounded-[2px] bg-primary -z-10", arrowClasses)}
+					class={cn("svadmin-tooltip-arrow", arrowClasses)}
 				></div>
 			</div>
 		{/if}

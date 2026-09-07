@@ -133,10 +133,11 @@ describe('Stripe-first refactor contract', () => {
     expect(integrations).not.toContain("connected: false");
     expect(read('packages/ui/src/components/AboutSettings.svelte')).toContain('<SettingsGroup');
     expect(read('packages/ui/src/components/SettingsPage.svelte')).not.toContain('tracking-wider');
-    expect(read('packages/ui/src/components/content/WorkspaceLayout.svelte')).toContain('items-start');
+    const utilityAliases = JSON.parse(read('packages/ui/scripts/utility-class-map.json'));
+    expect(read('packages/ui/src/components/content/WorkspaceLayout.svelte')).toContain(utilityAliases['items-start']);
     expect(read('packages/ui/src/components/account/CompanyProfilePage.svelte')).toContain('<WorkspaceLayout');
     expect(read('packages/ui/src/components/account/UserProfilePage.svelte')).toContain('<WorkspaceLayout');
-    expect(read('packages/ui/src/components/account/SettingsEnterprisePage.svelte')).toContain('grid items-start');
+    expect(read('packages/ui/src/components/account/SettingsEnterprisePage.svelte')).toContain(`${utilityAliases.grid} ${utilityAliases['items-start']}`);
   });
 
   it('keeps example sources on semantic color tokens (no bare palette utilities or hex)', () => {

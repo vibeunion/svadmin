@@ -78,7 +78,7 @@
   }
 </script>
 
-<tr class="hover:bg-muted/50 data-[state=selected]:bg-muted transition-colors bg-muted/50">
+<tr class="svadmin-u-39f703dbe296 svadmin-u-024b686f65d9 svadmin-u-ceb69a6b0e5f svadmin-u-358af0b65a31">
   {#each columns as column, index (index)}
     {@render header(column, index, {
       draggable: true,

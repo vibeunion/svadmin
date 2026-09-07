@@ -77,7 +77,7 @@
 </script>
 
 {#if editing}
-  <div class="relative flex items-center w-full">
+  <div class="svadmin-u-d89972fe17d6 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-6da6a3c3f741">
     <input
       bind:this={inputRef}
       type={field.type === 'number' ? 'number' : 'text'}
@@ -86,17 +86,17 @@
       onblur={handleBlur}
       disabled={saving}
       aria-label={fieldLabel}
-      class="h-7 w-full rounded border bg-background px-2 text-sm outline-none ring-1 ring-primary/50 focus:ring-2 focus:ring-primary transition-all disabled:opacity-60"
+      class="svadmin-u-d0a52b312f7d svadmin-u-6da6a3c3f741 svadmin-u-07389a777c1f svadmin-u-ca6bcd4b6f3f svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-fc7473ca09eb svadmin-u-df37b1fd9495 svadmin-u-3daca9af0861 svadmin-u-f42e9fee68a1 svadmin-u-608dd26cd5ba svadmin-u-1a5f9520d7fa svadmin-u-0fe7d7d814d0 svadmin-u-d463b664011d"
     />
     {#if saving}
-      <span class="absolute right-2 flex items-center pointer-events-none" role="status" aria-label="Saving...">
-        <Loader2 class="size-3.5 animate-spin text-muted-foreground" aria-hidden="true" />
+      <span class="svadmin-u-da4dbfbc4fdc svadmin-u-7b2d63937d23 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-a4326536b8f5" role="status" aria-label="Saving...">
+        <Loader2 class="svadmin-u-783b0d9d1e2c svadmin-u-afbdd13a380e svadmin-u-bfa603190748" aria-hidden="true" />
       </span>
     {/if}
   </div>
 {:else}
   <span
-    class="inline-flex items-center cursor-pointer rounded px-1.5 py-0.5 -mx-1 text-sm text-foreground hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 transition-colors"
+    class="svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-34516836730d svadmin-u-07389a777c1f svadmin-u-45d828117213 svadmin-u-465609a240a8 svadmin-u-76610325273f svadmin-u-fc7473ca09eb svadmin-u-d4108abe6359 svadmin-u-2a6233dc87a9 svadmin-u-f10f771f87e9 svadmin-u-793c80e97ffb svadmin-u-9c1295a6914a svadmin-u-ce4edccf4cbb svadmin-u-ceb69a6b0e5f"
     ondblclick={startEdit}
     title={`Double-click to edit ${fieldLabel}`}
     role="button"

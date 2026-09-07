@@ -34,14 +34,14 @@
 </script>
 
 {#await pagePromise}
-  <div class="flex min-h-40 items-center justify-center" role="status" aria-live="polite">
-    <span class="text-sm text-muted-foreground">Loading...</span>
+  <div class="svadmin-u-60fbb7713999 svadmin-u-8a7a926578c8 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227" role="status" aria-live="polite">
+    <span class="svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">Loading...</span>
   </div>
 {:then pageModule}
   {@const Page = pageModule.default as unknown as LazyPageRenderable}
   <Page {...props} />
 {:catch}
-  <div class="flex min-h-40 items-center justify-center" role="alert">
-    <span class="text-sm text-destructive">Unable to load this page.</span>
+  <div class="svadmin-u-60fbb7713999 svadmin-u-8a7a926578c8 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227" role="alert">
+    <span class="svadmin-u-fc7473ca09eb svadmin-u-811148b13d1e">Unable to load this page.</span>
   </div>
 {/await}

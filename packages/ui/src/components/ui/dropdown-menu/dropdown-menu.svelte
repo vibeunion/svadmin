@@ -42,7 +42,7 @@
 <div
 	bind:this={ref}
 	data-slot="dropdown-menu"
-	class={cn("relative inline-block", className)}
+	class={cn("svadmin-dropdown-menu", className)}
 	{...restProps}
 >
 	{@render children?.()}

@@ -1076,15 +1076,15 @@
   }
 </script>
 
-<div class="space-y-3">
+<div class="svadmin-u-6ed543e2fbbb">
   {#if showHeader}
     <!-- Header -->
-    <div class="flex flex-wrap items-center justify-between gap-2">
-      <h1 class="text-lg sm:text-xl font-semibold text-foreground">{title ?? resource.label}</h1>
-      <div class="flex flex-wrap items-center gap-2">
+    <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4">
+      <h1 class="svadmin-u-42536e69e639 svadmin-u-998e0b29fe9e svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{title ?? resource.label}</h1>
+      <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
         {#if canExport}
           <Button variant="outline" size="sm" onclick={exportCSV}>
-            <Download class="h-4 w-4" data-icon="inline-start" /> {i18n.t("common.export")}
+            <Download class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" data-icon="inline-start" /> {i18n.t("common.export")}
           </Button>
         {/if}
         {#if headerActions}
@@ -1092,7 +1092,7 @@
         {/if}
         {#if canCreate}
           <Button onclick={() => navigation.create(resourceName)}>
-            <Plus class="h-4 w-4" data-icon="inline-start" /> {i18n.t("common.create")}
+            <Plus class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" data-icon="inline-start" /> {i18n.t("common.create")}
           </Button>
         {/if}
       </div>
@@ -1102,17 +1102,17 @@
   <!-- Selection Banner (Enterprise Batch Actions) -->
   {#if selectedCount > 0}
     <div
-      class="flex flex-col gap-3 border border-primary/20 bg-primary/10 px-3.5 py-2 rounded-lg text-sm text-foreground animate-in fade-in duration-200 motion-reduce:animate-none sm:flex-row sm:items-center sm:justify-between"
+      class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-1004c0c3954c svadmin-u-ca6bcd4b6f3f svadmin-u-a6afccfc915b svadmin-u-375dc44df6e9 svadmin-u-e0d9cc7f0647 svadmin-u-03b4dd7f172b svadmin-u-5f22e64f2282 svadmin-u-fc7473ca09eb svadmin-u-d4108abe6359 svadmin-u-40137e897961 fade-in svadmin-u-625a4c3fbeb2 svadmin-u-259ce51fc8f3 svadmin-u-020ba687fa12 svadmin-u-9f76a62f4f44 svadmin-u-3b9871a0bf93"
       aria-label={i18n.t("common.selectedCount", { count: selectedCount })}
       data-svadmin-batch-toolbar
     >
-      <div class="flex min-w-0 items-center gap-2 text-sm">
-        <span class="font-medium text-foreground tabular-nums">{i18n.t("common.selectedCount", { count: selectedCount })}</span>
+      <div class="svadmin-u-60fbb7713999 svadmin-u-7e0b7cdf1a94 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-fc7473ca09eb">
+        <span class="svadmin-u-2689f3958069 svadmin-u-d4108abe6359 svadmin-u-3032cae0badb">{i18n.t("common.selectedCount", { count: selectedCount })}</span>
         {#if deleteManyMutation.isPending}
-          <span class="text-muted-foreground" role="status">{i18n.t("common.processing")}</span>
+          <span class="svadmin-u-bfa603190748" role="status">{i18n.t("common.processing")}</span>
         {/if}
       </div>
-      <div class="flex flex-wrap items-center gap-2">
+      <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
         {#if batchActions}
           {@render batchActions({ selectedIds })}
         {/if}
@@ -1120,17 +1120,17 @@
           <Button
             variant="destructive"
             size="sm"
-            class="h-8 text-xs whitespace-nowrap"
+            class="svadmin-u-ed8a5df7b2fb svadmin-u-359090c2d529 svadmin-u-e82ae8be04aa"
             disabled={deleteManyMutation.isPending}
             onclick={confirmBatchDelete}
           >
-            <Trash2 class="h-3.5 w-3.5" data-icon="inline-start" aria-hidden="true" /> {i18n.t("common.batchDelete", { count: selectedCount })}
+            <Trash2 class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" data-icon="inline-start" aria-hidden="true" /> {i18n.t("common.batchDelete", { count: selectedCount })}
           </Button>
         {/if}
         <Button
           variant="ghost"
           size="sm"
-          class="h-8 text-xs text-muted-foreground hover:text-foreground"
+          class="svadmin-u-ed8a5df7b2fb svadmin-u-359090c2d529 svadmin-u-bfa603190748 svadmin-u-ea7b2e9e070e"
           disabled={deleteManyMutation.isPending}
           onclick={clearSelection}
         >
@@ -1141,18 +1141,18 @@
   {/if}
 
   <!-- Search, Filter & Table Utility Toolbar -->
-  <div class="flex flex-wrap items-center justify-between gap-2">
+  <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4">
     <!-- Left: Search and Advanced Filters -->
-    <div class="flex flex-wrap items-center gap-2 flex-1 min-w-[200px]">
+    <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-36e579c0b41c svadmin-u-c614099df7f7">
       {#if searchableFields.length > 0}
-        <div class="relative max-w-sm flex-1 sm:min-w-[220px]">
-          <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+        <div class="svadmin-u-d89972fe17d6 svadmin-u-2472e9b81a97 svadmin-u-36e579c0b41c svadmin-u-c80f3ab59fae">
+          <Search class="svadmin-u-da4dbfbc4fdc svadmin-u-22e59b722111 svadmin-u-d694ba66e322 svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-36b381be4df3 svadmin-u-bfa603190748" aria-hidden="true" />
           <Input
             type="text"
             value={searchText}
             oninput={scheduleSearch}
             placeholder={i18n.t("common.search")}
-            class="pl-9 h-9 text-sm"
+            class="svadmin-u-9e83b2412bc9 svadmin-u-e7a768f922d2 svadmin-u-fc7473ca09eb"
           />
         </div>
       {/if}
@@ -1161,25 +1161,25 @@
         <Popover.Root>
           <Popover.Trigger>
             {#snippet child({ props })}
-              <Button variant="outline" size="sm" class="h-9 px-3" {...props}>
-                <FilterIcon class="h-4 w-4" data-icon="inline-start" aria-hidden="true" />
+              <Button variant="outline" size="sm" class="svadmin-u-e7a768f922d2 svadmin-u-0e17f2bd9074" {...props}>
+                <FilterIcon class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" data-icon="inline-start" aria-hidden="true" />
                 {i18n.t("common.filter")}
                 {#if activeFilterCount > 0}
-                  <Badge variant="secondary" class="ml-1 h-5 min-w-5 px-1 tabular-nums">{activeFilterCount}</Badge>
+                  <Badge variant="secondary" class="svadmin-u-f58b02572ab2 svadmin-u-cd0d9c512cdc svadmin-u-f8516763aedd svadmin-u-d8e0e382c67b svadmin-u-3032cae0badb">{activeFilterCount}</Badge>
                 {/if}
               </Button>
             {/snippet}
           </Popover.Trigger>
-          <Popover.Content class="w-80">
-            <div class="space-y-3">
-              <h4 class="font-medium text-sm">{i18n.t("common.filter")}</h4>
+          <Popover.Content class="svadmin-u-7ab81aede9d8">
+            <div class="svadmin-u-6ed543e2fbbb">
+              <h4 class="svadmin-u-2689f3958069 svadmin-u-fc7473ca09eb">{i18n.t("common.filter")}</h4>
               {#each filterableFields as field, _i (_i)}
-                <div class="space-y-1">
-                  <label class="text-xs text-muted-foreground" for="filter-{field.key}">{field.label}</label>
+                <div class="svadmin-u-da7c36cd8867">
+                  <label class="svadmin-u-359090c2d529 svadmin-u-bfa603190748" for="filter-{field.key}">{field.label}</label>
                   {#if field.type === "select" && field.options}
                     <Select.Root
                       id="filter-{field.key}"
-                      class="h-9 text-sm"
+                      class="svadmin-u-e7a768f922d2 svadmin-u-fc7473ca09eb"
                       value={filterValues[field.key] ?? ""}
                       onchange={(e) => setFilterValue(field.key, (e.currentTarget as HTMLSelectElement).value)}
                     >
@@ -1195,13 +1195,13 @@
                       value={filterValues[field.key] ?? ""}
                       oninput={(e) => setFilterValue(field.key, e.currentTarget.value)}
                       placeholder={field.label}
-                      class="h-9 text-sm"
+                      class="svadmin-u-e7a768f922d2 svadmin-u-fc7473ca09eb"
                     />
                   {/if}
                 </div>
               {/each}
-              <div class="flex gap-2 pt-2">
-                <Button size="sm" class="flex-1" onclick={() => { pagination = { ...pagination, current: 1 }; }}>
+              <div class="svadmin-u-60fbb7713999 svadmin-u-77a2a20e90d4 svadmin-u-f46b61a9b310">
+                <Button size="sm" class="svadmin-u-36e579c0b41c" onclick={() => { pagination = { ...pagination, current: 1 }; }}>
                   {i18n.t("common.confirm")}
                 </Button>
                 <Button variant="outline" size="sm" onclick={clearFilters}>
@@ -1215,10 +1215,10 @@
     </div>
 
     <!-- Right: Table Controls (Density, Columns, Saved Views, Refresh, Export if !showHeader) -->
-    <div class="flex items-center gap-1.5 shrink-0">
+    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-58284b4ea568 svadmin-u-012fbd121f37">
       {#if !showHeader && canExport}
-        <TooltipButton tooltip={i18n.t("common.export")} variant="outline" size="sm" class="h-9 px-2.5" onclick={exportCSV}>
-          <Download class="h-4 w-4" aria-hidden="true" />
+        <TooltipButton tooltip={i18n.t("common.export")} variant="outline" size="sm" class="svadmin-u-e7a768f922d2 svadmin-u-0b91436debbd" onclick={exportCSV}>
+          <Download class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" aria-hidden="true" />
         </TooltipButton>
       {/if}
 
@@ -1226,16 +1226,16 @@
         <DropdownMenu.Root>
           <DropdownMenu.Trigger>
             {#snippet child({ props })}
-              <TooltipButton tooltip={i18n.t("common.density")} variant="outline" size="sm" class="h-9 px-2.5" {...props}>
-                <Rows class="h-4 w-4" aria-hidden="true" />
+              <TooltipButton tooltip={i18n.t("common.density")} variant="outline" size="sm" class="svadmin-u-e7a768f922d2 svadmin-u-0b91436debbd" {...props}>
+                <Rows class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" aria-hidden="true" />
               </TooltipButton>
             {/snippet}
           </DropdownMenu.Trigger>
-          <DropdownMenu.Content align="end" class="w-36">
-            <DropdownMenu.Item onclick={() => { densityOverride = "comfortable"; }} class={currentDensity === "comfortable" ? "font-semibold text-primary" : ""}>
+          <DropdownMenu.Content align="end" class="svadmin-u-df403bbae8fc">
+            <DropdownMenu.Item onclick={() => { densityOverride = "comfortable"; }} class={currentDensity === "comfortable" ? "svadmin-u-e83a7042bc91 svadmin-u-20aaf08a7ed1" : ""}>
               {i18n.t("common.densityComfortable")}
             </DropdownMenu.Item>
-            <DropdownMenu.Item onclick={() => { densityOverride = "compact"; }} class={currentDensity === "compact" ? "font-semibold text-primary" : ""}>
+            <DropdownMenu.Item onclick={() => { densityOverride = "compact"; }} class={currentDensity === "compact" ? "svadmin-u-e83a7042bc91 svadmin-u-20aaf08a7ed1" : ""}>
               {i18n.t("common.densityCompact")}
             </DropdownMenu.Item>
           </DropdownMenu.Content>
@@ -1246,12 +1246,12 @@
       <DropdownMenu.Root>
         <DropdownMenu.Trigger>
           {#snippet child({ props })}
-            <TooltipButton tooltip={i18n.t("common.columns")} variant="outline" size="sm" class="h-9 px-2.5" {...props}>
-              <SlidersHorizontal class="h-4 w-4" />
+            <TooltipButton tooltip={i18n.t("common.columns")} variant="outline" size="sm" class="svadmin-u-e7a768f922d2 svadmin-u-0b91436debbd" {...props}>
+              <SlidersHorizontal class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
             </TooltipButton>
           {/snippet}
         </DropdownMenu.Trigger>
-        <DropdownMenu.Content align="end" class="w-48">
+        <DropdownMenu.Content align="end" class="svadmin-u-74b2435a1d40">
           {#each table_getAllLeafColumns(tbl).filter((column) => !column.id.startsWith("_")) as column, _i (_i)}
             <DropdownMenu.CheckboxItem
               checked={tableColumnVisibility.current[column.id] ?? true}
@@ -1267,22 +1267,22 @@
       <Popover.Root bind:open={savedViewsOpen}>
         <Popover.Trigger>
           {#snippet child({ props })}
-            <Button variant="outline" size="sm" class="h-9 px-2.5" {...props} aria-label={i18n.t("common.savedViews")}>
-              <Bookmark class="h-4 w-4" data-icon="inline-start" /> {activeSavedViewName ?? i18n.t("common.savedViews")}
+            <Button variant="outline" size="sm" class="svadmin-u-e7a768f922d2 svadmin-u-0b91436debbd" {...props} aria-label={i18n.t("common.savedViews")}>
+              <Bookmark class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" data-icon="inline-start" /> {activeSavedViewName ?? i18n.t("common.savedViews")}
             </Button>
           {/snippet}
         </Popover.Trigger>
-        <Popover.Content align="end" class="w-80">
-          <div class="space-y-3">
+        <Popover.Content align="end" class="svadmin-u-7ab81aede9d8">
+          <div class="svadmin-u-6ed543e2fbbb">
             <div>
-              <h4 class="font-medium text-sm">{i18n.t("common.savedViews")}</h4>
-              <p class="mt-1 text-xs text-muted-foreground">{i18n.t("common.savedViewsHint")}</p>
+              <h4 class="svadmin-u-2689f3958069 svadmin-u-fc7473ca09eb">{i18n.t("common.savedViews")}</h4>
+              <p class="svadmin-u-b6b02c0ebef6 svadmin-u-359090c2d529 svadmin-u-bfa603190748">{i18n.t("common.savedViewsHint")}</p>
             </div>
-            <div class="space-y-1">
-              <label class="text-xs text-muted-foreground" for="saved-list-view">{i18n.t("common.currentView")}</label>
+            <div class="svadmin-u-da7c36cd8867">
+              <label class="svadmin-u-359090c2d529 svadmin-u-bfa603190748" for="saved-list-view">{i18n.t("common.currentView")}</label>
               <Select.Root
                 id="saved-list-view"
-                class="h-9 w-full"
+                class="svadmin-u-e7a768f922d2 svadmin-u-6da6a3c3f741"
                 value={activeSavedViewId ?? ""}
                 onchange={(event) => {
                   const id = (event.currentTarget as HTMLSelectElement).value;
@@ -1300,31 +1300,31 @@
                 {/each}
               </Select.Root>
             </div>
-            <div class="flex gap-2">
+            <div class="svadmin-u-60fbb7713999 svadmin-u-77a2a20e90d4">
               <Input
                 aria-label={i18n.t("common.viewName")}
                 placeholder={i18n.t("common.viewName")}
                 maxlength={60}
                 bind:value={savedViewName}
-                class="h-9"
+                class="svadmin-u-e7a768f922d2"
               />
-              <Button size="sm" class="shrink-0" disabled={!savedViewName.trim()} onclick={saveCurrentView}>
-                <Check class="h-4 w-4" data-icon="inline-start" /> {i18n.t("common.saveView")}
+              <Button size="sm" class="svadmin-u-012fbd121f37" disabled={!savedViewName.trim()} onclick={saveCurrentView}>
+                <Check class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" data-icon="inline-start" /> {i18n.t("common.saveView")}
               </Button>
             </div>
             {#if savedViews.length > 0}
-              <div class="space-y-1 border-t border-border pt-2">
+              <div class="svadmin-u-da7c36cd8867 svadmin-u-b950dda299d3 svadmin-u-18049387f0af svadmin-u-f46b61a9b310">
                 {#each savedViews as view (view.id)}
-                  <div class="flex items-center justify-between gap-2 text-sm">
-                    <span class="min-w-0 truncate">{view.name}</span>
+                  <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4 svadmin-u-fc7473ca09eb">
+                    <span class="svadmin-u-7e0b7cdf1a94 svadmin-u-f283ea9bea0e">{view.name}</span>
                     <button
                       type="button"
-                      class="inline-flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      class="svadmin-u-52083e7da442 svadmin-u-cc46d0fa277d svadmin-u-012fbd121f37 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-421ac2be5045 svadmin-u-bfa603190748 svadmin-u-8e551981c8d7 svadmin-u-ea7b2e9e070e svadmin-u-f10f771f87e9 svadmin-u-793c80e97ffb svadmin-u-9c1295a6914a"
                       aria-label="{i18n.t("common.delete")} {view.name}"
                       title="{i18n.t("common.delete")} {view.name}"
                       onclick={() => deleteSavedView(view.id)}
                     >
-                      <Trash2 class="size-3.5" />
+                      <Trash2 class="svadmin-u-783b0d9d1e2c" />
                     </button>
                   </div>
                 {/each}
@@ -1339,16 +1339,16 @@
           tooltip={i18n.t("common.refresh")}
           variant="outline"
           size="sm"
-          class="h-9 px-2.5"
+          class="svadmin-u-e7a768f922d2 svadmin-u-0b91436debbd"
           onclick={() => listResult.refetch()}
         >
-          <RefreshCw class="h-4 w-4 {query.isFetching ? "animate-spin" : ""}" />
+          <RefreshCw class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 {query.isFetching ? "svadmin-u-afbdd13a380e" : ""}" />
         </TooltipButton>
       {/if}
 
       {#if !showHeader && canCreate}
         <Button onclick={() => navigation.create(resourceName)}>
-          <Plus class="h-4 w-4" data-icon="inline-start" /> {i18n.t("common.create")}
+          <Plus class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" data-icon="inline-start" /> {i18n.t("common.create")}
         </Button>
       {/if}
     </div>
@@ -1357,58 +1357,58 @@
   <!-- Active Filter Tags -->
   {#if showFilterTags && ((appliedSearchText || searchText).trim() || activeFilterItems.length > 0)}
     <div
-      class="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground pt-0.5 border-y border-border py-2"
+      class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3960ffc248d9 svadmin-u-58284b4ea568 svadmin-u-359090c2d529 svadmin-u-bfa603190748 svadmin-u-087ea857932e svadmin-u-8b8196092091 svadmin-u-18049387f0af svadmin-u-03b4dd7f172b"
       aria-label={i18n.t('common.filterTags')}
       data-svadmin-active-filters
     >
-      <span class="font-medium text-foreground">{i18n.t('common.filterTags')}:</span>
+      <span class="svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{i18n.t('common.filterTags')}:</span>
       {#if (appliedSearchText || searchText).trim()}
-        <Badge variant="secondary" class="gap-1 pr-1 font-normal text-xs">
+        <Badge variant="secondary" class="svadmin-u-44ee8ba0a421 svadmin-u-eda955402ba6 svadmin-u-8ecebc9f80e6 svadmin-u-359090c2d529">
           <span>{i18n.t('common.search')}: "{(appliedSearchText || searchText).trim()}"</span>
           <button
             type="button"
-            class="hover:text-foreground cursor-pointer inline-flex size-4 items-center justify-center rounded-sm"
+            class="svadmin-u-ea7b2e9e070e svadmin-u-34516836730d svadmin-u-52083e7da442 svadmin-u-f7b5fa971871 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-36d4469299aa"
             aria-label="{i18n.t('common.clear')}: {i18n.t('common.search')}"
             title="{i18n.t('common.clear')}: {i18n.t('common.search')}"
             onclick={() => { searchText = ""; appliedSearchText = ""; pagination = { ...pagination, current: 1 }; }}
           >
-            <X class="size-3" />
+            <X class="svadmin-u-ef2d6f74d3d0" />
           </button>
         </Badge>
       {/if}
       {#each activeFilterItems as item (`${item.label}-${item.index}`)}
-        <Badge variant="outline" class="max-w-full gap-1 pr-1 font-normal">
-          <span class="truncate">{item.label}</span>
+        <Badge variant="outline" class="svadmin-u-c0980a65a70d svadmin-u-44ee8ba0a421 svadmin-u-eda955402ba6 svadmin-u-8ecebc9f80e6">
+          <span class="svadmin-u-f283ea9bea0e">{item.label}</span>
           <button
             type="button"
-            class="inline-flex size-5 shrink-0 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer"
+            class="svadmin-u-52083e7da442 svadmin-u-add63bc6753d svadmin-u-012fbd121f37 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-36d4469299aa svadmin-u-bfa603190748 svadmin-u-8e551981c8d7 svadmin-u-ea7b2e9e070e svadmin-u-f10f771f87e9 svadmin-u-793c80e97ffb svadmin-u-9c1295a6914a svadmin-u-34516836730d"
             aria-label="{i18n.t('common.clear')}: {item.label}"
             title="{i18n.t('common.clear')}: {item.label}"
             onclick={() => removeActiveFilter(item.index)}
           >
-            <X class="size-3" />
+            <X class="svadmin-u-ef2d6f74d3d0" />
           </button>
         </Badge>
       {/each}
-      <Button variant="ghost" size="sm" class="h-6 px-2 text-xs text-muted-foreground hover:text-foreground" onclick={clearFilters}>
+      <Button variant="ghost" size="sm" class="svadmin-u-f6fe902450dc svadmin-u-d5eab218aa34 svadmin-u-359090c2d529 svadmin-u-bfa603190748 svadmin-u-ea7b2e9e070e" onclick={clearFilters}>
         {i18n.t('common.clearAllFilters')}
       </Button>
     </div>
   {/if}
 
   <!-- Table (TanStack-powered) -->
-  <div class="overflow-hidden rounded-lg border border-border bg-card shadow-sm" role="region" aria-label="{resource.label} {i18n.t('common.list')}" data-table-density={currentDensity}>
+  <div class="svadmin-u-2cd02d11d1af svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-438b2237b8d6" role="region" aria-label="{resource.label} {i18n.t('common.list')}" data-table-density={currentDensity}>
     {#if query.isLoading}
-      <div class="p-4 space-y-3">
-        <div class="flex gap-4 mb-2">
+      <div class="svadmin-u-8e63407b5ceb svadmin-u-6ed543e2fbbb">
+        <div class="svadmin-u-60fbb7713999 svadmin-u-0c3bc98565dd svadmin-u-a77ed4d908c0">
           {#each visibleFields.slice(0, 4) as _, _i (_i)}
-            <Skeleton class="h-4 flex-1" />
+            <Skeleton class="svadmin-u-11e59c6d5f6b svadmin-u-36e579c0b41c" />
           {/each}
         </div>
         {#each Array(5) as _, _i (_i)}
-          <div class="flex gap-4">
+          <div class="svadmin-u-60fbb7713999 svadmin-u-0c3bc98565dd">
             {#each visibleFields.slice(0, 4) as __, _i (_i)}
-              <Skeleton class="h-8 flex-1" />
+              <Skeleton class="svadmin-u-ed8a5df7b2fb svadmin-u-36e579c0b41c" />
             {/each}
           </div>
         {/each}
@@ -1422,7 +1422,7 @@
     {:else}
       <div in:fade={{ duration: 150 }}>
         <!-- Desktop Table (hidden on mobile) -->
-        <div class="hidden md:block">
+        <div class="svadmin-u-99d72c7fc3e2 svadmin-u-9d60be3a6d80">
         <Table.Root density={currentDensity}>
           <Table.Header>
             {#each tableView.headerGroups as headerGroup, _i (_i)}
@@ -1435,7 +1435,7 @@
                   {@const header = col.header as typeof headerGroup.headers[0]}
                   <Table.Head
                     {...dragProps}
-                    class={cn('border-b border-border bg-muted/25 font-medium tracking-normal text-muted-foreground hover:bg-muted/40', dragProps.class)}
+                    class={cn('svadmin-u-65fdbade2025 svadmin-u-18049387f0af svadmin-u-b247a17a0d75 svadmin-u-2689f3958069 svadmin-u-d9256981a032 svadmin-u-bfa603190748 svadmin-u-f6e31b39b8e4', dragProps.class)}
                     style={header_getSize(header) != null && header_getSize(header) !== 150 ? `width:${header_getSize(header)}px` : undefined}
                   >
                     {#if header.id === '_select'}
@@ -1457,16 +1457,16 @@
                     {:else if header.id === '_expand'}
                       <!-- empty -->
                     {:else if header.id === '_actions'}
-                      <span class="text-right block">{i18n.t('common.actions')}</span>
+                      <span class="svadmin-u-308fc069e46e svadmin-u-0214b4b355d1">{i18n.t('common.actions')}</span>
                     {:else if column_getCanSort(header.column)}
                       <Button
                         variant="ghost"
                         size="sm"
-                        class="flex items-center gap-1 hover:text-foreground -ml-2 h-auto py-1 px-2 uppercase tracking-wide text-[0.7rem] font-semibold"
+                        class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421 svadmin-u-ea7b2e9e070e svadmin-u-8ffe7a29179a svadmin-u-b8f0a08ece1e svadmin-u-660d2effb880 svadmin-u-d5eab218aa34 uppercase svadmin-u-8baf13a3e9d7 svadmin-u-7357df2b2e0c svadmin-u-e83a7042bc91"
                         onclick={() => toggleColumnSort(header.column)}
                       >
                         {visibleFields.find(f => f.key === header.id)?.label ?? header.id}
-                        <span class="text-xs opacity-50">
+                        <span class="svadmin-u-359090c2d529 svadmin-u-0b8c506a0596">
                           {#if column_getIsSorted(header.column) === 'asc'}↑
                           {:else if column_getIsSorted(header.column) === 'desc'}↓
                           {:else}⇅
@@ -1489,7 +1489,7 @@
               <ContextMenu.Root>
                 <ContextMenu.Trigger>
                   {#snippet child({ props })}
-                    <Table.Row {...props} class="transition-all duration-300 border-b border-border/10 {rowIsSelected(row.id) ? 'bg-primary/5' : 'hover:bg-muted/20'}">
+                    <Table.Row {...props} class="svadmin-u-0fe7d7d814d0 svadmin-u-7890552ecd63 svadmin-u-65fdbade2025 svadmin-u-945ecb9a9005 {rowIsSelected(row.id) ? 'svadmin-u-989c466fdbe7' : 'svadmin-u-c4b5eaba40e3'}">
                       {#each visibleCells as cell, _i (_i)}
                         <Table.Cell>
                           {#if cell.column.id === '_select'}
@@ -1509,36 +1509,36 @@
                               </CanAccess>
                             {/if}
                           {:else if cell.column.id === '_expand'}
-                            <TooltipButton tooltip={rowIsExpanded(row.id) ? i18n.t('common.collapse') : i18n.t('common.expand')} variant="ghost" size="icon" class="h-7 w-7" onclick={() => toggleRowExpanded(row.id)}>
+                            <TooltipButton tooltip={rowIsExpanded(row.id) ? i18n.t('common.collapse') : i18n.t('common.expand')} variant="ghost" size="icon" class="svadmin-u-d0a52b312f7d svadmin-u-cbbf90f9a828" onclick={() => toggleRowExpanded(row.id)}>
                               {#if rowIsExpanded(row.id)}
-                                <ChevronUp class="h-4 w-4" />
+                                <ChevronUp class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
                               {:else}
-                                <ChevronDown class="h-4 w-4" />
+                                <ChevronDown class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
                               {/if}
                             </TooltipButton>
                           {:else if cell.column.id === '_actions'}
-                            <div class="flex items-center justify-end gap-1">
+                            <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77c08e015d14 svadmin-u-44ee8ba0a421">
                               {#if rowActions}
                                 {@render rowActions({ record, id })}
                               {:else}
                                 {#if canShow}
                                   <CanAccess resource={resourceName} action="show" params={{ id }}>
                                     <TooltipButton tooltip={i18n.t('common.detail')} variant="ghost" size="icon-sm" onclick={() => openDetail(id)}>
-                                      <Eye class="h-4 w-4" />
+                                      <Eye class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
                                     </TooltipButton>
                                   </CanAccess>
                                 {/if}
                                 {#if canEdit}
                                   <CanAccess resource={resourceName} action="edit" params={{ id }}>
                                     <TooltipButton tooltip={i18n.t('common.edit')} variant="ghost" size="icon-sm" onclick={() => navigation.edit(resourceName, id)}>
-                                      <Pencil class="h-4 w-4" />
+                                      <Pencil class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
                                     </TooltipButton>
                                   </CanAccess>
                                 {/if}
                                 {#if canDelete}
                                   <CanAccess resource={resourceName} action="delete" params={{ id }}>
-                                    <TooltipButton tooltip={i18n.t('common.delete')} variant="ghost" size="icon-sm" onclick={() => confirmDelete(id)} class="hover:text-destructive">
-                                      <Trash2 class="h-4 w-4" />
+                                    <TooltipButton tooltip={i18n.t('common.delete')} variant="ghost" size="icon-sm" onclick={() => confirmDelete(id)} class="svadmin-u-51e95020d6f2">
+                                      <Trash2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
                                     </TooltipButton>
                                   </CanAccess>
                                 {/if}
@@ -1551,11 +1551,11 @@
                             {:else if defaultCellRenderer && field}
                               {@render defaultCellRenderer({ field, value: cell_getValue(cell), record })}
                             {:else if field?.type === 'boolean'}
-                              <span class="inline-block h-2 w-2 rounded-full {cell_getValue(cell) ? 'bg-success' : 'bg-muted-foreground/30'}"></span>
+                              <span class="svadmin-u-bb0c4bfc52bd svadmin-u-2f2a842e50fa svadmin-u-940924b6e2d9 svadmin-u-ac204c108886 {cell_getValue(cell) ? 'svadmin-u-3355648fe22b' : 'svadmin-u-2d56f1807e51'}"></span>
                             {:else if field?.type === 'date' && cell_getValue(cell)}
                               {new Date(cell_getValue(cell) as string).toLocaleDateString()}
                             {:else if field?.type === 'tags' && Array.isArray(cell_getValue(cell))}
-                              <div class="flex flex-wrap gap-1">
+                              <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-44ee8ba0a421">
                                 {#each (cell_getValue(cell) as string[]).slice(0, 3) as tag, _i (_i)}
                                   <Badge variant="secondary">{tag}</Badge>
                                 {/each}
@@ -1573,13 +1573,13 @@
                                   onSave={() => listResult.refetch()}
                                 />
                                 {#snippet fallback()}
-                                  <span class="block truncate" title={String(cell_getValue(cell) ?? '—')}>{cell_getValue(cell) ?? '—'}</span>
+                                  <span class="svadmin-u-0214b4b355d1 svadmin-u-f283ea9bea0e" title={String(cell_getValue(cell) ?? '—')}>{cell_getValue(cell) ?? '—'}</span>
                                 {/snippet}
                               </CanAccess>
                             {:else if field?.key === primaryKey}
-                              <span class="block truncate font-mono text-xs" title={String(cell_getValue(cell) ?? '—')}>{cell_getValue(cell) ?? '—'}</span>
+                              <span class="svadmin-u-0214b4b355d1 svadmin-u-f283ea9bea0e svadmin-u-0e65706bcccd svadmin-u-359090c2d529" title={String(cell_getValue(cell) ?? '—')}>{cell_getValue(cell) ?? '—'}</span>
                             {:else}
-                              <span class="block truncate" title={String(cell_getValue(cell) ?? '—')}>{cell_getValue(cell) ?? '—'}</span>
+                              <span class="svadmin-u-0214b4b355d1 svadmin-u-f283ea9bea0e" title={String(cell_getValue(cell) ?? '—')}>{cell_getValue(cell) ?? '—'}</span>
                             {/if}
                           {/if}
                         </Table.Cell>
@@ -1587,36 +1587,36 @@
                     </Table.Row>
                   {/snippet}
                 </ContextMenu.Trigger>
-                <ContextMenu.Content class="w-48">
+                <ContextMenu.Content class="svadmin-u-74b2435a1d40">
                   {#if canEdit}
                     <CanAccess resource={resourceName} action="edit" params={{ id }}>
-                      <ContextMenu.Item onclick={() => navigation.edit(resourceName, id)} class="gap-2">
-                        <Pencil class="h-4 w-4" /> {i18n.t('common.edit')}
+                      <ContextMenu.Item onclick={() => navigation.edit(resourceName, id)} class="svadmin-u-77a2a20e90d4">
+                        <Pencil class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" /> {i18n.t('common.edit')}
                       </ContextMenu.Item>
                     </CanAccess>
                   {/if}
                   {#if canShow}
                     <CanAccess resource={resourceName} action="show" params={{ id }}>
-                      <ContextMenu.Item onclick={() => openDetail(id)} class="gap-2">
-                        <Eye class="h-4 w-4" /> {i18n.t('common.detail')}
+                      <ContextMenu.Item onclick={() => openDetail(id)} class="svadmin-u-77a2a20e90d4">
+                        <Eye class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" /> {i18n.t('common.detail')}
                       </ContextMenu.Item>
                     </CanAccess>
                   {/if}
-                  <ContextMenu.Item onclick={() => navigator.clipboard?.writeText(String(id))} class="gap-2">
-                    <Copy class="h-4 w-4" /> {i18n.t('common.copyId')}
+                  <ContextMenu.Item onclick={() => navigator.clipboard?.writeText(String(id))} class="svadmin-u-77a2a20e90d4">
+                    <Copy class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" /> {i18n.t('common.copyId')}
                   </ContextMenu.Item>
                   {#if canDelete}
                     <CanAccess resource={resourceName} action="delete" params={{ id }}>
                       <ContextMenu.Separator />
-                      <ContextMenu.Item onclick={() => confirmDelete(id)} class="gap-2 text-destructive">
-                        <Trash2 class="h-4 w-4" /> {i18n.t('common.delete')}
+                      <ContextMenu.Item onclick={() => confirmDelete(id)} class="svadmin-u-77a2a20e90d4 svadmin-u-811148b13d1e">
+                        <Trash2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" /> {i18n.t('common.delete')}
                       </ContextMenu.Item>
                     </CanAccess>
                   {/if}
                 </ContextMenu.Content>
               </ContextMenu.Root>
               {#if expandedRowRender && rowIsExpanded(row.id)}
-                <Table.Row class="bg-muted/10 border-b border-border/10 transition-all">
+                <Table.Row class="svadmin-u-8a25a995eb8e svadmin-u-65fdbade2025 svadmin-u-945ecb9a9005 svadmin-u-0fe7d7d814d0">
                   <Table.Cell colspan={visibleCells.length}>
                     {@render expandedRowRender({ record })}
                   </Table.Cell>
@@ -1624,19 +1624,19 @@
               {/if}
             {:else}
               <Table.Row>
-                <Table.Cell colspan={columns.length} class="h-48 text-center">
+                <Table.Cell colspan={columns.length} class="svadmin-u-3c8ea328c09e svadmin-u-ca6bf63030aa">
                   {#if emptyState}
                     {@render emptyState()}
                   {:else}
-                    <div class="flex flex-col items-center justify-center py-8">
-                      <svg class="h-16 w-16 text-muted-foreground/30 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor">
+                    <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-a1f611f027dd">
+                      <svg class="svadmin-u-acaee62117b1 svadmin-u-baceed3462fd svadmin-u-106b502aac96 svadmin-u-da019856f2cc" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                       </svg>
-                      <p class="text-sm font-medium text-muted-foreground mb-1">{i18n.t('common.noData')}</p>
-                      <p class="text-xs text-muted-foreground/60 mb-4">{i18n.t('common.noDataHint')}</p>
+                      <p class="svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-bfa603190748 svadmin-u-65281709dacf">{i18n.t('common.noData')}</p>
+                      <p class="svadmin-u-359090c2d529 svadmin-u-7be4d67a6256 svadmin-u-da019856f2cc">{i18n.t('common.noDataHint')}</p>
                       {#if canCreate}
-                        <Button variant="outline" size="sm" class="gap-2" onclick={() => navigation.create(resourceName)}>
-                          <Plus class="h-3.5 w-3.5" />
+                        <Button variant="outline" size="sm" class="svadmin-u-77a2a20e90d4" onclick={() => navigation.create(resourceName)}>
+                          <Plus class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
                           {i18n.t('common.create')}
                         </Button>
                       {/if}
@@ -1647,7 +1647,7 @@
             {/each}
           </Table.Body>
           {#if summary}
-            <Table.Footer class="bg-muted/30 font-medium">
+            <Table.Footer class="svadmin-u-2859c861d7de svadmin-u-2689f3958069">
               {@render summary({ data: (query.data?.data as BaseRecord[]) ?? [], total: query.data?.total ?? 0, visibleColumnsCount: columns.filter((c) => c.id != null && isColumnVisible(c.id)).length })}
             </Table.Footer>
           {/if}
@@ -1655,16 +1655,16 @@
         </div>
 
         <!-- Mobile Card View (visible only on small screens) -->
-        <div class="md:hidden space-y-3 p-2">
+        <div class="svadmin-u-e477a6af4cb6 svadmin-u-6ed543e2fbbb svadmin-u-7660b450905a">
           {#each tableView.rows as row, _i (_i)}
             {@const record = row.original}
             {@const id = record[primaryKey] as string | number}
             <div
-              class="rounded-[20px] shadow-[0_4px_20px_rgb(0,0,0,0.03)] ring-1 ring-border/20 bg-card p-5 transition-all {rowIsSelected(row.id) ? 'ring-2 ring-primary/50 bg-primary/5' : ''}"
+              class="svadmin-u-f5c8cc114f47 svadmin-u-633ef3c47872 svadmin-u-3daca9af0861 svadmin-u-a3158643e114 svadmin-u-cd0ad9a56558 svadmin-u-c07e54fd1439 svadmin-u-0fe7d7d814d0 {rowIsSelected(row.id) ? 'svadmin-u-16b1efa5875e svadmin-u-f42e9fee68a1 svadmin-u-989c466fdbe7' : ''}"
             >
               <!-- Card header: ID + select + actions -->
-              <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center gap-2">
+              <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-1bb883263ed2">
+                <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
                   {#if selectable && (canDelete || batchActions)}
                     {#if batchActions}
                       <Checkbox
@@ -1682,30 +1682,30 @@
                       </CanAccess>
                     {/if}
                   {/if}
-                  <span class="text-xs font-mono text-muted-foreground">#{id}</span>
+                  <span class="svadmin-u-359090c2d529 svadmin-u-0e65706bcccd svadmin-u-bfa603190748">#{id}</span>
                 </div>
-                <div class="flex items-center gap-1">
+                <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421">
                   {#if rowActions}
                     {@render rowActions({ record, id })}
                   {:else}
                     {#if canEdit}
                       <CanAccess resource={resourceName} action="edit" params={{ id }}>
                         <TooltipButton tooltip={i18n.t('common.edit')} variant="ghost" size="icon-sm" onclick={() => navigation.edit(resourceName, id)}>
-                          <Pencil class="h-4 w-4" />
+                          <Pencil class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
                         </TooltipButton>
                       </CanAccess>
                     {/if}
                     {#if canShow}
                       <CanAccess resource={resourceName} action="show" params={{ id }}>
                         <TooltipButton tooltip={i18n.t('common.detail')} variant="ghost" size="icon-sm" onclick={() => openDetail(id)}>
-                          <Eye class="h-4 w-4" />
+                          <Eye class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
                         </TooltipButton>
                       </CanAccess>
                     {/if}
                     {#if canDelete}
                       <CanAccess resource={resourceName} action="delete" params={{ id }}>
-                        <TooltipButton tooltip={i18n.t('common.delete')} variant="ghost" size="icon-sm" onclick={() => confirmDelete(id)} class="hover:text-destructive">
-                          <Trash2 class="h-4 w-4" />
+                        <TooltipButton tooltip={i18n.t('common.delete')} variant="ghost" size="icon-sm" onclick={() => confirmDelete(id)} class="svadmin-u-51e95020d6f2">
+                          <Trash2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
                         </TooltipButton>
                       </CanAccess>
                     {/if}
@@ -1713,29 +1713,29 @@
                 </div>
               </div>
               <!-- Card fields -->
-              <div class="space-y-2">
+              <div class="svadmin-u-6f7e013d6499">
                 {#each visibleFields.filter((field) => isColumnVisible(field.key)).slice(0, 6) as field (field.key)}
                   {@const value = record[field.key]}
-                  <div class="flex items-start justify-between gap-4">
-                    <span class="text-xs font-medium text-muted-foreground shrink-0">{field.label}</span>
-                    <span class="text-sm text-right truncate max-w-[60%]">
+                  <div class="svadmin-u-60fbb7713999 svadmin-u-60541e1e26f8 svadmin-u-8ef2268efbbc svadmin-u-0c3bc98565dd">
+                    <span class="svadmin-u-359090c2d529 svadmin-u-2689f3958069 svadmin-u-bfa603190748 svadmin-u-012fbd121f37">{field.label}</span>
+                    <span class="svadmin-u-fc7473ca09eb svadmin-u-308fc069e46e svadmin-u-f283ea9bea0e svadmin-u-897d497e57b6">
                       {#if customColumns && field && customColumns[field.key]}
                         {@render customColumns[field.key]({ value, record })}
                       {:else if defaultCellRenderer && field}
                         {@render defaultCellRenderer({ field, value, record })}
                       {:else if field.type === 'boolean'}
-                        <span class="inline-block h-2 w-2 rounded-full {value ? 'bg-success' : 'bg-muted-foreground/30'}"></span>
+                        <span class="svadmin-u-bb0c4bfc52bd svadmin-u-2f2a842e50fa svadmin-u-940924b6e2d9 svadmin-u-ac204c108886 {value ? 'svadmin-u-3355648fe22b' : 'svadmin-u-2d56f1807e51'}"></span>
                       {:else if field.type === 'date' && value}
                         {new Date(value as string).toLocaleDateString()}
                       {:else if field.type === 'tags' && Array.isArray(value)}
-                        <div class="flex flex-wrap gap-1 justify-end">
+                        <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-44ee8ba0a421 svadmin-u-77c08e015d14">
                           {#each (value as string[]).slice(0, 2) as tag, _i (_i)}
-                            <Badge variant="secondary" class="text-[10px]">{tag}</Badge>
+                            <Badge variant="secondary" class="svadmin-u-1dc571a3609f">{tag}</Badge>
                           {/each}
                         </div>
                       {:else if field.type === 'select' && field.options}
                         {@const opt = field.options.find(o => o.value === value)}
-                        <Badge variant="outline" class="text-[10px]">{opt?.label ?? value ?? '—'}</Badge>
+                        <Badge variant="outline" class="svadmin-u-1dc571a3609f">{opt?.label ?? value ?? '—'}</Badge>
                       {:else}
                         {value ?? '—'}
                       {/if}
@@ -1745,11 +1745,11 @@
               </div>
             </div>
           {:else}
-            <div class="text-center py-10 text-muted-foreground">
+            <div class="svadmin-u-ca6bf63030aa svadmin-u-1100bef66e60 svadmin-u-bfa603190748">
               {#if emptyState}
                 {@render emptyState()}
               {:else}
-                <DataState state="empty" class="border-0 bg-transparent px-2 py-4" />
+                <DataState state="empty" class="svadmin-u-119b2aa0b8f6 svadmin-u-7f19cdf4c5bb svadmin-u-d5eab218aa34 svadmin-u-cb11fec3bb46" />
               {/if}
             </div>
           {/each}
@@ -1760,12 +1760,12 @@
 
   <!-- Pagination (shadcn) -->
   {#if totalPages > 0}
-  <div class="flex flex-col sm:flex-row items-center justify-between gap-3 px-1 py-2 text-sm text-muted-foreground">
-    <div class="flex shrink-0 items-center gap-3 leading-8">
-      <span class="shrink-0 whitespace-nowrap tabular-nums">{i18n.t('common.total', { total: query.data?.total ?? 0 })}</span>
+  <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-020ba687fa12 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-1004c0c3954c svadmin-u-d8e0e382c67b svadmin-u-03b4dd7f172b svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">
+    <div class="svadmin-u-60fbb7713999 svadmin-u-012fbd121f37 svadmin-u-3960ffc248d9 svadmin-u-1004c0c3954c svadmin-u-c6b7e58a30d8">
+      <span class="svadmin-u-012fbd121f37 svadmin-u-e82ae8be04aa svadmin-u-3032cae0badb">{i18n.t('common.total', { total: query.data?.total ?? 0 })}</span>
       <Select.Root
         aria-label={i18n.t('common.perPage')}
-        class="h-8 w-[78px] shrink-0 tabular-nums"
+        class="svadmin-u-ed8a5df7b2fb svadmin-u-d043cad8e3fa svadmin-u-012fbd121f37 svadmin-u-3032cae0badb"
         value={String(pagination.pageSize ?? 10)}
         onchange={(e) => {
           const size = Number((e.currentTarget as HTMLSelectElement).value);
@@ -1795,7 +1795,7 @@
               <PaginationUI.Ellipsis />
             {:else}
               <PaginationUI.Link
-                class="tabular-nums"
+                class="svadmin-u-3032cae0badb"
                 isActive={page === currentPage}
                 onclick={() => goToPage(page as number)}
               >

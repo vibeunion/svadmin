@@ -21,7 +21,7 @@
 	bind:ref
 	data-slot="command-group"
 	data-cmdk-group=""
-	class={cn("text-foreground overflow-hidden p-1", className)}
+	class={cn("svadmin-command-group", className)}
 	value={value ?? heading}
 	forceMount={alwaysRender ?? forceMount}
 	{...restProps}
@@ -30,7 +30,7 @@
 		<CommandPrimitive.GroupHeading
 			data-slot="command-group-heading"
 			data-cmdk-group-heading=""
-			class="text-muted-foreground px-2 py-1.5 text-xs font-medium"
+			class="svadmin-command-heading"
 		>
 			{heading}
 		</CommandPrimitive.GroupHeading>

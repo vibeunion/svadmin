@@ -2,11 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { render } from '@testing-library/svelte';
 import SplitPaneLayout from './SplitPaneLayout.svelte';
 import MasterDetailView from './MasterDetailView.svelte';
+import utilityClasses from '../../scripts/utility-class-map.json';
 
 describe('SplitPaneLayout and MasterDetailView', () => {
   it('renders SplitPaneLayout container', () => {
     const view = render(SplitPaneLayout);
-    expect(view.container.querySelector('.cursor-col-resize')).toBeTruthy();
+    expect(view.container.querySelector(`.${utilityClasses['cursor-col-resize']}`)).toBeTruthy();
   });
 
   it('renders MasterDetailView master items and details', () => {

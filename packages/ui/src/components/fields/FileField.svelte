@@ -5,10 +5,10 @@
   const fileName = $derived(value ? value.split('/').pop() ?? value : null);
 </script>
 {#if value}
-  <a href={value} download class="text-primary hover:underline no-underline inline-flex items-center gap-1" title={title ?? fileName ?? ''}>
-    <Download class="h-3.5 w-3.5 opacity-60" />
+  <a href={value} download class="svadmin-u-20aaf08a7ed1 svadmin-u-f673f4a7d061 no-underline svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421" title={title ?? fileName ?? ''}>
+    <Download class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-f2868c227fcd" />
     {fileName}
   </a>
 {:else}
-  <span class="text-muted-foreground">—</span>
+  <span class="svadmin-u-bfa603190748">—</span>
 {/if}

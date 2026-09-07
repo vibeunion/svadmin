@@ -23,12 +23,7 @@
 <div
 	bind:this={ref}
 	data-slot="dropdown-menu-content"
-	class={cn(
-		"bg-popover text-popover-foreground z-50 min-w-[8rem] overflow-hidden rounded-lg border p-1 shadow-lg",
-		"absolute mt-1 animate-in fade-in-0 zoom-in-95",
-		align === "end" ? "right-0" : align === "start" ? "left-0" : "left-1/2 -translate-x-1/2",
-		className
-	)}
+	class={cn("svadmin-dropdown-content", `svadmin-dropdown-align-${align}`, className)}
 	{...restProps}
 >
 	{@render children?.()}

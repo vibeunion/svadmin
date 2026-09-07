@@ -77,24 +77,24 @@
 </script>
 
 {#if !rawString}
-  <span class={cn('field-copy text-muted-foreground text-sm', className)}>{nullLabel}</span>
+  <span class={cn('field-copy svadmin-u-bfa603190748 svadmin-u-fc7473ca09eb', className)}>{nullLabel}</span>
 {:else}
-  <span class={cn('field-copy inline-flex items-center gap-1.5 text-sm group', className)}>
-    <span class={cn(monospace ? 'font-mono text-xs' : '', 'truncate select-all')}>
+  <span class={cn('field-copy svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-58284b4ea568 svadmin-u-fc7473ca09eb group', className)}>
+    <span class={cn(monospace ? 'svadmin-u-0e65706bcccd svadmin-u-359090c2d529' : '', 'svadmin-u-f283ea9bea0e svadmin-u-8078c71d23ee')}>
       {displayText}
     </span>
     {#if copyable}
       <button
         type="button"
-        class="inline-flex items-center justify-center h-5 w-5 rounded text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors focus:outline-none focus:ring-1 focus:ring-ring"
+        class="svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e svadmin-u-07389a777c1f svadmin-u-bfa603190748 svadmin-u-ea7b2e9e070e svadmin-u-68646cdcc246 svadmin-u-ceb69a6b0e5f svadmin-u-55d048ebfb1c svadmin-u-0f3af40e92e8 svadmin-u-80b9d0ae125f"
         onclick={handleCopy}
         title={copied ? copiedTitle : title}
         aria-label={copied ? copiedTitle : title}
       >
         {#if copied}
-          <Check class="h-3 w-3 text-success animate-in zoom-in-50 duration-150" />
+          <Check class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29 svadmin-u-76747e5e02ff svadmin-u-40137e897961 zoom-in-50 svadmin-u-233c0494b485" />
         {:else}
-          <Copy class="h-3 w-3 opacity-70 group-hover:opacity-100 transition-opacity" />
+          <Copy class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29 svadmin-u-0c67ca474a69 svadmin-u-181f3d6c9821 svadmin-u-67d6184a0024" />
         {/if}
       </button>
     {/if}

@@ -5,20 +5,6 @@
   type ColorVariant = 'primary' | 'success' | 'warning' | 'danger' | 'info';
   type StyleVariant = 'default' | 'outline' | 'filled';
 
-  const colorMap: Record<ColorVariant, string> = {
-    primary: 'bg-primary/10 text-primary',
-    success: 'bg-success/10 text-success',
-    warning: 'bg-warning/10 text-warning',
-    danger: 'bg-destructive/10 text-destructive',
-    info: 'bg-info/10 text-info',
-  };
-
-  const variantMap: Record<StyleVariant, string> = {
-    default: 'bg-card shadow-sm hover:shadow-md transition-shadow duration-300',
-    outline: 'border-2 border-border bg-transparent',
-    filled: 'border-0 bg-muted/50 shadow-sm',
-  };
-
   interface Props {
     label: string;
     value: string | number;
@@ -45,35 +31,36 @@
   }: Props = $props();
 </script>
 
-<div class="flex items-center gap-4 rounded-lg p-5 {variantMap[variant]} {className}">
+<div class="svadmin-stats-card {className}" data-color={color} data-variant={variant}>
   {#if Icon}
-    <div class="flex h-12 w-12 items-center justify-center rounded-lg {colorMap[color]}">
-      <Icon class="h-6 w-6" />
+    <div class="svadmin-stats-card__icon">
+      <Icon class="svadmin-stats-card__icon-glyph" />
     </div>
   {/if}
-  <div class="flex-1 min-w-0">
-    <p class="text-sm text-muted-foreground">{label}</p>
+  <div class="svadmin-stats-card__body">
+    <p class="svadmin-stats-card__label">{label}</p>
     {#if loading}
-      <Skeleton class="mt-1 h-7 w-20" />
+      <Skeleton class="svadmin-stats-card__skeleton" />
     {:else}
-      <div class="flex items-baseline gap-2">
-        <p class="text-xl font-mono font-semibold text-foreground tracking-tight">{value}</p>
+      <div class="svadmin-stats-card__value-row">
+        <p class="svadmin-stats-card__value">{value}</p>
         {#if trend}
           <span
-            class="text-xs font-medium inline-flex items-center gap-0.5 {trend.value >= 0 ? 'text-success' : 'text-destructive'}"
+            class="svadmin-stats-card__trend"
+            data-positive={trend.value >= 0 ? 'true' : 'false'}
             aria-label="{trend.value >= 0 ? '上升' : '下降'} {Math.abs(trend.value)}%"
           >
             <span aria-hidden="true">{trend.value >= 0 ? '↑' : '↓'}</span>
             <span>{Math.abs(trend.value)}%</span>
             {#if trend.label}
-              <span class="text-muted-foreground ml-0.5">{trend.label}</span>
+              <span class="svadmin-stats-card__trend-label">{trend.label}</span>
             {/if}
           </span>
         {/if}
       </div>
     {/if}
     {#if footer}
-      <div class="mt-2">
+      <div class="svadmin-stats-card__footer">
         {@render footer()}
       </div>
     {/if}

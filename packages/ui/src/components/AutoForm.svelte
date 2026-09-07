@@ -77,11 +77,11 @@
 
   const gridClass = $derived(
     columns === 4
-      ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'
+      ? 'svadmin-u-f3c543ad5fe9 svadmin-u-d7c8339810d3 svadmin-u-e4d6f343b9ff svadmin-u-4558bce6d8c0 svadmin-u-0c3bc98565dd'
       : columns === 3
-        ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'
+        ? 'svadmin-u-f3c543ad5fe9 svadmin-u-d7c8339810d3 svadmin-u-e4d6f343b9ff svadmin-u-19d9b25e8fae svadmin-u-0c3bc98565dd'
         : columns === 2
-          ? 'grid grid-cols-1 md:grid-cols-2 gap-4'
+          ? 'svadmin-u-f3c543ad5fe9 svadmin-u-d7c8339810d3 svadmin-u-e4d6f343b9ff svadmin-u-0c3bc98565dd'
           : 'space-y-5'
   );
 
@@ -191,42 +191,42 @@
   }
 </script>
 
-<div class={isCompact ? 'space-y-4' : 'space-y-6'}>
+<div class={isCompact ? 'svadmin-u-3e7ce58d64fa' : 'svadmin-u-b3542e058833'}>
   {#if showHeader}
-    <div class="flex items-center gap-4">
+    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-0c3bc98565dd">
       <TooltipButton
         tooltip={i18n.t('common.back')}
         onclick={() => guardNavigate(() => navigation.list(resourceName))}
       >
-        <ArrowLeft class="h-5 w-5" aria-hidden="true" />
+        <ArrowLeft class="svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e" aria-hidden="true" />
       </TooltipButton>
-      <h1 class="text-xl font-semibold text-foreground">{pageTitle}</h1>
+      <h1 class="svadmin-u-d5c9b0001e7e svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{pageTitle}</h1>
       {#if headerContent}
         {@render headerContent()}
       {/if}
       {#if form.isTainted()}
-        <Badge variant="outline" role="status" aria-live="polite" class="border-warning/30 bg-warning/10 text-warning-foreground">{i18n.t('common.unsaved')}</Badge>
+        <Badge variant="outline" role="status" aria-live="polite" class="svadmin-u-2f960aa0c478 svadmin-u-283481e780bb svadmin-u-3a4ff758c2ab">{i18n.t('common.unsaved')}</Badge>
       {/if}
     </div>
   {/if}
 
   {#if form.loading}
-    <div class="max-w-4xl space-y-6">
-      <div class="rounded-lg shadow-sm ring-1 ring-border/10 p-6 space-y-5">
+    <div class="svadmin-u-cf3893e36c22 svadmin-u-b3542e058833">
+      <div class="svadmin-u-5f22e64f2282 svadmin-u-438b2237b8d6 svadmin-u-3daca9af0861 svadmin-u-a10fdd7667ee svadmin-u-0478c89a150f svadmin-u-b43b4c086d9a">
         {#each Array(4) as _, _i (_i)}
-          <div class="space-y-2">
-            <Skeleton class="h-4 w-24" />
-            <Skeleton class="h-10 w-full" />
+          <div class="svadmin-u-6f7e013d6499">
+            <Skeleton class="svadmin-u-11e59c6d5f6b svadmin-u-69da7e4ff95d" />
+            <Skeleton class="svadmin-u-426b8b75185b svadmin-u-6da6a3c3f741" />
           </div>
         {/each}
       </div>
     </div>
   {:else}
-    <form bind:this={formElement} onsubmit={(e: Event) => { e.preventDefault(); handleSubmit(); }} class="max-w-4xl space-y-6" novalidate>
+    <form bind:this={formElement} onsubmit={(e: Event) => { e.preventDefault(); handleSubmit(); }} class="svadmin-u-cf3893e36c22 svadmin-u-b3542e058833" novalidate>
       {#if submitError}
         <div transition:slide={{ duration: 300, axis: 'y' }} class="svadmin-shake">
           <Alert.Root variant="destructive">
-            <AlertCircle class="h-4 w-4" aria-hidden="true" />
+            <AlertCircle class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" aria-hidden="true" />
             <Alert.Description>{submitError}</Alert.Description>
           </Alert.Root>
         </div>
@@ -234,16 +234,16 @@
 
       {#if hasGroups}
         {#each groups as group, _i (_i)}
-          <Card.Root class="border-border/40 shadow-sm">
+          <Card.Root class="svadmin-u-6ee2d41e2d2d svadmin-u-438b2237b8d6">
             {#if group.name}
-              <Card.Header class={isCompact ? 'px-4 py-3' : ''}>
-                <Card.Title class="text-lg">{group.name}</Card.Title>
+              <Card.Header class={isCompact ? 'svadmin-u-f0faeb26d656 svadmin-u-1b2d54a3fd12' : ''}>
+                <Card.Title class="svadmin-u-42536e69e639">{group.name}</Card.Title>
               </Card.Header>
             {/if}
-            <Card.Content class={isCompact ? 'px-4 pb-4 pt-0' : 'px-4 sm:px-6 pb-4 sm:pb-6 pt-0'}>
+            <Card.Content class={isCompact ? 'svadmin-u-f0faeb26d656 svadmin-u-9fcd8a13827e svadmin-u-9335c39f6eff' : 'svadmin-u-f0faeb26d656 svadmin-u-7a9aabfcd059 svadmin-u-9fcd8a13827e svadmin-u-050494726fba svadmin-u-9335c39f6eff'}>
               <div class={gridClass}>
                 {#each group.fields as field (field.key)}
-                  <div class={cn(columns > 1 && isFullWidthField(field) && 'col-span-full', !!form.errors[field.key] && 'border-destructive')}>
+                  <div class={cn(columns > 1 && isFullWidthField(field) && 'svadmin-u-2c955d1b45df', !!form.errors[field.key] && 'svadmin-u-ee1a5af3aa10')}>
                     {#if fieldRenderer}
                       {@render fieldRenderer({ field, value: form.values[field.key], onchange: (val: unknown) => form.setFieldValue(field.key, val) })}
                     {:else}
@@ -258,7 +258,7 @@
                       />
                     {/if}
                     {#if form.errors[field.key]}
-                      <p id={fieldErrorId(field.key)} class="text-destructive text-[0.8125rem] mt-1" role="alert" aria-live="polite">{form.errors[field.key]}</p>
+                      <p id={fieldErrorId(field.key)} class="svadmin-u-811148b13d1e svadmin-u-1d5904e7e755 svadmin-u-b6b02c0ebef6" role="alert" aria-live="polite">{form.errors[field.key]}</p>
                     {/if}
                   </div>
                 {/each}
@@ -267,11 +267,11 @@
           </Card.Root>
         {/each}
       {:else}
-        <Card.Root class="border-border/40 shadow-sm">
-          <Card.Content class={isCompact ? 'p-4' : 'px-4 pt-5 pb-4 sm:px-6 sm:pt-6 sm:pb-6'}>
+        <Card.Root class="svadmin-u-6ee2d41e2d2d svadmin-u-438b2237b8d6">
+          <Card.Content class={isCompact ? 'svadmin-u-8e63407b5ceb' : 'svadmin-u-f0faeb26d656 svadmin-u-52be28846b5f svadmin-u-9fcd8a13827e svadmin-u-7a9aabfcd059 svadmin-u-0a58453f3755 svadmin-u-050494726fba'}>
               <div class={gridClass} data-svadmin-form-grid data-columns={columns} data-density={density}>
               {#each formFields as field (field.key)}
-                <div class={cn(columns > 1 && isFullWidthField(field) && 'col-span-full', !!form.errors[field.key] && 'border-destructive')}>
+                <div class={cn(columns > 1 && isFullWidthField(field) && 'svadmin-u-2c955d1b45df', !!form.errors[field.key] && 'svadmin-u-ee1a5af3aa10')}>
                   {#if fieldRenderer}
                     {@render fieldRenderer({ field, value: form.values[field.key], onchange: (val: unknown) => form.setFieldValue(field.key, val) })}
                   {:else}
@@ -286,7 +286,7 @@
                     />
                   {/if}
                   {#if form.errors[field.key]}
-                    <p id={fieldErrorId(field.key)} class="text-destructive text-[0.8125rem] mt-1" role="alert" aria-live="polite">{form.errors[field.key]}</p>
+                    <p id={fieldErrorId(field.key)} class="svadmin-u-811148b13d1e svadmin-u-1d5904e7e755 svadmin-u-b6b02c0ebef6" role="alert" aria-live="polite">{form.errors[field.key]}</p>
                   {/if}
                 </div>
               {/each}
@@ -295,15 +295,15 @@
         </Card.Root>
       {/if}
 
-      <div class="flex items-center gap-3">
+      <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-1004c0c3954c">
         {#if formActions}
           {@render formActions({ isLoading: form.submitting, onSubmit: handleSubmit })}
         {:else if !isReadonly}
           <Button type="submit" size={isCompact ? 'sm' : 'default'} disabled={form.submitting}>
             {#if form.submitting}
-              <Loader2 class="h-4 w-4 animate-spin" data-icon="inline-start" aria-hidden="true" />
+              <Loader2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-afbdd13a380e" data-icon="inline-start" aria-hidden="true" />
             {:else}
-              <Save class="h-4 w-4" data-icon="inline-start" aria-hidden="true" />
+              <Save class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" data-icon="inline-start" aria-hidden="true" />
             {/if}
             {i18n.t('common.save')}
           </Button>

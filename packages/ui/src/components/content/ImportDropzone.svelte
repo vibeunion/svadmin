@@ -10,10 +10,10 @@
     if (files?.length) onimport?.(files);
   }
 </script>
-<div class={'rounded-lg border border-dashed border-border bg-card p-6 text-center ' + className} data-svadmin-import-dropzone>
-  <UploadCloud class="mx-auto size-8 text-muted-foreground" /><p class="mt-3 text-sm font-medium text-foreground">Import records</p><p class="mt-1 text-xs text-muted-foreground">CSV or spreadsheet files are accepted.</p>
-  <Input class="mx-auto mt-4 max-w-sm" type="file" {accept} onchange={choose} disabled={loading} />
-  {#if loading}<p class="mt-3 text-xs text-muted-foreground" aria-live="polite">Importing...</p>{/if}
-  {#if status}<p class="mt-3 text-xs text-success" role="status">{status}</p>{/if}
-  {#if !loading && files?.length}<Button class="mt-4" size="sm" onclick={() => onimport?.(files)}>Import {files.length} file{files.length === 1 ? '' : 's'}</Button>{/if}
+<div class={'svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-a29b7a649c77 svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-0478c89a150f svadmin-u-ca6bf63030aa ' + className} data-svadmin-import-dropzone>
+  <UploadCloud class="svadmin-u-0e12dc7de920 svadmin-u-d8f5213f0fe0 svadmin-u-bfa603190748" /><p class="svadmin-u-eccd13ef4f2f svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-d4108abe6359">Import records</p><p class="svadmin-u-b6b02c0ebef6 svadmin-u-359090c2d529 svadmin-u-bfa603190748">CSV or spreadsheet files are accepted.</p>
+  <Input class="svadmin-u-0e12dc7de920 svadmin-u-0ab8667228fd svadmin-u-2472e9b81a97" type="file" {accept} onchange={choose} disabled={loading} />
+  {#if loading}<p class="svadmin-u-eccd13ef4f2f svadmin-u-359090c2d529 svadmin-u-bfa603190748" aria-live="polite">Importing...</p>{/if}
+  {#if status}<p class="svadmin-u-eccd13ef4f2f svadmin-u-359090c2d529 svadmin-u-76747e5e02ff" role="status">{status}</p>{/if}
+  {#if !loading && files?.length}<Button class="svadmin-u-0ab8667228fd" size="sm" onclick={() => onimport?.(files)}>Import {files.length} file{files.length === 1 ? '' : 's'}</Button>{/if}
 </div>

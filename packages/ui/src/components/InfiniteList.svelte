@@ -55,14 +55,14 @@
   }
 </script>
 
-<div class="space-y-2">
+<div class="svadmin-u-6f7e013d6499">
   {#if query.isLoading}
     {#if loadingSkeleton}
       {@render loadingSkeleton()}
     {:else}
-      <div class="space-y-3">
+      <div class="svadmin-u-6ed543e2fbbb">
         {#each Array(5) as _, _i (_i)}
-          <Skeleton class="h-16 w-full rounded-lg" />
+          <Skeleton class="svadmin-u-acaee62117b1 svadmin-u-6da6a3c3f741 svadmin-u-5f22e64f2282" />
         {/each}
       </div>
     {/if}
@@ -70,7 +70,7 @@
     {#if empty}
       {@render empty()}
     {:else}
-      <p class="text-center text-sm text-muted-foreground py-8">{i18n.t('empty.title')}</p>
+      <p class="svadmin-u-ca6bf63030aa svadmin-u-fc7473ca09eb svadmin-u-bfa603190748 svadmin-u-a1f611f027dd">{i18n.t('empty.title')}</p>
     {/if}
   {:else}
     {#each allItems as item, index (index)}
@@ -80,16 +80,16 @@
     {/each}
 
     {#if isFetchingNextPage}
-      <div class="flex justify-center py-4">
-        <Loader2 class="h-5 w-5 animate-spin text-muted-foreground" />
+      <div class="svadmin-u-60fbb7713999 svadmin-u-86843cf1e227 svadmin-u-cb11fec3bb46">
+        <Loader2 class="svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e svadmin-u-afbdd13a380e svadmin-u-bfa603190748" />
       </div>
     {/if}
 
     {#if hasNextPage}
       <!-- Sentinel for infinite scroll -->
-      <div use:intersect={loadMore} class="h-1"></div>
+      <div use:intersect={loadMore} class="svadmin-u-3a1268a4e17f"></div>
     {:else}
-      <p class="text-center text-xs text-muted-foreground py-2">{i18n.t('empty.noMore')}</p>
+      <p class="svadmin-u-ca6bf63030aa svadmin-u-359090c2d529 svadmin-u-bfa603190748 svadmin-u-03b4dd7f172b">{i18n.t('empty.noMore')}</p>
     {/if}
   {/if}
 </div>

@@ -146,40 +146,40 @@
   ontouchend={handleTouchEnd}
 />
 {#if loading}
-  <div data-svadmin-layout-scope={layoutScope} class="flex h-screen" in:fade={{ duration: 150 }}>
-    <div class="hidden md:block w-[252px] bg-sidebar/80 p-4 space-y-4">
-      <Skeleton class="h-8 w-32" />
-      <div class="space-y-2 mt-6">
+  <div data-svadmin-layout-scope={layoutScope} class="svadmin-u-60fbb7713999 svadmin-u-ef114b5f5ad1" in:fade={{ duration: 150 }}>
+    <div class="svadmin-u-99d72c7fc3e2 svadmin-u-9d60be3a6d80 svadmin-u-e2fe2012a697 svadmin-u-ac402894e356 svadmin-u-8e63407b5ceb svadmin-u-3e7ce58d64fa">
+      <Skeleton class="svadmin-u-ed8a5df7b2fb svadmin-u-516b03df0b7c" />
+      <div class="svadmin-u-6f7e013d6499 svadmin-u-31f2553311b6">
         {#each Array(5) as _, _i (_i)}
-          <Skeleton class="h-9 w-full rounded-lg" />
+          <Skeleton class="svadmin-u-e7a768f922d2 svadmin-u-6da6a3c3f741 svadmin-u-5f22e64f2282" />
         {/each}
       </div>
     </div>
-    <div class="flex-1 p-8 space-y-6">
-      <Skeleton class="h-8 w-48" />
-      <div class="space-y-3">
+    <div class="svadmin-u-36e579c0b41c svadmin-u-845f53365c8d svadmin-u-b3542e058833">
+      <Skeleton class="svadmin-u-ed8a5df7b2fb svadmin-u-74b2435a1d40" />
+      <div class="svadmin-u-6ed543e2fbbb">
         {#each Array(4) as _, _i (_i)}
-          <Skeleton class="h-12 w-full" />
+          <Skeleton class="svadmin-u-508ebf85b1c9 svadmin-u-6da6a3c3f741" />
         {/each}
       </div>
     </div>
   </div>
-  <div class="hidden" aria-hidden="true">
+  <div class="svadmin-u-99d72c7fc3e2" aria-hidden="true">
     <DevTools docked />
   </div>
 {:else}
-  <div data-svadmin-layout-scope={layoutScope} class="flex h-screen bg-background" in:fade={{ duration: 200, delay: 50 }}>
+  <div data-svadmin-layout-scope={layoutScope} class="svadmin-u-60fbb7713999 svadmin-u-ef114b5f5ad1 svadmin-u-e6f9e383a762" in:fade={{ duration: 200, delay: 50 }}>
     <button
       type="button"
       data-svadmin-skip-link={mainContentId}
-      class="absolute left-3 top-3 z-[100] -translate-y-16 rounded-md border border-border bg-background px-3 py-2 text-sm font-medium text-foreground shadow-sm transition-transform focus:translate-y-0 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+      class="svadmin-u-da4dbfbc4fdc svadmin-u-22e59b722111 svadmin-u-8782d84cc906 svadmin-u-db5a366a0e21 svadmin-u-306d283a53fe svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-e6f9e383a762 svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-d4108abe6359 svadmin-u-438b2237b8d6 svadmin-u-eadef238231e svadmin-u-beab17f53576 svadmin-u-55d048ebfb1c svadmin-u-608dd26cd5ba svadmin-u-80b9d0ae125f svadmin-u-6b22a22a9752"
       onclick={focusMainContent}
     >
       {i18n.t('common.skipToMainContent')}
     </button>
 
     <!-- Desktop sidebar -->
-    <div class="hidden md:block">
+    <div class="svadmin-u-99d72c7fc3e2 svadmin-u-9d60be3a6d80">
       <Sidebar {collapsed} {identity} {title} {menu} {routeMode} onToggle={() => collapsed = !collapsed} onLogout={handleLogout} />
     </div>
 
@@ -191,14 +191,14 @@
       aria-modal="true"
       aria-labelledby={`${layoutScope}-mobile-navigation-title`}
     >
-      <Sheet.Title id={`${layoutScope}-mobile-navigation-title`} class="sr-only">{title}</Sheet.Title>
-      <div class="md:hidden">
+      <Sheet.Title id={`${layoutScope}-mobile-navigation-title`} class="svadmin-u-2daa8e5e2f2e">{title}</Sheet.Title>
+      <div class="svadmin-u-e477a6af4cb6">
         <Sidebar collapsed={false} {identity} {title} {menu} {routeMode} onToggle={() => { mobileMenuOpen = false; }} onLogout={handleLogout} />
       </div>
     </Sheet.Root>
 
     <div
-      class="flex-1 flex flex-col overflow-hidden transition-all duration-300"
+      class="svadmin-u-36e579c0b41c svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-2cd02d11d1af svadmin-u-0fe7d7d814d0 svadmin-u-7890552ecd63"
       class:md:ml-[252px]={!collapsed}
       class:sidebar-content-expanded={!collapsed}
       class:md:ml-[70px]={collapsed}
@@ -218,12 +218,12 @@
             type="button"
             variant="outline"
             size="sm"
-            class="md:hidden gap-1.5 px-2.5"
+            class="svadmin-u-e477a6af4cb6 svadmin-u-58284b4ea568 svadmin-u-0b91436debbd"
             aria-label={i18n.t('common.menu')}
             onclick={() => { mobileMenuOpen = true; }}
           >
-            <Menu class="h-5 w-5" />
-            <span class="text-xs">{i18n.t('common.menu')}</span>
+            <Menu class="svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e" />
+            <span class="svadmin-u-359090c2d529">{i18n.t('common.menu')}</span>
           </Button>
         {/snippet}
         {#snippet rightActions()}
@@ -237,8 +237,8 @@
 
       <!-- Content area: responsive padding + centered max-width container
            so wide screens don't stretch content indefinitely (avoids sparse layouts) -->
-      <main id={mainContentId} tabindex="-1" data-svadmin-main class="flex-1 overflow-y-auto bg-muted/30 px-4 py-5 sm:px-5 md:px-7.5 md:py-7">
-        <div class="mx-auto w-full max-w-[1600px]">
+      <main id={mainContentId} tabindex="-1" data-svadmin-main class="svadmin-u-36e579c0b41c svadmin-u-92bf82f493b1 svadmin-u-2859c861d7de svadmin-u-f0faeb26d656 svadmin-u-c9b99cd93450 svadmin-u-cc06a6575385 svadmin-u-daf5dc5fac2b svadmin-u-e86fadb84483">
+        <div class="svadmin-u-0e12dc7de920 svadmin-u-6da6a3c3f741 svadmin-u-9e3dc30c26a3">
           {#key getPath()}
             <div in:fly={{ x: 20, duration: 150 }} out:fade={{ duration: 80 }}>
               {@render children()}
@@ -247,7 +247,7 @@
         </div>
       </main>
 
-      <footer class="flex min-h-14 shrink-0 items-center justify-end gap-2 border-t border-border/60 bg-background px-4 empty:hidden">
+      <footer class="svadmin-u-60fbb7713999 svadmin-u-0cfe3fb5e434 svadmin-u-012fbd121f37 svadmin-u-3960ffc248d9 svadmin-u-77c08e015d14 svadmin-u-77a2a20e90d4 svadmin-u-b950dda299d3 svadmin-u-05faf5c801ff svadmin-u-e6f9e383a762 svadmin-u-f0faeb26d656 svadmin-u-472f43d3a27b">
         <DevTools docked />
         {@render aiAssistant?.({ docked: true, scope: chatScope, ownerScope: layoutScope })}
       </footer>

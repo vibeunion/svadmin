@@ -11,12 +11,12 @@
   role="presentation"
   aria-hidden="true"
   data-slot="breadcrumb-separator"
-  class={cn("[&>svg]:size-3.5", className)}
+  class={cn("svadmin-breadcrumb-separator", className)}
   {...restProps}
 >
   {#if children}
     {@render children()}
   {:else}
-    <ChevronRight />
+    <ChevronRight class="svadmin-breadcrumb-icon" />
   {/if}
 </li>

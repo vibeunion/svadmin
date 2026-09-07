@@ -21,14 +21,14 @@
 
 <div
   class={cn(
-    'grid min-w-0 overflow-hidden rounded-lg border border-border bg-card',
-    reverse ? 'lg:grid-cols-[var(--workspace-split-width)_minmax(0,1fr)]' : 'lg:grid-cols-[minmax(0,1fr)_var(--workspace-split-width)]',
+    'svadmin-u-f3c543ad5fe9 svadmin-u-7e0b7cdf1a94 svadmin-u-2cd02d11d1af svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558',
+    reverse ? 'svadmin-u-a43c96035e6f' : 'svadmin-u-7d167f503a39',
     className,
   )}
   style:--workspace-split-width={secondaryWidth}
   data-svadmin-workspace-split-pane
   data-reverse={reverse}
 >
-  <section class={cn('min-w-0 p-4', reverse && 'lg:order-2')} data-svadmin-split-primary>{@render primary()}</section>
-  <section class={cn('min-w-0 border-t border-border bg-muted/15 p-4 lg:border-l lg:border-t-0', reverse && 'lg:order-1 lg:border-l-0 lg:border-r')} data-svadmin-split-secondary>{@render secondary()}</section>
+  <section class={cn('svadmin-u-7e0b7cdf1a94 svadmin-u-8e63407b5ceb', reverse && 'svadmin-u-87faeaaa291e')} data-svadmin-split-primary>{@render primary()}</section>
+  <section class={cn('svadmin-u-7e0b7cdf1a94 svadmin-u-b950dda299d3 svadmin-u-18049387f0af svadmin-u-46daeb0b661f svadmin-u-8e63407b5ceb svadmin-u-bb3e95154365 svadmin-u-7d283214b870', reverse && 'svadmin-u-ac7e80a2c2ae svadmin-u-e00052b6f07e svadmin-u-64a6e3fce6e0')} data-svadmin-split-secondary>{@render secondary()}</section>
 </div>

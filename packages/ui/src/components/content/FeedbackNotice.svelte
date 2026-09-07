@@ -25,10 +25,10 @@
   const isBlocking = $derived(priority === 'blocking' || tone === 'danger');
   const toneClass = $derived(
     tone === 'danger'
-      ? 'border-destructive/40 bg-destructive/5 text-destructive'
+      ? 'svadmin-u-26e4f7bdbd56 svadmin-u-7a0854fdbc30 svadmin-u-811148b13d1e'
       : tone === 'warning'
-        ? 'border-warning/50 bg-warning/10 text-warning-foreground'
-        : 'border-border bg-muted/40 text-foreground',
+        ? 'svadmin-u-d008dee27eaa svadmin-u-283481e780bb svadmin-u-3a4ff758c2ab'
+        : 'svadmin-u-18049387f0af svadmin-u-b00f43c30c2b svadmin-u-d4108abe6359',
   );
 </script>
 
@@ -39,23 +39,23 @@
   role={isBlocking ? 'alert' : 'status'}
   aria-live={isBlocking ? 'assertive' : 'polite'}
   class={cn(
-    'flex w-full flex-col gap-3 rounded-md border px-3 py-2.5 text-sm sm:flex-row sm:items-center',
-    isBlocking && 'border-l-2',
+    'svadmin-u-60fbb7713999 svadmin-u-6da6a3c3f741 svadmin-u-8dddea0773ed svadmin-u-1004c0c3954c svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-0e17f2bd9074 svadmin-u-e7ee55ac7ffe svadmin-u-fc7473ca09eb svadmin-u-020ba687fa12 svadmin-u-9f76a62f4f44',
+    isBlocking && 'svadmin-u-f57e7530965b',
     toneClass,
     className,
   )}
 >
-  <div class="flex min-w-0 flex-1 items-start gap-2.5">
+  <div class="svadmin-u-60fbb7713999 svadmin-u-7e0b7cdf1a94 svadmin-u-36e579c0b41c svadmin-u-60541e1e26f8 svadmin-u-7e9a2a250cc3">
     {#if tone === 'danger'}
-      <CircleAlert class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+      <CircleAlert class="svadmin-u-15e1b1f444fe svadmin-u-f7b5fa971871 svadmin-u-012fbd121f37" aria-hidden="true" />
     {:else if tone === 'warning'}
-      <TriangleAlert class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+      <TriangleAlert class="svadmin-u-15e1b1f444fe svadmin-u-f7b5fa971871 svadmin-u-012fbd121f37" aria-hidden="true" />
     {:else}
-      <Info class="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+      <Info class="svadmin-u-15e1b1f444fe svadmin-u-f7b5fa971871 svadmin-u-012fbd121f37 svadmin-u-bfa603190748" aria-hidden="true" />
     {/if}
-    <p class="min-w-0 leading-5">{message}</p>
+    <p class="svadmin-u-7e0b7cdf1a94 svadmin-u-7054e2767710">{message}</p>
   </div>
   {#if action}
-    <div class="shrink-0">{@render action()}</div>
+    <div class="svadmin-u-012fbd121f37">{@render action()}</div>
   {/if}
 </div>

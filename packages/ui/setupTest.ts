@@ -30,7 +30,7 @@ beforeEach(() => {
 
 afterEach(async () => {
   cleanup();
-  // bits-ui 会延迟恢复 body 滚动样式；需在 Happy DOM 销毁前等它完成。
+  // bits-ui restores body scroll styles asynchronously; wait for it before Happy DOM teardown.
   await new Promise<void>((resolve) => {
     setTimeout(resolve, 30);
   });

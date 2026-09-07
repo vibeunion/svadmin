@@ -15,7 +15,7 @@
 <p
 	bind:this={ref}
 	data-slot="sheet-description"
-	class={cn("text-sm text-muted-foreground", className)}
+	class={cn("svadmin-sheet-description", className)}
 	{...restProps}
 >
 	{@render children?.()}

@@ -1,6 +1,6 @@
 <script lang="ts">
-  // ListInferencer — 基于资源定义零配置渲染列表视图
-  // 直接复用 ListPage + AutoTable，不需要手写任何页面代码。
+  // ListInferencer renders a list view from the resource definition with no page-specific configuration.
+  // It composes ListPage and AutoTable without requiring handwritten page code.
   import ListPage from './ListPage.svelte';
 
   interface Props {

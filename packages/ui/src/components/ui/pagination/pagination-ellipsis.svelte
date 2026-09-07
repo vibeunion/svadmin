@@ -6,7 +6,7 @@
   let { class: className, ...restProps }: HTMLAttributes<HTMLSpanElement> = $props();
 </script>
 
-<span aria-hidden="true" data-slot="pagination-ellipsis" class={cn("flex size-8 items-center justify-center", className)} {...restProps}>
-  <Ellipsis class="size-4" />
-  <span class="sr-only">More pages</span>
+<span aria-hidden="true" data-slot="pagination-ellipsis" class={cn("svadmin-pagination-ellipsis", className)} {...restProps}>
+  <Ellipsis class="svadmin-pagination-icon" />
+  <span class="svadmin-sr-only">More pages</span>
 </span>

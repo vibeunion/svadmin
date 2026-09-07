@@ -130,46 +130,46 @@
   }
 </script>
 
-<div class={cn('w-full space-y-2', className)}>
-  <div class="flex items-center justify-between px-1 py-1 text-xs">
-    <div class="flex items-center gap-2">
-      <Button variant="ghost" size="sm" class="h-6 px-2 text-xs" onclick={expandAll}>
+<div class={cn('svadmin-u-6da6a3c3f741 svadmin-u-6f7e013d6499', className)}>
+  <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-d8e0e382c67b svadmin-u-660d2effb880 svadmin-u-359090c2d529">
+    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
+      <Button variant="ghost" size="sm" class="svadmin-u-f6fe902450dc svadmin-u-d5eab218aa34 svadmin-u-359090c2d529" onclick={expandAll}>
         Expand All
       </Button>
-      <Button variant="ghost" size="sm" class="h-6 px-2 text-xs text-muted-foreground" onclick={collapseAll}>
+      <Button variant="ghost" size="sm" class="svadmin-u-f6fe902450dc svadmin-u-d5eab218aa34 svadmin-u-359090c2d529 svadmin-u-bfa603190748" onclick={collapseAll}>
         Collapse All
       </Button>
     </div>
     {#if selectable && selectedKeys.length > 0}
-      <span class="text-xs text-muted-foreground">
-        Selected: <strong class="text-foreground">{selectedKeys.length}</strong>
+      <span class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">
+        Selected: <strong class="svadmin-u-d4108abe6359">{selectedKeys.length}</strong>
       </span>
     {/if}
   </div>
 
-  <div class="rounded-lg border border-border/80 overflow-hidden bg-card">
-    <table class="w-full text-left text-xs border-collapse">
-      <thead class="bg-muted/50 border-b border-border/60 font-semibold text-muted-foreground">
+  <div class="svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-c9ed8c5f79ae svadmin-u-2cd02d11d1af svadmin-u-cd0ad9a56558">
+    <table class="svadmin-u-6da6a3c3f741 svadmin-u-2eba0d65d059 svadmin-u-359090c2d529 svadmin-u-4583f90cd9bd">
+      <thead class="svadmin-u-358af0b65a31 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff svadmin-u-e83a7042bc91 svadmin-u-bfa603190748">
         <tr>
           {#if selectable}
-            <th class="w-8 px-3 py-2 text-center"></th>
+            <th class="svadmin-u-2bbcfc3b5179 svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b svadmin-u-ca6bf63030aa"></th>
           {/if}
           {#each columns as col (col.key)}
-            <th class="px-3 py-2" style={col.width ? `width: ${col.width}` : ''}>
+            <th class="svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b" style={col.width ? `width: ${col.width}` : ''}>
               {col.label}
             </th>
           {/each}
           {#if rowActions}
-            <th class="w-20 px-3 py-2 text-right">Actions</th>
+            <th class="svadmin-u-ed831a4dff32 svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b svadmin-u-308fc069e46e">Actions</th>
           {/if}
         </tr>
       </thead>
-      <tbody class="divide-y divide-border/40">
+      <tbody class="svadmin-u-fa6acbf81d74 svadmin-u-08b5607c7258">
         {#each flattenedRows as row (row.id)}
           {@const isSelected = selectedKeys.includes(row.id)}
-          <tr class="hover:bg-muted/30 transition-colors {isSelected ? 'bg-primary/5' : ''}">
+          <tr class="svadmin-u-12251b8f1749 svadmin-u-ceb69a6b0e5f {isSelected ? 'svadmin-u-989c466fdbe7' : ''}">
             {#if selectable}
-              <td class="w-8 px-3 py-2 text-center">
+              <td class="svadmin-u-2bbcfc3b5179 svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b svadmin-u-ca6bf63030aa">
                 <Checkbox
                   checked={isSelected}
                   onCheckedChange={() => toggleSelect(row.record)}
@@ -180,53 +180,53 @@
 
             {#each columns as col, colIdx (col.key)}
               {@const val = row.record[col.key]}
-              <td class="px-3 py-2">
+              <td class="svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b">
                 {#if colIdx === 0}
                   <!-- Primary tree node column with indent -->
                   <div
-                    class="flex items-center gap-1.5"
+                    class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-58284b4ea568"
                     style="padding-left: {row.level * 20}px;"
                   >
                     {#if row.hasChildren}
                       <button
                         type="button"
-                        class="h-5 w-5 flex items-center justify-center rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                        class="svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-07389a777c1f svadmin-u-8e551981c8d7 svadmin-u-bfa603190748 svadmin-u-ea7b2e9e070e svadmin-u-ceb69a6b0e5f"
                         onclick={() => toggleExpand(row.id)}
                         aria-label={row.isExpanded ? 'Collapse' : 'Expand'}
                       >
                         {#if row.isExpanded}
-                          <ChevronDown class="h-3.5 w-3.5" />
+                          <ChevronDown class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
                         {:else}
-                          <ChevronRight class="h-3.5 w-3.5" />
+                          <ChevronRight class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
                         {/if}
                       </button>
-                      <Folder class="h-3.5 w-3.5 text-primary/70 shrink-0" />
+                      <Folder class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-96747a728556 svadmin-u-012fbd121f37" />
                     {:else}
-                      <span class="w-5 inline-block"></span>
-                      <File class="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />
+                      <span class="svadmin-u-72470489ff4e svadmin-u-bb0c4bfc52bd"></span>
+                      <File class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-3a33f11548cd svadmin-u-012fbd121f37" />
                     {/if}
 
-                    <span class="font-medium text-foreground truncate">
+                    <span class="svadmin-u-2689f3958069 svadmin-u-d4108abe6359 svadmin-u-f283ea9bea0e">
                       {val ?? '—'}
                     </span>
                   </div>
                 {:else if customCell}
                   {@render customCell({ column: col, record: row.record, value: val })}
                 {:else}
-                  <span class="text-foreground truncate">{val ?? '—'}</span>
+                  <span class="svadmin-u-d4108abe6359 svadmin-u-f283ea9bea0e">{val ?? '—'}</span>
                 {/if}
               </td>
             {/each}
 
             {#if rowActions}
-              <td class="w-20 px-3 py-2 text-right">
+              <td class="svadmin-u-ed831a4dff32 svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b svadmin-u-308fc069e46e">
                 {@render rowActions({ record: row.record, id: row.id })}
               </td>
             {/if}
           </tr>
         {:else}
           <tr>
-            <td colspan={columns.length + (selectable ? 1 : 0) + (rowActions ? 1 : 0)} class="py-8 text-center text-muted-foreground">
+            <td colspan={columns.length + (selectable ? 1 : 0) + (rowActions ? 1 : 0)} class="svadmin-u-a1f611f027dd svadmin-u-ca6bf63030aa svadmin-u-bfa603190748">
               No data available
             </td>
           </tr>

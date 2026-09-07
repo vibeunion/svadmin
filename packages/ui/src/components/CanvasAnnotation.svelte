@@ -252,112 +252,112 @@
   });
 </script>
 
-<div class={cn('rounded-xl border border-border bg-card p-4 shadow-xs text-xs space-y-3', className)}>
+<div class={cn('svadmin-u-a217b4eaa918 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-8e63407b5ceb svadmin-u-cef5b893cf23 svadmin-u-359090c2d529 svadmin-u-6ed543e2fbbb', className)}>
   <!-- Header & Toolbar -->
-  <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-border/60">
-    <div class="flex items-center gap-1 bg-muted/40 p-1 rounded-lg border border-border/60">
+  <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4 svadmin-u-f4cc511ff0c1 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff">
+    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421 svadmin-u-b00f43c30c2b svadmin-u-eb6a3cef9686 svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-05faf5c801ff">
       <Button
         variant={activeTool === 'pen' ? 'default' : 'ghost'}
         size="sm"
-        class="h-7 w-7 p-0"
+        class="svadmin-u-d0a52b312f7d svadmin-u-cbbf90f9a828 svadmin-u-8a539c7fe216"
         onclick={() => { activeTool = 'pen'; }}
         title="Pen"
       >
-        <Pencil class="h-3.5 w-3.5" />
+        <Pencil class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
       </Button>
 
       <Button
         variant={activeTool === 'rect' ? 'default' : 'ghost'}
         size="sm"
-        class="h-7 w-7 p-0"
+        class="svadmin-u-d0a52b312f7d svadmin-u-cbbf90f9a828 svadmin-u-8a539c7fe216"
         onclick={() => { activeTool = 'rect'; }}
         title="Rectangle"
       >
-        <Square class="h-3.5 w-3.5" />
+        <Square class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
       </Button>
 
       <Button
         variant={activeTool === 'circle' ? 'default' : 'ghost'}
         size="sm"
-        class="h-7 w-7 p-0"
+        class="svadmin-u-d0a52b312f7d svadmin-u-cbbf90f9a828 svadmin-u-8a539c7fe216"
         onclick={() => { activeTool = 'circle'; }}
         title="Circle"
       >
-        <Circle class="h-3.5 w-3.5" />
+        <Circle class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
       </Button>
 
       <Button
         variant={activeTool === 'arrow' ? 'default' : 'ghost'}
         size="sm"
-        class="h-7 w-7 p-0"
+        class="svadmin-u-d0a52b312f7d svadmin-u-cbbf90f9a828 svadmin-u-8a539c7fe216"
         onclick={() => { activeTool = 'arrow'; }}
         title="Arrow"
       >
-        <MoveUpRight class="h-3.5 w-3.5" />
+        <MoveUpRight class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
       </Button>
 
       <Button
         variant={activeTool === 'text' ? 'default' : 'ghost'}
         size="sm"
-        class="h-7 w-7 p-0"
+        class="svadmin-u-d0a52b312f7d svadmin-u-cbbf90f9a828 svadmin-u-8a539c7fe216"
         onclick={() => { activeTool = 'text'; }}
         title="Text Note"
       >
-        <Type class="h-3.5 w-3.5" />
+        <Type class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
       </Button>
 
       <Button
         variant={activeTool === 'eraser' ? 'default' : 'ghost'}
         size="sm"
-        class="h-7 w-7 p-0"
+        class="svadmin-u-d0a52b312f7d svadmin-u-cbbf90f9a828 svadmin-u-8a539c7fe216"
         onclick={() => { activeTool = 'eraser'; }}
         title="Eraser"
       >
-        <Eraser class="h-3.5 w-3.5" />
+        <Eraser class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
       </Button>
     </div>
 
-    <div class="flex items-center gap-1.5">
+    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-58284b4ea568">
       <Button
         variant="ghost"
         size="sm"
-        class="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground"
+        class="svadmin-u-d0a52b312f7d svadmin-u-359090c2d529 svadmin-u-44ee8ba0a421 svadmin-u-bfa603190748 svadmin-u-ea7b2e9e070e"
         disabled={history.length === 0}
         onclick={undo}
       >
-        <RotateCcw class="h-3 w-3" />
+        <RotateCcw class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
         Undo
       </Button>
 
       <Button
         variant="ghost"
         size="sm"
-        class="h-7 text-xs gap-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+        class="svadmin-u-d0a52b312f7d svadmin-u-359090c2d529 svadmin-u-44ee8ba0a421 svadmin-u-bfa603190748 svadmin-u-51e95020d6f2 svadmin-u-8db899b4e072"
         onclick={clear}
       >
-        <Trash2 class="h-3 w-3" />
+        <Trash2 class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
         Clear
       </Button>
 
       <Button
         variant="outline"
         size="sm"
-        class="h-7 text-xs gap-1"
+        class="svadmin-u-d0a52b312f7d svadmin-u-359090c2d529 svadmin-u-44ee8ba0a421"
         onclick={handleExport}
       >
-        <Download class="h-3 w-3" />
+        <Download class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
         Export
       </Button>
     </div>
   </div>
 
   <!-- Canvas Container -->
-  <div class="relative w-full rounded-lg border border-border/80 bg-muted/20 overflow-hidden flex items-center justify-center">
+  <div class="svadmin-u-d89972fe17d6 svadmin-u-6da6a3c3f741 svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-c9ed8c5f79ae svadmin-u-967d113a1451 svadmin-u-2cd02d11d1af svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227">
     <canvas
       bind:this={canvasEl}
       {width}
       {height}
-      class="touch-none cursor-crosshair max-w-full h-auto block bg-card"
+      class="touch-none svadmin-u-92b7f35f04c0 svadmin-u-c0980a65a70d svadmin-u-b8f0a08ece1e svadmin-u-0214b4b355d1 svadmin-u-cd0ad9a56558"
       onmousedown={startAction}
       onmousemove={handleMove}
       onmouseup={stopAction}
@@ -369,20 +369,20 @@
 
     {#if showTextPrompt}
       <div
-        class="absolute z-50 p-2 rounded-lg border border-border bg-popover shadow-md flex items-center gap-1.5"
+        class="svadmin-u-da4dbfbc4fdc svadmin-u-181b286668b5 svadmin-u-7660b450905a svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-e541d86d1ec8 svadmin-u-febc34e471df svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-58284b4ea568"
         style={`left: ${Math.min(textPos.x, width - 180)}px; top: ${Math.min(textPos.y, height - 50)}px;`}
       >
         <input
           type="text"
           bind:value={textInputPrompt}
           placeholder="Annotation text..."
-          class="h-7 w-36 rounded border border-input bg-background px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          class="svadmin-u-d0a52b312f7d svadmin-u-df403bbae8fc svadmin-u-07389a777c1f svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529 svadmin-u-d4108abe6359 svadmin-u-f10f771f87e9 svadmin-u-3e94a98e1466 svadmin-u-9c1295a6914a"
           onkeydown={(e) => {
             if (e.key === 'Enter') submitText();
             else if (e.key === 'Escape') showTextPrompt = false;
           }}
         />
-        <Button size="sm" class="h-7 text-xs px-2" onclick={submitText}>Add</Button>
+        <Button size="sm" class="svadmin-u-d0a52b312f7d svadmin-u-359090c2d529 svadmin-u-d5eab218aa34" onclick={submitText}>Add</Button>
       </div>
     {/if}
   </div>

@@ -14,6 +14,9 @@
 
 <button
   aria-current={isActive ? 'page' : undefined}
+  data-svadmin-button
+  data-variant={isActive ? 'outline' : 'ghost'}
+  data-size="icon-sm"
   data-slot="pagination-link"
   data-active={isActive}
   class={cn(

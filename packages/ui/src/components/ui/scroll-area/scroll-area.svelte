@@ -7,14 +7,13 @@
 </script>
 
 <div
-	class={cn("relative overflow-hidden", className)}
+	class={cn("svadmin-scroll-area", className)}
 	{...restProps}
 >
 	<div class={cn(
-		"h-full w-full overflow-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border hover:scrollbar-thumb-muted-foreground/50",
-		orientation === 'horizontal' ? 'overflow-x-auto overflow-y-hidden' : 'overflow-y-auto overflow-x-hidden'
+		"svadmin-scroll-area-viewport",
+		orientation === 'horizontal' ? 'svadmin-scroll-area-horizontal' : 'svadmin-scroll-area-vertical'
 	)}>
 		{@render children()}
 	</div>
 </div>
-

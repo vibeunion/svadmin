@@ -80,33 +80,33 @@
   }
 </script>
 
-<div class={cn('rounded-xl border border-border bg-card shadow-xs overflow-hidden', className)}>
+<div class={cn('svadmin-u-a217b4eaa918 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-cef5b893cf23 svadmin-u-2cd02d11d1af', className)}>
   <!-- Header & Toolbar -->
-  <div class="flex items-center justify-between p-3.5 border-b border-border/60 bg-muted/20">
-    <div class="flex items-center gap-2">
-      <h4 class="text-xs font-semibold text-foreground">Record Comparison</h4>
-      <Badge variant="outline" class="text-[11px]">
+  <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-56796a90bec5 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff svadmin-u-967d113a1451">
+    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
+      <h4 class="svadmin-u-359090c2d529 svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">Record Comparison</h4>
+      <Badge variant="outline" class="svadmin-u-d058ca6de60f">
         {modifiedCount} change{modifiedCount === 1 ? '' : 's'}
       </Badge>
     </div>
 
-    <div class="flex items-center gap-1">
+    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421">
       <Button
         variant={mode === 'split' ? 'secondary' : 'ghost'}
         size="sm"
-        class="h-7 text-xs gap-1 px-2"
+        class="svadmin-u-d0a52b312f7d svadmin-u-359090c2d529 svadmin-u-44ee8ba0a421 svadmin-u-d5eab218aa34"
         onclick={() => { mode = 'split'; }}
       >
-        <Columns2 class="h-3.5 w-3.5" />
+        <Columns2 class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
         Side by Side
       </Button>
       <Button
         variant={mode === 'unified' ? 'secondary' : 'ghost'}
         size="sm"
-        class="h-7 text-xs gap-1 px-2"
+        class="svadmin-u-d0a52b312f7d svadmin-u-359090c2d529 svadmin-u-44ee8ba0a421 svadmin-u-d5eab218aa34"
         onclick={() => { mode = 'unified'; }}
       >
-        <AlignJustify class="h-3.5 w-3.5" />
+        <AlignJustify class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
         Unified
       </Button>
     </div>
@@ -114,39 +114,39 @@
 
   {#if mode === 'split'}
     <!-- Split Side-by-Side View -->
-    <div class="grid grid-cols-2 divide-x divide-border/60 text-xs">
-      <div class="p-3 bg-muted/10 font-semibold text-muted-foreground border-b border-border/60">{oldTitle}</div>
-      <div class="p-3 bg-muted/10 font-semibold text-muted-foreground border-b border-border/60">{newTitle}</div>
+    <div class="svadmin-u-f3c543ad5fe9 svadmin-u-8e75e3db482b svadmin-u-3746131ec018 svadmin-u-d2c3932343f5 svadmin-u-359090c2d529">
+      <div class="svadmin-u-eb6e8b881acd svadmin-u-8a25a995eb8e svadmin-u-e83a7042bc91 svadmin-u-bfa603190748 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff">{oldTitle}</div>
+      <div class="svadmin-u-eb6e8b881acd svadmin-u-8a25a995eb8e svadmin-u-e83a7042bc91 svadmin-u-bfa603190748 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff">{newTitle}</div>
     </div>
 
-    <div class="divide-y divide-border/40 text-xs">
+    <div class="svadmin-u-fa6acbf81d74 svadmin-u-08b5607c7258 svadmin-u-359090c2d529">
       {#each diffList as diff (diff.key)}
         {@const isDiff = diff.status !== 'unchanged'}
-        <div class={cn('grid grid-cols-2 divide-x divide-border/40 transition-colors', isDiff ? 'bg-muted/15' : '')}>
+        <div class={cn('svadmin-u-f3c543ad5fe9 svadmin-u-8e75e3db482b svadmin-u-3746131ec018 svadmin-u-08b5607c7258 svadmin-u-ceb69a6b0e5f', isDiff ? 'svadmin-u-46daeb0b661f' : '')}>
           <!-- Left Column -->
-          <div class={cn('p-3 space-y-1', diff.status === 'removed' ? 'bg-destructive/5' : '')}>
-            <div class="flex items-center justify-between text-[11px] text-muted-foreground font-medium">
+          <div class={cn('svadmin-u-eb6e8b881acd svadmin-u-da7c36cd8867', diff.status === 'removed' ? 'svadmin-u-7a0854fdbc30' : '')}>
+            <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-d058ca6de60f svadmin-u-bfa603190748 svadmin-u-2689f3958069">
               <span>{diff.label}</span>
               {#if diff.status === 'removed'}
-                <Badge variant="outline" class="bg-destructive/15 text-destructive border-destructive/20 text-[10px]">Deleted</Badge>
+                <Badge variant="outline" class="svadmin-u-c698f77c9ba5 svadmin-u-811148b13d1e svadmin-u-f0c1e65bd6f2 svadmin-u-1dc571a3609f">Deleted</Badge>
               {/if}
             </div>
-            <div class={cn('font-mono text-xs break-words', diff.status === 'removed' ? 'line-through text-destructive' : 'text-foreground')}>
+            <div class={cn('svadmin-u-0e65706bcccd svadmin-u-359090c2d529 svadmin-u-170cee3ff4e4', diff.status === 'removed' ? 'line-through svadmin-u-811148b13d1e' : 'svadmin-u-d4108abe6359')}>
               {formatValue(diff.oldVal)}
             </div>
           </div>
 
           <!-- Right Column -->
-          <div class={cn('p-3 space-y-1', diff.status === 'added' ? 'bg-success/5' : diff.status === 'modified' ? 'bg-warning/5' : '')}>
-            <div class="flex items-center justify-between text-[11px] text-muted-foreground font-medium">
+          <div class={cn('svadmin-u-eb6e8b881acd svadmin-u-da7c36cd8867', diff.status === 'added' ? 'svadmin-u-338625ff877e' : diff.status === 'modified' ? 'svadmin-u-a909a196be82' : '')}>
+            <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-d058ca6de60f svadmin-u-bfa603190748 svadmin-u-2689f3958069">
               <span>{diff.label}</span>
               {#if diff.status === 'added'}
-                <Badge variant="outline" class="bg-success/15 text-success border-success/20 text-[10px]">Added</Badge>
+                <Badge variant="outline" class="svadmin-u-4cf5af8d25d3 svadmin-u-76747e5e02ff svadmin-u-95b7dea5a67f svadmin-u-1dc571a3609f">Added</Badge>
               {:else if diff.status === 'modified'}
-                <Badge variant="outline" class="bg-warning/15 text-warning-foreground border-warning/20 text-[10px]">Modified</Badge>
+                <Badge variant="outline" class="svadmin-u-d9c3c520f7d5 svadmin-u-3a4ff758c2ab svadmin-u-610bcc1bb506 svadmin-u-1dc571a3609f">Modified</Badge>
               {/if}
             </div>
-            <div class={cn('font-mono text-xs break-words', diff.status === 'added' ? 'text-success font-medium' : diff.status === 'modified' ? 'text-warning-foreground font-medium' : 'text-foreground')}>
+            <div class={cn('svadmin-u-0e65706bcccd svadmin-u-359090c2d529 svadmin-u-170cee3ff4e4', diff.status === 'added' ? 'svadmin-u-76747e5e02ff svadmin-u-2689f3958069' : diff.status === 'modified' ? 'svadmin-u-3a4ff758c2ab svadmin-u-2689f3958069' : 'svadmin-u-d4108abe6359')}>
               {formatValue(diff.newVal)}
             </div>
           </div>
@@ -155,37 +155,37 @@
     </div>
   {:else}
     <!-- Unified List View -->
-    <div class="divide-y divide-border/40 text-xs">
+    <div class="svadmin-u-fa6acbf81d74 svadmin-u-08b5607c7258 svadmin-u-359090c2d529">
       {#each diffList as diff (diff.key)}
-        <div class="p-3 space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="font-medium text-foreground">{diff.label}</span>
+        <div class="svadmin-u-eb6e8b881acd svadmin-u-6f7e013d6499">
+          <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc">
+            <span class="svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{diff.label}</span>
             {#if diff.status === 'added'}
-              <Badge variant="outline" class="bg-success/15 text-success border-success/20 text-[10px]">Added</Badge>
+              <Badge variant="outline" class="svadmin-u-4cf5af8d25d3 svadmin-u-76747e5e02ff svadmin-u-95b7dea5a67f svadmin-u-1dc571a3609f">Added</Badge>
             {:else if diff.status === 'removed'}
-              <Badge variant="outline" class="bg-destructive/15 text-destructive border-destructive/20 text-[10px]">Removed</Badge>
+              <Badge variant="outline" class="svadmin-u-c698f77c9ba5 svadmin-u-811148b13d1e svadmin-u-f0c1e65bd6f2 svadmin-u-1dc571a3609f">Removed</Badge>
             {:else if diff.status === 'modified'}
-              <Badge variant="outline" class="bg-warning/15 text-warning-foreground border-warning/20 text-[10px]">Modified</Badge>
+              <Badge variant="outline" class="svadmin-u-d9c3c520f7d5 svadmin-u-3a4ff758c2ab svadmin-u-610bcc1bb506 svadmin-u-1dc571a3609f">Modified</Badge>
             {:else}
-              <Badge variant="outline" class="text-[10px] text-muted-foreground">Unchanged</Badge>
+              <Badge variant="outline" class="svadmin-u-1dc571a3609f svadmin-u-bfa603190748">Unchanged</Badge>
             {/if}
           </div>
 
           {#if diff.status === 'modified'}
-            <div class="space-y-1 rounded-md bg-muted/40 p-2 font-mono text-[11px]">
-              <div class="text-destructive line-through">- {formatValue(diff.oldVal)}</div>
-              <div class="text-success font-medium">+ {formatValue(diff.newVal)}</div>
+            <div class="svadmin-u-da7c36cd8867 svadmin-u-421ac2be5045 svadmin-u-b00f43c30c2b svadmin-u-7660b450905a svadmin-u-0e65706bcccd svadmin-u-d058ca6de60f">
+              <div class="svadmin-u-811148b13d1e line-through">- {formatValue(diff.oldVal)}</div>
+              <div class="svadmin-u-76747e5e02ff svadmin-u-2689f3958069">+ {formatValue(diff.newVal)}</div>
             </div>
           {:else if diff.status === 'added'}
-            <div class="rounded-md bg-success/10 p-2 font-mono text-[11px] text-success">
+            <div class="svadmin-u-421ac2be5045 svadmin-u-17a9f7af2265 svadmin-u-7660b450905a svadmin-u-0e65706bcccd svadmin-u-d058ca6de60f svadmin-u-76747e5e02ff">
               + {formatValue(diff.newVal)}
             </div>
           {:else if diff.status === 'removed'}
-            <div class="rounded-md bg-destructive/10 p-2 font-mono text-[11px] text-destructive line-through">
+            <div class="svadmin-u-421ac2be5045 svadmin-u-43928fcc832f svadmin-u-7660b450905a svadmin-u-0e65706bcccd svadmin-u-d058ca6de60f svadmin-u-811148b13d1e line-through">
               - {formatValue(diff.oldVal)}
             </div>
           {:else}
-            <div class="font-mono text-[11px] text-muted-foreground">
+            <div class="svadmin-u-0e65706bcccd svadmin-u-d058ca6de60f svadmin-u-bfa603190748">
               {formatValue(diff.newVal)}
             </div>
           {/if}

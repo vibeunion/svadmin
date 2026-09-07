@@ -86,30 +86,30 @@
         {...props}
         type="button"
         class={cn(
-          'inline-flex items-center justify-center h-6 w-6 rounded-md transition-colors cursor-pointer',
+          'svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-f6fe902450dc svadmin-u-7ec10f86d9b1 svadmin-u-421ac2be5045 svadmin-u-ceb69a6b0e5f svadmin-u-34516836730d',
           hasActiveFilter
-            ? 'bg-primary/15 text-primary'
-            : 'text-muted-foreground/60 hover:text-foreground hover:bg-muted/50',
+            ? 'svadmin-u-30f13f694038 svadmin-u-20aaf08a7ed1'
+            : 'svadmin-u-7be4d67a6256 svadmin-u-ea7b2e9e070e svadmin-u-39f703dbe296',
           className
         )}
         aria-label="Filter {field.label}"
       >
-        <Filter class="h-3 w-3" />
+        <Filter class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
       </button>
     {/snippet}
   </Popover.Trigger>
-  <Popover.Content class="w-64 p-3 text-xs" align="start">
-    <div class="space-y-3">
-      <div class="font-medium text-foreground pb-1 border-b border-border/50">
+  <Popover.Content class="svadmin-u-6ca625288b1e svadmin-u-eb6e8b881acd svadmin-u-359090c2d529" align="start">
+    <div class="svadmin-u-6ed543e2fbbb">
+      <div class="svadmin-u-2689f3958069 svadmin-u-d4108abe6359 svadmin-u-569eb16216dd svadmin-u-65fdbade2025 svadmin-u-591f378e24a1">
         Filter {field.label}
       </div>
 
-      <div class="space-y-1">
-        <label class="block text-[11px] text-muted-foreground" for="header_filter_op_{field.key}">Operator</label>
+      <div class="svadmin-u-da7c36cd8867">
+        <label class="svadmin-u-0214b4b355d1 svadmin-u-d058ca6de60f svadmin-u-bfa603190748" for="header_filter_op_{field.key}">Operator</label>
         <select
           id="header_filter_op_{field.key}"
           bind:value={operator}
-          class="h-7.5 w-full rounded-md border border-input bg-background px-2 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          class="svadmin-u-d1c57777d8b6 svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529 svadmin-u-f10f771f87e9 svadmin-u-3e94a98e1466 svadmin-u-9c1295a6914a"
         >
           {#each applicableOperators as op (op.value)}
             <option value={op.value}>{op.label}</option>
@@ -117,13 +117,13 @@
         </select>
       </div>
 
-      <div class="space-y-1">
-        <label class="block text-[11px] text-muted-foreground" for="header_filter_val_{field.key}">Value</label>
+      <div class="svadmin-u-da7c36cd8867">
+        <label class="svadmin-u-0214b4b355d1 svadmin-u-d058ca6de60f svadmin-u-bfa603190748" for="header_filter_val_{field.key}">Value</label>
         {#if field.type === 'select' && field.options}
           <select
             id="header_filter_val_{field.key}"
             bind:value={filterVal}
-            class="h-7.5 w-full rounded-md border border-input bg-background px-2 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            class="svadmin-u-d1c57777d8b6 svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529 svadmin-u-f10f771f87e9 svadmin-u-3e94a98e1466 svadmin-u-9c1295a6914a"
           >
             <option value="">All</option>
             {#each field.options as opt (opt.value)}
@@ -134,7 +134,7 @@
           <select
             id="header_filter_val_{field.key}"
             bind:value={filterVal}
-            class="h-7.5 w-full rounded-md border border-input bg-background px-2 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            class="svadmin-u-d1c57777d8b6 svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529 svadmin-u-f10f771f87e9 svadmin-u-3e94a98e1466 svadmin-u-9c1295a6914a"
           >
             <option value="">All</option>
             <option value="true">Yes / True</option>
@@ -145,7 +145,7 @@
             id="header_filter_val_{field.key}"
             type="date"
             bind:value={filterVal}
-            class="h-7.5 w-full rounded-md border border-input bg-background px-2 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            class="svadmin-u-d1c57777d8b6 svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529 svadmin-u-f10f771f87e9 svadmin-u-3e94a98e1466 svadmin-u-9c1295a6914a"
           />
         {:else}
           <input
@@ -153,23 +153,23 @@
             type="text"
             bind:value={filterVal}
             placeholder="Search {field.label}..."
-            class="h-7.5 w-full rounded-md border border-input bg-background px-2 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            class="svadmin-u-d1c57777d8b6 svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529 svadmin-u-f10f771f87e9 svadmin-u-3e94a98e1466 svadmin-u-9c1295a6914a"
           />
         {/if}
       </div>
 
-      <div class="flex items-center justify-between pt-1 border-t border-border/50">
+      <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-6b7d6e21ccbd svadmin-u-b950dda299d3 svadmin-u-591f378e24a1">
         <Button
           variant="ghost"
           size="sm"
-          class="h-7 px-2 text-xs text-muted-foreground hover:text-foreground gap-1"
+          class="svadmin-u-d0a52b312f7d svadmin-u-d5eab218aa34 svadmin-u-359090c2d529 svadmin-u-bfa603190748 svadmin-u-ea7b2e9e070e svadmin-u-44ee8ba0a421"
           onclick={handleClear}
         >
-          <RotateCcw class="h-3 w-3" />
+          <RotateCcw class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
           {i18n.t('common.clear', { defaultValue: 'Clear' })}
         </Button>
-        <Button size="sm" class="h-7 px-2.5 text-xs gap-1" onclick={handleApply}>
-          <Check class="h-3 w-3" />
+        <Button size="sm" class="svadmin-u-d0a52b312f7d svadmin-u-0b91436debbd svadmin-u-359090c2d529 svadmin-u-44ee8ba0a421" onclick={handleApply}>
+          <Check class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
           {i18n.t('common.apply', { defaultValue: 'Apply' })}
         </Button>
       </div>

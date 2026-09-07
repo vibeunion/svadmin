@@ -16,7 +16,7 @@
 	bind:ref
 	bind:value
 	data-slot="navigation-menu"
-	class={cn("relative z-10 flex max-w-max flex-1 items-center justify-center", className)}
+	class={cn("svadmin-navigation-menu", className)}
 	{...restProps}
 >
 	{@render children?.()}

@@ -29,19 +29,19 @@
 </script>
 
 {#snippet headerActions()}
-  <Button onclick={save} disabled={saving} size="sm">{#if saving}<Loader2 class="size-3.5 animate-spin" />{/if}{i18n.t('common.save')}</Button>
+  <Button onclick={save} disabled={saving} size="sm">{#if saving}<Loader2 class="svadmin-u-783b0d9d1e2c svadmin-u-afbdd13a380e" />{/if}{i18n.t('common.save')}</Button>
 {/snippet}
 
 {#snippet primary()}
-  <SettingsGroup title={i18n.t('account.basicSettings')} description={i18n.t('account.companyProfileDescription')} bodyClass="space-y-4"><div class="grid gap-4 sm:grid-cols-2"><div class="space-y-2"><Label for="company-name">{i18n.t('profile.companyName')}</Label><Input id="company-name" bind:value={companyName} /></div><div class="space-y-2"><Label for="company-industry">{i18n.t('profile.industry')}</Label><Input id="company-industry" bind:value={industry} /></div><div class="space-y-2 sm:col-span-2"><Label for="company-website">{i18n.t('profile.website')}</Label><Input id="company-website" bind:value={website} type="url" /></div></div><div class="space-y-2"><Label for="company-description">{i18n.t('profile.companyDescription')}</Label><Textarea id="company-description" bind:value={description} rows={4} /></div></SettingsGroup>
+  <SettingsGroup title={i18n.t('account.basicSettings')} description={i18n.t('account.companyProfileDescription')} bodyClass="space-y-4"><div class="svadmin-u-f3c543ad5fe9 svadmin-u-0c3bc98565dd svadmin-u-e00ad81645a2"><div class="svadmin-u-6f7e013d6499"><Label for="company-name">{i18n.t('profile.companyName')}</Label><Input id="company-name" bind:value={companyName} /></div><div class="svadmin-u-6f7e013d6499"><Label for="company-industry">{i18n.t('profile.industry')}</Label><Input id="company-industry" bind:value={industry} /></div><div class="svadmin-u-6f7e013d6499 svadmin-u-d378a2461dc3"><Label for="company-website">{i18n.t('profile.website')}</Label><Input id="company-website" bind:value={website} type="url" /></div></div><div class="svadmin-u-6f7e013d6499"><Label for="company-description">{i18n.t('profile.companyDescription')}</Label><Textarea id="company-description" bind:value={description} rows={4} /></div></SettingsGroup>
 {/snippet}
 
 {#snippet secondary()}
-  <SettingsGroup title={i18n.t('profile.companyName')} description={industry} bodyClass="space-y-4"><p class="text-lg font-semibold text-foreground">{companyName}</p><DescriptionList columns={1} items={[{ label: i18n.t('profile.website'), value: website, href: website }, { label: i18n.t('profile.employees'), value: '1,250' }, { label: i18n.t('profile.founded'), value: '2015' }]} /></SettingsGroup>
+  <SettingsGroup title={i18n.t('profile.companyName')} description={industry} bodyClass="space-y-4"><p class="svadmin-u-42536e69e639 svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{companyName}</p><DescriptionList columns={1} items={[{ label: i18n.t('profile.website'), value: website, href: website }, { label: i18n.t('profile.employees'), value: '1,250' }, { label: i18n.t('profile.founded'), value: '2015' }]} /></SettingsGroup>
 {/snippet}
 
 <ContentPageShell pageId="account-company-profile" width="wide">
   <ContentPageHeader title={i18n.t('account.companyProfile')} description={i18n.t('account.companyProfileDescription')} actions={headerActions} />
   <WorkspaceLayout {primary} {secondary} secondaryWidth="20rem" />
-  <section class="space-y-3"><SectionHeader title={i18n.t('profileSections.members')} /><MemberList {members} emptyTitle={i18n.t('common.noData')} emptyDescription={i18n.t('empty.description')} /></section>
+  <section class="svadmin-u-6ed543e2fbbb"><SectionHeader title={i18n.t('profileSections.members')} /><MemberList {members} emptyTitle={i18n.t('common.noData')} emptyDescription={i18n.t('empty.description')} /></section>
 </ContentPageShell>

@@ -132,7 +132,7 @@
 <div
   bind:this={ref}
   data-slot="row-actions"
-  class={cn("inline-flex items-center gap-1.5", className)}
+  class={cn("svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-58284b4ea568", className)}
   onkeydown={manageMenuKeyboard}
   {...restProps}
 >
@@ -148,11 +148,11 @@
         href={action.href}
         disabled={action.disabled}
         title={action.title || action.label}
-        class="h-8 px-2 text-xs"
+        class="svadmin-u-ed8a5df7b2fb svadmin-u-d5eab218aa34 svadmin-u-359090c2d529"
       >
         {#if action.icon}
           {@const Icon = action.icon}
-          <Icon class="mr-1 size-3.5" />
+          <Icon class="svadmin-u-618162408e7a svadmin-u-783b0d9d1e2c" />
         {/if}
         {action.label}
       </Button>
@@ -163,11 +163,11 @@
         onclick={action.onclick}
         disabled={action.disabled}
         title={action.title || action.label}
-        class="h-8 px-2 text-xs"
+        class="svadmin-u-ed8a5df7b2fb svadmin-u-d5eab218aa34 svadmin-u-359090c2d529"
       >
         {#if action.icon}
           {@const Icon = action.icon}
-          <Icon class="mr-1 size-3.5" />
+          <Icon class="svadmin-u-618162408e7a svadmin-u-783b0d9d1e2c" />
         {/if}
         {action.label}
       </Button>
@@ -179,11 +179,11 @@
       <DropdownMenu.Trigger>
         {#snippet child({ props })}
           <Button {...props} variant="ghost" size="icon-sm" title={moreLabel} aria-label={moreLabel} aria-haspopup="menu" aria-expanded={overflowOpen}>
-            <Ellipsis class="size-4" />
+            <Ellipsis class="svadmin-u-f7b5fa971871" />
           </Button>
         {/snippet}
       </DropdownMenu.Trigger>
-      <DropdownMenu.Content align="end" class="min-w-[8rem]" role="menu" aria-label={moreLabel}>
+      <DropdownMenu.Content align="end" class="svadmin-u-3143d72a3869" role="menu" aria-label={moreLabel}>
         {#each overflowActions as action (action)}
           {#if action.href}
             <Button
@@ -194,11 +194,11 @@
               onclick={(event) => handleOverflowAction(action, event)}
               role="menuitem"
               tabindex={-1}
-              class="h-auto w-full justify-start rounded-md px-2 py-1.5 text-sm font-normal"
+              class="svadmin-u-b8f0a08ece1e svadmin-u-6da6a3c3f741 svadmin-u-4b5cc19bfdfc svadmin-u-421ac2be5045 svadmin-u-d5eab218aa34 svadmin-u-ec0091ee009b svadmin-u-fc7473ca09eb svadmin-u-8ecebc9f80e6"
             >
               {#if action.icon}
                 {@const Icon = action.icon}
-                <Icon class="size-3.5" />
+                <Icon class="svadmin-u-783b0d9d1e2c" />
               {/if}
               {action.label}
             </Button>
@@ -212,7 +212,7 @@
             >
               {#if action.icon}
                 {@const Icon = action.icon}
-                <Icon class="size-3.5" />
+                <Icon class="svadmin-u-783b0d9d1e2c" />
               {/if}
               {action.label}
             </DropdownMenu.Item>

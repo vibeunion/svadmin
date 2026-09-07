@@ -38,14 +38,14 @@
   });
 
   const sizeClasses: Record<AvatarSize, { container: string; text: string; dot: string }> = {
-    xs: { container: 'h-5 w-5', text: 'text-[10px]', dot: 'h-1.5 w-1.5' },
-    sm: { container: 'h-7 w-7', text: 'text-xs', dot: 'h-2 w-2' },
-    default: { container: 'h-9 w-9', text: 'text-sm', dot: 'h-2.5 w-2.5' },
-    lg: { container: 'h-11 w-11', text: 'text-base', dot: 'h-3 w-3' },
+    xs: { container: 'svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e', text: 'svadmin-u-1dc571a3609f', dot: 'svadmin-u-095acb275581 svadmin-u-c696a0890973' },
+    sm: { container: 'svadmin-u-d0a52b312f7d svadmin-u-cbbf90f9a828', text: 'svadmin-u-359090c2d529', dot: 'svadmin-u-2f2a842e50fa svadmin-u-940924b6e2d9' },
+    default: { container: 'svadmin-u-e7a768f922d2 svadmin-u-ae2181c7b10f', text: 'svadmin-u-fc7473ca09eb', dot: 'svadmin-u-9b3d0721b628 svadmin-u-650758f4572a' },
+    lg: { container: 'svadmin-u-f82f0c255ad9 svadmin-u-edaba517866e', text: 'svadmin-u-4ee734926ff6', dot: 'svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29' },
   };
 
   const statusColors: Record<AvatarStatus, string> = {
-    online: 'bg-success',
+    online: 'svadmin-u-3355648fe22b',
     success: 'bg-success',
     busy: 'bg-destructive',
     error: 'bg-destructive',
@@ -71,14 +71,14 @@
 </script>
 
 {#if !hasContent}
-  <span class={cn('field-avatar text-muted-foreground text-sm', className)}>{nullLabel}</span>
+  <span class={cn('field-avatar svadmin-u-bfa603190748 svadmin-u-fc7473ca09eb', className)}>{nullLabel}</span>
 {:else}
-  <div class={cn('field-avatar inline-flex items-center gap-2.5', className)}>
-    <div class="relative inline-block shrink-0">
+  <div class={cn('field-avatar svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-7e9a2a250cc3', className)}>
+    <div class="svadmin-u-d89972fe17d6 svadmin-u-bb0c4bfc52bd svadmin-u-012fbd121f37">
       <div
         class={cn(
-          'flex items-center justify-center overflow-hidden bg-muted font-medium text-muted-foreground select-none',
-          shape === 'circle' ? 'rounded-full' : 'rounded-md',
+          'svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-2cd02d11d1af svadmin-u-2ef11f1cb219 svadmin-u-2689f3958069 svadmin-u-bfa603190748 svadmin-u-7f6912283f11',
+          shape === 'circle' ? 'svadmin-u-ac204c108886' : 'svadmin-u-421ac2be5045',
           sizeClasses[size].container,
           sizeClasses[size].text
         )}
@@ -87,7 +87,7 @@
           <img
             {src}
             alt={name?.trim() || 'Avatar'}
-            class="h-full w-full object-cover"
+            class="svadmin-u-668b21aa5409 svadmin-u-6da6a3c3f741 svadmin-u-7d85d0c21a32"
             onerror={() => { imgError = true; }}
           />
         {:else}
@@ -98,7 +98,7 @@
       {#if status}
         <span
           class={cn(
-            'absolute bottom-0 right-0 rounded-full ring-2 ring-background',
+            'svadmin-u-da4dbfbc4fdc svadmin-u-189f036c335c svadmin-u-d8cdcad240d1 svadmin-u-ac204c108886 svadmin-u-16b1efa5875e svadmin-u-85399de17097',
             statusColors[status],
             sizeClasses[size].dot
           )}
@@ -110,12 +110,12 @@
     </div>
 
     {#if showName && (name || subtitle)}
-      <div class="flex flex-col min-w-0 text-left">
+      <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-7e0b7cdf1a94 svadmin-u-2eba0d65d059">
         {#if name}
-          <span class="truncate text-xs font-medium text-foreground leading-tight">{name}</span>
+          <span class="svadmin-u-f283ea9bea0e svadmin-u-359090c2d529 svadmin-u-2689f3958069 svadmin-u-d4108abe6359 svadmin-u-e9fadafbd4a2">{name}</span>
         {/if}
         {#if subtitle}
-          <span class="truncate text-[11px] text-muted-foreground leading-tight">{subtitle}</span>
+          <span class="svadmin-u-f283ea9bea0e svadmin-u-d058ca6de60f svadmin-u-bfa603190748 svadmin-u-e9fadafbd4a2">{subtitle}</span>
         {/if}
       </div>
     {/if}

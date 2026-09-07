@@ -99,8 +99,8 @@
 
 <div
   class={cn(
-    'space-y-1.5',
-    isCompact && 'space-y-1 [&_[data-slot=input]]:h-8 [&_[data-slot=input]]:px-2.5 [&_[data-slot=input]]:py-1 [&_[data-slot=input]]:text-xs [&_[data-slot=select]]:h-8 [&_[data-slot=select]]:px-2.5 [&_[data-slot=select]]:py-1 [&_[data-slot=select]]:text-xs [&_[data-slot=textarea]]:min-h-16 [&_[data-slot=textarea]]:px-2.5 [&_[data-slot=textarea]]:py-1.5 [&_[data-slot=textarea]]:text-xs [&_[data-slot=button]]:h-8 [&_[data-slot=button]]:text-xs'
+    'svadmin-u-5a2508227c6a',
+    isCompact && 'svadmin-u-da7c36cd8867 svadmin-u-01e043b9ca05 svadmin-u-5e375759a547 svadmin-u-0144d38a6921 svadmin-u-910198b850a8 svadmin-u-220cd47c030c svadmin-u-84a68a4bfa38 svadmin-u-2b201b2c12c7 svadmin-u-334c9da7fe2b svadmin-u-f7194f86de09 svadmin-u-a281d7e98ab9 svadmin-u-6cddb40447d9 svadmin-u-150c3670da1d svadmin-u-f01a063e8052 svadmin-u-3e2aa4ec6454'
   )}
   data-svadmin-field
   data-svadmin-field-key={field.key}
@@ -109,7 +109,7 @@
   <Label for={field.key} id="label-{field.key}" data-svadmin-field-label>
     {field.label}
     {#if field.required}
-      <span class="text-destructive">*</span>
+      <span class="svadmin-u-811148b13d1e">*</span>
     {/if}
   </Label>
 
@@ -177,14 +177,14 @@
     />
 
   {:else if field.type === 'color'}
-    <div class="flex items-center gap-3">
+    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-1004c0c3954c">
       <input
         id={field.key}
         name={field.key}
         type="color"
         value={strVal || '#000000'}
         oninput={(e) => onchange((e.target as HTMLInputElement).value)}
-        class="h-10 w-14 cursor-pointer rounded-md border border-input bg-background p-1"
+        class="svadmin-u-426b8b75185b svadmin-u-7e74e5fe798a svadmin-u-34516836730d svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-eb6a3cef9686"
         disabled={disabled}
         aria-invalid={invalid || undefined}
         aria-describedby={errorId}
@@ -194,12 +194,12 @@
         value={strVal}
         oninput={(e) => onchange((e.target as HTMLInputElement).value)}
         placeholder="#000000"
-        class="max-w-32 font-mono text-sm"
+        class="svadmin-u-1d274d2422d8 svadmin-u-0e65706bcccd svadmin-u-fc7473ca09eb"
         {disabled}
       />
       {#if strVal}
         <span
-          class="h-8 w-8 rounded-full border border-border shadow-sm"
+          class="svadmin-u-ed8a5df7b2fb svadmin-u-2bbcfc3b5179 svadmin-u-ac204c108886 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-438b2237b8d6"
           style="background-color: {strVal}"
         ></span>
       {/if}
@@ -247,7 +247,7 @@
         {disabled}
         rows={10}
         placeholder={i18n.t('field.enterValue', { label: field.label })}
-        class="resize-y"
+        class="svadmin-u-5bd7b080992c"
       />
     {/if}
 
@@ -263,7 +263,7 @@
       {disabled}
       rows={4}
       placeholder={i18n.t('field.enterValue', { label: field.label })}
-      class="resize-y"
+      class="svadmin-u-5bd7b080992c"
     />
 
   {:else if field.type === 'tree-select' || field.type === 'treeselect'}
@@ -316,7 +316,7 @@
         id={field.key}
         name={field.key}
         data-slot="select"
-        class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        class="svadmin-u-60fbb7713999 svadmin-u-426b8b75185b svadmin-u-6da6a3c3f741 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b svadmin-u-fc7473ca09eb svadmin-u-582e6ef4b245 svadmin-u-9c24ab70af61 svadmin-u-55d048ebfb1c svadmin-u-608dd26cd5ba svadmin-u-80b9d0ae125f svadmin-u-6b22a22a9752 svadmin-u-5f533b3a7de7 svadmin-u-b29d8adbad2e"
         value={strVal}
         onchange={(e) => onchange((e.target as HTMLSelectElement).value)}
         required={field.required}
@@ -352,14 +352,14 @@
       <input type="hidden" name={`${field.key}[]`} value={String(selectedValue)} />
     {/each}
     <div 
-      class="space-y-2 rounded-lg border border-input p-3 max-h-48 overflow-y-auto"
+      class="svadmin-u-6f7e013d6499 svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-eb6e8b881acd svadmin-u-558f64349245 svadmin-u-92bf82f493b1"
       role="group" 
       aria-labelledby="label-{field.key}"
       aria-describedby={errorId}
       data-invalid={invalid || undefined}
     >
       {#each field.options ?? [] as opt, _i (_i)}
-        <label class="flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5 transition-colors">
+        <label class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-fc7473ca09eb svadmin-u-34516836730d svadmin-u-39f703dbe296 svadmin-u-07389a777c1f svadmin-u-d8e0e382c67b svadmin-u-465609a240a8 svadmin-u-ceb69a6b0e5f">
           <Checkbox
             id={`${field.key}-${opt.value}`}
             checked={multiVal.includes(opt.value)}
@@ -372,16 +372,16 @@
         </label>
       {/each}
       {#if !(field.options?.length)}
-        <p class="text-xs text-muted-foreground">{i18n.t('field.noOptions')}</p>
+        <p class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">{i18n.t('field.noOptions')}</p>
       {/if}
     </div>
     {#if multiVal.length > 0}
-      <div class="flex flex-wrap gap-1 mt-1">
+      <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-44ee8ba0a421 svadmin-u-b6b02c0ebef6">
         {#each multiVal as v, _i (_i)}
           {@const label = field.options?.find((o: { label: string; value: string | number }) => o.value === v)?.label ?? String(v)}
-          <Badge variant="secondary" class="gap-1">
+          <Badge variant="secondary" class="svadmin-u-44ee8ba0a421">
             {label}
-            <button type="button" onclick={() => toggleMulti(v)} class="ml-0.5 rounded-sm hover:text-destructive hover:bg-destructive/10 transition-colors" aria-label={i18n.t('common.clear')}>×</button>
+            <button type="button" onclick={() => toggleMulti(v)} class="svadmin-u-b45ce4b65d53 svadmin-u-36d4469299aa svadmin-u-51e95020d6f2 svadmin-u-8db899b4e072 svadmin-u-ceb69a6b0e5f" aria-label={i18n.t('common.clear')}>×</button>
           </Badge>
         {/each}
       </div>
@@ -389,7 +389,7 @@
 
   {:else if field.type === 'boolean'}
     <input type="hidden" name={field.key} value={String(boolVal)} />
-    <div class="flex items-center gap-2 pt-1">
+    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-6b7d6e21ccbd">
       <Switch
         id={field.key}
         checked={boolVal}
@@ -398,22 +398,22 @@
         aria-describedby={errorId}
         disabled={disabled}
       />
-      <span class="text-sm text-muted-foreground">{boolVal ? i18n.t('common.yes') : i18n.t('common.no')}</span>
+      <span class="svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">{boolVal ? i18n.t('common.yes') : i18n.t('common.no')}</span>
     </div>
 
   {:else if field.type === 'tags'}
     {#each tagsVal as tag, tagIndex (`${tag}-${tagIndex}`)}
       <input type="hidden" name={`${field.key}[]`} value={tag} />
     {/each}
-    <div class="space-y-2">
-      <div class="flex flex-wrap gap-1.5">
+    <div class="svadmin-u-6f7e013d6499">
+      <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-58284b4ea568">
         {#each tagsVal as tag, i (i)}
-          <Badge variant="secondary" class="gap-1">
+          <Badge variant="secondary" class="svadmin-u-44ee8ba0a421">
             {tag}
             <button
               type="button"
               onclick={() => removeTag(i)}
-              class="ml-0.5 rounded-sm hover:text-destructive hover:bg-destructive/10 transition-colors"
+              class="svadmin-u-b45ce4b65d53 svadmin-u-36d4469299aa svadmin-u-51e95020d6f2 svadmin-u-8db899b4e072 svadmin-u-ceb69a6b0e5f"
               aria-label={i18n.t('common.clear')}
             >×</button>
           </Badge>
@@ -447,30 +447,30 @@
     {#each imagesVal as url, imageIndex (imageIndex)}
       <input type="hidden" name={`${field.key}[]`} value={url} />
     {/each}
-    <div class="space-y-2">
+    <div class="svadmin-u-6f7e013d6499">
       {#each imagesVal as url, i (i)}
-        <div class="flex items-center gap-2">
+        <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
           <Input
             id={i === 0 ? field.key : undefined}
             type="text"
             value={url}
             oninput={(e) => updateImage(i, (e.target as HTMLInputElement).value)}
             placeholder="https://example.com/image.jpg"
-            class="flex-1"
+            class="svadmin-u-36e579c0b41c"
             aria-invalid={invalid || undefined}
             aria-describedby={errorId}
             {disabled}
           />
           {#if url}
-            <div class="size-9 shrink-0"><MediaThumbnail src={url} alt="preview" size="full" fit="cover" showOverlay={false} /></div>
+            <div class="svadmin-u-665f07fe73cc svadmin-u-012fbd121f37"><MediaThumbnail src={url} alt="preview" size="full" fit="cover" showOverlay={false} /></div>
           {/if}
-          <TooltipButton tooltip={i18n.t('common.removeImage')} variant="ghost" size="icon" class="h-8 w-8 shrink-0" onclick={() => removeImage(i)}>
-            <X class="h-3.5 w-3.5" />
+          <TooltipButton tooltip={i18n.t('common.removeImage')} variant="ghost" size="icon" class="svadmin-u-ed8a5df7b2fb svadmin-u-2bbcfc3b5179 svadmin-u-012fbd121f37" onclick={() => removeImage(i)}>
+            <X class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
           </TooltipButton>
         </div>
       {/each}
       <Button variant="outline" size="sm" type="button" onclick={addImage}>
-        <Plus class="h-3.5 w-3.5 mr-1" /> {i18n.t('field.addImage')}
+        <Plus class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-618162408e7a" /> {i18n.t('field.addImage')}
       </Button>
     </div>
 
@@ -497,7 +497,7 @@
       aria-invalid={invalid || undefined}
       aria-describedby={errorId}
       rows={6}
-      class="resize-y font-mono text-xs"
+      class="svadmin-u-5bd7b080992c svadmin-u-0e65706bcccd svadmin-u-359090c2d529"
     />
 
   {:else}

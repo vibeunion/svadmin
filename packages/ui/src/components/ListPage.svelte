@@ -54,7 +54,7 @@
   const showCreate = $derived(canCreate ?? resource.canCreate !== false);
 </script>
 
-<div class="{density === 'compact' ? 'space-y-3' : 'space-y-4'} {className}">
+<div class="{density === 'compact' ? 'svadmin-u-6ed543e2fbbb' : 'svadmin-u-3e7ce58d64fa'} {className}">
   <PageHeader title={pageTitle} {density}>
     {#snippet actions()}
       {#if showCreate}

@@ -7,8 +7,8 @@
     onOrderSave,
     renderItem,
     class: className = '',
-    columns = 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
-    gap = 'gap-4',
+    columns = 'svadmin-u-d7c8339810d3 svadmin-u-e4d6f343b9ff svadmin-u-19d9b25e8fae',
+    gap = 'svadmin-u-0c3bc98565dd',
   }: {
     modules?: GridModule[];
     onOrderSave?: (orderedIds: string[]) => void;
@@ -66,7 +66,7 @@
   }
 </script>
 
-<div class="grid {columns} {gap} {className}">
+<div class="svadmin-u-f3c543ad5fe9 {columns} {gap} {className}">
   {#each modules as mod, i (mod.id)}
     <!-- svelte-ignore a11y_no_static_element_interactions -->
     <div
@@ -76,9 +76,9 @@
       ondrop={(e) => handleDrop(e, mod.id)}
       ondragend={handleDragEnd}
       ondragleave={() => { if (dragOverId === mod.id) dragOverId = null; }}
-      class="transition-all duration-200
-        {draggingId === mod.id ? 'opacity-40 scale-[0.97] cursor-grabbing' : 'cursor-grab'}
-        {dragOverId === mod.id ? 'ring-2 ring-primary/40 ring-offset-2 ring-offset-background rounded-lg scale-[1.02]' : ''}"
+      class="svadmin-u-0fe7d7d814d0 svadmin-u-625a4c3fbeb2
+        {draggingId === mod.id ? 'svadmin-u-2a2db4667b27 svadmin-u-ad36c0242ee8 svadmin-u-a50d3377f4ac' : 'svadmin-u-8d08385288a6'}
+        {dragOverId === mod.id ? 'svadmin-u-16b1efa5875e svadmin-u-2691847b25ed svadmin-u-0c15f6cff5a0 svadmin-u-582e6ef4b245 svadmin-u-5f22e64f2282 svadmin-u-1fdf1b136104' : ''}"
     >
       {@render renderItem({ module: mod, index: i, dragging: draggingId === mod.id })}
     </div>

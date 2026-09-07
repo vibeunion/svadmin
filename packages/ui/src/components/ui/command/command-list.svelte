@@ -13,6 +13,6 @@
 	bind:ref
 	data-slot="command-list"
 	data-cmdk-list=""
-	class={cn("max-h-72 overflow-x-hidden overflow-y-auto", className)}
+	class={cn("svadmin-command-list", className)}
 	{...restProps}
 />

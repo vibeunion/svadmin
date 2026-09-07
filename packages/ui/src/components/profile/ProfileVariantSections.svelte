@@ -33,15 +33,15 @@
   const skills = ['TypeScript', 'Svelte', 'Node.js', 'GraphQL', 'Design Systems', 'Accessibility'];
   const badges: { name: string; Icon: Component; tone: string }[] = [
     // Decorative demo tones — use the chart palette, not status tokens.
-    { name: 'Top Contributor', Icon: Medal, tone: 'bg-chart-1/10 text-chart-1' },
-    { name: 'Early Adopter', Icon: Star, tone: 'bg-chart-2/10 text-chart-2' },
-    { name: 'Community Mentor', Icon: Award, tone: 'bg-chart-3/10 text-chart-3' },
-    { name: 'Launch Partner', Icon: Crown, tone: 'bg-chart-4/10 text-chart-4' },
+    { name: 'Top Contributor', Icon: Medal, tone: 'svadmin-u-133e86d6e1b8 svadmin-u-b1c4d746518d' },
+    { name: 'Early Adopter', Icon: Star, tone: 'svadmin-u-97f0119b2cac svadmin-u-0f618ab9ca2f' },
+    { name: 'Community Mentor', Icon: Award, tone: 'svadmin-u-2917dba92464 svadmin-u-c4501453167b' },
+    { name: 'Launch Partner', Icon: Crown, tone: 'svadmin-u-22fda335435d svadmin-u-ed43795e908d' },
   ];
   const recentUploads: { name: string; size: string; Icon: Component; tone: string }[] = [
-    { name: 'dashboard-spec.fig', size: '4.2 MB', Icon: Image, tone: 'bg-chart-5/10 text-chart-5' },
-    { name: 'release-notes.md', size: '18 KB', Icon: FileText, tone: 'bg-chart-2/10 text-chart-2' },
-    { name: 'assets-bundle.zip', size: '24 MB', Icon: FileArchive, tone: 'bg-chart-3/10 text-chart-3' },
+    { name: 'dashboard-spec.fig', size: '4.2 MB', Icon: Image, tone: 'svadmin-u-287a02ddc463 svadmin-u-cddd27bcad85' },
+    { name: 'release-notes.md', size: '18 KB', Icon: FileText, tone: 'svadmin-u-97f0119b2cac svadmin-u-0f618ab9ca2f' },
+    { name: 'assets-bundle.zip', size: '24 MB', Icon: FileArchive, tone: 'svadmin-u-2917dba92464 svadmin-u-c4501453167b' },
   ];
   const contributors = ['Mia Torres', 'Chen Wei', 'Ava Novak', 'Liam Ortiz', 'Sofia Petrova', '+8'];
 
@@ -93,41 +93,41 @@
 </script>
 
 {#snippet projectsTable()}
-  <Card.Card class="border-border/60">
-    <Card.CardHeader class="pb-3">
-      <div class="flex items-center justify-between">
-        <Card.CardTitle class="text-base">{i18n.t('profileSections.projects')}</Card.CardTitle>
+  <Card.Card class="svadmin-u-05faf5c801ff">
+    <Card.CardHeader class="svadmin-u-7fcf9124b5df">
+      <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc">
+        <Card.CardTitle class="svadmin-u-4ee734926ff6">{i18n.t('profileSections.projects')}</Card.CardTitle>
         <Button variant="ghost" size="sm">{i18n.t('profileSections.viewAll')}</Button>
       </div>
     </Card.CardHeader>
-    <Card.CardContent class="p-0">
+    <Card.CardContent class="svadmin-u-8a539c7fe216">
       <Table.Root>
         <Table.Header>
           <Table.Row>
             <Table.Head>{i18n.t('profileSections.projectName')}</Table.Head>
-            <Table.Head class="w-40">{i18n.t('profileSections.progress')}</Table.Head>
+            <Table.Head class="svadmin-u-84789e8a20cd">{i18n.t('profileSections.progress')}</Table.Head>
             <Table.Head>{i18n.t('profileSections.people')}</Table.Head>
-            <Table.Head class="text-right">{i18n.t('profileSections.dueDate')}</Table.Head>
+            <Table.Head class="svadmin-u-308fc069e46e">{i18n.t('profileSections.dueDate')}</Table.Head>
           </Table.Row>
         </Table.Header>
         <Table.Body>
           {#each projectRows as row (row.name)}
             <Table.Row>
-              <Table.Cell class="font-medium">{row.name}</Table.Cell>
+              <Table.Cell class="svadmin-u-2689f3958069">{row.name}</Table.Cell>
               <Table.Cell>
-                <div class="flex items-center gap-2">
-                  <Progress value={row.progress} class="h-1.5 flex-1" />
-                  <span class="w-9 text-right text-xs text-muted-foreground">{row.progress}%</span>
+                <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
+                  <Progress value={row.progress} class="svadmin-u-095acb275581 svadmin-u-36e579c0b41c" />
+                  <span class="svadmin-u-ae2181c7b10f svadmin-u-308fc069e46e svadmin-u-359090c2d529 svadmin-u-bfa603190748">{row.progress}%</span>
                 </div>
               </Table.Cell>
               <Table.Cell>
-                <div class="flex -space-x-1.5">
+                <div class="svadmin-u-60fbb7713999 svadmin-u-27c43bea29d4">
                   {#each row.people as person (person)}
-                    <div class="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-[9px] font-semibold text-muted-foreground ring-2 ring-card">{person}</div>
+                    <div class="svadmin-u-60fbb7713999 svadmin-u-f6fe902450dc svadmin-u-7ec10f86d9b1 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-ac204c108886 svadmin-u-2ef11f1cb219 svadmin-u-e09880869d1f svadmin-u-e83a7042bc91 svadmin-u-bfa603190748 svadmin-u-16b1efa5875e svadmin-u-21752b56424c">{person}</div>
                   {/each}
                 </div>
               </Table.Cell>
-              <Table.Cell class="text-right text-muted-foreground">{row.due}</Table.Cell>
+              <Table.Cell class="svadmin-u-308fc069e46e svadmin-u-bfa603190748">{row.due}</Table.Cell>
             </Table.Row>
           {/each}
         </Table.Body>
@@ -137,18 +137,18 @@
 {/snippet}
 
 {#snippet badgesCard()}
-  <Card.Card class="border-border/60">
-    <Card.CardHeader class="pb-3">
-      <Card.CardTitle class="text-base">{i18n.t('profileSections.communityBadges')}</Card.CardTitle>
+  <Card.Card class="svadmin-u-05faf5c801ff">
+    <Card.CardHeader class="svadmin-u-7fcf9124b5df">
+      <Card.CardTitle class="svadmin-u-4ee734926ff6">{i18n.t('profileSections.communityBadges')}</Card.CardTitle>
     </Card.CardHeader>
     <Card.CardContent>
-      <div class="grid grid-cols-2 gap-2">
+      <div class="svadmin-u-f3c543ad5fe9 svadmin-u-8e75e3db482b svadmin-u-77a2a20e90d4">
         {#each badges as badge (badge.name)}
-          <div class="flex items-center gap-2 rounded-lg border border-border/60 p-2.5">
-            <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg {badge.tone}">
-              <badge.Icon class="h-4 w-4" />
+          <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-05faf5c801ff svadmin-u-9fe52d5d506c">
+            <div class="svadmin-u-60fbb7713999 svadmin-u-ed8a5df7b2fb svadmin-u-2bbcfc3b5179 svadmin-u-012fbd121f37 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-5f22e64f2282 {badge.tone}">
+              <badge.Icon class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
             </div>
-            <span class="text-xs font-medium text-foreground">{badge.name}</span>
+            <span class="svadmin-u-359090c2d529 svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{badge.name}</span>
           </div>
         {/each}
       </div>
@@ -157,45 +157,45 @@
 {/snippet}
 
 {#if variant === 'default'}
-  <div class="grid gap-4 lg:grid-cols-3">
-    <div class="space-y-4">
-      <Card.Card class="border-border/60">
-        <Card.CardHeader class="pb-3">
-          <Card.CardTitle class="text-base">{i18n.t('profileSections.about')}</Card.CardTitle>
+  <div class="svadmin-u-f3c543ad5fe9 svadmin-u-0c3bc98565dd svadmin-u-19d9b25e8fae">
+    <div class="svadmin-u-3e7ce58d64fa">
+      <Card.Card class="svadmin-u-05faf5c801ff">
+        <Card.CardHeader class="svadmin-u-7fcf9124b5df">
+          <Card.CardTitle class="svadmin-u-4ee734926ff6">{i18n.t('profileSections.about')}</Card.CardTitle>
         </Card.CardHeader>
-        <Card.CardContent class="space-y-2.5 text-sm">
-          <p class="text-muted-foreground">Full-stack developer focused on design systems and developer tooling. Building in the open.</p>
-          <div class="flex items-center gap-2 text-muted-foreground"><Briefcase class="h-3.5 w-3.5" />Nebula Labs</div>
-          <div class="flex items-center gap-2 text-muted-foreground"><MapPin class="h-3.5 w-3.5" />Shanghai, CN</div>
-          <div class="flex items-center gap-2 text-muted-foreground"><Globe class="h-3.5 w-3.5" />alexchen.dev</div>
+        <Card.CardContent class="svadmin-u-14dd497ee9c5 svadmin-u-fc7473ca09eb">
+          <p class="svadmin-u-bfa603190748">Full-stack developer focused on design systems and developer tooling. Building in the open.</p>
+          <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-bfa603190748"><Briefcase class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />Nebula Labs</div>
+          <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-bfa603190748"><MapPin class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />Shanghai, CN</div>
+          <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-bfa603190748"><Globe class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />alexchen.dev</div>
         </Card.CardContent>
       </Card.Card>
 
-      <Card.Card class="border-border/60">
-        <Card.CardHeader class="pb-3">
-          <Card.CardTitle class="text-base">{i18n.t('profileSections.workExperience')}</Card.CardTitle>
+      <Card.Card class="svadmin-u-05faf5c801ff">
+        <Card.CardHeader class="svadmin-u-7fcf9124b5df">
+          <Card.CardTitle class="svadmin-u-4ee734926ff6">{i18n.t('profileSections.workExperience')}</Card.CardTitle>
         </Card.CardHeader>
-        <Card.CardContent class="space-y-3">
+        <Card.CardContent class="svadmin-u-6ed543e2fbbb">
           {#each workExperience as job (job.company)}
-            <div class="flex items-start justify-between gap-2">
+            <div class="svadmin-u-60fbb7713999 svadmin-u-60541e1e26f8 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4">
               <div>
-                <p class="text-sm font-medium text-foreground">{job.role}</p>
-                <p class="text-xs text-muted-foreground">{job.company}</p>
+                <p class="svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{job.role}</p>
+                <p class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">{job.company}</p>
               </div>
-              <span class="shrink-0 text-xs text-muted-foreground">{job.period}{#if job.current}{i18n.t('profileSections.present')}{/if}</span>
+              <span class="svadmin-u-012fbd121f37 svadmin-u-359090c2d529 svadmin-u-bfa603190748">{job.period}{#if job.current}{i18n.t('profileSections.present')}{/if}</span>
             </div>
           {/each}
         </Card.CardContent>
       </Card.Card>
 
-      <Card.Card class="border-border/60">
-        <Card.CardHeader class="pb-3">
-          <Card.CardTitle class="text-base">{i18n.t('profileSections.skills')}</Card.CardTitle>
+      <Card.Card class="svadmin-u-05faf5c801ff">
+        <Card.CardHeader class="svadmin-u-7fcf9124b5df">
+          <Card.CardTitle class="svadmin-u-4ee734926ff6">{i18n.t('profileSections.skills')}</Card.CardTitle>
         </Card.CardHeader>
         <Card.CardContent>
-          <div class="flex flex-wrap gap-1.5">
+          <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-58284b4ea568">
             {#each skills as skill (skill)}
-              <Badge variant="secondary" class="text-xs">{skill}</Badge>
+              <Badge variant="secondary" class="svadmin-u-359090c2d529">{skill}</Badge>
             {/each}
           </div>
         </Card.CardContent>
@@ -204,37 +204,37 @@
       {@render badgesCard()}
     </div>
 
-    <div class="space-y-4 lg:col-span-2">
+    <div class="svadmin-u-3e7ce58d64fa svadmin-u-422d10025c0d">
       {@render projectsTable()}
 
-      <div class="grid gap-4 sm:grid-cols-2">
-        <Card.Card class="border-border/60">
-          <Card.CardHeader class="pb-3">
-            <Card.CardTitle class="text-base">{i18n.t('profileSections.recentUploads')}</Card.CardTitle>
+      <div class="svadmin-u-f3c543ad5fe9 svadmin-u-0c3bc98565dd svadmin-u-e00ad81645a2">
+        <Card.Card class="svadmin-u-05faf5c801ff">
+          <Card.CardHeader class="svadmin-u-7fcf9124b5df">
+            <Card.CardTitle class="svadmin-u-4ee734926ff6">{i18n.t('profileSections.recentUploads')}</Card.CardTitle>
           </Card.CardHeader>
-          <Card.CardContent class="space-y-2.5">
+          <Card.CardContent class="svadmin-u-14dd497ee9c5">
             {#each recentUploads as file (file.name)}
-              <div class="flex items-center gap-3">
-                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg {file.tone}">
-                  <file.Icon class="h-4 w-4" />
+              <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-1004c0c3954c">
+                <div class="svadmin-u-60fbb7713999 svadmin-u-e7a768f922d2 svadmin-u-ae2181c7b10f svadmin-u-012fbd121f37 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-5f22e64f2282 {file.tone}">
+                  <file.Icon class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
                 </div>
-                <div class="min-w-0 flex-1">
-                  <p class="truncate text-sm font-medium text-foreground">{file.name}</p>
-                  <p class="text-xs text-muted-foreground">{file.size}</p>
+                <div class="svadmin-u-7e0b7cdf1a94 svadmin-u-36e579c0b41c">
+                  <p class="svadmin-u-f283ea9bea0e svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{file.name}</p>
+                  <p class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">{file.size}</p>
                 </div>
               </div>
             {/each}
           </Card.CardContent>
         </Card.Card>
 
-        <Card.Card class="border-border/60">
-          <Card.CardHeader class="pb-3">
-            <Card.CardTitle class="text-base">{i18n.t('profileSections.contributors')}</Card.CardTitle>
+        <Card.Card class="svadmin-u-05faf5c801ff">
+          <Card.CardHeader class="svadmin-u-7fcf9124b5df">
+            <Card.CardTitle class="svadmin-u-4ee734926ff6">{i18n.t('profileSections.contributors')}</Card.CardTitle>
           </Card.CardHeader>
           <Card.CardContent>
-            <div class="flex flex-wrap gap-1.5">
+            <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-58284b4ea568">
               {#each contributors as person (person)}
-                <div class="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-[10px] font-semibold text-muted-foreground ring-2 ring-card" title={person}>
+                <div class="svadmin-u-60fbb7713999 svadmin-u-e7a768f922d2 svadmin-u-ae2181c7b10f svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-ac204c108886 svadmin-u-2ef11f1cb219 svadmin-u-1dc571a3609f svadmin-u-e83a7042bc91 svadmin-u-bfa603190748 svadmin-u-16b1efa5875e svadmin-u-21752b56424c" title={person}>
                   {person.startsWith('+') ? person : initials(person)}
                 </div>
               {/each}
@@ -245,49 +245,49 @@
     </div>
   </div>
 {:else if variant === 'company'}
-  <div class="space-y-4">
-    <div class="grid gap-4 sm:grid-cols-3">
+  <div class="svadmin-u-3e7ce58d64fa">
+    <div class="svadmin-u-f3c543ad5fe9 svadmin-u-0c3bc98565dd svadmin-u-ab1b20c2292a">
       {#each highlights as item (item.label)}
-        <Card.Card class="border-border/60">
-          <Card.CardContent class="p-4">
-            <p class="text-xs text-muted-foreground">{item.label}</p>
-            <div class="mt-1 flex items-baseline gap-2">
-              <span class="text-xl font-bold text-foreground">{item.value}</span>
-              <span class="flex items-center gap-0.5 text-xs font-medium text-success"><TrendingUp class="h-3 w-3" />{item.delta}</span>
+        <Card.Card class="svadmin-u-05faf5c801ff">
+          <Card.CardContent class="svadmin-u-8e63407b5ceb">
+            <p class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">{item.label}</p>
+            <div class="svadmin-u-b6b02c0ebef6 svadmin-u-60fbb7713999 svadmin-u-b7012bb243cc svadmin-u-77a2a20e90d4">
+              <span class="svadmin-u-d5c9b0001e7e svadmin-u-69450ef1487e svadmin-u-d4108abe6359">{item.value}</span>
+              <span class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-a3899220f90e svadmin-u-359090c2d529 svadmin-u-2689f3958069 svadmin-u-76747e5e02ff"><TrendingUp class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />{item.delta}</span>
             </div>
           </Card.CardContent>
         </Card.Card>
       {/each}
     </div>
 
-    <div class="grid gap-4 lg:grid-cols-3">
-      <div class="lg:col-span-2">
+    <div class="svadmin-u-f3c543ad5fe9 svadmin-u-0c3bc98565dd svadmin-u-19d9b25e8fae">
+      <div class="svadmin-u-422d10025c0d">
         {@render projectsTable()}
       </div>
 
-      <div class="space-y-4">
-        <Card.Card class="border-border/60">
-          <Card.CardHeader class="pb-3">
-            <Card.CardTitle class="text-base">{i18n.t('profileSections.openJobs')}</Card.CardTitle>
+      <div class="svadmin-u-3e7ce58d64fa">
+        <Card.Card class="svadmin-u-05faf5c801ff">
+          <Card.CardHeader class="svadmin-u-7fcf9124b5df">
+            <Card.CardTitle class="svadmin-u-4ee734926ff6">{i18n.t('profileSections.openJobs')}</Card.CardTitle>
           </Card.CardHeader>
-          <Card.CardContent class="space-y-3">
+          <Card.CardContent class="svadmin-u-6ed543e2fbbb">
             {#each openJobs as job (job.title)}
               <div>
-                <p class="text-sm font-medium text-foreground">{job.title}</p>
-                <p class="text-xs text-muted-foreground">{job.location} · {job.type}</p>
+                <p class="svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{job.title}</p>
+                <p class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">{job.location} · {job.type}</p>
               </div>
             {/each}
           </Card.CardContent>
         </Card.Card>
 
-        <Card.Card class="border-border/60">
-          <Card.CardHeader class="pb-3">
-            <Card.CardTitle class="text-base">{i18n.t('profileSections.locations')}</Card.CardTitle>
+        <Card.Card class="svadmin-u-05faf5c801ff">
+          <Card.CardHeader class="svadmin-u-7fcf9124b5df">
+            <Card.CardTitle class="svadmin-u-4ee734926ff6">{i18n.t('profileSections.locations')}</Card.CardTitle>
           </Card.CardHeader>
-          <Card.CardContent class="space-y-2">
+          <Card.CardContent class="svadmin-u-6f7e013d6499">
             {#each locations as loc (loc)}
-              <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                <Building2 class="h-3.5 w-3.5" />{loc}
+              <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">
+                <Building2 class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />{loc}
               </div>
             {/each}
           </Card.CardContent>
@@ -295,15 +295,15 @@
       </div>
     </div>
 
-    <div class="grid gap-4 sm:grid-cols-2">
-      <Card.Card class="border-border/60">
-        <Card.CardHeader class="pb-3">
-          <Card.CardTitle class="text-base">{i18n.t('profileSections.members')}</Card.CardTitle>
+    <div class="svadmin-u-f3c543ad5fe9 svadmin-u-0c3bc98565dd svadmin-u-e00ad81645a2">
+      <Card.Card class="svadmin-u-05faf5c801ff">
+        <Card.CardHeader class="svadmin-u-7fcf9124b5df">
+          <Card.CardTitle class="svadmin-u-4ee734926ff6">{i18n.t('profileSections.members')}</Card.CardTitle>
         </Card.CardHeader>
         <Card.CardContent>
-          <div class="flex flex-wrap gap-1.5">
+          <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-58284b4ea568">
             {#each companyMembers as person (person)}
-              <div class="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-[10px] font-semibold text-muted-foreground ring-2 ring-card" title={person}>
+              <div class="svadmin-u-60fbb7713999 svadmin-u-e7a768f922d2 svadmin-u-ae2181c7b10f svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-ac204c108886 svadmin-u-2ef11f1cb219 svadmin-u-1dc571a3609f svadmin-u-e83a7042bc91 svadmin-u-bfa603190748 svadmin-u-16b1efa5875e svadmin-u-21752b56424c" title={person}>
                 {person.startsWith('+') ? person : initials(person)}
               </div>
             {/each}
@@ -311,15 +311,15 @@
         </Card.CardContent>
       </Card.Card>
 
-      <Card.Card class="border-border/60">
-        <Card.CardHeader class="pb-3">
-          <Card.CardTitle class="text-base">{i18n.t('profileSections.investments')}</Card.CardTitle>
+      <Card.Card class="svadmin-u-05faf5c801ff">
+        <Card.CardHeader class="svadmin-u-7fcf9124b5df">
+          <Card.CardTitle class="svadmin-u-4ee734926ff6">{i18n.t('profileSections.investments')}</Card.CardTitle>
         </Card.CardHeader>
-        <Card.CardContent class="space-y-2.5">
+        <Card.CardContent class="svadmin-u-14dd497ee9c5">
           {#each investments as inv (inv.round)}
-            <div class="flex items-center justify-between text-sm">
-              <span class="font-medium text-foreground">{inv.round}</span>
-              <span class="text-muted-foreground">{inv.amount} · {inv.date}</span>
+            <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-fc7473ca09eb">
+              <span class="svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{inv.round}</span>
+              <span class="svadmin-u-bfa603190748">{inv.amount} · {inv.date}</span>
             </div>
           {/each}
         </Card.CardContent>
@@ -327,70 +327,70 @@
     </div>
   </div>
 {:else}
-  <div class="grid gap-4 lg:grid-cols-3">
-    <div class="space-y-4">
-      <Card.Card class="border-border/60">
-        <Card.CardHeader class="pb-3">
-          <Card.CardTitle class="text-base">{i18n.t('profileSections.about')}</Card.CardTitle>
+  <div class="svadmin-u-f3c543ad5fe9 svadmin-u-0c3bc98565dd svadmin-u-19d9b25e8fae">
+    <div class="svadmin-u-3e7ce58d64fa">
+      <Card.Card class="svadmin-u-05faf5c801ff">
+        <Card.CardHeader class="svadmin-u-7fcf9124b5df">
+          <Card.CardTitle class="svadmin-u-4ee734926ff6">{i18n.t('profileSections.about')}</Card.CardTitle>
         </Card.CardHeader>
-        <Card.CardContent class="space-y-2.5 text-sm">
-          <p class="text-muted-foreground">Pro gamer & content creator. Competing in FPS tournaments and streaming daily.</p>
-          <div class="flex items-center gap-2 text-muted-foreground"><Gamepad2 class="h-3.5 w-3.5" />ShadowFox#7742</div>
-          <div class="flex items-center gap-2 text-muted-foreground"><MapPin class="h-3.5 w-3.5" />Seoul, KR</div>
+        <Card.CardContent class="svadmin-u-14dd497ee9c5 svadmin-u-fc7473ca09eb">
+          <p class="svadmin-u-bfa603190748">Pro gamer & content creator. Competing in FPS tournaments and streaming daily.</p>
+          <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-bfa603190748"><Gamepad2 class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />ShadowFox#7742</div>
+          <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-bfa603190748"><MapPin class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />Seoul, KR</div>
         </Card.CardContent>
       </Card.Card>
 
-      <Card.Card class="border-border/60">
-        <Card.CardHeader class="pb-3">
-          <Card.CardTitle class="flex items-center gap-2 text-base">
-            <Gamepad2 class="h-4 w-4 text-muted-foreground" />{i18n.t('profileSections.favoriteGames')}
+      <Card.Card class="svadmin-u-05faf5c801ff">
+        <Card.CardHeader class="svadmin-u-7fcf9124b5df">
+          <Card.CardTitle class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-4ee734926ff6">
+            <Gamepad2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-bfa603190748" />{i18n.t('profileSections.favoriteGames')}
           </Card.CardTitle>
         </Card.CardHeader>
-        <Card.CardContent class="space-y-3">
+        <Card.CardContent class="svadmin-u-6ed543e2fbbb">
           {#each favoriteGames as game (game.name)}
-            <div class="flex items-center justify-between gap-2">
+            <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4">
               <div>
-                <p class="text-sm font-medium text-foreground">{game.name}</p>
-                <p class="text-xs text-muted-foreground">{game.hours}</p>
+                <p class="svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{game.name}</p>
+                <p class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">{game.hours}</p>
               </div>
-              <Badge variant="secondary" class="text-[10px]">{game.rank}</Badge>
+              <Badge variant="secondary" class="svadmin-u-1dc571a3609f">{game.rank}</Badge>
             </div>
           {/each}
         </Card.CardContent>
       </Card.Card>
 
-      <Card.Card class="border-primary/30 bg-primary/5">
-        <Card.CardHeader class="pb-3">
-          <Card.CardTitle class="flex items-center gap-2 text-base">
-            <Play class="h-4 w-4 text-primary" />{i18n.t('profileSections.nowPlaying')}
+      <Card.Card class="svadmin-u-05f954a846d6 svadmin-u-989c466fdbe7">
+        <Card.CardHeader class="svadmin-u-7fcf9124b5df">
+          <Card.CardTitle class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-4ee734926ff6">
+            <Play class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-20aaf08a7ed1" />{i18n.t('profileSections.nowPlaying')}
           </Card.CardTitle>
         </Card.CardHeader>
         <Card.CardContent>
-          <p class="text-sm font-medium text-foreground">Starfall Odyssey — Ranked</p>
-          <p class="mt-1 text-xs text-muted-foreground">Streaming live for 2.4K viewers</p>
-          <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-primary/15">
-            <div class="h-full w-2/3 rounded-full bg-primary"></div>
+          <p class="svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-d4108abe6359">Starfall Odyssey — Ranked</p>
+          <p class="svadmin-u-b6b02c0ebef6 svadmin-u-359090c2d529 svadmin-u-bfa603190748">Streaming live for 2.4K viewers</p>
+          <div class="svadmin-u-eccd13ef4f2f svadmin-u-095acb275581 svadmin-u-2cd02d11d1af svadmin-u-ac204c108886 svadmin-u-30f13f694038">
+            <div class="svadmin-u-668b21aa5409 svadmin-u-f09b0bbad9dd svadmin-u-ac204c108886 svadmin-u-75b1bec3ea0e"></div>
           </div>
         </Card.CardContent>
       </Card.Card>
 
       {@render badgesCard()}
 
-      <Card.Card class="border-border/60">
-        <Card.CardHeader class="pb-3">
-          <Card.CardTitle class="flex items-center gap-2 text-base">
-            <Users class="h-4 w-4 text-muted-foreground" />{i18n.t('profileSections.team')}
+      <Card.Card class="svadmin-u-05faf5c801ff">
+        <Card.CardHeader class="svadmin-u-7fcf9124b5df">
+          <Card.CardTitle class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-4ee734926ff6">
+            <Users class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-bfa603190748" />{i18n.t('profileSections.team')}
           </Card.CardTitle>
         </Card.CardHeader>
-        <Card.CardContent class="space-y-2.5">
+        <Card.CardContent class="svadmin-u-14dd497ee9c5">
           {#each [{ name: 'VortexQueen', role: 'IGL' }, { name: 'NoScopeNina', role: 'AWPer' }, { name: 'PixelPunk', role: 'Support' }] as mate (mate.name)}
-            <div class="flex items-center gap-2.5">
-              <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-[10px] font-semibold text-muted-foreground">
+            <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-7e9a2a250cc3">
+              <div class="svadmin-u-60fbb7713999 svadmin-u-ed8a5df7b2fb svadmin-u-2bbcfc3b5179 svadmin-u-012fbd121f37 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-ac204c108886 svadmin-u-2ef11f1cb219 svadmin-u-1dc571a3609f svadmin-u-e83a7042bc91 svadmin-u-bfa603190748">
                 {initials(mate.name)}
               </div>
-              <div class="min-w-0">
-                <p class="truncate text-sm font-medium text-foreground">{mate.name}</p>
-                <p class="text-xs text-muted-foreground">{mate.role}</p>
+              <div class="svadmin-u-7e0b7cdf1a94">
+                <p class="svadmin-u-f283ea9bea0e svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{mate.name}</p>
+                <p class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">{mate.role}</p>
               </div>
             </div>
           {/each}
@@ -398,28 +398,28 @@
       </Card.Card>
     </div>
 
-    <div class="space-y-4 lg:col-span-2">
-      <Card.Card class="border-border/60">
-        <Card.CardHeader class="pb-3">
-          <Card.CardTitle class="flex items-center gap-2 text-base">
-            <Trophy class="h-4 w-4 text-muted-foreground" />{i18n.t('profileSections.tournaments')}
+    <div class="svadmin-u-3e7ce58d64fa svadmin-u-422d10025c0d">
+      <Card.Card class="svadmin-u-05faf5c801ff">
+        <Card.CardHeader class="svadmin-u-7fcf9124b5df">
+          <Card.CardTitle class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-4ee734926ff6">
+            <Trophy class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-bfa603190748" />{i18n.t('profileSections.tournaments')}
           </Card.CardTitle>
         </Card.CardHeader>
-        <Card.CardContent class="p-0">
+        <Card.CardContent class="svadmin-u-8a539c7fe216">
           <Table.Root>
             <Table.Header>
               <Table.Row>
                 <Table.Head>{i18n.t('profileSections.tournaments')}</Table.Head>
                 <Table.Head>{i18n.t('profileSections.progress')}</Table.Head>
-                <Table.Head class="text-right">{i18n.t('account.amount')}</Table.Head>
+                <Table.Head class="svadmin-u-308fc069e46e">{i18n.t('account.amount')}</Table.Head>
               </Table.Row>
             </Table.Header>
             <Table.Body>
               {#each tournaments as t (t.name)}
                 <Table.Row>
-                  <Table.Cell class="font-medium">{t.name}</Table.Cell>
-                  <Table.Cell><Badge variant="secondary" class="text-[10px]">{t.result}</Badge></Table.Cell>
-                  <Table.Cell class="text-right text-muted-foreground">{t.prize}</Table.Cell>
+                  <Table.Cell class="svadmin-u-2689f3958069">{t.name}</Table.Cell>
+                  <Table.Cell><Badge variant="secondary" class="svadmin-u-1dc571a3609f">{t.result}</Badge></Table.Cell>
+                  <Table.Cell class="svadmin-u-308fc069e46e svadmin-u-bfa603190748">{t.prize}</Table.Cell>
                 </Table.Row>
               {/each}
             </Table.Body>
@@ -427,16 +427,16 @@
         </Card.CardContent>
       </Card.Card>
 
-      <Card.Card class="border-border/60">
-        <Card.CardHeader class="pb-3">
-          <Card.CardTitle class="flex items-center gap-2 text-base">
-            <Users class="h-4 w-4 text-muted-foreground" />{i18n.t('profileSections.network')}
+      <Card.Card class="svadmin-u-05faf5c801ff">
+        <Card.CardHeader class="svadmin-u-7fcf9124b5df">
+          <Card.CardTitle class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-4ee734926ff6">
+            <Users class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-bfa603190748" />{i18n.t('profileSections.network')}
           </Card.CardTitle>
         </Card.CardHeader>
         <Card.CardContent>
-          <div class="flex flex-wrap gap-1.5">
+          <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-58284b4ea568">
             {#each gamerNetwork as person (person)}
-              <div class="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-[10px] font-semibold text-muted-foreground ring-2 ring-card" title={person}>
+              <div class="svadmin-u-60fbb7713999 svadmin-u-e7a768f922d2 svadmin-u-ae2181c7b10f svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-ac204c108886 svadmin-u-2ef11f1cb219 svadmin-u-1dc571a3609f svadmin-u-e83a7042bc91 svadmin-u-bfa603190748 svadmin-u-16b1efa5875e svadmin-u-21752b56424c" title={person}>
                 {person.startsWith('+') ? person : initials(person)}
               </div>
             {/each}
@@ -445,7 +445,7 @@
       </Card.Card>
 
       <div>
-        <h4 class="mb-3 text-base font-semibold text-foreground">{i18n.t('profileSections.recentActivity')}</h4>
+        <h4 class="svadmin-u-1bb883263ed2 svadmin-u-4ee734926ff6 svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{i18n.t('profileSections.recentActivity')}</h4>
         <ActivityTimeline activities={gamerActivities} showAutoRefresh={false} />
       </div>
     </div>

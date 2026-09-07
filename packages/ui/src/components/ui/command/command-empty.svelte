@@ -13,6 +13,6 @@
 	bind:ref
 	data-slot="command-empty"
 	data-cmdk-empty=""
-	class={cn("py-6 text-center text-sm", className)}
+	class={cn("svadmin-command-empty", className)}
 	{...restProps}
 />

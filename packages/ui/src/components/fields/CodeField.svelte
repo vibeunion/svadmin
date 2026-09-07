@@ -70,13 +70,13 @@
 </script>
 
 {#if !formattedCode}
-  <span class={cn('field-code text-muted-foreground text-sm', className)}>{nullLabel}</span>
+  <span class={cn('field-code svadmin-u-bfa603190748 svadmin-u-fc7473ca09eb', className)}>{nullLabel}</span>
 {:else}
-  <div class={cn('field-code relative group rounded-md border border-border/80 bg-muted/40 text-xs font-mono', className)}>
+  <div class={cn('field-code svadmin-u-d89972fe17d6 group svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-c9ed8c5f79ae svadmin-u-b00f43c30c2b svadmin-u-359090c2d529 svadmin-u-0e65706bcccd', className)}>
     {#if language || copyable}
-      <div class="flex items-center justify-between border-b border-border/60 bg-muted/60 px-2.5 py-1 text-[11px] text-muted-foreground">
+      <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff svadmin-u-706701550477 svadmin-u-0b91436debbd svadmin-u-660d2effb880 svadmin-u-d058ca6de60f svadmin-u-bfa603190748">
         {#if language}
-          <Badge variant="outline" class="h-4 px-1 text-[10px] font-mono">
+          <Badge variant="outline" class="svadmin-u-11e59c6d5f6b svadmin-u-d8e0e382c67b svadmin-u-1dc571a3609f svadmin-u-0e65706bcccd">
             {language.toUpperCase()}
           </Badge>
         {:else}
@@ -86,23 +86,23 @@
         {#if copyable}
           <button
             type="button"
-            class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-muted-foreground hover:text-foreground hover:bg-background/80 transition-colors focus:outline-none focus:ring-1 focus:ring-ring"
+            class="svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421 svadmin-u-07389a777c1f svadmin-u-45d828117213 svadmin-u-465609a240a8 svadmin-u-bfa603190748 svadmin-u-ea7b2e9e070e svadmin-u-783c2dcc5172 svadmin-u-ceb69a6b0e5f svadmin-u-55d048ebfb1c svadmin-u-0f3af40e92e8 svadmin-u-80b9d0ae125f"
             onclick={handleCopy}
             title={copied ? copiedTitle : title}
             aria-label={copied ? copiedTitle : title}
           >
             {#if copied}
-              <Check class="h-3 w-3 text-success animate-in zoom-in-50" />
-              <span class="text-[10px] text-success">{copiedTitle}</span>
+              <Check class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29 svadmin-u-76747e5e02ff svadmin-u-40137e897961 zoom-in-50" />
+              <span class="svadmin-u-1dc571a3609f svadmin-u-76747e5e02ff">{copiedTitle}</span>
             {:else}
-              <Copy class="h-3 w-3" />
-              <span class="text-[10px]">{title}</span>
+              <Copy class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
+              <span class="svadmin-u-1dc571a3609f">{title}</span>
             {/if}
           </button>
         {/if}
       </div>
     {/if}
 
-    <pre class={cn('p-2.5 overflow-x-auto overflow-y-auto leading-relaxed select-all', maxHeight)}><code>{formattedCode}</code></pre>
+    <pre class={cn('svadmin-u-9fe52d5d506c svadmin-u-1384f66f41d0 svadmin-u-92bf82f493b1 svadmin-u-6b189c6edadb svadmin-u-8078c71d23ee', maxHeight)}><code>{formattedCode}</code></pre>
   </div>
 {/if}

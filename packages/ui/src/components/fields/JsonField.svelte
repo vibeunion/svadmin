@@ -34,41 +34,41 @@
 </script>
 
 {#if value == null}
-  <span class="text-muted-foreground">—</span>
+  <span class="svadmin-u-bfa603190748">—</span>
 {:else}
-  <div class="space-y-1">
-    <div class="flex items-center gap-2">
+  <div class="svadmin-u-da7c36cd8867">
+    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
       <Button
         variant="ghost"
         size="sm"
-        class="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground h-auto py-0.5 px-1"
+        class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421 svadmin-u-359090c2d529 svadmin-u-bfa603190748 svadmin-u-ea7b2e9e070e svadmin-u-b8f0a08ece1e svadmin-u-465609a240a8 svadmin-u-d8e0e382c67b"
         onclick={() => { expanded = !expanded; }}
       >
         {#if expanded}
-          <ChevronDown class="h-3 w-3" />
+          <ChevronDown class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
         {:else}
-          <ChevronRight class="h-3 w-3" />
+          <ChevronRight class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
         {/if}
         {expanded ? i18n.t('common.collapse') : i18n.t('common.expand')}
       </Button>
       <Button
         variant="ghost"
         size="sm"
-        class="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground h-auto py-0.5 px-1"
+        class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421 svadmin-u-359090c2d529 svadmin-u-bfa603190748 svadmin-u-ea7b2e9e070e svadmin-u-b8f0a08ece1e svadmin-u-465609a240a8 svadmin-u-d8e0e382c67b"
         onclick={copyJson}
         aria-label={i18n.t('common.copy')}
       >
         {#if copied}
-          <Check class="h-3 w-3 text-success" />
+          <Check class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29 svadmin-u-76747e5e02ff" />
         {:else}
-          <Copy class="h-3 w-3" />
+          <Copy class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
         {/if}
       </Button>
     </div>
     {#if expanded}
-      <pre class="rounded-lg bg-muted p-3 text-xs overflow-auto max-h-64 font-mono">{formatted}</pre>
+      <pre class="svadmin-u-5f22e64f2282 svadmin-u-2ef11f1cb219 svadmin-u-eb6e8b881acd svadmin-u-359090c2d529 svadmin-u-73fc3fb18ceb svadmin-u-8aee2b07b47d svadmin-u-0e65706bcccd">{formatted}</pre>
     {:else}
-      <code class="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">{preview}</code>
+      <code class="svadmin-u-359090c2d529 svadmin-u-0e65706bcccd svadmin-u-2ef11f1cb219 svadmin-u-45d828117213 svadmin-u-465609a240a8 svadmin-u-07389a777c1f">{preview}</code>
     {/if}
   </div>
 {/if}

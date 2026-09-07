@@ -24,7 +24,7 @@
     title = "",
     description = "",
     side = "right",
-    width = "max-w-md w-full sm:max-w-lg",
+    width = "svadmin-u-9794ab45094d svadmin-u-6da6a3c3f741 svadmin-u-a09a722d3ce4",
     ref = $bindable(null),
     class: className,
     "aria-label": ariaLabel,
@@ -52,7 +52,7 @@
   {side}
   onClose={handleClose}
   {closeLabel}
-  class={cn("gap-0 p-0 overflow-hidden", width, className)}
+  class={cn("svadmin-u-63a285be6490 svadmin-u-8a539c7fe216 svadmin-u-2cd02d11d1af", width, className)}
   role="dialog"
   aria-modal="true"
   aria-label={(ariaLabelledby || titleId) ? ariaLabel : (ariaLabel || title || "Details")}
@@ -60,11 +60,11 @@
   aria-describedby={ariaDescribedby || (descriptionId ? descriptionId : undefined)}
   {...restProps}
 >
-  <Sheet.Content class="flex h-full flex-col gap-0 p-0">
+  <Sheet.Content class="svadmin-u-60fbb7713999 svadmin-u-668b21aa5409 svadmin-u-8dddea0773ed svadmin-u-63a285be6490 svadmin-u-8a539c7fe216">
     {#if title || description || extra}
-      <Sheet.Header class="flex-shrink-0 border-b border-border px-6 py-4 pr-12">
-        <div class="flex items-start justify-between gap-4">
-          <div class="flex min-w-0 flex-1 flex-col gap-1.5">
+      <Sheet.Header class="svadmin-u-2074a75bf2e7 svadmin-u-65fdbade2025 svadmin-u-18049387f0af svadmin-u-f92d02360b8f svadmin-u-cb11fec3bb46 svadmin-u-ab82c25c24ec">
+        <div class="svadmin-u-60fbb7713999 svadmin-u-60541e1e26f8 svadmin-u-8ef2268efbbc svadmin-u-0c3bc98565dd">
+          <div class="svadmin-u-60fbb7713999 svadmin-u-7e0b7cdf1a94 svadmin-u-36e579c0b41c svadmin-u-8dddea0773ed svadmin-u-58284b4ea568">
             {#if title}
               <Sheet.Title id={titleId}>{title}</Sheet.Title>
             {/if}
@@ -73,7 +73,7 @@
             {/if}
           </div>
           {#if extra}
-            <div class="flex flex-shrink-0 items-center gap-2">
+            <div class="svadmin-u-60fbb7713999 svadmin-u-2074a75bf2e7 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
               {@render extra()}
             </div>
           {/if}
@@ -81,14 +81,14 @@
       </Sheet.Header>
     {/if}
 
-    <div class="flex-1 overflow-y-auto p-6">
+    <div class="svadmin-u-36e579c0b41c svadmin-u-92bf82f493b1 svadmin-u-0478c89a150f">
       {#if children}
         {@render children()}
       {/if}
     </div>
 
     {#if footer}
-      <Sheet.Footer class="mt-auto flex-shrink-0 border-t border-border px-6 py-4">
+      <Sheet.Footer class="svadmin-u-9953408a8ef3 svadmin-u-2074a75bf2e7 svadmin-u-b950dda299d3 svadmin-u-18049387f0af svadmin-u-f92d02360b8f svadmin-u-cb11fec3bb46">
         {@render footer()}
       </Sheet.Footer>
     {/if}

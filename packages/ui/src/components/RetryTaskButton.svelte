@@ -65,9 +65,9 @@
 
 <Button {variant} {size} onclick={handleRetry} disabled={disabled || pending || !taskProvider?.retry}>
   {#if pending}
-    <Loader2 class="mr-1.5 h-3.5 w-3.5 animate-spin" />
+    <Loader2 class="svadmin-u-82cc6c6581cd svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-afbdd13a380e" />
   {:else}
-    <RotateCcw class="mr-1.5 h-3.5 w-3.5" />
+    <RotateCcw class="svadmin-u-82cc6c6581cd svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
   {/if}
   {#if children}
     {@render children()}

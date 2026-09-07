@@ -16,7 +16,7 @@
 
 <ContentPageShell pageId="account-security-log" width="wide">
   <ContentPageHeader title={i18n.t('account.securityLog')} description={i18n.t('account.securityLogDescription')} actions={undefined} />
-  <div class="flex justify-end"><Button variant="outline" size="sm"><Download class="size-3.5" />{i18n.t('common.export')}</Button></div>
+  <div class="svadmin-u-60fbb7713999 svadmin-u-77c08e015d14"><Button variant="outline" size="sm"><Download class="svadmin-u-783b0d9d1e2c" />{i18n.t('common.export')}</Button></div>
   <FilterToolbar bind:query placeholder={i18n.t('common.search')} />
   <SecurityEventTable events={filtered} />
 </ContentPageShell>

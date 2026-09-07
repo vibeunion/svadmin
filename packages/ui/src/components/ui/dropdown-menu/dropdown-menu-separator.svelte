@@ -6,5 +6,5 @@
 
 <div
 	data-slot="dropdown-menu-separator"
-	class={cn("-mx-1 my-1 h-px bg-border", className)}
+	class={cn("svadmin-dropdown-separator", className)}
 ></div>

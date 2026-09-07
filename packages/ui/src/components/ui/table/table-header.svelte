@@ -13,7 +13,7 @@
 <thead
 	bind:this={ref}
 	data-slot="table-header"
-	class={cn(className)}
+	class={cn("svadmin-table-header", className)}
 	{...restProps}
 >
 	{@render children?.()}

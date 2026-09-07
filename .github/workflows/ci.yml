@@ -63,6 +63,9 @@ jobs:
       - name: Build workspace packages
         run: bun run build:packages
 
+      - name: Verify published UI stylesheets
+        run: bun run --cwd packages/ui test:css
+
       - name: Verify Lite SSR consumer
         run: bun run check:lite:ssr
 

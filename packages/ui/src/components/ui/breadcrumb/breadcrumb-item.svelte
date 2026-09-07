@@ -8,7 +8,7 @@
 
 <li
   data-slot="breadcrumb-item"
-  class={cn("inline-flex items-center gap-1.5", className)}
+  class={cn("svadmin-breadcrumb-item", className)}
   {...restProps}
 >
   {@render children?.()}

@@ -5,7 +5,7 @@
   const needsTooltip = $derived(value && maxLength && value.length > maxLength);
 </script>
 {#if value}
-  <span class="inline-block" title={needsTooltip ? value : undefined}>{display}</span>
+  <span class="svadmin-u-bb0c4bfc52bd" title={needsTooltip ? value : undefined}>{display}</span>
 {:else}
-  <span class="text-muted-foreground">—</span>
+  <span class="svadmin-u-bfa603190748">—</span>
 {/if}

@@ -62,8 +62,8 @@ describe('AutoTable interactions', () => {
     expect(tableContainer).toBeTruthy();
     const heading = tableContainer?.querySelector('[data-slot="table-head"]');
     const cell = tableContainer?.querySelector('[data-slot="table-cell"]');
-    expect(heading?.className).toContain('h-8');
-    expect(cell?.className).toContain('text-xs');
+    expect(heading?.getAttribute('data-density')).toBe('compact');
+    expect(cell?.getAttribute('data-density')).toBe('compact');
   });
 
   it('updates external column visibility state after a picker click', async () => {

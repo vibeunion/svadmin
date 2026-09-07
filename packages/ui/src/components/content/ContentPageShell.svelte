@@ -26,14 +26,14 @@
 
   const widthClass = $derived(
     width === 'narrow'
-      ? 'max-w-3xl'
+      ? 'svadmin-u-fa3f7111e53b'
       : width === 'wide'
         ? 'max-w-[92rem]'
         : 'max-w-[74rem]',
   );
 </script>
 
-<div data-svadmin-content-page={pageId} class={'mx-auto w-full ' + widthClass + ' space-y-6 ' + className}>
+<div data-svadmin-content-page={pageId} class={'svadmin-u-0e12dc7de920 svadmin-u-6da6a3c3f741 ' + widthClass + ' svadmin-u-b3542e058833 ' + className}>
   {#if title}<ContentPageHeader {title} {eyebrow} {description} {actions} />{/if}
   {@render children()}
 </div>

@@ -51,13 +51,13 @@
   const statusConfig = $derived.by(() => {
     switch (status) {
       case 'approved':
-        return { label: 'Approved', badge: 'bg-success/15 text-success border-success/20', icon: CheckCircle2 };
+        return { label: 'Approved', icon: CheckCircle2 };
       case 'rejected':
-        return { label: 'Rejected', badge: 'bg-destructive/15 text-destructive border-destructive/20', icon: XCircle };
+        return { label: 'Rejected', icon: XCircle };
       case 'recalled':
-        return { label: 'Recalled', badge: 'bg-muted text-muted-foreground border-border', icon: Undo2 };
+        return { label: 'Recalled', icon: Undo2 };
       default:
-        return { label: 'Pending Approval', badge: 'bg-warning/15 text-warning-foreground border-warning/20', icon: Clock };
+        return { label: 'Pending Approval', icon: Clock };
     }
   });
 
@@ -97,19 +97,19 @@
   }
 </script>
 
-<div class={cn('rounded-xl border border-border bg-card p-4 shadow-xs space-y-3', className)}>
-  <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-border/50">
-    <div class="space-y-0.5">
-      <div class="flex items-center gap-2">
-        <h4 class="text-sm font-semibold text-foreground">{title}</h4>
-        <Badge variant="outline" class={cn('gap-1 text-[11px] font-medium', statusConfig.badge)}>
-          <statusConfig.icon class="h-3 w-3" />
+<div class={cn('svadmin-approval-card', className)} data-status={status}>
+  <div class="svadmin-approval-card__header">
+    <div class="svadmin-approval-card__heading">
+      <div class="svadmin-approval-card__title-row">
+        <h4 class="svadmin-approval-card__title">{title}</h4>
+        <Badge variant="outline" data-status={status}>
+          <statusConfig.icon class="svadmin-approval-card__status-icon" />
           {statusConfig.label}
         </Badge>
       </div>
       {#if applicant}
-        <p class="text-xs text-muted-foreground">
-          Submitted by <strong class="text-foreground">{applicant.name}</strong>
+        <p class="svadmin-approval-card__applicant">
+          Submitted by <strong>{applicant.name}</strong>
           {#if applicant.department} ({applicant.department}){/if}
           {#if applicant.time} · {applicant.time}{/if}
         </p>
@@ -117,16 +117,16 @@
     </div>
 
     {#if status === 'pending'}
-      <div class="flex items-center gap-1.5">
+      <div class="svadmin-approval-card__actions">
         {#if ontransfer}
           <Button
             variant="outline"
             size="sm"
-            class="h-8 text-xs gap-1 text-muted-foreground"
+            class="svadmin-approval-card__action"
             {disabled}
             onclick={() => { transferDialogOpen = true; }}
           >
-            <ArrowRightLeft class="h-3.5 w-3.5" />
+            <ArrowRightLeft class="svadmin-approval-card__action-icon" />
             Transfer
           </Button>
         {/if}
@@ -135,11 +135,11 @@
           <Button
             variant="outline"
             size="sm"
-            class="h-8 text-xs gap-1 border-destructive/30 text-destructive hover:bg-destructive/10"
+            class="svadmin-approval-card__action svadmin-approval-card__action--reject"
             {disabled}
             onclick={() => { rejectDialogOpen = true; }}
           >
-            <X class="h-3.5 w-3.5" />
+            <X class="svadmin-approval-card__action-icon" />
             Reject
           </Button>
         {/if}
@@ -147,11 +147,11 @@
         {#if onapprove}
           <Button
             size="sm"
-            class="h-8 text-xs gap-1 bg-success hover:bg-success/90 text-success-foreground"
+            class="svadmin-approval-card__action svadmin-approval-card__action--approve"
             {disabled}
             onclick={() => { approveDialogOpen = true; }}
           >
-            <Check class="h-3.5 w-3.5" />
+            <Check class="svadmin-approval-card__action-icon" />
             Approve
           </Button>
         {/if}
@@ -160,7 +160,7 @@
   </div>
 
   {#if children}
-    <div class="text-xs text-foreground space-y-2">
+    <div class="svadmin-approval-card__content">
       {@render children()}
     </div>
   {/if}
@@ -169,22 +169,22 @@
 <!-- Approve Dialog -->
 {#if approveDialogOpen}
   <Dialog.Dialog bind:open={approveDialogOpen}>
-    <Dialog.DialogContent class="sm:max-w-md">
+    <Dialog.DialogContent class="svadmin-approval-card__dialog">
       <Dialog.DialogHeader>
         <Dialog.DialogTitle>Confirm Approval</Dialog.DialogTitle>
       </Dialog.DialogHeader>
-      <div class="space-y-3 py-2 text-xs">
-        <label class="block font-medium text-foreground" for="approve_comment_input">Optional Approval Comment</label>
+      <div class="svadmin-approval-card__dialog-form">
+        <label class="svadmin-approval-card__dialog-label" for="approve_comment_input">Optional Approval Comment</label>
         <textarea
           id="approve_comment_input"
           bind:value={approveComment}
           placeholder="e.g. Verified and approved"
-          class="w-full h-20 rounded-md border border-input bg-background p-2 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          class="svadmin-approval-card__textarea"
         ></textarea>
       </div>
       <Dialog.DialogFooter>
         <Button variant="outline" size="sm" onclick={() => { approveDialogOpen = false; }}>Cancel</Button>
-        <Button size="sm" class="bg-success hover:bg-success/90 text-success-foreground" disabled={isSubmitting} onclick={handleApprove}>
+        <Button size="sm" class="svadmin-approval-card__confirm svadmin-approval-card__confirm--approve" disabled={isSubmitting} onclick={handleApprove}>
           Confirm Approval
         </Button>
       </Dialog.DialogFooter>
@@ -195,17 +195,17 @@
 <!-- Reject Dialog -->
 {#if rejectDialogOpen}
   <Dialog.Dialog bind:open={rejectDialogOpen}>
-    <Dialog.DialogContent class="sm:max-w-md">
+    <Dialog.DialogContent class="svadmin-approval-card__dialog">
       <Dialog.DialogHeader>
-        <Dialog.DialogTitle class="text-destructive">Reject Request</Dialog.DialogTitle>
+        <Dialog.DialogTitle class="svadmin-approval-card__reject-title">Reject Request</Dialog.DialogTitle>
       </Dialog.DialogHeader>
-      <div class="space-y-3 py-2 text-xs">
-        <label class="block font-medium text-foreground" for="reject_reason_input">Rejection Reason (Required)</label>
+      <div class="svadmin-approval-card__dialog-form">
+        <label class="svadmin-approval-card__dialog-label" for="reject_reason_input">Rejection Reason (Required)</label>
         <textarea
           id="reject_reason_input"
           bind:value={rejectReason}
           placeholder="Please explain why this request is being rejected..."
-          class="w-full h-20 rounded-md border border-destructive/40 bg-background p-2 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-destructive"
+          class="svadmin-approval-card__textarea svadmin-approval-card__textarea--reject"
           required
         ></textarea>
       </div>
@@ -222,18 +222,18 @@
 <!-- Transfer Dialog -->
 {#if transferDialogOpen}
   <Dialog.Dialog bind:open={transferDialogOpen}>
-    <Dialog.DialogContent class="sm:max-w-md">
+    <Dialog.DialogContent class="svadmin-approval-card__dialog">
       <Dialog.DialogHeader>
         <Dialog.DialogTitle>Transfer Approval</Dialog.DialogTitle>
       </Dialog.DialogHeader>
-      <div class="space-y-3 py-2 text-xs">
-        <label class="block font-medium text-foreground" for="transfer_target_input">Target Approver Email / Username</label>
+      <div class="svadmin-approval-card__dialog-form">
+        <label class="svadmin-approval-card__dialog-label" for="transfer_target_input">Target Approver Email / Username</label>
         <input
           id="transfer_target_input"
           type="text"
           bind:value={transferTarget}
           placeholder="e.g. manager@example.com"
-          class="w-full h-8 rounded-md border border-input bg-background px-2 text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          class="svadmin-approval-card__input"
           required
         />
       </div>

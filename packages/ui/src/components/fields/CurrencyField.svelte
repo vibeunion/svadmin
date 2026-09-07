@@ -80,20 +80,20 @@
 
   const toneClasses: Record<CurrencyTone, string> = {
     auto: '',
-    success: 'text-success font-medium',
-    warning: 'text-warning-foreground font-medium',
-    destructive: 'text-destructive font-medium',
+    success: 'svadmin-u-76747e5e02ff svadmin-u-2689f3958069',
+    warning: 'svadmin-u-3a4ff758c2ab svadmin-u-2689f3958069',
+    destructive: 'svadmin-u-811148b13d1e svadmin-u-2689f3958069',
     neutral: 'text-foreground',
   };
 </script>
 
 {#if numericValue === null}
-  <span class={cn('field-currency text-muted-foreground text-sm', className)}>{nullLabel}</span>
+  <span class={cn('field-currency svadmin-u-bfa603190748 svadmin-u-fc7473ca09eb', className)}>{nullLabel}</span>
 {:else}
   <span
     class={cn(
-      'field-currency inline-flex items-center text-sm',
-      tabular && 'font-mono tabular-nums',
+      'field-currency svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-fc7473ca09eb',
+      tabular && 'svadmin-u-0e65706bcccd svadmin-u-3032cae0badb',
       toneClasses[resolvedTone],
       className
     )}

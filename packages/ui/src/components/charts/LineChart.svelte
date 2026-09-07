@@ -43,8 +43,8 @@
   );
 </script>
 
-<div class="w-full overflow-x-auto {className}">
-  <svg viewBox="0 0 {chartWidth} {height}" class="w-full" style="min-width: {Math.min(chartWidth, 300)}px;">
+<div class="svadmin-u-6da6a3c3f741 svadmin-u-1384f66f41d0 {className}">
+  <svg viewBox="0 0 {chartWidth} {height}" class="svadmin-u-6da6a3c3f741" style="min-width: {Math.min(chartWidth, 300)}px;">
     <!-- Grid lines -->
     {#each [0, 0.25, 0.5, 0.75, 1] as ratio, _i (_i)}
       {@const y = padding.top + chartHeight * (1 - ratio)}
@@ -96,7 +96,7 @@
           fill="var(--background)"
           stroke={color}
           stroke-width="2"
-          class="transition-all duration-200 hover:r-[6]"
+          class="svadmin-line-chart-point svadmin-u-0fe7d7d814d0 svadmin-u-625a4c3fbeb2"
         />
       {/each}
     {/if}

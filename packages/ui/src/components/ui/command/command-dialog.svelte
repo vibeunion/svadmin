@@ -27,9 +27,9 @@
 <Dialog.Dialog bind:open {onOpenChange} {onOpenChangeComplete}>
   <Dialog.DialogContent
     data-cmdk-dialog=""
-    class="overflow-hidden p-0"
+    class="svadmin-command-dialog-content"
   >
-    <Dialog.DialogHeader class="sr-only">
+    <Dialog.DialogHeader class="svadmin-sr-only">
       <Dialog.DialogTitle>{commandProps.label || 'Command menu'}</Dialog.DialogTitle>
       <Dialog.DialogDescription>Search for a command to run.</Dialog.DialogDescription>
     </Dialog.DialogHeader>
@@ -37,7 +37,7 @@
       bind:value
       {...commandProps}
       class={cn(
-        "[&_[data-command-group-heading]]:text-muted-foreground flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground [&_[data-command-group-heading]]:px-2 [&_[data-command-group-heading]]:font-medium [&_[data-command-group]:not([hidden])_~[data-command-group]]:pt-0 [&_[data-cmdk-input-wrapper]_svg]:h-5 [&_[data-cmdk-input-wrapper]_svg]:w-5 [&_[data-command-input]]:h-12 [&_[data-command-item]]:px-2 [&_[data-command-item]]:py-3",
+        "svadmin-command-dialog-root",
         className
       )}
     >

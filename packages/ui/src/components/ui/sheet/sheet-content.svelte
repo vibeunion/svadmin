@@ -15,10 +15,7 @@
 <div
 	bind:this={ref}
 	data-slot="sheet-content"
-	class={cn(
-		"flex flex-col gap-4 h-full",
-		className
-	)}
+	class={cn("svadmin-sheet-content", className)}
 	{...restProps}
 >
 	{@render children?.()}
