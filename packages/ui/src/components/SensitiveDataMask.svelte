@@ -88,21 +88,21 @@
   }
 </script>
 
-<div class={cn('inline-flex items-center gap-1.5 font-mono text-xs text-foreground', className)}>
-  <span class="truncate select-all">{displayedText}</span>
+<div class={cn('svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-58284b4ea568 svadmin-u-0e65706bcccd svadmin-u-359090c2d529 svadmin-u-d4108abe6359', className)}>
+  <span class="svadmin-u-f283ea9bea0e svadmin-u-8078c71d23ee">{displayedText}</span>
 
   {#if allowUnmask && rawString}
     <Button
       variant="ghost"
       size="icon"
-      class="h-5 w-5 text-muted-foreground hover:text-foreground"
+      class="svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e svadmin-u-bfa603190748 svadmin-u-ea7b2e9e070e"
       onclick={toggleMask}
       aria-label={isMasked ? 'Reveal sensitive data' : 'Mask sensitive data'}
     >
       {#if isMasked}
-        <Eye class="h-3 w-3" />
+        <Eye class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
       {:else}
-        <EyeOff class="h-3 w-3" />
+        <EyeOff class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
       {/if}
     </Button>
   {/if}
@@ -111,14 +111,14 @@
     <Button
       variant="ghost"
       size="icon"
-      class="h-5 w-5 text-muted-foreground hover:text-foreground"
+      class="svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e svadmin-u-bfa603190748 svadmin-u-ea7b2e9e070e"
       onclick={handleCopy}
       aria-label="Copy to clipboard"
     >
       {#if isCopied}
-        <Check class="h-3 w-3 text-success" />
+        <Check class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29 svadmin-u-76747e5e02ff" />
       {:else}
-        <Copy class="h-3 w-3" />
+        <Copy class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
       {/if}
     </Button>
   {/if}

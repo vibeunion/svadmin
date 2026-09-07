@@ -149,76 +149,76 @@
   );
 </script>
 
-<div class="space-y-6">
+<div class="svadmin-u-b3542e058833">
   <div>
-    <h2 class="text-xl font-semibold text-foreground">{i18n.t('profile.title')}</h2>
+    <h2 class="svadmin-u-d5c9b0001e7e svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{i18n.t('profile.title')}</h2>
   </div>
 
   <!-- Profile Info -->
   <Card.Card>
     <Card.CardHeader>
-      <Card.CardTitle class="flex items-center gap-2 text-base">
-        <User class="h-4 w-4 text-muted-foreground" />
+      <Card.CardTitle class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-4ee734926ff6">
+        <User class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-bfa603190748" />
         {i18n.t('profile.title')}
       </Card.CardTitle>
     </Card.CardHeader>
     <Card.CardContent>
       {#if identity.isLoading}
-        <div class="flex items-center gap-2 text-muted-foreground">
-          <Loader2 class="h-4 w-4 animate-spin" />
+        <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-bfa603190748">
+          <Loader2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-afbdd13a380e" />
           {i18n.t('common.loading')}
         </div>
       {:else if identity.data}
-        <div class="flex items-start gap-6">
+        <div class="svadmin-u-60fbb7713999 svadmin-u-60541e1e26f8 svadmin-u-0d304f904cb0">
           <!-- Avatar -->
-          <div class="shrink-0 relative group">
+          <div class="svadmin-u-012fbd121f37 svadmin-u-d89972fe17d6 group">
             {#if identity.data.avatar}
               <img
                 src={identity.data.avatar}
                 alt={identity.data.name ?? ''}
-                class="h-20 w-20 rounded-lg object-cover ring-2 ring-primary/20"
+                class="svadmin-u-0a769880db93 svadmin-u-ed831a4dff32 svadmin-u-5f22e64f2282 svadmin-u-7d85d0c21a32 svadmin-u-16b1efa5875e svadmin-u-2b6f77ad4036"
               />
             {:else}
-              <div class="h-20 w-20 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-2xl font-bold">
+              <div class="svadmin-u-0a769880db93 svadmin-u-ed831a4dff32 svadmin-u-5f22e64f2282 svadmin-u-375dc44df6e9 svadmin-u-20aaf08a7ed1 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-3febee094e85 svadmin-u-69450ef1487e">
                 {initials}
               </div>
             {/if}
             {#if canUpdateProfile}
               <button
-                class="absolute inset-0 rounded-lg bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                class="svadmin-u-da4dbfbc4fdc svadmin-u-7b7df0449b80 svadmin-u-5f22e64f2282 svadmin-u-53bb3a280599 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-7065497e1ca0 svadmin-u-181f3d6c9821 svadmin-u-67d6184a0024 svadmin-u-34516836730d"
                 onclick={() => fileInput?.click()}
                 disabled={avatarUploading}
               >
                 {#if avatarUploading}
-                  <Loader2 class="h-5 w-5 text-white animate-spin" />
+                  <Loader2 class="svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e svadmin-u-72a4c7cdeef7 svadmin-u-afbdd13a380e" />
                 {:else}
-                  <Camera class="h-5 w-5 text-white" />
+                  <Camera class="svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e svadmin-u-72a4c7cdeef7" />
                 {/if}
               </button>
               <input
                 bind:this={fileInput}
                 type="file"
                 accept="image/*"
-                class="hidden"
+                class="svadmin-u-99d72c7fc3e2"
                 onchange={handleAvatarChange}
               />
             {/if}
           </div>
 
           <!-- Info -->
-          <div class="space-y-3 flex-1 min-w-0">
+          <div class="svadmin-u-6ed543e2fbbb svadmin-u-36e579c0b41c svadmin-u-7e0b7cdf1a94">
             {#if editingProfile}
-              <div class="space-y-3 max-w-sm">
+              <div class="svadmin-u-6ed543e2fbbb svadmin-u-2472e9b81a97">
                 <div>
-                  <Label for="edit-name" class="text-xs text-muted-foreground">{i18n.t('profile.name')}</Label>
-                  <Input id="edit-name" bind:value={editName} class="mt-1" />
+                  <Label for="edit-name" class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">{i18n.t('profile.name')}</Label>
+                  <Input id="edit-name" bind:value={editName} class="svadmin-u-b6b02c0ebef6" />
                 </div>
                 {#if profileError}
-                  <p class="text-xs text-destructive">{profileError}</p>
+                  <p class="svadmin-u-359090c2d529 svadmin-u-811148b13d1e">{profileError}</p>
                 {/if}
-                <div class="flex gap-2">
+                <div class="svadmin-u-60fbb7713999 svadmin-u-77a2a20e90d4">
                   <Button size="sm" onclick={saveProfile} disabled={profileSaving}>
-                    {#if profileSaving}<Loader2 class="h-3 w-3 animate-spin mr-1" />{/if}
+                    {#if profileSaving}<Loader2 class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29 svadmin-u-afbdd13a380e svadmin-u-618162408e7a" />{/if}
                     {i18n.t('common.save')}
                   </Button>
                   <Button size="sm" variant="outline" onclick={() => { editingProfile = false; }}>
@@ -228,23 +228,23 @@
               </div>
             {:else}
               <div>
-                <Label class="text-xs text-muted-foreground">{i18n.t('profile.name')}</Label>
-                <p class="text-lg font-semibold truncate">{identity.data.name ?? '—'}</p>
+                <Label class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">{i18n.t('profile.name')}</Label>
+                <p class="svadmin-u-42536e69e639 svadmin-u-e83a7042bc91 svadmin-u-f283ea9bea0e">{identity.data.name ?? '—'}</p>
               </div>
 
               {#if identity.data.email || identity.data.username}
-                <div class="flex items-center gap-2 text-sm text-muted-foreground">
+                <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">
                   {#if identity.data.email}
-                    <Mail class="h-4 w-4 shrink-0" />
+                    <Mail class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-012fbd121f37" />
                   {:else}
-                    <User class="h-4 w-4 shrink-0" />
+                    <User class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-012fbd121f37" />
                   {/if}
-                  <span class="truncate">{identity.data.email || identity.data.username}</span>
+                  <span class="svadmin-u-f283ea9bea0e">{identity.data.email || identity.data.username}</span>
                 </div>
               {/if}
 
               {#if identity.data.id}
-                <div class="text-xs text-muted-foreground/60 font-mono">
+                <div class="svadmin-u-359090c2d529 svadmin-u-7be4d67a6256 svadmin-u-0e65706bcccd">
                   ID: {identity.data.id}
                 </div>
               {/if}
@@ -258,7 +258,7 @@
           </div>
         </div>
       {:else}
-        <p class="text-sm text-muted-foreground">{i18n.t('profile.notAvailable')}</p>
+        <p class="svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">{i18n.t('profile.notAvailable')}</p>
       {/if}
     </Card.CardContent>
   </Card.Card>
@@ -266,16 +266,16 @@
   <!-- Change Password -->
   <Card.Card>
     <Card.CardHeader>
-      <Card.CardTitle class="flex items-center gap-2 text-base">
-        <Lock class="h-4 w-4 text-muted-foreground" />
+      <Card.CardTitle class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-4ee734926ff6">
+        <Lock class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-bfa603190748" />
         {i18n.t('profile.changePassword')}
       </Card.CardTitle>
     </Card.CardHeader>
     <Card.CardContent>
-      <form onsubmit={handlePasswordChange} class="space-y-4 max-w-sm">
+      <form onsubmit={handlePasswordChange} class="svadmin-u-3e7ce58d64fa svadmin-u-2472e9b81a97">
         {#if pwError}
           <Alert.Root variant="destructive">
-            <AlertCircle class="h-4 w-4" />
+            <AlertCircle class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
             <Alert.Description>{pwError}</Alert.Description>
           </Alert.Root>
         {/if}
@@ -304,7 +304,7 @@
 
         <Button type="submit" disabled={updatePw.isLoading}>
           {#if updatePw.isLoading}
-            <Loader2 class="h-4 w-4 animate-spin mr-2" />
+            <Loader2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-afbdd13a380e svadmin-u-d2347e8497a9" />
           {/if}
           {i18n.t('profile.updatePassword')}
         </Button>

@@ -42,28 +42,28 @@
 </script>
 
 {#snippet footer()}
-  <div class="flex items-center justify-center gap-1"><span class="text-sm text-muted-foreground">{i18n.t('auth.hasAccount')}</span><Button variant="link" class="h-auto p-0 text-sm font-medium" onclick={() => adminContext.navigate('/login')}>{i18n.t('auth.login')}</Button></div>
+  <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-44ee8ba0a421"><span class="svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">{i18n.t('auth.hasAccount')}</span><Button variant="link" class="svadmin-u-b8f0a08ece1e svadmin-u-8a539c7fe216 svadmin-u-fc7473ca09eb svadmin-u-2689f3958069" onclick={() => adminContext.navigate('/login')}>{i18n.t('auth.login')}</Button></div>
 {/snippet}
 
 <AuthPageShell brand={title} title={i18n.t('auth.createAccount')} description={i18n.t('auth.createAccountMessage')} {footer}>
-      <form onsubmit={handleSubmit} class="space-y-5">
+      <form onsubmit={handleSubmit} class="svadmin-u-b43b4c086d9a">
         {#if error}
           <Alert.Root variant="destructive">
-            <AlertCircle class="h-4 w-4" />
+            <AlertCircle class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
             <Alert.Description>{error}</Alert.Description>
           </Alert.Root>
         {/if}
 
-        <div class="space-y-2">
+        <div class="svadmin-u-6f7e013d6499">
           <Label for="register-identifier">{i18n.t('auth.usernameOrEmail')}</Label>
-          <div class="relative">
-            <User class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-[1]" />
+          <div class="svadmin-u-d89972fe17d6">
+            <User class="svadmin-u-da4dbfbc4fdc svadmin-u-22e59b722111 svadmin-u-d694ba66e322 svadmin-u-36b381be4df3 svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-bfa603190748 svadmin-u-a4326536b8f5 svadmin-u-536a7530a44f" />
             <Input
               id="register-identifier"
               type="text"
               placeholder={i18n.t('auth.identifierPlaceholder')}
               bind:value={identifier}
-              class="pl-9"
+              class="svadmin-u-9e83b2412bc9"
               autocomplete="username"
             />
           </div>
@@ -84,9 +84,9 @@
           autocomplete="new-password"
         />
 
-        <Button type="submit" class="h-10 w-full" disabled={register.isLoading}>
+        <Button type="submit" class="svadmin-u-426b8b75185b svadmin-u-6da6a3c3f741" disabled={register.isLoading}>
           {#if register.isLoading}
-            <Loader2 class="h-4 w-4 animate-spin mr-2" />
+            <Loader2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-afbdd13a380e svadmin-u-d2347e8497a9" />
           {/if}
           {i18n.t('auth.registerButton')}
         </Button>

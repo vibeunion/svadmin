@@ -39,47 +39,47 @@
 
 <AuthPageShell brand={title} title={sent ? i18n.t('auth.resetLinkSentTitle') : i18n.t('auth.forgotPassword')} description={sent ? i18n.t('auth.resetLinkSentDescription') : i18n.t('auth.forgotPasswordDescription')}>
       {#if sent}
-        <div class="space-y-4">
-          <Button variant="outline" class="w-full" onclick={() => adminContext.navigate('/login')}>
-            <ArrowLeft class="h-4 w-4 mr-2" />
+        <div class="svadmin-u-3e7ce58d64fa">
+          <Button variant="outline" class="svadmin-u-6da6a3c3f741" onclick={() => adminContext.navigate('/login')}>
+            <ArrowLeft class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-d2347e8497a9" />
             {i18n.t('auth.backToLogin')}
           </Button>
         </div>
       {:else}
-        <form onsubmit={handleSubmit} class="space-y-5">
+        <form onsubmit={handleSubmit} class="svadmin-u-b43b4c086d9a">
           {#if error}
             <Alert.Root variant="destructive">
-              <AlertCircle class="h-4 w-4" />
+              <AlertCircle class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
               <Alert.Description>{error}</Alert.Description>
             </Alert.Root>
           {/if}
 
-          <div class="space-y-2">
+          <div class="svadmin-u-6f7e013d6499">
             <Label for="forgot-identifier">{i18n.t('auth.usernameOrEmail')}</Label>
-            <div class="relative">
-              <User class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-[1]" />
+            <div class="svadmin-u-d89972fe17d6">
+              <User class="svadmin-u-da4dbfbc4fdc svadmin-u-22e59b722111 svadmin-u-d694ba66e322 svadmin-u-36b381be4df3 svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-bfa603190748 svadmin-u-a4326536b8f5 svadmin-u-536a7530a44f" />
               <Input
                 id="forgot-identifier"
                 type="text"
                 placeholder={i18n.t('auth.identifierPlaceholder')}
                 bind:value={identifier}
-                class="pl-9"
+                class="svadmin-u-9e83b2412bc9"
                 autocomplete="username"
               />
             </div>
           </div>
 
-          <Button type="submit" class="w-full h-10" disabled={forgot.isLoading}>
+          <Button type="submit" class="svadmin-u-6da6a3c3f741 svadmin-u-426b8b75185b" disabled={forgot.isLoading}>
             {#if forgot.isLoading}
-              <Loader2 class="h-4 w-4 animate-spin mr-2" />
+              <Loader2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-afbdd13a380e svadmin-u-d2347e8497a9" />
             {/if}
             {i18n.t('auth.sendResetLink')}
           </Button>
         </form>
 
-        <div class="mt-6 flex items-center justify-center border-t pt-5">
-          <Button variant="link" class="text-sm h-auto p-0 font-medium inline-flex items-center gap-1" onclick={() => adminContext.navigate('/login')}>
-            <ArrowLeft class="h-3 w-3" />
+        <div class="svadmin-u-31f2553311b6 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-b950dda299d3 svadmin-u-52be28846b5f">
+          <Button variant="link" class="svadmin-u-fc7473ca09eb svadmin-u-b8f0a08ece1e svadmin-u-8a539c7fe216 svadmin-u-2689f3958069 svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421" onclick={() => adminContext.navigate('/login')}>
+            <ArrowLeft class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
             {i18n.t('auth.backToLogin')}
           </Button>
         </div>

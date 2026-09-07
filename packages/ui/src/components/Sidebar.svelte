@@ -291,8 +291,8 @@
     value={i18n.locale}
     onchange={(event) => selectLocale((event.target as HTMLSelectElement).value)}
     class={collapsed
-      ? 'h-8 w-auto min-w-0 max-w-full appearance-none rounded-md border border-border bg-sidebar px-1 text-center text-[10px] font-semibold text-sidebar-foreground/70 outline-none focus:ring-2 focus:ring-ring'
-      : 'h-8 w-auto min-w-0 max-w-full rounded-md border border-border bg-sidebar px-1.5 text-[11px] font-semibold text-sidebar-foreground/70 outline-none focus:ring-2 focus:ring-ring'}
+      ? 'svadmin-u-ed8a5df7b2fb svadmin-u-23e1f628d033 svadmin-u-7e0b7cdf1a94 svadmin-u-c0980a65a70d appearance-none svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-d3aed606df1d svadmin-u-d8e0e382c67b svadmin-u-ca6bf63030aa svadmin-u-1dc571a3609f svadmin-u-e83a7042bc91 svadmin-u-4e5ca9623e22 svadmin-u-df37b1fd9495 svadmin-u-608dd26cd5ba svadmin-u-80b9d0ae125f'
+      : 'svadmin-u-ed8a5df7b2fb svadmin-u-23e1f628d033 svadmin-u-7e0b7cdf1a94 svadmin-u-c0980a65a70d svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-d3aed606df1d svadmin-u-45d828117213 svadmin-u-d058ca6de60f svadmin-u-e83a7042bc91 svadmin-u-4e5ca9623e22 svadmin-u-df37b1fd9495 svadmin-u-608dd26cd5ba svadmin-u-80b9d0ae125f'}
   >
     {#each i18n.getAvailableLocales() as locale (locale)}
       <option value={locale}>{localeName(locale)}</option>
@@ -305,16 +305,16 @@
 <aside
   data-svadmin-sidebar
   aria-label="Sidebar navigation"
-  class="fixed inset-y-0 left-0 z-30 flex flex-col border-r border-border/40 transition-all duration-300"
+  class="svadmin-u-7bc555991dba svadmin-u-5f89f14a26db svadmin-u-c78facc7a0a6 svadmin-u-0f2fff0ae96e svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-5ceb636bd9f3 svadmin-u-6ee2d41e2d2d svadmin-u-0fe7d7d814d0 svadmin-u-7890552ecd63"
   style="background-color: var(--sidebar);"
   class:w-[252px]={!collapsed}
   class:w-[70px]={collapsed}
 >
-  <div class="flex h-[70px] items-center shrink-0" class:px-5={!collapsed} class:justify-center={collapsed}>
+  <div class="svadmin-u-60fbb7713999 svadmin-u-07017cde3e97 svadmin-u-3960ffc248d9 svadmin-u-012fbd121f37" class:px-5={!collapsed} class:justify-center={collapsed}>
     {#if !collapsed}
-      <a href={formatSidebarLink('/')} class="group flex items-center gap-2.5" onclick={(e) => { e.preventDefault(); adminContext.navigate('/'); }}>
+      <a href={formatSidebarLink('/')} class="group svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-7e9a2a250cc3" onclick={(e) => { e.preventDefault(); adminContext.navigate('/'); }}>
         <SvadminLogo />
-        <span class="font-semibold text-[15px] tracking-[-0.01em] text-sidebar-foreground">{title}</span>
+        <span class="svadmin-u-e83a7042bc91 svadmin-u-cff55289f8f2 svadmin-u-983fa003115f svadmin-u-a7a63217e098">{title}</span>
       </a>
     {:else}
       <a
@@ -328,10 +328,10 @@
     {/if}
   </div>
 
-  <ScrollArea class="flex-1 sidebar-scroll">
-  <nav aria-label="Main menu" class="pb-4" class:px-[10px]={!collapsed} class:px-2={collapsed}>
+  <ScrollArea class="svadmin-u-36e579c0b41c sidebar-scroll">
+  <nav aria-label="Main menu" class="svadmin-u-9fcd8a13827e" class:px-[10px]={!collapsed} class:px-2={collapsed}>
     {#if menu && menu.length > 0}
-      <div class="space-y-[2px]">
+      <div class="svadmin-u-a26339f4b89e">
         {#each customMenuItems as item (item.name)}
           <SidebarItem {item} currentPath={path} {collapsed} depth={0} />
         {/each}
@@ -345,24 +345,24 @@
           openGroups = next;
         }}>
           <Collapsible.Trigger
-            class="flex w-full items-center justify-between px-[10px] py-[6px] mt-4 mb-[2px] text-[10.5px] font-semibold tracking-[0.06em] uppercase text-sidebar-foreground/45 hover:text-sidebar-foreground/70 transition-colors"
+            class="svadmin-u-60fbb7713999 svadmin-u-6da6a3c3f741 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-7597e11b4d4b svadmin-u-a139beb4e318 svadmin-u-0ab8667228fd svadmin-u-506a96403942 svadmin-u-b486a1ee45b0 svadmin-u-e83a7042bc91 svadmin-u-064e4b9e19c3 uppercase svadmin-u-5f1ff8fe8768 svadmin-u-71357b4a2f24 svadmin-u-ceb69a6b0e5f"
           >
             <span>{group.name}</span>
-            <ChevronDown class="h-3 w-3 transition-transform duration-200 {openGroups.has(group.name) ? 'rotate-180' : ''}" />
+            <ChevronDown class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29 svadmin-u-eadef238231e svadmin-u-625a4c3fbeb2 {openGroups.has(group.name) ? 'svadmin-u-3350916b3513' : ''}" />
           </Collapsible.Trigger>
           <Collapsible.Content>
-            <div class="space-y-[2px]">
+            <div class="svadmin-u-a26339f4b89e">
               {#each group.items as item, _i (_i)}
                 {@const active = isActive(item.path)}
                 <a
                   href={formatSidebarLink(item.path)}
                   onclick={(e) => { e.preventDefault(); adminContext.navigate(item.path); }}
-                  class="sidebar-menu-item flex items-center gap-2.5 rounded-md px-[10px] {pyClassGroupItem} text-[13px] font-medium transition-colors duration-150
+                  class="sidebar-menu-item svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-7e9a2a250cc3 svadmin-u-421ac2be5045 svadmin-u-7597e11b4d4b {pyClassGroupItem} svadmin-u-a14daebf7748 svadmin-u-2689f3958069 svadmin-u-ceb69a6b0e5f svadmin-u-233c0494b485
                   {active
-                    ? 'sidebar-menu-item-active bg-sidebar-accent text-primary'
-                    : 'text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50'}"
+                    ? 'sidebar-menu-item-active svadmin-u-707e8e52f284 svadmin-u-20aaf08a7ed1'
+                    : 'svadmin-u-4e5ca9623e22 svadmin-u-646e10356266 svadmin-u-55d1f8b9d318'}"
                 >
-                  <item.Icon class="h-[18px] w-[18px] flex-shrink-0 {active ? 'text-primary' : 'text-sidebar-foreground/50'}" />
+                  <item.Icon class="svadmin-u-86171d20618e svadmin-u-10d7a2feb011 svadmin-u-2074a75bf2e7 {active ? 'svadmin-u-20aaf08a7ed1' : 'svadmin-u-68d55a736ff4'}" />
                   <span>{item.label}</span>
                 </a>
               {/each}
@@ -380,12 +380,12 @@
                     {...props}
                     href={formatSidebarLink(item.path)}
                     onclick={(e) => { e.preventDefault(); adminContext.navigate(item.path); }}
-                    class="sidebar-menu-item flex items-center justify-center rounded-md px-2 {pyClass} transition-colors duration-150
+                    class="sidebar-menu-item svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-421ac2be5045 svadmin-u-d5eab218aa34 {pyClass} svadmin-u-ceb69a6b0e5f svadmin-u-233c0494b485
                     {active
-                      ? 'sidebar-menu-item-active bg-sidebar-accent text-primary'
-                      : 'text-sidebar-foreground/50 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'}"
+                      ? 'sidebar-menu-item-active svadmin-u-707e8e52f284 svadmin-u-20aaf08a7ed1'
+                      : 'svadmin-u-68d55a736ff4 svadmin-u-55d1f8b9d318 svadmin-u-646e10356266'}"
                   >
-                    <item.Icon class="h-[18px] w-[18px] flex-shrink-0" />
+                    <item.Icon class="svadmin-u-86171d20618e svadmin-u-10d7a2feb011 svadmin-u-2074a75bf2e7" />
                   </a>
                 {/snippet}
               </Tooltip.Trigger>
@@ -397,12 +397,12 @@
             <a
               href={formatSidebarLink(item.path)}
               onclick={(e) => { e.preventDefault(); adminContext.navigate(item.path); }}
-              class="sidebar-menu-item flex items-center gap-2.5 rounded-md px-[10px] {pyClass} text-[13px] font-medium transition-colors duration-150
+              class="sidebar-menu-item svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-7e9a2a250cc3 svadmin-u-421ac2be5045 svadmin-u-7597e11b4d4b {pyClass} svadmin-u-a14daebf7748 svadmin-u-2689f3958069 svadmin-u-ceb69a6b0e5f svadmin-u-233c0494b485
               {active
-                ? 'sidebar-menu-item-active bg-sidebar-accent text-primary'
-                : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'}"
+                ? 'sidebar-menu-item-active svadmin-u-707e8e52f284 svadmin-u-20aaf08a7ed1'
+                : 'svadmin-u-4e5ca9623e22 svadmin-u-55d1f8b9d318 svadmin-u-646e10356266'}"
             >
-              <item.Icon class="h-[18px] w-[18px] flex-shrink-0 {active ? 'text-primary' : 'text-sidebar-foreground/50'}" />
+              <item.Icon class="svadmin-u-86171d20618e svadmin-u-10d7a2feb011 svadmin-u-2074a75bf2e7 {active ? 'svadmin-u-20aaf08a7ed1' : 'svadmin-u-68d55a736ff4'}" />
               <span>{item.label}</span>
             </a>
           {/if}
@@ -413,35 +413,35 @@
   </nav>
   </ScrollArea>
 
-  <div class="shrink-0 border-t border-border/40">
+  <div class="svadmin-u-012fbd121f37 svadmin-u-b950dda299d3 svadmin-u-6ee2d41e2d2d">
     {#if !collapsed}
-      <div class="px-3 pt-3 pb-1">
-        <div class="relative" bind:this={colorPickerRef}>
+      <div class="svadmin-u-0e17f2bd9074 svadmin-u-ce335a8e4f56 svadmin-u-569eb16216dd">
+        <div class="svadmin-u-d89972fe17d6" bind:this={colorPickerRef}>
           <button
-            class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-[12px] text-sidebar-foreground/60 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors"
+            class="svadmin-u-60fbb7713999 svadmin-u-6da6a3c3f741 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-421ac2be5045 svadmin-u-d5eab218aa34 svadmin-u-ec0091ee009b svadmin-u-69cdf25ad1e4 svadmin-u-b4f9f7800899 svadmin-u-55d1f8b9d318 svadmin-u-646e10356266 svadmin-u-ceb69a6b0e5f"
             onclick={() => { if (!colorPickerOpen) colorPickerOpenedAt = Date.now(); colorPickerOpen = !colorPickerOpen; }}
           >
-            <Palette class="h-3.5 w-3.5" />
-            <span class="flex-1 text-left">{i18n.t('common.toggleTheme')}</span>
+            <Palette class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
+            <span class="svadmin-u-36e579c0b41c svadmin-u-2eba0d65d059">{i18n.t('common.toggleTheme')}</span>
             <span
-              class="h-3 w-3 rounded-full ring-1 ring-offset-1 ring-offset-sidebar"
+              class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29 svadmin-u-ac204c108886 svadmin-u-3daca9af0861 svadmin-u-823f000e740a svadmin-u-6f8ab8abb126"
               style="background-color: {getColorThemes().find(c => c.id === getColorTheme())?.color ?? '#6366f1'}; --tw-ring-color: {getColorThemes().find(c => c.id === getColorTheme())?.color ?? '#6366f1'}"
             ></span>
             <!-- The dot previews the user-selected runtime theme swatch; the hex
                  fallback only covers the case where no registered theme matches. -->
           </button>
           {#if colorPickerOpen}
-            <div class="absolute bottom-full left-0 mb-1 z-50 w-40 rounded-lg border bg-popover p-1 text-popover-foreground shadow-lg animate-in fade-in-0 zoom-in-95">
+            <div class="svadmin-u-da4dbfbc4fdc svadmin-u-3ee5df8c651f svadmin-u-c78facc7a0a6 svadmin-u-65281709dacf svadmin-u-181b286668b5 svadmin-u-84789e8a20cd svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-e541d86d1ec8 svadmin-u-eb6a3cef9686 svadmin-u-9b13e8ae5c9c svadmin-u-06bbb43166db svadmin-u-40137e897961 fade-in-0 zoom-in-95">
               {#each getColorThemes() as ct, _i (_i)}
                 <button
-                  class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground transition-colors"
+                  class="svadmin-u-60fbb7713999 svadmin-u-6da6a3c3f741 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-421ac2be5045 svadmin-u-d5eab218aa34 svadmin-u-ec0091ee009b svadmin-u-fc7473ca09eb svadmin-u-0557b88819cd svadmin-u-3a99b2b8fbbe svadmin-u-ceb69a6b0e5f"
                   onclick={() => { setColorTheme(ct.id as typeof ct.id & import('@svadmin/core').ColorTheme); colorPickerOpen = false; }}
                 >
                   <span
-                    class="h-3 w-3 rounded-full {getColorTheme() === ct.id ? 'ring-2 ring-offset-1 scale-110' : 'opacity-70'}"
+                    class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29 svadmin-u-ac204c108886 {getColorTheme() === ct.id ? 'svadmin-u-16b1efa5875e svadmin-u-823f000e740a svadmin-u-fecb6ec6cfa0' : 'svadmin-u-0c67ca474a69'}"
                     style="background-color: {ct.color}; {getColorTheme() === ct.id ? `--tw-ring-color: ${ct.color}` : ''}"
                   ></span>
-                  <span class="text-xs">{ct.label}</span>
+                  <span class="svadmin-u-359090c2d529">{ct.label}</span>
                 </button>
               {/each}
             </div>
@@ -451,55 +451,55 @@
     {/if}
 
     {#if !collapsed && identity}
-      <div class="px-3 pb-3 pt-1">
-        <div class="flex items-center gap-2.5 rounded-lg p-2 transition-colors hover:bg-sidebar-accent/40 cursor-pointer">
+      <div class="svadmin-u-0e17f2bd9074 svadmin-u-7fcf9124b5df svadmin-u-6b7d6e21ccbd">
+        <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-7e9a2a250cc3 svadmin-u-5f22e64f2282 svadmin-u-7660b450905a svadmin-u-ceb69a6b0e5f svadmin-u-ace81495deee svadmin-u-34516836730d">
           <Avatar
             src={(identity as Record<string, unknown>).avatar as string | undefined}
             alt={identity.name ?? 'User'}
             fallback={identity.name?.charAt(0).toUpperCase() ?? 'U'}
             size="sm"
           />
-          <div class="flex-1 min-w-0">
-            <p class="truncate text-[13px] font-medium text-sidebar-foreground">{identity.name}</p>
-            <p class="truncate text-[11px] text-sidebar-foreground/45">{((identity as Record<string, unknown>).role || (identity as Record<string, unknown>).roleName) ?? 'User'}</p>
+          <div class="svadmin-u-36e579c0b41c svadmin-u-7e0b7cdf1a94">
+            <p class="svadmin-u-f283ea9bea0e svadmin-u-a14daebf7748 svadmin-u-2689f3958069 svadmin-u-a7a63217e098">{identity.name}</p>
+            <p class="svadmin-u-f283ea9bea0e svadmin-u-d058ca6de60f svadmin-u-5f1ff8fe8768">{((identity as Record<string, unknown>).role || (identity as Record<string, unknown>).roleName) ?? 'User'}</p>
           </div>
           <button
-            class="h-7 w-7 flex items-center justify-center rounded-md text-sidebar-foreground/40 hover:text-sidebar-foreground hover:bg-sidebar-accent/60 transition-colors"
+            class="svadmin-u-d0a52b312f7d svadmin-u-cbbf90f9a828 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-421ac2be5045 svadmin-u-3e3534b4c5df svadmin-u-646e10356266 svadmin-u-0b48b877be2a svadmin-u-ceb69a6b0e5f"
             onclick={onLogout}
           >
-            <LogOut class="h-3.5 w-3.5" />
+            <LogOut class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
           </button>
         </div>
-        <div class="mt-1 flex items-center justify-between px-1">
-          <div class="flex items-center gap-0.5">
+        <div class="svadmin-u-b6b02c0ebef6 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-d8e0e382c67b">
+          <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-a3899220f90e">
             {@render languageMenu(false)}
-            <TooltipButton tooltip={i18n.t('common.toggleTheme')} variant="ghost" size="icon-sm" onclick={toggleTheme} class="h-8 w-8 rounded-md text-sidebar-foreground/50 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground">
+            <TooltipButton tooltip={i18n.t('common.toggleTheme')} variant="ghost" size="icon-sm" onclick={toggleTheme} class="svadmin-u-ed8a5df7b2fb svadmin-u-2bbcfc3b5179 svadmin-u-421ac2be5045 svadmin-u-68d55a736ff4 svadmin-u-55d1f8b9d318 svadmin-u-646e10356266">
               {#if getResolvedTheme() === 'dark'}
-                <Sun class="h-3.5 w-3.5" />
+                <Sun class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
               {:else}
-                <Moon class="h-3.5 w-3.5" />
+                <Moon class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
               {/if}
             </TooltipButton>
-            <TooltipButton tooltip={i18n.t('settings.title')} variant="ghost" size="icon-sm" onclick={() => adminContext.navigate('/settings')} class="h-8 w-8 rounded-md text-sidebar-foreground/50 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground">
-              <Settings class="h-3.5 w-3.5" />
+            <TooltipButton tooltip={i18n.t('settings.title')} variant="ghost" size="icon-sm" onclick={() => adminContext.navigate('/settings')} class="svadmin-u-ed8a5df7b2fb svadmin-u-2bbcfc3b5179 svadmin-u-421ac2be5045 svadmin-u-68d55a736ff4 svadmin-u-55d1f8b9d318 svadmin-u-646e10356266">
+              <Settings class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
             </TooltipButton>
           </div>
-          <TooltipButton tooltip={i18n.t('common.toggleSidebar')} variant="ghost" size="icon-sm" onclick={onToggle} class="h-8 w-8 rounded-md text-sidebar-foreground/50 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground">
-            <ChevronLeft class="h-3.5 w-3.5" />
+          <TooltipButton tooltip={i18n.t('common.toggleSidebar')} variant="ghost" size="icon-sm" onclick={onToggle} class="svadmin-u-ed8a5df7b2fb svadmin-u-2bbcfc3b5179 svadmin-u-421ac2be5045 svadmin-u-68d55a736ff4 svadmin-u-55d1f8b9d318 svadmin-u-646e10356266">
+            <ChevronLeft class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
           </TooltipButton>
         </div>
       </div>
     {:else if collapsed}
-      <div class="flex flex-col items-center gap-0.5 px-1 py-3">
+      <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-3960ffc248d9 svadmin-u-a3899220f90e svadmin-u-d8e0e382c67b svadmin-u-1b2d54a3fd12">
         {@render languageMenu(true)}
         <Tooltip.Root>
           <Tooltip.Trigger>
             {#snippet child({ props }: { props: Record<string, unknown> })}
-              <Button {...props} variant="ghost" size="icon" onclick={toggleTheme} class="h-8 w-8 rounded-md text-sidebar-foreground/50 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground">
+              <Button {...props} variant="ghost" size="icon" onclick={toggleTheme} class="svadmin-u-ed8a5df7b2fb svadmin-u-2bbcfc3b5179 svadmin-u-421ac2be5045 svadmin-u-68d55a736ff4 svadmin-u-55d1f8b9d318 svadmin-u-646e10356266">
                 {#if getResolvedTheme() === 'dark'}
-                  <Sun class="h-3.5 w-3.5" />
+                  <Sun class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
                 {:else}
-                  <Moon class="h-3.5 w-3.5" />
+                  <Moon class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
                 {/if}
               </Button>
             {/snippet}
@@ -509,8 +509,8 @@
         <Tooltip.Root>
           <Tooltip.Trigger>
             {#snippet child({ props }: { props: Record<string, unknown> })}
-              <Button {...props} variant="ghost" size="icon" onclick={onToggle} class="h-8 w-8 rounded-md text-sidebar-foreground/50 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground">
-                <ChevronRight class="h-3.5 w-3.5" />
+              <Button {...props} variant="ghost" size="icon" onclick={onToggle} class="svadmin-u-ed8a5df7b2fb svadmin-u-2bbcfc3b5179 svadmin-u-421ac2be5045 svadmin-u-68d55a736ff4 svadmin-u-55d1f8b9d318 svadmin-u-646e10356266">
+                <ChevronRight class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
               </Button>
             {/snippet}
           </Tooltip.Trigger>
@@ -519,8 +519,8 @@
         <Tooltip.Root>
           <Tooltip.Trigger>
             {#snippet child({ props }: { props: Record<string, unknown> })}
-              <Button {...props} variant="ghost" size="icon" onclick={onLogout} class="h-8 w-8 rounded-md text-sidebar-foreground/50 hover:bg-sidebar-accent/50 hover:text-destructive">
-                <LogOut class="h-3.5 w-3.5" />
+              <Button {...props} variant="ghost" size="icon" onclick={onLogout} class="svadmin-u-ed8a5df7b2fb svadmin-u-2bbcfc3b5179 svadmin-u-421ac2be5045 svadmin-u-68d55a736ff4 svadmin-u-55d1f8b9d318 svadmin-u-51e95020d6f2">
+                <LogOut class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
               </Button>
             {/snippet}
           </Tooltip.Trigger>
@@ -528,13 +528,13 @@
         </Tooltip.Root>
       </div>
     {:else}
-      <div class="flex justify-center gap-1 p-3">
+      <div class="svadmin-u-60fbb7713999 svadmin-u-86843cf1e227 svadmin-u-44ee8ba0a421 svadmin-u-eb6e8b881acd">
         {@render languageMenu(false)}
-        <TooltipButton tooltip={i18n.t('common.toggleTheme')} variant="ghost" size="icon" onclick={toggleTheme} class="h-8 w-8 rounded-md text-sidebar-foreground/50 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground">
+        <TooltipButton tooltip={i18n.t('common.toggleTheme')} variant="ghost" size="icon" onclick={toggleTheme} class="svadmin-u-ed8a5df7b2fb svadmin-u-2bbcfc3b5179 svadmin-u-421ac2be5045 svadmin-u-68d55a736ff4 svadmin-u-55d1f8b9d318 svadmin-u-646e10356266">
           {#if getResolvedTheme() === 'dark'}
-            <Sun class="h-3.5 w-3.5" />
+            <Sun class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
           {:else}
-            <Moon class="h-3.5 w-3.5" />
+            <Moon class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
           {/if}
         </TooltipButton>
       </div>

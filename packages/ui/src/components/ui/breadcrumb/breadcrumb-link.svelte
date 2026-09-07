@@ -8,7 +8,7 @@
 
 <a
   data-slot="breadcrumb-link"
-  class={cn("hover:text-foreground transition-colors", className)}
+  class={cn("svadmin-breadcrumb-link", className)}
   {...restProps}
 >
   {@render children?.()}

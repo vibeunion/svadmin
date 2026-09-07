@@ -217,14 +217,14 @@
   {:else if error}
     <DataState state="error" title={isZh ? '企业设置加载失败' : 'Enterprise settings failed to load'} description={error} retry={loadSettings} />
   {:else}
-    <div class="grid items-start gap-4 lg:grid-cols-2">
+    <div class="svadmin-u-f3c543ad5fe9 svadmin-u-60541e1e26f8 svadmin-u-0c3bc98565dd svadmin-u-2f27a80ed92b">
       <SettingsGroup title={i18n.t('account.securityPolicy')} description={isZh ? '配置组织级身份、会话与审计策略。' : 'Configure organization-wide identity, session, and audit controls.'} bodyClass="space-y-4">
         {#if organizationProvider}
-          <div class="space-y-2"><Label for="organization-name">{isZh ? '组织名称' : 'Organization name'}</Label><div class="flex gap-2"><Input id="organization-name" bind:value={organizationName} disabled={!organizationProvider.updateCurrentOrganization || savingOrganization} /><Button variant="outline" size="sm" disabled={!organizationChanged || savingOrganization} onclick={saveOrganization}>{savingOrganization ? (isZh ? '保存中...' : 'Saving...') : i18n.t('common.save')}</Button></div></div>
+          <div class="svadmin-u-6f7e013d6499"><Label for="organization-name">{isZh ? '组织名称' : 'Organization name'}</Label><div class="svadmin-u-60fbb7713999 svadmin-u-77a2a20e90d4"><Input id="organization-name" bind:value={organizationName} disabled={!organizationProvider.updateCurrentOrganization || savingOrganization} /><Button variant="outline" size="sm" disabled={!organizationChanged || savingOrganization} onclick={saveOrganization}>{savingOrganization ? (isZh ? '保存中...' : 'Saving...') : i18n.t('common.save')}</Button></div></div>
         {/if}
-        <div class="grid gap-4 sm:grid-cols-2">
-          <div class="space-y-2"><Label for="session-timeout">{i18n.t('account.sessionTimeout')}</Label><Input id="session-timeout" type="number" min="1" step="1" bind:value={sessionTimeoutValue} disabled={!policy || saving} /></div>
-          <div class="space-y-2"><Label for="retention">{i18n.t('account.dataRetention')}</Label><Input id="retention" type="number" min="1" step="1" bind:value={auditRetentionValue} disabled={!policy || saving} /></div>
+        <div class="svadmin-u-f3c543ad5fe9 svadmin-u-0c3bc98565dd svadmin-u-e00ad81645a2">
+          <div class="svadmin-u-6f7e013d6499"><Label for="session-timeout">{i18n.t('account.sessionTimeout')}</Label><Input id="session-timeout" type="number" min="1" step="1" bind:value={sessionTimeoutValue} disabled={!policy || saving} /></div>
+          <div class="svadmin-u-6f7e013d6499"><Label for="retention">{i18n.t('account.dataRetention')}</Label><Input id="retention" type="number" min="1" step="1" bind:value={auditRetentionValue} disabled={!policy || saving} /></div>
         </div>
         {#if policy && !policyNumbersValid}<FeedbackNotice tone="warning" message={isZh ? '会话超时和审计保留天数必须为正整数。' : 'Session timeout and audit retention must be positive integers.'} />{/if}
         <SettingsFieldRow label={i18n.t('account.auditLogging')} description={isZh ? '由后端持久化组织级审计策略。' : 'Persist the organization audit policy through the backend provider.'} control={auditControl} separated />
@@ -236,7 +236,7 @@
         <Button variant="outline" size="sm" disabled={!identityProvider || testing} onclick={() => testConnection()}>{testing ? (isZh ? '测试中...' : 'Testing...') : i18n.t('common.test')}</Button>
       </SettingsGroup>
     </div>
-    <section class="space-y-3">
+    <section class="svadmin-u-6ed543e2fbbb">
       <SectionHeader title={i18n.t('account.connections')} />
       {#if identityProviders.length === 0}
         <DataState state="empty" title={isZh ? '尚未配置身份源' : 'No identity provider configured'} description={isZh ? '请在后端 IdentityGovernanceProvider 中创建并验证身份源。' : 'Create and verify an identity provider through the backend IdentityGovernanceProvider.'} />
@@ -246,6 +246,6 @@
         {/each}
       {/if}
     </section>
-    <section class="space-y-3"><SectionHeader title={i18n.t('account.securityLog')} /><SecurityEventTable events={displayEvents} emptyTitle={i18n.t('common.noData')} emptyDescription={isZh ? '当前 Provider 未返回安全事件。' : 'The provider returned no security events.'} /></section>
+    <section class="svadmin-u-6ed543e2fbbb"><SectionHeader title={i18n.t('account.securityLog')} /><SecurityEventTable events={displayEvents} emptyTitle={i18n.t('common.noData')} emptyDescription={isZh ? '当前 Provider 未返回安全事件。' : 'The provider returned no security events.'} /></section>
   {/if}
 </ContentPageShell>

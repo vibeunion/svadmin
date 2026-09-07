@@ -63,7 +63,7 @@
         {#snippet child({ props })}
           <Button variant={variantMap[variant as keyof typeof variantMap]} {...props} disabled={confirming} onclick={handleConfirm}>
             {#if confirming}
-              <Loader2 class="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+              <Loader2 class="svadmin-u-d2347e8497a9 svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-afbdd13a380e" aria-hidden="true" />
             {/if}
             {resolvedConfirmText}
           </Button>

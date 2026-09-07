@@ -141,20 +141,20 @@
   }
 </script>
 
-<div class={cn('w-full rounded-lg border border-border bg-card p-4 shadow-xs space-y-3', className)} data-testid="filter-builder">
-  <div class="flex items-center justify-between gap-2 border-b border-border/60 pb-3">
-    <div class="flex items-center gap-2">
-      <FilterIcon class="h-4 w-4 text-muted-foreground" />
-      <span class="text-sm font-medium text-foreground">
+<div class={cn('svadmin-u-6da6a3c3f741 svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-8e63407b5ceb svadmin-u-cef5b893cf23 svadmin-u-6ed543e2fbbb', className)} data-testid="filter-builder">
+  <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff svadmin-u-7fcf9124b5df">
+    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
+      <FilterIcon class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-bfa603190748" />
+      <span class="svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-d4108abe6359">
         {i18n.t('common.filterBuilder', undefined) ?? '高级筛选'}
       </span>
       {#if rules.length > 1}
-        <div class="flex items-center rounded-md border border-border bg-muted/40 p-0.5 text-xs">
+        <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-b00f43c30c2b svadmin-u-de8350a3bbad svadmin-u-359090c2d529">
           <button
             type="button"
             class={cn(
-              'rounded px-2 py-0.5 text-xs transition-colors',
-              logicalOperator === 'and' ? 'bg-background font-semibold text-foreground shadow-xs' : 'text-muted-foreground hover:text-foreground'
+              'svadmin-u-07389a777c1f svadmin-u-d5eab218aa34 svadmin-u-465609a240a8 svadmin-u-359090c2d529 svadmin-u-ceb69a6b0e5f',
+              logicalOperator === 'and' ? 'svadmin-u-e6f9e383a762 svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359 svadmin-u-cef5b893cf23' : 'svadmin-u-bfa603190748 svadmin-u-ea7b2e9e070e'
             )}
             onclick={() => (logicalOperator = 'and')}
           >
@@ -163,8 +163,8 @@
           <button
             type="button"
             class={cn(
-              'rounded px-2 py-0.5 text-xs transition-colors',
-              logicalOperator === 'or' ? 'bg-background font-semibold text-foreground shadow-xs' : 'text-muted-foreground hover:text-foreground'
+              'svadmin-u-07389a777c1f svadmin-u-d5eab218aa34 svadmin-u-465609a240a8 svadmin-u-359090c2d529 svadmin-u-ceb69a6b0e5f',
+              logicalOperator === 'or' ? 'svadmin-u-e6f9e383a762 svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359 svadmin-u-cef5b893cf23' : 'svadmin-u-bfa603190748 svadmin-u-ea7b2e9e070e'
             )}
             onclick={() => (logicalOperator = 'or')}
           >
@@ -174,38 +174,38 @@
       {/if}
     </div>
 
-    <div class="flex items-center gap-1.5">
+    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-58284b4ea568">
       <Button
         variant="ghost"
         size="sm"
-        class="h-8 gap-1 text-xs"
+        class="svadmin-u-ed8a5df7b2fb svadmin-u-44ee8ba0a421 svadmin-u-359090c2d529"
         data-testid="filter-builder-reset"
         onclick={reset}
       >
-        <RotateCcw class="h-3.5 w-3.5" />
+        <RotateCcw class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
         {i18n.t('common.reset', undefined) ?? '重置'}
       </Button>
       <Button
         variant="default"
         size="sm"
-        class="h-8 gap-1 text-xs"
+        class="svadmin-u-ed8a5df7b2fb svadmin-u-44ee8ba0a421 svadmin-u-359090c2d529"
         data-testid="filter-builder-apply"
         onclick={apply}
       >
-        <Check class="h-3.5 w-3.5" />
+        <Check class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
         {i18n.t('common.confirm', undefined) ?? '应用'}
       </Button>
     </div>
   </div>
 
-  <div class="space-y-2">
+  <div class="svadmin-u-6f7e013d6499">
     {#each rules as rule, index (rule.id)}
       {@const fieldDef = availableFields.find((f) => f.key === rule.field)}
-      <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 rounded-md bg-muted/20 p-2 border border-border/40">
+      <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3fd0f778c8d9 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-421ac2be5045 svadmin-u-967d113a1451 svadmin-u-7660b450905a svadmin-u-ca6bcd4b6f3f svadmin-u-6ee2d41e2d2d">
         <!-- Field select -->
-        <div class="w-36 shrink-0">
+        <div class="svadmin-u-df403bbae8fc svadmin-u-012fbd121f37">
           <Select
-            class="h-8 text-xs"
+            class="svadmin-u-ed8a5df7b2fb svadmin-u-359090c2d529"
             value={rule.field}
             onchange={(e: Event) => {
               rule.field = (e.currentTarget as HTMLSelectElement).value;
@@ -218,9 +218,9 @@
         </div>
 
         <!-- Operator select -->
-        <div class="w-36 shrink-0">
+        <div class="svadmin-u-df403bbae8fc svadmin-u-012fbd121f37">
           <Select
-            class="h-8 text-xs"
+            class="svadmin-u-ed8a5df7b2fb svadmin-u-359090c2d529"
             value={rule.operator}
             onchange={(e: Event) => {
               rule.operator = (e.currentTarget as HTMLSelectElement).value as CrudOperator;
@@ -233,14 +233,14 @@
         </div>
 
         <!-- Value input -->
-        <div class="flex-1 min-w-[120px]">
+        <div class="svadmin-u-36e579c0b41c svadmin-u-a9ef791a0777">
           {#if rule.operator === 'null' || rule.operator === 'nnull'}
-            <div class="h-8 flex items-center px-3 text-xs text-muted-foreground italic bg-muted/30 rounded-md">
+            <div class="svadmin-u-ed8a5df7b2fb svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-0e17f2bd9074 svadmin-u-359090c2d529 svadmin-u-bfa603190748 italic svadmin-u-2859c861d7de svadmin-u-421ac2be5045">
               无需填值
             </div>
           {:else if fieldDef?.type === 'select' && fieldDef.options}
             <Select
-              class="h-8 text-xs"
+              class="svadmin-u-ed8a5df7b2fb svadmin-u-359090c2d529"
               value={String(rule.value ?? '')}
               onchange={(e: Event) => {
                 rule.value = (e.currentTarget as HTMLSelectElement).value;
@@ -253,7 +253,7 @@
             </Select>
           {:else if fieldDef?.type === 'boolean'}
             <Select
-              class="h-8 text-xs"
+              class="svadmin-u-ed8a5df7b2fb svadmin-u-359090c2d529"
               value={String(rule.value ?? '')}
               onchange={(e: Event) => {
                 const val = (e.currentTarget as HTMLSelectElement).value;
@@ -267,7 +267,7 @@
           {:else}
             <Input
               type={fieldDef?.type === 'number' ? 'number' : 'text'}
-              class="h-8 text-xs"
+              class="svadmin-u-ed8a5df7b2fb svadmin-u-359090c2d529"
               placeholder="输入筛选值..."
               value={String(rule.value ?? '')}
               oninput={(e: Event) => {
@@ -283,14 +283,14 @@
           type="button"
           variant="ghost"
           size="icon-sm"
-          class="shrink-0 text-muted-foreground hover:text-destructive"
+          class="svadmin-u-012fbd121f37 svadmin-u-bfa603190748 svadmin-u-51e95020d6f2"
           onclick={() => removeRule(index)}
         >
-          <Trash2 class="h-3.5 w-3.5" />
+          <Trash2 class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
         </Button>
       </div>
     {:else}
-      <div class="rounded-md border border-dashed border-border/80 py-4 text-center text-xs text-muted-foreground">
+      <div class="svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-a29b7a649c77 svadmin-u-c9ed8c5f79ae svadmin-u-cb11fec3bb46 svadmin-u-ca6bf63030aa svadmin-u-359090c2d529 svadmin-u-bfa603190748">
         暂无筛选条件，点击下方按钮添加规则
       </div>
     {/each}
@@ -301,10 +301,10 @@
     variant="outline"
     size="sm"
     data-testid="filter-builder-add-rule"
-    class="w-full gap-1.5 border-dashed text-xs h-8"
+    class="svadmin-u-6da6a3c3f741 svadmin-u-58284b4ea568 svadmin-u-a29b7a649c77 svadmin-u-359090c2d529 svadmin-u-ed8a5df7b2fb"
     onclick={addRule}
   >
-    <Plus class="h-3.5 w-3.5" />
+    <Plus class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
     {i18n.t('common.addRule', undefined) ?? '添加筛选条件'}
   </Button>
 </div>

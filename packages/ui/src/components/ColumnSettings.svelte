@@ -110,85 +110,85 @@
         {...props}
         variant={triggerVariant}
         size={triggerSize}
-        class={cn('gap-1.5 text-xs font-normal', className)}
+        class={cn('svadmin-u-58284b4ea568 svadmin-u-359090c2d529 svadmin-u-8ecebc9f80e6', className)}
         aria-label={displayTitle}
       >
-        <SlidersHorizontal class="h-3.5 w-3.5 text-muted-foreground" data-icon="inline-start" />
+        <SlidersHorizontal class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-bfa603190748" data-icon="inline-start" />
         <span>{displayTitle}</span>
       </Button>
     {/snippet}
   </Popover.Trigger>
-  <Popover.Content class="w-72 p-3 text-xs" align="end">
+  <Popover.Content class="svadmin-u-92e13d146fd7 svadmin-u-eb6e8b881acd svadmin-u-359090c2d529" align="end">
     <!-- Header -->
-    <div class="flex items-center justify-between pb-2 border-b border-border/60">
-      <div class="flex items-center gap-2">
+    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-f4cc511ff0c1 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff">
+      <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
         <Checkbox
           checked={allVisible}
           indeterminate={someVisible}
           onCheckedChange={(checked) => toggleAll(checked === true)}
           aria-label={i18n.t('common.selectAll', { defaultValue: 'Select All' })}
         />
-        <span class="font-medium text-foreground">{displayTitle}</span>
+        <span class="svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{displayTitle}</span>
       </div>
       <Button
         variant="ghost"
         size="sm"
-        class="h-6 px-1.5 text-[11px] text-muted-foreground hover:text-foreground gap-1"
+        class="svadmin-u-f6fe902450dc svadmin-u-45d828117213 svadmin-u-d058ca6de60f svadmin-u-bfa603190748 svadmin-u-ea7b2e9e070e svadmin-u-44ee8ba0a421"
         onclick={handleReset}
       >
-        <RotateCcw class="h-3 w-3" />
+        <RotateCcw class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
         {resetLabel}
       </Button>
     </div>
 
     <!-- Filter input if many columns -->
     {#if columns.length > 6}
-      <div class="relative mt-2 mb-1">
-        <Search class="absolute left-2 top-2 h-3.5 w-3.5 text-muted-foreground" />
+      <div class="svadmin-u-d89972fe17d6 svadmin-u-50d0d216a2f8 svadmin-u-65281709dacf">
+        <Search class="svadmin-u-da4dbfbc4fdc svadmin-u-d83be576442b svadmin-u-9a2db8f949b6 svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-bfa603190748" />
         <input
           type="text"
           bind:value={filterText}
           placeholder={i18n.t('common.search', { defaultValue: 'Search columns...' })}
-          class="h-7.5 w-full rounded-md border border-input bg-muted/40 pl-7 pr-2 text-xs placeholder:text-muted-foreground/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          class="svadmin-u-d1c57777d8b6 svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-b00f43c30c2b svadmin-u-20ebde75765d svadmin-u-aa2c13a5e1b4 svadmin-u-359090c2d529 svadmin-u-35ca6b75d707 svadmin-u-f10f771f87e9 svadmin-u-3e94a98e1466 svadmin-u-9c1295a6914a"
         />
       </div>
     {/if}
 
     <!-- Column list with ordering -->
-    <div class="mt-2 max-h-60 overflow-y-auto space-y-1 pr-1">
+    <div class="svadmin-u-50d0d216a2f8 svadmin-u-67d7e383dca6 svadmin-u-92bf82f493b1 svadmin-u-da7c36cd8867 svadmin-u-eda955402ba6">
       {#each filteredColumns as col (col.key)}
         {@const realIdx = columns.findIndex((c) => c.key === col.key)}
-        <div class="flex items-center justify-between p-1 rounded-md hover:bg-muted/50 group transition-colors">
-          <label class="flex items-center gap-2 cursor-pointer select-none truncate flex-1 pr-2">
+        <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-eb6a3cef9686 svadmin-u-421ac2be5045 svadmin-u-39f703dbe296 group svadmin-u-ceb69a6b0e5f">
+          <label class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-34516836730d svadmin-u-7f6912283f11 svadmin-u-f283ea9bea0e svadmin-u-36e579c0b41c svadmin-u-aa2c13a5e1b4">
             <Checkbox
               checked={col.visible}
               onCheckedChange={() => toggleColumn(col.key)}
             />
-            <span class="truncate text-foreground {col.visible ? '' : 'text-muted-foreground line-through opacity-60'}">
+            <span class="svadmin-u-f283ea9bea0e svadmin-u-d4108abe6359 {col.visible ? '' : 'svadmin-u-bfa603190748 line-through svadmin-u-f2868c227fcd'}">
               {col.label}
             </span>
           </label>
 
-          <div class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-a3899220f90e svadmin-u-7065497e1ca0 svadmin-u-181f3d6c9821 svadmin-u-67d6184a0024">
             <Button
               variant="ghost"
               size="icon"
-              class="h-5 w-5 text-muted-foreground hover:text-foreground"
+              class="svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e svadmin-u-bfa603190748 svadmin-u-ea7b2e9e070e"
               disabled={realIdx === 0}
               onclick={() => moveColumn(realIdx, 'up')}
               aria-label="Move up"
             >
-              <ArrowUp class="h-3 w-3" />
+              <ArrowUp class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              class="h-5 w-5 text-muted-foreground hover:text-foreground"
+              class="svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e svadmin-u-bfa603190748 svadmin-u-ea7b2e9e070e"
               disabled={realIdx === columns.length - 1}
               onclick={() => moveColumn(realIdx, 'down')}
               aria-label="Move down"
             >
-              <ArrowDown class="h-3 w-3" />
+              <ArrowDown class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
             </Button>
           </div>
         </div>

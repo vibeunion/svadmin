@@ -21,8 +21,8 @@
   const totalWidth = $derived(data.length * (barWidth + gap) - gap + 40);
 </script>
 
-<div class="w-full overflow-x-auto {className}">
-  <svg viewBox="0 0 {totalWidth} {height + 30}" class="w-full" style="min-width: {Math.min(totalWidth, 300)}px;">
+<div class="svadmin-u-6da6a3c3f741 svadmin-u-1384f66f41d0 {className}">
+  <svg viewBox="0 0 {totalWidth} {height + 30}" class="svadmin-u-6da6a3c3f741" style="min-width: {Math.min(totalWidth, 300)}px;">
     <!-- Bars -->
     {#each data as point, i (i)}
       {@const barHeight = (point.value / maxValue) * (height - 20)}
@@ -38,7 +38,7 @@
         rx="4"
         fill={point.color || 'var(--primary)'}
         opacity="0.85"
-        class="transition-all duration-500 hover:opacity-100"
+        class="svadmin-u-0fe7d7d814d0 svadmin-u-844322115e56 svadmin-u-5da1d5250e75"
       >
         <animate attributeName="height" from="0" to={barHeight} dur="0.6s" fill="freeze" calcMode="spline" keySplines="0.16 1 0.3 1" />
         <animate attributeName="y" from={height} to={y} dur="0.6s" fill="freeze" calcMode="spline" keySplines="0.16 1 0.3 1" />

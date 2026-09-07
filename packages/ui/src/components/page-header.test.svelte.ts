@@ -29,14 +29,26 @@ describe('PageHeader', () => {
     expect(onBack).toHaveBeenCalled();
   });
 
-  it('supports compact density mode', () => {
-    const { container } = render(PageHeader, {
+  it('switches density without depending on utility aliases', async () => {
+    const { container, rerender } = render(PageHeader, {
       title: 'Compact View',
       density: 'compact',
       showBreadcrumbs: false,
     });
 
-    const h1 = container.querySelector('h1');
-    expect(h1?.classList.contains('text-lg')).toBe(true);
+    const header = container.querySelector('.svadmin-page-header');
+    expect(header?.getAttribute('data-density')).toBe('compact');
+    expect(container.querySelector('h1')?.className).toBe('svadmin-page-header__title');
+
+    await rerender({ title: 'Comfortable View', density: 'comfortable', showBreadcrumbs: false });
+    expect(header?.getAttribute('data-density')).toBe('comfortable');
+    expect(screen.getByRole('heading', { level: 1 }).textContent?.trim()).toBe('Comfortable View');
+  });
+
+  it('preserves consumer classes and omits unused controls', () => {
+    const { container } = render(PageHeader, { title: 'Orders', class: 'host-header', showBreadcrumbs: false });
+    expect(container.querySelector('.svadmin-page-header.host-header')).not.toBeNull();
+    expect(container.querySelector('.svadmin-page-header__actions')).toBeNull();
+    expect(screen.queryByRole('button')).toBeNull();
   });
 });

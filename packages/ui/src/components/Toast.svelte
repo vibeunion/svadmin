@@ -61,7 +61,7 @@
     theme,
     toastOptions: {
       classes: {
-        toast: 'font-sans',
+        toast: 'svadmin-u-79bf1259388b',
       },
     }
   } satisfies ToasterProps);
@@ -80,7 +80,7 @@
 {#if isActiveHost}
   <Toaster {...toasterProps} />
   <div
-    class="pointer-events-none fixed bottom-4 left-4 right-4 z-[100] flex flex-col-reverse gap-2 sm:bottom-6 sm:left-1/2 sm:right-auto sm:w-[min(32rem,calc(100vw-3rem))] sm:-translate-x-1/2"
+    class="svadmin-u-a4326536b8f5 svadmin-u-7bc555991dba svadmin-u-c1b9bd611950 svadmin-u-b2e7cc55921c svadmin-u-5a438c30beec svadmin-u-db5a366a0e21 svadmin-u-60fbb7713999 svadmin-u-aa6c1169cd77 svadmin-u-77a2a20e90d4 svadmin-u-6dfb687ea917 svadmin-u-5540f3495030 svadmin-u-9673d11dbf8a svadmin-u-dd317c20a8aa svadmin-u-8bd891360308"
     data-svadmin-undo-stack
   >
     {#each getToasts().slice(-3) as item (item.id)}

@@ -12,23 +12,23 @@
   const i18n = useTranslation();
 </script>
 
-<div class="min-h-screen bg-background text-foreground">
-  <header class="flex h-[70px] items-center justify-between border-b border-border/60 px-4 sm:px-6">
+<div class="svadmin-u-793346c7362c svadmin-u-e6f9e383a762 svadmin-u-d4108abe6359">
+  <header class="svadmin-u-60fbb7713999 svadmin-u-07017cde3e97 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff svadmin-u-f0faeb26d656 svadmin-u-7a9aabfcd059">
     <button
       type="button"
-      class="inline-flex items-center gap-2.5 text-sm font-semibold"
+      class="svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-7e9a2a250cc3 svadmin-u-fc7473ca09eb svadmin-u-e83a7042bc91"
       onclick={() => adminContext.navigate('/')}
     >
       <SvadminLogo size={30} />
       <span>{title}</span>
     </button>
     <Button variant="ghost" size="sm" onclick={() => adminContext.back()}>
-      <ArrowLeft class="h-4 w-4" />
-      <span class="hidden sm:inline">{i18n.t('common.back')}</span>
+      <ArrowLeft class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+      <span class="svadmin-u-99d72c7fc3e2 svadmin-u-ee3c1259a368">{i18n.t('common.back')}</span>
     </Button>
   </header>
 
-  <main class="min-h-[calc(100vh-70px)] bg-muted/20 px-3 py-5 sm:px-6 sm:py-8">
+  <main class="svadmin-u-055a17b0d27b svadmin-u-967d113a1451 svadmin-u-0e17f2bd9074 svadmin-u-c9b99cd93450 svadmin-u-7a9aabfcd059 svadmin-u-9249876ba240">
     {@render children()}
   </main>
 </div>

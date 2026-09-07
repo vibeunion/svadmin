@@ -10,7 +10,7 @@
 <div
 	bind:this={ref}
 	data-slot="alert-description"
-	class={cn("col-start-2 text-sm [&_p]:leading-relaxed text-muted-foreground", className)}
+	class={cn("svadmin-alert-description", className)}
 	{...restProps}
 >
 	{@render children?.()}

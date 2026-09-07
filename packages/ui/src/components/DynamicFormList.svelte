@@ -101,15 +101,15 @@
   }
 </script>
 
-<div class="w-full space-y-3" data-testid="dynamic-form-list">
+<div class="svadmin-u-6da6a3c3f741 svadmin-u-6ed543e2fbbb" data-testid="dynamic-form-list">
   {#if label || description || headerExtra}
-    <div class="flex items-center justify-between gap-2">
+    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4">
       <div>
         {#if label}
-          <div class="text-sm font-medium text-foreground">{label}</div>
+          <div class="svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{label}</div>
         {/if}
         {#if description}
-          <div class="text-xs text-muted-foreground">{description}</div>
+          <div class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">{description}</div>
         {/if}
       </div>
       {#if headerExtra}
@@ -118,17 +118,17 @@
     </div>
   {/if}
 
-  <div class="space-y-2">
+  <div class="svadmin-u-6f7e013d6499">
     {#each items as item, index (index)}
       {@const isFirst = index === 0}
       {@const isLast = index === items.length - 1}
-      <div class="group relative rounded-lg border border-border/70 bg-card p-3 shadow-xs transition-colors hover:border-border">
-        <div class="flex items-start gap-3">
-          <div class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-medium text-muted-foreground">
+      <div class="group svadmin-u-d89972fe17d6 svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-22bb278694b4 svadmin-u-cd0ad9a56558 svadmin-u-eb6e8b881acd svadmin-u-cef5b893cf23 svadmin-u-ceb69a6b0e5f svadmin-u-512e82e6a68f">
+        <div class="svadmin-u-60fbb7713999 svadmin-u-60541e1e26f8 svadmin-u-1004c0c3954c">
+          <div class="svadmin-u-60fbb7713999 svadmin-u-f6fe902450dc svadmin-u-7ec10f86d9b1 svadmin-u-012fbd121f37 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-ac204c108886 svadmin-u-2ef11f1cb219 svadmin-u-d058ca6de60f svadmin-u-2689f3958069 svadmin-u-bfa603190748">
             {index + 1}
           </div>
 
-          <div class="min-w-0 flex-1">
+          <div class="svadmin-u-7e0b7cdf1a94 svadmin-u-36e579c0b41c">
             {#if children}
               {@render children({
                 item,
@@ -141,13 +141,13 @@
                 isLast,
               })}
             {:else}
-              <div class="text-sm text-foreground/80">
+              <div class="svadmin-u-fc7473ca09eb svadmin-u-f93148569c39">
                 {JSON.stringify(item)}
               </div>
             {/if}
           </div>
 
-          <div class="flex shrink-0 items-center gap-0.5 opacity-80 group-hover:opacity-100">
+          <div class="svadmin-u-60fbb7713999 svadmin-u-012fbd121f37 svadmin-u-3960ffc248d9 svadmin-u-a3899220f90e svadmin-u-714816efc69c svadmin-u-181f3d6c9821">
             <TooltipButton
               tooltip={i18n.t('common.moveUp', undefined) ?? '上移'}
               variant="ghost"
@@ -155,7 +155,7 @@
               disabled={disabled || isFirst}
               onclick={() => moveUp(index)}
             >
-              <ArrowUp class="h-3.5 w-3.5" />
+              <ArrowUp class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
             </TooltipButton>
 
             <TooltipButton
@@ -165,7 +165,7 @@
               disabled={disabled || isLast}
               onclick={() => moveDown(index)}
             >
-              <ArrowDown class="h-3.5 w-3.5" />
+              <ArrowDown class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
             </TooltipButton>
 
             <TooltipButton
@@ -175,24 +175,24 @@
               disabled={disabled || items.length >= maxItems}
               onclick={() => duplicate(index)}
             >
-              <Copy class="h-3.5 w-3.5" />
+              <Copy class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
             </TooltipButton>
 
             <TooltipButton
               tooltip={i18n.t('common.delete', undefined) ?? '删除'}
               variant="ghost"
               size="icon-sm"
-              class="text-muted-foreground hover:text-destructive"
+              class="svadmin-u-bfa603190748 svadmin-u-51e95020d6f2"
               disabled={disabled || items.length <= minItems}
               onclick={() => remove(index)}
             >
-              <Trash2 class="h-3.5 w-3.5" />
+              <Trash2 class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
             </TooltipButton>
           </div>
         </div>
       </div>
     {:else}
-      <div class="rounded-lg border border-dashed border-border/80 p-6 text-center text-xs text-muted-foreground">
+      <div class="svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-a29b7a649c77 svadmin-u-c9ed8c5f79ae svadmin-u-0478c89a150f svadmin-u-ca6bf63030aa svadmin-u-359090c2d529 svadmin-u-bfa603190748">
         {emptyText ?? (i18n.t('common.noData', undefined) ?? '暂无项目')}
       </div>
     {/each}
@@ -203,11 +203,11 @@
       type="button"
       variant="outline"
       size="sm"
-      class="w-full gap-1.5 border-dashed"
+      class="svadmin-u-6da6a3c3f741 svadmin-u-58284b4ea568 svadmin-u-a29b7a649c77"
       {disabled}
       onclick={() => add()}
     >
-      <Plus class="h-4 w-4" />
+      <Plus class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
       {addButtonLabel ?? (i18n.t('common.add', undefined) ?? '添加一项')}
     </Button>
   {/if}

@@ -29,16 +29,16 @@
 
 <ContentPageShell pageId="account-settings-sidebar" width="wide">
   <ContentPageHeader title={i18n.t('account.settingsSidebar')} description={i18n.t('account.settingsSidebarDescription')} />
-  <div class="grid gap-6 lg:grid-cols-[12rem_minmax(0,1fr)]">
-    <nav class="flex gap-1 overflow-x-auto lg:flex-col" aria-label={i18n.t('account.settingsSidebar')}>
+  <div class="svadmin-u-f3c543ad5fe9 svadmin-u-0d304f904cb0 svadmin-u-7178afa5bad6">
+    <nav class="svadmin-u-60fbb7713999 svadmin-u-44ee8ba0a421 svadmin-u-1384f66f41d0 svadmin-u-a94f89d92058" aria-label={i18n.t('account.settingsSidebar')}>
       {#each sections as section (section.id)}
-        <button type="button" class={'whitespace-nowrap rounded-md px-3 py-2 text-left text-sm ' + (active === section.id ? 'bg-muted font-medium text-foreground' : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground')} aria-current={active === section.id ? 'page' : undefined} onclick={() => active = section.id}>{section.title}</button>
+        <button type="button" class={'svadmin-u-e82ae8be04aa svadmin-u-421ac2be5045 svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b svadmin-u-2eba0d65d059 svadmin-u-fc7473ca09eb ' + (active === section.id ? 'svadmin-u-2ef11f1cb219 svadmin-u-2689f3958069 svadmin-u-d4108abe6359' : 'svadmin-u-bfa603190748 svadmin-u-39f703dbe296 svadmin-u-ea7b2e9e070e')} aria-current={active === section.id ? 'page' : undefined} onclick={() => active = section.id}>{section.title}</button>
       {/each}
     </nav>
-    <div class="min-w-0">
+    <div class="svadmin-u-7e0b7cdf1a94">
       {#if active === 'profile'}
         <SettingsGroup title={i18n.t('account.basicSettings')} description={i18n.t('account.settingsPlainDescription')} bodyClass="space-y-4">
-          <div class="grid gap-4 sm:grid-cols-2"><Input value="Alex Chen" aria-label={i18n.t('profile.name')} /><Input value="Nebula Labs" aria-label="Company" /></div>
+          <div class="svadmin-u-f3c543ad5fe9 svadmin-u-0c3bc98565dd svadmin-u-e00ad81645a2"><Input value="Alex Chen" aria-label={i18n.t('profile.name')} /><Input value="Nebula Labs" aria-label="Company" /></div>
           <div><SettingsFieldRow label={i18n.t('account.visibility')} control={visibilityControl} separated /><SettingsFieldRow label={i18n.t('account.availability')} control={availabilityControl} separated /></div>
         </SettingsGroup>
       {:else if active === 'signin'}

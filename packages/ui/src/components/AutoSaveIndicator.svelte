@@ -16,21 +16,21 @@
   }>();
 </script>
 
-<div class="flex items-center gap-2 text-sm text-muted-foreground" role="status" aria-live="polite">
+<div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-fc7473ca09eb svadmin-u-bfa603190748" role="status" aria-live="polite">
   {#key status}
-    <div class="flex items-center gap-2" in:fly={{ y: -8, duration: 200 }} out:fade={{ duration: 150 }}>
+    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4" in:fly={{ y: -8, duration: 200 }} out:fade={{ duration: 150 }}>
       {#if status === 'idle'}
-        <Cloud class="h-4 w-4" aria-hidden="true" />
+        <Cloud class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" aria-hidden="true" />
         <span>{i18n.t('autoSave.idle')}</span>
       {:else if status === 'loading'}
-        <Loader2 class="h-4 w-4 animate-spin text-primary" aria-hidden="true" />
+        <Loader2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-afbdd13a380e svadmin-u-20aaf08a7ed1" aria-hidden="true" />
         <span>{i18n.t('autoSave.saving')}</span>
       {:else if status === 'success'}
-        <Check class="h-4 w-4 text-success" aria-hidden="true" />
-        <span class="text-success">{i18n.t('autoSave.saved')}</span>
+        <Check class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-76747e5e02ff" aria-hidden="true" />
+        <span class="svadmin-u-76747e5e02ff">{i18n.t('autoSave.saved')}</span>
       {:else if status === 'error'}
-        <X class="h-4 w-4 text-destructive" aria-hidden="true" />
-        <span class="text-destructive" title={error}>{i18n.t('autoSave.error')}</span>
+        <X class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-811148b13d1e" aria-hidden="true" />
+        <span class="svadmin-u-811148b13d1e" title={error}>{i18n.t('autoSave.error')}</span>
       {/if}
     </div>
   {/key}

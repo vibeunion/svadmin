@@ -40,44 +40,13 @@
     children,
   }: Props = $props();
 
-  const columnClassMap = {
-    2: 'grid-cols-1 sm:grid-cols-2',
-    3: 'grid-cols-1 sm:grid-cols-3',
-    4: 'grid-cols-2 sm:grid-cols-4',
-    5: 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5',
-    6: 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-6',
-    auto: 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-6',
-  };
-
-  const toneValueColorMap: Record<MetricTone, string> = {
-    default: 'text-foreground',
-    primary: 'text-primary',
-    success: 'text-success',
-    warning: 'text-warning',
-    danger: 'text-destructive',
-    info: 'text-info',
-  };
-
-  const badgeToneMap: Record<
-    NonNullable<NonNullable<MetricStripItem['badge']>['tone']>,
-    string
-  > = {
-    default: 'bg-muted text-muted-foreground border-border',
-    success: 'bg-success/10 text-success border-success/20',
-    warning: 'bg-warning/10 text-warning border-warning/20',
-    danger: 'bg-destructive/10 text-destructive border-destructive/20',
-    info: 'bg-info/10 text-info border-info/20',
-  };
 </script>
 
 <div
   role="region"
   aria-label={ariaLabel}
-  class={cn(
-    'grid gap-px overflow-hidden rounded-lg border border-border bg-border shadow-xs',
-    columnClassMap[columns] || columnClassMap.auto,
-    className
-  )}
+  data-columns={columns}
+  class={cn('svadmin-metric-strip', className)}
 >
   {#if children}
     {@render children()}
@@ -87,57 +56,48 @@
       <svelte:element
         this={isInteractive ? 'a' : 'div'}
         href={item.href}
-        class={cn(
-          'group relative flex flex-col justify-between gap-1 bg-card p-3.5 text-left transition-colors duration-150 sm:p-4',
-          isInteractive && 'cursor-pointer text-inherit no-underline hover:bg-muted/40',
-          item.class
-        )}
+        data-interactive={isInteractive ? 'true' : undefined}
+        data-tone={item.tone || 'default'}
+        class={cn('svadmin-metric-item', item.class)}
       >
-        <div class="flex items-center justify-between gap-2">
-          <span class="truncate text-xs font-semibold text-muted-foreground">{item.label}</span>
+        <div class="svadmin-metric-heading">
+          <span class="svadmin-metric-label">{item.label}</span>
           {#if item.icon}
-            <span class="shrink-0 text-muted-foreground/70">
-              <item.icon class="h-3.5 w-3.5" />
+            <span class="svadmin-metric-icon">
+              <item.icon />
             </span>
           {/if}
         </div>
 
         {#if item.loading}
-          <div class="mt-1 flex items-center justify-between">
-            <Skeleton class="h-6 w-16" />
+          <div class="svadmin-metric-loading">
+            <Skeleton class="svadmin-metric-skeleton" />
           </div>
         {:else}
-          <div class="mt-0.5 flex items-baseline justify-between gap-2">
+          <div class="svadmin-metric-value-row">
             <strong
-              class={cn(
-                'text-xl font-bold tracking-tight tabular-nums sm:text-2xl',
-                toneValueColorMap[item.tone || 'default']
-              )}
+              class="svadmin-metric-value"
             >
               {item.value}
             </strong>
 
             {#if item.badge}
               <span
-                class={cn(
-                  'inline-flex items-center rounded-full border px-1.5 py-0.5 text-[11px] font-semibold',
-                  badgeToneMap[item.badge.tone || 'default']
-                )}
+                data-tone={item.badge.tone || 'default'}
+                class="svadmin-metric-badge"
               >
                 {item.badge.text}
               </span>
             {:else if item.trend}
               <span
-                class={cn(
-                  'inline-flex items-center gap-0.5 text-xs font-medium tabular-nums',
-                  item.trend.value >= 0 ? 'text-success' : 'text-destructive'
-                )}
+                data-direction={item.trend.value >= 0 ? 'up' : 'down'}
+                class="svadmin-metric-trend"
                 aria-label="{item.trend.value >= 0 ? '上升' : '下降'} {Math.abs(item.trend.value)}%"
               >
                 <span aria-hidden="true">{item.trend.value >= 0 ? '↑' : '↓'}</span>
                 <span>{Math.abs(item.trend.value)}%</span>
                 {#if item.trend.label}
-                  <span class="ml-0.5 text-muted-foreground">{item.trend.label}</span>
+                  <span class="svadmin-metric-trend-label">{item.trend.label}</span>
                 {/if}
               </span>
             {/if}

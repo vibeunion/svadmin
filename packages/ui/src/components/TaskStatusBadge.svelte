@@ -34,14 +34,14 @@
           label: translateStatus(normalizedStatus),
           variant: 'default' as const,
           icon: Loader2,
-          iconClass: 'animate-spin',
+          iconClass: 'svadmin-u-afbdd13a380e',
         };
       case 'completed':
         return {
           label: translateStatus(normalizedStatus),
           variant: 'secondary' as const,
           icon: CheckCircle2,
-          iconClass: 'text-success',
+          iconClass: 'svadmin-u-76747e5e02ff',
         };
       case 'failed':
         return {
@@ -55,7 +55,7 @@
           label: translateStatus(normalizedStatus),
           variant: 'outline' as const,
           icon: Ban,
-          iconClass: 'text-muted-foreground',
+          iconClass: 'svadmin-u-bfa603190748',
         };
       case 'queued':
         return {
@@ -77,9 +77,9 @@
   const Icon = $derived(config.icon);
 </script>
 
-<Badge variant={config.variant} class={`gap-1.5 ${className}`.trim()}>
+<Badge variant={config.variant} class={`svadmin-u-58284b4ea568 ${className}`.trim()}>
   {#if showIcon}
-    <Icon class={`h-3.5 w-3.5 ${config.iconClass}`.trim()} />
+    <Icon class={`svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c ${config.iconClass}`.trim()} />
   {/if}
   <span>{config.label}</span>
 </Badge>

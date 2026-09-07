@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/svelte';
 import { describe, expect, it, vi } from 'vitest';
 import StatusTabs from './content/StatusTabs.svelte';
+import utilityClasses from '../../scripts/utility-class-map.json';
 
 describe('StatusTabs', () => {
   const items = [
@@ -81,5 +82,10 @@ describe('StatusTabs', () => {
     const tablist = container.querySelector('[data-svadmin-status-tabs]');
     expect(tablist?.getAttribute('data-variant')).toBe('segmented');
     expect(tablist?.getAttribute('data-density')).toBe('compact');
+  });
+
+  it('applies underline styling without rewriting the variant value', () => {
+    render(StatusTabs, { items, value: 'all', variant: 'underline' });
+    expect(screen.getByRole('tablist').classList.contains(utilityClasses['border-b'])).toBe(true);
   });
 });

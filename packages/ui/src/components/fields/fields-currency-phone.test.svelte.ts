@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import CurrencyField from './CurrencyField.svelte';
 import PhoneField from './PhoneField.svelte';
+import utilityClasses from '../../../scripts/utility-class-map.json';
 
 const originalClipboard = Object.getOwnPropertyDescriptor(globalThis.navigator, 'clipboard');
 
@@ -32,7 +33,7 @@ describe('CurrencyField enterprise capabilities', () => {
   it('formats standard currency with USD default', () => {
     const view = render(CurrencyField, { value: 1234.56, locale: 'en-US' });
     expect(view.container.textContent).toContain('$1,234.56');
-    expect(view.container.querySelector('.tabular-nums')).not.toBeNull();
+    expect(view.container.querySelector(`.${utilityClasses['tabular-nums']}`)).not.toBeNull();
   });
 
   it('formats CNY currency with custom precision', () => {
@@ -57,22 +58,22 @@ describe('CurrencyField enterprise capabilities', () => {
 
   it('applies positive and negative colors when colored=true', () => {
     const posView = render(CurrencyField, { value: 500, colored: true });
-    expect(posView.container.querySelector('.text-success')).not.toBeNull();
+    expect(posView.container.querySelector(`.${utilityClasses['text-success']}`)).not.toBeNull();
 
     const negView = render(CurrencyField, { value: -250, colored: true });
-    expect(negView.container.querySelector('.text-destructive')).not.toBeNull();
+    expect(negView.container.querySelector(`.${utilityClasses['text-destructive']}`)).not.toBeNull();
   });
 
   it('infers positive and negative colors when tone=auto', () => {
     const posView = render(CurrencyField, { value: 500, tone: 'auto' });
-    expect(posView.container.querySelector('.text-success')).not.toBeNull();
+    expect(posView.container.querySelector(`.${utilityClasses['text-success']}`)).not.toBeNull();
 
     const negView = render(CurrencyField, { value: -250, tone: 'auto' });
-    expect(negView.container.querySelector('.text-destructive')).not.toBeNull();
+    expect(negView.container.querySelector(`.${utilityClasses['text-destructive']}`)).not.toBeNull();
 
     const zeroView = render(CurrencyField, { value: 0, tone: 'auto' });
-    expect(zeroView.container.querySelector('.text-success')).toBeNull();
-    expect(zeroView.container.querySelector('.text-destructive')).toBeNull();
+    expect(zeroView.container.querySelector(`.${utilityClasses['text-success']}`)).toBeNull();
+    expect(zeroView.container.querySelector(`.${utilityClasses['text-destructive']}`)).toBeNull();
   });
 
   it('handles whitespace, NaN, and non-finite values by falling back to nullLabel', () => {

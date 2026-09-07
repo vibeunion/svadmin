@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render, fireEvent } from '@testing-library/svelte';
 import FilterDropdown from './FilterDropdown.svelte';
+import utilityClasses from '../../scripts/utility-class-map.json';
 
 describe('FilterDropdown component', () => {
   it('renders trigger button and toggles open state', async () => {
@@ -19,7 +20,7 @@ describe('FilterDropdown component', () => {
 
   it('shows active indicator dot when filter is active', () => {
     const view = render(FilterDropdown, { title: 'Filter Code', active: true });
-    expect(view.container.querySelector('.bg-primary')).not.toBeNull();
+    expect(view.container.querySelector(`.${utilityClasses['bg-primary']}`)).not.toBeNull();
   });
 
   it('renders and selects option checkboxes in select mode', async () => {

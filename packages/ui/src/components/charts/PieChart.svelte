@@ -57,13 +57,13 @@
   });
 </script>
 
-<div class="inline-flex flex-col items-center gap-3 {className}">
+<div class="svadmin-u-52083e7da442 svadmin-u-8dddea0773ed svadmin-u-3960ffc248d9 svadmin-u-1004c0c3954c {className}">
   <svg viewBox="0 0 {size} {size}" width={size} height={size}>
     {#each slices as slice, i (i)}
       <path
         d={getArcPath(slice.startAngle, slice.endAngle, radius, innerRadius)}
         fill={slice.color}
-        class="transition-all duration-200 hover:opacity-80"
+        class="svadmin-u-0fe7d7d814d0 svadmin-u-625a4c3fbeb2 svadmin-u-eaeb741978b7"
         stroke="var(--background)"
         stroke-width="2"
       >
@@ -83,12 +83,12 @@
   </svg>
 
   <!-- Legend -->
-  <div class="flex flex-wrap justify-center gap-x-4 gap-y-1">
+  <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-86843cf1e227 svadmin-u-513d5c30bf66 svadmin-u-c163b0edfdf0">
     {#each slices as slice, _i (_i)}
-      <div class="flex items-center gap-1.5 text-xs">
-        <span class="h-2.5 w-2.5 rounded-full" style="background-color: {slice.color};"></span>
-        <span class="text-muted-foreground">{slice.label}</span>
-        <span class="font-medium text-foreground">{slice.percentage}%</span>
+      <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-58284b4ea568 svadmin-u-359090c2d529">
+        <span class="svadmin-u-9b3d0721b628 svadmin-u-650758f4572a svadmin-u-ac204c108886" style="background-color: {slice.color};"></span>
+        <span class="svadmin-u-bfa603190748">{slice.label}</span>
+        <span class="svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{slice.percentage}%</span>
       </div>
     {/each}
   </div>

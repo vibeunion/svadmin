@@ -14,12 +14,12 @@
 {#if resolvedState}
   <DataState state={resolvedState} title={stateTitle ?? emptyTitle} description={stateDescription ?? emptyDescription} {retry} {retryLabel} {loadingLabel} class={className} />
 {:else}
-<div class={'overflow-x-auto rounded-lg border border-border bg-card ' + className}>
+<div class={'svadmin-u-1384f66f41d0 svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 ' + className}>
   <Table.Root data-svadmin-datatable>
     <Table.Header data-svadmin-table-head><Table.Row><Table.Head>{isZh ? '事件' : 'Event'}</Table.Head><Table.Head>{isZh ? '操作者' : 'Actor'}</Table.Head><Table.Head>{isZh ? '位置' : 'Location'}</Table.Head><Table.Head>{isZh ? '时间' : 'Time'}</Table.Head><Table.Head>{isZh ? '风险' : 'Risk'}</Table.Head></Table.Row></Table.Header>
     <Table.Body>
       {#each events as event (event.id)}
-        <Table.Row data-svadmin-table-row><Table.Cell class="font-medium">{event.event}</Table.Cell><Table.Cell>{event.actor ?? (isZh ? '系统' : 'System')}</Table.Cell><Table.Cell>{event.location ?? (isZh ? '未知' : 'Unknown')}</Table.Cell><Table.Cell class="whitespace-nowrap">{event.createdAt}</Table.Cell><Table.Cell><StatusBadge status={event.severity} label={event.severity} /></Table.Cell></Table.Row>
+        <Table.Row data-svadmin-table-row><Table.Cell class="svadmin-u-2689f3958069">{event.event}</Table.Cell><Table.Cell>{event.actor ?? (isZh ? '系统' : 'System')}</Table.Cell><Table.Cell>{event.location ?? (isZh ? '未知' : 'Unknown')}</Table.Cell><Table.Cell class="svadmin-u-e82ae8be04aa">{event.createdAt}</Table.Cell><Table.Cell><StatusBadge status={event.severity} label={event.severity} /></Table.Cell></Table.Row>
       {/each}
     </Table.Body>
   </Table.Root>

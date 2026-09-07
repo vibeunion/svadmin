@@ -8,6 +8,7 @@ import {
 import { tick } from 'svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import ScopedProviderActionsHost from './scoped-provider-actions.test-host.svelte';
+import utilityClasses from '../../scripts/utility-class-map.json';
 
 interface Deferred<T> {
   promise: Promise<T>;
@@ -128,7 +129,7 @@ describe('scoped provider actions', () => {
     await waitFor(() => expect(freshPermissions).toHaveBeenCalledTimes(1));
     const readToggle = view.getByRole('button', { name: 'Toggle Detail' }) as HTMLButtonElement;
     expect(readToggle.disabled).toBe(false);
-    expect(readToggle.querySelector('svg')?.classList.contains('block')).toBe(true);
+    expect(readToggle.querySelector('svg')?.classList.contains(utilityClasses.block)).toBe(true);
 
     staleUpdate.reject(new Error('stale scope A failure'));
     await staleUpdate.promise.catch(() => undefined);
@@ -136,6 +137,6 @@ describe('scoped provider actions', () => {
 
     expect(freshPermissions).toHaveBeenCalledTimes(1);
     expect(freshUpdatePermissions).not.toHaveBeenCalled();
-    expect(readToggle.querySelector('svg')?.classList.contains('block')).toBe(true);
+    expect(readToggle.querySelector('svg')?.classList.contains(utilityClasses.block)).toBe(true);
   });
 });

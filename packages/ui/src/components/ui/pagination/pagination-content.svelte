@@ -6,6 +6,6 @@
   let { class: className, children, ...restProps }: HTMLAttributes<HTMLUListElement> & { children?: Snippet } = $props();
 </script>
 
-<ul data-slot="pagination-content" class={cn("flex flex-row items-center gap-1", className)} {...restProps}>
+<ul data-slot="pagination-content" class={cn("svadmin-pagination-content", className)} {...restProps}>
   {@render children?.()}
 </ul>

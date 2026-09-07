@@ -215,13 +215,13 @@
 <Button
   variant="ghost"
   size="icon"
-  class="relative"
+  class="svadmin-u-d89972fe17d6"
   onclick={() => open = !open}
   aria-label={resolvedTitle}
 >
-  <ListTodo class="h-4 w-4" />
+  <ListTodo class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
   {#if runningCount > 0}
-    <span class="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+    <span class="svadmin-u-da4dbfbc4fdc svadmin-u-2a95a5f480f7 svadmin-u-4c15f4f8c5ab svadmin-u-60fbb7713999 svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-ac204c108886 svadmin-u-75b1bec3ea0e svadmin-u-1dc571a3609f svadmin-u-69450ef1487e svadmin-u-30ca335ae9c2">
       {runningCount}
     </span>
   {/if}
@@ -230,65 +230,65 @@
 <Sheet.Root
   bind:open
   side="right"
-  class="w-full max-w-6xl border-l border-border bg-card p-0"
+  class="svadmin-u-6da6a3c3f741 svadmin-u-1d4402dfae51 svadmin-u-d4f78465b34d svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-8a539c7fe216"
   role="dialog"
   aria-modal="true"
   aria-labelledby="svadmin-task-queue-title"
   onClose={() => open = false}
 >
-  <Sheet.Content class="h-full gap-0 p-0">
-    <div class="flex h-full flex-col">
-      <div class="border-b border-border bg-muted/30 px-4 py-3">
-        <Sheet.Title id="svadmin-task-queue-title" class="sr-only">{resolvedTitle}</Sheet.Title>
-        <div class="flex flex-wrap items-center gap-2">
-          <ListTodo class="h-5 w-5 text-muted-foreground" />
-          <h2 class="text-sm font-semibold">{resolvedTitle}</h2>
-          <Badge variant="secondary" class="text-xs">{i18n.t('task.activeCount', { count: runningCount })}</Badge>
+  <Sheet.Content class="svadmin-u-668b21aa5409 svadmin-u-63a285be6490 svadmin-u-8a539c7fe216">
+    <div class="svadmin-u-60fbb7713999 svadmin-u-668b21aa5409 svadmin-u-8dddea0773ed">
+      <div class="svadmin-u-65fdbade2025 svadmin-u-18049387f0af svadmin-u-2859c861d7de svadmin-u-f0faeb26d656 svadmin-u-1b2d54a3fd12">
+        <Sheet.Title id="svadmin-task-queue-title" class="svadmin-u-2daa8e5e2f2e">{resolvedTitle}</Sheet.Title>
+        <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
+          <ListTodo class="svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e svadmin-u-bfa603190748" />
+          <h2 class="svadmin-u-fc7473ca09eb svadmin-u-e83a7042bc91">{resolvedTitle}</h2>
+          <Badge variant="secondary" class="svadmin-u-359090c2d529">{i18n.t('task.activeCount', { count: runningCount })}</Badge>
           {#if allTasks[0] && resolveTaskCreatedAt(allTasks[0])}
-            <span class="text-xs text-muted-foreground">{i18n.t('task.lastQueuedAt', { time: formatTime(resolveTaskCreatedAt(allTasks[0])) })}</span>
+            <span class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">{i18n.t('task.lastQueuedAt', { time: formatTime(resolveTaskCreatedAt(allTasks[0])) })}</span>
           {/if}
         </div>
       </div>
 
       {#if !taskProvider}
-        <div class="flex flex-1 items-center justify-center p-6 text-sm text-muted-foreground">
+        <div class="svadmin-u-60fbb7713999 svadmin-u-36e579c0b41c svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-0478c89a150f svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">
           {i18n.t('common.configRequired')}
         </div>
       {:else}
-        <div class="grid min-h-0 flex-1 gap-0 lg:grid-cols-[minmax(0,1.2fr)_minmax(340px,0.8fr)]">
-          <div class="min-h-0 overflow-auto border-b border-border lg:border-b-0 lg:border-r">
-            <div class="space-y-4 p-4">
-              <div class="flex flex-col gap-3">
-                <div class="flex flex-wrap items-center gap-2">
-                  <Tabs.Root value={activeTab} class="w-full">
-                    <Tabs.List class="inline-flex rounded-lg border border-border bg-muted/40 p-1">
+        <div class="svadmin-u-f3c543ad5fe9 svadmin-u-fb7302e5364d svadmin-u-36e579c0b41c svadmin-u-63a285be6490 svadmin-u-bac517ea5f0f">
+          <div class="svadmin-u-fb7302e5364d svadmin-u-73fc3fb18ceb svadmin-u-65fdbade2025 svadmin-u-18049387f0af svadmin-u-e2f2b4a69d35 svadmin-u-64a6e3fce6e0">
+            <div class="svadmin-u-3e7ce58d64fa svadmin-u-8e63407b5ceb">
+              <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-1004c0c3954c">
+                <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
+                  <Tabs.Root value={activeTab} class="svadmin-u-6da6a3c3f741">
+                    <Tabs.List class="svadmin-u-52083e7da442 svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-b00f43c30c2b svadmin-u-eb6a3cef9686">
                       <Tabs.Trigger value="tasks" active={activeTab === 'tasks'} onclick={() => activeTab = 'tasks'}>
                         {i18n.t('task.tabTasks')}
-                        <Badge variant="outline" class="ml-1 text-[10px]">{taskQuery.data?.total ?? allTasks.length}</Badge>
+                        <Badge variant="outline" class="svadmin-u-f58b02572ab2 svadmin-u-1dc571a3609f">{taskQuery.data?.total ?? allTasks.length}</Badge>
                       </Tabs.Trigger>
                       <Tabs.Trigger value="dlq" active={activeTab === 'dlq'} onclick={() => activeTab = 'dlq'}>
                         {i18n.t('task.tabDlq')}
-                        <Badge variant="outline" class="ml-1 text-[10px]">{dlqQuery.data?.total ?? dlqTasks.length}</Badge>
+                        <Badge variant="outline" class="svadmin-u-f58b02572ab2 svadmin-u-1dc571a3609f">{dlqQuery.data?.total ?? dlqTasks.length}</Badge>
                       </Tabs.Trigger>
                     </Tabs.List>
                   </Tabs.Root>
-                  <div class="ml-auto flex items-center gap-2">
+                  <div class="svadmin-u-fb56d9cff341 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
                     <Button variant="outline" size="sm" onclick={() => void refreshCurrentTab()}>
-                      <RefreshCw class="mr-1.5 h-3.5 w-3.5" />
+                      <RefreshCw class="svadmin-u-82cc6c6581cd svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
                       {i18n.t('common.refresh')}
                     </Button>
                     <Button size="sm" onclick={() => submitOpen = !submitOpen}>
-                      <Plus class="mr-1.5 h-3.5 w-3.5" />
+                      <Plus class="svadmin-u-82cc6c6581cd svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
                       {i18n.t('task.submitAction')}
                     </Button>
                   </div>
                 </div>
 
-                <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_160px]">
-                  <div class="relative">
-                    <Search class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <div class="svadmin-u-f3c543ad5fe9 svadmin-u-1004c0c3954c svadmin-u-d05bf7110c88">
+                  <div class="svadmin-u-d89972fe17d6">
+                    <Search class="svadmin-u-a4326536b8f5 svadmin-u-da4dbfbc4fdc svadmin-u-22e59b722111 svadmin-u-d694ba66e322 svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-36b381be4df3 svadmin-u-bfa603190748" />
                     <Input
-                      class="pl-9"
+                      class="svadmin-u-9e83b2412bc9"
                       placeholder={i18n.t('task.searchPlaceholder')}
                       bind:value={searchQuery}
                     />
@@ -309,34 +309,34 @@
               </div>
 
               {#if submitOpen}
-                <Card.Root class="border-border/60 shadow-none">
-                  <Card.Header class="pb-3">
-                    <Card.Title class="text-base">{i18n.t('task.submitTitle')}</Card.Title>
+                <Card.Root class="svadmin-u-05faf5c801ff svadmin-u-ad47d17e603c">
+                  <Card.Header class="svadmin-u-7fcf9124b5df">
+                    <Card.Title class="svadmin-u-4ee734926ff6">{i18n.t('task.submitTitle')}</Card.Title>
                     <Card.Description>{i18n.t('task.submitDescription')}</Card.Description>
                   </Card.Header>
-                  <Card.Content class="space-y-4 pt-0">
-                    <div class="space-y-2">
+                  <Card.Content class="svadmin-u-3e7ce58d64fa svadmin-u-9335c39f6eff">
+                    <div class="svadmin-u-6f7e013d6499">
                       <Label for="task-name">{i18n.t('task.taskNameLabel')}</Label>
                       <Input id="task-name" bind:value={submitTaskName} placeholder="image.generate" />
                     </div>
-                    <div class="space-y-2">
+                    <div class="svadmin-u-6f7e013d6499">
                       <Label for="task-idempotency-key">{i18n.t('task.idempotencyKeyLabel')}</Label>
                       <Input id="task-idempotency-key" bind:value={submitIdempotencyKey} placeholder="poster-2026-04-19" />
                     </div>
-                    <div class="space-y-2">
+                    <div class="svadmin-u-6f7e013d6499">
                       <Label for="task-body">{i18n.t('task.bodyLabel')}</Label>
-                      <Textarea id="task-body" bind:value={submitBodyText} class="min-h-[140px] font-mono text-xs" />
+                      <Textarea id="task-body" bind:value={submitBodyText} class="svadmin-u-ee15a477cd9c svadmin-u-0e65706bcccd svadmin-u-359090c2d529" />
                     </div>
                     {#if submitError}
-                      <p class="text-sm text-destructive">{submitError}</p>
+                      <p class="svadmin-u-fc7473ca09eb svadmin-u-811148b13d1e">{submitError}</p>
                     {/if}
-                    <div class="flex flex-wrap justify-end gap-2">
+                    <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-77c08e015d14 svadmin-u-77a2a20e90d4">
                       <Button variant="ghost" onclick={() => { submitOpen = false; submitError = null; }}>
                         {i18n.t('common.cancel')}
                       </Button>
                       <Button onclick={() => void handleSubmitTask()} disabled={submitTask.mutation.isPending}>
                         {#if submitTask.mutation.isPending}
-                          <Loader2 class="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                          <Loader2 class="svadmin-u-82cc6c6581cd svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-afbdd13a380e" />
                         {/if}
                         {i18n.t('task.submitAction')}
                       </Button>
@@ -358,8 +358,8 @@
             </div>
           </div>
 
-          <div class="min-h-0 overflow-auto bg-muted/10">
-            <div class="p-4">
+          <div class="svadmin-u-fb7302e5364d svadmin-u-73fc3fb18ceb svadmin-u-8a25a995eb8e">
+            <div class="svadmin-u-8e63407b5ceb">
               {#if selectedTaskId}
                 <TaskDetails
                   taskId={selectedTaskId}
@@ -371,7 +371,7 @@
                   }}
                 />
               {:else}
-                <div class="flex h-full items-center justify-center rounded-lg border border-dashed border-border/60 bg-background/70 p-8 text-center text-sm text-muted-foreground">
+                <div class="svadmin-u-60fbb7713999 svadmin-u-668b21aa5409 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-a29b7a649c77 svadmin-u-05faf5c801ff svadmin-u-8417db9333ae svadmin-u-845f53365c8d svadmin-u-ca6bf63030aa svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">
                   {i18n.t('task.selectHint')}
                 </div>
               {/if}

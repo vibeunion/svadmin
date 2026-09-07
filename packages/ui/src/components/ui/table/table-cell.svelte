@@ -17,18 +17,15 @@
 	}: Props = $props();
 
 	const getDensity = getContext<() => TableDensity>("svadmin-table-density");
-	const densityClass = $derived(getDensity?.() === "compact"
-		? "h-8 px-2 py-1 text-xs"
-		: "p-2");
-	const stickyClass = $derived(
-		sticky === "right" || sticky === true
-			? "sticky right-0 z-10 bg-background shadow-[-1px_0_0_var(--border)] group-hover/row:bg-muted/50 group-data-[state=selected]/row:bg-muted"
-			: sticky === "left"
-			? "sticky left-0 z-10 bg-background shadow-[1px_0_0_var(--border)] group-hover/row:bg-muted/50 group-data-[state=selected]/row:bg-muted"
-			: ""
-	);
 </script>
 
-<td bind:this={ref} data-slot="table-cell" data-sticky={sticky ? (typeof sticky === "string" ? sticky : "right") : undefined} class={cn("align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0", densityClass, stickyClass, className)} {...restProps}>
+<td
+	bind:this={ref}
+	data-slot="table-cell"
+	data-sticky={sticky ? (typeof sticky === "string" ? sticky : "right") : undefined}
+	data-density={getDensity?.() === "compact" ? "compact" : "default"}
+	class={cn("svadmin-table-cell", className)}
+	{...restProps}
+>
 	{@render children?.()}
 </td>

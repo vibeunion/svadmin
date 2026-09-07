@@ -77,30 +77,30 @@
   }
 </script>
 
-<div class={cn('w-full overflow-x-auto border-t-2 border-border/80 bg-muted/30 font-medium text-xs text-foreground', className)}>
-  <table class="w-full text-left border-collapse">
+<div class={cn('svadmin-u-6da6a3c3f741 svadmin-u-1384f66f41d0 svadmin-u-bee68af349c9 svadmin-u-c9ed8c5f79ae svadmin-u-2859c861d7de svadmin-u-2689f3958069 svadmin-u-359090c2d529 svadmin-u-d4108abe6359', className)}>
+  <table class="svadmin-u-6da6a3c3f741 svadmin-u-2eba0d65d059 svadmin-u-4583f90cd9bd">
     <tbody>
-      <tr class="h-10">
+      <tr class="svadmin-u-426b8b75185b">
         {#each columns as col (col.key)}
           {@const isTitle = col.key === titleKey}
           {@const aggType = aggregations[col.key]}
           {@const align = col.align || 'left'}
           <td
             class={cn(
-              'px-4 py-2 tabular-nums',
-              align === 'right' ? 'text-right' : align === 'center' ? 'text-center' : 'text-left',
-              isTitle ? 'font-semibold text-foreground' : 'text-muted-foreground'
+              'svadmin-u-f0faeb26d656 svadmin-u-03b4dd7f172b svadmin-u-3032cae0badb',
+              align === 'right' ? 'svadmin-u-308fc069e46e' : align === 'center' ? 'svadmin-u-ca6bf63030aa' : 'svadmin-u-2eba0d65d059',
+              isTitle ? 'svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359' : 'svadmin-u-bfa603190748'
             )}
           >
             {#if isTitle && !aggType}
               <span>{title}</span>
             {:else if aggType}
               {@const result = calculateAggregation(col.key, aggType)}
-              <span class="font-semibold text-foreground">
+              <span class="svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">
                 {#if prefix[col.key]}{prefix[col.key]}{/if}{result}{#if suffix[col.key]}{suffix[col.key]}{/if}
               </span>
             {:else}
-              <span class="opacity-40">—</span>
+              <span class="svadmin-u-2a2db4667b27">—</span>
             {/if}
           </td>
         {/each}

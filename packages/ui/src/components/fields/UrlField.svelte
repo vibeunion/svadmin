@@ -37,14 +37,14 @@
     href={value}
     {target}
     rel="noopener noreferrer"
-    class={cn('text-primary hover:underline inline-flex items-center gap-1 text-sm font-medium', className)}
+    class={cn('svadmin-u-20aaf08a7ed1 svadmin-u-f673f4a7d061 svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421 svadmin-u-fc7473ca09eb svadmin-u-2689f3958069', className)}
     title={value}
   >
     <span>{display}</span>
     {#if showIcon}
-      <ExternalLink class="h-3 w-3 shrink-0 opacity-60" />
+      <ExternalLink class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29 svadmin-u-012fbd121f37 svadmin-u-f2868c227fcd" />
     {/if}
   </a>
 {:else}
-  <span class="text-muted-foreground">{nullLabel}</span>
+  <span class="svadmin-u-bfa603190748">{nullLabel}</span>
 {/if}

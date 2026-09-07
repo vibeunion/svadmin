@@ -42,33 +42,33 @@
   const advancedPanelId = `svadmin-filter-toolbar-advanced-${uid}`;
 </script>
 
-<div class={cn('space-y-2', className)} data-svadmin-filter-toolbar data-advanced-open={advanced && advancedOpen ? 'true' : 'false'}>
-  <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+<div class={cn('svadmin-filter-toolbar', className)} data-density={density} data-svadmin-filter-toolbar data-advanced-open={advanced && advancedOpen ? 'true' : 'false'}>
+  <div class="svadmin-filter-toolbar__row">
     {#if showSearch}
-      <div class="relative min-w-0 flex-1">
-        <Search class={cn('pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground', isCompact ? 'size-3.5' : 'size-4')} aria-hidden="true" />
+      <div class="svadmin-filter-toolbar__search">
+        <Search class="svadmin-filter-toolbar__search-icon" aria-hidden="true" />
         <Input
           bind:value={query}
           {placeholder}
-          class={cn('pl-9 pr-9', isCompact ? 'h-8 text-xs' : 'h-9 text-sm')}
+          class="svadmin-filter-toolbar__input"
           aria-label={placeholder}
         />
         {#if query}
           <Button
             variant="ghost"
             size="icon-xs"
-            class="absolute right-1 top-1/2 -translate-y-1/2"
+            class="svadmin-filter-toolbar__clear"
             aria-label={clearLabel}
             title={clearLabel}
             onclick={() => query = ''}
           >
-            <X class="size-3.5" aria-hidden="true" />
+            <X class="svadmin-filter-toolbar__control-icon" aria-hidden="true" />
           </Button>
         {/if}
       </div>
     {/if}
     {#if filters}
-      <div class="flex flex-wrap items-center gap-2">
+      <div class="svadmin-filter-toolbar__filters">
         {@render filters()}
       </div>
     {/if}
@@ -76,33 +76,33 @@
       <Button
         variant={advancedOpen ? 'secondary' : 'outline'}
         size={isCompact ? 'sm' : 'default'}
-        class={cn('gap-1.5 shrink-0', isCompact ? 'h-8 text-xs px-2.5' : '')}
+        class="svadmin-filter-toolbar__toggle"
         onclick={() => advancedOpen = !advancedOpen}
         aria-expanded={advancedOpen}
         aria-controls={advancedPanelId}
       >
-        <SlidersHorizontal class="size-3.5" aria-hidden="true" />
+        <SlidersHorizontal class="svadmin-filter-toolbar__control-icon" aria-hidden="true" />
         <span>{advancedLabel}</span>
         {#if activeFilterCount > 0}
-          <Badge variant="secondary" class="ml-0.5 h-4 min-w-4 px-1 text-[10px] leading-none font-semibold tabular-nums">
+          <Badge variant="secondary" class="svadmin-filter-toolbar__count">
             {activeFilterCount}
           </Badge>
         {/if}
         {#if advancedOpen}
-          <ChevronUp class="size-3 text-muted-foreground ml-0.5" aria-hidden="true" />
+          <ChevronUp class="svadmin-filter-toolbar__chevron" aria-hidden="true" />
         {:else}
-          <ChevronDown class="size-3 text-muted-foreground ml-0.5" aria-hidden="true" />
+          <ChevronDown class="svadmin-filter-toolbar__chevron" aria-hidden="true" />
         {/if}
       </Button>
     {/if}
     {#if actions}
-      <div class="flex shrink-0 flex-wrap items-center gap-2">
+      <div class="svadmin-filter-toolbar__actions">
         {@render actions()}
       </div>
     {/if}
   </div>
   {#if advanced && advancedOpen}
-    <div id={advancedPanelId} role="region" aria-label={advancedLabel} class="svadmin-filter-toolbar-advanced rounded-lg border border-border/60 bg-muted/20 p-3" aria-hidden="false">
+    <div id={advancedPanelId} role="region" aria-label={advancedLabel} class="svadmin-filter-toolbar-advanced" aria-hidden="false">
       {@render advanced()}
     </div>
   {/if}

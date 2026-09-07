@@ -1,23 +1,13 @@
+<script lang="ts" module>
+	import { avatarVariants as variants, type AvatarSize as Size } from "./avatar-variants.js";
+
+	export const avatarVariants = variants;
+	export type AvatarSize = Size;
+</script>
+
 <script lang="ts">
 	import { cn, type WithElementRef } from "../../../utils.js";
 	import type { HTMLImgAttributes } from "svelte/elements";
-	import { type VariantProps, tv } from "tailwind-variants";
-
-	export const avatarVariants = tv({
-		base: "relative flex shrink-0 overflow-hidden rounded-full",
-		variants: {
-			size: {
-				default: "size-10",
-				sm: "size-8",
-				lg: "size-12",
-				xl: "size-16",
-			},
-		},
-		defaultVariants: { size: "default" },
-	});
-
-	// AvatarSize type is exported from the package index.ts
-	type AvatarSize = VariantProps<typeof avatarVariants>["size"];
 
 	type Props = WithElementRef<HTMLImgAttributes, HTMLImageElement> & {
 		size?: AvatarSize;
@@ -38,13 +28,13 @@
 </script>
 
 {#if src && !imgError}
-	<span class={cn(avatarVariants({ size }), className)}>
+	<span data-size={size} class={cn(avatarVariants({ size }), className)}>
 		<img
 			bind:this={ref}
 			data-slot="avatar"
 			{src}
 			{alt}
-			class="aspect-square h-full w-full object-cover"
+			class="svadmin-avatar-image"
 			onerror={() => { imgError = true; }}
 			{...restProps}
 		/>
@@ -52,9 +42,10 @@
 {:else}
 	<span
 		data-slot="avatar-fallback"
+		data-size={size}
 		class={cn(
 			avatarVariants({ size }),
-			"flex items-center justify-center bg-muted text-muted-foreground font-medium text-sm",
+			"svadmin-avatar-fallback",
 			className
 		)}
 	>

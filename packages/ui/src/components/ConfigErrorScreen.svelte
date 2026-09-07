@@ -50,40 +50,40 @@
   }
 </script>
 
-<div class="min-h-screen flex items-center justify-center bg-background p-4">
-  <div class="w-full max-w-[480px]">
+<div class="svadmin-u-793346c7362c svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-e6f9e383a762 svadmin-u-8e63407b5ceb">
+  <div class="svadmin-u-6da6a3c3f741 svadmin-u-3698555097d6">
     <Card.Card>
-      <Card.CardHeader class="text-center pb-2">
-        <div class="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-destructive/10 text-destructive mx-auto mb-3">
-          <AlertTriangle class="h-6 w-6" />
+      <Card.CardHeader class="svadmin-u-ca6bf63030aa svadmin-u-f4cc511ff0c1">
+        <div class="svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-e7e371071bc5 svadmin-u-508ebf85b1c9 svadmin-u-5f22e64f2282 svadmin-u-43928fcc832f svadmin-u-811148b13d1e svadmin-u-0e12dc7de920 svadmin-u-1bb883263ed2">
+          <AlertTriangle class="svadmin-u-f6fe902450dc svadmin-u-7ec10f86d9b1" />
         </div>
-        <Card.CardTitle class="text-xl">{displayTitle}</Card.CardTitle>
-        <p class="text-sm text-muted-foreground">
+        <Card.CardTitle class="svadmin-u-d5c9b0001e7e">{displayTitle}</Card.CardTitle>
+        <p class="svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">
           {i18n.t('config.missingEnvDescription')}
         </p>
       </Card.CardHeader>
-      <Card.CardContent class="space-y-4">
+      <Card.CardContent class="svadmin-u-3e7ce58d64fa">
         {#if missingVars.length > 0}
-          <div class="rounded-lg border overflow-hidden">
+          <div class="svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-2cd02d11d1af">
             {#each missingVars as v, i (v.key)}
-              <div class="flex items-center justify-between px-3 py-2.5 gap-2 {i < missingVars.length - 1 ? 'border-b border-border/50' : ''}">
-                <div class="flex flex-col gap-0.5 min-w-0">
-                  <code class="text-[0.8125rem] font-semibold text-foreground font-mono">{v.key}</code>
+              <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-0e17f2bd9074 svadmin-u-e7ee55ac7ffe svadmin-u-77a2a20e90d4 {i < missingVars.length - 1 ? 'svadmin-u-65fdbade2025 svadmin-u-591f378e24a1' : ''}">
+                <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-a3899220f90e svadmin-u-7e0b7cdf1a94">
+                  <code class="svadmin-u-1d5904e7e755 svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359 svadmin-u-0e65706bcccd">{v.key}</code>
                   {#if v.description}
-                    <span class="text-[0.6875rem] text-muted-foreground">{v.description}</span>
+                    <span class="svadmin-u-76067d04e222 svadmin-u-bfa603190748">{v.description}</span>
                   {/if}
                 </div>
                 <TooltipButton
                   tooltip={i18n.t('common.copy')}
                   variant="ghost"
                   size="icon"
-                  class="h-7 w-7 shrink-0"
+                  class="svadmin-u-d0a52b312f7d svadmin-u-cbbf90f9a828 svadmin-u-012fbd121f37"
                   onclick={() => copyToClipboard(`${v.key}=`, v.key)}
                 >
                   {#if copied[v.key]}
-                    <CheckCircle class="h-3.5 w-3.5 text-success" />
+                    <CheckCircle class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-76747e5e02ff" />
                   {:else}
-                    <Copy class="h-3.5 w-3.5" />
+                    <Copy class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
                   {/if}
                 </TooltipButton>
               </div>
@@ -92,34 +92,34 @@
         {/if}
 
         {#if envTemplate}
-          <div class="rounded-lg border overflow-hidden">
-            <div class="flex items-center justify-between px-3 py-2 bg-muted/50 border-b border-border/50">
-              <span class="text-xs font-medium text-muted-foreground">{i18n.t('config.envFilePath')}</span>
+          <div class="svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-2cd02d11d1af">
+            <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b svadmin-u-358af0b65a31 svadmin-u-65fdbade2025 svadmin-u-591f378e24a1">
+              <span class="svadmin-u-359090c2d529 svadmin-u-2689f3958069 svadmin-u-bfa603190748">{i18n.t('config.envFilePath')}</span>
               <TooltipButton
                 tooltip={i18n.t('common.copyAll')}
                 variant="ghost"
                 size="sm"
-                class="h-7 gap-1"
+                class="svadmin-u-d0a52b312f7d svadmin-u-44ee8ba0a421"
                 onclick={copyAll}
               >
                 {#if copied['__all__']}
-                  <CheckCircle class="h-3.5 w-3.5 text-success" />
-                  <span class="text-xs">{i18n.t('common.copied')}</span>
+                  <CheckCircle class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-76747e5e02ff" />
+                  <span class="svadmin-u-359090c2d529">{i18n.t('common.copied')}</span>
                 {:else}
-                  <Copy class="h-3.5 w-3.5" />
-                  <span class="text-xs">{i18n.t('common.copyAll')}</span>
+                  <Copy class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
+                  <span class="svadmin-u-359090c2d529">{i18n.t('common.copyAll')}</span>
                 {/if}
               </TooltipButton>
             </div>
-            <pre class="px-3 py-3 text-xs font-mono leading-relaxed text-foreground bg-muted/20 m-0 whitespace-pre-wrap break-all">{envTemplate}</pre>
+            <pre class="svadmin-u-0e17f2bd9074 svadmin-u-1b2d54a3fd12 svadmin-u-359090c2d529 svadmin-u-0e65706bcccd svadmin-u-6b189c6edadb svadmin-u-d4108abe6359 svadmin-u-967d113a1451 svadmin-u-74f9876a6800 svadmin-u-a2edcb1a3a6b svadmin-u-451f34ab545d">{envTemplate}</pre>
           </div>
         {/if}
 
-        <p class="text-xs text-muted-foreground text-center mt-4">
+        <p class="svadmin-u-359090c2d529 svadmin-u-bfa603190748 svadmin-u-ca6bf63030aa svadmin-u-0ab8667228fd">
           {i18n.t('config.reload')}
         </p>
 
-        <Button variant="outline" class="w-full" onclick={() => window.location.reload()}>
+        <Button variant="outline" class="svadmin-u-6da6a3c3f741" onclick={() => window.location.reload()}>
           {i18n.t('config.reloadButton')}
         </Button>
       </Card.CardContent>

@@ -56,10 +56,10 @@
 
   const toneTextClass: Record<PercentTone, string> = {
     auto: '',
-    success: 'text-success font-medium',
-    warning: 'text-warning-foreground font-medium',
-    destructive: 'text-destructive font-medium',
-    info: 'text-primary font-medium',
+    success: 'svadmin-u-76747e5e02ff svadmin-u-2689f3958069',
+    warning: 'svadmin-u-3a4ff758c2ab svadmin-u-2689f3958069',
+    destructive: 'svadmin-u-811148b13d1e svadmin-u-2689f3958069',
+    info: 'svadmin-u-20aaf08a7ed1 svadmin-u-2689f3958069',
     neutral: 'text-foreground',
   };
 
@@ -78,15 +78,15 @@
 </script>
 
 {#if percentNumber === null}
-  <span class={cn('field-percent text-muted-foreground text-sm', className)}>{nullLabel}</span>
+  <span class={cn('field-percent svadmin-u-bfa603190748 svadmin-u-fc7473ca09eb', className)}>{nullLabel}</span>
 {:else}
-  <div class={cn('field-percent inline-flex items-center gap-2 text-sm', className)}>
-    <span class={cn('tabular-nums', toneTextClass[resolvedTone])}>
+  <div class={cn('field-percent svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-fc7473ca09eb', className)}>
+    <span class={cn('svadmin-u-3032cae0badb', toneTextClass[resolvedTone])}>
       {formatted}
     </span>
     {#if showProgress}
       <div
-        class="h-1.5 w-16 overflow-hidden rounded-full bg-muted"
+        class="svadmin-u-095acb275581 svadmin-u-baceed3462fd svadmin-u-2cd02d11d1af svadmin-u-ac204c108886 svadmin-u-2ef11f1cb219"
         role="progressbar"
         aria-label="Percentage"
         aria-valuemin="0"
@@ -94,7 +94,7 @@
         aria-valuenow={clampedProgress}
       >
         <div
-          class={cn('h-full transition-all duration-300', toneBarClass[resolvedTone])}
+          class={cn('svadmin-u-668b21aa5409 svadmin-u-0fe7d7d814d0 svadmin-u-7890552ecd63', toneBarClass[resolvedTone])}
           style="width: {clampedProgress}%"
         ></div>
       </div>

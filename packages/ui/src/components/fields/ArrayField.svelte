@@ -47,28 +47,28 @@
   }
 </script>
 
-<div class="space-y-4 rounded-lg border border-dashed p-4">
-  <div class="flex items-center justify-between">
-    <div class="text-sm font-medium text-foreground">
+<div class="svadmin-u-3e7ce58d64fa svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-a29b7a649c77 svadmin-u-8e63407b5ceb">
+  <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc">
+    <div class="svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-d4108abe6359">
       {field.label}
       {#if field.required}
-        <span class="text-destructive">*</span>
+        <span class="svadmin-u-811148b13d1e">*</span>
       {/if}
     </div>
     <Button variant="outline" size="sm" type="button" onclick={handleAdd}>
-      <Plus class="h-3.5 w-3.5 mr-1" /> {i18n.t('common.add') || 'Add'}
+      <Plus class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-618162408e7a" /> {i18n.t('common.add') || 'Add'}
     </Button>
   </div>
   
-  <div class="space-y-4 pt-2">
+  <div class="svadmin-u-3e7ce58d64fa svadmin-u-f46b61a9b310">
     {#each arrayVal as item, i (i)}
-      <div class="relative rounded-md border bg-card p-4 pt-6 shadow-sm">
-        <div class="absolute right-2 top-2">
-          <TooltipButton tooltip={i18n.t('common.remove') || 'Remove'} variant="ghost" size="icon" class="h-8 w-8 text-muted-foreground hover:text-destructive transition-colors" onclick={() => handleRemove(i)}>
-            <Trash2 class="h-4 w-4" />
+      <div class="svadmin-u-d89972fe17d6 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-cd0ad9a56558 svadmin-u-8e63407b5ceb svadmin-u-30c1d058f0db svadmin-u-438b2237b8d6">
+        <div class="svadmin-u-da4dbfbc4fdc svadmin-u-7b2d63937d23 svadmin-u-9a2db8f949b6">
+          <TooltipButton tooltip={i18n.t('common.remove') || 'Remove'} variant="ghost" size="icon" class="svadmin-u-ed8a5df7b2fb svadmin-u-2bbcfc3b5179 svadmin-u-bfa603190748 svadmin-u-51e95020d6f2 svadmin-u-ceb69a6b0e5f" onclick={() => handleRemove(i)}>
+            <Trash2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
           </TooltipButton>
         </div>
-        <div class="grid gap-5">
+        <div class="svadmin-u-f3c543ad5fe9 svadmin-u-b39e60c339f4">
           {#each subFields as subField (subField.key)}
             <FieldRenderer
               field={subField}
@@ -80,7 +80,7 @@
       </div>
     {/each}
     {#if arrayVal.length === 0}
-      <div class="flex flex-col items-center justify-center py-6 text-sm text-muted-foreground bg-muted/10 rounded-md">
+      <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-940911bf310c svadmin-u-fc7473ca09eb svadmin-u-bfa603190748 svadmin-u-8a25a995eb8e svadmin-u-421ac2be5045">
         <span>{i18n.t('common.noData') || 'No items added yet.'}</span>
       </div>
     {/if}

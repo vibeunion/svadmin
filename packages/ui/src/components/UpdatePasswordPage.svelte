@@ -36,10 +36,10 @@
 </script>
 
 <AuthPageShell brand={title} title={i18n.t('auth.resetPassword')} description={i18n.t('auth.resetPasswordDescription')}>
-      <form onsubmit={handleSubmit} class="space-y-5">
+      <form onsubmit={handleSubmit} class="svadmin-u-b43b4c086d9a">
         {#if error}
           <Alert.Root variant="destructive">
-            <AlertCircle class="h-4 w-4" />
+            <AlertCircle class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
             <Alert.Description>{error}</Alert.Description>
           </Alert.Root>
         {/if}
@@ -59,15 +59,15 @@
           autocomplete="new-password"
         />
 
-        <Button type="submit" class="w-full h-10" disabled={updatePw.isLoading}>
+        <Button type="submit" class="svadmin-u-6da6a3c3f741 svadmin-u-426b8b75185b" disabled={updatePw.isLoading}>
           {#if updatePw.isLoading}
-            <Loader2 class="h-4 w-4 animate-spin mr-2" />
+            <Loader2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-afbdd13a380e svadmin-u-d2347e8497a9" />
           {/if}
           {i18n.t('auth.resetPassword')}
         </Button>
 
-        <div class="flex items-center justify-center mt-2">
-          <Button variant="link" class="text-sm h-auto p-0 font-medium" onclick={() => adminContext.navigate('/login')}>
+        <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-50d0d216a2f8">
+          <Button variant="link" class="svadmin-u-fc7473ca09eb svadmin-u-b8f0a08ece1e svadmin-u-8a539c7fe216 svadmin-u-2689f3958069" onclick={() => adminContext.navigate('/login')}>
             {i18n.t('auth.backToLogin')}
           </Button>
         </div>

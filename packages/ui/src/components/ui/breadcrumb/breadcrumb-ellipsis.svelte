@@ -10,9 +10,9 @@
   role="presentation"
   aria-hidden="true"
   data-slot="breadcrumb-ellipsis"
-  class={cn("flex size-9 items-center justify-center", className)}
+  class={cn("svadmin-breadcrumb-ellipsis", className)}
   {...restProps}
 >
-  <Ellipsis class="size-4" />
-  <span class="sr-only">More</span>
+  <Ellipsis class="svadmin-breadcrumb-icon" />
+  <span class="svadmin-sr-only">More</span>
 </span>

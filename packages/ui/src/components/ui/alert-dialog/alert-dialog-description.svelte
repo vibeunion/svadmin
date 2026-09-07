@@ -11,6 +11,6 @@
 
 <AlertDialogPrimitive.Description
 	bind:ref
-	class={cn("text-sm text-muted-foreground", className)}
+	class={cn("svadmin-alert-dialog-description", className)}
 	{...restProps}
 />

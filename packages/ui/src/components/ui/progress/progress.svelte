@@ -8,7 +8,7 @@
 </script>
 
 <div
-	class={cn("relative h-2 w-full overflow-hidden rounded-full bg-primary/20", className)}
+	class={cn("svadmin-progress", className)}
 	role="progressbar"
 	aria-valuenow={value}
 	aria-valuemin={0}
@@ -16,7 +16,7 @@
 	{...restProps}
 >
 	<div
-		class="h-full w-full flex-1 bg-primary transition-all duration-200"
+		class="svadmin-progress-value"
 		style="transform: translateX(-{100 - percentage}%)"
 	></div>
 </div>

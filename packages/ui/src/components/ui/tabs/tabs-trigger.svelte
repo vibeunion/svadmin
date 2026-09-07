@@ -67,13 +67,7 @@
 	data-state={isActive ? "active" : "inactive"}
 	aria-selected={isActive}
 	tabindex={tabindex ?? (isActive ? 0 : -1)}
-	class={cn(
-		"inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-1 text-sm font-medium transition-all outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
-		isActive
-			? "bg-background text-foreground shadow-sm"
-			: "text-muted-foreground hover:text-foreground",
-		className
-	)}
+	class={cn("svadmin-tabs-trigger", className)}
 	{...restProps}
 	onclick={handleClick}
 	onkeydown={handleKeydown}

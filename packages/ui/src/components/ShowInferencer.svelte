@@ -1,12 +1,12 @@
 <script lang="ts">
-  // ShowInferencer — 基于资源定义零配置渲染详情页
-  // 从 URL 自动提取 :id 参数
+  // ShowInferencer renders a detail page from the resource definition with no page-specific configuration.
+  // The :id parameter is extracted from the URL automatically.
   import ShowPage from './ShowPage.svelte';
   import { useParsed } from '@svadmin/core';
 
   interface Props {
     resourceName: string;
-    /** 可选：显式指定 id，默认从 URL 解析 */
+    /** Optional explicit id; defaults to the value parsed from the URL. */
     id?: string | number;
     class?: string;
   }

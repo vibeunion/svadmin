@@ -31,11 +31,11 @@
   }: Props = $props();
 
   const toneClass: Record<TagTone, string> = {
-    success: 'border-success/30 bg-success/10 text-success',
-    warning: 'border-warning/30 bg-warning/10 text-warning-foreground',
-    danger: 'border-destructive/30 bg-destructive/10 text-destructive',
-    info: 'border-primary/30 bg-primary/10 text-primary',
-    neutral: 'border-border bg-muted text-muted-foreground',
+    success: 'svadmin-u-18a6e7a36f29 svadmin-u-17a9f7af2265 svadmin-u-76747e5e02ff',
+    warning: 'svadmin-u-2f960aa0c478 svadmin-u-283481e780bb svadmin-u-3a4ff758c2ab',
+    danger: 'svadmin-u-9d5d8b4711b4 svadmin-u-43928fcc832f svadmin-u-811148b13d1e',
+    info: 'svadmin-u-05f954a846d6 svadmin-u-375dc44df6e9 svadmin-u-20aaf08a7ed1',
+    neutral: 'svadmin-u-18049387f0af svadmin-u-2ef11f1cb219 svadmin-u-bfa603190748',
   };
 
   const tags = $derived(
@@ -58,20 +58,20 @@
   }
 </script>
 
-<span class={cn('inline-flex flex-wrap gap-1 items-center', className)}>
+<span class={cn('svadmin-u-52083e7da442 svadmin-u-1eb5c6df38c1 svadmin-u-44ee8ba0a421 svadmin-u-3960ffc248d9', className)}>
   {#each tags as tag, _i (_i)}
     {@const customClass = resolveTagClass(tag)}
     {#if clickable || onclick}
       <button
         type="button"
         onclick={() => onclick?.(tag)}
-        class="focus:outline-none focus:ring-1 focus:ring-ring rounded"
+        class="svadmin-u-55d048ebfb1c svadmin-u-0f3af40e92e8 svadmin-u-80b9d0ae125f svadmin-u-07389a777c1f"
       >
         <Badge
           variant={customClass ? 'outline' : variant}
           class={cn(
-            'transition-colors cursor-pointer hover:opacity-80',
-            size === 'sm' ? 'px-1.5 py-0 text-[11px] h-5' : '',
+            'svadmin-u-ceb69a6b0e5f svadmin-u-34516836730d svadmin-u-eaeb741978b7',
+            size === 'sm' ? 'svadmin-u-45d828117213 svadmin-u-68ecb30dbec6 svadmin-u-d058ca6de60f svadmin-u-cd0d9c512cdc' : '',
             customClass
           )}
         >
@@ -82,7 +82,7 @@
       <Badge
         variant={customClass ? 'outline' : variant}
         class={cn(
-          size === 'sm' ? 'px-1.5 py-0 text-[11px] h-5' : '',
+          size === 'sm' ? 'svadmin-u-45d828117213 svadmin-u-68ecb30dbec6 svadmin-u-d058ca6de60f svadmin-u-cd0d9c512cdc' : '',
           customClass
         )}
       >
@@ -91,6 +91,6 @@
     {/if}
   {/each}
   {#if tags.length === 0}
-    <span class="text-muted-foreground">{nullLabel}</span>
+    <span class="svadmin-u-bfa603190748">{nullLabel}</span>
   {/if}
 </span>

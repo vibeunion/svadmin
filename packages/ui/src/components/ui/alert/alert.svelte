@@ -1,22 +1,10 @@
 <script lang="ts" module>
 	import { cn, type WithElementRef } from "../../../utils.js";
 	import type { HTMLAttributes } from "svelte/elements";
-	import { type VariantProps, tv } from "tailwind-variants";
+	import { alertVariants as variants, type AlertVariant as Variant } from "./alert-variants.js";
 
-	export const alertVariants = tv({
-		base: "relative w-full rounded-lg border px-4 py-3 text-sm grid has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] grid-cols-[0_1fr] has-[>svg]:gap-x-3 gap-y-0.5 items-start [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current",
-		variants: {
-			variant: {
-				default: "bg-card text-foreground",
-				destructive: "text-destructive bg-card [&>svg]:text-current *:data-[slot=alert-description]:text-destructive/90",
-				warning: "border-warning/50 text-warning-foreground bg-warning/10 [&>svg]:text-current",
-				success: "border-success/50 text-success bg-success/10 [&>svg]:text-current",
-			},
-		},
-		defaultVariants: { variant: "default" },
-	});
-
-	export type AlertVariant = VariantProps<typeof alertVariants>["variant"];
+	export const alertVariants = variants;
+	export type AlertVariant = Variant;
 </script>
 
 <script lang="ts">
@@ -37,6 +25,7 @@
 	bind:this={ref}
 	data-slot="alert"
 	role="alert"
+	data-variant={variant}
 	class={cn(alertVariants({ variant }), className)}
 	{...restProps}
 >

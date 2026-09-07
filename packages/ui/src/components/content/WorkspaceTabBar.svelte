@@ -36,10 +36,10 @@
 <nav
   aria-label={ariaLabel}
   class={cn(
-    'flex items-center gap-1 overflow-x-auto',
-    variant === 'segmented' && 'rounded-lg border border-border bg-muted/40 p-1',
-    variant === 'pill' && 'gap-1.5 p-0.5',
-    variant === 'underline' && 'gap-2 border-b border-border',
+    'svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421 svadmin-u-1384f66f41d0',
+    variant === 'segmented' && 'svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-b00f43c30c2b svadmin-u-eb6a3cef9686',
+    variant === 'pill' && 'svadmin-u-58284b4ea568 svadmin-u-de8350a3bbad',
+    variant === 'underline' && 'svadmin-u-77a2a20e90d4 svadmin-u-65fdbade2025 svadmin-u-18049387f0af',
     className,
   )}
   data-svadmin-workspace-tab-bar
@@ -52,38 +52,38 @@
       type="button"
       disabled={item.disabled}
       class={cn(
-        'inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-xs font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
+        'svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-421ac2be5045 svadmin-u-0e17f2bd9074 svadmin-u-ec0091ee009b svadmin-u-359090c2d529 svadmin-u-2689f3958069 svadmin-u-ceb69a6b0e5f svadmin-u-df37b1fd9495 svadmin-u-793c80e97ffb svadmin-u-9c1295a6914a svadmin-u-49330148794a svadmin-u-b29d8adbad2e',
         variant === 'segmented' && [
           isActive
-            ? 'bg-background text-foreground shadow-sm font-semibold'
-            : 'text-muted-foreground hover:bg-background/50 hover:text-foreground',
+            ? 'svadmin-u-e6f9e383a762 svadmin-u-d4108abe6359 svadmin-u-438b2237b8d6 svadmin-u-e83a7042bc91'
+            : 'svadmin-u-bfa603190748 svadmin-u-d01723c1dc46 svadmin-u-ea7b2e9e070e',
         ],
         variant === 'pill' && [
           isActive
-            ? 'bg-primary text-primary-foreground font-semibold'
-            : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground',
+            ? 'svadmin-u-75b1bec3ea0e svadmin-u-30ca335ae9c2 svadmin-u-e83a7042bc91'
+            : 'svadmin-u-358af0b65a31 svadmin-u-bfa603190748 svadmin-u-8e551981c8d7 svadmin-u-ea7b2e9e070e',
         ],
         variant === 'underline' && [
-          'rounded-none border-b-2 px-3 py-2',
+          'svadmin-u-0c5e9137c7de svadmin-u-65ac0c49a5d5 svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b',
           isActive
-            ? 'border-primary text-primary font-semibold'
-            : 'border-transparent text-muted-foreground hover:border-border hover:text-foreground',
+            ? 'svadmin-u-6cbc84dd9e1a svadmin-u-20aaf08a7ed1 svadmin-u-e83a7042bc91'
+            : 'svadmin-u-521fa0c7c407 svadmin-u-bfa603190748 svadmin-u-512e82e6a68f svadmin-u-ea7b2e9e070e',
         ],
       )}
       aria-current={isActive ? 'page' : undefined}
       onclick={() => onselect?.(item)}
     >
       {#if Icon}
-        <Icon class="size-4 shrink-0" aria-hidden="true" />
+        <Icon class="svadmin-u-f7b5fa971871 svadmin-u-012fbd121f37" aria-hidden="true" />
       {/if}
       <span>{item.label}</span>
       {#if item.badge !== undefined && item.badge !== ''}
         <span
           class={cn(
-            'inline-flex items-center justify-center rounded-full px-1.5 py-0.5 text-[0.6875rem] font-bold leading-none tabular-nums',
+            'svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-ac204c108886 svadmin-u-45d828117213 svadmin-u-465609a240a8 svadmin-u-76067d04e222 svadmin-u-69450ef1487e svadmin-u-c2385a463da8 svadmin-u-3032cae0badb',
             isActive
-              ? (variant === 'pill' ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-primary/10 text-primary')
-              : 'bg-muted text-muted-foreground',
+              ? (variant === 'pill' ? 'svadmin-u-d9d0c50e89ff svadmin-u-30ca335ae9c2' : 'svadmin-u-375dc44df6e9 svadmin-u-20aaf08a7ed1')
+              : 'svadmin-u-2ef11f1cb219 svadmin-u-bfa603190748',
           )}
         >
           {item.badge}

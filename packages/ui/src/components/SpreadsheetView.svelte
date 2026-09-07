@@ -235,45 +235,45 @@
   }
 </script>
 
-<div class={cn('rounded-xl border border-border bg-card shadow-xs text-xs space-y-2 p-3 overflow-hidden', className)}>
+<div class={cn('svadmin-u-a217b4eaa918 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-cef5b893cf23 svadmin-u-359090c2d529 svadmin-u-6f7e013d6499 svadmin-u-eb6e8b881acd svadmin-u-2cd02d11d1af', className)}>
   <!-- Header Toolbar -->
-  <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-border/60">
-    <div class="flex items-center gap-2">
-      <FileSpreadsheet class="h-4 w-4 text-primary shrink-0" />
-      <span class="font-semibold text-foreground">{currentSheet?.name ?? 'Spreadsheet'}</span>
+  <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4 svadmin-u-f4cc511ff0c1 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff">
+    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
+      <FileSpreadsheet class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-20aaf08a7ed1 svadmin-u-012fbd121f37" />
+      <span class="svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{currentSheet?.name ?? 'Spreadsheet'}</span>
     </div>
 
-    <div class="flex items-center gap-1.5">
+    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-58284b4ea568">
       {#if !readonly}
-        <Button variant="outline" size="sm" class="h-7 text-xs gap-1" onclick={addRow}>
-          <Plus class="h-3 w-3" />
+        <Button variant="outline" size="sm" class="svadmin-u-d0a52b312f7d svadmin-u-359090c2d529 svadmin-u-44ee8ba0a421" onclick={addRow}>
+          <Plus class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
           Row
         </Button>
-        <Button variant="outline" size="sm" class="h-7 text-xs gap-1" onclick={addCol}>
-          <Plus class="h-3 w-3" />
+        <Button variant="outline" size="sm" class="svadmin-u-d0a52b312f7d svadmin-u-359090c2d529 svadmin-u-44ee8ba0a421" onclick={addCol}>
+          <Plus class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
           Column
         </Button>
       {/if}
 
-      <Button size="sm" class="h-7 text-xs gap-1" onclick={exportCsv}>
-        <Download class="h-3 w-3" />
+      <Button size="sm" class="svadmin-u-d0a52b312f7d svadmin-u-359090c2d529 svadmin-u-44ee8ba0a421" onclick={exportCsv}>
+        <Download class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
         Export CSV
       </Button>
     </div>
   </div>
 
   <!-- Formula Bar -->
-  <div class="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-muted/40 border border-border/60 font-mono">
-    <div class="px-2 py-0.5 rounded bg-background border border-border text-foreground font-semibold text-[11px] min-w-10 text-center">
+  <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-d5eab218aa34 svadmin-u-ec0091ee009b svadmin-u-5f22e64f2282 svadmin-u-b00f43c30c2b svadmin-u-ca6bcd4b6f3f svadmin-u-05faf5c801ff svadmin-u-0e65706bcccd">
+    <div class="svadmin-u-d5eab218aa34 svadmin-u-465609a240a8 svadmin-u-07389a777c1f svadmin-u-e6f9e383a762 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-d4108abe6359 svadmin-u-e83a7042bc91 svadmin-u-d058ca6de60f svadmin-u-28ae52cc20ae svadmin-u-ca6bf63030aa">
       {selectedCell}
     </div>
-    <span class="text-muted-foreground text-xs">fx</span>
+    <span class="svadmin-u-bfa603190748 svadmin-u-359090c2d529">fx</span>
     <input
       type="text"
       bind:value={formulaInput}
       {readonly}
       placeholder="Value or formula, e.g. =SUM(B2:E2)"
-      class="flex-1 h-6 bg-transparent border-0 px-1 text-xs text-foreground focus-visible:outline-none placeholder:text-muted-foreground/60 font-mono"
+      class="svadmin-u-36e579c0b41c svadmin-u-f6fe902450dc svadmin-u-7f19cdf4c5bb svadmin-u-119b2aa0b8f6 svadmin-u-d8e0e382c67b svadmin-u-359090c2d529 svadmin-u-d4108abe6359 svadmin-u-f10f771f87e9 svadmin-u-35ca6b75d707 svadmin-u-0e65706bcccd"
       oninput={handleFormulaCommit}
       onkeydown={(e) => { if (e.key === 'Enter') handleFormulaCommit(); }}
     />
@@ -281,23 +281,23 @@
 
   <!-- Spreadsheet Grid -->
   {#if currentSheet}
-    <div class="overflow-auto max-h-[500px] border border-border/60 rounded-lg">
-      <table class="w-full border-collapse text-left font-mono">
-        <thead class="bg-muted/60 sticky top-0 z-10 text-muted-foreground">
+    <div class="svadmin-u-73fc3fb18ceb svadmin-u-b63b7d8eef5d svadmin-u-ca6bcd4b6f3f svadmin-u-05faf5c801ff svadmin-u-5f22e64f2282">
+      <table class="svadmin-u-6da6a3c3f741 svadmin-u-4583f90cd9bd svadmin-u-2eba0d65d059 svadmin-u-0e65706bcccd">
+        <thead class="svadmin-u-706701550477 svadmin-u-3e0fd166d494 svadmin-u-2167406b24d7 svadmin-u-236812d64c82 svadmin-u-bfa603190748">
           <tr>
-            <th class="w-10 p-1.5 text-center border-r border-b border-border/60 bg-muted/80 text-[10px]">#</th>
+            <th class="svadmin-u-d854e5698b57 svadmin-u-cd009d7d208c svadmin-u-ca6bf63030aa svadmin-u-5ceb636bd9f3 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff svadmin-u-85d919893645 svadmin-u-1dc571a3609f">#</th>
             {#each Array.from({ length: currentSheet.cols }) as _, c (c)}
-              <th class="min-w-24 p-1.5 text-center border-r border-b border-border/60 font-semibold text-foreground text-xs">
+              <th class="svadmin-u-25effcb585ab svadmin-u-cd009d7d208c svadmin-u-ca6bf63030aa svadmin-u-5ceb636bd9f3 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359 svadmin-u-359090c2d529">
                 {getColName(c)}
               </th>
             {/each}
           </tr>
         </thead>
-        <tbody class="divide-y divide-border/40">
+        <tbody class="svadmin-u-fa6acbf81d74 svadmin-u-08b5607c7258">
           {#each Array.from({ length: currentSheet.rows }) as _, r (r)}
             {@const rowNum = r + 1}
-            <tr class="hover:bg-muted/10">
-              <td class="w-10 p-1 text-center border-r border-border/60 bg-muted/30 text-[10px] font-semibold text-muted-foreground select-none">
+            <tr class="svadmin-u-9fc5d875f5ca">
+              <td class="svadmin-u-d854e5698b57 svadmin-u-eb6a3cef9686 svadmin-u-ca6bf63030aa svadmin-u-5ceb636bd9f3 svadmin-u-05faf5c801ff svadmin-u-2859c861d7de svadmin-u-1dc571a3609f svadmin-u-e83a7042bc91 svadmin-u-bfa603190748 svadmin-u-7f6912283f11">
                 {rowNum}
               </td>
               {#each Array.from({ length: currentSheet.cols }) as _, c (c)}
@@ -305,8 +305,8 @@
                 {@const isSelected = selectedCell === cellKey}
                 <td
                   class={cn(
-                    'p-0 border-r border-border/40 relative cursor-pointer',
-                    isSelected ? 'ring-2 ring-primary z-10 bg-primary/5' : ''
+                    'svadmin-u-8a539c7fe216 svadmin-u-5ceb636bd9f3 svadmin-u-6ee2d41e2d2d svadmin-u-d89972fe17d6 svadmin-u-34516836730d',
+                    isSelected ? 'svadmin-u-16b1efa5875e svadmin-u-fd1dda07320a svadmin-u-236812d64c82 svadmin-u-989c466fdbe7' : ''
                   )}
                   onclick={() => selectCell(cellKey)}
                 >
@@ -315,8 +315,8 @@
                     {readonly}
                     value={isSelected ? (currentSheet.cells[cellKey] ?? '') : getRenderedValue(cellKey)}
                     class={cn(
-                      'w-full h-7 px-2 bg-transparent border-0 text-xs font-mono focus-visible:outline-none',
-                      typeof evaluateFormula(currentSheet.cells[cellKey] ?? '', currentSheet.cells) === 'number' ? 'text-right' : 'text-left'
+                      'svadmin-u-6da6a3c3f741 svadmin-u-d0a52b312f7d svadmin-u-d5eab218aa34 svadmin-u-7f19cdf4c5bb svadmin-u-119b2aa0b8f6 svadmin-u-359090c2d529 svadmin-u-0e65706bcccd svadmin-u-f10f771f87e9',
+                      typeof evaluateFormula(currentSheet.cells[cellKey] ?? '', currentSheet.cells) === 'number' ? 'svadmin-u-308fc069e46e' : 'svadmin-u-2eba0d65d059'
                     )}
                     onfocus={() => selectCell(cellKey)}
                     oninput={(e) => updateCellValue(cellKey, e.currentTarget.value)}
@@ -331,17 +331,17 @@
   {/if}
 
   <!-- Sheet Tabs Footer -->
-  <div class="flex items-center justify-between gap-2 pt-1 border-t border-border/60">
-    <div class="flex items-center gap-1 overflow-x-auto">
+  <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4 svadmin-u-6b7d6e21ccbd svadmin-u-b950dda299d3 svadmin-u-05faf5c801ff">
+    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421 svadmin-u-1384f66f41d0">
       {#each sheets as sheet (sheet.id)}
         {@const isActive = sheet.id === activeSheetId}
         <button
           type="button"
           class={cn(
-            'px-3 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer border',
+            'svadmin-u-0e17f2bd9074 svadmin-u-660d2effb880 svadmin-u-421ac2be5045 svadmin-u-359090c2d529 svadmin-u-2689f3958069 svadmin-u-ceb69a6b0e5f svadmin-u-34516836730d svadmin-u-ca6bcd4b6f3f',
             isActive
-              ? 'bg-primary text-primary-foreground border-primary shadow-xs'
-              : 'bg-card text-muted-foreground border-border/60 hover:text-foreground hover:bg-muted/60'
+              ? 'svadmin-u-75b1bec3ea0e svadmin-u-30ca335ae9c2 svadmin-u-6cbc84dd9e1a svadmin-u-cef5b893cf23'
+              : 'svadmin-u-cd0ad9a56558 svadmin-u-bfa603190748 svadmin-u-05faf5c801ff svadmin-u-ea7b2e9e070e svadmin-u-68646cdcc246'
           )}
           onclick={() => {
             activeSheetId = sheet.id;
@@ -354,8 +354,8 @@
       {/each}
 
       {#if !readonly}
-        <Button variant="ghost" size="sm" class="h-6 w-6 p-0 text-muted-foreground" onclick={addSheet} title="New Sheet">
-          <Plus class="h-3.5 w-3.5" />
+        <Button variant="ghost" size="sm" class="svadmin-u-f6fe902450dc svadmin-u-7ec10f86d9b1 svadmin-u-8a539c7fe216 svadmin-u-bfa603190748" onclick={addSheet} title="New Sheet">
+          <Plus class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
         </Button>
       {/if}
     </div>

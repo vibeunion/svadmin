@@ -156,10 +156,10 @@
 </script>
 
 {#if error}
-  <div class="h-full flex items-center justify-center">
-    <div class="max-w-md p-6 border border-destructive/20 bg-destructive/10 text-destructive rounded-lg flex flex-col items-center gap-3 text-center">
-      <AlertCircle class="h-8 w-8" />
-      <h3 class="font-bold text-lg">{i18n.t('common.error') ?? 'Error'}</h3>
+  <div class="svadmin-u-668b21aa5409 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227">
+    <div class="svadmin-u-9794ab45094d svadmin-u-0478c89a150f svadmin-u-ca6bcd4b6f3f svadmin-u-f0c1e65bd6f2 svadmin-u-43928fcc832f svadmin-u-811148b13d1e svadmin-u-5f22e64f2282 svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-3960ffc248d9 svadmin-u-1004c0c3954c svadmin-u-ca6bf63030aa">
+      <AlertCircle class="svadmin-u-ed8a5df7b2fb svadmin-u-2bbcfc3b5179" />
+      <h3 class="svadmin-u-69450ef1487e svadmin-u-42536e69e639">{i18n.t('common.error') ?? 'Error'}</h3>
       <p>{error}</p>
     </div>
   </div>

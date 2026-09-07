@@ -148,14 +148,14 @@
 
 <div
   bind:this={containerEl}
-  class={cn('relative overflow-hidden', className)}
+  class={cn('svadmin-u-d89972fe17d6 svadmin-u-2cd02d11d1af', className)}
   data-svadmin-watermark-wrapper
 >
   {#key watermarkRevision}
     {#if base64Url}
       <div
         data-svadmin-watermark
-        class="absolute inset-0 pointer-events-none"
+        class="svadmin-u-da4dbfbc4fdc svadmin-u-7b7df0449b80 svadmin-u-a4326536b8f5"
         style="z-index: {zIndex}; background-image: url('{base64Url}'); background-position: {offset[0]}px {offset[1]}px; background-repeat: repeat;"
       ></div>
     {/if}

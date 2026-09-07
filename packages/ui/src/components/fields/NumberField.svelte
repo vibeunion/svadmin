@@ -75,6 +75,6 @@
   });
 </script>
 
-<span class={cn('field-number text-sm', tabular && 'font-mono tabular-nums', className)}>
+<span class={cn('field-number svadmin-u-fc7473ca09eb', tabular && 'svadmin-u-0e65706bcccd svadmin-u-3032cae0badb', className)}>
   {formatted}
 </span>

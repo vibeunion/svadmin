@@ -37,9 +37,9 @@
   });
 
   const sizeClasses: Record<RatingSize, { icon: string; text: string }> = {
-    sm: { icon: 'h-3.5 w-3.5', text: 'text-xs' },
-    default: { icon: 'h-4 w-4', text: 'text-sm' },
-    lg: { icon: 'h-5 w-5', text: 'text-base' },
+    sm: { icon: 'svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c', text: 'svadmin-u-359090c2d529' },
+    default: { icon: 'svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3', text: 'svadmin-u-fc7473ca09eb' },
+    lg: { icon: 'svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e', text: 'svadmin-u-4ee734926ff6' },
   };
 
   const stars = $derived.by(() => {
@@ -59,26 +59,26 @@
 </script>
 
 {#if numericValue === null}
-  <span class={cn('field-rating text-muted-foreground text-sm', className)}>{nullLabel}</span>
+  <span class={cn('field-rating svadmin-u-bfa603190748 svadmin-u-fc7473ca09eb', className)}>{nullLabel}</span>
 {:else}
-  <div class={cn('field-rating inline-flex items-center gap-1.5', className)}>
+  <div class={cn('field-rating svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-58284b4ea568', className)}>
     <div
-      class="inline-flex items-center gap-0.5 text-warning"
+      class="svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-a3899220f90e svadmin-u-918184635b1d"
       role="img"
       aria-label={`${numericValue} out of ${normalizedMax}`}
     >
       {#each stars as starType, idx (idx)}
         {#if starType === 'full'}
-          <Star aria-hidden="true" class={cn(sizeClasses[size].icon, 'fill-warning text-warning')} />
+          <Star aria-hidden="true" class={cn(sizeClasses[size].icon, 'svadmin-u-d633790a1397 svadmin-u-918184635b1d')} />
         {:else if starType === 'half'}
-          <StarHalf aria-hidden="true" class={cn(sizeClasses[size].icon, 'fill-warning text-warning')} />
+          <StarHalf aria-hidden="true" class={cn(sizeClasses[size].icon, 'svadmin-u-d633790a1397 svadmin-u-918184635b1d')} />
         {:else}
-          <Star aria-hidden="true" class={cn(sizeClasses[size].icon, 'text-muted-foreground/30')} />
+          <Star aria-hidden="true" class={cn(sizeClasses[size].icon, 'svadmin-u-106b502aac96')} />
         {/if}
       {/each}
     </div>
     {#if showValue}
-      <span class={cn('tabular-nums font-medium text-foreground', sizeClasses[size].text)}>
+      <span class={cn('svadmin-u-3032cae0badb svadmin-u-2689f3958069 svadmin-u-d4108abe6359', sizeClasses[size].text)}>
         {numericValue}
       </span>
     {/if}

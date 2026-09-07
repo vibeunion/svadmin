@@ -185,54 +185,54 @@
   });
 </script>
 
-<div class={cn('rounded-xl border border-border bg-card p-4 shadow-xs text-xs space-y-3', className)}>
-  <div class="flex items-center justify-between gap-2 pb-2 border-b border-border/60">
-    <div class="font-semibold text-foreground">
-      Electronic Signature <span class="text-muted-foreground font-normal">(Sign inside the box)</span>
+<div class={cn('svadmin-u-a217b4eaa918 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-8e63407b5ceb svadmin-u-cef5b893cf23 svadmin-u-359090c2d529 svadmin-u-6ed543e2fbbb', className)}>
+  <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4 svadmin-u-f4cc511ff0c1 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff">
+    <div class="svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">
+      Electronic Signature <span class="svadmin-u-bfa603190748 svadmin-u-8ecebc9f80e6">(Sign inside the box)</span>
     </div>
 
-    <div class="flex items-center gap-1.5">
+    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-58284b4ea568">
       <Button
         variant="ghost"
         size="sm"
-        class="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground"
+        class="svadmin-u-d0a52b312f7d svadmin-u-359090c2d529 svadmin-u-44ee8ba0a421 svadmin-u-bfa603190748 svadmin-u-ea7b2e9e070e"
         disabled={history.length === 0 || disabled}
         onclick={undo}
       >
-        <RotateCcw class="h-3 w-3" />
+        <RotateCcw class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
         Undo
       </Button>
 
       <Button
         variant="ghost"
         size="sm"
-        class="h-7 text-xs gap-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+        class="svadmin-u-d0a52b312f7d svadmin-u-359090c2d529 svadmin-u-44ee8ba0a421 svadmin-u-bfa603190748 svadmin-u-51e95020d6f2 svadmin-u-8db899b4e072"
         disabled={isEmpty || disabled}
         onclick={clear}
       >
-        <Trash2 class="h-3 w-3" />
+        <Trash2 class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
         Clear
       </Button>
 
       {#if onsave}
         <Button
           size="sm"
-          class="h-7 text-xs gap-1"
+          class="svadmin-u-d0a52b312f7d svadmin-u-359090c2d529 svadmin-u-44ee8ba0a421"
           disabled={isEmpty || disabled}
           onclick={handleSave}
         >
-          <Check class="h-3 w-3" />
+          <Check class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
           Confirm
         </Button>
       {:else}
         <Button
           variant="outline"
           size="sm"
-          class="h-7 text-xs gap-1"
+          class="svadmin-u-d0a52b312f7d svadmin-u-359090c2d529 svadmin-u-44ee8ba0a421"
           disabled={isEmpty || disabled}
           onclick={handleDownload}
         >
-          <Download class="h-3 w-3" />
+          <Download class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
           Download
         </Button>
       {/if}
@@ -240,12 +240,12 @@
   </div>
 
   <!-- Canvas Drawing Board -->
-  <div class="relative w-full rounded-lg border-2 border-dashed border-border/80 bg-background overflow-hidden flex items-center justify-center">
+  <div class="svadmin-u-d89972fe17d6 svadmin-u-6da6a3c3f741 svadmin-u-5f22e64f2282 svadmin-u-65935df577ba svadmin-u-a29b7a649c77 svadmin-u-c9ed8c5f79ae svadmin-u-e6f9e383a762 svadmin-u-2cd02d11d1af svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227">
     <canvas
       bind:this={canvasEl}
       {width}
       {height}
-      class="touch-none cursor-crosshair max-w-full h-auto block"
+      class="touch-none svadmin-u-92b7f35f04c0 svadmin-u-c0980a65a70d svadmin-u-b8f0a08ece1e svadmin-u-0214b4b355d1"
       onmousedown={startDrawing}
       onmousemove={draw}
       onmouseup={stopDrawing}
@@ -256,7 +256,7 @@
     ></canvas>
 
     {#if isEmpty}
-      <div class="absolute inset-0 flex items-center justify-center pointer-events-none text-muted-foreground/40 font-mono text-xs select-none">
+      <div class="svadmin-u-da4dbfbc4fdc svadmin-u-7b7df0449b80 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-a4326536b8f5 svadmin-u-52183a1cca53 svadmin-u-0e65706bcccd svadmin-u-359090c2d529 svadmin-u-7f6912283f11">
         Sign here with mouse or touch
       </div>
     {/if}

@@ -75,34 +75,34 @@
 </script>
 
 {#if !stringValue}
-  <span class={cn('field-phone text-muted-foreground text-sm', className)}>{nullLabel}</span>
+  <span class={cn('field-phone svadmin-u-bfa603190748 svadmin-u-fc7473ca09eb', className)}>{nullLabel}</span>
 {:else}
-  <div class={cn('field-phone inline-flex items-center gap-1.5 text-sm', className)}>
+  <div class={cn('field-phone svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-58284b4ea568 svadmin-u-fc7473ca09eb', className)}>
     {#if showIcon}
-      <Phone class="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+      <Phone class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-012fbd121f37 svadmin-u-bfa603190748" />
     {/if}
     {#if clickable && telHref}
       <a
         href={telHref}
-        class="font-medium text-foreground hover:text-primary transition-colors underline-offset-4 hover:underline"
+        class="svadmin-u-2689f3958069 svadmin-u-d4108abe6359 svadmin-u-1a78fc7ab897 svadmin-u-ceb69a6b0e5f svadmin-u-02af9e5da98e svadmin-u-f673f4a7d061"
       >
         {stringValue}
       </a>
     {:else}
-      <span class="text-foreground">{stringValue}</span>
+      <span class="svadmin-u-d4108abe6359">{stringValue}</span>
     {/if}
     {#if copyable}
       <button
         type="button"
         onclick={handleCopy}
-        class="inline-flex h-5 w-5 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+        class="svadmin-u-52083e7da442 svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-07389a777c1f svadmin-u-bfa603190748 svadmin-u-8e551981c8d7 svadmin-u-ea7b2e9e070e svadmin-u-ceb69a6b0e5f"
         aria-label={copied ? 'Copied' : 'Copy phone number'}
         title={copied ? 'Copied' : 'Copy phone number'}
       >
         {#if copied}
-          <Check class="h-3 w-3 text-success" />
+          <Check class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29 svadmin-u-76747e5e02ff" />
         {:else}
-          <Copy class="h-3 w-3" />
+          <Copy class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
         {/if}
       </button>
     {/if}

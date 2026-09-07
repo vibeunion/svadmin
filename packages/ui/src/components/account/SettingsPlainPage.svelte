@@ -32,9 +32,9 @@
 <ContentPageShell pageId="account-settings-plain" width="narrow">
   <ContentPageHeader title={i18n.t('account.settingsPlain')} description={i18n.t('account.settingsPlainDescription')} actions={headerActions} />
   <SettingsGroup title={i18n.t('account.basicSettings')} description={i18n.t('account.settingsPlainDescription')} bodyClass="space-y-5">
-    <div class="grid gap-4 sm:grid-cols-2">
-      <div class="space-y-2"><Label for="settings-name">{i18n.t('profile.name')}</Label><Input id="settings-name" bind:value={displayName} /></div>
-      <div class="space-y-2"><Label for="settings-email">Email</Label><Input id="settings-email" bind:value={email} type="email" /></div>
+    <div class="svadmin-u-f3c543ad5fe9 svadmin-u-0c3bc98565dd svadmin-u-e00ad81645a2">
+      <div class="svadmin-u-6f7e013d6499"><Label for="settings-name">{i18n.t('profile.name')}</Label><Input id="settings-name" bind:value={displayName} /></div>
+      <div class="svadmin-u-6f7e013d6499"><Label for="settings-email">Email</Label><Input id="settings-email" bind:value={email} type="email" /></div>
     </div>
     <div>
       <SettingsFieldRow label={i18n.t('settings.notifications')} description="Receive account and workflow updates." control={notificationControl} />

@@ -13,7 +13,7 @@
 <tfoot
 	bind:this={ref}
 	data-slot="table-footer"
-	class={cn("bg-muted/50 font-medium", className)}
+	class={cn("svadmin-table-footer", className)}
 	{...restProps}
 >
 	{@render children?.()}

@@ -90,9 +90,9 @@
   });
 </script>
 
-<span class={cn('field-date-range inline-flex items-center gap-1.5 text-sm', className)}>
+<span class={cn('field-date-range svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-58284b4ea568 svadmin-u-fc7473ca09eb', className)}>
   {#if showIcon}
-    <Calendar class="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+    <Calendar class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-bfa603190748 svadmin-u-012fbd121f37" />
   {/if}
   <span>{display}</span>
 </span>

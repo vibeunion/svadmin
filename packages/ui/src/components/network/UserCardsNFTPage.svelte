@@ -29,7 +29,7 @@
   {#if filtered.length === 0}
     <DataState state="empty" title={i18n.t('network.userCards')} />
   {:else}
-    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <div class="svadmin-u-f3c543ad5fe9 svadmin-u-0c3bc98565dd svadmin-u-e4d6f343b9ff svadmin-u-b86f7f946cd8">
       {#each filtered as user (user.id)}
         <NetworkUserCard
           {user}

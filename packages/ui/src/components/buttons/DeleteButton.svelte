@@ -64,7 +64,7 @@
 
 {#if !hidden}
   {#if confirming}
-    <div class="inline-flex items-center gap-1">
+    <div class="svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421">
       <Button variant="destructive" size="sm" onclick={handleDelete}>
         {i18n.t('common.confirm')}
       </Button>
@@ -76,14 +76,14 @@
     <Button
       variant="ghost"
       size={hideText ? 'icon' : 'sm'}
-      class="text-destructive hover:text-destructive {className}"
+      class="svadmin-u-811148b13d1e svadmin-u-51e95020d6f2 {className}"
       aria-label={hideText ? displayText : undefined}
       disabled={!can.allowed}
       onclick={handleDelete}
     >
-      <Trash2 class="h-4 w-4" />
+      <Trash2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
       {#if !hideText}
-        <span class="ml-1">
+        <span class="svadmin-u-f58b02572ab2">
           {#if children}
             {@render children()}
           {:else}

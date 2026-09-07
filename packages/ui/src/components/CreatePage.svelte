@@ -34,7 +34,7 @@
   const pageTitle = $derived(title ?? `${i18n.t('common.create')}${resource.label}`);
 </script>
 
-<div class="{density === 'compact' ? 'space-y-4' : 'space-y-6'} {className}">
+<div class="{density === 'compact' ? 'svadmin-u-3e7ce58d64fa' : 'svadmin-u-b3542e058833'} {className}">
   <PageHeader
     title={pageTitle}
     {density}

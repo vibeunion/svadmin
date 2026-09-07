@@ -28,7 +28,7 @@
 		bind:ref
 		data-slot="dialog-content"
 		class={cn(
-			"bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-98 data-[state=open]:zoom-in-98 ring-foreground/10 grid max-w-[calc(100%-2rem)] gap-4 rounded-xl p-6 text-sm ring-1 duration-300 sm:max-w-lg fixed top-1/2 left-1/2 z-50 w-full -translate-x-1/2 -translate-y-1/2 outline-none shadow-2xl",
+			"svadmin-dialog-content",
 			className
 		)}
 		{...restProps}
@@ -37,9 +37,9 @@
 		{#if showCloseButton}
 			<DialogPrimitive.Close data-slot="dialog-close">
 				{#snippet child({ props })}
-					<Button variant="ghost" class="absolute top-2 right-2" size="icon-sm" {...props}>
+					<Button variant="ghost" class="svadmin-u-da4dbfbc4fdc svadmin-u-9a2db8f949b6 svadmin-u-7b2d63937d23" size="icon-sm" {...props}>
 						<XIcon  />
-						<span class="sr-only">Close</span>
+						<span class="svadmin-sr-only">Close</span>
 					</Button>
 				{/snippet}
 			</DialogPrimitive.Close>

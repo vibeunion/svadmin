@@ -15,7 +15,7 @@
 <h3
 	bind:this={ref}
 	data-slot="sheet-title"
-	class={cn("text-lg font-semibold text-foreground", className)}
+	class={cn("svadmin-sheet-title", className)}
 	{...restProps}
 >
 	{@render children?.()}

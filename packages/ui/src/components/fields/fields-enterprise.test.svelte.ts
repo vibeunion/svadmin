@@ -16,6 +16,7 @@ import UrlField from './UrlField.svelte';
 import DateRangeField from './DateRangeField.svelte';
 import CopyField from './CopyField.svelte';
 import AvatarField from './AvatarField.svelte';
+import utilityClasses from '../../../scripts/utility-class-map.json';
 
 const originalClipboard = Object.getOwnPropertyDescriptor(globalThis.navigator, 'clipboard');
 
@@ -52,15 +53,15 @@ describe('TagField enterprise capabilities', () => {
       value: ['approved', 'rejected'],
       colorMap: { approved: 'success', rejected: 'danger' },
     });
-    const approved = view.container.querySelector('.text-success');
-    const rejected = view.container.querySelector('.text-destructive');
+    const approved = view.container.querySelector(`.${utilityClasses['text-success']}`);
+    const rejected = view.container.querySelector(`.${utilityClasses['text-destructive']}`);
     expect(approved).not.toBeNull();
     expect(rejected).not.toBeNull();
   });
 
   it('supports compact size="sm"', () => {
     const view = render(TagField, { value: 'compact-tag', size: 'sm' });
-    expect(view.container.querySelector('.text-\\[11px\\]')).not.toBeNull();
+    expect(view.container.querySelector(`.${utilityClasses['text-[11px]']}`)).not.toBeNull();
   });
 });
 
@@ -84,7 +85,7 @@ describe('BooleanField enterprise capabilities', () => {
       trueTone: 'success',
     });
     expect(view.container.textContent).toContain('Active');
-    expect(view.container.querySelector('.text-success')).not.toBeNull();
+    expect(view.container.querySelector(`.${utilityClasses['text-success']}`)).not.toBeNull();
   });
 
   it('renders badge mode false state', () => {
@@ -95,7 +96,7 @@ describe('BooleanField enterprise capabilities', () => {
       falseTone: 'danger',
     });
     expect(view.container.textContent).toContain('Disabled');
-    expect(view.container.querySelector('.text-destructive')).not.toBeNull();
+    expect(view.container.querySelector(`.${utilityClasses['text-destructive']}`)).not.toBeNull();
   });
 });
 
@@ -136,7 +137,7 @@ describe('NumberField enterprise capabilities', () => {
       tabular: true,
     });
     expect(view.container.textContent).toContain('≥ 50 kg');
-    expect(view.container.querySelector('.tabular-nums')).not.toBeNull();
+    expect(view.container.querySelector(`.${utilityClasses['tabular-nums']}`)).not.toBeNull();
   });
 
   it('renders nullLabel when value is empty or invalid', () => {
@@ -274,7 +275,7 @@ describe('AvatarField enterprise capabilities', () => {
 
   it('renders status dot badge with an accessible label', () => {
     const view = render(AvatarField, { name: 'Alice', status: 'online' });
-    expect(view.container.querySelector('.bg-success')).not.toBeNull();
+    expect(view.container.querySelector(`.${utilityClasses['bg-success']}`)).not.toBeNull();
     expect(view.container.querySelector('[aria-label="Status: online"]')).not.toBeNull();
   });
 

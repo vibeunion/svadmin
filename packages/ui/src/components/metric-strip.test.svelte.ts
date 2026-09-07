@@ -43,20 +43,20 @@ describe('MetricStrip Component', () => {
 });
 
 describe('Badge subtle variants', () => {
-  it('renders subtle and subtle-pill variants with appropriate styling classes', () => {
+  it('renders subtle and subtle-pill variants with semantic attributes', () => {
     const subtleView = render(Badge, {
       variant: 'subtle',
       children: createRawSnippet(() => ({ render: () => '<span>Subtle</span>' })),
     });
     expect(subtleView.container.textContent).toContain('Subtle');
-    expect(subtleView.container.firstElementChild?.className).toContain('bg-primary/10');
+    expect(subtleView.container.firstElementChild?.getAttribute('data-variant')).toBe('subtle');
 
     const pillView = render(Badge, {
       variant: 'subtle-pill',
       children: createRawSnippet(() => ({ render: () => '<span>Pill</span>' })),
     });
     expect(pillView.container.textContent).toContain('Pill');
-    expect(pillView.container.firstElementChild?.className).toContain('rounded-full');
+    expect(pillView.container.firstElementChild?.getAttribute('data-variant')).toBe('subtle-pill');
   });
 });
 
@@ -68,9 +68,7 @@ describe('Table sticky action column support', () => {
     });
     const cell = cellView.container.querySelector('[data-slot="table-cell"]');
     expect(cell?.getAttribute('data-sticky')).toBe('right');
-    expect(cell?.className).toContain('sticky');
-    expect(cell?.className).toContain('right-0');
-    expect(cell?.className).toContain('group-data-[state=selected]/row:bg-muted');
+    expect(cell?.className).toContain('svadmin-table-cell');
 
     const headView = render(TableHead, {
       sticky: 'right',
@@ -78,7 +76,6 @@ describe('Table sticky action column support', () => {
     });
     const head = headView.container.querySelector('[data-slot="table-head"]');
     expect(head?.getAttribute('data-sticky')).toBe('right');
-    expect(head?.className).toContain('sticky');
-    expect(head?.className).toContain('right-0');
+    expect(head?.className).toContain('svadmin-table-head');
   });
 });

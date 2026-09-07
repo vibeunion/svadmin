@@ -5,6 +5,13 @@ import InputHarness from "../../../../test/fixtures/InputHarness.svelte";
 import Input from "./input.svelte";
 
 describe("Input", () => {
+	it("preserves a custom data-slot without exposing migration aliases as props", () => {
+		const { container } = render(Input, { "data-slot": "search-input" });
+		const input = container.querySelector("input");
+		expect(input?.getAttribute("data-slot")).toBe("search-input");
+		expect(input?.classList.contains("svadmin-input")).toBe(true);
+	});
+
 	it("binds uploaded and cleared files without writing the protected value property", async () => {
 		render(InputHarness, { props: { multiple: true } });
 
@@ -40,10 +47,8 @@ describe("Input", () => {
 	it("applies file selector button styling for file inputs", () => {
 		render(Input, { type: "file", "aria-label": "File input" });
 		const input = screen.getByLabelText<HTMLInputElement>("File input");
-		expect(input.className).toContain("file:bg-muted");
-		expect(input.className).toContain("file:rounded-md");
-		expect(input.className).toContain("file:mr-3");
-		expect(input.className).toContain("cursor-pointer");
+		expect(input.className).toContain("svadmin-input");
+		expect(input.getAttribute("data-input-type")).toBe("file");
 	});
 
 	it("keeps value binding for non-file inputs", async () => {

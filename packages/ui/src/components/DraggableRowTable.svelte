@@ -66,19 +66,19 @@
   }
 </script>
 
-<div class={cn('w-full rounded-xl border border-border bg-card shadow-xs overflow-hidden text-xs', className)}>
-  <table class="w-full text-left border-collapse">
-    <thead class="bg-muted/40 font-semibold text-muted-foreground border-b border-border/60 select-none">
+<div class={cn('svadmin-u-6da6a3c3f741 svadmin-u-a217b4eaa918 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-cef5b893cf23 svadmin-u-2cd02d11d1af svadmin-u-359090c2d529', className)}>
+  <table class="svadmin-u-6da6a3c3f741 svadmin-u-2eba0d65d059 svadmin-u-4583f90cd9bd">
+    <thead class="svadmin-u-b00f43c30c2b svadmin-u-e83a7042bc91 svadmin-u-bfa603190748 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff svadmin-u-7f6912283f11">
       <tr>
-        <th class="w-10 px-2 py-2.5 text-center">#</th>
+        <th class="svadmin-u-d854e5698b57 svadmin-u-d5eab218aa34 svadmin-u-e7ee55ac7ffe svadmin-u-ca6bf63030aa">#</th>
         {#each columns as col (col.key)}
-          <th style={col.width ? `width: ${col.width};` : ''} class="px-4 py-2.5">
+          <th style={col.width ? `width: ${col.width};` : ''} class="svadmin-u-f0faeb26d656 svadmin-u-e7ee55ac7ffe">
             {col.label}
           </th>
         {/each}
       </tr>
     </thead>
-    <tbody class="divide-y divide-border/40">
+    <tbody class="svadmin-u-fa6acbf81d74 svadmin-u-08b5607c7258">
       {#each items as item, index (item[rowKey] ?? index)}
         {@const isDragging = draggedIndex === index}
         {@const isOver = overIndex === index}
@@ -89,16 +89,16 @@
           ondrop={(e) => handleDrop(index, e)}
           ondragend={handleDragEnd}
           class={cn(
-            'transition-colors cursor-move select-none',
-            isDragging ? 'opacity-30 bg-muted/50' : 'hover:bg-muted/20',
-            isOver ? 'border-t-2 border-primary bg-primary/5' : ''
+            'svadmin-u-ceb69a6b0e5f svadmin-u-ae724a8c3dec svadmin-u-7f6912283f11',
+            isDragging ? 'svadmin-u-78e6d0ebb9a4 svadmin-u-358af0b65a31' : 'svadmin-u-c4b5eaba40e3',
+            isOver ? 'svadmin-u-bee68af349c9 svadmin-u-6cbc84dd9e1a svadmin-u-989c466fdbe7' : ''
           )}
         >
-          <td class="px-2 py-2.5 text-center text-muted-foreground/60 hover:text-foreground">
-            <GripVertical class="h-4 w-4 mx-auto" />
+          <td class="svadmin-u-d5eab218aa34 svadmin-u-e7ee55ac7ffe svadmin-u-ca6bf63030aa svadmin-u-7be4d67a6256 svadmin-u-ea7b2e9e070e">
+            <GripVertical class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-0e12dc7de920" />
           </td>
           {#each columns as col (col.key)}
-            <td class="px-4 py-2.5 font-medium text-foreground">
+            <td class="svadmin-u-f0faeb26d656 svadmin-u-e7ee55ac7ffe svadmin-u-2689f3958069 svadmin-u-d4108abe6359">
               {item[col.key] ?? '—'}
             </td>
           {/each}
@@ -107,7 +107,7 @@
 
       {#if items.length === 0}
         <tr>
-          <td colspan={columns.length + 1} class="py-8 text-center text-muted-foreground">
+          <td colspan={columns.length + 1} class="svadmin-u-a1f611f027dd svadmin-u-ca6bf63030aa svadmin-u-bfa603190748">
             No items to display
           </td>
         </tr>

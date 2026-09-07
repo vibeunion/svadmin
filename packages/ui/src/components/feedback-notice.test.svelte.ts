@@ -24,6 +24,11 @@ describe('FeedbackNotice', () => {
     expect(notice.getAttribute('data-priority')).toBe('blocking');
   });
 
+  it('keeps blocking priority independent of the visual tone', () => {
+    render(FeedbackNotice, { message: 'Review required', tone: 'warning', priority: 'blocking' });
+    expect(screen.getByRole('alert').getAttribute('aria-live')).toBe('assertive');
+  });
+
   it('renders the single action supplied by the owning workflow', () => {
     render(FeedbackNoticeHarness);
 

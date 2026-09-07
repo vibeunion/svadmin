@@ -47,7 +47,7 @@
 </script>
 
 {#if !isAnomaly}
-  <span class="text-muted-foreground text-sm font-medium tabular-nums {className}">
+  <span class="svadmin-anomaly-badge__value {className}">
     {formatter(value)}
   </span>
 {:else}
@@ -55,17 +55,18 @@
     tooltip={`Baseline: ${formatter(baseline)} (${diff > 0 ? '+' : '-'}${percentLabel})`}
     variant="ghost" 
     size="sm" 
-    class="p-0 h-auto hover:bg-transparent"
+    class="svadmin-anomaly-badge__trigger"
     aria-label={anomalyAriaLabel}
   >
     <Badge 
       variant={isGood ? 'default' : 'destructive'} 
-      class="flex items-center gap-1 font-mono text-xs tabular-nums px-1.5 py-0 {isGood ? 'bg-success hover:bg-success/90 text-success-foreground' : ''} {className}"
+      class="svadmin-anomaly-badge {className}"
+      data-good={isGood === true ? 'true' : 'false'}
     >
       {#if diff > 0}
-        <TrendingUp class="h-3 w-3" aria-hidden="true" />
+        <TrendingUp class="svadmin-anomaly-badge__icon" aria-hidden="true" />
       {:else}
-        <TrendingDown class="h-3 w-3" aria-hidden="true" />
+        <TrendingDown class="svadmin-anomaly-badge__icon" aria-hidden="true" />
       {/if}
       {formatter(value)}
     </Badge>

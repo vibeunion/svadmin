@@ -73,4 +73,4 @@
   });
 </script>
 
-<span class={cn('field-date text-sm', className)} title={fullIsoTitle}>{formatted}</span>
+<span class={cn('field-date svadmin-u-fc7473ca09eb', className)} title={fullIsoTitle}>{formatted}</span>

@@ -61,7 +61,7 @@
   <input
     type="file"
     accept={importHook.inputProps.accept}
-    class="hidden"
+    class="svadmin-u-99d72c7fc3e2"
     bind:this={fileInput}
     onchange={handleFileChange}
   />
@@ -73,9 +73,9 @@
     disabled={importHook.isLoading || !can.allowed}
     onclick={triggerImport}
   >
-    <Upload class="h-4 w-4" />
+    <Upload class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
     {#if !hideText}
-      <span class="ml-1">
+      <span class="svadmin-u-f58b02572ab2">
         {#if children}
           {@render children()}
         {:else}

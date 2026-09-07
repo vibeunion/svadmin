@@ -26,7 +26,7 @@
 		bind:this={ref}
 		data-slot="tabs-content"
 		role="tabpanel"
-		class={cn("flex-1 outline-none", className)}
+		class={cn("svadmin-tabs-content", className)}
 		{...restProps}
 	>
 		{@render children?.()}

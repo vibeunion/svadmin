@@ -52,7 +52,7 @@
 </script>
 
 {#if !value}
-  <span class="text-muted-foreground">—</span>
+  <span class="svadmin-u-bfa603190748">—</span>
 {:else}
-  <div class="prose prose-sm dark:prose-invert max-w-none leading-relaxed [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-[0.875em] [&_pre]:bg-muted [&_pre]:p-3 [&_pre]:rounded-lg [&_pre]:overflow-x-auto [&_a]:text-primary {className}">{@html sanitizedHtml}</div>
+  <div class="svadmin-rich-text prose prose-sm svadmin-u-2191c1456297 svadmin-u-6b189c6edadb svadmin-u-d5df4cfe422a svadmin-u-6a67a0ea1c2c svadmin-u-07604905e9d4 svadmin-u-e20c08d8d2ec svadmin-u-0e3a63222818 svadmin-u-43ea57af72e0 svadmin-u-347cd5c5691e svadmin-u-8399f46fd96c svadmin-u-08399a18ce0f svadmin-u-fa71240c566c {className}">{@html sanitizedHtml}</div>
 {/if}

@@ -107,25 +107,25 @@
   <!-- hidden -->
 {:else if hasChildren && !collapsed}
   {#if isTopLevel}
-    <div class="mt-3 first:mt-0">
+    <div class="svadmin-u-eccd13ef4f2f svadmin-u-71a0a94437c6">
       <Collapsible.Root bind:open={isOpen}>
         <Collapsible.Trigger
-          class="sidebar-menu-item flex w-full items-center justify-between rounded-md py-[7px] text-[13px] font-medium transition-colors duration-150
+          class="sidebar-menu-item svadmin-u-60fbb7713999 svadmin-u-6da6a3c3f741 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-421ac2be5045 svadmin-u-01cc1873771f svadmin-u-a14daebf7748 svadmin-u-2689f3958069 svadmin-u-ceb69a6b0e5f svadmin-u-233c0494b485
           {childActive
-            ? 'text-sidebar-foreground'
-            : 'text-sidebar-foreground/70 hover:text-sidebar-foreground'}"
+            ? 'svadmin-u-a7a63217e098'
+            : 'svadmin-u-4e5ca9623e22 svadmin-u-646e10356266'}"
           style="padding-left: {indentPx}px; padding-right: 10px"
         >
-          <span class="flex items-center gap-2.5">
-            <Icon class="h-[18px] w-[18px] flex-shrink-0 {childActive ? 'text-primary' : 'text-sidebar-foreground/50'}" />
+          <span class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-7e9a2a250cc3">
+            <Icon class="svadmin-u-86171d20618e svadmin-u-10d7a2feb011 svadmin-u-2074a75bf2e7 {childActive ? 'svadmin-u-20aaf08a7ed1' : 'svadmin-u-68d55a736ff4'}" />
             <span>{label}</span>
           </span>
-          <ChevronDown class="h-3.5 w-3.5 text-sidebar-foreground/40 transition-transform duration-200 {isOpen ? 'rotate-180' : ''}" />
+          <ChevronDown class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-3e3534b4c5df svadmin-u-eadef238231e svadmin-u-625a4c3fbeb2 {isOpen ? 'svadmin-u-3350916b3513' : ''}" />
         </Collapsible.Trigger>
         <Collapsible.Content>
-          <div class="relative mt-[2px]">
-            <div class="absolute left-[19px] top-0 bottom-0 w-px bg-border/60"></div>
-            <div class="space-y-[1px]">
+          <div class="svadmin-u-d89972fe17d6 svadmin-u-0a88129d55fd">
+            <div class="svadmin-u-da4dbfbc4fdc svadmin-u-45c5dd0869c8 svadmin-u-2167406b24d7 svadmin-u-189f036c335c svadmin-u-47a69140380e svadmin-u-29f553b60628"></div>
+            <div class="svadmin-u-cfa4ce4bdcbd">
               {#each item.children as child, _i (_i)}
                 <SidebarItem item={child} {currentPath} {collapsed} depth={depth + 1} />
               {/each}
@@ -137,20 +137,20 @@
   {:else}
     <Collapsible.Root bind:open={isOpen}>
       <Collapsible.Trigger
-        class="sidebar-menu-item flex w-full items-center justify-between rounded-md py-[6px] text-[13px] font-normal transition-colors duration-150
+        class="sidebar-menu-item svadmin-u-60fbb7713999 svadmin-u-6da6a3c3f741 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-421ac2be5045 svadmin-u-a139beb4e318 svadmin-u-a14daebf7748 svadmin-u-8ecebc9f80e6 svadmin-u-ceb69a6b0e5f svadmin-u-233c0494b485
         {childActive
-          ? 'text-primary font-medium'
-          : 'text-sidebar-foreground/65 hover:text-sidebar-foreground'}"
+          ? 'svadmin-u-20aaf08a7ed1 svadmin-u-2689f3958069'
+          : 'svadmin-u-98714a2f7d41 svadmin-u-646e10356266'}"
         style="padding-left: {indentPx}px; padding-right: 10px"
       >
-        <span class="flex items-center gap-2.5">
-          <Circle class="h-[5px] w-[5px] flex-shrink-0 {childActive ? 'fill-primary text-primary' : 'fill-sidebar-foreground/30 text-sidebar-foreground/30'}" />
+        <span class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-7e9a2a250cc3">
+          <Circle class="svadmin-u-6e718d5684c2 svadmin-u-28ab41ff3b38 svadmin-u-2074a75bf2e7 {childActive ? 'svadmin-u-fed9c9b1e894 svadmin-u-20aaf08a7ed1' : 'svadmin-u-da619aaefdf6 svadmin-u-8a1efe654daa'}" />
           <span>{label}</span>
         </span>
-        <ChevronDown class="h-3 w-3 text-sidebar-foreground/35 transition-transform duration-200 {isOpen ? 'rotate-180' : ''}" />
+        <ChevronDown class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29 svadmin-u-711a3789b7a6 svadmin-u-eadef238231e svadmin-u-625a4c3fbeb2 {isOpen ? 'svadmin-u-3350916b3513' : ''}" />
       </Collapsible.Trigger>
       <Collapsible.Content>
-        <div class="space-y-[1px] mt-[1px]">
+        <div class="svadmin-u-cfa4ce4bdcbd svadmin-u-75be195e1cd6">
           {#each item.children as child, _i (_i)}
             <SidebarItem item={child} {currentPath} {collapsed} depth={depth + 1} />
           {/each}
@@ -167,12 +167,12 @@
           href={finalHref}
           target={isExternal ? '_blank' : undefined}
           rel={isExternal ? 'noopener noreferrer' : undefined}
-          class="sidebar-menu-item flex items-center justify-center rounded-md px-2 py-[7px] transition-colors duration-150
+          class="sidebar-menu-item svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-421ac2be5045 svadmin-u-d5eab218aa34 svadmin-u-01cc1873771f svadmin-u-ceb69a6b0e5f svadmin-u-233c0494b485
           {active
-            ? 'sidebar-menu-item-active bg-sidebar-accent text-primary'
-            : 'text-sidebar-foreground/50 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'}"
+            ? 'sidebar-menu-item-active svadmin-u-707e8e52f284 svadmin-u-20aaf08a7ed1'
+            : 'svadmin-u-68d55a736ff4 svadmin-u-55d1f8b9d318 svadmin-u-646e10356266'}"
         >
-          <Icon class="h-[18px] w-[18px] flex-shrink-0" />
+          <Icon class="svadmin-u-86171d20618e svadmin-u-10d7a2feb011 svadmin-u-2074a75bf2e7" />
         </a>
       {/snippet}
     </Tooltip.Trigger>
@@ -186,19 +186,19 @@
       href={finalHref}
       target={isExternal ? '_blank' : undefined}
       rel={isExternal ? 'noopener noreferrer' : undefined}
-      class="sidebar-menu-item flex items-center gap-2.5 rounded-md py-[7px] text-[13px] font-medium transition-colors duration-150
+      class="sidebar-menu-item svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-7e9a2a250cc3 svadmin-u-421ac2be5045 svadmin-u-01cc1873771f svadmin-u-a14daebf7748 svadmin-u-2689f3958069 svadmin-u-ceb69a6b0e5f svadmin-u-233c0494b485
       {active
-        ? 'sidebar-menu-item-active text-primary bg-sidebar-accent'
-        : 'text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50'}"
+        ? 'sidebar-menu-item-active svadmin-u-20aaf08a7ed1 svadmin-u-707e8e52f284'
+        : 'svadmin-u-4e5ca9623e22 svadmin-u-646e10356266 svadmin-u-55d1f8b9d318'}"
       style="padding-left: {indentPx}px; padding-right: 10px"
     >
-      <Icon class="h-[18px] w-[18px] flex-shrink-0 {active ? 'text-primary' : 'text-sidebar-foreground/50'}" />
-      <span class="flex-1">{label}</span>
+      <Icon class="svadmin-u-86171d20618e svadmin-u-10d7a2feb011 svadmin-u-2074a75bf2e7 {active ? 'svadmin-u-20aaf08a7ed1' : 'svadmin-u-68d55a736ff4'}" />
+      <span class="svadmin-u-36e579c0b41c">{label}</span>
       {#if soon}
-        <Badge variant="secondary" class="h-[18px] px-1.5 text-[10px] font-medium">Soon</Badge>
+        <Badge variant="secondary" class="svadmin-u-86171d20618e svadmin-u-45d828117213 svadmin-u-1dc571a3609f svadmin-u-2689f3958069">Soon</Badge>
       {/if}
       {#if isExternal}
-        <ExternalLink class="h-3 w-3 opacity-40" />
+        <ExternalLink class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29 svadmin-u-2a2db4667b27" />
       {/if}
     </a>
   {:else}
@@ -206,19 +206,19 @@
       href={finalHref}
       target={isExternal ? '_blank' : undefined}
       rel={isExternal ? 'noopener noreferrer' : undefined}
-      class="sidebar-menu-item flex items-center gap-2.5 rounded-md py-[6px] text-[13px] font-normal transition-colors duration-150
+      class="sidebar-menu-item svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-7e9a2a250cc3 svadmin-u-421ac2be5045 svadmin-u-a139beb4e318 svadmin-u-a14daebf7748 svadmin-u-8ecebc9f80e6 svadmin-u-ceb69a6b0e5f svadmin-u-233c0494b485
       {active
-        ? 'sidebar-menu-item-active text-primary font-medium'
-        : 'text-sidebar-foreground/65 hover:text-sidebar-foreground'}"
+        ? 'sidebar-menu-item-active svadmin-u-20aaf08a7ed1 svadmin-u-2689f3958069'
+        : 'svadmin-u-98714a2f7d41 svadmin-u-646e10356266'}"
       style="padding-left: {indentPx}px; padding-right: 10px"
     >
-      <Circle class="h-[5px] w-[5px] flex-shrink-0 {active ? 'fill-primary text-primary' : 'fill-sidebar-foreground/30 text-sidebar-foreground/30'}" />
-      <span class="flex-1">{label}</span>
+      <Circle class="svadmin-u-6e718d5684c2 svadmin-u-28ab41ff3b38 svadmin-u-2074a75bf2e7 {active ? 'svadmin-u-fed9c9b1e894 svadmin-u-20aaf08a7ed1' : 'svadmin-u-da619aaefdf6 svadmin-u-8a1efe654daa'}" />
+      <span class="svadmin-u-36e579c0b41c">{label}</span>
       {#if soon}
-        <Badge variant="secondary" class="h-[18px] px-1.5 text-[10px] font-medium">Soon</Badge>
+        <Badge variant="secondary" class="svadmin-u-86171d20618e svadmin-u-45d828117213 svadmin-u-1dc571a3609f svadmin-u-2689f3958069">Soon</Badge>
       {/if}
       {#if isExternal}
-        <ExternalLink class="h-3 w-3 opacity-40" />
+        <ExternalLink class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29 svadmin-u-2a2db4667b27" />
       {/if}
     </a>
   {/if}

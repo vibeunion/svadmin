@@ -27,11 +27,11 @@
 </script>
 
 {#snippet row(item: CrewMember)}
-  <tr data-svadmin-table-row><td class="px-4 py-3"><div class="flex items-center gap-3"><Avatar fallback={initials(item.name)} alt={item.name} size="sm" /><div><p class="text-sm font-medium text-foreground">{item.name}</p><p class="text-xs text-muted-foreground">{item.email}</p></div></div></td><td class="px-4 py-3 text-sm">{item.role}</td><td class="px-4 py-3 text-sm text-muted-foreground">{item.department}</td><td class="px-4 py-3"><Badge variant="outline">{item.status}</Badge></td><td class="px-4 py-3 text-sm">{item.projects}</td></tr>
+  <tr data-svadmin-table-row><td class="svadmin-u-f0faeb26d656 svadmin-u-1b2d54a3fd12"><div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-1004c0c3954c"><Avatar fallback={initials(item.name)} alt={item.name} size="sm" /><div><p class="svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{item.name}</p><p class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">{item.email}</p></div></div></td><td class="svadmin-u-f0faeb26d656 svadmin-u-1b2d54a3fd12 svadmin-u-fc7473ca09eb">{item.role}</td><td class="svadmin-u-f0faeb26d656 svadmin-u-1b2d54a3fd12 svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">{item.department}</td><td class="svadmin-u-f0faeb26d656 svadmin-u-1b2d54a3fd12"><Badge variant="outline">{item.status}</Badge></td><td class="svadmin-u-f0faeb26d656 svadmin-u-1b2d54a3fd12 svadmin-u-fc7473ca09eb">{item.projects}</td></tr>
 {/snippet}
 
 <ContentPageShell pageId="network-team-crew" width="wide">
-  <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><ContentPageHeader title={i18n.t('network.teamCrew')} description={i18n.t('network.teamCrewDescription')} /><div class="flex flex-wrap gap-2"><Button variant="outline" size="sm"><Download class="size-3.5" />{i18n.t('common.export')}</Button><Button size="sm"><UserPlus class="size-3.5" />{i18n.t('account.inviteMember')}</Button></div></div>
+  <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-1004c0c3954c svadmin-u-020ba687fa12 svadmin-u-64cac80d2e9a svadmin-u-3b9871a0bf93"><ContentPageHeader title={i18n.t('network.teamCrew')} description={i18n.t('network.teamCrewDescription')} /><div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-77a2a20e90d4"><Button variant="outline" size="sm"><Download class="svadmin-u-783b0d9d1e2c" />{i18n.t('common.export')}</Button><Button size="sm"><UserPlus class="svadmin-u-783b0d9d1e2c" />{i18n.t('account.inviteMember')}</Button></div></div>
   <FilterToolbar bind:query placeholder={i18n.t('common.search')} />
   <NetworkTable rows={filtered} {columns} {row} />
 </ContentPageShell>

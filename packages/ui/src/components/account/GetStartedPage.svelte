@@ -26,39 +26,39 @@
 </script>
 
 <ContentPageShell pageId="account-get-started" width="wide">
-  <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+  <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-1004c0c3954c svadmin-u-020ba687fa12 svadmin-u-64cac80d2e9a svadmin-u-3b9871a0bf93">
     <ContentPageHeader title={i18n.t('account.getStarted')} description={isZh ? '从账户功能入口快速完成组织、成员、安全和集成配置。' : 'Use the account hub to complete organization, member, security, and integration setup.'} />
     <Badge variant="outline">{progress}% {isZh ? '已完成' : 'complete'}</Badge>
   </div>
 
-  <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_19rem]">
-    <div class="grid gap-4 md:grid-cols-2">
+  <div class="svadmin-u-f3c543ad5fe9 svadmin-u-0d304f904cb0 svadmin-u-078ed38802b9">
+    <div class="svadmin-u-f3c543ad5fe9 svadmin-u-0c3bc98565dd svadmin-u-e4d6f343b9ff">
       {#each entries as entry (entry.id)}
-        <Card.Card class="flex min-h-52 flex-col">
-          <Card.CardContent class="flex flex-1 flex-col p-5">
-            <div class="flex items-start justify-between gap-3">
-              <span class="flex size-9 items-center justify-center rounded-md border border-border bg-card text-primary"><entry.icon class="size-4" /></span>
-              <button type="button" class="flex size-8 items-center justify-center rounded-md border border-border text-muted-foreground hover:text-foreground" aria-label={isZh ? '切换完成状态' : 'Toggle completion'} onclick={() => toggleCompleted(entry.id)}>
-                {#if completed.includes(entry.id)}<Check class="size-4 text-success" />{/if}
+        <Card.Card class="svadmin-u-60fbb7713999 svadmin-u-a0206a0583c8 svadmin-u-8dddea0773ed">
+          <Card.CardContent class="svadmin-u-60fbb7713999 svadmin-u-36e579c0b41c svadmin-u-8dddea0773ed svadmin-u-c07e54fd1439">
+            <div class="svadmin-u-60fbb7713999 svadmin-u-60541e1e26f8 svadmin-u-8ef2268efbbc svadmin-u-1004c0c3954c">
+              <span class="svadmin-u-60fbb7713999 svadmin-u-665f07fe73cc svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-20aaf08a7ed1"><entry.icon class="svadmin-u-f7b5fa971871" /></span>
+              <button type="button" class="svadmin-u-60fbb7713999 svadmin-u-d8f5213f0fe0 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-bfa603190748 svadmin-u-ea7b2e9e070e" aria-label={isZh ? '切换完成状态' : 'Toggle completion'} onclick={() => toggleCompleted(entry.id)}>
+                {#if completed.includes(entry.id)}<Check class="svadmin-u-f7b5fa971871 svadmin-u-76747e5e02ff" />{/if}
               </button>
             </div>
-            <h2 class="mt-4 text-base font-semibold text-foreground">{entry.title}</h2>
-            <p class="mt-1 flex-1 text-sm leading-6 text-muted-foreground">{entry.description}</p>
-            <Button href={entry.href} variant="link" class="mt-4 h-auto justify-start p-0">{isZh ? '打开设置' : 'Open settings'}<ArrowRight class="size-3.5" /></Button>
+            <h2 class="svadmin-u-0ab8667228fd svadmin-u-4ee734926ff6 svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{entry.title}</h2>
+            <p class="svadmin-u-b6b02c0ebef6 svadmin-u-36e579c0b41c svadmin-u-fc7473ca09eb svadmin-u-18550d5945ae svadmin-u-bfa603190748">{entry.description}</p>
+            <Button href={entry.href} variant="link" class="svadmin-u-0ab8667228fd svadmin-u-b8f0a08ece1e svadmin-u-4b5cc19bfdfc svadmin-u-8a539c7fe216">{isZh ? '打开设置' : 'Open settings'}<ArrowRight class="svadmin-u-783b0d9d1e2c" /></Button>
           </Card.CardContent>
         </Card.Card>
       {/each}
     </div>
 
-    <aside class="space-y-5">
-      <section class="rounded-lg border border-border bg-card p-5">
-        <div class="flex items-center gap-3"><span class="flex size-9 items-center justify-center rounded-md bg-primary/10 text-primary"><KeyRound class="size-4" /></span><div><h2 class="text-sm font-semibold text-foreground">{isZh ? '账户准备度' : 'Account readiness'}</h2><p class="text-xs text-muted-foreground">{completed.length} / {entries.length}</p></div></div>
-        <div class="mt-4 h-2 overflow-hidden rounded-full bg-muted"><div class="h-full rounded-full bg-primary" style:width={`${progress}%`}></div></div>
-        <div class="mt-4 divide-y divide-border border-y border-border">
-          {#each entries as entry (entry.id)}<div class="flex items-center justify-between gap-3 py-3 text-sm"><span class="text-muted-foreground">{entry.title}</span>{#if completed.includes(entry.id)}<Badge variant="secondary">{isZh ? '完成' : 'Done'}</Badge>{:else}<span class="text-xs text-muted-foreground">{isZh ? '待配置' : 'Pending'}</span>{/if}</div>{/each}
+    <aside class="svadmin-u-b43b4c086d9a">
+      <section class="svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-c07e54fd1439">
+        <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-1004c0c3954c"><span class="svadmin-u-60fbb7713999 svadmin-u-665f07fe73cc svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-421ac2be5045 svadmin-u-375dc44df6e9 svadmin-u-20aaf08a7ed1"><KeyRound class="svadmin-u-f7b5fa971871" /></span><div><h2 class="svadmin-u-fc7473ca09eb svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{isZh ? '账户准备度' : 'Account readiness'}</h2><p class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">{completed.length} / {entries.length}</p></div></div>
+        <div class="svadmin-u-0ab8667228fd svadmin-u-2f2a842e50fa svadmin-u-2cd02d11d1af svadmin-u-ac204c108886 svadmin-u-2ef11f1cb219"><div class="svadmin-u-668b21aa5409 svadmin-u-ac204c108886 svadmin-u-75b1bec3ea0e" style:width={`${progress}%`}></div></div>
+        <div class="svadmin-u-0ab8667228fd svadmin-u-fa6acbf81d74 svadmin-u-e783642739e3 svadmin-u-8b8196092091 svadmin-u-18049387f0af">
+          {#each entries as entry (entry.id)}<div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-1004c0c3954c svadmin-u-1b2d54a3fd12 svadmin-u-fc7473ca09eb"><span class="svadmin-u-bfa603190748">{entry.title}</span>{#if completed.includes(entry.id)}<Badge variant="secondary">{isZh ? '完成' : 'Done'}</Badge>{:else}<span class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">{isZh ? '待配置' : 'Pending'}</span>{/if}</div>{/each}
         </div>
       </section>
-      <Button class="w-full" onclick={() => completed = entries.map((entry) => entry.id)}>{isZh ? '标记全部完成' : 'Mark all complete'}</Button>
+      <Button class="svadmin-u-6da6a3c3f741" onclick={() => completed = entries.map((entry) => entry.id)}>{isZh ? '标记全部完成' : 'Mark all complete'}</Button>
     </aside>
   </div>
 </ContentPageShell>

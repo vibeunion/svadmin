@@ -11,7 +11,7 @@
 {#if resolvedState}
   <DataState state={resolvedState} title={stateTitle ?? emptyTitle} description={stateDescription ?? emptyDescription} {retry} {retryLabel} {loadingLabel} class={className} />
 {:else}
-<div class={'overflow-x-auto rounded-lg border border-border bg-card ' + className}>
+<div class={'svadmin-u-1384f66f41d0 svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 ' + className}>
   <Table.Root data-svadmin-datatable>
     <Table.Header data-svadmin-table-head><Table.Row>{#each columns as column (String(column.key))}<Table.Head>{column.label}</Table.Head>{/each}</Table.Row></Table.Header>
     <Table.Body>

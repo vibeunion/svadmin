@@ -15,9 +15,6 @@
 	bind:value
 	data-slot="command-input"
 	data-cmdk-input=""
-	class={cn(
-		"w-full bg-transparent text-sm outline-none disabled:cursor-not-allowed disabled:opacity-50",
-		className
-	)}
+	class={cn("svadmin-command-input", className)}
 	{...restProps}
 />

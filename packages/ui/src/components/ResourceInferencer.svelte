@@ -1,7 +1,7 @@
 <script lang="ts">
-  // ResourceInferencer — 一站式零配置 CRUD 渲染器
-  // 根据 URL action（list/create/edit/show）自动分发到对应的 Inferencer 组件。
-  // 用法：<ResourceInferencer resourceName="posts" />
+  // ResourceInferencer provides a zero-configuration CRUD renderer.
+  // It dispatches to the matching Inferencer component from the URL action: list, create, edit, or show.
+  // Usage: <ResourceInferencer resourceName="posts" />
   import { useParsed } from '@svadmin/core';
   import ListInferencer from './ListInferencer.svelte';
   import CreateInferencer from './CreateInferencer.svelte';

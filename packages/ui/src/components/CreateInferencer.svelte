@@ -1,5 +1,5 @@
 <script lang="ts">
-  // CreateInferencer — 基于资源定义零配置渲染创建表单
+  // CreateInferencer renders a create form from the resource definition with no page-specific configuration.
   import CreatePage from './CreatePage.svelte';
 
   interface Props {

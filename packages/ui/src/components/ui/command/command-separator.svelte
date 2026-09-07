@@ -17,7 +17,7 @@
 	bind:ref
 	data-slot="command-separator"
 	data-cmdk-separator=""
-	class={cn("bg-border -mx-1 h-px", className)}
+	class={cn("svadmin-command-separator", className)}
 	forceMount={alwaysRender ?? forceMount}
 	{...restProps}
 />

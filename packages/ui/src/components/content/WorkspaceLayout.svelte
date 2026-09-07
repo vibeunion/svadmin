@@ -28,15 +28,15 @@
 </script>
 
 <div
-  class={cn('flex flex-col gap-6', className)}
+  class={cn('svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-0d304f904cb0', className)}
   data-svadmin-workspace-layout
   data-secondary-collapsed={secondaryCollapsed}
   style:--workspace-secondary-width={resolvedSecondaryWidth}
 >
   {#if summary}<div data-svadmin-workspace-summary>{@render summary()}</div>{/if}
-  <div class={cn('grid min-w-0 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_var(--workspace-secondary-width)]', mobileOrder === 'secondary-first' && 'grid-rows-[auto_auto]')}>
-    {#if mobileOrder === 'secondary-first' && secondary}<aside class="order-1 min-w-0 xl:order-2">{@render secondary()}</aside>{/if}
-    <div class={cn('min-w-0', mobileOrder === 'secondary-first' ? 'order-2 xl:order-1' : 'order-1')} data-svadmin-workspace-primary>{@render primary()}</div>
-    {#if mobileOrder !== 'secondary-first' && secondary}<aside class="order-2 min-w-0 xl:order-2">{@render secondary()}</aside>{/if}
+  <div class={cn('svadmin-u-f3c543ad5fe9 svadmin-u-7e0b7cdf1a94 svadmin-u-60541e1e26f8 svadmin-u-0d304f904cb0 svadmin-u-febbcd95bf06', mobileOrder === 'secondary-first' && 'svadmin-u-dfb5e722be57')}>
+    {#if mobileOrder === 'secondary-first' && secondary}<aside class="svadmin-u-ea37b42b1c3b svadmin-u-7e0b7cdf1a94 svadmin-u-2c1f5e2b6a5b">{@render secondary()}</aside>{/if}
+    <div class={cn('svadmin-u-7e0b7cdf1a94', mobileOrder === 'secondary-first' ? 'svadmin-u-ef72121aca75 svadmin-u-831f8770959d' : 'svadmin-u-ea37b42b1c3b')} data-svadmin-workspace-primary>{@render primary()}</div>
+    {#if mobileOrder !== 'secondary-first' && secondary}<aside class="svadmin-u-ef72121aca75 svadmin-u-7e0b7cdf1a94 svadmin-u-2c1f5e2b6a5b">{@render secondary()}</aside>{/if}
   </div>
 </div>

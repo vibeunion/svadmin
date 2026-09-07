@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { render } from '@testing-library/svelte';
 import AuditTimeline, { type TimelineItem } from './AuditTimeline.svelte';
+import utilityClasses from '../../../scripts/utility-class-map.json';
 
 describe('AuditTimeline enterprise component', () => {
   it('renders empty state when items are empty', () => {
@@ -35,6 +36,6 @@ describe('AuditTimeline enterprise component', () => {
     expect(view.container.textContent).toContain('Review Approved');
     expect(view.container.textContent).toContain('by Approver A');
     expect(view.container.textContent).toContain('Approved');
-    expect(view.container.querySelector('.text-success')).not.toBeNull();
+    expect(view.container.querySelector(`.${utilityClasses['text-success']}`)).not.toBeNull();
   });
 });
