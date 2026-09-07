@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.69.1](https://github.com/vibeunion/svadmin/compare/ui-v0.69.0...ui-v0.69.1) (2026-09-07)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.5.0
+
 ## [0.69.0](https://github.com/vibeunion/svadmin/compare/ui-v0.68.1...ui-v0.69.0) (2026-09-07)
 
 
