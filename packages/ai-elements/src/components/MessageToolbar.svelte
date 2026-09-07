@@ -3,4 +3,4 @@
   type Props = { children?: Snippet; class?: string };
   let { children, class: className = '' }: Props = $props();
 </script>
-<div class="mt-2 flex items-center gap-2 text-xs svadmin-ai__muted {className}">{@render children?.()}</div>
+<div class="mt-2 flex min-w-0 max-w-full flex-wrap items-center gap-2 text-xs svadmin-ai__muted {className}">{@render children?.()}</div>

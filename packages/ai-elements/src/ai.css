@@ -128,7 +128,16 @@
 .svadmin-ai__select { min-height: 2.5rem; padding: 0.5rem 0.75rem; }
 .svadmin-ai__textarea { min-height: 5rem; resize: vertical; padding: 0.75rem; }
 
-.svadmin-ai__markdown { line-height: 1.65; overflow-wrap: anywhere; }
+.svadmin-ai__markdown { min-width: 0; max-width: 100%; line-height: 1.65; overflow-wrap: anywhere; }
+.svadmin-ai__markdown [data-streamdown="code-block"],
+.svadmin-ai__markdown [data-streamdown="table-wrapper"] { min-width: 0; max-width: 100%; }
+.svadmin-ai__markdown [data-streamdown="code-block-header"],
+.svadmin-ai__markdown [data-streamdown="table-toolbar"] { min-width: 0; flex-wrap: wrap; }
+.svadmin-ai__markdown [data-streamdown="code-block-body"],
+.svadmin-ai__markdown [data-streamdown-table] { min-width: 0; max-width: 100%; overflow-x: auto; }
+.svadmin-ai__markdown pre { min-width: 0; max-width: 100%; white-space: pre; overflow-wrap: normal; }
+.svadmin-ai__markdown img,
+.svadmin-ai__markdown video { max-width: 100%; height: auto; }
 .svadmin-ai__markdown p { margin: 0.5rem 0; }
 .svadmin-ai__markdown p:first-child { margin-top: 0; }
 .svadmin-ai__markdown p:last-child { margin-bottom: 0; }

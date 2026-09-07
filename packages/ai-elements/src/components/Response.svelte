@@ -15,6 +15,7 @@
 <script lang="ts">
   import { Streamdown } from 'streamdown-svelte';
   import { cn } from '../utils.js';
+  import { createResponseHtmlPreparer } from './message/content-polish-html.js';
 
   let {
     content = '',
@@ -25,35 +26,20 @@
     skipHtml = true,
     controls = { code: { copy: true, download: false }, mermaid: false, table: false },
     translations,
+    extensions = [],
     ...rest
   }: ResponseProps = $props();
 
-  function escapeRawHtmlTags(markdown: string): string {
-    let inFence = false;
-    return markdown
-      .split('\n')
-      .map((line) => {
-        if (/^\s{0,3}(`{3,}|~{3,})/.test(line)) {
-          inFence = !inFence;
-          return line;
-        }
-        return inFence
-          ? line
-          : line.replace(/<\/?[A-Za-z][A-Za-z0-9:-]*(?:\s[^<>]*?)?\/?\s*>/g, (tag) =>
-              tag.replaceAll('<', '&lt;').replaceAll('>', '&gt;'),
-            );
-      })
-      .join('\n');
-  }
-
-  const responseText = $derived(escapeRawHtmlTags(text ?? content));
+  const prepareResponseHtml = createResponseHtmlPreparer();
+  const response = $derived(prepareResponseHtml(text ?? content, extensions));
   let streamdownContext = $state<StreamdownContext>();
 </script>
 
 <Streamdown
   bind:streamdown={streamdownContext}
   {...rest}
-  content={responseText}
+  content={response.content}
+  extensions={response.extensions}
   class={cn('svadmin-ai__markdown', className)}
   mode={streaming ? 'streaming' : 'static'}
   isAnimating={streaming}

@@ -17,7 +17,7 @@
 <div
   {...rest}
   class={cn(
-    'flex w-fit min-w-0 max-w-full flex-col gap-2 overflow-hidden text-sm',
+    'flex w-fit min-w-0 max-w-full flex-col gap-2 text-sm [overflow-wrap:anywhere]',
     'group-[.is-user]:ml-auto group-[.is-user]:rounded-lg group-[.is-user]:bg-secondary group-[.is-user]:px-4 group-[.is-user]:py-3 group-[.is-user]:text-foreground',
     'group-[.is-assistant]:text-foreground',
     className,

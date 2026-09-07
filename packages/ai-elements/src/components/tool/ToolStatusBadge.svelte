@@ -19,7 +19,7 @@
   const badge = $derived(getStatusBadge(state));
 </script>
 
-<span {...rest} class={cn('svadmin-ai-tool-status', className)} data-tone={badge.tone} data-slot="tool-status-badge">
+<span role="status" aria-live="polite" aria-atomic="true" {...rest} class={cn('svadmin-ai-tool-status', className)} data-tone={badge.tone} data-slot="tool-status-badge">
   {#if children}
     {@render children({ label: badge.label })}
   {:else}
@@ -32,7 +32,8 @@
 </span>
 
 <style>
-  .svadmin-ai-tool-status { display: inline-flex; align-items: center; gap: .375rem; border-radius: 999px; padding: .2rem .5rem; background: var(--muted, transparent); color: var(--muted-foreground, currentColor); font-size: .6875rem; }
+  .svadmin-ai-tool-status { display: inline-flex; flex: none; max-width: 100%; align-items: center; gap: .375rem; border-radius: 999px; padding: .2rem .5rem; background: var(--muted, transparent); color: var(--muted-foreground, currentColor); font-size: .6875rem; }
+  .svadmin-ai-tool-status > :global(svg) { flex: none; }
   .svadmin-ai-tool-status[data-tone='success'] { color: var(--success, currentColor); }
   .svadmin-ai-tool-status[data-tone='info'] { color: var(--info, currentColor); }
   .svadmin-ai-tool-status[data-tone='warning'] { color: var(--warning, currentColor); }

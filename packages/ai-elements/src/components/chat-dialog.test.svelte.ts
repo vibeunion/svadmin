@@ -161,6 +161,100 @@ describe('ChatDialog', () => {
     expect(within(chat).queryByText('Stale reply.')).toBeNull();
   });
 
+  it('retries a failed response without duplicating the user message or clearing a new draft', async () => {
+    const sendMessage = vi.fn<ChatProvider['sendMessage']>()
+      .mockRejectedValueOnce(new Error('Network unavailable'))
+      .mockResolvedValueOnce('Recovered reply.');
+    const view = render(ChatDialogHost, { chatProvider: { sendMessage } });
+    const chat = await openChat(view.container);
+    const input = await submitText(chat, 'retry this request');
+    const retry = await within(chat).findByRole('button', { name: 'Retry response' });
+    await fireEvent.input(input, { target: { value: 'My next question' } });
+    await fireEvent.click(retry);
+    expect(await within(chat).findByText('Recovered reply.')).not.toBeNull();
+    expect(sendMessage).toHaveBeenCalledTimes(2);
+    expect(sendMessage.mock.calls[1]?.[0]).toEqual(sendMessage.mock.calls[0]?.[0]);
+    expect(chat.querySelectorAll('[data-role="user"]')).toHaveLength(1);
+    expect(input.value).toBe('My next question');
+    expect(within(chat).queryByRole('button', { name: 'Retry response' })).toBeNull();
+  });
+
+  it('retries a stopped run while ignoring its late completion', async () => {
+    let release!: (value: string) => void;
+    const pending = new Promise<string>((resolve) => { release = resolve; });
+    const sendMessage = vi.fn<ChatProvider['sendMessage']>()
+      .mockImplementationOnce(() => pending)
+      .mockResolvedValueOnce('Retried reply.');
+    const view = render(ChatDialogHost, { chatProvider: { sendMessage } });
+    const chat = await openChat(view.container);
+    await submitText(chat, 'retry stopped request');
+    await fireEvent.click(await within(chat).findByRole('button', { name: 'Stop' }));
+    await fireEvent.click(await within(chat).findByRole('button', { name: 'Retry response' }));
+    expect(await within(chat).findByText('Retried reply.')).not.toBeNull();
+    release('Late completion.');
+    await pending;
+    await tick();
+    expect(within(chat).queryByText('Late completion.')).toBeNull();
+    expect(sendMessage.mock.calls[1]?.[0]).toEqual(sendMessage.mock.calls[0]?.[0]);
+    expect(chat.querySelectorAll('[data-role="user"]')).toHaveLength(1);
+  });
+
+  it.each([false, true])('retries a failed approved tool run without replaying approval confirmations (restored: %s)', async (restore) => {
+    let fail!: () => void;
+    const gate = new Promise<void>((resolve) => { fail = resolve; });
+    const approveToolCall = vi.fn().mockResolvedValue(undefined);
+    const agentChat = vi.fn<AgentProvider['chat']>()
+      .mockImplementationOnce(() => (async function* () {
+        yield { type: 'approval_request', id: 'retry-approval', tool: 'update', args: {}, description: 'Update record' } as const;
+        await gate;
+        throw new Error('Stream failed after approval');
+      })())
+      .mockImplementationOnce(() => (async function* () {
+        yield { type: 'text', content: 'Fresh run.' } as const;
+        yield { type: 'done' } as const;
+      })());
+    const props = { agentProvider: { chat: agentChat, approveToolCall }, persistKey: 'approval-retry' };
+    const view = render(ChatDialogHost, props);
+    let chat = await openChat(view.container);
+    await submitText(chat, 'update record');
+    await fireEvent.click(await within(chat).findByRole('button', { name: 'Approve: Update record' }));
+    await within(chat).findByText("User approved execution of tool 'update'");
+    fail();
+    await within(chat).findByRole('button', { name: 'Retry response' });
+    if (restore) {
+      view.unmount();
+      const restored = render(ChatDialogHost, props);
+      chat = await openChat(restored.container);
+      expect(within(chat).queryByRole('button', { name: 'Approve: Update record' })).toBeNull();
+    }
+    await fireEvent.click(await within(chat).findByRole('button', { name: 'Retry response' }));
+    expect(await within(chat).findByText('Fresh run.')).not.toBeNull();
+    expect(agentChat.mock.calls[1]?.[0]).toEqual(agentChat.mock.calls[0]?.[0]);
+    expect(approveToolCall).toHaveBeenCalledOnce();
+    expect(chat.querySelectorAll('[data-role="user"]')).toHaveLength(1);
+  });
+
+  it('requires reattachment before retrying restored local-file requests', async () => {
+    const sendMessage = vi.fn<ChatProvider['sendMessage']>().mockRejectedValue(new Error('Upload failed'));
+    const view = render(ChatDialogHost, { chatProvider: { sendMessage }, persistKey: 'file-retry' });
+    const chat = await openChat(view.container);
+    const input = chat.querySelector<HTMLInputElement>('input[type="file"]');
+    if (!input) throw new Error('Expected upload input');
+    await fireEvent.change(input, { target: { files: [new File(['content'], 'report.txt')] } });
+    await fireEvent.click(within(chat).getByRole('button', { name: 'Send' }));
+    const retry = await within(chat).findByRole('button', { name: 'Retry response' }) as HTMLButtonElement;
+    expect(retry.disabled).toBe(false);
+    view.unmount();
+
+    const restored = render(ChatDialogHost, { chatProvider: { sendMessage }, persistKey: 'file-retry' });
+    const restoredChat = await openChat(restored.container);
+    const restoredRetry = await within(restoredChat).findByRole('button', { name: 'Retry response' }) as HTMLButtonElement;
+    expect(restoredRetry.disabled).toBe(true);
+    expect(within(restoredChat).getByText('Reattach files to send this request again.')).not.toBeNull();
+    await fireEvent.click(restoredRetry);
+    expect(sendMessage).toHaveBeenCalledOnce();
+  });
+
   it('minimizes and restores the conversation panel', async () => {
     const view = render(ChatDialogHost, {
       chatProvider: { sendMessage: async () => 'Reply.' },
