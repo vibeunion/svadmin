@@ -21,6 +21,22 @@ const dataProvider = createElysiaDataProvider({
 });
 ```
 
+## Query Cancellation
+
+Core read hooks pass TanStack Query's `AbortSignal` to `getList`, `getOne`,
+`getMany` (including its `getOne` fallback), and `custom`. This includes
+infinite lists, select defaults and form record loading. The Elysia provider
+forwards it to `fetch`; an already aborted signal starts no fetch.
+
+The signal is not part of cache keys, query parameters or `meta`. A shared
+in-flight query remains active while another observer still needs it, and is
+cancelled when the final observer unmounts or the query is explicitly cancelled.
+Direct provider calls may supply their own top-level `signal`.
+
+Other providers remain source-compatible because `signal` is optional, but must
+forward it to their transport to cancel network work. Mutation hooks are unchanged;
+aborting a request does not roll back a command already accepted by the server.
+
 ## With Auth Headers
 
 ```typescript

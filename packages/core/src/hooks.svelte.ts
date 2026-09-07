@@ -68,8 +68,9 @@ export function useInfiniteList<TData extends BaseRecord = BaseRecord, TError = 
       filters: options.filters,
       meta: options.meta,
     }),
-    queryFn: async ({ pageParam = 1 }) => {
+    queryFn: async ({ pageParam = 1, signal }) => {
       const result = await provider.getList<TData>({
+        signal,
         resource,
         pagination: { current: pageParam as number, pageSize: options.pagination?.pageSize ?? 10 },
         sorters: options.sorters,
@@ -179,7 +180,7 @@ export function useSelect<TData extends BaseRecord = BaseRecord, TOption = { lab
       pagination,
       meta,
     }),
-    queryFn: () => provider.getList<TData>({ resource, sorters, filters: allFilters, pagination: { current: 1, pageSize: effectivePageSize }, meta }),
+    queryFn: ({ signal }) => provider.getList<TData>({ resource, sorters, filters: allFilters, pagination: { current: 1, pageSize: effectivePageSize }, meta, signal }),
     enabled: options.queryOptions?.enabled ?? true,
     staleTime: options.queryOptions?.staleTime ?? adminOptions.reactQuery?.staleTime,
     };
@@ -195,9 +196,9 @@ export function useSelect<TData extends BaseRecord = BaseRecord, TOption = { lab
             ids: defaultValueIds,
             meta,
           }),
-          queryFn: async () => {
-            if (provider.getMany) return provider.getMany<TData>({ resource, ids: defaultValueIds, meta });
-            const results = await Promise.all(defaultValueIds.map(id => provider.getOne<TData>({ resource, id, meta })));
+          queryFn: async ({ signal }) => {
+            if (provider.getMany) return provider.getMany<TData>({ resource, ids: defaultValueIds, meta, signal });
+            const results = await Promise.all(defaultValueIds.map(id => provider.getOne<TData>({ resource, id, meta, signal })));
             return { data: results.map(r => r.data) };
           },
           enabled: (options.defaultValueQueryOptions?.enabled ?? true) && defaultValueIds.length > 0,
@@ -297,9 +298,10 @@ export function useCustom<TData = unknown, TError = HttpError>(options: UseCusto
       options.method,
       { config: options.config, meta: options.meta },
     ),
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       if (!provider.custom) throw new Error('DataProvider does not support custom method');
       return provider.custom<TData>({
+        signal,
         url: options.url,
         method: options.method,
         payload: options.config?.payload,
