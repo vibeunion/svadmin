@@ -1,6 +1,5 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { SvelteMap } from 'svelte/reactivity';
   import { fly } from 'svelte/transition';
   import { useQueryClient } from '@tanstack/svelte-query';
   import {
@@ -56,10 +55,13 @@
   let collapsed = $state(false);
   let cacheDiagnostics = $state.raw<CacheDiagnostics>(EMPTY_CACHE_DIAGNOSTICS);
   let safeQueryDiagnostics = $state.raw<SafeQueryDiagnostic[]>([]);
-  const queryTimings = new SvelteMap<string, { startedAt?: number; duration?: number }>();
+  const queryTimings = new Map<string, { startedAt?: number; duration?: number }>();
 
   function toggle() {
     visible = !visible;
+    if (visible) {
+      refreshCacheDiagnostics();
+    }
   }
 
   function handleKeydown(event: KeyboardEvent) {
@@ -107,9 +109,20 @@
     });
   }
 
+  let refreshScheduled = false;
+  function scheduleRefreshCacheDiagnostics() {
+    if (!visible || refreshScheduled) return;
+    refreshScheduled = true;
+    queueMicrotask(() => {
+      refreshScheduled = false;
+      if (visible) {
+        refreshCacheDiagnostics();
+      }
+    });
+  }
+
   onMount(() => {
     if (!isDev) return;
-    refreshCacheDiagnostics();
     const unsubscribeQueries = queryClient.getQueryCache().subscribe((event) => {
       // Observer events arrive in pairs during component rerenders. Refreshing diagnostics triggers another render,
       // so respond only to events that actually change cached content or request state.
@@ -126,9 +139,9 @@
           });
         }
       }
-      refreshCacheDiagnostics();
+      scheduleRefreshCacheDiagnostics();
     });
-    const unsubscribeMutations = queryClient.getMutationCache().subscribe(refreshCacheDiagnostics);
+    const unsubscribeMutations = queryClient.getMutationCache().subscribe(scheduleRefreshCacheDiagnostics);
     return () => {
       unsubscribeQueries();
       unsubscribeMutations();
