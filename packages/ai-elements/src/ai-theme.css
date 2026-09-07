@@ -1,0 +1,28 @@
+/* Semantic fallbacks keep this package independent of @svadmin/ui. */
+@theme {
+  --color-background: var(--background, Canvas);
+  --color-foreground: var(--foreground, CanvasText);
+  --color-card: var(--card, Canvas);
+  --color-card-foreground: var(--card-foreground, CanvasText);
+  --color-popover: var(--popover, Canvas);
+  --color-popover-foreground: var(--popover-foreground, CanvasText);
+  --color-primary: var(--primary, Highlight);
+  --color-primary-foreground: var(--primary-foreground, HighlightText);
+  --color-secondary: var(--secondary, ButtonFace);
+  --color-secondary-foreground: var(--secondary-foreground, ButtonText);
+  --color-muted: var(--muted, ButtonFace);
+  --color-muted-foreground: var(--muted-foreground, GrayText);
+  --color-accent: var(--accent, ButtonFace);
+  --color-accent-foreground: var(--accent-foreground, ButtonText);
+  --color-destructive: var(--destructive, CanvasText);
+  --color-destructive-foreground: var(--destructive-foreground, Canvas);
+  --color-success: var(--success, CanvasText);
+  --color-success-foreground: var(--success-foreground, Canvas);
+  --color-warning: var(--warning, CanvasText);
+  --color-warning-foreground: var(--warning-foreground, Canvas);
+  --color-info: var(--info, Highlight);
+  --color-border: var(--border, ButtonBorder);
+  --color-input: var(--input, ButtonBorder);
+  --color-ring: var(--ring, Highlight);
+  --color-sidebar: var(--sidebar, Canvas);
+}
