@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.69.0](https://github.com/vibeunion/svadmin/compare/ui-v0.68.1...ui-v0.69.0) (2026-09-07)
+
+
+### 🚀 Features
+
+* **ui:** ship precompiled semantic styles without host Tailwind ([#382](https://github.com/vibeunion/svadmin/issues/382)) ([00c8cd3](https://github.com/vibeunion/svadmin/commit/00c8cd326798b360dbc328dcc9a9be1cee195a17))
+
 ## [0.68.1](https://github.com/vibeunion/svadmin/compare/ui-v0.68.0...ui-v0.68.1) (2026-09-06)
 
 
