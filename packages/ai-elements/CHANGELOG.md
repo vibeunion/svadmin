@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.0](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.4.1...ai-elements-v0.5.0) (2026-09-07)
+
+
+### 🚀 Features
+
+* **ai-elements:** polish conversation and streaming interactions ([#387](https://github.com/vibeunion/svadmin/issues/387)) ([531275c](https://github.com/vibeunion/svadmin/commit/531275cf95874788b284a9474bb01bd1ccd3df84))
+* **ai-elements:** ship standalone styles with host theme compatibility ([#385](https://github.com/vibeunion/svadmin/issues/385)) ([d6a2748](https://github.com/vibeunion/svadmin/commit/d6a2748fdb6cd022129be887e18142f781b50f67))
+
 ## [0.4.1](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.4.0...ai-elements-v0.4.1) (2026-09-06)
 
 
