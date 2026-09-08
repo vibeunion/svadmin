@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.12.7](https://github.com/vibeunion/svadmin/compare/elysia-v0.12.6...elysia-v0.12.7) (2026-09-08)
+
+
+### 🐛 Bug Fixes
+
+* **core:** propagate query cancellation to data providers ([#388](https://github.com/vibeunion/svadmin/issues/388)) ([e5866a2](https://github.com/vibeunion/svadmin/commit/e5866a24e41c90c9cdb5b99deb436a65d519ea06))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.50.0
+
 ## [0.12.6](https://github.com/vibeunion/svadmin/compare/elysia-v0.12.5...elysia-v0.12.6) (2026-09-06)
 
 

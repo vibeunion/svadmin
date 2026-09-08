@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.50.0](https://github.com/vibeunion/svadmin/compare/core-v0.49.1...core-v0.50.0) (2026-09-08)
+
+
+### 🚀 Features
+
+* **core:** TypeBox validation adapter for useForm ([#390](https://github.com/vibeunion/svadmin/issues/390)) ([31bbc34](https://github.com/vibeunion/svadmin/commit/31bbc34c67132c2841c3f490590ecea4101af5c1))
+
+
+### 🐛 Bug Fixes
+
+* **core:** propagate query cancellation to data providers ([#388](https://github.com/vibeunion/svadmin/issues/388)) ([e5866a2](https://github.com/vibeunion/svadmin/commit/e5866a24e41c90c9cdb5b99deb436a65d519ea06))
+
 ## [0.49.1](https://github.com/vibeunion/svadmin/compare/core-v0.49.0...core-v0.49.1) (2026-09-06)
 
 
