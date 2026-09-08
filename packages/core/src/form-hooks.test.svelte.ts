@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
 import { useForm } from './form-hooks.svelte';
 import { flushSync } from 'svelte';
 import { keys } from './query-keys';
+import { Type } from '@sinclair/typebox';
+import { createSchemaFormValidator } from './schema-form';
 
 interface MockMutationOptions {
   onMutate?: (variables: unknown) => unknown | Promise<unknown>;
@@ -137,6 +139,27 @@ describe('useForm - Headless Svelte 5 Compatibility', () => {
 
   afterEach(() => {
     vi.useRealTimers();
+  });
+
+  it('schema validation preserves invalid input and prevents mutation until corrected', async () => {
+    const { form, cleanup } = mountForm({
+      action: 'edit', resource: 'posts', id: 1,
+      validate: createSchemaFormValidator(Type.Object({ title: Type.String({ minLength: 1 }) })),
+    });
+    try {
+      form.setFieldValue('title', '');
+      await form.submit();
+      expect(providerMocks.update).not.toHaveBeenCalled();
+      expect(form.values.title).toBe('');
+      expect(form.errors.title).toBe('Invalid value');
+      form.setFieldValue('title', 'Corrected');
+      providerMocks.update.mockResolvedValue({ data: { id: 1, title: 'Corrected' } });
+      await form.submit();
+      expect(providerMocks.update).toHaveBeenCalledOnce();
+      expect(form.errors).toEqual({});
+    } finally {
+      cleanup();
+    }
   });
 
   it('preserves reactive proxy data bindings safely across Svelte boundaries', () => {

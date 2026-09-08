@@ -230,3 +230,5 @@ export type {
 // HTTP fetch utilities
 export { createFetchWithInterceptor, fetchWithInterceptor } from './http';
 export type { FetchWithInterceptor, FetchWithInterceptorOptions } from './http';
+export { createSchemaFormValidator } from './schema-form';
+export type { SchemaFormIssue, SchemaFormOptions } from './schema-form';
