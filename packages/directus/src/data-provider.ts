@@ -1,24 +1,11 @@
+import { definedOptions } from '@svadmin/core/options';
+import { withValidatedResponses, type DataTransport } from '@svadmin/core/schema';
 import type {
-  BaseRecord,
-  CreateParams,
-  CreateResult,
   CrudOperator,
-  CustomParams,
-  CustomResult,
   DataProvider,
-  DeleteParams,
-  DeleteResult,
   FieldFilter,
   Filter,
-  GetListParams,
-  GetListResult,
-  GetManyParams,
-  GetManyResult,
-  GetOneParams,
-  GetOneResult,
   Sort,
-  UpdateParams,
-  UpdateResult,
 } from '@svadmin/core';
 
 const DIRECTUS_OPERATOR_MAP: Record<CrudOperator, string> = {
@@ -57,15 +44,8 @@ type RequestOptions = Omit<RequestInit, 'headers'> & {
   headers?: Record<string, string>;
 };
 
-interface DirectusListResponse<TData> {
-  data?: TData[];
-  meta?: {
-    total_count?: number;
-  };
-}
-
-interface DirectusItemResponse<TData> {
-  data?: TData;
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function mergeHeaders(...sources: Array<Record<string, string> | undefined>): Record<string, string> {
@@ -112,7 +92,8 @@ function buildDirectusRule(filter: Filter): Record<string, unknown> {
 function buildDirectusFilter(filters?: Filter[]): Record<string, unknown> {
   if (!filters?.length) return {};
   const rules = filters.map(buildDirectusRule);
-  return rules.length === 1 ? rules[0] : { _and: rules };
+  const firstRule = rules[0];
+  return rules.length === 1 && firstRule ? firstRule : { _and: rules };
 }
 
 function serializeQueryValue(value: unknown): string {
@@ -153,7 +134,7 @@ function appendFilters(params: URLSearchParams, filters?: Filter[]): void {
 }
 
 function fieldsFromMeta(meta?: Record<string, unknown>): string[] | undefined {
-  const fields = meta?.fields;
+  const fields = meta?.['fields'];
   if (!Array.isArray(fields) || !fields.every(field => typeof field === 'string')) return undefined;
   return fields;
 }
@@ -168,45 +149,45 @@ function isSameOrigin(apiUrl: string, targetUrl: string): boolean {
   }
 }
 
-async function parseResponse<TData>(response: Response): Promise<TData> {
+async function parseResponse(response: Response): Promise<unknown> {
   if (response.status === 204 || response.status === 205) {
-    return undefined as unknown as TData;
+    return undefined;
   }
 
   const contentLength = response.headers?.get('content-length');
   if (contentLength?.trim() === '0') {
-    return undefined as unknown as TData;
+    return undefined;
   }
 
   const body = await response.text();
   if (!body || body.trim() === '') {
-    return undefined as unknown as TData;
+    return undefined;
   }
 
-  return JSON.parse(body) as TData;
+  return JSON.parse(body);
 }
 
-async function fetchData<TData>(
+async function fetchData(
   url: string,
   headers: Record<string, string>,
   init: RequestOptions | undefined,
   errorMessage: (status: number) => string,
-): Promise<TData> {
+): Promise<unknown> {
   const response = await fetch(url, {
     ...init,
     headers: mergeHeaders(headers, init?.headers),
   });
   if (!response.ok) throw new Error(errorMessage(response.status));
-  return parseResponse<TData>(response);
+  return parseResponse(response);
 }
 
 export function createDirectusDataProvider(apiUrl: string, token?: string): DataProvider {
   const providerHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
-  if (token) providerHeaders.Authorization = `Bearer ${token}`;
+  if (token) providerHeaders['Authorization'] = `Bearer ${token}`;
   const baseUrl = apiUrl.replace(/\/+$/, '');
 
-  function request<TData>(path: string, init?: RequestOptions): Promise<TData> {
-    return fetchData<TData>(
+  function request(path: string, init?: RequestOptions): Promise<unknown> {
+    return fetchData(
       `${baseUrl}${path}`,
       providerHeaders,
       init,
@@ -214,10 +195,10 @@ export function createDirectusDataProvider(apiUrl: string, token?: string): Data
     );
   }
 
-  return {
+  const transport: DataTransport = {
     getApiUrl: () => apiUrl,
 
-    async getList<TData extends BaseRecord = BaseRecord>({ resource, pagination, sorters, filters, meta }: GetListParams): Promise<GetListResult<TData>> {
+    async getList({ resource, pagination, sorters, filters, meta }) {
       const { current = 1, pageSize = 10 } = pagination ?? {};
       const params = new URLSearchParams();
       params.set('limit', String(pageSize));
@@ -228,55 +209,53 @@ export function createDirectusDataProvider(apiUrl: string, token?: string): Data
       appendSorters(params, sorters);
       appendFilters(params, filters);
 
-      const response = await request<DirectusListResponse<TData>>(`/items/${resource}?${params}`);
+      const response = await request(`/items/${resource}?${params}`);
+      if (!isObject(response)) return response;
+      const metadata = response['meta'];
       return {
-        data: response?.data ?? [],
-        total: response?.meta?.total_count ?? 0,
+        data: response['data'],
+        total: isObject(metadata) ? metadata['total_count'] : undefined,
       };
     },
 
-    async getOne<TData extends BaseRecord = BaseRecord>({ resource, id, meta }: GetOneParams): Promise<GetOneResult<TData>> {
+    async getOne({ resource, id, meta }) {
       const params = new URLSearchParams();
       const fields = fieldsFromMeta(meta);
       if (fields) params.set('fields', fields.join(','));
       const query = params.size ? `?${params}` : '';
-      const response = await request<DirectusItemResponse<TData>>(
+      return request(
         `/items/${resource}/${encodeURIComponent(String(id))}${query}`,
       );
-      return { data: response?.data as TData };
     },
 
-    async create<TData extends BaseRecord = BaseRecord, TVariables = unknown>({ resource, variables }: CreateParams<TVariables>): Promise<CreateResult<TData>> {
-      const response = await request<DirectusItemResponse<TData>>(`/items/${resource}`, {
+    async create({ resource, variables }) {
+      return request(`/items/${resource}`, {
         method: 'POST',
         body: JSON.stringify(variables),
       });
-      return { data: response?.data as TData };
     },
 
-    async update<TData extends BaseRecord = BaseRecord, TVariables = unknown>({ resource, id, variables }: UpdateParams<TVariables>): Promise<UpdateResult<TData>> {
-      const response = await request<DirectusItemResponse<TData>>(
+    async update({ resource, id, variables }) {
+      return request(
         `/items/${resource}/${encodeURIComponent(String(id))}`,
         { method: 'PATCH', body: JSON.stringify(variables) },
       );
-      return { data: response?.data as TData };
     },
 
-    async deleteOne<TData extends BaseRecord = BaseRecord, TVariables = unknown>({ resource, id }: DeleteParams<TVariables>): Promise<DeleteResult<TData>> {
-      await request(`/items/${resource}/${encodeURIComponent(String(id))}`, { method: 'DELETE' });
-      return { data: { id } as unknown as TData };
+    async deleteOne({ resource, id }) {
+      const response = await request(`/items/${resource}/${encodeURIComponent(String(id))}`, { method: 'DELETE' });
+      return response === undefined ? { data: { id } } : response;
     },
 
-    async getMany<TData extends BaseRecord = BaseRecord>({ resource, ids, meta }: GetManyParams): Promise<GetManyResult<TData>> {
+    async getMany({ resource, ids, meta }) {
       const params = new URLSearchParams();
       params.set('filter', JSON.stringify({ id: { _in: ids } }));
       const fields = fieldsFromMeta(meta);
       if (fields) params.set('fields', fields.join(','));
-      const response = await request<DirectusListResponse<TData>>(`/items/${resource}?${params}`);
-      return { data: response?.data ?? [] };
+      return request(`/items/${resource}?${params}`);
     },
 
-    async custom<TData = unknown, TVariables = unknown>({
+    async custom({
       url,
       method,
       payload,
@@ -284,7 +263,7 @@ export function createDirectusDataProvider(apiUrl: string, token?: string): Data
       headers,
       sorters,
       filters,
-    }: CustomParams<TVariables>): Promise<CustomResult<TData>> {
+    }) {
       const parsed = new URL(url, apiUrl.endsWith('/') ? apiUrl : `${apiUrl}/`);
       appendQuery(parsed.searchParams, query);
       appendSorters(parsed.searchParams, sorters);
@@ -295,16 +274,17 @@ export function createDirectusDataProvider(apiUrl: string, token?: string): Data
         sameOrigin ? providerHeaders : withoutSensitiveHeaders(providerHeaders),
         headers,
       );
-      const data = await fetchData<TData>(
+      const data = await fetchData(
         requestUrl,
         requestHeaders,
-        {
+        definedOptions({
           method: method.toUpperCase(),
           body: payload === undefined ? undefined : JSON.stringify(payload),
-        },
+        }),
         status => `Custom request failed: ${status}`,
       );
       return { data };
     },
   };
+  return withValidatedResponses(transport);
 }

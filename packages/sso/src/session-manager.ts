@@ -341,7 +341,7 @@ export function createSessionManager(options: SessionManagerOptions): SessionMan
   function saveSession(session: SSOSession, event?: AuthStateChangeEvent): void {
     const raw = JSON.stringify(session);
     try {
-      // 单次 setItem 写入完整 token set，避免轮换只落盘一半。
+      // Write the complete token set in one setItem call to avoid partial rotation persistence.
       options.storage.setItem(keys.tokens, raw);
     } catch (error) {
       clearStorageValue(options.storage, keys.tokens);
@@ -389,8 +389,8 @@ export function createSessionManager(options: SessionManagerOptions): SessionMan
 
   function clearTokenSession(): void {
     const persistenceFailure = clearStorageValue(options.storage, keys.tokens);
-    // 仅 token 失效不能取消已经持有 PKCE/state 的新认证尝试。
-    // 显式 logout 会走 clearSession()，仍会清理完整状态并推进 generation。
+    // Token invalidation alone must not cancel a new authentication attempt holding PKCE/state.
+    // Explicit logout calls clearSession(), which clears all state and advances the generation.
     const preservesAuthAttempt = hasPendingAuthAttempt();
     if (!preservesAuthAttempt) {
       authGeneration += 1;
@@ -540,8 +540,8 @@ export function createSessionManager(options: SessionManagerOptions): SessionMan
         throw error;
       }
 
-      // 网络请求只持有 refresh 锁；最终 CAS 与写入再短暂持有 auth 锁，
-      // 使跨标签页 logout/callback commit 与 token rotation 线性化。
+      // The network request holds only the refresh lock; final CAS and persistence briefly hold the auth lock,
+      // linearizing cross-tab logout/callback commits with token rotation.
       return runAuthMutation(async () => {
         const writeRace = resolveRefreshRace(initialRaw);
         if (writeRace.changed) return writeRace.session;
@@ -613,7 +613,7 @@ export function createSessionManager(options: SessionManagerOptions): SessionMan
     if (!force && raw === lastObservedRaw) return;
 
     if (raw === null) {
-      // token-only 失效可与新 callback 并发；共享 state 存在时不能把它误判为 logout。
+      // Token-only invalidation may race with a new callback; shared state means it must not be treated as logout.
       const shouldPreserveAuthAttempt = preserveAuthAttempt && hasPendingAuthAttempt();
       if (!shouldPreserveAuthAttempt) {
         authGeneration += 1;
@@ -631,7 +631,7 @@ export function createSessionManager(options: SessionManagerOptions): SessionMan
       return;
     }
 
-    // 一次明确的本地登出只有当前上下文的新登录才能撤销；远端刷新不能复活它。
+    // Only a new login in the current context can undo an explicit local sign-out; remote refresh must not resurrect it.
     if (locallySignedOut) return;
 
     authGeneration += 1;

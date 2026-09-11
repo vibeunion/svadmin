@@ -51,7 +51,7 @@ function base32Encode(buffer: Uint8Array): string {
   return result;
 }
 
-function base32Decode(encoded: string): Uint8Array {
+function base32Decode(encoded: string): Uint8Array<ArrayBuffer> {
   const cleaned = encoded.toUpperCase().replace(/[^A-Z2-7]/g, '');
   const output: number[] = [];
   let bits = 0;
@@ -73,9 +73,9 @@ function base32Decode(encoded: string): Uint8Array {
 
 async function hmac(
   algorithm: string,
-  key: Uint8Array,
-  data: Uint8Array,
-): Promise<Uint8Array> {
+  key: Uint8Array<ArrayBuffer>,
+  data: Uint8Array<ArrayBuffer>,
+): Promise<Uint8Array<ArrayBuffer>> {
   // Map algo names for Web Crypto
   const algoMap: Record<string, string> = {
     'SHA-1': 'SHA-1',
@@ -84,19 +84,19 @@ async function hmac(
   };
   const cryptoKey = await crypto.subtle.importKey(
     'raw',
-    key as unknown as BufferSource,
+    key,
     { name: 'HMAC', hash: algoMap[algorithm] ?? 'SHA-1' },
     false,
     ['sign'],
   );
-  const sig = await crypto.subtle.sign('HMAC', cryptoKey, data as unknown as BufferSource);
+  const sig = await crypto.subtle.sign('HMAC', cryptoKey, data);
   return new Uint8Array(sig);
 }
 
 // ─── HOTP (base for TOTP) ─────────────────────────────────────
 
 async function hotp(
-  secret: Uint8Array,
+  secret: Uint8Array<ArrayBuffer>,
   counter: number,
   digits: number,
   algorithm: string,
@@ -109,12 +109,11 @@ async function hotp(
   const hash = await hmac(algorithm, secret, new Uint8Array(buffer));
 
   // Dynamic truncation (RFC 4226 §5.4)
-  const offset = hash[hash.length - 1] & 0x0f;
-  const code =
-    ((hash[offset] & 0x7f) << 24) |
-    ((hash[offset + 1] & 0xff) << 16) |
-    ((hash[offset + 2] & 0xff) << 8) |
-    (hash[offset + 3] & 0xff);
+  if (hash.byteLength < 20) throw new Error('Invalid HMAC digest length');
+  const hashView = new DataView(hash.buffer, hash.byteOffset, hash.byteLength);
+  const offset = hashView.getUint8(hash.byteLength - 1) & 0x0f;
+  if (offset + 4 > hash.byteLength) throw new Error('Invalid HMAC truncation offset');
+  const code = hashView.getUint32(offset, false) & 0x7fffffff;
 
   return (code % 10 ** digits).toString().padStart(digits, '0');
 }

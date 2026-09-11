@@ -80,7 +80,7 @@ describe('Deterministic zero-key fixture replay', () => {
     };
 
     const source = fixtureSpec.dataSources[0] as ResourceListDataSource;
-    const resourcePolicy = fixturePolicy.resources.orders as SurfaceResourcePolicy;
+    const resourcePolicy = fixturePolicy.resources['orders'] as SurfaceResourcePolicy;
 
     const sourceState = await loadSurfaceSource({
       source,
@@ -101,10 +101,14 @@ describe('Deterministic zero-key fixture replay', () => {
         amount: 1500,
         status: 'completed',
       });
-      expect(readyValue.items[0].internalSecret).toBeUndefined();
+      const firstItem = readyValue.items[0];
+      if (!firstItem) throw new Error('Missing first record fixture');
+      expect(firstItem['internalSecret']).toBeUndefined();
 
       // Resolve metric widget binding (/total)
-      const metricState = resolveSurfaceWidgetData(fixtureSpec.widgets[0], {
+      const metricWidget = fixtureSpec.widgets[0];
+      if (!metricWidget) throw new Error('Missing metric widget fixture');
+      const metricState = resolveSurfaceWidgetData(metricWidget, {
         'orders-source': sourceState,
       });
       expect(metricState.status).toBe('ready');
@@ -113,7 +117,9 @@ describe('Deterministic zero-key fixture replay', () => {
       }
 
       // Resolve bar chart widget binding (/items)
-      const chartState = resolveSurfaceWidgetData(fixtureSpec.widgets[1], {
+      const chartWidget = fixtureSpec.widgets[1];
+      if (!chartWidget) throw new Error('Missing chart widget fixture');
+      const chartState = resolveSurfaceWidgetData(chartWidget, {
         'orders-source': sourceState,
       });
       expect(chartState.status).toBe('ready');

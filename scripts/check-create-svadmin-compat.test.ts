@@ -18,6 +18,21 @@ test('peer range comparison rejects incompatible generated toolchains', () => {
   expect(rangesOverlap('^7.0.2', '^5.0.0 || ^6.0.0')).toBe(false);
 });
 
+test('compatibility check rejects reintroducing a Tailwind build dependency to the scaffold', async () => {
+  const repositoryRoot = resolve(import.meta.dir, '..');
+  const scaffold = loadScaffoldManifest(join(repositoryRoot, 'packages', 'create-svadmin', 'scaffold-manifest.json'));
+  scaffold.devDependencies['tailwindcss'] = '^4.3.3';
+  const temporaryDirectory = await mkdtemp(join(tmpdir(), 'svadmin-stylesheet-compat-'));
+  const scaffoldManifestPath = join(temporaryDirectory, 'scaffold-manifest.json');
+  try {
+    await writeFile(scaffoldManifestPath, JSON.stringify(scaffold));
+    const issues = await checkCreateSvadminCompatibility(repositoryRoot, { scaffoldManifestPath });
+    expect(issues.some(issue => issue.includes('precompiled styles must not require tailwindcss'))).toBe(true);
+  } finally {
+    await rm(temporaryDirectory, { recursive: true, force: true });
+  }
+});
+
 test('compatibility check rejects a shipped scaffold that drifts from workspace versions', async () => {
   const repositoryRoot = resolve(import.meta.dir, '..');
   const scaffold = loadScaffoldManifest(

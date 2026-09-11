@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { captureAdminContext, useTranslation } from '@svadmin/core';
+  import { definedOptions } from '@svadmin/core/options';
+
+  import { captureAdminContext, useTranslation, withValidatedAuditProvider } from '@svadmin/core';
 
   import type { AuditEntry, AuditLogProvider } from '@svadmin/core';
   import * as Sheet from './ui/sheet/index.js';
@@ -16,6 +18,7 @@
 
   let logs = $state<AuditEntry[]>([]);
   let isLoading = $state(false);
+  let loadFailed = $state(false);
   let requestEpoch = 0;
 
   $effect(() => {
@@ -44,6 +47,7 @@
     cancelAuditRequest();
     logs = [];
     isLoading = false;
+    loadFailed = false;
   }
 
   async function loadAuditLogs(
@@ -54,10 +58,15 @@
     const epoch = requestEpoch;
     isLoading = true;
     try {
-      const entries = await scopedProvider.get({ resource: scopedResource, meta: providerMeta });
+      const entries = await withValidatedAuditProvider(scopedProvider).get(
+        definedOptions({ resource: scopedResource, meta: providerMeta }),
+      );
       if (epoch === requestEpoch) logs = entries;
     } catch (error) {
-      if (epoch === requestEpoch) console.error('[svadmin] Failed to fetch audit logs', error);
+      if (epoch === requestEpoch) {
+        loadFailed = true;
+        console.error('[svadmin] Failed to fetch audit logs', error);
+      }
     } finally {
       if (epoch === requestEpoch) isLoading = false;
     }
@@ -91,6 +100,8 @@
         <div class="svadmin-u-60fbb7713999 svadmin-u-86843cf1e227 svadmin-u-a1f611f027dd svadmin-u-bfa603190748">
           <Loader2 class="svadmin-u-f6fe902450dc svadmin-u-7ec10f86d9b1 svadmin-u-afbdd13a380e" />
         </div>
+      {:else if loadFailed}
+        <p role="alert">{i18n.t('common.error')}</p>
       {:else if logs.length === 0}
         <div class="svadmin-u-ca6bf63030aa svadmin-u-1100bef66e60">
           <History class="svadmin-u-ed8a5df7b2fb svadmin-u-2bbcfc3b5179 svadmin-u-0e12dc7de920 svadmin-u-106b502aac96 svadmin-u-1bb883263ed2" />

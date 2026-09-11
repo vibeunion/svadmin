@@ -69,7 +69,7 @@ export function shortcut(_node: HTMLElement, params: ShortcutParams) {
 export function intersect(node: HTMLElement, callback: () => void) {
   const observer = new IntersectionObserver(
     ([entry]) => {
-      if (entry.isIntersecting) callback();
+      if (entry?.isIntersecting) callback();
     },
     { rootMargin: '200px' },
   );

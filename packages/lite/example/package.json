@@ -4,11 +4,12 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "check": "svelte-kit sync && svelte-check --tsgo-experimental-api --tsconfig ./tsconfig.json",
+    "check": "svelte-kit sync && bun ../../../scripts/check-type-coverage.ts packages/lite/example/tsconfig.json && svelte-check --tsgo-experimental-api --tsconfig ./tsconfig.json && node ../../../node_modules/@typescript/native/bin/tsc --noEmit --pretty false -p tsconfig.bun-tests.json",
     "dev": "vite dev",
     "verify:ssr": "vite build && bun ./scripts/verify-ssr.ts"
   },
   "dependencies": {
+    "@sinclair/typebox": "^0.34.52",
     "@svadmin/core": "workspace:*",
     "@svadmin/lite": "workspace:*",
     "@sveltejs/kit": "^2.70.3",

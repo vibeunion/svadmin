@@ -1,3 +1,4 @@
+import { definedOptions } from '@svadmin/core/options';
 // @svadmin/appwrite — Appwrite AuthProvider
 import type { AuthProvider, Identity, AuthActionResult, CheckResult } from '@svadmin/core';
 
@@ -67,12 +68,12 @@ export function createAppwriteAuthProvider(options: AppwriteAuthOptions): AuthPr
     async getIdentity(): Promise<Identity | null> {
       try {
         const user = await account.get();
-        return {
+        return definedOptions({
           id: user.$id,
           name: user.name || user.email.split('@')[0],
           email: user.email,
-          avatar: user.prefs?.avatar as string | undefined,
-        };
+          avatar: user.prefs?.['avatar'] as string | undefined,
+        });
       } catch {
         return null;
       }

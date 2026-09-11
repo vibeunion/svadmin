@@ -67,16 +67,16 @@ function hasFunction(record: UnknownRecord | undefined, key: string): boolean {
 
 function supportsCanvas(documentValue: unknown, context: '2d' | 'webgl'): boolean {
   const documentRecord = asRecord(documentValue);
-  if (!documentRecord || typeof documentRecord.createElement !== 'function') return false;
-  const canvas = (documentRecord.createElement as (name: string) => unknown)('canvas');
+  if (!documentRecord || typeof documentRecord['createElement'] !== 'function') return false;
+  const canvas = (documentRecord['createElement'] as (name: string) => unknown)('canvas');
   const canvasRecord = asRecord(canvas);
-  if (!canvasRecord || typeof canvasRecord.getContext !== 'function') return false;
-  return Boolean((canvasRecord.getContext as (name: string) => unknown)(context));
+  if (!canvasRecord || typeof canvasRecord['getContext'] !== 'function') return false;
+  return Boolean((canvasRecord['getContext'] as (name: string) => unknown)(context));
 }
 
 function supportsDirectoryUpload(environment: UnknownRecord): boolean {
-  const inputConstructor = asRecord(environment.HTMLInputElement);
-  const prototype = asRecord(inputConstructor?.prototype);
+  const inputConstructor = asRecord(environment['HTMLInputElement']);
+  const prototype = asRecord(inputConstructor?.['prototype']);
   return prototype !== undefined && ('webkitdirectory' in prototype || 'directory' in prototype);
 }
 
@@ -113,35 +113,35 @@ export function detectLiteCapabilities(environment?: unknown): LiteCapabilitySup
   const env = asRecord(explicitEnvironment
     ? environment
     : typeof globalThis === 'undefined' ? undefined : globalThis) ?? {};
-  const navigator = asRecord(env.navigator);
-  const clipboard = asRecord(navigator?.clipboard);
-  const webAssembly = asRecord(env.WebAssembly);
-  const readableStream = asRecord(env.ReadableStream);
+  const navigator = asRecord(env['navigator']);
+  const clipboard = asRecord(navigator?.['clipboard']);
+  const webAssembly = asRecord(env['WebAssembly']);
+  const readableStream = asRecord(env['ReadableStream']);
 
   return {
-    'canvas-2d': supportsCanvas(env.document, '2d'),
-    webgl: supportsCanvas(env.document, 'webgl'),
+    'canvas-2d': supportsCanvas(env['document'], '2d'),
+    webgl: supportsCanvas(env['document'], 'webgl'),
     wasm: hasFunction(webAssembly, 'instantiate'),
     'wasm-streaming': hasFunction(webAssembly, 'instantiateStreaming'),
-    websocket: typeof env.WebSocket === 'function',
-    'event-source': typeof env.EventSource === 'function',
-    worker: typeof env.Worker === 'function',
+    websocket: typeof env['WebSocket'] === 'function',
+    'event-source': typeof env['EventSource'] === 'function',
+    worker: typeof env['Worker'] === 'function',
     'directory-upload': supportsDirectoryUpload(env),
-    'file-system-access': typeof env.showOpenFilePicker === 'function'
-      || typeof env.showDirectoryPicker === 'function',
+    'file-system-access': typeof env['showOpenFilePicker'] === 'function'
+      || typeof env['showDirectoryPicker'] === 'function',
     clipboard: hasFunction(clipboard, 'writeText'),
-    'broadcast-channel': typeof env.BroadcastChannel === 'function',
-    'intersection-observer': typeof env.IntersectionObserver === 'function',
-    'resize-observer': typeof env.ResizeObserver === 'function',
-    'service-worker': asRecord(navigator?.serviceWorker) !== undefined,
-    'indexed-db': asRecord(env.indexedDB) !== undefined,
-    notifications: typeof env.Notification === 'function',
-    'media-capture': hasFunction(asRecord(navigator?.mediaDevices), 'getUserMedia')
-      || typeof env.MediaRecorder === 'function',
-    'web-rtc': typeof env.RTCPeerConnection === 'function',
-    geolocation: asRecord(navigator?.geolocation) !== undefined,
-    'web-streams': asRecord(env.ReadableStream) !== undefined
-      && (hasFunction(readableStream, 'from') || typeof env.WritableStream === 'function'),
+    'broadcast-channel': typeof env['BroadcastChannel'] === 'function',
+    'intersection-observer': typeof env['IntersectionObserver'] === 'function',
+    'resize-observer': typeof env['ResizeObserver'] === 'function',
+    'service-worker': asRecord(navigator?.['serviceWorker']) !== undefined,
+    'indexed-db': asRecord(env['indexedDB']) !== undefined,
+    notifications: typeof env['Notification'] === 'function',
+    'media-capture': hasFunction(asRecord(navigator?.['mediaDevices']), 'getUserMedia')
+      || typeof env['MediaRecorder'] === 'function',
+    'web-rtc': typeof env['RTCPeerConnection'] === 'function',
+    geolocation: asRecord(navigator?.['geolocation']) !== undefined,
+    'web-streams': asRecord(env['ReadableStream']) !== undefined
+      && (hasFunction(readableStream, 'from') || typeof env['WritableStream'] === 'function'),
   };
 }
 

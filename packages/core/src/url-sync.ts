@@ -16,16 +16,16 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 function isFilter(value: unknown, depth: number, budget: { remaining: number }): value is Filter {
   if (depth > 20 || budget.remaining-- <= 0 || !isRecord(value)) return false;
 
-  if (typeof value.field === 'string') {
-    return value.field.trim().length > 0
-      && typeof value.operator === 'string'
-      && CRUD_OPERATORS.has(value.operator)
+  if (typeof value['field'] === 'string') {
+    return value['field'].trim().length > 0
+      && typeof value['operator'] === 'string'
+      && CRUD_OPERATORS.has(value['operator'])
       && 'value' in value;
   }
 
-  return (value.operator === 'and' || value.operator === 'or')
-    && Array.isArray(value.value)
-    && value.value.every((entry) => isFilter(entry, depth + 1, budget));
+  return (value['operator'] === 'and' || value['operator'] === 'or')
+    && Array.isArray(value['value'])
+    && value['value'].every((entry) => isFilter(entry, depth + 1, budget));
 }
 
 function parseFilters(value: string): Filter[] | undefined {
@@ -46,8 +46,8 @@ function positiveIntegerParam(value: string | undefined, max: number): string | 
 }
 
 /**
- * 保留从列表进入 CRUD 页面时可安全恢复的查询状态。
- * 未知参数不会跨页面传播，避免把 detail、tenantId 或敏感参数带入记录路由。
+ * Preserves query state that can be safely restored when navigating from a list to CRUD pages.
+ * Unknown parameters do not propagate across pages, preventing detail, tenantId, or sensitive values from entering record routes.
  */
 export function sanitizeListQueryParams(params: Record<string, string>): Record<string, string> {
   const result: Record<string, string> = {};
@@ -128,7 +128,8 @@ export function readURLState(adminContext: AdminContextAccessor = captureAdminCo
 }
 
 export function writeURLState(
-  state: URLState,
+  // An own undefined field clears that URL parameter; an absent field leaves it unchanged.
+  state: { [K in keyof URLState]?: URLState[K] | undefined },
   adminContext: AdminContextAccessor = captureAdminContext(),
   type: 'push' | 'replace' = 'replace',
 ): void {

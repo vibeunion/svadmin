@@ -1,6 +1,11 @@
 import { dataProvider, postsResource, resources } from "$lib/admin";
 import { createCrudActions, createListLoader } from "@svadmin/lite";
 import type { Actions, PageServerLoad } from "./$types";
+import { Type } from '@sinclair/typebox';
+import { checkExact, snapshotPlainData } from '@svadmin/core/schema';
+import { demoSchemas } from '../../../../../../example/src/resource-schemas';
+
+const orderList = Type.Array(demoSchemas.sales_orders);
 
 export const load = (async (event) => {
   const postsLoader = createListLoader(dataProvider, postsResource);
@@ -14,8 +19,9 @@ export const load = (async (event) => {
     dataProvider.getList({ resource: "warehouses", pagination: { current: 1, pageSize: 10 } }),
   ]);
 
-  const orders = ordersRes.data as Array<Record<string, unknown>>;
-  const totalRevenue = orders.reduce((sum, order) => sum + (Number(order.totalAmount) || 0), 0);
+  const orders = snapshotPlainData(ordersRes.data);
+  if (!checkExact(orderList, orders)) throw new Error('Invalid sales orders.');
+  const totalRevenue = orders.reduce((sum, order) => sum + order.totalAmount, 0);
 
   return {
     ...postsResult,
@@ -29,7 +35,7 @@ export const load = (async (event) => {
       resourcesCount: resources.length,
     },
     recentOrders: orders.slice(0, 5),
-    topProducts: (productsRes.data as Array<Record<string, unknown>>).slice(0, 4),
+    topProducts: productsRes.data.slice(0, 4),
   };
 }) satisfies PageServerLoad;
 

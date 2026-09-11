@@ -1,4 +1,8 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
+  import { demoContracts } from '../resource-contracts';
+
   import { useList } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { Badge, ContentPageHeader, ContentPageShell, MetricBlock, SectionHeader } from '@svadmin/ui';
@@ -8,32 +12,26 @@
 
   const i18n = useTranslation();
 
-  interface Account { id: number; accountName: string; health: string; ownerId: number; nextStep: string; }
-  interface Contact { id: number; fullName: string; roleTitle: string; influence: string; status: string; lastTouchDate: string; notes: string; }
-  interface Deal { id: number; dealName: string; stage: string; amount: number; probability: number; closeDate: string; }
-  interface Activity { id: number; subject: string; type: string; dueDate: string; status: string; }
-  type CrmResource = 'crm_accounts' | 'crm_contacts' | 'crm_deals' | 'crm_activities';
-
   let { resourceName = 'crm_accounts' } = $props<{ resourceName?: string }>();
   let activeView = $state(readHashView('default'));
 
   const locale = $derived(i18n.locale);
   const isZh = $derived(locale === 'zh-CN');
-  const accountsQuery = useList({ resource: 'crm_accounts', pagination: { mode: 'off' } });
-  const contactsQuery = useList({ resource: 'crm_contacts', pagination: { mode: 'off' }, sorters: [{ field: 'lastTouchDate', order: 'desc' }] });
-  const dealsQuery = useList({ resource: 'crm_deals', pagination: { mode: 'off' } });
-  const activitiesQuery = useList({ resource: 'crm_activities', pagination: { mode: 'off' } });
-  const accounts = $derived((accountsQuery.data?.data ?? []) as unknown as Account[]);
-  const contacts = $derived((contactsQuery.data?.data ?? []) as unknown as Contact[]);
-  const deals = $derived((dealsQuery.data?.data ?? []) as unknown as Deal[]);
-  const activities = $derived((activitiesQuery.data?.data ?? []) as unknown as Activity[]);
+  const accountsQuery = useList({ resource: demoContracts.crm_accounts, pagination: { mode: 'off' } });
+  const contactsQuery = useList({ resource: demoContracts.crm_contacts, pagination: { mode: 'off' }, sorters: [{ field: 'lastTouchDate', order: 'desc' }] });
+  const dealsQuery = useList({ resource: demoContracts.crm_deals, pagination: { mode: 'off' } });
+  const activitiesQuery = useList({ resource: demoContracts.crm_activities, pagination: { mode: 'off' } });
+  const accounts = $derived((accountsQuery.data?.data ?? []));
+  const contacts = $derived((contactsQuery.data?.data ?? []));
+  const deals = $derived((dealsQuery.data?.data ?? []));
+  const activities = $derived((activitiesQuery.data?.data ?? []));
   const pipeline = $derived(deals.reduce((sum, deal) => sum + deal.amount, 0));
   const weighted = $derived(deals.reduce((sum, deal) => sum + deal.amount * deal.probability / 100, 0));
   const activeContacts = $derived(contacts.filter((contact) => contact.status === 'active').length);
   const plannedActivities = $derived(activities.filter((activity) => activity.status !== 'completed').length);
   const stages = $derived(['discovery', 'proposal', 'negotiation', 'won']);
-  const activeResource = $derived((['crm_accounts', 'crm_contacts', 'crm_deals', 'crm_activities'].includes(resourceName) ? resourceName : 'crm_accounts') as CrmResource);
-  const normalizedView = $derived(['dashboard', 'companies', 'tasks', 'notes', 'reports'].includes(activeView) ? activeView : 'default');
+  const activeResource = $derived((['crm_accounts', 'crm_contacts', 'crm_deals', 'crm_activities'] as const).find(name => name === resourceName) ?? 'crm_accounts');
+  const normalizedView = $derived((['dashboard', 'companies', 'tasks', 'notes', 'reports'] as const).find(view => view === activeView) ?? 'default');
   const crmNav = $derived([
     { key: 'tasks', label: isZh ? '任务' : 'Tasks', href: '#/crm_activities?view=tasks', value: plannedActivities, Icon: ClipboardList },
     { key: 'notes', label: isZh ? '笔记' : 'Notes', href: '#/crm_activities?view=notes', value: contacts.length, Icon: FileText },
@@ -109,9 +107,9 @@
         focusTitle: isZh ? '报表维度' : 'Report Dimensions',
       },
     } satisfies Record<string, { badge: string; title: string; description: string; focusTitle: string }>;
-    return copies[normalizedView as keyof typeof copies];
+    return copies[normalizedView];
   });
-  const resourceMetrics = $derived.by(() => {
+  const resourceMetrics = $derived.by((): [string, string | number, string][] => {
     if (activeResource === 'crm_contacts') return [
       [isZh ? '联系人' : 'Contacts', contacts.length, isZh ? '关系网络' : 'Relationship network'],
       [isZh ? '活跃' : 'Active', activeContacts, isZh ? '近期可跟进' : 'Ready for follow-up'],
@@ -189,12 +187,12 @@
         {:else if activeResource === 'crm_activities'}
           <div class="divide-y divide-border rounded-lg border bg-card" data-crm-activity-layout>{#each activities as activity (activity.id)}<article class="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"><div><p class="text-sm font-semibold">{activity.subject}</p><p class="mt-1 text-xs text-muted-foreground">{activity.type} · {activity.dueDate}</p></div><Badge variant="outline">{activity.status.replace('_', ' ')}</Badge></article>{/each}</div>
         {:else}
-          <div class="grid gap-3 md:grid-cols-2" data-crm-account-layout>{#each accounts as account (account.id)}<article class="rounded-lg border bg-card p-4"><div class="flex items-start justify-between gap-3"><p class="text-sm font-semibold">{account.accountName}</p><Badge variant="outline">{healthLabel(account.health)}</Badge></div><p class="mt-3 text-sm text-muted-foreground">{account.nextStep}</p></article>{/each}</div>
+          <div class="grid gap-3 md:grid-cols-2" data-crm-account-layout>{#each accounts as account (account.id)}<article class="rounded-lg border bg-card p-4"><div class="flex items-start justify-between gap-3"><p class="text-sm font-semibold">{account.accountName}</p><Badge variant="outline">{healthLabel(account.health)}</Badge></div><p class="mt-3 text-sm text-muted-foreground">{account.notes}</p></article>{/each}</div>
         {/if}
     </section>
 
     <div class="grid gap-4 content-start">
-      <MetricBlock label={isZh ? '高价值商机' : 'Top opportunity'} value={deals[0]?.dealName ?? '-'} icon={undefined} />
+      <MetricBlock label={isZh ? '高价值商机' : 'Top opportunity'} value={deals[0]?.dealName ?? '-'} {...definedOptions({ "icon": undefined })} />
       <MetricBlock label={isZh ? '待跟进活动' : 'Follow-ups'} value={plannedActivities} detail={isZh ? '需要下一步' : 'Need a next step'} />
       <Card.Root>
         <Card.Header class="pb-3"><Card.Title class="text-base">{isZh ? '快捷导航' : 'Quick Navigation'}</Card.Title></Card.Header>
@@ -240,7 +238,7 @@
         {#each accounts.slice(0, 3) as account (account.id)}
           <div class="rounded-lg border bg-card p-4">
             <p class="font-semibold">{account.accountName}</p>
-            <p class="mt-1 text-xs text-muted-foreground">{account.nextStep}</p>
+            <p class="mt-1 text-xs text-muted-foreground">{account.notes}</p>
             <Badge variant="outline" class="mt-3">{healthLabel(account.health)}</Badge>
           </div>
         {/each}
@@ -249,7 +247,7 @@
   </Card.Root>
 
   <section class="grid gap-4 xl:grid-cols-3">
-    <Card.Root><Card.Header><Card.Title class="text-base">{isZh ? '重点客户' : 'Priority Accounts'}</Card.Title></Card.Header><Card.Content class="space-y-3">{#each accounts.slice(0, 4) as account (account.id)}<div class="rounded-lg border p-3"><div class="flex items-center justify-between"><p class="font-semibold">{account.accountName}</p><Badge variant="outline">{healthLabel(account.health)}</Badge></div><p class="mt-1 text-xs text-muted-foreground">{account.nextStep}</p></div>{/each}</Card.Content></Card.Root>
+    <Card.Root><Card.Header><Card.Title class="text-base">{isZh ? '重点客户' : 'Priority Accounts'}</Card.Title></Card.Header><Card.Content class="space-y-3">{#each accounts.slice(0, 4) as account (account.id)}<div class="rounded-lg border p-3"><div class="flex items-center justify-between"><p class="font-semibold">{account.accountName}</p><Badge variant="outline">{healthLabel(account.health)}</Badge></div><p class="mt-1 text-xs text-muted-foreground">{account.notes}</p></div>{/each}</Card.Content></Card.Root>
     <Card.Root><Card.Header><Card.Title class="flex items-center gap-2 text-base"><TrendingUp class="h-4 w-4 text-primary" />{isZh ? '商机列表' : 'Deals'}</Card.Title></Card.Header><Card.Content class="space-y-3">{#each deals.slice(0, 4) as deal (deal.id)}<div class="rounded-lg border p-3"><div class="flex items-center justify-between"><p class="font-semibold">{deal.dealName}</p><Badge>{money(deal.amount)}</Badge></div><p class="mt-1 text-xs text-muted-foreground">{stageLabel(deal.stage)} · {deal.probability}% · {deal.closeDate}</p></div>{/each}</Card.Content></Card.Root>
     <Card.Root><Card.Header><Card.Title class="flex items-center gap-2 text-base"><Users class="h-4 w-4 text-primary" />{isZh ? '联系人雷达' : 'Contact Radar'}</Card.Title></Card.Header><Card.Content class="space-y-3">{#each contacts.slice(0, 4) as contact (contact.id)}<div class="rounded-lg border p-3"><div class="flex items-center justify-between gap-3"><div><p class="font-semibold">{contact.fullName}</p><p class="mt-1 text-xs text-muted-foreground">{contact.roleTitle}</p></div><Badge variant="outline">{influenceLabel(contact.influence)}</Badge></div><p class="mt-2 text-xs text-primary">{isZh ? '最近触达' : 'Last touch'} · {contact.lastTouchDate}</p></div>{/each}</Card.Content></Card.Root>
   </section>

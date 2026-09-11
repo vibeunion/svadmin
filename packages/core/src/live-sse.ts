@@ -1,15 +1,8 @@
-/**
- * SSE (Server-Sent Events) LiveProvider
- *
- * Connects to an SSE endpoint and dispatches LiveEvents to subscribers.
- * The server should emit events as JSON matching the LiveEvent shape:
- *   data: { "type": "INSERT", "resource": "posts", "payload": {...} }
- *
- * Optionally, named SSE events can be used:
- *   event: posts
- *   data: { "type": "INSERT", "payload": {...} }
- */
-import type { LiveProvider, LiveEvent } from './live.svelte';
+import type { LiveProvider } from './live.svelte';
+import { createLiveSubscribers, decodeLiveMessage, notifyLiveObserver, readLiveOptions, captureLiveObserver } from './live-transport';
+import { Type } from '@sinclair/typebox';
+import { checkExact } from './schema-validation';
+import { snapshotPlainData } from './plain-data';
 
 export interface SSELiveProviderOptions {
   url: string;
@@ -18,137 +11,108 @@ export interface SSELiveProviderOptions {
   onError?: (event: Event) => void;
 }
 
-export function createSSELiveProvider(options: SSELiveProviderOptions): LiveProvider & { disconnect: () => void; getStatus: () => 'connecting' | 'connected' | 'disconnected' } {
-  const { url, eventSourceInit } = options;
+const initSchema = Type.Object({ withCredentials: Type.Optional(Type.Boolean()) }, { additionalProperties: false });
+function checkedInit(value: unknown) {
+  if (value === undefined) return undefined;
+  try {
+    const init = snapshotPlainData(value);
+    if (checkExact(initSchema, init)) return init;
+  } catch { /* Configuration reflection cannot leak into connection callbacks. */ }
+  throw new TypeError('Invalid SSE initialization');
+}
 
-  type Callback = (event: LiveEvent) => void;
-  const subscribers = new Map<string, Set<Callback>>();
-  let eventSource: EventSource | null = null;
+function configuration(options: unknown) {
+  const input = readLiveOptions(options, ['url', 'eventSourceInit', 'onOpen', 'onError']);
+  const url = input['url'];
+  if (typeof url !== 'string' || !url) throw new TypeError('Invalid SSE live options');
+  const eventSourceInit = checkedInit(input['eventSourceInit']);
+  const onOpen = captureLiveObserver(input['onOpen']);
+  const onError = captureLiveObserver(input['onError']);
+  return { url, eventSourceInit, onOpen, onError };
+}
+
+/**
+ * Named events may omit resource, but must include type and payload.
+ * Reserved message/open/error resources use default full-envelope messages.
+ * Per-subscription liveParams are unsupported and rejected.
+ */
+export function createSSELiveProvider(options: SSELiveProviderOptions): LiveProvider & {
+  disconnect: () => void; getStatus: () => 'connecting' | 'connected' | 'disconnected';
+} {
+  const { url, eventSourceInit, onOpen, onError } = configuration(options);
+  const subscribers = createLiveSubscribers();
+  let source: EventSource | null = null;
   let status: 'connecting' | 'connected' | 'disconnected' = 'disconnected';
   const namedListeners = new Map<string, EventListener>();
 
-  function connect() {
-    if (eventSource) return;
-    if (typeof EventSource === 'undefined') return;
-
-    status = 'connecting';
-    eventSource = new EventSource(url, eventSourceInit);
-
-    eventSource.onopen = () => {
-      status = 'connected';
-      options.onOpen?.();
-    };
-
-    eventSource.onmessage = (msgEvent) => {
-      dispatchEvent(msgEvent.data);
-    };
-
-    eventSource.onerror = (event) => {
-      if (eventSource?.readyState === EventSource.CLOSED) {
-        status = 'disconnected';
-      }
-      options.onError?.(event);
-    };
-
-    for (const resource of subscribers.keys()) {
-      if (resource !== '*') {
-        addNamedListener(resource);
-      }
-    }
-  }
-
   function addNamedListener(resource: string) {
-    if (!eventSource || namedListeners.has(resource)) return;
-    const listener = ((event: MessageEvent) => {
-      try {
-        const parsed = JSON.parse(event.data);
-        const liveEvent: LiveEvent = {
-          type: parsed.type,
-          resource: parsed.resource ?? resource,
-          payload: parsed.payload ?? parsed,
-        };
-        notifySubscribers(liveEvent);
-      } catch {
-        // ignore non-JSON
-      }
-    }) as EventListener;
+    const connection = source;
+    if (!connection || ['*', 'message', 'open', 'error'].includes(resource) || namedListeners.has(resource)) return;
+    const current = () => source === connection;
+    const listener: EventListener = event => {
+      if (!current() || namedListeners.get(resource) !== listener || !(event instanceof MessageEvent)) return;
+      const data: unknown = event.data;
+      const decoded = decodeLiveMessage(data, resource);
+      if (decoded) subscribers.notify(decoded, current);
+    };
     namedListeners.set(resource, listener);
-    eventSource.addEventListener(resource, listener);
+    connection.addEventListener(resource, listener);
   }
-
-  function removeNamedListener(resource: string) {
-    const listener = namedListeners.get(resource);
-    if (!listener) return;
-    if (eventSource) {
-      eventSource.removeEventListener(resource, listener);
-    }
-    namedListeners.delete(resource);
-  }
-
-  function dispatchEvent(data: string) {
-    try {
-      const event: LiveEvent = JSON.parse(data);
-      if (event.type && event.resource) {
-        notifySubscribers(event);
-      }
-    } catch {
-      // ignore non-JSON
-    }
-  }
-
-  function notifySubscribers(event: LiveEvent) {
-    const callbacks = subscribers.get(event.resource);
-    if (callbacks) {
-      for (const cb of callbacks) cb(event);
-    }
-    const wildcardCallbacks = subscribers.get('*');
-    if (wildcardCallbacks) {
-      for (const cb of wildcardCallbacks) cb(event);
-    }
-  }
-
   function disconnect() {
-    if (eventSource) {
-      eventSource.close();
-      eventSource = null;
-    }
+    const previous = source;
+    source = null;
     status = 'disconnected';
+    if (previous) {
+      for (const [resource, listener] of namedListeners) previous.removeEventListener(resource, listener);
+      previous.close();
+    }
     namedListeners.clear();
   }
-
+  function connect() {
+    if (source || subscribers.empty || typeof EventSource === 'undefined') return;
+    status = 'connecting';
+    let connection: EventSource;
+    try { connection = new EventSource(url, eventSourceInit); }
+    catch { status = 'disconnected'; return; }
+    source = connection;
+    const current = () => source === connection;
+    connection.onopen = event => {
+      if (!current() || event instanceof MessageEvent) return;
+      status = 'connected';
+      notifyLiveObserver(onOpen, undefined);
+    };
+    connection.onmessage = message => {
+      if (!current()) return;
+      const data: unknown = message.data;
+      const event = decodeLiveMessage(data);
+      if (event) subscribers.notify(event, current);
+    };
+    connection.onerror = event => {
+      if (!current() || event instanceof MessageEvent) return;
+      if (connection.readyState === EventSource.CLOSED) disconnect();
+      else status = 'connecting';
+      notifyLiveObserver(onError, event);
+    };
+    for (const channel of subscribers.channels()) addNamedListener(channel.resource);
+  }
   return {
-    subscribe({ resource, callback }) {
-      let isNewResource = false;
-      if (!subscribers.has(resource)) {
-        subscribers.set(resource, new Set());
-        isNewResource = true;
-      }
-      subscribers.get(resource)?.add(callback);
-
-      if (!eventSource && typeof EventSource !== 'undefined') {
-        connect();
-      }
-      if (eventSource && resource !== '*' && isNewResource) {
-        addNamedListener(resource);
-      }
-
+    subscribe(params) {
+      const entry = subscribers.add(params, false);
+      if (!source) connect();
+      else if (entry.first) addNamedListener(entry.resource);
+      let active = true;
       return () => {
-        const callbacks = subscribers.get(resource);
-        if (callbacks) {
-          callbacks.delete(callback);
-          if (callbacks.size === 0) {
-            subscribers.delete(resource);
-            removeNamedListener(resource);
-          }
+        if (!active) return;
+        active = false;
+        if (entry.remove()) {
+          const listener = namedListeners.get(entry.resource);
+          if (source && listener) source.removeEventListener(entry.resource, listener);
+          namedListeners.delete(entry.resource);
         }
-        if (subscribers.size === 0) disconnect();
+        if (subscribers.empty) disconnect();
       };
     },
-
     disconnect,
-
-    getStatus() {
-      return status;
-    },
+    getStatus: () => status,
   };
 }

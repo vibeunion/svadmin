@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   interface Props {
     schema: Record<string, unknown>;
     value?: Record<string, unknown>;
@@ -24,23 +26,23 @@
   }
 
   const properties = $derived.by<FieldMeta[]>(() => {
-    const propsObj = (schema.properties ?? {}) as Record<string, Record<string, unknown>>;
-    const requiredKeys = Array.isArray(schema.required) ? (schema.required as string[]) : [];
+    const propsObj = (schema['properties'] ?? {}) as Record<string, Record<string, unknown>>;
+    const requiredKeys = Array.isArray(schema['required']) ? (schema['required'] as string[]) : [];
 
-    return Object.entries(propsObj).map(([key, propDef]) => ({
+    return Object.entries(propsObj).map(([key, propDef]) => (definedOptions({
       key,
-      title: String(propDef.title ?? key),
-      type: String(propDef.type ?? 'string'),
-      enum: Array.isArray(propDef.enum) ? (propDef.enum as Array<string | number>) : undefined,
+      title: String(propDef['title'] ?? key),
+      type: String(propDef['type'] ?? 'string'),
+      enum: Array.isArray(propDef['enum']) ? (propDef['enum'] as Array<string | number>) : undefined,
       required: requiredKeys.includes(key),
-    }));
+    })));
   });
 </script>
 
 <div class="lite-schema-form-card">
-  {#if schema.title}
+  {#if schema['title']}
     <div class="lite-schema-form-header">
-      <strong>{schema.title}</strong>
+      <strong>{schema['title']}</strong>
     </div>
   {/if}
 

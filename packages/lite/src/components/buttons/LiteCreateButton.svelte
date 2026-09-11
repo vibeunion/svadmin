@@ -21,6 +21,9 @@
 
 <a
   href={`${basePath}/${resource}/create`}
+  data-svadmin-button
+  data-variant="default"
+  data-size={size}
   class="lite-btn lite-btn-primary {size === 'sm' ? 'lite-btn-sm' : ''} {className}"
   title={t('common.create') || 'Create'}
 >

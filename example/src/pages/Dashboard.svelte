@@ -1,4 +1,9 @@
 <script lang="ts">
+  import { demoContracts } from '../resource-contracts';
+  import type { DemoRow } from '../resource-schemas';
+
+  type Movement = DemoRow<'stock_movements'>;
+
   import { useList } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { ContentPageHeader, ContentPageShell, DataState, MetricBlock } from '@svadmin/ui';
@@ -23,113 +28,31 @@
   const i18n = useTranslation();
   const declarativeSurfacePromise = import('../components/DeclarativeSurfaceExample.svelte');
 
-  interface Product {
-    id: number;
-    name: string;
-    sku: string;
-    price: number;
-    stock: number;
-    minStock: number;
-  }
-
-  interface Movement {
-    id: number;
-    quantity: number;
-    type: string;
-    note: string;
-    date: string;
-  }
-
-  interface Todo {
-    id: number;
-    completed: boolean;
-    priority: string;
-    title: string;
-  }
-
-  interface CalendarEvent {
-    id: number;
-    title: string;
-    startDate: string;
-    type: string;
-  }
-
-  interface Conversation {
-    id: number;
-    title: string;
-    status: string;
-    updatedAt: string;
-  }
-
-  interface Notification {
-    id: number;
-    title: string;
-    severity: string;
-    read: boolean;
-    createdAt: string;
-  }
-
-  interface User {
-    id: number;
-    name: string;
-    department: string;
-    status: string;
-  }
-
-  interface SalesOrder {
-    id: number;
-    orderNumber: string;
-    customerName: string;
-    status: string;
-    totalAmount: number;
-    orderDate: string;
-  }
-
-  interface StockTransfer {
-    id: number;
-    status: string;
-  }
-
-  interface CycleCount {
-    id: number;
-    status: string;
-  }
-
-  interface InventoryAdjustment {
-    id: number;
-    status: string;
-  }
-
-  interface ReorderRule {
-    id: number;
-    status: string;
-  }
-
-  const productsQuery = useList({ resource: 'products', pagination: { mode: 'off' } });
-  const suppliersQuery = useList({ resource: 'suppliers', pagination: { current: 1, pageSize: 1 } });
-  const warehousesQuery = useList({ resource: 'warehouses', pagination: { current: 1, pageSize: 1 } });
-  const movementsQuery = useList({ resource: 'stock_movements', pagination: { current: 1, pageSize: 5 }, sorters: [{ field: 'date', order: 'desc' }] });
-  const transfersQuery = useList({ resource: 'stock_transfers', pagination: { mode: 'off' } });
-  const cycleCountsQuery = useList({ resource: 'cycle_counts', pagination: { mode: 'off' } });
-  const adjustmentsQuery = useList({ resource: 'inventory_adjustments', pagination: { mode: 'off' } });
-  const reorderRulesQuery = useList({ resource: 'reorder_rules', pagination: { mode: 'off' } });
-  const purchaseOrdersQuery = useList({ resource: 'purchase_orders', pagination: { current: 1, pageSize: 1 } });
-  const salesOrdersQuery = useList({ resource: 'sales_orders', pagination: { current: 1, pageSize: 5 }, sorters: [{ field: 'orderDate', order: 'desc' }] });
-  const todosQuery = useList({ resource: 'todos', pagination: { mode: 'off' } });
-  const usersQuery = useList({ resource: 'users', pagination: { mode: 'off' } });
-  const rolesQuery = useList({ resource: 'roles', pagination: { current: 1, pageSize: 1 } });
+  const productsQuery = useList({ resource: demoContracts.products, pagination: { mode: 'off' } });
+  const suppliersQuery = useList({ resource: demoContracts.suppliers, pagination: { current: 1, pageSize: 1 } });
+  const warehousesQuery = useList({ resource: demoContracts.warehouses, pagination: { current: 1, pageSize: 1 } });
+  const movementsQuery = useList({ resource: demoContracts.stock_movements, pagination: { current: 1, pageSize: 5 }, sorters: [{ field: 'date', order: 'desc' }] });
+  const transfersQuery = useList({ resource: demoContracts.stock_transfers, pagination: { mode: 'off' } });
+  const cycleCountsQuery = useList({ resource: demoContracts.cycle_counts, pagination: { mode: 'off' } });
+  const adjustmentsQuery = useList({ resource: demoContracts.inventory_adjustments, pagination: { mode: 'off' } });
+  const reorderRulesQuery = useList({ resource: demoContracts.reorder_rules, pagination: { mode: 'off' } });
+  const purchaseOrdersQuery = useList({ resource: demoContracts.purchase_orders, pagination: { current: 1, pageSize: 1 } });
+  const salesOrdersQuery = useList({ resource: demoContracts.sales_orders, pagination: { current: 1, pageSize: 5 }, sorters: [{ field: 'orderDate', order: 'desc' }] });
+  const todosQuery = useList({ resource: demoContracts.todos, pagination: { mode: 'off' } });
+  const usersQuery = useList({ resource: demoContracts.users, pagination: { mode: 'off' } });
+  const rolesQuery = useList({ resource: demoContracts.roles, pagination: { current: 1, pageSize: 1 } });
   const calendarQuery = useList({
-    resource: 'calendar_events',
+    resource: demoContracts.calendar_events,
     pagination: { current: 1, pageSize: 3 },
     sorters: [{ field: 'startDate', order: 'asc' }],
   });
   const conversationsQuery = useList({
-    resource: 'ai_conversations',
+    resource: demoContracts.ai_conversations,
     pagination: { current: 1, pageSize: 3 },
     sorters: [{ field: 'updatedAt', order: 'desc' }],
   });
   const notificationsQuery = useList({
-    resource: 'notifications',
+    resource: demoContracts.notifications,
     pagination: { current: 1, pageSize: 3 },
     sorters: [{ field: 'createdAt', order: 'desc' }],
   });
@@ -137,18 +60,18 @@
   const locale = $derived(i18n.locale);
   const isZh = $derived(locale === 'zh-CN');
 
-  const products = $derived((productsQuery.data?.data ?? []) as unknown as Product[]);
-  const movements = $derived((movementsQuery.data?.data ?? []) as unknown as Movement[]);
-  const transfers = $derived((transfersQuery.data?.data ?? []) as unknown as StockTransfer[]);
-  const cycleCounts = $derived((cycleCountsQuery.data?.data ?? []) as unknown as CycleCount[]);
-  const adjustments = $derived((adjustmentsQuery.data?.data ?? []) as unknown as InventoryAdjustment[]);
-  const reorderRules = $derived((reorderRulesQuery.data?.data ?? []) as unknown as ReorderRule[]);
-  const todos = $derived((todosQuery.data?.data ?? []) as unknown as Todo[]);
-  const users = $derived((usersQuery.data?.data ?? []) as unknown as User[]);
-  const salesOrders = $derived((salesOrdersQuery.data?.data ?? []) as unknown as SalesOrder[]);
-  const calendarEvents = $derived((calendarQuery.data?.data ?? []) as unknown as CalendarEvent[]);
-  const conversations = $derived((conversationsQuery.data?.data ?? []) as unknown as Conversation[]);
-  const notifications = $derived((notificationsQuery.data?.data ?? []) as unknown as Notification[]);
+  const products = $derived((productsQuery.data?.data ?? []));
+  const movements = $derived((movementsQuery.data?.data ?? []));
+  const transfers = $derived((transfersQuery.data?.data ?? []));
+  const cycleCounts = $derived((cycleCountsQuery.data?.data ?? []));
+  const adjustments = $derived((adjustmentsQuery.data?.data ?? []));
+  const reorderRules = $derived((reorderRulesQuery.data?.data ?? []));
+  const todos = $derived((todosQuery.data?.data ?? []));
+  const users = $derived((usersQuery.data?.data ?? []));
+  const salesOrders = $derived((salesOrdersQuery.data?.data ?? []));
+  const calendarEvents = $derived((calendarQuery.data?.data ?? []));
+  const conversations = $derived((conversationsQuery.data?.data ?? []));
+  const notifications = $derived((notificationsQuery.data?.data ?? []));
 
   const isLoading = $derived(
     productsQuery.isLoading ||

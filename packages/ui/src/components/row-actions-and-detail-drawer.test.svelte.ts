@@ -1,3 +1,4 @@
+import { requireValue } from "../../../../scripts/test-assertions";
 import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
 import { beforeEach, describe, expect, it } from 'vitest';
 import RowActionsDetailDrawerHarness from '../../test/fixtures/RowActionsDetailDrawerHarness.svelte';
@@ -45,11 +46,11 @@ describe('RowActions and DetailDrawer', () => {
     const items = within(menu).getAllByRole('menuitem');
     await waitFor(() => expect(document.activeElement).toBe(items[0]));
 
-    await fireEvent.keyDown(items[0], { key: 'End' });
+    await fireEvent.keyDown(requireValue(items[0]), { key: 'End' });
     expect(document.activeElement).toBe(items.at(-1));
     await fireEvent.keyDown(items.at(-1) as HTMLElement, { key: 'ArrowDown' });
     expect(document.activeElement).toBe(items[0]);
-    await fireEvent.keyDown(items[0], { key: 'Escape' });
+    await fireEvent.keyDown(requireValue(items[0]), { key: 'Escape' });
 
     await waitFor(() => {
       expect(within(rowActions).queryByRole('menu')).toBeNull();

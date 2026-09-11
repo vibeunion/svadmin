@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import { SvelteSet } from 'svelte/reactivity';
   import { ChevronRight, ChevronDown, Check, X, Search, ChevronsUpDown } from '@lucide/svelte';
   import { cn } from '../utils.js';
@@ -140,10 +142,10 @@
       const matchChildren = filteredChildren && filteredChildren.length > 0;
 
       if (matchSelf || matchChildren) {
-        filtered.push({
+        filtered.push(definedOptions({
           ...node,
           children: filteredChildren ?? node.children,
-        });
+        }));
       }
     }
     return filtered;

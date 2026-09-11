@@ -1,3 +1,4 @@
+import { definedOptions } from '@svadmin/core/options';
 /**
  * @svadmin/editor — Extension presets
  *
@@ -26,6 +27,9 @@ import TableHeader from '@tiptap/extension-table-header';
 import TableCell from '@tiptap/extension-table-cell';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import type { AnyExtension } from '@tiptap/core';
+import type { createLowlight } from 'lowlight';
+
+export type Lowlight = ReturnType<typeof createLowlight>;
 
 export interface EditorPresetOptions {
   /** Placeholder text */
@@ -35,7 +39,7 @@ export interface EditorPresetOptions {
   /** Enable code block syntax highlighting */
   codeHighlight?: boolean;
   /** lowlight instance (required if codeHighlight is true) */
-  lowlight?: unknown;
+  lowlight?: Lowlight;
 }
 
 /**
@@ -44,10 +48,10 @@ export interface EditorPresetOptions {
  */
 export function fullPreset(options: EditorPresetOptions = {}): AnyExtension[] {
   const extensions: AnyExtension[] = [
-    StarterKit.configure({
+    StarterKit.configure(definedOptions({
       // Disable default code block in favor of CodeBlockLowlight
       codeBlock: options.codeHighlight ? false : undefined,
-    }),
+    })),
     Underline,
     TextStyle,
     Color,
@@ -99,7 +103,7 @@ export function fullPreset(options: EditorPresetOptions = {}): AnyExtension[] {
   if (options.codeHighlight && options.lowlight) {
     extensions.push(
       CodeBlockLowlight.configure({
-        lowlight: options.lowlight as Parameters<typeof CodeBlockLowlight.configure>[0] extends { lowlight: infer L } ? L : never,
+        lowlight: options.lowlight,
       })
     );
   }
@@ -144,9 +148,9 @@ export function minimalPreset(options: EditorPresetOptions = {}): AnyExtension[]
  */
 export function prosePreset(options: EditorPresetOptions = {}): AnyExtension[] {
   const extensions: AnyExtension[] = [
-    StarterKit.configure({
+    StarterKit.configure(definedOptions({
       codeBlock: options.codeHighlight ? false : undefined,
-    }),
+    })),
     Underline,
     TextStyle,
     Color,
@@ -178,7 +182,7 @@ export function prosePreset(options: EditorPresetOptions = {}): AnyExtension[] {
   if (options.codeHighlight && options.lowlight) {
     extensions.push(
       CodeBlockLowlight.configure({
-        lowlight: options.lowlight as Parameters<typeof CodeBlockLowlight.configure>[0] extends { lowlight: infer L } ? L : never,
+        lowlight: options.lowlight,
       })
     );
   }

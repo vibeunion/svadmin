@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import type { FieldDefinition } from '@svadmin/core';
   import { t } from '@svadmin/core/i18n';
 
@@ -49,12 +51,12 @@
   function flattenTree(nodes: TreeSelectOption[], level = 0): FlatTreeOption[] {
     const list: FlatTreeOption[] = [];
     for (const node of nodes) {
-      list.push({
+      list.push(definedOptions({
         value: node.value,
         label: node.label,
         level,
         disabled: node.disabled,
-      });
+      }));
       if (node.children && node.children.length > 0) {
         list.push(...flattenTree(node.children, level + 1));
       }

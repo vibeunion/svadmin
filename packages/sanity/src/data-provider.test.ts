@@ -1,3 +1,4 @@
+import { requireValue } from "../../../scripts/test-assertions";
 import { afterEach, describe, expect, it, mock } from 'bun:test';
 import type { CustomParams, CustomResult, DataProvider, Filter } from '@svadmin/core';
 import { createSanityDataProvider } from './data-provider';
@@ -43,13 +44,13 @@ function queryCalls(): URL[] {
   return mockFetchFn.mock.calls.map((call: unknown[]) => new URL(String((call as [RequestInfo | URL])[0])));
 }
 
-function customRequest<TData = unknown, TVariables = unknown>(
+function customRequest(
   provider: DataProvider,
-  params: CustomParams<TVariables>,
-): Promise<CustomResult<TData>> {
+  params: CustomParams,
+): Promise<CustomResult> {
   const custom = provider.custom;
   if (!custom) throw new Error('Expected Sanity provider to expose custom()');
-  return custom<TData, TVariables>(params);
+  return custom(params);
 }
 
 afterEach(() => {
@@ -107,7 +108,7 @@ describe('createSanityDataProvider GROQ safety', () => {
       expect(parameterValues).toContain('20');
     }
 
-    const listQuery = queryCalls()[0].searchParams.get('query') ?? '';
+    const listQuery = requireValue(queryCalls()[0]).searchParams.get('query') ?? '';
     expect(listQuery).toContain('order(profile.name asc, _createdAt desc)');
   });
 
@@ -136,8 +137,8 @@ describe('createSanityDataProvider GROQ safety', () => {
     await provider.getList({ resource: 'post', filters });
 
     const url = queryCalls()[0];
-    const groq = url.searchParams.get('query') ?? '';
-    const parameterValues = [...url.searchParams.entries()]
+    const groq = requireValue(url).searchParams.get('query') ?? '';
+    const parameterValues = [...requireValue(url).searchParams.entries()]
       .filter(([name]) => name.startsWith('$'))
       .map(([, value]) => value);
 
@@ -238,7 +239,7 @@ describe('createSanityDataProvider custom requests', () => {
       method: 'get',
     });
     let [, init] = mockFetchFn.mock.calls[0] as [string, RequestInit];
-    expect((init.headers as Record<string, string>).Authorization).toBe('Bearer provider-token');
+    expect((init.headers as Record<string, string>)['Authorization']).toBe('Bearer provider-token');
 
     setupCustomFetch({ ok: true });
     await customRequest(provider, {
@@ -248,7 +249,7 @@ describe('createSanityDataProvider custom requests', () => {
     });
     [, init] = mockFetchFn.mock.calls[0] as [string, RequestInit];
     let requestHeaders = init.headers as Record<string, string>;
-    expect(requestHeaders.Authorization).toBeUndefined();
+    expect(requestHeaders['Authorization']).toBeUndefined();
     expect(requestHeaders['Content-Type']).toBe('application/json');
     expect(requestHeaders['X-Request-ID']).toBe('request-1');
 
@@ -260,7 +261,7 @@ describe('createSanityDataProvider custom requests', () => {
     });
     [, init] = mockFetchFn.mock.calls[0] as [string, RequestInit];
     requestHeaders = init.headers as Record<string, string>;
-    expect(requestHeaders.Authorization).toBe('Bearer explicit-token');
+    expect(requestHeaders['Authorization']).toBe('Bearer explicit-token');
   });
 
   it('serializes query, sorters, and nested filters without losing values', async () => {

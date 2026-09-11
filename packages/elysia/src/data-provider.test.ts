@@ -1,36 +1,36 @@
 // Tests for enhanced Elysia DataProvider
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { describe, it, expect, beforeEach, mock, afterEach } from 'bun:test';
+import { describe, it, expect, beforeEach, mock, afterEach, type Mock } from 'bun:test';
 import { createElysiaDataProvider } from './data-provider';
 import type { DataProvider, Filter } from '@svadmin/core';
+import { decodeBaseRecord } from '@svadmin/core/schema';
+import { requireValue } from '../../../scripts/test-assertions';
 
 // ─── Mock fetch ──────────────────────────────────────────────
 
 const originalFetch = globalThis.fetch;
-let mockFetchFn: ReturnType<typeof mock>;
+type FetchRequest = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+let mockFetchFn: Mock<FetchRequest>;
+
+function setupResponse(factory: () => Response) {
+  mockFetchFn = mock((_input: RequestInfo | URL, _init?: RequestInit) => Promise.resolve(factory()));
+  globalThis.fetch = Object.assign(mockFetchFn, { preconnect: () => {} });
+}
+
+function capturedRequest(call: Parameters<FetchRequest> | undefined): [string, RequestInit] {
+  const [input, init] = requireValue(call);
+  const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
+  return [url, requireValue(init)];
+}
 
 function setupMockFetch(response: unknown, status = 200, statusText = 'OK') {
-  mockFetchFn = mock(() =>
-    Promise.resolve({
-      ok: status >= 200 && status < 300,
-      status,
-      statusText,
-      json: () => Promise.resolve(response),
-      text: () => Promise.resolve(JSON.stringify(response)),
-    } as Response)
-  );
-  globalThis.fetch = mockFetchFn as unknown as typeof fetch;
+  setupResponse(() => Response.json(response, { status, statusText }));
 }
 
 function setupNoContentFetch(status = 204) {
-  mockFetchFn = mock(() => Promise.resolve({
-    ok: true,
+  setupResponse(() => new Response(null, {
     status,
     statusText: status === 205 ? 'Reset Content' : 'No Content',
-    headers: new Headers(),
-    text: mock(() => Promise.resolve('')),
-  } as unknown as Response));
-  globalThis.fetch = mockFetchFn as unknown as typeof fetch;
+  }));
 }
 
 afterEach(() => {
@@ -62,7 +62,7 @@ describe('createElysiaDataProvider', () => {
       expect(result.data).toEqual([{ id: 1, name: 'Test' }]);
       expect(result.total).toBe(1);
       expect(mockFetchFn).toHaveBeenCalledTimes(1);
-      const [url] = mockFetchFn.mock.calls[0] as [string, RequestInit];
+      const [url] = capturedRequest(mockFetchFn.mock.calls[0]);
       expect(url).toContain('http://localhost:3000/posts?');
       expect(url).toContain('_page=1');
       expect(url).toContain('_limit=10');
@@ -112,7 +112,7 @@ describe('createElysiaDataProvider', () => {
         pagination: { current: 3, pageSize: 25 },
       });
 
-      const [url] = mockFetchFn.mock.calls[0] as [string, RequestInit];
+      const [url] = capturedRequest(mockFetchFn.mock.calls[0]);
       expect(url).toContain('_page=3');
       expect(url).toContain('_limit=25');
     });
@@ -125,7 +125,7 @@ describe('createElysiaDataProvider', () => {
         sorters: [{ field: 'name', order: 'asc' }],
       });
 
-      const [url] = mockFetchFn.mock.calls[0] as [string, RequestInit];
+      const [url] = capturedRequest(mockFetchFn.mock.calls[0]);
       expect(url).toContain('_sort=name');
       expect(url).toContain('_order=asc');
     });
@@ -142,7 +142,7 @@ describe('createElysiaDataProvider', () => {
         ],
       });
 
-      const [url] = mockFetchFn.mock.calls[0] as [string, RequestInit];
+      const [url] = capturedRequest(mockFetchFn.mock.calls[0]);
       expect(url).toContain('status=active');
       expect(url).toContain('name_like=test');
       expect(url).toContain('age_gte=18');
@@ -184,7 +184,7 @@ describe('createElysiaDataProvider', () => {
 
       await provider.getList({ resource: 'posts', filters });
 
-      const [rawUrl] = mockFetchFn.mock.calls[0] as [string, RequestInit];
+      const [rawUrl] = capturedRequest(mockFetchFn.mock.calls[0]);
       const params = new URL(rawUrl).searchParams;
       expect(params.get('eq')).toBe('0');
       expect(params.get('ne_ne')).toBe('false');
@@ -202,7 +202,7 @@ describe('createElysiaDataProvider', () => {
       expect(params.get('nnull_nnull')).toBe('true');
       expect(params.get('between_between')).toBe('10,20');
       expect(params.get('nbetween_nbetween')).toBe('30,40');
-      expect(JSON.parse(params.get('_filters')!)).toEqual(filters);
+      expect(JSON.parse(requireValue(params.get('_filters')))).toEqual(filters);
       expect(rawUrl).not.toContain('undefined');
       expect(rawUrl).not.toContain('%5Bobject+Object%5D');
     });
@@ -218,7 +218,7 @@ describe('createElysiaDataProvider', () => {
       const result = await provider.getOne({ resource: 'posts', id: 1 });
       expect(result.data).toEqual(mockData);
 
-      const [url] = mockFetchFn.mock.calls[0] as [string, RequestInit];
+      const [url] = capturedRequest(mockFetchFn.mock.calls[0]);
       expect(url).toBe('http://localhost:3000/posts/1');
     });
 
@@ -228,7 +228,7 @@ describe('createElysiaDataProvider', () => {
 
       await provider.getOne({ resource: 'posts', id: unsafeId });
 
-      const [url] = mockFetchFn.mock.calls[0] as [string, RequestInit];
+      const [url] = capturedRequest(mockFetchFn.mock.calls[0]);
       expect(url).toBe('http://localhost:3000/posts/..%2Fadmin%2Fusers%3Frole%3Downer%23details');
     });
   });
@@ -246,7 +246,7 @@ describe('createElysiaDataProvider', () => {
       });
 
       expect(result.data).toEqual(mockData);
-      const [url, init] = mockFetchFn.mock.calls[0] as [string, RequestInit];
+      const [url, init] = capturedRequest(mockFetchFn.mock.calls[0]);
       expect(url).toBe('http://localhost:3000/posts');
       expect(init.method).toBe('POST');
       expect(init.body).toBe('{"name":"New"}');
@@ -266,7 +266,7 @@ describe('createElysiaDataProvider', () => {
         variables: { name: 'Updated' },
       });
 
-      const [, init] = mockFetchFn.mock.calls[0] as [string, RequestInit];
+      const [, init] = capturedRequest(mockFetchFn.mock.calls[0]);
       expect(init.method).toBe('PATCH');
     });
 
@@ -279,7 +279,7 @@ describe('createElysiaDataProvider', () => {
         variables: { name: 'Updated' },
       });
 
-      const [url] = mockFetchFn.mock.calls[0] as [string, RequestInit];
+      const [url] = capturedRequest(mockFetchFn.mock.calls[0]);
       expect(url).toBe('http://localhost:3000/posts/folder%2Fitem%3Fdraft%23top');
     });
   });
@@ -293,7 +293,7 @@ describe('createElysiaDataProvider', () => {
       const result = await provider.deleteOne({ resource: 'posts', id: 1 });
       expect(result.data).toEqual({ id: 1 });
 
-      const [url, init] = mockFetchFn.mock.calls[0] as [string, RequestInit];
+      const [url, init] = capturedRequest(mockFetchFn.mock.calls[0]);
       expect(url).toBe('http://localhost:3000/posts/1');
       expect(init.method).toBe('DELETE');
     });
@@ -311,7 +311,7 @@ describe('createElysiaDataProvider', () => {
 
       await provider.deleteOne({ resource: 'posts', id: 'folder/item?draft#top' });
 
-      const [url] = mockFetchFn.mock.calls[0] as [string, RequestInit];
+      const [url] = capturedRequest(mockFetchFn.mock.calls[0]);
       expect(url).toBe('http://localhost:3000/posts/folder%2Fitem%3Fdraft%23top');
     });
   });
@@ -346,7 +346,7 @@ describe('updateMethod: PUT', () => {
       variables: { name: 'Updated' },
     });
 
-    const [url, init] = mockFetchFn.mock.calls[0] as [string, RequestInit];
+    const [url, init] = capturedRequest(mockFetchFn.mock.calls[0]);
     expect(url).toBe('http://localhost:3000/channels/1');
     expect(init.method).toBe('PUT');
   });
@@ -359,14 +359,14 @@ describe('updateMethod: PUT', () => {
 
     setupMockFetch({ id: 1 });
 
-    await provider.updateMany!({
+    await requireValue(provider.updateMany)({
       resource: 'channels',
       ids: [1, 2],
       variables: { status: 'active' },
     });
 
     for (const call of mockFetchFn.mock.calls) {
-      const [, init] = call as [string, RequestInit];
+      const [, init] = capturedRequest(call);
       expect(init.method).toBe('PUT');
     }
   });
@@ -385,7 +385,7 @@ describe('withCredentials', () => {
 
     await provider.getList({ resource: 'posts' });
 
-    const [, init] = mockFetchFn.mock.calls[0] as [string, RequestInit];
+    const [, init] = capturedRequest(mockFetchFn.mock.calls[0]);
     expect(init.credentials).toBe('include');
   });
 
@@ -398,7 +398,7 @@ describe('withCredentials', () => {
 
     await provider.getList({ resource: 'posts' });
 
-    const [, init] = mockFetchFn.mock.calls[0] as [string, RequestInit];
+    const [, init] = capturedRequest(mockFetchFn.mock.calls[0]);
     expect(init.credentials).toBeUndefined();
   });
 });
@@ -418,13 +418,13 @@ describe('resourceUrlMap', () => {
     setupMockFetch([{ id: 1 }]);
 
     await provider.getList({ resource: 'user_groups' });
-    const [url1] = mockFetchFn.mock.calls[0] as [string, RequestInit];
+    const [url1] = capturedRequest(mockFetchFn.mock.calls[0]);
     expect(url1).toContain('http://localhost:3000/admin/user-groups?');
 
     setupMockFetch({ id: 1 });
 
     await provider.getOne({ resource: 'rateLimits', id: 1 });
-    const [url2] = mockFetchFn.mock.calls[0] as [string, RequestInit];
+    const [url2] = capturedRequest(mockFetchFn.mock.calls[0]);
     expect(url2).toBe('http://localhost:3000/admin/rate-limits/1');
   });
 
@@ -437,7 +437,7 @@ describe('resourceUrlMap', () => {
     setupMockFetch({ items: [], total: 0 });
 
     await provider.getList({ resource: 'unmapped' });
-    const [url] = mockFetchFn.mock.calls[0] as [string, RequestInit];
+    const [url] = capturedRequest(mockFetchFn.mock.calls[0]);
     expect(url).toContain('http://localhost:3000/unmapped?');
   });
 });
@@ -448,9 +448,9 @@ describe('parseListResponse', () => {
   it('should use custom parser when provided', async () => {
     const provider = createElysiaDataProvider({
       apiUrl: 'http://localhost:3000',
-      parseListResponse: <T>(json: unknown) => {
-        const obj = json as { results: T[]; count: number };
-        return { data: obj.results, total: obj.count };
+      parseListResponse: (json: unknown) => {
+        const obj = decodeBaseRecord(json);
+        return { data: obj['results'], total: obj['count'] };
       },
     });
 
@@ -474,9 +474,9 @@ describe('resourceAdapters', () => {
           match: () => ++matcherCalls === 1,
           resourcePath: 'snapshot-records',
           buildListSearchParams: () => new URLSearchParams({ dialect: 'snapshot' }),
-          parseListResponse: <T>(json: unknown) => {
-            const response = json as { rows: T[]; count: number };
-            return { data: response.rows, total: response.count };
+          parseListResponse: (json: unknown) => {
+            const response = decodeBaseRecord(json);
+            return { data: response['rows'], total: response['count'] };
           },
         },
         { match: () => true, resourcePath: 'fallback-records' },
@@ -523,20 +523,20 @@ describe('resourceAdapters', () => {
         {
           match: 'project-tables',
           resourcePath: ({ meta }) => {
-            const projectRef = String(meta?.projectRef ?? '');
+            const projectRef = String(meta?.['projectRef'] ?? '');
             return `v1/projects/${encodeURIComponent(projectRef)}/database/tables`;
           },
           buildListSearchParams: ({ pagination, meta }) => new URLSearchParams({
             page: String(pagination.current),
             limit: String(pagination.pageSize),
-            search: String(meta?.search ?? ''),
+            search: String(meta?.['search'] ?? ''),
           }),
-          parseListResponse: <T>(json: unknown) => {
-            const response = json as { rows: T[]; total: number; nextCursor: string };
+          parseListResponse: (json: unknown) => {
+            const response = decodeBaseRecord(json);
             return {
-              data: response.rows,
-              total: response.total,
-              nextCursor: response.nextCursor,
+              data: response['rows'],
+              total: response['total'],
+              nextCursor: response['nextCursor'],
             };
           },
         },
@@ -551,7 +551,7 @@ describe('resourceAdapters', () => {
       meta: { projectRef: 'alpha/beta', search: 'order' },
     });
 
-    const [rawUrl] = mockFetchFn.mock.calls[0] as [string, RequestInit];
+    const [rawUrl] = capturedRequest(mockFetchFn.mock.calls[0]);
     const url = new URL(rawUrl);
     expect(url.pathname).toBe('/v1/projects/alpha%2Fbeta/database/tables');
     expect(Object.fromEntries(url.searchParams)).toEqual({
@@ -580,10 +580,10 @@ describe('headers', () => {
 
     await provider.getList({ resource: 'posts' });
 
-    const [, init] = mockFetchFn.mock.calls[0] as [string, RequestInit];
-    const headers = init.headers as Record<string, string>;
-    expect(headers['Authorization']).toBe('Bearer token123');
-    expect(headers['Content-Type']).toBe('application/json');
+    const [, init] = capturedRequest(mockFetchFn.mock.calls[0]);
+    const headers = new Headers(init.headers);
+    expect(headers.get('Authorization')).toBe('Bearer token123');
+    expect(headers.get('Content-Type')).toBe('application/json');
   });
 
   it('should support dynamic headers function', async () => {
@@ -596,16 +596,16 @@ describe('headers', () => {
     setupMockFetch({ items: [], total: 0 });
 
     await provider.getList({ resource: 'posts' });
-    let [, init] = mockFetchFn.mock.calls[0] as [string, RequestInit];
-    expect((init.headers as Record<string, string>)['Authorization']).toBe('Bearer token1');
+    let [, init] = capturedRequest(mockFetchFn.mock.calls[0]);
+    expect(new Headers(init.headers).get('Authorization')).toBe('Bearer token1');
 
     // Change token
     token = 'token2';
     setupMockFetch({ items: [], total: 0 });
 
     await provider.getList({ resource: 'posts' });
-    [, init] = mockFetchFn.mock.calls[0] as [string, RequestInit];
-    expect((init.headers as Record<string, string>)['Authorization']).toBe('Bearer token2');
+    [, init] = capturedRequest(mockFetchFn.mock.calls[0]);
+    expect(new Headers(init.headers).get('Authorization')).toBe('Bearer token2');
   });
 });
 
@@ -620,13 +620,13 @@ describe('custom', () => {
 
     setupMockFetch({ success: true, modelsCount: 42 });
 
-    const result = await provider.custom!({
+    const result = await requireValue(provider.custom)({
       url: 'http://localhost:3000/channels/1/sync-models',
       method: 'post',
     });
 
     expect(result.data).toEqual({ success: true, modelsCount: 42 });
-    const [url, init] = mockFetchFn.mock.calls[0] as [string, RequestInit];
+    const [url, init] = capturedRequest(mockFetchFn.mock.calls[0]);
     expect(url).toBe('http://localhost:3000/channels/1/sync-models');
     expect(init.method).toBe('POST');
     expect(init.credentials).toBe('include');
@@ -655,7 +655,7 @@ describe('custom', () => {
 
     setupMockFetch({ ok: true });
 
-    await provider.custom!({
+    await requireValue(provider.custom)({
       url: 'http://localhost:3000/api/reports?existing=yes',
       method: 'post',
       query: {
@@ -672,7 +672,7 @@ describe('custom', () => {
       filters,
     });
 
-    const [rawUrl] = mockFetchFn.mock.calls[0] as [string, RequestInit];
+    const [rawUrl] = capturedRequest(mockFetchFn.mock.calls[0]);
     const url = new URL(rawUrl);
     expect(url.searchParams.get('existing')).toBe('yes');
     expect(url.searchParams.get('page')).toBe('0');
@@ -682,7 +682,7 @@ describe('custom', () => {
     expect(url.searchParams.getAll('tags')).toEqual(['one', 'two']);
     expect(url.searchParams.get('_sort')).toBe('createdAt,name');
     expect(url.searchParams.get('_order')).toBe('desc,asc');
-    expect(JSON.parse(url.searchParams.get('_filters')!)).toEqual(filters);
+    expect(JSON.parse(requireValue(url.searchParams.get('_filters')))).toEqual(filters);
   });
 
   it('should keep provider credentials on same-origin requests', async () => {
@@ -698,17 +698,17 @@ describe('custom', () => {
     });
 
     setupMockFetch({ ok: true });
-    await provider.custom!({
+    await requireValue(provider.custom)({
       url: 'https://api.example.com/v1/reports',
       method: 'get',
     });
 
-    const [, init] = mockFetchFn.mock.calls[0] as [string, RequestInit];
-    const headers = init.headers as Record<string, string>;
-    expect(headers.Authorization).toBe('Bearer provider-token');
-    expect(headers.Cookie).toBe('session=provider-session');
-    expect(headers['X-API-Key']).toBe('provider-key');
-    expect(headers['X-Tenant']).toBe('tenant-a');
+    const [, init] = capturedRequest(mockFetchFn.mock.calls[0]);
+    const headers = new Headers(init.headers);
+    expect(headers.get('Authorization')).toBe('Bearer provider-token');
+    expect(headers.get('Cookie')).toBe('session=provider-session');
+    expect(headers.get('X-API-Key')).toBe('provider-key');
+    expect(headers.get('X-Tenant')).toBe('tenant-a');
     expect(init.credentials).toBe('include');
   });
 
@@ -726,21 +726,21 @@ describe('custom', () => {
     });
 
     setupMockFetch({ ok: true });
-    await provider.custom!({
+    await requireValue(provider.custom)({
       url: 'https://analytics.example.net/report',
       method: 'get',
       headers: { 'X-Request-ID': 'request-1' },
     });
 
-    const [, init] = mockFetchFn.mock.calls[0] as [string, RequestInit];
-    const headers = init.headers as Record<string, string>;
-    expect(headers.Authorization).toBeUndefined();
-    expect(headers.Cookie).toBeUndefined();
-    expect(headers['X-API-Key']).toBeUndefined();
-    expect(headers['X-Tenant']).toBeUndefined();
-    expect(headers['X-Client-Secret']).toBeUndefined();
-    expect(headers['Content-Type']).toBe('application/json');
-    expect(headers['X-Request-ID']).toBe('request-1');
+    const [, init] = capturedRequest(mockFetchFn.mock.calls[0]);
+    const headers = new Headers(init.headers);
+    expect(headers.get('Authorization')).toBeNull();
+    expect(headers.get('Cookie')).toBeNull();
+    expect(headers.get('X-API-Key')).toBeNull();
+    expect(headers.get('X-Tenant')).toBeNull();
+    expect(headers.get('X-Client-Secret')).toBeNull();
+    expect(headers.get('Content-Type')).toBe('application/json');
+    expect(headers.get('X-Request-ID')).toBe('request-1');
     expect(init.credentials).toBeUndefined();
   });
 
@@ -751,14 +751,14 @@ describe('custom', () => {
     });
 
     setupMockFetch({ ok: true });
-    await provider.custom!({
+    await requireValue(provider.custom)({
       url: 'https://analytics.example.net/report',
       method: 'get',
       headers: { Authorization: 'Bearer analytics-token' },
     });
 
-    const [, init] = mockFetchFn.mock.calls[0] as [string, RequestInit];
-    expect((init.headers as Record<string, string>).Authorization).toBe('Bearer analytics-token');
+    const [, init] = capturedRequest(mockFetchFn.mock.calls[0]);
+    expect(new Headers(init.headers).get('Authorization')).toBe('Bearer analytics-token');
   });
 
   for (const [name, payload, expectedBody] of [
@@ -771,13 +771,13 @@ describe('custom', () => {
       const provider = createElysiaDataProvider({ apiUrl: 'http://localhost:3000' });
       setupMockFetch({ ok: true });
 
-      await provider.custom!({
+      await requireValue(provider.custom)({
         url: 'http://localhost:3000/echo',
         method: 'post',
         payload,
       });
 
-      const [, init] = mockFetchFn.mock.calls[0] as [string, RequestInit];
+      const [, init] = capturedRequest(mockFetchFn.mock.calls[0]);
       expect(init.body).toBe(expectedBody);
     });
   }
@@ -785,18 +785,13 @@ describe('custom', () => {
   it('should not parse JSON for a 204 response', async () => {
     const json = mock(() => Promise.reject(new Error('json() must not be called')));
     const text = mock(() => Promise.resolve(''));
-    mockFetchFn = mock(() => Promise.resolve({
-      ok: true,
+    setupResponse(() => Object.assign(new Response(null, {
       status: 204,
       statusText: 'No Content',
-      headers: new Headers(),
-      json,
-      text,
-    } as unknown as Response));
-    globalThis.fetch = mockFetchFn as unknown as typeof fetch;
+    }), { json, text }));
 
     const provider = createElysiaDataProvider({ apiUrl: 'http://localhost:3000' });
-    const result = await provider.custom!({
+    const result = await requireValue(provider.custom)({
       url: 'http://localhost:3000/empty',
       method: 'delete',
     });
@@ -809,18 +804,13 @@ describe('custom', () => {
   it('should not parse JSON for a 205 response', async () => {
     const json = mock(() => Promise.reject(new Error('json() must not be called')));
     const text = mock(() => Promise.resolve(''));
-    mockFetchFn = mock(() => Promise.resolve({
-      ok: true,
+    setupResponse(() => Object.assign(new Response(null, {
       status: 205,
       statusText: 'Reset Content',
-      headers: new Headers(),
-      json,
-      text,
-    } as unknown as Response));
-    globalThis.fetch = mockFetchFn as unknown as typeof fetch;
+    }), { json, text }));
 
     const provider = createElysiaDataProvider({ apiUrl: 'http://localhost:3000' });
-    const result = await provider.custom!({
+    const result = await requireValue(provider.custom)({
       url: 'http://localhost:3000/empty',
       method: 'post',
     });
@@ -833,18 +823,14 @@ describe('custom', () => {
   it('should not parse JSON when Content-Length is zero', async () => {
     const json = mock(() => Promise.reject(new Error('json() must not be called')));
     const text = mock(() => Promise.reject(new Error('text() must not be called')));
-    mockFetchFn = mock(() => Promise.resolve({
-      ok: true,
+    setupResponse(() => Object.assign(new Response(null, {
       status: 200,
       statusText: 'OK',
       headers: new Headers({ 'Content-Length': '0' }),
-      json,
-      text,
-    } as unknown as Response));
-    globalThis.fetch = mockFetchFn as unknown as typeof fetch;
+    }), { json, text }));
 
     const provider = createElysiaDataProvider({ apiUrl: 'http://localhost:3000' });
-    const result = await provider.custom!({
+    const result = await requireValue(provider.custom)({
       url: 'http://localhost:3000/empty',
       method: 'get',
     });
@@ -857,18 +843,13 @@ describe('custom', () => {
   it('should not parse JSON when the response body is actually empty', async () => {
     const json = mock(() => Promise.reject(new Error('json() must not be called')));
     const text = mock(() => Promise.resolve(''));
-    mockFetchFn = mock(() => Promise.resolve({
-      ok: true,
+    setupResponse(() => Object.assign(new Response(null, {
       status: 200,
       statusText: 'OK',
-      headers: new Headers(),
-      json,
-      text,
-    } as unknown as Response));
-    globalThis.fetch = mockFetchFn as unknown as typeof fetch;
+    }), { json, text }));
 
     const provider = createElysiaDataProvider({ apiUrl: 'http://localhost:3000' });
-    const result = await provider.custom!({
+    const result = await requireValue(provider.custom)({
       url: 'http://localhost:3000/empty',
       method: 'get',
     });
@@ -886,10 +867,10 @@ describe('bulk operations', () => {
     const provider = createElysiaDataProvider({ apiUrl: 'http://localhost:3000' });
     setupMockFetch([{ id: 1 }, { id: 2 }]);
 
-    const result = await provider.getMany!({ resource: 'posts', ids: [1, 2] });
+    const result = await requireValue(provider.getMany)({ resource: 'posts', ids: [1, 2] });
     expect(result.data).toEqual([{ id: 1 }, { id: 2 }]);
 
-    const [url] = mockFetchFn.mock.calls[0] as [string, RequestInit];
+    const [url] = capturedRequest(mockFetchFn.mock.calls[0]);
     expect(url).toContain('id=1&id=2');
   });
 
@@ -897,7 +878,7 @@ describe('bulk operations', () => {
     const provider = createElysiaDataProvider({ apiUrl: 'http://localhost:3000' });
     setupMockFetch({ id: 1, name: 'A' });
 
-    await provider.createMany!({
+    await requireValue(provider.createMany)({
       resource: 'posts',
       variables: [{ name: 'A' }, { name: 'B' }],
     });
@@ -909,11 +890,11 @@ describe('bulk operations', () => {
     const provider = createElysiaDataProvider({ apiUrl: 'http://localhost:3000' });
     setupMockFetch({ success: true });
 
-    await provider.deleteMany!({ resource: 'posts', ids: [1, 2, 3] });
+    await requireValue(provider.deleteMany)({ resource: 'posts', ids: [1, 2, 3] });
 
     expect(mockFetchFn).toHaveBeenCalledTimes(3);
     for (const call of mockFetchFn.mock.calls) {
-      const [, init] = call as [string, RequestInit];
+      const [, init] = capturedRequest(call);
       expect(init.method).toBe('DELETE');
     }
   });
@@ -922,7 +903,7 @@ describe('bulk operations', () => {
     const provider = createElysiaDataProvider({ apiUrl: 'http://localhost:3000' });
     setupNoContentFetch();
 
-    const result = await provider.deleteMany!({ resource: 'posts', ids: [1, 2] });
+    const result = await requireValue(provider.deleteMany)({ resource: 'posts', ids: [1, 2] });
 
     expect(result.data).toEqual([{ id: 1 }, { id: 2 }]);
   });
@@ -936,11 +917,11 @@ describe('bulk operations', () => {
     ];
 
     setupMockFetch({ ok: true });
-    await provider.updateMany!({ resource: 'posts', ids, variables: { active: true } });
-    expect(mockFetchFn.mock.calls.map(call => (call as [string, RequestInit])[0])).toEqual(expectedUrls);
+    await requireValue(provider.updateMany)({ resource: 'posts', ids, variables: { active: true } });
+    expect(mockFetchFn.mock.calls.map(call => (capturedRequest(call))[0])).toEqual(expectedUrls);
 
     setupMockFetch({ ok: true });
-    await provider.deleteMany!({ resource: 'posts', ids });
-    expect(mockFetchFn.mock.calls.map(call => (call as [string, RequestInit])[0])).toEqual(expectedUrls);
+    await requireValue(provider.deleteMany)({ resource: 'posts', ids });
+    expect(mockFetchFn.mock.calls.map(call => (capturedRequest(call))[0])).toEqual(expectedUrls);
   });
 });

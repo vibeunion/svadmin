@@ -63,8 +63,8 @@ interface DesiredDependency {
 }
 
 interface DependencyState {
-  canonicalVersion?: string;
-  alternateVersion?: string;
+  canonicalVersion: string | undefined;
+  alternateVersion: string | undefined;
   alternateSection: DependencySection;
 }
 
@@ -89,9 +89,9 @@ export function parseMaintainedPackageJson(packageJsonCandidate: unknown): Maint
   assertJsonObject(packageJsonCandidate, 'package.json');
 
   const packageJson: MaintainedPackageJson = structuredClone(packageJsonCandidate);
-  const dependencies = parseDependencyMap(packageJsonCandidate.dependencies, 'package.json.dependencies');
+  const dependencies = parseDependencyMap(packageJsonCandidate['dependencies'], 'package.json.dependencies');
   const devDependencies = parseDependencyMap(
-    packageJsonCandidate.devDependencies,
+    packageJsonCandidate['devDependencies'],
     'package.json.devDependencies',
   );
   if (dependencies !== undefined) packageJson.dependencies = dependencies;
@@ -148,6 +148,7 @@ function desiredDependencies(
   }
   for (const packName of selectedDependencyPacks(project, scaffold)) {
     const pack = scaffold.svadmin.dependencyPacks[packName];
+    if (pack === undefined) throw new Error(`Unknown dependency pack: ${packName}`);
     for (const [packageName, version] of Object.entries(pack)) {
       const existing = desired.get(packageName);
       if (existing !== undefined && (existing.version !== version || existing.section !== 'dependencies')) {
@@ -242,7 +243,7 @@ function missingDependencyIssue(desired: DesiredDependency): DoctorIssue {
 
 function misplacedDependencyIssue(
   desired: DesiredDependency,
-  state: DependencyState,
+  state: DependencyState & { alternateVersion: string },
 ): DoctorIssue {
   return {
     kind: 'section',
@@ -274,7 +275,7 @@ function versionDependencyIssue(
 
 function duplicateDependencyIssue(
   desired: DesiredDependency,
-  state: DependencyState,
+  state: DependencyState & { alternateVersion: string },
 ): DoctorIssue {
   return {
     kind: 'section',
@@ -297,12 +298,14 @@ function doctorIssueForDependency(
   if (state.canonicalVersion === undefined) {
     return state.alternateVersion === undefined
       ? missingDependencyIssue(desired)
-      : misplacedDependencyIssue(desired, state);
+      : misplacedDependencyIssue(desired, { ...state, alternateVersion: state.alternateVersion });
   }
   if (state.canonicalVersion !== desired.version) {
     return versionDependencyIssue(desired, state.canonicalVersion);
   }
-  return state.alternateVersion === undefined ? null : duplicateDependencyIssue(desired, state);
+  return state.alternateVersion === undefined
+    ? null
+    : duplicateDependencyIssue(desired, { ...state, alternateVersion: state.alternateVersion });
 }
 
 export function doctorProjectPackageJson(
@@ -323,10 +326,10 @@ function upgradeChangeForDependency(
   desired: DesiredDependency,
   state: DependencyState,
 ): UpgradeChange | null {
-  if (state.canonicalVersion === undefined && state.alternateVersion === undefined) {
-    return { action: 'add', packageName: desired.packageName, to: desired.version, section: desired.section };
-  }
   if (state.canonicalVersion === undefined) {
+    if (state.alternateVersion === undefined) {
+      return { action: 'add', packageName: desired.packageName, to: desired.version, section: desired.section };
+    }
     return {
       action: 'move',
       packageName: desired.packageName,
@@ -343,7 +346,7 @@ function upgradeChangeForDependency(
     from: state.canonicalVersion,
     to: desired.version,
     section: desired.section,
-    previousSection: state.alternateVersion === undefined ? undefined : state.alternateSection,
+    ...(state.alternateVersion === undefined ? {} : { previousSection: state.alternateSection }),
   };
 }
 

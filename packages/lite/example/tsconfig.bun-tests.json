@@ -1,0 +1,6 @@
+{
+  "extends": "../../core/tsconfig.contracts.json",
+  "compilerOptions": { "types": ["bun", "svelte"] },
+  "include": ["test/**/*.ts"],
+  "exclude": []
+}

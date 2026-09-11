@@ -1,29 +1,29 @@
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { keys, resetContext } from '@svadmin/core';
 import type { TaskProvider, TaskRecord } from '@svadmin/core';
-import { QueryClient } from '@tanstack/svelte-query';
+import { QueryClient, type InvalidateQueryFilters } from '@tanstack/svelte-query';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import TaskButtonHost from './task-buttons.tenant.test-host.svelte';
 
 function createTaskProvider() {
-  const cancel = vi.fn(async () => undefined);
-  const retry = vi.fn(async () => undefined);
-  const provider = {
-    submit: async () => ({ wait: async () => ({ id: 'task' }) }),
+  const cancel = vi.fn(async (id: string) => ({ id, status: 'cancelled' }));
+  const retry = vi.fn(async (id: string) => ({ id, status: 'pending' }));
+  const provider: TaskProvider<TaskRecord> = {
+    submit: async () => ({ id: 'task', wait: async () => ({ id: 'task' }) }),
     get: async (taskId: string) => ({ id: taskId }),
     list: async () => ({ data: [] }),
     cancel,
     retry,
-  } as TaskProvider<TaskRecord>;
+  };
   return { provider, cancel, retry };
 }
 
 function matchesQuery(
-  call: unknown,
+  call: InvalidateQueryFilters | undefined,
   queryKey: readonly unknown[],
 ): boolean {
-  const filters = call as { predicate?: (query: { queryKey: readonly unknown[] }) => boolean };
-  return filters.predicate?.({ queryKey }) ?? false;
+  const client = new QueryClient();
+  return call?.predicate?.(client.getQueryCache().build(client, { queryKey })) ?? false;
 }
 
 afterEach(() => {
@@ -32,6 +32,49 @@ afterEach(() => {
 });
 
 describe('tenant-scoped task buttons', () => {
+  for (const action of ['cancel', 'retry'] as const) {
+    it(`rejects a mismatched ${action} receipt without success or cache invalidation`, async () => {
+      const queryClient = new QueryClient();
+      const invalidate = vi.spyOn(queryClient, 'invalidateQueries');
+      const { provider } = createTaskProvider();
+      provider[action] = async () => ({ id: 'other-task', status: 'running' });
+      const onSuccess = vi.fn();
+      const onError = vi.fn();
+      const view = render(TaskButtonHost, {
+        action, taskId: 'task', taskProvider: provider,
+        tenant: { tenantId: 'tenant-a' }, queryClient, onSuccess, onError,
+      });
+      await fireEvent.click(view.getByRole('button'));
+      await waitFor(() => expect(onError).toHaveBeenCalledWith(
+        expect.objectContaining({ code: 'INVALID_TASK_RESPONSE', writeMayHaveSucceeded: true }),
+      ));
+      expect(onSuccess).not.toHaveBeenCalled();
+      expect(invalidate).not.toHaveBeenCalled();
+    });
+
+    it(`retains the originating tenant and task while ${action} is pending`, async () => {
+      const queryClient = new QueryClient();
+      const invalidate = vi.spyOn(queryClient, 'invalidateQueries').mockResolvedValue(undefined);
+      const { provider } = createTaskProvider();
+      let finish = () => {};
+      const pending = new Promise<void>(resolve => { finish = resolve; });
+      provider[action] = async id => { await pending; return { id, status: 'running' }; };
+      const onSuccess = vi.fn();
+      const view = render(TaskButtonHost, {
+        action, taskId: 'original', taskProvider: provider,
+        tenant: { tenantId: 'tenant-a' }, queryClient, onSuccess,
+      });
+      await fireEvent.click(view.getByRole('button'));
+      await view.rerender({ taskId: 'later', tenant: { tenantId: 'tenant-b' } });
+      finish();
+      await waitFor(() => expect(onSuccess).toHaveBeenCalledOnce());
+      expect(matchesQuery(invalidate.mock.calls[0]?.[0], keys({ tenant: 'tenant-a' }).task.list())).toBe(true);
+      expect(matchesQuery(invalidate.mock.calls[0]?.[0], keys({ tenant: 'tenant-b' }).task.list())).toBe(false);
+      expect(matchesQuery(invalidate.mock.calls[1]?.[0], keys({ tenant: 'tenant-a' }).task.one('original'))).toBe(true);
+      expect(matchesQuery(invalidate.mock.calls[1]?.[0], keys({ tenant: 'tenant-b' }).task.one('later'))).toBe(false);
+    });
+  }
+
   it('invalidates only the owning tenant task lists and target task detail', async () => {
     const queryClient = new QueryClient();
     const invalidateQueries = vi.spyOn(queryClient, 'invalidateQueries').mockResolvedValue(undefined);

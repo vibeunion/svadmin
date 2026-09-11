@@ -63,7 +63,7 @@ export function createAuthenticatedFetch(
       });
     }
 
-    // 两份副本都在首次发送前创建，避免流式 body 被消费后静默丢失。
+    // Create both copies before the first send so a streamed body is not silently lost after consumption.
     const firstAttempt = cloneReplayableRequest(request);
     const retryAttempt = cloneReplayableRequest(request);
     const authorization = await source.getAuthorizationHeader();

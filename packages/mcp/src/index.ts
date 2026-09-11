@@ -1,3 +1,4 @@
+import { definedOptions } from '@svadmin/core/options';
 /**
  * @svadmin/mcp — Model Context Protocol server for svadmin DataProvider
  *
@@ -51,11 +52,11 @@ export interface MCPTool {
     properties: Record<string, MCPPropertySchema>;
     required?: string[];
   };
-  /** 显式声明是否为只读操作（只读操作可并发执行，无持久化副作用） */
+  /** Declares whether the operation is read-only and safe for concurrent execution without persistent side effects. */
   readOnly?: boolean;
-  /** 显式声明是否支持并发调用 */
+  /** Declares whether concurrent calls are supported. */
   concurrent?: boolean;
-  /** 显式声明是否具有高风险/破坏性 */
+  /** Declares whether the operation is high risk or destructive. */
   destructive?: boolean;
 }
 
@@ -226,7 +227,7 @@ async function handleToolCall(
   args: Record<string, unknown>,
   options: MCPServerOptions,
 ): Promise<unknown> {
-  const resource = args.resource as string;
+  const resource = args['resource'] as string;
   if (resource && !options.resources.includes(resource)) {
     throw new Error(`Unauthorized resource access: ${resource} is not exposed.`);
   }
@@ -234,64 +235,64 @@ async function handleToolCall(
 
   switch (toolName) {
     case 'svadmin_getList': {
-      const resource = args.resource as string;
-      const page = (args.page as number) ?? 1;
-      const pageSize = (args.pageSize as number) ?? 10;
-      const sorters = args.sortField
-        ? [{ field: args.sortField as string, order: (args.sortOrder as 'asc' | 'desc') ?? 'asc' }]
+      const resource = args['resource'] as string;
+      const page = (args['page'] as number) ?? 1;
+      const pageSize = (args['pageSize'] as number) ?? 10;
+      const sorters = args['sortField']
+        ? [{ field: args['sortField'] as string, order: (args['sortOrder'] as 'asc' | 'desc') ?? 'asc' }]
         : undefined;
-      const filters = args.filters
-        ? JSON.parse(args.filters as string)
+      const filters = args['filters']
+        ? JSON.parse(args['filters'] as string)
         : undefined;
 
-      return dp.getList({
+      return dp.getList(definedOptions({
         resource,
         pagination: { current: page, pageSize },
         sorters,
         filters,
-      });
+      }));
     }
 
     case 'svadmin_getOne': {
       return dp.getOne({
-        resource: args.resource as string,
-        id: args.id as string,
+        resource: args['resource'] as string,
+        id: args['id'] as string,
       });
     }
 
     case 'svadmin_getMany': {
-      const ids = (args.ids as string).split(',').map(id => id.trim());
+      const ids = (args['ids'] as string).split(',').map(id => id.trim());
       if (dp.getMany) {
-        return dp.getMany({ resource: args.resource as string, ids });
+        return dp.getMany({ resource: args['resource'] as string, ids });
       }
       // Fallback: fetch one by one
       const results = await Promise.all(
-        ids.map(id => dp.getOne({ resource: args.resource as string, id }))
+        ids.map(id => dp.getOne({ resource: args['resource'] as string, id }))
       );
       return { data: results.map(r => r.data) };
     }
 
     case 'svadmin_create': {
-      const data = JSON.parse(args.data as string);
+      const data = JSON.parse(args['data'] as string);
       return dp.create({
-        resource: args.resource as string,
+        resource: args['resource'] as string,
         variables: data,
       });
     }
 
     case 'svadmin_update': {
-      const data = JSON.parse(args.data as string);
+      const data = JSON.parse(args['data'] as string);
       return dp.update({
-        resource: args.resource as string,
-        id: args.id as string,
+        resource: args['resource'] as string,
+        id: args['id'] as string,
         variables: data,
       });
     }
 
     case 'svadmin_delete': {
       return dp.deleteOne({
-        resource: args.resource as string,
-        id: args.id as string,
+        resource: args['resource'] as string,
+        id: args['id'] as string,
       });
     }
 
@@ -323,7 +324,7 @@ async function handleToolCall(
  * ```
  */
 /**
- * 投影 MCP 工具为标准白名单 Schema，确保元数据与安全标记正确保留。
+ * Projects an MCP tool into the standard allowlisted schema while preserving metadata and safety flags.
  */
 export function projectMCPToolSchema(tool: MCPTool): MCPTool {
   return {
@@ -369,8 +370,8 @@ export function createMCPServer(options: MCPServerOptions): MCPServer {
           };
 
         case 'tools/call': {
-          const toolName = (params as Record<string, unknown>)?.name as string;
-          const toolArgs = ((params as Record<string, unknown>)?.arguments ?? {}) as Record<string, unknown>;
+          const toolName = (params as Record<string, unknown>)?.['name'] as string;
+          const toolArgs = ((params as Record<string, unknown>)?.['arguments'] ?? {}) as Record<string, unknown>;
 
           if (!toolName) {
             return {

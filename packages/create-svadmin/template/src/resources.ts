@@ -1,10 +1,12 @@
 // Example resource definitions — generic demo data (JSONPlaceholder-style)
 
 import type { ResourceDefinition } from '@svadmin/core';
+import { posts, users, comments, todos } from './resource-contracts';
 
 export const resources: ResourceDefinition[] = [
   {
     name: 'posts',
+    contract: posts,
     label: 'Posts',
     icon: 'file-text',
     fields: [
@@ -18,6 +20,7 @@ export const resources: ResourceDefinition[] = [
 
   {
     name: 'users',
+    contract: users,
     label: 'Users',
     icon: 'users',
     canCreate: false,
@@ -34,6 +37,7 @@ export const resources: ResourceDefinition[] = [
 
   {
     name: 'comments',
+    contract: comments,
     label: 'Comments',
     icon: 'message-circle',
     fields: [
@@ -48,6 +52,7 @@ export const resources: ResourceDefinition[] = [
 
   {
     name: 'todos',
+    contract: todos,
     label: 'Todos',
     icon: 'check-square',
     fields: [

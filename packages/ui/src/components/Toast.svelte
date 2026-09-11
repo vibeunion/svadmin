@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import { onMount } from 'svelte';
   import { Toaster, toast as sonner, type ToasterProps } from 'svelte-sonner';
   import {
@@ -29,7 +31,7 @@
     const queue = getToastQueue();
     if (queue.length > 0) {
       for (const t of queue) {
-        const options = { duration: t.duration, id: t.key ?? t.id };
+        const options = definedOptions({ duration: t.duration, id: t.key ?? t.id });
         switch (t.type) {
           case 'success': sonner.success(t.message, options); break;
           case 'error': sonner.error(t.message, options); break;
@@ -86,7 +88,7 @@
     {#each getToasts().slice(-3) as item (item.id)}
       <UndoableNotification
         message={item.message}
-        duration={item.duration}
+        {...definedOptions({ "duration": item.duration })}
         embedded
         managedExternally
         onUndo={() => undo(item.id, item.onUndo)}

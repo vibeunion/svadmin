@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import { getResource, captureAdminContext } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import type { Snippet } from 'svelte';
@@ -55,6 +57,6 @@
     {columns}
     showHeader={false}
     onNavigationGuardReady={(guard) => navigateGuard = guard}
-    {onSuccess}
+    {...definedOptions({ "onSuccess": onSuccess })}
   />
 </div>

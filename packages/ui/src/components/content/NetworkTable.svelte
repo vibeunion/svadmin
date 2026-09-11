@@ -1,4 +1,6 @@
 <script lang="ts" generics="T extends object">
+  import { definedOptions } from '@svadmin/core/options';
+
   import type { Snippet } from 'svelte';
   import * as Table from '../ui/table/index.js';
   import DataState from './DataState.svelte';
@@ -9,7 +11,7 @@
   const resolvedState = $derived(state ?? (rows.length === 0 ? 'empty' : undefined));
 </script>
 {#if resolvedState}
-  <DataState state={resolvedState} title={stateTitle ?? emptyTitle} description={stateDescription ?? emptyDescription} {retry} {retryLabel} {loadingLabel} class={className} />
+  <DataState state={resolvedState} {...definedOptions({ title: stateTitle ?? emptyTitle, description: stateDescription ?? emptyDescription, retry, retryLabel, loadingLabel })} class={className} />
 {:else}
 <div class={'svadmin-u-1384f66f41d0 svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 ' + className}>
   <Table.Root data-svadmin-datatable>

@@ -1,3 +1,4 @@
+import { definedOptions } from '@svadmin/core/options';
 import { render, waitFor, within } from '@testing-library/svelte';
 import { resetContext, type AuthProvider } from '@svadmin/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -60,10 +61,10 @@ afterEach(() => {
 describe('auth capability scope', () => {
   it('reveals current auth capabilities and audit data after adding a provider on rerender', async () => {
     const freshAuth = createCapabilityAuthProvider();
-    const view = render(AuthCapabilitiesScopeHost, {
+    const view = render(AuthCapabilitiesScopeHost, definedOptions({
       authProvider: undefined,
       tenant: { tenantId: 'tenant-auth' },
-    });
+    }));
     const login = within(view.getByTestId('snapshot-login'));
     const settings = within(view.getByTestId('snapshot-settings'));
 

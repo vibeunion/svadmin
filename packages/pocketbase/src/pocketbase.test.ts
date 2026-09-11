@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // @svadmin/pocketbase — Unit Tests
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, test, expect, mock } from 'bun:test';
+import { requireValue } from '../../../scripts/test-assertions';
 import { createPocketBaseDataProvider } from './data-provider';
 import { createPocketBaseAuthProvider } from './auth-provider';
 import { createPocketBaseLiveProvider } from './live-provider';
@@ -9,17 +8,27 @@ import { createPocketBaseLiveProvider } from './live-provider';
 // ─── Mock PocketBase Client ─────────────────────────────────
 
 function createMockPB() {
+  const dispose = mock(async () => {});
+  const record: unknown = { id: 'user-1', name: 'Admin', email: 'admin@test.com' };
+  const authStore = {
+    isValid: true, record, token: 'test-token',
+    clear: mock((): void => {
+      authStore.isValid = false;
+      authStore.record = null;
+      authStore.token = '';
+    }),
+  };
   const mockCollection = {
-    getList: mock(async () => ({
+    getList: mock(async (_page: number, _perPage: number, _options?: { sort?: string; filter?: string }) => ({
       items: [{ id: '1', name: 'Test' }, { id: '2', name: 'Test2' }],
       totalItems: 2,
     })),
     getOne: mock(async (id: string) => ({ id, name: 'Test' })),
-    getFullList: mock(async () => [{ id: '1' }, { id: '2' }]),
+    getFullList: mock(async (_options?: { filter?: string }) => [{ id: '1' }, { id: '2' }]),
     create: mock(async (data: Record<string, unknown>) => ({ id: 'new-1', ...data })),
     update: mock(async (id: string, data: Record<string, unknown>) => ({ id, ...data })),
     delete: mock(async () => true),
-    subscribe: mock(async () => {}),
+    subscribe: mock(async (_topic: string, _callback: (data: unknown) => void) => dispose),
     unsubscribe: mock(async () => {}),
     authWithPassword: mock(async () => ({ record: { id: 'user-1' }, token: 'tok' })),
     requestPasswordReset: mock(async () => true),
@@ -30,14 +39,10 @@ function createMockPB() {
     pb: {
       collection: mock(() => mockCollection),
       buildUrl: mock((path: string) => `http://localhost:8090${path}`),
-      authStore: {
-        isValid: true,
-        model: { id: 'user-1', name: 'Admin', email: 'admin@test.com' },
-        clear: mock(() => {}),
-        token: 'test-token',
-      },
+      authStore,
     },
     mockCollection,
+    dispose,
   };
 }
 
@@ -63,7 +68,7 @@ describe('PocketBase DataProvider', () => {
     const { pb, mockCollection } = createMockPB();
     const dp = createPocketBaseDataProvider({ pb });
     await dp.getList({ resource: 'posts', sorters: [{ field: 'name', order: 'desc' }] });
-    const opts = (mockCollection.getList.mock.calls as any)[0][2] as { sort?: string };
+    const opts = requireValue(mockCollection.getList.mock.calls[0]?.[2]);
     expect(opts.sort).toBe('-name');
   });
 
@@ -71,7 +76,7 @@ describe('PocketBase DataProvider', () => {
     const { pb, mockCollection } = createMockPB();
     const dp = createPocketBaseDataProvider({ pb });
     await dp.getList({ resource: 'posts', filters: [{ field: 'status', operator: 'eq', value: 'active' }] });
-    const opts = (mockCollection.getList.mock.calls as any)[0][2] as { filter?: string };
+    const opts = requireValue(mockCollection.getList.mock.calls[0]?.[2]);
     expect(opts.filter).toContain("status = 'active'");
   });
 
@@ -106,16 +111,16 @@ describe('PocketBase DataProvider', () => {
   test('getMany fetches all ids', async () => {
     const { pb, mockCollection } = createMockPB();
     const dp = createPocketBaseDataProvider({ pb });
-    const result = await dp.getMany!({ resource: 'posts', ids: ['1', '2'] });
+    const result = await requireValue(dp.getMany)({ resource: 'posts', ids: ['1', '2'] });
     expect(result.data).toHaveLength(2);
-    const filterArg = (mockCollection.getFullList.mock.calls as any)[0][0] as { filter?: string };
+    const filterArg = requireValue(mockCollection.getFullList.mock.calls[0]?.[0]);
     expect(filterArg.filter).toContain("id = '1'");
   });
 
   test('deleteMany deletes each', async () => {
     const { pb, mockCollection } = createMockPB();
     const dp = createPocketBaseDataProvider({ pb });
-    await dp.deleteMany!({ resource: 'posts', ids: ['1', '2'] });
+    await requireValue(dp.deleteMany)({ resource: 'posts', ids: ['1', '2'] });
     expect(mockCollection.delete).toHaveBeenCalledTimes(2);
   });
 
@@ -143,7 +148,7 @@ describe('PocketBase AuthProvider', () => {
     const auth = createPocketBaseAuthProvider({ pb });
     const result = await auth.login({ email: 'bad', password: 'bad' });
     expect(result.success).toBe(false);
-    expect(result.error?.message).toBe('Invalid credentials');
+    expect(result.error?.message).toBe('Login failed.');
   });
 
   test('logout clears auth store', async () => {
@@ -174,12 +179,12 @@ describe('PocketBase AuthProvider', () => {
     const auth = createPocketBaseAuthProvider({ pb });
     const identity = await auth.getIdentity();
     expect(identity).not.toBeNull();
-    expect(identity!.name).toBe('Admin');
+    expect(requireValue(identity).name).toBe('Admin');
   });
 
-  test('getIdentity returns null when no model', async () => {
+  test('getIdentity returns null when no record', async () => {
     const { pb } = createMockPB();
-    pb.authStore.model = null as unknown as typeof pb.authStore.model;
+    pb.authStore.record = null;
     const auth = createPocketBaseAuthProvider({ pb });
     const identity = await auth.getIdentity();
     expect(identity).toBeNull();
@@ -188,7 +193,7 @@ describe('PocketBase AuthProvider', () => {
   test('register success', async () => {
     const { pb } = createMockPB();
     const auth = createPocketBaseAuthProvider({ pb });
-    const result = await auth.register!({ email: 'new@test.com', password: 'pass', passwordConfirm: 'pass' });
+    const result = await requireValue(auth.register)({ email: 'new@test.com', password: 'pass', confirmPassword: 'pass' });
     expect(result.success).toBe(true);
   });
 });
@@ -204,11 +209,13 @@ describe('PocketBase LiveProvider', () => {
     expect(mockCollection.subscribe).toHaveBeenCalledWith('*', expect.any(Function));
   });
 
-  test('unsubscribe calls pb.collection().unsubscribe', () => {
-    const { pb, mockCollection } = createMockPB();
+  test('unsubscribe calls only the disposer returned for this subscription', async () => {
+    const { pb, mockCollection, dispose } = createMockPB();
     const lp = createPocketBaseLiveProvider({ pb });
     const unsub = lp.subscribe({ resource: 'posts', callback: () => {} });
     unsub();
-    expect(mockCollection.unsubscribe).toHaveBeenCalledWith('*', expect.any(Function));
+    await Promise.resolve();
+    expect(dispose).toHaveBeenCalledTimes(1);
+    expect(mockCollection.unsubscribe).not.toHaveBeenCalled();
   });
 });

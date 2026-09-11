@@ -49,29 +49,29 @@ function parseFilter(
 ): Filter | undefined {
   if (depth > 20 || budget.remaining-- <= 0 || !isRecord(value)) return undefined;
 
-  if (typeof value.field === 'string') {
-    if (!allowedFieldIds.has(value.field) || typeof value.operator !== 'string' || !CRUD_OPERATORS.has(value.operator) || !('value' in value)) {
+  if (typeof value['field'] === 'string') {
+    if (!allowedFieldIds.has(value['field']) || typeof value['operator'] !== 'string' || !CRUD_OPERATORS.has(value['operator']) || !('value' in value)) {
       return undefined;
     }
     return {
-      field: value.field,
-      operator: value.operator as CrudOperator,
-      value: value.value,
+      field: value['field'],
+      operator: value['operator'] as CrudOperator,
+      value: value['value'],
     } as Filter;
   }
 
-  if ((value.operator !== 'and' && value.operator !== 'or') || !Array.isArray(value.value)) return undefined;
-  const children = value.value.map((entry) => parseFilter(entry, allowedFieldIds, budget, depth + 1));
+  if ((value['operator'] !== 'and' && value['operator'] !== 'or') || !Array.isArray(value['value'])) return undefined;
+  const children = value['value'].map((entry) => parseFilter(entry, allowedFieldIds, budget, depth + 1));
   if (children.some((entry) => entry === undefined)) return undefined;
-  return { operator: value.operator, value: children as Filter[] };
+  return { operator: value['operator'], value: children as Filter[] };
 }
 
 function parseSorters(value: unknown[], allowedFieldIds: Set<string>): Sort[] | undefined {
   const sorters: Sort[] = [];
   for (const sorter of value) {
-    if (!isRecord(sorter) || typeof sorter.field !== 'string' || !allowedFieldIds.has(sorter.field)) return undefined;
-    if (sorter.order !== 'asc' && sorter.order !== 'desc') return undefined;
-    sorters.push({ field: sorter.field, order: sorter.order });
+    if (!isRecord(sorter) || typeof sorter['field'] !== 'string' || !allowedFieldIds.has(sorter['field'])) return undefined;
+    if (sorter['order'] !== 'asc' && sorter['order'] !== 'desc') return undefined;
+    sorters.push({ field: sorter['field'], order: sorter['order'] });
   }
   return sorters;
 }
@@ -95,28 +95,28 @@ function parseColumnOrder(value: unknown, allowedColumnIds: Set<string>): string
 
 function parseState(value: unknown, allowedColumnIds: Set<string>): SavedListViewState | undefined {
   if (!isRecord(value)) return undefined;
-  if (typeof value.search !== 'string' || value.search.length > 1_000) return undefined;
-  if (!Array.isArray(value.filters) || !Array.isArray(value.sorters)) return undefined;
-  if (!isRecord(value.pagination) || !isPositiveInteger(value.pagination.current, 1_000_000) || !isPositiveInteger(value.pagination.pageSize, 1_000)) {
+  if (typeof value['search'] !== 'string' || value['search'].length > 1_000) return undefined;
+  if (!Array.isArray(value['filters']) || !Array.isArray(value['sorters'])) return undefined;
+  if (!isRecord(value['pagination']) || !isPositiveInteger(value['pagination']['current'], 1_000_000) || !isPositiveInteger(value['pagination']['pageSize'], 1_000)) {
     return undefined;
   }
 
   const allowedFieldIds = new Set([...allowedColumnIds].filter((columnId) => !columnId.startsWith('_')));
   const filterBudget = { remaining: MAX_FILTER_NODES };
-  const filters = value.filters.map((entry) => parseFilter(entry, allowedFieldIds, filterBudget));
+  const filters = value['filters'].map((entry) => parseFilter(entry, allowedFieldIds, filterBudget));
   if (filters.some((entry) => entry === undefined)) return undefined;
-  const sorters = parseSorters(value.sorters, allowedFieldIds);
-  const columnVisibility = parseColumnVisibility(value.columnVisibility, allowedColumnIds);
-  const columnOrder = parseColumnOrder(value.columnOrder, allowedColumnIds);
+  const sorters = parseSorters(value['sorters'], allowedFieldIds);
+  const columnVisibility = parseColumnVisibility(value['columnVisibility'], allowedColumnIds);
+  const columnOrder = parseColumnOrder(value['columnOrder'], allowedColumnIds);
   if (!sorters || !columnVisibility || !columnOrder) return undefined;
 
   return {
-    search: value.search,
+    search: value['search'],
     filters: filters as Filter[],
     sorters,
     pagination: {
-      current: value.pagination.current,
-      pageSize: value.pagination.pageSize,
+      current: value['pagination']['current'],
+      pageSize: value['pagination']['pageSize'],
     },
     columnVisibility,
     columnOrder,
@@ -127,18 +127,18 @@ export function readSavedListViews(raw: string | null, allowedColumnIds: Set<str
   if (!raw) return [];
   try {
     const parsed: unknown = JSON.parse(raw);
-    if (!isRecord(parsed) || parsed.version !== STORAGE_VERSION || !Array.isArray(parsed.views)) return [];
+    if (!isRecord(parsed) || parsed['version'] !== STORAGE_VERSION || !Array.isArray(parsed['views'])) return [];
 
     const views: SavedListView[] = [];
     const seenIds = new Set<string>();
-    for (const entry of parsed.views.slice(0, MAX_SAVED_VIEWS)) {
-      if (!isRecord(entry) || typeof entry.id !== 'string' || !entry.id.trim() || entry.id.length > 120) continue;
-      if (seenIds.has(entry.id)) continue;
-      if (typeof entry.name !== 'string' || !entry.name.trim() || entry.name.length > 60) continue;
-      const state = parseState(entry.state, allowedColumnIds);
+    for (const entry of parsed['views'].slice(0, MAX_SAVED_VIEWS)) {
+      if (!isRecord(entry) || typeof entry['id'] !== 'string' || !entry['id'].trim() || entry['id'].length > 120) continue;
+      if (seenIds.has(entry['id'])) continue;
+      if (typeof entry['name'] !== 'string' || !entry['name'].trim() || entry['name'].length > 60) continue;
+      const state = parseState(entry['state'], allowedColumnIds);
       if (!state) continue;
-      seenIds.add(entry.id);
-      views.push({ id: entry.id, name: entry.name.trim(), state });
+      seenIds.add(entry['id']);
+      views.push({ id: entry['id'], name: entry['name'].trim(), state });
     }
     return views;
   } catch (error) {

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   /**
    * LiteShowField — SSR-compatible field renderer for detail views.
    * Renders a single field value based on its type definition.
@@ -50,13 +52,13 @@
 {:else if field.type === "avatar"}
   <LiteAvatarField {field} value={value as unknown} mode="show" />
 {:else if field.type === "rating"}
-  <LiteRatingField {field} value={value as string | number | null | undefined} mode="show" />
+  <LiteRatingField {field} {...definedOptions({ "value": value as string | number | null | undefined })} mode="show" />
 {:else if field.type === "code"}
-  <LiteCodeField {field} value={value as string | number | Record<string, unknown> | unknown[] | null | undefined} mode="show" />
+  <LiteCodeField {field} {...definedOptions({ "value": value as string | number | Record<string, unknown> | unknown[] | null | undefined })} mode="show" />
 {:else if field.type === "currency"}
-  <LiteCurrencyField {field} value={value as string | number | null | undefined} mode="show" />
+  <LiteCurrencyField {field} {...definedOptions({ "value": value as string | number | null | undefined })} mode="show" />
 {:else if field.type === "phone"}
-  <LitePhoneField {field} value={value as string | number | null | undefined} mode="show" />
+  <LitePhoneField {field} {...definedOptions({ "value": value as string | number | null | undefined })} mode="show" />
 {:else if field.type === "password"}
   <span>••••••••</span>
 {:else if field.type === "color" && value}

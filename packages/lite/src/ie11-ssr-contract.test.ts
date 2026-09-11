@@ -70,6 +70,24 @@ describe('IE11 SSR source contract', () => {
     expect(violations).toEqual([]);
   });
 
+  test('keeps shared button state attributes on IE11-safe Lite controls', async () => {
+    const buttonRoot = resolve(import.meta.dir, 'components', 'buttons');
+    const buttonFiles = Array.fromAsync(
+      new Bun.Glob('*.svelte').scan({ cwd: buttonRoot, absolute: true }),
+    );
+    const missingStateAttributes: string[] = [];
+
+    for (const buttonFile of await buttonFiles) {
+      const source = await readFile(buttonFile, 'utf8');
+      if (!source.includes('data-svadmin-button')
+        || !source.includes('data-variant=')
+        || !source.includes('data-size=')) {
+        missingStateAttributes.push(buttonFile.slice(buttonRoot.length + 1));
+      }
+    }
+
+    expect(missingStateAttributes).toEqual([]);
+  });
   test('keeps the SvelteKit example server-rendered without client hydration', async () => {
     const routeOptions = await readFile(
       resolve(import.meta.dir, '../example/src/routes/lite/+layout.ts'),

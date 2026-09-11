@@ -1,3 +1,4 @@
+import { requireValue } from "../../../../scripts/test-assertions";
 import { describe, expect, it, vi } from 'vitest';
 import { render, fireEvent } from '@testing-library/svelte';
 import FilterDropdown from './FilterDropdown.svelte';
@@ -43,7 +44,7 @@ describe('FilterDropdown component', () => {
     const checkboxes = view.container.querySelectorAll('input[type="checkbox"]');
     expect(checkboxes.length).toBe(3);
 
-    await fireEvent.click(checkboxes[0]);
+    await fireEvent.click(requireValue(checkboxes[0]));
     const applyButton = Array.from(view.container.querySelectorAll('button')).find(
       (button) => button.textContent?.trim() === 'Apply'
     );

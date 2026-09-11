@@ -1,12 +1,14 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "strict": true,
-    "skipLibCheck": true,
-    "noEmit": true
+    "skipLibCheck": false,
+    "types": [
+      "bun",
+      "svelte"
+    ]
   },
-  "include": ["src/**/*"],
-  "exclude": ["src/data-provider.test.ts"]
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.mts"
+  ]
 }

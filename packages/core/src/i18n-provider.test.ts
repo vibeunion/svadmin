@@ -1,12 +1,12 @@
-// 测试 I18nProvider 注入与委托逻辑
-// 注意：i18n.svelte.ts 使用 Svelte 5 runes ($state)，在纯 bun:test 环境下 $state 不可用。
-// runes 依赖测试在 bun:test 中跳过（需 vitest + Svelte 编译器运行），
-// 类型契约测试在所有环境均可运行。
+// Tests I18nProvider injection and delegation.
+// i18n.svelte.ts uses Svelte 5 runes, so $state is unavailable in a plain bun:test environment.
+// Rune-dependent tests are skipped under bun:test and run with Vitest plus the Svelte compiler;
+// type contract tests run in every environment.
 import { describe, test, expect } from 'bun:test';
 
 describe('I18nProvider type contract', () => {
   test('I18nProvider interface requires translate, getLocale, setLocale', () => {
-    // 验证 provider 接口包含三个必需方法
+    // Verify that the provider interface includes the three required methods.
     type Provider = {
       translate: (key: string, params?: Record<string, string | number>) => string;
       getLocale: () => string;
@@ -29,7 +29,7 @@ describe('I18nProvider type contract', () => {
       setLocale: (locale: string) => void;
       getAvailableLocales?: () => string[];
     };
-    // 不带 getAvailableLocales 也能赋值
+    // Assignment remains valid without getAvailableLocales.
     const minimal: Provider = {
       translate: () => '',
       getLocale: () => 'en',
@@ -37,7 +37,7 @@ describe('I18nProvider type contract', () => {
     };
     expect(minimal.getAvailableLocales).toBeUndefined();
 
-    // 带 getAvailableLocales 也能赋值
+    // Assignment remains valid with getAvailableLocales.
     const extended: Provider = {
       translate: () => '',
       getLocale: () => 'en',
@@ -48,4 +48,4 @@ describe('I18nProvider type contract', () => {
   });
 });
 
-// 运行时委托行为由 i18n-provider.test.svelte.ts 在 Vitest + Svelte 编译环境中覆盖。
+// i18n-provider.test.svelte.ts covers runtime delegation under Vitest with the Svelte compiler.

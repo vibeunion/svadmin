@@ -1,3 +1,4 @@
+import { requireValue } from "../../../../scripts/test-assertions";
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import AutoTableEnterpriseHarness from '../../test/fixtures/AutoTableEnterpriseHarness.svelte';
@@ -66,7 +67,7 @@ describe('AutoTable enterprise enhancements', () => {
     // Check the first row checkbox
     const checkboxes = view.getAllByRole('checkbox');
     expect(checkboxes.length).toBeGreaterThan(1);
-    await fireEvent.click(checkboxes[1]); // first row checkbox
+    await fireEvent.click(requireValue(checkboxes[1])); // first row checkbox
 
     await waitFor(async () => {
       expect(await view.findByText('已选择 1 条记录')).toBeTruthy();

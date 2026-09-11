@@ -1,5 +1,9 @@
 <script lang="ts">
-  import { useForm, getResource, deriveValidator, useNavigation } from '@svadmin/core';
+  import { definedReactiveOptions } from '@svadmin/core/options';
+
+  import { definedOptions } from '@svadmin/core/options';
+
+  import { captureAdminContext, captureAuthSession, useResourceContract, getContractFormFields, deriveValidator, useNavigation, useCan, useForm } from '@svadmin/core';
   import { slide } from 'svelte/transition';
   import type { FieldDefinition } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
@@ -46,17 +50,34 @@
     onNavigationGuardReady,
   }: Props = $props();
   const navigation = useNavigation();
+  const context = captureAdminContext();
+  const binding = useResourceContract(() => resourceName);
   const isReadonly = $derived(mode === 'show');
   const isCompact = $derived(density === 'compact');
 
   // ─── Resource metadata ────────────────────────────────────────────
-  const resource = $derived(getResource(resourceName));
+  const resource = $derived(context.getResource(resourceName));
   const primaryKey = $derived(resource.primaryKey ?? 'id');
+  const contractFields = $derived(getContractFormFields(binding.resource, mode));
+  const readPermission = useCan(() => definedOptions({
+    resource: resourceName, action: mode === 'edit' ? 'edit' : 'show', id,
+    queryOptions: { enabled: mode !== 'create' },
+  }));
+  const createPermission = useCan(() => ({
+    resource: resourceName, action: 'create', queryOptions: { enabled: mode === 'create' || mode === 'clone' },
+  }));
+  const permissionPending = $derived(mode === 'create' ? createPermission.isLoading
+    : readPermission.isLoading || (mode === 'clone' && createPermission.isLoading));
+  const allowed = $derived(mode === 'create' ? resource.canCreate !== false && createPermission.allowed
+    : mode === 'edit' ? resource.canEdit !== false && readPermission.allowed
+    : mode === 'show' ? resource.canShow !== false && readPermission.allowed
+    : resource.canCreate !== false && resource.canShow !== false && readPermission.allowed && createPermission.allowed);
 
   const formFields = $derived(resource.fields.filter(f => {
     if (f.key === primaryKey) return false;
+    if (!contractFields.includes(f.key)) return false;
     if (f.showInForm === false) return false;
-    if (mode === 'create' && f.showInCreate === false) return false;
+    if ((mode === 'create' || mode === 'clone') && f.showInCreate === false) return false;
     if (mode === 'edit' && f.showInEdit === false) return false;
     if (mode === 'show' && f.showInShow === false) return false;
     return true;
@@ -117,19 +138,42 @@
   const validator = $derived(deriveValidator(formFields, { translate: i18n.t }));
 
   // ─── useForm: single source of truth for values, errors, tainted ──
-  const form = useForm({
-    get resource() { return resourceName; },
+  const form = useForm(definedReactiveOptions({
+    get resource() { return binding.resource; },
     get action() { return mode; },
     get id() { return id; },
     get defaultValues() { return defaults; },
+    get enabled() { return allowed; },
+    get dataProviderName() { return binding.dataProviderName; },
     redirect: 'list',
     warnWhenUnsavedChanges: true,
     get validate() { return validator; },
-  });
+    get onMutationSuccess() {
+      const callback = onSuccess;
+      return callback ? () => callback() : undefined;
+    },
+  }));
 
   // ─── Submission error (non-field, e.g. network error) ─────────────
   let submitError = $state<string | null>(null);
   let formElement = $state.raw<HTMLFormElement>();
+  const scope = $derived({
+    contract: binding.resource, id, mode, allowed,
+    provider: context.providers?.[binding.dataProviderName], meta: binding.meta,
+    tenant: context.tenantCacheKey?.__svadminTenant, auth: context.authProvider,
+    session: captureAuthSession(context.authProvider),
+  });
+  let mounted = true;
+  const currentScope = (origin: typeof scope) => mounted && scope === origin && origin.session.isCurrent();
+  let submission: object | undefined;
+  $effect(() => {
+    void scope;
+    submission = undefined;
+    submitError = null;
+    confirmOpen = false;
+    pendingNavigation = null;
+  });
+  $effect(() => () => { mounted = false; submission = undefined; });
 
   function fieldErrorId(fieldKey: string): string {
     return `${resourceName}-${fieldKey}-error`;
@@ -140,19 +184,42 @@
     firstInvalid?.focus();
   }
 
-  async function handleSubmit() {
-    submitError = null;
-    try {
-      await form.submit();
-      if (Object.keys(form.errors).length > 0) {
-        queueMicrotask(focusFirstInvalidField);
-        return;
+  const handleSubmit = $derived.by(() => {
+    const current = scope;
+    return async () => {
+      if (!currentScope(current) || !allowed || isReadonly || !form.ready || form.submitting || submission) return;
+      const token = {};
+      submission = token;
+      submitError = null;
+      try {
+        await form.submit();
+      } catch {
+        if (submission === token && currentScope(current)) {
+          submitError = i18n.t('common.operationFailed');
+          queueMicrotask(() => {
+            if (currentScope(current)) focusFirstInvalidField();
+          });
+        }
+      } finally {
+        if (submission === token) submission = undefined;
       }
-      onSuccess?.();
-    } catch (e) {
-      submitError = e instanceof Error ? e.message : i18n.t('common.operationFailed');
-    }
-  }
+    };
+  });
+  const submitEvent = $derived.by(() => {
+    const submit = handleSubmit;
+    return (event: Event) => { event.preventDefault(); void submit(); };
+  });
+  const fieldChange = $derived.by(() => {
+    const origin = scope;
+    return (key: string) => (value: unknown) => {
+      if (currentScope(origin)) form.setFieldValue(key, value);
+    };
+  });
+  const retry = $derived.by(() => {
+    const origin = scope;
+    const refetch = form.query.refetch;
+    return () => { if (currentScope(origin)) void refetch().catch(() => {}); };
+  });
 
   const pageTitle = $derived(
     mode === 'create'
@@ -166,29 +233,47 @@
   let confirmOpen = $state(false);
   let pendingNavigation: (() => void) | null = null;
 
-  function guardNavigate(fn: () => void) {
-    if (form.isTainted()) {
-      pendingNavigation = fn;
-      confirmOpen = true;
-    } else {
-      fn();
-    }
-  }
+  const guardNavigate = $derived.by(() => {
+    const origin = scope;
+    return (fn: () => void) => {
+      if (!currentScope(origin)) return;
+      if (form.isTainted()) {
+        pendingNavigation = () => { if (currentScope(origin)) fn(); };
+        confirmOpen = true;
+      } else {
+        fn();
+      }
+    };
+  });
+  const back = $derived.by(() => {
+    const guard = guardNavigate;
+    const name = resourceName;
+    return () => guard(() => navigation.list(name));
+  });
 
   $effect(() => {
     onNavigationGuardReady?.(guardNavigate);
   });
 
-  function confirmNavigate() {
-    confirmOpen = false;
-    pendingNavigation?.();
-    pendingNavigation = null;
-  }
+  const confirmNavigate = $derived.by(() => {
+    const origin = scope;
+    return () => {
+      if (!currentScope(origin)) return;
+      confirmOpen = false;
+      const navigate = pendingNavigation;
+      pendingNavigation = null;
+      navigate?.();
+    };
+  });
 
-  function cancelNavigate() {
-    confirmOpen = false;
-    pendingNavigation = null;
-  }
+  const cancelNavigate = $derived.by(() => {
+    const origin = scope;
+    return () => {
+      if (!currentScope(origin)) return;
+      confirmOpen = false;
+      pendingNavigation = null;
+    };
+  });
 </script>
 
 <div class={isCompact ? 'svadmin-u-3e7ce58d64fa' : 'svadmin-u-b3542e058833'}>
@@ -196,7 +281,7 @@
     <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-0c3bc98565dd">
       <TooltipButton
         tooltip={i18n.t('common.back')}
-        onclick={() => guardNavigate(() => navigation.list(resourceName))}
+        onclick={back}
       >
         <ArrowLeft class="svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e" aria-hidden="true" />
       </TooltipButton>
@@ -210,8 +295,7 @@
     </div>
   {/if}
 
-  {#if form.loading}
-    <div class="svadmin-u-cf3893e36c22 svadmin-u-b3542e058833">
+  {#if form.loading || permissionPending}    <div class="svadmin-u-cf3893e36c22 svadmin-u-b3542e058833">
       <div class="svadmin-u-5f22e64f2282 svadmin-u-438b2237b8d6 svadmin-u-3daca9af0861 svadmin-u-a10fdd7667ee svadmin-u-0478c89a150f svadmin-u-b43b4c086d9a">
         {#each Array(4) as _, _i (_i)}
           <div class="svadmin-u-6f7e013d6499">
@@ -221,9 +305,15 @@
         {/each}
       </div>
     </div>
-  {:else}
-    <form bind:this={formElement} onsubmit={(e: Event) => { e.preventDefault(); handleSubmit(); }} class="svadmin-u-cf3893e36c22 svadmin-u-b3542e058833" novalidate>
-      {#if submitError}
+  {:else if !allowed}
+    <p role="alert">{i18n.t('common.operationFailed')}</p>
+  {:else if !form.ready && form.error}
+    <p role="alert">{i18n.t('common.operationFailed')}</p>
+    <Button type="button" variant="outline" onclick={retry}>
+      {i18n.t('common.retry')}
+    </Button>
+  {:else if form.ready}
+    <form bind:this={formElement} onsubmit={submitEvent} class="svadmin-u-cf3893e36c22 svadmin-u-b3542e058833" novalidate>      {#if submitError}
         <div transition:slide={{ duration: 300, axis: 'y' }} class="svadmin-shake">
           <Alert.Root variant="destructive">
             <AlertCircle class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" aria-hidden="true" />
@@ -245,15 +335,15 @@
                 {#each group.fields as field (field.key)}
                   <div class={cn(columns > 1 && isFullWidthField(field) && 'svadmin-u-2c955d1b45df', !!form.errors[field.key] && 'svadmin-u-ee1a5af3aa10')}>
                     {#if fieldRenderer}
-                      {@render fieldRenderer({ field, value: form.values[field.key], onchange: (val: unknown) => form.setFieldValue(field.key, val) })}
+                      {@render fieldRenderer({ field, value: form.values[field.key], onchange: fieldChange(field.key) })}
                     {:else}
                       <FieldRenderer
                         {field}
                         value={form.values[field.key]}
-                        onchange={(val: unknown) => form.setFieldValue(field.key, val)}
+                        onchange={fieldChange(field.key)}
                         {density}
                         invalid={!!form.errors[field.key]}
-                        errorId={form.errors[field.key] ? fieldErrorId(field.key) : undefined}
+                        {...definedOptions({ "errorId": form.errors[field.key] ? fieldErrorId(field.key) : undefined })}
                         disabled={isReadonly}
                       />
                     {/if}
@@ -273,15 +363,15 @@
               {#each formFields as field (field.key)}
                 <div class={cn(columns > 1 && isFullWidthField(field) && 'svadmin-u-2c955d1b45df', !!form.errors[field.key] && 'svadmin-u-ee1a5af3aa10')}>
                   {#if fieldRenderer}
-                    {@render fieldRenderer({ field, value: form.values[field.key], onchange: (val: unknown) => form.setFieldValue(field.key, val) })}
+                    {@render fieldRenderer({ field, value: form.values[field.key], onchange: fieldChange(field.key) })}
                   {:else}
                   <FieldRenderer
                     {field}
                     value={form.values[field.key]}
-                    onchange={(val: unknown) => form.setFieldValue(field.key, val)}
+                    onchange={fieldChange(field.key)}
                     {density}
                     invalid={!!form.errors[field.key]}
-                      errorId={form.errors[field.key] ? fieldErrorId(field.key) : undefined}
+                      {...definedOptions({ "errorId": form.errors[field.key] ? fieldErrorId(field.key) : undefined })}
                       disabled={isReadonly}
                     />
                   {/if}
@@ -296,8 +386,7 @@
       {/if}
 
       <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-1004c0c3954c">
-        {#if formActions}
-          {@render formActions({ isLoading: form.submitting, onSubmit: handleSubmit })}
+        {#if formActions && !isReadonly}          {@render formActions({ isLoading: form.submitting, onSubmit: handleSubmit })}
         {:else if !isReadonly}
           <Button type="submit" size={isCompact ? 'sm' : 'default'} disabled={form.submitting}>
             {#if form.submitting}
@@ -311,7 +400,7 @@
             type="button"
             variant="outline"
             size={isCompact ? 'sm' : 'default'}
-            onclick={() => guardNavigate(() => navigation.list(resourceName))}
+            onclick={back}
           >
             {i18n.t('common.cancel')}
           </Button>

@@ -238,7 +238,7 @@ describe('SurfaceRenderer', () => {
     const view = render(SurfaceRenderer, { spec, policy, catalog: defaultSurfaceCatalog, dataProvider: provider });
     const widget = await screen.findByTestId('surface-widget-product-count');
 
-    await view.component.refresh('products');
+    await view.component['refresh']('products');
     await waitFor(() => expect(getList).toHaveBeenCalledTimes(3));
     expect(screen.getByTestId('surface-widget-product-count')).toBe(widget);
   });
@@ -278,7 +278,7 @@ describe('SurfaceRenderer', () => {
     });
 
     await waitFor(() => expect(requestCount).toBe(1));
-    const refresh = view.component.refresh('products');
+    const refresh = view.component['refresh']('products');
     await waitFor(() => expect(requestCount).toBe(2));
     second.resolve({ data: [{ id: 2, name: 'New', stock: 1 }], total: 2 });
     await refresh;

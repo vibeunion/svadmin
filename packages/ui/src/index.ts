@@ -245,7 +245,7 @@ export {
   builtinDisplayComponents, registerDisplayComponent,
   getDisplayComponent, hasDisplayComponent,
 } from './components/fieldComponentMap';
-export type { FieldComponentMap } from './components/fieldComponentMap';
+export type { FieldComponentMap, FieldDisplayProps } from './components/fieldComponentMap';
 
 // Svelte Actions
 export { clickOutside, shortcut, intersect, copyOnClick } from './actions';

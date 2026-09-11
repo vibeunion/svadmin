@@ -88,30 +88,30 @@ function assertReferencedPacksExist(
 
 function assertScaffoldManifest(candidate: unknown): asserts candidate is ScaffoldManifest {
   assertJsonObject(candidate, 'scaffold manifest');
-  assertNonEmptyString(candidate.name, 'scaffold manifest.name');
-  assertNonEmptyString(candidate.version, 'scaffold manifest.version');
-  if (candidate.private !== true) {
+  assertNonEmptyString(candidate['name'], 'scaffold manifest.name');
+  assertNonEmptyString(candidate['version'], 'scaffold manifest.version');
+  if (candidate['private'] !== true) {
     throw new Error('scaffold manifest.private must be true');
   }
-  assertNonEmptyString(candidate.type, 'scaffold manifest.type');
-  assertStringRecord(candidate.scripts, 'scaffold manifest.scripts');
-  assertStringRecord(candidate.dependencies, 'scaffold manifest.dependencies');
-  assertStringRecord(candidate.devDependencies, 'scaffold manifest.devDependencies');
-  assertJsonObject(candidate.svadmin, 'scaffold manifest.svadmin');
-  assertDependencyPacks(candidate.svadmin.dependencyPacks);
+  assertNonEmptyString(candidate['type'], 'scaffold manifest.type');
+  assertStringRecord(candidate['scripts'], 'scaffold manifest.scripts');
+  assertStringRecord(candidate['dependencies'], 'scaffold manifest.dependencies');
+  assertStringRecord(candidate['devDependencies'], 'scaffold manifest.devDependencies');
+  assertJsonObject(candidate['svadmin'], 'scaffold manifest.svadmin');
+  assertDependencyPacks(candidate['svadmin']['dependencyPacks']);
   assertSelectionMap(
-    candidate.svadmin.dataProviders,
+    candidate['svadmin']['dataProviders'],
     DATA_PROVIDER_CHOICES,
     'scaffold manifest.svadmin.dataProviders',
   );
   assertSelectionMap(
-    candidate.svadmin.authProviders,
+    candidate['svadmin']['authProviders'],
     AUTH_PROVIDER_CHOICES,
     'scaffold manifest.svadmin.authProviders',
   );
-  assertReferencedPacksExist(candidate.svadmin.dependencyPacks, [
-    ...Object.values(candidate.svadmin.dataProviders).flat(),
-    ...Object.values(candidate.svadmin.authProviders).flat(),
+  assertReferencedPacksExist(candidate['svadmin']['dependencyPacks'], [
+    ...Object.values(candidate['svadmin']['dataProviders']).flat(),
+    ...Object.values(candidate['svadmin']['authProviders']).flat(),
   ]);
 }
 
@@ -148,7 +148,9 @@ export function createProjectPackageJson(
   ]);
 
   for (const packName of selectedPacks) {
-    mergeDependencyPack(dependencies, scaffold.svadmin.dependencyPacks[packName], packName);
+    const pack = scaffold.svadmin.dependencyPacks[packName];
+    if (pack === undefined) throw new Error(`Unknown dependency pack: ${packName}`);
+    mergeDependencyPack(dependencies, pack, packName);
   }
 
   return {

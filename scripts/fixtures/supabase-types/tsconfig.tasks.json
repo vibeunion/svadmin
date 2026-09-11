@@ -1,0 +1,13 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": [
+      "node",
+      "svelte"
+    ],
+    "skipLibCheck": false
+  },
+  "include": [
+    "tasks.ts"
+  ]
+}

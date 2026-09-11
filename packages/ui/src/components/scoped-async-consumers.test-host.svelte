@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedReactiveOptions } from '@svadmin/core/options';
+
   import {
     provideAdminContext,
     type AuthProvider,
@@ -66,7 +68,7 @@
       pathname: `/${requestContext}`,
     }),
   };
-  provideAdminContext({
+  provideAdminContext(definedReactiveOptions({
     get dataProvider() { return dataProvider ?? fallbackDataProvider; },
     get authProvider() { return authProvider; },
     get resources() { return resources; },
@@ -74,7 +76,7 @@
     get chatProvider() { return chatProvider; },
     get auditLogProvider() { return auditLogProvider; },
     get tenant() { return tenant; },
-  });
+  }));
 </script>
 
 {#if consumer === 'insight'}

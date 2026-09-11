@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import { getResource, useNavigation } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
 
@@ -70,6 +72,6 @@
     {columns}
     showHeader={false}
     onNavigationGuardReady={(guard) => navigateGuard = guard}
-    {onSuccess}
+    {...definedOptions({ "onSuccess": onSuccess })}
   />
 </div>

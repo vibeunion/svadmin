@@ -39,24 +39,24 @@ export interface AdminTool<Schema extends TObject = TObject> {
   parameters: Schema;
   /** Pause execution until the user explicitly approves the invocation. */
   needsApproval?: boolean;
-  /** 显式声明是否为只读操作（只读操作可并发执行，无副作用）。 */
+  /** Declares whether the operation is read-only and safe to execute concurrently. */
   readOnly?: boolean;
-  /** 显式声明是否为破坏性或高风险操作。 */
+  /** Declares whether the operation is destructive or high risk. */
   destructive?: boolean;
-  /** 显式声明是否支持并发调用。 */
+  /** Declares whether concurrent calls are supported. */
   concurrent?: boolean;
   /** Execute the tool with decoded arguments. */
   execute(args: StaticDecode<Schema>): Promise<ToolResult>;
 }
 
-/** 保留具体 TypeBox Schema，让 execute 参数获得精确的静态类型。 */
+/** Preserves the concrete TypeBox schema so execute receives precise static types. */
 export function defineAdminTool<const Schema extends TObject>(
   tool: AdminTool<Schema>,
 ): AdminTool<Schema> {
   return { ...tool, parameters: strictAdminToolSchema(tool.parameters) };
 }
 
-/** 在进入工具实现前统一执行 TypeBox 校验与转换。 */
+/** Applies TypeBox validation and conversion before invoking the tool implementation. */
 export function decodeAdminToolArgs<const Schema extends TObject>(
   tool: AdminTool<Schema>,
   input: unknown,
@@ -64,7 +64,7 @@ export function decodeAdminToolArgs<const Schema extends TObject>(
   return Value.Decode(strictAdminToolSchema(tool.parameters), input);
 }
 
-/** 解码并执行工具，避免调用方绕过运行时参数边界。 */
+/** Decodes and executes a tool without allowing callers to bypass runtime input validation. */
 export async function executeAdminTool<const Schema extends TObject>(
   tool: AdminTool<Schema>,
   input: unknown,
@@ -72,7 +72,7 @@ export async function executeAdminTool<const Schema extends TObject>(
   return tool.execute(decodeAdminToolArgs(tool, input));
 }
 
-/** 将工具投影为发给 LLM 或 MCP 客户端的公开 Schema。 */
+/** Projects a tool into the public schema sent to LLM or MCP clients. */
 export function projectAdminToolSchema<Schema extends TObject>(tool: AdminTool<Schema>): {
   name: string;
   description: string;

@@ -87,6 +87,11 @@ function readPackageJson(path = 'package.json'): {
   name?: string;
   version?: string;
   packageManager?: string;
+  repository?: {
+    type?: string;
+    url?: string;
+    directory?: string;
+  };
   devDependencies?: Record<string, string>;
   peerDependencies?: Record<string, string>;
 } {
@@ -122,6 +127,18 @@ function readReleasePleaseManifest(): Record<string, string> {
 }
 
 describe('npm trusted-publishing workflow contract', () => {
+  test('uses canonical git repository URLs in every published package', () => {
+    const packagePaths = readdirSync(resolve(repositoryRoot, 'packages'), { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => `packages/${entry.name}/package.json`);
+
+    for (const packagePath of ['package.json', ...packagePaths]) {
+      const packageJson = readPackageJson(packagePath);
+      expect(packageJson.repository?.type).toBe('git');
+      expect(packageJson.repository?.url).toBe('git+https://github.com/vibeunion/svadmin.git');
+    }
+  });
+
   test('pins one Bun toolchain version across local development and CI', () => {
     const rootPackage = readPackageJson();
     const bunVersion = rootPackage.packageManager?.match(/^bun@(.+)$/)?.[1];

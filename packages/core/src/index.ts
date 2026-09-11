@@ -11,7 +11,7 @@ export {
   provideTenantContext, getTenantContext, getProviderBundle,
   resetContext,
 } from './context.svelte';
-export type { DataProviderInput, AdminContextSource, AdminContextValue, AdminContextAccessor } from './context.svelte';
+export type { DataProviderInput, AdminContextSource, AdminContextValue, AdminContextAccessor, ResolvedProviderBundle } from './context.svelte';
 export {
   createProviderBundle,
   createTenantCacheKey,
@@ -50,24 +50,36 @@ export type {
   TenantId,
 } from './provider-bundle';
 export {
-  useList, useInfiniteList,
-  useOne, useShow,
-  useSelect, useMany,
-  useCustom, useApiUrl,
-  useCustomMutation, useInvalidate,
-  useCreate, useCreateMany,
-  useUpdate, useUpdateMany,
-  useDelete, useDeleteMany,
-  useForm, useTable,
+  useApiUrl,
   useNavigation, useGo, useBack,
   useGetToPath, useLink,
   useResource,
-  useModalForm, useDrawerForm, useModal, useCheckboxGroup, useRadioGroup, useAutocomplete,
-  useOvertime, useRelation,
-  useNotification, useDataProvider,
+  useModal,
+  useOvertime,
+  useNotification,
   useMenu, useBreadcrumb, useThemedLayoutContext,
-  publishLiveEvent, resetSidebarCollapsed,
+  resetSidebarCollapsed,
 } from './hooks.svelte';
+export {
+  useList, useOne, useShow, useMany, useInfiniteList, useSelect, useTable,
+  useCreate, useUpdate, useDelete, useCreateMany, useUpdateMany, useDeleteMany, useForm,
+  useInvalidate,
+} from './strict-hooks.svelte';
+export { defineResource, getContractFormFields } from './resource-contract';
+export { UpdateManyPartialError } from './update-many-contract';
+export { CreateManyPartialError } from './create-many-contract';
+export type { ContractCreateOptions as UseCreateOptions } from './create-hooks.svelte';
+export type { ContractCreateParams as UseCreateMutateParams } from './create-contract';
+export type { ContractUpdateOptions as UseUpdateOptions } from './update-hooks.svelte';
+export type { ContractUpdateParams as UseUpdateMutateParams } from './update-contract';
+export type { ContractDeleteOptions as UseDeleteOptions } from './delete-hooks.svelte';
+export type { ContractDeleteParams as UseDeleteMutateParams } from './delete-contract';
+export type { ContractFormAction, ContractFormDraft, ContractFormValues } from './resource-contract';
+export type { ResourceContract, ContractSchemas, ContractRecord, ContractId, ContractInput } from './resource-contract';
+export type { ContractFilter, ContractSort } from './strict-hooks.svelte';
+export { defineCommand } from './command-contract';
+export type { CommandContract, CommandInput, CommandOutput } from './command-contract';
+export { useCustom, useCustomMutation } from './strict-command-hooks.svelte';
 export { matchRoute, navigate, currentPath, setActiveRouterProvider, beforeEach, afterEach, resetRouter } from './router';
 export type { RouteGuard } from './router';
 export {
@@ -90,8 +102,11 @@ export {
 export type { NotificationParams } from './notification.svelte';
 export { t, setLocale, getLocale, getAvailableLocales, addTranslations, useTranslation, setI18nProvider, getI18nProvider, createI18nScope, provideI18nScope, getI18nScope, resetI18n } from './i18n.svelte';
 export type { I18nProvider, I18nScope, I18nScopeOptions } from './i18n.svelte';
-export { audit, auditWithProvider, writeAuditEntry, recordMutationRollback, setAuditHandler, setAuditLogProvider, getAuditLogProvider } from './audit';
-export type { AuditLogProvider } from './audit';
+export { audit, auditWithProvider, writeAuditEntry, recordMutationRollback, setAuditHandler, setAuditLogProvider, getAuditLogProvider, withValidatedAuditProvider, AuditError } from './audit';
+export type { AuditLogProvider, AuditLogTransport, AuditCreateParams, AuditQueryParams, AuditDraft } from './audit';
+export { TaskError } from './task-contract';
+export { withValidatedTaskProvider } from './task-provider';
+export type { TaskTransport } from './task-provider';
 export type {
   ApiCredentialSummary,
   CreatedApiCredential,
@@ -131,6 +146,8 @@ export { checkError } from './hook-utils.svelte';
 export type { NotificationConfig, OvertimeOptions, OvertimeResult, LiveSubscriptionParams } from './hook-utils.svelte';
 
 export { DeleteManyPartialError, HttpError, UndoError } from './types';
+export { withResourceSchemas } from './resource-schemas';
+export type { ResourceSchemas, ResourceSchemaMap, InferSchemaResourceMap, InferSchemaInputMap } from './resource-schemas';
 export type {
   DataProvider, AuthProvider, NotificationProvider, MutationMode,
   ValidationErrors, HttpErrorOptions, CrudOperator, LogicalFilter, FieldFilter,
@@ -148,20 +165,24 @@ export type {
   ResourceDefinition, ResourceProviderConfig, ResourceTransportConfig, ResourceAdapterConfig,
   FieldDefinition, MenuItem,
   AuthActionResult, CheckResult,
-  ResourceTypeMap, KnownResources, InferData,
+  ResourceTypeMap, ResourceInputMap, ResourceInputOperation, InferResourceInput, KnownResources, InferData,
   BaseRecord, Role, AuditLog
 } from './types';
 export type { InvalidateScope } from './options.svelte';
 export type { LiveProvider, LiveEvent, LiveMode } from './live.svelte';
-export type { Action, CanParams, CanResult, AccessControlProvider, FeatureGateConfig, FeatureGateUser } from './permissions.svelte';
+export type { Action, CanParams, CanResult, AccessControlProvider, RegisteredAccessControlProvider, AccessControlOptions, FeatureGateConfig, FeatureGateUser } from './permissions.svelte';
 export type { AuditEntry, AuditHandler, AuditAction } from './audit';
 export { useCan } from './useCan';
 export type { UseCanOptions, UseCanResult } from './useCan';
 export { createCaslAccessControl } from './adapters/casl';
 export { createCasbinAccessControl } from './adapters/casbin';
 export type { CasbinAdapterOptions } from './adapters/casbin';
-export { useExport, useImport, downloadData, toCsv, toJson, toXlsx, parseCSV } from './data-transfer.svelte';
-export type { UseExportOptions, UseImportOptions, ExportFormat } from './data-transfer.svelte';
+export { downloadData, toCsv, toJson, toXlsx, parseCSV } from './data-transfer.svelte';
+export { useExport } from './export-hooks.svelte';
+export type { UseExportOptions } from './export-hooks.svelte';
+export { useImport } from './import-hooks.svelte';
+export type { UseImportOptions, ImportProgress, ImportResult } from './import-hooks.svelte';
+export type { ExportFormat } from './data-transfer.svelte';
 export {
   useLogin, useLogout,
   useRegister, useForgotPassword, useUpdatePassword,
@@ -169,16 +190,25 @@ export {
   useGetIdentity, useIsAuthenticated,
   useOnError, usePermissions,
   getLogoutVersion, resetLogoutVersion,
+  captureAuthLiveScope as captureAuthSession,
 } from './auth-hooks.svelte';
 export type { AuthNotificationOptions } from './auth-hooks.svelte';
+export { AuthQueryError, AuthErrorHandlingError } from './auth-query-contract';
+export type { AuthErrorHandlingResult } from './auth-query-contract';
+export { AuthMutationError } from './auth-mutation-contract';
+export { useResourceContract } from './resource-binding.svelte';
+export { PermissionHintsError } from './permission-hints-contract';
+export type { PermissionHints } from './permission-hints-contract';
 export {
   useSubmitTask,
   useTask,
   useTaskList,
   useTaskSubscription,
 } from './task-hooks.svelte';
+export type { UseSubmitTaskOptions, UseSubmitTaskMutateParams } from './task-hooks.svelte';
 export { useParsed, resetGlobalPath, syncGlobalPath } from './useParsed.svelte';
-export * from './useStepsForm.svelte';
+export type { UseStepsFormOptions, UseStepsFormReturn } from './useStepsForm.svelte';
+export { useStepsForm } from './useStepsForm.svelte';
 export { createHashRouterProvider, createHistoryRouterProvider } from './router-provider';
 export type { RouterNavigationResult, RouterProvider } from './router-provider';
 export {
@@ -210,12 +240,19 @@ export {
   createTypeBoxValidator,
 } from './helpers';
 export type { TypeBoxValidatorLike } from './helpers';
-export { TableState } from './table-state.svelte';
-export type { TableStateOptions } from './table-state.svelte';
-export type { UseInfiniteListOptions } from './hooks.svelte';
-export type { UseSelectOptions } from './hooks.svelte';
-export type { UseDeleteManyOptions, UseDeleteManyMutateParams } from './hooks.svelte';
-export type { UseFormReturn } from './form-hooks.svelte';
+export type {
+  StrictUseListOptions as UseListOptions,
+  StrictUseOneOptions as UseOneOptions,
+  StrictUseManyOptions as UseManyOptions,
+  StrictUseInfiniteListOptions as UseInfiniteListOptions,
+  StrictUseSelectOptions as UseSelectOptions,
+  StrictUseDeleteManyOptions as UseDeleteManyOptions,
+  StrictUseDeleteManyMutateParams as UseDeleteManyMutateParams,
+  StrictUseCreateManyMutateParams as UseCreateManyMutateParams,
+  StrictUseUpdateManyMutateParams as UseUpdateManyMutateParams,
+  StrictUseFormOptions as UseFormOptions,
+  StrictUseFormReturn as UseFormReturn,
+} from './strict-hooks.svelte';
 export type {
   TaskProvider,
   TaskDateValue,

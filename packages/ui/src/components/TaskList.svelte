@@ -1,5 +1,8 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import { useTaskList, getTaskProvider } from '@svadmin/core';
+  import { decodeTaskList } from '@svadmin/core/schema';
   import { useTranslation } from '@svadmin/core/i18n';
 
   import type { TaskProvider, TaskRecord } from '@svadmin/core';
@@ -24,7 +27,7 @@
 
   let {
     tasks,
-    taskProvider = getTaskProvider({ optional: true }) as TaskProvider<TaskRecord> | undefined,
+    taskProvider = getTaskProvider({ optional: true }) ?? undefined,
     params,
     dlq = false,
     title,
@@ -70,14 +73,21 @@
     },
   });
 
-  const resolvedTasks = $derived(tasks ?? query.data?.data ?? []);
+  const view = $derived.by(() => {
+    try {
+      return { data: decodeTaskList({ data: tasks === undefined ? query.data?.data ?? [] : tasks }).data, invalid: false };
+    } catch {
+      return { data: [], invalid: true };
+    }
+  });
+  const resolvedTasks = $derived(view.data);
   const resolvedTitle = $derived(title ?? (dlq ? i18n.t('task.dlqTitle') : i18n.t('task.listTitle')));
   const resolvedEmptyText = $derived(emptyText ?? (dlq ? i18n.t('task.noDlq') : i18n.t('task.noTasks')));
 
   function formatDate(value: unknown) {
-    if (!value) return '—';
-    const date = new Date(value as string | Date);
-    if (Number.isNaN(date.getTime())) return String(value);
+    if (typeof value !== 'string' || !value) return '—';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '—';
     return date.toLocaleString();
   }
 </script>
@@ -94,8 +104,9 @@
     </Card.Description>
   </Card.Header>
   <Card.Content class="svadmin-u-9335c39f6eff">
-    {#if useProviderData && taskProvider && query.isLoading}
-      <div class="svadmin-u-60fbb7713999 svadmin-u-aadad6871af8 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-bfa603190748">
+    {#if view.invalid || (useProviderData && query.isError)}
+      <p role="alert">{i18n.t('validation.invalidFormat')}</p>
+    {:else if useProviderData && taskProvider && query.isLoading}      <div class="svadmin-u-60fbb7713999 svadmin-u-aadad6871af8 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-bfa603190748">
         <Loader2 class="svadmin-u-d2347e8497a9 svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-afbdd13a380e" />
         {i18n.t('task.loadingList')}
       </div>
@@ -122,7 +133,7 @@
                       <div class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">{resolveTaskMessage(task)}</div>
                     {/if}
                     {#if showProgress && typeof resolveTaskProgress(task) === 'number'}
-                      <TaskProgressBar value={resolveTaskProgress(task)} />
+                      <TaskProgressBar {...definedOptions({ "value": resolveTaskProgress(task) })} />
                     {/if}
                   </div>
                 </Table.Cell>

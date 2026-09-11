@@ -159,7 +159,7 @@ function createProvider(options: {
     storage: options.storage,
     storageKey: options.storageKey,
     fetcher: options.fetcher,
-    refreshLock: options.refreshLock,
+    ...(options.refreshLock === undefined ? {} : { refreshLock: options.refreshLock }),
     autoRefresh: options.autoRefresh ?? false,
     manualEndpoints: endpoints,
   });

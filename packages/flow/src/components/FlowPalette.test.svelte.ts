@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/svelte';
 import { describe, expect, it, vi } from 'vitest';
 import { decodeFlowPaletteItem, FLOW_PALETTE_MIME_TYPE } from '../flow-dnd.js';
+import type { FlowPaletteItem } from '../types.js';
 import FlowPalette from './FlowPalette.svelte';
 
 const items = [
@@ -22,17 +23,20 @@ describe('FlowPalette', () => {
   });
 
   it('serializes a template into its package-specific drag payload', async () => {
-    const dataTransfer = { effectAllowed: 'none', setData: vi.fn() } as unknown as DataTransfer;
+    const dataTransfer = new DataTransfer();
     render(FlowPalette, { items });
 
-    await fireEvent.dragStart(screen.getByRole('button', { name: /review/i }), { dataTransfer });
+    const event = new DragEvent('dragstart', { bubbles: true, cancelable: true });
+    // Happy DOM currently aliases DragEvent to Event and drops dataTransfer.
+    Object.defineProperty(event, 'dataTransfer', { value: dataTransfer });
+    await fireEvent(screen.getByRole('button', { name: /review/i }), event);
 
-    expect(dataTransfer.setData).toHaveBeenCalledWith(FLOW_PALETTE_MIME_TYPE, expect.any(String));
-    expect(decodeFlowPaletteItem(vi.mocked(dataTransfer.setData).mock.calls[0]?.[1] ?? '')).toEqual(items[0]);
+    expect(dataTransfer.effectAllowed).toBe('copy');
+    expect(decodeFlowPaletteItem(dataTransfer.getData(FLOW_PALETTE_MIME_TYPE))).toEqual(items[0]);
   });
 
   it('keeps click insertion host-controlled', async () => {
-    const onitemselect = vi.fn();
+    const onitemselect = vi.fn<(item: FlowPaletteItem) => void>();
     render(FlowPalette, { items, onitemselect });
 
     await fireEvent.click(screen.getByRole('button', { name: /review/i }));

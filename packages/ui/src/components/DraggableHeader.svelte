@@ -1,4 +1,4 @@
-<script lang="ts">
+<script lang="ts" generics="TColumn extends { id: string }">
   /**
    * DraggableHeader — Wraps table header cells with HTML5 Drag and Drop
    * to enable column reorder. The parent owns persistence and restoration.
@@ -12,11 +12,6 @@
    */
   import type { Snippet } from 'svelte';
 
-  interface Column {
-    id: string;
-    [key: string]: unknown;
-  }
-
   interface DragHeaderProps {
     draggable: true;
     ondragstart: (event: DragEvent) => void;
@@ -29,9 +24,9 @@
   }
 
   interface Props {
-    columns: Column[];
-    onReorder: (newOrder: Column[]) => void;
-    header: Snippet<[Column, number, DragHeaderProps]>;
+    columns: TColumn[];
+    onReorder: (newOrder: TColumn[]) => void;
+    header: Snippet<[TColumn, number, DragHeaderProps]>;
   }
 
   let { columns, onReorder, header }: Props = $props();
@@ -65,6 +60,7 @@
 
     const newColumns = [...columns];
     const [moved] = newColumns.splice(dragIndex, 1);
+    if (moved === undefined) return;
     newColumns.splice(index, 0, moved);
 
     onReorder(newColumns);

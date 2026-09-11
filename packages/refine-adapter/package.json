@@ -25,7 +25,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vibeunion/svadmin.git",
+    "url": "git+https://github.com/vibeunion/svadmin.git",
     "directory": "packages/refine-adapter"
   },
   "peerDependenciesMeta": {

@@ -32,6 +32,8 @@ export interface GeneratedFile {
   content: string;
 }
 
+export type InferFetch = (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
+
 export interface InferExecutionResult {
   resources: ResourceDefinition[];
   bundles: Map<string, InferResult>;
@@ -52,73 +54,101 @@ export function parseInferArguments(args: string[]): InferCommandOptions {
     format: 'all',
   };
 
-  for (let i = 0; i < args.length; i++) {
-    const arg = args[i];
+  const argumentsIterator = args.values();
+  function requireArgument(flag: string): string {
+    const next = argumentsIterator.next();
+    if (next.done || !next.value.trim() || next.value.startsWith('-')) {
+      throw new Error(`Missing value for ${flag}`);
+    }
+    return next.value;
+  }
+  function sourceType(value: string): NonNullable<InferCommandOptions['type']> {
+    switch (value) {
+      case 'rest':
+      case 'openapi':
+      case 'graphql':
+      case 'auto':
+        return value;
+      default:
+        throw new Error(`Invalid source type: ${value}`);
+    }
+  }
+  function outputFormat(value: string): NonNullable<InferCommandOptions['format']> {
+    switch (value) {
+      case 'all':
+      case 'resource':
+      case 'typebox':
+      case 'components':
+        return value;
+      default:
+        throw new Error(`Invalid output format: ${value}`);
+    }
+  }
+  function addHeader(headerLine: string): void {
+    const colonIndex = headerLine.indexOf(':');
+    const key = headerLine.slice(0, colonIndex).trim();
+    if (colonIndex <= 0 || !key) {
+      throw new Error(`Invalid header: ${headerLine}`);
+    }
+    options.headers ??= {};
+    options.headers[key] = headerLine.slice(colonIndex + 1).trim();
+  }
+
+  for (const arg of argumentsIterator) {
+    if (arg.startsWith('--') && arg.indexOf('=') === arg.length - 1) {
+      throw new Error(`Missing value for ${arg.slice(0, -1)}`);
+    }
 
     if (arg === '--write' || arg === '-w') {
       options.write = true;
     } else if (arg === '--dry-run') {
       options.write = false;
     } else if (arg === '--url' || arg === '-u') {
-      options.url = args[++i];
+      options.url = requireArgument(arg);
     } else if (arg.startsWith('--url=')) {
       options.url = arg.slice(6);
     } else if (arg === '--file' || arg === '-f') {
-      options.file = args[++i];
+      options.file = requireArgument(arg);
     } else if (arg.startsWith('--file=')) {
       options.file = arg.slice(7);
     } else if (arg === '--type' || arg === '-t') {
-      options.type = args[++i] as InferCommandOptions['type'];
+      options.type = sourceType(requireArgument(arg));
     } else if (arg.startsWith('--type=')) {
-      options.type = arg.slice(7) as InferCommandOptions['type'];
+      options.type = sourceType(arg.slice(7));
     } else if (arg === '--resource' || arg === '-r') {
-      options.resource = args[++i];
+      options.resource = requireArgument(arg);
     } else if (arg.startsWith('--resource=')) {
       options.resource = arg.slice(11);
     } else if (arg === '--out-dir' || arg === '-o' || arg === '--output') {
-      options.outDir = args[++i];
+      options.outDir = requireArgument(arg);
     } else if (arg.startsWith('--out-dir=')) {
       options.outDir = arg.slice(10);
     } else if (arg.startsWith('--output=')) {
       options.outDir = arg.slice(9);
     } else if (arg === '--primary-key' || arg === '-k') {
-      options.primaryKey = args[++i];
+      options.primaryKey = requireArgument(arg);
     } else if (arg.startsWith('--primary-key=')) {
       options.primaryKey = arg.slice(14);
     } else if (arg === '--fields') {
-      options.fields = args[++i];
+      options.fields = requireArgument(arg);
     } else if (arg.startsWith('--fields=')) {
       options.fields = arg.slice(9);
     } else if (arg === '--header' || arg === '-H') {
-      const headerLine = args[++i] ?? '';
-      const colonIndex = headerLine.indexOf(':');
-      if (colonIndex > 0) {
-        const key = headerLine.slice(0, colonIndex).trim();
-        const value = headerLine.slice(colonIndex + 1).trim();
-        if (!options.headers) options.headers = {};
-        options.headers[key] = value;
-      }
+      addHeader(requireArgument(arg));
     } else if (arg.startsWith('--header=')) {
-      const headerLine = arg.slice(9);
-      const colonIndex = headerLine.indexOf(':');
-      if (colonIndex > 0) {
-        const key = headerLine.slice(0, colonIndex).trim();
-        const value = headerLine.slice(colonIndex + 1).trim();
-        if (!options.headers) options.headers = {};
-        options.headers[key] = value;
-      }
+      addHeader(arg.slice(9));
     } else if (arg === '--method' || arg === '-m') {
-      options.method = (args[++i] ?? 'GET').toUpperCase();
+      options.method = requireArgument(arg).toUpperCase();
     } else if (arg.startsWith('--method=')) {
       options.method = arg.slice(9).toUpperCase();
     } else if (arg === '--body' || arg === '-b') {
-      options.body = args[++i];
+      options.body = requireArgument(arg);
     } else if (arg.startsWith('--body=')) {
       options.body = arg.slice(7);
     } else if (arg === '--format') {
-      options.format = args[++i] as InferCommandOptions['format'];
+      options.format = outputFormat(requireArgument(arg));
     } else if (arg.startsWith('--format=')) {
-      options.format = arg.slice(9) as InferCommandOptions['format'];
+      options.format = outputFormat(arg.slice(9));
     } else if (arg === '--help' || arg === '-h') {
       printInferHelp();
       process.exit(0);
@@ -130,6 +160,8 @@ export function parseInferArguments(args: string[]): InferCommandOptions {
       } else {
         options.resource = arg;
       }
+    } else {
+      throw new Error(`Unexpected argument: ${arg}`);
     }
   }
 
@@ -168,12 +200,43 @@ ${pc.bold('EXAMPLES:')}
 `);
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isOpenAPIDocument(value: unknown): value is Record<string, unknown> {
+  return isRecord(value) &&
+    ('openapi' in value || 'swagger' in value || ('paths' in value && 'components' in value));
+}
+
+function isGraphQLDocument(value: unknown): boolean {
+  return isRecord(value) && (
+    '__schema' in value ||
+    (isRecord(value['data']) && '__schema' in value['data']) ||
+    Array.isArray(value['types'])
+  );
+}
+
+function readSampleRecords(value: unknown): Record<string, unknown>[] {
+  const records: unknown[] = Array.isArray(value)
+    ? value
+    : isRecord(value) && Array.isArray(value['data'])
+      ? value['data']
+      : isRecord(value) && Array.isArray(value['items'])
+        ? value['items']
+        : [value];
+  if (!records.every(isRecord)) {
+    throw new Error('REST samples must be objects or arrays of objects');
+  }
+  return records;
+}
+
 /**
  * Fetch or load data from source (URL or File).
  */
 export async function loadSourceData(
   options: InferCommandOptions,
-  customFetch: typeof fetch = fetch
+  customFetch: InferFetch = fetch
 ): Promise<{
   sourceType: 'openapi' | 'graphql' | 'rest';
   data: unknown;
@@ -199,49 +262,10 @@ export async function loadSourceData(
       };
     }
 
+    let json: unknown;
     try {
-      const json = JSON.parse(content);
-      if (
-        (typeof json === 'object' && json !== null) &&
-        ('openapi' in json || 'swagger' in json || ('paths' in json && 'components' in json))
-      ) {
-        return {
-          sourceType: 'openapi',
-          data: json,
-          derivedResourceName: options.resource,
-          sourceDescription: options.file,
-        };
-      }
-
-      if (
-        (typeof json === 'object' && json !== null) &&
-        ('__schema' in json || ('data' in json && json.data && '__schema' in json.data) || ('types' in json && Array.isArray(json.types)))
-      ) {
-        return {
-          sourceType: 'graphql',
-          data: json,
-          derivedResourceName: options.resource,
-          sourceDescription: options.file,
-        };
-      }
-
-      // REST sample data
-      const records = Array.isArray(json)
-        ? json
-        : Array.isArray(json.data)
-        ? json.data
-        : Array.isArray(json.items)
-        ? json.items
-        : [json];
-
-      return {
-        sourceType: 'rest',
-        data: records,
-        derivedResourceName: options.resource || baseName,
-        sourceDescription: options.file,
-      };
+      json = JSON.parse(content);
     } catch {
-      // If it fails JSON parse, but has GraphQL schema syntax
       if (content.includes('type ') || content.includes('enum ') || content.includes('schema ')) {
         return {
           sourceType: 'graphql',
@@ -252,6 +276,33 @@ export async function loadSourceData(
       }
       throw new Error(`Unable to parse file ${filePath}. Expected valid JSON or GraphQL SDL schema.`);
     }
+      if (isOpenAPIDocument(json)) {
+        return {
+          sourceType: 'openapi',
+          data: json,
+          ...(options.resource === undefined ? {} : { derivedResourceName: options.resource }),
+          sourceDescription: options.file,
+        };
+      }
+
+      if (isGraphQLDocument(json)) {
+        return {
+          sourceType: 'graphql',
+          data: json,
+          ...(options.resource === undefined ? {} : { derivedResourceName: options.resource }),
+          sourceDescription: options.file,
+        };
+      }
+
+      // REST sample data
+      const records = readSampleRecords(json);
+
+      return {
+        sourceType: 'rest',
+        data: records,
+        derivedResourceName: options.resource || baseName,
+        sourceDescription: options.file,
+      };
   }
 
   if (options.url) {
@@ -277,7 +328,7 @@ export async function loadSourceData(
       return {
         sourceType: 'graphql',
         data: json,
-        derivedResourceName: options.resource,
+        ...(options.resource === undefined ? {} : { derivedResourceName: options.resource }),
         sourceDescription: url,
       };
     }
@@ -289,35 +340,29 @@ export async function loadSourceData(
         Accept: 'application/json',
         ...(options.headers ?? {}),
       },
-      body: options.body,
+      ...(options.body === undefined ? {} : { body: options.body }),
     });
 
     if (!response.ok) {
       throw new Error(`HTTP request failed: HTTP ${response.status} ${response.statusText}`);
     }
 
-    const json = (await response.json()) as Record<string, unknown>;
+    const json: unknown = await response.json();
 
-    if (
-      (typeof json === 'object' && json !== null) &&
-      ('openapi' in json || 'swagger' in json || ('paths' in json && 'components' in json))
-    ) {
+    if (isOpenAPIDocument(json)) {
       return {
         sourceType: 'openapi',
         data: json,
-        derivedResourceName: options.resource,
+        ...(options.resource === undefined ? {} : { derivedResourceName: options.resource }),
         sourceDescription: url,
       };
     }
 
-    if (
-      (typeof json === 'object' && json !== null) &&
-      ('__schema' in json || ('data' in json && (json.data as Record<string, unknown>)?.__schema))
-    ) {
+    if (isGraphQLDocument(json)) {
       return {
         sourceType: 'graphql',
         data: json,
-        derivedResourceName: options.resource,
+        ...(options.resource === undefined ? {} : { derivedResourceName: options.resource }),
         sourceDescription: url,
       };
     }
@@ -334,13 +379,7 @@ export async function loadSourceData(
       }
     }
 
-    const records = Array.isArray(json)
-      ? json
-      : Array.isArray(json.data)
-      ? json.data
-      : Array.isArray(json.items)
-      ? json.items
-      : [json];
+    const records = readSampleRecords(json);
 
     return {
       sourceType: 'rest',
@@ -427,7 +466,7 @@ export function planGeneratedFiles(
  */
 export async function executeInfer(
   options: InferCommandOptions,
-  customFetch: typeof fetch = fetch
+  customFetch: InferFetch = fetch
 ): Promise<InferExecutionResult> {
   const loaded = await loadSourceData(options, customFetch);
   const primaryKey = options.primaryKey ?? 'id';
@@ -435,9 +474,10 @@ export async function executeInfer(
   const bundles = new Map<string, InferResult>();
 
   if (loaded.sourceType === 'openapi') {
-    resources = inferFromOpenAPI(loaded.data as Record<string, unknown>, {
+    if (!isRecord(loaded.data)) throw new Error('OpenAPI source must be an object');
+    resources = inferFromOpenAPI(loaded.data, {
       primaryKey,
-      include: options.resource ? [options.resource] : undefined,
+      ...(options.resource ? { include: [options.resource] } : {}),
     });
     for (const res of resources) {
       bundles.set(res.name, generateResourceBundle(res));
@@ -445,7 +485,7 @@ export async function executeInfer(
   } else if (loaded.sourceType === 'graphql') {
     resources = inferFromGraphQL(loaded.data, {
       primaryKey,
-      include: options.resource ? [options.resource] : undefined,
+      ...(options.resource ? { include: [options.resource] } : {}),
     });
     for (const res of resources) {
       bundles.set(res.name, generateResourceBundle(res));
@@ -453,9 +493,7 @@ export async function executeInfer(
   } else {
     // REST sample data
     const resName = options.resource || loaded.derivedResourceName || 'items';
-    const sampleArray = Array.isArray(loaded.data)
-      ? (loaded.data as Record<string, unknown>[])
-      : [loaded.data as Record<string, unknown>];
+    const sampleArray = readSampleRecords(loaded.data);
     const inferRes = inferResource(resName, sampleArray, { primaryKey });
     resources = [inferRes.resource];
     bundles.set(resName, inferRes);
@@ -484,7 +522,7 @@ export async function executeInfer(
     files,
     sourceDescription: loaded.sourceDescription,
     wrote,
-    outDir: options.outDir,
+    ...(options.outDir === undefined ? {} : { outDir: options.outDir }),
   };
 }
 
@@ -555,7 +593,7 @@ export function printInferResult(result: InferExecutionResult): void {
  * Interactive wizard prompt when run without arguments in terminal.
  */
 async function promptInferWizard(): Promise<InferCommandOptions> {
-  const answers = await prompts([
+  const answers: unknown = await prompts([
     {
       type: 'select',
       name: 'sourceType',
@@ -594,15 +632,35 @@ async function promptInferWizard(): Promise<InferCommandOptions> {
     },
   ]);
 
-  const targetPath = answers.pathOrUrl || answers.endpointUrl;
-  const isUrl = targetPath?.startsWith('http://') || targetPath?.startsWith('https://');
+  return parseInferWizardAnswers(answers);
+}
 
+export function parseInferWizardAnswers(answers: unknown): InferCommandOptions {
+  if (!isRecord(answers)) throw new Error('Invalid inference wizard answers');
+  const sourceType = answers['sourceType'];
+  if (sourceType !== 'rest-file' && sourceType !== 'rest-url' && sourceType !== 'openapi' && sourceType !== 'graphql') {
+    throw new Error('Invalid inference wizard source type');
+  }
+  const targetPath = sourceType === 'rest-file' || sourceType === 'openapi'
+    ? answers['pathOrUrl']
+    : answers['endpointUrl'];
+  if (typeof targetPath !== 'string' || !targetPath.trim()) {
+    throw new Error('Inference wizard requires a URL or file path');
+  }
+  const outDir = answers['outDir'];
+  const write = answers['write'];
+  if (typeof outDir !== 'string' || !outDir.trim() || typeof write !== 'boolean') {
+    throw new Error('Invalid inference wizard output options');
+  }
+  const isUrl = targetPath.startsWith('http://') || targetPath.startsWith('https://');
+  if ((sourceType === 'rest-url' || sourceType === 'graphql') && !isUrl) {
+    throw new Error('Inference wizard requires an HTTP(S) endpoint');
+  }
   return {
-    url: isUrl ? targetPath : undefined,
-    file: !isUrl ? targetPath : undefined,
-    type: answers.sourceType.startsWith('graphql') ? 'graphql' : answers.sourceType.startsWith('openapi') ? 'openapi' : 'rest',
-    outDir: answers.outDir,
-    write: answers.write,
+    ...(isUrl ? { url: targetPath } : { file: targetPath }),
+    type: sourceType === 'graphql' ? 'graphql' : sourceType === 'openapi' ? 'openapi' : 'rest',
+    outDir,
+    write,
   };
 }
 

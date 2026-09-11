@@ -1,7 +1,6 @@
 {
   "name": "@svadmin/surface",
-  "version": "0.8.5",
-  "description": "Validated declarative surfaces for svadmin dashboards",
+  "version": "0.8.5",  "description": "Validated declarative surfaces for svadmin dashboards",
   "type": "module",
   "sideEffects": false,
   "files": [
@@ -26,8 +25,7 @@
   },
   "peerDependencies": {
     "@svadmin/core": ">=0.34.2 <0.50.0",
-    "@svadmin/ui": ">=0.40.6 <0.70.0",
-    "svelte": "^5.56.8"
+    "@svadmin/ui": ">=0.40.6 <0.70.0",    "svelte": "^5.56.8"
   },
   "dependencies": {
     "@sinclair/typebox": "^0.34.52"
@@ -53,7 +51,7 @@
   "author": "zuohuadong",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vibeunion/svadmin.git",
+    "url": "git+https://github.com/vibeunion/svadmin.git",
     "directory": "packages/surface"
   },
   "homepage": "https://github.com/vibeunion/svadmin#readme",

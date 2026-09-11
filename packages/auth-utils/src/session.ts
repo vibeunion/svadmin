@@ -62,11 +62,11 @@ function base64urlDecode(str: string): string {
   }
   const padded = str + '='.repeat((4 - (str.length % 4)) % 4);
   const binString = atob(padded.replace(/-/g, '+').replace(/_/g, '/'));
-  const bytes = Uint8Array.from(binString, (m) => m.codePointAt(0) as number);
+  const bytes = Uint8Array.from(binString, (m) => m.charCodeAt(0));
   return new TextDecoder().decode(bytes);
 }
 
-function hexToBytes(hex: string): Uint8Array | null {
+function hexToBytes(hex: string): Uint8Array<ArrayBuffer> | null {
   if (!/^[0-9a-f]{64}$/i.test(hex)) return null;
   const bytes = new Uint8Array(hex.length / 2);
   for (let index = 0; index < hex.length; index += 2) {
@@ -78,17 +78,18 @@ function hexToBytes(hex: string): Uint8Array | null {
 function isSessionPayload(value: unknown): value is SessionPayload {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) return false;
 
-  const payload = value as Record<string, unknown>;
+  if (!('sub' in value) || !('iat' in value) || !('exp' in value)) return false;
+  const payload = value;
   return (
-    typeof payload.sub === 'string' &&
-    payload.sub.length > 0 &&
-    typeof payload.iat === 'number' &&
-    Number.isSafeInteger(payload.iat) &&
-    payload.iat >= 0 &&
-    typeof payload.exp === 'number' &&
-    Number.isSafeInteger(payload.exp) &&
-    payload.exp > 0 &&
-    payload.exp >= payload.iat
+    typeof payload['sub'] === 'string' &&
+    payload['sub'].length > 0 &&
+    typeof payload['iat'] === 'number' &&
+    Number.isSafeInteger(payload['iat']) &&
+    payload['iat'] >= 0 &&
+    typeof payload['exp'] === 'number' &&
+    Number.isSafeInteger(payload['exp']) &&
+    payload['exp'] > 0 &&
+    payload['exp'] >= payload['iat']
   );
 }
 
@@ -132,10 +133,10 @@ export function createSessionManager(
   return {
     async create(data: Record<string, unknown>): Promise<string> {
       const now = Math.floor(Date.now() / 1000);
-      const subject = typeof data.userId === 'string'
-        ? data.userId
-        : typeof data.sub === 'string'
-          ? data.sub
+      const subject = typeof data['userId'] === 'string'
+        ? data['userId']
+        : typeof data['sub'] === 'string'
+          ? data['sub']
           : '';
       const payload: SessionPayload = {
         ...data,
@@ -153,6 +154,7 @@ export function createSessionManager(
       if (parts.length !== 2) return null;
 
       const [payloadStr, signature] = parts;
+      if (!payloadStr || !signature) return null;
 
       try {
         const signatureBytes = hexToBytes(signature);
@@ -162,7 +164,7 @@ export function createSessionManager(
         const validSignature = await crypto.subtle.verify(
           'HMAC',
           key,
-          signatureBytes as unknown as BufferSource,
+          signatureBytes,
           new TextEncoder().encode(payloadStr),
         );
         if (!validSignature) return null;

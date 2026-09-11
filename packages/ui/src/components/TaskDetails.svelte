@@ -1,5 +1,8 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import { useTask, getTaskProvider } from '@svadmin/core';
+  import { decodeTaskRecord } from '@svadmin/core/schema';
   import { useTranslation } from '@svadmin/core/i18n';
 
   import type { TaskProvider, TaskRecord } from '@svadmin/core';
@@ -27,7 +30,7 @@
   let {
     task,
     taskId,
-    taskProvider = getTaskProvider({ optional: true }) as TaskProvider<TaskRecord> | undefined,
+    taskProvider = getTaskProvider({ optional: true }) ?? undefined,
     title,
     useProviderData = !task && !!taskId,
     queryOptions,
@@ -59,13 +62,21 @@
     },
   });
 
-  const resolvedTask = $derived(task ?? query.data);
+  const view = $derived.by(() => {
+    const value = task === undefined ? query.data : task;
+    try {
+      return { data: value === undefined ? undefined : decodeTaskRecord(value, taskId), invalid: false };
+    } catch {
+      return { data: undefined, invalid: true };
+    }
+  });
+  const resolvedTask = $derived(view.data);
   const resolvedTitle = $derived(title ?? i18n.t('task.detailsTitle'));
 
   function formatDate(value: unknown) {
-    if (!value) return '—';
-    const date = new Date(value as string | Date);
-    if (Number.isNaN(date.getTime())) return String(value);
+    if (typeof value !== 'string' || !value) return '—';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '—';
     return date.toLocaleString();
   }
 
@@ -90,8 +101,9 @@
     </Card.Description>
   </Card.Header>
   <Card.Content class="svadmin-u-b43b4c086d9a svadmin-u-9335c39f6eff">
-    {#if useProviderData && taskProvider && query.isLoading}
-      <div class="svadmin-u-60fbb7713999 svadmin-u-aadad6871af8 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-bfa603190748">
+    {#if view.invalid || (useProviderData && query.isError)}
+      <p role="alert">{i18n.t('validation.invalidFormat')}</p>
+    {:else if useProviderData && taskProvider && query.isLoading}      <div class="svadmin-u-60fbb7713999 svadmin-u-aadad6871af8 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-bfa603190748">
         <Loader2 class="svadmin-u-d2347e8497a9 svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-afbdd13a380e" />
         {i18n.t('task.loadingDetail')}
       </div>
@@ -102,7 +114,7 @@
       </div>
 
       {#if typeof resolveTaskProgress(resolvedTask) === 'number'}
-        <TaskProgressBar value={resolveTaskProgress(resolvedTask)} />
+        <TaskProgressBar {...definedOptions({ "value": resolveTaskProgress(resolvedTask) })} />
       {/if}
 
       <div class="svadmin-u-f3c543ad5fe9 svadmin-u-0c3bc98565dd svadmin-u-e4d6f343b9ff">

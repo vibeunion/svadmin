@@ -15,7 +15,7 @@ describe('JSON value boundary', () => {
 
   test('rejects cyclic values while allowing repeated non-cyclic references', () => {
     const cyclic: Record<string, unknown> = {};
-    cyclic.self = cyclic;
+    cyclic['self'] = cyclic;
     expect(jsonValueIssue(cyclic)).toEqual(expect.objectContaining({ path: ['self'] }));
 
     const shared = { value: 1 };

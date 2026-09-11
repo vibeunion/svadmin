@@ -7,6 +7,7 @@ const checks = [
   ['diff', []],
   ['ui:evidence', []],
   ['build:packages', []],
+  ['check:types:dependencies', []],
   ['build:example', []],
   ['check:lite:ssr', []],
   ['pack:check', []],

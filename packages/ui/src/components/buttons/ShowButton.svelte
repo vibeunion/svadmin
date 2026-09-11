@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import type { Snippet } from 'svelte';
   import { getResource, useNavigation, useCan, useTranslation } from '@svadmin/core';
   import { Button } from '../ui/button/index.js';
@@ -17,7 +19,7 @@
     accessControl = { enabled: true, hideIfUnauthorized: true },
     onBeforeNavigate,
     class: className = '',
-  } = $props<{
+  }: {
     resource: string;
     recordItemId: string | number;
     label?: string;
@@ -26,7 +28,7 @@
     accessControl?: ButtonAccessControl;
     onBeforeNavigate?: (navigate: () => void) => void;
     class?: string;
-  }>();
+  } = $props();
 
   const nav = useNavigation();
   const resourceDefinition = $derived.by(() => {
@@ -36,13 +38,13 @@
       return null;
     }
   });
-  const can = useCan(() => ({
+  const can = useCan(() => (definedOptions({
     resource,
     action: 'show',
     params: withRecordId(accessControl?.params, recordItemId),
     meta: accessControl?.meta,
     queryOptions: { enabled: accessControl?.enabled ?? true }
-  }));
+  })));
   const hidden = $derived(resourceDefinition?.canShow === false || (accessControl?.hideIfUnauthorized && !can.allowed));
   const displayText = $derived(label ?? i18n.t('common.detail'));
 

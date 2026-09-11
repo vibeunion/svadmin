@@ -94,10 +94,10 @@ describe('Layout auth scope', () => {
 
       expect(askAIEvents).toEqual([{
         query: 'scoped question',
-        scope: assistant.dataset.scope,
+        scope: assistant.dataset['scope'],
       }]);
-      expect(assistant.dataset.ownerScope).toBe(
-        assistant.closest<HTMLElement>('[data-svadmin-layout-scope]')?.dataset.svadminLayoutScope,
+      expect(assistant.dataset['ownerScope']).toBe(
+        assistant.closest<HTMLElement>('[data-svadmin-layout-scope]')?.dataset['svadminLayoutScope'],
       );
     } finally {
       window.removeEventListener('svadmin:ask-ai', handleAskAI);
@@ -125,7 +125,7 @@ describe('Layout auth scope', () => {
       const skipLink = layoutHost.querySelector<HTMLButtonElement>('button[data-svadmin-skip-link]');
       const main = layoutHost.querySelector<HTMLElement>('main[data-svadmin-main]');
       if (!skipLink || !main) throw new Error('Expected each Layout to render its skip control and main content');
-      expect(skipLink.dataset.svadminSkipLink).toBe(main.id);
+      expect(skipLink.dataset['svadminSkipLink']).toBe(main.id);
       mainIds.add(main.id);
 
       const hashBeforeFocus = window.location.hash;

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import { untrack } from 'svelte';
   import type {
     AuthProvider,
@@ -101,8 +103,8 @@
     <section data-testid={`persist-callback-chat-${instance}`}>
       <ChatDialog
         persistKey={chatPersistProbe.key}
-        onPersist={chatPersistProbe.onPersist}
-        onRestore={chatPersistProbe.onRestore}
+        {...definedOptions({ "onPersist": chatPersistProbe.onPersist })}
+        {...definedOptions({ "onRestore": chatPersistProbe.onRestore })}
       />
     </section>
   {/if}
@@ -113,22 +115,16 @@
 {/snippet}
 
 <AdminApp
-  {dataProvider}
-  {providers}
-  {providerBundle}
-  {authProvider}
-  {chatProvider}
-  {taskProvider}
+  {...definedOptions({ "dataProvider": dataProvider })}
+  {...definedOptions({ "providers": providers })}
+  {...definedOptions({ "providerBundle": providerBundle })}
+  {...definedOptions({ authProvider, chatProvider, taskProvider })}
   {routerProvider}
   {resources}
   bind:locale={boundLocale}
-  {i18nProvider}
-  {defaultTheme}
-  {themeConfig}
-  {queryClient}
-  {tenant}
-  aiAssistant={aiAssistant as never}
-  dashboard={dashboard as never}
+  {...definedOptions({ i18nProvider, defaultTheme, themeConfig, queryClient, tenant })}
+  {aiAssistant}
+  {dashboard}
 />
 
 <output data-testid={`bound-locale-${instance}`}>{boundLocale ?? ''}</output>

@@ -1,21 +1,22 @@
 <script lang="ts">
   import { useList } from '@svadmin/core';
+  import { posts, users, comments } from '../resource-contracts';
   import { FileText, Users, MessageCircle, Loader2 } from '@lucide/svelte';
 
-  const postsQuery = useList({ resource: 'posts', pagination: { current: 1, pageSize: 1 } });
-  const usersQuery = useList({ resource: 'users', pagination: { current: 1, pageSize: 1 } });
-  const commentsQuery = useList({ resource: 'comments', pagination: { current: 1, pageSize: 1 } });
+  const postsQuery = useList({ resource: posts, pagination: { current: 1, pageSize: 1 } });
+  const usersQuery = useList({ resource: users, pagination: { current: 1, pageSize: 1 } });
+  const commentsQuery = useList({ resource: comments, pagination: { current: 1, pageSize: 1 } });
 
   const stats = $derived([
-    { label: 'Total Posts', value: $postsQuery.data?.total ?? '—', Icon: FileText, color: 'bg-blue-50 text-blue-600' },
-    { label: 'Total Users', value: $usersQuery.data?.total ?? '—', Icon: Users, color: 'bg-green-50 text-green-600' },
-    { label: 'Total Comments', value: $commentsQuery.data?.total ?? '—', Icon: MessageCircle, color: 'bg-purple-50 text-purple-600' },
+    { label: 'Total Posts', value: postsQuery.data?.total ?? '—', Icon: FileText, color: 'bg-blue-50 text-blue-600' },
+    { label: 'Total Users', value: usersQuery.data?.total ?? '—', Icon: Users, color: 'bg-green-50 text-green-600' },
+    { label: 'Total Comments', value: commentsQuery.data?.total ?? '—', Icon: MessageCircle, color: 'bg-purple-50 text-purple-600' },
   ]);
 
-  const isLoading = $derived($postsQuery.isLoading || $usersQuery.isLoading || $commentsQuery.isLoading);
+  const isLoading = $derived(postsQuery.isLoading || usersQuery.isLoading || commentsQuery.isLoading);
 
-  const recentPosts = useList({ resource: 'posts', pagination: { current: 1, pageSize: 5 } });
-  const recentUsers = useList({ resource: 'users', pagination: { current: 1, pageSize: 5 } });
+  const recentPosts = useList({ resource: posts, pagination: { current: 1, pageSize: 5 } });
+  const recentUsers = useList({ resource: users, pagination: { current: 1, pageSize: 5 } });
 </script>
 
 <div class="space-y-6">
@@ -48,7 +49,7 @@
         <a href="#/posts" class="text-sm text-primary hover:underline">View all</a>
       </div>
       <div class="divide-y divide-gray-50">
-        {#each $recentPosts.data?.data ?? [] as post, _i (_i)}
+        {#each recentPosts.data?.data ?? [] as post, _i (_i)}
           <div class="flex items-center justify-between px-5 py-3">
             <div>
               <p class="text-sm font-medium text-gray-900">{post.title}</p>
@@ -65,7 +66,7 @@
         <a href="#/users" class="text-sm text-primary hover:underline">View all</a>
       </div>
       <div class="divide-y divide-gray-50">
-        {#each $recentUsers.data?.data ?? [] as user, _i (_i)}
+        {#each recentUsers.data?.data ?? [] as user, _i (_i)}
           <div class="flex items-center justify-between px-5 py-3">
             <div>
               <p class="text-sm font-medium text-gray-900">{user.name}</p>

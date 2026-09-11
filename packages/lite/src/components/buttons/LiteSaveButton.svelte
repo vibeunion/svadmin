@@ -17,6 +17,9 @@
 
 <button
   type="submit"
+  data-svadmin-button
+  data-variant="default"
+  data-size={size}
   class="lite-btn lite-btn-primary {size === 'sm' ? 'lite-btn-sm' : ''} {className}"
   title={t('common.save') || 'Save'}
 >

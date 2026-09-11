@@ -50,8 +50,17 @@ function useTranslation() {
   return { t: (key: string) => translations[key] ?? key };
 }
 
-vi.mock('@svadmin/core', () => ({
+vi.mock('@svadmin/core', async original => {
+  const actual = await original<typeof import('@svadmin/core')>();
+  const { Type } = await import('@sinclair/typebox');
+  const contract = actual.defineResource('users', { record: Type.Object({ id: Type.String() }) });
+  return {
+  ...actual,
+  useResourceContract: () => ({ resource: contract, dataProviderName: 'default', meta: undefined }),
+  useDelete: () => ({ mutation: { mutateAsync: vi.fn() } }),
   captureAdminContext: () => ({
+    providers: {},
+    getResource: () => mocks.resource,
     accessControlProvider: { can: vi.fn() },
     agentProvider: undefined,
     chatProvider: undefined,
@@ -64,8 +73,9 @@ vi.mock('@svadmin/core', () => ({
   getResource: () => mocks.resource,
   getResources: () => [mocks.resource],
   toggleTheme: vi.fn(),
-  useCan: (options: () => { resource: string; action: string; params?: Record<string, unknown> }) => {
-    const request = options();
+  useCan: (options: () => { resource: string; action: string; id?: string | number; params?: Record<string, unknown> }) => {
+    const current = options();
+    const request = current.id === undefined ? current : { ...current, params: { ...current.params, id: current.id } };
     mocks.permissionRequests.push(request);
     return {
       get allowed() { return !mocks.deniedActions.has(request.action); },
@@ -73,10 +83,14 @@ vi.mock('@svadmin/core', () => ({
       reason: undefined,
     };
   },
-  useDelete: () => ({ mutation: { mutateAsync: vi.fn() } }),
   useNavigation: () => mocks.navigation,
   useParsed: () => ({ resource: 'users', action: 'list', id: undefined }),
   useTranslation,
+  };
+});
+
+vi.mock('@svadmin/core/unsafe', () => ({
+  useDelete: () => ({ mutation: { mutateAsync: vi.fn() } }),
 }));
 
 vi.mock('@svadmin/core/i18n', () => ({ useTranslation }));

@@ -40,7 +40,7 @@
   }
 
   function handleFileSelect(e: Event) {
-    const file = (e.target as HTMLInputElement).files?.[0];
+    const file = e.target instanceof HTMLInputElement ? e.target.files?.[0] : undefined;
     if (file) processFile(file);
   }
 
@@ -162,8 +162,7 @@
         {#each importOptions as option, i (option.key)}
           <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-0c3bc98565dd">
             <Label for="import-option-{i}" class="svadmin-u-fc7473ca09eb svadmin-u-8ecebc9f80e6 svadmin-u-d4108abe6359">{i18n.t(option.key)}</Label>
-            <Switch id="import-option-{i}" bind:checked={optionStates[i]} />
-          </div>
+            <Switch id="import-option-{i}" checked={optionStates[i] ?? option.checked} onCheckedChange={(checked) => { optionStates[i] = checked; }} />          </div>
         {/each}
         <div class="svadmin-u-60fbb7713999 svadmin-u-77c08e015d14 svadmin-u-b950dda299d3 svadmin-u-173fa8f06789">
           <Button onclick={() => { const input = document.getElementById('file-input'); input?.click(); }}>

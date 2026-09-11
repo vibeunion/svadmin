@@ -74,12 +74,10 @@ const refineCorePeerByProvider = {
 
 const toolchainPackageNames = [
   '@sveltejs/vite-plugin-svelte',
-  '@tailwindcss/vite',
   'svelte-check',
-  'tailwindcss',
-  'tw-animate-css',
   'vite',
 ] as const;
+const precompiledStylesheetDependencies = ['@tailwindcss/vite', 'tailwindcss', 'tw-animate-css'] as const;
 
 function optionalStringRecord(candidate: unknown, path: string): Record<string, string> {
   if (candidate === undefined) return {};
@@ -90,22 +88,22 @@ function optionalStringRecord(candidate: unknown, path: string): Record<string, 
 async function readPackageManifest(manifestPath: string): Promise<PackageManifest> {
   const manifestCandidate: unknown = JSON.parse(await readFile(manifestPath, 'utf8'));
   assertJsonObject(manifestCandidate, manifestPath);
-  assertNonEmptyString(manifestCandidate.name, `${manifestPath}.name`);
-  assertNonEmptyString(manifestCandidate.version, `${manifestPath}.version`);
+  assertNonEmptyString(manifestCandidate['name'], `${manifestPath}.name`);
+  assertNonEmptyString(manifestCandidate['version'], `${manifestPath}.version`);
 
   return {
-    name: manifestCandidate.name,
-    version: manifestCandidate.version,
+    name: manifestCandidate['name'],
+    version: manifestCandidate['version'],
     dependencies: optionalStringRecord(
-      manifestCandidate.dependencies,
+      manifestCandidate['dependencies'],
       `${manifestPath}.dependencies`,
     ),
     devDependencies: optionalStringRecord(
-      manifestCandidate.devDependencies,
+      manifestCandidate['devDependencies'],
       `${manifestPath}.devDependencies`,
     ),
     peerDependencies: optionalStringRecord(
-      manifestCandidate.peerDependencies,
+      manifestCandidate['peerDependencies'],
       `${manifestPath}.peerDependencies`,
     ),
   };
@@ -119,7 +117,7 @@ async function readInstalledManifest(
   try {
     return await readPackageManifest(manifestPath);
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null;
+    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') return null;
     throw error;
   }
 }
@@ -129,7 +127,7 @@ function allDependencies(manifest: ProjectPackageJson): Record<string, string> {
 }
 
 function semverCandidates(range: string): string[] {
-  return [...range.matchAll(/\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?/g)].map(([version]) => version);
+  return [...range.matchAll(/\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?/g)].map(match => match[0]);
 }
 
 export function rangesOverlap(left: string, right: string): boolean {
@@ -266,7 +264,7 @@ function baseRuntimeIssues(
       label: project.label,
       dependencies: project.manifest.devDependencies,
       packageName: 'svelte',
-      expectedVersion: workspace.core.peerDependencies.svelte,
+      expectedVersion: workspace.core.peerDependencies['svelte'],
     }),
     exactDependencyIssue({
       label: project.label,
@@ -298,8 +296,14 @@ function toolchainIssues(project: GeneratedProject, context: CompatibilityContex
     label: project.label,
     dependencies: project.manifest.devDependencies,
     packageName: 'typescript',
-    expectedVersion: context.rootManifest.dependencies.typescript,
+    expectedVersion: context.rootManifest.dependencies['typescript'],
   }));
+  const dependencies = allDependencies(project.manifest);
+  for (const packageName of precompiledStylesheetDependencies) {
+    if (dependencies[packageName] !== undefined) {
+      issues.push(`${project.label}: precompiled styles must not require ${packageName}`);
+    }
+  }
   return compactIssues(issues);
 }
 

@@ -1,0 +1,29 @@
+diff --git a/dist/createTableHook.svelte.d.ts b/dist/createTableHook.svelte.d.ts
+index 0ec54620e5efc3cdd07f201c70a226a6f3e8d999..a3b312b42afcd68d56c9b39dd175c518bbc1b8e9 100644
+--- a/dist/createTableHook.svelte.d.ts
++++ b/dist/createTableHook.svelte.d.ts
+@@ -1,5 +1,5 @@
+ import FlexRenderSvelte from './FlexRender.svelte';
+-import type { SvelteTable } from './createTable.svelte';
++import type { SvelteTable } from './createTable.svelte.js';
+ import type { Component, Snippet } from 'svelte';
+ import type { AccessorFn, AccessorFnColumnDef, AccessorKeyColumnDef, Cell, CellContext, CellData, Column, ColumnDef, DeepKeys, DeepValue, DisplayColumnDef, GroupColumnDef, Header, IdentifiedColumnDef, NoInfer, Row, RowData, Table, TableFeatures, TableOptions } from '@tanstack/table-core';
+ export type ComponentType<T extends Record<string, any>> = Component<T>;
+diff --git a/dist/index.d.ts b/dist/index.d.ts
+index 799062d4e2d6d659e636f1a4c6886fa29bb480c1..9f56a288827089f138ad8ae8611786675c368b16 100644
+--- a/dist/index.d.ts
++++ b/dist/index.d.ts
+@@ -1,8 +1,8 @@
+ export * from '@tanstack/table-core';
+-export { createTable } from './createTable.svelte';
+-export type { SvelteTable } from './createTable.svelte';
+-export { createTableHook } from './createTableHook.svelte';
+-export type { AppCellContext, AppColumnDefBase, AppColumnDefTemplate, AppColumnHelper, AppDisplayColumnDef, AppGroupColumnDef, AppHeaderContext, AppSvelteTable, ComponentType, CreateTableHookOptions, CreateTableHookResult, } from './createTableHook.svelte';
+-export { createTableState } from './createTableState.svelte';
++export { createTable } from './createTable.svelte.js';
++export type { SvelteTable } from './createTable.svelte.js';
++export { createTableHook } from './createTableHook.svelte.js';
++export type { AppCellContext, AppColumnDefBase, AppColumnDefTemplate, AppColumnHelper, AppDisplayColumnDef, AppGroupColumnDef, AppHeaderContext, AppSvelteTable, ComponentType, CreateTableHookOptions, CreateTableHookResult, } from './createTableHook.svelte.js';
++export { createTableState } from './createTableState.svelte.js';
+ export { default as FlexRender } from './FlexRender.svelte';
+ export { renderComponent, renderSnippet } from './render-component';

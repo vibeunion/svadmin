@@ -1,0 +1,20 @@
+diff --git a/dist/box/box-extras.svelte.d.ts b/dist/box/box-extras.svelte.d.ts
+index 8f9409f938b2ea3fe2bb90cfd1fbea3eca0e6fbb..50a1e3b95a57ba8e61d06d4b745453271f1263e3 100644
+--- a/dist/box/box-extras.svelte.d.ts
++++ b/dist/box/box-extras.svelte.d.ts
+@@ -1,4 +1,4 @@
+-import type { Getter, MaybeBoxOrGetter } from "../types.js";
++import type { Expand, Getter, MaybeBoxOrGetter } from "../types.js";
+ export declare const BoxSymbol: unique symbol;
+ export declare const isWritableSymbol: unique symbol;
+ export type ReadableBox<T> = {
+diff --git a/dist/utils/after-sleep.d.ts b/dist/utils/after-sleep.d.ts
+index 4e7848b9133b875172d49aca67fd6ff2a71e8baa..4934c11db60245ad7968c11d5a204159dc499e9f 100644
+--- a/dist/utils/after-sleep.d.ts
++++ b/dist/utils/after-sleep.d.ts
+@@ -1,4 +1,4 @@
+ /**
+  * A utility function that executes a callback after a specified number of milliseconds.
+  */
+-export declare function afterSleep(ms: number, cb: () => void): NodeJS.Timeout;
++export declare function afterSleep(ms: number, cb: () => void): ReturnType<typeof setTimeout>;

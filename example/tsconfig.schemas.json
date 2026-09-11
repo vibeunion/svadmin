@@ -1,0 +1,4 @@
+{
+  "extends": "../packages/core/tsconfig.contracts.json",
+  "include": ["src/resource-schemas.ts", "src/demo-database.ts"]
+}

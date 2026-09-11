@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import { Ellipsis } from '@lucide/svelte';
   import { tick, type Component, type Snippet } from 'svelte';
   import type { HTMLAttributes } from 'svelte/elements';
@@ -143,7 +145,7 @@
   {#each visibleActions as action (action)}
     {#if action.href}
       <Button
-        variant={resolvedVariant(action)}
+        {...definedOptions({ "variant": resolvedVariant(action) })}
         size="sm"
         href={action.href}
         disabled={action.disabled}
@@ -158,7 +160,7 @@
       </Button>
     {:else}
       <Button
-        variant={resolvedVariant(action)}
+        {...definedOptions({ "variant": resolvedVariant(action) })}
         size="sm"
         onclick={action.onclick}
         disabled={action.disabled}
@@ -188,7 +190,7 @@
           {#if action.href}
             <Button
               href={action.href}
-              variant={resolvedVariant(action)}
+              {...definedOptions({ "variant": resolvedVariant(action) })}
               size="sm"
               disabled={action.disabled}
               onclick={(event) => handleOverflowAction(action, event)}

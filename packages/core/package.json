@@ -25,6 +25,18 @@
     "@tanstack/svelte-query": "^6.1.48"
   },
   "exports": {
+    "./schema": {
+      "types": "./src/schema.ts",
+      "default": "./src/schema.ts"
+    },
+    "./options": {
+      "types": "./src/defined-options.ts",
+      "default": "./src/defined-options.ts"
+    },
+    "./unsafe": {
+      "types": "./src/unsafe.ts",
+      "default": "./src/unsafe.ts"
+    },
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
@@ -91,7 +103,8 @@
   "type": "module",
   "types": "src/index.ts",
   "dependencies": {
-    "@sinclair/typebox": "^0.34.52"
+    "@sinclair/typebox": "^0.34.52",
+    "papaparse": "^5.5.4"
   },
   "peerDependenciesMeta": {
     "svelte": {

@@ -1,3 +1,4 @@
+import { definedOptions } from '@svadmin/core/options';
 import { render, screen, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import {
@@ -30,14 +31,14 @@ afterEach(() => {
 });
 
 function renderSidebar(menu?: MenuItem[]) {
-  return render(Sidebar, {
+  return render(Sidebar, definedOptions({
     collapsed: false,
     identity: null,
     title: 'Test Admin',
     onToggle: vi.fn(),
     onLogout: vi.fn(),
     menu,
-  });
+  }));
 }
 
 describe('Sidebar access control', () => {
@@ -45,9 +46,6 @@ describe('Sidebar access control', () => {
     const permissionChecks: CanParams[] = [];
     const accessControlProvider: AccessControlProvider = {
       can: async (request) => {
-        if (Array.isArray(request)) {
-          return request.map(({ resource }) => ({ can: resource !== 'denied' }));
-        }
         permissionChecks.push(request);
         return { can: request.resource !== 'denied' };
       },
@@ -120,9 +118,6 @@ describe('Sidebar access control', () => {
     setResources(resources);
     setAccessControlProvider({
       can: async (request) => {
-        if (Array.isArray(request)) {
-          return request.map(({ resource }) => ({ can: resource !== 'denied' }));
-        }
         return { can: request.resource !== 'denied' };
       },
     });

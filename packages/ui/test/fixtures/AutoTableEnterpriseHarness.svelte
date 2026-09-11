@@ -1,5 +1,7 @@
 <script lang="ts">
   import type { DataProvider, ResourceDefinition, RouterProvider } from '@svadmin/core';
+  import { defineResource } from '@svadmin/core';
+  import { Type } from '@sinclair/typebox';
   import AdminApp from '../../src/components/AdminApp.svelte';
   import AutoTable from '../../src/components/AutoTable.svelte';
   import ListPage from '../../src/components/ListPage.svelte';
@@ -44,6 +46,11 @@
   const resources: ResourceDefinition[] = [{
     name: 'users',
     label: '用户管理',
+    contract: defineResource('users', { record: Type.Object({
+      id: Type.String(), email: Type.String(), role: Type.String(), active: Type.Boolean(),
+    }), update: Type.Object({
+      email: Type.Optional(Type.String()), role: Type.Optional(Type.String()), active: Type.Optional(Type.Boolean()),
+    }) }),
     canCreate: true,
     canEdit: true,
     canDelete: true,

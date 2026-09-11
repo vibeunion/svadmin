@@ -6,7 +6,24 @@ import ShowButton from './ShowButton.svelte';
 import DeleteButton from './DeleteButton.svelte';
 import ImportButton from './ImportButton.svelte';
 
-vi.mock('@svadmin/core', () => ({
+vi.mock('@svadmin/core', async original => {
+  const actual = await original<typeof import('@svadmin/core')>();
+  const { Type } = await import('@sinclair/typebox');
+  const contract = actual.defineResource('posts', { record: Type.Object({ id: Type.String(), title: Type.String() }) });
+  return {
+  ...actual,
+  captureAdminContext: () => ({
+    providers: {}, tenantCacheKey: undefined,
+    getResource: (name: string) => ({ name, label: name.toUpperCase() }),
+  }),
+  useResourceContract: () => ({ resource: contract, dataProviderName: 'default', meta: undefined }),
+  useDelete: () => ({ mutation: { mutateAsync: vi.fn() } }),
+  useImport: () => ({
+    inputProps: { type: 'file', accept: '.csv,.json' },
+    handleChange: vi.fn(),
+    isLoading: false,
+    error: null,
+  }),
   useNavigation: () => ({
     create: vi.fn(),
     edit: vi.fn(),
@@ -18,15 +35,14 @@ vi.mock('@svadmin/core', () => ({
   useTranslation: () => ({
     t: (key: string) => (key === 'common.create' ? 'Create' : key === 'common.edit' ? 'Edit' : key === 'common.detail' ? 'Detail' : key === 'common.delete' ? 'Delete' : key),
   }),
+  getResource: (res: string) => ({ name: res, label: res.toUpperCase() }),
+  };
+});
+
+vi.mock('@svadmin/core/unsafe', () => ({
   useDelete: () => ({
     mutation: { mutateAsync: vi.fn() },
   }),
-  useImport: () => ({
-    inputProps: { type: 'file', accept: '.csv,.json' },
-    handleChange: vi.fn(),
-    isLoading: false,
-  }),
-  getResource: (res: string) => ({ name: res, label: res.toUpperCase() }),
 }));
 
 describe('Action Buttons label & custom text', () => {

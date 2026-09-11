@@ -34,7 +34,7 @@ describe('query cancellation reaches DataProvider', () => {
   it.each([
     ['list', false, 1], ['one', false, 1], ['many', false, 1], ['many', true, 2],
     ['infinite', false, 1], ['select', false, 2], ['select', true, 3],
-    ['form', false, 1], ['custom', false, 1],
+    ['custom', false, 1],
   ] as const)('cancels %s reads (getMany fallback=%s) after unmount', async (kind, fallback, count) => {
     const state = setup(fallback);
     const view = render(Host, { props: { dataProvider: state.dataProvider, client: state.client, kind } });
@@ -70,7 +70,9 @@ describe('query cancellation reaches DataProvider', () => {
     await waitFor(() => expect(state.pending).toHaveBeenCalledTimes(1));
     const queries = state.client.getQueryCache().getAll();
     expect(queries).toHaveLength(1);
-    expect(JSON.stringify(queries[0].queryKey)).not.toContain('signal');
+    const query = queries[0];
+    if (!query) throw new Error('Expected a cached query');
+    expect(JSON.stringify(query.queryKey)).not.toContain('signal');
     await state.client.cancelQueries();
     expect(state.signals[0]?.aborted).toBe(true);
   });

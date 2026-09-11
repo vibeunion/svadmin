@@ -1,10 +1,10 @@
-// 纯函数导出格式化工具 — 不依赖 Svelte runes 或浏览器 API（downloadData 除外）
-// 可被 bun:test 直接测试
+// Pure export formatting helpers with no Svelte rune or browser API dependencies except downloadData.
+// These helpers can be tested directly with bun:test.
 
-/** 支持的导出/导入格式 */
+/** Supported export and import formats. */
 export type ExportFormat = 'csv' | 'json' | 'xlsx';
 
-/** CSV 转义，含公式注入防护 */
+/** Escapes a CSV field and prevents formula injection. */
 export function escapeCsvField(fieldValue: string): string {
   let escapedValue = fieldValue;
   if (/^[=+@\t\r]/.test(escapedValue)) escapedValue = "'" + escapedValue;
@@ -13,10 +13,11 @@ export function escapeCsvField(fieldValue: string): string {
     : escapedValue;
 }
 
-/** 将记录数组转为 CSV 字符串 */
+/** Converts records to a CSV string. */
 export function toCsv(records: Record<string, unknown>[]): string {
-  if (records.length === 0) return '';
-  const fieldNames = Object.keys(records[0]);
+  const [firstRecord] = records;
+  if (!firstRecord) return '';
+  const fieldNames = Object.keys(firstRecord);
   const header = fieldNames.map(escapeCsvField).join(',');
   const rows = records.map(record =>
     fieldNames.map(fieldName => {
@@ -32,22 +33,23 @@ export function toCsv(records: Record<string, unknown>[]): string {
   return [header, ...rows].join('\n');
 }
 
-/** 将记录数组转为格式化的 JSON 字符串 */
+/** Converts records to a formatted JSON string. */
 export function toJson(records: Record<string, unknown>[]): string {
   return JSON.stringify(records, null, 2);
 }
 
-/** 转义 XML 特殊字符 */
+/** Escapes XML special characters. */
 export function escapeXml(xmlValue: string): string {
   return xmlValue.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 /**
- * 生成最小可用的 XLSX（SpreadsheetML）——零依赖。
+ * Generates a minimal XLSX document using SpreadsheetML with no dependencies.
  */
 export function toXlsx(records: Record<string, unknown>[]): string {
-  if (records.length === 0) return '';
-  const fieldNames = Object.keys(records[0]);
+  const [firstRecord] = records;
+  if (!firstRecord) return '';
+  const fieldNames = Object.keys(firstRecord);
 
   const headerCells = fieldNames.map(fieldName => `<Cell><Data ss:Type="String">${escapeXml(fieldName)}</Data></Cell>`).join('');
   const dataRows = records.map(record =>
@@ -75,8 +77,8 @@ ${dataRows}
 }
 
 /**
- * 将记录以指定格式下载为文件。
- * 依赖浏览器 document API；在 Node/bun:test 中需 mock。
+ * Downloads records in the requested format.
+ * Requires the browser document API, which must be mocked in Node or bun:test.
  */
 export function downloadData(
   records: Record<string, unknown>[],

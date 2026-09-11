@@ -8,7 +8,7 @@ import { describe, test, expect } from 'bun:test';
  */
 function parseHash(hash: string) {
   const raw = hash.startsWith('#') ? hash.slice(1) : hash;
-  const [pathPart, queryPart] = raw.split('?');
+  const [pathPart = '/', queryPart] = raw.split('?');
   const segments = pathPart.split('/').filter(Boolean);
   
   const params: Record<string, string> = {};
@@ -64,8 +64,8 @@ describe('parseHash (useParsed logic)', () => {
   test('with query params', () => {
     const result = parseHash('#/posts?page=2&sort=name');
     expect(result.resource).toBe('posts');
-    expect(result.params.page).toBe('2');
-    expect(result.params.sort).toBe('name');
+    expect(result.params['page']).toBe('2');
+    expect(result.params['sort']).toBe('name');
   });
 
   test('resource with action and query', () => {
@@ -73,13 +73,13 @@ describe('parseHash (useParsed logic)', () => {
     expect(result.resource).toBe('posts');
     expect(result.action).toBe('edit');
     expect(result.id).toBe('5');
-    expect(result.params.tab).toBe('details');
+    expect(result.params['tab']).toBe('details');
   });
 
   test('encoded query params', () => {
     const result = parseHash('#/search?q=hello%20world&filter=tag%3Djs');
-    expect(result.params.q).toBe('hello world');
-    expect(result.params.filter).toBe('tag=js');
+    expect(result.params['q']).toBe('hello world');
+    expect(result.params['filter']).toBe('tag=js');
   });
 
   test('login route', () => {

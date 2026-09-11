@@ -1,4 +1,8 @@
 <script lang="ts">
+  import { demoContracts } from '../resource-contracts';
+  import type { DemoRow } from '../resource-schemas';
+  type Permission = DemoRow<'permissions'>;
+
   import { useList } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { AutoTable, Badge, Button, ContentPageHeader, ContentPageShell, MetricBlock } from '@svadmin/ui';
@@ -19,63 +23,6 @@
 
   const i18n = useTranslation();
 
-  interface User {
-    id: number;
-    name: string;
-    email: string;
-    roleId: number;
-    status: string;
-    department: string;
-    lastActiveAt: string;
-  }
-
-  interface Role {
-    id: number;
-    name: string;
-    slug?: string;
-    scope: string;
-    level: string;
-    description?: string;
-  }
-
-  interface Permission {
-    id: number;
-    module: string;
-    action: string;
-    roleId: number;
-    effect: string;
-    updatedAt: string;
-    notes?: string;
-  }
-
-  interface UserAccount {
-    id: number;
-    userId: number;
-    accountType: string;
-    status: string;
-    lastSignInAt: string;
-    notes?: string;
-  }
-
-  interface UserLog {
-    id: number;
-    userId: number;
-    event: string;
-    ipAddress: string;
-    severity: string;
-    createdAt: string;
-    details?: string;
-  }
-
-  interface UserSetting {
-    id: number;
-    setting: string;
-    scope: string;
-    status: string;
-    ownerId: number;
-    updatedAt: string;
-  }
-
   type UserManagementResource = 'users' | 'roles' | 'permissions' | 'user_accounts' | 'user_logs' | 'user_settings';
 
   let { resourceName = 'users' } = $props<{ resourceName?: string }>();
@@ -90,21 +37,21 @@
 
   const locale = $derived(i18n.locale);
   const isZh = $derived(locale === 'zh-CN');
-  const activeResource = $derived((['users', 'roles', 'permissions', 'user_accounts', 'user_logs', 'user_settings'].includes(resourceName) ? resourceName : 'users') as UserManagementResource);
+  const activeResource = $derived((['users', 'roles', 'permissions', 'user_accounts', 'user_logs', 'user_settings'] as const).find(name => name === resourceName) ?? 'users');
 
-  const usersQuery = useList({ resource: 'users', pagination: { mode: 'off' } });
-  const rolesQuery = useList({ resource: 'roles', pagination: { mode: 'off' } });
-  const permissionsQuery = useList({ resource: 'permissions', pagination: { mode: 'off' } });
-  const accountsQuery = useList({ resource: 'user_accounts', pagination: { mode: 'off' } });
-  const logsQuery = useList({ resource: 'user_logs', pagination: { mode: 'off' } });
-  const settingsQuery = useList({ resource: 'user_settings', pagination: { mode: 'off' } });
+  const usersQuery = useList({ resource: demoContracts.users, pagination: { mode: 'off' } });
+  const rolesQuery = useList({ resource: demoContracts.roles, pagination: { mode: 'off' } });
+  const permissionsQuery = useList({ resource: demoContracts.permissions, pagination: { mode: 'off' } });
+  const accountsQuery = useList({ resource: demoContracts.user_accounts, pagination: { mode: 'off' } });
+  const logsQuery = useList({ resource: demoContracts.user_logs, pagination: { mode: 'off' } });
+  const settingsQuery = useList({ resource: demoContracts.user_settings, pagination: { mode: 'off' } });
 
-  const users = $derived((usersQuery.data?.data ?? []) as unknown as User[]);
-  const roles = $derived((rolesQuery.data?.data ?? []) as unknown as Role[]);
-  const permissions = $derived((permissionsQuery.data?.data ?? []) as unknown as Permission[]);
-  const accounts = $derived((accountsQuery.data?.data ?? []) as unknown as UserAccount[]);
-  const logs = $derived((logsQuery.data?.data ?? []) as unknown as UserLog[]);
-  const settings = $derived((settingsQuery.data?.data ?? []) as unknown as UserSetting[]);
+  const users = $derived((usersQuery.data?.data ?? []));
+  const roles = $derived((rolesQuery.data?.data ?? []));
+  const permissions = $derived((permissionsQuery.data?.data ?? []));
+  const accounts = $derived((accountsQuery.data?.data ?? []));
+  const logs = $derived((logsQuery.data?.data ?? []));
+  const settings = $derived((settingsQuery.data?.data ?? []));
   const filteredUsers = $derived(users.filter((user) =>
     (userRoleFilter === null || user.roleId === userRoleFilter)
     && (!userStatusFilter || user.status === userStatusFilter)

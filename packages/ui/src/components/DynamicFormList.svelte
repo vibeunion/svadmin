@@ -14,7 +14,8 @@
     addButtonLabel?: string;
     minItems?: number;
     maxItems?: number;
-    defaultItem?: T | (() => T);
+    defaultItem?: T;
+    createItem?: () => T;
     disabled?: boolean;
     emptyText?: string;
     onchange?: (items: T[]) => void;
@@ -39,6 +40,7 @@
     minItems = 0,
     maxItems = Infinity,
     defaultItem,
+    createItem,
     disabled = false,
     emptyText,
     onchange,
@@ -47,13 +49,13 @@
   }: Props = $props();
 
   function createNewItem(): T {
-    if (typeof defaultItem === 'function') {
-      return (defaultItem as () => T)();
+    if (createItem) {
+      return createItem();
     }
     if (defaultItem !== undefined) {
       return structuredClone(defaultItem);
     }
-    return {} as T;
+    throw new Error('DynamicFormList requires defaultItem or createItem when adding without a value');
   }
 
   export function add(customItem?: T): void {
@@ -64,7 +66,7 @@
   }
 
   export function remove(index: number): void {
-    if (disabled || items.length <= minItems || index < 0 || index >= items.length) return;
+    if (disabled || items.length <= minItems || !Number.isInteger(index) || index < 0 || index >= items.length) return;
     const next = [...items];
     next.splice(index, 1);
     items = next;
@@ -72,30 +74,28 @@
   }
 
   export function moveUp(index: number): void {
-    if (disabled || index <= 0 || index >= items.length) return;
+    if (disabled || !Number.isInteger(index) || index <= 0 || index >= items.length) return;
     const next = [...items];
-    const temp = next[index - 1];
-    next[index - 1] = next[index];
-    next[index] = temp;
+    const moved = next.splice(index, 1);
+    next.splice(index - 1, 0, ...moved);
     items = next;
     onchange?.(items);
   }
 
   export function moveDown(index: number): void {
-    if (disabled || index < 0 || index >= items.length - 1) return;
+    if (disabled || !Number.isInteger(index) || index < 0 || index >= items.length - 1) return;
     const next = [...items];
-    const temp = next[index + 1];
-    next[index + 1] = next[index];
-    next[index] = temp;
+    const moved = next.splice(index, 1);
+    next.splice(index + 1, 0, ...moved);
     items = next;
     onchange?.(items);
   }
 
   export function duplicate(index: number): void {
-    if (disabled || items.length >= maxItems || index < 0 || index >= items.length) return;
+    if (disabled || items.length >= maxItems || !Number.isInteger(index) || index < 0 || index >= items.length) return;
     const next = [...items];
-    const cloned = structuredClone(next[index]);
-    next.splice(index + 1, 0, cloned);
+    const cloned = structuredClone(next.slice(index, index + 1));
+    next.splice(index + 1, 0, ...cloned);
     items = next;
     onchange?.(items);
   }
@@ -204,8 +204,7 @@
       variant="outline"
       size="sm"
       class="svadmin-u-6da6a3c3f741 svadmin-u-58284b4ea568 svadmin-u-a29b7a649c77"
-      {disabled}
-      onclick={() => add()}
+      disabled={disabled || (defaultItem === undefined && createItem === undefined)}      onclick={() => add()}
     >
       <Plus class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
       {addButtonLabel ?? (i18n.t('common.add', undefined) ?? '添加一项')}

@@ -1,3 +1,5 @@
+import { definedOptions } from '@svadmin/core/options';
+import { requireValue } from "../../../scripts/test-assertions";
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, test, expect } from 'bun:test';
 import { createMCPServer } from './index';
@@ -34,12 +36,12 @@ const mockDataProvider = {
     return { data: data.slice(start, start + size), total: data.length };
   },
   getOne: async (params: { resource: string; id: string | number }) => {
-    const item = (mockData[params.resource] ?? []).find(r => r.id === params.id);
+    const item = (mockData[params.resource] ?? []).find(r => r['id'] === params.id);
     if (!item) throw new Error(`Not found: ${params.resource}/${params.id}`);
     return { data: item };
   },
   getMany: async (params: { resource: string; ids: (string | number)[] }) => {
-    const items = (mockData[params.resource] ?? []).filter(r => params.ids.includes(r.id as string));
+    const items = (mockData[params.resource] ?? []).filter(r => params.ids.includes(r['id'] as string));
     return { data: items };
   },
   create: async (params: { resource: string; variables: unknown }) => {
@@ -47,12 +49,12 @@ const mockDataProvider = {
     return { data: newItem };
   },
   update: async (params: { resource: string; id: string | number; variables: unknown }) => {
-    const existing = (mockData[params.resource] ?? []).find(r => r.id === params.id);
+    const existing = (mockData[params.resource] ?? []).find(r => r['id'] === params.id);
     const updated = { ...existing, ...(params.variables as Record<string, unknown>) };
     return { data: updated };
   },
   deleteOne: async (params: { resource: string; id: string | number }) => {
-    const item = (mockData[params.resource] ?? []).find(r => r.id === params.id);
+    const item = (mockData[params.resource] ?? []).find(r => r['id'] === params.id);
     return { data: item ?? { id: params.id } };
   },
   getApiUrl: () => 'http://localhost:3000/api',
@@ -61,7 +63,7 @@ const mockDataProvider = {
 // ─── Helper ──────────────────────────────────────────────────
 
 function makeRequest(method: string, params?: Record<string, unknown>): MCPRequest {
-  return { jsonrpc: '2.0', id: 1, method, params };
+  return definedOptions({ jsonrpc: '2.0', id: 1, method, params });
 }
 
 // ─── Tests ───────────────────────────────────────────────────
@@ -98,7 +100,7 @@ describe('createMCPServer', () => {
   test('tool resource enum matches configured resources', () => {
     const tools = server.getTools();
     const getListTool = tools.find(t => t.name === 'svadmin_getList')!;
-    expect(getListTool.inputSchema.properties.resource.enum).toEqual(['posts', 'users']);
+    expect(requireValue(getListTool.inputSchema.properties['resource']).enum).toEqual(['posts', 'users']);
   });
 
   test('getServerInfo returns correct metadata', () => {
@@ -119,8 +121,8 @@ describe('MCP JSON-RPC handling', () => {
     const res = await server.handleRequest(makeRequest('initialize'));
     expect(res.error).toBeUndefined();
     const result = res.result as Record<string, unknown>;
-    expect(result.protocolVersion).toBe('2024-11-05');
-    expect((result.serverInfo as Record<string, unknown>).name).toBe('@svadmin/mcp');
+    expect(result['protocolVersion']).toBe('2024-11-05');
+    expect((result['serverInfo'] as Record<string, unknown>)['name']).toBe('@svadmin/mcp');
   });
 
   test('tools/list returns all tools', async () => {
@@ -138,7 +140,7 @@ describe('MCP JSON-RPC handling', () => {
 
     expect(res.error).toBeUndefined();
     const result = res.result as { content: { type: string; text: string }[] };
-    const parsed = JSON.parse(result.content[0].text);
+    const parsed = JSON.parse(requireValue(result.content[0]).text);
     expect(parsed.data).toHaveLength(2);
     expect(parsed.total).toBe(3);
   });
@@ -154,7 +156,7 @@ describe('MCP JSON-RPC handling', () => {
 
     expect(res.error).toBeUndefined();
     const result = res.result as { content: { type: string; text: string }[] };
-    const parsed = JSON.parse(result.content[0].text);
+    const parsed = JSON.parse(requireValue(result.content[0]).text);
     expect(parsed.data).toHaveLength(1);
     expect(parsed.data[0].title).toBe('Draft Post');
   });
@@ -167,7 +169,7 @@ describe('MCP JSON-RPC handling', () => {
 
     expect(res.error).toBeUndefined();
     const result = res.result as { content: { type: string; text: string }[] };
-    const parsed = JSON.parse(result.content[0].text);
+    const parsed = JSON.parse(requireValue(result.content[0]).text);
     expect(parsed.data.name).toBe('Alice');
   });
 
@@ -179,7 +181,7 @@ describe('MCP JSON-RPC handling', () => {
 
     expect(res.error).toBeUndefined();
     const result = res.result as { content: { type: string; text: string }[] };
-    const parsed = JSON.parse(result.content[0].text);
+    const parsed = JSON.parse(requireValue(result.content[0]).text);
     expect(parsed.data).toHaveLength(2);
   });
 
@@ -194,7 +196,7 @@ describe('MCP JSON-RPC handling', () => {
 
     expect(res.error).toBeUndefined();
     const result = res.result as { content: { type: string; text: string }[] };
-    const parsed = JSON.parse(result.content[0].text);
+    const parsed = JSON.parse(requireValue(result.content[0]).text);
     expect(parsed.data.title).toBe('New Post');
     expect(parsed.data.id).toBeDefined();
   });
@@ -211,7 +213,7 @@ describe('MCP JSON-RPC handling', () => {
 
     expect(res.error).toBeUndefined();
     const result = res.result as { content: { type: string; text: string }[] };
-    const parsed = JSON.parse(result.content[0].text);
+    const parsed = JSON.parse(requireValue(result.content[0]).text);
     expect(parsed.data.title).toBe('Updated Title');
   });
 
@@ -223,7 +225,7 @@ describe('MCP JSON-RPC handling', () => {
 
     expect(res.error).toBeUndefined();
     const result = res.result as { content: { type: string; text: string }[] };
-    const parsed = JSON.parse(result.content[0].text);
+    const parsed = JSON.parse(requireValue(result.content[0]).text);
     expect(parsed.data.id).toBe('2');
   });
 

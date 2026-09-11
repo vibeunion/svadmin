@@ -68,8 +68,8 @@ describe('fieldsToTypeBoxSchema numeric fields', () => {
     const schema = fieldsToTypeBoxSchema([{ ...requiredNumber, required: false }]);
     const result = schema.Decode({ count: '' });
 
-    expect(result.count).toBeUndefined();
-    expect(result.count).not.toBe(0);
+    expect(result['count']).toBeUndefined();
+    expect(result['count']).not.toBe(0);
   });
 });
 
@@ -229,9 +229,9 @@ describe('fieldsToTypeBoxSchema file fields', () => {
       avatar: emptyFile,
       gallery: [emptyFile],
     });
-    expect(optionalResult.attachment).toBeUndefined();
-    expect(optionalResult.avatar).toBeUndefined();
-    expect(optionalResult.gallery).toBeUndefined();
+    expect(optionalResult['attachment']).toBeUndefined();
+    expect(optionalResult['avatar']).toBeUndefined();
+    expect(optionalResult['gallery']).toBeUndefined();
   });
 
   test('does not reference the File constructor unsafely during SSR', () => {

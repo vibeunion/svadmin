@@ -1,18 +1,38 @@
+import { definedOptions } from '@svadmin/core/options';
+import { decodeBaseRecord, decodeOneResult, decodeManyResult, withValidatedResponses, type DataTransport } from '@svadmin/core/schema';
 import type {
-  DataProvider, GetListParams, GetListResult, GetOneParams, GetOneResult,
-  CreateParams, CreateResult, UpdateParams, UpdateResult, DeleteParams, DeleteResult,
-  GetManyParams, GetManyResult, CustomParams, CustomResult, CrudOperator, FieldFilter,
+  DataProvider, CrudOperator, FieldFilter,
   Filter, Sort, BaseRecord
 } from '@svadmin/core';
 
-interface SanityDoc {
-  _id: string;
-  _type: string;
-  [key: string]: unknown;
+function decodeDocument(value: unknown): BaseRecord {
+  const document = decodeBaseRecord(value);
+  const id = document['_id'];
+  if (typeof id !== 'string' || id.length === 0 || typeof document['_type'] !== 'string') {
+    throw new TypeError('Invalid Sanity document identity');
+  }
+  return { ...document, id };
 }
 
-interface SanityMutationResult {
-  results?: Array<{ id: string }>;
+function inputRecord(value: unknown): Record<string, unknown> {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    throw new TypeError('Sanity variables must be an object');
+  }
+  return decodeBaseRecord(value);
+}
+
+function mutationReceipt(value: unknown, expectedId?: string | number): { id: string } {
+  return decodeOneResult({ data: value }, raw => {
+    const result = decodeBaseRecord(raw);
+    const results = result['results'];
+    if (!Array.isArray(results) || results.length !== 1) throw new TypeError('Missing Sanity mutation receipt');
+    const receipt = decodeBaseRecord(results[0]);
+    const id = receipt['id'];
+    if (typeof id !== 'string' || id.length === 0 || (expectedId !== undefined && id !== String(expectedId))) {
+      throw new TypeError('Invalid Sanity mutation identity');
+    }
+    return { id };
+  }, true).data;
 }
 
 const DEFAULT_JSON_HEADERS: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -201,28 +221,28 @@ function buildCustomUrl(
   return parsed.toString();
 }
 
-async function parseResponse<TData>(response: Response): Promise<TData> {
+async function parseResponse(response: Response): Promise<unknown> {
   if (response.status === 204 || response.status === 205) {
-    return undefined as unknown as TData;
+    return undefined;
   }
 
   const contentLength = response.headers?.get('content-length');
   if (contentLength?.trim() === '0') {
-    return undefined as unknown as TData;
+    return undefined;
   }
 
   const body = await response.text();
   if (!body || body.trim() === '') {
-    return undefined as unknown as TData;
+    return undefined;
   }
 
-  return JSON.parse(body) as TData;
+  return JSON.parse(body);
 }
 
 export function createSanityDataProvider(projectId: string, dataset: string, token?: string, apiVersion = '2023-05-03'): DataProvider {
   const apiUrl = `https://${projectId}.api.sanity.io/v${apiVersion}`;
   const providerHeaders: Record<string, string> = { ...DEFAULT_JSON_HEADERS };
-  if (token) providerHeaders.Authorization = `Bearer ${token}`;
+  if (token) providerHeaders['Authorization'] = `Bearer ${token}`;
 
   async function query(groq: string, params: Record<string, unknown> = {}): Promise<unknown> {
     const url = new URL(`${apiUrl}/data/query/${dataset}`);
@@ -230,22 +250,22 @@ export function createSanityDataProvider(projectId: string, dataset: string, tok
     for (const [k, v] of Object.entries(params)) url.searchParams.set(`$${k}`, JSON.stringify(v));
     const res = await fetch(url.toString(), { headers: providerHeaders });
     if (!res.ok) throw new Error(`Sanity error: ${res.status}`);
-    const data = await res.json();
-    return data.result;
+    const data = decodeBaseRecord(await parseResponse(res));
+    return data['result'];
   }
 
-  async function mutate(mutations: Record<string, unknown>[]): Promise<SanityMutationResult> {
+  async function mutate(mutations: Record<string, unknown>[]): Promise<unknown> {
     const res = await fetch(`${apiUrl}/data/mutate/${dataset}`, {
       method: 'POST', headers: providerHeaders, body: JSON.stringify({ mutations }),
     });
     if (!res.ok) throw new Error(`Sanity mutation error: ${res.status}`);
-    return res.json();
+    return parseResponse(res);
   }
 
-  return {
+  const transport: DataTransport = {
     getApiUrl: () => apiUrl,
 
-    async getList<T extends BaseRecord = BaseRecord>({ resource, pagination, sorters, filters }: GetListParams): Promise<GetListResult<T>> {
+    async getList({ resource, pagination, sorters, filters }) {
       const { current = 1, pageSize = 10 } = pagination ?? {};
       const start = (current - 1) * pageSize;
       const end = start + pageSize;
@@ -259,50 +279,53 @@ export function createSanityDataProvider(projectId: string, dataset: string, tok
         query(`*[${where}]${orderStr}[${start}...${end}]`, params),
         query(`count(*[${where}])`, params),
       ]);
-      return { data: ((data as SanityDoc[]) ?? []).map((d) => ({ ...d, id: d._id })) as unknown as unknown as T[], total: (total as number) ?? 0 };
+      return { data: decodeManyResult({ data }, decodeDocument).data, total };
     },
 
-    async getOne<T extends BaseRecord = BaseRecord>({ resource, id }: GetOneParams): Promise<GetOneResult<T>> {
+    async getOne({ resource, id }) {
       const raw = await query('*[_type == $resource && _id == $id][0]', { resource, id });
-      const data = raw as SanityDoc;
-      return { data: { ...data, id: data._id } as unknown as unknown as T };
+      return decodeOneResult({ data: raw }, decodeDocument);
     },
 
-    async create<T extends BaseRecord = BaseRecord>({ resource, variables }: CreateParams): Promise<CreateResult<T>> {
-      const doc = { _type: resource, ...(variables as Record<string, unknown>) };
+    async create({ resource, variables }) {
+      const input = inputRecord(variables);
+      const doc = { ...input, _type: resource };
       const result = await mutate([{ create: doc }]);
-      const id = result.results?.[0]?.id;
-      return { data: { ...(variables as Record<string, unknown>), id, _id: id } as unknown as unknown as T };
+      const { id } = mutationReceipt(result);
+      return { data: { ...input, id, _id: id } };
     },
 
-    async update<T extends BaseRecord = BaseRecord>({ id, variables }: UpdateParams): Promise<UpdateResult<T>> {
-      await mutate([{ patch: { id, set: variables } }]);
-      return { data: { ...(variables as Record<string, unknown>), id, _id: id } as unknown as unknown as T };
+    async update({ id, variables }) {
+      const input = inputRecord(variables);
+      const result = await mutate([{ patch: { id, set: input } }]);
+      const receipt = mutationReceipt(result, id);
+      return { data: { ...input, id: receipt.id, _id: receipt.id } };
     },
 
-    async deleteOne<T extends BaseRecord = BaseRecord>({ id }: DeleteParams): Promise<DeleteResult<T>> {
-      await mutate([{ delete: { id } }]);
-      return { data: { id } as unknown as unknown as T };
+    async deleteOne({ id }) {
+      const result = await mutate([{ delete: { id } }]);
+      return { data: mutationReceipt(result, id) };
     },
 
-    async getMany<T extends BaseRecord = BaseRecord>({ resource, ids }: GetManyParams): Promise<GetManyResult<T>> {
+    async getMany({ resource, ids }) {
       const data = await query('*[_type == $resource && _id in $ids]', { resource, ids });
-      return { data: ((data as SanityDoc[]) ?? []).map((d) => ({ ...d, id: d._id })) as unknown as unknown as T[] };
+      return decodeManyResult({ data }, decodeDocument);
     },
 
-    async custom<T = unknown>({ url, method, payload, query: customQuery, headers, sorters, filters }: CustomParams): Promise<CustomResult<T>> {
+    async custom({ url, method, payload, query: customQuery, headers, sorters, filters }) {
       const requestUrl = buildCustomUrl(url, apiUrl, customQuery, sorters, filters);
       const requestHeaders = mergeHeaders(
         isSameOrigin(apiUrl, requestUrl) ? providerHeaders : DEFAULT_JSON_HEADERS,
         headers,
       );
-      const res = await fetch(requestUrl, {
+      const res = await fetch(requestUrl, definedOptions({
         method: method.toUpperCase(),
         headers: requestHeaders,
         body: payload === undefined ? undefined : JSON.stringify(payload),
-      });
+      }));
       if (!res.ok) throw new Error(`Custom request failed: ${res.status}`);
-      return { data: await parseResponse<T>(res) };
+      return { data: await parseResponse(res) };
     },
   };
+  return withValidatedResponses(transport);
 }

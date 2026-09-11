@@ -35,10 +35,12 @@
       if (!containerEl) return;
       const rect = containerEl.getBoundingClientRect();
 
+      const pointer = 'touches' in ev ? ev.touches.item(0) : ev;
+      if (!pointer) return;
       const clientPos =
         direction === 'horizontal'
-          ? ('touches' in ev ? ev.touches[0].clientX - rect.left : ev.clientX - rect.left)
-          : ('touches' in ev ? ev.touches[0].clientY - rect.top : ev.clientY - rect.top);
+          ? pointer.clientX - rect.left
+          : pointer.clientY - rect.top;
       const totalSize = direction === 'horizontal' ? rect.width : rect.height;
 
       if (totalSize > 0) {

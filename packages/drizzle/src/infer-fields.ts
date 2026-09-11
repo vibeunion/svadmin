@@ -15,24 +15,9 @@
  */
 
 import type { FieldDefinition } from '@svadmin/core';
-
-/** Drizzle column shape (duck-typed to avoid version coupling) */
-interface DrizzleColumnLike {
-  dataType?: string;
-  columnType?: string;
-  name?: string;
-  notNull?: boolean;
-  hasDefault?: boolean;
-  default?: unknown;
-  primary?: boolean;
-  enumValues?: string[];
-}
-
-/** Drizzle table shape (duck-typed — works with any Drizzle table object) */
-interface DrizzleTableLike {
-  [Symbol.iterator]?: never;
-  _?: { columns?: Record<string, DrizzleColumnLike> };
-}
+import { getTableColumns } from 'drizzle-orm/utils';
+import { isTable, type Table } from 'drizzle-orm/table';
+import { decodeColumns, type ColumnMetadata } from './column-metadata';
 
 /** Options for field inference */
 export interface InferFieldsOptions {
@@ -49,11 +34,13 @@ export interface InferFieldsOptions {
 /**
  * Map a Drizzle column type string to a svadmin FieldDefinition type.
  */
-function mapColumnType(col: DrizzleColumnLike): FieldDefinition['type'] {
-  const dt = (col.dataType ?? col.columnType ?? '').toLowerCase();
+function mapColumnType(col: ColumnMetadata): FieldDefinition['type'] {
+  const dt = `${col.dataType} ${col.columnType}`.toLowerCase();
 
   // Integer / serial / numeric types
-  if (dt.includes('int') || dt.includes('serial') || dt.includes('numeric') || dt.includes('real') || dt.includes('float') || dt.includes('double') || dt.includes('decimal')) {
+  if (col.dataType.includes('bool')) return 'boolean';
+  if (col.dataType.includes('date')) return 'date';
+  if (dt.includes('int') || dt.includes('serial') || dt.includes('numeric') || dt.includes('real') || dt.includes('float') || dt.includes('double') || dt.includes('decimal') || dt.includes('number')) {
     return 'number';
   }
   // Boolean
@@ -90,37 +77,18 @@ function humanizeKey(key: string): string {
 /**
  * Infer FieldDefinition[] from a Drizzle ORM table schema.
  *
- * Works with any Drizzle table (SQLite, PostgreSQL, MySQL) that exposes
- * the internal `_` metadata with column definitions.
+ * Uses Drizzle's runtime column API; `_` is type-only metadata, not a table
+ * property. Malformed column metadata is rejected before deriving UI fields.
  */
 export function inferFieldsFromDrizzle(
-  table: DrizzleTableLike,
+  table: Table,
   options: InferFieldsOptions = {},
 ): FieldDefinition[] {
-  const columns = (table as Record<string, unknown>)?._ 
-    ? ((table as Record<string, unknown>)._ as Record<string, unknown>)?.columns as Record<string, DrizzleColumnLike> | undefined
-    : undefined;
-
-  if (!columns) {
-    // Fallback: try to iterate over table keys that look like columns
-    const result: FieldDefinition[] = [];
-    for (const [key, val] of Object.entries(table as Record<string, unknown>)) {
-      if (key.startsWith('_') || typeof val === 'function') continue;
-      if (options.exclude?.includes(key)) continue;
-      
-      const col = val as DrizzleColumnLike;
-      if (!col || typeof col !== 'object') continue;
-      
-      // Check if it looks like a Drizzle column (has dataType or columnType)
-      if (!col.dataType && !col.columnType) continue;
-
-      result.push(buildField(key, col, options));
-    }
-    return result;
-  }
+  if (!isTable(table)) throw new TypeError('Expected a Drizzle table');
+  const columns: unknown = getTableColumns(table);
 
   const fields: FieldDefinition[] = [];
-  for (const [key, col] of Object.entries(columns)) {
+  for (const [key, col] of decodeColumns(columns)) {
     if (options.exclude?.includes(key)) continue;
     fields.push(buildField(key, col, options));
   }
@@ -129,12 +97,12 @@ export function inferFieldsFromDrizzle(
 
 function buildField(
   key: string,
-  col: DrizzleColumnLike,
+  col: ColumnMetadata,
   options: InferFieldsOptions,
 ): FieldDefinition {
   const type = mapColumnType(col);
   const field: FieldDefinition = {
-    key: col.name ?? key,
+    key,
     label: options.labels?.[key] ?? humanizeKey(key),
     type,
     required: col.notNull === true && !col.hasDefault,

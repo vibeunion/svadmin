@@ -17,7 +17,7 @@
     "build:example": "bun run --cwd example build",
     "check": "bun run typecheck",
     "lint": "eslint . --max-warnings 0",
-    "typecheck": "svelte-check --tsgo-experimental-api --tsconfig ./tsconfig.json && bun run --cwd packages/surface check && bun run --cwd packages/flow check",
+    "typecheck": "bun run check:types && svelte-check --tsgo-experimental-api --tsconfig ./tsconfig.browser.json && bun run --cwd packages/surface check && bun run --cwd packages/flow check && bun run --cwd example check && bun run --cwd packages/lite/example check",
     "test": "bun scripts/run-tests.ts",
     "verify": "bun scripts/verify.ts",
     "test:e2e": "bun run playwright test",
@@ -31,7 +31,9 @@
     "check:lite:ie11": "bun run --cwd packages/lite test:server",
     "pack:check": "bun scripts/check-package-packs.ts",
     "doc:sync": "bun scripts/check-doc-sync.ts",
-    "check:parity": "bun scripts/check-parity.ts --write"
+    "check:parity": "bun scripts/check-parity.ts --write",
+    "check:types": "bun scripts/check-type-contracts.ts",
+    "check:types:dependencies": "bun scripts/check-type-coverage.ts && node node_modules/@typescript/native/bin/tsc -p tsconfig.bun-tests.json --pretty false && svelte-check --tsgo-experimental-api --tsconfig ./tsconfig.dependencies.json"
   },
   "keywords": [
     "svelte",
@@ -68,7 +70,8 @@
     "globals": "^17.11.0",
     "husky": "^9.1.7",
     "svelte-check": "^4.7.6",
-    "typescript-eslint": "^8.68.0"
+    "typescript-eslint": "^8.68.0",
+    "@types/papaparse": "^5.5.2"
   },
   "dependencies": {
     "typescript": "~6.0.3"
@@ -100,7 +103,18 @@
     "decode-uri-component": "0.5.0"
   },
   "patchedDependencies": {
-    "@sveltejs/package@2.5.8": "patches/@sveltejs%2Fpackage@2.5.8.patch"
+    "@sveltejs/package@2.5.8": "patches/@sveltejs%2Fpackage@2.5.8.patch",
+    "@refinedev/core@5.0.12": "patches/@refinedev%2Fcore@5.0.12.patch",
+    "drizzle-orm@1.0.0-rc.2-63dd281": "patches/drizzle-orm@1.0.0-rc.2-63dd281.patch",
+    "@sveltejs/kit@2.70.3": "patches/@sveltejs%2Fkit@2.70.3.patch",
+    "@tanstack/svelte-query@6.1.48": "patches/@tanstack%2Fsvelte-query@6.1.48.patch",
+    "@tanstack/svelte-table@9.2.3": "patches/@tanstack%2Fsvelte-table@9.2.3.patch",
+    "@xyflow/system@0.0.81": "patches/@xyflow%2Fsystem@0.0.81.patch",
+    "@xyflow/svelte@1.6.5": "patches/@xyflow%2Fsvelte@1.6.5.patch",
+    "elysia@1.4.30": "patches/elysia@1.4.30.patch",
+    "bits-ui@2.19.0": "patches/bits-ui@2.19.0.patch",
+    "svelte-toolbelt@0.10.6": "patches/svelte-toolbelt@0.10.6.patch",
+    "@supabase/auth-js@2.112.4": "patches/@supabase%2Fauth-js@2.112.4.patch"
   },
   "main": "eslint.config.js",
   "directories": {

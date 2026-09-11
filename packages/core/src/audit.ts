@@ -1,149 +1,114 @@
-// Audit logging — record admin operations
-// Full AuditLogProvider interface
+import { definedOptions } from './defined-options';
+import { Value } from '@sinclair/typebox/value';
+import {
+  AuditError, createAuditEntry, decodeAuditCreate, decodeAuditEntries, decodeAuditEntry, decodeAuditQuery,
+  type AuditCreateParams, type AuditDraft, type AuditEntry, type AuditQueryParams,
+} from './audit-contract';
 
+export type { AuditEntry, AuditDraft, AuditCreateParams, AuditQueryParams } from './audit-contract';
+export { AuditError } from './audit-contract';
 export type AuditAction = 'create' | 'update' | 'delete' | 'login' | 'logout' | 'rollback' | 'undo' | (string & {});
-
-export interface AuditEntry {
-  id?: string | number;
-  timestamp: string;
-  action: AuditAction;
-  mutationId?: string;
-  resource?: string;
-  recordId?: string | number;
-  userId?: string;
-  details?: Record<string, unknown>;
-  data?: Record<string, unknown>;
-  previousData?: Record<string, unknown>;
-  meta?: Record<string, unknown>;
-  outcome?: 'success' | 'failure';
-  tenantId?: string | number;
-  requestId?: string;
-  traceId?: string;
-  ipAddress?: string;
-  userAgent?: string;
-  error?: { message: string; code?: string };
-}
-
 export type AuditHandler = (entry: AuditEntry) => void | Promise<void>;
 
-/**
- * Full AuditLogProvider interface.
- * - create: log a new entry
- * - get: retrieve entries for a resource
- * - update: update an existing entry (e.g. mark as reviewed)
- */
-export interface AuditLogProvider {
-  create: (params: {
-    resource: string;
-    action: string;
-    timestamp?: string;
-    recordId?: string | number;
-    userId?: string;
-    outcome?: AuditEntry['outcome'];
-    data?: Record<string, unknown>;
-    previousData?: Record<string, unknown>;
-    meta?: Record<string, unknown>;
-  }) => Promise<AuditEntry>;
-  get: (params: { resource: string; action?: string; meta?: Record<string, unknown>; author?: Record<string, unknown> }) => Promise<AuditEntry[]>;
-  /** @deprecated 合规审计应保持追加写入；仅为旧实现兼容保留。 */
-  update?: (params: { id: string | number; name: string; meta?: Record<string, unknown> }) => Promise<AuditEntry>;
+export interface AuditLogTransport {
+  create(params: AuditCreateParams): Promise<unknown>;
+  get(params: AuditQueryParams): Promise<unknown>;
 }
 
-let handler: AuditHandler = (entry) => {
+/** Audit records are append-only. Response types come from runtime validation. */
+export interface AuditLogProvider {
+  create(params: AuditCreateParams): Promise<AuditEntry>;
+  get(params: AuditQueryParams): Promise<AuditEntry[]>;
+}
+
+export function withValidatedAuditProvider(transport: AuditLogTransport): AuditLogProvider {
+  return {
+    async create(params) {
+      return callProvider(transport, decodeAuditCreate(params));
+    },
+    async get(params) {
+      const input = decodeAuditQuery(params);
+      let result: unknown;
+      try { result = await transport.get(input); }
+      catch { throw new AuditError('AUDIT_PROVIDER_FAILED'); }
+      return decodeAuditEntries(result);
+    },
+  };
+}
+
+const defaultHandler: AuditHandler = entry => {
   console.info('[audit]', entry.action, entry.resource, entry.recordId);
 };
-
+let handler = defaultHandler;
 let auditLogProvider: AuditLogProvider | null = null;
 
-export function setAuditHandler(fn: AuditHandler): void {
-  handler = fn;
+export function setAuditHandler(fn: AuditHandler): void { handler = fn; }
+
+export function setAuditLogProvider(provider: AuditLogTransport): void {
+  auditLogProvider = withValidatedAuditProvider(provider);
 }
 
-export function setAuditLogProvider(provider: AuditLogProvider): void {
-  auditLogProvider = provider;
-}
-
-export function getAuditLogProvider(): AuditLogProvider | null {
-  return auditLogProvider;
-}
+export function getAuditLogProvider(): AuditLogProvider | null { return auditLogProvider; }
 
 export function resetAuditLogProvider(): void {
   auditLogProvider = null;
-  handler = (entry) => { console.info('[audit]', entry.action, entry.resource, entry.recordId); };
+  handler = defaultHandler;
 }
 
-/** Record an entry through an explicitly scoped provider and the compatibility handler. */
+function providerInput(entry: AuditEntry): AuditCreateParams {
+  const { id: _id, ...input } = entry;
+  return decodeAuditCreate(input);
+}
+
+async function callHandler(target: AuditHandler, entry: AuditEntry): Promise<void> {
+  try { await target(decodeAuditEntry(entry)); }
+  catch { throw new AuditError('AUDIT_HANDLER_FAILED', true); }
+}
+
+async function callProvider(provider: AuditLogTransport, input: AuditCreateParams): Promise<AuditEntry> {
+  let result: unknown;
+  try { result = await provider.create(decodeAuditCreate(input)); }
+  catch { throw new AuditError('AUDIT_PROVIDER_FAILED', true); }
+  const receipt = decodeAuditEntry(result, 'response', true);
+  for (const [key, expected] of Object.entries(input)) {
+    const descriptor = Object.getOwnPropertyDescriptor(receipt, key);
+    const actual: unknown = descriptor && 'value' in descriptor ? descriptor.value : undefined;
+    if (!descriptor || !Value.Equal(expected, actual)) throw new AuditError('INVALID_AUDIT_RESPONSE', true);
+  }
+  return receipt;
+}
+
+/** Best-effort delivery still validates input and receipts and omits raw failure details. */
 export function auditWithProvider(
-  entry: Omit<AuditEntry, 'timestamp'>,
-  provider: AuditLogProvider | null | undefined,
+  entry: AuditDraft, provider: AuditLogTransport | null | undefined, current: () => boolean = () => true,
 ): void {
-  const fullEntry: AuditEntry = { ...entry, timestamp: new Date().toISOString() };
+  if (!current()) return;
+  let snapshot: AuditEntry;
+  let input: AuditCreateParams;
   try {
-    const result = handler(fullEntry);
-    if (result && typeof result === 'object' && 'then' in result) {
-      (result as Promise<void>).catch(e => console.error('[audit] handler error:', e));
-    }
-  } catch (e) {
-    console.error('[audit] handler error:', e);
+    snapshot = createAuditEntry(entry);
+    input = providerInput(snapshot);
+  } catch {
+    console.error(new AuditError('INVALID_AUDIT_INPUT'));
+    return;
   }
-  if (provider) {
-    provider.create({
-      resource: entry.resource ?? '',
-      action: entry.action,
-      timestamp: fullEntry.timestamp,
-      recordId: entry.recordId,
-      userId: entry.userId,
-      outcome: entry.outcome,
-      data: entry.data ?? entry.details,
-      previousData: entry.previousData,
-      meta: entry.meta,
-    }).catch(e => console.error('[audit] provider create error:', e));
-  }
+  void callHandler(handler, snapshot).catch(error => console.error(error));
+  if (provider && current()) void callProvider(provider, input).catch(error => console.error(error));
 }
 
-export function audit(entry: Omit<AuditEntry, 'timestamp'>): void {
-  auditWithProvider(entry, auditLogProvider);
-}
+export function audit(entry: AuditDraft): void { auditWithProvider(entry, auditLogProvider); }
 
-/**
- * 严格写入审计记录。与兼容的 best-effort `audit` 不同，此函数会等待所有
- * 写入并传播失败，适合权限、凭据、策略等必须和业务结果一起验证的流程。
- */
+/** Wait for every sink and reject malformed receipts; earlier writes may already have committed. */
 export async function writeAuditEntry(
-  entry: Omit<AuditEntry, 'timestamp'>,
-  provider: AuditLogProvider | null | undefined = auditLogProvider,
+  entry: AuditDraft, provider: AuditLogTransport | null | undefined = auditLogProvider,
 ): Promise<AuditEntry> {
-  const fullEntry: AuditEntry = { ...entry, timestamp: new Date().toISOString() };
-  if (!provider) {
-    throw new Error('Strict audit logging requires an AuditLogProvider.');
-  }
-  await handler(fullEntry);
-  return provider.create({
-    resource: entry.resource ?? '',
-    action: entry.action,
-    timestamp: fullEntry.timestamp,
-    recordId: entry.recordId,
-    userId: entry.userId,
-    outcome: entry.outcome,
-    data: entry.data ?? entry.details,
-    previousData: entry.previousData,
-    meta: {
-      ...(entry.meta ?? {}),
-      ...(entry.outcome === undefined ? {} : { outcome: entry.outcome }),
-      ...(entry.tenantId === undefined ? {} : { tenantId: entry.tenantId }),
-      ...(entry.requestId === undefined ? {} : { requestId: entry.requestId }),
-      ...(entry.traceId === undefined ? {} : { traceId: entry.traceId }),
-      ...(entry.ipAddress === undefined ? {} : { ipAddress: entry.ipAddress }),
-      ...(entry.userAgent === undefined ? {} : { userAgent: entry.userAgent }),
-      ...(entry.error === undefined ? {} : { error: entry.error }),
-    },
-  });
+  if (!provider) throw new AuditError('AUDIT_PROVIDER_REQUIRED');
+  const snapshot = createAuditEntry(entry);
+  const input = providerInput(snapshot);
+  await callHandler(handler, snapshot);
+  return callProvider(provider, input);
 }
 
-/**
- * 记录乐观变更回滚或撤回事件至审计流。
- * 将前序状态快照与回滚原因作为不可变事实写入审计。
- */
 export async function recordMutationRollback(
   params: {
     resource: string;
@@ -157,23 +122,18 @@ export async function recordMutationRollback(
     requestId?: string;
     traceId?: string;
   },
-  provider: AuditLogProvider | null | undefined = auditLogProvider,
+  provider: AuditLogTransport | null | undefined = auditLogProvider,
 ): Promise<AuditEntry> {
   return writeAuditEntry({
     action: 'rollback',
     resource: params.resource,
-    recordId: params.recordId,
-    userId: params.userId,
-    tenantId: params.tenantId,
-    requestId: params.requestId,
-    traceId: params.traceId,
+    ...definedOptions({
+      recordId: params.recordId, mutationId: params.mutationId,
+      userId: params.userId, tenantId: params.tenantId,
+      requestId: params.requestId, traceId: params.traceId,
+      previousData: params.previousData, data: params.currentData,
+    }),
     outcome: 'success',
-    previousData: params.previousData,
-    data: params.currentData,
-    meta: {
-      actionType: 'mutation_rollback',
-      mutationId: params.mutationId,
-      reason: params.reason,
-    },
+    meta: { actionType: 'mutation_rollback', ...definedOptions({ reason: params.reason }) },
   }, provider);
 }

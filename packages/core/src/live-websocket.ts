@@ -1,157 +1,124 @@
-/**
- * WebSocket LiveProvider
- *
- * Connects to a WebSocket server and dispatches LiveEvents to subscribers.
- * The server is expected to send JSON messages matching the LiveEvent shape:
- *   { type: 'INSERT' | 'UPDATE' | 'DELETE', resource: string, payload: {...} }
- */
-import type { LiveProvider, LiveEvent } from './live.svelte';
+import type { LiveProvider } from './live.svelte';
+import { createLiveSubscribers, decodeLiveMessage, notifyLiveObserver, readLiveOptions, captureLiveObserver } from './live-transport';
 
 export interface WebSocketLiveProviderOptions {
-  /** WebSocket server URL, e.g. "wss://api.example.com/ws" */
   url: string;
-  /** Reconnect delay in ms (default 3000) */
+  /** Retry delay in milliseconds; defaults to 3000. */
   reconnectDelay?: number;
-  /** Max reconnect attempts (default Infinity) */
+  /** Consecutive failed reconnects; defaults to Infinity. */
   maxReconnects?: number;
-  /** Optional callback when connection opens */
   onOpen?: () => void;
-  /** Optional callback when connection closes */
   onClose?: (event: CloseEvent) => void;
-  /** Optional callback for connection errors */
   onError?: (event: Event) => void;
 }
 
-export function createWebSocketLiveProvider(options: WebSocketLiveProviderOptions): LiveProvider & { disconnect: () => void; getStatus: () => 'connecting' | 'connected' | 'disconnected' } {
-  const { url, reconnectDelay = 3000, maxReconnects = Infinity } = options;
+function configuration(options: unknown) {
+  const input = readLiveOptions(options, ['url', 'reconnectDelay', 'maxReconnects', 'onOpen', 'onClose', 'onError']);
+  const url = input['url'];
+  const reconnectDelay = input['reconnectDelay'] === undefined ? 3000 : input['reconnectDelay'];
+  const maxReconnects = input['maxReconnects'] === undefined ? Infinity : input['maxReconnects'];
+  if (typeof url !== 'string' || !url || typeof reconnectDelay !== 'number' ||
+    !Number.isSafeInteger(reconnectDelay) || reconnectDelay < 0 || reconnectDelay > 2_147_483_647 ||
+    typeof maxReconnects !== 'number' || (maxReconnects !== Infinity && (!Number.isSafeInteger(maxReconnects) || maxReconnects < 0))) {
+    throw new TypeError('Invalid WebSocket live options');
+  }
+  const onOpen = captureLiveObserver(input['onOpen']);
+  const onClose = captureLiveObserver(input['onClose']);
+  const onError = captureLiveObserver(input['onError']);
+  return { url, reconnectDelay, maxReconnects, onOpen, onClose, onError };
+}
 
-  type Callback = (event: LiveEvent) => void;
-  const subscribers = new Map<string, Set<Callback>>();
-  const lastParams = new Map<string, Record<string, unknown> | undefined>();
+/** Each resource uses one checked parameter set until its last subscriber leaves. */
+export function createWebSocketLiveProvider(options: WebSocketLiveProviderOptions): LiveProvider & {
+  disconnect: () => void; getStatus: () => 'connecting' | 'connected' | 'disconnected';
+} {
+  const { url, reconnectDelay, maxReconnects, onOpen, onClose, onError } = configuration(options);
+  const subscribers = createLiveSubscribers();
   let ws: WebSocket | null = null;
   let reconnectAttempts = 0;
-  let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
   let status: 'connecting' | 'connected' | 'disconnected' = 'disconnected';
-  let intentionalClose = false;
-
-  function connect() {
-    if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
-
-    status = 'connecting';
-    intentionalClose = false;
-
-    try {
-      ws = new WebSocket(url);
-    } catch {
-      status = 'disconnected';
-      scheduleReconnect();
-      return;
-    }
-
-    ws.onopen = () => {
-      status = 'connected';
-      reconnectAttempts = 0;
-      options.onOpen?.();
-      
-      // Resend subscriptions upon reconnects
-      for (const [res, callbacks] of subscribers.entries()) {
-        if (callbacks.size > 0) {
-          const liveParams = lastParams.get(res);
-          ws?.send(JSON.stringify({ type: 'SUBSCRIBE', resource: res, liveParams }));
-        }
-      }
-    };
-
-    ws.onmessage = (msgEvent) => {
-      try {
-        const event: LiveEvent = JSON.parse(msgEvent.data);
-        if (event.type && event.resource) {
-          const callbacks = subscribers.get(event.resource);
-          if (callbacks) {
-            for (const cb of callbacks) cb(event);
-          }
-          // Also notify wildcard '*' subscribers
-          const wildcardCallbacks = subscribers.get('*');
-          if (wildcardCallbacks) {
-            for (const cb of wildcardCallbacks) cb(event);
-          }
-        }
-      } catch {
-        // ignore non-JSON messages
-      }
-    };
-
-    ws.onclose = (event) => {
-      status = 'disconnected';
-      options.onClose?.(event);
-      if (!intentionalClose) scheduleReconnect();
-    };
-
-    ws.onerror = (event) => {
-      options.onError?.(event);
-    };
-  }
 
   function scheduleReconnect() {
-    if (reconnectAttempts >= maxReconnects) return;
-    if (reconnectTimer) clearTimeout(reconnectTimer);
-
+    if (subscribers.empty || ws || reconnectAttempts >= maxReconnects) return;
+    if (reconnectTimer !== undefined) clearTimeout(reconnectTimer);
     reconnectAttempts++;
-    reconnectTimer = setTimeout(connect, reconnectDelay);
+    reconnectTimer = setTimeout(() => { reconnectTimer = undefined; connect(); }, reconnectDelay);
   }
-
-  function disconnect() {
-    intentionalClose = true;
-    reconnectAttempts = 0;
-    if (reconnectTimer) {
-      clearTimeout(reconnectTimer);
-      reconnectTimer = null;
-    }
-    if (ws) {
-      ws.close();
+  function close(socket: WebSocket) {
+    try { socket.close(); } catch { /* A retired transport cannot own current state. */ }
+  }
+  function send(socket: WebSocket, message: object) {
+    if (ws !== socket) return;
+    try { socket.send(JSON.stringify(message)); }
+    catch {
       ws = null;
+      status = 'disconnected';
+      close(socket);
+      scheduleReconnect();
     }
-    status = 'disconnected';
   }
-
-
+  function connect() {
+    if (ws || subscribers.empty || typeof WebSocket === 'undefined') return;
+    if (reconnectTimer !== undefined) { clearTimeout(reconnectTimer); reconnectTimer = undefined; }
+    status = 'connecting';
+    let socket: WebSocket;
+    try { socket = new WebSocket(url); }
+    catch { status = 'disconnected'; scheduleReconnect(); return; }
+    ws = socket;
+    const current = () => ws === socket;
+    socket.onopen = () => {
+      if (!current()) return;
+      status = 'connected';
+      for (const channel of subscribers.channels()) send(socket, { type: 'SUBSCRIBE', ...channel });
+      if (current()) {
+        reconnectAttempts = 0;
+        notifyLiveObserver(onOpen, undefined);
+      }
+    };
+    socket.onmessage = message => {
+      if (!current()) return;
+      const data: unknown = message.data;
+      const event = decodeLiveMessage(data);
+      if (event) subscribers.notify(event, current);
+    };
+    socket.onclose = event => {
+      if (!current()) return;
+      ws = null;
+      status = 'disconnected';
+      scheduleReconnect();
+      notifyLiveObserver(onClose, event);
+    };
+    socket.onerror = event => {
+      if (current()) notifyLiveObserver(onError, event);
+    };
+  }
+  function disconnect() {
+    if (reconnectTimer !== undefined) { clearTimeout(reconnectTimer); reconnectTimer = undefined; }
+    reconnectAttempts = 0;
+    const previous = ws;
+    ws = null;
+    status = 'disconnected';
+    if (previous) close(previous);
+  }
 
   return {
-    subscribe({ resource, liveParams, callback }) {
-      if (!subscribers.has(resource)) {
-        subscribers.set(resource, new Set());
+    subscribe(params) {
+      const entry = subscribers.add(params);
+      if (!ws) connect();
+      else if (entry.first && status === 'connected') {
+        const channel = subscribers.channels().find(channel => channel.resource === entry.resource);
+        if (channel) send(ws, { type: 'SUBSCRIBE', ...channel });
       }
-      subscribers.get(resource)?.add(callback);
-      lastParams.set(resource, liveParams);
-
-      // Ensure connection is open
-      if (status === 'disconnected' && typeof WebSocket !== 'undefined') {
-        connect();
-      } else if (status === 'connected' && ws && ws.readyState === WebSocket.OPEN) {
-        // If already connected, dispatch subscription payload dynamically
-        ws.send(JSON.stringify({ type: 'SUBSCRIBE', resource, liveParams }));
-      }
-
+      let active = true;
       return () => {
-        const callbacks = subscribers.get(resource);
-        if (callbacks) {
-          callbacks.delete(callback);
-          if (callbacks.size === 0) {
-            subscribers.delete(resource);
-            if (status === 'connected' && ws && ws.readyState === WebSocket.OPEN) {
-              ws.send(JSON.stringify({ type: 'UNSUBSCRIBE', resource }));
-            }
-          }
-        }
-        // Auto-disconnect if no subscribers left
-        if (subscribers.size === 0) disconnect();
+        if (!active) return;
+        active = false;
+        if (entry.remove() && ws && status === 'connected') send(ws, { type: 'UNSUBSCRIBE', resource: entry.resource });
+        if (subscribers.empty) disconnect();
       };
     },
-
     disconnect,
-
-    getStatus() {
-      return status;
-    },
+    getStatus: () => status,
   };
 }

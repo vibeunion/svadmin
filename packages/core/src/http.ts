@@ -1,85 +1,82 @@
 /**
- * HTTP fetch 工具 — 带 CSRF 防护、401 自动跳转和结构化错误语义。
+ * HTTP fetch utilities with CSRF protection, automatic 401 redirects, and structured error semantics.
  */
 
-import { HttpError, type ValidationErrors } from './types';
+import { HttpError,type ValidationErrors } from './types';
+import { Type } from '@sinclair/typebox';
+import { Value } from '@sinclair/typebox/value';
+import { definedOptions } from './defined-options';
 
 export interface FetchWithInterceptorOptions {
-  /** 401 时跳转的登录页路径 */
+  /** Login path used for 401 redirects. */
   loginPath?: string;
-  /** 403 且服务端未返回消息时使用的错误消息 */
+  /** Error message used when a 403 response has no server-provided message. */
   forbiddenMessage?: string;
-  /** 是否自动添加 X-Requested-With header (CSRF 防护) */
+  /** Whether to add the X-Requested-With header automatically for CSRF protection. */
   csrfProtection?: boolean;
-  /** 自定义 fetch 实现，便于测试或 SSR 环境注入 */
+  /** Custom fetch implementation for testing or SSR injection. */
   fetchImpl?: FetchWithInterceptor;
-  /** 自定义 401 重定向处理，便于测试或 SSR 环境注入 */
-  onUnauthorized?: (loginPath: string, returnTo: string) => void;
+  /** Custom 401 redirect handler for testing or SSR injection. */
+  onUnauthorized?: (loginPath: string,returnTo: string) => void;
 }
 
-export type FetchWithInterceptor = (url: string, init?: RequestInit) => Promise<Response>;
+export type FetchWithInterceptor=(url: string,init?: RequestInit) => Promise<Response>;
 
-const DEFAULT_OPTIONS: Required<Omit<FetchWithInterceptorOptions, 'fetchImpl' | 'onUnauthorized'>> & {
+const DEFAULT_OPTIONS: Required<Omit<FetchWithInterceptorOptions,'fetchImpl'|'onUnauthorized'>>&{
   fetchImpl: FetchWithInterceptor;
-  onUnauthorized: (loginPath: string, returnTo: string) => void;
-} = {
+  onUnauthorized: (loginPath: string,returnTo: string) => void;
+}={
   loginPath: '/auth/login',
   forbiddenMessage: 'Forbidden: 该操作已被安全策略拒绝',
   csrfProtection: true,
   get fetchImpl() {
-    if (typeof globalThis !== 'undefined' && typeof globalThis.fetch === 'function') {
-      return (url: string, init?: RequestInit) => globalThis.fetch(url, init);
+    if(typeof globalThis!=='undefined'&&typeof globalThis.fetch==='function') {
+      return (url: string,init?: RequestInit) => globalThis.fetch(url,init);
     }
     return async () => {
       throw new Error('No fetch implementation found. Pass fetchImpl in options.');
     };
   },
-  onUnauthorized: (loginPath, returnTo) => {
-    if (typeof window !== 'undefined') {
-      window.location.href = `${loginPath}?returnTo=${returnTo}`;
+  onUnauthorized: (loginPath,returnTo) => {
+    if(typeof window!=='undefined') {
+      window.location.href=`${loginPath}?returnTo=${returnTo}`;
     }
   },
 };
 
-function asRecord(value: unknown): Record<string, unknown> | null {
-  return typeof value === 'object' && value !== null
-    ? value as Record<string, unknown>
-    : null;
+function asRecord(value: unknown): Record<string,unknown>|null {
+  return Value.Check(Type.Record(Type.String(),Type.Unknown()),value)? value:null;
 }
 
-function asStructuredHttpError(error: unknown): HttpError | null {
-  const record = asRecord(error);
-  if (!record || typeof record.statusCode !== 'number') return null;
-  const message = typeof record.message === 'string' ? record.message : 'HTTP request failed';
-  const errors = asValidationErrors(record.errors);
-  return new HttpError(message, record.statusCode, errors, {
-    code: typeof record.code === 'string' ? record.code : undefined,
-    details: record.details,
-    body: record.body,
+function asStructuredHttpError(error: unknown): HttpError|null {
+  const record=asRecord(error);
+  const status=record?.['statusCode'];
+  if(!record||typeof status!=='number'||!Number.isInteger(status)||status<100||status>599) return null;
+  const message=typeof record['message']==='string'? record['message']:'HTTP request failed';
+  const errors=asValidationErrors(record['errors']);
+  return new HttpError(message,status,errors,definedOptions({
+    code: typeof record['code']==='string'? record['code']:undefined,
+    details: record['details'],
+    body: record['body'],
     cause: error,
-  });
+  }));
 }
 
-function firstString(...values: unknown[]): string | undefined {
-  return values.find((value): value is string => typeof value === 'string');
+function firstString(...values: unknown[]): string|undefined {
+  return values.find((value): value is string => typeof value==='string');
 }
 
-function asValidationErrors(value: unknown): ValidationErrors | undefined {
-  const record = asRecord(value);
-  if (!record) return undefined;
-
-  const valid = Object.values(record).every((entry) => (
-    typeof entry === 'string'
-    || (Array.isArray(entry) && entry.every((item) => typeof item === 'string'))
-  ));
-  return valid ? record as ValidationErrors : undefined;
+function asValidationErrors(value: unknown): ValidationErrors|undefined {
+  const schema=Type.Record(Type.String(),Type.Union([Type.String(),Type.Array(Type.String())]));
+  return Value.Check(schema,value)? value:undefined;
 }
 
 async function readErrorBody(response: Response): Promise<unknown> {
-  const text = await response.text();
-  if (!text) return undefined;
+  const text=await response.text();
+  if(!text) return undefined;
   try {
-    return JSON.parse(text) as unknown;
+    const parsed: unknown=JSON.parse(text);
+    return parsed;
   } catch {
     return text;
   }
@@ -89,81 +86,85 @@ async function createResponseError(
   response: Response,
   forbiddenMessage: string,
 ): Promise<HttpError> {
-  const body = await readErrorBody(response);
-  const record = asRecord(body);
-  const nestedError = asRecord(record?.error);
-  const code = response.headers.get('X-Svadmin-Auth-Retry') === 'exhausted'
+  const body=await readErrorBody(response);
+  const record=asRecord(body);
+  const nestedError=asRecord(record?.['error']);
+  const code=response.headers.get('X-Svadmin-Auth-Retry')==='exhausted'
     ? 'auth_retry_exhausted'
-    : firstString(
-      record?.code,
-      record?.error_code,
-      nestedError?.code,
-      nestedError?.error_code,
-      record?.error,
+    :firstString(
+      record?.['code'],
+      record?.['error_code'],
+      nestedError?.['code'],
+      nestedError?.['error_code'],
+      record?.['error'],
     );
-  const details = record?.details ?? nestedError?.details;
-  const message = firstString(
-    record?.message,
-    nestedError?.message,
-    record?.error_description,
-    nestedError?.error_description,
+  const details=record?.['details']??nestedError?.['details'];
+  const message=firstString(
+    record?.['message'],
+    nestedError?.['message'],
+    record?.['error_description'],
+    nestedError?.['error_description'],
     body,
-  ) ?? (response.status === 401 ? 'Unauthorized' : forbiddenMessage);
+  )??(response.status===401? 'Unauthorized':forbiddenMessage);
 
   return new HttpError(
     message,
     response.status,
-    asValidationErrors(record?.errors ?? nestedError?.errors),
-    { code, details, body },
+    asValidationErrors(record?.['errors']??nestedError?.['errors']),
+    definedOptions({
+      code,
+      details,
+      body,
+    }),
   );
 }
 
 /**
- * 带拦截器的 fetch。Core 只保留错误语义；认证刷新和请求重放由认证提供方处理。
+ * Fetch with interceptors. Core owns error semantics; the auth provider handles refresh and request replay.
  */
 export function createFetchWithInterceptor(
-  options: FetchWithInterceptorOptions = {},
+  options: FetchWithInterceptorOptions={},
 ): FetchWithInterceptor {
-  const opts = { ...DEFAULT_OPTIONS, ...options };
+  const opts={ ...DEFAULT_OPTIONS,...options };
 
-  return async (url: string, init: RequestInit = {}): Promise<Response> => {
-    const headers = new Headers(init.headers || {});
-    if (
+  return async (url: string,init: RequestInit={}): Promise<Response> => {
+    const headers=new Headers(init.headers||{});
+    if(
       opts.csrfProtection
-      && init.method
-      && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(init.method.toUpperCase())
+      &&init.method
+      &&['POST','PUT','DELETE','PATCH'].includes(init.method.toUpperCase())
     ) {
-      headers.set('X-Requested-With', 'XMLHttpRequest');
+      headers.set('X-Requested-With','XMLHttpRequest');
     }
 
     let response: Response;
     try {
-      response = await opts.fetchImpl(url, { ...init, headers });
-    } catch (error) {
-      if (error instanceof HttpError) throw error;
-      const structuredError = asStructuredHttpError(error);
-      if (structuredError) throw structuredError;
+      response=await opts.fetchImpl(url,{ ...init,headers });
+    } catch(error) {
+      if(error instanceof HttpError) throw error;
+      const structuredError=asStructuredHttpError(error);
+      if(structuredError) throw structuredError;
       throw error;
     }
 
-    if (response.ok || (response.status !== 401 && response.status !== 403)) {
+    if(response.ok||(response.status!==401&&response.status!==403)) {
       return response;
     }
 
-    const httpError = await createResponseError(response, opts.forbiddenMessage);
-    if (response.status === 401) {
-      const returnTo = typeof window !== 'undefined'
+    const httpError=await createResponseError(response,opts.forbiddenMessage);
+    if(response.status===401) {
+      const returnTo=typeof window!=='undefined'
         ? encodeURIComponent(window.location.pathname)
-        : '';
+        :'';
       try {
-        opts.onUnauthorized(opts.loginPath, returnTo);
+        opts.onUnauthorized(opts.loginPath,returnTo);
       } catch {
-        // 重定向适配器失败不能覆盖服务端的结构化 401 错误。
+        // Redirect adapter failures must not replace the server's structured 401 error.
       }
     }
     throw httpError;
   };
 }
 
-/** 便捷全局实例 — 使用默认配置。 */
-export const fetchWithInterceptor = createFetchWithInterceptor();
+/** Convenient global instance using the default configuration. */
+export const fetchWithInterceptor=createFetchWithInterceptor();

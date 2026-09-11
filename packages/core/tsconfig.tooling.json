@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.contracts.json",
+  "compilerOptions": { "types": ["bun"], "resolveJsonModule": true },
+  "include": [
+    "../../scripts/check-type-contracts.ts",
+    "../../scripts/check-type-coverage.test.ts",
+    "../../scripts/check-create-svadmin-compat.ts",
+    "../../scripts/check-create-svadmin-compat.test.ts",
+    "../../scripts/stripe-first-refactor-contract.test.ts",
+    "../../scripts/tailwind-source-contract.test.ts"
+  ],
+  "exclude": []
+}

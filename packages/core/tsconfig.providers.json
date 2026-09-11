@@ -1,0 +1,31 @@
+{
+  "extends": "./tsconfig.contracts.json",
+  "compilerOptions": { "types": ["bun"] },
+  "include": [
+    "../refine-adapter/src/index.ts",
+    "../refine-adapter/src/index.test.ts",
+    "../elysia/src/data-provider.ts",
+    "../elysia/src/response-validation.test.ts",
+    "../directus/src/data-provider.ts",
+    "../directus/src/response-validation.test.ts",
+    "../drizzle/src/column-metadata.ts",
+    "../drizzle/src/column-metadata.test.ts",
+    "../pocketbase/src/data-provider.ts",
+    "../pocketbase/src/response-validation.test.ts",
+    "../sanity/src/data-provider.ts",
+    "../sanity/src/response-validation.test.ts",
+    "../supabase/src/data-provider.ts",
+    "../supabase/src/rpc.ts",
+    "../supabase/src/live-provider.ts",
+    "../supabase/src/live-validation.test.ts",
+    "../supabase/src/auth-provider.ts",
+    "../supabase/src/auth-validation.test.ts",
+    "../supabase/src/audit-handler.ts",
+    "../supabase/src/audit-validation.test.ts",
+    "../supabase/src/supacloud.ts",
+    "../supabase/src/supacloud-validation.test.ts",
+    "../supabase/src/response-validation.test.ts",
+    "../refine-adapter/src/refinedev-optional.d.ts"
+  ],
+  "exclude": []
+}

@@ -1,5 +1,8 @@
 <script lang="ts">
-  import { captureAdminContext, useList } from '@svadmin/core';
+  import { demoContracts, demoContract } from '../resource-contracts';
+
+  import { captureAdminContext } from '@svadmin/core';
+import { useList } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import {
     AutoTable,
@@ -50,21 +53,25 @@
   const i18n = useTranslation();
   const adminContext = captureAdminContext();
   const query = useList({
-    get resource() { return resourceName; },
+    get resource() { return demoContract(resourceName); },
     pagination: { mode: 'off' },
   });
-  const productsQuery = useList({ resource: 'products', pagination: { mode: 'off' } });
-  const warehousesQuery = useList({ resource: 'warehouses', pagination: { mode: 'off' } });
-  const suppliersQuery = useList({ resource: 'suppliers', pagination: { mode: 'off' } });
+  const productsQuery = useList({ resource: demoContracts.products, pagination: { mode: 'off' } });
+  const warehousesQuery = useList({ resource: demoContracts.warehouses, pagination: { mode: 'off' } });
+  const suppliersQuery = useList({ resource: demoContracts.suppliers, pagination: { mode: 'off' } });
 
   const isZh = $derived(i18n.locale === 'zh-CN');
-  const rows = $derived((query.data?.data ?? []) as Row[]);
-  const products = $derived((productsQuery.data?.data ?? []) as Row[]);
-  const warehouses = $derived((warehousesQuery.data?.data ?? []) as Row[]);
-  const suppliers = $derived((suppliersQuery.data?.data ?? []) as Row[]);
+  const rows = $derived((query.data?.data ?? []));
+  const products = $derived((productsQuery.data?.data ?? []));
+  const warehouses = $derived((warehousesQuery.data?.data ?? []));
+  const suppliers = $derived((suppliersQuery.data?.data ?? []));
   const isLoading = $derived(query.isLoading || productsQuery.isLoading || warehousesQuery.isLoading || suppliersQuery.isLoading);
   const hasError = $derived(Boolean(query.error || productsQuery.error || warehousesQuery.error || suppliersQuery.error));
-  const operationsResource = $derived(resourceName as OperationsResource);
+  const operationsResource = $derived(isOperationsResource(resourceName) ? resourceName : 'stock_movements');
+
+  function isOperationsResource(name: string): name is OperationsResource {
+    return Object.hasOwn(profiles, name);
+  }
 
   const profiles: Record<OperationsResource, PageProfile> = {
     stock_movements: {
@@ -137,7 +144,7 @@
   const countBy = (key: string, value: string) => rows.filter((row) => text(row, key) === value).length;
   const sumBy = (key: string) => rows.reduce((sum, row) => sum + numeric(row, key), 0);
   const absoluteSumBy = (key: string) => rows.reduce((sum, row) => sum + Math.abs(numeric(row, key)), 0);
-  const findName = (items: Row[], id: unknown, fallback: string) => String(items.find((item) => item.id === id)?.name ?? fallback);
+  const findName = (items: Row[], id: unknown, fallback: string) => String(items.find((item) => item['id'] === id)?.['name'] ?? fallback);
   const productName = (id: unknown) => findName(products, id, isZh ? '未知商品' : 'Unknown product');
   const warehouseName = (id: unknown) => findName(warehouses, id, isZh ? '未知仓库' : 'Unknown warehouse');
   const supplierName = (id: unknown) => findName(suppliers, id, isZh ? '未知供应商' : 'Unknown supplier');
@@ -216,13 +223,13 @@
       <div class="rounded-lg border border-border bg-card">
         <div class="border-b border-border p-4"><SectionHeader title={isZh ? '近期库存活动' : 'Recent inventory activity'} description={isZh ? '按时间查看每次库存增减及所在仓库。' : 'Review every stock change with its warehouse context.'} /></div>
         <div class="divide-y divide-border">
-          {#each recentMovements as row (String(row.id))}
+          {#each recentMovements as row (String(row['id']))}
             <article class="grid gap-3 p-4 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center">
               <span class="flex size-9 items-center justify-center rounded-md border border-border bg-muted text-muted-foreground">
                 {#if text(row, 'type') === 'in'}<ArrowDownToLine class="size-4" />{:else}<ArrowUpFromLine class="size-4" />{/if}
               </span>
-              <div class="min-w-0"><p class="truncate text-sm font-medium text-foreground">{productName(row.productId)}</p><p class="mt-1 text-xs text-muted-foreground">{warehouseName(row.warehouseId)} · {text(row, 'note')}</p></div>
-              <div class="flex items-center justify-between gap-3 sm:block sm:text-right"><Badge variant={badgeVariant(row.type)}>{statusLabel(row.type)}</Badge><p class="mt-1 text-sm font-semibold text-foreground">{numeric(row, 'quantity') > 0 ? '+' : ''}{numeric(row, 'quantity')}</p></div>
+              <div class="min-w-0"><p class="truncate text-sm font-medium text-foreground">{productName(row['productId'])}</p><p class="mt-1 text-xs text-muted-foreground">{warehouseName(row['warehouseId'])} · {text(row, 'note')}</p></div>
+              <div class="flex items-center justify-between gap-3 sm:block sm:text-right"><Badge variant={badgeVariant(row['type'])}>{statusLabel(row['type'])}</Badge><p class="mt-1 text-sm font-semibold text-foreground">{numeric(row, 'quantity') > 0 ? '+' : ''}{numeric(row, 'quantity')}</p></div>
             </article>
           {:else}
             <DataState state="empty" title={isZh ? '暂无库存流水' : 'No stock movements'} />
@@ -254,11 +261,11 @@
         {/each}
       </div>
       <div class="divide-y divide-border">
-        {#each activeTransfers as row (String(row.id))}
+        {#each activeTransfers as row (String(row['id']))}
           <article class="grid gap-4 p-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.4fr)_auto] lg:items-center">
-            <div><div class="flex items-center gap-2"><Repeat2 class="size-4 text-muted-foreground" /><p class="text-sm font-medium text-foreground">{text(row, 'transferNumber')}</p></div><p class="mt-1 text-xs text-muted-foreground">{productName(row.productId)} · {numeric(row, 'quantity')} {isZh ? '件' : 'units'}</p></div>
-            <div class="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3"><span class="truncate text-sm text-foreground">{warehouseName(row.fromWarehouseId)}</span><ArrowRight class="size-4 text-muted-foreground" /><span class="truncate text-right text-sm text-foreground">{warehouseName(row.toWarehouseId)}</span></div>
-            <div class="flex items-center justify-between gap-3 lg:justify-end"><Badge variant={badgeVariant(row.status)}>{statusLabel(row.status)}</Badge><span class="text-xs text-muted-foreground">{text(row, 'expectedDate')}</span></div>
+            <div><div class="flex items-center gap-2"><Repeat2 class="size-4 text-muted-foreground" /><p class="text-sm font-medium text-foreground">{text(row, 'transferNumber')}</p></div><p class="mt-1 text-xs text-muted-foreground">{productName(row['productId'])} · {numeric(row, 'quantity')} {isZh ? '件' : 'units'}</p></div>
+            <div class="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3"><span class="truncate text-sm text-foreground">{warehouseName(row['fromWarehouseId'])}</span><ArrowRight class="size-4 text-muted-foreground" /><span class="truncate text-right text-sm text-foreground">{warehouseName(row['toWarehouseId'])}</span></div>
+            <div class="flex items-center justify-between gap-3 lg:justify-end"><Badge variant={badgeVariant(row['status'])}>{statusLabel(row['status'])}</Badge><span class="text-xs text-muted-foreground">{text(row, 'expectedDate')}</span></div>
           </article>
         {:else}
           <DataState state="empty" title={isZh ? '暂无进行中的调拨' : 'No active transfers'} />
@@ -279,9 +286,9 @@
       <div class="rounded-lg border border-border bg-card">
         <div class="border-b border-border p-4"><SectionHeader title={isZh ? '盘点执行计划' : 'Count execution plan'} description={isZh ? '按仓库查看范围、负责人、进度和差异。' : 'Review scope, owner, progress, and variance by warehouse.'} /></div>
         <div class="divide-y divide-border">
-          {#each rows as row (String(row.id))}
+          {#each rows as row (String(row['id']))}
             {@const completion = percent(numeric(row, 'countedItems'), numeric(row, 'expectedItems'))}
-            <article class="p-4"><div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><div class="flex items-center gap-2"><ClipboardCheck class="size-4 text-muted-foreground" /><p class="text-sm font-medium text-foreground">{text(row, 'countNumber')} · {text(row, 'scope')}</p></div><p class="mt-1 text-xs text-muted-foreground">{warehouseName(row.warehouseId)} · {text(row, 'scheduledDate')}</p></div><div class="flex items-center gap-2"><Badge variant={badgeVariant(row.status)}>{statusLabel(row.status)}</Badge>{#if numeric(row, 'varianceItems') > 0}<Badge variant="outline">{numeric(row, 'varianceItems')} {isZh ? '项差异' : 'variance'}</Badge>{/if}</div></div><div class="mt-4"><div class="flex items-center justify-between text-xs text-muted-foreground"><span>{numeric(row, 'countedItems')} / {numeric(row, 'expectedItems')}</span><span>{completion}%</span></div><div class="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"><div class="h-full rounded-full bg-primary" style:width={`${completion}%`}></div></div></div></article>
+            <article class="p-4"><div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><div class="flex items-center gap-2"><ClipboardCheck class="size-4 text-muted-foreground" /><p class="text-sm font-medium text-foreground">{text(row, 'countNumber')} · {text(row, 'scope')}</p></div><p class="mt-1 text-xs text-muted-foreground">{warehouseName(row['warehouseId'])} · {text(row, 'scheduledDate')}</p></div><div class="flex items-center gap-2"><Badge variant={badgeVariant(row['status'])}>{statusLabel(row['status'])}</Badge>{#if numeric(row, 'varianceItems') > 0}<Badge variant="outline">{numeric(row, 'varianceItems')} {isZh ? '项差异' : 'variance'}</Badge>{/if}</div></div><div class="mt-4"><div class="flex items-center justify-between text-xs text-muted-foreground"><span>{numeric(row, 'countedItems')} / {numeric(row, 'expectedItems')}</span><span>{completion}%</span></div><div class="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"><div class="h-full rounded-full bg-primary" style:width={`${completion}%`}></div></div></div></article>
           {/each}
         </div>
       </div>
@@ -301,11 +308,11 @@
           <SectionHeader title={isZh ? '审批队列' : 'Approval queue'} description={isZh ? '先处理待审批的库存修正，再进入完整记录表。' : 'Resolve pending stock corrections before reviewing the full ledger.'} />
         </div>
         <div class="divide-y divide-border">
-          {#each pendingAdjustments as row (String(row.id))}
+          {#each pendingAdjustments as row (String(row['id']))}
             <article class="p-4">
               <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div><p class="text-sm font-medium text-foreground">{text(row, 'adjustmentNumber')} · {productName(row.productId)}</p><p class="mt-1 text-xs text-muted-foreground">{warehouseName(row.warehouseId)} · {text(row, 'reason').replaceAll('_', ' ')}</p></div>
-                <div class="flex items-center gap-3"><span class={`text-sm font-semibold ${numeric(row, 'quantityChange') < 0 ? 'text-destructive' : 'text-foreground'}`}>{numeric(row, 'quantityChange') > 0 ? '+' : ''}{numeric(row, 'quantityChange')}</span><Badge variant={badgeVariant(row.status)}>{statusLabel(row.status)}</Badge></div>
+                <div><p class="text-sm font-medium text-foreground">{text(row, 'adjustmentNumber')} · {productName(row['productId'])}</p><p class="mt-1 text-xs text-muted-foreground">{warehouseName(row['warehouseId'])} · {text(row, 'reason').replaceAll('_', ' ')}</p></div>
+                <div class="flex items-center gap-3"><span class={`text-sm font-semibold ${numeric(row, 'quantityChange') < 0 ? 'text-destructive' : 'text-foreground'}`}>{numeric(row, 'quantityChange') > 0 ? '+' : ''}{numeric(row, 'quantityChange')}</span><Badge variant={badgeVariant(row['status'])}>{statusLabel(row['status'])}</Badge></div>
               </div>
               <p class="mt-3 text-sm leading-6 text-muted-foreground">{text(row, 'notes')}</p>
             </article>
@@ -314,7 +321,7 @@
           {/each}
         </div>
       </div>
-      <aside class="rounded-lg border border-border bg-card p-4"><SectionHeader title={isZh ? '调整影响' : 'Adjustment impact'} /><div class="mt-5 space-y-4">{#each rows as row (String(row.id))}<div class="flex items-center justify-between gap-3"><div class="min-w-0"><p class="truncate text-sm font-medium text-foreground">{productName(row.productId)}</p><p class="text-xs text-muted-foreground">{warehouseName(row.warehouseId)}</p></div><span class={`text-sm font-semibold ${numeric(row, 'quantityChange') < 0 ? 'text-destructive' : 'text-foreground'}`}>{numeric(row, 'quantityChange') > 0 ? '+' : ''}{numeric(row, 'quantityChange')}</span></div>{/each}</div></aside>
+      <aside class="rounded-lg border border-border bg-card p-4"><SectionHeader title={isZh ? '调整影响' : 'Adjustment impact'} /><div class="mt-5 space-y-4">{#each rows as row (String(row['id']))}<div class="flex items-center justify-between gap-3"><div class="min-w-0"><p class="truncate text-sm font-medium text-foreground">{productName(row['productId'])}</p><p class="text-xs text-muted-foreground">{warehouseName(row['warehouseId'])}</p></div><span class={`text-sm font-semibold ${numeric(row, 'quantityChange') < 0 ? 'text-destructive' : 'text-foreground'}`}>{numeric(row, 'quantityChange') > 0 ? '+' : ''}{numeric(row, 'quantityChange')}</span></div>{/each}</div></aside>
     </section>
   {:else if operationsResource === 'reorder_rules'}
     {@const reviewRules = rows.filter((row) => text(row, 'status') === 'review')}
@@ -327,9 +334,9 @@
     <section class="rounded-lg border border-border bg-card" data-reorder-layout>
       <div class="border-b border-border p-4"><SectionHeader title={isZh ? '策略健康度' : 'Policy health'} description={isZh ? '对照最低库存、目标库存、补货量和供应商交期。' : 'Compare minimum stock, target coverage, reorder quantity, and supplier lead time.'} /></div>
       <div class="divide-y divide-border">
-        {#each rows as row (String(row.id))}
+        {#each rows as row (String(row['id']))}
           {@const coverage = percent(numeric(row, 'minStock'), numeric(row, 'targetStock'))}
-          <article class="grid gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_minmax(15rem,0.8fr)_auto] lg:items-center"><div><div class="flex items-center gap-2"><Settings2 class="size-4 text-muted-foreground" /><p class="text-sm font-medium text-foreground">{productName(row.productId)}</p></div><p class="mt-1 text-xs text-muted-foreground">{warehouseName(row.warehouseId)} · {supplierName(row.supplierId)}</p></div><div><div class="flex items-center justify-between text-xs text-muted-foreground"><span>{isZh ? '最低 / 目标' : 'Minimum / target'}</span><span>{numeric(row, 'minStock')} / {numeric(row, 'targetStock')}</span></div><div class="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"><div class="h-full rounded-full bg-primary" style:width={`${coverage}%`}></div></div></div><div class="flex items-center justify-between gap-3 lg:justify-end"><div class="text-right"><p class="text-sm font-semibold text-foreground">+{numeric(row, 'reorderQuantity')}</p><p class="text-xs text-muted-foreground">{numeric(row, 'leadTimeDays')} {isZh ? '天交期' : 'days lead'}</p></div><Badge variant={badgeVariant(row.status)}>{statusLabel(row.status)}</Badge></div></article>
+          <article class="grid gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_minmax(15rem,0.8fr)_auto] lg:items-center"><div><div class="flex items-center gap-2"><Settings2 class="size-4 text-muted-foreground" /><p class="text-sm font-medium text-foreground">{productName(row['productId'])}</p></div><p class="mt-1 text-xs text-muted-foreground">{warehouseName(row['warehouseId'])} · {supplierName(row['supplierId'])}</p></div><div><div class="flex items-center justify-between text-xs text-muted-foreground"><span>{isZh ? '最低 / 目标' : 'Minimum / target'}</span><span>{numeric(row, 'minStock')} / {numeric(row, 'targetStock')}</span></div><div class="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"><div class="h-full rounded-full bg-primary" style:width={`${coverage}%`}></div></div></div><div class="flex items-center justify-between gap-3 lg:justify-end"><div class="text-right"><p class="text-sm font-semibold text-foreground">+{numeric(row, 'reorderQuantity')}</p><p class="text-xs text-muted-foreground">{numeric(row, 'leadTimeDays')} {isZh ? '天交期' : 'days lead'}</p></div><Badge variant={badgeVariant(row['status'])}>{statusLabel(row['status'])}</Badge></div></article>
         {/each}
       </div>
     </section>
@@ -348,8 +355,8 @@
       <div class="rounded-lg border border-border bg-card">
         <div class="border-b border-border p-4"><SectionHeader title={isPurchase ? (isZh ? '供应商履约队列' : 'Supplier fulfillment queue') : (isZh ? '客户履约队列' : 'Customer fulfillment queue')} description={isPurchase ? (isZh ? '跟踪下单、到货窗口和收货状态。' : 'Track ordering, delivery windows, and receiving state.') : (isZh ? '跟踪客户需求、处理状态和发货窗口。' : 'Track customer demand, processing state, and shipment windows.')} /></div>
         <div class="divide-y divide-border">
-          {#each activeOrders as row (String(row.id))}
-            <article class="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"><div><div class="flex items-center gap-2">{#if isPurchase}<Truck class="size-4 text-muted-foreground" />{:else}<PackageCheck class="size-4 text-muted-foreground" />{/if}<p class="text-sm font-medium text-foreground">{text(row, 'orderNumber')}</p></div><p class="mt-1 text-xs text-muted-foreground">{isPurchase ? supplierName(row.supplierId) : text(row, 'customerName')} · {isPurchase ? text(row, 'deliveryDate') : text(row, 'shippingDate')}</p></div><div class="flex items-center justify-between gap-3"><span class="text-sm font-semibold text-foreground">{money(numeric(row, 'totalAmount'))}</span><Badge variant={badgeVariant(row.status)}>{statusLabel(row.status)}</Badge></div></article>
+          {#each activeOrders as row (String(row['id']))}
+            <article class="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"><div><div class="flex items-center gap-2">{#if isPurchase}<Truck class="size-4 text-muted-foreground" />{:else}<PackageCheck class="size-4 text-muted-foreground" />{/if}<p class="text-sm font-medium text-foreground">{text(row, 'orderNumber')}</p></div><p class="mt-1 text-xs text-muted-foreground">{isPurchase ? supplierName(row['supplierId']) : text(row, 'customerName')} · {isPurchase ? text(row, 'deliveryDate') : text(row, 'shippingDate')}</p></div><div class="flex items-center justify-between gap-3"><span class="text-sm font-semibold text-foreground">{money(numeric(row, 'totalAmount'))}</span><Badge variant={badgeVariant(row['status'])}>{statusLabel(row['status'])}</Badge></div></article>
           {:else}
             <DataState state="empty" title={isZh ? '暂无进行中的订单' : 'No active orders'} />
           {/each}

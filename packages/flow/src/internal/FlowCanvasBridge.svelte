@@ -9,7 +9,7 @@
 
   onMount(() => {
     onready({
-      fitView: () => instance.fitView(),
+      fitView: () => instance.getNodes().length === 0 ? Promise.resolve(false) : instance.fitView(),
       screenToFlowPosition: instance.screenToFlowPosition,
     });
   });

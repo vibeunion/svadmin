@@ -63,7 +63,7 @@
 
   const isCompact = $derived(density === 'compact');
 
-  const toneClasses: Record<string, { activeBadge: string; inactiveBadge: string }> = {
+  const toneClasses: Record<NonNullable<StatusTabItem['tone']>, { activeBadge: string; inactiveBadge: string }> = {
     default: {
       activeBadge: 'svadmin-u-6a1572b6bf5a svadmin-u-20aaf08a7ed1',
       inactiveBadge: 'svadmin-u-2ef11f1cb219 svadmin-u-bfa603190748',
@@ -107,7 +107,7 @@
   {#each items as item (item.key)}
     {@const active = value === item.key}
     {@const tone = item.tone ?? 'default'}
-    {@const badgeTone = toneClasses[tone] ?? toneClasses.default}
+    {@const badgeTone = toneClasses[tone] ?? toneClasses['default']}
     <button
       type="button"
       role="tab"

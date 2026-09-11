@@ -47,7 +47,7 @@ describe('scoped router navigation', () => {
   });
 
   it('waits for an asynchronous provider before syncing and running after hooks', async () => {
-    let finishNavigation!: () => void;
+    let finishNavigation = () => {};
     const navigation = new Promise<void>((resolve) => {
       finishNavigation = resolve;
     });
@@ -79,6 +79,21 @@ describe('scoped router navigation', () => {
 
     await navigateWithProvider(router, '/blocked');
 
+    expect(router.go).not.toHaveBeenCalled();
+    expect(sync).not.toHaveBeenCalled();
+  });
+
+  it('does not dispatch navigation after its owning request becomes inactive during a guard', async () => {
+    const router = createRouter();
+    let active = true;
+    let proceed = (_allowed: boolean) => {};
+    registerBeforeEach(() => new Promise<boolean>(resolve => { proceed = resolve; }));
+    const sync = vi.fn();
+    registerRouterSync(sync);
+    const pending = navigateWithProvider(router, '/old-session', undefined, () => active);
+    active = false;
+    proceed(true);
+    await pending;
     expect(router.go).not.toHaveBeenCalled();
     expect(sync).not.toHaveBeenCalled();
   });

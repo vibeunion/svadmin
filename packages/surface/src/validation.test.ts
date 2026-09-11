@@ -159,7 +159,7 @@ describe("validateSurfaceSpec", () => {
           columns: Type.Array(Type.Object({ field: Type.String(), label: Type.String() }, { additionalProperties: false })),
         }, { additionalProperties: false }),
         getReferencedFields: (props) => (
-          props.columns as Array<{ field: string }>
+          props['columns'] as Array<{ field: string }>
         ).map((column) => column.field),
       }],
     }, policy);

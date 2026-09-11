@@ -24,12 +24,12 @@ function requiredSearchParam(params: URLSearchParams, name: string): string {
   return value;
 }
 
-function customRequest<TData = unknown, TVariables = unknown>(
+function customRequest(
   provider: DataProvider,
-  params: CustomParams<TVariables>,
-): Promise<CustomResult<TData>> {
+  params: CustomParams,
+): Promise<CustomResult> {
   if (!provider.custom) throw new Error('Directus provider custom() is unavailable');
-  return provider.custom<TData, TVariables>(params);
+  return provider.custom(params);
 }
 
 afterEach(() => {
@@ -182,7 +182,7 @@ describe('createDirectusDataProvider', () => {
       ],
     });
     expect(init.body).toBe('false');
-    expect((init.headers as Record<string, string>).Authorization).toBe('Bearer provider-token');
+    expect((init.headers as Record<string, string>)['Authorization']).toBe('Bearer provider-token');
   });
 
   for (const [name, payload, expectedBody] of [
@@ -215,7 +215,7 @@ describe('createDirectusDataProvider', () => {
 
     const [, init] = mockFetchFn.mock.calls[0] as [string, RequestInit];
     const headers = init.headers as Record<string, string>;
-    expect(headers.Authorization).toBeUndefined();
+    expect(headers['Authorization']).toBeUndefined();
     expect(headers['Content-Type']).toBe('application/json');
     expect(headers['X-Request-ID']).toBe('request-1');
   });
@@ -230,7 +230,7 @@ describe('createDirectusDataProvider', () => {
     });
 
     const [, init] = mockFetchFn.mock.calls[0] as [string, RequestInit];
-    expect((init.headers as Record<string, string>).Authorization).toBe('Bearer analytics-token');
+    expect((init.headers as Record<string, string>)['Authorization']).toBe('Bearer analytics-token');
   });
 
   it('does not call json() for a 204 response', async () => {

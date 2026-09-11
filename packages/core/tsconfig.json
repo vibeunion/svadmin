@@ -1,7 +1,12 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "types": ["bun"]
+    "types": [
+      "bun"
+    ]
   },
-  "include": ["src/**/*.ts", "src/**/*.svelte.ts"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.svelte.ts"
+  ]
 }

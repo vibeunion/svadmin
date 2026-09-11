@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test';
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import {
   AUTH_PROVIDER_CHOICES,
@@ -10,6 +11,19 @@ import {
 const scaffold = loadScaffoldManifest(resolve(import.meta.dir, '..', 'scaffold-manifest.json'));
 
 describe('create-svadmin project manifest', () => {
+  test('scaffolds a consumer without Tailwind runtime tooling', () => {
+    const templateRoot = resolve(import.meta.dir, '..', 'template');
+    const viteConfig = readFileSync(resolve(templateRoot, 'vite.config.ts'), 'utf8');
+    const appCss = readFileSync(resolve(templateRoot, 'src/app.css'), 'utf8');
+    const devDependencies = Object.keys(scaffold.devDependencies);
+
+    expect(devDependencies.some((name) => name.includes('tailwind'))).toBe(false);
+    expect(devDependencies).not.toContain('tw-animate-css');
+    expect(viteConfig).not.toContain('@tailwindcss/vite');
+    expect(appCss).not.toContain('tailwindcss');
+    expect(appCss).toContain('@svadmin/ui/app.css');
+  });
+
   test('generates every provider combination from the canonical dependency packs', () => {
     for (const dataProvider of DATA_PROVIDER_CHOICES) {
       for (const authProvider of AUTH_PROVIDER_CHOICES) {
@@ -23,8 +37,8 @@ describe('create-svadmin project manifest', () => {
         expect(generated.dependencies['@svadmin/core']).toBeDefined();
         expect(generated.dependencies['@svadmin/ai-elements']).toBeDefined();
         expect(generated.dependencies['@svadmin/ui']).toBeDefined();
-        expect(generated.devDependencies.svelte).toBeDefined();
-        expect(generated.devDependencies.typescript).toBeDefined();
+        expect(generated.devDependencies['svelte']).toBeDefined();
+        expect(generated.devDependencies['typescript']).toBeDefined();
         expect('svadmin' in generated).toBe(false);
       }
     }

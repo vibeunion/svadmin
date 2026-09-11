@@ -1,3 +1,4 @@
+import { requireValue } from "../../../../scripts/test-assertions";
 import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
 import { resetContext, type AuthProvider } from '@svadmin/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -70,7 +71,7 @@ describe('AuditLogViewer scope', () => {
     const pagination = view.getByText('1 / 2').parentElement;
     if (!pagination) throw new Error('Expected audit pagination controls');
     const [, nextPage] = within(pagination).getAllByRole('button');
-    await fireEvent.click(nextPage);
+    await fireEvent.click(requireValue(nextPage));
 
     await waitFor(() => expect(scopeA.getAuditLogs).toHaveBeenCalledWith({ page: 2, pageSize: 20 }));
     expect(view.getByText(/scope-a-secret/)).not.toBeNull();

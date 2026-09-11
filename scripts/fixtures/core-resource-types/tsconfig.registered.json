@@ -1,0 +1,16 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": [
+      "svelte"
+    ],
+    "paths": {
+      "@svadmin/core": [
+        "../../../packages/core/src/index.ts"
+      ]
+    }
+  },
+  "include": [
+    "registered.ts"
+  ]
+}

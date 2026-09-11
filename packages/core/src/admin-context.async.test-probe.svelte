@@ -1,7 +1,11 @@
 <script lang="ts">
   import { useLogout, useOnError } from './auth-hooks.svelte';
-  import { useExport, useImport } from './data-transfer.svelte';
-  import { useDataProvider, useCreate } from './hooks.svelte';
+  import { useImport } from './import-hooks.svelte';
+  import { useExport } from './export-hooks.svelte';
+  import { defineResource } from './resource-contract';
+  import { Type } from '@sinclair/typebox';
+  import { useDataProvider } from './hooks.svelte';
+  import { useCreate } from './strict-hooks.svelte';
   import { useBack, useGo } from './routing-hooks.svelte';
   import { useSubmitTask } from './task-hooks.svelte';
   import { useTable } from './table-hooks.svelte';
@@ -11,14 +15,23 @@
   let { instance }: { instance: string } = $props();
 
   const resolveDataProvider = useDataProvider();
-  const createRecord = useCreate({ resource: 'posts' });
+  const createContract = defineResource('posts', {
+    record: Type.Object({ id: Type.String(), title: Type.String() }),
+    create: Type.Object({ title: Type.String() }),
+  });
+  const createRecord = useCreate({ resource: createContract });
   const submitTask = useSubmitTask();
   const authError = useOnError();
   const logout = useLogout();
   const go = useGo();
   const back = useBack();
-  const exporter = useExport({ resource: 'posts', download: false });
-  const importer = useImport({ resource: 'posts', format: 'json' });
+  const exportContract = defineResource('posts', { record: Type.Object({ id: Type.String() }) });
+  const exporter = useExport({ resource: exportContract, download: false });
+  const importContract = defineResource('posts', {
+    record: Type.Object({ id: Type.String(), title: Type.String() }),
+    create: Type.Object({ title: Type.String() }),
+  });
+  const importer = useImport({ resource: importContract, format: 'json' });
   const parsed = useParsed();
   const menu = useMenu();
   const breadcrumb = useBreadcrumb();

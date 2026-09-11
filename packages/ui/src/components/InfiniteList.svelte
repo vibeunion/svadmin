@@ -1,23 +1,26 @@
 <script lang="ts">
+  import { definedReactiveOptions } from '@svadmin/core/options';
+
   import { fade } from 'svelte/transition';
-  import { useInfiniteList } from '@svadmin/core';
+  import { useInfiniteList, useResourceContract } from '@svadmin/core';
   import type { BaseRecord, Sort, Filter } from '@svadmin/core';
   import type { Snippet } from 'svelte';
   import { useTranslation } from '@svadmin/core/i18n';
 
   import { Skeleton } from './ui/skeleton/index.js';
-  import { Loader2 } from '@lucide/svelte';
+  import { Loader2, RotateCw } from '@lucide/svelte';
+  import { Button } from './ui/button/index.js';
   import { intersect } from '../actions.js';
 
   const i18n = useTranslation();
 
-  interface Props<T extends BaseRecord = BaseRecord> {
+  interface Props {
     resource: string;
     pageSize?: number;
     sorters?: Sort[];
     filters?: Filter[];
     /** Render each item */
-    children: Snippet<[{ item: T; index: number }]>;
+    children: Snippet<[{ item: BaseRecord & { id: string | number }; index: number }]>;
     /** Custom empty state */
     empty?: Snippet;
     /** Custom loading skeleton */
@@ -34,15 +37,18 @@
     loadingSkeleton,
   }: Props = $props();
 
-  const { query } = useInfiniteList({
-    get resource() { return resource; },
+  const binding = useResourceContract(() => resource);
+  const { query } = useInfiniteList(definedReactiveOptions({
+    get resource() { return binding.resource; },
+    get dataProviderName() { return binding.dataProviderName; },
+    get meta() { return binding.meta; },
     get pagination() { return { pageSize }; },
     get sorters() { return sorters; },
     get filters() { return filters; },
-  });
+  }));
 
   const allItems = $derived(
-    (query.data as { pages?: { data: BaseRecord[] }[] })?.pages?.flatMap(p => p.data) ?? []
+    query.data?.pages.flatMap(p => p.data) ?? []
   );
 
   const hasNextPage = $derived(query.hasNextPage ?? false);
@@ -66,6 +72,14 @@
         {/each}
       </div>
     {/if}
+  {:else if query.isError}
+    <div role="alert">
+      <p>{i18n.t('common.error')}</p>
+      <Button variant="outline" disabled={query.isFetching} onclick={() => query.refetch()}>
+        <RotateCw />
+        {i18n.t('common.retry')}
+      </Button>
+    </div>
   {:else if allItems.length === 0}
     {#if empty}
       {@render empty()}

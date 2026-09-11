@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { demoContracts } from '../resource-contracts';
+
   import { useList } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { Badge, Button, ContentPageHeader, ContentPageShell, MetricBlock } from '@svadmin/ui';
@@ -7,15 +9,6 @@
   import { readHashView } from '../utils/hashView';
 
   const i18n = useTranslation();
-
-  interface Conversation {
-    id: number;
-    title: string;
-    intent: string;
-    status: string;
-    lastMessage: string;
-    updatedAt: string;
-  }
 
   interface ChatMessage {
     id: string;
@@ -33,14 +26,14 @@
 
   const locale = $derived(i18n.locale);
   const isZh = $derived(locale === 'zh-CN');
-  const query = useList({ resource: 'ai_conversations', pagination: { mode: 'off' }, sorters: [{ field: 'updatedAt', order: 'desc' }] });
-  const conversations = $derived((query.data?.data ?? []) as unknown as Conversation[]);
+  const query = useList({ resource: demoContracts.ai_conversations, pagination: { mode: 'off' }, sorters: [{ field: 'updatedAt', order: 'desc' }] });
+  const conversations = $derived((query.data?.data ?? []));
   const active = $derived(conversations[0]);
   const selectedThread = $derived(conversations.find((thread) => thread.id === selectedThreadId) ?? active);
   const openCount = $derived(conversations.filter((item) => item.status !== 'resolved').length);
   const resolvedCount = $derived(conversations.filter((item) => item.status === 'resolved').length);
   const waitingCount = $derived(conversations.filter((item) => item.status === 'waiting').length);
-  const normalizedView = $derived(['new', 'templates', 'settings'].includes(activeView) ? activeView : 'threads');
+  const normalizedView = $derived((['new', 'templates', 'settings'] as const).find(view => view === activeView) ?? 'threads');
   const chatMessages = $derived.by(() => {
     if (!selectedThread) return [];
     const seed: ChatMessage[] = [
@@ -174,7 +167,7 @@
         panelTitle: isZh ? '检查本地助手配置' : 'Review local assistant configuration',
       },
     } satisfies Record<string, { badge: string; title: string; description: string; panelTitle: string }>;
-    return copies[normalizedView as keyof typeof copies];
+    return copies[normalizedView];
   });
 
   function syncView(): void {

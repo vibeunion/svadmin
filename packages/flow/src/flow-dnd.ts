@@ -1,41 +1,26 @@
 import type { FlowPaletteItem } from './types.js';
+import { parsePaletteRecord } from './palette-schema.js';
 
 /** The private browser drag payload shared by `FlowPalette` and `FlowCanvas`. */
 export const FLOW_PALETTE_MIME_TYPE = 'application/x-svadmin-flow-palette-item';
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-/** Serializes a palette template for a browser `DataTransfer`. */
-export function encodeFlowPaletteItem(paletteItem: FlowPaletteItem): string {
-  return JSON.stringify(paletteItem);
+/** Validates and serializes plain palette data for a browser `DataTransfer`. */
+export function encodeFlowPaletteItem(paletteItem: unknown): string {
+  const validated = parsePaletteRecord(paletteItem);
+  if (!validated) throw new TypeError('Invalid flow palette item');
+  const serialized: unknown = JSON.stringify(validated);
+  if (typeof serialized !== 'string') throw new TypeError('Invalid flow palette item');
+  return serialized;
 }
 
 /**
  * Decodes only the serializable palette shape that this package understands.
- * The returned value is UI state, not a server-side validation boundary.
+ * This validates the transport shape, not host-specific business rules.
  */
 export function decodeFlowPaletteItem(serializedItem: string): FlowPaletteItem | null {
   try {
     const parsed: unknown = JSON.parse(serializedItem);
-    if (!isRecord(parsed)) return null;
-
-    const { id, type, label, description, data: nodeData, disabled } = parsed;
-    if (typeof id !== 'string' || typeof type !== 'string' || typeof label !== 'string' || !isRecord(nodeData)) {
-      return null;
-    }
-    if (description !== undefined && typeof description !== 'string') return null;
-    if (disabled !== undefined && typeof disabled !== 'boolean') return null;
-
-    return {
-      id,
-      type,
-      label,
-      ...(description === undefined ? {} : { description }),
-      data: nodeData,
-      ...(disabled === undefined ? {} : { disabled }),
-    };
+    return parsePaletteRecord(parsed);
   } catch (error) {
     if (error instanceof SyntaxError) return null;
     throw error;

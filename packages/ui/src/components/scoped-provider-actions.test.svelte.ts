@@ -1,3 +1,4 @@
+import { definedOptions } from '@svadmin/core/options';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import {
   resetContext,
@@ -46,7 +47,7 @@ function createRolesAuthProvider(
   getRolePermissions: AuthProvider['getRolePermissions'],
   updateRolePermissions: AuthProvider['updateRolePermissions'],
 ) {
-  const provider: AuthProvider = {
+  const provider: AuthProvider = definedOptions({
     login: async () => ({ success: true }),
     logout: async () => ({ success: true }),
     check: async () => ({ authenticated: true }),
@@ -54,7 +55,7 @@ function createRolesAuthProvider(
     getRoles: async () => [{ id: 'shared-role', name: `${scope} role` }],
     getRolePermissions,
     updateRolePermissions,
-  };
+  });
   return provider;
 }
 

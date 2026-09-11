@@ -1,660 +1,286 @@
-import type {
-  LiveEvent,
-  LiveProvider,
-  SubmitTaskOptions,
-  TaskHandle,
-  TaskListResult,
-  TaskProvider,
-  TaskRecord,
-  TaskSubscription,
-} from '@svadmin/core';
+import { Type, type Static, type TSchema } from '@sinclair/typebox';
+import type { LiveEvent, LiveProvider, TaskHandle, TaskProvider, TaskRecord, SubmitTaskOptions } from '@svadmin/core';
+import { definedOptions } from '@svadmin/core/options';
+import { checkExact, decodeTaskRecord, decodeTaskSubmitOptions, snapshotPlainData, TaskError, validatedTaskSubscription, taskClientField, requiredTaskClientMethod } from '@svadmin/core/schema';
 
-export interface SupaCloudTaskRecord extends TaskRecord {
-  [key: string]: unknown;
-}
+const text = Type.String({ minLength: 1 });
+const idSchema = Type.String({ pattern: '^[A-Za-z0-9][A-Za-z0-9_.:-]*$' });
+const nameSchema = Type.String({ pattern: '^[A-Za-z0-9][A-Za-z0-9_.-]*(/[A-Za-z0-9][A-Za-z0-9_.-]*)*$' });
+const statusSchema = Type.Union([
+  Type.Literal('pending'), Type.Literal('leased'), Type.Literal('running'),
+  Type.Literal('retry_scheduled'), Type.Literal('succeeded'), Type.Literal('failed'),
+  Type.Literal('dead_lettered'), Type.Literal('cancelled'), Type.Literal('queued'),
+  Type.Literal('processing'), Type.Literal('completed'), Type.Literal('enqueued'),
+]);
+const filterValue = Type.Union([text, Type.Array(text, { minItems: 1 })]);
+const limitSchema = Type.Integer({ minimum: 1, maximum: Number.MAX_SAFE_INTEGER });
+const listSchema = Type.Object({
+  status: Type.Optional(filterValue), taskType: Type.Optional(filterValue),
+  functionSlug: Type.Optional(text), dlq: Type.Optional(Type.Boolean()), limit: Type.Optional(limitSchema),
+}, { additionalProperties: false });
+const dlqSchema = Type.Object({ limit: Type.Optional(limitSchema) }, { additionalProperties: false });
+const snapshotSchema = Type.Object({
+  id: idSchema, status: statusSchema, raw: Type.Unknown(),
+  progress: Type.Optional(Type.Union([Type.Number({ minimum: 0, maximum: 100 }), Type.Null()])),
+  error: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  updatedAt: Type.Optional(Type.Union([text, Type.Null()])),
+}, { additionalProperties: false });
+const liveParamsSchema = Type.Object({ taskId: idSchema }, { additionalProperties: false });
+const eventSchema = Type.Object({
+  type: Type.Union([Type.Literal('INSERT'), Type.Literal('UPDATE'), Type.Literal('DELETE')]),
+  resource: text, payload: Type.Record(Type.String(), Type.Unknown()),
+}, { additionalProperties: false });
+const terminal = new Set<string>(['succeeded', 'failed', 'dead_lettered', 'cancelled', 'completed']);
 
-export interface SupaCloudSdkTaskRecord {
-  id: string;
-  status: string;
-  progress?: number | null;
-  error?: string | null;
-  error_message?: string | null;
-  updatedAt?: string | null;
-  updated_at?: string | null;
-  [key: string]: unknown;
-}
+export type SupaCloudTaskRecord = TaskRecord & { status: Static<typeof statusSchema> };
+export type SupaCloudTaskListParams = Static<typeof listSchema>;
+export type SupaCloudTaskDlqParams = Static<typeof dlqSchema>;
 
-export interface SupaCloudTaskSnapshot {
-  id: string;
-  status: string;
-  progress?: number | null;
-  error?: string | null;
-  updatedAt?: string | null;
-  raw: unknown;
-}
-
-export type SupaCloudTaskSubscribeState = 'connecting' | 'realtime' | 'polling' | 'closed';
-
-export interface SupaCloudTaskSubscribeOptions<TTask = SupaCloudTaskSnapshot> {
-  pollingIntervalMs?: number;
-  realtimeTimeoutMs?: number;
-  reconcileIntervalMs?: number;
-  onUpdate: (task: TTask) => void;
-  onStateChange?: (state: SupaCloudTaskSubscribeState, details?: { error?: unknown }) => void;
-  onError?: (error: unknown) => void;
-  stopOnTerminal?: boolean;
-}
-
-export interface SupaCloudSdkTaskWaitOptions {
-  intervalMs?: number;
-  signal?: AbortSignal;
-}
-
-export interface SupaCloudSdkTaskSubmitOptions {
-  body?: string
-    | Blob
-    | ArrayBuffer
-    | FormData
-    | File
-    | ReadableStream<Uint8Array>
-    | Record<string, unknown>;
+export interface SupaCloudTaskSdkSubmitOptions {
+  body?: Record<string, unknown>;
   headers?: Record<string, string>;
-  retries?: number;
-  timeoutSec?: number;
   idempotencyKey?: string;
-  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-  correlationId?: string;
-  businessTaskId?: string;
   metadata?: Record<string, unknown>;
 }
 
-export interface SupaCloudTaskReceipt<
-  TTask = SupaCloudTaskRecord,
-  TUpdate = TTask,
-  TWaitOptions = unknown,
-> {
-  id?: string;
-  taskId?: string;
-  status?: string;
-  wait(options?: TWaitOptions): Promise<TTask>;
-  get?(): Promise<TTask>;
-  cancel?(): Promise<unknown>;
-  retry?(): Promise<unknown>;
-  subscribe?(
-    options: Omit<SupaCloudTaskSubscribeOptions<TUpdate>, 'onUpdate'> & {
-      onUpdate: (task: TUpdate) => void;
-    },
-  ): TaskSubscription | (() => void);
+export interface SupaCloudTaskSubscribeOptions {
+  onUpdate: (snapshot: unknown) => void;
+  onError: (error: unknown) => void;
 }
 
-/** Structural shape of `@supacloud/js` 0.23.x task clients. */
-export interface SupaCloudSdkTaskClient<
-  TTask = SupaCloudSdkTaskRecord,
-  TUpdate = SupaCloudTaskSnapshot,
-> {
-  submit(
-    taskName: string,
-    options?: SupaCloudSdkTaskSubmitOptions,
-  ): Promise<SupaCloudTaskReceipt<TTask, TUpdate, SupaCloudSdkTaskWaitOptions>>;
-  get(taskId: string): Promise<TTask>;
-  list?(params?: {
-    status?: string | string[];
-    taskType?: string | string[];
-    functionSlug?: string;
-    dlq?: boolean;
-    limit?: number;
-  }): Promise<TTask[]>;
-  listDlq?(limit?: number): Promise<TTask[]>;
-  cancel?(taskId: string): Promise<unknown>;
-  retry?(taskId: string): Promise<unknown>;
-  subscribe?(
-    taskId: string,
-    options: Omit<SupaCloudTaskSubscribeOptions<TUpdate>, 'onUpdate'> & {
-      onUpdate: (task: TUpdate) => void;
-    },
-  ): TaskSubscription | (() => void);
-}
-
-/** Structural shape of a root `createSupaCloudClient()` task result. */
-export interface SupaCloudTaskSdkClient<
-  TTask = SupaCloudTaskRecord,
-  TUpdate = TTask,
-  TWaitOptions = unknown,
-> {
+/** SDK values stay unknown until their matching request/receipt is validated. */
+export interface SupaCloudTaskClient {
   tasks: {
-    submit(
-      taskName: string,
-      options?: SupaCloudSdkTaskSubmitOptions,
-    ): Promise<SupaCloudTaskReceipt<TTask, TUpdate, TWaitOptions>>;
-    get(taskId: string): Promise<TTask>;
-    list?(params?: Record<string, unknown>): Promise<TTask[]>;
-    listDlq?(limit?: number): Promise<TTask[]>;
-    cancel?(taskId: string): Promise<unknown>;
-    retry?(taskId: string): Promise<unknown>;
-    subscribe?(
-      taskId: string,
-      options: Omit<SupaCloudTaskSubscribeOptions<TUpdate>, 'onUpdate'> & {
-        onUpdate: (task: TUpdate) => void;
-      },
-    ): TaskSubscription | (() => void);
+    submit(name: string, options?: SupaCloudTaskSdkSubmitOptions): Promise<unknown>;
+    get(id: string): Promise<unknown>;
+    list(params?: SupaCloudTaskListParams): Promise<unknown>;
+    listDlq(limit?: number): Promise<unknown>;
+    cancel(id: string): Promise<unknown>;
+    retry(id: string): Promise<unknown>;
+    subscribe(id: string, options: SupaCloudTaskSubscribeOptions): unknown;
   };
 }
 
-type CurrentSupaCloudSdkRootClient = SupaCloudTaskSdkClient<
-  SupaCloudSdkTaskRecord,
-  SupaCloudTaskSnapshot,
-  SupaCloudSdkTaskWaitOptions
->;
-
-export interface SupaCloudTaskLegacyClient<TTask extends SupaCloudTaskRecord = SupaCloudTaskRecord> {
-  submit(taskName: string, options?: SubmitTaskOptions): Promise<TaskHandle<TTask>>;
-  get(taskId: string): Promise<TTask>;
-  list?(params?: Record<string, unknown>): Promise<TTask[] | { data?: TTask[] }>;
-  listDlq?(params?: Record<string, unknown>): Promise<TTask[] | { data?: TTask[] }>;
-  cancel?(taskId: string): Promise<unknown>;
-  retry?(taskId: string): Promise<unknown>;
-  subscribe?(
-    taskId: string,
-    callback: (task: TTask) => void
-  ): TaskSubscription | (() => void) | undefined;
+export interface SupaCloudTaskHandle extends TaskHandle<SupaCloudTaskRecord> {
+  id: string;
+  cancel(): Promise<SupaCloudTaskRecord>;
+  retry(): Promise<SupaCloudTaskRecord>;
+  subscribe(callback: (task: SupaCloudTaskRecord) => void, onError?: (error: TaskError) => void): () => void;
 }
 
-/** Supported task-client shapes: the legacy root methods or a root SDK client. */
-export type SupaCloudTaskClient<TTask extends SupaCloudTaskRecord = SupaCloudTaskRecord> =
-  | SupaCloudTaskLegacyClient<TTask>
-  | SupaCloudTaskSdkClient<TTask>
-  | CurrentSupaCloudSdkRootClient;
-
-interface LegacyTaskProviderOptions<TTask extends SupaCloudTaskRecord> {
-  supacloud: SupaCloudTaskLegacyClient<TTask>;
-  clientKind?: 'legacy';
+export interface SupaCloudTaskProvider extends TaskProvider<SupaCloudTaskRecord> {
+  submit(name: string, options?: SubmitTaskOptions): Promise<SupaCloudTaskHandle>;
+  list(params?: SupaCloudTaskListParams): Promise<{ data: SupaCloudTaskRecord[]; total: number }>;
+  listDlq(params?: SupaCloudTaskDlqParams): Promise<{ data: SupaCloudTaskRecord[]; total: number }>;
+  cancel(id: string): Promise<SupaCloudTaskRecord>;
+  retry(id: string): Promise<SupaCloudTaskRecord>;
+  subscribe(id: string, callback: (task: SupaCloudTaskRecord) => void, onError?: (error: TaskError) => void): () => void;
 }
 
-interface SdkTaskProviderOptions<TTask extends SupaCloudTaskRecord> {
-  supacloud:
-    | SupaCloudSdkTaskClient
-    | SupaCloudTaskSdkClient<TTask>
-    | CurrentSupaCloudSdkRootClient;
-  clientKind: 'sdk';
+export interface CreateSupaCloudTaskProviderOptions {
+  supacloud: SupaCloudTaskClient;
+  onError?: (error: TaskError) => void;
 }
 
-interface AutoSdkTaskProviderOptions<TTask extends SupaCloudTaskRecord> {
-  supacloud: SupaCloudTaskSdkClient<TTask> | CurrentSupaCloudSdkRootClient;
-  clientKind?: undefined;
-}
-
-export type CreateSupaCloudTaskProviderOptions<
-  TTask extends SupaCloudTaskRecord = SupaCloudTaskRecord,
-> = LegacyTaskProviderOptions<TTask>
-  | SdkTaskProviderOptions<TTask>
-  | AutoSdkTaskProviderOptions<TTask>;
-
-interface LegacyTaskLiveProviderOptions<TTask extends SupaCloudTaskRecord> {
-  supacloud: Pick<SupaCloudTaskLegacyClient<TTask>, 'subscribe'>;
-  clientKind?: 'legacy';
+export interface CreateSupaCloudTaskLiveProviderOptions {
+  supacloud: { tasks: Pick<SupaCloudTaskClient['tasks'], 'subscribe'> };
   resource?: string;
-  mapTaskToEvent?: (task: TTask, resource: string) => LiveEvent;
+  mapTaskToEvent?: (task: SupaCloudTaskRecord, resource: string) => unknown;
+  onError?: (error: TaskError) => void;
 }
 
-interface SdkTaskLiveProviderOptions<TTask extends SupaCloudTaskRecord> {
-  supacloud:
-    | Pick<SupaCloudSdkTaskClient, 'subscribe'>
-    | SupaCloudTaskSdkClient<TTask>
-    | CurrentSupaCloudSdkRootClient;
-  clientKind: 'sdk';
-  resource?: string;
-  mapTaskToEvent?: (task: TTask, resource: string) => LiveEvent;
-}
-
-interface AutoSdkTaskLiveProviderOptions<TTask extends SupaCloudTaskRecord> {
-  supacloud: SupaCloudTaskSdkClient<TTask> | CurrentSupaCloudSdkRootClient;
-  clientKind?: undefined;
-  resource?: string;
-  mapTaskToEvent?: (task: TTask, resource: string) => LiveEvent;
-}
-
-export type CreateSupaCloudTaskLiveProviderOptions<
-  TTask extends SupaCloudTaskRecord = SupaCloudTaskRecord,
-> = LegacyTaskLiveProviderOptions<TTask>
-  | SdkTaskLiveProviderOptions<TTask>
-  | AutoSdkTaskLiveProviderOptions<TTask>;
-
-function normalizeTaskSubscription(subscription: unknown): (() => void) | undefined {
-  if (!subscription) return undefined;
-  if (typeof subscription === 'function') return subscription as () => void;
-  if (
-    typeof subscription === 'object'
-    && subscription !== null
-    && 'unsubscribe' in subscription
-    && typeof subscription.unsubscribe === 'function'
-  ) {
-    const unsubscribe = (subscription as { unsubscribe: () => void }).unsubscribe;
-    return () => unsubscribe.call(subscription);
+function decode<S extends TSchema>(schema: S, value: unknown, input = false, write = false): Static<S> {
+  try {
+    const candidate = snapshotPlainData(value);
+    if (checkExact(schema, candidate)) return candidate;
+  } catch {
+    // Reflection and raw SDK errors must not escape this boundary.
   }
-  return undefined;
+  throw new TaskError(input ? 'INVALID_TASK_INPUT' : 'INVALID_TASK_RESPONSE', write);
 }
 
-function readSdkTaskSubscription(subscription: unknown, operation: string): () => void {
-  const unsubscribe = normalizeTaskSubscription(subscription);
-  if (!unsubscribe) {
-    throw invalidSdkResponse(operation, 'an invalid task subscription');
+function taskRecord(value: unknown, id?: string, write = false): SupaCloudTaskRecord {
+  const task = decodeTaskRecord(value, id, write);
+  decode(idSchema, task.id, false, write);
+  return { ...task, status: decode(statusSchema, task.status, false, write) };
+}
+
+function taskSnapshot(value: unknown, id: string): SupaCloudTaskRecord {
+  const snapshot = decode(snapshotSchema, value);
+  const task = taskRecord(snapshot.raw, id);
+  const expectedError = typeof task.error === 'string' ? task.error : task.error_message ?? null;
+  const expectedDate = task.updated_at ?? task.updatedAt ?? null;
+  if (snapshot.id !== task.id || snapshot.status !== task.status
+    || snapshot.progress !== undefined && snapshot.progress !== (task.progress ?? null)
+    || snapshot.error !== undefined && snapshot.error !== expectedError
+    || snapshot.updatedAt !== undefined && snapshot.updatedAt !== expectedDate) {
+    throw new TaskError('INVALID_TASK_RESPONSE');
   }
-  return unsubscribe;
+  return task;
 }
 
-function normalizeLegacyTaskList<TTask extends SupaCloudTaskRecord>(
-  payload: unknown,
-  context: string,
-): TaskListResult<TTask> {
-  if (Array.isArray(payload)) {
-    return { data: payload as TTask[], total: payload.length };
+function ownField(value: unknown, key: string, write = false): unknown {
+  try {
+    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      const descriptor = Object.getOwnPropertyDescriptor(value, key);
+      if (descriptor && 'value' in descriptor) {
+        const field: unknown = descriptor.value;
+        return field;
+      }
+    }
+  } catch {
+    // Never invoke receipt or subscription accessors.
   }
-  if (isObjectRecord(payload) && Array.isArray(payload.data)) {
-    return { data: payload.data as TTask[], total: payload.data.length };
-  }
-  throw new Error(`[svadmin/supabase] ${context} returned an invalid task list response`);
+  throw new TaskError('INVALID_TASK_RESPONSE', write);
 }
 
-function invalidSdkResponse(operation: string, reason: string): TypeError {
-  return new TypeError(`[svadmin/supabase] SupaCloud SDK ${operation} returned ${reason}`);
-}
-
-function isObjectRecord(payload: unknown): payload is Record<string, unknown> {
-  return typeof payload === 'object' && payload !== null && !Array.isArray(payload);
-}
-
-function isSdkRootClient(
-  payload: unknown,
-): payload is SupaCloudTaskSdkClient {
-  return isObjectRecord(payload) && isObjectRecord(payload.tasks);
-}
-
-interface ResolvedSdkTaskClient {
-  submit(taskName: string, options?: SupaCloudSdkTaskSubmitOptions): Promise<unknown>;
-  get(taskId: string): Promise<unknown>;
-  list?(params?: Record<string, unknown>): Promise<unknown>;
-  listDlq?(limit?: number): Promise<unknown>;
-  cancel?(taskId: string): Promise<unknown>;
-  retry?(taskId: string): Promise<unknown>;
-  subscribe?(
-    taskId: string,
-    options: Omit<SupaCloudTaskSubscribeOptions<unknown>, 'onUpdate'> & {
-      onUpdate: (task: unknown) => void;
-    },
-  ): unknown;
-}
-
-function resolveSdkTaskClient(payload: unknown): ResolvedSdkTaskClient {
-  const client = isSdkRootClient(payload) ? payload.tasks : payload;
-  return client as ResolvedSdkTaskClient;
-}
-
-function nonEmptyString(candidate: unknown): string | undefined {
-  return typeof candidate === 'string' && candidate.trim().length > 0 ? candidate : undefined;
-}
-
-function readSdkTaskId(
-  taskPayload: Record<string, unknown>,
-  rawTask: Record<string, unknown>,
-  operation: string,
-): string {
-  const taskId = nonEmptyString(taskPayload.id) ?? nonEmptyString(rawTask.id);
-  if (!taskId) throw invalidSdkResponse(operation, 'a task without a non-empty id');
-  return taskId;
-}
-
-function readSdkTaskStatus(
-  taskPayload: Record<string, unknown>,
-  rawTask: Record<string, unknown>,
-  operation: string,
-): string {
-  const taskStatus = nonEmptyString(taskPayload.status) ?? nonEmptyString(rawTask.status);
-  if (!taskStatus) throw invalidSdkResponse(operation, 'a task without a non-empty status');
-  return taskStatus;
-}
-
-function validateSdkProgress(
-  taskPayload: Record<string, unknown>,
-  operation: string,
-): void {
-  if (
-    taskPayload.progress !== undefined
-    && taskPayload.progress !== null
-    && (typeof taskPayload.progress !== 'number' || !Number.isFinite(taskPayload.progress))
-  ) {
-    throw invalidSdkResponse(operation, 'a task with invalid progress');
-  }
-}
-
-function validateSdkError(
-  taskPayload: Record<string, unknown>,
-  operation: string,
-): void {
-  const errorPayload = taskPayload.error ?? taskPayload.error_message;
-  if (errorPayload !== undefined && errorPayload !== null && typeof errorPayload !== 'string') {
-    throw invalidSdkResponse(operation, 'a task with invalid error');
-  }
-}
-
-function validateSdkUpdatedAt(
-  taskPayload: Record<string, unknown>,
-  operation: string,
-): void {
-  const updatedAtPayload = taskPayload.updatedAt ?? taskPayload.updated_at;
-  if (updatedAtPayload !== undefined && updatedAtPayload !== null && typeof updatedAtPayload !== 'string') {
-    throw invalidSdkResponse(operation, 'a task with invalid updatedAt');
-  }
-}
-
-function validateOptionalSdkTaskFields(
-  taskPayload: Record<string, unknown>,
-  operation: string,
-): void {
-  validateSdkProgress(taskPayload, operation);
-  validateSdkError(taskPayload, operation);
-  validateSdkUpdatedAt(taskPayload, operation);
-}
-
-function readSdkTask<TTask extends SupaCloudTaskRecord>(
-  taskPayload: unknown,
-  operation: string,
-): TTask {
-  if (!isObjectRecord(taskPayload)) {
-    throw invalidSdkResponse(operation, 'a non-object task payload');
-  }
-  validateOptionalSdkTaskFields(taskPayload, operation);
-
-  const rawTask = isObjectRecord(taskPayload.raw) ? taskPayload.raw : taskPayload;
-  if (rawTask !== taskPayload) validateOptionalSdkTaskFields(rawTask, operation);
-  const taskId = readSdkTaskId(taskPayload, rawTask, operation);
-  const taskStatus = readSdkTaskStatus(taskPayload, rawTask, operation);
-
-  const normalizedTask: Record<string, unknown> = { ...rawTask, id: taskId, status: taskStatus };
-  const taskProgress = taskPayload.progress ?? rawTask.progress;
-  if (typeof taskProgress === 'number') normalizedTask.progress = taskProgress;
-  else delete normalizedTask.progress;
-  if (taskPayload.error === null || typeof taskPayload.error === 'string') {
-    normalizedTask.error = taskPayload.error;
-  }
-  if (taskPayload.updatedAt === null || typeof taskPayload.updatedAt === 'string') {
-    normalizedTask.updatedAt = taskPayload.updatedAt;
-  }
-  return normalizedTask as TTask;
-}
-
-function readSdkTaskList<TTask extends SupaCloudTaskRecord>(
-  taskListPayload: unknown,
-  operation: string,
-): TaskListResult<TTask> {
-  if (!Array.isArray(taskListPayload)) {
-    throw invalidSdkResponse(operation, 'a non-array task list');
-  }
-  const tasks = taskListPayload.map((task) => readSdkTask<TTask>(task, operation));
-  return { data: tasks, total: tasks.length };
-}
-
-function assertOptionalReceiptMethod(
-  receipt: Record<string, unknown>,
-  method: 'cancel' | 'retry' | 'subscribe',
-): void {
-  if (receipt[method] !== undefined && typeof receipt[method] !== 'function') {
-    throw invalidSdkResponse('submit', `a receipt with invalid ${method}`);
-  }
-}
-
-function readSdkReceipt(receiptPayload: unknown): SupaCloudTaskReceipt {
-  if (!isObjectRecord(receiptPayload)) {
-    throw invalidSdkResponse('submit', 'a non-object receipt');
-  }
-  if (!nonEmptyString(receiptPayload.taskId) || typeof receiptPayload.wait !== 'function') {
-    throw invalidSdkResponse('submit', 'a receipt without a non-empty taskId and wait method');
-  }
-  assertOptionalReceiptMethod(receiptPayload, 'cancel');
-  assertOptionalReceiptMethod(receiptPayload, 'retry');
-  assertOptionalReceiptMethod(receiptPayload, 'subscribe');
-  return receiptPayload as unknown as SupaCloudTaskReceipt;
-}
-
-function adaptSdkReceipt<TTask extends SupaCloudTaskRecord>(
-  receipt: SupaCloudTaskReceipt,
-): TaskHandle<TTask> {
-  const wait = receipt.wait;
-  const taskHandle: TaskHandle<TTask> = {
-    id: receipt.taskId,
-    wait: async () => readSdkTask<TTask>(
-      await wait.call(receipt),
-      'receipt.wait',
-    ),
-  };
-
-  const cancel = receipt.cancel;
-  if (cancel) taskHandle.cancel = () => cancel.call(receipt);
-  const retry = receipt.retry;
-  if (retry) taskHandle.retry = () => retry.call(receipt);
-  const subscribe = receipt.subscribe;
-  if (subscribe) {
-    taskHandle.subscribe = (callback) => readSdkTaskSubscription(
-      subscribe.call(receipt, {
-        onUpdate: (task) => callback(readSdkTask<TTask>(task, 'receipt.subscribe')),
-      }),
-      'receipt.subscribe',
-    );
-  }
-  return taskHandle;
-}
-
-function toSdkSubmitOptions(
-  submitOptions?: SubmitTaskOptions,
-): SupaCloudSdkTaskSubmitOptions | undefined {
-  if (!submitOptions) return undefined;
-  const { meta, ...sharedOptions } = submitOptions;
-  return {
-    ...sharedOptions,
-    ...(meta === undefined ? {} : { metadata: meta }),
+function method(value: unknown, key: string, write = false): (...args: unknown[]) => unknown {
+  const callable = ownField(value, key, write);
+  if (typeof callable !== 'function') throw new TaskError('INVALID_TASK_RESPONSE', write);
+  return (...args) => {
+    const result: unknown = Reflect.apply(callable, value, args);
+    return result;
   };
 }
 
-function readSdkDlqLimit(params?: Record<string, unknown>): number | undefined {
-  const limit = params?.limit;
-  if (limit === undefined) return undefined;
-  if (typeof limit !== 'number' || !Number.isFinite(limit)) {
-    throw new TypeError('[svadmin/supabase] SupaCloud SDK tasks.listDlq requires a finite numeric limit');
-  }
-  return limit;
+async function request(invoke: () => unknown, write = false): Promise<unknown> {
+  try { return await invoke(); }
+  catch { throw new TaskError('TASK_PROVIDER_FAILED', write); }
 }
 
-function createLegacyTaskProvider<TTask extends SupaCloudTaskRecord>(
-  supacloud: SupaCloudTaskLegacyClient<TTask>,
-): TaskProvider<TTask> {
+function listen(
+  start: (options: SupaCloudTaskSubscribeOptions) => unknown,
+  id: string,
+  callback: (task: SupaCloudTaskRecord) => void,
+  onError?: (error: TaskError) => void,
+): () => void {
+  return validatedTaskSubscription(
+    (onUpdate, onFailure) => start({ onUpdate, onError: onFailure }),
+    value => taskSnapshot(value, id), callback, onError,
+  );
+}
+
+function submitOptions(value: SubmitTaskOptions | undefined): SupaCloudTaskSdkSubmitOptions {
+  const input = decodeTaskSubmitOptions(value === undefined ? {} : value);
+  try {
+    if (input.headers) {
+      const headers = new Headers(input.headers);
+      if (headers.has('x-supacloud-task-metadata') || headers.has('x-supacloud-idempotency-key')) {
+        throw new TaskError('INVALID_TASK_INPUT');
+      }
+    }
+    if (input.idempotencyKey !== undefined) {
+      if (!input.idempotencyKey.trim()) throw new TaskError('INVALID_TASK_INPUT');
+      new Headers({ 'x-supacloud-idempotency-key': input.idempotencyKey });
+    }
+  } catch { throw new TaskError('INVALID_TASK_INPUT'); }
+  return definedOptions({
+    body: input.body, headers: input.headers, idempotencyKey: input.idempotencyKey, metadata: input.meta,
+  });
+}
+
+function receipt(value: unknown, onError?: (error: TaskError) => void): SupaCloudTaskHandle {
+  const id = decode(idSchema, ownField(value, 'taskId', true), false, true);
+  decode(statusSchema, ownField(value, 'status', true), false, true);
+  const wait = method(value, 'wait', true);
+  const cancel = method(value, 'cancel', true);
+  const retry = method(value, 'retry', true);
+  const subscribe = method(value, 'subscribe', true);
   return {
-    submit: (taskName, submitOptions) => supacloud.submit(taskName, submitOptions),
-    get: (taskId) => supacloud.get(taskId),
-    async list(params) {
-      if (!supacloud.list) {
-        throw new Error('[svadmin/supabase] SupaCloud client does not implement tasks.list');
-      }
-      return normalizeLegacyTaskList(await supacloud.list(params), 'tasks.list');
+    id,
+    async wait() {
+      const task = taskRecord(await request(() => wait()), id);
+      if (!terminal.has(task.status)) throw new TaskError('INVALID_TASK_RESPONSE');
+      return task;
     },
-    async listDlq(params) {
-      if (!supacloud.listDlq) {
-        throw new Error('[svadmin/supabase] SupaCloud client does not implement tasks.listDlq');
-      }
-      return normalizeLegacyTaskList(await supacloud.listDlq(params), 'tasks.listDlq');
-    },
-    cancel(taskId) {
-      if (!supacloud.cancel) {
-        throw new Error('[svadmin/supabase] SupaCloud client does not implement tasks.cancel');
-      }
-      return supacloud.cancel(taskId);
-    },
-    retry(taskId) {
-      if (!supacloud.retry) {
-        throw new Error('[svadmin/supabase] SupaCloud client does not implement tasks.retry');
-      }
-      return supacloud.retry(taskId);
-    },
-    subscribe(taskId, callback) {
-      if (!supacloud.subscribe) {
-        throw new Error('[svadmin/supabase] SupaCloud client does not implement tasks.subscribe');
-      }
-      return supacloud.subscribe(taskId, callback);
+    async cancel() { return taskRecord(await request(() => cancel(), true), id, true); },
+    async retry() { return taskRecord(await request(() => retry(), true), id, true); },
+    subscribe(callback, subscriptionError) {
+      return listen(options => subscribe(options), id, callback, subscriptionError ?? onError);
     },
   };
 }
 
-function createSdkTaskProvider<TTask extends SupaCloudTaskRecord>(
-  supacloud: unknown,
-): TaskProvider<TTask> {
-  const sdk = resolveSdkTaskClient(supacloud);
+export function createSupaCloudTaskProvider(options: CreateSupaCloudTaskProviderOptions): SupaCloudTaskProvider {
+  const sdk = taskClientField(taskClientField(options, 'supacloud'), 'tasks');
+  const submit = requiredTaskClientMethod(sdk, 'submit');
+  const get = requiredTaskClientMethod(sdk, 'get');
+  const list = requiredTaskClientMethod(sdk, 'list');
+  const listDlq = requiredTaskClientMethod(sdk, 'listDlq');
+  const cancel = requiredTaskClientMethod(sdk, 'cancel');
+  const retry = requiredTaskClientMethod(sdk, 'retry');
+  const subscribe = requiredTaskClientMethod(sdk, 'subscribe');
+  const onError = errorCallback(taskClientField(options, 'onError'));
+  const listResult = (value: unknown) => {
+    const values = decode(Type.Array(Type.Unknown()), value);
+    const data = values.map(value => taskRecord(value));
+    return { data, total: data.length };
+  };
   return {
-    async submit(taskName, submitOptions) {
-      const receipt = readSdkReceipt(await sdk.submit(
-        taskName,
-        toSdkSubmitOptions(submitOptions),
-      ));
-      return adaptSdkReceipt<TTask>(receipt);
+    async submit(name, options) {
+      const taskName = decode(nameSchema, name, true);
+      const params = submitOptions(options);
+      return receipt(await request(() => submit(taskName, params), true), onError);
     },
     async get(taskId) {
-      return readSdkTask<TTask>(await sdk.get(taskId), 'tasks.get');
+      const id = decode(idSchema, taskId, true);
+      return taskRecord(await request(() => get(id)), id);
     },
     async list(params) {
-      if (!sdk.list) {
-        throw new Error('[svadmin/supabase] SupaCloud SDK client does not implement tasks.list');
-      }
-      return readSdkTaskList<TTask>(await sdk.list(params), 'tasks.list');
+      const input = decode(listSchema, params === undefined ? {} : params, true);
+      return listResult(await request(() => list(input)));
     },
     async listDlq(params) {
-      if (!sdk.listDlq) {
-        throw new Error('[svadmin/supabase] SupaCloud SDK client does not implement tasks.listDlq');
-      }
-      return readSdkTaskList<TTask>(
-        await sdk.listDlq(readSdkDlqLimit(params)),
-        'tasks.listDlq',
-      );
+      const input = decode(dlqSchema, params === undefined ? {} : params, true);
+      return listResult(await request(() => listDlq(input.limit)));
     },
-    cancel(taskId) {
-      if (!sdk.cancel) {
-        throw new Error('[svadmin/supabase] SupaCloud SDK client does not implement tasks.cancel');
-      }
-      return sdk.cancel(taskId);
+    async cancel(taskId) {
+      const id = decode(idSchema, taskId, true);
+      return taskRecord(await request(() => cancel(id), true), id, true);
     },
-    retry(taskId) {
-      if (!sdk.retry) {
-        throw new Error('[svadmin/supabase] SupaCloud SDK client does not implement tasks.retry');
-      }
-      return sdk.retry(taskId);
+    async retry(taskId) {
+      const id = decode(idSchema, taskId, true);
+      return taskRecord(await request(() => retry(id), true), id, true);
     },
-    subscribe(taskId, callback) {
-      if (!sdk.subscribe) {
-        throw new Error('[svadmin/supabase] SupaCloud SDK client does not implement tasks.subscribe');
-      }
-      return readSdkTaskSubscription(
-        sdk.subscribe(taskId, {
-          onUpdate: (task) => callback(readSdkTask<TTask>(task, 'tasks.subscribe')),
-        }),
-        'tasks.subscribe',
-      );
+    subscribe(taskId, callback, subscriptionError) {
+      const id = decode(idSchema, taskId, true);
+      return listen(options => subscribe(id, options), id, callback, subscriptionError ?? onError);
     },
   };
 }
 
-function defaultMapTaskToEvent<TTask extends SupaCloudTaskRecord>(
-  task: TTask,
-  resource: string,
-): LiveEvent {
-  return {
-    type: 'UPDATE',
-    resource,
-    payload: task as Record<string, unknown>,
-  };
+function errorCallback(value: unknown): ((error: TaskError) => unknown) | undefined {
+  if (value === undefined) return undefined;
+  if (typeof value !== 'function') throw new TaskError('INVALID_TASK_INPUT');
+  return error => { const result: unknown = Reflect.apply(value, undefined, [error]); return result; };
 }
 
-function requiredLiveTaskId(liveParams?: Record<string, unknown>): string {
-  const taskId = nonEmptyString(liveParams?.taskId);
-  if (!taskId) {
-    throw new Error('[svadmin/supabase] createSupaCloudTaskLiveProvider requires liveParams.taskId');
-  }
-  return taskId;
-}
-
-function createLegacyTaskLiveProvider<TTask extends SupaCloudTaskRecord>(
-  options: LegacyTaskLiveProviderOptions<TTask>,
-): LiveProvider {
-  const resourceName = options.resource ?? 'tasks';
-  const mapTaskToEvent = options.mapTaskToEvent ?? defaultMapTaskToEvent<TTask>;
+export function createSupaCloudTaskLiveProvider(options: CreateSupaCloudTaskLiveProviderOptions): LiveProvider {
+  const sdk = taskClientField(taskClientField(options, 'supacloud'), 'tasks');
+  const subscribe = requiredTaskClientMethod(sdk, 'subscribe');
+  const resource = taskClientField(options, 'resource');
+  const resourceName = decode(text, resource === undefined ? 'tasks' : resource, true);
+  const map = taskClientField(options, 'mapTaskToEvent');
+  if (map !== undefined && typeof map !== 'function') throw new TaskError('INVALID_TASK_INPUT');
+  const onError = errorCallback(taskClientField(options, 'onError'));
   return {
     subscribe({ resource, liveParams, callback }) {
-      if (!options.supacloud.subscribe) {
-        throw new Error('[svadmin/supabase] SupaCloud client does not implement tasks.subscribe');
-      }
-      const taskId = requiredLiveTaskId(liveParams);
-      const subscription = options.supacloud.subscribe(taskId, (task) => {
-        callback(mapTaskToEvent(task, resource || resourceName));
-      });
-      return normalizeTaskSubscription(subscription) ?? (() => {});
-    },
-  };
-}
-
-function createSdkTaskLiveProvider<TTask extends SupaCloudTaskRecord>(
-  options: {
-    supacloud: unknown;
-    resource?: string;
-    mapTaskToEvent?: (task: TTask, resource: string) => LiveEvent;
-  },
-): LiveProvider {
-  const sdk = resolveSdkTaskClient(options.supacloud);
-  const resourceName = options.resource ?? 'tasks';
-  const mapTaskToEvent = options.mapTaskToEvent ?? defaultMapTaskToEvent<TTask>;
-  return {
-    subscribe({ resource, liveParams, callback }) {
-      if (!sdk.subscribe) {
-        throw new Error('[svadmin/supabase] SupaCloud SDK client does not implement tasks.subscribe');
-      }
-      const taskId = requiredLiveTaskId(liveParams);
-      return readSdkTaskSubscription(
-        sdk.subscribe(taskId, {
-          onUpdate: (task) => callback(mapTaskToEvent(
-            readSdkTask<TTask>(task, 'tasks.subscribe'),
-            resource || resourceName,
-          )),
-        }),
-        'tasks.subscribe',
+      const resourceId = decode(text, resource === undefined ? resourceName : resource, true);
+      const { taskId } = decode(liveParamsSchema, liveParams, true);
+      return validatedTaskSubscription(
+        (onUpdate, onError) => subscribe(taskId, { onUpdate, onError }),
+        value => {
+          const task = taskSnapshot(value, taskId);
+          let mapped: unknown;
+          try {
+            mapped = map ? Reflect.apply(map, undefined, [task, resourceId]) : { type: 'UPDATE', resource: resourceId, payload: task };
+          } catch { throw new TaskError('TASK_CALLBACK_FAILED'); }
+          const event: LiveEvent = decode(eventSchema, mapped);
+          if (event.resource !== resourceId) throw new TaskError('INVALID_TASK_RESPONSE');
+          return event;
+        },
+        callback, onError,
       );
     },
   };
-}
-
-export function createSupaCloudTaskProvider<
-  TTask extends SupaCloudTaskRecord = SupaCloudTaskRecord,
->(options: CreateSupaCloudTaskProviderOptions<TTask>): TaskProvider<TTask> {
-  if (options.clientKind === 'legacy') {
-    return createLegacyTaskProvider(options.supacloud);
-  }
-  if (options.clientKind === 'sdk') {
-    return createSdkTaskProvider<TTask>(options.supacloud);
-  }
-  if (isSdkRootClient(options.supacloud)) {
-    return createSdkTaskProvider<TTask>(options.supacloud);
-  }
-  return createLegacyTaskProvider(options.supacloud as SupaCloudTaskLegacyClient<TTask>);
-}
-
-export function createSupaCloudTaskLiveProvider<
-  TTask extends SupaCloudTaskRecord = SupaCloudTaskRecord,
->(options: CreateSupaCloudTaskLiveProviderOptions<TTask>): LiveProvider {
-  if (options.clientKind === 'legacy') {
-    return createLegacyTaskLiveProvider(options);
-  }
-  if (options.clientKind === 'sdk') {
-    return createSdkTaskLiveProvider(options);
-  }
-  if (isSdkRootClient(options.supacloud)) {
-    return createSdkTaskLiveProvider({
-      supacloud: options.supacloud,
-      resource: options.resource,
-      mapTaskToEvent: options.mapTaskToEvent,
-    });
-  }
-  return createLegacyTaskLiveProvider(options as LegacyTaskLiveProviderOptions<TTask>);
 }

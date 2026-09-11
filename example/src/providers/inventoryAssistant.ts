@@ -153,8 +153,8 @@ export function createInventoryChatProvider(
     ]);
 
     const lowStockProducts = products.filter((product) => recordNumber(product, 'stock') <= recordNumber(product, 'minStock'));
-    const openTodos = todos.filter((todo) => recordString(todo, 'status') !== 'done' && !todo.completed);
-    const unreadNotifications = notifications.filter((notification) => !notification.read);
+    const openTodos = todos.filter((todo) => recordString(todo, 'status') !== 'done' && !todo['completed']);
+    const unreadNotifications = notifications.filter((notification) => !notification['read']);
     const activeConversations = conversations.filter((conversation) => recordString(conversation, 'status') !== 'resolved');
     const openPurchaseOrders = purchaseOrders.filter((order) => !['received', 'cancelled'].includes(recordString(order, 'status')));
     const activeTransfers = transfers.filter((transfer) => !['received', 'cancelled'].includes(recordString(transfer, 'status')));

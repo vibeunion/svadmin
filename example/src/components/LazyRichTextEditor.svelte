@@ -1,35 +1,13 @@
 <script module lang="ts">
-  import type { Component } from 'svelte';
+  import type { ComponentProps } from 'svelte';
 
-  type RichTextEditorProps = {
-    value?: string;
-    placeholder?: string;
-    editable?: boolean;
-    autofocus?: boolean | 'start' | 'end';
-    maxLength?: number;
-    showToolbar?: boolean;
-    showBubbleMenu?: boolean;
-    showFloatingMenu?: boolean;
-    showCharCount?: boolean;
-    preset?: 'full' | 'minimal' | 'prose';
-    extensions?: unknown[];
-    onUpload?: (file: File) => Promise<string>;
-    onchange?: (html: string) => void;
-    class?: string;
-    minHeight?: string;
-    maxHeight?: string;
-    lowlight?: unknown;
-  };
-
-  type RichTextEditorModule = {
-    default: Component<RichTextEditorProps>;
-  };
+  type RichTextEditorModule = typeof import('@svadmin/editor/components/Editor.svelte');
+  type RichTextEditorProps = ComponentProps<RichTextEditorModule['default']>;
 
   let editorPromise: Promise<RichTextEditorModule> | undefined;
 
   export function loadRichTextEditor(): Promise<RichTextEditorModule> {
     editorPromise ??= import('@svadmin/editor/components/Editor.svelte')
-      .then((module) => module as unknown as RichTextEditorModule)
       .catch((error: unknown) => {
         editorPromise = undefined;
         throw error;
@@ -39,6 +17,8 @@
 </script>
 
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   let {
     id,
     value = $bindable(''),
@@ -77,22 +57,15 @@
     {@const Editor = editorModule.default}
     <Editor
       bind:value
-      {placeholder}
+      {...definedOptions({ "placeholder": placeholder })}
       editable={resolvedEditable}
-      {autofocus}
-      {maxLength}
-      {showToolbar}
-      {showBubbleMenu}
-      {showFloatingMenu}
-      {showCharCount}
-      {preset}
-      {extensions}
-      {onUpload}
-      {onchange}
-      class={className}
-      {minHeight}
-      {maxHeight}
-      {lowlight}
+      {...definedOptions({ "autofocus": autofocus })}
+      {...definedOptions({ "maxLength": maxLength })}
+      {...definedOptions({
+        showToolbar, showBubbleMenu, showFloatingMenu, showCharCount,
+        preset, extensions, onUpload, onchange, class: className,
+        minHeight, maxHeight, lowlight,
+      })}
     />
   {:catch}
     <div class="flex min-h-40 items-center justify-center" role="alert">

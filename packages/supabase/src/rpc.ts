@@ -1,10 +1,9 @@
-// Supabase RPC Helper — Type-safe and Ergonomic PostgreSQL Function Execution
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { executeSupabaseRpc, inputObject } from './sdk-boundary';
 
 export interface SupabaseRpcOptions {
   /** Database schema where the RPC function resides (defaults to client schema or 'public') */
   schema?: string;
-  /** When true, do not return result rows (sets Prefer: return=minimal) */
+  /** Use HEAD and omit result rows. */
   head?: boolean;
   /** Count algorithm to use */
   count?: 'exact' | 'planned' | 'estimated';
@@ -21,11 +20,11 @@ export interface SupabaseRpcClient {
    * @param options Additional Supabase RPC options (schema, head, count, get)
    * @returns The returned data from the RPC call
    */
-  call: <TResult = unknown, TArgs extends Record<string, unknown> = Record<string, unknown>>(
+  call: (
     functionName: string,
-    args?: TArgs,
+    args?: Record<string, unknown>,
     options?: SupabaseRpcOptions
-  ) => Promise<TResult>;
+  ) => Promise<unknown>;
 }
 
 /**
@@ -35,35 +34,18 @@ export interface SupabaseRpcClient {
  * @param defaultOptions Default options applied to all RPC calls
  */
 export function createSupabaseRpc(
-  client: SupabaseClient,
+  client: unknown,
   defaultOptions: SupabaseRpcOptions = {}
 ): SupabaseRpcClient {
+  inputObject(client, 'Supabase client');
   return {
-    async call<TResult = unknown, TArgs extends Record<string, unknown> = Record<string, unknown>>(
+    async call(
       functionName: string,
-      args?: TArgs,
+      args?: Record<string, unknown>,
       options: SupabaseRpcOptions = {}
-    ): Promise<TResult> {
+    ): Promise<unknown> {
       const mergedOptions = { ...defaultOptions, ...options };
-      const targetClient = mergedOptions.schema ? client.schema(mergedOptions.schema) : client;
-
-      const { data, error } = await targetClient.rpc(
-        functionName,
-        args ?? ({} as TArgs),
-        {
-          head: mergedOptions.head,
-          count: mergedOptions.count,
-          get: mergedOptions.get,
-        }
-      );
-
-      if (error) {
-        throw new Error(
-          `[svadmin/supabase] RPC function "${functionName}" failed: ${error.message}`
-        );
-      }
-
-      return data as TResult;
+      return executeSupabaseRpc(client, functionName, args === undefined ? {} : args, mergedOptions);
     },
   };
 }

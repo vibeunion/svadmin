@@ -351,7 +351,7 @@ function assertUiDependencyContract(manifest: PackageManifest): void {
     '@svadmin/ui: cmdk-sv must not reintroduce the Svelte 4-only @melt-ui/svelte dependency chain',
   );
   assert(
-    manifest.peerDependencies?.svelte === '^5.56.10',
+    manifest.peerDependencies?.['svelte'] === '^5.56.10',
     '@svadmin/ui: Svelte peer range must match the supported Svelte 5 release line',
   );
 }
@@ -770,7 +770,7 @@ async function verifyUiPeerTree(
   const rootManifest = JSON.parse(
     await readFile(join(repositoryRoot, 'package.json'), 'utf8'),
   ) as { overrides?: Record<string, string> };
-  const svelteVersion = rootManifest.overrides?.svelte;
+  const svelteVersion = rootManifest.overrides?.['svelte'];
   const queryVersion = uiManifest.peerDependencies?.['@tanstack/svelte-query'];
   assert(svelteVersion, 'root package.json: overrides.svelte is required for peer dependency verification');
   assert(queryVersion, '@svadmin/ui: @tanstack/svelte-query peer range is required');
@@ -822,8 +822,8 @@ async function verifyUiPnpmPeerTree(
   const rootManifest = JSON.parse(
     await readFile(join(repositoryRoot, 'package.json'), 'utf8'),
   ) as { overrides?: Record<string, string> };
-  const svelteVersion = rootManifest.overrides?.svelte;
-  const viteVersion = rootManifest.overrides?.vite;
+  const svelteVersion = rootManifest.overrides?.['svelte'];
+  const viteVersion = rootManifest.overrides?.['vite'];
   const queryVersion = uiManifest.peerDependencies?.['@tanstack/svelte-query'];
   const sveltePluginVersion = uiManifest.devDependencies?.['@sveltejs/vite-plugin-svelte'];
   assert(svelteVersion, 'root package.json: overrides.svelte is required for pnpm verification');
@@ -959,8 +959,8 @@ async function verifyAiElementsPnpmConsumer(
   const rootManifest = JSON.parse(
     await readFile(join(repositoryRoot, 'package.json'), 'utf8'),
   ) as { overrides?: Record<string, string> };
-  const svelteVersion = rootManifest.overrides?.svelte;
-  const viteVersion = rootManifest.overrides?.vite;
+  const svelteVersion = rootManifest.overrides?.['svelte'];
+  const viteVersion = rootManifest.overrides?.['vite'];
   const queryVersion = aiElementsManifest.peerDependencies?.['@tanstack/svelte-query'];
   const sveltePluginVersion = aiElementsManifest.devDependencies?.['@sveltejs/vite-plugin-svelte'];
   assert(svelteVersion, 'root package.json: overrides.svelte is required for AI Elements pnpm verification');
@@ -1293,8 +1293,8 @@ async function verifySurfaceCompatibility(
   const rootManifest = JSON.parse(await readFile(join(repositoryRoot, 'package.json'), 'utf8')) as {
     overrides?: Record<string, string>;
   };
-  const workspaceSvelte = rootManifest.overrides?.svelte;
-  const workspaceVite = rootManifest.overrides?.vite;
+  const workspaceSvelte = rootManifest.overrides?.['svelte'];
+  const workspaceVite = rootManifest.overrides?.['vite'];
   const queryVersion = uiManifest.peerDependencies?.['@tanstack/svelte-query'];
   const sveltePlugin = uiManifest.devDependencies?.['@sveltejs/vite-plugin-svelte'];
   assert(workspaceSvelte, 'root package.json: overrides.svelte is required for Surface verification');

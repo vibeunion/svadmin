@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import { getResource } from '@svadmin/core';
 
   import type { Snippet } from 'svelte';
@@ -82,11 +84,10 @@
     {resourceName}
     showHeader={false}
     {density}
-    {selectable}
-    {batchActions}
-    defaultCellRenderer={cellRenderer}
-    {rowActions}
-    {emptyState}
-    {expandedRowRender}
+    {...definedOptions({ "selectable": selectable })}
+    {...definedOptions({ batchActions })}
+    {...definedOptions({ "defaultCellRenderer": cellRenderer })}
+    {...definedOptions({ "rowActions": rowActions })}
+    {...definedOptions({ emptyState, expandedRowRender })}
   />
 </div>

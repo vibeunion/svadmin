@@ -1,3 +1,4 @@
+import { definedOptions } from '@svadmin/core/options';
 /// <reference types="@sveltejs/kit" />
 import { goto } from '$app/navigation';
 import { page } from '$app/state';
@@ -87,13 +88,13 @@ export function createSvelteKitRouterProvider(): RouterProvider {
       let p_params: Record<string, string> = {};
       try { p_params = (page.params ?? {}) as Record<string, string>; } catch { /* intentional */ }
 
-      return {
-        resource: p_params?.resource,
-        action: p_params?.action,
-        id: p_params?.id,
+      return definedOptions({
+        resource: p_params?.['resource'],
+        action: p_params?.['action'],
+        id: p_params?.['id'],
         pathname,
         params
-      };
+      });
     }
   };
 }

@@ -1,5 +1,10 @@
 <script lang="ts">
-  import { syncGlobalPath } from '@svadmin/core';
+  import { definedReactiveOptions } from '@svadmin/core/options';
+
+  import { definedOptions } from '@svadmin/core/options';
+
+  import { defineResource, syncGlobalPath } from '@svadmin/core';
+  import { Type } from '@sinclair/typebox';
   import type { AccessControlProvider, DataProvider, NotificationProvider, ResourceDefinition, RouterProvider } from '@svadmin/core';
   import { untrack } from 'svelte';
   import { SvelteSet } from 'svelte/reactivity';
@@ -73,7 +78,7 @@
   }: Props = $props();
 
   const deletedIds = new SvelteSet<string>();
-  const dataProvider = {
+  const dataProvider: DataProvider = definedReactiveOptions({
     getList: async () => {
       const data = (emptyData ? [] : [
         { id: numericIds ? 1 : 'user-1', email: 'user@example.com' },
@@ -81,31 +86,34 @@
       ]).filter((record) => !deletedIds.has(String(record.id)));
       return { data, total: data.length };
     },
-    getOne: async ({ id }) => {
+    getOne: async ({ id }: Parameters<DataProvider['getOne']>[0]) => {
       onGetOne?.(id);
       return { data: { id, email: 'user@example.com' } };
     },
-    create: async () => ({ data: { id: numericIds ? 1 : 'user-1' } }),
-    update: async () => ({ data: { id: numericIds ? 1 : 'user-1' } }),
-    deleteOne: async ({ id }) => {
+    create: async () => ({ data: { id: numericIds ? 1 : 'user-1', email: 'user@example.com' } }),
+    update: async () => ({ data: { id: numericIds ? 1 : 'user-1', email: 'user@example.com' } }),
+    deleteOne: async ({ id }: Parameters<DataProvider['deleteOne']>[0]) => {
       await onDeleteOne?.(id);
       deletedIds.add(String(id));
-      return { data: { id } };
+      return { data: { id, email: 'user@example.com' } };
     },
     get deleteMany() {
       if (disableDeleteMany) return undefined;
       return async ({ ids }: { ids: (string | number)[] }) => {
         await onDeleteMany?.(ids);
         for (const id of ids) deletedIds.add(String(id));
-        return { data: ids.map((id) => ({ id })) };
+        return { data: ids.map((id) => ({ id, email: 'user@example.com' })) };
       };
     },
     getApiUrl: () => 'https://example.test',
-  } as DataProvider;
+  });
 
-  const resources: ResourceDefinition[] = [{
+  const resources: ResourceDefinition[] = [definedReactiveOptions({
     name: 'users',
     label: 'Users',
+    contract: defineResource('users', { record: Type.Object({
+      id: Type.Union([Type.String(), Type.Number()]), email: Type.String(),
+    }), update: Type.Object({ email: Type.Optional(Type.String()) }) }),
     get canCreate() { return canCreate; },
     get canEdit() { return canEdit; },
     get canDelete() { return canDelete; },
@@ -116,8 +124,8 @@
     fields: [
       { key: 'id', label: 'ID', type: 'text' },
       { key: 'email', label: 'Email', type: 'text', searchable: true, filterable: true },
-    ],
-  }];
+    ] satisfies ResourceDefinition['fields'],
+  })];
 
   const initialPathname = '/';
   let currentPathname = $state(initialPathname);
@@ -140,11 +148,13 @@
   };
 
   function permissionFor(params: { action: string; params?: Record<string, unknown> }): boolean {
-    const id = params.params?.id;
-    if ((typeof id === 'string' || typeof id === 'number') && recordPermissions?.[String(id)]?.[params.action as 'show' | 'edit' | 'delete'] !== undefined) {
-      return recordPermissions[String(id)]?.[params.action as 'show' | 'edit' | 'delete'] === true;
+    const id = params.params?.['id'];
+    if ((typeof id === 'string' || typeof id === 'number') &&
+        (params.action === 'show' || params.action === 'edit' || params.action === 'delete')) {
+      const permission = recordPermissions?.[String(id)]?.[params.action];
+      if (permission !== undefined) return permission;
     }
-    if (params.action === 'delete' && Array.isArray(params.params?.ids) && batchDeleteAllowed !== undefined) {
+    if (params.action === 'delete' && Array.isArray(params.params?.['ids']) && batchDeleteAllowed !== undefined) {
       return batchDeleteAllowed;
     }
     if (params.action === 'show' && showAllowed !== undefined) return showAllowed;
@@ -155,12 +165,6 @@
 
   const testAccessControlProvider: AccessControlProvider = {
     can: async (params) => {
-      if (Array.isArray(params)) {
-        return params.map((entry) => {
-          onCan?.(entry);
-          return { can: permissionFor(entry) };
-        });
-      }
       onCan?.(params);
       return { can: permissionFor(params) };
     },
@@ -179,7 +183,7 @@
 
 {#snippet dashboard()}
   {#snippet expandedRowRender({ record }: { record: Record<string, unknown> })}
-    已展开：{record.email}
+    已展开：{record['email']}
   {/snippet}
 
   {#snippet batchActions({ selectedIds }: { selectedIds: (string | number)[] })}
@@ -189,9 +193,9 @@
   {#if standaloneDetailId != null}
     <RecordDetailDrawer resourceName="users" open={true} recordId={standaloneDetailId} />
   {:else if customBatchAction}
-    <AutoTable resourceName="users" {selectable} {density} expandedRowRender={expandedRowRender as never} batchActions={batchActions as never} />
+    <AutoTable resourceName="users" {selectable} {density} {expandedRowRender} {batchActions} />
   {:else}
-    <AutoTable resourceName="users" {selectable} {density} expandedRowRender={expandedRowRender as never} />
+    <AutoTable resourceName="users" {selectable} {density} {expandedRowRender} />
   {/if}
 {/snippet}
 
@@ -199,9 +203,9 @@
   dataProvider={providerName === 'default' ? dataProvider : { [providerName]: dataProvider }}
   {resources}
   {routerProvider}
-  {accessControlProvider}
-  {notificationProvider}
+  {...definedOptions({ "accessControlProvider": accessControlProvider })}
+  {...definedOptions({ "notificationProvider": notificationProvider })}
   {locale}
-  tenant={tenantIdentity === undefined ? undefined : { tenantId: tenantIdentity }}
-  dashboard={dashboard as never}
+  {...definedOptions({ "tenant": tenantIdentity === undefined ? undefined : { tenantId: tenantIdentity } })}
+  {dashboard}
 />

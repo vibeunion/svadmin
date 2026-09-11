@@ -1,4 +1,4 @@
-/** 企业级管理能力的正式 Provider 契约。 */
+/** Formal provider contract for enterprise management capabilities. */
 
 export interface EnterpriseActionError {
   message: string;
@@ -10,7 +10,7 @@ export interface EnterpriseActionResult {
   error?: EnterpriseActionError;
 }
 
-/** 每次企业能力调用都必须显式携带当前请求树的租户与追踪上下文。 */
+/** Every enterprise capability call must carry the current request tree's tenant and trace context. */
 export interface EnterpriseRequestContext {
   tenantId?: string | number;
   requestId?: string;
@@ -18,7 +18,7 @@ export interface EnterpriseRequestContext {
   meta?: Readonly<Record<string, unknown>>;
 }
 
-/** Provider 调用使用的严格请求上下文；三项边界标识不可省略。 */
+/** Strict provider request context; all three boundary identifiers are required. */
 export interface StrictEnterpriseRequestContext {
   tenantId: string | number;
   requestId: string;
@@ -179,7 +179,7 @@ export interface ApiCredentialSummary {
 
 export interface CreatedApiCredential {
   credential: ApiCredentialSummary;
-  /** 只在创建时返回一次；列表接口不得返回此字段。 */
+  /** Returned only at creation time; list endpoints must not expose this field. */
   secret: string;
 }
 

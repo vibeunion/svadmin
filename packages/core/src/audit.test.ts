@@ -6,6 +6,7 @@ import {
   recordMutationRollback,
   type AuditEntry,
   type AuditLogProvider,
+  type AuditCreateParams,
 } from './audit';
 
 afterEach(() => {
@@ -20,9 +21,9 @@ describe('writeAuditEntry', () => {
       calls.push('handler');
     });
     const provider: AuditLogProvider = {
-      create: mock(async (params): Promise<AuditEntry> => {
+      create: mock(async (params: AuditCreateParams): Promise<AuditEntry> => {
         calls.push('provider');
-        return { timestamp: '2026-08-25T00:00:00.000Z', action: 'update', resource: params.resource, meta: params.meta };
+        return { ...params, id: 'audit-1' };
       }),
       get: mock(async () => []),
     };
@@ -45,12 +46,9 @@ describe('writeAuditEntry', () => {
       recordId: 'policy-1',
       userId: 'user-1',
       outcome: 'success',
-      meta: expect.objectContaining({
-        outcome: 'success',
-        tenantId: 'tenant-1',
-        requestId: 'request-1',
-        traceId: 'trace-1',
-      }),
+      tenantId: 'tenant-1',
+      requestId: 'request-1',
+      traceId: 'trace-1',
     }));
   });
 
@@ -62,7 +60,7 @@ describe('writeAuditEntry', () => {
     };
 
     await expect(writeAuditEntry({ action: 'delete', resource: 'api-credentials' }, provider))
-      .rejects.toThrow('audit storage unavailable');
+      .rejects.toThrow('Audit provider request failed.');
   });
 
   test('fails closed when no persistent provider is configured', async () => {
@@ -76,15 +74,8 @@ describe('writeAuditEntry', () => {
 describe("recordMutationRollback", () => {
   test("records mutation rollback event with snapshot and reason", async () => {
     const provider: AuditLogProvider = {
-      create: mock(async (params): Promise<AuditEntry> => {
-        return {
-          timestamp: "2026-08-25T00:00:00.000Z",
-          action: "rollback",
-          resource: params.resource,
-          previousData: params.previousData,
-          data: params.data,
-          meta: params.meta,
-        };
+      create: mock(async (params: AuditCreateParams): Promise<AuditEntry> => {
+        return { ...params, id: 'audit-rollback' };
       }),
       get: mock(async () => []),
     };
@@ -108,9 +99,9 @@ describe("recordMutationRollback", () => {
       outcome: "success",
       previousData: { status: "pending" },
       data: { status: "canceled" },
+      mutationId: "mut-99",
       meta: expect.objectContaining({
         actionType: "mutation_rollback",
-        mutationId: "mut-99",
         reason: "Network timeout during optimistic commit",
       }),
     }));

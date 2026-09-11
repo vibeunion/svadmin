@@ -1,160 +1,309 @@
-// Auth Hooks — reactive wrappers around AuthProvider methods
-// Each hook encapsulates the auth call + loading state + error handling + redirect
-// Uses module-level $state — no component init-time constraints.
+import { definedOptions } from './defined-options';
+// Component-scoped auth calls with validated results and provider-scoped session revisions.
 
 import { captureAdminContext } from './context.svelte';
 import type { AdminContextAccessor } from './context.svelte';
 import { notifyWithProvider } from './notification.svelte';
-import { t, useTranslation } from './i18n.svelte';
-import type { AuthActionResult, CheckResult, Identity, AuthProvider } from './types';
+import { t,useTranslation } from './i18n.svelte';
+import type { AuthActionResult,CheckResult,Identity,AuthProvider } from './types';
 import { useQueryClient } from '@tanstack/svelte-query';
+import { untrack } from 'svelte';
+import { createSubscriber } from 'svelte/reactivity';
+import { parseQueryKey } from './query-keys';
+import { decodePermissionHints, hasPermissionHint, PermissionHintsError, type PermissionHints } from './permission-hints-contract';
+import {
+  AuthQueryError, decodeAuthCheck, decodeIdentity, AuthErrorHandlingError, decodeAuthErrorResult,
+  type AuthErrorHandlingResult,
+} from './auth-query-contract';
+import {
+  AuthMutationError, authMutationFailure, decodeAuthAction, prepareAuthMutation,
+  type AuthMutationArgs, type AuthMutationMethod,
+} from './auth-mutation-contract';
+import { navigateWithProvider } from './router';
 
-let _logoutVersion = $state(0);
-let nextAuthMutationInstanceId = 0;
+let _logoutVersion=$state(0);
+interface AuthSession {
+  readonly cacheId: number;
+  readonly observe: () => void;
+  readonly changed: () => void;
+  version: number;
+  logout: number;
+  intent: number;
+  liveRevision: number;
+  liveState: 'ready' | 'changing' | 'signed-out' | 'uncertain';
+  inFlight: number;
+}
+let sessions=$state.raw(new WeakMap<AuthProvider, AuthSession>());
+let nextAuthMutationInstanceId=0;
+let nextAuthSessionId=0;
 export function getLogoutVersion() { return _logoutVersion; }
-export function resetLogoutVersion() { _logoutVersion = 0; }
+export function resetLogoutVersion() {
+  _logoutVersion=0;
+  sessions=new WeakMap<AuthProvider, AuthSession>();
+}
+
+function authSession(provider: AuthProvider | null) {
+  if(!provider) return { cacheId: 0, observe: () => {}, changed: () => {},
+    version: 0, logout: 0, intent: 0, liveRevision: 0, liveState: 'ready' as const, inFlight: 0 };
+  const existing=sessions.get(provider);
+  if(existing) return existing;
+  let update: (() => void) | undefined;
+  // A lazily created session may originate inside a derived expression.
+  const observe=createSubscriber(notify => { update=notify; return () => { update=undefined; }; });
+  const session=$state<AuthSession>({ cacheId: ++nextAuthSessionId, observe, changed: () => update?.(),
+    version: 0, logout: 0, intent: 0, liveRevision: 0, liveState: 'ready', inFlight: 0 });
+  sessions.set(provider,session);
+  return session;
+}
+
+function setLiveSession(provider: AuthProvider, state: AuthSession['liveState']) {
+  const session=authSession(provider);
+  session.liveRevision++;
+  session.liveState=state;
+  session.changed();
+}
+
+function beginLiveSessionChange(provider: AuthProvider, intent: number) {
+  const session=authSession(provider);
+  session.inFlight++;
+  setLiveSession(provider,'changing');
+  return () => {
+    session.inFlight--;
+    session.changed();
+    // An older request finishing last leaves the effective remote principal uncertain.
+    if(authSession(provider)===session && session.inFlight===0 && session.intent!==intent) {
+      setLiveSession(provider,'uncertain');
+    }
+  };
+}
+
+/** Read-only capability snapshot; consumers cannot mutate the underlying auth session. */
+export function captureAuthLiveScope(provider: AuthProvider | null) {
+  if(!provider) return Object.freeze({ cacheKey: 'anonymous', available: true, isCurrent: () => true });
+  const session=authSession(provider);
+  session.observe();
+  const revision=session.liveRevision;
+  const available=session.liveState==='ready' && session.inFlight===0;
+  return Object.freeze({
+    cacheKey: `auth:${session.cacheId}:${revision}`,
+    available,
+    isCurrent: () => available && authSession(provider)===session && session.liveRevision===revision &&
+      session.liveState==='ready' && session.inFlight===0,
+  });
+}
+
+function rejectedLiveState(previous: AuthSession['liveState']): AuthSession['liveState'] {
+  return previous==='ready' || previous==='signed-out' ? previous : 'uncertain';
+}
+
+function advanceAuthSession(provider: AuthProvider, logout: boolean, liveState: AuthSession['liveState']='ready'): number {
+  const session=authSession(provider);
+  session.version++;
+  setLiveSession(provider,logout ? 'signed-out' : liveState);
+  if(logout) {
+    session.logout++;
+    _logoutVersion++;
+  }
+  return session.version;
+}
 
 // ─── Mutate Factory ─────────────────────────────────────────────
 
-interface CreateAuthMutationOptions {
-  method: keyof AuthProvider;
-  successMessage?: string | null;
-  errorMessage?: string | false;
-  onSuccess?: (result: AuthActionResult, adminContext: AdminContextAccessor) => void | Promise<void>;
+interface CreateAuthMutationOptions<M extends AuthMutationMethod> {
+  method: M;
+  successMessage?: string|null;
+  errorMessage?: string|false;
+  onSuccess?: (result: AuthActionResult,navigate: (path: string) => Promise<void>) => void|Promise<void>;
 }
 
 export interface AuthNotificationOptions {
   /** Set to false when the page owns the success state. */
-  successNotification?: string | false;
-  errorNotification?: string | false;
+  successNotification?: string|false;
+  errorNotification?: string|false;
 }
 
 function resolveSuccessMessage(
-  configured: string | false | undefined,
+  configured: string|false|undefined,
   defaultMessage: string,
-): string | null {
-  return configured === false ? null : configured ?? defaultMessage;
+): string|null {
+  return configured===false? null:configured??defaultMessage;
 }
 
-function createAuthMutation(options: CreateAuthMutationOptions) {
-  const mutationInstanceId = nextAuthMutationInstanceId++;
-  const adminContext = captureAdminContext();
-  const i18n = useTranslation();
-  let isLoading = $state(false);
-  let mutationEpoch = 0;
+function createAuthMutation<M extends AuthMutationMethod>(options: CreateAuthMutationOptions<M>) {
+  const mutationInstanceId=nextAuthMutationInstanceId++;
+  const adminContext=captureAdminContext();
+  const i18n=useTranslation();
+  interface Pending {
+    epoch: number;
+    provider: AuthProvider | null;
+    tenant: string | number | undefined;
+    authVersion: number;
+    intent: number;
+    previousLive: AuthSession['liveState'];
+    changedLive: boolean;
+  }
+  let pending=$state.raw<Pending | null>(null);
+  let mutationEpoch=0;
+  let disposed=false;
 
-  const activeTenantIdentity = () => adminContext.tenantCacheKey?.__svadminTenant;
-  let observedProvider = adminContext.authProvider;
-  let observedTenantIdentity = activeTenantIdentity();
-
-  function isActiveMutation(
-    epoch: number,
-    provider: AuthProvider,
-    tenantIdentity: string | number | undefined,
-  ): boolean {
-    return epoch === mutationEpoch
-      && provider === adminContext.authProvider
-      && tenantIdentity === activeTenantIdentity();
+  const activeTenantIdentity=() => adminContext.tenantCacheKey?.__svadminTenant;
+  function current(value: Pending): boolean {
+    return !disposed && value.epoch === mutationEpoch
+      && value.provider === adminContext.authProvider
+      && value.tenant === activeTenantIdentity()
+      && value.intent === authSession(value.provider).intent
+      && value.authVersion === authSession(value.provider).version;
   }
 
-  async function mutate(params?: Record<string, unknown>): Promise<AuthActionResult> {
-    const provider = adminContext.authProvider;
-    if (!provider) throw new Error('AuthProvider not configured');
-    const fn = provider[options.method] as ((params?: Record<string, unknown>) => Promise<AuthActionResult>) | undefined;
-    if (!fn) throw new Error(`AuthProvider.${options.method} not implemented`);
-
-    const epoch = ++mutationEpoch;
-    const tenantIdentity = activeTenantIdentity();
-    const notificationProvider = adminContext.notificationProvider;
-    const sendNotification = (notification: Parameters<typeof notifyWithProvider>[0]) =>
-      notifyWithProvider(notification, notificationProvider);
-    isLoading = true;
-    try {
-      const result = await fn.call(provider, params);
-      if (!isActiveMutation(epoch, provider, tenantIdentity)) return result;
-      const eventKey = `auth:${mutationInstanceId}:${String(options.method)}:${epoch}`;
-      if (result.success) {
-        if (options.successMessage) {
-          sendNotification({
-            type: 'success',
-            message: options.successMessage,
-            key: `${eventKey}:success`,
-          });
+  async function mutate(...[params]: AuthMutationArgs<M>): Promise<AuthActionResult> {
+    if(disposed) return authMutationFailure('AUTH_RESULT_SUPERSEDED');
+    const provider=adminContext.authProvider;
+    const epoch=++mutationEpoch;
+    const started: Pending={
+      epoch, provider, tenant: activeTenantIdentity(),
+      authVersion: authSession(provider).version, intent: authSession(provider).intent,
+      previousLive: authSession(provider).liveState, changedLive: false,
+    };
+    pending=started;
+    const router=adminContext.routerProvider;
+    const notificationProvider=adminContext.notificationProvider;
+    const eventKey=`auth:${mutationInstanceId}:${options.method}:${epoch}`;
+    const sendNotification=(notification: Parameters<typeof notifyWithProvider>[0]) => {
+      try {
+        notifyWithProvider(notification,notificationProvider);
+      } catch {
+        // A presentation failure cannot change an already completed authentication operation.
+      }
+    };
+    const failure=(code: AuthMutationError['code']) => {
+      const result=authMutationFailure(code);
+      if(current(started)) {
+        if(provider && started.changedLive) {
+          setLiveSession(provider,code==='AUTH_REJECTED' ? rejectedLiveState(started.previousLive) : 'uncertain');
         }
-        if (options.onSuccess) await options.onSuccess(result, adminContext);
-      } else {
-        const msg = result.error?.message ?? (typeof options.errorMessage === 'string' ? options.errorMessage : i18n.t('common.operationFailed'));
-        if (options.errorMessage !== false) {
-          sendNotification({ type: 'error', message: msg, key: `${eventKey}:error` });
+        pending=null;
+        if(options.errorMessage!==false) {
+          sendNotification({
+            type: 'error',
+            message: typeof options.errorMessage==='string' ? options.errorMessage : i18n.t('common.operationFailed'),
+            key: `${eventKey}:error`,
+          });
         }
       }
       return result;
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : (typeof options.errorMessage === 'string' ? options.errorMessage : i18n.t('common.operationFailed'));
-      if (isActiveMutation(epoch, provider, tenantIdentity) && options.errorMessage !== false) {
+    };
+    let invoke: () => Promise<unknown>;
+    try {
+      if(!provider) return failure('AUTH_METHOD_UNAVAILABLE');
+      invoke=prepareAuthMutation(provider,options.method,params);
+    } catch(err) {
+      return failure(err instanceof AuthMutationError ? err.code : 'INVALID_AUTH_INPUT');
+    }
+    if(!current(started)) return authMutationFailure('AUTH_RESULT_SUPERSEDED');
+    let releaseLive: (() => void) | undefined;
+    if(provider && options.method!=='forgotPassword') {
+      started.intent=++authSession(provider).intent;
+      started.changedLive=true;
+      releaseLive=beginLiveSessionChange(provider,started.intent);
+    }
+    let response: unknown;
+    try {
+      response=await invoke();
+    } catch {
+      return current(started) ? failure('AUTH_REQUEST_FAILED') : authMutationFailure('AUTH_RESULT_SUPERSEDED');
+    } finally {
+      releaseLive?.();
+    }
+    if(!current(started)) return authMutationFailure('AUTH_RESULT_SUPERSEDED');
+    let result: AuthActionResult;
+    try {
+      result=decodeAuthAction(response);
+    } catch {
+      return failure('INVALID_AUTH_RESULT');
+    }
+    if(!current(started)) return authMutationFailure('AUTH_RESULT_SUPERSEDED');
+    if(!result.success) return failure('AUTH_REJECTED');
+    pending=null;
+    if(provider && options.method!=='forgotPassword') {
+      started.authVersion=advanceAuthSession(provider,options.method==='logout',
+        options.method==='login' ? 'ready' : rejectedLiveState(started.previousLive));
+    }
+    try {
+      if(options.successMessage) {
         sendNotification({
-          type: 'error',
-          message: msg,
-          key: `auth:${mutationInstanceId}:${String(options.method)}:${epoch}:error`,
+          type: 'success', message: options.successMessage, key: `${eventKey}:success`,
         });
       }
-      return { success: false, error: { message: msg } };
-    } finally {
-      if (isActiveMutation(epoch, provider, tenantIdentity)) isLoading = false;
+      if(current(started) && options.onSuccess) {
+        await options.onSuccess(result,async path => {
+          await navigateWithProvider(router,path,undefined,
+            () => current(started) && router===adminContext.routerProvider);
+        });
+      }
+    } catch {
+      // Navigation is a separate side effect; do not report the server write as failed.
     }
+    return current(started) ? result : authMutationFailure('AUTH_RESULT_SUPERSEDED');
   }
 
-  if (typeof window !== 'undefined') {
+  if(typeof window!=='undefined') {
     $effect(() => {
-      const provider = adminContext.authProvider;
-      const tenantIdentity = activeTenantIdentity();
-      if (provider !== observedProvider || tenantIdentity !== observedTenantIdentity) {
-        observedProvider = provider;
-        observedTenantIdentity = tenantIdentity;
-        mutationEpoch++;
-        isLoading = false;
-      }
-      return () => {
-        mutationEpoch++;
-      };
+      void adminContext.authProvider;
+      void activeTenantIdentity();
+      return () => { ++mutationEpoch; };
     });
+    $effect(() => () => { disposed=true; ++mutationEpoch; });
   }
 
   return {
     mutate,
-    get isLoading() { return isLoading; },
+    get isLoading() { return pending !== null && current(pending); },
   };
 }
 
 // ─── useLogin ─────────────────────────────────────────────────
 
-export function useLogin(opts?: AuthNotificationOptions & { errorMessage?: string | false }) {
+export function useLogin(opts?: AuthNotificationOptions&{ errorMessage?: string|false }) {
   return createAuthMutation({
     method: 'login',
-    successMessage: resolveSuccessMessage(opts?.successNotification, t('common.operationSuccess')),
-    errorMessage: opts?.errorNotification ?? opts?.errorMessage ?? t('common.loginFailed'),
-    onSuccess: async (result, adminContext) => { await adminContext.navigate(result.redirectTo ?? '/'); }
+    successMessage: resolveSuccessMessage(opts?.successNotification,t('common.operationSuccess')),
+    errorMessage: opts?.errorNotification??opts?.errorMessage??t('common.loginFailed'),
+    onSuccess: async (result,navigate) => { await navigate(result.redirectTo??'/'); }
   });
 }
 
 // ─── useLogout ────────────────────────────────────────────────
 
 export function useLogout() {
-  let queryClient: ReturnType<typeof useQueryClient> | undefined;
+  const context=captureAdminContext();
+  let queryClient: ReturnType<typeof useQueryClient>|undefined;
   try {
-    queryClient = useQueryClient();
+    queryClient=useQueryClient();
   } catch {
     // Auth hooks remain usable without TanStack Query; cache clearing is best-effort.
   }
   return createAuthMutation({
     method: 'logout',
     successMessage: null,
-    onSuccess: async (result, adminContext) => {
-      _logoutVersion++;
-      queryClient?.clear();
-      await adminContext.navigate(result.redirectTo ?? '/login');
+    onSuccess: async (result,navigate) => {
+      clearAuthQueries(queryClient,context.authProvider);
+      await navigate(result.redirectTo??'/login');
     }
   });
+}
+
+/** @internal Preserve caches with a proven different authentication owner. */
+export function clearAuthQueries(client: ReturnType<typeof useQueryClient> | undefined, provider: AuthProvider | null): void {
+  if(!client) return;
+  client.getMutationCache().clear();
+  const prefix=provider ? `auth:${authSession(provider).cacheId}:` : 'anonymous';
+  client.removeQueries({ predicate: query => {
+    const params=parseQueryKey(query.queryKey)?.params;
+    const tag: unknown=typeof params==='object' && params!==null
+      ? Object.getOwnPropertyDescriptor(params,'authSession')?.value : undefined;
+    // Untagged caches have no provable session owner and retain conservative logout eviction.
+    return typeof tag!=='string' || (provider ? tag.startsWith(prefix) : tag===prefix);
+  } });
 }
 
 // ─── useRegister ──────────────────────────────────────────────
@@ -162,10 +311,10 @@ export function useLogout() {
 export function useRegister(opts?: AuthNotificationOptions) {
   return createAuthMutation({
     method: 'register',
-    successMessage: resolveSuccessMessage(opts?.successNotification, t('auth.registerSuccess')),
-    errorMessage: opts?.errorNotification,
-    onSuccess: async (result, adminContext) => {
-      if (result.redirectTo) await adminContext.navigate(result.redirectTo);
+    successMessage: resolveSuccessMessage(opts?.successNotification,t('auth.registerSuccess')),
+    ...definedOptions({ errorMessage: opts?.errorNotification }),
+    onSuccess: async (result,navigate) => {
+      if(result.redirectTo) await navigate(result.redirectTo);
     }
   });
 }
@@ -175,8 +324,8 @@ export function useRegister(opts?: AuthNotificationOptions) {
 export function useForgotPassword(opts?: AuthNotificationOptions) {
   return createAuthMutation({
     method: 'forgotPassword',
-    successMessage: resolveSuccessMessage(opts?.successNotification, t('auth.resetLinkSent')),
-    errorMessage: opts?.errorNotification,
+    successMessage: resolveSuccessMessage(opts?.successNotification,t('auth.resetLinkSent')),
+    ...definedOptions({ errorMessage: opts?.errorNotification }),
   });
 }
 
@@ -185,10 +334,10 @@ export function useForgotPassword(opts?: AuthNotificationOptions) {
 export function useUpdatePassword(opts?: AuthNotificationOptions) {
   return createAuthMutation({
     method: 'updatePassword',
-    successMessage: resolveSuccessMessage(opts?.successNotification, t('common.operationSuccess')),
-    errorMessage: opts?.errorNotification,
-    onSuccess: async (result, adminContext) => {
-      if (result.redirectTo) await adminContext.navigate(result.redirectTo);
+    successMessage: resolveSuccessMessage(opts?.successNotification,t('common.operationSuccess')),
+    ...definedOptions({ errorMessage: opts?.errorNotification }),
+    onSuccess: async (result,navigate) => {
+      if(result.redirectTo) await navigate(result.redirectTo);
     }
   });
 }
@@ -198,10 +347,10 @@ export function useUpdatePassword(opts?: AuthNotificationOptions) {
 export function useUpdateIdentity(opts?: AuthNotificationOptions) {
   return createAuthMutation({
     method: 'updateIdentity',
-    successMessage: resolveSuccessMessage(opts?.successNotification, t('common.operationSuccess')),
-    errorMessage: opts?.errorNotification,
-    onSuccess: async (result, adminContext) => {
-      if (result.redirectTo) await adminContext.navigate(result.redirectTo);
+    successMessage: resolveSuccessMessage(opts?.successNotification,t('common.operationSuccess')),
+    ...definedOptions({ errorMessage: opts?.errorNotification }),
+    onSuccess: async (result,navigate) => {
+      if(result.redirectTo) await navigate(result.redirectTo);
     }
   });
 }
@@ -209,131 +358,160 @@ export function useUpdateIdentity(opts?: AuthNotificationOptions) {
 export function useUpdateProfile(opts?: AuthNotificationOptions) {
   return createAuthMutation({
     method: 'updateProfile',
-    successMessage: resolveSuccessMessage(opts?.successNotification, t('common.operationSuccess')),
-    errorMessage: opts?.errorNotification,
-    onSuccess: async (result, adminContext) => {
-      if (result.redirectTo) await adminContext.navigate(result.redirectTo);
+    successMessage: resolveSuccessMessage(opts?.successNotification,t('common.operationSuccess')),
+    ...definedOptions({ errorMessage: opts?.errorNotification }),
+    onSuccess: async (result,navigate) => {
+      if(result.redirectTo) await navigate(result.redirectTo);
     }
   });
 }
 
 // ─── useGetIdentity ──────────────────────────────────────────
 
-export function useGetIdentity() {
-  const adminContext = captureAdminContext();
-  let data = $state<Identity | null>(null);
-  let isLoading = $state(true);
-  let error = $state<Error | null>(null);
-  let requestEpoch = 0;
-  let observedLogoutVersion = _logoutVersion;
+function createAuthQuery<T>(options: {
+  empty: T;
+  withoutProvider: T;
+  request: (provider: AuthProvider) => Promise<unknown>;
+  decode: (value: unknown) => T;
+  invalidCode: 'INVALID_AUTH_IDENTITY' | 'INVALID_AUTH_CHECK';
+  onValidated?: (provider: AuthProvider, data: T, liveRevision: number) => void;
+}) {
+  const adminContext=captureAdminContext();
+  interface Snapshot {
+    provider: AuthProvider | null;
+    tenant: string | number | undefined;
+    logout: number;
+    authVersion: number;
+    data: T;
+    isLoading: boolean;
+    error: AuthQueryError | null;
+  }
+  let snapshot=$state.raw<Snapshot | null>(null);
+  let epoch=0;
+  let disposed=false;
+  let observedProvider=adminContext.authProvider;
+  let observedLogoutVersion=authSession(observedProvider).logout;
 
-  function requestIdentity(provider: AuthProvider | null): void {
-    const epoch = ++requestEpoch;
-    error = null;
-    if (!provider) {
-      data = null;
-      isLoading = false;
+  function current(value: Snapshot | null): value is Snapshot {
+    return !disposed && value !== null
+      && value.provider === adminContext.authProvider
+      && value.tenant === adminContext.tenantCacheKey?.__svadminTenant
+      && value.authVersion === authSession(value.provider).version
+      && value.logout === authSession(value.provider).logout;
+  }
+
+  async function fetch(): Promise<void> {
+    if(disposed) return;
+    const provider=adminContext.authProvider;
+    const liveRevision=authSession(provider).liveRevision;
+    const request=++epoch;
+    const started: Snapshot={
+      provider, tenant: adminContext.tenantCacheKey?.__svadminTenant,
+      logout: authSession(provider).logout, authVersion: authSession(provider).version,
+      data: provider ? options.empty : options.withoutProvider,
+      isLoading: provider !== null && typeof window !== 'undefined', error: null,
+    };
+    snapshot=started;
+    if(!started.isLoading || !provider) return;
+    const fail=(code: AuthQueryError['code']) => {
+      if(request !== epoch || !current(started)) return;
+      snapshot={ ...started, isLoading: false, error: new AuthQueryError(code) };
+    };
+    let response: unknown;
+    try {
+      response=await options.request(provider);
+    } catch {
+      fail('AUTH_QUERY_FAILED');
       return;
     }
-    isLoading = true;
-    provider.getIdentity().then(identity => {
-      if (epoch !== requestEpoch) return;
-      data = identity;
-      isLoading = false;
-    }).catch(err => {
-      if (epoch !== requestEpoch) return;
-      error = err instanceof Error ? err : new Error(String(err));
-      isLoading = false;
-      console.warn('[svadmin] useGetIdentity failed:', err);
-    });
+    try {
+      const data=options.decode(response);
+      if(request !== epoch || !current(started)) return;
+      options.onValidated?.(provider,data,liveRevision);
+      snapshot={ ...started, data, isLoading: false };
+    } catch {
+      fail(options.invalidCode);
+    }
   }
 
-  function refetchIdentity(): void {
-    requestIdentity(adminContext.authProvider);
-  }
-
-  function loadScopedIdentity(provider: AuthProvider | null): void {
-    data = null;
-    requestIdentity(provider);
-  }
-
-  if (typeof window !== 'undefined') {
+  if(typeof window!=='undefined') {
     $effect(() => {
-      const provider = adminContext.authProvider;
-      void adminContext.tenantCacheKey?.__svadminTenant;
-      const logoutVersion = _logoutVersion;
-      if (logoutVersion !== observedLogoutVersion) {
-        observedLogoutVersion = logoutVersion;
-        requestEpoch++;
-        data = null;
-        error = null;
-        isLoading = false;
+      const provider=adminContext.authProvider;
+      const tenant=adminContext.tenantCacheKey?.__svadminTenant;
+      const logout=authSession(provider).logout;
+      const authVersion=authSession(provider).version;
+      if(provider===observedProvider && logout!==observedLogoutVersion) {
+        observedLogoutVersion=logout;
+        ++epoch;
+        snapshot={
+          provider, tenant, logout, authVersion,
+          data: provider ? options.empty : options.withoutProvider, isLoading: false, error: null,
+        };
         return;
       }
-
-      loadScopedIdentity(provider);
-      return () => {
-        requestEpoch++;
-      };
+      observedProvider=provider;
+      observedLogoutVersion=logout;
+      untrack(() => { void fetch(); });
+      return () => { ++epoch; };
     });
+    $effect(() => () => { disposed=true; ++epoch; });
   }
 
   return {
-    get data() { return data; },
-    get isLoading() { return isLoading; },
-    get error() { return error; },
-    refetch: refetchIdentity,
+    get data() {
+      if(current(snapshot)) return snapshot.data;
+      return !disposed && !adminContext.authProvider ? options.withoutProvider : options.empty;
+    },
+    get isLoading() {
+      return current(snapshot) ? snapshot.isLoading
+        : !disposed && adminContext.authProvider !== null && typeof window !== 'undefined';
+    },
+    get error() { return current(snapshot) ? snapshot.error : null; },
+    refetch: fetch,
   };
+}
+
+export function useGetIdentity() {
+  return createAuthQuery<Readonly<Identity> | null>({
+    empty: null,
+    withoutProvider: null,
+    request: provider => {
+      const method=provider.getIdentity;
+      if(typeof method !== 'function') throw new AuthQueryError('AUTH_QUERY_FAILED');
+      return method.call(provider);
+    },
+    decode: decodeIdentity,
+    invalidCode: 'INVALID_AUTH_IDENTITY',
+  });
 }
 
 // ─── useIsAuthenticated ──────────────────────────────────────
 
 export function useIsAuthenticated() {
-  const adminContext = captureAdminContext();
-  let isAuthenticated = $state(false);
-  let isLoading = $state(true);
-  let checkResult = $state<CheckResult | null>(null);
-
-  function check() {
-    const provider = adminContext.authProvider;
-    if (!provider) {
-      isAuthenticated = true;
-      isLoading = false;
-      return;
-    }
-    if (typeof window === 'undefined') {
-      // In SSR we assume false to prevent hydration mismatch before check
-      isAuthenticated = false;
-      isLoading = false;
-      return;
-    }
-    isLoading = true;
-    provider.check().then((result: CheckResult) => {
-      isAuthenticated = result.authenticated;
-      checkResult = result;
-      isLoading = false;
-    }).catch(() => {
-      isAuthenticated = false;
-      checkResult = { authenticated: false };
-      isLoading = false;
-    });
-  }
-
-  // Initial check
-  check();
-
-  if (typeof window !== 'undefined') {
-    $effect(() => {
-      void _logoutVersion;
-      isAuthenticated = false;
-    });
-  }
+  const query=createAuthQuery<Readonly<CheckResult> | null>({
+    empty: null,
+    withoutProvider: Object.freeze({ authenticated: true }),
+    request: provider => {
+      const method=provider.check;
+      if(typeof method !== 'function') throw new AuthQueryError('AUTH_QUERY_FAILED');
+      return method.call(provider);
+    },
+    decode: decodeAuthCheck,
+    invalidCode: 'INVALID_AUTH_CHECK',
+    onValidated(provider,data,revision) {
+      const session=authSession(provider);
+      if(data && session.liveRevision===revision && session.liveState!=='changing' && session.inFlight===0) {
+        setLiveSession(provider,data.authenticated ? 'ready' : 'signed-out');
+      }
+    },
+  });
 
   return {
-    get isAuthenticated() { return isAuthenticated; },
-    get isLoading() { return isLoading; },
-    get data() { return checkResult; },
-    refetch: check,
+    get isAuthenticated() { return query.data?.authenticated === true; },
+    get isLoading() { return query.isLoading; },
+    get data() { return query.data; },
+    get error() { return query.error; },
+    refetch: query.refetch,
   };
 }
 
@@ -345,28 +523,127 @@ export function useIsAuthenticated() {
  * If it returns { redirectTo }, navigates there.
  */
 export function useOnError() {
-  const adminContext = captureAdminContext();
+  const adminContext=captureAdminContext();
+  let queryClient: ReturnType<typeof useQueryClient> | undefined;
+  try {
+    queryClient=useQueryClient();
+  } catch {
+    // Standalone auth hooks may not have a query cache.
+  }
+  let epoch=0;
+  let disposed=false;
+  $effect(() => {
+    void adminContext.authProvider;
+    void adminContext.tenantCacheKey?.__svadminTenant;
+    return () => { ++epoch; };
+  });
+  $effect(() => () => { disposed=true; ++epoch; });
 
-  async function mutate(error: unknown) {
-    const provider = adminContext.authProvider;
-    if (!provider?.onError) {
-      console.warn('[svadmin] useOnError: authProvider.onError not implemented');
-      return;
+  return {
+    mutate(error: unknown): Promise<AuthErrorHandlingResult> {
+      const request=++epoch;
+      return handleAuthError(error,adminContext,
+        () => !disposed && request===epoch, () => clearAuthQueries(queryClient,adminContext.authProvider));
+    },
+  };
+}
+
+/** Shared validated delegate for auth hooks and data-hook errors. */
+export async function handleAuthError(
+  error: unknown,
+  adminContext: AdminContextAccessor,
+  isActive: () => boolean = () => true,
+  onLogout: () => void = () => {},
+  origin?: ReturnType<typeof captureAuthLiveScope>,
+): Promise<AuthErrorHandlingResult> {
+  const provider=adminContext.authProvider;
+  const tenant=adminContext.tenantCacheKey?.__svadminTenant;
+  const router=adminContext.routerProvider;
+  let version=authSession(provider).version;
+  let intent=authSession(provider).intent;
+  let previousLive: AuthSession['liveState'] | undefined;
+  let ownsLogout=false;
+  const current=() => isActive() && (ownsLogout || origin===undefined || origin.isCurrent()) && provider===adminContext.authProvider
+    && tenant===adminContext.tenantCacheKey?.__svadminTenant && version===authSession(provider).version
+    && intent===authSession(provider).intent
+    && router===adminContext.routerProvider;
+  const fail=(code: AuthErrorHandlingError['code'], rejected=false): AuthErrorHandlingResult => {
+    if(provider && previousLive!==undefined && current()) {
+      // A failed data-query logout must not automatically restart the unauthorized read.
+      setLiveSession(provider,rejected && origin===undefined ? rejectedLiveState(previousLive) : 'uncertain');
     }
+    return { status: 'failed', error: new AuthErrorHandlingError(code) };
+  };
+  if(!current()) return { status: 'superseded' };
+  let response: unknown;
+  let invokeLogout: (() => Promise<unknown>) | undefined;
+  try {
+    const method=provider?.onError;
+    if(method===undefined) {
+      const descriptor=typeof error==='object' && error!==null
+        ? Object.getOwnPropertyDescriptor(error,'statusCode') : undefined;
+      const status: unknown=descriptor && 'value' in descriptor ? descriptor.value : undefined;
+      if(status!==401) return { status: 'ignored' };
+      await navigateWithProvider(router,'/login',undefined,current);
+      return { status: current() ? 'handled' : 'superseded' };
+    }
+    if(typeof method!=='function' || !provider) return fail('AUTH_ERROR_HANDLER_FAILED');
     try {
-      const result = await provider.onError(error);
-      if (result.logout) {
-        await provider.logout?.();
-        await adminContext.navigate(result.redirectTo ?? '/login');
-      } else if (result.redirectTo) {
-        await adminContext.navigate(result.redirectTo);
-      }
-    } catch (err) {
-      console.warn('[svadmin] useOnError failed:', err);
+      invokeLogout=prepareAuthMutation(provider,'logout',undefined);
+    } catch {
+      // A missing logout method matters only if the validated handler requests logout.
+    }
+    if(!current()) return { status: 'superseded' };
+    response=await method.call(provider,error);
+  } catch {
+    return current() ? fail('AUTH_ERROR_HANDLER_FAILED') : { status: 'superseded' };
+  }
+  if(!current()) return { status: 'superseded' };
+  let result: ReturnType<typeof decodeAuthErrorResult>;
+  try {
+    result=decodeAuthErrorResult(response);
+  } catch {
+    return fail('INVALID_AUTH_ERROR_RESULT');
+  }
+  if(!current()) return { status: 'superseded' };
+  if(result.logout) {
+    if(!invokeLogout || !provider) return fail('AUTH_LOGOUT_FAILED');
+    previousLive=authSession(provider).liveState;
+    // The checked origin hands ownership to this delegate's own logout intent.
+    ownsLogout=true;
+    intent=++authSession(provider).intent;
+    const releaseLive=beginLiveSessionChange(provider,intent);
+    let logout: unknown;
+    try {
+      logout=await invokeLogout();
+    } catch {
+      return current() ? fail('AUTH_LOGOUT_FAILED') : { status: 'superseded' };
+    } finally {
+      releaseLive();
+    }
+    if(!current()) return { status: 'superseded' };
+    try {
+      if(!decodeAuthAction(logout).success) return fail('AUTH_LOGOUT_FAILED',true);
+    } catch {
+      return fail('AUTH_LOGOUT_FAILED');
+    }
+    if(!current()) return { status: 'superseded' };
+    version=advanceAuthSession(provider,true);
+    try {
+      onLogout();
+    } catch {
+      // A cache observer cannot undo a confirmed server logout.
     }
   }
-
-  return { mutate };
+  const redirect=result.redirectTo ?? (result.logout ? '/login' : undefined);
+  if(redirect!==undefined) {
+    try {
+      await navigateWithProvider(router,redirect,undefined,current);
+    } catch {
+      return current() ? fail('AUTH_ERROR_HANDLER_FAILED') : { status: 'superseded' };
+    }
+  }
+  return { status: current() ? 'handled' : 'superseded' };
 }
 
 // ─── usePermissions ──────────────────────────────────────────
@@ -389,52 +666,104 @@ export function useOnError() {
  * </script>
  * ```
  */
-export function usePermissions<T = unknown>() {
-  const adminContext = captureAdminContext();
-  let permissions = $state<T | null>(null);
-  let isLoading = $state(true);
-  let error = $state<Error | null>(null);
-  let version = $state(0);
+export function usePermissions() {
+  const adminContext=captureAdminContext();
+  interface Snapshot {
+    provider: AuthProvider | null;
+    tenant: string | number | undefined;
+    logout: number;
+    authVersion: number;
+    hints: PermissionHints;
+    isLoading: boolean;
+    error: PermissionHintsError | null;
+  }
+  let snapshot=$state.raw<Snapshot | null>(null);
+  let epoch=0;
+  let disposed=false;
+  let observedProvider=adminContext.authProvider;
+  let observedLogoutVersion=authSession(observedProvider).logout;
+  let version=$state(0);
 
-  function fetch() {
-    const provider = adminContext.authProvider;
-    if (!provider?.getPermissions) { isLoading = false; return; }
-    isLoading = true;
-    error = null;
-    provider.getPermissions().then(p => {
-      permissions = p as T;
+  function current(value: Snapshot | null): value is Snapshot {
+    return !disposed && value !== null
+      && value.provider === adminContext.authProvider
+      && value.tenant === adminContext.tenantCacheKey?.__svadminTenant
+      && value.authVersion === authSession(value.provider).version
+      && value.logout === authSession(value.provider).logout;
+  }
+
+  async function fetch(): Promise<void> {
+    if(disposed) return;
+    const provider=adminContext.authProvider;
+    const request=++epoch;
+    const started: Snapshot={
+      provider, tenant: adminContext.tenantCacheKey?.__svadminTenant,
+      logout: authSession(provider).logout, authVersion: authSession(provider).version,
+      hints: null, isLoading: true, error: null,
+    };
+    snapshot=started;
+    const fail=(code: PermissionHintsError['code']) => {
+      if(request!==epoch || !current(started)) return;
+      snapshot={ ...started, isLoading: false, error: new PermissionHintsError(code) };
+    };
+    let response: unknown;
+    try {
+      const getPermissions=provider?.getPermissions;
+      if(getPermissions===undefined) {
+        snapshot={ ...started, isLoading: false };
+        return;
+      }
+      if(typeof getPermissions!=='function') {
+        fail('PERMISSION_HINTS_FAILED');
+        return;
+      }
+      response=await getPermissions.call(provider);
+    } catch {
+      fail('PERMISSION_HINTS_FAILED');
+      return;
+    }
+    try {
+      const hints=decodePermissionHints(response);
+      if(request!==epoch || !current(started)) return;
+      snapshot={ ...started, hints, isLoading: false };
       version++;
-      isLoading = false;
-    }).catch(err => {
-      error = err instanceof Error ? err : new Error(String(err));
-      isLoading = false;
-      console.warn('[svadmin] usePermissions failed:', err);
-    });
+    } catch {
+      fail('INVALID_PERMISSION_HINTS');
+    }
   }
 
-  if (typeof window !== 'undefined') {
-    fetch();
-  }
+  $effect(() => {
+    const provider=adminContext.authProvider;
+    const tenant=adminContext.tenantCacheKey?.__svadminTenant;
+    const logout=authSession(provider).logout;
+    const authVersion=authSession(provider).version;
+    if(provider===observedProvider && logout!==observedLogoutVersion) {
+      observedLogoutVersion=logout;
+      ++epoch;
+      snapshot={ provider, tenant, logout, authVersion, hints: null, isLoading: false, error: null };
+      return;
+    }
+    observedProvider=provider;
+    observedLogoutVersion=logout;
+    untrack(() => { void fetch(); });
+    return () => { ++epoch; };
+  });
+  $effect(() => () => { disposed=true; ++epoch; });
 
-  const hasFn = (perm: string): boolean => {
-    if (!permissions) return false;
-    if (Array.isArray(permissions)) return permissions.includes(perm);
-    if (permissions instanceof Set) return (permissions as Set<string>).has(perm);
-    if (typeof permissions === 'object') return !!(permissions as Record<string, boolean>)[perm];
-    return false;
-  };
+  const raw=(): PermissionHints => current(snapshot) ? snapshot.hints : null;
+  const hasFn=(permission: string): boolean => hasPermissionHint(raw(),permission);
 
   return {
-    get isLoading() { return isLoading; },
-    get error() { return error; },
+    get isLoading() { return current(snapshot) ? snapshot.isLoading : !disposed && typeof window!=='undefined'; },
+    get error() { return current(snapshot) ? snapshot.error : null; },
     get version() { return version; },
-    get raw() { return permissions; },
+    get raw() { return raw(); },
     refetch: fetch,
 
     /** Check if a specific permission string exists */
     has: hasFn,
 
     /** Check resource:action style permission */
-    can: (resource: string, action: string): boolean => hasFn(`${resource}:${action}`),
+    can: (resource: string,action: string): boolean => hasFn(`${resource}:${action}`),
   };
 }

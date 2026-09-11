@@ -1,0 +1,18 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "skipLibCheck": false,
+    "types": [],
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "rootDir": "../../../node_modules/@supabase/auth-js/src/lib",
+    "declaration": true
+  },
+  "include": [
+    "../../../node_modules/@supabase/auth-js/src/lib/webauthn.serialization.ts"
+  ],
+  "exclude": []
+}

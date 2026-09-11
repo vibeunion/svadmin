@@ -17,7 +17,7 @@
   let inviteStatus = $state('');
   let members = $state<MemberSummary[]>(referenceDemoData.members.map((member) => ({ ...member, status: member.status === 'active' ? 'success' : member.status === 'invited' ? 'warning' : 'neutral' })));
   const filtered = $derived(query ? members.filter((member) => `${member.name} ${member.email} ${member.department}`.toLowerCase().includes(query.toLowerCase())) : members);
-  function sendInvite() { const email = inviteEmail.trim(); if (!email) return; members = [...members, { id: `invite-${Date.now()}`, name: email.split('@')[0], email, role: 'Viewer', department: 'Pending assignment', status: 'warning' }]; inviteStatus = email; inviteEmail = ''; }
+  function sendInvite() { const email = inviteEmail.trim(); if (!email) return; members = [...members, { id: `invite-${Date.now()}`, name: email.replace(/@.*$/, ''), email, role: 'Viewer', department: 'Pending assignment', status: 'warning' }]; inviteStatus = email; inviteEmail = ''; }
 </script>
 
 <ContentPageShell pageId="account-team-members" width="wide">

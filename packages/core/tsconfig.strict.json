@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.contracts.json",
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.svelte.ts"]
+}

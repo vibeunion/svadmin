@@ -213,7 +213,7 @@
       {
         name: 'Audit',
         configured: Boolean(audit),
-        capabilities: audit ? 'create, get, update' : 'not configured',
+        capabilities: audit ? 'create, get' : 'not configured',
       },
       {
         name: 'Notification',

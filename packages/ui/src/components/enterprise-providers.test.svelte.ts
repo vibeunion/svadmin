@@ -1,3 +1,4 @@
+import { requireValue } from "../../../../scripts/test-assertions";
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type {
@@ -61,13 +62,13 @@ describe('enterprise provider settings', () => {
     expect(await screen.findByDisplayValue('sv_live_one_time_secret')).toBeTruthy();
     expect(credentialProvider.createApiCredential).toHaveBeenCalledWith(
       { name: 'Automation key', permissions: ['Read'] },
-      expect.objectContaining({ tenantId: undefined }),
+      {},
     );
 
     await fireEvent.click(screen.getByRole('button', { name: /Delete Deployment key|删除 Deployment key/ }));
     await waitFor(() => expect(credentialProvider.revokeApiCredential).toHaveBeenCalledWith(
       'key-1',
-      expect.objectContaining({ tenantId: undefined }),
+      {},
     ));
   });
 
@@ -212,7 +213,7 @@ describe('enterprise provider settings', () => {
     await fireEvent.click(screen.getByTitle(/Sign out device|注销此设备/));
     await waitFor(() => expect(sessionProvider.revokeSession).toHaveBeenCalledWith(
       'other',
-      expect.objectContaining({ tenantId: undefined }),
+      {},
     ));
 
     await fireEvent.input(screen.getByLabelText(/Current Password|当前密码/), { target: { value: 'old-password' } });
@@ -245,17 +246,17 @@ describe('enterprise provider settings', () => {
 
     await waitFor(() => expect(updateSecurityPolicy).toHaveBeenCalledWith(
       expect.objectContaining({ sessionTimeoutMinutes: 45 }),
-      expect.objectContaining({ tenantId: undefined }),
+      {},
     ));
 
-    await fireEvent.click(screen.getAllByRole('button', { name: 'Manage' })[1]);
+    await fireEvent.click(requireValue(screen.getAllByRole('button', { name: 'Manage' })[1]));
     await waitFor(() => expect(identityGovernanceProvider.testIdentityProvider).toHaveBeenCalledWith(
       {
         id: 'saml',
         protocol: 'saml',
         metadataUrl: 'https://partner.example/saml',
       },
-      expect.objectContaining({ tenantId: undefined }),
+      {},
     ));
   });
 
@@ -276,11 +277,11 @@ describe('enterprise provider settings', () => {
     const organizationName = await screen.findByLabelText(/Organization name|组织名称/);
     await fireEvent.input(organizationName, { target: { value: 'Acme Global' } });
     const saveButtons = screen.getAllByRole('button', { name: /Save|保存/ });
-    await fireEvent.click(saveButtons[0]);
+    await fireEvent.click(requireValue(saveButtons[0]));
 
     await waitFor(() => expect(updateCurrentOrganization).toHaveBeenCalledWith(
       { name: 'Acme Global' },
-      expect.objectContaining({ tenantId: undefined }),
+      {},
     ));
   });
 });

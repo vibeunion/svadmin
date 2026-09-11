@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { requireValue } from "../../../scripts/test-assertions";
 import { describe, test, expect } from 'bun:test';
 import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -7,6 +7,7 @@ import {
   parseInferArguments,
   planGeneratedFiles,
   executeInfer,
+  parseInferWizardAnswers,
 } from './infer-command';
 import { generateResourceBundle } from '@svadmin/core/inferencer';
 
@@ -56,6 +57,27 @@ describe('parseInferArguments', () => {
     expect(urlOpts.url).toBe('https://api.example.com/openapi.json');
     expect(urlOpts.write).toBe(true);
   });
+
+  test.each(['--url', '--file', '--type', '--resource', '--out-dir', '--primary-key', '--fields', '--header', '--method', '--body', '--format'])('rejects missing values for %s', (flag) => {
+    expect(() => parseInferArguments([flag])).toThrow('Missing value');
+    expect(() => parseInferArguments([flag, '--write'])).toThrow('Missing value');
+    expect(() => parseInferArguments([`${flag}=`])).toThrow('Missing value');
+  });
+
+  test('rejects invalid enum values, malformed headers and unknown flags', () => {
+    expect(() => parseInferArguments(['--type', 'invalid'])).toThrow('Invalid source type');
+    expect(() => parseInferArguments(['--type=invalid'])).toThrow('Invalid source type');
+    expect(() => parseInferArguments(['--format', 'invalid'])).toThrow('Invalid output format');
+    expect(() => parseInferArguments(['--format=invalid'])).toThrow('Invalid output format');
+    expect(() => parseInferArguments(['--header', 'missing-colon'])).toThrow('Invalid header');
+    expect(() => parseInferArguments(['--header= : value'])).toThrow('Invalid header');
+    expect(() => parseInferArguments(['--unknown'])).toThrow('Unexpected argument');
+  });
+
+  test('preserves equals signs inside values', () => {
+    expect(parseInferArguments(['--body=abc=']).body).toBe('abc=');
+    expect(parseInferArguments(['--header=X-Token: abc=']).headers).toEqual({ 'X-Token': 'abc=' });
+  });
 });
 
 describe('planGeneratedFiles', () => {
@@ -84,7 +106,7 @@ describe('planGeneratedFiles', () => {
       'index.ts',
     ]);
 
-    const indexFile = files.find(f => f.relativePath === 'index.ts')!;
+    const indexFile = requireValue(files.find(f => f.relativePath === 'index.ts'));
     expect(indexFile.content).toContain("export * from './articles.resource.js';");
     expect(indexFile.content).toContain("export * from './articles.schema.js';");
     expect(indexFile.content).toContain("export { default as ArticleListPage } from './articles/ListPage.svelte';");
@@ -112,7 +134,7 @@ describe('executeInfer with mock fetch & files', () => {
       });
 
       expect(dryRunResult.resources.length).toBe(1);
-      expect(dryRunResult.resources[0].name).toBe('products');
+      expect(requireValue(dryRunResult.resources[0]).name).toBe('products');
       expect(dryRunResult.wrote).toBe(false);
       expect(dryRunResult.files.length).toBeGreaterThan(0);
 
@@ -167,25 +189,18 @@ describe('executeInfer with mock fetch & files', () => {
       },
     };
 
-    const mockFetch = async () => {
-      return {
-        ok: true,
-        status: 200,
-        statusText: 'OK',
-        json: async () => sampleOpenAPI,
-      } as unknown as Response;
-    };
+    const mockFetch = async () => Response.json(sampleOpenAPI);
 
     const result = await executeInfer(
       {
         url: 'https://api.example.com/openapi.json',
       },
-      mockFetch as unknown as typeof fetch
+      mockFetch
     );
 
     expect(result.resources.length).toBe(1);
-    expect(result.resources[0].name).toBe('tasks');
-    expect(result.resources[0].fields.find((f: { key: string }) => f.key === 'completed')?.type).toBe('boolean');
+    expect(requireValue(result.resources[0]).name).toBe('tasks');
+    expect(requireValue(result.resources[0]).fields.find((f: { key: string }) => f.key === 'completed')?.type).toBe('boolean');
   });
 
   test('infers from GraphQL endpoint mock URL using introspection query', async () => {
@@ -215,14 +230,10 @@ describe('executeInfer with mock fetch & files', () => {
     };
 
     let sentQuery = '';
-    const mockFetch = async (_url: unknown, init: { body?: string } = {}) => {
-      sentQuery = init.body ?? '';
-      return {
-        ok: true,
-        status: 200,
-        statusText: 'OK',
-        json: async () => sampleGraphQL,
-      } as unknown as Response;
+    const mockFetch = async (_url: unknown, init: RequestInit = {}) => {
+      if (typeof init.body !== 'string') throw new Error('Expected a JSON query body');
+      sentQuery = init.body;
+      return Response.json(sampleGraphQL);
     };
 
     const result = await executeInfer(
@@ -230,14 +241,55 @@ describe('executeInfer with mock fetch & files', () => {
         url: 'https://api.example.com/graphql',
         type: 'graphql',
       },
-      mockFetch as unknown as typeof fetch
+      mockFetch
     );
 
     expect(sentQuery).toContain('__schema');
     expect(result.resources.length).toBe(1);
-    expect(result.resources[0].name).toBe('members');
-    const emailField = result.resources[0].fields.find((f: { key: string }) => f.key === 'email');
+    expect(requireValue(result.resources[0]).name).toBe('members');
+    const emailField = requireValue(result.resources[0]).fields.find((f: { key: string }) => f.key === 'email');
     expect(emailField?.type).toBe('email');
     expect(emailField?.required).toBe(true);
+  });
+});
+
+describe('inference input boundaries', () => {
+  test.each([null, true, 42, 'primitive', [null], [{ id: 1 }, false]].map((sample) => ({ sample })))(
+    'rejects non-record REST samples: %j',
+    async ({ sample }) => {
+      await expect(executeInfer(
+        { url: 'https://api.example.com/items' },
+        async () => Response.json(sample),
+      )).rejects.toThrow('REST samples must be objects');
+    },
+  );
+
+  test('validates interactive wizard results and preserves dry-run', () => {
+    expect(parseInferWizardAnswers({
+      sourceType: 'rest-url', endpointUrl: 'https://api.example.com/items',
+      outDir: 'src/resources', write: false,
+    })).toEqual({
+      type: 'rest', url: 'https://api.example.com/items', outDir: 'src/resources', write: false,
+    });
+    for (const answers of [
+      null,
+      {},
+      { sourceType: 'unknown' },
+      { sourceType: 'rest-file', pathOrUrl: 'items.json', outDir: 1, write: true },
+      { sourceType: 'rest-url', endpointUrl: 'file:///tmp/items.json', outDir: 'src', write: true },
+    ]) {
+      expect(() => parseInferWizardAnswers(answers)).toThrow();
+    }
+  });
+
+  test('does not reinterpret a valid primitive JSON file as GraphQL SDL', async () => {
+    const tempDir = await mkdtemp(join(tmpdir(), 'infer-invalid-record-'));
+    const file = join(tempDir, 'sample.json');
+    try {
+      await writeFile(file, JSON.stringify('type NotAnObject'));
+      await expect(executeInfer({ file })).rejects.toThrow('REST samples must be objects');
+    } finally {
+      await rm(tempDir, { recursive: true, force: true });
+    }
   });
 });

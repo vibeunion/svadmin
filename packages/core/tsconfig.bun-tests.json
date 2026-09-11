@@ -1,0 +1,6 @@
+{
+  "extends": "./tsconfig.contracts.json",
+  "compilerOptions": { "types": ["bun"] },
+  "include": ["src/**/*.test.ts", "test/**/*.ts"],
+  "exclude": []
+}
