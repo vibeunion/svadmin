@@ -34,7 +34,7 @@ describe('query cancellation reaches DataProvider', () => {
   it.each([
     ['list', false, 1], ['one', false, 1], ['many', false, 1], ['many', true, 2],
     ['infinite', false, 1], ['select', false, 2], ['select', true, 3],
-    ['custom', false, 1],
+    ['form', false, 1], ['custom', false, 1],
   ] as const)('cancels %s reads (getMany fallback=%s) after unmount', async (kind, fallback, count) => {
     const state = setup(fallback);
     const view = render(Host, { props: { dataProvider: state.dataProvider, client: state.client, kind } });

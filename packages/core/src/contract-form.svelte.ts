@@ -189,7 +189,7 @@ export function useContractForm<S extends ContractSchemas, A extends ContractFor
     const scope = current.scope;
     return {
       queryKey: queryKey(scope),
-      queryFn: async (signal) => {
+      queryFn: async ({ signal }) => {
         if (!isCurrent(scope)) throw cancelled();
         if (scope.id === undefined) throw new HttpError('A form read requires an ID', 422, undefined, { code: 'INVALID_RESOURCE_INPUT' });
         const response = await scope.provider.getOne(snapshotOneParams({
