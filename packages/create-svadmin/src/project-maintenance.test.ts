@@ -37,7 +37,14 @@ describe('create-svadmin doctor', () => {
       authProvider: 'mock',
     });
     project.dependencies['@svadmin/core'] = '^0.1.0';
-    project.dependencies['@svadmin/simple-rest'] = '^0.9.10';
+    // Derive the drifted range from the scaffold so the fixture stays within
+    // the same compatibility window (drift) instead of crossing a minor
+    // boundary (incompatible) as scaffold versions advance.
+    const scaffoldSimpleRest = String(project.dependencies['@svadmin/simple-rest']);
+    const simpleRestPatch = scaffoldSimpleRest.match(/^(~?\^?\d+\.\d+\.)\d+$/);
+    project.dependencies['@svadmin/simple-rest'] = simpleRestPatch
+      ? `${simpleRestPatch[1]}${Number(simpleRestPatch[2]) + 1}`
+      : scaffoldSimpleRest;
     delete project.dependencies['@tanstack/svelte-query'];
     delete project.dependencies['@refinedev/core'];
 

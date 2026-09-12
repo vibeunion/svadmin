@@ -7,7 +7,9 @@ export const load = (({ url }) => {
   const currentResource = segments[1] ?? '';
 
   return {
-    resources,
+    // TypeBox contracts are non-POJO (symbols/functions) and cannot cross the
+    // SSR serialization boundary; clients only need the plain definitions.
+    resources: resources.map(({ contract: _contract, ...resource }) => resource),
     menu,
     currentResource,
   };

@@ -1,6 +1,6 @@
 import { error, redirect } from '@sveltejs/kit';
 import { createCrudActions } from '@svadmin/lite';
-import { dataProvider, getResource } from '$lib/admin';
+import { dataProvider, getResource, plainDefinition } from '$lib/admin';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load = (({ params }) => {
@@ -8,7 +8,7 @@ export const load = (({ params }) => {
   if (!resource) {
     throw error(404, `Resource "${params.resource}" not found`);
   }
-  return { resource };
+  return { resource: plainDefinition(resource) };
 }) satisfies PageServerLoad;
 
 export const actions = {
