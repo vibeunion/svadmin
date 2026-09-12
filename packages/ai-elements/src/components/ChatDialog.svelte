@@ -139,7 +139,7 @@
   let messages = $state<ChatMessage[]>([]);
   const retryCandidate = $derived.by(() => {
     let index = messages.length - 1;
-    while (index >= 0 && messages[index].role !== 'assistant') index -= 1;
+    while (index >= 0 && messages[index]?.role !== 'assistant') index -= 1;
     const response = messages[index];
     const request = messages[index - 1];
     if (!response || request?.role !== 'user' ||
@@ -147,7 +147,7 @@
     // Approval confirmations belong to this run; never discard a later draft message.
     if (!messages.slice(index + 1).every((message) =>
       message.role === 'user' && message.parts.length === 1 &&
-      message.parts[0].type === 'text' && message.approvalConfirmationFor === response.id,
+      message.parts[0]?.type === 'text' && message.approvalConfirmationFor === response.id,
     )) return;
     const files = [
       ...(request.attachments ?? []),
@@ -256,6 +256,7 @@
   ): ResolvedGeneratedComponent | { error: 'unavailable' | 'invalid' } {
     if (!Object.prototype.hasOwnProperty.call(componentRegistry, name)) return { error: 'unavailable' };
     const definition = componentRegistry[name];
+    if (definition === undefined) return { error: 'unavailable' };
     try {
       const parsedProps = decodeGeneratedComponentProps(definition, props);
       return {
@@ -390,7 +391,9 @@
     const index = messages.findIndex((message) => message.id === messageId);
     if (index < 0) return false;
     const nextMessages = [...messages];
-    nextMessages[index] = update(messages[index]);
+    const currentMessage = messages[index];
+    if (!currentMessage) return false;
+    nextMessages[index] = update(currentMessage);
     replaceMessages(nextMessages);
     return true;
   }
@@ -754,7 +757,7 @@
           id: createId('part'),
           type: 'reasoning',
           text: event.content,
-          streaming: event.streaming,
+          streaming: event.streaming ?? false,
         });
       case 'tool_call':
         return appendPart(message, {
@@ -1128,10 +1131,10 @@
         : null;
     const eventLayoutScope = eventTarget
       ?.closest<HTMLElement>('[data-svadmin-layout-scope]')
-      ?.dataset.svadminLayoutScope;
+      ?.dataset['svadminLayoutScope'];
     const eventChatScope = eventTarget
       ?.closest<HTMLElement>('[data-svadmin-chat-scope]')
-      ?.dataset.svadminChatScope;
+      ?.dataset['svadminChatScope'];
     const layoutCount = document.querySelectorAll('[data-svadmin-layout-scope]').length;
     const chatCount = document.querySelectorAll('[data-svadmin-chat-scope]').length;
     const ownsShortcut = ownerScope

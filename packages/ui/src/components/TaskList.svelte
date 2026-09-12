@@ -152,7 +152,7 @@
                       {#if taskProvider?.cancel && canCancelTask(task)}
                         <CancelTaskButton taskId={task.id} {taskProvider} />
                       {/if}
-                      <Button variant="ghost" size="sm" onclick={(e) => { e.stopPropagation(); onSelect?.(task); }}>
+                      <Button variant="ghost" size="sm" onclick={(e: MouseEvent) => { e.stopPropagation(); onSelect?.(task); }}>
                         {i18n.t('task.detailsAction')}
                       </Button>
                     </div>
