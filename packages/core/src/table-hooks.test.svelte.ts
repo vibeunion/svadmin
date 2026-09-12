@@ -1,15 +1,16 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { requireValue } from '../test/assertions';
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { describe, it, expect, vi } from 'vitest';
+import { describe,it,expect,vi } from 'vitest';
 import { useTable } from './table-hooks.svelte';
 import { flushSync } from 'svelte';
 import { QueryClient } from '@tanstack/svelte-query';
 
-vi.mock('./context.svelte', () => {
-  const dataProvider = {
-    getList: vi.fn().mockResolvedValue({ data: [], total: 0 })
+vi.mock('./context.svelte',() => {
+  const dataProvider={
+    getList: vi.fn().mockResolvedValue({ data: [],total: 0 })
   };
-  const getResource = (name: string) => ({ name, primaryKey: 'id' });
+  const getResource=(name: string) => ({ name,primaryKey: 'id' });
   return {
     captureAdminContext: () => ({
       providers: { default: dataProvider },
@@ -21,30 +22,31 @@ vi.mock('./context.svelte', () => {
       getDataProvider: () => dataProvider,
       getDataProviderNames: () => ['default'],
       getDataProviderForResource: () => dataProvider,
+      getProviderMeta: () => undefined,
       getResource,
       currentPath: () => '/',
       formatLink: (path: string) => path,
-      navigate: vi.fn(async () => {}),
+      navigate: vi.fn(async () => { }),
       back: vi.fn(),
     }),
     useDataProvider: () => dataProvider,
     useResource: () => ({ name: 'posts' }),
     getResource,
-    useRouterContext: () => ({ navigate: vi.fn(), url: '/', parsedParams: { current: 1, pageSize: 10 } }),
+    useRouterContext: () => ({ navigate: vi.fn(),url: '/',parsedParams: { current: 1,pageSize: 10 } }),
     useTranslate: () => (key: string) => key,
     getSyncWithLocation: () => false,
-    useNotification: () => ({ open: vi.fn(), close: vi.fn() }),
+    useNotification: () => ({ open: vi.fn(),close: vi.fn() }),
     getLiveProvider: () => undefined
   };
 });
 
-vi.mock('@tanstack/svelte-query', async (importOriginal) => {
-  const actual = await importOriginal();
+vi.mock('@tanstack/svelte-query',async (importOriginal) => {
+  const actual=await importOriginal();
   return {
     ...actual as any,
     useQueryClient: () => new QueryClient(),
     createQuery: () => ({
-      data: { data: [{ id: 1, title: 'Row' }], total: 1 },
+      data: { data: [{ id: 1,title: 'Row' }],total: 1 },
       isPending: false,
       isFetching: false,
       error: null
@@ -52,27 +54,27 @@ vi.mock('@tanstack/svelte-query', async (importOriginal) => {
   };
 });
 
-describe('useTable - Headless Svelte 5 Compatibility', () => {
+describe('useTable - Headless Svelte 5 Compatibility',() => {
 
-  it('binds useTable logic internally and updates pagination flawlessly via $state', () => {
-    let table: ReturnType<typeof useTable>;
+  it('binds useTable logic internally and updates pagination flawlessly via $state',() => {
+    let table: ReturnType<typeof useTable>|undefined;
 
-    const cleanup = $effect.root(() => {
-        table = useTable({ resource: 'posts' });
+    const cleanup=$effect.root(() => {
+      table=useTable({ resource: 'posts' });
     });
 
     flushSync();
-    
-    expect(table!.query).toBeDefined();
-    expect(table!.query?.data?.data[0].title).toBe('Row');
-    expect(table!.current).toBe(1);
+
+    expect(requireValue(table).query).toBeDefined();
+    expect(requireValue(requireValue(table).query.data?.data[0])['title']).toBe('Row');
+    expect(requireValue(table).current).toBe(1);
 
     // Trigger mutable state 
-    table!.setPage(2);
-    
+    requireValue(table).setPage(2);
+
     flushSync();
 
-    expect(table!.current).toBe(2);
+    expect(requireValue(table).current).toBe(2);
 
     cleanup();
   });

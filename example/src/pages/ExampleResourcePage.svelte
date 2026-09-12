@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import { getResource } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { ResourceOperationsPage } from '@svadmin/ui';
@@ -82,7 +84,7 @@
     ],
   };
 
-  const appConfigs: Record<string, PageConfig> = {
+  const appConfigs = {
     inventory: {
       ...fallbackConfig,
       icon: Package,
@@ -478,7 +480,7 @@
       lanes: [{ label: 'Sent', value: 1, hint: 'waiting' }, { label: 'Accepted', value: 1, hint: 'completed' }, { label: 'Expired', value: 1, hint: 'needs resend' }],
       highlights: [{ title: 'Operations referral', description: 'Invite operators into the shared workspace.', meta: 'OPS-2026-A', badge: 'Accepted' }, { title: 'Team referral', description: 'Reusable campaign link for internal teams.', meta: 'OPS-2026-B', badge: 'Active' }],
     },
-  };
+  } satisfies Record<string, PageConfig>;
 
   const resourceDescriptions = {
     products: {
@@ -853,12 +855,12 @@
   function configFor(resource: string): PageConfig {
     const applicationLayout = resolveApplicationLayout(resource);
     if (applicationLayout !== 'default') return appConfigs[applicationLayout];
-    if (['users', 'roles'].includes(resource)) return appConfigs.people;
-    if (resource === 'calendar_events') return appConfigs.calendar;
-    if (resource === 'ai_conversations') return appConfigs.ai;
-    if (resource.startsWith('mail_')) return appConfigs.communications;
-    if (resource.startsWith('crm_')) return appConfigs.crm;
-    if (resource.startsWith('property') || resource === 'properties') return appConfigs.property;
+    if (['users', 'roles'].includes(resource)) return appConfigs['people'];
+    if (resource === 'calendar_events') return appConfigs['calendar'];
+    if (resource === 'ai_conversations') return appConfigs['ai'];
+    if (resource.startsWith('mail_')) return appConfigs['communications'];
+    if (resource.startsWith('crm_')) return appConfigs['crm'];
+    if (resource.startsWith('property') || resource === 'properties') return appConfigs['property'];
     return fallbackConfig;
   }
 
@@ -931,17 +933,17 @@
         : `Use the table to maintain ${label} data across list, create, edit, show, and delete flows.`),
     };
   });
-  const metrics = $derived(config.metrics.map((metric) => ({
+  const metrics = $derived(config.metrics.map((metric) => definedOptions({
     ...metric,
     label: localizeText(metric.label) ?? metric.label,
     hint: localizeText(metric.hint),
   })));
-  const lanes = $derived(config.lanes.map((lane) => ({
+  const lanes = $derived(config.lanes.map((lane) => definedOptions({
     ...lane,
     label: localizeText(lane.label) ?? lane.label,
     hint: localizeText(lane.hint),
   })));
-  const highlights = $derived(config.highlights.map((item) => ({
+  const highlights = $derived(config.highlights.map((item) => definedOptions({
     ...item,
     title: localizeText(item.title) ?? item.title,
     description: localizeText(item.description),
@@ -961,7 +963,7 @@
     {resourceName}
     eyebrow={copy.eyebrow}
     title={copy.title}
-    description={copy.description}
+    {...definedOptions({ "description": copy.description })}
     actionLabel={copy.actionLabel}
     icon={config.icon}
     {metrics}

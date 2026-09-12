@@ -1,4 +1,7 @@
 <script lang="ts">
+  import type { ResourceDefinition } from '@svadmin/core';
+  import { definedReactiveOptions } from '@svadmin/core/options';
+
   import {
     provideAdminContext,
     type AuthProvider,
@@ -32,13 +35,13 @@
     parse: () => ({ resource: 'settings', action: 'list', params: {}, pathname: '/settings/profile' }),
   };
 
-  provideAdminContext({
+  provideAdminContext(definedReactiveOptions({
     dataProvider: fallbackDataProvider,
     get authProvider() { return authProvider; },
-    resources: [],
+    resources: [] satisfies ResourceDefinition[],
     routerProvider,
     get tenant() { return tenant; },
-  });
+  }));
 </script>
 
 <section data-testid="snapshot-login"><LoginPage /></section>

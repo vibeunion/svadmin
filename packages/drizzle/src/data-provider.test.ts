@@ -5,13 +5,13 @@
  * through the wrapper layer.
  */
 
-import { describe, it, expect, beforeAll } from 'bun:test';
+import { describe, it, expect, beforeAll, afterAll } from 'bun:test';
 import { Database } from 'bun:sqlite';
 import { drizzle } from 'drizzle-orm/bun-sqlite';
 import { sqliteTable, integer, text } from 'drizzle-orm/sqlite-core';
 import { createDrizzleDataProvider } from './data-provider';
-import type { DataProvider } from '@svadmin/core';
-import type { RefineSQLConfig } from 'refine-sqlx';
+import type { BaseRecord, DataProvider } from '@svadmin/core';
+import { requireValue } from '../../../scripts/test-assertions';
 
 // ─── Test Schema ──────────────────────────────────────────────────
 
@@ -24,14 +24,20 @@ const users = sqliteTable('users', {
 
 const schema = { users };
 
+function recordId(record: BaseRecord): string | number {
+  const id = record['id'];
+  if (typeof id === 'string' || (typeof id === 'number' && Number.isFinite(id))) return id;
+  throw new Error('Expected a record ID');
+}
+
 // ─── Tests ────────────────────────────────────────────────────────
 
 describe('@svadmin/drizzle DataProvider', () => {
   let dataProvider: DataProvider;
-  let db: ReturnType<typeof drizzle>;
+  let sqlite: Database;
 
   beforeAll(async () => {
-    const sqlite = new Database(':memory:');
+    sqlite = new Database(':memory:');
     sqlite.run(`
       CREATE TABLE users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -40,10 +46,11 @@ describe('@svadmin/drizzle DataProvider', () => {
         role TEXT DEFAULT 'user'
       )
     `);
-    db = drizzle({ client: sqlite, schema });
-    const connection = db as unknown as RefineSQLConfig<typeof schema>['connection'];
+    const connection = drizzle({ client: sqlite, schema });
     dataProvider = await createDrizzleDataProvider({ connection, schema });
   });
+
+  afterAll(() => sqlite.close());
 
   it('returns a valid DataProvider with all required methods', () => {
     expect(dataProvider.getList).toBeFunction();
@@ -55,13 +62,10 @@ describe('@svadmin/drizzle DataProvider', () => {
   });
 
   it('declares the statically imported refine-sqlx runtime as a required peer', async () => {
-    const manifest = await Bun.file(new URL('../package.json', import.meta.url)).json() as {
-      peerDependencies?: Record<string, string>;
-      peerDependenciesMeta?: Record<string, { optional?: boolean }>;
-    };
+    const manifest: unknown = await Bun.file(new URL('../package.json', import.meta.url)).json();
 
-    expect(manifest.peerDependencies?.['refine-sqlx']).toBe('^0.10.3');
-    expect(manifest.peerDependenciesMeta?.['refine-sqlx']?.optional).toBeUndefined();
+    expect(manifest).toMatchObject({ peerDependencies: { 'refine-sqlx': '^0.10.3' } });
+    expect(manifest).not.toHaveProperty('peerDependenciesMeta.refine-sqlx.optional', true);
   });
 
   it('create → getOne roundtrip', async () => {
@@ -78,7 +82,7 @@ describe('@svadmin/drizzle DataProvider', () => {
 
     const fetched = await dataProvider.getOne({
       resource: 'users',
-      id: (created.data as Record<string, unknown>).id as number,
+      id: recordId(created.data),
     });
 
     expect(fetched.data).toMatchObject({
@@ -101,7 +105,7 @@ describe('@svadmin/drizzle DataProvider', () => {
     expect(result.data.length).toBe(2);
     expect(result.total).toBeGreaterThanOrEqual(3);
     // Sorted ascending: Alice before Bob
-    expect((result.data[0] as Record<string, unknown>).name).toBe('Alice');
+    expect(requireValue(result.data[0])['name']).toBe('Alice');
   });
 
   it('getList with filters', async () => {
@@ -111,12 +115,12 @@ describe('@svadmin/drizzle DataProvider', () => {
     });
 
     expect(result.data.length).toBe(1);
-    expect((result.data[0] as Record<string, unknown>).name).toBe('Alice');
+    expect(requireValue(result.data[0])['name']).toBe('Alice');
   });
 
   it('update modifies a record', async () => {
     const list = await dataProvider.getList({ resource: 'users', filters: [{ field: 'name', operator: 'eq', value: 'Bob' }] });
-    const bobId = (list.data[0] as Record<string, unknown>).id as number;
+    const bobId = recordId(requireValue(list.data[0]));
 
     const updated = await dataProvider.update({
       resource: 'users',
@@ -124,12 +128,12 @@ describe('@svadmin/drizzle DataProvider', () => {
       variables: { role: 'editor' },
     });
 
-    expect((updated.data as Record<string, unknown>).role).toBe('editor');
+    expect(updated.data['role']).toBe('editor');
   });
 
   it('deleteOne removes a record', async () => {
     const list = await dataProvider.getList({ resource: 'users', filters: [{ field: 'name', operator: 'eq', value: 'Charlie' }] });
-    const charlieId = (list.data[0] as Record<string, unknown>).id as number;
+    const charlieId = recordId(requireValue(list.data[0]));
 
     await dataProvider.deleteOne({ resource: 'users', id: charlieId });
 
@@ -141,12 +145,12 @@ describe('@svadmin/drizzle DataProvider', () => {
   });
 
   it('getMany fetches multiple records by IDs', async () => {
-    if (!dataProvider.getMany) return;
+    const getMany = requireValue(dataProvider.getMany);
 
     const list = await dataProvider.getList({ resource: 'users' });
-    const ids = list.data.slice(0, 2).map(d => (d as Record<string, unknown>).id as number);
+    const ids = list.data.slice(0, 2).map(recordId);
 
-    const result = await dataProvider.getMany({ resource: 'users', ids });
+    const result = await getMany.call(dataProvider, { resource: 'users', ids });
     expect(result.data.length).toBe(2);
   });
 

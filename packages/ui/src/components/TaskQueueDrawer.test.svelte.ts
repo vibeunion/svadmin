@@ -1,8 +1,12 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { requireValue } from "../../../../scripts/test-assertions";
+import type { UseSubmitTaskMutateParams } from '@svadmin/core';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
 import TaskQueueDrawer from './TaskQueueDrawer.svelte';
+import LazyTaskQueueDrawer from './LazyTaskQueueDrawer.svelte';
+import TaskList from './TaskList.svelte';
+import TaskDetails from './TaskDetails.svelte';
+import { normalizeTaskStatus } from './task-utils';
 
 const taskFixtures = [
   {
@@ -48,17 +52,17 @@ const mockTaskProvider = {
     }),
   })),
   get: vi.fn(async (taskId: string) => {
-    return [...taskFixtures, ...dlqFixtures].find((task) => task.id === taskId) ?? taskFixtures[0];
+    return requireValue([...taskFixtures, ...dlqFixtures].find((task) => task.id === taskId));
   }),
   list: vi.fn(async () => ({ data: taskFixtures, total: taskFixtures.length })),
   listDlq: vi.fn(async () => ({ data: dlqFixtures, total: dlqFixtures.length })),
-  retry: vi.fn(async () => undefined),
-  cancel: vi.fn(async () => undefined),
+  retry: vi.fn(async (id: string) => ({ id, status: 'pending' })),
+  cancel: vi.fn(async (id: string) => ({ id, status: 'cancelled' })),
 };
 
 const refetchTasks = vi.fn(async () => ({ data: { data: taskFixtures, total: taskFixtures.length } }));
 const refetchDlq = vi.fn(async () => ({ data: { data: dlqFixtures, total: dlqFixtures.length } }));
-const mutateAsync = vi.fn(async (params: any) => ({
+const mutateAsync = vi.fn(async (params: UseSubmitTaskMutateParams) => ({
   id: `submitted-${params.taskName}`,
   wait: async () => ({
     id: `submitted-${params.taskName}`,
@@ -67,7 +71,8 @@ const mutateAsync = vi.fn(async (params: any) => ({
   }),
 }));
 
-vi.mock('@svadmin/core', () => ({
+vi.mock('@svadmin/core', async importOriginal => ({
+  ...await importOriginal<typeof import('@svadmin/core')>(),
   captureAdminContext: () => ({
     taskProvider: mockTaskProvider,
   }),
@@ -110,6 +115,19 @@ describe('TaskQueueDrawer', () => {
     mockTaskProvider.cancel.mockClear();
   });
 
+  it('loads the default task center with its current props and open state', async () => {
+    const view = render(LazyTaskQueueDrawer, {
+      open: true, taskProvider: mockTaskProvider, title: 'Scoped task center', initialTab: 'dlq',
+    });
+    await waitFor(() => expect(screen.getByRole('dialog', { name: 'Scoped task center' })).toBeTruthy());
+    expect(screen.getByRole('tab', { name: /DLQ/i }).getAttribute('aria-selected')).toBe('true');
+    expect(screen.getAllByText('Nightly sync').length).toBeGreaterThan(0);
+    await view.rerender({ open: false });
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Scoped task center' })).toBeNull());
+    await fireEvent.click(screen.getByRole('button', { name: 'Scoped task center' }));
+    await waitFor(() => expect(screen.getByRole('dialog', { name: 'Scoped task center' })).toBeTruthy());
+  });
+
   it('supports tab switching, filtering, and detail selection', async () => {
     render(TaskQueueDrawer, { open: true, taskProvider: mockTaskProvider });
 
@@ -132,7 +150,7 @@ describe('TaskQueueDrawer', () => {
 
     const dlqRow = screen.getByText('Nightly sync').closest('tr');
     expect(dlqRow).toBeTruthy();
-    await fireEvent.click(dlqRow!);
+    await fireEvent.click(requireValue(dlqRow));
 
     await waitFor(() => {
       expect(screen.getAllByText('Remote API timeout').length).toBeGreaterThan(0);
@@ -142,7 +160,7 @@ describe('TaskQueueDrawer', () => {
   it('submits a task from the inline form', async () => {
     render(TaskQueueDrawer, { open: true, taskProvider: mockTaskProvider });
 
-    await fireEvent.click(screen.getAllByRole('button', { name: 'Submit Task' })[0]);
+    await fireEvent.click(requireValue(screen.getAllByRole('button', { name: 'Submit Task' })[0]));
 
     await fireEvent.input(screen.getByLabelText('Task name'), {
       target: { value: 'image.generate' },
@@ -152,7 +170,7 @@ describe('TaskQueueDrawer', () => {
     });
 
     const submitButtons = screen.getAllByRole('button', { name: 'Submit Task' });
-    await fireEvent.click(submitButtons[submitButtons.length - 1]);
+    await fireEvent.click(requireValue(submitButtons[submitButtons.length - 1]));
 
     await waitFor(() => {
       expect(mutateAsync).toHaveBeenCalledWith({
@@ -160,9 +178,49 @@ describe('TaskQueueDrawer', () => {
         taskProvider: mockTaskProvider,
         options: {
           body: { prompt: 'poster' },
-          idempotencyKey: undefined,
         },
       });
     });
+  });
+
+  for (const payload of ['null', '[]', '42', '"secret"', '{"amount":1e400}']) {
+    it(`rejects non-record or non-finite JSON input: ${payload}`, async () => {
+      render(TaskQueueDrawer, { open: true, taskProvider: mockTaskProvider });
+      await fireEvent.click(requireValue(screen.getAllByRole('button', { name: 'Submit Task' })[0]));
+      await fireEvent.input(screen.getByLabelText('Task name'), { target: { value: 'function' } });
+      await fireEvent.input(screen.getByLabelText('Task payload (JSON)'), { target: { value: payload } });
+      const buttons = screen.getAllByRole('button', { name: 'Submit Task' });
+      await fireEvent.click(requireValue(buttons.at(-1)));
+      expect(mutateAsync).not.toHaveBeenCalled();
+      expect(screen.getByText('Task payload must be valid JSON')).toBeTruthy();
+    });
+  }
+
+  it('rejects malformed direct task props and recovers after a valid update', async () => {
+    const task = { id: 'task-1', title: 'Private invalid task', progress: 10 };
+    Reflect.set(task, 'progress', 'secret-progress');
+    const view = render(TaskDetails, { task, useProviderData: false });
+    expect(screen.getByRole('alert').textContent).toBe('Invalid format');
+    expect(screen.queryByText('Private invalid task')).toBeNull();
+    expect(screen.queryByText('secret-progress')).toBeNull();
+    await view.rerender({ task: { id: 'task-1', title: 'Valid task' } });
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(screen.getAllByText('Valid task').length).toBeGreaterThan(0);
+    await view.rerender({ task, taskId: 'other-task' });
+    expect(screen.getByRole('alert').textContent).toBe('Invalid format');
+  });
+
+  it('rejects malformed direct list props without partially rendering invalid data', () => {
+    const task = { id: 'task-1', title: 'Private invalid task', progress: 10 };
+    Reflect.set(task, 'progress', 'secret-progress');
+    render(TaskList, { tasks: [task], useProviderData: false });
+    expect(screen.getByRole('alert').textContent).toBe('Invalid format');
+    expect(screen.queryByText('Private invalid task')).toBeNull();
+  });
+
+  it('does not resolve prototype keys or execute status coercion', () => {
+    expect(normalizeTaskStatus('constructor')).toBe('unknown');
+    expect(normalizeTaskStatus('__proto__')).toBe('unknown');
+    expect(normalizeTaskStatus({ toString() { throw new Error('secret'); } })).toBe('unknown');
   });
 });

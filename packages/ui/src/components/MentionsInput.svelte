@@ -65,7 +65,7 @@
 
     for (const trig of triggers) {
       const idx = textBeforeCursor.lastIndexOf(trig);
-      if (idx !== -1 && (idx === 0 || /\s/.test(textBeforeCursor[idx - 1]))) {
+      if (idx !== -1 && (idx === 0 || /\s/.test(textBeforeCursor.charAt(idx - 1)))) {
         const query = textBeforeCursor.slice(idx + 1);
         if (!/\s/.test(query)) {
           matchTrigger = trig;
@@ -117,8 +117,9 @@
       selectedIndex = (selectedIndex - 1 + activeOptions.length) % activeOptions.length;
     } else if (e.key === 'Enter' || e.key === 'Tab') {
       e.preventDefault();
-      if (activeOptions[selectedIndex]) {
-        insertMention(activeOptions[selectedIndex]);
+      const selectedOption = activeOptions[selectedIndex];
+      if (selectedOption) {
+        insertMention(selectedOption);
       }
     } else if (e.key === 'Escape') {
       showDropdown = false;

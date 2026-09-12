@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   /**
    * SSR VirtualTable — Identical to LiteTable.
    * Virtual scrolling (rendering only visible rows) requires JS.
@@ -37,11 +39,10 @@
 <LiteTable
   {records}
   {resource}
-  {currentSort}
+  {...definedOptions({ "currentSort": currentSort })}
   {currentOrder}
-  {currentSearch}
+  {...definedOptions({ "currentSearch": currentSearch })}
   {basePath}
-  {canShow}
-  {canEdit}
-  {canDelete}
+  {...definedOptions({ "canShow": canShow })}
+  {...definedOptions({ canEdit, canDelete })}
 />

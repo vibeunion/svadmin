@@ -26,7 +26,7 @@
 		let active = true;
 		let generation = 0;
 		let currentAlignment = alignment;
-		node.dataset.floating = "";
+		node.dataset["floating"] = "";
 		const anchor = trigger.getBoundingClientRect();
 		node.style.left = `${anchor.left}px`;
 		node.style.top = `${anchor.bottom + 4}px`;

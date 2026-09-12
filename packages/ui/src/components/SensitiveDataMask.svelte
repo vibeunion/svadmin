@@ -48,10 +48,10 @@
           : '********';
       case 'email': {
         const parts = val.split('@');
-        if (parts.length === 2) {
-          const name = parts[0];
+        const [name, domain] = parts;
+        if (parts.length === 2 && name && domain) {
           const maskedName = name.length > 2 ? `${name[0]}***${name.slice(-1)}` : `${name[0]}***`;
-          return `${maskedName}@${parts[1]}`;
+          return `${maskedName}@${domain}`;
         }
         return '***@***.***';
       }

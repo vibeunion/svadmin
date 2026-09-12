@@ -1,4 +1,7 @@
 import type { ResourceDefinition } from '@svadmin/core';
+import { demoContracts } from './resource-contracts';
+import { isDemoResource } from './resource-schemas';
+import { definedOptions } from '@svadmin/core/options';
 
 const inventoryGroup = 'Inventory';
 const operationsGroup = 'Operations';
@@ -13,7 +16,7 @@ const storeGroup = 'Store Operations';
 const billingGroup = 'Billing';
 const securityOpsGroup = 'Security Operations';
 const referralGroup = 'Referrals';
-export const resources: ResourceDefinition[] = [
+const resourceDefinitions: ResourceDefinition[] = [
   {
     name: 'design_principles',
     label: 'Design Principles',
@@ -1484,6 +1487,11 @@ export const resources: ResourceDefinition[] = [
   },
 ];
 
+export const resources: ResourceDefinition[] = resourceDefinitions.map(resource => ({
+  ...resource,
+  ...(isDemoResource(resource.name) ? { contract: demoContracts[resource.name] } : {}),
+}));
+
 const zhGroupLabels: Record<string, string> = {
   Inventory: '库存中心',
   Operations: '运营作业',
@@ -1859,11 +1867,11 @@ function localizeLabel(label: string, labels: Record<string, string>, locale: st
 }
 
 export function createResources(locale: string): ResourceDefinition[] {
-  return resources.map((resource) => ({
+  return resources.map((resource) => definedOptions({
     ...resource,
     label: localizeLabel(resource.label, zhResourceLabels, locale),
     group: resource.group ? localizeLabel(resource.group, zhGroupLabels, locale) : resource.group,
-    fields: resource.fields.map((field) => ({
+    fields: resource.fields.map((field) => definedOptions({
       ...field,
       label: localizeLabel(field.label, zhFieldLabels, locale),
       options: field.options?.map((option) => ({

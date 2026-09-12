@@ -34,14 +34,26 @@ interface BunPasswordApi {
 }
 
 function getBunPasswordApi(): BunPasswordApi | null {
-  const runtime = Reflect.get(globalThis, 'Bun');
+  const runtime: unknown = Reflect.get(globalThis, 'Bun');
   if (runtime === null || typeof runtime !== 'object') return null;
 
-  const passwordApi = Reflect.get(runtime, 'password');
+  const passwordApi: unknown = Reflect.get(runtime, 'password');
   if (passwordApi === null || typeof passwordApi !== 'object') return null;
-  if (typeof Reflect.get(passwordApi, 'hash') !== 'function') return null;
-  if (typeof Reflect.get(passwordApi, 'verify') !== 'function') return null;
-  return passwordApi as BunPasswordApi;
+  const hash: unknown = Reflect.get(passwordApi, 'hash');
+  const verify: unknown = Reflect.get(passwordApi, 'verify');
+  if (typeof hash !== 'function' || typeof verify !== 'function') return null;
+  return {
+    async hash(password, options) {
+      const result: unknown = await Reflect.apply(hash, passwordApi, [password, options]);
+      if (typeof result !== 'string') throw new Error('Invalid Bun.password.hash response');
+      return result;
+    },
+    async verify(password, storedHash) {
+      const result: unknown = await Reflect.apply(verify, passwordApi, [password, storedHash]);
+      if (typeof result !== 'boolean') throw new Error('Invalid Bun.password.verify response');
+      return result;
+    },
+  };
 }
 
 // ─── PBKDF2 fallback (Web Crypto API) ─────────────────────────
@@ -55,7 +67,7 @@ function toHex(buffer: ArrayBuffer): string {
   return Array.from(new Uint8Array(buffer), b => b.toString(16).padStart(2, '0')).join('');
 }
 
-function fromHex(hex: unknown): Uint8Array | null {
+function fromHex(hex: unknown): Uint8Array<ArrayBuffer> | null {
   if (typeof hex !== 'string') return null;
   if (hex.length % 2 !== 0 || !/^[0-9a-f]+$/i.test(hex)) return null;
   const bytes = new Uint8Array(hex.length / 2);
@@ -75,7 +87,7 @@ async function pbkdf2Hash(password: string): Promise<string> {
     ['deriveBits'],
   );
   const derived = await crypto.subtle.deriveBits(
-    { name: 'PBKDF2', salt: salt as unknown as BufferSource, iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' },
+    { name: 'PBKDF2', salt, iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' },
     key,
     PBKDF2_KEY_LENGTH * 8,
   );
@@ -107,16 +119,18 @@ async function pbkdf2Verify(password: string, stored: string): Promise<boolean> 
     ['deriveBits'],
   );
   const derived = await crypto.subtle.deriveBits(
-    { name: 'PBKDF2', salt: salt as unknown as BufferSource, iterations, hash: 'SHA-256' },
+    { name: 'PBKDF2', salt, iterations, hash: 'SHA-256' },
     key,
     PBKDF2_KEY_LENGTH * 8,
   );
   const actualHash = new Uint8Array(derived);
   if (actualHash.length !== expectedHash.length) return false;
 
+  const actualView = new DataView(actualHash.buffer, actualHash.byteOffset, actualHash.byteLength);
+  const expectedView = new DataView(expectedHash.buffer, expectedHash.byteOffset, expectedHash.byteLength);
   let difference = 0;
   for (let index = 0; index < actualHash.length; index += 1) {
-    difference |= actualHash[index] ^ expectedHash[index];
+    difference |= actualView.getUint8(index) ^ expectedView.getUint8(index);
   }
   return difference === 0;
 }

@@ -1,7 +1,7 @@
 /**
  * @svadmin/auth-utils — Unit Tests
  */
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { ok } from 'node:assert/strict';
 import { describe, test, expect } from 'bun:test';
 import { hashPassword, verifyPassword } from './password';
 import { createSessionManager } from './session';
@@ -53,6 +53,12 @@ describe('password', () => {
     expect(hash.startsWith('pbkdf2:')).toBe(true);
   });
 
+  test('verifies PBKDF2 hashes and rejects a different password', async () => {
+    const hash = await hashPassword('correct-password', { algorithm: 'pbkdf2' });
+    expect(await verifyPassword('correct-password', hash)).toBe(true);
+    expect(await verifyPassword('incorrect-password', hash)).toBe(false);
+  });
+
   test('different passwords produce different hashes', async () => {
     const h1 = await hashPassword('password-1', { algorithm: 'pbkdf2' });
     const h2 = await hashPassword('password-2', { algorithm: 'pbkdf2' });
@@ -66,9 +72,10 @@ describe('password', () => {
   });
 
   test('explicit Bun-only algorithms fail when Bun.password is unavailable', async () => {
-    const bunRuntime = Reflect.get(globalThis, 'Bun') as Record<string, unknown>;
-    const originalPasswordApi = bunRuntime.password;
-    bunRuntime.password = undefined;
+    const bunRuntime: unknown = Reflect.get(globalThis, 'Bun');
+    ok(typeof bunRuntime === 'object' && bunRuntime !== null);
+    const originalPasswordApi: unknown = Reflect.get(bunRuntime, 'password');
+    Reflect.set(bunRuntime, 'password', undefined);
 
     try {
       await expect(hashPassword('test', { algorithm: 'argon2id' })).rejects.toThrow('requires Bun.password');
@@ -77,7 +84,20 @@ describe('password', () => {
       const fallbackHash = await hashPassword('test', { algorithm: 'auto' });
       expect(fallbackHash.startsWith('pbkdf2:')).toBe(true);
     } finally {
-      bunRuntime.password = originalPasswordApi;
+      Reflect.set(bunRuntime, 'password', originalPasswordApi);
+    }
+  });
+
+  test('rejects malformed native password results at the runtime boundary', async () => {
+    const bunRuntime: unknown = Reflect.get(globalThis, 'Bun');
+    ok(typeof bunRuntime === 'object' && bunRuntime !== null);
+    const originalPasswordApi: unknown = Reflect.get(bunRuntime, 'password');
+    Reflect.set(bunRuntime, 'password', { hash: async () => 42, verify: async () => 'true' });
+    try {
+      await expect(hashPassword('test')).rejects.toThrow('Invalid Bun.password.hash response');
+      await expect(verifyPassword('test', 'argon2:fixture')).rejects.toThrow('Invalid Bun.password.verify response');
+    } finally {
+      Reflect.set(bunRuntime, 'password', originalPasswordApi);
     }
   });
 
@@ -108,8 +128,9 @@ describe('session', () => {
 
     const payload = await sessions.verify(token);
     expect(payload).not.toBeNull();
-    expect(payload!.sub).toBe('user-123');
-    expect(payload!.role).toBe('admin');
+    ok(payload);
+    expect(payload.sub).toBe('user-123');
+    expect(payload['role']).toBe('admin');
   });
 
   test('verify rejects tampered token', async () => {
@@ -130,6 +151,9 @@ describe('session', () => {
     expect(await sessions.verify('not-a-valid-token')).toBeNull();
     expect(await sessions.verify('')).toBeNull();
     expect(await sessions.verify('a.b.c')).toBeNull();
+    expect(await sessions.verify('.')).toBeNull();
+    expect(await sessions.verify('a.')).toBeNull();
+    expect(await sessions.verify('.b')).toBeNull();
   });
 
   test('generateId produces hex string', () => {
@@ -149,9 +173,10 @@ describe('session', () => {
 
     const payload = await protectedSessions.verify(token);
     expect(payload).not.toBeNull();
-    expect(payload!.sub).toBe('trusted-user');
-    expect(payload!.iat).toBeGreaterThanOrEqual(now);
-    expect(payload!.exp).toBeGreaterThanOrEqual(now + 59);
+    ok(payload);
+    expect(payload.sub).toBe('trusted-user');
+    expect(payload.iat).toBeGreaterThanOrEqual(now);
+    expect(payload.exp).toBeGreaterThanOrEqual(now + 59);
   });
 
   test('verify rejects signed payloads with missing or invalid registered claims', async () => {

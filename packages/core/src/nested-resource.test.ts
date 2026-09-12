@@ -1,8 +1,8 @@
-// 测试嵌套资源 URL 解析逻辑（parent filter 自动注入的基础）
+// Tests nested-resource URL parsing, which underpins automatic parent-filter injection.
 import { describe, test, expect } from 'bun:test';
 
 /**
- * 复刻 useParsed 中的嵌套资源路径解析逻辑。
+ * Mirrors the nested-resource path parsing implemented by useParsed.
  * /teams/123/users -> resource=users, parentParams.teamId=123
  */
 function singularize(word: string): string {
@@ -15,7 +15,7 @@ function singularize(word: string): string {
 
 function parseNestedRoute(hash: string, knownResources: string[]) {
   const raw = hash.startsWith('#') ? hash.slice(1) : hash;
-  const [pathPart, queryString] = raw.split('?');
+  const [pathPart = '/', queryString] = raw.split('?');
   const segments = pathPart.split('/').filter(Boolean);
   const result: { resource?: string; resourcePath?: string; params: Record<string, string>; parentParams: Record<string, string> } = { params: {}, parentParams: {} };
 
@@ -28,26 +28,29 @@ function parseNestedRoute(hash: string, knownResources: string[]) {
 
   if (segments.length === 0) return result;
 
-  // 找到最右边的已知资源段
+  // Find the rightmost known resource segment.
   let resourceIndex = -1;
   for (let i = segments.length - 1; i >= 0; i--) {
-    if (knownResources.includes(segments[i])) {
+    const segment = segments[i];
+    if (segment !== undefined && knownResources.includes(segment)) {
       resourceIndex = i;
       break;
     }
   }
 
   if (resourceIndex !== -1) {
-    result.resource = segments[resourceIndex];
+    const resource = segments[resourceIndex];
+    if (resource !== undefined) result.resource = resource;
     result.resourcePath = segments.slice(0, resourceIndex + 1).join('/');
 
-    // 提取 parent params: /<parentResource>/<parentId>/...
-    // parent path params 与 query params 分离，避免 query 被误当 parent filter
+    // Extract parent params from /<parentResource>/<parentId>/...
+    // Keep parent path params separate from query params so queries are not treated as parent filters.
     for (let i = 0; i < resourceIndex; i += 2) {
-      if (segments[i] && segments[i + 1]) {
-        const parentName = segments[i];
+      const parentName = segments[i];
+      const parentId = segments[i + 1];
+      if (parentName && parentId) {
         const singular = singularize(parentName);
-        result.parentParams[`${singular}Id`] = segments[i + 1];
+        result.parentParams[`${singular}Id`] = parentId;
       }
     }
   }
@@ -66,32 +69,32 @@ describe('Nested resource URL parsing (parent filter)', () => {
     const result = parseNestedRoute('#/teams/123/users', ['teams', 'users']);
     expect(result.resource).toBe('users');
     expect(result.resourcePath).toBe('teams/123/users');
-    expect(result.parentParams.teamId).toBe('123');
+    expect(result.parentParams['teamId']).toBe('123');
     expect(result.params).toEqual({});
   });
 
   test('nested resource with action', () => {
     const result = parseNestedRoute('#/categories/5/posts/create', ['categories', 'posts']);
     expect(result.resource).toBe('posts');
-    expect(result.parentParams.categoryId).toBe('5');
+    expect(result.parentParams['categoryId']).toBe('5');
   });
 
   test('double nested: /orgs/9/teams/3/users', () => {
     const result = parseNestedRoute('#/orgs/9/teams/3/users', ['orgs', 'teams', 'users']);
     expect(result.resource).toBe('users');
     expect(result.resourcePath).toBe('orgs/9/teams/3/users');
-    expect(result.parentParams.orgId).toBe('9');
-    expect(result.parentParams.teamId).toBe('3');
+    expect(result.parentParams['orgId']).toBe('9');
+    expect(result.parentParams['teamId']).toBe('3');
   });
 
   test('parent param key uses singular form', () => {
     const result = parseNestedRoute('#/companies/42/members', ['companies', 'members']);
-    expect(result.parentParams.companyId).toBe('42');
+    expect(result.parentParams['companyId']).toBe('42');
   });
 
   test('resource without trailing s for parent', () => {
     const result = parseNestedRoute('#/data/7/records', ['data', 'records']);
-    expect(result.parentParams.dataId).toBe('7');
+    expect(result.parentParams['dataId']).toBe('7');
   });
 });
 
@@ -119,7 +122,7 @@ describe('Query params must not leak into parent filters (P1 regression)', () =>
     // #/users?tenantId=1 — flat route, tenantId is a query param, not a parent
     const result = parseNestedRoute('#/users?tenantId=1', ['users']);
     expect(result.parentParams).toEqual({});
-    expect(result.params.tenantId).toBe('1');
+    expect(result.params['tenantId']).toBe('1');
   });
 
   test('query params on nested route stay separate from parent path params', () => {

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import { captureAdminContext, getResources, type MenuItem } from '@svadmin/core';
   import { getPath } from '../router-state.svelte.js';
   import { useTranslation } from '@svadmin/core/i18n';
@@ -16,7 +18,7 @@
   interface Crumb { label: string; href?: string; }
 
   function normalizePath(path: string): string {
-    const normalized = path.replace(/^#/, '').split(/[?#]/)[0].replace(/\/$/, '');
+    const normalized = path.replace(/^#/, '').replace(/[?#].*$/, '').replace(/\/$/, '');
     return normalized || '/';
   }
 
@@ -39,10 +41,10 @@
     const menuTrail = menu ? findMenuTrail(menu, currentPathname) : undefined;
     if (menuTrail) {
       for (const item of menuTrail) {
-        result.push({
+        result.push(definedOptions({
           label: item.label ?? item.name,
           href: item.href ? adminContext.formatLink(normalizePath(item.href)) : undefined,
-        });
+        }));
       }
       return result;
     }
@@ -56,6 +58,7 @@
 
     for (let i = 0; i < segments.length; i++) {
        const seg = segments[i];
+       if (seg === undefined) continue;
        currentPath += `/${seg}`;
 
        if (resourceNames.includes(seg)) {
@@ -73,7 +76,7 @@
           currentPath += `/${id}`; // advance path by id
           result.push({ label: `${actionLabel} #${id}`, href: adminContext.formatLink(currentPath) });
           i++; // skip next segment since we consumed the id
-       } else if (i > 0 && resourceNames.includes(segments[i-1])) {
+       } else if (i > 0 && resourceNames.some((name) => name === segments[i-1])) {
           // This is a parent ID (e.g. /teams/123/users) and we are not an action
           result.push({ label: `#${seg}`, href: adminContext.formatLink(currentPath) });
        }

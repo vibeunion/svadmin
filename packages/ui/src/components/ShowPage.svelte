@@ -1,15 +1,17 @@
 <script lang="ts">
-  import { useNavigation, useShow, getResource } from '@svadmin/core';
+  import { useNavigation } from '@svadmin/core';
+  import { useRecordDetail } from './record-detail.svelte';
   import { useTranslation } from '@svadmin/core/i18n';
   import type { Snippet } from 'svelte';
   import * as Card from './ui/card/index.js';
   import { Skeleton } from './ui/skeleton/index.js';
   import PageHeader from './PageHeader.svelte';
-  import { getDisplayComponent } from './fieldComponentMap.js';
+  import FieldDisplay from './FieldDisplay.svelte';
   import EditButton from './buttons/EditButton.svelte';
   import DeleteButton from './buttons/DeleteButton.svelte';
   import CloneButton from './buttons/CloneButton.svelte';
-  import RefreshButton from './buttons/RefreshButton.svelte';
+  import { Button } from './ui/button/index.js';
+  import { RefreshCw } from '@lucide/svelte';
 
   const i18n = useTranslation();
 
@@ -40,10 +42,10 @@
   const navigation = useNavigation();
   const isCompact = $derived(density === 'compact');
 
-  const resource = $derived(getResource(resourceName));
-  const showFields = $derived(resource.fields.filter(f => f.showInShow !== false));
-
-  const query = useShow({ get resource() { return resourceName; }, get id() { return id; } });
+  const detail = useRecordDetail(() => ({ resourceName, id }));
+  const resource = $derived(detail.resource);
+  const showFields = $derived(detail.fields);
+  const query = detail.query;
 
   const gridColumnClass = $derived.by(() => {
     switch (columns) {
@@ -63,24 +65,27 @@
     backLabel={i18n.t('common.backToList')}
   >
     {#snippet actions()}
-      {#if resource.canEdit !== false}
+      {#if detail.canRead && query.isSuccess && resource.canEdit !== false}
         <EditButton resource={resourceName} recordItemId={id} hideText />
       {/if}
-      {#if resource.canCreate !== false}
+      {#if detail.canRead && query.isSuccess && resource.canCreate !== false}
         <CloneButton resource={resourceName} recordItemId={id} hideText />
       {/if}
-      {#if resource.canDelete !== false}
+      {#if detail.canRead && query.isSuccess && resource.canDelete !== false}
         <DeleteButton resource={resourceName} recordItemId={id} hideText onSuccess={() => navigation.list(resourceName)} />
       {/if}
-      <RefreshButton resource={resourceName} hideText />
+      <Button type="button" variant="ghost" size="icon" title={i18n.t('common.refresh')}
+        aria-label={i18n.t('common.refresh')} aria-busy={query.isFetching}
+        disabled={!detail.canRead || query.isFetching} onclick={detail.refresh}>
+        <RefreshCw class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+      </Button>
       {#if headerActions}
         {@render headerActions()}
       {/if}
     {/snippet}
   </PageHeader>
 
-  {#if query.isLoading}
-    <Card.Root class="svadmin-u-2cd02d11d1af svadmin-u-6ee2d41e2d2d svadmin-u-438b2237b8d6">
+  {#if detail.checkingPermission || query.isLoading}    <Card.Root class="svadmin-u-2cd02d11d1af svadmin-u-6ee2d41e2d2d svadmin-u-438b2237b8d6">
       <Card.Content class="svadmin-u-8a539c7fe216">
         {#each showFields.slice(0, 6) as _, i (i)}
           <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-020ba687fa12 {isCompact ? 'svadmin-u-f0faeb26d656 svadmin-u-03b4dd7f172b' : 'svadmin-u-f0faeb26d656 svadmin-u-7a9aabfcd059 svadmin-u-1b2d54a3fd12 svadmin-u-b7daff9b9ddd'} {i % 2 === 1 ? 'svadmin-u-967d113a1451' : ''}">
@@ -90,27 +95,33 @@
         {/each}
       </Card.Content>
     </Card.Root>
-  {:else if query.data?.data}
+  {:else if !detail.canRead}
+    <p role="status" data-svadmin-access-denied>{i18n.t('common.accessDenied')}</p>
+  {:else if query.isError}
+    <div role="alert">
+      <p>{i18n.t('common.operationFailed')}</p>
+      <Button type="button" variant="ghost" size="icon" title={i18n.t('common.retry')}
+        aria-label={i18n.t('common.retry')} disabled={query.isFetching} onclick={detail.refresh}>
+        <RefreshCw class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+      </Button>
+    </div>
+  {:else if query.isSuccess}
+    {@const record = query.data.data}
     {#if layout === 'grid'}
       <Card.Root class="svadmin-u-2cd02d11d1af svadmin-u-6ee2d41e2d2d svadmin-u-438b2237b8d6">
         <Card.Content class="svadmin-u-8a539c7fe216">
           <dl class="svadmin-u-f3c543ad5fe9 svadmin-u-fa6acbf81d74 svadmin-u-3533cbce9e93 svadmin-u-4d9da416df16 {gridColumnClass}">
             {#each showFields as field, i (i)}
-              {@const value = ((query.data as { data: Record<string, unknown> }).data as Record<string, unknown>)[field.key]}
-              {@const DisplayComponent = getDisplayComponent(field.type)}
+              {@const value = record[field.key]}
               <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed {bordered ? 'svadmin-u-65fdbade2025 svadmin-u-5ceb636bd9f3 svadmin-u-cdf6e054e5e0 svadmin-u-b4cf72cd1cd8 svadmin-u-eb6e8b881acd svadmin-u-1884518576f2' : 'svadmin-u-eb6e8b881acd svadmin-u-1884518576f2 svadmin-u-65fdbade2025 svadmin-u-945ecb9a9005'}">
                 <dt class="svadmin-u-359090c2d529 svadmin-u-2689f3958069 svadmin-u-bfa603190748 svadmin-u-65281709dacf">{field.label}</dt>
                 <dd class="svadmin-u-359090c2d529 svadmin-u-e2327d142859 svadmin-u-d4108abe6359 svadmin-u-2689f3958069 svadmin-u-170cee3ff4e4">
-                  {#if DisplayComponent && value != null}
-                    <DisplayComponent
-                      {value}
-                      options={field.options}
-                      resourceName={field.resource}
-                    />
-                  {:else}
-                    {value != null ? String(value) : '—'}
-                  {/if}
-                </dd>
+                  <FieldDisplay
+                    type={field.type}
+                    {value}
+                    options={field.options}
+                    resourceName={field.resource}
+                  />                </dd>
               </div>
             {/each}
           </dl>
@@ -120,21 +131,16 @@
       <Card.Root class="svadmin-u-2cd02d11d1af svadmin-u-6ee2d41e2d2d svadmin-u-438b2237b8d6">
         <Card.Content class="svadmin-u-8a539c7fe216 svadmin-u-fa6acbf81d74 svadmin-u-3533cbce9e93">
           {#each showFields as field, i (i)}
-            {@const value = ((query.data as { data: Record<string, unknown> }).data as Record<string, unknown>)[field.key]}
-            {@const DisplayComponent = getDisplayComponent(field.type)}
+            {@const value = record[field.key]}
             <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-020ba687fa12 {isCompact ? 'svadmin-u-f0faeb26d656 svadmin-u-03b4dd7f172b svadmin-u-cc06a6575385 svadmin-u-7209fd2a90e7' : 'svadmin-u-f0faeb26d656 svadmin-u-7a9aabfcd059 svadmin-u-1b2d54a3fd12 svadmin-u-4701b613ff95'} {i % 2 === 1 ? 'svadmin-u-8a25a995eb8e' : ''}">
               <div class="svadmin-u-b03f3c253900 {isCompact ? 'svadmin-u-359090c2d529' : 'svadmin-u-359090c2d529 svadmin-u-e2327d142859'} svadmin-u-2689f3958069 svadmin-u-bfa603190748 svadmin-u-65281709dacf svadmin-u-84bdd56b0e81">{field.label}</div>
               <div class="svadmin-u-6b3526212209 {isCompact ? 'svadmin-u-359090c2d529 svadmin-u-e2327d142859' : 'svadmin-u-fc7473ca09eb'} svadmin-u-d4108abe6359">
-                {#if DisplayComponent && value != null}
-                  <DisplayComponent
-                    {value}
-                    options={field.options}
-                    resourceName={field.resource}
-                  />
-                {:else}
-                  {value != null ? String(value) : '—'}
-                {/if}
-              </div>
+                <FieldDisplay
+                  type={field.type}
+                  {value}
+                  options={field.options}
+                  resourceName={field.resource}
+                />              </div>
             </div>
           {/each}
         </Card.Content>
@@ -147,9 +153,6 @@
     <Card.Root class="svadmin-u-2cd02d11d1af svadmin-u-6ee2d41e2d2d svadmin-u-438b2237b8d6">
       <Card.Content class="svadmin-u-845f53365c8d svadmin-u-ca6bf63030aa">
         <p class="svadmin-u-bfa603190748">{i18n.t('common.noData')}</p>
-        {#if query.isError}
-          <p class="svadmin-u-fc7473ca09eb svadmin-u-811148b13d1e svadmin-u-50d0d216a2f8">{(query.error as Error)?.message ?? i18n.t('common.operationFailed')}</p>
-        {/if}
       </Card.Content>
     </Card.Root>
   {/if}

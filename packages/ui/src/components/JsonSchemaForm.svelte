@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import { Button } from './ui/button/index.js';
   import { Loader2 } from '@lucide/svelte';
   import { cn } from '../utils.js';
@@ -32,18 +34,18 @@
   }
 
   const properties = $derived.by<FieldMeta[]>(() => {
-    const propsObj = (schema.properties ?? {}) as Record<string, Record<string, unknown>>;
-    const requiredKeys = Array.isArray(schema.required) ? (schema.required as string[]) : [];
+    const propsObj = (schema['properties'] ?? {}) as Record<string, Record<string, unknown>>;
+    const requiredKeys = Array.isArray(schema['required']) ? (schema['required'] as string[]) : [];
 
-    return Object.entries(propsObj).map(([key, propDef]) => ({
+    return Object.entries(propsObj).map(([key, propDef]) => (definedOptions({
       key,
-      title: String(propDef.title ?? key),
-      description: propDef.description ? String(propDef.description) : undefined,
-      type: String(propDef.type ?? 'string'),
-      enum: Array.isArray(propDef.enum) ? (propDef.enum as Array<string | number>) : undefined,
+      title: String(propDef['title'] ?? key),
+      description: propDef['description'] ? String(propDef['description']) : undefined,
+      type: String(propDef['type'] ?? 'string'),
+      enum: Array.isArray(propDef['enum']) ? (propDef['enum'] as Array<string | number>) : undefined,
       required: requiredKeys.includes(key),
-      default: propDef.default,
-    }));
+      default: propDef['default'],
+    })));
   });
 
   async function handleSubmit(e: SubmitEvent) {
@@ -68,12 +70,11 @@
   onsubmit={handleSubmit}
   class={cn('svadmin-u-3e7ce58d64fa svadmin-u-a217b4eaa918 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-0478c89a150f svadmin-u-cef5b893cf23 svadmin-u-359090c2d529', className)}
 >
-  {#if schema.title}
+  {#if schema['title']}
     <div class="svadmin-u-f4cc511ff0c1 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff">
-      <h3 class="svadmin-u-fc7473ca09eb svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{schema.title}</h3>
-      {#if schema.description}
-        <p class="svadmin-u-359090c2d529 svadmin-u-bfa603190748 svadmin-u-15e1b1f444fe">{schema.description}</p>
-      {/if}
+      <h3 class="svadmin-u-fc7473ca09eb svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{schema['title']}</h3>
+      {#if schema['description']}
+        <p class="svadmin-u-359090c2d529 svadmin-u-bfa603190748 svadmin-u-15e1b1f444fe">{schema['description']}</p>      {/if}
     </div>
   {/if}
 

@@ -1,4 +1,10 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
+  import { demoContracts } from '../resource-contracts';
+  import type { DemoRow } from '../resource-schemas';
+  type CalendarEvent = DemoRow<'calendar_events'>;
+
   import { useList } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { Badge, Button, ContentPageHeader, ContentPageShell, MetricBlock, SectionHeader } from '@svadmin/ui';
@@ -6,14 +12,6 @@
   import { CalendarDays, ChevronLeft, ChevronRight, Clock, Filter, Plus } from '@lucide/svelte';
 
   const i18n = useTranslation();
-
-  interface CalendarEvent {
-    id: number;
-    title: string;
-    type: string;
-    startDate: string;
-    status: string;
-  }
 
   let { resourceName = 'calendar_events' } = $props<{ resourceName?: string }>();
   let monthOffset = $state(0);
@@ -23,8 +21,8 @@
 
   const locale = $derived(i18n.locale);
   const isZh = $derived(locale === 'zh-CN');
-  const query = useList({ resource: 'calendar_events', pagination: { mode: 'off' }, sorters: [{ field: 'startDate', order: 'asc' }] });
-  const events = $derived((query.data?.data ?? []) as unknown as CalendarEvent[]);
+  const query = useList({ resource: demoContracts.calendar_events, pagination: { mode: 'off' }, sorters: [{ field: 'startDate', order: 'asc' }] });
+  const events = $derived((query.data?.data ?? []));
   const displayDate = $derived(new Date(Date.UTC(2026, 5 + monthOffset, 1)));
   const displayYear = $derived(displayDate.getUTCFullYear());
   const displayMonth = $derived(displayDate.getUTCMonth() + 1);
@@ -95,7 +93,7 @@
   <ContentPageHeader eyebrow={isZh ? '日程应用' : 'Calendar app'} title={isZh ? '运营日程控制台' : 'Operations schedule console'} description={isZh ? '用月视图、议程列表、类型过滤和状态摘要管理计划作业。' : 'Manage planned work with month view, agenda, type filters, and status summaries.'} actions={headerActions} />
   <section class="grid gap-3 sm:grid-cols-3">
     <MetricBlock label={isZh ? '日程总数' : 'Total events'} value={events.length} detail={isZh ? '当前计划作业' : 'Planned work'} />
-    <MetricBlock label={isZh ? '下一项' : 'Next event'} value={nextEvent?.title ?? '-'} detail={nextEvent?.startDate} />
+    <MetricBlock label={isZh ? '下一项' : 'Next event'} value={nextEvent?.title ?? '-'} {...definedOptions({ "detail": nextEvent?.startDate })} />
     <MetricBlock label={isZh ? '当前视图' : 'Current view'} value={viewMode === 'month' ? (isZh ? '月' : 'Month') : (isZh ? '议程' : 'Agenda')} detail={selectedType ? typeLabel(selectedType) : (isZh ? '全部类型' : 'All types')} />
   </section>
   <section class="space-y-3"><SectionHeader title={isZh ? '类型过滤' : 'Type filters'} /><div class="flex flex-wrap gap-2">{#each typeStats as item (item.type)}<Button size="sm" variant={selectedType === item.type ? 'default' : 'outline'} onclick={() => selectedType = selectedType === item.type ? null : item.type}>{typeLabel(item.type)}<Badge variant="secondary">{item.count}</Badge></Button>{/each}<Button size="sm" variant={viewMode === 'month' ? 'default' : 'outline'} onclick={() => viewMode = 'month'}>{isZh ? '月视图' : 'Month'}</Button><Button size="sm" variant={viewMode === 'agenda' ? 'default' : 'outline'} onclick={() => viewMode = 'agenda'}>{isZh ? '议程' : 'Agenda'}</Button></div></section>

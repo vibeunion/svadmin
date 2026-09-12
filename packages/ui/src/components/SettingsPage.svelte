@@ -108,7 +108,7 @@
   const i18n = useTranslation();
 
   let activeKey = $derived.by(() => {
-    const tab = getParams().tab;
+    const tab = getParams()['tab'];
     if (!tab) return "profile";
     const alias = tab === "api-keys" ? "api" : tab === "audit-logs" ? "audit" : tab;
     if (sectionKeys.has(alias)) return alias;

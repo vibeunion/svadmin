@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import {
     AlertTriangle,
     ArrowRight,
@@ -68,7 +70,7 @@
         ? (isZh ? '证据已补齐' : 'Evidence complete')
         : stage.description;
 
-      return { ...stage, description, status };
+      return definedOptions({ ...stage, description, status });
     });
   });
 
@@ -117,7 +119,7 @@
       <WorkspaceStageStepper stages={stageForState} activeId={state.activeStage} onselect={selectStage} class="mt-5" ariaLabel={isZh ? '案件阶段流' : 'Case stage flow'} />
     </header>
 
-    <WorkspaceActionBar title={nextAction} status={state.activeStage === 'evidence' && !state.evidenceComplete ? (isZh ? '存在阻塞' : 'Blocked') : undefined} description={isZh ? '主行动随案件阶段变化，辅助管理动作保留在上下文区域。' : 'The primary action follows the case stage; supporting operations stay in context.'}>
+    <WorkspaceActionBar title={nextAction} {...definedOptions({ "status": state.activeStage === 'evidence' && !state.evidenceComplete ? (isZh ? '存在阻塞' : 'Blocked') : undefined })} description={isZh ? '主行动随案件阶段变化，辅助管理动作保留在上下文区域。' : 'The primary action follows the case stage; supporting operations stay in context.'}>
       {#snippet primaryAction()}
         <Button size="sm" onclick={handlePrimaryAction}>
           {#if state.activeStage === 'overview'}<CheckCircle2 class="size-4" />{:else if state.activeStage === 'execution'}<ArrowRight class="size-4" />{:else if state.activeStage === 'evidence'}<FileCheck2 class="size-4" />{:else}<Save class="size-4" />{/if}

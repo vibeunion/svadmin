@@ -63,6 +63,7 @@
     }
   },
   "dependencies": {
+    "@sinclair/typebox": "^0.34.52",
     "@floating-ui/dom": "^1.8.0",
     "@lucide/svelte": "^1.35.0",
     "@tanstack/svelte-store": "^0.12.1",

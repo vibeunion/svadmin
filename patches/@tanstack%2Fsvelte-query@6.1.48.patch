@@ -1,0 +1,11 @@
+diff --git a/dist/context.d.ts b/dist/context.d.ts
+index b33bfb38a4bfedabf26147340e0adceed6586a03..8bde335fd0b9ce25429ad94eab946acafe41f99d 100644
+--- a/dist/context.d.ts
++++ b/dist/context.d.ts
+@@ -1,5 +1,5 @@
+ import type { QueryClient } from '@tanstack/query-core';
+-import type { Box } from './containers.svelte';
++import type { Box } from './containers.svelte.js';
+ /** Retrieves a Client from Svelte's context */
+ export declare const getQueryClientContext: () => QueryClient;
+ /** Sets a QueryClient on Svelte's context */

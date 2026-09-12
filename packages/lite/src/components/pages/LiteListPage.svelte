@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import type { ResourceDefinition } from "@svadmin/core";
   import { t } from "@svadmin/core/i18n";
   import LiteTable from "../LiteTable.svelte";
@@ -134,9 +136,9 @@
       <LiteTable
         {records}
         {resource}
-        {currentSort}
+        {...definedOptions({ "currentSort": currentSort })}
         {currentOrder}
-        {currentSearch}
+        {...definedOptions({ "currentSearch": currentSearch })}
         {basePath}
         canShow={showView}
         canEdit={showEdit}

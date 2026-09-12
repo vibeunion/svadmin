@@ -1,1 +1,5 @@
-{"compilerOptions":{"target":"ESNext","module":"ESNext","moduleResolution":"bundler","strict":true,"skipLibCheck":true,"esModuleInterop":true,"declaration":true,"outDir":"./dist","rootDir":"./src"},"include":["src/**/*"]}
+{
+  "extends": "../core/tsconfig.contracts.json",
+  "compilerOptions": { "types": ["bun", "svelte"] },
+  "include": ["src/**/*"]
+}

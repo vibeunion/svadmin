@@ -208,8 +208,9 @@ function parseGraphQLSDL(sdl: string): GraphQLSchemaBody {
   const enumRegex = /enum\s+([A-Za-z0-9_]+)\s*\{([^}]+)\}/g;
   let match: RegExpExecArray | null;
   while ((match = enumRegex.exec(cleanSDL)) !== null) {
-    const enumName = match[1];
-    const rawValues = match[2].split(/\s+/).filter(Boolean);
+    const [, enumName, enumBody] = match;
+    if (enumName === undefined || enumBody === undefined) continue;
+    const rawValues = enumBody.split(/\s+/).filter(Boolean);
     types.push({
       kind: 'ENUM',
       name: enumName,
@@ -220,8 +221,8 @@ function parseGraphQLSDL(sdl: string): GraphQLSchemaBody {
   // Extract types: type Post { id: ID! title: String ... }
   const typeRegex = /type\s+([A-Za-z0-9_]+)\s*(?:implements\s+[A-Za-z0-9_&,\s]+)?\s*\{([^}]+)\}/g;
   while ((match = typeRegex.exec(cleanSDL)) !== null) {
-    const typeName = match[1];
-    const fieldsBody = match[2];
+    const [, typeName, fieldsBody] = match;
+    if (typeName === undefined || fieldsBody === undefined) continue;
     const fieldLines = fieldsBody.split('\n').map(l => l.trim()).filter(Boolean);
     const fields: GraphQLFieldDescriptor[] = [];
 
@@ -230,8 +231,8 @@ function parseGraphQLSDL(sdl: string): GraphQLSchemaBody {
       const fieldMatch = /^([A-Za-z0-9_]+)(?:\([^)]*\))?\s*:\s*([[\]A-Za-z0-9_!]+)/.exec(line);
       if (!fieldMatch) continue;
 
-      const fName = fieldMatch[1];
-      const rawType = fieldMatch[2];
+      const [, fName, rawType] = fieldMatch;
+      if (fName === undefined || rawType === undefined) continue;
 
       const isNonNullable = rawType.endsWith('!');
       const cleanType = isNonNullable ? rawType.slice(0, -1) : rawType;

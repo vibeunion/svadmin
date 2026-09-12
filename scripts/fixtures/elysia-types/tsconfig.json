@@ -1,0 +1,12 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "skipLibCheck": false,
+    "types": [
+      "bun"
+    ]
+  },
+  "include": [
+    "strict.ts"
+  ]
+}

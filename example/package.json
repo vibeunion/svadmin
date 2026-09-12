@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "check": "node ../node_modules/@typescript/native/bin/tsc -p tsconfig.bun-tests.json --pretty false && svelte-check --tsgo-experimental-api --tsconfig ./tsconfig.json",
     "dev": "vite --host 127.0.0.1 --port 5173",
     "build": "vite build",
     "preview": "vite preview",
@@ -12,6 +13,7 @@
   "dependencies": {
     "@internationalized/date": "^3.12.3",
     "@lucide/svelte": "^1.35.0",
+    "@sinclair/typebox": "^0.34.52",
     "@svadmin/core": "workspace:*",
     "@svadmin/ai-elements": "workspace:*",
     "@svadmin/editor": "workspace:*",

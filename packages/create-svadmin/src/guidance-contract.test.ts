@@ -25,4 +25,22 @@ describe('create-svadmin AI guidance contract', () => {
     expect(agents).toContain('at most one full-width high-emphasis notice');
     expect(agents).toContain('successNotification: false');
   });
+
+  it('requires schema-derived models, boundary validation, and compiler checks', () => {
+    const agents = readFileSync(guidanceAgentsPath, 'utf8');
+    expect(agents).toContain('Static<typeof Schema>');
+    expect(agents).toContain('defineResource(name, schemas)');
+    expect(agents).toContain('String resources, implicit routes, and data generics');
+    expect(agents).toContain('`useList`, `useOne`, `useShow`, and `useMany`');
+    expect(agents).toContain('`useTable` also infers');
+    expect(agents).toContain('`defineCommand`');
+    expect(agents).toContain('missing schemas disable writes');
+    expect(agents).toContain('`@svadmin/core/unsafe`');
+    expect(agents).toContain('`useInfiniteList` and `useSelect`');
+    expect(agents).toContain('`setFieldValue`');
+    expect(agents).toContain('`writeMayHaveSucceeded`');
+    expect(agents).toContain('but they do not authorize a mutation');
+    expect(agents).toContain('`bun run check`');
+    expect(agents).toContain('Passing runtime tests alone does not prove compile-time type safety');
+  });
 });

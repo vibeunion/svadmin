@@ -33,7 +33,7 @@
         {@const isSelected = String(item[idKey]) === String(activeItem?.[idKey])}
         <li class="lite-master-item {isSelected ? 'lite-master-item-active' : ''}">
           <a href="?selectedId={item[idKey]}" class="lite-master-link">
-            {item[titleKey] ?? item.name ?? `Item #${item[idKey]}`}
+            {item[titleKey] ?? item['name'] ?? `Item #${item[idKey]}`}
           </a>
         </li>
       {/each}
@@ -47,7 +47,7 @@
         {@render detailSnippet(activeItem)}
       {:else}
         <div class="lite-detail-content">
-          <h4 style="margin: 0 0 12px 0;">{activeItem[titleKey] ?? activeItem.name ?? `Item #${activeItem[idKey]}`}</h4>
+          <h4 style="margin: 0 0 12px 0;">{activeItem[titleKey] ?? activeItem['name'] ?? `Item #${activeItem[idKey]}`}</h4>
           <table class="lite-table">
             <tbody>
               {#each Object.entries(activeItem) as [k, v] (k)}

@@ -11,13 +11,13 @@
 
   let { status = 'idle', message }: Props = $props();
 
-  const statusConfig: Record<string, { icon: string; color: string; text: string }> = {
+  const statusConfig: Record<NonNullable<Props['status']>, { icon: string; color: string; text: string }> = {
     idle: { icon: '☁', color: '#64748b', text: 'All changes saved' },
     saved: { icon: '✓', color: '#10b981', text: 'Saved' },
     error: { icon: '✕', color: '#ef4444', text: 'Save failed' },
   };
 
-  const cfg = $derived(statusConfig[status] ?? statusConfig.idle);
+  const cfg = $derived(statusConfig[status] ?? statusConfig['idle']);
 </script>
 
 <span class="lite-inline-sm" style="display: inline-flex; align-items: center; font-size: 13px; color: {cfg.color};">

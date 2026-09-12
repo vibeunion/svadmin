@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import type { Action } from '@svadmin/core';
   import { captureAdminContext, useCan } from '@svadmin/core';
   import type { Snippet } from 'svelte';
@@ -34,18 +36,18 @@
   );
   const sourceReadAllowedByResource = $derived(!requireSourceRead || resource.canShow !== false);
   const params = $derived(id === undefined ? undefined : { id });
-  const permission = useCan(() => ({
+  const permission = useCan(() => (definedOptions({
     resource: resourceName,
     action,
     params,
     queryOptions: { enabled: accessControlEnabled },
-  }));
-  const sourceReadPermission = useCan(() => ({
+  })));
+  const sourceReadPermission = useCan(() => (definedOptions({
     resource: resourceName,
     action: 'show',
     params,
     queryOptions: { enabled: accessControlEnabled && requireSourceRead },
-  }));
+  })));
   const permissionPending = $derived(
     accessControlEnabled
       && (permission.isLoading || (requireSourceRead && sourceReadPermission.isLoading)),
@@ -64,5 +66,5 @@
 {:else if allowed}
   {@render children()}
 {:else}
-  <DataState state="forbidden" description={denialReason} />
+  <DataState state="forbidden" {...definedOptions({ "description": denialReason })} />
 {/if}

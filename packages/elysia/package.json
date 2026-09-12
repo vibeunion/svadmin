@@ -28,7 +28,7 @@
   "author": "zuohuadong",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vibeunion/svadmin.git",
+    "url": "git+https://github.com/vibeunion/svadmin.git",
     "directory": "packages/elysia"
   },
   "peerDependenciesMeta": {
@@ -43,6 +43,7 @@
     }
   },
   "devDependencies": {
+    "zod": "^4.4.3",
     "elysia": ">=1.4.30",
     "@elysiajs/eden": ">=1.4.9"
   }

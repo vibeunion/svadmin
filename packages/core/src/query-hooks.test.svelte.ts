@@ -1,17 +1,18 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { requireValue } from '../test/assertions';
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { describe, it, expect, vi } from 'vitest';
-import { useList, useOne } from './query-hooks.svelte';
+import { describe,it,expect,vi } from 'vitest';
+import { useList,useOne } from './query-hooks.svelte';
 import { flushSync } from 'svelte';
 import { QueryClient } from '@tanstack/svelte-query';
-import { keys, parseQueryKey } from './query-keys';
+import { keys,parseQueryKey } from './query-keys';
 
-vi.mock('./context.svelte', () => {
-  const dataProvider = {
+vi.mock('./context.svelte',() => {
+  const dataProvider={
     getOne: vi.fn(),
     getList: vi.fn()
   };
-  const getResource = (name: string) => ({ name, primaryKey: 'id' });
+  const getResource=(name: string) => ({ name,primaryKey: 'id' });
   return {
     captureAdminContext: () => ({
       providers: { default: dataProvider },
@@ -24,10 +25,11 @@ vi.mock('./context.svelte', () => {
       getDataProviderNames: () => ['default'],
       queryKeys: () => keys(),
       getDataProviderForResource: () => dataProvider,
+      getProviderMeta: () => undefined,
       getResource,
       currentPath: () => '/posts',
       formatLink: (path: string) => path,
-      navigate: vi.fn(async () => {}),
+      navigate: vi.fn(async () => { }),
       back: vi.fn(),
     }),
     getDataProviderForResource: () => dataProvider,
@@ -35,20 +37,20 @@ vi.mock('./context.svelte', () => {
     getResource,
     useRouterContext: () => ({ navigate: vi.fn() }),
     useTranslate: () => (key: string) => key,
-    useNotification: () => ({ open: vi.fn(), close: vi.fn() }),
+    useNotification: () => ({ open: vi.fn(),close: vi.fn() }),
     getLiveProvider: () => undefined
   };
 });
 
-vi.mock('@tanstack/svelte-query', async (importOriginal) => {
-  const actual = await importOriginal();
+vi.mock('@tanstack/svelte-query',async (importOriginal) => {
+  const actual=await importOriginal();
   return {
     ...actual as any,
     useQueryClient: () => new QueryClient(),
     createQuery: (factory: any) => ({
-      data: parseQueryKey(factory().queryKey)?.action === 'one'
-        ? { data: { id: 1, title: 'One' } }
-        : { data: [{ id: 1, title: 'One' }], total: 1 },
+      data: parseQueryKey(factory().queryKey)?.action==='one'
+        ? { data: { id: 1,title: 'One' } }
+        :{ data: [{ id: 1,title: 'One' }],total: 1 },
       isPending: false,
       isFetching: false,
       isSuccess: true,
@@ -60,36 +62,36 @@ vi.mock('@tanstack/svelte-query', async (importOriginal) => {
   };
 });
 
-describe('useList & useOne - Headless Svelte 5 Compatibility', () => {
+describe('useList & useOne - Headless Svelte 5 Compatibility',() => {
 
-  it('safely binds useList query state without headless Svelte destruction', () => {
-    let listQuery: ReturnType<typeof useList>;
-    
-    const cleanup = $effect.root(() => {
-        listQuery = useList({ resource: 'posts' });
+  it('safely binds useList query state without headless Svelte destruction',() => {
+    let listQuery: ReturnType<typeof useList>|undefined;
+
+    const cleanup=$effect.root(() => {
+      listQuery=useList({ resource: 'posts' });
     });
 
     flushSync();
-    
-    expect(listQuery!.data).toBeDefined();
-    expect(listQuery!.data!.data[0].title).toBe('One');
-    expect(listQuery!.data!.total).toBe(1);
-    expect(listQuery!.isPending).toBe(false);
+
+    expect(requireValue(listQuery).data).toBeDefined();
+    expect(requireValue(requireValue(requireValue(listQuery).data).data[0])['title']).toBe('One');
+    expect(requireValue(requireValue(listQuery).data).total).toBe(1);
+    expect(requireValue(listQuery).isPending).toBe(false);
 
     cleanup();
   });
 
-  it('safely binds useOne query state without headless component mounting', () => {
-    let oneQuery: ReturnType<typeof useOne>;
-    
-    const cleanup = $effect.root(() => {
-        oneQuery = useOne({ resource: 'posts', id: 1 });
+  it('safely binds useOne query state without headless component mounting',() => {
+    let oneQuery: ReturnType<typeof useOne>|undefined;
+
+    const cleanup=$effect.root(() => {
+      oneQuery=useOne({ resource: 'posts',id: 1 });
     });
 
     flushSync();
-    
-    expect(oneQuery!.data).toBeDefined();
-    expect((oneQuery!.data!.data as any).title).toBe('One');
+
+    expect(requireValue(oneQuery).data).toBeDefined();
+    expect((requireValue(requireValue(oneQuery).data).data as any).title).toBe('One');
 
     cleanup();
   });

@@ -82,6 +82,7 @@
 
     const next = [...columns];
     const [moved] = next.splice(index, 1);
+    if (moved === undefined) return;
     next.splice(targetIndex, 0, moved);
 
     columns = next;

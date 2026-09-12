@@ -21,6 +21,9 @@
 
 <a
   href={`${basePath}/${resource}`}
+  data-svadmin-button
+  data-variant="ghost"
+  data-size={size}
   class="lite-btn {size === 'sm' ? 'lite-btn-sm' : ''} {className}"
   title={t('common.list') || 'List'}
 >

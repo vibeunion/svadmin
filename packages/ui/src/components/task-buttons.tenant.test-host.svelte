@@ -8,6 +8,7 @@
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
   import CancelTaskButton from './CancelTaskButton.svelte';
   import RetryTaskButton from './RetryTaskButton.svelte';
+  import { definedOptions } from '@svadmin/core/options';
 
   interface Props {
     action: 'cancel' | 'retry';
@@ -16,6 +17,7 @@
     tenant: TenantContext;
     queryClient: QueryClient;
     onSuccess: () => void;
+    onError?: (error: unknown) => void;
   }
 
   const {
@@ -25,6 +27,7 @@
     tenant,
     queryClient,
     onSuccess,
+    onError,
   }: Props = $props();
 
   const dataProvider = {
@@ -34,7 +37,7 @@
     update: async () => ({ data: { id: 'test' } }),
     deleteOne: async () => ({ data: { id: 'test' } }),
     getApiUrl: () => 'https://task-buttons.example.test',
-  } as DataProvider;
+  } satisfies DataProvider;
 
   provideAdminContext({
     dataProvider,
@@ -46,8 +49,8 @@
 
 <QueryClientProvider client={queryClient}>
   {#if action === 'cancel'}
-    <CancelTaskButton {taskId} {taskProvider} {onSuccess}>Cancel scoped task</CancelTaskButton>
+    <CancelTaskButton {taskId} {taskProvider} {onSuccess} {...definedOptions({ onError })}>Cancel scoped task</CancelTaskButton>
   {:else}
-    <RetryTaskButton {taskId} {taskProvider} {onSuccess}>Retry scoped task</RetryTaskButton>
+    <RetryTaskButton {taskId} {taskProvider} {onSuccess} {...definedOptions({ onError })}>Retry scoped task</RetryTaskButton>
   {/if}
 </QueryClientProvider>

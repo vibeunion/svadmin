@@ -135,9 +135,8 @@ function createStreamingChatProvider(stream: ReturnType<typeof createControlledS
 function createControlledAuditProvider(entries: Deferred<AuditEntry[]>) {
   const get = vi.fn(() => entries.promise);
   const provider: AuditLogProvider = {
-    create: async () => ({ timestamp: '', action: 'create' }),
+    create: async params => params,
     get,
-    update: async () => ({ timestamp: '', action: 'update' }),
   };
   return { provider, get };
 }
@@ -296,6 +295,28 @@ describe('scoped async consumers', () => {
     });
     expect(view.queryByText('User: stale-auditor')).toBeNull();
     expect(view.getByText('User: fresh-auditor')).not.toBeNull();
+  });
+
+  it('rejects malformed audit records before rendering their payload', async () => {
+    const entries = createDeferred<AuditEntry[]>();
+    const audit = createControlledAuditProvider(entries);
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      const view = render(ScopedAsyncConsumersHost, {
+        consumer: 'audit',
+        auditLogProvider: audit.provider,
+        tenant: { tenantId: 'tenant-new' },
+        requestContext: 'orders',
+      });
+      await waitFor(() => expect(audit.get).toHaveBeenCalledTimes(1));
+      entries.resolve([{ timestamp: 'invalid', action: 'update', userId: 'secret-auditor' }]);
+      await waitFor(() => expect(errors).toHaveBeenCalledWith(
+        '[svadmin] Failed to fetch audit logs',
+        expect.objectContaining({ code: 'INVALID_AUDIT_RESPONSE', message: 'Invalid audit response.' }),
+      ));
+      expect(view.queryByText('User: secret-auditor')).toBeNull();
+      expect(view.getByRole('alert')).not.toBeNull();
+    } finally { errors.mockRestore(); }
   });
 
   it('keeps a late CopilotPanel reply from an old page scope out of the new scope', async () => {

@@ -1,3 +1,4 @@
+import { requireValue } from "../../../scripts/test-assertions";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @svadmin/appwrite — Unit Tests
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
@@ -5,6 +6,7 @@ import { describe, test, expect, mock } from 'bun:test';
 import { createAppwriteDataProvider } from './data-provider';
 import { createAppwriteAuthProvider } from './auth-provider';
 import { createAppwriteLiveProvider } from './live-provider';
+import type { DeleteManyParams } from '@svadmin/core';
 
 // ─── Mock Appwrite Databases ────────────────────────────────
 mock.module('@refinedev/appwrite', () => {
@@ -25,7 +27,10 @@ mock.module('@refinedev/appwrite', () => {
         deleteOne: async (params: any) => { await databases.deleteDocument(databaseId, params.resource, params.id); return { data: {} }; },
         getApiUrl: () => '',
         getMany: async (params: any) => ({ data: params.ids.map((id: string) => ({ $id: id })) }),
-        deleteMany: async () => { for (const id of ['1', '2']) await databases.deleteDocument(databaseId, 'posts', id); },
+        deleteMany: async ({ resource, ids }: DeleteManyParams) => {
+          for (const id of ids) await databases.deleteDocument(databaseId, resource, id);
+          return { data: ids.map(id => ({ $id: id })) };
+        },
       };
       return mockDp;
     }
@@ -82,7 +87,7 @@ describe('Appwrite DataProvider', () => {
     const db = createMockDatabases();
     const dp = await createAppwriteDataProvider({ databases: db, databaseId: 'main' });
     await dp.getList({ resource: 'posts', pagination: { current: 2, pageSize: 5 } });
-    const queries = db.listDocuments.mock.calls[0][2] as string[];
+    const queries = requireValue(db.listDocuments.mock.calls[0])[2] as string[];
     expect(queries).toContain('limit(5)');
     expect(queries).toContain('offset(5)');
   });
@@ -91,7 +96,7 @@ describe('Appwrite DataProvider', () => {
     const db = createMockDatabases();
     const dp = await createAppwriteDataProvider({ databases: db, databaseId: 'main' });
     await dp.getList({ resource: 'posts', sorters: [{ field: 'name', order: 'desc' }] });
-    const queries = db.listDocuments.mock.calls[0][2] as string[];
+    const queries = requireValue(db.listDocuments.mock.calls[0])[2] as string[];
     expect(queries.some((q: string) => q.includes('orderDesc'))).toBe(true);
   });
 
@@ -99,7 +104,7 @@ describe('Appwrite DataProvider', () => {
     const db = createMockDatabases();
     const dp = await createAppwriteDataProvider({ databases: db, databaseId: 'main' });
     await dp.getList({ resource: 'posts', filters: [{ field: 'status', operator: 'eq', value: 'active' }] });
-    const queries = db.listDocuments.mock.calls[0][2] as string[];
+    const queries = requireValue(db.listDocuments.mock.calls[0])[2] as string[];
     expect(queries.some((q: string) => q.includes('equal'))).toBe(true);
   });
 
@@ -228,7 +233,7 @@ describe('Appwrite LiveProvider', () => {
     const unsub = lp.subscribe({ resource: 'posts', callback: cb });
 
     expect(mockClient.subscribe).toHaveBeenCalledTimes(1);
-    const channel = mockClient.subscribe.mock.calls[0][0];
+    const channel = requireValue(mockClient.subscribe.mock.calls[0])[0];
     expect(channel).toBe('databases.main.collections.posts.documents');
 
     unsub();

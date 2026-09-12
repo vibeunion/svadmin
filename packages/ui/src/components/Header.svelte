@@ -1,5 +1,4 @@
 <script lang="ts">
-/* eslint-disable @typescript-eslint/no-explicit-any */
   import { Moon, Sun, Search, MonitorUp } from '@lucide/svelte';
   import { Button } from './ui/button';
   import TooltipButton from './TooltipButton.svelte';
@@ -33,11 +32,11 @@
   }>();
 
   // Retrieve optional component overrides from registry
-  const registry = getComponentRegistry() || {} as any;
-  const CustomBreadcrumbs = registry.Breadcrumbs;
-  const CustomThemeToggle = registry.ThemeToggle;
-  const CustomUserMenu = registry.UserMenu;
-  const CustomNotificationPanel = registry.NotificationPanel;
+  const registry = getComponentRegistry();
+  const CustomBreadcrumbs = registry?.Breadcrumbs;
+  const CustomThemeToggle = registry?.ThemeToggle;
+  const CustomUserMenu = registry?.UserMenu;
+  const CustomNotificationPanel = registry?.NotificationPanel;
 </script>
 
 <header class="svadmin-u-3e0fd166d494 svadmin-u-2167406b24d7 svadmin-u-0f2fff0ae96e svadmin-u-60fbb7713999 svadmin-u-07017cde3e97 svadmin-u-6da6a3c3f741 svadmin-u-012fbd121f37 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-65fdbade2025 svadmin-u-6ee2d41e2d2d svadmin-u-16d6f96aa157 svadmin-u-1ca6dd1e47c4 svadmin-u-f0faeb26d656 svadmin-u-8a3831239aa5">

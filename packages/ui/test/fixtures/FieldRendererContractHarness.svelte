@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+  import { decodeBaseRecord } from '@svadmin/core/schema';
+
   import type { DataProvider, FieldDefinition, ResourceDefinition, RouterProvider } from '@svadmin/core';
   import AdminApp from '../../src/components/AdminApp.svelte';
   import FieldRenderer from '../../src/components/FieldRenderer.svelte';
@@ -51,17 +54,17 @@
     values = { ...values, [key]: value };
   }
 
-  const dataProvider = {
+  const dataProvider: DataProvider = {
     getList: async ({ resource }) => ({
       data: resource === 'owners' ? [{ id: 2, name: 'Owner Two' }] : [],
       total: resource === 'owners' ? 1 : 0,
     }),
     getOne: async () => ({ data: { id: 2, name: 'Owner Two' } }),
-    create: async ({ variables }) => ({ data: { id: 'created', ...variables } }),
-    update: async ({ id, variables }) => ({ data: { id, ...variables } }),
+    create: async ({ variables }) => ({ data: { id: 'created', ...decodeBaseRecord(variables) } }),
+    update: async ({ id, variables }) => ({ data: { id, ...decodeBaseRecord(variables) } }),
     deleteOne: async ({ id }) => ({ data: { id } }),
     getApiUrl: () => 'https://example.test',
-  } as DataProvider;
+  };
 
   const resources: ResourceDefinition[] = [
     { name: 'contracts', label: 'Contracts', fields },
@@ -83,7 +86,7 @@
         value={values[field.key]}
         onchange={(value) => updateValue(field.key, value)}
         invalid={field.key === 'title' || field.key === 'permissions'}
-        errorId={field.key === 'title' || field.key === 'permissions' ? `${field.key}-error` : undefined}
+        {...definedOptions({ "errorId": field.key === 'title' || field.key === 'permissions' ? `${field.key}-error` : undefined })}
       />
     {/each}
     <p id="title-error">Title is required</p>
@@ -91,4 +94,4 @@
   </form>
 {/snippet}
 
-<AdminApp {dataProvider} {resources} {routerProvider} locale="en" dashboard={dashboard as never} />
+<AdminApp {dataProvider} {resources} {routerProvider} locale="en" {dashboard} />

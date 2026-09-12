@@ -70,8 +70,8 @@ describe('createHashRouterProvider (with mock DOM)', () => {
     window.location.hash = '#/posts?page=2&sort=name';
     const provider = createHashRouterProvider();
     const parsed = provider.parse();
-    expect(parsed.params.page).toBe('2');
-    expect(parsed.params.sort).toBe('name');
+    expect(parsed.params['page']).toBe('2');
+    expect(parsed.params['sort']).toBe('name');
   });
 
   test('go sets window.location.hash', () => {

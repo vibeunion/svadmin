@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { demoContracts } from '../resource-contracts';
+
   import { useList } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { Badge, Button, ContentPageHeader, ContentPageShell, FilterToolbar, MetricBlock } from '@svadmin/ui';
@@ -8,32 +10,26 @@
 
   const i18n = useTranslation();
 
-  interface Agent { id: number; name: string; territory: string; status: string; capacityScore: number; notes: string; }
-  interface Property { id: number; propertyName: string; market: string; assetType: string; askingPrice: number; status: string; units: number; occupancy: number; notes: string; }
-  interface Lead { id: number; leadName: string; budget: number; status: string; }
-  interface Showing { id: number; showingNumber: string; scheduledDate: string; status: string; feedbackScore: number | null; notes: string; }
-  type PropertyResource = 'properties' | 'property_agents' | 'property_leads' | 'property_showings';
-
   let { resourceName = 'properties' } = $props<{ resourceName?: string }>();
   let activeView = $state(readHashView('portfolio'));
   let searchQuery = $state('');
 
   const locale = $derived(i18n.locale);
   const isZh = $derived(locale === 'zh-CN');
-  const propertiesQuery = useList({ resource: 'properties', pagination: { mode: 'off' } });
-  const agentsQuery = useList({ resource: 'property_agents', pagination: { mode: 'off' } });
-  const leadsQuery = useList({ resource: 'property_leads', pagination: { mode: 'off' } });
-  const showingsQuery = useList({ resource: 'property_showings', pagination: { mode: 'off' }, sorters: [{ field: 'scheduledDate', order: 'asc' }] });
-  const properties = $derived((propertiesQuery.data?.data ?? []) as unknown as Property[]);
-  const agents = $derived((agentsQuery.data?.data ?? []) as unknown as Agent[]);
-  const leads = $derived((leadsQuery.data?.data ?? []) as unknown as Lead[]);
-  const showings = $derived((showingsQuery.data?.data ?? []) as unknown as Showing[]);
+  const propertiesQuery = useList({ resource: demoContracts.properties, pagination: { mode: 'off' } });
+  const agentsQuery = useList({ resource: demoContracts.property_agents, pagination: { mode: 'off' } });
+  const leadsQuery = useList({ resource: demoContracts.property_leads, pagination: { mode: 'off' } });
+  const showingsQuery = useList({ resource: demoContracts.property_showings, pagination: { mode: 'off' }, sorters: [{ field: 'scheduledDate', order: 'asc' }] });
+  const properties = $derived((propertiesQuery.data?.data ?? []));
+  const agents = $derived((agentsQuery.data?.data ?? []));
+  const leads = $derived((leadsQuery.data?.data ?? []));
+  const showings = $derived((showingsQuery.data?.data ?? []));
   const filteredProperties = $derived(searchQuery.trim() ? properties.filter((property) => `${property.propertyName} ${property.market} ${property.assetType}`.toLowerCase().includes(searchQuery.trim().toLowerCase())) : properties);
   const showingCount = $derived(showings.length);
   const avgOccupancy = $derived(properties.length ? Math.round(properties.reduce((sum, property) => sum + property.occupancy, 0) / properties.length) : 0);
-  const activeResource = $derived((['properties', 'property_agents', 'property_leads', 'property_showings'].includes(resourceName) ? resourceName : 'properties') as PropertyResource);
-  const resourceDefaultView = $derived({ properties: 'portfolio', property_agents: 'advisors', property_leads: 'leads', property_showings: 'tours' }[activeResource]);
-  const normalizedView = $derived(['buy', 'rent', 'sell', 'commercial', 'saved', 'map', 'filters', 'advisors', 'leads', 'tours'].includes(activeView) ? activeView : resourceDefaultView);
+  const activeResource = $derived((['properties', 'property_agents', 'property_leads', 'property_showings'] as const).find(name => name === resourceName) ?? 'properties');
+  const resourceDefaultView = $derived(({ properties: 'portfolio', property_agents: 'advisors', property_leads: 'leads', property_showings: 'tours' } as const)[activeResource]);
+  const normalizedView = $derived((['buy', 'rent', 'sell', 'commercial', 'saved', 'map', 'filters', 'advisors', 'leads', 'tours'] as const).find(view => view === activeView) ?? resourceDefaultView);
   const marketTabs = $derived([
     { key: 'buy', label: isZh ? '购买' : 'Buy', href: '#/properties?view=buy' },
     { key: 'rent', label: isZh ? '租赁' : 'Rent', href: '#/properties?view=rent' },
@@ -139,9 +135,9 @@
         action: isZh ? '新增看房' : 'New showing',
       },
     } satisfies Record<string, { badge: string; title: string; description: string; action: string }>;
-    return copies[normalizedView as keyof typeof copies];
+    return copies[normalizedView];
   });
-  const resourceMetrics = $derived.by(() => {
+  const resourceMetrics = $derived.by((): [string, string | number, string][] => {
     if (activeResource === 'property_agents') return [
       [isZh ? '顾问' : 'Advisors', agents.length, isZh ? '当前团队' : 'Current team'],
       [isZh ? '可接单' : 'Available', agents.filter((agent) => agent.status === 'active').length, isZh ? '活跃状态' : 'Active status'],

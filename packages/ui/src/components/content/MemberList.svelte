@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import { MoreHorizontal } from '@lucide/svelte';
   import { useTranslation } from '@svadmin/core/i18n';
   import { Avatar } from '../ui/avatar/index.js';
@@ -14,7 +16,7 @@
   const initials = (name: string) => name.split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase();
 </script>
 {#if resolvedState}
-  <DataState state={resolvedState} title={stateTitle ?? emptyTitle} description={stateDescription ?? emptyDescription} {retry} {retryLabel} {loadingLabel} class={className} />
+  <DataState state={resolvedState} {...definedOptions({ title: stateTitle ?? emptyTitle, description: stateDescription ?? emptyDescription, retry, retryLabel, loadingLabel })} class={className} />
 {:else}
 <div class={'svadmin-u-fa6acbf81d74 svadmin-u-e783642739e3 svadmin-u-2cd02d11d1af svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 ' + className}>
   {#each members as member (member.id)}

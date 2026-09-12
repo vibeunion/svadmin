@@ -5,10 +5,10 @@ import type {
 } from '@svadmin/core';
 
 /**
- * AdminApp 的可组合 provider 配置。
+ * Composable provider configuration for AdminApp.
  *
- * 旧版顶层 props 仍然可用，且在同时传入时优先于这里的同名配置。
- * Access control 仅控制浏览器端呈现，后端仍必须独立鉴权。
+ * Legacy top-level props remain supported and take precedence over matching fields here when both are provided.
+ * Access control only affects browser rendering; the backend must still authenticate independently.
  */
 export type AdminProviderBundle = ProviderBundle & {
   /** UI-only locale integration; all other fields come from Core's canonical ProviderBundle. */

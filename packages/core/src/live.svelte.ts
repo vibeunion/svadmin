@@ -1,22 +1,23 @@
+import { definedOptions } from './defined-options';
 // LiveProvider — Real-time subscription interface + hooks
 
 import { useQueryClient } from '@tanstack/svelte-query';
 import { captureAdminContext } from './context.svelte';
-import { dataQueryMatches } from './query-keys';
+import { createCheckedLiveSubscription } from './live-subscription.svelte';
+import type { ResourceContract } from './resource-contract';
+import { snapshotLiveEvent } from './live-transport';
+import { HttpError } from './types';
+import { captureAuthLiveScope } from './auth-hooks.svelte';
+import type { LiveEvent } from './live-transport';
+export type { LiveEvent } from './live-transport';
 
 // ─── Types ──────────────────────────────────────────────────────
 
-export type LiveMode = 'auto' | 'manual' | 'off';
-
-export interface LiveEvent {
-  type: 'INSERT' | 'UPDATE' | 'DELETE';
-  resource: string;
-  payload: Record<string, unknown>;
-}
+export type LiveMode='auto'|'manual'|'off';
 
 export interface LiveProvider {
-  subscribe(params: { resource: string; liveParams?: Record<string, unknown>; callback: (event: LiveEvent) => void }): () => void;
-  unsubscribe?(params: { resource: string; liveParams?: Record<string, unknown> }): void;
+  subscribe(params: { resource: string; liveParams?: Record<string,unknown>; callback: (event: LiveEvent) => void }): () => void;
+  unsubscribe?(params: { resource: string; liveParams?: Record<string,unknown> }): void;
   publish?(event: LiveEvent): void;
   onConnected?: () => void;
   onDisconnected?: () => void;
@@ -31,78 +32,75 @@ export interface LiveProviderReconnectOptions {
 // ─── useLive — auto-invalidate queries on real-time events ──────
 
 export function useLive(
-  liveProvider: LiveProvider | (() => LiveProvider),
-  resource: string | (() => string),
-  options?: { liveMode?: LiveMode | (() => LiveMode); onLiveEvent?: (event: LiveEvent) => void; liveParams?: Record<string, unknown> | (() => Record<string, unknown>); dataProviderName?: string }
+  liveProvider: LiveProvider|(() => LiveProvider),
+  resource: string|(() => string),
+  options?: { liveMode?: LiveMode|(() => LiveMode); onLiveEvent?: (event: LiveEvent) => void; liveParams?: Record<string,unknown>|(() => Record<string,unknown>); dataProviderName?: string; contract?: ResourceContract }
 ): void {
-  const queryClient = useQueryClient();
-  const adminContext = captureAdminContext();
-
-  $effect(() => {
-    const lp = typeof liveProvider === 'function' ? liveProvider() : liveProvider;
-    const res = typeof resource === 'function' ? resource() : resource;
-    const liveMode = typeof options?.liveMode === 'function' ? options.liveMode() : (options?.liveMode ?? 'auto');
-    const liveParams = typeof options?.liveParams === 'function' ? options.liveParams() : options?.liveParams;
-    if (liveMode === 'off') return;
-
-    let unsubscribe: (() => void) | undefined;
-    try {
-      unsubscribe = lp.subscribe({
-        resource: res,
-        liveParams,
-        callback: (event) => {
-          options?.onLiveEvent?.(event);
-          if (liveMode === 'auto') {
-            const matcher = adminContext.queryKeyMatcher(res, options?.dataProviderName);
-            queryClient.invalidateQueries({
-              predicate: (q) => dataQueryMatches(q.queryKey, { ...matcher, resource: res }),
-            });
-          }
-        },
-      });
-    } catch (e) {
-      console.warn('[svadmin] LiveProvider.subscribe failed:', e);
-      return;
-    }
-    return unsubscribe;
-  });
+  const queryClient=useQueryClient();
+  createCheckedLiveSubscription(() => ({
+    resource: typeof resource==='function'? resource():resource,
+    liveProvider: typeof liveProvider==='function'? liveProvider():liveProvider,
+    liveMode: typeof options?.liveMode==='function'? options.liveMode() : options?.liveMode === undefined ? 'auto' : options.liveMode,
+    ...definedOptions({
+      liveParams: typeof options?.liveParams==='function'? options.liveParams():options?.liveParams,
+      onLiveEvent: options?.onLiveEvent, dataProviderName: options?.dataProviderName, contract: options?.contract,
+    }),
+  }),queryClient);
 }
 
 // ─── useSubscription — manual channel subscription ──────────────
 
 interface UseSubscriptionOptions {
-  resource: string | (() => string);
-  liveProvider: LiveProvider | (() => LiveProvider);
+  resource: string|(() => string);
+  liveProvider: LiveProvider|(() => LiveProvider);
   onLiveEvent: (event: LiveEvent) => void;
-  enabled?: boolean | (() => boolean);
-  liveParams?: Record<string, unknown> | (() => Record<string, unknown>);
+  enabled?: boolean|(() => boolean);
+  liveParams?: Record<string,unknown>|(() => Record<string,unknown>);
 }
 
 export function useSubscription(options: UseSubscriptionOptions): void {
-  $effect(() => {
-    const res = typeof options.resource === 'function' ? options.resource() : options.resource;
-    const lp = typeof options.liveProvider === 'function' ? options.liveProvider() : options.liveProvider;
-    const enabled = typeof options.enabled === 'function' ? options.enabled() : (options.enabled ?? true);
-    const liveParams = typeof options.liveParams === 'function' ? options.liveParams() : options.liveParams;
-    if (!enabled) return;
-
-    const unsubscribe = lp.subscribe({
-      resource: res,
-      liveParams,
-      callback: options.onLiveEvent,
-    });
-    return unsubscribe;
-  });
+  createCheckedLiveSubscription(() => ({
+    resource: typeof options.resource==='function'? options.resource():options.resource,
+    liveProvider: typeof options.liveProvider==='function'? options.liveProvider():options.liveProvider,
+    liveMode: 'manual', onLiveEvent: options.onLiveEvent,
+    ...definedOptions({
+      enabled: typeof options.enabled==='function'? options.enabled():options.enabled,
+      liveParams: typeof options.liveParams==='function'? options.liveParams():options.liveParams,
+    }),
+  }));
 }
 
 // ─── usePublish — publish custom events ─────────────────────────
 
-export function usePublish(liveProvider: LiveProvider) {
-  return (event: LiveEvent) => {
-    if (liveProvider.publish) {
-      liveProvider.publish(event);
-    } else {
-      console.warn('[svadmin] LiveProvider.publish() not implemented');
+/** Await publication failures; successful invocation is not a remote delivery receipt. */
+export function usePublish(liveProvider: LiveProvider | (() => LiveProvider)) {
+  const context = captureAdminContext();
+  let mounted = true;
+  $effect(() => () => { mounted = false; });
+  return async (event: LiveEvent): Promise<void> => {
+    const checked = snapshotLiveEvent(event);
+    if (!checked) throw new HttpError('Invalid live event', 422, undefined, { code: 'INVALID_LIVE_EVENT' });
+    let dispatched = false;
+    try {
+      const provider = typeof liveProvider === 'function' ? liveProvider() : liveProvider;
+      const publish = provider.publish;
+      const auth = context.authProvider;
+      const authScope = captureAuthLiveScope(auth);
+      const router = context.routerProvider;
+      const tenant = context.tenantCacheKey?.__svadminTenant;
+      const current = () => mounted && (typeof liveProvider === 'function' ? liveProvider() : liveProvider) === provider &&
+        context.authProvider === auth && authScope.available && authScope.isCurrent() &&
+        context.routerProvider === router && context.tenantCacheKey?.__svadminTenant === tenant;
+      if (!current()) throw new Error();
+      if (typeof publish !== 'function') throw new Error();
+      dispatched = true;
+      const result: unknown = publish.call(provider, checked);
+      await result;
+      if (!current()) throw new Error();
+    } catch {
+      throw new HttpError('Live publication failed', 502, undefined, {
+        code: 'LIVE_PUBLISH_FAILED', details: { writeMayHaveSucceeded: dispatched },
+      });
     }
   };
 }

@@ -16,6 +16,10 @@
 </script>
 
 <script lang="ts">
+  import { definedReactiveOptions } from '@svadmin/core/options';
+
+  import { definedOptions } from '@svadmin/core/options';
+
   // Auto-inject design tokens so consumers don't need to manually import
   import '../app.css';
   import { onDestroy, onMount, untrack, type Component, type Snippet } from 'svelte';
@@ -68,7 +72,7 @@
   import ConfigErrorScreen from './ConfigErrorScreen.svelte';
   import Sidebar from './Sidebar.svelte';
   import Header from './Header.svelte';
-  import TaskQueueDrawer from './TaskQueueDrawer.svelte';
+  import TaskQueueDrawer from './LazyTaskQueueDrawer.svelte';
   import SettingsPage from './SettingsPage.svelte';
   import ErrorPage from './ErrorPage.svelte';
   import SystemPageShell from './SystemPageShell.svelte';
@@ -105,8 +109,8 @@
     /** Request/tree-scoped tenant. Tenant identifiers are never rendered by DevTools. */
     tenant?: TenantContext;
     resources: ResourceDefinition[];
-    /** Bindable tree-local locale; defaults to the provider locale or per-tree browser detection (English during SSR). */
-    locale?: string;
+    /** Undefined releases the bound locale to provider/browser detection (English during SSR). */
+    locale?: string | undefined;
     /** Optional tree-local translation provider. */
     i18nProvider?: I18nProvider;
     title?: string;
@@ -188,10 +192,7 @@
     Layout, Sidebar, Header,
     LoginPage, AutoTable, AutoForm, ShowPage,
     TaskQueueDrawer, ErrorPage,
-    Button: Button as unknown as ComponentRegistry['Button'],
-    Input: Input as unknown as ComponentRegistry['Input'],
-    Badge: Badge as unknown as ComponentRegistry['Badge'],
-    Skeleton: Skeleton as unknown as ComponentRegistry['Skeleton'],
+    Button, Input, Badge, Skeleton,
   };
 
   const resolvedProviderBundle = $derived(providerBundle ?? providers);
@@ -241,31 +242,31 @@
     locale = nextLocale;
   }
 
-  const i18nScope = createI18nScope({
+  const i18nScope = createI18nScope(definedOptions({
     locale: untrack(() => locale),
     provider: untrack(() => resolvedI18nProvider),
     onLocaleChange: updateBoundLocale,
-  });
+  }));
   provideI18nScope(i18nScope);
   const translation = useTranslation();
 
   $effect.pre(() => {
     const ownerProvider = resolvedI18nProvider;
     const ownerLocale = locale;
-    untrack(() => i18nScope.updateOwner({
+    untrack(() => i18nScope.updateOwner(definedOptions({
       locale: ownerLocale,
       provider: ownerProvider,
       onLocaleChange: updateBoundLocale,
-    }));
+    })));
   });
 
   let themeOwner = $state.raw<ReturnType<typeof registerThemeOwner>>(undefined);
 
   onMount(() => {
-    themeOwner = registerThemeOwner({
+    themeOwner = registerThemeOwner(definedOptions({
       defaultTheme,
       themeConfig: userThemeConfig,
-    });
+    }));
 
     return () => {
       unregisterThemeOwner(themeOwner);
@@ -275,10 +276,10 @@
 
   $effect(() => {
     const owner = themeOwner;
-    const ownerOptions = {
+    const ownerOptions = definedOptions({
       defaultTheme,
       themeConfig: userThemeConfig,
-    };
+    });
     untrack(() => updateThemeOwner(owner, ownerOptions));
   });
 
@@ -286,7 +287,7 @@
     setComponentRegistry(mergedComponents);
   }
 
-  provideAdminContext({
+  provideAdminContext(definedReactiveOptions({
     get providerBundle() { return resolvedProviderBundle as ProviderBundle | undefined; },
     get dataProvider() {
       if (!resolvedDataProvider) throw new Error('AdminApp requires a DataProvider.');
@@ -308,7 +309,7 @@
     get routerProvider() { return scopedRouterProvider; },
     get tenantAdapter() { return resolvedTenantAdapter; },
     get tenant() { return tenant; },
-  });
+  }));
   const adminContext = captureAdminContext();
 
   // Context must be available synchronously to descendants during their first render.
@@ -330,8 +331,8 @@
   const resourceNames = $derived(new Set(resources.map((resource) => resource.name)));
   const isStandaloneTwoFactor = $derived(route === '/2fa' || route === '/authentication/branded/2fa');
   const standaloneErrorStatus = $derived.by((): '404' | '500' | undefined => {
-    if (route === '/authentication/error-404' || route === '/404' || (route === '/:resource' && params.resource === '404')) return '404';
-    if (route === '/authentication/error-500' || route === '/500' || (route === '/:resource' && params.resource === '500')) return '500';
+    if (route === '/authentication/error-404' || route === '/404' || (route === '/:resource' && params['resource'] === '404')) return '404';
+    if (route === '/authentication/error-500' || route === '/500' || (route === '/:resource' && params['resource'] === '500')) return '500';
     return undefined;
   });
 
@@ -353,22 +354,23 @@
   );
   const renderedRoute = $derived(route);
   const renderedParams = $derived(params);
-  const renderedHasRouteResource = $derived(!renderedParams.resource || resourceNames.has(renderedParams.resource));
-  const renderedResourcePages = $derived(renderedParams.resource ? resourcePages?.[renderedParams.resource] : undefined);
+  const renderedResourceName = $derived(renderedParams['resource']);
+  const renderedHasRouteResource = $derived(renderedResourceName !== undefined && resourceNames.has(renderedResourceName));
+  const renderedResourcePages = $derived(renderedParams['resource'] ? resourcePages?.[renderedParams['resource']] : undefined);
   const documentTitle = $derived.by(() => {
-    const resource = renderedParams.resource
-      ? resources.find((candidate) => candidate.name === renderedParams.resource)
+    const resource = renderedParams['resource']
+      ? resources.find((candidate) => candidate.name === renderedParams['resource'])
       : undefined;
     let pageLabel = '';
 
     if (resource) {
       pageLabel = resource.label || resource.name;
     } else if (renderedRoute.startsWith('/settings') || renderedRoute === '/account/:tab') {
-      const tab = renderedParams.tab === 'api-keys'
+      const tab = renderedParams['tab'] === 'api-keys'
         ? 'api'
-        : renderedParams.tab === 'audit-logs'
+        : renderedParams['tab'] === 'audit-logs'
           ? 'audit'
-          : renderedParams.tab ?? 'profile';
+          : renderedParams['tab'] ?? 'profile';
       const labels: Record<string, string> = {
         profile: translation.t('settings.profile'),
         appearance: translation.t('settings.appearance'),
@@ -528,9 +530,9 @@
   {:else if route === '/login' && resolvedAuthProvider}
     <LoginPage
       {title}
-      defaultIdentifier={loginDefaults?.identifier}
-      defaultPassword={loginDefaults?.password}
-      loginHint={loginDefaults?.hint}
+      {...definedOptions({ "defaultIdentifier": loginDefaults?.identifier })}
+      {...definedOptions({ "defaultPassword": loginDefaults?.password })}
+      {...definedOptions({ "loginHint": loginDefaults?.hint })}
       onSuccess={() => { isAuthenticated = true; void navigateWithinApp('/'); }}
     />
   {:else if route === '/register' && resolvedAuthProvider?.register}
@@ -551,8 +553,7 @@
       <ErrorComp status={standaloneErrorStatus} />
     </SystemPageShell>
   {:else if isAuthenticated || !resolvedAuthProvider}
-    <Layout {title} {menu} {siteUrl} routeMode={resolvedRouteMode} {aiAssistant}>
-      <div class="svadmin-u-d89972fe17d6 svadmin-u-8a7a926578c8" aria-busy={authRechecking}>
+    <Layout {title} {...definedOptions({ "menu": menu })} {...definedOptions({ "siteUrl": siteUrl })} routeMode={resolvedRouteMode} {...definedOptions({ "aiAssistant": aiAssistant })}>      <div class="svadmin-u-d89972fe17d6 svadmin-u-8a7a926578c8" aria-busy={authRechecking}>
         {#if authRechecking}
           <div class="svadmin-u-da4dbfbc4fdc svadmin-u-7b7df0449b80 svadmin-u-236812d64c82 svadmin-u-60fbb7713999 svadmin-u-8a7a926578c8 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-d542b60b5312" role="status" aria-live="polite">
             <div class="svadmin-u-6ed543e2fbbb svadmin-u-ca6bf63030aa">
@@ -561,18 +562,18 @@
             </div>
           </div>
         {:else}
-      {#key renderedRoute + (renderedParams.resource ?? '') + (renderedParams.id ?? '') + (renderedParams.variant ?? '') + (renderedParams.columns ?? '')}
+      {#key renderedRoute + (renderedParams['resource'] ?? '') + (renderedParams['id'] ?? '') + (renderedParams['variant'] ?? '') + (renderedParams['columns'] ?? '')}
       <div class="svadmin-page-enter">
       {#if renderedRoute === '/public-profile'}
         <LazyPage loader={loadPublicProfilePage} props={{ variant: 'default', initialTab: 'projects' }} />
       {:else if renderedRoute === '/public-profile/projects/:columns'}
-        <LazyPage loader={loadPublicProfilePage} props={{ variant: 'default', initialTab: 'projects', columns: renderedParams.columns?.includes('3') ? 3 : 2 }} />
+        <LazyPage loader={loadPublicProfilePage} props={{ variant: 'default', initialTab: 'projects', columns: renderedParams['columns']?.includes('3') ? 3 : 2 }} />
       {:else if renderedRoute === '/public-profile/activity'}
         <LazyPage loader={loadPublicProfilePage} props={{ variant: 'default', initialTab: 'activity' }} />
       {:else if renderedRoute === '/public-profile/teams'}
         <LazyPage loader={loadPublicProfilePage} props={{ variant: 'default', initialTab: 'teams' }} />
       {:else if renderedRoute === '/public-profile/profiles/:variant'}
-        <LazyPage loader={loadPublicProfilePage} props={{ variant: (renderedParams.variant === 'company' || renderedParams.variant === 'gamer' || renderedParams.variant === 'default' ? renderedParams.variant : 'default') as 'company' | 'gamer' | 'default', showSections: true }} />
+        <LazyPage loader={loadPublicProfilePage} props={{ variant: (renderedParams['variant'] === 'company' || renderedParams['variant'] === 'gamer' || renderedParams['variant'] === 'default' ? renderedParams['variant'] : 'default') as 'company' | 'gamer' | 'default', showSections: true }} />
       {:else if renderedRoute === '/account/get-started' || renderedRoute === '/account/home/get-started'}
         <LazyPage loader={loadGetStartedPage} props={{}} />
       {:else if renderedRoute === '/account/home/user-profile'}
@@ -610,39 +611,39 @@
             <p class="svadmin-u-bfa603190748">{translation.t('common.dashboardHint')}</p>
           </div>
         {/if}
-      {:else if (renderedRoute === '/:resource' || renderedRoute === '/:parent/:parentId/:resource') && renderedHasRouteResource}
-        {#key renderedParams.resource}
+      {:else if (renderedRoute === '/:resource' || renderedRoute === '/:parent/:parentId/:resource') && renderedHasRouteResource && renderedResourceName !== undefined}
+        {#key renderedParams['resource']}
           {@const Comp = renderedResourcePages?.list ?? mergedComponents.AutoTable}
-          <ResourceAccessGuard resourceName={renderedParams.resource} action="list">
-            <Comp resourceName={renderedParams.resource} />
+          <ResourceAccessGuard resourceName={renderedResourceName} action="list">
+            <Comp resourceName={renderedResourceName} />
           </ResourceAccessGuard>
         {/key}
-      {:else if (renderedRoute === '/:resource/create' || renderedRoute === '/:parent/:parentId/:resource/create') && renderedHasRouteResource}
-        {#key renderedParams.resource}
+      {:else if (renderedRoute === '/:resource/create' || renderedRoute === '/:parent/:parentId/:resource/create') && renderedHasRouteResource && renderedResourceName !== undefined}
+        {#key renderedParams['resource']}
           {@const Comp = renderedResourcePages?.create ?? mergedComponents.AutoForm}
-          <ResourceAccessGuard resourceName={renderedParams.resource} action="create">
-            <Comp resourceName={renderedParams.resource} mode="create" />
+          <ResourceAccessGuard resourceName={renderedResourceName} action="create">
+            <Comp resourceName={renderedResourceName} mode="create" />
           </ResourceAccessGuard>
         {/key}
-      {:else if (renderedRoute === '/:resource/edit/:id' || renderedRoute === '/:resource/:id/edit' || renderedRoute === '/:parent/:parentId/:resource/edit/:id') && renderedHasRouteResource}
-        {#key `${renderedParams.resource}-${renderedParams.id}`}
+      {:else if (renderedRoute === '/:resource/edit/:id' || renderedRoute === '/:resource/:id/edit' || renderedRoute === '/:parent/:parentId/:resource/edit/:id') && renderedHasRouteResource && renderedResourceName !== undefined && renderedParams['id'] !== undefined}
+        {#key `${renderedParams['resource']}-${renderedParams['id']}`}
           {@const Comp = renderedResourcePages?.edit ?? mergedComponents.AutoForm}
-          <ResourceAccessGuard resourceName={renderedParams.resource} action="edit" id={renderedParams.id}>
-            <Comp resourceName={renderedParams.resource} mode="edit" id={renderedParams.id} />
+          <ResourceAccessGuard resourceName={renderedResourceName} action="edit" {...definedOptions({ "id": renderedParams['id'] })}>
+            <Comp resourceName={renderedResourceName} mode="edit" {...definedOptions({ "id": renderedParams['id'] })} />
           </ResourceAccessGuard>
         {/key}
-      {:else if (renderedRoute === '/:resource/show/:id' || renderedRoute === '/:resource/:id' || renderedRoute === '/:parent/:parentId/:resource/show/:id') && renderedHasRouteResource}
-        {#key `${renderedParams.resource}-${renderedParams.id}`}
+      {:else if (renderedRoute === '/:resource/show/:id' || renderedRoute === '/:resource/:id' || renderedRoute === '/:parent/:parentId/:resource/show/:id') && renderedHasRouteResource && renderedResourceName !== undefined && renderedParams['id'] !== undefined}
+        {#key `${renderedParams['resource']}-${renderedParams['id']}`}
           {@const Comp = renderedResourcePages?.show ?? mergedComponents.ShowPage}
-          <ResourceAccessGuard resourceName={renderedParams.resource} action="show" id={renderedParams.id}>
-            <Comp resourceName={renderedParams.resource} id={renderedParams.id} />
+          <ResourceAccessGuard resourceName={renderedResourceName} action="show" {...definedOptions({ "id": renderedParams['id'] })}>
+            <Comp resourceName={renderedResourceName} id={renderedParams['id']} />
           </ResourceAccessGuard>
         {/key}
-      {:else if (renderedRoute === '/:resource/clone/:id' || renderedRoute === '/:parent/:parentId/:resource/clone/:id') && renderedHasRouteResource}
-        {#key `${renderedParams.resource}-clone-${renderedParams.id}`}
+      {:else if (renderedRoute === '/:resource/clone/:id' || renderedRoute === '/:parent/:parentId/:resource/clone/:id') && renderedHasRouteResource && renderedResourceName !== undefined && renderedParams['id'] !== undefined}
+        {#key `${renderedParams['resource']}-clone-${renderedParams['id']}`}
           {@const Comp = renderedResourcePages?.clone ?? mergedComponents.AutoForm}
-          <ResourceAccessGuard resourceName={renderedParams.resource} action="create" id={renderedParams.id} requireSourceRead>
-            <Comp resourceName={renderedParams.resource} mode="clone" id={renderedParams.id} />
+          <ResourceAccessGuard resourceName={renderedResourceName} action="create" {...definedOptions({ "id": renderedParams['id'] })} requireSourceRead>
+            <Comp resourceName={renderedResourceName} mode="clone" {...definedOptions({ "id": renderedParams['id'] })} />
           </ResourceAccessGuard>
         {/key}
       {:else}

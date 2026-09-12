@@ -1,5 +1,5 @@
-// I18nProvider 运行时委托测试 — 需 vitest + Svelte 5 编译器
-// 运行方式：cd packages/core && bunx vitest run src/i18n-provider.test.svelte.ts
+// I18nProvider runtime delegation tests require Vitest and the Svelte 5 compiler.
+// Run with: cd packages/core && bunx vitest run src/i18n-provider.test.svelte.ts
 import { describe, it, expect } from 'vitest';
 import {
   setI18nProvider,

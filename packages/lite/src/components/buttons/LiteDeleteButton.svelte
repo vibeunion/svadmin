@@ -32,6 +32,9 @@
   <span id={`${confirmationId}-closed`} class="lite-confirm-cancel-target" aria-hidden="true"></span>
   <a
     href={`#${confirmationId}`}
+    data-svadmin-button
+    data-variant="destructive"
+    data-size={size}
     class="lite-btn lite-btn-danger {size === 'sm' ? 'lite-btn-sm' : ''}"
     title={t('common.delete') || 'Delete'}
     aria-controls={confirmationId}

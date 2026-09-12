@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import { useTranslation } from '@svadmin/core/i18n';
   import { Download } from '@lucide/svelte';
   import { Button } from '../ui/button/index.js';
@@ -15,8 +17,7 @@
 </script>
 
 <ContentPageShell pageId="account-security-log" width="wide">
-  <ContentPageHeader title={i18n.t('account.securityLog')} description={i18n.t('account.securityLogDescription')} actions={undefined} />
-  <div class="svadmin-u-60fbb7713999 svadmin-u-77c08e015d14"><Button variant="outline" size="sm"><Download class="svadmin-u-783b0d9d1e2c" />{i18n.t('common.export')}</Button></div>
+  <ContentPageHeader title={i18n.t('account.securityLog')} description={i18n.t('account.securityLogDescription')} {...definedOptions({ "actions": undefined })} />  <div class="svadmin-u-60fbb7713999 svadmin-u-77c08e015d14"><Button variant="outline" size="sm"><Download class="svadmin-u-783b0d9d1e2c" />{i18n.t('common.export')}</Button></div>
   <FilterToolbar bind:query placeholder={i18n.t('common.search')} />
   <SecurityEventTable events={filtered} />
 </ContentPageShell>

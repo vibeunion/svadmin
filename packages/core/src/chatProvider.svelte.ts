@@ -27,7 +27,7 @@ export interface ChatAttachment {
   mediaType?: string;
   url?: string;
   size?: number;
-  /** 原始浏览器文件，供上传适配器直接读取；持久化恢复时不会保留。 */
+  /** Original browser file for upload adapters; it is not retained after persistence restore. */
   file?: File;
 }
 

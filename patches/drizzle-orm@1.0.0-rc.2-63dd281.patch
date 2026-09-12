@@ -1,0 +1,696 @@
+diff --git a/cockroach-core/policies.d.cts b/cockroach-core/policies.d.cts
+index b45ab02b7fe66eb1cc43907a6a7d939b802d0629..b366ec670db1b8e366c700ced51cdc2d67f086bc 100644
+--- a/cockroach-core/policies.d.cts
++++ b/cockroach-core/policies.d.cts
+@@ -6,11 +6,11 @@ import { SQL } from "../sql/sql.cjs";
+ //#region src/cockroach-core/policies.d.ts
+ type CockroachPolicyToOption = 'public' | 'current_user' | 'session_user' | (string & {}) | CockroachPolicyToOption[] | CockroachRole;
+ interface CockroachPolicyConfig {
+-  as?: 'permissive' | 'restrictive';
+-  for?: 'all' | 'select' | 'insert' | 'update' | 'delete';
+-  to?: CockroachPolicyToOption;
+-  using?: SQL;
+-  withCheck?: SQL;
++  as?: 'permissive' | 'restrictive' | undefined;
++  for?: 'all' | 'select' | 'insert' | 'update' | 'delete' | undefined;
++  to?: CockroachPolicyToOption | undefined;
++  using?: SQL | undefined;
++  withCheck?: SQL | undefined;
+ }
+ declare class CockroachPolicy implements CockroachPolicyConfig {
+   readonly name: string;
+diff --git a/cockroach-core/policies.d.ts b/cockroach-core/policies.d.ts
+index 3d000078a7c7eb9e1fbf6663079d34cc4f065692..3dbb2d88c15f7a9a5b0e0773499980a5d6d18e1a 100644
+--- a/cockroach-core/policies.d.ts
++++ b/cockroach-core/policies.d.ts
+@@ -6,11 +6,11 @@ import { SQL } from "../sql/sql.js";
+ //#region src/cockroach-core/policies.d.ts
+ type CockroachPolicyToOption = 'public' | 'current_user' | 'session_user' | (string & {}) | CockroachPolicyToOption[] | CockroachRole;
+ interface CockroachPolicyConfig {
+-  as?: 'permissive' | 'restrictive';
+-  for?: 'all' | 'select' | 'insert' | 'update' | 'delete';
+-  to?: CockroachPolicyToOption;
+-  using?: SQL;
+-  withCheck?: SQL;
++  as?: 'permissive' | 'restrictive' | undefined;
++  for?: 'all' | 'select' | 'insert' | 'update' | 'delete' | undefined;
++  to?: CockroachPolicyToOption | undefined;
++  using?: SQL | undefined;
++  withCheck?: SQL | undefined;
+ }
+ declare class CockroachPolicy implements CockroachPolicyConfig {
+   readonly name: string;
+diff --git a/cockroach-core/query-builders/query.d.cts b/cockroach-core/query-builders/query.d.cts
+index 03e5ecb95fe18b7ef793e361eece0622a879df0e..bfc1e1cb8f7cfe218f6262cf8f4c2a0fbedd9c47 100644
+--- a/cockroach-core/query-builders/query.d.cts
++++ b/cockroach-core/query-builders/query.d.cts
+@@ -2,7 +2,7 @@ import { CockroachTable } from "../table.cjs";
+ import { CockroachDialect } from "../dialect.cjs";
+ import { CockroachPreparedQuery, CockroachSession, PreparedQueryConfig } from "../session.cjs";
+ import { entityKind } from "../../entity.cjs";
+-import { Query, SQLWrapper } from "../../sql/sql.cjs";
++import { Query, SQL, SQLWrapper } from "../../sql/sql.cjs";
+ import { KnownKeysOnly } from "../../utils.cjs";
+ import { BuildQueryResult, DBQueryConfig, TableRelationalConfig, TablesRelationalConfig } from "../../_relations.cjs";
+ import { QueryPromise } from "../../query-promise.cjs";
+@@ -43,6 +43,7 @@ declare class CockroachRelationalQuery<TResult> extends QueryPromise<TResult> im
+   }>;
+   private _getQuery;
+   private _toSQL;
++  getSQL(): SQL;
+   toSQL(): Query;
+   execute(): Promise<TResult>;
+ }
+diff --git a/cockroach-core/query-builders/query.d.ts b/cockroach-core/query-builders/query.d.ts
+index 85f9be620ebb9399bff5178be92ae9adb7c21106..7ed41b8e336d4a39f19b3bc1988fc4d006f49807 100644
+--- a/cockroach-core/query-builders/query.d.ts
++++ b/cockroach-core/query-builders/query.d.ts
+@@ -3,7 +3,7 @@ import { CockroachDialect } from "../dialect.js";
+ import { CockroachPreparedQuery, CockroachSession, PreparedQueryConfig } from "../session.js";
+ import { entityKind } from "../../entity.js";
+ import { KnownKeysOnly } from "../../utils.js";
+-import { Query, SQLWrapper } from "../../sql/sql.js";
++import { Query, SQL, SQLWrapper } from "../../sql/sql.js";
+ import { BuildQueryResult, DBQueryConfig, TableRelationalConfig, TablesRelationalConfig } from "../../_relations.js";
+ import { QueryPromise } from "../../query-promise.js";
+ import { RunnableQuery } from "../../runnable-query.js";
+@@ -43,6 +43,7 @@ declare class CockroachRelationalQuery<TResult> extends QueryPromise<TResult> im
+   }>;
+   private _getQuery;
+   private _toSQL;
++  getSQL(): SQL;
+   toSQL(): Query;
+   execute(): Promise<TResult>;
+ }
+diff --git a/cockroach-core/roles.d.cts b/cockroach-core/roles.d.cts
+index d34865246b0ab0a682d5cfe1edae3684bf85a97b..ef4ba8aa7c1dff03f8a5dff42cab0731b2283358 100644
+--- a/cockroach-core/roles.d.cts
++++ b/cockroach-core/roles.d.cts
+@@ -2,11 +2,13 @@ import { entityKind } from "../entity.cjs";
+ 
+ //#region src/cockroach-core/roles.d.ts
+ interface CockroachRoleConfig {
+-  createDb?: boolean;
+-  createRole?: boolean;
++  createDb?: boolean | undefined;
++  createRole?: boolean | undefined;
+ }
+ declare class CockroachRole implements CockroachRoleConfig {
+   readonly name: string;
++  readonly createDb: CockroachRoleConfig['createDb'];
++  readonly createRole: CockroachRoleConfig['createRole'];
+   static readonly [entityKind]: string;
+   constructor(name: string, config?: CockroachRoleConfig);
+   existing(): this;
+diff --git a/cockroach-core/roles.d.ts b/cockroach-core/roles.d.ts
+index d797efaf8f50f14db7d812cbb75ab3d52a372c0f..405a53c90b28d56fd7a7522f33c21abbe8e1aa9a 100644
+--- a/cockroach-core/roles.d.ts
++++ b/cockroach-core/roles.d.ts
+@@ -2,11 +2,13 @@ import { entityKind } from "../entity.js";
+ 
+ //#region src/cockroach-core/roles.d.ts
+ interface CockroachRoleConfig {
+-  createDb?: boolean;
+-  createRole?: boolean;
++  createDb?: boolean | undefined;
++  createRole?: boolean | undefined;
+ }
+ declare class CockroachRole implements CockroachRoleConfig {
+   readonly name: string;
++  readonly createDb: CockroachRoleConfig['createDb'];
++  readonly createRole: CockroachRoleConfig['createRole'];
+   static readonly [entityKind]: string;
+   constructor(name: string, config?: CockroachRoleConfig);
+   existing(): this;
+diff --git a/column-builder.d.cts b/column-builder.d.cts
+index f56639be963250b7e0a145146cbf5d190d9397f1..003af298f3e957897da08b721f03fcad09ddc3e6 100644
+--- a/column-builder.d.cts
++++ b/column-builder.d.cts
+@@ -146,9 +146,10 @@ type IsIdentity<T, TType extends 'always' | 'byDefault'> = T & {
+ interface ColumnBuilderBase<out T extends ColumnBuilderBaseConfig<ColumnType> = ColumnBuilderBaseConfig<ColumnType>> {
+   _: T;
+ }
+-declare abstract class ColumnBuilder<out T extends ColumnBuilderBaseConfig<ColumnType>, TRuntimeConfig extends object = object, TExtraConfig extends ColumnBuilderExtraConfig = ColumnBuilderExtraConfig> implements ColumnBuilderBase<T> {
++declare abstract class ColumnBuilder<in out T extends ColumnBuilderBaseConfig<ColumnType>, TRuntimeConfig extends object = object, TExtraConfig extends ColumnBuilderExtraConfig = ColumnBuilderExtraConfig> implements ColumnBuilderBase<T> {
+   static readonly [entityKind]: string;
+   _: T;
++  protected config: ColumnBuilderRuntimeConfig<T['data']> & TRuntimeConfig;
+   constructor(name: string, dataType: ColumnType, columnType: string);
+   /**
+    * Changes the data type of the column. Commonly used with `json` columns. Also, useful for branded types.
+diff --git a/column-builder.d.ts b/column-builder.d.ts
+index ef98a22a0071256c6f1035cfead21ce8e3c78d8d..59af785b21926f392bb774c206a33dd458bba592 100644
+--- a/column-builder.d.ts
++++ b/column-builder.d.ts
+@@ -146,9 +146,10 @@ type IsIdentity<T, TType extends 'always' | 'byDefault'> = T & {
+ interface ColumnBuilderBase<out T extends ColumnBuilderBaseConfig<ColumnType> = ColumnBuilderBaseConfig<ColumnType>> {
+   _: T;
+ }
+-declare abstract class ColumnBuilder<out T extends ColumnBuilderBaseConfig<ColumnType>, TRuntimeConfig extends object = object, TExtraConfig extends ColumnBuilderExtraConfig = ColumnBuilderExtraConfig> implements ColumnBuilderBase<T> {
++declare abstract class ColumnBuilder<in out T extends ColumnBuilderBaseConfig<ColumnType>, TRuntimeConfig extends object = object, TExtraConfig extends ColumnBuilderExtraConfig = ColumnBuilderExtraConfig> implements ColumnBuilderBase<T> {
+   static readonly [entityKind]: string;
+   _: T;
++  protected config: ColumnBuilderRuntimeConfig<T['data']> & TRuntimeConfig;
+   constructor(name: string, dataType: ColumnType, columnType: string);
+   /**
+    * Changes the data type of the column. Commonly used with `json` columns. Also, useful for branded types.
+diff --git a/d1/driver.d.cts b/d1/driver.d.cts
+index 65272cb3859128d7614f3909015b8fafc5b0f1f9..a4dcbe3aa4d8f6900c32ae2411869cc7ddc2e1dd 100644
+--- a/d1/driver.d.cts
++++ b/d1/driver.d.cts
+@@ -1,12 +1,12 @@
+ import { entityKind } from "../entity.cjs";
+-import { DrizzleConfig, IfNotImported } from "../utils.cjs";
++import { DrizzleConfig } from "../utils.cjs";
+ import { AnyRelations, EmptyRelations } from "../relations.cjs";
+ import { BaseSQLiteDatabase } from "../sqlite-core/db.cjs";
+-import { D1Database as D1Database$1 } from "@miniflare/d1";
++import type { D1Database, D1DatabaseSession, D1Result } from "@cloudflare/workers-types";
+ import { BatchItem, BatchResponse } from "../batch.cjs";
+ 
+ //#region src/d1/driver.d.ts
+-type AnyD1Database = IfNotImported<D1Database, D1Database$1, D1Database | IfNotImported<D1DatabaseSession, never, D1DatabaseSession> | IfNotImported<D1Database$1, never, D1Database$1>>;
++type AnyD1Database = D1Database | D1DatabaseSession;
+ declare class DrizzleD1Database<TSchema extends Record<string, unknown> = Record<string, never>, TRelations extends AnyRelations = EmptyRelations> extends BaseSQLiteDatabase<'async', D1Result, TSchema, TRelations> {
+   static readonly [entityKind]: string;
+   batch<U extends BatchItem<'sqlite'>, T extends Readonly<[U, ...U[]]>>(batch: T): Promise<BatchResponse<T>>;
+diff --git a/d1/driver.d.ts b/d1/driver.d.ts
+index a03fccb04dba0cf04a9bfab91cbc930f44c6c869..ab1ba79dfbd3b2837bc20c81c89ca5e67f7fa7a9 100644
+--- a/d1/driver.d.ts
++++ b/d1/driver.d.ts
+@@ -1,12 +1,12 @@
+ import { entityKind } from "../entity.js";
+-import { DrizzleConfig, IfNotImported } from "../utils.js";
++import { DrizzleConfig } from "../utils.js";
+ import { AnyRelations, EmptyRelations } from "../relations.js";
+ import { BaseSQLiteDatabase } from "../sqlite-core/db.js";
+-import { D1Database as D1Database$1 } from "@miniflare/d1";
++import type { D1Database, D1DatabaseSession, D1Result } from "@cloudflare/workers-types";
+ import { BatchItem, BatchResponse } from "../batch.js";
+ 
+ //#region src/d1/driver.d.ts
+-type AnyD1Database = IfNotImported<D1Database, D1Database$1, D1Database | IfNotImported<D1DatabaseSession, never, D1DatabaseSession> | IfNotImported<D1Database$1, never, D1Database$1>>;
++type AnyD1Database = D1Database | D1DatabaseSession;
+ declare class DrizzleD1Database<TSchema extends Record<string, unknown> = Record<string, never>, TRelations extends AnyRelations = EmptyRelations> extends BaseSQLiteDatabase<'async', D1Result, TSchema, TRelations> {
+   static readonly [entityKind]: string;
+   batch<U extends BatchItem<'sqlite'>, T extends Readonly<[U, ...U[]]>>(batch: T): Promise<BatchResponse<T>>;
+diff --git a/d1/session.d.cts b/d1/session.d.cts
+index 87447174af3bc40066445a9915541595efb6cde8..5374f9d83dbf56a1f2a4e4e320b97a4a8821a64f 100644
+--- a/d1/session.d.cts
++++ b/d1/session.d.cts
+@@ -10,6 +10,7 @@ import { Cache } from "../cache/core/index.cjs";
+ import { SQLiteTransaction as SQLiteTransaction$1 } from "../sqlite-core/index.cjs";
+ import { SelectedFieldsOrdered } from "../sqlite-core/query-builders/select.types.cjs";
+ import { BatchItem } from "../batch.cjs";
++import type { D1Database, D1DatabaseSession, D1Result, D1Response, D1PreparedStatement } from "@cloudflare/workers-types";
+ 
+ //#region src/d1/session.d.ts
+ interface SQLiteD1SessionOptions {
+diff --git a/d1/session.d.ts b/d1/session.d.ts
+index 485e743430bba3172921544059a178799c9b7a94..92480c7547707c38574e00e4dbcfa6d0289806a3 100644
+--- a/d1/session.d.ts
++++ b/d1/session.d.ts
+@@ -10,6 +10,7 @@ import { PreparedQueryConfig, SQLiteExecuteMethod, SQLitePreparedQuery, SQLiteSe
+ import { WithCacheConfig } from "../cache/core/types.js";
+ import { SelectedFieldsOrdered } from "../sqlite-core/query-builders/select.types.js";
+ import { BatchItem } from "../batch.js";
++import type { D1Database, D1DatabaseSession, D1Result, D1Response, D1PreparedStatement } from "@cloudflare/workers-types";
+ 
+ //#region src/d1/session.d.ts
+ interface SQLiteD1SessionOptions {
+diff --git a/mysql-core/query-builders/delete.d.cts b/mysql-core/query-builders/delete.d.cts
+index fcf32f50406b827c5f1d1729e8a8526f45cf9951..537a6e4ba1d9729fac88dfda96e3ace921e29177 100644
+--- a/mysql-core/query-builders/delete.d.cts
++++ b/mysql-core/query-builders/delete.d.cts
+@@ -80,6 +80,7 @@ declare class MySqlDeleteBase<TTable extends MySqlTable, TQueryResult extends My
+    * Attach [sqlcommenter](https://google.github.io/sqlcommenter) comment to a query
+    */
+   comment(comment: SqlCommenterInput): MySqlDeleteWithout<this, TDynamic, 'comment'>;
++  getSQL(): SQL;
+   toSQL(): Query;
+   prepare(): MySqlDeletePrepare<this>;
+   execute: ReturnType<this['prepare']>['execute'];
+diff --git a/mysql-core/query-builders/delete.d.ts b/mysql-core/query-builders/delete.d.ts
+index e182ad8cc3059e2dfeba6deee701b96d7e2d8b7b..41c09ab6ae74f6cd70211cfb5ac5e3e46a28ddcc 100644
+--- a/mysql-core/query-builders/delete.d.ts
++++ b/mysql-core/query-builders/delete.d.ts
+@@ -80,6 +80,7 @@ declare class MySqlDeleteBase<TTable extends MySqlTable, TQueryResult extends My
+    * Attach [sqlcommenter](https://google.github.io/sqlcommenter) comment to a query
+    */
+   comment(comment: SqlCommenterInput): MySqlDeleteWithout<this, TDynamic, 'comment'>;
++  getSQL(): SQL;
+   toSQL(): Query;
+   prepare(): MySqlDeletePrepare<this>;
+   execute: ReturnType<this['prepare']>['execute'];
+diff --git a/mysql-core/query-builders/select.d.cts b/mysql-core/query-builders/select.d.cts
+index cda653f6fe9f580103953eddd97a076711685426..48cd325c36a4adab236a5a0392af01627397b1a8 100644
+--- a/mysql-core/query-builders/select.d.cts
++++ b/mysql-core/query-builders/select.d.cts
+@@ -614,6 +614,7 @@ declare abstract class MySqlSelectQueryBuilderBase<THKT extends MySqlSelectHKTBa
+    * Attach [sqlcommenter](https://google.github.io/sqlcommenter) comment to a query
+    */
+   comment(comment: SqlCommenterInput): MySqlSelectWithout<this, TDynamic, 'comment'>;
++  getSQL(): SQL;
+   toSQL(): Query;
+   as<TAlias extends string>(alias: TAlias): SubqueryWithSelection<this['_']['selectedFields'], TAlias>;
+   $dynamic(): MySqlSelectDynamic<this>;
+diff --git a/mysql-core/query-builders/select.d.ts b/mysql-core/query-builders/select.d.ts
+index 680af0b7f7c7eb541051b41ceaabf4b04db1e89b..a8c221a08ec94047de6e760823cb6371dd6711d0 100644
+--- a/mysql-core/query-builders/select.d.ts
++++ b/mysql-core/query-builders/select.d.ts
+@@ -614,6 +614,7 @@ declare abstract class MySqlSelectQueryBuilderBase<THKT extends MySqlSelectHKTBa
+    * Attach [sqlcommenter](https://google.github.io/sqlcommenter) comment to a query
+    */
+   comment(comment: SqlCommenterInput): MySqlSelectWithout<this, TDynamic, 'comment'>;
++  getSQL(): SQL;
+   toSQL(): Query;
+   as<TAlias extends string>(alias: TAlias): SubqueryWithSelection<this['_']['selectedFields'], TAlias>;
+   $dynamic(): MySqlSelectDynamic<this>;
+diff --git a/mysql-core/query-builders/select.types.d.cts b/mysql-core/query-builders/select.types.d.cts
+index d4cb4c30bf8161bd9cb553e02a5d320f3b223c0d..cfb095505387ec08bd78c31cc020c85dcbe10a03 100644
+--- a/mysql-core/query-builders/select.types.d.cts
++++ b/mysql-core/query-builders/select.types.d.cts
+@@ -104,7 +104,7 @@ interface MySqlSelectQueryBuilderHKT extends MySqlSelectHKTBase {
+ interface MySqlSelectHKT extends MySqlSelectHKTBase {
+   _type: MySqlSelectBase<this['tableName'], Assume<this['selection'], ColumnsSelection>, this['selectMode'], Assume<this['preparedQueryHKT'], PreparedQueryHKTBase>, Assume<this['nullabilityMap'], Record<string, JoinNullability>>, this['dynamic'], this['excludedMethods'], Assume<this['result'], any[]>, Assume<this['selectedFields'], ColumnsSelection>>;
+ }
+-type MySqlSetOperatorExcludedMethods = 'where' | 'having' | 'groupBy' | 'session' | 'leftJoin' | 'rightJoin' | 'innerJoin' | 'for';
++type MySqlSetOperatorExcludedMethods = 'where' | 'having' | 'groupBy' | 'leftJoin' | 'rightJoin' | 'innerJoin' | 'for';
+ type MySqlSelectWithout<T extends AnyMySqlSelectQueryBuilder, TDynamic extends boolean, K extends keyof T & string, TResetExcluded extends boolean = false> = TDynamic extends true ? T : Omit<MySqlSelectKind<T['_']['hkt'], T['_']['tableName'], T['_']['selection'], T['_']['selectMode'], T['_']['preparedQueryHKT'], T['_']['nullabilityMap'], TDynamic, TResetExcluded extends true ? K : T['_']['excludedMethods'] | K, T['_']['result'], T['_']['selectedFields']>, TResetExcluded extends true ? K : T['_']['excludedMethods'] | K>;
+ type MySqlSelectPrepare<T extends AnyMySqlSelect> = PreparedQueryKind<T['_']['preparedQueryHKT'], MySqlPreparedQueryConfig & {
+   execute: T['_']['result'];
+diff --git a/mysql-core/query-builders/select.types.d.ts b/mysql-core/query-builders/select.types.d.ts
+index e28e1c9bc901a03f600c2b1953c9102454943921..9ce8ce4a22e7ea3c19560c6a2532401fc69bd334 100644
+--- a/mysql-core/query-builders/select.types.d.ts
++++ b/mysql-core/query-builders/select.types.d.ts
+@@ -104,7 +104,7 @@ interface MySqlSelectQueryBuilderHKT extends MySqlSelectHKTBase {
+ interface MySqlSelectHKT extends MySqlSelectHKTBase {
+   _type: MySqlSelectBase<this['tableName'], Assume<this['selection'], ColumnsSelection>, this['selectMode'], Assume<this['preparedQueryHKT'], PreparedQueryHKTBase>, Assume<this['nullabilityMap'], Record<string, JoinNullability>>, this['dynamic'], this['excludedMethods'], Assume<this['result'], any[]>, Assume<this['selectedFields'], ColumnsSelection>>;
+ }
+-type MySqlSetOperatorExcludedMethods = 'where' | 'having' | 'groupBy' | 'session' | 'leftJoin' | 'rightJoin' | 'innerJoin' | 'for';
++type MySqlSetOperatorExcludedMethods = 'where' | 'having' | 'groupBy' | 'leftJoin' | 'rightJoin' | 'innerJoin' | 'for';
+ type MySqlSelectWithout<T extends AnyMySqlSelectQueryBuilder, TDynamic extends boolean, K extends keyof T & string, TResetExcluded extends boolean = false> = TDynamic extends true ? T : Omit<MySqlSelectKind<T['_']['hkt'], T['_']['tableName'], T['_']['selection'], T['_']['selectMode'], T['_']['preparedQueryHKT'], T['_']['nullabilityMap'], TDynamic, TResetExcluded extends true ? K : T['_']['excludedMethods'] | K, T['_']['result'], T['_']['selectedFields']>, TResetExcluded extends true ? K : T['_']['excludedMethods'] | K>;
+ type MySqlSelectPrepare<T extends AnyMySqlSelect> = PreparedQueryKind<T['_']['preparedQueryHKT'], MySqlPreparedQueryConfig & {
+   execute: T['_']['result'];
+diff --git a/pg-core/columns/common.d.cts b/pg-core/columns/common.d.cts
+index b88d07cd952cb164c81202aaadddba566cf16e62..11b46272c9823e7dee12ab09bff105fc37bfc0d7 100644
+--- a/pg-core/columns/common.d.cts
++++ b/pg-core/columns/common.d.cts
+@@ -143,7 +143,7 @@ interface ReferenceConfig {
+     onDelete?: UpdateDeleteAction;
+   };
+ }
+-declare abstract class PgColumnBuilder<out T extends PgColumnBuilderConfig = PgColumnBuilderConfig, out TRuntimeConfig extends object = object> {
++declare abstract class PgColumnBuilder<in out T extends PgColumnBuilderConfig = PgColumnBuilderConfig, out TRuntimeConfig extends object = object> {
+   static readonly [entityKind]: string;
+   readonly _: T;
+   private foreignKeyConfigs;
+diff --git a/pg-core/columns/common.d.ts b/pg-core/columns/common.d.ts
+index 42069c5e6259d8e7b2971d9cf9c463dddaf81908..5a7b4dbc7d8271befd5fb8ed3e4b5394a96a4885 100644
+--- a/pg-core/columns/common.d.ts
++++ b/pg-core/columns/common.d.ts
+@@ -143,7 +143,7 @@ interface ReferenceConfig {
+     onDelete?: UpdateDeleteAction;
+   };
+ }
+-declare abstract class PgColumnBuilder<out T extends PgColumnBuilderConfig = PgColumnBuilderConfig, out TRuntimeConfig extends object = object> {
++declare abstract class PgColumnBuilder<in out T extends PgColumnBuilderConfig = PgColumnBuilderConfig, out TRuntimeConfig extends object = object> {
+   static readonly [entityKind]: string;
+   readonly _: T;
+   private foreignKeyConfigs;
+diff --git a/pg-core/columns/date.common.d.cts b/pg-core/columns/date.common.d.cts
+index 4df75624e70bc054e0813880c03cf51baa14e41d..f7448507dd4a2209c5b5933d92ee972351d7435b 100644
+--- a/pg-core/columns/date.common.d.cts
++++ b/pg-core/columns/date.common.d.cts
+@@ -2,7 +2,7 @@ import { PgColumnBuilder, PgColumnBuilderConfig, SetHasDefault } from "./common.
+ import { entityKind } from "../../entity.cjs";
+ 
+ //#region src/pg-core/columns/date.common.d.ts
+-declare abstract class PgDateColumnBuilder<out T extends PgColumnBuilderConfig = PgColumnBuilderConfig, out TRuntimeConfig extends object = object> extends PgColumnBuilder<T, TRuntimeConfig> {
++declare abstract class PgDateColumnBuilder<in out T extends PgColumnBuilderConfig = PgColumnBuilderConfig, out TRuntimeConfig extends object = object> extends PgColumnBuilder<T, TRuntimeConfig> {
+   static readonly [entityKind]: string;
+   /**
+    * Adds a `default now()` clause to the column definition.
+diff --git a/pg-core/columns/date.common.d.ts b/pg-core/columns/date.common.d.ts
+index ac7d730e241a42dbaaac91a672415aa11146462c..a9f03fd49d75041764dede5fe950ef4e5fc8efa7 100644
+--- a/pg-core/columns/date.common.d.ts
++++ b/pg-core/columns/date.common.d.ts
+@@ -2,7 +2,7 @@ import { PgColumnBuilder, PgColumnBuilderConfig, SetHasDefault } from "./common.
+ import { entityKind } from "../../entity.js";
+ 
+ //#region src/pg-core/columns/date.common.d.ts
+-declare abstract class PgDateColumnBuilder<out T extends PgColumnBuilderConfig = PgColumnBuilderConfig, out TRuntimeConfig extends object = object> extends PgColumnBuilder<T, TRuntimeConfig> {
++declare abstract class PgDateColumnBuilder<in out T extends PgColumnBuilderConfig = PgColumnBuilderConfig, out TRuntimeConfig extends object = object> extends PgColumnBuilder<T, TRuntimeConfig> {
+   static readonly [entityKind]: string;
+   /**
+    * Adds a `default now()` clause to the column definition.
+diff --git a/pg-core/columns/int.common.d.cts b/pg-core/columns/int.common.d.cts
+index 804e2a816487cf5d4071e5ab466a39da798e44bd..e55648c0c5e094e0d3b9cc04fe415c6f453774b0 100644
+--- a/pg-core/columns/int.common.d.cts
++++ b/pg-core/columns/int.common.d.cts
+@@ -3,7 +3,7 @@ import { HasIdentity, PgColumnBuilder, PgColumnBuilderConfig } from "./common.cj
+ import { entityKind } from "../../entity.cjs";
+ 
+ //#region src/pg-core/columns/int.common.d.ts
+-declare abstract class PgIntColumnBuilder<out T extends PgColumnBuilderConfig = PgColumnBuilderConfig, out TRuntimeConfig extends object = object> extends PgColumnBuilder<T, TRuntimeConfig> {
++declare abstract class PgIntColumnBuilder<in out T extends PgColumnBuilderConfig = PgColumnBuilderConfig, out TRuntimeConfig extends object = object> extends PgColumnBuilder<T, TRuntimeConfig> {
+   static readonly [entityKind]: string;
+   /**
+    * Adds an `ALWAYS AS IDENTITY` clause to the column definition.
+diff --git a/pg-core/columns/int.common.d.ts b/pg-core/columns/int.common.d.ts
+index 1f84a02cfa61416a07cbfc93f7c5133c03d37806..85deb6ecc3a30da909e9d0d07057f3eec83f1263 100644
+--- a/pg-core/columns/int.common.d.ts
++++ b/pg-core/columns/int.common.d.ts
+@@ -3,7 +3,7 @@ import { HasIdentity, PgColumnBuilder, PgColumnBuilderConfig } from "./common.js
+ import { entityKind } from "../../entity.js";
+ 
+ //#region src/pg-core/columns/int.common.d.ts
+-declare abstract class PgIntColumnBuilder<out T extends PgColumnBuilderConfig = PgColumnBuilderConfig, out TRuntimeConfig extends object = object> extends PgColumnBuilder<T, TRuntimeConfig> {
++declare abstract class PgIntColumnBuilder<in out T extends PgColumnBuilderConfig = PgColumnBuilderConfig, out TRuntimeConfig extends object = object> extends PgColumnBuilder<T, TRuntimeConfig> {
+   static readonly [entityKind]: string;
+   /**
+    * Adds an `ALWAYS AS IDENTITY` clause to the column definition.
+diff --git a/pg-core/policies.d.cts b/pg-core/policies.d.cts
+index 7229cdd896f19cefc544f755eddf7c9b99912a2d..664838eed6ee6c16f34c3eb0884ede82c6c1066c 100644
+--- a/pg-core/policies.d.cts
++++ b/pg-core/policies.d.cts
+@@ -6,11 +6,11 @@ import { SQL } from "../sql/sql.cjs";
+ //#region src/pg-core/policies.d.ts
+ type PgPolicyToOption = 'public' | 'current_role' | 'current_user' | 'session_user' | (string & {}) | PgPolicyToOption[] | PgRole;
+ interface PgPolicyConfig {
+-  as?: 'permissive' | 'restrictive';
+-  for?: 'all' | 'select' | 'insert' | 'update' | 'delete';
+-  to?: PgPolicyToOption;
+-  using?: SQL;
+-  withCheck?: SQL;
++  as?: 'permissive' | 'restrictive' | undefined;
++  for?: 'all' | 'select' | 'insert' | 'update' | 'delete' | undefined;
++  to?: PgPolicyToOption | undefined;
++  using?: SQL | undefined;
++  withCheck?: SQL | undefined;
+ }
+ declare class PgPolicy implements PgPolicyConfig {
+   readonly name: string;
+diff --git a/pg-core/policies.d.ts b/pg-core/policies.d.ts
+index 8dddf4ca5865abfcd754bfcc793d16272aeecf13..5a163e3af3e309447435aff7465c4abb96d19b76 100644
+--- a/pg-core/policies.d.ts
++++ b/pg-core/policies.d.ts
+@@ -6,11 +6,11 @@ import { SQL } from "../sql/sql.js";
+ //#region src/pg-core/policies.d.ts
+ type PgPolicyToOption = 'public' | 'current_role' | 'current_user' | 'session_user' | (string & {}) | PgPolicyToOption[] | PgRole;
+ interface PgPolicyConfig {
+-  as?: 'permissive' | 'restrictive';
+-  for?: 'all' | 'select' | 'insert' | 'update' | 'delete';
+-  to?: PgPolicyToOption;
+-  using?: SQL;
+-  withCheck?: SQL;
++  as?: 'permissive' | 'restrictive' | undefined;
++  for?: 'all' | 'select' | 'insert' | 'update' | 'delete' | undefined;
++  to?: PgPolicyToOption | undefined;
++  using?: SQL | undefined;
++  withCheck?: SQL | undefined;
+ }
+ declare class PgPolicy implements PgPolicyConfig {
+   readonly name: string;
+diff --git a/pg-core/query-builders/refresh-materialized-view.d.cts b/pg-core/query-builders/refresh-materialized-view.d.cts
+index c875ed4cf20c536d0f977d6ea7b931e85e08ee25..6b89ac19eafd570fefedea837c934c520dd29051 100644
+--- a/pg-core/query-builders/refresh-materialized-view.d.cts
++++ b/pg-core/query-builders/refresh-materialized-view.d.cts
+@@ -1,5 +1,5 @@
+ import { entityKind } from "../../entity.cjs";
+-import { Query, SQLWrapper } from "../../sql/sql.cjs";
++import { Query, SQL, SQLWrapper } from "../../sql/sql.cjs";
+ import { PgMaterializedView } from "../view.cjs";
+ import { PgDialect } from "../dialect.cjs";
+ import { PgQueryResultHKT, PgQueryResultKind, PgSession } from "../session.cjs";
+@@ -21,6 +21,7 @@ declare class PgRefreshMaterializedView<TQueryResult extends PgQueryResultHKT> i
+   constructor(view: PgMaterializedView, session: PgSession, dialect: PgDialect);
+   concurrently(): this;
+   withNoData(): this;
++  getSQL(): SQL;
+   toSQL(): Query;
+ }
+ //#endregion
+diff --git a/pg-core/query-builders/refresh-materialized-view.d.ts b/pg-core/query-builders/refresh-materialized-view.d.ts
+index e2d890db862d0270609e24e62b2e54a9ad8eeebf..90f50e2e271682701509d48bc8556b57c1c4f9ac 100644
+--- a/pg-core/query-builders/refresh-materialized-view.d.ts
++++ b/pg-core/query-builders/refresh-materialized-view.d.ts
+@@ -1,5 +1,5 @@
+ import { entityKind } from "../../entity.js";
+-import { Query, SQLWrapper } from "../../sql/sql.js";
++import { Query, SQL, SQLWrapper } from "../../sql/sql.js";
+ import { PgDialect } from "../dialect.js";
+ import { PgMaterializedView } from "../view.js";
+ import { PgQueryResultHKT, PgQueryResultKind, PgSession } from "../session.js";
+@@ -21,6 +21,7 @@ declare class PgRefreshMaterializedView<TQueryResult extends PgQueryResultHKT> i
+   constructor(view: PgMaterializedView, session: PgSession, dialect: PgDialect);
+   concurrently(): this;
+   withNoData(): this;
++  getSQL(): SQL;
+   toSQL(): Query;
+ }
+ //#endregion
+diff --git a/pg-core/roles.d.cts b/pg-core/roles.d.cts
+index 3a072b6008fb3fb9dec39bf1735be4355fe691af..96e3da803b0925985820df3e7e7f143cebe291e4 100644
+--- a/pg-core/roles.d.cts
++++ b/pg-core/roles.d.cts
+@@ -2,12 +2,15 @@ import { entityKind } from "../entity.cjs";
+ 
+ //#region src/pg-core/roles.d.ts
+ interface PgRoleConfig {
+-  createDb?: boolean;
+-  createRole?: boolean;
+-  inherit?: boolean;
++  createDb?: boolean | undefined;
++  createRole?: boolean | undefined;
++  inherit?: boolean | undefined;
+ }
+ declare class PgRole implements PgRoleConfig {
+   readonly name: string;
++  readonly createDb: PgRoleConfig['createDb'];
++  readonly createRole: PgRoleConfig['createRole'];
++  readonly inherit: PgRoleConfig['inherit'];
+   static readonly [entityKind]: string;
+   constructor(name: string, config?: PgRoleConfig);
+   existing(): this;
+diff --git a/pg-core/roles.d.ts b/pg-core/roles.d.ts
+index 24534dbf0f583d5533333ae80d9ae9c0d193b49c..0cc06d035bd9a0f7af9d5b434f0bee1752cb9368 100644
+--- a/pg-core/roles.d.ts
++++ b/pg-core/roles.d.ts
+@@ -2,12 +2,15 @@ import { entityKind } from "../entity.js";
+ 
+ //#region src/pg-core/roles.d.ts
+ interface PgRoleConfig {
+-  createDb?: boolean;
+-  createRole?: boolean;
+-  inherit?: boolean;
++  createDb?: boolean | undefined;
++  createRole?: boolean | undefined;
++  inherit?: boolean | undefined;
+ }
+ declare class PgRole implements PgRoleConfig {
+   readonly name: string;
++  readonly createDb: PgRoleConfig['createDb'];
++  readonly createRole: PgRoleConfig['createRole'];
++  readonly inherit: PgRoleConfig['inherit'];
+   static readonly [entityKind]: string;
+   constructor(name: string, config?: PgRoleConfig);
+   existing(): this;
+diff --git a/postgres-js/session.cjs b/postgres-js/session.cjs
+index 3dda624c598a6062c5ca1022b529382288a7253f..dbfc7fc22916ea6c801cc974e31435a73a890281 100644
+--- a/postgres-js/session.cjs
++++ b/postgres-js/session.cjs
+@@ -27,12 +27,17 @@ var PostgresJsSession = class PostgresJsSession extends __pg_core_async_session_
+ 		return new __pg_core_async_session_ts.PgAsyncPreparedQuery(executor, query, mapper, mode, this.logger, this.cache, queryMetadata, cacheConfig);
+ 	}
+ 	transaction(transaction, config) {
+-		return this.client.begin(async (client) => {
++		const run = async (client) => {
+ 			const session = new PostgresJsSession(client, this.dialect, this.relations, this.options);
+ 			const tx = new PostgresJsTransaction(this.dialect, session, this.relations);
+ 			if (config) await tx.setTransaction(config);
+ 			return transaction(tx);
+-		});
++		};
++		if (typeof this.client.savepoint === "function") {
++			if (config !== undefined) throw new TypeError("Nested transactions do not accept transaction configuration");
++			return this.client.savepoint(run);
++		}
++		return this.client.begin(run);
+ 	}
+ };
+ var PostgresJsTransaction = class PostgresJsTransaction extends __pg_core_async_session_ts.PgAsyncTransaction {
+diff --git a/postgres-js/session.d.cts b/postgres-js/session.d.cts
+index 0a8dd2ea25f4356d7bbbab722120ca6bc0cc30d1..ab7293f64eeb72fa19e63da6772c934c57c4cbd3 100644
+--- a/postgres-js/session.d.cts
++++ b/postgres-js/session.d.cts
+@@ -15,7 +15,7 @@ interface PostgresJsSessionOptions {
+   logger?: Logger;
+   cache?: Cache;
+ }
+-declare class PostgresJsSession<TSQL extends Sql, TRelations extends AnyRelations> extends PgAsyncSession<PostgresJsQueryResultHKT, TRelations> {
++declare class PostgresJsSession<TSQL extends Sql | TransactionSql, TRelations extends AnyRelations> extends PgAsyncSession<PostgresJsQueryResultHKT, TRelations> {
+   client: TSQL;
+   private relations;
+   static readonly [entityKind]: string;
+diff --git a/postgres-js/session.d.ts b/postgres-js/session.d.ts
+index 03cbded33f45de3913ba1ed9e8be96e9ff32b47b..965ab33bb7c183b473923893f64b9265962df82f 100644
+--- a/postgres-js/session.d.ts
++++ b/postgres-js/session.d.ts
+@@ -15,7 +15,7 @@ interface PostgresJsSessionOptions {
+   logger?: Logger;
+   cache?: Cache;
+ }
+-declare class PostgresJsSession<TSQL extends Sql, TRelations extends AnyRelations> extends PgAsyncSession<PostgresJsQueryResultHKT, TRelations> {
++declare class PostgresJsSession<TSQL extends Sql | TransactionSql, TRelations extends AnyRelations> extends PgAsyncSession<PostgresJsQueryResultHKT, TRelations> {
+   client: TSQL;
+   private relations;
+   static readonly [entityKind]: string;
+diff --git a/postgres-js/session.js b/postgres-js/session.js
+index 3d57f8c90696976fc24ccd5cb968d722dcf63a43..728477e218ad641b69433a565ddf83d02b44848f 100644
+--- a/postgres-js/session.js
++++ b/postgres-js/session.js
+@@ -25,12 +25,17 @@ var PostgresJsSession = class PostgresJsSession extends PgAsyncSession {
+ 		return new PgAsyncPreparedQuery(executor, query, mapper, mode, this.logger, this.cache, queryMetadata, cacheConfig);
+ 	}
+ 	transaction(transaction, config) {
+-		return this.client.begin(async (client) => {
++		const run = async (client) => {
+ 			const session = new PostgresJsSession(client, this.dialect, this.relations, this.options);
+ 			const tx = new PostgresJsTransaction(this.dialect, session, this.relations);
+ 			if (config) await tx.setTransaction(config);
+ 			return transaction(tx);
+-		});
++		};
++		if (typeof this.client.savepoint === "function") {
++			if (config !== undefined) throw new TypeError("Nested transactions do not accept transaction configuration");
++			return this.client.savepoint(run);
++		}
++		return this.client.begin(run);
+ 	}
+ };
+ var PostgresJsTransaction = class PostgresJsTransaction extends PgAsyncTransaction {
+diff --git a/sqlite-core/query-builders/_query.d.cts b/sqlite-core/query-builders/_query.d.cts
+index 3118abd4c7fd6ef2274e87f2bf3c820f8dbc30bf..42a064c9eec4c9264f67091c9a848a6dbf4c0d87 100644
+--- a/sqlite-core/query-builders/_query.d.cts
++++ b/sqlite-core/query-builders/_query.d.cts
+@@ -2,7 +2,7 @@ import { SQLiteDialect } from "../dialect.cjs";
+ import { SQLiteTable } from "../table.cjs";
+ import { PreparedQueryConfig, SQLitePreparedQuery, SQLiteSession } from "../session.cjs";
+ import { entityKind } from "../../entity.cjs";
+-import { Query, SQLWrapper } from "../../sql/sql.cjs";
++import { Query, SQL, SQLWrapper } from "../../sql/sql.cjs";
+ import { KnownKeysOnly } from "../../utils.cjs";
+ import * as V1 from "../../_relations.cjs";
+ import { QueryPromise } from "../../query-promise.cjs";
+@@ -48,6 +48,7 @@ declare class SQLiteRelationalQuery<TType extends 'sync' | 'async', TResult> ext
+     execute: TResult;
+   }>;
+   private _toSQL;
++  getSQL(): SQL;
+   toSQL(): Query;
+   execute(): Promise<TResult>;
+ }
+diff --git a/sqlite-core/query-builders/_query.d.ts b/sqlite-core/query-builders/_query.d.ts
+index 4a4f6f533af9d8ee5f9cccb7769d768a9331bd4c..aa1e559fc289888d292f771306e0c4d3a03c6951 100644
+--- a/sqlite-core/query-builders/_query.d.ts
++++ b/sqlite-core/query-builders/_query.d.ts
+@@ -3,7 +3,7 @@ import { SQLiteTable } from "../table.js";
+ import { PreparedQueryConfig, SQLitePreparedQuery, SQLiteSession } from "../session.js";
+ import { entityKind } from "../../entity.js";
+ import { KnownKeysOnly } from "../../utils.js";
+-import { Query, SQLWrapper } from "../../sql/sql.js";
++import { Query, SQL, SQLWrapper } from "../../sql/sql.js";
+ import * as V1 from "../../_relations.js";
+ import { QueryPromise } from "../../query-promise.js";
+ import { RunnableQuery } from "../../runnable-query.js";
+@@ -48,6 +48,7 @@ declare class SQLiteRelationalQuery<TType extends 'sync' | 'async', TResult> ext
+     execute: TResult;
+   }>;
+   private _toSQL;
++  getSQL(): SQL;
+   toSQL(): Query;
+   execute(): Promise<TResult>;
+ }
+diff --git a/sqlite-core/query-builders/query.d.cts b/sqlite-core/query-builders/query.d.cts
+index 26316f0ecd385f54032f6b880a7c8938a2bd68ee..7728fa4f6f81243bcc75a5b6c361a27b2341db3b 100644
+--- a/sqlite-core/query-builders/query.d.cts
++++ b/sqlite-core/query-builders/query.d.cts
+@@ -2,7 +2,7 @@ import { SQLiteDialect } from "../dialect.cjs";
+ import { SQLiteTable } from "../table.cjs";
+ import { PreparedQueryConfig, SQLitePreparedQuery, SQLiteSession } from "../session.cjs";
+ import { entityKind } from "../../entity.cjs";
+-import { Query, SQLWrapper } from "../../sql/sql.cjs";
++import { Query, SQL, SQLWrapper } from "../../sql/sql.cjs";
+ import { KnownKeysOnly } from "../../utils.cjs";
+ import { QueryPromise } from "../../query-promise.cjs";
+ import { RunnableQuery } from "../../runnable-query.cjs";
+@@ -47,6 +47,7 @@ declare class SQLiteRelationalQuery<TType extends 'sync' | 'async', TResult> ext
+   }>;
+   private _getQuery;
+   private _toSQL;
++  getSQL(): SQL;
+   toSQL(): Query;
+   execute(): Promise<TResult>;
+ }
+diff --git a/sqlite-core/query-builders/query.d.ts b/sqlite-core/query-builders/query.d.ts
+index c5b03c3406cbb3200eb7e881716895bf68e3d655..57384e99df150c0bb61fea05675ddb41788e4978 100644
+--- a/sqlite-core/query-builders/query.d.ts
++++ b/sqlite-core/query-builders/query.d.ts
+@@ -3,7 +3,7 @@ import { SQLiteTable } from "../table.js";
+ import { PreparedQueryConfig, SQLitePreparedQuery, SQLiteSession } from "../session.js";
+ import { entityKind } from "../../entity.js";
+ import { KnownKeysOnly } from "../../utils.js";
+-import { Query, SQLWrapper } from "../../sql/sql.js";
++import { Query, SQL, SQLWrapper } from "../../sql/sql.js";
+ import { BuildQueryResult, DBQueryConfig, TableRelationalConfig, TablesRelationalConfig } from "../../relations.js";
+ import { QueryPromise } from "../../query-promise.js";
+ import { RunnableQuery } from "../../runnable-query.js";
+@@ -47,6 +47,7 @@ declare class SQLiteRelationalQuery<TType extends 'sync' | 'async', TResult> ext
+   }>;
+   private _getQuery;
+   private _toSQL;
++  getSQL(): SQL;
+   toSQL(): Query;
+   execute(): Promise<TResult>;
+ }
+diff --git a/sqlite-core/query-builders/select.d.cts b/sqlite-core/query-builders/select.d.cts
+index 3ae034e7dd0497e2b87e0753bdc383d7f3b75e96..1059ae4404a5d8e379a6a065fd7338da9a632745 100644
+--- a/sqlite-core/query-builders/select.d.cts
++++ b/sqlite-core/query-builders/select.d.cts
+@@ -50,6 +50,7 @@ declare abstract class SQLiteSelectQueryBuilderBase<THKT extends SQLiteSelectHKT
+     readonly config: SQLiteSelectConfig;
+   };
+   protected joinsNotNullableMap: Record<string, boolean>;
++  config: SQLiteSelectConfig;
+   private tableName;
+   private isPartialSelect;
+   protected session: SQLiteSession<any, any, any, any, any> | undefined;
+@@ -452,6 +453,7 @@ declare abstract class SQLiteSelectQueryBuilderBase<THKT extends SQLiteSelectHKT
+    * ```
+    */
+   offset(offset: number | Placeholder): SQLiteSelectWithout<this, TDynamic, 'offset'>;
++  getSQL(): SQL;
+   toSQL(): Query;
+   as<TAlias extends string>(alias: TAlias): SubqueryWithSelection<this['_']['selectedFields'], TAlias>;
+   $dynamic(): SQLiteSelectDynamic<this>;
+diff --git a/sqlite-core/query-builders/select.d.ts b/sqlite-core/query-builders/select.d.ts
+index a08636264a8f843d90bf800e1ca58dc346fe3737..e7f7960ca10bb32fe2ce67e25f06541d53ac710c 100644
+--- a/sqlite-core/query-builders/select.d.ts
++++ b/sqlite-core/query-builders/select.d.ts
+@@ -50,6 +50,7 @@ declare abstract class SQLiteSelectQueryBuilderBase<THKT extends SQLiteSelectHKT
+     readonly config: SQLiteSelectConfig;
+   };
+   protected joinsNotNullableMap: Record<string, boolean>;
++  config: SQLiteSelectConfig;
+   private tableName;
+   private isPartialSelect;
+   protected session: SQLiteSession<any, any, any, any, any> | undefined;
+@@ -452,6 +453,7 @@ declare abstract class SQLiteSelectQueryBuilderBase<THKT extends SQLiteSelectHKT
+    * ```
+    */
+   offset(offset: number | Placeholder): SQLiteSelectWithout<this, TDynamic, 'offset'>;
++  getSQL(): SQL;
+   toSQL(): Query;
+   as<TAlias extends string>(alias: TAlias): SubqueryWithSelection<this['_']['selectedFields'], TAlias>;
+   $dynamic(): SQLiteSelectDynamic<this>;

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import { useTranslation } from '@svadmin/core/i18n';
   import {
     Accessibility,
@@ -270,9 +272,9 @@
       </div>
       <DataState
         state={viewState}
-        title={stateCopy[viewState][0]}
-        description={stateCopy[viewState][1]}
-        retry={viewState === 'error' ? resetState : undefined}
+        {...definedOptions({ "title": stateCopy[viewState][0] })}
+        {...definedOptions({ "description": stateCopy[viewState][1] })}
+        {...definedOptions({ "retry": viewState === 'error' ? resetState : undefined })}
         retryLabel={isZh ? '重试' : 'Retry'}
         loadingLabel={isZh ? '加载中' : 'Loading'}
       >

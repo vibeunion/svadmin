@@ -1,14 +1,12 @@
+import { definedOptions } from '@svadmin/core/options';
 // Elysia DataProvider — CRUD convention compatible
 // Expects backend routes following: GET /resource, GET /resource/:id, POST /resource, PATCH /resource/:id, DELETE /resource/:id
 // Response format for lists: { items: T[], total: number } (also supports raw arrays)
 
 import type {
-  DataProvider, GetListParams, GetListResult, GetOneParams, GetOneResult,
-  CreateParams, CreateResult, UpdateParams, UpdateResult, DeleteParams, DeleteResult,
-  GetManyParams, GetManyResult, CreateManyParams, CreateManyResult,
-  UpdateManyParams, UpdateManyResult, DeleteManyParams, DeleteManyResult,
-  CustomParams, CustomResult, BaseRecord, FieldFilter, Filter, Sort, Pagination,
+  DataProvider, FieldFilter, Filter, Sort, Pagination,
 } from '@svadmin/core';
+import { withValidatedResponses, type DataTransport } from '@svadmin/core/schema';
 
 export interface ElysiaResourceContext {
   apiUrl: string;
@@ -39,10 +37,10 @@ export interface ElysiaResourceAdapter {
   /** Build the complete query string for list requests. */
   buildListSearchParams?: (context: ElysiaListContext) => URLSearchParams;
   /** Normalize a resource-specific list envelope while retaining extra result metadata. */
-  parseListResponse?: <TData extends BaseRecord = BaseRecord>(
+  parseListResponse?: (
     json: unknown,
     context: ElysiaListContext,
-  ) => GetListResult<TData>;
+  ) => unknown;
 }
 
 export interface ElysiaDataProviderOptions {
@@ -75,10 +73,10 @@ export interface ElysiaDataProviderOptions {
    *
    * @default Handles `{ items, total }` and raw arrays automatically
    */
-  parseListResponse?: <TData extends BaseRecord = BaseRecord>(
+  parseListResponse?: (
     json: unknown,
     resource: string,
-  ) => GetListResult<TData>;
+  ) => unknown;
   /**
    * Ordered per-resource transport overrides. The first matching adapter wins.
    * Existing global options remain the fallback for unmatched resources.
@@ -141,7 +139,7 @@ function resolveResourceUrl(
   resource: string,
   meta?: Record<string, unknown>,
 ): string {
-  const context: ElysiaResourceContext = { apiUrl: opts.apiUrl, resource, meta };
+  const context: ElysiaResourceContext = definedOptions({ apiUrl: opts.apiUrl, resource, meta });
   return resolveResourceUrlWithAdapter(opts, context, resolveResourceAdapter(opts, resource));
 }
 
@@ -244,25 +242,25 @@ function buildCustomUrl(
   return parsed.toString();
 }
 
-async function parseResponse<T>(response: Response): Promise<T> {
+async function parseResponse(response: Response): Promise<unknown> {
   if (response.status === 204 || response.status === 205) {
-    return undefined as unknown as T;
+    return undefined;
   }
 
   const contentLength = response.headers?.get('content-length');
   if (contentLength?.trim() === '0') {
-    return undefined as unknown as T;
+    return undefined;
   }
 
   const body = await response.text();
   if (!body || body.trim() === '') {
-    return undefined as unknown as T;
+    return undefined;
   }
 
-  return JSON.parse(body) as T;
+  return JSON.parse(body);
 }
 
-async function request<T>(url: string, headers: Record<string, string>, init?: RequestOptions, withCredentials?: boolean): Promise<T> {
+async function request(url: string, headers: Record<string, string>, init?: RequestOptions, withCredentials?: boolean): Promise<unknown> {
   init?.signal?.throwIfAborted();
   const fetchInit: RequestInit = { ...init, headers: mergeHeaders(headers, init?.headers) };
   if (withCredentials) {
@@ -273,7 +271,7 @@ async function request<T>(url: string, headers: Record<string, string>, init?: R
     const body = await response.text().catch(() => '');
     throw new Error(`HTTP ${response.status}: ${response.statusText}${body ? ` — ${body}` : ''}`);
   }
-  return parseResponse<T>(response);
+  return parseResponse(response);
 }
 
 /**
@@ -283,31 +281,34 @@ async function request<T>(url: string, headers: Record<string, string>, init?: R
  * - `{ data: T[], total: number }` (common alternative)
  * - `T[]` (raw array — total is inferred from array length)
  */
-function normalizeObjectListResponse<TData extends BaseRecord>(
+function normalizeObjectListResponse(
   response: Record<string, unknown>,
   recordsKey: 'items' | 'data',
-): GetListResult<TData> {
+): unknown {
   const { [recordsKey]: rawRecords, ...metadata } = response;
-  const records = rawRecords as TData[];
   return {
     ...metadata,
-    data: records,
-    total: response.total !== undefined ? Number(response.total) : records.length,
+    data: rawRecords,
+    total: response['total'] !== undefined ? response['total'] : Array.isArray(rawRecords) ? rawRecords.length : undefined,
   };
 }
 
-function defaultParseListResponse<TData extends BaseRecord>(json: unknown): GetListResult<TData> {
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function defaultParseListResponse(json: unknown): unknown {
   if (Array.isArray(json)) {
-    return { data: json as TData[], total: json.length };
+    return { data: json, total: json.length };
   }
-  const obj = json as Record<string, unknown>;
-  if (Array.isArray(obj.items)) {
-    return normalizeObjectListResponse<TData>(obj, 'items');
+  if (isObject(json) && Array.isArray(json['items'])) {
+    return normalizeObjectListResponse(json, 'items');
   }
-  if (Array.isArray(obj.data)) {
-    return normalizeObjectListResponse<TData>(obj, 'data');
+  if (isObject(json) && Array.isArray(json['data'])) {
+    return normalizeObjectListResponse(json, 'data');
   }
-  throw new Error('Unrecognized list response format. Expected { items, total }, { data, total }, or an array.');
+  // Keep malformed payloads unknown so the shared boundary rejects them.
+  return json;
 }
 
 /**
@@ -333,80 +334,77 @@ function defaultParseListResponse<TData extends BaseRecord>(json: unknown): GetL
 export function createElysiaDataProvider(opts: ElysiaDataProviderOptions): DataProvider {
   const { apiUrl, updateMethod = 'PATCH', withCredentials = false } = opts;
 
-  return {
+  const transport: DataTransport = {
     getApiUrl: () => apiUrl,
 
-    async getList<TData extends BaseRecord = BaseRecord>({ resource, pagination, sorters, filters, meta, signal }: GetListParams): Promise<GetListResult<TData>> {
+    async getList({ resource, pagination, sorters, filters, meta, signal }) {
       const { current = 1, pageSize = 10 } = pagination ?? {};
-      const context: ElysiaListContext = {
+      const context: ElysiaListContext = definedOptions({
         apiUrl,
         resource,
         meta,
         pagination: { current, pageSize, mode: pagination?.mode },
         sorters: sorters ?? [],
         filters: filters ?? [],
-      };
+      });
       const adapter = resolveResourceAdapter(opts, resource);
       const params = adapter?.buildListSearchParams?.(context) ?? buildDefaultListSearchParams(context);
       const baseUrl = resolveResourceUrlWithAdapter(opts, context, adapter);
       const query = params.toString();
       const url = query ? `${baseUrl}?${query}` : baseUrl;
       const headers = resolveHeaders(opts);
-      const json = await request<unknown>(url, headers, { signal }, withCredentials);
-
+      const json = await request(url, headers, definedOptions({ signal }), withCredentials);
       if (adapter?.parseListResponse) {
-        return adapter.parseListResponse<TData>(json, context);
+        return adapter.parseListResponse(json, context);
       }
       if (opts.parseListResponse) {
-        return opts.parseListResponse<TData>(json, resource);
+        return opts.parseListResponse(json, resource);
       }
-      return defaultParseListResponse<TData>(json);
+      return defaultParseListResponse(json);
     },
 
-    async getOne<TData extends BaseRecord = BaseRecord>({ resource, id, meta, signal }: GetOneParams): Promise<GetOneResult<TData>> {
+    async getOne({ resource, id, meta, signal }) {
       const baseUrl = resolveResourceUrl(opts, resource, meta);
-      const data = await request<TData>(`${baseUrl}/${encodeIdPathSegment(id)}`, resolveHeaders(opts), { signal }, withCredentials);
-      return { data };
+      const data = await request(`${baseUrl}/${encodeIdPathSegment(id)}`, resolveHeaders(opts), definedOptions({ signal }), withCredentials);      return { data };
     },
 
-    async create<TData extends BaseRecord = BaseRecord, TVariables = unknown>({ resource, variables, meta }: CreateParams<TVariables>): Promise<CreateResult<TData>> {
+    async create({ resource, variables, meta }) {
       const baseUrl = resolveResourceUrl(opts, resource, meta);
-      const data = await request<TData>(baseUrl, resolveHeaders(opts), {
+      const data = await request(baseUrl, resolveHeaders(opts), {
         method: 'POST',
         body: JSON.stringify(variables),
       }, withCredentials);
       return { data };
     },
 
-    async update<TData extends BaseRecord = BaseRecord, TVariables = unknown>({ resource, id, variables, meta }: UpdateParams<TVariables>): Promise<UpdateResult<TData>> {
+    async update({ resource, id, variables, meta }) {
       const baseUrl = resolveResourceUrl(opts, resource, meta);
-      const data = await request<TData>(`${baseUrl}/${encodeIdPathSegment(id)}`, resolveHeaders(opts), {
+      const data = await request(`${baseUrl}/${encodeIdPathSegment(id)}`, resolveHeaders(opts), {
         method: updateMethod,
         body: JSON.stringify(variables),
       }, withCredentials);
       return { data };
     },
 
-    async deleteOne<TData extends BaseRecord = BaseRecord, TVariables = unknown>({ resource, id, meta }: DeleteParams<TVariables>): Promise<DeleteResult<TData>> {
+    async deleteOne({ resource, id, meta }) {
       const baseUrl = resolveResourceUrl(opts, resource, meta);
-      const data = await request<TData | undefined>(`${baseUrl}/${encodeIdPathSegment(id)}`, resolveHeaders(opts), {
+      const data = await request(`${baseUrl}/${encodeIdPathSegment(id)}`, resolveHeaders(opts), {
         method: 'DELETE',
       }, withCredentials);
-      return { data: data === undefined ? { id } as unknown as TData : data };
+      return { data: data === undefined ? { id } : data };
     },
 
-    async getMany<TData extends BaseRecord = BaseRecord>({ resource, ids, meta, signal }: GetManyParams): Promise<GetManyResult<TData>> {
+    async getMany({ resource, ids, meta, signal }) {
       const baseUrl = resolveResourceUrl(opts, resource, meta);
       const params = ids.map(id => `id=${encodeURIComponent(String(id))}`).join('&');
-      const data = await request<TData[]>(`${baseUrl}?${params}`, resolveHeaders(opts), { signal }, withCredentials);
-      return { data };
+      const data = await request(`${baseUrl}?${params}`, resolveHeaders(opts), definedOptions({ signal }), withCredentials);      return { data };
     },
 
-    async createMany<TData extends BaseRecord = BaseRecord, TVariables = unknown>({ resource, variables, meta }: CreateManyParams<TVariables>): Promise<CreateManyResult<TData>> {
+    async createMany({ resource, variables, meta }) {
       const baseUrl = resolveResourceUrl(opts, resource, meta);
       const results = await Promise.all(
         variables.map(vars =>
-          request<TData>(baseUrl, resolveHeaders(opts), {
+          request(baseUrl, resolveHeaders(opts), {
             method: 'POST',
             body: JSON.stringify(vars),
           }, withCredentials)
@@ -415,11 +413,11 @@ export function createElysiaDataProvider(opts: ElysiaDataProviderOptions): DataP
       return { data: results };
     },
 
-    async updateMany<TData extends BaseRecord = BaseRecord, TVariables = unknown>({ resource, ids, variables, meta }: UpdateManyParams<TVariables>): Promise<UpdateManyResult<TData>> {
+    async updateMany({ resource, ids, variables, meta }) {
       const baseUrl = resolveResourceUrl(opts, resource, meta);
       const results = await Promise.all(
         ids.map(id =>
-          request<TData>(`${baseUrl}/${encodeIdPathSegment(id)}`, resolveHeaders(opts), {
+          request(`${baseUrl}/${encodeIdPathSegment(id)}`, resolveHeaders(opts), {
             method: updateMethod,
             body: JSON.stringify(variables),
           }, withCredentials)
@@ -428,19 +426,19 @@ export function createElysiaDataProvider(opts: ElysiaDataProviderOptions): DataP
       return { data: results };
     },
 
-    async deleteMany<TData extends BaseRecord = BaseRecord, TVariables = unknown>({ resource, ids, meta }: DeleteManyParams<TVariables>): Promise<DeleteManyResult<TData>> {
+    async deleteMany({ resource, ids, meta }) {
       const baseUrl = resolveResourceUrl(opts, resource, meta);
       const results = await Promise.all(
         ids.map(id =>
-          request<TData | undefined>(`${baseUrl}/${encodeIdPathSegment(id)}`, resolveHeaders(opts), {
+          request(`${baseUrl}/${encodeIdPathSegment(id)}`, resolveHeaders(opts), {
             method: 'DELETE',
-          }, withCredentials).then(data => data === undefined ? { id } as unknown as TData : data)
+          }, withCredentials).then(data => data === undefined ? { id } : data)
         )
       );
       return { data: results };
     },
 
-    async custom<TData = unknown, TVariables = unknown>({ url, method, payload, query, headers, sorters, filters, signal }: CustomParams<TVariables>): Promise<CustomResult<TData>> {
+    async custom({ url, method, payload, query, headers, sorters, filters, signal }) {
       const requestUrl = buildCustomUrl(url, apiUrl, query, sorters, filters);
       const sameOrigin = isSameOrigin(apiUrl, requestUrl);
       const providerHeaders = resolveHeaders(opts);
@@ -451,12 +449,13 @@ export function createElysiaDataProvider(opts: ElysiaDataProviderOptions): DataP
         sameOrigin ? providerHeaders : DEFAULT_JSON_HEADERS,
         headers,
       );
-      const data = await request<TData>(requestUrl, requestHeaders, {
-        signal,
+      const data = await request(requestUrl, requestHeaders, definedOptions({
         method: method.toUpperCase(),
         body: payload === undefined ? undefined : JSON.stringify(payload),
-      }, withCredentials && sameOrigin);
+        signal,
+      }), withCredentials && sameOrigin);
       return { data };
     },
   };
+  return withValidatedResponses(transport);
 }

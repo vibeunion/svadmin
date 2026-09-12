@@ -1,3 +1,4 @@
+import { definedOptions } from '@svadmin/core/options';
 /**
  * @svadmin/lite — Server Adapter
  *
@@ -58,7 +59,7 @@ function listRequestState(url: URL, resource: ResourceDefinition): ListRequestSt
   const order: 'asc' | 'desc' = sortableField
     ? requestedOrder === 'asc' || requestedOrder === 'desc' ? requestedOrder : 'asc'
     : resource.defaultSort?.order ?? 'asc';
-  return { page, pageSize, sort, order, search: url.searchParams.get('q') ?? undefined };
+  return definedOptions({ page, pageSize, sort, order, search: url.searchParams.get('q') ?? undefined });
 }
 
 function listRequestFilterValues(resource: ResourceDefinition, url: URL): Record<string, string> {
@@ -84,7 +85,7 @@ function listRequestFilters(resource: ResourceDefinition, url: URL): Filter[] {
         value: search,
       }));
     if (searchFilters.length === 1) {
-      filters.push(searchFilters[0]);
+      filters.push(...searchFilters);
     } else if (searchFilters.length > 1) {
       filters.push({ operator: 'or', value: searchFilters });
     }
@@ -122,7 +123,7 @@ export function createListLoader(
       filters: listRequestFilters(resource, url),
     });
 
-    return {
+    return definedOptions({
       records: listResponse.data as Record<string, unknown>[],
       total: listResponse.total,
       page,
@@ -137,7 +138,7 @@ export function createListLoader(
       currentSearch: search,
       currentFilters: listRequestFilterValues(resource, url),
       resource,
-    };
+    });
   };
 }
 
@@ -319,7 +320,7 @@ export function createAuthActions(authProvider: AuthProvider) {
     | { valid: true; providerParams: Record<string, unknown> }
     | { valid: false; error: string } {
     const { confirmPassword, ...providerParams } = authParams;
-    const password = authParams.password;
+    const password = authParams['password'];
     if (typeof password !== 'string'
       || password.length === 0
       || typeof confirmPassword !== 'string'
@@ -463,13 +464,13 @@ function redirectOptions(options: string | LegacyRedirectOptions): Required<
   Pick<LegacyRedirectOptions, 'litePrefix' | 'spaPrefix' | 'exclude' | 'status'>
 > & Pick<LegacyRedirectOptions, 'mapPath'> {
   const configured = typeof options === 'string' ? { litePrefix: options } : options;
-  return {
+  return definedOptions({
     litePrefix: normalizeRoutePrefix(configured.litePrefix ?? '/lite'),
     spaPrefix: normalizeRoutePrefix(configured.spaPrefix ?? '/'),
     exclude: (configured.exclude ?? []).map(normalizeRoutePrefix),
     mapPath: configured.mapPath,
     status: configured.status ?? 302,
-  };
+  });
 }
 
 /**

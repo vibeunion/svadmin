@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Plus, Trash2, RotateCcw, Filter as FilterIcon, Check } from '@lucide/svelte';
   import { cn } from '../utils.js';
+  import { numericInputValue } from '../numeric-input.js';
   import { Button } from './ui/button/index.js';
   import { Input } from './ui/input/index.js';
   import { Select } from './ui/select/index.js';
@@ -55,8 +56,7 @@
       const parsedRules: FilterRuleItem[] = [];
       let nextLogical: 'and' | 'or' = 'and';
 
-      for (let i = 0; i < filters.length; i++) {
-        const item = filters[i];
+      for (const [i, item] of filters.entries()) {
         if ('field' in item) {
           parsedRules.push({
             id: `rule-${i}-${Date.now()}`,
@@ -66,8 +66,7 @@
           });
         } else if (item.operator === 'and' || item.operator === 'or') {
           nextLogical = item.operator;
-          for (let j = 0; j < item.value.length; j++) {
-            const sub = item.value[j];
+          for (const [j, sub] of item.value.entries()) {
             if ('field' in sub) {
               parsedRules.push({
                 id: `rule-${i}-${j}-${Date.now()}`,
@@ -264,15 +263,26 @@
               <option value="true">{i18n.t('common.yes', undefined) ?? '是 (true)'}</option>
               <option value="false">{i18n.t('common.no', undefined) ?? '否 (false)'}</option>
             </Select>
-          {:else}
+          {:else if fieldDef?.type === 'number'}
             <Input
-              type={fieldDef?.type === 'number' ? 'number' : 'text'}
+              type="number"
               class="svadmin-u-ed8a5df7b2fb svadmin-u-359090c2d529"
               placeholder="输入筛选值..."
+              value={numericInputValue(rule.value)}
+              oninput={(e) => {
+                const input = e.currentTarget;
+                if (!(input instanceof HTMLInputElement)) return;
+                rule.value = input.value === '' ? null : numericInputValue(input.valueAsNumber);
+              }}
+            />
+          {:else}
+            <Input
+              type="text"              class="svadmin-u-ed8a5df7b2fb svadmin-u-359090c2d529"
+              placeholder="输入筛选值..."
               value={String(rule.value ?? '')}
-              oninput={(e: Event) => {
-                const val = (e.currentTarget as HTMLInputElement).value;
-                rule.value = fieldDef?.type === 'number' && val !== '' ? Number(val) : val;
+              oninput={(e) => {
+                const input = e.currentTarget;
+                if (input instanceof HTMLInputElement) rule.value = input.value;
               }}
             />
           {/if}

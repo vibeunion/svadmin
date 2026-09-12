@@ -60,7 +60,7 @@
 <Tooltip.Root bind:open>
   <Tooltip.Trigger aria-describedby={restProps['aria-describedby']}>
     {#snippet child({ props })}
-      {@const primitiveOnclick = props.onclick as ((event: MouseEvent) => void) | undefined}
+      {@const primitiveOnclick = props['onclick'] as ((event: MouseEvent) => void) | undefined}
       {@const buttonProps = { ...mergeButtonProps(props), href, target, rel, variant, size, type, class: className, 'aria-label': restProps['aria-label'] ?? tooltip, 'aria-describedby': props['aria-describedby'], onclick: (event: MouseEvent) => handleClick(event, primitiveOnclick), disabled, tabindex } as any}
       <Button {...buttonProps}>
         {@render children()}

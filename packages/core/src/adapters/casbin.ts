@@ -18,7 +18,10 @@
  * ```
  */
 
-import type { AccessControlProvider, CanParams, CanResult } from '../permissions.svelte';
+import type { AccessControlProvider } from '../permissions.svelte';
+import { definedOptions } from '../defined-options';
+import { accessControlFailure, decodeCanResult, snapshotCanParams } from '../access-control-contract';
+import { HttpError } from '../types';
 
 /** Casbin Enforcer interface (minimal, to avoid hard dependency on casbin) */
 interface CasbinEnforcer {
@@ -48,21 +51,24 @@ export function createCasbinAccessControl(
   options: CasbinAdapterOptions,
 ): AccessControlProvider {
   return {
-    can: async (params: CanParams | CanParams[]): Promise<CanResult | CanResult[]> => {
-      const executeCheck = async ({ resource, action }: CanParams) => {
-        const user = options.getUser();
-        const allowed = await enforcer.enforce(user, resource, action);
-        return {
+    can: async (input) => {
+      try {
+        const { resource, action } = snapshotCanParams(input);
+        const user=options.getUser();
+        if (typeof user !== 'string') {
+          throw new HttpError('Invalid access control provider', 502, undefined, { code: 'INVALID_ACCESS_CONTROL_PROVIDER' });
+        }
+        const allowed=await enforcer.enforce(user,resource,action);
+        return decodeCanResult({
           can: allowed,
-          reason: allowed ? undefined : `User "${user}" cannot "${action}" on "${resource}"`,
-        };
-      };
-
-      if (Array.isArray(params)) {
-        return Promise.all(params.map(p => executeCheck(p)));
+          ...definedOptions({
+            reason: allowed? undefined:`User "${user}" cannot "${action}" on "${resource}"`,
+          }),
+        });
+      } catch (error) {
+        throw accessControlFailure(error);
       }
-      return executeCheck(params);
     },
-    options: options.providerOptions,
+    ...definedOptions({ options: options.providerOptions }),
   };
 }

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { captureAdminContext, queryKeyMatches } from '@svadmin/core';
+  import { captureAdminContext, queryKeyMatches, withValidatedTaskProvider } from '@svadmin/core';
   import { useQueryClient } from '@tanstack/svelte-query';
   import { useTranslation } from '@svadmin/core/i18n';
 
@@ -34,23 +34,27 @@
 
   async function handleCancel() {
     if (!taskProvider?.cancel || pending) return;
+    const scopedTaskId = taskId;
+    const scope = adminContext.queryKeyMatcher();
     pending = true;
     try {
-      await taskProvider.cancel(taskId);
+      const provider = withValidatedTaskProvider(taskProvider);
+      if (!provider.cancel) return;
+      await provider.cancel(scopedTaskId);
       await Promise.all([
         queryClient.invalidateQueries({
           predicate: (query) => queryKeyMatches(query.queryKey, {
-            ...adminContext.queryKeyMatcher(),
+            ...scope,
             kind: 'task',
             action: 'list',
           }),
         }),
         queryClient.invalidateQueries({
           predicate: (query) => queryKeyMatches(query.queryKey, {
-            ...adminContext.queryKeyMatcher(),
+            ...scope,
             kind: 'task',
             action: 'one',
-            id: taskId,
+            id: scopedTaskId,
           }),
         }),
       ]);

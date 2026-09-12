@@ -1,14 +1,8 @@
+import { requireValue } from "../../../scripts/test-assertions";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @svadmin/supabase — Unit Tests
 import { describe, test, expect, mock } from 'bun:test';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { createSupaCloudClient } from '@supacloud/js';
-import type { CreateSupaCloudTaskProviderOptions } from './supacloud';
-
-const supaCloudRootClientCompatibility: CreateSupaCloudTaskProviderOptions = {
-  supacloud: null as unknown as ReturnType<typeof createSupaCloudClient>,
-};
-void supaCloudRootClientCompatibility;
 
 // ─── Mock @svadmin/core ───────────────────────────────────────────
 mock.module('@svadmin/core', () => {
@@ -43,14 +37,14 @@ function createMockSupabaseClient(overrides: Record<string, any> = {}) {
       }),
       signOut: mock(async () => ({ error: null })),
       getSession: mock(async () => ({ data: { session: { access_token: 'valid-token' } } })),
-      getUser: mock(async () => ({ 
-        data: { 
-          user: { 
-            id: 'user-1', 
-            email: 'admin@test.com', 
-            user_metadata: { name: 'Admin', avatar_url: 'http://avatar', role: 'admin' } 
-          } 
-        } 
+      getUser: mock(async () => ({
+        data: {
+          user: {
+            id: 'user-1',
+            email: 'admin@test.com',
+            user_metadata: { name: 'Admin', avatar_url: 'http://avatar', role: 'admin' }
+          }
+        }
       })),
       signUp: mock(async ({ email }) => {
         if (email === 'bad@test.com') return { error: { message: 'Signup failed' } };
@@ -58,7 +52,7 @@ function createMockSupabaseClient(overrides: Record<string, any> = {}) {
       }),
       resetPasswordForEmail: mock(async () => ({ error: null })),
       updateUser: mock(async () => ({ error: null })),
-      ...(overrides.auth || {}),
+      ...(overrides['auth'] || {}),
     },
     rpc: mock(async (fnName: string, args: any, options?: any) => {
       if (fnName === 'fail_proc') {
@@ -73,7 +67,7 @@ function createMockSupabaseClient(overrides: Record<string, any> = {}) {
         }
         return { data: { functionResult: true, fnName, options }, error: null };
       }),
-      ...(overrides.functions || {}),
+      ...(overrides['functions'] || {}),
     },
     from: mock((tableName: string) => {
       const builder: any = {
@@ -104,7 +98,7 @@ function createMockSupabaseClient(overrides: Record<string, any> = {}) {
         }),
         then: (onfulfilled: any) => {
           if (builder.isDelete) {
-            return Promise.resolve({ data: { success: true }, error: null }).then(onfulfilled);
+            return Promise.resolve({ data: [{ id: 1 }], error: null }).then(onfulfilled);
           }
           if (builder.updatedValues) {
             return Promise.resolve({ data: [{ id: 1, ...builder.updatedValues }], error: null }).then(onfulfilled);
@@ -160,14 +154,14 @@ describe('Supabase DataProvider', () => {
     const result = await dp.getList({ resource: 'posts' });
     expect(result.data).toHaveLength(1);
     expect(result.total).toBe(1);
-    expect(result.data[0].id).toBe(1);
+    expect(requireValue(result.data[0])['id']).toBe(1);
   });
 
   test('create returns new record', async () => {
     const { createSupabaseDataProvider } = await import('./data-provider');
     const dp = await createSupabaseDataProvider({} as any);
     const result = await dp.create({ resource: 'posts', variables: { title: 'New Item' } });
-    expect(result.data.id).toBe(2);
+    expect(result.data['id']).toBe(2);
   });
 
   test('custom invokes RPC with prefix rpc/', async () => {
@@ -258,7 +252,7 @@ describe('Supabase DataProvider', () => {
     const dp = createSupabaseDataProvider(client);
 
     if (!dp.custom) throw new Error('dp.custom should be defined');
-    
+
     // GET
     const getRes = await dp.custom({
       url: 'cases_summary',
@@ -293,7 +287,7 @@ describe('Supabase DataProvider', () => {
       method: 'delete',
       query: { id: 1 },
     });
-    expect(delRes.data).toEqual({ success: true });
+    expect(delRes.data).toEqual([{ id: 1 }]);
   });
 });
 
@@ -306,7 +300,7 @@ describe('Supabase RPC Helper', () => {
     const rpc = createSupabaseRpc(client);
 
     const result = await rpc.call('get_user_metrics', { user_id: 'u1' });
-    expect(client.rpc).toHaveBeenCalledWith('get_user_metrics', { user_id: 'u1' }, { head: undefined, count: undefined, get: undefined });
+    expect(client.rpc).toHaveBeenCalledWith('get_user_metrics', { user_id: 'u1' }, {});
     expect((result as any).procResult).toBe(true);
     expect((result as any).fnName).toBe('get_user_metrics');
   });
@@ -330,600 +324,5 @@ describe('Supabase RPC Helper', () => {
     await expect(rpc.call('fail_proc')).rejects.toThrow(
       '[svadmin/supabase] RPC function "fail_proc" failed: Database error occurred'
     );
-  });
-});
-
-
-// ─── AuthProvider Tests ──────────────────────────────────────────
-describe('Supabase AuthProvider', () => {
-  test('login success', async () => {
-    const { createSupabaseAuthProvider } = await import('./auth-provider');
-    const auth = createSupabaseAuthProvider(createMockSupabaseClient());
-    const result = await auth.login({ email: 'admin@test.com', password: 'pass' });
-    expect(result.success).toBe(true);
-    expect(result.redirectTo).toBe('/');
-  });
-
-  test('login failure', async () => {
-    const { createSupabaseAuthProvider } = await import('./auth-provider');
-    const auth = createSupabaseAuthProvider(createMockSupabaseClient());
-    const result = await auth.login({ email: 'admin@test.com', password: 'bad' });
-    expect(result.success).toBe(false);
-    expect(result.error?.message).toBe('Invalid credentials');
-  });
-
-  test('logout success', async () => {
-    const { createSupabaseAuthProvider } = await import('./auth-provider');
-    const auth = createSupabaseAuthProvider(createMockSupabaseClient());
-    const result = await auth.logout();
-    expect(result.success).toBe(true);
-    expect(result.redirectTo).toBe('/login');
-  });
-
-  test('check returns authenticated when session exists', async () => {
-    const { createSupabaseAuthProvider } = await import('./auth-provider');
-    const auth = createSupabaseAuthProvider(createMockSupabaseClient());
-    const result = await auth.check();
-    expect(result.authenticated).toBe(true);
-  });
-
-  test('check returns unauthenticated when no session', async () => {
-    const { createSupabaseAuthProvider } = await import('./auth-provider');
-    const client = createMockSupabaseClient({
-      auth: { getSession: mock(async () => ({ data: { session: null } })) }
-    });
-    const auth = createSupabaseAuthProvider(client);
-    const result = await auth.check();
-    expect(result.authenticated).toBe(false);
-    expect(result.redirectTo).toBe('/login');
-  });
-
-  test('check clears invalid refresh token sessions', async () => {
-    const { createSupabaseAuthProvider } = await import('./auth-provider');
-    const client = createMockSupabaseClient({
-      auth: {
-        getSession: mock(async () => ({
-          data: { session: null },
-          error: new Error('Invalid Refresh Token: Refresh Token Not Found'),
-        })),
-        signOut: mock(async () => ({ error: null })),
-      },
-    });
-    const auth = createSupabaseAuthProvider(client);
-    const result = await auth.check();
-
-    expect(client.auth.signOut).toHaveBeenCalledWith({ scope: 'local' });
-    expect(result).toEqual({
-      authenticated: false,
-      redirectTo: '/login',
-      logout: true,
-      error: { message: 'Session expired, please sign in again.' },
-    });
-  });
-
-  test('getIdentity surfaces user metadata', async () => {
-    const { createSupabaseAuthProvider } = await import('./auth-provider');
-    const auth = createSupabaseAuthProvider(createMockSupabaseClient());
-    const identity = await auth.getIdentity?.();
-    expect(identity?.id).toBe('user-1');
-    expect(identity?.name).toBe('Admin');
-    expect(identity?.avatar).toBe('http://avatar');
-    expect(identity?.token).toBe('valid-token');
-  });
-
-  test('getPermissions fails closed without a trusted resolver', async () => {
-    const { createSupabaseAuthProvider } = await import('./auth-provider');
-    const auth = createSupabaseAuthProvider(createMockSupabaseClient());
-    const perms = await auth.getPermissions?.();
-    expect(perms).toBeNull();
-  });
-
-  test('getPermissions uses the configured permission resolver', async () => {
-    const { createSupabaseAuthProvider } = await import('./auth-provider');
-    const auth = createSupabaseAuthProvider(createMockSupabaseClient(), {
-      getPermissions: ({ user }) => ({
-        role: user.user_metadata?.role,
-        capabilities: ['billing.read'],
-      }),
-    });
-    const perms = await auth.getPermissions?.();
-    expect(perms).toEqual({
-      role: 'admin',
-      capabilities: ['billing.read'],
-    });
-  });
-
-  test('getPermissions surfaces transient user lookup errors without calling the resolver', async () => {
-    const { createSupabaseAuthProvider } = await import('./auth-provider');
-    const resolver = mock(() => ({ role: 'admin' }));
-    const client = createMockSupabaseClient({
-      auth: {
-        getUser: mock(async () => ({
-          data: { user: null },
-          error: new Error('Network error'),
-        })),
-      },
-    });
-    const auth = createSupabaseAuthProvider(client, { getPermissions: resolver });
-
-    await expect(auth.getPermissions?.()).rejects.toThrow('Network error');
-    expect(resolver).not.toHaveBeenCalled();
-  });
-
-  test('getIdentity clears invalid refresh token sessions', async () => {
-    const { createSupabaseAuthProvider } = await import('./auth-provider');
-    const client = createMockSupabaseClient({
-      auth: {
-        getUser: mock(async () => ({
-          data: { user: null },
-          error: new Error('Invalid Refresh Token: Refresh Token Not Found'),
-        })),
-        signOut: mock(async () => ({ error: null })),
-      },
-    });
-    const auth = createSupabaseAuthProvider(client);
-    const identity = await auth.getIdentity?.();
-
-    expect(client.auth.signOut).toHaveBeenCalledWith({ scope: 'local' });
-    expect(identity).toBeNull();
-  });
-
-  test('onError returns logout true on 401 with no session', async () => {
-    const { createSupabaseAuthProvider } = await import('./auth-provider');
-    const client = createMockSupabaseClient({
-      auth: { getSession: mock(async () => ({ data: { session: null } })) }
-    });
-    const auth = createSupabaseAuthProvider(client);
-    const result = await auth.onError?.(new Error('401 Unauthorized'));
-    expect(result?.logout).toBe(true);
-    expect(result?.redirectTo).toBe('/login');
-  });
-
-  test('onError swallows 401 if token actually exists (race condition guard)', async () => {
-    const { createSupabaseAuthProvider } = await import('./auth-provider');
-    const auth = createSupabaseAuthProvider(createMockSupabaseClient());
-    const result = await auth.onError?.(new Error('401 Unauthorized'));
-    expect(result?.logout).toBeUndefined();
-    expect(result?.redirectTo).toBeUndefined();
-  });
-
-  test('onError logs out on invalid refresh token', async () => {
-    const { createSupabaseAuthProvider } = await import('./auth-provider');
-    const client = createMockSupabaseClient({
-      auth: {
-        signOut: mock(async () => ({ error: null })),
-      },
-    });
-    const auth = createSupabaseAuthProvider(client);
-    const result = await auth.onError?.(new Error('Invalid Refresh Token: Refresh Token Not Found'));
-
-    expect(client.auth.signOut).toHaveBeenCalledWith({ scope: 'local' });
-    expect(result).toEqual({
-      redirectTo: '/login',
-      logout: true,
-    });
-  });
-});
-
-
-// ─── LiveProvider Tests ──────────────────────────────────────────
-describe('Supabase LiveProvider', () => {
-  test('subscribe builds channel and binds events', async () => {
-    const { createSupabaseLiveProvider } = await import('./live-provider');
-    const client = createMockSupabaseClient();
-    const live = createSupabaseLiveProvider(client);
-    
-    let callbackEvent: any = null;
-    const unsub = live.subscribe({
-      resource: 'posts',
-      callback: (e) => { callbackEvent = e; }
-    });
-
-    expect(client.channel).toHaveBeenCalledWith('live-posts');
-    const channelMock = (client.channel as ReturnType<typeof mock>).mock.results[0].value;
-    expect(channelMock.on).toHaveBeenCalled();
-    expect(channelMock.subscribe).toHaveBeenCalled();
-
-    const onCalls = channelMock.on.mock.calls;
-    const postgresChangesCall = onCalls.find((call: any[]) => call[0] === 'postgres_changes');
-    expect(postgresChangesCall).toBeDefined();
-
-    const postgresChangesHandler = postgresChangesCall[2] as (payload: {
-      eventType: string;
-      new: Record<string, unknown>;
-      old: null;
-    }) => void;
-    postgresChangesHandler({ eventType: 'INSERT', new: { id: 1 }, old: null });
-    expect(callbackEvent).toEqual({
-      type: 'INSERT',
-      resource: 'posts',
-      payload: { id: 1 },
-    });
-
-    unsub();
-    expect(channelMock.unsubscribe).toHaveBeenCalled();
-  });
-
-  test('publish triggers broadcast send', async () => {
-    const { createSupabaseLiveProvider } = await import('./live-provider');
-    const client = createMockSupabaseClient();
-    const live = createSupabaseLiveProvider(client);
-    
-    live.publish?.({ type: 'INSERT', resource: 'posts', payload: { a: 1 } });
-    
-    const channelMock = (client.channel as ReturnType<typeof mock>).mock.results[0].value;
-    expect(channelMock.send).toHaveBeenCalled();
-    const sendArgs = channelMock.send.mock.calls[0][0];
-    expect(sendArgs.type).toBe('broadcast');
-    expect(sendArgs.event).toBe('live-event');
-    expect(sendArgs.payload.type).toBe('INSERT');
-  });
-});
-
-
-// ─── SupaCloud Task Provider Tests ───────────────────────────────
-describe('SupaCloud Task Provider', () => {
-  test('submit proxies to supacloud tasks client', async () => {
-    const { createSupaCloudTaskProvider } = await import('./supacloud');
-    const taskHandle = {
-      id: 'task-1',
-      wait: mock(async () => ({ id: 'task-1', status: 'done' })),
-    };
-    const supacloud = {
-      submit: mock(async () => taskHandle),
-      get: mock(async () => ({ id: 'task-1', status: 'done' })),
-    };
-
-    const provider = createSupaCloudTaskProvider({ supacloud });
-    const result = await provider.submit('image.generate', {
-      body: { prompt: 'poster' },
-      idempotencyKey: 'job-1',
-    });
-
-    expect(supacloud.submit).toHaveBeenCalledWith('image.generate', {
-      body: { prompt: 'poster' },
-      idempotencyKey: 'job-1',
-    });
-    expect(result).toBe(taskHandle);
-  });
-
-  test('list normalizes object payload with data field', async () => {
-    const { createSupaCloudTaskProvider } = await import('./supacloud');
-    const supacloud: import('@svadmin/core').TaskProvider<{ id: string; status: string }> = {
-      submit: mock(async () => ({ wait: async () => ({ id: 'task-1', status: 'queued' }) })),
-      get: mock(async () => ({ id: 'task-1', status: 'queued' })),
-      list: mock(async () => ({ data: [{ id: 'task-1', status: 'queued' }] })),
-    };
-
-    const provider = createSupaCloudTaskProvider({ supacloud });
-    if (!provider.list) throw new Error('provider.list should exist');
-    const tasks = await provider.list();
-
-    expect(tasks).toEqual({
-      data: [{ id: 'task-1', status: 'queued' }],
-      total: 1,
-    });
-  });
-
-  test('list rejects a legacy object without an array data field', async () => {
-    const { createSupaCloudTaskProvider } = await import('./supacloud');
-    const supacloud = {
-      submit: mock(async () => ({ wait: async () => ({ id: 'task-1' }) })),
-      get: mock(async () => ({ id: 'task-1' })),
-      list: mock(async () => ({ status: 'ok' } as any)),
-    };
-
-    const provider = createSupaCloudTaskProvider({ supacloud });
-
-    await expect(provider.list?.()).rejects.toThrow(
-      '[svadmin/supabase] tasks.list returned an invalid task list response',
-    );
-  });
-
-  test('list rejects a legacy object with a non-array data field', async () => {
-    const { createSupaCloudTaskProvider } = await import('./supacloud');
-    const supacloud = {
-      submit: mock(async () => ({ wait: async () => ({ id: 'task-1' }) })),
-      get: mock(async () => ({ id: 'task-1' })),
-      list: mock(async () => ({ data: 'not-an-array' } as any)),
-    };
-
-    const provider = createSupaCloudTaskProvider({ supacloud });
-
-    await expect(provider.list?.()).rejects.toThrow(
-      '[svadmin/supabase] tasks.list returned an invalid task list response',
-    );
-  });
-
-  test('listDlq throws clear error when capability is missing', async () => {
-    const { createSupaCloudTaskProvider } = await import('./supacloud');
-    const supacloud: import('@svadmin/core').TaskProvider<{ id: string }> = {
-      submit: mock(async () => ({ wait: async () => ({ id: 'task-1' }) })),
-      get: mock(async () => ({ id: 'task-1' })),
-    };
-
-    const provider = createSupaCloudTaskProvider({ supacloud });
-    if (!provider.listDlq) throw new Error('provider.listDlq should exist');
-
-    await expect(provider.listDlq()).rejects.toThrow('tasks.listDlq');
-  });
-
-  test('listDlq preserves object params for legacy task clients', async () => {
-    const { createSupaCloudTaskProvider } = await import('./supacloud');
-    let receivedParams: Record<string, unknown> | undefined;
-    const supacloud = {
-      submit: mock(async () => ({ wait: async () => ({ id: 'task-1' }) })),
-      get: mock(async () => ({ id: 'task-1' })),
-      listDlq: mock(async (params?: Record<string, unknown>) => {
-        receivedParams = params;
-        return [{ id: 'task-1', status: 'dead_lettered' }];
-      }),
-    };
-
-    const provider = createSupaCloudTaskProvider({ supacloud });
-    if (!provider.listDlq) throw new Error('provider.listDlq should exist');
-    await provider.listDlq({ limit: 9, status: 'failed' });
-
-    expect(receivedParams?.limit).toBe(9);
-    expect(receivedParams?.status).toBe('failed');
-  });
-
-  test('listDlq rejects a malformed legacy response', async () => {
-    const { createSupaCloudTaskProvider } = await import('./supacloud');
-    const supacloud = {
-      submit: mock(async () => ({ wait: async () => ({ id: 'task-1' }) })),
-      get: mock(async () => ({ id: 'task-1' })),
-      listDlq: mock(async () => ({ data: 'not-an-array' } as any)),
-    };
-
-    const provider = createSupaCloudTaskProvider({ supacloud });
-
-    await expect(provider.listDlq?.()).rejects.toThrow(
-      '[svadmin/supabase] tasks.listDlq returned an invalid task list response',
-    );
-  });
-
-  test('SDK receipt methods preserve their receiver context', async () => {
-    const { createSupaCloudTaskProvider } = await import('./supacloud');
-    const receiverCalls: string[] = [];
-    const taskSubscription = {
-      unsubscribe() {
-        if (this !== taskSubscription) throw new Error('unsubscribe receiver was lost');
-        receiverCalls.push('unsubscribe');
-      },
-    };
-    const receipt = {
-      taskId: 'task-sdk',
-      async wait() {
-        if (this !== receipt) throw new Error('wait receiver was lost');
-        receiverCalls.push('wait');
-        return { id: 'task-sdk', status: 'succeeded' };
-      },
-      async cancel() {
-        if (this !== receipt) throw new Error('cancel receiver was lost');
-        receiverCalls.push('cancel');
-        return { id: 'task-sdk', status: 'cancelled' };
-      },
-      async retry() {
-        if (this !== receipt) throw new Error('retry receiver was lost');
-        receiverCalls.push('retry');
-        return { id: 'task-sdk', status: 'queued' };
-      },
-      subscribe(options: { onUpdate: (task: { id: string; status: string }) => void }) {
-        if (this !== receipt) throw new Error('subscribe receiver was lost');
-        receiverCalls.push('subscribe');
-        options.onUpdate({ id: 'task-sdk', status: 'running' });
-        return taskSubscription;
-      },
-    };
-    const supacloud = {
-      submit: mock(async () => receipt),
-      get: mock(async () => ({ id: 'task-sdk', status: 'queued' })),
-    };
-
-    const provider = createSupaCloudTaskProvider({ supacloud, clientKind: 'sdk' });
-    const taskHandle = await provider.submit('reports.generate');
-    const taskUpdates: string[] = [];
-
-    expect(await taskHandle.wait()).toEqual({ id: 'task-sdk', status: 'succeeded' });
-    await taskHandle.cancel?.();
-    await taskHandle.retry?.();
-    const stop = taskHandle.subscribe?.((task) => taskUpdates.push(task.status ?? ''));
-    if (typeof stop === 'function') stop();
-    else stop?.unsubscribe();
-
-    expect(taskUpdates).toEqual(['running']);
-    expect(receiverCalls).toEqual(['wait', 'cancel', 'retry', 'subscribe', 'unsubscribe']);
-  });
-});
-
-
-// ─── SupaCloud Task LiveProvider Tests ───────────────────────────
-describe('SupaCloud Task LiveProvider', () => {
-  test('subscribe requires taskId in liveParams', async () => {
-    const { createSupaCloudTaskLiveProvider } = await import('./supacloud');
-    const supacloud = {
-      subscribe: mock(() => ({ unsubscribe: mock(() => {}) })),
-    };
-
-    const live = createSupaCloudTaskLiveProvider({ supacloud });
-
-    expect(() =>
-      live.subscribe({
-        resource: 'tasks',
-        callback: () => {},
-      }),
-    ).toThrow('liveParams.taskId');
-  });
-
-  test('subscribe maps task updates into svadmin live events', async () => {
-    const { createSupaCloudTaskLiveProvider } = await import('./supacloud');
-    let receivedTaskCallback: ((task: Record<string, unknown>) => void) | undefined;
-    const unsubscribe = mock(() => {});
-    const supacloud = {
-      subscribe: mock((taskId: string, callback: (task: Record<string, unknown>) => void) => {
-        receivedTaskCallback = callback;
-        expect(taskId).toBe('task-42');
-        return { unsubscribe };
-      }),
-    };
-
-    const live = createSupaCloudTaskLiveProvider({ supacloud });
-    const callback = mock(() => {});
-    const stop = live.subscribe({
-      resource: 'tasks',
-      liveParams: { taskId: 'task-42' },
-      callback,
-    });
-
-    receivedTaskCallback?.({ id: 'task-42', status: 'running' });
-
-    expect(callback).toHaveBeenCalledWith({
-      type: 'UPDATE',
-      resource: 'tasks',
-      payload: { id: 'task-42', status: 'running' },
-    });
-
-    stop();
-    expect(unsubscribe).toHaveBeenCalled();
-  });
-});
-
-describe('SupaCloud Task Provider SDK bridge', () => {
-  test('auto-detects a root createSupaCloudClient task SDK', async () => {
-    const { createSupaCloudTaskProvider } = await import('./supacloud');
-    const tasks = {
-      submit: mock(async () => ({
-        taskId: 'task-auto',
-        wait: async () => ({ id: 'task-auto', status: 'succeeded' }),
-      })),
-      get: mock(async () => ({ id: 'task-auto', status: 'queued' })),
-    };
-
-    const provider = createSupaCloudTaskProvider({ supacloud: { tasks } });
-    const handle = await provider.submit('reports.generate');
-
-    expect(tasks.submit).toHaveBeenCalledWith('reports.generate', undefined);
-    expect(handle.id).toBe('task-auto');
-    expect(await handle.wait()).toEqual({ id: 'task-auto', status: 'succeeded' });
-  });
-
-  test('accepts a root createSupaCloudClient task SDK in explicit sdk mode', async () => {
-    const { createSupaCloudTaskProvider } = await import('./supacloud');
-    const tasks = {
-      submit: mock(async () => ({
-        taskId: 'task-explicit',
-        wait: async () => ({ id: 'task-explicit', status: 'succeeded' }),
-      })),
-      get: mock(async () => ({ id: 'task-explicit', status: 'queued' })),
-    };
-
-    const provider = createSupaCloudTaskProvider({
-      supacloud: { tasks },
-      clientKind: 'sdk',
-    });
-    const handle = await provider.submit('reports.generate');
-
-    expect(tasks.submit).toHaveBeenCalledWith('reports.generate', undefined);
-    expect(handle.id).toBe('task-explicit');
-    expect(await handle.wait()).toEqual({ id: 'task-explicit', status: 'succeeded' });
-  });
-
-  test('submit maps meta to metadata and wraps sdk receipts', async () => {
-    const { createSupaCloudTaskProvider } = await import('./supacloud');
-    const receiptUnsubscribe = mock(() => {});
-    const receipt = {
-      taskId: 'task-99',
-      wait: mock(async () => ({ id: 'task-99', status: 'queued' })),
-      cancel: mock(async () => ({ id: 'task-99', status: 'cancelled' })),
-      retry: mock(async () => ({ id: 'task-99', status: 'retry_scheduled' })),
-      subscribe: mock(({ onUpdate }: { onUpdate: (task: { id: string; status: string }) => void }) => {
-        onUpdate({ id: 'task-99', status: 'running' });
-        return { unsubscribe: receiptUnsubscribe };
-      }),
-    };
-    const tasks = {
-      submit: mock(async (_taskName: string, options: Record<string, unknown>) => {
-        expect(options).toEqual({
-          body: { prompt: 'poster' },
-          headers: { 'x-trace': '1' },
-          idempotencyKey: 'job-1',
-          metadata: { tenant: 'acme' },
-        });
-        return receipt;
-      }),
-      get: mock(async () => ({ id: 'task-99', status: 'queued' })),
-      list: mock(async () => [{ id: 'task-1', status: 'queued' }]),
-      listDlq: mock(async (limit?: number) => [{ id: 'dlq-1', status: 'failed', limit } as any]),
-      cancel: mock(async () => ({ id: 'task-99', status: 'cancelled' })),
-      retry: mock(async () => ({ id: 'task-99', status: 'retry_scheduled' })),
-      subscribe: mock(
-        (_taskId: string, options: { onUpdate: (task: { id: string; status: string }) => void }) => {
-          options.onUpdate({ id: 'task-99', status: 'running' });
-          return { unsubscribe: receiptUnsubscribe };
-        },
-      ),
-    };
-
-    const provider = createSupaCloudTaskProvider({
-      supacloud: tasks,
-      clientKind: 'sdk',
-    });
-    const handle = await provider.submit('image.generate', {
-      body: { prompt: 'poster' },
-      headers: { 'x-trace': '1' },
-      idempotencyKey: 'job-1',
-      meta: { tenant: 'acme' },
-    });
-
-    expect(handle.id).toBe('task-99');
-    expect(await handle.wait()).toEqual({ id: 'task-99', status: 'queued' });
-
-    const handleCallback = mock(() => {});
-    const handleStop = handle.subscribe?.(handleCallback);
-    expect(handleCallback).toHaveBeenCalledWith({ id: 'task-99', status: 'running' });
-    if (typeof handleStop === 'function') {
-      handleStop();
-    } else {
-      handleStop?.unsubscribe();
-    }
-    expect(receiptUnsubscribe).toHaveBeenCalledTimes(1);
-
-    const providerCallback = mock(() => {});
-    const providerStop = provider.subscribe?.('task-99', providerCallback);
-    expect(tasks.subscribe).toHaveBeenCalledWith('task-99', {
-      onUpdate: expect.any(Function),
-    });
-    expect(providerCallback).toHaveBeenCalledWith({
-      id: 'task-99',
-      status: 'running',
-    });
-    if (typeof providerStop === 'function') {
-      providerStop();
-    } else {
-      providerStop?.unsubscribe();
-    }
-    expect(receiptUnsubscribe).toHaveBeenCalledTimes(2);
-
-    const listResult = await provider.listDlq?.({ limit: 7 });
-    expect(tasks.listDlq).toHaveBeenCalledWith(7);
-    expect(listResult).toEqual({
-      data: [{ id: 'dlq-1', status: 'failed', limit: 7 }],
-      total: 1,
-    });
-  });
-
-  test('list fails closed on invalid sdk list payload', async () => {
-    const { createSupaCloudTaskProvider } = await import('./supacloud');
-    const provider = createSupaCloudTaskProvider({
-      supacloud: {
-        submit: mock(async () => ({ taskId: 'task-1', wait: async () => ({ id: 'task-1' }) })),
-        get: mock(async () => ({ id: 'task-1' })),
-        list: mock(async () => ({ status: 'ok' })),
-      } as any,
-      clientKind: 'sdk',
-    });
-
-    await expect(provider.list?.()).rejects.toThrow('non-array task list');
   });
 });

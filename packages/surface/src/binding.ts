@@ -10,7 +10,7 @@ function readJsonPointer(root: JsonValue, pointer: string): JsonValue | undefine
   if (pointer === '') return root;
   if (!pointer.startsWith('/')) return undefined;
 
-  let current: JsonValue = root;
+  let current: JsonValue | undefined = root;
   for (const encodedToken of pointer.slice(1).split('/')) {
     const token = decodedJsonPointerToken(encodedToken);
     if (token === null || current === null || typeof current !== 'object') return undefined;

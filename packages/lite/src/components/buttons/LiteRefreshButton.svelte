@@ -20,6 +20,9 @@
 <!-- svelte-ignore a11y_invalid_attribute -->
 <a
   href=""
+  data-svadmin-button
+  data-variant="ghost"
+  data-size={size}
   class="lite-btn {size === 'sm' ? 'lite-btn-sm' : ''} {className}"
   title={t('common.refresh') || 'Refresh'}
 >

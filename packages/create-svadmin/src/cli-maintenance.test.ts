@@ -105,7 +105,7 @@ test('upgrade CLI stays read-only until --write and then preserves custom fields
     };
     expect(upgraded.dependencies['@svadmin/core']).toBe(scaffold.dependencies['@svadmin/core']);
     expect(upgraded.dependencies['user-owned-runtime']).toBe('^9.9.9');
-    expect(upgraded.scripts.custom).toBe('keep-me');
+    expect(upgraded.scripts['custom']).toBe('keep-me');
     expect(upgraded.customMetadata).toEqual({ keep: true });
   } finally {
     await rm(projectDirectory, { recursive: true, force: true });

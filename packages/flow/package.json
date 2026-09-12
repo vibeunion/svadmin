@@ -45,6 +45,7 @@
     }
   },
   "dependencies": {
+    "@sinclair/typebox": "^0.34.52",
     "@xyflow/svelte": "^1.6.5"
   },
   "devDependencies": {
@@ -69,7 +70,7 @@
   "author": "zuohuadong",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vibeunion/svadmin.git",
+    "url": "git+https://github.com/vibeunion/svadmin.git",
     "directory": "packages/flow"
   },
   "homepage": "https://github.com/vibeunion/svadmin#readme",

@@ -7,7 +7,7 @@ import {
   withTenantDataProvider,
 } from './provider-bundle';
 import { keys, parseQueryKey, queryKeyMatches } from './query-keys';
-import type { AuditEntry, AuditLogProvider } from './audit';
+import type { AuditEntry, AuditCreateParams, AuditLogProvider } from './audit';
 import type { ChatProvider } from './chatProvider.svelte';
 import type {
   CredentialProvider,
@@ -38,16 +38,11 @@ function createBundle(instance: string, calls: GetListParams[]) {
     can: vi.fn(async () => ({ can: true })),
   };
   const auditLogProvider: AuditLogProvider = {
-    create: vi.fn(async ({ resource }): Promise<AuditEntry> => ({
-      timestamp: '2026-01-01T00:00:00.000Z',
-      resource,
-      action: 'create',
+    create: vi.fn(async (params: AuditCreateParams): Promise<AuditEntry> => ({
+      ...params,
+      id: 'audit-1',
     })),
     get: vi.fn(async () => []),
-    update: vi.fn(async (): Promise<AuditEntry> => ({
-      timestamp: '2026-01-01T00:00:00.000Z',
-      action: 'update',
-    })),
   };
   const notificationProvider: NotificationProvider = {
     open: vi.fn(),
@@ -61,7 +56,7 @@ function createBundle(instance: string, calls: GetListParams[]) {
       id: `${instance}-task`,
       wait: async () => ({ id: `${instance}-task`, status: 'done' }),
     })),
-    get: vi.fn(async () => ({ id: `${instance}-task`, status: 'running' })),
+    get: vi.fn(async (id: string) => ({ id, title: `${instance}-task`, status: 'running' })),
   };
   const organizationProvider: OrganizationProvider = {
     getCurrentOrganization: vi.fn(async () => ({ id: instance, name: `${instance} organization` })),

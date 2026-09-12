@@ -62,8 +62,9 @@
       }
     } else {
       const rows = parseCSV(cleanText);
-      if (rows.length > 0) {
-        rawHeaders = rows[0];
+      const firstRow = rows[0];
+      if (firstRow) {
+        rawHeaders = firstRow;
         rawRows = rows.slice(1).filter((r: string[]) => r.some((cell: string) => cell.trim().length > 0));
       }
     }

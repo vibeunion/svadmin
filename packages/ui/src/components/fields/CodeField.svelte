@@ -3,9 +3,11 @@
   import { Copy, Check } from '@lucide/svelte';
   import { Badge } from '../ui/badge/index.js';
   import { cn } from '../../utils.js';
+  import { useTranslation } from '@svadmin/core/i18n';
+  import { formatJsonValue } from './json-value';
 
   interface Props {
-    value?: string | number | Record<string, unknown> | unknown[] | null | undefined;
+    value?: string | number | boolean | Record<string, unknown> | unknown[] | null | undefined;
     language?: string;
     copyable?: boolean;
     title?: string;
@@ -29,22 +31,17 @@
   let copied = $state(false);
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
   let destroyed = false;
+  const i18n = useTranslation();
 
   onDestroy(() => {
     destroyed = true;
     if (timeoutId) clearTimeout(timeoutId);
   });
 
-  const formattedCode = $derived.by(() => {
-    if (value == null || value === '') return '';
-    if (typeof value === 'string') return value;
-    if (typeof value === 'number' || typeof value === 'boolean') return String(value);
-    try {
-      return JSON.stringify(value, null, 2);
-    } catch {
-      return String(value);
-    }
-  });
+  const display = $derived(formatJsonValue(value));
+  const formattedCode = $derived(display.status === 'valid'
+    ? typeof value === 'string' ? value : display.formatted
+    : '');
 
   async function handleCopy(event: MouseEvent) {
     event.stopPropagation();
@@ -69,8 +66,9 @@
   }
 </script>
 
-{#if !formattedCode}
-  <span class={cn('field-code svadmin-u-bfa603190748 svadmin-u-fc7473ca09eb', className)}>{nullLabel}</span>
+{#if display.status === 'invalid'}
+  <span role="status" data-svadmin-invalid-field>{i18n.t('validation.invalidFormat')}</span>
+{:else if !formattedCode}  <span class={cn('field-code svadmin-u-bfa603190748 svadmin-u-fc7473ca09eb', className)}>{nullLabel}</span>
 {:else}
   <div class={cn('field-code svadmin-u-d89972fe17d6 group svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-c9ed8c5f79ae svadmin-u-b00f43c30c2b svadmin-u-359090c2d529 svadmin-u-0e65706bcccd', className)}>
     {#if language || copyable}

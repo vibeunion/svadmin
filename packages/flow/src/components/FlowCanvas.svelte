@@ -1,4 +1,5 @@
 <script lang="ts" generics="NodeType extends Node = Node, EdgeType extends Edge = Edge">
+
   import { Background, Controls, MiniMap, SvelteFlow } from '@xyflow/svelte';
   import type { Edge, Node, NodeEvents } from '@xyflow/svelte';
   import type { Snippet } from 'svelte';
@@ -77,18 +78,18 @@
 <SvelteFlow
   bind:nodes
   bind:edges
-  {nodeTypes}
-  {edgeTypes}
+  {...(nodeTypes === undefined ? {} : { nodeTypes })}
+  {...(edgeTypes === undefined ? {} : { edgeTypes })}
   {fitView}
-  {minZoom}
-  {maxZoom}
+  {...(minZoom === undefined ? {} : { minZoom })}
+  {...(maxZoom === undefined ? {} : { maxZoom })}
   nodesDraggable={interactive}
   nodesConnectable={interactive}
   elementsSelectable={interactive}
   class={['svadmin-flow-canvas', className]}
   aria-label={ariaLabel}
-  {onconnect}
-  {onnodeclick}
+  {...(onconnect === undefined ? {} : { onconnect })}
+  {...(onnodeclick === undefined ? {} : { onnodeclick })}
   ondragover={allowPaletteDrop}
   ondrop={emitPaletteDrop}
 >

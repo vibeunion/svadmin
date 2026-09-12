@@ -1,4 +1,5 @@
 import type { MenuItem } from '@svadmin/core';
+import { definedOptions } from '@svadmin/core/options';
 import { addTranslations } from '@svadmin/core';
 
 type LocaleCode = 'en' | 'zh-CN';
@@ -447,12 +448,12 @@ const menuLabels = {
 type MenuKey = keyof typeof menuLabels.en;
 
 function item(name: MenuKey, icon: string, href?: string, children?: MenuNode[], meta?: MenuNode['meta']): MenuNode {
-  return { name, icon, href, children, meta };
+  return definedOptions({ name, icon, href, children, meta });
 }
 
 function localize(items: MenuNode[], locale: string): MenuItem[] {
   const resolvedLocale: LocaleCode = locale === 'zh-CN' ? 'zh-CN' : 'en';
-  return items.map((menuItem) => ({
+  return items.map((menuItem) => definedOptions({
     ...menuItem,
     label: menuLabels[resolvedLocale][menuItem.name],
     children: menuItem.children ? localize(menuItem.children, locale) : undefined,

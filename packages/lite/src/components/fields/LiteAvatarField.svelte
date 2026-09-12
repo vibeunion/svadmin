@@ -44,7 +44,7 @@
       return value;
     }
     if (value && typeof value === 'object' && 'src' in (value as Record<string, unknown>)) {
-      return String((value as Record<string, unknown>).src ?? '');
+      return String((value as Record<string, unknown>)['src'] ?? '');
     }
     return null;
   });
@@ -55,7 +55,7 @@
       return value;
     }
     if (value && typeof value === 'object' && 'name' in (value as Record<string, unknown>)) {
-      return String((value as Record<string, unknown>).name ?? '');
+      return String((value as Record<string, unknown>)['name'] ?? '');
     }
     return null;
   });
@@ -65,7 +65,7 @@
     if (!trimmed) return '?';
     const parts = trimmed.split(/\s+/);
     if (parts.length >= 2) {
-      return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+      return `${trimmed.charAt(0)}${parts.at(-1)?.charAt(0) ?? ''}`.toUpperCase();
     }
     return trimmed.slice(0, 2).toUpperCase();
   }

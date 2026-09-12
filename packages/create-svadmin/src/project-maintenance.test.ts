@@ -87,8 +87,8 @@ describe('create-svadmin upgrade', () => {
       expect.objectContaining({ packageName: '@svadmin/simple-rest', action: 'update' }),
       expect.objectContaining({ packageName: '@refinedev/core', action: 'add' }),
     ]));
-    expect(plan.updatedPackageJson.scripts).toEqual(project.scripts);
-    expect(plan.updatedPackageJson.customMetadata).toEqual(project.customMetadata);
+    expect(plan.updatedPackageJson['scripts']).toEqual(project.scripts);
+    expect(plan.updatedPackageJson['customMetadata']).toEqual(project.customMetadata);
     expect(plan.updatedPackageJson.dependencies?.['user-owned-runtime']).toBe('^9.9.9');
     expect(plan.updatedPackageJson.devDependencies?.['user-owned-tool']).toBe('^1.2.3');
   });

@@ -21,7 +21,7 @@ describe('Resource Type Registry', () => {
     // For any resource not in ResourceTypeMap, InferData should return Record<string, unknown>
     type Result = InferData<'nonexistent'>;
     const data: Result = { arbitrary: 'value', number: 42 };
-    expect(data.arbitrary).toBe('value');
+    expect(data['arbitrary']).toBe('value');
   });
 
   test('type utilities are structurally sound', () => {

@@ -1,15 +1,17 @@
 {
+  "extends": "../core/tsconfig.contracts.json",
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
     "strict": true,
-    "skipLibCheck": true,
+    "skipLibCheck": false,
+    "types": ["bun", "svelte"],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
     "outDir": "./dist",
-    "rootDir": "./src"
+    "rootDir": "../.."
   },
   "include": ["src/**/*"]
 }

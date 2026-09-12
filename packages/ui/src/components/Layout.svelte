@@ -7,6 +7,8 @@
 </script>
 
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
 /* eslint-disable svelte/no-useless-children-snippet */
   import type { Snippet } from 'svelte';
   import { fade, fly } from 'svelte/transition';
@@ -18,7 +20,7 @@
   import { useTranslation } from '@svadmin/core/i18n';
 
   import { captureAdminContext } from '@svadmin/core';
-  import type { Identity, MenuItem, TaskProvider, TaskRecord } from '@svadmin/core';
+  import type { Identity, MenuItem } from '@svadmin/core';
   import { getPath } from '../router-state.svelte.js';
   import { Skeleton } from './ui/skeleton/index.js';
   import * as Sheet from './ui/sheet/index.js';
@@ -42,7 +44,7 @@
   const auth = $derived(adminContext.authProvider);
   let loading = $state(true);
   let identity = $state<Identity | null>(null);
-  const taskProvider = $derived(adminContext.taskProvider as TaskProvider<TaskRecord> | undefined);
+  const taskProvider = $derived(adminContext.taskProvider ?? undefined);
   const TaskQueueComponent = getComponentRegistry()?.TaskQueueDrawer;
 
   $effect(() => {
@@ -94,10 +96,10 @@
   let touchEndX = $state(0);
 
   function ownsLayoutEvent(event: Event): boolean {
-    const target = event.target instanceof HTMLElement ? event.target : document.activeElement as HTMLElement | null;
+    const target = event.target instanceof Element ? event.target : document.activeElement;
     const owner = target
       ?.closest<HTMLElement>('[data-svadmin-layout-scope]')
-      ?.dataset.svadminLayoutScope;
+      ?.dataset['svadminLayoutScope'];
     if (owner) return owner === layoutScope;
     return document.querySelectorAll('[data-svadmin-layout-scope]').length === 1;
   }
@@ -108,7 +110,7 @@
       e.preventDefault();
       commandOpen = true;
     }
-    if (e.key === '?' && !['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
+    if (e.key === '?' && !(e.target instanceof Element && ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName))) {
       e.preventDefault();
       shortcutsOpen = true;
     }
@@ -116,16 +118,18 @@
 
   function handleTouchStart(e: TouchEvent) {
     if (!ownsLayoutEvent(e)) return;
-    if (e.touches.length === 1) {
-      touchStartX = e.touches[0].clientX;
-      touchEndX = e.touches[0].clientX;
+    const touch = e.touches.item(0);
+    if (e.touches.length === 1 && touch) {
+      touchStartX = touch.clientX;
+      touchEndX = touch.clientX;
     }
   }
 
   function handleTouchMove(e: TouchEvent) {
     if (!ownsLayoutEvent(e)) return;
-    if (e.touches.length === 1) {
-      touchEndX = e.touches[0].clientX;
+    const touch = e.touches.item(0);
+    if (e.touches.length === 1 && touch) {
+      touchEndX = touch.clientX;
     }
   }
 
@@ -180,8 +184,7 @@
 
     <!-- Desktop sidebar -->
     <div class="svadmin-u-99d72c7fc3e2 svadmin-u-9d60be3a6d80">
-      <Sidebar {collapsed} {identity} {title} {menu} {routeMode} onToggle={() => collapsed = !collapsed} onLogout={handleLogout} />
-    </div>
+      <Sidebar {collapsed} {identity} {title} {...definedOptions({ "menu": menu })} {routeMode} onToggle={() => collapsed = !collapsed} onLogout={handleLogout} />    </div>
 
     <!-- Mobile sidebar via Sheet -->
     <Sheet.Root
@@ -193,8 +196,7 @@
     >
       <Sheet.Title id={`${layoutScope}-mobile-navigation-title`} class="svadmin-u-2daa8e5e2f2e">{title}</Sheet.Title>
       <div class="svadmin-u-e477a6af4cb6">
-        <Sidebar collapsed={false} {identity} {title} {menu} {routeMode} onToggle={() => { mobileMenuOpen = false; }} onLogout={handleLogout} />
-      </div>
+        <Sidebar collapsed={false} {identity} {title} {...definedOptions({ "menu": menu })} {routeMode} onToggle={() => { mobileMenuOpen = false; }} onLogout={handleLogout} />      </div>
     </Sheet.Root>
 
     <div
@@ -206,8 +208,8 @@
     >
       <!-- Header with mobile hamburger -->
       <Header
-        {siteUrl}
-        {menu}
+        {...definedOptions({ "siteUrl": siteUrl })}
+        {...definedOptions({ "menu": menu })}
         showSearch={true}
         showThemeToggle={true}
         onSearchClick={() => { commandOpen = true; }}
@@ -255,7 +257,7 @@
   </div>
   <CommandPalette
     bind:open={commandOpen}
-    onAskAI={aiAssistant ? handleAskAI : undefined}
+    {...definedOptions({ "onAskAI": aiAssistant ? handleAskAI : undefined })}
   />
   <KeyboardShortcuts bind:open={shortcutsOpen} />
 {/if}

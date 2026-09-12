@@ -1,3 +1,4 @@
+import { definedOptions } from '@svadmin/core/options';
 import { cleanup, fireEvent, render, waitFor, within } from '@testing-library/svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AccessControlProvider, AuthProvider, CheckResult, DataProvider, ResourceDefinition, RouterProvider } from '@svadmin/core';
@@ -41,13 +42,13 @@ function createTestRouter(go: RouterProvider['go']): RouterProvider {
     parse: () => {
       const pathname = window.location.hash.replace(/^#/, '').split('?')[0] || '/';
       const segments = pathname.split('/').filter(Boolean);
-      return {
+      return definedOptions({
         resource: segments[0],
         action: segments[1],
         id: segments[2],
         params: {},
         pathname,
-      };
+      });
     },
     formatLink: (path) => `#${path.replace(/^#/, '')}`,
   };
@@ -193,7 +194,7 @@ describe('AdminApp authenticated navigation', () => {
     const mounted = vi.fn();
     pageMountedListener = mounted;
     window.addEventListener('svadmin:test-page-mounted', pageMountedListener);
-    const guardedResources: ResourceDefinition[] = [{ ...resources[0], ...resourceFlags }];
+    const guardedResources: ResourceDefinition[] = resources.slice(0, 1).map((resource) => ({ ...resource, ...resourceFlags }));
 
     const view = render(AdminApp, {
       dataProvider: createDataProvider(),

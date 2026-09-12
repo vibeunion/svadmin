@@ -13,14 +13,14 @@
 
   let { message, type = 'info', dismissUrl }: Props = $props();
 
-  const colors: Record<string, { bg: string; border: string; text: string }> = {
+  const colors: Record<NonNullable<Props['type']>, { bg: string; border: string; text: string }> = {
     success: { bg: '#ecfdf5', border: '#a7f3d0', text: '#065f46' },
     error: { bg: '#fef2f2', border: '#fecaca', text: '#991b1b' },
     warning: { bg: '#fffbeb', border: '#fed7aa', text: '#92400e' },
     info: { bg: '#eff6ff', border: '#bfdbfe', text: '#1e40af' },
   };
 
-  const style = $derived(colors[type] ?? colors.info);
+  const style = $derived(colors[type] ?? colors['info']);
 </script>
 
 <div

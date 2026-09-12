@@ -58,7 +58,7 @@ function installFetch(handler: (url: string, init?: RequestInit) => Response | P
       const effectiveInit = input instanceof Request
         ? { method: input.method, headers: input.headers, signal: input.signal }
         : init;
-      calls.push({ url, init: effectiveInit });
+      calls.push({ url, ...(effectiveInit === undefined ? {} : { init: effectiveInit }) });
       return handler(url, effectiveInit);
     },
     configurable: true,
@@ -666,6 +666,38 @@ describe('createSSOAuthProvider', () => {
       email: 'admin@example.com',
       avatar: 'https://example.com/avatar.png',
     });
+  });
+
+  test.each([
+    null,
+    [],
+    'not-an-object',
+    { name: 'Missing subject' },
+    { sub: 42 },
+    { sub: '' },
+    { sub: 'user-123', name: 42 },
+    { sub: 'user-123', email: false },
+    { sub: 'user-123', picture: {} },
+  ].map((userinfo) => ({ userinfo })))('rejects malformed userinfo before mapping identity: %j', async ({ userinfo }) => {
+    const storage = createMemoryStorage();
+    storage.setItem(`${STORAGE_PREFIX}tokens`, JSON.stringify({
+      access_token: 'access-123',
+      token_type: 'bearer',
+    }));
+    installFetch(() => jsonResponse(userinfo));
+    const provider = createSSOAuthProvider({
+      issuer: 'https://idp.test',
+      clientId: 'admin-console',
+      redirectUri: 'https://app.test/callback',
+      storage,
+      autoRefresh: false,
+      manualEndpoints,
+    });
+    try {
+      expect(await provider.getIdentity()).toBeNull();
+    } finally {
+      provider.destroy();
+    }
   });
 
   test('returns userinfo after refreshing an expired session', async () => {

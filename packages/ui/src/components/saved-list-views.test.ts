@@ -1,3 +1,4 @@
+import { requireValue } from "../../../../scripts/test-assertions";
 import { describe, expect, it } from 'vitest';
 import {
   activeSavedListViewStorageKey,
@@ -35,7 +36,7 @@ describe('saved list views', () => {
     expect(readSavedListViews(serializeSavedListViews(views), allowedColumns)).toEqual([{
       ...views[0],
       state: {
-        ...views[0].state,
+        ...requireValue(views[0]).state,
         columnVisibility: { id: false },
         columnOrder: ['email', 'id'],
       },

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import { captureAdminContext } from '@svadmin/core';
   import type { AccessControlProvider, Action, Identity, MenuItem } from '@svadmin/core';
   import { getPath } from '../router-state.svelte.js';
@@ -107,11 +109,11 @@
   async function checkAccess(provider: AccessControlProvider | null, resource: string, action: Action): Promise<boolean> {
     if (!provider) return true;
 
-    const result = await provider.can({
+    const result = await provider.can(definedOptions({
       resource,
       action,
       meta: adminContext.getProviderMeta(resource),
-    });
+    }));
     return Array.isArray(result) ? (result[0]?.can ?? false) : result.can;
   }
 
@@ -132,11 +134,11 @@
   }
 
   function snapshotCustomMenuItems(menuItems: MenuItem[]): MenuItem[] {
-    return menuItems.map((menuItem) => ({
+    return menuItems.map((menuItem) => (definedOptions({
       ...menuItem,
       meta: menuItem.meta ? { ...menuItem.meta } : undefined,
       children: menuItem.children ? snapshotCustomMenuItems(menuItem.children) : undefined,
-    }));
+    })));
   }
 
   async function visibleCustomMenuItem(menuItem: MenuItem, provider: AccessControlProvider | null): Promise<MenuItem | null> {
@@ -188,12 +190,12 @@
       const items: NavItem[] = [{ path: '/', label: homeLabel, Icon: LayoutDashboard }];
       for (const { r, can } of results) {
         if (can) {
-          items.push({
+          items.push(definedOptions({
             path: `/${r.name}`,
             label: r.label,
             Icon: (typeof r.icon === 'string' ? iconMap[r.icon] : r.icon) ?? iconMap[r.name] ?? Settings,
             group: r.group,
-          });
+          }));
         }
       }
       navItems = items;
@@ -454,15 +456,14 @@
       <div class="svadmin-u-0e17f2bd9074 svadmin-u-7fcf9124b5df svadmin-u-6b7d6e21ccbd">
         <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-7e9a2a250cc3 svadmin-u-5f22e64f2282 svadmin-u-7660b450905a svadmin-u-ceb69a6b0e5f svadmin-u-ace81495deee svadmin-u-34516836730d">
           <Avatar
-            src={(identity as Record<string, unknown>).avatar as string | undefined}
+            src={(identity as Record<string, unknown>)['avatar'] as string | undefined}
             alt={identity.name ?? 'User'}
             fallback={identity.name?.charAt(0).toUpperCase() ?? 'U'}
             size="sm"
           />
           <div class="svadmin-u-36e579c0b41c svadmin-u-7e0b7cdf1a94">
             <p class="svadmin-u-f283ea9bea0e svadmin-u-a14daebf7748 svadmin-u-2689f3958069 svadmin-u-a7a63217e098">{identity.name}</p>
-            <p class="svadmin-u-f283ea9bea0e svadmin-u-d058ca6de60f svadmin-u-5f1ff8fe8768">{((identity as Record<string, unknown>).role || (identity as Record<string, unknown>).roleName) ?? 'User'}</p>
-          </div>
+            <p class="svadmin-u-f283ea9bea0e svadmin-u-d058ca6de60f svadmin-u-5f1ff8fe8768">{((identity as Record<string, unknown>)['role'] || (identity as Record<string, unknown>)['roleName']) ?? 'User'}</p>          </div>
           <button
             class="svadmin-u-d0a52b312f7d svadmin-u-cbbf90f9a828 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-421ac2be5045 svadmin-u-3e3534b4c5df svadmin-u-646e10356266 svadmin-u-0b48b877be2a svadmin-u-ceb69a6b0e5f"
             onclick={onLogout}

@@ -1,4 +1,8 @@
 <script lang="ts">
+  import { demoContracts } from '../resource-contracts';
+  import type { DemoRow } from '../resource-schemas';
+  type Todo = DemoRow<'todos'>;
+
   import { useList } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { Badge, Button, ContentPageHeader, ContentPageShell, MetricBlock } from '@svadmin/ui';
@@ -8,16 +12,6 @@
 
   const i18n = useTranslation();
 
-  interface Todo {
-    id: number;
-    title: string;
-    priority: string;
-    status: string;
-    dueDate: string;
-    completed: boolean;
-    notes: string;
-  }
-
   let { resourceName = 'todos' } = $props<{ resourceName?: string }>();
   let activeView = $state(readHashView('all'));
   let statusOverrides = $state<Record<number, string>>({});
@@ -25,11 +19,11 @@
 
   const locale = $derived(i18n.locale);
   const isZh = $derived(locale === 'zh-CN');
-  const query = useList({ resource: 'todos', pagination: { mode: 'off' }, sorters: [{ field: 'dueDate', order: 'asc' }] });
-  const todos = $derived((query.data?.data ?? []) as unknown as Todo[]);
+  const query = useList({ resource: demoContracts.todos, pagination: { mode: 'off' }, sorters: [{ field: 'dueDate', order: 'asc' }] });
+  const todos = $derived((query.data?.data ?? []));
   const boardTodos = $derived(todos.map((todo) => {
     const hasOverride = Object.hasOwn(statusOverrides, todo.id);
-    const status = hasOverride ? statusOverrides[todo.id] : todo.status;
+    const status = statusOverrides[todo.id] ?? todo.status;
     return { ...todo, status, completed: hasOverride ? status === 'done' : status === 'done' || todo.completed };
   }));
   const lanes = $derived([
@@ -60,7 +54,7 @@
     { label: isZh ? '团队' : 'Team', count: usersFallback(boardTodos.length) },
     { label: isZh ? '目标' : 'Goals', count: highPriorityCount },
   ]);
-  const normalizedView = $derived(['today', 'upcoming', 'priority', 'completed', 'tags'].includes(activeView) ? activeView : 'all');
+  const normalizedView = $derived((['today', 'upcoming', 'priority', 'completed', 'tags'] as const).find(view => view === activeView) ?? 'all');
   const viewCopy = $derived.by(() => {
     const copies = {
       all: {
@@ -100,7 +94,7 @@
         helper: isZh ? '上下文整理' : 'context sorting',
       },
     } satisfies Record<string, { badge: string; title: string; description: string; helper: string }>;
-    return copies[normalizedView as keyof typeof copies];
+    return copies[normalizedView];
   });
   const focusedTodos = $derived.by(() => {
     if (normalizedView === 'today') return boardTodos.filter((todo) => todo.dueDate <= '2026-06-14' && !todo.completed);

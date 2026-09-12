@@ -59,7 +59,8 @@ export function matchRoute(
     if (match) {
       const params: Record<string, string> = {};
       keys.forEach((key, i) => {
-        params[key] = match[i + 1];
+        const value = match[i + 1];
+        if (value !== undefined) params[key] = value;
       });
       return { route: pattern, params };
     }
@@ -75,20 +76,24 @@ export async function navigateWithProvider(
   provider: RouterProvider | undefined,
   path: string,
   options?: { replaceState?: boolean },
+  isActive: () => boolean = () => true,
 ): Promise<void> {
+  if (!isActive()) return;
   const from = currentPathWithProvider(provider);
   for (const guard of _beforeGuards) {
     const allowed = await guard(path, from);
-    if (!allowed) return;
+    if (!allowed || !isActive()) return;
   }
+  if (!isActive()) return;
   if (provider) {
     const navigated = await provider.go({ to: path, type: options?.replaceState ? 'replace' : 'push' });
-    if (navigated === false) return;
+    if (navigated === false || !isActive()) return;
   } else if (typeof window !== 'undefined') {
     window.location.hash = '#' + path.replace(/^#/, '');
   }
   _syncGlobalPath();
   for (const guard of _afterGuards) {
+    if (!isActive()) return;
     guard(path, from);
   }
 }

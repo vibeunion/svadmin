@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import {
     captureAdminContext,
     notifyWithProvider,
@@ -167,13 +169,13 @@
     testing = true;
     try {
       const selectedProvider = target ?? identityProviders[0];
-      const result = await provider.testIdentityProvider({
+      const result = await provider.testIdentityProvider(definedOptions({
         id: selectedProvider?.id,
         protocol: selectedProvider?.protocol,
         metadataUrl: target
           ? target.metadataUrl
           : (metadataUrl.trim() || selectedProvider?.metadataUrl),
-      }, context);
+      }), context);
       if (currentRequest !== requestId) return;
       notifyWithProvider({
         type: result.success ? 'success' : 'error',
@@ -189,14 +191,14 @@
     }
   }
 
-  const displayEvents = $derived(events.map((event): SecurityEvent => ({
+  const displayEvents = $derived(events.map((event): SecurityEvent => (definedOptions({
     id: event.id,
     event: event.event,
     actor: event.actor,
     location: event.location,
     createdAt: event.createdAt instanceof Date ? event.createdAt.toLocaleString() : String(event.createdAt),
     severity: event.severity === 'critical' ? 'danger' : (event.severity ?? 'info'),
-  })));
+  }))));
 </script>
 
 {#snippet auditControl()}
@@ -242,7 +244,7 @@
         <DataState state="empty" title={isZh ? '尚未配置身份源' : 'No identity provider configured'} description={isZh ? '请在后端 IdentityGovernanceProvider 中创建并验证身份源。' : 'Create and verify an identity provider through the backend IdentityGovernanceProvider.'} />
       {:else}
         {#each identityProviders as connection (connection.id)}
-          <IntegrationCard integration={{ id: connection.id, name: connection.name, account: connection.protocol.toUpperCase(), connected: connection.status === 'connected', description: connection.domain ?? connection.metadataUrl }} onconnect={() => testConnection(connection)} />
+          <IntegrationCard integration={definedOptions({ id: connection.id, name: connection.name, account: connection.protocol.toUpperCase(), connected: connection.status === 'connected', description: connection.domain ?? connection.metadataUrl })} onconnect={() => testConnection(connection)} />
         {/each}
       {/if}
     </section>

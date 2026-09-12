@@ -11,6 +11,7 @@
   } from "@svadmin/lite";
   import { postsResource } from "$lib/admin";
   import type { PageProps } from "./$types";
+  import { definedOptions } from '@svadmin/core/options';
 
   let { data, form }: PageProps = $props();
 
@@ -186,16 +187,14 @@
     </div>
 
     <div style="padding: 16px 16px 0 16px;">
-      <LiteSearch value={data.currentSearch} placeholder="Search posts..." />
+      <LiteSearch {...definedOptions({ value: data.currentSearch })} placeholder="Search posts..." />
     </div>
 
     <div class="lite-table-scroll">
       <LiteTable
         records={data.records}
         resource={postsResource}
-        currentSearch={data.currentSearch}
-        currentSort={data.currentSort}
-        currentOrder={data.currentOrder}
+        {...definedOptions({ currentSearch: data.currentSearch, currentSort: data.currentSort, currentOrder: data.currentOrder })}
         basePath="/lite"
         canShow={false}
         canEdit={false}

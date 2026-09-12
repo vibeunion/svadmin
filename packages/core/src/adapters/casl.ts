@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * CASL adapter for svadmin AccessControlProvider.
  *
@@ -20,12 +19,15 @@
  * ```
  */
 
-import type { AccessControlProvider, CanParams, CanResult } from '../permissions.svelte';
+import type { AccessControlProvider } from '../permissions.svelte';
+import { definedOptions } from '../defined-options';
+import { accessControlFailure, decodeCanResult, snapshotCanParams } from '../access-control-contract';
+import { HttpError } from '../types';
 
 /** CASL Ability interface (minimal, to avoid hard dependency on @casl/ability) */
 interface CaslAbility {
-  can: (action: string, subject: string, field?: string) => boolean;
-  cannot: (action: string, subject: string, field?: string) => boolean;
+  can: (action: string,subject: string,field?: string) => boolean;
+  cannot: (action: string,subject: string,field?: string) => boolean;
 }
 
 /**
@@ -39,23 +41,24 @@ export function createCaslAccessControl(
   options?: AccessControlProvider['options'],
 ): AccessControlProvider {
   return {
-    can: async (params: CanParams | CanParams[]): Promise<CanResult | CanResult[]> => {
-      const executeCheck = async ({ resource, action, params: actionParams }: CanParams) => {
-        const field = actionParams?.field as string | undefined;
-        // CaslAbility's can only accepts string for subject based on its internal definition in this file
-        // To support object subjects when CanParams might pass them, cast it to any here to satisfy the local interface
-        const allowed = ability.can(action as string, resource as any, field);
-        return {
+    can: async (input) => {
+      try {
+        const { resource, action, params: actionParams } = snapshotCanParams(input);
+        const field=actionParams?.['field'];
+        if(field!==undefined&&typeof field!=='string') {
+          throw new HttpError('Invalid access control request', 422, undefined, { code: 'INVALID_ACCESS_CONTROL_INPUT' });
+        }
+        const allowed=ability.can(action,resource,field);
+        return decodeCanResult({
           can: allowed,
-          reason: allowed ? undefined : `Cannot "${action}" on "${resource}"${field ? ` (field: ${field})` : ''}`,
-        };
-      };
-
-      if (Array.isArray(params)) {
-        return Promise.all(params.map(p => executeCheck(p)));
+          ...definedOptions({
+            reason: allowed? undefined:`Cannot "${action}" on "${resource}"${field? ` (field: ${field})`:''}`,
+          }),
+        });
+      } catch (error) {
+        throw accessControlFailure(error);
       }
-      return executeCheck(params);
     },
-    options,
+    ...definedOptions({ options }),
   };
 }

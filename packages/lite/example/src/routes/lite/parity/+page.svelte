@@ -68,7 +68,7 @@
     />
   </div>
 
-  <!-- 分类进度面板 -->
+  <!-- Category progress panel -->
   <div class="lite-card" style="margin-bottom: 24px;">
     <h2>模块分类适配进度</h2>
     <p class="lite-muted" style="margin-bottom: 16px;">
@@ -94,7 +94,7 @@
     </div>
   </div>
 
-  <!-- 新增组件现场验证与交互 Showcase -->
+  <!-- Interactive showcase for newly added components -->
   <div class="lite-card" style="margin-bottom: 24px;">
     <h2>SSR 组件现场展示与验证 (Showcase)</h2>
     <p class="lite-muted" style="margin-bottom: 16px;">
@@ -291,7 +291,7 @@
     </div>
   </div>
 
-  <!-- 详细组件对齐清单 -->
+  <!-- Detailed component parity checklist -->
   {#if report.items && report.items.length > 0}
     <div class="lite-card">
       <h2>详细组件对齐清单 (Parity Matrix)</h2>

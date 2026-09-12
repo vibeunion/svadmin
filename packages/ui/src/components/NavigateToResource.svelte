@@ -7,9 +7,10 @@
   let navigated = false;
   $effect(() => {
     // Navigate to first resource ONCE — avoid infinite re-triggers
-    if (!navigated && menuItems.length > 0) {
+    const firstMenuItem = menuItems[0];
+    if (!navigated && firstMenuItem) {
       navigated = true;
-      adminContext.navigate(menuItems[0].route);
+      adminContext.navigate(firstMenuItem.route);
     }
   });
 </script>

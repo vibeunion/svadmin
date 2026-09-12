@@ -16,6 +16,7 @@
  */
 
 import type { DataProvider } from '@svadmin/core';
+import { createRefineAdapter } from '@svadmin/refine-adapter';
 import type { RefineSQLConfig } from 'refine-sqlx';
 import { createRefineSQL } from 'refine-sqlx';
 
@@ -25,8 +26,8 @@ export type { RefineSQLConfig } from 'refine-sqlx';
  * Create a svadmin DataProvider backed by Drizzle ORM.
  *
  * Wraps refine-sqlx's `createRefineSQL()` and returns a `@svadmin/core` DataProvider.
- * Both type systems are structurally compatible (duck typing), so the wrapper is
- * a simple type-level bridge with no runtime overhead.
+ * The shared adapter validates method availability and every response envelope
+ * before database results enter the application's typed data layer.
  *
  * @param config - refine-sqlx configuration (connection, schema, features, etc.)
  * @returns A @svadmin/core DataProvider
@@ -54,18 +55,6 @@ export type { RefineSQLConfig } from 'refine-sqlx';
 export async function createDrizzleDataProvider<
   TSchema extends Record<string, unknown>,
 >(config: RefineSQLConfig<TSchema>): Promise<DataProvider> {
-  const provider = await createRefineSQL(config);
-
-  // refine-sqlx's DataProvider is structurally compatible with @svadmin/core's DataProvider:
-  //   - Same method names: getList, getOne, getMany, create, update, deleteOne, etc.
-  //   - Same parameter shapes: { resource, pagination, sorters, filters, meta, ... }
-  //   - Same return shapes: { data, total } / { data }
-  //
-  // The only nominal difference is type naming (GetListResponse vs GetListResult, etc.)
-  // which TypeScript's structural type system bridges automatically.
-  //
-  // The `custom()` method has a minor signature superset (refine-sqlx supports
-  // 'head' and 'options' HTTP methods that svadmin doesn't define), which is
-  // a non-breaking superset — safe to cast.
-  return provider as unknown as DataProvider;
+  const provider: unknown = await createRefineSQL(config);
+  return createRefineAdapter(provider);
 }

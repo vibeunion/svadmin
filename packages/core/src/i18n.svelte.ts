@@ -1355,7 +1355,7 @@ function detectLocale(): string {
   if (typeof navigator === 'undefined') return 'en';
   const browserLang = navigator.language || navigator.languages?.[0] || 'zh-CN';
   if (locales[browserLang]) return browserLang;
-  const prefix = browserLang.split('-')[0];
+  const [prefix = browserLang] = browserLang.split('-');
   for (const key of Object.keys(locales)) {
     if (key === browserLang || key.startsWith(prefix + '-')) return key;
   }
@@ -1407,7 +1407,7 @@ function translateFromTables(
   params?: Record<string, string | number>,
 ): string {
   const localeTable = locales[locale];
-  let text = localeTable?.[key] ?? locales.en?.[key] ?? key;
+  let text = localeTable?.[key] ?? locales['en']?.[key] ?? key;
 
   if (params) {
     for (const [param, value] of Object.entries(params)) {

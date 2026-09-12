@@ -114,8 +114,7 @@ export function jsonValueIssue(input: unknown): JsonValueIssue | null {
         }
         entries.push([key, descriptor.value]);
       }
-      for (let index = entries.length - 1; index >= 0; index -= 1) {
-        const [key, entry] = entries[index];
+      for (const [key, entry] of entries.reverse()) {
         pending.push({ kind: 'visit', candidate: entry, path: [...path, key], depth: depth + 1 });
       }
     }

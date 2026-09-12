@@ -121,14 +121,20 @@ const REQUIRED_OIDC_ENDPOINTS = [
 ] as const;
 
 function readOIDCConfig(body: unknown): OIDCConfig {
-  const discovery = typeof body === 'object' && body !== null && !Array.isArray(body)
-    ? body as Record<string, unknown>
-    : {};
+  const discovery = isUnknownRecord(body) ? body : {};
   const missingEndpoints = REQUIRED_OIDC_ENDPOINTS.filter((endpoint) => {
     const value = discovery[endpoint];
     return typeof value !== 'string' || value.length === 0;
   });
-  if (missingEndpoints.length > 0) {
+  const authorizationEndpoint = discovery['authorization_endpoint'];
+  const tokenEndpoint = discovery['token_endpoint'];
+  const userinfoEndpoint = discovery['userinfo_endpoint'];
+  if (
+    missingEndpoints.length > 0 ||
+    typeof authorizationEndpoint !== 'string' ||
+    typeof tokenEndpoint !== 'string' ||
+    typeof userinfoEndpoint !== 'string'
+  ) {
     throw new SSOAuthError(
       `OIDC discovery returned incomplete endpoints: missing ${missingEndpoints.join(', ')}`,
       502,
@@ -140,12 +146,12 @@ function readOIDCConfig(body: unknown): OIDCConfig {
   }
 
   return {
-    authorization_endpoint: discovery.authorization_endpoint as string,
-    token_endpoint: discovery.token_endpoint as string,
-    userinfo_endpoint: discovery.userinfo_endpoint as string,
-    ...(typeof discovery.end_session_endpoint === 'string'
-      && discovery.end_session_endpoint.length > 0
-      ? { end_session_endpoint: discovery.end_session_endpoint }
+    authorization_endpoint: authorizationEndpoint,
+    token_endpoint: tokenEndpoint,
+    userinfo_endpoint: userinfoEndpoint,
+    ...(typeof discovery['end_session_endpoint'] === 'string'
+      && discovery['end_session_endpoint'].length > 0
+      ? { end_session_endpoint: discovery['end_session_endpoint'] }
       : {}),
   };
 }
@@ -155,20 +161,25 @@ function decodeJwtPayload(token: string): Record<string, unknown> | null {
   const parts = token.split('.');
   if (parts.length < 2) return null;
   const payloadStr = parts[1];
+  if (!payloadStr) return null;
   const padded = payloadStr + '='.repeat((4 - (payloadStr.length % 4)) % 4);
   const binString = atob(padded.replace(/-/g, '+').replace(/_/g, '/'));
   const bytes = Uint8Array.from(binString, (value) => value.codePointAt(0) ?? 0);
-  return JSON.parse(new TextDecoder().decode(bytes)) as Record<string, unknown>;
+  const payload: unknown = JSON.parse(new TextDecoder().decode(bytes));
+  return isUnknownRecord(payload) ? payload : null;
 }
 
+function isUnknownRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
 function getAccessTokenExpiry(data: TokenResponse, accessToken: string): number | undefined {
-  if (typeof data.expires_in === 'number' && Number.isFinite(data.expires_in)) {
-    return Math.floor(Date.now() / 1000) + data.expires_in;
+  if (typeof data['expires_in'] === 'number' && Number.isFinite(data['expires_in'])) {
+    return Math.floor(Date.now() / 1000) + data['expires_in'];
   }
 
   try {
     const payload = decodeJwtPayload(accessToken);
-    return typeof payload?.exp === 'number' ? payload.exp : undefined;
+    return typeof payload?.['exp'] === 'number' ? payload['exp'] : undefined;
   } catch {
     return undefined;
   }
@@ -187,8 +198,8 @@ function createInvalidTokenResponseError(
 }
 
 function readTokenResponse(body: unknown, fallbackMessage: string): TokenResponse {
-  if (typeof body === 'object' && body !== null && !Array.isArray(body)) {
-    return body as TokenResponse;
+  if (isUnknownRecord(body)) {
+    return body;
   }
   throw createInvalidTokenResponseError(fallbackMessage, 'response body', body);
 }
@@ -225,16 +236,16 @@ function normalizeTokenResponse(
 ): SSOSession {
   const response = readTokenResponse(body, fallbackMessage);
   const accessToken = requireTokenString(response, 'access_token', fallbackMessage);
+  const idToken = typeof response['id_token'] === 'string' ? response['id_token'] : defaults.idToken;
+  const refreshToken = readOptionalTokenString(
+    response, 'refresh_token', defaults.refreshToken, fallbackMessage,
+  );
+  const expiresAt = getAccessTokenExpiry(response, accessToken);
   return {
     access_token: accessToken,
-    id_token: typeof response.id_token === 'string' ? response.id_token : defaults.idToken,
-    refresh_token: readOptionalTokenString(
-      response,
-      'refresh_token',
-      defaults.refreshToken,
-      fallbackMessage,
-    ),
-    expires_at: getAccessTokenExpiry(response, accessToken),
+    ...(idToken === undefined ? {} : { id_token: idToken }),
+    ...(refreshToken === undefined ? {} : { refresh_token: refreshToken }),
+    ...(expiresAt === undefined ? {} : { expires_at: expiresAt }),
     token_type: authorizationScheme(
       readOptionalTokenString(
         response,
@@ -355,7 +366,7 @@ export function createSSOAuthProvider(config: SSOConfig): SSOAuthProvider {
         retryable: false,
       });
     }
-    return fetcher.bind(globalThis) as typeof fetch;
+    return fetcher.bind(globalThis);
   }
 
   async function discover(): Promise<OIDCConfig> {
@@ -379,7 +390,7 @@ export function createSSOAuthProvider(config: SSOConfig): SSOAuthProvider {
 
     let discovered: unknown;
     try {
-      discovered = await response.json() as unknown;
+      discovered = await response.json();
     } catch (error) {
       throw new SSOAuthError('OIDC discovery returned invalid JSON', 502, {
         code: 'invalid_discovery_document',
@@ -413,7 +424,8 @@ export function createSSOAuthProvider(config: SSOConfig): SSOAuthProvider {
     if (!response.ok) throw await createSSOAuthResponseError(response, fallbackMessage);
 
     try {
-      return await response.json() as unknown;
+      const body: unknown = await response.json();
+      return body;
     } catch (error) {
       throw new SSOAuthError(`${fallbackMessage}: invalid JSON response`, 502, {
         code: 'invalid_token_response',
@@ -441,7 +453,7 @@ export function createSSOAuthProvider(config: SSOConfig): SSOAuthProvider {
       'Token refresh failed',
     );
     return normalizeTokenResponse(response, {
-      idToken: current.id_token,
+      ...(current.id_token === undefined ? {} : { idToken: current.id_token }),
       refreshToken: current.refresh_token,
       tokenType: current.token_type,
     }, 'Token refresh failed');
@@ -452,9 +464,9 @@ export function createSSOAuthProvider(config: SSOConfig): SSOAuthProvider {
     storageKey,
     autoRefresh: config.autoRefresh ?? true,
     refreshBuffer,
-    refreshLock: config.refreshLock,
+    ...(config.refreshLock === undefined ? {} : { refreshLock: config.refreshLock }),
     refresh: performRefresh,
-    legacyStorageKey: config.legacyStorageKey,
+    ...(config.legacyStorageKey === undefined ? {} : { legacyStorageKey: config.legacyStorageKey }),
   });
 
   function assertAuthorizationExchangeCurrent(
@@ -506,12 +518,25 @@ export function createSSOAuthProvider(config: SSOConfig): SSOAuthProvider {
     });
   }
 
-  const mapIdentity = config.mapIdentity ?? ((userinfo: Record<string, unknown>): Identity => ({
-    id: (userinfo.sub as string) ?? '',
-    name: (userinfo.name as string) ?? (userinfo.preferred_username as string) ?? '',
-    avatar: (userinfo.picture as string) ?? undefined,
-    email: (userinfo.email as string) ?? undefined,
-  }));
+  const mapIdentity = config.mapIdentity ?? ((userinfo: Record<string, unknown>): Identity => {
+    const id = userinfo['sub'];
+    if (typeof id !== 'string' || !id) throw new Error('Invalid userinfo subject');
+    const name = userinfo['name'];
+    const username = userinfo['preferred_username'];
+    const avatar = userinfo['picture'];
+    const email = userinfo['email'];
+    for (const value of [name, username, avatar, email]) {
+      if (value !== undefined && typeof value !== 'string') {
+        throw new Error('Invalid userinfo profile field');
+      }
+    }
+    return {
+      id,
+      ...(typeof name === 'string' ? { name } : typeof username === 'string' ? { name: username } : {}),
+      ...(typeof avatar === 'string' ? { avatar } : {}),
+      ...(typeof email === 'string' ? { email } : {}),
+    };
+  });
 
   const authorizationSource = {
     getAuthorizationHeader: async (options?: GetAccessTokenOptions) => {
@@ -570,7 +595,7 @@ export function createSSOAuthProvider(config: SSOConfig): SSOAuthProvider {
         try {
           await clearOwnedLoginState(state);
         } catch {
-          // 保留触发失败的原始认证错误；清理失败不能掩盖根因。
+          // Preserve the original authentication error; cleanup failures must not hide the root cause.
         }
         return { success: false, error: getErrorResult(error) };
       }
@@ -585,7 +610,7 @@ export function createSSOAuthProvider(config: SSOConfig): SSOAuthProvider {
         });
       } catch (error) {
         if (!(error instanceof SSOAuthError) || error.code !== 'auth_lock_failed') throw error;
-        // 无跨上下文锁时 callback commit 同样会失败；本地登出仍应清理会话。
+        // Callback commit also fails without a cross-context lock; local sign-out must still clear the session.
         sessions.clearSession();
       }
 
@@ -604,7 +629,7 @@ export function createSSOAuthProvider(config: SSOConfig): SSOAuthProvider {
           return { success: true };
         }
       } catch {
-        // 本地会话已清理，发现或跳转失败不能恢复为登录态。
+        // The local session is cleared; discovery or redirect failures must not restore an authenticated state.
       }
 
       return {
@@ -641,7 +666,7 @@ export function createSSOAuthProvider(config: SSOConfig): SSOAuthProvider {
           try {
             await clearOwnedLoginState(savedState);
           } catch {
-            // 错误回调仍返回 IdP 的原始错误；清理失败不掩盖它。
+            // Error callbacks still return the IdP's original error; cleanup failures must not hide it.
           }
         }
         return {
@@ -671,7 +696,7 @@ export function createSSOAuthProvider(config: SSOConfig): SSOAuthProvider {
           try {
             await clearOwnedLoginState(savedState);
           } catch {
-            // 保留 token exchange 的原始错误。
+            // Preserve the original token exchange error.
           }
           return { authenticated: false, error: getErrorResult(error) };
         }
@@ -720,7 +745,8 @@ export function createSSOAuthProvider(config: SSOConfig): SSOAuthProvider {
           { requireAuthorization: true },
         )(endpoints.userinfo_endpoint);
         if (!response.ok) return null;
-        const userinfo = await response.json() as Record<string, unknown>;
+        const userinfo: unknown = await response.json();
+        if (!isUnknownRecord(userinfo)) return null;
         if (
           sessions.getAuthGeneration() !== authGeneration
           || !sessions.getSession()

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import type { FieldDefinition } from '@svadmin/core';
   import { t } from '@svadmin/core/i18n';
 
@@ -59,11 +61,11 @@
       if (node.children && node.children.length > 0) {
         paths.push(...generatePaths(node.children, nextValues, nextLabels));
       } else {
-        paths.push({
+        paths.push(definedOptions({
           pathValue: nextValues.join('/'),
           pathLabels: nextLabels,
           disabled: node.disabled,
-        });
+        }));
       }
     }
     return paths;

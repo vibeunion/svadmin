@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import { Check, Copy, KeyRound, Trash2 } from '@lucide/svelte';
   import { useTranslation } from '@svadmin/core/i18n';
   import { Badge } from '../ui/badge/index.js';
@@ -21,7 +23,7 @@
   const isZh = $derived(i18n.locale === 'zh-CN');
 </script>
 {#if resolvedState}
-  <DataState state={resolvedState} title={stateTitle} description={stateDescription} {retry} {retryLabel} {loadingLabel} class={className} />
+  <DataState state={resolvedState} {...definedOptions({ title: stateTitle, description: stateDescription, retry, retryLabel, loadingLabel })} class={className} />
 {:else}
 <div class={'svadmin-u-fa6acbf81d74 svadmin-u-e783642739e3 svadmin-u-2cd02d11d1af svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 ' + className}>
   {#each keys as apiKey (apiKey.id)}

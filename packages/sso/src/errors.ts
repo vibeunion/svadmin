@@ -23,7 +23,7 @@ const TERMINAL_OAUTH_CODES = new Set([
 
 export class SSOAuthError extends Error {
   readonly statusCode: number;
-  readonly code?: string;
+  readonly code: string | undefined;
   readonly details?: unknown;
   readonly body?: unknown;
   readonly retryable: boolean;
@@ -42,9 +42,11 @@ export class SSOAuthError extends Error {
 }
 
 function asRecord(value: unknown): Record<string, unknown> | null {
-  return typeof value === 'object' && value !== null
-    ? value as Record<string, unknown>
-    : null;
+  return isRecord(value) ? value : null;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function firstString(...values: unknown[]): string | undefined {
@@ -56,7 +58,8 @@ async function readResponseBody(response: Response): Promise<unknown> {
   if (!text) return undefined;
 
   try {
-    return JSON.parse(text) as unknown;
+    const value: unknown = JSON.parse(text);
+    return value;
   } catch {
     return text;
   }
@@ -68,19 +71,19 @@ export async function createSSOAuthResponseError(
 ): Promise<SSOAuthError> {
   const body = await readResponseBody(response);
   const record = asRecord(body);
-  const nestedError = asRecord(record?.error);
+  const nestedError = asRecord(record?.['error']);
   const code = firstString(
-    record?.code,
-    record?.error_code,
-    nestedError?.code,
-    nestedError?.error_code,
-    record?.error,
+    record?.['code'],
+    record?.['error_code'],
+    nestedError?.['code'],
+    nestedError?.['error_code'],
+    record?.['error'],
   );
   const description = firstString(
-    record?.error_description,
-    nestedError?.error_description,
+    record?.['error_description'],
+    nestedError?.['error_description'],
   );
-  const responseMessage = firstString(record?.message, nestedError?.message);
+  const responseMessage = firstString(record?.['message'], nestedError?.['message']);
   const textMessage = typeof body === 'string' ? body : undefined;
   const statusMessage = response.statusText || `HTTP ${response.status}`;
 
@@ -88,8 +91,8 @@ export async function createSSOAuthResponseError(
     description ?? responseMessage ?? textMessage ?? `${fallbackMessage}: ${statusMessage}`,
     response.status,
     {
-      code,
-      details: record?.details ?? nestedError?.details,
+      ...(code === undefined ? {} : { code }),
+      details: record?.['details'] ?? nestedError?.['details'],
       body,
     },
   );
@@ -122,10 +125,10 @@ export function createSSOAuthNetworkError(error: unknown, fallbackMessage: strin
 export function isTerminalSessionError(error: unknown): boolean {
   const record = asRecord(error);
   const code = firstString(
-    record?.code,
-    record?.error_code,
-    asRecord(record?.error)?.code,
-    asRecord(record?.error)?.error_code,
+    record?.['code'],
+    record?.['error_code'],
+    asRecord(record?.['error'])?.['code'],
+    asRecord(record?.['error'])?.['error_code'],
   );
   return code !== undefined && TERMINAL_OAUTH_CODES.has(code);
 }

@@ -25,62 +25,14 @@ import type {
   UpdateParams,
   UpdateResult,
 } from '@svadmin/core';
+import { isDemoResource, type DemoResource, type DemoDatabase } from '../resource-schemas';
+import { parseDemoDatabase } from '../demo-database';
+import { Type } from '@sinclair/typebox';
+import { Value } from '@sinclair/typebox/value';
 
 const STORAGE_KEY = 'svadmin_inventory_demo_db_v5';
 
-type ResourceName =
-  | 'case_workspace'
-  | 'products'
-  | 'skus'
-  | 'categories'
-  | 'suppliers'
-  | 'warehouses'
-  | 'stock_movements'
-  | 'purchase_orders'
-  | 'sales_orders'
-  | 'todos'
-  | 'users'
-  | 'roles'
-  | 'permissions'
-  | 'user_accounts'
-  | 'user_logs'
-  | 'user_settings'
-  | 'calendar_events'
-  | 'ai_conversations'
-  | 'notifications'
-  | 'stock_transfers'
-  | 'cycle_counts'
-  | 'inventory_adjustments'
-  | 'reorder_rules'
-  | 'crm_accounts'
-  | 'crm_contacts'
-  | 'crm_deals'
-  | 'crm_activities'
-  | 'properties'
-  | 'property_agents'
-  | 'property_leads'
-  | 'property_showings'
-  | 'mail_inbox'
-  | 'mail_draft'
-  | 'mail_sent'
-  | 'mail_archive'
-  | 'mail_snoozed'
-  | 'mail_spam'
-  | 'mail_trash'
-  | 'store_client_products'
-  | 'store_client_orders'
-  | 'project_planning'
-  | 'store_admin'
-  | 'store_services'
-  | 'ai_prompt'
-  | 'invoice_generator'
-  | 'billing_plans'
-  | 'billing_invoices'
-  | 'billing_subscriptions'
-  | 'security_sessions'
-  | 'security_devices'
-  | 'security_allowed_ips'
-  | 'referral_invites';
+type ResourceName = DemoResource;
 type DbState = Record<ResourceName, BaseRecord[]>;
 
 const initialDbState: DbState = {
@@ -1089,12 +1041,12 @@ const initialDbState: DbState = {
     { id: 2, inviteeEmail: 'evelyn@example.com', inviterId: 2, code: 'OPS-2026-B', status: 'sent', sentAt: '2026-06-01', acceptedAt: '' },
     { id: 3, inviteeEmail: 'carlos@example.com', inviterId: 3, code: 'OPS-2026-C', status: 'expired', sentAt: '2026-04-01', acceptedAt: '' },
   ],
-};
+} satisfies DemoDatabase;
 
 let memoryDb = cloneDb(initialDbState);
 
 function cloneDb(db: DbState): DbState {
-  return JSON.parse(JSON.stringify(db)) as DbState;
+  return structuredClone(db);
 }
 
 function getStorage(): Storage | null {
@@ -1102,55 +1054,33 @@ function getStorage(): Storage | null {
   return globalThis.localStorage;
 }
 
-function normalizeDb(value: unknown): DbState {
-  const db = cloneDb(initialDbState);
-  if (!value || typeof value !== 'object') return db;
-
-  for (const resource of Object.keys(initialDbState) as ResourceName[]) {
-    const records = (value as Partial<DbState>)[resource];
-    if (Array.isArray(records)) db[resource] = records;
-  }
-
-  return db;
-}
-
 function getDb(): DbState {
   const storage = getStorage();
-  if (!storage) return memoryDb;
+  if (!storage) return cloneDb(memoryDb);
 
-  try {
-    const raw = storage.getItem(STORAGE_KEY);
-    if (!raw) {
-      const seeded = cloneDb(initialDbState);
-      storage.setItem(STORAGE_KEY, JSON.stringify(seeded));
-      return seeded;
-    }
-    return normalizeDb(JSON.parse(raw) as unknown);
-  } catch {
-    return cloneDb(initialDbState);
-  }
+  let raw: string | null;
+  try { raw = storage.getItem(STORAGE_KEY); }
+  catch { return cloneDb(memoryDb); }
+  if (raw === null) return cloneDb(initialDbState);
+  const stored: unknown = JSON.parse(raw);
+  return parseDemoDatabase(stored);
 }
 
 function saveDb(db: DbState): void {
+  const validated = parseDemoDatabase(db);
+  memoryDb = cloneDb(validated);
   const storage = getStorage();
-  if (!storage) {
-    memoryDb = db;
-    return;
-  }
+  if (!storage) return;
 
   try {
-    storage.setItem(STORAGE_KEY, JSON.stringify(db));
+    storage.setItem(STORAGE_KEY, JSON.stringify(validated));
   } catch {
     // The demo remains usable in memory if browser storage is unavailable.
   }
 }
 
-function isResourceName(resource: string): resource is ResourceName {
-  return resource in initialDbState;
-}
-
 function getResource(db: DbState, resource: string): BaseRecord[] {
-  if (!isResourceName(resource)) {
+  if (!isDemoResource(resource)) {
     throw new Error(`Resource ${resource} not found`);
   }
   return db[resource];
@@ -1263,26 +1193,33 @@ function applyPagination(items: BaseRecord[], pagination?: Pagination): { data: 
   };
 }
 
-function toVariablesRecord<TVariables>(variables: TVariables): Record<string, unknown> {
-  if (!variables || typeof variables !== 'object' || Array.isArray(variables)) return {};
-  return variables as Record<string, unknown>;
+function toVariablesRecord(variables: unknown): Record<string, unknown> {
+  if (!Value.Check(Type.Record(Type.String(), Type.Unknown()), variables)) {
+    throw new Error('Demo writes require an object');
+  }
+  return variables;
 }
 
 function getNextId(records: BaseRecord[]): number {
-  return records.reduce((max, record) => Math.max(max, Number(record.id) || 0), 0) + 1;
+  return records.reduce((max, record) => {
+    const id = record['id'];
+    if (typeof id !== 'number' || !Number.isFinite(id)) throw new Error('Invalid demo record ID');
+    return Math.max(max, id);
+  }, 0) + 1;
 }
 
 function updateOneRecord<TVariables>(db: DbState, resourceName: string, id: string | number, variables: TVariables): BaseRecord {
   const resource = getResource(db, resourceName);
-  const index = resource.findIndex((record) => String(record.id) === String(id));
-  if (index === -1) {
+  const index = resource.findIndex((record) => String(record['id']) === String(id));
+  const previous = resource[index];
+  if (!previous) {
     throw new Error(`Item ${id} not found in ${resourceName}`);
   }
 
   const updated: BaseRecord = {
-    ...resource[index],
+    ...previous,
     ...toVariablesRecord(variables),
-    id: resource[index].id,
+    id: previous['id'],
   };
 
   resource[index] = updated;
@@ -1291,12 +1228,13 @@ function updateOneRecord<TVariables>(db: DbState, resourceName: string, id: stri
 
 function deleteOneRecord(db: DbState, resourceName: string, id: string | number): BaseRecord {
   const resource = getResource(db, resourceName);
-  const index = resource.findIndex((record) => String(record.id) === String(id));
-  if (index === -1) {
+  const index = resource.findIndex((record) => String(record['id']) === String(id));
+  const deleted = resource[index];
+  if (!deleted) {
     throw new Error(`Item ${id} not found in ${resourceName}`);
   }
 
-  const [deleted] = resource.splice(index, 1);
+  resource.splice(index, 1);
   return deleted;
 }
 
@@ -1312,7 +1250,7 @@ export const inMemoryDataProvider: DataProvider = {
   },
 
   getOne: async <TData extends BaseRecord = BaseRecord>(params: GetOneParams): Promise<GetOneResult<TData>> => {
-    const item = getResource(getDb(), params.resource).find((record) => String(record.id) === String(params.id));
+    const item = getResource(getDb(), params.resource).find((record) => String(record['id']) === String(params.id));
     if (!item) {
       throw new Error(`Item ${params.id} not found in ${params.resource}`);
     }
@@ -1321,7 +1259,7 @@ export const inMemoryDataProvider: DataProvider = {
 
   getMany: async <TData extends BaseRecord = BaseRecord>(params: GetManyParams): Promise<GetManyResult<TData>> => {
     const ids = params.ids.map(String);
-    const data = getResource(getDb(), params.resource).filter((record) => ids.includes(String(record.id)));
+    const data = getResource(getDb(), params.resource).filter((record) => ids.includes(String(record['id'])));
     return { data: data as TData[] };
   },
 

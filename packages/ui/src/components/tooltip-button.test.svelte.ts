@@ -23,7 +23,7 @@ declare global {
 function disconnectedTooltipLayers() {
   return [...(globalThis.bitsDismissableLayers?.keys() ?? [])].filter((layer) => {
     const node = layer.opts.ref.current;
-    return node?.dataset.slot === 'tooltip-content' && !node.isConnected;
+    return node?.dataset['slot'] === 'tooltip-content' && !node.isConnected;
   });
 }
 

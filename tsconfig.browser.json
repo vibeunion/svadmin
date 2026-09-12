@@ -1,0 +1,33 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["node", "svelte", "vite/client"]
+  },
+  "exclude": [
+    "node_modules", "dist",
+    "packages/airtable/src/**/*.test.ts",
+    "packages/appwrite/src/**/*.test.ts",
+    "packages/auth-utils/src/**/*.test.ts",
+    "packages/core/src/**/*.test.ts",
+    "packages/create-svadmin/src/**/*.test.ts",
+    "packages/directus/src/**/*.test.ts",
+    "packages/drizzle/src/**",
+    "packages/elysia/src/**/*.test.ts",
+    "packages/firebase/src/**/*.test.ts",
+    "packages/graphql/src/**/*.test.ts",
+    "packages/hasura/src/**/*.test.ts",
+    "packages/lite/src/**/*.test.ts",
+    "packages/mcp/src/**/*.test.ts",
+    "packages/medusa/src/**/*.test.ts",
+    "packages/nestjs-query/src/**/*.test.ts",
+    "packages/nestjsx-crud/src/**/*.test.ts",
+    "packages/pocketbase/src/**/*.test.ts",
+    "packages/refine-adapter/src/**/*.test.ts",
+    "packages/sanity/src/**/*.test.ts",
+    "packages/simple-rest/src/**/*.test.ts",
+    "packages/sso/src/**/*.test.ts",
+    "packages/strapi/src/**/*.test.ts",
+    "packages/supabase/src/**/*.test.ts",
+    "example/src/**/*.test.ts"
+  ]
+}

@@ -20,7 +20,8 @@
         return val.length >= 10 ? `${val.slice(0, 6)}********${val.slice(-4)}` : '********';
       case 'email': {
         const parts = val.split('@');
-        return parts.length === 2 ? `${parts[0].slice(0, 1)}***@${parts[1]}` : '***@***.***';
+        const [name, domain] = parts;
+        return parts.length === 2 && name && domain ? `${name.slice(0, 1)}***@${domain}` : '***@***.***';
       }
       default:
         return '••••••••';

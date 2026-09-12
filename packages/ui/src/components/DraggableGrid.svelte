@@ -53,6 +53,7 @@
 
     const newModules = [...modules];
     const [dragged] = newModules.splice(sourceIdx, 1);
+    if (dragged === undefined) return;
     newModules.splice(targetIdx, 0, dragged);
 
     modules = newModules;

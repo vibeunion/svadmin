@@ -28,6 +28,9 @@
   <span id={`${importPanelId}-closed`} class="lite-confirm-cancel-target" aria-hidden="true"></span>
   <a
     href={`#${importPanelId}`}
+    data-svadmin-button
+    data-variant="outline"
+    data-size={size}
     class="lite-btn {size === 'sm' ? 'lite-btn-sm' : ''}"
     title={t('common.import') || 'Import'}
     aria-controls={importPanelId}

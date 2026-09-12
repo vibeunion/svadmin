@@ -70,7 +70,9 @@ describe('query cancellation reaches DataProvider', () => {
     await waitFor(() => expect(state.pending).toHaveBeenCalledTimes(1));
     const queries = state.client.getQueryCache().getAll();
     expect(queries).toHaveLength(1);
-    expect(JSON.stringify(queries[0].queryKey)).not.toContain('signal');
+    const query = queries[0];
+    if (!query) throw new Error('Expected a cached query');
+    expect(JSON.stringify(query.queryKey)).not.toContain('signal');
     await state.client.cancelQueries();
     expect(state.signals[0]?.aborted).toBe(true);
   });

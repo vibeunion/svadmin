@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { demoContracts } from '../resource-contracts';
+  import type { DemoRow } from '../resource-schemas';
+
   import { useList } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { Badge, Button, ContentPageHeader, ContentPageShell, MetricBlock, SectionHeader } from '@svadmin/ui';
@@ -8,17 +11,7 @@
 
   const i18n = useTranslation();
 
-  interface MailMessage {
-    id: number;
-    sender?: string;
-    to?: string;
-    subject: string;
-    body: string;
-    date?: string;
-    sentAt?: string;
-    updatedAt?: string;
-    unread?: boolean;
-  }
+  type MailMessage = DemoRow<'mail_inbox' | 'mail_draft' | 'mail_sent'>;
 
   let { resourceName = 'mail_inbox' } = $props<{ resourceName?: string }>();
   let activeView = $state(readHashView('folder'));
@@ -27,13 +20,13 @@
 
   const locale = $derived(i18n.locale);
   const isZh = $derived(locale === 'zh-CN');
-  const inboxQuery = useList({ resource: 'mail_inbox', pagination: { mode: 'off' } });
-  const draftQuery = useList({ resource: 'mail_draft', pagination: { mode: 'off' } });
-  const sentQuery = useList({ resource: 'mail_sent', pagination: { mode: 'off' } });
-  const archiveQuery = useList({ resource: 'mail_archive', pagination: { mode: 'off' } });
-  const snoozedQuery = useList({ resource: 'mail_snoozed', pagination: { mode: 'off' } });
-  const spamQuery = useList({ resource: 'mail_spam', pagination: { mode: 'off' } });
-  const trashQuery = useList({ resource: 'mail_trash', pagination: { mode: 'off' } });
+  const inboxQuery = useList({ resource: demoContracts.mail_inbox, pagination: { mode: 'off' } });
+  const draftQuery = useList({ resource: demoContracts.mail_draft, pagination: { mode: 'off' } });
+  const sentQuery = useList({ resource: demoContracts.mail_sent, pagination: { mode: 'off' } });
+  const archiveQuery = useList({ resource: demoContracts.mail_archive, pagination: { mode: 'off' } });
+  const snoozedQuery = useList({ resource: demoContracts.mail_snoozed, pagination: { mode: 'off' } });
+  const spamQuery = useList({ resource: demoContracts.mail_spam, pagination: { mode: 'off' } });
+  const trashQuery = useList({ resource: demoContracts.mail_trash, pagination: { mode: 'off' } });
   const query = $derived.by(() => {
     if (resourceName === 'mail_draft') return draftQuery;
     if (resourceName === 'mail_sent') return sentQuery;
@@ -43,9 +36,9 @@
     if (resourceName === 'mail_trash') return trashQuery;
     return inboxQuery;
   });
-  const messages = $derived((query.data?.data ?? []) as unknown as MailMessage[]);
+  const messages = $derived((query.data?.data ?? []));
   const selected = $derived(messages.find((message) => message.id === selectedMessageId) ?? messages[0]);
-  const unread = $derived(messages.filter((message) => message.unread).length);
+  const unread = $derived(messages.filter((message) => 'unread' in message && message.unread).length);
   const labels = $derived([
     { name: isZh ? '运营' : 'Operations', count: inboxQuery.data?.total ?? 0 },
     { name: isZh ? '财务' : 'Finance', count: 1 },
@@ -75,7 +68,13 @@
   ]);
 
   function messageDate(message: MailMessage): string {
-    return message.date ?? message.sentAt ?? message.updatedAt ?? '';
+    if ('date' in message) return message.date;
+    if ('sentAt' in message) return message.sentAt;
+    return message.updatedAt;
+  }
+
+  function messageParty(message: MailMessage): string {
+    return 'sender' in message ? message.sender : message.to;
   }
 
   const viewCopy = $derived.by(() => {
@@ -196,9 +195,9 @@
               <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
                   <p class="truncate text-sm font-semibold">{message.subject}</p>
-                  <p class="mt-1 truncate text-xs text-muted-foreground">{message.sender ?? message.to}</p>
+                  <p class="mt-1 truncate text-xs text-muted-foreground">{messageParty(message)}</p>
                 </div>
-                {#if message.unread}<span class="mt-1 h-2 w-2 rounded-full bg-primary"></span>{/if}
+                {#if 'unread' in message && message.unread}<span class="mt-1 h-2 w-2 rounded-full bg-primary"></span>{/if}
               </div>
               <p class="mt-2 line-clamp-2 text-xs text-muted-foreground">{message.body}</p>
               <p class="mt-2 text-xs text-primary">{messageDate(message)}</p>
@@ -212,7 +211,7 @@
       <Card.Header class="border-b">
         <Badge>{isZh ? '阅读面板' : 'Reading Pane'}</Badge>
         <Card.Title class="mt-3 text-xl">{selected?.subject ?? (isZh ? '暂无邮件' : 'No message selected')}</Card.Title>
-        <Card.Description>{selected ? `${selected.sender ?? selected.to} · ${messageDate(selected)}` : ''}</Card.Description>
+        <Card.Description>{selected ? `${messageParty(selected)} · ${messageDate(selected)}` : ''}</Card.Description>
       </Card.Header>
       <Card.Content class="space-y-4 p-5">
         <p class="rounded-lg border bg-muted/25 p-4 text-sm leading-6 text-muted-foreground">
@@ -229,7 +228,7 @@
           </div>
           <div class="rounded-lg border bg-background p-3">
             <p class="text-xs font-semibold text-muted-foreground">{isZh ? '邮件元信息' : 'Mail metadata'}</p>
-            <p class="mt-2 text-sm text-muted-foreground">{resourceName.replace('mail_', '')} · {selected?.unread ? (isZh ? '未读' : 'unread') : (isZh ? '已读' : 'read')}</p>
+            <p class="mt-2 text-sm text-muted-foreground">{resourceName.replace('mail_', '')} · {selected && 'unread' in selected && selected.unread ? (isZh ? '未读' : 'unread') : (isZh ? '已读' : 'read')}</p>
           </div>
         </div>
         <div class="rounded-lg border bg-background p-3">

@@ -25,15 +25,15 @@ describe('Strapi DataProvider', () => {
     expect(listRes.total).toBe(1);
 
     const oneRes = await dp.getOne({ resource: 'posts', id: 1 });
-    expect(oneRes.data.id).toBe(1);
+    expect(oneRes.data['id']).toBe(1);
 
     const createRes = await dp.create({ resource: 'posts', variables: {} });
-    expect(createRes.data.id).toBe('new-1');
+    expect(createRes.data['id']).toBe('new-1');
 
     const updateRes = await dp.update({ resource: 'posts', id: 1, variables: {} });
-    expect(updateRes.data.id).toBe(1);
+    expect(updateRes.data['id']).toBe(1);
     
     const deleteRes = await dp.deleteOne({ resource: 'posts', id: 1 });
-    expect(deleteRes.data.id).toBe(1);
+    expect(deleteRes.data['id']).toBe(1);
   });
 });

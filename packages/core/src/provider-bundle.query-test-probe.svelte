@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { useCreate } from './mutation-hooks.svelte';
+  import { useCreate } from './strict-hooks.svelte';
+  import { defineResource } from './resource-contract';
+  import { Type } from '@sinclair/typebox';
   import { useList } from './query-hooks.svelte';
   import { useTask } from './task-hooks.svelte';
   import { useNotification } from './utility-hooks.svelte';
@@ -9,7 +11,10 @@
     resource: 'posts',
     queryOptions: { enabled },
   }));
-  const create = useCreate({ resource: 'posts' });
+  const contract = defineResource('posts', {
+    record: Type.Object({ id: Type.String() }), create: Type.Object({ title: Type.String() }),
+  });
+  const create = useCreate({ resource: contract });
   const task = useTask({
     taskId: 'shared-task',
     queryOptions: {
@@ -20,8 +25,7 @@
 
   async function createResource(): Promise<void> {
     await create.mutation.mutateAsync({
-      resource: 'posts',
-      variables: { id: `${instance}-created` },
+      variables: { title: `${instance}-created` },
     });
   }
 </script>
@@ -29,4 +33,4 @@
 <button data-testid={`${instance}-create`} onclick={createResource}>create</button>
 <button data-testid={`${instance}-notify`} onclick={() => notification.open(`${instance}-notice`)}>notify</button>
 <output data-testid={`${instance}-query`}>{query.status}</output>
-<output data-testid={`${instance}-task`}>{task.data?.id ?? ''}</output>
+<output data-testid={`${instance}-task`}>{task.data?.title ?? ''}</output>

@@ -20,7 +20,7 @@ import '@svadmin/flow/flow.css';
 
 ```svelte
 <script lang="ts">
-  import { FlowCanvas, FlowPalette, type FlowEdge, type FlowNode } from '@svadmin/flow';
+  import { FlowCanvas, FlowPalette, type FlowEdge, type FlowNode, type FlowItemDropDetail } from '@svadmin/flow';
   import '@svadmin/flow/flow.css';
 
   let nodes = $state<FlowNode[]>([
@@ -34,7 +34,7 @@ import '@svadmin/flow/flow.css';
     { id: 'finish', type: 'output', label: 'Finish', data: { label: 'Finish' } },
   ];
 
-  function addNode({ template, position }) {
+  function addNode({ template, position }: FlowItemDropDetail) {
     sequence += 1;
     nodes = [...nodes, { id: `${template.id}-${sequence}`, type: template.type, position, data: template.data }];
   }
@@ -47,6 +47,10 @@ import '@svadmin/flow/flow.css';
 ```
 
 `FlowCanvas` updates bound `nodes` and `edges` when users move, connect, select, or delete elements. `FlowPalette` puts an explicitly-scoped JSON payload on the browser drag operation; `onitemdrop` receives that palette template and flow-space coordinates. The host creates the node, so it can assign IDs, validate node types, apply permissions, and choose its persistence model.
+
+The `onready` callback exposes `fitView()` and `screenToFlowPosition()`.
+`fitView()` resolves to `false` for an empty canvas rather than waiting for
+nodes to appear. Later calls use the current nodes.
 
 ## API
 
@@ -61,6 +65,12 @@ import '@svadmin/flow/flow.css';
 ## Boundaries
 
 - This package is browser-oriented; SSR consumers should render it client-side only.
-- Palette data is a UI transport format, not a trust boundary. Do not save it or authorize it without server-side validation.
+- Palette types and runtime validation share one schema. Data must contain only
+  plain JSON objects, dense arrays, strings, finite numbers, booleans, and null.
+  Unknown template properties, explicit undefined, cycles, accessors, symbols,
+  custom instances, and serialization hooks are rejected. Encoding invalid input
+  throws `TypeError`; decoding invalid payloads returns `null`.
+- Palette validation checks the transport format, not host-specific business
+  rules or authorization. Saved graphs still require server-side validation.
 - `FlowCanvas` does not serialize or persist state. Save only a host-owned graph document after validating node, edge, tenancy, authorization, and version rules.
 - Custom nodes and edges use the native `@xyflow/svelte` `nodeTypes` and `edgeTypes` props.

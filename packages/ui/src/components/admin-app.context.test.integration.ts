@@ -1,3 +1,4 @@
+import { requireValue } from "../../../../scripts/test-assertions";
 import { cleanup, fireEvent, render as renderComponent, waitFor, within } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -88,12 +89,13 @@ function createAuthProvider(instance: string): AuthProvider {
 }
 
 function createTaskProvider(instance: string): TaskProvider {
-  return {
+  const provider: TaskProvider & { __testId: string } = {
     __testId: instance,
-    submit: async () => ({ wait: async () => ({ id: `${instance}-task` }) }),
+    submit: async () => ({ id: `${instance}-task`, wait: async () => ({ id: `${instance}-task` }) }),
     get: async taskId => ({ id: taskId }),
     list: async () => ({ data: [] }),
-  } as TaskProvider;
+  };
+  return provider;
 }
 
 function createRouterProvider(instance: string): RouterProvider {
@@ -135,12 +137,11 @@ function createProviderBundle(instance: string, dataProvider: AdminProviderBundl
     subscribe: () => () => {},
     publish: () => {},
   } as LiveProvider;
-  const auditLogProvider = {
+  const auditLogProvider: AuditLogProvider & { __testId: string } = {
     __testId: `${instance}-audit`,
-    create: async () => ({ timestamp: '', action: 'create' as const }),
+    create: async params => params,
     get: async () => [],
-    update: async () => ({ timestamp: '', action: 'update' as const }),
-  } as AuditLogProvider;
+  };
   const notificationProvider = {
     __testId: `${instance}-notification`,
     open: () => {},
@@ -188,9 +189,8 @@ function createConsumerProviderBundle(instance: string) {
       options: { buttons: { enableAccessControl: true } },
     },
     auditLogProvider: {
-      create: async () => ({ timestamp: '', action: 'create' as const }),
+      create: async params => params,
       get: auditGet,
-      update: async () => ({ timestamp: '', action: 'update' as const }),
     },
     chatProvider: { sendMessage: chatSend },
   };
@@ -1020,9 +1020,8 @@ describe('AdminApp context isolation', () => {
     const accessCan = vi.fn(async () => ({ can: true }));
     setChatProvider({ sendMessage: chatSend });
     setAuditLogProvider({
-      create: async () => ({ timestamp: '', action: 'create' as const }),
+      create: async params => params,
       get: auditGet,
-      update: async () => ({ timestamp: '', action: 'update' as const }),
     });
     setAccessControlProvider({ can: accessCan });
     setResources([createResource('legacy')]);
@@ -1094,11 +1093,11 @@ describe('AdminApp context isolation', () => {
     expect(firstLayout?.contains(document.activeElement)).toBe(true);
 
     await fireEvent.keyDown(firstShortcutTarget as HTMLElement, { key: 'L', ctrlKey: true, shiftKey: true });
-    await waitFor(() => expect(firstChat.dataset.svadminChatVisible).toBe('true'));
-    expect(secondChat.dataset.svadminChatVisible).toBe('false');
+    await waitFor(() => expect(firstChat.dataset['svadminChatVisible']).toBe('true'));
+    expect(secondChat.dataset['svadminChatVisible']).toBe('false');
 
-    const firstScope = firstChat.dataset.svadminChatScope;
-    const secondScope = secondChat.dataset.svadminChatScope;
+    const firstScope = firstChat.dataset['svadminChatScope'];
+    const secondScope = secondChat.dataset['svadminChatScope'];
     window.dispatchEvent(new CustomEvent('svadmin:ask-ai', {
       detail: { query: 'first scoped question', scope: firstScope },
     }));
@@ -1142,7 +1141,7 @@ describe('AdminApp context isolation', () => {
     window.dispatchEvent(new CustomEvent('svadmin:ask-ai', {
       detail: {
         query: 'restore this conversation',
-        scope: firstChat.dataset.svadminChatScope,
+        scope: firstChat.dataset['svadminChatScope'],
       },
     }));
     await waitFor(() => {
@@ -1154,7 +1153,7 @@ describe('AdminApp context isolation', () => {
         'stable-tenant',
         'persist-remount-auth:assistant',
       ));
-      expect(testLocalStorage.getItem(keys[0])).toContain('restore this conversation');
+      expect(testLocalStorage.getItem(requireValue(keys[0]))).toContain('restore this conversation');
     }, { timeout: 2_000 });
     first.unmount();
 

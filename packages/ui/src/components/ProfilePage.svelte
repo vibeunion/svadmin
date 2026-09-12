@@ -232,15 +232,13 @@
                 <p class="svadmin-u-42536e69e639 svadmin-u-e83a7042bc91 svadmin-u-f283ea9bea0e">{identity.data.name ?? '—'}</p>
               </div>
 
-              {#if identity.data.email || identity.data.username}
-                <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">
+              {#if identity.data.email || identity.data['username']}                <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">
                   {#if identity.data.email}
                     <Mail class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-012fbd121f37" />
                   {:else}
                     <User class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-012fbd121f37" />
                   {/if}
-                  <span class="svadmin-u-f283ea9bea0e">{identity.data.email || identity.data.username}</span>
-                </div>
+                  <span class="svadmin-u-f283ea9bea0e">{identity.data.email || identity.data['username']}</span>                </div>
               {/if}
 
               {#if identity.data.id}

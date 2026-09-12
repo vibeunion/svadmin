@@ -1,0 +1,4 @@
+{
+  "extends": "../../../packages/drizzle/tsconfig.json",
+  "include": ["strict.ts"]
+}

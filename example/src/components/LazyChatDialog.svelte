@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import type { Component } from 'svelte';
 
   type ChatDialogProps = {
@@ -24,7 +26,7 @@
       <span class="text-xs text-muted-foreground">Loading assistant...</span>
     </div>
   {:then { ChatDialog }}
-    <ChatDialog {docked} {scope} {ownerScope} />
+    <ChatDialog {...definedOptions({ "docked": docked })} {...definedOptions({ "scope": scope })} {...definedOptions({ "ownerScope": ownerScope })} />
   {:catch}
     <div class="flex h-12 items-center justify-center p-4" role="alert">
       <span class="text-xs text-destructive">Unable to load assistant.</span>

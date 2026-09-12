@@ -1,0 +1,6 @@
+{
+  "scripts/fixtures/core-resource-types/unregistered.ts": "Regression coverage that dynamic reads cannot claim caller-selected record types.",
+  "packages/ui/src/components/detail-contract.test.type-fixture.ts": "Compile fixture proving the unchecked detail entry point is removed from the public surface.",
+  "packages/ui/src/components/import-contract.test.type-fixture.ts": "Compile fixture proving import receipts stay on the resource schema instead of unsafe transfer types.",
+  "packages/ui/src/components/import-contract.test.svelte.ts": "Runtime coverage that import UI talks to contracts and does not ship the unchecked transfer API."
+}

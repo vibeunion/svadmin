@@ -1,7 +1,8 @@
 <script lang="ts">
-/* eslint-disable @typescript-eslint/no-explicit-any */
-  import { Editor } from '@tiptap/core';
-  import { fullPreset, minimalPreset, prosePreset, type EditorPresetOptions } from '../extensions/index.js';
+  import { definedOptions } from '@svadmin/core/options';
+
+  import { Editor as TiptapEditor } from '@tiptap/core';
+  import { fullPreset, minimalPreset, prosePreset, type EditorPresetOptions, type Lowlight } from '../extensions/index.js';
   import type { AnyExtension } from '@tiptap/core';
   import Toolbar from './Toolbar.svelte';
   import BubbleMenuComp from './BubbleMenu.svelte';
@@ -43,7 +44,7 @@
     /** Max height for the editor content area */
     maxHeight?: string;
     /** lowlight instance for syntax-highlighted code blocks */
-    lowlight?: unknown;
+    lowlight?: Lowlight;
   }
 
   let {
@@ -67,7 +68,7 @@
   }: Props = $props();
 
   let editorElement: HTMLDivElement | undefined = $state();
-  let editor: Editor | null = $state(null);
+  let editor: TiptapEditor | null = $state(null);
 
   // Track whether we're updating externally to prevent loops
   let isUpdatingFromExternal = false;
@@ -77,11 +78,11 @@
   function buildExtensions(): AnyExtension[] {
     if (customExtensions) return customExtensions;
 
-    const opts: EditorPresetOptions = {
+    const opts: EditorPresetOptions = definedOptions({
       placeholder,
       maxLength,
       lowlight,
-    };
+    });
 
     switch (preset) {
       case 'minimal': return minimalPreset(opts);
@@ -97,7 +98,7 @@
 
     const ext = buildExtensions();
 
-    editor = new Editor({
+    editor = new TiptapEditor({
       element: editorElement,
       extensions: ext,
       content: value || '',
@@ -111,16 +112,16 @@
         handleDrop(view, event, slice, moved) {
           if (!moved && event.dataTransfer?.files?.length && onUpload) {
             const files = event.dataTransfer.files;
-            for (let i = 0; i < files.length; i++) {
-              const file = files[i];
+            for (const file of files) {
               if (file.type.startsWith('image/')) {
                 event.preventDefault();
                 onUpload(file).then((url) => {
                   if (editor) {
                     const { schema } = editor.state;
                     const pos = view.posAtCoords({ left: event.clientX, top: event.clientY });
-                    if (pos) {
-                      const node = schema.nodes.image.create({ src: url, alt: file.name });
+                    const imageNode = schema.nodes['image'];
+                    if (pos && imageNode) {
+                      const node = imageNode.create({ src: url, alt: file.name });
                       const transaction = view.state.tr.insert(pos.pos, node);
                       view.dispatch(transaction);
                     }
@@ -136,8 +137,7 @@
         handlePaste(view, event) {
           const items = event.clipboardData?.items;
           if (items && onUpload) {
-            for (let i = 0; i < items.length; i++) {
-              const item = items[i];
+            for (const item of items) {
               if (item.type.startsWith('image/')) {
                 event.preventDefault();
                 const file = item.getAsFile();
@@ -191,13 +191,13 @@
   });
 
   // Character count
-  const charCount = $derived(((editor as any)?.storage as Record<string, any>)?.characterCount?.characters() ?? 0);
-  const wordCount = $derived(((editor as any)?.storage as Record<string, any>)?.characterCount?.words() ?? 0);
+  const charCount = $derived.by(() => editor?.storage.characterCount?.characters() ?? 0);
+  const wordCount = $derived.by(() => editor?.storage.characterCount?.words() ?? 0);
 </script>
 
 <div class="svadmin-editor {className}">
   {#if showToolbar && editor}
-    <Toolbar {editor} {onUpload} {preset} />
+    <Toolbar {editor} {...definedOptions({ "onUpload": onUpload })} {preset} />
   {/if}
 
   <div

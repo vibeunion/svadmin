@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from './defined-options';
+
   import { untrack } from 'svelte';
   import {
     createI18nScope,
@@ -9,7 +11,8 @@
 
   interface Props {
     instance: string;
-    locale?: string;
+    // Rerendering with undefined explicitly clears the locale override.
+    locale?: string | undefined;
     provider?: I18nProvider;
     nextLocale?: string;
     onLocaleChange?: (locale: string) => void;
@@ -24,11 +27,11 @@
   }: Props = $props();
 
   const scope = createI18nScope();
-  untrack(() => scope.updateOwner({ locale, provider, onLocaleChange }));
+  untrack(() => scope.updateOwner(definedOptions({ locale, provider, onLocaleChange })));
   provideI18nScope(scope);
 
   $effect.pre(() => {
-    scope.updateOwner({ locale, provider, onLocaleChange });
+    scope.updateOwner(definedOptions({ locale, provider, onLocaleChange }));
   });
 </script>
 

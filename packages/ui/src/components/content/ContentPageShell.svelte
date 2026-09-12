@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import type { Snippet } from 'svelte';
   import ContentPageHeader from './ContentPageHeader.svelte';
 
@@ -34,6 +36,5 @@
 </script>
 
 <div data-svadmin-content-page={pageId} class={'svadmin-u-0e12dc7de920 svadmin-u-6da6a3c3f741 ' + widthClass + ' svadmin-u-b3542e058833 ' + className}>
-  {#if title}<ContentPageHeader {title} {eyebrow} {description} {actions} />{/if}
-  {@render children()}
+  {#if title}<ContentPageHeader {title} {...definedOptions({ "eyebrow": eyebrow })} {...definedOptions({ "description": description })} {...definedOptions({ "actions": actions })} />{/if}  {@render children()}
 </div>

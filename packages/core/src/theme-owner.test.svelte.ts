@@ -30,7 +30,7 @@ const secondPreset: ColorPreset = {
 };
 
 function createMemoryStorage(): Storage {
-  const values: Record<string, string> = Object.create(null) as Record<string, string>;
+  const values: Record<string, string> = {};
 
   return {
     get length() {
@@ -40,7 +40,7 @@ function createMemoryStorage(): Storage {
       for (const key of Object.keys(values)) Reflect.deleteProperty(values, key);
     },
     getItem(key) {
-      return Object.hasOwn(values, key) ? values[key] : null;
+      return Object.hasOwn(values, key) ? values[key] ?? null : null;
     },
     key(index) {
       return Object.keys(values)[index] ?? null;

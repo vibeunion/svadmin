@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import pc from 'picocolors';
 import {
-  inferResource,
+  generateResourceBundle,
   type FieldDefinition,
   type ResourceDefinition,
 } from '@svadmin/core/inferencer';
@@ -20,6 +20,38 @@ export function parseGenerateArguments(args: string[]): GenerateCommandOptions {
   return parseInferArguments(args);
 }
 
+const fieldTypes = {
+  text: true, number: true, boolean: true, date: true, select: true, multiselect: true,
+  tags: true, textarea: true, richtext: true, image: true, images: true, json: true,
+  relation: true, color: true, url: true, email: true, phone: true, currency: true,
+  file: true, markdown: true, password: true, array: true, 'tree-select': true,
+  treeselect: true, cascader: true, transfer: true, rate: true, rating: true,
+  avatar: true, copy: true, code: true,
+} satisfies Record<FieldDefinition['type'], true>;
+
+function isFieldType(value: string): value is FieldDefinition['type'] {
+  return Object.hasOwn(fieldTypes, value);
+}
+
+export function parseManualFields(fields: string, primaryKey: string): FieldDefinition[] {
+  const keys = new Set<string>();
+  return fields.split(',').map((field) => {
+    const [rawKey, rawType, extra] = field.split(':');
+    const key = rawKey?.trim();
+    const type = rawType === undefined ? 'text' : rawType.trim();
+    if (!key || extra !== undefined) throw new Error(`Invalid field definition: ${field}`);
+    if (!isFieldType(type)) throw new Error(`Invalid field type: ${type}`);
+    if (keys.has(key)) throw new Error(`Duplicate field: ${key}`);
+    keys.add(key);
+    return {
+      key,
+      label: key.charAt(0).toUpperCase() + key.slice(1),
+      type,
+      required: key === primaryKey,
+    };
+  });
+}
+
 export async function generateCommand(args: string[]): Promise<void> {
   const options = parseGenerateArguments(args);
 
@@ -27,32 +59,15 @@ export async function generateCommand(args: string[]): Promise<void> {
   if (options.resource && options.fields) {
     const resourceName = options.resource;
     const primaryKey = options.primaryKey ?? 'id';
-    const fieldDefs: FieldDefinition[] = options.fields.split(',').map((f) => {
-      const [key, typeRaw] = f.split(':');
-      const type = (typeRaw || 'text') as FieldDefinition['type'];
-      return {
-        key: key.trim(),
-        label: key.trim().charAt(0).toUpperCase() + key.trim().slice(1),
-        type,
-        required: key.trim() === primaryKey,
-      };
-    });
-
-    const mockSample: Record<string, unknown> = {};
-    for (const f of fieldDefs) {
-      mockSample[f.key] = f.type === 'number' ? 1 : f.type === 'boolean' ? true : `sample_${f.key}`;
-    }
-
-    const inferRes = inferResource(resourceName, [mockSample], { primaryKey });
-    const resources: ResourceDefinition[] = [
-      {
+    const fieldDefs = parseManualFields(options.fields, primaryKey);
+    const resource: ResourceDefinition = {
         name: resourceName,
         label: resourceName.charAt(0).toUpperCase() + resourceName.slice(1),
         primaryKey,
         fields: fieldDefs,
-      },
-    ];
-
+    };
+    const resources = [resource];
+    const inferRes = generateResourceBundle(resource);
     const bundles = new Map([[resourceName, inferRes]]);
     const files = planGeneratedFiles(resources, bundles, options.format);
     let wrote = false;
@@ -73,7 +88,7 @@ export async function generateCommand(args: string[]): Promise<void> {
       files,
       sourceDescription: `manual schema: ${options.fields}`,
       wrote,
-      outDir: options.outDir,
+      ...(options.outDir === undefined ? {} : { outDir: options.outDir }),
     });
     return;
   }

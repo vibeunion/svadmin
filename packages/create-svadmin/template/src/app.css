@@ -1,8 +1,2 @@
-@import "tailwindcss";
-@import "tw-animate-css";
-
-/* Tailwind source tokens and component discovery are owned by SVAdmin packages. */
-@import "@svadmin/ui/app.theme.css";
+@import "@svadmin/ui/app.css";
 @import "@svadmin/ai-elements/ai.css";
-
-@custom-variant dark (&:is(.dark *));

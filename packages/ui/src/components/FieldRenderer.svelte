@@ -4,6 +4,8 @@
 </script>
 
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import type { FieldDefinition } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { Input } from './ui/input/index.js';
@@ -25,6 +27,7 @@
   import type { Snippet } from 'svelte';
   import { getRichTextEditor } from '../editor-config.svelte.js';
   import { cn } from '../utils.js';
+  import { numericInputValue } from '../numeric-input.js';
 
   const i18n = useTranslation();
 
@@ -43,7 +46,7 @@
 
   // Typed accessors
   const strVal = $derived((value as string) ?? '');
-  const numVal = $derived(value as number | null | undefined);
+  const numVal = $derived(numericInputValue(value));
   const boolVal = $derived((value as boolean) ?? false);
   const tagsVal = $derived((value as string[]) ?? []);
   const multiVal = $derived((value as (string | number)[]) ?? []);
@@ -210,10 +213,11 @@
       id={field.key}
       name={field.key}
       type="number"
-      value={numVal == null ? '' : String(numVal)}
+      value={numVal}
       oninput={(e) => {
-        const v = (e.target as HTMLInputElement).value;
-        onchange(v === '' ? null : Number(v));
+        const input = e.currentTarget;
+        if (!(input instanceof HTMLInputElement)) return;
+        onchange(input.value === '' ? null : numericInputValue(input.valueAsNumber));
       }}
       required={field.required}
       aria-invalid={invalid || undefined}
@@ -269,7 +273,7 @@
   {:else if field.type === 'tree-select' || field.type === 'treeselect'}
     <TreeSelect
       options={(field.treeOptions ?? field.options ?? []) as TreeSelectOption[]}
-      value={value as string | number | (string | number)[] | undefined}
+      {...definedOptions({ "value": value as string | number | (string | number)[] | undefined })}
       multiple={field.multiple}
       disabled={disabled}
       placeholder={i18n.t('field.selectPlaceholder')}

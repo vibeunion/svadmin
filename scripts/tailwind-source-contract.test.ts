@@ -32,13 +32,15 @@ describe('@svadmin/ui Tailwind source contract', () => {
     expect(readme).toContain('registers its published `dist/components` directory');
   });
 
-  it('keeps the example and generated app on the published Tailwind theme artifact', () => {
+  it('uses the published theme for the Tailwind example and precompiled CSS for generated apps', () => {
     const exampleCss = readRepositoryFile('example/src/app.css');
     const templateCss = readRepositoryFile('packages/create-svadmin/template/src/app.css');
     const exampleApp = readRepositoryFile('example/src/App.svelte');
 
     expect(exampleCss).toContain('@import "@svadmin/ui/app.theme.css";');
-    expect(templateCss).toContain('@import "@svadmin/ui/app.theme.css";');
+    expect(templateCss).toContain('@import "@svadmin/ui/app.css";');
+    expect(templateCss).not.toContain('tailwindcss');
+    expect(templateCss).not.toContain('@svadmin/ui/app.theme.css');
     expect(exampleCss).not.toMatch(/--primary\s*:/);
     expect(templateCss).not.toMatch(/--primary\s*:/);
     expect(exampleApp).toContain("colorPreset: 'indigo'");

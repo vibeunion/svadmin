@@ -41,8 +41,7 @@
     if (startDate !== undefined) return startDate;
     if (Array.isArray(value)) return value[0];
     if (value && typeof value === 'object') {
-      const obj = value as Record<string, unknown>;
-      return (obj.start ?? obj.from) as string | number | Date | null | undefined;
+      return value.start ?? value.from;
     }
     return undefined;
   });
@@ -51,8 +50,7 @@
     if (endDate !== undefined) return endDate;
     if (Array.isArray(value)) return value[1];
     if (value && typeof value === 'object') {
-      const obj = value as Record<string, unknown>;
-      return (obj.end ?? obj.to) as string | number | Date | null | undefined;
+      return value.end ?? value.to;
     }
     return undefined;
   });

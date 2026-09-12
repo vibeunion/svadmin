@@ -1,3 +1,4 @@
+import { requireValue } from "../../../../scripts/test-assertions";
 import { describe, expect, it, vi } from 'vitest';
 import { render, fireEvent } from '@testing-library/svelte';
 import DynamicFormList from './DynamicFormList.svelte';
@@ -43,7 +44,7 @@ describe('DynamicFormList component', () => {
     if (addBtn) await fireEvent.click(addBtn);
 
     expect(onchange).toHaveBeenCalled();
-    const updated = onchange.mock.calls[0][0];
+    const updated = requireValue(onchange.mock.calls[0])[0];
     expect(updated).toHaveLength(2);
     expect(updated[1]).toEqual({ name: 'New Item' });
   });
@@ -60,5 +61,37 @@ describe('DynamicFormList component', () => {
       (btn) => btn.textContent?.includes('添加一项')
     );
     expect(addBtn).toBeUndefined();
+  });
+
+  it('moves and duplicates undefined elements without treating them as missing indices', () => {
+    const onchange = vi.fn<(items: (number | undefined)[]) => void>();
+    const view = render(DynamicFormList<number | undefined>, { items: [1, undefined, 3], onchange });
+    view.component.moveUp(1);
+    expect(onchange).toHaveBeenLastCalledWith([undefined, 1, 3]);
+    view.component.moveDown(0);
+    expect(onchange).toHaveBeenLastCalledWith([1, undefined, 3]);
+    view.component.duplicate(1);
+    expect(onchange).toHaveBeenLastCalledWith([1, undefined, undefined, 3]);
+  });
+
+  it('ignores out-of-range and non-integer indices', () => {
+    const onchange = vi.fn();
+    const view = render(DynamicFormList, { items: [1, 2], onchange });
+    for (const index of [-1, 2, 0.5, Number.NaN, Infinity]) {
+      view.component.moveUp(index);
+      view.component.moveDown(index);
+      view.component.duplicate(index);
+      view.component.remove(index);
+    }
+    expect(onchange).not.toHaveBeenCalled();
+  });
+
+  it('requires an explicit factory instead of inventing an item of generic type', () => {
+    const view = render(DynamicFormList, { items: [1] });
+    expect(() => view.component.add()).toThrow('requires defaultItem or createItem');
+    const onchange = vi.fn();
+    const withFactory = render(DynamicFormList, { items: [1], createItem: () => 2, onchange });
+    withFactory.component.add();
+    expect(onchange).toHaveBeenCalledWith([1, 2]);
   });
 });

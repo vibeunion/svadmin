@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "skipLibCheck": false,
+    "types": [
+      "bun"
+    ]
+  },
+  "include": [
+    "packages/*/src/**/*.test.ts",
+    "packages/drizzle/src/**/*.ts",
+    "example/src/**/*.test.ts",
+    "packages/refine-adapter/src/refinedev-optional.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "packages/ai-elements/src/**/*.test.ts",
+    "packages/flow/src/**/*.test.ts",
+    "packages/surface/src/**/*.test.ts",
+    "packages/ui/src/**/*.test.ts",
+    "packages/lite/src/server-adapter.test.ts"
+  ]
+}

@@ -1,4 +1,9 @@
 <script lang="ts">
+  import type { ResourceDefinition } from '@svadmin/core';
+  import { definedReactiveOptions } from '@svadmin/core/options';
+
+  import { definedOptions } from '@svadmin/core/options';
+
   import {
     provideAdminContext,
     type AuthProvider,
@@ -15,7 +20,8 @@
     tenant,
     withAIAssistant = false,
   }: {
-    authProvider?: AuthProvider;
+    // A present undefined value removes a previously supplied provider on rerender.
+    authProvider?: AuthProvider | undefined;
     tenant: TenantContext;
     withAIAssistant?: boolean;
   } = $props();
@@ -35,13 +41,13 @@
   };
   const queryClient = new QueryClient();
 
-  provideAdminContext({
+  provideAdminContext(definedReactiveOptions({
     dataProvider: fallbackDataProvider,
     get authProvider() { return authProvider; },
-    resources: [],
+    resources: [] satisfies ResourceDefinition[],
     routerProvider,
     get tenant() { return tenant; },
-  });
+  }));
 </script>
 
 {#snippet content()}
@@ -57,5 +63,5 @@
 {/snippet}
 
 <QueryClientProvider client={queryClient}>
-  <Layout children={content} aiAssistant={withAIAssistant ? aiAssistant : undefined} />
+  <Layout children={content} {...definedOptions({ "aiAssistant": withAIAssistant ? aiAssistant : undefined })} />
 </QueryClientProvider>

@@ -1,12 +1,14 @@
+import { definedOptions } from '@svadmin/core/options';
 import type { DataProvider as SvadminDataProvider } from '@svadmin/core';
+import { withValidatedResponses, type DataTransport } from '@svadmin/core/schema';
 
 type RequiredRefineDataProvider = Pick<
-  SvadminDataProvider,
+  DataTransport,
   'getList' | 'getOne' | 'create' | 'update' | 'deleteOne'
 >;
 
 type OptionalRefineDataProvider = Partial<
-  Pick<SvadminDataProvider, 'getApiUrl' | 'getMany' | 'createMany' | 'updateMany' | 'deleteMany' | 'custom'>
+  Pick<DataTransport, 'getApiUrl' | 'getMany' | 'createMany' | 'updateMany' | 'deleteMany' | 'custom'>
 >;
 
 export type RefineDataProviderLike = RequiredRefineDataProvider & OptionalRefineDataProvider;
@@ -31,7 +33,7 @@ function isObjectLike(value: unknown): value is Record<PropertyKey, unknown> {
   return typeof value === 'object' && value !== null;
 }
 
-function assertRefineDataProvider(value: unknown): asserts value is RefineDataProviderLike {
+function requireRefineDataProvider(value: unknown): Record<PropertyKey, unknown> {
   if (!isObjectLike(value)) {
     throw new Error('[svadmin] createRefineAdapter: expected a valid Refine DataProvider object, got ' + String(value));
   }
@@ -41,6 +43,12 @@ function assertRefineDataProvider(value: unknown): asserts value is RefineDataPr
       throw new Error(`[svadmin] createRefineAdapter: missing required Refine DataProvider method "${method}"`);
     }
   }
+  for (const method of [...optionalMethods, 'getApiUrl']) {
+    if (value[method] !== undefined && typeof value[method] !== 'function') {
+      throw new Error(`[svadmin] createRefineAdapter: invalid optional Refine DataProvider method "${method}"`);
+    }
+  }
+  return value;
 }
 
 /**
@@ -49,29 +57,41 @@ function assertRefineDataProvider(value: unknown): asserts value is RefineDataPr
  * definition of @svadmin/core, except for the current page property.
  */
 export function createRefineAdapter(refineProvider: unknown): SvadminDataProvider {
-  assertRefineDataProvider(refineProvider);
+  const source = requireRefineDataProvider(refineProvider);
+  function method(name: keyof RefineDataProviderLike) {
+    const handler = source[name];
+    if (typeof handler !== 'function') throw new TypeError(`Refine DataProvider method "${name}" is unavailable`);
+    return handler;
+  }
+  async function call(name: keyof RefineDataProviderLike, params: unknown): Promise<unknown> {
+    const result: unknown = await Reflect.apply(method(name), source, [params]);
+    return result;
+  }
 
-  const adapter: SvadminDataProvider = {
-    getApiUrl: () => refineProvider.getApiUrl?.() ?? '',
+  const transport: DataTransport = {
+    getApiUrl: () => {
+      if (source['getApiUrl'] === undefined) return '';
+      const result: unknown = Reflect.apply(method('getApiUrl'), source, []);
+      if (typeof result !== 'string') throw new TypeError('Refine DataProvider getApiUrl must return a string');
+      return result;
+    },
     getList(params) {
       const pagination = params.pagination?.current === undefined
         ? params.pagination
         : { ...params.pagination, currentPage: params.pagination.current };
-      return refineProvider.getList({ ...params, pagination });
+      return call('getList', definedOptions({ ...params, pagination }));
     },
-    getOne: refineProvider.getOne.bind(refineProvider),
-    create: refineProvider.create.bind(refineProvider),
-    update: refineProvider.update.bind(refineProvider),
-    deleteOne: refineProvider.deleteOne.bind(refineProvider),
+    getOne: params => call('getOne', params),
+    create: params => call('create', params),
+    update: params => call('update', params),
+    deleteOne: params => call('deleteOne', params),
   };
 
-  // Only attach optional methods if they actually exist
-  for (const method of optionalMethods) {
-    const handler = refineProvider[method];
-    if (typeof handler === 'function') {
-      adapter[method] = handler.bind(refineProvider) as never;
-    }
-  }
+  if (source['getMany'] !== undefined) transport.getMany = params => call('getMany', params);
+  if (source['createMany'] !== undefined) transport.createMany = params => call('createMany', params);
+  if (source['updateMany'] !== undefined) transport.updateMany = params => call('updateMany', params);
+  if (source['deleteMany'] !== undefined) transport.deleteMany = params => call('deleteMany', params);
+  if (source['custom'] !== undefined) transport.custom = params => call('custom', params);
 
-  return adapter;
+  return withValidatedResponses(transport);
 }

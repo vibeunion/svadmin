@@ -1,6 +1,13 @@
 // Core type definitions — DataProvider + AuthProvider + Providers
 
 import type { Component } from 'svelte';
+import type { TaskRecord, SubmitTaskOptions, TaskError } from './task-contract';
+import type { Identity, CheckResult, AuthErrorResult } from './auth-query-contract';
+export type { Identity, CheckResult } from './auth-query-contract';
+import type { AuthActionResult } from './auth-mutation-contract';
+import type { ResourceContract } from './resource-contract';
+export type { AuthActionResult } from './auth-mutation-contract';
+export type { TaskRecord, SubmitTaskOptions, TaskDateValue, TaskMessageValue } from './task-contract';
 
 // ─── HttpError ─────────────────────────────────────────────────
 
@@ -15,8 +22,8 @@ export interface HttpErrorOptions {
 
 export class HttpError extends Error {
   statusCode: number;
-  errors?: ValidationErrors;
-  code?: string;
+  errors: ValidationErrors | undefined;
+  code: string | undefined;
   details?: unknown;
   body?: unknown;
   override cause?: unknown;
@@ -222,90 +229,35 @@ export interface CustomResult<TData = unknown> {
 
 export interface DataProvider {
   // Required methods
-  getList: <TData extends BaseRecord = BaseRecord>(params: GetListParams) => Promise<GetListResult<TData>>;
-  getOne: <TData extends BaseRecord = BaseRecord>(params: GetOneParams) => Promise<GetOneResult<TData>>;
-  create: <TData extends BaseRecord = BaseRecord, TVariables = unknown>(params: CreateParams<TVariables>) => Promise<CreateResult<TData>>;
-  update: <TData extends BaseRecord = BaseRecord, TVariables = unknown>(params: UpdateParams<TVariables>) => Promise<UpdateResult<TData>>;
-  deleteOne: <TData extends BaseRecord = BaseRecord, TVariables = unknown>(params: DeleteParams<TVariables>) => Promise<DeleteResult<TData>>;
+  getList: (params: GetListParams) => Promise<GetListResult>;
+  getOne: (params: GetOneParams) => Promise<GetOneResult>;
+  create: (params: CreateParams) => Promise<CreateResult>;
+  update: (params: UpdateParams) => Promise<UpdateResult>;
+  deleteOne: (params: DeleteParams) => Promise<DeleteResult>;
   getApiUrl: () => string;
 
   // Optional bulk methods
-  getMany?: <TData extends BaseRecord = BaseRecord>(params: GetManyParams) => Promise<GetManyResult<TData>>;
-  createMany?: <TData extends BaseRecord = BaseRecord, TVariables = unknown>(params: CreateManyParams<TVariables>) => Promise<CreateManyResult<TData>>;
-  updateMany?: <TData extends BaseRecord = BaseRecord, TVariables = unknown>(params: UpdateManyParams<TVariables>) => Promise<UpdateManyResult<TData>>;
-  deleteMany?: <TData extends BaseRecord = BaseRecord, TVariables = unknown>(params: DeleteManyParams<TVariables>) => Promise<DeleteManyResult<TData>>;
+  getMany?: (params: GetManyParams) => Promise<GetManyResult>;
+  createMany?: (params: CreateManyParams) => Promise<CreateManyResult>;
+  updateMany?: (params: UpdateManyParams) => Promise<UpdateManyResult>;
+  deleteMany?: (params: DeleteManyParams) => Promise<DeleteManyResult>;
 
   // Optional custom method
-  custom?: <TData = unknown, TVariables = unknown>(params: CustomParams<TVariables>) => Promise<CustomResult<TData>>;
+  custom?: (params: CustomParams) => Promise<CustomResult>;
 }
 
 // ─── TaskProvider ─────────────────────────────────────────────
-
-export type TaskDateValue = string | Date | null;
-export type TaskMessageValue = string | null;
-
-export interface TaskRecord extends BaseRecord {
-  id: string;
-  name?: string;
-  title?: string;
-  status?: string;
-  progress?: number;
-  priority?: number;
-  queueName?: string;
-  queue_name?: string;
-  message?: TaskMessageValue;
-  payload?: unknown;
-  /**
-   * Task output payload. `result` is the canonical camelCase field used by
-   * svadmin UI helpers; `result_data` is accepted for Supabase/Postgres-style
-   * task mirrors. Consumers should prefer `result`, then fall back to
-   * `result_data`, matching `resolveTaskResult`.
-   */
-  result?: unknown;
-  result_data?: unknown;
-  /**
-   * Task lifecycle timestamps. Supabase/Postgres mirrors often expose nullable
-   * columns for lifecycle phases that have not happened yet, and svadmin UI
-   * helpers intentionally skip nullish values with `??` fallback ordering.
-   */
-  createdAt?: TaskDateValue;
-  created_at?: TaskDateValue;
-  updatedAt?: TaskDateValue;
-  updated_at?: TaskDateValue;
-  startedAt?: TaskDateValue;
-  started_at?: TaskDateValue;
-  finishedAt?: TaskDateValue;
-  finished_at?: TaskDateValue;
-  cancelledAt?: TaskDateValue;
-  cancelled_at?: TaskDateValue;
-  /**
-   * Task failure payload/message. `error` carries structured error details
-   * when available; `errorMessage` and `error_message` are string fallbacks for
-   * camelCase and snake_case providers. Consumers should prefer `error`, then
-   * `errorMessage`, then `error_message`, matching `resolveTaskError`.
-   */
-  error?: unknown;
-  errorMessage?: TaskMessageValue;
-  error_message?: TaskMessageValue;
-}
-
-export interface SubmitTaskOptions {
-  body?: Record<string, unknown>;
-  idempotencyKey?: string;
-  headers?: Record<string, string>;
-  meta?: Record<string, unknown>;
-}
 
 export interface TaskSubscription {
   unsubscribe(): void;
 }
 
 export interface TaskHandle<TTask extends TaskRecord = TaskRecord> {
-  id?: string;
+  id: string;
   wait(): Promise<TTask>;
-  subscribe?(callback: (task: TTask) => void): TaskSubscription | (() => void) | undefined;
-  cancel?(): Promise<unknown>;
-  retry?(): Promise<unknown>;
+  subscribe?(callback: (task: TTask) => void, onError?: (error: TaskError) => void): TaskSubscription | (() => void);
+  cancel?(): Promise<TTask>;
+  retry?(): Promise<TTask>;
 }
 
 export interface TaskListResult<TTask extends TaskRecord = TaskRecord> {
@@ -318,33 +270,12 @@ export interface TaskProvider<TTask extends TaskRecord = TaskRecord> {
   get(taskId: string): Promise<TTask>;
   list?(params?: Record<string, unknown>): Promise<TaskListResult<TTask>>;
   listDlq?(params?: Record<string, unknown>): Promise<TaskListResult<TTask>>;
-  cancel?(taskId: string): Promise<unknown>;
-  retry?(taskId: string): Promise<unknown>;
-  subscribe?(taskId: string, callback: (task: TTask) => void): TaskSubscription | (() => void) | undefined;
+  cancel?(taskId: string): Promise<TTask>;
+  retry?(taskId: string): Promise<TTask>;
+  subscribe?(taskId: string, callback: (task: TTask) => void, onError?: (error: TaskError) => void): TaskSubscription | (() => void);
 }
 
 // ─── AuthProvider ─────────────────────────────────────────────
-
-export interface Identity {
-  id?: string;
-  name?: string;
-  email?: string;
-  avatar?: string;
-  [key: string]: unknown;
-}
-
-export interface AuthActionResult {
-  success: boolean;
-  redirectTo?: string;
-  error?: { message: string; name?: string };
-}
-
-export interface CheckResult {
-  authenticated: boolean;
-  redirectTo?: string;
-  error?: { message: string; name?: string };
-  logout?: boolean;
-}
 
 export interface Role {
   id: string;
@@ -379,7 +310,7 @@ export interface AuthProvider {
   updateRolePermissions?: (roleId: string, permissions: Record<string, string[]>) => Promise<AuthActionResult>;
   /** Get recent audit logs */
   getAuditLogs?: (params?: { page?: number; pageSize?: number }) => Promise<{ data: AuditLog[]; total: number }>;
-  onError?: (error: unknown) => Promise<{ redirectTo?: string; logout?: boolean }>;
+  onError?: (error: unknown) => Promise<AuthErrorResult>;
 }
 
 export interface AuditLog {
@@ -406,21 +337,21 @@ export type MutationMode = 'pessimistic' | 'optimistic' | 'undoable';
 
 // ─── ResourceDefinition ───────────────────────────────────────
 
-/** 声明资源使用的传输协议；具体 URL/序列化行为由对应 provider 实现。 */
+/** Declares a resource transport protocol; the corresponding provider owns URL and serialization behavior. */
 export interface ResourceTransportConfig {
   readonly type: string;
   readonly endpoint?: string;
   readonly options?: Readonly<Record<string, unknown>>;
 }
 
-/** 声明资源使用的后端 adapter，不在 Core 内绑定具体运行时实现。 */
+/** Declares a resource backend adapter without binding Core to a concrete runtime implementation. */
 export interface ResourceAdapterConfig {
   readonly name: string;
   readonly version?: string;
   readonly options?: Readonly<Record<string, unknown>>;
 }
 
-/** 每资源的 provider 选择与声明性 transport/adapter 元数据。 */
+/** Per-resource provider selection and declarative transport/adapter metadata. */
 export interface ResourceProviderConfig {
   readonly dataProviderName?: string;
   readonly transport?: string | ResourceTransportConfig;
@@ -430,6 +361,8 @@ export interface ResourceProviderConfig {
 
 export interface ResourceDefinition {
   name: string;
+  /** Runtime contract required by schema-bound metadata-driven data components. */
+  contract?: ResourceContract;
   /** Unique identifier — use when multiple resources share the same `name` but target different DataProviders */
   identifier?: string;
   label: string;
@@ -447,9 +380,9 @@ export interface ResourceDefinition {
   menuOrder?: number;
   /** Navigation group name — resources with the same group are displayed in a collapsible section */
   group?: string;
-  /** DataProvider 选择及声明性 transport/adapter 元数据。 */
+  /** DataProvider selection and declarative transport/adapter metadata. */
   provider?: ResourceProviderConfig;
-  /** @deprecated 新代码优先使用 `provider.dataProviderName` 选择 DataProvider。 */
+  /** @deprecated New code should select the DataProvider through `provider.dataProviderName`. */
   meta?: Record<string, unknown> & { dataProviderName?: string; parent?: string };
 }
 
@@ -518,7 +451,8 @@ export interface FieldDefinition {
 
 /**
  * Extend this interface via declaration merging to register resource types.
- * When registered, all hooks automatically infer data types from resource names.
+ * Query and mutation hooks infer data from explicit resource names.
+ * Extend ResourceInputMap as well to infer mutation payloads.
  *
  * @example
  * ```ts
@@ -531,11 +465,23 @@ export interface FieldDefinition {
  *
  * // Now hooks auto-infer:
  * const list = useList({ resource: 'users' })
- * // list.data → { id: string; name: string; email: string }[]
+ * // list.data?.data -> { id: string; name: string; email: string }[] | undefined
  * ```
  */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ResourceTypeMap {}
+
+/** Extend alongside ResourceTypeMap to register create/update/delete payloads. */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface ResourceInputMap {}
+
+export type ResourceInputOperation = 'create' | 'update' | 'delete';
+
+/** Unregistered inputs retain the legacy dynamic payload contract. */
+export type InferResourceInput<R extends string, O extends ResourceInputOperation> =
+  R extends keyof ResourceInputMap
+    ? O extends keyof ResourceInputMap[R] ? ResourceInputMap[R][O] : never
+    : O extends 'delete' ? Record<string, unknown> | undefined : Record<string, unknown>;
 
 /** When ResourceTypeMap is empty → string; otherwise → registered keys */
 export type KnownResources = keyof ResourceTypeMap extends never
@@ -546,3 +492,9 @@ export type KnownResources = keyof ResourceTypeMap extends never
 export type InferData<R extends string> = R extends keyof ResourceTypeMap
   ? ResourceTypeMap[R]
   : Record<string, unknown>
+
+// Map interface models without adding an index signature; distribute over unions.
+type RecordShape<T> = T extends object ? { [K in keyof T]: T[K] } : never;
+
+/** @internal Normalized record shape for resource-aware hook signatures. */
+export type ResourceRecord<R extends string> = RecordShape<InferData<R>>;

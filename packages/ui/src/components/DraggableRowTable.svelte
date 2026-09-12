@@ -50,8 +50,8 @@
     }
 
     const nextItems = [...items];
-    const [movedItem] = nextItems.splice(draggedIndex, 1);
-    nextItems.splice(index, 0, movedItem);
+    const movedItems = nextItems.splice(draggedIndex, 1);
+    nextItems.splice(index, 0, ...movedItems);
 
     items = nextItems;
     onreorder?.(items);

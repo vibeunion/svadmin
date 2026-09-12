@@ -1,0 +1,23 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": [],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": false
+  },
+  "include": [
+    "src/resource-contract.ts",
+    "src/command-contract.ts",
+    "src/resource-schemas.ts",
+    "src/reactive-projection.ts",
+    "src/query-keys.ts",
+    "src/defined-options.ts",
+    "src/http.ts",
+    "src/schema-validation.ts"
+  ]
+}

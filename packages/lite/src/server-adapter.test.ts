@@ -283,7 +283,7 @@ describe('createAuthActions exported page compatibility', () => {
       getIdentity: mock(async () => null),
       async register(this: { marker: string }, params: Record<string, unknown>) {
         if (this.marker !== 'provider-context') throw new Error('AuthProvider context was lost');
-        return { success: params.email === 'user@example.com' };
+        return { success: params['email'] === 'user@example.com' };
       },
     } as unknown as AuthProvider;
 
@@ -758,12 +758,12 @@ describe('createCrudActions array form parsing', () => {
     expect(result).toEqual({ success: true, id: 1 });
     expect(create).toHaveBeenCalledTimes(1);
     const variables = create.mock.calls[0]?.[0].variables;
-    expect(variables?.count).toBe(42.5);
-    expect(variables?.optionalCount).toBeUndefined();
-    expect(variables?.attachment).toBeInstanceOf(File);
-    expect(variables?.avatar).toBeInstanceOf(File);
-    expect(variables?.gallery).toHaveLength(2);
-    expect((variables?.gallery as File[]).map((file) => file.name)).toEqual(['first.png', 'second.png']);
+    expect(variables?.['count']).toBe(42.5);
+    expect(variables?.['optionalCount']).toBeUndefined();
+    expect(variables?.['attachment']).toBeInstanceOf(File);
+    expect(variables?.['avatar']).toBeInstanceOf(File);
+    expect(variables?.['gallery']).toHaveLength(2);
+    expect((variables?.['gallery'] as File[]).map((file) => file.name)).toEqual(['first.png', 'second.png']);
   });
 
   test('keeps an existing required upload when edit submits no replacement file', async () => {
@@ -840,14 +840,14 @@ describe('createCrudActions array form parsing', () => {
 
     expect(result).toEqual({ success: true });
     expect(update).toHaveBeenCalledTimes(1);
-    const documents = update.mock.calls[0]?.[0].variables.documents as Record<string, unknown>[];
+    const documents = update.mock.calls[0]?.[0].variables['documents'] as Record<string, unknown>[];
     expect(documents[0]).toEqual({
       attachment: '/stored/report.pdf',
       gallery: ['/stored/first.png', '/stored/second.png'],
     });
-    expect(documents[1]?.attachment).toBeInstanceOf(File);
-    expect((documents[1]?.attachment as File).name).toBe('replacement.pdf');
-    expect((documents[1]?.gallery as File[]).map((file) => file.name)).toEqual(['new-one.png', 'new-two.png']);
+    expect(documents[1]?.['attachment']).toBeInstanceOf(File);
+    expect((documents[1]?.['attachment'] as File).name).toBe('replacement.pdf');
+    expect((documents[1]?.['gallery'] as File[]).map((file) => file.name)).toEqual(['new-one.png', 'new-two.png']);
   });
 
   test('leaves delete action validation behavior unchanged', async () => {

@@ -1,6 +1,9 @@
 <script lang="ts">
+  import { definedReactiveOptions, definedOptions } from '@svadmin/core/options';
+
   import { ListTodo, Loader2, Plus, Search, RefreshCw } from '@lucide/svelte';
   import { getTaskProvider, useSubmitTask, useTaskList } from '@svadmin/core';
+  import { decodeTaskSubmitOptions } from '@svadmin/core/schema';
   import { useTranslation } from '@svadmin/core/i18n';
   import type { TaskProvider, TaskRecord } from '@svadmin/core';
   import { Button } from './ui/button/index.js';
@@ -28,7 +31,7 @@
 
   let {
     open = $bindable(false),
-    taskProvider = getTaskProvider({ optional: true }) as TaskProvider<TaskRecord> | undefined,
+    taskProvider = getTaskProvider({ optional: true }) ?? undefined,
     title,
     initialTab = 'tasks',
   }: {
@@ -38,8 +41,7 @@
     initialTab?: TaskTab;
   } = $props();
 
-    // eslint-disable-next-line svelte/prefer-writable-derived
-  let activeTab = $state<TaskTab>('tasks');
+  let activeTab = $derived(initialTab);
   let selectedTaskId = $state<string | null>(null);
   let searchQuery = $state('');
   let statusFilter = $state('all');
@@ -55,7 +57,7 @@
   );
   const resolvedTitle = $derived(title ?? i18n.t('task.drawerTitle'));
 
-  const taskQuery = useTaskList({
+  const taskQuery = useTaskList(definedReactiveOptions({
     get taskProvider() {
       return taskProvider;
     },
@@ -66,9 +68,9 @@
         refetchIntervalInBackground: true,
       };
     },
-  });
+  }));
 
-  const dlqQuery = useTaskList({
+  const dlqQuery = useTaskList(definedReactiveOptions({
     get dlq() {
       return true;
     },
@@ -82,7 +84,7 @@
         refetchIntervalInBackground: true,
       };
     },
-  });
+  }));
 
   const submitTask = useSubmitTask();
 
@@ -124,10 +126,6 @@
   );
 
   $effect(() => {
-    activeTab = initialTab;
-  });
-
-  $effect(() => {
     if (statusFilter !== 'all' && !availableStatuses.includes(statusFilter)) {
       statusFilter = 'all';
     }
@@ -141,19 +139,19 @@
     }
 
     if (!selectedTaskId) {
-      selectedTaskId = current[0].id;
+      selectedTaskId = current[0]?.id ?? null;
       return;
     }
 
     if (!current.some((task) => task.id === selectedTaskId)) {
-      selectedTaskId = current[0].id;
+      selectedTaskId = current[0]?.id ?? null;
     }
   });
 
   function formatTime(value: unknown) {
-    if (!value) return '—';
-    const date = new Date(value as string | Date);
-    if (Number.isNaN(date.getTime())) return String(value);
+    if (typeof value !== 'string' || !value) return '—';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '—';
     return date.toLocaleString();
   }
 
@@ -174,7 +172,8 @@
     let body: Record<string, unknown> | undefined;
     if (submitBodyText.trim()) {
       try {
-        body = JSON.parse(submitBodyText) as Record<string, unknown>;
+        const parsed: unknown = JSON.parse(submitBodyText);
+        body = decodeTaskSubmitOptions({ body: parsed }).body;
       } catch {
         submitError = i18n.t('task.invalidJson');
         return;
@@ -182,16 +181,16 @@
     }
 
     try {
-      const handle = await submitTask.mutation.mutateAsync({
+      const handle = await submitTask.mutation.mutateAsync(definedOptions({
         taskName: submitTaskName.trim(),
         taskProvider,
-        options: {
+        options: definedOptions({
           body,
           idempotencyKey: submitIdempotencyKey.trim() || undefined,
-        },
-      });
+        }),
+      }));
       activeTab = 'tasks';
-      selectedTaskId = handle.id ?? null;
+      selectedTaskId = handle.id;
       submitOpen = false;
       resetSubmitForm();
       await Promise.all([

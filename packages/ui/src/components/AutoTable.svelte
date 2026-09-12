@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import { onDestroy, untrack } from 'svelte';
   import { SvelteMap } from 'svelte/reactivity';
   import { cn } from '../utils.js';
@@ -34,7 +36,9 @@
     cell_getValue,
   } from '@tanstack/table-core/static-functions';
 
-  import { captureAdminContext, DeleteManyPartialError, getAdminOptions, useList, useDelete, useDeleteMany, getResource, useNavigation, useParsed } from '@svadmin/core';
+  import { captureAdminContext, DeleteManyPartialError, getContractFormFields, useNavigation, useParsed, useResourceContract, useList, useDeleteMany, downloadData } from '@svadmin/core';
+  import { decodeBaseRecord, snapshotPlainData, parseContractRouteId, formatContractRouteId } from '@svadmin/core/schema';
+  import { checkedTableRows, copyTableRecord, tableExportRows, tableRowKey, type TableRecord } from './table-contract';
   import type {
     BaseRecord,
     FieldDefinition,
@@ -87,6 +91,7 @@
   import CanAccess from './CanAccess.svelte';
   import TooltipButton from './TooltipButton.svelte';
   import InlineEdit from './InlineEdit.svelte';
+  import FieldDisplay from './FieldDisplay.svelte';
   import DraggableHeader from './DraggableHeader.svelte';
   import DataState from './content/DataState.svelte';
   import type { Snippet } from 'svelte';
@@ -123,6 +128,7 @@
     batchActions?: Snippet<[{ selectedIds: (string | number)[] }]>;
     /** Summary row rendered at table footer */
     summary?: Snippet<[{ data: BaseRecord[]; total: number; visibleColumnsCount: number }]>;
+    deleteVariables?: unknown;
   }
 
   let {
@@ -144,25 +150,27 @@
     summary,
     pagination: externalPagination,
     sorters: externalSorters,
+    deleteVariables,
   }: Props = $props();
 
   let densityOverride = $state<'compact' | 'comfortable' | undefined>(undefined);
   const currentDensity = $derived(densityOverride ?? density);
   const adminContext = captureAdminContext();
-  const adminOptions = getAdminOptions();
-  const mutationMode = $derived(adminOptions.mutationMode ?? 'pessimistic');
   const parsed = useParsed();
   const navigation = useNavigation();
 
-  const resource = $derived(getResource(resourceName));
+  const binding = useResourceContract(() => resourceName);
+  const resource = $derived(adminContext.getResource(resourceName));
   const primaryKey = $derived(resource.primaryKey ?? 'id');
+  const listPermission = useCan(() => ({ resource: resourceName, action: 'list' }));
+  const canRead = $derived(listPermission.allowed);
   const listPreferenceScope = $derived.by(() => {
     const matcher = adminContext.queryKeyMatcher(resourceName);
-    return {
+    return definedOptions({
       resourceName,
       providerName: matcher.provider ?? 'default',
       tenantIdentity: matcher.tenant,
-    };
+    });
   });
 
   function readLocalPreference(key: string): string | null {
@@ -189,10 +197,10 @@
   // ─── URL state + server-side state ────────────────────────────
   const urlState = readURLState(adminContext);
 
-  const savedViewColumnIds = new Set([
-    ...untrack(() => resource.fields.map((field) => field.key)),
+  const savedViewColumnIds = $derived(new Set([
+    ...resource.fields.map((field) => field.key),
     '_select', '_expand', '_actions',
-  ]);
+  ]));
   const storedSavedViews = untrack(() => readSavedListViews(
     readScopedPreference(
       listPreferenceScope,
@@ -244,7 +252,7 @@
         const parsed: unknown = JSON.parse(stored);
         if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
           const visibility: ColumnVisibilityState = {};
-          for (const [columnId, visible] of Object.entries(parsed as Record<string, unknown>)) {
+          for (const [columnId, visible] of Object.entries(decodeBaseRecord(parsed))) {
             if (savedViewColumnIds.has(columnId) && typeof visible === 'boolean') {
               visibility[columnId] = visible;
             }
@@ -271,7 +279,7 @@
     try {
       const parsed: unknown = JSON.parse(stored);
       return Array.isArray(parsed)
-        ? [...new Set(parsed.filter((columnId): columnId is string => (
+        ? [...new Set(parsed.filter((columnId: unknown): columnId is string => (
           typeof columnId === 'string' && savedViewColumnIds.has(columnId)
         )))]
         : [];
@@ -301,19 +309,19 @@
       legacyActiveSavedListViewStorageKey(resourceName),
     );
     const activeSavedView = scopedSavedViews.find((view) => view.id === candidate);
-    return {
+    return definedOptions({
       savedViews: scopedSavedViews,
       activeSavedViewId: activeSavedView?.id,
       activeSavedView,
       columnVisibility: readColumnVisibilityPreference(scope),
       columnOrder: readColumnOrderPreference(scope),
-    };
+    });
   }
 
   // Snapshot resource values for initial state (untrack to avoid reactive tracking)
   const storedPageSize = parseInt(readLocalPreference('svadmin-default-page-size') ?? '', 10);
-  const initPageSize = untrack(() => resource.pageSize ?? (isNaN(storedPageSize) ? 10 : storedPageSize));
-  const initDefaultSort = untrack(() => resource.defaultSort);
+  const initPageSize = $derived(resource.pageSize ?? (Number.isSafeInteger(storedPageSize) && storedPageSize > 0 ? storedPageSize : 10));
+  const initDefaultSort = $derived(resource.defaultSort);
 
   let pagination = $state<PaginationState>(untrack(() => externalPagination ?? {
     current: urlState.page ?? initialViewState?.pagination.current ?? 1,
@@ -326,10 +334,10 @@
       : initialViewState?.sorters ?? (initDefaultSort ? [initDefaultSort] : [])))
   );
   const initialURLFilters = untrack(() => urlState.filters ?? initialViewState?.filters ?? []);
-  const editableFilterKeys = new Set(untrack(() => resource.fields.filter((field) => field.filterable).map((field) => field.key)));
+  const editableFilterKeys = $derived(new Set(resource.fields.filter((field) => field.filterable).map((field) => field.key)));
   const editableFilterCounts: Record<string, number> = {};
   for (const filter of initialURLFilters) {
-    if ('field' in filter && filter.operator === 'contains' && typeof filter.value === 'string' && editableFilterKeys.has(filter.field)) {
+    if ('field' in filter && filter.operator === 'contains' && typeof filter.value === 'string' && untrack(() => editableFilterKeys.has(filter.field))) {
       editableFilterCounts[filter.field] = (editableFilterCounts[filter.field] ?? 0) + 1;
     }
   }
@@ -350,7 +358,8 @@
   let searchDebounceTimer: ReturnType<typeof setTimeout> | undefined;
 
   function scheduleSearch(event: Event) {
-    searchText = (event.currentTarget as HTMLInputElement).value;
+    if (!(event.currentTarget instanceof HTMLInputElement)) return;
+    searchText = event.currentTarget.value;
     if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
     searchDebounceTimer = setTimeout(() => {
       appliedSearchText = searchText;
@@ -395,8 +404,9 @@
   const activeFilters = $derived.by(() => {
     const result: Filter[] = [...locationFilters];
     if (appliedSearchText.trim() && searchableFields.length > 0) {
-      if (searchableFields.length === 1) {
-        result.push({ field: searchableFields[0].key, operator: 'contains', value: appliedSearchText });
+      const firstSearchableField = searchableFields[0];
+      if (searchableFields.length === 1 && firstSearchableField) {
+        result.push({ field: firstSearchableField.key, operator: 'contains', value: appliedSearchText });
       } else {
         const searchFilter: LogicalFilter = {
           operator: 'or',
@@ -447,6 +457,12 @@
     pagination = { ...pagination, current: 1 };
   }
 
+  function setFilterFromEvent(field: string, event: Event): void {
+    if (event.currentTarget instanceof HTMLInputElement || event.currentTarget instanceof HTMLSelectElement) {
+      setFilterValue(field, event.currentTarget.value);
+    }
+  }
+
   function removeActiveFilter(index: number): void {
     markSavedViewDirty();
     const filter = locationFilters[index];
@@ -460,21 +476,16 @@
         && candidate.operator === 'contains'
         && typeof candidate.value === 'string'
       ));
-      filterValues[filter.field] = remaining.length === 1 && 'field' in remaining[0]
-        ? String(remaining[0].value)
+      const remainingFilter = remaining[0];
+      filterValues[filter.field] = remaining.length === 1 && remainingFilter && 'field' in remainingFilter
+        ? String(remainingFilter.value)
         : '';
     }
     pagination = { ...pagination, current: 1 };
   }
 
   function clonePlainValue(value: unknown): unknown {
-    if (Array.isArray(value)) return value.map(clonePlainValue);
-    if (value && typeof value === 'object') {
-      return Object.fromEntries(
-        Object.entries(value as Record<string, unknown>).map(([key, entry]) => [key, clonePlainValue(entry)])
-      );
-    }
-    return value;
+    return value === undefined ? undefined : snapshotPlainData(value);
   }
 
   function cloneFilter(filter: Filter): Filter {
@@ -491,11 +502,11 @@
     };
   }
 
-  const queryPagination = $derived<PaginationState>({
+  const queryPagination = $derived<PaginationState>(definedOptions({
     current: pagination.current,
     pageSize: pagination.pageSize,
     mode: pagination.mode,
-  });
+  }));
   const querySorters = $derived<Sort[]>(sorters.map(sorter => ({
     field: sorter.field,
     order: sorter.order,
@@ -504,26 +515,29 @@
 
   // ─── Data fetching ────────────────────────────────────────────
   const listResult = useList({
-    get resource() { return resourceName; },
+    get resource() { return binding.resource; },
+    get dataProviderName() { return binding.dataProviderName; },
+    get queryOptions() { return { enabled: canRead }; },
     get pagination() { return queryPagination; },
     get sorters() { return querySorters; },
     get filters() { return queryFilters; },
   });
   const query = listResult;
-  const deleteResult = useDelete({ get resource() { return resourceName; } });
-  const deleteMutation = deleteResult.mutation;
-  let batchOperationCount = $state(0);
+  const pageRecords = $derived.by(() => {
+    try { return { ok: true as const, data: canRead ? checkedTableRows(query.data?.data ?? []) : [] }; }
+    catch { return { ok: false as const, data: [] }; }
+  });
+  let deleteRequest = $state<{ ids: (string | number)[]; batch: boolean } | null>(null);
+  const deletePermission = useCan(() => definedOptions({
+    resource: resourceName, action: 'delete',
+    id: deleteRequest?.batch === false ? deleteRequest.ids[0] : undefined,
+    params: deleteRequest?.batch ? { ids: deleteRequest.ids } : undefined,
+    queryOptions: { enabled: deleteRequest !== null },
+  }));
+  const deleteAllowed = $derived(canRead && resource.canDelete !== false && deleteRequest !== null && deletePermission.allowed);
   const deleteManyResult = useDeleteMany({
-    get resource() { return resourceName; },
-    successNotification: () => ({
-      message: i18n.t('common.batchDeleteSuccess', { count: batchOperationCount }),
-    }),
-    errorNotification: (error) => ({
-      type: 'error',
-      message: error instanceof DeleteManyPartialError
-        ? i18n.t('common.batchDeletePartialFail', { failed: error.failedIds.length, total: batchOperationCount })
-        : i18n.t('common.batchDeleteFailed', { count: batchOperationCount }),
-    }),
+    get resource() { return binding.resource; },
+    get enabled() { return deleteAllowed; },
   });
   const deleteManyMutation = deleteManyResult.mutation;
 
@@ -533,6 +547,10 @@
   const canExportPerm = useCan(() => ({ resource: resourceName, action: 'export', queryOptions: { enabled: acEnabled } }));
   const canCreate = $derived(resource.canCreate !== false && (!acEnabled || canCreatePerm.allowed));
   const canEdit = $derived(resource.canEdit !== false);
+  const writableFields = $derived.by(() => {
+    try { return new Set(getContractFormFields(binding.resource, 'edit')); }
+    catch { return new Set<string>(); }
+  });
   const canShow = $derived(resource.canShow !== false);
   const canDelete = $derived(resource.canDelete !== false);
   const canExport = $derived(canExportPerm.allowed);
@@ -546,8 +564,8 @@
   ));
   const sortingAtom = createAtom(initialSorting);
   const columnVisibilityAtom = createAtom(initialColumnVisibility);
-  const rowSelectionAtom = createAtom({} as RowSelectionState);
-  const expandedAtom = createAtom({} as ExpandedState);
+  const rowSelectionAtom = createAtom<RowSelectionState>({});
+  const expandedAtom = createAtom<ExpandedState>({});
   const initialColumnOrder = untrack(() => (
     initialViewState?.columnOrder?.length
       ? initialViewState.columnOrder
@@ -583,12 +601,12 @@
     return tableRowSelection.current[rowId] === true;
   }
 
-  function rowIdValue(row: Row<TableFeatures, BaseRecord>): string | number {
-    const value = row.original[primaryKey];
-    return typeof value === 'string' || typeof value === 'number' ? value : row.id;
+  function rowIdValue(row: Row<TableFeatures, TableRecord>): string | number {
+    return row.original.id;
   }
 
-  function toggleRowSelection(row: Row<TableFeatures, BaseRecord>): void {
+  function toggleRowSelection(row: Row<TableFeatures, TableRecord>): void {
+    if (confirmPending || !canRead) return;
     const wasSelected = rowIsSelected(row.id);
     if (!wasSelected) {
       selectedIdValueByKey.set(row.id, rowIdValue(row));
@@ -697,6 +715,7 @@
     columnOrderAtom.set(state.columnOrder);
     persistColumnOrder(state.columnOrder);
     rowSelectionAtom.set({});
+    selectedIdValueByKey.clear();
   }
 
   function resetToDefaultListState(): void {
@@ -734,6 +753,7 @@
       columnVisibilityAtom.set(preferences.columnVisibility);
       columnOrderAtom.set(preferences.columnOrder);
       rowSelectionAtom.set({});
+      selectedIdValueByKey.clear();
     }
 
     loadedPreferenceScopeId = scopeId;
@@ -785,7 +805,7 @@
     columnOrderAtom.set(ids);
   }
 
-  function toggleColumnSort(column: Column<TableFeatures, BaseRecord, unknown>): void {
+  function toggleColumnSort(column: Column<TableFeatures, TableRecord, unknown>): void {
     markSavedViewDirty();
     column_toggleSorting(column);
   }
@@ -808,7 +828,7 @@
     resource.fields.filter(f => f.showInList !== false)
   );
 
-  const columns = $derived<ColumnDef<TableFeatures, BaseRecord, unknown>[]>([
+  const columns = $derived<ColumnDef<TableFeatures, TableRecord, unknown>[]>([
     // Selection column
     ...(selectable && (canDelete || batchActions) ? [{
       id: '_select',
@@ -816,7 +836,7 @@
       cell: () => '',
       size: 40,
       enableSorting: false,
-    } satisfies ColumnDef<TableFeatures, BaseRecord, unknown>] : []),
+    } satisfies ColumnDef<TableFeatures, TableRecord, unknown>] : []),
     // Expand column
     ...(expandedRowRender ? [{
       id: '_expand',
@@ -824,14 +844,14 @@
       cell: () => '',
       size: 40,
       enableSorting: false,
-    } satisfies ColumnDef<TableFeatures, BaseRecord, unknown>] : []),
+    } satisfies ColumnDef<TableFeatures, TableRecord, unknown>] : []),
     // Data columns
-    ...visibleFields.map((field): ColumnDef<TableFeatures, BaseRecord, unknown> => ({
+    ...visibleFields.map((field): ColumnDef<TableFeatures, TableRecord, unknown> => (definedOptions({
       id: field.key,
       accessorKey: field.key,
       header: () => field.label,
       size: field.width ? parseInt(String(field.width)) : undefined,
-    })),
+    }))),
     // Actions column
     {
       id: '_actions',
@@ -856,13 +876,13 @@
   });
 
   // ─── Create TanStack Table ────────────────────────────────────
-  const tbl = createTable<TableFeatures, BaseRecord>(
+  const tbl = createTable<TableFeatures, TableRecord>(
     {
       features,
-      get data() { return query.data?.data ?? []; },
+      get data() { return pageRecords.data; },
       get columns() { return orderedColumns; },
       manualSorting: true,
-      getRowId: (row: BaseRecord) => String(row[primaryKey]),
+      getRowId: (row: TableRecord) => tableRowKey(row.id),
       state: {
         get sorting() { return tableSorting.current; },
         get columnVisibility() { return tableColumnVisibility.current; },
@@ -882,6 +902,7 @@
   );
 
   function toggleAllRowsSelection(): void {
+    if (confirmPending || !canRead) return;
     const willSelect = !table_getIsAllRowsSelected(tbl);
     for (const row of tableView.rows) {
       if (willSelect) {
@@ -894,7 +915,11 @@
   }
 
   const selectedIds = $derived(
-    Object.keys(tableRowSelection.current).map((key) => selectedIdValueByKey.get(key) ?? key)
+    Object.keys(tableRowSelection.current).filter(key => tableRowSelection.current[key] === true)
+      .flatMap(key => {
+        const id = selectedIdValueByKey.get(key);
+        return id === undefined ? [] : [id];
+      })
   );
   const selectedCount = $derived(selectedIds.length);
   const batchDeletePerm = useCan(() => ({
@@ -951,7 +976,8 @@
     expandedAtom.set({ ...current, [rowId]: true });
   }
 
-  const totalPages = $derived(Math.ceil((query.data?.total ?? 0) / (pagination.pageSize ?? 10)));
+  const totalPages = $derived(canRead && pageRecords.ok && !query.isError
+    ? Math.ceil((query.data?.total ?? 0) / (pagination.pageSize ?? 10)) : 0);
 
   // ─── Pagination helpers ───────────────────────────────────────
   const currentPage = $derived(pagination.current ?? 1);
@@ -974,68 +1000,110 @@
   // ─── Confirm dialog ───────────────────────────────────────────
   let confirmOpen = $state(false);
   let confirmMessage = $state('');
-  let confirmAction = $state<() => void>(() => {});
   let confirmPending = $state(false);
+  let operationError = $state<string | null>(null);
+  let activeDelete: object | undefined;
   let detailOpenedInHistory = $state(false);
-  const detailRecordId = $derived(parsed.params.detail);
+  const tableScope = $derived({
+    contract: binding.resource, resourceName, provider: adminContext.providers?.[binding.dataProviderName],
+    meta: JSON.stringify(binding.meta), tenant: adminContext.tenantCacheKey?.__svadminTenant,
+    auth: adminContext.authProvider, router: adminContext.routerProvider,
+    permissionProvider: adminContext.accessControlProvider, canRead, canDelete,
+    variables: deleteVariables,
+  });
+  let previousTableScope: typeof tableScope | undefined;
+  const detailState = $derived.by(() => {
+    const route = parsed.params['detail'];
+    if (route === undefined || !canRead) return { id: undefined, invalid: false };
+    try { return { id: parseContractRouteId(binding.resource, route), invalid: false }; }
+    catch { return { id: undefined, invalid: true }; }
+  });
+  const detailRecordId = $derived(detailState.id);
   const detailOpen = $derived(detailRecordId != null);
+  $effect.pre(() => {
+    const scope = tableScope;
+    if (previousTableScope && previousTableScope !== scope) {
+      activeDelete = undefined;
+      confirmOpen = false;
+      confirmPending = false;
+      deleteRequest = null;
+      operationError = null;
+      selectedIdValueByKey.clear();
+      rowSelectionAtom.set({});
+      expandedAtom.set({});
+      detailOpenedInHistory = false;
+      if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = undefined;
+      if (previousTableScope.resourceName !== scope.resourceName) resetToDefaultListState();
+    }
+    previousTableScope = scope;
+  });
+  $effect(() => {
+    if (deleteRequest && !deletePermission.isLoading && !deletePermission.allowed) {
+      confirmOpen = false;
+      deleteRequest = null;
+      operationError = i18n.t('common.operationFailed');
+    }
+  });
+  onDestroy(() => { activeDelete = undefined; });
 
   function confirmDelete(id: string | number) {
+    if (!canRead || !pageRecords.ok || query.isError || !canDelete || confirmPending) return;
     confirmMessage = i18n.t('common.deleteConfirm');
-    confirmAction = async () => {
-      confirmPending = true;
-      if (mutationMode !== 'pessimistic') confirmOpen = false;
-      try {
-        await deleteMutation.mutateAsync({
-          id,
-          resource: resourceName,
-          onCancel: () => { confirmOpen = false; },
-        });
-        confirmOpen = false;
-      } catch {
-        // useDelete owns error feedback and restores optimistic cache state.
-      } finally {
-        confirmPending = false;
-      }
-    };
+    deleteRequest = { ids: [id], batch: false };
+    operationError = null;
     confirmOpen = true;
   }
 
   function confirmBatchDelete() {
     const ids = [...selectedIds];
-    if (ids.length === 0 || deleteManyMutation.isPending) return;
-    batchOperationCount = ids.length;
+    if (!canRead || !pageRecords.ok || query.isError || !canBatchDelete || ids.length === 0 || confirmPending) return;
     confirmMessage = i18n.t('common.batchDeleteConfirm', { count: ids.length });
-    confirmAction = async () => {
-      confirmPending = true;
-      if (mutationMode !== 'pessimistic') confirmOpen = false;
-      try {
-        await deleteManyMutation.mutateAsync({
-          ids,
-          resource: resourceName,
-          onCancel: () => { confirmOpen = false; },
-        });
-        selectedIdValueByKey.clear();
-        rowSelectionAtom.set({});
-        confirmOpen = false;
-      } catch (error) {
-        if (error instanceof DeleteManyPartialError) {
-          const failedSelection: RowSelectionState = {};
-          for (const id of error.failedIds) failedSelection[String(id)] = true;
-          for (const id of error.succeededIds) selectedIdValueByKey.delete(String(id));
-          rowSelectionAtom.set(failedSelection);
-        }
-        // useDeleteMany owns the error notification; keep failed selection for retry.
-      } finally {
-        confirmPending = false;
-      }
-    };
+    deleteRequest = { ids, batch: true };
+    operationError = null;
     confirmOpen = true;
   }
 
+  async function confirmAction() {
+    if (!confirmOpen || !pageRecords.ok || query.isError || !deleteAllowed || confirmPending || !deleteRequest) return;
+    const request = deleteRequest;
+    if (request.batch && JSON.stringify(request.ids) !== JSON.stringify(selectedIds)) {
+      confirmOpen = false;
+      deleteRequest = null;
+      return;
+    }
+    const scope = tableScope;
+    const token = {};
+    activeDelete = token;
+    confirmPending = true;
+    const current = () => activeDelete === token && tableScope === scope && deleteAllowed;
+    try {
+      await deleteManyMutation.mutateAsync({
+        ids: [...request.ids],
+        ...definedOptions({ variables: deleteVariables, dataProviderName: binding.dataProviderName }),
+      });
+      if (!current()) return;
+      for (const id of request.ids) selectedIdValueByKey.delete(tableRowKey(id));
+      rowSelectionAtom.set(Object.fromEntries(Object.entries(tableRowSelection.current)
+        .filter(([key]) => selectedIdValueByKey.has(key))));
+      confirmOpen = false;
+    } catch (error) {
+      if (!current()) return;
+      if (error instanceof DeleteManyPartialError) {
+        for (const id of error.succeededIds) selectedIdValueByKey.delete(tableRowKey(id));
+        rowSelectionAtom.set(Object.fromEntries(error.failedIds.map(id => [tableRowKey(id), true as const])));
+        operationError = i18n.t('common.batchDeletePartialFail', { failed: error.failedIds.length, total: request.ids.length });
+      } else operationError = i18n.t('common.operationFailed');
+      confirmOpen = false;
+    } finally {
+      if (activeDelete === token) { activeDelete = undefined; confirmPending = false; deleteRequest = null; }
+    }
+  }
+
   function openDetail(id: string | number): void {
+    if (!canRead || !canShow) return;
     detailOpenedInHistory = true;
-    writeURLState({ detailId: String(id) }, adminContext, 'push');
+    writeURLState({ detailId: formatContractRouteId(binding.resource, id) }, adminContext, 'push');
   }
 
   function closeDetail(): void {
@@ -1050,34 +1118,31 @@
 
   // ─── CSV Export ───────────────────────────────────────────────
   function exportCSV() {
-    const data = query.data?.data ?? [];
-    if (data.length === 0) return;
-    const headers = visibleFields.map(f => f.label);
-    const rows = data.map(record =>
-      visibleFields.map(f => {
-        const val = record[f.key];
-        if (val == null) return '';
-        if (typeof val === 'object') return JSON.stringify(val);
-        return String(val);
-      })
-    );
-    const csv = [headers.map(h => `"${h.replace(/"/g, '""')}"`).join(','), ...rows.map(r => r.map(v => `"${v.replace(/"/g, '""')}"`).join(','))].join('\n');
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `${resourceName}_${new Date().toISOString().slice(0, 10)}.csv`;
-    link.click();
-    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+    if (!canRead || !canExport || !pageRecords.ok || query.isError || query.isFetching || !pageRecords.data.length) return;
+    try {
+      const exportFields = table_getAllLeafColumns(tbl).flatMap(column => {
+        const field = visibleFields.find(field => field.key === column.id);
+        return field && isColumnVisible(field.key) ? [field] : [];
+      });
+      if (!exportFields.length) return;
+      const rows = tableExportRows(pageRecords.data, exportFields);
+      downloadData(rows, resourceName, 'csv');
+    } catch { operationError = i18n.t('common.operationFailed'); }
   }
 
   function goToPage(page: number) {
+    if (!Number.isSafeInteger(page) || page < 1 || page > Math.max(1, totalPages)) return;
     markSavedViewDirty();
     pagination = { ...pagination, current: page };
+  }
+  function refreshList() {
+    if (canRead && !query.isFetching) void listResult.refetch();
   }
 </script>
 
 <div class="svadmin-u-6ed543e2fbbb">
-  {#if showHeader}
+  {#if operationError}<p role="alert">{operationError}</p>{/if}
+  {#if detailState.invalid}<p role="alert">{i18n.t('common.operationFailed')}</p>{/if}  {#if showHeader}
     <!-- Header -->
     <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4">
       <h1 class="svadmin-u-42536e69e639 svadmin-u-998e0b29fe9e svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{title ?? resource.label}</h1>
@@ -1181,7 +1246,7 @@
                       id="filter-{field.key}"
                       class="svadmin-u-e7a768f922d2 svadmin-u-fc7473ca09eb"
                       value={filterValues[field.key] ?? ""}
-                      onchange={(e) => setFilterValue(field.key, (e.currentTarget as HTMLSelectElement).value)}
+                      onchange={(e: Event) => setFilterFromEvent(field.key, e)}
                     >
                       <option value="">{i18n.t("common.all")}</option>
                       {#each field.options as opt, _i (_i)}
@@ -1193,7 +1258,7 @@
                       id="filter-{field.key}"
                       type="text"
                       value={filterValues[field.key] ?? ""}
-                      oninput={(e) => setFilterValue(field.key, e.currentTarget.value)}
+                      oninput={(e: Event) => setFilterFromEvent(field.key, e)}
                       placeholder={field.label}
                       class="svadmin-u-e7a768f922d2 svadmin-u-fc7473ca09eb"
                     />
@@ -1225,8 +1290,7 @@
       {#if showDensitySwitcher}
         <DropdownMenu.Root>
           <DropdownMenu.Trigger>
-            {#snippet child({ props })}
-              <TooltipButton tooltip={i18n.t("common.density")} variant="outline" size="sm" class="svadmin-u-e7a768f922d2 svadmin-u-0b91436debbd" {...props}>
+            {#snippet child({ props }: { props: Record<string, unknown> })}              <TooltipButton tooltip={i18n.t("common.density")} variant="outline" size="sm" class="svadmin-u-e7a768f922d2 svadmin-u-0b91436debbd" {...props}>
                 <Rows class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" aria-hidden="true" />
               </TooltipButton>
             {/snippet}
@@ -1245,8 +1309,7 @@
       <!-- Column Visibility Picker -->
       <DropdownMenu.Root>
         <DropdownMenu.Trigger>
-          {#snippet child({ props })}
-            <TooltipButton tooltip={i18n.t("common.columns")} variant="outline" size="sm" class="svadmin-u-e7a768f922d2 svadmin-u-0b91436debbd" {...props}>
+          {#snippet child({ props }: { props: Record<string, unknown> })}            <TooltipButton tooltip={i18n.t("common.columns")} variant="outline" size="sm" class="svadmin-u-e7a768f922d2 svadmin-u-0b91436debbd" {...props}>
               <SlidersHorizontal class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
             </TooltipButton>
           {/snippet}
@@ -1255,7 +1318,7 @@
           {#each table_getAllLeafColumns(tbl).filter((column) => !column.id.startsWith("_")) as column, _i (_i)}
             <DropdownMenu.CheckboxItem
               checked={tableColumnVisibility.current[column.id] ?? true}
-              onCheckedChange={(v) => setColumnVisibility(column.id, !!v)}
+              onCheckedChange={(v: boolean) => setColumnVisibility(column.id, v)}
             >
               {visibleFields.find(f => f.key === column.id)?.label ?? column.id}
             </DropdownMenu.CheckboxItem>
@@ -1284,8 +1347,9 @@
                 id="saved-list-view"
                 class="svadmin-u-e7a768f922d2 svadmin-u-6da6a3c3f741"
                 value={activeSavedViewId ?? ""}
-                onchange={(event) => {
-                  const id = (event.currentTarget as HTMLSelectElement).value;
+                onchange={(event: Event) => {
+                  if (!(event.currentTarget instanceof HTMLSelectElement)) return;
+                  const id = event.currentTarget.value;
                   const view = savedViews.find((candidate) => candidate.id === id);
                   if (view) applySavedView(view);
                   else {
@@ -1340,8 +1404,7 @@
           variant="outline"
           size="sm"
           class="svadmin-u-e7a768f922d2 svadmin-u-0b91436debbd"
-          onclick={() => listResult.refetch()}
-        >
+          onclick={refreshList}        >
           <RefreshCw class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 {query.isFetching ? "svadmin-u-afbdd13a380e" : ""}" />
         </TooltipButton>
       {/if}
@@ -1398,8 +1461,7 @@
 
   <!-- Table (TanStack-powered) -->
   <div class="svadmin-u-2cd02d11d1af svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-438b2237b8d6" role="region" aria-label="{resource.label} {i18n.t('common.list')}" data-table-density={currentDensity}>
-    {#if query.isLoading}
-      <div class="svadmin-u-8e63407b5ceb svadmin-u-6ed543e2fbbb">
+    {#if query.isLoading || listPermission.isLoading}      <div class="svadmin-u-8e63407b5ceb svadmin-u-6ed543e2fbbb">
         <div class="svadmin-u-60fbb7713999 svadmin-u-0c3bc98565dd svadmin-u-a77ed4d908c0">
           {#each visibleFields.slice(0, 4) as _, _i (_i)}
             <Skeleton class="svadmin-u-11e59c6d5f6b svadmin-u-36e579c0b41c" />
@@ -1413,11 +1475,13 @@
           </div>
         {/each}
       </div>
-    {:else if query.error}
+    {:else if !canRead}
+      <p role="alert">{i18n.t('common.operationFailed')}</p>
+    {:else if query.error || !pageRecords.ok}
       <DataState
         state="error"
-        description={i18n.t('common.loadFailed', { message: (query.error as Error).message })}
-        retry={() => listResult.refetch()}
+        description={i18n.t('common.operationFailed')}
+        retry={refreshList}
       />
     {:else}
       <div in:fade={{ duration: 150 }}>
@@ -1426,13 +1490,13 @@
         <Table.Root density={currentDensity}>
           <Table.Header>
             {#each tableView.headerGroups as headerGroup, _i (_i)}
-              {@const visibleHeaders = headerGroup.headers.filter((header: Header<TableFeatures, BaseRecord, unknown>) => isColumnVisible(header.column.id))}
+              {@const visibleHeaders = headerGroup.headers.filter((header: Header<TableFeatures, TableRecord, unknown>) => isColumnVisible(header.column.id))}
               <DraggableHeader
                 columns={visibleHeaders.map((header) => ({ id: header.column.id, header }))}
                 onReorder={setColumnOrder}
               >
                 {#snippet header(col, _index, dragProps)}
-                  {@const header = col.header as typeof headerGroup.headers[0]}
+                  {@const header = col.header}
                   <Table.Head
                     {...dragProps}
                     class={cn('svadmin-u-65fdbade2025 svadmin-u-18049387f0af svadmin-u-b247a17a0d75 svadmin-u-2689f3958069 svadmin-u-d9256981a032 svadmin-u-bfa603190748 svadmin-u-f6e31b39b8e4', dragProps.class)}
@@ -1483,8 +1547,8 @@
           </Table.Header>
           <Table.Body>
             {#each tableView.rows as row (row.id)}
-              {@const record = row.original}
-              {@const id = record[primaryKey] as string | number}
+              {@const record = copyTableRecord(row.original)}
+              {@const id = rowIdValue(row)}
               {@const visibleCells = row_getVisibleCells(row).filter((cell) => isColumnVisible(cell.column.id))}
               <ContextMenu.Root>
                 <ContextMenu.Trigger>
@@ -1546,41 +1610,26 @@
                             </div>
                           {:else}
                             {@const field = visibleFields.find(f => f.key === cell.column.id)}
-                            {#if customColumns && field && customColumns[field.key]}
-                              {@render customColumns[field.key]({ value: cell_getValue(cell), record })}
+                            {@const customColumn = field ? customColumns?.[field.key] : undefined}
+                            {#if customColumn}
+                              {@render customColumn({ value: clonePlainValue(cell_getValue(cell)), record: copyTableRecord(record) })}
                             {:else if defaultCellRenderer && field}
-                              {@render defaultCellRenderer({ field, value: cell_getValue(cell), record })}
-                            {:else if field?.type === 'boolean'}
-                              <span class="svadmin-u-bb0c4bfc52bd svadmin-u-2f2a842e50fa svadmin-u-940924b6e2d9 svadmin-u-ac204c108886 {cell_getValue(cell) ? 'svadmin-u-3355648fe22b' : 'svadmin-u-2d56f1807e51'}"></span>
-                            {:else if field?.type === 'date' && cell_getValue(cell)}
-                              {new Date(cell_getValue(cell) as string).toLocaleDateString()}
-                            {:else if field?.type === 'tags' && Array.isArray(cell_getValue(cell))}
-                              <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-44ee8ba0a421">
-                                {#each (cell_getValue(cell) as string[]).slice(0, 3) as tag, _i (_i)}
-                                  <Badge variant="secondary">{tag}</Badge>
-                                {/each}
-                              </div>
-                            {:else if field?.type === 'select' && field.options}
-                              {@const opt = field.options.find(o => o.value === cell_getValue(cell))}
-                              <Badge variant="outline">{opt?.label ?? cell_getValue(cell) ?? '—'}</Badge>
-                            {:else if canEdit && field && ['text', 'number', 'email', 'url'].includes(field.type)}
-                              <CanAccess resource={resourceName} action="edit" params={{ id }}>
+                              {@render defaultCellRenderer({ field, value: clonePlainValue(cell_getValue(cell)), record: copyTableRecord(record) })}
+                            {:else if canEdit && field && field.showInEdit !== false && writableFields.has(field.key) && field.key !== primaryKey && field.key !== 'id' && ['text', 'number', 'email', 'url'].includes(field.type)}                              <CanAccess resource={resourceName} action="edit" params={{ id }}>
                                 <InlineEdit
                                   {resourceName}
                                   recordId={id}
                                   {field}
                                   value={cell_getValue(cell)}
-                                  onSave={() => listResult.refetch()}
                                 />
                                 {#snippet fallback()}
-                                  <span class="svadmin-u-0214b4b355d1 svadmin-u-f283ea9bea0e" title={String(cell_getValue(cell) ?? '—')}>{cell_getValue(cell) ?? '—'}</span>
+                                  <FieldDisplay type={field.type} value={cell_getValue(cell)} options={field.options} />
                                 {/snippet}
                               </CanAccess>
-                            {:else if field?.key === primaryKey}
+                            {:else if field?.key === 'id'}
                               <span class="svadmin-u-0214b4b355d1 svadmin-u-f283ea9bea0e svadmin-u-0e65706bcccd svadmin-u-359090c2d529" title={String(cell_getValue(cell) ?? '—')}>{cell_getValue(cell) ?? '—'}</span>
-                            {:else}
-                              <span class="svadmin-u-0214b4b355d1 svadmin-u-f283ea9bea0e" title={String(cell_getValue(cell) ?? '—')}>{cell_getValue(cell) ?? '—'}</span>
-                            {/if}
+                            {:else if field}
+                              <FieldDisplay type={field.type} value={cell_getValue(cell)} options={field.options} resourceName={field.resource} />                            {/if}
                           {/if}
                         </Table.Cell>
                       {/each}
@@ -1648,8 +1697,7 @@
           </Table.Body>
           {#if summary}
             <Table.Footer class="svadmin-u-2859c861d7de svadmin-u-2689f3958069">
-              {@render summary({ data: (query.data?.data as BaseRecord[]) ?? [], total: query.data?.total ?? 0, visibleColumnsCount: columns.filter((c) => c.id != null && isColumnVisible(c.id)).length })}
-            </Table.Footer>
+              {@render summary({ data: pageRecords.data.map(copyTableRecord), total: query.data?.total ?? 0, visibleColumnsCount: columns.filter((c) => c.id != null && isColumnVisible(c.id)).length })}            </Table.Footer>
           {/if}
         </Table.Root>
         </div>
@@ -1657,8 +1705,8 @@
         <!-- Mobile Card View (visible only on small screens) -->
         <div class="svadmin-u-e477a6af4cb6 svadmin-u-6ed543e2fbbb svadmin-u-7660b450905a">
           {#each tableView.rows as row, _i (_i)}
-            {@const record = row.original}
-            {@const id = record[primaryKey] as string | number}
+            {@const record = copyTableRecord(row.original)}
+            {@const id = rowIdValue(row)}
             <div
               class="svadmin-u-f5c8cc114f47 svadmin-u-633ef3c47872 svadmin-u-3daca9af0861 svadmin-u-a3158643e114 svadmin-u-cd0ad9a56558 svadmin-u-c07e54fd1439 svadmin-u-0fe7d7d814d0 {rowIsSelected(row.id) ? 'svadmin-u-16b1efa5875e svadmin-u-f42e9fee68a1 svadmin-u-989c466fdbe7' : ''}"
             >
@@ -1716,28 +1764,17 @@
               <div class="svadmin-u-6f7e013d6499">
                 {#each visibleFields.filter((field) => isColumnVisible(field.key)).slice(0, 6) as field (field.key)}
                   {@const value = record[field.key]}
+                  {@const customColumn = customColumns?.[field.key]}
                   <div class="svadmin-u-60fbb7713999 svadmin-u-60541e1e26f8 svadmin-u-8ef2268efbbc svadmin-u-0c3bc98565dd">
                     <span class="svadmin-u-359090c2d529 svadmin-u-2689f3958069 svadmin-u-bfa603190748 svadmin-u-012fbd121f37">{field.label}</span>
                     <span class="svadmin-u-fc7473ca09eb svadmin-u-308fc069e46e svadmin-u-f283ea9bea0e svadmin-u-897d497e57b6">
-                      {#if customColumns && field && customColumns[field.key]}
-                        {@render customColumns[field.key]({ value, record })}
+                      {#if customColumn}
+                        {@render customColumn({ value: clonePlainValue(value), record: copyTableRecord(record) })}
                       {:else if defaultCellRenderer && field}
-                        {@render defaultCellRenderer({ field, value, record })}
-                      {:else if field.type === 'boolean'}
-                        <span class="svadmin-u-bb0c4bfc52bd svadmin-u-2f2a842e50fa svadmin-u-940924b6e2d9 svadmin-u-ac204c108886 {value ? 'svadmin-u-3355648fe22b' : 'svadmin-u-2d56f1807e51'}"></span>
-                      {:else if field.type === 'date' && value}
-                        {new Date(value as string).toLocaleDateString()}
-                      {:else if field.type === 'tags' && Array.isArray(value)}
-                        <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-44ee8ba0a421 svadmin-u-77c08e015d14">
-                          {#each (value as string[]).slice(0, 2) as tag, _i (_i)}
-                            <Badge variant="secondary" class="svadmin-u-1dc571a3609f">{tag}</Badge>
-                          {/each}
-                        </div>
-                      {:else if field.type === 'select' && field.options}
-                        {@const opt = field.options.find(o => o.value === value)}
-                        <Badge variant="outline" class="svadmin-u-1dc571a3609f">{opt?.label ?? value ?? '—'}</Badge>
-                      {:else}
-                        {value ?? '—'}
+                        {@render defaultCellRenderer({ field, value: clonePlainValue(value), record: copyTableRecord(record) })}
+                      {:else if field.key === 'id'}
+                        {id}                      {:else}
+                        <FieldDisplay type={field.type} {value} options={field.options} resourceName={field.resource} />
                       {/if}
                     </span>
                   </div>
@@ -1767,9 +1804,10 @@
         aria-label={i18n.t('common.perPage')}
         class="svadmin-u-ed8a5df7b2fb svadmin-u-d043cad8e3fa svadmin-u-012fbd121f37 svadmin-u-3032cae0badb"
         value={String(pagination.pageSize ?? 10)}
-        onchange={(e) => {
-          const size = Number((e.currentTarget as HTMLSelectElement).value);
-          if (!isNaN(size)) {
+        onchange={(e: Event) => {
+          if (!(e.currentTarget instanceof HTMLSelectElement)) return;
+          const size = Number(e.currentTarget.value);
+          if (Number.isSafeInteger(size) && size > 0) {
             markSavedViewDirty();
             pagination = { ...pagination, pageSize: size, current: 1 };
           }
@@ -1797,7 +1835,7 @@
               <PaginationUI.Link
                 class="svadmin-u-3032cae0badb"
                 isActive={page === currentPage}
-                onclick={() => goToPage(page as number)}
+                onclick={() => { if (typeof page === 'number') goToPage(page); }}
               >
                 {page}
               </PaginationUI.Link>
@@ -1820,9 +1858,9 @@
   open={confirmOpen}
   message={confirmMessage}
   confirmText={i18n.t('common.delete')}
-  confirming={confirmPending}
+  confirming={confirmPending || deletePermission.isLoading}
   onconfirm={confirmAction}
-  oncancel={() => { confirmOpen = false; }}
+  oncancel={() => { if (!confirmPending) { confirmOpen = false; deleteRequest = null; } }}
 />
 
 {#if detailRecordId != null}

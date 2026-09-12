@@ -48,8 +48,9 @@
   } = $props();
 
   $effect(() => {
-    if (!selectedRole && roles.length > 0) {
-      selectedRole = roles[0].code;
+    const firstRole = roles[0];
+    if (!selectedRole && firstRole) {
+      selectedRole = firstRole.code;
     }
   });
 </script>
@@ -163,8 +164,7 @@
             {/if}
             {#each resources as resource, i (i)}
               <!-- Section Grouping Header -->
-              {#if resource.section && (i === 0 || resource.section !== resources[i-1].section)}
-                <tr class="svadmin-u-989c466fdbe7">
+              {#if resource.section && (i === 0 || resource.section !== resources[i-1]?.section)}                <tr class="svadmin-u-989c466fdbe7">
                   <td colspan="{actions.length + 1}" class="svadmin-u-f0faeb26d656 svadmin-u-03b4dd7f172b svadmin-u-359090c2d529 svadmin-u-69450ef1487e svadmin-u-20aaf08a7ed1">{resource.section}</td>
                 </tr>
               {/if}

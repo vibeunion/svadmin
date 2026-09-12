@@ -34,6 +34,7 @@ export {
   minimalPreset,
   prosePreset,
   type EditorPresetOptions,
+  type Lowlight,
 } from './extensions/index.js';
 
 // ─── Individual extensions (re-exports for custom composition) ──

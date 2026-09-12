@@ -1,15 +1,22 @@
+import { definedOptions } from './defined-options';
+import {
+  accessControlFailure, prepareCanCheck, prepareCanBatchCheck, snapshotCanParams,
+  supersededAccessControl, captureAccessControlProvider,
+} from './access-control-contract';
+import { HttpError } from './types';
+import { parseFeatureGateUser, snapshotFeatureGateConfig } from './feature-gate-contract';
 // Permission / Access Control
 
 // ─── Types ────────────────────────────────────────────────────
 
 /** Actions that can be checked for access control. Extensible via string literal union. */
-export type Action = 'list' | 'show' | 'create' | 'edit' | 'delete' | 'export' | 'field' | (string & {});
+export type Action='list'|'show'|'create'|'edit'|'delete'|'export'|'field'|(string&{});
 
 export interface CanParams {
   resource: string;
   action: Action;
-  params?: { id?: string | number; [key: string]: unknown };
-  meta?: Record<string, unknown>;
+  params?: { id?: string|number;[key: string]: unknown };
+  meta?: Record<string,unknown>;
 }
 
 export interface CanResult {
@@ -40,7 +47,9 @@ export interface CanResult {
  * ```
  */
 export interface AccessControlProvider {
-  can: (params: CanParams | CanParams[]) => Promise<CanResult | CanResult[]>;
+  can: (params: CanParams) => Promise<CanResult>;
+  /** Optional native batch capability; otherwise the framework checks each item through can. */
+  canMany?: (params: readonly CanParams[]) => Promise<CanResult[]>;
   options?: {
     buttons?: {
       /** Enable access control checks on CRUD buttons globally. Default: false */
@@ -51,82 +60,127 @@ export interface AccessControlProvider {
   };
 }
 
+export interface AccessControlOptions {
+  readonly buttons?: {
+    readonly enableAccessControl?: boolean;
+    readonly hideIfUnauthorized?: boolean;
+  };
+}
+
+/** Checked, immutable projection. Use a new input object when changing provider configuration. */
+export interface RegisteredAccessControlProvider {
+  readonly can: AccessControlProvider['can'];
+  readonly canMany?: NonNullable<AccessControlProvider['canMany']>;
+  readonly options: AccessControlOptions;
+}
+
 // ─── State ────────────────────────────────────────────────────
 
-let provider: AccessControlProvider | null = $state(null);
+let provider: RegisteredAccessControlProvider|null=$state.raw(null);
+let providerRevision = 0;
+let registrationIntent = 0;
+const emptyOptions: AccessControlOptions = Object.freeze({});
 
 // ─── API ──────────────────────────────────────────────────────
 
 /**
- * Register an AccessControlProvider.
+ * Register a checked snapshot. Input object identity denotes immutable configuration.
  */
 export function setAccessControlProvider(p: AccessControlProvider): void {
-  provider = p;
+  const intent = ++registrationIntent;
+  let candidate: RegisteredAccessControlProvider;
+  try {
+    candidate = captureAccessControlProvider(p);
+  } catch (error) {
+    if (intent !== registrationIntent) throw supersededAccessControl();
+    throw error;
+  }
+  if (intent !== registrationIntent) throw supersededAccessControl();
+  providerRevision++;
+  provider=candidate;
 }
 
 /** Get the current AccessControlProvider (or null) */
-export function getAccessControlProvider(): AccessControlProvider | null {
+export function getAccessControlProvider(): RegisteredAccessControlProvider|null {
   return provider;
 }
 
 export function resetAccessControlProvider(): void {
-  provider = null;
+  registrationIntent++;
+  providerRevision++;
+  provider=null;
 }
 
 /** Get global button options from the AccessControlProvider */
-export function getAccessControlOptions() {
-  return provider?.options ?? {};
+export function getAccessControlOptions(): AccessControlOptions {
+  return provider?.options??emptyOptions;
 }
 
 /**
  * UI access check supporting single capabilities or a batch.
  * Its result can change browser presentation but never authorizes the backend action.
  */
-export async function canAccessAsync(params: CanParams[]): Promise<CanResult[]>;
-export async function canAccessAsync(resource: string, action: Action, params?: Record<string, unknown>, meta?: Record<string, unknown>): Promise<CanResult>;
-export async function canAccessAsync(resourceOrBatch: string | CanParams[], action?: Action, params?: Record<string, unknown>, meta?: Record<string, unknown>): Promise<CanResult | CanResult[]> {
-  if (!provider) {
-    return Array.isArray(resourceOrBatch)
-      ? resourceOrBatch.map(() => ({ can: true }))
-      : { can: true };
+export async function canAccessAsync(params: readonly CanParams[]): Promise<CanResult[]>;
+export async function canAccessAsync(resource: string,action: Action,params?: CanParams['params'],meta?: CanParams['meta']): Promise<CanResult>;
+export async function canAccessAsync(resourceOrBatch: string|readonly CanParams[],action?: Action,params?: CanParams['params'],meta?: CanParams['meta']): Promise<CanResult|CanResult[]> {
+  const captured = provider;
+  const revision = providerRevision;
+  const current = () => provider === captured && providerRevision === revision;
+  const checkCurrent = () => { if (!current()) throw supersededAccessControl(); };
+  try {
+    let execute: () => Promise<CanResult | CanResult[]>;
+    if (typeof resourceOrBatch === 'string') {
+      const request = snapshotCanParams({
+        resource: resourceOrBatch, ...definedOptions({ action, params, meta }),
+      });
+      execute = prepareCanCheck(captured, request);
+    } else {
+      if (action !== undefined || params !== undefined || meta !== undefined) {
+        throw new HttpError('Invalid access control request', 422, undefined, { code: 'INVALID_ACCESS_CONTROL_INPUT' });
+      }
+      execute = prepareCanBatchCheck(captured, resourceOrBatch, current);
+    }
+    checkCurrent();
+    const result = await execute();
+    checkCurrent();
+    return result;
+  } catch (error) {
+    const failure = accessControlFailure(error);
+    checkCurrent();
+    throw failure;
   }
-  
-  if (Array.isArray(resourceOrBatch)) {
-    return provider.can(resourceOrBatch);
-  }
-  
-  return provider.can({ resource: resourceOrBatch, action: action as string, params, meta }) as Promise<CanResult>;
 }
 
 // ─── Feature Gate ─────────────────────────────────────────────
 
-export interface FeatureGateConfig {
-  /** 仅用于前端展示的角色列表。 */
-  roles?: string[];
-  /**
-   * 需要的最低角色 (含以上所有角色)。
-   * 使用 minRole 时必须同时提供 roleHierarchy。
-   */
-  minRole?: string;
-  /**
-   * 角色层级定义 (高权 → 低权)，用于 minRole 比较。
-   * 由调用方按自身业务定义，框架不预设任何角色。
-   */
-  roleHierarchy?: string[];
-  /** 仅用于前端展示的权限列表 (全部匹配)。 */
-  permissions?: string[];
+interface FeatureGateConstraints {
+  /** Role list used only for frontend presentation. */
+  readonly roles?: readonly string[];
+  /** Permission list used only for frontend presentation; all entries must match. */
+  readonly permissions?: readonly string[];
 }
 
-/** 浏览器中的角色和权限提示，不是授权凭据。 */
+export type FeatureGateConfig = FeatureGateConstraints & (
+  | {
+    /** Minimum required role, including all higher roles. Must occur in roleHierarchy. */
+    readonly minRole: string;
+    /** Nonempty unique roles, ordered from highest to lowest privilege. */
+    readonly roleHierarchy: readonly string[];
+  }
+  | { readonly minRole?: never; readonly roleHierarchy?: never }
+);
+
+/** Browser-side role and permission hints, not authorization credentials. */
 export interface FeatureGateUser {
-  role: string;
-  permissions: string[];
+  readonly role: string;
+  readonly permissions: readonly string[];
 }
 
 /**
- * 创建仅用于前端展示的功能门控函数。
- * 只做客户端 UI 门控；输入可被篡改，后端必须独立完成令牌验证和操作授权。
- * 不预设任何角色层级，也不解释通配符权限。
+ * Creates a feature gate used only for frontend presentation.
+ * Configuration is captured as a checked snapshot. User hints remain client-side
+ * presentation data; the backend must independently authorize operations.
+ * It assumes no role hierarchy and does not interpret wildcard permissions.
  *
  * @example
  * ```ts
@@ -141,26 +195,22 @@ export interface FeatureGateUser {
  * ```
  */
 export function createFeatureGate(config: FeatureGateConfig): (user: FeatureGateUser) => boolean {
+  const rule = snapshotFeatureGateConfig(config);
   return (user: FeatureGateUser): boolean => {
-    if (config.roles && !config.roles.includes(user.role)) {
+    const subject = parseFeatureGateUser(user);
+    if (!subject) return false;
+    if(rule.roles&&!rule.roles.includes(subject.role)) {
       return false;
     }
 
-    if (config.minRole) {
-      const hierarchy = config.roleHierarchy;
-      if (!hierarchy || hierarchy.length === 0) {
-        if (user.role !== config.minRole) return false;
-      } else {
-        const userIndex = hierarchy.indexOf(user.role);
-        const minIndex = hierarchy.indexOf(config.minRole);
-        if (userIndex === -1 || minIndex === -1 || userIndex > minIndex) {
-          return false;
-        }
-      }
+    if(rule.minRole !== undefined) {
+      const userIndex=rule.roleHierarchy.indexOf(subject.role);
+      const minIndex=rule.roleHierarchy.indexOf(rule.minRole);
+      if(userIndex===-1||userIndex>minIndex) return false;
     }
 
-    if (config.permissions && config.permissions.length > 0) {
-      if (!config.permissions.every((permission) => user.permissions.includes(permission))) return false;
+    if(rule.permissions&&rule.permissions.length>0) {
+      if(!rule.permissions.every((permission) => subject.permissions.includes(permission))) return false;
     }
 
     return true;

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // useParsed — parse current URL hash into structured route info
 
 import { registerRouterSync } from './router';
@@ -6,10 +5,10 @@ import { captureAdminContext } from './context.svelte';
 import { parseResourceActionSegments } from './route-parsing';
 
 interface ParsedRoute {
-  resource?: string;
-  resourcePath?: string;
-  action?: 'list' | 'create' | 'edit' | 'show' | 'clone';
-  id?: string;
+  resource: string | undefined;
+  resourcePath: string | undefined;
+  action: 'list' | 'create' | 'edit' | 'show' | 'clone' | undefined;
+  id: string | undefined;
   /** Query params parsed from the URL search string (e.g. ?page=2). */
   params: Record<string, string>;
   /** Parent path params derived from nested routes (e.g. /teams/123/users -> teamId). */
@@ -25,7 +24,7 @@ export function syncGlobalPath(): void {
   routeVersion++;
 }
 
-/** 简单的英文名词单数化，处理常见复数模式（-ies, -ses, -es, -s） */
+/** Basic English noun singularization for common plural suffixes: -ies, -ses, -es, and -s. */
 function singularize(word: string): string {
   if (word.endsWith('ies') && word.length > 3) return word.slice(0, -3) + 'y';
   if (word.endsWith('ses') && word.length > 3) return word.slice(0, -2);
@@ -37,8 +36,8 @@ function singularize(word: string): string {
 registerRouterSync(syncGlobalPath);
 
 if (typeof window !== 'undefined') {
-  if (!(window as any).__svadminParsedInit) {
-    (window as any).__svadminParsedInit = true;
+  if (!('__svadminParsedInit' in window) || window.__svadminParsedInit !== true) {
+    Object.defineProperty(window, '__svadminParsedInit', { value: true, configurable: true });
     window.addEventListener('hashchange', syncGlobalPath);
     window.addEventListener('popstate', syncGlobalPath);
   }
@@ -68,10 +67,13 @@ export function useParsed(): ParsedRoute {
 
   const parsed = $derived.by(() => {
     const p = activePath;
-    const result: ParsedRoute = { params: {}, parentParams: {} };
+    const result: ParsedRoute = {
+      resource: undefined, resourcePath: undefined, action: undefined, id: undefined,
+      params: {}, parentParams: {},
+    };
 
     // Parse query params from hash
-    const [pathname, queryString] = p.split('?');
+    const [pathname = '/', queryString] = p.split('?');
     if (queryString) {
       const sp = new URLSearchParams(queryString);
       for (const [k, v] of sp.entries()) {
@@ -86,7 +88,8 @@ export function useParsed(): ParsedRoute {
     const resourceNames = resources.map(r => r.name);
     let resourceIndex = -1;
     for (let i = segments.length - 1; i >= 0; i--) {
-      if (resourceNames.includes(segments[i])) {
+      const segment = segments[i];
+      if (segment !== undefined && resourceNames.includes(segment)) {
         resourceIndex = i;
         break;
       }
@@ -101,10 +104,11 @@ export function useParsed(): ParsedRoute {
       // injection only applies to path-derived parent params, never to
       // arbitrary query params like ?tenantId=1.
       for (let i = 0; i < resourceIndex; i += 2) {
-        if (segments[i] && segments[i + 1]) {
-          const parentName = segments[i];
+        const parentName = segments[i];
+        const parentId = segments[i + 1];
+        if (parentName && parentId) {
           const singular = singularize(parentName);
-          result.parentParams[`${singular}Id`] = segments[i + 1];
+          result.parentParams[`${singular}Id`] = parentId;
         }
       }
 

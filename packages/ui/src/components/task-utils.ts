@@ -31,8 +31,9 @@ const STATUS_ALIASES: Record<string, TaskLifecycle> = {
 };
 
 export function normalizeTaskStatus(status: unknown): TaskLifecycle {
-  const value = String(status ?? '').trim().toLowerCase();
-  return STATUS_ALIASES[value] ?? 'unknown';
+  if (typeof status !== 'string') return 'unknown';
+  const value = status.trim().toLowerCase();
+  return Object.hasOwn(STATUS_ALIASES, value) ? STATUS_ALIASES[value] ?? 'unknown' : 'unknown';
 }
 
 export function isTaskActive(task: TaskRecord): boolean {

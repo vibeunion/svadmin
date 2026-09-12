@@ -140,7 +140,7 @@ describe('toXlsx (SpreadsheetML)', () => {
 
 describe('downloadData (browser API integration)', () => {
   test('empty records does nothing without document', () => {
-    // 无 document 环境下安全返回
+    // Return safely when document is unavailable.
     expect(() => downloadData([], 'users', 'csv')).not.toThrow();
   });
 });

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedReactiveOptions } from '@svadmin/core/options';
+
   import {
     provideAdminContext,
     type AuthProvider,
@@ -33,12 +35,12 @@
     getApiUrl: () => 'https://scoped-provider-actions.example.test',
   } as DataProvider;
 
-  provideAdminContext({
+  provideAdminContext(definedReactiveOptions({
     get dataProvider() { return dataProvider ?? fallbackDataProvider; },
     get authProvider() { return authProvider; },
     get resources() { return resources; },
     get tenant() { return tenant; },
-  });
+  }));
 </script>
 
 {#if consumer === 'inferencer'}

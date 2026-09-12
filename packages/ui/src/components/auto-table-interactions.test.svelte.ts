@@ -1,3 +1,4 @@
+import { requireValue } from "../../../../scripts/test-assertions";
 import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
 import { resetToast, setAdminOptions } from '@svadmin/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -543,13 +544,13 @@ describe('AutoTable interactions', () => {
     });
 
     const detailButtons = await view.findAllByRole('button', { name: '详情' });
-    await fireEvent.click(detailButtons[0]);
+    await fireEvent.click(requireValue(detailButtons[0]));
 
     const dialog = await view.findByRole('dialog', { name: 'Users 详情' });
     expect(within(dialog).getByText('user@example.com')).toBeTruthy();
     expect(onNavigate).toHaveBeenCalledWith({
       to: '/',
-      query: { detail: 'user-1' },
+      query: { detail: '~svadmin-id:["string","user-1"]' },
       type: 'push',
     });
 
@@ -580,7 +581,7 @@ describe('AutoTable interactions', () => {
     });
 
     const detailButtons = await view.findAllByRole('button', { name: '详情' });
-    await fireEvent.click(detailButtons[0]);
+    await fireEvent.click(requireValue(detailButtons[0]));
     const dialog = await view.findByRole('dialog', { name: 'Users 详情' });
     await fireEvent.click(within(dialog).getByRole('button', { name: '完整详情' }));
 
@@ -662,7 +663,7 @@ describe('AutoTable interactions', () => {
     });
     const editButtons = await editView.findAllByRole('button', { name: '编辑' });
     expect(editButtons.length).toBeGreaterThan(0);
-    await fireEvent.click(editButtons[0]);
+    await fireEvent.click(requireValue(editButtons[0]));
     expect(editNavigate).toHaveBeenLastCalledWith({
       to: '/users/edit/user-1?q=user&records=1',
       type: 'push',
@@ -682,7 +683,7 @@ describe('AutoTable interactions', () => {
     });
 
     const detailButtons = await view.findAllByRole('button', { name: '详情' });
-    await fireEvent.click(detailButtons[0]);
+    await fireEvent.click(requireValue(detailButtons[0]));
     const dialog = await view.findByRole('dialog', { name: 'Users 详情' });
 
     await fireEvent.click(within(dialog).getByRole('button', { name: '关闭' }));
@@ -691,7 +692,7 @@ describe('AutoTable interactions', () => {
     expect(onBack).toHaveBeenCalledTimes(1);
     expect(onNavigate).toHaveBeenCalledWith({
       to: '/',
-      query: { detail: 'user-1' },
+      query: { detail: '~svadmin-id:["string","user-1"]' },
       type: 'push',
     });
   });
@@ -764,7 +765,7 @@ describe('AutoTable interactions', () => {
     });
 
     const detailButtons = await view.findAllByRole('button', { name: '详情' });
-    await fireEvent.click(detailButtons[0]);
+    await fireEvent.click(requireValue(detailButtons[0]));
     const dialog = await view.findByRole('dialog', { name: 'Users 详情' });
     expect(within(dialog).getByRole('button', { name: '完整详情' })).toBeTruthy();
     expect(within(dialog).queryByRole('button', { name: '编辑' })).toBeNull();
@@ -780,7 +781,7 @@ describe('AutoTable interactions', () => {
 
     const detailButtons = await view.findAllByRole('button', { name: '详情' });
     expect(detailButtons.length).toBeGreaterThan(0);
-    await fireEvent.click(detailButtons[0]);
+    await fireEvent.click(requireValue(detailButtons[0]));
     expect(await view.findByRole('dialog', { name: 'Users 详情' })).toBeTruthy();
   });
 
@@ -840,7 +841,7 @@ describe('AutoTable interactions', () => {
     });
 
     const rowCheckboxes = await view.findAllByRole('checkbox', { name: '选择记录 user-1' });
-    await fireEvent.click(rowCheckboxes[0]);
+    await fireEvent.click(requireValue(rowCheckboxes[0]));
     expect(await view.findByText('已选择 1 条记录')).toBeTruthy();
 
     await fireEvent.click(view.getByRole('button', { name: '批量删除 (1)' }));
@@ -877,7 +878,7 @@ describe('AutoTable interactions', () => {
       onCustomBatchAction,
     });
 
-    await fireEvent.click((await view.findAllByRole('checkbox', { name: '选择记录 1' }))[0]);
+    await fireEvent.click(requireValue((await view.findAllByRole('checkbox', { name: '选择记录 1' }))[0]));
     await fireEvent.click(view.getByRole('button', { name: '自定义批量 (1)' }));
     expect(onCustomBatchAction).toHaveBeenCalledWith([1]);
 
@@ -907,8 +908,8 @@ describe('AutoTable interactions', () => {
 
     const first = (await view.findAllByRole('checkbox', { name: '选择记录 user-1' }))[0];
     const second = (await view.findAllByRole('checkbox', { name: '选择记录 user-2' }))[0];
-    await fireEvent.click(first);
-    await fireEvent.click(second);
+    await fireEvent.click(requireValue(first));
+    await fireEvent.click(requireValue(second));
     expect(await view.findByText('已选择 2 条记录')).toBeTruthy();
 
     await fireEvent.click(view.getByRole('button', { name: '批量删除 (2)' }));
@@ -940,8 +941,8 @@ describe('AutoTable interactions', () => {
       onNotify,
     });
 
-    await fireEvent.click((await view.findAllByRole('checkbox', { name: '选择记录 user-1' }))[0]);
-    await fireEvent.click((await view.findAllByRole('checkbox', { name: '选择记录 user-2' }))[0]);
+    await fireEvent.click(requireValue((await view.findAllByRole('checkbox', { name: '选择记录 user-1' }))[0]));
+    await fireEvent.click(requireValue((await view.findAllByRole('checkbox', { name: '选择记录 user-2' }))[0]));
     await fireEvent.click(view.getByRole('button', { name: '批量删除 (2)' }));
     await fireEvent.click(within(await view.findByRole('alertdialog')).getByRole('button', { name: '删除' }));
 
@@ -978,8 +979,8 @@ describe('AutoTable interactions', () => {
       onCustomBatchAction,
     });
 
-    await fireEvent.click((await view.findAllByRole('checkbox', { name: '选择记录 1' }))[0]);
-    await fireEvent.click((await view.findAllByRole('checkbox', { name: '选择记录 2' }))[0]);
+    await fireEvent.click(requireValue((await view.findAllByRole('checkbox', { name: '选择记录 1' }))[0]));
+    await fireEvent.click(requireValue((await view.findAllByRole('checkbox', { name: '选择记录 2' }))[0]));
     await fireEvent.click(view.getByRole('button', { name: '批量删除 (2)' }));
     await fireEvent.click(within(await view.findByRole('alertdialog')).getByRole('button', { name: '删除' }));
 
@@ -997,7 +998,7 @@ describe('AutoTable interactions', () => {
     expect(onCustomBatchAction).toHaveBeenCalledWith([2]);
   });
 
-  it('lets users undo a batch delete before the provider is called', async () => {
+  it('uses checked deletion even when global undoable mode is configured', async () => {
     setAdminOptions({ mutationMode: 'undoable', undoableTimeout: 60_000 });
     const onDeleteMany = vi.fn(async () => {});
     const view = render(AutoTableInteractionsHarness, {
@@ -1010,50 +1011,40 @@ describe('AutoTable interactions', () => {
     });
 
     const rowCheckbox = (await view.findAllByRole('checkbox', { name: '选择记录 user-1' }))[0];
-    await fireEvent.click(rowCheckbox);
+    await fireEvent.click(requireValue(rowCheckbox));
     expect((await view.findAllByRole('checkbox', { name: '选择记录 user-1' }))
       .every((checkbox) => checkbox.getAttribute('aria-checked') === 'true')).toBe(true);
     await fireEvent.click(view.getByRole('button', { name: '批量删除 (1)' }));
     await fireEvent.click(within(await view.findByRole('alertdialog')).getByRole('button', { name: '删除' }));
 
     await waitFor(() => expect(view.queryAllByText('user@example.com')).toHaveLength(0));
-    expect(onDeleteMany).not.toHaveBeenCalled();
-
-    await fireEvent.click(await view.findByRole('button', { name: '撤销' }));
-
-    expect((await view.findAllByText('user@example.com')).length).toBeGreaterThan(0);
+    expect(onDeleteMany).toHaveBeenCalledWith(['user-1']);
+    expect(view.queryByRole('button', { name: '撤销' })).toBeNull();
     expect(view.queryByRole('alertdialog')).toBeNull();
-    expect(view.getByText('已选择 1 条记录')).toBeTruthy();
-    expect((await view.findAllByRole('checkbox', { name: '选择记录 user-1' }))
-      .every((checkbox) => checkbox.getAttribute('aria-checked') === 'true')).toBe(true);
-    expect(onDeleteMany).not.toHaveBeenCalled();
+    expect(view.queryByText('已选择 1 条记录')).toBeNull();
   });
 
-  it('closes the confirmation immediately when a record delete is undoable', async () => {
+  it('uses the checked batch boundary for a single confirmed record', async () => {
     setAdminOptions({ mutationMode: 'undoable', undoableTimeout: 60_000 });
-    const onDeleteOne = vi.fn(async () => {});
+    const onDeleteMany = vi.fn(async () => {});
     const view = render(AutoTableInteractionsHarness, {
       onNavigate: vi.fn(),
       canDelete: true,
       deleteAllowed: true,
-      onDeleteOne,
+      onDeleteMany,
     });
 
     const deleteButtons = await view.findAllByRole('button', { name: '删除' });
-    await fireEvent.click(deleteButtons[0]);
+    await fireEvent.click(requireValue(deleteButtons[0]));
     await fireEvent.click(within(await view.findByRole('alertdialog')).getByRole('button', { name: '删除' }));
 
     await waitFor(() => expect(view.queryByRole('alertdialog')).toBeNull());
     await waitFor(() => expect(view.queryAllByText('user@example.com')).toHaveLength(0));
-    expect(onDeleteOne).not.toHaveBeenCalled();
-
-    await fireEvent.click(await view.findByRole('button', { name: '撤销' }));
-
-    expect((await view.findAllByText('user@example.com')).length).toBeGreaterThan(0);
-    expect(onDeleteOne).not.toHaveBeenCalled();
+    expect(onDeleteMany).toHaveBeenCalledWith(['user-1']);
+    expect(view.queryByRole('button', { name: '撤销' })).toBeNull();
   });
 
-  it('restores optimistic batch deletion after the provider rejects it', async () => {
+  it('keeps checked rows visible while deletion is pending even in global optimistic mode', async () => {
     setAdminOptions({ mutationMode: 'optimistic' });
     let rejectDelete: ((reason?: unknown) => void) | undefined;
     const deletePromise = new Promise<void>((_resolve, reject) => { rejectDelete = reject; });
@@ -1072,14 +1063,15 @@ describe('AutoTable interactions', () => {
 
     const first = (await view.findAllByRole('checkbox', { name: '选择记录 user-1' }))[0];
     const second = (await view.findAllByRole('checkbox', { name: '选择记录 user-2' }))[0];
-    await fireEvent.click(first);
-    await fireEvent.click(second);
+    await fireEvent.click(requireValue(first));
+    await fireEvent.click(requireValue(second));
     await fireEvent.click(view.getByRole('button', { name: '批量删除 (2)' }));
     await fireEvent.click(within(await view.findByRole('alertdialog')).getByRole('button', { name: '删除' }));
 
     await waitFor(() => {
-      expect(view.queryAllByText('user@example.com')).toHaveLength(0);
-      expect(view.queryAllByText('second@example.com')).toHaveLength(0);
+      expect(onDeleteMany).toHaveBeenCalledTimes(1);
+      expect(view.queryAllByText('user@example.com').length).toBeGreaterThan(0);
+      expect(view.queryAllByText('second@example.com').length).toBeGreaterThan(0);
     });
 
     rejectDelete?.(new Error('delete failed'));
@@ -1087,7 +1079,7 @@ describe('AutoTable interactions', () => {
     expect((await view.findAllByText('user@example.com')).length).toBeGreaterThan(0);
     expect((await view.findAllByText('second@example.com')).length).toBeGreaterThan(0);
     expect(view.getByText('已选择 2 条记录')).toBeTruthy();
-    expect(onNotify).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(onNotify).toHaveBeenCalledTimes(1));
   });
 
   it('keeps custom batch actions visible when batch delete permission is denied', async () => {
@@ -1101,7 +1093,7 @@ describe('AutoTable interactions', () => {
     });
 
     const rowCheckboxes = await view.findAllByRole('checkbox', { name: '选择记录 user-1' });
-    await fireEvent.click(rowCheckboxes[0]);
+    await fireEvent.click(requireValue(rowCheckboxes[0]));
     expect(await view.findByRole('button', { name: '自定义批量 (1)' })).toBeTruthy();
     expect(view.queryByRole('button', { name: '批量删除 (1)' })).toBeNull();
 

@@ -9,13 +9,15 @@ type Equal<Left, Right> =
 
 type Expect<Value extends true> = Value;
 
+const user = { id: 1, name: '' };
+const post = { id: 1, title: '' };
 const app = new Elysia()
   .get('/users', () => ({
-    items: [{ id: 1 as number, name: '' as string }],
+    items: [user],
     total: 1,
   }))
   .get('/posts', () => [
-    { id: 1 as number, title: '' as string },
+    post,
   ])
   .get('/health', () => ({ ok: true }))
   .get('/health/status', () => ({ ok: true }));

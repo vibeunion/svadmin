@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import type { GetListParams } from '@svadmin/core';
+import { HttpError } from '../../core/src/types';
 import { createRefineAdapter } from './index';
 
 type RefineGetListParams = Omit<GetListParams, 'pagination'> & {
@@ -81,9 +82,9 @@ describe('createRefineAdapter', () => {
   });
 
   test('does not expose optional methods missing from the Refine provider', () => {
-    const minimalProvider = createMockRefineProvider();
-    delete (minimalProvider as Partial<typeof minimalProvider>).getMany;
-    delete (minimalProvider as Partial<typeof minimalProvider>).custom;
+    const minimalProvider: Partial<ReturnType<typeof createMockRefineProvider>> = createMockRefineProvider();
+    delete minimalProvider.getMany;
+    delete minimalProvider.custom;
     const adapter = createRefineAdapter(minimalProvider);
 
     expect(adapter.getMany).toBeUndefined();
@@ -91,8 +92,8 @@ describe('createRefineAdapter', () => {
   });
 
   test('falls back to empty api URL when the Refine provider omits getApiUrl', () => {
-    const minimalProvider = createMockRefineProvider();
-    delete (minimalProvider as Partial<typeof minimalProvider>).getApiUrl;
+    const minimalProvider: Partial<ReturnType<typeof createMockRefineProvider>> = createMockRefineProvider();
+    delete minimalProvider.getApiUrl;
     const adapter = createRefineAdapter(minimalProvider);
 
     expect(adapter.getApiUrl()).toBe('');
@@ -110,5 +111,51 @@ describe('createRefineAdapter', () => {
     expect(() => createRefineAdapter(invalidProvider)).toThrow(
       '[svadmin] createRefineAdapter: missing required Refine DataProvider method "deleteOne"',
     );
+  });
+
+  test('rejects malformed required responses even when methods exist', async () => {
+    const adapter = createRefineAdapter({
+      ...createMockRefineProvider(),
+      getList: async () => ({ data: [null], total: 1 }),
+      getOne: async () => ({ data: 'private-row' }),
+      create: async () => null,
+      update: async () => ({ data: [] }),
+      deleteOne: async () => ({}),
+    });
+    await expect(adapter.getList({ resource: 'posts' })).rejects.toBeInstanceOf(HttpError);
+    await expect(adapter.getOne({ resource: 'posts', id: 1 })).rejects.toBeInstanceOf(HttpError);
+    await expect(adapter.create({ resource: 'posts', variables: {} })).rejects.toBeInstanceOf(HttpError);
+    await expect(adapter.update({ resource: 'posts', id: 1, variables: {} })).rejects.toBeInstanceOf(HttpError);
+    await expect(adapter.deleteOne({ resource: 'posts', id: 1 })).rejects.toBeInstanceOf(HttpError);
+  });
+
+  test('validates every optional response and marks uncertain writes', async () => {
+    const adapter = createRefineAdapter({
+      ...createMockRefineProvider(),
+      getMany: async () => ({ data: 'not-an-array' }),
+      createMany: async () => ({ data: [false] }),
+      updateMany: async () => ({ data: [42] }),
+      deleteMany: async () => ({ data: [null] }),
+      custom: async () => ({ missingData: true }),
+    });
+    if (!adapter.getMany || !adapter.createMany || !adapter.updateMany || !adapter.deleteMany || !adapter.custom) {
+      throw new Error('Expected optional operations');
+    }
+    await expect(adapter.getMany({ resource: 'posts', ids: [1] })).rejects.toBeInstanceOf(HttpError);
+    await expect(adapter.createMany({ resource: 'posts', variables: [{}] })).rejects.toBeInstanceOf(HttpError);
+    await expect(adapter.updateMany({ resource: 'posts', ids: [1], variables: {} })).rejects.toBeInstanceOf(HttpError);
+    await expect(adapter.deleteMany({ resource: 'posts', ids: [1] })).rejects.toBeInstanceOf(HttpError);
+    await expect(adapter.custom({ url: '/command', method: 'get' })).rejects.toMatchObject({
+      code: 'INVALID_PROVIDER_RESPONSE', details: { writeMayHaveSucceeded: false },
+    });
+    await expect(adapter.custom({ url: '/command', method: 'post' })).rejects.toMatchObject({
+      code: 'INVALID_PROVIDER_RESPONSE', details: { writeMayHaveSucceeded: true },
+    });
+  });
+
+  test('rejects non-callable optional operations and invalid API URLs', () => {
+    expect(() => createRefineAdapter({ ...createMockRefineProvider(), getMany: 'not-a-function' })).toThrow('invalid optional');
+    const adapter = createRefineAdapter({ ...createMockRefineProvider(), getApiUrl: () => 42 });
+    expect(() => adapter.getApiUrl()).toThrow('must return a string');
   });
 });
