@@ -41,7 +41,7 @@ function provider(): DataProvider {
     create: async () => ({ data: {} }), deleteOne: async () => ({ data: {} }),
   };
 }
-function deferred<T>() {
+function deferred<T = void>() {
   let resolve: (value: T) => void = () => { throw new Error('Request not initialized'); };
   let reject: (cause: unknown) => void = () => { throw new Error('Request not initialized'); };
   const promise = new Promise<T>((done, fail) => { resolve = done; reject = fail; });
@@ -630,7 +630,7 @@ describe('single-update authentication ownership', () => {
 
   it('does not dispatch after a native queue delay crosses a session transition', async () => {
     const app = await mountSession();
-    const gate = deferred<void>();
+    const gate = deferred();
     const observer = vi.fn(() => gate.promise);
     app.client.getMutationCache().config.onMutate = observer;
     const operation = app.read().update.mutation.mutateAsync(updateInput).catch((error: unknown) => error);
@@ -850,7 +850,7 @@ describe('single-update authentication ownership', () => {
     const app = await mountSession();
     const receipt = deferred<GetOneResult>();
     vi.mocked(app.source.update).mockReturnValueOnce(receipt.promise);
-    const gate = deferred<void>();
+    const gate = deferred();
     const observer = vi.fn(() => gate.promise);
     if (outcome === 'success') app.client.getMutationCache().config.onSuccess = observer;
     else app.client.getMutationCache().config.onError = observer;
@@ -869,7 +869,7 @@ describe('single-update authentication ownership', () => {
 
   it('settles every started refresh even after failure and session replacement', async () => {
     const app = await mountSession();
-    const gate = deferred<void>();
+    const gate = deferred();
     const refresh = vi.spyOn(app.client, 'invalidateQueries').mockRejectedValueOnce(new Error('PRIVATE')).mockReturnValue(gate.promise);
     let settled = false;
     const operation = app.read().update.mutation.mutateAsync(updateInput).catch((error: unknown) => error)

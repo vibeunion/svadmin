@@ -20,7 +20,7 @@ export type { OvertimeResult,OvertimeOptions,NotificationConfig } from './hook-u
 import { captureAdminContext } from './context.svelte';
 import { createOvertimeTracker } from './hook-utils.svelte';
 import type { OvertimeOptions } from './hook-utils.svelte';
-import type { BaseRecord, DataProvider } from './types';
+import type { DataProvider } from './types';
 import { decodeBaseRecord } from './record-decoder';
 import { createSelectQuery, type UseSelectOptions } from './select-query.svelte';
 

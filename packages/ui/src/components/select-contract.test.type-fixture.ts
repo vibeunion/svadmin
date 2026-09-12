@@ -12,17 +12,23 @@ const options: UseSelectOptions<typeof schemas> = {
 };
 const select = useSelect(options);
 if (select.query.isSuccess) {
-  const title: string = select.query.data.data[0]!.title;
+  const first = select.query.data.data[0];
+  if (first) {
+    const title: string = first.title;
+    void title;
+    // @ts-expect-error Record fields retain the concrete schema's types.
+    const invalid: number = first.title;
+    void invalid;
+  }
   const total: number = select.query.data.total;
-  void title;
   void total;
-  // @ts-expect-error Record fields retain the concrete schema's types.
-  const invalid: number = select.query.data.data[0]!.title;
-  void invalid;
 }
 if (select.defaultValueQuery.isSuccess) {
-  const id: number = select.defaultValueQuery.data.data[0]!.id;
-  void id;
+  const first = select.defaultValueQuery.data.data[0];
+  if (first) {
+    const id: number = first.id;
+    void id;
+  }
 }
 if (select.query.isError) {
   // @ts-expect-error A transport can throw non-Error values.

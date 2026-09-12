@@ -176,7 +176,7 @@ function cacheFixture(app: ReturnType<typeof mountLive>, contract = posts, tenan
   for (const key of [...selected, ...excluded]) app.client.setQueryData(key, { data: [] });
   return { selected, excluded };
 }
-function pending<T>() {
+function pending<T = void>() {
   let resolve: (value: T) => void = () => { throw new Error('Not initialized'); };
   let reject: (reason: unknown) => void = () => { throw new Error('Not initialized'); };
   const promise = new Promise<T>((done, fail) => { resolve = done; reject = fail; });
@@ -626,7 +626,7 @@ describe('session-owned refresh', () => {
   it.each(['failure', 'synchronous-failure', 'superseded'] as const)('awaits every started refresh before reporting %s', async outcome => {
     const app = mountLive();
     const { selected } = cacheFixture(app);
-    const gate = pending<void>();
+    const gate = pending();
     vi.spyOn(app.client, 'invalidateQueries')
       .mockImplementationOnce(() => {
         if (outcome === 'synchronous-failure') throw new Error('PRIVATE synchronous failure');
@@ -711,7 +711,7 @@ describe('checked publication', () => {
   });
 
   it.each(['tenant', 'provider', 'unmount'] as const)('rejects an obsolete publication after %s changes', async change => {
-    const gate = pending<void>();
+    const gate = pending();
     const live = thirdParty();
     live.provider.publish = vi.fn(() => gate.promise);
     const app = mountLive('publish', { resource: 'posts' }, live);
@@ -1032,7 +1032,7 @@ describe('realtime authentication session revisions', () => {
 
   it('rejects pending publication even after authentication becomes usable again', async () => {
     const app = await mountSession(sessionProvider(), 'publish');
-    const gate = pending<void>();
+    const gate = pending();
     app.live.provider.publish = vi.fn(() => gate.promise);
     const published = app.publish(liveEvent).catch((cause: unknown) => cause);
     await app.actions.login.mutate({});

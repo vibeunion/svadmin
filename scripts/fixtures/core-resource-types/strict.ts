@@ -98,6 +98,7 @@ export async function exportTypes() {
   });
   const records = await exporter.triggerExport();
   expectType<Equal<typeof records[number]['id'], number>>();
+  void records;
   // @ts-expect-error Dynamic names are not resource contracts.
   useExport({ resource: 'posts' });
   // @ts-expect-error Caller-selected record generics are not proof of a schema.

@@ -2,7 +2,6 @@ import { cleanup, render, waitFor } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { tick } from 'svelte';
 import { QueryClient, MutationCache } from '@tanstack/svelte-query';
-import { Type } from '@sinclair/typebox';
 import { defineCommand, HttpError, resetContext, captureAuthSession, useCustom, useCustomMutation,
   type DataProvider, type CustomParams, type CustomResult, type AuthProvider, type RouterProvider } from '@svadmin/core';
 import * as unsafe from '../../../core/src/unsafe';
@@ -82,7 +81,7 @@ function firstKey(client: QueryClient) {
 async function rejected(promise: Promise<unknown>): Promise<HttpError> {
   try { await promise; } catch (cause) {
     if (cause instanceof HttpError) return cause;
-    throw new Error('Expected a checked error');
+    throw new Error('Expected a checked error', { cause });
   }
   throw new Error('Expected command rejection');
 }

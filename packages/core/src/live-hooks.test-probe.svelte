@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { useLive, useSubscription, usePublish, type LiveProvider, type LiveEvent } from './live.svelte';
+  import { useLive, useSubscription, usePublish, type LiveProvider } from './live.svelte';
   import { createLiveSubscription, type LiveSubscriptionParams } from './hook-utils.svelte';
   import { useList, useOne, useMany, useInvalidate } from './strict-hooks.svelte';
   import { createInfiniteListQuery } from './hooks.svelte';

@@ -47,7 +47,7 @@ async function invoke(provider: DataProvider, command: unknown, value: unknown):
 async function failure(pending: Promise<unknown>): Promise<HttpError> {
   try { await pending; } catch (error) {
     if (error instanceof HttpError) return error;
-    throw new Error('Expected a checked HttpError');
+    throw new Error('Expected a checked HttpError', { cause: error });
   }
   throw new Error('Expected a rejected command');
 }
