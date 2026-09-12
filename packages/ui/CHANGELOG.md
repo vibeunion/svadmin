@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.70.3](https://github.com/vibeunion/svadmin/compare/ui-v0.70.2...ui-v0.70.3) (2026-09-12)
+
+
+### 🐛 Bug Fixes
+
+* **lint:** resolve repository-wide eslint violations on main ([#395](https://github.com/vibeunion/svadmin/issues/395)) ([971da87](https://github.com/vibeunion/svadmin/commit/971da874dd252e49b32cfcf4bd030094ce000b7e))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.6.1
+  * peerDependencies
+    * @svadmin/core bumped to 0.51.1
+
 ## [0.70.2](https://github.com/vibeunion/svadmin/compare/ui-v0.70.1...ui-v0.70.2) (2026-09-12)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/nestjs-query",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "NestJS Query DataProvider for svadmin",
   "type": "module",
   "sideEffects": false,
