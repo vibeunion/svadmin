@@ -1,6 +1,7 @@
 import { requireValue } from "../../../../scripts/test-assertions";
 import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import DropdownContainmentHarness from '../../test/fixtures/DropdownContainmentHarness.svelte';
 import RowActionsDetailDrawerHarness from '../../test/fixtures/RowActionsDetailDrawerHarness.svelte';
 import SheetFocusLifecycleHarness from '../../test/fixtures/SheetFocusLifecycleHarness.svelte';
 
@@ -12,7 +13,36 @@ beforeEach(() => {
   });
 });
 
+afterEach(() => { vi.restoreAllMocks(); });
+
 describe('RowActions and DetailDrawer', () => {
+  it('opens in the top layer while preserving drawer ownership and Escape focus', async () => {
+    const showPopover = vi.fn();
+    const previous = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'showPopover');
+    Object.defineProperty(HTMLElement.prototype, 'showPopover', { configurable: true, value: showPopover });
+    try {
+      const view = render(DropdownContainmentHarness);
+      await fireEvent.click(view.getByRole('button', { name: 'Open drawer' }));
+      const dialog = view.getByRole('dialog', { name: 'Containment drawer' });
+      const trigger = within(dialog).getByRole('button', { name: 'Drawer actions' });
+      await fireEvent.keyDown(trigger, { key: 'ArrowDown' });
+      const menu = within(dialog).getByRole('menu', { name: 'Drawer actions' });
+      expect(menu.getAttribute('popover')).toBe('manual');
+      expect(showPopover).toHaveBeenCalledTimes(1);
+      expect(dialog.contains(menu)).toBe(true);
+      expect(menu.hasAttribute('data-floating')).toBe(true);
+      await waitFor(() => expect(document.activeElement).toBe(within(menu).getByRole('menuitem', { name: 'Inspect' })));
+      await fireEvent.keyDown(document.activeElement as HTMLElement, { key: 'Escape' });
+      await waitFor(() => expect(document.activeElement).toBe(trigger));
+      expect(view.getByRole('dialog', { name: 'Containment drawer' })).toBe(dialog);
+      expect(within(dialog).queryByRole('menu')).toBeNull();
+      view.unmount();
+    } finally {
+      if (previous) Object.defineProperty(HTMLElement.prototype, 'showPopover', previous);
+      else Reflect.deleteProperty(HTMLElement.prototype, 'showPopover');
+    }
+  });
+
   it('renders actions without nested interactive controls and runs overflow actions', async () => {
     const view = render(RowActionsDetailDrawerHarness);
     const rowActions = view.getByTestId('row-actions');

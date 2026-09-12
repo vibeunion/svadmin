@@ -1,6 +1,7 @@
 {
   "name": "@svadmin/sso",
-  "version": "0.11.20",  "type": "module",
+  "version": "0.11.21",
+  "type": "module",
   "description": "OIDC/OAuth2 SSO AuthProvider plugin for svadmin — supports Okta, Azure AD, Cognito, Keycloak, Google",
   "license": "MIT",
   "keywords": [
@@ -17,7 +18,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vibeunion/svadmin.git",
+    "url": "https://github.com/vibeunion/svadmin",
     "directory": "packages/sso"
   },
   "sideEffects": false,

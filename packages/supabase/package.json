@@ -1,6 +1,7 @@
 {
   "name": "@svadmin/supabase",
-  "version": "0.13.8",  "description": "Supabase adapters — DataProvider, AuthProvider, LiveProvider, AuditHandler",
+  "version": "0.13.9",
+  "description": "Supabase adapters — DataProvider, AuthProvider, LiveProvider, AuditHandler",
   "type": "module",
   "sideEffects": false,
   "files": [
@@ -32,7 +33,7 @@
   "author": "zuohuadong",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vibeunion/svadmin.git",
+    "url": "https://github.com/vibeunion/svadmin.git",
     "directory": "packages/supabase"
   },
   "homepage": "https://github.com/vibeunion/svadmin#readme",

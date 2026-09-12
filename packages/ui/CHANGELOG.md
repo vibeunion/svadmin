@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.70.0](https://github.com/vibeunion/svadmin/compare/ui-v0.69.1...ui-v0.70.0) (2026-09-08)
+
+
+### 🚀 Features
+
+* **core:** TypeBox validation adapter for useForm ([#390](https://github.com/vibeunion/svadmin/issues/390)) ([31bbc34](https://github.com/vibeunion/svadmin/commit/31bbc34c67132c2841c3f490590ecea4101af5c1))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.5.1
+  * peerDependencies
+    * @svadmin/core bumped to 0.50.0
+
 ## [0.69.1](https://github.com/vibeunion/svadmin/compare/ui-v0.69.0...ui-v0.69.1) (2026-09-07)
 
 
