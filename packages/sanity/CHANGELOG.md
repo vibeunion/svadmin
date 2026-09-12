@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.10.0](https://github.com/vibeunion/svadmin/compare/sanity-v0.9.20...sanity-v0.10.0) (2026-09-12)
+
+
+### 🚀 Features
+
+* **core:** close out schema-based type safety and strict gates ([#391](https://github.com/vibeunion/svadmin/issues/391)) ([2a84e3d](https://github.com/vibeunion/svadmin/commit/2a84e3d32835b7f91d0990a303f9f3b1e4c8bb09))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.51.0
+
 ## [0.9.20](https://github.com/vibeunion/svadmin/compare/sanity-v0.9.19...sanity-v0.9.20) (2026-09-08)
 
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/vibeunion/svadmin/compare/auth-utils-v0.7.10...auth-utils-v0.8.0) (2026-09-12)
+
+
+### 🚀 Features
+
+* **core:** close out schema-based type safety and strict gates ([#391](https://github.com/vibeunion/svadmin/issues/391)) ([2a84e3d](https://github.com/vibeunion/svadmin/commit/2a84e3d32835b7f91d0990a303f9f3b1e4c8bb09))
+
 ## [0.7.10](https://github.com/vibeunion/svadmin/compare/auth-utils-v0.7.9...auth-utils-v0.7.10) (2026-08-28)
 
 

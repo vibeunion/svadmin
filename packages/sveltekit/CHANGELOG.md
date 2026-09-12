@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.11.0](https://github.com/vibeunion/svadmin/compare/sveltekit-v0.10.7...sveltekit-v0.11.0) (2026-09-12)
+
+
+### 🚀 Features
+
+* **core:** close out schema-based type safety and strict gates ([#391](https://github.com/vibeunion/svadmin/issues/391)) ([2a84e3d](https://github.com/vibeunion/svadmin/commit/2a84e3d32835b7f91d0990a303f9f3b1e4c8bb09))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.32.2 <0.51.0 to >=0.51.0
+
 ## [0.10.7](https://github.com/vibeunion/svadmin/compare/sveltekit-v0.10.6...sveltekit-v0.10.7) (2026-09-08)
 
 

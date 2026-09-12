@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.12.0](https://github.com/vibeunion/svadmin/compare/drizzle-v0.11.16...drizzle-v0.12.0) (2026-09-12)
+
+
+### 🚀 Features
+
+* **core:** close out schema-based type safety and strict gates ([#391](https://github.com/vibeunion/svadmin/issues/391)) ([2a84e3d](https://github.com/vibeunion/svadmin/commit/2a84e3d32835b7f91d0990a303f9f3b1e4c8bb09))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.11.0
+  * peerDependencies
+    * @svadmin/core bumped to 0.51.0
+
 ## [0.11.16](https://github.com/vibeunion/svadmin/compare/drizzle-v0.11.15...drizzle-v0.11.16) (2026-09-08)
 
 
