@@ -116,15 +116,15 @@
 		const first = tabbable[0];
 		const last = tabbable.at(-1);
 		const activeIndex = tabbable.indexOf(document.activeElement as HTMLElement);
-		if (!ref.contains(document.activeElement) || activeIndex === -1) {
-			event.preventDefault();
-			(event.shiftKey ? last : first)?.focus();
+      if (!ref.contains(document.activeElement) || activeIndex === -1) {
+        event.preventDefault();
+        (event.shiftKey ? last : first)?.focus();
 		} else if (event.shiftKey && activeIndex === 0) {
 			event.preventDefault();
 			last?.focus();
 		} else if (!event.shiftKey && activeIndex === tabbable.length - 1) {
 			event.preventDefault();
-			first.focus();
+        first?.focus();
 		}
 	}
 

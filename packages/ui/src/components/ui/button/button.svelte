@@ -11,11 +11,16 @@
 	export type ButtonSize = Size;
 	export type ButtonVariant = Variant;
 
-	export type ButtonProps = WithElementRef<HTMLButtonAttributes, HTMLButtonElement> &
-		WithElementRef<HTMLAnchorAttributes, HTMLAnchorElement> & {
-			variant?: ButtonVariant;
-			size?: ButtonSize;
-		};
+	type ButtonStyleProps = {
+		variant?: ButtonVariant | undefined;
+		size?: ButtonSize | undefined;
+		disabled?: boolean | null | undefined;
+		type?: HTMLButtonAttributes['type'] | undefined;
+	};
+
+	export type ButtonProps =
+		| (Omit<WithElementRef<HTMLButtonAttributes, HTMLButtonElement>, 'href' | 'type' | 'disabled'> & ButtonStyleProps & { href?: never })
+		| (Omit<WithElementRef<HTMLAnchorAttributes, HTMLAnchorElement>, 'type' | 'href' | 'disabled'> & ButtonStyleProps & { href: string });
 </script>
 
 <script lang="ts">
@@ -52,7 +57,7 @@
 		aria-disabled={disabled}
 		role={disabled ? "link" : undefined}
 		tabindex={disabled ? -1 : undefined}
-		{...restProps}
+		{...(restProps as Omit<HTMLAnchorAttributes, 'children' | 'class' | 'href' | 'disabled'>)}
 	>
 		{@render children?.()}
 	</a>
@@ -63,9 +68,9 @@
 		data-variant={variant}
 		data-size={size}
 		class={cn(buttonVariants({ variant, size }), className)}
-		{type}
+		type={type as HTMLButtonAttributes['type']}
 		{disabled}
-		{...restProps}
+		{...(restProps as Omit<HTMLButtonAttributes, 'children' | 'class' | 'type' | 'disabled'>)}
 	>
 		{@render children?.()}
 	</button>

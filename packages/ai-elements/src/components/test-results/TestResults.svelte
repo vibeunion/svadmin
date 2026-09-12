@@ -57,7 +57,7 @@
   provideTestResultsContext({ get summary() { return resolvedSummary; } });
 
   function statusLabel(status: TestResultStatus): string {
-    return status === 'todo' ? 'To do' : status[0].toUpperCase() + status.slice(1);
+    return status === 'todo' ? 'To do' : status.charAt(0).toUpperCase() + status.slice(1);
   }
 
   function formatDuration(value?: number): string {
