@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { definedReactiveOptions } from '@svadmin/core/options';
-
   import { definedOptions } from '@svadmin/core/options';
+  import { definedReactiveOptions } from '@svadmin/core/options';
 
   import { defineResource, syncGlobalPath } from '@svadmin/core';
   import { Type } from '@sinclair/typebox';
@@ -78,7 +77,7 @@
   }: Props = $props();
 
   const deletedIds = new SvelteSet<string>();
-  const dataProvider: DataProvider = definedReactiveOptions({
+  const dataProvider: DataProvider = $derived({
     getList: async () => {
       const data = (emptyData ? [] : [
         { id: numericIds ? 1 : 'user-1', email: 'user@example.com' },
@@ -97,14 +96,13 @@
       deletedIds.add(String(id));
       return { data: { id, email: 'user@example.com' } };
     },
-    get deleteMany() {
-      if (disableDeleteMany) return undefined;
-      return async ({ ids }: { ids: (string | number)[] }) => {
+    ...(disableDeleteMany ? {} : {
+      deleteMany: async ({ ids }: { ids: (string | number)[] }) => {
         await onDeleteMany?.(ids);
         for (const id of ids) deletedIds.add(String(id));
         return { data: ids.map((id) => ({ id, email: 'user@example.com' })) };
-      };
-    },
+      },
+    }),
     getApiUrl: () => 'https://example.test',
   });
 
@@ -113,7 +111,7 @@
     label: 'Users',
     contract: defineResource('users', { record: Type.Object({
       id: Type.Union([Type.String(), Type.Number()]), email: Type.String(),
-    }), update: Type.Object({ email: Type.Optional(Type.String()) }) }),
+    }), create: Type.Object({ email: Type.Optional(Type.String()) }), update: Type.Object({ email: Type.Optional(Type.String()) }) }),
     get canCreate() { return canCreate; },
     get canEdit() { return canEdit; },
     get canDelete() { return canDelete; },

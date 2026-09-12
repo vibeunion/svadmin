@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, waitFor, within } from '@testing-library/sv
 import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
 import { Type } from '@sinclair/typebox';
 import { QueryClient } from '@tanstack/svelte-query';
-import { defineResource, resetContext, setAdminOptions, type DataProvider, type ResourceDefinition, type AccessControlProvider } from '@svadmin/core';
+import { defineResource, resetContext, setAdminOptions, type AccessControlProvider, type CanParams, type CanResult, type DataProvider, type ResourceDefinition } from '@svadmin/core';
 import { resetToast } from '@svadmin/core/toast';
 import { formatContractRouteId, parseContractRouteId } from '@svadmin/core/schema';
 import ts from 'typescript';
@@ -46,7 +46,10 @@ function deferred<T>() {
   return { promise, resolve };
 }
 function access(allowed: boolean): AccessControlProvider {
-  return { can: async input => Array.isArray(input) ? input.map(() => ({ can: allowed })) : { can: allowed } };
+  return {
+    can: async (_input: CanParams): Promise<CanResult> => ({ can: allowed }),
+    canMany: async (input: readonly CanParams[]): Promise<CanResult[]> => input.map(() => ({ can: allowed })),
+  };
 }
 function mount(source: DataProvider = provider(), permission?: AccessControlProvider) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity }, mutations: { retry: false } } });
@@ -61,7 +64,7 @@ async function ready(app: ReturnType<typeof mount>) {
 }
 async function selectAll(app: ReturnType<typeof mount>) {
   await ready(app);
-  await fireEvent.click(app.view.getByRole('checkbox', { name: /全选|Select all/i }));
+  await fireEvent.click(await app.view.findByRole('checkbox', { name: /全选|Select all/i }));
 }
 async function openBatch(app: ReturnType<typeof mount>) {
   await selectAll(app);
@@ -183,11 +186,11 @@ describe('contract-bound AutoTable', () => {
     [rows[0], rows[0]],
   ].map(data => ({ data })))('shows a retryable error for invalid rows %j', async ({ data }) => {
     const source = provider();
-    source.getList = vi.fn(async () => ({ data, total: data.length }));
+    vi.mocked(source.getList).mockImplementation(async () => ({ data, total: data.length }));
     const app = mount(source);
     await app.view.findByRole('button', { name: /重试|Retry/ });
     expect(app.view.queryByText('First')).toBeNull();
-    source.getList = vi.fn(async () => ({ data: rows, total: 2 }));
+    vi.mocked(source.getList).mockImplementation(async () => ({ data: rows, total: 2 }));
     await fireEvent.click(app.view.getByRole('button', { name: /重试|Retry/ }));
     await ready(app);
   });
@@ -290,8 +293,10 @@ describe('contract-bound AutoTable', () => {
   });
   it('waits for permission before fetching and hides cached rows after revocation', async () => {
     const pending = deferred<{ can: boolean }>();
-    const permission: AccessControlProvider = { can: input => Array.isArray(input)
-      ? Promise.all(input.map(() => pending.promise)) : pending.promise };
+    const permission: AccessControlProvider = {
+      can: (_input: CanParams) => pending.promise,
+      canMany: (input: readonly CanParams[]) => Promise.all(input.map(() => pending.promise)),
+    };
     const app = mount(provider(), permission);
     expect(app.source.getList).not.toHaveBeenCalled();
     pending.resolve({ can: true });
@@ -411,8 +416,8 @@ describe('contract-bound AutoTable', () => {
   });
   it('allows reading but denies destructive actions with delete-only denial', async () => {
     const permission: AccessControlProvider = {
-      can: async input => Array.isArray(input)
-        ? input.map(entry => ({ can: entry.action !== 'delete' })) : { can: input.action !== 'delete' },
+      can: async (input: CanParams) => ({ can: input.action !== 'delete' }),
+      canMany: async (input: readonly CanParams[]) => input.map(entry => ({ can: entry.action !== 'delete' })),
     };
     const app = mount(provider(), permission);
     await ready(app);
@@ -422,7 +427,7 @@ describe('contract-bound AutoTable', () => {
   it('does not export previously cached rows after a malformed refresh', async () => {
     const app = mount();
     await ready(app);
-    app.source.getList = vi.fn(async () => ({ data: [{ id: 1, title: false }], total: 1 }));
+    vi.mocked(app.source.getList).mockImplementation(async () => ({ data: [{ id: 1, title: false }], total: 1 }));
     await fireEvent.click(app.view.getByRole('button', { name: /^(Refresh|刷新)$/ }));
     await app.view.findByRole('button', { name: /Retry|重试/ });
     const createURL = vi.spyOn(URL, 'createObjectURL');

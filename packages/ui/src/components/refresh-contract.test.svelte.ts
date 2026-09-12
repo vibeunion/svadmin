@@ -52,6 +52,17 @@ function scopeOf(client: QueryClient) {
   return definedOptions({ provider: descriptor.provider, tenant: descriptor.tenant, contract: descriptor.contract });
 }
 
+function ownerOf(client: QueryClient) {
+  const descriptor = client.getQueryCache().getAll().map(query => parseQueryKey(query.queryKey))
+    .find(key => key?.kind === 'data' && key.resource === 'posts');
+  const params = descriptor?.params;
+  if (typeof params !== 'object' || params === null || Array.isArray(params)) throw new Error('Expected query owner');
+  const source = Object.getOwnPropertyDescriptor(params, 'source')?.value;
+  const authSession = Object.getOwnPropertyDescriptor(params, 'authSession')?.value;
+  if (typeof source !== 'string' || typeof authSession !== 'string') throw new Error('Expected query owner');
+  return { source, authSession };
+}
+
 afterEach(() => {
   cleanup();
   for (const client of clients.splice(0)) client.clear();
@@ -88,18 +99,21 @@ describe('contract-bound refresh', () => {
     const scope = definedOptions({ provider: descriptor.provider, tenant: descriptor.tenant, contract: descriptor.contract });
     const sourceId: unknown = typeof descriptor.params === 'object' && descriptor.params !== null
       ? Object.getOwnPropertyDescriptor(descriptor.params, 'source')?.value : undefined;
-    if (typeof sourceId !== 'string') throw new Error('Expected a provider source');
+    const authSession: unknown = typeof descriptor.params === 'object' && descriptor.params !== null
+      ? Object.getOwnPropertyDescriptor(descriptor.params, 'authSession')?.value : undefined;
+    if (typeof sourceId !== 'string' || typeof authSession !== 'string') throw new Error('Expected a provider owner');
+    const owner = { source: sourceId, authSession };
     const current = keys(scope);
     const selected = [
-      current.data.list('posts'), current.data.infiniteList('posts', { source: sourceId, fixture: true }),
-      current.data.select('posts'), current.data.selectDefaults('posts'), current.data.many('posts', [1]),
+      current.data.list('posts', owner), current.data.infiniteList('posts', { ...owner, fixture: true }),
+      current.data.select('posts', owner), current.data.selectDefaults('posts', owner), current.data.many('posts', { ...owner, ids: [1] }),
     ];
     const excluded = [
-      current.data.one('posts', 1), current.data.list('other'),
-      keys({ ...scope, provider: 'default' }).data.list('posts'),
-      keys({ ...scope, tenant: 'another-tenant' }).data.list('posts'),
-      keys({ ...scope, contract: contractKey(other) }).data.list('posts'),
-      keys(definedOptions({ provider: scope.provider, tenant: scope.tenant })).data.list('posts'),
+      current.data.one('posts', 1, owner), current.data.list('other', owner),
+      keys({ ...scope, provider: 'default' }).data.list('posts', owner),
+      keys({ ...scope, tenant: 'another-tenant' }).data.list('posts', owner),
+      keys({ ...scope, contract: contractKey(other) }).data.list('posts', owner),
+      keys(definedOptions({ provider: scope.provider, tenant: scope.tenant })).data.list('posts', owner),
       current.data.infiniteList('posts', { source: 'another-instance' }),
       current.data.infiniteList('posts', { fixture: true }),
       current.access.can('posts'), current.custom.call('posts', 1), current.task.list(),
@@ -129,9 +143,10 @@ describe('contract-bound refresh', () => {
   it('validates detail IDs against the contract and matches number and string IDs separately', async () => {
     const app = mount(provider(), false);
     const builder = keys(scopeOf(app.client));
-    const one = builder.data.one('posts', 1);
-    const second = builder.data.one('posts', 2);
-    const textId = builder.data.one('posts', '1');
+    const owner = ownerOf(app.client);
+    const one = builder.data.one('posts', 1, owner);
+    const second = builder.data.one('posts', 2, owner);
+    const textId = builder.data.one('posts', '1', owner);
     for (const key of [one, second, textId]) app.client.setQueryData(key, { data: row });
     await expect(app.read().invalidate({ invalidates: ['detail'], id: '1' })).rejects.toMatchObject({ code: 'INVALID_RESOURCE_INPUT' });
     expect(app.client.getQueryState(one)?.isInvalidated).toBe(false);
@@ -144,8 +159,9 @@ describe('contract-bound refresh', () => {
   it.each([undefined, 'all', ['resourceAll']] as const)('keeps the broad refresh mode %j inside the bound data resource', async mode => {
     const app = mount(provider(), false);
     const builder = keys(scopeOf(app.client));
-    const selected = [builder.data.list('posts'), builder.data.one('posts', 1), builder.data.many('posts', [1])];
-    const excluded = [builder.data.list('other'), builder.access.can('posts'), builder.custom.call('posts', 1), builder.task.list()];
+    const owner = ownerOf(app.client);
+    const selected = [builder.data.list('posts', owner), builder.data.one('posts', 1, owner), builder.data.many('posts', { ...owner, ids: [1] })];
+    const excluded = [builder.data.list('other', owner), builder.access.can('posts', owner), builder.custom.call('posts', 1, undefined, owner), builder.task.list(owner)];
     for (const key of [...selected, ...excluded]) app.client.setQueryData(key, { fixture: true });
     if (mode === undefined) await app.read().invalidate();
     else await app.read().invalidate({ invalidates: typeof mode === 'string' ? mode : [...mode] });
@@ -223,10 +239,11 @@ describe('contract-bound refresh', () => {
   it('waits for every active query within a list scope even when one query fails early', async () => {
     const app = mount(provider(), false);
     const builder = keys(scopeOf(app.client));
+    const owner = ownerOf(app.client);
     const first = deferred<GetListResult>();
     const slow = deferred<GetListResult>();
-    const firstKey = builder.data.list('posts', { filter: 'first' });
-    const slowKey = builder.data.list('posts', { filter: 'slow' });
+    const firstKey = builder.data.list('posts', { ...owner, filter: 'first' });
+    const slowKey = builder.data.list('posts', { ...owner, filter: 'slow' });
     const firstObserver = new QueryObserver(app.client, {
       queryKey: firstKey, initialData: { data: [row], total: 1 }, staleTime: Infinity,
       queryFn: () => first.promise,

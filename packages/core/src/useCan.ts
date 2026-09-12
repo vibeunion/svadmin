@@ -122,9 +122,12 @@ export function useCan(options: () => UseCanOptions): UseCanResult {
 
   return Object.freeze({
     get allowed() {
+      const auth = captureAuthLiveScope(adminContext.authProvider);
+      if (adminContext.accessControlProvider === null) return query.isEnabled && auth.isCurrent();
+      if (!auth.isCurrent()) return false;
       return query.isEnabled && query.isSuccess && query.data?.can === true;
     },
     get reason() { return query.isEnabled && query.isSuccess ? query.data?.reason : undefined; },
-    get isLoading() { return query.isLoading; },
+    get isLoading() { return adminContext.accessControlProvider !== null && query.isLoading; },
   });
 }

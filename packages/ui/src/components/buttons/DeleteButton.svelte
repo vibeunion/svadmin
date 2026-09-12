@@ -50,7 +50,7 @@
   const session = $derived(captureAuthSession(context.authProvider));
   const policyAllowed = $derived(accessControl.enabled === false || can.allowed === true);
   const allowed = $derived(session.available && policyAllowed);
-  const hidden = $derived(resourceDefinition.canDelete === false || (accessControl.hideIfUnauthorized && !allowed));
+  const hidden = $derived(!can.isLoading && (resourceDefinition.canDelete === false || (accessControl.hideIfUnauthorized && !allowed)));
   const deleteMut = useDelete(definedReactiveOptions({
     get resource() { return binding.resource; },
     get id() { return recordItemId; },

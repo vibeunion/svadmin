@@ -248,7 +248,17 @@ export function useContractForm<S extends ContractSchemas, A extends ContractFor
       hydratedKey = scope.key;
     }
   });
-  $effect(() => () => { mounted = false; active = undefined; latest = undefined; });
+  $effect(() => () => {
+    mounted = false;
+    active = undefined;
+    latest = undefined;
+    queueMicrotask(() => {
+      const current = state;
+      if (!current.ok) return;
+      const query = client.getQueryCache().find({ queryKey: queryKey(current.scope), exact: true });
+      if (query?.getObserversCount() === 0) void query.cancel();
+    });
+  });
 
   function isTainted(field?: string): boolean {
     return ready() && (field === undefined ? Object.values(tainted).some(Boolean) : tainted[field] === true);

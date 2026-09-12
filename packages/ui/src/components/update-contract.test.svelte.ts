@@ -1136,7 +1136,7 @@ describe('InlineEdit contract consumer', () => {
     await app.view.rerender({ onSave });
     await ready(app);
     const refresh = deferred<GetListResult>();
-    source.getList = vi.fn(() => refresh.promise);
+    vi.mocked(source.getList).mockClear().mockImplementation(() => refresh.promise);
     await fireEvent.keyDown(await edit(app), { key: 'Enter' });
     await waitFor(() => expect(source.getList).toHaveBeenCalledTimes(1));
     expect(app.view.getByRole('button', { name: /^save$/i }).hasAttribute('disabled')).toBe(true);

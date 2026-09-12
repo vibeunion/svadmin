@@ -592,7 +592,7 @@ describe('select projection content ownership', () => {
 
   it('remaps when object key order observed by the mapper changes', () => {
     const contract = defineResource('ordered', { record: Type.Object({
-      id: Type.Number(), entries: Type.Record(Type.String(), Type.Number()),
+      id: Type.Number(), entries: Type.Object({ first: Type.Number(), second: Type.Number() }),
     }) });
     const decode = (input: unknown) => parseContractRecord(contract, input);
     const label = vi.fn((record: ReturnType<typeof decode>) => Object.keys(record.entries).join(','));
@@ -610,7 +610,7 @@ describe('select projection content ownership', () => {
     const decode = (input: unknown) => parseContractRecord(posts, input);
     const record = { id: 1, title: 'Recursive' };
     const receipt = { data: [record], total: 1 };
-    let reenter = () => { throw new Error('Projection not initialized'); };
+    let reenter: () => void = () => { throw new Error('Projection not initialized'); };
     const label = vi.fn((record: ReturnType<typeof decode>) => {
       if (record.title === 'Recursive') reenter();
       return record.title;

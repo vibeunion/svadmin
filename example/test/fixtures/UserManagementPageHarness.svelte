@@ -3,16 +3,10 @@
   import { AdminApp } from '@svadmin/ui';
   import UserManagementPage from '../../src/pages/UserManagementPage.svelte';
   import { inMemoryDataProvider as dataProvider } from '../../src/providers/inMemoryDb';
+  import { createResources } from '../../src/resources';
 
-  const resources: ResourceDefinition[] = ['users', 'roles', 'permissions', 'user_accounts', 'user_logs', 'user_settings'].map((name) => ({
-    name,
-    label: name,
-    fields: name === 'users' ? [
-      { key: 'id', label: 'ID', type: 'number' },
-      { key: 'name', label: 'Name', type: 'text' },
-      { key: 'email', label: 'Email', type: 'email' },
-    ] : [],
-  }));
+  const targetNames = new Set(['users', 'roles', 'permissions', 'user_accounts', 'user_logs', 'user_settings']);
+  const resources: ResourceDefinition[] = createResources('en').filter((resource) => targetNames.has(resource.name));
 
   const routerProvider: RouterProvider = {
     go: () => {},

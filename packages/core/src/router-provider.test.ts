@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // Unit tests for RouterProvider implementations
 // Router provider tests need a DOM environment or a mock.
-import { describe, test, expect, beforeEach } from 'bun:test';
+import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { createHashRouterProvider, createHistoryRouterProvider } from './router-provider';
 
 describe('createHashRouterProvider (unit — no DOM)', () => {
@@ -28,17 +27,45 @@ describe('createHistoryRouterProvider (unit — no DOM)', () => {
   });
 });
 
-// DOM-dependent tests — mocked window if not exists
+// DOM-dependent tests — install a self-contained window mock for every test
+// (other test files may leave a partial `window` behind, so never rely on the
+// ambient value) and restore whatever was there afterwards.
 describe('createHashRouterProvider (with mock DOM)', () => {
+  let previousWindow: unknown;
+  let hash = '';
+
   beforeEach(() => {
-    if (typeof globalThis.window === 'undefined') {
-      let _hash = '';
-      (globalThis as any).window = {
+    previousWindow = (globalThis as unknown as { window?: unknown }).window;
+    hash = '';
+    // Plain assignment throws on windows left behind by other files with
+    // defineProperty (non-writable); defineProperty always succeeds here.
+    Object.defineProperty(globalThis, 'window', {
+      value: {
         location: {
-          get hash() { return _hash ? (_hash.startsWith('#') ? _hash : '#' + _hash) : ''; },
-          set hash(val) { _hash = val; }
-        }
-      };
+          get href() { return `https://unit.test/${hash}`; },
+          get hash() { return hash ? (hash.startsWith('#') ? hash : '#' + hash) : ''; },
+          set hash(val) { hash = val; },
+        },
+        history: { replaceState() {}, back() {} },
+        dispatchEvent() {},
+      },
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    });
+  });
+
+  afterEach(() => {
+    const globalScope = globalThis as unknown as { window?: unknown };
+    if (previousWindow === undefined) {
+      Reflect.deleteProperty(globalScope, 'window');
+    } else {
+      Object.defineProperty(globalScope, 'window', {
+        value: previousWindow,
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      });
     }
   });
 
@@ -80,4 +107,3 @@ describe('createHashRouterProvider (with mock DOM)', () => {
     expect(window.location.hash).toBe('#/users');
   });
 });
-

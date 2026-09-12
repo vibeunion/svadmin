@@ -8,14 +8,18 @@ import { keys } from './query-keys';
 import type { GetListParams,GetListResult } from './types';
 
 type QueryOptions={ queryFn: () => Promise<GetListResult> };
-const { factories,getList,route }=vi.hoisted(() => ({
+type TestRoute={ resource: string; parentParams: Record<string,string> };
+const { factories,getList }=vi.hoisted(() => ({
   factories: [] as (() => QueryOptions)[],
   getList: vi.fn<(params: GetListParams) => Promise<GetListResult>>(),
-  route: { resource: 'posts',parentParams: {} as Record<string,string> },
 }));
 
+const route=$state({ resource: 'posts',parentParams: {} as Record<string,string> });
+const testGlobal=globalThis as typeof globalThis & { __getTestRoute: () => TestRoute };
+testGlobal.__getTestRoute=() => route;
+
 vi.mock('./useParsed.svelte',() => ({
-  useParsed: () => route,
+  useParsed: () => (globalThis as typeof globalThis & { __getTestRoute: () => TestRoute }).__getTestRoute(),
 }));
 
 vi.mock('./context.svelte',() => ({
@@ -91,6 +95,7 @@ describe.each(['useTable','TableState'] as const)('%s resource forwarding',(kind
     await fetchList();
     route.resource='users';
     route.parentParams={};
+    flushSync();
     await fetchList();
     expect(getList).toHaveBeenLastCalledWith(expect.objectContaining({
       resource: 'users',

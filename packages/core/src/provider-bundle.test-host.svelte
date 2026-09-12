@@ -1,6 +1,7 @@
 <script lang="ts">
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
   import { captureAdminContext, provideAdminContext } from './context.svelte';
+  import { captureAccessControlProvider } from './access-control-contract';
   import type { ProviderBundle, TenantContext } from './provider-bundle';
   import type { ResourceDefinition } from './types';
   import ProviderBundleQueryTestProbe from './provider-bundle.query-test-probe.svelte';
@@ -47,7 +48,7 @@
 <output data-testid={`${instance}-tenant`}>{adminContext.tenant?.tenantId ?? ''}</output>
 <output data-testid={`${instance}-cache`}>{adminContext.tenantCacheKey?.__svadminTenant ?? ''}</output>
 <output data-testid={`${instance}-access`}>
-  {adminContext.accessControlProvider === providerBundle.accessControlProvider ? 'scoped' : 'missing'}
+  {adminContext.accessControlProvider === (providerBundle.accessControlProvider ? captureAccessControlProvider(providerBundle.accessControlProvider) : null) ? 'scoped' : 'missing'}
 </output>
 <output data-testid={`${instance}-audit`}>
   {adminContext.auditLogProvider === providerBundle.auditLogProvider ? 'scoped' : 'missing'}

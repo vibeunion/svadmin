@@ -27,7 +27,7 @@ export function createSessionQuery<TQuery, T = TQuery>(
     const origin = session.options;
     return {
       queryKey: origin.queryKey,
-      queryFn: ({ signal }) => session.run(origin, () => origin.queryFn(signal)),
+      queryFn: (queryContext) => session.run(origin, () => origin.queryFn(queryContext?.signal)),
       enabled: origin.enabled && origin.auth.available,
       ...definedOptions({
         staleTime: origin.staleTime, gcTime: origin.gcTime, refetchOnWindowFocus: origin.refetchOnWindowFocus,

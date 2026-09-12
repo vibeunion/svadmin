@@ -138,7 +138,13 @@ export function createQuerySession<O extends QuerySessionOptions>(context: Admin
       }
     });
   }
-  $effect(() => () => { disposed = true; });
+  $effect(() => () => {
+    disposed = true;
+    queueMicrotask(() => {
+      const query = client.getQueryCache().find({ queryKey: options.queryKey, exact: true });
+      if (query?.getObserversCount() === 0) void query.cancel();
+    });
+  });
   return { get options() { return options; }, client, current, sessionCurrent, run, observe };
 }
 

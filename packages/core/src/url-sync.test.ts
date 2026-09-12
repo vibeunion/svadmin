@@ -1,6 +1,6 @@
 import { requireValue } from '../test/assertions';
 
-import { beforeEach,describe,expect,mock,test } from 'bun:test';
+import { afterEach,beforeEach,describe,expect,mock,test } from 'bun:test';
 import type { RouterProvider } from './router-provider';
 import { createHashRouterProvider } from './router-provider';
 import type { Filter } from './types';
@@ -18,7 +18,15 @@ mock.module('./options.svelte',() => ({
 
 const { appendListQueryFromPath,readURLState,sanitizeListQueryParams,writeURLState }=await import('./url-sync');
 
+// Ambient global descriptors captured by installMockWindow so afterEach can
+// restore them; leaving these globals defined leaks a non-writable `window`
+// into later test files (bun test shares one global realm across files).
+let installedGlobals: Array<readonly [string, PropertyDescriptor | undefined]> = [];
+
 function installMockWindow() {
+  installedGlobals = ['window', 'history', 'HashChangeEvent'].map((name) => (
+    [name, Object.getOwnPropertyDescriptor(globalThis, name)] as const
+  ));
   let href='http://localhost/#/posts';
   const location={
     get href() { return href; },
@@ -54,6 +62,16 @@ function installMockWindow() {
     getHash() { return location.hash; },
   };
 }
+
+afterEach(() => {
+  for (const [name, descriptor] of installedGlobals.splice(0)) {
+    if (descriptor) {
+      Object.defineProperty(globalThis, name, descriptor);
+    } else {
+      Reflect.deleteProperty(globalThis, name);
+    }
+  }
+});
 
 describe('url-sync',() => {
   let mockWindow: ReturnType<typeof installMockWindow>|undefined;

@@ -1,5 +1,7 @@
 <script lang="ts">
+  import { defineResource } from '@svadmin/core';
   import { definedOptions } from '@svadmin/core/options';
+  import { Type } from '@sinclair/typebox';
   import { decodeBaseRecord } from '@svadmin/core/schema';
 
   import type { DataProvider, FieldDefinition, ResourceDefinition, RouterProvider } from '@svadmin/core';
@@ -67,8 +69,8 @@
   };
 
   const resources: ResourceDefinition[] = [
-    { name: 'contracts', label: 'Contracts', fields },
-    { name: 'owners', label: 'Owners', fields: [{ key: 'name', label: 'Name', type: 'text' }] },
+    { name: 'contracts', label: 'Contracts', fields, contract: defineResource('contracts', { record: Type.Object({ id: Type.String() }) }) },
+    { name: 'owners', label: 'Owners', fields: [{ key: 'name', label: 'Name', type: 'text' }], contract: defineResource('owners', { record: Type.Object({ id: Type.Number(), name: Type.String() }) }) },
   ];
 
   const routerProvider: RouterProvider = {
