@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/refine-adapter",
-  "version": "0.10.15",
+  "version": "0.11.0",
   "description": "Universal Refine DataProvider adapter for svadmin",
   "type": "module",
   "sideEffects": false,
