@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/strapi",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "Strapi v4/v5 DataProvider for svadmin",
   "type": "module",
   "sideEffects": false,

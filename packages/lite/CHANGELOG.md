@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.11.1](https://github.com/vibeunion/svadmin/compare/lite-v0.11.0...lite-v0.11.1) (2026-09-12)
+
+
+### 🐛 Bug Fixes
+
+* **lite,core:** isolate contract schema exports from client runes in ssr ([#397](https://github.com/vibeunion/svadmin/issues/397)) ([a3b7b66](https://github.com/vibeunion/svadmin/commit/a3b7b66657d2b9554d0880efcfe4ca8dc2f40ca5))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core remains compatible with >=0.34.2 <0.52.0
+
 ## [0.11.0](https://github.com/vibeunion/svadmin/compare/lite-v0.10.1...lite-v0.11.0) (2026-09-12)
 
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.51.1](https://github.com/vibeunion/svadmin/compare/core-v0.51.0...core-v0.51.1) (2026-09-12)
+
+
+### 🐛 Bug Fixes
+
+* **lint:** resolve repository-wide eslint violations on main ([#395](https://github.com/vibeunion/svadmin/issues/395)) ([971da87](https://github.com/vibeunion/svadmin/commit/971da874dd252e49b32cfcf4bd030094ce000b7e))
+* **lite,core:** isolate contract schema exports from client runes in ssr ([#397](https://github.com/vibeunion/svadmin/issues/397)) ([a3b7b66](https://github.com/vibeunion/svadmin/commit/a3b7b66657d2b9554d0880efcfe4ca8dc2f40ca5))
+
 ## [0.51.0](https://github.com/vibeunion/svadmin/compare/core-v0.50.0...core-v0.51.0) (2026-09-12)
 
 

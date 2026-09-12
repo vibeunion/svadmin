@@ -1,10 +1,10 @@
 {
   "name": "@svadmin/core",
-  "version": "0.51.0",
+  "version": "0.51.1",
   "author": "zuohuadong",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vibeunion/svadmin.git",
+    "url": "https://github.com/vibeunion/svadmin.git",
     "directory": "packages/core"
   },
   "main": "src/index.ts",
@@ -32,10 +32,6 @@
     "./options": {
       "types": "./src/defined-options.ts",
       "default": "./src/defined-options.ts"
-    },
-    "./resource-contract": {
-      "types": "./src/resource-contract.ts",
-      "default": "./src/resource-contract.ts"
     },
     "./unsafe": {
       "types": "./src/unsafe.ts",

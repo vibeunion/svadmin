@@ -37,7 +37,9 @@ const fullResources = createResources('en').filter((r: ResourceDefinition) => r.
 
 export const resources: ResourceDefinition[] = [
   postsResource,
-  ...fullResources.filter((r: ResourceDefinition) => r.name !== 'posts'),
+  ...fullResources
+    .filter((r: ResourceDefinition) => r.name !== 'posts')
+    .map(({ contract: _ignored, ...resource }) => resource),
 ];
 
 export function getResource(name: string): ResourceDefinition | undefined {
@@ -171,14 +173,3 @@ export const menu: MenuItem[] = [
     ],
   },
 ];
-
-/**
- * Strip the TypeBox contract from a resource definition before returning it
- * from a server load. Contracts carry symbols and functions (non-POJO) that
- * SvelteKit cannot serialize across the SSR boundary; clients only need the
- * plain definition for rendering.
- */
-export function plainDefinition<T extends { contract?: unknown }>(definition: T): Omit<T, 'contract'> {
-  const { contract: _contract, ...rest } = definition;
-  return rest;
-}

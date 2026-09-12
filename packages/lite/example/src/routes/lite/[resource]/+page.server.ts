@@ -1,15 +1,14 @@
 import { error } from '@sveltejs/kit';
 import { createCrudActions, createListLoader } from '@svadmin/lite';
-import { dataProvider, getResource, plainDefinition } from '$lib/admin';
+import { dataProvider, getResource } from '$lib/admin';
 import type { Actions, PageServerLoad } from './$types';
 
-export const load = (async (event) => {
+export const load = ((event) => {
   const resource = getResource(event.params.resource);
   if (!resource) {
     throw error(404, `Resource "${event.params.resource}" not found`);
   }
-  const result = await createListLoader(dataProvider, resource)(event);
-  return { ...result, resource: plainDefinition(result.resource) };
+  return createListLoader(dataProvider, resource)(event);
 }) satisfies PageServerLoad;
 
 export const actions = {
