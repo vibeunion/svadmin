@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.70.1](https://github.com/vibeunion/svadmin/compare/ui-v0.70.0...ui-v0.70.1) (2026-09-12)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** keep dropdown menus usable in clipped drawers ([#392](https://github.com/vibeunion/svadmin/issues/392)) ([32c5dcc](https://github.com/vibeunion/svadmin/commit/32c5dcc9c154e616778e4a731d0db8c1a7560ae1))
+
 ## [0.70.0](https://github.com/vibeunion/svadmin/compare/ui-v0.69.1...ui-v0.70.0) (2026-09-08)
 
 
