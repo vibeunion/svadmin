@@ -5,7 +5,7 @@
 
   import { useList } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
-  import { AutoTable, Badge, Button, ContentPageHeader, ContentPageShell, MetricBlock } from '@svadmin/ui';
+  import { AutoTable, Badge, Button, ContentPageHeader, ContentPageShell, DataState, MetricBlock } from '@svadmin/ui';
   import * as Card from '@svadmin/ui/components/ui/card/index.js';
   import * as DropdownMenu from '@svadmin/ui/components/ui/dropdown-menu/index.js';
   import {
@@ -13,7 +13,6 @@
     Clock3,
     KeyRound,
     Search,
-    ShieldCheck,
     SlidersHorizontal,
     Table2,
     UserCog,
@@ -25,7 +24,8 @@
 
   type UserManagementResource = 'users' | 'roles' | 'permissions' | 'user_accounts' | 'user_logs' | 'user_settings';
 
-  let { resourceName = 'users' } = $props<{ resourceName?: string }>();
+  interface Props { resourceName?: string }
+  let { resourceName = 'users' }: Props = $props();
   let activeView = $state(readHashView('default'));
   let sortField = $state(readHashParam('sort') ?? 'name');
   let sortOrder = $state(readHashParam('order') ?? 'asc');
@@ -116,7 +116,7 @@
     const copies: Record<UserManagementResource, { badge: string; title: string; description: string; action: string; focus: string }> = {
       users: {
         badge: isZh ? '用户管理' : 'User Management',
-        title: isZh ? '用户目录与入职工作台' : 'Users Directory and Onboarding Workspace',
+        title: isZh ? '用户' : 'Users',
         description: isZh ? '覆盖用户搜索、角色筛选、状态分组、最近登录与团队分配。' : 'Covers user search, role filters, status groups, recent sign-ins, and team assignment.',
         action: isZh ? '新增用户' : 'Add user',
         focus: isZh ? '成员入职' : 'Member onboarding',
@@ -297,13 +297,13 @@
         {showRecords ? (isZh ? '收起记录' : 'Hide records') : (isZh ? '查看记录' : 'View records')}
       </Button>
     {/if}
-    <Button size="sm">{pageCopy.action}</Button>
+    <Button size="sm" href={`#/${activeResource}/create`}><UserPlus class="size-4" />{pageCopy.action}</Button>
   </div>
 {/snippet}
 
 <div data-app-page="user-management" data-user-management-resource={activeResource} data-user-management-view={activeView}>
 <ContentPageShell pageId="user-management" width="wide">
-  <ContentPageHeader eyebrow={pageCopy.badge} title={pageCopy.title} description={pageCopy.description} actions={headerActions} />
+  <ContentPageHeader title={pageCopy.title} actions={headerActions} />
   {#if activeResource !== 'roles'}
   <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
     <MetricBlock label={isZh ? '成员总数' : 'Members'} value={users.length} detail={isZh ? '当前组织成员' : 'Current organization'} />
@@ -314,77 +314,53 @@
   {/if}
 
   {#if activeResource === 'roles'}
+    {#if rolesQuery.isLoading || permissionsQuery.isLoading || usersQuery.isLoading}
+      <DataState state="loading" />
+    {:else if rolesQuery.isError || permissionsQuery.isError || usersQuery.isError}
+      <DataState state="error" retry={() => {
+        for (const query of [rolesQuery, permissionsQuery, usersQuery]) {
+          if (query.isError && !query.isFetching) void query.refetch();
+        }
+      }} />
+    {:else}
     <section class="grid gap-4" data-role-workspace>
-      <div class="grid gap-4 xl:grid-cols-[1fr_0.36fr]">
-        <div class="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
+      <div class="grid gap-4 xl:grid-cols-[1fr_1fr]">
+        <div class="divide-y">
           {#each roleCards as role (role.id)}
             <button
-              class={`rounded-lg border bg-card p-4 text-left shadow-sm transition hover:border-primary/40 hover:shadow-md ${selectedRole?.id === role.id ? 'border-primary/45 ring-2 ring-primary/10' : 'border-border'}`}
+              class={`flex w-full items-center justify-between gap-3 px-3 py-3 text-left transition hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring ${selectedRole?.id === role.id ? 'bg-muted' : ''}`}
+              aria-pressed={selectedRole?.id === role.id}
               onclick={() => selectRole(role.id)}
             >
-              <div class="flex items-start justify-between gap-3">
-                <span class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-sm font-semibold text-primary">
-                  {initials(role.name)}
-                </span>
-                <Badge variant="outline">{roleLevelLabel(role.level)}</Badge>
-              </div>
-              <div class="mt-4">
-                <p class="font-semibold">{role.name}</p>
-                <p class="mt-1 line-clamp-2 text-sm text-muted-foreground">{role.description}</p>
-              </div>
-              <div class="mt-4 flex items-center justify-between rounded-lg border bg-muted/20 px-3 py-2 text-sm">
-                <span class="text-muted-foreground">{isZh ? '成员' : 'Members'}</span>
-                <span class="font-semibold">{role.assignedUsers.length}</span>
-              </div>
-              <div class="mt-4 flex -space-x-2">
-                {#each role.assignedUsers.slice(0, 4) as user (user.id)}
-                  <span class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-card bg-primary/10 text-[10px] font-semibold text-primary" title={user.name}>
-                    {initials(user.name)}
-                  </span>
-                {/each}
-                {#if role.assignedUsers.length === 0}
-                  <span class="text-xs text-muted-foreground">{isZh ? '暂无成员' : 'No assigned members'}</span>
-                {/if}
-              </div>
-              <div class="mt-4 flex flex-wrap gap-1.5">
-                {#each role.permissions.slice(0, 3) as permission (permission.id)}
-                  <Badge variant="secondary">{permissionDomainLabel(permission.module)}</Badge>
-                {/each}
-                {#if role.permissions.length > 3}
-                  <Badge variant="outline">{role.permissions.length - 3} {isZh ? '更多' : 'more'}</Badge>
-                {/if}
-              </div>
+              <span class="min-w-0 break-words font-medium">{role.name}</span>
+              <Badge variant="outline">{roleLevelLabel(role.level)}</Badge>
+              <span class="shrink-0 text-sm tabular-nums text-muted-foreground">{role.assignedUsers.length} {isZh ? '位成员' : 'members'}</span>
             </button>
           {/each}
-          <a href="#/roles/create" class="flex flex-col items-center justify-center rounded-lg border border-dashed bg-muted/10 p-5 text-center transition hover:border-primary/60 hover:bg-primary/5">
-            <span class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <ShieldCheck class="h-5 w-5" />
-            </span>
-            <span class="mt-4 font-semibold">{isZh ? '新增角色' : 'Add New Role'}</span>
-            <span class="mt-2 text-sm text-muted-foreground">{isZh ? '创建角色、Slug 和默认权限集合。' : 'Create a role, slug, and default permission set.'}</span>
-          </a>
+          {#if roleCards.length === 0}
+            <p class="py-4 text-sm text-muted-foreground">{isZh ? '暂无角色' : 'No roles yet'}</p>
+          {/if}
         </div>
 
-        <Card.Root class="border-primary/25 bg-primary/5">
-          <Card.Header>
-            <Badge>{isZh ? '权限工作台' : 'Permission Studio'}</Badge>
-            <Card.Title class="mt-3 text-xl">{selectedRole?.name ?? (isZh ? '选择角色' : 'Select a role')}</Card.Title>
-            <Card.Description>{selectedRole?.description ?? (isZh ? '点击左侧角色卡片查看权限分组。' : 'Click a role card to review grouped permissions.')}</Card.Description>
-          </Card.Header>
-          <Card.Content class="space-y-4">
-            <div class="grid grid-cols-2 gap-3">
-              <div class="rounded-lg border bg-card p-3">
+        <aside class="min-w-0 border-t pt-4 xl:border-l xl:border-t-0 xl:pl-4 xl:pt-0" data-role-details>
+          <header class="pb-4">
+            <h2 class="text-base font-semibold">{selectedRole?.name ?? (isZh ? '选择角色' : 'Select a role')}</h2>
+            {#if selectedRole?.description}<p class="mt-1 text-sm text-muted-foreground">{selectedRole.description}</p>{/if}
+          </header>
+          <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-3 border-y py-3">
+              <div>
                 <p class="text-xs text-muted-foreground">{isZh ? '成员' : 'Members'}</p>
                 <p class="mt-1 text-2xl font-semibold">{selectedRole?.assignedUsers.length ?? 0}</p>
               </div>
-              <div class="rounded-lg border bg-card p-3">
+              <div>
                 <p class="text-xs text-muted-foreground">{isZh ? '权限' : 'Permissions'}</p>
                 <p class="mt-1 text-2xl font-semibold">{selectedRole?.permissionCount ?? 0}</p>
               </div>
             </div>
-            <div class="space-y-2">
+            <div class="divide-y">
               {#each selectedPermissionDomains as domain (domain.module)}
-                <div class="rounded-lg border bg-card p-3">
+                <div class="py-3">
                   <div class="flex items-center justify-between gap-3">
                     <p class="text-sm font-semibold">{permissionDomainLabel(domain.module)}</p>
                     <Badge variant="outline">{domain.permissions.length}</Badge>
@@ -397,28 +373,24 @@
                 </div>
               {/each}
               {#if selectedPermissionDomains.length === 0}
-                <p class="rounded-lg border bg-card p-3 text-sm text-muted-foreground">{isZh ? '该角色暂无权限，可通过下方表格进入配置。' : 'This role has no permissions yet; use the table below to configure it.'}</p>
+                <p class="py-3 text-sm text-muted-foreground">{isZh ? '该角色尚未分配权限。' : 'No permissions assigned.'}</p>
               {/if}
             </div>
+            {#if selectedRole}
             <div class="flex flex-wrap gap-2">
               <a class="inline-flex h-9 items-center justify-center rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground transition hover:bg-primary/90" href={`#/permissions?view=role-${selectedRole?.id ?? ''}`}>{isZh ? '配置权限' : 'Configure permissions'}</a>
               <a class="inline-flex h-9 items-center justify-center rounded-md border bg-background px-3 text-xs font-medium transition hover:bg-muted" href={`#/roles/edit/${selectedRole?.id ?? ''}`}>{isZh ? '编辑角色' : 'Edit role'}</a>
             </div>
-          </Card.Content>
-        </Card.Root>
+            {/if}
+          </div>
+        </aside>
       </div>
 
       <Card.Root class="overflow-hidden">
         <Card.Header class="border-b">
           <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <Card.Title class="text-2xl">{isZh ? '角色' : 'Roles'}</Card.Title>
-              <Card.Description>{isZh ? '对齐参考的角色资源列表：搜索、Add Role、Role / Slug / Permissions / Actions。' : 'A focused role resource list with search, Add Role, and Role / Slug / Permissions / Actions columns.'}</Card.Description>
-            </div>
-            <div class="flex flex-wrap gap-2">
-              <a class="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition hover:bg-primary/90" href="#/roles/create">
-                <ShieldCheck class="mr-2 h-4 w-4" />{isZh ? '新增角色' : 'Add Role'}
-              </a>
+              <Card.Title class="text-base">{isZh ? '角色明细' : 'Role details'}</Card.Title>
             </div>
           </div>
         </Card.Header>
@@ -486,24 +458,24 @@
                   </tr>
                 {:else}
                   <tr>
-                    <td class="px-5 py-10 text-center text-sm text-muted-foreground" colspan="4">{isZh ? '没有匹配的角色。' : 'No roles match your search.'}</td>
+                    <td class="px-5 py-10 text-center text-sm text-muted-foreground" colspan="4">
+                      <p>{isZh ? '没有匹配的角色。' : 'No roles match your search.'}</p>
+                      {#if roleSearch}
+                        <Button variant="outline" size="sm" onclick={() => roleSearch = ''}>{isZh ? '清除搜索' : 'Clear search'}</Button>
+                      {/if}
+                    </td>
                   </tr>
                 {/each}
               </tbody>
             </table>
           </div>
           <div class="flex flex-col gap-3 border-t px-5 py-4 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-            <span>{isZh ? `1 - ${filteredRoleCards.length} / ${roleCards.length}` : `1 - ${filteredRoleCards.length} of ${roleCards.length}`}</span>
-            <div class="flex flex-wrap items-center gap-2">
-              <span>{isZh ? '每页行数' : 'Rows per page'}</span>
-              <Badge variant="outline">10</Badge>
-              <Button size="sm" variant="outline" disabled>{isZh ? '上一页' : 'Previous'}</Button>
-              <Button size="sm" variant="outline" disabled>{isZh ? '下一页' : 'Next'}</Button>
-            </div>
+            <span>{isZh ? `${filteredRoleCards.length} / ${roleCards.length} 个角色` : `${filteredRoleCards.length} of ${roleCards.length} roles`}</span>
           </div>
         </Card.Content>
       </Card.Root>
     </section>
+    {/if}
   {:else if activeResource === 'permissions'}
     <section class="grid gap-4">
       {#if focusedRoleName}
@@ -602,7 +574,6 @@
                 {/each}
               </DropdownMenu.Content>
             </DropdownMenu.Root>
-            <Button><UserPlus class="mr-2 h-4 w-4" />{pageCopy.action}</Button>
           </div>
         </div>
       </Card.Header>

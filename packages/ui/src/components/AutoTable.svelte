@@ -88,6 +88,8 @@
   } from '@lucide/svelte';
   import ConfirmDialog from './ConfirmDialog.svelte';
   import RecordDetailDrawer from './RecordDetailDrawer.svelte';
+  import QuickEditDrawer from './QuickEditDrawer.svelte';
+  import RecordRowActions from './RecordRowActions.svelte';
   import CanAccess from './CanAccess.svelte';
   import TooltipButton from './TooltipButton.svelte';
   import InlineEdit from './InlineEdit.svelte';
@@ -436,6 +438,10 @@
 
   function clearFilters(): void {
     markSavedViewDirty();
+    if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = undefined;
+    searchText = '';
+    appliedSearchText = '';
     filters = [];
     filterValues = {};
     pagination = { ...pagination, current: 1 };
@@ -1004,6 +1010,7 @@
   let operationError = $state<string | null>(null);
   let activeDelete: object | undefined;
   let detailOpenedInHistory = $state(false);
+  let quickEditId = $state<string | number | undefined>();
   const tableScope = $derived({
     contract: binding.resource, resourceName, provider: adminContext.providers?.[binding.dataProviderName],
     meta: JSON.stringify(binding.meta), tenant: adminContext.tenantCacheKey?.__svadminTenant,
@@ -1032,6 +1039,7 @@
       rowSelectionAtom.set({});
       expandedAtom.set({});
       detailOpenedInHistory = false;
+      quickEditId = undefined;
       if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
       searchDebounceTimer = undefined;
       if (previousTableScope.resourceName !== scope.resourceName) resetToDefaultListState();
@@ -1139,6 +1147,35 @@
     if (canRead && !query.isFetching) void listResult.refetch();
   }
 </script>
+
+{#snippet defaultRowActions(id: string | number)}
+  <RecordRowActions
+    {resourceName} {id} {canShow} {canEdit} {canDelete}
+    onShow={() => openDetail(id)}
+    onEdit={() => navigation.edit(resourceName, id)}
+    onQuickEdit={() => quickEditId = id}
+    onDelete={() => confirmDelete(id)}
+  />
+{/snippet}
+
+{#snippet defaultEmptyState()}
+  {@const hasCriteria = !!(searchText.trim() || appliedSearchText.trim() || activeFilterCount > 0)}
+  <DataState state="empty" description={i18n.t(hasCriteria ? 'empty.description' : 'common.noDataHint')}>
+    {#snippet action()}
+      {#if hasCriteria}
+        <Button variant="outline" size="sm" onclick={clearFilters}>
+          <X class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+          {i18n.t('common.clearAllFilters')}
+        </Button>
+      {:else if canCreate}
+        <Button variant="outline" size="sm" onclick={() => navigation.create(resourceName)}>
+          <Plus class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+          {i18n.t('common.create')}
+        </Button>
+      {/if}
+    {/snippet}
+  </DataState>
+{/snippet}
 
 <div class="svadmin-u-6ed543e2fbbb">
   {#if operationError}<p role="alert">{operationError}</p>{/if}
@@ -1585,27 +1622,7 @@
                               {#if rowActions}
                                 {@render rowActions({ record, id })}
                               {:else}
-                                {#if canShow}
-                                  <CanAccess resource={resourceName} action="show" params={{ id }}>
-                                    <TooltipButton tooltip={i18n.t('common.detail')} variant="ghost" size="icon-sm" onclick={() => openDetail(id)}>
-                                      <Eye class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
-                                    </TooltipButton>
-                                  </CanAccess>
-                                {/if}
-                                {#if canEdit}
-                                  <CanAccess resource={resourceName} action="edit" params={{ id }}>
-                                    <TooltipButton tooltip={i18n.t('common.edit')} variant="ghost" size="icon-sm" onclick={() => navigation.edit(resourceName, id)}>
-                                      <Pencil class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
-                                    </TooltipButton>
-                                  </CanAccess>
-                                {/if}
-                                {#if canDelete}
-                                  <CanAccess resource={resourceName} action="delete" params={{ id }}>
-                                    <TooltipButton tooltip={i18n.t('common.delete')} variant="ghost" size="icon-sm" onclick={() => confirmDelete(id)} class="svadmin-u-51e95020d6f2">
-                                      <Trash2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
-                                    </TooltipButton>
-                                  </CanAccess>
-                                {/if}
+                                {@render defaultRowActions(id)}
                               {/if}
                             </div>
                           {:else}
@@ -1677,19 +1694,7 @@
                   {#if emptyState}
                     {@render emptyState()}
                   {:else}
-                    <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-a1f611f027dd">
-                      <svg class="svadmin-u-acaee62117b1 svadmin-u-baceed3462fd svadmin-u-106b502aac96 svadmin-u-da019856f2cc" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                      </svg>
-                      <p class="svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-bfa603190748 svadmin-u-65281709dacf">{i18n.t('common.noData')}</p>
-                      <p class="svadmin-u-359090c2d529 svadmin-u-7be4d67a6256 svadmin-u-da019856f2cc">{i18n.t('common.noDataHint')}</p>
-                      {#if canCreate}
-                        <Button variant="outline" size="sm" class="svadmin-u-77a2a20e90d4" onclick={() => navigation.create(resourceName)}>
-                          <Plus class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
-                          {i18n.t('common.create')}
-                        </Button>
-                      {/if}
-                    </div>
+                    {@render defaultEmptyState()}
                   {/if}
                 </Table.Cell>
               </Table.Row>
@@ -1736,27 +1741,7 @@
                   {#if rowActions}
                     {@render rowActions({ record, id })}
                   {:else}
-                    {#if canEdit}
-                      <CanAccess resource={resourceName} action="edit" params={{ id }}>
-                        <TooltipButton tooltip={i18n.t('common.edit')} variant="ghost" size="icon-sm" onclick={() => navigation.edit(resourceName, id)}>
-                          <Pencil class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
-                        </TooltipButton>
-                      </CanAccess>
-                    {/if}
-                    {#if canShow}
-                      <CanAccess resource={resourceName} action="show" params={{ id }}>
-                        <TooltipButton tooltip={i18n.t('common.detail')} variant="ghost" size="icon-sm" onclick={() => openDetail(id)}>
-                          <Eye class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
-                        </TooltipButton>
-                      </CanAccess>
-                    {/if}
-                    {#if canDelete}
-                      <CanAccess resource={resourceName} action="delete" params={{ id }}>
-                        <TooltipButton tooltip={i18n.t('common.delete')} variant="ghost" size="icon-sm" onclick={() => confirmDelete(id)} class="svadmin-u-51e95020d6f2">
-                          <Trash2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
-                        </TooltipButton>
-                      </CanAccess>
-                    {/if}
+                    {@render defaultRowActions(id)}
                   {/if}
                 </div>
               </div>
@@ -1786,7 +1771,7 @@
               {#if emptyState}
                 {@render emptyState()}
               {:else}
-                <DataState state="empty" class="svadmin-u-119b2aa0b8f6 svadmin-u-7f19cdf4c5bb svadmin-u-d5eab218aa34 svadmin-u-cb11fec3bb46" />
+                {@render defaultEmptyState()}
               {/if}
             </div>
           {/each}
@@ -1870,4 +1855,10 @@
     recordId={detailRecordId}
     onClose={closeDetail}
   />
+{/if}
+
+{#if quickEditId != null && canRead && canEdit}
+  {#key quickEditId}
+    <QuickEditDrawer {resourceName} recordId={quickEditId} onClose={() => quickEditId = undefined} />
+  {/key}
 {/if}

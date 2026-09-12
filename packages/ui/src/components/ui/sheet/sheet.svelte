@@ -50,6 +50,7 @@
 		open?: boolean;
 		side?: "left" | "right";
 		onClose?: () => void;
+		onCloseRequest?: (close: () => void) => void;
 		closeLabel?: string;
 	};
 
@@ -58,6 +59,7 @@
 		open = $bindable(false),
 		side = "right",
 		onClose,
+		onCloseRequest,
 		closeLabel = "Close",
 		class: className,
 		tabindex = -1,
@@ -66,8 +68,12 @@
 	}: Props = $props();
 
 	function close() {
-		open = false;
-		onClose?.();
+		const commitClose = () => {
+			open = false;
+			onClose?.();
+		};
+		if (onCloseRequest) onCloseRequest(commitClose);
+		else commitClose();
 	}
 
 	function isContentEditableHost(element: HTMLElement) {
@@ -124,7 +130,7 @@
 			last?.focus();
 		} else if (!event.shiftKey && activeIndex === tabbable.length - 1) {
 			event.preventDefault();
-			first.focus();
+			first?.focus();
 		}
 	}
 

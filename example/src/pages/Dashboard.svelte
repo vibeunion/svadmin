@@ -9,7 +9,6 @@
   import { ContentPageHeader, ContentPageShell, DataState, MetricBlock } from '@svadmin/ui';
   import * as Card from '@svadmin/ui/components/ui/card/index.js';
   import {
-    AlertTriangle,
     Bell,
     Bot,
     CalendarDays,
@@ -73,24 +72,20 @@
   const conversations = $derived((conversationsQuery.data?.data ?? []));
   const notifications = $derived((notificationsQuery.data?.data ?? []));
 
-  const isLoading = $derived(
-    productsQuery.isLoading ||
-      suppliersQuery.isLoading ||
-      warehousesQuery.isLoading ||
-      movementsQuery.isLoading ||
-      transfersQuery.isLoading ||
-      cycleCountsQuery.isLoading ||
-      adjustmentsQuery.isLoading ||
-      reorderRulesQuery.isLoading ||
-      purchaseOrdersQuery.isLoading ||
-      salesOrdersQuery.isLoading ||
-      todosQuery.isLoading ||
-      usersQuery.isLoading ||
-      rolesQuery.isLoading ||
-      calendarQuery.isLoading ||
-      conversationsQuery.isLoading ||
-      notificationsQuery.isLoading,
-  );
+  const queries = [
+    productsQuery, suppliersQuery, warehousesQuery, movementsQuery, transfersQuery,
+    cycleCountsQuery, adjustmentsQuery, reorderRulesQuery, purchaseOrdersQuery,
+    salesOrdersQuery, todosQuery, usersQuery, rolesQuery, calendarQuery,
+    conversationsQuery, notificationsQuery,
+  ];
+  const isLoading = $derived(queries.some((query) => query.isLoading));
+  const isRefreshing = $derived(queries.some((query) => query.isFetching));
+  const hasError = $derived(queries.some((query) => query.isError));
+  function retryFailedQueries(): void {
+    for (const query of queries) {
+      if (query.isError && !query.isFetching) void query.refetch();
+    }
+  }
 
   const totalStock = $derived(products.reduce((sum, product) => sum + product.stock, 0));
   const totalAssetValue = $derived(products.reduce((sum, product) => sum + product.stock * product.price, 0));
@@ -105,27 +100,15 @@
   const pendingAdjustments = $derived(adjustments.filter((adjustment) => adjustment.status === 'pending_approval').length);
   const reviewReorderRules = $derived(reorderRules.filter((rule) => rule.status === 'review').length);
   const bestSellers = $derived(products.slice().sort((a, b) => b.stock - a.stock).slice(0, 3));
-  const staffPerformance = $derived(
-    users.slice(0, 4).map((user, index) => ({
-      ...user,
-      score: [98, 94, 89, 84][index] ?? 82,
-      closed: [18, 15, 12, 9][index] ?? 8,
-    })),
-  );
+  const teamMembers = $derived(users.slice(0, 4));
 
   const stats = $derived([
     { label: isZh ? '资产价值' : 'Total Asset Value', value: `$${Math.round(totalAssetValue / 1000)}K`, href: '#/products', Icon: TrendingUp, tone: 'bg-primary/10 text-primary border-primary/20' },
     { label: isZh ? '可用商品' : 'Available', value: availableProducts.length, href: '#/products', Icon: Package, tone: 'bg-success/10 text-success border-success/20' },
     { label: isZh ? '库存件数' : 'Stock Units', value: totalStock, href: '#/products', Icon: Package, tone: 'bg-info/10 text-info border-info/20' },
-    { label: isZh ? '低库存' : 'Low Stock', value: lowStockProducts.length, href: '#/products', Icon: AlertTriangle, tone: 'bg-destructive/10 text-destructive border-destructive/20' },
-    { label: isZh ? '缺货' : 'Out of Stock', value: outOfStockProducts.length, href: '#/products', Icon: AlertTriangle, tone: 'bg-warning/10 text-warning border-warning/20' },
     { label: isZh ? '仓库' : 'Warehouses', value: warehousesQuery.data?.total ?? 0, href: '#/warehouses', Icon: Home, tone: 'bg-success/10 text-success border-success/20' },
     { label: isZh ? '供应商' : 'Suppliers', value: suppliersQuery.data?.total ?? 0, href: '#/suppliers', Icon: Truck, tone: 'bg-warning/10 text-warning border-warning/20' },
-    { label: isZh ? '客户' : 'Customer', value: salesOrdersQuery.data?.total ?? 0, href: '#/sales_orders', Icon: Users, tone: 'bg-info/10 text-info border-info/20' },
     { label: isZh ? '库存设置' : 'Settings', value: reorderRules.length, href: '#/reorder_rules', Icon: Settings, tone: 'bg-muted text-muted-foreground border-border' },
-    { label: isZh ? '采购订单' : 'Purchase Orders', value: purchaseOrdersQuery.data?.total ?? 0, href: '#/purchase_orders', Icon: ClipboardCheck, tone: 'bg-primary/10 text-primary border-primary/20' },
-    { label: isZh ? '销售订单' : 'Sales Orders', value: salesOrdersQuery.data?.total ?? 0, href: '#/sales_orders', Icon: CreditCard, tone: 'bg-info/10 text-info border-info/20' },
-    { label: isZh ? '未读提醒' : 'Unread Alerts', value: unreadNotifications, href: '#/notifications', Icon: Bell, tone: 'bg-warning/10 text-warning border-warning/20' },
   ]);
 
   const orderSummary = $derived([
@@ -258,22 +241,34 @@
 </script>
 
 <ContentPageShell pageId="operations-dashboard" width="wide">
-  <ContentPageHeader eyebrow={isZh ? '运营驾驶舱' : 'Operations cockpit'} title={isZh ? '运营工作台' : 'Operations workspace'} description={isZh ? '集中掌握库存风险、履约进度、访问权限、计划任务和关键通知。' : 'Monitor inventory risk, fulfillment, access, planned work, and critical notifications in one place.'} />
+  <ContentPageHeader title={isZh ? '运营工作台' : 'Operations workspace'} />
 
-  <section class="grid gap-3 sm:grid-cols-3">
-    <MetricBlock label={isZh ? '履约健康' : 'Fulfillment health'} value={lowStockProducts.length === 0 ? '100%' : '91%'} detail={isZh ? '低库存风险已纳入队列' : 'Low-stock risk is queued'} trend={isZh ? '稳定' : 'Stable'} trendTone="positive" />
-    <MetricBlock label={isZh ? '待处理' : 'Open work'} value={openTodos + activeTransfers + pendingAdjustments} detail={isZh ? '待办、调拨与审批' : 'Todos, transfers, approvals'} />
-    <MetricBlock label={isZh ? '刷新状态' : 'Refresh status'} value={isLoading ? (isZh ? '同步中' : 'Refreshing') : (isZh ? '已同步' : 'Synced')} detail={isZh ? '运营数据实时读取' : 'Operations data is live'} loading={isLoading} />
+  {#if hasError}
+    <DataState state="error" title={isZh ? '部分数据未能更新' : 'Some data could not be updated'}
+      description={isZh ? '暂不可用的指标显示为 —，请重试后再作判断。' : 'Unavailable metrics show —. Retry before making a decision.'}
+      retry={retryFailedQueries} />
+  {/if}
+  <section class="grid gap-3 sm:grid-cols-3" data-dashboard-decisions>
+    <MetricBlock label={isZh ? '库存风险' : 'Stock at risk'} value={productsQuery.isError ? '—' : lowStockProducts.length}
+      detail={productsQuery.isError ? '' : (isZh ? `其中 ${outOfStockProducts.length} 项缺货` : `${outOfStockProducts.length} out of stock`)}
+      loading={productsQuery.isLoading} />
+    <MetricBlock label={isZh ? '待处理' : 'Open work'}
+      value={todosQuery.isError || transfersQuery.isError || adjustmentsQuery.isError ? '—' : openTodos + activeTransfers + pendingAdjustments}
+      detail={isZh ? '待办、调拨与审批' : 'Todos, transfers, approvals'} loading={todosQuery.isLoading || transfersQuery.isLoading || adjustmentsQuery.isLoading} />
+    <MetricBlock label={isZh ? '数据状态' : 'Data status'}
+      value={hasError ? (isZh ? '部分失败' : 'Partial failure') : isRefreshing ? (isZh ? '更新中' : 'Refreshing') : (isZh ? '已加载' : 'Loaded')}
+      loading={isLoading} />
   </section>
 
-  <!-- Key stats -->
-  <section class="grid grid-cols-2 gap-3 xl:grid-cols-4">
+  <details class="border-y" data-dashboard-summary>
+    <summary class="cursor-pointer py-3 text-sm font-medium">{isZh ? '资源概览' : 'Resource overview'}</summary>
+  <section class="grid grid-cols-2 gap-x-6 gap-y-3 pb-4 xl:grid-cols-3">
     {#each stats as stat (stat.label)}
-      <a href={stat.href} class="block rounded-lg border bg-card px-4 py-4 shadow-sm transition hover:border-primary/40 sm:px-6">
+      <a href={stat.href} class="block py-2 hover:text-primary">
         <div class="flex items-center justify-between gap-3">
           <div class="min-w-0">
             <p class="min-h-7 text-xs font-medium leading-tight text-muted-foreground sm:min-h-0">{stat.label}</p>
-            <p class="mt-2 text-2xl font-semibold text-foreground">{stat.value}</p>
+            <p class="mt-1 text-lg font-semibold tabular-nums text-foreground">{hasError ? '—' : stat.value}</p>
           </div>
           <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border {stat.tone}">
             <stat.Icon class="h-5 w-5" />
@@ -282,18 +277,23 @@
       </a>
     {/each}
   </section>
+  </details>
 
   <!-- Inventory Health + Operations Queue -->
-  <section class="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-    <Card.Root class="overflow-hidden border-border/40">
-      <Card.Header class="flex flex-row items-center justify-between border-b px-6 py-4">
-        <Card.Title class="text-sm font-semibold">{isZh ? '库存健康' : 'Inventory Health'}</Card.Title>
+  <section class="grid items-start gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+    <section class="min-w-0">
+      <header class="flex items-center justify-between border-b py-3">
+        <h2 class="text-sm font-semibold">{isZh ? '库存风险清单' : 'Stock risk queue'}</h2>
         <a class="text-sm font-medium text-primary hover:underline" href="#/products">{isZh ? '商品档案' : 'Products'}</a>
-      </Card.Header>
-      <Card.Content class="p-0">
+      </header>
+      {#if productsQuery.isLoading}
+        <DataState state="loading" />
+      {:else if productsQuery.isError}
+        <p class="py-4 text-sm text-muted-foreground">{isZh ? '库存清单暂不可用' : 'Stock queue unavailable'}</p>
+      {:else}
         <div class="divide-y">
           {#each lowStockProducts as product (product.id)}
-            <div class="flex items-center justify-between gap-4 px-6 py-4">
+            <div class="flex items-center justify-between gap-4 py-3">
               <div class="min-w-0">
                 <p class="truncate text-sm font-medium text-foreground">{product.name}</p>
                 <p class="text-xs text-muted-foreground">{product.sku}</p>
@@ -307,27 +307,25 @@
             <div class="px-6 py-8 text-sm text-muted-foreground">{isZh ? '所有跟踪商品均高于库存下限。' : 'All tracked products are above threshold.'}</div>
           {/each}
         </div>
-      </Card.Content>
-    </Card.Root>
+      {/if}
+    </section>
 
-    <Card.Root class="overflow-hidden border-border/40">
-      <Card.Header class="border-b px-6 py-4">
-        <Card.Title class="text-sm font-semibold">{isZh ? '运营队列' : 'Operations Queue'}</Card.Title>
-      </Card.Header>
-      <Card.Content class="p-4">
-        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+    <section class="min-w-0">
+      <header class="border-b py-3">
+        <h2 class="text-sm font-semibold">{isZh ? '运营队列' : 'Operations Queue'}</h2>
+      </header>
+        <div class="divide-y">
           {#each orderSummary as item (item.label)}
-            <a href={item.href} class="rounded-lg border p-3 transition hover:border-primary/50 hover:bg-muted/50">
-              <div class="flex items-center justify-between gap-3">
+            <a href={item.href} class="flex items-center justify-between gap-3 py-3 transition hover:bg-muted/50">
+              <div class="flex items-center gap-3">
                 <item.Icon class="h-4 w-4 text-muted-foreground" />
-                <span class="text-lg font-semibold text-foreground">{item.value}</span>
+                <span class="text-sm font-medium">{item.label}</span>
               </div>
-              <p class="mt-2 text-xs font-medium text-muted-foreground">{item.label}</p>
+              <span class="text-sm font-semibold tabular-nums text-foreground">{hasError ? '—' : item.value}</span>
             </a>
           {/each}
         </div>
-      </Card.Content>
-    </Card.Root>
+    </section>
   </section>
 
   <!-- Roadmap modules -->
@@ -419,7 +417,7 @@
   <section class="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
     <Card.Root class="overflow-hidden border-border/40">
       <Card.Header class="flex flex-row items-center justify-between border-b px-6 py-4">
-        <Card.Title class="text-sm font-semibold">{isZh ? '热销与周转' : 'Best Sellers'}</Card.Title>
+        <Card.Title class="text-sm font-semibold">{isZh ? '库存排行' : 'Stock ranking'}</Card.Title>
         <a class="text-sm font-medium text-primary hover:underline" href="#/products">{isZh ? '商品档案' : 'Products'}</a>
       </Card.Header>
       <Card.Content class="p-0">
@@ -447,20 +445,19 @@
 
     <Card.Root class="overflow-hidden border-border/40">
       <Card.Header class="flex flex-row items-center justify-between border-b px-6 py-4">
-        <Card.Title class="text-sm font-semibold">{isZh ? '团队表现' : 'Staff Performance'}</Card.Title>
+        <Card.Title class="text-sm font-semibold">{isZh ? '团队成员' : 'Team members'}</Card.Title>
         <a class="text-sm font-medium text-primary hover:underline" href="#/users">{isZh ? '用户管理' : 'Users'}</a>
       </Card.Header>
       <Card.Content class="p-0">
         <div class="divide-y">
-          {#each staffPerformance as member (member.id)}
+          {#each teamMembers as member (member.id)}
             <div class="grid gap-3 px-6 py-4 sm:grid-cols-[1fr_auto] sm:items-center">
               <div class="min-w-0">
                 <p class="truncate text-sm font-medium text-foreground">{member.name}</p>
                 <p class="text-xs text-muted-foreground">{member.department}</p>
               </div>
               <div class="flex items-center gap-3">
-                <span class="rounded-md bg-primary/10 px-2 py-1 text-xs font-semibold text-primary">{member.closed} {isZh ? '项' : 'closed'}</span>
-                <span class="text-sm font-semibold text-foreground">{member.score}%</span>
+                <a class="text-sm text-primary hover:underline" href={`#/users/show/${member.id}`}>{isZh ? '查看成员' : 'View member'}</a>
               </div>
             </div>
           {/each}

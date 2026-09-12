@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
   import type { Snippet } from "svelte";
   import type { HTMLAttributes } from "svelte/elements";
   import { cn, type WithElementRef } from "../utils.js";
@@ -14,6 +15,7 @@
     side?: "left" | "right";
     width?: string;
     onClose?: () => void;
+    onCloseRequest?: (close: () => void) => void;
     children?: Snippet;
     footer?: Snippet;
     extra?: Snippet;
@@ -34,6 +36,7 @@
     descriptionId,
     closeLabel = "Close",
     onClose,
+    onCloseRequest,
     children,
     footer,
     extra,
@@ -51,6 +54,7 @@
   bind:open
   {side}
   onClose={handleClose}
+  {...definedOptions({ onCloseRequest })}
   {closeLabel}
   class={cn("svadmin-u-63a285be6490 svadmin-u-8a539c7fe216 svadmin-u-2cd02d11d1af", width, className)}
   role="dialog"

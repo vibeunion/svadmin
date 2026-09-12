@@ -6,8 +6,7 @@ import { t } from './i18n.svelte';
 import type { BaseRecord,HttpError,Filter,KnownResources,ResourceDefinition } from './types';
 import { useList } from './query-hooks.svelte';
 import { toast } from './toast.svelte';
-import type { UseSelectOptions } from './hooks.svelte';
-import { useSelect as useSelectImpl } from './hooks.svelte';
+import { createSelectQuery as useSelectImpl, type UseSelectOptions } from './select-query.svelte';
 
 // ─── useModal ─────────────────────────────────────────────────
 export function useModal(options?: { defaultVisible?: boolean }) {

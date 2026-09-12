@@ -33,6 +33,8 @@
     formActions?: Snippet<[{ isLoading: boolean; onSubmit: () => void }]>;
     headerContent?: Snippet;
     onSuccess?: () => void;
+    redirect?: 'list' | false;
+    onCancel?: () => void;
     onNavigationGuardReady?: (guard: (fn: () => void) => void) => void;
   }
 
@@ -47,6 +49,8 @@
     formActions,
     headerContent,
     onSuccess,
+    redirect = 'list',
+    onCancel,
     onNavigationGuardReady,
   }: Props = $props();
   const navigation = useNavigation();
@@ -145,7 +149,7 @@
     get defaultValues() { return defaults; },
     get enabled() { return allowed; },
     get dataProviderName() { return binding.dataProviderName; },
-    redirect: 'list',
+    get redirect() { return redirect; },
     warnWhenUnsavedChanges: true,
     get validate() { return validator; },
     get onMutationSuccess() {
@@ -237,6 +241,7 @@
     const origin = scope;
     return (fn: () => void) => {
       if (!currentScope(origin)) return;
+      if (form.submitting) return;
       if (form.isTainted()) {
         pendingNavigation = () => { if (currentScope(origin)) fn(); };
         confirmOpen = true;
@@ -248,7 +253,8 @@
   const back = $derived.by(() => {
     const guard = guardNavigate;
     const name = resourceName;
-    return () => guard(() => navigation.list(name));
+    const cancel = onCancel;
+    return () => guard(() => cancel ? cancel() : navigation.list(name));
   });
 
   $effect(() => {
