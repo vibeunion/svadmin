@@ -84,7 +84,7 @@ try {
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
         assert.deepEqual(errors, []);
         await page.close();
-        console.log(`${name} ${width}x${height}: clipping, flip, hit-test, scroll tracking, drawer focus and actions passed`);
+        console.info(`${name} ${width}x${height}: clipping, flip, hit-test, scroll tracking, drawer focus and actions passed`);
       }
     } finally {
       await browser.close();

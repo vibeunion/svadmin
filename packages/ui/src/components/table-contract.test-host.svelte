@@ -35,7 +35,7 @@
 </script>
 {#snippet customCell({ record, value }: { record: Record<string, unknown>; value: unknown })}
   {@const ignored = inspect?.(record)}
-  <span>{value}</span>
+  <span data-inspected={ignored !== undefined}>{value}</span>
 {/snippet}
 <QueryClientProvider client={queryClient}>
   <AutoTable resourceName={resource} {deleteVariables}

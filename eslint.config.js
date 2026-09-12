@@ -39,6 +39,7 @@ export default ts.config(
   {
     files: [
       'packages/core/src/form-hooks.svelte.ts',
+      'packages/core/src/infinite-query.svelte.ts',
       'packages/core/src/query-hooks.svelte.ts',
       'packages/core/src/utility-hooks.svelte.ts',
     ],

@@ -25,7 +25,7 @@ afterEach(() => {
 function rejectedKey(action: () => unknown): HttpError {
   try { action(); } catch (cause) {
     if (cause instanceof HttpError) return cause;
-    throw new Error('Expected a checked key error');
+    throw new Error('Expected a checked key error', { cause });
   }
   throw new Error('Expected an invalid key');
 }

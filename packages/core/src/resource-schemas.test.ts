@@ -90,7 +90,7 @@ async function rejected(pending: Promise<unknown>): Promise<HttpError> {
   try { await pending; }
   catch (cause: unknown) {
     if (cause instanceof HttpError) return cause;
-    throw new Error('Expected a checked HttpError');
+    throw new Error('Expected a checked HttpError', { cause });
   }
   throw new Error('Expected rejection');
 }

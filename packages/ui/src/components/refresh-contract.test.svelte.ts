@@ -24,7 +24,7 @@ function provider(getList: DataProvider['getList'] = async () => ({ data: [row],
   };
 }
 
-function deferred<T>() {
+function deferred<T = void>() {
   let resolve: (value: T) => void = () => { throw new Error('Request not initialized'); };
   let reject: (cause: unknown) => void = () => { throw new Error('Request not initialized'); };
   const promise = new Promise<T>((done, fail) => { resolve = done; reject = fail; });
@@ -205,7 +205,7 @@ describe('contract-bound refresh', () => {
   it('waits for every selected refresh operation before reporting a sanitized failure', async () => {
     const app = mount(provider(), false);
     app.client.setQueryData(keys(scopeOf(app.client)).data.many('posts', [1]), { data: [row] });
-    const slow = deferred<void>();
+    const slow = deferred();
     vi.spyOn(app.client, 'invalidateQueries')
       .mockRejectedValueOnce({ privateValue: 'secret' })
       .mockImplementationOnce(() => slow.promise);

@@ -40,7 +40,7 @@ function provider(): DataProvider {
     createMany: vi.fn(async () => ({ data: [] })),
   };
 }
-function deferred<T>() {
+function deferred<T = void>() {
   let resolve: (value: T) => void = () => { throw new Error('Not initialized'); };
   let reject: (cause: unknown) => void = () => { throw new Error('Not initialized'); };
   const promise = new Promise<T>((done, fail) => { resolve = done; reject = fail; });
@@ -162,7 +162,7 @@ describe('single-create authentication ownership', () => {
     const app = await mountSession();
     const receipt = deferred<GetOneResult>();
     vi.mocked(app.source.create).mockReturnValueOnce(receipt.promise);
-    const gate = deferred<void>();
+    const gate = deferred();
     const observer = vi.fn(() => gate.promise);
     if (outcome === 'success') app.client.getMutationCache().config.onSuccess = observer;
     else app.client.getMutationCache().config.onError = observer;
@@ -181,7 +181,7 @@ describe('single-create authentication ownership', () => {
 
   it('keeps pre-dispatch cancellation accurate after a native queue delay', async () => {
     const app = await mountSession();
-    const gate = deferred<void>();
+    const gate = deferred();
     const observer = vi.fn(() => gate.promise);
     app.client.getMutationCache().config.onMutate = observer;
     const operation = app.read().create.mutation.mutateAsync({ variables }).catch((error: unknown) => error);
@@ -404,7 +404,7 @@ describe('single-create authentication ownership', () => {
     const app = await mountSession();
     const { builder, owner } = scopedKeys(app, posts, captureAuthLiveScope(app.session).cacheKey);
     app.client.setQueryData(builder.data.select('posts', owner), {});
-    const gate = deferred<void>();
+    const gate = deferred();
     const refresh = vi.spyOn(app.client, 'invalidateQueries').mockRejectedValueOnce(new Error('PRIVATE')).mockReturnValue(gate.promise);
     let settled = false;
     const outcome = app.read().create.mutation.mutateAsync({ variables }).catch((error: unknown) => error)
@@ -926,7 +926,7 @@ describe('contract-bound single create', () => {
     await ready(app);
     const { builder, owner } = scopedKeys(app);
     app.client.setQueryData(builder.data.list('posts', { ...owner, extra: true }), {});
-    const hold = deferred<void>();
+    const hold = deferred();
     const invalidate = vi.spyOn(app.client, 'invalidateQueries')
       .mockRejectedValueOnce(new Error('refresh'))
       .mockImplementation(() => hold.promise);

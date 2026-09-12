@@ -45,7 +45,7 @@ function nativeUpdate(source: DataProvider) {
   if (!source.updateMany) throw new Error('Expected a native batch provider');
   return vi.mocked(source.updateMany);
 }
-function deferred<T>() {
+function deferred<T = void>() {
   let resolve: (value: T) => void = () => { throw new Error('Not initialized'); };
   let reject: (cause: unknown) => void = () => { throw new Error('Not initialized'); };
   const promise = new Promise<T>((done, fail) => { resolve = done; reject = fail; });
@@ -147,7 +147,7 @@ describe.each(['native', 'fallback'] as const)('%s batch-update auth ownership',
     const source = provider();
     if (mode === 'fallback') delete source.updateMany;
     const app = await mountSession(source);
-    const gate = deferred<void>();
+    const gate = deferred();
     const observer = vi.fn(() => gate.promise);
     app.client.getMutationCache().config.onMutate = observer;
     const operation = app.read().update.mutation.mutateAsync({ ids: [1, 2], variables }).catch((error: unknown) => error);
@@ -181,7 +181,7 @@ describe.each(['native', 'fallback'] as const)('%s batch-update auth ownership',
 
   it.each(['login', 'logout', 'check', 'provider'] as const)('withholds dispatched receipts when %s retires the session', async change => {
     const source = provider();
-    const gate = deferred<void>();
+    const gate = deferred();
     source.updateMany = vi.fn(async () => { await gate.promise; return { data: rows }; });
     source.update = vi.fn(async () => { await gate.promise; return { data: rows[0] }; });
     if (mode === 'fallback') delete source.updateMany;
@@ -376,7 +376,7 @@ describe('batch-update progress and completion', () => {
       vi.mocked(source.update).mockResolvedValueOnce({ data: rows[0] }).mockRejectedValueOnce(new Error('PRIVATE'));
     } else nativeUpdate(source).mockReturnValueOnce(receipt.promise);
     const app = await mountSession(source);
-    const gate = deferred<void>();
+    const gate = deferred();
     const observer = vi.fn(() => gate.promise);
     if (outcome === 'success') app.client.getMutationCache().config.onSuccess = observer;
     else app.client.getMutationCache().config.onError = observer;
@@ -488,7 +488,7 @@ describe('batch-update progress and completion', () => {
 
   it.each(['success', 'partial', 'failure'] as const)('delivers detached %s to each coalesced caller and observer', async outcome => {
     const source = provider();
-    const gate = deferred<void>();
+    const gate = deferred();
     source.updateMany = vi.fn(async () => {
       await gate.promise;
       if (outcome === 'failure') throw new Error('PRIVATE');
@@ -542,8 +542,8 @@ describe('batch-update progress and completion', () => {
     const { builder, owner } = scopedKeys(app, captureAuthSession(app.session).cacheKey);
     app.client.setQueryData(builder.data.select('posts', owner), {});
     app.client.setQueryData(builder.data.one('posts', 1, owner), {});
-    const collectionGate = deferred<void>();
-    const detailGate = deferred<void>();
+    const collectionGate = deferred();
+    const detailGate = deferred();
     const refresh = vi.spyOn(app.client, 'invalidateQueries').mockRejectedValueOnce(new Error('PRIVATE'))
       .mockReturnValueOnce(collectionGate.promise).mockReturnValue(detailGate.promise);
     let settled = false;

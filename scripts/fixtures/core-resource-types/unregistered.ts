@@ -43,6 +43,7 @@ export function unregisteredQueries(resource: string) {
   // @ts-expect-error Infinite response types require a contract.
   useInfiniteList<Post>({ resource });
   const select = unsafe.useSelect({ resource, optionLabel: 'title' });
+  void select;
   expectType<Equal<typeof select.query.data, { data: BaseRecord[]; total: number; options: { label: string; value: string | number }[] } | undefined>>();
   // @ts-expect-error Unchecked selection cannot claim a caller-selected record type.
   unsafe.useSelect<Post>({ resource, optionLabel: 'title' });

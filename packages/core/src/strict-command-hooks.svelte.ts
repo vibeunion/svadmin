@@ -56,7 +56,7 @@ function requireMethod(command: CommandContract, read: boolean) {
   }
   return definition;
 }
-function observe(callback: () => void | Promise<unknown>): void {
+function observe(callback: () => unknown): void {
   try { void Promise.resolve(callback()).catch(() => {}); }
   catch { /* Observers do not own the command outcome. */ }
 }

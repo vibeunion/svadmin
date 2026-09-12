@@ -152,7 +152,7 @@ export function useContractDelete<S extends ContractSchemas>(options: ContractDe
   function waitForUndo(scope: Scope, token: object): Promise<void> {
     return new Promise((resolve, reject) => {
       let settled = false;
-      let toastId: number | undefined;
+      let toastId: number | undefined = undefined;
       const finish = (error?: Failure) => {
         if (settled) return;
         settled = true;
