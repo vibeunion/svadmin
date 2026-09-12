@@ -153,7 +153,9 @@ export function createFetchWithInterceptor(
 
     const httpError=await createResponseError(response,opts.forbiddenMessage);
     if(response.status===401) {
-      const returnTo=typeof window!=='undefined'
+      // Some test/embedded environments expose a partial `window` without
+      // `location`; only build a returnTo when both are available.
+      const returnTo=typeof window!=='undefined'&&typeof window.location?.pathname==='string'
         ? encodeURIComponent(window.location.pathname)
         :'';
       try {

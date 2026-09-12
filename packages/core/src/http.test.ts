@@ -17,18 +17,18 @@ const originalWindow=Object.getOwnPropertyDescriptor(globalThis,'window');
 afterEach(() => {
   const globalScope = globalThis as { window?: TestWindow };
   if (originalWindow) {
-    // Another test file may have defined `window` as a non-writable global
-    // (e.g. via defineProperty without configurable), so plain assignment
-    // throws "Attempted to assign to readonly property". Restore through
-    // defineProperty so the descriptor is always writable again.
+    // Restore the original VALUE (not the descriptor object) so `window`
+    // keeps its pre-test shape; resetting through defineProperty keeps the
+    // property writable for tests that still need to redefine it.
     Object.defineProperty(globalScope, 'window', {
-      value: originalWindow,
+      value: originalWindow.value,
       writable: true,
       enumerable: true,
       configurable: true,
     });
   } else {
-    Reflect.deleteProperty(globalScope, 'window');  }
+    Reflect.deleteProperty(globalScope, 'window');
+  }
 });
 
 function mockFetchWithStatus(status: number) {
