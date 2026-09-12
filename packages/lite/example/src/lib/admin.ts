@@ -37,7 +37,9 @@ const fullResources = createResources('en').filter((r: ResourceDefinition) => r.
 
 export const resources: ResourceDefinition[] = [
   postsResource,
-  ...fullResources.filter((r: ResourceDefinition) => r.name !== 'posts'),
+  ...fullResources
+    .filter((r: ResourceDefinition) => r.name !== 'posts')
+    .map(({ contract: _ignored, ...resource }) => resource),
 ];
 
 export function getResource(name: string): ResourceDefinition | undefined {

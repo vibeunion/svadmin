@@ -1,4 +1,4 @@
-import { defineResource, type ResourceContract } from '@svadmin/core';
+import { defineResource, type ResourceContract } from '@svadmin/core/schema';
 import { Type } from '@sinclair/typebox';
 import { demoSchemas as schemas, isDemoResource } from './resource-schemas';
 
