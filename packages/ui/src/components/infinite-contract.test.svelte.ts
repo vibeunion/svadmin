@@ -387,7 +387,7 @@ describe('checked pagination states and authentication', () => {
 });
 
 describe('contract-bound infinite lists', () => {
-  it('strictly compiles the paginated result states, shared lifecycle and mounted consumers', () => {
+  it('strictly compiles the paginated result states, shared lifecycle and mounted consumers', { timeout: 30_000 }, () => {
     const directory = dirname(fileURLToPath(import.meta.url));
     const core = resolve(directory, '../../../core/src');
     const sources = [

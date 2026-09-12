@@ -5,6 +5,7 @@ import { describe,it,expect,vi } from 'vitest';
 import { useTable } from './table-hooks.svelte';
 import { flushSync } from 'svelte';
 import { QueryClient } from '@tanstack/svelte-query';
+import { keys } from './query-keys';
 
 vi.mock('./context.svelte',() => {
   const dataProvider={
@@ -21,6 +22,7 @@ vi.mock('./context.svelte',() => {
       taskProvider: undefined,
       getDataProvider: () => dataProvider,
       getDataProviderNames: () => ['default'],
+      queryKeys: () => keys(),
       getDataProviderForResource: () => dataProvider,
       getProviderMeta: () => undefined,
       getResource,
@@ -40,17 +42,25 @@ vi.mock('./context.svelte',() => {
   };
 });
 
+const testQueryClient = new QueryClient();
 vi.mock('@tanstack/svelte-query',async (importOriginal) => {
   const actual=await importOriginal();
   return {
     ...actual as any,
-    useQueryClient: () => new QueryClient(),
-    createQuery: () => ({
-      data: { data: [{ id: 1,title: 'Row' }],total: 1 },
-      isPending: false,
-      isFetching: false,
-      error: null
-    })
+    useQueryClient: () => testQueryClient,
+    createQuery: (factory: any) => {
+      const options = typeof factory === "function" ? factory() : factory;
+      const data = { data: [{ id: 1,title: 'Row' }],total: 1 };
+      if (options?.queryKey) {
+        testQueryClient.setQueryData(options.queryKey, data);
+      }
+      return {
+        data,
+        isPending: false,
+        isFetching: false,
+        error: null
+      };
+    }
   };
 });
 

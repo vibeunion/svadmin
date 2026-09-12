@@ -42,23 +42,29 @@ vi.mock('./context.svelte',() => {
   };
 });
 
+const testQueryClient = new QueryClient();
 vi.mock('@tanstack/svelte-query',async (importOriginal) => {
   const actual=await importOriginal();
   return {
     ...actual as any,
-    useQueryClient: () => new QueryClient(),
-    createQuery: (factory: any) => ({
-      data: parseQueryKey(factory().queryKey)?.action==='one'
+    useQueryClient: () => testQueryClient,
+    createQuery: (factory: any) => {
+      const options = factory();
+      const data = parseQueryKey(options.queryKey)?.action==='one'
         ? { data: { id: 1,title: 'One' } }
-        :{ data: [{ id: 1,title: 'One' }],total: 1 },
-      isPending: false,
-      isFetching: false,
-      isSuccess: true,
-      isError: false,
-      dataUpdatedAt: 1,
-      errorUpdatedAt: 0,
-      error: null,
-    })
+        :{ data: [{ id: 1,title: 'One' }],total: 1 };
+      testQueryClient.setQueryData(options.queryKey, data);
+      return {
+        data,
+        isPending: false,
+        isFetching: false,
+        isSuccess: true,
+        isError: false,
+        dataUpdatedAt: 1,
+        errorUpdatedAt: 0,
+        error: null,
+      };
+    }
   };
 });
 

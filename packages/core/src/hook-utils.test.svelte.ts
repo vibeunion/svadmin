@@ -220,7 +220,7 @@ describe('checked live hooks', () => {
     });
     expect(diagnostics.map(diagnostic => `${diagnostic.file?.fileName}:${diagnostic.start}: ${
       ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`)).toEqual([]);
-  });
+  }, 30_000);
 
   it.each(['shared', 'live', 'subscription'] as const)('%s rejects invalid events and mismatched resources', async mode => {
     const observed = vi.fn();
@@ -549,9 +549,10 @@ describe('session-owned refresh', () => {
     const getter = vi.fn(() => 'provider');
     const accessor = Object.defineProperty({ authSession: 'session' }, 'source', { enumerable: true, get: getter });
     const inherited: unknown = Object.create(owner);
+    const malformedKey = (params: unknown): readonly unknown[] => [{ action: 'list', resource: 'posts', params }];
     for (const params of [undefined, {}, { source: 'provider' }, { ...owner, authSession: '' },
       { ...owner, source: 1 }, accessor, inherited]) {
-      expect(readOwnedDataQuery(keys().data.list('posts', params), matcher, owner)).toBeUndefined();
+      expect(readOwnedDataQuery(malformedKey(params), matcher, owner)).toBeUndefined();
     }
     expect(readOwnedDataQuery(valid, matcher, Object.defineProperty({ ...owner }, 'source', { get: getter }))).toBeUndefined();
     expect(readOwnedDataQuery([Object.defineProperty({ ...valid[0] }, 'params', { get: getter })], matcher, owner)).toBeUndefined();

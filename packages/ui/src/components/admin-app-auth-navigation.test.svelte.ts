@@ -1,3 +1,5 @@
+import { Type } from '@sinclair/typebox';
+import { defineResource } from '@svadmin/core';
 import { definedOptions } from '@svadmin/core/options';
 import { cleanup, fireEvent, render, waitFor, within } from '@testing-library/svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -58,6 +60,11 @@ const resources: ResourceDefinition[] = [{
   name: 'posts',
   label: 'Posts',
   fields: [],
+  contract: defineResource('posts', {
+    record: Type.Object({ id: Type.String() }),
+    create: Type.Object({}),
+    update: Type.Object({}),
+  }),
 }];
 
 let pageMountedListener: (() => void) | undefined;

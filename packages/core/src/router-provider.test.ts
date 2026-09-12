@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // Unit tests for RouterProvider implementations
 // Router provider tests need a DOM environment or a mock.
-import { describe, test, expect, beforeEach } from 'bun:test';
+import { describe, test, expect, beforeEach, afterEach } from 'bun:test';
 import { createHashRouterProvider, createHistoryRouterProvider } from './router-provider';
 
 describe('createHashRouterProvider (unit — no DOM)', () => {
@@ -30,15 +30,31 @@ describe('createHistoryRouterProvider (unit — no DOM)', () => {
 
 // DOM-dependent tests — mocked window if not exists
 describe('createHashRouterProvider (with mock DOM)', () => {
+  let hadWindow = false;
+  let originalLocation: any;
+
   beforeEach(() => {
-    if (typeof globalThis.window === 'undefined') {
-      let _hash = '';
-      (globalThis as any).window = {
-        location: {
-          get hash() { return _hash ? (_hash.startsWith('#') ? _hash : '#' + _hash) : ''; },
-          set hash(val) { _hash = val; }
-        }
-      };
+    hadWindow = typeof globalThis.window !== 'undefined';
+    let _hash = '';
+    const mockLocation = {
+      get hash() { return _hash ? (_hash.startsWith('#') ? _hash : '#' + _hash) : ''; },
+      set hash(val: string) { _hash = val; },
+      href: 'http://localhost/',
+      pathname: '/',
+    };
+    if (!hadWindow) {
+      (globalThis as any).window = { location: mockLocation };
+    } else {
+      originalLocation = (globalThis as any).window.location;
+      (globalThis as any).window.location = mockLocation;
+    }
+  });
+
+  afterEach(() => {
+    if (!hadWindow) {
+      delete (globalThis as any).window;
+    } else {
+      (globalThis as any).window.location = originalLocation;
     }
   });
 
@@ -80,4 +96,3 @@ describe('createHashRouterProvider (with mock DOM)', () => {
     expect(window.location.hash).toBe('#/users');
   });
 });
-

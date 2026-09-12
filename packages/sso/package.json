@@ -15,12 +15,12 @@
     "azure-ad",
     "cognito",
     "keycloak"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/vibeunion/svadmin",
-    "directory": "packages/sso"
-  },
+ ],
+ "repository": {
+   "type": "git",
+   "url": "git+https://github.com/vibeunion/svadmin.git",
+   "directory": "packages/sso"
+ },
   "sideEffects": false,
   "exports": {
     ".": {

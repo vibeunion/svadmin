@@ -444,7 +444,7 @@ describe('AutoTable interactions', () => {
     });
 
     await waitFor(() => expect((view.getByPlaceholderText('搜索...') as HTMLInputElement).value).toBe('reporting'));
-    expect(view.getByRole('columnheader', { name: /^ID/ })).toBeTruthy();
+    expect(await view.findByRole('columnheader', { name: /^ID/ })).toBeTruthy();
     expect(view.queryByRole('columnheader', { name: 'Email' })).toBeNull();
     expect(localStorage.getItem(columnVisibilityStorageKey(analyticsScope))).toBe(JSON.stringify({ id: false }));
     expect(localStorage.getItem(columnVisibilityStorageKey(reportingScope))).toBe(JSON.stringify({ email: false }));
@@ -483,9 +483,9 @@ describe('AutoTable interactions', () => {
 
     await waitFor(() => expect((view.getByPlaceholderText('搜索...') as HTMLInputElement).value).toBe(''));
     expect(view.queryByText('Email: acme')).toBeNull();
-    expect(view.getByRole('columnheader', { name: /^ID/ })).toBeTruthy();
-    expect(view.getByRole('columnheader', { name: /^Email/ })).toBeTruthy();
-    expect(view.getByRole('button', { name: /^Email.*⇅$/ })).toBeTruthy();
+    expect(await view.findByRole('columnheader', { name: /^ID/ })).toBeTruthy();
+    expect(await view.findByRole('columnheader', { name: /^Email/ })).toBeTruthy();
+    expect(await view.findByRole('button', { name: /^Email.*⇅$/ })).toBeTruthy();
     expect(localStorage.getItem(savedListViewsStorageKey(analyticsScope))).toContain('analytics');
   });
 
@@ -912,7 +912,7 @@ describe('AutoTable interactions', () => {
     await fireEvent.click(requireValue(second));
     expect(await view.findByText('已选择 2 条记录')).toBeTruthy();
 
-    await fireEvent.click(view.getByRole('button', { name: '批量删除 (2)' }));
+    await fireEvent.click(await view.findByRole('button', { name: '批量删除 (2)' }));
     const confirm = await view.findByRole('alertdialog');
     await fireEvent.click(within(confirm).getByRole('button', { name: '删除' }));
 
@@ -943,7 +943,7 @@ describe('AutoTable interactions', () => {
 
     await fireEvent.click(requireValue((await view.findAllByRole('checkbox', { name: '选择记录 user-1' }))[0]));
     await fireEvent.click(requireValue((await view.findAllByRole('checkbox', { name: '选择记录 user-2' }))[0]));
-    await fireEvent.click(view.getByRole('button', { name: '批量删除 (2)' }));
+    await fireEvent.click(await view.findByRole('button', { name: '批量删除 (2)' }));
     await fireEvent.click(within(await view.findByRole('alertdialog')).getByRole('button', { name: '删除' }));
 
     await waitFor(() => expect(onNotify).toHaveBeenCalledWith(expect.objectContaining({
@@ -981,7 +981,7 @@ describe('AutoTable interactions', () => {
 
     await fireEvent.click(requireValue((await view.findAllByRole('checkbox', { name: '选择记录 1' }))[0]));
     await fireEvent.click(requireValue((await view.findAllByRole('checkbox', { name: '选择记录 2' }))[0]));
-    await fireEvent.click(view.getByRole('button', { name: '批量删除 (2)' }));
+    await fireEvent.click(await view.findByRole('button', { name: '批量删除 (2)' }));
     await fireEvent.click(within(await view.findByRole('alertdialog')).getByRole('button', { name: '删除' }));
 
     await waitFor(() => expect(onNotify).toHaveBeenCalledWith(expect.objectContaining({
@@ -1020,7 +1020,7 @@ describe('AutoTable interactions', () => {
     await waitFor(() => expect(view.queryAllByText('user@example.com')).toHaveLength(0));
     expect(onDeleteMany).toHaveBeenCalledWith(['user-1']);
     expect(view.queryByRole('button', { name: '撤销' })).toBeNull();
-    expect(view.queryByRole('alertdialog')).toBeNull();
+    await waitFor(() => expect(view.queryByRole('alertdialog')).toBeNull());
     expect(view.queryByText('已选择 1 条记录')).toBeNull();
   });
 

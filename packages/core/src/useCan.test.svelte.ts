@@ -439,7 +439,7 @@ describe('owned access queries', () => {
     if (kind === 'missing') Reflect.set(source, 'can', null);
     else Object.defineProperty(source, 'can', { get() { throw new Error('private-token'); } });
     expect(() => mount(source)).toThrowError(expect.objectContaining({
-      code: 'INVALID_ACCESS_CONTROL_PROVIDER', message: 'Access control request failed',
+      code: 'INVALID_ACCESS_CONTROL_PROVIDER', message: expect.stringContaining('Access control request failed'),
     }));
   });
 

@@ -37,11 +37,11 @@ const DEFAULT_OPTIONS: Required<Omit<FetchWithInterceptorOptions,'fetchImpl'|'on
       throw new Error('No fetch implementation found. Pass fetchImpl in options.');
     };
   },
-  onUnauthorized: (loginPath,returnTo) => {
-    if(typeof window!=='undefined') {
-      window.location.href=`${loginPath}?returnTo=${returnTo}`;
-    }
-  },
+ onUnauthorized: (loginPath,returnTo) => {
+   if(typeof window!=='undefined'&&window.location) {
+     window.location.href=`${loginPath}?returnTo=${returnTo}`;
+   }
+ },
 };
 
 function asRecord(value: unknown): Record<string,unknown>|null {
@@ -151,12 +151,12 @@ export function createFetchWithInterceptor(
       return response;
     }
 
-    const httpError=await createResponseError(response,opts.forbiddenMessage);
-    if(response.status===401) {
-      const returnTo=typeof window!=='undefined'
-        ? encodeURIComponent(window.location.pathname)
-        :'';
-      try {
+   const httpError=await createResponseError(response,opts.forbiddenMessage);
+   if(response.status===401) {
+     const returnTo=typeof window!=='undefined'&&window.location?.pathname
+       ? encodeURIComponent(window.location.pathname)
+       :'';
+     try {
         opts.onUnauthorized(opts.loginPath,returnTo);
       } catch {
         // Redirect adapter failures must not replace the server's structured 401 error.
