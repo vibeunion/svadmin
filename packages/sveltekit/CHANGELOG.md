@@ -12,7 +12,7 @@
 
 * The following workspace dependencies were updated
   * peerDependencies
-    * @svadmin/core bumped from >=0.32.2 <0.51.0 to >=0.51.0
+    * @svadmin/core bumped from >=0.32.2 <0.51.0 to >=0.32.2 <0.52.0
 
 ## [0.10.7](https://github.com/vibeunion/svadmin/compare/sveltekit-v0.10.6...sveltekit-v0.10.7) (2026-09-08)
 
