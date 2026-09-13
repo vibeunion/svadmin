@@ -77,7 +77,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         if: steps.release-pr.outputs.branch != '' || steps.release.outputs.releases_created == 'true'
         with:
-          bun-version: "1.4.0"
+          bun-version: "1.4.2"
 
       - name: Synchronize release peer ranges and lockfile
         if: steps.release-pr.outputs.branch != ''

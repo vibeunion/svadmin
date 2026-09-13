@@ -272,7 +272,7 @@ describe('npm trusted-publishing workflow contract', () => {
     expect(releaseWorkflow).toContain("if: steps.release-pr.outputs.branch != ''");
     expect(releaseWorkflow).not.toContain('steps.release.outputs.prs_created');
     expect(releaseWorkflow).not.toContain('steps.release.outputs.pr');
-    expect(releaseWorkflow).toContain('bun-version: "1.4.0"');
+    expect(releaseWorkflow).toContain('bun-version: "1.4.2"');
     expect(releaseWorkflow).toContain('persist-credentials: false');
     expect(releaseWorkflow).toContain(
       'git checkout origin/main -- scripts/sync-release-pr.ts',

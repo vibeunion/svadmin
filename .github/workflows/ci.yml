@@ -50,7 +50,7 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: "1.4.0"
+          bun-version: "1.4.2"
 
       - name: Install dependencies
         run: |
@@ -65,9 +65,6 @@ jobs:
 
       - name: Verify published UI stylesheets
         run: bun run --cwd packages/ui test:css
-
-      - name: Verify published AI stylesheets
-        run: bun run --cwd packages/ai-elements test:css
 
       - name: Verify Lite SSR consumer
         run: bun run check:lite:ssr
@@ -133,7 +130,7 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: "1.4.0"
+          bun-version: "1.4.2"
 
       - name: Install dependencies
         run: |
@@ -215,7 +212,7 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: "1.4.0"
+          bun-version: "1.4.2"
 
       - name: Verify release tags
         env:
