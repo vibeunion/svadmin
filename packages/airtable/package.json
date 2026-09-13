@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/airtable",
-  "version": "0.10.2",
+  "version": "0.10.3",
   "description": "Airtable DataProvider for svadmin",
   "type": "module",
   "sideEffects": false,

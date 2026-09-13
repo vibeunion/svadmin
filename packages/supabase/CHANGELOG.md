@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.14.3](https://github.com/vibeunion/svadmin/compare/supabase-v0.14.2...supabase-v0.14.3) (2026-09-13)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** close workspace validation gates ([#403](https://github.com/vibeunion/svadmin/issues/403)) ([9e92f77](https://github.com/vibeunion/svadmin/commit/9e92f7772ff1eb69e3a660e48ceee8f834387822))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.11.3
+  * peerDependencies
+    * @svadmin/core bumped to 0.51.3
+
 ## [0.14.2](https://github.com/vibeunion/svadmin/compare/supabase-v0.14.1...supabase-v0.14.2) (2026-09-13)
 
 

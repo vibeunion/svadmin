@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/vibeunion/svadmin/compare/auth-utils-v0.8.0...auth-utils-v0.8.1) (2026-09-13)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** close workspace validation gates ([#403](https://github.com/vibeunion/svadmin/issues/403)) ([9e92f77](https://github.com/vibeunion/svadmin/commit/9e92f7772ff1eb69e3a660e48ceee8f834387822))
+
 ## [0.8.0](https://github.com/vibeunion/svadmin/compare/auth-utils-v0.7.10...auth-utils-v0.8.0) (2026-09-12)
 
 

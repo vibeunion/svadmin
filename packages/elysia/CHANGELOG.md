@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.13.3](https://github.com/vibeunion/svadmin/compare/elysia-v0.13.2...elysia-v0.13.3) (2026-09-13)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** close workspace validation gates ([#403](https://github.com/vibeunion/svadmin/issues/403)) ([9e92f77](https://github.com/vibeunion/svadmin/commit/9e92f7772ff1eb69e3a660e48ceee8f834387822))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.51.3
+
 ## [0.13.2](https://github.com/vibeunion/svadmin/compare/elysia-v0.13.1...elysia-v0.13.2) (2026-09-13)
 
 

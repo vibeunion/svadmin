@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.8.11](https://github.com/vibeunion/svadmin/compare/surface-v0.8.10...surface-v0.8.11) (2026-09-13)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** close workspace validation gates ([#403](https://github.com/vibeunion/svadmin/issues/403)) ([9e92f77](https://github.com/vibeunion/svadmin/commit/9e92f7772ff1eb69e3a660e48ceee8f834387822))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core remains compatible with >=0.34.2 <0.52.0
+    * @svadmin/ui remains compatible with >=0.40.6 <0.71.0
+
 ## [0.8.10](https://github.com/vibeunion/svadmin/compare/surface-v0.8.9...surface-v0.8.10) (2026-09-13)
 
 

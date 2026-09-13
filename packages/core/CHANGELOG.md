@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.51.3](https://github.com/vibeunion/svadmin/compare/core-v0.51.2...core-v0.51.3) (2026-09-13)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** close workspace validation gates ([#403](https://github.com/vibeunion/svadmin/issues/403)) ([9e92f77](https://github.com/vibeunion/svadmin/commit/9e92f7772ff1eb69e3a660e48ceee8f834387822))
+* **ci:** standardize Bun 1.4.2 toolchain ([#405](https://github.com/vibeunion/svadmin/issues/405)) ([23e36e8](https://github.com/vibeunion/svadmin/commit/23e36e8906c8b3eae702bca913d87e78c1f7854f))
+
 ## [0.51.2](https://github.com/vibeunion/svadmin/compare/core-v0.51.1...core-v0.51.2) (2026-09-13)
 
 
