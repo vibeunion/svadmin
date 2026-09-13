@@ -220,7 +220,8 @@ export function useContractForm<S extends ContractSchemas, A extends ContractFor
     const router = context.routerProvider;
     if (key !== previousKey || auth !== previousAuth || router !== previousRouter) {
       const target = state.ok ? state.scope.targetKey : undefined;
-      if (target !== previousTarget || auth !== previousAuth || router !== previousRouter) latest = undefined;
+      const authTransition = latest !== undefined && auth === previousAuth && !captureAuthLiveScope(auth).isCurrent();
+      if ((target !== previousTarget || auth !== previousAuth || router !== previousRouter) && !authTransition) latest = undefined;
       previousTarget = target;
       previousKey = key;
       previousAuth = auth;
@@ -473,7 +474,8 @@ export function useContractForm<S extends ContractSchemas, A extends ContractFor
         }
         notify(async () => { await handleAuthError(copyFailure(failed.error), context,
           () => targetCurrent(target) && latest === token,
-          () => clearAuthQueries(client, target.authProvider), target.authScope); }, undefined);
+          () => clearAuthQueries(client, target.authProvider), target.authScope,
+          () => mounted && latest !== token); }, undefined);
         if (current()) notify(() => fireErrorNotification({ config: undefined, defaultMessage: i18n.t('common.operationFailed'), error: copyFailure(failed.error),
           resource: target.contract.name, ...definedOptions({ provider: target.notificationProvider }) }), undefined);
         if (current()) notify(onError, copyFailure(failed.error));

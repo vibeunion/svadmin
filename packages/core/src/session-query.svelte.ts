@@ -1,4 +1,4 @@
-import { createQuery, type QueryObserverResult, type RefetchOptions } from '@tanstack/svelte-query';
+import { createQuery, hashKey, type QueryObserverResult, type RefetchOptions } from '@tanstack/svelte-query';
 import { tick, untrack } from 'svelte';
 import type { AdminContextAccessor } from './context.svelte';
 import { definedOptions } from './defined-options';
@@ -22,12 +22,26 @@ export function createSessionQuery<TQuery, T = TQuery>(
   getOptions: () => SessionQueryOptions<TQuery, T>,
 ): QueryObserverResult<T, unknown> {
   const session = createQuerySession(context, getOptions);
+  const inFlight = new Map<string, { origin: typeof session.options; request: Promise<TQuery> }>();
   type Origin = typeof session.options;
   const query = createQuery<TQuery, unknown>(() => {
     const origin = session.options;
     return {
       queryKey: origin.queryKey,
-      queryFn: (queryContext) => session.run(origin, () => origin.queryFn(queryContext?.signal)),
+      queryFn: (queryContext) => {
+        const key = hashKey(origin.queryKey);
+        const existing = inFlight.get(key);
+        if (existing && session.current(existing.origin)) return existing.request;
+        if (existing) inFlight.delete(key);
+        const request = session.run(origin, () => origin.queryFn(queryContext?.signal));
+        inFlight.set(key, { origin, request });
+        void request.then(() => {
+          if (inFlight.get(key)?.request === request) inFlight.delete(key);
+        }, () => {
+          if (inFlight.get(key)?.request === request) inFlight.delete(key);
+        });
+        return request;
+      },
       enabled: origin.enabled && origin.auth.available,
       ...definedOptions({
         staleTime: origin.staleTime, gcTime: origin.gcTime, refetchOnWindowFocus: origin.refetchOnWindowFocus,

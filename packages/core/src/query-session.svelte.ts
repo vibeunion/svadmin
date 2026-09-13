@@ -24,6 +24,8 @@ export interface QuerySessionOptions {
   errorNotification: NotificationConfig;
   /** Extra observer lifetime constraints; must not include auth retirement during delegated logout. */
   isTargetCurrent?: () => boolean;
+  /** Allow a shared query function to delegate work to another live observer. */
+  allowRetiredQueryFn?: boolean;
 }
 
 export function supersededQuerySession(): HttpError {
@@ -105,14 +107,53 @@ export function createQuerySession<O extends QuerySessionOptions>(context: Admin
     }
   }
 
+  function settleDetached(origin: Origin, result: { data?: unknown; error?: unknown; success: boolean }): void {
+    if (disposed) return;
+    const query = client.getQueryCache().find({ queryKey: origin.queryKey, exact: true });
+    if (!query || query.getObserversCount() > 0) return;
+    const now = Date.now();
+    if (result.success) {
+      query.setState({
+        data: result.data,
+        dataUpdatedAt: now,
+        dataUpdateCount: query.state.dataUpdateCount + 1,
+        error: null,
+        fetchFailureCount: 0,
+        fetchFailureReason: null,
+        fetchStatus: 'idle',
+        status: 'success',
+      });
+      return;
+    }
+    const error = querySessionError(result.error);
+    query.setState({
+      error,
+      errorUpdatedAt: now,
+      errorUpdateCount: query.state.errorUpdateCount + 1,
+      fetchFailureCount: query.state.fetchFailureCount + 1,
+      fetchFailureReason: error,
+      fetchStatus: 'idle',
+      status: 'error',
+    });
+  }
+
   async function run<T>(origin: Origin, request: () => Promise<T>): Promise<T> {
-    if (!sessionCurrent(origin)) throw supersededQuerySession();
+    const allowRetired = origin.allowRetiredQueryFn === true;
+    if ((!allowRetired && disposed) || !sessionCurrent(origin)) throw supersededQuerySession();
     try {
       const result = await request();
-      if (!sessionCurrent(origin)) throw supersededQuerySession();
+      if ((!allowRetired && disposed) || !sessionCurrent(origin)) {
+        if (!disposed) settleDetached(origin, { success: false, error: supersededQuerySession() });
+        throw supersededQuerySession();
+      }
+      if (!current(origin)) settleDetached(origin, { success: true, data: result });
       return result;
     } catch (error) {
-      if (!sessionCurrent(origin)) throw supersededQuerySession();
+      if ((!allowRetired && disposed) || !sessionCurrent(origin)) {
+        if (!disposed) settleDetached(origin, { success: false, error: supersededQuerySession() });
+        throw supersededQuerySession();
+      }
+      if (!current(origin)) settleDetached(origin, { success: false, error });
       throw querySessionError(error);
     }
   }

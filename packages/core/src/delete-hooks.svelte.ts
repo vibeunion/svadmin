@@ -266,7 +266,8 @@ export function useContractDelete<S extends ContractSchemas>(options: ContractDe
           observe(async () => {
             await handleAuthError(copyFailure(error), context,
               () => targetCurrent(scope) && latestToken === invocation.token,
-              () => clearAuthQueries(client, scope.auth), scope.authScope);
+              () => clearAuthQueries(client, scope.auth), scope.authScope,
+              () => mounted && latestToken !== invocation.token);
           });
           notify(scope, current, 'error', i18n.t('common.operationFailed'));
         }

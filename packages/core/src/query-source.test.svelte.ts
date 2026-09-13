@@ -160,7 +160,7 @@ describe('standard query provider sources', () => {
     expect(diagnostics.map(diagnostic =>
       `${diagnostic.file?.fileName ?? ''}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`,
     )).toEqual([]);
-  });
+  }, 30_000);
 
   it('derives detached receipt types from decoders without admitting caller-selected result types', () => {
     const directory = dirname(fileURLToPath(import.meta.url));

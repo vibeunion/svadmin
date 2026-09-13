@@ -32,6 +32,11 @@
       "style": "./dist/app.theme.css",
       "default": "./dist/app.theme.css"
     },
+    "./editor-config": {
+      "types": "./dist/editor-config.svelte.d.ts",
+      "svelte": "./dist/editor-config.svelte.js",
+      "default": "./dist/editor-config.svelte.js"
+    },
     "./components/*.svelte": {
       "types": "./dist/components/*.svelte.d.ts",
       "svelte": "./dist/components/*.svelte",

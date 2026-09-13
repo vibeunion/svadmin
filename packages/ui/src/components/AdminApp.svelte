@@ -61,9 +61,9 @@
   import { QueryClient, QueryClientProvider, type DefaultOptions } from '@tanstack/svelte-query';
   import { setComponentRegistry, type ComponentRegistry } from '../component-registry.svelte.js';
   import Layout, { type LayoutAIAssistantProps } from './Layout.svelte';
-  import AutoTable from './AutoTable.svelte';
-  import AutoForm from './AutoForm.svelte';
-  import ShowPage from './ShowPage.svelte';
+  import LazyAutoTable from './LazyAutoTable.svelte';
+  import LazyAutoForm from './LazyAutoForm.svelte';
+  import LazyShowPage from './LazyShowPage.svelte';
   import Toast from './Toast.svelte';
   import LoginPage from './LoginPage.svelte';
   import RegisterPage from './RegisterPage.svelte';
@@ -190,7 +190,7 @@
   // Default component registry
   const defaultComponents: ComponentRegistry = {
     Layout, Sidebar, Header,
-    LoginPage, AutoTable, AutoForm, ShowPage,
+    LoginPage, AutoTable: LazyAutoTable, AutoForm: LazyAutoForm, ShowPage: LazyShowPage,
     TaskQueueDrawer, ErrorPage,
     Button, Input, Badge, Skeleton,
   };

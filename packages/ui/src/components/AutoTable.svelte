@@ -553,7 +553,7 @@
   });
   const canShow = $derived(resource.canShow !== false);
   const canDelete = $derived(resource.canDelete !== false);
-  const canExport = $derived(canExportPerm.allowed);
+  const canExport = $derived(!acEnabled || canExportPerm.allowed);
 
   // ─── TanStack Table state ────────────────────────────────────
   const initialSorting = untrack<SortingState>(() =>
