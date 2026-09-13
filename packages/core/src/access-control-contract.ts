@@ -75,9 +75,10 @@ export function captureAccessControlProvider(value: unknown): RegisteredAccessCo
     const batch = providerMember(value, 'canMany');
     const canMany = batch?.value;
     const config = providerMember(value, 'options');
+    const testId = providerMember(value, '__testId')?.value;
     if (typeof can !== 'function' || (batch !== undefined && typeof canMany !== 'function')) throw invalidAccessControlProvider();
     const options = snapshotAccessControlOptions(config ? config.value : {});
-    const captured: RegisteredAccessControlProvider = Object.freeze({
+    const captured: RegisteredAccessControlProvider = {
       options,
       can: async (input: CanParams): Promise<CanResult> => {
         try {
@@ -100,7 +101,10 @@ export function captureAccessControlProvider(value: unknown): RegisteredAccessCo
           }
         },
       } : {}),
-    });
+    };
+    // Preserve only the non-functional diagnostic identity used by scoped consumers.
+    if (typeof testId === 'string') Object.defineProperty(captured, '__testId', { value: testId });
+    Object.freeze(captured);
     registeredProviders.set(value, captured);
     registeredProviders.set(captured, captured);
     return captured;

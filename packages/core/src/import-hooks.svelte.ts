@@ -273,7 +273,8 @@ export function useImport<S extends ContractSchemas>(options: UseImportOptions<S
         const authError = result.errored.find(item => item.error.statusCode === 401 || item.error.statusCode === 403)?.error ?? error;
         if (authError) notify(async () => {
           await handleAuthError(copyFailure(authError), context, () => targetCurrent(scope) && latestToken === token,
-            () => clearAuthQueries(client, scope.authProvider), scope.authScope);
+            () => clearAuthQueries(client, scope.authProvider), scope.authScope,
+            () => mounted && latestToken !== token);
         }, undefined);
         if (isCurrent(token, scope)) notify(onFinish, copyResult(scope, result));
         ensureActive();

@@ -266,7 +266,8 @@ export function useContractDeleteMany<S extends ContractSchemas>(options: Contra
         observe(async () => {
           await handleAuthError(failure(authError, true), context,
             () => targetCurrent(scope) && latestToken === invocation.token,
-            () => clearAuthQueries(client, scope.auth), scope.authScope);
+            () => clearAuthQueries(client, scope.auth), scope.authScope,
+            () => mounted && latestToken !== invocation.token);
         });
         notify(scope, current, 'error', error instanceof DeleteManyPartialError
           ? i18n.t('common.batchDeletePartialFail', { failed: error.failedIds.length, total: scope.ids.length })

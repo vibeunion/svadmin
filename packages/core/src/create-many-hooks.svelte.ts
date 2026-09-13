@@ -264,7 +264,8 @@ export function useContractCreateMany<S extends ContractSchemas>(options: Contra
         observe(async () => {
           await handleAuthError(failure(authError, true), context,
             () => targetCurrent(scope) && latestToken === invocation.token,
-            () => clearAuthQueries(client, scope.auth), scope.authScope);
+            () => clearAuthQueries(client, scope.auth), scope.authScope,
+            () => mounted && latestToken !== invocation.token);
         });
         notify(scope, current, 'error', i18n.t('common.operationFailed'));
         observe(() => { if (current()) return invocation.callbacks.onError?.(copyFailure(error)); });

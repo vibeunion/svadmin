@@ -555,6 +555,7 @@ export async function handleAuthError(
   isActive: () => boolean = () => true,
   onLogout: () => void = () => {},
   origin?: ReturnType<typeof captureAuthLiveScope>,
+  isExplicitlyCancelled: () => boolean = () => false,
 ): Promise<AuthErrorHandlingResult> {
   const provider=adminContext.authProvider;
   const tenant=adminContext.tenantCacheKey?.__svadminTenant;
@@ -563,7 +564,11 @@ export async function handleAuthError(
   let intent=authSession(provider).intent;
   let previousLive: AuthSession['liveState'] | undefined;
   let ownsLogout=false;
-  const current=() => isActive() && (ownsLogout || origin===undefined || origin.isCurrent()) && provider===adminContext.authProvider
+  // Once this handler has started its own checked logout, its origin scope may
+  // become inactive as the live session transitions, but its caller can still
+  // explicitly retire the pending operation.
+  const current=() => (isActive() || (ownsLogout && !isExplicitlyCancelled()))
+    && (ownsLogout || origin===undefined || origin.isCurrent()) && provider===adminContext.authProvider
     && tenant===adminContext.tenantCacheKey?.__svadminTenant && version===authSession(provider).version
     && intent===authSession(provider).intent
     && router===adminContext.routerProvider;

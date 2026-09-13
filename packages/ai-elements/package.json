@@ -71,7 +71,8 @@
     "@sinclair/typebox": "^0.34.52",
     "@xyflow/svelte": "^1.6.5",
     "cn": "^0.2.4",
-    "streamdown-svelte": "^3.0.6"
+    "streamdown-svelte": "^3.0.6",
+    "type-fest": "^4.41.0"
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "^20.11.12",

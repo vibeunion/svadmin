@@ -107,6 +107,7 @@ export function useCan(options: () => UseCanOptions): UseCanResult {
     return {
       resource: target.resource, queryKey: target.queryKey,
       successNotification: false, errorNotification: false,
+      allowRetiredQueryFn: true,
       isTargetCurrent: () => !disposed && options().queryOptions?.enabled !== false,
       queryFn: async () => {
         // Native cache refreshes may retain an unmounted peer's query function.

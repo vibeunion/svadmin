@@ -1,3 +1,11 @@
+<script module lang="ts">
+  export type {
+    GeneratedComponentDefinition,
+    GeneratedComponentProps,
+    GeneratedComponentRegistry,
+  } from '../generated-components.js';
+</script>
+
 <script lang="ts">
   import { captureAdminContext, useParsed } from '@svadmin/core';
   import { Bot, Maximize2, MessageCircle, Minus, RotateCcw, Trash2, X } from '@lucide/svelte';
@@ -32,12 +40,6 @@
     decodeGeneratedComponentProps,
     type GeneratedComponentProps as GeneratedProps,
     type GeneratedComponentRegistry as ComponentRegistry,
-  } from '../generated-components.js';
-
-  export type {
-    GeneratedComponentDefinition,
-    GeneratedComponentProps,
-    GeneratedComponentRegistry,
   } from '../generated-components.js';
 
   export type ChatPersistenceOperation = 'restore' | 'persist';

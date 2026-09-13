@@ -18,9 +18,10 @@
 		type?: HTMLButtonAttributes['type'] | undefined;
 	};
 
-	export type ButtonProps =
-		| (Omit<WithElementRef<HTMLButtonAttributes, HTMLButtonElement>, 'href' | 'type' | 'disabled'> & ButtonStyleProps & { href?: never })
-		| (Omit<WithElementRef<HTMLAnchorAttributes, HTMLAnchorElement>, 'type' | 'href' | 'disabled'> & ButtonStyleProps & { href: string });
+	export type ButtonProps = Omit<WithElementRef<HTMLButtonAttributes, HTMLButtonElement>, 'href' | 'type' | 'disabled'> & ButtonStyleProps & {
+		href?: string;
+		ref?: HTMLButtonElement | HTMLAnchorElement | null;
+	};
 </script>
 
 <script lang="ts">
