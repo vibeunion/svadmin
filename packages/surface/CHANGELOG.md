@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.8.10](https://github.com/vibeunion/svadmin/compare/surface-v0.8.9...surface-v0.8.10) (2026-09-13)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** repair lite and contract test failures ([ed986a5](https://github.com/vibeunion/svadmin/commit/ed986a556a7dd10f4e45e5c7538583b015ae92ee))
+* **ci:** restore green main — SSR-safe resource serialization and scaffold hygiene ([912836c](https://github.com/vibeunion/svadmin/commit/912836ca814d7ba6408fef6fd3cf78e6d90a0097))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core remains compatible with >=0.34.2 <0.52.0
+    * @svadmin/ui remains compatible with >=0.40.6 <0.71.0
+
 ## [0.8.9](https://github.com/vibeunion/svadmin/compare/surface-v0.8.8...surface-v0.8.9) (2026-09-12)
 
 

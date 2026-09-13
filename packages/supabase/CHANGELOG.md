@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.14.2](https://github.com/vibeunion/svadmin/compare/supabase-v0.14.1...supabase-v0.14.2) (2026-09-13)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** repair lite and contract test failures ([ed986a5](https://github.com/vibeunion/svadmin/commit/ed986a556a7dd10f4e45e5c7538583b015ae92ee))
+* **ci:** restore green main — SSR-safe resource serialization and scaffold hygiene ([912836c](https://github.com/vibeunion/svadmin/commit/912836ca814d7ba6408fef6fd3cf78e6d90a0097))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.11.2
+  * peerDependencies
+    * @svadmin/core bumped to 0.51.2
+
 ## [0.14.1](https://github.com/vibeunion/svadmin/compare/supabase-v0.14.0...supabase-v0.14.1) (2026-09-12)
 
 

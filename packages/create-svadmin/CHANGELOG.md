@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.27.2](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.27.1...create-svadmin-v0.27.2) (2026-09-13)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** repair lite and contract test failures ([ed986a5](https://github.com/vibeunion/svadmin/commit/ed986a556a7dd10f4e45e5c7538583b015ae92ee))
+* **ci:** restore green main — SSR-safe resource serialization and scaffold hygiene ([912836c](https://github.com/vibeunion/svadmin/commit/912836ca814d7ba6408fef6fd3cf78e6d90a0097))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/core bumped to 0.51.2
+
 ## [0.27.1](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.27.0...create-svadmin-v0.27.1) (2026-09-12)
 
 

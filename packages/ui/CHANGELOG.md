@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.70.4](https://github.com/vibeunion/svadmin/compare/ui-v0.70.3...ui-v0.70.4) (2026-09-13)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** close strict validation gates ([2f24ff6](https://github.com/vibeunion/svadmin/commit/2f24ff65f04f406939d3767fe4def710fa2a96d2))
+* **ci:** repair lite and contract test failures ([ed986a5](https://github.com/vibeunion/svadmin/commit/ed986a556a7dd10f4e45e5c7538583b015ae92ee))
+* **ci:** resolve remaining strict component diagnostics ([635746d](https://github.com/vibeunion/svadmin/commit/635746d38fe96fb89f8484faa9ad5e123272d40a))
+* **ci:** restore green main — SSR-safe resource serialization and scaffold hygiene ([912836c](https://github.com/vibeunion/svadmin/commit/912836ca814d7ba6408fef6fd3cf78e6d90a0097))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.6.2
+  * peerDependencies
+    * @svadmin/core bumped to 0.51.2
+
 ## [0.70.3](https://github.com/vibeunion/svadmin/compare/ui-v0.70.2...ui-v0.70.3) (2026-09-12)
 
 
