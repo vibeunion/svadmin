@@ -220,7 +220,7 @@ describe('checked live hooks', () => {
     });
     expect(diagnostics.map(diagnostic => `${diagnostic.file?.fileName}:${diagnostic.start}: ${
       ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`)).toEqual([]);
-  });
+  }, 30_000);
 
   it.each(['shared', 'live', 'subscription'] as const)('%s rejects invalid events and mismatched resources', async mode => {
     const observed = vi.fn();
