@@ -277,7 +277,8 @@
             />
           {:else}
             <Input
-              type="text"              class="svadmin-u-ed8a5df7b2fb svadmin-u-359090c2d529"
+              type="text"
+              class="svadmin-u-ed8a5df7b2fb svadmin-u-359090c2d529"
               placeholder="输入筛选值..."
               value={String(rule.value ?? '')}
               oninput={(e) => {

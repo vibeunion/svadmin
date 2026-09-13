@@ -82,7 +82,7 @@ let nextSource = 0;
 /** Capture a contract query's transport and metadata before any deferred query work. */
 export function captureQueryProvider(
   context: AdminContextAccessor,
-  options: { resource: string; dataProviderName?: string; contract?: ResourceContract; meta?: Record<string, unknown> },
+  options: { resource: string; dataProviderName?: string; contract?: ResourceContract; meta?: Record<string, unknown>; fresh?: boolean },
 ) {
   const resource = context.resources.find(item => item.identifier === options.resource || item.name === options.resource);
   const name = options.dataProviderName ?? resource?.provider?.dataProviderName ?? resource?.meta?.dataProviderName ?? 'default';
@@ -97,7 +97,7 @@ export function captureQueryProvider(
   const metadata = context.getProviderMeta(options.resource, explicit.meta);
   const params = snapshotListParams(definedOptions({ resource: options.resource, meta: metadata }));
   if (options.contract) {
-    return { provider: contractProvider(raw, options.contract), source, meta: params.meta };
+    return { provider: contractProvider(raw, options.contract, { cache: options.fresh !== true }), source, meta: params.meta };
   }
   const provider: DataProvider = {
     ...raw,
@@ -124,7 +124,7 @@ export function captureQueryProvider(
     getMany: async input => {
       if (!raw.getMany) {
         const results = await Promise.all(input.ids.map(id => provider.getOne(snapshotOneParams({
-          resource: input.resource, id, ...definedOptions({ meta: input.meta, signal: input.signal }),
+          resource: input.resource, id, ...definedOptions({ meta: input.meta }),
         }))));
         return { data: results.map(result => result.data) };
       }

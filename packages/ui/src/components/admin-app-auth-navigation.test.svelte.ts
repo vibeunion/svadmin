@@ -1,6 +1,6 @@
+import { definedOptions } from '@svadmin/core/options';
 import { Type } from '@sinclair/typebox';
 import { defineResource } from '@svadmin/core';
-import { definedOptions } from '@svadmin/core/options';
 import { cleanup, fireEvent, render, waitFor, within } from '@testing-library/svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AccessControlProvider, AuthProvider, CheckResult, DataProvider, ResourceDefinition, RouterProvider } from '@svadmin/core';
@@ -138,10 +138,7 @@ describe('AdminApp authenticated navigation', () => {
     const mounted = vi.fn();
     pageMountedListener = mounted;
     window.addEventListener('svadmin:test-page-mounted', pageMountedListener);
-    const can = vi.fn<AccessControlProvider['can']>(async (request) => {
-      if (Array.isArray(request)) return request.map(() => ({ can: false }));
-      return { can: request.action === 'create' };
-    });
+    const can = vi.fn<AccessControlProvider['can']>(async request => ({ can: request.action === 'create' }));
 
     const view = render(AdminApp, {
       dataProvider: createDataProvider(),
@@ -171,10 +168,9 @@ describe('AdminApp authenticated navigation', () => {
   });
 
   it('hides denied resource navigation and create actions from the command palette', async () => {
-    const can = vi.fn<AccessControlProvider['can']>(async (request) => {
-      if (Array.isArray(request)) return request.map(() => ({ can: false }));
-      return { can: request.action !== 'list' && request.action !== 'create' };
-    });
+    const can = vi.fn<AccessControlProvider['can']>(async request => ({
+      can: request.action !== 'list' && request.action !== 'create',
+    }));
     const view = render(AdminApp, {
       dataProvider: createDataProvider(),
       accessControlProvider: { can },

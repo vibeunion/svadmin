@@ -1,10 +1,8 @@
 {
-  "extends": "./tsconfig.base.json",
+  "extends": "./tsconfig.json",
   "compilerOptions": {
     "skipLibCheck": false,
-    "types": [
-      "bun"
-    ]
+    "types": ["@types/bun", "svelte"]
   },
   "include": [
     "packages/*/src/**/*.test.ts",
@@ -13,8 +11,7 @@
     "packages/refine-adapter/src/refinedev-optional.d.ts"
   ],
   "exclude": [
-    "node_modules",
-    "dist",
+    "node_modules", "dist",
     "packages/ai-elements/src/**/*.test.ts",
     "packages/flow/src/**/*.test.ts",
     "packages/surface/src/**/*.test.ts",

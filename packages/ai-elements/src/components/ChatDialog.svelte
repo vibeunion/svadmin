@@ -7,8 +7,10 @@
 </script>
 
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import { captureAdminContext, useParsed } from '@svadmin/core';
-  import { Bot, Maximize2, MessageCircle, Minus, RotateCcw, Trash2, X } from '@lucide/svelte';
+  import { Bot, Maximize2, MessageCircle, Minus, Trash2, X } from '@lucide/svelte';
   import { onDestroy, tick, untrack, type Component } from 'svelte';
   import { SvelteMap } from 'svelte/reactivity';
   import type {
@@ -16,7 +18,7 @@
     AgentProvider,
     ChatAttachment,
     ChatContext,
-    ChatMessage as ProviderMessage,
+    ChatMessage,
     ChatMessagePart,
     ChatProvider,
     ChatSource,
@@ -25,7 +27,6 @@
   import Conversation from './Conversation.svelte';
   import ConversationContent from './ConversationContent.svelte';
   import ConversationEmptyState from './ConversationEmptyState.svelte';
-  import ConversationScrollButton from './ConversationScrollButton.svelte';
   import Message from './Message.svelte';
   import MessageContent from './MessageContent.svelte';
   import MessageToolbar from './MessageToolbar.svelte';
@@ -105,8 +106,6 @@
   };
 
   type ApprovalDecision = 'approved' | 'rejected';
-  // Display-only provenance survives restore; it never grants approval capability.
-  type ChatMessage = ProviderMessage & { approvalConfirmationFor?: string };
 
   let {
     docked = false,
@@ -127,39 +126,18 @@
   const parsed = useParsed();
   const provider = $derived(adminContext.chatProvider);
   const agent = $derived(adminContext.agentProvider);
-  const chatContext = $derived.by((): ChatContext => ({
+  const chatContext = $derived.by((): ChatContext => (definedOptions({
     currentResource: parsed.resource,
     selectedRecordId: parsed.id,
     currentView: parsed.action as ChatContext['currentView'],
     pathname: adminContext.currentPath(),
-  }));
+  })));
 
   let open = $state(false);
   let minimized = $state(false);
   let inputValue = $state('');
   let inputAttachments = $state<ChatAttachment[]>([]);
   let messages = $state<ChatMessage[]>([]);
-  const retryCandidate = $derived.by(() => {
-    let index = messages.length - 1;
-    while (index >= 0 && messages[index]?.role !== 'assistant') index -= 1;
-    const response = messages[index];
-    const request = messages[index - 1];
-    if (!response || request?.role !== 'user' ||
-        (response.status !== 'error' && response.status !== 'aborted')) return;
-    // Approval confirmations belong to this run; never discard a later draft message.
-    if (!messages.slice(index + 1).every((message) =>
-      message.role === 'user' && message.parts.length === 1 &&
-      message.parts[0]?.type === 'text' && message.approvalConfirmationFor === response.id,
-    )) return;
-    const files = [
-      ...(request.attachments ?? []),
-      ...request.parts.flatMap((part) => part.type === 'file' ? [part.file] : []),
-    ];
-    const missingFiles = files.some((file) =>
-      !file.file && (!safeResourceUrl(file.url) || file.url?.startsWith('blob:')),
-    );
-    return { id: response.id, index, missingFiles };
-  });
   let isStreaming = $state(false);
   let chatRoot = $state<HTMLElement | null>(null);
   let launcherButton = $state<HTMLButtonElement | null>(null);
@@ -241,11 +219,11 @@
     if (part.type === 'text' && previous?.type === 'text') {
       parts[parts.length - 1] = { ...previous, text: previous.text + part.text };
     } else if (part.type === 'reasoning' && previous?.type === 'reasoning') {
-      parts[parts.length - 1] = {
+      parts[parts.length - 1] = definedOptions({
         ...previous,
         text: previous.text + part.text,
         streaming: part.streaming ?? previous.streaming,
-      };
+      });
     } else {
       parts.push(part);
     }
@@ -258,7 +236,7 @@
   ): ResolvedGeneratedComponent | { error: 'unavailable' | 'invalid' } {
     if (!Object.prototype.hasOwnProperty.call(componentRegistry, name)) return { error: 'unavailable' };
     const definition = componentRegistry[name];
-    if (definition === undefined) return { error: 'unavailable' };
+    if (!definition) return { error: 'unavailable' };
     try {
       const parsedProps = decodeGeneratedComponentProps(definition, props);
       return {
@@ -287,6 +265,24 @@
           }
         : {}),
     }));
+  }
+
+  function getConversationLog(): HTMLElement | null {
+    return chatRoot?.querySelector<HTMLElement>('[role="log"]') ?? null;
+  }
+
+  function shouldStickToBottom(): boolean {
+    const log = getConversationLog();
+    if (!log) return true;
+    return log.scrollHeight - log.scrollTop - log.clientHeight <= 64;
+  }
+
+  function scrollToBottomAfterUpdate(shouldScroll: boolean): void {
+    if (!shouldScroll || typeof window === 'undefined') return;
+    window.requestAnimationFrame(() => {
+      const log = getConversationLog();
+      log?.scrollTo({ top: log.scrollHeight, behavior: 'smooth' });
+    });
   }
 
   function getChatStorage(): Storage | null {
@@ -344,13 +340,13 @@
     let snapshot: PersistSnapshot;
 
     if (callback) {
-      snapshot = {
+      snapshot = definedOptions({
         sink: 'callback',
         key: restoredPersistKey ?? resolvedPersistKey,
         messages: persistedMessages,
         callback,
         errorHandler: onPersistenceError,
-      };
+      });
     } else {
       const key = restoredPersistKey;
       if (key === null || !key || key !== resolvedPersistKey) return;
@@ -361,13 +357,13 @@
         reportPersistenceError('persist', error);
         return;
       }
-      snapshot = {
+      snapshot = definedOptions({
         sink: 'storage',
         key,
         messages: persistedMessages,
         storage,
         errorHandler: onPersistenceError,
-      };
+      });
     }
 
     if (persistTimer) clearTimeout(persistTimer);
@@ -382,8 +378,10 @@
   }
 
   function replaceMessages(nextMessages: ChatMessage[], persist = true): void {
+    const shouldScroll = shouldStickToBottom();
     messages = nextMessages;
     if (persist) schedulePersist(nextMessages);
+    scrollToBottomAfterUpdate(shouldScroll);
   }
 
   function updateMessageById(
@@ -392,10 +390,10 @@
   ): boolean {
     const index = messages.findIndex((message) => message.id === messageId);
     if (index < 0) return false;
+    const message = messages[index];
+    if (!message) return false;
     const nextMessages = [...messages];
-    const currentMessage = messages[index];
-    if (!currentMessage) return false;
-    nextMessages[index] = update(currentMessage);
+    nextMessages[index] = update(message);
     replaceMessages(nextMessages);
     return true;
   }
@@ -409,80 +407,80 @@
   }
 
   function parseStoredSource(value: unknown): ChatSource | null {
-    if (!isRecord(value) || typeof value.title !== 'string') return null;
-    const url = typeof value.url === 'string' ? safeResourceUrl(value.url) : undefined;
+    if (!isRecord(value) || typeof value['title'] !== 'string') return null;
+    const url = typeof value['url'] === 'string' ? safeResourceUrl(value['url']) : undefined;
     return {
-      ...(typeof value.id === 'string' ? { id: value.id } : {}),
-      title: value.title,
+      ...(typeof value['id'] === 'string' ? { id: value['id'] } : {}),
+      title: value['title'],
       ...(url ? { url } : {}),
-      ...(typeof value.quote === 'string' ? { quote: value.quote } : {}),
-      ...(typeof value.description === 'string' ? { description: value.description } : {}),
+      ...(typeof value['quote'] === 'string' ? { quote: value['quote'] } : {}),
+      ...(typeof value['description'] === 'string' ? { description: value['description'] } : {}),
     };
   }
 
   function parseStoredAttachment(value: unknown): ChatAttachment | null {
-    if (!isRecord(value) || typeof value.id !== 'string' || typeof value.name !== 'string') return null;
-    const url = typeof value.url === 'string' ? safeResourceUrl(value.url) : undefined;
+    if (!isRecord(value) || typeof value['id'] !== 'string' || typeof value['name'] !== 'string') return null;
+    const url = typeof value['url'] === 'string' ? safeResourceUrl(value['url']) : undefined;
     return {
-      id: value.id,
-      name: value.name,
-      ...(typeof value.mediaType === 'string' ? { mediaType: value.mediaType } : {}),
+      id: value['id'],
+      name: value['name'],
+      ...(typeof value['mediaType'] === 'string' ? { mediaType: value['mediaType'] } : {}),
       ...(url ? { url } : {}),
-      ...(typeof value.size === 'number' && Number.isFinite(value.size) ? { size: value.size } : {}),
+      ...(typeof value['size'] === 'number' && Number.isFinite(value['size']) ? { size: value['size'] } : {}),
     };
   }
 
   function parseStoredPart(value: unknown, fallbackId: string): ChatMessagePart | null {
-    if (!isRecord(value) || typeof value.type !== 'string') return null;
-    const id = typeof value.id === 'string' && value.id ? value.id : fallbackId;
-    switch (value.type) {
+    if (!isRecord(value) || typeof value['type'] !== 'string') return null;
+    const id = typeof value['id'] === 'string' && value['id'] ? value['id'] : fallbackId;
+    switch (value['type']) {
       case 'text':
-        return typeof value.text === 'string' ? { id, type: 'text', text: value.text } : null;
+        return typeof value['text'] === 'string' ? { id, type: 'text', text: value['text'] } : null;
       case 'reasoning':
-        return typeof value.text === 'string'
-          ? { id, type: 'reasoning', text: value.text, streaming: false }
+        return typeof value['text'] === 'string'
+          ? { id, type: 'reasoning', text: value['text'], streaming: false }
           : null;
       case 'tool-call':
-        return typeof value.tool === 'string' && isToolState(value.state)
+        return typeof value['tool'] === 'string' && isToolState(value['state'])
           ? {
               id,
               type: 'tool-call',
-              tool: value.tool,
-              input: value.input,
-              state: value.state,
-              ...(typeof value.callId === 'string' ? { callId: value.callId } : {}),
+              tool: value['tool'],
+              input: value['input'],
+              state: value['state'],
+              ...(typeof value['callId'] === 'string' ? { callId: value['callId'] } : {}),
             }
           : null;
       case 'tool-result':
-        return typeof value.tool === 'string'
+        return typeof value['tool'] === 'string'
           ? {
               id,
               type: 'tool-result',
-              tool: value.tool,
-              output: value.output,
-              ...(typeof value.error === 'string' ? { error: value.error } : {}),
-              ...(typeof value.callId === 'string' ? { callId: value.callId } : {}),
+              tool: value['tool'],
+              output: value['output'],
+              ...(typeof value['error'] === 'string' ? { error: value['error'] } : {}),
+              ...(typeof value['callId'] === 'string' ? { callId: value['callId'] } : {}),
             }
           : null;
       case 'source': {
-        const source = parseStoredSource(value.source);
+        const source = parseStoredSource(value['source']);
         return source ? { id, type: 'source', source } : null;
       }
       case 'image': {
-        const src = typeof value.src === 'string' ? safeResourceUrl(value.src) : undefined;
+        const src = typeof value['src'] === 'string' ? safeResourceUrl(value['src']) : undefined;
         return src
           ? {
               id,
               type: 'image',
               src,
-              ...(typeof value.alt === 'string' ? { alt: value.alt } : {}),
-              ...(typeof value.width === 'number' && Number.isFinite(value.width) ? { width: value.width } : {}),
-              ...(typeof value.height === 'number' && Number.isFinite(value.height) ? { height: value.height } : {}),
+              ...(typeof value['alt'] === 'string' ? { alt: value['alt'] } : {}),
+              ...(typeof value['width'] === 'number' && Number.isFinite(value['width']) ? { width: value['width'] } : {}),
+              ...(typeof value['height'] === 'number' && Number.isFinite(value['height']) ? { height: value['height'] } : {}),
             }
           : null;
       }
       case 'file': {
-        const file = parseStoredAttachment(value.file);
+        const file = parseStoredAttachment(value['file']);
         return file ? { id, type: 'file', file } : null;
       }
       case 'approval':
@@ -499,32 +497,29 @@
   function parseStoredMessage(value: unknown): ChatMessage | null {
     if (!isRecord(value)) return null;
     if (
-      typeof value.id !== 'string'
-      || (value.role !== 'user' && value.role !== 'assistant')
-      || !Array.isArray(value.parts)
-      || typeof value.createdAt !== 'number'
-      || !Number.isFinite(value.createdAt)
+      typeof value['id'] !== 'string'
+      || (value['role'] !== 'user' && value['role'] !== 'assistant')
+      || !Array.isArray(value['parts'])
+      || typeof value['createdAt'] !== 'number'
+      || !Number.isFinite(value['createdAt'])
     ) return null;
 
-    const parts = value.parts
-      .map((part, index) => parseStoredPart(part, `${value.id}-part-${index}`))
+    const parts = value['parts']
+      .map((part, index) => parseStoredPart(part, `${value['id']}-part-${index}`))
       .filter((part): part is ChatMessagePart => part !== null);
     if (parts.length === 0) return null;
 
-    const attachments = Array.isArray(value.attachments)
-      ? value.attachments
+    const attachments = Array.isArray(value['attachments'])
+      ? value['attachments']
           .map(parseStoredAttachment)
           .filter((attachment): attachment is ChatAttachment => attachment !== null)
       : [];
     return {
-      id: value.id,
-      role: value.role,
+      id: value['id'],
+      role: value['role'],
       parts,
-      status: value.status === 'error' || value.status === 'aborted' ? value.status : 'complete',
-      createdAt: value.createdAt,
-      ...(value.role === 'user' && typeof value.approvalConfirmationFor === 'string'
-        ? { approvalConfirmationFor: value.approvalConfirmationFor }
-        : {}),
+      status: value['status'] === 'error' || value['status'] === 'aborted' ? value['status'] : 'complete',
+      createdAt: value['createdAt'],
       ...(attachments.length > 0 ? { attachments } : {}),
     };
   }
@@ -590,7 +585,7 @@
         ? 'aborted' as const
         : message.status;
       if (status !== message.status) changed = true;
-      return changed ? { ...message, parts, status } : message;
+      return changed ? definedOptions({ ...message, parts, status }) : message;
     });
   }
 
@@ -755,12 +750,12 @@
       case 'text':
         return appendPart(message, textPart(event.content));
       case 'reasoning':
-        return appendPart(message, {
+        return appendPart(message, definedOptions({
           id: createId('part'),
           type: 'reasoning',
           text: event.content,
-          streaming: event.streaming ?? false,
-        });
+          streaming: event.streaming,
+        }));
       case 'tool_call':
         return appendPart(message, {
           id: createId('part'),
@@ -877,15 +872,11 @@
   async function sendMessage(
     rawValue = inputValue,
     attachments = inputAttachments,
-    retryId?: string,
   ): Promise<void> {
     const value = rawValue.trim();
     const activeAgent = agent;
     const activeProvider = provider;
-    if (isStreaming || (!activeAgent && !activeProvider)) return;
-    const retry = retryId ? retryCandidate : undefined;
-    if (retryId && (retry?.id !== retryId || retry.missingFiles)) return;
-    if (!retryId && value.length === 0 && attachments.length === 0) return;
+    if ((value.length === 0 && attachments.length === 0) || isStreaming || (!activeAgent && !activeProvider)) return;
 
     // A new run revokes unresolved approval capabilities from the previous run.
     if (approvalEntries.size > 0 || abortController) invalidateActiveRun();
@@ -915,17 +906,11 @@
       status: 'streaming',
       createdAt: Date.now(),
     };
-    const nextMessages = retry
-      ? [...messages.slice(0, retry.index), assistantMessage]
-      : [...messages, userMessage, assistantMessage];
-    const sentMessages = nextMessages
-      .filter((message) => message.parts.length > 0)
-      .map(({ approvalConfirmationFor: _provenance, ...message }) => message);
+    const nextMessages = [...messages, userMessage, assistantMessage];
+    const sentMessages = nextMessages.filter((message) => message.parts.length > 0);
 
-    if (!retryId) {
-      inputValue = '';
-      inputAttachments = [];
-    }
+    inputValue = '';
+    inputAttachments = [];
     replaceMessages(nextMessages);
 
     const controller = new AbortController();
@@ -1005,7 +990,6 @@
     return {
       id: createId('user'),
       role: 'user',
-      approvalConfirmationFor: entry.messageId,
       parts: [textPart(
         `User ${decision} execution of tool '${entry.tool}'`,
       )],
@@ -1406,22 +1390,10 @@
                   </MessageContent>
                   <MessageToolbar>
                     <span>{message.status ?? 'complete'}</span>
-                    {#if message.id === retryCandidate?.id}
-                      <button
-                        type="button"
-                        class="svadmin-ai__button svadmin-ai__button--ghost size-8 min-h-8 p-0"
-                        aria-label="Retry response"
-                        title={retryCandidate.missingFiles ? 'Reattach files to send this request again.' : 'Retry response'}
-                        disabled={isStreaming || retryCandidate.missingFiles}
-                        onclick={() => { void sendMessage('', [], message.id); }}
-                      ><RotateCcw size={14} aria-hidden="true" /></button>
-                      {#if retryCandidate.missingFiles}<span role="status">Reattach files to send this request again.</span>{/if}
-                    {/if}
                   </MessageToolbar>
                 </Message>
               {/each}
             </ConversationContent>
-            <ConversationScrollButton />
           </Conversation>
 
           <footer class="shrink-0 border-t border-border/70 bg-card p-3">

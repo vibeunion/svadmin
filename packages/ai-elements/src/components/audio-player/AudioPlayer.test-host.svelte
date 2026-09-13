@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import AudioPlayer from './AudioPlayer.svelte';
 
   let { onerror }: { onerror?: (event: Event) => void } = $props();
@@ -15,4 +17,4 @@
 <button type="button" onclick={() => { src = '/second.mp3'; }}>Change source</button>
 <output aria-label="Audio state">{currentTime}|{volume}|{playing}</output>
 
-<AudioPlayer {src} duration={30} bind:currentTime bind:volume bind:playing {onerror} />
+<AudioPlayer {src} duration={30} bind:currentTime bind:volume bind:playing {...definedOptions({ "onerror": onerror })} />

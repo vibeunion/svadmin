@@ -1,4 +1,4 @@
-import { createInfiniteQuery, hashKey, type InfiniteData, type InfiniteQueryObserverBaseResult, type QueryObserverResult,
+import { createInfiniteQuery, type InfiniteData, type InfiniteQueryObserverBaseResult, type QueryObserverResult,
   type RefetchOptions, type FetchNextPageOptions, type FetchPreviousPageOptions } from '@tanstack/svelte-query';
 import { tick } from 'svelte';
 import { Type } from '@sinclair/typebox';
@@ -19,7 +19,7 @@ import {
   createQuerySession, createQueryResultView, pendingQueryResult, querySessionError, supersededQuerySession,
 } from './query-session.svelte';
 
-export interface UseInfiniteListOptions<_TData extends BaseRecord = BaseRecord, _TError = HttpError> extends ContractOptions {
+export interface UseInfiniteListOptions extends ContractOptions {
   resource?: KnownResources;
   pagination?: Pagination;
   sorters?: Sort[];
@@ -96,7 +96,6 @@ export function createInfiniteListQuery<TData extends BaseRecord>(
   const adminOptions = getAdminOptions();
   type Data = Pages<TData>;
   type Result = InfiniteListResult<TData>;
-  const inFlight = new Map<string, { origin: typeof session.options; request: Promise<GetListResult<TData>> }>();
   const session = createQuerySession(context, () => {
     const resource = options.resource ?? parsed.resource ?? '';
     const captured = captureQueryProvider(context, {
@@ -121,29 +120,15 @@ export function createInfiniteListQuery<TData extends BaseRecord>(
     const origin = session.options;
     return {
       queryKey: origin.queryKey, initialPageParam: 1,
-      queryFn: ({ pageParam, signal }) => {
-        const key = hashKey([origin.queryKey, pageParam]);
-        const existing = inFlight.get(key);
-        if (existing && session.current(existing.origin)) return existing.request;
-        if (existing) inFlight.delete(key);
-        const request = session.run(origin, async () => {
+      queryFn: ({ pageParam }) => session.run(origin, async () => {
         if (typeof pageParam !== 'number' || !Number.isSafeInteger(pageParam) || pageParam < 1) {
           throw new HttpError('Invalid page number', 422, undefined, { code: 'INVALID_RESOURCE_INPUT' });
         }
         const result = await origin.captured.provider.getList(snapshotListParams({
           ...origin.params, pagination: { ...origin.params.pagination, current: pageParam },
-          ...definedOptions({ signal }),
         }));
         return decodeListResult(result, origin.decode);
-        });
-        inFlight.set(key, { origin, request });
-        void request.then(() => {
-          if (inFlight.get(key)?.request === request) inFlight.delete(key);
-        }, () => {
-          if (inFlight.get(key)?.request === request) inFlight.delete(key);
-        });
-        return request;
-      },
+      }),
       getNextPageParam: (_last, pages, _lastParam, pageParams) => {
         if (!session.sessionCurrent(origin)) return undefined;
         try {
@@ -175,28 +160,20 @@ export function createInfiniteListQuery<TData extends BaseRecord>(
     };
   }
   function project(origin: Origin, result: QueryObserverResult<Data, unknown>): Result {
-    async function run(
-      request: () => Promise<QueryObserverResult<Data, unknown>>,
-      settings?: RefetchOptions | FetchNextPageOptions | FetchPreviousPageOptions,
-    ): Promise<Result> {
+    async function run(request: () => Promise<QueryObserverResult<Data, unknown>>): Promise<Result> {
       if (!session.current(origin)) return pending(operations);
       await tick();
       if (!session.current(origin)) return pending(operations);
       try {
-        const result = await request();
-        if (!session.current(origin)) {
-          if (settings?.throwOnError === true) throw supersededQuerySession();
-          return pending(operations);
-        }
-        return project(origin, result);
+        return project(origin, await request());
       } catch (error) {
         throw session.current(origin) ? querySessionError(error) : supersededQuerySession();
       }
     }
     const operations: Operations = {
-      refetch: settings => run(() => raw.refetch(settings), settings),
-      fetchNextPage: settings => run(() => raw.fetchNextPage(settings), settings),
-      fetchPreviousPage: settings => run(() => raw.fetchPreviousPage(settings), settings),
+      refetch: settings => run(() => raw.refetch(settings)),
+      fetchNextPage: settings => run(() => raw.fetchNextPage(settings)),
+      fetchPreviousPage: settings => run(() => raw.fetchPreviousPage(settings)),
     };
     if (!session.current(origin)) return pending(operations);
     const state = session.client.getQueryState(origin.queryKey);

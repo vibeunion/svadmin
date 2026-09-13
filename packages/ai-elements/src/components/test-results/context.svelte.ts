@@ -4,7 +4,7 @@ import type { TestResultStatus } from './TestResults.svelte';
 export interface TestResultsSummaryData { passed: number; failed: number; skipped: number; total: number; duration?: number; }
 export interface TestResultsContextValue { readonly summary?: TestResultsSummaryData; }
 export interface TestSuiteContextValue { readonly name: string; readonly status: TestResultStatus; readonly open: boolean; setOpen(open: boolean): void; }
-export interface TestContextValue { readonly name: string; readonly status: TestResultStatus; readonly duration?: number; }
+export interface TestContextValue { readonly name: string; readonly status: TestResultStatus; readonly duration?: number | undefined; }
 
 const [getResultsContext, setResultsContext] = createContext<TestResultsContextValue>();
 const [getSuiteContext, setSuiteContext] = createContext<TestSuiteContextValue>();

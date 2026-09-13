@@ -68,7 +68,8 @@
 
 {#if display.status === 'invalid'}
   <span role="status" data-svadmin-invalid-field>{i18n.t('validation.invalidFormat')}</span>
-{:else if !formattedCode}  <span class={cn('field-code svadmin-u-bfa603190748 svadmin-u-fc7473ca09eb', className)}>{nullLabel}</span>
+{:else if !formattedCode}
+  <span class={cn('field-code svadmin-u-bfa603190748 svadmin-u-fc7473ca09eb', className)}>{nullLabel}</span>
 {:else}
   <div class={cn('field-code svadmin-u-d89972fe17d6 group svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-c9ed8c5f79ae svadmin-u-b00f43c30c2b svadmin-u-359090c2d529 svadmin-u-0e65706bcccd', className)}>
     {#if language || copyable}

@@ -171,11 +171,7 @@ function createProviderBundle(instance: string, dataProvider: AdminProviderBundl
 }
 
 function createConsumerProviderBundle(instance: string) {
-  const accessCan = vi.fn(async (request: Parameters<AccessControlProvider['can']>[0]) => (
-    Array.isArray(request)
-      ? request.map(() => ({ can: true }))
-      : { can: true }
-  ));
+  const accessCan = vi.fn<AccessControlProvider['can']>(async () => ({ can: true }));
   const auditGet = vi.fn(async () => []);
   const chatSend = vi.fn(async (
     _messages: Parameters<ChatProvider['sendMessage']>[0],
@@ -319,7 +315,7 @@ describe('AdminApp context isolation', () => {
     expect(probe.getAttribute('data-resource-provider')).toBe('https://bundle-analytics.example.test');
     expect(probe.getAttribute('data-auth')).toBe('direct-auth');
     expect(probe.getAttribute('data-live')).toBe('first-bundle-live');
-    expect(probe.getAttribute('data-access')).toBe('first-bundle-access');
+    expect(probe.getAttribute('data-access')).toBe('scoped');
     expect(probe.getAttribute('data-audit')).toBe('first-bundle-audit');
     expect(probe.getAttribute('data-notification')).toBe('first-bundle-notification');
     expect(probe.getAttribute('data-chat')).toBe('first-bundle-chat');
@@ -331,7 +327,7 @@ describe('AdminApp context isolation', () => {
     expect(secondProbe.getAttribute('data-resource-provider')).toBe('https://second-analytics.example.test');
     expect(secondProbe.getAttribute('data-auth')).toBe('second-bundle-auth');
     expect(secondProbe.getAttribute('data-live')).toBe('second-bundle-live');
-    expect(secondProbe.getAttribute('data-access')).toBe('second-bundle-access');
+    expect(secondProbe.getAttribute('data-access')).toBe('scoped');
     expect(secondProbe.getAttribute('data-audit')).toBe('second-bundle-audit');
     expect(secondProbe.getAttribute('data-notification')).toBe('second-bundle-notification');
     expect(secondProbe.getAttribute('data-chat')).toBe('second-bundle-chat');

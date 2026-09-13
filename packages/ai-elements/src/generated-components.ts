@@ -18,7 +18,7 @@ export interface RuntimeGeneratedComponentDefinition {
 
 export type GeneratedComponentRegistry = Record<string, RuntimeGeneratedComponentDefinition>;
 
-/** 定义 Agent 可渲染组件，并以 TypeBox schema 作为运行时 props 边界。 */
+/** Defines Agent-rendered components with a TypeBox schema as the runtime props boundary. */
 export function defineGeneratedComponent<const Schema extends TObject>(
   definition: GeneratedComponentDefinition<Schema>,
 ): GeneratedComponentDefinition<Schema> {

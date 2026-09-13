@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import { Command as CommandPrimitive, Dialog as DialogPrimitive } from 'bits-ui';
   import Root from './command.svelte';
   import * as Dialog from '../dialog/index.js';
@@ -24,7 +26,7 @@
   }: Props = $props();
 </script>
 
-<Dialog.Dialog bind:open {onOpenChange} {onOpenChangeComplete}>
+<Dialog.Dialog bind:open {...definedOptions({ "onOpenChange": onOpenChange })} {...definedOptions({ "onOpenChangeComplete": onOpenChangeComplete })}>
   <Dialog.DialogContent
     data-cmdk-dialog=""
     class="svadmin-command-dialog-content"

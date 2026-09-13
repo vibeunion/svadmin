@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import PromptInput from './PromptInput.svelte';
   import PromptInputSpeechButton from './PromptInputSpeechButton.svelte';
   import PromptInputTextarea from './PromptInputTextarea.svelte';
@@ -14,5 +16,5 @@
 
 <PromptInput bind:value>
   <PromptInputTextarea aria-label="Speech prompt" />
-  <PromptInputSpeechButton {ontranscriptionchange} />
+  <PromptInputSpeechButton {...definedOptions({ "ontranscriptionchange": ontranscriptionchange })} />
 </PromptInput>

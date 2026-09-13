@@ -48,7 +48,7 @@ function nativeCreate(source: DataProvider) {
   if (!source.createMany) throw new Error('Expected a native batch provider');
   return vi.mocked(source.createMany);
 }
-function deferred<T = void>() {
+function deferred<T>() {
   let resolve: (value: T) => void = () => { throw new Error('Not initialized'); };
   let reject: (cause: unknown) => void = () => { throw new Error('Not initialized'); };
   const promise = new Promise<T>((done, fail) => { resolve = done; reject = fail; });
@@ -157,13 +157,13 @@ describe.each(['native', 'fallback'] as const)('%s batch authentication ownershi
     const source = provider();
     if (mode === 'fallback') delete source.createMany;
     const app = await mountSession(source);
-    const gate = deferred();
+    const gate = deferred<undefined>();
     const observer = vi.fn(() => gate.promise);
     app.client.getMutationCache().config.onMutate = observer;
     const operation = app.read().create.mutation.mutateAsync({ variables }).catch((error: unknown) => error);
     await waitFor(() => expect(observer).toHaveBeenCalledTimes(1));
     await app.actions().login.mutate({});
-    gate.resolve();
+    gate.resolve(undefined);
     expect(await operation).toMatchObject({ code: 'CREATE_MANY_CANCELLED', details: {
       writeMayHaveSucceeded: false, attemptedIndexes: [], unattemptedIndexes: [0, 1],
     } });
@@ -191,7 +191,7 @@ describe.each(['native', 'fallback'] as const)('%s batch authentication ownershi
 
   it.each(['login', 'logout', 'check', 'provider'] as const)('withholds dispatched receipts when %s retires the session', async change => {
     const source = provider();
-    const gate = deferred();
+    const gate = deferred<undefined>();
     source.createMany = vi.fn(async () => { await gate.promise; return { data: rows }; });
     source.create = vi.fn(async () => { await gate.promise; return { data: rows[0] }; });
     if (mode === 'fallback') delete source.createMany;
@@ -207,7 +207,7 @@ describe.each(['native', 'fallback'] as const)('%s batch authentication ownershi
     else if (change === 'check') await app.actions().check.refetch();
     else await app.view.rerender({ auth: auth() });
     const invalidate = vi.spyOn(app.client, 'invalidateQueries');
-    gate.resolve();
+    gate.resolve(undefined);
     const error: unknown = await operation;
     expect(error).toMatchObject({ code: 'CREATE_MANY_CANCELLED', details: {
       writeMayHaveSucceeded: true, attemptedIndexes: mode === 'native' ? [0, 1] : [0],
@@ -386,7 +386,7 @@ describe('batch progress and completion ownership', () => {
       vi.mocked(source.create).mockResolvedValueOnce({ data: rows[0] }).mockRejectedValueOnce(new Error('PRIVATE'));
     } else nativeCreate(source).mockReturnValueOnce(receipt.promise);
     const app = await mountSession(source);
-    const gate = deferred();
+    const gate = deferred<undefined>();
     const observer = vi.fn(() => gate.promise);
     if (outcome === 'success') app.client.getMutationCache().config.onSuccess = observer;
     else app.client.getMutationCache().config.onError = observer;
@@ -399,7 +399,7 @@ describe('batch progress and completion ownership', () => {
     }
     await waitFor(() => expect(observer).toHaveBeenCalledTimes(1));
     await app.actions().login.mutate({});
-    gate.resolve();
+    gate.resolve(undefined);
     const error: unknown = await operation;
     expect(error).toMatchObject({ code: 'CREATE_MANY_CANCELLED', details: {
       writeMayHaveSucceeded: outcome !== 'preflight', attemptedIndexes: outcome === 'preflight' ? [] : [0, 1],
@@ -500,8 +500,8 @@ describe('batch progress and completion ownership', () => {
     const { builder, owner } = scopedKeys(app, posts, captureAuthSession(app.session).cacheKey);
     app.client.setQueryData(builder.data.select('posts', owner), {});
     app.client.setQueryData(builder.data.one('posts', 1, owner), {});
-    const collectionGate = deferred();
-    const detailGate = deferred();
+    const collectionGate = deferred<undefined>();
+    const detailGate = deferred<undefined>();
     const refresh = vi.spyOn(app.client, 'invalidateQueries').mockRejectedValueOnce(new Error('PRIVATE'))
       .mockReturnValueOnce(collectionGate.promise).mockReturnValue(detailGate.promise);
     let settled = false;
@@ -510,11 +510,11 @@ describe('batch progress and completion ownership', () => {
     await waitFor(() => expect(refresh).toHaveBeenCalledTimes(3));
     await app.actions().login.mutate({});
     expect(settled).toBe(false);
-    collectionGate.resolve();
+    collectionGate.resolve(undefined);
     await collectionGate.promise;
     await Promise.resolve();
     expect(settled).toBe(false);
-    detailGate.resolve();
+    detailGate.resolve(undefined);
     const error: unknown = await operation;
     expect(error).toMatchObject({ code: 'CREATE_MANY_CANCELLED' });
     expect(error).not.toHaveProperty('details.succeeded');
@@ -1205,7 +1205,7 @@ describe('contract-bound batch create', () => {
     await ready(app);
     const { builder, owner } = scopedKeys(app);
     app.client.setQueryData(builder.data.list('posts', { ...owner, extra: true }), {});
-    const hold = deferred();
+    const hold = deferred<undefined>();
     const invalidate = vi.spyOn(app.client, 'invalidateQueries')
       .mockRejectedValueOnce(new Error('refresh'))
       .mockImplementation(() => hold.promise);
@@ -1213,7 +1213,7 @@ describe('contract-bound batch create', () => {
     const operation = app.read().create.mutation.mutateAsync({ variables }).finally(() => { settled = true; });
     await waitFor(() => expect(invalidate.mock.calls.length).toBeGreaterThan(1));
     expect(settled).toBe(false);
-    hold.resolve();
+    hold.resolve(undefined);
     await expect(operation).resolves.toMatchObject({ data: [{ id: 1 }, { id: 2 }] });
   });
 });

@@ -5,6 +5,7 @@
   import { useResourceContract, useSelect } from '@svadmin/core';
   import type { BaseRecord, Filter } from '@svadmin/core';
   import type { HTMLButtonAttributes } from 'svelte/elements';
+  import type { ButtonProps } from './ui/button/index.js';
   import { Button } from './ui/button/index.js';
   import { Command } from './ui/command/index.js';
   import { Skeleton } from './ui/skeleton/index.js';
@@ -46,6 +47,8 @@
     ...restProps
   }: Props = $props();
 
+  const buttonRestProps = $derived(restProps as Omit<ButtonProps, 'children' | 'variant' | 'size'>);
+
   const binding = useResourceContract(() => resource);
   const defaultSearch = $derived.by(() => {
     const field = optionLabel;
@@ -63,6 +66,7 @@
         throw new TypeError('Invalid select value field');
       };
     },
+    get projectionKey() { return `combobox:${optionLabel}:${optionValue}`; },
     get defaultValue() { return value === null ? [] : [value]; },
     get onSearch() { return onSearch ?? (searchable ? defaultSearch : undefined); },
   }));
@@ -105,12 +109,13 @@
 </script>
 
 <div class="svadmin-u-d89972fe17d6" use:clickOutside>
-  <div class="select-control">  <Button
+  <div class="select-control">
+  <Button
     variant="outline"
     type="button"
     class="svadmin-u-6da6a3c3f741 svadmin-u-8ef2268efbbc svadmin-u-8ecebc9f80e6"
     onclick={() => { open = !open; }}
-    {...restProps}
+    {...buttonRestProps}
     {disabled}
     aria-haspopup="listbox"
     aria-expanded={open}
@@ -143,7 +148,8 @@
 
   {#if open}
     <div class="svadmin-u-da4dbfbc4fdc svadmin-u-181b286668b5 svadmin-u-b6b02c0ebef6 svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e541d86d1ec8 svadmin-u-06bbb43166db">
-      <Command.Root shouldFilter={false} class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-2cd02d11d1af svadmin-u-421ac2be5045 svadmin-u-e541d86d1ec8 svadmin-u-9b13e8ae5c9c">        {#if searchable}
+      <Command.Root shouldFilter={false} class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-2cd02d11d1af svadmin-u-421ac2be5045 svadmin-u-e541d86d1ec8 svadmin-u-9b13e8ae5c9c">
+        {#if searchable}
           <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-65fdbade2025 svadmin-u-d5eab218aa34">
             <Search class="svadmin-u-82cc6c6581cd svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-012fbd121f37 svadmin-u-0b8c506a0596" />
             <Command.Input
@@ -155,7 +161,8 @@
           </div>
         {/if}
         <Command.List class="svadmin-u-558f64349245 svadmin-u-92bf82f493b1 svadmin-u-eb6a3cef9686">
-          {#if select.isLoading}            {#each Array(3) as _, _i (_i)}
+          {#if select.isLoading}
+            {#each Array(3) as _, _i (_i)}
               <div class="svadmin-u-d5eab218aa34 svadmin-u-ec0091ee009b"><Skeleton class="svadmin-u-cd0d9c512cdc svadmin-u-6da6a3c3f741" /></div>
             {/each}
           {:else if !select.isError}

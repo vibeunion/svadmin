@@ -13,6 +13,8 @@
 </script>
 
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import { cn } from '../../utils.js';
   import Tooltip from '../../internal/Tooltip.svelte';
 
@@ -31,7 +33,7 @@
   const actionChildren = $derived(children);
 </script>
 
-<Tooltip content={tooltip}>
+<Tooltip {...definedOptions({ "content": tooltip })}>
   {#snippet children({ describedBy: tooltipDescribedBy })}
   <button
     {...rest}

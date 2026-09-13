@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import { BaseEdge, getBezierPath, Position, useInternalNode } from '@xyflow/svelte';
   import type { InternalNode } from '@xyflow/svelte';
   import type { EdgeProps } from '@xyflow/svelte';
@@ -69,14 +71,12 @@
 <BaseEdge
   {id}
   {path}
-  {label}
+  {...definedOptions({ "label": label })}
   labelX={computedLabelX}
   labelY={computedLabelY}
-  {labelStyle}
-  {interactionWidth}
-  {markerStart}
-  {markerEnd}
-  {style}
+  {...definedOptions({ "labelStyle": labelStyle })}
+  {...definedOptions({ "interactionWidth": interactionWidth })}
+  {...definedOptions({ markerStart, markerEnd, style })}
   class="svadmin-ai-edge-animated"
 />
 

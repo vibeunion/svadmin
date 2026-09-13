@@ -4,7 +4,7 @@ import type { ChatAttachment, ChatSource } from '../../contracts.js';
 
 export interface PromptInputFile extends ChatAttachment {
   filename?: string;
-  /** 由输入组件创建并负责释放的本地预览 URL。 */
+  /** Local preview URL created and released by the input component. */
   previewUrlOwned?: boolean;
 }
 
@@ -26,13 +26,6 @@ export interface PromptInputTextContext {
 export interface PromptInputController {
   readonly textInput: PromptInputTextContext;
   readonly attachments: PromptInputAttachmentsContext;
-  readonly form?: {
-    readonly disabled: boolean;
-    readonly busy: boolean;
-    readonly status: 'submitted' | 'streaming' | 'error' | 'ready';
-    readonly canSubmit: boolean;
-    readonly onstop?: () => void;
-  };
   readonly syncHiddenInput?: boolean;
   registerFileInput(input: HTMLInputElement | null, open?: () => void): void;
 }

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import { Type } from '@sinclair/typebox';
   import {
     defineJSXPreviewComponent,
@@ -50,7 +52,7 @@
       {isStreaming}
       {bindings}
       components={{ Card: cardDefinition, Badge: defineJSXPreviewSnippet({ snippet: badge, schema: badgeSchema }), FormCard: formCardDefinition }}
-      {onerror}
+      {...definedOptions({ "onerror": onerror })}
     >
       <JSXPreviewContent data-testid="preview-content" />
       <JSXPreviewError data-testid="preview-error" />
@@ -62,7 +64,7 @@
     {isStreaming}
     {bindings}
     components={{ Card: cardDefinition, Badge: defineJSXPreviewSnippet({ snippet: badge, schema: badgeSchema }), FormCard: formCardDefinition }}
-    {onerror}
+    {...definedOptions({ "onerror": onerror })}
   >
     <JSXPreviewContent data-testid="preview-content" />
     <JSXPreviewError data-testid="preview-error" />

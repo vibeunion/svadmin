@@ -1,10 +1,10 @@
 <script lang="ts">
   import { definedOptions } from '@svadmin/core/options';
 
-  import { useCan, useNavigation } from '@svadmin/core';
+  import { useCan, useNavigation, type FieldDefinition } from '@svadmin/core';
   import { useRecordDetail } from './record-detail.svelte';
   import { useTranslation } from '@svadmin/core/i18n';
-  import { Eye, Pencil, RefreshCw } from '@lucide/svelte';
+  import { Copy, Check, Eye, Pencil, RefreshCw } from '@lucide/svelte';
   import DetailDrawer from './DetailDrawer.svelte';
   import FieldDisplay from './FieldDisplay.svelte';
   import { Button } from './ui/button/index.js';
@@ -27,6 +27,18 @@
   const detail = useRecordDetail(() => ({ resourceName, id: recordId }));
   const resource = $derived(detail.resource);
   const showFields = $derived(detail.fields);
+  const fieldGroups = $derived.by(() => {
+    const groups = new Map<string, FieldDefinition[]>();
+    for (const field of showFields) {
+      const label = field.group ?? '';
+      const fields = groups.get(label) ?? [];
+      fields.push(field);
+      groups.set(label, fields);
+    }
+    return [...groups].map(([label, fields]) => ({ label, fields }));
+  });
+  let copyState = $state<'idle' | 'copied' | 'error'>('idle');
+  $effect(() => { void recordId; void resourceName; copyState = 'idle'; });
   const permissionPending = $derived(detail.checkingPermission);
   const canReadRecord = $derived(detail.canRead);
   const query = detail.query;
@@ -41,7 +53,33 @@
     navigation[action](resourceName, recordId);
     open = false;
   }
+
+  async function copyId(): Promise<void> {
+    if (!canReadRecord || !query.isSuccess) return;
+    const id = recordId;
+    try {
+      await navigator.clipboard.writeText(String(id));
+      if (recordId === id) copyState = 'copied';
+    } catch {
+      if (recordId === id) copyState = 'error';
+    }
+  }
 </script>
+
+{#snippet fieldsList(fields: FieldDefinition[])}
+  {#if query.isSuccess}
+    <dl class="svadmin-u-fa6acbf81d74 svadmin-u-d2c3932343f5">
+      {#each fields as field (field.key)}
+        <div class="svadmin-u-f3c543ad5fe9 svadmin-u-58284b4ea568 svadmin-u-cb11fec3bb46 svadmin-u-d9bdd3d643a2 svadmin-u-022e8076dfea">
+          <dt class="svadmin-u-359090c2d529 svadmin-u-2689f3958069 svadmin-u-bfa603190748 svadmin-u-e2327d142859">{field.label}</dt>
+          <dd class="svadmin-u-7e0b7cdf1a94 svadmin-u-170cee3ff4e4 svadmin-u-fc7473ca09eb svadmin-u-d4108abe6359">
+            <FieldDisplay type={field.type} value={query.data.data[field.key]} options={field.options} resourceName={field.resource} />
+          </dd>
+        </div>
+      {/each}
+    </dl>
+  {/if}
+{/snippet}
 
 <DetailDrawer
   bind:open
@@ -52,6 +90,19 @@
   {...definedOptions({ onClose })}
   data-svadmin-record-detail
 >
+  {#snippet extra()}
+    {#if canReadRecord && query.isSuccess}
+      <Button type="button" variant="ghost" size="icon" onclick={copyId}
+        title={i18n.t('common.copyId')} aria-label={i18n.t('common.copyId')}>
+        {#if copyState === 'copied'}
+          <Check class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+        {:else}
+          <Copy class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+        {/if}
+      </Button>
+      <span role="status">{copyState === 'copied' ? i18n.t('common.copied') : copyState === 'error' ? i18n.t('common.operationFailed') : ''}</span>
+    {/if}
+  {/snippet}
   {#if permissionPending || (canReadRecord && query.isLoading)}
     <div class="svadmin-u-fa6acbf81d74 svadmin-u-d2c3932343f5" role="status" aria-live="polite" aria-label={i18n.t('common.loading')} aria-busy="true">
       {#each showFields.slice(0, 6) as field (field.key)}
@@ -74,18 +125,18 @@
       </Button>
     </div>
   {:else if query.isSuccess}
-    {@const record = query.data.data}
-    <dl class="svadmin-u-fa6acbf81d74 svadmin-u-d2c3932343f5">
-      {#each showFields as field (field.key)}
-        {@const value = record[field.key]}
-        <div class="svadmin-u-f3c543ad5fe9 svadmin-u-58284b4ea568 svadmin-u-cb11fec3bb46 svadmin-u-d9bdd3d643a2 svadmin-u-022e8076dfea">
-          <dt class="svadmin-u-359090c2d529 svadmin-u-2689f3958069 svadmin-u-bfa603190748 svadmin-u-e2327d142859">{field.label}</dt>
-          <dd class="svadmin-u-7e0b7cdf1a94 svadmin-u-170cee3ff4e4 svadmin-u-fc7473ca09eb svadmin-u-d4108abe6359">
-            <FieldDisplay type={field.type} {value} options={field.options} resourceName={field.resource} />
-          </dd>
-        </div>
+    {#key `${resourceName}:${recordId}`}
+      {#each fieldGroups as group, index (group.label)}
+        {#if group.label}
+          <details open={index === 0} class="record-detail-group">
+            <summary>{group.label}</summary>
+            {@render fieldsList(group.fields)}
+          </details>
+        {:else}
+          {@render fieldsList(group.fields)}
+        {/if}
       {/each}
-    </dl>
+    {/key}
   {:else}
     <div class="svadmin-u-61357c0c2f29 svadmin-u-ca6bf63030aa">
       <p class="svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">{i18n.t('common.noData')}</p>
@@ -107,3 +158,9 @@
     {/if}
   {/snippet}
 </DetailDrawer>
+
+<style>
+  .record-detail-group { border-bottom: 1px solid var(--border); }
+  .record-detail-group summary { cursor: pointer; padding: 12px 0; font-weight: 500; }
+  .record-detail-group summary:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+</style>

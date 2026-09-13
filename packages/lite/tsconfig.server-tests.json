@@ -1,15 +1,8 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "skipLibCheck": false,
-    "types": [
-      "node",
-      "svelte",
-      "vite/client"
-    ]
+    "types": ["node", "svelte", "vite/client"]
   },
-  "include": [
-    "src/server-adapter.test.integration.ts",
-    "src/server-adapter.test.config.ts"
-  ]
+  "include": ["src/server-adapter.test.integration.ts", "src/server-adapter.test.config.ts"]
 }

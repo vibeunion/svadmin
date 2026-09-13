@@ -1,8 +1,9 @@
 <script module lang="ts">
   import type { Snippet } from 'svelte'; import type { HTMLAttributes } from 'svelte/elements';
-  export interface VoiceSelectorProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'class'> { value?: string; defaultValue?: string; open?: boolean; defaultOpen?: boolean; class?: string; children?: Snippet; onvaluechange?: (value: string | undefined) => void; onopenchange?: (open: boolean) => void; }
+  export interface VoiceSelectorProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'class'> { value?: string | undefined; defaultValue?: string; open?: boolean; defaultOpen?: boolean; class?: string; children?: Snippet; onvaluechange?: (value: string | undefined) => void; onopenchange?: (open: boolean) => void; }
 </script>
 <script lang="ts">
+
   import { cn } from '../../utils.js'; import { provideVoiceSelector, type VoiceSelectorItemRegistration } from './context.svelte.js';
   let { value = $bindable<string | undefined>(), defaultValue, open = $bindable(false), defaultOpen = false, class: className = '', children, onvaluechange, onopenchange, onkeydown, ...rest }: VoiceSelectorProps = $props();
   let initialized = false;

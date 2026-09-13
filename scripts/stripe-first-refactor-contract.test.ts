@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'bun:test';
 import { readdirSync, readFileSync } from 'node:fs';
 import { relative, resolve } from 'node:path';
+import utilityClasses from '../packages/ui/scripts/utility-class-map.json' with { type: 'json' };
 
 const root = resolve(import.meta.dir, '..');
 const read = (path: string) => readFileSync(resolve(root, path), 'utf8');
@@ -133,11 +134,11 @@ describe('Stripe-first refactor contract', () => {
     expect(integrations).not.toContain("connected: false");
     expect(read('packages/ui/src/components/AboutSettings.svelte')).toContain('<SettingsGroup');
     expect(read('packages/ui/src/components/SettingsPage.svelte')).not.toContain('tracking-wider');
-    const utilityAliases = JSON.parse(read('packages/ui/scripts/utility-class-map.json'));
-    expect(read('packages/ui/src/components/content/WorkspaceLayout.svelte')).toContain(utilityAliases['items-start']);
+    expect(read('packages/ui/src/components/content/WorkspaceLayout.svelte')).toContain(utilityClasses['items-start']);
     expect(read('packages/ui/src/components/account/CompanyProfilePage.svelte')).toContain('<WorkspaceLayout');
     expect(read('packages/ui/src/components/account/UserProfilePage.svelte')).toContain('<WorkspaceLayout');
-    expect(read('packages/ui/src/components/account/SettingsEnterprisePage.svelte')).toContain(`${utilityAliases.grid} ${utilityAliases['items-start']}`);  });
+    expect(read('packages/ui/src/components/account/SettingsEnterprisePage.svelte')).toContain(`${utilityClasses.grid} ${utilityClasses['items-start']}`);
+  });
 
   it('keeps example sources on semantic color tokens (no bare palette utilities or hex)', () => {
     // Bare Tailwind palette utilities, e.g. text-green-500, dark:bg-emerald-600.

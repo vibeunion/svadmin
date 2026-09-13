@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import {
     captureAdminContext,
     toggleTheme,
@@ -44,12 +46,12 @@
   const generatedId = $props.id();
   const provider = $derived(adminContext.chatProvider);
   const resources = $derived(adminContext.resources);
-  const chatContext = $derived<ChatContext>({
+  const chatContext = $derived<ChatContext>(definedOptions({
     currentResource: parsed.resource,
     selectedRecordId: parsed.id,
     currentView: parsed.action,
     pathname: adminContext.currentPath(),
-  });
+  }));
 
   let query = $state('');
   let answer = $state('');
@@ -126,12 +128,12 @@
     const scopedProvider: ChatProvider | null = provider;
     const prompt = query.trim();
     if (!scopedProvider || !prompt) return;
-    const scopedContext: ChatContext = {
+    const scopedContext: ChatContext = definedOptions({
       currentResource: chatContext.currentResource,
       selectedRecordId: chatContext.selectedRecordId,
       currentView: chatContext.currentView,
       pathname: chatContext.pathname,
-    };
+    });
 
     cancelRequest();
     const epoch = requestEpoch;

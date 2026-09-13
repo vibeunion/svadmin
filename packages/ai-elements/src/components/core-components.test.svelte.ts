@@ -20,7 +20,7 @@ describe('Response', () => {
     await waitFor(() => expect(screen.getByText('safe')).not.toBeNull());
     expect(container.querySelector('script')).toBeNull();
     expect(container.querySelector('code')?.textContent).toBe('code');
-    expect((globalThis as Record<string, unknown>).__aiXss).toBeUndefined();
+    expect(Reflect.get(globalThis, '__aiXss')).toBeUndefined();
   });
 
   it('copies fenced code and tracks content updates', async () => {
@@ -40,6 +40,18 @@ describe('Response', () => {
     await fireEvent.click(getByRole('button', { name: 'Copy code' }));
     expect(writeText).toHaveBeenLastCalledWith('const answer = 43;');
     expect(writeText).toHaveBeenCalledTimes(2);
+  });
+
+  it('retains the renderer context across repeated streaming transitions', async () => {
+    const { rerender } = render(Response, { content: '**Starting**', streaming: true });
+    expect(screen.getByText('Starting')).not.toBeNull();
+    await rerender({ content: '**First result**', streaming: false });
+    expect(screen.getByText('First result')).not.toBeNull();
+    await rerender({ content: '**Continuing**', streaming: true });
+    expect(screen.getByText('Continuing')).not.toBeNull();
+    await rerender({ content: '**Final result**', streaming: false });
+    expect(screen.getByText('Final result')).not.toBeNull();
+    expect(screen.queryByText('Starting')).toBeNull();
   });
 });
 

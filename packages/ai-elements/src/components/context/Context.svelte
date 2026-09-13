@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions, definedReactiveOptions } from '@svadmin/core/options';
+
   import type { Snippet } from 'svelte';
   import type { HTMLAttributes } from 'svelte/elements';
   import { BarChart3, ChevronDown, ChevronUp, CircleAlert } from '@lucide/svelte';
@@ -78,22 +80,22 @@
     if (onOpenChange !== onopenchange) onOpenChange?.(nextOpen);
   }
 
-  provideContextContext({
+  provideContextContext(definedReactiveOptions({
     get usedTokens() { return safeUsed; },
     get maxTokens() { return safeLimit ?? 0; },
     get usage() {
-      return usage ?? {
+      return usage ?? definedOptions({
         inputTokens: resolvedInputTokens,
         outputTokens: resolvedOutputTokens,
         cachedInputTokens: resolvedCachedTokens,
-      };
+      });
     },
     get modelId() { return modelId; },
     get cost() { return cost; },
     get currency() { return currency; },
     get open() { return open; },
     setOpen,
-  });
+  }));
 
   $effect(() => {
     if (!children || !open || typeof document === 'undefined') return;

@@ -1,4 +1,9 @@
 <script lang="ts">
+  import type { ResourceDefinition } from '@svadmin/core';
+  import { definedReactiveOptions } from '@svadmin/core/options';
+
+  import { definedOptions } from '@svadmin/core/options';
+
   import {
     provideAdminContext,
     type AgentProvider,
@@ -13,7 +18,6 @@
   import type { GeneratedComponentRegistry } from '../generated-components.js';
 
   interface Props {
-    docked?: boolean;
     chatProvider?: ChatProvider | null;
     agentProvider?: AgentProvider | null;
     tenant?: TenantContext;
@@ -25,7 +29,6 @@
   }
 
   let {
-    docked = false,
     chatProvider = null,
     agentProvider = null,
     tenant,
@@ -56,14 +59,14 @@
     }),
   };
 
-  provideAdminContext({
+  provideAdminContext(definedReactiveOptions({
     dataProvider,
-    resources: [{ name: 'products', label: 'Products', fields: [] }],
+    resources: [{ name: 'products', label: 'Products', fields: [] }] satisfies ResourceDefinition[],
     routerProvider,
     get chatProvider() { return chatProvider ?? undefined; },
     get agentProvider() { return agentProvider ?? undefined; },
     get tenant() { return tenant; },
-  });
+  }));
 </script>
 
-<ChatDialog {docked} {persistKey} {onPersist} {onRestore} {onPersistenceError} {componentRegistry} />
+<ChatDialog {...definedOptions({ persistKey, onPersist, onRestore, onPersistenceError })} {componentRegistry} />

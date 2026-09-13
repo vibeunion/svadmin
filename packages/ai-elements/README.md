@@ -14,30 +14,6 @@ Import the package stylesheet once in your application CSS:
 @import '@svadmin/ai-elements/ai.css';
 ```
 
-This entry is precompiled: the host needs neither a Tailwind plugin nor
-dependency source scanning. It includes the utility styles used by the package
-and its Streamdown renderer, without injecting a global reset.
-
-Tailwind v4 hosts can instead use the theme entry:
-
-```css
-@import 'tailwindcss';
-@import '@svadmin/ai-elements/ai.theme.css';
-```
-
-Import one AI stylesheet entry, not both. Semantic colors read host CSS
-variables such as `--background`, `--foreground`, and `--primary`, with system
-color fallbacks. Nested themes use `.svadmin-theme`.
-For a non-Tailwind host, define global typography/reset styles in the host
-application; this package does not reset unrelated content.
-
-Tailwind remains a build-time dependency. The package no longer declares
-`tailwind-variants` or `tailwind-merge` as runtime dependencies, although Streamdown still
-uses the latter transitively. SvelteFlow keeps its component-owned stylesheet.
-No `@svadmin/ui` dependency is required.
-The public `codeVariants` helper retains extension metadata; `tailwind-variants`
-is used only in development to verify consumer extension compatibility.
-
 ## Vite SSR
 
 Vite SSR consumers must bundle the Svelte and ESM dependency boundary used by the complete package entry:
@@ -109,28 +85,6 @@ The packed-package verification loads the root entry through `vite.ssrLoadModule
 <PromptInput bind:value={prompt} />
 ```
 
-### Conversation Interaction
-
-Use `ConversationContent` inside `Conversation` for automatic following,
-including streamed Markdown and delayed content resizing. Scrolling away pauses
-following; `ConversationScrollButton` returns to the latest content. Clearing
-the history restores following.
-
-Composed `PromptInputTextarea` and `PromptInputSubmit` inherit their form's
-disabled, submission, streaming, and stop state. Explicit child props remain
-supported. A busy submit control never submits another request. Disabling
-editing does not disable stopping an active response unless the stop button
-itself is explicitly disabled.
-
-`ChatDialog` offers retry for the latest failed or stopped response, preserving
-the original user request and any new draft. Retrying a tool run requires fresh
-approval rather than reusing the prior confirmation. Restored local attachments
-without file contents or a durable URL must be reattached before resending.
-
-Long message text wraps, while wide Markdown code and tables scroll locally.
-Tool details remain collapsed until opened; overflowing tool values are
-keyboard-focusable. Code copy preserves literal HTML and nested code fences.
-
 Messages use the `ChatMessagePart` contract from `@svadmin/core`, including text, reasoning, tool calls/results, sources, images, files, approvals, and generated components.
 
 Generated components use TypeBox as their runtime boundary. The schema also
@@ -184,11 +138,6 @@ fidelity are tracked independently: an exact export name is not proof of
 interaction or pixel parity. `JSXPreview` intentionally uses a restricted,
 TypeBox-validated parser instead of executing arbitrary JSX. `Tool.getStatusBadge`
 returns Svelte-renderable status metadata instead of a React element.
-
-The architecture comparison, adopted Sikandar patterns, component counts, and
-intentional framework differences are documented in
-[`UPSTREAM_PARITY.md`](./UPSTREAM_PARITY.md). Behavior classifications must be
-backed by an existing test file in the parity manifest.
 
 ## AdminApp Integration
 

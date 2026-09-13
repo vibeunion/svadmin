@@ -60,7 +60,7 @@ export function assertRuntimeImports(file: string, source: string, runtime: 'bro
   const info = ts.preProcessFile(source, true, true);
   const references = [...info.importedFiles, ...info.typeReferenceDirectives].map(item => item.fileName);
   const incompatible = references.filter(name => runtime === 'browser'
-    ? name === 'bun' || name === 'bun-types' || name.startsWith('bun:')
+    ? name === 'bun' || name === '@types/bun' || name === 'bun-types' || name.startsWith('bun:')
     : name === 'vite/client' || name === 'vitest' || name.startsWith('vitest/'));
   if (incompatible.length) {
     throw new Error(`${file} is assigned to ${runtime} but imports ${incompatible.join(', ')}`);

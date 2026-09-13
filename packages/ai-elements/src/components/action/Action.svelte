@@ -12,13 +12,15 @@
 </script>
 
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import Tooltip from '../../internal/Tooltip.svelte';
   import { cn } from '../../utils.js';
   let { tooltip, label, size = 'icon-sm', variant = 'ghost', class: className = '', type = 'button', children, 'aria-describedby': ariaDescribedBy, ...rest }: ActionProps = $props();
   const actionChildren = $derived(children);
 </script>
 
-<Tooltip content={tooltip}>
+<Tooltip {...definedOptions({ "content": tooltip })}>
   {#snippet children({ describedBy })}
     <button {...rest} {type} class={cn('svadmin-ai-action', className)} data-slot="action" data-size={size} data-variant={variant} aria-describedby={[ariaDescribedBy, describedBy].filter(Boolean).join(' ') || undefined}>
       {@render actionChildren?.()}

@@ -6,7 +6,7 @@
     "moduleResolution": "bundler",
     "strict": true,
     "skipLibCheck": false,
-    "types": ["bun", "svelte"],
+    "types": ["@types/bun", "svelte"],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "declaration": true,

@@ -13,6 +13,8 @@
 </script>
 
 <script lang="ts">
+  import { definedReactiveOptions } from '@svadmin/core/options';
+
   import { cn } from '../../utils.js';
   import { getMediaCategory } from './attachments.js';
   import { provideAttachmentContext, useAttachmentsContext } from './context.svelte.js';
@@ -23,12 +25,12 @@
   const normalizedData = $derived(normalizeAttachmentData(data));
   const mediaCategory = $derived(getMediaCategory(data));
 
-  provideAttachmentContext({
+  provideAttachmentContext(definedReactiveOptions({
     get data() { return normalizedData; },
     get mediaCategory() { return mediaCategory; },
     get onRemove() { return onRemove ?? onremove; },
     get variant() { return attachments.variant; },
-  });
+  }));
 </script>
 
 <div

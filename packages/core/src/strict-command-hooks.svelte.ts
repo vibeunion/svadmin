@@ -104,12 +104,12 @@ export function useCustom<I extends TObject, O extends TSchema>(options: Command
       queryKey: keys(definedOptions({
         provider: captured.name, contract: definition.key, tenant,
       })).custom.call(definition.key, definition.key, definition.method, { input: prepared.input, source: captured.source }),
-      queryFn: (signal) => {
+      queryFn: () => {
         if (command !== options.command || override !== options.dataProviderName ||
             tenant !== context.tenantCacheKey?.__svadminTenant ||
             captured.provider !== captureProvider(context, override).provider ||
             signature !== hashKey([parseCommandInput(command, options.input)])) throw supersededQuerySession();
-        return prepared.execute(signal);
+        return prepared.execute();
       },
       decode: value => parseCommandResponse(command, value),
       enabled, ...definedOptions({ staleTime }),

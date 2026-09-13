@@ -29,6 +29,8 @@
 </script>
 
 <script lang="ts">
+  import { definedReactiveOptions } from '@svadmin/core/options';
+
   import type { Snippet } from 'svelte';
   import { Braces, ChevronDown } from '@lucide/svelte';
   import { cn } from '../../utils.js';
@@ -86,14 +88,14 @@
     ? rows.filter((row) => `${row.path} ${row.schema.description ?? ''} ${schemaType(row.schema)}`.toLowerCase().includes(filter.trim().toLowerCase()))
     : rows);
   const endpointMode = $derived(Boolean(path || description || parameters?.length || requestBody?.length || responseBody?.length));
-  provideSchemaDisplayContext({
+  provideSchemaDisplayContext(definedReactiveOptions({
     get method() { return method; },
     get path() { return path; },
     get description() { return description; },
     get parameters() { return parameters; },
     get requestBody() { return requestBody; },
     get responseBody() { return responseBody; },
-  });
+  }));
 
   function flattenSchema(root: SchemaDefinition, name: string): SchemaRow[] {
     const result: SchemaRow[] = [];

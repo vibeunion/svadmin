@@ -12,7 +12,8 @@ export interface VoiceSelectorContextValue {
   readonly value: string | undefined;
   readonly open: boolean;
   readonly query: string;
-  readonly activeId?: string;
+  /** The getter remains present when filtering leaves no active item. */
+  readonly activeId: string | undefined;
   readonly visibleCount: number;
   setValue(value: string | undefined): void;
   setOpen(open: boolean): void;

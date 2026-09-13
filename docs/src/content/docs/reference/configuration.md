@@ -27,6 +27,41 @@ Provider contracts define the UI/backend boundary. The backend must still enforc
 
 Enterprise provider methods receive `EnterpriseRequestContext` from the active `AdminApp` tree. `writeAuditEntry()` is fail-closed and requires an `AuditLogProvider`; it is not a replacement for a backend transaction that commits the sensitive mutation and its audit record together.
 
+## Validated Audit Contracts
+
+Wrap remote audit implementations with `withValidatedAuditProvider(transport)`.
+`AuditLogTransport.create` and `get` return `Promise<unknown>`; the wrapper
+validates input and returned records before exposing `AuditLogProvider`.
+Global registration also installs this wrapper. Audit records are append-only:
+the old `update` method is removed.
+
+`writeAuditEntry` accepts `AuditDraft`, without caller-supplied `id` or
+`timestamp`. It creates a canonical UTC timestamp, snapshots plain JSON data,
+waits for the handler, and checks the persistent provider's receipt against the
+original input. A provider may add server-generated fields but must preserve
+submitted values. Invalid or unconfirmed writes reject with a sanitized
+`AuditError`; `writeMayHaveSucceeded` warns against assuming rollback or blindly
+retrying. The best-effort `audit` helper logs sanitized failures instead of
+providing durable-write acknowledgement.
+
+Migration changes:
+
+- `resource` is optional for login/logout events, not an empty string.
+- `tenantId`, `requestId`, `traceId`, `mutationId`, and `outcome` remain explicit
+  event fields. `details` is no longer renamed to `data`.
+- Optional fields must be omitted, not explicitly set to `undefined`. Nested
+  values must be plain JSON; dates, accessors, cycles and nonfinite numbers fail.
+- Supabase's audit handler stores the entire validated event in `audit_log.details`,
+  alongside the indexed `action`, `resource`, `record_id`, `user_id`, and
+  `created_at` columns. Numeric record ID `0` remains `"0"`. Readers of the old
+  details-only storage format must migrate; the adapter does not rewrite history.
+- Supabase database rejection is not successful delivery. Validated rejections
+  produce `WRITE_REJECTED`; malformed receipts, timeouts, and transport failures
+  produce `WRITE_OUTCOME_UNKNOWN`.
+
+These checks validate data contracts, not backend authorization, retention,
+append-only database enforcement, or atomic business/audit persistence.
+
 ## Resource Definition
 
 ```typescript

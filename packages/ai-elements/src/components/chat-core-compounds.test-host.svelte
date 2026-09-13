@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import type { ChatMessage } from '../contracts.js';
   import * as Confirmation from './confirmation/index.js';
   import * as Conversation from './conversation/index.js';
@@ -64,4 +66,4 @@
   </Message.BranchSelector>
 </Message.Branch>
 
-<Conversation.Download {messages} {ondownload} />
+<Conversation.Download {messages} {...definedOptions({ "ondownload": ondownload })} />

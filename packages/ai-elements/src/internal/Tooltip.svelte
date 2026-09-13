@@ -13,6 +13,7 @@
 </script>
 
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
   import { onMount, tick } from 'svelte';
 
   let { content, children, delay = 250 }: TooltipProps = $props();
@@ -101,7 +102,7 @@
   onfocusin={() => show(true)}
   onfocusout={handleFocusOut}
 >
-  {@render children({ describedBy: content ? tooltipId : undefined })}
+  {@render children(definedOptions({ describedBy: content ? tooltipId : undefined }))}
 </span>
 
 {#if content && open}

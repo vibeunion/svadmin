@@ -133,7 +133,8 @@
 </script>
 
 {#if editing && editingScope === scope && session.isCurrent()}
-  <div bind:this={editorRef} class="svadmin-u-d89972fe17d6 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-6da6a3c3f741">    <input
+  <div bind:this={editorRef} class="svadmin-u-d89972fe17d6 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-6da6a3c3f741">
+    <input
       bind:this={inputRef}
       type="text"
       inputmode={field.type === 'number' ? 'decimal' : field.type === 'email' ? 'email' : field.type === 'url' ? 'url' : 'text'}
@@ -162,7 +163,8 @@
     <p role="alert">{i18n.t(failure === 'input' ? 'validation.invalidFormat' : 'common.operationFailed')}</p>
   {/if}
 {:else if editable && display}
-  <button type="button"    class="svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-34516836730d svadmin-u-07389a777c1f svadmin-u-45d828117213 svadmin-u-465609a240a8 svadmin-u-76610325273f svadmin-u-fc7473ca09eb svadmin-u-d4108abe6359 svadmin-u-2a6233dc87a9 svadmin-u-f10f771f87e9 svadmin-u-793c80e97ffb svadmin-u-9c1295a6914a svadmin-u-ce4edccf4cbb svadmin-u-ceb69a6b0e5f"
+  <button type="button"
+    class="svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-34516836730d svadmin-u-07389a777c1f svadmin-u-45d828117213 svadmin-u-465609a240a8 svadmin-u-76610325273f svadmin-u-fc7473ca09eb svadmin-u-d4108abe6359 svadmin-u-2a6233dc87a9 svadmin-u-f10f771f87e9 svadmin-u-793c80e97ffb svadmin-u-9c1295a6914a svadmin-u-ce4edccf4cbb svadmin-u-ceb69a6b0e5f"
     ondblclick={startEdit}
     onclick={startEdit}
     title={`${i18n.t('common.edit')} ${fieldLabel}`}

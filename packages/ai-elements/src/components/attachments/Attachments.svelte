@@ -21,6 +21,8 @@
 </script>
 
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import { File as FileIcon, Image as ImageIcon, Paperclip, Trash2, Upload } from '@lucide/svelte';
   import { cn, safeResourceUrl } from '../../utils.js';
   import { provideAttachmentsContext } from './context.svelte.js';
@@ -84,7 +86,7 @@
       const id = makeId(file, index);
       const url = typeof URL !== 'undefined' ? URL.createObjectURL(file) : undefined;
       if (url) objectUrls.set(id, url);
-      accepted.push({ id, name: file.name, mediaType: file.type || undefined, size: file.size, url, file });
+      accepted.push(definedOptions({ id, name: file.name, mediaType: file.type || undefined, size: file.size, url, file }));
     }
 
     const next = multiple ? [...currentAttachments, ...accepted] : accepted.slice(0, 1);

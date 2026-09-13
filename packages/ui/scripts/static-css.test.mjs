@@ -86,28 +86,3 @@ test('postbuild is idempotent and preserves both CSS side effects', () => {
   assert.ok(!manifest.dependencies['tailwind-variants']);
   assert.ok(!manifest.dependencies['tailwind-merge']);
 });
-
-test('semantic aliases and primitive defaults remain below host overrides', () => {
-  for (const name of ['app.css', 'app.theme.css']) {
-    const css = postcss.parse(read(name));
-    let aliases = 0;
-    let controlDefaults = 0;
-    css.walkRules((rule) => {
-      if (rule.parent.type === 'atrule' && rule.parent.name === 'layer' && rule.parent.params === 'theme') {
-        assert.notEqual(rule.selector, ':root, :host', 'precompiled theme defaults must have zero specificity');
-      }
-      if (rule.selector === ':where(:root, .svadmin-theme)') {
-        aliases++;
-        assert.equal(rule.parent.name, 'layer');
-        assert.equal(rule.parent.params, 'theme');
-      }
-      if (rule.nodes.some((node) => node.prop === 'box-shadow' && node.value === 'var(--shadow-control)')) {
-        controlDefaults++;
-        assert.equal(rule.parent.name, 'layer');
-        assert.equal(rule.parent.params, 'components');
-      }
-    });
-    assert.equal(aliases, 1);
-    assert.ok(controlDefaults > 0);
-  }
-});

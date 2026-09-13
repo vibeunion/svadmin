@@ -10,8 +10,7 @@ export const buttonVariants = ({
 }: {
   variant?: ButtonVariant | null;
   size?: ButtonSize | null;
-  class?: Parameters<typeof clsx>[number];
-  className?: Parameters<typeof clsx>[number];
+  class?: string;
+  className?: string;
 } = {}): string =>
-  clsx("svadmin-button", variant && `svadmin-button--${variant}`, size && `svadmin-button-size--${size}`, className, extraClassName);
-import { clsx } from "cn/engine";
+  ["svadmin-button", variant && `svadmin-button--${variant}`, size && `svadmin-button-size--${size}`, className, extraClassName].filter(Boolean).join(" ");

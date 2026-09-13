@@ -11,6 +11,8 @@
 </script>
 
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import ModelSelector from './ModelSelector.svelte';
   import ModelSelectorContent from './ModelSelectorContent.svelte';
 
@@ -23,7 +25,7 @@
   }: ModelSelectorDialogProps = $props();
 </script>
 
-<ModelSelector bind:open {defaultOpen} {onopenchange}>
+<ModelSelector bind:open {defaultOpen} {...definedOptions({ "onopenchange": onopenchange })}>
   <ModelSelectorContent {...rest}>
     {@render children?.()}
   </ModelSelectorContent>

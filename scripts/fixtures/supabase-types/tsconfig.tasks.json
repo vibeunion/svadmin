@@ -1,13 +1,8 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../tsconfig.json",
   "compilerOptions": {
-    "types": [
-      "node",
-      "svelte"
-    ],
+    "types": ["node", "svelte"],
     "skipLibCheck": false
   },
-  "include": [
-    "tasks.ts"
-  ]
+  "include": ["tasks.ts"]
 }

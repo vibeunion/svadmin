@@ -52,10 +52,7 @@ const supacloud = createSupaCloudClient({
 ```ts
 import { createSupaCloudTaskProvider } from '@svadmin/supabase/supacloud';
 
-const taskProvider = createSupaCloudTaskProvider({
-  supacloud: supacloud.tasks,
-  clientKind: 'sdk',
-});
+const taskProvider = createSupaCloudTaskProvider({ supacloud });
 ```
 
 ### 支持的方法
@@ -66,7 +63,36 @@ const taskProvider = createSupaCloudTaskProvider({
 - `listDlq(params?)`
 - `cancel(taskId)`
 - `retry(taskId)`
-- `subscribe(taskId, callback)`
+- `subscribe(taskId, callback, onError?)`
+
+### 经校验的契约
+
+仅接受现代 `{ tasks: ... }` 客户端，不再支持旧版裸任务客户端或由调用方任意指定结果类型的泛型。
+已安装的 `@supacloud/js` 0.23.1 契约通过了注入 HTTP 和实时传输的测试；
+这些测试不代表真实部署环境已经验收。
+
+所有 SDK 回执先视为 `unknown`，任务记录、列表、提交句柄、订阅摘要和自定义实时事件
+均在使用前校验。`payload`、`result` 和扩展字段仍为 `unknown`，
+业务代码必须先通过自己的 schema 校验再读取字段。任务日期只接受 JSON 字符串或
+`null`，不接受原生 `Date`；通用任务契约检查其形状，但不保证 ISO 日期语义。
+
+提交的正文和元数据必须是 JSON 对象。`meta` 映射到 SDK 的 `metadata`，
+不能通过保留的元数据或幂等请求头覆盖这些值。
+列表筛选仅接受 `status`、`taskType`、`functionSlug`、`dlq` 和 `limit`；
+DLQ 参数仅接受 `limit`。非法输入在请求发出前被拒绝。
+
+提交句柄必须有 `id`，`wait()` 返回 ID 匹配的终态记录。
+取消和重试返回 ID 匹配的当前记录，不虚构终态：
+请求取消一个运行中的任务，回执仍可能是 `running`。
+
+失败使用脱敏的 `TaskError` 错误码。`writeMayHaveSucceeded: true`
+表示写入已经尝试、但结果尚未确认，不表示已经回滚。
+通过工厂的 `onError` 或单次订阅的可选错误回调处理异步失败。
+非法订阅数据会终止订阅；清理完成后，后续 SDK 更新不会再进入应用。
+
+核心任务钩子和任务操作按钮同样校验自定义 `TaskProvider` 的回执。
+直接使用自定义提供方时，可通过 `@svadmin/core` 的 `withValidatedTaskProvider`
+包装传输层。传输方法返回 `unknown`，调用方不能通过钩子泛型任意指定结果类型。
 
 ### 提交任务
 
@@ -102,10 +128,7 @@ await taskProvider.retry('task_123');
 ```ts
 import { createSupaCloudTaskLiveProvider } from '@svadmin/supabase/supacloud';
 
-const taskLiveProvider = createSupaCloudTaskLiveProvider({
-  supacloud: supacloud.tasks,
-  clientKind: 'sdk',
-});
+const taskLiveProvider = createSupaCloudTaskLiveProvider({ supacloud });
 ```
 
 这个 provider 在订阅时要求提供 `liveParams.taskId`：
@@ -137,8 +160,7 @@ stop();
 
 ```ts
 const taskLiveProvider = createSupaCloudTaskLiveProvider({
-  supacloud: supacloud.tasks,
-  clientKind: 'sdk',
+  supacloud,
   resource: 'jobs',
   mapTaskToEvent: (task, resource) => ({
     type: task.status === 'queued' ? 'INSERT' : 'UPDATE',
@@ -167,14 +189,8 @@ const dataProvider = createSupabaseDataProvider(supabase);
 const authProvider = createSupabaseAuthProvider(supabase);
 const liveProvider = createSupabaseLiveProvider(supabase);
 
-const taskProvider = createSupaCloudTaskProvider({
-  supacloud: supacloud.tasks,
-  clientKind: 'sdk',
-});
-const taskLiveProvider = createSupaCloudTaskLiveProvider({
-  supacloud: supacloud.tasks,
-  clientKind: 'sdk',
-});
+const taskProvider = createSupaCloudTaskProvider({ supacloud });
+const taskLiveProvider = createSupaCloudTaskLiveProvider({ supacloud });
 ```
 
 日常管理后台 CRUD 继续走标准 Supabase Provider；只有在需要平台任务语义时，再使用 SupaCloud 这层增强。

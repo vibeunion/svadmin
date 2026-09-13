@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
 	import { Command as CommandPrimitive } from "bits-ui";
 	import { cn } from "../../../utils.js";
 
@@ -18,6 +20,6 @@
 	data-slot="command-separator"
 	data-cmdk-separator=""
 	class={cn("svadmin-command-separator", className)}
-	forceMount={alwaysRender ?? forceMount}
+	{...definedOptions({ "forceMount": alwaysRender ?? forceMount })}
 	{...restProps}
 />

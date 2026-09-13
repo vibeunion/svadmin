@@ -149,12 +149,12 @@ export function prepareCommand<I extends TObject, O extends TSchema>(
   provider: DataProvider,
   command: CommandContract<I, O>,
   input: NoInfer<CommandInput<I>>,
-): { readonly input: CommandInput<I>; execute(signal?: AbortSignal): Promise<{ data: CommandOutput<O> }> };
+): { readonly input: CommandInput<I>; execute(): Promise<{ data: CommandOutput<O> }> };
 export function prepareCommand(
   provider: DataProvider,
   command: CommandContract,
   input: Record<string, unknown>,
-): { readonly input: Record<string, unknown>; execute(signal?: AbortSignal): Promise<{ data: unknown }> } {
+): { readonly input: Record<string, unknown>; execute(): Promise<{ data: unknown }> } {
   const definition = definitionOf(command);
   const payload = inputSnapshot(definition, input);
   let custom: DataProvider['custom'];
@@ -169,14 +169,13 @@ export function prepareCommand(
   const dispatch = custom;
   return Object.freeze({
     get input() { return inputSnapshot(definition, payload); },
-    async execute(signal?: AbortSignal) {
+    async execute() {
       let response: unknown;
       try {
         const input = inputSnapshot(definition, payload);
         const pending: unknown = Reflect.apply(dispatch, provider, [{
           url: definition.url, method: definition.method,
           ...(definition.method === 'get' ? { query: input } : { payload: input }),
-          ...(signal ? { signal } : {}),
         }]);
         response = await pending;
       } catch (error) {

@@ -41,7 +41,7 @@ function provider(): DataProvider {
     create: async () => ({ data: {} }), deleteOne: async () => ({ data: {} }),
   };
 }
-function deferred<T = void>() {
+function deferred<T>() {
   let resolve: (value: T) => void = () => { throw new Error('Request not initialized'); };
   let reject: (cause: unknown) => void = () => { throw new Error('Request not initialized'); };
   const promise = new Promise<T>((done, fail) => { resolve = done; reject = fail; });
@@ -630,13 +630,13 @@ describe('single-update authentication ownership', () => {
 
   it('does not dispatch after a native queue delay crosses a session transition', async () => {
     const app = await mountSession();
-    const gate = deferred();
+    const gate = deferred<undefined>();
     const observer = vi.fn(() => gate.promise);
     app.client.getMutationCache().config.onMutate = observer;
     const operation = app.read().update.mutation.mutateAsync(updateInput).catch((error: unknown) => error);
     await waitFor(() => expect(observer).toHaveBeenCalledTimes(1));
     await app.actions().login.mutate({});
-    gate.resolve();
+    gate.resolve(undefined);
     expect(await operation).toMatchObject({ code: 'UPDATE_CANCELLED', details: { writeMayHaveSucceeded: false, id: 1 } });
     expect(app.source.update).not.toHaveBeenCalled();
   });
@@ -850,7 +850,7 @@ describe('single-update authentication ownership', () => {
     const app = await mountSession();
     const receipt = deferred<GetOneResult>();
     vi.mocked(app.source.update).mockReturnValueOnce(receipt.promise);
-    const gate = deferred();
+    const gate = deferred<undefined>();
     const observer = vi.fn(() => gate.promise);
     if (outcome === 'success') app.client.getMutationCache().config.onSuccess = observer;
     else app.client.getMutationCache().config.onError = observer;
@@ -860,7 +860,7 @@ describe('single-update authentication ownership', () => {
     receipt.resolve({ data: updatedRow });
     await waitFor(() => expect(observer).toHaveBeenCalledTimes(1));
     await app.actions().login.mutate({});
-    gate.resolve();
+    gate.resolve(undefined);
     const error: unknown = await operation;
     expect(error).toMatchObject({ code: 'UPDATE_CANCELLED', details: { writeMayHaveSucceeded: true, id: 1 } });
     expect(error).not.toHaveProperty('details.updated');
@@ -869,7 +869,7 @@ describe('single-update authentication ownership', () => {
 
   it('settles every started refresh even after failure and session replacement', async () => {
     const app = await mountSession();
-    const gate = deferred();
+    const gate = deferred<undefined>();
     const refresh = vi.spyOn(app.client, 'invalidateQueries').mockRejectedValueOnce(new Error('PRIVATE')).mockReturnValue(gate.promise);
     let settled = false;
     const operation = app.read().update.mutation.mutateAsync(updateInput).catch((error: unknown) => error)
@@ -877,7 +877,7 @@ describe('single-update authentication ownership', () => {
     await waitFor(() => expect(refresh.mock.calls.length).toBeGreaterThan(1));
     await app.actions().login.mutate({});
     expect(settled).toBe(false);
-    gate.resolve();
+    gate.resolve(undefined);
     const error: unknown = await operation;
     expect(error).toMatchObject({ code: 'UPDATE_CANCELLED', details: { id: 1 } });
     expect(error).not.toHaveProperty('details.updated');
@@ -1136,7 +1136,7 @@ describe('InlineEdit contract consumer', () => {
     await app.view.rerender({ onSave });
     await ready(app);
     const refresh = deferred<GetListResult>();
-    vi.mocked(source.getList).mockClear().mockImplementation(() => refresh.promise);
+    source.getList = vi.fn(() => refresh.promise);
     await fireEvent.keyDown(await edit(app), { key: 'Enter' });
     await waitFor(() => expect(source.getList).toHaveBeenCalledTimes(1));
     expect(app.view.getByRole('button', { name: /^save$/i }).hasAttribute('disabled')).toBe(true);

@@ -21,8 +21,6 @@ import { captureAdminContext } from './context.svelte';
 import { createOvertimeTracker } from './hook-utils.svelte';
 import type { OvertimeOptions } from './hook-utils.svelte';
 import type { DataProvider } from './types';
-import { decodeBaseRecord } from './record-decoder';
-import { createSelectQuery, type UseSelectOptions } from './select-query.svelte';
 
 // ─── useInfiniteList ────────────────────────────────────────────────
 
@@ -34,9 +32,6 @@ export type { UseInfiniteListOptions } from './infinite-query.svelte';
 export { createSelectQuery } from './select-query.svelte';
 export type { UseSelectOptions } from './select-query.svelte';
 
-export function useSelect(options: UseSelectOptions) {
-  return createSelectQuery(options, () => decodeBaseRecord);
-}
 // ─── useOvertime ────────────────────────────────────────────────────
 
 export function useOvertime(options?: OvertimeOptions) {

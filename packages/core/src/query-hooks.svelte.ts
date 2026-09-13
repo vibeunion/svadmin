@@ -101,12 +101,18 @@ export function createListQuery<TData extends BaseRecord>(
         }),
         source: captured.source,
       }),
-      queryFn: async (signal) => decodeResult(await captured.provider.getList(snapshotListParams({ ...params, ...definedOptions({ signal }) }))),
+      queryFn: async (signal) => {
+        const current = captureQueryProvider(adminContext, {
+          resource, ...definedOptions({ dataProviderName: opts.dataProviderName, contract: opts.contract, meta: opts.meta, fresh: true }),
+        });
+        return decodeResult(await current.provider.getList(snapshotListParams({ ...params, ...definedOptions({ signal }) })));
+      },
       enabled: queryOptions?.enabled??true,
       ...definedOptions({
         staleTime: queryOptions?.staleTime??adminOptions.reactQuery?.staleTime,
         gcTime: queryOptions?.gcTime??adminOptions.reactQuery?.gcTime,
-        refetchOnWindowFocus: queryOptions?.refetchOnWindowFocus??adminOptions.reactQuery?.refetchOnWindowFocus,      }),
+        refetchOnWindowFocus: queryOptions?.refetchOnWindowFocus??adminOptions.reactQuery?.refetchOnWindowFocus,
+      }),
     };
   });
 
@@ -193,7 +199,8 @@ export function createOneQuery<TData extends BaseRecord>(
         const result=await captured.provider.getOne(snapshotOneParams({ ...params, ...definedOptions({ signal }) }));
         const decoded=decodeOneResult(result, decode);
         if(checkId && decoded.data['id']!==params.id) return rejectProviderResponse();
-        return decoded;      },
+        return decoded;
+      },
       enabled: (queryOptions?.enabled??true)&&id!=null,
       ...definedOptions({
         staleTime: queryOptions?.staleTime??adminOptions.reactQuery?.staleTime,
@@ -314,7 +321,8 @@ export function createManyQuery<TData extends BaseRecord>(
             id,meta: params.meta,signal
           })
         })),decode)));
-        return decodeResult({ data: results.map(r => r.data) });      },
+        return decodeResult({ data: results.map(r => r.data) });
+      },
       enabled: (queryOptions?.enabled??true)&&params.ids.length>0,
       ...definedOptions({
         staleTime: queryOptions?.staleTime??adminOptions.reactQuery?.staleTime,

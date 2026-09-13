@@ -40,7 +40,7 @@ function provider(): DataProvider {
     createMany: vi.fn(async () => ({ data: [] })),
   };
 }
-function deferred<T = void>() {
+function deferred<T>() {
   let resolve: (value: T) => void = () => { throw new Error('Not initialized'); };
   let reject: (cause: unknown) => void = () => { throw new Error('Not initialized'); };
   const promise = new Promise<T>((done, fail) => { resolve = done; reject = fail; });
@@ -162,7 +162,7 @@ describe('single-create authentication ownership', () => {
     const app = await mountSession();
     const receipt = deferred<GetOneResult>();
     vi.mocked(app.source.create).mockReturnValueOnce(receipt.promise);
-    const gate = deferred();
+    const gate = deferred<undefined>();
     const observer = vi.fn(() => gate.promise);
     if (outcome === 'success') app.client.getMutationCache().config.onSuccess = observer;
     else app.client.getMutationCache().config.onError = observer;
@@ -172,7 +172,7 @@ describe('single-create authentication ownership', () => {
     receipt.resolve({ data: row });
     await waitFor(() => expect(observer).toHaveBeenCalledTimes(1));
     await app.actions().login.mutate({});
-    gate.resolve();
+    gate.resolve(undefined);
     const error: unknown = await operation;
     expect(error).toMatchObject({ code: 'CREATE_CANCELLED', details: { writeMayHaveSucceeded: true } });
     expect(error).not.toHaveProperty('details.created');
@@ -181,13 +181,13 @@ describe('single-create authentication ownership', () => {
 
   it('keeps pre-dispatch cancellation accurate after a native queue delay', async () => {
     const app = await mountSession();
-    const gate = deferred();
+    const gate = deferred<undefined>();
     const observer = vi.fn(() => gate.promise);
     app.client.getMutationCache().config.onMutate = observer;
     const operation = app.read().create.mutation.mutateAsync({ variables }).catch((error: unknown) => error);
     await waitFor(() => expect(observer).toHaveBeenCalledTimes(1));
     await app.actions().login.mutate({});
-    gate.resolve();
+    gate.resolve(undefined);
     expect(await operation).toMatchObject({ code: 'CREATE_CANCELLED', details: { writeMayHaveSucceeded: false } });
     expect(app.source.create).not.toHaveBeenCalled();
   });
@@ -404,7 +404,7 @@ describe('single-create authentication ownership', () => {
     const app = await mountSession();
     const { builder, owner } = scopedKeys(app, posts, captureAuthLiveScope(app.session).cacheKey);
     app.client.setQueryData(builder.data.select('posts', owner), {});
-    const gate = deferred();
+    const gate = deferred<undefined>();
     const refresh = vi.spyOn(app.client, 'invalidateQueries').mockRejectedValueOnce(new Error('PRIVATE')).mockReturnValue(gate.promise);
     let settled = false;
     const outcome = app.read().create.mutation.mutateAsync({ variables }).catch((error: unknown) => error)
@@ -412,7 +412,7 @@ describe('single-create authentication ownership', () => {
     await waitFor(() => expect(refresh.mock.calls.length).toBeGreaterThan(1));
     await app.actions().login.mutate({});
     expect(settled).toBe(false);
-    gate.resolve();
+    gate.resolve(undefined);
     const error: unknown = await outcome;
     expect(error).toMatchObject({ code: 'CREATE_CANCELLED' });
     expect(error).not.toHaveProperty('details.created');
@@ -926,7 +926,7 @@ describe('contract-bound single create', () => {
     await ready(app);
     const { builder, owner } = scopedKeys(app);
     app.client.setQueryData(builder.data.list('posts', { ...owner, extra: true }), {});
-    const hold = deferred();
+    const hold = deferred<undefined>();
     const invalidate = vi.spyOn(app.client, 'invalidateQueries')
       .mockRejectedValueOnce(new Error('refresh'))
       .mockImplementation(() => hold.promise);
@@ -934,7 +934,7 @@ describe('contract-bound single create', () => {
     const operation = app.read().create.mutation.mutateAsync({ variables }).catch(() => undefined).finally(() => { settled = true; });
     await waitFor(() => expect(invalidate.mock.calls.length).toBeGreaterThan(1));
     expect(settled).toBe(false);
-    hold.resolve();
+    hold.resolve(undefined);
     await operation;
   });
   it.each(['unchanged', 'resource', 'reset', 'new-call'])('guards late auth completion after %s', async change => {

@@ -152,11 +152,11 @@ export function useContractDelete<S extends ContractSchemas>(options: ContractDe
   function waitForUndo(scope: Scope, token: object): Promise<void> {
     return new Promise((resolve, reject) => {
       let settled = false;
-      let toastId: number | undefined = undefined;
+      const toastRef: { id: number | undefined } = { id: undefined };
       const finish = (error?: Failure) => {
         if (settled) return;
         settled = true;
-        if (toastId !== undefined) removeToast(toastId);
+        if (toastRef.id !== undefined) removeToast(toastRef.id);
         if (waiter?.token === token) waiter = undefined;
         if (error) reject(error);
         else resolve();
@@ -164,8 +164,8 @@ export function useContractDelete<S extends ContractSchemas>(options: ContractDe
       const onUndo = () => finish(new UndoError());
       const onTimeout = () => finish();
       toast.undoable('Action can be undone', scope.timeout, onUndo, onTimeout);
-      toastId = getToasts().find(item => item.onUndo === onUndo && item.onTimeout === onTimeout)?.id;
-      if (toastId === undefined) {
+      toastRef.id = getToasts().find(item => item.onUndo === onUndo && item.onTimeout === onTimeout)?.id;
+      if (toastRef.id === undefined) {
         finish(new HttpError('Undo window unavailable', 500));
         return;
       }

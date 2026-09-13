@@ -463,7 +463,8 @@
           />
           <div class="svadmin-u-36e579c0b41c svadmin-u-7e0b7cdf1a94">
             <p class="svadmin-u-f283ea9bea0e svadmin-u-a14daebf7748 svadmin-u-2689f3958069 svadmin-u-a7a63217e098">{identity.name}</p>
-            <p class="svadmin-u-f283ea9bea0e svadmin-u-d058ca6de60f svadmin-u-5f1ff8fe8768">{((identity as Record<string, unknown>)['role'] || (identity as Record<string, unknown>)['roleName']) ?? 'User'}</p>          </div>
+            <p class="svadmin-u-f283ea9bea0e svadmin-u-d058ca6de60f svadmin-u-5f1ff8fe8768">{((identity as Record<string, unknown>)['role'] || (identity as Record<string, unknown>)['roleName']) ?? 'User'}</p>
+          </div>
           <button
             class="svadmin-u-d0a52b312f7d svadmin-u-cbbf90f9a828 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-421ac2be5045 svadmin-u-3e3534b4c5df svadmin-u-646e10356266 svadmin-u-0b48b877be2a svadmin-u-ceb69a6b0e5f"
             onclick={onLogout}

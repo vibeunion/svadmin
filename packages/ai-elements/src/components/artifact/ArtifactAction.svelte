@@ -16,6 +16,8 @@
 </script>
 
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import { cn } from '../../utils.js';
   import Tooltip from '../../internal/Tooltip.svelte';
   let {
@@ -36,7 +38,7 @@
   const actionChildren = $derived(children);
 </script>
 
-<Tooltip content={tooltip}>
+<Tooltip {...definedOptions({ "content": tooltip })}>
   {#snippet children({ describedBy: tooltipDescribedBy })}
   <button {...rest} {type} class={cn('svadmin-ai-artifact-part__action', className)} aria-label={accessibleLabel} aria-describedby={[ariaDescribedBy, tooltipDescribedBy].filter(Boolean).join(' ') || undefined} {title} data-slot="artifact-action" data-size={size} data-variant={variant}>
     {#if Icon}<Icon size={16} aria-hidden="true" />{:else}{@render actionChildren?.()}{/if}

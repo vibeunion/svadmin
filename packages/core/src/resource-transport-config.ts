@@ -136,9 +136,11 @@ export function captureResourceTransport(provider: unknown) {
     function capture(name: keyof DataProvider, required: boolean): Invocation | undefined {
       const found = member(owner, name);
       if (!required && found === undefined) return undefined;
-      const method = found?.value;
-      if (typeof method !== 'function') return invalidProvider();
-      return (...args: unknown[]): unknown => Reflect.apply(method, owner, args);
+      const captured = found?.value;
+      if (typeof captured !== 'function') return invalidProvider();
+      return (...args: unknown[]): unknown => {
+        return Reflect.apply(captured, owner, args);
+      };
     }
     return Object.freeze({
       getApiUrl: capture('getApiUrl', true), getList: capture('getList', true),

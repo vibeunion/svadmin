@@ -37,11 +37,11 @@ const DEFAULT_OPTIONS: Required<Omit<FetchWithInterceptorOptions,'fetchImpl'|'on
       throw new Error('No fetch implementation found. Pass fetchImpl in options.');
     };
   },
- onUnauthorized: (loginPath,returnTo) => {
-   if(typeof window!=='undefined'&&window.location) {
-     window.location.href=`${loginPath}?returnTo=${returnTo}`;
-   }
- },
+  onUnauthorized: (loginPath,returnTo) => {
+    if(typeof window!=='undefined') {
+      window.location.href=`${loginPath}?returnTo=${returnTo}`;
+    }
+  },
 };
 
 function asRecord(value: unknown): Record<string,unknown>|null {
@@ -153,9 +153,7 @@ export function createFetchWithInterceptor(
 
     const httpError=await createResponseError(response,opts.forbiddenMessage);
     if(response.status===401) {
-      // Some test/embedded environments expose a partial `window` without
-      // `location`; only build a returnTo when both are available.
-      const returnTo=typeof window!=='undefined'&&typeof window.location?.pathname==='string'
+      const returnTo=typeof window!=='undefined'
         ? encodeURIComponent(window.location.pathname)
         :'';
       try {

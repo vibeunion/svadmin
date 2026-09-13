@@ -85,7 +85,8 @@
     {/snippet}
   </PageHeader>
 
-  {#if detail.checkingPermission || query.isLoading}    <Card.Root class="svadmin-u-2cd02d11d1af svadmin-u-6ee2d41e2d2d svadmin-u-438b2237b8d6">
+  {#if detail.checkingPermission || query.isLoading}
+    <Card.Root class="svadmin-u-2cd02d11d1af svadmin-u-6ee2d41e2d2d svadmin-u-438b2237b8d6">
       <Card.Content class="svadmin-u-8a539c7fe216">
         {#each showFields.slice(0, 6) as _, i (i)}
           <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-020ba687fa12 {isCompact ? 'svadmin-u-f0faeb26d656 svadmin-u-03b4dd7f172b' : 'svadmin-u-f0faeb26d656 svadmin-u-7a9aabfcd059 svadmin-u-1b2d54a3fd12 svadmin-u-b7daff9b9ddd'} {i % 2 === 1 ? 'svadmin-u-967d113a1451' : ''}">
@@ -121,7 +122,8 @@
                     {value}
                     options={field.options}
                     resourceName={field.resource}
-                  />                </dd>
+                  />
+                </dd>
               </div>
             {/each}
           </dl>
@@ -140,7 +142,8 @@
                   {value}
                   options={field.options}
                   resourceName={field.resource}
-                />              </div>
+                />
+              </div>
             </div>
           {/each}
         </Card.Content>

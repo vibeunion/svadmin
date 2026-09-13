@@ -34,7 +34,7 @@ describe('Command', () => {
 		const keyboardItem = container.querySelector<HTMLElement>('[data-command-item][data-selected]');
 		expect(keyboardItem).toBeTruthy();
 		await fireEvent.keyDown(input, { key: 'Enter' });
-		expect(screen.getByTestId('selected-command').textContent).toBe(keyboardItem?.dataset.value);
+		expect(screen.getByTestId('selected-command').textContent).toBe(keyboardItem?.dataset['value']);
 	});
 
 	it('keeps the dialog, loading, separator, and selected-value API compatible', async () => {

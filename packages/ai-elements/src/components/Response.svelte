@@ -1,8 +1,8 @@
 <script module lang="ts">
-  import type { StreamdownContext, StreamdownProps } from 'streamdown-svelte';
+  import type { StreamdownProps } from 'streamdown-svelte';
 
   export type ResponseProps = Omit<
-    StreamdownProps,
+    StreamdownProps<Record<string, unknown>>,
     'content' | 'class' | 'className' | 'mode' | 'static' | 'isAnimating' | 'caret'
   > & {
     content?: string;
@@ -13,9 +13,9 @@
 </script>
 
 <script lang="ts">
+  import { definedReactiveOptions } from '@svadmin/core/options';
   import { Streamdown } from 'streamdown-svelte';
   import { cn } from '../utils.js';
-  import { createResponseHtmlPreparer } from './message/content-polish-html.js';
 
   let {
     content = '',
@@ -26,24 +26,44 @@
     skipHtml = true,
     controls = { code: { copy: true, download: false }, mermaid: false, table: false },
     translations,
-    extensions = [],
+    streamdown = $bindable(),
     ...rest
   }: ResponseProps = $props();
 
-  const prepareResponseHtml = createResponseHtmlPreparer();
-  const response = $derived(prepareResponseHtml(text ?? content, extensions));
-  let streamdownContext = $state<StreamdownContext>();
+  function escapeRawHtmlTags(markdown: string): string {
+    let inFence = false;
+    return markdown
+      .split('\n')
+      .map((line) => {
+        if (/^\s{0,3}(`{3,}|~{3,})/.test(line)) {
+          inFence = !inFence;
+          return line;
+        }
+        return inFence
+          ? line
+          : line.replace(/<\/?[A-Za-z][A-Za-z0-9:-]*(?:\s[^<>]*?)?\/?\s*>/g, (tag) =>
+              tag.replaceAll('<', '&lt;').replaceAll('>', '&gt;'),
+            );
+      })
+      .join('\n');
+  }
+
+  const responseText = $derived(escapeRawHtmlTags(text ?? content));
+  // Preserve the renderer-owned context when parent props or streaming state change.
+  const contextBinding = definedReactiveOptions({
+    get streamdown() { return streamdown; },
+    set streamdown(next: StreamdownProps<Record<string, unknown>>['streamdown']) { streamdown = next; },
+  });
 </script>
 
 <Streamdown
-  bind:streamdown={streamdownContext}
   {...rest}
-  content={response.content}
-  extensions={response.extensions}
+  {...contextBinding}
+  content={responseText}
   class={cn('svadmin-ai__markdown', className)}
   mode={streaming ? 'streaming' : 'static'}
   isAnimating={streaming}
-  caret={streaming ? 'block' : undefined}
+  caret="block"
   {baseTheme}
   {skipHtml}
   {controls}

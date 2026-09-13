@@ -4,9 +4,7 @@
     "allowJs": true,
     "checkJs": true
   },
-  "files": [
-    "../../../node_modules/elysia/dist/standard-parse.cjs"
-  ],
+  "files": ["../../../node_modules/elysia/dist/standard-parse.cjs"],
   "include": [],
   "exclude": []
 }

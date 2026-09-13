@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
 	import { Command as CommandPrimitive } from "bits-ui";
 	import { cn } from "../../../utils.js";
 	import type { Snippet } from "svelte";
@@ -22,7 +24,7 @@
 	}: Props = $props();
 
 	function handleSelect() {
-		onSelect?.(value || ref?.dataset.value || ref?.textContent?.trim() || "");
+		onSelect?.(value || ref?.dataset['value'] || ref?.textContent?.trim() || "");
 	}
 </script>
 
@@ -32,7 +34,7 @@
 	data-cmdk-item=""
 	class={cn("svadmin-command-item", className)}
 	{value}
-	forceMount={alwaysRender ?? forceMount}
+	{...definedOptions({ "forceMount": alwaysRender ?? forceMount })}
 	onSelect={handleSelect}
 	{...restProps}
 >

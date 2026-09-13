@@ -17,6 +17,8 @@
 </script>
 
 <script lang="ts">
+  import { definedOptions, definedReactiveOptions } from '@svadmin/core/options';
+
   import type { Snippet } from 'svelte';
   import type { HTMLAttributes } from 'svelte/elements';
   import { ChevronDown, Copy, ExternalLink } from '@lucide/svelte';
@@ -68,26 +70,26 @@
   const resolvedFrames = $derived(frames?.length ? frames : parseStack(stackText));
   const selectedFrame = $derived(resolvedFrames.find((frame) => frame.id === selectedId));
   const compoundTrace = $derived(parseCompoundStackTrace(stackText));
-  provideStackTraceContext({
+  provideStackTraceContext(definedReactiveOptions({
     get trace() { return compoundTrace; },
     get raw() { return stackText; },
     get open() { return open; },
-    setOpen(nextOpen) { open = nextOpen; onopenchange?.(nextOpen); if (onOpenChange !== onopenchange) onOpenChange?.(nextOpen); },
+    setOpen(nextOpen: boolean) { open = nextOpen; onopenchange?.(nextOpen); if (onOpenChange !== onopenchange) onOpenChange?.(nextOpen); },
     get onFilePathClick() { return onfilepathclick ?? onFilePathClick; },
-  });
+  }));
 
   function parseStack(value: string): StackTraceFrame[] {
     return value.split('\n').map((line) => line.trim()).filter(Boolean).map((line, index) => {
       const match = line.match(/^(?:at\s+)?(?:(.*?)\s+\()?(.+?):(\d+):(\d+)\)?$/);
       if (!match) return { id: `frame-${index}`, source: line };
-      return {
+      return definedOptions({
         id: `frame-${index}`,
         functionName: match[1] || undefined,
         file: match[2],
         line: Number(match[3]),
         column: Number(match[4]),
         source: line,
-      };
+      });
     });
   }
 

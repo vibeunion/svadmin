@@ -13,7 +13,7 @@ describe('utility migration safety', () => {
     expect(migrated).toContain('"data-slot": dataSlot');
     expect(migrated).toContain('const label = "text-success"');
     expect(migrated).toContain(`"data-slot": "${map['text-success']}"`);
-    expect(migrated).toContain(`class="${map.flex}"`);
+    expect(migrated).toContain(`class="${map['flex']}"`);
     expect(map).not.toHaveProperty('data-slot');
     expect(migrateSource(migrated, map)).toBe(migrated);
   });
@@ -23,7 +23,7 @@ describe('utility migration safety', () => {
     const map: Record<string, string> = {};
     const migrated = migrateSource(source, map);
     expect(migrated).toContain('class={`h-${size}`}');
-    expect(migrated).toContain(`class:${map.hidden}={active}`);
+    expect(migrated).toContain(`class:${map['hidden']}={active}`);
     expect(map).not.toHaveProperty('h-');
   });
 

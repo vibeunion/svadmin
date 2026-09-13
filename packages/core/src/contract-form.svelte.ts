@@ -189,11 +189,11 @@ export function useContractForm<S extends ContractSchemas, A extends ContractFor
     const scope = current.scope;
     return {
       queryKey: queryKey(scope),
-      queryFn: async ({ signal }) => {
+      queryFn: async () => {
         if (!isCurrent(scope)) throw cancelled();
         if (scope.id === undefined) throw new HttpError('A form read requires an ID', 422, undefined, { code: 'INVALID_RESOURCE_INPUT' });
         const response = await scope.provider.getOne(snapshotOneParams({
-          resource: scope.contract.name, id: scope.id, ...definedOptions({ meta: scope.meta, signal }),
+          resource: scope.contract.name, id: scope.id, ...definedOptions({ meta: scope.meta }),
         }));
         if (!isCurrent(scope)) throw cancelled();
         const result = decodeOneResult(snapshotPlainData(response), value => parseContractRecord(scope.contract, value));
@@ -249,17 +249,7 @@ export function useContractForm<S extends ContractSchemas, A extends ContractFor
       hydratedKey = scope.key;
     }
   });
-  $effect(() => () => {
-    mounted = false;
-    active = undefined;
-    latest = undefined;
-    queueMicrotask(() => {
-      const current = state;
-      if (!current.ok) return;
-      const query = client.getQueryCache().find({ queryKey: queryKey(current.scope), exact: true });
-      if (query?.getObserversCount() === 0) void query.cancel();
-    });
-  });
+  $effect(() => () => { mounted = false; active = undefined; latest = undefined; });
 
   function isTainted(field?: string): boolean {
     return ready() && (field === undefined ? Object.values(tainted).some(Boolean) : tainted[field] === true);

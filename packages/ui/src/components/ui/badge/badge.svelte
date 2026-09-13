@@ -1,8 +1,7 @@
 <script lang="ts" module>
-	import { badgeVariants as variants, type BadgeVariant as Variant } from "./badge-variants.js";
+	import { badgeVariants as resolveBadgeVariants, type BadgeVariant as BadgeVariantValue } from "./badge-variants.js";
 
-	export const badgeVariants = variants;
-	export type BadgeVariant = Variant;
+	export { badgeVariants, type BadgeVariant } from "./badge-variants.js";
 </script>
 
 <script lang="ts">
@@ -17,7 +16,7 @@
 		children,
 		...restProps
 	}: WithElementRef<HTMLAnchorAttributes> & {
-		variant?: BadgeVariant;
+		variant?: BadgeVariantValue;
 	} = $props();
 </script>
 
@@ -27,7 +26,7 @@
 	data-slot="badge"
 	data-variant={variant}
 	{href}
-	class={cn(badgeVariants({ variant }), className)}
+	class={cn(resolveBadgeVariants({ variant }), className)}
 	{...restProps}
 >
 	{@render children?.()}

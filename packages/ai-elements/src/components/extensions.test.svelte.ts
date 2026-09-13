@@ -1,3 +1,4 @@
+import { requireValue } from "../../../../scripts/test-assertions";
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import CopyButton from './copy-button/CopyButton.svelte';
@@ -30,7 +31,7 @@ describe('AI element extensions', () => {
       ['output-denied', 'Denied', 'warning'],
       ['output-error', 'Error', 'danger'],
     ];
-    const view = render(ExtensionHost, { state: states[0][0] });
+    const view = render(ExtensionHost, { state: requireValue(states[0])[0] });
     const icon = view.getByTestId('context-icon');
     expect(icon.querySelectorAll('circle')[1]?.getAttribute('stroke-dashoffset')).toBeCloseTo(
       Math.PI * 20 * 0.25,

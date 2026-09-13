@@ -110,8 +110,6 @@ export interface LogicalFilter {
 }
 
 export interface GetListParams {
-  /** Query-owned cancellation signal. Never include it in a cache key or URL. */
-  signal?: AbortSignal;
   resource: string;
   pagination?: Pagination;
   sorters?: Sort[];
@@ -126,7 +124,6 @@ export interface GetListResult<TData extends BaseRecord = BaseRecord> {
 }
 
 export interface GetOneParams {
-  signal?: AbortSignal;
   resource: string;
   id: string | number;
   meta?: Record<string, unknown>;
@@ -137,7 +134,6 @@ export interface GetOneResult<TData extends BaseRecord = BaseRecord> {
 }
 
 export interface GetManyParams {
-  signal?: AbortSignal;
   resource: string;
   ids: (string | number)[];
   meta?: Record<string, unknown>;
@@ -212,7 +208,6 @@ export interface DeleteManyResult<TData extends BaseRecord = BaseRecord> {
 }
 
 export interface CustomParams<TVariables = unknown> {
-  signal?: AbortSignal;
   url: string;
   method: 'get' | 'post' | 'put' | 'patch' | 'delete';
   payload?: TVariables;

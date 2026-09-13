@@ -1,16 +1,6 @@
 {
   "extends": "./tsconfig.browser.json",
   "compilerOptions": {
-    "exactOptionalPropertyTypes": false,
-    "noPropertyAccessFromIndexSignature": false,
-    "skipLibCheck": true
-  },
-  "exclude": [
-    "node_modules",
-    "dist",
-    "packages/*/src/**/*.test.*",
-    "packages/*/src/**/*.spec.*",
-    "example/src/**/*.test.*",
-    "example/src/**/*.spec.*"
-  ]
+    "skipLibCheck": false
+  }
 }
