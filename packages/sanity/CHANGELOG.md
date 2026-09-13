@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.10.2](https://github.com/vibeunion/svadmin/compare/sanity-v0.10.1...sanity-v0.10.2) (2026-09-13)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.51.2
+
 ## [0.10.1](https://github.com/vibeunion/svadmin/compare/sanity-v0.10.0...sanity-v0.10.1) (2026-09-12)
 
 

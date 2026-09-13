@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.51.2](https://github.com/vibeunion/svadmin/compare/core-v0.51.1...core-v0.51.2) (2026-09-13)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** close strict validation gates ([2f24ff6](https://github.com/vibeunion/svadmin/commit/2f24ff65f04f406939d3767fe4def710fa2a96d2))
+* **ci:** normalize repository URLs to canonical git+https form ([a150174](https://github.com/vibeunion/svadmin/commit/a150174999475d7ab78d3e3ee10e966ac4bfab88))
+* **ci:** repair lite and contract test failures ([ed986a5](https://github.com/vibeunion/svadmin/commit/ed986a556a7dd10f4e45e5c7538583b015ae92ee))
+* **ci:** restore green main — SSR-safe resource serialization and scaffold hygiene ([912836c](https://github.com/vibeunion/svadmin/commit/912836ca814d7ba6408fef6fd3cf78e6d90a0097))
+* **core:** make window-mocking tests order-independent ([6cac46c](https://github.com/vibeunion/svadmin/commit/6cac46c07d646afcb6934a63caa5ab05f93da172))
+
 ## [0.51.1](https://github.com/vibeunion/svadmin/compare/core-v0.51.0...core-v0.51.1) (2026-09-12)
 
 

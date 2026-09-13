@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.6.2](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.6.1...ai-elements-v0.6.2) (2026-09-13)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** close strict validation gates ([2f24ff6](https://github.com/vibeunion/svadmin/commit/2f24ff65f04f406939d3767fe4def710fa2a96d2))
+* **ci:** resolve remaining strict component diagnostics ([635746d](https://github.com/vibeunion/svadmin/commit/635746d38fe96fb89f8484faa9ad5e123272d40a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.51.2
+
 ## [0.6.1](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.6.0...ai-elements-v0.6.1) (2026-09-12)
 
 
