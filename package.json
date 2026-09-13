@@ -4,7 +4,7 @@
   "type": "module",
   "version": "0.5.14",
   "description": "Headless admin framework for Svelte 5 — bring your own backend",
-  "packageManager": "bun@1.4.0",
+  "packageManager": "bun@1.4.2",
   "workspaces": [
     "packages/*",
     "example",
@@ -63,7 +63,7 @@
     "@playwright/test": "^1.62.1",
     "@sveltejs/kit": "2.70.3",
     "@sveltejs/package": "^2.5.8",
-    "@types/bun": "^1.4.0",
+    "@types/bun": "^1.4.2",
     "@types/papaparse": "^5.5.2",
     "@typescript/native": "npm:typescript@^7.0.2",
     "eslint": "^10.9.1",
