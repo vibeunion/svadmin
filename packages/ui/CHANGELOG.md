@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.70.5](https://github.com/vibeunion/svadmin/compare/ui-v0.70.4...ui-v0.70.5) (2026-09-13)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** close workspace validation gates ([#403](https://github.com/vibeunion/svadmin/issues/403)) ([9e92f77](https://github.com/vibeunion/svadmin/commit/9e92f7772ff1eb69e3a660e48ceee8f834387822))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.6.3
+  * peerDependencies
+    * @svadmin/core bumped to 0.51.3
+
 ## [0.70.4](https://github.com/vibeunion/svadmin/compare/ui-v0.70.3...ui-v0.70.4) (2026-09-13)
 
 

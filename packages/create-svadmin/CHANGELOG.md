@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.27.3](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.27.2...create-svadmin-v0.27.3) (2026-09-13)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** close workspace validation gates ([#403](https://github.com/vibeunion/svadmin/issues/403)) ([9e92f77](https://github.com/vibeunion/svadmin/commit/9e92f7772ff1eb69e3a660e48ceee8f834387822))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/core bumped to 0.51.3
+
 ## [0.27.2](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.27.1...create-svadmin-v0.27.2) (2026-09-13)
 
 
