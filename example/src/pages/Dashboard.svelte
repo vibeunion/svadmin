@@ -6,10 +6,7 @@
 
   import { useList } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
-  import ContentPageHeader from '@svadmin/ui/components/content/ContentPageHeader.svelte';
-  import ContentPageShell from '@svadmin/ui/components/content/ContentPageShell.svelte';
-  import DataState from '@svadmin/ui/components/content/DataState.svelte';
-  import MetricBlock from '@svadmin/ui/components/content/MetricBlock.svelte';
+  import { ContentPageHeader, ContentPageShell, DataState, MetricBlock } from '@svadmin/ui';
   import * as Card from '@svadmin/ui/components/ui/card/index.js';
   import {
     Bell,
@@ -263,7 +260,7 @@
       loading={isLoading} />
   </section>
 
-  <details class="border-y" data-dashboard-summary>
+  <details class="border-y" data-dashboard-summary data-svadmin-collapsible>
     <summary class="cursor-pointer py-3 text-sm font-medium">{isZh ? '资源概览' : 'Resource overview'}</summary>
   <section class="grid grid-cols-2 gap-x-6 gap-y-3 pb-4 xl:grid-cols-3">
     {#each stats as stat (stat.label)}
