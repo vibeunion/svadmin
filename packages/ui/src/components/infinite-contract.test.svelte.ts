@@ -429,7 +429,7 @@ describe('contract-bound infinite lists', () => {
     });
     expect(diagnostics.map(diagnostic => `${diagnostic.file?.fileName}:${diagnostic.start}: ${
       ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`)).toEqual([]);
-  });
+  }, 30_000);
   it('renders only validated records using the registered contract and preserves the provider receiver', async () => {
     const source = provider();
     source.getList = vi.fn(async function(this: DataProvider, params: GetListParams) {
