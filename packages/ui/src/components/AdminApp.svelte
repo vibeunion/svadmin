@@ -61,9 +61,9 @@
   import { QueryClient, QueryClientProvider, type DefaultOptions } from '@tanstack/svelte-query';
   import { setComponentRegistry, type ComponentRegistry } from '../component-registry.svelte.js';
   import Layout, { type LayoutAIAssistantProps } from './Layout.svelte';
-  import LazyAutoTable from './LazyAutoTable.svelte';
-  import LazyAutoForm from './LazyAutoForm.svelte';
-  import LazyShowPage from './LazyShowPage.svelte';
+  import AutoTable from './AutoTable.svelte';
+  import AutoForm from './AutoForm.svelte';
+  import ShowPage from './ShowPage.svelte';
   import Toast from './Toast.svelte';
   import LoginPage from './LoginPage.svelte';
   import RegisterPage from './RegisterPage.svelte';
@@ -190,7 +190,7 @@
   // Default component registry
   const defaultComponents: ComponentRegistry = {
     Layout, Sidebar, Header,
-    LoginPage, AutoTable: LazyAutoTable, AutoForm: LazyAutoForm, ShowPage: LazyShowPage,
+    LoginPage, AutoTable, AutoForm, ShowPage,
     TaskQueueDrawer, ErrorPage,
     Button, Input, Badge, Skeleton,
   };
@@ -553,7 +553,8 @@
       <ErrorComp status={standaloneErrorStatus} />
     </SystemPageShell>
   {:else if isAuthenticated || !resolvedAuthProvider}
-    <Layout {title} {...definedOptions({ "menu": menu })} {...definedOptions({ "siteUrl": siteUrl })} routeMode={resolvedRouteMode} {...definedOptions({ "aiAssistant": aiAssistant })}>      <div class="svadmin-u-d89972fe17d6 svadmin-u-8a7a926578c8" aria-busy={authRechecking}>
+    <Layout {title} {...definedOptions({ "menu": menu })} {...definedOptions({ "siteUrl": siteUrl })} routeMode={resolvedRouteMode} {...definedOptions({ "aiAssistant": aiAssistant })}>
+      <div class="svadmin-u-d89972fe17d6 svadmin-u-8a7a926578c8" aria-busy={authRechecking}>
         {#if authRechecking}
           <div class="svadmin-u-da4dbfbc4fdc svadmin-u-7b7df0449b80 svadmin-u-236812d64c82 svadmin-u-60fbb7713999 svadmin-u-8a7a926578c8 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-d542b60b5312" role="status" aria-live="polite">
             <div class="svadmin-u-6ed543e2fbbb svadmin-u-ca6bf63030aa">

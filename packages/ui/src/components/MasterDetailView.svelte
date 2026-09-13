@@ -80,7 +80,8 @@
             {@render itemSnippet(item, isSelected)}
           {:else}
             <div class={cn('svadmin-u-e83a7042bc91 svadmin-u-f283ea9bea0e', isSelected ? 'svadmin-u-20aaf08a7ed1' : 'svadmin-u-d4108abe6359')}>
-              {item[titleKey] ?? item['name'] ?? `Item #${item[idKey]}`}            </div>
+              {item[titleKey] ?? item['name'] ?? `Item #${item[idKey]}`}
+            </div>
             {#if item[subtitleKey]}
               <div class="svadmin-u-d058ca6de60f svadmin-u-bfa603190748 svadmin-u-f283ea9bea0e svadmin-u-15e1b1f444fe">
                 {item[subtitleKey]}
@@ -107,7 +108,8 @@
         <div class="svadmin-u-3e7ce58d64fa">
           <div class="svadmin-u-7fcf9124b5df svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff">
             <h3 class="svadmin-u-4ee734926ff6 svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">
-              {activeItem[titleKey] ?? activeItem['name'] ?? `Item #${activeItem[idKey]}`}            </h3>
+              {activeItem[titleKey] ?? activeItem['name'] ?? `Item #${activeItem[idKey]}`}
+            </h3>
             {#if activeItem[subtitleKey]}
               <p class="svadmin-u-359090c2d529 svadmin-u-bfa603190748 svadmin-u-15e1b1f444fe">{activeItem[subtitleKey]}</p>
             {/if}

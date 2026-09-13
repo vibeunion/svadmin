@@ -1,1 +1,3 @@
-<script lang="ts">import type { Snippet } from 'svelte'; import OpenInProviderLink from './OpenInProviderLink.svelte'; let { class: className = '', children, ...rest }: { class?: string; children?: Snippet; [key: string]: unknown } = $props();</script><OpenInProviderLink provider="v0" class={className} {children} {...rest} />
+<script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+import type { Snippet } from 'svelte'; import OpenInProviderLink from './OpenInProviderLink.svelte'; let { class: className = '', children, ...rest }: { class?: string; children?: Snippet; [key: string]: unknown } = $props();</script><OpenInProviderLink provider="v0" class={className} {...definedOptions({ "children": children })} {...rest} />

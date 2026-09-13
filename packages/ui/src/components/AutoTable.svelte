@@ -1,7 +1,7 @@
 <script lang="ts">
   import { definedOptions } from '@svadmin/core/options';
 
-  import { onDestroy, untrack } from 'svelte';
+  import { onDestroy, tick, untrack } from 'svelte';
   import { SvelteMap } from 'svelte/reactivity';
   import { cn } from '../utils.js';
   import {
@@ -30,13 +30,14 @@
     table_getRowModel,
     table_getAllLeafColumns,
     table_getIsAllRowsSelected,
+    table_resetRowSelection,
     table_toggleAllRowsSelected,
     row_toggleSelected,
     row_getVisibleCells,
     cell_getValue,
   } from '@tanstack/table-core/static-functions';
 
-  import { captureAdminContext, DeleteManyPartialError, getContractFormFields, useNavigation, useParsed, useResourceContract, useList, useDeleteMany, downloadData } from '@svadmin/core';
+  import { captureAdminContext, DeleteManyPartialError, getAdminOptions, getContractFormFields, useNavigation, useParsed, useResourceContract, useList, useDeleteMany, downloadData } from '@svadmin/core';
   import { decodeBaseRecord, snapshotPlainData, parseContractRouteId, formatContractRouteId } from '@svadmin/core/schema';
   import { checkedTableRows, copyTableRecord, tableExportRows, tableRowKey, type TableRecord } from './table-contract';
   import type {
@@ -88,6 +89,8 @@
   } from '@lucide/svelte';
   import ConfirmDialog from './ConfirmDialog.svelte';
   import RecordDetailDrawer from './RecordDetailDrawer.svelte';
+  import QuickEditDrawer from './QuickEditDrawer.svelte';
+  import RecordRowActions from './RecordRowActions.svelte';
   import CanAccess from './CanAccess.svelte';
   import TooltipButton from './TooltipButton.svelte';
   import InlineEdit from './InlineEdit.svelte';
@@ -436,6 +439,10 @@
 
   function clearFilters(): void {
     markSavedViewDirty();
+    if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = undefined;
+    searchText = '';
+    appliedSearchText = '';
     filters = [];
     filterValues = {};
     pagination = { ...pagination, current: 1 };
@@ -543,6 +550,9 @@
 
   // ─── Permissions ──────────────────────────────────────────────
   const acEnabled = $derived(!!adminContext.accessControlProvider);
+  const deleteResourcePermission = useCan(() => ({
+    resource: resourceName, action: 'delete', queryOptions: { enabled: acEnabled },
+  }));
   const canCreatePerm = useCan(() => ({ resource: resourceName, action: 'create', queryOptions: { enabled: acEnabled } }));
   const canExportPerm = useCan(() => ({ resource: resourceName, action: 'export', queryOptions: { enabled: acEnabled } }));
   const canCreate = $derived(resource.canCreate !== false && (!acEnabled || canCreatePerm.allowed));
@@ -564,7 +574,7 @@
   ));
   const sortingAtom = createAtom(initialSorting);
   const columnVisibilityAtom = createAtom(initialColumnVisibility);
-  const rowSelectionAtom = createAtom<RowSelectionState>({});
+  let rowSelection = $state<RowSelectionState>({});
   const expandedAtom = createAtom<ExpandedState>({});
   const initialColumnOrder = untrack(() => (
     initialViewState?.columnOrder?.length
@@ -583,7 +593,6 @@
 
   const tableSorting = useSelector(sortingAtom);
   const tableColumnVisibility = useSelector(columnVisibilityAtom);
-  const tableRowSelection = useSelector(rowSelectionAtom);
   const tableExpanded = useSelector(expandedAtom);
   const tableColumnOrder = useSelector(columnOrderAtom);
   const selectedIdValueByKey = new SvelteMap<string, string | number>();
@@ -598,7 +607,7 @@
   }
 
   function rowIsSelected(rowId: string): boolean {
-    return tableRowSelection.current[rowId] === true;
+    return rowSelection[rowId] === true;
   }
 
   function rowIdValue(row: Row<TableFeatures, TableRecord>): string | number {
@@ -714,7 +723,7 @@
     columnVisibilityAtom.set(state.columnVisibility);
     columnOrderAtom.set(state.columnOrder);
     persistColumnOrder(state.columnOrder);
-    rowSelectionAtom.set({});
+    rowSelection = {};
     selectedIdValueByKey.clear();
   }
 
@@ -752,7 +761,7 @@
       if (!hasExplicitURLState) resetToDefaultListState();
       columnVisibilityAtom.set(preferences.columnVisibility);
       columnOrderAtom.set(preferences.columnOrder);
-      rowSelectionAtom.set({});
+      rowSelection = {};
       selectedIdValueByKey.clear();
     }
 
@@ -886,12 +895,15 @@
       state: {
         get sorting() { return tableSorting.current; },
         get columnVisibility() { return tableColumnVisibility.current; },
+        get rowSelection() { return rowSelection; },
       },
       onSortingChange: (updater) => {
         sortingAtom.set(typeof updater === 'function' ? updater(tableSorting.current) : updater);
       },
+      onRowSelectionChange: (updater) => {
+        rowSelection = typeof updater === 'function' ? updater(rowSelection) : updater;
+      },
       atoms: {
-        rowSelection: rowSelectionAtom,
         expanded: expandedAtom,
       },
       autoResetExpanded: false,
@@ -915,13 +927,13 @@
   }
 
   const selectedIds = $derived(
-    Object.keys(tableRowSelection.current).filter(key => tableRowSelection.current[key] === true)
+    Object.keys(rowSelection).filter(key => rowSelection[key] === true)
       .flatMap(key => {
         const id = selectedIdValueByKey.get(key);
         return id === undefined ? [] : [id];
       })
   );
-  const selectedCount = $derived(selectedIds.length);
+  const selectedCount = $derived(Object.keys(rowSelection).filter(key => rowSelection[key] === true).length);
   const batchDeletePerm = useCan(() => ({
     resource: resourceName,
     action: 'delete',
@@ -929,13 +941,13 @@
     queryOptions: { enabled: acEnabled && canDelete && selectedIds.length > 0 },
   }));
   const canBatchDelete = $derived(
-    canDelete && (!acEnabled || (!batchDeletePerm.isLoading && batchDeletePerm.allowed))
+    canDelete && (!acEnabled || batchDeletePerm.isLoading || batchDeletePerm.allowed)
   );
 
   function clearSelection(): void {
     if (!deleteManyMutation.isPending) {
       selectedIdValueByKey.clear();
-      rowSelectionAtom.set({});
+      table_resetRowSelection(tbl, true);
     }
   }
 
@@ -947,7 +959,7 @@
     void tableSorting.current;
     void tableColumnVisibility.current;
     void orderedColumns;
-    void tableRowSelection.current;
+    void rowSelection;
     void tableExpanded.current;
     void tableColumnOrder.current;
     const headerGroups = table_getHeaderGroups(tbl);
@@ -1004,6 +1016,7 @@
   let operationError = $state<string | null>(null);
   let activeDelete: object | undefined;
   let detailOpenedInHistory = $state(false);
+  let quickEditId = $state<string | number | undefined>();
   const tableScope = $derived({
     contract: binding.resource, resourceName, provider: adminContext.providers?.[binding.dataProviderName],
     meta: JSON.stringify(binding.meta), tenant: adminContext.tenantCacheKey?.__svadminTenant,
@@ -1029,9 +1042,10 @@
       deleteRequest = null;
       operationError = null;
       selectedIdValueByKey.clear();
-      rowSelectionAtom.set({});
+      rowSelection = {};
       expandedAtom.set({});
       detailOpenedInHistory = false;
+      quickEditId = undefined;
       if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
       searchDebounceTimer = undefined;
       if (previousTableScope.resourceName !== scope.resourceName) resetToDefaultListState();
@@ -1076,27 +1090,52 @@
     const token = {};
     activeDelete = token;
     confirmPending = true;
-    const current = () => activeDelete === token && tableScope === scope && deleteAllowed;
+    confirmOpen = false;
+    const clearBatchSelectionBeforeMutation = request.batch && getAdminOptions().mutationMode === 'undoable';
+    const selectionBeforeDelete = clearBatchSelectionBeforeMutation ? new Map(selectedIdValueByKey) : undefined;
+    if (clearBatchSelectionBeforeMutation) {
+      selectedIdValueByKey.clear();
+      table_resetRowSelection(tbl, true);
+    }
+    const current = () => activeDelete === token &&
+      tableScope.contract === scope.contract &&
+      tableScope.resourceName === scope.resourceName &&
+      tableScope.provider === scope.provider &&
+      tableScope.meta === scope.meta &&
+      tableScope.tenant === scope.tenant &&
+      tableScope.auth === scope.auth &&
+      tableScope.router === scope.router &&
+      tableScope.permissionProvider === scope.permissionProvider;
     try {
       await deleteManyMutation.mutateAsync({
         ids: [...request.ids],
         ...definedOptions({ variables: deleteVariables, dataProviderName: binding.dataProviderName }),
       });
       if (!current()) return;
-      for (const id of request.ids) selectedIdValueByKey.delete(tableRowKey(id));
-      rowSelectionAtom.set(Object.fromEntries(Object.entries(tableRowSelection.current)
-        .filter(([key]) => selectedIdValueByKey.has(key))));
+      selectedIdValueByKey.clear();
+      table_resetRowSelection(tbl, true);
+      await tick();
       confirmOpen = false;
     } catch (error) {
       if (!current()) return;
       if (error instanceof DeleteManyPartialError) {
-        for (const id of error.succeededIds) selectedIdValueByKey.delete(tableRowKey(id));
-        rowSelectionAtom.set(Object.fromEntries(error.failedIds.map(id => [tableRowKey(id), true as const])));
+        rowSelection = Object.fromEntries(error.failedIds.map(id => [tableRowKey(id), true as const]));
+        selectedIdValueByKey.clear();
+        for (const id of error.failedIds) selectedIdValueByKey.set(tableRowKey(id), id);
         operationError = i18n.t('common.batchDeletePartialFail', { failed: error.failedIds.length, total: request.ids.length });
-      } else operationError = i18n.t('common.operationFailed');
+      } else {
+        if (selectionBeforeDelete) {
+          selectedIdValueByKey.clear();
+          for (const [key, id] of selectionBeforeDelete) selectedIdValueByKey.set(key, id);
+          rowSelection = Object.fromEntries([...selectionBeforeDelete.keys()].map(key => [key, true as const]));
+        }
+        operationError = i18n.t('common.operationFailed');
+      }
       confirmOpen = false;
     } finally {
       if (activeDelete === token) { activeDelete = undefined; confirmPending = false; deleteRequest = null; }
+      await tick();
+      await tick();
     }
   }
 
@@ -1140,9 +1179,39 @@
   }
 </script>
 
+{#snippet defaultRowActions(id: string | number)}
+  <RecordRowActions
+    {resourceName} {id} {canShow} {canEdit} {canDelete}
+    onShow={() => openDetail(id)}
+    onEdit={() => navigation.edit(resourceName, id)}
+    onQuickEdit={() => quickEditId = id}
+    onDelete={() => confirmDelete(id)}
+  />
+{/snippet}
+
+{#snippet defaultEmptyState()}
+  {@const hasCriteria = !!(searchText.trim() || appliedSearchText.trim() || activeFilterCount > 0)}
+  <DataState state="empty" description={i18n.t(hasCriteria ? 'empty.description' : 'common.noDataHint')}>
+    {#snippet action()}
+      {#if hasCriteria}
+        <Button variant="outline" size="sm" onclick={clearFilters}>
+          <X class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+          {i18n.t('common.clearAllFilters')}
+        </Button>
+      {:else if canCreate}
+        <Button variant="outline" size="sm" onclick={() => navigation.create(resourceName)}>
+          <Plus class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+          {i18n.t('common.create')}
+        </Button>
+      {/if}
+    {/snippet}
+  </DataState>
+{/snippet}
+
 <div class="svadmin-u-6ed543e2fbbb">
   {#if operationError}<p role="alert">{operationError}</p>{/if}
-  {#if detailState.invalid}<p role="alert">{i18n.t('common.operationFailed')}</p>{/if}  {#if showHeader}
+  {#if detailState.invalid}<p role="alert">{i18n.t('common.operationFailed')}</p>{/if}
+  {#if showHeader}
     <!-- Header -->
     <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4">
       <h1 class="svadmin-u-42536e69e639 svadmin-u-998e0b29fe9e svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{title ?? resource.label}</h1>
@@ -1166,7 +1235,7 @@
 
   <!-- Selection Banner (Enterprise Batch Actions) -->
   {#if selectedCount > 0}
-    <div
+<div
       class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-1004c0c3954c svadmin-u-ca6bcd4b6f3f svadmin-u-a6afccfc915b svadmin-u-375dc44df6e9 svadmin-u-e0d9cc7f0647 svadmin-u-03b4dd7f172b svadmin-u-5f22e64f2282 svadmin-u-fc7473ca09eb svadmin-u-d4108abe6359 svadmin-u-40137e897961 fade-in svadmin-u-625a4c3fbeb2 svadmin-u-259ce51fc8f3 svadmin-u-020ba687fa12 svadmin-u-9f76a62f4f44 svadmin-u-3b9871a0bf93"
       aria-label={i18n.t("common.selectedCount", { count: selectedCount })}
       data-svadmin-batch-toolbar
@@ -1290,7 +1359,8 @@
       {#if showDensitySwitcher}
         <DropdownMenu.Root>
           <DropdownMenu.Trigger>
-            {#snippet child({ props }: { props: Record<string, unknown> })}              <TooltipButton tooltip={i18n.t("common.density")} variant="outline" size="sm" class="svadmin-u-e7a768f922d2 svadmin-u-0b91436debbd" {...props}>
+            {#snippet child({ props }: { props: Record<string, unknown> })}
+              <TooltipButton tooltip={i18n.t("common.density")} variant="outline" size="sm" class="svadmin-u-e7a768f922d2 svadmin-u-0b91436debbd" {...props}>
                 <Rows class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" aria-hidden="true" />
               </TooltipButton>
             {/snippet}
@@ -1309,7 +1379,8 @@
       <!-- Column Visibility Picker -->
       <DropdownMenu.Root>
         <DropdownMenu.Trigger>
-          {#snippet child({ props }: { props: Record<string, unknown> })}            <TooltipButton tooltip={i18n.t("common.columns")} variant="outline" size="sm" class="svadmin-u-e7a768f922d2 svadmin-u-0b91436debbd" {...props}>
+          {#snippet child({ props }: { props: Record<string, unknown> })}
+            <TooltipButton tooltip={i18n.t("common.columns")} variant="outline" size="sm" class="svadmin-u-e7a768f922d2 svadmin-u-0b91436debbd" {...props}>
               <SlidersHorizontal class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
             </TooltipButton>
           {/snippet}
@@ -1404,7 +1475,8 @@
           variant="outline"
           size="sm"
           class="svadmin-u-e7a768f922d2 svadmin-u-0b91436debbd"
-          onclick={refreshList}        >
+          onclick={refreshList}
+        >
           <RefreshCw class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 {query.isFetching ? "svadmin-u-afbdd13a380e" : ""}" />
         </TooltipButton>
       {/if}
@@ -1461,7 +1533,41 @@
 
   <!-- Table (TanStack-powered) -->
   <div class="svadmin-u-2cd02d11d1af svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-438b2237b8d6" role="region" aria-label="{resource.label} {i18n.t('common.list')}" data-table-density={currentDensity}>
-    {#if query.isLoading || listPermission.isLoading}      <div class="svadmin-u-8e63407b5ceb svadmin-u-6ed543e2fbbb">
+    {#if listPermission.isLoading || (query.isLoading && !query.isError)}
+      <Table.Root density={currentDensity}>
+        <Table.Header>
+          {#each tableView.headerGroups as headerGroup, _i (_i)}
+            {@const visibleHeaders = headerGroup.headers.filter((header: Header<TableFeatures, TableRecord, unknown>) => isColumnVisible(header.column.id))}
+            <Table.Row>
+              {#each visibleHeaders as header (header.id)}
+                <Table.Head>
+                  {#if header.id === '_actions'}
+                    {i18n.t('common.actions')}
+                  {:else if column_getCanSort(header.column)}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421 svadmin-u-ea7b2e9e070e svadmin-u-8ffe7a29179a svadmin-u-b8f0a08ece1e svadmin-u-660d2effb880 svadmin-u-d5eab218aa34 uppercase svadmin-u-8baf13a3e9d7 svadmin-u-7357df2b2e0c svadmin-u-e83a7042bc91"
+                      onclick={() => toggleColumnSort(header.column)}
+                    >
+                      {visibleFields.find(field => field.key === header.id)?.label ?? header.id}
+                      <span class="svadmin-u-359090c2d529 svadmin-u-0b8c506a0596">
+                        {#if column_getIsSorted(header.column) === 'asc'}↑
+                        {:else if column_getIsSorted(header.column) === 'desc'}↓
+                        {:else}⇅
+                        {/if}
+                      </span>
+                    </Button>
+                  {:else}
+                    {visibleFields.find(field => field.key === header.id)?.label ?? header.id}
+                  {/if}
+                </Table.Head>
+              {/each}
+            </Table.Row>
+          {/each}
+        </Table.Header>
+      </Table.Root>
+      <div class="svadmin-u-8e63407b5ceb svadmin-u-6ed543e2fbbb">
         <div class="svadmin-u-60fbb7713999 svadmin-u-0c3bc98565dd svadmin-u-a77ed4d908c0">
           {#each visibleFields.slice(0, 4) as _, _i (_i)}
             <Skeleton class="svadmin-u-11e59c6d5f6b svadmin-u-36e579c0b41c" />
@@ -1477,7 +1583,7 @@
       </div>
     {:else if !canRead}
       <p role="alert">{i18n.t('common.operationFailed')}</p>
-    {:else if query.error || !pageRecords.ok}
+    {:else if query.error || query.isError || !pageRecords.ok}
       <DataState
         state="error"
         description={i18n.t('common.operationFailed')}
@@ -1509,14 +1615,12 @@
                           checked={table_getIsAllRowsSelected(tbl)}
                           onCheckedChange={toggleAllRowsSelection}
                         />
-                      {:else}
-                        <CanAccess resource={resourceName} action="delete" params={{ ids: tableView.rows.map(rowIdValue) }}>
+                      {:else if !acEnabled || deleteResourcePermission.isLoading || deleteResourcePermission.allowed}
                           <Checkbox
                             aria-label={i18n.t('common.selectAll')}
                             checked={table_getIsAllRowsSelected(tbl)}
                             onCheckedChange={toggleAllRowsSelection}
                           />
-                        </CanAccess>
                       {/if}
                     {:else if header.id === '_expand'}
                       <!-- empty -->
@@ -1585,27 +1689,7 @@
                               {#if rowActions}
                                 {@render rowActions({ record, id })}
                               {:else}
-                                {#if canShow}
-                                  <CanAccess resource={resourceName} action="show" params={{ id }}>
-                                    <TooltipButton tooltip={i18n.t('common.detail')} variant="ghost" size="icon-sm" onclick={() => openDetail(id)}>
-                                      <Eye class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
-                                    </TooltipButton>
-                                  </CanAccess>
-                                {/if}
-                                {#if canEdit}
-                                  <CanAccess resource={resourceName} action="edit" params={{ id }}>
-                                    <TooltipButton tooltip={i18n.t('common.edit')} variant="ghost" size="icon-sm" onclick={() => navigation.edit(resourceName, id)}>
-                                      <Pencil class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
-                                    </TooltipButton>
-                                  </CanAccess>
-                                {/if}
-                                {#if canDelete}
-                                  <CanAccess resource={resourceName} action="delete" params={{ id }}>
-                                    <TooltipButton tooltip={i18n.t('common.delete')} variant="ghost" size="icon-sm" onclick={() => confirmDelete(id)} class="svadmin-u-51e95020d6f2">
-                                      <Trash2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
-                                    </TooltipButton>
-                                  </CanAccess>
-                                {/if}
+                                {@render defaultRowActions(id)}
                               {/if}
                             </div>
                           {:else}
@@ -1615,7 +1699,8 @@
                               {@render customColumn({ value: clonePlainValue(cell_getValue(cell)), record: copyTableRecord(record) })}
                             {:else if defaultCellRenderer && field}
                               {@render defaultCellRenderer({ field, value: clonePlainValue(cell_getValue(cell)), record: copyTableRecord(record) })}
-                            {:else if canEdit && field && field.showInEdit !== false && writableFields.has(field.key) && field.key !== primaryKey && field.key !== 'id' && ['text', 'number', 'email', 'url'].includes(field.type)}                              <CanAccess resource={resourceName} action="edit" params={{ id }}>
+                            {:else if canEdit && field && field.showInEdit !== false && writableFields.has(field.key) && field.key !== primaryKey && field.key !== 'id' && ['text', 'number', 'email', 'url'].includes(field.type)}
+                              <CanAccess resource={resourceName} action="edit" params={{ id }}>
                                 <InlineEdit
                                   {resourceName}
                                   recordId={id}
@@ -1629,7 +1714,8 @@
                             {:else if field?.key === 'id'}
                               <span class="svadmin-u-0214b4b355d1 svadmin-u-f283ea9bea0e svadmin-u-0e65706bcccd svadmin-u-359090c2d529" title={String(cell_getValue(cell) ?? '—')}>{cell_getValue(cell) ?? '—'}</span>
                             {:else if field}
-                              <FieldDisplay type={field.type} value={cell_getValue(cell)} options={field.options} resourceName={field.resource} />                            {/if}
+                              <FieldDisplay type={field.type} value={cell_getValue(cell)} options={field.options} resourceName={field.resource} />
+                            {/if}
                           {/if}
                         </Table.Cell>
                       {/each}
@@ -1677,19 +1763,7 @@
                   {#if emptyState}
                     {@render emptyState()}
                   {:else}
-                    <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-a1f611f027dd">
-                      <svg class="svadmin-u-acaee62117b1 svadmin-u-baceed3462fd svadmin-u-106b502aac96 svadmin-u-da019856f2cc" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                      </svg>
-                      <p class="svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-bfa603190748 svadmin-u-65281709dacf">{i18n.t('common.noData')}</p>
-                      <p class="svadmin-u-359090c2d529 svadmin-u-7be4d67a6256 svadmin-u-da019856f2cc">{i18n.t('common.noDataHint')}</p>
-                      {#if canCreate}
-                        <Button variant="outline" size="sm" class="svadmin-u-77a2a20e90d4" onclick={() => navigation.create(resourceName)}>
-                          <Plus class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
-                          {i18n.t('common.create')}
-                        </Button>
-                      {/if}
-                    </div>
+                    {@render defaultEmptyState()}
                   {/if}
                 </Table.Cell>
               </Table.Row>
@@ -1697,7 +1771,8 @@
           </Table.Body>
           {#if summary}
             <Table.Footer class="svadmin-u-2859c861d7de svadmin-u-2689f3958069">
-              {@render summary({ data: pageRecords.data.map(copyTableRecord), total: query.data?.total ?? 0, visibleColumnsCount: columns.filter((c) => c.id != null && isColumnVisible(c.id)).length })}            </Table.Footer>
+              {@render summary({ data: pageRecords.data.map(copyTableRecord), total: query.data?.total ?? 0, visibleColumnsCount: columns.filter((c) => c.id != null && isColumnVisible(c.id)).length })}
+            </Table.Footer>
           {/if}
         </Table.Root>
         </div>
@@ -1736,27 +1811,7 @@
                   {#if rowActions}
                     {@render rowActions({ record, id })}
                   {:else}
-                    {#if canEdit}
-                      <CanAccess resource={resourceName} action="edit" params={{ id }}>
-                        <TooltipButton tooltip={i18n.t('common.edit')} variant="ghost" size="icon-sm" onclick={() => navigation.edit(resourceName, id)}>
-                          <Pencil class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
-                        </TooltipButton>
-                      </CanAccess>
-                    {/if}
-                    {#if canShow}
-                      <CanAccess resource={resourceName} action="show" params={{ id }}>
-                        <TooltipButton tooltip={i18n.t('common.detail')} variant="ghost" size="icon-sm" onclick={() => openDetail(id)}>
-                          <Eye class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
-                        </TooltipButton>
-                      </CanAccess>
-                    {/if}
-                    {#if canDelete}
-                      <CanAccess resource={resourceName} action="delete" params={{ id }}>
-                        <TooltipButton tooltip={i18n.t('common.delete')} variant="ghost" size="icon-sm" onclick={() => confirmDelete(id)} class="svadmin-u-51e95020d6f2">
-                          <Trash2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
-                        </TooltipButton>
-                      </CanAccess>
-                    {/if}
+                    {@render defaultRowActions(id)}
                   {/if}
                 </div>
               </div>
@@ -1773,7 +1828,8 @@
                       {:else if defaultCellRenderer && field}
                         {@render defaultCellRenderer({ field, value: clonePlainValue(value), record: copyTableRecord(record) })}
                       {:else if field.key === 'id'}
-                        {id}                      {:else}
+                        {id}
+                      {:else}
                         <FieldDisplay type={field.type} {value} options={field.options} resourceName={field.resource} />
                       {/if}
                     </span>
@@ -1786,7 +1842,7 @@
               {#if emptyState}
                 {@render emptyState()}
               {:else}
-                <DataState state="empty" class="svadmin-u-119b2aa0b8f6 svadmin-u-7f19cdf4c5bb svadmin-u-d5eab218aa34 svadmin-u-cb11fec3bb46" />
+                {@render defaultEmptyState()}
               {/if}
             </div>
           {/each}
@@ -1870,4 +1926,10 @@
     recordId={detailRecordId}
     onClose={closeDetail}
   />
+{/if}
+
+{#if quickEditId != null && canRead && canEdit}
+  {#key quickEditId}
+    <QuickEditDrawer {resourceName} recordId={quickEditId} onClose={() => quickEditId = undefined} />
+  {/key}
 {/if}

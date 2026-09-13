@@ -308,8 +308,6 @@ h6,
   letter-spacing: 0;
 }
 
-/* Keep shared control defaults below host utilities. */
-@layer components {
 :is([data-slot="button"], .svadmin-button),
 :is([data-svadmin-button], .svadmin-button),
 [data-slot="input"],
@@ -363,6 +361,7 @@ h6,
 }
 
 /* Keep primitive defaults below consumer utility overrides. */
+@layer components {
 /* Button primitives use stable state attributes so consumers do not need Tailwind. */
 :is([data-slot="button"], .svadmin-button),
 :is([data-svadmin-button], .svadmin-button) {
@@ -501,11 +500,6 @@ h6,
   height: 1rem;
   color: currentColor;
   transform: translateY(0.125rem);
-}
-
-:is([data-slot="alert"], .svadmin-alert).svadmin-alert:has(> svg) {
-  grid-template-columns: 1rem minmax(0, 1fr);
-  column-gap: 0.75rem;
 }
 
 :is([data-slot="alert"], .svadmin-alert).svadmin-alert:is([data-variant="destructive"], .svadmin-alert--destructive) {
@@ -1861,12 +1855,6 @@ main {
   transition: width 300ms ease, height 300ms ease;
 }
 
-@media (min-width: 768px) {
-  .svadmin-navigation-viewport {
-    width: var(--bits-navigation-menu-viewport-width);
-  }
-}
-
 .svadmin-popover-content {
   z-index: 50;
   width: 18rem;
@@ -2114,7 +2102,7 @@ main {
 }
 
 .svadmin-alert-description {
-  grid-column: 1;
+  grid-column: 2;
   color: var(--muted-foreground);
   font-size: 0.875rem;
 }
@@ -2124,7 +2112,7 @@ main {
 }
 
 .svadmin-alert-title {
-  grid-column: 1;
+  grid-column: 2;
   min-height: 1rem;
   overflow: hidden;
   color: var(--foreground);
@@ -2132,10 +2120,6 @@ main {
   letter-spacing: 0;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.svadmin-alert:has(> svg) > :is(.svadmin-alert-title, .svadmin-alert-description) {
-  grid-column: 2;
 }
 
 .svadmin-scroll-area {

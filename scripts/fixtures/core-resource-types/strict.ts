@@ -97,8 +97,8 @@ export async function exportTypes() {
     mapData: item => ({ heading: item.title.toUpperCase() }),
   });
   const records = await exporter.triggerExport();
-  expectType<Equal<typeof records[number]['id'], number>>();
   void records;
+  expectType<Equal<typeof records[number]['id'], number>>();
   // @ts-expect-error Dynamic names are not resource contracts.
   useExport({ resource: 'posts' });
   // @ts-expect-error Caller-selected record generics are not proof of a schema.

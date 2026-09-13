@@ -1,13 +1,8 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "../../../tsconfig.json",
   "compilerOptions": {
     "skipLibCheck": false,
-    "types": [
-      "node",
-      "svelte"
-    ]
+    "types": ["node", "svelte"]
   },
-  "include": [
-    "auth.ts"
-  ]
+  "include": ["auth.ts"]
 }

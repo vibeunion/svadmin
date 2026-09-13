@@ -214,7 +214,8 @@
         {i18n.t('common.retry')}
       </Button>
     {/if}
-  {:else if form.ready}  <!-- Step indicators -->
+  {:else if form.ready}
+  <!-- Step indicators -->
   <div class="svadmin-u-6ed543e2fbbb">
     <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-fc7473ca09eb">
       {#each steps as step, i (i)}
@@ -224,7 +225,8 @@
           class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-ceb69a6b0e5f svadmin-u-b8f0a08ece1e svadmin-u-660d2effb880 svadmin-u-d5eab218aa34 {i === form.steps.currentStep ? 'svadmin-u-20aaf08a7ed1 svadmin-u-e83a7042bc91' : 'svadmin-u-bfa603190748'}"
           aria-current={i === form.steps.currentStep ? 'step' : undefined}
           disabled={form.submitting || !!submission}
-          onclick={changeStep(i)}        >
+          onclick={changeStep(i)}
+        >
           <span
             class="svadmin-u-60fbb7713999 svadmin-u-d0a52b312f7d svadmin-u-cbbf90f9a828 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-ac204c108886 svadmin-u-359090c2d529 svadmin-u-2689f3958069 svadmin-u-ceb69a6b0e5f"
             class:bg-primary={i <= form.steps.currentStep}
@@ -261,7 +263,8 @@
         <form bind:this={element} class="svadmin-u-b43b4c086d9a" novalidate onsubmit={submitEvent} in:fly={{ x: 30, duration: 250 }}>
         {#if submitError || form.error}
           <p role="alert">{submitError ?? i18n.t('common.operationFailed')}</p>
-        {/if}        {#each currentFields as field (field.key)}
+        {/if}
+        {#each currentFields as field (field.key)}
           <FieldRenderer
             {field}
             value={form.values[field.key]}
@@ -270,7 +273,8 @@
             {...definedOptions({ errorId: form.errors[field.key] ? errorId(field.key) : undefined })}
           />
           {#if form.errors[field.key]}
-            <p id={errorId(field.key)} role="alert" aria-live="polite" class="svadmin-u-811148b13d1e svadmin-u-1d5904e7e755 svadmin-u-b6b02c0ebef6">{form.errors[field.key]}</p>          {/if}
+            <p id={errorId(field.key)} role="alert" aria-live="polite" class="svadmin-u-811148b13d1e svadmin-u-1d5904e7e755 svadmin-u-b6b02c0ebef6">{form.errors[field.key]}</p>
+          {/if}
         {/each}
 
         <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-173fa8f06789">

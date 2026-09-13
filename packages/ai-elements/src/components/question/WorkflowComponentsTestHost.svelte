@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import type { QuestionResponse } from './context.svelte.js';
   import AgentTool from '../agent/AgentTool.svelte';
   import ChainOfThought from '../chain-of-thought/ChainOfThought.svelte';
@@ -65,7 +67,7 @@
         <CodeBlockLanguageSelectorItem value="javascript">JavaScript</CodeBlockLanguageSelectorItem>
       </CodeBlockLanguageSelectorContent>
     </CodeBlockLanguageSelector>
-    <CodeBlockActions><CodeBlockCopyButton oncopy={oncodecopy} /></CodeBlockActions>
+    <CodeBlockActions><CodeBlockCopyButton {...definedOptions({ "oncopy": oncodecopy })} /></CodeBlockActions>
   </CodeBlockHeader>
 </CodeBlock>
 <output data-testid="language">{language}</output>
@@ -76,13 +78,13 @@
 </ChainOfThought>
 
 <AgentTool tool={{ description: 'Search the web', inputSchema: { query: { type: 'string' } } }} value="search" />
-<CommitCopyButton hash="abc123" oncopy={oncommitcopy} />
+<CommitCopyButton hash="abc123" {...definedOptions({ "oncopy": oncommitcopy })} />
 
 <EnvironmentVariables>
   <EnvironmentVariablesToggle />
   <EnvironmentVariable name="SECRET" value="top-secret">
     <EnvironmentVariableGroup><EnvironmentVariableName /><EnvironmentVariableValue /></EnvironmentVariableGroup>
-    <EnvironmentVariableCopyButton copyFormat="export" oncopy={onenvcopy} />
+    <EnvironmentVariableCopyButton copyFormat="export" {...definedOptions({ "oncopy": onenvcopy })} />
   </EnvironmentVariable>
 </EnvironmentVariables>
 

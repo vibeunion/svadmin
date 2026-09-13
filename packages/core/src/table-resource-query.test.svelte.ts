@@ -8,18 +8,14 @@ import { keys } from './query-keys';
 import type { GetListParams,GetListResult } from './types';
 
 type QueryOptions={ queryFn: () => Promise<GetListResult> };
-type TestRoute={ resource: string; parentParams: Record<string,string> };
-const { factories,getList }=vi.hoisted(() => ({
+const { factories,getList,route }=vi.hoisted(() => ({
   factories: [] as (() => QueryOptions)[],
   getList: vi.fn<(params: GetListParams) => Promise<GetListResult>>(),
+  route: { resource: 'posts',parentParams: {} as Record<string,string> },
 }));
 
-const route=$state({ resource: 'posts',parentParams: {} as Record<string,string> });
-const testGlobal=globalThis as typeof globalThis & { __getTestRoute: () => TestRoute };
-testGlobal.__getTestRoute=() => route;
-
 vi.mock('./useParsed.svelte',() => ({
-  useParsed: () => (globalThis as typeof globalThis & { __getTestRoute: () => TestRoute }).__getTestRoute(),
+  useParsed: () => route,
 }));
 
 vi.mock('./context.svelte',() => ({
@@ -93,9 +89,11 @@ describe.each(['useTable','TableState'] as const)('%s resource forwarding',(kind
   it('resolves an omitted resource from the current route on each query',async () => {
     mount();
     await fetchList();
+    cleanup?.();
+    factories.length=0;
     route.resource='users';
     route.parentParams={};
-    flushSync();
+    mount();
     await fetchList();
     expect(getList).toHaveBeenLastCalledWith(expect.objectContaining({
       resource: 'users',

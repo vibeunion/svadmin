@@ -1,8 +1,7 @@
 <script lang="ts" module>
-	import { avatarVariants as variants, type AvatarSize as Size } from "./avatar-variants.js";
+	import { avatarVariants as resolveAvatarVariants, type AvatarSize as AvatarSizeValue } from "./avatar-variants.js";
 
-	export const avatarVariants = variants;
-	export type AvatarSize = Size;
+	export { avatarVariants, type AvatarSize } from "./avatar-variants.js";
 </script>
 
 <script lang="ts">
@@ -10,7 +9,7 @@
 	import type { HTMLImgAttributes } from "svelte/elements";
 
 	type Props = WithElementRef<HTMLImgAttributes, HTMLImageElement> & {
-		size?: AvatarSize;
+		size?: AvatarSizeValue;
 		fallback?: string;
 	};
 
@@ -28,7 +27,7 @@
 </script>
 
 {#if src && !imgError}
-	<span data-size={size} class={cn(avatarVariants({ size }), className)}>
+	<span data-size={size} class={cn(resolveAvatarVariants({ size }), className)}>
 		<img
 			bind:this={ref}
 			data-slot="avatar"
@@ -44,7 +43,7 @@
 		data-slot="avatar-fallback"
 		data-size={size}
 		class={cn(
-			avatarVariants({ size }),
+			resolveAvatarVariants({ size }),
 			"svadmin-avatar-fallback",
 			className
 		)}

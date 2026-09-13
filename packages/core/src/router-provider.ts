@@ -30,7 +30,7 @@ export interface RouterProvider {
 export function createHashRouterProvider(): RouterProvider {
   return {
     go({ to,query,hash,type='push' }) {
-      if(typeof window==='undefined'||!window.location) return;
+      if(typeof window==='undefined') return;
       let url=to;
       if(query) {
         const params=new URLSearchParams(query).toString();
@@ -51,10 +51,10 @@ export function createHashRouterProvider(): RouterProvider {
       history.back();
     },
     parse() {
-      if(typeof window==='undefined'||!window.location) {
+      if(typeof window==='undefined') {
         return { params: {},pathname: '/' };
       }
-      const hash=(window.location.hash||'').slice(1)||'/';
+      const hash=window.location.hash.slice(1)||'/';
       const [pathname='/',queryString]=hash.split('?');
       const params: Record<string,string>={};
       if(queryString) {
@@ -104,19 +104,17 @@ export function createHistoryRouterProvider(basePath=''): RouterProvider {
       history.back();
     },
     parse() {
-      if(typeof window==='undefined'||!window.location) {
+      if(typeof window==='undefined') {
         return { params: {},pathname: '/' };
       }
-      const fullPath=window.location.pathname||'/';
+      const fullPath=window.location.pathname;
       const pathname=(normalizedBase&&fullPath.startsWith(normalizedBase)
         &&(fullPath.length===normalizedBase.length||fullPath[normalizedBase.length]==='/')
         ? fullPath.slice(normalizedBase.length)||'/'
-        :fullPath);
+        :window.location.pathname);
       const params: Record<string,string>={};
-      if(window.location.search) {
-        for(const [k,v] of new URLSearchParams(window.location.search).entries()) {
-          params[k]=v;
-        }
+      for(const [k,v] of new URLSearchParams(window.location.search).entries()) {
+        params[k]=v;
       }
       const segments=pathname.split('/').filter(Boolean);
       return {

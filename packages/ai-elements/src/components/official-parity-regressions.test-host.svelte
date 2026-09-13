@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import * as Context from './context/index.js';
   import * as FileTree from './file-tree/index.js';
   import * as Sandbox from './sandbox/index.js';
@@ -33,7 +35,7 @@
 {/snippet}
 
 <Terminal.Root data-testid="passive-terminal" output={ansiOutput} />
-<Terminal.Root data-testid="interactive-terminal" output="Ready" oncommand={() => undefined} onclear={onterminalclear} />
+<Terminal.Root data-testid="interactive-terminal" output="Ready" oncommand={() => undefined} {...definedOptions({ "onclear": onterminalclear })} />
 
 <StackTrace.Root data-testid="stack-root" aria-label="Application stack" trace={stack}>
   <StackTrace.Header data-testid="stack-header">
@@ -69,8 +71,8 @@
   aria-label="Source files"
   data-testid="compound-file-tree"
   defaultExpanded={new Set(['src'])}
-  onExpandedChange={onfileexpandedchange}
-  onSelect={onfileselect}
+  {...definedOptions({ "onExpandedChange": onfileexpandedchange })}
+  {...definedOptions({ "onSelect": onfileselect })}
 >
   <FileTree.Folder path="src" name="src">
     <FileTree.File path="src/index.ts" name="index.ts" icon={customFileIcon} />
@@ -82,7 +84,7 @@
   data-testid="context-root"
   usedTokens={50}
   maxTokens={100}
-  onopenchange={oncontextopenchange}
+  {...definedOptions({ "onopenchange": oncontextopenchange })}
 >
   <Context.Trigger>Context trigger</Context.Trigger>
   <Context.Content>Context details</Context.Content>

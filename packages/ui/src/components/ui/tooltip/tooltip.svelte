@@ -1,4 +1,6 @@
 <script lang="ts" generics="Payload = never">
+  import { definedOptions } from '@svadmin/core/options';
+
 	import { Tooltip as TooltipPrimitive } from "bits-ui";
 	import { onDestroy } from "svelte";
 	import TooltipProvider from "./tooltip-provider.svelte";
@@ -62,8 +64,8 @@
 	<TooltipPrimitive.Root
 		bind:open
 		bind:triggerId
-		{disableHoverableContent}
-		{onOpenChange}
+		{...definedOptions({ "disableHoverableContent": disableHoverableContent })}
+		{...definedOptions({ "onOpenChange": onOpenChange })}
 		{tether}
 		{...restProps}
 	/>

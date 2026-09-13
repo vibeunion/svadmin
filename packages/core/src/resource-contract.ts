@@ -434,9 +434,13 @@ function checkFilters(filters: unknown, record: TObject, depth = 0): void {
 }
 
 /** Internal transport boundary; public hooks never accept a raw provider as proof of a contract. */
-export function contractProvider(provider: DataProvider, contract: ResourceContract): Readonly<DataProvider> {
+export function contractProvider(
+  provider: DataProvider,
+  contract: ResourceContract,
+  options: { cache?: boolean } = {},
+): Readonly<DataProvider> {
   const definition = definitionOf(contract);
-  const cached = definition.providers.get(provider);
+  const cached = options.cache === false ? undefined : definition.providers.get(provider);
   if (cached) return cached;
   const { schemas } = definition;
   const registry = { [contract.name]: schemas };
@@ -586,6 +590,6 @@ export function contractProvider(provider: DataProvider, contract: ResourceContr
     },
   };
   const adapted = Object.freeze(transport);
-  definition.providers.set(provider, adapted);
+  if (options.cache !== false) definition.providers.set(provider, adapted);
   return adapted;
 }

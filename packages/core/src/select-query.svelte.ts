@@ -13,6 +13,8 @@ import { HttpError, type BaseRecord, type KnownResources, type Pagination, type 
 
 export interface UseSelectOptions<TData extends BaseRecord = BaseRecord> extends ContractOptions {
   resource: KnownResources;
+  /** @internal Distinguishes consumers that use different projection semantics. */
+  projectionKey?: string;
   optionLabel?: string | ((item: TData) => string);
   optionValue?: string | ((item: TData) => string | number);
   sorters?: Sort[];
@@ -53,8 +55,22 @@ export function createSelectQuery<TData extends BaseRecord>(
       }),
     });
     const authProvider = context.authProvider;
-    return { captured, params, decode: getDecoder(), keys: context.queryKeys(resource, options.dataProviderName),
-      onSearch: options.onSearch, checkIds: contract !== undefined, authProvider, auth: captureAuthLiveScope(authProvider) };
+    return {
+      captured,
+      params,
+      decode: getDecoder(),
+      keys: context.queryKeys(resource, options.dataProviderName),
+      optionLabel: options.optionLabel,
+      optionValue: options.optionValue,
+      projectionKey: options.projectionKey ?? [
+        typeof options.optionLabel === 'string' ? options.optionLabel : 'callback',
+        typeof options.optionValue === 'string' ? options.optionValue : 'callback',
+      ].join(':'),
+      onSearch: options.onSearch,
+      checkIds: contract !== undefined,
+      authProvider,
+      auth: captureAuthLiveScope(authProvider),
+    };
   });
   const sessionCurrent = (origin: typeof scope) => !disposed &&
     origin.authProvider === context.authProvider && origin.auth.isCurrent();
@@ -84,8 +100,8 @@ export function createSelectQuery<TData extends BaseRecord>(
     const origin = scope;
     const { captured, decode, keys } = origin;
     const { params, text, error } = request;
-    const label = options.optionLabel ?? 'title';
-    const value = options.optionValue ?? 'id';
+    const label = origin.optionLabel ?? 'title';
+    const value = origin.optionValue ?? 'id';
     const decodeResult = (input: unknown) => {
       const result = decodeListResult(input, decode);
       if (origin.checkIds && new Set(result.data.map(record => record['id'])).size !== result.data.length) return rejectProviderResponse();
@@ -94,10 +110,12 @@ export function createSelectQuery<TData extends BaseRecord>(
     return {
       resource: params.resource, successNotification: options.successNotification, errorNotification: options.errorNotification,
       decode: createSelectProjection(decodeResult, label, value, decode, () => sessionCurrent(origin)),
-      queryKey: keys.data.select(params.resource, { ...params, source: captured.source, search: text, invalid: !!error }),
-      queryFn: async (signal) => {
+      queryKey: keys.data.select(params.resource, {
+        ...params, source: captured.source, search: text, invalid: !!error, projection: origin.projectionKey,
+      }),
+      queryFn: async () => {
         if (error) throw error;
-        return decodeResult(await captured.provider.getList(snapshotListParams({ ...params, ...definedOptions({ signal }) })));
+        return decodeResult(await captured.provider.getList(snapshotListParams(params)));
       },
       enabled: options.queryOptions?.enabled ?? true,
       ...definedOptions({ staleTime: options.queryOptions?.staleTime ?? adminOptions.reactQuery?.staleTime }),
@@ -111,8 +129,8 @@ export function createSelectQuery<TData extends BaseRecord>(
     const params = snapshotManyParams({
       resource: base.resource, ids: options.defaultValue ?? [], ...definedOptions({ meta: base.meta }),
     });
-    const label = options.optionLabel ?? 'title';
-    const value = options.optionValue ?? 'id';
+    const label = origin.optionLabel ?? 'title';
+    const value = origin.optionValue ?? 'id';
     const expected = new Set<unknown>(params.ids);
     const decodeResult = (input: unknown) => {
       const result = decodeManyResult(input, decode);
@@ -124,12 +142,12 @@ export function createSelectQuery<TData extends BaseRecord>(
     return {
       resource: params.resource, successNotification: false, errorNotification: options.errorNotification,
       decode: createSelectProjection(decodeResult, label, value, decode, () => sessionCurrent(origin)),
-      queryKey: keys.data.selectDefaults(params.resource, { ...params, source: captured.source }),
-      queryFn: async (signal) => {
+      queryKey: keys.data.selectDefaults(params.resource, { ...params, source: captured.source, projection: origin.projectionKey }),
+      queryFn: async () => {
         if (!params.ids.length) return { data: [] };
         const getMany = captured.provider.getMany;
         if (!getMany) throw new Error('Captured query provider must support getMany');
-        return decodeResult(await getMany.call(captured.provider, snapshotManyParams({ ...params, ...definedOptions({ signal }) })));
+        return decodeResult(await getMany.call(captured.provider, snapshotManyParams(params)));
       },
       enabled: (options.queryOptions?.enabled ?? true) &&
         (options.defaultValueQueryOptions?.enabled ?? true) && params.ids.length > 0,

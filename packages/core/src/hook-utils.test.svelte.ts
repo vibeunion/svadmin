@@ -176,7 +176,7 @@ function cacheFixture(app: ReturnType<typeof mountLive>, contract = posts, tenan
   for (const key of [...selected, ...excluded]) app.client.setQueryData(key, { data: [] });
   return { selected, excluded };
 }
-function pending<T = void>() {
+function pending<T = undefined>() {
   let resolve: (value: T) => void = () => { throw new Error('Not initialized'); };
   let reject: (reason: unknown) => void = () => { throw new Error('Not initialized'); };
   const promise = new Promise<T>((done, fail) => { resolve = done; reject = fail; });
@@ -220,7 +220,7 @@ describe('checked live hooks', () => {
     });
     expect(diagnostics.map(diagnostic => `${diagnostic.file?.fileName}:${diagnostic.start}: ${
       ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`)).toEqual([]);
-  }, 30_000);
+  });
 
   it.each(['shared', 'live', 'subscription'] as const)('%s rejects invalid events and mismatched resources', async mode => {
     const observed = vi.fn();
@@ -549,10 +549,9 @@ describe('session-owned refresh', () => {
     const getter = vi.fn(() => 'provider');
     const accessor = Object.defineProperty({ authSession: 'session' }, 'source', { enumerable: true, get: getter });
     const inherited: unknown = Object.create(owner);
-    const malformedKey = (params: unknown): readonly unknown[] => [{ action: 'list', resource: 'posts', params }];
     for (const params of [undefined, {}, { source: 'provider' }, { ...owner, authSession: '' },
       { ...owner, source: 1 }, accessor, inherited]) {
-      expect(readOwnedDataQuery(malformedKey(params), matcher, owner)).toBeUndefined();
+      expect(readOwnedDataQuery([{ ...valid[0], params }], matcher, owner)).toBeUndefined();
     }
     expect(readOwnedDataQuery(valid, matcher, Object.defineProperty({ ...owner }, 'source', { get: getter }))).toBeUndefined();
     expect(readOwnedDataQuery([Object.defineProperty({ ...valid[0] }, 'params', { get: getter })], matcher, owner)).toBeUndefined();
@@ -627,7 +626,7 @@ describe('session-owned refresh', () => {
   it.each(['failure', 'synchronous-failure', 'superseded'] as const)('awaits every started refresh before reporting %s', async outcome => {
     const app = mountLive();
     const { selected } = cacheFixture(app);
-    const gate = pending();
+    const gate = pending<undefined>();
     vi.spyOn(app.client, 'invalidateQueries')
       .mockImplementationOnce(() => {
         if (outcome === 'synchronous-failure') throw new Error('PRIVATE synchronous failure');
@@ -640,7 +639,7 @@ describe('session-owned refresh', () => {
     await Promise.resolve();
     expect(settled).toBe(false);
     if (outcome === 'superseded') await app.view.rerender({ tenant: 'second' });
-    gate.resolve();
+    gate.resolve(undefined);
     expect(await result).toMatchObject(outcome === 'superseded'
       ? { message: 'Refresh is no longer current', code: 'REFRESH_SUPERSEDED' }
       : { message: 'Refresh failed', code: 'REFRESH_FAILED' });
@@ -712,7 +711,7 @@ describe('checked publication', () => {
   });
 
   it.each(['tenant', 'provider', 'unmount'] as const)('rejects an obsolete publication after %s changes', async change => {
-    const gate = pending();
+    const gate = pending<undefined>();
     const live = thirdParty();
     live.provider.publish = vi.fn(() => gate.promise);
     const app = mountLive('publish', { resource: 'posts' }, live);
@@ -721,7 +720,7 @@ describe('checked publication', () => {
     if (change === 'tenant') await app.view.rerender({ tenant: 'next' });
     if (change === 'provider') await app.view.rerender({ live: thirdParty().provider });
     if (change === 'unmount') await app.view.rerender({ visible: false });
-    gate.resolve();
+    gate.resolve(undefined);
     expect(await result).toMatchObject({ code: 'LIVE_PUBLISH_FAILED', details: { writeMayHaveSucceeded: true } });
   });
 });
@@ -1033,12 +1032,12 @@ describe('realtime authentication session revisions', () => {
 
   it('rejects pending publication even after authentication becomes usable again', async () => {
     const app = await mountSession(sessionProvider(), 'publish');
-    const gate = pending();
+    const gate = pending<undefined>();
     app.live.provider.publish = vi.fn(() => gate.promise);
     const published = app.publish(liveEvent).catch((cause: unknown) => cause);
     await app.actions.login.mutate({});
     expect(captureAuthLiveScope(app.auth).available).toBe(true);
-    gate.resolve();
+    gate.resolve(undefined);
     expect(await published).toMatchObject({ code: 'LIVE_PUBLISH_FAILED', details: { writeMayHaveSucceeded: true } });
   });
 

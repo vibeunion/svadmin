@@ -1,7 +1,6 @@
 <script lang="ts" generics="NodeType extends Node = Node, EdgeType extends Edge = Edge">
   import { Background, SvelteFlow } from '@xyflow/svelte';
   import type { BackgroundProps, Edge, Node, SvelteFlowProps } from '@xyflow/svelte';
-  import type { Viewport } from '@xyflow/system';
   import type { Snippet } from 'svelte';
   import type { ClassValue } from 'svelte/elements';
   import { cn } from '../../utils.js';
@@ -17,7 +16,7 @@
     children,
     nodes = $bindable<NodeType[]>([]),
     edges = $bindable<EdgeType[]>([]),
-    viewport = $bindable<Viewport>({ x: 0, y: 0, zoom: 1 }),
+    viewport = $bindable({ x: 0, y: 0, zoom: 1 }),
     deleteKey = ['Backspace', 'Delete'],
     fitView = true,
     panOnDrag = false,

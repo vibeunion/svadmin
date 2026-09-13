@@ -100,34 +100,53 @@ Multi-step wizard form with step navigation and per-step validation.
 
 ```svelte
 <script lang="ts">
-  import { useStepsForm } from '@svadmin/core';
+  import { defineResource, useStepsForm } from '@svadmin/core';
+  import { Type } from '@sinclair/typebox';
 
-  const {
-    steps: { currentStep, gotoStep, canGoNext, canGoPrev, nextStep, prevStep, totalSteps },
-    ...formProps
-  } = useStepsForm({
-    resource: 'products',
-    action: 'create',
-    stepsCount: 3,
-    validate: (values, step) => {
-      if (step === 0 && !values.name) return { name: 'Required' };
-      if (step === 1 && !values.price) return { price: 'Required' };
-      return null;
-    },
+  const products = defineResource('products', {
+    record: Type.Object({ id: Type.Number(), name: Type.String(), price: Type.Number() }),
+    create: Type.Object({ name: Type.String({ minLength: 1 }), price: Type.Number({ minimum: 0 }) }),
   });
+  const form = useStepsForm({
+    resource: products,
+    action: 'create',
+    steps: [{ fields: ['name'] }, { fields: ['price'] }, { fields: [] }],
+  });
+  async function save() {
+    try { await form.submit(); }
+    catch { /* Render the checked form errors below. */ }
+  }
 </script>
 
-{#if currentStep === 0}
-  <input bind:value={name} />
-{:else if currentStep === 1}
-  <input bind:value={price} type="number" />
+{#if form.steps.currentStep === 0}
+  <input aria-label="Name" value={typeof form.values.name === 'string' ? form.values.name : ''}
+    oninput={(event) => form.setFieldValue('name', event.currentTarget.value)} />
+{:else if form.steps.currentStep === 1}
+  <input aria-label="Price" type="number" value={typeof form.values.price === 'number' ? form.values.price : ''}
+    oninput={(event) => {
+      const value = event.currentTarget.valueAsNumber;
+      form.setFieldValue('price', Number.isFinite(value) ? value : undefined);
+    }} />
 {:else}
   <p>Review and submit</p>
+  <button onclick={save} disabled={!form.ready || form.submitting}>Save</button>
 {/if}
 
-<button onclick={prevStep} disabled={!canGoPrev}>Back</button>
-<button onclick={nextStep} disabled={!canGoNext}>Next</button>
+{#each Object.values(form.errors) as message}
+  <p role="alert">{message}</p>
+{/each}
+{#if form.error}<p role="alert">{form.error.message}</p>{/if}
+<button onclick={() => form.steps.prevStep()} disabled={!form.steps.canGoPrev}>Back</button>
+<button onclick={() => form.steps.nextStep()} disabled={!form.steps.canGoNext}>Next</button>
 ```
+
+Use this hook inside an admin and query-client context. Edit forms require an
+explicit contract-typed `id`. `steps` replaces `stepsCount`; field names derive
+from the operation schema. Forward jumps validate all preceding steps, while
+`isBackValidate: true` also validates the current step before going backward.
+`defaultStep` must be an in-range integer. Changing the step layout resets the
+workflow and cancels stale completion effects. Draft reads remain unknown until
+validated; `submit()` checks the entire payload and receipt and rejects failure.
 
 ### Return Value
 
@@ -137,9 +156,9 @@ Extends `useForm` return with a `steps` object:
 |----------|------|-------------|
 | `currentStep` | `number` | Current step index (0-based) |
 | `totalSteps` | `number` | Total number of steps |
-| `gotoStep` | `(step) => void` | Jump to a specific step |
-| `nextStep` | `() => void` | Go to next step (validates current) |
-| `prevStep` | `() => void` | Go to previous step |
+| `gotoStep` | `(step: number) => boolean` | Validate and navigate; rejects invalid indexes |
+| `nextStep` | `() => boolean` | Advance after validating all preceding steps |
+| `prevStep` | `() => boolean` | Go back, optionally validating the current step |
 | `canGoNext` | `boolean` | Whether next step is available |
 | `canGoPrev` | `boolean` | Whether previous step is available |
 

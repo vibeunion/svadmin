@@ -15,19 +15,10 @@ interface TestWindow {
 const originalWindow=Object.getOwnPropertyDescriptor(globalThis,'window');
 
 afterEach(() => {
-  const globalScope = globalThis as { window?: TestWindow };
-  if (originalWindow) {
-    // Restore the original VALUE (not the descriptor object) so `window`
-    // keeps its pre-test shape; resetting through defineProperty keeps the
-    // property writable for tests that still need to redefine it.
-    Object.defineProperty(globalScope, 'window', {
-      value: originalWindow.value,
-      writable: true,
-      enumerable: true,
-      configurable: true,
-    });
+  if(originalWindow) {
+    Object.defineProperty(globalThis,'window',originalWindow);
   } else {
-    Reflect.deleteProperty(globalScope, 'window');
+    Reflect.deleteProperty(globalThis,'window');
   }
 });
 

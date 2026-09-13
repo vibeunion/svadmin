@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import type { PromptInputSubmitDetail } from './PromptInput.svelte';
   import { PromptInput, PromptInputProvider } from './index.js';
 
@@ -12,5 +14,5 @@
 </script>
 
 <PromptInputProvider>
-  <PromptInput {multiple} {onsubmit} />
+  <PromptInput {multiple} {...definedOptions({ "onsubmit": onsubmit })} />
 </PromptInputProvider>

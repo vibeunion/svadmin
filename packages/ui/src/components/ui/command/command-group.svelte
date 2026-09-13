@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
 	import { Command as CommandPrimitive } from "bits-ui";
 	import { cn } from "../../../utils.js";
 
@@ -22,8 +24,8 @@
 	data-slot="command-group"
 	data-cmdk-group=""
 	class={cn("svadmin-command-group", className)}
-	value={value ?? heading}
-	forceMount={alwaysRender ?? forceMount}
+	{...definedOptions({ "value": value ?? heading })}
+	{...definedOptions({ "forceMount": alwaysRender ?? forceMount })}
 	{...restProps}
 >
 	{#if heading}

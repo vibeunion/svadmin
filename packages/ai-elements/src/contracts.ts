@@ -44,9 +44,9 @@ export function isChatProviderStream(response: ChatProviderResponse): response i
 }
 
 export interface ConsumeTextResponseOptions {
-  /** Provider 请求取消后停止应用后续分片。 */
+  /** Stops applying subsequent chunks after the provider request is cancelled. */
   signal?: AbortSignal;
-  /** 组件作用域或输入值变化时，用额外身份检查拒绝过期结果。 */
+  /** Rejects stale results with an identity check when the component scope or input changes. */
   isCurrent?: () => boolean;
 }
 

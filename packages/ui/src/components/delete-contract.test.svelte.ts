@@ -36,7 +36,7 @@ function provider(): DataProvider {
     create: async () => ({ data: {} }), update: async () => ({ data: {} }),
   };
 }
-function deferred<T = void>() {
+function deferred<T>() {
   let resolve: (value: T) => void = () => { throw new Error('Request not initialized'); };
   let reject: (cause: unknown) => void = () => { throw new Error('Request not initialized'); };
   const promise = new Promise<T>((done, fail) => { resolve = done; reject = fail; });
@@ -673,13 +673,13 @@ describe('single-deletion authentication ownership', () => {
 
   it('rechecks ownership after a native pre-dispatch callback delay', async () => {
     const app = await mountSession();
-    const gate = deferred();
+    const gate = deferred<undefined>();
     const observer = vi.fn(() => gate.promise);
     app.client.getMutationCache().config.onMutate = observer;
     const operation = app.read().remove.mutation.mutateAsync({}).catch((error: unknown) => error);
     await waitFor(() => expect(observer).toHaveBeenCalledTimes(1));
     await app.actions().login.mutate({});
-    gate.resolve();
+    gate.resolve(undefined);
     expect(await operation).toMatchObject({ code: 'DELETE_CANCELLED', details: { writeMayHaveSucceeded: false, id: 1 } });
     expect(app.source.deleteOne).not.toHaveBeenCalled();
   });
@@ -939,7 +939,7 @@ describe('single-deletion authentication ownership', () => {
     const receipt = deferred<GetOneResult>();
     vi.mocked(app.source.deleteOne).mockReturnValueOnce(receipt.promise);
     if (outcome === 'undo') await app.view.rerender({ undoable: true });
-    const gate = deferred();
+    const gate = deferred<undefined>();
     const observer = vi.fn(() => gate.promise);
     if (outcome === 'success') app.client.getMutationCache().config.onSuccess = observer;
     else app.client.getMutationCache().config.onError = observer;
@@ -954,7 +954,7 @@ describe('single-deletion authentication ownership', () => {
     }
     await waitFor(() => expect(observer).toHaveBeenCalledTimes(1));
     await app.actions().login.mutate({});
-    gate.resolve();
+    gate.resolve(undefined);
     const error: unknown = await operation;
     expect(error).toMatchObject({ code: 'DELETE_CANCELLED', details: { writeMayHaveSucceeded: outcome !== 'undo', id: 1 } });
     expect(error).not.toHaveProperty('details.deleted');
@@ -965,14 +965,14 @@ describe('single-deletion authentication ownership', () => {
     const app = await mountSession();
     const { builder, owner } = scopedKeys(app, captureAuthSession(app.session).cacheKey);
     app.client.setQueryData(builder.data.select('posts', owner), {});
-    const gate = deferred();
+    const gate = deferred<undefined>();
     const refresh = vi.spyOn(app.client, 'invalidateQueries').mockRejectedValueOnce(new Error('PRIVATE')).mockReturnValue(gate.promise);
     let settled = false;
     const operation = app.read().remove.mutation.mutateAsync({}).catch((error: unknown) => error).finally(() => { settled = true; });
     await waitFor(() => expect(refresh.mock.calls.length).toBeGreaterThan(1));
     await app.actions().login.mutate({});
     expect(settled).toBe(false);
-    gate.resolve();
+    gate.resolve(undefined);
     const error: unknown = await operation;
     expect(error).toMatchObject({ code: 'DELETE_CANCELLED', details: { id: 1 } });
     expect(error).not.toHaveProperty('details.deleted');

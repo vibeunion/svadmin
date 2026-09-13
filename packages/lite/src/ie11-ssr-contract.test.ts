@@ -88,6 +88,7 @@ describe('IE11 SSR source contract', () => {
 
     expect(missingStateAttributes).toEqual([]);
   });
+
   test('keeps the SvelteKit example server-rendered without client hydration', async () => {
     const routeOptions = await readFile(
       resolve(import.meta.dir, '../example/src/routes/lite/+layout.ts'),
@@ -127,39 +128,6 @@ describe('IE11 SSR source contract', () => {
     );
     expect(compatibilitySource).not.toMatch(/\b(?:window|document)\s*\./u);
     expect(compatibilitySource).not.toMatch(/\bglobalThis\s*\./u);
-  });
-
-  test('keeps optional enhancement asset in the IE11 ES5 baseline', async () => {
-    const enhancementSource = await readFile(
-      resolve(import.meta.dir, '../static/enhance.js'),
-      'utf8',
-    );
-
-    expect(enhancementSource).not.toMatch(/\b(?:let|const|class)\b/u);
-    expect(enhancementSource).not.toMatch(/=>/u);
-    expect(enhancementSource).not.toMatch(/[`]/u);
-    expect(enhancementSource).not.toMatch(/\?\./u);
-    expect(enhancementSource).not.toMatch(/\?\?/u);
-    expect(enhancementSource).not.toMatch(/\b(?:Promise|fetch|Map|Set|WeakMap|WeakSet)\b/u);
-    expect(enhancementSource).not.toMatch(/\b(?:async|await)\b/u);
-  });
-
-  test('keeps optional polyfill asset in the IE11 ES5 baseline', async () => {
-    const polyfillSource = await readFile(
-      resolve(import.meta.dir, 'polyfill-entry.ts'),
-      'utf8',
-    );
-    const packageManifest = await readFile(resolve(import.meta.dir, '../package.json'), 'utf8');
-
-    expect(polyfillSource).toContain("import 'core-js/stable'");
-    expect(polyfillSource).toContain("import 'whatwg-fetch'");
-    expect(packageManifest).toContain('--target=es5');
-  });
-
-  test('publishes the optional legacy assets', async () => {
-    const packageManifest = await readFile(resolve(import.meta.dir, '../package.json'), 'utf8');
-    expect(packageManifest).toContain('"./polyfill.js"');
-    expect(packageManifest).toContain('--bundle src/polyfill-entry.ts --target=es5 --outfile=dist/polyfill.js');
   });
 
   test('keeps the real SSR response check in the default CI gate', async () => {

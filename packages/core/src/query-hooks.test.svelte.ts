@@ -4,7 +4,6 @@ import { requireValue } from '../test/assertions';
 import { describe,it,expect,vi } from 'vitest';
 import { useList,useOne } from './query-hooks.svelte';
 import { flushSync } from 'svelte';
-import { QueryClient } from '@tanstack/svelte-query';
 import { keys,parseQueryKey } from './query-keys';
 
 vi.mock('./context.svelte',() => {
@@ -42,18 +41,18 @@ vi.mock('./context.svelte',() => {
   };
 });
 
-const testQueryClient = new QueryClient();
 vi.mock('@tanstack/svelte-query',async (importOriginal) => {
-  const actual=await importOriginal();
+  const actual=await importOriginal<typeof import('@tanstack/svelte-query')>();
+  const client = new actual.QueryClient();
   return {
     ...actual as any,
-    useQueryClient: () => testQueryClient,
+    useQueryClient: () => client,
     createQuery: (factory: any) => {
       const options = factory();
-      const data = parseQueryKey(options.queryKey)?.action==='one'
-        ? { data: { id: 1,title: 'One' } }
-        :{ data: [{ id: 1,title: 'One' }],total: 1 };
-      testQueryClient.setQueryData(options.queryKey, data);
+      const data = parseQueryKey(options.queryKey)?.action === 'one'
+        ? { data: { id: 1, title: 'One' } }
+        : { data: [{ id: 1, title: 'One' }], total: 1 };
+      client.setQueryData(options.queryKey, data);
       return {
         data,
         isPending: false,

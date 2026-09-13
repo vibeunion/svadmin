@@ -74,7 +74,7 @@
   {#if viewMode === 'table'}
     <AutoTable resourceName="users" {showHeader} {density} {selectable} />
   {:else if viewMode === 'list-page'}
-    <ListPage resourceName="users" {density}>
+    <ListPage resourceName="users" {density} selectable={selectable}>
       {#snippet statusTabs()}
         <StatusTabs
           items={[

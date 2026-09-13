@@ -41,9 +41,14 @@ interface AuthProvider {
 ### 用法
 
 ```typescript
-const { mutate: login, isPending } = useLogin();
-await login({ email: 'user@example.com', password: 'secret' });
+const login = useLogin();
+await login.mutate({ email: 'user@example.com', password: 'secret' });
 ```
+
+Core Hook 会在运行时校验普通数据输入和 Provider 回执。除登出外，变更输入均为必填；
+资料更新另支持头像文件。`redirectTo` 应返回应用内 `/` 路径，不存在的字段应省略，
+不能依赖 Provider 原始错误文本直接显示到页面。凭据业务 schema 和服务端授权仍由
+Provider 与后端负责。错误和生命周期约定见[认证 Hook](/zh-cn/hooks/auth)。
 
 内置 Supabase 与 SSO Provider 会提供 `getPermissions()`，但在应用配置可信 resolver 前返回
 `null`。resolver 的返回值可用于调整标签、导航或禁用控件，但浏览器中的值绝不能授权 API、
@@ -97,17 +102,38 @@ export const mockAuthProvider: AuthProvider = {
 ### Supabase
 
 ```typescript
+import { Type } from '@sinclair/typebox';
+import { checkExact, snapshotPlainData } from '@svadmin/core/schema';
 import { createSupabaseAuthProvider } from '@svadmin/supabase';
+
+const grantsResponse = Type.Object({
+  data: Type.Array(Type.Object({ permission: Type.String() })),
+  error: Type.Null(),
+});
+
 const authProvider = createSupabaseAuthProvider(supabaseClient, {
   getPermissions: async ({ client }) => {
-    const { data, error } = await client
+    const response: unknown = await client
       .from('effective_permission_grants')
       .select('permission');
-    if (error) throw error;
-    return data.map((grant) => grant.permission);
+    const candidate = snapshotPlainData(response);
+    if (!checkExact(grantsResponse, candidate)) {
+      throw new Error('Permission lookup failed.');
+    }
+    return candidate.data.map((grant) => grant.permission);
   },
 });
 ```
+
+凭据、会话、SDK 回执和权限结果均在使用前校验。仅有本地令牌不能证明身份：
+适配器会通过 SDK 验证用户，并在会话变化时丢弃旧的身份或权限结果。
+权限回调拿到的是由 schema 推导的用户快照，不再直接暴露 SDK 的宽泛元数据类型；
+回调结果只用于界面提示，不能代替服务端授权。
+
+内置表单提交的 `username` 如存在，必须与 `email` 相同。注册支持
+`email`、`password`、可选 `username` 和字符串 `name`，不再透传任意附加资料字段。
+密码更新会先校验可选的 `confirmPassword`。SDK 原始错误消息会替换为不含敏感数据的错误码；
+退出成功则同时要求合法回执和本地会话已清空。
 
 `@supacloud/js` 不会改变认证流程。认证部分仍然建议继续使用官方 Supabase 客户端配合 `createSupabaseAuthProvider()`，任务相关 API 再通过 [`@svadmin/supabase/supacloud`](/zh-cn/providers/supacloud) 单独组合接入。
 不要把用户可修改的 metadata 当成授权事实。

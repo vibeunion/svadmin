@@ -1,13 +1,8 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "types": [
-      "bun",
-      "svelte"
-    ],
+    "types": ["@types/bun", "svelte"],
     "skipLibCheck": false
   },
-  "include": [
-    "src/**/*.ts"
-  ]
+  "include": ["src/**/*.ts"]
 }

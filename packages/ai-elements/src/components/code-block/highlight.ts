@@ -1,4 +1,5 @@
 import { createCodePlugin, type HighlightResult } from 'streamdown-svelte/plugins';
+import { definedOptions } from '@svadmin/core/options';
 
 export interface CodeToken {
   content: string;
@@ -74,29 +75,29 @@ function readStyle(token: ShikiToken | undefined): ThemeTokenStyle {
   if (!token) return {};
 
   const htmlStyle = token.htmlStyle ?? {};
-  const fontStyle = htmlStyle['font-style'] === 'italic' || htmlStyle.fontStyle === 'italic'
+  const fontStyle = htmlStyle['font-style'] === 'italic' || htmlStyle['fontStyle'] === 'italic'
     ? 'italic'
     : token.fontStyle && (token.fontStyle & 1) !== 0
       ? 'italic'
       : undefined;
-  const fontWeight = htmlStyle['font-weight'] === 'bold' || htmlStyle.fontWeight === 'bold'
+  const fontWeight = htmlStyle['font-weight'] === 'bold' || htmlStyle['fontWeight'] === 'bold'
     ? 'bold'
     : token.fontStyle && (token.fontStyle & 2) !== 0
       ? 'bold'
       : undefined;
-  const textDecoration = htmlStyle['text-decoration'] === 'underline' || htmlStyle.textDecoration === 'underline'
+  const textDecoration = htmlStyle['text-decoration'] === 'underline' || htmlStyle['textDecoration'] === 'underline'
     ? 'underline'
     : token.fontStyle && (token.fontStyle & 4) !== 0
       ? 'underline'
       : undefined;
 
-  return {
-    color: htmlStyle.color ?? token.color,
-    backgroundColor: htmlStyle['background-color'] ?? htmlStyle.backgroundColor ?? token.bgColor,
+  return definedOptions({
+    color: htmlStyle['color'] ?? token.color,
+    backgroundColor: htmlStyle['background-color'] ?? htmlStyle['backgroundColor'] ?? token.bgColor,
     fontStyle,
     fontWeight,
     textDecoration,
-  };
+  });
 }
 
 function mergeLine(line: string, lightTokens: ShikiToken[], darkTokens: ShikiToken[]): CodeToken[] {
@@ -121,7 +122,7 @@ function mergeLine(line: string, lightTokens: ShikiToken[], darkTokens: ShikiTok
 
     const light = readStyle(tokenAt(lightRanges, start));
     const dark = readStyle(tokenAt(darkRanges, start));
-    tokens.push({
+    tokens.push(definedOptions({
       content: line.slice(start, end),
       color: light.color,
       backgroundColor: light.backgroundColor,
@@ -133,7 +134,7 @@ function mergeLine(line: string, lightTokens: ShikiToken[], darkTokens: ShikiTok
       darkFontStyle: dark.fontStyle,
       darkFontWeight: dark.fontWeight,
       darkTextDecoration: dark.textDecoration,
-    });
+    }));
   }
 
   return tokens;

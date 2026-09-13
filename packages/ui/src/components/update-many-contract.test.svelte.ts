@@ -45,7 +45,7 @@ function nativeUpdate(source: DataProvider) {
   if (!source.updateMany) throw new Error('Expected a native batch provider');
   return vi.mocked(source.updateMany);
 }
-function deferred<T = void>() {
+function deferred<T>() {
   let resolve: (value: T) => void = () => { throw new Error('Not initialized'); };
   let reject: (cause: unknown) => void = () => { throw new Error('Not initialized'); };
   const promise = new Promise<T>((done, fail) => { resolve = done; reject = fail; });
@@ -147,13 +147,13 @@ describe.each(['native', 'fallback'] as const)('%s batch-update auth ownership',
     const source = provider();
     if (mode === 'fallback') delete source.updateMany;
     const app = await mountSession(source);
-    const gate = deferred();
+    const gate = deferred<undefined>();
     const observer = vi.fn(() => gate.promise);
     app.client.getMutationCache().config.onMutate = observer;
     const operation = app.read().update.mutation.mutateAsync({ ids: [1, 2], variables }).catch((error: unknown) => error);
     await waitFor(() => expect(observer).toHaveBeenCalledTimes(1));
     await app.actions().login.mutate({});
-    gate.resolve();
+    gate.resolve(undefined);
     expect(await operation).toMatchObject({ code: 'UPDATE_MANY_CANCELLED', details: {
       writeMayHaveSucceeded: false, attemptedIds: [], unattemptedIds: [1, 2],
     } });
@@ -181,7 +181,7 @@ describe.each(['native', 'fallback'] as const)('%s batch-update auth ownership',
 
   it.each(['login', 'logout', 'check', 'provider'] as const)('withholds dispatched receipts when %s retires the session', async change => {
     const source = provider();
-    const gate = deferred();
+    const gate = deferred<undefined>();
     source.updateMany = vi.fn(async () => { await gate.promise; return { data: rows }; });
     source.update = vi.fn(async () => { await gate.promise; return { data: rows[0] }; });
     if (mode === 'fallback') delete source.updateMany;
@@ -197,7 +197,7 @@ describe.each(['native', 'fallback'] as const)('%s batch-update auth ownership',
     else if (change === 'check') await app.actions().check.refetch();
     else await app.view.rerender({ auth: auth() });
     const invalidate = vi.spyOn(app.client, 'invalidateQueries');
-    gate.resolve();
+    gate.resolve(undefined);
     const error: unknown = await operation;
     expect(error).toMatchObject({ code: 'UPDATE_MANY_CANCELLED', details: {
       writeMayHaveSucceeded: true, attemptedIds: mode === 'native' ? [1, 2] : [1],
@@ -376,7 +376,7 @@ describe('batch-update progress and completion', () => {
       vi.mocked(source.update).mockResolvedValueOnce({ data: rows[0] }).mockRejectedValueOnce(new Error('PRIVATE'));
     } else nativeUpdate(source).mockReturnValueOnce(receipt.promise);
     const app = await mountSession(source);
-    const gate = deferred();
+    const gate = deferred<undefined>();
     const observer = vi.fn(() => gate.promise);
     if (outcome === 'success') app.client.getMutationCache().config.onSuccess = observer;
     else app.client.getMutationCache().config.onError = observer;
@@ -389,7 +389,7 @@ describe('batch-update progress and completion', () => {
     }
     await waitFor(() => expect(observer).toHaveBeenCalledTimes(1));
     await app.actions().login.mutate({});
-    gate.resolve();
+    gate.resolve(undefined);
     const error: unknown = await operation;
     expect(error).toMatchObject({ code: 'UPDATE_MANY_CANCELLED', details: {
       writeMayHaveSucceeded: outcome !== 'preflight', attemptedIds: outcome === 'preflight' ? [] : [1, 2],
@@ -488,7 +488,7 @@ describe('batch-update progress and completion', () => {
 
   it.each(['success', 'partial', 'failure'] as const)('delivers detached %s to each coalesced caller and observer', async outcome => {
     const source = provider();
-    const gate = deferred();
+    const gate = deferred<undefined>();
     source.updateMany = vi.fn(async () => {
       await gate.promise;
       if (outcome === 'failure') throw new Error('PRIVATE');
@@ -517,7 +517,7 @@ describe('batch-update progress and completion', () => {
     const second = app.read().update.mutation.mutateAsync({ ids: [1, 2], variables }, {
       onSuccess: success, onError: error, onSettled: settled,
     }).catch((error: unknown) => error);
-    gate.resolve();
+    gate.resolve(undefined);
     const [left, right] = await Promise.all([first, second]);
     expect(left).toEqual(right);
     expect(left).not.toBe(right);
@@ -542,8 +542,8 @@ describe('batch-update progress and completion', () => {
     const { builder, owner } = scopedKeys(app, captureAuthSession(app.session).cacheKey);
     app.client.setQueryData(builder.data.select('posts', owner), {});
     app.client.setQueryData(builder.data.one('posts', 1, owner), {});
-    const collectionGate = deferred();
-    const detailGate = deferred();
+    const collectionGate = deferred<undefined>();
+    const detailGate = deferred<undefined>();
     const refresh = vi.spyOn(app.client, 'invalidateQueries').mockRejectedValueOnce(new Error('PRIVATE'))
       .mockReturnValueOnce(collectionGate.promise).mockReturnValue(detailGate.promise);
     let settled = false;
@@ -552,11 +552,11 @@ describe('batch-update progress and completion', () => {
     await waitFor(() => expect(refresh).toHaveBeenCalledTimes(3));
     await app.actions().login.mutate({});
     expect(settled).toBe(false);
-    collectionGate.resolve();
+    collectionGate.resolve(undefined);
     await collectionGate.promise;
     await Promise.resolve();
     expect(settled).toBe(false);
-    detailGate.resolve();
+    detailGate.resolve(undefined);
     const error: unknown = await operation;
     expect(error).toMatchObject({ code: 'UPDATE_MANY_CANCELLED' });
     expect(error).not.toHaveProperty('details.succeededIds');

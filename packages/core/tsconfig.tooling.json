@@ -1,6 +1,6 @@
 {
   "extends": "./tsconfig.contracts.json",
-  "compilerOptions": { "types": ["bun"], "resolveJsonModule": true },
+  "compilerOptions": { "types": ["@types/bun"], "resolveJsonModule": true },
   "include": [
     "../../scripts/check-type-contracts.ts",
     "../../scripts/check-type-coverage.test.ts",

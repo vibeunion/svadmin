@@ -10,6 +10,8 @@
 </script>
 
 <script lang="ts">
+  import { definedReactiveOptions } from '@svadmin/core/options';
+
   import type { Snippet } from 'svelte';
   import type { HTMLAttributes } from 'svelte/elements';
   import { cn, isPromiseLike } from '../../utils.js';
@@ -67,13 +69,13 @@
   const hasClearCallback = $derived(Boolean(onclear || onClear));
 
   import { provideTerminalContext } from './context.svelte.js';
-  provideTerminalContext({
+  provideTerminalContext(definedReactiveOptions({
     get output() { return outputText; },
     get lines() { return renderedLines; },
     get isStreaming() { return effectiveStreaming; },
     get autoScroll() { return autoScroll; },
     get onClear() { return hasClearCallback ? clearTerminal : undefined; },
-  });
+  }));
 
   $effect(() => {
     void outputText;

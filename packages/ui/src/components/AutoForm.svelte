@@ -33,6 +33,8 @@
     formActions?: Snippet<[{ isLoading: boolean; onSubmit: () => void }]>;
     headerContent?: Snippet;
     onSuccess?: () => void;
+    redirect?: 'list' | false;
+    onCancel?: () => void;
     onNavigationGuardReady?: (guard: (fn: () => void) => void) => void;
   }
 
@@ -47,6 +49,8 @@
     formActions,
     headerContent,
     onSuccess,
+    redirect = 'list',
+    onCancel,
     onNavigationGuardReady,
   }: Props = $props();
   const navigation = useNavigation();
@@ -145,7 +149,7 @@
     get defaultValues() { return defaults; },
     get enabled() { return allowed; },
     get dataProviderName() { return binding.dataProviderName; },
-    redirect: 'list',
+    get redirect() { return redirect; },
     warnWhenUnsavedChanges: true,
     get validate() { return validator; },
     get onMutationSuccess() {
@@ -237,6 +241,7 @@
     const origin = scope;
     return (fn: () => void) => {
       if (!currentScope(origin)) return;
+      if (form.submitting) return;
       if (form.isTainted()) {
         pendingNavigation = () => { if (currentScope(origin)) fn(); };
         confirmOpen = true;
@@ -248,7 +253,8 @@
   const back = $derived.by(() => {
     const guard = guardNavigate;
     const name = resourceName;
-    return () => guard(() => navigation.list(name));
+    const cancel = onCancel;
+    return () => guard(() => cancel ? cancel() : navigation.list(name));
   });
 
   $effect(() => {
@@ -295,7 +301,8 @@
     </div>
   {/if}
 
-  {#if form.loading || permissionPending}    <div class="svadmin-u-cf3893e36c22 svadmin-u-b3542e058833">
+  {#if form.loading || permissionPending}
+    <div class="svadmin-u-cf3893e36c22 svadmin-u-b3542e058833">
       <div class="svadmin-u-5f22e64f2282 svadmin-u-438b2237b8d6 svadmin-u-3daca9af0861 svadmin-u-a10fdd7667ee svadmin-u-0478c89a150f svadmin-u-b43b4c086d9a">
         {#each Array(4) as _, _i (_i)}
           <div class="svadmin-u-6f7e013d6499">
@@ -313,7 +320,8 @@
       {i18n.t('common.retry')}
     </Button>
   {:else if form.ready}
-    <form bind:this={formElement} onsubmit={submitEvent} class="svadmin-u-cf3893e36c22 svadmin-u-b3542e058833" novalidate>      {#if submitError}
+    <form bind:this={formElement} onsubmit={submitEvent} class="svadmin-u-cf3893e36c22 svadmin-u-b3542e058833" novalidate>
+      {#if submitError}
         <div transition:slide={{ duration: 300, axis: 'y' }} class="svadmin-shake">
           <Alert.Root variant="destructive">
             <AlertCircle class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" aria-hidden="true" />
@@ -386,7 +394,8 @@
       {/if}
 
       <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-1004c0c3954c">
-        {#if formActions && !isReadonly}          {@render formActions({ isLoading: form.submitting, onSubmit: handleSubmit })}
+        {#if formActions && !isReadonly}
+          {@render formActions({ isLoading: form.submitting, onSubmit: handleSubmit })}
         {:else if !isReadonly}
           <Button type="submit" size={isCompact ? 'sm' : 'default'} disabled={form.submitting}>
             {#if form.submitting}

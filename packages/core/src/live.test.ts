@@ -112,7 +112,7 @@ test('strictly compiles the transports, shared boundary and test sources', () =>
   const options: ts.CompilerOptions = {
     noEmit: true, strict: true, exactOptionalPropertyTypes: true, noUncheckedIndexedAccess: true,
     noPropertyAccessFromIndexSignature: true, noImplicitOverride: true, skipLibCheck: false,
-    types: ['bun', 'svelte'], target: ts.ScriptTarget.ESNext, module: ts.ModuleKind.ESNext,
+    types: ['@types/bun', 'svelte'], target: ts.ScriptTarget.ESNext, module: ts.ModuleKind.ESNext,
     moduleResolution: ts.ModuleResolutionKind.Bundler, allowImportingTsExtensions: true,
   };
   const program = ts.createProgram(roots, options);

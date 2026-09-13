@@ -261,7 +261,6 @@ async function parseResponse(response: Response): Promise<unknown> {
 }
 
 async function request(url: string, headers: Record<string, string>, init?: RequestOptions, withCredentials?: boolean): Promise<unknown> {
-  init?.signal?.throwIfAborted();
   const fetchInit: RequestInit = { ...init, headers: mergeHeaders(headers, init?.headers) };
   if (withCredentials) {
     fetchInit.credentials = 'include';
@@ -337,7 +336,7 @@ export function createElysiaDataProvider(opts: ElysiaDataProviderOptions): DataP
   const transport: DataTransport = {
     getApiUrl: () => apiUrl,
 
-    async getList({ resource, pagination, sorters, filters, meta, signal }) {
+    async getList({ resource, pagination, sorters, filters, meta }) {
       const { current = 1, pageSize = 10 } = pagination ?? {};
       const context: ElysiaListContext = definedOptions({
         apiUrl,
@@ -353,7 +352,8 @@ export function createElysiaDataProvider(opts: ElysiaDataProviderOptions): DataP
       const query = params.toString();
       const url = query ? `${baseUrl}?${query}` : baseUrl;
       const headers = resolveHeaders(opts);
-      const json = await request(url, headers, definedOptions({ signal }), withCredentials);
+      const json = await request(url, headers, undefined, withCredentials);
+
       if (adapter?.parseListResponse) {
         return adapter.parseListResponse(json, context);
       }
@@ -363,9 +363,10 @@ export function createElysiaDataProvider(opts: ElysiaDataProviderOptions): DataP
       return defaultParseListResponse(json);
     },
 
-    async getOne({ resource, id, meta, signal }) {
+    async getOne({ resource, id, meta }) {
       const baseUrl = resolveResourceUrl(opts, resource, meta);
-      const data = await request(`${baseUrl}/${encodeIdPathSegment(id)}`, resolveHeaders(opts), definedOptions({ signal }), withCredentials);      return { data };
+      const data = await request(`${baseUrl}/${encodeIdPathSegment(id)}`, resolveHeaders(opts), undefined, withCredentials);
+      return { data };
     },
 
     async create({ resource, variables, meta }) {
@@ -394,10 +395,11 @@ export function createElysiaDataProvider(opts: ElysiaDataProviderOptions): DataP
       return { data: data === undefined ? { id } : data };
     },
 
-    async getMany({ resource, ids, meta, signal }) {
+    async getMany({ resource, ids, meta }) {
       const baseUrl = resolveResourceUrl(opts, resource, meta);
       const params = ids.map(id => `id=${encodeURIComponent(String(id))}`).join('&');
-      const data = await request(`${baseUrl}?${params}`, resolveHeaders(opts), definedOptions({ signal }), withCredentials);      return { data };
+      const data = await request(`${baseUrl}?${params}`, resolveHeaders(opts), undefined, withCredentials);
+      return { data };
     },
 
     async createMany({ resource, variables, meta }) {
@@ -438,7 +440,7 @@ export function createElysiaDataProvider(opts: ElysiaDataProviderOptions): DataP
       return { data: results };
     },
 
-    async custom({ url, method, payload, query, headers, sorters, filters, signal }) {
+    async custom({ url, method, payload, query, headers, sorters, filters }) {
       const requestUrl = buildCustomUrl(url, apiUrl, query, sorters, filters);
       const sameOrigin = isSameOrigin(apiUrl, requestUrl);
       const providerHeaders = resolveHeaders(opts);
@@ -452,7 +454,6 @@ export function createElysiaDataProvider(opts: ElysiaDataProviderOptions): DataP
       const data = await request(requestUrl, requestHeaders, definedOptions({
         method: method.toUpperCase(),
         body: payload === undefined ? undefined : JSON.stringify(payload),
-        signal,
       }), withCredentials && sameOrigin);
       return { data };
     },

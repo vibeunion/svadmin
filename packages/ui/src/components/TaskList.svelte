@@ -106,7 +106,8 @@
   <Card.Content class="svadmin-u-9335c39f6eff">
     {#if view.invalid || (useProviderData && query.isError)}
       <p role="alert">{i18n.t('validation.invalidFormat')}</p>
-    {:else if useProviderData && taskProvider && query.isLoading}      <div class="svadmin-u-60fbb7713999 svadmin-u-aadad6871af8 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-bfa603190748">
+    {:else if useProviderData && taskProvider && query.isLoading}
+      <div class="svadmin-u-60fbb7713999 svadmin-u-aadad6871af8 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-bfa603190748">
         <Loader2 class="svadmin-u-d2347e8497a9 svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-afbdd13a380e" />
         {i18n.t('task.loadingList')}
       </div>
@@ -152,7 +153,7 @@
                       {#if taskProvider?.cancel && canCancelTask(task)}
                         <CancelTaskButton taskId={task.id} {taskProvider} />
                       {/if}
-                      <Button variant="ghost" size="sm" onclick={(e: MouseEvent) => { e.stopPropagation(); onSelect?.(task); }}>
+                      <Button variant="ghost" size="sm" onclick={(e) => { e.stopPropagation(); onSelect?.(task); }}>
                         {i18n.t('task.detailsAction')}
                       </Button>
                     </div>

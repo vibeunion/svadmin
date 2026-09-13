@@ -24,7 +24,7 @@ function provider(getList: DataProvider['getList'] = async () => ({ data: [row],
   };
 }
 
-function deferred<T = void>() {
+function deferred<T>() {
   let resolve: (value: T) => void = () => { throw new Error('Request not initialized'); };
   let reject: (cause: unknown) => void = () => { throw new Error('Request not initialized'); };
   const promise = new Promise<T>((done, fail) => { resolve = done; reject = fail; });
@@ -221,7 +221,7 @@ describe('contract-bound refresh', () => {
   it('waits for every selected refresh operation before reporting a sanitized failure', async () => {
     const app = mount(provider(), false);
     app.client.setQueryData(keys(scopeOf(app.client)).data.many('posts', [1]), { data: [row] });
-    const slow = deferred();
+    const slow = deferred<undefined>();
     vi.spyOn(app.client, 'invalidateQueries')
       .mockRejectedValueOnce({ privateValue: 'secret' })
       .mockImplementationOnce(() => slow.promise);
@@ -231,7 +231,7 @@ describe('contract-bound refresh', () => {
     await Promise.resolve();
     await Promise.resolve();
     expect(settled).toBe(false);
-    slow.resolve();
+    slow.resolve(undefined);
     await expect(refresh).resolves.toMatchObject({ code: 'REFRESH_FAILED', message: 'Refresh failed' });
     expect(settled).toBe(true);
   });

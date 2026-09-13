@@ -15,13 +15,13 @@ if (select.query.isSuccess) {
   const first = select.query.data.data[0];
   if (first) {
     const title: string = first.title;
+    const total: number = select.query.data.total;
     void title;
+    void total;
     // @ts-expect-error Record fields retain the concrete schema's types.
     const invalid: number = first.title;
     void invalid;
   }
-  const total: number = select.query.data.total;
-  void total;
 }
 if (select.defaultValueQuery.isSuccess) {
   const first = select.defaultValueQuery.data.data[0];

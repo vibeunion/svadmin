@@ -1,4 +1,5 @@
 import type { ChatAttachment } from '../../contracts.js';
+import { definedOptions } from '@svadmin/core/options';
 import type { PromptInputFile } from './context.svelte.js';
 
 function createFileId(file: File, usedIds: Set<string>): string {
@@ -19,7 +20,7 @@ export function createPromptInputFiles(
     const url = typeof URL === 'undefined' || typeof URL.createObjectURL !== 'function'
       ? undefined
       : URL.createObjectURL(file);
-    return {
+    return definedOptions({
       id: createFileId(file, usedIds),
       name: file.name,
       filename: file.name,
@@ -28,7 +29,7 @@ export function createPromptInputFiles(
       url,
       previewUrlOwned: Boolean(url),
       file,
-    };
+    });
   });
 }
 

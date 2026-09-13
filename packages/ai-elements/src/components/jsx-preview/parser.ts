@@ -597,18 +597,18 @@ function sanitizeProps(
       : attribute.value;
   }
 
-  if (intrinsic && target.tag === 'button') props.type = 'button';
-  if (intrinsic && target.tag === 'input' && typeof props.type === 'string'
-    && ['submit', 'reset', 'image'].includes(props.type.toLowerCase())) {
-    props.type = 'text';
+  if (intrinsic && target.tag === 'button') props['type'] = 'button';
+  if (intrinsic && target.tag === 'input' && typeof props['type'] === 'string'
+    && ['submit', 'reset', 'image'].includes(props['type'].toLowerCase())) {
+    props['type'] = 'text';
   }
-  if (intrinsic && target.tag === 'img' && props.alt === undefined) props.alt = '';
-  if (intrinsic && target.tag === 'a' && props.target === '_blank') {
-    props.rel = mergeRel(props.rel);
+  if (intrinsic && target.tag === 'img' && props['alt'] === undefined) props['alt'] = '';
+  if (intrinsic && target.tag === 'a' && props['target'] === '_blank') {
+    props['rel'] = mergeRel(props['rel']);
   }
   if (intrinsic && target.tag === 'form') {
-    delete props.onsubmit;
-    delete props.action;
+    delete props['onsubmit'];
+    delete props['action'];
   }
 
   return props;

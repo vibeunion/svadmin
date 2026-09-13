@@ -100,34 +100,51 @@ throw new HttpError('验证失败', 422, {
 
 ```svelte
 <script lang="ts">
-  import { useStepsForm } from '@svadmin/core';
+  import { defineResource, useStepsForm } from '@svadmin/core';
+  import { Type } from '@sinclair/typebox';
 
-  const {
-    steps: { currentStep, gotoStep, canGoNext, canGoPrev, nextStep, prevStep, totalSteps },
-    ...formProps
-  } = useStepsForm({
-    resource: 'products',
-    action: 'create',
-    stepsCount: 3,
-    validate: (values, step) => {
-      if (step === 0 && !values.name) return { name: '必填' };
-      if (step === 1 && !values.price) return { price: '必填' };
-      return null;
-    },
+  const products = defineResource('products', {
+    record: Type.Object({ id: Type.Number(), name: Type.String(), price: Type.Number() }),
+    create: Type.Object({ name: Type.String({ minLength: 1 }), price: Type.Number({ minimum: 0 }) }),
   });
+  const form = useStepsForm({
+    resource: products,
+    action: 'create',
+    steps: [{ fields: ['name'] }, { fields: ['price'] }, { fields: [] }],
+  });
+  async function save() {
+    try { await form.submit(); }
+    catch { /* Render the checked form errors below. */ }
+  }
 </script>
 
-{#if currentStep === 0}
-  <input bind:value={name} />
-{:else if currentStep === 1}
-  <input bind:value={price} type="number" />
+{#if form.steps.currentStep === 0}
+  <input aria-label="名称" value={typeof form.values.name === 'string' ? form.values.name : ''}
+    oninput={(event) => form.setFieldValue('name', event.currentTarget.value)} />
+{:else if form.steps.currentStep === 1}
+  <input aria-label="价格" type="number" value={typeof form.values.price === 'number' ? form.values.price : ''}
+    oninput={(event) => {
+      const value = event.currentTarget.valueAsNumber;
+      form.setFieldValue('price', Number.isFinite(value) ? value : undefined);
+    }} />
 {:else}
   <p>确认并提交</p>
+  <button onclick={save} disabled={!form.ready || form.submitting}>保存</button>
 {/if}
 
-<button onclick={prevStep} disabled={!canGoPrev}>上一步</button>
-<button onclick={nextStep} disabled={!canGoNext}>下一步</button>
+{#each Object.values(form.errors) as message}
+  <p role="alert">{message}</p>
+{/each}
+{#if form.error}<p role="alert">{form.error.message}</p>{/if}
+<button onclick={() => form.steps.prevStep()} disabled={!form.steps.canGoPrev}>上一步</button>
+<button onclick={() => form.steps.nextStep()} disabled={!form.steps.canGoNext}>下一步</button>
 ```
+
+在 admin 和 query-client 上下文中使用此 hook。编辑模式必须显式提供符合契约的 `id`。
+`steps` 替代 `stepsCount`，字段名由当前操作的 schema 推导。向前跳转会校验全部前置步骤，
+设置 `isBackValidate: true` 后，回退也会校验当前步骤。`defaultStep` 必须是范围内整数。
+修改步骤配置会重置流程并取消旧请求的完成回调。草稿读取保持 unknown；
+`submit()` 校验完整输入与回执，失败时明确拒绝。
 
 ### 返回值
 
@@ -137,9 +154,9 @@ throw new HttpError('验证失败', 422, {
 |------|------|------|
 | `currentStep` | `number` | 当前步骤索引（从 0 开始） |
 | `totalSteps` | `number` | 总步骤数 |
-| `gotoStep` | `(step) => void` | 跳转到指定步骤 |
-| `nextStep` | `() => void` | 前往下一步（会验证当前步骤） |
-| `prevStep` | `() => void` | 返回上一步 |
+| `gotoStep` | `(step: number) => boolean` | 校验后跳转；非法索引会抛错 |
+| `nextStep` | `() => boolean` | 校验全部前置步骤后前进 |
+| `prevStep` | `() => boolean` | 返回上一步，可配置当前步骤校验 |
 | `canGoNext` | `boolean` | 是否可以前进 |
 | `canGoPrev` | `boolean` | 是否可以后退 |
 

@@ -564,9 +564,7 @@ export async function handleAuthError(
   let intent=authSession(provider).intent;
   let previousLive: AuthSession['liveState'] | undefined;
   let ownsLogout=false;
-  // Once this handler has started its own checked logout, its origin scope may
-  // become inactive as the live session transitions, but its caller can still
-  // explicitly retire the pending operation.
+  // A delegate owns its checked logout after the session begins transitioning.
   const current=() => (isActive() || (ownsLogout && !isExplicitlyCancelled()))
     && (ownsLogout || origin===undefined || origin.isCurrent()) && provider===adminContext.authProvider
     && tenant===adminContext.tenantCacheKey?.__svadminTenant && version===authSession(provider).version

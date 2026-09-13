@@ -37,11 +37,7 @@ describe('create-svadmin doctor', () => {
       authProvider: 'mock',
     });
     project.dependencies['@svadmin/core'] = '^0.1.0';
-    const simpleRestPack = scaffold.svadmin.dependencyPacks['simple-rest'];
-    if (simpleRestPack === undefined) throw new Error('Missing simple-rest dependency pack');
-    const currentSimpleRest = simpleRestPack['@svadmin/simple-rest'];
-    if (currentSimpleRest === undefined) throw new Error('Missing simple-rest dependency');
-    project.dependencies['@svadmin/simple-rest'] = `~${currentSimpleRest.replace(/^[\^~]/, '')}`;
+    project.dependencies['@svadmin/simple-rest'] = '^0.10.0';
     delete project.dependencies['@tanstack/svelte-query'];
     delete project.dependencies['@refinedev/core'];
 

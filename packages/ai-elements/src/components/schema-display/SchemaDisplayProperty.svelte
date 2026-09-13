@@ -1,4 +1,19 @@
-<script lang="ts">import type { Snippet } from 'svelte'; import type { HTMLAttributes } from 'svelte/elements'; import { ChevronRight } from '@lucide/svelte'; import { cn } from '../../utils.js'; import type { SchemaProperty } from './context.svelte.js'; interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'class'>, SchemaProperty { depth?: number; class?: string; children?: Snippet<[SchemaProperty, number]>; } let { name, type, required = false, description, properties, items, depth = 0, class: className = '', children, ...rest }: Props = $props(); const property = $derived({ name, type, required, description, properties, items });</script>
+<script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+  import type { Snippet } from 'svelte';
+  import type { HTMLAttributes } from 'svelte/elements';
+  import { ChevronRight } from '@lucide/svelte';
+  import { cn } from '../../utils.js';
+  import type { SchemaProperty } from './context.svelte.js';
+
+  interface Props extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'class'>, SchemaProperty {
+    depth?: number;
+    class?: string;
+    children?: Snippet<[SchemaProperty, number]>;
+  }
+  let { name, type, required = false, description, properties, items, depth = 0, class: className = '', children, ...rest }: Props = $props();
+  const property = $derived(definedOptions({ name, type, required, description, properties, items }));
+</script>
 {#snippet tree(node: SchemaProperty, level: number)}
   {@const nested = Boolean(node.properties?.length || node.items)}
   {#if nested}<details open={level < 2} class="svadmin-ai-schema-part__property-node"><summary style={`--schema-level: ${level}`}><ChevronRight size={13} aria-hidden="true" /><code>{node.name}</code><span>{node.type}</span>{#if node.required}<strong>required</strong>{/if}</summary>{#if node.description}<p style={`--schema-level: ${level}`}>{node.description}</p>{/if}<div>{#each node.properties ?? [] as child (child.name)}{@render tree(child, level + 1)}{/each}{#if node.items}{@render tree({ ...node.items, name: `${node.name}[]` }, level + 1)}{/if}</div></details>{:else}<div class="svadmin-ai-schema-part__property-leaf" style={`--schema-level: ${level}`}><span aria-hidden="true"></span><code>{node.name}</code><span>{node.type}</span>{#if node.required}<strong>required</strong>{/if}{#if node.description}<p>{node.description}</p>{/if}</div>{/if}

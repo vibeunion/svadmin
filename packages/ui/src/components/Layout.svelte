@@ -184,7 +184,8 @@
 
     <!-- Desktop sidebar -->
     <div class="svadmin-u-99d72c7fc3e2 svadmin-u-9d60be3a6d80">
-      <Sidebar {collapsed} {identity} {title} {...definedOptions({ "menu": menu })} {routeMode} onToggle={() => collapsed = !collapsed} onLogout={handleLogout} />    </div>
+      <Sidebar {collapsed} {identity} {title} {...definedOptions({ "menu": menu })} {routeMode} onToggle={() => collapsed = !collapsed} onLogout={handleLogout} />
+    </div>
 
     <!-- Mobile sidebar via Sheet -->
     <Sheet.Root
@@ -196,7 +197,8 @@
     >
       <Sheet.Title id={`${layoutScope}-mobile-navigation-title`} class="svadmin-u-2daa8e5e2f2e">{title}</Sheet.Title>
       <div class="svadmin-u-e477a6af4cb6">
-        <Sidebar collapsed={false} {identity} {title} {...definedOptions({ "menu": menu })} {routeMode} onToggle={() => { mobileMenuOpen = false; }} onLogout={handleLogout} />      </div>
+        <Sidebar collapsed={false} {identity} {title} {...definedOptions({ "menu": menu })} {routeMode} onToggle={() => { mobileMenuOpen = false; }} onLogout={handleLogout} />
+      </div>
     </Sheet.Root>
 
     <div

@@ -30,7 +30,7 @@
     }
   });
   const liveId = $derived(String(Reflect.get(adminContext.liveProvider ?? {}, '__testId') ?? 'none'));
-  const accessId = $derived(String(Reflect.get(adminContext.accessControlProvider ?? {}, '__testId') ?? 'none'));
+  const accessId = $derived(adminContext.accessControlProvider ? 'scoped' : 'none');
   const auditId = $derived(String(Reflect.get(adminContext.auditLogProvider ?? {}, '__testId') ?? 'none'));
   const notificationId = $derived(String(Reflect.get(adminContext.notificationProvider ?? {}, '__testId') ?? 'none'));
   const chatId = $derived(String(Reflect.get(adminContext.chatProvider ?? {}, '__testId') ?? 'none'));

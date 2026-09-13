@@ -29,6 +29,7 @@ describe('strict checking coverage', () => {
   test('rejects imports and reference directives from the other runtime', () => {
     expect(() => assertRuntimeImports('source.ts', 'import { test } from "bun:test";', 'browser')).toThrow('bun:test');
     expect(() => assertRuntimeImports('source.ts', '/// <reference types="bun" />', 'browser')).toThrow('bun');
+    expect(() => assertRuntimeImports('source.ts', '/// <reference types="@types/bun" />', 'browser')).toThrow('@types/bun');
     expect(() => assertRuntimeImports('test.ts', 'import { test } from "vitest";', 'bun')).toThrow('vitest');
     expect(() => assertRuntimeImports('test.ts', '/// <reference types="vite/client" />', 'bun')).toThrow('vite/client');
   });

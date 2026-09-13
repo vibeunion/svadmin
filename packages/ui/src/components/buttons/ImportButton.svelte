@@ -104,7 +104,8 @@
       bind:this={fileInput}
       onchange={handleFileChange}
     />
-  {/key}  <Button
+  {/key}
+  <Button
     type="button"
     variant="outline"
     size={hideText ? 'icon' : 'sm'}

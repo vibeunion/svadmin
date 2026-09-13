@@ -61,10 +61,6 @@ if (legacyCandidates.length) {
   const root = postcss.parse(compiledCss);
   root.walkRules((rule) => {
     rule.selector = renameSelectors.processSync(rule.selector);
-    // Precompiled defaults must not override a Tailwind host's own @theme.
-    if (rule.parent.type === 'atrule' && rule.parent.name === 'layer' && rule.parent.params === 'theme') {
-      if (rule.selector === ':root, :host') rule.selector = ':where(:root, :host)';
-    }
   });
   compiledCss = root.toString();
 }

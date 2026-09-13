@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { definedOptions } from '@svadmin/core/options';
   import { definedReactiveOptions } from '@svadmin/core/options';
+  import { definedOptions } from '@svadmin/core/options';
 
   import { defineResource, syncGlobalPath } from '@svadmin/core';
   import { Type } from '@sinclair/typebox';

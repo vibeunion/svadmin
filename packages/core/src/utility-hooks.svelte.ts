@@ -6,8 +6,8 @@ import { t } from './i18n.svelte';
 import type { BaseRecord,HttpError,Filter,KnownResources,ResourceDefinition } from './types';
 import { useList } from './query-hooks.svelte';
 import { toast } from './toast.svelte';
-import type { UseSelectOptions } from './hooks.svelte';
-import { useSelect as useSelectImpl } from './hooks.svelte';
+import { createSelectQuery as useSelectImpl, type UseSelectOptions } from './select-query.svelte';
+import { decodeBaseRecord } from './record-decoder';
 
 // ─── useModal ─────────────────────────────────────────────────
 export function useModal(options?: { defaultVisible?: boolean }) {
@@ -174,7 +174,7 @@ export interface UseCheckboxGroupOptions<TData extends BaseRecord=BaseRecord> ex
  * Provides a list of checkbox options plus helpers to toggle individual values.
  */
 export function useCheckboxGroup(options: UseCheckboxGroupOptions) {
-  const select=useSelectImpl(options);
+  const select=useSelectImpl(options, () => decodeBaseRecord);
   let selected=$state<(string|number)[]>(options.defaultValue??[]);
 
   function toggle(value: string|number) {
@@ -217,7 +217,7 @@ export function useRadioGroup(options: UseRadioGroupOptions) {
   const select=useSelectImpl({
     ...selectOpts,
     defaultValue: _dv!==undefined? [_dv]:[],
-  });
+  }, () => decodeBaseRecord);
   let value=$state<string|number|undefined>(_dv);
 
   return {
@@ -253,7 +253,7 @@ export function useAutocomplete(options: UseAutocompleteOptions) {
       operator: 'contains' as const,
       value: term,
     }],
-  });
+  }, () => decodeBaseRecord);
   let value=$state<string|number|undefined>(_dv);
 
   return {

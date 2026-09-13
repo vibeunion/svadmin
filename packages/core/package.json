@@ -33,6 +33,10 @@
       "types": "./src/defined-options.ts",
       "default": "./src/defined-options.ts"
     },
+    "./resource-contract": {
+      "types": "./src/resource-contract.ts",
+      "default": "./src/resource-contract.ts"
+    },
     "./unsafe": {
       "types": "./src/unsafe.ts",
       "default": "./src/unsafe.ts"

@@ -150,8 +150,16 @@ describe('npm trusted-publishing workflow contract', () => {
     );
     expect(ciVersions).toEqual([bunVersion, bunVersion, bunVersion]);
 
-    for (const packagePath of ['packages/core/package.json', 'packages/lite/package.json']) {
-      expect(readPackageJson(packagePath).devDependencies?.['@types/bun']).toBe(`^${bunVersion}`);
+    for (const packagePath of [
+      'package.json',
+      'packages/core/package.json',
+      'packages/lite/package.json',
+      'packages/ai-elements/package.json',
+    ]) {
+      const packageJson = readPackageJson(packagePath);
+      expect(packageJson.devDependencies?.['@types/bun']).toBe(`^${bunVersion}`);
+      expect(packageJson.dependencies?.['bun-types']).toBeUndefined();
+      expect(packageJson.devDependencies?.['bun-types']).toBeUndefined();
     }
   });
 

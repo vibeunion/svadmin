@@ -11,6 +11,7 @@
 </script>
 
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
   import { cn } from '../../utils.js';
 
   let { tokens, costText, class: className = '', children, ...rest }: TokensWithCostProps = $props();
@@ -21,7 +22,7 @@
 
 <span {...rest} class={cn('svadmin-ai-tokens-with-cost', className)} data-slot="tokens-with-cost">
   {#if children}
-    {@render children({ tokens: formattedTokens, costText })}
+    {@render children(definedOptions({ tokens: formattedTokens, costText }))}
   {:else}
     {formattedTokens}
     {#if costText}<span class="svadmin-ai-tokens-with-cost__cost">&bull; {costText}</span>{/if}

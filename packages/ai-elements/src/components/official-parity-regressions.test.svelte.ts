@@ -1,3 +1,4 @@
+import { requireValue } from "../../../../scripts/test-assertions";
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import OfficialParityRegressionsHost from './official-parity-regressions.test-host.svelte';
@@ -75,7 +76,7 @@ describe('official family parity regressions', () => {
 
     await fireEvent.click(screen.getByRole('button', { name: 'Collapse src' }));
     expect(onfileexpandedchange).toHaveBeenCalledOnce();
-    expect([...onfileexpandedchange.mock.calls[0][0]]).toEqual([]);
+    expect([...requireValue(onfileexpandedchange.mock.calls[0])[0]]).toEqual([]);
   });
 
   it('opens context on hover and focus, then dismisses on leave, escape, and outside press', async () => {

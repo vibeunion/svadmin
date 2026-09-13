@@ -12,9 +12,8 @@
 </script>
 
 <script lang="ts">
-  import { onDestroy } from 'svelte';
+  import { untrack } from 'svelte';
   import { provideConversationContext } from '../context.svelte.js';
-  import { observeConversationScroll } from './conversation/scroll.js';
   import { cn } from '../utils.js';
 
   let {
@@ -25,18 +24,30 @@
     'aria-label': ariaLabel = 'Conversation',
     ...rest
   }: ConversationProps = $props();
-  let scroll: ReturnType<typeof observeConversationScroll> | undefined;
+  let contentElement = $state<HTMLElement | null>(null);
   let isAtBottom = $state(true);
 
   function scrollToBottom(): void {
-    scroll?.scrollToBottom();
+    const element = contentElement;
+    if (!element) return;
+    isAtBottom = true;
+    if (typeof element.scrollTo === 'function') element.scrollTo({ top: element.scrollHeight, behavior: 'smooth' });
+    else element.scrollTop = element.scrollHeight;
+  }
+
+  function updateScrollState(): void {
+    const element = contentElement;
+    if (!element) return;
+    isAtBottom = element.scrollHeight - element.scrollTop - element.clientHeight <= 48;
   }
 
   function registerContent(element: HTMLElement | null): void {
-    scroll?.destroy();
-    scroll = element
-      ? observeConversationScroll(element, (atBottom) => { isAtBottom = atBottom; })
-      : undefined;
+    untrack(() => {
+      contentElement?.removeEventListener('scroll', updateScrollState);
+      contentElement = element;
+      contentElement?.addEventListener('scroll', updateScrollState, { passive: true });
+      updateScrollState();
+    });
   }
 
   provideConversationContext({
@@ -47,14 +58,27 @@
     registerContent,
   });
 
-  onDestroy(() => scroll?.destroy());
+  $effect(() => {
+    void messages;
+    void isStreaming;
+    queueMicrotask(() => {
+      const element = contentElement;
+      if (element && isAtBottom) {
+        if (typeof element.scrollTo === 'function') element.scrollTo({ top: element.scrollHeight });
+        else element.scrollTop = element.scrollHeight;
+      }
+      updateScrollState();
+    });
+  });
 </script>
 
 <section
   {...rest}
-  class={cn('svadmin-ai svadmin-ai__surface relative flex min-h-0 min-w-0 flex-col overflow-hidden', className)}
+  class={cn('svadmin-ai svadmin-ai__surface relative flex min-h-0 flex-col overflow-hidden', className)}
   aria-label={ariaLabel}
   data-slot="conversation"
 >
   {@render children?.()}
 </section>
+
+<svelte:window onresize={updateScrollState} />

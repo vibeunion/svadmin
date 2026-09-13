@@ -27,7 +27,7 @@ vi.mock('@rive-app/webgl2', () => ({
       this.params = params;
       riveMocks.instances.push(this);
       queueMicrotask(() => {
-        const onLoad = params.onLoad as ((event: { type: string }) => void) | undefined;
+        const onLoad = params['onLoad'] as ((event: { type: string }) => void) | undefined;
         onLoad?.({ type: 'load' });
       });
     }
@@ -71,7 +71,7 @@ describe('Persona', () => {
     await view.rerender({ state: 'speaking', variant: 'opal', onready });
     await waitFor(() => expect(riveMocks.instances).toHaveLength(2));
     expect(riveMocks.instances[0]?.cleanup).toHaveBeenCalledOnce();
-    expect(String(riveMocks.instances[1]?.params.src)).toContain('orb-1.2.riv');
+    expect(String(riveMocks.instances[1]?.params['src'])).toContain('orb-1.2.riv');
 
     view.unmount();
     expect(riveMocks.instances[1]?.cleanup).toHaveBeenCalledOnce();

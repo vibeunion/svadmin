@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import * as Context from '../context/index.js';
   import * as SchemaDisplay from '../schema-display/index.js';
   import * as StackTrace from '../stack-trace/index.js';
@@ -34,7 +36,7 @@
   <SchemaDisplay.Content><SchemaDisplay.Parameters /></SchemaDisplay.Content>
 </SchemaDisplay.Root>
 
-<StackTrace.Root trace={stackTrace} open={true} {onfilepathclick}>
+<StackTrace.Root trace={stackTrace} open={true} {...definedOptions({ "onfilepathclick": onfilepathclick })}>
   <StackTrace.Header>
     <StackTrace.Error><StackTrace.ErrorType /><StackTrace.ErrorMessage /></StackTrace.Error>
     <StackTrace.ExpandButton />
@@ -59,13 +61,13 @@
   </TestResults.Content>
 </TestResults.Root>
 
-<Transcription.Root segments={transcriptSegments} currentTime={2.5} {onseek}>
+<Transcription.Root segments={transcriptSegments} currentTime={2.5} {...definedOptions({ "onseek": onseek })}>
   {#snippet children(segment, index)}
     <Transcription.Segment {segment} {index} />
   {/snippet}
 </Transcription.Root>
 
-<WebPreview.Root defaultUrl="about:blank#one" title="Compound preview" {onurlchange}>
+<WebPreview.Root defaultUrl="about:blank#one" title="Compound preview" {...definedOptions({ "onurlchange": onurlchange })}>
   <WebPreview.Navigation>
     <WebPreview.NavigationButton action="back" />
     <WebPreview.NavigationButton action="forward" />

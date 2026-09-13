@@ -48,10 +48,7 @@ Use `createSupaCloudTaskProvider()` when you want a thin, task-focused API surfa
 ```ts
 import { createSupaCloudTaskProvider } from '@svadmin/supabase/supacloud';
 
-const taskProvider = createSupaCloudTaskProvider({
-  supacloud: supacloud.tasks,
-  clientKind: 'sdk',
-});
+const taskProvider = createSupaCloudTaskProvider({ supacloud });
 ```
 
 ### Supported Methods
@@ -62,7 +59,41 @@ const taskProvider = createSupaCloudTaskProvider({
 - `listDlq(params?)`
 - `cancel(taskId)`
 - `retry(taskId)`
-- `subscribe(taskId, callback)`
+- `subscribe(taskId, callback, onError?)`
+
+### Validated Contract
+
+Only the modern `{ tasks: ... }` client is accepted. Bare legacy task clients and
+caller-selected result generics are removed. The installed SDK contract is tested
+with `@supacloud/js` 0.23.1; these tests use injected HTTP and realtime transports,
+not a hosted deployment.
+
+All SDK responses enter as `unknown`. Records, list results, submit handles,
+subscription snapshots, and custom live events are validated before use.
+`payload`, `result`, and extension fields remain `unknown`; validate a business
+schema before reading their fields. Task dates are JSON strings or `null`, not
+`Date` objects. Their shape is checked, but the generic task contract does not
+promise ISO timestamp semantics.
+
+Submission bodies and metadata must be JSON objects. `meta` maps to the SDK's
+`metadata`; reserved metadata/idempotency headers cannot override these values.
+List filters accept only `status`, `taskType`, `functionSlug`, `dlq`, and `limit`;
+DLQ parameters accept only `limit`. Invalid input is rejected before dispatch.
+
+Every submitted handle has an `id`. `wait()` returns a matching terminal record.
+Cancel and retry return the matching current record, not a fabricated terminal
+state: cancellation of a running task can still return `running`.
+
+Failures use sanitized `TaskError` codes. `writeMayHaveSucceeded: true` means a
+write was attempted but its outcome could not be confirmed; it does not mean the
+write was rolled back. Use the factory's `onError` or the subscription's optional
+error callback to handle asynchronous failures. Invalid subscription data stops
+the subscription, and cleanup suppresses subsequent SDK updates.
+
+Core task hooks and task action buttons also validate custom `TaskProvider`
+responses. For direct custom-provider use, wrap the transport with
+`withValidatedTaskProvider` from `@svadmin/core`. Its transport methods return
+`unknown`; callers cannot select an arbitrary result type through a hook generic.
 
 ### Submit a Task
 
@@ -98,10 +129,7 @@ Use `createSupaCloudTaskLiveProvider()` when you want to bridge `tasks.subscribe
 ```ts
 import { createSupaCloudTaskLiveProvider } from '@svadmin/supabase/supacloud';
 
-const taskLiveProvider = createSupaCloudTaskLiveProvider({
-  supacloud: supacloud.tasks,
-  clientKind: 'sdk',
-});
+const taskLiveProvider = createSupaCloudTaskLiveProvider({ supacloud });
 ```
 
 This provider expects `liveParams.taskId` when subscribing:
@@ -133,8 +161,7 @@ You can override this behavior with `mapTaskToEvent`:
 
 ```ts
 const taskLiveProvider = createSupaCloudTaskLiveProvider({
-  supacloud: supacloud.tasks,
-  clientKind: 'sdk',
+  supacloud,
   resource: 'jobs',
   mapTaskToEvent: (task, resource) => ({
     type: task.status === 'queued' ? 'INSERT' : 'UPDATE',
@@ -163,14 +190,8 @@ const dataProvider = createSupabaseDataProvider(supabase);
 const authProvider = createSupabaseAuthProvider(supabase);
 const liveProvider = createSupabaseLiveProvider(supabase);
 
-const taskProvider = createSupaCloudTaskProvider({
-  supacloud: supacloud.tasks,
-  clientKind: 'sdk',
-});
-const taskLiveProvider = createSupaCloudTaskLiveProvider({
-  supacloud: supacloud.tasks,
-  clientKind: 'sdk',
-});
+const taskProvider = createSupaCloudTaskProvider({ supacloud });
+const taskLiveProvider = createSupaCloudTaskLiveProvider({ supacloud });
 ```
 
 Use the standard providers for your admin CRUD flows, and use the SupaCloud helpers only where you need platform task semantics.

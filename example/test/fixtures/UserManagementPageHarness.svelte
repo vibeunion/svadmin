@@ -1,12 +1,21 @@
 <script lang="ts">
   import type { ResourceDefinition, RouterProvider } from '@svadmin/core';
   import { AdminApp } from '@svadmin/ui';
+  import { demoContracts } from '../../src/resource-contracts';
   import UserManagementPage from '../../src/pages/UserManagementPage.svelte';
   import { inMemoryDataProvider as dataProvider } from '../../src/providers/inMemoryDb';
-  import { createResources } from '../../src/resources';
 
-  const targetNames = new Set(['users', 'roles', 'permissions', 'user_accounts', 'user_logs', 'user_settings']);
-  const resources: ResourceDefinition[] = createResources('en').filter((resource) => targetNames.has(resource.name));
+  const resourceNames = ['users', 'roles', 'permissions', 'user_accounts', 'user_logs', 'user_settings'] as const;
+  const resources: ResourceDefinition[] = resourceNames.map((name) => ({
+    name,
+    label: name,
+    contract: demoContracts[name],
+    fields: name === 'users' ? [
+      { key: 'id', label: 'ID', type: 'number' },
+      { key: 'name', label: 'Name', type: 'text' },
+      { key: 'email', label: 'Email', type: 'email' },
+    ] : [],
+  }));
 
   const routerProvider: RouterProvider = {
     go: () => {},

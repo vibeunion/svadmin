@@ -20,6 +20,8 @@
 </script>
 
 <script lang="ts">
+  import { definedOptions, definedReactiveOptions } from '@svadmin/core/options';
+
   import type { Snippet } from 'svelte';
   import type { HTMLAttributes } from 'svelte/elements';
   import { ChevronRight, File, Folder, FolderOpen } from '@lucide/svelte';
@@ -81,7 +83,7 @@
   function flattenNodes(source: FileTreeNode[], expanded: ReadonlySet<string>, depth = 1, parentId?: string): FlatNode[] {
     const flattened: FlatNode[] = [];
     for (const node of source) {
-      flattened.push({ node, depth, parentId });
+      flattened.push(definedOptions({ node, depth, parentId }));
       if (node.type === 'directory' && expanded.has(node.id) && node.children?.length) {
         flattened.push(...flattenNodes(node.children, expanded, depth + 1, node.id));
       }
@@ -121,19 +123,19 @@
     return `${treeId}-node-${encodeURIComponent(nodeId)}`;
   }
 
-  provideFileTreeContext({
+  provideFileTreeContext(definedReactiveOptions({
     get selectedPath() { return activeSelectedPath; },
     get expandedPaths() { return expandedSet; },
     get onSelect() { return onSelect; },
     get onExpandedChange() { return onExpandedChange; },
-    selectPath(path) { if (selectedPath === undefined) selectedId = path; onSelect?.(path); },
-    togglePath(path) {
+    selectPath(path: string) { if (selectedPath === undefined) selectedId = path; onSelect?.(path); },
+    togglePath(path: string) {
       const next = new Set(expandedSet);
       if (next.has(path)) next.delete(path); else next.add(path);
       if (expanded === undefined) { internalExpanded = next; expandedIds = [...next]; }
       onExpandedChange?.(next);
     },
-  });
+  }));
 
   function handleKeydown(event: KeyboardEvent, entry: FlatNode, index: number): void {
     const { node } = entry;

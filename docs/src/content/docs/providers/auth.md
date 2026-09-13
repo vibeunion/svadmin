@@ -41,9 +41,16 @@ interface AuthProvider {
 ### Usage
 
 ```typescript
-const { mutate: login, isPending } = useLogin();
-await login({ email: 'user@example.com', password: 'secret' });
+const login = useLogin();
+await login.mutate({ email: 'user@example.com', password: 'secret' });
 ```
+
+Core hooks validate plain-data inputs and provider replies at runtime. Mutation
+inputs are required except for logout; profile updates also accept avatar files.
+Return local `/` paths in `redirectTo`, omit absent fields, and do not rely on
+raw provider error text reaching the UI. Provider-specific credential schemas and
+server authorization remain the provider/backend's responsibility. See
+[Auth Hooks](/hooks/auth) for error codes and lifecycle guarantees.
 
 The built-in Supabase and SSO providers expose `getPermissions()`, but it returns `null` until
 the application configures a trusted resolver. Resolver values may change labels, navigation,
@@ -98,17 +105,41 @@ export const mockAuthProvider: AuthProvider = {
 ### Supabase
 
 ```typescript
+import { Type } from '@sinclair/typebox';
+import { checkExact, snapshotPlainData } from '@svadmin/core/schema';
 import { createSupabaseAuthProvider } from '@svadmin/supabase';
+
+const grantsResponse = Type.Object({
+  data: Type.Array(Type.Object({ permission: Type.String() })),
+  error: Type.Null(),
+});
+
 const authProvider = createSupabaseAuthProvider(supabaseClient, {
   getPermissions: async ({ client }) => {
-    const { data, error } = await client
+    const response: unknown = await client
       .from('effective_permission_grants')
       .select('permission');
-    if (error) throw error;
-    return data.map((grant) => grant.permission);
+    const candidate = snapshotPlainData(response);
+    if (!checkExact(grantsResponse, candidate)) {
+      throw new Error('Permission lookup failed.');
+    }
+    return candidate.data.map((grant) => grant.permission);
   },
 });
 ```
+
+Credentials, sessions, SDK receipts, and permission results are validated before
+use. A valid stored token alone does not establish identity: the adapter verifies
+its user through the SDK and discards identity/permission results when the session
+changes. The resolver receives a schema-derived user snapshot, not the SDK's
+unchecked metadata type. Its results are UI hints, not server authorization.
+
+The built-in pages' `username` field must match `email` when present. Registration
+supports `email`, `password`, optional `username`, and optional string `name`;
+arbitrary extra profile properties are no longer forwarded. Password updates
+validate optional `confirmPassword` before dispatch. SDK error messages are
+replaced with sanitized error codes, and sign-out success requires both a valid
+receipt and confirmed empty local session state.
 
 `@supacloud/js` does not change the auth flow. Keep using the official Supabase client with `createSupabaseAuthProvider()`, and layer any task APIs separately through [`@svadmin/supabase/supacloud`](/providers/supacloud).
 Do not use user-editable metadata as an authorization fact.

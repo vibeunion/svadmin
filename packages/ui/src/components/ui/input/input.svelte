@@ -3,16 +3,17 @@
 	generics="Type extends HTMLInputTypeAttribute | undefined = undefined"
 >
 	import type { HTMLInputAttributes, HTMLInputTypeAttribute } from "svelte/elements";
+	import { definedOptions } from "@svadmin/core/options";
 	import { cn, type WithElementRef } from "../../../utils.js";
 
-	type InputValue = HTMLInputAttributes["value"];
+	type InputValue = Type extends "number" | "range"
+		? number | null | undefined
+		: string | null | undefined;
 
-	type Props = WithElementRef<
-		Omit<HTMLInputAttributes, "type" | "value"> &
+	type Props = WithElementRef<Omit<HTMLInputAttributes, "type" | "value">> &
 			(Type extends "file"
 				? { type: "file"; files?: FileList; value?: never }
-				: { type?: Type; files?: undefined; value?: InputValue })
-	>;
+				: { type?: Type; files?: undefined; value?: InputValue });
 
 	let {
 		ref = $bindable(null),
@@ -25,6 +26,7 @@
 	}: Props = $props();
 
 	const isFileInput = $derived(type?.toLowerCase() === "file");
+	const attributes = $derived(definedOptions(restProps));
 </script>
 
 {#if isFileInput}
@@ -38,7 +40,7 @@
 		)}
 		type="file"
 		bind:files
-		{...restProps}
+		{...attributes}
 	/>
 {:else}
 	<input
@@ -50,6 +52,6 @@
 		)}
 		{type}
 		bind:value
-		{...restProps}
+		{...attributes}
 	/>
 {/if}

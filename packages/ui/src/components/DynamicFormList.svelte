@@ -204,7 +204,8 @@
       variant="outline"
       size="sm"
       class="svadmin-u-6da6a3c3f741 svadmin-u-58284b4ea568 svadmin-u-a29b7a649c77"
-      disabled={disabled || (defaultItem === undefined && createItem === undefined)}      onclick={() => add()}
+      disabled={disabled || (defaultItem === undefined && createItem === undefined)}
+      onclick={() => add()}
     >
       <Plus class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
       {addButtonLabel ?? (i18n.t('common.add', undefined) ?? '添加一项')}

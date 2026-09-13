@@ -6,13 +6,13 @@
   import * as PackageInfo from './package-info/index.js';
 
   let {
-    onagentopenchange,
-    onchainopenchange,
-    oncommitopenchange,
-    oncopycommit,
-    oncopyenvironment,
-    onenvironmentshowchange,
-    oncopyerror,
+    onagentopenchange = () => {},
+    onchainopenchange = () => {},
+    oncommitopenchange = () => {},
+    oncopycommit = () => {},
+    oncopyenvironment = () => {},
+    onenvironmentshowchange = () => {},
+    oncopyerror = () => {},
   }: {
     onagentopenchange?: (open: boolean) => void;
     onchainopenchange?: (open: boolean) => void;

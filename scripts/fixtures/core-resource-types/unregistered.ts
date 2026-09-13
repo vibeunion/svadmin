@@ -42,6 +42,8 @@ export function unregisteredQueries(resource: string) {
   useInfiniteList();
   // @ts-expect-error Infinite response types require a contract.
   useInfiniteList<Post>({ resource });
+  // @ts-expect-error The unchecked selection entry point has been removed.
+  unsafe.useSelect({ resource, optionLabel: 'title' });
   // @ts-expect-error Single creation requires the public contract-bound entry point.
   unsafe.useCreate({ resource }).mutation.mutate({ variables: { arbitrary: true } });
   // @ts-expect-error Single updates require the public contract-bound entry point.

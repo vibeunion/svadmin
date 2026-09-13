@@ -3,6 +3,7 @@
 </script>
 
 <script lang="ts">
+  import { definedReactiveOptions } from '@svadmin/core/options';
   import type { Snippet } from 'svelte';
   import { ExternalLink, Globe, Monitor, RefreshCw, Smartphone, Tablet } from '@lucide/svelte';
   import { cn } from '../../utils.js';
@@ -87,7 +88,7 @@
     onload?.();
   }
 
-  provideWebPreviewContext({
+  provideWebPreviewContext(definedReactiveOptions({
     get url() { return url; },
     get safeUrl() { return safeUrl; },
     get srcdoc() { return srcdoc; },
@@ -102,9 +103,9 @@
     back,
     forward,
     reload,
-    setConsoleOpen(nextOpen) { consoleOpen = nextOpen; },
+    setConsoleOpen(nextOpen: boolean) { consoleOpen = nextOpen; },
     frameLoaded: handleLoad,
-  });
+  }));
 </script>
 
 <section class={cn('svadmin-ai-web-preview', children && 'svadmin-ai-web-preview--compound', className)} aria-labelledby={children ? undefined : `${previewId}-title`} data-slot="web-preview">

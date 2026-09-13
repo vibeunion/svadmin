@@ -50,7 +50,7 @@
   const session = $derived(captureAuthSession(context.authProvider));
   const policyAllowed = $derived(accessControl.enabled === false || can.allowed === true);
   const allowed = $derived(session.available && policyAllowed);
-  const hidden = $derived(!can.isLoading && (resourceDefinition.canDelete === false || (accessControl.hideIfUnauthorized && !allowed)));
+  const hidden = $derived(resourceDefinition.canDelete === false || (accessControl.hideIfUnauthorized && !allowed));
   const deleteMut = useDelete(definedReactiveOptions({
     get resource() { return binding.resource; },
     get id() { return recordItemId; },
@@ -126,7 +126,8 @@
 {#if !hidden}
   {#if confirming && confirmationScope === scope && session.isCurrent()}
     <div class="svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421">
-      <Button type="button" variant="destructive" size="sm" disabled={pending || !allowed} onclick={confirmDelete}>        {i18n.t('common.confirm')}
+      <Button type="button" variant="destructive" size="sm" disabled={pending || !allowed} onclick={confirmDelete}>
+        {i18n.t('common.confirm')}
       </Button>
       <Button type="button" variant="ghost" size="sm" disabled={pending} onclick={cancel}>
         {i18n.t('common.cancel')}

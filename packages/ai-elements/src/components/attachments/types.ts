@@ -1,4 +1,5 @@
 import type { ChatAttachment } from '../../contracts.js';
+import { definedOptions } from '@svadmin/core/options';
 
 export type AttachmentMediaCategory = 'image' | 'video' | 'audio' | 'document' | 'source' | 'unknown';
 export type AttachmentVariant = 'grid' | 'inline' | 'list';
@@ -26,11 +27,11 @@ export type AttachmentDataLike = AttachmentData | ChatAttachment;
 
 export function normalizeAttachmentData(data: AttachmentDataLike): AttachmentData {
   if ('type' in data) return data;
-  return {
+  return definedOptions({
     id: data.id,
     type: 'file',
     mediaType: data.mediaType,
     filename: data.name,
     url: data.url,
-  };
+  });
 }

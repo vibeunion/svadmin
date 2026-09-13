@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { definedOptions } from '@svadmin/core/options';
+
   import { captureAdminContext, useParsed } from '@svadmin/core';
   import { LoaderCircle, RefreshCcw, Sparkles, X } from '@lucide/svelte';
   import { slide } from 'svelte/transition';
@@ -15,12 +17,12 @@
   const parsed = useParsed();
   const generatedId = $props.id();
   const provider = $derived(adminContext.chatProvider);
-  const chatContext = $derived<ChatContext>({
+  const chatContext = $derived<ChatContext>(definedOptions({
     currentResource: parsed.resource,
     selectedRecordId: parsed.id,
     currentView: parsed.action,
     pathname: adminContext.currentPath(),
-  });
+  }));
 
   let text = $state('');
   let loading = $state(false);
@@ -90,22 +92,22 @@ Use bullet points and do not include introductory text.`;
   async function refresh(): Promise<void> {
     const scopedProvider: ChatProvider | null = provider;
     if (!scopedProvider) return;
-    await requestInsights(scopedProvider, {
+    await requestInsights(scopedProvider, definedOptions({
+      currentResource: chatContext.currentResource,
+      selectedRecordId: chatContext.selectedRecordId,
+      currentView: chatContext.currentView,
+      pathname: chatContext.pathname,
+    }));
+  }
+
+  $effect(() => {
+    const scopedProvider: ChatProvider | null = provider;
+    const scopedContext: ChatContext = definedOptions({
       currentResource: chatContext.currentResource,
       selectedRecordId: chatContext.selectedRecordId,
       currentView: chatContext.currentView,
       pathname: chatContext.pathname,
     });
-  }
-
-  $effect(() => {
-    const scopedProvider: ChatProvider | null = provider;
-    const scopedContext: ChatContext = {
-      currentResource: chatContext.currentResource,
-      selectedRecordId: chatContext.selectedRecordId,
-      currentView: chatContext.currentView,
-      pathname: chatContext.pathname,
-    };
     const tenant = adminContext.tenantCacheKey?.__svadminTenant;
     const shouldFetch = open;
     void tenant;

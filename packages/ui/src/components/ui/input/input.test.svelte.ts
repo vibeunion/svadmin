@@ -63,7 +63,20 @@ describe("Input", () => {
 	it("keeps file values out of the public prop contract", () => {
 		type FileInputProps = ComponentProps<typeof Input<"file">>;
 		type TextInputProps = ComponentProps<typeof Input<"text">>;
+		type NumberInputProps = ComponentProps<typeof Input<"number">>;
 		expectTypeOf<{ type: "file"; value: string }>().not.toExtend<FileInputProps>();
 		expectTypeOf<{ type: "text"; value: string }>().toExtend<TextInputProps>();
+		expectTypeOf<{ type: "text"; value: { invalid: true } }>().not.toExtend<TextInputProps>();
+		expectTypeOf<{ type: "number"; value: string }>().not.toExtend<NumberInputProps>();
+		expectTypeOf<{ type: "number"; value: number | null }>().toExtend<NumberInputProps>();
+	});
+
+	it("binds numeric input and models an empty field as null", async () => {
+		render(InputHarness, { mode: "number" });
+		const input = screen.getByLabelText<HTMLInputElement>("Numeric value");
+		await fireEvent.input(input, { target: { value: "73" } });
+		expect(screen.getByTestId("bound-number").textContent).toBe("73");
+		await fireEvent.input(input, { target: { value: "" } });
+		expect(screen.getByTestId("bound-number").textContent).toBe("empty");
 	});
 });
