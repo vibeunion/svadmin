@@ -211,10 +211,7 @@ A background task center showing real-time progress, status indicators, and down
     managementApiUrl: import.meta.env.VITE_SUPACLOUD_API_URL,
     projectRef: import.meta.env.VITE_SUPACLOUD_PROJECT_REF,
   });
-  const taskProvider = createSupaCloudTaskProvider({
-    supacloud: supacloud.tasks,
-    clientKind: 'sdk',
-  });
+  const taskProvider = createSupaCloudTaskProvider({ supacloud });
 
   let drawerOpen = $state(false);
 </script>

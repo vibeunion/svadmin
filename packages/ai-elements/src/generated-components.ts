@@ -9,25 +9,16 @@ export type GeneratedComponentSchemaProps<Schema extends TObject> =
 export interface GeneratedComponentDefinition<Schema extends TObject = TObject> {
   readonly component: Component<GeneratedComponentSchemaProps<Schema>>;
   readonly schema: Schema;
-  readonly description?: string;
 }
 
 export interface RuntimeGeneratedComponentDefinition {
   readonly component: Component<never>;
   readonly schema: TObject;
-  readonly description?: string;
 }
 
 export type GeneratedComponentRegistry = Record<string, RuntimeGeneratedComponentDefinition>;
 
-export interface GeneratedComponentPromptOptions {
-  /** Adds a caller-owned instruction before the generated catalog. */
-  readonly preamble?: string;
-  /** Includes the JSON Schema for each component's props. */
-  readonly includeSchemas?: boolean;
-}
-
-/** Defines Agent-rendered components with a TypeBox schema as the runtime props boundary. */
+/** 定义 Agent 可渲染组件，并以 TypeBox schema 作为运行时 props 边界。 */
 export function defineGeneratedComponent<const Schema extends TObject>(
   definition: GeneratedComponentDefinition<Schema>,
 ): GeneratedComponentDefinition<Schema> {
@@ -53,30 +44,6 @@ export function decodeGeneratedComponentProps(
   input: unknown,
 ): GeneratedComponentProps {
   return decodeGeneratedObjectProps(definition.schema, input);
-}
-
-/**
- * Creates a deterministic model-facing catalog from the allow-listed registry.
- * The catalog describes data and component names only; visual styling remains
- * owned by the registered Svelte components.
- */
-export function createGeneratedComponentPrompt(
-  registry: GeneratedComponentRegistry,
-  options: GeneratedComponentPromptOptions = {},
-): string {
-  const entries = Object.entries(registry)
-    .sort(([left], [right]) => left.localeCompare(right))
-    .map(([name, definition]) => {
-      const description = definition.description ? ` - ${definition.description}` : '';
-      const schema = options.includeSchemas === false
-        ? ''
-        : `\n  propsSchema: ${JSON.stringify(definition.schema)}`;
-      return `- ${name}${description}${schema}`;
-    });
-
-  const preamble = options.preamble?.trim();
-  const header = preamble ? `${preamble}\n\n` : '';
-  return `${header}You may render only registered components from this catalog. Do not emit HTML, CSS, class names, or unregistered component names. Validate every prop against the component propsSchema.\n\nComponents:\n${entries.join('\n')}`;
 }
 
 function strictGeneratedObjectSchema<Schema extends TObject>(schema: Schema): Schema {

@@ -2,7 +2,6 @@ import { Type } from '@sinclair/typebox';
 import { describe, expect, expectTypeOf, it } from 'vitest';
 import {
   decodeGeneratedComponentProps,
-  createGeneratedComponentPrompt,
   defineGeneratedComponent,
   type GeneratedComponentSchemaProps,
 } from './generated-components.js';
@@ -44,28 +43,5 @@ describe('generated component TypeBox boundary', () => {
     expectTypeOf<keyof InventoryProps>().toEqualTypeOf<'warehouse' | 'count'>();
     expectTypeOf<{ warehouse: string; count: number; secret: string }>()
       .not.toEqualTypeOf<InventoryProps>();
-  });
-
-  it('creates a deterministic catalog prompt without exposing styling controls', () => {
-    const prompt = createGeneratedComponentPrompt({
-      ZSummary: defineGeneratedComponent({
-        component,
-        schema: Type.Object({ total: Type.Integer() }),
-        description: 'Shows a summary total.',
-      }),
-      Inventory: definition,
-    });
-
-    expect(prompt).toContain('Shows a summary total.');
-    expect(prompt.indexOf('- Inventory')).toBeLessThan(prompt.indexOf('- ZSummary'));
-    expect(prompt).toContain('"additionalProperties":false');
-    expect(prompt).toContain('Do not emit HTML, CSS, class names');
-    expect(prompt).not.toContain('tailwind');
-  });
-
-  it('can omit schemas for compact prompts', () => {
-    const prompt = createGeneratedComponentPrompt({ Inventory: definition }, { includeSchemas: false });
-    expect(prompt).toContain('- Inventory');
-    expect(prompt).not.toContain('propsSchema:');
   });
 });
