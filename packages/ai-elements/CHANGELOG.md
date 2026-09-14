@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.6.3...ai-elements-v0.7.0) (2026-09-14)
+
+
+### 🚀 Features
+
+* **ai-elements:** generate component catalog prompts ([715bc55](https://github.com/vibeunion/svadmin/commit/715bc5590a001e5b75705ff3c0f8122063fd23b8))
+
 ## [0.6.3](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.6.2...ai-elements-v0.6.3) (2026-09-13)
 
 
