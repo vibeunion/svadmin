@@ -48,9 +48,24 @@ test.describe('UI state contracts', () => {
       await expect(filterToolbar.locator('.svadmin-filter-toolbar-advanced')).toHaveCount(0);
 
       const screenshotDirectory = process.env.UI_SCREENSHOT_DIR ?? testInfo.outputPath('screenshots');
+      const commandFixture = page.locator('[data-command-action-fixture]');
+      await expect(commandFixture).toBeVisible();
+      const commandButtons = commandFixture.getByRole('button', { name: /Submit order|提交订单/ });
+      await expect(commandButtons).toHaveCount(2);
+      await expect(commandButtons.nth(0)).toBeEnabled();
+      await expect(commandButtons.nth(1)).toBeDisabled();
+      const blockedCommand = commandFixture.locator('[data-slot="button-restriction"]');
+      await expect(blockedCommand).toHaveCount(1);
+      await blockedCommand.hover();
+      await expect(page.getByRole('tooltip')).toContainText(/frozen|冻结/);
+
       await mkdir(screenshotDirectory, { recursive: true });
       await filterToggle.click();
       await page.screenshot({ path: join(screenshotDirectory, `ui-state-matrix-${viewport.width}x${viewport.height}.png`), fullPage: false });
+      await commandFixture.scrollIntoViewIfNeeded();
+      await blockedCommand.hover();
+      await expect(page.getByRole('tooltip')).toBeVisible();
+      await page.screenshot({ path: join(screenshotDirectory, `command-action-${viewport.width}x${viewport.height}.png`), fullPage: false });
 
       await page.goto('/#/case_workspace');
       await page.getByRole('button', { name: /证据治理: Blocked|Evidence: Blocked/ }).click();

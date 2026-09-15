@@ -15,10 +15,10 @@ const e2e = readFileSync(e2ePath, 'utf8');
 const workflow = readFileSync(workflowPath, 'utf8');
 const pullRequestTemplate = readFileSync(pullRequestTemplatePath, 'utf8');
 
-for (const heading of ['MediaThumbnail', 'FilterToolbar', 'Collapsible containers', 'Browser evidence', 'Repository audit']) {
+for (const heading of ['MediaThumbnail', 'FilterToolbar', 'Button', 'Collapsible containers', 'Browser evidence', 'Repository audit']) {
   if (!matrix.includes(`## ${heading}`)) throw new Error(`Missing state matrix section: ${heading}`);
 }
-for (const token of ['1440, height: 900', '1920, height: 1080', 'page.screenshot', 'media-state', 'aria-expanded']) {
+for (const token of ['1440, height: 900', '1920, height: 1080', 'page.screenshot', 'media-state', 'aria-expanded', 'command-action-fixture']) {
   if (!e2e.includes(token)) throw new Error(`Missing browser evidence token: ${token}`);
 }
 if (!workflow.includes('bun scripts/ui-state-evidence-check.ts') || !workflow.includes('git diff --check') || !workflow.includes('two distinct screenshot attachments')) {
