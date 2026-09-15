@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.71.0](https://github.com/vibeunion/svadmin/compare/ui-v0.70.6...ui-v0.71.0) (2026-09-15)
+
+
+### 🚀 Features
+
+* **ui:** disable command buttons from backend reasons ([#411](https://github.com/vibeunion/svadmin/issues/411)) ([8d530c2](https://github.com/vibeunion/svadmin/commit/8d530c236a0bd70c5edea3f7543fd1441348584f))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** access restriction trigger props by index ([#413](https://github.com/vibeunion/svadmin/issues/413)) ([ea51431](https://github.com/vibeunion/svadmin/commit/ea5143117f44c913e643d9dc02431804513267f8))
+
 ## [0.70.6](https://github.com/vibeunion/svadmin/compare/ui-v0.70.5...ui-v0.70.6) (2026-09-14)
 
 
