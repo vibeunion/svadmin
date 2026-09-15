@@ -2,7 +2,7 @@ import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 import { tick } from 'svelte';
 import { captureAdminContext } from './context.svelte';
 import { captureQueryProvider, snapshotOneParams } from './query-snapshot';
-import { contractKey, formatContractRouteId, parseContractId, parseContractRecord, parseContractCreateInput, parseContractUpdateInput,
+import { contractKey, formatContractRouteId, parseContractId, parseContractRouteId, parseContractRecord, parseContractCreateInput, parseContractUpdateInput,
   getContractFormFields, snapshotContractFormDraft, contractFormInvalidFields,
   type ResourceContract, type ContractSchemas, type ContractId, type ContractRecord,
   type ContractFormAction, type ContractFormDraft, type ContractFormValues } from './resource-contract';
@@ -91,6 +91,12 @@ const submitSchema = Type.Object({
   redirect: Type.Optional(Type.Union([Type.Literal('list'), Type.Literal('edit'), Type.Literal('show'), Type.Literal(false)])),
 }, { additionalProperties: false });
 const editSchema = Type.Object({ taint: Type.Optional(Type.Boolean()) }, { additionalProperties: false });
+
+/** 地址栏里的 id 是字符串，需要按路由规则还原成合同身份。 */
+function parseFormTargetId(contract: ResourceContract, value: unknown): string | number {
+  return typeof value === 'string' ? parseContractRouteId(contract, value) : parseContractId(contract, value);
+}
+
 function ownValue(value: object, field: string): unknown {
   return Object.getOwnPropertyDescriptor(value, field)?.value;
 }
@@ -124,7 +130,7 @@ export function useContractForm<S extends ContractSchemas, A extends ContractFor
     const action = options.action;
     if (!['create', 'edit', 'clone', 'show'].includes(action)) throw new HttpError('Invalid form action', 422, undefined, { code: 'INVALID_RESOURCE_INPUT' });
     getContractFormFields(contract, action);
-    const id = action === 'create' ? undefined : parseContractId(contract, options.id);
+    const id = action === 'create' ? undefined : parseFormTargetId(contract, options.id);
     if (action === 'create' && options.id !== undefined) throw new HttpError('Create forms cannot target an ID', 422, undefined, { code: 'INVALID_RESOURCE_INPUT' });
     const captured = captureQueryProvider(context, { resource: contract.name,
       ...definedOptions({ dataProviderName: options.dataProviderName, meta: options.meta }) });

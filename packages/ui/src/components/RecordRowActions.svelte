@@ -20,21 +20,22 @@
   const show = useCan(() => ({ resource: resourceName, action: 'show', id, queryOptions: { enabled: canShow } }));
   const edit = useCan(() => ({ resource: resourceName, action: 'edit', id, queryOptions: { enabled: canEdit } }));
   const remove = useCan(() => ({ resource: resourceName, action: 'delete', id, queryOptions: { enabled: canDelete } }));
+  // 编辑保持为可见主按钮；删除和快速编辑放入更多菜单。
   const actions = $derived<RowActionItem[]>([
-    { label: i18n.t('common.edit'), icon: Pencil, hidden: !canEdit || edit.allowed !== true, onclick: onEdit },
     { label: i18n.t('common.quickEdit'), icon: PanelRight, hidden: !canEdit || edit.allowed !== true, onclick: onQuickEdit },
     { label: i18n.t('common.delete'), icon: Trash2, hidden: !canDelete || remove.allowed !== true, danger: true, onclick: onDelete },
   ]);
-  const availableActionCount = $derived(actions.filter(action => !action.hidden).length);
-  const maxVisible = $derived(
-    availableActionCount > 1 && remove.allowed === true ? 0 : 1
-  );
 </script>
 
-<RowActions {actions} {maxVisible} moreLabel={i18n.t('common.moreActions')}>
+<RowActions {actions} maxVisible={0} moreLabel={i18n.t('common.moreActions')}>
   {#if canShow && show.allowed === true}
     <TooltipButton tooltip={i18n.t('common.detail')} variant="ghost" size="icon-sm" onclick={onShow}>
       <Eye class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+    </TooltipButton>
+  {/if}
+  {#if canEdit && edit.allowed === true}
+    <TooltipButton tooltip={i18n.t('common.edit')} variant="ghost" size="icon-sm" onclick={onEdit}>
+      <Pencil class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
     </TooltipButton>
   {/if}
 </RowActions>

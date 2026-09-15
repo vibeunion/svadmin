@@ -252,6 +252,17 @@ describe('contract-bound form', () => {
     expect(app.read().form.isDirty).toBe(false);
   });
 
+  it('accepts numeric route identities for edit forms', async () => {
+    const source = provider();
+    const app = mount(source);
+    await app.view.rerender({ action: 'edit', id: '1' });
+    await ready(app);
+    expect(source.getOne).toHaveBeenCalledWith(expect.objectContaining({ resource: 'posts', id: 1 }));
+    await app.view.rerender({ action: 'edit', id: formatContractRouteId(posts, 1) });
+    await ready(app);
+    expect(source.getOne).toHaveBeenCalledWith(expect.objectContaining({ resource: 'posts', id: 1 }));
+  });
+
   it('loads only the bound edit target and projects writable fields', async () => {
     const source = provider();
     const app = mount(source);
