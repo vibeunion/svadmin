@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.10.4](https://github.com/vibeunion/svadmin/compare/hasura-v0.10.3...hasura-v0.10.4) (2026-09-15)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.11.4
+  * peerDependencies
+    * @svadmin/core bumped to 0.51.4
+
 ## [0.10.3](https://github.com/vibeunion/svadmin/compare/hasura-v0.10.2...hasura-v0.10.3) (2026-09-13)
 
 

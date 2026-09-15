@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.71.1](https://github.com/vibeunion/svadmin/compare/ui-v0.71.0...ui-v0.71.1) (2026-09-15)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** restore visible row edit and demo form contracts ([#415](https://github.com/vibeunion/svadmin/issues/415)) ([77a1318](https://github.com/vibeunion/svadmin/commit/77a1318cdea18384bff269aa43936baff81fa1bf))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.7.1
+  * peerDependencies
+    * @svadmin/core bumped to 0.51.4
+
 ## [0.71.0](https://github.com/vibeunion/svadmin/compare/ui-v0.70.6...ui-v0.71.0) (2026-09-15)
 
 

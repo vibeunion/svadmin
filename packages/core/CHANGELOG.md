@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.51.4](https://github.com/vibeunion/svadmin/compare/core-v0.51.3...core-v0.51.4) (2026-09-15)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** restore visible row edit and demo form contracts ([#415](https://github.com/vibeunion/svadmin/issues/415)) ([77a1318](https://github.com/vibeunion/svadmin/commit/77a1318cdea18384bff269aa43936baff81fa1bf))
+
 ## [0.51.3](https://github.com/vibeunion/svadmin/compare/core-v0.51.2...core-v0.51.3) (2026-09-13)
 
 
