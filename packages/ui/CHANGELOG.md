@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.71.3](https://github.com/vibeunion/svadmin/compare/ui-v0.71.2...ui-v0.71.3) (2026-09-15)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** repair single-record deletion release verification ([458a7ee](https://github.com/vibeunion/svadmin/commit/458a7ee9efe378c3ac6e4a841920d8c767205259))
+
 ## [0.71.2](https://github.com/vibeunion/svadmin/compare/ui-v0.71.1...ui-v0.71.2) (2026-09-15)
 
 

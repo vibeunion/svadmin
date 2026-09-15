@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.51.5](https://github.com/vibeunion/svadmin/compare/core-v0.51.4...core-v0.51.5) (2026-09-16)
+
+### Bug Fixes
+
+* Republish the route identity and form contract fixes from the corrected release verification baseline. Version 0.51.4 was tagged but never published.
+
 ## [0.51.4](https://github.com/vibeunion/svadmin/compare/core-v0.51.3...core-v0.51.4) (2026-09-15)
 
 
