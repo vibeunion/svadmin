@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/svelte';
+import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { buttonVariants } from './button-variants';
 import ButtonRefHarness from '../../../../test/fixtures/ButtonRefHarness.svelte';
+import ButtonDisabledReasonHarness from '../../../../test/fixtures/ButtonDisabledReasonHarness.svelte';
 
 describe('buttonVariants', () => {
 	it('returns a stable primitive class instead of Tailwind utility classes', () => {
@@ -32,5 +33,31 @@ describe('buttonVariants', () => {
 		expect(screen.getByRole('link', { name: 'Reference action' }).getAttribute('href')).toBe('/destination');
 		await rerender({ href: '' });
 		await waitFor(() => expect(screen.getByTestId('bound-button-tag').textContent).toBe('BUTTON'));
+	});
+});
+
+describe('disabledReason', () => {
+	it('leaves an empty reason enabled and does not wrap or leak the prop', () => {
+		render(ButtonDisabledReasonHarness, { props: { disabledReason: '   ' } });
+		const button = screen.getByRole('button', { name: 'Command action' });
+		expect(button.hasAttribute('disabled')).toBe(false);
+		expect(button.getAttribute('disabledreason')).toBeNull();
+		expect(button.getAttribute('disabledReason')).toBeNull();
+		expect(button.closest('[data-slot="button-restriction"]')).toBeNull();
+		expect(screen.queryByRole('tooltip')).toBeNull();
+	});
+
+	it('disables a blocked command and exposes the reason on hover', async () => {
+		const reason = 'Order is frozen；unfreeze it before submitting';
+		render(ButtonDisabledReasonHarness, { props: { disabledReason: reason } });
+		const button = screen.getByRole('button', { name: 'Command action' });
+		expect(button.hasAttribute('disabled')).toBe(true);
+		expect(button.getAttribute('disabledreason')).toBeNull();
+		const wrapper = button.closest('[data-slot="button-restriction"]');
+		expect(wrapper).not.toBeNull();
+		expect(wrapper?.getAttribute('data-disabled-reason')).toBe(reason);
+		expect(document.getElementById(button.getAttribute('aria-describedby') ?? '')?.textContent).toBe(reason);
+		await fireEvent.pointerEnter(wrapper as HTMLElement, { pointerType: 'mouse' });
+		expect((await screen.findByRole('tooltip')).textContent?.trim()).toBe(reason);
 	});
 });

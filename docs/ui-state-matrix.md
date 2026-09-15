@@ -22,13 +22,23 @@
 | Expanded | 高级筛选打开 | 高级内容自适应，不固定高度 | `aria-controls` 指向面板 |
 | Filtered empty | 条件无结果 | 由页面使用 `DataState empty` 表达 | 提供恢复路径 |
 
+## Button
+
+| 状态 | 触发条件 | 视觉契约 | 交互契约 |
+| --- | --- | --- | --- |
+| Enabled command | `disabledReason` 为空且 `disabled` 为假 | 主操作可点，无限制提示 | 点击提交命令 |
+| Blocked command | `disabledReason` 非空 | 按钮禁用；原生 button/a 不接收 `disabledReason` 属性 | 悬停或聚焦显示原因，按钮不可提交 |
+| Disabled without reason | 仅 `disabled` | 与现有禁用按钮相同 | 不额外包裹 tooltip |
+
+`disabledReason` 非空时按钮必须禁用。禁用按钮本身 `pointer-events: none`，因此原因提示挂在外层触发器上，而不是让用户点到后端再看到 403。
+
 ## Collapsible containers
 
 所有折叠容器必须使用 `.svadmin-collapsible` 或 `[data-svadmin-collapsible]` 状态钩子。未展开时清除外层 margin、padding、border、background 和 shadow；不得添加全局 `details:not([open])` 规则。
 
 ## Browser evidence
 
-`e2e/ui-state-contracts.spec.ts` 固定覆盖 `1440x900` 和 `1920x1080`，并验证媒体成功/失败/空态、预览关闭、筛选器展开/折叠、横向溢出和空态高度。测试始终在 `test-results/**/screenshots/` 生成按视口命名的截图产物。
+`e2e/ui-state-contracts.spec.ts` 固定覆盖 `1440x900` 和 `1920x1080`，并验证媒体成功/失败/空态、预览关闭、筛选器展开/折叠、命令按钮启用/禁用原因、横向溢出和空态高度。测试始终在 `test-results/**/screenshots/` 生成按视口命名的截图产物。
 
 当前基线证据保存在 `docs/evidence/ui-state/ui-state-matrix-1440x900.png` 和 `docs/evidence/ui-state/ui-state-matrix-1920x1080.png`，用于 PR 正文引用和后续人工对比。
 

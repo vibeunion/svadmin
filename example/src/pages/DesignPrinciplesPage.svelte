@@ -294,6 +294,13 @@
           <div class="grid gap-1 text-xs text-muted-foreground"><MediaThumbnail src={null} emptyLabel={isZh ? '暂无媒体' : 'No media'} showOverlay={false} /><span>{isZh ? '空态' : 'Empty'}</span></div>
         </div>
       </section>
+      <section class="space-y-3" aria-labelledby="command-action-heading" data-command-action-fixture>
+        <SectionHeader id="command-action-heading" title={isZh ? '命令按钮' : 'Command buttons'} description={isZh ? '后端会拒绝的命令不能保持可点。' : 'Commands the backend would reject must not stay clickable.'} />
+        <div class="flex flex-wrap items-center gap-2">
+          <Button size="sm">{isZh ? '提交订单' : 'Submit order'}</Button>
+          <Button size="sm" disabledReason={isZh ? '订单已冻结，解冻后才能提交' : 'Order is frozen; unfreeze it before submitting'}>{isZh ? '提交订单' : 'Submit order'}</Button>
+        </div>
+      </section>
       <div class="rounded-lg border border-border bg-card p-4 shadow-sm">
         <div class="flex items-center justify-between gap-3"><div><p class="text-sm font-semibold text-foreground">{isZh ? '验收清单' : 'Acceptance checklist'}</p><p class="mt-1 text-xs text-muted-foreground">{isZh ? '示例页本身也是规范的可运行证明。' : 'The example is a runnable proof of the standard.'}</p></div><StatusBadge status="success" label={isZh ? '通过' : 'Pass'} /></div>
         <ul class="mt-4 space-y-3 text-sm text-muted-foreground">
