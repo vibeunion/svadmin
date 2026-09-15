@@ -1034,8 +1034,9 @@ describe('AutoTable interactions', () => {
       onDeleteMany,
     });
 
-    const deleteButtons = await view.findAllByRole('button', { name: '删除' });
-    await fireEvent.click(requireValue(deleteButtons[0]));
+    const row = within(await view.findByRole('row', { name: /user@example\.com/ }));
+    await fireEvent.click(await row.findByRole('button', { name: '更多操作' }));
+    await fireEvent.click(await view.findByRole('menuitem', { name: '删除' }));
     await fireEvent.click(within(await view.findByRole('alertdialog')).getByRole('button', { name: '删除' }));
 
     await waitFor(() => expect(view.queryByRole('alertdialog')).toBeNull());
