@@ -264,7 +264,8 @@ describe('contract-bound AutoTable', () => {
     const app = mount();
     await ready(app);
     const firstRow = within(app.view.getByRole('row', { name: /First/ }));
-    await fireEvent.click(firstRow.getByRole('button', { name: /^(Delete|删除)$/ }));
+    await fireEvent.click(firstRow.getByRole('button', { name: /^(More actions|更多操作)$/ }));
+    await fireEvent.click(await app.view.findByRole('menuitem', { name: /^(Delete|删除)$/ }));
     const dialog = within(await app.view.findByRole('alertdialog'));
     const button = dialog.getByRole('button', { name: /^(Delete|删除)$/ });
     await fireEvent.click(button);
