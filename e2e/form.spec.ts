@@ -27,7 +27,7 @@ test.describe('Edit form persistence', () => {
     await openRecords(page);
     await expect(page.locator('table tbody tr').first()).toBeVisible({ timeout: 10000 });
 
-    const editButton = page.getByRole('button', { name: /edit/i }).first();
+    const editButton = page.locator('table tbody tr').first().locator('[data-slot="row-actions"]').getByRole('button', { name: /^(edit|编辑)$/i });
     await expect(editButton).toBeVisible({ timeout: 5000 });
     await editButton.click();
     await expect(page).toHaveURL(/#\/products\/edit\//, { timeout: 5000 });
@@ -40,6 +40,6 @@ test.describe('Edit form persistence', () => {
     await page.getByRole('button', { name: /save/i }).click();
     await expect(page).toHaveURL(/#\/products(?:\?|$)/, { timeout: 10000 });
     await openRecords(page);
-    await expect(page.getByRole('cell', { name: 'Race Condition Payload 2', exact: true })).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('table').getByText('Race Condition Payload 2', { exact: true })).toBeVisible({ timeout: 10000 });
   });
 });

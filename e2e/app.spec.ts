@@ -100,7 +100,7 @@ test.describe('CRUD Operations', () => {
     await page.goto('/#/products');
     await openRecords(page);
     await expect(page.locator('table tbody tr').first()).toBeVisible({ timeout: 10000 });
-    const editBtn = page.getByRole('button', { name: /edit/i }).first();
+    const editBtn = page.locator('table tbody tr').first().locator('[data-slot="row-actions"]').getByRole('button', { name: /^(edit|编辑)$/i });
     await expect(editBtn).toBeVisible({ timeout: 5000 });
     await editBtn.click();
     await expect(page).toHaveURL(/edit/, { timeout: 5000 });
@@ -112,7 +112,7 @@ test.describe('CRUD Operations', () => {
       await openRecords(page);
       await expect(page.locator('table tbody tr').first()).toBeVisible({ timeout: 10000 });
 
-      const editBtn = page.getByRole('button', { name: /edit/i }).first();
+      const editBtn = page.locator('table tbody tr').first().locator('[data-slot="row-actions"]').getByRole('button', { name: /^(edit|编辑)$/i });
       await editBtn.hover();
       await expect(page.getByRole('tooltip')).toBeVisible();
       await editBtn.click();
