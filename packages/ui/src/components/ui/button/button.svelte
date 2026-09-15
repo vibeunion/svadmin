@@ -50,10 +50,10 @@
 
 	function restrictionTriggerProps(props: Record<string, unknown>): Record<string, unknown> {
 		const next = { ...props };
-		delete next.type;
-		delete next.role;
-		delete next.disabled;
-		delete next.href;
+		delete next['type'];
+		delete next['role'];
+		delete next['disabled'];
+		delete next['href'];
 		return next;
 	}
 </script>
