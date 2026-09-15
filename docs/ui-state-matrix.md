@@ -32,6 +32,10 @@
 
 `disabledReason` 非空时按钮必须禁用。禁用按钮本身 `pointer-events: none`，因此原因提示挂在外层触发器上，而不是让用户点到后端再看到 403。
 
+链接式按钮禁用时同时阻止点击回调；原因清空后恢复跳转和回调。外层焦点继承 `aria-label` / `aria-labelledby`，图标按钮应提供操作名称。
+
+存在禁用原因时，外层触发器成为 flex/grid 的直接子项。此时通过 `restrictionClass` / `restrictionStyle` 设置 `flex`、`grid-column` 等父级布局属性，`class` / `style` 仍控制内部按钮。需要在原因切换时保持同一布局的调用方，应使用稳定的外部布局容器；包装层布局属性仅在原因非空时生效。
+
 ## Collapsible containers
 
 所有折叠容器必须使用 `.svadmin-collapsible` 或 `[data-svadmin-collapsible]` 状态钩子。未展开时清除外层 margin、padding、border、background 和 shadow；不得添加全局 `details:not([open])` 规则。

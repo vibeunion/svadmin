@@ -16,6 +16,8 @@
 			variant?: ButtonVariantValue;
 			size?: ButtonSizeValue;
 			disabledReason?: string;
+			restrictionClass?: string;
+			restrictionStyle?: string;
 		};
 </script>
 
@@ -32,6 +34,8 @@
 		type = "button",
 		disabled,
 		disabledReason = "",
+		restrictionClass,
+		restrictionStyle,
 		children,
 		"aria-describedby": ariaDescribedBy,
 		...restProps
@@ -68,6 +72,14 @@
 			tabindex={isDisabled ? -1 : undefined}
 			aria-describedby={describedBy}
 			{...restProps}
+			onclick={(event) => {
+				if (isDisabled) {
+					event.preventDefault();
+					event.stopImmediatePropagation();
+					return;
+				}
+				restProps.onclick?.(event);
+			}}
 		>
 			{@render children?.()}
 		</a>
@@ -97,7 +109,11 @@
 					{...triggerProps}
 					data-slot="button-restriction"
 					data-disabled-reason={restriction}
-					style="display: inline-flex; max-width: 100%;"
+					role="group"
+					aria-label={restProps["aria-label"]}
+					aria-labelledby={restProps["aria-labelledby"]}
+					class={restrictionClass}
+					style={`display: inline-flex; max-width: 100%; ${restrictionStyle ?? ""}`}
 					aria-describedby={[triggerProps["aria-describedby"], describedBy].filter(Boolean).join(" ") || undefined}
 				>
 					{@render control()}
