@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.7.2](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.7.1...ai-elements-v0.7.2) (2026-09-16)
+
+### Dependencies
+
+* Include @svadmin/core 0.51.5 in the same verified publication. Version 0.7.1 was tagged but never published.
+
 ## [0.7.1](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.7.0...ai-elements-v0.7.1) (2026-09-15)
 
 

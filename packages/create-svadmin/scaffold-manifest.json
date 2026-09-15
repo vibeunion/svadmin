@@ -10,7 +10,7 @@
     "check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "dependencies": {
-    "@svadmin/core": "^0.51.4",
+    "@svadmin/core": "^0.51.5",
     "@svadmin/ai-elements": "^0.7.1",
     "@svadmin/ui": "^0.71.3",
     "@sinclair/typebox": "^0.34.52",
