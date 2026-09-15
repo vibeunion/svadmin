@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.71.2](https://github.com/vibeunion/svadmin/compare/ui-v0.71.1...ui-v0.71.2) (2026-09-15)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** open overflow menu before row delete in table tests ([#417](https://github.com/vibeunion/svadmin/issues/417)) ([3626ac2](https://github.com/vibeunion/svadmin/commit/3626ac2fc8de0d6be6067496401aa129b62a3a05))
+
 ## [0.71.1](https://github.com/vibeunion/svadmin/compare/ui-v0.71.0...ui-v0.71.1) (2026-09-15)
 
 
