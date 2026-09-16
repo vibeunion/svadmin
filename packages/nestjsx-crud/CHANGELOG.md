@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.10.5](https://github.com/vibeunion/svadmin/compare/nestjsx-crud-v0.10.4...nestjsx-crud-v0.10.5) (2026-09-16)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.11.5
+  * peerDependencies
+    * @svadmin/core bumped to 0.51.6
+
 ## [0.10.4](https://github.com/vibeunion/svadmin/compare/nestjsx-crud-v0.10.3...nestjsx-crud-v0.10.4) (2026-09-15)
 
 

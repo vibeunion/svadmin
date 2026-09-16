@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.71.4](https://github.com/vibeunion/svadmin/compare/ui-v0.71.3...ui-v0.71.4) (2026-09-16)
+
+
+### 🐛 Bug Fixes
+
+* **i18n:** localize file and date controls ([a5e109a](https://github.com/vibeunion/svadmin/commit/a5e109a769cfe72d5836986c256f827c807d00a7))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.7.3
+  * peerDependencies
+    * @svadmin/core bumped to 0.51.6
+
 ## [0.71.3](https://github.com/vibeunion/svadmin/compare/ui-v0.71.2...ui-v0.71.3) (2026-09-15)
 
 

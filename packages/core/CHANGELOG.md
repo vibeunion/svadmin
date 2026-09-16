@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.51.6](https://github.com/vibeunion/svadmin/compare/core-v0.51.5...core-v0.51.6) (2026-09-16)
+
+
+### 🐛 Bug Fixes
+
+* **i18n:** localize file and date controls ([a5e109a](https://github.com/vibeunion/svadmin/commit/a5e109a769cfe72d5836986c256f827c807d00a7))
+
 ## [0.51.5](https://github.com/vibeunion/svadmin/compare/core-v0.51.4...core-v0.51.5) (2026-09-16)
 
 ### Bug Fixes

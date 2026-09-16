@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.11.5](https://github.com/vibeunion/svadmin/compare/lite-v0.11.4...lite-v0.11.5) (2026-09-16)
+
+
+### 🐛 Bug Fixes
+
+* **i18n:** localize file and date controls ([a5e109a](https://github.com/vibeunion/svadmin/commit/a5e109a769cfe72d5836986c256f827c807d00a7))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.34.2 <0.52.0 to >=0.51.6
+
 ## [0.11.4](https://github.com/vibeunion/svadmin/compare/lite-v0.11.3...lite-v0.11.4) (2026-09-15)
 
 
