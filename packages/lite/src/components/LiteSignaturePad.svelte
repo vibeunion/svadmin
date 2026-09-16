@@ -1,4 +1,6 @@
 <script lang="ts">
+  import LiteFileInput from './LiteFileInput.svelte';
+
   interface Props {
     name?: string;
     value?: string;
@@ -36,7 +38,7 @@
 
   <div class="sv-lite-sig-actions">
     <form method="POST" action={formAction} enctype="multipart/form-data">
-      <input type="file" name={name} accept="image/*" {disabled} class="sv-lite-sig-file" />
+      <LiteFileInput name={name} accept="image/*" {disabled} class="sv-lite-sig-file" />
       <button type="submit" {disabled} class="sv-lite-sig-btn">Upload Signature</button>
     </form>
   </div>

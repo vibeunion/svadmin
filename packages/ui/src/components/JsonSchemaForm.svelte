@@ -1,5 +1,6 @@
 <script lang="ts">
   import { definedOptions } from '@svadmin/core/options';
+  import { useTranslation } from '@svadmin/core/i18n';
 
   import { Button } from './ui/button/index.js';
   import { Loader2 } from '@lucide/svelte';
@@ -20,6 +21,8 @@
     submitText = 'Submit Form',
     class: className = '',
   }: Props = $props();
+
+  const i18n = useTranslation();
 
   let isSubmitting = $state(false);
 
@@ -101,7 +104,7 @@
             onchange={(e) => updateValue(field.key, e.currentTarget.value)}
             class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529 svadmin-u-f10f771f87e9 svadmin-u-3e94a98e1466 svadmin-u-9c1295a6914a"
           >
-            <option value="">Select an option...</option>
+            <option value="">{i18n.t('common.selectOption')}</option>
             {#each field.enum as option (option)}
               <option value={String(option)}>{option}</option>
             {/each}

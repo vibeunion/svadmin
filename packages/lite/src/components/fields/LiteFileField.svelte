@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { FieldDefinition } from '@svadmin/core';
   import { toSafeHref } from '../../security';
+  import LiteFileInput from '../LiteFileInput.svelte';
 
   interface Props {
     field: FieldDefinition;
@@ -42,8 +43,7 @@
         <span style="font-size: 12px;">Current files: {files.length}</span>
       </div>
     {/if}
-    <input
-      type="file"
+    <LiteFileInput
       name={field.key}
       id={field.key}
       class="lite-input {hasError ? 'lite-input-error' : ''}"

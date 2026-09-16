@@ -2,6 +2,7 @@
   import { t } from '@svadmin/core/i18n';
   import { Upload } from '@lucide/svelte';
   import { liteFragmentId } from '../../fragment-id';
+  import LiteFileInput from '../LiteFileInput.svelte';
 
   interface Props {
     resource: string;
@@ -44,7 +45,7 @@
   <div id={importPanelId} class="lite-confirm-panel lite-confirm-target" role="dialog" aria-labelledby={importPanelTitleId} tabindex="-1">
     <p id={importPanelTitleId} style="margin: 0 0 8px; font-size: 13px;">{t('common.importData') || 'Import data (CSV/JSON)'}</p>
     <form method="POST" action={`${basePath}/${resource}?/${resource}_import`} enctype="multipart/form-data" class="lite-stack-sm">
-      <input type="file" name="file" accept=".csv,.json" required style="font-size: 13px;" />
+      <LiteFileInput name="file" accept=".csv,.json" required class="lite-import-file-input" />
       <div class="lite-inline-actions lite-justify-end">
         <a href={`#${importPanelId}-closed`} class="lite-btn lite-btn-sm">
           {t('common.cancel') || 'Cancel'}

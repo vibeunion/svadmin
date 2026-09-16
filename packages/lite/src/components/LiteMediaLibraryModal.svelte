@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { t } from '@svadmin/core/i18n';
+  import LiteFileInput from './LiteFileInput.svelte';
+
   interface LiteMediaItem {
     id: string;
     name: string;
@@ -33,9 +36,9 @@
     <!-- Upload Section -->
     <div class="lite-media-upload-row">
       <label for="media_upload_input" class="lite-label">Upload New Media:</label>
-      <input id="media_upload_input" type="file" name="files" multiple={multiple} class="lite-file-input" />
+      <LiteFileInput id="media_upload_input" name="files" multiple={multiple} class="lite-file-input" />
       <button type="submit" name="_media_action" value="upload" class="lite-btn lite-btn-sm lite-btn-outline" style="margin-left: 8px;">
-        Upload File
+        {t('common.uploadFile') || 'Upload File'}
       </button>
     </div>
 

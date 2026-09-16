@@ -3,6 +3,7 @@
   import { Button } from './ui/button/index.js';
   import { Badge } from './ui/badge/index.js';
   import { Upload, Image as ImageIcon, Check, Search, Folder } from '@lucide/svelte';
+  import { useTranslation } from '@svadmin/core/i18n';
   import { cn } from '../utils.js';
 
   export interface MediaItem {
@@ -37,6 +38,8 @@
     onupload,
     class: className = '',
   }: Props = $props();
+
+  const i18n = useTranslation();
 
   let activeCategory = $state('All');
   let searchQuery = $state('');
@@ -111,7 +114,7 @@
           <input
             type="text"
             bind:value={searchQuery}
-            placeholder="Search media..."
+            placeholder={i18n.t('common.search')}
             class="svadmin-u-d1c57777d8b6 svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d2d2d97dd0c8 svadmin-u-aa2c13a5e1b4 svadmin-u-359090c2d529 svadmin-u-f10f771f87e9 svadmin-u-3e94a98e1466 svadmin-u-9c1295a6914a"
           />
         </div>
@@ -120,7 +123,7 @@
           <input type="file" multiple class="svadmin-u-99d72c7fc3e2" onchange={handleFileInput} />
           <span class="svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421 svadmin-u-d1c57777d8b6 svadmin-u-0b91436debbd svadmin-u-421ac2be5045 svadmin-u-ba939ea82d8b svadmin-u-5064267f78e3 svadmin-u-359090c2d529 svadmin-u-2689f3958069 svadmin-u-35b680bc2a46 svadmin-u-34516836730d">
             <Upload class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
-            Upload
+            {i18n.t('common.upload')}
           </span>
         </label>
       </div>

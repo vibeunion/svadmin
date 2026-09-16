@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { FieldDefinition } from '@svadmin/core';
   import { fieldToInputType, fieldToPlaceholder } from '../schema-generator';
+  import LiteFileInput from './LiteFileInput.svelte';
   import { isExplicitBooleanTrue } from '../value-normalization';
 
   interface Props {
@@ -142,10 +143,9 @@
             <input type="hidden" name={fieldName(sub.key)} value={reference} />
           {/each}
         {/if}
-        <input
+        <LiteFileInput
           id={fieldId(sub.key)}
           name={fieldName(sub.key)}
-          type="file"
           class="lite-input"
           required={sub.required
             && !isDraft

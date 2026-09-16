@@ -471,6 +471,86 @@ a:hover {
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
 }
 
+/* File inputs keep the native form control but replace its browser-localized
+ * visible copy with application-controlled labels. */
+.lite-file-picker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  min-height: 38px;
+  color: #64748b;
+  vertical-align: middle;
+}
+
+.lite-file-picker.lite-input {
+  display: flex;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.lite-file-picker__native {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.lite-file-picker__visual {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  min-height: 38px;
+  overflow: hidden;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 6px 10px 6px 6px;
+  background: #fff;
+  pointer-events: none;
+}
+
+.lite-file-picker__button {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 0 10px;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.lite-file-picker__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lite-file-picker[data-disabled="true"] .lite-file-picker__visual {
+  opacity: 0.5;
+}
+
+.lite-file-picker.lite-input-error .lite-file-picker__visual {
+  border-color: #ef4444;
+}
+
+.lite-file-picker__native:focus-visible + .lite-file-picker__visual {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 1px #fff, 0 0 0 3px rgba(79, 70, 229, 0.3);
+}
+
 .lite-error-text {
   color: #ef4444;
   font-size: 12px;

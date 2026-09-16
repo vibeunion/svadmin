@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { FieldDefinition } from '@svadmin/core';
+  import LiteFileInput from './LiteFileInput.svelte';
 
   interface Props {
     resourceName: string;
@@ -25,7 +26,7 @@
   <form {action} {method} enctype="multipart/form-data" class="lite-import-form">
     <div class="lite-file-row">
       <label for="import_file" class="lite-label">Select CSV / JSON file:</label>
-      <input type="file" id="import_file" name="file" accept=".csv,.json" class="lite-input" required />
+      <LiteFileInput id="import_file" name="file" accept=".csv,.json" class="lite-input" required />
     </div>
 
     {#if fields.length > 0}

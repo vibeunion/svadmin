@@ -9,6 +9,7 @@
   import { fieldToInputType, fieldToPlaceholder } from '../schema-generator';
   import { isExplicitBooleanTrue } from '../value-normalization';
   import LiteArrayField from './LiteArrayField.svelte';
+  import LiteFileInput from './LiteFileInput.svelte';
 
   interface Props {
     fields: FieldDefinition[];
@@ -156,8 +157,7 @@
             {/if}
           </select>
         {:else if inputType === 'file'}
-          <input
-            type="file"
+          <LiteFileInput
             name={field.key}
             id={field.key}
             class="lite-input {hasError ? 'lite-input-error' : ''}"

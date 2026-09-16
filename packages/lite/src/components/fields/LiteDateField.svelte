@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { FieldDefinition } from '@svadmin/core';
+  import { useTranslation } from '@svadmin/core/i18n';
 
   interface Props {
     field: FieldDefinition;
@@ -9,6 +10,7 @@
   }
 
   let { field, value, error = [], mode = 'show' }: Props = $props();
+  const i18n = useTranslation();
   let hasError = $derived(error.length > 0);
 
   function formatDate(v: unknown): string {
@@ -36,6 +38,7 @@
   <div>
     <input
       type="datetime-local"
+      lang={i18n.locale}
       name={field.key}
       id={field.key}
       value={formatDate(value)}

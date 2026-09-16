@@ -136,14 +136,15 @@
             bind:value={filterVal}
             class="svadmin-u-d1c57777d8b6 svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529 svadmin-u-f10f771f87e9 svadmin-u-3e94a98e1466 svadmin-u-9c1295a6914a"
           >
-            <option value="">All</option>
-            <option value="true">Yes / True</option>
-            <option value="false">No / False</option>
+            <option value="">{i18n.t('common.all')}</option>
+            <option value="true">{i18n.t('common.yesTrue')}</option>
+            <option value="false">{i18n.t('common.noFalse')}</option>
           </select>
         {:else if field.type === 'date'}
           <input
             id="header_filter_val_{field.key}"
             type="date"
+            lang={i18n.locale}
             bind:value={filterVal}
             class="svadmin-u-d1c57777d8b6 svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529 svadmin-u-f10f771f87e9 svadmin-u-3e94a98e1466 svadmin-u-9c1295a6914a"
           />

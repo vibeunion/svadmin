@@ -9,6 +9,7 @@
 
 <script lang="ts">
   import type { FieldDefinition } from '@svadmin/core';
+  import { useTranslation } from '@svadmin/core/i18n';
 
   interface Props {
     field?: FieldDefinition;
@@ -40,6 +41,8 @@
     error = [],
     mode = 'show',
   }: Props = $props();
+
+  const i18n = useTranslation();
 
   const start = $derived.by(() => {
     if (startDate !== undefined) return startDate;
@@ -118,23 +121,25 @@
     <div class="lite-inline-sm" style="display: flex; align-items: center;">
       <input
         type="date"
+        lang={i18n.locale}
         name={startKey}
         id={startKey}
         value={toIsoDateInput(start)}
         class="lite-input {hasError ? 'lite-input-error' : ''}"
         style="flex: 1; min-width: 120px;"
-        placeholder="Start date"
+        placeholder={i18n.t('common.startDate')}
         {...field?.required ? { required: true } : {}}
       />
       <span style="margin: 0 8px; color: #64748b;">{separator}</span>
       <input
         type="date"
+        lang={i18n.locale}
         name={endKey}
         id={endKey}
         value={toIsoDateInput(end)}
         class="lite-input {hasError ? 'lite-input-error' : ''}"
         style="flex: 1; min-width: 120px;"
-        placeholder="End date"
+        placeholder={i18n.t('common.endDate')}
         {...field?.required ? { required: true } : {}}
       />
     </div>

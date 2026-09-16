@@ -43,6 +43,7 @@ export { default as LiteLayout } from './components/LiteLayout.svelte';
 export { default as LiteTable } from './components/LiteTable.svelte';
 export { default as LitePagination } from './components/LitePagination.svelte';
 export { default as LiteForm } from './components/LiteForm.svelte';
+export { default as LiteFileInput } from './components/LiteFileInput.svelte';
 export { default as LiteLogin } from './components/LiteLogin.svelte';
 export { default as LiteShow } from './components/LiteShow.svelte';
 export { default as LiteSearch } from './components/LiteSearch.svelte';

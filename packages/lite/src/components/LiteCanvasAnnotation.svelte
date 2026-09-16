@@ -1,4 +1,6 @@
 <script lang="ts">
+  import LiteFileInput from './LiteFileInput.svelte';
+
   export interface AnnotationItem {
     id: string;
     type: string;
@@ -50,7 +52,7 @@
   {#if formAction}
     <div class="sv-lite-anno-upload">
       <form method="POST" action={formAction} enctype="multipart/form-data">
-        <input type="file" name="annotatedImage" accept="image/*" class="sv-lite-file-input" />
+        <LiteFileInput name="annotatedImage" accept="image/*" class="sv-lite-file-input" />
         <button type="submit" class="sv-lite-upload-btn">Upload Markup</button>
       </form>
     </div>

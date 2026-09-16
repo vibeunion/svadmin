@@ -803,6 +803,59 @@ main {
   color: var(--foreground);
 }
 
+.svadmin-file-input {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  height: 2.25rem;
+}
+
+.svadmin-file-input__visual {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--card);
+  box-shadow: var(--shadow-control);
+  padding: 0.25rem 0.75rem 0.25rem 0.25rem;
+  color: var(--muted-foreground);
+  pointer-events: none;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.svadmin-file-input__button {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  height: 1.75rem;
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+  border-radius: 0.375rem;
+  padding: 0 0.625rem;
+  background: var(--muted);
+  color: var(--foreground);
+  font: inherit;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.svadmin-file-input__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.svadmin-file-input[data-disabled="true"] .svadmin-file-input__visual {
+  opacity: 0.5;
+}
+
 .svadmin-input {
   width: 100%;
   min-width: 0;
@@ -821,9 +874,20 @@ main {
 }
 
 .svadmin-input[data-input-type="file"] {
-  padding: 0.25rem 0.75rem 0.25rem 0.25rem;
-  color: var(--muted-foreground);
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  height: 100%;
+  border: 0;
+  padding: 0;
+  opacity: 0;
+  appearance: none;
   cursor: pointer;
+}
+
+.svadmin-input[data-input-type="file"]:focus-visible + .svadmin-file-input__visual {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 20%, transparent);
 }
 
 .svadmin-input:focus-visible {
@@ -843,19 +907,6 @@ main {
 
 .svadmin-input::placeholder {
   color: var(--muted-foreground);
-}
-
-.svadmin-input::file-selector-button {
-  margin-right: 0.75rem;
-  height: 1.75rem;
-  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
-  border-radius: 0.375rem;
-  padding: 0 0.625rem;
-  background: var(--muted);
-  color: var(--foreground);
-  font: inherit;
-  font-size: 0.75rem;
-  cursor: pointer;
 }
 
 .svadmin-card {

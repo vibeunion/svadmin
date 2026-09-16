@@ -1,4 +1,6 @@
 <script lang="ts">
+  import LiteFileInput from '../LiteFileInput.svelte';
+
   interface Props {
     name?: string;
     label?: string;
@@ -26,10 +28,9 @@
   <p class="lite-muted">{helpText}</p>
   <div class="lite-form-group">
     <label for={controlId}>{label}</label>
-    <input
+    <LiteFileInput
       id={controlId}
       class="lite-input"
-      type="file"
       {name}
       {accept}
       {disabled}
@@ -39,6 +40,6 @@
   </div>
   <div class="lite-form-group">
     <label for={`${controlId}-zip`}>ZIP archive fallback</label>
-    <input id={`${controlId}-zip`} class="lite-input" type="file" name={zipName} accept=".zip,application/zip" {disabled} />
+    <LiteFileInput id={`${controlId}-zip`} class="lite-input" name={zipName} accept=".zip,application/zip" {disabled} />
   </div>
 </fieldset>

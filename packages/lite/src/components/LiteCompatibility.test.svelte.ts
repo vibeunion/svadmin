@@ -21,6 +21,12 @@ import LiteAnomalyBadge from './widgets/LiteAnomalyBadge.svelte';
 
 vi.mock('@svadmin/core/i18n', () => ({
   t: (key: string) => key,
+  useTranslation: () => ({
+    t: (key: string) => key,
+    locale: 'en',
+    setLocale: () => undefined,
+    getAvailableLocales: () => [],
+  }),
 }));
 
 const resource: ResourceDefinition = {

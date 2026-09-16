@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/svelte";
+import { setLocale } from "@svadmin/core/i18n";
 import type { ComponentProps } from "svelte";
 import { describe, expect, expectTypeOf, it } from "vitest";
 import InputHarness from "../../../../test/fixtures/InputHarness.svelte";
@@ -49,6 +50,38 @@ describe("Input", () => {
 		const input = screen.getByLabelText<HTMLInputElement>("File input");
 		expect(input.className).toContain("svadmin-input");
 		expect(input.getAttribute("data-input-type")).toBe("file");
+	});
+
+	it("renders file picker copy from the active application locale", () => {
+		setLocale("zh-CN");
+		render(Input, { type: "file", "aria-label": "文件" });
+
+		expect(screen.getByText("选择文件")).toBeTruthy();
+		expect(screen.getByText("未选择文件")).toBeTruthy();
+
+		setLocale("en");
+	});
+
+	it("renders a translated count for multiple selected files", async () => {
+		setLocale("en");
+		render(InputHarness, { props: { multiple: true } });
+
+		const input = screen.getByLabelText<HTMLInputElement>("Attachment");
+		const files = new DataTransfer();
+		files.items.add(new File(["first"], "first.txt"));
+		files.items.add(new File(["second"], "second.txt"));
+
+		await fireEvent.change(input, { target: { files: files.files } });
+		expect(screen.getByText("2 files selected")).toBeTruthy();
+	});
+
+	it("passes the active application locale to date inputs", () => {
+		setLocale("zh-CN");
+		render(Input, { type: "date", "aria-label": "日期" });
+
+		expect(screen.getByLabelText<HTMLInputElement>("日期").lang).toBe("zh-CN");
+
+		setLocale("en");
 	});
 
 	it("keeps value binding for non-file inputs", async () => {
