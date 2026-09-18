@@ -37,6 +37,7 @@ export function snapshotAccessControlOptions(value: unknown): AccessControlOptio
     const candidate = snapshotPlainData(value);
     if (checkExact(providerOptions, candidate)) {
       if (candidate.buttons) Object.freeze(candidate.buttons);
+      if (candidate.permissionCatalog) Object.freeze(candidate.permissionCatalog);
       return Object.freeze(candidate);
     }
   } catch {
