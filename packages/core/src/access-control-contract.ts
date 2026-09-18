@@ -24,6 +24,11 @@ const providerOptions = Type.Object({
     enableAccessControl: Type.Optional(Type.Boolean()),
     hideIfUnauthorized: Type.Optional(Type.Boolean()),
   }, { additionalProperties: false })),
+  permissionCatalog: Type.Optional(Type.Object({
+    applicationId: Type.String({ minLength: 1, pattern: '\\S' }),
+    version: Type.String({ minLength: 1, pattern: '^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$' }),
+    digest: Type.Optional(Type.String({ minLength: 1, pattern: '\\S' })),
+  }, { additionalProperties: false })),
 }, { additionalProperties: false });
 const registeredProviders = new WeakMap<object, RegisteredAccessControlProvider>();
 
