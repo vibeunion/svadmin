@@ -1,0 +1,145 @@
+name: PR 425 Lite UI evidence
+on:
+  push:
+    branches: [codex/permission-catalog-adapter]
+    paths: [.github/workflows/pr425-ui-evidence.yml]
+permissions:
+  contents: read
+jobs:
+  evidence:
+    if: github.repository == 'vibeunion/svadmin' && github.ref == 'refs/heads/codex/permission-catalog-adapter'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - run: bun install --frozen-lockfile
+      - run: bunx playwright install --with-deps chromium
+      - name: Render the real component and assert visual-state contracts
+        run: |
+          mkdir -p .pr425-evidence docs/pr-evidence/lite-file-picker
+          cat > .pr425-evidence/index.html <<'HTML'
+          <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head><body><div id="app"></div><script type="module" src="/main.js"></script></body></html>
+          HTML
+          cat > .pr425-evidence/main.js <<'JS'
+          import { mount } from 'svelte';
+          import Harness from './Harness.svelte';
+          import '../packages/lite/src/lite.css';
+          mount(Harness, { target: document.getElementById('app') });
+          JS
+          cat > .pr425-evidence/Harness.svelte <<'SVELTE'
+          <script>
+            import LiteFileInput from '../packages/lite/src/components/LiteFileInput.svelte';
+          </script>
+          <main style="max-width: 1040px; margin: 32px auto; padding: 0 24px;">
+            <h1>Lite file input — compatibility repair</h1>
+            <p>Real LiteFileInput component and repository lite.css. Chromium rendering evidence; not an IE11 engine or backend authorization test.</p>
+            <section class="lite-card"><h2>Empty</h2><LiteFileInput id="empty" label="Choose file" aria-label="Empty file input" /></section>
+            <section class="lite-card"><h2>Keyboard focus</h2><LiteFileInput id="focus" label="Choose file" aria-label="Focused file input" /></section>
+            <section class="lite-card"><h2>Selected file</h2><LiteFileInput id="selected" label="Choose file" aria-label="Selected file input" /></section>
+            <section class="lite-card"><h2>Disabled</h2><LiteFileInput id="disabled" label="Choose file" disabled aria-label="Disabled file input" /></section>
+            <section class="lite-card"><h2>Validation error</h2><LiteFileInput id="error" class="lite-input-error" label="Choose file" aria-invalid="true" aria-label="Invalid file input" /></section>
+            <section class="lite-card"><h2>Long filename</h2><div style="width: 320px;"><LiteFileInput id="long" class="lite-input" label="Choose file" aria-label="Long filename input" /></div></section>
+          </main>
+          <style>h1 { font-size: 25px; margin-bottom: 8px; } h2 { font-size: 16px; margin: 0 0 12px; } p { color: #475569; margin: 0 0 24px; } section.lite-card { padding: 18px 22px; margin-bottom: 16px; }</style>
+          SVELTE
+          cat > .pr425-evidence/capture.mjs <<'JS'
+          import { createServer } from 'vite';
+          import { svelte } from '@sveltejs/vite-plugin-svelte';
+          import { chromium } from '@playwright/test';
+          import { readFile, writeFile } from 'node:fs/promises';
+          import { createHash } from 'node:crypto';
+          import { resolve } from 'node:path';
+          import assert from 'node:assert/strict';
+          const root = process.cwd();
+          const server = await createServer({ configFile: false, root: resolve(root, '.pr425-evidence'), plugins: [svelte({ configFile: false })], server: { host: '127.0.0.1', port: 4178, strictPort: true, fs: { allow: [root] } } });
+          let browser;
+          try {
+            await server.listen();
+            browser = await chromium.launch();
+            const checks = [];
+            for (const [width, height] of [[1440, 900], [1920, 1080]]) {
+              const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1, reducedMotion: 'reduce' });
+              const errors = [];
+              page.on('pageerror', error => errors.push(error.message));
+              await page.goto('http://127.0.0.1:4178', { waitUntil: 'networkidle' });
+              await page.locator('#empty').waitFor();
+              await page.locator('#selected').setInputFiles({ name: 'invoice.csv', mimeType: 'text/csv', buffer: Buffer.from('id\n1\n') });
+              await page.locator('#long').setInputFiles({ name: 'a-very-long-report-filename-to-check-clipping-and-layout-without-expanding-the-control.csv', mimeType: 'text/csv', buffer: Buffer.from('id\n1\n') });
+              await page.waitForFunction(() => document.querySelector('#selected')?.parentElement?.textContent?.includes('invoice.csv'));
+              await page.locator('#empty').focus();
+              await page.keyboard.press('Tab');
+              assert.equal(await page.evaluate(() => document.activeElement?.id), 'focus');
+              assert.equal(await page.locator('#disabled').isDisabled(), true);
+              const metrics = await page.evaluate(() => {
+                const input = document.querySelector('#focus');
+                const visual = input.nextElementSibling;
+                const selected = document.querySelector('#selected');
+                const name = document.querySelector('#long').parentElement.querySelector('.lite-file-picker__name');
+                const error = document.querySelector('#error').nextElementSibling;
+                const inputBox = input.getBoundingClientRect();
+                const visualBox = visual.getBoundingClientRect();
+                return { focusShadow: getComputedStyle(visual).boxShadow, gap: getComputedStyle(visual).gap, nameMargin: getComputedStyle(visual.lastElementChild).marginLeft, overlayWidth: inputBox.width, visualWidth: visualBox.width, overlayHeight: inputBox.height, visualHeight: visualBox.height, selectedText: selected.parentElement.textContent, clipped: name.scrollWidth > name.clientWidth, errorBorder: getComputedStyle(error).borderColor, overflow: document.documentElement.scrollWidth > innerWidth };
+              });
+              assert.notEqual(metrics.focusShadow, 'none');
+              assert.equal(metrics.nameMargin, '10px');
+              assert.ok(Math.abs(metrics.overlayWidth - metrics.visualWidth) < 1);
+              assert.ok(Math.abs(metrics.overlayHeight - metrics.visualHeight) < 1);
+              assert.ok(metrics.selectedText.includes('invoice.csv'));
+              assert.equal(metrics.clipped, true);
+              assert.equal(metrics.errorBorder, 'rgb(239, 68, 68)');
+              assert.equal(metrics.overflow, false);
+              assert.deepEqual(errors, []);
+              await page.screenshot({ path: `docs/pr-evidence/lite-file-picker/${width}x${height}.png`, fullPage: false });
+              checks.push({ width, height, metrics, browserErrors: errors });
+              await page.close();
+            }
+            const css = await readFile('packages/lite/src/lite.css');
+            const component = await readFile('packages/lite/src/components/LiteFileInput.svelte');
+            await writeFile('docs/pr-evidence/lite-file-picker/provenance.json', JSON.stringify({ sourceCommit: process.env.GITHUB_SHA, workflowRun: process.env.GITHUB_RUN_ID, browser: await browser.version(), cssSha256: createHash('sha256').update(css).digest('hex'), componentSha256: createHash('sha256').update(component).digest('hex'), scope: 'Real Svelte component mounted in an isolated browser fixture. No IE11-engine, end-to-end application, or backend-authorization claim.', checks }, null, 2) + '\n');
+          } finally {
+            await browser?.close();
+            await server.close();
+          }
+          JS
+          bun .pr425-evidence/capture.mjs
+          cat > docs/pr-evidence/lite-file-picker/README.md <<'MD'
+          # Lite file-input compatibility evidence
+
+          Captures mount the actual `LiteFileInput.svelte` with the repository's `lite.css` in Chromium. Viewports are exactly 1440x900 and 1920x1080. Source commit, browser version, source hashes, and checked measurements are recorded in `provenance.json`.
+
+          | State matrix | Evidence |
+          | --- | --- |
+          | Empty | Native input and localized empty-file label remain visible through the visual control. |
+          | Keyboard focus | Tab moves from the empty input to the next real file input; computed focus shadow is present. |
+          | Selected file | Playwright assigns a real browser File; reactive filename becomes invoice.csv. |
+          | Disabled | Actual component input has disabled=true. |
+          | Validation error | Actual error-class component renders the red border. |
+          | Long filename | Reactive long filename is clipped within a 320px wrapper, without page overflow. |
+          | Loading / permissions / submission | Not provided by this component; not simulated or asserted. |
+
+          The browser assertions verify 10px sibling spacing, native-input overlay dimensions, focus feedback, filename reactivity, clipping, validation border, and absence of browser errors. Screenshots do not prove IE11 engine execution, complete application workflows, or server authorization. Existing source, distribution CSS, and SSR compatibility checks remain required.
+          MD
+          git diff --check
+      - name: Commit captured evidence without overwriting concurrent changes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          auth=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" fetch origin codex/permission-catalog-adapter
+          test "$(git rev-parse FETCH_HEAD)" = "$GITHUB_SHA"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/pr-evidence/lite-file-picker/1440x900.png docs/pr-evidence/lite-file-picker/1920x1080.png docs/pr-evidence/lite-file-picker/provenance.json docs/pr-evidence/lite-file-picker/README.md
+          git commit -m 'docs(review): capture real Lite file-input states at both required viewports'
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" push origin HEAD:refs/heads/codex/permission-catalog-adapter
