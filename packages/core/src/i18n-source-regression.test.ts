@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import ts from 'typescript';
-import { expect, test } from 'vitest';
+import { expect, test } from 'bun:test';
 
 function propertyName(name: ts.PropertyName): string {
   if (ts.isIdentifier(name) || ts.isStringLiteral(name) || ts.isNumericLiteral(name)) return name.text;
@@ -25,13 +25,13 @@ test('base locale dictionaries contain unique keys and retain processing labels'
       throw new Error('Locale dictionaries must use explicit object literals');
     }
     const localeName = propertyName(locale.name);
-    expect(locales.has(localeName), `Duplicate locale: ${localeName}`).toBe(false);
+    if (locales.has(localeName)) throw new Error(`Duplicate locale: ${localeName}`);
     locales.add(localeName);
     const keys = new Set<string>();
     for (const entry of locale.initializer.properties) {
       if (!ts.isPropertyAssignment(entry)) throw new Error(`Invalid locale entry in ${localeName}`);
       const key = propertyName(entry.name);
-      expect(keys.has(key), `Duplicate translation: ${localeName}.${key}`).toBe(false);
+      if (keys.has(key)) throw new Error(`Duplicate translation: ${localeName}.${key}`);
       keys.add(key);
       if (key === 'common.processing' && ts.isStringLiteral(entry.initializer)) {
         processing.set(localeName, entry.initializer.text);
