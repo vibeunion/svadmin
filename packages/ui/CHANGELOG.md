@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.71.5](https://github.com/vibeunion/svadmin/compare/ui-v0.71.4...ui-v0.71.5) (2026-09-18)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** use tree-local i18n in input tests ([88d4277](https://github.com/vibeunion/svadmin/commit/88d42770f382b82170e8b9e9f33a0b3d0a4eac86))
+
 ## [0.71.4](https://github.com/vibeunion/svadmin/compare/ui-v0.71.3...ui-v0.71.4) (2026-09-16)
 
 

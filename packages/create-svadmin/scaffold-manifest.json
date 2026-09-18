@@ -12,7 +12,7 @@
   "dependencies": {
     "@svadmin/core": "^0.51.6",
     "@svadmin/ai-elements": "^0.7.3",
-    "@svadmin/ui": "^0.71.4",
+    "@svadmin/ui": "^0.71.5",
     "@sinclair/typebox": "^0.34.52",
     "@tanstack/svelte-query": "^6.1.48",
     "@lucide/svelte": "^1.35.0"
