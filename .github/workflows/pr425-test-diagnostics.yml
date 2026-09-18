@@ -1,0 +1,37 @@
+name: PR 425 test diagnostics
+
+on:
+  push:
+    branches: [codex/permission-catalog-adapter]
+    paths: [.github/workflows/pr425-test-diagnostics.yml]
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  diagnostics:
+    if: github.repository == 'vibeunion/svadmin' && github.ref == 'refs/heads/codex/permission-catalog-adapter'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Extract failure contexts from the completed CI job
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api repos/vibeunion/svadmin/actions/jobs/105789952370/logs > /tmp/pr425-ci.log
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          text = re.sub(r'\x1b\[[0-9;]*m', '', Path('/tmp/pr425-ci.log').read_text(encoding='utf-8-sig'))
+          lines = text.splitlines()
+          selected = set()
+          for index, line in enumerate(lines):
+              if re.search(r'FAIL\s|AssertionError|Error:|\(fail\)|× |❯ |Test Files|Tests\s+\d+ failed|Unhandled', line):
+                  selected.update(range(max(0, index - 2), min(len(lines), index + 14)))
+          print('Failure context lines:', len(selected))
+          for index in sorted(selected)[-350:]:
+              print(lines[index])
+          PY
