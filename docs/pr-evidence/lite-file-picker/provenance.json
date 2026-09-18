@@ -1,0 +1,46 @@
+{
+  "sourceCommit": "7fdd9fe619a1bba2b0d4e5362366756385ad890f",
+  "workflowRun": "35406932706",
+  "browser": "151.0.7922.34",
+  "cssSha256": "027c84e51f787ec6a44efa77c6140c49c672e413be41acc125b96b6ff5d507db",
+  "componentSha256": "e62b5f763d9623012d69b6fac21d478b86c8eb9365b3752942291ea38d771348",
+  "scope": "Real Svelte component mounted in an isolated browser fixture. No IE11-engine, end-to-end application, or backend-authorization claim.",
+  "checks": [
+    {
+      "width": 1440,
+      "height": 900,
+      "metrics": {
+        "focusShadow": "rgb(255, 255, 255) 0px 0px 0px 1px, rgba(79, 70, 229, 0.3) 0px 0px 0px 3px",
+        "gap": "normal",
+        "nameMargin": "10px",
+        "overlayWidth": 198.765625,
+        "visualWidth": 198.765625,
+        "overlayHeight": 40,
+        "visualHeight": 40,
+        "selectedText": " Choose file invoice.csv",
+        "clipped": true,
+        "errorBorder": "rgb(239, 68, 68)",
+        "overflow": false
+      },
+      "browserErrors": []
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "metrics": {
+        "focusShadow": "rgb(255, 255, 255) 0px 0px 0px 1px, rgba(79, 70, 229, 0.3) 0px 0px 0px 3px",
+        "gap": "normal",
+        "nameMargin": "10px",
+        "overlayWidth": 198.765625,
+        "visualWidth": 198.765625,
+        "overlayHeight": 40,
+        "visualHeight": 40,
+        "selectedText": " Choose file invoice.csv",
+        "clipped": true,
+        "errorBorder": "rgb(239, 68, 68)",
+        "overflow": false
+      },
+      "browserErrors": []
+    }
+  ]
+}
