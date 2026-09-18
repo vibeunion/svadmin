@@ -1,19 +1,14 @@
-import { Type, type Static } from '@sinclair/typebox';
+import { Type } from '@sinclair/typebox';
 import { checkExact } from './schema-validation';
 import { snapshotPlainData } from './plain-data';
-import { decodePermissionSnapshot, type PermissionSnapshot } from './permission-catalog';
+import { decodePermissionSnapshot, permissionSnapshotSchema, type PermissionSnapshot } from './permission-catalog';
 
 const permissionName = Type.String({ minLength: 1, pattern: '\\S' });
 const permissionHintsSchema = Type.Union([
   Type.Null(),
   Type.Array(permissionName),
   Type.Record(Type.String({ pattern: '\\S' }), Type.Boolean(), { additionalProperties: false }),
-  Type.Object({
-    applicationId: Type.String({ minLength: 1, pattern: '\\S' }),
-    catalogVersion: Type.String({ minLength: 1, pattern: '^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$' }),
-    catalogDigest: Type.Optional(Type.String({ minLength: 1, pattern: '\\S' })),
-    permissions: Type.Array(permissionName),
-  }, { additionalProperties: false }),
+  permissionSnapshotSchema,
 ]);
 
 export type PermissionHints = null | readonly string[] | Readonly<Record<string, boolean>> | PermissionSnapshot;
@@ -30,8 +25,10 @@ export function decodePermissionHints(value: unknown): PermissionHints {
     const candidate = snapshotPlainData(value);
     if (checkExact(permissionHintsSchema, candidate)) {
       if (candidate === null) return null;
-      if (!Array.isArray(candidate) && typeof candidate === 'object' && 'applicationId' in candidate) {
-        return decodePermissionSnapshot(candidate) as PermissionSnapshot;
+      // 旧式布尔映射允许 applicationId 作为权限名称，不能仅凭键名识别快照。
+      if (!Array.isArray(candidate) && typeof candidate === 'object'
+          && 'applicationId' in candidate && typeof candidate.applicationId === 'string') {
+        return decodePermissionSnapshot(candidate);
       }
       return Object.freeze(candidate);
     }
