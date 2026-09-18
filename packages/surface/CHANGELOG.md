@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.8.18](https://github.com/vibeunion/svadmin/compare/surface-v0.8.17...surface-v0.8.18) (2026-09-18)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/ui bumped from >=0.40.6 <0.72.0 to >=0.71.5
+
 ## [0.8.17](https://github.com/vibeunion/svadmin/compare/surface-v0.8.16...surface-v0.8.17) (2026-09-16)
 
 
