@@ -21,7 +21,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          gh api repos/vibeunion/svadmin/actions/jobs/105789952370/logs > /tmp/pr425-ci.log
+          gh api --allow-escape-sequences repos/vibeunion/svadmin/actions/jobs/105789952370/logs > /tmp/pr425-ci.log
           python3 - <<'PY'
           from pathlib import Path
           import re
