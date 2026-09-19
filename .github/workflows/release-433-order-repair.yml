@@ -1,0 +1,121 @@
+name: Release 433 isolated publication-order repair
+on:
+  push:
+    branches: [fix/release-433-publish-order-20260920]
+permissions:
+  contents: write
+jobs:
+  repair:
+    if: github.repository == 'vibeunion/svadmin'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SOURCE_SHA: 00ccdc9c662e5e9ce170cad7e2ccf41b2f16a909
+      REPAIR_BRANCH: fix/release-433-publish-order-20260920
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - name: Apply bounded publication-order guard
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "$SOURCE_SHA"
+          python3 - <<'PY'
+          import re
+          import subprocess
+          from pathlib import Path
+          expected = {'scripts/plan-release-publication.ts': '7f1846add8c6391a6b96f4f1905bddb153abc9a6', '.github/workflows/ci.yml': '08fa48ca232512f1c79d931b5b459b828ba5ef4f'}
+          for path, sha in expected.items():
+              if subprocess.check_output(['git', 'hash-object', path], text=True).strip() != sha:
+                  raise SystemExit(f'Unexpected source: {path}')
+
+          def once(text, old, new):
+              if text.count(old) != 1:
+                  raise SystemExit(f'Unexpected replacement count for {old[:80]}')
+              return text.replace(old, new, 1)
+
+          path = Path('scripts/plan-release-publication.ts')
+          text = path.read_text()
+          text = once(text, "import { npmPackageVersionStatus } from './npm-package-version';\n", "import { npmPackageVersionStatus } from './npm-package-version';\nimport { applyPeerMinimum } from './surface-release-policy';\n")
+          text = once(text, '  peerDependencies?: Record<string, string>;\n', '  peerDependencies?: Record<string, string>;\n  svadmin?: { peerMinimums?: Record<string, string> };\n')
+          text = once(text, '  return [...names];\n', '''  for (const [name, minimum] of Object.entries(manifest.svadmin?.peerMinimums ?? {})) {
+              const range = manifest.peerDependencies?.[name];
+              if (typeof minimum !== 'string' || typeof range !== 'string' ||
+                  applyPeerMinimum(range, minimum) !== range) {
+                throw new Error(`${manifest.name}: peer ${name} does not enforce its declared capability minimum`);
+              }
+              names.add(name);
+            }
+            return [...names];
+          ''')
+          text = once(text, '  if (context.releasePathSet.has(dependencyPackage.path)) return dependencyPackage.path;\n', '''  if (releasePackage.manifest.svadmin?.peerMinimums?.[dependencyName] !== undefined) {
+              const range = releasePackage.manifest.peerDependencies?.[dependencyName];
+              if (range === undefined || !Bun.semver.satisfies(dependencyPackage.manifest.version, range)) {
+                throw new Error(`${dependencyName}@${dependencyPackage.manifest.version} does not satisfy capability peer ${range ?? 'missing'}`);
+              }
+            }
+            if (context.releasePathSet.has(dependencyPackage.path)) return dependencyPackage.path;
+          ''')
+          path.write_text(text)
+          path = Path('.github/workflows/ci.yml')
+          text = path.read_text()
+          pattern = r'^( +)if \[ "\$NPM_STATUS" = "missing" \]; then\n'
+          matches = list(re.finditer(pattern, text, re.M))
+          if len(matches) != 1:
+              raise SystemExit('Unexpected publish branch')
+          match = matches[0]
+          indent = match.group(1) + '  '
+          lines = [
+              '# 每次实际发布前重查依赖；上游发布失败或尚未可见时不得继续发布下游。',
+              '''DEPENDENCY_CHECK_MANIFEST=$(node -e 'process.stdout.write(JSON.stringify([{path: process.argv[1]}]))' "$pkg_dir")''',
+              'if ! RELEASE_MANIFEST="$DEPENDENCY_CHECK_MANIFEST" bun scripts/plan-release-publication.ts > /dev/null; then',
+              '  echo "::error::Release dependencies not published for $NAME@$LOCAL_VER"',
+              '  failed=1',
+              '  continue',
+              'fi',
+          ]
+          text = text[:match.end()] + ''.join(indent + line + '\n' for line in lines) + text[match.end():]
+          path.write_text(text)
+          PY
+      - name: Verify release guards without real publication
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/release433-order-evidence"
+          bun install --frozen-lockfile
+          git diff --exit-code -- bun.lock
+          bun test scripts/surface-release-policy.test.ts scripts/release-dependency-guard.test.ts scripts/sync-release-pr.test.ts scripts/release-workflow-contract.test.ts 2>&1 | tee "$RUNNER_TEMP/release433-order-evidence/tests.log"
+          bunx eslint scripts/plan-release-publication.ts scripts/release-dependency-guard.test.ts --max-warnings 0
+      - name: Remove the helper and preserve exact repair evidence
+        run: |
+          set -euo pipefail
+          rm .github/workflows/release-433-order-repair.yml
+          git add .github/workflows/release-433-order-repair.yml .github/workflows/ci.yml scripts/plan-release-publication.ts scripts/release-dependency-guard.test.ts
+          python3 - <<'PY'
+          import subprocess
+          allowed = {'.github/workflows/ci.yml', 'scripts/plan-release-publication.ts', 'scripts/release-dependency-guard.test.ts'}
+          actual = set(subprocess.check_output(['git', 'diff', '--cached', '--name-only', '00ccdc9c662e5e9ce170cad7e2ccf41b2f16a909'], text=True).splitlines())
+          if actual != allowed:
+              raise SystemExit(f'Unexpected repair paths: {sorted(actual ^ allowed)}')
+          PY
+          git diff --cached --check "$SOURCE_SHA"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'fix(release): gate downstream publication on available peers'
+          git diff --binary "$SOURCE_SHA" HEAD > "$RUNNER_TEMP/release433-order-evidence/repair.patch"
+          git diff --binary 979064345279e7bae470fe17cd422f093c0cd552 HEAD > "$RUNNER_TEMP/release433-order-evidence/combined-repair.patch"
+          git rev-parse HEAD > "$RUNNER_TEMP/release433-order-evidence/repaired-sha.txt"
+          git archive --format=tar.gz --output="$RUNNER_TEMP/release433-order-evidence/source.tar.gz" HEAD .github/workflows/ci.yml scripts/plan-release-publication.ts scripts/release-dependency-guard.test.ts
+          git push origin "HEAD:$REPAIR_BRANCH"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: release433-publication-order-repair
+          path: ${{ runner.temp }}/release433-order-evidence/
+          if-no-files-found: error
