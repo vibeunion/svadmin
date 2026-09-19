@@ -675,14 +675,6 @@ main {
   left: auto;
   right: 0;
 }
-[dir="rtl"] .sidebar-content-expanded {
-  margin-left: 0;
-  margin-right: 252px;
-}
-[dir="rtl"] .sidebar-content-collapsed {
-  margin-left: 0;
-  margin-right: 70px;
-}
 .sidebar-menu-item, .sidebar-menu-item-active {
   position: relative;
 }

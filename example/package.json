@@ -6,9 +6,10 @@
   "scripts": {
     "check": "node ../node_modules/@typescript/native/bin/tsc -p tsconfig.bun-tests.json --pretty false && svelte-check --tsgo-experimental-api --tsconfig ./tsconfig.json",
     "dev": "vite --host 127.0.0.1 --port 5173",
-    "build": "vite build",
+    "build": "node ../scripts/build-migrated-ui.mjs example && vite build",
     "preview": "vite preview",
-    "test": "vitest run --config vitest.config.ts"
+    "test": "vitest run --config vitest.config.ts",
+    "styles:migrated:check": "node ../scripts/build-migrated-ui.mjs example --check"
   },
   "dependencies": {
     "@internationalized/date": "^3.12.3",

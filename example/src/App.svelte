@@ -2,7 +2,6 @@
   import { useTranslation } from '@svadmin/core/i18n';
   import AdminApp from '@svadmin/ui/components/AdminApp.svelte';
   import { setRichTextEditor } from '@svadmin/ui/editor-config';
-  import '@svadmin/ui/app.theme.css';
   import '@svadmin/ai-elements/ai.css';
   import { inMemoryDataProvider } from './providers/inMemoryDb';
   import { createInventoryChatProvider } from './providers/inventoryAssistant';
