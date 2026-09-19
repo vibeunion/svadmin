@@ -43,10 +43,15 @@ const server = await createServer({
 const checks = [];
 const pageErrors = [];
 const failures = [];
-// Chromium 的 Skia SIMD 优化可能让相同圆角出现 1 色阶舍入差异。
-// 仅截图基线使用精度优先路径；不改 CSS，不放宽逐像素比较。
+// Precision-oriented, single-threaded CPU rasterization for this screenshot fixture only.
+// Application E2E and conditional-style checks still launch unmodified Chromium.
 // Upstream diagnosis: https://issues.chromium.org/issues/40039960
-const screenshotLaunchArgs = ['--disable-skia-runtime-opts'];
+const screenshotLaunchArgs = [
+  '--disable-skia-runtime-opts',
+  '--disable-gpu',
+  '--disable-partial-raster',
+  '--num-raster-threads=1',
+];
 let browser;
 try {
   await server.listen();
