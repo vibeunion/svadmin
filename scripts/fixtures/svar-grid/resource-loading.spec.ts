@@ -5,7 +5,7 @@ import type { GetListParams } from '@svadmin/core';
 interface Row { id: number; name: string; stock: number; parentId?: number | null; hasChildren?: boolean }
 async function server(page: Page, data?: Row[]) {
   const requests: GetListParams[] = [];
-  const rows = data ?? Array.from({ length: 2000 }, (_, id) => ({ id, name: `Resource ${id}`, stock: id }));
+  const rows: Row[] = data ?? Array.from({ length: 2000 }, (_, id) => ({ id, name: `Resource ${id}`, stock: id }));
   await page.route('**/api/rows?query=**', async route => {
     const query = JSON.parse(new URL(route.request().url()).searchParams.get('query') ?? '{}') as GetListParams;
     requests.push(query);

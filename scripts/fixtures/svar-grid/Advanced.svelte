@@ -32,7 +32,7 @@
   }
   const provider: DataProvider = {
     getApiUrl: () => '/api',
-    getList: async params => responseData(await fetch(`/api/rows?query=${encodeURIComponent(JSON.stringify(params))}`, params.signal ? { signal: params.signal } : {})),
+    getList: async (params: Parameters<DataProvider['getList']>[0] & { signal?: AbortSignal }) => responseData(await fetch(`/api/rows?query=${encodeURIComponent(JSON.stringify(params))}`, params.signal instanceof AbortSignal ? { signal: params.signal } : {})),
     getOne: async params => responseData(await fetch(`/api/rows/${encodeURIComponent(String(params.id))}`)),
     create: async () => { throw new Error('Creation is not part of this fixture'); },
     update: async params => responseData(await fetch(`/api/rows/${encodeURIComponent(String(params.id))}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(params) })),
