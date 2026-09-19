@@ -1,0 +1,54 @@
+name: PR443 main integration review
+on:
+  push:
+    branches: [review/pr443-main-20260919-1549]
+    paths: [.github/workflows/pr443-main-review.yml]
+permissions:
+  contents: read
+jobs:
+  strict-coverage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: 0dd3ec59c290835c46edc482b11f7a183a9dfa12
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 26
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Verify narrow repair and unchanged runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --quiet --no-tags --unshallow origin
+          test "$(git diff --name-only 761310059dc0845311f3ffe9aec9c4a5bf53b6d2 HEAD)" = tsconfig.bun-tests.json
+          git diff --check 8f068fb093b48cd2410b3b28a6066b567a44690e HEAD
+          git diff 761310059dc0845311f3ffe9aec9c4a5bf53b6d2 HEAD
+          git rev-parse HEAD HEAD:tsconfig.bun-tests.json HEAD:scripts/check-type-coverage.ts
+      - name: Install unchanged dependencies
+        run: |
+          bun install
+          git diff --exit-code -- bun.lock
+      - name: Strict coverage before builds
+        run: bun scripts/check-type-coverage.ts
+      - name: Build normal generated workspace dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! bun run build:packages >/tmp/pr443-build.log 2>&1; then tail -100 /tmp/pr443-build.log; exit 1; fi
+          tail -8 /tmp/pr443-build.log
+      - name: Run the exact failed root check without suppressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! bun run check >/tmp/pr443-check.log 2>&1; then tail -120 /tmp/pr443-check.log; exit 1; fi
+          cat /tmp/pr443-check.log
+      - name: Verify regression and lint
+        run: |
+          bunx --no-install eslint scripts/stripe-first-refactor-contract.test.ts --max-warnings 0
+          bun test scripts/stripe-first-refactor-contract.test.ts scripts/check-type-coverage.test.ts
+          git diff --exit-code -- tsconfig.bun-tests.json bun.lock packages/ui/design/product-recipes.ts scripts/stripe-first-refactor-contract.test.ts
