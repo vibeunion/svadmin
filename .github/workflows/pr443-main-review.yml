@@ -6,58 +6,87 @@ on:
 permissions:
   contents: read
 jobs:
-  verify-repair:
+  retain-evidence:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: read
     steps:
       - uses: actions/checkout@v7
         with:
           ref: 713d90db73373821ab6102eb694b3882cfd11d2e
-          persist-credentials: false
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 26
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.4.2
-      - name: Verify exact ancestry and complete diff
-        run: |
-          set -euo pipefail
-          git fetch --quiet --no-tags --unshallow origin
-          git merge-base --is-ancestor c02ac0dab6edc081b4175d17a46fdeff98e1267d HEAD
-          git merge-base --is-ancestor b39b4953af4166548b21b8ab7fd2c7af80d6a027 HEAD
-          git merge-base --is-ancestor 0f6c4ad148f69b501870f0c18c6ea94bd27a8349 HEAD
-          git diff --check c02ac0dab6edc081b4175d17a46fdeff98e1267d HEAD
-          git diff HEAD^ HEAD -- scripts/stripe-first-refactor-contract.test.ts
-      - name: Install unchanged dependencies
-        run: |
-          bun install
-          git diff --exit-code -- bun.lock
-      - name: Verify corrected contract and lint
-        run: |
-          bunx --no-install eslint scripts/stripe-first-refactor-contract.test.ts --max-warnings 0
-          bun test scripts/stripe-first-refactor-contract.test.ts
-      - name: Prove the contract rejects lost top alignment
+      - name: Download and validate exact successful run artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
-          file=packages/ui/design/product-recipes.ts
-          cp "$file" /tmp/pr443-product-recipes.ts
-          trap 'cp /tmp/pr443-product-recipes.ts "$file"' EXIT
+          api=https://api.github.com/repos/vibeunion/svadmin
+          curl --fail --silent --show-error --max-time 60 -H "Authorization: Bearer $GH_TOKEN" "$api/actions/runs/35453565034" > /tmp/pr443-run.json
+          curl --fail --silent --show-error --max-time 60 -H "Authorization: Bearer $GH_TOKEN" "$api/actions/artifacts/10587437234" > /tmp/pr443-artifact.json
+          curl --fail --silent --show-error --location --max-time 60 -H "Authorization: Bearer $GH_TOKEN" "$api/actions/artifacts/10587437234/zip" > /tmp/pr443-evidence.zip
           python3 - <<'PY'
-          from pathlib import Path
-          p = Path('packages/ui/design/product-recipes.ts')
-          source = p.read_text()
-          old = "columns: { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', alignItems: 'start',"
-          assert source.count(old) == 1
-          p.write_text(source.replace(old, old.replace("alignItems: 'start'", "alignItems: 'stretch'")))
+          import hashlib, json, stat, struct, subprocess, zipfile
+          from pathlib import Path, PurePosixPath
+          head = '713d90db73373821ab6102eb694b3882cfd11d2e'
+          tested = '65b516477d8720c75eedc236efe0da3d1eecba65'
+          expected_digest = '1e3d3cf6f69e4a6c439c4dc8faed3b952331e99b38abeb4e5027c691bbdb98aa'
+          run = json.loads(Path('/tmp/pr443-run.json').read_text())
+          artifact = json.loads(Path('/tmp/pr443-artifact.json').read_text())
+          assert run['id'] == 35453565034 and run['head_sha'] == head
+          assert run['status'] == 'completed' and run['conclusion'] == 'success'
+          assert artifact['id'] == 10587437234 and not artifact['expired']
+          assert artifact['name'] == 'surface-workflows-' + tested
+          assert artifact['workflow_run']['head_sha'] == head
+          assert artifact['digest'] == 'sha256:' + expected_digest
+          archive = Path('/tmp/pr443-evidence.zip').read_bytes()
+          assert hashlib.sha256(archive).hexdigest() == expected_digest
+          assert subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip() == head
+          out = Path('docs/pr-evidence/pr443-713d90d')
+          assert not out.exists()
+          out.mkdir(parents=True)
+          images = []
+          with zipfile.ZipFile('/tmp/pr443-evidence.zip') as z:
+              entries = z.infolist()
+              assert sum(e.file_size for e in entries) < 20000000
+              assert len({e.filename for e in entries}) == len(entries)
+              for e in entries:
+                  p = PurePosixPath(e.filename)
+                  assert not p.is_absolute() and '..' not in p.parts
+                  assert not stat.S_ISLNK(e.external_attr >> 16)
+              for width, height in [(1440, 900), (1920, 1080), (390, 844)]:
+                  name = f'surface-workflow-{width}x{height}.png'
+                  matches = [e for e in entries if PurePosixPath(e.filename).name == name]
+                  assert len(matches) == 1, (name, len(matches))
+                  data = z.read(matches[0])
+                  assert data[:8] == b'\x89PNG\r\n\x1a\n' and data[12:16] == b'IHDR'
+                  actual_width, actual_height = struct.unpack('>II', data[16:24])
+                  assert actual_width == width and actual_height >= height
+                  (out / name).write_bytes(data)
+                  images.append({'file': name, 'archivePath': matches[0].filename, 'viewport': [width, height], 'bitmap': [actual_width, actual_height], 'sha256': hashlib.sha256(data).hexdigest(), 'capture': 'original full-page PNG'})
+              reports = [e for e in entries if PurePosixPath(e.filename).name == 'packed-consumer.json']
+              assert len(reports) == 1
+              data = z.read(reports[0])
+              report = json.loads(data)
+              assert report['status'] == 'passed'
+              (out / 'packed-consumer.json').write_bytes(data)
+          source_paths = ['packages/core/src/query-session.svelte.ts', 'packages/core/src/session-query.svelte.ts', 'packages/core/src/task-hooks.svelte.ts', 'packages/ui/src/components/FileUpload.svelte', 'packages/ui/src/components/FilterBuilder.svelte', 'packages/ui/src/components/TreeSelect.svelte', 'packages/ui/src/components/JsonSchemaForm.svelte', 'packages/ui/design/product-recipes.ts', 'packages/ui/panda.config.ts', 'scripts/surface-workflows/workflow.e2e.ts', 'scripts/stripe-first-refactor-contract.test.ts']
+          provenance = {'sourceHead': head, 'testedMerge': tested, 'sourceTree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], text=True).strip(), 'workflowRun': run['id'], 'artifactId': artifact['id'], 'artifactSha256': expected_digest, 'artifactCreatedAt': artifact['created_at'], 'images': images, 'sourceSha256': {p: hashlib.sha256(Path(p).read_bytes()).hexdigest() for p in source_paths}, 'scope': 'Synthetic functional acceptance fixtures, not production backend evidence or final product visual approval.'}
+          (out / 'provenance.json').write_text(json.dumps(provenance, indent=2) + '\n')
+          (out / 'README.md').write_text('# PR443 exact-head browser evidence\n\nOriginal PNG bytes from successful Surface workflow run 35453565034, artifact 10587437234. Source head `' + head + '`; tested PR merge `' + tested + '`. Archive digest, image hashes, bitmap dimensions, and selected source hashes are in provenance.json. These are full-page captures under the stated viewports; the narrow bitmap can be taller than the viewport. Synthetic functional fixtures do not certify final Stripe-style visual design or live production authorization. No source branch, main, baseline or test tolerance is changed by retention.\n')
+          print(json.dumps({'images': images, 'packedConsumer': report['status'], 'archiveDigestVerified': True}, indent=2))
           PY
-          if bun test scripts/stripe-first-refactor-contract.test.ts >/tmp/pr443-negative.log 2>&1; then
-            echo 'ERROR: removed top-alignment contract was not detected'
-            exit 1
-          fi
-          grep -F '1 fail' /tmp/pr443-negative.log
-          grep -F 'stretch' /tmp/pr443-negative.log
-          cp /tmp/pr443-product-recipes.ts "$file"
-          git diff --exit-code
-          echo 'Exact-head positive test and intentional-mutation negative test passed; no source changes retained.'
+      - name: Retain only evidence on a new non-main branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          branch=evidence/pr443-713d90d
+          test -z "$(git ls-remote --heads origin "refs/heads/$branch")"
+          git config user.name 'Integration review'
+          git config user.email 'noreply@github.com'
+          git add -- docs/pr-evidence/pr443-713d90d
+          git diff --cached --check
+          git commit -m 'docs: retain exact-head PR443 Surface browser evidence'
+          git push origin "HEAD:refs/heads/$branch"
+          echo "EVIDENCE_COMMIT=$(git rev-parse HEAD)"
