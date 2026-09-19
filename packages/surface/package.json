@@ -12,7 +12,9 @@
     "README.md",
     "compatibility.json",
     "!dist/**/*.test.*",
+    "!dist/**/*.test-*",
     "!dist/**/*.spec.*",
+    "!dist/**/*.spec-*",
     "STYLING.md"
   ],
   "main": "dist/index.js",
