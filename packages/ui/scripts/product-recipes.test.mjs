@@ -60,3 +60,24 @@ test('published aliases stay identical; generated variables remain namespaced', 
     if (decl.prop.startsWith('--')) assert.match(decl.prop, /^--svadmin-/u);
   });
 });
+
+test('workspace definition and emitted CSS retain top alignment and responsive column order', () => {
+  const workspace = definitions.productWorkspace;
+  assert.equal(workspace.base.columns.display, 'grid');
+  assert.equal(workspace.base.columns.alignItems, 'start');
+  assert.equal(workspace.base.columns.gridTemplateColumns, 'minmax(0, 1fr)');
+  const responsive = workspace.variants.hasSecondary.true;
+  assert.equal(responsive.columns['@media (min-width: 64rem)'].gridTemplateColumns, 'minmax(0, 1fr) minmax(0, var(--workspace-secondary-width, 22rem))');
+  assert.equal(responsive.primary['@media (min-width: 64rem)'].order, '1');
+  assert.equal(responsive.secondary['@media (min-width: 64rem)'].order, '2');
+  const single = runtime.productWorkspace();
+  const split = runtime.productWorkspace({ hasSecondary: true });
+  for (const css of [generated, published]) {
+    assert.equal(declarations(css, single.columns).get('display'), 'grid');
+    assert.equal(declarations(css, single.columns).get('align-items'), 'start');
+    assert.equal(declarations(css, single.columns).get('grid-template-columns'), 'minmax(0, 1fr)');
+    assert.equal(declarations(css, split.columns).get('grid-template-columns'), 'minmax(0, 1fr) minmax(0, var(--workspace-secondary-width, 22rem))');
+    assert.equal(declarations(css, split.primary).get('order'), '1');
+    assert.equal(declarations(css, split.secondary).get('order'), '2');
+  }
+});

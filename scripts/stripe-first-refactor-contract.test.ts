@@ -2,7 +2,6 @@ import { describe, expect, it } from 'bun:test';
 import { readdirSync, readFileSync } from 'node:fs';
 import { relative, resolve } from 'node:path';
 import utilityClasses from '../packages/ui/scripts/utility-class-map.json' with { type: 'json' };
-import { productWorkspace } from '../packages/ui/design/product-recipes';
 
 const root = resolve(import.meta.dir, '..');
 const read = (path: string) => readFileSync(resolve(root, path), 'utf8');
@@ -136,23 +135,9 @@ describe('Stripe-first refactor contract', () => {
     expect(read('packages/ui/src/components/AboutSettings.svelte')).toContain('<SettingsGroup');
     expect(read('packages/ui/src/components/SettingsPage.svelte')).not.toContain('tracking-wider');
     const workspace = read('packages/ui/src/components/content/WorkspaceLayout.svelte');
-    // 布局已迁移到 slot recipe；验证真实声明与接线，不要求退役的 utility 类。
+    // 样式声明由 product-recipes.test.mjs 验证；这里保留 Svelte 接线契约。
     expect(workspace).toContain('productWorkspace({ hasSecondary: Boolean(secondary) })');
     expect(workspace).toContain('class={styles.columns}');
-    expect(productWorkspace).toMatchObject({
-      base: {
-        columns: { display: 'grid', alignItems: 'start', gridTemplateColumns: 'minmax(0, 1fr)' },
-      },
-      variants: {
-        hasSecondary: {
-          true: {
-            columns: { '@media (min-width: 64rem)': { gridTemplateColumns: 'minmax(0, 1fr) minmax(0, var(--workspace-secondary-width, 22rem))' } },
-            primary: { '@media (min-width: 64rem)': { order: '1' } },
-            secondary: { '@media (min-width: 64rem)': { order: '2' } },
-          },
-        },
-      },
-    });
     expect(read('packages/ui/src/components/account/CompanyProfilePage.svelte')).toContain('<WorkspaceLayout');
     expect(read('packages/ui/src/components/account/UserProfilePage.svelte')).toContain('<WorkspaceLayout');
     expect(read('packages/ui/src/components/account/SettingsEnterprisePage.svelte')).toContain(`${utilityClasses.grid} ${utilityClasses['items-start']}`);
