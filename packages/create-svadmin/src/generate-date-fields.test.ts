@@ -15,7 +15,7 @@ describe('manual temporal field contracts', () => {
 
   it('generates local clock strings and a nullable two-endpoint range, not a scalar range', () => {
     const bundle = generateResourceBundle({
-      name: 'events', primaryKey: 'id',
+      name: 'events', label: 'Events', primaryKey: 'id',
       fields: parseManualFields('id:number,startsAt:datetime,alarm:time,period:daterange', 'id'),
     });
     expect(bundle.typeboxCode).toContain('startsAt: Type.Optional(Type.String())');
