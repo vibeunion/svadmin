@@ -1,0 +1,23 @@
+import { cleanup, fireEvent, render } from '@testing-library/svelte';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import FileUpload, { type UploadItem } from './FileUpload.svelte';
+
+afterEach(cleanup);
+
+describe('FileUpload reentrant host callbacks', () => {
+  it.each(['queued', 'uploading'] as const)('does not dispatch after unmount from the %s notification', async phase => {
+    let teardown: (() => void) | undefined;
+    const upload = vi.fn(async () => undefined);
+    const onChange = vi.fn((items: UploadItem[]) => {
+      if (items[0]?.status === phase) teardown?.();
+    });
+    const view = render(FileUpload, { upload, onChange });
+    teardown = () => { view.unmount(); };
+    const input = view.container.querySelector('input[type="file"]');
+    if (!(input instanceof HTMLInputElement)) throw new Error('Expected a native file input');
+    await fireEvent.change(input, { target: { files: [new File(['draft'], 'draft.txt', { type: 'text/plain' })] } });
+    expect(onChange).toHaveBeenCalledWith([expect.objectContaining({ status: phase })]);
+    expect(upload).not.toHaveBeenCalled();
+    expect(view.container.querySelector('input[type="file"]')).toBeNull();
+  });
+});

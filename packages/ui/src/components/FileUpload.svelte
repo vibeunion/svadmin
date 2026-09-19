@@ -106,6 +106,8 @@
     const current = () => !disposed && !controller.signal.aborted && controllers.get(item.id) === controller;
     updateItem(item.id, { status: 'uploading', progress: 0 }, ['error', 'url']);
     try {
+      // onChange may synchronously unmount the component or retire this attempt.
+      if (!current()) return;
       const result = await upload(item.file, {
         signal: controller.signal,
         onProgress: progress => {
