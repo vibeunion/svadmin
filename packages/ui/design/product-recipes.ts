@@ -111,9 +111,9 @@ export const productList = defineSlotRecipe({
   },
 });
 
-
-// 状态标签不沿用用于实心警告背景的 warning-foreground；在浅色底上混合
-// 当前主题前景，暗色底上同样可读。不支持 color-mix 时保留高对比回退。
+// 不把实心警告背景的 warning-foreground 用于浅色标签。
+// 与带显式色相的中性色混合时，使用矩形 Oklab 空间，避免 Oklch 色相旋转。
+// 不支持 color-mix 时保留可读的 foreground/muted 回退。
 export const productStatus = defineSlotRecipe({
   className: 'product-status',
   slots: ['root'],
@@ -123,10 +123,10 @@ export const productStatus = defineSlotRecipe({
       '&[data-slot=badge]': {
         background: 'var(--muted)', color: 'var(--foreground)',
         borderColor: 'var(--svadmin-status-color)', whiteSpace: 'nowrap',
-        '@supports (color: color-mix(in oklch, black, white))': {
-          background: 'color-mix(in oklch, var(--svadmin-status-color) 10%, var(--card))',
-          borderColor: 'color-mix(in oklch, var(--svadmin-status-color) 25%, var(--card))',
-          color: 'color-mix(in oklch, var(--svadmin-status-color) 35%, var(--foreground))',
+        '@supports (color: color-mix(in oklab, black, white))': {
+          background: 'color-mix(in oklab, var(--svadmin-status-color) 10%, var(--card))',
+          borderColor: 'color-mix(in oklab, var(--svadmin-status-color) 25%, var(--card))',
+          color: 'color-mix(in oklab, var(--svadmin-status-color) 35%, var(--foreground))',
         },
       },
     },
