@@ -11,13 +11,13 @@ body { margin: 0; }
 .kit-options label, .kit-scenario label { display: flex; align-items: center; gap: 8px; }
 .kit-options select, .kit-scenario select { font: inherit; color: var(--foreground); background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md); min-height: 32px; padding: 4px 8px; }
 .kit-layout { display: grid; grid-template-columns: 208px minmax(0, 1fr); }
-.kit-nav { padding: 24px 16px; background: var(--card); border-right: 1px solid var(--border); }
-.kit-eyebrow { color: var(--muted-foreground); font-size: 11px; margin: 0 12px 16px; }
-.kit-nav button { display: block; width: 100%; text-align: start; min-height: 40px; border: 0; border-radius: var(--radius-md); padding: 8px 12px; font: inherit; cursor: pointer; background: transparent; color: var(--foreground); }
+.kit-nav { padding: 24px 16px; background: var(--background); border-right: 1px solid var(--border); }
+.kit-eyebrow { text-transform: none; color: var(--muted-foreground); font-size: 11px; margin: 0 12px 16px; }
+.kit-nav button { display: flex; align-items: center; gap: 10px; width: 100%; text-align: start; min-height: 40px; border: 0; border-radius: var(--radius-md); padding: 8px 12px; font: inherit; cursor: pointer; background: transparent; color: var(--foreground); }
 .kit-nav button:hover { background: var(--muted); }
 .kit-nav button[aria-current='page'] { background: var(--accent); color: var(--accent-foreground); font-weight: 600; }
 .kit-nav-note { white-space: pre-line; margin: 32px 12px; color: var(--muted-foreground); font-size: 12px; }
-.kit-workspace { min-width: 0; }
+.kit-workspace { min-width: 0; background: var(--card); }
 .kit-scenario { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; min-height: 60px; padding: 12px 32px; border-bottom: 1px solid var(--border); }
 .kit-scenario > span { font-size: 12px; margin-inline-start: auto; }
 .kit-check { font-size: 12px; }
@@ -62,3 +62,22 @@ body { margin: 0; }
   .kit-save-bar { align-items: flex-start; padding-block: 16px; }
 }
 @media (prefers-reduced-motion: reduce) { .kit-root *, .kit-root *::before, .kit-root *::after { animation-duration: .01ms; transition-duration: .01ms; } }
+
+/* 产品页只用组合规则；控件外观及表格部件由公开的 Panda recipes 提供。 */
+[data-svadmin-table-toolbar] .svadmin-filter-toolbar { width: min(100%, 28rem); }
+.kit-section:first-child { border-top: 0; }
+.kit-timeline { padding: 0; list-style: none; gap: 0; }
+.kit-timeline li { position: relative; padding: 0 0 28px 24px; border-left: 1px solid var(--border); }
+.kit-timeline li::before { content: ''; position: absolute; left: -4px; top: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--muted-foreground); }
+.kit-timeline li:last-child { border-left-color: transparent; }
+.kit-timeline strong { font-weight: 500; }
+.kit-save-bar { border-top: 1px solid var(--border); }
+.kit-developer { margin-top: 32px; }
+.kit-settings-nav { display: flex; flex-direction: column; gap: 12px; padding-top: 20px; font-size: 13px; }
+.kit-settings-nav p { margin: 0; font-weight: 500; }
+.kit-settings-nav a { color: var(--foreground); text-decoration: none; padding: 4px 0; }
+.kit-settings-nav a:hover { color: var(--primary); text-decoration: underline; }
+.kit-settings-nav a:focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
+.kit-form-control { width: 100%; }
+[data-svadmin-workspace-secondary] .kit-section { padding-top: 0; }
+@media (max-width: 700px) { .kit-settings-nav { padding-top: 0; } }

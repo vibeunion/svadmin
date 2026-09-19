@@ -32,6 +32,12 @@ jobs:
           bun run --cwd packages/ai-elements build
           bun run --cwd packages/ui build
           git diff --exit-code -- bun.lock
+      - name: Verify reusable product recipes and component contracts
+        run: |
+          set -euo pipefail
+          node --test packages/ui/scripts/product-recipes.test.mjs
+          (cd packages/ui && node ../../node_modules/vitest/vitest.mjs run src/components/content/product-layout.test.svelte.ts)
+          node node_modules/eslint/bin/eslint.js packages/ui/design/product-recipes.ts packages/ui/src/components/content/{SectionHeader,PageToolbar,SettingsGroup,SettingsFieldRow,WorkspaceLayout,product-layout.test-host}.svelte packages/ui/src/components/content/product-layout.test.svelte.ts design/stripe-first/preview/Preview.svelte --max-warnings 0
       - name: Type-check the actual specimen
         run: node node_modules/svelte-check/bin/svelte-check --tsconfig design/stripe-first/preview/tsconfig.json --fail-on-warnings
       - name: Install Chromium

@@ -28,10 +28,12 @@ export const customers = Object.freeze([
   { id: 'demo_004', name: 'Long-name operational workspace / 多语言协作与数据服务', email: 'accounts@workspace.example', status: 'pending', amount: -1200, created: '2026-09-16' },
 ].map(record => Object.freeze(record)));
 
-/** @param {string} query */
-export function filterCustomers(query) {
+/** @param {string} query @param {string} [status] */
+export function filterCustomers(query, status = 'all') {
   const term = String(query).trim().toLowerCase();
-  return customers.filter(record => `${record.name} ${record.email}`.toLowerCase().includes(term));
+  const allowed = ['all', 'active', 'pending'];
+  if (!allowed.includes(status)) return [];
+  return customers.filter(record => (status === 'all' || record.status === status) && `${record.name} ${record.email}`.toLowerCase().includes(term));
 }
 
 /** @param {string} state */
