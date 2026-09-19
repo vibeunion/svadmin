@@ -31,7 +31,18 @@ for (const [name, definition] of Object.entries(definitions)) {
     assert.doesNotMatch(JSON.stringify(definition), /#[0-9a-f]{3,8}\b|--tw-|svadmin-u-|!important|@(?:theme|apply|tailwind)\b/iu);
   });
 }
-test('workspace default stays one column without an aside', () => {
+test('workspace stays top-aligned and only adds a responsive column for an aside', () => {
+  const workspace = definitions.productWorkspace;
+  assert.equal(workspace.base.columns.display, 'grid');
+  assert.equal(workspace.base.columns.alignItems, 'start');
+  assert.equal(workspace.base.columns.gridTemplateColumns, 'minmax(0, 1fr)');
+  assert.deepEqual(workspace.variants.hasSecondary.true.columns, {
+    '@media (min-width: 64rem)': {
+      gridTemplateColumns: 'minmax(0, 1fr) minmax(0, var(--workspace-secondary-width, 22rem))',
+    },
+  });
+  // 与真实发布 CSS 交叉核验，不让仅定义正确但遗漏生成的样式通过。
+  assert.equal(declarations(published, runtime.productWorkspace().columns).get('align-items'), 'start');
   assert.equal(definitions.productWorkspace.defaultVariants.hasSecondary, false);
   assert.equal(declarations(published, runtime.productWorkspace().columns).get('grid-template-columns'), 'minmax(0, 1fr)');
   assert.match(declarations(published, runtime.productWorkspace({ hasSecondary: true }).columns).get('grid-template-columns'), /--workspace-secondary-width/u);

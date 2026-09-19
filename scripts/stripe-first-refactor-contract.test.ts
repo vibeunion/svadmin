@@ -2,7 +2,6 @@ import { describe, expect, it } from 'bun:test';
 import { readdirSync, readFileSync } from 'node:fs';
 import { relative, resolve } from 'node:path';
 import utilityClasses from '../packages/ui/scripts/utility-class-map.json' with { type: 'json' };
-import { productWorkspace } from '../packages/ui/design/product-recipes';
 
 const root = resolve(import.meta.dir, '..');
 const read = (path: string) => readFileSync(resolve(root, path), 'utf8');
@@ -138,14 +137,8 @@ describe('Stripe-first refactor contract', () => {
     const workspace = read('packages/ui/src/components/content/WorkspaceLayout.svelte');
     expect(workspace).toContain('$derived(productWorkspace({ hasSecondary: Boolean(secondary) }))');
     expect(workspace).toContain('class={styles.columns}');
-    // 样式已迁移到语义 recipe，验证真实对齐/响应式契约，而不是旧工具类字串。
-    expect(productWorkspace.base?.['columns']).toEqual(expect.objectContaining({
-      display: 'grid', alignItems: 'start', gridTemplateColumns: 'minmax(0, 1fr)',
-    }));
-    expect(productWorkspace.defaultVariants?.['hasSecondary']).toBe(false);
-    expect(productWorkspace.variants?.['hasSecondary']?.['true']).toEqual(expect.objectContaining({
-      columns: { '@media (min-width: 64rem)': { gridTemplateColumns: 'minmax(0, 1fr) minmax(0, var(--workspace-secondary-width, 22rem))' } },
-    }));
+    // 配方几何与发布 CSS 由 packages/ui/scripts/product-recipes.test.mjs 验证，
+    // 此处只验证组件绑定，避免把 Panda 构建工具类型带入 core tooling。
     expect(read('packages/ui/src/components/account/CompanyProfilePage.svelte')).toContain('<WorkspaceLayout');
     expect(read('packages/ui/src/components/account/UserProfilePage.svelte')).toContain('<WorkspaceLayout');
     expect(read('packages/ui/src/components/account/SettingsEnterprisePage.svelte')).toContain(`${utilityClasses.grid} ${utilityClasses['items-start']}`);
