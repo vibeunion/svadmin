@@ -6,7 +6,7 @@
   import { createSurfaceOpenUIStream } from '../../packages/surface/src/openui.js';
   import type { SurfaceSpec, SurfaceDataProvider } from '../../packages/surface/src/types.js';
   import type { SurfaceWorkflowTransport } from '../../packages/surface/src/workflows/client.js';
-  import '@svadmin/ui/styles.css';
+  import '@svadmin/ui/app.css';
   import '../../packages/surface/src/styles.css';
   import { actionDescriptor, policy, firstChunk, lastChunk } from './fixture.js';
   const actions = [actionDescriptor];
