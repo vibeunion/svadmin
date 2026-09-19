@@ -115,9 +115,29 @@ export function statusView(status: 'paid' | 'pending') {
 专项工作流 `Typed renderer contracts` 执行运行时回归、原生 Svelte snippets / 动态组件更新、正反 TypeScript 契约和真实 AutoTable / AutoForm 消费端编译。DOM 回归使用 happy-dom，不冒充真实浏览器端到端或视觉对比结果。
 
 ```sh
-bun run --cwd packages/ui test src/rendering/rendering.test.ts
+bun run --cwd packages/ui test src/rendering
 node node_modules/@typescript/native/bin/tsc --noEmit -p scripts/fixtures/ui-rendering/tsconfig.json
 bun run svelte-check --tsgo-experimental-api --tsconfig scripts/fixtures/ui-rendering/tsconfig.svelte.json --fail-on-warnings
 ```
 
-本次是增量 API，不是全仓库调用点迁移。不替换 AutoTable / AutoForm，不改变 Panda recipes，不合并并行样式或 SVAR 工作，也不扩展 Surface 的读写协议。TSX 将来仍可按明确需求单独试验，但不是当前组件主线依赖。
+适配器本身保持增量 API；示例应用的所有业务页面调用点已统一接入，详见 [迁移清单](./typed-rendering-migration.md)。不替换 AutoTable / AutoForm，不改变 Panda recipes，不合并并行样式或 SVAR 工作，也不扩展 Surface 的读写协议。TSX 将来仍可按明确需求单独试验，但不是当前组件主线依赖。
+
+
+## 页面级接入
+
+`createResourceRenderers` 还提供 `records(values)`、`draftValue(mode, key, value)` 和只读 `resource`。为 `AutoTable`、`AutoForm`、`ShowPage`、`ResourceOperationsPage` 传入可选的 `rendering`，可以把数据校验接入原生组件而不替换默认单元格或字段模板。组件会在使用资源绑定前验证 `rendering.resource` 与宿主资源的契约是同一个实例；相同名称但不同契约也会拒绝。
+
+```svelte
+<AutoTable resourceName={orders.name} rendering={orderUI} />
+<AutoForm resourceName={orders.name} rendering={orderUI} mode="create" />
+<ShowPage resourceName={orders.name} rendering={orderUI} id={1} />
+```
+
+不要用 `defaultCellRenderer` 全面替代默认渲染来实现这项迁移：那会绕过原有 `InlineEdit` 分支。页面级 `rendering` 保留行内编辑、表单错误关联、密度与禁用状态。表单回调会捕获契约/模式/租户/会话所属作用域，过期作用域和 show 模式不会写入草稿。组件输出 `data-svadmin-rendering-resource` 供集成测试核对实际接入点，此标记不是授权凭证。
+
+
+## 业务页面接入
+
+纯记录/表单草稿视图使用轻量 `createResourceRendering(contract)`，需要自定义单元格或字段 snippet 时使用 `createResourceRenderers(contract)`。二者共用相同的校验实现，并提供 `resource`、`record`、`records`、`draft`。具体业务类型来自实际契约；通用路由只通过 `ResourceRendering` 擦除类型，不假定某个运行时资源名必然对应某个静态类型。
+
+将适配器通过 `rendering` 传入 `AutoTable`、`AutoForm`、`ShowPage`；框架也会继续传递到快速编辑和详情抽屉。`bindResourceRendering` 使用契约对象身份校验绑定，不能只用名称相同的另一个契约。旧的未传入 `rendering` 的第三方调用继续工作。全部示例业务页面与路由的覆盖清单见 [业务迁移记录](./typed-rendering-migration.md)。

@@ -69,9 +69,8 @@
   } as const;
 
   function getResourcePageLoader(resourceName: string) {
-    if (resourceName in resourcePageLoaders) {
-      return resourcePageLoaders[resourceName as keyof typeof resourcePageLoaders];
-    }
+    const entry = Object.entries(resourcePageLoaders).find(([name]) => name === resourceName);
+    if (entry) return entry[1];
     return loadDefaultResourcePage;
   }
 </script>

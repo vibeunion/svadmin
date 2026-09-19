@@ -1,5 +1,9 @@
 export type CaseStageId = 'overview' | 'execution' | 'evidence' | 'report';
 
+export function isCaseStageId(value: string): value is CaseStageId {
+  return ['overview', 'execution', 'evidence', 'report'].includes(value);
+}
+
 export interface CaseWorkspaceState {
   readonly activeStage: CaseStageId;
   readonly inspectorOpen: boolean;

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { ResourceRendering } from '../rendering/index.js';
   import { definedOptions } from '@svadmin/core/options';
 
   import { getResource, captureAdminContext } from '@svadmin/core';
@@ -12,6 +13,7 @@
 
   interface Props {
     resourceName: string;
+    rendering?: ResourceRendering | undefined;
     title?: string;
     density?: 'compact' | 'comfortable';
     columns?: 1 | 2 | 3 | 4;
@@ -22,6 +24,7 @@
 
   let {
     resourceName,
+    rendering,
     title,
     density = 'comfortable',
     columns = 1,
@@ -51,6 +54,7 @@
   </PageHeader>
 
   <AutoForm
+    {rendering}
     {resourceName}
     mode="create"
     {density}

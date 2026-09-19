@@ -1,6 +1,6 @@
 import type { Component, Snippet } from 'svelte';
 import {
-  componentView, createResourceRenderers, type CellInput, type FieldInput,
+  componentView, createResourceRendering, createResourceRenderers, type CellInput, type FieldInput,
 } from '@svadmin/ui/rendering';
 import { orders } from '../resource.js';
 
@@ -33,4 +33,18 @@ export function verifyPublishedTypes(input: CellInput, field: FieldInput, snippe
   ui.columns({ missing: snippet });
   // @ts-expect-error props 不能通过公开声明反向拓宽组件类型。
   componentView(Status, { status: 'cancelled' });
+}
+
+
+export function verifyPublishedBusinessBoundary(input: unknown) {
+  const business = createResourceRendering(orders);
+  business.records(input)[0]?.amount.toFixed(2);
+  business.record(input).status.toUpperCase();
+  const draft = business.draft('edit', input);
+  // @ts-expect-error 记录数组的公开声明必须保留金额的 number 类型。
+  business.records(input)[0]?.amount.toUpperCase();
+  // @ts-expect-error 更新草稿只包含该操作允许的字段。
+  void draft.amount;
+  // @ts-expect-error 草稿尚未通过完整输入校验，不得假定状态是 string。
+  draft.status.toUpperCase();
 }

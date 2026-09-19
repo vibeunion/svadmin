@@ -5,6 +5,9 @@ on:
     paths:
       - 'packages/ui/**'
       - 'packages/core/**'
+      - 'example/**'
+      - 'e2e/business-rendering.spec.ts'
+      - 'playwright.rendering.config.ts'
       - 'scripts/fixtures/ui-rendering/**'
       - '.github/workflows/typed-renderers.yml'
       - 'bun.lock'
@@ -54,3 +57,42 @@ jobs:
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: git diff --check "$BASE_SHA...HEAD"
+
+  business-pages:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - run: bun install --frozen-lockfile
+      - name: Build workspace and production example
+        run: bun run build:packages && bun run --cwd example build && bun run bundle:check
+      - name: Check every page and migration test type
+        run: |
+          bun run --cwd example check
+          node node_modules/@typescript/native/bin/tsc --noEmit -p example/tsconfig.rendering-tests.json
+      - name: Check inventory, all seed resources, and existing example regressions
+        run: bun run --cwd example test
+      - name: Verify native table interactions and accessible forms
+        run: bun run --cwd packages/ui test src/rendering src/components/detail-contract src/components/auto-table-interactions.test.svelte.ts src/components/auto-form-accessibility.test.svelte.ts src/components/form-contract src/components/ResourceOperationsPage.test.svelte.ts
+      - name: Install real Chromium
+        run: bun run playwright install --with-deps chromium
+      - name: All resource routes, inline editing, persistence, and screenshots
+        env:
+          UI_SCREENSHOT_DIR: test-results/screenshots
+        run: bun run playwright test --config playwright.rendering.config.ts
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: typed-business-page-evidence
+          path: test-results
+          retention-days: 7
+          if-no-files-found: warn

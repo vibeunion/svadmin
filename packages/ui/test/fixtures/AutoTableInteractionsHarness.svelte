@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { createResourceRenderers } from '../../src/rendering/index.js';
+  import { resolveResourceContract } from '@svadmin/core/resource-contract';
   import { definedReactiveOptions } from '@svadmin/core/options';
   import { definedOptions } from '@svadmin/core/options';
 
@@ -125,6 +127,8 @@
     ] satisfies ResourceDefinition['fields'],
   })];
 
+  const rendering = createResourceRenderers(resolveResourceContract(resources[0] ?? { name: 'users' }));
+
   const initialPathname = '/';
   let currentPathname = $state(initialPathname);
   let currentParams = $state<Record<string, string>>({ ...untrack(() => initialParams) });
@@ -191,9 +195,9 @@
   {#if standaloneDetailId != null}
     <RecordDetailDrawer resourceName="users" open={true} recordId={standaloneDetailId} />
   {:else if customBatchAction}
-    <AutoTable resourceName="users" {selectable} {density} {expandedRowRender} {batchActions} />
+    <AutoTable {rendering} resourceName="users" {selectable} {density} {expandedRowRender} {batchActions} />
   {:else}
-    <AutoTable resourceName="users" {selectable} {density} {expandedRowRender} />
+    <AutoTable {rendering} resourceName="users" {selectable} {density} {expandedRowRender} />
   {/if}
 {/snippet}
 

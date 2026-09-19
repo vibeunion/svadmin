@@ -1,12 +1,15 @@
 import type { Component, Snippet } from 'svelte';
-import type { FieldDefinition } from '@svadmin/core';
+import type { BaseRecord, FieldDefinition } from '@svadmin/core';
+import { snapshotPlainData } from '@svadmin/core/schema';
 import {
   contractFormInvalidFields,
+  contractKey,
   getContractFormFields,
   parseContractId,
   parseContractRecord,
   snapshotContractFormDraft,
   type ContractFormAction,
+  type ContractFormDraft,
   type ContractFormValues,
   type ContractId,
   type ContractRecord,
@@ -50,6 +53,24 @@ export interface RowContext<S extends ContractSchemas> {
   id: ContractId<S>;
 }
 
+/** 动态路由只擦除资源类型，不把未知记录或草稿假定为业务类型。 */
+export interface ResourceRendering {
+  readonly resource: ResourceContract;
+  record(value: unknown): BaseRecord;
+  records(value: unknown): BaseRecord[];
+  draft(action: ContractFormAction, value: unknown): Record<string, unknown>;
+}
+
+/** 同名但不同实例的契约也不可混用；宿主配置必须绑定实际查询契约。 */
+export function bindResourceRendering(
+  rendering: ResourceRendering | undefined, resource: ResourceContract,
+): ResourceRendering | undefined {
+  if (rendering && rendering.resource !== resource) {
+    throw new TypeError('Renderer resource contract mismatch');
+  }
+  return rendering;
+}
+
 function assertAction(action: ContractFormAction): void {
   if (!['create', 'edit', 'clone', 'show'].includes(action)) {
     throw new TypeError('Invalid renderer form action');
@@ -73,13 +94,29 @@ function fieldState(
   }
 }
 
-/** 原生 Svelte 渲染适配器：不执行生成代码，不发请求，也不改变组件生命周期。 */
-export function createResourceRenderers<S extends ContractSchemas>(resource: ResourceContract<S>) {
-  const recordFields = new Set<string>(getContractFormFields(resource, 'show'));
-
+/** 业务记录/草稿边界；无需自定义 snippet 时，不把完整渲染工具链加入首屏。 */
+export function createResourceRendering<S extends ContractSchemas>(resource: ResourceContract<S>) {
+  contractKey(resource);
   function record(value: unknown): ContractRecord<S> {
     return parseContractRecord(resource, value);
   }
+  function records(value: unknown): ContractRecord<S>[] {
+    const snapshot = snapshotPlainData(value);
+    if (!Array.isArray(snapshot)) throw new TypeError('Renderer records must be an array');
+    return snapshot.map(record);
+  }
+  function draft<A extends ContractFormAction>(action: A, value: unknown): ContractFormDraft<S, A> {
+    assertAction(action);
+    return snapshotContractFormDraft(resource, action, value);
+  }
+  return Object.freeze({ resource, record, records, draft });
+}
+
+/** 原生 Svelte 渲染适配器：不执行生成代码，不发请求，也不改变组件生命周期。 */
+export function createResourceRenderers<S extends ContractSchemas>(resource: ResourceContract<S>) {
+  const boundary = createResourceRendering(resource);
+  const { record, records, draft } = boundary;
+  const recordFields = new Set<string>(getContractFormFields(resource, 'show'));
 
   function cell<K extends RecordField<S>>(key: K, input: CellInput): CellContext<S, K> {
     if (!recordFields.has(key)) throw new TypeError('Unknown renderer record field');
@@ -148,7 +185,7 @@ export function createResourceRenderers<S extends ContractSchemas>(resource: Res
     };
   }
 
-  return { record, cell, row, summary, columns, field };
+  return Object.freeze({ resource, record, records, draft, cell, row, summary, columns, field });
 }
 
 /** 在普通 .ts 配置中保留组件与属性的类型关联；使用原生 <view.component {...view.props} />。 */

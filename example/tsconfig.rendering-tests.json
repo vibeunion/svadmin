@@ -1,0 +1,6 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "types": ["vite/client", "node", "vitest/globals"] },
+  "include": ["src/rendering-values.types.test.ts", "test/business-rendering.test.ts"],
+  "exclude": ["node_modules", "dist"]
+}

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { demoRenderers } from '../resource-rendering';
   import { demoContracts } from '../resource-contracts';
   import type { DemoRow } from '../resource-schemas';
 
@@ -27,16 +28,18 @@
   const snoozedQuery = useList({ resource: demoContracts.mail_snoozed, pagination: { mode: 'off' } });
   const spamQuery = useList({ resource: demoContracts.mail_spam, pagination: { mode: 'off' } });
   const trashQuery = useList({ resource: demoContracts.mail_trash, pagination: { mode: 'off' } });
-  const query = $derived.by(() => {
-    if (resourceName === 'mail_draft') return draftQuery;
-    if (resourceName === 'mail_sent') return sentQuery;
-    if (resourceName === 'mail_archive') return archiveQuery;
-    if (resourceName === 'mail_snoozed') return snoozedQuery;
-    if (resourceName === 'mail_spam') return spamQuery;
-    if (resourceName === 'mail_trash') return trashQuery;
-    return inboxQuery;
+  const messages = $derived.by(() => {
+    switch (resourceName) {
+      case 'mail_inbox': return demoRenderers.mail_inbox.records(inboxQuery.data?.data ?? []);
+      case 'mail_draft': return demoRenderers.mail_draft.records(draftQuery.data?.data ?? []);
+      case 'mail_sent': return demoRenderers.mail_sent.records(sentQuery.data?.data ?? []);
+      case 'mail_archive': return demoRenderers.mail_archive.records(archiveQuery.data?.data ?? []);
+      case 'mail_snoozed': return demoRenderers.mail_snoozed.records(snoozedQuery.data?.data ?? []);
+      case 'mail_spam': return demoRenderers.mail_spam.records(spamQuery.data?.data ?? []);
+      case 'mail_trash': return demoRenderers.mail_trash.records(trashQuery.data?.data ?? []);
+      default: throw new TypeError('Unknown mail rendering resource');
+    }
   });
-  const messages = $derived((query.data?.data ?? []));
   const selected = $derived(messages.find((message) => message.id === selectedMessageId) ?? messages[0]);
   const unread = $derived(messages.filter((message) => 'unread' in message && message.unread).length);
   const labels = $derived([
