@@ -1,0 +1,22 @@
+/* Svelte class: directives are runtime class toggles, not static class attributes.
+ * Publish their finite native rules so hosts never need a utility compiler.
+ * Keep these in the existing utilities layer, after the frozen aliases. */
+@layer utilities {
+  .bg-primary { background-color: var(--color-primary, var(--primary)); }
+  .bg-muted { background-color: var(--color-muted, var(--muted)); }
+  .text-primary-foreground { color: var(--color-primary-foreground, var(--primary-foreground)); }
+  .text-muted-foreground { color: var(--color-muted-foreground, var(--muted-foreground)); }
+  .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .w-auto { width: auto; }
+  .min-w-\[200px\] { min-width: 200px; }
+  .w-\[252px\] { width: 252px; }
+  .w-\[70px\] { width: 70px; }
+  .px-5 { padding-inline: calc(var(--spacing, 0.25rem) * 5); }
+  .px-2 { padding-inline: calc(var(--spacing, 0.25rem) * 2); }
+  .px-\[10px\] { padding-inline: 10px; }
+  .justify-center { justify-content: center; }
+  @media (min-width: 48rem) {
+    .md\:ml-\[252px\] { margin-left: 252px; }
+    .md\:ml-\[70px\] { margin-left: 70px; }
+  }
+}

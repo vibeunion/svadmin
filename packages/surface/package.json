@@ -1,15 +1,18 @@
 {
   "name": "@svadmin/surface",
-  "version": "0.8.18",
+  "version": "0.8.19",
   "description": "Validated declarative surfaces for svadmin dashboards",
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": [
+    "./dist/styles.css"
+  ],
   "files": [
     "dist",
     "README.md",
     "compatibility.json",
     "!dist/**/*.test.*",
-    "!dist/**/*.spec.*"
+    "!dist/**/*.spec.*",
+    "STYLING.md"
   ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -27,11 +30,15 @@
       "types": "./dist/svar.d.ts",
       "svelte": "./dist/svar.js",
       "default": "./dist/svar.js"
+    },
+    "./styles.css": {
+      "style": "./dist/styles.css",
+      "default": "./dist/styles.css"
     }
   },
   "peerDependencies": {
-    "@svadmin/core": ">=0.34.2 <0.52.0",
-    "@svadmin/ui": ">=0.40.6 <0.72.0",
+    "@svadmin/core": ">=0.34.2 <0.53.0",
+    "@svadmin/ui": ">=0.40.6 <0.73.0",
     "svelte": "^5.56.8"
   },
   "dependencies": {
@@ -46,7 +53,7 @@
     "vitest": "^4.1.11"
   },
   "scripts": {
-    "build": "node ../../node_modules/@sveltejs/package/svelte-package.js -i src -o dist",
+    "build": "node scripts/prepare-design.mjs && node ../../node_modules/@sveltejs/package/svelte-package.js -i src -o dist",
     "check": "svelte-check --tsgo-experimental-api --tsconfig ./tsconfig.json --threshold error",
     "test": "vitest run --config ./vitest.config.ts"
   },

@@ -22,7 +22,7 @@ describe('semantic page chrome', () => {
     const root = postcss.parse(css);
     const layers: string[] = [];
     root.walkAtRules((rule) => {
-      expect(['layer', 'media']).toContain(rule.name);
+      expect(['layer', 'media', 'supports']).toContain(rule.name);
       if (rule.name === 'layer') layers.push(rule.params);
     });
     expect(layers).toEqual(['components']);
