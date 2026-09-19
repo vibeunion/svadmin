@@ -13,7 +13,7 @@ describe('LiteFileUpload native form fallback', () => {
       multiple: true,
       required: true,
     });
-    const input = view.getByLabelText<HTMLInputElement>('Attachments');
+    const input = view.getByLabelText('Attachments') as HTMLInputElement;
     expect(input.type).toBe('file');
     expect(input.name).toBe('attachments');
     expect(input.accept).toBe('.pdf,application/pdf');
@@ -29,7 +29,7 @@ describe('LiteFileUpload native form fallback', () => {
     const view = render(LiteFileUpload, {
       name: 'attachment', label: 'Attachment', required: true,
     });
-    const input = view.getByLabelText<HTMLInputElement>('Attachment');
+    const input = view.getByLabelText('Attachment') as HTMLInputElement;
     expect(input.checkValidity()).toBe(false);
     await view.rerender({ disabled: true });
     expect(input.disabled).toBe(true);
@@ -41,7 +41,7 @@ describe('LiteFileUpload native form fallback', () => {
     const view = render(LiteFileUpload, {
       name: 'attachment', label: 'Attachment', error: 'File is too large.',
     });
-    const input = view.getByLabelText<HTMLInputElement>('Attachment');
+    const input = view.getByLabelText('Attachment') as HTMLInputElement;
     expect(input.getAttribute('aria-invalid')).toBe('true');
     expect(view.getByRole('alert').id).toBe(input.getAttribute('aria-describedby'));
     expect(view.getByRole('alert').textContent).toBe('File is too large.');
@@ -54,8 +54,8 @@ describe('LiteFileUpload native form fallback', () => {
   it('generates distinct label targets for repeated fields', () => {
     const first = render(LiteFileUpload, { name: 'attachments', label: 'First' });
     const second = render(LiteFileUpload, { name: 'attachments', label: 'Second' });
-    const firstInput = first.getByLabelText<HTMLInputElement>('First');
-    const secondInput = second.getByLabelText<HTMLInputElement>('Second');
+    const firstInput = first.getByLabelText('First') as HTMLInputElement;
+    const secondInput = second.getByLabelText('Second') as HTMLInputElement;
     expect(firstInput.id).toBeTruthy();
     expect(firstInput.id).not.toBe(secondInput.id);
     expect(firstInput.multiple).toBe(false);
