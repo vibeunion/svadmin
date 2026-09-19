@@ -127,9 +127,11 @@
   }
 
   function addFiles(selected: File[]): void {
-    if (disabled) return;
+    if (disabled || disposed) return;
     const available = Math.max(0, maxFiles - items.length);
     for (const file of selected.slice(0, multiple ? available : 1)) {
+      // Host notifications may synchronously disable or unmount this batch.
+      if (disabled || disposed) return;
       const reason = validate(file);
       if (reason) {
         onReject?.(file, reason);

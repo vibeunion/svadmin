@@ -52,3 +52,19 @@ test('recipe families are registered and all runtime variants are pre-generated'
     assert.match(config, new RegExp(`${name}: \\[\\'\\*\\'\\]`));
   }
 });
+
+test('unsupported color-mix never paints destructive or subtle text onto the same color', () => {
+  const button = uiButton.variants.variant.destructive;
+  assert.notEqual(button.background, button.color);
+  assert.notEqual(button['&:hover'].background, button.color);
+  assert.equal(button.borderColor, 'var(--destructive)');
+  assert.equal(button[mix].color, 'var(--destructive)');
+  assert.equal(button[mix].borderColor, 'transparent');
+  for (const variant of ['destructive', 'subtle', 'subtle-success', 'subtle-warning', 'subtle-destructive']) {
+    const styles = uiBadge.variants.variant[variant];
+    assert.equal(styles.background, 'var(--muted)');
+    assert.equal(styles.color, 'var(--foreground)');
+    assert.notEqual(styles.color, styles.background);
+    assert.equal(styles[mix].color, styles.borderColor);
+  }
+});
