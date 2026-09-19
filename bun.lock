@@ -284,8 +284,8 @@
       "version": "0.13.6",
       "devDependencies": {
         "@elysiajs/eden": ">=1.4.9",
+        "@sinclair/typebox": "^0.34.52",
         "elysia": ">=1.4.30",
-        "zod": "^4.4.3",
       },
       "peerDependencies": {
         "@elysiajs/eden": ">=1.4.9",

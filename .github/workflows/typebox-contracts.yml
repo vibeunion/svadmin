@@ -1,0 +1,73 @@
+name: TypeBox Contracts
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: typebox-contracts-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - name: Reject direct Zod dependencies in tracked package manifests
+        run: |
+          node --input-type=module <<'NODE'
+          import { execFileSync } from 'node:child_process';
+          import { readFileSync } from 'node:fs';
+          const files = execFileSync('git', ['ls-files', '-z'], { encoding: 'utf8' })
+            .split('\0').filter(path => /(^|\/)package\.json$/.test(path));
+          const sections = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies'];
+          const failures = [];
+          for (const path of files) {
+            const manifest = JSON.parse(readFileSync(path, 'utf8'));
+            for (const section of sections) {
+              for (const [name, specifier] of Object.entries(manifest[section] ?? {})) {
+                if (name === 'zod' || (typeof specifier === 'string' && /^npm:zod(?:@|$)/.test(specifier))) {
+                  failures.push(`${path}: ${section}.${name}`);
+                }
+              }
+            }
+          }
+          if (failures.length) throw new Error(`Use TypeBox instead of direct Zod dependencies:\n${failures.join('\n')}`);
+          console.log(`Checked ${files.length} package manifests; no direct Zod dependencies or npm aliases.`);
+          NODE
+      - name: Install frozen dependencies
+        run: bun install --frozen-lockfile
+      - name: Focused lint
+        run: bunx eslint packages/elysia/src/declaration-contract.test.ts packages/elysia/test/commonjs-contract.mts packages/elysia/test/typebox-standard-schema.mts scripts/fixtures/elysia-types/strict.ts --max-warnings 0
+      - name: Elysia runtime contracts including standalone CommonJS
+        run: bun test packages/elysia/src
+      - name: Strict Elysia and negative type contracts
+        run: |
+          node node_modules/@typescript/native/bin/tsc -p packages/elysia/tsconfig.json --pretty false
+          node node_modules/@typescript/native/bin/tsc -p scripts/fixtures/elysia-types/tsconfig.json --pretty false
+          node node_modules/@typescript/native/bin/tsc -p scripts/fixtures/elysia-types/tsconfig.runtime.json --pretty false
+      - name: Check lockfile stability and whitespace
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git diff --exit-code -- bun.lock
+          if [ -n "$BASE_SHA" ]; then
+            git diff --check "$BASE_SHA...HEAD"
+          else
+            git diff --check
+          fi

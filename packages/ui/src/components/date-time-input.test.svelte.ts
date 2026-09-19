@@ -53,4 +53,18 @@ describe('enterprise date and time inputs', () => {
     expect(datetime.container.querySelector('[data-date-time-input="datetime"]')).not.toBeNull();
     expect(range.container.querySelector('[data-date-range-input]')).not.toBeNull();
   });
+
+  it('emits a complete nullable range when editing an initially null value', async () => {
+    const onchange = vi.fn();
+    const view = render(DateRangeInput, { value: null, startId: 'range-start', startName: 'start', onchange });
+    const start = view.container.querySelector('input');
+    if (!(start instanceof HTMLInputElement)) throw new Error('Expected range input');
+    expect(start.id).toBe('range-start');
+    expect(start.name).toBe('start');
+    await fireEvent.input(start, { target: { value: '2026-09-19' } });
+    expect(onchange).toHaveBeenLastCalledWith({ start: '2026-09-19', end: null });
+    await fireEvent.input(start, { target: { value: '' } });
+    expect(onchange).toHaveBeenLastCalledWith({ start: null, end: null });
+  });
+
 });

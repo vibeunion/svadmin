@@ -1,0 +1,31 @@
+{
+  "sourceSha": "ec4f27340a95bc8152bc7657d647e340b67ea623",
+  "runId": "35447092860",
+  "checks": [
+    {
+      "width": 1440,
+      "height": 900,
+      "nullableRange": true,
+      "emptyUploadReceipt": true,
+      "retryRecovery": true,
+      "liteErrorClearing": true,
+      "nativeFilterData": true
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "nullableRange": true,
+      "emptyUploadReceipt": true,
+      "retryRecovery": true,
+      "liteErrorClearing": true,
+      "nativeFilterData": true
+    }
+  ],
+  "pageErrors": [],
+  "images": {
+    "1440x900-error.png": "dd66b63204d5d7c54bf2a4992e0da206c222bd17665ce75e306e86028ea6f39e",
+    "1440x900-recovered.png": "1def6b56fb6e75d5d0eef980adc4819a4bfe48332160792f2c697aebf2c9f722",
+    "1920x1080-error.png": "72beeb0e19acb8f58997fc83fd04fbe2eafcb1874328bf40e9ca5356dc58399f",
+    "1920x1080-recovered.png": "2e8346ff463dde5a771a1e7ef4693d0dea30e1251b1c54bd5e5acf302b5c9324"
+  }
+}
