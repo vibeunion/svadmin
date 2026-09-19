@@ -6,6 +6,7 @@ import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'nod
 import { resolve } from 'node:path';
 import { buildPreview, directory, evidence, root, servePreview } from './run.mjs';
 import { scenarios } from './model.mjs';
+import { captureSpecimen } from './capture.mjs';
 
 const require = createRequire(resolve(root, 'package.json'));
 const { chromium, expect } = require('@playwright/test');
@@ -13,6 +14,7 @@ const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const report = {
   revision: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(),
   scope: 'Built Svelte specimens, not production backend integration, Figma parity or WCAG certification',
+  capture: { mode: 'full-page', attempts: 8, equality: 'consecutive PNG buffers, byte-for-byte', masks: false, baselineComparison: false },
   figmaSynced: false, sourceHashes: {}, scenes: [], interactions: [], failures: [],
 };
 rmSync(evidence, { force: true, recursive: true });
@@ -34,15 +36,6 @@ async function openScene(options, viewport) {
   await page.goto(`http://127.0.0.1:4179/?${new URLSearchParams(options)}`, { waitUntil: 'networkidle' });
   await expect(page.getByTestId('specimen')).toHaveAttribute('data-view', options.view);
   return { context, page, errors, unexpectedRequests };
-}
-async function stableScreenshot(locator) {
-  let previous;
-  for (let attempt = 0; attempt < 8; attempt += 1) {
-    const current = await locator.screenshot({ animations: 'disabled' });
-    if (previous?.equals(current)) return current;
-    previous = current;
-  }
-  throw new Error('Specimen screenshot did not stabilize');
 }
 try {
   await buildPreview();
@@ -72,12 +65,16 @@ try {
         if (view === 'settings') await expect(page.getByTestId('save-state')).toHaveAttribute('data-phase', state);
         if (view === 'settings' && state === 'readonly') await expect(page.getByTestId('save')).toBeDisabled();
         if (view === 'settings' && state === 'saving') await expect(page.getByTestId('workspace-name')).toBeDisabled();
-        const png = await stableScreenshot(page.getByTestId('specimen'));
+        const capture = await captureSpecimen(page, { id, directory: evidence });
         const filename = `${id}.png`;
-        writeFileSync(resolve(evidence, 'screenshots', filename), png);
+        writeFileSync(resolve(evidence, 'screenshots', filename), capture.png);
+        // 瞬时状态若已消失，不能把另一状态的截图算作目标状态的通过证据。
+        assert.equal(capture.lastFrame?.state.view, view);
+        assert.equal(capture.lastFrame?.state.scenario, state);
+        if (view === 'settings') assert.equal(capture.lastFrame?.state.phase, state);
         assert.deepEqual(scene.errors, []);
         assert.deepEqual(scene.unexpectedRequests, []);
-        report.scenes.push({ id, ...options, viewport, passed: true, screenshot: `screenshots/${filename}`, sha256: sha256(png) });
+        report.scenes.push({ id, ...options, viewport, passed: true, screenshot: `screenshots/${filename}`, sha256: sha256(capture.png), captureAttempts: capture.attempts });
       } catch (error) {
         report.scenes.push({ id, ...options, viewport, passed: false, error: String(error) });
         report.failures.push({ id, error: String(error) });
@@ -115,7 +112,9 @@ try {
       await page.getByTestId('input-default').fill('保持输入 · retained');
       await page.getByTestId('input-default').focus();
       await expect(page.getByTestId('input-default')).toBeFocused();
-      writeFileSync(resolve(evidence, 'screenshots', `${id}-focus.png`), await stableScreenshot(page.getByTestId('specimen')));
+      const focused = await captureSpecimen(page, { id: `${id}-focus`, directory: evidence });
+      writeFileSync(resolve(evidence, 'screenshots', `${id}-focus.png`), focused.png);
+      await expect(page.getByTestId('input-default')).toBeFocused();
       await page.getByTestId('input-file').setInputFiles({ name: 'customers.csv', mimeType: 'text/csv', buffer: Buffer.from('name\nAster\n') });
       await expect(page.locator('.svadmin-file-input__name')).toHaveText('customers.csv');
       await page.getByTestId('theme').selectOption('light');
@@ -156,7 +155,7 @@ finally {
   if (server) await new Promise(resolveClose => server.httpServer.close(resolveClose));
   writeFileSync(resolve(evidence, 'report.json'), JSON.stringify(report, null, 2) + '\n');
   const passed = report.scenes.filter(scene => scene.passed);
-  writeFileSync(resolve(evidence, 'index.html'), '<!doctype html><meta charset="UTF-8"><title>svadmin browser specimens</title><h1>svadmin · Browser specimens</h1><p>Actual built components. Not synchronized to Figma. See report.json for exact revision and scope.</p>' + passed.map(scene => `<details><summary>${scene.id}</summary><img style="max-width:100%;height:auto" src="${scene.screenshot}" alt="${scene.id}"></details>`).join('\n'));
+  writeFileSync(resolve(evidence, 'index.html'), '<!doctype html><meta charset="UTF-8"><title>svadmin browser specimens</title><h1>svadmin · Browser specimens</h1><p>Actual built components. Full-page captures; not synchronized to Figma. See report.json for exact revision and scope.</p>' + passed.map(scene => `<details><summary>${scene.id}</summary><img style="max-width:100%;height:auto" src="${scene.screenshot}" alt="${scene.id}"></details>`).join('\n'));
   console.info(JSON.stringify({ revision: report.revision, scenes: report.scenes.length, passed: passed.length, interactions: report.interactions.filter(item => item.passed).length, failures: report.failures }));
 }
 assert.equal(report.scenes.length, 152, 'complete finite state matrix must run');

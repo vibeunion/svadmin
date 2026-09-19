@@ -2,10 +2,10 @@ name: Stripe-first browser specimens
 on:
   push:
     branches: [main, feat/stripe-first-design-kit-20260919]
-    paths: ['design/stripe-first/**', 'packages/ui/**', 'packages/core/**', 'bun.lock', '.github/workflows/stripe-first-browser-specimens.yml']
+    paths: ['design/stripe-first/**', 'packages/ui/**', 'packages/core/**', 'scripts/stable-screenshot*', 'bun.lock', '.github/workflows/stripe-first-browser-specimens.yml']
   pull_request:
     branches: [main]
-    paths: ['design/stripe-first/**', 'packages/ui/**', 'packages/core/**', 'bun.lock', '.github/workflows/stripe-first-browser-specimens.yml']
+    paths: ['design/stripe-first/**', 'packages/ui/**', 'packages/core/**', 'scripts/stable-screenshot*', 'bun.lock', '.github/workflows/stripe-first-browser-specimens.yml']
 permissions:
   contents: read
 concurrency:
@@ -23,7 +23,7 @@ jobs:
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
         with: {bun-version: '1.4.2'}
       - name: Unit contracts before installation
-        run: node --test design/stripe-first/build.test.mjs design/stripe-first/preview/model.test.mjs
+        run: node --test design/stripe-first/build.test.mjs design/stripe-first/preview/model.test.mjs design/stripe-first/preview/capture.test.mjs scripts/stable-screenshot.test.mjs
       - name: Install frozen dependencies and build actual packages
         env: {HUSKY: '0'}
         run: |
@@ -37,11 +37,18 @@ jobs:
       - name: Install Chromium
         run: bunx playwright install --with-deps chromium
       - name: Verify complete state matrix and interactions
+        id: scenes
+        continue-on-error: true
         run: node design/stripe-first/preview/verify.mjs
       - name: Verify keyboard-only table scrolling
+        id: keyboard
+        continue-on-error: true
         run: node design/stripe-first/preview/keyboard.mjs
       - name: Verify no source or dependency mutations
+        id: unchanged
+        continue-on-error: true
         run: |
+          set -euo pipefail
           git diff --exit-code -- packages bun.lock
           git diff --check HEAD^ HEAD
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -49,5 +56,16 @@ jobs:
         with:
           name: stripe-first-browser-specimens-${{ github.sha }}
           path: test-results/stripe-first-browser/
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 14
+      - name: Require all checks, including failures collected above
+        if: always()
+        env:
+          SCENES: ${{ steps.scenes.outcome }}
+          KEYBOARD: ${{ steps.keyboard.outcome }}
+          UNCHANGED: ${{ steps.unchanged.outcome }}
+        run: |
+          set -euo pipefail
+          test "$SCENES" = success
+          test "$KEYBOARD" = success
+          test "$UNCHANGED" = success
