@@ -1,0 +1,29 @@
+name: Export renderer debug source
+on:
+  push:
+    branches: [evidence/typed-rendering-cae3d37-build]
+    paths: [.github/workflows/rendering-debug-source.yml]
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: cae3d37f51801d1a1a653504d1891dba8cd9748e
+          persist-credentials: false
+      - name: Export only tracked source and provenance
+        run: |
+          test "$(git rev-parse HEAD)" = cae3d37f51801d1a1a653504d1891dba8cd9748e
+          mkdir /tmp/rendering-debug-source
+          git archive HEAD > /tmp/rendering-debug-source/source.tar
+          git rev-parse HEAD > /tmp/rendering-debug-source/source-sha.txt
+          sha256sum /tmp/rendering-debug-source/source.tar > /tmp/rendering-debug-source/source-sha256.txt
+      - uses: actions/upload-artifact@v7
+        with:
+          name: renderer-debug-source
+          path: /tmp/rendering-debug-source
+          retention-days: 1
+          if-no-files-found: error
