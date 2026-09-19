@@ -9,8 +9,9 @@
     file: File;
     status: UploadItemStatus;
     progress: number;
-    url?: string;
-    error?: string;
+    // 重试与无 URL 的成功回调会显式清空这些字段。
+    url?: string | undefined;
+    error?: string | undefined;
   }
 
   export interface UploadSession {
