@@ -27,7 +27,7 @@ async function capture(page: Page, info: TestInfo, name: string) {
 test('health office: desktop dashboard and scoped report search', async ({ page }, info) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.setViewportSize({ width: 1440, height: 900 });
   const office = await openOffice(page);
   await expect(office).toHaveAttribute('data-office-view', 'dashboard');
   await expect(office.getByText('交互演示 · 非生产系统', { exact: true })).toBeVisible();
@@ -124,3 +124,18 @@ test('health office: mobile layout remains navigable', async ({ page }, info) =>
   await expect(office.getByRole('button', { name: '领取并确认任务', exact: true })).toBeVisible();
   await capture(page, info, 'health-office-mobile-alert');
 });
+
+// Both desktop evidence sizes required by the repository are captured from real UI.
+for (const viewport of [{ width: 1440, height: 900 }, { width: 1920, height: 1080 }]) {
+  test(`health office: viewport evidence ${viewport.width}x${viewport.height}`, async ({ page }, info) => {
+    await page.setViewportSize(viewport);
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    const office = await openOffice(page);
+    await expect.poll(() => office.evaluate((element) => {
+      let opacity = 1;
+      for (let node: Element | null = element; node; node = node.parentElement) opacity *= Number(getComputedStyle(node).opacity);
+      return opacity;
+    })).toBe(1);
+    await capture(page, info, `health-office-${viewport.width}x${viewport.height}`);
+  });
+}

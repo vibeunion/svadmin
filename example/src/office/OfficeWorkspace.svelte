@@ -27,13 +27,17 @@
   let feedbackError = $state(false);
   let reportTab = $state<'indicators' | 'original' | 'history'>('indicators');
 
-  const actor = $derived(actors.find((item) => item.id === actorId) ?? actors[0]!);
+  function required<T>(value: T | undefined): T {
+    if (value === undefined) throw new Error('演示配置缺失，请重新加载工作区');
+    return value;
+  }
+  const actor = $derived(required(actors.find((item) => item.id === actorId) ?? actors[0]));
   const reports = $derived(visibleReports(data, actor));
   const alerts = $derived(visibleAlerts(data, actor));
   const report = $derived(reportById(data, actor, reportId));
   const alert = $derived(alerts.find((item) => item.id === alertId));
   const metrics = $derived(officeMetrics(data, actor));
-  const activeView = $derived(views.find((item) => item.id === view)!);
+  const activeView = $derived(required(views.find((item) => item.id === view)));
   const disabledActor = $derived(data.staff.some((item) => item.id === actorId && !item.active));
   const permitted = $derived(canView(actor, view) && !disabledActor);
   const suggestions = $derived(data.suggestions.filter((item) => item.reportId === report?.id));
