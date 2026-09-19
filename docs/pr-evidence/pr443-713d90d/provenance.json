@@ -1,0 +1,26 @@
+{
+  "sourceHead": "713d90db73373821ab6102eb694b3882cfd11d2e",
+  "testedMerge": "65b516477d8720c75eedc236efe0da3d1eecba65",
+  "tree": "3e5c187c5712ae1724f46ad33b5c07e10ea4bc04",
+  "surfaceRun": 35453565034,
+  "surfaceArtifact": 10587437234,
+  "stripeRun": 35453564988,
+  "stripeArtifact": 10587069376,
+  "originalArchiveSha256": {
+    "surface": "1e3d3cf6f69e4a6c439c4dc8faed3b952331e99b38abeb4e5027c691bbdb98aa",
+    "stripe": "f6ddc3b3d70e411c484dd92f7db09610968822cd03d16c6a365fefc7ae44d7bd"
+  },
+  "sha256": {
+    "surface-1440x900.png": "dc1a90409e9746c39e1616e92435e62038b6c81c8f1eaf311bbaab04dc4ad2d5",
+    "surface-1920x1080.png": "1e9699b814e6dc71ef1fa60f8c9329d7fa599bc7bfd8a8d78ff9dc37a5bb86ad",
+    "surface-390x844-full-page.png": "7c24eb31134319f321b51cd2dec1474b8b4d2e84cea82b7792d6553ffae30e96",
+    "stripe-list-1440x1000.png": "5978b7bafba9950502d116960c293c930093c6b82231d359837d9b450593e2cb",
+    "stripe-settings-390-full-page.png": "fc4df19d193b34e93f5a27fae5d6a5439bac2bc087d42bf57f3834b98f4079d5",
+    "stripe-report.json": "916ad400c985202573d20c2a1e83fcb5909c298de7cea2977e356a6874a7540a",
+    "stripe-keyboard.json": "880189215e62001ce8636ee3343de92a0d0626af62ee7ccbf2eb64caac2a1cb9",
+    "surface-packed-consumer.json": "7e393a8dd7cf462c14ae5370d18ceb994fafd9f5340d7b0cff2d29a04ec264e9"
+  },
+  "scope": "Original synthetic Svelte browser fixtures, not production backend or Figma approval. No image transformations.",
+  "capture": "Surface desktop PNGs are 1440x900 and 1920x1080. Narrow Surface viewport is 390x844; full-page bitmap is 390x1456. Stripe list is 1440x1000; settings narrow bitmap is 390x1307.",
+  "sourceCheck": "All 17 versioned report source hashes verified. Generated packages/ui/dist/app.css is recorded by the original browser workflow, not rebuilt here."
+}
