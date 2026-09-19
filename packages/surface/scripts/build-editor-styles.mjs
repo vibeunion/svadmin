@@ -3,6 +3,7 @@ import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import postcss from 'postcss';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const require = createRequire(import.meta.url);
@@ -18,7 +19,15 @@ for (const args of [['codegen'], ['cssgen', '--outfile', stylesheet]]) {
 const recipes = await import(pathToFileURL(join(generated, 'recipes/index.mjs')).href);
 const editorClasses = Object.fromEntries(['compact', 'comfortable'].map((density) => [density, recipes.surfaceEditor({ density })]));
 const editorButtonClasses = Object.fromEntries(['secondary', 'primary'].map((variant) => [variant, recipes.surfaceEditorButton({ variant })]));
-const css = readFileSync(stylesheet, 'utf8');
+const rootCss = postcss.parse(readFileSync(stylesheet, 'utf8'));
+// preset-base 的变换/滤镜变量初始化是全局选择器，本组件不用这些能力；明确去掉该层。
+rootCss.walkAtRules('layer', (rule) => { if (rule.params === 'sv-surface.base') rule.remove(); });
+rootCss.walkRules((rule) => {
+  if (!rule.selector.startsWith('.svsurface-') && rule.selector !== '.svadmin-surface-editor') {
+    throw new Error(`Unscoped selector in Surface CSS: ${rule.selector}`);
+  }
+});
+const css = rootCss.toString();
 if (Buffer.byteLength(css) > 32_768 || /@(?:import|tailwind|theme|apply)\b/u.test(css)) {
   throw new Error('Surface styles must be bounded, standalone compiled CSS');
 }
