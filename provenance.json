@@ -1,0 +1,24 @@
+{
+  "source_sha": "da3c6b6a3971173f23601f4065d73499b99dfd90",
+  "run_id": 35422877456,
+  "artifact_id": 10577914482,
+  "digest": "sha256:6109e6836b63da01c63b903743addee647605bf9ff951eb82c0972fcd20ebc28",
+  "stats": {
+    "startTime": "2026-09-19T05:06:14.468Z",
+    "duration": 94999.752,
+    "expected": 58,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "images": [
+    {
+      "path": "screenshots/typed-rendering-1440x900.png",
+      "sha256": "08b1f6aa81a7bcd17b6ed420f325a8ce9f45b675e9fe001219a7ade911e7a22e"
+    },
+    {
+      "path": "screenshots/typed-rendering-1920x1080.png",
+      "sha256": "58cb7d28fbe6ae1c51c182eead64c9b0a97d9ab048b5f395f110b5275c04477d"
+    }
+  ]
+}
