@@ -137,7 +137,7 @@ The Svelte `SurfaceEditPreview` component accepts a controlled revision and untr
 
 It leaves the current surface intact during streaming, offers a separate preview/back action, and revalidates at the explicit apply click. It calls `onApply(candidate)` only for a valid proposal. The host performs any persistence with server authorization and atomic revision compare-and-swap, then updates `revision` and clears `proposal`. Missing handlers, invalid proposals and pending callbacks disable application. A rejected callback reports an error without changing the controlled revision. Changing scope does not authorize an old proposal: the host must discard old proposals as described above.
 
-The new preview controls use Panda build-time tokens/recipes and import their compiled CSS. `@svadmin/surface/editor.css` is also available for explicit CSS collection. Only finite density/button variants are emitted; host styles can override the existing complete-color semantic CSS variables. This does not replace all existing SVAdmin styling with Panda or remove Tailwind from the repository.
+The new preview controls use Panda build-time tokens/recipes and import their compiled CSS. `@svadmin/surface/editor.css` is also available for explicit CSS collection. Only finite density/button variants are emitted; host styles can override the existing complete-color semantic CSS variables. The integrated main already uses the compiler-free native/Panda build from PR #430; this preview adds its own scoped recipes without restoring Tailwind dependencies. The separate `@svadmin/surface/styles.css` entry for `styledSurfaceCatalog` remains available; see `STYLING.md`.
 
 ## Built-in catalog
 
@@ -182,4 +182,4 @@ Limits are eight data sources, 24 widgets, 100 rows per page, eight filters, thr
 
 Actual OpenUI Lang parsing, nested interactive forms, registered business actions, server persistence, SSR/Lite rendering, arbitrary URLs, client aggregation, Canvas and iframe execution are not implemented. Aggregated metrics should come from a policy-authorized backend summary resource and bind through `resource-one`. The current UI contract remains read-only even though its definition can be edited.
 
-See `docs/architecture/openui-surface-phase2.md` in the repository for architecture and browser acceptance details. 中文指南见文档站的“声明式 Surface”。
+See `docs/architecture/openui-surface-phase2.md` for the original feature scope and `docs/architecture/surface-integration-provenance.md` for its integration with the current native/Panda main. 中文指南见文档站的“声明式 Surface”。

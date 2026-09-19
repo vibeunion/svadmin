@@ -99,7 +99,7 @@ function contractContext(catalog: SurfaceCatalog, policy: SurfacePolicy): string
   const resources = Object.entries(policy.resources).map(([resource, rule]) => (
     `${resource}(read=${rule.readFields.join(',') || '(none)'};filter=${rule.filterFields?.join(',') || '(none)'};sort=${rule.sortFields?.join(',') || '(none)'};getOne=${rule.allowGetOne === true};maxPageSize=${rule.maxPageSize ?? 'default'})`
   )).join(' | ') || '(none)';
-  return `Catalog: ${JSON.stringify(manifest)}\nResource policy: ${resources}\nPolicy JSON: ${JSON.stringify(policy)}`;
+  return `Catalog: ${JSON.stringify(manifest.catalogVersion)}\nComponent contracts: ${JSON.stringify(manifest)}\nResource policy: ${resources}\nPolicy JSON: ${JSON.stringify(policy)}`;
 }
 
 function boundedPrompt(prompt: string): string {
