@@ -29,13 +29,17 @@ for (const resource of Object.keys(demoSchemas)) {
     await expect(page.locator('[data-svadmin-content-page]').first()).toBeVisible();
     await expect(page.locator('[data-svadmin-content-page]').first()).not.toBeEmpty();
     await expect(page.locator('[role="alert"]')).toHaveCount(0);
-    if (/^(products|skus|categories|suppliers|warehouses|stock_|cycle_|inventory_|reorder_|purchase_|sales_|users$|roles$|permissions$|user_|notifications$|store_|project_|ai_prompt$|invoice_|billing_|security_|referral_)/.test(resource)) {
+    if (resource === 'roles') {
+      await expect(page.locator('[data-role-workspace]')).toBeVisible();
+      await expect(page.locator('[data-role-workspace] table tbody tr').first()).toBeVisible();
+    } else if (/^(products|skus|categories|suppliers|warehouses|stock_|cycle_|inventory_|reorder_|purchase_|sales_|users$|permissions$|user_|notifications$|store_|project_|ai_prompt$|invoice_|billing_|security_|referral_)/.test(resource)) {
       await openRecords(page);
       await expect(page.locator(`[data-svadmin-rendering-resource="${resource}"][data-svadmin-rendering-kind="table"]`)).toBeVisible();
       await expect(page.locator('table tbody tr').first()).toBeVisible();
     }
     await page.goto(`/#/${resource}/create`);
     const create = page.locator(`[data-svadmin-rendering-resource="${resource}"][data-svadmin-rendering-kind="form"]`);
+    await expect(create).toHaveCount(1);
     await expect(create.locator('form')).toBeVisible();
     const result = await inMemoryDataProvider.getList({ resource, pagination: { current: 1, pageSize: 1 } });
     const first = result.data[0];
@@ -46,6 +50,8 @@ for (const resource of Object.keys(demoSchemas)) {
         await page.goto(`/#/${resource}/${action}/${id}`);
         const kind = action === 'show' ? 'show' : 'form';
         const boundary = page.locator(`[data-svadmin-rendering-resource="${resource}"][data-svadmin-rendering-kind="${kind}"]`);
+        // 等待路由退出动画移除旧表单，不用 first() 掩盖重复挂载。
+        await expect(boundary).toHaveCount(1);
         await expect(boundary).toBeVisible();
         if (kind === 'form') await expect(boundary.locator('form')).toBeVisible();
         else await expect(boundary.locator('[data-slot="skeleton"]')).toHaveCount(0);
@@ -61,15 +67,17 @@ test('native product inline editing remains usable through the rendering boundar
   await page.goto('/#/products');
   await openRecords(page);
   const table = page.locator('[data-svadmin-rendering-kind="table"]');
-  await table.getByRole('button', { name: /^Edit Name$/ }).first().click();
+  // 按稳定 ID 定位；修改名称后，升序表格会重新排列行。
+  const row = table.getByRole('row').filter({ has: page.getByRole('checkbox', { name: 'Select record 1', exact: true }) });
+  await row.getByRole('button', { name: /^Edit Name$/ }).click();
   const input = table.getByRole('textbox', { name: 'Name', exact: true });
   await input.fill('Typed renderer inline update');
   await input.press('Enter');
   await expect(input).toBeHidden();
-  await expect(table.getByRole('button', { name: /^Edit Name$/ }).first()).toHaveText('Typed renderer inline update');
+  await expect(row.getByRole('button', { name: /^Edit Name$/ })).toHaveText('Typed renderer inline update');
   await page.reload();
   await openRecords(page);
-  await expect(table.getByRole('button', { name: /^Edit Name$/ }).first()).toHaveText('Typed renderer inline update');
+  await expect(row.getByRole('button', { name: /^Edit Name$/ })).toHaveText('Typed renderer inline update');
 });
 
 for (const viewport of [{ width: 1440, height: 900 }, { width: 1920, height: 1080 }]) {
@@ -106,7 +114,7 @@ test('product quick-edit and detail drawers keep the checked contract and persis
   await page.goto('/#/products');
   await openRecords(page);
   const table = page.locator('[data-svadmin-rendering-kind="table"]');
-  const row = table.locator('tbody tr').first();
+  const row = table.getByRole('row').filter({ has: page.getByRole('checkbox', { name: 'Select record 1', exact: true }) });
   await row.getByRole('button', { name: 'More actions', exact: true }).click();
   await page.getByRole('menuitem', { name: /^Quick edit$/i }).click();
   const drawer = page.locator('[data-svadmin-quick-edit]');
@@ -122,6 +130,6 @@ test('product quick-edit and detail drawers keep the checked contract and persis
   await expect(detail.locator('[role="alert"]')).toHaveCount(0);
   await page.reload();
   await openRecords(page);
-  await expect(table.locator('tbody tr').first()).toContainText('Contract checked drawer update');
+  await expect(row).toContainText('Contract checked drawer update');
   expect(errors).toEqual([]);
 });
