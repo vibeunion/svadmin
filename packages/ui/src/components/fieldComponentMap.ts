@@ -89,6 +89,10 @@ export const builtinDisplayComponents: FieldComponentMap
   images: validatedDisplay(props(nullable(Type.Array(Type.String()))), ImagesField),
   tags: validatedDisplay(props(nullable(Type.Union([Type.String(), Type.Array(Type.String())]))), TagField),
   date: validatedDisplay(props(date), DateField),
+  // 原生 time 输入存储无时区的时钟字符串，不能按日期解析。
+  time: textDisplay,
+  datetime: validatedDisplay(Type.Object({ value: date, format: Type.Literal('datetime') }),
+    DateField, input => ({ value: input.value, format: 'datetime' })),
   daterange: validatedDisplay(props(nullable(Type.Union([
     Type.Tuple([date, date]),
     Type.Object({ start: dateProperty, end: dateProperty, from: dateProperty, to: dateProperty }, { additionalProperties: false }),
