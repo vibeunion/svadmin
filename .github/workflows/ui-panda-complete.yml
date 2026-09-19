@@ -1,0 +1,106 @@
+name: Complete UI recipe migration
+on:
+  push:
+    branches: [feat/ui-panda-complete-20260919]
+    paths:
+      - '.github/workflows/ui-panda-complete.yml'
+      - 'scripts/**'
+      - 'packages/**'
+      - 'example/**'
+      - 'bun.lock'
+permissions:
+  contents: read
+concurrency:
+  group: complete-ui-migration-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  migration:
+    if: github.repository == 'vibeunion/svadmin' && github.ref == 'refs/heads/feat/ui-panda-complete-20260919'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - run: mkdir -p "$RUNNER_TEMP/complete-ui/logs"
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+      - name: Generate finite recipes without changing public selectors
+        run: node scripts/migrate-ui-utilities.mjs
+      - name: Commit generated sources to this migration branch only
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test "$GITHUB_REF" = refs/heads/feat/ui-panda-complete-20260919
+          git diff --check
+          git add packages/ui/design/migrated-utilities packages/ui/test/style-baselines packages/ui/src/styles/compatibility.prelude.css packages/ui/package.json packages/ui/scripts/panda-css.test.mjs
+          git add packages/ai-elements/design/migrated-utilities packages/ai-elements/test/style-baselines packages/ai-elements/src/utilities.css packages/ai-elements/package.json
+          git add example/design/migrated-utilities example/test/style-baselines example/src/compatibility.css example/package.json scripts/check-panda-browser.mjs
+          if ! git diff --cached --quiet; then
+            git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' -c core.hooksPath=/dev/null commit -m 'feat(styles): generate repository-wide finite Panda utility recipes'
+            git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)" push origin HEAD:refs/heads/feat/ui-panda-complete-20260919
+          fi
+          git rev-parse HEAD | tee "$RUNNER_TEMP/complete-ui/tested-commit.txt"
+      - name: Build all workspace packages
+        run: |
+          bun run build:packages > "$RUNNER_TEMP/complete-ui/logs/build.log" 2>&1 || { tail -100 "$RUNNER_TEMP/complete-ui/logs/build.log"; exit 1; }
+          tail -20 "$RUNNER_TEMP/complete-ui/logs/build.log"
+      - name: Native CSS and finite recipe regressions
+        id: css
+        continue-on-error: true
+        run: |
+          bun run --cwd packages/ui test:css
+          node scripts/build-migrated-ui.mjs ui ai-elements example --check
+      - name: Lint
+        id: lint
+        continue-on-error: true
+        run: bun run lint
+      - name: Svelte component tests
+        id: tests
+        continue-on-error: true
+        run: |
+          status=0
+          for package in ui ai-elements surface; do
+            bun run --cwd "packages/$package" test > "$RUNNER_TEMP/complete-ui/logs/$package-tests.log" 2>&1 || status=1
+            tail -45 "$RUNNER_TEMP/complete-ui/logs/$package-tests.log"
+          done
+          exit "$status"
+      - name: Standalone runtime and declaration checks
+        id: runtime
+        continue-on-error: true
+        run: node scripts/check-panda-runtime.mjs
+      - name: Chromium immutable-baseline comparison
+        id: browser
+        continue-on-error: true
+        run: |
+          bunx --no-install playwright install --with-deps chromium > "$RUNNER_TEMP/complete-ui/logs/browser-install.log" 2>&1
+          node scripts/check-panda-browser.mjs
+      - name: Record bounded dependency diagnostics
+        if: always()
+        run: |
+          node --input-type=module -e "import fs from 'node:fs'; for (const name of ['cn','streamdown-svelte']) { const p='node_modules/'+name; if(fs.existsSync(p+'/package.json')) console.info(name,fs.readFileSync(p+'/package.json','utf8')); } if(fs.existsSync('node_modules/streamdown-svelte/dist/theme.js')) console.info('STREAMDOWN_THEME_HEAD',fs.readFileSync('node_modules/streamdown-svelte/dist/theme.js','utf8').slice(0,1300));"
+          mkdir -p "$RUNNER_TEMP/complete-ui/screenshots"
+          cp docs/pr-evidence/panda-styles/*.png docs/pr-evidence/panda-styles/*.json "$RUNNER_TEMP/complete-ui/screenshots/" 2>/dev/null || true
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: complete-ui-migration-evidence
+          path: ${{ runner.temp }}/complete-ui/
+          retention-days: 14
+      - name: Enforce all verification gates
+        if: always()
+        run: |
+          test '${{ steps.css.outcome }}' = success
+          test '${{ steps.lint.outcome }}' = success
+          test '${{ steps.tests.outcome }}' = success
+          test '${{ steps.runtime.outcome }}' = success
+          test '${{ steps.browser.outcome }}' = success
