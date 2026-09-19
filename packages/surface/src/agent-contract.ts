@@ -71,7 +71,11 @@ export function surfaceSchemaToJson(schema: TSchema): JsonObject {
       if (Object.keys(result).length !== value.length || Object.keys(result).some((key) => !/^(0|[1-9][0-9]*)$/u.test(key) || Number(key) >= value.length)) {
         throw new Error('Surface schema arrays must be dense JSON arrays');
       }
-      return Array.from({ length: value.length }, (_, index) => result[String(index)]);
+      return Array.from({ length: value.length }, (_, index) => {
+        const item = result[String(index)];
+        if (item === undefined) throw new Error('Surface schema arrays must be dense JSON arrays');
+        return item;
+      });
     }
     return result;
   }
@@ -86,8 +90,8 @@ export function surfaceSchemaToJson(schema: TSchema): JsonObject {
 }
 
 function isClosedObject(schema: JsonObject): boolean {
-  if (schema.type === 'object' && schema.additionalProperties === false) return true;
-  const branches = schema.anyOf ?? schema.oneOf ?? schema.allOf;
+  if (schema['type'] === 'object' && schema['additionalProperties'] === false) return true;
+  const branches = schema['anyOf'] ?? schema['oneOf'] ?? schema['allOf'];
   return Array.isArray(branches) && branches.length > 0 && branches.every((branch) => (
     branch !== null && typeof branch === 'object' && !Array.isArray(branch) && isClosedObject(branch as JsonObject)
   ));

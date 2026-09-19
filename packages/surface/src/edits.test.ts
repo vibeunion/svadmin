@@ -7,6 +7,11 @@ import {
 import type { SurfaceEditOperation, SurfaceRevision } from './edits.js';
 import type { SurfaceCatalog, SurfacePolicy, SurfaceSpec } from './types.js';
 
+function required<T>(value: T | undefined): T {
+  if (value === undefined) throw new Error('Required test fixture entry is missing');
+  return value;
+}
+
 const catalog = { version: 'edits/v1', widgets: [{
   type: 'metric', dataKind: 'scalar',
   propsSchema: Type.Object({ label: Type.String() }, { additionalProperties: false }),
@@ -39,7 +44,7 @@ describe('revisioned surface edits', () => {
     if (!result.ok) throw new Error('Expected success');
     expect(result.value.spec.widgets).toEqual(current.spec.widgets);
     expect(result.value.spec.dataSources).toEqual(current.spec.dataSources);
-    expect(Object.isFrozen(result.value.spec.widgets[0].props)).toBe(true);
+    expect(Object.isFrozen(required(result.value.spec.widgets[0]).props)).toBe(true);
     expect(() => Object.assign(result.value.spec, { title: 'Mutation' })).toThrow();
   });
 
@@ -71,14 +76,14 @@ describe('revisioned surface edits', () => {
   test('enforces current resource policies and forbidden props, never granting authority from edits', () => {
     const current = snapshot();
     expect(applySurfaceEditProposal(current, edit([{ op: 'upsert-source', source: { id: 'rows', type: 'resource-list', resource: 'secrets' } }]), catalog, policy)).toMatchObject({ ok: false, issues: [{ code: 'resource_denied' }] });
-    expect(applySurfaceEditProposal(current, edit([{ op: 'upsert-widget', widget: { ...current.spec.widgets[0], props: { label: 'X', class: 'hidden' } } }]), catalog, policy).ok).toBe(false);
+    expect(applySurfaceEditProposal(current, edit([{ op: 'upsert-widget', widget: { ...required(current.spec.widgets[0]), props: { label: 'X', class: 'hidden' } } }]), catalog, policy).ok).toBe(false);
     expect(applySurfaceEditProposal(current, edit([{ op: 'set-title', value: 'X' }]), catalog, { resources: {} }).ok).toBe(false);
     expect(applySurfaceEditProposal(current, edit([{ op: 'set-title', value: 'X' }], { policy: { allowAll: true } }), catalog, policy).ok).toBe(false);
   });
 
   test('uses stable IDs, rejects unknown removals and requires a complete reorder', () => {
     const current = snapshot();
-    const next = { ...current.spec.widgets[0], id: 'second' };
+    const next = { ...required(current.spec.widgets[0]), id: 'second' };
     const result = applySurfaceEditProposal(current, edit([{ op: 'upsert-widget', widget: next }, { op: 'reorder-widgets', ids: ['second', 'total'] }]), catalog, policy);
     if (!result.ok) throw new Error('Expected success');
     expect(result.value.spec.widgets.map((widget) => widget.id)).toEqual(['second', 'total']);
@@ -98,10 +103,10 @@ describe('revisioned surface edits', () => {
 
   test('generates edit instructions from the active catalog and separates the user request', () => {
     const messages = buildSurfaceEditMessages('Rename the page', snapshot(), catalog, policy);
-    expect(messages[0].content).toContain('"baseRevision"');
-    expect(messages[0].content).toContain('"revision":3');
-    expect(messages[0].content).toContain('"required":["label"]');
-    expect(messages[1]).toEqual({ role: 'user', content: 'Rename the page' });
+    expect(required(messages[0]).content).toContain('"baseRevision"');
+    expect(required(messages[0]).content).toContain('"revision":3');
+    expect(required(messages[0]).content).toContain('"required":["label"]');
+    expect(required(messages[1])).toEqual({ role: 'user', content: 'Rename the page' });
     expect(createSurfaceEditSchema()).toHaveProperty('additionalProperties', false);
     expect(() => buildSurfaceEditMessages('', snapshot(), catalog, policy)).toThrow();
   });
