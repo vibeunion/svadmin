@@ -1,0 +1,49 @@
+name: TypeBox Migration Verification
+
+on:
+  push:
+    branches: [refactor/replace-zod-with-typebox]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: typebox-migration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    if: github.repository == 'vibeunion/svadmin' && github.ref == 'refs/heads/refactor/replace-zod-with-typebox'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - name: Regenerate migration lockfile
+        run: bun install --lockfile-only --ignore-scripts
+      - name: Commit only the regenerated lockfile to this migration branch
+        run: |
+          if ! git diff --quiet -- bun.lock; then
+            git add -- bun.lock
+            git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'chore(elysia): sync TypeBox migration lockfile'
+            git push origin HEAD:refactor/replace-zod-with-typebox
+          fi
+      - name: Install frozen dependencies
+        run: bun install --frozen-lockfile
+      - name: Focused lint
+        run: bunx eslint packages/elysia/src/declaration-contract.test.ts packages/elysia/test/commonjs-contract.mts packages/elysia/test/typebox-standard-schema.mts scripts/fixtures/elysia-types/strict.ts --max-warnings 0
+      - name: Elysia runtime contracts including standalone CommonJS
+        run: bun test packages/elysia/src
+      - name: Strict Elysia and negative type contracts
+        run: |
+          node node_modules/@typescript/native/bin/tsc -p packages/elysia/tsconfig.json --pretty false
+          node node_modules/@typescript/native/bin/tsc -p scripts/fixtures/elysia-types/tsconfig.json --pretty false
+          node node_modules/@typescript/native/bin/tsc -p scripts/fixtures/elysia-types/tsconfig.runtime.json --pretty false
+      - name: Check lockfile stability and whitespace
+        run: |
+          git diff --exit-code -- bun.lock
+          git diff --check

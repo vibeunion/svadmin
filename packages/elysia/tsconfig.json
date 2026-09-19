@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "skipLibCheck": false,
+    "allowImportingTsExtensions": true,
     "types": ["@types/bun", "svelte"]
   },
   "include": ["src/**/*.ts", "test/**/*.mts"]
