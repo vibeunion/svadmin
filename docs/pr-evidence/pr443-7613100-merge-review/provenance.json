@@ -1,0 +1,258 @@
+{
+  "sourceHead": "761310059dc0845311f3ffe9aec9c4a5bf53b6d2",
+  "testedMerge": "6348beb020e94bb5aecbe0934023fff51e18322d",
+  "base": "8f068fb093b48cd2410b3b28a6066b567a44690e",
+  "sourceTree": "718f91308d467eae3df98b833b1c8ba8d7894cac",
+  "archives": [
+    {
+      "kind": "surface",
+      "runId": 35454111997,
+      "artifactId": 10587662395,
+      "sha256": "ffb36f0888927abb9e484e6ea328178550a4d7c499892527bc58b5d1f1147c25",
+      "createdAt": "2026-09-19T16:15:05Z"
+    },
+    {
+      "kind": "stripe",
+      "runId": 35454111987,
+      "artifactId": 10588330136,
+      "sha256": "ea57c7a3ec0adf4043caa9e189801803ca8d13c2ac60d7a8cbb7ec5b463ca999",
+      "createdAt": "2026-09-19T16:15:13Z"
+    }
+  ],
+  "images": [
+    {
+      "file": "surface-workflow-1440x900.png",
+      "archivePath": "workflow.e2e.ts-streamed-form-layout-1440x900/surface-workflow-1440x900.png",
+      "viewport": [
+        1440,
+        900
+      ],
+      "bitmap": [
+        1440,
+        900
+      ],
+      "sha256": "dc1a90409e9746c39e1616e92435e62038b6c81c8f1eaf311bbaab04dc4ad2d5",
+      "capture": "original full-page PNG"
+    },
+    {
+      "file": "surface-workflow-1920x1080.png",
+      "archivePath": "workflow.e2e.ts-streamed-form-layout-1920x1080/surface-workflow-1920x1080.png",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "bitmap": [
+        1920,
+        1080
+      ],
+      "sha256": "1e9699b814e6dc71ef1fa60f8c9329d7fa599bc7bfd8a8d78ff9dc37a5bb86ad",
+      "capture": "original full-page PNG"
+    },
+    {
+      "file": "surface-workflow-390x844.png",
+      "archivePath": "workflow.e2e.ts-streamed-form-layout-390x844/surface-workflow-390x844.png",
+      "viewport": [
+        390,
+        844
+      ],
+      "bitmap": [
+        390,
+        1456
+      ],
+      "sha256": "7c24eb31134319f321b51cd2dec1474b8b4d2e84cea82b7792d6553ffae30e96",
+      "capture": "original full-page PNG"
+    },
+    {
+      "file": "stripe/resource-list-ready-light-zh-CN-1440.png",
+      "archivePath": "screenshots/resource-list-ready-light-zh-CN-1440.png",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "bitmap": [
+        1440,
+        1000
+      ],
+      "sha256": "5978b7bafba9950502d116960c293c930093c6b82231d359837d9b450593e2cb",
+      "capture": "original full-page PNG"
+    },
+    {
+      "file": "stripe/record-detail-ready-light-zh-CN-1440.png",
+      "archivePath": "screenshots/record-detail-ready-light-zh-CN-1440.png",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "bitmap": [
+        1440,
+        1000
+      ],
+      "sha256": "6b02216e00010fca1e60ca415e4ca8d36230fd68821a72196f9461c01d63bc41",
+      "capture": "original full-page PNG"
+    },
+    {
+      "file": "stripe/settings-ready-light-zh-CN-1440.png",
+      "archivePath": "screenshots/settings-ready-light-zh-CN-1440.png",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "bitmap": [
+        1440,
+        1000
+      ],
+      "sha256": "dc89dfa01b62b2aa8d77b9ff6dba7f9dfe15986b9012f87735488b4d5d7ab024",
+      "capture": "original full-page PNG"
+    },
+    {
+      "file": "stripe/resource-list-ready-dark-zh-CN-1440.png",
+      "archivePath": "screenshots/resource-list-ready-dark-zh-CN-1440.png",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "bitmap": [
+        1440,
+        1000
+      ],
+      "sha256": "0d2362dc9c0734eb67cccc20555a0f4410d6348f683fecc5221a613997d7dd30",
+      "capture": "original full-page PNG"
+    },
+    {
+      "file": "stripe/record-detail-ready-dark-zh-CN-1440.png",
+      "archivePath": "screenshots/record-detail-ready-dark-zh-CN-1440.png",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "bitmap": [
+        1440,
+        1000
+      ],
+      "sha256": "0c8be27af77d6b3d6736d2725c52817d9e51ce51a420e610059e8cd76b32e725",
+      "capture": "original full-page PNG"
+    },
+    {
+      "file": "stripe/settings-ready-dark-zh-CN-1440.png",
+      "archivePath": "screenshots/settings-ready-dark-zh-CN-1440.png",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "bitmap": [
+        1440,
+        1000
+      ],
+      "sha256": "d04042ed65eaac0352d8d317a7e433ffe4016b8f8e3de58db9ef8eb58d5b1685",
+      "capture": "original full-page PNG"
+    },
+    {
+      "file": "stripe/resource-list-ready-light-zh-CN-390.png",
+      "archivePath": "screenshots/resource-list-ready-light-zh-CN-390.png",
+      "viewport": [
+        390,
+        844
+      ],
+      "bitmap": [
+        390,
+        1148
+      ],
+      "sha256": "e9ce2d1fa29d99b984bac7f97e8ff7a0fdab78b27f14df0c4ff49badb7efaa28",
+      "capture": "original full-page PNG"
+    },
+    {
+      "file": "stripe/record-detail-ready-light-zh-CN-390.png",
+      "archivePath": "screenshots/record-detail-ready-light-zh-CN-390.png",
+      "viewport": [
+        390,
+        844
+      ],
+      "bitmap": [
+        390,
+        1095
+      ],
+      "sha256": "a7f71dd15c2dc6aa56c9f5b2e9b5f45abee358415f6ca584bd7e80bbbd770409",
+      "capture": "original full-page PNG"
+    },
+    {
+      "file": "stripe/settings-ready-light-zh-CN-390.png",
+      "archivePath": "screenshots/settings-ready-light-zh-CN-390.png",
+      "viewport": [
+        390,
+        844
+      ],
+      "bitmap": [
+        390,
+        1307
+      ],
+      "sha256": "6ca53e777a624639df7f48e656fd8a35a8281e3f77ef6ba7ee31dc02283dce0b",
+      "capture": "original full-page PNG"
+    },
+    {
+      "file": "stripe/resource-list-ready-dark-zh-CN-390.png",
+      "archivePath": "screenshots/resource-list-ready-dark-zh-CN-390.png",
+      "viewport": [
+        390,
+        844
+      ],
+      "bitmap": [
+        390,
+        1148
+      ],
+      "sha256": "a0c2466cf1789e3603f1ad806c52c8f5b47837092f29cf9bcfdc62be49543644",
+      "capture": "original full-page PNG"
+    },
+    {
+      "file": "stripe/record-detail-ready-dark-zh-CN-390.png",
+      "archivePath": "screenshots/record-detail-ready-dark-zh-CN-390.png",
+      "viewport": [
+        390,
+        844
+      ],
+      "bitmap": [
+        390,
+        1095
+      ],
+      "sha256": "9afb394fc8b7cd4d374b3236a1e5e8a711acedfc9a6c61f8616fd8a7f19ba32f",
+      "capture": "original full-page PNG"
+    },
+    {
+      "file": "stripe/settings-ready-dark-zh-CN-390.png",
+      "archivePath": "screenshots/settings-ready-dark-zh-CN-390.png",
+      "viewport": [
+        390,
+        844
+      ],
+      "bitmap": [
+        390,
+        1307
+      ],
+      "sha256": "fc4df19d193b34e93f5a27fae5d6a5439bac2bc087d42bf57f3834b98f4079d5",
+      "capture": "original full-page PNG"
+    }
+  ],
+  "sourceSha256": {
+    "packages/core/src/query-session.svelte.ts": "d0ad3824a88136905c1a226d92091480ada959fa7e8d8e8b4b8cfef038528b20",
+    "packages/core/src/session-query.svelte.ts": "48345e16850428c13146b18948bce578f8e83db9361b2ca02290a860e3e355e8",
+    "packages/core/src/task-hooks.svelte.ts": "f6fc090c7c688a59715d23f1f75eaef47062483662eec9e7589acee56046f612",
+    "packages/ui/src/components/FileUpload.svelte": "3f983c54ad5b8f98ada3258e81f3c87ea88cf2cd41a0a9f2a30fe45bb2a9ecf5",
+    "packages/ui/src/components/FilterBuilder.svelte": "401d02966a03c2d62c0748b064b7c8860ef630d02b12381b9b97b301e6e63c9d",
+    "packages/ui/src/components/TreeSelect.svelte": "950cb8e432bd9b728050679c235c46dccf873fd8f068c5501c92baa9674062c8",
+    "packages/ui/src/components/JsonSchemaForm.svelte": "c66ec765c719342cb25538e5e0b7b6eda33cf772df6fddce950a4c1e575b9b15",
+    "packages/ui/design/primitive-recipes.ts": "b103f4c1a0b9a4004c5e1c3ef90209a275dfc819d7ad8862f12313c774b6efe8",
+    "packages/ui/design/product-recipes.ts": "57449af0852bf44f047805a88f3ad14e68cf1c5a5bce93846423268e8d142953",
+    "packages/ui/panda.config.ts": "7dd42c89ef1a58e1c92fe9406c86fcf46850169426eedf6dc407ec9acdc0a02d",
+    "scripts/surface-workflows/workflow.e2e.ts": "2e5c907dbb60c293cf767fac3e7c33884f1587c9e3b0732c3268114ac3ec7488",
+    "scripts/stripe-first-refactor-contract.test.ts": "53a2aa4cac23812adf4a430cfb8a5cfdb3f65908c288f0af2cf6741eeec2bc5c",
+    "design/stripe-first/source.json": "cf6b88e95ae272190613be7038ea3b8a94d39ac1fca383c90d8a511802f737fb"
+  },
+  "checks": {
+    "mainAndSourceAncestry": true,
+    "testedMergeTreeMatchesHead": true,
+    "completeDiffWhitespace": true,
+    "stripeScenes": 152,
+    "stripeInteractions": 4,
+    "keyboardChecks": 2
+  },
+  "scope": "Real built Svelte components with synthetic fixtures; not live backend evidence, Figma synchronization, manual visual approval or accessibility certification."
+}
