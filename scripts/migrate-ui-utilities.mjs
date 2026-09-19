@@ -27,8 +27,7 @@ function propertyName(name) {
   return name.replace(/^-ms-/, 'ms-').replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
 }
 
-// 使用有序片段保留回退声明以及声明与嵌套条件的先后次序。
-// 同一个条件或属性再次出现时不能覆盖之前的对象键。
+// Ordered fragments preserve fallback declarations and nested-condition precedence.
 export function styleParts(container) {
   const parts = [];
   let declarations = null;
@@ -53,9 +52,36 @@ export function styleParts(container) {
       for (const part of styleParts(node)) parts.push({ [`@${node.name} ${node.params}`]: part });
       continue;
     }
-    throw new Error(`Unsupported utility node ${node.type} ${node.name ?? ''}; do not silently omit CSS`);
+    throw new Error(`Unsupported utility node ${node.type} ${node.name ?? ''} ${node.params ?? ''}; refusing incomplete CSS`);
   }
   return parts;
+}
+
+export function migrateUtilityContainer(container, records) {
+  for (const node of [...(container.nodes ?? [])]) {
+    if (node.type === 'comment') continue;
+    if (node.type === 'atrule') {
+      if (['media', 'supports', 'container', 'layer'].includes(node.name) && node.nodes) {
+        // Keep the grouping rule at its original cascade position, including nesting.
+        migrateUtilityContainer(node, records);
+        continue;
+      }
+      // Native animation and property registrations are foundation CSS, not utilities.
+      if (['keyframes', '-webkit-keyframes', 'property'].includes(node.name)) continue;
+      throw new Error(`Unsupported utility group @${node.name} ${node.params}; refusing incomplete CSS`);
+    }
+    assert.equal(node.type, 'rule', `Unsupported utility node ${node.type}`);
+    const selectors = selectorParser().astSync(node.selector).nodes.map((selector) => selector.toString());
+    const parts = styleParts(node);
+    assert.ok(parts.length, `Empty utility rule ${node.selector}`);
+    const markers = parts.map((base) => {
+      const index = records.length;
+      const recipe = `migrated${String(index).padStart(5, '0')}`;
+      records.push({ name: recipe, className: `svmigration${index}`, selectors, base });
+      return postcss.comment({ text: `svadmin-recipe:${recipe}` });
+    });
+    node.replaceWith(...markers);
+  }
 }
 
 function replaceOnce(path, before, after) {
@@ -66,7 +92,6 @@ function replaceOnce(path, before, after) {
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  // 不覆盖历史基线；保留摘要以及声明顺序，供独立浏览器比较使用。
   const manifest = JSON.parse(read('packages/ui/styles-compatibility.json'));
   for (const [file, hash] of Object.entries(manifest.files)) {
     const destination = `packages/ui/test/style-baselines/${file}`;
@@ -87,23 +112,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
       const layers = [];
       css.walkAtRules('layer', (layer) => { if (layer.params === 'utilities' && layer.nodes) layers.push(layer); });
       assert.ok(layers.length, `${name}: no utility layer found`);
-      for (const layer of layers) {
-        for (const node of [...layer.nodes]) {
-          if (node.type === 'comment') continue;
-          assert.equal(node.type, 'rule', `${name}: unsupported top-level utility node ${node.type}`);
-          const selectors = selectorParser().astSync(node.selector).nodes.map((selector) => selector.toString());
-          const parts = styleParts(node);
-          assert.ok(parts.length, `${name}: empty utility rule ${node.selector}`);
-          const markers = [];
-          for (const base of parts) {
-            const index = records.length;
-            const recipe = `migrated${String(index).padStart(5, '0')}`;
-            records.push({ name: recipe, className: `svmigration${index}`, selectors, base });
-            markers.push(postcss.comment({ text: `svadmin-recipe:${recipe}` }));
-          }
-          node.replaceWith(...markers);
-        }
-      }
+      for (const layer of layers) migrateUtilityContainer(layer, records);
       write(`${design}/recipes.json`, `${JSON.stringify(records, null, 2)}\n`);
       write(`${design}/foundation.css.template`, `${css.toString().trim()}\n`);
       write(`${design}/provenance.json`, `${JSON.stringify({ baselineCommit: '4e7f62ce98af8b50c92a8218f1b3060f52ac42c0', originalFile: file, originalSha256: sha(original), recipes: records.length, retainsPublicSelectors: true }, null, 2)}\n`);
