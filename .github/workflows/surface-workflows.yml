@@ -1,0 +1,65 @@
+name: Surface controlled workflows
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/surface/**'
+      - 'packages/ui/src/components/**'
+      - 'packages/lite/src/components/LiteFilterBuilder*'
+      - 'packages/lite/src/filter-form.ts'
+      - 'packages/core/src/types.ts'
+      - 'scripts/surface-workflows/**'
+      - '.github/workflows/surface-workflows.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - name: Install unchanged workspace dependencies
+        run: |
+          bun install
+          git diff --exit-code -- bun.lock
+      - name: Build real workspace packages
+        run: bun run build:packages
+      - name: Surface contracts, components, actions and durable storage
+        run: bun run --cwd packages/surface test
+      - name: Strict Surface and UI contracts
+        run: |
+          bun run --cwd packages/surface check
+          bunx --no-install svelte-check --tsgo-experimental-api --tsconfig packages/ui/tsconfig.json --threshold error
+      - name: Real UI and Lite workflow regression components
+        run: |
+          bun run --cwd packages/ui test src/components/workflow-boundaries.test.svelte.ts src/components/import-wizard.test.svelte.ts src/components/resource-workspace.test.svelte.ts src/components/combobox-field.test.svelte.ts src/components/numeric-input.test.svelte.ts
+          bun run --cwd packages/lite test:components src/components/LiteFilterBuilder.apply.test.svelte.ts
+      - name: Install isolated optional parser (not a new workspace dependency)
+        run: |
+          npm install --prefix "$RUNNER_TEMP/surface-openui" --ignore-scripts --no-audit --no-fund --save-exact @openuidev/lang-core@0.3.0
+          echo "SVADMIN_OPENUI_ENTRY=$RUNNER_TEMP/surface-openui/node_modules/@openuidev/lang-core/dist/index.mjs" >> "$GITHUB_ENV"
+      - name: Real OpenUI parser conformance
+        run: node scripts/surface-workflows/openui-conformance.mjs
+      - name: Install Chromium
+        run: bun run playwright install --with-deps chromium
+      - name: Real browser acceptance with synthetic data and authenticated-identity fixtures
+        run: bun run playwright test --config scripts/surface-workflows/playwright.config.ts
+      # Playwright clears its outputDir at startup; produce the package report afterwards.
+      - name: Verify isolated packed consumer and server boundary
+        run: node scripts/surface-workflows/packed-consumer.mjs
+      - name: Upload current-run browser evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: surface-workflows-${{ github.sha }}
+          path: test-results/surface-workflows
+          if-no-files-found: warn

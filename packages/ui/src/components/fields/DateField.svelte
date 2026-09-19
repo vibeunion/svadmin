@@ -3,6 +3,7 @@
 </script>
 
 <script lang="ts">
+  import { dateFieldValue } from './date-field-value.js';
   import { cn } from '../../utils.js';
 
   interface Props {
@@ -45,7 +46,7 @@
 
   const formatted = $derived.by(() => {
     if (value == null || value === '') return nullLabel;
-    const d = value instanceof Date ? value : new Date(value);
+    const d = dateFieldValue(value, format === 'time');
     if (isNaN(d.getTime())) return nullLabel;
 
     if (format === 'iso') return d.toISOString();
@@ -68,8 +69,8 @@
 
   const fullIsoTitle = $derived.by(() => {
     if (value == null || value === '') return undefined;
-    const d = value instanceof Date ? value : new Date(value);
-    return isNaN(d.getTime()) ? undefined : d.toISOString();
+    const d = dateFieldValue(value, format === 'time');
+    return isNaN(d.getTime()) ? undefined : format === 'time' && typeof value === 'string' && /^\d{2}:/u.test(value) ? value : d.toISOString();
   });
 </script>
 
