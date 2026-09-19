@@ -60,6 +60,8 @@ export function createSurfaceFormController(options: {
     const ticket = ++generation;
     publish({ busy: true, ...(state.proposal ? { proposal: state.proposal } : {}) });
     try {
+      // 宿主状态回调可能同步 reset/dispose；不得继续派发已失效请求。
+      if (disposed || ticket !== generation) return;
       if (!same(scope, options.getScope())) { reset(); return; }
       const proposal = await work(scope, abort.signal);
       if (disposed || ticket !== generation) return;
@@ -68,6 +70,9 @@ export function createSurfaceFormController(options: {
         throw new Error('Proposal does not belong to the active form');
       }
       publish({ busy: false, proposal });
+      // 成功状态发布也可能切换会话或启动新请求，旧完成回调必须失效。
+      if (disposed || ticket !== generation) return;
+      if (!same(scope, options.getScope())) { reset(); return; }
       if (proposal.status === 'succeeded' && proposal.id !== notified) {
         notified = proposal.id;
         try { options.onCommitted?.(proposal); } catch { /* A host refresh failure must not misreport a successful write. */ }

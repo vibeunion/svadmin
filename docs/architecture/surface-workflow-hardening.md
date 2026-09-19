@@ -10,6 +10,16 @@ and validation errors at the same boundary. A presentation-only change retains
 the input and its component identity. Instance-specific IDs prevent collisions
 when two surfaces happen to reuse a widget ID.
 
+Host state callbacks are synchronous reentrancy boundaries. After publishing a
+busy state, the controller checks request ownership again before calling the
+transport: a callback may already have reset or disposed it. After publishing a
+successful result, it rechecks request ownership and the authenticated scope
+before notifying completion. A callback that changes tenants or starts a new
+request cannot cause the retired request to dispatch, refresh the new tenant's
+sources, or replace the newer request's state. Controller regression tests cover
+all five transport methods and reset/dispose/session-change callbacks. These
+client lifecycle checks complement, but do not replace, server authorization.
+
 The prerequisite UI fixes preserve a null date range, date/time display contracts,
 required false booleans and decimal input. File uploads use per-request ownership:
 cancel, replacement, retry and unmount prevent late progress/results from changing
