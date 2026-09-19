@@ -1,6 +1,6 @@
 name: Prepare enterprise array ownership candidate
 
-# Temporary source-only review helper; no branch ref or main writes.
+# Temporary review helper. Creates source objects and tests them, never moves refs.
 on:
   push:
     branches: [review/enterprise-reconcile-20260920]
@@ -11,13 +11,19 @@ jobs:
     if: >-
       github.event.head_commit.message == 'review: prepare guarded array ownership candidate'
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
       - name: Prepare bounded source and regression changes
         env:
           GH_TOKEN: ${{ github.token }}
@@ -30,3 +36,10 @@ jobs:
           python3 "$REVIEW_ASSETS/array-ownership-repair.py"
           git diff --check
           test -z "$(git diff --name-only -- .github/workflows)"
+      - run: bun install --frozen-lockfile
+      - name: Build real UI dependencies
+        run: bun run --cwd packages/ai-elements build && bun run --cwd packages/ui build
+      - name: Run all enterprise component regressions including both array cases
+        run: bun run --cwd packages/ui test src/components/enterprise-components.test.svelte.ts
+      - name: Verify no dependency changes
+        run: git diff --exit-code -- bun.lock package.json packages/ui/package.json
