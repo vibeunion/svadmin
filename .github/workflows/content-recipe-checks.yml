@@ -1,0 +1,63 @@
+name: Content recipe checks
+on:
+  push:
+    branches: [fix/panda-stage3-validation-20260919]
+    paths:
+      - .github/workflows/content-recipe-checks.yml
+permissions:
+  contents: read
+concurrency:
+  group: content-recipes-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  content:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ee01ea0b52285bd3129447cd0b2ddb0c114f45ce
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - name: Build immutable baseline
+        env:
+          HUSKY: '0'
+        run: |
+          set -euo pipefail
+          bun install --frozen-lockfile > /tmp/install.log 2>&1 || { tail -80 /tmp/install.log; exit 1; }
+          bun run --cwd packages/ai-elements build > /tmp/ai.log 2>&1 || { tail -80 /tmp/ai.log; exit 1; }
+          bun run --cwd packages/ui build > /tmp/ui.log 2>&1 || { tail -80 /tmp/ui.log; exit 1; }
+          git diff --exit-code -- bun.lock
+      - name: Inspect actual slot declarations
+        run: |
+          node --input-type=module <<'JS'
+          import { readFileSync } from 'node:fs';
+          import { createRequire } from 'node:module';
+          const require = createRequire(process.cwd() + '/packages/ui/package.json');
+          const postcss = require('postcss');
+          const selectors = require('postcss-selector-parser');
+          const map = JSON.parse(readFileSync('packages/ui/scripts/utility-class-map.json', 'utf8'));
+          const reverse = Object.fromEntries(Object.entries(map).map(([key, value]) => [value, key]));
+          const classes = new Set();
+          for (const name of ['ContentPageShell', 'ContentPageHeader', 'MetricBlock']) {
+            const text = readFileSync(`packages/ui/src/components/content/${name}.svelte`, 'utf8');
+            const used = [...new Set(text.match(/svadmin-u-[a-f0-9]{12}/g))];
+            for (const key of used) classes.add(key);
+            console.log(name, JSON.stringify(Object.fromEntries(used.map((key) => [key, reverse[key]]))));
+          }
+          const css = postcss.parse(readFileSync('packages/ui/dist/app.css', 'utf8'));
+          css.walkRules((rule) => {
+            let used = false;
+            selectors((ast) => ast.walkClasses((node) => { if (classes.has(node.value)) used = true; })).processSync(rule.selector);
+            if (used) {
+              const context = [];
+              for (let p = rule.parent; p?.type !== 'root'; p = p.parent) if (p?.type === 'atrule') context.unshift(`@${p.name} ${p.params}`);
+              console.log(JSON.stringify({ context, rule: rule.toString() }));
+            }
+          });
+          JS
