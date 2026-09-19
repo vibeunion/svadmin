@@ -33,6 +33,8 @@ jobs:
           git rev-parse HEAD > scripts/fixtures/svar-grid/evidence/tested-commit.txt
       - name: Install unchanged workspace dependencies
         run: bun install --frozen-lockfile
+      - name: Prepare the existing Panda design runtime
+        run: bun run --cwd packages/ui build:styles
       - name: Install pinned real SVAR in isolated consumer
         run: npm ci --prefix scripts/fixtures/svar-grid --ignore-scripts --no-audit --no-fund
       - name: Verify adapter and Surface lint
@@ -53,6 +55,7 @@ jobs:
         run: bun x --no-install playwright install --with-deps chromium
       - name: Run real browser integration and capture states
         env:
+          PLAYWRIGHT_HTML_OUTPUT_DIR: scripts/fixtures/svar-grid/report
           PLAYWRIGHT_JSON_OUTPUT_FILE: scripts/fixtures/svar-grid/evidence/browser-tests.json
         run: bun x --no-install playwright test --config scripts/fixtures/svar-grid/playwright.config.ts --reporter=line,html,json
       - name: Check dependency isolation and whitespace
