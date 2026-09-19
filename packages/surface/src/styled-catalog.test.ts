@@ -41,7 +41,7 @@ describe('opt-in styled Surface catalog', () => {
     }
     expect(Value.Check(styledMetricPropsSchema, { label: 'Revenue', format: 'currency', tone: 'success' })).toBe(false);
     expect(Value.Check(styledMetricPropsSchema, { label: 'Revenue', format: 'currency', currency: 'USD', tone: 'success' })).toBe(true);
-    expect(Value.Check(styledMetricPropsSchema, { label: 'Products', format: 'number', currency: 'USD' })).toBe(false);
+    expect(Value.Check(styledMetricPropsSchema, { label: 'Products', format: 'number', currency: 'USD', tone: 'success' })).toBe(false);
   });
 
   test('styled table fields still enforce the host read policy', () => {
@@ -68,7 +68,8 @@ describe('opt-in styled Surface catalog', () => {
   });
 
   test('catalog examples must themselves satisfy their strict props schema', () => {
-    const widget = styledSurfaceCatalog.widgets[0]!;
+    const widget = styledSurfaceCatalog.widgets.find((candidate) => candidate.type === 'metric');
+    if (!widget) throw new Error('Styled catalog must contain the metric widget');
     expect(() => defineSurfaceCatalog({ version: 'invalid/v1', widgets: [{ ...widget, examples: [{ label: 'Invalid', format: 'number', tone: 'unknown' }] }] })).toThrow('Invalid catalog example');
   });
 });
