@@ -19,14 +19,14 @@ utilities.split(',').forEach((utility) => {
 const resolveShorthand = (prop) => shorthands.get(prop) || prop
 
 const context = {
-  
+
   conditions: {
     shift: sortConditions,
     finalize: finalizeConditions,
     breakpoints: { keys: ["base","sm","md","lg","xl","2xl"] }
   },
   utility: {
-    
+
     transform: (prop, value) => {
               const key = resolveShorthand(prop)
               const propKey = classNameByProp.get(key) || hypenateProperty(key)

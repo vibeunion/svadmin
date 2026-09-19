@@ -24,7 +24,7 @@ export type ButtonVariantProps = {
 }
 
 export interface ButtonRecipe {
-  
+
   __type: ButtonVariantProps
   (props?: ButtonVariantProps): string
   raw: (props?: ButtonVariantProps) => ButtonVariantProps
