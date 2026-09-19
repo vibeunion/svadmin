@@ -6,129 +6,128 @@ on:
 permissions:
   contents: read
 jobs:
-  strict-boundary:
+  retain-evidence:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 5
     permissions:
       contents: write
+      actions: read
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: 0dd3ec59c290835c46edc482b11f7a183a9dfa12
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 26
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.4.2
-      - name: Move declaration assertions into the existing style test boundary
-        shell: bash
+          ref: 747e1392f70dfa2294de0254d58b5deffb22309e
+      - name: Verify exact candidate ancestry and complete diff
         run: |
           set -euo pipefail
           git fetch --quiet --no-tags --unshallow origin
-          test "$(git rev-parse HEAD:scripts/stripe-first-refactor-contract.test.ts)" = f24ba3d5d18344b5e5f97448ca5f235524d4fc85
-          test "$(git rev-parse HEAD:packages/ui/scripts/product-recipes.test.mjs)" = df39dd1b987963bef3b3d1ff2f41b857521190c5
-          test "$(git rev-parse HEAD:tsconfig.bun-tests.json)" = 0896fce83966ddd2992db5c7bb4d61f1d0c73b17
-          python3 - <<'PY'
-          from pathlib import Path
-          import subprocess
-          p = Path('scripts/stripe-first-refactor-contract.test.ts')
-          source = p.read_text()
-          import_line = "import { productWorkspace } from '../packages/ui/design/product-recipes';\n"
-          start_text = '    expect(productWorkspace).toMatchObject({'
-          assert source.count(import_line) == 1 and source.count(start_text) == 1
-          source = source.replace(import_line, '')
-          start = source.index(start_text)
-          end = source.index('\n    });', start) + len('\n    });\n')
-          source = source[:start] + source[end:]
-          source = source.replace('// 布局已迁移到 slot recipe；验证真实声明与接线，不要求退役的 utility 类。', '// 样式声明由 product-recipes.test.mjs 验证；这里保留 Svelte 接线契约。')
-          p.write_text(source)
-          Path('tsconfig.bun-tests.json').write_bytes(subprocess.check_output(['git', 'show', '761310059dc0845311f3ffe9aec9c4a5bf53b6d2:tsconfig.bun-tests.json']))
-          p = Path('packages/ui/scripts/product-recipes.test.mjs')
-          p.write_text(p.read_text() + '''
-          test('workspace definition and emitted CSS retain top alignment and responsive column order', () => {
-            const workspace = definitions.productWorkspace;
-            assert.equal(workspace.base.columns.display, 'grid');
-            assert.equal(workspace.base.columns.alignItems, 'start');
-            assert.equal(workspace.base.columns.gridTemplateColumns, 'minmax(0, 1fr)');
-            const responsive = workspace.variants.hasSecondary.true;
-            assert.equal(responsive.columns['@media (min-width: 64rem)'].gridTemplateColumns, 'minmax(0, 1fr) minmax(0, var(--workspace-secondary-width, 22rem))');
-            assert.equal(responsive.primary['@media (min-width: 64rem)'].order, '1');
-            assert.equal(responsive.secondary['@media (min-width: 64rem)'].order, '2');
-            const single = runtime.productWorkspace();
-            const split = runtime.productWorkspace({ hasSecondary: true });
-            for (const css of [generated, published]) {
-              assert.equal(declarations(css, single.columns).get('display'), 'grid');
-              assert.equal(declarations(css, single.columns).get('align-items'), 'start');
-              assert.equal(declarations(css, single.columns).get('grid-template-columns'), 'minmax(0, 1fr)');
-              assert.equal(declarations(css, split.columns).get('grid-template-columns'), 'minmax(0, 1fr) minmax(0, var(--workspace-secondary-width, 22rem))');
-              assert.equal(declarations(css, split.primary).get('order'), '1');
-              assert.equal(declarations(css, split.secondary).get('order'), '2');
-            }
-          });
-          ''')
-          PY
-          git diff --check
-          git diff --stat
-      - name: Install unchanged dependencies
-        run: |
-          bun install
-          git diff --exit-code -- bun.lock
-      - name: Build unchanged workspace packages
-        shell: bash
-        run: |
-          set -euo pipefail
-          if ! bun run build:packages >/tmp/pr443-build.log 2>&1; then tail -100 /tmp/pr443-build.log; exit 1; fi
-          tail -8 /tmp/pr443-build.log
-      - name: Complete strict root check and both test boundaries
-        shell: bash
-        run: |
-          set -euo pipefail
-          if ! bun run check >/tmp/pr443-check.log 2>&1; then tail -120 /tmp/pr443-check.log; exit 1; fi
-          cat /tmp/pr443-check.log
-          bunx --no-install eslint scripts/stripe-first-refactor-contract.test.ts packages/ui/scripts/product-recipes.test.mjs --max-warnings 0
-          bun test scripts/stripe-first-refactor-contract.test.ts scripts/check-type-coverage.test.ts
-          node --experimental-strip-types --test packages/ui/scripts/product-recipes.test.mjs
-      - name: Prove the relocated assertion still detects a broken recipe
-        shell: bash
-        run: |
-          set -euo pipefail
-          file=packages/ui/design/product-recipes.ts
-          cp "$file" /tmp/pr443-product-recipes-original.ts
-          trap 'cp /tmp/pr443-product-recipes-original.ts "$file"' EXIT
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path('packages/ui/design/product-recipes.ts')
-          source = p.read_text()
-          old = "columns: { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', alignItems: 'start',"
-          assert source.count(old) == 1
-          p.write_text(source.replace(old, old.replace("alignItems: 'start'", "alignItems: 'stretch'")))
-          PY
-          if node --experimental-strip-types --test packages/ui/scripts/product-recipes.test.mjs >/tmp/pr443-negative.log 2>&1; then
-            echo 'ERROR: broken alignment was not detected'
-            exit 1
-          fi
-          grep -F 'workspace definition and emitted CSS retain top alignment' /tmp/pr443-negative.log
-          grep -F 'stretch' /tmp/pr443-negative.log
-          cp /tmp/pr443-product-recipes-original.ts "$file"
-          git diff --exit-code -- packages/ui/design/product-recipes.ts bun.lock
-      - name: Publish verified three-file candidate, not main or feature branch
-        shell: bash
+          git fetch --quiet --no-tags origin a964145dd27b73197846980faf4aaad6ba7f6cf6
+          for sha in 8f068fb093b48cd2410b3b28a6066b567a44690e b39b4953af4166548b21b8ab7fd2c7af80d6a027 0f6c4ad148f69b501870f0c18c6ea94bd27a8349; do git merge-base --is-ancestor "$sha" HEAD; done
+          test "$(git rev-parse HEAD^{tree})" = "$(git rev-parse a964145dd27b73197846980faf4aaad6ba7f6cf6^{tree})"
+          git diff --check 8f068fb093b48cd2410b3b28a6066b567a44690e HEAD
+          git diff --exit-code 761310059dc0845311f3ffe9aec9c4a5bf53b6d2 HEAD -- packages/ui/src packages/ui/design packages/core packages/surface design/stripe-first bun.lock
+      - name: Validate and retain original successful-run artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import subprocess
-          expected = {'scripts/stripe-first-refactor-contract.test.ts', 'packages/ui/scripts/product-recipes.test.mjs', 'tsconfig.bun-tests.json'}
-          actual = set(subprocess.check_output(['git', 'diff', '--name-only'], text=True).splitlines())
-          assert actual == expected, actual
+          import hashlib, json, os, stat, struct, subprocess, zipfile
+          from pathlib import Path, PurePosixPath
+          head = '747e1392f70dfa2294de0254d58b5deffb22309e'
+          tested = 'a964145dd27b73197846980faf4aaad6ba7f6cf6'
+          base = '8f068fb093b48cd2410b3b28a6066b567a44690e'
+          api = 'https://api.github.com/repos/vibeunion/svadmin'
+          out = Path('docs/pr-evidence/pr443-747e139-merge-review')
+          assert not out.exists()
+          out.mkdir(parents=True)
+          records, images = [], []
+          def download(path, destination):
+              subprocess.run(['curl', '--fail', '--silent', '--show-error', '--location', '--max-time', '90', '-H', 'Authorization: Bearer ' + os.environ['GH_TOKEN'], api + path, '-o', str(destination)], check=True)
+          def read_json(z, name):
+              matches = [e for e in z.infolist() if PurePosixPath(e.filename).name == name]
+              assert len(matches) == 1, name
+              data = z.read(matches[0])
+              return data, json.loads(data)
+          def png(z, path, destination, viewport, expected_hash=None):
+              data = z.read(path)
+              digest = hashlib.sha256(data).hexdigest()
+              if expected_hash is not None: assert digest == expected_hash
+              assert data[:8] == b'\x89PNG\r\n\x1a\n' and data[12:16] == b'IHDR'
+              width, height = struct.unpack('>II', data[16:24])
+              assert width == viewport[0] and height >= viewport[1]
+              dest = out / destination
+              dest.parent.mkdir(parents=True, exist_ok=True)
+              dest.write_bytes(data)
+              images.append({'file': destination, 'archivePath': path, 'viewport': viewport, 'bitmap': [width, height], 'sha256': digest, 'capture': 'original full-page PNG'})
+          captures = [
+              ('surface', 35455261854, 10588426637, 'surface-workflows-', '059f2fbab2bf30f3fa154c69a6628da2a855e7fe552a70e144b1c67b37e77d9c'),
+              ('stripe', 35455261831, 10587808235, 'stripe-first-browser-specimens-', '45765460348c9985ca01269a57bae0fe2a446cf7d95907e57ba239c2930575e7'),
+          ]
+          for kind, run_id, artifact_id, prefix, digest in captures:
+              run_path = Path('/tmp/pr443-' + kind + '-run.json')
+              metadata_path = Path('/tmp/pr443-' + kind + '-artifact.json')
+              archive_path = Path('/tmp/pr443-' + kind + '.zip')
+              download('/actions/runs/' + str(run_id), run_path)
+              download('/actions/artifacts/' + str(artifact_id), metadata_path)
+              run = json.loads(run_path.read_text())
+              artifact = json.loads(metadata_path.read_text())
+              assert run['id'] == run_id and run['head_sha'] == head
+              assert run['status'] == 'completed' and run['conclusion'] == 'success'
+              assert artifact['id'] == artifact_id and not artifact['expired']
+              assert artifact['name'] == prefix + tested
+              assert artifact['workflow_run']['head_sha'] == head
+              assert artifact['digest'] == 'sha256:' + digest
+              download('/actions/artifacts/' + str(artifact_id) + '/zip', archive_path)
+              assert hashlib.sha256(archive_path.read_bytes()).hexdigest() == digest
+              records.append({'kind': kind, 'runId': run_id, 'artifactId': artifact_id, 'sha256': digest, 'createdAt': artifact['created_at']})
+              with zipfile.ZipFile(archive_path) as z:
+                  entries = z.infolist()
+                  assert sum(e.file_size for e in entries) < 100000000
+                  assert len({e.filename for e in entries}) == len(entries)
+                  for e in entries:
+                      p = PurePosixPath(e.filename)
+                      assert not p.is_absolute() and '..' not in p.parts
+                      assert not stat.S_ISLNK(e.external_attr >> 16)
+                  if kind == 'surface':
+                      for width, height in [(1440, 900), (1920, 1080), (390, 844)]:
+                          name = f'surface-workflow-{width}x{height}.png'
+                          matches = [e for e in entries if PurePosixPath(e.filename).name == name]
+                          assert len(matches) == 1
+                          png(z, matches[0].filename, name, [width, height])
+                      data, report = read_json(z, 'packed-consumer.json')
+                      assert report['status'] == 'passed'
+                      (out / 'packed-consumer.json').write_bytes(data)
+                  else:
+                      data, report = read_json(z, 'report.json')
+                      assert report['revision'] == tested and report['failures'] == []
+                      assert len(report['scenes']) == 152 and all(s['passed'] is True for s in report['scenes'])
+                      assert len(report['interactions']) == 4 and all(s['passed'] is True for s in report['interactions'])
+                      for path, source_digest in report['sourceHashes'].items():
+                          if '/dist/' not in path:
+                              assert hashlib.sha256(Path(path).read_bytes()).hexdigest() == source_digest, path
+                      (out / 'stripe-report.json').write_bytes(data)
+                      data, keyboard = read_json(z, 'keyboard.json')
+                      assert len(keyboard) == 2 and all(s['passed'] is True for s in keyboard)
+                      (out / 'stripe-keyboard.json').write_bytes(data)
+                      selected = [s for s in report['scenes'] if s['view'] in ['resource-list', 'record-detail', 'settings'] and s['state'] == 'ready' and s['locale'] == 'zh-CN']
+                      assert len(selected) == 12
+                      for scene in selected:
+                          png(z, scene['screenshot'], 'stripe/' + PurePosixPath(scene['screenshot']).name, [scene['viewport']['width'], scene['viewport']['height']], scene['sha256'])
+          source_paths = ['packages/core/src/query-session.svelte.ts', 'packages/core/src/session-query.svelte.ts', 'packages/core/src/task-hooks.svelte.ts', 'packages/ui/src/components/FileUpload.svelte', 'packages/ui/src/components/FilterBuilder.svelte', 'packages/ui/src/components/TreeSelect.svelte', 'packages/ui/src/components/JsonSchemaForm.svelte', 'packages/ui/design/primitive-recipes.ts', 'packages/ui/design/product-recipes.ts', 'packages/ui/panda.config.ts', 'packages/ui/scripts/product-recipes.test.mjs', 'scripts/surface-workflows/workflow.e2e.ts', 'scripts/stripe-first-refactor-contract.test.ts', 'design/stripe-first/source.json', 'tsconfig.bun-tests.json']
+          provenance = {'sourceHead': head, 'testedMerge': tested, 'base': base, 'sourceTree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], text=True).strip(), 'archives': records, 'images': images, 'sourceSha256': {p: hashlib.sha256(Path(p).read_bytes()).hexdigest() for p in source_paths}, 'checks': {'mainAndSourceAncestry': True, 'testedMergeTreeMatchesHead': True, 'completeDiffWhitespace': True, 'productionUnchangedFrom7613100': True, 'stripeScenes': 152, 'stripeInteractions': 4, 'keyboardChecks': 2}, 'scope': 'Real built Svelte components with synthetic fixtures; not live backend evidence, Figma synchronization, independent manual visual approval or accessibility certification.'}
+          (out / 'provenance.json').write_text(json.dumps(provenance, indent=2) + '\n')
+          (out / 'README.md').write_text('# PR443 final-candidate browser evidence\n\nSource `' + head + '`, tested PR merge `' + tested + '`, base `' + base + '`. Exact run/ZIP/source/image hashes and full-page dimensions are in provenance.json. Surface PNGs cover 1440x900, 1920x1080 and a 390x844 viewport. Stripe originals cover list/detail/settings in Chinese, both themes and 1440x1000/390x844 viewports. Its full report and original artifact cover 152 states, four interactions and two keyboard/motion checks. Mobile bitmaps can exceed viewport height. These are synthetic acceptance fixtures, not live backend evidence or independent manual visual/Figma approval. Older 7613100/713d90d checkpoints remain historical even where pixels match. No source branch, main, baseline or threshold is changed by archival.\n')
+          print(json.dumps({'head': head, 'tested': tested, 'images': len(images), 'stripeScenes': 152, 'stripeInteractions': 4, 'keyboardChecks': 2, 'archives': records}, indent=2))
           PY
-          branch=review/pr443-type-boundary-candidate-20260919
+      - name: Publish evidence-only branch
+        run: |
+          set -euo pipefail
+          branch=evidence/pr443-747e139-merge-review
           test -z "$(git ls-remote --heads origin "refs/heads/$branch")"
           git config user.name 'Integration review'
           git config user.email 'noreply@github.com'
-          git add -- scripts/stripe-first-refactor-contract.test.ts packages/ui/scripts/product-recipes.test.mjs tsconfig.bun-tests.json
+          git add -- docs/pr-evidence/pr443-747e139-merge-review
           git diff --cached --check
-          git commit -m 'test(ui): keep Panda declaration checks in the existing style test boundary'
+          git commit -m 'docs: retain final PR443 exact-head Surface and Stripe evidence'
           git push origin "HEAD:refs/heads/$branch"
-          echo "VERIFIED_CANDIDATE=$(git rev-parse HEAD)"
-          echo "VERIFIED_TREE=$(git rev-parse HEAD^{tree})"
+          echo "EVIDENCE_COMMIT=$(git rev-parse HEAD)"
