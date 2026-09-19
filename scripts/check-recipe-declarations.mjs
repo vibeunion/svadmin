@@ -15,10 +15,14 @@ function cssProperty(property) {
   return /^ms[A-Z]/.test(property) ? `-${value}` : value;
 }
 
-function normalizedValue(value) {
-  const text = String(value).trim();
-  if (/^0(?:px|rem|em)?$/.test(text)) return '0';
-  // Preserve quoted content exactly; only normalize insignificant function spacing.
+function normalizedValue(property, value) {
+  let text = String(value).trim();
+  // Only numeric spelling is equivalent here. Never convert custom-property units.
+  text = text.replace(/^(-?)\.(\d+)$/, '$10.$2');
+  const length = /^(?:(?:min-|max-)?(?:width|height)|(?:padding|margin)(?:-[a-z-]+)?|(?:row-|column-)?gap|top|right|bottom|left|outline-width|border(?:-[a-z]+)?-width)$/;
+  if (length.test(property) && /^0(?:px|rem|em)?$/.test(text)) return '0';
+  // Browser flex shorthand expansion: retain percent basis, not a length basis.
+  if (property === 'flex' && /^\d+(?:\.\d+)?$/.test(text)) return `${text} 1 0%`;
   return text.replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[^'"]+/g, (part) =>
     /^["']/.test(part) ? part : part.replace(/\s+/g, ' ').replace(/\s*([(),])\s*/g, '$1')).trim();
 }
@@ -31,7 +35,8 @@ function expectedDeclarations(base, result = []) {
     } else {
       assert.ok(typeof value === 'string' || typeof value === 'number', `Unsupported CSS value for ${key}`);
       const important = /\s*!important$/.test(String(value));
-      result.push(JSON.stringify([cssProperty(key), normalizedValue(String(value).replace(/\s*!important$/, '')), important]));
+      const property = cssProperty(key);
+      result.push(JSON.stringify([property, normalizedValue(property, String(value).replace(/\s*!important$/, '')), important]));
     }
   }
   return result;
@@ -47,7 +52,7 @@ export function verifyRecipeDeclarations(records, css) {
       if (known.has(node.value)) used.add(node.value);
     })).processSync(rule.selector);
     rule.walkDecls((declaration) => {
-      const value = JSON.stringify([declaration.prop, normalizedValue(declaration.value), Boolean(declaration.important)]);
+      const value = JSON.stringify([declaration.prop, normalizedValue(declaration.prop, declaration.value), Boolean(declaration.important)]);
       for (const name of used) known.get(name).add(value);
     });
   });
@@ -56,7 +61,7 @@ export function verifyRecipeDeclarations(records, css) {
   for (const record of records) {
     for (const declaration of expectedDeclarations(record.base)) {
       checked++;
-      if (!known.get(record.className)?.has(declaration)) missing.push(`${record.name}: ${declaration}`);
+      if (!known.get(record.className)?.has(declaration)) missing.push(`${record.name}: ${declaration}; emitted=${JSON.stringify([...known.get(record.className)])}`);
     }
   }
   assert.equal(missing.length, 0, `Panda dropped or changed ${missing.length} declarations:\n${missing.slice(0, 30).join('\n')}`);

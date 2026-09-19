@@ -11,19 +11,32 @@ the following projects on August 31, 2026:
 Those projects remain subject to their own licenses and trademark policies.
 Their names are used only to identify compatibility research sources.
 
-## Runtime Dependencies
+## Runtime dependencies and vendored code
 
-- `streamdown-svelte` 3.0.6, Apache-2.0. It provides the streaming Markdown,
-  sanitization, math, Mermaid, and code-rendering pipeline used by `Response`.
+- The `streamdown-svelte` 3.0.6 distribution is an explicit Apache-2.0 vendor
+  copy under `vendor/streamdown`. It provides streaming Markdown, sanitization,
+  math, Mermaid and code rendering. Its LICENSE and modification notice are
+  distributed there. Only the two class-composition calls in theme.js were
+  changed to use SVAdmin's native finite-class helper. Original source digests
+  and the modification list are recorded in `vendor/streamdown/provenance.json`.
+  The copy requires deliberate upstream maintenance, not automatic wrapper updates.
 - `@rive-app/webgl2` 2.41.0, MIT. It renders the `.riv` persona assets and
   drives their `default` state-machine inputs.
 - `@xyflow/svelte` 1.6.5, MIT. It provides the workflow canvas primitives.
 - `@lucide/svelte` 1.35.0, ISC. It provides interface icons.
-- `clsx` 2.1.1, `tailwind-merge` 3.6.0, and `tailwind-variants` 3.3.1, MIT.
+- `clsx` 2.1.1, MIT. It composes conditional class tokens without parsing a
+  utility language. The external `cn`, `tailwind-merge` and `tailwind-variants`
+  runtime packages are no longer dependencies.
 
-`streamdown-svelte` includes or loads its own documented runtime dependencies,
-including Shiki, KaTeX, Mermaid, Unified, Marked, and rehype/remark packages.
+The vendored Markdown distribution uses explicitly declared runtime dependencies,
+including Shiki, KaTeX, Mermaid, Unified, Marked and rehype/remark packages.
 Their license texts are distributed by their respective packages.
+
+## Historical native CSS attribution
+
+The notices below are retained for native CSS foundations and migration baselines.
+They do not indicate an active compiler or runtime dependency. Removing a compiler
+does not remove the attribution obligations of retained derived CSS.
 
 ## tailwindcss
 
@@ -48,7 +61,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
 
 ## tw-animate-css
 

@@ -1,4 +1,4 @@
-name: Finish native UI prerequisites
+name: Record native UI browser evidence
 on:
   push:
     branches: [feat/ui-panda-complete-20260919]
@@ -16,6 +16,8 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
+      - name: Discard old captures before any verification
+        run: rm -rf docs/pr-evidence/panda-styles
       - uses: actions/setup-node@v7
         with:
           node-version: '26'
@@ -23,50 +25,10 @@ jobs:
         with:
           bun-version: '1.4.2'
       - run: bun install --frozen-lockfile
-      - name: Restore missing built-in processing labels without rewriting dictionaries
-        run: |
-          node --input-type=module <<'NODE'
-          import assert from 'node:assert/strict';
-          import { readFileSync, writeFileSync } from 'node:fs';
-          import { execFileSync } from 'node:child_process';
-          import ts from 'typescript';
-          const path = 'packages/core/src/i18n.svelte.ts';
-          assert.equal(execFileSync('git', ['hash-object', path], { encoding: 'utf8' }).trim(), 'd7f30b01496954b65564e161d864d9ac85966e6f', 'Re-review concurrent dictionary edits');
-          let text = readFileSync(path, 'utf8');
-          const source = ts.createSourceFile(path, text, ts.ScriptTarget.Latest, true);
-          const declaration = source.statements.flatMap(s => ts.isVariableStatement(s) ? [...s.declarationList.declarations] : []).find(d => ts.isIdentifier(d.name) && d.name.text === 'baseLocales');
-          assert.ok(declaration && ts.isObjectLiteralExpression(declaration.initializer));
-          const edits = [];
-          for (const locale of declaration.initializer.properties) {
-            assert.ok(ts.isPropertyAssignment(locale) && ts.isObjectLiteralExpression(locale.initializer));
-            const name = locale.name.text;
-            const value = name === 'zh-CN' ? '处理中...' : name === 'en' || name === 'en-US' ? 'Processing...' : undefined;
-            if (value === undefined) continue;
-            assert.ok(!locale.initializer.properties.some(p => p.name?.text === 'common.processing'), 'Do not duplicate an existing label');
-            const anchor = locale.initializer.properties.find(p => p.name?.text === 'common.selectedCount');
-            assert.ok(anchor, 'Missing reviewed insertion anchor');
-            const at = text.indexOf('\n', anchor.end);
-            assert.ok(at >= anchor.end);
-            edits.push({ at, value: `\n    'common.processing': '${value}',` });
-          }
-          assert.equal(edits.length, 2);
-          for (const edit of edits.sort((a, b) => b.at - a.at)) text = text.slice(0, edit.at) + edit.value + text.slice(edit.at);
-          writeFileSync(path, text);
-          NODE
-          bun test packages/core/src/i18n-source-regression.test.ts
-          git diff --check
-      - name: Commit only the verified locale fix
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          test "$GITHUB_REF" = refs/heads/feat/ui-panda-complete-20260919
-          git add packages/core/src/i18n.svelte.ts
-          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' -c core.hooksPath=/dev/null commit -m 'fix(core): restore processing labels in both built-in locales'
-          git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)" push origin HEAD:refs/heads/feat/ui-panda-complete-20260919
+      - run: bun test packages/core/src/i18n-source-regression.test.ts
       - run: bun run build:packages
-      - name: Capture actual components against the immutable baseline
+      - name: Capture actual components against immutable baseline
         run: |
-          rm -rf docs/pr-evidence/panda-styles
           bunx --no-install playwright install --with-deps chromium
           node scripts/check-panda-browser.mjs || { node scripts/diagnose-ui-screenshots.mjs; exit 1; }
           git diff --check
@@ -76,7 +38,7 @@ jobs:
           name: native-ui-diagnostic-captures
           path: docs/pr-evidence/panda-styles/
           if-no-files-found: ignore
-      - name: Record successful current-run captures and retire this writer
+      - name: Record passing captures and remove this one-time writer
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -84,5 +46,5 @@ jobs:
           test -s docs/pr-evidence/panda-styles/provenance.json
           git add docs/pr-evidence/panda-styles
           git rm .github/workflows/native-ui-capture-once.yml
-          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' -c core.hooksPath=/dev/null commit -m 'test(styles): record native UI browser evidence and retire capture writer'
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' -c core.hooksPath=/dev/null commit -m 'test(styles): record native UI captures and retire evidence writer'
           git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)" push origin HEAD:refs/heads/feat/ui-panda-complete-20260919

@@ -6,6 +6,7 @@ import { resolve } from 'node:path';
 import { createServer } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { chromium } from '@playwright/test';
+import { stableScreenshot } from './stable-screenshot.mjs';
 
 const root = process.cwd();
 const output = resolve(root, 'docs/pr-evidence/panda-styles');
@@ -42,8 +43,6 @@ try {
   await server.listen();
   browser = await chromium.launch();
   async function open(viewport, query) {
-    // Each capture gets fresh focus, mouse, file-input and scroll state. Never compare pages
-    // left at different scroll offsets by the preceding interaction test.
     const page = await browser.newPage({ viewport, reducedMotion: 'reduce' });
     page.setDefaultTimeout(15_000);
     page.on('pageerror', (error) => pageErrors.push(error.message));
@@ -61,7 +60,8 @@ try {
   async function capture(viewport, query, name) {
     const page = await open(viewport, query);
     try {
-      const image = await page.screenshot({ path: resolve(output, `${name}.png`), fullPage: true, animations: 'disabled', caret: 'hide' });
+      const image = await stableScreenshot(() => page.screenshot({ fullPage: true, animations: 'disabled', caret: 'hide' }));
+      writeFileSync(resolve(output, `${name}.png`), image);
       const styles = await page.evaluate(() => [...document.querySelectorAll('body *')].map((el) => {
         const css = getComputedStyle(el);
         const bounds = el.getBoundingClientRect();
@@ -117,7 +117,8 @@ try {
         });
         assert.equal(nestedStyle.actual, nestedStyle.expected);
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true, `${name}: horizontal overflow`);
-        await page.screenshot({ path: resolve(output, `${name}.png`), fullPage: true, animations: 'disabled', caret: 'hide' });
+        const image = await stableScreenshot(() => page.screenshot({ fullPage: true, animations: 'disabled', caret: 'hide' }));
+        writeFileSync(resolve(output, `${name}.png`), image);
         await page.getByText('Advanced details', { exact: true }).click();
         assert.equal(await page.locator('details').evaluate((el) => el.open), true);
         await page.getByText('Advanced details', { exact: true }).click();
@@ -138,6 +139,7 @@ try {
     baselineCommit: manifest.baseCommit,
     publishedCssSha256: createHash('sha256').update(publishedCss).digest('hex'),
     browser: browser.version(),
+    capturePolicy: 'Two consecutive identical captures per page; zero-tolerance comparison across baseline and published pages',
     scope: 'Current real Svelte widget/control fixture under baseline vs published CSS; Chromium only; not a full application or historical DOM comparison',
     checks, failures, pageErrors,
   };
