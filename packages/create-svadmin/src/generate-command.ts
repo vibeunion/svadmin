@@ -26,7 +26,7 @@ const fieldTypes = {
   relation: true, color: true, url: true, email: true, phone: true, currency: true,
   file: true, markdown: true, password: true, array: true, 'tree-select': true,
   treeselect: true, cascader: true, transfer: true, rate: true, rating: true,
-  avatar: true, copy: true, code: true,
+  avatar: true, copy: true, code: true, daterange: true, datetime: true, time: true, percent: true,
 } satisfies Record<FieldDefinition['type'], true>;
 
 function isFieldType(value: string): value is FieldDefinition['type'] {

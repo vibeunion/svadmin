@@ -410,7 +410,7 @@ export interface FieldDefinition {
   label: string;
   type: 'text' | 'number' | 'boolean' | 'date' | 'time' | 'datetime' | 'daterange' | 'select' | 'multiselect' | 'tags'
     | 'textarea' | 'richtext' | 'image' | 'images' | 'json' | 'relation' | 'color'
-    | 'url' | 'email' | 'phone' | 'currency' | 'file' | 'markdown' | 'password' | 'array'
+    | 'url' | 'email' | 'phone' | 'currency' | 'percent' | 'file' | 'markdown' | 'password' | 'array'
     | 'tree-select' | 'treeselect' | 'cascader' | 'transfer' | 'rate' | 'rating' | 'avatar' | 'copy' | 'code';
   required?: boolean;
   searchable?: boolean;

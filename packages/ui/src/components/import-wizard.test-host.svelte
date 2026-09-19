@@ -1,6 +1,6 @@
 <script lang="ts">
   import { provideAdminContext, type DataProvider, type ResourceDefinition, type AccessControlProvider } from '@svadmin/core';
-  import { definedReactiveOptions } from '@svadmin/core/options';
+  import { definedOptions, definedReactiveOptions } from '@svadmin/core/options';
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
   import ImportWizard from './ImportWizard.svelte';
   import { createI18nScope, provideI18nScope } from '@svadmin/core/i18n';
@@ -36,5 +36,5 @@
 </script>
 
 <QueryClientProvider client={queryClient}>
-  <ImportWizard {resourceName} {open} {onSuccess} />
+  <ImportWizard {resourceName} {open} {...definedOptions({ onSuccess })} />
 </QueryClientProvider>
