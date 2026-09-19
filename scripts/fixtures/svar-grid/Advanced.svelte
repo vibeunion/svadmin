@@ -15,12 +15,14 @@
   let scope = $state(0);
   let tenant = $state('alpha');
   let denySecond = false;
+  let denyList = false;
   let sorters = $state<SvarSort[]>([]);
   let filters = $state<SvarTextFilter[]>([]);
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity, gcTime: Infinity } } });
   onDestroy(() => client.clear());
   const access: AccessControlProvider = {
     async can(params) {
+      if (params.action === 'list' && denyList) return { can: false, reason: 'Fixture list access denied' };
       return { can: !(denySecond && params.params?.['id'] === 2 && ['edit', 'delete', 'export'].includes(params.action)), reason: 'Fixture record permission denied' };
     },
   };
@@ -30,7 +32,7 @@
   }
   const provider: DataProvider = {
     getApiUrl: () => '/api',
-    getList: async params => responseData(await fetch(`/api/rows?query=${encodeURIComponent(JSON.stringify(params))}`)),
+    getList: async params => responseData(await fetch(`/api/rows?query=${encodeURIComponent(JSON.stringify(params))}`, params.signal ? { signal: params.signal } : {})),
     getOne: async params => responseData(await fetch(`/api/rows/${encodeURIComponent(String(params.id))}`)),
     create: async () => { throw new Error('Creation is not part of this fixture'); },
     update: async params => responseData(await fetch(`/api/rows/${encodeURIComponent(String(params.id))}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(params) })),
@@ -38,7 +40,7 @@
   };
   const childSchema = Type.Object({ id: Type.Number(), name: Type.String(), stock: Type.Number() });
   const contract = defineResource('products', {
-    record: Type.Object({ id: Type.Number(), name: Type.String(), stock: Type.Number(), children: Type.Optional(Type.Array(childSchema)) }),
+    record: Type.Object({ id: Type.Number(), name: Type.String(), stock: Type.Number(), parentId: Type.Optional(Type.Union([Type.Number(), Type.Null()])), hasChildren: Type.Optional(Type.Boolean()), children: Type.Optional(Type.Array(childSchema)) }),
     update: Type.Object({ name: Type.Optional(Type.String({ minLength: 1 })), stock: Type.Optional(Type.Number({ minimum: 0 })) }),
     delete: Type.Object({}),
   });
@@ -47,6 +49,7 @@
       { key: 'id', label: 'ID', type: 'number', sortable: true },
       { key: 'name', label: 'Name', type: 'text', sortable: true, filterable: true, searchable: true },
       { key: 'stock', label: 'Stock', type: 'number', sortable: true },
+      { key: 'parentId', label: 'Parent', type: 'number', showInList: false, showInEdit: false },
     ] }], get tenant() { return { tenantId: tenant }; },
   });
   const columns: SvarInteractiveColumn[] = [
@@ -73,17 +76,19 @@
     if (signal.aborted || !Array.isArray(value)) throw new Error('Aborted or invalid fixture page');
     infiniteRows = snapshotSvarRecords([...infiniteRows, ...value]);
   }
+  let cellAction = $state('');
 </script>
 
 <main class:dark>
   <h1>SVAR advanced integration</h1>
   <nav aria-label="Advanced fixture controls">
-    {#each ['operations', 'tree-operations', 'window', 'infinite', 'lazy', 'pinned'] as target (target)}
+    {#each ['operations', 'tree-operations', 'window', 'infinite', 'lazy', 'pinned', 'resource-window', 'resource-infinite', 'resource-lazy', 'native-cells'] as target (target)}
       <button type="button" onclick={() => { mode = target; sorters = []; filters = []; }}>{target}</button>
     {/each}
     <button type="button" onclick={() => { dark = !dark; }}>Theme</button>
     <button type="button" onclick={() => { scope++; }}>Scope</button>
     <button type="button" onclick={() => { tenant = tenant === 'alpha' ? 'beta' : 'alpha'; }}>Tenant</button>
+    <button type="button" onclick={() => { denyList = !denyList; scope++; }}>Deny list</button>
     <button type="button" onclick={() => { denySecond = !denySecond; }}>Deny second record</button>
   </nav>
   <output data-testid="advanced-scope">{tenant}:{scope}</output>
@@ -93,6 +98,22 @@
         editable selectable batchUpdate batchDelete exportable savedViews preferenceScopeKey="fixture-viewer" migrateAutoTableViews
         {...mode === 'tree-operations' ? { childrenKey: 'children' } : {}} />
     </QueryClientProvider>
+  {:else if mode.startsWith('resource-')}
+    <QueryClientProvider client={client}>
+      <SvarResourceTable {Grid} Theme={Willow} resourceName="products" pageSize={25} dataScopeKey={scope} freezeRight={1}
+        loadingMode={mode === 'resource-window' ? 'window' : mode === 'resource-infinite' ? 'infinite' : 'page'}
+        {...mode === 'resource-lazy' ? { lazyTree: { parentField: 'parentId', rootValue: null } } : {}}
+        editable selectable batchUpdate batchDelete exportable savedViews preferenceScopeKey="fixture-viewer" />
+    </QueryClientProvider>
+  {:else if mode === 'native-cells'}
+    <SvarDataGrid {Grid} Theme={Willow} items={flatRows} {columns} freezeRight={1} scopeKey={`native:${scope}`} height={420}>
+      {#snippet cellContent({ id, field, value, record })}
+        {#if field === 'note'}
+          <button type="button" aria-label={`Inspect row ${id}`} onclick={() => { record['name'] = 'Changed copy'; cellAction = `${id}:${flatRows[Number(id)]?.name}`; }}>Inspect {id}</button>
+        {:else}<span data-native-cell={field}>{String(value)}</span>{/if}
+      {/snippet}
+    </SvarDataGrid>
+    <output data-testid="native-cell-action">{cellAction}</output>
   {:else if mode === 'window'}
     <SvarDataGrid {Grid} Theme={Willow} {columns} {windowSource} queryMode="server" {sorters} {filters}
       onSortChange={next => { sorters = next; }} onFilterChange={next => { filters = next; }}
