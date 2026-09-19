@@ -1,8 +1,8 @@
 # Base UI Components / 基础 UI 组件
 
-All base components are from [shadcn-svelte](https://shadcn-svelte.com/) with dark mode support.
+Base components are maintained in `@svadmin/ui`, with Bits UI for headless interactions and native CSS / Panda recipes for styling. Dark mode uses shared semantic tokens.
 
-所有基础组件基于 [shadcn-svelte](https://shadcn-svelte.com/)，支持暗色模式。
+基础组件由 `@svadmin/ui` 维护：Bits UI 提供无样式交互，原生 CSS / Panda recipes 负责视觉。保留已有 API，不再使用 shadcn-svelte CLI 或 Tailwind。当前已迁移与未迁移范围见 [迁移状态](../no-tailwind-component-migration.md)。
 
 ## Import / 导入
 

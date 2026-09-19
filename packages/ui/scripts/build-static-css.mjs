@@ -2,6 +2,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import postcss from 'postcss';
+import { retirePrimitiveFallbacks } from './retire-primitive-fallbacks.mjs';
 
 const packageRoot = fileURLToPath(new URL('..', import.meta.url));
 const sourceRoot = resolve(packageRoot, 'src');
@@ -19,20 +20,21 @@ function inlineCss(path, ancestors = new Set()) {
     rule.replaceWith(...inlineCss(target, stack).nodes);
   });
   root.walkAtRules((rule) => {
-    if (['theme', 'source', 'apply', 'utility', 'custom-variant', 'tailwind'].includes(rule.name)) {
+    if (['theme', 'source', 'apply', 'utility', 'custom-variant', 'tailwind', 'reference', 'variant', 'config', 'plugin', 'screen', 'responsive', 'variants'].includes(rule.name)) {
       throw new Error(`Unexpected compiler directive @${rule.name}`);
     }
   });
+  if (path === resolve(sourceRoot, 'components.css')) retirePrimitiveFallbacks(root);
   return root;
 }
 
-const css = inlineCss(resolve(sourceRoot, 'app.css')).toString();
+const css = `${inlineCss(resolve(sourceRoot, 'app.css')).toString().trim()}\n`;
 const aliases = postcss.parse(readFileSync(resolve(sourceRoot, 'styles/aliases.css'), 'utf8'));
-const metadata = postcss.atRule({ name: 'theme' });
-aliases.walkDecls((decl) => metadata.append(decl.clone()));
-if (!metadata.nodes?.length) throw new Error('Missing public theme aliases');
+let hasPrimaryAlias = false;
+aliases.walkDecls('--color-primary', () => { hasPrimaryAlias = true; });
+if (!hasPrimaryAlias) throw new Error('Missing public theme aliases');
 mkdirSync(dist, { recursive: true });
-writeFileSync(resolve(dist, 'app.css'), `${css.trim()}\n`);
-// 仅此兼容入口保留旧宿主的主题元数据；本库自身不安装或运行旧编译器。
-writeFileSync(resolve(dist, 'app.theme.css'), `${css.trim()}\n${metadata.toString()}\n@source "./components";\n`);
-console.info('[build-static-css] published native compatibility CSS and pre-generated Panda recipes');
+// 两个公开入口保持同一原生 CSS；旧路径兼容不再意味着保留编译器元数据。
+writeFileSync(resolve(dist, 'app.css'), css);
+writeFileSync(resolve(dist, 'app.theme.css'), css);
+console.info('[build-static-css] published native CSS entries and pre-generated Panda recipes');

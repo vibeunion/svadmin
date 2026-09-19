@@ -118,7 +118,7 @@
   "scripts": {
     "build": "bun run build:styles && node ../../node_modules/@sveltejs/package/svelte-package.js -i src -o dist && node scripts/build-static-css.mjs && node scripts/postbuild-css.mjs",
     "test": "vitest run --config ./vitest.config.ts",
-    "test:css": "node --test scripts/static-css.test.mjs scripts/panda-css.test.mjs scripts/panda-css-layers.test.mjs scripts/panda-css-isolation.test.mjs scripts/conditional-css.test.mjs",
+    "test:css": "node --experimental-strip-types --test scripts/static-css.test.mjs scripts/panda-css.test.mjs scripts/panda-css-layers.test.mjs scripts/panda-css-isolation.test.mjs scripts/conditional-css.test.mjs scripts/primitive-recipes.test.mjs scripts/primitive-css-layers.test.mjs scripts/native-css-entries.test.mjs scripts/panda-primitive-runtime.test.mjs ../../scripts/no-tailwind-contract.test.mjs scripts/retire-primitive-fallbacks.test.mjs",
     "build:styles": "panda codegen && panda cssgen --outfile src/styled-system/styles.css && node scripts/flatten-panda-css.mjs && node scripts/prepare-panda-runtime.mjs"
   }
 }

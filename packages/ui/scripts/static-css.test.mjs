@@ -24,24 +24,13 @@ test('both published CSS entries contain migrated utility and variant styles', (
   }
 });
 
-test('plain CSS has no Tailwind directives, while the theme entry keeps valid metadata', () => {
-  postcss.parse(read('app.css')).walkAtRules((rule) => {
-    assert.ok(!['import', 'theme', 'source', 'apply', 'utility'].includes(rule.name), rule.name);
-  });
-  let themes = 0;
-  let sources = 0;
-  postcss.parse(read('app.theme.css')).walkAtRules((rule) => {
-    if (rule.name === 'theme') {
-      themes++;
-      assert.ok(rule.nodes.some((node) => node.prop === '--color-primary'));
-    }
-    if (rule.name === 'source') {
-      sources++;
-      assert.equal(rule.params, '"./components"');
-    }
-  });
-  assert.equal(themes, 1);
-  assert.equal(sources, 1);
+test('both public CSS entries are native and contain identical styles', () => {
+  for (const name of ['app.css', 'app.theme.css']) {
+    postcss.parse(read(name)).walkAtRules((rule) => {
+      assert.ok(!['import', 'theme', 'source', 'apply', 'utility', 'tailwind', 'custom-variant', 'reference', 'variant', 'config', 'plugin'].includes(rule.name), `${name}: ${rule.name}`);
+    });
+  }
+  assert.equal(read('app.theme.css'), read('app.css'));
 });
 
 test('every migrated utility referenced by a component has a published CSS selector', () => {

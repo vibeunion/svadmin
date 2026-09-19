@@ -2,7 +2,7 @@
 
 The official scaffolding CLI for `headless-admin-svelte` (svadmin).
 
-Quickly bootstrap a completely configured, headless admin panel project built on Svelte 5, Shadcn Svelte, and TanStack Query.
+Quickly bootstrap a completely configured, headless admin panel project built on Svelte 5, the native-CSS `@svadmin/ui` components, and TanStack Query.
 
 ## Quick Start
 
@@ -21,7 +21,7 @@ Follow the interactive prompts to:
 
 The generated project is pre-configured with:
 - **Svelte 5** + **Vite**
-- **Tailwind CSS** + **Shadcn Svelte** UI components
+- **@svadmin/ui** native CSS, semantic tokens and Bits UI interactions; no host CSS compiler is required
 - **@svadmin/core**: The headless business logic and hooks (useTable, useForm, useAuth, etc.)
 - **@svadmin/ai-elements**: Composable Svelte 5 AI conversation, tool, reasoning, and source components.
 - **@svadmin/ui**: Beautiful default dashboard UI, standalone CRUD buttons, and data tables.

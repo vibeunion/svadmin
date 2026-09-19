@@ -14,15 +14,9 @@ Consumers do not need Tailwind or Panda. Both component styles and the existing
 utility aliases are included in the published native stylesheet. Theme overrides
 continue to use public semantic CSS variables; nested themes use `.svadmin-theme`.
 
-Existing Tailwind v4 hosts may opt into the legacy metadata entry instead:
-
-```css
-@import "@svadmin/ui/app.theme.css";
-```
-
-This entry includes the same component CSS plus `@theme` and `@source` metadata.
-Import one UI CSS entry, not both. The metadata does not add a Tailwind dependency
-to SVAdmin, and plain-CSS hosts should use `app.css`.
+`app.theme.css` is retained as a native-CSS alias of `app.css`. It no longer
+emits compiler metadata. Import one UI CSS entry, not both. Old host `@source`
+directives can be removed; styles are pre-generated, not scanned at consumption.
 
 ## Migration Boundary
 
@@ -34,6 +28,19 @@ Existing `svadmin-u-*` aliases, animation rules and compiled `--tw-*` variables
 remain native compatibility CSS. Do not rename or delete them mechanically.
 New styles should use native CSS or reviewed Panda recipes, not new uncompiled
 Tailwind class strings. This is not a wholesale rewrite of every UI component.
+
+Button, Badge, Input and Textarea now select pre-generated Panda recipes. Their
+public props, bindings, semantic class markers and null-variant semantics remain
+compatible. Migrated instances are excluded from the old primitive defaults at
+CSS publication time; the original compatibility snapshot is not rewritten.
+Primitive recipes stay in the `components` layer so consumer overrides keep their
+priority. Shared theme/focus rules and unmigrated components remain native CSS.
+
+The strict repository check also rejects helper packages (`tailwind-merge`,
+`tailwind-variants`) and the shadcn-svelte generator, including transitive lockfile
+entries. **The current Streamdown dependency still brings `tailwind-merge`; the
+strict check intentionally fails until a behavior-preserving replacement is
+verified. Do not describe this migration as fully complete.**
 
 The initial `surfaceMetric` and `surfaceTable` recipes pre-generate every public
 variant. Surface applications opt into `styledSurfaceCatalog` and load

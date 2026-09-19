@@ -110,13 +110,8 @@ const expectations: PackageExpectation[] = [
     contentAssertions: [
       {
         path: 'dist/ai.theme.css',
-        includes: [
-          '@source "./components";',
-          '@source "../node_modules/streamdown-svelte/dist/**/*.{js,svelte,ts}";',
-          '@source "../../../node_modules/streamdown-svelte/dist/**/*.{js,svelte,ts}";',
-          '@source "../../../streamdown-svelte/dist/**/*.{js,svelte,ts}";',
-        ],
-        excludes: ['@source "./src";'],
+        includes: ['@import "./ai.css";'],
+        excludes: ['@source', '@theme', '@apply', '@import "tailwindcss"'],
       },
     ],
   },
@@ -136,8 +131,8 @@ const expectations: PackageExpectation[] = [
     contentAssertions: [
       {
         path: 'dist/app.theme.css',
-        includes: ['@theme', '@source "./components";'],
-        excludes: ['@source "./src";'],
+        includes: ['.svadmin-button', '--color-primary'],
+        excludes: ['@theme', '@source', '@apply', '@import "tailwindcss"'],
       },
       {
         path: 'dist/app.css',

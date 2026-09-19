@@ -1,0 +1,68 @@
+name: Native primitive migration
+
+on:
+  push:
+    branches: [feat/panda-tokens-no-tailwind]
+  pull_request:
+    paths:
+      - 'packages/ui/**'
+      - 'packages/ai-elements/**'
+      - 'scripts/*tailwind*'
+      - 'scripts/check-package-packs.ts'
+      - 'bun.lock'
+      - '.github/workflows/native-primitives.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-primitives-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  strict-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - run: bun install --frozen-lockfile
+      - run: node --test scripts/no-tailwind-contract.test.mjs
+      - run: node scripts/check-no-tailwind.mjs
+  styles:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - run: bun install --frozen-lockfile
+      - name: Build native component packages
+        run: |
+          bun run --cwd packages/ai-elements build
+          bun run --cwd packages/ui build
+          bun run --cwd packages/surface build
+      - run: bun run --cwd packages/ui test:css
+      - run: node scripts/check-panda-runtime.mjs
+      - run: bun run --cwd packages/surface check
+      - name: Record exact source
+        if: always()
+        run: |
+          mkdir -p "$RUNNER_TEMP/native-primitives"
+          git rev-parse HEAD > "$RUNNER_TEMP/native-primitives/commit.txt"
+          git archive --format=tar.gz --output="$RUNNER_TEMP/native-primitives/source.tar.gz" HEAD
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: native-primitives-source
+          path: ${{ runner.temp }}/native-primitives/
+          retention-days: 14

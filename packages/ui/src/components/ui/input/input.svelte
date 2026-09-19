@@ -6,6 +6,7 @@
 	import { useTranslation } from "@svadmin/core/i18n";
 	import { definedOptions } from "@svadmin/core/options";
 	import { cn, type WithElementRef } from "../../../utils.js";
+	import { uiInput } from "../../../styled-system/recipes/index.js";
 
 	type InputValue = Type extends "number" | "range"
 		? number | null | undefined
@@ -27,6 +28,7 @@
 		...restProps
 	}: Props = $props();
 
+	const styles = uiInput();
 	const i18n = useTranslation();
 	const isFileInput = $derived(type?.toLowerCase() === "file");
 	const isDateInput = $derived(["date", "datetime-local", "month", "week", "time"].includes(type?.toLowerCase() ?? ""));
@@ -42,21 +44,21 @@
 
 {#if isFileInput}
 	<div
-		class={cn("svadmin-file-input", className)}
+		class={cn("svadmin-file-input", styles.root, className)}
 		data-disabled={disabled ? "true" : undefined}
 	>
 		<input
 			bind:this={ref}
 			data-slot={dataSlot}
 			data-input-type="file"
-			class={cn("svadmin-input", className)}
+			class={cn("svadmin-input", styles.control, className)}
 			type="file"
 			bind:files
 			{...attributes}
 		/>
-		<span class="svadmin-file-input__visual" aria-hidden="true">
-			<span class="svadmin-file-input__button">{i18n.t("common.chooseFile")}</span>
-			<span class="svadmin-file-input__name">{selectedFileLabel}</span>
+		<span class={cn("svadmin-file-input__visual", styles.visual)} aria-hidden="true">
+			<span class={cn("svadmin-file-input__button", styles.button)}>{i18n.t("common.chooseFile")}</span>
+			<span class={cn("svadmin-file-input__name", styles.name)}>{selectedFileLabel}</span>
 		</span>
 	</div>
 {:else}
@@ -65,6 +67,7 @@
 		data-slot={dataSlot}
 		class={cn(
 			"svadmin-input",
+			styles.control,
 			className
 		)}
 			{type}

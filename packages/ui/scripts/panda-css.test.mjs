@@ -93,7 +93,22 @@ test('variant coverage detects a missing rule rather than passing vacuously', ()
 
 test('Panda recipes do not introduce global resets or theme scoping regressions', () => {
   const root = postcss.parse(read('src/styles/recipes.css'));
-  root.walkAtRules('layer', () => assert.fail('Recipe layers must not lose to existing unlayered component CSS'));
+  const primitive = /\.svadmin-ui-(?:button|badge|input|textarea)(?=[\s.\[:#>+~_-]|$)/;
+  root.walkAtRules('layer', (layer) => {
+    assert.equal(layer.params, 'components');
+    layer.walkRules((rule) => {
+      // 原生嵌套选择器归属于最近的具名 recipe 根。
+      let owner = rule;
+      while (owner && !primitive.test(owner.selector ?? '')) owner = owner.parent;
+      assert.ok(owner, `Only primitive recipes may be layered: ${rule.selector}`);
+    });
+  });
+  root.walkRules((rule) => {
+    if (!rule.selector.includes('surface-metric') && !rule.selector.includes('surface-table')) return;
+    for (let parent = rule.parent; parent; parent = parent.parent) {
+      assert.ok(parent.type !== 'atrule' || parent.name !== 'layer', 'Surface enhancement recipes must remain unlayered');
+    }
+  });
   assert.ok(root.toString().includes('.svadmin-theme'));
   assert.ok(root.toString().includes('[data-theme]'));
   assert.ok(root.toString().includes('var(--card)'));

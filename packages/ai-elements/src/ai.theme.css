@@ -1,5 +1,1 @@
 @import "./ai.css";
-@source "./components";
-@source "../node_modules/streamdown-svelte/dist/**/*.{js,svelte,ts}";
-@source "../../../node_modules/streamdown-svelte/dist/**/*.{js,svelte,ts}";
-@source "../../../streamdown-svelte/dist/**/*.{js,svelte,ts}";
