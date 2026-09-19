@@ -80,10 +80,24 @@ test('AutoTable semantic colors follow a nested host theme at desktop and mobile
           viewport.scrollLeft = viewport.scrollWidth;
           viewport.dispatchEvent(new Event('scroll'));
         });
-        return page.getByRole('button', { name: 'Edit Stock', exact: true }).first().isVisible();
+        // isVisible 只要求布局框存在，旧虚拟列即使已被滚动窗裁切也会返回 true。
+        // 在浏览器完成布局后检查真实交集，避免缩小视口时过早结束轮询。
+        return page.getByRole('button', { name: 'Edit Stock', exact: true }).first().evaluateAll(async elements => {
+          const button = elements[0];
+          if (!button) return false;
+          return new Promise<boolean>(resolve => {
+            const observer = new IntersectionObserver(entries => {
+              observer.disconnect();
+              const entry = entries[0];
+              resolve(entry?.isIntersecting === true && entry.intersectionRatio === 1);
+            });
+            observer.observe(button);
+          });
+        });
       }, { timeout: 5_000 }).toBe(true);
     }
     await expect(page.getByRole('button', { name: 'Edit Stock', exact: true }).first()).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Edit Stock', exact: true }).first()).toBeInViewport();
     for (const dark of [false, true]) {
       if (dark) await page.getByRole('button', { name: 'Theme', exact: true }).click();
       const hostColor = await page.locator('main').evaluate(element => getComputedStyle(element).color);
