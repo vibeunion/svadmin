@@ -1,0 +1,33 @@
+{
+  "head": "6303ac76dfe198d7e41692d1ca336b18a233d422",
+  "testedRevision": "4ffbdfa9ef10078f8547e3b095544e85813191cf",
+  "run": 35456971369,
+  "source": "GitHub Actions artifact; unmodified captures",
+  "screenshots": [
+    {
+      "file": "resource-list-ready-light-en-1440.png",
+      "sha256": "ff2322635b53cc9935aa2bb30124cfef538bc1780422106e7bf8a6f2f1945945",
+      "scene": "resource-list-ready-light-en-1440"
+    },
+    {
+      "file": "resource-list-ready-light-en-1920.png",
+      "sha256": "81ca99f53b61a2d6f90b91012910233dbe25ea6b109302d34a0722e52ce48128",
+      "scene": "resource-list-ready-light-en-1920"
+    },
+    {
+      "file": "record-detail-ready-light-zh-CN-1440.png",
+      "sha256": "bdc255e24450bd82107d1a13c04814744b4150afde01bc17710552144cf6ad02",
+      "scene": "record-detail-ready-light-zh-CN-1440"
+    },
+    {
+      "file": "settings-ready-dark-zh-CN-390.png",
+      "sha256": "fc4df19d193b34e93f5a27fae5d6a5439bac2bc087d42bf57f3834b98f4079d5",
+      "scene": "settings-ready-dark-zh-CN-390"
+    },
+    {
+      "file": "components-ready-dark-en-1440.png",
+      "sha256": "323fe1ae4ddb04d77b344465ece2accb0242dabe19b33769e964a6126dea0ab4",
+      "scene": "components-ready-dark-en-1440"
+    }
+  ]
+}
