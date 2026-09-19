@@ -32,6 +32,11 @@ const spec: SurfaceSpec = {
 };
 const singleSpec: SurfaceSpec = { ...spec, dataSources: spec.dataSources.slice(0, 1), widgets: spec.widgets.slice(0, 1) };
 
+function fixture<T>(value: T | undefined): T {
+  if (value === undefined) throw new Error('Missing test fixture');
+  return value;
+}
+
 function deferred<T>() {
   let resolve!: (value: T) => void;
   let reject!: (reason: unknown) => void;
@@ -103,7 +108,7 @@ describe('SurfaceRenderer incremental loading', () => {
     await view.rerender({
       spec: equivalent,
       policy: { ...policy, resources: { ...policy.resources, products: {
-        ...policy.resources['products']!, readFields: ['stock', 'name', 'id'],
+        ...fixture(policy.resources['products']), readFields: ['stock', 'name', 'id'],
       } } },
     });
     await settle();
@@ -132,7 +137,7 @@ describe('SurfaceRenderer incremental loading', () => {
     const view = render(SurfaceRenderer, { spec, policy, dataProvider: h.provider });
     await screen.findByText('110');
     await view.rerender({ policy: {
-      resources: { ...policy.resources, products: { ...policy.resources['products']!, readFields: ['id'] } },
+      resources: { ...policy.resources, products: { ...fixture(policy.resources['products']), readFields: ['id'] } },
     } });
     await waitFor(() => expect(h.getList).toHaveBeenCalledTimes(3));
     expect(h.getList.mock.calls[2]?.[0].resource).toBe('products');
@@ -288,7 +293,7 @@ describe('SurfaceRenderer incremental loading', () => {
     const one: SurfaceSpec = {
       ...singleSpec,
       dataSources: [{ id: 'products', type: 'resource-one', resource: 'products', recordId: 1 }],
-      widgets: [{ ...singleSpec.widgets[0]!, binding: { sourceId: 'products', pointer: '/stock' } }],
+      widgets: [{ ...fixture(singleSpec.widgets[0]), binding: { sourceId: 'products', pointer: '/stock' } }],
     };
     const view = render(SurfaceRenderer, { spec: one, policy, dataProvider: h.provider });
     await screen.findByText('10');
