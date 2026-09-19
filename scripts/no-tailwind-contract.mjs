@@ -2,7 +2,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import ts from 'typescript';
 
-const forbidden = /^(?:tailwindcss|@tailwindcss\/[^/@\s]+|tw-animate-css|tailwind-merge|tailwind-variants|shadcn-svelte)(?:$|@|\/)/;
+const forbidden = /^(?:tailwindcss|@tailwindcss\/[^/@\s]+|tw-animate-css|tailwind-variants|shadcn-svelte)(?:$|@|\/)/;
 const directives = new Set(['theme', 'source', 'apply', 'utility', 'custom-variant', 'tailwind', 'reference', 'variant', 'config', 'plugin', 'screen', 'responsive', 'variants']);
 export const isForbiddenPackage = (value) => forbidden.test(value.replace(/^npm:/, ''));
 

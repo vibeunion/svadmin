@@ -51,7 +51,7 @@
 			bind:this={ref}
 			data-slot={dataSlot}
 			data-input-type="file"
-			class={cn("svadmin-input", styles.control, className)}
+			class={cn("svadmin-input", className)}
 			type="file"
 			bind:files
 			{...attributes}
