@@ -83,7 +83,8 @@
     items = items.map(item => {
       if (item.id !== id) return item;
       const next = { ...item, ...update };
-      for (const key of clear) delete next[key];
+      if (clear.includes('error')) delete next.error;
+      if (clear.includes('url')) delete next.url;
       return next;
     });
     emitChange();
