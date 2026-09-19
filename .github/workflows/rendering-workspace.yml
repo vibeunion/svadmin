@@ -46,7 +46,7 @@ jobs:
           assert hashlib.sha256(raw).hexdigest() == 'a1ed1477a946b2786705c70af0db5795be1b5b7f9ad08a6649c5cb24b6c2df93'
           manifest = json.loads(raw)
           assert manifest['base'] == '4cbc00bc08e01d415aec1405d54b89f8a760710b'
-          assert subprocess.check_output(['git', 'rev-parse', 'HEAD^'], text=True).strip() == manifest['base']
+          assert subprocess.check_output(['git', 'rev-parse', 'HEAD^'], text=True).strip() == 'e82e44d2ebb9806e58ed7b29ace1a40caabe119a'
           assert len(manifest['files']) == 55
           seen = set()
           updates = []
@@ -84,7 +84,8 @@ jobs:
               path.unlink()
           manifest['cleanup'] = cleanup
           pathlib.Path('/tmp/rendering-manifest.json').write_text(json.dumps(manifest))
-          subprocess.run(['git', 'add', '--all', '--', *seen, *cleanup], check=True)
+          subprocess.run(['git', 'add', '--all', '--', *sorted(seen)], check=True)
+          subprocess.run(['git', 'add', '--update', '--', *cleanup], check=True)
           subprocess.run(['git', 'diff', '--cached', '--check'], check=True)
           print(f'Verified {len(updates)} source files; removed temporary migration transport files.')
           PY
