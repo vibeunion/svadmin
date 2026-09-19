@@ -1,0 +1,71 @@
+name: Integrate content branch with main
+on:
+  push:
+    branches: [fix/panda-stage3-validation-20260919]
+    paths: [.github/workflows/content-main-integration.yml]
+permissions:
+  contents: write
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Merge one immutable main revision into this feature branch only
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          branch=fix/panda-stage3-validation-20260919
+          test "$(git ls-remote origin "refs/heads/$branch" | cut -f1)" = "$EXPECTED_HEAD"
+          git config user.name 'svadmin automation'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if ! git merge --no-commit --no-ff c91936335e1a431f2ac37dec31da138afbbbc21f; then
+            test "$(git diff --name-only --diff-filter=U)" = 'packages/ui/panda.config.ts'
+          fi
+          cat > packages/ui/panda.config.ts <<'TS'
+          import { defineConfig } from '@pandacss/dev';
+          import { designTokens, semanticTokens } from './design/tokens.js';
+          import { surfaceMetric, surfaceTable } from './design/recipes.js';
+          import { uiButton, uiBadge, uiInput, uiTextarea } from './design/primitive-recipes.js';
+          import { contentTokens, contentSemanticTokens } from './design/content-tokens.js';
+          import { contentPage, contentHeader, metricBlock } from './design/content-recipes.js';
+
+          export default defineConfig({
+            preflight: false,
+            presets: [],
+            prefix: 'svadmin',
+            // 主题变量必须在嵌套主题根重新绑定，不能继承已经解析的根节点颜色。
+            cssVarRoot: ':where(:root, :host, .svadmin-theme, .dark, [data-theme])',
+            include: ['./src/**/*.{ts,svelte}'],
+            exclude: ['./src/**/*.test.*', './src/styled-system/**'],
+            outdir: 'src/styled-system',
+            outExtension: 'js',
+            theme: {
+              tokens: designTokens,
+              semanticTokens,
+              recipes: { uiButton, uiBadge, uiTextarea },
+              slotRecipes: { surfaceMetric, surfaceTable, uiInput },
+              extend: {
+                tokens: contentTokens,
+                semanticTokens: contentSemanticTokens,
+                slotRecipes: { contentPage, contentHeader, metricBlock },
+              },
+            },
+            // AI 与普通调用方在运行时选择变体；不能依赖扫描碰巧发现这些值。
+            staticCss: { recipes: {
+              surfaceMetric: ['*'], surfaceTable: ['*'],
+              uiButton: ['*'], uiBadge: ['*'], uiInput: ['*'], uiTextarea: ['*'],
+              contentPage: ['*'], contentHeader: ['*'], metricBlock: ['*'],
+            } },
+          });
+          TS
+          git add packages/ui/panda.config.ts
+          test -z "$(git diff --name-only --diff-filter=U)"
+          git diff --cached --check
+          git commit -m 'chore(styles): reconcile content recipes with native primitives on main'
+          git push origin "HEAD:refs/heads/$branch"
+          git rev-parse HEAD HEAD^{tree}
