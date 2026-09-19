@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { canAccessAsync, captureAdminContext } from '@svadmin/core';
+  import { canAccessAsync, captureAdminContext, getAccessControlProvider, getLogoutVersion } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
-  import { untrack } from 'svelte';
-  import { resolveSurfaceWidgetData } from '../binding.js';
+  import { onDestroy, untrack } from 'svelte';
+  import { SvelteMap } from 'svelte/reactivity';
+  import { resolveSurfaceSourceData } from '../binding.js';
   import { defaultSurfaceCatalog } from '../catalog.js';
   import type { SurfaceRenderCatalog } from '../catalog.js';
   import { loadSurfaceSource } from '../runtime.js';
@@ -11,12 +12,13 @@
   import type {
     SurfaceDataError,
     SurfaceDataProvider,
-    SurfaceDataSource,
     SurfacePolicy,
     SurfaceSourceDataState,
     SurfaceValidationIssue,
   } from '../types.js';
   import { validateSurfaceSpec } from '../validation.js';
+  import { createSurfaceSourceCache, sameSourceIdentity, snapshotSurfaceSource } from '../source-cache.js';
+  import type { SurfaceSourceRequest } from '../source-cache.js';
 
   export type SurfaceRendererError =
     | { readonly type: 'validation'; readonly issues: readonly SurfaceValidationIssue[] }
@@ -27,6 +29,8 @@
     readonly policy: SurfacePolicy;
     readonly catalog?: SurfaceRenderCatalog;
     readonly dataProvider?: SurfaceDataProvider;
+    /** Host-controlled cache scope for opaque credential/session changes; never part of the spec. */
+    readonly dataScopeKey?: string | number;
     readonly locale?: string;
     readonly messages?: Partial<SurfaceMessages>;
     readonly class?: string;
@@ -38,6 +42,7 @@
     policy,
     catalog = defaultSurfaceCatalog,
     dataProvider,
+    dataScopeKey,
     locale,
     messages,
     class: className = '',
@@ -50,27 +55,13 @@
   const activeMessages = $derived(resolveSurfaceMessages(activeLocale, messages));
   const validation = $derived(validateSurfaceSpec(spec, catalog, policy));
   const widgetRegistrations = $derived(new Map(catalog.widgets.map((widget) => [widget.type, widget])));
-  const currentSpec = $derived(validation.ok ? validation.value : null);
-  const sourceGenerations: Record<string, number> = Object.create(null) as Record<string, number>;
-  let sourceStates = $state.raw<Record<string, SurfaceSourceDataState>>({});
-
-  function nextGeneration(sourceId: string): number {
-    const generation = (sourceGenerations[sourceId] ?? 0) + 1;
-    sourceGenerations[sourceId] = generation;
-    return generation;
-  }
-
-  function setSourceState(sourceId: string, state: SurfaceSourceDataState): void {
-    sourceStates = { ...sourceStates, [sourceId]: state };
-  }
-
-  function providerFor(resource: string): SurfaceDataProvider {
-    return dataProvider ?? adminContext.getDataProviderForResource(resource);
-  }
-
-  async function authorize(resource: string, action: 'list' | 'show') {
-    return canAccessAsync(resource, action);
-  }
+  const sourceStates = new SvelteMap<string, SurfaceSourceDataState>();
+  let destroyed = false;
+  const sourceCache = createSurfaceSourceCache({
+    set: (id, state) => { sourceStates.set(id, state); },
+    remove: (id) => { sourceStates.delete(id); },
+    onError: (state) => { onError?.({ type: 'data', error: state.error }); },
+  });
 
   function providerError(sourceId: string, failure: unknown): SurfaceSourceDataState {
     const message = failure instanceof Error ? failure.message : activeMessages.providerUnavailable;
@@ -81,61 +72,88 @@
     };
   }
 
-  async function loadSource(source: SurfaceDataSource): Promise<void> {
-    const generation = nextGeneration(source.id);
-    setSourceState(source.id, { status: 'loading', sourceId: source.id });
-
-    let result: SurfaceSourceDataState;
-    try {
+  const sourceRequests: SurfaceSourceRequest[] = $derived.by(() => {
+    if (!validation.ok) return [];
+    // Read context here (not inside untrack) so provider/permission changes reconcile
+    // even when the host does not replace its spec. No credentials enter a JSON key.
+    const scope = [
+      validation.value.surfaceId,
+      dataScopeKey,
+      getLogoutVersion(),
+      adminContext.tenantCacheKey?.__svadminTenant,
+      adminContext.authProvider,
+      adminContext.accessControlProvider,
+      getAccessControlProvider(),
+    ];
+    return validation.value.dataSources.map((source): SurfaceSourceRequest => {
       const resourcePolicy = Object.hasOwn(policy.resources, source.resource)
         ? policy.resources[source.resource]
         : undefined;
+      // Full validation above rejects a missing policy before any query is planned.
       if (!resourcePolicy) throw new Error(`Resource "${source.resource}" is not allowed`);
-      result = await loadSurfaceSource({
-        source,
-        resourcePolicy,
-        provider: providerFor(source.resource),
-        authorize,
-      });
-    } catch (failure) {
-      result = providerError(source.id, failure);
-    }
-
-    if (sourceGenerations[source.id] !== generation) return;
-    setSourceState(source.id, result);
-    if (result.status === 'error') onError?.({ type: 'data', error: result.error });
-  }
-
-  async function loadSources(sources: readonly SurfaceDataSource[]): Promise<void> {
-    await Promise.all(sources.map(loadSource));
-  }
-
-  function invalidateCurrentSources(): void {
-    for (const sourceId of Object.keys(sourceGenerations)) nextGeneration(sourceId);
-    sourceStates = {};
-  }
+      const snapshot = snapshotSurfaceSource(source, resourcePolicy);
+      let provider: SurfaceDataProvider | undefined;
+      let providerFailure: unknown;
+      try {
+        provider = dataProvider ?? adminContext.getDataProviderForResource(source.resource);
+      } catch (failure) {
+        providerFailure = failure;
+      }
+      const identity = [snapshot.key, provider, provider?.getList, provider?.getOne, ...scope];
+      const isCurrent = () => !destroyed && sourceRequests.some((request) =>
+        request.id === snapshot.source.id && sameSourceIdentity(request.identity, identity));
+      return {
+        id: snapshot.source.id,
+        identity,
+        isCurrent,
+        async load() {
+          if (!provider) return providerError(snapshot.source.id, providerFailure);
+          try {
+            return await loadSurfaceSource({
+              source: snapshot.source,
+              resourcePolicy: snapshot.resourcePolicy,
+              provider,
+              async authorize(resource, action) {
+                if (!isCurrent()) return { can: false };
+                const decision = await canAccessAsync(resource, action);
+                // An invalidated/deleted source must not start a provider request
+                // after an already-running permission check finishes.
+                return isCurrent() ? decision : { can: false };
+              },
+            });
+          } catch (failure) {
+            return providerError(snapshot.source.id, failure);
+          }
+        },
+      };
+    });
+  });
 
   export async function refresh(sourceId?: string): Promise<void> {
-    const activeSpec = currentSpec;
-    if (!activeSpec) return;
-    const sources = sourceId === undefined
-      ? activeSpec.dataSources
-      : activeSpec.dataSources.filter((source) => source.id === sourceId);
-    await loadSources(sources);
-  }
-
-  $effect(() => {
-    const validatedSpec = validation;
-    void dataProvider;
-    invalidateCurrentSources();
-    if (!validatedSpec.ok) {
-      onError?.({ type: 'validation', issues: validatedSpec.issues });
+    if (!validation.ok) {
+      sourceCache.clear();
       return;
     }
+    await untrack(() => sourceCache.reconcile(sourceRequests, sourceId ?? true));
+  }
 
+  $effect.pre(() => {
+    const validatedSpec = validation;
+    const requests = sourceRequests;
+    // State writes and callbacks must not become dependencies of reconciliation.
     untrack(() => {
-      void loadSources(validatedSpec.value.dataSources);
+      if (!validatedSpec.ok) {
+        sourceCache.clear();
+        onError?.({ type: 'validation', issues: validatedSpec.issues });
+        return;
+      }
+      void sourceCache.reconcile(requests);
     });
+  });
+
+  onDestroy(() => {
+    destroyed = true;
+    sourceCache.dispose();
   });
 </script>
 
@@ -160,7 +178,7 @@
             <WidgetComponent
               widgetId={widget.id}
               props={widget.props}
-              data={resolveSurfaceWidgetData(widget, sourceStates)}
+              data={resolveSurfaceSourceData(widget, widget.binding ? sourceStates.get(widget.binding.sourceId) : undefined)}
               locale={activeLocale}
               messages={activeMessages}
             />
