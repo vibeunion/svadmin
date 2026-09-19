@@ -1,0 +1,6 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": { "types": ["svelte", "node"] },
+  "include": ["./App.svelte", "./main.ts", "../../../packages/ui/src/components/Svar*.svelte", "../../../packages/ui/src/components/svar-grid-contract.ts"],
+  "exclude": ["node_modules"]
+}
