@@ -17,9 +17,12 @@ describe('array parse-error ownership', () => {
     const first = numberInput(view.container, 0);
     Object.defineProperty(first, 'validity', { configurable: true, value: { badInput: true } });
     await fireEvent.input(first, { target: { value: '' } });
-    await fireEvent.click(view.getAllByRole('button', { name: 'Remove', exact: true })[0]!);
+    const removeButton = view.getAllByRole('button', { name: 'Remove item', exact: true })[0];
+    if (!removeButton) throw new Error('Missing array removal control');
+    await fireEvent.click(removeButton);
     await fireEvent.submit(view.getByTestId('json-schema-form'));
-    expect(onsubmit).toHaveBeenCalledExactlyOnceWith({ rows: [{ amount: 2 }] });
+    expect(onsubmit).toHaveBeenCalledTimes(1);
+    expect(onsubmit).toHaveBeenCalledWith({ rows: [{ amount: 2 }] });
   });
   it('reindexes a surviving invalid numeric draft when a previous array item is removed', async () => {
     const onsubmit = vi.fn(), onvalidationerror = vi.fn();
@@ -27,12 +30,15 @@ describe('array parse-error ownership', () => {
     const second = numberInput(view.container, 1);
     Object.defineProperty(second, 'validity', { configurable: true, value: { badInput: true } });
     await fireEvent.input(second, { target: { value: '' } });
-    await fireEvent.click(view.getAllByRole('button', { name: 'Remove', exact: true })[0]!);
+    const removeButton = view.getAllByRole('button', { name: 'Remove item', exact: true })[0];
+    if (!removeButton) throw new Error('Missing array removal control');
+    await fireEvent.click(removeButton);
     await fireEvent.submit(view.getByTestId('json-schema-form'));
     expect(onsubmit).not.toHaveBeenCalled();
     expect(onvalidationerror).toHaveBeenLastCalledWith([{ path: '/rows/0/amount', code: 'invalid-value' }]);
     await fireEvent.input(numberInput(view.container, 0), { target: { value: '3' } });
     await fireEvent.submit(view.getByTestId('json-schema-form'));
-    expect(onsubmit).toHaveBeenCalledExactlyOnceWith({ rows: [{ amount: 3 }] });
+    expect(onsubmit).toHaveBeenCalledTimes(1);
+    expect(onsubmit).toHaveBeenCalledWith({ rows: [{ amount: 3 }] });
   });
 });
