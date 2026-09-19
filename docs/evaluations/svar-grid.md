@@ -1,33 +1,22 @@
-# SVAR DataGrid 评估与可选接入
+# SVAR DataGrid 接入、兼容层与验收
 
-评估日期：2026-09-19。实际验证版本：`@svar-ui/svelte-grid@2.7.3`、Svelte `5.56.10`。
+更新日期：2026-09-19。独立真实消费者固定 `@svar-ui/svelte-grid@2.7.3`、Svelte `5.56.10`，并将 `@svar-ui/lib-state` 统一为 `1.9.7`。
 
-## 结论与范围
+## 组件选择与范围
 
-采用 **可选的只读适配组件**，暂不替换 `AutoTable`、`VirtualTable` 或 `TreeTable`。SVAR 负责网格布局、本地排序过滤、虚拟滚动和树展开；资源契约、服务端请求、缓存、租户和访问检查仍由 svadmin 负责，没有增加第二套 REST 数据层。
+SVAR 是可选引擎，不是默认 AutoTable 的强制替换。资源契约、Provider 路由、查询缓存、认证、租户和写入校验仍由 svadmin 负责；没有接入第二套 REST 数据层。下面三个入口服务于不同迁移需求，不能把某个入口的能力自动视为另外两个入口已经具备。
 
-两个组件通过已有深导出使用，不进入 UI 根 barrel：
+| 入口 | 适用场景 | 状态与业务的所有者 |
+| --- | --- | --- |
+| `@svadmin/ui/components/SvarDataGrid.svelte` | 已授权数据、原生自定义单元格、本地/受控服务端查询、树和滚动窗口 | 宿主负责数据、授权及查询作用域；适配器负责引擎交互与加载隔离 |
+| `@svadmin/ui/components/SvarResourceTable.svelte` | 资源级分页、窗口/无限加载、懒树、受控编辑/批量/导出 | 现有 core 资源契约及查询/mutation hooks |
+| `@svadmin/ui/components/SvarAutoTable.svelte` | 迁移已有 AutoTable 页面，保留工具栏、URL、偏好和 snippets | 原有 AutoTable；SVAR 只替换非空列表的表体 |
 
-- `@svadmin/ui/components/SvarDataGrid.svelte`：传入已授权的记录和显式列配置，可选择本地或受控服务端查询模式。
-- `@svadmin/ui/components/SvarResourceTable.svelte`：读取现有 AdminContext 的资源定义，连接 `useResourceContract`、`useCan` 和 `useList`，提供分页、刷新及列排序/文本过滤。
+宿主显式注入真正的 `Grid` 和 `Willow`。这些组件不进入 UI 根 barrel，未选择 SVAR 的应用不需要安装 SVAR。Panda 和已迁移的原生 CSS 保持现有构建边界，不恢复 Tailwind 编译器。
 
-宿主显式注入真正的 `Grid` 和 `Willow`。未选择 SVAR 的消费者不必安装其依赖，也不会因 UI 根导出加载其运行时代码。真实引擎及其类型已在独立消费者中验证；原有 UI 依赖和根锁文件保持不变。
+## 安装与基本用法
 
-## 上游核实
-
-| 评估项 | 核实结果与本次决定 |
-| --- | --- |
-| 许可 | [官方入门](https://docs.svar.dev/svelte/grid/getting_started/)与[发行包清单](https://github.com/svar-widgets/grid/blob/main/svelte/package.json)声明 MIT；没有购买商业许可或引入 PRO 包。 |
-| 框架与接口 | Svelte 5 组件，[上游声明](https://github.com/svar-widgets/grid/blob/main/svelte/types/index.d.ts)与实际适配组件一起通过严格类型检查。固定消费者版本，升级后重跑验证。 |
-| 服务端操作 | [intercept](https://docs.svar.dev/svelte/grid/api/methods/intercept/)可返回 false 取消默认动作。本次将排序和过滤事件转为 core 查询条件，不使用上游 RestDataProvider。 |
-| 主题 | [主题指南](https://docs.svar.dev/svelte/grid/guides/styling/)提供 CSS 变量。映射位于 Theme 内部，使用 svadmin 语义 tokens；`fonts={false}` 禁止自动外部字体。 |
-| 冻结列 | [公开 split API](https://docs.svar.dev/svelte/grid/api/properties/split/)只有左侧冻结。本次仅暴露 `freezeLeft`，不依赖内部 right 字段。 |
-| 树 | 传入 `childrenKey` 的完整树，映射至上游 `data` 子数组并初始折叠；不实现异步子节点加载。 |
-| 性能 | 真实浏览器已验证 20,000 行数据使用 DOM 窗口渲染，测试要求少于 300 个 gridcell。没有同等场景 TanStack 耗时、内存或包体积对照，不宣称更快或更小。 |
-
-## 安装与使用
-
-在消费应用的 `package.json` 中合并以下配置，再使用应用自己的包管理器安装并提交锁文件：
+消费应用添加依赖并提交自己的锁文件：
 
 ```json
 {
@@ -36,12 +25,11 @@
 }
 ```
 
-严格检查发现上游 2.7.3 的依赖树同时包含 `lib-state@1.9.6` 和 `1.9.7`，旧版本声明中的 `EventResolver.exec` / `EventBusRouter.exec` 与基础事件接口不兼容。验证消费者将其统一为 1.9.7 后，完整依赖声明检查和真实浏览器测试通过；没有启用 `skipLibCheck`，没有修改上游运行时代码。这个 override 放在消费应用根配置，不是要求所有 svadmin 用户引入该依赖。
-
-在已有 `AdminContext`、资源 `contract` 和 `QueryClientProvider` 的页面中：
+`lib-state` override 用于统一上游依赖声明，不是跳过类型检查，也不是修改上游运行时代码。真实消费者不启用 `skipLibCheck`。使用 Vite 且显式设置 `compilerOptions.types` 的应用，应保留 `vite/client` 以识别 CSS 资源导入。
 
 ```svelte
 <script lang="ts">
+  import '@svadmin/ui/app.css';
   import { Grid, Willow } from '@svar-ui/svelte-grid';
   import SvarResourceTable from '@svadmin/ui/components/SvarResourceTable.svelte';
 </script>
@@ -52,50 +40,101 @@
   resourceName="products"
   pageSize={25}
   freezeLeft={1}
+  freezeRight={1}
+  loadingMode="window"
 />
 ```
 
-资源必须带真实 TypeBox `contract`，不是从可见字段推测 schema。`sortable: true` 开启该列排序；`filterable: true` 且字段类型为文本、邮件、URL 或 textarea 时开启 contains 列过滤。数值、日期及复合约束由宿主的 `filters` 传入；后端必须实现对应操作。宿主 filters 与用户列过滤使用 AND 组合，`initialSorters` 只设置挂载时的初始顺序。
+资源组件必须位于已有 `AdminContext`、`QueryClientProvider` 下，资源必须带真实 TypeBox `contract`。`sortable: true` 开启服务端排序；文本类字段的 `filterable: true` 开启列过滤。宿主 `filters` 与用户过滤组合，不把部分服务端数据误当作全量本地查询。
 
-不使用资源查询层的静态数据：
+## 高级数据加载与冻结列
+
+`loadingMode="page"` 为默认分页。`window` 将 Grid 的零起点、右端不含窗口映射为现有 Provider 的一基分页；请求范围有界，并验证返回条数、重复 ID 和总数。`infinite` 使用相同 core 查询追加后续页面，保留滚动位置，并提供可键盘访问的“加载更多”按钮。高级读取仍共享资源契约、租户/会话缓存和权限检查。
+
+懒树使用分页模式，不能与 flat window/infinite 模式混用：
+
+```svelte
+<SvarResourceTable
+  {Grid}
+  Theme={Willow}
+  resourceName="categories"
+  lazyTree={{ parentField: 'parentId', rootValue: null, hasChildrenKey: 'hasChildren', maxChildren: 10000 }}
+  childrenKey="children"
+  freezeRight={1}
+/>
+```
+
+`parentId` 必须属于资源字段。根查询添加根父级过滤，展开时按父 ID 加载所有子页；超过 `maxChildren` 会报错而不是悄悄截断分支。重复展开去重，失败可重试，过期作用域响应不得写回当前树。分页过程中总数变化会拒绝结果，但这不等于数据库快照隔离；需要强一致列表时，后端仍须提供稳定排序和相应一致性机制。
+
+左冻结使用上游公开 `split.left`。右冻结使用两个同步的 Grid 面板，不读取或修改未公开的 `split.right`，不引入 PRO 包。面板同步垂直滚动、排序/过滤、树展开和键盘边界焦点。行高固定为 compact 32px / comfortable 44px，右侧面板在窄屏占宽最多 55%。
+
+底层 `SvarDataGrid` 也可以直接接收 `windowSource`、`loadChildren`、`onLoadMore`。这时宿主必须自行授权数据，并在查询/身份/租户变化时改变非敏感 `scopeKey`；同一数据集的正常追加不需要更换该版本。
+
+## 写入、选择和导出
+
+`SvarResourceTable` 的 `editable`、`selectable`、`batchUpdate`、`batchDelete`、`exportable` 默认关闭，由可信宿主显式开启。写入限制为契约允许的字段，禁止改主键，提交走 core `useUpdate` / `useDelete`。批量操作最多 100 条，先检查所有记录权限，再分派；部分失败保留成功/失败/未执行结果，不宣称事务回滚，不自动重试失败写入。删除需要确认。
+
+如果契约声明 `delete: Type.Object({})`，应传入 `deleteVariables={{}}`；如果没有声明删除输入 schema，则沿用该契约本身的输入要求。不能为了让按钮“能用”而绕过 core 的删除输入校验。动态页面应保持相同删除参数的对象引用稳定，避免把参数重建误当作作用域变化。
+
+操作使用实际已加载记录的独立快照，包含懒树已加载后代及无限追加页。普通分页导出当前页；高级模式按钮明确为“导出已加载记录”，不是全量资源导出。CSV 在首次异步授权前固定内容和 ID，对后代逐记录检查，防公式注入，并在作用域变化后取消下载。数值、货币、百分比、日期、日期时间及布尔格式可由宿主选择。
+
+`dataScopeKey` 同时进入数据查询和权限查询 meta 的 `svadminSvarScope`，不是单纯的组件 key。宿主在 core 之外改变凭据或授权环境时须更新它，但不要传入 token。服务端必须独立授权所有操作。
+
+## AutoTable 兼容入口
+
+```svelte
+<script lang="ts">
+  import '@svadmin/ui/app.css';
+  import { Grid, Willow } from '@svar-ui/svelte-grid';
+  import SvarAutoTable from '@svadmin/ui/components/SvarAutoTable.svelte';
+</script>
+
+<SvarAutoTable {Grid} Theme={Willow} resourceName="products" freezeRight={1}>
+  {#snippet headerActions()}<button type="button">宿主操作</button>{/snippet}
+  {#snippet rowActions({ record, id })}<a href={`/products/${encodeURIComponent(String(id))}`}>{String(record['name'])}</a>{/snippet}
+</SvarAutoTable>
+```
+
+`SvarAutoTable` 透传 AutoTable 的公开业务参数，包括 `columns`、`defaultCellRenderer`、`rowActions`、`headerActions`、`batchActions`、`emptyState`、`expandedRowRender`、`summary`、受控 `pagination` / `sorters` 和 `deleteVariables`。排序、过滤、搜索、分页、URL 同步、列偏好、保存视图、选择、默认行操作、详情/快速编辑及 mutation 均保留在原 AutoTable，不复制另一套业务状态或偏好存储。内部 `gridBody` 是可信宿主渲染扩展，不进入 AI schema。
+
+**兼容不表示像素布局相同：** 自定义单元格仍处于固定行高的虚拟网格内；展开详情和 summary 在网格后的原生表格区域呈现，选择全页/列重排控制位于“表格选择与列顺序”区域。空、加载、错误状态复用原 AutoTable。若页面依赖任意行高、详情紧跟每一行或原移动端卡片布局，应继续使用默认 AutoTable。这一入口仍保留 TanStack 的原有表格状态，并未宣称移除 TanStack 依赖。
+
+需要资源窗口/懒树的页面使用 `SvarResourceTable`；`SvarAutoTable` 不会把原 AutoTable 的受控分页接口暗中改为无限加载。`SvarResourceTable.savedViews` 使用独立作用域存储，可显式导入原 AutoTable 视图；`SvarAutoTable` 直接沿用原偏好存储，无须迁移。
+
+自定义单元格使用 SVAR 的原生 `cell` 组件和 Svelte snippet。宿主接收独立记录副本，不接收引擎 `api` / `exec`。默认单元格只接受文本/标量，不接受 AI 注入的 HTML 或可执行模板。
+
+## AI / Surface
+
+通过 `@svadmin/surface/svar` 导入 `createSvarSurfaceCatalog` 和 `SvarSurfaceProvider`，显式扩展目录并注入宿主引擎。目录版本追加 `+svar/v1`，新增 widget 类型是 **`data-grid`**；默认 Surface 目录不被隐式改变。
 
 ```svelte
 <script lang="ts">
   import { Grid, Willow } from '@svar-ui/svelte-grid';
-  import SvarDataGrid from '@svadmin/ui/components/SvarDataGrid.svelte';
-  const items = [{ id: 1, name: 'Parent', children: [{ id: 2, name: 'Child' }] }];
-  const columns = [{ key: 'name', label: 'Name', width: 240, sortable: true }];
+  import { SurfaceRenderer } from '@svadmin/surface/svelte';
+  import { createSvarSurfaceCatalog, SvarSurfaceProvider } from '@svadmin/surface/svar';
+  const catalog = createSvarSurfaceCatalog();
+  // spec、policy、dataProvider 由宿主定义；spec.catalogVersion 应等于 catalog.version。
 </script>
 
-<SvarDataGrid {Grid} Theme={Willow} {items} {columns} childrenKey="children" freezeLeft={1} />
+<SvarSurfaceProvider {Grid} Theme={Willow} scopeKey="session-revision-1">
+  <SurfaceRenderer {spec} {catalog} {policy} {dataProvider} />
+</SvarSurfaceProvider>
 ```
 
-本地模式仅处理已传入的数据，不能对部分服务端分页结果冒充全量查询。服务端模式必须为启用的排序/过滤提供 `onSortChange` / `onFilterChange`，并回传受控 `sorters` / `filters`。
+`data-grid` 使用已有资源数据源和字段白名单，主键也是必须授权的读取字段。JSON schema 只允许标题、列、有限格式、密度、尺寸和冻结配置，拒绝额外字段、回调、任意 URL、编辑配置及写操作。Agent prompt/提案验证器使用相同目录。**当前 AI 入口是只读 Grid，不是把宿主的全部写入、懒加载回调或 AutoTable snippets 开放给 AI。**
 
-## 数据及权限边界
+## 可复现验收
 
-所有传给引擎的记录都是独立投影，只包含声明的标量列。业务字段 `id`、`data`、`open` 与引擎配置使用不同命名空间；数字 ID 与字符串 ID 不会互相覆盖。缺失或重复 ID、循环树和读取访问器会被拒绝。复杂对象暂显示 `—`，不会隐式调用对象转换方法。默认单元格不接受 HTML 模板或执行函数。
-
-资源组件在读取前使用 core 的访问检查；拒绝时卸载网格，不发送新的数据查询。框架管理的认证会话、租户、Provider 或访问控制变化会重建相应视图。只有 `SvarResourceTable` 接入了这些自动作用域约束；`SvarDataGrid` 的宿主必须自行提供已授权数据并更新 `scopeKey`。
-
-宿主绕过 core API 修改内部凭据或身份时，更新非敏感的 `dataScopeKey`。该值同时进入 core **数据查询与权限查询** meta 的 `svadminSvarScope` 字段，以及网格作用域，不只是重新挂载组件。浏览器测试在长期缓存配置下验证不更换 Provider 的作用域撤权：旧授权不能用于发起新读取。不要传 token；后端授权不可由前端检查替代。
-
-## 明确未覆盖
-
-本阶段是读取集成，不是 AutoTable 完整替代：不开放单元格编辑、行新增/删除/复制、批量选择、拖动变更、撤销重做、导出或打印。相应事件被拦截，未绑定任何写 Provider；后续编辑需专门接入记录权限、字段契约及 mutation 流程。
-
-没有右冻结列、服务端滚动窗口/无限加载、异步树、复杂字段格式化、保存视图迁移或 AutoTable snippets 兼容。网格有固定视口和固定密度行高，不宣称任意行高支持。本次不注册 Surface catalog、不扩展 AI schema、不移除 TanStack Table，也不改 PandaCSS/Tailwind。
-
-SSR 输出最多 20 个根节点的静态表格预览，浏览器挂载后切换为真实 Grid；这不是完整的无 JS 高级网格，也不是完整 SvelteKit hydration 验收。关闭 Theme 字体后补足树形开关和排序箭头。当前交互测试不等同于完整键盘导航和辅助技术认证。
-
-## 可复现验证
-
-`scripts/fixtures/svar-grid` 位于工作区之外，使用已提交的独立 npm 锁文件；不是模拟 Grid。测试包括 20,000 行数据、树、真实 core 查询、权限撤销、租户和宿主作用域切换，以及亮暗主题的正常/加载/空/错误/禁用状态。
+工作流 `.github/workflows/svar-grid.yml` 对真实消费者执行以下检查；清单描述检查范围，不代表某个尚未完成的运行已通过：
 
 ```sh
 bun install --frozen-lockfile
+bun run --cwd packages/ui build:styles
+node packages/surface/scripts/prepare-design.mjs
 npm ci --prefix scripts/fixtures/svar-grid --ignore-scripts --no-audit --no-fund
-bun run --cwd packages/ui test src/components/svar-grid-contract.test.ts
+bun run --cwd packages/ui test src/components/svar-grid
+bun run --cwd packages/ui test src/components/auto-table
+bun run --cwd packages/surface test src/svar-schema.test.ts
 bun x --no-install svelte-check --tsgo-experimental-api --tsconfig scripts/fixtures/svar-grid/tsconfig.json --threshold error
 node scripts/fixtures/svar-grid/ssr.mjs
 node node_modules/vite/bin/vite.js build --config scripts/fixtures/svar-grid/vite.config.ts
@@ -103,14 +142,12 @@ bun x --no-install playwright install chromium
 bun x --no-install playwright test --config scripts/fixtures/svar-grid/playwright.config.ts
 ```
 
-**通过记录：** 提交 `c75394f1216531c1185a344b183d13f57ed5c542` 的 [专用 CI 35413011684](https://github.com/vibeunion/svadmin/actions/runs/35413011684) 已通过锁文件安装、lint、23 个 Vitest 契约测试、严格 Svelte/上游类型检查、SSR、消费者构建、8 个 Playwright 用例，以及依赖隔离与基线 `git diff --check`。下载的 Playwright 报告汇总为 8 expected、0 unexpected、0 flaky、0 skipped。资源测试使用 `staleTime: Infinity` / `gcTime: Infinity`；旧租户响应在真正完成且经过浏览器渲染帧后再检查污染。
+验收覆盖：真实 20,000 行窗口渲染、低于 300 个 DOM gridcell 的指定场景、左右面板、懒树和窗口重试、资源分页适配、无限追加的选择/CSV、作用域撤权和旧响应、写入契约和部分失败、原生 snippets、AutoTable 工具栏/行操作/详情/快速编辑/URL/保存视图，以及 Surface 字段和 mutation 越权拒绝。截图覆盖 1440×900、1920×1080、390×844；状态和亮暗主题按各用例断言。
 
-生成 30 张原始 PNG：5 个状态 × 2 种主题 × 3 个视口（1440×900、1920×1080、390×844）。已检查整套状态截图概览。完整截图在该运行的 `svar-grid-verification` 产物中，归档 ID `10574771156`，ZIP SHA-256 为 `46003de3d6c1d36ab9d55783aeee5f185392b757a5a034cddd43b7ddecf612f7`。
+`svar-grid-verification` 产物包含实际测试源码归档、测试提交号、JSON 单测/浏览器报告、原始截图和消费者构建。GitHub `pull_request` 默认测试的是合并提交；`evidence/tested-commit.txt` 记录实际执行版本，应同时核对运行的 head SHA 和 base，而不是用旧版本通过记录替代最新结果。CI 运行状态和本次验收数目以 PR #429 的最新验证记录为准。
 
-以下两张是产物中的**原始 PNG**，未缩放或重画；每张图片的尺寸、源路径和 SHA-256 记录于 [svar-evidence.json](assets/svar-evidence.json)。本次一次性截图归档工作流已移除，长期验证工作流继续仅使用 `contents: read`。
+仓库中的旧 [svar-evidence.json](assets/svar-evidence.json) 及两张 `svar-grid-*.png` 是 `c75394f` 只读基线的历史证据（23 单测/8 浏览器用例/30 截图），不是当前高级功能或 AutoTable 兼容层的验收证据。
 
-![SVAR 正常状态，亮色，1440x900](assets/svar-grid-1440x900.png)
+## 保留的边界
 
-![SVAR 正常状态，暗色，1920x1080](assets/svar-grid-1920x1080.png)
-
-专用消费者通过不代表整个 svadmin 工作区 CI、原有全部 E2E 或完整 AutoTable 功能对齐。PR 保持未合并，整体状态以最新提交的 CI 为准。
+底层 SSR 输出最多 20 个根节点的静态文本预览，挂载后切换真实 Grid；不宣称完整 SvelteKit hydration 验收。没有同场景 TanStack 耗时、内存、包体积对照，没有完整辅助技术认证，不宣称更快、更小或全部键盘路径已认证。任意行高、拖动写入、引擎 undo/redo、打印仍未开放。默认 AutoTable、VirtualTable、TreeTable 保留，不自动全量替换业务页面；是否切换默认实现应由上述真实验收及具体页面需求决定。

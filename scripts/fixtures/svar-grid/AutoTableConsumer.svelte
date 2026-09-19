@@ -13,6 +13,9 @@
   let tenant = $state('alpha');
   let denied = $state(false);
   let denyEdit = $state(false);
+  let invalidDelete = $state(false);
+  // 删除契约显式要求对象；合法与非法输入均保持稳定引用。
+  const deleteInputs = { valid: {}, invalid: { unexpected: true } };
   let fallback = $state(false);
   let defaultActions = $state(false);
   let dark = $state(false);
@@ -60,6 +63,7 @@
     <button type="button" onclick={() => { defaultActions = !defaultActions; }}>Default actions</button>
     <button type="button" onclick={() => { denyEdit = !denyEdit; }}>Deny edits</button>
     <button type="button" onclick={() => { denied = !denied; }}>Deny list</button>
+    <button type="button" onclick={() => { invalidDelete = !invalidDelete; }}>Invalid delete input</button>
     <button type="button" onclick={() => { tenant = tenant === 'alpha' ? 'beta' : 'alpha'; }}>Tenant</button>
     <button type="button" onclick={() => { externalPagination = { current: 2, pageSize: 10 }; externalSorters = [{ field: 'stock', order: 'desc' }]; }}>Controlled state</button>
     <button type="button" onclick={() => { dark = !dark; }}>Theme</button>
@@ -68,6 +72,7 @@
   <output data-testid="compat-tenant">{tenant}</output>
   <QueryClientProvider client={client}>
     <SvarAutoTable {Grid} Theme={Willow} resourceName="inventory" freezeRight={1}
+      deleteVariables={invalidDelete ? deleteInputs.invalid : deleteInputs.valid}
       columns={{ name: nameCell satisfies ColumnSnippet }}
       {...fallback ? { defaultCellRenderer: fallbackCell } : {}}
       {...defaultActions ? {} : { rowActions: hostRows }}
