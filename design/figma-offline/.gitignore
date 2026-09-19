@@ -1,0 +1,6 @@
+# 导出可能包含第三方及私人设计，默认不进入源码仓库。
+*.svfig.json
+exports/
+reports/
+plugin-dist/
+__pycache__/

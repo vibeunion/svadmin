@@ -3,7 +3,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { QueryClient } from '@tanstack/svelte-query';
 import { Type } from '@sinclair/typebox';
 import { defineResource, resetContext, type DataProvider, type ResourceDefinition } from '@svadmin/core';
-import { setLocale } from '@svadmin/core/i18n';
 import Host from './resource-workspace.test-host.svelte';
 
 const record = Type.Object({ id: Type.Number(), title: Type.String() });
@@ -33,7 +32,6 @@ function mount() {
   return { view, source, onBatch, client };
 }
 beforeEach(() => {
-  setLocale('en');
   Object.defineProperty(Element.prototype, 'animate', {
     configurable: true, value: () => ({ cancel: () => {}, finished: Promise.resolve() }),
   });

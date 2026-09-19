@@ -9,8 +9,9 @@
     file: File;
     status: UploadItemStatus;
     progress: number;
-    url?: string;
-    error?: string;
+    // 重试与无 URL 的成功回调会显式清空这些字段。
+    url?: string | undefined;
+    error?: string | undefined;
   }
 
   export interface UploadSession {
@@ -27,6 +28,7 @@
     maxSize?: number;
     disabled?: boolean;
     required?: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-invalid-void-type -- 兼容返回 Promise<void> 或可选上传结果的回调。
     upload?: (file: File, session: UploadSession) => Promise<{ url?: string } | void>;
     onChange?: (items: UploadItem[]) => void;
     onReject?: (file: File, reason: string) => void;

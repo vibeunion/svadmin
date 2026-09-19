@@ -28,7 +28,6 @@
     action = '',
     method = 'GET',
     disabled = false,
-    onApply,
   }: Props = $props();
 
   const operatorOptions: { value: CrudOperator; label: string }[] = [
