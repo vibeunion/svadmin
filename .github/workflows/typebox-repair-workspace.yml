@@ -1,0 +1,38 @@
+name: TypeBox repair workspace
+# Temporary development helper; removed before merge.
+on:
+  push:
+    branches: [refactor/replace-zod-with-typebox]
+permissions:
+  contents: read
+jobs:
+  workspace:
+    if: github.event.head_commit.message == 'chore: prepare isolated TypeBox repair workspace'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - run: bun install --frozen-lockfile
+      - name: Package source and installed development tools
+        run: |
+          git rev-parse HEAD > "$RUNNER_TEMP/source-sha.txt"
+          tar --exclude='./.git' -czf "$RUNNER_TEMP/svadmin-workspace.tar.gz" .
+          cp "$(command -v node)" "$RUNNER_TEMP/node"
+          cp "$(command -v bun)" "$RUNNER_TEMP/bun"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: typebox-repair-workspace
+          path: |
+            ${{ runner.temp }}/svadmin-workspace.tar.gz
+            ${{ runner.temp }}/source-sha.txt
+            ${{ runner.temp }}/node
+            ${{ runner.temp }}/bun
+          retention-days: 1
