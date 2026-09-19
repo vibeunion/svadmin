@@ -4,14 +4,17 @@
   "description": "Validated declarative surfaces for svadmin dashboards",
   "type": "module",
   "sideEffects": [
-    "./dist/styles.css"
+    "./dist/styles.css",
+    "./dist/styles/editor.css"
   ],
   "files": [
     "dist",
     "README.md",
     "compatibility.json",
     "!dist/**/*.test.*",
+    "!dist/**/*.test-*",
     "!dist/**/*.spec.*",
+    "!dist/**/*.spec-*",
     "STYLING.md"
   ],
   "main": "dist/index.js",
@@ -29,6 +32,10 @@
     "./styles.css": {
       "style": "./dist/styles.css",
       "default": "./dist/styles.css"
+    },
+    "./editor.css": {
+      "style": "./dist/styles/editor.css",
+      "default": "./dist/styles/editor.css"
     }
   },
   "peerDependencies": {
@@ -40,17 +47,21 @@
     "@sinclair/typebox": "^0.34.52"
   },
   "devDependencies": {
+    "@pandacss/dev": "1.12.1",
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/svelte": "^5.4.2",
     "@testing-library/user-event": "^14.6.6",
     "happy-dom": "^20.11.12",
+    "postcss": "^8.5.26",
     "vitest": "^4.1.11"
   },
   "scripts": {
-    "build": "node scripts/prepare-design.mjs && node ../../node_modules/@sveltejs/package/svelte-package.js -i src -o dist",
-    "check": "svelte-check --tsgo-experimental-api --tsconfig ./tsconfig.json --threshold error",
-    "test": "vitest run --config ./vitest.config.ts"
+    "build": "node scripts/build-editor-styles.mjs && node scripts/prepare-design.mjs && node ../../node_modules/@sveltejs/package/svelte-package.js -i src -o dist",
+    "check": "svelte-check --tsgo-experimental-api --tsconfig ./tsconfig.check.json --threshold error",
+    "test": "vitest run --config ./vitest.config.ts",
+    "styles:build": "node scripts/build-editor-styles.mjs",
+    "styles:check": "node scripts/build-editor-styles.mjs --check"
   },
   "license": "MIT",
   "publishConfig": {

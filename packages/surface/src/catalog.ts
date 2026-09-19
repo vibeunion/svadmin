@@ -72,12 +72,15 @@ export const defaultSurfaceCatalog = defineSurfaceCatalog({
     {
       type: 'metric',
       dataKind: 'scalar',
+      description: 'Display a count or readable scalar. Bind list counts to /total; currency metrics require an ISO currency code.',
+      examples: [{ label: 'Total', format: 'number' }],
       propsSchema: metricPropsSchema,
       component: MetricWidget,
     },
     {
       type: 'resource-table',
       dataKind: 'items',
+      description: 'Display up to eight explicitly readable resource fields. Bind to /items and select fields from the active resource policy.',
       propsSchema: resourceTablePropsSchema,
       getReferencedFields: tableFields,
       component: ResourceTableWidget,
@@ -85,6 +88,7 @@ export const defaultSurfaceCatalog = defineSurfaceCatalog({
     {
       type: 'bar-chart',
       dataKind: 'items',
+      description: 'Compare a readable numeric field by a readable label field. Bind to /items; aggregated data must come from an authorized backend resource.',
       propsSchema: barChartPropsSchema,
       getReferencedFields: barChartFields,
       component: BarChartWidget,
@@ -92,6 +96,7 @@ export const defaultSurfaceCatalog = defineSurfaceCatalog({
     {
       type: 'line-chart',
       dataKind: 'items',
+      description: 'Show a trend using readable label and numeric fields. Bind to /items; request only policy-authorized sorting.',
       propsSchema: lineChartPropsSchema,
       getReferencedFields: lineChartFields,
       component: LineChartWidget,
