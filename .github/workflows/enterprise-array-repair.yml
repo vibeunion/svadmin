@@ -1,0 +1,32 @@
+name: Prepare enterprise array ownership candidate
+
+# Temporary source-only review helper; no branch ref or main writes.
+on:
+  push:
+    branches: [review/enterprise-reconcile-20260920]
+permissions:
+  contents: read
+jobs:
+  prepare:
+    if: >-
+      github.event.head_commit.message == 'review: prepare guarded array ownership candidate'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Prepare bounded source and regression changes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          cp -R review-assets "$RUNNER_TEMP/array-ownership-assets"
+          git fetch --quiet --no-tags --depth=1 origin a21bdfc8121715f5d148454657daf687f17e2414
+          git switch --detach a21bdfc8121715f5d148454657daf687f17e2414
+          export REVIEW_ASSETS="$RUNNER_TEMP/array-ownership-assets"
+          python3 "$REVIEW_ASSETS/array-ownership-repair.py"
+          git diff --check
+          test -z "$(git diff --name-only -- .github/workflows)"
