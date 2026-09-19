@@ -1,5 +1,4 @@
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
-import { setLocale } from '@svadmin/core/i18n';
 import userEvent from '@testing-library/user-event';
 import { QueryClient } from '@tanstack/svelte-query';
 import { Type } from '@sinclair/typebox';
@@ -48,7 +47,6 @@ function provider(overrides: Partial<DataProvider> = {}): DataProvider {
 }
 
 function mount(source = provider(), options: { resourceName?: string; onSuccess?: (result: { succeeded: number; failed: number }) => void } = {}) {
-  setLocale('en');
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   clients.push(client);
   const view = render(ImportWizardHost, {

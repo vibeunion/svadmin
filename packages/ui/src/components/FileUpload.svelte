@@ -27,6 +27,7 @@
     maxSize?: number;
     disabled?: boolean;
     required?: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-invalid-void-type -- 兼容返回 Promise<void> 或可选上传结果的回调。
     upload?: (file: File, session: UploadSession) => Promise<{ url?: string } | void>;
     onChange?: (items: UploadItem[]) => void;
     onReject?: (file: File, reason: string) => void;
