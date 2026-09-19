@@ -21,7 +21,10 @@ export const surfaceMetric = defineSlotRecipe({
     }])),
     density: Object.fromEntries(surfaceDesignContract.metric.density.map((density) => [density, {
       card: { padding: density === 'compact' ? 'sm' : 'lg' },
-      state: { '--svadmin-metric-state-padding': density === 'compact' ? '0.75rem' : '1.25rem', '--svadmin-metric-state-height': density === 'compact' ? '4.5rem' : '6rem' },
+      state: {
+        '--svadmin-metric-state-padding': density === 'compact' ? '0.75rem' : '1.25rem',
+        '--svadmin-metric-state-height': density === 'compact' ? '4.5rem' : '6rem',
+      },
     }])),
   },
   defaultVariants: { tone: 'neutral', density: 'comfortable' },
@@ -35,8 +38,15 @@ export const surfaceTable = defineSlotRecipe({
     density: Object.fromEntries(surfaceDesignContract.table.density.map((density) => [density, {
       header: { paddingInline: density === 'compact' ? 'sm' : 'md' },
       content: { paddingInline: density === 'compact' ? 'sm' : 'md' },
-      head: { paddingBlock: density === 'compact' ? 'xs' : '0.5rem', fontSize: density === 'compact' ? 'compact' : 'body' },
-      cell: { paddingBlock: density === 'compact' ? 'xs' : '0.5rem', fontSize: density === 'compact' ? 'compact' : 'body' },
+      // 限定真实部件，覆盖既有 class + data-density 规则；不使用 !important。
+      head: { '&[data-slot="table-head"]': {
+        paddingBlock: density === 'compact' ? 'xs' : '0.5rem',
+        fontSize: density === 'compact' ? 'compact' : 'body',
+      } },
+      cell: { '&[data-slot="table-cell"]': {
+        paddingBlock: density === 'compact' ? 'xs' : '0.5rem',
+        fontSize: density === 'compact' ? 'compact' : 'body',
+      } },
       state: { '--svadmin-table-state-height': density === 'compact' ? '6rem' : '8rem' },
     }])),
   },

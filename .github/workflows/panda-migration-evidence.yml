@@ -1,63 +1,51 @@
-name: Panda migration evidence
+name: Panda style compatibility
 
 on:
   push:
     branches: [feat/panda-tokens-no-tailwind]
+  pull_request:
+    paths:
+      - 'packages/ui/**'
+      - 'packages/surface/**'
+      - 'packages/ai-elements/**'
+      - 'example/**'
+      - 'scripts/check-panda-browser.mjs'
+      - 'scripts/check-no-tailwind.mjs'
+      - 'bun.lock'
+      - '.github/workflows/panda-migration-evidence.yml'
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: panda-migration-bootstrap
-  cancel-in-progress: false
+  group: panda-styles-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  migration:
-    if: github.ref == 'refs/heads/feat/panda-tokens-no-tailwind'
+  compatibility:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: feat/panda-tokens-no-tailwind
-          fetch-depth: 1
-      - run: git fetch --no-tags --depth=1 origin cf6c4746578176ea773a17ef6f49f353292f7818
+          persist-credentials: false
       - uses: actions/setup-node@v7
         with:
           node-version: '26'
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: '1.4.2'
-      - name: Install immutable migration baseline
+      - name: Install locked dependencies
         run: bun install --frozen-lockfile
-      - name: Generate native compatibility sources and remove compiler dependencies
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path('scripts/panda-seed.mjs')
-          s = p.read_text().replace(')))]))', '))]))')
-          s = s.replace("...widget, propsSchema: styledResourceTablePropsSchema,", "...widget, propsSchema: styledResourceTablePropsSchema,\\n      getReferencedFields: (props: JsonObject) => Value.Decode(styledResourceTablePropsSchema, props).columns.map((column) => column.field),")
-          p.write_text(s)
-          PY
-          node --check scripts/panda-seed.mjs
-          PANDA_VERSION="$(npm view @pandacss/dev version)" node scripts/panda-seed.mjs
-          python3 - <<'PY'
-          from pathlib import Path
-          for f in ['packages/ui/THIRD_PARTY_NOTICES.md', 'packages/ai-elements/THIRD_PARTY_NOTICES.md']:
-              p = Path(f)
-              p.write_text(p.read_text().rstrip() + '\n')
-          PY
-      - name: Resolve Panda dependency and update lockfile
-        run: bun install
+      - name: Reject Tailwind compiler dependencies and active directives
+        run: node scripts/check-no-tailwind.mjs
       - name: Build component packages
-        id: build
-        continue-on-error: true
         run: |
           bun run --cwd packages/core build
           bun run --cwd packages/ai-elements build
           bun run --cwd packages/ui build
           bun run --cwd packages/surface build
-      - name: Focused CSS and Surface tests
+      - name: Native CSS and component contract tests
         id: tests
         continue-on-error: true
         run: |
@@ -66,35 +54,30 @@ jobs:
           (cd packages/ui && bunx --no-install vitest run --config vitest.config.ts src/app-css.test.ts src/page-chrome-css.test.ts) || status=1
           bun run --cwd packages/surface test || status=1
           exit "$status"
-      - name: Chromium component compatibility evidence
+      - name: Surface type checks
+        id: types
+        continue-on-error: true
+        run: bun run --cwd packages/surface check
+      - name: Chromium component compatibility
         id: browser
         continue-on-error: true
         run: |
           bunx --no-install playwright install --with-deps chromium
           node scripts/check-panda-browser.mjs
-      - name: Commit generated migration only to the feature branch
-        run: |
-          test "$(git branch --show-current)" = 'feat/panda-tokens-no-tailwind'
-          git add -- .gitignore eslint.config.js bun.lock README.md packages/ui packages/ai-elements packages/surface packages/create-svadmin/src/index.ts example scripts/check-package-packs.ts
-          if test -f docs/pr-evidence/panda-styles/provenance.json; then git add docs/pr-evidence/panda-styles; fi
-          git diff --cached --check
-          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'feat(styles): remove Tailwind and preserve CSS compatibility'
-          git push origin HEAD:refs/heads/feat/panda-tokens-no-tailwind
-      - name: Archive generated source and styles for inspection
+      - name: Preserve evidence for this exact commit
         if: always()
         run: |
           mkdir -p "$RUNNER_TEMP/panda-evidence"
-          git archive --format=tar.gz --output="$RUNNER_TEMP/panda-evidence/source.tar.gz" "$(git write-tree)"
+          git archive --format=tar.gz --output="$RUNNER_TEMP/panda-evidence/source.tar.gz" HEAD
           git rev-parse HEAD > "$RUNNER_TEMP/panda-evidence/commit.txt"
-          if test -d packages/ui/dist; then tar -czf "$RUNNER_TEMP/panda-evidence/ui-dist.tar.gz" -C packages/ui dist; fi
           if test -d docs/pr-evidence/panda-styles; then cp -R docs/pr-evidence/panda-styles "$RUNNER_TEMP/panda-evidence/"; fi
+          if test -d packages/ui/dist; then tar -czf "$RUNNER_TEMP/panda-evidence/ui-dist.tar.gz" -C packages/ui dist; fi
       - uses: actions/upload-artifact@v6
         if: always()
         with:
-          name: panda-generated-source
+          name: panda-style-compatibility
           path: ${{ runner.temp }}/panda-evidence/
-          retention-days: 7
-          compression-level: 0
-      - name: Report verification result
-        if: steps.build.outcome == 'failure' || steps.tests.outcome == 'failure' || steps.browser.outcome == 'failure'
+          retention-days: 14
+      - name: Enforce every verification result
+        if: steps.tests.outcome == 'failure' || steps.types.outcome == 'failure' || steps.browser.outcome == 'failure'
         run: exit 1
