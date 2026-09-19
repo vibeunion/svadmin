@@ -1,5 +1,7 @@
 import { definedOptions } from './defined-options';
-import { createMutation,createQuery,useQueryClient } from '@tanstack/svelte-query';
+import { createMutation,useQueryClient } from '@tanstack/svelte-query';
+import { createSessionQuery } from './session-query.svelte';
+import { supersededQuerySession } from './query-session.svelte';
 import { getAdminOptions } from './options.svelte';
 import { captureAdminContext } from './context.svelte';
 import type { AdminContextAccessor } from './context.svelte';
@@ -9,7 +11,7 @@ import {
 import { queryKeyMatches, type QueryKey } from './query-keys';
 import { replaceReactiveMembers } from './reactive-projection';
 import { taskQueryParams, withValidatedTaskProvider } from './task-provider';
-import type { TaskError } from './task-contract';
+import { TaskError, decodeTaskRecord, decodeTaskList } from './task-contract';
 import { checkError,createOvertimeTracker,fireErrorNotification,fireSuccessNotification } from './hook-utils.svelte';
 import type { NotificationConfig,OvertimeOptions } from './hook-utils.svelte';
 import { useTranslation } from './i18n.svelte';
@@ -46,6 +48,19 @@ function taskProviderKey(provider: TaskProvider | undefined): number {
 function scopedTaskKey(key: QueryKey, provider: TaskProvider | undefined): QueryKey {
   const providerKey = taskProviderKey(provider);
   return [{ ...key[0], params: definedOptions({ taskProvider: providerKey, query: key[0].params }) }];
+}
+
+function taskReadError(error: unknown): Error {
+  try {
+    if (typeof error === 'object' && error !== null) {
+      const code: unknown = Object.getOwnPropertyDescriptor(error, 'code')?.value;
+      if (code === 'QUERY_SESSION_SUPERSEDED') return supersededQuerySession();
+      if (code === 'INVALID_TASK_INPUT' || code === 'INVALID_TASK_RESPONSE' || code === 'TASK_PROVIDER_FAILED') {
+        return new TaskError(code);
+      }
+    }
+  } catch { /* 不执行错误对象中的 getter，也不回显上游诊断。 */ }
+  return new TaskError('TASK_PROVIDER_FAILED');
 }
 
 export interface UseSubmitTaskOptions {
@@ -157,12 +172,17 @@ export function useTask(
   const i18n=useTranslation();
   const adminOptions=getAdminOptions();
 
-  const query=createQuery<TaskRecord,Error>(() => {
+  const query=createSessionQuery<TaskRecord>(adminContext, () => {
     const activeProvider=options.taskProvider??adminContext.taskProvider;
     const provider=activeProvider? withValidatedTaskProvider(activeProvider):undefined;
     const taskId=options.taskId;
     const queryOptions=options.queryOptions;
     return {
+      resource: taskId ?? '',
+      successNotification: options.successNotification,
+      errorNotification: options.errorNotification ?? i18n.t('task.fetchFailed'),
+      normalizeError: taskReadError,
+      decode: value => decodeTaskRecord(value, taskId),
       queryKey: scopedTaskKey(adminContext.queryKeys().task.one(taskId??''),provider),
       queryFn: async () => {
         if(!provider) throw new Error('TaskProvider not found.');
@@ -183,37 +203,6 @@ export function useTask(
   });
 
   const overtime=createOvertimeTracker(() => query.isLoading,options.overtimeOptions??adminOptions.overtime);
-
-  let lastSuccessAt=0;
-  let lastErrorAt=0;
-  $effect(() => {
-    if(query.isSuccess&&query.dataUpdatedAt>lastSuccessAt) {
-      lastSuccessAt=query.dataUpdatedAt;
-      if(options.successNotification) {
-        fireSuccessNotification({
-          config: options.successNotification,
-          defaultMessage: '',
-          data: query.data,
-          ...definedOptions({ resource: options.taskId }),
-          ...definedOptions({
-            provider: adminContext.notificationProvider
-          })
-        });
-      }
-    } else if(query.isError&&query.errorUpdatedAt>lastErrorAt) {
-      lastErrorAt=query.errorUpdatedAt;
-      checkError(query.error,adminContext);
-      fireErrorNotification({
-        config: options.errorNotification,
-        defaultMessage: i18n.t('task.fetchFailed'),
-        error: query.error,
-        ...definedOptions({ resource: options.taskId }),
-        ...definedOptions({
-          provider: adminContext.notificationProvider
-        })
-      });
-    }
-  });
 
   return replaceReactiveMembers(query,{ get overtime() { return overtime; } });
 }
@@ -242,13 +231,22 @@ export function useTaskList(
   const i18n=useTranslation();
   const adminOptions=getAdminOptions();
 
-  const query=createQuery<TaskListResult,Error>(() => {
+  const query=createSessionQuery<TaskListResult>(adminContext, () => {
     const activeProvider=options.taskProvider??adminContext.taskProvider;
     const provider=activeProvider? withValidatedTaskProvider(activeProvider):undefined;
     const params=options.params===undefined? undefined:taskQueryParams(options.params);
     const dlq=options.dlq??false;
     const queryOptions=options.queryOptions;
+    const resource = dlq ? 'taskDlq' : 'tasks';
+    const successNotification = options.successNotification;
     return {
+      resource,
+      successNotification: typeof successNotification === 'function'
+        ? (data: unknown) => successNotification(data, params, resource)
+        : successNotification,
+      errorNotification: options.errorNotification ?? i18n.t('task.fetchListFailed'),
+      normalizeError: taskReadError,
+      decode: decodeTaskList,
       queryKey: scopedTaskKey(adminContext.queryKeys().task.list(definedOptions({
         list: dlq? 'dlq':'default',
         params,
@@ -276,38 +274,6 @@ export function useTaskList(
   });
 
   const overtime=createOvertimeTracker(() => query.isLoading,options.overtimeOptions??adminOptions.overtime);
-
-  let lastSuccessAt=0;
-  let lastErrorAt=0;
-  $effect(() => {
-    if(query.isSuccess&&query.dataUpdatedAt>lastSuccessAt) {
-      lastSuccessAt=query.dataUpdatedAt;
-      if(options.successNotification) {
-        fireSuccessNotification({
-          config: options.successNotification,
-          defaultMessage: '',
-          data: query.data,
-          values: options.params,
-          resource: options.dlq? 'taskDlq':'tasks',
-          ...definedOptions({
-            provider: adminContext.notificationProvider
-          })
-        });
-      }
-    } else if(query.isError&&query.errorUpdatedAt>lastErrorAt) {
-      lastErrorAt=query.errorUpdatedAt;
-      checkError(query.error,adminContext);
-      fireErrorNotification({
-        config: options.errorNotification,
-        defaultMessage: i18n.t('task.fetchListFailed'),
-        error: query.error,
-        resource: options.dlq? 'taskDlq':'tasks',
-        ...definedOptions({
-          provider: adminContext.notificationProvider
-        })
-      });
-    }
-  });
 
   return replaceReactiveMembers(query,{ get overtime() { return overtime; } });
 }

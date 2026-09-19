@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { CrudOperator, FieldDefinition, Filter } from '@svadmin/core';
+  import { readFilterForm } from '../filter-form.js';
   import { t } from '@svadmin/core/i18n';
 
   export interface FilterRuleItem {
@@ -28,7 +29,24 @@
     action = '',
     method = 'GET',
     disabled = false,
+    onApply,
   }: Props = $props();
+
+  const formId = $props.id();
+  let formError = $state('');
+
+  function handleSubmit(event: SubmitEvent): void {
+    if (disabled) { event.preventDefault(); return; }
+    // 无回调时保留原生 GET/POST；添加/删除规则仍交给原生服务端 action。
+    if (!onApply || (event.submitter instanceof HTMLButtonElement && event.submitter.name === '_action')) return;
+    event.preventDefault();
+    if (!(event.currentTarget instanceof HTMLFormElement)) return;
+    let next: Filter[];
+    try { next = readFilterForm(filters, availableFields, new FormData(event.currentTarget)); }
+    catch { formError = '筛选条件无效，请检查字段、运算符和值。'; return; }
+    formError = '';
+    onApply(next);
+  }
 
   const operatorOptions: { value: CrudOperator; label: string }[] = [
     { value: 'eq', label: '= 等于' },
@@ -68,12 +86,13 @@
 <div class="lite-filter-builder lite-form-group">
   <div class="lite-filter-header">
     <strong>{t('common.filters') || '高级多条件筛选'}</strong>
-    <button type="submit" form="lite-filter-form" class="lite-btn lite-btn-primary lite-btn-sm" disabled={disabled}>
+    <button type="submit" form={formId} class="lite-btn lite-btn-primary lite-btn-sm" disabled={disabled}>
       应用筛选
     </button>
   </div>
 
-  <form id="lite-filter-form" {action} {method} class="lite-filter-form">
+  {#if formError}<p role="alert">{formError}</p>{/if}
+  <form id={formId} {action} {method} onsubmit={handleSubmit} class="lite-filter-form">
     {#snippet renderNode(node: FilterNode, path: string, isRoot = false)}
       {#if node.kind === 'group'}
         <fieldset class="lite-filter-group" data-testid={isRoot ? 'lite-filter-root' : 'lite-filter-group'}>

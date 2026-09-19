@@ -1,11 +1,16 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, waitFor } from '@testing-library/svelte';
+import { act, cleanup, render, waitFor } from '@testing-library/svelte';
 import { QueryClient } from '@tanstack/svelte-query';
 import { resetContext } from './context.svelte';
 import { parseQueryKey } from './query-keys';
-import type { TaskProvider, TaskRecord, SubmitTaskOptions } from './types';
+import type { AuthActionResult, AuthProvider, NotificationProvider, TaskProvider, TaskRecord, SubmitTaskOptions } from './types';
 import type { TaskHookState } from './task-hooks.test.types';
 import TaskHookHost from './task-hooks.test-host.svelte';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
+import { svelte2tsx } from 'svelte2tsx';
+import ts from 'typescript';
 
 const clients: QueryClient[] = [];
 function fixture(overrides: Partial<TaskProvider> = {}) {
@@ -25,7 +30,8 @@ function fixture(overrides: Partial<TaskProvider> = {}) {
   };
   return { provider, listeners, stop };
 }
-function mount(provider: TaskProvider, onTask?: (task: TaskRecord) => void, onError?: (error: Error) => void) {
+function mount(provider: TaskProvider, onTask?: (task: TaskRecord) => void, onError?: (error: Error) => void,
+  options: { authProvider?: AuthProvider; notificationProvider?: NotificationProvider; notifyReads?: boolean; refetchInterval?: number | false } = {}) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   clients.push(queryClient);
   let state: TaskHookState | undefined;
@@ -33,6 +39,7 @@ function mount(provider: TaskProvider, onTask?: (task: TaskRecord) => void, onEr
     provider, queryClient,
     ...(onTask ? { onTask } : {}),
     ...(onError ? { onError } : {}),
+    ...options,
     onReady: (value: TaskHookState) => { state = value; },
   });
   return {
@@ -41,6 +48,14 @@ function mount(provider: TaskProvider, onTask?: (task: TaskRecord) => void, onEr
       if (!state) throw new Error('Task hooks have not mounted.');
       return state;
     },
+  };
+}
+function authProvider(login: () => Promise<AuthActionResult>): AuthProvider {
+  return {
+    login,
+    logout: vi.fn(async () => ({ success: true })),
+    check: vi.fn(async () => ({ authenticated: true })),
+    getIdentity: vi.fn(async () => null),
   };
 }
 function deferred() {
@@ -56,6 +71,43 @@ afterEach(() => {
 });
 
 describe('task hooks with the actual query runtime', () => {
+  it('strictly compiles task hooks and their reactive fixture contracts', () => {
+    const directory = dirname(fileURLToPath(import.meta.url));
+    const virtual = new Map(['task-hooks.test-host.svelte', 'task-hooks.test-probe.svelte'].map(file => {
+      const filename = resolve(directory, file);
+      return [`${filename}.tsx`, svelte2tsx(readFileSync(filename, 'utf8'), { filename, isTsFile: true, mode: 'ts' }).code];
+    }));
+    const options: ts.CompilerOptions = {
+      noEmit: true, strict: true, exactOptionalPropertyTypes: true, noUncheckedIndexedAccess: true,
+      noPropertyAccessFromIndexSignature: true, skipLibCheck: true,
+      target: ts.ScriptTarget.ESNext, module: ts.ModuleKind.ESNext, moduleResolution: ts.ModuleResolutionKind.Bundler,
+      types: ['svelte', 'node'], jsx: ts.JsxEmit.Preserve, allowImportingTsExtensions: true,
+    };
+    const host = ts.createCompilerHost(options);
+    const read = host.readFile;
+    const exists = host.fileExists;
+    host.readFile = file => virtual.get(file) ?? read(file);
+    host.fileExists = file => virtual.has(file) || exists(file);
+    host.resolveModuleNames = (names, from) => names.map(name => {
+      const file = resolve(dirname(from), `${name}.tsx`);
+      return virtual.has(file) ? { resolvedFileName: file, extension: ts.Extension.Tsx }
+        : ts.resolveModuleName(name, from, options, host).resolvedModule;
+    });
+    const targets = [...virtual.keys(), ...['task-hooks.svelte.ts', 'task-hooks.test.types.ts',
+      'task-hooks.test.svelte.ts', 'query-session.svelte.ts', 'session-query.svelte.ts'].map(file => resolve(directory, file))];
+    const program = ts.createProgram([...targets,
+      resolve(directory, '../../../node_modules/svelte2tsx/svelte-shims-v4.d.ts'),
+      resolve(directory, '../../../node_modules/svelte2tsx/svelte-jsx-v4.d.ts')], options, host);
+    const diagnostics = targets.flatMap(file => {
+      const source = program.getSourceFile(file);
+      if (!source) throw new Error(`Missing ${file}`);
+      return [...program.getSyntacticDiagnostics(source), ...program.getSemanticDiagnostics(source)];
+    });
+    expect(diagnostics.map(diagnostic =>
+      `${diagnostic.file?.fileName}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`,
+    )).toEqual([]);
+  }, 30_000);
+
   it('supports disabled task queries before a provider is configured', async () => {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     clients.push(queryClient);
@@ -119,6 +171,86 @@ describe('task hooks with the actual query runtime', () => {
     if (!matches) throw new Error('Expected scoped invalidation.');
     const affected = app.queryClient.getQueryCache().getAll().filter(matches).map(query => parseQueryKey(query.queryKey)?.tenant);
     expect(affected).toEqual(['tenant-1']);
+  });
+
+  it.each(['task', 'list'] as const)('masks cached %s data and saved refetch across login', async (kind) => {
+    let finishLogin = () => {};
+    const pendingLogin = new Promise<AuthActionResult>(resolve => { finishLogin = () => resolve({ success: true }); });
+    const auth = authProvider(() => pendingLogin);
+    const { provider } = fixture();
+    const app = mount(provider, undefined, undefined, { authProvider: auth, notifyReads: true });
+    await waitFor(() => expect(app.read()[kind].isSuccess).toBe(true));
+    const saved = app.read()[kind].refetch;
+    const login = app.read().login.mutate({});
+    expect(app.read()[kind].data).toBeUndefined();
+    expect(app.read()[kind].status).toBe('pending');
+    await expect(saved()).resolves.toMatchObject({ data: undefined, status: 'pending' });
+    finishLogin();
+    await login;
+    await waitFor(() => expect(app.read()[kind].isSuccess).toBe(true));
+    expect(provider.get).toHaveBeenCalledTimes(2);
+    expect(provider.list).toHaveBeenCalledTimes(2);
+    await expect(saved()).resolves.toMatchObject({ data: undefined, status: 'pending' });
+  });
+
+  it.each(['success', 'error'] as const)('ignores old %s data and notifications after a same-provider login', async outcome => {
+    let finish: (task: TaskRecord) => void = () => {};
+    let fail: (error: Error) => void = () => {};
+    const pending = new Promise<TaskRecord>((resolve, reject) => { finish = resolve; fail = reject; });
+    let fresh = false;
+    const provider = fixture({
+      get: vi.fn(async () => fresh ? { id: 'task-1', title: 'New' } : pending),
+      list: vi.fn(async () => ({ data: [fresh ? { id: 'task-1', title: 'New' } : await pending], total: 1 })),
+    }).provider;
+    const notificationProvider = { open: vi.fn(), close: vi.fn() };
+    const app = mount(provider, undefined, undefined, {
+      authProvider: authProvider(async () => ({ success: true })), notificationProvider, notifyReads: true,
+    });
+    await waitFor(() => expect(provider.get).toHaveBeenCalledOnce());
+    await waitFor(() => expect(provider.list).toHaveBeenCalledOnce());
+    const old = [...app.queryClient.getQueryCache().getAll()];
+    fresh = true;
+    await app.read().login.mutate({});
+    await waitFor(() => expect(app.read().task.data?.title).toBe('New'));
+    await waitFor(() => expect(app.read().list.data?.data[0]?.title).toBe('New'));
+    const notices = notificationProvider.open.mock.calls.length;
+    expect(notices).toBe(2);
+    await act(async () => {
+      if (outcome === 'success') finish({ id: 'task-1', title: 'Old' });
+      else fail(new Error('Old private error'));
+      await pending.catch(() => {});
+    });
+    await waitFor(() => expect(old.every(query => query.state.status === 'error')).toBe(true));
+    expect(old.every(query => query.state.data === undefined)).toBe(true);
+    expect(notificationProvider.open).toHaveBeenCalledTimes(notices);
+    expect(app.read().task.data?.title).toBe('New');
+    expect(app.read().list.data?.data[0]?.title).toBe('New');
+  });
+
+  it('keeps signed-out reads disabled until login and isolates auth provider replacement', async () => {
+    const provider = fixture().provider;
+    const app = mount(provider, undefined, undefined, { authProvider: authProvider(async () => ({ success: true })) });
+    await waitFor(() => expect(app.read().task.isSuccess && app.read().list.isSuccess).toBe(true));
+    await app.read().logout.mutate();
+    expect(app.read().task.data).toBeUndefined();
+    expect(app.read().list.data).toBeUndefined();
+    const reads = [vi.mocked(provider.get).mock.calls.length, vi.mocked(provider.list).mock.calls.length];
+    await app.read().task.refetch();
+    await app.read().list.refetch();
+    expect([vi.mocked(provider.get).mock.calls.length, vi.mocked(provider.list).mock.calls.length]).toEqual(reads);
+    await app.read().login.mutate({});
+    await waitFor(() => expect(app.read().task.isSuccess && app.read().list.isSuccess).toBe(true));
+    await app.view.rerender({ authProvider: authProvider(async () => ({ success: true })) });
+    await waitFor(() => expect(provider.get).toHaveBeenCalledTimes(3));
+    await waitFor(() => expect(provider.list).toHaveBeenCalledTimes(3));
+  });
+
+  it('retains task polling through the session adapter', async () => {
+    const provider = fixture().provider;
+    const app = mount(provider, undefined, undefined, { refetchInterval: 10 });
+    await waitFor(() => expect(vi.mocked(provider.get).mock.calls.length).toBeGreaterThan(1));
+    await waitFor(() => expect(vi.mocked(provider.list).mock.calls.length).toBeGreaterThan(1));
+    app.view.unmount();
   });
 
   it('returns checked single/list records and preserves reactive query members', async () => {
