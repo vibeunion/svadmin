@@ -105,7 +105,7 @@ describe('Surface source snapshots', () => {
       { ...policy, readFields: ['id'] }, { ...policy, filterFields: [] },
       { ...policy, sortFields: [] }, { ...policy, allowGetOne: true },
       { ...policy, maxPageSize: 20 },
-    ]) assert.notEqual(snapshotSurfaceSource(source, changed).key, baseline);
+    ]) assert.notEqual(snapshotSurfaceSource(source, changed,).key, baseline);
   });
 
   it('detaches pending queries and projection policy from mutable host data', () => {
@@ -117,7 +117,9 @@ describe('Surface source snapshots', () => {
     const before = JSON.stringify(snapshot);
     values.push(3);
     fields.pop();
-    sorters[0]!.order = 'desc';
+    const firstSorter = sorters[0];
+    assert.ok(firstSorter);
+    firstSorter.order = 'desc';
     assert.equal(JSON.stringify(snapshot), before);
   });
 
