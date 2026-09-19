@@ -1,0 +1,173 @@
+name: Release 433 isolated peer-floor repair
+on:
+  push:
+    branches: [fix/release-433-peer-floor-20260920]
+permissions:
+  contents: write
+jobs:
+  repair:
+    if: github.repository == 'vibeunion/svadmin'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SOURCE_SHA: 979064345279e7bae470fe17cd422f093c0cd552
+      BASE_SHA: 4fead3dee59364c86ab895c106db2b3b9cfb4d17
+      REPAIR_BRANCH: fix/release-433-peer-floor-20260920
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - name: Apply the bounded, hash-checked repair
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = "$SOURCE_SHA"
+          python3 - <<'PY'
+          import json
+          import subprocess
+          from pathlib import Path
+
+          expected_blobs = {
+              'scripts/sync-release-pr.ts': '3023cb5674f5e7b4d2ab164c14c7df59867538ad',
+              'scripts/check-package-packs.ts': '812e70ee4af0d53ec512dc8fd120280a152ba700',
+              'packages/surface/CHANGELOG.md': 'a73b630772f071338d45bceefa6826d412852af4',
+          }
+          for path, expected in expected_blobs.items():
+              actual = subprocess.check_output(['git', 'hash-object', path], text=True).strip()
+              if actual != expected:
+                  raise SystemExit(f'Source changed: {path}: {actual}')
+
+          def replace_once(text, before, after):
+              if text.count(before) != 1:
+                  raise SystemExit(f'Expected exactly one replacement for {before[:100]!r}')
+              return text.replace(before, after, 1)
+
+          def write_json(path, value):
+              Path(path).write_text(json.dumps(value, ensure_ascii=False, indent=2) + '\n')
+
+          path = Path('scripts/sync-release-pr.ts')
+          text = path.read_text()
+          text = replace_once(text, "import { basename, join, resolve } from 'node:path';\n", "import { basename, join, resolve } from 'node:path';\nimport { applyPeerMinimum } from './surface-release-policy';\n")
+          text = replace_once(text, '  peerDependenciesMeta?: Record<string, { optional?: boolean }>;\n', '  peerDependenciesMeta?: Record<string, { optional?: boolean }>;\n  svadmin?: { peerMinimums?: Record<string, string> };\n')
+          text = replace_once(text, '        const widened = widenPeerRange(baseRange, targetVersion);\n', '''        const widened = applyPeerMinimum(
+                    widenPeerRange(baseRange, targetVersion),
+                    current.manifest.svadmin?.peerMinimums?.[dependencyName],
+                  );
+                  if (!Bun.semver.satisfies(targetVersion, widened)) {
+                    throw new Error(`Peer minimum rejects release ${dependencyName}@${targetVersion}: ${widened}`);
+                  }
+          ''')
+          path.write_text(text)
+
+          path = Path('scripts/check-package-packs.ts')
+          text = path.read_text()
+          text = replace_once(text, "import { AI_ELEMENT_PARITY } from '../packages/ai-elements/src/parity-manifest.js';\n", "import { AI_ELEMENT_PARITY } from '../packages/ai-elements/src/parity-manifest.js';\nimport { minimumDependencySource } from './surface-release-policy';\n")
+          text = replace_once(text, 'interface PackageManifest {\n  name: string;\n', 'interface PackageManifest {\n  name: string;\n  version?: string;\n')
+          start = text.index('async function verifySurfaceCompatibility(')
+          end = text.index('async function main(): Promise<void>', start)
+          body = text[start:end]
+          body = replace_once(body, "  const uiManifest = manifests.get('@svadmin/ui');\n", "  const uiManifest = manifests.get('@svadmin/ui');\n  const coreManifest = manifests.get('@svadmin/core');\n")
+          body = replace_once(body, "  assert(uiManifest, '@svadmin/ui: missing manifest for Surface compatibility verification');\n", "  assert(uiManifest, '@svadmin/ui: missing manifest for Surface compatibility verification');\n  assert(coreManifest, '@svadmin/core: missing manifest for Surface compatibility verification');\n")
+          body = replace_once(body, "      core: compatibility.minimumSupported['@svadmin/core'],\n", "      core: minimumDependencySource(compatibility.minimumSupported['@svadmin/core'],\n        coreManifest.version, join(packDirectory, corePack.filename)),\n")
+          body = replace_once(body, "      ui: compatibility.minimumSupported['@svadmin/ui'],\n", "      ui: minimumDependencySource(compatibility.minimumSupported['@svadmin/ui'],\n        uiManifest.version, join(packDirectory, uiPack.filename)),\n")
+          body = replace_once(body, "        `console.info(typeof validateSurfaceSpec, typeof SurfaceRenderer, defaultSurfaceCatalog.version);\\n`,", "        `import * as interactive from '@svadmin/surface/interactive';\\n` +\n        `console.info(typeof validateSurfaceSpec, typeof SurfaceRenderer, defaultSurfaceCatalog.version, Object.keys(interactive));\\n`,")
+          body = replace_once(body, '    const nodeOutput = run(\n', '''    if (combination.name === 'minimum-supported') {
+                for (const [name, expectedVersion] of Object.entries(compatibility.minimumSupported)) {
+                  const installed = JSON.parse(await readFile(
+                    join(consumerDirectory, 'node_modules', ...name.split('/'), 'package.json'), 'utf8',
+                  )) as PackageManifest;
+                  assert(installed.version === expectedVersion,
+                    `minimum-supported: expected ${name}@${expectedVersion}, got ${installed.version ?? 'missing'}`);
+                }
+              }
+              const nodeOutput = run(
+          ''')
+          body = replace_once(body, '    outputs.push(`${combination.name}: ${nodeOutput.trim()}\\n${buildOutput.trim()}`);', '    outputs.push(`${combination.name} (core=${combination.core}, ui=${combination.ui}): ${nodeOutput.trim()}\\n${buildOutput.trim()}`);')
+          path.write_text(text[:start] + body + text[end:])
+
+          path = 'packages/surface/package.json'
+          manifest = json.loads(Path(path).read_text())
+          if manifest['version'] != '0.9.0' or 'svadmin' in manifest:
+              raise SystemExit('Unexpected Surface release manifest')
+          manifest['peerDependencies']['@svadmin/core'] = '>=0.53.0 <0.54.0'
+          manifest['peerDependencies']['@svadmin/ui'] = '>=0.73.0 <0.74.0'
+          manifest['peerDependencies']['svelte'] = '^5.56.10'
+          manifest['svadmin'] = {'peerMinimums': {'@svadmin/core': '0.53.0', '@svadmin/ui': '0.73.0'}}
+          write_json(path, manifest)
+
+          path = 'packages/surface/compatibility.json'
+          compatibility = json.loads(Path(path).read_text())
+          compatibility['minimumSupported'] = {'@svadmin/core': '0.53.0', '@svadmin/ui': '0.73.0', 'svelte': '5.56.10'}
+          for combination in compatibility['testedCombinations']:
+              if combination['name'] == 'minimum-supported':
+                  combination.update(core='0.53.0', ui='0.73.0', svelte='5.56.10')
+                  combination['source'] = 'Exact candidate tarballs when workspace versions equal these minima; otherwise install the exact registry minima. CI must pass; this is not a publication receipt.'
+          compatibility['minimumSupportedAppliesTo'] = ['.', './svelte', './interactive']
+          interactive = compatibility['entrypointCompatibility']['./interactive']
+          interactive['minimumRequiredUi'] = '0.73.0'
+          interactive['minimumPublishedUi'] = None
+          interactive['verification'] = 'scripts/check-package-packs.ts validates exact installed minima, strict peers and the interactive browser import; scripts/surface-workflows/packed-consumer.mjs checks the full same-checkout workflow. Read the final-head CI results.'
+          interactive['releaseGate'] = 'Publish the dependency-closed release with @svadmin/core@0.53.0 and @svadmin/ui@0.73.0 before Surface. The package peer floors enforce this requirement. minimumPublishedUi remains null until registry publication is independently verified; candidate tarballs are not registry evidence.'
+          write_json(path, compatibility)
+
+          path = Path('packages/surface/CHANGELOG.md')
+          text = path.read_text()
+          text = replace_once(text, 'to >=0.34.2 <0.54.0', 'to >=0.53.0 <0.54.0')
+          text = replace_once(text, 'to >=0.40.6 <0.74.0', 'to >=0.73.0 <0.74.0')
+          marker = '## [0.8.19]'
+          text = replace_once(text, marker, '''### Compatibility
+
+          * Surface 0.9 requires Core >=0.53.0, UI >=0.73.0 and Svelte >=5.56.10. The older readonly-only floor does not cover the interactive entry.
+          * Explicit peer minima survive release synchronization. Strict consumers verify the exact minimum candidate tarballs before their first publication, and the registry minima on later releases, including the interactive browser import.
+          * The interactive API remains experimental. Candidate validation is not proof of registry availability; publish Core and UI before Surface.
+
+          ''' + marker)
+          path.write_text(text)
+          PY
+      - name: Synchronize and verify frozen workspace metadata
+        run: |
+          set -euo pipefail
+          bun scripts/sync-release-pr.ts --base-ref "$BASE_SHA"
+          sha256sum bun.lock > "$RUNNER_TEMP/release433-lock.sha256"
+          bun install --frozen-lockfile
+          bun install --ignore-scripts
+          sha256sum --check "$RUNNER_TEMP/release433-lock.sha256"
+      - name: Test release boundaries and lint changed scripts
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/release433-evidence"
+          bun test scripts/surface-release-policy.test.ts scripts/sync-release-pr.test.ts scripts/release-workflow-contract.test.ts 2>&1 | tee "$RUNNER_TEMP/release433-evidence/tests.log"
+          bunx eslint scripts/surface-release-policy.ts scripts/surface-release-policy.test.ts scripts/check-package-packs.ts scripts/sync-release-pr.ts --max-warnings 0
+      - name: Remove the helper and commit only the reviewed repair
+        run: |
+          set -euo pipefail
+          rm .github/workflows/release-433-repair.yml
+          git add .github/workflows/release-433-repair.yml scripts/surface-release-policy.ts scripts/surface-release-policy.test.ts scripts/sync-release-pr.ts scripts/check-package-packs.ts packages/surface/package.json packages/surface/compatibility.json packages/surface/CHANGELOG.md bun.lock
+          python3 - <<'PY'
+          import subprocess
+          allowed = {'scripts/surface-release-policy.ts', 'scripts/surface-release-policy.test.ts', 'scripts/sync-release-pr.ts', 'scripts/check-package-packs.ts', 'packages/surface/package.json', 'packages/surface/compatibility.json', 'packages/surface/CHANGELOG.md', 'bun.lock'}
+          actual = set(subprocess.check_output(['git', 'diff', '--cached', '--name-only', '979064345279e7bae470fe17cd422f093c0cd552'], text=True).splitlines())
+          if actual != allowed:
+              raise SystemExit(f'Unexpected repair files: {sorted(actual ^ allowed)}')
+          PY
+          git diff --cached --check "$SOURCE_SHA"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'fix(release): enforce coordinated Surface peer floors'
+          git diff --binary "$SOURCE_SHA" HEAD > "$RUNNER_TEMP/release433-evidence/repair.patch"
+          git diff --stat "$SOURCE_SHA" HEAD > "$RUNNER_TEMP/release433-evidence/diff-stat.txt"
+          git rev-parse HEAD > "$RUNNER_TEMP/release433-evidence/repaired-sha.txt"
+          git archive --format=tar.gz --output="$RUNNER_TEMP/release433-evidence/source.tar.gz" HEAD scripts/surface-release-policy.ts scripts/surface-release-policy.test.ts scripts/sync-release-pr.ts scripts/check-package-packs.ts packages/surface/package.json packages/surface/compatibility.json packages/surface/CHANGELOG.md bun.lock
+          git push origin "HEAD:$REPAIR_BRANCH"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: release433-peer-floor-repair
+          path: ${{ runner.temp }}/release433-evidence/
+          if-no-files-found: error
