@@ -193,7 +193,7 @@ import { ChevronRight, ChevronDown, Check, X, Search, ChevronsUpDown, Loader2, M
 
   function focusSibling(nodeValue: string | number, offset: number): void {
     const nodes = Array.from(document.querySelectorAll<HTMLElement>('[data-tree-value]'));
-    const index = nodes.findIndex((node) => node.dataset.treeValue === String(nodeValue));
+    const index = nodes.findIndex((node) => node.dataset['treeValue'] === String(nodeValue));
     const target = nodes[index + offset];
     target?.focus();
   }

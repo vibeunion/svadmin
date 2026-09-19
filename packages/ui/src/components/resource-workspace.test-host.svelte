@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { createI18nScope, provideI18nScope } from '@svadmin/core/i18n';
   import { provideAdminContext, type DataProvider, type ResourceDefinition, type AccessControlProvider } from '@svadmin/core';
   import { definedReactiveOptions } from '@svadmin/core/options';
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
@@ -32,6 +33,7 @@
     get accessControlProvider() { return access; },
     routerProvider: router,
   }));
+  provideI18nScope(createI18nScope({ locale: 'en' }));
 </script>
 
 {#snippet batchActions({ selectedIds }: { selectedIds: (string | number)[] })}

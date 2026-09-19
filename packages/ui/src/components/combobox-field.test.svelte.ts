@@ -22,7 +22,7 @@ function provider(): DataProvider {
       data: [{ id: 1, title: 'First' }],
       total: 1,
     })),
-    getMany: vi.fn(async ({ ids }) => ({
+    getMany: vi.fn<NonNullable<DataProvider['getMany']>>(async ({ ids }) => ({
       data: ids.map(id => ({ id: Number(id), title: `Selected ${id}` })),
     })),
     getOne: async ({ id }) => ({ data: { id: Number(id), title: `Selected ${id}` } }),

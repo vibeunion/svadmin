@@ -27,7 +27,7 @@
     maxSize?: number;
     disabled?: boolean;
     required?: boolean;
-    upload?: (file: File, session: UploadSession) => Promise<{ url?: string } | void>;
+    upload?: (file: File, session: UploadSession) => Promise<{ url?: string } | undefined> | Promise<void>;
     onChange?: (items: UploadItem[]) => void;
     onReject?: (file: File, reason: string) => void;
     class?: string;
@@ -79,8 +79,13 @@
     return undefined;
   }
 
-  function updateItem(id: string, update: Partial<UploadItem>): void {
-    items = items.map(item => item.id === id ? { ...item, ...update } : item);
+  function updateItem(id: string, update: Partial<UploadItem>, clear: ('error' | 'url')[] = []): void {
+    items = items.map(item => {
+      if (item.id !== id) return item;
+      const next = { ...item, ...update };
+      for (const key of clear) delete next[key];
+      return next;
+    });
     emitChange();
   }
 
@@ -88,7 +93,7 @@
     if (!upload || disabled) return;
     const controller = new AbortController();
     controllers.set(item.id, controller);
-    updateItem(item.id, { status: 'uploading', progress: 0, error: undefined });
+    updateItem(item.id, { status: 'uploading', progress: 0 }, ['error']);
     try {
       const result = await upload(item.file, {
         signal: controller.signal,
@@ -96,7 +101,8 @@
           progress: Number.isFinite(progress) ? Math.max(0, Math.min(100, Math.round(progress))) : 0,
         }),
       });
-      updateItem(item.id, { status: 'success', progress: 100, url: result?.url });
+      const url = result?.url;
+      updateItem(item.id, { status: 'success', progress: 100, ...(url === undefined ? {} : { url }) }, url === undefined ? ['url'] : []);
     } catch (error) {
       updateItem(item.id, {
         status: controller.signal.aborted ? 'cancelled' : 'error',
@@ -140,7 +146,7 @@
   }
 
   function retry(item: UploadItem): void {
-    void process({ ...item, status: 'queued', error: undefined });
+    void process(item);
   }
 
   function handleKeydown(event: KeyboardEvent): void {
