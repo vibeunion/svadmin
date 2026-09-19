@@ -58,3 +58,14 @@ jobs:
         run: |
           bun run --cwd packages/surface styles:check
           git diff --exit-code -- bun.lock packages/surface/src/styles
+      - name: Install Chromium
+        run: bun run playwright install --with-deps chromium
+      - name: Built-package browser acceptance without CSS compiler plugins
+        run: node packages/surface/scripts/browser-evidence.mjs
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: surface-browser-evidence
+          path: test-results/surface-evidence/
+          if-no-files-found: warn

@@ -1,11 +1,12 @@
 <script lang="ts">
-  import { canAccessAsync, captureAdminContext } from '@svadmin/core';
+  import { canAccessAsync, captureAdminContext, getAccessControlProvider, getLogoutVersion } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { onDestroy, untrack } from 'svelte';
-  import { resolveSurfaceWidgetData } from '../binding.js';
+  import { SvelteMap } from 'svelte/reactivity';
+  import { resolveSurfaceSourceData } from '../binding.js';
   import { defaultSurfaceCatalog } from '../catalog.js';
   import type { SurfaceRenderCatalog } from '../catalog.js';
-  import { createSurfaceSourceController } from '../source-controller.js';
+  import { loadSurfaceSource } from '../runtime.js';
   import { resolveSurfaceMessages } from '../localization.js';
   import type { SurfaceMessages } from '../localization.js';
   import type {
@@ -13,6 +14,8 @@
     SurfaceSourceDataState, SurfaceValidationIssue,
   } from '../types.js';
   import { validateSurfaceSpec } from '../validation.js';
+  import { createSurfaceSourceCache, sameSourceIdentity, snapshotSurfaceSource } from '../source-cache.js';
+  import type { SurfaceSourceRequest } from '../source-cache.js';
 
   export type SurfaceRendererError =
     | { readonly type: 'validation'; readonly issues: readonly SurfaceValidationIssue[] }
@@ -23,8 +26,10 @@
     readonly policy: SurfacePolicy;
     readonly catalog?: SurfaceRenderCatalog;
     readonly dataProvider?: SurfaceDataProvider;
-    /** 可信宿主在用户、租户或授权会话切换时更新；不是模型可提供的字段。 */
+    /** 可信宿主的用户/租户/授权会话标识；禁止使用凭证或模型提供的值。 */
     readonly scopeKey?: string;
+    /** 与独立增量加载接口保持兼容；任一作用域标识变化都会清空状态。 */
+    readonly dataScopeKey?: string | number;
     readonly locale?: string;
     readonly messages?: Partial<SurfaceMessages>;
     readonly class?: string;
@@ -32,7 +37,7 @@
   }
 
   let {
-    spec, policy, catalog = defaultSurfaceCatalog, dataProvider, scopeKey = '',
+    spec, policy, catalog = defaultSurfaceCatalog, dataProvider, scopeKey = '', dataScopeKey,
     locale, messages, class: className = '', onError,
   }: SurfaceRendererProps = $props();
 
@@ -42,66 +47,100 @@
   const activeMessages = $derived(resolveSurfaceMessages(activeLocale, messages));
   const validation = $derived(validateSurfaceSpec(spec, catalog, policy));
   const widgetRegistrations = $derived(new Map(catalog.widgets.map((widget) => [widget.type, widget])));
-  // 单独写入数据源键，避免每次响应替换整个状态对象。
-  const sourceStates = $state<Record<string, SurfaceSourceDataState>>({});
-  const controller = createSurfaceSourceController({
-    authorize: (resource, action) => canAccessAsync(resource, action),
-    onState(id, state) {
-      if (state === undefined) delete sourceStates[id];
-      else sourceStates[id] = state;
-    },
-    onError: (error) => onError?.({ type: 'data', error }),
+  const sourceStates = new SvelteMap<string, SurfaceSourceDataState>();
+  let destroyed = false;
+  let previousScope: readonly unknown[] = [];
+  let widgetScopeRevision = $state(0);
+  const sessionIdentity = $derived([
+    validation.ok ? validation.value.surfaceId : undefined,
+    catalog.version, scopeKey, dataScopeKey, getLogoutVersion(),
+    adminContext.tenantCacheKey?.__svadminTenant,
+    adminContext.authProvider, adminContext.accessControlProvider, getAccessControlProvider(),
+  ]);
+  // 复用 PR #428 的请求所有权与会话隔离实现，不维护第二套缓存。
+  const sourceCache = createSurfaceSourceCache({
+    set: (id, state) => { sourceStates.set(id, state); },
+    remove: (id) => { sourceStates.delete(id); },
+    onError: (state) => { onError?.({ type: 'data', error: state.error }); },
+  });
+
+  function providerError(sourceId: string, failure: unknown): SurfaceSourceDataState {
+    const message = failure instanceof Error ? failure.message : activeMessages.providerUnavailable;
+    return { status: 'error', sourceId, error: { code: 'provider_failed', sourceId, message } };
+  }
+
+  const sourceRequests: SurfaceSourceRequest[] = $derived.by(() => {
+    if (!validation.ok) return [];
+    const scope = sessionIdentity;
+    return validation.value.dataSources.map((source): SurfaceSourceRequest => {
+      const resourcePolicy = Object.hasOwn(policy.resources, source.resource) ? policy.resources[source.resource] : undefined;
+      if (!resourcePolicy) throw new Error(`Resource "${source.resource}" is not allowed`);
+      const snapshot = snapshotSurfaceSource(source, resourcePolicy);
+      let provider: SurfaceDataProvider | undefined;
+      let providerFailure: unknown;
+      try {
+        provider = dataProvider ?? adminContext.getDataProviderForResource(source.resource);
+      } catch (failure) { providerFailure = failure; }
+      const identity = [snapshot.key, provider, provider?.getList, provider?.getOne, ...scope];
+      const isCurrent = () => !destroyed && sourceRequests.some((request) =>
+        request.id === snapshot.source.id && sameSourceIdentity(request.identity, identity));
+      return {
+        id: snapshot.source.id, identity, isCurrent,
+        async load(isRequestCurrent) {
+          if (!provider) return providerError(snapshot.source.id, providerFailure);
+          try {
+            return await loadSurfaceSource({
+              source: snapshot.source, resourcePolicy: snapshot.resourcePolicy, provider,
+              async authorize(resource, action) {
+                if (!isRequestCurrent()) return { can: false };
+                const decision = await canAccessAsync(resource, action);
+                return isRequestCurrent() ? decision : { can: false };
+              },
+            });
+          } catch (failure) { return providerError(snapshot.source.id, failure); }
+        },
+      };
+    });
   });
 
   export async function refresh(sourceId?: string): Promise<void> {
-    if (!validation.ok) return;
-    await controller.refresh(sourceId);
+    if (!validation.ok) { sourceCache.clear(); return; }
+    await untrack(() => sourceCache.reconcile(sourceRequests, sourceId ?? true));
   }
 
-  $effect(() => {
+  $effect.pre(() => {
     const validatedSpec = validation;
-    const provider = dataProvider;
-    const activeScope = scopeKey;
-    const activePolicy = policy;
+    const requests = sourceRequests;
+    const scope = sessionIdentity;
     untrack(() => {
+      if (!sameSourceIdentity(previousScope, scope)) {
+        previousScope = [...scope];
+        widgetScopeRevision += 1;
+      }
       if (!validatedSpec.ok) {
-        controller.clear();
+        sourceCache.clear();
         onError?.({ type: 'validation', issues: validatedSpec.issues });
         return;
       }
-      void controller.reconcile(validatedSpec.value, activePolicy,
-        (resource) => provider ?? adminContext.getDataProviderForResource(resource), activeScope);
+      void sourceCache.reconcile(requests);
     });
   });
-  onDestroy(() => controller.dispose());
+  onDestroy(() => { destroyed = true; sourceCache.dispose(); });
 </script>
 
 {#if validation.ok}
-  <section
-    class="surface {className}"
-    aria-labelledby="surface-{validation.value.surfaceId}-title"
-    data-surface-id={validation.value.surfaceId}
-  >
-    <header class="surface-header">
-      <h2 id="surface-{validation.value.surfaceId}-title">{validation.value.title}</h2>
-    </header>
+  <section class="surface {className}" aria-labelledby="surface-{validation.value.surfaceId}-title" data-surface-id={validation.value.surfaceId}>
+    <header class="surface-header"><h2 id="surface-{validation.value.surfaceId}-title">{validation.value.title}</h2></header>
     <div class="surface-grid surface-gap-{validation.value.layout.gap ?? 'md'}">
-      {#key JSON.stringify([validation.value.surfaceId, catalog.version, scopeKey])}
+      {#key widgetScopeRevision}
         {#each validation.value.widgets as widget (widget.id)}
           {@const registration = widgetRegistrations.get(widget.type)}
           {@const WidgetComponent = registration?.component}
-          <div
-            class="surface-widget surface-span-{widget.placement?.columnSpan ?? 12}"
-            data-testid="surface-widget-{widget.id}"
-          >
+          <div class="surface-widget surface-span-{widget.placement?.columnSpan ?? 12}" data-testid="surface-widget-{widget.id}">
             {#if WidgetComponent}
-              <WidgetComponent
-                widgetId={widget.id}
-                props={widget.props}
-                data={resolveSurfaceWidgetData(widget, sourceStates)}
-                locale={activeLocale}
-                messages={activeMessages}
-              />
+              <WidgetComponent widgetId={widget.id} props={widget.props}
+                data={resolveSurfaceSourceData(widget, widget.binding ? sourceStates.get(widget.binding.sourceId) : undefined)}
+                locale={activeLocale} messages={activeMessages} />
             {/if}
           </div>
         {/each}
@@ -111,43 +150,22 @@
 {:else}
   <section class="surface-error {className}" role="alert" data-surface-error>
     <h2>{activeMessages.renderErrorTitle}</h2>
-    <ul>
-      {#each validation.issues as issue, issueIndex (`${issue.code}:${issue.path}:${issueIndex}`)}
-        <li><code>{issue.code}</code>: {issue.message}</li>
-      {/each}
-    </ul>
+    <ul>{#each validation.issues as issue, issueIndex (`${issue.code}:${issue.path}:${issueIndex}`)}
+      <li><code>{issue.code}</code>: {issue.message}</li>
+    {/each}</ul>
   </section>
 {/if}
 
 <style>
-  .surface,
-  .surface-error {
-    width: 100%;
-    min-width: 0;
-  }
+  .surface, .surface-error { width: 100%; min-width: 0; }
   .surface-header { margin-bottom: 1rem; }
-  .surface-header h2,
-  .surface-error h2 {
-    margin: 0;
-    color: var(--foreground);
-    font-size: clamp(1.25rem, 2vw, 1.75rem);
-    line-height: 1.2;
-  }
-  .surface-grid {
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-  }
+  .surface-header h2, .surface-error h2 { margin: 0; color: var(--foreground); font-size: clamp(1.25rem, 2vw, 1.75rem); line-height: 1.2; }
+  .surface-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); }
   .surface-gap-sm { gap: 0.5rem; }
   .surface-gap-md { gap: 1rem; }
   .surface-gap-lg { gap: 1.5rem; }
   .surface-widget { grid-column: 1 / -1; min-width: 0; }
-  .surface-error {
-    padding: 1rem;
-    border: 1px solid var(--destructive);
-    border-radius: 0.75rem;
-    background: var(--card);
-    color: var(--destructive);
-  }
+  .surface-error { padding: 1rem; border: 1px solid var(--destructive); border-radius: 0.75rem; background: var(--card); color: var(--destructive); }
   .surface-error ul { margin: 0.75rem 0 0; padding-left: 1.25rem; }
   @media (min-width: 48rem) {
     .surface-span-1 { grid-column: span 1; }
