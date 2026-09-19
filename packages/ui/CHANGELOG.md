@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.72.0](https://github.com/vibeunion/svadmin/compare/ui-v0.71.5...ui-v0.72.0) (2026-09-19)
+
+
+### 🚀 Features
+
+* **permissions:** add catalog snapshot adapter ([#425](https://github.com/vibeunion/svadmin/issues/425)) ([49a1433](https://github.com/vibeunion/svadmin/commit/49a143383a10df6be8b5f8e4b02e9af8dccc161f))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.7.4
+  * peerDependencies
+    * @svadmin/core bumped to 0.52.0
+
 ## [0.71.5](https://github.com/vibeunion/svadmin/compare/ui-v0.71.4...ui-v0.71.5) (2026-09-18)
 
 
