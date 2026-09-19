@@ -1,3 +1,9 @@
+> Historical validation notes below describe an earlier migration stage. Current
+> `ai.theme.css` is a plain `@import "./ai.css"` alias, not a Tailwind source entry.
+> The compiler is removed from active builds. Streamdown still brings the
+> `tailwind-merge` helper transitively, so the strict no-Tailwind contract remains
+> blocked. See [current migration status](no-tailwind-component-migration.md).
+
 # AI Elements Static CSS
 
 ## PM Gate
@@ -44,7 +50,7 @@ Scenario: Independent components
 | Dependencies | Streamdown utility coverage, SvelteFlow component stylesheet |
 | Packaging | Root/subpath exports, CSS side effects, SSR consumer |
 
-Tailwind remains a build tool. Streamdown still depends transitively on
+At that historical stage, Tailwind remained a build tool (not the current build). Streamdown still depends transitively on
 tailwind-merge. Only ai-elements' runtime variant dependencies are removed.
 tailwind-variants remains a development dependency for the public helper's
 consumer-extension regression tests.
