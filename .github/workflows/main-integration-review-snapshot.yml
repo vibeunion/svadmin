@@ -1,0 +1,47 @@
+name: Main integration review snapshot
+on:
+  push:
+    branches: [review/main-integration-20260919-1549]
+    paths: [.github/workflows/main-integration-review-snapshot.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: c1b5aa834dd06b00e2666d2319415add0b787015
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Bundle reviewed source histories only
+        run: |
+          mkdir -p /tmp/review-snapshot
+          git branch snapshot-integration c1b5aa834dd06b00e2666d2319415add0b787015
+          git branch snapshot-current-main c02ac0dab6edc081b4175d17a46fdeff98e1267d
+          git branch snapshot-pr438 0f6c4ad148f69b501870f0c18c6ea94bd27a8349
+          git branch snapshot-pr437 b39b4953af4166548b21b8ab7fd2c7af80d6a027
+          git bundle create /tmp/review-snapshot/repository.bundle snapshot-integration snapshot-current-main snapshot-pr438 snapshot-pr437
+          git bundle verify /tmp/review-snapshot/repository.bundle
+      - name: Preserve failed job diagnostics
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const fs = require('node:fs');
+            const runs = [35451738429, 35451738442, 35451738446, 35451738451, 35451738607];
+            for (const run_id of runs) {
+              const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, { ...context.repo, run_id, per_page: 100 });
+              for (const job of jobs.filter(j => j.conclusion === 'failure')) {
+                const response = await github.rest.actions.downloadJobLogsForWorkflowRun({ ...context.repo, job_id: job.id });
+                const text = typeof response.data === 'string' ? response.data : Buffer.from(response.data).toString('utf8');
+                fs.writeFileSync(`/tmp/review-snapshot/${run_id}-${job.id}.log`, text);
+              }
+            }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: main-integration-review-snapshot
+          path: /tmp/review-snapshot
+          retention-days: 3
+          if-no-files-found: error
