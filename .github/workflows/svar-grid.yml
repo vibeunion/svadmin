@@ -4,6 +4,8 @@ on:
     paths:
       - 'packages/ui/src/components/Svar*'
       - 'packages/ui/src/components/svar-grid-*'
+      - 'packages/ui/src/components/AutoTable.svelte'
+      - 'packages/ui/src/components/auto-table-*'
       - 'packages/surface/**'
       - 'packages/core/src/**'
       - 'scripts/fixtures/svar-grid/**'
@@ -40,10 +42,13 @@ jobs:
       - name: Install pinned real SVAR in isolated consumer
         run: npm ci --prefix scripts/fixtures/svar-grid --ignore-scripts --no-audit --no-fund
       - name: Verify adapter and Surface lint
-        run: bun x --no-install eslint packages/ui/src/components/Svar*.svelte packages/ui/src/components/svar-grid-*.ts packages/surface/src/svar*.ts packages/surface/src/components/Svar*.svelte scripts/fixtures/svar-grid --max-warnings 0
+        run: bun x --no-install eslint packages/ui/src/components/Svar*.svelte packages/ui/src/components/svar-grid-*.ts packages/ui/src/components/AutoTable.svelte packages/ui/src/components/auto-table-grid.ts packages/surface/src/svar*.ts packages/surface/src/components/Svar*.svelte scripts/fixtures/svar-grid --max-warnings 0
       - name: Verify all adapter unit tests
         working-directory: packages/ui
         run: bun run test src/components/svar-grid --reporter=default --reporter=json --outputFile=../../scripts/fixtures/svar-grid/evidence/ui-tests.json
+      - name: Verify existing AutoTable behavior remains compatible
+        working-directory: packages/ui
+        run: bun run test src/components/auto-table --reporter=default --reporter=json --outputFile=../../scripts/fixtures/svar-grid/evidence/auto-table-tests.json
       - name: Verify AI Surface schema boundaries
         working-directory: packages/surface
         run: bun run test src/svar-schema.test.ts --reporter=default --reporter=json --outputFile=../../scripts/fixtures/svar-grid/evidence/surface-tests.json

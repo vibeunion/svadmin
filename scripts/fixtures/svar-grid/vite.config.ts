@@ -9,6 +9,7 @@ export default defineConfig({
   ssr: { noExternal: ['@tanstack/svelte-query'] },
   build: { rollupOptions: { input: {
     basic: fileURLToPath(new URL('index.html', import.meta.url)), advanced: fileURLToPath(new URL('advanced.html', import.meta.url)), surface: fileURLToPath(new URL('surface.html', import.meta.url)),
+    autoTable: fileURLToPath(new URL('auto-table.html', import.meta.url)),
   } } },
   server: { host: '127.0.0.1', port: 4175, strictPort: true, fs: { allow: [fileURLToPath(new URL('../../..', import.meta.url))] } },
 });
