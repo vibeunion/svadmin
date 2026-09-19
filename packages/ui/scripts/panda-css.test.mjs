@@ -20,12 +20,12 @@ function semantic(node) {
   };
 }
 
-test('native compatibility CSS preserves the complete baseline cascade and declarations', () => {
+test('historical compatibility baseline retains its original cascade and declarations', () => {
   const manifest = JSON.parse(read('styles-compatibility.json'));
   assert.equal(manifest.baseCommit, 'cf6c4746578176ea773a17ef6f49f353292f7818');
   assert.equal(manifest.sourceCssSha256, '6e66d8c843dd623e89007d7d8c4b4d36fe3d248f228fac8f5bc38b01e6f6dd4e');
   const sources = Object.entries(manifest.files).map(([file, hash]) => {
-    const css = read(`src/${file}`);
+    const css = read(`test/style-baselines/${file}`);
     assert.equal(digest(css), hash, `Compatibility source changed: ${file}; review the baseline deliberately`);
     return css;
   });

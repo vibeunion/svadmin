@@ -1,5 +1,6 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
+import ts from 'typescript';
 
 const forbidden = /^(?:tailwindcss|@tailwindcss\/[^/@\s]+|tw-animate-css|tailwind-variants|shadcn-svelte)(?:$|@|\/)/;
 const directives = new Set(['theme', 'source', 'apply', 'utility', 'custom-variant', 'tailwind', 'reference', 'variant', 'config', 'plugin', 'screen', 'responsive', 'variants']);
@@ -59,118 +60,23 @@ export function lockViolations(text) {
   return [...found].sort();
 }
 
-/** 使用轻量词法扫描提取静态模块标识，保持边界检查无需安装仓库依赖。 */
+/** 使用仓库已有的 TypeScript 解析器，避免把文档字符串误判为真实 import。 */
 export function moduleSpecifiers(source, filename = 'source.ts') {
+  const result = [];
   const scripts = filename.endsWith('.svelte')
     ? [...source.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(match => match[1])
     : [source];
-  const result = [];
-
-  const isIdentifierStart = (char) => /[A-Za-z_$]/.test(char ?? '');
-  const isIdentifierPart = (char) => /[A-Za-z0-9_$]/.test(char ?? '');
-  const skipTrivia = (text, index, end) => {
-    while (index < end) {
-      if (/\s/.test(text[index])) {
-        index++;
-      } else if (text.startsWith('//', index)) {
-        const lineEnd = text.indexOf('\n', index + 2);
-        index = lineEnd < 0 ? end : lineEnd + 1;
-      } else if (text.startsWith('/*', index)) {
-        const commentEnd = text.indexOf('*/', index + 2);
-        index = commentEnd < 0 ? end : commentEnd + 2;
-      } else {
-        break;
-      }
-    }
-    return index;
-  };
-  const readString = (text, index, end) => {
-    const quote = text[index++];
-    const start = index;
-    while (index < end) {
-      if (text[index] === '\\') {
-        index += 2;
-      } else if (text[index] === quote) {
-        return { value: text.slice(start, index), next: index + 1 };
-      } else {
-        index++;
-      }
-    }
-    return { value: null, next: end };
-  };
-  const addStringArgument = (text, index, end) => {
-    index = skipTrivia(text, index, end);
-    if (text[index] !== '"' && text[index] !== "'") return index;
-    const parsed = readString(text, index, end);
-    if (parsed.value !== null) result.push(parsed.value);
-    return parsed.next;
-  };
-  const scan = (text, start, end) => {
-    for (let index = start; index < end;) {
-      index = skipTrivia(text, index, end);
-      if (index >= end) break;
-      if (text[index] === '"' || text[index] === "'") {
-        index = readString(text, index, end).next;
-        continue;
-      }
-      if (text[index] === '`') {
-        const templateEnd = text.indexOf('`', index + 1);
-        const template = templateEnd < 0 ? end : templateEnd;
-        for (const expression of text.slice(index + 1, template).matchAll(/\$\{([\s\S]*?)\}/g)) {
-          scan(expression[1], 0, expression[1].length);
-        }
-        index = templateEnd < 0 ? end : templateEnd + 1;
-        continue;
-      }
-      if (!isIdentifierStart(text[index])) {
-        index++;
-        continue;
-      }
-      const identifierStart = index;
-      index++;
-      while (index < end && isIdentifierPart(text[index])) index++;
-      const identifier = text.slice(identifierStart, index);
-      const afterIdentifier = skipTrivia(text, index, end);
-      if (identifier === 'require' && text[afterIdentifier] === '(') {
-        index = addStringArgument(text, afterIdentifier + 1, end);
-      } else if (identifier === 'import') {
-        if (text[afterIdentifier] === '(') {
-          index = addStringArgument(text, afterIdentifier + 1, end);
-        } else if (text[afterIdentifier] === '"' || text[afterIdentifier] === "'") {
-          index = addStringArgument(text, afterIdentifier, end);
-        } else {
-          const statementEnd = text.indexOf(';', afterIdentifier);
-          const limit = statementEnd < 0 ? end : statementEnd;
-          let cursor = afterIdentifier;
-          while (cursor < limit) {
-            cursor = skipTrivia(text, cursor, limit);
-            if (text.startsWith('from', cursor) && !isIdentifierPart(text[cursor - 1]) && !isIdentifierPart(text[cursor + 4])) {
-              addStringArgument(text, cursor + 4, limit);
-              break;
-            }
-            cursor++;
-          }
-          scan(text, afterIdentifier, limit);
-          index = limit;
-        }
-      } else if (identifier === 'export') {
-        const statementEnd = text.indexOf(';', afterIdentifier);
-        const limit = statementEnd < 0 ? end : statementEnd;
-        let cursor = afterIdentifier;
-        while (cursor < limit) {
-          cursor = skipTrivia(text, cursor, limit);
-          if (text.startsWith('from', cursor) && !isIdentifierPart(text[cursor - 1]) && !isIdentifierPart(text[cursor + 4])) {
-            addStringArgument(text, cursor + 4, limit);
-            break;
-          }
-          cursor++;
-        }
-        index = limit;
-      }
-    }
-  };
   for (const script of scripts) {
-    scan(script, 0, script.length);
+    const file = ts.createSourceFile(filename, script, ts.ScriptTarget.Latest, false, filename.endsWith('.tsx') || filename.endsWith('.jsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
+    function visit(node) {
+      let specifier;
+      if (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) specifier = node.moduleSpecifier;
+      else if (ts.isImportEqualsDeclaration(node) && ts.isExternalModuleReference(node.moduleReference)) specifier = node.moduleReference.expression;
+      else if (ts.isCallExpression(node) && (node.expression.kind === ts.SyntaxKind.ImportKeyword || (ts.isIdentifier(node.expression) && node.expression.text === 'require'))) specifier = node.arguments[0];
+      if (specifier && (ts.isStringLiteral(specifier) || ts.isNoSubstitutionTemplateLiteral(specifier))) result.push(specifier.text);
+      ts.forEachChild(node, visit);
+    }
+    visit(file);
   }
   return result;
 }

@@ -82,3 +82,9 @@ test('unquoted CSS url imports and bundling-all metadata cannot bypass or crash 
   assert.deepEqual(cssViolations('@import url(tailwindcss);'), ['compiler import tailwindcss']);
   assert.deepEqual(manifestViolations({ bundledDependencies: true, dependencies: { tailwindcss: '4' } }), ['dependencies.tailwindcss']);
 });
+
+test('source parser handles exported loaders, escaped specifiers and regex literals', () => {
+  assert.deepEqual(moduleSpecifiers("export const load = () => import('tailwindcss');"), ['tailwindcss']);
+  assert.deepEqual(moduleSpecifiers(String.raw`import 'tailwind\u0063ss';`), ['tailwindcss']);
+  assert.deepEqual(moduleSpecifiers("const pattern = /import('tailwindcss')/;"), []);
+});
