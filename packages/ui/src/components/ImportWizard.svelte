@@ -60,6 +60,7 @@
     get dataProviderName() { return binding.dataProviderName; },
     get batchSize() { return batchSize; },
     get enabled() { return open && allowed; },
+    mapData: mapRow,
   }));
   const isImporting = $derived(importer.isLoading);
   const processedCount = $derived(importer.progress.processedAmount);
@@ -145,28 +146,28 @@
     }
   }
 
-  function mappedRows(): Record<string, unknown>[] {
-    return rawRows.map((row) => {
-      const record: Record<string, unknown> = {};
-      rawHeaders.forEach((header, idx) => {
-        const targetFieldKey = columnMapping[header];
-        if (!targetFieldKey) return;
-        const fieldDef = availableFields.find((f) => f.key === targetFieldKey);
-        let val: unknown = row[idx];
-        if (typeof val === 'string') {
-          if (fieldDef?.type === 'number' || fieldDef?.type === 'currency' || fieldDef?.type === 'percent') {
-            const num = val.trim() === '' ? NaN : Number(val);
-            val = val.trim() === '' ? undefined : Number.isFinite(num) ? num : val;
-          } else if (fieldDef?.type === 'boolean') {
-            const normalized = val.trim().toLowerCase();
-            if (['true', '1', 'yes', '是'].includes(normalized)) val = true;
-            else if (['false', '0', 'no', '否'].includes(normalized)) val = false;
-          }
+  function mapRow(row: Record<string, unknown>): Record<string, unknown> {
+    const record: Record<string, unknown> = {};
+    rawHeaders.forEach((header) => {
+      const targetFieldKey = columnMapping[header];
+      if (!targetFieldKey) return;
+      const fieldDef = availableFields.find((f) => f.key === targetFieldKey);
+      let val: unknown = row[header];
+      if (typeof val === 'string') {
+        if (fieldDef?.type === 'number' || fieldDef?.type === 'currency' || fieldDef?.type === 'percent') {
+          const num = val.trim() === '' ? NaN : Number(val);
+          val = val.trim() === '' ? undefined : Number.isFinite(num) ? num : val;
+        } else if (fieldDef?.type === 'boolean') {
+          const normalized = val.trim().toLowerCase();
+          if (['true', '1', 'yes', '是'].includes(normalized)) val = true;
+          else if (['false', '0', 'no', '否'].includes(normalized)) val = false;
         }
+      }
+      if (val !== undefined) {
         Object.defineProperty(record, targetFieldKey, { value: val, enumerable: true });
-      });
-      return record;
+      }
     });
+    return record;
   }
 
   async function startImport() {
@@ -184,13 +185,8 @@
     failedRecords = [];
     importResult = null;
     importError = null;
-    const mappedFile = new File(
-      [JSON.stringify(mappedRows())],
-      `${fileName || 'import'}.json`,
-      { type: 'application/json' },
-    );
     try {
-      const result = await importer.handleChange({ file: mappedFile });
+      const result = await importer.handleChange({ file: selectedFile });
       if (!current(origin, token)) return;
       succeededCount = result.succeeded.length;
       failedRecords = result.errored.map(item => ({
@@ -336,7 +332,11 @@
                   <select
                     aria-label={`Map ${header}`}
                     class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529 svadmin-u-f10f771f87e9 svadmin-u-3e94a98e1466 svadmin-u-9c1295a6914a"
-                    bind:value={columnMapping[header]}
+                    value={columnMapping[header]}
+                    onchange={(event) => {
+                      columnMapping = { ...columnMapping, [header]: event.currentTarget.value };
+                      fileError = null;
+                    }}
                   >
                     <option value="">— {i18n.t('common.ignoreColumn', { defaultValue: 'Ignore' })} —</option>
                     {#each availableFields as field (field.key)}
