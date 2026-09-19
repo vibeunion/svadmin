@@ -83,10 +83,11 @@
     "vitest": "^4.1.11"
   },
   "scripts": {
-    "build": "node ../../node_modules/@sveltejs/package/svelte-package.js -i src -o dist && bun scripts/clean-dist.ts",
+    "build": "node ../../scripts/build-migrated-ui.mjs ai-elements && node ../../node_modules/@sveltejs/package/svelte-package.js -i src -o dist && bun scripts/clean-dist.ts",
     "check": "svelte-check --tsgo-experimental-api --tsconfig ./tsconfig.json --threshold error",
     "test": "vitest run --config ./vitest.config.ts && bun test scripts/clean-dist.test.ts scripts/audit-upstream-parity.test.ts",
-    "audit:upstream": "bun scripts/audit-upstream-parity.ts"
+    "audit:upstream": "bun scripts/audit-upstream-parity.ts",
+    "styles:migrated:check": "node ../../scripts/build-migrated-ui.mjs ai-elements --check"
   },
   "license": "MIT",
   "publishConfig": {

@@ -1,0 +1,7 @@
+{
+  "baselineCommit": "4e7f62ce98af8b50c92a8218f1b3060f52ac42c0",
+  "originalFile": "src/utilities.css",
+  "originalSha256": "c5232f52698d61177848f4b0c61033a70b102505666c25908dab9fcea73d45d7",
+  "recipes": 588,
+  "retainsPublicSelectors": true
+}

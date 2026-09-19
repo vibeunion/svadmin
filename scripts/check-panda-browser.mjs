@@ -13,7 +13,7 @@ mkdirSync(output, { recursive: true });
 rmSync(resolve(output, 'provenance.json'), { force: true });
 const read = (path) => readFileSync(resolve(root, path), 'utf8');
 const manifest = JSON.parse(read('packages/ui/styles-compatibility.json'));
-const baselineCss = Object.keys(manifest.files).map((path) => read(`packages/ui/src/${path}`)).join('\n');
+const baselineCss = Object.keys(manifest.files).map((path) => read(`packages/ui/test/style-baselines/${path}`)).join('\n');
 const publishedCss = read('packages/ui/dist/app.css');
 const server = await createServer({
   configFile: false,
