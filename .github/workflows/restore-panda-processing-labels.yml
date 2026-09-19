@@ -17,13 +17,14 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: ${{ github.sha }}
-      - name: Apply exactly two missing translations and remove this one-shot workflow
+      - name: Apply the two bounded source corrections
         run: |
+          test "$(git hash-object packages/core/src/i18n.svelte.ts)" = '521392b00ace3745903604ff24f95ee26e1272fb'
+          test "$(git hash-object scripts/stripe-first-refactor-contract.test.ts)" = 'd8a813e6cd6aaf410e35fc59283088c9a3f7b974'
           python3 - <<'PY'
           from pathlib import Path
-          from hashlib import sha256
+          import subprocess
           path = Path('packages/core/src/i18n.svelte.ts')
-          assert sha256(path.read_bytes()).hexdigest() == '1f82005f10b97e5e6ff1a628fb378056433412c0f8af6846cca13f494a0e645a'
           text = path.read_text(encoding='utf-8')
           assert text.count("'common.processing'") == 0
           for anchor, label in [
@@ -34,10 +35,19 @@ jobs:
               text = text.replace(anchor, anchor + '\n' + label)
           assert text.count("'common.processing'") == 2
           path.write_text(text, encoding='utf-8')
-          Path('.github/workflows/restore-panda-processing-labels.yml').unlink()
+          assert subprocess.check_output(['git', 'diff', '--numstat', '--', str(path)], text=True).strip() == '2\t0\t' + str(path)
+          path = Path('scripts/stripe-first-refactor-contract.test.ts')
+          text = path.read_text(encoding='utf-8')
+          anchor = "import { relative, resolve } from 'node:path';"
+          assert text.count(anchor) == 1
+          text = text.replace(anchor, anchor + "\nimport { isFrozenCompatibilityCss } from './frozen-css-compatibility.js';")
+          anchor = "          readFileSync(path, 'utf8')\n            .split('\\n')"
+          assert text.count(anchor) == 1
+          text = text.replace(anchor, "          const source = readFileSync(path, 'utf8');\n          if (isFrozenCompatibilityCss(rel, source)) continue;\n          source.split('\\n')")
+          path.write_text(text, encoding='utf-8')
+          assert subprocess.check_output(['git', 'diff', '--numstat', '--', str(path)], text=True).strip() == '4\t2\t' + str(path)
           PY
-          test "$(git hash-object packages/core/src/i18n.svelte.ts)" = '54abb8b9df80703a158a604b1f028fde78f750fc'
-          git add -- packages/core/src/i18n.svelte.ts .github/workflows/restore-panda-processing-labels.yml
+          git add -- packages/core/src/i18n.svelte.ts scripts/stripe-first-refactor-contract.test.ts
           git diff --cached --check
-          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'fix(i18n): retain one processing label per locale'
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'fix(styles): restore translations and bound frozen CSS exceptions'
           git push origin HEAD:refs/heads/feat/panda-tokens-no-tailwind
