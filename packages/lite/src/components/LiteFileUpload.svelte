@@ -8,7 +8,8 @@
     multiple?: boolean;
     required?: boolean;
     disabled?: boolean;
-    error?: string;
+    /** Explicit undefined clears a previously displayed server error. */
+    error?: string | undefined;
     class?: string;
   }
 

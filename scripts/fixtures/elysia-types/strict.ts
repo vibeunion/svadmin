@@ -2,7 +2,7 @@ import { Elysia, t } from 'elysia';
 import type { SelectiveStatus } from 'elysia/error';
 import type { InferResourceMap } from '../../../packages/elysia/src/types.js';
 import type { Reconcile, UnwrapSchema } from 'elysia/types';
-import { z } from 'zod';
+import { typeboxStandard } from '../../../packages/elysia/test/typebox-standard-schema.mjs';
 
 const app = new Elysia().get('/users', () => ({
   items: [{ id: 1, name: 'Ada' }],
@@ -83,7 +83,8 @@ void old;
 
 const mixed = new Elysia().model({
   User: t.Object({ id: t.Number() }),
-  Label: z.string().transform(value => value.length),
+  Label: typeboxStandard(t.Transform(t.String())
+    .Decode(value => value.length).Encode(value => String(value))),
 });
 const labelLength: number = mixed.models.Label.parse('label');
 // @ts-expect-error Standard Schema models retain their decoded output type.

@@ -32,3 +32,8 @@ describe('svadmin generate command', () => {
     expect(() => parseManualFields('id:toString', 'id')).toThrow('Invalid field type');
   });
 });
+
+it('manual fields retain temporal and percentage contracts', () => {
+  const result = parseManualFields('start:date,clock:time,stamp:datetime,period:daterange,ratio:percent', 'id');
+  expect(result.map(field => field.type)).toEqual(['date', 'time', 'datetime', 'daterange', 'percent']);
+});
