@@ -28,7 +28,7 @@ jobs:
       - name: Install unchanged workspace dependencies
         run: bun install --frozen-lockfile
       - name: Install pinned real SVAR in isolated consumer
-        run: npm install --prefix scripts/fixtures/svar-grid --ignore-scripts --no-audit --no-fund
+        run: npm ci --prefix scripts/fixtures/svar-grid --ignore-scripts --no-audit --no-fund
       - name: Verify adapter lint
         run: bun x --no-install eslint packages/ui/src/components/Svar*.svelte packages/ui/src/components/svar-grid-*.ts scripts/fixtures/svar-grid --max-warnings 0
       - name: Verify adapter unit tests
@@ -45,9 +45,12 @@ jobs:
       - name: Run real browser integration and capture states
         run: bun x --no-install playwright test --config scripts/fixtures/svar-grid/playwright.config.ts
       - name: Check dependency isolation and whitespace
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           git diff --exit-code -- bun.lock package.json packages/ui/package.json
-          git diff --check
+          git fetch --depth=1 origin "$BASE_SHA"
+          git diff --check "$BASE_SHA" HEAD
       - uses: actions/upload-artifact@v4
         if: always()
         with:

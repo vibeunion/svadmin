@@ -30,6 +30,7 @@
     label?: string;
     emptyLabel?: string;
     loadingLabel?: string;
+    disabledLabel?: string;
     fallbackLabel?: string;
   }
   let {
@@ -37,7 +38,7 @@
     height = 420, density = 'comfortable', freezeLeft = 0, queryMode = 'local',
     sorters = [], filters = [], onSortChange, onFilterChange, scopeKey = 0,
     loading = false, error, disabled = false, label = 'Data grid',
-    emptyLabel = 'No records', loadingLabel = 'Loading', fallbackLabel = 'Static preview (up to 20 rows)',
+    emptyLabel = 'No records', loadingLabel = 'Loading', disabledLabel = 'Grid is disabled', fallbackLabel = 'Static preview (up to 20 rows)',
   }: SvarDataGridProps = $props();
 
   let mounted = $state(false);
@@ -97,12 +98,13 @@
 </script>
 
 <Theme fonts={false}>
-  <div class="svadmin-svar-grid" data-svadmin-svar-grid data-density={density} role="region" aria-label={label} aria-busy={loading}>
+  <div class="svadmin-svar-grid" data-svadmin-svar-grid data-density={density} role="region" aria-label={label} aria-busy={loading} aria-disabled={disabled}>
     {#if !model.ok || !rows.ok}
       <p role="alert">{!model.ok ? model.message : !rows.ok ? rows.message : ''}</p>
     {:else}
       {#if error}<p role="alert">{error}</p>
       {:else if loading}<p role="status">{loadingLabel}</p>
+      {:else if disabled}<p role="status">{disabledLabel}</p>
       {:else if rows.value.length === 0}<p role="status">{emptyLabel}</p>{/if}
       {#if mounted}
         <div class="grid-viewport" style:height="{height}px" inert={disabled}>
@@ -167,6 +169,7 @@
     --wx-input-border: var(--wx-border);
   }
   .grid-viewport { min-width: 0; width: 100%; }
+  .grid-viewport[inert] { opacity: 0.6; }
   p { margin: 0; padding: 0.75rem; }
   [role='alert'] { color: var(--destructive, CanvasText); }
   .static-preview { overflow-x: auto; }

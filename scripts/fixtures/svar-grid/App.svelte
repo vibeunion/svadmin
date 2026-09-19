@@ -13,9 +13,10 @@
   let dark = $state(false);
   let tenant = $state('alpha');
   let scope = $state(0);
-  let granted = $state(true);
-  let access = $state.raw<AccessControlProvider>({ can: async () => ({ can: true }) });
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: 0, gcTime: 0 } } });
+  let granted = true;
+  const checkAccess = async () => ({ can: granted, reason: granted ? '' : 'Read access denied by fixture' });
+  let access = $state.raw<AccessControlProvider>({ can: checkAccess });
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity, gcTime: Infinity } } });
   onDestroy(() => client.clear());
   const provider: DataProvider = {
     getApiUrl: () => '/api',
@@ -56,8 +57,7 @@
 
   function toggleAccess() {
     granted = !granted;
-    const can = granted;
-    access = { can: async () => ({ can, reason: can ? '' : 'Read access denied by fixture' }) };
+    access = { can: checkAccess };
   }
 </script>
 
@@ -71,6 +71,7 @@
     <button onclick={() => { tenant = tenant === 'alpha' ? 'beta' : 'alpha'; }}>Tenant</button>
     <button onclick={toggleAccess}>Access</button>
     <button onclick={() => { scope += 1; }}>Scope</button>
+    <button onclick={() => { granted = false; scope += 1; }}>Scope deny</button>
     <button onclick={() => { viewState = 'loading'; }}>Loading</button>
     <button onclick={() => { viewState = 'empty'; }}>Empty</button>
     <button onclick={() => { viewState = 'error'; }}>Error</button>

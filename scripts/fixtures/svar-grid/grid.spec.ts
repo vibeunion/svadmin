@@ -91,6 +91,11 @@ test('permission revocation clears records without another data read; tenant res
   const before = requests.length;
   await page.getByRole('button', { name: 'Scope', exact: true }).click();
   await expect.poll(() => requests.length).toBe(before + 1);
+  expect(requests.at(-1)?.meta?.['svadminSvarScope']).toBe(1);
+  await page.getByRole('button', { name: 'Scope deny', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('Read access denied');
+  await expect(page.getByRole('grid')).toHaveCount(0);
+  expect(requests.length).toBe(before + 1);
 });
 
 test('a delayed old-tenant response cannot enter the new grid', async ({ page }) => {
@@ -104,12 +109,15 @@ test('a delayed old-tenant response cannot enter the new grid', async ({ page })
   await expect.poll(() => oldRoute !== undefined).toBe(true);
   await page.getByRole('button', { name: 'Tenant', exact: true }).click();
   await expect(page.getByText('Beta current', { exact: true })).toBeVisible();
+  const retiredResponse = page.waitForResponse(response => decodeURIComponent(response.url()).includes('alpha') && response.url().includes('/api/rows'));
   await oldRoute?.fulfill({ json: { data: [{ id: 1, name: 'Alpha obsolete', stock: 1 }], total: 1 } });
+  await (await retiredResponse).finished();
+  await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve(true)))));
   await expect(page.getByText('Beta current', { exact: true })).toBeVisible();
   await expect(page.getByText('Alpha obsolete', { exact: true })).toHaveCount(0);
 });
 
-for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844 }]) {
+for (const viewport of [{ width: 1440, height: 900 }, { width: 1920, height: 1080 }, { width: 390, height: 844 }]) {
   test(`light/dark state evidence at ${viewport.width}`, async ({ page }, testInfo) => {
     await page.setViewportSize(viewport);
     await page.goto('/');
@@ -118,6 +126,12 @@ for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844
       if (theme === 'dark') await page.getByRole('button', { name: 'Theme', exact: true }).click();
       for (const state of ['Restore', 'Loading', 'Empty', 'Error', 'Disabled']) {
         await page.getByRole('button', { name: state, exact: true }).click();
+        const grid = page.locator('[data-svadmin-svar-grid]');
+        if (state === 'Restore') await expect(page.getByText('Product 00000', { exact: true })).toBeVisible();
+        if (state === 'Loading') await expect(grid.getByRole('status')).toHaveText('Loading');
+        if (state === 'Empty') await expect(grid.getByRole('status')).toHaveText('No records');
+        if (state === 'Error') await expect(grid.getByRole('alert')).toHaveText('Fixture data error');
+        if (state === 'Disabled') await expect(grid).toHaveAttribute('aria-disabled', 'true');
         await page.screenshot({ path: testInfo.outputPath(`${theme}-${state.toLowerCase()}-${viewport.width}.png`), fullPage: true });
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
       }

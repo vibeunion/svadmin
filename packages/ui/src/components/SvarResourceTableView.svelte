@@ -16,7 +16,9 @@
   const i18n = useTranslation();
   const binding = useResourceContract(() => resourceName);
   const resource = $derived(context.getResource(resourceName));
-  const permission = useCan(() => ({ resource: resourceName, action: 'list' }));
+  const permission = useCan(() => ({
+    resource: resourceName, action: 'list', meta: { svadminSvarScope: dataScopeKey },
+  }));
   const columns = $derived<SvarColumn[]>(resource.fields.filter(field => field.showInList !== false).map(field => ({
     key: field.key, label: field.label,
     sortable: field.sortable === true,
