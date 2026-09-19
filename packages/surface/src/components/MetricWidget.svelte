@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Value } from '@sinclair/typebox/value';
-  import { surfaceMetric } from '@svadmin/ui/recipes';
+  import { surfaceMetric } from '../styled-system/recipes/index.js';
   import StatsCard from '@svadmin/ui/components/StatsCard.svelte';
   import { styledMetricPropsSchema as metricPropsSchema } from '../builtin-schemas.js';
   import type { SurfaceWidgetRendererProps } from '../catalog.js';

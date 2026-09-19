@@ -3,7 +3,7 @@
   "version": "0.8.18",
   "description": "Validated declarative surfaces for svadmin dashboards",
   "type": "module",
-  "sideEffects": false,
+  "sideEffects": ["./dist/styles.css"],
   "files": [
     "dist",
     "README.md",
@@ -22,6 +22,10 @@
       "types": "./dist/svelte.d.ts",
       "svelte": "./dist/svelte.js",
       "default": "./dist/svelte.js"
+    },
+    "./styles.css": {
+      "style": "./dist/styles.css",
+      "default": "./dist/styles.css"
     }
   },
   "peerDependencies": {
@@ -41,7 +45,7 @@
     "vitest": "^4.1.11"
   },
   "scripts": {
-    "build": "node ../../node_modules/@sveltejs/package/svelte-package.js -i src -o dist",
+    "build": "node scripts/prepare-design.mjs && node ../../node_modules/@sveltejs/package/svelte-package.js -i src -o dist",
     "check": "svelte-check --tsgo-experimental-api --tsconfig ./tsconfig.json --threshold error",
     "test": "vitest run --config ./vitest.config.ts"
   },
