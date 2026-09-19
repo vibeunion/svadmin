@@ -1,7 +1,8 @@
-import { Type, type TSchema } from "@sinclair/typebox";
+import type { TSchema } from "@sinclair/typebox";
 import { TypeCompiler } from "@sinclair/typebox/compiler";
 import { Value } from "@sinclair/typebox/value";
 import { decodedJsonPointerToken, jsonPointer, jsonValueIssue } from "./json.js";
+import { surfaceSpecSchema } from './schema.js';
 import {
   SURFACE_LIMITS,
   SURFACE_SCHEMA_VERSION,
@@ -18,119 +19,9 @@ import {
   type SurfaceWidgetDefinition,
 } from "./types.js";
 
-const idSchema = Type.String({
-  minLength: 1,
-  maxLength: SURFACE_LIMITS.maxIdLength,
-  pattern: "^[A-Za-z][A-Za-z0-9_-]*$",
-});
-
-const fieldSchema = Type.String({
-  minLength: 1,
-  maxLength: SURFACE_LIMITS.maxIdLength,
-});
-
-const jsonPrimitiveSchema = Type.Union([
-  Type.String(),
-  Type.Number(),
-  Type.Boolean(),
-  Type.Null(),
-]);
-
-const surfaceFilterSchema = Type.Union([
-  Type.Object({
-    field: fieldSchema,
-    operator: Type.Union([
-      Type.Literal("eq"),
-      Type.Literal("ne"),
-      Type.Literal("lt"),
-      Type.Literal("lte"),
-      Type.Literal("gt"),
-      Type.Literal("gte"),
-      Type.Literal("contains"),
-      Type.Literal("startswith"),
-      Type.Literal("endswith"),
-    ]),
-    value: jsonPrimitiveSchema,
-  }, { additionalProperties: false }),
-  Type.Object({
-    field: fieldSchema,
-    operator: Type.Union([
-      Type.Literal("in"),
-      Type.Literal("nin"),
-    ]),
-    value: Type.Array(jsonPrimitiveSchema),
-  }, { additionalProperties: false }),
-  Type.Object({
-    field: fieldSchema,
-    operator: Type.Union([
-      Type.Literal("null"),
-      Type.Literal("nnull"),
-    ]),
-  }, { additionalProperties: false }),
-]);
-
-const resourceListSchema = Type.Object({
-  id: idSchema,
-  type: Type.Literal("resource-list"),
-  resource: idSchema,
-  pageSize: Type.Optional(Type.Integer({ minimum: 1 })),
-  sorters: Type.Optional(Type.Array(
-    Type.Object({
-      field: fieldSchema,
-      order: Type.Union([Type.Literal("asc"), Type.Literal("desc")]),
-    }, { additionalProperties: false })
-  )),
-  filters: Type.Optional(Type.Array(surfaceFilterSchema)),
-}, { additionalProperties: false });
-
-const resourceOneSchema = Type.Object({
-  id: idSchema,
-  type: Type.Literal("resource-one"),
-  resource: idSchema,
-  recordId: Type.Union([Type.String(), Type.Number()]),
-}, { additionalProperties: false });
-
-const surfaceSpecSchema = Type.Object({
-  schemaVersion: Type.String(),
-  catalogVersion: Type.String({ minLength: 1 }),
-  surfaceId: idSchema,
-  title: Type.String({ minLength: 1, maxLength: SURFACE_LIMITS.maxTitleLength }),
-  layout: Type.Object({
-    type: Type.Literal("grid"),
-    columns: Type.Literal(12),
-    gap: Type.Optional(Type.Union([
-      Type.Literal("sm"),
-      Type.Literal("md"),
-      Type.Literal("lg"),
-    ])),
-  }, { additionalProperties: false }),
-  dataSources: Type.Array(Type.Union([resourceListSchema, resourceOneSchema])),
-  widgets: Type.Array(Type.Object({
-    id: idSchema,
-    type: idSchema,
-    props: Type.Record(Type.String(), Type.Unknown()),
-    binding: Type.Optional(Type.Object({
-      sourceId: idSchema,
-      pointer: Type.Optional(Type.String()),
-    }, { additionalProperties: false })),
-    placement: Type.Optional(Type.Object({
-      columnSpan: Type.Optional(Type.Integer({ minimum: 1, maximum: 12 })),
-    }, { additionalProperties: false })),
-  }, { additionalProperties: false })),
-}, { additionalProperties: false });
-
 const compiledSurfaceSpec = TypeCompiler.Compile(surfaceSpecSchema);
-
 const forbiddenPropertyNames = new Set([
-  "class",
-  "className",
-  "color",
-  "href",
-  "html",
-  "innerHTML",
-  "src",
-  "style",
-  "url",
+  "class", "className", "color", "href", "html", "innerHTML", "src", "style", "url",
 ]);
 const strictSchemaProbeKey = "__surface_unknown_property_probe__";
 

@@ -16,42 +16,19 @@ export const SURFACE_LIMITS = {
 } as const;
 
 export type JsonPrimitive = string | number | boolean | null;
-
 export type JsonValue = JsonPrimitive | JsonObject | readonly JsonValue[];
-
-export interface JsonObject {
-  readonly [key: string]: JsonValue;
-}
-
+export interface JsonObject { readonly [key: string]: JsonValue }
 export type SurfaceGridSpan = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
-
 export interface SurfaceGridLayout {
   readonly type: 'grid';
   readonly columns: 12;
   readonly gap?: 'sm' | 'md' | 'lg';
 }
-
-export interface SurfaceSort {
-  readonly field: string;
-  readonly order: 'asc' | 'desc';
-}
-
+export interface SurfaceSort { readonly field: string; readonly order: 'asc' | 'desc' }
 export type SurfaceFilter =
-  | {
-      readonly field: string;
-      readonly operator: 'eq' | 'ne' | 'lt' | 'lte' | 'gt' | 'gte' | 'contains' | 'startswith' | 'endswith';
-      readonly value: JsonPrimitive;
-    }
-  | {
-      readonly field: string;
-      readonly operator: 'in' | 'nin';
-      readonly value: readonly JsonPrimitive[];
-    }
-  | {
-      readonly field: string;
-      readonly operator: 'null' | 'nnull';
-    };
-
+  | { readonly field: string; readonly operator: 'eq' | 'ne' | 'lt' | 'lte' | 'gt' | 'gte' | 'contains' | 'startswith' | 'endswith'; readonly value: JsonPrimitive }
+  | { readonly field: string; readonly operator: 'in' | 'nin'; readonly value: readonly JsonPrimitive[] }
+  | { readonly field: string; readonly operator: 'null' | 'nnull' };
 export interface ResourceListSource {
   readonly id: string;
   readonly type: 'resource-list';
@@ -60,23 +37,16 @@ export interface ResourceListSource {
   readonly sorters?: readonly SurfaceSort[];
   readonly filters?: readonly SurfaceFilter[];
 }
-
 export interface ResourceOneSource {
   readonly id: string;
   readonly type: 'resource-one';
   readonly resource: string;
   readonly recordId: string | number;
 }
-
 export type ResourceListDataSource = ResourceListSource;
 export type ResourceOneDataSource = ResourceOneSource;
 export type SurfaceDataSource = ResourceListSource | ResourceOneSource;
-
-export interface SurfaceBinding {
-  readonly sourceId: string;
-  readonly pointer?: string;
-}
-
+export interface SurfaceBinding { readonly sourceId: string; readonly pointer?: string }
 export interface SurfaceWidget {
   readonly id: string;
   readonly type: string;
@@ -84,7 +54,6 @@ export interface SurfaceWidget {
   readonly binding?: SurfaceBinding;
   readonly placement?: { readonly columnSpan?: SurfaceGridSpan };
 }
-
 export interface SurfaceSpec {
   readonly schemaVersion: typeof SURFACE_SCHEMA_VERSION;
   readonly catalogVersion: string;
@@ -94,7 +63,6 @@ export interface SurfaceSpec {
   readonly dataSources: readonly SurfaceDataSource[];
   readonly widgets: readonly SurfaceWidget[];
 }
-
 export interface SurfaceResourcePolicy {
   readonly readFields: readonly string[];
   readonly filterFields?: readonly string[];
@@ -102,26 +70,23 @@ export interface SurfaceResourcePolicy {
   readonly allowGetOne?: boolean;
   readonly maxPageSize?: number;
 }
-
-export interface SurfacePolicy {
-  readonly resources: Readonly<Record<string, SurfaceResourcePolicy>>;
-}
-
+export interface SurfacePolicy { readonly resources: Readonly<Record<string, SurfaceResourcePolicy>> }
 export type SurfaceCatalogDataKind = 'none' | 'scalar' | 'items';
-
 export interface SurfaceWidgetDefinition {
   readonly type: string;
   readonly dataKind: SurfaceCatalogDataKind;
   readonly propsSchema: TSchema;
+  /** 由可信目录提供，用于生成 AI 使用说明；不来自模型输出。 */
+  readonly description?: string;
+  /** 参数示例必须通过同一 propsSchema 校验。不要放入真实用户数据。 */
+  readonly examples?: readonly JsonObject[];
   /** Fields read from the bound record, supplied by a trusted Catalog. */
   readonly getReferencedFields?: (props: JsonObject) => readonly string[];
 }
-
 export interface SurfaceCatalog {
   readonly version: string;
   readonly widgets: readonly SurfaceWidgetDefinition[];
 }
-
 export type SurfaceValidationCode =
   | 'invalid_json'
   | 'unsupported_schema_version'
@@ -134,7 +99,6 @@ export type SurfaceValidationCode =
   | 'resource_denied'
   | 'field_denied'
   | 'limit_exceeded';
-
 export interface SurfaceValidationIssue {
   readonly code: SurfaceValidationCode;
   readonly path: string;
@@ -142,32 +106,19 @@ export interface SurfaceValidationIssue {
   readonly widgetId?: string;
   readonly sourceId?: string;
 }
-
 export type SurfaceValidationResult =
   | { readonly ok: true; readonly value: SurfaceSpec }
   | { readonly ok: false; readonly issues: readonly SurfaceValidationIssue[] };
-
 export type SurfaceDataProvider = Pick<DataProvider, 'getList' | 'getOne'>;
-
 export interface SurfaceDataError {
-  readonly code:
-    | 'access_denied'
-    | 'access_check_failed'
-    | 'provider_failed'
-    | 'provider_result_not_json'
-    | 'binding_pointer_not_found';
+  readonly code: 'access_denied' | 'access_check_failed' | 'provider_failed' | 'provider_result_not_json' | 'binding_pointer_not_found';
   readonly sourceId: string;
   readonly message: string;
 }
-
 export type SurfaceWidgetDataState =
   | { readonly status: 'unbound' }
   | { readonly status: 'loading'; readonly sourceId: string }
   | { readonly status: 'empty'; readonly sourceId: string }
   | { readonly status: 'ready'; readonly sourceId: string; readonly value: JsonValue }
   | { readonly status: 'error'; readonly sourceId: string; readonly error: SurfaceDataError };
-
-export type SurfaceSourceDataState = Extract<
-  SurfaceWidgetDataState,
-  { status: 'loading' | 'ready' | 'error' }
->;
+export type SurfaceSourceDataState = Extract<SurfaceWidgetDataState, { status: 'loading' | 'ready' | 'error' }>;
