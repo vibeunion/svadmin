@@ -29,7 +29,7 @@ export interface ContractDeleteOptions<S extends ContractSchemas> {
 }
 type Result<S extends ContractSchemas> = { data: ContractRecord<S> };
 type Failure = HttpError | UndoError;
-interface Callbacks<S extends ContractSchemas> {
+export interface Callbacks<S extends ContractSchemas> {
   onSuccess?: (data: Result<S>, params: ContractDeleteParams<S>) => void | Promise<void>;
   onError?: (error: Failure, params: ContractDeleteParams<S> | undefined) => void | Promise<void>;
   onSettled?: (data: Result<S> | undefined, error: Failure | null, params: ContractDeleteParams<S> | undefined) => void | Promise<void>;
