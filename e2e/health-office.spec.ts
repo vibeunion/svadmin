@@ -11,8 +11,10 @@ async function openOffice(page: Page, query = '') {
   await expect(page).toHaveURL(/#\/$/);
   await page.goto(`/${query}#/health_office`);
   const office = page.locator('[data-office-workspace]');
+  // Vite 首次转换懒加载工作区可能超过默认 5 秒；只扩大首次加载等待，
+  // 保留后续交互断言的默认时限，不用固定延时或自动跳过掩盖失败。
+  await expect(office).toBeVisible({ timeout: 15000 });
   await expect(office).toHaveCount(1);
-  await expect(office).toBeVisible();
   return office;
 }
 async function capture(page: Page, info: TestInfo, name: string) {

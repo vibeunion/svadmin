@@ -32,10 +32,16 @@ jobs:
         run: bun test example/src/office/domain.test.ts
       - name: Build workspace dependencies
         run: bun run build:packages
+      - name: Type check example and business tests
+        run: cd example && bun run check
+      - name: Build production example
+        run: cd example && bun run build
+      - name: Diff whitespace check
+        run: git diff --check HEAD^ HEAD
       - name: Install Chromium
         run: bunx playwright install --with-deps chromium
       - name: Browser workflows and real screenshot evidence
-        run: bunx playwright test e2e/health-office.spec.ts
+        run: bunx playwright test e2e/health-office.spec.ts --fail-on-flaky-tests
       - name: Upload browser evidence
         if: always()
         uses: actions/upload-artifact@v7
