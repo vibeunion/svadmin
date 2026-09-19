@@ -2,7 +2,7 @@
   import { provideAdminContext } from '@svadmin/core';
   import type { AccessControlProvider, DataProvider } from '@svadmin/core';
   import SurfaceRenderer from '../../src/components/SurfaceRenderer.svelte';
-  import type { SurfaceRendererProps } from '../../src/components/SurfaceRenderer.svelte';
+  import type { ComponentProps } from 'svelte';
   import type { SurfacePolicy } from '../../src/types.js';
 
   let { dataProvider, accessControlProvider, spec, policy, tenant = 'alpha', onError }: {
@@ -11,7 +11,7 @@
     spec: unknown;
     policy: SurfacePolicy;
     tenant?: string;
-    onError?: SurfaceRendererProps['onError'];
+    onError?: ComponentProps<typeof SurfaceRenderer>['onError'];
   } = $props();
 
   provideAdminContext({
