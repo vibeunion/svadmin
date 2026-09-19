@@ -38,7 +38,7 @@ jobs:
         run: |
           mkdir -p test-results/enterprise
           cd packages/ui
-          bun run test src/components/enterprise/correctness.test.ts src/components/enterprise-components.test.svelte.ts src/components/filter-builder.test.svelte.ts --reporter=default --reporter=json --outputFile=../../test-results/enterprise/unit-results.json
+          bun run test src/components/enterprise/correctness.test.ts src/components/enterprise/recursive-schema-form.test.ts src/components/enterprise-components.test.svelte.ts src/components/enterprise-filter-legacy.test.svelte.ts src/components/filter-builder.test.svelte.ts --reporter=default --reporter=json --outputFile=../../test-results/enterprise/unit-results.json
       - name: Build production browser fixture
         run: bun run vite build --config scripts/fixtures/enterprise-ui/vite.config.ts
       - name: Install Chromium

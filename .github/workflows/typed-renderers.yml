@@ -32,6 +32,8 @@ jobs:
         with:
           bun-version: '1.4.2'
       - run: bun install --frozen-lockfile
+      - name: Generate current UI recipe runtime before source checks
+        run: bun run --cwd packages/ui build:styles
       - name: Lint new adapters and fixtures
         run: bun run eslint packages/ui/src/rendering scripts/fixtures/ui-rendering --max-warnings 0
       - name: Runtime and native snippet regression tests

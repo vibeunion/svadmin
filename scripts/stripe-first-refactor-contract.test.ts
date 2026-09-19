@@ -134,7 +134,11 @@ describe('Stripe-first refactor contract', () => {
     expect(integrations).not.toContain("connected: false");
     expect(read('packages/ui/src/components/AboutSettings.svelte')).toContain('<SettingsGroup');
     expect(read('packages/ui/src/components/SettingsPage.svelte')).not.toContain('tracking-wider');
-    expect(read('packages/ui/src/components/content/WorkspaceLayout.svelte')).toContain(utilityClasses['items-start']);
+    const workspace = read('packages/ui/src/components/content/WorkspaceLayout.svelte');
+    expect(workspace).toContain('$derived(productWorkspace({ hasSecondary: Boolean(secondary) }))');
+    expect(workspace).toContain('class={styles.columns}');
+    // 配方几何与发布 CSS 由 packages/ui/scripts/product-recipes.test.mjs 验证，
+    // 此处只验证组件绑定，避免把 Panda 构建工具类型带入 core tooling。
     expect(read('packages/ui/src/components/account/CompanyProfilePage.svelte')).toContain('<WorkspaceLayout');
     expect(read('packages/ui/src/components/account/UserProfilePage.svelte')).toContain('<WorkspaceLayout');
     expect(read('packages/ui/src/components/account/SettingsEnterprisePage.svelte')).toContain(`${utilityClasses.grid} ${utilityClasses['items-start']}`);

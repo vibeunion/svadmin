@@ -1,7 +1,7 @@
 import type { CrudOperator, FieldDefinition, Filter } from '@svadmin/core';
 
 export const FILTER_EDITOR_LIMITS = Object.freeze({ depth: 12, nodes: 256, values: 1000 });
-export interface FilterRuleNode { kind: 'rule'; id: string; field: string; operator: CrudOperator; value: unknown }
+export interface FilterRuleNode { kind: 'rule'; id: string; field: string; operator: CrudOperator; value: unknown; readonly?: boolean }
 export interface FilterGroupNode { kind: 'group'; id: string; operator: 'and' | 'or'; children: FilterNode[]; wrapped?: boolean }
 export type FilterNode = FilterRuleNode | FilterGroupNode;
 export type FilterIssueCode = 'invalid-filter' | 'limit' | 'unknown-field' | 'operator' | 'value' | 'empty-group';
@@ -39,7 +39,7 @@ export function readFilterTree(input: unknown): FilterTreeRead {
         if (typeof raw['field'] !== 'string' || !raw['field'] || !operators.includes(raw['operator'] as CrudOperator)
           || Object.keys(raw).some((key) => !['field', 'operator', 'value'].includes(key))) { issues.push({ path, code: 'invalid-filter' }); return; }
         const value = raw['value'];
-        if (!scalar(value) && !(Array.isArray(value) && value.length <= FILTER_EDITOR_LIMITS.values && value.every(scalar))) { issues.push({ path, code: 'value' }); return; }
+        if (!scalar(value) && !(Array.isArray(value) && value.length <= FILTER_EDITOR_LIMITS.values && Array.from(value).every(scalar))) { issues.push({ path, code: 'value' }); return; }
         return { kind: 'rule', id, field: raw['field'], operator: raw['operator'] as CrudOperator, value: Array.isArray(value) ? [...value] : value };
       }
       if (!['and', 'or'].includes(String(raw['operator'])) || !Array.isArray(raw['value'])
@@ -67,7 +67,7 @@ export function readFilterTree(input: unknown): FilterTreeRead {
     : { kind: 'group', id: 'root', operator: 'and', children, wrapped: false } };
 }
 
-export function compileFilterTree(root: FilterGroupNode, fields: readonly FieldDefinition[]): FilterTreeCompile {
+export function compileFilterTree(root: FilterGroupNode, fields: readonly FieldDefinition[], preserved: ReadonlyMap<string, Filter> = new Map()): FilterTreeCompile {
   const issues: FilterEditorIssue[] = [];
   const fieldMap = new Map(fields.map((field) => [field.key, field]));
   const active = new Set<FilterNode>();
@@ -78,6 +78,18 @@ export function compileFilterTree(root: FilterGroupNode, fields: readonly FieldD
     if (active.has(node)) { issue('invalid-filter'); return; }
     active.add(node);
     try {
+      // Only unchanged host-owned readonly leaves and originally empty groups may bypass
+      // editor capability checks. A forged readonly flag or edited payload is not sufficient.
+      const original = preserved.get(node.id);
+      if (original && node.kind === 'rule' && node.readonly && 'field' in original
+        && node.field === original.field && node.operator === original.operator
+        && JSON.stringify(node.value) === JSON.stringify(original.value)) {
+        return { ...original, value: Array.isArray(original.value) ? [...original.value] : original.value };
+      }
+      if (original && node.kind === 'group' && !('field' in original)
+        && !node.children.length && !original.value.length && node.operator === original.operator) {
+        return { operator: node.operator, value: [] };
+      }
       if (node.kind === 'group') {
         if (node.operator !== 'and' && node.operator !== 'or') { issue('operator'); return; }
         if (!node.children.length) issue('empty-group');
@@ -93,13 +105,13 @@ export function compileFilterTree(root: FilterGroupNode, fields: readonly FieldD
         if (!scalar(value) || value === null) return false;
         if (field.type === 'number') return typeof value === 'number';
         if (field.type === 'boolean') return typeof value === 'boolean';
-        if (field.options?.length) return field.options.some((option) => option.value === value);
+        if (field.options?.length) return field.options.some((option) => !option.disabled && option.value === value);
         return typeof value === 'string';
       };
       if (isNullOperator(node.operator)) {
         if (node.value !== null) { issue('value'); return; }
       } else if (isCollectionOperator(node.operator)) {
-        if (!Array.isArray(node.value) || node.value.length === 0 || node.value.length > FILTER_EDITOR_LIMITS.values || !node.value.every(validScalar)
+        if (!Array.isArray(node.value) || node.value.length === 0 || node.value.length > FILTER_EDITOR_LIMITS.values || !Array.from(node.value).every(validScalar)
           || ((node.operator === 'between' || node.operator === 'nbetween') && node.value.length !== 2)) { issue('value'); return; }
         if ((node.operator === 'between' || node.operator === 'nbetween') && typeof node.value[0] === 'number' && typeof node.value[1] === 'number' && node.value[0] > node.value[1]) { issue('value'); return; }
       } else if (!validScalar(node.value)) { issue('value'); return; }
@@ -120,6 +132,7 @@ export function compileFilterTree(root: FilterGroupNode, fields: readonly FieldD
 }
 
 export function parseFilterInput(raw: string, field: Pick<FieldDefinition, 'type'> | undefined, operator: CrudOperator): unknown {
+  if (raw.length > 1_048_576) throw new Error('value');
   if (isNullOperator(operator)) return null;
   if (isCollectionOperator(operator)) return raw.trim() ? JSON.parse(raw) : undefined;
   if (field?.type === 'number') {

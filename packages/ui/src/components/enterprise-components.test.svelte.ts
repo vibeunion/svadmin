@@ -48,12 +48,12 @@ describe('enterprise schema form interactions', () => {
     await fireEvent.submit(view.getByTestId('json-schema-form'));
     expect(onsubmit).toHaveBeenCalledWith({ enabled: false, plan: 1 });
   });
-  it('blocks unsupported object schemas rather than stringify nested values', async () => {
+  it('preserves supported recursive objects instead of replacing them with a scalar form', async () => {
     const onsubmit = vi.fn();
-    const view = render(JsonSchemaForm, { schema: { properties: { nested: { type: 'object', properties: {} } } }, onsubmit });
+    const view = render(JsonSchemaForm, { schema: { properties: { nested: { type: 'object', properties: { count: { type: 'integer', default: 2 } } } } }, onsubmit });
     await fireEvent.submit(view.getByTestId('json-schema-form'));
-    expect(onsubmit).not.toHaveBeenCalled();
-    expect(view.getByTestId('schema-form-errors')).toBeTruthy();
+    expect(onsubmit).toHaveBeenCalledWith({ nested: { count: 2 } });
+    expect(view.queryByTestId('schema-form-errors')).toBeNull();
   });
   it('does not share field IDs across form instances', () => {
     const first = render(JsonSchemaForm, { schema }), second = render(JsonSchemaForm, { schema });
@@ -155,12 +155,12 @@ describe('enterprise recursive filter interactions', () => {
     expect(onApply).not.toHaveBeenCalled();
     expect(onInvalid).toHaveBeenCalled();
   });
-  it('blocks unknown incoming fields and permits explicit reset', async () => {
+  it('preserves unknown incoming host fields read-only and permits explicit reset', async () => {
     const onApply = vi.fn(), onReset = vi.fn();
     const view = render(FilterBuilder, { fields, filters: [{ field: 'missing', operator: 'eq', value: 'x' }], onApply, onReset });
     await fireEvent.click(view.getByTestId('filter-builder-apply'));
-    expect(onApply).not.toHaveBeenCalled();
-    expect(view.getByTestId('filter-builder-errors')).toBeTruthy();
+    expect(onApply).toHaveBeenCalledWith([{ field: 'missing', operator: 'eq', value: 'x' }]);
+    expect(view.container.querySelector('output')).toBeTruthy();
     await fireEvent.click(view.getByTestId('filter-builder-reset'));
     await fireEvent.click(view.getByTestId('filter-builder-apply'));
     expect(onReset).toHaveBeenCalledTimes(1);

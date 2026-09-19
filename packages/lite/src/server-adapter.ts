@@ -9,7 +9,7 @@ import { definedOptions } from '@svadmin/core/options';
 import type {
   DataProvider, AuthProvider, AuthActionResult,
   ResourceDefinition, FieldDefinition,
-  Sort, Filter,
+  Sort, Filter, CrudOperator,
 } from '@svadmin/core';
 import { redirect, isRedirect, type RequestEvent } from '@sveltejs/kit';
 import { resourceToTypeBoxSchema } from './schema-generator';
@@ -102,7 +102,60 @@ function listRequestFilters(resource: ResourceDefinition, url: URL): Filter[] {
     }
   }
 
-  return filters;
+  const structured = parseStructuredFilters(resource, url);
+  return structured.length > 0 ? structured : filters;
+}
+
+function parseStructuredFilters(resource: ResourceDefinition, url: URL): Filter[] {
+  const entries = [...url.searchParams.entries()]
+    .map(([key, value]) => {
+      const match = /^filters\[([0-9]+(?:\.value\.[0-9]+)*)\]\[(field|operator|value)\]$/.exec(key);
+      return match ? { path: match[1], property: match[2], value } : undefined;
+    })
+    .filter((entry): entry is { path: string; property: 'field' | 'operator' | 'value'; value: string } => entry !== undefined);
+  if (entries.length === 0) return [];
+
+  type Node = { field?: string; operator?: string; value?: string; children?: Node[] };
+  const roots: Node[] = [];
+  for (const entry of entries) {
+    const segments = [...entry.path.matchAll(/\d+/g)].map(match => Number(match[0]));
+    const rootIndex = segments.shift();
+    if (rootIndex === undefined || !Number.isSafeInteger(rootIndex) || rootIndex < 0) continue;
+    let node = roots[rootIndex];
+    if (!node) {
+      node = {};
+      roots[rootIndex] = node;
+    }
+    for (const childIndex of segments) {
+      if (!Number.isSafeInteger(childIndex) || childIndex < 0) break;
+      node.children ??= [];
+      node = node.children[childIndex] ??= {};
+    }
+    node[entry.property] = entry.value;
+  }
+
+  function compile(node: Node): Filter | undefined {
+    const operator = node.operator;
+    if (node.field && operator && operator !== 'and' && operator !== 'or') {
+      const field = resource.fields.find(candidate => candidate.key === node.field);
+      if (!field) return undefined;
+      if (operator === 'null' || operator === 'nnull') {
+        return { field: node.field, operator: operator as 'null' | 'nnull', value: null };
+      }
+      if (node.value === undefined || node.value === '') return undefined;
+      const value = field.type === 'number' || field.type === 'currency' || field.type === 'percent'
+        ? Number(node.value)
+        : field.type === 'boolean' ? node.value === 'true' : node.value;
+      return { field: node.field, operator: operator as CrudOperator, value };
+    }
+    if ((operator === 'and' || operator === 'or') && node.children) {
+      const children = node.children.map(compile).filter((child): child is Filter => child !== undefined);
+      return children.length > 0 ? { operator, value: children } : undefined;
+    }
+    return undefined;
+  }
+
+  return roots.map(compile).filter((filter): filter is Filter => filter !== undefined);
 }
 
 /**

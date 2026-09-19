@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import { Plus, Trash2, RotateCcw, Filter as FilterIcon, Check } from '@lucide/svelte';
   import { cn } from '../utils.js';
   import { Button } from './ui/button/index.js';
@@ -30,24 +31,62 @@
   let loadIssues = $state<FilterEditorIssue[]>([]);
   let attempted = $state(false);
   let nextId = 0;
-  const compilation = $derived(compileFilterTree({ ...root, operator: logicalOperator }, fields));
+  let lastInputFilters: Filter[] | undefined;
+  let preserved = $state.raw<ReadonlyMap<string, Filter>>(new Map());
+  const compilation = $derived(compileFilterTree({ ...root, operator: logicalOperator }, fields, preserved));
   const issues = $derived(loadIssues.length ? loadIssues : attempted && !compilation.ok ? compilation.issues : []);
   function countNodes(node: FilterNode): number { return 1 + (node.kind === 'group' ? node.children.reduce((sum, child) => sum + countNodes(child), 0) : 0); }
   const nodeCount = $derived(countNodes(root));
   const full = $derived(nodeCount >= FILTER_EDITOR_LIMITS.nodes);
 
+  function snapshotNode(node: FilterNode): Filter {
+    return node.kind === 'group' ? { operator: node.operator, value: node.children.map(snapshotNode) }
+      : { field: node.field, operator: node.operator, value: Array.isArray(node.value) ? [...node.value] : node.value };
+  }
+  function cannotEdit(node: FilterRuleNode): boolean {
+    return isCollectionOperator(node.operator) || node.value === ''
+      || !compileFilterTree({ kind: 'group', id: 'probe', operator: 'and', children: [{ ...node, readonly: false }] }, fields).ok;
+  }
+  function remember(node: FilterNode, saved: Map<string, Filter>): void {
+    saved.set(node.id, snapshotNode(node));
+    if (node.kind === 'group') node.children.forEach(child => remember(child, saved));
+    else node.readonly = cannotEdit(node);
+  }
+  function refreshReadonly(node: FilterNode): void {
+    if (node.kind === 'group') { node.children.forEach(refreshReadonly); return; }
+    const original = preserved.get(node.id);
+    node.readonly = original !== undefined && JSON.stringify(original) === JSON.stringify(snapshotNode(node)) && cannotEdit(node);
+  }
   $effect(() => {
-    const parsed = readFilterTree(filters);
-    if (parsed.ok) {
-      root = parsed.root;
-      loadIssues = [];
-      if (filters.length) logicalOperator = parsed.root.operator;
+    const metadata = availableFields;
+    if (filters !== lastInputFilters) {
+      lastInputFilters = filters;
+      const parsed = readFilterTree(filters);
+      if (parsed.ok) {
+        const saved = new Map<string, Filter>();
+        untrack(() => remember(parsed.root, saved));
+        root = parsed.root;
+        preserved = saved;
+        loadIssues = [];
+        if (filters.length) logicalOperator = parsed.root.operator;
+      } else {
+        preserved = new Map();
+        loadIssues = parsed.issues;
+        root = { kind: 'group', id: 'root', operator: 'and', children: [], wrapped: false };
+      }
+      attempted = false;
     } else {
-      loadIssues = parsed.issues;
-      root = { kind: 'group', id: 'root', operator: 'and', children: [], wrapped: false };
+      untrack(() => { void metadata; refreshReadonly(root); });
     }
-    attempted = false;
   });
+  function depthOf(target: FilterGroupNode, node: FilterGroupNode = root, depth = root.wrapped || logicalOperator === 'or' ? 1 : 0): number {
+    if (node === target) return depth;
+    for (const child of node.children) if (child.kind === 'group') {
+      const found = depthOf(target, child, depth + 1);
+      if (found >= 0) return found;
+    }
+    return -1;
+  }
 
   function message(code: FilterIssueCode): string {
     const labels: Record<FilterIssueCode, [string, string]> = {
@@ -60,14 +99,14 @@
     return labels[code][chinese ? 0 : 1];
   }
   function appendRule(group: FilterGroupNode): void {
-    if (disabled || loadIssues.length || full) return;
+    if (disabled || loadIssues.length || full || depthOf(group) < 0 || depthOf(group) >= FILTER_EDITOR_LIMITS.depth) return;
     const first = availableFields[0];
     if (!first) return;
     group.children = [...group.children, { kind: 'rule', id: `draft-${++nextId}`, field: first.key,
       operator: filterOperators(first).includes('contains') ? 'contains' : 'eq', value: undefined }];
   }
   function appendGroup(group: FilterGroupNode): void {
-    if (disabled || loadIssues.length || full) return;
+    if (disabled || loadIssues.length || full || depthOf(group) < 0 || depthOf(group) >= FILTER_EDITOR_LIMITS.depth) return;
     group.children = [...group.children, { kind: 'group', id: `draft-${++nextId}`, operator: 'and', children: [] }];
   }
   function removeNode(group: FilterGroupNode, id: string): void {
@@ -75,16 +114,19 @@
     group.children = group.children.filter((node) => node.id !== id);
   }
   function changeField(rule: FilterRuleNode, key: string): void {
+    if (disabled || rule.readonly) return;
     rule.field = key;
     rule.operator = filterOperators(fields.find((field) => field.key === key)).includes('contains') ? 'contains' : 'eq';
     rule.value = undefined;
   }
   function changeOperator(rule: FilterRuleNode, next: CrudOperator): void {
+    if (disabled || rule.readonly) return;
     if (isNullOperator(next)) rule.value = null;
     else if (isNullOperator(rule.operator) || isCollectionOperator(rule.operator) !== isCollectionOperator(next)) rule.value = undefined;
     rule.operator = next;
   }
   function changeValue(rule: FilterRuleNode, raw: string): void {
+    if (disabled || rule.readonly) return;
     try { rule.value = parseFilterInput(raw, fields.find((field) => field.key === rule.field), rule.operator); }
     catch { rule.value = raw; }
   }
@@ -95,6 +137,8 @@
     if (disabled) return;
     root = { kind: 'group', id: 'root', operator: 'and', children: [], wrapped: false };
     loadIssues = [];
+    preserved = new Map();
+    logicalOperator = 'and';
     filters = [];
     attempted = false;
     onReset?.();
@@ -106,12 +150,13 @@
     if (!compilation.ok) { onInvalid?.(compilation.issues); return; }
     // 失败时绝不输出“剩余的有效条件”，避免改变查询的逻辑含义。
     filters = compilation.filters;
+    lastInputFilters = filters;
     onApply?.(compilation.filters);
   }
 </script>
 
 {#snippet groupEditor(group: FilterGroupNode, depth: number, top: boolean)}
-  <fieldset class="filter-group" data-filter-group={group.id} disabled={disabled}>
+  <fieldset class="filter-group" data-testid={top ? 'filter-builder-root' : 'filter-builder-group'} data-filter-group={group.id} disabled={disabled}>
     <legend>{top ? (chinese ? '筛选条件' : 'Filters') : (chinese ? '条件组' : 'Filter group')}</legend>
     <div class="group-actions">
       <label for={`${uid}-${group.id}-logic`}>{chinese ? '逻辑' : 'Logic'}</label>
@@ -119,7 +164,7 @@
         value={top ? logicalOperator : group.operator}
         onchange={(event: Event) => {
           const target = event.currentTarget;
-          if (!(target instanceof HTMLSelectElement)) return;
+          if (disabled || !(target instanceof HTMLSelectElement)) return;
           const next = target.value === 'or' ? 'or' : 'and';
           if (top) logicalOperator = next; else group.operator = next;
         }}>
@@ -143,7 +188,10 @@
         {@const allowed = filterOperators(field)}
         {@const collection = isCollectionOperator(node.operator)}
         {@const invalid = issues.some((issue) => issue.path === node.id)}
-        <div class="filter-rule" data-filter-rule={node.id}>
+        <div class="filter-rule" data-testid="filter-builder-rule" data-filter-rule={node.id}>
+          {#if node.readonly}
+            <output aria-label={i18n.t('filter.readonly')}>{node.field} {node.operator} {JSON.stringify(node.value)}</output>
+          {:else}
           <div>
             <label for={`${uid}-${node.id}-field`}>{chinese ? '字段' : 'Field'}</label>
             <Select id={`${uid}-${node.id}-field`} value={node.field} onchange={(event: Event) => { if (event.currentTarget instanceof HTMLSelectElement) changeField(node, event.currentTarget.value); }}>
@@ -165,9 +213,16 @@
             {:else if !collection && field?.options?.length}
               <Select id={`${uid}-${node.id}-value`} aria-invalid={invalid}
                 value={field.options.findIndex((option) => option.value === node.value) < 0 ? '' : String(field.options.findIndex((option) => option.value === node.value))}
-                onchange={(event: Event) => { if (event.currentTarget instanceof HTMLSelectElement) node.value = event.currentTarget.value === '' ? undefined : field.options?.[Number(event.currentTarget.value)]?.value; }}>
+                onchange={(event: Event) => {
+                  if (disabled || node.readonly || !(event.currentTarget instanceof HTMLSelectElement)) return;
+                  const raw = event.currentTarget.value;
+                  if (raw === '') { node.value = undefined; return; }
+                  if (!/^(0|[1-9][0-9]*)$/u.test(raw)) return;
+                  const option = field.options?.[Number(raw)];
+                  if (option && !option.disabled) node.value = option.value;
+                }}>
                 <option value="">{chinese ? '请选择' : 'Choose'}</option>
-                {#each field.options as option, index (index)}<option value={String(index)}>{option.label}</option>{/each}
+                {#each field.options as option, index (index)}<option value={String(index)} disabled={option.disabled}>{option.label}</option>{/each}
               </Select>
             {:else if !collection && field?.type === 'boolean'}
               <Select id={`${uid}-${node.id}-value`} aria-invalid={invalid} value={valueText(node.value)}
@@ -175,10 +230,11 @@
                 <option value="">{chinese ? '请选择' : 'Choose'}</option><option value="true">true</option><option value="false">false</option>
               </Select>
             {:else}
-              <Input id={`${uid}-${node.id}-value`} type="text" aria-invalid={invalid} value={valueText(node.value)} placeholder={collection ? '[1, 2]' : ''}
+              <Input id={`${uid}-${node.id}-value`} type={!collection && field?.type === 'number' ? 'number' : 'text'} step="any" aria-invalid={invalid} value={valueText(node.value)} placeholder={collection ? '[1, 2]' : ''}
                 oninput={(event) => { if (event.currentTarget instanceof HTMLInputElement) changeValue(node, event.currentTarget.value); }} />
             {/if}
           </div>
+          {/if}
           <Button type="button" size="sm" variant="ghost" aria-label={chinese ? '删除条件' : 'Remove rule'} onclick={() => removeNode(group, node.id)}><Trash2 size={14} aria-hidden="true" /></Button>
         </div>
       {/if}
@@ -210,6 +266,7 @@
   legend { padding-inline: .25rem; color: var(--muted-foreground); }
   .filter-rule { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr) auto; align-items: end; gap: .5rem; margin-block-start: .75rem; }
   .filter-rule > div { min-width: 0; }
+  .filter-rule > output { grid-column: 1 / -2; overflow-wrap: anywhere; }
   .filter-rule label { display: block; margin-block-end: .25rem; color: var(--muted-foreground); }
   .empty { padding-block: .75rem; color: var(--muted-foreground); }
   .errors { color: var(--destructive); overflow-wrap: anywhere; }

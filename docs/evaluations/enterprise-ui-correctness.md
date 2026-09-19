@@ -1,3 +1,5 @@
+> Integration update: recursive form and preserved-host-filter contracts supersede the original scalar-only scope below. See `../architecture/enterprise-ui-reconciliation.md`. Original validation counts are historical, not current-head approval.
+
 # Enterprise UI correctness — batch one
 
 本批对应 `enterprise-ui-plan.md` 中的第一批正确性工作，不代表企业级组件路线图整体完成。保留三个现有公开组件入口、Svelte 5、Panda/原生样式和现有 Provider/Surface 边界；没有新运行时依赖、Tailwind、默认网格切换、发布或部署。

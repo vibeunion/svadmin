@@ -1,3 +1,5 @@
+> Integration update: recursive form and preserved-host-filter contracts supersede the original scalar-only scope below. See `../architecture/enterprise-ui-reconciliation.md`. Original validation counts are historical, not current-head approval.
+
 # 企业级 UI 补全：执行计划与验收边界
 
 基线：`ee01ea0b52285bd3129447cd0b2ddb0c114f45ce`（2026-09-19）。

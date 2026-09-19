@@ -70,17 +70,34 @@ test('AutoTable semantic colors follow a nested host theme at desktop and mobile
   const heading = page.getByRole('heading', { name: 'Compatible inventory', exact: true });
   for (const width of [1440, 1920, 390]) {
     await page.setViewportSize({ width, height: 900 });
-    // 窄屏会真正卸载不可见列，先像用户一样横向滚动，不能假设 Stock 永远在 DOM 中。
+    // ResizeObserver 与虚拟列更新不是同步完成的；在原 5 秒预算内按实际布局滚动。
     if (width === 390) {
-      await page.locator('[data-svar-pane="center"]').evaluate(root => {
-        const viewport = [...root.querySelectorAll<HTMLElement>('*')].find(element =>
-          element.scrollWidth > element.clientWidth + 20 && ['auto', 'scroll'].includes(getComputedStyle(element).overflowX));
-        if (!viewport) throw new Error('Horizontal grid viewport not found');
-        viewport.scrollLeft = viewport.scrollWidth;
-        viewport.dispatchEvent(new Event('scroll'));
-      });
+      await expect.poll(async () => {
+        await page.locator('[data-svar-pane="center"]').evaluate(root => {
+          const viewport = [...root.querySelectorAll<HTMLElement>('*')].find(element =>
+            element.scrollWidth > element.clientWidth + 20 && ['auto', 'scroll'].includes(getComputedStyle(element).overflowX));
+          if (!viewport) return;
+          viewport.scrollLeft = viewport.scrollWidth;
+          viewport.dispatchEvent(new Event('scroll'));
+        });
+        // isVisible 只要求布局框存在，旧虚拟列即使已被滚动窗裁切也会返回 true。
+        // 在浏览器完成布局后检查真实交集，避免缩小视口时过早结束轮询。
+        return page.getByRole('button', { name: 'Edit Stock', exact: true }).first().evaluateAll(async elements => {
+          const button = elements[0];
+          if (!button) return false;
+          return new Promise<boolean>(resolve => {
+            const observer = new IntersectionObserver(entries => {
+              observer.disconnect();
+              const entry = entries[0];
+              resolve(entry?.isIntersecting === true && entry.intersectionRatio === 1);
+            });
+            observer.observe(button);
+          });
+        });
+      }, { timeout: 5_000 }).toBe(true);
     }
     await expect(page.getByRole('button', { name: 'Edit Stock', exact: true }).first()).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Edit Stock', exact: true }).first()).toBeInViewport();
     for (const dark of [false, true]) {
       if (dark) await page.getByRole('button', { name: 'Theme', exact: true }).click();
       const hostColor = await page.locator('main').evaluate(element => getComputedStyle(element).color);

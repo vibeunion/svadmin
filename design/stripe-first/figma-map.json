@@ -1,0 +1,22 @@
+{
+  "version": "0.1.0",
+  "fileKey": "r02lMyLBPoaNS3gep3TNRF",
+  "url": "https://www.figma.com/design/r02lMyLBPoaNS3gep3TNRF",
+  "sourceRevision": "c91936335e1a431f2ac37dec31da138afbbbc21f",
+  "pages": {"foundations": "0:1", "components": "6:4", "patterns": "6:5"},
+  "frames": {"guide": "7:2", "foundations": "7:10", "buttonDocumentation": "8:2"},
+  "collections": {
+    "primitives": {"id": "VariableCollectionId:2:2", "mode": "2:0", "variableCount": 32},
+    "light": {"id": "VariableCollectionId:2:3", "mode": "2:1", "variableCount": 16},
+    "dark": {"id": "VariableCollectionId:2:4", "mode": "2:2", "variableCount": 16},
+    "dimensions": {"id": "VariableCollectionId:2:5", "mode": "2:3", "variableCount": 17}
+  },
+  "themeModel": "separate-single-mode-collections",
+  "textStyles": ["Caption", "Body", "Label", "Heading", "Metric", "Documentation title"],
+  "effectStyles": ["Light/Control", "Light/Surface", "Light/Overlay", "Dark/Control", "Dark/Surface", "Dark/Overlay"],
+  "components": [
+    {"name": "Button", "nodeId": "8:53", "source": "packages/ui/src/components/ui/button/button.svelte", "status": "subset-created-and-visually-checked", "variantCount": 24, "axes": {"theme": ["Light", "Dark"], "variant": ["default", "outline"], "size": ["sm", "default", "lg"], "state": ["default", "disabled"]}, "textProperty": "Label#8:0", "designOnlyAxes": ["theme", "state"], "previewWidthPx": 140, "browserParityCertified": false}
+  ],
+  "codeConnect": {"registered": false, "status": "blocked-by-plan-seat", "fallback": "This source map is ordinary versioned metadata, not a Code Connect registration."},
+  "pending": ["Input", "Badge", "resource-list", "record-detail", "settings"]
+}

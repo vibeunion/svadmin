@@ -539,10 +539,25 @@
     get filters() { return queryFilters; },
   });
   const query = listResult;
-  const pageRecords = $derived.by(() => {
-    try { return { ok: true as const, data: canRead ? checkedTableRows(activeRendering ? activeRendering.records(query.data?.data ?? []) : query.data?.data ?? []) : [] }; }
-    catch { return { ok: false as const, data: [] }; }
-  });
+  const pageRecords = {
+    get ok(): boolean {
+      if (!canRead) return true;
+      try {
+        checkedTableRows(activeRendering ? activeRendering.records(query.data?.data ?? []) : query.data?.data ?? []);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    get data(): TableRecord[] {
+      if (!canRead) return [];
+      try {
+        return checkedTableRows(activeRendering ? activeRendering.records(query.data?.data ?? []) : query.data?.data ?? []);
+      } catch {
+        return [];
+      }
+    },
+  };
   let deleteRequest = $state<{ ids: (string | number)[]; batch: boolean } | null>(null);
   const deletePermission = useCan(() => definedOptions({
     resource: resourceName, action: 'delete',
@@ -1044,7 +1059,19 @@
   const detailOpen = $derived(detailRecordId != null);
   $effect.pre(() => {
     const scope = tableScope;
-    if (previousTableScope && previousTableScope !== scope) {
+    if (previousTableScope && (
+      previousTableScope.contract !== scope.contract ||
+      previousTableScope.resourceName !== scope.resourceName ||
+      previousTableScope.provider !== scope.provider ||
+      previousTableScope.meta !== scope.meta ||
+      previousTableScope.tenant !== scope.tenant ||
+      previousTableScope.auth !== scope.auth ||
+      previousTableScope.router !== scope.router ||
+      previousTableScope.permissionProvider !== scope.permissionProvider ||
+      previousTableScope.canRead !== scope.canRead ||
+      previousTableScope.canDelete !== scope.canDelete ||
+      previousTableScope.variables !== scope.variables
+    )) {
       activeDelete = undefined;
       confirmOpen = false;
       confirmPending = false;

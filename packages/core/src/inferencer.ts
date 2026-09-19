@@ -351,6 +351,15 @@ export function generateTypeBoxSchemaCode(resource: ResourceDefinition): string 
       case 'date':
         typeDef = "Type.String({ format: 'date-time' })";
         break;
+      case 'datetime':
+      case 'time':
+        // 原生输入没有强制时区，不把本地时间误标为 RFC3339 date-time。
+        typeDef = 'Type.String()';
+        break;
+      case 'daterange':
+        // 与 DateRangeInput 一致：两个端点明确存在，未选择时为 null。
+        typeDef = 'Type.Union([Type.Object({ start: Type.Union([Type.String(), Type.Null()]), end: Type.Union([Type.String(), Type.Null()]) }, { additionalProperties: false }), Type.Null()])';
+        break;
       case 'email':
         typeDef = "Type.String({ format: 'email' })";
         break;

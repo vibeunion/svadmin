@@ -97,7 +97,7 @@ describe('schema form value correctness', () => {
     assert.deepEqual(validateSchemaForm(text, { note: '😀' }), []);
     assert.ok(validateSchemaForm(text, { note: 'ab' }).length);
   });
-  it('refuses unsupported nested fields rather than stringify them', () => assert.ok(readSchemaForm({ properties: { obj: { type: 'object', properties: {} } } }).issues.length));
+  it('keeps the leaf-only validator explicit; recursive objects use the recursive adapter', () => assert.ok(readSchemaForm({ properties: { obj: { type: 'object', properties: {} } } }).issues.length));
   for (const keyword of ['$ref', 'allOf', 'anyOf', 'if', 'dependentRequired']) it(`refuses unsupported root assertion ${keyword}`, () => assert.ok(readSchemaForm({ [keyword]: {} }).issues.length));
   it('refuses unsupported regex assertions', () => assert.ok(readSchemaForm({ properties: { text: { type: 'string', pattern: '.*' } } }).issues.length));
   it('rejects non-finite defaults', () => assert.ok(readSchemaForm({ properties: { n: { type: 'number', default: Infinity } } }).issues.length));

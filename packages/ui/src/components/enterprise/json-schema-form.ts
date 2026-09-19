@@ -1,6 +1,6 @@
 /** JsonSchemaForm 当前支持的标量子集。未知断言必须显式拒绝，不能假装已校验。 */
 export type JsonScalar = string | number | boolean | null;
-export type SchemaIssueCode = 'unsupported-schema' | 'invalid-schema' | 'required' | 'type' | 'enum' | 'minimum' | 'maximum' | 'multipleOf' | 'minLength' | 'maxLength' | 'additionalProperties' | 'invalid-value';
+export type SchemaIssueCode = 'unsupported-schema' | 'invalid-schema' | 'required' | 'type' | 'enum' | 'minimum' | 'maximum' | 'multipleOf' | 'minLength' | 'maxLength' | 'additionalProperties' | 'invalid-value' | 'minItems' | 'maxItems';
 export interface SchemaFormIssue { path: string; code: SchemaIssueCode }
 export interface SchemaFormField {
   key: string;
@@ -157,33 +157,5 @@ export function validateSchemaForm(model: SchemaFormModel, value: Record<string,
   return issues;
 }
 
-/** 提交使用独立 JSON 快照；拒绝循环/非 JSON 值，不把 undefined 偷换成 null。 */
-export function schemaFormSnapshot(value: Record<string, unknown>): Record<string, unknown> {
-  let visited = 0;
-  const active = new Set<object>();
-  function clone(current: unknown, depth: number): unknown {
-    if (++visited > 10000 || depth > 32) throw new Error('invalid-value');
-    if (scalar(current)) return current;
-    if ((!record(current) && !Array.isArray(current)) || active.has(current)) throw new Error('invalid-value');
-    active.add(current);
-    try {
-      if (Array.isArray(current)) {
-        if (current.length > 10000) throw new Error('invalid-value');
-        const result: unknown[] = [];
-        for (let index = 0; index < current.length; index++) {
-          if (!Object.hasOwn(current, index)) throw new Error('invalid-value');
-          result.push(clone(current[index], depth + 1));
-        }
-        return result;
-      }
-      const result: Record<string, unknown> = {};
-      for (const [key, item] of Object.entries(current)) {
-        if (unsafeKeys.has(key)) throw new Error('invalid-value');
-        if (item !== undefined) result[key] = clone(item, depth + 1);
-      }
-      return result;
-    } finally { active.delete(current); }
-  }
-  if (!record(value)) throw new Error('invalid-value');
-  return clone(value, 0) as Record<string, unknown>;
-}
+// Reuse the hardened recursive form transport boundary, including accessor/symbol rejection.
+export { schemaFormSnapshot } from '../json-schema-form-state.js';

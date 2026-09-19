@@ -1,17 +1,17 @@
 {
-  "timestamp": "2026-09-01T03:07:50.023Z",
-  "totalComponents": 103,
+  "timestamp": "2026-09-19T08:59:45.334Z",
+  "totalComponents": 104,
   "adaptedCount": 91,
-  "fallbackCount": 10,
+  "fallbackCount": 11,
   "spaOnlyCount": 2,
   "missingCount": 0,
   "overallCoveragePercentage": 100,
   "categories": {
     "fields": {
       "category": "fields",
-      "total": 32,
+      "total": 33,
       "adapted": 29,
-      "fallback": 3,
+      "fallback": 4,
       "spaOnly": 0,
       "missing": 0,
       "percentage": 100
@@ -63,6 +63,14 @@
     }
   },
   "items": [
+    {
+      "name": "FileUpload",
+      "uiComponent": "FileUpload.svelte",
+      "liteComponent": "LiteFileUpload.svelte",
+      "category": "fields",
+      "status": "fallback",
+      "strategy": "可见原生文件输入与 multipart POST；服务端校验，不提供客户端进度、取消或重试"
+    },
     {
       "name": "TextField",
       "uiComponent": "TextField.svelte",

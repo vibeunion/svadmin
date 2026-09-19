@@ -43,6 +43,7 @@ export interface ParityReport {
 }
 
 const PARITY_ITEMS: ParityItem[] = [
+  { name: 'FileUpload', uiComponent: 'FileUpload.svelte', liteComponent: 'LiteFileUpload.svelte', category: 'fields', status: 'fallback', strategy: '可见原生文件输入与 multipart POST；服务端校验，不提供客户端进度、取消或重试' },
   // ─── Fields ─────────────────────────────────────────────────────────────
   { name: 'TextField', uiComponent: 'TextField.svelte', liteComponent: 'LiteTextField.svelte', category: 'fields', status: 'exact', strategy: '原生 <input type="text">' },
   { name: 'NumberField', uiComponent: 'NumberField.svelte', liteComponent: 'LiteNumberField.svelte', category: 'fields', status: 'exact', strategy: '原生 <input type="number">' },
@@ -231,6 +232,8 @@ export function generateMarkdownReport(report: ParityReport): string {
 
 > 自动生成时间：\`${report.timestamp}\`
 > 总体适配覆盖率：**${report.overallCoveragePercentage}%**（${report.adaptedCount + report.fallbackCount + report.spaOnlyCount}/${report.totalComponents} 组件）
+>
+> 覆盖率仅统计本清单中的映射分类（含降级与免适配），不代表所有公开组件已收录或完整行为已通过验收。
 
 ## 进度总览
 

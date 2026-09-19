@@ -1,13 +1,15 @@
 # @svadmin/ui ↔ @svadmin/lite 组件对齐矩阵
 
-> 自动生成时间：`2026-09-01T03:07:50.023Z`
-> 总体适配覆盖率：**100%**（103/103 组件）
+> 自动生成时间：`2026-09-19T08:59:45.334Z`
+> 总体适配覆盖率：**100%**（104/104 组件）
+>
+> 覆盖率仅统计本清单中的映射分类（含降级与免适配），不代表所有公开组件已收录或完整行为已通过验收。
 
 ## 进度总览
 
 | 模块分类 | 组件总数 | 1:1 对齐 (Exact) | 语义降级 (Fallback) | 免适配 (SPA Only) | 待补齐 (Missing) | 覆盖率 |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
-| **fields** | 32 | 29 | 3 | 0 | 0 | **100%** |
+| **fields** | 33 | 29 | 4 | 0 | 0 | **100%** |
 | **buttons** | 10 | 10 | 0 | 0 | 0 | **100%** |
 | **pages** | 12 | 12 | 0 | 0 | 0 | **100%** |
 | **layout** | 9 | 8 | 0 | 1 | 0 | **100%** |
@@ -22,6 +24,7 @@
 
 | UI 组件 (SPA) | Lite 对应组件 (SSR) | 对齐状态 | 降级策略 / 承接方案 |
 |---|---|:---:|---|
+| `FileUpload` | `LiteFileUpload.svelte` | ⚡ 语义降级 | 可见原生文件输入与 multipart POST；服务端校验，不提供客户端进度、取消或重试 |
 | `TextField` | `LiteTextField.svelte` | ✅ 1:1 对齐 | 原生 <input type="text"> |
 | `NumberField` | `LiteNumberField.svelte` | ✅ 1:1 对齐 | 原生 <input type="number"> |
 | `BooleanField` | `LiteBooleanField.svelte` | ✅ 1:1 对齐 | 原生 <input type="checkbox"> |

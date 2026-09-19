@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { render } from '@testing-library/svelte';
+import { describe, expect, it, vi } from 'vitest';
+import { fireEvent, render } from '@testing-library/svelte';
 import PrintableBill from './PrintableBill.svelte';
 import JsonSchemaForm from './JsonSchemaForm.svelte';
 
@@ -40,5 +40,34 @@ describe('PrintableBill and JsonSchemaForm', () => {
     expect(view.container.textContent).toContain('Username');
     expect(view.container.textContent).toContain('User Age');
     expect(view.container.textContent).toContain('Submit Form');
+  });
+
+  it('submits defaults with native enum and nested object values', async () => {
+    const onsubmit = vi.fn();
+    const view = render(JsonSchemaForm, {
+      schema: {
+        properties: {
+          role: { type: 'string', enum: ['admin', 'viewer'], default: 'viewer' },
+          quota: { type: 'number', default: 10 },
+          profile: {
+            type: 'object',
+            properties: {
+              enabled: { type: 'boolean', default: true },
+            },
+          },
+        },
+      },
+      onsubmit,
+    });
+
+    const form = view.container.querySelector('form');
+    expect(form).not.toBeNull();
+    if (form) await fireEvent.submit(form);
+
+    expect(onsubmit).toHaveBeenCalledWith({
+      role: 'viewer',
+      quota: 10,
+      profile: { enabled: true },
+    });
   });
 });

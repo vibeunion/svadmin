@@ -1,6 +1,10 @@
 import { defineConfig } from '@pandacss/dev';
 import { designTokens, semanticTokens } from './design/tokens.js';
 import { surfaceMetric, surfaceTable } from './design/recipes.js';
+import { uiButton, uiBadge, uiInput, uiTextarea } from './design/primitive-recipes.js';
+import { productSection, productToolbar, productWorkspace, productSettings, productSettingsRow, productList, productStatus } from './design/product-recipes.js';
+import { contentTokens, contentSemanticTokens } from './design/content-tokens.js';
+import { contentPage, contentHeader, metricBlock } from './design/content-recipes.js';
 
 export default defineConfig({
   preflight: false,
@@ -12,7 +16,22 @@ export default defineConfig({
   exclude: ['./src/**/*.test.*', './src/styled-system/**'],
   outdir: 'src/styled-system',
   outExtension: 'js',
-  theme: { tokens: designTokens, semanticTokens, slotRecipes: { surfaceMetric, surfaceTable } },
-  // AI 在运行时选择变体；不能依赖源码扫描碰巧发现这些值。
-  staticCss: { recipes: { surfaceMetric: ['*'], surfaceTable: ['*'] } },
+  theme: {
+    tokens: designTokens,
+    semanticTokens,
+    recipes: { uiButton, uiBadge, uiTextarea },
+    slotRecipes: { surfaceMetric, surfaceTable, uiInput, productSection, productToolbar, productWorkspace, productSettings, productSettingsRow, productList, productStatus },
+    extend: {
+      tokens: contentTokens,
+      semanticTokens: contentSemanticTokens,
+      slotRecipes: { contentPage, contentHeader, metricBlock },
+    },
+  },
+  // AI 与普通调用方在运行时选择变体；不能依赖扫描碰巧发现这些值。
+  staticCss: { recipes: {
+    surfaceMetric: ['*'], surfaceTable: ['*'],
+    uiButton: ['*'], uiBadge: ['*'], uiInput: ['*'], uiTextarea: ['*'],
+    contentPage: ['*'], contentHeader: ['*'], metricBlock: ['*'],
+    productSection: ['*'], productToolbar: ['*'], productWorkspace: ['*'], productSettings: ['*'], productSettingsRow: ['*'], productList: ['*'], productStatus: ['*'],
+  } },
 });

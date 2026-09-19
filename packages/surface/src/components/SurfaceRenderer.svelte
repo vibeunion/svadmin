@@ -11,11 +11,20 @@
   import type { SurfaceMessages } from '../localization.js';
   import type {
     SurfaceDataError, SurfaceDataProvider, SurfacePolicy,
-    SurfaceSourceDataState, SurfaceValidationIssue,
+    SurfaceSourceDataState, SurfaceValidationIssue, JsonObject,
   } from '../types.js';
   import { validateSurfaceSpec } from '../validation.js';
   import { createSurfaceSourceCache, sameSourceIdentity, snapshotSurfaceSource } from '../source-cache.js';
   import type { SurfaceSourceRequest } from '../source-cache.js';
+  import { surfaceMetric } from '../styled-system/recipes/index.js';
+  import { withoutSurfaceAppearance } from '../workflows/catalog.js';
+
+  function appearanceClasses(props: JsonObject): string {
+    const appearance = props['appearance'] as { tone?: 'neutral' | 'success' | 'warning' | 'danger' | 'info'; density?: 'compact' | 'comfortable' } | undefined;
+    if (!appearance) return '';
+    const classes = surfaceMetric(appearance);
+    return `surface-appearance ${classes.root} ${classes.card}`;
+  }
 
   export type SurfaceRendererError =
     | { readonly type: 'validation'; readonly issues: readonly SurfaceValidationIssue[] }
@@ -141,9 +150,10 @@
         {#each validation.value.widgets as widget (widget.id)}
           {@const registration = widgetRegistrations.get(widget.type)}
           {@const WidgetComponent = registration?.component}
-          <div class="surface-widget surface-span-{widget.placement?.columnSpan ?? 12}" data-testid="surface-widget-{widget.id}">
+          {@const semantic = registration?.presentation === 'surface-appearance/v1'}
+          <div class="surface-widget surface-span-{widget.placement?.columnSpan ?? 12} {semantic ? appearanceClasses(widget.props) : ''}" data-testid="surface-widget-{widget.id}">
             {#if WidgetComponent}
-              <WidgetComponent widgetId={widget.id} props={widget.props}
+              <WidgetComponent widgetId={widget.id} props={semantic ? withoutSurfaceAppearance(widget.props) : widget.props}
                 data={resolveSurfaceSourceData(widget, widget.binding ? sourceStates.get(widget.binding.sourceId) : undefined)}
                 locale={activeLocale} messages={activeMessages} />
             {/if}
@@ -170,6 +180,7 @@
   .surface-gap-md { gap: 1rem; }
   .surface-gap-lg { gap: 1.5rem; }
   .surface-widget { grid-column: 1 / -1; min-width: 0; }
+  .surface-appearance { border-block: 1px solid var(--border); border-inline-end: 1px solid var(--border); border-inline-start-style: solid; border-radius: 0.75rem; background: var(--card); }
   .surface-error { padding: 1rem; border: 1px solid var(--destructive); border-radius: 0.75rem; background: var(--card); color: var(--destructive); }
   .surface-error ul { margin: 0.75rem 0 0; padding-left: 1.25rem; }
   @media (min-width: 48rem) {
