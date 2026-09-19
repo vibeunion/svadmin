@@ -263,11 +263,11 @@ declare module "@svadmin/core" {
 const dataProvider = createElysiaDataProvider<App>("http://localhost:3000");
 ```
 
-### Tailwind CSS v4 Integration / Tailwind CSS v4 集成
+### Precompiled CSS Integration / 预生成 CSS 集成
 
-> **Important / 重要**: Tailwind CSS v4 does not scan `node_modules` by default. `@svadmin/ui` registers its published `dist/components` directory from its own CSS entry, so consumers no longer need a separate `@source` directive for the UI package.
+> **No host CSS compiler required / 消费端无需 CSS 编译器**: UI and AI Elements ship precompiled CSS. Import their styles once; do not install Tailwind or Panda just to use SVAdmin. Panda is used only when building the UI package from source.
 >
-> Tailwind CSS v4 默认不扫描 `node_modules`。`@svadmin/ui` 会在自己的 CSS 入口中注册已发布的 `dist/components` 目录，因此消费者不再需要为 UI 包单独添加 `@source` 指令。
+> UI 与 AI Elements 发布预生成 CSS。消费端只需引入样式，不需要安装 Tailwind 或 Panda；Panda 仅用于从源码构建 UI 的语义 tokens / recipes。
 
 **1. Import the UI stylesheet / 引入 UI 样式:**
 
@@ -277,9 +277,11 @@ const dataProvider = createElysiaDataProvider<App>("http://localhost:3000");
 @import "@svadmin/ai-elements/ai.css";
 ```
 
-If an existing app still contains `@source "../node_modules/@svadmin/ui/src";`, remove that line or point it at `dist`; the published package contains `dist`, not the workspace-only `src` directory.
+The plain CSS entry does not scan component sources. Remove obsolete SVAdmin `@source` directives. Existing hosts that intentionally use Tailwind v4 for their own application styles may opt into `@svadmin/ui/app.theme.css` instead of `app.css`, and `@svadmin/ai-elements/ai.theme.css` instead of `ai.css`. These legacy metadata entries do not make Tailwind a dependency of SVAdmin. Import only one entry per package.
 
-如果已有项目仍包含 `@source "../node_modules/@svadmin/ui/src";`，请删除该行或改为指向 `dist`；npm 发布包只包含 `dist`，不包含工作区中的 `src` 目录。
+普通 CSS 入口不扫描组件源码，请删除旧的 SVAdmin `@source` 指令。仍自行使用 Tailwind v4 的宿主，可将 UI 入口换为 `app.theme.css`，将 AI Elements 入口换为 `ai.theme.css`；每个包只引入一种入口。已编译的兼容类名和变量不应被批量删除。新样式请使用原生 CSS 或受控 recipes，而不是新增未经编译的工具类。
+
+For the opt-in Surface semantic variants, also import `@svadmin/surface/styles.css` and follow [Surface styling](packages/surface/STYLING.md). The default `svadmin/v1` contract is unchanged.
 
 **2. Configure Vite `optimizeDeps` / 配置 Vite `optimizeDeps`:**
 

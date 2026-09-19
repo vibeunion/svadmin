@@ -23,12 +23,16 @@ describe('@svadmin/ui native stylesheet contract', () => {
       'packages/create-svadmin/template/src/app.css',
     ]) {
       const css = readRepositoryFile(path);
-      expect(css).not.toMatch(/@(?:source|theme|apply|tailwind|utility|custom-variant)\b/);
+      expect(css).not.toMatch(
+        /@(?:source|theme|apply|tailwind|utility|custom-variant)\b/,
+      );
       expect(css).not.toMatch(/@import\s+["'](?:tailwindcss|tw-animate-css)/);
     }
     const readme = readRepositoryFile('README.md');
     expect(readme).toContain('No host CSS compiler required');
-    expect(readme).not.toContain('registers its published `dist/components` directory');
+    expect(readme).not.toContain(
+      'registers its published `dist/components` directory',
+    );
   });
 
   it('uses precompiled CSS for both the example and generated apps', () => {
@@ -41,7 +45,9 @@ describe('@svadmin/ui native stylesheet contract', () => {
       expect(css).not.toContain('@svadmin/ui/app.theme.css');
       expect(css).not.toMatch(/--primary\s*:/);
     }
-    expect(readRepositoryFile('example/src/App.svelte')).toContain("colorPreset: 'indigo'");
+    expect(readRepositoryFile('example/src/App.svelte')).toContain(
+      "colorPreset: 'indigo'",
+    );
   });
 
   it('keeps clean-flat semantic and bounded after the native CSS split', () => {
