@@ -37,10 +37,14 @@ const server = await createServer({
 const checks = [];
 const pageErrors = [];
 const failures = [];
+// Chromium 的 Skia SIMD 优化可能让相同圆角出现 1 色阶舍入差异。
+// 仅截图基线使用精度优先路径；不改 CSS，不放宽逐像素比较。
+// Upstream diagnosis: https://issues.chromium.org/issues/40039960
+const screenshotLaunchArgs = ['--disable-skia-runtime-opts'];
 let browser;
 try {
   await server.listen();
-  browser = await chromium.launch();
+  browser = await chromium.launch({ args: screenshotLaunchArgs });
   async function open(viewport, query) {
     // Each capture gets fresh focus, mouse, file-input and scroll state. Never compare pages
     // left at different scroll offsets by the preceding interaction test.
@@ -70,7 +74,7 @@ try {
           shadow: css.boxShadow, opacity: css.opacity, font: css.font, display: css.display };
       }));
       writeFileSync(resolve(output, `${name}.json`), `${JSON.stringify(styles, null, 2)}\n`);
-      return image;
+      return { image, styles };
     } finally { await page.close(); }
   }
   for (const viewport of [{ width: 1440, height: 900 }, { width: 1920, height: 1080 }, { width: 390, height: 844 }]) {
@@ -80,7 +84,8 @@ try {
       try {
         const before = await capture(viewport, `variants=0&baseline=1&dark=${dark}`, `${name}-baseline`);
         const after = await capture(viewport, `variants=0&dark=${dark}`, `${name}-published`);
-        assert.ok(before.equals(after), `${name}: published CSS changed default widget/control screenshots`);
+        assert.deepEqual(after.styles, before.styles, `${name}: published CSS changed default computed styles or layout`);
+        assert.ok(before.image.equals(after.image), `${name}: published CSS changed default widget/control screenshots`);
         page = await open(viewport, `variants=1&dark=${dark}`);
         assert.equal(await page.getByRole('button', { name: 'Disabled action' }).isDisabled(), true);
         assert.equal(await page.locator('article[aria-busy="true"]').count(), 1);
@@ -138,6 +143,7 @@ try {
     baselineCommit: manifest.baseCommit,
     publishedCssSha256: createHash('sha256').update(publishedCss).digest('hex'),
     browser: browser.version(),
+    screenshotLaunchArgs,
     scope: 'Current real Svelte widget/control fixture under baseline vs published CSS; Chromium only; not a full application or historical DOM comparison',
     checks, failures, pageErrors,
   };
