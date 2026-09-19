@@ -2,11 +2,12 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import postcss from 'postcss';
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 
 function readAppCss(): string {
-  return readFileSync(join(currentDir, 'app.css'), 'utf8');
+  return readFileSync(join(currentDir, 'components.css'), 'utf8');
 }
 
 function readCleanFlatCss(): string {
@@ -22,24 +23,28 @@ function readSidebar(): string {
   return readFileSync(join(currentDir, 'components', 'Sidebar.svelte'), 'utf8');
 }
 
-describe('src/app.css (Tailwind source)', () => {
-  it('keeps @theme block so Tailwind v4 generates utility classes', () => {
+describe('native component CSS', () => {
+  it('keeps compiler directives out of native component CSS', () => {
     const css = readAppCss();
 
-    expect(css).toContain('@theme');
+    expect(css).not.toContain('@theme');
   });
 
   it('uses the semantic border token in the global reset', () => {
     const css = readAppCss();
 
-    expect(css).toContain('border-color: var(--color-border, var(--border));');
-    expect(css).not.toMatch(/border-color:\s*var\(--border\);/);
+    const values: string[] = [];
+    postcss.parse(css).walkRules((rule) => {
+      if (rule.selector !== '*, ::after, ::before') return;
+      rule.walkDecls('border-color', (decl) => { values.push(decl.value); });
+    });
+    expect(values).toEqual(['var(--color-border, var(--border))']);
   });
 
-  it('registers the published component directory as its own Tailwind source', () => {
+  it('does not require component source scanning', () => {
     const css = readAppCss();
 
-    expect(css).toContain('@source "./components";');
+    expect(css).not.toContain('@source');
     expect(css).not.toContain('@source "./src";');
   });
 
@@ -80,7 +85,7 @@ describe('src/app.css (Tailwind source)', () => {
     expect(cleanFlatCss).toContain(
       '.layout-clean-flat [data-svadmin-table-row]:hover [data-slot="table-cell"]',
     );
-    expect(cleanFlatCss).toContain('.layout-clean-flat [data-svadmin-content-page] .bg-card');
+    expect(cleanFlatCss).toContain('.layout-clean-flat [data-svadmin-content-page] .svadmin-u-cd0ad9a56558');
     expect(readSidebar()).toMatch(/<aside\s+data-svadmin-sidebar/);
   });
 

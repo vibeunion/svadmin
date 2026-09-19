@@ -1,0 +1,89 @@
+{
+  "testedCommit": "6fe9b80e4a5547c5a0135a8c71118deb1f03fefd",
+  "baselineCommit": "cf6c4746578176ea773a17ef6f49f353292f7818",
+  "publishedCssSha256": "dccc78e266394aa341bf2c31f0183976338ed7105a324be8e85e523abafe9c21",
+  "browser": "151.0.7922.34",
+  "scope": "Current real Svelte widget/control fixture under baseline vs published CSS; Chromium only; not a full application or historical DOM comparison",
+  "checks": [
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "mode": "light",
+      "defaultScreenshotsIdentical": true,
+      "semanticVariants": true,
+      "states": true,
+      "nestedTheme": true,
+      "noHorizontalOverflow": true,
+      "controls": true
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "mode": "dark",
+      "defaultScreenshotsIdentical": true,
+      "semanticVariants": true,
+      "states": true,
+      "nestedTheme": true,
+      "noHorizontalOverflow": true,
+      "controls": true
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "mode": "light",
+      "defaultScreenshotsIdentical": true,
+      "semanticVariants": true,
+      "states": true,
+      "nestedTheme": true,
+      "noHorizontalOverflow": true,
+      "controls": true
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "mode": "dark",
+      "defaultScreenshotsIdentical": true,
+      "semanticVariants": true,
+      "states": true,
+      "nestedTheme": true,
+      "noHorizontalOverflow": true,
+      "controls": true
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mode": "light",
+      "defaultScreenshotsIdentical": true,
+      "semanticVariants": true,
+      "states": true,
+      "nestedTheme": true,
+      "noHorizontalOverflow": true,
+      "controls": true
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mode": "dark",
+      "defaultScreenshotsIdentical": true,
+      "semanticVariants": true,
+      "states": true,
+      "nestedTheme": true,
+      "noHorizontalOverflow": true,
+      "controls": true
+    }
+  ],
+  "failures": [],
+  "pageErrors": []
+}

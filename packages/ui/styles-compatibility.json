@@ -1,0 +1,12 @@
+{
+  "baseCommit": "cf6c4746578176ea773a17ef6f49f353292f7818",
+  "sourceCssSha256": "6e66d8c843dd623e89007d7d8c4b4d36fe3d248f228fac8f5bc38b01e6f6dd4e",
+  "cascadeSha256": "599adbf0c84e7e7e02c2b45a2cb7eb29c089b4da115e6b831888ee2e7dafbbd2",
+  "files": {
+    "styles/compatibility.prelude.css": "90119df86530830a2e364abb163ed8e55af97165572977a5bc588620097d1f56",
+    "page-chrome.css": "c1788ef4c71070ef78e2d8377f5688312dfb24c6bb21db36cb96cc3c0c61a014",
+    "components.css": "3588e7541b9accc90e3d86c61126b5d74d2e80a0b18599dafb320aa05d564224",
+    "styles/compatibility.epilogue.css": "94e2b5b2f8b5f1368b058e326f3b1b5949e464cc23f2fd88d02866f99528530b",
+    "styles/aliases.css": "307f6d367df20726fe43785e255245d10e623f9f36fba10da2313d630879e0d0"
+  }
+}

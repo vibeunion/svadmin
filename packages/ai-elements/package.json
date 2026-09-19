@@ -4,7 +4,7 @@
   "description": "Composable Svelte 5 AI interaction components for SVAdmin",
   "type": "module",
   "sideEffects": [
-    "./dist/ai.css"
+    "./dist/*.css"
   ],
   "files": [
     "dist",
@@ -47,6 +47,10 @@
     "./parity": {
       "types": "./dist/parity-manifest.d.ts",
       "default": "./dist/parity-manifest.js"
+    },
+    "./ai.theme.css": {
+      "style": "./dist/ai.theme.css",
+      "default": "./dist/ai.theme.css"
     }
   },
   "peerDependencies": {
@@ -66,8 +70,6 @@
     "@xyflow/svelte": "^1.6.5",
     "cn": "^0.2.4",
     "streamdown-svelte": "^3.0.6",
-    "tailwind-merge": "^3.6.0",
-    "tailwind-variants": "^3.3.1",
     "type-fest": "^4.41.0"
   },
   "devDependencies": {
