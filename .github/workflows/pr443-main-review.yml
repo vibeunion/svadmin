@@ -6,49 +6,129 @@ on:
 permissions:
   contents: read
 jobs:
-  strict-coverage:
+  strict-boundary:
     runs-on: ubuntu-latest
     timeout-minutes: 12
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v7
         with:
           ref: 0dd3ec59c290835c46edc482b11f7a183a9dfa12
-          persist-credentials: false
       - uses: actions/setup-node@v7
         with:
           node-version: 26
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
-      - name: Verify narrow repair and unchanged runtime
+      - name: Move declaration assertions into the existing style test boundary
         shell: bash
         run: |
           set -euo pipefail
           git fetch --quiet --no-tags --unshallow origin
-          test "$(git diff --name-only 761310059dc0845311f3ffe9aec9c4a5bf53b6d2 HEAD)" = tsconfig.bun-tests.json
-          git diff --check 8f068fb093b48cd2410b3b28a6066b567a44690e HEAD
-          git diff 761310059dc0845311f3ffe9aec9c4a5bf53b6d2 HEAD
-          git rev-parse HEAD HEAD:tsconfig.bun-tests.json HEAD:scripts/check-type-coverage.ts
+          test "$(git rev-parse HEAD:scripts/stripe-first-refactor-contract.test.ts)" = f24ba3d5d18344b5e5f97448ca5f235524d4fc85
+          test "$(git rev-parse HEAD:packages/ui/scripts/product-recipes.test.mjs)" = df39dd1b987963bef3b3d1ff2f41b857521190c5
+          test "$(git rev-parse HEAD:tsconfig.bun-tests.json)" = 0896fce83966ddd2992db5c7bb4d61f1d0c73b17
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess
+          p = Path('scripts/stripe-first-refactor-contract.test.ts')
+          source = p.read_text()
+          import_line = "import { productWorkspace } from '../packages/ui/design/product-recipes';\n"
+          start_text = '    expect(productWorkspace).toMatchObject({'
+          assert source.count(import_line) == 1 and source.count(start_text) == 1
+          source = source.replace(import_line, '')
+          start = source.index(start_text)
+          end = source.index('\n    });', start) + len('\n    });\n')
+          source = source[:start] + source[end:]
+          source = source.replace('// 布局已迁移到 slot recipe；验证真实声明与接线，不要求退役的 utility 类。', '// 样式声明由 product-recipes.test.mjs 验证；这里保留 Svelte 接线契约。')
+          p.write_text(source)
+          Path('tsconfig.bun-tests.json').write_bytes(subprocess.check_output(['git', 'show', '761310059dc0845311f3ffe9aec9c4a5bf53b6d2:tsconfig.bun-tests.json']))
+          p = Path('packages/ui/scripts/product-recipes.test.mjs')
+          p.write_text(p.read_text() + '''
+          test('workspace definition and emitted CSS retain top alignment and responsive column order', () => {
+            const workspace = definitions.productWorkspace;
+            assert.equal(workspace.base.columns.display, 'grid');
+            assert.equal(workspace.base.columns.alignItems, 'start');
+            assert.equal(workspace.base.columns.gridTemplateColumns, 'minmax(0, 1fr)');
+            const responsive = workspace.variants.hasSecondary.true;
+            assert.equal(responsive.columns['@media (min-width: 64rem)'].gridTemplateColumns, 'minmax(0, 1fr) minmax(0, var(--workspace-secondary-width, 22rem))');
+            assert.equal(responsive.primary['@media (min-width: 64rem)'].order, '1');
+            assert.equal(responsive.secondary['@media (min-width: 64rem)'].order, '2');
+            const single = runtime.productWorkspace();
+            const split = runtime.productWorkspace({ hasSecondary: true });
+            for (const css of [generated, published]) {
+              assert.equal(declarations(css, single.columns).get('display'), 'grid');
+              assert.equal(declarations(css, single.columns).get('align-items'), 'start');
+              assert.equal(declarations(css, single.columns).get('grid-template-columns'), 'minmax(0, 1fr)');
+              assert.equal(declarations(css, split.columns).get('grid-template-columns'), 'minmax(0, 1fr) minmax(0, var(--workspace-secondary-width, 22rem))');
+              assert.equal(declarations(css, split.primary).get('order'), '1');
+              assert.equal(declarations(css, split.secondary).get('order'), '2');
+            }
+          });
+          ''')
+          PY
+          git diff --check
+          git diff --stat
       - name: Install unchanged dependencies
         run: |
           bun install
           git diff --exit-code -- bun.lock
-      - name: Strict coverage before builds
-        run: bun scripts/check-type-coverage.ts
-      - name: Build normal generated workspace dependencies
+      - name: Build unchanged workspace packages
         shell: bash
         run: |
           set -euo pipefail
           if ! bun run build:packages >/tmp/pr443-build.log 2>&1; then tail -100 /tmp/pr443-build.log; exit 1; fi
           tail -8 /tmp/pr443-build.log
-      - name: Run the exact failed root check without suppressions
+      - name: Complete strict root check and both test boundaries
         shell: bash
         run: |
           set -euo pipefail
           if ! bun run check >/tmp/pr443-check.log 2>&1; then tail -120 /tmp/pr443-check.log; exit 1; fi
           cat /tmp/pr443-check.log
-      - name: Verify regression and lint
-        run: |
-          bunx --no-install eslint scripts/stripe-first-refactor-contract.test.ts --max-warnings 0
+          bunx --no-install eslint scripts/stripe-first-refactor-contract.test.ts packages/ui/scripts/product-recipes.test.mjs --max-warnings 0
           bun test scripts/stripe-first-refactor-contract.test.ts scripts/check-type-coverage.test.ts
-          git diff --exit-code -- tsconfig.bun-tests.json bun.lock packages/ui/design/product-recipes.ts scripts/stripe-first-refactor-contract.test.ts
+          node --experimental-strip-types --test packages/ui/scripts/product-recipes.test.mjs
+      - name: Prove the relocated assertion still detects a broken recipe
+        shell: bash
+        run: |
+          set -euo pipefail
+          file=packages/ui/design/product-recipes.ts
+          cp "$file" /tmp/pr443-product-recipes-original.ts
+          trap 'cp /tmp/pr443-product-recipes-original.ts "$file"' EXIT
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('packages/ui/design/product-recipes.ts')
+          source = p.read_text()
+          old = "columns: { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', alignItems: 'start',"
+          assert source.count(old) == 1
+          p.write_text(source.replace(old, old.replace("alignItems: 'start'", "alignItems: 'stretch'")))
+          PY
+          if node --experimental-strip-types --test packages/ui/scripts/product-recipes.test.mjs >/tmp/pr443-negative.log 2>&1; then
+            echo 'ERROR: broken alignment was not detected'
+            exit 1
+          fi
+          grep -F 'workspace definition and emitted CSS retain top alignment' /tmp/pr443-negative.log
+          grep -F 'stretch' /tmp/pr443-negative.log
+          cp /tmp/pr443-product-recipes-original.ts "$file"
+          git diff --exit-code -- packages/ui/design/product-recipes.ts bun.lock
+      - name: Publish verified three-file candidate, not main or feature branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import subprocess
+          expected = {'scripts/stripe-first-refactor-contract.test.ts', 'packages/ui/scripts/product-recipes.test.mjs', 'tsconfig.bun-tests.json'}
+          actual = set(subprocess.check_output(['git', 'diff', '--name-only'], text=True).splitlines())
+          assert actual == expected, actual
+          PY
+          branch=review/pr443-type-boundary-candidate-20260919
+          test -z "$(git ls-remote --heads origin "refs/heads/$branch")"
+          git config user.name 'Integration review'
+          git config user.email 'noreply@github.com'
+          git add -- scripts/stripe-first-refactor-contract.test.ts packages/ui/scripts/product-recipes.test.mjs tsconfig.bun-tests.json
+          git diff --cached --check
+          git commit -m 'test(ui): keep Panda declaration checks in the existing style test boundary'
+          git push origin "HEAD:refs/heads/$branch"
+          echo "VERIFIED_CANDIDATE=$(git rev-parse HEAD)"
+          echo "VERIFIED_TREE=$(git rev-parse HEAD^{tree})"
