@@ -118,4 +118,50 @@ describe('TreeSelect component', () => {
     expect(loadChildren).toHaveBeenCalledOnce();
     expect(document.body.textContent).toContain('懒加载节点');
   });
+
+  it('shows a retryable error and retries loading children', async () => {
+    let rejectLoad!: (reason: unknown) => void;
+    const loadChildren = vi.fn(() => new Promise<TreeSelectOption[]>((_, reject) => {
+      rejectLoad = reject;
+    }));
+    const view = render(TreeSelect, {
+      options: [{ value: 'lazy-error', label: '失败部门', hasChildren: true }],
+      loadChildren,
+    });
+    const trigger = view.container.querySelector<HTMLButtonElement>('button');
+    if (!trigger) throw new Error('Expected tree trigger');
+    await fireEvent.click(trigger);
+    const expand = document.querySelector<HTMLButtonElement>('[data-tree-value="lazy-error"] button');
+    if (!expand) throw new Error('Expected expand control');
+    await fireEvent.click(expand);
+    rejectLoad(new Error('private provider details'));
+    await vi.waitFor(() => expect(view.getByRole('alert').textContent).toContain('Failed to load child nodes'));
+    loadChildren.mockResolvedValueOnce([{ value: 'retry-child', label: '重试子节点' }]);
+    await fireEvent.click(view.getByRole('button', { name: /失败部门.*Retry/ }));
+    await view.findByText('重试子节点');
+    view.unmount();
+    expect(loadChildren).toHaveBeenCalledTimes(2);
+  });
+
+  it('ignores a late lazy load after unmount', async () => {
+    let resolveLoad!: (nodes: TreeSelectOption[]) => void;
+    const loadChildren = vi.fn(() => new Promise<TreeSelectOption[]>((resolve) => {
+      resolveLoad = resolve;
+    }));
+    const view = render(TreeSelect, {
+      options: [{ value: 'lazy-late', label: '迟到部门', hasChildren: true }],
+      loadChildren,
+    });
+    const trigger = view.container.querySelector<HTMLButtonElement>('button');
+    if (!trigger) throw new Error('Expected tree trigger');
+    await fireEvent.click(trigger);
+    const expand = document.querySelector<HTMLButtonElement>('[data-tree-value="lazy-late"] button');
+    if (!expand) throw new Error('Expected expand control');
+    await fireEvent.click(expand);
+    view.unmount();
+    resolveLoad([{ value: 'late-child', label: '迟到节点' }]);
+    await Promise.resolve();
+    expect(loadChildren).toHaveBeenCalledOnce();
+    expect(document.body.textContent).not.toContain('迟到节点');
+  });
 });

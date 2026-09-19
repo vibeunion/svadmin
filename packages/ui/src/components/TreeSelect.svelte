@@ -2,7 +2,8 @@
   import { definedOptions } from '@svadmin/core/options';
 
   import { SvelteSet } from 'svelte/reactivity';
-import { ChevronRight, ChevronDown, Check, X, Search, ChevronsUpDown, Loader2, Minus } from '@lucide/svelte';
+  import { onDestroy } from 'svelte';
+  import { ChevronRight, ChevronDown, Check, X, Search, ChevronsUpDown, Loader2, Minus, RotateCw } from '@lucide/svelte';
   import { cn } from '../utils.js';
   import * as Popover from './ui/popover/index.js';
   import { Input } from './ui/input/index.js';
@@ -51,7 +52,14 @@ import { ChevronRight, ChevronDown, Check, X, Search, ChevronsUpDown, Loader2, M
   let open = $state(false);
   let searchQuery = $state('');
   let loadingValues = new SvelteSet<string | number>();
+  let loadErrors = new SvelteSet<string | number>();
   let expandedNodes = new SvelteSet<string | number>();
+  let mounted = true;
+  const loads = new Map<string | number, {
+    node: TreeSelectOption;
+    loader: NonNullable<Props['loadChildren']>;
+  }>();
+  onDestroy(() => { mounted = false; loads.clear(); });
 
   // Map to quickly look up option info by value
   const optionMap = $derived.by(() => {
@@ -74,6 +82,19 @@ import { ChevronRight, ChevronDown, Check, X, Search, ChevronsUpDown, Loader2, M
 
   const selectedLabels = $derived.by(() => {
     return selectedValues.map((v) => optionMap.get(v)?.label ?? String(v));
+  });
+
+  $effect.pre(() => {
+    const nodes = optionMap;
+    const loader = loadChildren;
+    const unavailable = disabled;
+    for (const [key, request] of loads) {
+      if (unavailable || nodes.get(key) !== request.node || loader !== request.loader) {
+        loads.delete(key);
+        loadingValues.delete(key);
+        loadErrors.delete(key);
+      }
+    }
   });
 
   function toggleExpand(nodeValue: string | number, event?: MouseEvent) {
@@ -118,27 +139,58 @@ import { ChevronRight, ChevronDown, Check, X, Search, ChevronsUpDown, Loader2, M
   }
 
   function updateOptionsChildren(nodes: TreeSelectOption[], target: string | number, children: TreeSelectOption[]): TreeSelectOption[] {
-    return nodes.map((node) => {
-      if (node.value === target) return { ...node, children, hasChildren: children.length > 0 };
-      return node.children ? { ...node, children: updateOptionsChildren(node.children, target, children) } : node;
+    let changed = false;
+    const next = nodes.map((node) => {
+      if (node.value === target) {
+        changed = true;
+        return { ...node, children, hasChildren: children.length > 0 };
+      }
+      if (!node.children) return node;
+      const updated = updateOptionsChildren(node.children, target, children);
+      if (updated === node.children) return node;
+      changed = true;
+      return { ...node, children: updated };
     });
+    return changed ? next : nodes;
   }
 
-  async function ensureChildren(node: TreeSelectOption): Promise<void> {
-    if (!loadChildren || !node.hasChildren || node.children || loadingValues.has(node.value)) return;
+  async function ensureChildren(node: TreeSelectOption): Promise<boolean> {
+    if (!mounted || disabled || loadingValues.has(node.value)) return false;
+    if (!node.hasChildren || node.children) return true;
+    const currentNode = optionMap.get(node.value);
+    if (!loadChildren || !currentNode) return false;
+    const request = { node: currentNode, loader: loadChildren };
+    loads.set(node.value, request);
+    const current = () => mounted && !disabled && loads.get(node.value) === request
+      && optionMap.get(node.value) === request.node && loadChildren === request.loader;
     loadingValues.add(node.value);
+    loadErrors.delete(node.value);
     try {
-      const children = await loadChildren(node);
+      const children = await request.loader(request.node);
+      if (!current()) return false;
       options = updateOptionsChildren(options, node.value, children);
+      return true;
+    } catch {
+      if (current()) loadErrors.add(node.value);
+      return false;
     } finally {
-      loadingValues.delete(node.value);
+      if (mounted && loads.get(node.value) === request) {
+        loads.delete(node.value);
+        loadingValues.delete(node.value);
+      }
     }
   }
 
   async function toggleExpandAsync(node: TreeSelectOption, event?: MouseEvent): Promise<void> {
     event?.stopPropagation();
-    await ensureChildren(node);
+    if (!await ensureChildren(node)) return;
+    if (!mounted || disabled) return;
     toggleExpand(node.value);
+  }
+
+  function retryChildren(node: TreeSelectOption, event: MouseEvent): void {
+    event.stopPropagation();
+    void toggleExpandAsync(node);
   }
 
   function setMultipleSelection(node: TreeSelectOption): void {
@@ -300,6 +352,8 @@ import { ChevronRight, ChevronDown, Check, X, Search, ChevronsUpDown, Loader2, M
         {#if nodeHasChildren}
           <button
             type="button"
+            aria-label={`${node.label}: ${i18n.t('tree.toggleChildren')}`}
+            aria-busy={loadingValues.has(node.value)}
             class="svadmin-u-60fbb7713999 svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-012fbd121f37 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-07389a777c1f svadmin-u-bfa603190748 svadmin-u-8e551981c8d7"
             onclick={(e) => void toggleExpandAsync(node, e)}
           >
@@ -317,6 +371,14 @@ import { ChevronRight, ChevronDown, Check, X, Search, ChevronsUpDown, Loader2, M
 
         <span class="svadmin-u-f283ea9bea0e">{node.label}</span>
       </div>
+
+      {#if loadErrors.has(node.value)}
+        <span role="alert" class="svadmin-u-bfa603190748">{i18n.t('tree.loadFailed')}</span>
+        <button type="button" aria-label={`${node.label}: ${i18n.t('common.retry')}`}
+          title={i18n.t('common.retry')} onclick={(e) => retryChildren(node, e)}>
+          <RotateCw class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
+        </button>
+      {/if}
 
       {#if partial}
         <Minus class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-012fbd121f37 svadmin-u-20aaf08a7ed1" />

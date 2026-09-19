@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte';
   import { X, Upload, RotateCw, Ban } from '@lucide/svelte';
   import { Button } from './ui/button/index.js';
 
@@ -27,6 +28,7 @@
     maxSize?: number;
     disabled?: boolean;
     required?: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-invalid-void-type -- 保留已有无返回值上传回调的兼容性。
     upload?: (file: File, session: UploadSession) => Promise<{ url?: string } | void>;
     onChange?: (items: UploadItem[]) => void;
     onReject?: (file: File, reason: string) => void;
@@ -52,6 +54,16 @@
   let items = $state<UploadItem[]>([]);
   let sequence = 0;
   const controllers = new Map<string, AbortController>();
+
+  function retire(id: string): void {
+    const controller = controllers.get(id);
+    controllers.delete(id);
+    controller?.abort();
+  }
+
+  onDestroy(() => {
+    for (const id of controllers.keys()) retire(id);
+  });
 
   function emitChange(): void {
     onChange?.(items.map(item => ({ ...item })));
@@ -86,24 +98,31 @@
 
   async function process(item: UploadItem): Promise<void> {
     if (!upload || disabled) return;
+    if (controllers.has(item.id) || !items.some(candidate => candidate.id === item.id)) return;
     const controller = new AbortController();
     controllers.set(item.id, controller);
+    // 每次尝试由独立控制器持有；旧回执和 finally 不得影响新尝试。
+    const current = () => controllers.get(item.id) === controller;
+    const updateCurrent = (update: Partial<UploadItem>) => {
+      if (current() && !controller.signal.aborted) updateItem(item.id, update);
+    };
     updateItem(item.id, { status: 'uploading', progress: 0, error: undefined });
     try {
       const result = await upload(item.file, {
         signal: controller.signal,
-        onProgress: progress => updateItem(item.id, {
+        onProgress: progress => updateCurrent({
           progress: Number.isFinite(progress) ? Math.max(0, Math.min(100, Math.round(progress))) : 0,
         }),
       });
-      updateItem(item.id, { status: 'success', progress: 100, url: result?.url });
+      updateCurrent({ status: 'success', progress: 100, url: result?.url });
     } catch (error) {
+      if (!current()) return;
       updateItem(item.id, {
         status: controller.signal.aborted ? 'cancelled' : 'error',
         error: controller.signal.aborted ? 'Upload cancelled.' : error instanceof Error ? error.message : 'Upload failed.',
       });
     } finally {
-      controllers.delete(item.id);
+      if (current()) controllers.delete(item.id);
     }
   }
 
@@ -117,6 +136,9 @@
         continue;
       }
       const item: UploadItem = { id: nextId(), file, status: 'queued', progress: 0 };
+      if (!multiple) {
+        for (const previous of items) retire(previous.id);
+      }
       items = multiple ? [...items, item] : [item];
       emitChange();
       void process(item);
@@ -130,13 +152,17 @@
   }
 
   function remove(id: string): void {
-    controllers.get(id)?.abort();
+    if (disabled) return;
+    retire(id);
     items = items.filter(item => item.id !== id);
     emitChange();
   }
 
   function cancel(id: string): void {
-    controllers.get(id)?.abort();
+    const controller = controllers.get(id);
+    if (!controller) return;
+    retire(id);
+    updateItem(id, { status: 'cancelled', error: 'Upload cancelled.' });
   }
 
   function retry(item: UploadItem): void {
@@ -194,11 +220,11 @@
               <Ban aria-hidden="true" />
             </Button>
           {:else if item.status === 'error' || item.status === 'cancelled'}
-            <Button type="button" variant="ghost" size="icon-sm" aria-label="Retry upload" onclick={() => retry(item)}>
+            <Button type="button" variant="ghost" size="icon-sm" aria-label="Retry upload" {disabled} onclick={() => retry(item)}>
               <RotateCw aria-hidden="true" />
             </Button>
           {/if}
-          <Button type="button" variant="ghost" size="icon-sm" aria-label="Remove file" onclick={() => remove(item.id)}>
+          <Button type="button" variant="ghost" size="icon-sm" aria-label="Remove file" {disabled} onclick={() => remove(item.id)}>
             <X aria-hidden="true" />
           </Button>
           {#if item.error}<span role="alert">{item.error}</span>{/if}

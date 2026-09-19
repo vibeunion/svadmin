@@ -2,8 +2,8 @@ import { cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { QueryClient } from '@tanstack/svelte-query';
 import { Type } from '@sinclair/typebox';
+import type { ComponentProps } from 'svelte';
 import { defineResource, resetContext, type DataProvider, type ResourceDefinition } from '@svadmin/core';
-import { setLocale } from '@svadmin/core/i18n';
 import Host from './resource-workspace.test-host.svelte';
 
 const record = Type.Object({ id: Type.Number(), title: Type.String() });
@@ -15,7 +15,7 @@ const resources: ResourceDefinition[] = ['posts', 'other'].map(name => ({
   }],
 }));
 const clients: QueryClient[] = [];
-function mount() {
+function mount(options: Partial<Pick<ComponentProps<typeof Host>, 'workspaceStyle' | 'tableProps'>> = {}) {
   const source: DataProvider = {
     getApiUrl: () => '/api',
     getList: vi.fn(async ({ pagination }) => ({
@@ -29,11 +29,10 @@ function mount() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   clients.push(client);
   const onBatch = vi.fn();
-  const view = render(Host, { provider: source, resources, queryClient: client, onBatch });
-  return { view, source, onBatch, client };
+  const view = render(Host, { provider: source, resources, queryClient: client, onBatch, ...options });
+  return { view, source, onBatch };
 }
 beforeEach(() => {
-  setLocale('en');
   Object.defineProperty(Element.prototype, 'animate', {
     configurable: true, value: () => ({ cancel: () => {}, finished: Promise.resolve() }),
   });
@@ -46,6 +45,18 @@ afterEach(() => {
 });
 
 describe('ResourceOperationsPage real table composition', () => {
+  it.each([
+    'inventory', 'operations', 'orders', 'people', 'calendar', 'communications', 'crm',
+    'property', 'ai', 'store', 'planning', 'generation', 'billing', 'security', 'referral',
+  ] as const)('forwards table configuration and batch actions in the %s layout', async (workspaceStyle) => {
+    const app = mount({ workspaceStyle, tableProps: { pagination: { current: 2, pageSize: 5 }, title: 'Configured list' } });
+    await app.view.findAllByText('Page 2 record');
+    expect(app.view.getByRole('heading', { name: 'Configured list' })).toBeTruthy();
+    await fireEvent.click(app.view.getByRole('checkbox', { name: /Select all/i }));
+    await fireEvent.click(app.view.getByRole('button', { name: 'Process selection' }));
+    expect(app.onBatch).toHaveBeenLastCalledWith([2]);
+  });
+
   it('passes controlled pagination and sorting to the provider and keeps search functional', async () => {
     const app = mount();
     await app.view.findAllByText('Page 1 record');
@@ -54,10 +65,13 @@ describe('ResourceOperationsPage real table composition', () => {
       resource: 'posts', pagination: expect.objectContaining({ current: 2, pageSize: 5 }),
       sorters: [{ field: 'title', order: 'desc' }],
     })));
+    await app.view.findAllByText('Page 2 record');
+    expect(app.view.queryAllByText('Page 1 record')).toHaveLength(0);
     await fireEvent.input(app.view.getByPlaceholderText(/Search/), { target: { value: 'needle' } });
     await waitFor(() => expect(app.source.getList).toHaveBeenCalledWith(expect.objectContaining({
       filters: [{ field: 'title', operator: 'contains', value: 'needle' }],
     })));
+    await app.view.findAllByText('Page 1 record');
   });
 
   it('passes cross-page selection to business batch actions and clears it on tenant change', async () => {
@@ -99,6 +113,7 @@ describe('ResourceOperationsPage real table composition', () => {
     await waitFor(() => expect(app.source.getList).toHaveBeenCalledWith(expect.objectContaining({
       resource: 'posts', pagination: expect.objectContaining({ current: 2 }),
     })));
+    await app.view.findAllByText('Page 2 record');
     expect(vi.mocked(app.source.getList).mock.calls.every(([params]) => params.resource === 'posts')).toBe(true);
   });
 });

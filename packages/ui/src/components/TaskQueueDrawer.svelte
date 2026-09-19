@@ -1,8 +1,9 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte';
   import { definedReactiveOptions, definedOptions } from '@svadmin/core/options';
 
   import { ListTodo, Loader2, Plus, Search, RefreshCw } from '@lucide/svelte';
-  import { getTaskProvider, useSubmitTask, useTaskList } from '@svadmin/core';
+  import { captureAdminContext, captureAuthSession, useSubmitTask, useTaskList } from '@svadmin/core';
   import { decodeTaskSubmitOptions } from '@svadmin/core/schema';
   import { useTranslation } from '@svadmin/core/i18n';
   import type { TaskProvider, TaskRecord } from '@svadmin/core';
@@ -25,13 +26,14 @@
   } from './task-utils.js';
 
   const i18n = useTranslation();
+  const context = captureAdminContext();
 
   type AutoRefreshValue = '0' | '5000' | '15000' | '30000';
   type TaskTab = 'tasks' | 'dlq';
 
   let {
     open = $bindable(false),
-    taskProvider = getTaskProvider({ optional: true }) ?? undefined,
+    taskProvider,
     title,
     initialTab = 'tasks',
   }: {
@@ -51,6 +53,45 @@
   let submitBodyText = $state(i18n.t('task.bodyPlaceholder'));
   let submitError = $state<string | null>(null);
   let submitOpen = $state(false);
+  let submitAttempt = $state.raw<object | null>(null);
+  let mounted = true;
+  onDestroy(() => { mounted = false; submitAttempt = null; });
+  const activeTaskProvider = $derived(taskProvider ?? context.taskProvider);
+  const taskScope = $derived({
+    provider: activeTaskProvider,
+    tenant: context.tenantCacheKey?.__svadminTenant,
+    auth: context.authProvider,
+    router: context.routerProvider,
+    session: captureAuthSession(context.authProvider),
+  });
+  let previousTaskScope: typeof taskScope | undefined;
+  function taskScopesEqual(left: typeof taskScope, right: typeof taskScope): boolean {
+    return left.provider === right.provider
+      && left.tenant === right.tenant
+      && left.auth === right.auth
+      && left.router === right.router
+      && left.session.cacheKey === right.session.cacheKey
+      && left.session.available === right.session.available;
+  }
+  function taskScopeIsCurrent(origin: typeof taskScope): boolean {
+    return mounted && taskScopesEqual(origin, taskScope) && origin.session.isCurrent();
+  }
+  $effect.pre(() => {
+    const scope = taskScope;
+    if (previousTaskScope && !taskScopesEqual(previousTaskScope, scope)) {
+      selectedTaskId = null;
+      submitAttempt = null;
+      submitOpen = false;
+      resetSubmitForm();
+    }
+    previousTaskScope = scope;
+  });
+  $effect.pre(() => {
+    if (!open) {
+      submitAttempt = null;
+      submitOpen = false;
+    }
+  });
 
   const refreshInterval = $derived.by<number | false>(() =>
     autoRefresh === '0' ? false : Number(autoRefresh),
@@ -59,11 +100,11 @@
 
   const taskQuery = useTaskList(definedReactiveOptions({
     get taskProvider() {
-      return taskProvider;
+      return activeTaskProvider;
     },
     get queryOptions() {
       return {
-        enabled: !!taskProvider,
+        enabled: !!activeTaskProvider,
         refetchInterval: refreshInterval,
         refetchIntervalInBackground: true,
       };
@@ -75,11 +116,11 @@
       return true;
     },
     get taskProvider() {
-      return taskProvider;
+      return activeTaskProvider;
     },
     get queryOptions() {
       return {
-        enabled: !!taskProvider && !!taskProvider?.listDlq,
+        enabled: !!activeTaskProvider && !!activeTaskProvider?.listDlq,
         refetchInterval: refreshInterval,
         refetchIntervalInBackground: true,
       };
@@ -162,7 +203,14 @@
     submitError = null;
   }
 
+  function toggleSubmitForm(): void {
+    submitAttempt = null;
+    submitError = null;
+    submitOpen = !submitOpen;
+  }
+
   async function handleSubmitTask() {
+    if (!open || !submitOpen || submitAttempt || !activeTaskProvider || !taskScope.session.available) return;
     submitError = null;
     if (!submitTaskName.trim()) {
       submitError = i18n.t('validation.required');
@@ -180,25 +228,33 @@
       }
     }
 
+    const origin = taskScope;
+    const attempt = {};
+    submitAttempt = attempt;
+    const current = () => submitAttempt === attempt && taskScopeIsCurrent(origin);
     try {
       const handle = await submitTask.mutation.mutateAsync(definedOptions({
         taskName: submitTaskName.trim(),
-        taskProvider,
+        taskProvider: activeTaskProvider,
         options: definedOptions({
           body,
           idempotencyKey: submitIdempotencyKey.trim() || undefined,
         }),
       }));
+      if (!current()) return;
       activeTab = 'tasks';
       selectedTaskId = handle.id;
       submitOpen = false;
       resetSubmitForm();
-      await Promise.all([
+      await Promise.allSettled([
         taskQuery.refetch?.(),
         dlqQuery.refetch?.(),
       ]);
     } catch (error) {
+      if (!current()) return;
       submitError = error instanceof Error ? error.message : i18n.t('task.submitFailed');
+    } finally {
+      if (submitAttempt === attempt) submitAttempt = null;
     }
   }
 
@@ -249,7 +305,7 @@
         </div>
       </div>
 
-      {#if !taskProvider}
+      {#if !activeTaskProvider}
         <div class="svadmin-u-60fbb7713999 svadmin-u-36e579c0b41c svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-0478c89a150f svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">
           {i18n.t('common.configRequired')}
         </div>
@@ -276,7 +332,7 @@
                       <RefreshCw class="svadmin-u-82cc6c6581cd svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
                       {i18n.t('common.refresh')}
                     </Button>
-                    <Button size="sm" onclick={() => submitOpen = !submitOpen}>
+                    <Button size="sm" disabled={!taskScope.session.available} onclick={toggleSubmitForm}>
                       <Plus class="svadmin-u-82cc6c6581cd svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
                       {i18n.t('task.submitAction')}
                     </Button>
@@ -327,14 +383,14 @@
                       <Textarea id="task-body" bind:value={submitBodyText} class="svadmin-u-ee15a477cd9c svadmin-u-0e65706bcccd svadmin-u-359090c2d529" />
                     </div>
                     {#if submitError}
-                      <p class="svadmin-u-fc7473ca09eb svadmin-u-811148b13d1e">{submitError}</p>
+                      <p role="alert" class="svadmin-u-fc7473ca09eb svadmin-u-811148b13d1e">{submitError}</p>
                     {/if}
                     <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-77c08e015d14 svadmin-u-77a2a20e90d4">
-                      <Button variant="ghost" onclick={() => { submitOpen = false; submitError = null; }}>
+                      <Button variant="ghost" onclick={toggleSubmitForm}>
                         {i18n.t('common.cancel')}
                       </Button>
-                      <Button onclick={() => void handleSubmitTask()} disabled={submitTask.mutation.isPending}>
-                        {#if submitTask.mutation.isPending}
+                      <Button onclick={() => void handleSubmitTask()} disabled={submitAttempt !== null || !taskScope.session.available}>
+                        {#if submitAttempt !== null}
                           <Loader2 class="svadmin-u-82cc6c6581cd svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-afbdd13a380e" />
                         {/if}
                         {i18n.t('task.submitAction')}
@@ -346,7 +402,7 @@
 
               <TaskList
                 tasks={filteredTasks}
-                {taskProvider}
+                taskProvider={activeTaskProvider}
                 dlq={activeTab === 'dlq'}
                 title={activeTab === 'dlq' ? i18n.t('task.dlqTitle') : i18n.t('task.listTitle')}
                 emptyText={activeTab === 'dlq' ? i18n.t('task.noDlq') : i18n.t('task.noTasks')}
@@ -362,7 +418,7 @@
               {#if selectedTaskId}
                 <TaskDetails
                   taskId={selectedTaskId}
-                  {taskProvider}
+                  taskProvider={activeTaskProvider}
                   useProviderData
                   queryOptions={{
                     refetchInterval: refreshInterval,
