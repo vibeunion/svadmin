@@ -4,36 +4,41 @@ Svelte 5 admin components using semantic design tokens and Bits UI primitives.
 
 ## CSS Integration
 
-For a host without Tailwind, import the precompiled stylesheet once:
+Import the precompiled stylesheet once:
 
 ```ts
 import '@svadmin/ui/app.css';
 ```
 
-No Tailwind plugin is required in that host. Both component styles and the
-transitional utility aliases are compiled into the published stylesheet.
+Consumers do not need Tailwind or Panda. Both component styles and the existing
+utility aliases are included in the published native stylesheet. Theme overrides
+continue to use public semantic CSS variables; nested themes use `.svadmin-theme`.
 
-For a Tailwind v4 host that also generates its own utilities:
+Existing Tailwind v4 hosts may opt into the legacy metadata entry instead:
 
 ```css
-@import "tailwindcss";
 @import "@svadmin/ui/app.theme.css";
 ```
 
-The theme entry includes the same precompiled component styles, plus the
-semantic `@theme` metadata. Import one SVAdmin CSS entry, not both.
-Theme overrides use semantic CSS variables; nested themes use `.svadmin-theme`.
+This entry includes the same component CSS plus `@theme` and `@source` metadata.
+Import one UI CSS entry, not both. The metadata does not add a Tailwind dependency
+to SVAdmin, and plain-CSS hosts should use `app.css`.
 
 ## Migration Boundary
 
-Tailwind and its animation helpers remain build-time tools. The UI package no
-longer declares `tailwind-variants` or `tailwind-merge` as runtime dependencies.
-The source still contains transitional utility aliases; this is not a complete
-rewrite to hand-authored CSS.
+Tailwind, its Vite plugin and animation compiler are no longer build dependencies.
+Panda is a development dependency for the new semantic tokens and slot recipes;
+its runtime class helpers and type declarations do not import the compiler.
 
-The public variant helpers return semantic classes for class-only composition.
-Components also expose variant and size data attributes. Primitive defaults
-live in the `components` layer so host utilities can override them.
+Existing `svadmin-u-*` aliases, animation rules and compiled `--tw-*` variables
+remain native compatibility CSS. Do not rename or delete them mechanically.
+New styles should use native CSS or reviewed Panda recipes, not new uncompiled
+Tailwind class strings. This is not a wholesale rewrite of every UI component.
+
+The initial `surfaceMetric` and `surfaceTable` recipes pre-generate every public
+variant. Surface applications opt into `styledSurfaceCatalog` and load
+`@svadmin/surface/styles.css`; see the Surface package's `STYLING.md`. Default
+Surface v1 props and the no-variant rendering path stay unchanged.
 
 ## Validation
 
@@ -43,10 +48,13 @@ bun run test
 bun run test:css
 ```
 
-The CSS tests inspect both published entries, require coverage for every
-migrated utility alias referenced by components, compile a Tailwind host, and
-verify that postprocessing is idempotent.
+CSS tests pin the original native compatibility rule tree, declarations and
+cascade order, check every referenced utility alias, verify the declarations for
+all styled recipe slots and variants, and exercise a deliberately missing rule.
+They also check nested layer flattening, isolation of generated CSS variables,
+postbuild idempotence and both public stylesheet entries.
 
-The utility migration script is an explicit maintenance operation, not a build
-step. It validates the full input set before writing and leaves dynamic
-template fragments unchanged for manual review.
+The repository's Panda compatibility workflow additionally checks strict Surface
+types, generated helpers in a dependency-free consumer, and Chromium screenshot
+and computed-style comparisons. Its viewport/theme matrix uses actual Svelte
+components; it is not a claim of full-application or cross-browser coverage.

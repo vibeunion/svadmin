@@ -1,0 +1,95 @@
+name: Panda style compatibility
+
+on:
+  push:
+    branches: [feat/panda-tokens-no-tailwind]
+  pull_request:
+    paths:
+      - 'packages/ui/**'
+      - 'packages/surface/**'
+      - 'packages/ai-elements/**'
+      - 'example/**'
+      - 'scripts/check-panda-browser.mjs'
+      - 'scripts/check-no-tailwind.mjs'
+      - 'scripts/check-panda-runtime.mjs'
+      - 'packages/core/src/i18n.svelte.ts'
+      - 'bun.lock'
+      - '.github/workflows/panda-migration-evidence.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: panda-styles-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compatibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - name: Prepare diagnostic output
+        run: mkdir -p "$RUNNER_TEMP/panda-evidence/logs"
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+      - name: Reject Tailwind compiler dependencies and active directives
+        run: node scripts/check-no-tailwind.mjs
+      - name: Build component packages
+        run: |
+          bun run --cwd packages/ai-elements build
+          bun run --cwd packages/ui build
+          bun run --cwd packages/surface build
+      - name: Native CSS and component contract tests
+        id: tests
+        continue-on-error: true
+        run: |
+          status=0
+          bun run --cwd packages/ui test:css || status=1
+          (cd packages/ui && bunx --no-install vitest run --config vitest.config.ts src/app-css.test.ts src/page-chrome-css.test.ts) || status=1
+          (cd packages/ai-elements && bunx --no-install vitest run --config vitest.config.ts src/components/code/code-variants.test.ts) || status=1
+          bun run --cwd packages/surface test || status=1
+          exit "$status"
+      - name: Standalone generated runtime and declaration checks
+        id: runtime
+        continue-on-error: true
+        run: node scripts/check-panda-runtime.mjs 2>&1 | tee "$RUNNER_TEMP/panda-evidence/logs/runtime.log"
+      - name: Surface type checks
+        id: types
+        continue-on-error: true
+        run: bun run --cwd packages/surface check 2>&1 | tee "$RUNNER_TEMP/panda-evidence/logs/types.log"
+      - name: Chromium component compatibility
+        id: browser
+        continue-on-error: true
+        run: |
+          bunx --no-install playwright install --with-deps chromium
+          node scripts/check-panda-browser.mjs 2>&1 | tee "$RUNNER_TEMP/panda-evidence/logs/browser.log"
+      - name: Preserve evidence for this exact commit
+        if: always()
+        run: |
+          mkdir -p "$RUNNER_TEMP/panda-evidence"
+          git archive --format=tar.gz --output="$RUNNER_TEMP/panda-evidence/source.tar.gz" HEAD
+          git rev-parse HEAD > "$RUNNER_TEMP/panda-evidence/commit.txt"
+          if test -d docs/pr-evidence/panda-styles; then cp -R docs/pr-evidence/panda-styles "$RUNNER_TEMP/panda-evidence/"; fi
+          if test -d packages/surface/dist; then tar -czf "$RUNNER_TEMP/panda-evidence/surface-dist.tar.gz" -C packages/surface dist; fi
+          if test -d packages/ui/dist; then tar -czf "$RUNNER_TEMP/panda-evidence/ui-dist.tar.gz" -C packages/ui dist; fi
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: panda-style-compatibility
+          path: ${{ runner.temp }}/panda-evidence/
+          retention-days: 14
+      - name: Enforce every verification result
+        if: steps.tests.outcome != 'success' || steps.types.outcome != 'success' || steps.runtime.outcome != 'success' || steps.browser.outcome != 'success'
+        run: exit 1

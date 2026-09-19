@@ -6,6 +6,8 @@ export type {
 export type { SurfaceMessages } from './localization.js';
 export {
   DEFAULT_SURFACE_CATALOG_VERSION,
+  STYLED_SURFACE_CATALOG_VERSION,
+  styledSurfaceCatalog,
   defaultSurfaceCatalog,
   defineSurfaceCatalog,
 } from './catalog.js';

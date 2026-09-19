@@ -113,6 +113,8 @@ export interface SurfaceWidgetDefinition {
   readonly type: string;
   readonly dataKind: SurfaceCatalogDataKind;
   readonly propsSchema: TSchema;
+  readonly description?: string;
+  readonly examples?: readonly JsonObject[];
   /** Fields read from the bound record, supplied by a trusted Catalog. */
   readonly getReferencedFields?: (props: JsonObject) => readonly string[];
 }
