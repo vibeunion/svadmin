@@ -1,0 +1,76 @@
+name: Resolve scoped Panda security fixes
+
+on:
+  push:
+    branches: [feat/panda-tokens-no-tailwind]
+    paths: ['.github/workflows/panda-lockfile-security-fix.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  resolve:
+    if: github.repository == 'vibeunion/svadmin' && github.ref == 'refs/heads/feat/panda-tokens-no-tailwind'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - name: Verify old lock and resolve only the two scoped fixes
+        run: |
+          echo '07d82e609b5d848d0e795b08ce82870daf01247e61491108600c35fd357a3425  bun.lock' | sha256sum -c
+          mkdir -p "$RUNNER_TEMP/security-lock"
+          cp bun.lock "$RUNNER_TEMP/security-lock/before.lock"
+          bun install
+          git diff --exit-code -- package.json
+          bun - <<'JS'
+          import assert from 'node:assert/strict';
+          import { readFileSync } from 'node:fs';
+          const parse = (p) => JSON.parse(readFileSync(p, 'utf8').replace(/,\s*([}\]])/g, '$1'));
+          const before = parse(process.env.RUNNER_TEMP + '/security-lock/before.lock');
+          const after = parse('bun.lock');
+          assert.deepEqual(after.workspaces, before.workspaces);
+          assert.deepEqual(after.patchedDependencies, before.patchedDependencies);
+          const allowed = new Set(['browserslist', 'postcss-selector-parser', '@pandacss/core/postcss-selector-parser']);
+          for (const key of new Set([...Object.keys(before.packages), ...Object.keys(after.packages)])) {
+            if (!allowed.has(key)) assert.deepEqual(after.packages[key], before.packages[key], 'Unrelated dependency changed: ' + key);
+          }
+          assert.equal(after.packages.browserslist[0], 'browserslist@4.28.7');
+          assert.equal(after.packages['postcss-selector-parser'][0], 'postcss-selector-parser@7.1.5');
+          if (after.packages['@pandacss/core/postcss-selector-parser']) {
+            assert.equal(after.packages['@pandacss/core/postcss-selector-parser'][0], 'postcss-selector-parser@7.1.5');
+          }
+          assert.equal(after.packages['@expressive-code/core/postcss-nested/postcss-selector-parser'][0], 'postcss-selector-parser@6.1.4');
+          console.info('Only the approved Browserslist and Panda selector-parser entries changed.');
+          JS
+          bun install --frozen-lockfile
+          bun audit
+      - name: Commit only the verified lockfile to the feature branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          test "$(git diff --name-only)" = 'bun.lock'
+          git add bun.lock
+          git diff --cached --check
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'fix(deps): lock patched Browserslist and scoped Panda selector parser'
+          header="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $header" push origin HEAD:refs/heads/feat/panda-tokens-no-tailwind
+      - name: Preserve exact dependency diff
+        if: always()
+        run: |
+          mkdir -p "$RUNNER_TEMP/security-lock"
+          cp bun.lock "$RUNNER_TEMP/security-lock/after.lock"
+          git rev-parse HEAD > "$RUNNER_TEMP/security-lock/commit.txt"
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: panda-security-lock
+          path: ${{ runner.temp }}/security-lock/
+          retention-days: 7
