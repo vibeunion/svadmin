@@ -1,0 +1,36 @@
+name: PR443 main integration review
+on:
+  push:
+    branches: [review/pr443-main-20260919-1549]
+    paths: [.github/workflows/pr443-main-review.yml]
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: c1b5aa834dd06b00e2666d2319415add0b787015
+          persist-credentials: false
+      - name: Inspect exact main merge without modifying any remote branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --quiet --no-tags --unshallow origin
+          git fetch --quiet --no-tags origin c02ac0dab6edc081b4175d17a46fdeff98e1267d
+          git config user.name 'Integration review'
+          git config user.email 'noreply@github.com'
+          git status --short
+          for path in .agents/AGENTS.local.md .agents/state/coordination.json; do
+            if test -f "$path"; then echo "--- $path"; head -100 "$path"; fi
+          done
+          if git merge --no-commit --no-ff c02ac0dab6edc081b4175d17a46fdeff98e1267d; then
+            echo 'MERGE_DIAGNOSTIC=clean'
+            git diff --cached --stat
+          else
+            echo 'MERGE_DIAGNOSTIC=conflicts; this is not a passing acceptance run'
+            git diff --name-only --diff-filter=U
+            git diff --cc
+          fi
