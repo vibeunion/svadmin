@@ -79,12 +79,15 @@
     return undefined;
   }
 
-  function updateItem(id: string, update: Partial<UploadItem>, clear: ('error' | 'url')[] = []): void {
+  function updateItem(id: string, update: Partial<UploadItem>): void {
     items = items.map(item => {
       if (item.id !== id) return item;
       const next = { ...item, ...update };
-      if (clear.includes('error')) delete next.error;
-      if (clear.includes('url')) delete next.url;
+      // 清除可选字段时删除键，避免发布显式 undefined 的记录。
+      if (update.status === 'uploading') {
+        delete next.error;
+        delete next.url;
+      }
       return next;
     });
     emitChange();
@@ -94,7 +97,7 @@
     if (!upload || disabled) return;
     const controller = new AbortController();
     controllers.set(item.id, controller);
-    updateItem(item.id, { status: 'uploading', progress: 0 }, ['error']);
+    updateItem(item.id, { status: 'uploading', progress: 0 });
     try {
       const result = await upload(item.file, {
         signal: controller.signal,
@@ -102,8 +105,7 @@
           progress: Number.isFinite(progress) ? Math.max(0, Math.min(100, Math.round(progress))) : 0,
         }),
       });
-      const url = result?.url;
-      updateItem(item.id, { status: 'success', progress: 100, ...(url === undefined ? {} : { url }) }, url === undefined ? ['url'] : []);
+      updateItem(item.id, { status: 'success', progress: 100, ...(result?.url === undefined ? {} : { url: result.url }) });
     } catch (error) {
       updateItem(item.id, {
         status: controller.signal.aborted ? 'cancelled' : 'error',
@@ -147,7 +149,7 @@
   }
 
   function retry(item: UploadItem): void {
-    void process(item);
+    void process({ ...item, status: 'queued' });
   }
 
   function handleKeydown(event: KeyboardEvent): void {

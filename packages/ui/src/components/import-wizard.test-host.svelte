@@ -1,9 +1,11 @@
 <script lang="ts">
-  import { createI18nScope, provideI18nScope } from '@svadmin/core/i18n';
   import { provideAdminContext, type DataProvider, type ResourceDefinition, type AccessControlProvider } from '@svadmin/core';
   import { definedOptions, definedReactiveOptions } from '@svadmin/core/options';
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
   import ImportWizard from './ImportWizard.svelte';
+  import { createI18nScope, provideI18nScope } from '@svadmin/core/i18n';
+
+  provideI18nScope(createI18nScope({ locale: 'en' }));
 
   let {
     provider,
@@ -31,7 +33,6 @@
     get tenant() { return { tenantId: tenant }; },
     get accessControlProvider() { return permission; },
   }));
-  provideI18nScope(createI18nScope({ locale: 'en' }));
 </script>
 
 <QueryClientProvider client={queryClient}>

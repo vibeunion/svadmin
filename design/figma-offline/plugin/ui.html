@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root { color-scheme: light dark; font: 13px/1.6 system-ui,sans-serif; color: var(--figma-color-text, #222); background: var(--figma-color-bg, #fff); }
+* { box-sizing: border-box; } body { margin: 0; padding: 20px; } h1 { font-size: 18px; margin: 0 0 8px; } h2 { font-size: 14px; margin: 0 0 8px; }
+p { margin: 8px 0; } section { padding: 18px 0; border-bottom: 1px solid var(--figma-color-border, #aaa); }
+label { display: block; margin: 6px 0; } input[type=checkbox] { margin-inline-end: 8px; } input[type=file] { width: 100%; }
+button { margin: 10px 6px 0 0; padding: 8px 12px; font: inherit; min-height: 36px; cursor: pointer; } button:disabled { cursor: not-allowed; opacity: .6; }
+:focus-visible { outline: 2px solid var(--figma-color-border-brand, #5066da); outline-offset: 3px; }
+pre { white-space: pre-wrap; overflow-wrap: anywhere; padding: 12px; background: var(--figma-color-bg-secondary, #f1f2f5); border-radius: 4px; max-height: 180px; overflow-y: auto; }
+#status { min-height: 42px; overflow-wrap: anywhere; } [hidden] { display: none !important; }
+</style><title>svadmin 离线设计工具</title></head>
+<body>
+<h1>svadmin 离线设计工具</h1>
+<p>无需令牌。插件不连接外部网络。文件内容、文本及图片可能包含敏感信息，分享前请检查。</p>
+<section aria-labelledby="export-title">
+<h2 id="export-title">1. 导出选中的设计</h2>
+<p>先在画布中选择少量 Frame／Component。默认只导出选区及其引用的变量、样式；不会自动导出整份文件。</p>
+<label><input id="images" type="checkbox">包含选区引用的图片原始字节</label>
+<label><input id="previews" type="checkbox" checked>包含 PNG 对照图（最长边至多 1600px）</label>
+<label><input id="all-tokens" type="checkbox">额外包含全部本地变量和样式（可能含选区外信息）</label>
+<button id="export">生成导出文件</button><button id="download" disabled>保存 .svfig.json</button>
+</section>
+<section aria-labelledby="import-title">
+<h2 id="import-title">2. 预览并导入自有蓝图</h2>
+<p>不是 .fig 导入器，不会把第三方导出自动变成组件库。仅接受自有受限蓝图，创建新页面和新变量，不替换现有内容。</p>
+<label for="blueprint">选择 .blueprint.json（上限 1 MiB）</label><input id="blueprint" type="file" accept=".json,application/json">
+<pre id="preview" hidden></pre>
+<label><input id="consent" type="checkbox" disabled>我有权使用这些数据，并确认创建上述新页面及变量。</label>
+<button id="confirm" disabled>确认导入</button><button id="cancel" disabled>取消预览</button>
+</section>
+<p id="status" role="status" aria-live="polite">就绪。实际 Figma 导出和导入需在编辑器中运行。</p>
+<script>
+/*__CORE__*/
+</script>
+<script>
+(() => {
+  'use strict';
+  const C = globalThis.FigmaOffline, el = id => document.getElementById(id);
+  let seq = 0, active = null, stageId = null, bundle = null, fileRevision = 0;
+  const status = message => { el('status').textContent = message; };
+  function controls(busy) {
+    el('export').disabled = busy; el('blueprint').disabled = busy;
+    el('confirm').disabled = busy || !stageId || !el('consent').checked;
+    el('consent').disabled = busy || !stageId; el('cancel').disabled = busy || !stageId;
+    el('download').disabled = busy || !bundle;
+  }
+  function clearStage() { stageId = null; el('consent').checked = false; el('preview').hidden = true; el('preview').textContent = ''; }
+  function send(type, payload = {}) {
+    active = `request-${++seq}`; controls(true);
+    parent.postMessage({ pluginMessage: { type, requestId: active, ...payload } }, '*');
+  }
+  el('export').onclick = () => { clearStage(); bundle = null; status('正在导出，请勿修改画布。'); send('export', { options: {
+    includeImages: el('images').checked, includePreviews: el('previews').checked, includeAllLocalTokens: el('all-tokens').checked } }); };
+  el('blueprint').onchange = async () => {
+    const revision = ++fileRevision; clearStage(); controls(true);
+    try {
+      const file = el('blueprint').files[0]; if (!file) { send('cancel'); return; }
+      if (file.size > 1024 * 1024) throw new Error('蓝图超过 1 MiB，请缩小导入范围。');
+      const data = JSON.parse(await file.text()); if (revision !== fileRevision) return;
+      C.validateBlueprint(data); status('正在校验目标文件和蓝图……'); send('stage', { blueprint: data });
+    } catch (error) { active = null; status(error.message); controls(false); }
+  };
+  el('consent').onchange = () => controls(Boolean(active));
+  el('confirm').onclick = () => { if (!stageId || !el('consent').checked || active) return; status('正在创建新页面……'); send('confirm', { stageId, confirmed: true }); };
+  el('cancel').onclick = () => { clearStage(); send('cancel'); };
+  el('download').onclick = () => {
+    if (!bundle) return;
+    const blob = new Blob([JSON.stringify(bundle, null, 2) + '\n'], { type: 'application/json' });
+    const url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = 'svadmin-export.svfig.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+  window.onmessage = event => {
+    if (event.source !== parent) return;
+    const m = event.data?.pluginMessage;
+    if (!m || typeof m !== 'object' || m.requestId !== active) return;
+    active = null;
+    try {
+      if (m.type === 'exported') { C.validateBundle(m.bundle); bundle = m.bundle; status(`导出完成：${m.summary.nodes} 个节点，${m.summary.assets} 份资源。请保存文件；警告见离线分析结果。`); }
+      else if (m.type === 'staged') { stageId = m.stageId; el('preview').hidden = false; el('preview').textContent = JSON.stringify({ target: m.target, ...m.summary, action: m.action }, null, 2); status('预览已就绪。确认前不会修改文件。'); }
+      else if (m.type === 'imported') { clearStage(); el('preview').hidden = false; el('preview').textContent = JSON.stringify(m.result, null, 2); status('导入操作已返回。请在画布检查布局、变量绑定及文本；这不是自动视觉验收。'); }
+      else if (m.type === 'cancelled') { clearStage(); status('已取消，不再持有待导入蓝图。'); }
+      else if (m.type === 'error') { clearStage(); status(m.message || '操作失败'); }
+      else { clearStage(); status('收到不支持的响应。'); }
+    } catch (error) { clearStage(); bundle = null; status(error.message); }
+    controls(false);
+  };
+})();
+</script></body></html>

@@ -1,10 +1,12 @@
 <script lang="ts">
-  import { createI18nScope, provideI18nScope } from '@svadmin/core/i18n';
   import { provideAdminContext, type DataProvider, type ResourceDefinition, type AccessControlProvider } from '@svadmin/core';
   import { definedReactiveOptions } from '@svadmin/core/options';
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
   import type { ComponentProps } from 'svelte';
   import ResourceOperationsPage from './ResourceOperationsPage.svelte';
+  import { createI18nScope, provideI18nScope } from '@svadmin/core/i18n';
+
+  provideI18nScope(createI18nScope({ locale: 'en' }));
 
   let {
     provider, resources, queryClient, resourceName = 'posts', tenant = 'first', access,
@@ -33,7 +35,6 @@
     get accessControlProvider() { return access; },
     routerProvider: router,
   }));
-  provideI18nScope(createI18nScope({ locale: 'en' }));
 </script>
 
 {#snippet batchActions({ selectedIds }: { selectedIds: (string | number)[] })}

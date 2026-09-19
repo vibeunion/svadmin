@@ -21,9 +21,9 @@ export function parseGenerateArguments(args: string[]): GenerateCommandOptions {
 }
 
 const fieldTypes = {
-  text: true, number: true, boolean: true, date: true, select: true, multiselect: true,
+  text: true, number: true, boolean: true, date: true, time: true, datetime: true, daterange: true, select: true, multiselect: true,
   tags: true, textarea: true, richtext: true, image: true, images: true, json: true,
-  relation: true, color: true, url: true, email: true, phone: true, currency: true,
+  relation: true, color: true, url: true, email: true, phone: true, currency: true, percent: true,
   file: true, markdown: true, password: true, array: true, 'tree-select': true,
   treeselect: true, cascader: true, transfer: true, rate: true, rating: true,
   avatar: true, copy: true, code: true,
