@@ -39,7 +39,7 @@ jobs:
           node scripts/build-native-classnames.mjs ui ai-elements --check
           node scripts/check-recipe-declarations.mjs
           node scripts/check-style-boundary.mjs
-          git diff --exit-code -- bun.lock packages/ui/src/styles packages/ui/src/class-properties.generated.ts packages/ai-elements/src/utilities.css packages/ai-elements/src/class-properties.generated.ts example/src/compatibility.css
+          git diff --exit-code -- bun.lock packages/ui/src/styles packages/ui/src/class-properties.generated.ts packages/ai-elements/src/utilities.css packages/ai-elements/src/class-properties.generated.ts example/styles/compatibility.css
       - name: Verify standalone helpers and declarations
         run: node scripts/check-panda-runtime.mjs
       - name: Strict UI and AI package checks
