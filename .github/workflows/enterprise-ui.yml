@@ -1,0 +1,65 @@
+name: Enterprise UI correctness
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/ui/**'
+      - 'packages/core/**'
+      - 'scripts/fixtures/enterprise-ui/**'
+      - 'playwright.enterprise.config.ts'
+      - '.github/workflows/enterprise-ui.yml'
+      - 'bun.lock'
+      - 'package.json'
+permissions:
+  contents: read
+concurrency:
+  group: enterprise-ui-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  correctness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - run: bun install --frozen-lockfile
+      - name: Build published native UI styles
+        run: bun run --cwd packages/ai-elements build && bun run --cwd packages/ui build
+      - name: Run real Svelte interaction and pure contract tests
+        run: |
+          mkdir -p test-results/enterprise
+          cd packages/ui
+          bun run test src/components/enterprise/correctness.test.ts src/components/enterprise-components.test.svelte.ts src/components/filter-builder.test.svelte.ts --reporter=default --reporter=json --outputFile=../../test-results/enterprise/unit-results.json
+      - name: Build production browser fixture
+        run: bun run vite build --config scripts/fixtures/enterprise-ui/vite.config.ts
+      - name: Install Chromium
+        run: bun run playwright install --with-deps chromium
+      - name: Verify contracts and capture responsive state evidence
+        run: bun run playwright test --config playwright.enterprise.config.ts
+      - name: Record exact source and whitespace verification
+        if: always()
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          mkdir -p test-results/enterprise
+          git rev-parse HEAD > test-results/enterprise/commit.txt
+          git diff --check "$BASE_SHA...HEAD" > test-results/enterprise/diff-check.txt
+          git diff --stat "$BASE_SHA...HEAD" > test-results/enterprise/diff-stat.txt
+          git diff "$BASE_SHA...HEAD" > test-results/enterprise/changes.patch
+          sha256sum packages/ui/src/components/enterprise/*.ts packages/ui/src/components/{JsonSchemaForm,FilterBuilder,SpreadsheetView}.svelte > test-results/enterprise/source-sha256.txt
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: enterprise-ui-evidence
+          path: test-results/enterprise
+          retention-days: 7
+          if-no-files-found: error
