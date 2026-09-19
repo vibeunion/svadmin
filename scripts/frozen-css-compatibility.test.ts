@@ -2,13 +2,13 @@ import { describe, expect, it } from 'bun:test';
 import { readFileSync } from 'node:fs';
 import { isFrozenCompatibilityCss } from './frozen-css-compatibility.js';
 
-const examplePath = 'example/src/compatibility.css';
-const exampleCss = readFileSync(new URL('../example/src/compatibility.css', import.meta.url), 'utf8');
+const examplePath = 'example/test/style-baselines/utilities.css';
+const exampleCss = readFileSync(new URL('../example/test/style-baselines/utilities.css', import.meta.url), 'utf8');
 
 describe('frozen compatibility asset boundary', () => {
   it('accepts only the reviewed bytes of the two legacy generated assets', () => {
     expect(isFrozenCompatibilityCss(examplePath, exampleCss)).toBe(true);
-    const aiPath = 'packages/ai-elements/src/utilities.css';
+    const aiPath = 'packages/ai-elements/test/style-baselines/utilities.css';
     const aiCss = readFileSync(new URL(`../${aiPath}`, import.meta.url), 'utf8');
     expect(isFrozenCompatibilityCss(aiPath, aiCss)).toBe(true);
   });
@@ -19,7 +19,7 @@ describe('frozen compatibility asset boundary', () => {
   });
 
   it('never exempts authored files or similarly named files', () => {
-    for (const path of ['example/src/app.css', 'example/src/pages/compatibility.css', '../example/src/compatibility.css']) {
+    for (const path of ['example/src/app.css', 'example/src/pages/compatibility.css', '../example/test/style-baselines/utilities.css']) {
       expect(isFrozenCompatibilityCss(path, exampleCss)).toBe(false);
     }
   });
