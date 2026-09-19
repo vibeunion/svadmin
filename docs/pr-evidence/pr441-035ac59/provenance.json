@@ -1,0 +1,14 @@
+{
+  "implementationHead": "035ac5950c131e2dba0a50ce750ab9e8b3dc64e6",
+  "testedCheckout": "8720e2943864c81523ed200ae7bd021750ea098d",
+  "base": "e594440ad6e143727fb5b8d81f0368d9a9024385",
+  "run": 35450707246,
+  "artifact": 10586835676,
+  "archiveSha256": "1eb39f97e02427ad7f2cc55c8599428f42638d4e0fcfd153046e341779b5bf81",
+  "images": [
+    {"file":"surface-workflow-1440x900.png","bytes":64404,"dimensions":[1440,900],"gitBlob":"76913cf3e84755b842599788400a304a1302a8a9","sha256":"dc1a90409e9746c39e1616e92435e62038b6c81c8f1eaf311bbaab04dc4ad2d5"},
+    {"file":"surface-workflow-1920x1080.png","bytes":68167,"dimensions":[1920,1080],"gitBlob":"7e8b5405e034ac63e981c940fac49761f69ffe8b","sha256":"1e9699b814e6dc71ef1fa60f8c9329d7fa599bc7bfd8a8d78ff9dc37a5bb86ad"},
+    {"file":"surface-workflow-390x844.png","bytes":60199,"dimensions":[390,1456],"gitBlob":"bc4f31e62ad69678ba456af4991895d58946cf16","sha256":"7c24eb31134319f321b51cd2dec1474b8b4d2e84cea82b7792d6553ffae30e96"}
+  ],
+  "note": "Original PNGs freshly downloaded, hash-verified and inspected from this successful run. Identical prior blobs are deduplicated, not substituted as test evidence. Narrow PNG is a full-page capture of a 390x844 viewport."
+}
