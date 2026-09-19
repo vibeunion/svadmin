@@ -5,7 +5,6 @@ import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import postcss from 'postcss';
 import selectorParser from 'postcss-selector-parser';
-import { compile } from '@tailwindcss/node';
 
 const root = new URL('../', import.meta.url);
 const read = (name) => readFileSync(new URL(`dist/${name}`, root), 'utf8');
@@ -62,18 +61,6 @@ test('every migrated utility referenced by a component has a published CSS selec
     }
   }
   assert.deepEqual([...missing], []);
-});
-
-test('Tailwind hosts can compile new utilities without losing prebuilt component styles', async () => {
-  const compiler = await compile(`@import "tailwindcss";\n${read('app.theme.css')}`, {
-    base: fileURLToPath(new URL('dist/', root)),
-    onDependency() {},
-  });
-  const css = compiler.build(['text-primary', 'bg-success']);
-  assert.ok(css.includes('.text-primary'));
-  assert.ok(css.includes('.bg-success'));
-  assert.ok(css.includes('.svadmin-u-ed8a5df7b2fb'));
-  assert.ok(css.includes('.svadmin-button--outline'));
 });
 
 test('postbuild is idempotent and preserves both CSS side effects', () => {

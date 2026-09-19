@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 const currentDir = dirname(fileURLToPath(import.meta.url));
 
 function readAppCss(): string {
-  return readFileSync(join(currentDir, 'app.css'), 'utf8');
+  return readFileSync(join(currentDir, 'components.css'), 'utf8');
 }
 
 function readCleanFlatCss(): string {
@@ -22,11 +22,11 @@ function readSidebar(): string {
   return readFileSync(join(currentDir, 'components', 'Sidebar.svelte'), 'utf8');
 }
 
-describe('src/app.css (Tailwind source)', () => {
-  it('keeps @theme block so Tailwind v4 generates utility classes', () => {
+describe('native component CSS', () => {
+  it('keeps compiler directives out of native component CSS', () => {
     const css = readAppCss();
 
-    expect(css).toContain('@theme');
+    expect(css).not.toContain('@theme');
   });
 
   it('uses the semantic border token in the global reset', () => {
@@ -36,10 +36,10 @@ describe('src/app.css (Tailwind source)', () => {
     expect(css).not.toMatch(/border-color:\s*var\(--border\);/);
   });
 
-  it('registers the published component directory as its own Tailwind source', () => {
+  it('does not require component source scanning', () => {
     const css = readAppCss();
 
-    expect(css).toContain('@source "./components";');
+    expect(css).not.toContain('@source');
     expect(css).not.toContain('@source "./src";');
   });
 
@@ -80,7 +80,7 @@ describe('src/app.css (Tailwind source)', () => {
     expect(cleanFlatCss).toContain(
       '.layout-clean-flat [data-svadmin-table-row]:hover [data-slot="table-cell"]',
     );
-    expect(cleanFlatCss).toContain('.layout-clean-flat [data-svadmin-content-page] .bg-card');
+    expect(cleanFlatCss).toContain('.layout-clean-flat [data-svadmin-content-page] .svadmin-u-cd0ad9a56558');
     expect(readSidebar()).toMatch(/<aside\s+data-svadmin-sidebar/);
   });
 

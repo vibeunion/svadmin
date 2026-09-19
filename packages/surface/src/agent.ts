@@ -101,6 +101,7 @@ export function buildSurfaceAgentPrompt(
   catalog: SurfaceCatalog,
   policy: SurfacePolicy,
 ): string {
+  const contracts = catalog.widgets.map(({ type, dataKind, propsSchema, description, examples }) => ({ type, dataKind, propsSchema, description, examples }));
   const widgetTypes = catalog.widgets.map((widget) => widget.type).join(', ') || '(none)';
   const resources = Object.entries(policy.resources).map(([resource, resourcePolicy]) => {
     const permissions = [
@@ -113,5 +114,5 @@ export function buildSurfaceAgentPrompt(
     return `${resource}(${permissions.join(';')})`;
   }).join(' | ') || '(none)';
 
-  return `${request}\n\n[svadmin surface agent protocol]\nReturn only a human-reviewable fenced JSON proposal. Never generate or execute Svelte, HTML, CSS, JavaScript, SQL, URLs, event handlers, or mutations. The envelope must be {"schemaVersion":"${SURFACE_AGENT_SCHEMA_VERSION}","action":"propose","summary":"...","spec":{...}}. The spec must use schemaVersion "surface/v1" and catalogVersion "${catalog.version}". Allowed widget types: ${widgetTypes}. Resource policy: ${resources}. Use only catalog widgets and policy-authorized resources and fields. If the request cannot be represented safely, explain the limitation without inventing fields or capabilities.`;
+  return `${request}\n\n[svadmin surface agent protocol]\nReturn only a human-reviewable fenced JSON proposal. Never generate or execute Svelte, HTML, CSS, JavaScript, SQL, URLs, event handlers, or mutations. The envelope must be {"schemaVersion":"${SURFACE_AGENT_SCHEMA_VERSION}","action":"propose","summary":"...","spec":{...}}. The spec must use schemaVersion "surface/v1" and catalogVersion "${catalog.version}". Allowed widget types: ${widgetTypes}. Component contracts: ${JSON.stringify(contracts)}. Select only schema-enumerated semantic variants; never emit class names, CSS objects, tokens, or recipes. Resource policy: ${resources}. Use only catalog widgets and policy-authorized resources and fields. If the request cannot be represented safely, explain the limitation without inventing fields or capabilities.`;
 }

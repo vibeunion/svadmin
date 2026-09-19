@@ -1,3 +1,4 @@
+import { surfaceDesignContract } from '@svadmin/ui/design-contract';
 import { Type, type Static } from "@sinclair/typebox";
 
 const catalogFieldSchema = Type.String({
@@ -59,3 +60,16 @@ export type MetricProps = Static<typeof metricPropsSchema>;
 export type ResourceTableProps = Static<typeof resourceTablePropsSchema>;
 export type BarChartProps = Static<typeof barChartPropsSchema>;
 export type LineChartProps = Static<typeof lineChartPropsSchema>;
+
+const styledMetricProperties = {
+  tone: Type.Optional(Type.Union(surfaceDesignContract.metric.tone.map((value) => Type.Literal(value)))),
+  density: Type.Optional(Type.Union(surfaceDesignContract.metric.density.map((value) => Type.Literal(value)))),
+};
+export const styledMetricPropsSchema = Type.Union([
+  Type.Object({ ...currencyMetric.properties, ...styledMetricProperties }, { additionalProperties: false }),
+  Type.Object({ ...otherMetric.properties, ...styledMetricProperties }, { additionalProperties: false }),
+]);
+export const styledResourceTablePropsSchema = Type.Object({
+  ...resourceTablePropsSchema.properties,
+  density: Type.Optional(Type.Union(surfaceDesignContract.table.density.map((value) => Type.Literal(value)))),
+}, { additionalProperties: false });

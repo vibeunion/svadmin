@@ -53,3 +53,7 @@ CODEBUDDY.md
 HERMES.md
 .agents/docs/
 output/
+
+# Panda build products
+packages/ui/src/styled-system/
+packages/ui/src/styles/recipes.css

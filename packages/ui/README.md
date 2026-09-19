@@ -16,8 +16,7 @@ transitional utility aliases are compiled into the published stylesheet.
 For a Tailwind v4 host that also generates its own utilities:
 
 ```css
-@import "tailwindcss";
-@import "@svadmin/ui/app.theme.css";
+@import "@svadmin/ui/app.css";
 ```
 
 The theme entry includes the same precompiled component styles, plus the

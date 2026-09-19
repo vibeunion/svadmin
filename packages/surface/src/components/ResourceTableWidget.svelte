@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Value } from '@sinclair/typebox/value';
+  import { surfaceTable } from '@svadmin/ui/recipes';
   import CardContent from '@svadmin/ui/components/ui/card/card-content.svelte';
   import CardHeader from '@svadmin/ui/components/ui/card/card-header.svelte';
   import CardTitle from '@svadmin/ui/components/ui/card/card-title.svelte';
@@ -10,7 +11,7 @@
   import TableHeader from '@svadmin/ui/components/ui/table/table-header.svelte';
   import TableRow from '@svadmin/ui/components/ui/table/table-row.svelte';
   import Table from '@svadmin/ui/components/ui/table/table.svelte';
-  import { resourceTablePropsSchema } from '../builtin-schemas.js';
+  import { styledResourceTablePropsSchema as resourceTablePropsSchema } from '../builtin-schemas.js';
   import type { SurfaceWidgetRendererProps } from '../catalog.js';
   import { resolveSurfaceMessages } from '../localization.js';
   import { asRecordArray, displayTableValue } from '../widget-data.js';
@@ -19,27 +20,28 @@
   const activeMessages = $derived(resolveSurfaceMessages(locale, messages));
 
   const tableProps = $derived(Value.Decode(resourceTablePropsSchema, props));
+  const tableClasses = $derived(tableProps.density === undefined ? undefined : surfaceTable({ density: tableProps.density }));
   const records = $derived(data.status === 'ready' ? asRecordArray(data.value) : null);
 </script>
 
-<Card>
-  <CardHeader>
+<Card class={tableClasses?.root} data-surface-density={tableProps.density}>
+  <CardHeader class={tableClasses?.header}>
     <CardTitle>{tableProps.title}</CardTitle>
   </CardHeader>
-  <CardContent>
+  <CardContent class={tableClasses?.content}>
     {#if data.status === 'loading'}
-      <div class="table-state table-loading" role="status">{activeMessages.tableLoading}</div>
+      <div class={"table-state table-loading " + (tableClasses?.state ?? "")} role="status">{activeMessages.tableLoading}</div>
     {:else if data.status === 'empty'}
-      <p class="table-state" role="status">{tableProps.emptyLabel ?? activeMessages.tableNoRecords}</p>
+      <p class={"table-state " + (tableClasses?.state ?? "")} role="status">{tableProps.emptyLabel ?? activeMessages.tableNoRecords}</p>
     {:else if data.status === 'error'}
-      <p class="table-state" role="alert">{data.error.message}</p>
+      <p class={"table-state " + (tableClasses?.state ?? "")} role="alert">{data.error.message}</p>
     {:else if data.status === 'ready' && records?.ok}
       <div class="surface-table">
-        <Table aria-label={tableProps.title}>
+        <Table density={tableProps.density ?? "comfortable"} aria-label={tableProps.title}>
           <TableHeader>
             <TableRow>
               {#each tableProps.columns as column (column.field)}
-                <TableHead scope="col">{column.label}</TableHead>
+                <TableHead class={tableClasses?.head} scope="col">{column.label}</TableHead>
               {/each}
             </TableRow>
           </TableHeader>
@@ -47,7 +49,7 @@
             {#each records.value as record, index (index)}
               <TableRow>
                 {#each tableProps.columns as column (column.field)}
-                  <TableCell>{displayTableValue(record[column.field], {
+                  <TableCell class={tableClasses?.cell}>{displayTableValue(record[column.field], {
                     format: column.format,
                     locale,
                     messages: activeMessages,
@@ -59,7 +61,7 @@
         </Table>
       </div>
     {:else}
-      <p class="table-state" role="alert">{records && !records.ok ? activeMessages.tableInvalidData : activeMessages.tableUnavailable}</p>
+      <p class={"table-state " + (tableClasses?.state ?? "")} role="alert">{records && !records.ok ? activeMessages.tableInvalidData : activeMessages.tableUnavailable}</p>
     {/if}
   </CardContent>
 </Card>
@@ -67,7 +69,7 @@
 <style>
   .table-state {
     display: grid;
-    min-height: 8rem;
+    min-height: var(--svadmin-table-state-height, 8rem);
     margin: 0;
     place-items: center;
     color: var(--muted-foreground);

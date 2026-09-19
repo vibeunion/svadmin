@@ -1,7 +1,8 @@
 <script lang="ts">
   import { Value } from '@sinclair/typebox/value';
+  import { surfaceMetric } from '@svadmin/ui/recipes';
   import StatsCard from '@svadmin/ui/components/StatsCard.svelte';
-  import { metricPropsSchema } from '../builtin-schemas.js';
+  import { styledMetricPropsSchema as metricPropsSchema } from '../builtin-schemas.js';
   import type { SurfaceWidgetRendererProps } from '../catalog.js';
   import { resolveSurfaceMessages } from '../localization.js';
 
@@ -9,6 +10,8 @@
   const activeMessages = $derived(resolveSurfaceMessages(locale, messages));
 
   const metricProps = $derived(Value.Decode(metricPropsSchema, props));
+  const metricClasses = $derived(metricProps.tone !== undefined || metricProps.density !== undefined
+    ? surfaceMetric({ tone: metricProps.tone, density: metricProps.density }) : undefined);
   const formattedValue = $derived.by(() => {
     if (data.status !== 'ready') return '—';
     const value = data.value;
@@ -26,17 +29,17 @@
   });
 </script>
 
-<article aria-labelledby="{widgetId}-label" aria-busy={data.status === 'loading'}>
+<article class={metricClasses?.root} data-surface-tone={metricProps.tone} data-surface-density={metricProps.density} aria-labelledby="{widgetId}-label" aria-busy={data.status === 'loading'}>
   <span id="{widgetId}-label" class="visually-hidden">{metricProps.label}</span>
   {#if data.status === 'loading'}
-    <StatsCard label={metricProps.label} value="" loading />
+    <StatsCard class={metricClasses?.card} label={metricProps.label} value="" loading />
   {:else if data.status === 'ready' && typeof data.value === 'number'}
-    <StatsCard label={metricProps.label} value={formattedValue} />
+    <StatsCard class={metricClasses?.card} label={metricProps.label} value={formattedValue} />
     {#if metricProps.description}
-      <p class="metric-description">{metricProps.description}</p>
+      <p class={"metric-description " + (metricClasses?.description ?? "")}>{metricProps.description}</p>
     {/if}
   {:else}
-    <div class="metric-state" role={data.status === 'error' ? 'alert' : 'status'}>
+    <div class={"metric-state " + (metricClasses?.state ?? "")} role={data.status === 'error' ? 'alert' : 'status'}>
       <strong>{metricProps.label}</strong>
       <span>{data.status === 'error' ? data.error.message : data.status === 'empty' ? activeMessages.metricNoData : activeMessages.metricInvalidData}</span>
     </div>
@@ -65,8 +68,8 @@
   .metric-state {
     display: grid;
     gap: 0.35rem;
-    min-height: 6rem;
-    padding: 1.25rem;
+    min-height: var(--svadmin-metric-state-height, 6rem);
+    padding: var(--svadmin-metric-state-padding, 1.25rem);
     border: 1px solid var(--border);
     border-radius: 0.75rem;
     background: var(--card);

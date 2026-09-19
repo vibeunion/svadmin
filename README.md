@@ -273,8 +273,7 @@ const dataProvider = createElysiaDataProvider<App>("http://localhost:3000");
 
 ```css
 /* app.css */
-@import "tailwindcss";
-@import "@svadmin/ui/app.theme.css";
+@import "@svadmin/ui/app.css";
 @import "@svadmin/ai-elements/ai.css";
 ```
 

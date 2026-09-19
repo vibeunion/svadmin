@@ -230,6 +230,7 @@ export default ts.config(
     ignores: [
       '**/node_modules/**',
       '**/dist/**',
+      '**/styled-system/**',
       '**/.svelte-kit/**',
       '**/.astro/**',
       'test-results/**',
