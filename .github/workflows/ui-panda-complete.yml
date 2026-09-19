@@ -2,12 +2,7 @@ name: Complete UI recipe migration
 on:
   push:
     branches: [feat/ui-panda-complete-20260919]
-    paths:
-      - '.github/workflows/ui-panda-complete.yml'
-      - 'scripts/**'
-      - 'packages/**'
-      - 'example/**'
-      - 'bun.lock'
+    paths: ['.github/workflows/ui-panda-complete.yml', 'scripts/**', 'packages/**', 'example/**', 'bun.lock', 'eslint.config.js']
 permissions:
   contents: read
 concurrency:
@@ -17,7 +12,7 @@ jobs:
   migration:
     if: github.repository == 'vibeunion/svadmin' && github.ref == 'refs/heads/feat/ui-panda-complete-20260919'
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     permissions:
       contents: write
     steps:
@@ -31,15 +26,18 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: '1.4.2'
-      - name: Start with an empty evidence directory
+      - name: Start with empty evidence
         run: |
           mkdir -p "$RUNNER_TEMP/complete-ui/logs"
           rm -rf docs/pr-evidence/panda-styles
-      - name: Install locked dependencies
+      - name: Install locked bootstrap dependencies
         run: bun install --frozen-lockfile
-      - name: Generate finite recipes without changing public selectors
-        run: node scripts/migrate-ui-utilities.mjs
-      - name: Commit generated sources to this migration branch only
+      - name: Generate finite recipes and native runtime
+        run: |
+          node scripts/migrate-ui-utilities.mjs
+          node scripts/migrate-ui-runtime.mjs
+          bun install
+      - name: Commit generated sources to this branch only
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -48,11 +46,20 @@ jobs:
           git add packages/ui/design/migrated-utilities packages/ui/test/style-baselines packages/ui/src/styles/compatibility.prelude.css packages/ui/package.json packages/ui/scripts/panda-css.test.mjs
           git add packages/ai-elements/design/migrated-utilities packages/ai-elements/test/style-baselines packages/ai-elements/src/utilities.css packages/ai-elements/package.json
           git add example/design/migrated-utilities example/test/style-baselines example/src/compatibility.css example/package.json scripts/check-panda-browser.mjs
+          git add packages/ui/src/classnames.ts packages/ui/src/classnames.test.ts packages/ui/src/class-properties.generated.ts packages/ui/src/utils.ts
+          git add packages/ai-elements/src packages/ai-elements/vendor bun.lock eslint.config.js
           if ! git diff --cached --quiet; then
-            git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' -c core.hooksPath=/dev/null commit -m 'feat(styles): generate repository-wide finite Panda utility recipes'
+            git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' -c core.hooksPath=/dev/null commit -m 'feat(styles): remove class engines and own finite native runtime'
             git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)" push origin HEAD:refs/heads/feat/ui-panda-complete-20260919
           fi
           git rev-parse HEAD | tee "$RUNNER_TEMP/complete-ui/tested-commit.txt"
+      - name: Prove a fresh frozen install has no class engine
+        run: |
+          rm -rf node_modules
+          bun install --frozen-lockfile
+          git diff --exit-code -- bun.lock
+          node scripts/check-style-boundary.mjs --source
+          node --test scripts/native-classnames.test.mjs scripts/style-boundary.test.mjs
       - name: Build all workspace packages
         run: |
           bun run build:packages > "$RUNNER_TEMP/complete-ui/logs/build.log" 2>&1 || { tail -100 "$RUNNER_TEMP/complete-ui/logs/build.log"; exit 1; }
@@ -63,6 +70,18 @@ jobs:
         run: |
           bun run --cwd packages/ui test:css
           node scripts/build-migrated-ui.mjs ui ai-elements example --check
+          node scripts/build-native-classnames.mjs ui ai-elements --check
+          node scripts/check-style-boundary.mjs
+      - name: Chromium immutable-baseline comparison
+        id: browser
+        continue-on-error: true
+        run: |
+          bunx --no-install playwright install --with-deps chromium > "$RUNNER_TEMP/complete-ui/logs/browser-install.log" 2>&1
+          node scripts/check-panda-browser.mjs
+      - name: Standalone runtime and declaration checks
+        id: runtime
+        continue-on-error: true
+        run: node scripts/check-panda-runtime.mjs
       - name: Lint
         id: lint
         continue-on-error: true
@@ -77,17 +96,7 @@ jobs:
             tail -45 "$RUNNER_TEMP/complete-ui/logs/$package-tests.log"
           done
           exit "$status"
-      - name: Standalone runtime and declaration checks
-        id: runtime
-        continue-on-error: true
-        run: node scripts/check-panda-runtime.mjs
-      - name: Chromium immutable-baseline comparison
-        id: browser
-        continue-on-error: true
-        run: |
-          bunx --no-install playwright install --with-deps chromium > "$RUNNER_TEMP/complete-ui/logs/browser-install.log" 2>&1
-          node scripts/check-panda-browser.mjs
-      - name: Collect only this run's generated evidence
+      - name: Collect only current-run evidence
         if: always()
         run: |
           mkdir -p "$RUNNER_TEMP/complete-ui/screenshots"
@@ -100,11 +109,11 @@ jobs:
           name: complete-ui-migration-evidence
           path: ${{ runner.temp }}/complete-ui/
           retention-days: 14
-      - name: Enforce all verification gates
+      - name: Enforce every verification gate
         if: always()
         run: |
           test '${{ steps.css.outcome }}' = success
+          test '${{ steps.browser.outcome }}' = success
+          test '${{ steps.runtime.outcome }}' = success
           test '${{ steps.lint.outcome }}' = success
           test '${{ steps.tests.outcome }}' = success
-          test '${{ steps.runtime.outcome }}' = success
-          test '${{ steps.browser.outcome }}' = success
