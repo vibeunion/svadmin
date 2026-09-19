@@ -1,0 +1,166 @@
+@layer sv-surface.reset, sv-surface.base, sv-surface.tokens, sv-surface.recipes, sv-surface.utilities;
+
+@layer sv-surface.base{
+  :root {
+    --made-with-panda: '🐼';
+}
+
+  *,::before,::after,::backdrop {
+    --blur: /*-*/ /*-*/;
+    --brightness: /*-*/ /*-*/;
+    --contrast: /*-*/ /*-*/;
+    --grayscale: /*-*/ /*-*/;
+    --hue-rotate: /*-*/ /*-*/;
+    --invert: /*-*/ /*-*/;
+    --saturate: /*-*/ /*-*/;
+    --sepia: /*-*/ /*-*/;
+    --drop-shadow: /*-*/ /*-*/;
+    --backdrop-blur: /*-*/ /*-*/;
+    --backdrop-brightness: /*-*/ /*-*/;
+    --backdrop-contrast: /*-*/ /*-*/;
+    --backdrop-grayscale: /*-*/ /*-*/;
+    --backdrop-hue-rotate: /*-*/ /*-*/;
+    --backdrop-invert: /*-*/ /*-*/;
+    --backdrop-opacity: /*-*/ /*-*/;
+    --backdrop-saturate: /*-*/ /*-*/;
+    --backdrop-sepia: /*-*/ /*-*/;
+    --gradient-from-position: /*-*/ /*-*/;
+    --gradient-to-position: /*-*/ /*-*/;
+    --gradient-via-position: /*-*/ /*-*/;
+    --scroll-snap-strictness: proximity;
+    --border-spacing-x: 0;
+    --border-spacing-y: 0;
+    --translate-x: 0;
+    --translate-y: 0;
+    --rotate: 0;
+    --rotate-x: 0;
+    --rotate-y: 0;
+    --skew-x: 0;
+    --skew-y: 0;
+    --scale-x: 1;
+    --scale-y: 1;
+}
+}
+
+@layer sv-surface.tokens{
+  .svadmin-surface-editor {
+    --svsurface-colors-background: var(--card, #ffffff);
+    --svsurface-colors-foreground: var(--foreground, #18181b);
+    --svsurface-colors-muted: var(--muted-foreground, #52525b);
+    --svsurface-colors-border: var(--border, #d4d4d8);
+    --svsurface-colors-primary: var(--primary, #2563eb);
+    --svsurface-colors-on-primary: var(--primary-foreground, #ffffff);
+    --svsurface-colors-destructive: var(--destructive, #b91c1c);
+    --svsurface-spacing-sm: 0.5rem;
+    --svsurface-spacing-md: 0.75rem;
+    --svsurface-spacing-lg: 1rem;
+    --svsurface-radii-control: 0.375rem;
+    --svsurface-radii-panel: 0.75rem;
+}
+}
+
+@layer sv-surface.recipes{
+  @layer _base{
+
+    .svsurface-surface-editor {
+      border: 1px solid;
+      border-color: var(--svsurface-colors-border);
+      border-radius: var(--svsurface-radii-panel);
+      box-sizing: border-box;
+      background-color: var(--svsurface-colors-background);
+      color: var(--svsurface-colors-foreground);
+      font-family: inherit;
+      width: 100%;
+      min-width: 0;
+}
+
+    .svsurface-surface-editor [data-part="title"] {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+      overflow-wrap: anywhere;
+}
+
+    .svsurface-surface-editor [data-part="status"] {
+      margin: 0.25rem 0 0;
+      color: var(--svsurface-colors-muted);
+      font-size: 0.875rem;
+}
+
+    .svsurface-surface-editor [data-part="error"] {
+      border: 1px solid;
+      padding: var(--svsurface-spacing-md);
+      border-color: var(--svsurface-colors-destructive);
+      border-radius: var(--svsurface-radii-control);
+      color: var(--svsurface-colors-destructive);
+      overflow-wrap: anywhere;
+      margin-bottom: var(--svsurface-spacing-lg);
+}
+
+    .svsurface-surface-editor [data-part="toolbar"] {
+      gap: var(--svsurface-spacing-md);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--svsurface-spacing-lg);
+}
+
+    .svsurface-surface-editor [data-part="actions"] {
+      gap: var(--svsurface-spacing-sm);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+}
+
+    .svsurface-surface-editor [data-part="viewport"] {
+      min-width: 0;
+}
+
+    .svsurface-surface-editor-button {
+      border: 1px solid;
+      padding: 0.5rem 0.875rem;
+      font: inherit;
+      border-color: var(--svsurface-colors-border);
+      border-radius: var(--svsurface-radii-control);
+      appearance: none;
+      -webkit-appearance: none;
+      font-size: 0.875rem;
+      line-height: 1.25;
+      cursor: pointer;
+      white-space: normal;
+      min-height: 2.5rem;
+      max-width: 100%;
+}
+
+    .svsurface-surface-editor-button:is(:disabled, [disabled], [data-disabled], [aria-disabled=true]) {
+      opacity: 0.5;
+      cursor: not-allowed;
+}
+
+    .svsurface-surface-editor-button:is(:focus-visible, [data-focus-visible]) {
+      outline: 2px solid;
+      outline-color: var(--svsurface-colors-primary);
+      outline-offset: 2px;
+}
+}
+
+  .svsurface-surface-editor--density_comfortable {
+    padding: var(--svsurface-spacing-lg);
+}
+
+  .svsurface-surface-editor--density_compact {
+    padding: var(--svsurface-spacing-md);
+}
+
+  .svsurface-surface-editor-button--variant_secondary {
+    background-color: var(--svsurface-colors-background);
+    color: var(--svsurface-colors-foreground);
+}
+
+  .svsurface-surface-editor-button--variant_primary {
+    border-color: var(--svsurface-colors-primary);
+    background-color: var(--svsurface-colors-primary);
+    color: var(--svsurface-colors-on-primary);
+}
+}
