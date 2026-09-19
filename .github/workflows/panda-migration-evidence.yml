@@ -58,6 +58,7 @@ jobs:
           status=0
           bun run --cwd packages/ui test:css || status=1
           (cd packages/ui && bunx --no-install vitest run --config vitest.config.ts src/app-css.test.ts src/page-chrome-css.test.ts) || status=1
+          (cd packages/ai-elements && bunx --no-install vitest run --config vitest.config.ts src/components/code/code-variants.test.ts) || status=1
           bun run --cwd packages/surface test || status=1
           exit "$status"
       - name: Standalone generated runtime and declaration checks

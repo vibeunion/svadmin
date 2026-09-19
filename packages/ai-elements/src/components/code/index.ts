@@ -1,10 +1,27 @@
 import { cn } from '../../utils.js';
 
-export type CodeVariant = 'default' | 'secondary' | undefined;
+export type CodeVariant = 'default' | 'secondary' | null | undefined;
+type CodeClassValue = Parameters<typeof cn>[number];
 
-/** 保留公开调用方式，但不再依赖运行时样式变体引擎。 */
-export function codeVariants({ variant = 'default', class: className = '', className: extraClassName = '' }: { variant?: CodeVariant | null; class?: string; className?: string } = {}): string {
-  return cn('relative h-full overflow-auto rounded-md border text-foreground', variant === 'secondary' ? 'border-transparent bg-secondary' : variant === null ? '' : 'border-border bg-background', className, extraClassName);
+/** Select already-published utility classes without a runtime variant engine. */
+export function codeVariants({
+  variant = 'default',
+  class: className,
+  className: extraClassName,
+}: {
+  variant?: CodeVariant;
+  class?: CodeClassValue;
+  className?: CodeClassValue;
+} = {}): string {
+  // null disables the variant, not the original recipe's base border/background.
+  return cn(
+    'relative h-full overflow-auto rounded-md border text-foreground',
+    variant === 'secondary'
+      ? 'border-transparent bg-secondary'
+      : 'border-border bg-background',
+    className,
+    extraClassName,
+  );
 }
 
 export { default, default as Root, default as Code } from './Code.svelte';
