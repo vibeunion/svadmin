@@ -8,7 +8,7 @@
     multiple?: boolean;
     required?: boolean;
     disabled?: boolean;
-    error?: string;
+    error?: string | undefined;
     class?: string;
   }
 
