@@ -106,7 +106,7 @@
         id: snapshot.source.id,
         identity,
         isCurrent,
-        async load() {
+        async load(isRequestCurrent) {
           if (!provider) return providerError(snapshot.source.id, providerFailure);
           try {
             return await loadSurfaceSource({
@@ -114,11 +114,11 @@
               resourcePolicy: snapshot.resourcePolicy,
               provider,
               async authorize(resource, action) {
-                if (!isCurrent()) return { can: false };
+                if (!isRequestCurrent()) return { can: false };
                 const decision = await canAccessAsync(resource, action);
                 // An invalidated/deleted source must not start a provider request
                 // after an already-running permission check finishes.
-                return isCurrent() ? decision : { can: false };
+                return isRequestCurrent() ? decision : { can: false };
               },
             });
           } catch (failure) {

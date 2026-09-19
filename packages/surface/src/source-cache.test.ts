@@ -325,6 +325,26 @@ describe('Surface source cache', () => {
     assert.equal(h.errors.length, 1);
   });
 
+  it('passes an owner-scoped guard to pending authorization across identical refreshes', async () => {
+    const h = harness();
+    const permission = deferred<void>();
+    let obsoleteReadStarted = false;
+    const pending = h.cache.reconcile([{
+      id: 'a', identity: ['same'], isCurrent: () => true,
+      async load(isCurrent) {
+        await permission.promise;
+        obsoleteReadStarted = isCurrent();
+        return ready('a', 1);
+      },
+    }]);
+    const latest = ready('a', 42);
+    await h.cache.reconcile([h.request('a', ['same'], async () => latest)], 'a');
+    permission.resolve();
+    await pending;
+    assert.equal(obsoleteReadStarted, false);
+    assert.equal(h.states.get('a'), latest);
+  });
+
   it('never shares cached data across renderer instances', async () => {
     const first = harness();
     const second = harness();

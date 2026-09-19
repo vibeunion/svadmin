@@ -53,7 +53,7 @@ export interface SurfaceSourceRequest {
   readonly id: string;
   /** Values compare by Object.is; provider and permission identities are not serialized. */
   readonly identity: readonly unknown[];
-  readonly load: () => Promise<SurfaceSourceDataState>;
+  readonly load: (isCurrent: () => boolean) => Promise<SurfaceSourceDataState>;
   /** Also guards prop changes that happen before Svelte's next effect flush. */
   readonly isCurrent: () => boolean;
 }
@@ -104,7 +104,7 @@ export function createSurfaceSourceCache(sink: SourceCacheSink) {
       if (!current()) { retire(); return; }
       let state: SurfaceSourceDataState;
       try {
-        state = await request.load();
+        state = await request.load(current);
       } catch (failure) {
         state = {
           status: 'error', sourceId: request.id,
