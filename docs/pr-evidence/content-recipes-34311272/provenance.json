@@ -1,0 +1,28 @@
+{
+  "sourceHead": "34311272a1b5dd556049645e57d108123a9902d7",
+  "testedMergeHead": "d81182b7f5d02c67843ef21ce10e5f671aa7938d",
+  "workflowRun": 35450546994,
+  "artifactId": 10585698947,
+  "images": [
+    {
+      "file": "1440x900-candidate.png",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "scene": "2-1440-light-default",
+      "sha256": "0a56b67912322dba62e9b669460aee0af7a1e09e4f3881cdf51bc2f998c37d6f",
+      "capture": "stage locator, not a full viewport bitmap"
+    },
+    {
+      "file": "1920x1080-candidate.png",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "scene": "18-1920-light-default",
+      "sha256": "0c3b8e08f7f78c90d58acab9c6bbfb427934e35f81f3945fe0aa6006ea66a7ee",
+      "capture": "stage locator, not a full viewport bitmap"
+    }
+  ]
+}

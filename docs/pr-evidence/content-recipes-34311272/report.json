@@ -1,0 +1,1762 @@
+{
+  "baseline": "ee01ea0b52285bd3129447cd0b2ddb0c114f45ce",
+  "head": "d81182b7f5d02c67843ef21ce10e5f671aa7938d",
+  "baselineSources": {
+    "packages/ui/src/components/content/ContentPageShell.svelte": "c5c755e60d3498c95887cec8af2c90cde4edc47ef3daa7c88131e1503dc7b1da",
+    "packages/ui/src/components/content/ContentPageHeader.svelte": "6c09349d0eb12685321472de6299fb13d1bef1786364d6e5c816948aef2c2610",
+    "packages/ui/src/components/content/MetricBlock.svelte": "86af6b1e458658613b89f738676a6427413f5892cab93cfb3741e8b761eb17d5"
+  },
+  "candidateSources": {
+    "packages/ui/src/components/content/ContentPageShell.svelte": "827b5324ba9dc67eb697bd0b39bcf46a454fd26b1388ef60fa6e715fd3dfedc3",
+    "packages/ui/src/components/content/ContentPageHeader.svelte": "7ba5ba59a4fcf4628fbcbbe2b23bec9a56dc62675d1e3ea70f799054e3b298e1",
+    "packages/ui/src/components/content/MetricBlock.svelte": "b7879b6d6dc6afde2ee96fea53a86ce34aad8864467c8074bc55a1daabb690ce"
+  },
+  "css": {
+    "published": "62ed1e91fcd5eb90d9d9b39d1a0bd393dfbf967605f333bbbebff2308fbfc335",
+    "recipes": "b4a02cc64369dd51f4239d3acd0cf2866bcc7df0bb9b4c546e23dd7f0fe6c1ce"
+  },
+  "comparison": "Exact geometry/styles and PNG versus historical components plus four explicit trend-color corrections. Original historical PNGs are retained, not overwritten.",
+  "cases": [
+    {
+      "id": "0-1440-light-narrow",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "width": "narrow",
+      "flat": false,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.55 0.16 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.58 0.22 27)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.25 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "324435be7771c55c2193d85553b6ed5dcf5e12223fd480bf2abf8be0c24541b3",
+      "candidatePngSha256": "8afbd06b31da2408fce7baf23523795c5d18e4bd6ddf2daa0185be16c30a8c4b",
+      "correctedReferencePngSha256": "8afbd06b31da2408fce7baf23523795c5d18e4bd6ddf2daa0185be16c30a8c4b"
+    },
+    {
+      "id": "1-1440-light-narrow",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "width": "narrow",
+      "flat": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.55 0.16 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.58 0.22 27)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.25 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "feac9d68bf9bf85272ff6e1b5fca84293a7bfe2f70694196d01854b9d53f018c",
+      "candidatePngSha256": "c1756c028fdfdc057d863169f952ab222ae35d287de03d132e502ff87ccbc5f9",
+      "correctedReferencePngSha256": "c1756c028fdfdc057d863169f952ab222ae35d287de03d132e502ff87ccbc5f9"
+    },
+    {
+      "id": "2-1440-light-default",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "width": "default",
+      "flat": false,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.55 0.16 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.58 0.22 27)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.25 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "a97cc400fe7499ccdbedf42efedc5b6cb3f3e5230c1c24496739e7bb030776fa",
+      "candidatePngSha256": "0a56b67912322dba62e9b669460aee0af7a1e09e4f3881cdf51bc2f998c37d6f",
+      "correctedReferencePngSha256": "0a56b67912322dba62e9b669460aee0af7a1e09e4f3881cdf51bc2f998c37d6f"
+    },
+    {
+      "id": "3-1440-light-default",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "width": "default",
+      "flat": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.55 0.16 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.58 0.22 27)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.25 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "64d7b42af367eb68061869e3e95de86a32c9fc61d419603bf2614e2f09dc4d45",
+      "candidatePngSha256": "2dc380de8c8ee8329177f5e464adcbb24e2ca80c702e047f5ca562455158fbda",
+      "correctedReferencePngSha256": "2dc380de8c8ee8329177f5e464adcbb24e2ca80c702e047f5ca562455158fbda"
+    },
+    {
+      "id": "4-1440-light-wide",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "width": "wide",
+      "flat": false,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.55 0.16 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.58 0.22 27)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.25 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "1e3db777aec0b4eb57e450e4b2f7f3387897e6f03fd8343ef74d2dcdffd92063",
+      "candidatePngSha256": "6e225d425a8a45caf5bca03457af7a6759e60d2e20062592bf0c501ea80600b4",
+      "correctedReferencePngSha256": "6e225d425a8a45caf5bca03457af7a6759e60d2e20062592bf0c501ea80600b4"
+    },
+    {
+      "id": "5-1440-light-wide",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "width": "wide",
+      "flat": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.55 0.16 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.58 0.22 27)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.25 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "64d7b42af367eb68061869e3e95de86a32c9fc61d419603bf2614e2f09dc4d45",
+      "candidatePngSha256": "2dc380de8c8ee8329177f5e464adcbb24e2ca80c702e047f5ca562455158fbda",
+      "correctedReferencePngSha256": "2dc380de8c8ee8329177f5e464adcbb24e2ca80c702e047f5ca562455158fbda"
+    },
+    {
+      "id": "6-1440-light-default",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "width": "default",
+      "flat": true,
+      "rtl": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.55 0.16 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.58 0.22 27)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.25 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "429810961a1f979204cd3fd0717bf0256778a80516888f0874cab105e838a0b5",
+      "candidatePngSha256": "864ac6d63da948d1fb0a343dab2da6f3266d8683f6f925e1866ea6dde05290ea",
+      "correctedReferencePngSha256": "864ac6d63da948d1fb0a343dab2da6f3266d8683f6f925e1866ea6dde05290ea"
+    },
+    {
+      "id": "7-1440-light-default",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "width": "default",
+      "flat": true,
+      "nested": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.15 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.19 24)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.22 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "9bfadf5422fec75310ff6a1cbbc21e6dd72b2b9e9186e969db24a38b837abed6",
+      "candidatePngSha256": "852711bd6a5f3bccdc9d549335385d81d3b607cfdda6539eae6b89f1a7a5d292",
+      "correctedReferencePngSha256": "852711bd6a5f3bccdc9d549335385d81d3b607cfdda6539eae6b89f1a7a5d292"
+    },
+    {
+      "id": "8-1440-dark-narrow",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "dark",
+      "width": "narrow",
+      "flat": false,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.15 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.19 24)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.22 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "f775190b00d1c89f87d69342ebee5c542294a97f39a26b983c9ffd38fffb76e4",
+      "candidatePngSha256": "09a6452f3d479f062eb70e7b347458c51de5c81094099d4bd42032b1ea415456",
+      "correctedReferencePngSha256": "09a6452f3d479f062eb70e7b347458c51de5c81094099d4bd42032b1ea415456"
+    },
+    {
+      "id": "9-1440-dark-narrow",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "dark",
+      "width": "narrow",
+      "flat": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.15 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.19 24)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.22 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "2ff5b6e06cf855bafae5b8d6442f3bf39d04ea2ccb794ccfc0739fc1153d249b",
+      "candidatePngSha256": "c32e44fedff1bdf6a8ae703cbcc8ccd35be846647b24148f0ec6c4c8db6c3dbb",
+      "correctedReferencePngSha256": "c32e44fedff1bdf6a8ae703cbcc8ccd35be846647b24148f0ec6c4c8db6c3dbb"
+    },
+    {
+      "id": "10-1440-dark-default",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "dark",
+      "width": "default",
+      "flat": false,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.15 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.19 24)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.22 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "3e5af237ff12907014bdd558a76b5c335c060bc076806900e6230087433d8a34",
+      "candidatePngSha256": "ccb0707ab09ab45061c90208c276e08d50aee792cd1b199025dfb2f1378739e2",
+      "correctedReferencePngSha256": "ccb0707ab09ab45061c90208c276e08d50aee792cd1b199025dfb2f1378739e2"
+    },
+    {
+      "id": "11-1440-dark-default",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "dark",
+      "width": "default",
+      "flat": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.15 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.19 24)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.22 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "9bfadf5422fec75310ff6a1cbbc21e6dd72b2b9e9186e969db24a38b837abed6",
+      "candidatePngSha256": "852711bd6a5f3bccdc9d549335385d81d3b607cfdda6539eae6b89f1a7a5d292",
+      "correctedReferencePngSha256": "852711bd6a5f3bccdc9d549335385d81d3b607cfdda6539eae6b89f1a7a5d292"
+    },
+    {
+      "id": "12-1440-dark-wide",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "dark",
+      "width": "wide",
+      "flat": false,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.15 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.19 24)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.22 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "24b019a773d7eec723d35d96d4de4063de7aa05f641c2fdaae6c8d9fdf582cfb",
+      "candidatePngSha256": "d7e4b7d946d96b7002f943ce2d8999a6c654113266d14c0795230b06f667adbc",
+      "correctedReferencePngSha256": "d7e4b7d946d96b7002f943ce2d8999a6c654113266d14c0795230b06f667adbc"
+    },
+    {
+      "id": "13-1440-dark-wide",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "dark",
+      "width": "wide",
+      "flat": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.15 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.19 24)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.22 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "9bfadf5422fec75310ff6a1cbbc21e6dd72b2b9e9186e969db24a38b837abed6",
+      "candidatePngSha256": "852711bd6a5f3bccdc9d549335385d81d3b607cfdda6539eae6b89f1a7a5d292",
+      "correctedReferencePngSha256": "852711bd6a5f3bccdc9d549335385d81d3b607cfdda6539eae6b89f1a7a5d292"
+    },
+    {
+      "id": "14-1440-dark-default",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "dark",
+      "width": "default",
+      "flat": true,
+      "rtl": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.15 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.19 24)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.22 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "65150cb9522c532e72703abdf928beb88bc801710a1619b3b53a7e3381868c49",
+      "candidatePngSha256": "904dea1b20af3861444133462228972859ffdb7615b2c629307ad4cc4e914d77",
+      "correctedReferencePngSha256": "904dea1b20af3861444133462228972859ffdb7615b2c629307ad4cc4e914d77"
+    },
+    {
+      "id": "15-1440-dark-default",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "dark",
+      "width": "default",
+      "flat": true,
+      "nested": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.15 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.19 24)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.22 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "820b5f0b51cfcadfb7da0e15c524c2f084f85c60634e0fdabfd1e26f4ccd3ff3",
+      "candidatePngSha256": "c6f55446f2e9fa8d924c2c173d3c50f7c91b7d8dd13f24ac62bf73e08715d9f7",
+      "correctedReferencePngSha256": "c6f55446f2e9fa8d924c2c173d3c50f7c91b7d8dd13f24ac62bf73e08715d9f7"
+    },
+    {
+      "id": "16-1920-light-narrow",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "light",
+      "width": "narrow",
+      "flat": false,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.55 0.16 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.58 0.22 27)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.25 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "cbf75d2e935d35f5f5b7eb50b0e6127433bb20b9a41e7add0f67402fa92e8722",
+      "candidatePngSha256": "9aed6173250ae959d839bfd3a6b40cb73c411e638ab774f3d872b878a3993b4a",
+      "correctedReferencePngSha256": "9aed6173250ae959d839bfd3a6b40cb73c411e638ab774f3d872b878a3993b4a"
+    },
+    {
+      "id": "17-1920-light-narrow",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "light",
+      "width": "narrow",
+      "flat": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.55 0.16 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.58 0.22 27)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.25 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "3d6ee42fe713b4f8028412c19359357ef97a4b7612c4c30556e45399e7f12f9c",
+      "candidatePngSha256": "7fecafa6d411b00b19c8762e125499cd2f9e4da395854aa0e1056ed55fd15df5",
+      "correctedReferencePngSha256": "7fecafa6d411b00b19c8762e125499cd2f9e4da395854aa0e1056ed55fd15df5"
+    },
+    {
+      "id": "18-1920-light-default",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "light",
+      "width": "default",
+      "flat": false,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.55 0.16 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.58 0.22 27)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.25 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "c532ac8c90335c060ef2a23e50ab05327654c15b2147bee7930281381de4fc19",
+      "candidatePngSha256": "0c3b8e08f7f78c90d58acab9c6bbfb427934e35f81f3945fe0aa6006ea66a7ee",
+      "correctedReferencePngSha256": "0c3b8e08f7f78c90d58acab9c6bbfb427934e35f81f3945fe0aa6006ea66a7ee"
+    },
+    {
+      "id": "19-1920-light-default",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "light",
+      "width": "default",
+      "flat": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.55 0.16 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.58 0.22 27)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.25 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "fcc4861845483d8786ff625aba1e4e5cf36b03ed6309236d56bc7733be8d8cb5",
+      "candidatePngSha256": "aba5dc5b5a3cd150422c2711c99f8997d9fce7c9fddd7f27f4fc784e718b9a1b",
+      "correctedReferencePngSha256": "aba5dc5b5a3cd150422c2711c99f8997d9fce7c9fddd7f27f4fc784e718b9a1b"
+    },
+    {
+      "id": "20-1920-light-wide",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "light",
+      "width": "wide",
+      "flat": false,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.55 0.16 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.58 0.22 27)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.25 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "69455f05b491747fa6e90aa6e7e34bf382b1e8ec11dca5544bfd02f5fe797141",
+      "candidatePngSha256": "0f692f8c8b7b0a14660b68d28989bf00794fc647f0c398660815b7fb0adfef70",
+      "correctedReferencePngSha256": "0f692f8c8b7b0a14660b68d28989bf00794fc647f0c398660815b7fb0adfef70"
+    },
+    {
+      "id": "21-1920-light-wide",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "light",
+      "width": "wide",
+      "flat": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.55 0.16 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.58 0.22 27)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.25 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "fcc4861845483d8786ff625aba1e4e5cf36b03ed6309236d56bc7733be8d8cb5",
+      "candidatePngSha256": "aba5dc5b5a3cd150422c2711c99f8997d9fce7c9fddd7f27f4fc784e718b9a1b",
+      "correctedReferencePngSha256": "aba5dc5b5a3cd150422c2711c99f8997d9fce7c9fddd7f27f4fc784e718b9a1b"
+    },
+    {
+      "id": "22-1920-light-default",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "light",
+      "width": "default",
+      "flat": true,
+      "rtl": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.55 0.16 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.58 0.22 27)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.25 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "d6f8cb2397cd60983911ca3164f886a4eb7b830f1d56fddf915aa588afd52059",
+      "candidatePngSha256": "a7c36e899eff5daf946c614a20ea58e2eab7293fe2f52e5998292117317b4dfa",
+      "correctedReferencePngSha256": "a7c36e899eff5daf946c614a20ea58e2eab7293fe2f52e5998292117317b4dfa"
+    },
+    {
+      "id": "23-1920-light-default",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "light",
+      "width": "default",
+      "flat": true,
+      "nested": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.15 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.19 24)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.22 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "59abc58f7e770c6cc10aa2f280c21a01f49da5241d36145d338b51734c131606",
+      "candidatePngSha256": "56eb80adc13bd06550869a3c7833baf588058311bd3aaf8358bc05e166aedfab",
+      "correctedReferencePngSha256": "56eb80adc13bd06550869a3c7833baf588058311bd3aaf8358bc05e166aedfab"
+    },
+    {
+      "id": "24-1920-dark-narrow",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "dark",
+      "width": "narrow",
+      "flat": false,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.15 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.19 24)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.22 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "5c885f0b62d8542f2c4bdb046e536d183c9a3ef7b3d07100cf2f7853baeb944d",
+      "candidatePngSha256": "44b69d793a850bdd64ff49571975e502afca74ff158ba9b4bb6234d99603c388",
+      "correctedReferencePngSha256": "44b69d793a850bdd64ff49571975e502afca74ff158ba9b4bb6234d99603c388"
+    },
+    {
+      "id": "25-1920-dark-narrow",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "dark",
+      "width": "narrow",
+      "flat": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.15 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.19 24)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.22 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "f3e3bcfea4003e738766d4ed55a9290af698ec50f2e9b5ae0978d78bd87ea697",
+      "candidatePngSha256": "b16123b46a72fcbda80c65c66dd9036c7e3580d8acd70cbb0537f842bd8fc881",
+      "correctedReferencePngSha256": "b16123b46a72fcbda80c65c66dd9036c7e3580d8acd70cbb0537f842bd8fc881"
+    },
+    {
+      "id": "26-1920-dark-default",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "dark",
+      "width": "default",
+      "flat": false,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.15 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.19 24)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.22 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "a5b6b065d1a2eedf1ae5d46f60ecf431415fc6ad0dcfc79fe1a6dcc910b51998",
+      "candidatePngSha256": "7ca4f951422e6a2d847ea76d520682fcac968bd05b499f3c8702c1ee53584eca",
+      "correctedReferencePngSha256": "7ca4f951422e6a2d847ea76d520682fcac968bd05b499f3c8702c1ee53584eca"
+    },
+    {
+      "id": "27-1920-dark-default",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "dark",
+      "width": "default",
+      "flat": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.15 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.19 24)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.22 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "59abc58f7e770c6cc10aa2f280c21a01f49da5241d36145d338b51734c131606",
+      "candidatePngSha256": "56eb80adc13bd06550869a3c7833baf588058311bd3aaf8358bc05e166aedfab",
+      "correctedReferencePngSha256": "56eb80adc13bd06550869a3c7833baf588058311bd3aaf8358bc05e166aedfab"
+    },
+    {
+      "id": "28-1920-dark-wide",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "dark",
+      "width": "wide",
+      "flat": false,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.15 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.19 24)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.22 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "82dc120e7e0c3f26118beda016c6ee42c7f874d8a4e41203ca7408010eebfd15",
+      "candidatePngSha256": "f06c111fb1ae75826c041dce8dfb3ad63898a2f8f45f0a155a27350c83d3f03c",
+      "correctedReferencePngSha256": "f06c111fb1ae75826c041dce8dfb3ad63898a2f8f45f0a155a27350c83d3f03c"
+    },
+    {
+      "id": "29-1920-dark-wide",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "dark",
+      "width": "wide",
+      "flat": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.15 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.19 24)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.22 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "59abc58f7e770c6cc10aa2f280c21a01f49da5241d36145d338b51734c131606",
+      "candidatePngSha256": "56eb80adc13bd06550869a3c7833baf588058311bd3aaf8358bc05e166aedfab",
+      "correctedReferencePngSha256": "56eb80adc13bd06550869a3c7833baf588058311bd3aaf8358bc05e166aedfab"
+    },
+    {
+      "id": "30-1920-dark-default",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "dark",
+      "width": "default",
+      "flat": true,
+      "rtl": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.15 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.19 24)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.22 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "fdd54b8311dfe458e83d2f25b90d0b81a3920fdda286a4073e7af9dd04e74144",
+      "candidatePngSha256": "0bdd5e6f77267e13e1177f05af47f2303ccfd0d22f516f856a0bc6c87d68a7a1",
+      "correctedReferencePngSha256": "0bdd5e6f77267e13e1177f05af47f2303ccfd0d22f516f856a0bc6c87d68a7a1"
+    },
+    {
+      "id": "31-1920-dark-default",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "dark",
+      "width": "default",
+      "flat": true,
+      "nested": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.15 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.19 24)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.22 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "6491b626b077b6822beca68b3faa15e544b26c11fd60f51a5eecbd6de9ccf52f",
+      "candidatePngSha256": "70b7f21e4016a6f0d622d4a4bd3a795ee886da916a261b1a7f23abda10daf7c3",
+      "correctedReferencePngSha256": "70b7f21e4016a6f0d622d4a4bd3a795ee886da916a261b1a7f23abda10daf7c3"
+    },
+    {
+      "id": "32-390-light-narrow",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "width": "narrow",
+      "flat": false,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.55 0.16 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.58 0.22 27)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.25 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "eec8324fc4d1ce1b1a45a2b775b6e15209bbdaf0cbdee031458617b42de641fa",
+      "candidatePngSha256": "1d7b22c1891f65eb44580d551d8ef055a81a316a3dfc1bf7b04f9b0790b7a520",
+      "correctedReferencePngSha256": "1d7b22c1891f65eb44580d551d8ef055a81a316a3dfc1bf7b04f9b0790b7a520"
+    },
+    {
+      "id": "33-390-light-narrow",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "width": "narrow",
+      "flat": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.55 0.16 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.58 0.22 27)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.25 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "45082cd75e5bffd777c8ec8ef93d370e3ca584d36fd11794d20a877ea596937a",
+      "candidatePngSha256": "3c6a24ebf6f0ddc914f3fe927f0a7f4ea0d28a689568e7ad45afd6092c49c055",
+      "correctedReferencePngSha256": "3c6a24ebf6f0ddc914f3fe927f0a7f4ea0d28a689568e7ad45afd6092c49c055"
+    },
+    {
+      "id": "34-390-light-default",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "width": "default",
+      "flat": false,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.55 0.16 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.58 0.22 27)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.25 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "eec8324fc4d1ce1b1a45a2b775b6e15209bbdaf0cbdee031458617b42de641fa",
+      "candidatePngSha256": "1d7b22c1891f65eb44580d551d8ef055a81a316a3dfc1bf7b04f9b0790b7a520",
+      "correctedReferencePngSha256": "1d7b22c1891f65eb44580d551d8ef055a81a316a3dfc1bf7b04f9b0790b7a520"
+    },
+    {
+      "id": "35-390-light-default",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "width": "default",
+      "flat": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.55 0.16 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.58 0.22 27)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.25 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "45082cd75e5bffd777c8ec8ef93d370e3ca584d36fd11794d20a877ea596937a",
+      "candidatePngSha256": "3c6a24ebf6f0ddc914f3fe927f0a7f4ea0d28a689568e7ad45afd6092c49c055",
+      "correctedReferencePngSha256": "3c6a24ebf6f0ddc914f3fe927f0a7f4ea0d28a689568e7ad45afd6092c49c055"
+    },
+    {
+      "id": "36-390-light-wide",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "width": "wide",
+      "flat": false,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.55 0.16 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.58 0.22 27)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.25 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "eec8324fc4d1ce1b1a45a2b775b6e15209bbdaf0cbdee031458617b42de641fa",
+      "candidatePngSha256": "1d7b22c1891f65eb44580d551d8ef055a81a316a3dfc1bf7b04f9b0790b7a520",
+      "correctedReferencePngSha256": "1d7b22c1891f65eb44580d551d8ef055a81a316a3dfc1bf7b04f9b0790b7a520"
+    },
+    {
+      "id": "37-390-light-wide",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "width": "wide",
+      "flat": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.55 0.16 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.58 0.22 27)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.25 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "45082cd75e5bffd777c8ec8ef93d370e3ca584d36fd11794d20a877ea596937a",
+      "candidatePngSha256": "3c6a24ebf6f0ddc914f3fe927f0a7f4ea0d28a689568e7ad45afd6092c49c055",
+      "correctedReferencePngSha256": "3c6a24ebf6f0ddc914f3fe927f0a7f4ea0d28a689568e7ad45afd6092c49c055"
+    },
+    {
+      "id": "38-390-light-default",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "width": "default",
+      "flat": true,
+      "rtl": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.55 0.16 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.58 0.22 27)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.205 0.012 264)",
+          "to": "oklch(0.25 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "19d3b30487879d910028d472f0e6c5823edd88d0165b36cee2159de1ef454c66",
+      "candidatePngSha256": "6b36140d0de5ccfef6faeb1b19e06d4fb15e261ebb6978a9d6c1345a0f2b01ce",
+      "correctedReferencePngSha256": "6b36140d0de5ccfef6faeb1b19e06d4fb15e261ebb6978a9d6c1345a0f2b01ce"
+    },
+    {
+      "id": "39-390-light-default",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "width": "default",
+      "flat": true,
+      "nested": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.15 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.19 24)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.22 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "bcae9908c15fdff877f23191e438dcdef3542ac65fb37a0c280d415f23f1ca4d",
+      "candidatePngSha256": "bbbcadeb2f68127c8a87ed9d467aa71d856180fe62c827e4018e8b33176cac63",
+      "correctedReferencePngSha256": "bbbcadeb2f68127c8a87ed9d467aa71d856180fe62c827e4018e8b33176cac63"
+    },
+    {
+      "id": "40-390-dark-narrow",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "dark",
+      "width": "narrow",
+      "flat": false,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.15 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.19 24)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.22 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "14abed026d98cbeadb38660ac5efca084571e30822ef468934d3af76df52f4ee",
+      "candidatePngSha256": "ad916384f52ec155bc462250b20ac690ac4d20a35dfcb16a01a033c1c5870cea",
+      "correctedReferencePngSha256": "ad916384f52ec155bc462250b20ac690ac4d20a35dfcb16a01a033c1c5870cea"
+    },
+    {
+      "id": "41-390-dark-narrow",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "dark",
+      "width": "narrow",
+      "flat": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.15 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.19 24)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.22 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "bcae9908c15fdff877f23191e438dcdef3542ac65fb37a0c280d415f23f1ca4d",
+      "candidatePngSha256": "bbbcadeb2f68127c8a87ed9d467aa71d856180fe62c827e4018e8b33176cac63",
+      "correctedReferencePngSha256": "bbbcadeb2f68127c8a87ed9d467aa71d856180fe62c827e4018e8b33176cac63"
+    },
+    {
+      "id": "42-390-dark-default",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "dark",
+      "width": "default",
+      "flat": false,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.15 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.19 24)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.22 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "14abed026d98cbeadb38660ac5efca084571e30822ef468934d3af76df52f4ee",
+      "candidatePngSha256": "ad916384f52ec155bc462250b20ac690ac4d20a35dfcb16a01a033c1c5870cea",
+      "correctedReferencePngSha256": "ad916384f52ec155bc462250b20ac690ac4d20a35dfcb16a01a033c1c5870cea"
+    },
+    {
+      "id": "43-390-dark-default",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "dark",
+      "width": "default",
+      "flat": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.15 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.19 24)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.22 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "bcae9908c15fdff877f23191e438dcdef3542ac65fb37a0c280d415f23f1ca4d",
+      "candidatePngSha256": "bbbcadeb2f68127c8a87ed9d467aa71d856180fe62c827e4018e8b33176cac63",
+      "correctedReferencePngSha256": "bbbcadeb2f68127c8a87ed9d467aa71d856180fe62c827e4018e8b33176cac63"
+    },
+    {
+      "id": "44-390-dark-wide",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "dark",
+      "width": "wide",
+      "flat": false,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.15 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.19 24)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.22 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "14abed026d98cbeadb38660ac5efca084571e30822ef468934d3af76df52f4ee",
+      "candidatePngSha256": "ad916384f52ec155bc462250b20ac690ac4d20a35dfcb16a01a033c1c5870cea",
+      "correctedReferencePngSha256": "ad916384f52ec155bc462250b20ac690ac4d20a35dfcb16a01a033c1c5870cea"
+    },
+    {
+      "id": "45-390-dark-wide",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "dark",
+      "width": "wide",
+      "flat": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.15 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.19 24)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.22 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "bcae9908c15fdff877f23191e438dcdef3542ac65fb37a0c280d415f23f1ca4d",
+      "candidatePngSha256": "bbbcadeb2f68127c8a87ed9d467aa71d856180fe62c827e4018e8b33176cac63",
+      "correctedReferencePngSha256": "bbbcadeb2f68127c8a87ed9d467aa71d856180fe62c827e4018e8b33176cac63"
+    },
+    {
+      "id": "46-390-dark-default",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "dark",
+      "width": "default",
+      "flat": true,
+      "rtl": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.15 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.19 24)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.22 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "8f32cbfa814bc61f836500c5ed97647e45431385cabc0728cb04de6e9a636e64",
+      "candidatePngSha256": "b4655300854c20c01d3a738854bb8687fb57dd8ca12e9ae681a613b44cacbd81",
+      "correctedReferencePngSha256": "b4655300854c20c01d3a738854bb8687fb57dd8ca12e9ae681a613b44cacbd81"
+    },
+    {
+      "id": "47-390-dark-default",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "dark",
+      "width": "default",
+      "flat": true,
+      "nested": true,
+      "passed": true,
+      "nodes": 62,
+      "colorCorrections": [
+        {
+          "label": "Completed",
+          "index": 30,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.15 151)"
+        },
+        {
+          "label": "Failed",
+          "index": 37,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.68 0.19 24)"
+        },
+        {
+          "label": "Pending",
+          "index": 44,
+          "from": "oklch(0.96 0.004 264)",
+          "to": "oklch(0.22 0.04 60)"
+        }
+      ],
+      "historicalPngIdentical": false,
+      "baselinePngSha256": "83e14dff20db960311d72c36588f462c71527b6385eb9541f00a8427165e3233",
+      "candidatePngSha256": "c697437a7d8ff74b57ce475fb33717a7d4a87e78772e79b1802ebe7511dedfd6",
+      "correctedReferencePngSha256": "c697437a7d8ff74b57ce475fb33717a7d4a87e78772e79b1802ebe7511dedfd6"
+    }
+  ],
+  "errors": []
+}
