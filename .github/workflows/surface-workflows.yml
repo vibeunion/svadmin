@@ -49,12 +49,13 @@ jobs:
           echo "SVADMIN_OPENUI_ENTRY=$RUNNER_TEMP/surface-openui/node_modules/@openuidev/lang-core/dist/index.mjs" >> "$GITHUB_ENV"
       - name: Real OpenUI parser conformance
         run: node scripts/surface-workflows/openui-conformance.mjs
-      - name: Verify isolated packed consumer and server boundary
-        run: node scripts/surface-workflows/packed-consumer.mjs
       - name: Install Chromium
         run: bun run playwright install --with-deps chromium
       - name: Real browser acceptance with synthetic data and authenticated-identity fixtures
         run: bun run playwright test --config scripts/surface-workflows/playwright.config.ts
+      # Playwright clears its outputDir at startup; produce the package report afterwards.
+      - name: Verify isolated packed consumer and server boundary
+        run: node scripts/surface-workflows/packed-consumer.mjs
       - name: Upload current-run browser evidence
         if: always()
         uses: actions/upload-artifact@v7

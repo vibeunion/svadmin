@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [svelte(), svelteTesting()],
   ssr: {
     // Compile the real packaged form and its Svelte dependencies in component tests.
-    noExternal: ['@tanstack/svelte-query', '@svadmin/ui', 'bits-ui'],
+    noExternal: ['@tanstack/svelte-query', '@svadmin/ui', 'bits-ui', '@lucide/svelte'],
   },
   test: {
     environment: 'happy-dom',
