@@ -105,7 +105,7 @@ describe('Surface source snapshots', () => {
       { ...policy, readFields: ['id'] }, { ...policy, filterFields: [] },
       { ...policy, sortFields: [] }, { ...policy, allowGetOne: true },
       { ...policy, maxPageSize: 20 },
-    ]) assert.notEqual(snapshotSurfaceSource(source, changed,).key, baseline);
+    ]) assert.notEqual(snapshotSurfaceSource(source, changed).key, baseline);
   });
 
   it('detaches pending queries and projection policy from mutable host data', () => {
@@ -327,7 +327,7 @@ describe('Surface source cache', () => {
 
   it('passes an owner-scoped guard to pending authorization across identical refreshes', async () => {
     const h = harness();
-    const permission = deferred<void>();
+    const permission = deferred<boolean>();
     let obsoleteReadStarted = false;
     const pending = h.cache.reconcile([{
       id: 'a', identity: ['same'], isCurrent: () => true,
@@ -339,7 +339,7 @@ describe('Surface source cache', () => {
     }]);
     const latest = ready('a', 42);
     await h.cache.reconcile([h.request('a', ['same'], async () => latest)], 'a');
-    permission.resolve();
+    permission.resolve(true);
     await pending;
     assert.equal(obsoleteReadStarted, false);
     assert.equal(h.states.get('a'), latest);
