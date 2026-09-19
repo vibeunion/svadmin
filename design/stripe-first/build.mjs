@@ -6,6 +6,18 @@ import { fileURLToPath } from 'node:url';
 
 const directory = dirname(fileURLToPath(import.meta.url));
 export const source = JSON.parse(readFileSync(resolve(directory, 'source.json'), 'utf8'));
+export const runtimeSource = JSON.parse(readFileSync(resolve(directory, 'runtime-source.json'), 'utf8'));
+
+// 运行时代码可经审查推进；Figma 的历史来源不能因此被标记为已同步。
+export function verifyRuntimeSources(css, recipe, review = runtimeSource) {
+  assert.equal(review.figmaBaselineRevision, source.revision, 'Figma baseline changed without synchronization');
+  assert.equal(review.basedOnRecipeBlob, source.recipeBlob, 'Unrelated recipe baseline');
+  assert.equal(review.recipeSource, source.recipeSource, 'Unexpected recipe path');
+  assert.equal(review.figmaSynchronized, false, 'Runtime validation cannot assert Figma synchronization');
+  assert.equal(review.stylesheetBlob, source.stylesheetBlob, 'Theme baseline changed');
+  assert.equal(gitBlob(css), review.stylesheetBlob, 'Source changed: review theme baseline');
+  assert.equal(gitBlob(recipe), review.recipeBlob, 'Primitive recipe source changed: review runtime-source.json');
+}
 
 export function gitBlob(bytes) {
   const content = Buffer.isBuffer(bytes) ? bytes : Buffer.from(bytes, 'utf8');
@@ -56,7 +68,7 @@ export function buildKit(css) {
   assert.equal(gitBlob(css), source.stylesheetBlob, 'Source changed: review the baseline before regenerating the design snapshot');
   const sourceSha256 = createHash('sha256').update(css).digest('hex');
   const files = {};
-  const seed = { revision: source.revision, sourceSha256, colors: {}, dimensions: source.dimensions, clipped: [] };
+  const seed = { runtimeSource: { revision: runtimeSource.revision, recipeBlob: runtimeSource.recipeBlob, figmaSynchronized: false }, revision: source.revision, sourceSha256, colors: {}, dimensions: source.dimensions, clipped: [] };
   for (const [theme, selector] of [['Light', ':root'], ['Dark', '.dark']]) {
     const colors = parseTheme(css, selector);
     const primitive = {};
@@ -105,7 +117,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   const root = resolve(directory, '../..');
   const output = resolve(root, 'test-results/stripe-first-design-kit');
   const css = readFileSync(resolve(root, source.stylesheet), 'utf8');
-  assert.equal(gitBlob(readFileSync(resolve(root, source.recipeSource))), source.recipeBlob, 'Primitive recipe source changed');
+  verifyRuntimeSources(css, readFileSync(resolve(root, runtimeSource.recipeSource)));
   validateManifest(JSON.parse(readFileSync(resolve(directory, 'references.json'), 'utf8')));
   const files = buildKit(css);
   mkdirSync(output, { recursive: true });

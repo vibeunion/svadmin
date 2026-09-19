@@ -33,6 +33,7 @@ for (const [name, definition] of Object.entries(definitions)) {
 }
 test('workspace default stays one column without an aside', () => {
   assert.equal(definitions.productWorkspace.defaultVariants.hasSecondary, false);
+  assert.equal(declarations(published, runtime.productWorkspace().columns).get('align-items'), 'start');
   assert.equal(declarations(published, runtime.productWorkspace().columns).get('grid-template-columns'), 'minmax(0, 1fr)');
   assert.match(declarations(published, runtime.productWorkspace({ hasSecondary: true }).columns).get('grid-template-columns'), /--workspace-secondary-width/u);
 });
@@ -40,10 +41,16 @@ test('workspace recipe preserves top alignment, responsive columns and slot orde
   // These assertions belong with the actual build-tool definitions and CSS,
   // not in Core's source-only contract test or public dependency type graph.
   const workspace = definitions.productWorkspace;
+  assert.equal(workspace.defaultVariants.hasSecondary, false);
   assert.equal(workspace.base.columns.display, 'grid');
   assert.equal(workspace.base.columns.alignItems, 'start');
   assert.equal(workspace.base.columns.gridTemplateColumns, 'minmax(0, 1fr)');
   const desktop = workspace.variants.hasSecondary.true;
+  assert.deepEqual(desktop.columns, {
+    '@media (min-width: 64rem)': {
+      gridTemplateColumns: 'minmax(0, 1fr) minmax(0, var(--workspace-secondary-width, 22rem))',
+    },
+  });
   assert.deepEqual(desktop.columns['@media (min-width: 64rem)'], {
     gridTemplateColumns: 'minmax(0, 1fr) minmax(0, var(--workspace-secondary-width, 22rem))',
   });
@@ -79,3 +86,16 @@ test('published aliases stay identical; generated variables remain namespaced', 
     if (decl.prop.startsWith('--')) assert.match(decl.prop, /^--svadmin-/u);
   });
 });
+
+for (const status of ['success', 'warning', 'danger', 'info', 'neutral']) {
+  test(`status ${status} is published, with a readable no-color-mix fallback`, () => {
+    const className = runtime.productStatus({ status }).root;
+    const values = declarations(published, className);
+    assert.ok(values.has('color') && values.has('background'));
+    assert.ok(values.has('--svadmin-status-color'));
+    const fallback = definitions.productStatus.base.root['&[data-slot=badge]'];
+    assert.equal(fallback.color, 'var(--foreground)');
+    assert.equal(fallback.background, 'var(--muted)');
+    assert.notEqual(fallback.color, fallback.background);
+  });
+}

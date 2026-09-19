@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render } from '@testing-library/svelte';
 import { afterEach, describe, expect, it } from 'vitest';
 import Host from './product-layout.test-host.svelte';
+import StatusBadge from './StatusBadge.svelte';
 
 afterEach(cleanup);
 describe('Stripe-first product layout compatibility', () => {
@@ -35,5 +36,23 @@ describe('Stripe-first product layout compatibility', () => {
     const view = render(Host);
     for (const name of ['Header action', 'Trailing action', 'Group action']) await fireEvent.click(view.getByRole('button', { name }));
     expect(view.getByTestId('primary').textContent).toBe('Primary 3');
+  });
+});
+
+
+describe('StatusBadge public contract', () => {
+  it.each(['success', 'warning', 'danger', 'info', 'neutral'] as const)('keeps the %s label and consumer class hook', status => {
+    const view = render(StatusBadge, { status, class: 'consumer-status' });
+    const badge = view.getByText(status);
+    expect(badge.getAttribute('data-svadmin-status')).toBe(status);
+    expect(badge.classList.contains('consumer-status')).toBe(true);
+  });
+  it('reacts to status changes without losing localized labels', async () => {
+    const view = render(StatusBadge, { status: 'success', label: '已启用' });
+    const before = view.getByText('已启用').className;
+    await view.rerender({ status: 'warning', label: '待审核' });
+    const badge = view.getByText('待审核');
+    expect(badge.getAttribute('data-svadmin-status')).toBe('warning');
+    expect(badge.className).not.toBe(before);
   });
 });
