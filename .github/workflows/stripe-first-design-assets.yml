@@ -1,0 +1,62 @@
+name: Stripe-first design assets
+on:
+  push:
+    branches: [main, feat/stripe-first-design-kit-20260919]
+    paths:
+      - 'design/stripe-first/**'
+      - 'packages/ui/src/components.css'
+      - 'packages/ui/design/primitive-recipes.ts'
+      - '.github/workflows/stripe-first-design-assets.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'design/stripe-first/**'
+      - 'packages/ui/src/components.css'
+      - 'packages/ui/design/primitive-recipes.ts'
+      - '.github/workflows/stripe-first-design-assets.yml'
+permissions:
+  contents: read
+concurrency:
+  group: stripe-first-assets-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  design-assets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - name: Test actual source and design metadata
+        run: |
+          set -euo pipefail
+          mkdir -p test-results/stripe-first-design-kit/logs
+          node --test design/stripe-first/build.test.mjs 2>&1 | tee test-results/stripe-first-design-kit/logs/tests.log
+      - name: Generate source-bound snapshots and check reproducibility
+        run: |
+          set -euo pipefail
+          node design/stripe-first/build.mjs 2>&1 | tee test-results/stripe-first-design-kit/logs/generate.log
+          node design/stripe-first/build.mjs --check 2>&1 | tee test-results/stripe-first-design-kit/logs/check.log
+          git diff --exit-code -- packages bun.lock
+          git diff --check HEAD^ HEAD
+      - name: Record source and handoff provenance
+        if: always()
+        run: |
+          set -euo pipefail
+          mkdir -p test-results/stripe-first-design-kit/handoff
+          cp design/stripe-first/*.json design/stripe-first/README.md test-results/stripe-first-design-kit/handoff/
+          git rev-parse HEAD HEAD^{tree} > test-results/stripe-first-design-kit/revision.txt
+          node --version > test-results/stripe-first-design-kit/node-version.txt
+          sha256sum design/stripe-first/* > test-results/stripe-first-design-kit/source-hashes.txt
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: stripe-first-design-assets-${{ github.sha }}
+          path: test-results/stripe-first-design-kit/
+          retention-days: 14
+          if-no-files-found: error
