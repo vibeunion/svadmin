@@ -6,6 +6,7 @@ on:
       - 'example/src/components/LazyOfficeWorkspace.svelte'
       - 'example/src/App.svelte'
       - 'e2e/health-office.spec.ts'
+      - 'playwright.office.config.ts'
       - '.github/workflows/health-office.yml'
 permissions:
   contents: read
@@ -29,7 +30,7 @@ jobs:
       - name: Install locked dependencies
         run: bun install --frozen-lockfile
       - name: Lint changed workspace
-        run: bunx eslint example/src/App.svelte example/src/office example/src/components/LazyOfficeWorkspace.svelte e2e/health-office.spec.ts --max-warnings 0
+        run: bunx eslint example/src/App.svelte example/src/office example/src/components/LazyOfficeWorkspace.svelte e2e/health-office.spec.ts playwright.office.config.ts --max-warnings 0
       - name: Domain state tests
         run: bun test example/src/office/domain.test.ts
       - name: Build workspace dependencies
@@ -43,7 +44,7 @@ jobs:
       - name: Install Chromium
         run: bunx playwright install --with-deps chromium
       - name: Browser workflows and real screenshot evidence
-        run: bunx playwright test e2e/health-office.spec.ts --fail-on-flaky-tests
+        run: bunx playwright test --config playwright.office.config.ts --fail-on-flaky-tests
       - name: Upload browser evidence
         if: always()
         uses: actions/upload-artifact@v7
