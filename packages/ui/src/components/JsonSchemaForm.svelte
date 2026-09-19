@@ -20,6 +20,8 @@
     value?: Record<string, unknown>;
     onsubmit?: (data: Record<string, unknown>) => void | Promise<void>;
     submitText?: string;
+    /** Use a unique stable prefix when several schema forms share a page. */
+    idPrefix?: string;
     class?: string;
   }
 
@@ -28,6 +30,7 @@
     value = $bindable({}),
     onsubmit,
     submitText = 'Submit Form',
+    idPrefix = 'json_field',
     class: className = '',
   }: Props = $props();
 
@@ -54,6 +57,7 @@
     for (const [key, child] of Object.entries(node.properties ?? {})) {
       const next = mergeDefaults(child, result[key]);
       if (next !== undefined) result[key] = next;
+      else if (child.type === 'boolean' && node.required?.includes(key)) result[key] = false;
     }
     return result;
   }
@@ -70,7 +74,7 @@
   }
 
   function writePath(path: string[], nextValue: unknown): void {
-    const next = structuredClone(value);
+    const next = structuredClone($state.snapshot(value));
     let target: Record<string, unknown> = next;
     for (const key of path.slice(0, -1)) {
       const child = target[key];
@@ -89,7 +93,7 @@
   function addArrayItem(path: string[], itemSchema: JsonSchema): void {
     const current = readPath(path);
     const items = Array.isArray(current) ? current : [];
-    writePath(path, [...items, cloneDefault(itemSchema) ?? (itemSchema.type === 'object' ? {} : '')]);
+    writePath(path, [...items, cloneDefault(itemSchema) ?? (itemSchema.type === 'object' ? {} : itemSchema.type === 'boolean' ? false : '')]);
   }
 
   function removeArrayItem(path: string[], index: number): void {
@@ -121,7 +125,7 @@
 
   {#snippet renderField(node: JsonSchema, path: string[], title: string, required = false)}
     {@const current = readPath(path)}
-    {@const id = `json_field_${path.join('_')}`}
+    {@const id = `${idPrefix}_${path.map(encodeURIComponent).join('/')}`}
     {#if node.type === 'object' || node.properties}
       <fieldset class="svadmin-u-da7c36cd8867 svadmin-u-421ac2be5045">
         <legend class="svadmin-u-0214b4b355d1 svadmin-u-2689f3958069">{title}</legend>
@@ -163,7 +167,7 @@
         {:else if node.type === 'boolean'}
           <input id={id} type="checkbox" checked={Boolean(current)} onchange={(event) => writePath(path, event.currentTarget.checked)} />
         {:else if node.type === 'number' || node.type === 'integer'}
-          <input id={id} type="number" required={required} value={current === undefined ? '' : String(current)} oninput={(event) => writePath(path, event.currentTarget.value === '' ? undefined : Number(event.currentTarget.value))} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529" />
+          <input id={id} type="number" step={node.type === 'integer' ? 1 : 'any'} required={required} value={current === undefined ? '' : String(current)} oninput={(event) => writePath(path, event.currentTarget.value === '' ? undefined : Number(event.currentTarget.value))} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529" />
         {:else}
           <input id={id} type="text" required={required} value={String(current ?? '')} oninput={(event) => writePath(path, event.currentTarget.value)} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529" />
         {/if}
