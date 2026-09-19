@@ -53,6 +53,8 @@ jobs:
           git rev-parse HEAD HEAD^{tree} > test-results/stripe-first-design-kit/revision.txt
           node --version > test-results/stripe-first-design-kit/node-version.txt
           find design/stripe-first -type f -print0 | sort -z | xargs -0 sha256sum > test-results/stripe-first-design-kit/source-hashes.txt
+          # 只归档该修订的受版本控制源码；不含凭证、环境变量或依赖目录。
+          git archive --format=tar.gz HEAD > test-results/stripe-first-design-kit/source.tar.gz
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:

@@ -1,0 +1,14 @@
+{
+  "id": "stripe-reference-implementation-20260919",
+  "parent": "stripe-first-design-kit-20260919",
+  "source": "User: 请完成参考和实施，以 stripe 风格为主 (2026-09-19T14:31:30Z)",
+  "reason": "Move from research and unreviewed specimens to source-linked, independently implemented Stripe-first product patterns.",
+  "state": "in-progress",
+  "risk": "low",
+  "orchestration": {"mode": "native", "writer": "single-owner", "externalReviewers": 0},
+  "scope": ["design/stripe-first", "packages/ui/design", "packages/ui/src/components/content", "packages/ui/panda.config.ts", "packages/ui/scripts", ".github/workflows/stripe-first-*"],
+  "acceptance": ["Record inspected official Stripe and vendor reference pages and separate observations from svadmin decisions", "Implement reusable token-backed product layout and component anatomy without new runtime dependencies", "Polish the existing component/list/detail/settings specimens and preserve state, localization and keyboard behavior", "Inspect real light/dark desktop/mobile screenshots and run the existing complete browser matrix", "Commit to PR #438 and report exact remaining Figma and full-CI boundaries"],
+  "nonGoals": ["purchase or copy paid template source/assets", "new backend writes or permissions", "change public component contracts incompatibly", "merge main or release/deploy", "bypass Figma limits", "claim pixel equivalence to Stripe"],
+  "baseMain": "cac09fdaf23a82aa00c01667035ba3f37e9bfd38",
+  "baseSpecimens": "cd79b75a42ba08f402b7f085eea92ab41a8f0059"
+}
