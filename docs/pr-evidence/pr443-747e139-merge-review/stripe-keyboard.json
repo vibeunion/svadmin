@@ -1,0 +1,14 @@
+[
+  {
+    "locale": "en",
+    "passed": true,
+    "overflow": 224,
+    "motionPreference": "normal pulse retained; reduced pulse disabled"
+  },
+  {
+    "locale": "zh-CN",
+    "passed": true,
+    "overflow": 225,
+    "motionPreference": "normal pulse retained; reduced pulse disabled"
+  }
+]
