@@ -19,8 +19,9 @@
 
   const selectedFiles = $derived(files ? Array.from(files) : []);
   const selectedLabel = $derived.by(() => {
-    if (selectedFiles.length === 0) return t('common.noFileChosen') || 'No file chosen';
-    if (selectedFiles.length === 1) return selectedFiles[0].name;
+    const firstFile = selectedFiles[0];
+    if (firstFile === undefined) return t('common.noFileChosen') || 'No file chosen';
+    if (selectedFiles.length === 1) return firstFile.name;
     return t('common.filesSelected', { count: selectedFiles.length }) || `${selectedFiles.length} files selected`;
   });
 </script>

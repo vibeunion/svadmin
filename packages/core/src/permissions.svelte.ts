@@ -5,6 +5,7 @@ import {
 } from './access-control-contract';
 import { HttpError } from './types';
 import { parseFeatureGateUser, snapshotFeatureGateConfig } from './feature-gate-contract';
+import type { PermissionCatalogBinding } from './permission-catalog';
 // Permission / Access Control
 
 // ─── Types ────────────────────────────────────────────────────
@@ -57,6 +58,7 @@ export interface AccessControlProvider {
       /** Hide buttons when unauthorized instead of disabling. Default: false */
       hideIfUnauthorized?: boolean;
     };
+    permissionCatalog?: PermissionCatalogBinding;
   };
 }
 
@@ -65,6 +67,7 @@ export interface AccessControlOptions {
     readonly enableAccessControl?: boolean;
     readonly hideIfUnauthorized?: boolean;
   };
+  readonly permissionCatalog?: PermissionCatalogBinding;
 }
 
 /** Checked, immutable projection. Use a new input object when changing provider configuration. */
