@@ -104,9 +104,9 @@ test('AutoTable compatibility screenshots cover light dark and required viewport
   await backend(page); await open(page); await expect(names(page).first()).toHaveText('SKU:Item 01');
   for (const size of [{ width: 1440, height: 900 }, { width: 1920, height: 1080 }, { width: 390, height: 844 }]) {
     await page.setViewportSize(size);
-    await page.screenshot({ path: testInfo.outputPath(`auto-table-light-${size.width}x${size.height}.png`), fullPage: true });
+    await page.screenshot({ path: testInfo.outputPath(`auto-table-light-${size.width}x${size.height}.png`), fullPage: true, animations: 'disabled' });
     await page.getByRole('button', { name: 'Theme', exact: true }).click();
-    await page.screenshot({ path: testInfo.outputPath(`auto-table-dark-${size.width}x${size.height}.png`), fullPage: true });
+    await page.screenshot({ path: testInfo.outputPath(`auto-table-dark-${size.width}x${size.height}.png`), fullPage: true, animations: 'disabled' });
     await page.getByRole('button', { name: 'Theme', exact: true }).click();
   }
 });

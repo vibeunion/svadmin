@@ -74,6 +74,8 @@ test('AutoTable semantic colors follow a nested host theme at desktop and mobile
       if (dark) await page.getByRole('button', { name: 'Theme', exact: true }).click();
       const hostColor = await page.locator('main').evaluate(element => getComputedStyle(element).color);
       await expect(heading).toHaveCSS('color', hostColor);
+      await expect(page.getByRole('button', { name: 'Edit Stock', exact: true }).first()).toHaveCSS('color', hostColor);
+      await expect(page.getByRole('button', { name: 'Filter', exact: true })).toHaveCSS('color', hostColor);
       const sizes = await page.evaluate(() => ({ viewport: innerWidth, document: document.documentElement.scrollWidth }));
       expect(sizes.document).toBeLessThanOrEqual(sizes.viewport);
     }
