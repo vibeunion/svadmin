@@ -28,11 +28,20 @@ node --test design/stripe-first/preview/model.test.mjs
 node node_modules/svelte-check/bin/svelte-check --tsconfig design/stripe-first/preview/tsconfig.json --fail-on-warnings
 bunx playwright install --with-deps chromium
 node design/stripe-first/preview/verify.mjs
+node design/stripe-first/preview/keyboard.mjs
 ```
 
-专项工作流输出 `test-results/stripe-first-browser/`：可运行静态站点 `site/`、截图浏览 `index.html`、逐场景 `report.json`、截图及源文件哈希。解压 artifact 后，可用 `python3 -m http.server 4179 --directory site` 预览，无需为消费端安装 Panda/Tailwind。不要直接用 file:// 打开 ES 模块入口。
+专项工作流输出 `test-results/stripe-first-browser/`：可运行静态站点 `site/`、截图浏览 `index.html`、逐场景 `report.json`、键盘与媒体偏好结果 `keyboard.json`、截图及源文件哈希。解压 artifact 后，可用 `python3 -m http.server 4179 --directory site` 预览，无需为消费端安装 Panda/Tailwind。不要直接用 file:// 打开 ES 模块入口。
 
-预定矩阵为 19 场景 × 两种主题 × 两种语言 × 两种视口（1440/390px）= 152 项；另有四组交互序列。结果只有实际工作流成功后才算通过。构建失败、只生成截图或此前 PR 的绿灯都不能替代本次结果。
+预定矩阵为 19 场景 × 两种主题 × 两种语言 × 两种视口（1440/390px）=152项；另有四组交互序列和两组键盘/媒体偏好检查。结果只有实际工作流成功后才算通过。构建失败、只生成截图或此前 PR 的绿灯都不能替代本次结果。
+
+## 明确的无障碍适配
+
+表格在窄屏时保留横向滚动，不伪装成按钮或重写 grid。具名 `role=region`、`tabindex=0` 和可见焦点让键盘用户能够滚动。Svelte 的单点静态提示例外附有原因；没有关闭全局告警。`keyboard.mjs` 检查 Tab 进入、方向键实际滚动、Tab 离开、Enter 打开详情及新的主内容焦点。
+
+依据：[MDN region / scrolling content](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Reference/Roles/region_role#scrolling_content_areas_with_overflow_text)。样例只保留一个滚动所有者，不让内部包装器吞掉键盘滚动。
+
+首次真实浏览器矩阵中147项及四组交互通过，但五个列表加载场景的截图不稳定。原先把无限骨架脉冲缩短为0.01ms，并不能停止无限动画。因此交付样式 `motion.css` 在用户选择减少动态效果时停止骨架脉冲，保留占位与 `aria-busy`；普通模式继续动画。这不是截图注入或遮罩，不增加截图差异阈值。两种用户媒体偏好都有真实浏览器断言。
 
 ## 与 Figma 分开验收
 

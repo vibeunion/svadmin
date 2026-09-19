@@ -32,7 +32,19 @@ try {
       await page.keyboard.press('Enter');
       await expect(page.getByTestId('specimen')).toHaveAttribute('data-view', 'record-detail');
       await expect(page.getByTestId('specimen')).toBeFocused();
-      results.push({ locale, passed: true, overflow });
+
+      // 只切换用户媒体偏好，不给截图临时注入动画覆盖。
+      await page.goto(`http://127.0.0.1:4179/?view=resource-list&state=loading&locale=${locale}`, { waitUntil: 'networkidle' });
+      const skeleton = page.locator('[data-slot="skeleton"]').first();
+      const status = page.getByRole('status', { name: locale === 'en' ? 'Loading customers' : '正在加载客户' });
+      await expect(status).toHaveAttribute('aria-busy', 'true');
+      await expect(skeleton).toHaveCSS('animation-name', 'none');
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
+      await expect(skeleton).toHaveCSS('animation-name', 'svadmin-skeleton-pulse');
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await expect(skeleton).toHaveCSS('animation-name', 'none');
+      await expect(status).toHaveAttribute('aria-busy', 'true');
+      results.push({ locale, passed: true, overflow, motionPreference: 'normal pulse retained; reduced pulse disabled' });
     } catch (error) { results.push({ locale, passed: false, error: String(error) }); }
     finally { await context.close(); }
   }
@@ -43,4 +55,4 @@ try {
 }
 console.info(JSON.stringify({ keyboard: results }));
 assert.equal(results.length, 2);
-assert.ok(results.every(result => result.passed), 'Keyboard scroll or focus navigation failed');
+assert.ok(results.every(result => result.passed), 'Keyboard scroll, focus navigation or motion preference failed');

@@ -3,57 +3,67 @@
 本目录把可追溯的设计参考、现有代码资产与实际创建的 Figma 文件关联起来。
 这是设计资产交付，不是另一套运行时主题，也不是全站视觉改版。
 
-## 打开已创建的设计文件
+## 打开已有 Figma 文件
 
 [Figma：svadmin · Stripe-first Design Kit v0.1](https://www.figma.com/design/r02lMyLBPoaNS3gep3TNRF)
 
 [基础样张](https://www.figma.com/design/r02lMyLBPoaNS3gep3TNRF?node-id=7-10) · [Button 组件集](https://www.figma.com/design/r02lMyLBPoaNS3gep3TNRF?node-id=8-53)
 
-实际完成：81 个变量（32 个基础颜色、32 个语义颜色别名、17 个尺寸变量）、6 种文本样式、6 种明暗主题阴影样式，以及 24 个 Button 变体。颜色与尺寸来自现有代码，不是从 Stripe 截图猜测的值。变量均设定用途范围和 WEB code syntax。
+已创建81个变量（32个基础颜色、32个语义颜色别名、17个尺寸变量）、6种文本样式、6种明暗阴影样式和24个 Button 变体。颜色与尺寸来自现有代码，不是从 Stripe 截图猜测的值。变量均设定用途范围和 WEB code syntax。
 
-基础样张和 Button 已通过 Figma 结构读取及截图检查。Button 提供可编辑 Label 属性；24 个变体覆盖 Light/Dark、default/outline、sm/default/lg 和 default/disabled。它只是公开 Button API 的一个子集，不包含全部外观、图标、加载与焦点状态。当前 Button 样张宽度为 140px，尚未认证为完整的自适应内容实现。
+前一轮已读取基础样张与 Button 结构并检查截图。Button 提供可编辑 Label，变体覆盖 Light/Dark、default/outline、sm/default/lg 和 default/disabled。这是公开 API 子集，不含全部外观、图标、加载与焦点状态；样张宽度140px，未认证为完整自适应实现。
 
-## 未完成项与账户限制
+## 新增：可运行的浏览器样例
 
-Figma 当前账户只允许三页，因此使用“基础与说明／组件／页面模式”的结构。Light 和 Dark 是两个独立的单模式变量集合，不是一个可一键切换的双模式集合。
+[运行说明、状态矩阵与验收边界](./preview/README.md)。`preview/` 使用构建后的真实 Svelte 组件与普通 CSS，包含 Input/Badge 状态页，以及客户列表、详情、设置三类页面。支持中文/英文、明暗主题、桌面/窄屏；密度只传给支持此 API 的组件。
 
-继续创建 Input 时，Figma 返回 Starter MCP 调用额度已用尽。Input、Badge 和三类页面模式尚未创建；第三页目前只是空的预留页。不得把此交付称为完整 UI Kit。Code Connect 的访问检查也因当前席位不满足要求而失败；`figma-map.json` 是普通源码映射，不是已经发布的 Code Connect。
+搜索、查看后返回、重试、输入、文件选择、模拟保存与反馈生命周期在浏览器真实运行；所有数据是合成记录，没有生产后端请求。源码与构建产物由同一专项工作流校验。生成截图只用于设计评审，不自动等于视觉设计已获批准。
 
-这些未完成项保留在 `handoff.json`。恢复后应先读取现有节点，复用返回的真实 ID，不能重新创建同名文件或删除未知节点。不得绕过账户额度或权限限制。
+```sh
+bun install --frozen-lockfile
+bun run --cwd packages/ai-elements build
+bun run --cwd packages/ui build
+node design/stripe-first/preview/run.mjs
+```
+
+预览地址为 `http://127.0.0.1:4179`。专项工作流会生成可运行静态站点、状态截图、完整结果及源码哈希；以对应提交的实际结果为准，不引用旧提交绿灯证明新代码。
+
+**浏览器样例不是 Figma 同步。** 本轮复查仍遇到 Starter MCP 读取限额，没有改动已有 Figma 节点或将 pending 状态改为完成。
+
+## Figma 未完成项与账户限制
+
+当前账户最多三页，文件采用“基础与说明／组件／页面模式”。Light 和 Dark 是两个独立单模式变量集合，不是一键切换的双模式集合。
+
+Input、Badge 和三类页面的 Figma 图层仍未创建；第三页是空的预留页。Code Connect 因席位要求未启用，`figma-map.json` 是普通源码映射，不是已发布 Code Connect。不得将此交付称为完整 Figma UI Kit，不得绕过账户额度或权限。
+
+原有未完成项保留在 `handoff.json`；浏览器后续任务在 `preview/task.json`。恢复时先读取原文件，使用已返回的真实节点 ID，不重新创建同名文件或删除未知节点。
 
 ## 设计来源与边界
 
-视觉决定由根目录 `DESIGN.md` 与经过审查的 svadmin 实现共同管理。Stripe Connect 官方 Toolkit 用于研究产品结构，Park Foundations 用于研究变量和组件组织；本次没有复制第三方 Figma 图层、商标、字体或商业素材。外部文件级许可仍为 pending，不得随 npm 包再分发。
+视觉决定由根目录 `DESIGN.md` 与经过审查的 svadmin 实现共同管理。Stripe Connect 官方 Toolkit 参考产品结构，Park Foundations 参考变量与组件组织。本次不复制第三方图层、商标、字体或商业素材；文件级许可仍为 pending，不得随 npm 包再分发。
 
-运行时保持 Svelte + Bits UI + Panda CSS，不新增 Tailwind、React、Stripe SDK 或 Ark UI 依赖，也不改动 PR #436。页面模式契约用于后续设计验收，不是直接交给 SurfaceRenderer 的 schema。
+运行时保持 Svelte + Bits UI + Panda CSS，不新增 Tailwind、React、Stripe SDK 或 Ark UI 依赖，不改动 PR #436。页面模式契约用于设计验收，不是 SurfaceRenderer schema；模拟权限也不代替后端授权。
 
 ## 单一来源与生成格式
 
-`source.json` 固定代码来源及经过审查的尺寸映射。生成器从 `packages/ui/src/components.css` 读取明暗主题，并检查 Git blob 哈希；源文件改变时会失败，要求先审查新的来源版本，而不是继续给旧 Figma 文件贴上“同步”的标签。
+`source.json` 固定代码来源及经过审查的尺寸映射。生成器从 `packages/ui/src/components.css` 读取明暗主题，检查 Git blob 哈希。来源改变时要求审查新的版本，不能继续给旧 Figma 文件贴“同步”标签。
 
-生成文件包括 `light.tokens.json`、`dark.tokens.json` 和 `figma-seed.json`。前两者使用 DTCG 2025.10 的结构化 color/dimension 与 token 引用形式，范围限于本套件支持的类型，不是完整 DTCG 校验器。它们是代码生成的设计快照，不取代现有 CSS/Panda 作为运行时来源。
+生成 `light.tokens.json`、`dark.tokens.json` 与 `figma-seed.json`。前两者采用 DTCG 2025.10 结构化 color/dimension 及引用形式，仅支持本套件所需类型，不是完整 DTCG 校验器。它们是代码生成的设计快照，不取代现有 CSS/Panda 运行时来源。
 
-Figma 接受的颜色为 sRGB 投影；Light/success、Light/warning、Dark/primary、Dark/ring、Dark/accent-foreground 有色域裁剪。DTCG 快照保留原始 OKLCH 数值，`figma-seed.json` 单独标记裁剪，不能声称两个渲染器无损或像素完全一致。尺寸转换明确假设根字号为 16px。
+Figma 颜色采用 sRGB 投影；Light/success、Light/warning、Dark/primary、Dark/ring、Dark/accent-foreground 有色域裁剪。DTCG 保留原始 OKLCH，figma-seed 单独标记裁剪，不能宣称两个渲染器无损或像素一致。尺寸换算明确假设根字号16px。
 
-已记录但未强行修改的差异：DESIGN.md 的 spacing sm/lg 为 8/24px，现有 Panda 基础尺度为 0.75/1.25rem（16px 根字号下为 12/20px）。本套件使用数值尺度命名，避免把文档名称冲突悄悄变成组件几何变化。
+已记录但未强行改动：DESIGN.md 的 spacing sm/lg 为8/24px，现有 Panda 基础尺度为0.75/1.25rem（16px根字号下为12/20px）。套件采用数值尺度命名，不把文档命名冲突变成未经审查的组件几何改动。
 
-## 验证与生成
+## 设计快照验证
 
-仅需要 Node.js 22 或更新版本，不安装项目依赖：
+只需 Node.js 22 或更新版本，不安装项目依赖：
 
 ```sh
-node --test design/stripe-first/build.test.mjs
+node --test design/stripe-first/build.test.mjs design/stripe-first/preview/model.test.mjs
 node design/stripe-first/build.mjs
 node design/stripe-first/build.mjs --check
 ```
 
-输出位于 `test-results/stripe-first-design-kit/`，专项工作流会保留生成快照、源码映射和测试日志。工作流通过只证明设计资产提取与契约检查成功，不证明全部业务组件、完整应用、无障碍合规或发布条件已经通过。
+快照输出位于 `test-results/stripe-first-design-kit/`；真实组件浏览器样例输出位于 `test-results/stripe-first-browser/`。专项通过仅证明各自声明的检查，不代表全部应用、无障碍合规、完整 Figma 库或发布验收通过。
 
-## 文件职责
-
-- `source.json`：不可变来源、颜色角色、尺寸映射与已知差异。
-- `references.json`：官方入口、参考用途及许可状态。
-- `contract.json`：列表、详情、设置模式的目标契约，明确未实现状态。
-- `figma-map.json`：已返回的 Figma 节点 ID、组件属性和代码位置。
-- `handoff.json`：已完成检查、真实阻断与恢复步骤。
-- `build.mjs` / `build.test.mjs`：无依赖的快照生成器与正反例测试。
+文件职责：`source.json` 固定来源；`references.json` 记录许可；`contract.json` 是页面目标；`figma-map.json` 记录已知节点；`handoff.json` 保留 Figma 阻断；`build.mjs` 与 `build.test.mjs` 负责快照；`preview/` 负责实际浏览器样例及独立验收。

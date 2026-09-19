@@ -2,6 +2,7 @@ import { mount } from 'svelte';
 import '../../../packages/ui/dist/app.css';
 import './preview.css';
 import './scroll.css';
+import './motion.css';
 import Preview from './Preview.svelte';
 
 const target = document.getElementById('app');
