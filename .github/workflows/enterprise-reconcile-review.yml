@@ -1,0 +1,42 @@
+name: Guarded enterprise reconciliation
+
+# Temporary review-branch helper. Neither this workflow nor review-assets enter main.
+on:
+  push:
+    branches: [review/enterprise-reconcile-20260920]
+permissions:
+  contents: read
+jobs:
+  reconcile:
+    if: github.event.head_commit.message == 'review: execute guarded enterprise reconciliation'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Reconcile only the captured enterprise PR with current main
+        env:
+          OLD_HEAD: 7621ec2103ef0f7ad87899283eedb65b7b7e4b0a
+        run: |
+          set -euo pipefail
+          git fetch origin main feat/enterprise-ui-correctness
+          test "$(git rev-parse origin/feat/enterprise-ui-correctness)" = "$OLD_HEAD"
+          BASE="$(git rev-parse origin/main)"
+          cp -R review-assets "$RUNNER_TEMP/enterprise-review-assets"
+          git switch --detach "$BASE"
+          export REVIEW_ASSETS="$RUNNER_TEMP/enterprise-review-assets"
+          python3 "$REVIEW_ASSETS/reconcile.py"
+          git diff --check
+          git add --all
+          TREE="$(git write-tree)"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          NEW="$(git commit-tree "$TREE" -p "$OLD_HEAD" -p "$BASE" -m 'fix(ui): reconcile enterprise validation with recursive form and host-filter contracts' -m 'Preserve current main and the original enterprise source as real parents. Retain recursive rendering, locale, IDs, strict snapshots and callback ownership. Preserve immutable host-filter round trips while validating edited queries atomically. No check or permission relaxation; runtime validation remains required.')"
+          test -z "$(git ls-tree -r --name-only "$NEW" -- review-assets .github/workflows/enterprise-reconcile-review.yml)"
+          git diff --check "$BASE" "$NEW"
+          git push origin "$NEW:refs/heads/feat/enterprise-ui-correctness"
+          printf 'BASE=%s\nHEAD=%s\nTREE=%s\n' "$BASE" "$NEW" "$TREE"
+          echo 'Source published to the existing draft branch only. Fresh normal PR CI is still required.'
