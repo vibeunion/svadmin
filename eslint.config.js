@@ -114,6 +114,7 @@ export default ts.config(
       'packages/ui/src/components/task-utils.ts',
       'packages/ui/src/components/task-buttons.tenant.test.svelte.ts',
       'packages/ui/src/components/task-buttons.tenant.test-host.svelte',
+      'packages/ui/src/components/task-hooks.test-probe.svelte',
       'packages/ui/src/components/TaskQueueDrawer.test.svelte.ts',
       'packages/supabase/src/webauthn-contract.test.ts',
     ],
@@ -241,6 +242,9 @@ export default ts.config(
       'output/**',
       'private/**',
       'xigu-fa/**',
+      // Immutable third-party distribution: hash and import/security boundaries
+      // are checked by check-style-boundary.mjs; first-party adapters stay linted.
+      'packages/ai-elements/vendor/streamdown/**',
     ],
   },
 );

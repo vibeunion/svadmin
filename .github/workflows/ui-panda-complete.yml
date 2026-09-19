@@ -1,119 +1,91 @@
-name: Complete UI recipe migration
+name: Native UI Styles
 on:
   push:
-    branches: [feat/ui-panda-complete-20260919]
-    paths: ['.github/workflows/ui-panda-complete.yml', 'scripts/**', 'packages/**', 'example/**', 'bun.lock', 'eslint.config.js']
+    branches: [main, feat/ui-panda-complete-20260919]
+    paths: ['.github/workflows/ui-panda-complete.yml', 'scripts/**', 'packages/**', 'example/**', 'bun.lock']
+  pull_request:
+    paths: ['.github/workflows/ui-panda-complete.yml', 'scripts/**', 'packages/**', 'example/**', 'bun.lock']
 permissions:
   contents: read
 concurrency:
-  group: complete-ui-migration-${{ github.ref }}
+  group: native-ui-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 jobs:
-  migration:
-    if: github.repository == 'vibeunion/svadmin' && github.ref == 'refs/heads/feat/ui-panda-complete-20260919'
+  styles:
+    name: Native dependency and CSS contract
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    permissions:
-      contents: write
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-          fetch-depth: 1
       - uses: actions/setup-node@v7
         with:
           node-version: '26'
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: '1.4.2'
-      - name: Start with empty evidence
-        run: |
-          mkdir -p "$RUNNER_TEMP/complete-ui/logs"
-          rm -rf docs/pr-evidence/panda-styles
-      - name: Install locked bootstrap dependencies
-        run: bun install --frozen-lockfile
-      - name: Generate finite recipes and native runtime
-        run: |
-          node scripts/migrate-ui-utilities.mjs
-          node scripts/migrate-ui-runtime.mjs
-          bun install
-      - name: Commit generated sources to this branch only
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          test "$GITHUB_REF" = refs/heads/feat/ui-panda-complete-20260919
-          git diff --check
-          git add packages/ui/design/migrated-utilities packages/ui/test/style-baselines packages/ui/src/styles/compatibility.prelude.css packages/ui/package.json packages/ui/scripts/panda-css.test.mjs
-          git add packages/ai-elements/design/migrated-utilities packages/ai-elements/test/style-baselines packages/ai-elements/src/utilities.css packages/ai-elements/package.json
-          git add example/design/migrated-utilities example/test/style-baselines example/src/compatibility.css example/package.json scripts/check-panda-browser.mjs
-          git add packages/ui/src/classnames.ts packages/ui/src/classnames.test.ts packages/ui/src/class-properties.generated.ts packages/ui/src/utils.ts
-          git add packages/ai-elements/src packages/ai-elements/vendor bun.lock eslint.config.js
-          if ! git diff --cached --quiet; then
-            git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' -c core.hooksPath=/dev/null commit -m 'feat(styles): remove class engines and own finite native runtime'
-            git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)" push origin HEAD:refs/heads/feat/ui-panda-complete-20260919
-          fi
-          git rev-parse HEAD | tee "$RUNNER_TEMP/complete-ui/tested-commit.txt"
-      - name: Prove a fresh frozen install has no class engine
-        run: |
-          rm -rf node_modules
-          bun install --frozen-lockfile
-          git diff --exit-code -- bun.lock
-          node scripts/check-style-boundary.mjs --source
-          node --test scripts/native-classnames.test.mjs scripts/style-boundary.test.mjs
-      - name: Build all workspace packages
-        run: |
-          bun run build:packages > "$RUNNER_TEMP/complete-ui/logs/build.log" 2>&1 || { tail -100 "$RUNNER_TEMP/complete-ui/logs/build.log"; exit 1; }
-          tail -20 "$RUNNER_TEMP/complete-ui/logs/build.log"
-      - name: Native CSS and finite recipe regressions
-        id: css
-        continue-on-error: true
+      - run: bun install --frozen-lockfile
+      - run: node scripts/check-style-boundary.mjs --source
+      - run: node --test scripts/native-classnames.test.mjs scripts/style-boundary.test.mjs scripts/recipe-declarations.test.mjs
+      - name: Build every workspace package
+        run: bun run build:packages
+      - name: Check both published CSS entries and finite recipes
         run: |
           bun run --cwd packages/ui test:css
           node scripts/build-migrated-ui.mjs ui ai-elements example --check
           node scripts/build-native-classnames.mjs ui ai-elements --check
+          node scripts/check-recipe-declarations.mjs
           node scripts/check-style-boundary.mjs
-      - name: Chromium immutable-baseline comparison
-        id: browser
-        continue-on-error: true
-        run: |
-          bunx --no-install playwright install --with-deps chromium > "$RUNNER_TEMP/complete-ui/logs/browser-install.log" 2>&1
-          node scripts/check-panda-browser.mjs
-      - name: Standalone runtime and declaration checks
-        id: runtime
-        continue-on-error: true
+          git diff --exit-code -- bun.lock packages/ui/src/styles packages/ui/src/class-properties.generated.ts packages/ai-elements/src/utilities.css packages/ai-elements/src/class-properties.generated.ts example/src/compatibility.css
+      - name: Verify standalone helpers and declarations
         run: node scripts/check-panda-runtime.mjs
-      - name: Lint
-        id: lint
-        continue-on-error: true
-        run: bun run lint
-      - name: Svelte component tests
-        id: tests
-        continue-on-error: true
+      - name: Strict UI and AI package checks
         run: |
-          status=0
-          for package in ui ai-elements surface; do
-            bun run --cwd "packages/$package" test > "$RUNNER_TEMP/complete-ui/logs/$package-tests.log" 2>&1 || status=1
-            tail -45 "$RUNNER_TEMP/complete-ui/logs/$package-tests.log"
-          done
-          exit "$status"
-      - name: Collect only current-run evidence
-        if: always()
+          bun run --cwd packages/ui check
+          bun run --cwd packages/ai-elements check
+      - name: Chromium comparison with immutable baseline
         run: |
-          mkdir -p "$RUNNER_TEMP/complete-ui/screenshots"
-          if test -d docs/pr-evidence/panda-styles; then
-            cp docs/pr-evidence/panda-styles/*.png docs/pr-evidence/panda-styles/*.json "$RUNNER_TEMP/complete-ui/screenshots/" 2>/dev/null || true
-          fi
+          rm -rf docs/pr-evidence/panda-styles
+          bunx --no-install playwright install --with-deps chromium
+          node scripts/check-panda-browser.mjs
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: complete-ui-migration-evidence
-          path: ${{ runner.temp }}/complete-ui/
+          name: native-ui-browser-${{ github.sha }}
+          path: docs/pr-evidence/panda-styles/
+          if-no-files-found: ignore
           retention-days: 14
-      - name: Enforce every verification gate
-        if: always()
+  components:
+    name: UI and AI component regressions
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - run: bun install --frozen-lockfile
+      - run: bun run build:packages
+      - run: bun run lint
+      - name: Run all UI, AI and Surface tests
         run: |
-          test '${{ steps.css.outcome }}' = success
-          test '${{ steps.browser.outcome }}' = success
-          test '${{ steps.runtime.outcome }}' = success
-          test '${{ steps.lint.outcome }}' = success
-          test '${{ steps.tests.outcome }}' = success
+          mkdir -p test-results/native-ui-logs
+          status=0
+          for package in ui ai-elements surface; do
+            bun run --cwd "packages/$package" test > "test-results/native-ui-logs/$package.log" 2>&1 || status=1
+            tail -45 "test-results/native-ui-logs/$package.log"
+          done
+          exit "$status"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: native-ui-component-logs-${{ github.sha }}
+          path: test-results/native-ui-logs/
+          if-no-files-found: ignore
+          retention-days: 14
