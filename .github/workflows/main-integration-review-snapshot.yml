@@ -1,4 +1,5 @@
 name: Main integration review snapshot
+# Temporary review-only helper. Never merge this workflow into main.
 on:
   push:
     branches: [review/main-integration-20260919-1549]
@@ -7,41 +8,119 @@ permissions:
   contents: read
   actions: read
 jobs:
-  snapshot:
+  evidence:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: read
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: c1b5aa834dd06b00e2666d2319415add0b787015
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Bundle reviewed source histories only
-        run: |
-          mkdir -p /tmp/review-snapshot
-          git branch snapshot-integration c1b5aa834dd06b00e2666d2319415add0b787015
-          git branch snapshot-current-main c02ac0dab6edc081b4175d17a46fdeff98e1267d
-          git branch snapshot-pr438 0f6c4ad148f69b501870f0c18c6ea94bd27a8349
-          git branch snapshot-pr437 b39b4953af4166548b21b8ab7fd2c7af80d6a027
-          git bundle create /tmp/review-snapshot/repository.bundle snapshot-integration snapshot-current-main snapshot-pr438 snapshot-pr437
-          git bundle verify /tmp/review-snapshot/repository.bundle
-      - name: Preserve failed job diagnostics
+          ref: 713d90db73373821ab6102eb694b3882cfd11d2e
+      - name: Verify immutable source and artifact association
         uses: actions/github-script@v9
         with:
           script: |
-            const fs = require('node:fs');
-            const runs = [35451738429, 35451738442, 35451738446, 35451738451, 35451738607];
-            for (const run_id of runs) {
-              const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, { ...context.repo, run_id, per_page: 100 });
-              for (const job of jobs.filter(j => j.conclusion === 'failure')) {
-                const response = await github.rest.actions.downloadJobLogsForWorkflowRun({ ...context.repo, job_id: job.id });
-                const text = typeof response.data === 'string' ? response.data : Buffer.from(response.data).toString('utf8');
-                fs.writeFileSync(`/tmp/review-snapshot/${run_id}-${job.id}.log`, text);
-              }
+            const assert = require('node:assert/strict');
+            const head = '713d90db73373821ab6102eb694b3882cfd11d2e';
+            for (const [artifact_id, run_id, digest] of [
+              [10587437234, 35453565034, 'sha256:1e3d3cf6f69e4a6c439c4dc8faed3b952331e99b38abeb4e5027c691bbdb98aa'],
+              [10587069376, 35453564988, 'sha256:f6ddc3b3d70e411c484dd92f7db09610968822cd03d16c6a365fefc7ae44d7bd'],
+            ]) {
+              const { data: artifact } = await github.rest.actions.getArtifact({ ...context.repo, artifact_id });
+              assert.equal(artifact.workflow_run.id, run_id);
+              assert.equal(artifact.workflow_run.head_sha, head);
+              assert.equal(artifact.digest, digest);
+              assert.equal(artifact.expired, false);
+              const { data: run } = await github.rest.actions.getWorkflowRun({ ...context.repo, run_id });
+              assert.equal(run.head_sha, head);
+              assert.equal(run.conclusion, 'success');
             }
-      - uses: actions/upload-artifact@v4
+            for (const commit_sha of [head, '65b516477d8720c75eedc236efe0da3d1eecba65']) {
+              const { data: commit } = await github.rest.git.getCommit({ ...context.repo, commit_sha });
+              assert.equal(commit.tree.sha, '3e5c187c5712ae1724f46ad33b5c07e10ea4bc04');
+            }
+      - uses: actions/download-artifact@v4
         with:
-          name: main-integration-review-snapshot
-          path: /tmp/review-snapshot
-          retention-days: 3
-          if-no-files-found: error
+          github-token: ${{ github.token }}
+          run-id: 35453565034
+          artifact-ids: '10587437234'
+          path: /tmp/pr443-surface
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 35453564988
+          artifact-ids: '10587069376'
+          path: /tmp/pr443-stripe
+          merge-multiple: true
+      - name: Validate reports and retain unchanged original PNGs
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, shutil
+          from pathlib import Path
+          head = '713d90db73373821ab6102eb694b3882cfd11d2e'
+          merge = '65b516477d8720c75eedc236efe0da3d1eecba65'
+          surface = Path('/tmp/pr443-surface')
+          stripe = Path('/tmp/pr443-stripe')
+          out = Path('docs/pr-evidence/pr443-713d90d')
+          out.mkdir(parents=True, exist_ok=False)
+          files = [
+            (surface / 'workflow.e2e.ts-streamed-form-layout-1440x900/surface-workflow-1440x900.png', 'surface-1440x900.png', 'dc1a90409e9746c39e1616e92435e62038b6c81c8f1eaf311bbaab04dc4ad2d5'),
+            (surface / 'workflow.e2e.ts-streamed-form-layout-1920x1080/surface-workflow-1920x1080.png', 'surface-1920x1080.png', '1e9699b814e6dc71ef1fa60f8c9329d7fa599bc7bfd8a8d78ff9dc37a5bb86ad'),
+            (surface / 'workflow.e2e.ts-streamed-form-layout-390x844/surface-workflow-390x844.png', 'surface-390x844-full-page.png', '7c24eb31134319f321b51cd2dec1474b8b4d2e84cea82b7792d6553ffae30e96'),
+            (stripe / 'screenshots/resource-list-ready-light-zh-CN-1440.png', 'stripe-list-1440x1000.png', '5978b7bafba9950502d116960c293c930093c6b82231d359837d9b450593e2cb'),
+            (stripe / 'screenshots/settings-ready-dark-zh-CN-390.png', 'stripe-settings-390-full-page.png', 'fc4df19d193b34e93f5a27fae5d6a5439bac2bc087d42bf57f3834b98f4079d5'),
+            (stripe / 'report.json', 'stripe-report.json', '916ad400c985202573d20c2a1e83fcb5909c298de7cea2977e356a6874a7540a'),
+            (stripe / 'keyboard.json', 'stripe-keyboard.json', '880189215e62001ce8636ee3343de92a0d0626af62ee7ccbf2eb64caac2a1cb9'),
+            (surface / 'packed-consumer.json', 'surface-packed-consumer.json', '7e393a8dd7cf462c14ae5370d18ceb994fafd9f5340d7b0cff2d29a04ec264e9'),
+          ]
+          for source, name, digest in files:
+            assert hashlib.sha256(source.read_bytes()).hexdigest() == digest, name
+          report = json.loads((stripe / 'report.json').read_text())
+          assert report['revision'] == merge and not report['failures']
+          assert len(report['scenes']) == 152 and all(s['passed'] for s in report['scenes'])
+          assert len(report['interactions']) == 4 and all(s['passed'] for s in report['interactions'])
+          for scene in report['scenes']:
+            path = (stripe / scene['screenshot']).resolve()
+            assert stripe.resolve() in path.parents
+            assert hashlib.sha256(path.read_bytes()).hexdigest() == scene['sha256']
+          for name, digest in report['sourceHashes'].items():
+            if name == 'packages/ui/dist/app.css':
+              continue  # Built entry retained in the CI report, not recreated by this archival job.
+            path = Path(name).resolve()
+            assert Path.cwd() in path.parents
+            assert hashlib.sha256(path.read_bytes()).hexdigest() == digest, name
+          keyboard = json.loads((stripe / 'keyboard.json').read_text())
+          assert len(keyboard) == 2 and all(s['passed'] for s in keyboard)
+          packed = json.loads((surface / 'packed-consumer.json').read_text())
+          assert packed['checkout'] == merge and packed['status'] == 'passed'
+          for source, name, digest in files:
+            shutil.copyfile(source, out / name)
+          provenance = {
+            'sourceHead': head, 'testedMerge': merge, 'tree': '3e5c187c5712ae1724f46ad33b5c07e10ea4bc04',
+            'surfaceRun': 35453565034, 'surfaceArtifact': 10587437234,
+            'stripeRun': 35453564988, 'stripeArtifact': 10587069376,
+            'originalArchiveSha256': {
+              'surface': '1e3d3cf6f69e4a6c439c4dc8faed3b952331e99b38abeb4e5027c691bbdb98aa',
+              'stripe': 'f6ddc3b3d70e411c484dd92f7db09610968822cd03d16c6a365fefc7ae44d7bd'
+            },
+            'sha256': {name: digest for _, name, digest in files},
+            'scope': 'Original synthetic Svelte browser fixtures, not production backend or Figma approval. No image transformations.',
+            'capture': 'Surface desktop PNGs are 1440x900 and 1920x1080. Narrow Surface viewport is 390x844; full-page bitmap is 390x1456. Stripe list is 1440x1000; settings narrow bitmap is 390x1307.',
+            'sourceCheck': 'All 17 versioned report source hashes verified. Generated packages/ui/dist/app.css is recorded by the original browser workflow, not rebuilt here.'
+          }
+          (out / 'provenance.json').write_text(json.dumps(provenance, ensure_ascii=False, indent=2) + '\n')
+          PY
+      - name: Commit evidence only to a separate branch
+        run: |
+          test "$(git rev-parse HEAD)" = 713d90db73373821ab6102eb694b3882cfd11d2e
+          git switch -c evidence/pr443-713d90d-merge-review
+          git add docs/pr-evidence/pr443-713d90d
+          git diff --cached --check
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'docs: retain verified current PR 443 browser evidence'
+          git push origin HEAD:refs/heads/evidence/pr443-713d90d-merge-review
+          echo "Evidence commit: $(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
