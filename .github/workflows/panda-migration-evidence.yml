@@ -30,7 +30,16 @@ jobs:
       - name: Install immutable migration baseline
         run: bun install --frozen-lockfile
       - name: Generate native compatibility sources and remove compiler dependencies
-        run: PANDA_VERSION="$(npm view @pandacss/dev version)" node scripts/panda-seed.mjs
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('scripts/panda-seed.mjs')
+          s = p.read_text().replace(')))]))', '))]))')
+          s = s.replace("...widget, propsSchema: styledResourceTablePropsSchema,", "...widget, propsSchema: styledResourceTablePropsSchema,\\n      getReferencedFields: (props: JsonObject) => Value.Decode(styledResourceTablePropsSchema, props).columns.map((column) => column.field),")
+          p.write_text(s)
+          PY
+          node --check scripts/panda-seed.mjs
+          PANDA_VERSION="$(npm view @pandacss/dev version)" node scripts/panda-seed.mjs
       - name: Resolve Panda dependency and update lockfile
         run: bun install
       - name: Build native styles and component packages
