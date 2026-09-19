@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { createServer } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
@@ -10,7 +10,13 @@ import { chromium } from '@playwright/test';
 const root = process.cwd();
 const output = resolve(root, 'docs/pr-evidence/panda-styles');
 mkdirSync(output, { recursive: true });
-rmSync(resolve(output, 'provenance.json'), { force: true });
+// Never upload screenshots left over from a different commit after a failed case.
+for (const file of readdirSync(output)) {
+  if (/^\d+x\d+-(light|dark)(-(baseline|published))?\.(png|json)$/.test(file)
+    || ['provenance.json', 'results.json', 'conditional-styles.json'].includes(file)) {
+    rmSync(resolve(output, file));
+  }
+}
 const read = (path) => readFileSync(resolve(root, path), 'utf8');
 const manifest = JSON.parse(read('packages/ui/styles-compatibility.json'));
 const baselineCss = Object.keys(manifest.files).map((path) => read(`packages/ui/src/${path}`)).join('\n');
@@ -62,19 +68,50 @@ try {
     });
     return page;
   }
-  async function capture(viewport, query, name) {
-    const page = await open(viewport, query);
+  async function capture(page, name) {
+    let previous;
+    let image;
+    let stable = false;
+    for (let frame = 0; frame < 4; frame++) {
+      image = await page.screenshot({ fullPage: true, animations: 'disabled', caret: 'hide' });
+      if (previous?.equals(image)) { stable = true; break; }
+      previous = image;
+      await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+    }
+    writeFileSync(resolve(output, `${name}.png`), image);
+    assert.ok(stable, `${name}: screenshot did not stabilize across consecutive frames`);
+    const styles = await page.evaluate(() => [...document.querySelectorAll('body *')].map((el) => {
+      const css = getComputedStyle(el);
+      const bounds = el.getBoundingClientRect();
+      return { tag: el.tagName, class: el.getAttribute('class'), bounds: [bounds.x, bounds.y, bounds.width, bounds.height],
+        color: css.color, background: css.backgroundColor, border: css.border, padding: css.padding,
+        shadow: css.boxShadow, opacity: css.opacity, font: css.font, display: css.display };
+    }));
+    writeFileSync(resolve(output, `${name}.json`), `${JSON.stringify(styles, null, 2)}\n`);
+    return { image, styles };
+  }
+  async function compareStylesheets(viewport, dark, name) {
+    // Change only CSS, keeping the DOM, browser context and raster cache constant.
+    // Separate fresh pages are still used for later interactive state tests.
+    const page = await open(viewport, `variants=0&baseline=1&dark=${dark}`);
     try {
-      const image = await page.screenshot({ path: resolve(output, `${name}.png`), fullPage: true, animations: 'disabled', caret: 'hide' });
-      const styles = await page.evaluate(() => [...document.querySelectorAll('body *')].map((el) => {
-        const css = getComputedStyle(el);
-        const bounds = el.getBoundingClientRect();
-        return { tag: el.tagName, class: el.getAttribute('class'), bounds: [bounds.x, bounds.y, bounds.width, bounds.height],
-          color: css.color, background: css.backgroundColor, border: css.border, padding: css.padding,
-          shadow: css.boxShadow, opacity: css.opacity, font: css.font, display: css.display };
-      }));
-      writeFileSync(resolve(output, `${name}.json`), `${JSON.stringify(styles, null, 2)}\n`);
-      return { image, styles };
+      const before = await capture(page, `${name}-baseline`);
+      await page.evaluate(async (dark) => {
+        const link = document.querySelector('link[rel="stylesheet"][href^="/__ui.css"]');
+        if (!(link instanceof HTMLLinkElement)) throw new Error('Missing comparison stylesheet');
+        await new Promise((resolve, reject) => {
+          link.onload = () => resolve();
+          link.onerror = () => reject(new Error('Published stylesheet failed to load'));
+          link.href = `/__ui.css?variants=0&dark=${dark}`;
+        });
+        if (link.href.includes('baseline=1')) throw new Error('Baseline stylesheet was not replaced');
+        await document.fonts.ready;
+        window.scrollTo(0, 0);
+        await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
+      }, dark);
+      const after = await capture(page, `${name}-published`);
+      assert.deepEqual(after.styles, before.styles, `${name}: published CSS changed default computed styles or layout`);
+      assert.ok(before.image.equals(after.image), `${name}: published CSS changed default widget/control screenshots`);
     } finally { await page.close(); }
   }
   for (const viewport of [{ width: 1440, height: 900 }, { width: 1920, height: 1080 }, { width: 390, height: 844 }]) {
@@ -82,10 +119,7 @@ try {
       const name = `${viewport.width}x${viewport.height}-${dark ? 'dark' : 'light'}`;
       let page;
       try {
-        const before = await capture(viewport, `variants=0&baseline=1&dark=${dark}`, `${name}-baseline`);
-        const after = await capture(viewport, `variants=0&dark=${dark}`, `${name}-published`);
-        assert.deepEqual(after.styles, before.styles, `${name}: published CSS changed default computed styles or layout`);
-        assert.ok(before.image.equals(after.image), `${name}: published CSS changed default widget/control screenshots`);
+        await compareStylesheets(viewport, dark, name);
         page = await open(viewport, `variants=1&dark=${dark}`);
         assert.equal(await page.getByRole('button', { name: 'Disabled action' }).isDisabled(), true);
         assert.equal(await page.locator('article[aria-busy="true"]').count(), 1);
@@ -144,6 +178,7 @@ try {
     publishedCssSha256: createHash('sha256').update(publishedCss).digest('hex'),
     browser: browser.version(),
     screenshotLaunchArgs,
+    comparison: 'Same DOM with only the stylesheet replaced; two identical consecutive frames required; exact PNG and computed-style equality',
     scope: 'Current real Svelte widget/control fixture under baseline vs published CSS; Chromium only; not a full application or historical DOM comparison',
     checks, failures, pageErrors,
   };
