@@ -11,7 +11,11 @@ function classesIn(css) {
   const classes = new Set();
   postcss.parse(css).walkRules(rule => selectorParser(selectors => {
     selectors.walkClasses(node => {
-      if (rule.nodes?.length) classes.add(node.value);
+      // A reference inside :not() deliberately excludes this class; it is not its CSS.
+      for (let parent = node.parent; parent; parent = parent.parent) {
+        if (parent.type === 'pseudo' && parent.value === ':not') return;
+      }
+      if (rule.nodes?.some(child => child.type === 'decl' || child.type === 'atrule')) classes.add(node.value);
     });
   }).processSync(rule.selector));
   return classes;
@@ -49,4 +53,10 @@ test('missing primitive rules cause coverage to fail', () => {
     if (rule.selector.includes('ui-button') && rule.selector.includes('--size_icon-lg')) rule.remove();
   });
   assert.throws(() => assertGenerated(uiButton({ size: 'icon-lg' }), classesIn(missing.toString())), /Missing generated primitive CSS/);
+});
+
+test('legacy exclusions cannot masquerade as generated primitive declarations', () => {
+  const css = '.legacy:not(:where(.svadmin-ui-button)) { color: red }';
+  assert.ok(!classesIn(css).has('svadmin-ui-button'));
+  assert.throws(() => assertGenerated('svadmin-ui-button', classesIn(css)), /Missing generated primitive CSS/);
 });
