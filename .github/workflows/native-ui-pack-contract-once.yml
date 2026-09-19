@@ -76,47 +76,44 @@ jobs:
           assert.ok(Array.isArray(manifest.sideEffects));
           if (!manifest.sideEffects.includes('./vendor/**/*.css')) manifest.sideEffects.push('./vendor/**/*.css');
           writeFileSync(packagePath, JSON.stringify(manifest, null, 2) + '\n');
-          const workflowPath = '.github/workflows/ui-panda-complete.yml';
-          let workflow = readFileSync(workflowPath, 'utf8');
-          for (const name of ['ui', 'ai-elements']) {
-            const previous = `bun run --cwd packages/${name} check`;
-            assert.equal(workflow.split(previous).length - 1, 1);
-            workflow = workflow.replace(previous, `bunx --no-install svelte-check --tsgo-experimental-api --tsconfig packages/${name}/tsconfig.json --threshold error`);
-          }
-          writeFileSync(workflowPath, workflow);
           NODE
           git diff --check
           bunx --no-install eslint scripts/check-package-packs.ts
           node scripts/check-style-boundary.mjs --source
-      - name: Commit bounded fixes and retire this writer
+      - name: Commit only the two reviewed code files
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           test "$GITHUB_REF" = refs/heads/feat/ui-panda-complete-20260919
-          git add scripts/check-package-packs.ts packages/ai-elements/package.json .github/workflows/ui-panda-complete.yml
-          git rm .github/workflows/native-ui-pack-contract-once.yml
-          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' -c core.hooksPath=/dev/null commit -m 'fix(styles): verify compiler-free tarballs and explicit package typechecks'
+          git add scripts/check-package-packs.ts packages/ai-elements/package.json
+          test "$(git diff --cached --name-only | wc -l)" -eq 2
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' -c core.hooksPath=/dev/null commit -m 'fix(styles): verify compiler-free tarballs and preserve vendor CSS side effects'
           git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)" push origin HEAD:refs/heads/feat/ui-panda-complete-20260919
-          git fetch --no-tags --depth=1 origin main
-          git diff --check FETCH_HEAD HEAD
       - name: Build and verify native package boundaries
         run: |
           mkdir -p test-results/native-ui-final
           bun run build:packages > test-results/native-ui-final/build.log 2>&1 || { tail -80 test-results/native-ui-final/build.log; exit 1; }
           node scripts/check-style-boundary.mjs
           git diff --exit-code -- bun.lock
-      - name: Explicit strict package typechecks
+      - name: Execute existing full tarball and isolated-consumer matrix
         run: |
+          bun run pack:check > test-results/native-ui-final/packs.log 2>&1 || { tail -100 test-results/native-ui-final/packs.log; exit 1; }
+          tail -45 test-results/native-ui-final/packs.log
+      - name: Explicit strict package typechecks
+        if: ${{ !cancelled() }}
+        run: |
+          mkdir -p test-results/native-ui-final
           status=0
           for package in ui ai-elements; do
             bunx --no-install svelte-check --tsgo-experimental-api --tsconfig "packages/$package/tsconfig.json" --threshold error > "test-results/native-ui-final/$package-types.log" 2>&1 || status=1
             tail -60 "test-results/native-ui-final/$package-types.log"
           done
           exit "$status"
-      - name: Execute existing full tarball and isolated-consumer matrix
+      - name: Check complete PR whitespace against main
+        if: ${{ !cancelled() }}
         run: |
-          bun run pack:check > test-results/native-ui-final/packs.log 2>&1 || { tail -100 test-results/native-ui-final/packs.log; exit 1; }
-          tail -45 test-results/native-ui-final/packs.log
+          git fetch --no-tags --depth=1 origin main
+          git diff --check FETCH_HEAD HEAD
       - uses: actions/upload-artifact@v7
         if: always()
         with:
