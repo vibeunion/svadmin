@@ -1,0 +1,6 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": { "types": ["svelte", "node"] },
+  "include": ["contracts.ts", "resource.ts"],
+  "exclude": ["node_modules"]
+}

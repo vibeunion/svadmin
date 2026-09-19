@@ -1,0 +1,42 @@
+name: Typed renderer contracts
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/ui/**'
+      - 'packages/core/**'
+      - 'scripts/fixtures/ui-rendering/**'
+      - '.github/workflows/typed-renderers.yml'
+      - 'bun.lock'
+      - 'tsconfig*.json'
+  push:
+    branches: [feat/typed-svelte-renderers]
+permissions:
+  contents: read
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - run: bun install --frozen-lockfile
+      - name: Lint new adapters and fixtures
+        run: bun run eslint packages/ui/src/rendering scripts/fixtures/ui-rendering --max-warnings 0
+      - name: Runtime and native snippet regression tests
+        if: success() || failure()
+        run: bun run --cwd packages/ui test src/rendering/rendering.test.ts
+      - name: Positive and negative TypeScript contracts
+        if: success() || failure()
+        run: node node_modules/@typescript/native/bin/tsc --noEmit --pretty false -p scripts/fixtures/ui-rendering/tsconfig.json
+      - name: Compile native Svelte consumers
+        if: success() || failure()
+        run: bun run svelte-check --tsgo-experimental-api --tsconfig scripts/fixtures/ui-rendering/tsconfig.svelte.json --fail-on-warnings
+      - name: Check diff whitespace
+        if: success() || failure()
+        run: git show --format= --check HEAD
