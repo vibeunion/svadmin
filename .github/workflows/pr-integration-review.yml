@@ -1,0 +1,51 @@
+name: PR integration review workspace
+
+# 仅供本次合并审查使用，不进入主分支；不写任何业务数据或分支。
+on:
+  push:
+    branches: [review/merge-readiness-20260919]
+permissions:
+  contents: read
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: e594440ad6e143727fb5b8d81f0368d9a9024385
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - name: Capture immutable source references and conflicts without pushing
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/review"
+          git branch snapshot-main HEAD
+          for number in 434 436 437 438 441; do
+            git fetch origin "refs/pull/$number/head:refs/heads/snapshot-pr-$number"
+            git rev-parse "snapshot-pr-$number" >> "$RUNNER_TEMP/review/heads.txt"
+            git merge-tree --write-tree snapshot-main "snapshot-pr-$number" > "$RUNNER_TEMP/review/merge-$number.txt" || test "$?" -eq 1
+          done
+          git bundle create "$RUNNER_TEMP/review/repository.bundle" snapshot-main snapshot-pr-434 snapshot-pr-436 snapshot-pr-437 snapshot-pr-438 snapshot-pr-441
+      - name: Prepare locked offline validation dependencies
+        env:
+          HUSKY: '0'
+        run: |
+          set -euo pipefail
+          bun install --frozen-lockfile
+          git diff --exit-code -- bun.lock
+          mkdir -p .review-tools
+          cp "$(command -v node)" .review-tools/node
+          cp "$(command -v bun)" .review-tools/bun
+          tar --exclude='./.git' -czf "$RUNNER_TEMP/review/workspace.tar.gz" .
+      - uses: actions/upload-artifact@v7
+        with:
+          name: pr-integration-review-workspace
+          path: ${{ runner.temp }}/review/
+          retention-days: 1
