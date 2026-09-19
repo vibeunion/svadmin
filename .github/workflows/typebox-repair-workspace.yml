@@ -48,7 +48,7 @@ jobs:
           git diff --exit-code -- bun.lock
           git diff --check
           git add -- packages/core/src/types.ts packages/create-svadmin/src/generate-command.ts packages/create-svadmin/src/generate-command.test.ts packages/lite/src/components/LiteFileUpload.svelte packages/lite/src/components/LiteFileUpload.test.svelte.ts packages/lite/src/components/LiteFilterBuilder.svelte packages/ui/src/components/DateRangeInput.svelte packages/ui/src/components/FileUpload.svelte packages/ui/src/components/TreeSelect.svelte packages/ui/src/components/combobox-field.test.svelte.ts packages/ui/src/components/date-time-input.test.svelte.ts packages/ui/src/components/field-display-registration.test.svelte.ts packages/ui/src/components/fieldComponentMap.ts packages/ui/src/components/file-upload.test.svelte.ts packages/ui/src/components/import-wizard.test-host.svelte packages/ui/src/components/import-wizard.test.svelte.ts packages/ui/src/components/resource-workspace.test-host.svelte packages/ui/src/components/resource-workspace.test.svelte.ts
-          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'fix: repair typed field contracts and isolate regression test state'
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'fix(ui): repair typed field contracts and isolate regression test state'
           git push origin HEAD:refs/heads/refactor/replace-zod-with-typebox
       - name: Install Chromium for actual browser evidence
         run: bunx --no-install playwright install --with-deps chromium
@@ -159,7 +159,7 @@ jobs:
       - name: Commit only verified browser evidence
         run: |
           git add -- docs/pr-evidence/typebox-ci
-          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'test: record TypeBox CI repair browser evidence'
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'test(ui): record TypeBox CI repair browser evidence'
           git push origin HEAD:refs/heads/refactor/replace-zod-with-typebox
           rm -rf .tmp-typebox-evidence
       - name: Validate complete strict checking inventory
