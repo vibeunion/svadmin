@@ -1,0 +1,82 @@
+name: Apply guarded content integration fixes
+on:
+  push:
+    branches: [fix/panda-stage3-validation-20260919]
+    paths: [.github/workflows/content-closeout-apply.yml]
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - name: Apply exact reviewed replacements, never force-push
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          branch=fix/panda-stage3-validation-20260919
+          test "$(git ls-remote origin "refs/heads/$branch" | cut -f1)" = "$EXPECTED_HEAD"
+          test "$(git rev-parse HEAD^)" = b281ef0b5d41f8bd0b8c0df04784f8cbb9034de1
+          python3 <<'PY'
+          from pathlib import Path
+          import subprocess
+          def edit(path, sha, replacements):
+              assert subprocess.check_output(['git', 'hash-object', path], text=True).strip() == sha, path
+              file = Path(path)
+              text = file.read_text()
+              for old, new in replacements:
+                  assert text.count(old) == 1, (path, old, text.count(old))
+                  text = text.replace(old, new)
+              file.write_text(text)
+          edit('packages/lite/src/components/LiteFilterBuilder.svelte', '2e3236b7e7d5a6a2259524343428397f4f80631d', [('    disabled = false,\n    onApply,', '    disabled = false,')])
+          edit('packages/core/src/types.ts', 'ff7df3c9a275b048f010db8f601a613fd6f3e8cb', [("| 'url' | 'email' | 'phone' | 'currency' | 'file'", "| 'url' | 'email' | 'phone' | 'currency' | 'percent' | 'file'")])
+          edit('packages/ui/src/components/TreeSelect.svelte', '39db017e42b6777840bce55488d89986e9019444', [('node.dataset.treeValue', "node.dataset['treeValue']")])
+          edit('packages/ui/src/components/DateRangeInput.svelte', 'b09e5a84143b22dc53a65b483a4acd8bbdeaddd2', [
+              ("  import DateTimeInput,", "  import { definedOptions } from '@svadmin/core/options';\n  import DateTimeInput,"),
+              ("    const result = { ...value, [part]: next };", "    const result: DateRangeInputValue = { start: value?.start ?? null, end: value?.end ?? null, [part]: next };"),
+              ("    value={value?.start}\n    {mode}\n    {min}\n    {max}\n    {step}\n    id={startId}\n    name={startName}", "    value={value?.start ?? null}\n    {mode}\n    {...definedOptions({ min, max, step, id: startId, name: startName, describedby })}"),
+              ("    describedby={describedby}\n    onchange={(next) => update('start', next)}", "    onchange={(next) => update('start', next)}"),
+              ("    value={value?.end}\n    {mode}\n    {min}\n    {max}\n    {step}\n    id={endId}\n    name={endName}", "    value={value?.end ?? null}\n    {mode}\n    {...definedOptions({ min, max, step, id: endId, name: endName, describedby })}"),
+              ("    describedby={describedby}\n    onchange={(next) => update('end', next)}", "    onchange={(next) => update('end', next)}"),
+          ])
+          edit('packages/ui/src/components/FileUpload.svelte', '228f08f27d9cc4ccf5e0251a3ae544f6c5e67450', [
+              ('Promise<{ url?: string } | void>', 'Promise<{ url?: string } | undefined> | Promise<void>'),
+              ("  function updateItem(id: string, update: Partial<UploadItem>): void {\n    items = items.map(item => item.id === id ? { ...item, ...update } : item);", "  function updateItem(id: string, update: Partial<UploadItem>, clear: ('error' | 'url')[] = []): void {\n    items = items.map(item => {\n      if (item.id !== id) return item;\n      const next = { ...item, ...update };\n      for (const key of clear) delete next[key];\n      return next;\n    });"),
+              ("updateItem(item.id, { status: 'uploading', progress: 0, error: undefined });", "updateItem(item.id, { status: 'uploading', progress: 0 }, ['error']);"),
+              ("      updateItem(item.id, { status: 'success', progress: 100, url: result?.url });", "      const url = result?.url;\n      updateItem(item.id, { status: 'success', progress: 100, ...(url === undefined ? {} : { url }) }, url === undefined ? ['url'] : []);"),
+              ("void process({ ...item, status: 'queued', error: undefined });", "void process(item);"),
+          ])
+          edit('packages/ui/src/components/combobox-field.test.svelte.ts', '940bf88ede2d40bf54dc100e985b6f9578cbeccd', [("getMany: vi.fn(async ({ ids })", "getMany: vi.fn<NonNullable<DataProvider['getMany']>>(async ({ ids })")])
+          edit('packages/ui/src/components/import-wizard.test.svelte.ts', 'bfa55c69d575e79b8e555b14d950df90f0b54814', [
+              ("import { setLocale } from '@svadmin/core/i18n';\n", ''),
+              ("  setLocale('en');\n", ''),
+              ("const source = provider({ create: vi.fn(() => new Promise(resolve => { resolveWrite = resolve; })) });", "const source = provider({ create: vi.fn(() => new Promise<{ data: { id: number; title: string; quantity: number } }>(resolve => { resolveWrite = resolve; })) });"),
+          ])
+          edit('packages/ui/src/components/resource-workspace.test.svelte.ts', 'a013bba38e5dd4f910b504c9b71d0bb9656b4545', [
+              ("import { setLocale } from '@svadmin/core/i18n';\n", ''),
+              ("  setLocale('en');\n", ''),
+          ])
+          edit('packages/ui/src/components/import-wizard.test-host.svelte', '054c6c4571be9bb277bec98e8af5249675c25550', [
+              ("  import { provideAdminContext,", "  import { createI18nScope, provideI18nScope } from '@svadmin/core/i18n';\n  import { provideAdminContext,"),
+              ("import { definedReactiveOptions }", "import { definedOptions, definedReactiveOptions }"),
+              ("  }));\n</script>", "  }));\n  provideI18nScope(createI18nScope({ locale: 'en' }));\n</script>"),
+              ("<ImportWizard {resourceName} {open} {onSuccess} />", "<ImportWizard {resourceName} {open} {...definedOptions({ onSuccess })} />"),
+          ])
+          edit('packages/ui/src/components/resource-workspace.test-host.svelte', '06caa8e9ffb434a94de3285338e6582d2ae9f3b4', [
+              ("  import { provideAdminContext,", "  import { createI18nScope, provideI18nScope } from '@svadmin/core/i18n';\n  import { provideAdminContext,"),
+              ("  }));\n</script>", "  }));\n  provideI18nScope(createI18nScope({ locale: 'en' }));\n</script>"),
+          ])
+          Path('.github/workflows/content-closeout-apply.yml').unlink()
+          PY
+          git diff --check
+          git config user.name 'svadmin automation'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add packages/core/src/types.ts packages/lite/src/components/LiteFilterBuilder.svelte packages/ui/src/components .github/workflows/content-closeout-apply.yml
+          git commit -m 'fix(ui): close strict optional, field and scoped-locale integration gaps'
+          git push origin "HEAD:refs/heads/$branch"
+          git show --stat --oneline HEAD
