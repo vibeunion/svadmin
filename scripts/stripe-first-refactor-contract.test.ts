@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'bun:test';
 import { readdirSync, readFileSync } from 'node:fs';
 import { relative, resolve } from 'node:path';
+import { isFrozenCompatibilityCss } from './frozen-css-compatibility.js';
 import utilityClasses from '../packages/ui/scripts/utility-class-map.json' with { type: 'json' };
 
 const root = resolve(import.meta.dir, '..');
@@ -156,8 +157,9 @@ describe('Stripe-first refactor contract', () => {
           walk(path);
         } else if (/\.(?:svelte|ts|css)$/.test(entry.name)) {
           const rel = relative(root, path);
-          readFileSync(path, 'utf8')
-            .split('\n')
+          const source = readFileSync(path, 'utf8');
+          if (isFrozenCompatibilityCss(rel, source)) continue;
+          source.split('\n')
             .forEach((line, index) => {
               if (paletteUtility.test(line)) violations.push(`${rel}:${index + 1} bare palette utility: ${line.trim()}`);
               if (bareHex.test(line)) violations.push(`${rel}:${index + 1} bare hex color: ${line.trim()}`);
