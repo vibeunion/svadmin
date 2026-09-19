@@ -77,9 +77,11 @@ fields; malformed issue envelopes fail closed. Synchronous parsing rejects
 asynchronous schemas explicitly, while `Validate` retains async support.
 Both ESM and CommonJS use the same strictly checked parsing helper.
 
-`packages/elysia/src/declaration-contract.test.ts` exercises actual Elysia,
-TypeBox, and Zod behavior. Its CommonJS fixture runs in a standalone Node
-process rather than relying on Bun's already-loaded ESM modules.
+`packages/elysia/src/declaration-contract.test.ts` exercises actual Elysia and
+TypeBox behavior, with a TypeBox-backed test-only Standard Schema boundary.
+Its async fixture tests the Standard Schema protocol, not native TypeBox async
+refinements. Its CommonJS fixture runs in a standalone Node process rather than
+relying on Bun's already-loaded ESM modules.
 Negative fixtures cover statuses, decoded model values, references, model
 mapping, macro resolution, and registered guard error narrowing.
 
