@@ -41,7 +41,6 @@ jobs:
         run: node scripts/check-no-tailwind.mjs
       - name: Build component packages
         run: |
-          bun run --cwd packages/core build
           bun run --cwd packages/ai-elements build
           bun run --cwd packages/ui build
           bun run --cwd packages/surface build
