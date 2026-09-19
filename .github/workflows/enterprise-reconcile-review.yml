@@ -1,31 +1,30 @@
 name: Guarded enterprise reconciliation
 
-# Temporary review-branch helper; never part of main or the feature candidate.
+# Temporary review branch only. Evidence objects never update main or feature refs.
 on:
   push:
     branches: [review/enterprise-reconcile-20260920]
 permissions:
   contents: read
 jobs:
-  prepare:
+  retain:
     if: >-
-      github.event.head_commit.message == 'review: execute guarded enterprise follow-up'
+      github.event.head_commit.message == 'review: retain verified enterprise browser evidence'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
       contents: write
+      actions: read
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - name: Prepare source-only follow-up Git objects
+      - name: Verify current successful source, reports, archive digest and original PNGs
         env:
           GH_TOKEN: ${{ github.token }}
+          SOURCE_HEAD: a21bdfc8121715f5d148454657daf687f17e2414
+          EVIDENCE_RUN_ID: '35476674592'
         run: |
           set -euo pipefail
-          cp review-assets/followup.py "$RUNNER_TEMP/enterprise-followup.py"
-          git fetch --quiet --no-tags --depth=1 origin 034eb737b1ad4caca02fcd42c5f83559aaedb592
-          git switch --detach 034eb737b1ad4caca02fcd42c5f83559aaedb592
-          python3 "$RUNNER_TEMP/enterprise-followup.py"
-          test -z "$(git diff --name-only -- .github/workflows)"
-          git diff --check
+          git fetch --quiet --no-tags --depth=1 origin "$SOURCE_HEAD"
+          python3 review-assets/retain-evidence.py
