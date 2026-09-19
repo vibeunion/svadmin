@@ -2,6 +2,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import postcss from 'postcss';
+import { retirePrimitiveFallbacks } from './retire-primitive-fallbacks.mjs';
 
 const packageRoot = fileURLToPath(new URL('..', import.meta.url));
 const sourceRoot = resolve(packageRoot, 'src');
@@ -19,10 +20,11 @@ function inlineCss(path, ancestors = new Set()) {
     rule.replaceWith(...inlineCss(target, stack).nodes);
   });
   root.walkAtRules((rule) => {
-    if (['theme', 'source', 'apply', 'utility', 'custom-variant', 'tailwind', 'plugin', 'config'].includes(rule.name)) {
+    if (['theme', 'source', 'apply', 'utility', 'custom-variant', 'tailwind', 'reference', 'variant', 'config', 'plugin', 'screen', 'responsive', 'variants'].includes(rule.name)) {
       throw new Error(`Unexpected compiler directive @${rule.name}`);
     }
   });
+  if (path === resolve(sourceRoot, 'components.css')) retirePrimitiveFallbacks(root);
   return root;
 }
 
@@ -32,7 +34,7 @@ let hasPrimaryAlias = false;
 aliases.walkDecls('--color-primary', () => { hasPrimaryAlias = true; });
 if (!hasPrimaryAlias) throw new Error('Missing public theme aliases');
 mkdirSync(dist, { recursive: true });
-// 保留旧入口路径，但两个入口都只发布浏览器可直接执行的 CSS。
-// 主题变量仍由 styles/aliases.css 提供，不再向宿主注入编译器元数据。
-for (const name of ['app.css', 'app.theme.css']) writeFileSync(resolve(dist, name), css);
-console.info('[build-static-css] published compiler-free CSS through both public entry points');
+// 两个公开入口保持同一原生 CSS；旧路径兼容不再意味着保留编译器元数据。
+writeFileSync(resolve(dist, 'app.css'), css);
+writeFileSync(resolve(dist, 'app.theme.css'), css);
+console.info('[build-static-css] published native CSS entries and pre-generated Panda recipes');

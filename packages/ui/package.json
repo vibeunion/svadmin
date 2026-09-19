@@ -24,11 +24,6 @@
       "svelte": "./dist/index.js",
       "default": "./dist/index.js"
     },
-    "./rendering": {
-      "types": "./dist/rendering/index.d.ts",
-      "svelte": "./dist/rendering/index.js",
-      "default": "./dist/rendering/index.js"
-    },
     "./app.css": {
       "svelte": "./dist/app.css",
       "import": "./dist/app.css",
@@ -90,8 +85,8 @@
     "@tanstack/svelte-table": "^9.2.3",
     "@tanstack/table-core": "^9.2.3",
     "bits-ui": "^2.19.0",
-    "svelte-sonner": "^1.2.1",
-    "clsx": "^2.1.1"
+    "cn": "^0.2.4",
+    "svelte-sonner": "^1.2.1"
   },
   "license": "MIT",
   "author": "zuohuadong",
@@ -123,8 +118,7 @@
   "scripts": {
     "build": "bun run build:styles && node ../../node_modules/@sveltejs/package/svelte-package.js -i src -o dist && node scripts/build-static-css.mjs && node scripts/postbuild-css.mjs",
     "test": "vitest run --config ./vitest.config.ts",
-    "test:css": "node --test scripts/static-css.test.mjs scripts/panda-css.test.mjs scripts/panda-css-layers.test.mjs scripts/panda-css-isolation.test.mjs scripts/conditional-css.test.mjs",
-    "build:styles": "panda codegen && panda cssgen --outfile src/styled-system/styles.css && node scripts/flatten-panda-css.mjs && node scripts/prepare-panda-runtime.mjs && node ../../scripts/build-migrated-ui.mjs ui && node ../../scripts/build-native-classnames.mjs ui",
-    "styles:migrated:check": "node ../../scripts/build-migrated-ui.mjs ui --check"
+    "test:css": "node --experimental-strip-types --test scripts/static-css.test.mjs scripts/panda-css.test.mjs scripts/panda-css-layers.test.mjs scripts/panda-css-isolation.test.mjs scripts/conditional-css.test.mjs scripts/primitive-recipes.test.mjs scripts/primitive-css-layers.test.mjs scripts/native-css-entries.test.mjs scripts/panda-primitive-runtime.test.mjs ../../scripts/no-tailwind-contract.test.mjs scripts/retire-primitive-fallbacks.test.mjs",
+    "build:styles": "panda codegen && panda cssgen --outfile src/styled-system/styles.css && node scripts/flatten-panda-css.mjs && node scripts/prepare-panda-runtime.mjs"
   }
 }

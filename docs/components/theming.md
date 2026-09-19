@@ -79,14 +79,17 @@ This injects CSS variables directly onto `<html>`, taking highest priority over 
 
 这会将 CSS 变量直接注入 `<html>`，优先级高于 `app.css` 的默认值。
 
-Color tokens should normally contain a complete CSS `<color>` value. For legacy Tailwind/shadcn themes that store only HSL channels, normalize the semantic mapping so both svadmin's base reset and Tailwind utilities receive a valid color:
+Color tokens must contain complete CSS color values. Convert legacy HSL channel
+values into ordinary CSS variables rather than adding compiler directives:
 
-颜色 token 通常应保存完整的 CSS `<color>` 值。如果旧版 Tailwind/shadcn 主题只保存 HSL 通道，请在语义映射中归一化，确保 svadmin 基础重置和 Tailwind 工具类都收到有效颜色：
+颜色 token 应保存完整 CSS 颜色。旧 HSL 通道值使用原生 CSS 归一化，不需要 Tailwind 指令：
 
 ```css
-:root { --border: 214.3 31.8% 91.4%; }
-
-@theme { --color-border: hsl(var(--border)); }
+:root, .svadmin-theme {
+  --legacy-border-channels: 214.3 31.8% 91.4%;
+  --border: hsl(var(--legacy-border-channels));
+  --color-border: var(--border);
+}
 ```
 
 Using `border-color: var(--border)` with channel-only values is invalid CSS and falls back to `currentColor`, which can create unexpectedly dark borders.
