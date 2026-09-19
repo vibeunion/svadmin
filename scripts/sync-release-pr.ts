@@ -1,11 +1,13 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
+import { applyPeerMinimum } from './surface-release-policy';
 
 interface PackageManifest {
   name?: string;
   version?: string;
   peerDependencies?: Record<string, string>;
   peerDependenciesMeta?: Record<string, { optional?: boolean }>;
+  svadmin?: { peerMinimums?: Record<string, string> };
 }
 
 interface ReleasePleaseConfig {
@@ -303,7 +305,13 @@ export function syncReleasePr(options: SyncReleasePrOptions): SyncReleasePrResul
         const baseRange = basePackages.get(name)?.peerDependencies?.[dependencyName];
         if (!targetVersion || !baseRange || baseRange.startsWith('workspace:')) continue;
 
-        const widened = widenPeerRange(baseRange, targetVersion);
+        const widened = applyPeerMinimum(
+          widenPeerRange(baseRange, targetVersion),
+          current.manifest.svadmin?.peerMinimums?.[dependencyName],
+        );
+        if (!Bun.semver.satisfies(targetVersion, widened)) {
+          throw new Error(`Peer minimum rejects release ${dependencyName}@${targetVersion}: ${widened}`);
+        }
         if (widened === range) continue;
         peers[dependencyName] = widened;
         const dependencyChanges = changedPeers.get(name) ?? new Set<string>();

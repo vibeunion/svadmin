@@ -34,8 +34,14 @@
 
 * The following workspace dependencies were updated
   * peerDependencies
-    * @svadmin/core bumped from >=0.34.2 <0.53.0 to >=0.34.2 <0.54.0
-    * @svadmin/ui bumped from >=0.40.6 <0.73.0 to >=0.40.6 <0.74.0
+    * @svadmin/core bumped from >=0.34.2 <0.53.0 to >=0.53.0 <0.54.0
+    * @svadmin/ui bumped from >=0.40.6 <0.73.0 to >=0.73.0 <0.74.0
+
+### Compatibility
+
+* Surface 0.9 requires Core >=0.53.0, UI >=0.73.0 and Svelte >=5.56.10. The older readonly-only floor does not cover the interactive entry.
+* Explicit peer minima survive release synchronization. Strict consumers verify the exact minimum candidate tarballs before their first publication, and the registry minima on later releases, including the interactive browser import.
+* The interactive API remains experimental. Candidate validation is not proof of registry availability; publish Core and UI before Surface.
 
 ## [0.8.19](https://github.com/vibeunion/svadmin/compare/surface-v0.8.18...surface-v0.8.19) (2026-09-19)
 

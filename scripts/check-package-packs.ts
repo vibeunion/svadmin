@@ -4,6 +4,7 @@ import { access, cp, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'no
 import { tmpdir } from 'node:os';
 import { basename, join, resolve } from 'node:path';
 import { AI_ELEMENT_PARITY } from '../packages/ai-elements/src/parity-manifest.js';
+import { minimumDependencySource } from './surface-release-policy';
 
 interface PackFile {
   path: string;
@@ -27,6 +28,7 @@ interface PackageExpectation {
 
 interface PackageManifest {
   name: string;
+  version?: string;
   main?: string;
   types?: string;
   svelte?: string;
@@ -1271,10 +1273,12 @@ async function verifySurfaceCompatibility(
   const corePack = results.get('@svadmin/core');
   const uiPack = results.get('@svadmin/ui');
   const uiManifest = manifests.get('@svadmin/ui');
+  const coreManifest = manifests.get('@svadmin/core');
   assert(surfacePack, '@svadmin/surface: missing tarball for compatibility verification');
   assert(corePack, '@svadmin/core: missing tarball for Surface compatibility verification');
   assert(uiPack, '@svadmin/ui: missing tarball for Surface compatibility verification');
   assert(uiManifest, '@svadmin/ui: missing manifest for Surface compatibility verification');
+  assert(coreManifest, '@svadmin/core: missing manifest for Surface compatibility verification');
 
   const compatibility = JSON.parse(await readFile(
     join(repositoryRoot, 'packages', 'surface', 'compatibility.json'),
@@ -1301,8 +1305,10 @@ async function verifySurfaceCompatibility(
     },
     {
       name: 'minimum-supported',
-      core: compatibility.minimumSupported['@svadmin/core'],
-      ui: compatibility.minimumSupported['@svadmin/ui'],
+      core: minimumDependencySource(compatibility.minimumSupported['@svadmin/core'],
+        coreManifest.version, join(packDirectory, corePack.filename)),
+      ui: minimumDependencySource(compatibility.minimumSupported['@svadmin/ui'],
+        uiManifest.version, join(packDirectory, uiPack.filename)),
       svelte: compatibility.minimumSupported.svelte,
     },
   ] as const;
@@ -1332,7 +1338,8 @@ async function verifySurfaceCompatibility(
       join(consumerDirectory, 'entry.ts'),
       `import { validateSurfaceSpec } from '@svadmin/surface';\n` +
         `import { SurfaceRenderer, defaultSurfaceCatalog } from '@svadmin/surface/svelte';\n` +
-        `console.info(typeof validateSurfaceSpec, typeof SurfaceRenderer, defaultSurfaceCatalog.version);\n`,
+        `import * as interactive from '@svadmin/surface/interactive';\n` +
+        `console.info(typeof validateSurfaceSpec, typeof SurfaceRenderer, defaultSurfaceCatalog.version, Object.keys(interactive));\n`,
     );
     await writeFile(
       join(consumerDirectory, 'vite.config.mjs'),
@@ -1351,6 +1358,15 @@ async function verifySurfaceCompatibility(
       '--store-dir',
       join(consumerDirectory, '.pnpm-store'),
     ], consumerDirectory);
+    if (combination.name === 'minimum-supported') {
+      for (const [name, expectedVersion] of Object.entries(compatibility.minimumSupported)) {
+        const installed = JSON.parse(await readFile(
+          join(consumerDirectory, 'node_modules', ...name.split('/'), 'package.json'), 'utf8',
+        )) as PackageManifest;
+        assert(installed.version === expectedVersion,
+          `minimum-supported: expected ${name}@${expectedVersion}, got ${installed.version ?? 'missing'}`);
+      }
+    }
     const nodeOutput = run(
       'node',
       ['--input-type=module', '-e', "import('@svadmin/surface').then((module) => console.info(typeof module.validateSurfaceSpec))"],
@@ -1358,7 +1374,7 @@ async function verifySurfaceCompatibility(
     );
     const vitePath = join(repositoryRoot, 'node_modules', 'vite', 'bin', 'vite.js');
     const buildOutput = run('node', [vitePath, 'build', '--config', 'vite.config.mjs'], consumerDirectory);
-    outputs.push(`${combination.name}: ${nodeOutput.trim()}\n${buildOutput.trim()}`);
+    outputs.push(`${combination.name} (core=${combination.core}, ui=${combination.ui}): ${nodeOutput.trim()}\n${buildOutput.trim()}`);
   }
 
   return outputs.join('\n');
