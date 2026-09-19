@@ -56,7 +56,7 @@
   },
   "scripts": {
     "build": "node scripts/build-editor-styles.mjs && node scripts/prepare-design.mjs && node ../../node_modules/@sveltejs/package/svelte-package.js -i src -o dist",
-    "check": "svelte-check --tsgo-experimental-api --tsconfig ./tsconfig.json --threshold error",
+    "check": "svelte-check --tsgo-experimental-api --tsconfig ./tsconfig.check.json --threshold error",
     "test": "vitest run --config ./vitest.config.ts",
     "styles:build": "node scripts/build-editor-styles.mjs",
     "styles:check": "node scripts/build-editor-styles.mjs --check"
