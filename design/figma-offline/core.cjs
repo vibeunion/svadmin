@@ -162,7 +162,7 @@
     function token(name, type, scope) { text(name, 'binding'); assert(Object.prototype.hasOwnProperty.call(tokens, name) && tokens[name].type === type && tokens[name].scopes.includes(scope), `Invalid ${scope} binding: ${name}`); }
     function resolve(name) { const seen = new Set(); let t = tokens[name]; while (t.alias !== undefined) { assert(!seen.has(t.alias), 'Alias cycle'); seen.add(t.alias); t = tokens[t.alias]; } return t.value; }
     names.forEach(resolve);
-    let count = 0; const ids = new Set(), components = new Set();
+    let count = 0; const ids = new Set(), components = new Set(), componentSizes = new Map();
     function node(n, depth) {
       keys(n, ['key', 'kind', 'name', 'layout', 'width', 'fill', 'stroke', 'gap', 'padding', 'radius', 'text', 'fontSize', 'children', 'component'], 'blueprint node');
       text(n.key, 'node key', 100); assert(!ids.has(n.key), 'Duplicate blueprint key'); ids.add(n.key);
@@ -170,12 +170,12 @@
       assert(['FRAME', 'COMPONENT', 'TEXT', 'INSTANCE'].includes(n.kind), 'Unsupported blueprint node type');
       if (n.kind === 'INSTANCE') {
         assert(components.has(n.component), 'Instance must reference an earlier top-level component');
-        assert(Object.keys(n).every(k => ['key', 'kind', 'name', 'component'].includes(k)), 'Instance overrides are not supported'); return;
+        assert(Object.keys(n).every(k => ['key', 'kind', 'name', 'component'].includes(k)), 'Instance overrides are not supported'); return componentSizes.get(n.component);
       }
       if (n.kind === 'TEXT') {
         assert(Object.keys(n).every(k => ['key', 'kind', 'name', 'text', 'width', 'fill', 'fontSize'].includes(k)), 'Invalid text properties');
         text(n.text, 'text', 10000); number(n.width, 'text width', 20, 1920); token(n.fill, 'COLOR', 'TEXT_FILL'); token(n.fontSize, 'FLOAT', 'FONT_SIZE');
-        number(resolve(n.fontSize), 'font size', 8, 72); return;
+        number(resolve(n.fontSize), 'font size', 8, 72); return 1;
       }
       assert(n.text === undefined && n.fontSize === undefined && n.component === undefined, 'Invalid container properties');
       assert(['VERTICAL', 'HORIZONTAL'].includes(n.layout), 'Only auto-layout containers are supported');
@@ -184,11 +184,21 @@
       assert(resolve(n.padding) * 2 < n.width, 'Padding exceeds container width');
       if (n.stroke) token(n.stroke, 'COLOR', 'STROKE_COLOR');
       if (n.kind === 'COMPONENT') assert(depth === 0, 'Components must be top-level');
-      for (const child of list(n.children, 'blueprint children', LIMITS.blueprintNodes)) node(child, depth + 1);
-      if (n.kind === 'COMPONENT') components.add(n.key);
+      let expanded = 1;
+      for (const child of list(n.children, 'blueprint children', LIMITS.blueprintNodes)) {
+        expanded += node(child, depth + 1);
+        assert(expanded <= LIMITS.blueprintNodes, 'Expanded instance node budget exceeded');
+      }
+      if (n.kind === 'COMPONENT') { components.add(n.key); componentSizes.set(n.key, expanded); }
+      return expanded;
     }
-    assert(list(input.nodes, 'blueprint roots', 20).length > 0, 'Empty blueprint'); input.nodes.forEach(n => node(n, 0));
-    return { id: input.id, title: input.title, nodes: count, tokens: names.length, components: components.size, font: 'Inter Regular', modeCount: 1 };
+    assert(list(input.nodes, 'blueprint roots', 20).length > 0, 'Empty blueprint');
+    let expandedNodes = 0;
+    for (const n of input.nodes) {
+      expandedNodes += node(n, 0);
+      assert(expandedNodes <= LIMITS.blueprintNodes, 'Expanded instance node budget exceeded');
+    }
+    return { id: input.id, title: input.title, nodes: count, expandedNodes, tokens: names.length, components: components.size, font: 'Inter Regular', modeCount: 1 };
   }
   const api = { FORMAT, BLUEPRINT, LIMITS, assert, text, list, walk, jsonClone, rootsOnly, documents, refs, encode64, base64Bytes, validateBundle, diagnostics, validateBlueprint };
   if (typeof module === 'object' && module.exports) module.exports = api;
