@@ -6,7 +6,9 @@ PR #441 的实现提交 `035ac5950c131e2dba0a50ce750ab9e8b3dc64e6` 在 PR 合成
 `8720e2943864c81523ed200ae7bd021750ea098d` 上通过全部 12 个专项/总工作流，
 包括总 CI `35450707276` 的 Lint & Test 与 E2E Tests、Surface `35450707246`、
 SVAR `35450707257`。合并提交为 `c02ac0dab6edc081b4175d17a46fdeff98e1267d`。
-这说明当前工程集成通过，不说明所有 UI 状态、最终设计稿或发布兼容性完成。
+合并时主线另已加入内容组件 recipes；实际合并树为 `da6bdbc507431fd69cbb65bc3be0431fd234fdd5`，
+不是前述 PR 验证树。后续必须验证保留两边成果的完整集成，不以早前 12 项代替新树验收。
+这说明工程验收需绑定版本，不说明所有 UI 状态、最终设计稿或发布兼容性完成。
 
 ## 本次代码修复
 
@@ -32,8 +34,8 @@ SVAR `35450707257`。合并提交为 `c02ac0dab6edc081b4175d17a46fdeff98e1267d`�
 | 层次 | 源码现状 | 完成条件 |
 | --- | --- | --- |
 | 样式编译与兼容 | Panda 预生成样式，保留公开语义类/主题变量与迁移规则 | 两个入口、SSR/打包消费者、默认样式精确回归持续通过 |
-| 组件语义 | `panda.config.ts` 显式注册六个语义 recipe 家族；迁移目录中大量有限规则不等于同等数量的完整语义组件 | 为表单、表格、抽屉、工作区逐个统一 slots、状态和有限变体 |
-| Token 单一来源 | `design/reference-kit/contract.json` 已记录 DESIGN.md 与代码的 spacing.sm/lg 差异 | 保持已有公开变量行为，统一命名、说明及机器导出；不静默改变现有布局 |
+| 组件语义 | `panda.config.ts` 显式注册九个语义 recipe 家族，含主线新加入的 contentPage/contentHeader/metricBlock；迁移目录中大量有限规则不等于完整语义组件 | 为表单、表格、抽屉、工作区逐个统一 slots、状态和有限变体 |
+| Token 单一来源 | `design/reference-kit/contract.json` 已记录 DESIGN.md 与代码的 spacing.sm/lg 差异；内容组件另有 content-tokens.ts | 保持已有公开变量行为，统一命名、说明及机器导出；不静默改变现有布局 |
 | 产品页面 | 现有截图覆盖真实示例路由，但参考 kit 的三类页面/18 个状态首先是需求声明 | 列表、详情、设置各状态的真实交互、键盘与响应式证据，逐页审阅 |
 | 设计文件 | 仓库 manifest 的 Figma 记录仍为 created-empty / contentVerified:false | 从真实文件核验可编辑组件、变量、状态及对应节点，不能用入口 URL 宣称完成 |
 | 表格生命周期 | 通过的 AutoTable/resource-workspace 测试仍曾报告 derived_inert | 定位到实际调用栈，补回归并消除告警；不能屏蔽 console 或只升级依赖碰运气 |
