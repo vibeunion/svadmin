@@ -30,11 +30,7 @@
   let isSubmitting = $state(false);
   let attempted = $state(false);
   let submitFailed = $state(false);
-  let invalidInputs = $state<Record<string, boolean>>({});
-  const issues = $derived([
-    ...validateSchemaForm(model, current),
-    ...Object.keys(invalidInputs).filter((key) => invalidInputs[key]).map((key): SchemaFormIssue => ({ path: pathFor(key), code: 'invalid-value' })),
-  ]);
+  const issues = $derived(validateSchemaForm(model, current));
   const visibleIssues = $derived(model.issues.length ? model.issues : attempted ? issues : []);
   const inputClass = 'svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529 svadmin-u-f10f771f87e9 svadmin-u-3e94a98e1466 svadmin-u-9c1295a6914a';
 
@@ -58,7 +54,6 @@
   function updateValue(key: string, next: unknown): void {
     if (disabled || readonly || isSubmitting || model.fields.find((field) => field.key === key)?.readonly) return;
     value = { ...current, [key]: next };
-    invalidInputs = { ...invalidInputs, [key]: false };
     submitFailed = false;
   }
   function updateNumber(key: string, input: HTMLInputElement): void {
@@ -66,8 +61,8 @@
       if (input.validity.badInput) throw new Error('invalid-value');
       updateValue(key, parseSchemaNumber(input.value));
     } catch {
-      updateValue(key, undefined);
-      invalidInputs = { ...invalidInputs, [key]: true };
+      // Preserve the invalid draft as a non-number; replacement values clear the error naturally.
+      updateValue(key, input.value);
       attempted = true;
     }
   }

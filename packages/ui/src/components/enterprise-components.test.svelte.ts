@@ -94,6 +94,18 @@ describe('enterprise schema form interactions', () => {
     expect(value.hidden.version).toBe(1);
     expect(input(view.container, '[name="amount"]').value).toBe('3');
   });
+  it('clears a numeric parse error when the host replaces the form value', async () => {
+    const onsubmit = vi.fn();
+    const view = render(JsonSchemaForm, { schema, onsubmit });
+    const amount = input(view.container, '[name="amount"]');
+    Object.defineProperty(amount, 'validity', { value: { badInput: true }, configurable: true });
+    await fireEvent.input(amount, { target: { value: '' } });
+    await fireEvent.submit(view.getByTestId('json-schema-form'));
+    expect(onsubmit).not.toHaveBeenCalled();
+    await view.rerender({ schema, value: { amount: 3 }, onsubmit });
+    await fireEvent.submit(view.getByTestId('json-schema-form'));
+    expect(onsubmit).toHaveBeenCalledWith({ amount: 3, enabled: false, plan: 1 });
+  });
   it('blocks programmatic submission in readonly mode', async () => {
     const onsubmit = vi.fn();
     const view = render(JsonSchemaForm, { schema, readonly: true, onsubmit });

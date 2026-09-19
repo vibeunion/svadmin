@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render, fireEvent } from '@testing-library/svelte';
-import { getLocale, setLocale } from '@svadmin/core/i18n';
 import FilterBuilder from './FilterBuilder.svelte';
+import FilterBuilderLocale from './FilterBuilderLocale.test.svelte';
 import type { FieldDefinition } from '@svadmin/core';
 
 const testFields: FieldDefinition[] = [
@@ -12,18 +12,19 @@ const testFields: FieldDefinition[] = [
 
 describe('FilterBuilder component', () => {
   it.each([['en', 'No filters yet.'], ['zh', '暂无筛选条件']])('renders %s empty state and allows adding rules', async (locale, emptyText) => {
-    const previousLocale = getLocale();
-    setLocale(locale);
-    const view = render(FilterBuilder, { fields: testFields, filters: [] });
-    try {
-      expect(view.container.textContent).toContain(emptyText);
-      await fireEvent.click(view.getByTestId('filter-builder-add-rule'));
-      expect(view.container.textContent).not.toContain(emptyText);
-      expect(view.container.querySelectorAll('[data-filter-rule]')).toHaveLength(1);
-    } finally {
-      view.unmount();
-      setLocale(previousLocale);
-    }
+    const view = render(FilterBuilderLocale, { locale, fields: testFields });
+    expect(view.container.textContent).toContain(emptyText);
+    await fireEvent.click(view.getByTestId('filter-builder-add-rule'));
+    expect(view.container.textContent).not.toContain(emptyText);
+    expect(view.container.querySelectorAll('[data-filter-rule]')).toHaveLength(1);
+  });
+
+  it('keeps simultaneous form-tree locales isolated', () => {
+    const english = render(FilterBuilderLocale, { locale: 'en', fields: testFields });
+    const chinese = render(FilterBuilderLocale, { locale: 'zh', fields: testFields });
+    expect(english.container.textContent).toContain('No filters yet.');
+    expect(english.container.textContent).not.toContain('暂无筛选条件');
+    expect(chinese.container.textContent).toContain('暂无筛选条件');
   });
 
   it('compiles rules into filters and triggers onApply', async () => {

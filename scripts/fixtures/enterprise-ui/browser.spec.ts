@@ -6,7 +6,8 @@ const screenshots = 'test-results/enterprise/screenshots';
 test('typed defaults, enum edits, required clear and retry', async ({ page }) => {
   await page.goto('/');
   const form = page.getByTestId('json-schema-form');
-  await form.locator('[name="plan"]').selectOption('1');
+  await form.locator('[name="plan"]').selectOption({ value: '1' });
+  await expect(form.locator('[name="plan"]')).toHaveValue('1');
   await form.getByRole('button', { name: 'Submit', exact: true }).click();
   await expect(page.getByTestId('form-result')).toHaveText('{"amount":0,"enabled":false,"plan":2}');
   await form.locator('[name="amount"]').fill('');
