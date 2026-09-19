@@ -1,0 +1,43 @@
+name: Restore processing labels
+
+on:
+  push:
+    branches: [feat/panda-tokens-no-tailwind]
+    paths: ['.github/workflows/restore-panda-processing-labels.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  restore:
+    if: github.repository == 'vibeunion/svadmin' && github.ref == 'refs/heads/feat/panda-tokens-no-tailwind'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+      - name: Apply exactly two missing translations and remove this one-shot workflow
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from hashlib import sha256
+          path = Path('packages/core/src/i18n.svelte.ts')
+          assert sha256(path.read_bytes()).hexdigest() == '1f82005f10b97e5e6ff1a628fb378056433412c0f8af6846cca13f494a0e645a'
+          text = path.read_text(encoding='utf-8')
+          assert text.count("'common.processing'") == 0
+          for anchor, label in [
+              ("    'common.list': '列表',", "    'common.processing': '处理中...',"),
+              ("    'common.list': 'List',", "    'common.processing': 'Processing...',"),
+          ]:
+              assert text.count(anchor) == 1
+              text = text.replace(anchor, anchor + '\n' + label)
+          assert text.count("'common.processing'") == 2
+          path.write_text(text, encoding='utf-8')
+          Path('.github/workflows/restore-panda-processing-labels.yml').unlink()
+          PY
+          test "$(git hash-object packages/core/src/i18n.svelte.ts)" = '54abb8b9df80703a158a604b1f028fde78f750fc'
+          git add -- packages/core/src/i18n.svelte.ts .github/workflows/restore-panda-processing-labels.yml
+          git diff --cached --check
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'fix(i18n): retain one processing label per locale'
+          git push origin HEAD:refs/heads/feat/panda-tokens-no-tailwind
