@@ -1,0 +1,42 @@
+name: Surface Contracts
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/surface/**'
+      - 'package.json'
+      - 'bun.lock'
+      - 'tsconfig.json'
+      - '.github/workflows/surface-contracts.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: surface-contracts-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contracts:
+    name: Contract tests (Node)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 26
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Install locked workspace dependencies
+        run: bun install --frozen-lockfile
+      - name: Test DOM-free Surface contracts
+        working-directory: packages/surface
+        run: bun x vitest run --config vitest.contracts.config.ts
+      - name: Verify lockfile stayed unchanged
+        run: git diff --exit-code -- bun.lock
