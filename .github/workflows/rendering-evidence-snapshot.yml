@@ -1,0 +1,87 @@
+name: Capture verified rendering evidence
+on:
+  push:
+    branches: [evidence/typed-rendering-cae3d37-build]
+    paths: [.github/workflows/rendering-evidence-snapshot.yml]
+permissions:
+  actions: read
+  contents: write
+jobs:
+  capture:
+    if: github.repository == 'vibeunion/svadmin' && github.ref == 'refs/heads/evidence/typed-rendering-cae3d37-build'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Read only the exact source run's browser artifact
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const fs = require('node:fs');
+            const crypto = require('node:crypto');
+            const run_id = 35421515002;
+            const source_sha = 'cae3d37f51801d1a1a653504d1891dba8cd9748e';
+            let selected;
+            for (let attempt = 0; attempt < 40; attempt++) {
+              const { data: run } = await github.rest.actions.getWorkflowRun({ ...context.repo, run_id });
+              if (run.head_sha !== source_sha || run.head_branch !== 'feat/typed-svelte-renderers') throw new Error('Unexpected source run');
+              const { data } = await github.rest.actions.listWorkflowRunArtifacts({ ...context.repo, run_id });
+              selected = data.artifacts.find(item => item.name === 'typed-business-page-evidence');
+              if (selected) break;
+              if (run.status === 'completed') throw new Error('Source run completed without browser evidence');
+              await new Promise(resolve => setTimeout(resolve, 15000));
+            }
+            if (!selected || selected.expired || selected.size_in_bytes > 150000000 || selected.workflow_run.head_sha !== source_sha) throw new Error('Unavailable or unexpected artifact');
+            const archive = await github.rest.actions.downloadArtifact({ ...context.repo, artifact_id: selected.id, archive_format: 'zip' });
+            const bytes = Buffer.from(archive.data);
+            const digest = 'sha256:' + crypto.createHash('sha256').update(bytes).digest('hex');
+            if (selected.digest && selected.digest !== digest) throw new Error('Artifact digest mismatch');
+            fs.writeFileSync('/tmp/rendering-evidence.zip', bytes);
+            fs.writeFileSync('/tmp/rendering-provenance.json', JSON.stringify({ source_sha, run_id, artifact_id: selected.id, digest }));
+      - name: Require passing browser results and preserve exact screenshot bytes
+        run: |
+          python3 - <<'PY'
+          import base64, hashlib, json, pathlib, struct, zipfile
+          provenance = json.loads(pathlib.Path('/tmp/rendering-provenance.json').read_text())
+          with zipfile.ZipFile('/tmp/rendering-evidence.zip') as archive:
+              report_info = archive.getinfo('rendering-results.json')
+              assert report_info.file_size < 4000000
+              report = json.loads(archive.read(report_info))
+              stats = report['stats']
+              assert stats['expected'] == 58 and stats['unexpected'] == 0 and stats['skipped'] == 0 and stats['flaky'] == 0, stats
+              images = []
+              for width, height in [(1440, 900), (1920, 1080)]:
+                  name = f'screenshots/typed-rendering-{width}x{height}.png'
+                  info = archive.getinfo(name)
+                  assert info.file_size < 4000000
+                  data = archive.read(info)
+                  assert data[:8] == b'\x89PNG\r\n\x1a\n'
+                  assert struct.unpack('>II', data[16:24]) == (width, height)
+                  images.append({'path': name, 'sha256': hashlib.sha256(data).hexdigest(), 'content': base64.b64encode(data).decode()})
+          provenance['stats'] = stats
+          provenance['images'] = [{k: image[k] for k in ['path', 'sha256']} for image in images]
+          pathlib.Path('/tmp/rendering-images.json').write_text(json.dumps(images))
+          pathlib.Path('/tmp/rendering-provenance.json').write_text(json.dumps(provenance, indent=2))
+          print('Verified 58 browser tests and both original viewport screenshots.')
+          PY
+      - name: Create an unreferenced evidence-only commit
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const fs = require('node:fs');
+            const images = JSON.parse(fs.readFileSync('/tmp/rendering-images.json', 'utf8'));
+            const tree = [];
+            for (const image of images) {
+              const { data } = await github.rest.git.createBlob({ ...context.repo, content: image.content, encoding: 'base64' });
+              tree.push({ path: image.path, type: 'blob', mode: '100644', sha: data.sha });
+            }
+            tree.push({ path: 'provenance.json', type: 'blob', mode: '100644', content: fs.readFileSync('/tmp/rendering-provenance.json', 'utf8') });
+            const { data: object } = await github.rest.git.createTree({ ...context.repo, tree });
+            const { data: commit } = await github.rest.git.createCommit({ ...context.repo, tree: object.sha, parents: [], message: 'docs: verified business rendering evidence for cae3d37' });
+            fs.writeFileSync('/tmp/rendering-evidence-result.json', JSON.stringify({ sha: commit.sha, tree: object.sha, images: images.map(({ path, sha256 }) => ({ path, sha256 })) }, null, 2));
+            core.info(`Evidence-only commit: ${commit.sha}. No branch, PR, release or deployment updated.`);
+      - uses: actions/upload-artifact@v7
+        with:
+          name: rendering-evidence-commit
+          path: /tmp/rendering-evidence-result.json
+          retention-days: 3
+          if-no-files-found: error
