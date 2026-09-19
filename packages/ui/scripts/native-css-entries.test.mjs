@@ -15,11 +15,15 @@ function fixture(run) {
     mkdirSync(join(dir, 'src/styles'), { recursive: true });
     mkdirSync(join(dir, 'node_modules'));
     symlinkSync(dirname(require.resolve('postcss/package.json')), join(dir, 'node_modules/postcss'), 'dir');
-    for (const script of ['build-static-css.mjs', 'retire-primitive-fallbacks.mjs']) copyFileSync(new URL(`./${script}`, import.meta.url), join(dir, `scripts/${script}`));
+    for (const script of ['build-static-css.mjs', 'retire-primitive-fallbacks.mjs', 'postbuild-css.mjs']) copyFileSync(new URL(`./${script}`, import.meta.url), join(dir, `scripts/${script}`));
     writeFileSync(join(dir, 'src/styles/aliases.css'), ':root{--color-primary:var(--primary)}');
     writeFileSync(join(dir, 'src/app.css'), '@import "./styles/aliases.css";\n.first{color:red}\n@layer components{.second{color:blue}}');
-    const build = () => execFileSync(process.execPath, [join(dir, 'scripts/build-static-css.mjs')], { encoding: 'utf8', stdio: 'pipe' });
-    run({ dir, build });
+    const postbuild = () => execFileSync(process.execPath, [join(dir, 'scripts/postbuild-css.mjs')], { encoding: 'utf8', stdio: 'pipe' });
+    const build = () => {
+      execFileSync(process.execPath, [join(dir, 'scripts/build-static-css.mjs')], { encoding: 'utf8', stdio: 'pipe' });
+      postbuild();
+    };
+    run({ dir, build, postbuild });
   } finally { rmSync(dir, { recursive: true, force: true }); }
 }
 test('both public CSS paths contain identical native CSS without metadata', () => fixture(({ dir, build }) => {
@@ -61,4 +65,48 @@ test('published primitive instances get styles from recipes, while legacy consum
   assert.ok(css.includes('.svadmin-input:not(:where(.svadmin-ui-input__control))'));
   assert.ok(css.includes('height:2.25rem'));
   assert.equal(readFileSync(join(dir, 'src/components.css'), 'utf8'), '@layer components{.svadmin-input{height:2.25rem}}');
+}));
+
+test('postbuild uses native alias values and rebinds them at nested theme roots', () => fixture(({ dir, build, postbuild }) => {
+  writeFileSync(join(dir, 'src/styles/aliases.css'), ':root, .svadmin-theme {--color-primary:var(--primary);--radius-sm:calc(var(--radius) - 4px)}');
+  build();
+  const before = readFileSync(join(dir, 'dist/app.css'), 'utf8');
+  postbuild();
+  postbuild();
+  assert.equal(readFileSync(join(dir, 'dist/app.css'), 'utf8'), before);
+  assert.equal(readFileSync(join(dir, 'dist/app.theme.css'), 'utf8'), before);
+  const roots = [];
+  postcss.parse(before).walkRules(rule => {
+    if (rule.parent.type === 'root' && rule.selectors.includes('.svadmin-theme')) roots.push(rule);
+  });
+  assert.equal(roots.length, 1, 'repeated postbuild must not accumulate alias rules');
+  assert.deepEqual(roots[0].selectors, [':root', '.svadmin-theme']);
+  assert.deepEqual(roots[0].nodes.map(node => [node.prop, node.value]), [
+    ['--color-primary', 'var(--primary)'],
+    ['--radius-sm', 'calc(var(--radius) - 4px)'],
+  ]);
+}));
+
+test('postbuild preserves unrelated layered theme declarations', () => fixture(({ dir, build }) => {
+  writeFileSync(join(dir, 'src/app.css'), '@import "./styles/aliases.css"; @layer theme { :root, .svadmin-theme {--color-primary:var(--legacy-primary)} }');
+  build();
+  const css = readFileSync(join(dir, 'dist/app.css'), 'utf8');
+  let preserved = false;
+  postcss.parse(css).walkAtRules('layer', rule => rule.walkDecls('--color-primary', decl => {
+    if (decl.value === 'var(--legacy-primary)') preserved = true;
+  }));
+  assert.ok(preserved);
+}));
+
+test('postbuild rejects missing, compiler-based or non-root alias mappings', () => fixture(({ dir, build, postbuild }) => {
+  build();
+  for (const [source, error] of [
+    [':root {--other:red}', /Missing native semantic --color-primary/],
+    ['@theme {--color-primary:red}', /Unexpected directive/],
+    ['.button {--color-primary:red}', /custom properties at theme roots/],
+    [':root {--color-primary:red;color:red}', /custom properties at theme roots/],
+  ]) {
+    writeFileSync(join(dir, 'src/styles/aliases.css'), source);
+    assert.throws(postbuild, error);
+  }
 }));
