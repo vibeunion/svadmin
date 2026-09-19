@@ -1,0 +1,36 @@
+name: Enterprise array ownership review
+
+# Temporary read-only probe; never part of the implementation or main.
+on:
+  push:
+    branches: [review/enterprise-reconcile-20260920]
+permissions:
+  contents: read
+jobs:
+  probe:
+    if: >-
+      github.event.head_commit.message == 'review: execute array parse-error ownership probes'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - name: Stage probes against the exact repaired candidate
+        run: |
+          set -euo pipefail
+          cp review-assets/array-parse-probe.test.svelte.ts "$RUNNER_TEMP/array-parse-probe.test.svelte.ts"
+          git fetch --quiet --no-tags --depth=1 origin a21bdfc8121715f5d148454657daf687f17e2414
+          git switch --detach a21bdfc8121715f5d148454657daf687f17e2414
+          cp "$RUNNER_TEMP/array-parse-probe.test.svelte.ts" packages/ui/src/components/array-parse-probe.test.svelte.ts
+      - run: bun install --frozen-lockfile
+      - name: Build real native UI dependencies
+        run: bun run --cwd packages/ai-elements build && bun run --cwd packages/ui build
+      - name: Execute real recursive form array ownership tests
+        run: bun run --cwd packages/ui test src/components/array-parse-probe.test.svelte.ts
