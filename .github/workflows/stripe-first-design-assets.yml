@@ -36,7 +36,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p test-results/stripe-first-design-kit/logs
-          node --test design/stripe-first/build.test.mjs 2>&1 | tee test-results/stripe-first-design-kit/logs/tests.log
+          node --test design/stripe-first/build.test.mjs design/stripe-first/preview/model.test.mjs 2>&1 | tee test-results/stripe-first-design-kit/logs/tests.log
       - name: Generate source-bound snapshots and check reproducibility
         run: |
           set -euo pipefail
@@ -52,7 +52,7 @@ jobs:
           cp design/stripe-first/*.json design/stripe-first/README.md test-results/stripe-first-design-kit/handoff/
           git rev-parse HEAD HEAD^{tree} > test-results/stripe-first-design-kit/revision.txt
           node --version > test-results/stripe-first-design-kit/node-version.txt
-          sha256sum design/stripe-first/* > test-results/stripe-first-design-kit/source-hashes.txt
+          find design/stripe-first -type f -print0 | sort -z | xargs -0 sha256sum > test-results/stripe-first-design-kit/source-hashes.txt
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:

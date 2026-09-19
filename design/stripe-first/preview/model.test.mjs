@@ -54,8 +54,8 @@ test('settings fixtures use supported states and invalid seed is deliberately em
 test('preview uses built components, not an external theme or new backend client', () => {
   const source = readFileSync(new URL('./Preview.svelte', import.meta.url), 'utf8');
   const css = readFileSync(new URL('./preview.css', import.meta.url), 'utf8');
-  for (const name of ['Input', 'Badge', 'FilterToolbar', 'DescriptionList', 'SettingsGroup', 'SettingsFieldRow']) assert.match(source, new RegExp(`import.*${name}.*packages/ui/dist/`));
-  assert.doesNotMatch(source, /\bfetch\s*\(|localStorage|sessionStorage|{@html|svadmin-u-/u);
+  for (const name of ['Input', 'Badge', 'FilterToolbar', 'DescriptionList', 'SettingsGroup', 'SettingsFieldRow', 'ContentPageShell']) assert.match(source, new RegExp(`import.*${name}.*packages/ui/dist/`));
+  assert.doesNotMatch(source, /\bfetch\s*\(|localStorage|sessionStorage|\{@html|svadmin-u-/u);
   assert.doesNotMatch(css, /@(?:tailwind|theme|apply|source)\b|#[a-fA-F0-9]{3,8}\b|(?:rgb|hsl|oklch)\(/u);
   assert.match(source, /clearTimeout/u);
 });

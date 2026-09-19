@@ -5,6 +5,7 @@
   import { Input } from '../../../packages/ui/dist/components/ui/input/index.js';
   import { Badge } from '../../../packages/ui/dist/components/ui/badge/index.js';
   import * as Table from '../../../packages/ui/dist/components/ui/table/index.js';
+  import ContentPageShell from '../../../packages/ui/dist/components/content/ContentPageShell.svelte';
   import ContentPageHeader from '../../../packages/ui/dist/components/content/ContentPageHeader.svelte';
   import FilterToolbar from '../../../packages/ui/dist/components/content/FilterToolbar.svelte';
   import DataState from '../../../packages/ui/dist/components/content/DataState.svelte';
@@ -24,8 +25,14 @@
   provideI18nScope(scope);
   $effect(() => { scope.setLocale(locale); document.documentElement.lang = locale; });
   const tx = (zh: string, en: string) => locale === 'zh-CN' ? zh : en;
-  const viewLabel = (key: string) => ({ components: tx('组件状态', 'Component states'), 'resource-list': tx('客户列表', 'Customers'), 'record-detail': tx('客户详情', 'Customer detail'), settings: tx('工作区设置', 'Settings') })[key] ?? key;
-  const stateLabel = (key: string) => ({ ready: tx('正常', 'Ready'), loading: tx('加载中', 'Loading'), 'initial-empty': tx('首次无数据', 'First use'), 'filtered-empty': tx('筛选无结果', 'No matches'), error: tx('请求失败', 'Error'), forbidden: tx('无权限', 'Forbidden'), partial: tx('部分数据', 'Partial'), dirty: tx('待保存', 'Unsaved'), invalid: tx('校验失败', 'Invalid'), saving: tx('保存中', 'Saving'), saved: tx('保存成功', 'Saved'), readonly: tx('只读', 'Read only') })[key] ?? key;
+  function viewLabel(key: string) {
+    const labels: Record<string, string> = { components: tx('组件状态', 'Component states'), 'resource-list': tx('客户列表', 'Customers'), 'record-detail': tx('客户详情', 'Customer detail'), settings: tx('工作区设置', 'Settings') };
+    return Object.hasOwn(labels, key) ? labels[key] : key;
+  }
+  function stateLabel(key: string) {
+    const labels: Record<string, string> = { ready: tx('正常', 'Ready'), loading: tx('加载中', 'Loading'), 'initial-empty': tx('首次无数据', 'First use'), 'filtered-empty': tx('筛选无结果', 'No matches'), error: tx('请求失败', 'Error'), forbidden: tx('无权限', 'Forbidden'), partial: tx('部分数据', 'Partial'), dirty: tx('待保存', 'Unsaved'), invalid: tx('校验失败', 'Invalid'), saving: tx('保存中', 'Saving'), saved: tx('保存成功', 'Saved'), readonly: tx('只读', 'Read only') };
+    return Object.hasOwn(labels, key) ? labels[key] : key;
+  }
   let query = $state('');
   let selectedId = $state(customers[0]?.id ?? '');
   const selected = $derived(customers.find(record => record.id === selectedId) ?? customers[0]);
@@ -118,18 +125,19 @@
         <span>{tx('浏览器样例；尚未同步到 Figma', 'Browser specimen; not synchronized to Figma')}</span>
       </div>
       <main id="kit-main" tabindex="-1" data-testid="specimen" data-view={view} data-scenario={scenario}>
+        <ContentPageShell width="wide" pageId="design-kit">
         {#if view === 'components'}
           <ContentPageHeader title={viewLabel(view)} eyebrow="FOUNDATIONS" description={tx('查看现有组件的尺寸、语义状态及键盘表现。这里没有复制第三方图层。', 'Inspect existing component sizes, semantic states and keyboard behavior. No third-party layers are copied.')} />
           <section class="kit-section" aria-labelledby="buttons-title"><h2 id="buttons-title">Button</h2><p class="kit-muted">{tx('两种外观 × 三种尺寸 × 默认／禁用；使用真实组件。', 'Two variants × three sizes × enabled/disabled; actual components.')}</p>
             {#each buttonVariants as variant (variant)}<div class="kit-demo-row">{#each buttonSizes as size (size)}<Button {variant} {size}>{tx('新增客户', 'Create customer')}</Button><Button {variant} {size} disabled>{tx('新增客户', 'Create customer')}</Button>{/each}</div>{/each}
           </section>
           <section class="kit-section" aria-labelledby="inputs-title"><h2 id="inputs-title">Input</h2><div class="kit-field-grid">
-            <label class="kit-field">{tx('默认 / 可输入', 'Default / editable')}<Input data-testid="input-default" bind:value={sample} placeholder={tx('输入客户名称', 'Enter customer name')} /><span class="kit-muted">{tx('使用 Tab 检查焦点。', 'Use Tab to inspect focus.')}</span></label>
-            <label class="kit-field">{tx('已有内容', 'Filled')}<Input value="Aster Studio" /></label>
-            <label class="kit-field">{tx('禁用', 'Disabled')}<Input data-testid="input-disabled" value="Aster Studio" disabled /></label>
-            <label class="kit-field">{tx('只读', 'Read only')}<Input data-testid="input-readonly" value="demo_001" readonly /></label>
-            <label class="kit-field">{tx('校验失败', 'Invalid')}<Input data-testid="input-invalid" value="invalid" aria-invalid="true" aria-describedby="invalid-hint" /><span id="invalid-hint" class="kit-error">{tx('请输入有效的邮箱地址。', 'Enter a valid email address.')}</span></label>
-            <label class="kit-field">{tx('文件', 'File')}<Input data-testid="input-file" type="file" accept=".csv" /></label>
+            <label for="demo-default" class="kit-field">{tx('默认 / 可输入', 'Default / editable')}<Input id="demo-default" data-testid="input-default" bind:value={sample} placeholder={tx('输入客户名称', 'Enter customer name')} /><span class="kit-muted">{tx('使用 Tab 检查焦点。', 'Use Tab to inspect focus.')}</span></label>
+            <label for="demo-filled" class="kit-field">{tx('已有内容', 'Filled')}<Input id="demo-filled" value="Aster Studio" /></label>
+            <label for="demo-disabled" class="kit-field">{tx('禁用', 'Disabled')}<Input id="demo-disabled" data-testid="input-disabled" value="Aster Studio" disabled /></label>
+            <label for="demo-readonly" class="kit-field">{tx('只读', 'Read only')}<Input id="demo-readonly" data-testid="input-readonly" value="demo_001" readonly /></label>
+            <label for="demo-invalid" class="kit-field">{tx('校验失败', 'Invalid')}<Input id="demo-invalid" data-testid="input-invalid" value="invalid" aria-invalid="true" aria-describedby="invalid-hint" /><span id="invalid-hint" class="kit-error">{tx('请输入有效的邮箱地址。', 'Enter a valid email address.')}</span></label>
+            <label for="demo-file" class="kit-field">{tx('文件', 'File')}<Input id="demo-file" data-testid="input-file" type="file" accept=".csv" /></label>
           </div></section>
           <section class="kit-section" aria-labelledby="badges-title"><h2 id="badges-title">Badge</h2><div class="kit-demo-row">{#each badgeVariants as variant (variant)}<Badge {variant}>{variant}</Badge>{/each}</div><div class="kit-demo-row"><StatusBadge status="success" label={tx('已启用', 'Active')} /><StatusBadge status="warning" label={tx('待审核', 'Pending review')} /><StatusBadge status="danger" label={tx('失败', 'Failed')} /><StatusBadge status="info" label={tx('处理中', 'Processing')} /><StatusBadge status="neutral" label={tx('已归档', 'Archived')} /></div></section>
         {:else if view === 'resource-list'}
@@ -174,10 +182,10 @@
           <form novalidate onsubmit={save} data-testid="settings-form" aria-busy={busy}>
             <SettingsGroup title={tx('基本信息', 'General information')} description={tx('这些设置只在当前预览内生效。', 'These settings affect this preview only.')}>
               <SettingsFieldRow label={tx('工作区名称', 'Workspace name')} description={tx('用于导航与内部通知。', 'Shown in navigation and internal notifications.')}>
-                {#snippet control()}<div class="kit-form-control"><Input data-testid="workspace-name" aria-label={tx('工作区名称', 'Workspace name')} bind:value={formName} oninput={changed} disabled={busy} {readonly} aria-invalid={invalid && !formName.trim()} aria-describedby={invalid && !formName.trim() ? 'name-error' : undefined} />{#if invalid && !formName.trim()}<p id="name-error" role="alert" class="kit-error">{tx('请填写工作区名称。', 'Enter a workspace name.')}</p>{/if}</div>{/snippet}
+                {#snippet control()}<div class="kit-form-control"><Input data-testid="workspace-name" aria-label={tx('工作区名称', 'Workspace name')} bind:value={formName} oninput={(event) => { formName = event.currentTarget.value; changed(); }} disabled={busy} {readonly} aria-invalid={invalid && !formName.trim()} aria-describedby={invalid && !formName.trim() ? 'name-error' : undefined} />{#if invalid && !formName.trim()}<p id="name-error" role="alert" class="kit-error">{tx('请填写工作区名称。', 'Enter a workspace name.')}</p>{/if}</div>{/snippet}
               </SettingsFieldRow>
               <SettingsFieldRow label={tx('账单邮箱', 'Billing email')} description={tx('不会发送真实邮件。', 'No real email is sent.')} separated>
-                {#snippet control()}<div class="kit-form-control"><Input data-testid="billing-email" aria-label={tx('账单邮箱', 'Billing email')} type="email" bind:value={formEmail} oninput={changed} disabled={busy} {readonly} aria-invalid={invalid && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formEmail)} aria-describedby={invalid && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formEmail) ? 'email-error' : undefined} />{#if invalid && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formEmail)}<p id="email-error" role="alert" class="kit-error">{tx('请输入有效邮箱。', 'Enter a valid email.')}</p>{/if}</div>{/snippet}
+                {#snippet control()}<div class="kit-form-control"><Input data-testid="billing-email" aria-label={tx('账单邮箱', 'Billing email')} type="email" bind:value={formEmail} oninput={(event) => { formEmail = event.currentTarget.value; changed(); }} disabled={busy} {readonly} aria-invalid={invalid && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formEmail)} aria-describedby={invalid && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formEmail) ? 'email-error' : undefined} />{#if invalid && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formEmail)}<p id="email-error" role="alert" class="kit-error">{tx('请输入有效邮箱。', 'Enter a valid email.')}</p>{/if}</div>{/snippet}
               </SettingsFieldRow>
             </SettingsGroup>
             <div class="kit-save-bar">
@@ -192,6 +200,7 @@
             </div>
           </form>
         {/if}
+        </ContentPageShell>
       </main>
     </div>
   </div>

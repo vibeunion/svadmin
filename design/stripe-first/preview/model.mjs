@@ -1,4 +1,5 @@
 // 仅用于设计样例：有限场景与合成数据，不注册 Surface 能力或调用后端。
+/** @type {Readonly<Record<string, readonly string[]>>} */
 export const scenarios = Object.freeze({
   components: Object.freeze(['ready']),
   'resource-list': Object.freeze(['ready', 'loading', 'initial-empty', 'filtered-empty', 'error', 'forbidden']),
@@ -27,11 +28,13 @@ export const customers = Object.freeze([
   { id: 'demo_004', name: 'Long-name operational workspace / 多语言协作与数据服务', email: 'accounts@workspace.example', status: 'pending', amount: -1200, created: '2026-09-16' },
 ].map(record => Object.freeze(record)));
 
+/** @param {string} query */
 export function filterCustomers(query) {
   const term = String(query).trim().toLowerCase();
   return customers.filter(record => `${record.name} ${record.email}`.toLowerCase().includes(term));
 }
 
+/** @param {string} state */
 export function settingsSeed(state) {
   return {
     name: state === 'invalid' ? '' : state === 'dirty' || state === 'error' ? 'Aster Operations' : 'Aster Studio',
