@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { demoRenderers } from '../resource-rendering';
   import { demoContracts } from '../resource-contracts';
 
   import { useList } from '@svadmin/core';
@@ -20,10 +21,10 @@
   const agentsQuery = useList({ resource: demoContracts.property_agents, pagination: { mode: 'off' } });
   const leadsQuery = useList({ resource: demoContracts.property_leads, pagination: { mode: 'off' } });
   const showingsQuery = useList({ resource: demoContracts.property_showings, pagination: { mode: 'off' }, sorters: [{ field: 'scheduledDate', order: 'asc' }] });
-  const properties = $derived((propertiesQuery.data?.data ?? []));
-  const agents = $derived((agentsQuery.data?.data ?? []));
-  const leads = $derived((leadsQuery.data?.data ?? []));
-  const showings = $derived((showingsQuery.data?.data ?? []));
+  const properties = $derived(demoRenderers.properties.records(propertiesQuery.data?.data ?? []));
+  const agents = $derived(demoRenderers.property_agents.records(agentsQuery.data?.data ?? []));
+  const leads = $derived(demoRenderers.property_leads.records(leadsQuery.data?.data ?? []));
+  const showings = $derived(demoRenderers.property_showings.records(showingsQuery.data?.data ?? []));
   const filteredProperties = $derived(searchQuery.trim() ? properties.filter((property) => `${property.propertyName} ${property.market} ${property.assetType}`.toLowerCase().includes(searchQuery.trim().toLowerCase())) : properties);
   const showingCount = $derived(showings.length);
   const avgOccupancy = $derived(properties.length ? Math.round(properties.reduce((sum, property) => sum + property.occupancy, 0) / properties.length) : 0);

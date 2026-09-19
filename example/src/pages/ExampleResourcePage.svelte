@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { demoRendering } from '../resource-rendering';
   import { definedOptions } from '@svadmin/core/options';
 
   import { getResource } from '@svadmin/core';
@@ -870,7 +871,7 @@
   }
 
   function resourceDescription(resourceKey: string, label: string): string {
-    const description = resourceDescriptions[resourceKey as keyof typeof resourceDescriptions];
+    const description = Object.entries(resourceDescriptions).find(([key]) => key === resourceKey)?.[1];
     if (description) return locale === 'zh-CN' ? description.zh : description.en;
     return locale === 'zh-CN'
       ? `管理${label}的列表、创建、编辑和详情流程。`
@@ -910,8 +911,8 @@
         },
       },
     } as const;
-    const resourceOverrides = overrides[resourceKey as keyof typeof overrides];
-    const override = resourceOverrides?.[view as keyof typeof resourceOverrides];
+    const resourceOverrides = Object.entries(overrides).find(([key]) => key === resourceKey)?.[1];
+    const override = resourceOverrides ? Object.entries(resourceOverrides).find(([key]) => key === view)?.[1] : undefined;
     if (!override) return undefined;
     const [title, description, actionLabel, tableDescription] = locale === 'zh-CN' ? override.zh : override.en;
     return { title, description, actionLabel, tableDescription };
@@ -960,6 +961,7 @@
 
 <div data-app-page="resource-operations" data-resource-name={resourceName} data-resource-view={activeView}>
   <ResourceOperationsPage
+    rendering={demoRendering(resourceName)}
     {resourceName}
     eyebrow={copy.eyebrow}
     title={copy.title}

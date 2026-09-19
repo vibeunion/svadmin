@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { demoRenderers } from '../resource-rendering';
   import { definedOptions } from '@svadmin/core/options';
 
   import { demoContracts } from '../resource-contracts';
@@ -21,10 +22,10 @@
   const contactsQuery = useList({ resource: demoContracts.crm_contacts, pagination: { mode: 'off' }, sorters: [{ field: 'lastTouchDate', order: 'desc' }] });
   const dealsQuery = useList({ resource: demoContracts.crm_deals, pagination: { mode: 'off' } });
   const activitiesQuery = useList({ resource: demoContracts.crm_activities, pagination: { mode: 'off' } });
-  const accounts = $derived((accountsQuery.data?.data ?? []));
-  const contacts = $derived((contactsQuery.data?.data ?? []));
-  const deals = $derived((dealsQuery.data?.data ?? []));
-  const activities = $derived((activitiesQuery.data?.data ?? []));
+  const accounts = $derived(demoRenderers.crm_accounts.records(accountsQuery.data?.data ?? []));
+  const contacts = $derived(demoRenderers.crm_contacts.records(contactsQuery.data?.data ?? []));
+  const deals = $derived(demoRenderers.crm_deals.records(dealsQuery.data?.data ?? []));
+  const activities = $derived(demoRenderers.crm_activities.records(activitiesQuery.data?.data ?? []));
   const pipeline = $derived(deals.reduce((sum, deal) => sum + deal.amount, 0));
   const weighted = $derived(deals.reduce((sum, deal) => sum + deal.amount * deal.probability / 100, 0));
   const activeContacts = $derived(contacts.filter((contact) => contact.status === 'active').length);

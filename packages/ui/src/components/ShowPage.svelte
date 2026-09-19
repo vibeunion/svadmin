@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { ResourceRendering } from '../rendering/index.js';
   import { useNavigation } from '@svadmin/core';
   import { useRecordDetail } from './record-detail.svelte';
   import { useTranslation } from '@svadmin/core/i18n';
@@ -17,6 +18,7 @@
 
   interface Props {
     resourceName: string;
+    rendering?: ResourceRendering | undefined;
     id: string | number;
     density?: 'compact' | 'comfortable';
     layout?: 'list' | 'grid';
@@ -29,6 +31,7 @@
 
   let {
     resourceName,
+    rendering,
     id,
     density = 'comfortable',
     layout = 'list',
@@ -42,7 +45,8 @@
   const navigation = useNavigation();
   const isCompact = $derived(density === 'compact');
 
-  const detail = useRecordDetail(() => ({ resourceName, id }));
+  const detail = useRecordDetail(() => ({ resourceName, id, rendering }));
+  const activeRendering = $derived(detail.rendering);
   const resource = $derived(detail.resource);
   const showFields = $derived(detail.fields);
   const query = detail.query;
@@ -57,7 +61,7 @@
   });
 </script>
 
-<div class="{isCompact ? 'svadmin-u-6ed543e2fbbb' : 'svadmin-u-3e7ce58d64fa'} {className}">
+<div data-svadmin-rendering-resource={activeRendering?.resource.name} data-svadmin-rendering-kind={activeRendering ? 'show' : undefined} class="{isCompact ? 'svadmin-u-6ed543e2fbbb' : 'svadmin-u-3e7ce58d64fa'} {className}">
   <PageHeader
     title="{resource.label} {i18n.t('common.detail')} #{id}"
     {density}
@@ -107,7 +111,7 @@
       </Button>
     </div>
   {:else if query.isSuccess}
-    {@const record = query.data.data}
+    {@const record = activeRendering ? activeRendering.record(query.data.data) : query.data.data}
     {#if layout === 'grid'}
       <Card.Root class="svadmin-u-2cd02d11d1af svadmin-u-6ee2d41e2d2d svadmin-u-438b2237b8d6">
         <Card.Content class="svadmin-u-8a539c7fe216">

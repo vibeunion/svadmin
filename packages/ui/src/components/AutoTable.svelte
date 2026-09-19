@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { bindResourceRendering, type ResourceRendering } from '../rendering/index.js';
   import type { AutoTableGridState } from './auto-table-grid.js';
   import { definedOptions } from '@svadmin/core/options';
 
@@ -106,6 +107,7 @@
   // ─── Props with Snippet composability ─────────────────────────
   interface Props {
     resourceName: string;
+    rendering?: ResourceRendering | undefined;
     /** 可选主体渲染器：不替换资源、权限、工具栏和持久化逻辑。 */
     gridBody?: Snippet<[AutoTableGridState]>;
     selectable?: boolean;
@@ -140,6 +142,7 @@
 
   let {
     resourceName,
+    rendering,
     gridBody,
     selectable = true,
     density = 'comfortable',
@@ -168,6 +171,7 @@
   const navigation = useNavigation();
 
   const binding = useResourceContract(() => resourceName);
+  const activeRendering = $derived(bindResourceRendering(rendering, binding.resource));
   const resource = $derived(adminContext.getResource(resourceName));
   const primaryKey = $derived(resource.primaryKey ?? 'id');
   const listPermission = useCan(() => ({ resource: resourceName, action: 'list' }));
@@ -527,7 +531,7 @@
 
   // ─── Data fetching ────────────────────────────────────────────
   const listResult = useList({
-    get resource() { return binding.resource; },
+    get resource() { void activeRendering; return binding.resource; },
     get dataProviderName() { return binding.dataProviderName; },
     get queryOptions() { return { enabled: canRead }; },
     get pagination() { return queryPagination; },
@@ -536,7 +540,7 @@
   });
   const query = listResult;
   const pageRecords = $derived.by(() => {
-    try { return { ok: true as const, data: canRead ? checkedTableRows(query.data?.data ?? []) : [] }; }
+    try { return { ok: true as const, data: canRead ? checkedTableRows(activeRendering ? activeRendering.records(query.data?.data ?? []) : query.data?.data ?? []) : [] }; }
     catch { return { ok: false as const, data: [] }; }
   });
   let deleteRequest = $state<{ ids: (string | number)[]; batch: boolean } | null>(null);
@@ -548,7 +552,7 @@
   }));
   const deleteAllowed = $derived(canRead && resource.canDelete !== false && deleteRequest !== null && deletePermission.allowed);
   const deleteManyResult = useDeleteMany({
-    get resource() { return binding.resource; },
+    get resource() { void activeRendering; return binding.resource; },
     get enabled() { return deleteAllowed; },
   });
   const deleteManyMutation = deleteManyResult.mutation;
@@ -1410,7 +1414,7 @@
   </DataState>
 {/snippet}
 
-<div class="svadmin-u-6ed543e2fbbb">
+<div class="svadmin-u-6ed543e2fbbb" data-svadmin-rendering-resource={activeRendering?.resource.name} data-svadmin-rendering-kind={activeRendering ? 'table' : undefined}>
   {#if operationError}<p role="alert">{operationError}</p>{/if}
   {#if detailState.invalid}<p role="alert">{i18n.t('common.operationFailed')}</p>{/if}
   {#if showHeader}
@@ -2129,6 +2133,7 @@
 
 {#if detailRecordId != null}
   <RecordDetailDrawer
+    rendering={activeRendering}
     resourceName={resourceName}
     open={detailOpen}
     recordId={detailRecordId}
@@ -2138,6 +2143,6 @@
 
 {#if quickEditId != null && canRead && canEdit}
   {#key quickEditId}
-    <QuickEditDrawer {resourceName} recordId={quickEditId} onClose={() => quickEditId = undefined} />
+    <QuickEditDrawer rendering={activeRendering} {resourceName} recordId={quickEditId} onClose={() => quickEditId = undefined} />
   {/key}
 {/if}

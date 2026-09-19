@@ -5,12 +5,14 @@
   import { Type } from '@sinclair/typebox';
   import { defineResource, provideAdminContext, createHashRouterProvider, createI18nScope, provideI18nScope,
     type AccessControlProvider, type DataProvider, type Sort } from '@svadmin/core';
+  import { createResourceRenderers, type CellInput } from '../../../packages/ui/src/rendering/index.js';
   import SvarAutoTable from '../../../packages/ui/src/components/SvarAutoTable.svelte';
 
   provideI18nScope(createI18nScope({ locale: 'en' }));
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity, gcTime: Infinity } } });
   onDestroy(() => client.clear());
   let tenant = $state('alpha');
+  let mismatchedRendering = $state(typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('mismatch'));
   let denied = $state(false);
   let denyEdit = $state(false);
   let invalidDelete = $state(false);
@@ -42,6 +44,11 @@
     record: Type.Object({ id: Type.Number(), name: Type.String(), stock: Type.Number() }),
     update: Type.Object({ stock: Type.Optional(Type.Number({ minimum: 0 })) }), delete: Type.Object({}),
   });
+  const rendering = createResourceRenderers(contract);
+  const incompatibleRendering = createResourceRenderers(defineResource('inventory', {
+    record: Type.Object({ id: Type.Number(), name: Type.String(), stock: Type.Number() }),
+    update: Type.Object({ stock: Type.Optional(Type.Number({ minimum: 0 })) }), delete: Type.Object({}),
+  }));
   provideAdminContext({ dataProvider: provider, get accessControlProvider() { return access; }, routerProvider: createHashRouterProvider(),
     get tenant() { return { tenantId: tenant }; },
     resources: [{ name: 'inventory', label: 'Compatible inventory', contract, canCreate: false, pageSize: 10, fields: [
@@ -53,12 +60,13 @@
   type ColumnSnippet = Snippet<[{ value: unknown; record: Record<string, unknown> }]>;
 </script>
 
-{#snippet nameCell({ value }: { value: unknown; record: Record<string, unknown> })}<strong data-compat-name>SKU:{String(value)}</strong>{/snippet}
+{#snippet nameCell(input: CellInput)}{@const cell = rendering.cell('name', input)}<strong data-compat-name>SKU:{cell.value}</strong>{/snippet}
 {#snippet hostRows({ id }: { record: Record<string, unknown>; id: string | number })}<button type="button" aria-label={`Host row ${id}`} onclick={() => { output = `row:${id}`; }}>Open {id}</button>{/snippet}
 {#snippet fallbackCell({ field, value }: { field: { key: string }; value: unknown; record: Record<string, unknown> })}<span data-compat-fallback={field.key}>Fallback:{String(value)}</span>{/snippet}
 
 <main class="svadmin-theme" class:dark>
   <nav aria-label="Compatibility fixture controls">
+    <button type="button" onclick={() => { mismatchedRendering = true; }}>Mismatched rendering</button>
     <button type="button" onclick={() => { fallback = !fallback; }}>Fallback cells</button>
     <button type="button" onclick={() => { defaultActions = !defaultActions; }}>Default actions</button>
     <button type="button" onclick={() => { denyEdit = !denyEdit; }}>Deny edits</button>
@@ -71,9 +79,15 @@
   <output data-testid="compat-output">{output}</output>
   <output data-testid="compat-tenant">{tenant}</output>
   <QueryClientProvider client={client}>
+    <svelte:boundary>
+      {#snippet failed(error, reset)}
+        <p role="alert">{error instanceof Error ? error.message : 'Rendering failed'}</p>
+        <button type="button" onclick={() => { mismatchedRendering = false; reset(); }}>Recover rendering</button>
+      {/snippet}
     <SvarAutoTable {Grid} Theme={Willow} resourceName="inventory" freezeRight={1}
+      rendering={mismatchedRendering ? incompatibleRendering : rendering}
       deleteVariables={invalidDelete ? deleteInputs.invalid : deleteInputs.valid}
-      columns={{ name: nameCell satisfies ColumnSnippet }}
+      columns={rendering.columns({ name: nameCell satisfies ColumnSnippet })}
       {...fallback ? { defaultCellRenderer: fallbackCell } : {}}
       {...defaultActions ? {} : { rowActions: hostRows }}
       {...externalPagination ? { pagination: externalPagination } : {}}
@@ -84,6 +98,7 @@
       {#snippet emptyState()}<p data-compat-empty>Host empty state</p>{/snippet}
       {#snippet summary({ data, total, visibleColumnsCount })}<tr><td colspan={visibleColumnsCount}><output data-testid="compat-summary">{data.length}:{total}:{visibleColumnsCount}</output></td></tr>{/snippet}
     </SvarAutoTable>
+    </svelte:boundary>
   </QueryClientProvider>
 </main>
 

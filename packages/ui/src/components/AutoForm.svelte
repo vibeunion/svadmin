@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { bindResourceRendering, type ResourceRendering } from '../rendering/index.js';
   import { definedReactiveOptions } from '@svadmin/core/options';
 
   import { definedOptions } from '@svadmin/core/options';
@@ -24,6 +25,7 @@
 
   interface Props {
     resourceName: string;
+    rendering?: ResourceRendering | undefined;
     id?: string | number;
     mode?: 'create' | 'edit' | 'clone' | 'show';
     density?: 'compact' | 'comfortable';
@@ -40,6 +42,7 @@
 
   let {
     resourceName,
+    rendering,
     id,
     mode = 'create',
     density = 'comfortable',
@@ -56,6 +59,7 @@
   const navigation = useNavigation();
   const context = captureAdminContext();
   const binding = useResourceContract(() => resourceName);
+  const activeRendering = $derived(bindResourceRendering(rendering, binding.resource));
   const isReadonly = $derived(mode === 'show');
   const isCompact = $derived(density === 'compact');
 
@@ -143,7 +147,7 @@
 
   // ─── useForm: single source of truth for values, errors, tainted ──
   const form = useForm(definedReactiveOptions({
-    get resource() { return binding.resource; },
+    get resource() { void activeRendering; return binding.resource; },
     get action() { return mode; },
     get id() { return id; },
     get defaultValues() { return defaults; },
@@ -157,6 +161,14 @@
       return callback ? () => callback() : undefined;
     },
   }));
+
+  const renderedDraft = $derived.by(() => {
+    try {
+      return { ok: true, values: form.ready && activeRendering ? activeRendering.draft(mode, form.values) : form.values };
+    } catch {
+      return { ok: false, values: {} };
+    }
+  });
 
   // ─── Submission error (non-field, e.g. network error) ─────────────
   let submitError = $state<string | null>(null);
@@ -282,7 +294,7 @@
   });
 </script>
 
-<div class={isCompact ? 'svadmin-u-3e7ce58d64fa' : 'svadmin-u-b3542e058833'}>
+<div class={isCompact ? 'svadmin-u-3e7ce58d64fa' : 'svadmin-u-b3542e058833'} data-svadmin-rendering-resource={activeRendering?.resource.name} data-svadmin-rendering-kind={activeRendering ? 'form' : undefined}>
   {#if showHeader}
     <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-0c3bc98565dd">
       <TooltipButton
@@ -319,6 +331,8 @@
     <Button type="button" variant="outline" onclick={retry}>
       {i18n.t('common.retry')}
     </Button>
+  {:else if !renderedDraft.ok}
+    <p role="alert">{i18n.t('common.operationFailed')}</p>
   {:else if form.ready}
     <form bind:this={formElement} onsubmit={submitEvent} class="svadmin-u-cf3893e36c22 svadmin-u-b3542e058833" novalidate>
       {#if submitError}
@@ -343,11 +357,11 @@
                 {#each group.fields as field (field.key)}
                   <div class={cn(columns > 1 && isFullWidthField(field) && 'svadmin-u-2c955d1b45df', !!form.errors[field.key] && 'svadmin-u-ee1a5af3aa10')}>
                     {#if fieldRenderer}
-                      {@render fieldRenderer({ field, value: form.values[field.key], onchange: fieldChange(field.key) })}
+                      {@render fieldRenderer({ field, value: renderedDraft.values[field.key], onchange: fieldChange(field.key) })}
                     {:else}
                       <FieldRenderer
                         {field}
-                        value={form.values[field.key]}
+                        value={renderedDraft.values[field.key]}
                         onchange={fieldChange(field.key)}
                         {density}
                         invalid={!!form.errors[field.key]}
@@ -371,11 +385,11 @@
               {#each formFields as field (field.key)}
                 <div class={cn(columns > 1 && isFullWidthField(field) && 'svadmin-u-2c955d1b45df', !!form.errors[field.key] && 'svadmin-u-ee1a5af3aa10')}>
                   {#if fieldRenderer}
-                    {@render fieldRenderer({ field, value: form.values[field.key], onchange: fieldChange(field.key) })}
+                    {@render fieldRenderer({ field, value: renderedDraft.values[field.key], onchange: fieldChange(field.key) })}
                   {:else}
                   <FieldRenderer
                     {field}
-                    value={form.values[field.key]}
+                    value={renderedDraft.values[field.key]}
                     onchange={fieldChange(field.key)}
                     {density}
                     invalid={!!form.errors[field.key]}

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { demoRenderers } from '../resource-rendering';
   import { definedOptions } from '@svadmin/core/options';
 
   import { demoContracts } from '../resource-contracts';
@@ -22,7 +23,7 @@
   const locale = $derived(i18n.locale);
   const isZh = $derived(locale === 'zh-CN');
   const query = useList({ resource: demoContracts.calendar_events, pagination: { mode: 'off' }, sorters: [{ field: 'startDate', order: 'asc' }] });
-  const events = $derived((query.data?.data ?? []));
+  const events = $derived(demoRenderers.calendar_events.records(query.data?.data ?? []));
   const displayDate = $derived(new Date(Date.UTC(2026, 5 + monthOffset, 1)));
   const displayYear = $derived(displayDate.getUTCFullYear());
   const displayMonth = $derived(displayDate.getUTCMonth() + 1);
