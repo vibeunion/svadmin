@@ -301,7 +301,7 @@
       {#if branchPending.size}<p role="status">{locale.startsWith('zh') ? '正在加载子节点' : 'Loading children'}</p>{/if}
       {#each [...branchErrors] as [key, failure] (key)}<p role="alert">{failure.message}: {failure.id} <button type="button" disabled={disabled} onclick={() => openBranch(key, true)}>{locale.startsWith('zh') ? '重试' : 'Retry children'}</button></p>{/each}
       {#if mounted}
-        {#key dataOwner}<div class="grid-panes" class:has-right={freezeRight > 0} inert={disabled}>
+        {#key dataOwner}<div class="grid-panes" inert={disabled}>
           <div class="grid-viewport center-pane" data-svar-pane="center" style:height="{height}px" role="region" aria-label="Scrollable columns" onkeydowncapture={event => navigatePane(event, 0)}>
             <Grid columns={model.center} data={activeError || isLoading ? [] : records.rows} tree={treeKey !== undefined}
               split={{ left: freezeLeft }} sizes={{ rowHeight, headerHeight: 36, columnWidth: 160 }} select={selectable} multiselect={selectable} {selectedRows}
