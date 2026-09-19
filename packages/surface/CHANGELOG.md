@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.9.0](https://github.com/vibeunion/svadmin/compare/surface-v0.8.19...surface-v0.9.0) (2026-09-19)
+
+
+### 🚀 Features
+
+* **surface:** add controlled OpenUI streaming and audited form actions ([baae627](https://github.com/vibeunion/svadmin/commit/baae627c35d68dc754b60237d3ab79f394914810))
+* **ui:** integrate optional SVAR resource grid and AutoTable adapter ([ee01ea0](https://github.com/vibeunion/svadmin/commit/ee01ea0b52285bd3129447cd0b2ddb0c114f45ce))
+
+
+### 🐛 Bug Fixes
+
+* **i18n:** reconcile processing labels when syncing main into Panda migration ([7b2f036](https://github.com/vibeunion/svadmin/commit/7b2f036ca797e2c9349fc041c3b640d1138fdaba))
+* **surface:** enforce pre-dispatch scope isolation and repair workflow prerequisites ([0994a52](https://github.com/vibeunion/svadmin/commit/0994a52e9faf44e6baf56a33fc55855dcad43bcb))
+* **surface:** exclude hyphenated test fixtures from published packages ([0e43bbb](https://github.com/vibeunion/svadmin/commit/0e43bbb9e30a7f2f180b5d9ef8f646f20488c2cb))
+* **surface:** honor the owning permission context for incremental reads ([1702be7](https://github.com/vibeunion/svadmin/commit/1702be7766f891209f7f94a22b0cf66ec8442da6))
+* **surface:** integrate edit preview with native main and scoped source loading ([0a6d22d](https://github.com/vibeunion/svadmin/commit/0a6d22dbbfbfa68615f99dffa4966062acbc683f))
+* **surface:** prepare real design contracts and preserve legacy prompt section ([b204f15](https://github.com/vibeunion/svadmin/commit/b204f15284070e7b7ec1ed165e82e620152d6d15))
+* **surface:** preserve Panda recipes across host CSS import orders ([e153f71](https://github.com/vibeunion/svadmin/commit/e153f71bab911a8d48f0f5eebd2ba0930d4435ab))
+* **surface:** retire reentrant form callbacks before dispatch and completion ([bc721dd](https://github.com/vibeunion/svadmin/commit/bc721dd17c777fe7708268306cd9d3da8a00ee02))
+* **surface:** satisfy strict indexed contracts and avoid rune name collision ([9d24ca5](https://github.com/vibeunion/svadmin/commit/9d24ca53c0624ddd94f047dc602e82af3f0ca684))
+* **surface:** satisfy strict lint without weakening stream validation ([d353d68](https://github.com/vibeunion/svadmin/commit/d353d683f054efa26584021830d81813e68be7a7))
+* **surface:** share source cache and restore reactive binding updates ([9ba6904](https://github.com/vibeunion/svadmin/commit/9ba6904fb42263d3ee69aca17696c947fc90b522))
+* **surface:** typecheck scoped fixtures without changing package output layout ([ee733c2](https://github.com/vibeunion/svadmin/commit/ee733c2d6f559314f8ae21cb55644eaf5ae8248a))
+* **ui:** integrate enterprise components with current Panda contracts ([1565f54](https://github.com/vibeunion/svadmin/commit/1565f549af42a04bc63d9189a267e01c58ffedf2))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.34.2 <0.53.0 to >=0.34.2 <0.54.0
+    * @svadmin/ui bumped from >=0.40.6 <0.73.0 to >=0.40.6 <0.74.0
+
 ## [0.8.19](https://github.com/vibeunion/svadmin/compare/surface-v0.8.18...surface-v0.8.19) (2026-09-19)
 
 

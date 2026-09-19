@@ -1,5 +1,77 @@
 # Changelog
 
+## [0.73.0](https://github.com/vibeunion/svadmin/compare/ui-v0.72.0...ui-v0.73.0) (2026-09-19)
+
+
+### 🚀 Features
+
+* **styles:** add finite content page header and metric slot recipes ([1603ef4](https://github.com/vibeunion/svadmin/commit/1603ef46931a80da6f707bd5dadbdc7918b62c8b))
+* **styles:** define theme-bound content layout and typography tokens ([64bd1bc](https://github.com/vibeunion/svadmin/commit/64bd1bc740602b4f37006ddf74abd9c2f165793a))
+* **styles:** generate repository-wide finite Panda utility recipes ([addeefd](https://github.com/vibeunion/svadmin/commit/addeefda3f7d2c6f794891409502114b8981e54d))
+* **styles:** remove class engines and own finite native runtime ([8b899b4](https://github.com/vibeunion/svadmin/commit/8b899b4dc806bbc48463e5ae577f93d55e43cb1a))
+* **styles:** statically generate every content recipe variant ([d9d2a14](https://github.com/vibeunion/svadmin/commit/d9d2a1401d68052d992cb9d06ff89bda0c9e6af2))
+* **surface:** add controlled OpenUI streaming and audited form actions ([baae627](https://github.com/vibeunion/svadmin/commit/baae627c35d68dc754b60237d3ab79f394914810))
+* **ui:** add SVAR file browser wrapper ([34dfff9](https://github.com/vibeunion/svadmin/commit/34dfff9433a1c52c48bc03e93434bc855e78c506))
+* **ui:** integrate optional SVAR resource grid and AutoTable adapter ([ee01ea0](https://github.com/vibeunion/svadmin/commit/ee01ea0b52285bd3129447cd0b2ddb0c114f45ce))
+* **ui:** migrate admin styling to Panda CSS ([f23e290](https://github.com/vibeunion/svadmin/commit/f23e2909b1dd6ec3ca89339cb2eb72f75149e8ad))
+* **ui:** migrate all business pages to contract-bound Svelte rendering ([#432](https://github.com/vibeunion/svadmin/issues/432)) ([3ee37f2](https://github.com/vibeunion/svadmin/commit/3ee37f27f7a0c0260303195b121d089f1edf6613))
+* **ui:** replace shadcn styling with native Panda primitives ([#435](https://github.com/vibeunion/svadmin/issues/435)) ([6aeb107](https://github.com/vibeunion/svadmin/commit/6aeb107f851a7cd50ecc5fd2d6d67edc0262b00b))
+
+
+### 🐛 Bug Fixes
+
+* **ci:** restore strict PR contracts ([5155153](https://github.com/vibeunion/svadmin/commit/5155153faef9c2edb12be86eb291114ae35f36e9))
+* **i18n:** reconcile processing labels when syncing main into Panda migration ([7b2f036](https://github.com/vibeunion/svadmin/commit/7b2f036ca797e2c9349fc041c3b640d1138fdaba))
+* reconcile TypeBox migration with merged field contracts ([1a30604](https://github.com/vibeunion/svadmin/commit/1a3060434f5a59bdb8d84510ba5044e48fe1f83e))
+* **styles:** align integration regressions with relocated baselines and semantic states ([a2bc9b3](https://github.com/vibeunion/svadmin/commit/a2bc9b370e625abf846924311aa43a6a0f158c4f))
+* **styles:** load Playwright through its matching module entry ([b281ef0](https://github.com/vibeunion/svadmin/commit/b281ef0b5d41f8bd0b8c0df04784f8cbb9034de1))
+* **styles:** migrate conditional classes and restore native sidebar geometry ([76c2821](https://github.com/vibeunion/svadmin/commit/76c2821daa7997c6116bc2bbaf159e2138f2ff72))
+* **styles:** publish both UI entries as compiler-free CSS ([bce6a5d](https://github.com/vibeunion/svadmin/commit/bce6a5db593c55d406e74cd616d3cf5c5394728d))
+* **styles:** publish Svelte conditional utility styles without Tailwind ([5f2b7b3](https://github.com/vibeunion/svadmin/commit/5f2b7b3c1b01d214059dfbc4fd224b1d7be25331))
+* **styles:** rebind nested themes from native aliases instead of compiler metadata ([48179fb](https://github.com/vibeunion/svadmin/commit/48179fbae31ade7d507a252941250f809d8c2e43))
+* **styles:** reconcile content recipes with current strict field contracts ([3431127](https://github.com/vibeunion/svadmin/commit/34311272a1b5dd556049645e57d108123a9902d7))
+* **surface:** enforce pre-dispatch scope isolation and repair workflow prerequisites ([0994a52](https://github.com/vibeunion/svadmin/commit/0994a52e9faf44e6baf56a33fc55855dcad43bcb))
+* **surface:** integrate edit preview with native main and scoped source loading ([0a6d22d](https://github.com/vibeunion/svadmin/commit/0a6d22dbbfbfa68615f99dffa4966062acbc683f))
+* **surface:** reconcile controlled workflows with merged TypeBox repairs ([d2494e8](https://github.com/vibeunion/svadmin/commit/d2494e863264d2ea34b2ea96898e105a307d1238))
+* **ui:** align file browser public types with SVAR ([7b53ff5](https://github.com/vibeunion/svadmin/commit/7b53ff5c1f2f9bcd20cd28b6e789cdf95bd70182))
+* **ui:** clear only named upload status fields ([023eadd](https://github.com/vibeunion/svadmin/commit/023eadd63f56839818ec892aac909ae7565ba6fb))
+* **ui:** close strict optional, field and scoped-locale integration gaps ([469ed93](https://github.com/vibeunion/svadmin/commit/469ed9351000bddc6fc7b3994d811714eb8bd198))
+* **ui:** complete import and workspace workflows ([0e23398](https://github.com/vibeunion/svadmin/commit/0e23398eb5a6f2bbae415b4bc36f16179d779bad))
+* **ui:** integrate enterprise components with current Panda contracts ([1565f54](https://github.com/vibeunion/svadmin/commit/1565f549af42a04bc63d9189a267e01c58ffedf2))
+* **ui:** preserve concurrently merged content recipes in follow-up ([fdb2d13](https://github.com/vibeunion/svadmin/commit/fdb2d13e6ae3c89bd8a9470a1d6bf725658331dc))
+* **ui:** readable Panda fallbacks and stable product evidence ([101b3f7](https://github.com/vibeunion/svadmin/commit/101b3f72f7f0de47021ae32f0b5762a249fb5dc0))
+* **ui:** register validated time and datetime displays ([d688aab](https://github.com/vibeunion/svadmin/commit/d688aabe2f999d410da5e1c4d0724adb3b08c997))
+* **ui:** repair typed field contracts and isolate regression test state ([ec4f273](https://github.com/vibeunion/svadmin/commit/ec4f27340a95bc8152bc7657d647e340b67ea623))
+* **ui:** resolve reference kit PR lint blockers ([6a9b7b1](https://github.com/vibeunion/svadmin/commit/6a9b7b10cfd42fbe32defba0ec58c506fc11661b))
+* **ui:** unblock strict nullable field contracts before merge ([516b175](https://github.com/vibeunion/svadmin/commit/516b1752fbb0d9df3b467ba13fe276aac44c7649))
+* **ui:** use indexed dataset access in TreeSelect strict typing ([22f57f7](https://github.com/vibeunion/svadmin/commit/22f57f70b39a7fc0a78bb6a3b196add4a6e94a73))
+
+
+### 💅 Elegance & Refactoring
+
+* **styles:** bind content page width to a finite Panda recipe ([05a1542](https://github.com/vibeunion/svadmin/commit/05a15424854a8fa1e11cca359599c167e568684e))
+* **styles:** move content header anatomy into Panda slots ([4ae6995](https://github.com/vibeunion/svadmin/commit/4ae69957b8d9ff651d1ae12efb1c65af023095e8))
+* **styles:** use semantic metric recipe without changing truncation ([0bd9d13](https://github.com/vibeunion/svadmin/commit/0bd9d137fd73607c3a28ef90f932ce509069b672))
+
+
+### 📝 Documentation
+
+* **styles:** migrate native CSS contracts and prepare verified evidence ([a5ab1cd](https://github.com/vibeunion/svadmin/commit/a5ab1cd905de1fbb7cdd4b813eef4c0475f6830d))
+
+
+### 🔧 Miscellaneous Chores
+
+* **styles:** reconcile content recipes with native primitives on main ([ae608de](https://github.com/vibeunion/svadmin/commit/ae608de888de8e06c3f6aeebd92e5de1b8ae9af3))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.8.0
+  * peerDependencies
+    * @svadmin/core bumped to 0.53.0
+
 ## [0.72.0](https://github.com/vibeunion/svadmin/compare/ui-v0.71.5...ui-v0.72.0) (2026-09-19)
 
 

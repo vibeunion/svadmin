@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.13.7](https://github.com/vibeunion/svadmin/compare/elysia-v0.13.6...elysia-v0.13.7) (2026-09-19)
+
+
+### 🐛 Bug Fixes
+
+* **i18n:** reconcile processing labels when syncing main into Panda migration ([7b2f036](https://github.com/vibeunion/svadmin/commit/7b2f036ca797e2c9349fc041c3b640d1138fdaba))
+* **styles:** reconcile content recipes with current strict field contracts ([3431127](https://github.com/vibeunion/svadmin/commit/34311272a1b5dd556049645e57d108123a9902d7))
+* **surface:** integrate edit preview with native main and scoped source loading ([0a6d22d](https://github.com/vibeunion/svadmin/commit/0a6d22dbbfbfa68615f99dffa4966062acbc683f))
+* **surface:** reconcile controlled workflows with merged TypeBox repairs ([d2494e8](https://github.com/vibeunion/svadmin/commit/d2494e863264d2ea34b2ea96898e105a307d1238))
+* **ui:** integrate enterprise components with current Panda contracts ([1565f54](https://github.com/vibeunion/svadmin/commit/1565f549af42a04bc63d9189a267e01c58ffedf2))
+
+
+### 💅 Elegance & Refactoring
+
+* **elysia:** replace remaining Zod fixtures with TypeBox ([f723a41](https://github.com/vibeunion/svadmin/commit/f723a411447c64adae754e86db86e5de28ba18de))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.53.0
+
 ## [0.13.6](https://github.com/vibeunion/svadmin/compare/elysia-v0.13.5...elysia-v0.13.6) (2026-09-19)
 
 
