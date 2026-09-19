@@ -177,7 +177,11 @@ describe('ImportWizard component workflow', () => {
   it.each(['tenant', 'provider', 'close'] as const)(
     'retires an in-flight import after %s changes', async change => {
       let resolveWrite: (value: { data: { id: number; title: string; quantity: number } }) => void = () => {};
-      const source = provider({ create: vi.fn(() => new Promise<Awaited<ReturnType<DataProvider['create']>>>(resolve => { resolveWrite = resolve; })) });
+      const source = provider({
+        create: vi.fn(async () => await new Promise<{ data: { id: number; title: string; quantity: number } }>((resolve) => {
+          resolveWrite = resolve;
+        })),
+      });
       const onSuccess = vi.fn();
       const app = mount(source, { onSuccess });
       await selectFile(csvFile('title,quantity\nPrivate,1\nLater,2'));

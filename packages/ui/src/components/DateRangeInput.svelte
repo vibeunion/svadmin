@@ -1,7 +1,7 @@
 <script lang="ts">
   import DateTimeInput, { type DateTimeInputMode } from './DateTimeInput.svelte';
-  import { definedOptions } from '@svadmin/core/options';
   import { cn } from '../utils.js';
+  import { definedOptions } from '@svadmin/core/options';
 
   export interface DateRangeInputValue {
     start: string | null;
@@ -45,6 +45,7 @@
   }: Props = $props();
 
   function update(part: 'start' | 'end', next: string | null): void {
+    // null 范围首次编辑也必须返回两个明确的端点。
     const result: DateRangeInputValue = { start: value?.start ?? null, end: value?.end ?? null, [part]: next };
     value = result;
     onchange?.(result);

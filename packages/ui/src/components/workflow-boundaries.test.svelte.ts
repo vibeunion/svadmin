@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import DateRangeInput from './DateRangeInput.svelte';
 import FileUpload, { type UploadItem, type UploadSession } from './FileUpload.svelte';
 import FieldDisplay from './FieldDisplay.svelte';
+import DateField from './fields/DateField.svelte';
 import JsonSchemaForm from './JsonSchemaForm.svelte';
 
 afterEach(cleanup);
@@ -36,8 +37,11 @@ describe('workflow prerequisite regressions', () => {
     const time = render(FieldDisplay, { type: 'time', value: '13:45' });
     expect(datetime.container.querySelector('[data-svadmin-invalid-field]')).toBeNull();
     expect(datetime.container.textContent).toContain('2026');
-    expect(time.container.textContent).toContain('1:45');
-    expect(time.container.querySelector('span')?.title).toBe('13:45');
+    expect(time.container.textContent).toContain('13:45');
+    // Native field values stay literal; explicit DateField formatting is opt-in.
+    const formatted = render(DateField, { value: '13:45', format: 'time' });
+    expect(formatted.container.textContent).toContain('1:45');
+    expect(formatted.container.querySelector('span')?.title).toBe('13:45');
   });
   it('does not turn cancellation into success when an executor ignores AbortSignal', async () => {
     const pending = pendingUpload(); const onChange = vi.fn();
