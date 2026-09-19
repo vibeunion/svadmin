@@ -1,13 +1,7 @@
 // @svadmin/ui — Pre-built admin UI components
 
-export {
-	DESIGN_CONTRACT_VERSION,
-	designContract,
-	designTones,
-	semanticColorTokens,
-	surfaceDensities,
-} from "./design-contract.js";
-export type { DesignTone, SemanticColorToken, SurfaceDensity } from "./design-contract.js";
+export { surfaceDesignContract } from "./design-contract.js";
+export type { SurfaceTone, SurfaceDensity } from "./design-contract.js";
 
 // Entry component
 export { default as AdminApp } from './components/AdminApp.svelte';

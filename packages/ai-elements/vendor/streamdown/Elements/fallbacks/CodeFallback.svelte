@@ -1,0 +1,41 @@
+<script lang="ts">
+	import { useStreamdown } from '../../context.svelte.js';
+	import type { Tokens } from 'marked';
+
+	const {
+		token,
+		id,
+		isIncomplete = false
+	}: {
+		token: Tokens.Code;
+		id: string;
+		isIncomplete?: boolean;
+	} = $props();
+
+	const streamdown = useStreamdown();
+	const showLineNumbers = $derived(streamdown.lineNumbers !== false);
+</script>
+
+<div
+	data-streamdown-code={id}
+	data-incomplete={isIncomplete || undefined}
+	style={streamdown.isMounted ? streamdown.animationBlockStyle : ''}
+	class={streamdown.theme.code.base}
+>
+	<div class={streamdown.theme.code.header}>
+		<span class={streamdown.theme.code.language}>{token.lang}</span>
+	</div>
+	<div style="height: fit-content; width: 100%;" class={streamdown.theme.code.container}>
+		<pre class={streamdown.theme.code.pre}><code
+				class="block"
+				class:sd-line-numbers={showLineNumbers}
+				data-streamdown-line-numbers={showLineNumbers}
+				>{#each token.text.split('\n') as line}<span
+						class={`sd-code-line ${streamdown.theme.code.line}`}
+						><span style={streamdown.isMounted ? streamdown.animationTextStyle : ''}
+							>{line.trim().length > 0 ? line : '\u200B'}</span
+						></span
+					>{/each}</code
+			></pre>
+	</div>
+</div>

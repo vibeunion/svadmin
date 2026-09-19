@@ -1,4 +1,4 @@
-import { createCodePlugin, type HighlightResult } from 'streamdown-svelte/plugins';
+import { createCodePlugin, type HighlightResult } from '../../../vendor/streamdown/plugins.js';
 import { definedOptions } from '@svadmin/core/options';
 
 export interface CodeToken {

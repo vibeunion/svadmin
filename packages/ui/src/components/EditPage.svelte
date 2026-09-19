@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { ResourceRendering } from '../rendering/index.js';
   import { definedOptions } from '@svadmin/core/options';
 
   import { getResource, useNavigation } from '@svadmin/core';
@@ -16,6 +17,7 @@
 
   interface Props {
     resourceName: string;
+    rendering?: ResourceRendering | undefined;
     id: string | number;
     title?: string;
     density?: 'compact' | 'comfortable';
@@ -28,6 +30,7 @@
 
   let {
     resourceName,
+    rendering,
     id,
     title,
     density = 'comfortable',
@@ -65,6 +68,7 @@
   </PageHeader>
 
   <AutoForm
+    {rendering}
     {resourceName}
     mode="edit"
     {id}

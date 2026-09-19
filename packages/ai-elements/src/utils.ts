@@ -1,4 +1,4 @@
-export { cn } from 'cn';
+export { cn } from './classnames.js';
 
 const RESOURCE_PROTOCOLS = new Set(['http:', 'https:', 'blob:']);
 

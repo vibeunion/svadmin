@@ -1,16 +1,18 @@
 <script lang="ts">
+  import type { ComponentProps } from 'svelte';
   import { useTranslation } from '@svadmin/core/i18n';
   import AdminApp from '@svadmin/ui/components/AdminApp.svelte';
   import { setRichTextEditor } from '@svadmin/ui/editor-config';
-  import '@svadmin/ui/app.theme.css';
   import '@svadmin/ai-elements/ai.css';
   import { inMemoryDataProvider } from './providers/inMemoryDb';
   import { createInventoryChatProvider } from './providers/inventoryAssistant';
   import { createResources } from './resources';
   import { createExampleMenu, registerExampleMenuTranslations } from './exampleMenuCatalog';
   import { mockAuthProvider } from './providers/mockAuth';
-  import Dashboard from './pages/Dashboard.svelte';
+  import LazyDashboard from './components/LazyDashboard.svelte';
   import LazyResourcePage from './components/LazyResourcePage.svelte';
+  import BusinessAutoForm from './components/BusinessAutoForm.svelte';
+  import BusinessShowPage from './components/BusinessShowPage.svelte';
   import LazyRichTextEditor from './components/LazyRichTextEditor.svelte';
   import LazyChatDialog from './components/LazyChatDialog.svelte';
 
@@ -28,10 +30,17 @@
 
   const chatProvider = $derived.by(() => createInventoryChatProvider(inMemoryDataProvider, resources));
 
-  const resourcePages = $derived.by(() => ({
-    ...Object.fromEntries(resources.map((resource) => [resource.name, { list: LazyResourcePage }])),
-    design_principles: { list: LazyResourcePage },
-  }));
+  const resourcePages = $derived.by(() => {
+    const pages: NonNullable<ComponentProps<typeof AdminApp>['resourcePages']> = {};
+    for (const resource of resources) {
+      pages[resource.name] = {
+        list: LazyResourcePage, create: BusinessAutoForm, edit: BusinessAutoForm,
+        clone: BusinessAutoForm, show: BusinessShowPage,
+      };
+    }
+    pages['design_principles'] = { list: LazyResourcePage };
+    return pages;
+  });
 </script>
 
 <AdminApp
@@ -54,6 +63,6 @@
     <LazyChatDialog {docked} {scope} {ownerScope} />
   {/snippet}
   {#snippet dashboard()}
-    <Dashboard />
+    <LazyDashboard />
   {/snippet}
 </AdminApp>

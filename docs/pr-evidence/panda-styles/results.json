@@ -1,0 +1,90 @@
+{
+  "testedCommit": "2fd14b02750d1ed9b5b6caf650284a0ea3f8ea72",
+  "baselineCommit": "cf6c4746578176ea773a17ef6f49f353292f7818",
+  "publishedCssSha256": "ef829569f012e6c7aee72da1c587f9f461fbf7a152443547ad7051f9d337ae39",
+  "browser": "151.0.7922.34",
+  "capturePolicy": "Two consecutive identical captures per page; zero-tolerance comparison across baseline and published pages",
+  "scope": "Current real Svelte widget/control fixture under baseline vs published CSS; Chromium only; not a full application or historical DOM comparison",
+  "checks": [
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "mode": "light",
+      "defaultScreenshotsIdentical": true,
+      "semanticVariants": true,
+      "states": true,
+      "nestedTheme": true,
+      "noHorizontalOverflow": true,
+      "controls": true
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "mode": "dark",
+      "defaultScreenshotsIdentical": true,
+      "semanticVariants": true,
+      "states": true,
+      "nestedTheme": true,
+      "noHorizontalOverflow": true,
+      "controls": true
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "mode": "light",
+      "defaultScreenshotsIdentical": true,
+      "semanticVariants": true,
+      "states": true,
+      "nestedTheme": true,
+      "noHorizontalOverflow": true,
+      "controls": true
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "mode": "dark",
+      "defaultScreenshotsIdentical": true,
+      "semanticVariants": true,
+      "states": true,
+      "nestedTheme": true,
+      "noHorizontalOverflow": true,
+      "controls": true
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mode": "light",
+      "defaultScreenshotsIdentical": true,
+      "semanticVariants": true,
+      "states": true,
+      "nestedTheme": true,
+      "noHorizontalOverflow": true,
+      "controls": true
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mode": "dark",
+      "defaultScreenshotsIdentical": true,
+      "semanticVariants": true,
+      "states": true,
+      "nestedTheme": true,
+      "noHorizontalOverflow": true,
+      "controls": true
+    }
+  ],
+  "failures": [],
+  "pageErrors": []
+}

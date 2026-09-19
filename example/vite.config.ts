@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
-import tailwindcss from '@tailwindcss/vite';
 
 function manualChunks(id: string): string | undefined {
   const normalizedId = id.replaceAll('\\', '/');
@@ -12,14 +11,13 @@ function manualChunks(id: string): string | undefined {
   if (normalizedId.includes('/node_modules/@tiptap/')) return 'editor-tiptap';
   if (/\/node_modules\/(?:highlight\.js|lowlight|linkifyjs|rope-sequence|dompurify|isomorphic-dompurify)\//.test(normalizedId)) return 'editor-support';
   if (normalizedId.includes('/node_modules/@tanstack/')) return 'tanstack';
-  if (/\/node_modules\/(?:tailwind-merge|tailwind-variants|clsx)\//.test(normalizedId)) return 'styling';
+  if (/\/node_modules\/(?:clsx)\//.test(normalizedId)) return 'styling';
   if (normalizedId.includes('/node_modules/svelte/')) return 'svelte-runtime';
   return undefined;
 }
 
 export default defineConfig({
   plugins: [
-    tailwindcss(),
     svelte(),
   ],
   server: {

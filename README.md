@@ -263,13 +263,11 @@ declare module "@svadmin/core" {
 const dataProvider = createElysiaDataProvider<App>("http://localhost:3000");
 ```
 
-### Standalone Panda CSS / 独立 Panda CSS
+### Precompiled CSS Integration / 预生成 CSS 集成
 
-`@svadmin/ui` publishes standalone Panda CSS. The host does not need a
-Tailwind plugin, CSS framework import, or source-registration directive.
-
-`@svadmin/ui` 发布的是独立的 Panda CSS。宿主项目无需安装 Tailwind 插件、
-引入 CSS 框架，也无需额外注册组件源码扫描路径。
+> **No host CSS compiler required / 消费端无需 CSS 编译器**: UI and AI Elements ship precompiled CSS. Import their styles once; do not install Tailwind or Panda just to use SVAdmin. Panda is used only when building the UI package from source.
+>
+> UI 与 AI Elements 发布预生成 CSS。消费端只需引入样式，不需要安装 Tailwind 或 Panda；Panda 仅用于从源码构建 UI 的语义 tokens / recipes。
 
 **1. Import the UI stylesheet / 引入 UI 样式:**
 
@@ -279,11 +277,11 @@ Tailwind plugin, CSS framework import, or source-registration directive.
 @import "@svadmin/ai-elements/ai.css";
 ```
 
-`app.theme.css` remains as a compatibility-named entry with the same
-standalone output. Import only one SVAdmin UI stylesheet.
+The plain CSS entry does not scan component sources. Remove obsolete SVAdmin `@source` directives. Existing hosts that intentionally use Tailwind v4 for their own application styles may opt into `@svadmin/ui/app.theme.css` instead of `app.css`, and `@svadmin/ai-elements/ai.theme.css` instead of `ai.css`. These legacy metadata entries do not make Tailwind a dependency of SVAdmin. Import only one entry per package.
 
-`app.theme.css` 作为兼容名称保留，内容同样是独立 CSS 输出。SVAdmin UI 样式入口
-只需引入一个。
+普通 CSS 入口不扫描组件源码，请删除旧的 SVAdmin `@source` 指令。仍自行使用 Tailwind v4 的宿主，可将 UI 入口换为 `app.theme.css`，将 AI Elements 入口换为 `ai.theme.css`；每个包只引入一种入口。已编译的兼容类名和变量不应被批量删除。新样式请使用原生 CSS 或受控 recipes，而不是新增未经编译的工具类。
+
+For the opt-in Surface semantic variants, also import `@svadmin/surface/styles.css` and follow [Surface styling](packages/surface/STYLING.md). The default `svadmin/v1` contract is unchanged.
 
 **2. Configure Vite `optimizeDeps` / 配置 Vite `optimizeDeps`:**
 

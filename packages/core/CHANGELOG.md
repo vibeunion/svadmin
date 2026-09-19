@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.52.0](https://github.com/vibeunion/svadmin/compare/core-v0.51.6...core-v0.52.0) (2026-09-19)
+
+
+### 🚀 Features
+
+* **permissions:** add catalog snapshot adapter ([#425](https://github.com/vibeunion/svadmin/issues/425)) ([49a1433](https://github.com/vibeunion/svadmin/commit/49a143383a10df6be8b5f8e4b02e9af8dccc161f))
+
 ## [0.51.6](https://github.com/vibeunion/svadmin/compare/core-v0.51.5...core-v0.51.6) (2026-09-16)
 
 

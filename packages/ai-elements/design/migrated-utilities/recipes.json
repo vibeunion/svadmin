@@ -1,0 +1,6075 @@
+[
+  {
+    "name": "migrated00000",
+    "className": "svmigration0",
+    "selectors": [
+      ".pointer-events-auto"
+    ],
+    "base": {
+      "pointerEvents": "auto"
+    }
+  },
+  {
+    "name": "migrated00001",
+    "className": "svmigration1",
+    "selectors": [
+      ".pointer-events-none"
+    ],
+    "base": {
+      "pointerEvents": "none"
+    }
+  },
+  {
+    "name": "migrated00002",
+    "className": "svmigration2",
+    "selectors": [
+      ".visible"
+    ],
+    "base": {
+      "visibility": "visible"
+    }
+  },
+  {
+    "name": "migrated00003",
+    "className": "svmigration3",
+    "selectors": [
+      ".sr-only"
+    ],
+    "base": {
+      "position": "absolute",
+      "width": "1px",
+      "height": "1px",
+      "padding": "0",
+      "margin": "-1px",
+      "overflow": "hidden",
+      "clipPath": "inset(50%)",
+      "whiteSpace": "nowrap",
+      "borderWidth": "0"
+    }
+  },
+  {
+    "name": "migrated00004",
+    "className": "svmigration4",
+    "selectors": [
+      ".absolute"
+    ],
+    "base": {
+      "position": "absolute"
+    }
+  },
+  {
+    "name": "migrated00005",
+    "className": "svmigration5",
+    "selectors": [
+      ".fixed"
+    ],
+    "base": {
+      "position": "fixed"
+    }
+  },
+  {
+    "name": "migrated00006",
+    "className": "svmigration6",
+    "selectors": [
+      ".relative"
+    ],
+    "base": {
+      "position": "relative"
+    }
+  },
+  {
+    "name": "migrated00007",
+    "className": "svmigration7",
+    "selectors": [
+      ".static"
+    ],
+    "base": {
+      "position": "static"
+    }
+  },
+  {
+    "name": "migrated00008",
+    "className": "svmigration8",
+    "selectors": [
+      ".sticky"
+    ],
+    "base": {
+      "position": "sticky"
+    }
+  },
+  {
+    "name": "migrated00009",
+    "className": "svmigration9",
+    "selectors": [
+      ".inset-0"
+    ],
+    "base": {
+      "inset": "0px"
+    }
+  },
+  {
+    "name": "migrated00010",
+    "className": "svmigration10",
+    "selectors": [
+      ".inset-y-0"
+    ],
+    "base": {
+      "insetBlock": "0px"
+    }
+  },
+  {
+    "name": "migrated00011",
+    "className": "svmigration11",
+    "selectors": [
+      ".top-0"
+    ],
+    "base": {
+      "top": "0px"
+    }
+  },
+  {
+    "name": "migrated00012",
+    "className": "svmigration12",
+    "selectors": [
+      ".top-0\\.5"
+    ],
+    "base": {
+      "top": "calc(var(--spacing) * 0.5)"
+    }
+  },
+  {
+    "name": "migrated00013",
+    "className": "svmigration13",
+    "selectors": [
+      ".top-1"
+    ],
+    "base": {
+      "top": "var(--spacing)"
+    }
+  },
+  {
+    "name": "migrated00014",
+    "className": "svmigration14",
+    "selectors": [
+      ".top-1\\/2"
+    ],
+    "base": {
+      "top": "calc(1 / 2 * 100%)"
+    }
+  },
+  {
+    "name": "migrated00015",
+    "className": "svmigration15",
+    "selectors": [
+      ".top-2"
+    ],
+    "base": {
+      "top": "calc(var(--spacing) * 2)"
+    }
+  },
+  {
+    "name": "migrated00016",
+    "className": "svmigration16",
+    "selectors": [
+      ".top-4"
+    ],
+    "base": {
+      "top": "calc(var(--spacing) * 4)"
+    }
+  },
+  {
+    "name": "migrated00017",
+    "className": "svmigration17",
+    "selectors": [
+      ".top-7"
+    ],
+    "base": {
+      "top": "calc(var(--spacing) * 7)"
+    }
+  },
+  {
+    "name": "migrated00018",
+    "className": "svmigration18",
+    "selectors": [
+      ".top-full"
+    ],
+    "base": {
+      "top": "100%"
+    }
+  },
+  {
+    "name": "migrated00019",
+    "className": "svmigration19",
+    "selectors": [
+      ".right-0"
+    ],
+    "base": {
+      "right": "0px"
+    }
+  },
+  {
+    "name": "migrated00020",
+    "className": "svmigration20",
+    "selectors": [
+      ".right-0\\.5"
+    ],
+    "base": {
+      "right": "calc(var(--spacing) * 0.5)"
+    }
+  },
+  {
+    "name": "migrated00021",
+    "className": "svmigration21",
+    "selectors": [
+      ".right-1"
+    ],
+    "base": {
+      "right": "var(--spacing)"
+    }
+  },
+  {
+    "name": "migrated00022",
+    "className": "svmigration22",
+    "selectors": [
+      ".right-2"
+    ],
+    "base": {
+      "right": "calc(var(--spacing) * 2)"
+    }
+  },
+  {
+    "name": "migrated00023",
+    "className": "svmigration23",
+    "selectors": [
+      ".right-3"
+    ],
+    "base": {
+      "right": "calc(var(--spacing) * 3)"
+    }
+  },
+  {
+    "name": "migrated00024",
+    "className": "svmigration24",
+    "selectors": [
+      ".right-4"
+    ],
+    "base": {
+      "right": "calc(var(--spacing) * 4)"
+    }
+  },
+  {
+    "name": "migrated00025",
+    "className": "svmigration25",
+    "selectors": [
+      ".bottom-0"
+    ],
+    "base": {
+      "bottom": "0px"
+    }
+  },
+  {
+    "name": "migrated00026",
+    "className": "svmigration26",
+    "selectors": [
+      ".bottom-2"
+    ],
+    "base": {
+      "bottom": "calc(var(--spacing) * 2)"
+    }
+  },
+  {
+    "name": "migrated00027",
+    "className": "svmigration27",
+    "selectors": [
+      ".bottom-3"
+    ],
+    "base": {
+      "bottom": "calc(var(--spacing) * 3)"
+    }
+  },
+  {
+    "name": "migrated00028",
+    "className": "svmigration28",
+    "selectors": [
+      ".bottom-4"
+    ],
+    "base": {
+      "bottom": "calc(var(--spacing) * 4)"
+    }
+  },
+  {
+    "name": "migrated00029",
+    "className": "svmigration29",
+    "selectors": [
+      ".bottom-full"
+    ],
+    "base": {
+      "bottom": "100%"
+    }
+  },
+  {
+    "name": "migrated00030",
+    "className": "svmigration30",
+    "selectors": [
+      ".left-0"
+    ],
+    "base": {
+      "left": "0px"
+    }
+  },
+  {
+    "name": "migrated00031",
+    "className": "svmigration31",
+    "selectors": [
+      ".left-1\\/2"
+    ],
+    "base": {
+      "left": "calc(1 / 2 * 100%)"
+    }
+  },
+  {
+    "name": "migrated00032",
+    "className": "svmigration32",
+    "selectors": [
+      ".left-2"
+    ],
+    "base": {
+      "left": "calc(var(--spacing) * 2)"
+    }
+  },
+  {
+    "name": "migrated00033",
+    "className": "svmigration33",
+    "selectors": [
+      ".left-4"
+    ],
+    "base": {
+      "left": "calc(var(--spacing) * 4)"
+    }
+  },
+  {
+    "name": "migrated00034",
+    "className": "svmigration34",
+    "selectors": [
+      ".z-10"
+    ],
+    "base": {
+      "zIndex": "10"
+    }
+  },
+  {
+    "name": "migrated00035",
+    "className": "svmigration35",
+    "selectors": [
+      ".z-30"
+    ],
+    "base": {
+      "zIndex": "30"
+    }
+  },
+  {
+    "name": "migrated00036",
+    "className": "svmigration36",
+    "selectors": [
+      ".z-40"
+    ],
+    "base": {
+      "zIndex": "40"
+    }
+  },
+  {
+    "name": "migrated00037",
+    "className": "svmigration37",
+    "selectors": [
+      ".z-50"
+    ],
+    "base": {
+      "zIndex": "50"
+    }
+  },
+  {
+    "name": "migrated00038",
+    "className": "svmigration38",
+    "selectors": [
+      ".z-\\[1000\\]"
+    ],
+    "base": {
+      "zIndex": "1000"
+    }
+  },
+  {
+    "name": "migrated00039",
+    "className": "svmigration39",
+    "selectors": [
+      ".z-\\[9998\\]"
+    ],
+    "base": {
+      "zIndex": "9998"
+    }
+  },
+  {
+    "name": "migrated00040",
+    "className": "svmigration40",
+    "selectors": [
+      ".order-first"
+    ],
+    "base": {
+      "order": "-9999"
+    }
+  },
+  {
+    "name": "migrated00041",
+    "className": "svmigration41",
+    "selectors": [
+      ".container"
+    ],
+    "base": {
+      "width": "100%"
+    }
+  },
+  {
+    "name": "migrated00042",
+    "className": "svmigration42",
+    "selectors": [
+      ".container"
+    ],
+    "base": {
+      "@media (width >= 40rem)": {
+        "maxWidth": "40rem"
+      }
+    }
+  },
+  {
+    "name": "migrated00043",
+    "className": "svmigration43",
+    "selectors": [
+      ".container"
+    ],
+    "base": {
+      "@media (width >= 48rem)": {
+        "maxWidth": "48rem"
+      }
+    }
+  },
+  {
+    "name": "migrated00044",
+    "className": "svmigration44",
+    "selectors": [
+      ".container"
+    ],
+    "base": {
+      "@media (width >= 64rem)": {
+        "maxWidth": "64rem"
+      }
+    }
+  },
+  {
+    "name": "migrated00045",
+    "className": "svmigration45",
+    "selectors": [
+      ".container"
+    ],
+    "base": {
+      "@media (width >= 80rem)": {
+        "maxWidth": "80rem"
+      }
+    }
+  },
+  {
+    "name": "migrated00046",
+    "className": "svmigration46",
+    "selectors": [
+      ".container"
+    ],
+    "base": {
+      "@media (width >= 96rem)": {
+        "maxWidth": "96rem"
+      }
+    }
+  },
+  {
+    "name": "migrated00047",
+    "className": "svmigration47",
+    "selectors": [
+      ".m-0"
+    ],
+    "base": {
+      "margin": "0px"
+    }
+  },
+  {
+    "name": "migrated00048",
+    "className": "svmigration48",
+    "selectors": [
+      ".-mx-1"
+    ],
+    "base": {
+      "marginInline": "calc(var(--spacing) * -1)"
+    }
+  },
+  {
+    "name": "migrated00049",
+    "className": "svmigration49",
+    "selectors": [
+      ".mx-1\\.5"
+    ],
+    "base": {
+      "marginInline": "calc(var(--spacing) * 1.5)"
+    }
+  },
+  {
+    "name": "migrated00050",
+    "className": "svmigration50",
+    "selectors": [
+      ".mx-auto"
+    ],
+    "base": {
+      "marginInline": "auto"
+    }
+  },
+  {
+    "name": "migrated00051",
+    "className": "svmigration51",
+    "selectors": [
+      ".my-0"
+    ],
+    "base": {
+      "marginBlock": "0px"
+    }
+  },
+  {
+    "name": "migrated00052",
+    "className": "svmigration52",
+    "selectors": [
+      ".my-1"
+    ],
+    "base": {
+      "marginBlock": "var(--spacing)"
+    }
+  },
+  {
+    "name": "migrated00053",
+    "className": "svmigration53",
+    "selectors": [
+      ".my-2"
+    ],
+    "base": {
+      "marginBlock": "calc(var(--spacing) * 2)"
+    }
+  },
+  {
+    "name": "migrated00054",
+    "className": "svmigration54",
+    "selectors": [
+      ".my-4"
+    ],
+    "base": {
+      "marginBlock": "calc(var(--spacing) * 4)"
+    }
+  },
+  {
+    "name": "migrated00055",
+    "className": "svmigration55",
+    "selectors": [
+      ".my-6"
+    ],
+    "base": {
+      "marginBlock": "calc(var(--spacing) * 6)"
+    }
+  },
+  {
+    "name": "migrated00056",
+    "className": "svmigration56",
+    "selectors": [
+      ".-mt-10"
+    ],
+    "base": {
+      "marginTop": "calc(var(--spacing) * -10)"
+    }
+  },
+  {
+    "name": "migrated00057",
+    "className": "svmigration57",
+    "selectors": [
+      ".mt-0"
+    ],
+    "base": {
+      "marginTop": "0px"
+    }
+  },
+  {
+    "name": "migrated00058",
+    "className": "svmigration58",
+    "selectors": [
+      ".mt-0\\.5"
+    ],
+    "base": {
+      "marginTop": "calc(var(--spacing) * 0.5)"
+    }
+  },
+  {
+    "name": "migrated00059",
+    "className": "svmigration59",
+    "selectors": [
+      ".mt-1"
+    ],
+    "base": {
+      "marginTop": "var(--spacing)"
+    }
+  },
+  {
+    "name": "migrated00060",
+    "className": "svmigration60",
+    "selectors": [
+      ".mt-2"
+    ],
+    "base": {
+      "marginTop": "calc(var(--spacing) * 2)"
+    }
+  },
+  {
+    "name": "migrated00061",
+    "className": "svmigration61",
+    "selectors": [
+      ".mt-3"
+    ],
+    "base": {
+      "marginTop": "calc(var(--spacing) * 3)"
+    }
+  },
+  {
+    "name": "migrated00062",
+    "className": "svmigration62",
+    "selectors": [
+      ".mt-6"
+    ],
+    "base": {
+      "marginTop": "calc(var(--spacing) * 6)"
+    }
+  },
+  {
+    "name": "migrated00063",
+    "className": "svmigration63",
+    "selectors": [
+      ".mr-2"
+    ],
+    "base": {
+      "marginRight": "calc(var(--spacing) * 2)"
+    }
+  },
+  {
+    "name": "migrated00064",
+    "className": "svmigration64",
+    "selectors": [
+      ".mr-4"
+    ],
+    "base": {
+      "marginRight": "calc(var(--spacing) * 4)"
+    }
+  },
+  {
+    "name": "migrated00065",
+    "className": "svmigration65",
+    "selectors": [
+      ".mb-1"
+    ],
+    "base": {
+      "marginBottom": "var(--spacing)"
+    }
+  },
+  {
+    "name": "migrated00066",
+    "className": "svmigration66",
+    "selectors": [
+      ".mb-2"
+    ],
+    "base": {
+      "marginBottom": "calc(var(--spacing) * 2)"
+    }
+  },
+  {
+    "name": "migrated00067",
+    "className": "svmigration67",
+    "selectors": [
+      ".mb-3"
+    ],
+    "base": {
+      "marginBottom": "calc(var(--spacing) * 3)"
+    }
+  },
+  {
+    "name": "migrated00068",
+    "className": "svmigration68",
+    "selectors": [
+      ".mb-4"
+    ],
+    "base": {
+      "marginBottom": "calc(var(--spacing) * 4)"
+    }
+  },
+  {
+    "name": "migrated00069",
+    "className": "svmigration69",
+    "selectors": [
+      ".ml-1"
+    ],
+    "base": {
+      "marginLeft": "var(--spacing)"
+    }
+  },
+  {
+    "name": "migrated00070",
+    "className": "svmigration70",
+    "selectors": [
+      ".ml-2"
+    ],
+    "base": {
+      "marginLeft": "calc(var(--spacing) * 2)"
+    }
+  },
+  {
+    "name": "migrated00071",
+    "className": "svmigration71",
+    "selectors": [
+      ".ml-4"
+    ],
+    "base": {
+      "marginLeft": "calc(var(--spacing) * 4)"
+    }
+  },
+  {
+    "name": "migrated00072",
+    "className": "svmigration72",
+    "selectors": [
+      ".ml-auto"
+    ],
+    "base": {
+      "marginLeft": "auto"
+    }
+  },
+  {
+    "name": "migrated00073",
+    "className": "svmigration73",
+    "selectors": [
+      ".line-clamp-1"
+    ],
+    "base": {
+      "overflow": "hidden",
+      "display": "-webkit-box",
+      "WebkitBoxOrient": "vertical",
+      "WebkitLineClamp": "1"
+    }
+  },
+  {
+    "name": "migrated00074",
+    "className": "svmigration74",
+    "selectors": [
+      ".line-clamp-2"
+    ],
+    "base": {
+      "overflow": "hidden",
+      "display": "-webkit-box",
+      "WebkitBoxOrient": "vertical",
+      "WebkitLineClamp": "2"
+    }
+  },
+  {
+    "name": "migrated00075",
+    "className": "svmigration75",
+    "selectors": [
+      ".block"
+    ],
+    "base": {
+      "display": "block"
+    }
+  },
+  {
+    "name": "migrated00076",
+    "className": "svmigration76",
+    "selectors": [
+      ".contents"
+    ],
+    "base": {
+      "display": "contents"
+    }
+  },
+  {
+    "name": "migrated00077",
+    "className": "svmigration77",
+    "selectors": [
+      ".flex"
+    ],
+    "base": {
+      "display": "flex"
+    }
+  },
+  {
+    "name": "migrated00078",
+    "className": "svmigration78",
+    "selectors": [
+      ".grid"
+    ],
+    "base": {
+      "display": "grid"
+    }
+  },
+  {
+    "name": "migrated00079",
+    "className": "svmigration79",
+    "selectors": [
+      ".hidden"
+    ],
+    "base": {
+      "display": "none"
+    }
+  },
+  {
+    "name": "migrated00080",
+    "className": "svmigration80",
+    "selectors": [
+      ".inline"
+    ],
+    "base": {
+      "display": "inline"
+    }
+  },
+  {
+    "name": "migrated00081",
+    "className": "svmigration81",
+    "selectors": [
+      ".inline-block"
+    ],
+    "base": {
+      "display": "inline-block"
+    }
+  },
+  {
+    "name": "migrated00082",
+    "className": "svmigration82",
+    "selectors": [
+      ".inline-flex"
+    ],
+    "base": {
+      "display": "inline-flex"
+    }
+  },
+  {
+    "name": "migrated00083",
+    "className": "svmigration83",
+    "selectors": [
+      ".list-item"
+    ],
+    "base": {
+      "display": "list-item"
+    }
+  },
+  {
+    "name": "migrated00084",
+    "className": "svmigration84",
+    "selectors": [
+      ".table"
+    ],
+    "base": {
+      "display": "table"
+    }
+  },
+  {
+    "name": "migrated00085",
+    "className": "svmigration85",
+    "selectors": [
+      ".field-sizing-content"
+    ],
+    "base": {
+      "fieldSizing": "content"
+    }
+  },
+  {
+    "name": "migrated00086",
+    "className": "svmigration86",
+    "selectors": [
+      ".size-3"
+    ],
+    "base": {
+      "width": "calc(var(--spacing) * 3)",
+      "height": "calc(var(--spacing) * 3)"
+    }
+  },
+  {
+    "name": "migrated00087",
+    "className": "svmigration87",
+    "selectors": [
+      ".size-3\\.5"
+    ],
+    "base": {
+      "width": "calc(var(--spacing) * 3.5)",
+      "height": "calc(var(--spacing) * 3.5)"
+    }
+  },
+  {
+    "name": "migrated00088",
+    "className": "svmigration88",
+    "selectors": [
+      ".size-4"
+    ],
+    "base": {
+      "width": "calc(var(--spacing) * 4)",
+      "height": "calc(var(--spacing) * 4)"
+    }
+  },
+  {
+    "name": "migrated00089",
+    "className": "svmigration89",
+    "selectors": [
+      ".size-5"
+    ],
+    "base": {
+      "width": "calc(var(--spacing) * 5)",
+      "height": "calc(var(--spacing) * 5)"
+    }
+  },
+  {
+    "name": "migrated00090",
+    "className": "svmigration90",
+    "selectors": [
+      ".size-6"
+    ],
+    "base": {
+      "width": "calc(var(--spacing) * 6)",
+      "height": "calc(var(--spacing) * 6)"
+    }
+  },
+  {
+    "name": "migrated00091",
+    "className": "svmigration91",
+    "selectors": [
+      ".size-7"
+    ],
+    "base": {
+      "width": "calc(var(--spacing) * 7)",
+      "height": "calc(var(--spacing) * 7)"
+    }
+  },
+  {
+    "name": "migrated00092",
+    "className": "svmigration92",
+    "selectors": [
+      ".size-8"
+    ],
+    "base": {
+      "width": "calc(var(--spacing) * 8)",
+      "height": "calc(var(--spacing) * 8)"
+    }
+  },
+  {
+    "name": "migrated00093",
+    "className": "svmigration93",
+    "selectors": [
+      ".size-9"
+    ],
+    "base": {
+      "width": "calc(var(--spacing) * 9)",
+      "height": "calc(var(--spacing) * 9)"
+    }
+  },
+  {
+    "name": "migrated00094",
+    "className": "svmigration94",
+    "selectors": [
+      ".size-12"
+    ],
+    "base": {
+      "width": "calc(var(--spacing) * 12)",
+      "height": "calc(var(--spacing) * 12)"
+    }
+  },
+  {
+    "name": "migrated00095",
+    "className": "svmigration95",
+    "selectors": [
+      ".size-16"
+    ],
+    "base": {
+      "width": "calc(var(--spacing) * 16)",
+      "height": "calc(var(--spacing) * 16)"
+    }
+  },
+  {
+    "name": "migrated00096",
+    "className": "svmigration96",
+    "selectors": [
+      ".size-full"
+    ],
+    "base": {
+      "width": "100%",
+      "height": "100%"
+    }
+  },
+  {
+    "name": "migrated00097",
+    "className": "svmigration97",
+    "selectors": [
+      ".h-3"
+    ],
+    "base": {
+      "height": "calc(var(--spacing) * 3)"
+    }
+  },
+  {
+    "name": "migrated00098",
+    "className": "svmigration98",
+    "selectors": [
+      ".h-4"
+    ],
+    "base": {
+      "height": "calc(var(--spacing) * 4)"
+    }
+  },
+  {
+    "name": "migrated00099",
+    "className": "svmigration99",
+    "selectors": [
+      ".h-5"
+    ],
+    "base": {
+      "height": "calc(var(--spacing) * 5)"
+    }
+  },
+  {
+    "name": "migrated00100",
+    "className": "svmigration100",
+    "selectors": [
+      ".h-6"
+    ],
+    "base": {
+      "height": "calc(var(--spacing) * 6)"
+    }
+  },
+  {
+    "name": "migrated00101",
+    "className": "svmigration101",
+    "selectors": [
+      ".h-7"
+    ],
+    "base": {
+      "height": "calc(var(--spacing) * 7)"
+    }
+  },
+  {
+    "name": "migrated00102",
+    "className": "svmigration102",
+    "selectors": [
+      ".h-8"
+    ],
+    "base": {
+      "height": "calc(var(--spacing) * 8)"
+    }
+  },
+  {
+    "name": "migrated00103",
+    "className": "svmigration103",
+    "selectors": [
+      ".h-80"
+    ],
+    "base": {
+      "height": "calc(var(--spacing) * 80)"
+    }
+  },
+  {
+    "name": "migrated00104",
+    "className": "svmigration104",
+    "selectors": [
+      ".h-\\[4\\.35rem\\]"
+    ],
+    "base": {
+      "height": "4.35rem"
+    }
+  },
+  {
+    "name": "migrated00105",
+    "className": "svmigration105",
+    "selectors": [
+      ".h-\\[600px\\]"
+    ],
+    "base": {
+      "height": "600px"
+    }
+  },
+  {
+    "name": "migrated00106",
+    "className": "svmigration106",
+    "selectors": [
+      ".h-\\[min\\(42rem\\,calc\\(100dvh-1\\.5rem\\)\\)\\]"
+    ],
+    "base": {
+      "height": "min(42rem, calc(100dvh - 1.5rem))"
+    }
+  },
+  {
+    "name": "migrated00107",
+    "className": "svmigration107",
+    "selectors": [
+      ".h-auto"
+    ],
+    "base": {
+      "height": "auto"
+    }
+  },
+  {
+    "name": "migrated00108",
+    "className": "svmigration108",
+    "selectors": [
+      ".h-fit"
+    ],
+    "base": {
+      "height": "fit-content"
+    }
+  },
+  {
+    "name": "migrated00109",
+    "className": "svmigration109",
+    "selectors": [
+      ".h-full"
+    ],
+    "base": {
+      "height": "100%"
+    }
+  },
+  {
+    "name": "migrated00110",
+    "className": "svmigration110",
+    "selectors": [
+      ".h-px"
+    ],
+    "base": {
+      "height": "1px"
+    }
+  },
+  {
+    "name": "migrated00111",
+    "className": "svmigration111",
+    "selectors": [
+      ".max-h-32"
+    ],
+    "base": {
+      "maxHeight": "calc(var(--spacing) * 32)"
+    }
+  },
+  {
+    "name": "migrated00112",
+    "className": "svmigration112",
+    "selectors": [
+      ".max-h-48"
+    ],
+    "base": {
+      "maxHeight": "calc(var(--spacing) * 48)"
+    }
+  },
+  {
+    "name": "migrated00113",
+    "className": "svmigration113",
+    "selectors": [
+      ".max-h-56"
+    ],
+    "base": {
+      "maxHeight": "calc(var(--spacing) * 56)"
+    }
+  },
+  {
+    "name": "migrated00114",
+    "className": "svmigration114",
+    "selectors": [
+      ".max-h-72"
+    ],
+    "base": {
+      "maxHeight": "calc(var(--spacing) * 72)"
+    }
+  },
+  {
+    "name": "migrated00115",
+    "className": "svmigration115",
+    "selectors": [
+      ".max-h-80"
+    ],
+    "base": {
+      "maxHeight": "calc(var(--spacing) * 80)"
+    }
+  },
+  {
+    "name": "migrated00116",
+    "className": "svmigration116",
+    "selectors": [
+      ".max-h-\\[22rem\\]"
+    ],
+    "base": {
+      "maxHeight": "22rem"
+    }
+  },
+  {
+    "name": "migrated00117",
+    "className": "svmigration117",
+    "selectors": [
+      ".max-h-\\[min\\(32rem\\,calc\\(100dvh-2rem\\)\\)\\]"
+    ],
+    "base": {
+      "maxHeight": "min(32rem, calc(100dvh - 2rem))"
+    }
+  },
+  {
+    "name": "migrated00118",
+    "className": "svmigration118",
+    "selectors": [
+      ".min-h-0"
+    ],
+    "base": {
+      "minHeight": "0px"
+    }
+  },
+  {
+    "name": "migrated00119",
+    "className": "svmigration119",
+    "selectors": [
+      ".min-h-5"
+    ],
+    "base": {
+      "minHeight": "calc(var(--spacing) * 5)"
+    }
+  },
+  {
+    "name": "migrated00120",
+    "className": "svmigration120",
+    "selectors": [
+      ".min-h-6"
+    ],
+    "base": {
+      "minHeight": "calc(var(--spacing) * 6)"
+    }
+  },
+  {
+    "name": "migrated00121",
+    "className": "svmigration121",
+    "selectors": [
+      ".min-h-7"
+    ],
+    "base": {
+      "minHeight": "calc(var(--spacing) * 7)"
+    }
+  },
+  {
+    "name": "migrated00122",
+    "className": "svmigration122",
+    "selectors": [
+      ".min-h-8"
+    ],
+    "base": {
+      "minHeight": "calc(var(--spacing) * 8)"
+    }
+  },
+  {
+    "name": "migrated00123",
+    "className": "svmigration123",
+    "selectors": [
+      ".min-h-9"
+    ],
+    "base": {
+      "minHeight": "calc(var(--spacing) * 9)"
+    }
+  },
+  {
+    "name": "migrated00124",
+    "className": "svmigration124",
+    "selectors": [
+      ".min-h-10"
+    ],
+    "base": {
+      "minHeight": "calc(var(--spacing) * 10)"
+    }
+  },
+  {
+    "name": "migrated00125",
+    "className": "svmigration125",
+    "selectors": [
+      ".min-h-11"
+    ],
+    "base": {
+      "minHeight": "calc(var(--spacing) * 11)"
+    }
+  },
+  {
+    "name": "migrated00126",
+    "className": "svmigration126",
+    "selectors": [
+      ".min-h-12"
+    ],
+    "base": {
+      "minHeight": "calc(var(--spacing) * 12)"
+    }
+  },
+  {
+    "name": "migrated00127",
+    "className": "svmigration127",
+    "selectors": [
+      ".min-h-14"
+    ],
+    "base": {
+      "minHeight": "calc(var(--spacing) * 14)"
+    }
+  },
+  {
+    "name": "migrated00128",
+    "className": "svmigration128",
+    "selectors": [
+      ".min-h-16"
+    ],
+    "base": {
+      "minHeight": "calc(var(--spacing) * 16)"
+    }
+  },
+  {
+    "name": "migrated00129",
+    "className": "svmigration129",
+    "selectors": [
+      ".min-h-20"
+    ],
+    "base": {
+      "minHeight": "calc(var(--spacing) * 20)"
+    }
+  },
+  {
+    "name": "migrated00130",
+    "className": "svmigration130",
+    "selectors": [
+      ".min-h-24"
+    ],
+    "base": {
+      "minHeight": "calc(var(--spacing) * 24)"
+    }
+  },
+  {
+    "name": "migrated00131",
+    "className": "svmigration131",
+    "selectors": [
+      ".min-h-48"
+    ],
+    "base": {
+      "minHeight": "calc(var(--spacing) * 48)"
+    }
+  },
+  {
+    "name": "migrated00132",
+    "className": "svmigration132",
+    "selectors": [
+      ".min-h-\\[500px\\]"
+    ],
+    "base": {
+      "minHeight": "500px"
+    }
+  },
+  {
+    "name": "migrated00133",
+    "className": "svmigration133",
+    "selectors": [
+      ".min-h-dvh"
+    ],
+    "base": {
+      "minHeight": "100dvh"
+    }
+  },
+  {
+    "name": "migrated00134",
+    "className": "svmigration134",
+    "selectors": [
+      ".w-3"
+    ],
+    "base": {
+      "width": "calc(var(--spacing) * 3)"
+    }
+  },
+  {
+    "name": "migrated00135",
+    "className": "svmigration135",
+    "selectors": [
+      ".w-4"
+    ],
+    "base": {
+      "width": "calc(var(--spacing) * 4)"
+    }
+  },
+  {
+    "name": "migrated00136",
+    "className": "svmigration136",
+    "selectors": [
+      ".w-6"
+    ],
+    "base": {
+      "width": "calc(var(--spacing) * 6)"
+    }
+  },
+  {
+    "name": "migrated00137",
+    "className": "svmigration137",
+    "selectors": [
+      ".w-8"
+    ],
+    "base": {
+      "width": "calc(var(--spacing) * 8)"
+    }
+  },
+  {
+    "name": "migrated00138",
+    "className": "svmigration138",
+    "selectors": [
+      ".w-9"
+    ],
+    "base": {
+      "width": "calc(var(--spacing) * 9)"
+    }
+  },
+  {
+    "name": "migrated00139",
+    "className": "svmigration139",
+    "selectors": [
+      ".w-20"
+    ],
+    "base": {
+      "width": "calc(var(--spacing) * 20)"
+    }
+  },
+  {
+    "name": "migrated00140",
+    "className": "svmigration140",
+    "selectors": [
+      ".w-60"
+    ],
+    "base": {
+      "width": "calc(var(--spacing) * 60)"
+    }
+  },
+  {
+    "name": "migrated00141",
+    "className": "svmigration141",
+    "selectors": [
+      ".w-64"
+    ],
+    "base": {
+      "width": "calc(var(--spacing) * 64)"
+    }
+  },
+  {
+    "name": "migrated00142",
+    "className": "svmigration142",
+    "selectors": [
+      ".w-80"
+    ],
+    "base": {
+      "width": "calc(var(--spacing) * 80)"
+    }
+  },
+  {
+    "name": "migrated00143",
+    "className": "svmigration143",
+    "selectors": [
+      ".w-\\[min\\(18rem\\,calc\\(100vw-1\\.5rem\\)\\)\\]"
+    ],
+    "base": {
+      "width": "min(18rem, calc(100vw - 1.5rem))"
+    }
+  },
+  {
+    "name": "migrated00144",
+    "className": "svmigration144",
+    "selectors": [
+      ".w-\\[min\\(28rem\\,calc\\(100vw-2rem\\)\\)\\]"
+    ],
+    "base": {
+      "width": "min(28rem, calc(100vw - 2rem))"
+    }
+  },
+  {
+    "name": "migrated00145",
+    "className": "svmigration145",
+    "selectors": [
+      ".w-\\[min\\(32rem\\,100\\%\\)\\]"
+    ],
+    "base": {
+      "width": "min(32rem, 100%)"
+    }
+  },
+  {
+    "name": "migrated00146",
+    "className": "svmigration146",
+    "selectors": [
+      ".w-\\[min\\(42rem\\,calc\\(100vw-1\\.5rem\\)\\)\\]"
+    ],
+    "base": {
+      "width": "min(42rem, calc(100vw - 1.5rem))"
+    }
+  },
+  {
+    "name": "migrated00147",
+    "className": "svmigration147",
+    "selectors": [
+      ".w-fit"
+    ],
+    "base": {
+      "width": "fit-content"
+    }
+  },
+  {
+    "name": "migrated00148",
+    "className": "svmigration148",
+    "selectors": [
+      ".w-full"
+    ],
+    "base": {
+      "width": "100%"
+    }
+  },
+  {
+    "name": "migrated00149",
+    "className": "svmigration149",
+    "selectors": [
+      ".w-px"
+    ],
+    "base": {
+      "width": "1px"
+    }
+  },
+  {
+    "name": "migrated00150",
+    "className": "svmigration150",
+    "selectors": [
+      ".max-w-2xl"
+    ],
+    "base": {
+      "maxWidth": "var(--container-2xl)"
+    }
+  },
+  {
+    "name": "migrated00151",
+    "className": "svmigration151",
+    "selectors": [
+      ".max-w-3xl"
+    ],
+    "base": {
+      "maxWidth": "var(--container-3xl)"
+    }
+  },
+  {
+    "name": "migrated00152",
+    "className": "svmigration152",
+    "selectors": [
+      ".max-w-4xl"
+    ],
+    "base": {
+      "maxWidth": "var(--container-4xl)"
+    }
+  },
+  {
+    "name": "migrated00153",
+    "className": "svmigration153",
+    "selectors": [
+      ".max-w-5xl"
+    ],
+    "base": {
+      "maxWidth": "var(--container-5xl)"
+    }
+  },
+  {
+    "name": "migrated00154",
+    "className": "svmigration154",
+    "selectors": [
+      ".max-w-6xl"
+    ],
+    "base": {
+      "maxWidth": "var(--container-6xl)"
+    }
+  },
+  {
+    "name": "migrated00155",
+    "className": "svmigration155",
+    "selectors": [
+      ".max-w-48"
+    ],
+    "base": {
+      "maxWidth": "calc(var(--spacing) * 48)"
+    }
+  },
+  {
+    "name": "migrated00156",
+    "className": "svmigration156",
+    "selectors": [
+      ".max-w-72"
+    ],
+    "base": {
+      "maxWidth": "calc(var(--spacing) * 72)"
+    }
+  },
+  {
+    "name": "migrated00157",
+    "className": "svmigration157",
+    "selectors": [
+      ".max-w-\\[95\\%\\]"
+    ],
+    "base": {
+      "maxWidth": "95%"
+    }
+  },
+  {
+    "name": "migrated00158",
+    "className": "svmigration158",
+    "selectors": [
+      ".max-w-\\[400px\\]"
+    ],
+    "base": {
+      "maxWidth": "400px"
+    }
+  },
+  {
+    "name": "migrated00159",
+    "className": "svmigration159",
+    "selectors": [
+      ".max-w-\\[calc\\(100vw-1\\.5rem\\)\\]"
+    ],
+    "base": {
+      "maxWidth": "calc(100vw - 1.5rem)"
+    }
+  },
+  {
+    "name": "migrated00160",
+    "className": "svmigration160",
+    "selectors": [
+      ".max-w-full"
+    ],
+    "base": {
+      "maxWidth": "100%"
+    }
+  },
+  {
+    "name": "migrated00161",
+    "className": "svmigration161",
+    "selectors": [
+      ".max-w-md"
+    ],
+    "base": {
+      "maxWidth": "var(--container-md)"
+    }
+  },
+  {
+    "name": "migrated00162",
+    "className": "svmigration162",
+    "selectors": [
+      ".max-w-prose"
+    ],
+    "base": {
+      "maxWidth": "65ch"
+    }
+  },
+  {
+    "name": "migrated00163",
+    "className": "svmigration163",
+    "selectors": [
+      ".max-w-sm"
+    ],
+    "base": {
+      "maxWidth": "var(--container-sm)"
+    }
+  },
+  {
+    "name": "migrated00164",
+    "className": "svmigration164",
+    "selectors": [
+      ".max-w-xl"
+    ],
+    "base": {
+      "maxWidth": "var(--container-xl)"
+    }
+  },
+  {
+    "name": "migrated00165",
+    "className": "svmigration165",
+    "selectors": [
+      ".min-w-0"
+    ],
+    "base": {
+      "minWidth": "0px"
+    }
+  },
+  {
+    "name": "migrated00166",
+    "className": "svmigration166",
+    "selectors": [
+      ".min-w-5"
+    ],
+    "base": {
+      "minWidth": "calc(var(--spacing) * 5)"
+    }
+  },
+  {
+    "name": "migrated00167",
+    "className": "svmigration167",
+    "selectors": [
+      ".min-w-10"
+    ],
+    "base": {
+      "minWidth": "calc(var(--spacing) * 10)"
+    }
+  },
+  {
+    "name": "migrated00168",
+    "className": "svmigration168",
+    "selectors": [
+      ".min-w-20"
+    ],
+    "base": {
+      "minWidth": "calc(var(--spacing) * 20)"
+    }
+  },
+  {
+    "name": "migrated00169",
+    "className": "svmigration169",
+    "selectors": [
+      ".min-w-24"
+    ],
+    "base": {
+      "minWidth": "calc(var(--spacing) * 24)"
+    }
+  },
+  {
+    "name": "migrated00170",
+    "className": "svmigration170",
+    "selectors": [
+      ".min-w-32"
+    ],
+    "base": {
+      "minWidth": "calc(var(--spacing) * 32)"
+    }
+  },
+  {
+    "name": "migrated00171",
+    "className": "svmigration171",
+    "selectors": [
+      ".min-w-40"
+    ],
+    "base": {
+      "minWidth": "calc(var(--spacing) * 40)"
+    }
+  },
+  {
+    "name": "migrated00172",
+    "className": "svmigration172",
+    "selectors": [
+      ".min-w-48"
+    ],
+    "base": {
+      "minWidth": "calc(var(--spacing) * 48)"
+    }
+  },
+  {
+    "name": "migrated00173",
+    "className": "svmigration173",
+    "selectors": [
+      ".min-w-\\[200px\\]"
+    ],
+    "base": {
+      "minWidth": "200px"
+    }
+  },
+  {
+    "name": "migrated00174",
+    "className": "svmigration174",
+    "selectors": [
+      ".min-w-\\[250px\\]"
+    ],
+    "base": {
+      "minWidth": "250px"
+    }
+  },
+  {
+    "name": "migrated00175",
+    "className": "svmigration175",
+    "selectors": [
+      ".min-w-full"
+    ],
+    "base": {
+      "minWidth": "100%"
+    }
+  },
+  {
+    "name": "migrated00176",
+    "className": "svmigration176",
+    "selectors": [
+      ".min-w-max"
+    ],
+    "base": {
+      "minWidth": "max-content"
+    }
+  },
+  {
+    "name": "migrated00177",
+    "className": "svmigration177",
+    "selectors": [
+      ".flex-1"
+    ],
+    "base": {
+      "flex": "1"
+    }
+  },
+  {
+    "name": "migrated00178",
+    "className": "svmigration178",
+    "selectors": [
+      ".shrink-0"
+    ],
+    "base": {
+      "flexShrink": "0"
+    }
+  },
+  {
+    "name": "migrated00179",
+    "className": "svmigration179",
+    "selectors": [
+      ".border-collapse"
+    ],
+    "base": {
+      "borderCollapse": "collapse"
+    }
+  },
+  {
+    "name": "migrated00180",
+    "className": "svmigration180",
+    "selectors": [
+      ".-translate-x-1\\/2"
+    ],
+    "base": {
+      "--tw-translate-x": "calc(calc(1 / 2 * 100%) * -1)",
+      "translate": "var(--tw-translate-x) var(--tw-translate-y)"
+    }
+  },
+  {
+    "name": "migrated00181",
+    "className": "svmigration181",
+    "selectors": [
+      ".translate-x-4"
+    ],
+    "base": {
+      "--tw-translate-x": "calc(var(--spacing) * 4)",
+      "translate": "var(--tw-translate-x) var(--tw-translate-y)"
+    }
+  },
+  {
+    "name": "migrated00182",
+    "className": "svmigration182",
+    "selectors": [
+      ".-translate-y-1\\/2"
+    ],
+    "base": {
+      "--tw-translate-y": "calc(calc(1 / 2 * 100%) * -1)",
+      "translate": "var(--tw-translate-x) var(--tw-translate-y)"
+    }
+  },
+  {
+    "name": "migrated00183",
+    "className": "svmigration183",
+    "selectors": [
+      ".scale-y-90"
+    ],
+    "base": {
+      "--tw-scale-y": "90%",
+      "scale": "var(--tw-scale-x) var(--tw-scale-y)"
+    }
+  },
+  {
+    "name": "migrated00184",
+    "className": "svmigration184",
+    "selectors": [
+      ".rotate-180"
+    ],
+    "base": {
+      "rotate": "180deg"
+    }
+  },
+  {
+    "name": "migrated00185",
+    "className": "svmigration185",
+    "selectors": [
+      ".transform"
+    ],
+    "base": {
+      "transform": "var(--tw-rotate-x,) var(--tw-rotate-y,) var(--tw-rotate-z,) var(--tw-skew-x,) var(--tw-skew-y,)"
+    }
+  },
+  {
+    "name": "migrated00186",
+    "className": "svmigration186",
+    "selectors": [
+      ".animate-pulse"
+    ],
+    "base": {
+      "animation": "var(--animate-pulse)"
+    }
+  },
+  {
+    "name": "migrated00187",
+    "className": "svmigration187",
+    "selectors": [
+      ".animate-spin"
+    ],
+    "base": {
+      "animation": "var(--animate-spin)"
+    }
+  },
+  {
+    "name": "migrated00188",
+    "className": "svmigration188",
+    "selectors": [
+      ".cursor-pointer"
+    ],
+    "base": {
+      "cursor": "pointer"
+    }
+  },
+  {
+    "name": "migrated00189",
+    "className": "svmigration189",
+    "selectors": [
+      ".cursor-zoom-in"
+    ],
+    "base": {
+      "cursor": "zoom-in"
+    }
+  },
+  {
+    "name": "migrated00190",
+    "className": "svmigration190",
+    "selectors": [
+      ".resize"
+    ],
+    "base": {
+      "resize": "both"
+    }
+  },
+  {
+    "name": "migrated00191",
+    "className": "svmigration191",
+    "selectors": [
+      ".resize-y"
+    ],
+    "base": {
+      "resize": "vertical"
+    }
+  },
+  {
+    "name": "migrated00192",
+    "className": "svmigration192",
+    "selectors": [
+      ".scroll-mt-24"
+    ],
+    "base": {
+      "scrollMarginTop": "calc(var(--spacing) * 24)"
+    }
+  },
+  {
+    "name": "migrated00193",
+    "className": "svmigration193",
+    "selectors": [
+      ".list-outside"
+    ],
+    "base": {
+      "listStylePosition": "outside"
+    }
+  },
+  {
+    "name": "migrated00194",
+    "className": "svmigration194",
+    "selectors": [
+      ".list-disc"
+    ],
+    "base": {
+      "listStyleType": "disc"
+    }
+  },
+  {
+    "name": "migrated00195",
+    "className": "svmigration195",
+    "selectors": [
+      ".list-none"
+    ],
+    "base": {
+      "listStyleType": "none"
+    }
+  },
+  {
+    "name": "migrated00196",
+    "className": "svmigration196",
+    "selectors": [
+      ".appearance-none"
+    ],
+    "base": {
+      "appearance": "none"
+    }
+  },
+  {
+    "name": "migrated00197",
+    "className": "svmigration197",
+    "selectors": [
+      ".grid-cols-\\[auto_1fr\\]"
+    ],
+    "base": {
+      "gridTemplateColumns": "auto 1fr"
+    }
+  },
+  {
+    "name": "migrated00198",
+    "className": "svmigration198",
+    "selectors": [
+      ".flex-col"
+    ],
+    "base": {
+      "flexDirection": "column"
+    }
+  },
+  {
+    "name": "migrated00199",
+    "className": "svmigration199",
+    "selectors": [
+      ".flex-wrap"
+    ],
+    "base": {
+      "flexWrap": "wrap"
+    }
+  },
+  {
+    "name": "migrated00200",
+    "className": "svmigration200",
+    "selectors": [
+      ".place-items-center"
+    ],
+    "base": {
+      "placeItems": "center"
+    }
+  },
+  {
+    "name": "migrated00201",
+    "className": "svmigration201",
+    "selectors": [
+      ".items-center"
+    ],
+    "base": {
+      "alignItems": "center"
+    }
+  },
+  {
+    "name": "migrated00202",
+    "className": "svmigration202",
+    "selectors": [
+      ".items-start"
+    ],
+    "base": {
+      "alignItems": "flex-start"
+    }
+  },
+  {
+    "name": "migrated00203",
+    "className": "svmigration203",
+    "selectors": [
+      ".justify-between"
+    ],
+    "base": {
+      "justifyContent": "space-between"
+    }
+  },
+  {
+    "name": "migrated00204",
+    "className": "svmigration204",
+    "selectors": [
+      ".justify-center"
+    ],
+    "base": {
+      "justifyContent": "center"
+    }
+  },
+  {
+    "name": "migrated00205",
+    "className": "svmigration205",
+    "selectors": [
+      ".justify-end"
+    ],
+    "base": {
+      "justifyContent": "flex-end"
+    }
+  },
+  {
+    "name": "migrated00206",
+    "className": "svmigration206",
+    "selectors": [
+      ".justify-start"
+    ],
+    "base": {
+      "justifyContent": "flex-start"
+    }
+  },
+  {
+    "name": "migrated00207",
+    "className": "svmigration207",
+    "selectors": [
+      ".gap-0"
+    ],
+    "base": {
+      "gap": "0px"
+    }
+  },
+  {
+    "name": "migrated00208",
+    "className": "svmigration208",
+    "selectors": [
+      ".gap-0\\.5"
+    ],
+    "base": {
+      "gap": "calc(var(--spacing) * 0.5)"
+    }
+  },
+  {
+    "name": "migrated00209",
+    "className": "svmigration209",
+    "selectors": [
+      ".gap-1"
+    ],
+    "base": {
+      "gap": "var(--spacing)"
+    }
+  },
+  {
+    "name": "migrated00210",
+    "className": "svmigration210",
+    "selectors": [
+      ".gap-1\\.5"
+    ],
+    "base": {
+      "gap": "calc(var(--spacing) * 1.5)"
+    }
+  },
+  {
+    "name": "migrated00211",
+    "className": "svmigration211",
+    "selectors": [
+      ".gap-2"
+    ],
+    "base": {
+      "gap": "calc(var(--spacing) * 2)"
+    }
+  },
+  {
+    "name": "migrated00212",
+    "className": "svmigration212",
+    "selectors": [
+      ".gap-3"
+    ],
+    "base": {
+      "gap": "calc(var(--spacing) * 3)"
+    }
+  },
+  {
+    "name": "migrated00213",
+    "className": "svmigration213",
+    "selectors": [
+      ".gap-4"
+    ],
+    "base": {
+      "gap": "calc(var(--spacing) * 4)"
+    }
+  },
+  {
+    "name": "migrated00214",
+    "className": "svmigration214",
+    "selectors": [
+      ".gap-8"
+    ],
+    "base": {
+      "gap": "calc(var(--spacing) * 8)"
+    }
+  },
+  {
+    "name": "migrated00215",
+    "className": "svmigration215",
+    "selectors": [
+      ".gap-10"
+    ],
+    "base": {
+      "gap": "calc(var(--spacing) * 10)"
+    }
+  },
+  {
+    "name": "migrated00216",
+    "className": "svmigration216",
+    "selectors": [
+      ".gap-12"
+    ],
+    "base": {
+      "gap": "calc(var(--spacing) * 12)"
+    }
+  },
+  {
+    "name": "migrated00217",
+    "className": "svmigration217",
+    "selectors": [
+      ":where(.space-y-1 > :not(:last-child))"
+    ],
+    "base": {
+      "--tw-space-y-reverse": "0",
+      "marginBlockStart": "calc(var(--spacing) * var(--tw-space-y-reverse))",
+      "marginBlockEnd": "calc(var(--spacing) * calc(1 - var(--tw-space-y-reverse)))"
+    }
+  },
+  {
+    "name": "migrated00218",
+    "className": "svmigration218",
+    "selectors": [
+      ":where(.space-y-2 > :not(:last-child))"
+    ],
+    "base": {
+      "--tw-space-y-reverse": "0",
+      "marginBlockStart": "calc(calc(var(--spacing) * 2) * var(--tw-space-y-reverse))",
+      "marginBlockEnd": "calc(calc(var(--spacing) * 2) * calc(1 - var(--tw-space-y-reverse)))"
+    }
+  },
+  {
+    "name": "migrated00219",
+    "className": "svmigration219",
+    "selectors": [
+      ":where(.space-y-3 > :not(:last-child))"
+    ],
+    "base": {
+      "--tw-space-y-reverse": "0",
+      "marginBlockStart": "calc(calc(var(--spacing) * 3) * var(--tw-space-y-reverse))",
+      "marginBlockEnd": "calc(calc(var(--spacing) * 3) * calc(1 - var(--tw-space-y-reverse)))"
+    }
+  },
+  {
+    "name": "migrated00220",
+    "className": "svmigration220",
+    "selectors": [
+      ":where(.space-y-4 > :not(:last-child))"
+    ],
+    "base": {
+      "--tw-space-y-reverse": "0",
+      "marginBlockStart": "calc(calc(var(--spacing) * 4) * var(--tw-space-y-reverse))",
+      "marginBlockEnd": "calc(calc(var(--spacing) * 4) * calc(1 - var(--tw-space-y-reverse)))"
+    }
+  },
+  {
+    "name": "migrated00221",
+    "className": "svmigration221",
+    "selectors": [
+      ":where(.space-y-5 > :not(:last-child))"
+    ],
+    "base": {
+      "--tw-space-y-reverse": "0",
+      "marginBlockStart": "calc(calc(var(--spacing) * 5) * var(--tw-space-y-reverse))",
+      "marginBlockEnd": "calc(calc(var(--spacing) * 5) * calc(1 - var(--tw-space-y-reverse)))"
+    }
+  },
+  {
+    "name": "migrated00222",
+    "className": "svmigration222",
+    "selectors": [
+      ":where(.space-y-6 > :not(:last-child))"
+    ],
+    "base": {
+      "--tw-space-y-reverse": "0",
+      "marginBlockStart": "calc(calc(var(--spacing) * 6) * var(--tw-space-y-reverse))",
+      "marginBlockEnd": "calc(calc(var(--spacing) * 6) * calc(1 - var(--tw-space-y-reverse)))"
+    }
+  },
+  {
+    "name": "migrated00223",
+    "className": "svmigration223",
+    "selectors": [
+      ".gap-x-3"
+    ],
+    "base": {
+      "columnGap": "calc(var(--spacing) * 3)"
+    }
+  },
+  {
+    "name": "migrated00224",
+    "className": "svmigration224",
+    "selectors": [
+      ".gap-y-1"
+    ],
+    "base": {
+      "rowGap": "var(--spacing)"
+    }
+  },
+  {
+    "name": "migrated00225",
+    "className": "svmigration225",
+    "selectors": [
+      ":where(.divide-y > :not(:last-child))"
+    ],
+    "base": {
+      "--tw-divide-y-reverse": "0",
+      "borderBottomStyle": "var(--tw-border-style)",
+      "borderTopStyle": "var(--tw-border-style)",
+      "borderTopWidth": "calc(1px * var(--tw-divide-y-reverse))",
+      "borderBottomWidth": "calc(1px * calc(1 - var(--tw-divide-y-reverse)))"
+    }
+  },
+  {
+    "name": "migrated00226",
+    "className": "svmigration226",
+    "selectors": [
+      ":where(.divide-border > :not(:last-child))"
+    ],
+    "base": {
+      "borderColor": "var(--color-border)"
+    }
+  },
+  {
+    "name": "migrated00227",
+    "className": "svmigration227",
+    "selectors": [
+      ".truncate"
+    ],
+    "base": {
+      "overflow": "hidden",
+      "textOverflow": "ellipsis",
+      "whiteSpace": "nowrap"
+    }
+  },
+  {
+    "name": "migrated00228",
+    "className": "svmigration228",
+    "selectors": [
+      ".overflow-auto"
+    ],
+    "base": {
+      "overflow": "auto"
+    }
+  },
+  {
+    "name": "migrated00229",
+    "className": "svmigration229",
+    "selectors": [
+      ".overflow-hidden"
+    ],
+    "base": {
+      "overflow": "hidden"
+    }
+  },
+  {
+    "name": "migrated00230",
+    "className": "svmigration230",
+    "selectors": [
+      ".overflow-visible"
+    ],
+    "base": {
+      "overflow": "visible"
+    }
+  },
+  {
+    "name": "migrated00231",
+    "className": "svmigration231",
+    "selectors": [
+      ".overflow-x-auto"
+    ],
+    "base": {
+      "overflowX": "auto"
+    }
+  },
+  {
+    "name": "migrated00232",
+    "className": "svmigration232",
+    "selectors": [
+      ".overflow-y-auto"
+    ],
+    "base": {
+      "overflowY": "auto"
+    }
+  },
+  {
+    "name": "migrated00233",
+    "className": "svmigration233",
+    "selectors": [
+      ".rounded"
+    ],
+    "base": {
+      "borderRadius": "0.25rem"
+    }
+  },
+  {
+    "name": "migrated00234",
+    "className": "svmigration234",
+    "selectors": [
+      ".rounded-2xl"
+    ],
+    "base": {
+      "borderRadius": "var(--radius-2xl)"
+    }
+  },
+  {
+    "name": "migrated00235",
+    "className": "svmigration235",
+    "selectors": [
+      ".rounded-full"
+    ],
+    "base": {
+      "borderRadius": "calc(infinity * 1px)"
+    }
+  },
+  {
+    "name": "migrated00236",
+    "className": "svmigration236",
+    "selectors": [
+      ".rounded-lg"
+    ],
+    "base": {
+      "borderRadius": "var(--radius-lg)"
+    }
+  },
+  {
+    "name": "migrated00237",
+    "className": "svmigration237",
+    "selectors": [
+      ".rounded-md"
+    ],
+    "base": {
+      "borderRadius": "var(--radius-md)"
+    }
+  },
+  {
+    "name": "migrated00238",
+    "className": "svmigration238",
+    "selectors": [
+      ".rounded-none"
+    ],
+    "base": {
+      "borderRadius": "0"
+    }
+  },
+  {
+    "name": "migrated00239",
+    "className": "svmigration239",
+    "selectors": [
+      ".rounded-sm"
+    ],
+    "base": {
+      "borderRadius": "var(--radius-sm)"
+    }
+  },
+  {
+    "name": "migrated00240",
+    "className": "svmigration240",
+    "selectors": [
+      ".rounded-xl"
+    ],
+    "base": {
+      "borderRadius": "var(--radius-xl)"
+    }
+  },
+  {
+    "name": "migrated00241",
+    "className": "svmigration241",
+    "selectors": [
+      ".rounded-t-md"
+    ],
+    "base": {
+      "borderTopLeftRadius": "var(--radius-md)",
+      "borderTopRightRadius": "var(--radius-md)"
+    }
+  },
+  {
+    "name": "migrated00242",
+    "className": "svmigration242",
+    "selectors": [
+      ".border"
+    ],
+    "base": {
+      "borderStyle": "var(--tw-border-style)",
+      "borderWidth": "1px"
+    }
+  },
+  {
+    "name": "migrated00243",
+    "className": "svmigration243",
+    "selectors": [
+      ".border-0"
+    ],
+    "base": {
+      "borderStyle": "var(--tw-border-style)",
+      "borderWidth": "0px"
+    }
+  },
+  {
+    "name": "migrated00244",
+    "className": "svmigration244",
+    "selectors": [
+      ".border-y"
+    ],
+    "base": {
+      "borderBlockStyle": "var(--tw-border-style)",
+      "borderBlockWidth": "1px"
+    }
+  },
+  {
+    "name": "migrated00245",
+    "className": "svmigration245",
+    "selectors": [
+      ".border-y-0"
+    ],
+    "base": {
+      "borderBlockStyle": "var(--tw-border-style)",
+      "borderBlockWidth": "0px"
+    }
+  },
+  {
+    "name": "migrated00246",
+    "className": "svmigration246",
+    "selectors": [
+      ".border-t"
+    ],
+    "base": {
+      "borderTopStyle": "var(--tw-border-style)",
+      "borderTopWidth": "1px"
+    }
+  },
+  {
+    "name": "migrated00247",
+    "className": "svmigration247",
+    "selectors": [
+      ".border-r"
+    ],
+    "base": {
+      "borderRightStyle": "var(--tw-border-style)",
+      "borderRightWidth": "1px"
+    }
+  },
+  {
+    "name": "migrated00248",
+    "className": "svmigration248",
+    "selectors": [
+      ".border-r-0"
+    ],
+    "base": {
+      "borderRightStyle": "var(--tw-border-style)",
+      "borderRightWidth": "0px"
+    }
+  },
+  {
+    "name": "migrated00249",
+    "className": "svmigration249",
+    "selectors": [
+      ".border-b"
+    ],
+    "base": {
+      "borderBottomStyle": "var(--tw-border-style)",
+      "borderBottomWidth": "1px"
+    }
+  },
+  {
+    "name": "migrated00250",
+    "className": "svmigration250",
+    "selectors": [
+      ".border-b-2"
+    ],
+    "base": {
+      "borderBottomStyle": "var(--tw-border-style)",
+      "borderBottomWidth": "2px"
+    }
+  },
+  {
+    "name": "migrated00251",
+    "className": "svmigration251",
+    "selectors": [
+      ".border-l"
+    ],
+    "base": {
+      "borderLeftStyle": "var(--tw-border-style)",
+      "borderLeftWidth": "1px"
+    }
+  },
+  {
+    "name": "migrated00252",
+    "className": "svmigration252",
+    "selectors": [
+      ".border-l-2"
+    ],
+    "base": {
+      "borderLeftStyle": "var(--tw-border-style)",
+      "borderLeftWidth": "2px"
+    }
+  },
+  {
+    "name": "migrated00253",
+    "className": "svmigration253",
+    "selectors": [
+      ".border-l-4"
+    ],
+    "base": {
+      "borderLeftStyle": "var(--tw-border-style)",
+      "borderLeftWidth": "4px"
+    }
+  },
+  {
+    "name": "migrated00254",
+    "className": "svmigration254",
+    "selectors": [
+      ".border-none"
+    ],
+    "base": {
+      "--tw-border-style": "none",
+      "borderStyle": "none"
+    }
+  },
+  {
+    "name": "migrated00255",
+    "className": "svmigration255",
+    "selectors": [
+      ".border-\\[\\#ff3e00\\]\\/30"
+    ],
+    "base": {
+      "borderColor": "color-mix(in oklab, #ff3e00 30%, transparent)"
+    }
+  },
+  {
+    "name": "migrated00256",
+    "className": "svmigration256",
+    "selectors": [
+      ".border-blue-600"
+    ],
+    "base": {
+      "borderColor": "var(--color-blue-600)"
+    }
+  },
+  {
+    "name": "migrated00257",
+    "className": "svmigration257",
+    "selectors": [
+      ".border-border"
+    ],
+    "base": {
+      "borderColor": "var(--color-border)"
+    }
+  },
+  {
+    "name": "migrated00258",
+    "className": "svmigration258",
+    "selectors": [
+      ".border-border\\/70"
+    ],
+    "base": {
+      "borderColor": "var(--color-border)"
+    }
+  },
+  {
+    "name": "migrated00259",
+    "className": "svmigration259",
+    "selectors": [
+      ".border-border\\/70"
+    ],
+    "base": {
+      "@supports (color: color-mix(in lab, red, red))": {
+        "borderColor": "color-mix(in oklab, var(--color-border) 70%, transparent)"
+      }
+    }
+  },
+  {
+    "name": "migrated00260",
+    "className": "svmigration260",
+    "selectors": [
+      ".border-destructive"
+    ],
+    "base": {
+      "borderColor": "var(--color-destructive)"
+    }
+  },
+  {
+    "name": "migrated00261",
+    "className": "svmigration261",
+    "selectors": [
+      ".border-destructive\\/25"
+    ],
+    "base": {
+      "borderColor": "var(--color-destructive)"
+    }
+  },
+  {
+    "name": "migrated00262",
+    "className": "svmigration262",
+    "selectors": [
+      ".border-destructive\\/25"
+    ],
+    "base": {
+      "@supports (color: color-mix(in lab, red, red))": {
+        "borderColor": "color-mix(in oklab, var(--color-destructive) 25%, transparent)"
+      }
+    }
+  },
+  {
+    "name": "migrated00263",
+    "className": "svmigration263",
+    "selectors": [
+      ".border-gray-200"
+    ],
+    "base": {
+      "borderColor": "var(--color-gray-200)"
+    }
+  },
+  {
+    "name": "migrated00264",
+    "className": "svmigration264",
+    "selectors": [
+      ".border-green-600"
+    ],
+    "base": {
+      "borderColor": "var(--color-green-600)"
+    }
+  },
+  {
+    "name": "migrated00265",
+    "className": "svmigration265",
+    "selectors": [
+      ".border-input"
+    ],
+    "base": {
+      "borderColor": "var(--color-input)"
+    }
+  },
+  {
+    "name": "migrated00266",
+    "className": "svmigration266",
+    "selectors": [
+      ".border-muted-foreground\\/30"
+    ],
+    "base": {
+      "borderColor": "var(--color-muted-foreground)"
+    }
+  },
+  {
+    "name": "migrated00267",
+    "className": "svmigration267",
+    "selectors": [
+      ".border-muted-foreground\\/30"
+    ],
+    "base": {
+      "@supports (color: color-mix(in lab, red, red))": {
+        "borderColor": "color-mix(in oklab, var(--color-muted-foreground) 30%, transparent)"
+      }
+    }
+  },
+  {
+    "name": "migrated00268",
+    "className": "svmigration268",
+    "selectors": [
+      ".border-primary"
+    ],
+    "base": {
+      "borderColor": "var(--color-primary)"
+    }
+  },
+  {
+    "name": "migrated00269",
+    "className": "svmigration269",
+    "selectors": [
+      ".border-primary\\/10"
+    ],
+    "base": {
+      "borderColor": "var(--color-primary)"
+    }
+  },
+  {
+    "name": "migrated00270",
+    "className": "svmigration270",
+    "selectors": [
+      ".border-primary\\/10"
+    ],
+    "base": {
+      "@supports (color: color-mix(in lab, red, red))": {
+        "borderColor": "color-mix(in oklab, var(--color-primary) 10%, transparent)"
+      }
+    }
+  },
+  {
+    "name": "migrated00271",
+    "className": "svmigration271",
+    "selectors": [
+      ".border-purple-600"
+    ],
+    "base": {
+      "borderColor": "var(--color-purple-600)"
+    }
+  },
+  {
+    "name": "migrated00272",
+    "className": "svmigration272",
+    "selectors": [
+      ".border-red-600"
+    ],
+    "base": {
+      "borderColor": "var(--color-red-600)"
+    }
+  },
+  {
+    "name": "migrated00273",
+    "className": "svmigration273",
+    "selectors": [
+      ".border-sidebar"
+    ],
+    "base": {
+      "borderColor": "var(--color-sidebar)"
+    }
+  },
+  {
+    "name": "migrated00274",
+    "className": "svmigration274",
+    "selectors": [
+      ".border-transparent"
+    ],
+    "base": {
+      "borderColor": "transparent"
+    }
+  },
+  {
+    "name": "migrated00275",
+    "className": "svmigration275",
+    "selectors": [
+      ".border-warning\\/40"
+    ],
+    "base": {
+      "borderColor": "var(--color-warning)"
+    }
+  },
+  {
+    "name": "migrated00276",
+    "className": "svmigration276",
+    "selectors": [
+      ".border-warning\\/40"
+    ],
+    "base": {
+      "@supports (color: color-mix(in lab, red, red))": {
+        "borderColor": "color-mix(in oklab, var(--color-warning) 40%, transparent)"
+      }
+    }
+  },
+  {
+    "name": "migrated00277",
+    "className": "svmigration277",
+    "selectors": [
+      ".border-yellow-600"
+    ],
+    "base": {
+      "borderColor": "var(--color-yellow-600)"
+    }
+  },
+  {
+    "name": "migrated00278",
+    "className": "svmigration278",
+    "selectors": [
+      ".bg-\\[\\#ff3e00\\]"
+    ],
+    "base": {
+      "backgroundColor": "#ff3e00"
+    }
+  },
+  {
+    "name": "migrated00279",
+    "className": "svmigration279",
+    "selectors": [
+      ".bg-\\[\\#ff3e00\\]\\/8"
+    ],
+    "base": {
+      "backgroundColor": "color-mix(in oklab, #ff3e00 8%, transparent)"
+    }
+  },
+  {
+    "name": "migrated00280",
+    "className": "svmigration280",
+    "selectors": [
+      ".bg-\\[var\\(--sdm-bg\\,inherit\\)\\]"
+    ],
+    "base": {
+      "backgroundColor": "var(--sdm-bg,inherit)"
+    }
+  },
+  {
+    "name": "migrated00281",
+    "className": "svmigration281",
+    "selectors": [
+      ".bg-background"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-background)"
+    }
+  },
+  {
+    "name": "migrated00282",
+    "className": "svmigration282",
+    "selectors": [
+      ".bg-background\\/70"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-background)"
+    }
+  },
+  {
+    "name": "migrated00283",
+    "className": "svmigration283",
+    "selectors": [
+      ".bg-background\\/70"
+    ],
+    "base": {
+      "@supports (color: color-mix(in lab, red, red))": {
+        "backgroundColor": "color-mix(in oklab, var(--color-background) 70%, transparent)"
+      }
+    }
+  },
+  {
+    "name": "migrated00284",
+    "className": "svmigration284",
+    "selectors": [
+      ".bg-background\\/80"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-background)"
+    }
+  },
+  {
+    "name": "migrated00285",
+    "className": "svmigration285",
+    "selectors": [
+      ".bg-background\\/80"
+    ],
+    "base": {
+      "@supports (color: color-mix(in lab, red, red))": {
+        "backgroundColor": "color-mix(in oklab, var(--color-background) 80%, transparent)"
+      }
+    }
+  },
+  {
+    "name": "migrated00286",
+    "className": "svmigration286",
+    "selectors": [
+      ".bg-background\\/90"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-background)"
+    }
+  },
+  {
+    "name": "migrated00287",
+    "className": "svmigration287",
+    "selectors": [
+      ".bg-background\\/90"
+    ],
+    "base": {
+      "@supports (color: color-mix(in lab, red, red))": {
+        "backgroundColor": "color-mix(in oklab, var(--color-background) 90%, transparent)"
+      }
+    }
+  },
+  {
+    "name": "migrated00288",
+    "className": "svmigration288",
+    "selectors": [
+      ".bg-black\\/10"
+    ],
+    "base": {
+      "backgroundColor": "color-mix(in srgb, #000 10%, transparent)"
+    }
+  },
+  {
+    "name": "migrated00289",
+    "className": "svmigration289",
+    "selectors": [
+      ".bg-black\\/10"
+    ],
+    "base": {
+      "@supports (color: color-mix(in lab, red, red))": {
+        "backgroundColor": "color-mix(in oklab, var(--color-black) 10%, transparent)"
+      }
+    }
+  },
+  {
+    "name": "migrated00290",
+    "className": "svmigration290",
+    "selectors": [
+      ".bg-black\\/45"
+    ],
+    "base": {
+      "backgroundColor": "color-mix(in srgb, #000 45%, transparent)"
+    }
+  },
+  {
+    "name": "migrated00291",
+    "className": "svmigration291",
+    "selectors": [
+      ".bg-black\\/45"
+    ],
+    "base": {
+      "@supports (color: color-mix(in lab, red, red))": {
+        "backgroundColor": "color-mix(in oklab, var(--color-black) 45%, transparent)"
+      }
+    }
+  },
+  {
+    "name": "migrated00292",
+    "className": "svmigration292",
+    "selectors": [
+      ".bg-border"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-border)"
+    }
+  },
+  {
+    "name": "migrated00293",
+    "className": "svmigration293",
+    "selectors": [
+      ".bg-border\\/70"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-border)"
+    }
+  },
+  {
+    "name": "migrated00294",
+    "className": "svmigration294",
+    "selectors": [
+      ".bg-border\\/70"
+    ],
+    "base": {
+      "@supports (color: color-mix(in lab, red, red))": {
+        "backgroundColor": "color-mix(in oklab, var(--color-border) 70%, transparent)"
+      }
+    }
+  },
+  {
+    "name": "migrated00295",
+    "className": "svmigration295",
+    "selectors": [
+      ".bg-border\\/80"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-border)"
+    }
+  },
+  {
+    "name": "migrated00296",
+    "className": "svmigration296",
+    "selectors": [
+      ".bg-border\\/80"
+    ],
+    "base": {
+      "@supports (color: color-mix(in lab, red, red))": {
+        "backgroundColor": "color-mix(in oklab, var(--color-border) 80%, transparent)"
+      }
+    }
+  },
+  {
+    "name": "migrated00297",
+    "className": "svmigration297",
+    "selectors": [
+      ".bg-card"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-card)"
+    }
+  },
+  {
+    "name": "migrated00298",
+    "className": "svmigration298",
+    "selectors": [
+      ".bg-destructive\\/10"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-destructive)"
+    }
+  },
+  {
+    "name": "migrated00299",
+    "className": "svmigration299",
+    "selectors": [
+      ".bg-destructive\\/10"
+    ],
+    "base": {
+      "@supports (color: color-mix(in lab, red, red))": {
+        "backgroundColor": "color-mix(in oklab, var(--color-destructive) 10%, transparent)"
+      }
+    }
+  },
+  {
+    "name": "migrated00300",
+    "className": "svmigration300",
+    "selectors": [
+      ".bg-foreground"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-foreground)"
+    }
+  },
+  {
+    "name": "migrated00301",
+    "className": "svmigration301",
+    "selectors": [
+      ".bg-gray-50"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-gray-50)"
+    }
+  },
+  {
+    "name": "migrated00302",
+    "className": "svmigration302",
+    "selectors": [
+      ".bg-gray-200"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-gray-200)"
+    }
+  },
+  {
+    "name": "migrated00303",
+    "className": "svmigration303",
+    "selectors": [
+      ".bg-gray-900"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-gray-900)"
+    }
+  },
+  {
+    "name": "migrated00304",
+    "className": "svmigration304",
+    "selectors": [
+      ".bg-info\\/10"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-info)"
+    }
+  },
+  {
+    "name": "migrated00305",
+    "className": "svmigration305",
+    "selectors": [
+      ".bg-info\\/10"
+    ],
+    "base": {
+      "@supports (color: color-mix(in lab, red, red))": {
+        "backgroundColor": "color-mix(in oklab, var(--color-info) 10%, transparent)"
+      }
+    }
+  },
+  {
+    "name": "migrated00306",
+    "className": "svmigration306",
+    "selectors": [
+      ".bg-muted"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-muted)"
+    }
+  },
+  {
+    "name": "migrated00307",
+    "className": "svmigration307",
+    "selectors": [
+      ".bg-muted\\/10"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-muted)"
+    }
+  },
+  {
+    "name": "migrated00308",
+    "className": "svmigration308",
+    "selectors": [
+      ".bg-muted\\/10"
+    ],
+    "base": {
+      "@supports (color: color-mix(in lab, red, red))": {
+        "backgroundColor": "color-mix(in oklab, var(--color-muted) 10%, transparent)"
+      }
+    }
+  },
+  {
+    "name": "migrated00309",
+    "className": "svmigration309",
+    "selectors": [
+      ".bg-muted\\/20"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-muted)"
+    }
+  },
+  {
+    "name": "migrated00310",
+    "className": "svmigration310",
+    "selectors": [
+      ".bg-muted\\/20"
+    ],
+    "base": {
+      "@supports (color: color-mix(in lab, red, red))": {
+        "backgroundColor": "color-mix(in oklab, var(--color-muted) 20%, transparent)"
+      }
+    }
+  },
+  {
+    "name": "migrated00311",
+    "className": "svmigration311",
+    "selectors": [
+      ".bg-muted\\/30"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-muted)"
+    }
+  },
+  {
+    "name": "migrated00312",
+    "className": "svmigration312",
+    "selectors": [
+      ".bg-muted\\/30"
+    ],
+    "base": {
+      "@supports (color: color-mix(in lab, red, red))": {
+        "backgroundColor": "color-mix(in oklab, var(--color-muted) 30%, transparent)"
+      }
+    }
+  },
+  {
+    "name": "migrated00313",
+    "className": "svmigration313",
+    "selectors": [
+      ".bg-muted\\/50"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-muted)"
+    }
+  },
+  {
+    "name": "migrated00314",
+    "className": "svmigration314",
+    "selectors": [
+      ".bg-muted\\/50"
+    ],
+    "base": {
+      "@supports (color: color-mix(in lab, red, red))": {
+        "backgroundColor": "color-mix(in oklab, var(--color-muted) 50%, transparent)"
+      }
+    }
+  },
+  {
+    "name": "migrated00315",
+    "className": "svmigration315",
+    "selectors": [
+      ".bg-muted\\/80"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-muted)"
+    }
+  },
+  {
+    "name": "migrated00316",
+    "className": "svmigration316",
+    "selectors": [
+      ".bg-muted\\/80"
+    ],
+    "base": {
+      "@supports (color: color-mix(in lab, red, red))": {
+        "backgroundColor": "color-mix(in oklab, var(--color-muted) 80%, transparent)"
+      }
+    }
+  },
+  {
+    "name": "migrated00317",
+    "className": "svmigration317",
+    "selectors": [
+      ".bg-popover"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-popover)"
+    }
+  },
+  {
+    "name": "migrated00318",
+    "className": "svmigration318",
+    "selectors": [
+      ".bg-primary"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-primary)"
+    }
+  },
+  {
+    "name": "migrated00319",
+    "className": "svmigration319",
+    "selectors": [
+      ".bg-primary\\/5"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-primary)"
+    }
+  },
+  {
+    "name": "migrated00320",
+    "className": "svmigration320",
+    "selectors": [
+      ".bg-primary\\/5"
+    ],
+    "base": {
+      "@supports (color: color-mix(in lab, red, red))": {
+        "backgroundColor": "color-mix(in oklab, var(--color-primary) 5%, transparent)"
+      }
+    }
+  },
+  {
+    "name": "migrated00321",
+    "className": "svmigration321",
+    "selectors": [
+      ".bg-red-50"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-red-50)"
+    }
+  },
+  {
+    "name": "migrated00322",
+    "className": "svmigration322",
+    "selectors": [
+      ".bg-red-100"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-red-100)"
+    }
+  },
+  {
+    "name": "migrated00323",
+    "className": "svmigration323",
+    "selectors": [
+      ".bg-secondary"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-secondary)"
+    }
+  },
+  {
+    "name": "migrated00324",
+    "className": "svmigration324",
+    "selectors": [
+      ".bg-sidebar"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-sidebar)"
+    }
+  },
+  {
+    "name": "migrated00325",
+    "className": "svmigration325",
+    "selectors": [
+      ".bg-sidebar\\/20"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-sidebar)"
+    }
+  },
+  {
+    "name": "migrated00326",
+    "className": "svmigration326",
+    "selectors": [
+      ".bg-sidebar\\/20"
+    ],
+    "base": {
+      "@supports (color: color-mix(in lab, red, red))": {
+        "backgroundColor": "color-mix(in oklab, var(--color-sidebar) 20%, transparent)"
+      }
+    }
+  },
+  {
+    "name": "migrated00327",
+    "className": "svmigration327",
+    "selectors": [
+      ".bg-sidebar\\/80"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-sidebar)"
+    }
+  },
+  {
+    "name": "migrated00328",
+    "className": "svmigration328",
+    "selectors": [
+      ".bg-sidebar\\/80"
+    ],
+    "base": {
+      "@supports (color: color-mix(in lab, red, red))": {
+        "backgroundColor": "color-mix(in oklab, var(--color-sidebar) 80%, transparent)"
+      }
+    }
+  },
+  {
+    "name": "migrated00329",
+    "className": "svmigration329",
+    "selectors": [
+      ".bg-sidebar\\/90"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-sidebar)"
+    }
+  },
+  {
+    "name": "migrated00330",
+    "className": "svmigration330",
+    "selectors": [
+      ".bg-sidebar\\/90"
+    ],
+    "base": {
+      "@supports (color: color-mix(in lab, red, red))": {
+        "backgroundColor": "color-mix(in oklab, var(--color-sidebar) 90%, transparent)"
+      }
+    }
+  },
+  {
+    "name": "migrated00331",
+    "className": "svmigration331",
+    "selectors": [
+      ".bg-success\\/10"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-success)"
+    }
+  },
+  {
+    "name": "migrated00332",
+    "className": "svmigration332",
+    "selectors": [
+      ".bg-success\\/10"
+    ],
+    "base": {
+      "@supports (color: color-mix(in lab, red, red))": {
+        "backgroundColor": "color-mix(in oklab, var(--color-success) 10%, transparent)"
+      }
+    }
+  },
+  {
+    "name": "migrated00333",
+    "className": "svmigration333",
+    "selectors": [
+      ".bg-transparent"
+    ],
+    "base": {
+      "backgroundColor": "transparent"
+    }
+  },
+  {
+    "name": "migrated00334",
+    "className": "svmigration334",
+    "selectors": [
+      ".bg-warning\\/10"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-warning)"
+    }
+  },
+  {
+    "name": "migrated00335",
+    "className": "svmigration335",
+    "selectors": [
+      ".bg-warning\\/10"
+    ],
+    "base": {
+      "@supports (color: color-mix(in lab, red, red))": {
+        "backgroundColor": "color-mix(in oklab, var(--color-warning) 10%, transparent)"
+      }
+    }
+  },
+  {
+    "name": "migrated00336",
+    "className": "svmigration336",
+    "selectors": [
+      ".bg-white"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-white)"
+    }
+  },
+  {
+    "name": "migrated00337",
+    "className": "svmigration337",
+    "selectors": [
+      ".stroke-blue-600"
+    ],
+    "base": {
+      "stroke": "var(--color-blue-600)"
+    }
+  },
+  {
+    "name": "migrated00338",
+    "className": "svmigration338",
+    "selectors": [
+      ".stroke-destructive"
+    ],
+    "base": {
+      "stroke": "var(--color-destructive)"
+    }
+  },
+  {
+    "name": "migrated00339",
+    "className": "svmigration339",
+    "selectors": [
+      ".stroke-green-600"
+    ],
+    "base": {
+      "stroke": "var(--color-green-600)"
+    }
+  },
+  {
+    "name": "migrated00340",
+    "className": "svmigration340",
+    "selectors": [
+      ".stroke-purple-600"
+    ],
+    "base": {
+      "stroke": "var(--color-purple-600)"
+    }
+  },
+  {
+    "name": "migrated00341",
+    "className": "svmigration341",
+    "selectors": [
+      ".stroke-red-600"
+    ],
+    "base": {
+      "stroke": "var(--color-red-600)"
+    }
+  },
+  {
+    "name": "migrated00342",
+    "className": "svmigration342",
+    "selectors": [
+      ".stroke-yellow-600"
+    ],
+    "base": {
+      "stroke": "var(--color-yellow-600)"
+    }
+  },
+  {
+    "name": "migrated00343",
+    "className": "svmigration343",
+    "selectors": [
+      ".object-contain"
+    ],
+    "base": {
+      "objectFit": "contain"
+    }
+  },
+  {
+    "name": "migrated00344",
+    "className": "svmigration344",
+    "selectors": [
+      ".object-cover"
+    ],
+    "base": {
+      "objectFit": "cover"
+    }
+  },
+  {
+    "name": "migrated00345",
+    "className": "svmigration345",
+    "selectors": [
+      ".p-0"
+    ],
+    "base": {
+      "padding": "0px"
+    }
+  },
+  {
+    "name": "migrated00346",
+    "className": "svmigration346",
+    "selectors": [
+      ".p-0\\.5"
+    ],
+    "base": {
+      "padding": "calc(var(--spacing) * 0.5)"
+    }
+  },
+  {
+    "name": "migrated00347",
+    "className": "svmigration347",
+    "selectors": [
+      ".p-1"
+    ],
+    "base": {
+      "padding": "var(--spacing)"
+    }
+  },
+  {
+    "name": "migrated00348",
+    "className": "svmigration348",
+    "selectors": [
+      ".p-2"
+    ],
+    "base": {
+      "padding": "calc(var(--spacing) * 2)"
+    }
+  },
+  {
+    "name": "migrated00349",
+    "className": "svmigration349",
+    "selectors": [
+      ".p-3"
+    ],
+    "base": {
+      "padding": "calc(var(--spacing) * 3)"
+    }
+  },
+  {
+    "name": "migrated00350",
+    "className": "svmigration350",
+    "selectors": [
+      ".p-4"
+    ],
+    "base": {
+      "padding": "calc(var(--spacing) * 4)"
+    }
+  },
+  {
+    "name": "migrated00351",
+    "className": "svmigration351",
+    "selectors": [
+      ".p-5"
+    ],
+    "base": {
+      "padding": "calc(var(--spacing) * 5)"
+    }
+  },
+  {
+    "name": "migrated00352",
+    "className": "svmigration352",
+    "selectors": [
+      ".p-6"
+    ],
+    "base": {
+      "padding": "calc(var(--spacing) * 6)"
+    }
+  },
+  {
+    "name": "migrated00353",
+    "className": "svmigration353",
+    "selectors": [
+      ".p-8"
+    ],
+    "base": {
+      "padding": "calc(var(--spacing) * 8)"
+    }
+  },
+  {
+    "name": "migrated00354",
+    "className": "svmigration354",
+    "selectors": [
+      ".px-1"
+    ],
+    "base": {
+      "paddingInline": "var(--spacing)"
+    }
+  },
+  {
+    "name": "migrated00355",
+    "className": "svmigration355",
+    "selectors": [
+      ".px-1\\.5"
+    ],
+    "base": {
+      "paddingInline": "calc(var(--spacing) * 1.5)"
+    }
+  },
+  {
+    "name": "migrated00356",
+    "className": "svmigration356",
+    "selectors": [
+      ".px-2"
+    ],
+    "base": {
+      "paddingInline": "calc(var(--spacing) * 2)"
+    }
+  },
+  {
+    "name": "migrated00357",
+    "className": "svmigration357",
+    "selectors": [
+      ".px-3"
+    ],
+    "base": {
+      "paddingInline": "calc(var(--spacing) * 3)"
+    }
+  },
+  {
+    "name": "migrated00358",
+    "className": "svmigration358",
+    "selectors": [
+      ".px-4"
+    ],
+    "base": {
+      "paddingInline": "calc(var(--spacing) * 4)"
+    }
+  },
+  {
+    "name": "migrated00359",
+    "className": "svmigration359",
+    "selectors": [
+      ".px-8"
+    ],
+    "base": {
+      "paddingInline": "calc(var(--spacing) * 8)"
+    }
+  },
+  {
+    "name": "migrated00360",
+    "className": "svmigration360",
+    "selectors": [
+      ".py-0\\.5"
+    ],
+    "base": {
+      "paddingBlock": "calc(var(--spacing) * 0.5)"
+    }
+  },
+  {
+    "name": "migrated00361",
+    "className": "svmigration361",
+    "selectors": [
+      ".py-1"
+    ],
+    "base": {
+      "paddingBlock": "var(--spacing)"
+    }
+  },
+  {
+    "name": "migrated00362",
+    "className": "svmigration362",
+    "selectors": [
+      ".py-1\\.5"
+    ],
+    "base": {
+      "paddingBlock": "calc(var(--spacing) * 1.5)"
+    }
+  },
+  {
+    "name": "migrated00363",
+    "className": "svmigration363",
+    "selectors": [
+      ".py-2"
+    ],
+    "base": {
+      "paddingBlock": "calc(var(--spacing) * 2)"
+    }
+  },
+  {
+    "name": "migrated00364",
+    "className": "svmigration364",
+    "selectors": [
+      ".py-3"
+    ],
+    "base": {
+      "paddingBlock": "calc(var(--spacing) * 3)"
+    }
+  },
+  {
+    "name": "migrated00365",
+    "className": "svmigration365",
+    "selectors": [
+      ".py-4"
+    ],
+    "base": {
+      "paddingBlock": "calc(var(--spacing) * 4)"
+    }
+  },
+  {
+    "name": "migrated00366",
+    "className": "svmigration366",
+    "selectors": [
+      ".py-6"
+    ],
+    "base": {
+      "paddingBlock": "calc(var(--spacing) * 6)"
+    }
+  },
+  {
+    "name": "migrated00367",
+    "className": "svmigration367",
+    "selectors": [
+      ".py-8"
+    ],
+    "base": {
+      "paddingBlock": "calc(var(--spacing) * 8)"
+    }
+  },
+  {
+    "name": "migrated00368",
+    "className": "svmigration368",
+    "selectors": [
+      ".py-10"
+    ],
+    "base": {
+      "paddingBlock": "calc(var(--spacing) * 10)"
+    }
+  },
+  {
+    "name": "migrated00369",
+    "className": "svmigration369",
+    "selectors": [
+      ".pt-0"
+    ],
+    "base": {
+      "paddingTop": "0px"
+    }
+  },
+  {
+    "name": "migrated00370",
+    "className": "svmigration370",
+    "selectors": [
+      ".pt-2"
+    ],
+    "base": {
+      "paddingTop": "calc(var(--spacing) * 2)"
+    }
+  },
+  {
+    "name": "migrated00371",
+    "className": "svmigration371",
+    "selectors": [
+      ".pt-3"
+    ],
+    "base": {
+      "paddingTop": "calc(var(--spacing) * 3)"
+    }
+  },
+  {
+    "name": "migrated00372",
+    "className": "svmigration372",
+    "selectors": [
+      ".pt-16"
+    ],
+    "base": {
+      "paddingTop": "calc(var(--spacing) * 16)"
+    }
+  },
+  {
+    "name": "migrated00373",
+    "className": "svmigration373",
+    "selectors": [
+      ".pr-12"
+    ],
+    "base": {
+      "paddingRight": "calc(var(--spacing) * 12)"
+    }
+  },
+  {
+    "name": "migrated00374",
+    "className": "svmigration374",
+    "selectors": [
+      ".pb-2"
+    ],
+    "base": {
+      "paddingBottom": "calc(var(--spacing) * 2)"
+    }
+  },
+  {
+    "name": "migrated00375",
+    "className": "svmigration375",
+    "selectors": [
+      ".pb-3"
+    ],
+    "base": {
+      "paddingBottom": "calc(var(--spacing) * 3)"
+    }
+  },
+  {
+    "name": "migrated00376",
+    "className": "svmigration376",
+    "selectors": [
+      ".pb-4"
+    ],
+    "base": {
+      "paddingBottom": "calc(var(--spacing) * 4)"
+    }
+  },
+  {
+    "name": "migrated00377",
+    "className": "svmigration377",
+    "selectors": [
+      ".pb-16"
+    ],
+    "base": {
+      "paddingBottom": "calc(var(--spacing) * 16)"
+    }
+  },
+  {
+    "name": "migrated00378",
+    "className": "svmigration378",
+    "selectors": [
+      ".pb-32"
+    ],
+    "base": {
+      "paddingBottom": "calc(var(--spacing) * 32)"
+    }
+  },
+  {
+    "name": "migrated00379",
+    "className": "svmigration379",
+    "selectors": [
+      ".pl-2"
+    ],
+    "base": {
+      "paddingLeft": "calc(var(--spacing) * 2)"
+    }
+  },
+  {
+    "name": "migrated00380",
+    "className": "svmigration380",
+    "selectors": [
+      ".pl-3"
+    ],
+    "base": {
+      "paddingLeft": "calc(var(--spacing) * 3)"
+    }
+  },
+  {
+    "name": "migrated00381",
+    "className": "svmigration381",
+    "selectors": [
+      ".pl-4"
+    ],
+    "base": {
+      "paddingLeft": "calc(var(--spacing) * 4)"
+    }
+  },
+  {
+    "name": "migrated00382",
+    "className": "svmigration382",
+    "selectors": [
+      ".text-center"
+    ],
+    "base": {
+      "textAlign": "center"
+    }
+  },
+  {
+    "name": "migrated00383",
+    "className": "svmigration383",
+    "selectors": [
+      ".text-left"
+    ],
+    "base": {
+      "textAlign": "left"
+    }
+  },
+  {
+    "name": "migrated00384",
+    "className": "svmigration384",
+    "selectors": [
+      ".text-right"
+    ],
+    "base": {
+      "textAlign": "right"
+    }
+  },
+  {
+    "name": "migrated00385",
+    "className": "svmigration385",
+    "selectors": [
+      ".font-mono"
+    ],
+    "base": {
+      "fontFamily": "var(--font-mono)"
+    }
+  },
+  {
+    "name": "migrated00386",
+    "className": "svmigration386",
+    "selectors": [
+      ".text-2xl"
+    ],
+    "base": {
+      "fontSize": "var(--text-2xl)",
+      "lineHeight": "var(--tw-leading, var(--text-2xl--line-height))"
+    }
+  },
+  {
+    "name": "migrated00387",
+    "className": "svmigration387",
+    "selectors": [
+      ".text-3xl"
+    ],
+    "base": {
+      "fontSize": "var(--text-3xl)",
+      "lineHeight": "var(--tw-leading, var(--text-3xl--line-height))"
+    }
+  },
+  {
+    "name": "migrated00388",
+    "className": "svmigration388",
+    "selectors": [
+      ".text-4xl"
+    ],
+    "base": {
+      "fontSize": "var(--text-4xl)",
+      "lineHeight": "var(--tw-leading, var(--text-4xl--line-height))"
+    }
+  },
+  {
+    "name": "migrated00389",
+    "className": "svmigration389",
+    "selectors": [
+      ".text-base"
+    ],
+    "base": {
+      "fontSize": "var(--text-base)",
+      "lineHeight": "var(--tw-leading, var(--text-base--line-height))"
+    }
+  },
+  {
+    "name": "migrated00390",
+    "className": "svmigration390",
+    "selectors": [
+      ".text-lg"
+    ],
+    "base": {
+      "fontSize": "var(--text-lg)",
+      "lineHeight": "var(--tw-leading, var(--text-lg--line-height))"
+    }
+  },
+  {
+    "name": "migrated00391",
+    "className": "svmigration391",
+    "selectors": [
+      ".text-sm"
+    ],
+    "base": {
+      "fontSize": "var(--text-sm)",
+      "lineHeight": "var(--tw-leading, var(--text-sm--line-height))"
+    }
+  },
+  {
+    "name": "migrated00392",
+    "className": "svmigration392",
+    "selectors": [
+      ".text-xl"
+    ],
+    "base": {
+      "fontSize": "var(--text-xl)",
+      "lineHeight": "var(--tw-leading, var(--text-xl--line-height))"
+    }
+  },
+  {
+    "name": "migrated00393",
+    "className": "svmigration393",
+    "selectors": [
+      ".text-xs"
+    ],
+    "base": {
+      "fontSize": "var(--text-xs)",
+      "lineHeight": "var(--tw-leading, var(--text-xs--line-height))"
+    }
+  },
+  {
+    "name": "migrated00394",
+    "className": "svmigration394",
+    "selectors": [
+      ".text-\\[0\\.9em\\]"
+    ],
+    "base": {
+      "fontSize": "0.9em"
+    }
+  },
+  {
+    "name": "migrated00395",
+    "className": "svmigration395",
+    "selectors": [
+      ".text-\\[0\\.95rem\\]"
+    ],
+    "base": {
+      "fontSize": "0.95rem"
+    }
+  },
+  {
+    "name": "migrated00396",
+    "className": "svmigration396",
+    "selectors": [
+      ".text-\\[1\\.05rem\\]"
+    ],
+    "base": {
+      "fontSize": "1.05rem"
+    }
+  },
+  {
+    "name": "migrated00397",
+    "className": "svmigration397",
+    "selectors": [
+      ".leading-relaxed"
+    ],
+    "base": {
+      "--tw-leading": "var(--leading-relaxed)",
+      "lineHeight": "var(--leading-relaxed)"
+    }
+  },
+  {
+    "name": "migrated00398",
+    "className": "svmigration398",
+    "selectors": [
+      ".leading-tight"
+    ],
+    "base": {
+      "--tw-leading": "var(--leading-tight)",
+      "lineHeight": "var(--leading-tight)"
+    }
+  },
+  {
+    "name": "migrated00399",
+    "className": "svmigration399",
+    "selectors": [
+      ".font-medium"
+    ],
+    "base": {
+      "--tw-font-weight": "var(--font-weight-medium)",
+      "fontWeight": "var(--font-weight-medium)"
+    }
+  },
+  {
+    "name": "migrated00400",
+    "className": "svmigration400",
+    "selectors": [
+      ".font-normal"
+    ],
+    "base": {
+      "--tw-font-weight": "var(--font-weight-normal)",
+      "fontWeight": "var(--font-weight-normal)"
+    }
+  },
+  {
+    "name": "migrated00401",
+    "className": "svmigration401",
+    "selectors": [
+      ".font-semibold"
+    ],
+    "base": {
+      "--tw-font-weight": "var(--font-weight-semibold)",
+      "fontWeight": "var(--font-weight-semibold)"
+    }
+  },
+  {
+    "name": "migrated00402",
+    "className": "svmigration402",
+    "selectors": [
+      ".tracking-\\[-0\\.02em\\]"
+    ],
+    "base": {
+      "--tw-tracking": "-0.02em",
+      "letterSpacing": "-0.02em"
+    }
+  },
+  {
+    "name": "migrated00403",
+    "className": "svmigration403",
+    "selectors": [
+      ".tracking-\\[-0\\.035em\\]"
+    ],
+    "base": {
+      "--tw-tracking": "-0.035em",
+      "letterSpacing": "-0.035em"
+    }
+  },
+  {
+    "name": "migrated00404",
+    "className": "svmigration404",
+    "selectors": [
+      ".tracking-tight"
+    ],
+    "base": {
+      "--tw-tracking": "var(--tracking-tight)",
+      "letterSpacing": "var(--tracking-tight)"
+    }
+  },
+  {
+    "name": "migrated00405",
+    "className": "svmigration405",
+    "selectors": [
+      ".text-balance"
+    ],
+    "base": {
+      "textWrap": "balance"
+    }
+  },
+  {
+    "name": "migrated00406",
+    "className": "svmigration406",
+    "selectors": [
+      ".\\[overflow-wrap\\:anywhere\\]"
+    ],
+    "base": {
+      "overflowWrap": "anywhere"
+    }
+  },
+  {
+    "name": "migrated00407",
+    "className": "svmigration407",
+    "selectors": [
+      ".break-words"
+    ],
+    "base": {
+      "overflowWrap": "break-word"
+    }
+  },
+  {
+    "name": "migrated00408",
+    "className": "svmigration408",
+    "selectors": [
+      ".wrap-anywhere"
+    ],
+    "base": {
+      "overflowWrap": "anywhere"
+    }
+  },
+  {
+    "name": "migrated00409",
+    "className": "svmigration409",
+    "selectors": [
+      ".break-all"
+    ],
+    "base": {
+      "wordBreak": "break-all"
+    }
+  },
+  {
+    "name": "migrated00410",
+    "className": "svmigration410",
+    "selectors": [
+      ".whitespace-normal"
+    ],
+    "base": {
+      "whiteSpace": "normal"
+    }
+  },
+  {
+    "name": "migrated00411",
+    "className": "svmigration411",
+    "selectors": [
+      ".whitespace-nowrap"
+    ],
+    "base": {
+      "whiteSpace": "nowrap"
+    }
+  },
+  {
+    "name": "migrated00412",
+    "className": "svmigration412",
+    "selectors": [
+      ".whitespace-pre-wrap"
+    ],
+    "base": {
+      "whiteSpace": "pre-wrap"
+    }
+  },
+  {
+    "name": "migrated00413",
+    "className": "svmigration413",
+    "selectors": [
+      ".text-\\[\\#ff3e00\\]"
+    ],
+    "base": {
+      "color": "#ff3e00"
+    }
+  },
+  {
+    "name": "migrated00414",
+    "className": "svmigration414",
+    "selectors": [
+      ".text-border"
+    ],
+    "base": {
+      "color": "var(--color-border)"
+    }
+  },
+  {
+    "name": "migrated00415",
+    "className": "svmigration415",
+    "selectors": [
+      ".text-card-foreground"
+    ],
+    "base": {
+      "color": "var(--color-card-foreground)"
+    }
+  },
+  {
+    "name": "migrated00416",
+    "className": "svmigration416",
+    "selectors": [
+      ".text-destructive"
+    ],
+    "base": {
+      "color": "var(--color-destructive)"
+    }
+  },
+  {
+    "name": "migrated00417",
+    "className": "svmigration417",
+    "selectors": [
+      ".text-foreground"
+    ],
+    "base": {
+      "color": "var(--color-foreground)"
+    }
+  },
+  {
+    "name": "migrated00418",
+    "className": "svmigration418",
+    "selectors": [
+      ".text-gray-500"
+    ],
+    "base": {
+      "color": "var(--color-gray-500)"
+    }
+  },
+  {
+    "name": "migrated00419",
+    "className": "svmigration419",
+    "selectors": [
+      ".text-gray-600"
+    ],
+    "base": {
+      "color": "var(--color-gray-600)"
+    }
+  },
+  {
+    "name": "migrated00420",
+    "className": "svmigration420",
+    "selectors": [
+      ".text-gray-700"
+    ],
+    "base": {
+      "color": "var(--color-gray-700)"
+    }
+  },
+  {
+    "name": "migrated00421",
+    "className": "svmigration421",
+    "selectors": [
+      ".text-gray-900"
+    ],
+    "base": {
+      "color": "var(--color-gray-900)"
+    }
+  },
+  {
+    "name": "migrated00422",
+    "className": "svmigration422",
+    "selectors": [
+      ".text-info"
+    ],
+    "base": {
+      "color": "var(--color-info)"
+    }
+  },
+  {
+    "name": "migrated00423",
+    "className": "svmigration423",
+    "selectors": [
+      ".text-muted-foreground"
+    ],
+    "base": {
+      "color": "var(--color-muted-foreground)"
+    }
+  },
+  {
+    "name": "migrated00424",
+    "className": "svmigration424",
+    "selectors": [
+      ".text-popover-foreground"
+    ],
+    "base": {
+      "color": "var(--color-popover-foreground)"
+    }
+  },
+  {
+    "name": "migrated00425",
+    "className": "svmigration425",
+    "selectors": [
+      ".text-primary"
+    ],
+    "base": {
+      "color": "var(--color-primary)"
+    }
+  },
+  {
+    "name": "migrated00426",
+    "className": "svmigration426",
+    "selectors": [
+      ".text-primary-foreground"
+    ],
+    "base": {
+      "color": "var(--color-primary-foreground)"
+    }
+  },
+  {
+    "name": "migrated00427",
+    "className": "svmigration427",
+    "selectors": [
+      ".text-red-600"
+    ],
+    "base": {
+      "color": "var(--color-red-600)"
+    }
+  },
+  {
+    "name": "migrated00428",
+    "className": "svmigration428",
+    "selectors": [
+      ".text-red-700"
+    ],
+    "base": {
+      "color": "var(--color-red-700)"
+    }
+  },
+  {
+    "name": "migrated00429",
+    "className": "svmigration429",
+    "selectors": [
+      ".text-red-800"
+    ],
+    "base": {
+      "color": "var(--color-red-800)"
+    }
+  },
+  {
+    "name": "migrated00430",
+    "className": "svmigration430",
+    "selectors": [
+      ".text-success"
+    ],
+    "base": {
+      "color": "var(--color-success)"
+    }
+  },
+  {
+    "name": "migrated00431",
+    "className": "svmigration431",
+    "selectors": [
+      ".text-transparent"
+    ],
+    "base": {
+      "color": "transparent"
+    }
+  },
+  {
+    "name": "migrated00432",
+    "className": "svmigration432",
+    "selectors": [
+      ".text-warning"
+    ],
+    "base": {
+      "color": "var(--color-warning)"
+    }
+  },
+  {
+    "name": "migrated00433",
+    "className": "svmigration433",
+    "selectors": [
+      ".text-white"
+    ],
+    "base": {
+      "color": "var(--color-white)"
+    }
+  },
+  {
+    "name": "migrated00434",
+    "className": "svmigration434",
+    "selectors": [
+      ".capitalize"
+    ],
+    "base": {
+      "textTransform": "capitalize"
+    }
+  },
+  {
+    "name": "migrated00435",
+    "className": "svmigration435",
+    "selectors": [
+      ".lowercase"
+    ],
+    "base": {
+      "textTransform": "lowercase"
+    }
+  },
+  {
+    "name": "migrated00436",
+    "className": "svmigration436",
+    "selectors": [
+      ".uppercase"
+    ],
+    "base": {
+      "textTransform": "uppercase"
+    }
+  },
+  {
+    "name": "migrated00437",
+    "className": "svmigration437",
+    "selectors": [
+      ".italic"
+    ],
+    "base": {
+      "fontStyle": "italic"
+    }
+  },
+  {
+    "name": "migrated00438",
+    "className": "svmigration438",
+    "selectors": [
+      ".tabular-nums"
+    ],
+    "base": {
+      "--tw-numeric-spacing": "tabular-nums",
+      "fontVariantNumeric": "var(--tw-ordinal,) var(--tw-slashed-zero,) var(--tw-numeric-figure,) var(--tw-numeric-spacing,) var(--tw-numeric-fraction,)"
+    }
+  },
+  {
+    "name": "migrated00439",
+    "className": "svmigration439",
+    "selectors": [
+      ".underline"
+    ],
+    "base": {
+      "textDecorationLine": "underline"
+    }
+  },
+  {
+    "name": "migrated00440",
+    "className": "svmigration440",
+    "selectors": [
+      ".underline-offset-4"
+    ],
+    "base": {
+      "textUnderlineOffset": "4px"
+    }
+  },
+  {
+    "name": "migrated00441",
+    "className": "svmigration441",
+    "selectors": [
+      ".accent-primary"
+    ],
+    "base": {
+      "accentColor": "var(--color-primary)"
+    }
+  },
+  {
+    "name": "migrated00442",
+    "className": "svmigration442",
+    "selectors": [
+      ".opacity-0"
+    ],
+    "base": {
+      "opacity": "0%"
+    }
+  },
+  {
+    "name": "migrated00443",
+    "className": "svmigration443",
+    "selectors": [
+      ".opacity-60"
+    ],
+    "base": {
+      "opacity": "60%"
+    }
+  },
+  {
+    "name": "migrated00444",
+    "className": "svmigration444",
+    "selectors": [
+      ".shadow"
+    ],
+    "base": {
+      "--tw-shadow": "0 1px 3px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 1px 2px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1))",
+      "boxShadow": "var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow)"
+    }
+  },
+  {
+    "name": "migrated00445",
+    "className": "svmigration445",
+    "selectors": [
+      ".shadow-\\[0_20px_70px_-40px_rgba\\(15\\,23\\,42\\,0\\.45\\)\\]"
+    ],
+    "base": {
+      "--tw-shadow": "0 20px 70px -40px var(--tw-shadow-color, rgba(15,23,42,0.45))",
+      "boxShadow": "var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow)"
+    }
+  },
+  {
+    "name": "migrated00446",
+    "className": "svmigration446",
+    "selectors": [
+      ".shadow-lg"
+    ],
+    "base": {
+      "--tw-shadow": "0 10px 15px -3px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 4px 6px -4px var(--tw-shadow-color, rgb(0 0 0 / 0.1))",
+      "boxShadow": "var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow)"
+    }
+  },
+  {
+    "name": "migrated00447",
+    "className": "svmigration447",
+    "selectors": [
+      ".shadow-md"
+    ],
+    "base": {
+      "--tw-shadow": "0 4px 6px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 2px 4px -2px var(--tw-shadow-color, rgb(0 0 0 / 0.1))",
+      "boxShadow": "var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow)"
+    }
+  },
+  {
+    "name": "migrated00448",
+    "className": "svmigration448",
+    "selectors": [
+      ".shadow-sm"
+    ],
+    "base": {
+      "--tw-shadow": "0 1px 3px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 1px 2px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1))",
+      "boxShadow": "var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow)"
+    }
+  },
+  {
+    "name": "migrated00449",
+    "className": "svmigration449",
+    "selectors": [
+      ".shadow-xl"
+    ],
+    "base": {
+      "--tw-shadow": "0 20px 25px -5px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 8px 10px -6px var(--tw-shadow-color, rgb(0 0 0 / 0.1))",
+      "boxShadow": "var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow)"
+    }
+  },
+  {
+    "name": "migrated00450",
+    "className": "svmigration450",
+    "selectors": [
+      ".outline"
+    ],
+    "base": {
+      "outlineStyle": "var(--tw-outline-style)",
+      "outlineWidth": "1px"
+    }
+  },
+  {
+    "name": "migrated00451",
+    "className": "svmigration451",
+    "selectors": [
+      ".blur"
+    ],
+    "base": {
+      "--tw-blur": "blur(8px)",
+      "filter": "var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,)"
+    }
+  },
+  {
+    "name": "migrated00452",
+    "className": "svmigration452",
+    "selectors": [
+      ".filter"
+    ],
+    "base": {
+      "filter": "var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,)"
+    }
+  },
+  {
+    "name": "migrated00453",
+    "className": "svmigration453",
+    "selectors": [
+      ".backdrop-blur"
+    ],
+    "base": {
+      "--tw-backdrop-blur": "blur(8px)",
+      "WebkitBackdropFilter": "var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,)",
+      "backdropFilter": "var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,)"
+    }
+  },
+  {
+    "name": "migrated00454",
+    "className": "svmigration454",
+    "selectors": [
+      ".backdrop-blur-sm"
+    ],
+    "base": {
+      "--tw-backdrop-blur": "blur(var(--blur-sm))",
+      "WebkitBackdropFilter": "var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,)",
+      "backdropFilter": "var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,)"
+    }
+  },
+  {
+    "name": "migrated00455",
+    "className": "svmigration455",
+    "selectors": [
+      ".transition"
+    ],
+    "base": {
+      "transitionProperty": "color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events",
+      "transitionTimingFunction": "var(--tw-ease, var(--default-transition-timing-function))",
+      "transitionDuration": "var(--tw-duration, var(--default-transition-duration))"
+    }
+  },
+  {
+    "name": "migrated00456",
+    "className": "svmigration456",
+    "selectors": [
+      ".transition-all"
+    ],
+    "base": {
+      "transitionProperty": "all",
+      "transitionTimingFunction": "var(--tw-ease, var(--default-transition-timing-function))",
+      "transitionDuration": "var(--tw-duration, var(--default-transition-duration))"
+    }
+  },
+  {
+    "name": "migrated00457",
+    "className": "svmigration457",
+    "selectors": [
+      ".transition-colors"
+    ],
+    "base": {
+      "transitionProperty": "color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to",
+      "transitionTimingFunction": "var(--tw-ease, var(--default-transition-timing-function))",
+      "transitionDuration": "var(--tw-duration, var(--default-transition-duration))"
+    }
+  },
+  {
+    "name": "migrated00458",
+    "className": "svmigration458",
+    "selectors": [
+      ".transition-opacity"
+    ],
+    "base": {
+      "transitionProperty": "opacity",
+      "transitionTimingFunction": "var(--tw-ease, var(--default-transition-timing-function))",
+      "transitionDuration": "var(--tw-duration, var(--default-transition-duration))"
+    }
+  },
+  {
+    "name": "migrated00459",
+    "className": "svmigration459",
+    "selectors": [
+      ".transition-transform"
+    ],
+    "base": {
+      "transitionProperty": "transform, translate, scale, rotate",
+      "transitionTimingFunction": "var(--tw-ease, var(--default-transition-timing-function))",
+      "transitionDuration": "var(--tw-duration, var(--default-transition-duration))"
+    }
+  },
+  {
+    "name": "migrated00460",
+    "className": "svmigration460",
+    "selectors": [
+      ".duration-200"
+    ],
+    "base": {
+      "--tw-duration": "200ms",
+      "transitionDuration": "200ms"
+    }
+  },
+  {
+    "name": "migrated00461",
+    "className": "svmigration461",
+    "selectors": [
+      ".ease-in"
+    ],
+    "base": {
+      "--tw-ease": "var(--ease-in)",
+      "transitionTimingFunction": "var(--ease-in)"
+    }
+  },
+  {
+    "name": "migrated00462",
+    "className": "svmigration462",
+    "selectors": [
+      ".ease-in-out"
+    ],
+    "base": {
+      "--tw-ease": "var(--ease-in-out)",
+      "transitionTimingFunction": "var(--ease-in-out)"
+    }
+  },
+  {
+    "name": "migrated00463",
+    "className": "svmigration463",
+    "selectors": [
+      ".ease-out"
+    ],
+    "base": {
+      "--tw-ease": "var(--ease-out)",
+      "transitionTimingFunction": "var(--ease-out)"
+    }
+  },
+  {
+    "name": "migrated00464",
+    "className": "svmigration464",
+    "selectors": [
+      ".outline-none"
+    ],
+    "base": {
+      "--tw-outline-style": "none",
+      "outlineStyle": "none"
+    }
+  },
+  {
+    "name": "migrated00465",
+    "className": "svmigration465",
+    "selectors": [
+      ".select-none"
+    ],
+    "base": {
+      "WebkitUserSelect": "none",
+      "userSelect": "none"
+    }
+  },
+  {
+    "name": "migrated00466",
+    "className": "svmigration466",
+    "selectors": [
+      ".fade-in"
+    ],
+    "base": {
+      "--tw-enter-opacity": "0"
+    }
+  },
+  {
+    "name": "migrated00467",
+    "className": "svmigration467",
+    "selectors": [
+      ".running"
+    ],
+    "base": {
+      "animationPlayState": "running"
+    }
+  },
+  {
+    "name": "migrated00468",
+    "className": "svmigration468",
+    "selectors": [
+      ".group-open\\:rotate-180:is(:where(.group):is([open], :popover-open, :open) *)"
+    ],
+    "base": {
+      "rotate": "180deg"
+    }
+  },
+  {
+    "name": "migrated00469",
+    "className": "svmigration469",
+    "selectors": [
+      ".group-hover\\:block:is(:where(.group):hover *)"
+    ],
+    "base": {
+      "display": "block"
+    }
+  },
+  {
+    "name": "migrated00470",
+    "className": "svmigration470",
+    "selectors": [
+      ".group-hover\\:bg-muted:is(:where(.group):hover *)"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-muted)"
+    }
+  },
+  {
+    "name": "migrated00471",
+    "className": "svmigration471",
+    "selectors": [
+      ".group-hover\\:opacity-100:is(:where(.group):hover *)"
+    ],
+    "base": {
+      "opacity": "100%"
+    }
+  },
+  {
+    "name": "migrated00472",
+    "className": "svmigration472",
+    "selectors": [
+      ".group-\\[\\.is-assistant\\]\\:text-foreground:is(:where(.group):is(.is-assistant) *)"
+    ],
+    "base": {
+      "color": "var(--color-foreground)"
+    }
+  },
+  {
+    "name": "migrated00473",
+    "className": "svmigration473",
+    "selectors": [
+      ".group-\\[\\.is-user\\]\\:ml-auto:is(:where(.group):is(.is-user) *)"
+    ],
+    "base": {
+      "marginLeft": "auto"
+    }
+  },
+  {
+    "name": "migrated00474",
+    "className": "svmigration474",
+    "selectors": [
+      ".group-\\[\\.is-user\\]\\:rounded-lg:is(:where(.group):is(.is-user) *)"
+    ],
+    "base": {
+      "borderRadius": "var(--radius-lg)"
+    }
+  },
+  {
+    "name": "migrated00475",
+    "className": "svmigration475",
+    "selectors": [
+      ".group-\\[\\.is-user\\]\\:bg-secondary:is(:where(.group):is(.is-user) *)"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-secondary)"
+    }
+  },
+  {
+    "name": "migrated00476",
+    "className": "svmigration476",
+    "selectors": [
+      ".group-\\[\\.is-user\\]\\:px-4:is(:where(.group):is(.is-user) *)"
+    ],
+    "base": {
+      "paddingInline": "calc(var(--spacing) * 4)"
+    }
+  },
+  {
+    "name": "migrated00477",
+    "className": "svmigration477",
+    "selectors": [
+      ".group-\\[\\.is-user\\]\\:py-3:is(:where(.group):is(.is-user) *)"
+    ],
+    "base": {
+      "paddingBlock": "calc(var(--spacing) * 3)"
+    }
+  },
+  {
+    "name": "migrated00478",
+    "className": "svmigration478",
+    "selectors": [
+      ".group-\\[\\.is-user\\]\\:text-foreground:is(:where(.group):is(.is-user) *)"
+    ],
+    "base": {
+      "color": "var(--color-foreground)"
+    }
+  },
+  {
+    "name": "migrated00479",
+    "className": "svmigration479",
+    "selectors": [
+      ".marker\\:hidden ::marker"
+    ],
+    "base": {
+      "display": "none"
+    }
+  },
+  {
+    "name": "migrated00480",
+    "className": "svmigration480",
+    "selectors": [
+      ".marker\\:hidden::marker"
+    ],
+    "base": {
+      "display": "none"
+    }
+  },
+  {
+    "name": "migrated00481",
+    "className": "svmigration481",
+    "selectors": [
+      ".marker\\:hidden ::-webkit-details-marker"
+    ],
+    "base": {
+      "display": "none"
+    }
+  },
+  {
+    "name": "migrated00482",
+    "className": "svmigration482",
+    "selectors": [
+      ".marker\\:hidden::-webkit-details-marker"
+    ],
+    "base": {
+      "display": "none"
+    }
+  },
+  {
+    "name": "migrated00483",
+    "className": "svmigration483",
+    "selectors": [
+      ".placeholder\\:text-muted-foreground::placeholder"
+    ],
+    "base": {
+      "color": "var(--color-muted-foreground)"
+    }
+  },
+  {
+    "name": "migrated00484",
+    "className": "svmigration484",
+    "selectors": [
+      ".last\\:border-b-0:last-child"
+    ],
+    "base": {
+      "borderBottomStyle": "var(--tw-border-style)",
+      "borderBottomWidth": "0px"
+    }
+  },
+  {
+    "name": "migrated00485",
+    "className": "svmigration485",
+    "selectors": [
+      ".hover\\:bg-\\[\\#e43700\\]:hover"
+    ],
+    "base": {
+      "backgroundColor": "#e43700"
+    }
+  },
+  {
+    "name": "migrated00486",
+    "className": "svmigration486",
+    "selectors": [
+      ".hover\\:bg-\\[\\#ff3e00\\]\\/14:hover"
+    ],
+    "base": {
+      "backgroundColor": "color-mix(in oklab, #ff3e00 14%, transparent)"
+    }
+  },
+  {
+    "name": "migrated00487",
+    "className": "svmigration487",
+    "selectors": [
+      ".hover\\:bg-accent:hover"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-accent)"
+    }
+  },
+  {
+    "name": "migrated00488",
+    "className": "svmigration488",
+    "selectors": [
+      ".hover\\:bg-background:hover"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-background)"
+    }
+  },
+  {
+    "name": "migrated00489",
+    "className": "svmigration489",
+    "selectors": [
+      ".hover\\:bg-background\\/70:hover"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-background)"
+    }
+  },
+  {
+    "name": "migrated00490",
+    "className": "svmigration490",
+    "selectors": [
+      ".hover\\:bg-background\\/70:hover"
+    ],
+    "base": {
+      "backgroundColor": "color-mix(in oklab, var(--color-background) 70%, transparent)"
+    }
+  },
+  {
+    "name": "migrated00491",
+    "className": "svmigration491",
+    "selectors": [
+      ".hover\\:bg-black:hover"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-black)"
+    }
+  },
+  {
+    "name": "migrated00492",
+    "className": "svmigration492",
+    "selectors": [
+      ".hover\\:bg-border:hover"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-border)"
+    }
+  },
+  {
+    "name": "migrated00493",
+    "className": "svmigration493",
+    "selectors": [
+      ".hover\\:bg-gray-50:hover"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-gray-50)"
+    }
+  },
+  {
+    "name": "migrated00494",
+    "className": "svmigration494",
+    "selectors": [
+      ".hover\\:bg-gray-100:hover"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-gray-100)"
+    }
+  },
+  {
+    "name": "migrated00495",
+    "className": "svmigration495",
+    "selectors": [
+      ".hover\\:bg-muted:hover"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-muted)"
+    }
+  },
+  {
+    "name": "migrated00496",
+    "className": "svmigration496",
+    "selectors": [
+      ".hover\\:bg-muted\\/50:hover"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-muted)"
+    }
+  },
+  {
+    "name": "migrated00497",
+    "className": "svmigration497",
+    "selectors": [
+      ".hover\\:bg-muted\\/50:hover"
+    ],
+    "base": {
+      "backgroundColor": "color-mix(in oklab, var(--color-muted) 50%, transparent)"
+    }
+  },
+  {
+    "name": "migrated00498",
+    "className": "svmigration498",
+    "selectors": [
+      ".hover\\:text-accent-foreground:hover"
+    ],
+    "base": {
+      "color": "var(--color-accent-foreground)"
+    }
+  },
+  {
+    "name": "migrated00499",
+    "className": "svmigration499",
+    "selectors": [
+      ".hover\\:text-foreground:hover"
+    ],
+    "base": {
+      "color": "var(--color-foreground)"
+    }
+  },
+  {
+    "name": "migrated00500",
+    "className": "svmigration500",
+    "selectors": [
+      ".hover\\:text-gray-900:hover"
+    ],
+    "base": {
+      "color": "var(--color-gray-900)"
+    }
+  },
+  {
+    "name": "migrated00501",
+    "className": "svmigration501",
+    "selectors": [
+      ".hover\\:text-primary\\/80:hover"
+    ],
+    "base": {
+      "color": "var(--color-primary)"
+    }
+  },
+  {
+    "name": "migrated00502",
+    "className": "svmigration502",
+    "selectors": [
+      ".hover\\:text-primary\\/80:hover"
+    ],
+    "base": {
+      "color": "color-mix(in oklab, var(--color-primary) 80%, transparent)"
+    }
+  },
+  {
+    "name": "migrated00503",
+    "className": "svmigration503",
+    "selectors": [
+      ".hover\\:underline:hover"
+    ],
+    "base": {
+      "textDecorationLine": "underline"
+    }
+  },
+  {
+    "name": "migrated00504",
+    "className": "svmigration504",
+    "selectors": [
+      ".hover\\:opacity-80:hover"
+    ],
+    "base": {
+      "opacity": "80%"
+    }
+  },
+  {
+    "name": "migrated00505",
+    "className": "svmigration505",
+    "selectors": [
+      ".hover\\:opacity-90:hover"
+    ],
+    "base": {
+      "opacity": "90%"
+    }
+  },
+  {
+    "name": "migrated00506",
+    "className": "svmigration506",
+    "selectors": [
+      ".focus\\:ring-1:focus"
+    ],
+    "base": {
+      "--tw-ring-shadow": "var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor)",
+      "boxShadow": "var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow)"
+    }
+  },
+  {
+    "name": "migrated00507",
+    "className": "svmigration507",
+    "selectors": [
+      ".focus\\:ring-primary:focus"
+    ],
+    "base": {
+      "--tw-ring-color": "var(--color-primary)"
+    }
+  },
+  {
+    "name": "migrated00508",
+    "className": "svmigration508",
+    "selectors": [
+      ".focus-visible\\:opacity-100:focus-visible"
+    ],
+    "base": {
+      "opacity": "100%"
+    }
+  },
+  {
+    "name": "migrated00509",
+    "className": "svmigration509",
+    "selectors": [
+      ".focus-visible\\:ring-2:focus-visible"
+    ],
+    "base": {
+      "--tw-ring-shadow": "var(--tw-ring-inset,) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor)",
+      "boxShadow": "var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow)"
+    }
+  },
+  {
+    "name": "migrated00510",
+    "className": "svmigration510",
+    "selectors": [
+      ".focus-visible\\:ring-ring:focus-visible"
+    ],
+    "base": {
+      "--tw-ring-color": "var(--color-ring)"
+    }
+  },
+  {
+    "name": "migrated00511",
+    "className": "svmigration511",
+    "selectors": [
+      ".focus-visible\\:outline-2:focus-visible"
+    ],
+    "base": {
+      "outlineStyle": "var(--tw-outline-style)",
+      "outlineWidth": "2px"
+    }
+  },
+  {
+    "name": "migrated00512",
+    "className": "svmigration512",
+    "selectors": [
+      ".focus-visible\\:outline-offset-1:focus-visible"
+    ],
+    "base": {
+      "outlineOffset": "1px"
+    }
+  },
+  {
+    "name": "migrated00513",
+    "className": "svmigration513",
+    "selectors": [
+      ".focus-visible\\:outline-offset-2:focus-visible"
+    ],
+    "base": {
+      "outlineOffset": "2px"
+    }
+  },
+  {
+    "name": "migrated00514",
+    "className": "svmigration514",
+    "selectors": [
+      ".focus-visible\\:outline-offset-\\[-2px\\]:focus-visible"
+    ],
+    "base": {
+      "outlineOffset": "-2px"
+    }
+  },
+  {
+    "name": "migrated00515",
+    "className": "svmigration515",
+    "selectors": [
+      ".focus-visible\\:outline-ring:focus-visible"
+    ],
+    "base": {
+      "outlineColor": "var(--color-ring)"
+    }
+  },
+  {
+    "name": "migrated00516",
+    "className": "svmigration516",
+    "selectors": [
+      ".focus-visible\\:outline-none:focus-visible"
+    ],
+    "base": {
+      "--tw-outline-style": "none",
+      "outlineStyle": "none"
+    }
+  },
+  {
+    "name": "migrated00517",
+    "className": "svmigration517",
+    "selectors": [
+      ".disabled\\:cursor-not-allowed:disabled"
+    ],
+    "base": {
+      "cursor": "not-allowed"
+    }
+  },
+  {
+    "name": "migrated00518",
+    "className": "svmigration518",
+    "selectors": [
+      ".disabled\\:opacity-50:disabled"
+    ],
+    "base": {
+      "opacity": "50%"
+    }
+  },
+  {
+    "name": "migrated00519",
+    "className": "svmigration519",
+    "selectors": [
+      ".supports-\\[backdrop-filter\\]\\:bg-background\\/70"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-background)"
+    }
+  },
+  {
+    "name": "migrated00520",
+    "className": "svmigration520",
+    "selectors": [
+      ".supports-\\[backdrop-filter\\]\\:bg-background\\/70"
+    ],
+    "base": {
+      "backgroundColor": "color-mix(in oklab, var(--color-background) 70%, transparent)"
+    }
+  },
+  {
+    "name": "migrated00521",
+    "className": "svmigration521",
+    "selectors": [
+      ".supports-\\[backdrop-filter\\]\\:bg-background\\/80"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-background)"
+    }
+  },
+  {
+    "name": "migrated00522",
+    "className": "svmigration522",
+    "selectors": [
+      ".supports-\\[backdrop-filter\\]\\:bg-background\\/80"
+    ],
+    "base": {
+      "backgroundColor": "color-mix(in oklab, var(--color-background) 80%, transparent)"
+    }
+  },
+  {
+    "name": "migrated00523",
+    "className": "svmigration523",
+    "selectors": [
+      ".supports-\\[backdrop-filter\\]\\:bg-sidebar\\/70"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-sidebar)"
+    }
+  },
+  {
+    "name": "migrated00524",
+    "className": "svmigration524",
+    "selectors": [
+      ".supports-\\[backdrop-filter\\]\\:bg-sidebar\\/70"
+    ],
+    "base": {
+      "backgroundColor": "color-mix(in oklab, var(--color-sidebar) 70%, transparent)"
+    }
+  },
+  {
+    "name": "migrated00525",
+    "className": "svmigration525",
+    "selectors": [
+      ".supports-\\[backdrop-filter\\]\\:backdrop-blur"
+    ],
+    "base": {
+      "--tw-backdrop-blur": "blur(8px)",
+      "WebkitBackdropFilter": "var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,)",
+      "backdropFilter": "var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,)"
+    }
+  },
+  {
+    "name": "migrated00526",
+    "className": "svmigration526",
+    "selectors": [
+      ".supports-\\[backdrop-filter\\]\\:backdrop-blur-sm"
+    ],
+    "base": {
+      "--tw-backdrop-blur": "blur(var(--blur-sm))",
+      "WebkitBackdropFilter": "var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,)",
+      "backdropFilter": "var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,)"
+    }
+  },
+  {
+    "name": "migrated00527",
+    "className": "svmigration527",
+    "selectors": [
+      ".sm\\:right-6"
+    ],
+    "base": {
+      "right": "calc(var(--spacing) * 6)"
+    }
+  },
+  {
+    "name": "migrated00528",
+    "className": "svmigration528",
+    "selectors": [
+      ".sm\\:bottom-6"
+    ],
+    "base": {
+      "bottom": "calc(var(--spacing) * 6)"
+    }
+  },
+  {
+    "name": "migrated00529",
+    "className": "svmigration529",
+    "selectors": [
+      ".sm\\:col-span-2"
+    ],
+    "base": {
+      "gridColumn": "span 2 / span 2"
+    }
+  },
+  {
+    "name": "migrated00530",
+    "className": "svmigration530",
+    "selectors": [
+      ".sm\\:inline-flex"
+    ],
+    "base": {
+      "display": "inline-flex"
+    }
+  },
+  {
+    "name": "migrated00531",
+    "className": "svmigration531",
+    "selectors": [
+      ".sm\\:min-w-\\[12rem\\]"
+    ],
+    "base": {
+      "minWidth": "12rem"
+    }
+  },
+  {
+    "name": "migrated00532",
+    "className": "svmigration532",
+    "selectors": [
+      ".sm\\:flex-\\[0_1_24rem\\]"
+    ],
+    "base": {
+      "flex": "0 1 24rem"
+    }
+  },
+  {
+    "name": "migrated00533",
+    "className": "svmigration533",
+    "selectors": [
+      ".sm\\:grid-cols-2"
+    ],
+    "base": {
+      "gridTemplateColumns": "repeat(2, minmax(0, 1fr))"
+    }
+  },
+  {
+    "name": "migrated00534",
+    "className": "svmigration534",
+    "selectors": [
+      ".sm\\:grid-cols-3"
+    ],
+    "base": {
+      "gridTemplateColumns": "repeat(3, minmax(0, 1fr))"
+    }
+  },
+  {
+    "name": "migrated00535",
+    "className": "svmigration535",
+    "selectors": [
+      ".sm\\:flex-row"
+    ],
+    "base": {
+      "flexDirection": "row"
+    }
+  },
+  {
+    "name": "migrated00536",
+    "className": "svmigration536",
+    "selectors": [
+      ".sm\\:justify-center"
+    ],
+    "base": {
+      "justifyContent": "center"
+    }
+  },
+  {
+    "name": "migrated00537",
+    "className": "svmigration537",
+    "selectors": [
+      ".sm\\:gap-0"
+    ],
+    "base": {
+      "gap": "0px"
+    }
+  },
+  {
+    "name": "migrated00538",
+    "className": "svmigration538",
+    "selectors": [
+      ":where(.sm\\:divide-x > :not(:last-child))"
+    ],
+    "base": {
+      "--tw-divide-x-reverse": "0",
+      "borderInlineStyle": "var(--tw-border-style)",
+      "borderInlineStartWidth": "calc(1px * var(--tw-divide-x-reverse))",
+      "borderInlineEndWidth": "calc(1px * calc(1 - var(--tw-divide-x-reverse)))"
+    }
+  },
+  {
+    "name": "migrated00539",
+    "className": "svmigration539",
+    "selectors": [
+      ".sm\\:border-x"
+    ],
+    "base": {
+      "borderInlineStyle": "var(--tw-border-style)",
+      "borderInlineWidth": "1px"
+    }
+  },
+  {
+    "name": "migrated00540",
+    "className": "svmigration540",
+    "selectors": [
+      ".sm\\:p-0"
+    ],
+    "base": {
+      "padding": "0px"
+    }
+  },
+  {
+    "name": "migrated00541",
+    "className": "svmigration541",
+    "selectors": [
+      ".sm\\:p-12"
+    ],
+    "base": {
+      "padding": "calc(var(--spacing) * 12)"
+    }
+  },
+  {
+    "name": "migrated00542",
+    "className": "svmigration542",
+    "selectors": [
+      ".sm\\:px-12"
+    ],
+    "base": {
+      "paddingInline": "calc(var(--spacing) * 12)"
+    }
+  },
+  {
+    "name": "migrated00543",
+    "className": "svmigration543",
+    "selectors": [
+      ".sm\\:py-12"
+    ],
+    "base": {
+      "paddingBlock": "calc(var(--spacing) * 12)"
+    }
+  },
+  {
+    "name": "migrated00544",
+    "className": "svmigration544",
+    "selectors": [
+      ".sm\\:pt-24"
+    ],
+    "base": {
+      "paddingTop": "calc(var(--spacing) * 24)"
+    }
+  },
+  {
+    "name": "migrated00545",
+    "className": "svmigration545",
+    "selectors": [
+      ".sm\\:text-2xl"
+    ],
+    "base": {
+      "fontSize": "var(--text-2xl)",
+      "lineHeight": "var(--tw-leading, var(--text-2xl--line-height))"
+    }
+  },
+  {
+    "name": "migrated00546",
+    "className": "svmigration546",
+    "selectors": [
+      ".sm\\:text-5xl"
+    ],
+    "base": {
+      "fontSize": "var(--text-5xl)",
+      "lineHeight": "var(--tw-leading, var(--text-5xl--line-height))"
+    }
+  },
+  {
+    "name": "migrated00547",
+    "className": "svmigration547",
+    "selectors": [
+      ".sm\\:text-xl"
+    ],
+    "base": {
+      "fontSize": "var(--text-xl)",
+      "lineHeight": "var(--tw-leading, var(--text-xl--line-height))"
+    }
+  },
+  {
+    "name": "migrated00548",
+    "className": "svmigration548",
+    "selectors": [
+      ".md\\:size-8"
+    ],
+    "base": {
+      "width": "calc(var(--spacing) * 8)",
+      "height": "calc(var(--spacing) * 8)"
+    }
+  },
+  {
+    "name": "migrated00549",
+    "className": "svmigration549",
+    "selectors": [
+      ".md\\:min-w-\\[12rem\\]"
+    ],
+    "base": {
+      "minWidth": "12rem"
+    }
+  },
+  {
+    "name": "migrated00550",
+    "className": "svmigration550",
+    "selectors": [
+      ".md\\:grid-cols-2"
+    ],
+    "base": {
+      "gridTemplateColumns": "repeat(2, minmax(0, 1fr))"
+    }
+  },
+  {
+    "name": "migrated00551",
+    "className": "svmigration551",
+    "selectors": [
+      ".md\\:grid-cols-3"
+    ],
+    "base": {
+      "gridTemplateColumns": "repeat(3, minmax(0, 1fr))"
+    }
+  },
+  {
+    "name": "migrated00552",
+    "className": "svmigration552",
+    "selectors": [
+      ".md\\:flex-row"
+    ],
+    "base": {
+      "flexDirection": "row"
+    }
+  },
+  {
+    "name": "migrated00553",
+    "className": "svmigration553",
+    "selectors": [
+      ".md\\:items-center"
+    ],
+    "base": {
+      "alignItems": "center"
+    }
+  },
+  {
+    "name": "migrated00554",
+    "className": "svmigration554",
+    "selectors": [
+      ".md\\:justify-between"
+    ],
+    "base": {
+      "justifyContent": "space-between"
+    }
+  },
+  {
+    "name": "migrated00555",
+    "className": "svmigration555",
+    "selectors": [
+      ".md\\:px-6"
+    ],
+    "base": {
+      "paddingInline": "calc(var(--spacing) * 6)"
+    }
+  },
+  {
+    "name": "migrated00556",
+    "className": "svmigration556",
+    "selectors": [
+      ".md\\:text-3xl"
+    ],
+    "base": {
+      "fontSize": "var(--text-3xl)",
+      "lineHeight": "var(--tw-leading, var(--text-3xl--line-height))"
+    }
+  },
+  {
+    "name": "migrated00557",
+    "className": "svmigration557",
+    "selectors": [
+      ".md\\:text-\\[1\\.25rem\\]"
+    ],
+    "base": {
+      "fontSize": "1.25rem"
+    }
+  },
+  {
+    "name": "migrated00558",
+    "className": "svmigration558",
+    "selectors": [
+      ".md\\:text-\\[1rem\\]"
+    ],
+    "base": {
+      "fontSize": "1rem"
+    }
+  },
+  {
+    "name": "migrated00559",
+    "className": "svmigration559",
+    "selectors": [
+      ".lg\\:text-\\[40px\\]"
+    ],
+    "base": {
+      "fontSize": "40px"
+    }
+  },
+  {
+    "name": "migrated00560",
+    "className": "svmigration560",
+    "selectors": [
+      ".xl\\:grid-cols-4"
+    ],
+    "base": {
+      "gridTemplateColumns": "repeat(4, minmax(0, 1fr))"
+    }
+  },
+  {
+    "name": "migrated00561",
+    "className": "svmigration561",
+    "selectors": [
+      ".xl\\:px-8"
+    ],
+    "base": {
+      "paddingInline": "calc(var(--spacing) * 8)"
+    }
+  },
+  {
+    "name": "migrated00562",
+    "className": "svmigration562",
+    "selectors": [
+      ".xl\\:text-6xl"
+    ],
+    "base": {
+      "fontSize": "var(--text-6xl)",
+      "lineHeight": "var(--tw-leading, var(--text-6xl--line-height))"
+    }
+  },
+  {
+    "name": "migrated00563",
+    "className": "svmigration563",
+    "selectors": [
+      ".dark\\:border-\\[\\#ff6b3d\\]\\/30:is(.dark *)"
+    ],
+    "base": {
+      "borderColor": "color-mix(in oklab, #ff6b3d 30%, transparent)"
+    }
+  },
+  {
+    "name": "migrated00564",
+    "className": "svmigration564",
+    "selectors": [
+      ".dark\\:bg-\\[\\#ff6b3d\\]\\/10:is(.dark *)"
+    ],
+    "base": {
+      "backgroundColor": "color-mix(in oklab, #ff6b3d 10%, transparent)"
+    }
+  },
+  {
+    "name": "migrated00565",
+    "className": "svmigration565",
+    "selectors": [
+      ".dark\\:bg-\\[var\\(--shiki-dark-bg\\,var\\(--sdm-bg\\,inherit\\)\\)\\]:is(.dark *)"
+    ],
+    "base": {
+      "backgroundColor": "var(--shiki-dark-bg,var(--sdm-bg,inherit))"
+    }
+  },
+  {
+    "name": "migrated00566",
+    "className": "svmigration566",
+    "selectors": [
+      ".dark\\:bg-background:is(.dark *)"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-background)"
+    }
+  },
+  {
+    "name": "migrated00567",
+    "className": "svmigration567",
+    "selectors": [
+      ".dark\\:bg-gray-700:is(.dark *)"
+    ],
+    "base": {
+      "backgroundColor": "var(--color-gray-700)"
+    }
+  },
+  {
+    "name": "migrated00568",
+    "className": "svmigration568",
+    "selectors": [
+      ".dark\\:text-\\[\\#ff8a66\\]:is(.dark *)"
+    ],
+    "base": {
+      "color": "#ff8a66"
+    }
+  },
+  {
+    "name": "migrated00569",
+    "className": "svmigration569",
+    "selectors": [
+      ".dark\\:text-gray-400:is(.dark *)"
+    ],
+    "base": {
+      "color": "var(--color-gray-400)"
+    }
+  },
+  {
+    "name": "migrated00570",
+    "className": "svmigration570",
+    "selectors": [
+      ".dark\\:hover\\:bg-\\[\\#ff6b3d\\]\\/16:is(.dark *):hover"
+    ],
+    "base": {
+      "backgroundColor": "color-mix(in oklab, #ff6b3d 16%, transparent)"
+    }
+  },
+  {
+    "name": "migrated00571",
+    "className": "svmigration571",
+    "selectors": [
+      ".\\[\\&_a\\]\\:font-medium a"
+    ],
+    "base": {
+      "--tw-font-weight": "var(--font-weight-medium)",
+      "fontWeight": "var(--font-weight-medium)"
+    }
+  },
+  {
+    "name": "migrated00572",
+    "className": "svmigration572",
+    "selectors": [
+      ".\\[\\&_a\\]\\:text-foreground a"
+    ],
+    "base": {
+      "color": "var(--color-foreground)"
+    }
+  },
+  {
+    "name": "migrated00573",
+    "className": "svmigration573",
+    "selectors": [
+      ".\\[\\&_a\\]\\:underline a"
+    ],
+    "base": {
+      "textDecorationLine": "underline"
+    }
+  },
+  {
+    "name": "migrated00574",
+    "className": "svmigration574",
+    "selectors": [
+      ".\\[\\&_a\\]\\:decoration-border a"
+    ],
+    "base": {
+      "textDecorationColor": "var(--color-border)"
+    }
+  },
+  {
+    "name": "migrated00575",
+    "className": "svmigration575",
+    "selectors": [
+      ".\\[\\&_a\\]\\:underline-offset-4 a"
+    ],
+    "base": {
+      "textUnderlineOffset": "4px"
+    }
+  },
+  {
+    "name": "migrated00576",
+    "className": "svmigration576",
+    "selectors": [
+      ".\\[\\&_a\\]\\:transition-colors a"
+    ],
+    "base": {
+      "transitionProperty": "color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to",
+      "transitionTimingFunction": "var(--tw-ease, var(--default-transition-timing-function))",
+      "transitionDuration": "var(--tw-duration, var(--default-transition-duration))"
+    }
+  },
+  {
+    "name": "migrated00577",
+    "className": "svmigration577",
+    "selectors": [
+      ".\\[\\&_a\\:hover\\]\\:decoration-foreground\\/60 a:hover"
+    ],
+    "base": {
+      "textDecorationColor": "var(--color-foreground)"
+    }
+  },
+  {
+    "name": "migrated00578",
+    "className": "svmigration578",
+    "selectors": [
+      ".\\[\\&_a\\:hover\\]\\:decoration-foreground\\/60 a:hover"
+    ],
+    "base": {
+      "@supports (color: color-mix(in lab, red, red))": {
+        "textDecorationColor": "color-mix(in oklab, var(--color-foreground) 60%, transparent)"
+      }
+    }
+  },
+  {
+    "name": "migrated00579",
+    "className": "svmigration579",
+    "selectors": [
+      ".\\[\\&\\>\\*\\:last-child\\]\\:after\\:inline > :last-child::after"
+    ],
+    "base": {
+      "content": "var(--tw-content)",
+      "display": "inline"
+    }
+  },
+  {
+    "name": "migrated00580",
+    "className": "svmigration580",
+    "selectors": [
+      ".\\[\\&\\>\\*\\:last-child\\]\\:after\\:align-baseline > :last-child::after"
+    ],
+    "base": {
+      "content": "var(--tw-content)",
+      "verticalAlign": "baseline"
+    }
+  },
+  {
+    "name": "migrated00581",
+    "className": "svmigration581",
+    "selectors": [
+      ".\\[\\&\\>\\*\\:last-child\\]\\:after\\:content-\\[var\\(--streamdown-caret\\)\\] > :last-child::after"
+    ],
+    "base": {
+      "--tw-content": "var(--streamdown-caret)",
+      "content": "var(--tw-content)"
+    }
+  },
+  {
+    "name": "migrated00582",
+    "className": "svmigration582",
+    "selectors": [
+      ".\\[\\&\\>\\[data-alert-title\\]\\]\\:text-blue-600 > [data-alert-title]"
+    ],
+    "base": {
+      "color": "var(--color-blue-600)"
+    }
+  },
+  {
+    "name": "migrated00583",
+    "className": "svmigration583",
+    "selectors": [
+      ".\\[\\&\\>\\[data-alert-title\\]\\]\\:text-destructive > [data-alert-title]"
+    ],
+    "base": {
+      "color": "var(--color-destructive)"
+    }
+  },
+  {
+    "name": "migrated00584",
+    "className": "svmigration584",
+    "selectors": [
+      ".\\[\\&\\>\\[data-alert-title\\]\\]\\:text-green-600 > [data-alert-title]"
+    ],
+    "base": {
+      "color": "var(--color-green-600)"
+    }
+  },
+  {
+    "name": "migrated00585",
+    "className": "svmigration585",
+    "selectors": [
+      ".\\[\\&\\>\\[data-alert-title\\]\\]\\:text-purple-600 > [data-alert-title]"
+    ],
+    "base": {
+      "color": "var(--color-purple-600)"
+    }
+  },
+  {
+    "name": "migrated00586",
+    "className": "svmigration586",
+    "selectors": [
+      ".\\[\\&\\>\\[data-alert-title\\]\\]\\:text-red-600 > [data-alert-title]"
+    ],
+    "base": {
+      "color": "var(--color-red-600)"
+    }
+  },
+  {
+    "name": "migrated00587",
+    "className": "svmigration587",
+    "selectors": [
+      ".\\[\\&\\>\\[data-alert-title\\]\\]\\:text-yellow-600 > [data-alert-title]"
+    ],
+    "base": {
+      "color": "var(--color-yellow-600)"
+    }
+  }
+]

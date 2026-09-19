@@ -8,7 +8,7 @@ describe('buttonVariants', () => {
 	it('returns a stable primitive class instead of Tailwind utility classes', () => {
 		const classes = buttonVariants({ variant: 'default' });
 
-		expect(classes).toBe('svadmin-button svadmin-panda-button svadmin-panda-button--variant_default svadmin-panda-button--size_default svadmin-button--default svadmin-button-size--default');
+		expect(classes).toBe('svadmin-button svadmin-button--default svadmin-button-size--default');
 		expect(classes).not.toMatch(/(?:bg|text|hover|focus|rounded|inline-flex)-/);
 	});
 
@@ -20,7 +20,7 @@ describe('buttonVariants', () => {
 
 	it('preserves sizes and additional classes for class-only composition', () => {
 		expect(buttonVariants({ variant: 'outline', size: 'sm', class: 'custom', className: 'extra' }))
-			.toBe('svadmin-button svadmin-panda-button svadmin-panda-button--variant_outline svadmin-panda-button--size_sm svadmin-button--outline svadmin-button-size--sm custom extra');
+			.toBe('svadmin-button svadmin-button--outline svadmin-button-size--sm custom extra');
 		expect(buttonVariants({ variant: null, size: null })).toBe('svadmin-button');
 	});
 

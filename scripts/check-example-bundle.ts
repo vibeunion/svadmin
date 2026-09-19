@@ -1,6 +1,7 @@
 import { readFile, readdir, stat } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { gzipSync } from 'node:zlib';
+import { assertExampleLayoutCss } from './example-layout-contract.js';
 
 interface ManifestChunk {
   file: string;
@@ -34,15 +35,7 @@ const emittedCss = await Promise.all(
   cssAssets.map((assetName) => readFile(join(assetsDirectory, assetName), 'utf8')),
 ).then((contents) => contents.join('\n'));
 
-for (const [label, selector] of [
-  ['expanded sidebar width', '.w-\\[252px\\]'],
-  ['collapsed sidebar width', '.w-\\[70px\\]'],
-  ['expanded content offset', '.md\\:ml-\\[252px\\]'],
-  ['collapsed content offset', '.md\\:ml-\\[70px\\]'],
-  ['table container radius', '.rounded-lg'],
-] as const) {
-  assert(emittedCss.includes(selector), `Example CSS is missing ${label} utility ${selector}`);
-}
+assertExampleLayoutCss(emittedCss);
 
 let largestChunk = { name: '', size: 0 };
 for (const assetName of javascriptAssets) {

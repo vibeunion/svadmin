@@ -21,6 +21,7 @@
 		value = $bindable(),
 		type,
 		files = $bindable(),
+		disabled,
 		class: className,
 		"data-slot": dataSlot = "input",
 		...restProps
@@ -29,11 +30,12 @@
 	const i18n = useTranslation();
 	const isFileInput = $derived(type?.toLowerCase() === "file");
 	const isDateInput = $derived(["date", "datetime-local", "month", "week", "time"].includes(type?.toLowerCase() ?? ""));
-	const attributes = $derived(definedOptions(restProps));
+	const attributes = $derived(definedOptions({ ...restProps, disabled }));
 	const selectedFiles = $derived(files ? Array.from(files) : []);
 	const selectedFileLabel = $derived.by(() => {
-		if (selectedFiles.length === 0) return i18n.t("common.noFileChosen");
-		if (selectedFiles.length === 1) return selectedFiles[0].name;
+		const firstFile = selectedFiles[0];
+		if (firstFile === undefined) return i18n.t("common.noFileChosen");
+		if (selectedFiles.length === 1) return firstFile.name;
 		return i18n.t("common.filesSelected", { count: selectedFiles.length });
 	});
 </script>
@@ -41,7 +43,7 @@
 {#if isFileInput}
 	<div
 		class={cn("svadmin-file-input", className)}
-		data-disabled={attributes.disabled ? "true" : undefined}
+		data-disabled={disabled ? "true" : undefined}
 	>
 		<input
 			bind:this={ref}

@@ -1,0 +1,21 @@
+{
+  "sourceCommit": "c75394f1216531c1185a344b183d13f57ed5c542",
+  "runId": 35413011684,
+  "artifactId": 10574771156,
+  "files": [
+    {
+      "input": "results/grid-light-dark-state-evidence-at-1440/light-restore-1440.png",
+      "path": "docs/evaluations/assets/svar-grid-1440x900.png",
+      "width": 1440,
+      "height": 900,
+      "sha256": "b2f41800be45bf9401c88a85735827aaf01e0825a724706fdfd6388e4be5b435"
+    },
+    {
+      "input": "results/grid-light-dark-state-evidence-at-1920/dark-restore-1920.png",
+      "path": "docs/evaluations/assets/svar-grid-1920x1080.png",
+      "width": 1920,
+      "height": 1080,
+      "sha256": "e3f9cbffe9c9374339737063d619067498872b9c30164d346248af6bf023fdc1"
+    }
+  ]
+}

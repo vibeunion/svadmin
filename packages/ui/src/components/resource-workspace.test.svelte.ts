@@ -70,8 +70,6 @@ describe('ResourceOperationsPage real table composition', () => {
     await waitFor(() => expect(app.source.getList).toHaveBeenCalledWith(expect.objectContaining({
       pagination: expect.objectContaining({ current: 2 }),
     })));
-    await new Promise(resolve => setTimeout(resolve, 50));
-    console.info('workspace diagnostic', app.view.container.textContent, app.client.getQueryCache().getAll().map(q => ({ key: q.queryKey, data: q.state.data, error: q.state.error })));
     await app.view.findAllByText('Page 2 record');
     await fireEvent.click(app.view.getByRole('checkbox', { name: /Select all/i }));
     await fireEvent.click(app.view.getByRole('button', { name: 'Process selection' }));

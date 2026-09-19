@@ -25,7 +25,7 @@ export interface ContractUpdateManyOptions<S extends ContractSchemas> {
 }
 type Result<S extends ContractSchemas> = { data: ContractRecord<S>[] };
 type Failure = HttpError | UpdateManyPartialError;
-interface Callbacks<S extends ContractSchemas> {
+export interface Callbacks<S extends ContractSchemas> {
   onSuccess?: (data: Result<S>) => void | Promise<void>;
   onError?: (error: Failure) => void | Promise<void>;
   onSettled?: (data: Result<S> | undefined, error: Failure | null) => void | Promise<void>;

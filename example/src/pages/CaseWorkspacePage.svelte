@@ -30,7 +30,7 @@
     type WorkspaceStage,
   } from '@svadmin/ui';
   import { createCaseActions } from './case-actions.js';
-  import { createCaseWorkspaceState, type CaseStageId } from './case-workspace.svelte.js';
+  import { createCaseWorkspaceState, isCaseStageId, type CaseStageId } from './case-workspace.svelte.js';
 
   let { resourceName = 'case_workspace' }: { resourceName?: string } = $props();
   const i18n = useTranslation();
@@ -53,7 +53,8 @@
 
   const stageForState = $derived.by<WorkspaceStage[]>(() => {
     return stages.map((stage) => {
-      const stageId = stage.id as CaseStageId;
+      const stageId = stage.id;
+      if (!isCaseStageId(stageId)) throw new TypeError('Unknown case stage');
       const status = stageId === state.activeStage
         ? 'current'
         : stageId === 'overview' && state.caseAccepted
@@ -86,7 +87,8 @@
         : (isZh ? '保存当前工作区' : 'Save workspace'));
 
   function selectStage(stage: WorkspaceStage): void {
-    state.setStage(stage.id as CaseStageId);
+    if (!isCaseStageId(stage.id)) throw new TypeError('Unknown case stage');
+    state.setStage(stage.id);
   }
 
   function handlePrimaryAction(): void {

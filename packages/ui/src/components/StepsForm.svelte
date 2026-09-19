@@ -229,10 +229,10 @@
         >
           <span
             class="svadmin-u-60fbb7713999 svadmin-u-d0a52b312f7d svadmin-u-cbbf90f9a828 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-ac204c108886 svadmin-u-359090c2d529 svadmin-u-2689f3958069 svadmin-u-ceb69a6b0e5f"
-            class:bg-primary={i <= form.steps.currentStep}
-            class:text-primary-foreground={i <= form.steps.currentStep}
-            class:bg-muted={i > form.steps.currentStep}
-            class:text-muted-foreground={i > form.steps.currentStep}
+            class:svadmin-u-75b1bec3ea0e={i <= form.steps.currentStep}
+            class:svadmin-u-30ca335ae9c2={i <= form.steps.currentStep}
+            class:svadmin-u-2ef11f1cb219={i > form.steps.currentStep}
+            class:svadmin-u-bfa603190748={i > form.steps.currentStep}
           >
             {#if i < form.steps.currentStep}
               <Check class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
@@ -243,7 +243,7 @@
           <span class="svadmin-u-99d72c7fc3e2 svadmin-u-ee3c1259a368">{step.title}</span>
         </Button>
         {#if i < steps.length - 1}
-          <div class="svadmin-u-36e579c0b41c svadmin-u-9e10c04e17bb svadmin-u-aea6160836e7 svadmin-u-a59afa8d9b9d" class:bg-primary={i < form.steps.currentStep}></div>
+          <div class="svadmin-u-36e579c0b41c svadmin-u-9e10c04e17bb svadmin-u-aea6160836e7 svadmin-u-a59afa8d9b9d" class:svadmin-u-75b1bec3ea0e={i < form.steps.currentStep}></div>
         {/if}
       {/each}
     </div>

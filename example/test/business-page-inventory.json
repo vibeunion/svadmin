@@ -1,0 +1,90 @@
+[
+  {
+    "file": "AiWorkspacePage.svelte",
+    "mode": "query-rendering"
+  },
+  {
+    "file": "CalendarPage.svelte",
+    "mode": "delegated-rendering"
+  },
+  {
+    "file": "CalendarWorkspacePage.svelte",
+    "mode": "query-rendering"
+  },
+  {
+    "file": "CaseWorkspacePage.svelte",
+    "mode": "local-state"
+  },
+  {
+    "file": "CrmDashboardPage.svelte",
+    "mode": "query-rendering"
+  },
+  {
+    "file": "CrmOperationsPage.svelte",
+    "mode": "delegated-rendering"
+  },
+  {
+    "file": "Dashboard.svelte",
+    "mode": "query-rendering"
+  },
+  {
+    "file": "DesignPrinciplesPage.svelte",
+    "mode": "static-showcase"
+  },
+  {
+    "file": "DomainWorkspacePage.svelte",
+    "mode": "query-rendering"
+  },
+  {
+    "file": "ExampleResourcePage.svelte",
+    "mode": "delegated-rendering"
+  },
+  {
+    "file": "InventoryDirectoryPage.svelte",
+    "mode": "delegated-rendering"
+  },
+  {
+    "file": "MailWorkspacePage.svelte",
+    "mode": "query-rendering"
+  },
+  {
+    "file": "MessagesPage.svelte",
+    "mode": "delegated-rendering"
+  },
+  {
+    "file": "OperationsPage.svelte",
+    "mode": "delegated-rendering"
+  },
+  {
+    "file": "OperationsWorkspacePage.svelte",
+    "mode": "query-rendering"
+  },
+  {
+    "file": "OrdersPage.svelte",
+    "mode": "delegated-rendering"
+  },
+  {
+    "file": "PeoplePage.svelte",
+    "mode": "delegated-rendering"
+  },
+  {
+    "file": "ProductsPage.svelte",
+    "mode": "delegated-rendering"
+  },
+  {
+    "file": "PropertyOperationsPage.svelte",
+    "mode": "delegated-rendering"
+  },
+  {
+    "file": "RealEstateWorkspacePage.svelte",
+    "mode": "query-rendering"
+  },
+  {
+    "file": "TodoWorkspacePage.svelte",
+    "mode": "query-rendering"
+  },
+  {
+    "file": "UserManagementPage.svelte",
+    "mode": "query-rendering"
+  }
+]

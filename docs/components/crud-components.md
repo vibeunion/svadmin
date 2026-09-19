@@ -35,6 +35,10 @@ import { AutoTable } from '@svadmin/ui';
 - ✅ Permission-based action visibility / 权限控制
 - ✅ CSV export / CSV 导出
 
+## Typed snippets / 类型化扩展
+
+Use `createResourceRenderers` from `@svadmin/ui/rendering` to validate and type existing cell, row-action, expanded-row and summary snippets against a resource contract. The existing dynamic component props remain compatible. See [Typed native Svelte rendering](../typed-rendering.md) for runtime boundaries and examples without TSX.
+
 ---
 
 # AutoForm
@@ -51,10 +55,10 @@ import { AutoForm } from '@svadmin/ui';
 
 ```svelte
 <!-- Create mode / 创建模式 -->
-<AutoForm resourceName="posts" action="create" />
+<AutoForm resourceName="posts" mode="create" />
 
 <!-- Edit mode / 编辑模式 -->
-<AutoForm resourceName="posts" action="edit" id="1" />
+<AutoForm resourceName="posts" mode="edit" id="1" />
 ```
 
 ## Props
@@ -62,8 +66,10 @@ import { AutoForm } from '@svadmin/ui';
 | Prop | Type | Required | Description / 描述 |
 |------|------|----------|-------------------|
 | `resourceName` | `string` | ✅ | Resource name / 资源名称 |
-| `action` | `'create' \| 'edit'` | ✅ | Form action / 表单操作 |
-| `id` | `string` | edit only | Record ID for edit / 编辑记录 ID |
+| `mode` | `'create' \| 'edit' \| 'clone' \| 'show'` | default: create | Form mode / 表单模式 |
+| `id` | `string \| number` | edit / clone / show | Record ID / 记录 ID |
+
+For typed `fieldRenderer` extensions, use `createResourceRenderers(contract).field(mode, key, input)`. Validated values and incomplete drafts are deliberately separate; see [the field-rendering guide](../typed-rendering.md#3-字段类型必须区分-createeditclone-和-show).
 
 ## Supported Field Types / 支持字段类型
 

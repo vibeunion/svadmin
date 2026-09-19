@@ -1,0 +1,9 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "types": ["svelte", "node", "vite/client"],
+    "paths": { "@svadmin/ui/components/*": ["../../../packages/ui/src/components/*"] }
+  },
+  "include": ["./*.svelte", "./*.ts", "../../../packages/ui/src/components/Svar*.svelte", "../../../packages/ui/src/components/svar-grid-*.ts", "../../../packages/surface/src/svar*.ts", "../../../packages/surface/src/components/Svar*.svelte"],
+  "exclude": ["node_modules"]
+}

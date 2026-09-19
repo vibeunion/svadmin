@@ -1,5 +1,3 @@
-import { button as pandaButton } from "../../../styled-system/recipes/button.js";
-
 export type ButtonVariant = "default" | "outline" | "secondary" | "ghost" | "destructive" | "link";
 export type ButtonSize = "default" | "xs" | "sm" | "lg" | "icon" | "icon-xs" | "icon-sm" | "icon-lg";
 
@@ -16,9 +14,6 @@ export const buttonVariants = ({
 } = {}): string =>
 	[
 		"svadmin-button",
-		variant === null && size === null
-			? ""
-			: pandaButton({ variant: variant ?? undefined, size: size ?? undefined }),
 		variant && `svadmin-button--${variant}`,
 		size && `svadmin-button-size--${size}`,
 		className,

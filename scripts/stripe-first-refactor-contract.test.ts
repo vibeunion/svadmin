@@ -33,7 +33,7 @@ describe('Stripe-first refactor contract', () => {
     expect(source).toContain('MetricBlock');
     expect(source).toContain('useList');
     expect(source).toContain('data-operations-record-toggle');
-    expect(source).toMatch(/\{#if !hasError && !isLoading && showRecords\}[\s\S]*<AutoTable \{resourceName\} \/>[\s\S]*\{\/if\}/);
+    expect(source).toMatch(/\{#if !hasError && !isLoading && showRecords\}[\s\S]*<AutoTable \{resourceName\} rendering=\{demoRendering\(resourceName\)\} \/>[\s\S]*\{\/if\}/);
     for (const layout of [
       'data-stock-movement-layout',
       'data-stock-transfer-layout',
@@ -53,7 +53,7 @@ describe('Stripe-first refactor contract', () => {
     expect(source).toContain('MetricBlock');
     expect(source).toContain('useList');
     expect(source).toContain('data-domain-record-toggle');
-    expect(source).toMatch(/\{#if showRecords\}[\s\S]*<AutoTable \{resourceName\} \/>[\s\S]*\{\/if\}/);
+    expect(source).toMatch(/\{#if showRecords\}[\s\S]*<AutoTable \{resourceName\} rendering=\{demoRendering\(resourceName\)\} \/>[\s\S]*\{\/if\}/);
     for (const layout of [
       'data-product-catalog-layout',
       'data-sku-directory-layout',
@@ -86,7 +86,7 @@ describe('Stripe-first refactor contract', () => {
   it('keeps the user workspace focused and reveals CRUD records on demand', () => {
     const source = read('example/src/pages/UserManagementPage.svelte');
     expect(source).toContain('data-user-record-toggle');
-    expect(source).toMatch(/\{#if showRecords\}[\s\S]*<AutoTable \{resourceName\} \/>[\s\S]*\{\/if\}/);
+    expect(source).toMatch(/\{#if showRecords\}[\s\S]*<AutoTable \{resourceName\} rendering=\{demoRendering\(resourceName\)\} \/>[\s\S]*\{\/if\}/);
   });
 
   it('keeps auth flows on one restrained shell', () => {
