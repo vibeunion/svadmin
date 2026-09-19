@@ -1,0 +1,67 @@
+name: Archive verified Surface evidence
+on:
+  push:
+    branches: ['evidence/surface-ad2cd10']
+    paths: ['.github/workflows/publish-surface-evidence.yml']
+permissions:
+  contents: write
+  actions: read
+jobs:
+  archive:
+    if: github.repository == 'vibeunion/svadmin' && github.ref == 'refs/heads/evidence/surface-ad2cd10'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - name: Copy only verified current-run screenshots and package report
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api repos/vibeunion/svadmin/actions/artifacts/10585777860 > "$RUNNER_TEMP/surface-artifact.json"
+          gh api repos/vibeunion/svadmin/actions/artifacts/10585777860/zip > "$RUNNER_TEMP/surface-artifact.zip"
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, struct, zipfile
+          temporary = pathlib.Path(os.environ['RUNNER_TEMP'])
+          metadata = json.loads((temporary / 'surface-artifact.json').read_text())
+          assert metadata['workflow_run']['head_sha'] == 'ad2cd10426940d230ace6c62acaadc42105ef4ba'
+          assert metadata['workflow_run']['id'] == 35448378615
+          archive = temporary / 'surface-artifact.zip'
+          expected = '36feeda62f19e22441ef2b794da5494f20f9addf2ce16f60a86a9a4345ac7968'
+          assert hashlib.sha256(archive.read_bytes()).hexdigest() == expected
+          output = pathlib.Path('docs/pr-evidence/pr441-ad2cd10')
+          output.mkdir(parents=True, exist_ok=True)
+          checks = {
+            '1440x900': ((1440, 900), 'dc1a90409e9746c39e1616e92435e62038b6c81c8f1eaf311bbaab04dc4ad2d5'),
+            '1920x1080': ((1920, 1080), '1e9699b814e6dc71ef1fa60f8c9329d7fa599bc7bfd8a8d78ff9dc37a5bb86ad'),
+            '390x844': ((390, 1456), '7c24eb31134319f321b51cd2dec1474b8b4d2e84cea82b7792d6553ffae30e96'),
+          }
+          with zipfile.ZipFile(archive) as source:
+            for viewport, (dimensions, digest) in checks.items():
+              name = f'surface-workflow-{viewport}.png'
+              data = source.read(f'workflow.e2e.ts-streamed-form-layout-{viewport}/{name}')
+              assert hashlib.sha256(data).hexdigest() == digest
+              assert data[:8] == b'\x89PNG\r\n\x1a\n' and struct.unpack('>II', data[16:24]) == dimensions
+              (output / name).write_bytes(data)
+            packed = source.read('packed-consumer.json')
+            report = json.loads(packed)
+            assert report['status'] == 'passed' and report['checkout'] == '3bd15fd19323f7cc35270bb4f63b96f7cb38efae'
+            (output / 'packed-consumer.json').write_bytes(packed)
+          provenance = {
+            'implementationHead': 'ad2cd10426940d230ace6c62acaadc42105ef4ba',
+            'baseCommit': 'cac09fdaf23a82aa00c01667035ba3f37e9bfd38',
+            'testedCheckout': report['checkout'], 'workflowRun': 35448378615,
+            'artifactId': 10585777860, 'archiveSha256': expected,
+            'screenshots': {viewport: {'pixelDimensions': dimensions, 'sha256': digest} for viewport, (dimensions, digest) in checks.items()},
+            'notes': 'Original unmodified PNG bytes from passing Chromium fixture. Mobile is a full-page capture. Synthetic business data; not final product-design approval. Same-checkout tarballs do not prove compatibility with older published UI versions.'
+          }
+          (output / 'provenance.json').write_text(json.dumps(provenance, indent=2) + '\n')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/pr-evidence/pr441-ad2cd10
+          git diff --cached --check
+          if ! git diff --cached --quiet; then
+            git commit -m 'docs(surface): archive verified ad2cd10 browser and package evidence'
+            git push origin HEAD:refs/heads/evidence/surface-ad2cd10
+          fi
