@@ -37,6 +37,11 @@ description: 企业组件数据契约与异步关系选择器的升级说明。
 嵌套条件不再被展平。服务端序列化、URL 查询参数和保存视图应直接保存完整
 `Filter` 树，并在读回后验证序列化往返不改变逻辑结构。
 
+编辑器无法安全表达的运算符、字段类型或值会以只读条件保留，不会在点击“应用”时
+静默降级为文本或丢失。新建或编辑的条件如果未填完整，也不会触发 `onApply`；
+组件会显示校验提示，调用方不要再依赖“应用时自动删除空条件”的旧行为。
+数字枚举与同文字符串枚举（例如 `2` 和 `'2'`）编辑后保留各自类型。
+
 `@svadmin/lite` 的 `LiteFilterBuilder` 也已移除 `logicalOperator`，使用
 `filters[0][operator]`、`filters[0.value.0][field]` 这类嵌套字段名提交条件树。
 Lite Server Adapter 会把这些字段还原为同样的 `Filter` 树；自定义 SvelteKit
@@ -223,6 +228,15 @@ Provider 必须实现 `getMany`，并返回请求的全部 ID；缺失或重复 
 - 重试是否具备幂等键，不能把同一文件重复写成多个业务附件；
 - 表单是否在成功回调后保存服务端返回的资源 URL，而不是本地文件名。
 
+取消会立即把条目标记为 `cancelled`，不再等待上传回调拒绝。
+即使上传实现忽略 `AbortSignal`，旧请求的成功、错误和进度回调也不会覆盖取消后的状态。
+重试使用独立会话；旧请求的结束不会解除新请求的取消能力。
+移除文件、单文件模式替换文件或卸载组件都会中止并丢弃旧会话，
+卸载后不再触发 `onChange`。成功后迟到的进度也会被忽略。
+
+这些保证只针对客户端状态，不表示服务端已回滚。若取消前服务端已保存文件，
+仍须通过上传会话查询、幂等键和回收策略避免重复附件或遗留对象。
+
 ### Lite 原生上传
 
 SSR 页面使用 `@svadmin/lite` 导出的 `LiteFileUpload`。它提供可见原生文件输入，
@@ -281,6 +295,39 @@ Lite 不接受 SPA 的 `upload`、`onChange`、`maxFiles` 或 `maxSize` 属性�
 失败 CSV 只包含失败的提交记录及核心清理过的错误消息，不回显 Provider 的私有异常。
 下载失败记录后，先核对服务端是否已写入，不能把网络错误直接当作可安全重试。
 
+## ResourceOperationsPage
+
+资源工作台不再把所有列表行为固定在页面内部。现在可以通过 `tableProps` 向每个布局中的
+`AutoTable` 传入分页、排序和批量操作插槽；列渲染器使用页面顶层 `rendering`：
+
+```svelte
+<ResourceOperationsPage
+  resourceName="orders"
+  workspaceStyle="operations"
+  eyebrow="运营"
+  title="订单"
+  description="订单处理"
+  actionLabel="新建订单"
+  tableProps={{
+    pagination: { current: 1, pageSize: 25 },
+    sorters: [{ field: 'createdAt', order: 'desc' }],
+    batchActions,
+  }}
+/>
+```
+
+迁移时请检查：
+
+- `resourceName` 由工作台拥有，`tableProps.resourceName` 不允许覆盖页面资源。
+- `tableProps` 会同时传给当前布局中的列表；如果业务需要不同列表，应拆分页面而不是依赖布局内部
+  的隐式差异。
+- `batchActions` 只能接收已选择的 ID 并发起业务命令。选择状态不是授权凭据，后端必须在 FA RPC、
+  领域 API 或受信任 Edge Function 中重新检查租户、权限、状态和幂等性。
+- 同一资源下翻页保留已选 ID；切换租户或撤销列表权限时会清理选择状态。
+  不要在页面外缓存旧租户的 ID。
+- 如果旧页面直接在多个布局分支中复制 `<AutoTable {resourceName} />`，迁移为
+  `<AutoTable {...tableProps} {resourceName} />`，并保留资源名放在 spread 之后。
+
 ## 升级检查
 
 1. 更新调用方的 `FilterBuilder` 数据，移除 `logicalOperator`。
@@ -293,3 +340,33 @@ Lite 不接受 SPA 的 `upload`、`onChange`、`maxFiles` 或 `maxSize` 属性�
 8. 验证保存视图、URL 查询和服务端请求的条件树往返。
 9. 在真实消费者中执行严格类型检查和浏览器挂载验证。
 10. Lite 文件上传改用 multipart POST，补齐服务端文件校验、授权和错误回显。
+11. 为 `ResourceOperationsPage` 的 `tableProps` 补充真实 Provider 集成测试，至少覆盖翻页、
+    排序、搜索、跨页选择和租户切换。
+
+## TaskQueueDrawer
+
+任务队列抽屉现在从当前管理上下文响应式读取 `TaskProvider`。提交任务后，只有当
+Provider、租户、路由和认证会话仍与提交开始时一致，才会更新当前抽屉的选中任务、
+关闭提交表单并刷新列表。
+
+迁移时请检查：
+
+- 不要在页面外长期缓存 `getTaskProvider()` 的结果；需要跟随租户或 Provider 切换时，
+  通过上下文提供任务 Provider，或显式传入当前 Provider。
+- 关闭抽屉、切换租户、Provider 或认证会话后，旧提交的成功/失败回执不会污染新表单。
+- 提交刷新失败不会覆盖已成功取得的任务回执；调用方仍应通过任务详情和服务端状态确认最终结果。
+- `idempotencyKey` 仍由业务调用方提供，组件不会替业务决定重复任务是否合并。
+
+### 任务查询的认证会话
+
+`useTask` 和 `useTaskList`（包括 DLQ）现在按认证会话隔离缓存。登录进行中或登出后，
+读取结果暂时为 `pending`，不继续展示上一会话的数据；旧会话保存的 `refetch`
+不会发起新请求，也不会返回当前会话的数据。重新登录成功后，即使 Provider 与任务 ID
+都没有改变，也会重新查询，而不是复用旧用户的缓存。
+
+- 不要手工拼接任务查询缓存键；其参数新增了内部认证会话标识。
+- 不要把旧 `refetch` 长期保存在页面外。需要刷新时读取当前 Hook 的 `refetch`。
+- 原有 `refetchInterval`、后台轮询和任务错误码保留。
+- 查询错误保留 `Error` 类型；错误态仍可直接读取 `error.message`。
+- 迟到的查询结果、错误及通知被隔离，不等于远端任务已取消。
+  这部分只覆盖任务读取；任务提交、取消、重试和订阅仍需各自的授权与幂等控制。

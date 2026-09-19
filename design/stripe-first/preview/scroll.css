@@ -1,0 +1,3 @@
+/* 命名区域是本样例唯一的水平滚动所有者，保留原生 table 语义。 */
+.kit-table-scroll > .svadmin-table-container { overflow: visible; }
+.kit-table-scroll:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
