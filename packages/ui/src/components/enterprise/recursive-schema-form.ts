@@ -88,8 +88,9 @@ export function readRecursiveSchemaForm(schema: unknown): RecursiveSchemaFormMod
         return { kind: 'object', properties: result, required: new Set(keys as string[]), additional: raw['additionalProperties'] !== false, nullable };
       }
       const item = read(raw['items'], path + '/items', depth + 1);
+      const definition = raw;
       function bound(key: string): number | undefined {
-        const value = raw[key];
+        const value = definition[key];
         if (value === undefined) return;
         if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < 0) { issue(path + '/' + key, 'invalid-schema'); return; }
         return value;

@@ -140,8 +140,9 @@
   function writePath(path: string[], nextValue: unknown): void {
     if (!editable() || !prepared.ok || pathReadonly(path)) return;
     try {
-      internalValue = writeSchemaFormPath(prepared.value, path, nextValue);
-      value = internalValue;
+      value = writeSchemaFormPath(prepared.value, path, nextValue);
+      // Capture the actual bindable value after Svelte wraps it, not its raw source.
+      internalValue = value;
       failure = null;
       validationIssues = [];
     }

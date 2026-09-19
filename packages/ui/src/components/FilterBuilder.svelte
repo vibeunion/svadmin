@@ -229,8 +229,11 @@
                 onchange={(event: Event) => { if (event.currentTarget instanceof HTMLSelectElement) changeValue(node, event.currentTarget.value); }}>
                 <option value="">{chinese ? '请选择' : 'Choose'}</option><option value="true">true</option><option value="false">false</option>
               </Select>
+            {:else if !collection && field?.type === 'number'}
+              <Input id={`${uid}-${node.id}-value`} type="number" step="any" aria-invalid={invalid} value={typeof node.value === 'number' ? node.value : undefined}
+                oninput={(event) => { if (event.currentTarget instanceof HTMLInputElement) changeValue(node, event.currentTarget.value); }} />
             {:else}
-              <Input id={`${uid}-${node.id}-value`} type={!collection && field?.type === 'number' ? 'number' : 'text'} step="any" aria-invalid={invalid} value={valueText(node.value)} placeholder={collection ? '[1, 2]' : ''}
+              <Input id={`${uid}-${node.id}-value`} type="text" aria-invalid={invalid} value={valueText(node.value)} placeholder={collection ? '[1, 2]' : ''}
                 oninput={(event) => { if (event.currentTarget instanceof HTMLInputElement) changeValue(node, event.currentTarget.value); }} />
             {/if}
           </div>

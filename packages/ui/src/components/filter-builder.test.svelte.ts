@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render, fireEvent, within } from '@testing-library/svelte';
 import FilterBuilder from './FilterBuilder.svelte';
+import FilterBuilderLocale from './FilterBuilderLocale.test.svelte';
 import type { FieldDefinition } from '@svadmin/core';
 
 const testFields: FieldDefinition[] = [
@@ -28,9 +29,9 @@ describe('FilterBuilder component', () => {
   });
 
   it('renders initial empty state and allows adding rules', async () => {
-    const view = render(FilterBuilder, {
+    const view = render(FilterBuilderLocale, {
       fields: testFields,
-      filters: [],
+      locale: 'zh',
     });
 
     expect(view.container.textContent).toContain('暂无筛选条件');

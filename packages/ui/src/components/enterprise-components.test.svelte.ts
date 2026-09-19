@@ -239,3 +239,22 @@ describe('enterprise spreadsheet interactions', () => {
     expect(onexport).toHaveBeenCalledWith('"0.3333333333333333","\'@SUM(1,2)","ACME ""Tokyo""","-42"');
   });
 });
+
+
+describe('recursive form parse-error ownership', () => {
+  it('retains an invalid numeric draft across sibling edits until that field is corrected', async () => {
+    const onsubmit = vi.fn(), onvalidationerror = vi.fn();
+    const view = render(JsonSchemaForm, { schema, onsubmit, onvalidationerror });
+    const amount = input(view.container, '[name="amount"]');
+    Object.defineProperty(amount, 'validity', { value: { badInput: true }, configurable: true });
+    await fireEvent.input(amount, { target: { value: '' } });
+    await fireEvent.change(input(view.container, '[name="enabled"]'), { target: { checked: true } });
+    await fireEvent.submit(view.getByTestId('json-schema-form'));
+    expect(onsubmit).not.toHaveBeenCalled();
+    expect(onvalidationerror).toHaveBeenCalledWith(expect.arrayContaining([{ path: '/amount', code: 'invalid-value' }]));
+    Object.defineProperty(amount, 'validity', { value: { badInput: false }, configurable: true });
+    await fireEvent.input(amount, { target: { value: '0' } });
+    await fireEvent.submit(view.getByTestId('json-schema-form'));
+    expect(onsubmit).toHaveBeenCalledWith({ amount: 0, enabled: true, plan: 1 });
+  });
+});
