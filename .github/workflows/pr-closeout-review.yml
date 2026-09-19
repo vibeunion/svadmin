@@ -15,7 +15,7 @@ jobs:
           ref: 626a85c8a541af295f1db9dee022007a2bf107ca
           fetch-depth: 1
           show-progress: false
-      - name: Archive pinned browser evidence and audit diagnostics
+      - name: Archive exact integration evidence without changing implementation heads
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -25,9 +25,9 @@ jobs:
           python3 - <<'PY'
           import hashlib, json, os, pathlib, subprocess, urllib.parse, urllib.request, zipfile
           # Delegation Decision: native, low-risk evidence-only, one writer, external=0.
-          # 不更新 main 或任何功能分支；不执行下载的代码或日志内容。
+          # 固定来源，只读下载；仅创建独立证据分支，不更新任何 PR 或 main。
           root = pathlib.Path.cwd()
-          out = pathlib.Path(os.environ['RUNNER_TEMP']) / 'pr-closeout'
+          out = pathlib.Path(os.environ['RUNNER_TEMP']) / 'integration-evidence'
           out.mkdir()
           class SafeRedirect(urllib.request.HTTPRedirectHandler):
               def redirect_request(self, req, fp, code, msg, headers, newurl):
@@ -42,26 +42,39 @@ jobs:
               req = urllib.request.Request('https://api.github.com/repos/vibeunion/svadmin/' + path, headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Accept': 'application/vnd.github+json'})
               with opener.open(req, timeout=60) as response:
                   return response.read()
-          # 确认跨主机重定向不携带凭证；不真实发送此合成请求。
           fake = urllib.request.Request('https://api.github.com/test', headers={'Authorization': 'Bearer synthetic'})
-          redirected = SafeRedirect().redirect_request(fake, None, 302, 'Found', {}, 'https://example.com/object')
-          assert not redirected.has_header('Authorization')
-          evidence = root / 'docs/pr-evidence/closeout-20260920'
+          assert not SafeRedirect().redirect_request(fake, None, 302, 'Found', {}, 'https://example.com/object').has_header('Authorization')
+          evidence = root / 'docs/pr-evidence/integration-20260920'
           evidence.mkdir(parents=True)
           report = {'artifacts': []}
-          specs = [('445', '03c78b91b28413989aefa11b576d37143c0d0765', 10588422651, 35456028680, '7152926de88785f1fcc0bcba195319f4020e6b4ec9ca68578332b55cde6cb64c'), ('446', 'a87136dd3f83f813a4261f177886e8a689d14af1', 10588584070, 35457386396, '287fec7cc8f55e37bd5de7802bf9d22c9df4474a9f0391c58426fc218fd8e703')]
-          for number, head, artifact, run, digest in specs:
+          specs = [
+              ('438', 'f1f46c5c48832f29f5ff7695d0d7faf6db82ba73', 35473587755, 10594047248, '46aa6c5cb452944b641dbb7337470998a1916f57372d30a1bf2d88f45c756930'),
+              ('445', 'f40fe385d627c02b5a4c286d06c1e1f93af52b72', 35474151373, 10594137664, 'a5462961985cf88d940621ef08a371a37ebd38dc23d94abbe9df9a9b1db2f1f2'),
+              ('445-svar', 'f40fe385d627c02b5a4c286d06c1e1f93af52b72', 35474151353, 10593322326, '5ce6b8183325bd8ef43e0f4c719474844668f4da4b4769a1d7560a9517bdfc00'),
+              ('446', '5578055d65d9e0264f43f9fc7bd473860776ee3f', 35473875890, 10593132510, '1b50feb88f3bd73e365377699ecd8adc13ba571ccace354d43c9772190afaab9'),
+          ]
+          selected = {'resource-list-ready-light-en-1440.png', 'resource-list-ready-light-en-1920.png', 'settings-invalid-dark-en-390.png'}
+          for number, head, run, artifact, digest in specs:
               meta = json.loads(get('actions/artifacts/' + str(artifact)))
               assert meta['workflow_run']['head_sha'] == head and meta['workflow_run']['id'] == run
+              run_meta = json.loads(get('actions/runs/' + str(run)))
+              assert run_meta['status'] == 'completed' and run_meta['conclusion'] == 'success'
               payload = get('actions/artifacts/' + str(artifact) + '/zip')
               assert hashlib.sha256(payload).hexdigest() == digest, 'Artifact checksum mismatch'
-              archive = out / ('evidence-' + number + '.zip')
+              archive = out / (number + '.zip')
               archive.write_bytes(payload)
-              item = {'pr': int(number), 'head': head, 'run': run, 'artifact': artifact, 'sha256': digest, 'files': []}
+              item = {'pr': int(number.split('-')[0]), 'scope': number, 'head': head, 'run': run, 'artifact': artifact, 'sha256': digest, 'files': []}
               with zipfile.ZipFile(archive) as z:
                   for info in z.infolist():
                       path = pathlib.PurePosixPath(info.filename)
-                      if info.is_dir() or path.is_absolute() or '..' in path.parts or path.suffix.lower() not in ['.png', '.json']:
+                      if info.is_dir() or path.is_absolute() or '..' in path.parts:
+                          continue
+                      keep = path.suffix.lower() in ['.png', '.json']
+                      if number == '438':
+                          keep = path.name in selected or (len(path.parts) == 1 and path.suffix == '.json')
+                      elif number == '445-svar':
+                          keep = info.filename == 'evidence/browser-tests.json'
+                      if not keep:
                           continue
                       if info.file_size > 20_000_000:
                           raise RuntimeError('Unexpected evidence file size')
@@ -70,27 +83,26 @@ jobs:
                       data = z.read(info)
                       dest.write_bytes(data)
                       item['files'].append({'path': str(dest.relative_to(root)), 'sha256': hashlib.sha256(data).hexdigest()})
+              assert item['files'], 'No matching evidence files'
               report['artifacts'].append(item)
           (evidence / 'provenance.json').write_text(json.dumps(report['artifacts'], indent=2) + '\n')
-          (evidence / 'README.md').write_text('# Pinned browser evidence\n\nUnmodified synthetic-fixture Chromium PNGs from PR #445 head 03c78b91 and PR #446 head a87136dd. These validate their original tested revisions, not later integration candidates. Original ZIP checksums and paths are in provenance.json. Not production, medical, independent-human design or complete accessibility approval.\n')
+          (evidence / 'README.md').write_text('# Exact integration browser evidence\n\nOriginal unmodified synthetic-fixture Chromium PNGs and reports, tied to the exact implementation heads and successful workflow runs in provenance.json. Product full-page capture sizes may exceed the named viewport heights. These are not Figma synchronization, production acceptance, medical-service validation, published-peer compatibility, or independent-human accessibility/design certification. Browser checks do not waive full CI/E2E gates. The 438 archive contains a selected three-image subset plus reports; the complete 228-scene ZIP remains in its original Actions artifact and the collection artifact.\n')
           def git(*args):
               return subprocess.run(['git', *args], check=True, capture_output=True, text=True).stdout.strip()
           git('add', '--', str(evidence.relative_to(root)))
-          git('commit', '-m', 'docs(review): archive verified original form and health-office screenshots')
+          git('commit', '-m', 'docs(review): archive exact integrated product form and office browser evidence')
           report['evidence_commit'] = git('rev-parse', 'HEAD')
-          branch = 'evidence/pr-closeout-20260920'
+          branch = 'evidence/pr-integration-20260920'
           if git('ls-remote', '--heads', 'origin', branch):
-              raise RuntimeError('Evidence branch already exists; refusing overwrite')
+              raise RuntimeError('Evidence branch exists; refusing overwrite')
           git('push', 'origin', 'HEAD:refs/heads/' + branch)
           (out / 'report.json').write_text(json.dumps(report, indent=2) + '\n')
-          text = get('actions/jobs/105934980583/logs').decode('utf-8', errors='replace')
-          (out / 'audit-failure-tail.txt').write_text('\n'.join(text.splitlines()[-180:]) + '\n')
           print('Evidence commit:', report['evidence_commit'])
           PY
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
-          name: pinned-pr-closeout-evidence
-          path: ${{ runner.temp }}/pr-closeout/
+          name: exact-integration-browser-evidence
+          path: ${{ runner.temp }}/integration-evidence/
           retention-days: 14
           if-no-files-found: error
