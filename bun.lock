@@ -596,8 +596,6 @@
         "@floating-ui/dom": "^1.8.0",
         "@lucide/svelte": "^1.35.0",
         "@sinclair/typebox": "^0.34.52",
-        "@svar-ui/svelte-core": "^2.6.0",
-        "@svar-ui/svelte-filemanager": "^2.6.0",
         "@tanstack/svelte-store": "^0.12.1",
         "@tanstack/svelte-table": "^9.2.3",
         "@tanstack/table-core": "^9.2.3",
@@ -1226,42 +1224,6 @@
     "@svadmin/sveltekit": ["@svadmin/sveltekit@workspace:packages/sveltekit"],
 
     "@svadmin/ui": ["@svadmin/ui@workspace:packages/ui"],
-
-    "@svar-ui/core-locales": ["@svar-ui/core-locales@2.6.1", "https://registry.npmmirror.com/@svar-ui/core-locales/-/core-locales-2.6.1.tgz", {}, "sha512-18xu7qn8Bxwi2EHguVV3Xya5kS+A+6Gnuo2wl55dofp9y948iZ5z7HIRh1+Mj1BgzbdVt6+B04JOCDMLJXyjtg=="],
-
-    "@svar-ui/filemanager-data-provider": ["@svar-ui/filemanager-data-provider@2.6.0", "https://registry.npmmirror.com/@svar-ui/filemanager-data-provider/-/filemanager-data-provider-2.6.0.tgz", { "dependencies": { "@svar-ui/lib-data-provider": "1.7.1" } }, "sha512-H0cVpLblqPItF4zLmk1ZetTT7TDvE+sl2TVlQC3Wm3PzZrq32aSYfMDEoqliUWHaBRP2Lt1klSX9rPQGV2k8Sw=="],
-
-    "@svar-ui/filemanager-locales": ["@svar-ui/filemanager-locales@2.6.0", "https://registry.npmmirror.com/@svar-ui/filemanager-locales/-/filemanager-locales-2.6.0.tgz", {}, "sha512-+gZPuAP2NUm3G/JPSCpd1pSS+VuFgSC1nu908xKk2KnwrU+NxIVUDvydMs0+P03AQPjcq0+ou3qwqK3OvrigSg=="],
-
-    "@svar-ui/filemanager-store": ["@svar-ui/filemanager-store@2.6.0", "https://registry.npmmirror.com/@svar-ui/filemanager-store/-/filemanager-store-2.6.0.tgz", { "dependencies": { "@svar-ui/lib-state": "1.9.7" } }, "sha512-59fbDTpHDr7DzgXCTw+2aLLkVXR8Yg8Y5nMUImkuNf0ekD5eb0vfthwH8I2FqqhW3bupGfgGEFscRWTupBNq4w=="],
-
-    "@svar-ui/grid-data-provider": ["@svar-ui/grid-data-provider@2.7.0", "https://registry.npmmirror.com/@svar-ui/grid-data-provider/-/grid-data-provider-2.7.0.tgz", { "dependencies": { "@svar-ui/lib-data-provider": "1.7.2" } }, "sha512-bLhxYwGVjWnC3NbvGeYoOJ3Kv7/qhbEIJeXZhwGQZLYEYUaYrkgmz2pCVmzSt2EfPLG4YlUMf3y+Afz0EoE86g=="],
-
-    "@svar-ui/grid-locales": ["@svar-ui/grid-locales@2.7.0", "https://registry.npmmirror.com/@svar-ui/grid-locales/-/grid-locales-2.7.0.tgz", {}, "sha512-/y4aR6CEbIAsV2YTeLRPfGXTIKYBWqrKc485LN2xkT6jPilT5i1QST1BRn+S2ANC9p83MXCNVLJxAoR+3glsBw=="],
-
-    "@svar-ui/grid-store": ["@svar-ui/grid-store@2.7.0", "https://registry.npmmirror.com/@svar-ui/grid-store/-/grid-store-2.7.0.tgz", { "dependencies": { "@svar-ui/lib-dom": "0.12.1", "@svar-ui/lib-state": "1.9.6" } }, "sha512-m23KKQPuEyDfXiD+nLe7LCGX2+zRhbGUxIUzjAnInqhtjAM0HyhWsQpuZzzXhSdUyFYje5haStffUoK6rrpq6Q=="],
-
-    "@svar-ui/lib-data-provider": ["@svar-ui/lib-data-provider@1.7.1", "https://registry.npmmirror.com/@svar-ui/lib-data-provider/-/lib-data-provider-1.7.1.tgz", { "dependencies": { "@svar-ui/lib-state": "1.9.6" } }, "sha512-5Bi9ywngcMTKpGtan0s7q8ivd84Bp0ZnRP+5bLZg6oiRB7YMyN5D5X+apc3CWDAnG4zZn3en4YwS2qc/aHIIuQ=="],
-
-    "@svar-ui/lib-dom": ["@svar-ui/lib-dom@0.14.0", "https://registry.npmmirror.com/@svar-ui/lib-dom/-/lib-dom-0.14.0.tgz", {}, "sha512-9uao5ebcQmuW0RoMu1LCesPsZ7i6G3xIvYAQzX/aeg662Yy/ETsNVy1pXoSa2q5v6ccAMjVxFrFCYReK7fzaJQ=="],
-
-    "@svar-ui/lib-state": ["@svar-ui/lib-state@1.9.7", "https://registry.npmmirror.com/@svar-ui/lib-state/-/lib-state-1.9.7.tgz", {}, "sha512-nxRdk+54m1RJjGT2yDH7NjxAM5KECxA39kdTZezEIj1ixykyefssB9BrgxKy2jIseYxJMtd6lPZvQ3SZXuvn2g=="],
-
-    "@svar-ui/lib-svelte": ["@svar-ui/lib-svelte@0.5.2", "https://registry.npmmirror.com/@svar-ui/lib-svelte/-/lib-svelte-0.5.2.tgz", { "dependencies": { "@svar-ui/lib-state": "^1.9.6" } }, "sha512-i+hHMT3zctaGbRpyMDREt9im7YfLpvGwFYvH1ntEp/kYAwUrR/sxMJlEEKIid+Yg2EeMUstGxmYQbkWoMpPG7A=="],
-
-    "@svar-ui/svelte-core": ["@svar-ui/svelte-core@2.6.1", "https://registry.npmmirror.com/@svar-ui/svelte-core/-/svelte-core-2.6.1.tgz", { "dependencies": { "@svar-ui/core-locales": "2.6.1", "@svar-ui/lib-dom": "0.14.0", "@svar-ui/lib-svelte": "0.5.2" } }, "sha512-PDITkUE/D5RfGTYezrzK2U5/uNSW1n/aPJ59VmMPCdrrfKpVvrcPIZrg+O6zlnQHxBP0sMh18AN7iuSR+Y7Sxw=="],
-
-    "@svar-ui/svelte-filemanager": ["@svar-ui/svelte-filemanager@2.6.0", "https://registry.npmmirror.com/@svar-ui/svelte-filemanager/-/svelte-filemanager-2.6.0.tgz", { "dependencies": { "@svar-ui/filemanager-data-provider": "2.6.0", "@svar-ui/filemanager-locales": "2.6.0", "@svar-ui/filemanager-store": "2.6.0", "@svar-ui/lib-dom": "0.13.1", "@svar-ui/lib-state": "1.9.7", "@svar-ui/lib-svelte": "0.5.2", "@svar-ui/svelte-core": "2.6.0", "@svar-ui/svelte-grid": "2.7.0", "@svar-ui/svelte-menu": "2.6.0", "@svar-ui/svelte-uploader": "2.6.0" } }, "sha512-//RMVYKCdxug3iN3wAlJQcODrbgBZ4/kPd808lRFIj0XQqeen5H/gtBWTrjc1i6kAW+NSO32mb7ncdPcoSkYyA=="],
-
-    "@svar-ui/svelte-grid": ["@svar-ui/svelte-grid@2.7.0", "https://registry.npmmirror.com/@svar-ui/svelte-grid/-/svelte-grid-2.7.0.tgz", { "dependencies": { "@svar-ui/grid-data-provider": "2.7.0", "@svar-ui/grid-locales": "2.7.0", "@svar-ui/grid-store": "2.7.0", "@svar-ui/lib-dom": "0.13.1", "@svar-ui/lib-state": "1.9.7", "@svar-ui/lib-svelte": "0.5.2", "@svar-ui/svelte-core": "2.6.0", "@svar-ui/svelte-menu": "2.6.0", "@svar-ui/svelte-toolbar": "2.6.0" } }, "sha512-kgPIwNi8JxdQRgmgDn5SmfZFGg7kp/L0jQPXpIpsXZ9Yun/E6XeYRpfduG9DRchzP714dHGxJ50UEW4p7+/b9w=="],
-
-    "@svar-ui/svelte-menu": ["@svar-ui/svelte-menu@2.6.0", "https://registry.npmmirror.com/@svar-ui/svelte-menu/-/svelte-menu-2.6.0.tgz", { "dependencies": { "@svar-ui/lib-dom": "0.13.1", "@svar-ui/svelte-core": "2.6.0" } }, "sha512-1sXgVKG4hUhkrnbfrSKvfp0M/OqMjbHBnoYRMZKNLs9z1hWGJpKqzZZkUZg8ahH40SfitMjK8XjEgGMFBwC/7g=="],
-
-    "@svar-ui/svelte-toolbar": ["@svar-ui/svelte-toolbar@2.6.0", "https://registry.npmmirror.com/@svar-ui/svelte-toolbar/-/svelte-toolbar-2.6.0.tgz", { "dependencies": { "@svar-ui/lib-dom": "0.13.1", "@svar-ui/svelte-core": "2.6.0" } }, "sha512-/LHwQdo2FTzuQHdNXzmV0rsnKONAMHvb1M+8jSv6WCzfSBtggEEZ1voItl4EB3NzoBeI42zKxwuiskjXpkHyoQ=="],
-
-    "@svar-ui/svelte-uploader": ["@svar-ui/svelte-uploader@2.6.0", "https://registry.npmmirror.com/@svar-ui/svelte-uploader/-/svelte-uploader-2.6.0.tgz", { "dependencies": { "@svar-ui/lib-dom": "0.13.1", "@svar-ui/svelte-core": "2.6.0", "@svar-ui/uploader-locales": "2.6.0" } }, "sha512-aXnGC+InNzpNcPSf2BlhKSkhsQh5BY6a0srRnrJDKGrrsPKhdtPX9vm7wVdzHea7BY+itHRoPLPNxf4lB19haA=="],
-
-    "@svar-ui/uploader-locales": ["@svar-ui/uploader-locales@2.6.0", "https://registry.npmmirror.com/@svar-ui/uploader-locales/-/uploader-locales-2.6.0.tgz", {}, "sha512-ecqvGp2KbVlecYJ1+5erWIMIrRtAqbNwxJJTNjh6fgHdFX/wQn7cO4rJZD8Gbvag5GiR2btA0EOAi3ug6Lvf2g=="],
 
     "@svelte-put/shortcut": ["@svelte-put/shortcut@4.2.0", "https://registry.npmmirror.com/@svelte-put/shortcut/-/shortcut-4.2.0.tgz", { "peerDependencies": { "svelte": "^5.1.0" } }, "sha512-hqNLo4yEc++SLgAkZUvuwMxIAsii9qjQtTuzfcYVf3xRxa+0HFcfaWFK7LdU3l+15s9SYVNbPB0qQj9CHFqSuw=="],
 
@@ -3079,34 +3041,6 @@
 
     "@svadmin/sso/typescript": ["typescript@7.0.2", "https://registry.npmmirror.com/typescript/-/typescript-7.0.2.tgz", { "optionalDependencies": { "@typescript/typescript-aix-ppc64": "7.0.2", "@typescript/typescript-darwin-arm64": "7.0.2", "@typescript/typescript-darwin-x64": "7.0.2", "@typescript/typescript-freebsd-arm64": "7.0.2", "@typescript/typescript-freebsd-x64": "7.0.2", "@typescript/typescript-linux-arm": "7.0.2", "@typescript/typescript-linux-arm64": "7.0.2", "@typescript/typescript-linux-loong64": "7.0.2", "@typescript/typescript-linux-mips64el": "7.0.2", "@typescript/typescript-linux-ppc64": "7.0.2", "@typescript/typescript-linux-riscv64": "7.0.2", "@typescript/typescript-linux-s390x": "7.0.2", "@typescript/typescript-linux-x64": "7.0.2", "@typescript/typescript-netbsd-arm64": "7.0.2", "@typescript/typescript-netbsd-x64": "7.0.2", "@typescript/typescript-openbsd-arm64": "7.0.2", "@typescript/typescript-openbsd-x64": "7.0.2", "@typescript/typescript-sunos-x64": "7.0.2", "@typescript/typescript-win32-arm64": "7.0.2", "@typescript/typescript-win32-x64": "7.0.2" }, "bin": { "tsc": "bin/tsc" } }, "sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA=="],
 
-    "@svar-ui/grid-data-provider/@svar-ui/lib-data-provider": ["@svar-ui/lib-data-provider@1.7.2", "https://registry.npmmirror.com/@svar-ui/lib-data-provider/-/lib-data-provider-1.7.2.tgz", { "dependencies": { "@svar-ui/lib-state": "1.9.6" } }, "sha512-Od93Iiy0vBwVzgJm25WdizH3d4Xlli/HAA2kqoUj1pzeZ2SWBeFzvE59iihQz8NuIlfAtQJ6MMe168458T+2lQ=="],
-
-    "@svar-ui/grid-store/@svar-ui/lib-dom": ["@svar-ui/lib-dom@0.12.1", "https://registry.npmmirror.com/@svar-ui/lib-dom/-/lib-dom-0.12.1.tgz", {}, "sha512-srvDleQqR6stBBDijCgzDHMFTTffI6sv3XCpNPKmurrnE83L1MDNqezqg6j3+0dUVPd4AAEGOez2DvK6byblTQ=="],
-
-    "@svar-ui/grid-store/@svar-ui/lib-state": ["@svar-ui/lib-state@1.9.6", "https://registry.npmmirror.com/@svar-ui/lib-state/-/lib-state-1.9.6.tgz", {}, "sha512-twoHa8wZvzdxtES68s6Wnp4Xi1WivScNaFFK6sJ6WDgqVYOzJw0ZhVVrdwHQgieLITTKl/DYh/U3nuqtMetKYw=="],
-
-    "@svar-ui/lib-data-provider/@svar-ui/lib-state": ["@svar-ui/lib-state@1.9.6", "https://registry.npmmirror.com/@svar-ui/lib-state/-/lib-state-1.9.6.tgz", {}, "sha512-twoHa8wZvzdxtES68s6Wnp4Xi1WivScNaFFK6sJ6WDgqVYOzJw0ZhVVrdwHQgieLITTKl/DYh/U3nuqtMetKYw=="],
-
-    "@svar-ui/svelte-filemanager/@svar-ui/lib-dom": ["@svar-ui/lib-dom@0.13.1", "https://registry.npmmirror.com/@svar-ui/lib-dom/-/lib-dom-0.13.1.tgz", {}, "sha512-e9+RIEkppVkAUJqfHEr7KmiVXi3uf+qddr513h5mhgSx3PNYtG9eHwtI8OQf4JMc6Hvuu3y0iv+fL6jqE340yw=="],
-
-    "@svar-ui/svelte-filemanager/@svar-ui/svelte-core": ["@svar-ui/svelte-core@2.6.0", "https://registry.npmmirror.com/@svar-ui/svelte-core/-/svelte-core-2.6.0.tgz", { "dependencies": { "@svar-ui/core-locales": "2.6.0", "@svar-ui/lib-dom": "0.13.1", "@svar-ui/lib-svelte": "0.5.2" } }, "sha512-5fnEm4FXjRpVZgU8EoOMisiZ0bkkj0gtP1RK66Pi5Jw9OWu+ytZleaeUyFkpBxWNPX9yENkqEEOMWUnitPYO6A=="],
-
-    "@svar-ui/svelte-grid/@svar-ui/lib-dom": ["@svar-ui/lib-dom@0.13.1", "https://registry.npmmirror.com/@svar-ui/lib-dom/-/lib-dom-0.13.1.tgz", {}, "sha512-e9+RIEkppVkAUJqfHEr7KmiVXi3uf+qddr513h5mhgSx3PNYtG9eHwtI8OQf4JMc6Hvuu3y0iv+fL6jqE340yw=="],
-
-    "@svar-ui/svelte-grid/@svar-ui/svelte-core": ["@svar-ui/svelte-core@2.6.0", "https://registry.npmmirror.com/@svar-ui/svelte-core/-/svelte-core-2.6.0.tgz", { "dependencies": { "@svar-ui/core-locales": "2.6.0", "@svar-ui/lib-dom": "0.13.1", "@svar-ui/lib-svelte": "0.5.2" } }, "sha512-5fnEm4FXjRpVZgU8EoOMisiZ0bkkj0gtP1RK66Pi5Jw9OWu+ytZleaeUyFkpBxWNPX9yENkqEEOMWUnitPYO6A=="],
-
-    "@svar-ui/svelte-menu/@svar-ui/lib-dom": ["@svar-ui/lib-dom@0.13.1", "https://registry.npmmirror.com/@svar-ui/lib-dom/-/lib-dom-0.13.1.tgz", {}, "sha512-e9+RIEkppVkAUJqfHEr7KmiVXi3uf+qddr513h5mhgSx3PNYtG9eHwtI8OQf4JMc6Hvuu3y0iv+fL6jqE340yw=="],
-
-    "@svar-ui/svelte-menu/@svar-ui/svelte-core": ["@svar-ui/svelte-core@2.6.0", "https://registry.npmmirror.com/@svar-ui/svelte-core/-/svelte-core-2.6.0.tgz", { "dependencies": { "@svar-ui/core-locales": "2.6.0", "@svar-ui/lib-dom": "0.13.1", "@svar-ui/lib-svelte": "0.5.2" } }, "sha512-5fnEm4FXjRpVZgU8EoOMisiZ0bkkj0gtP1RK66Pi5Jw9OWu+ytZleaeUyFkpBxWNPX9yENkqEEOMWUnitPYO6A=="],
-
-    "@svar-ui/svelte-toolbar/@svar-ui/lib-dom": ["@svar-ui/lib-dom@0.13.1", "https://registry.npmmirror.com/@svar-ui/lib-dom/-/lib-dom-0.13.1.tgz", {}, "sha512-e9+RIEkppVkAUJqfHEr7KmiVXi3uf+qddr513h5mhgSx3PNYtG9eHwtI8OQf4JMc6Hvuu3y0iv+fL6jqE340yw=="],
-
-    "@svar-ui/svelte-toolbar/@svar-ui/svelte-core": ["@svar-ui/svelte-core@2.6.0", "https://registry.npmmirror.com/@svar-ui/svelte-core/-/svelte-core-2.6.0.tgz", { "dependencies": { "@svar-ui/core-locales": "2.6.0", "@svar-ui/lib-dom": "0.13.1", "@svar-ui/lib-svelte": "0.5.2" } }, "sha512-5fnEm4FXjRpVZgU8EoOMisiZ0bkkj0gtP1RK66Pi5Jw9OWu+ytZleaeUyFkpBxWNPX9yENkqEEOMWUnitPYO6A=="],
-
-    "@svar-ui/svelte-uploader/@svar-ui/lib-dom": ["@svar-ui/lib-dom@0.13.1", "https://registry.npmmirror.com/@svar-ui/lib-dom/-/lib-dom-0.13.1.tgz", {}, "sha512-e9+RIEkppVkAUJqfHEr7KmiVXi3uf+qddr513h5mhgSx3PNYtG9eHwtI8OQf4JMc6Hvuu3y0iv+fL6jqE340yw=="],
-
-    "@svar-ui/svelte-uploader/@svar-ui/svelte-core": ["@svar-ui/svelte-core@2.6.0", "https://registry.npmmirror.com/@svar-ui/svelte-core/-/svelte-core-2.6.0.tgz", { "dependencies": { "@svar-ui/core-locales": "2.6.0", "@svar-ui/lib-dom": "0.13.1", "@svar-ui/lib-svelte": "0.5.2" } }, "sha512-5fnEm4FXjRpVZgU8EoOMisiZ0bkkj0gtP1RK66Pi5Jw9OWu+ytZleaeUyFkpBxWNPX9yENkqEEOMWUnitPYO6A=="],
-
     "@sveltejs/vite-plugin-svelte/magic-string": ["magic-string@1.1.0", "https://registry.npmmirror.com/magic-string/-/magic-string-1.1.0.tgz", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.5" } }, "sha512-kS3VHe0nEPST2saQV4Rbkchcd3UBRkVTQHo1D3h/ZTwFDhai/mfKkmtPAtD129EOI7K3HlHIsFOt0WrI2/oU9g=="],
 
     "@tanstack/react-query/@tanstack/query-core": ["@tanstack/query-core@5.101.2", "https://registry.npmmirror.com/@tanstack/query-core/-/query-core-5.101.2.tgz", {}, "sha512-hH5MLoJhF7KaIGd7q3xTXGXvslI+GYlM1Z/35aSHHWaCJWB7XvTSHYuV3eM7tw+aE0mT/xMro4M4Q9rCGHT0lw=="],
@@ -3314,18 +3248,6 @@
     "@pandacss/plugin-lightningcss/lightningcss/lightningcss-win32-arm64-msvc": ["lightningcss-win32-arm64-msvc@1.31.1", "https://registry.npmmirror.com/lightningcss-win32-arm64-msvc/-/lightningcss-win32-arm64-msvc-1.31.1.tgz", { "os": "win32", "cpu": "arm64" }, "sha512-aJReEbSEQzx1uBlQizAOBSjcmr9dCdL3XuC/6HLXAxmtErsj2ICo5yYggg1qOODQMtnjNQv2UHb9NpOuFtYe4w=="],
 
     "@pandacss/plugin-lightningcss/lightningcss/lightningcss-win32-x64-msvc": ["lightningcss-win32-x64-msvc@1.31.1", "https://registry.npmmirror.com/lightningcss-win32-x64-msvc/-/lightningcss-win32-x64-msvc-1.31.1.tgz", { "os": "win32", "cpu": "x64" }, "sha512-I9aiFrbd7oYHwlnQDqr1Roz+fTz61oDDJX7n9tYF9FJymH1cIN1DtKw3iYt6b8WZgEjoNwVSncwF4wx/ZedMhw=="],
-
-    "@svar-ui/grid-data-provider/@svar-ui/lib-data-provider/@svar-ui/lib-state": ["@svar-ui/lib-state@1.9.6", "https://registry.npmmirror.com/@svar-ui/lib-state/-/lib-state-1.9.6.tgz", {}, "sha512-twoHa8wZvzdxtES68s6Wnp4Xi1WivScNaFFK6sJ6WDgqVYOzJw0ZhVVrdwHQgieLITTKl/DYh/U3nuqtMetKYw=="],
-
-    "@svar-ui/svelte-filemanager/@svar-ui/svelte-core/@svar-ui/core-locales": ["@svar-ui/core-locales@2.6.0", "https://registry.npmmirror.com/@svar-ui/core-locales/-/core-locales-2.6.0.tgz", {}, "sha512-Sma/BkR3we76Ix/67NmSh511yvtKVpi8LFK06ZbWSiC3xEsCSoKsJ5AtLmi8dxaXPa5HuCWI/jMwJsKRwQ0F2Q=="],
-
-    "@svar-ui/svelte-grid/@svar-ui/svelte-core/@svar-ui/core-locales": ["@svar-ui/core-locales@2.6.0", "https://registry.npmmirror.com/@svar-ui/core-locales/-/core-locales-2.6.0.tgz", {}, "sha512-Sma/BkR3we76Ix/67NmSh511yvtKVpi8LFK06ZbWSiC3xEsCSoKsJ5AtLmi8dxaXPa5HuCWI/jMwJsKRwQ0F2Q=="],
-
-    "@svar-ui/svelte-menu/@svar-ui/svelte-core/@svar-ui/core-locales": ["@svar-ui/core-locales@2.6.0", "https://registry.npmmirror.com/@svar-ui/core-locales/-/core-locales-2.6.0.tgz", {}, "sha512-Sma/BkR3we76Ix/67NmSh511yvtKVpi8LFK06ZbWSiC3xEsCSoKsJ5AtLmi8dxaXPa5HuCWI/jMwJsKRwQ0F2Q=="],
-
-    "@svar-ui/svelte-toolbar/@svar-ui/svelte-core/@svar-ui/core-locales": ["@svar-ui/core-locales@2.6.0", "https://registry.npmmirror.com/@svar-ui/core-locales/-/core-locales-2.6.0.tgz", {}, "sha512-Sma/BkR3we76Ix/67NmSh511yvtKVpi8LFK06ZbWSiC3xEsCSoKsJ5AtLmi8dxaXPa5HuCWI/jMwJsKRwQ0F2Q=="],
-
-    "@svar-ui/svelte-uploader/@svar-ui/svelte-core/@svar-ui/core-locales": ["@svar-ui/core-locales@2.6.0", "https://registry.npmmirror.com/@svar-ui/core-locales/-/core-locales-2.6.0.tgz", {}, "sha512-Sma/BkR3we76Ix/67NmSh511yvtKVpi8LFK06ZbWSiC3xEsCSoKsJ5AtLmi8dxaXPa5HuCWI/jMwJsKRwQ0F2Q=="],
 
     "@types/prompts/@types/node/undici-types": ["undici-types@7.19.2", "https://registry.npmmirror.com/undici-types/-/undici-types-7.19.2.tgz", {}, "sha512-qYVnV5OEm2AW8cJMCpdV20CDyaN3g0AjDlOGf1OW4iaDEx8MwdtChUp4zu4H0VP3nDRF/8RKWH+IPp9uW0YGZg=="],
 

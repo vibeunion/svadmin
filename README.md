@@ -277,9 +277,9 @@ const dataProvider = createElysiaDataProvider<App>("http://localhost:3000");
 @import "@svadmin/ai-elements/ai.css";
 ```
 
-The plain CSS entry does not scan component sources. Remove obsolete SVAdmin `@source` directives. Existing hosts that intentionally use Tailwind v4 for their own application styles may opt into `@svadmin/ui/app.theme.css` instead of `app.css`, and `@svadmin/ai-elements/ai.theme.css` instead of `ai.css`. These legacy metadata entries do not make Tailwind a dependency of SVAdmin. Import only one entry per package.
+The CSS entries do not scan component sources. Remove obsolete SVAdmin `@source` directives. `app.theme.css` and `ai.theme.css` are retained as native-CSS compatibility entry names; neither emits Tailwind metadata. Import only one entry per package.
 
-普通 CSS 入口不扫描组件源码，请删除旧的 SVAdmin `@source` 指令。仍自行使用 Tailwind v4 的宿主，可将 UI 入口换为 `app.theme.css`，将 AI Elements 入口换为 `ai.theme.css`；每个包只引入一种入口。已编译的兼容类名和变量不应被批量删除。新样式请使用原生 CSS 或受控 recipes，而不是新增未经编译的工具类。
+普通 CSS 入口不扫描组件源码，请删除旧的 SVAdmin `@source` 指令。`app.theme.css` 与 `ai.theme.css` 仅保留旧导入路径，不再生成 Tailwind 指令。新样式使用原生 CSS 或受控 Panda recipes；不得运行 shadcn-svelte CLI 重新引入 Tailwind。旧兼容样式仍逐批迁移，Streamdown 的传递依赖清理仍未完成，详见 [迁移状态](docs/no-tailwind-component-migration.md)。
 
 For the opt-in Surface semantic variants, also import `@svadmin/surface/styles.css` and follow [Surface styling](packages/surface/STYLING.md). The default `svadmin/v1` contract is unchanged.
 

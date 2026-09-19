@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { buttonVariants } from './button-variants';
+import { uiButton } from '../../../styled-system/recipes/index.js';
 import ButtonRefHarness from '../../../../test/fixtures/ButtonRefHarness.svelte';
 import ButtonDisabledReasonHarness from '../../../../test/fixtures/ButtonDisabledReasonHarness.svelte';
 
@@ -8,7 +9,7 @@ describe('buttonVariants', () => {
 	it('returns a stable primitive class instead of Tailwind utility classes', () => {
 		const classes = buttonVariants({ variant: 'default' });
 
-		expect(classes).toBe('svadmin-button svadmin-button--default svadmin-button-size--default');
+		expect(classes).toBe(`svadmin-button svadmin-button--default svadmin-button-size--default ${uiButton({ variant: 'default', size: 'default' })}`);
 		expect(classes).not.toMatch(/(?:bg|text|hover|focus|rounded|inline-flex)-/);
 	});
 
@@ -20,8 +21,8 @@ describe('buttonVariants', () => {
 
 	it('preserves sizes and additional classes for class-only composition', () => {
 		expect(buttonVariants({ variant: 'outline', size: 'sm', class: 'custom', className: 'extra' }))
-			.toBe('svadmin-button svadmin-button--outline svadmin-button-size--sm custom extra');
-		expect(buttonVariants({ variant: null, size: null })).toBe('svadmin-button');
+			.toBe(`svadmin-button svadmin-button--outline svadmin-button-size--sm ${uiButton({ variant: 'outline', size: 'sm' })} custom extra`);
+		expect(buttonVariants({ variant: null, size: null })).toBe(`svadmin-button ${uiButton()}`);
 	});
 
 	it('binds the actual element when switching between button and link', async () => {
