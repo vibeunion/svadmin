@@ -67,6 +67,9 @@ describe('nested schema form draft and submission ownership', () => {
     expect(onsubmit).toHaveBeenCalledOnce();
     const name = view.getByLabelText('Name');
     expect(name.matches(':disabled')).toBe(true);
+    for (const control of element.querySelectorAll('input, select, button')) {
+      expect(control.hasAttribute('disabled')).toBe(true);
+    }
     await fireEvent.input(name, { target: { value: 'Synthetic event while busy' } });
     finish(); await waitFor(() => expect(element.getAttribute('aria-busy')).toBe('false'));
     await fireEvent.submit(element);

@@ -61,6 +61,7 @@
     try { return { ok: true as const, value: initializeSchemaForm(schema, value) }; }
     catch { return { ok: false as const }; }
   });
+  const locked = $derived(disabled || readonly || isSubmitting || !prepared.ok);
   // 按键是否存在初始化，不能每次输入都用 ?? 把清空的默认值补回来。
   $effect.pre(() => {
     if (prepared.ok && prepared.value !== value) value = prepared.value;
@@ -176,13 +177,13 @@
         {#if node.description}<p class="svadmin-u-d058ca6de60f svadmin-u-bfa603190748">{node.description}</p>{/if}
         {#each items as _, index (index)}
           {@render renderField(node.items ?? { type: 'string' }, [...path, String(index)], `${title} ${index + 1}`, true)}
-          <Button type="button" variant="ghost" size="sm" onclick={() => removeArrayItem(path, index)}>
+          <Button type="button" disabled={locked} variant="ghost" size="sm" onclick={() => removeArrayItem(path, index)}>
             <Trash2 class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" /> {labels.remove}
           </Button>
         {:else}
           <span class="svadmin-u-bfa603190748">{labels.empty}</span>
         {/each}
-        <Button type="button" variant="outline" size="sm" onclick={() => addArrayItem(path, node.items ?? { type: 'string' })}>
+        <Button type="button" disabled={locked} variant="outline" size="sm" onclick={() => addArrayItem(path, node.items ?? { type: 'string' })}>
           <Plus class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" /> {labels.add}
         </Button>
       </fieldset>
@@ -193,22 +194,22 @@
         </label>
         {#if node.description}<p class="svadmin-u-d058ca6de60f svadmin-u-bfa603190748">{node.description}</p>{/if}
         {#if node.enum}
-          <select id={id} required={required} value={schemaFormEnumIndex(node.enum, current)} onchange={(event) => choose(path, event.currentTarget.value, node.enum)} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529">
+          <select id={id} disabled={locked} required={required} value={schemaFormEnumIndex(node.enum, current)} onchange={(event) => choose(path, event.currentTarget.value, node.enum)} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529">
             <option value="">{i18n.t('common.selectOption')}</option>
             {#each node.enum as option, optionIndex (optionIndex)}<option value={String(optionIndex)}>{String(option)}</option>{/each}
           </select>
         {:else if node.type === 'boolean'}
-          <input id={id} type="checkbox" checked={Boolean(current)} onchange={(event) => writePath(path, event.currentTarget.checked)} />
+          <input id={id} disabled={locked} type="checkbox" checked={Boolean(current)} onchange={(event) => writePath(path, event.currentTarget.checked)} />
         {:else if node.type === 'number' || node.type === 'integer'}
-          <input id={id} type="number" step={node.type === 'integer' ? 1 : 'any'} required={required} value={current === undefined ? '' : String(current)} oninput={(event) => writePath(path, event.currentTarget.value === '' ? undefined : Number(event.currentTarget.value))} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529" />
+          <input id={id} disabled={locked} type="number" step={node.type === 'integer' ? 1 : 'any'} required={required} value={current === undefined ? '' : String(current)} oninput={(event) => writePath(path, event.currentTarget.value === '' ? undefined : Number(event.currentTarget.value))} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529" />
         {:else}
-          <input id={id} type="text" required={required} value={String(current ?? '')} oninput={(event) => writePath(path, event.currentTarget.value)} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529" />
+          <input id={id} disabled={locked} type="text" required={required} value={String(current ?? '')} oninput={(event) => writePath(path, event.currentTarget.value)} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529" />
         {/if}
       </div>
     {/if}
   {/snippet}
 
-  <fieldset class="schema-form-fields svadmin-u-3e7ce58d64fa" disabled={disabled || readonly || isSubmitting || !prepared.ok}>
+  <fieldset class="schema-form-fields svadmin-u-3e7ce58d64fa" disabled={locked}>
   {#if prepared.ok}
   <div class="svadmin-u-9c6cdfa2ba3d">
     {#each Object.entries(schema.properties ?? {}) as [key, node] (key)}
@@ -217,7 +218,7 @@
   </div>
 
   <div class="svadmin-u-173fa8f06789 svadmin-u-b950dda299d3 svadmin-u-05faf5c801ff svadmin-u-60fbb7713999 svadmin-u-77c08e015d14">
-    <Button type="submit" size="sm" disabled={disabled || readonly || isSubmitting || !prepared.ok} class="svadmin-u-44ee8ba0a421 svadmin-u-25effcb585ab">
+    <Button type="submit" size="sm" disabled={locked} class="svadmin-u-44ee8ba0a421 svadmin-u-25effcb585ab">
       {#if isSubmitting}<Loader2 class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-afbdd13a380e" />{/if}
       {submitText}
     </Button>
