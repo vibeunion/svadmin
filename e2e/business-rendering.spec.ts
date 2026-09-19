@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { stableScreenshot } from '../scripts/stable-screenshot.mjs';
 import { join } from 'node:path';
 import { demoSchemas } from '../example/src/resource-schemas';
 import { inMemoryDataProvider } from '../example/src/providers/inMemoryDb';
@@ -82,6 +83,8 @@ test('native product inline editing remains usable through the rendering boundar
 
 for (const viewport of [{ width: 1440, height: 900 }, { width: 1920, height: 1080 }]) {
   test(`migration evidence ${viewport.width}x${viewport.height}`, async ({ page }, testInfo) => {
+    // 仅证据截图降低动效；交互回归仍使用默认浏览器设置。
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.setViewportSize(viewport);
     await login(page);
     await page.goto('/#/products');
@@ -90,7 +93,17 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 1920, height: 108
     await expect(boundary.locator('table tbody tr').first()).toBeVisible();
     const directory = process.env['UI_SCREENSHOT_DIR'] ?? testInfo.outputPath('screenshots');
     await mkdir(directory, { recursive: true });
-    await page.screenshot({ path: join(directory, `typed-rendering-${viewport.width}x${viewport.height}.png`), fullPage: false });
+    // 行已可见不等于页面入场结束；检查实际祖先透明度，不覆盖生产 CSS。
+    await expect.poll(() => boundary.first().evaluate(element => {
+      let opacity = 1;
+      for (let node: Element | null = element; node; node = node.parentElement) {
+        opacity *= Number(getComputedStyle(node).opacity);
+      }
+      return opacity;
+    })).toBe(1);
+    await page.evaluate(() => document.fonts.ready.then(() => undefined));
+    const screenshot = await stableScreenshot(() => page.screenshot({ fullPage: false, animations: 'disabled', caret: 'hide' }));
+    await writeFile(join(directory, `typed-rendering-${viewport.width}x${viewport.height}.png`), screenshot);
     await testInfo.attach('typed-rendering-screen', { path: join(directory, `typed-rendering-${viewport.width}x${viewport.height}.png`), contentType: 'image/png' });
   });
 }

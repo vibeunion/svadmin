@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { buildKit, gitBlob, oklchToSrgb, parseTheme, source, validateManifest } from './build.mjs';
+import { buildKit, gitBlob, oklchToSrgb, parseTheme, source, runtimeSource, verifyRuntimeSources, validateManifest } from './build.mjs';
 
 const directory = dirname(fileURLToPath(import.meta.url));
 const root = resolve(directory, '../..');
@@ -21,7 +21,8 @@ for (const [theme, selector] of [['Light', ':root'], ['Dark', '.dark']]) {
 
 test('pins the actual stylesheet and primitive recipe blobs', () => {
   assert.equal(gitBlob(css), source.stylesheetBlob);
-  assert.equal(gitBlob(readFileSync(resolve(root, source.recipeSource))), source.recipeBlob);
+  verifyRuntimeSources(css, readFileSync(resolve(root, source.recipeSource)));
+  assert.equal(gitBlob(readFileSync(resolve(root, source.recipeSource))), runtimeSource.recipeBlob);
 });
 
 test('source changes cannot masquerade as a synchronized snapshot', () => {
@@ -118,4 +119,17 @@ test('page contracts remain finite metadata, not new runtime authority', () => {
     assert.equal(new Set(pattern.states).size, pattern.states.length);
     assert.ok(pattern.components.length && pattern.rules.length);
   }
+});
+
+
+test('runtime review retains historical Figma provenance and fails on unreviewed recipe drift', () => {
+  const recipe = readFileSync(resolve(root, source.recipeSource));
+  verifyRuntimeSources(css, recipe);
+  assert.throws(() => verifyRuntimeSources(css, Buffer.concat([recipe, Buffer.from('/* drift */')])), /source changed/u);
+  assert.throws(() => verifyRuntimeSources(css, recipe, { ...runtimeSource, figmaSynchronized: true }), /synchronization/u);
+  assert.throws(() => verifyRuntimeSources(css, recipe, { ...runtimeSource, figmaBaselineRevision: runtimeSource.revision }), /baseline changed/u);
+  assert.throws(() => verifyRuntimeSources(css, recipe, { ...runtimeSource, basedOnRecipeBlob: 'unrelated' }), /Unrelated/u);
+  const seed = buildKit(css)['figma-seed.json'];
+  assert.equal(seed.revision, read('figma-map.json').sourceRevision);
+  assert.equal(seed.runtimeSource.figmaSynchronized, false);
 });

@@ -60,3 +60,17 @@ test('published aliases stay identical; generated variables remain namespaced', 
     if (decl.prop.startsWith('--')) assert.match(decl.prop, /^--svadmin-/u);
   });
 });
+
+
+for (const status of ['success', 'warning', 'danger', 'info', 'neutral']) {
+  test(`status ${status} is published, with a readable no-color-mix fallback`, () => {
+    const className = runtime.productStatus({ status }).root;
+    const values = declarations(published, className);
+    assert.ok(values.has('color') && values.has('background'));
+    assert.ok(values.has('--svadmin-status-color'));
+    const fallback = definitions.productStatus.base.root['&[data-slot=badge]'];
+    assert.equal(fallback.color, 'var(--foreground)');
+    assert.equal(fallback.background, 'var(--muted)');
+    assert.notEqual(fallback.color, fallback.background);
+  });
+}

@@ -2,4 +2,4 @@
 export { surfaceMetric, surfaceTable, uiButton, uiBadge, uiInput, uiTextarea } from './styled-system/recipes/index.js';
 
 /** Stripe-first 产品组合部件，消费端仅选择已生成 CSS。 */
-export { productSection, productToolbar, productWorkspace, productSettings, productSettingsRow, productList } from './styled-system/recipes/index.js';
+export { productSection, productToolbar, productWorkspace, productSettings, productSettingsRow, productList, productStatus } from './styled-system/recipes/index.js';

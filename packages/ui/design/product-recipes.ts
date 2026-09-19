@@ -110,3 +110,35 @@ export const productList = defineSlotRecipe({
     help: { ...caption, margin: '0', maxWidth: '65ch' },
   },
 });
+
+
+// 状态标签不沿用用于实心警告背景的 warning-foreground；在浅色底上混合
+// 当前主题前景，暗色底上同样可读。不支持 color-mix 时保留高对比回退。
+export const productStatus = defineSlotRecipe({
+  className: 'product-status',
+  slots: ['root'],
+  base: {
+    root: {
+      '--svadmin-status-color': 'var(--muted-foreground)',
+      '&[data-slot=badge]': {
+        background: 'var(--muted)', color: 'var(--foreground)',
+        borderColor: 'var(--svadmin-status-color)', whiteSpace: 'nowrap',
+        '@supports (color: color-mix(in oklch, black, white))': {
+          background: 'color-mix(in oklch, var(--svadmin-status-color) 10%, var(--card))',
+          borderColor: 'color-mix(in oklch, var(--svadmin-status-color) 25%, var(--card))',
+          color: 'color-mix(in oklch, var(--svadmin-status-color) 35%, var(--foreground))',
+        },
+      },
+    },
+  },
+  variants: {
+    status: {
+      success: { root: { '--svadmin-status-color': 'var(--success)' } },
+      warning: { root: { '--svadmin-status-color': 'var(--warning)' } },
+      danger: { root: { '--svadmin-status-color': 'var(--destructive)' } },
+      info: { root: { '--svadmin-status-color': 'var(--info)' } },
+      neutral: { root: { '--svadmin-status-color': 'var(--muted-foreground)' } },
+    },
+  },
+  defaultVariants: { status: 'neutral' },
+});

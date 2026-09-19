@@ -41,6 +41,27 @@
       "types": "./dist/svar.d.ts",
       "svelte": "./dist/svar.js",
       "default": "./dist/svar.js"
+    },
+    "./workflows": {
+      "types": "./dist/workflows.d.ts",
+      "default": "./dist/workflows.js"
+    },
+    "./interactive": {
+      "types": "./dist/interactive.d.ts",
+      "svelte": "./dist/interactive.js",
+      "default": "./dist/interactive.js"
+    },
+    "./openui": {
+      "types": "./dist/openui.d.ts",
+      "default": "./dist/openui.js"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "node": "./dist/server.js"
+    },
+    "./server/sqlite": {
+      "types": "./dist/server-sqlite.d.ts",
+      "node": "./dist/server-sqlite.js"
     }
   },
   "peerDependencies": {
