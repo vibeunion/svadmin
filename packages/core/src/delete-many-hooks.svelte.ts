@@ -26,7 +26,7 @@ export interface ContractDeleteManyOptions<S extends ContractSchemas> {
 export type { ContractDeleteManyParams } from './delete-many-contract';
 type Result<S extends ContractSchemas> = { data: ContractRecord<S>[] };
 type Failure = HttpError | DeleteManyPartialError;
-interface Callbacks<S extends ContractSchemas> {
+export interface Callbacks<S extends ContractSchemas> {
   onSuccess?: (data: Result<S>) => void | Promise<void>;
   onError?: (error: Failure) => void | Promise<void>;
   onSettled?: (data: Result<S> | undefined, error: Failure | null) => void | Promise<void>;

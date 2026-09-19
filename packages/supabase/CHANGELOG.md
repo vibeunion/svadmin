@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.15.0](https://github.com/vibeunion/svadmin/compare/supabase-v0.14.5...supabase-v0.15.0) (2026-09-19)
+
+
+### 🚀 Features
+
+* **permissions:** add catalog snapshot adapter ([#425](https://github.com/vibeunion/svadmin/issues/425)) ([49a1433](https://github.com/vibeunion/svadmin/commit/49a143383a10df6be8b5f8e4b02e9af8dccc161f))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.11.6
+  * peerDependencies
+    * @svadmin/core bumped to 0.52.0
+
 ## [0.14.5](https://github.com/vibeunion/svadmin/compare/supabase-v0.14.4...supabase-v0.14.5) (2026-09-16)
 
 

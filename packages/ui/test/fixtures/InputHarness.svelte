@@ -16,7 +16,7 @@
 	} = $props();
 
 	const scope = createI18nScope();
-	untrack(() => scope.updateOwner({ locale }));
+	untrack(() => scope.updateOwner(locale === undefined ? {} : { locale }));
 	provideI18nScope(scope);
 
 	let files = $state<FileList>(new DataTransfer().files);
