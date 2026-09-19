@@ -1,0 +1,44 @@
+{
+  "implementation": "f1f46c5c48832f29f5ff7695d0d7faf6db82ba73",
+  "testedCheckout": "a36b6be7a7703873e06854c7bbe18e50412bdafd",
+  "sourceTree": "0314fe9efca0774bf3f536961249bb7b99144928",
+  "product": {
+    "run": 35473587755,
+    "artifactId": 10594047248,
+    "archiveSha256": "46aa6c5cb452944b641dbb7337470998a1916f57372d30a1bf2d88f45c756930",
+    "scenesPassed": 228,
+    "interactionsPassed": 6,
+    "keyboardGroupsPassed": 2,
+    "statusColorThemesPassed": 2,
+    "minimumMeasuredStatusTextContrast": 9.343529270493969,
+    "all228SceneImageHashesVerified": true,
+    "all18VersionedSourceHashesVerified": true,
+    "publishedCssSha256": "e6a3aad9f1edc603927ade731d201ebbce9dcd8fa7b5541476ccf31b06c6b35d"
+  },
+  "surface": {
+    "run": 35473587762,
+    "artifactId": 10593161992,
+    "archiveSha256": "6f02e6588344bb5e5391cda46bf128ef73b987d00d3b930d76754f7a305f7f73",
+    "workflowConclusion": "success",
+    "packedConsumerReport": "packed-consumer.json"
+  },
+  "nativeStyles": {
+    "run": 35473587791,
+    "artifactId": 10594245364,
+    "archiveSha256": "90a1e76ae09d66dddab1f46389be5ca92e5f3c2c56c39dac67db3a709cbd37c8",
+    "sourceTreeReconstructed": true,
+    "defaultExactCasesPassed": 6,
+    "fallbackCasesPassed": 12
+  },
+  "images": [
+    {"file":"resource-list-ready-light-en-1440.png","width":1440,"height":900,"sha256":"ff2322635b53cc9935aa2bb30124cfef538bc1780422106e7bf8a6f2f1945945"},
+    {"file":"resource-list-ready-light-en-1920.png","width":1920,"height":1080,"sha256":"81ca99f53b61a2d6f90b91012910233dbe25ea6b109302d34a0722e52ce48128"},
+    {"file":"record-detail-ready-light-zh-CN-1440.png","width":1440,"height":900,"sha256":"bdc255e24450bd82107d1a13c04814744b4150afde01bc17710552144cf6ad02"},
+    {"file":"settings-ready-dark-zh-CN-390.png","width":390,"height":1307,"viewportHeight":844,"sha256":"fc4df19d193b34e93f5a27fae5d6a5439bac2bc087d42bf57f3834b98f4079d5"},
+    {"file":"components-ready-dark-en-1440.png","width":1440,"height":1116,"viewportHeight":900,"sha256":"323fe1ae4ddb04d77b344465ece2accb0242dabe19b33769e964a6126dea0ab4"}
+  ],
+  "capture": "Fresh original PNG bytes downloaded from this implementation's successful run and independently hash-checked. These five images happen to equal older Git blobs, which are reused only after equality verification; test provenance is current, not relabeled old results.",
+  "scope": "Real Svelte specimens with synthetic data; not production backend, full application coverage, Figma parity, WCAG certification or independent human design approval.",
+  "overallCiAtArchive": "still in progress; specialized passes do not replace full CI 35473587795",
+  "figma": "Fresh metadata attempt hit Starter MCP quota; no write or synchronization claimed."
+}
