@@ -5,40 +5,61 @@ on:
     branches: [feat/panda-tokens-no-tailwind]
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: panda-migration-bootstrap
+  cancel-in-progress: false
 
 jobs:
-  baseline:
+  migration:
+    if: github.ref == 'refs/heads/feat/panda-tokens-no-tailwind'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
         with:
-          persist-credentials: false
-      - name: Archive tracked sources
-        run: |
-          mkdir -p "$RUNNER_TEMP/panda-evidence"
-          git archive --format=tar.gz --output="$RUNNER_TEMP/panda-evidence/source.tar.gz" HEAD
-          git rev-parse HEAD > "$RUNNER_TEMP/panda-evidence/commit.txt"
+          ref: feat/panda-tokens-no-tailwind
+          fetch-depth: 0
       - uses: actions/setup-node@v7
         with:
           node-version: '26'
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: '1.4.2'
-      - name: Install unchanged dependency baseline
+      - name: Install immutable migration baseline
         run: bun install --frozen-lockfile
-      - name: Capture existing published CSS before migration
+      - name: Generate native compatibility sources and remove compiler dependencies
+        run: PANDA_VERSION="$(npm view @pandacss/dev version)" node scripts/panda-seed.mjs
+      - name: Resolve Panda dependency and update lockfile
+        run: bun install
+      - name: Build native styles and component packages
+        id: build
+        continue-on-error: true
         run: |
-          node packages/ui/scripts/build-static-css.mjs
-          node packages/ui/scripts/postbuild-css.mjs
-          cp packages/ui/dist/app.css "$RUNNER_TEMP/panda-evidence/ui.baseline.css"
-          cp packages/ui/dist/app.theme.css "$RUNNER_TEMP/panda-evidence/ui-theme.baseline.css"
-      - name: Preserve baseline evidence
+          bun run --cwd packages/ai-elements build
+          bun run --cwd packages/ui build
+          bun run --cwd packages/surface build
+      - name: Commit generated migration only to the feature branch
+        run: |
+          test "$(git branch --show-current)" = 'feat/panda-tokens-no-tailwind'
+          git add -- .gitignore eslint.config.js bun.lock README.md packages/ui packages/ai-elements packages/surface packages/create-svadmin/src/index.ts example scripts/check-package-packs.ts
+          git diff --cached --check
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'feat(styles): remove Tailwind and preserve CSS compatibility'
+          git push origin HEAD:refs/heads/feat/panda-tokens-no-tailwind
+      - name: Archive generated source for independent inspection
         if: always()
-        uses: actions/upload-artifact@v6
+        run: |
+          mkdir -p "$RUNNER_TEMP/panda-evidence"
+          git archive --format=tar.gz --output="$RUNNER_TEMP/panda-evidence/source.tar.gz" HEAD
+          git rev-parse HEAD > "$RUNNER_TEMP/panda-evidence/commit.txt"
+      - uses: actions/upload-artifact@v6
+        if: always()
         with:
-          name: panda-migration-baseline
+          name: panda-generated-source
           path: ${{ runner.temp }}/panda-evidence/
           retention-days: 7
           compression-level: 0
+      - name: Report build result
+        if: steps.build.outcome == 'failure'
+        run: exit 1
