@@ -4,6 +4,7 @@
   import type { ComponentProps } from 'svelte';
   import SvarDataGrid from './SvarDataGrid.svelte';
   import SvarResourceTableView from './SvarResourceTableView.svelte';
+  import type { SvarLazyTree } from './svar-grid-resource-loading.js';
   import type { SvarValueFormat } from './svar-grid-interactions.js';
 
   export interface SvarResourceTableProps {
@@ -15,6 +16,10 @@
     initialSorters?: readonly Sort[];
     height?: number;
     freezeLeft?: number;
+    freezeRight?: number;
+    /** 高级读取仍使用资源契约、Provider 和核心查询缓存。 */
+    loadingMode?: 'page' | 'window' | 'infinite';
+    lazyTree?: SvarLazyTree;
     density?: 'compact' | 'comfortable';
     childrenKey?: string;
     dataScopeKey?: string | number;
