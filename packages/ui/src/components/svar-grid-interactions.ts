@@ -17,7 +17,7 @@ export interface SvarInteractiveApi extends SvarGridApi {
   on(action: string, callback: (event: unknown) => void): void;
   getState(): { selectedRows?: unknown };
 }
-export interface SvarInteractiveEngineProps extends SvarGridEngineProps {
+export interface SvarInteractiveEngineProps extends Omit<SvarGridEngineProps, 'init' | 'columns'> {
   columns: (SvarEngineColumn & { editor?: 'text'; template?: (value: unknown) => string })[];
   selectedRows?: (string | number)[];
   init?: (api: SvarInteractiveApi) => void;

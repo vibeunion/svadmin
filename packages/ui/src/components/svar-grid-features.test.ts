@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
-import { checkedSvarSelection, svarRecordIndex, svarRecordKey, runSvarBatch, svarCsv } from './svar-grid-operations.js';
+import { checkedSvarSelection, svarRecordIndex, svarRecordKey, runSvarBatch, svarCsv, prepareSvarExport, authorizeSvarExport } from './svar-grid-operations.js';
 import { projectSvarRows, svarColumnId } from './svar-grid-contract.js';
 import { checkedSvarInteractiveColumns, buildSvarInteractiveColumns, formatSvarValue, parseSvarCellEdit, installSvarInteractions, type SvarInteractiveApi, type SvarInteractiveColumn } from './svar-grid-interactions.js';
 
@@ -8,18 +8,15 @@ const columns: SvarInteractiveColumn[] = [{ key: 'name', label: 'Name', editable
 const records = [{ id: 1, name: 'Alice', amount: 2 }, { id: '1', name: 'Bob', amount: 3 }];
 
 describe('SVAR scoped batch operations', () => {
-  it('validates and deduplicates IDs without confusing number/string IDs', () => {
+  it('validates and deduplicates typed IDs', () => {
     assert.deepEqual(checkedSvarSelection([1, '1', 1]), [1, '1']);
     assert.throws(() => checkedSvarSelection(Array.from({ length: 101 }, (_, i) => i)));
-    assert.throws(() => svarRecordKey(NaN));
-    assert.throws(() => svarRecordKey(''));
+    assert.throws(() => svarRecordKey(NaN)); assert.throws(() => svarRecordKey(''));
   });
   it('preflights the entire selection before any write', async () => {
     const writes: (string | number)[] = [];
     const result = await runSvarBatch({ ids: [1, 2], current: () => true, authorize: async id => id === 1, write: async id => { writes.push(id); } });
-    assert.deepEqual(writes, []);
-    assert.equal(result.failed[0]?.id, 2);
-    assert.deepEqual(result.skipped, [1]);
+    assert.deepEqual(writes, []); assert.equal(result.failed[0]?.id, 2); assert.deepEqual(result.skipped, [1]);
   });
   it('treats authorization exceptions as denial', async () => {
     let writes = 0;
@@ -27,20 +24,17 @@ describe('SVAR scoped batch operations', () => {
     assert.equal(writes, 0); assert.equal(result.failed.length, 1);
   });
   it('rechecks each record just before dispatch', async () => {
-    let checks = 0;
-    let writes = 0;
+    let checks = 0; let writes = 0;
     const result = await runSvarBatch({ ids: [1], current: () => true, authorize: async () => ++checks === 1, write: async () => { writes++; } });
     assert.equal(checks, 2); assert.equal(writes, 0); assert.equal(result.failed.length, 1);
   });
   it('does not dispatch after the authorization scope changed', async () => {
-    let current = true;
-    let writes = 0;
+    let current = true; let writes = 0;
     const result = await runSvarBatch({ ids: [1, 2], current: () => current, authorize: async () => { current = false; return true; }, write: async () => { writes++; } });
     assert.equal(writes, 0); assert.equal(result.cancelled, true); assert.deepEqual(result.skipped, [1, 2]);
   });
-  it('stops the remaining batch when the first completed write changes scope', async () => {
-    let current = true;
-    const writes: (string | number)[] = [];
+  it('stops the remaining batch after a scope change', async () => {
+    let current = true; const writes: (string | number)[] = [];
     const result = await runSvarBatch({ ids: [1, 2, 3], current: () => current, authorize: async () => true, write: async id => { writes.push(id); current = false; } });
     assert.deepEqual(writes, [1]); assert.deepEqual(result.succeeded, [1]); assert.deepEqual(result.skipped, [2, 3]); assert.equal(result.cancelled, true);
   });
@@ -62,8 +56,7 @@ describe('SVAR exported and editable data', () => {
   it('indexes original typed IDs and rejects duplicate or missing IDs', () => {
     const index = svarRecordIndex(records);
     assert.equal(index.get('n:1')?.['name'], 'Alice'); assert.equal(index.get('s:1')?.['name'], 'Bob');
-    assert.throws(() => svarRecordIndex([{ id: 1 }, { id: 1 }]));
-    assert.throws(() => svarRecordIndex([{ name: 'missing' }]));
+    assert.throws(() => svarRecordIndex([{ id: 1 }, { id: 1 }])); assert.throws(() => svarRecordIndex([{ name: 'missing' }]));
   });
   it('rejects cyclic child data', () => {
     const root: Record<string, unknown> = { id: 1 }; root['children'] = [root];
@@ -86,17 +79,15 @@ describe('SVAR exported and editable data', () => {
   });
   it('projects only declared CSV columns and escapes values and headers', () => {
     const declared = [{ key: 'name', label: '=danger' }];
-    const rows = projectSvarRows([{ id: 1, name: '="formula"', secret: 'hidden' }], declared);
-    const csv = svarCsv(rows, declared);
+    const csv = svarCsv(projectSvarRows([{ id: 1, name: '="formula"', secret: 'hidden' }], declared), declared);
     assert.ok(csv.includes('"\'=danger"')); assert.ok(csv.includes('"\'=""formula"""')); assert.ok(!csv.includes('hidden'));
   });
-  it('defuses formula prefixes with whitespace/control characters', () => {
-    for (const name of ['=cmd', '+cmd', '-cmd', '@cmd', '  =cmd', '\tcmd', '\r=cmd', '\n+cmd']) {
-      const csv = svarCsv(projectSvarRows([{ id: 1, name }], columns), columns);
-      assert.ok(csv.includes(`"'${name}"`));
+  it('defuses formula prefixes with whitespace and every leading ASCII control', () => {
+    for (const name of ['=cmd', '+cmd', '-cmd', '@cmd', '  =cmd', '\tcmd', '\r=cmd', '\n+cmd', ...Array.from({ length: 32 }, (_, i) => `${String.fromCharCode(i)}=cmd`)]) {
+      assert.ok(svarCsv(projectSvarRows([{ id: 1, name }], columns), columns).includes(`"'${name}"`));
     }
   });
-  it('preserves real negative numbers as numbers instead of formula strings', () => {
+  it('preserves real negative numbers instead of treating them as formula strings', () => {
     const csv = svarCsv(projectSvarRows([{ id: 1, name: 'a,b\nc', amount: -12 }], columns), columns);
     assert.ok(csv.includes('"-12"')); assert.ok(csv.includes('"a,b\nc"'));
   });
@@ -105,9 +96,10 @@ describe('SVAR exported and editable data', () => {
     const csv = svarCsv(projectSvarRows(data, columns, 'id', 'children'), columns);
     assert.ok(csv.includes('Child')); assert.ok(csv.includes('—'));
   });
-  it('validates typed formats and never forwards arbitrary template properties', () => {
+  it('validates typed formats without forwarding arbitrary template properties', () => {
     const raw = { key: 'name', label: 'Name', template: () => { throw new Error(); } };
-    assert.equal('template' in checkedSvarInteractiveColumns([raw])[0]!, false);
+    const [checked] = checkedSvarInteractiveColumns([raw]);
+    assert.ok(checked); assert.equal('template' in checked, false);
     assert.equal(formatSvarValue(0.5, { key: 'x', label: 'X', format: 'percent' }, 'en-US'), '50%');
     assert.equal(formatSvarValue(true, { key: 'x', label: 'X', format: 'boolean' }, 'zh-CN'), '是');
     assert.equal(formatSvarValue('invalid', { key: 'x', label: 'X', format: 'date' }, 'en-US'), '—');
@@ -116,13 +108,41 @@ describe('SVAR exported and editable data', () => {
   });
 });
 
+describe('SVAR export snapshot authorization', () => {
+  it('checks every descendant and rejects a denied child', async () => {
+    const snapshot = prepareSvarExport([{ id: 1, name: 'Parent', children: [{ id: 2, name: 'Child' }] }], columns, 'id', 'children');
+    const checked: unknown[] = [];
+    await assert.rejects(authorizeSvarExport(snapshot, { current: () => true, authorize: async (action, id) => { checked.push([action, id]); return id !== 2; } }));
+    assert.deepEqual(checked, [['list', undefined], ['export', undefined], ['export', 1], ['export', 2]]);
+  });
+  it('freezes records, headers and IDs before asynchronous authorization', async () => {
+    const child = { id: 2, name: 'Before' };
+    const data = [{ id: 1, name: 'Parent', children: [child] }];
+    const declared = [{ key: 'name', label: 'Name' }];
+    const snapshot = prepareSvarExport(data, declared, 'id', 'children');
+    const csv = await authorizeSvarExport(snapshot, { current: () => true, authorize: async () => {
+      child.id = 3; child.name = 'After'; declared[0] = { key: 'name', label: 'Changed' };
+      data[0]?.children.push({ id: 4, name: 'Unreviewed' }); return true;
+    } });
+    assert.deepEqual(snapshot.ids, [1, 2]); assert.ok(csv.includes('Before')); assert.ok(!csv.includes('After')); assert.ok(!csv.includes('Unreviewed')); assert.ok(!csv.includes('Changed'));
+    assert.equal(Object.isFrozen(snapshot), true); assert.equal(Object.isFrozen(snapshot.ids), true);
+  });
+  it('rejects scope changes during the final permission check', async () => {
+    const snapshot = prepareSvarExport(records, columns);
+    let current = true;
+    await assert.rejects(authorizeSvarExport(snapshot, { current: () => current, authorize: async (_action, id) => { if (id === '1') current = false; return true; } }));
+  });
+  it('treats permission errors as failed exports', async () => {
+    await assert.rejects(authorizeSvarExport(prepareSvarExport(records, columns), { current: () => true, authorize: async () => { throw new Error('Offline'); } }));
+  });
+});
+
 describe('SVAR engine interaction boundaries', () => {
   function setup() {
     const guards = new Map<string, (event: unknown) => false | undefined>();
     const listeners = new Map<string, (event: unknown) => void>();
     const api: SvarInteractiveApi = { intercept: (key, fn) => { guards.set(key, fn); }, on: (key, fn) => { listeners.set(key, fn); }, getState: () => ({ selectedRows: ['n:1', 's:1', 'n:999'] }) };
-    let current = true;
-    const edits: unknown[] = [], selections: unknown[] = [];
+    let current = true; const edits: unknown[] = [], selections: unknown[] = [];
     installSvarInteractions(api, {
       current: () => current, columns: () => columns, items: () => records,
       primaryKey: () => 'id', childrenKey: () => undefined, server: () => true,

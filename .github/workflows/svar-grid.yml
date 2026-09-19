@@ -4,6 +4,7 @@ on:
     paths:
       - 'packages/ui/src/components/Svar*'
       - 'packages/ui/src/components/svar-grid-*'
+      - 'packages/surface/src/**'
       - 'packages/core/src/**'
       - 'scripts/fixtures/svar-grid/**'
       - '.github/workflows/svar-grid.yml'
@@ -31,9 +32,9 @@ jobs:
         run: npm ci --prefix scripts/fixtures/svar-grid --ignore-scripts --no-audit --no-fund
       - name: Verify adapter lint
         run: bun x --no-install eslint packages/ui/src/components/Svar*.svelte packages/ui/src/components/svar-grid-*.ts scripts/fixtures/svar-grid --max-warnings 0
-      - name: Verify adapter unit tests
+      - name: Verify all adapter unit tests
         working-directory: packages/ui
-        run: bun run test src/components/svar-grid-contract.test.ts
+        run: bun run test src/components/svar-grid
       - name: Verify real upstream types and resource adapter
         run: bun x --no-install svelte-check --tsgo-experimental-api --tsconfig scripts/fixtures/svar-grid/tsconfig.json --threshold error
       - name: Verify SSR fallback

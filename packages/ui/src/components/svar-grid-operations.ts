@@ -1,5 +1,5 @@
 import type { SvarColumn, SvarRow } from './svar-grid-contract.js';
-import { svarColumnId } from './svar-grid-contract.js';
+import { checkedSvarColumns, projectSvarRows, svarColumnId } from './svar-grid-contract.js';
 
 export type SvarRecordId = string | number;
 export interface SvarBatchResult {
@@ -21,17 +21,19 @@ export function svarRecordIndex(items: readonly Record<string, unknown>[], prima
   const index = new Map<string, Record<string, unknown>>();
   const ancestors = new Set<object>();
   function visit(records: readonly Record<string, unknown>[], depth: number): void {
-    if (depth > 64) throw new Error('Grid tree is too deep');
+    if (!Array.isArray(records) || depth > 64) throw new Error('Invalid grid tree');
     for (const record of records) {
       if (!record || typeof record !== 'object' || Array.isArray(record) || ancestors.has(record)) throw new Error('Invalid grid tree');
-      const id = Object.getOwnPropertyDescriptor(record, primaryKey)?.value;
+      const descriptor = Object.getOwnPropertyDescriptor(record, primaryKey);
+      const id: unknown = descriptor && 'value' in descriptor ? descriptor.value : undefined;
+      if (typeof id !== 'string' && typeof id !== 'number') throw new Error('Invalid record ID');
       const key = svarRecordKey(id);
       if (index.has(key)) throw new Error('Duplicate record ID');
       index.set(key, record);
       if (childrenKey) {
-        const descriptor = Object.getOwnPropertyDescriptor(record, childrenKey);
-        if (descriptor && !('value' in descriptor)) throw new Error('Accessors are not allowed');
-        const children = descriptor?.value;
+        const childDescriptor = Object.getOwnPropertyDescriptor(record, childrenKey);
+        if (childDescriptor && !('value' in childDescriptor)) throw new Error('Accessors are not allowed');
+        const children: unknown = childDescriptor?.value;
         if (children !== undefined && !Array.isArray(children)) throw new Error('Invalid child records');
         if (Array.isArray(children)) {
           ancestors.add(record);
@@ -56,10 +58,7 @@ export function checkedSvarSelection(ids: readonly SvarRecordId[], max = 100): S
   });
 }
 
-/**
- * 先检查整批权限，再逐条重新授权并串行调用现有 mutation。
- * 不把部分成功伪装成事务回滚；会话变更后不再派发后续写入。
- */
+/** 整批预检后逐条重新授权；部分成功不是事务回滚，会话变更后停止派发。 */
 export async function runSvarBatch(options: {
   ids: readonly SvarRecordId[];
   current: () => boolean;
@@ -85,9 +84,8 @@ export async function runSvarBatch(options: {
       await options.write(id);
       succeeded.push(id);
     } catch (error) {
-      // 已派发的请求失败可能仍在服务端完成，禁止自动重试或声称已回滚。
-      const details = error && typeof error === 'object' ? Object.getOwnPropertyDescriptor(error, 'details')?.value : undefined;
-      const known = details && typeof details === 'object' ? Object.getOwnPropertyDescriptor(details, 'writeMayHaveSucceeded')?.value : undefined;
+      const details: unknown = error && typeof error === 'object' ? Object.getOwnPropertyDescriptor(error, 'details')?.value : undefined;
+      const known: unknown = details && typeof details === 'object' ? Object.getOwnPropertyDescriptor(details, 'writeMayHaveSucceeded')?.value : undefined;
       failed.push({ id, message: 'Operation failed; refresh before retrying', uncertain: known !== false });
     }
     if (!options.current()) { cancelled = true; break; }
@@ -96,14 +94,25 @@ export async function runSvarBatch(options: {
   return { succeeded, failed, skipped: ids.filter(id => !attempted.has(svarRecordKey(id))), cancelled };
 }
 
+function hasFormulaPrefix(text: string): boolean {
+  if (text.startsWith('\t') || text.startsWith('\r') || text.startsWith('\n')) return true;
+  let offset = 0;
+  while (offset < text.length) {
+    const character = text[offset] ?? '';
+    if (text.charCodeAt(offset) <= 31 || /\s/u.test(character)) offset++;
+    else break;
+  }
+  const first = text[offset];
+  return first !== undefined && '=+@-'.includes(first);
+}
+
 /** 导出只接受显式投影后的标量值；不调用对象的 toString/toJSON。 */
 export function svarCsv(rows: readonly SvarRow[], columns: readonly SvarColumn[]): string {
   const cell = (value: unknown): string => {
     let text = typeof value === 'string' ? value
       : typeof value === 'number' && Number.isFinite(value) ? String(value)
       : typeof value === 'boolean' ? String(value) : '';
-    // 防止表格程序将不可信文本解释为公式，包含空白/控制符前缀。
-    if (typeof value === 'string' && (/^[\s\u0000-\u001f]*[=+@-]/u.test(text) || /^[\t\r\n]/u.test(text))) text = `'${text}`;
+    if (typeof value === 'string' && hasFormulaPrefix(text)) text = `'${text}`;
     return `"${text.replaceAll('"', '""')}"`;
   };
   const lines = [columns.map(column => cell(column.label)).join(',')];
@@ -123,6 +132,44 @@ export function svarCsv(rows: readonly SvarRow[], columns: readonly SvarColumn[]
   }
   visit(rows, 0);
   return `\uFEFF${lines.join('\r\n')}\r\n`;
+}
+
+export interface SvarExportSnapshot {
+  readonly ids: readonly SvarRecordId[];
+  readonly csv: string;
+}
+
+/** 在首次 await 之前冻结完整导出内容与所有后代 ID，避免检查与导出对象不一致。 */
+export function prepareSvarExport(
+  items: readonly Record<string, unknown>[], columns: readonly SvarColumn[], primaryKey = 'id', childrenKey?: string,
+): SvarExportSnapshot {
+  const checked = checkedSvarColumns(columns);
+  const index = svarRecordIndex(items, primaryKey, childrenKey);
+  const ids: SvarRecordId[] = [];
+  for (const record of index.values()) {
+    const id: unknown = Object.getOwnPropertyDescriptor(record, primaryKey)?.value;
+    if (typeof id !== 'string' && typeof id !== 'number') throw new Error('Invalid record ID');
+    ids.push(id);
+  }
+  const csv = svarCsv(projectSvarRows(items, checked, primaryKey, childrenKey), checked);
+  return Object.freeze({ ids: Object.freeze(ids), csv });
+}
+
+/** 只授权已经冻结的快照；禁止只检查树根，或在权限等待结束后读取新数据。 */
+export async function authorizeSvarExport(snapshot: SvarExportSnapshot, options: {
+  current: () => boolean;
+  authorize: (action: 'list' | 'export', id: SvarRecordId | undefined) => Promise<boolean>;
+}): Promise<string> {
+  async function check(action: 'list' | 'export', id?: SvarRecordId): Promise<void> {
+    if (!options.current()) throw new Error('Export scope changed');
+    const allowed = await options.authorize(action, id);
+    if (!options.current() || !allowed) throw new Error('Export access denied');
+  }
+  await check('list');
+  await check('export');
+  for (const id of snapshot.ids) await check('export', id);
+  if (!options.current()) throw new Error('Export scope changed');
+  return snapshot.csv;
 }
 
 export function downloadSvarCsv(content: string, resourceName: string): void {
