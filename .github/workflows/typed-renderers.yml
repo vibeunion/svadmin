@@ -8,9 +8,9 @@ on:
       - 'scripts/fixtures/ui-rendering/**'
       - '.github/workflows/typed-renderers.yml'
       - 'bun.lock'
+      - 'package.json'
+      - 'scripts/check-type-contracts.ts'
       - 'tsconfig*.json'
-  push:
-    branches: [feat/typed-svelte-renderers]
 permissions:
   contents: read
 jobs:
@@ -19,6 +19,9 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
       - uses: actions/setup-node@v7
         with:
           node-version: '26'
@@ -37,6 +40,14 @@ jobs:
       - name: Compile native Svelte consumers
         if: success() || failure()
         run: bun run svelte-check --tsgo-experimental-api --tsconfig scripts/fixtures/ui-rendering/tsconfig.svelte.json --fail-on-warnings
+      - name: Build and verify public rendering subpath
+        if: success() || failure()
+        run: |
+          bun run --cwd packages/ai-elements build
+          bun run --cwd packages/ui build
+          bun -e 'const api = await import("@svadmin/ui/rendering"); if (typeof api.createResourceRenderers !== "function" || typeof api.componentView !== "function") throw new Error("Missing rendering exports"); console.info("Public rendering subpath OK");'
       - name: Check diff whitespace
         if: success() || failure()
-        run: git show --format= --check HEAD
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: git diff --check "$BASE_SHA...HEAD"

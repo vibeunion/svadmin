@@ -34,7 +34,7 @@ export function verifyTypes(raw: CellInput, input: FieldInput, snippet: Snippet<
   ui.field('clone', 'status', input).onchange(undefined);
   // @ts-expect-error 创建契约不包含只读 id。
   ui.field('create', 'id', input);
-  // @ts-expect-error 不允许虚构列。
+  // @ts-expect-error 列映射的字段必须真实存在于资源记录契约。
   ui.columns({ typo: snippet });
   const extraColumns = { status: snippet, typo: snippet };
   // @ts-expect-error 变量形式的多余字段也必须被拒绝。
