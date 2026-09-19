@@ -1,0 +1,3 @@
+# PR443 exact-head browser evidence
+
+Original PNG bytes from successful Surface workflow run 35453565034, artifact 10587437234. Source head `713d90db73373821ab6102eb694b3882cfd11d2e`; tested PR merge `65b516477d8720c75eedc236efe0da3d1eecba65`. Archive digest, image hashes, bitmap dimensions, and selected source hashes are in provenance.json. These are full-page captures under the stated viewports; the narrow bitmap can be taller than the viewport. Synthetic functional fixtures do not certify final Stripe-style visual design or live production authorization. No source branch, main, baseline or test tolerance is changed by retention.
