@@ -20,7 +20,7 @@ export interface SvarEngineColumn {
   treetoggle: boolean;
 }
 export interface SvarGridApi {
-  intercept(action: string, callback: (event: unknown) => false | void): void;
+  intercept(action: string, callback: (event: unknown) => false | undefined): void;
 }
 /** 仅使用已核对的上游属性；不暴露任意 editor、template 或事件执行入口。 */
 export interface SvarGridEngineProps {
@@ -160,7 +160,7 @@ export function nextSvarFilter(
   }
   return next;
 }
-export function svarSortMarks(sorters: readonly SvarSort[]): SvarGridEngineProps['sortMarks'] {
+export function svarSortMarks(sorters: readonly SvarSort[]): NonNullable<SvarGridEngineProps['sortMarks']> {
   return Object.fromEntries(sorters.map((sort, index) => [svarColumnId(sort.field), { order: sort.order, index }]));
 }
 export function svarFilterValues(filters: readonly SvarTextFilter[]): Record<string, string> {

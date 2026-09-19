@@ -63,6 +63,8 @@
     }
   });
   const rows = $derived.by(() => {
+    // 引擎可能修改树展开信息；新作用域必须获得全新投影。
+    void scopeKey;
     if (!model.ok) return { ok: false as const, message: model.message };
     try {
       return { ok: true as const, value: projectSvarRows(items, model.columns, primaryKey, childrenKey) };
@@ -171,7 +173,10 @@
   table { border-collapse: collapse; width: 100%; }
   th, td { padding: 0.5rem; text-align: start; border-bottom: var(--wx-border); }
   caption { text-align: start; color: var(--muted-foreground, GrayText); }
-  .svadmin-svar-grid :global(.wx-table-tree-toggle) { font-family: system-ui; }
+  .svadmin-svar-grid :global(.wx-table-tree-toggle),
+  .svadmin-svar-grid :global(.wx-sort i) { font-family: system-ui; font-style: normal; }
+  .svadmin-svar-grid :global(.wx-sort .wxi-arrow-up)::before { content: '↑'; }
+  .svadmin-svar-grid :global(.wx-sort .wxi-arrow-down)::before { content: '↓'; }
   .svadmin-svar-grid :global(.wx-table-tree-toggle.wxi-menu-right)::before { content: '▸'; }
   .svadmin-svar-grid :global(.wx-table-tree-toggle.wxi-menu-down)::before { content: '▾'; }
 </style>

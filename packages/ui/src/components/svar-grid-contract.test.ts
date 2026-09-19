@@ -11,7 +11,7 @@ const columns: SvarColumn[] = [
   { key: 'stock', label: 'Stock', sortable: true, width: 120 },
 ];
 function bus() {
-  const handlers = new Map<string, (event: unknown) => false | void>();
+  const handlers = new Map<string, (event: unknown) => false | undefined>();
   const api: SvarGridApi = { intercept(action, handler) { handlers.set(action, handler); } };
   return { api, dispatch(action: string, event: unknown = {}) { return handlers.get(action)?.(event); } };
 }
