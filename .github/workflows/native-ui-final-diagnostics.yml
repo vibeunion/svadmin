@@ -1,0 +1,43 @@
+name: Native UI final diagnostics
+on:
+  push:
+    branches: [feat/ui-panda-complete-20260919]
+    paths: ['.github/workflows/native-ui-final-diagnostics.yml']
+permissions:
+  contents: read
+jobs:
+  inspect:
+    if: github.repository == 'vibeunion/svadmin' && github.ref == 'refs/heads/feat/ui-panda-complete-20260919'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - name: Read bounded source and instruction context
+        run: |
+          git rev-parse HEAD
+          git status --short
+          if test -f .agents/AGENTS.local.md; then cat .agents/AGENTS.local.md; fi
+          git ls-files '*AGENTS*' '*form-builder*' '*FormBuilder*'
+          test ! -f packages/ui/src/components/form-builder.test.svelte.ts || cat packages/ui/src/components/form-builder.test.svelte.ts
+          git grep -n 'schema-output' -- packages/ui || true
+          cat package.json
+          grep -n 'fast-xml-parser\|@kapso-whatsapp' bun.lock || true
+      - run: bun install --frozen-lockfile
+      - name: Inspect actual advisory response and patched releases
+        run: |
+          npm view fast-xml-parser version --json
+          npm view fast-xml-parser@5.7.2 version dist.integrity dependencies --json
+          bun audit --json > "$RUNNER_TEMP/audit.json" 2>&1 || true
+          head -c 24000 "$RUNNER_TEMP/audit.json"
+      - name: Check branch divergence without changing code
+        run: |
+          git fetch --no-tags --depth=1 origin main
+          git diff --name-status FETCH_HEAD HEAD -- packages/ui/src/components/form-builder.test.svelte.ts package.json bun.lock
