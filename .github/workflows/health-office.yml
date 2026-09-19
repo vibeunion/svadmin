@@ -1,0 +1,57 @@
+name: Health office workspace
+on:
+  pull_request:
+    paths:
+      - 'example/src/office/**'
+      - 'example/src/components/LazyOfficeWorkspace.svelte'
+      - 'example/src/App.svelte'
+      - 'e2e/health-office.spec.ts'
+      - 'playwright.office.config.ts'
+      - '.github/workflows/health-office.yml'
+permissions:
+  contents: read
+concurrency:
+  group: health-office-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  health-office:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+      - name: Lint changed workspace
+        run: bunx eslint example/src/App.svelte example/src/office example/src/components/LazyOfficeWorkspace.svelte e2e/health-office.spec.ts playwright.office.config.ts --max-warnings 0
+      - name: Domain state tests
+        run: bun test example/src/office/domain.test.ts
+      - name: Build workspace dependencies
+        run: bun run build:packages
+      - name: Type check example and business tests
+        run: cd example && bun run check
+      - name: Build production example
+        run: cd example && bun run build
+      - name: Diff whitespace check
+        run: git diff --check HEAD^ HEAD
+      - name: Install Chromium
+        run: bunx playwright install --with-deps chromium
+      - name: Browser workflows and real screenshot evidence
+        run: bunx playwright test --config playwright.office.config.ts --fail-on-flaky-tests
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: health-office-browser-evidence
+          path: |
+            test-results/**/screenshots/*.png
+            test-results/**/error-context.md
+            playwright-report/
+          if-no-files-found: warn
