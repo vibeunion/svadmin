@@ -36,6 +36,25 @@ test('workspace default stays one column without an aside', () => {
   assert.equal(declarations(published, runtime.productWorkspace().columns).get('grid-template-columns'), 'minmax(0, 1fr)');
   assert.match(declarations(published, runtime.productWorkspace({ hasSecondary: true }).columns).get('grid-template-columns'), /--workspace-secondary-width/u);
 });
+test('workspace recipe preserves top alignment, responsive columns and slot order', () => {
+  // These assertions belong with the actual build-tool definitions and CSS,
+  // not in Core's source-only contract test or public dependency type graph.
+  const workspace = definitions.productWorkspace;
+  assert.equal(workspace.base.columns.display, 'grid');
+  assert.equal(workspace.base.columns.alignItems, 'start');
+  assert.equal(workspace.base.columns.gridTemplateColumns, 'minmax(0, 1fr)');
+  const desktop = workspace.variants.hasSecondary.true;
+  assert.deepEqual(desktop.columns['@media (min-width: 64rem)'], {
+    gridTemplateColumns: 'minmax(0, 1fr) minmax(0, var(--workspace-secondary-width, 22rem))',
+  });
+  assert.deepEqual(desktop.primary['@media (min-width: 64rem)'], { order: '1' });
+  assert.deepEqual(desktop.secondary['@media (min-width: 64rem)'], { order: '2' });
+  const styles = runtime.productWorkspace({ hasSecondary: true });
+  assert.equal(declarations(published, styles.columns).get('display'), 'grid');
+  assert.equal(declarations(published, styles.columns).get('align-items'), 'start');
+  assert.equal(declarations(published, styles.primary).get('order'), '1');
+  assert.equal(declarations(published, styles.secondary).get('order'), '2');
+});
 test('both field separation variants are explicitly generated', () => {
   assert.equal(declarations(published, runtime.productSettingsRow({ separated: true }).root).get('border-top'), '1px solid');
   assert.equal(declarations(published, runtime.productSettingsRow({ separated: false }).root).has('border-top'), false);

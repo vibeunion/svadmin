@@ -7,7 +7,6 @@
   "include": [
     "packages/*/src/**/*.test.ts",
     "packages/drizzle/src/**/*.ts",
-    "packages/ui/design/product-recipes.ts",
     "example/src/**/*.test.ts",
     "packages/refine-adapter/src/refinedev-optional.d.ts"
   ],
