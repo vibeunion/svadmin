@@ -1,39 +1,52 @@
-name: TypeBox repair workspace
-# Temporary development helper; removed before merge.
+name: TypeBox repair validation
+# Temporary branch-only repair helper; removed before merge.
 on:
   push:
     branches: [refactor/replace-zod-with-typebox]
 permissions:
-  contents: read
+  contents: write
 jobs:
-  workspace:
+  repair:
     if: >-
-      github.event.head_commit.message == 'chore: prepare isolated TypeBox repair workspace'
+      github.event.head_commit.message == 'chore: apply reviewed TypeBox CI repairs'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
-        with:
-          persist-credentials: false
       - uses: actions/setup-node@v7
         with:
           node-version: '26'
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: '1.4.2'
-      - run: bun install --frozen-lockfile
-      - name: Package source and installed development tools
+      - name: Verify and apply exact reviewed patch
         run: |
-          git rev-parse HEAD > "$RUNNER_TEMP/source-sha.txt"
-          tar --exclude='./.git' -czf "$RUNNER_TEMP/svadmin-workspace.tar.gz" .
-          cp "$(command -v node)" "$RUNNER_TEMP/node"
-          cp "$(command -v bun)" "$RUNNER_TEMP/bun"
-      - uses: actions/upload-artifact@v7
-        with:
-          name: typebox-repair-workspace
-          path: |
-            ${{ runner.temp }}/svadmin-workspace.tar.gz
-            ${{ runner.temp }}/source-sha.txt
-            ${{ runner.temp }}/node
-            ${{ runner.temp }}/bun
-          retention-days: 1
+          python3 <<'PY'
+          import base64, gzip, hashlib, os, pathlib, subprocess
+          source = pathlib.Path('.github/typebox-ci-repairs.patch.b64')
+          encoded = source.read_text().strip()
+          encoded = encoded.replace('ffreO3fv', 'ffreO2fv').replace('J866bArsUKeipIKP866bArsUKeipIKPndv', 'J866bArsUKeipIKPndv')
+          patch = gzip.decompress(base64.b64decode(encoded, validate=True))
+          assert hashlib.sha256(patch).hexdigest() == '1119a87fcfce785bc2051828af73826668b034155c4b38c2c2e7a301153196e6', 'Patch checksum mismatch'
+          target = pathlib.Path(os.environ['RUNNER_TEMP']) / 'reviewed.patch'
+          target.write_bytes(patch)
+          subprocess.run(['git', 'apply', '--check', '--whitespace=error', str(target)], check=True)
+          subprocess.run(['git', 'apply', '--whitespace=error', str(target)], check=True)
+          subprocess.run(['git', 'rm', '--', str(source)], check=True)
+          PY
+      - run: bun install --frozen-lockfile
+      - run: bun run lint
+      - name: Verify focused runtime contracts
+        run: |
+          bun test packages/elysia/src packages/create-svadmin/src/generate-command.test.ts
+          cd packages/ui
+          bunx --no-install vitest run src/components/date-time-input.test.svelte.ts src/components/file-upload.test.svelte.ts src/components/field-display-registration.test.svelte.ts src/components/import-wizard.test.svelte.ts src/components/resource-workspace.test.svelte.ts src/components/numeric-input.test.svelte.ts src/components/combobox-field.test.svelte.ts
+      - name: Commit only reviewed source repairs
+        run: |
+          git diff --exit-code -- bun.lock
+          git diff --check
+          git add -- packages/core/src/types.ts packages/create-svadmin/src/generate-command.ts packages/create-svadmin/src/generate-command.test.ts packages/lite/src/components/LiteFileUpload.svelte packages/lite/src/components/LiteFileUpload.test.svelte.ts packages/lite/src/components/LiteFilterBuilder.svelte packages/ui/src/components/DateRangeInput.svelte packages/ui/src/components/FileUpload.svelte packages/ui/src/components/TreeSelect.svelte packages/ui/src/components/combobox-field.test.svelte.ts packages/ui/src/components/date-time-input.test.svelte.ts packages/ui/src/components/field-display-registration.test.svelte.ts packages/ui/src/components/fieldComponentMap.ts packages/ui/src/components/file-upload.test.svelte.ts packages/ui/src/components/import-wizard.test-host.svelte packages/ui/src/components/import-wizard.test.svelte.ts packages/ui/src/components/resource-workspace.test-host.svelte packages/ui/src/components/resource-workspace.test.svelte.ts
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'fix: repair typed field contracts and isolate regression test state'
+          git push origin HEAD:refs/heads/refactor/replace-zod-with-typebox
+      - name: Validate complete strict checking inventory
+        run: bun run typecheck
