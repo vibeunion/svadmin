@@ -33,3 +33,18 @@ test('small recursive component graph fails before any canvas write when expande
   assert.equal(mock.calls.length, 0);
   assert.equal(mock.figma.root.children.length, 1);
 });
+
+// 保留底层原因用于诊断，不改变只回滚本次新增对象的边界。
+test('import rollback preserves the original caught error as its cause', async () => {
+  const mock = fixtures.createMock({ failText: true });
+  const runtime = createRuntime(mock.figma);
+  const staged = runtime.stageBlueprint(fixtures.blueprint());
+  await assert.rejects(runtime.importBlueprint(staged.stageId, true), error => {
+    assert.match(error.message, /Created resources rolled back/);
+    assert.ok(error.cause instanceof Error);
+    assert.equal(error.cause.message, 'synthetic text failure');
+    return true;
+  });
+  assert.equal(mock.figma.root.children.length, 1);
+  assert.equal(mock.variables.size, 1);
+});

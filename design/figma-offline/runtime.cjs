@@ -186,7 +186,7 @@
         try { if (page && !page.removed) page.remove(); } catch { failed.push(`page:${page.id}`); }
         try { if (collection) collection.remove(); } catch { failed.push(`collection:${collection.id}`); }
         const message = error instanceof Error ? error.message : String(error);
-        throw new Error(`${message}. ${failed.length ? `Rollback incomplete: ${failed.join(', ')}` : 'Created resources rolled back.'}`);
+        throw new Error(`${message}. ${failed.length ? `Rollback incomplete: ${failed.join(', ')}` : 'Created resources rolled back.'}`, { cause: error });
       }
     }
     async function handle(message) {
