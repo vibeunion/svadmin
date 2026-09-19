@@ -1,0 +1,164 @@
+import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { createRequire } from 'node:module';
+import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { buildPreview, directory, evidence, root, servePreview } from './run.mjs';
+import { scenarios } from './model.mjs';
+
+const require = createRequire(resolve(root, 'package.json'));
+const { chromium, expect } = require('@playwright/test');
+const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
+const report = {
+  revision: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(),
+  scope: 'Built Svelte specimens, not production backend integration, Figma parity or WCAG certification',
+  figmaSynced: false, sourceHashes: {}, scenes: [], interactions: [], failures: [],
+};
+rmSync(evidence, { force: true, recursive: true });
+mkdirSync(resolve(evidence, 'screenshots'), { recursive: true });
+for (const file of readdirSync(directory).filter(name => /\.(svelte|css|mjs|js|json)$/u.test(name)).sort()) report.sourceHashes[`design/stripe-first/preview/${file}`] = sha256(readFileSync(resolve(directory, file)));
+for (const file of ['packages/ui/dist/app.css', 'packages/ui/design/primitive-recipes.ts']) report.sourceHashes[file] = sha256(readFileSync(resolve(root, file)));
+let server;
+let browser;
+
+async function openScene(options, viewport) {
+  const context = await browser.newContext({ viewport, reducedMotion: 'reduce' });
+  const page = await context.newPage();
+  const errors = [];
+  const unexpectedRequests = [];
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('request', request => {
+    if (new URL(request.url()).origin !== 'http://127.0.0.1:4179' || request.method() !== 'GET') unexpectedRequests.push({ method: request.method(), url: request.url() });
+  });
+  await page.goto(`http://127.0.0.1:4179/?${new URLSearchParams(options)}`, { waitUntil: 'networkidle' });
+  await expect(page.getByTestId('specimen')).toHaveAttribute('data-view', options.view);
+  return { context, page, errors, unexpectedRequests };
+}
+async function stableScreenshot(locator) {
+  let previous;
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const current = await locator.screenshot({ animations: 'disabled' });
+    if (previous?.equals(current)) return current;
+    previous = current;
+  }
+  throw new Error('Specimen screenshot did not stabilize');
+}
+try {
+  await buildPreview();
+  server = await servePreview();
+  browser = await chromium.launch();
+  const viewports = [{ width: 1440, height: 1000 }, { width: 390, height: 844 }];
+  for (const viewport of viewports) for (const theme of ['light', 'dark']) for (const locale of ['en', 'zh-CN']) {
+    for (const [view, states] of Object.entries(scenarios)) for (const state of states) {
+      const options = { view, state, theme, locale };
+      const id = `${view}-${state}-${theme}-${locale}-${viewport.width}`;
+      const scene = await openScene(options, viewport);
+      try {
+        const { page } = scene;
+        await expect(page.getByTestId('specimen')).toHaveAttribute('data-scenario', state);
+        await expect(page.locator('html')).toHaveAttribute('lang', locale);
+        assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'page-level horizontal overflow');
+        if (state === 'forbidden') {
+          await expect(page.getByTestId('create')).toHaveCount(0);
+          await expect(page.getByTestId('specimen')).not.toContainText('billing@aster.example');
+          await expect(page.getByTestId('specimen')).not.toContainText('Aster Studio');
+        }
+        if (view === 'components') {
+          await expect(page.getByTestId('input-disabled')).toBeDisabled();
+          await expect(page.getByTestId('input-readonly')).toHaveAttribute('readonly', '');
+          await expect(page.getByTestId('input-invalid')).toHaveAttribute('aria-describedby', 'invalid-hint');
+        }
+        if (view === 'settings') await expect(page.getByTestId('save-state')).toHaveAttribute('data-phase', state);
+        if (view === 'settings' && state === 'readonly') await expect(page.getByTestId('save')).toBeDisabled();
+        if (view === 'settings' && state === 'saving') await expect(page.getByTestId('workspace-name')).toBeDisabled();
+        const png = await stableScreenshot(page.getByTestId('specimen'));
+        const filename = `${id}.png`;
+        writeFileSync(resolve(evidence, 'screenshots', filename), png);
+        assert.deepEqual(scene.errors, []);
+        assert.deepEqual(scene.unexpectedRequests, []);
+        report.scenes.push({ id, ...options, viewport, passed: true, screenshot: `screenshots/${filename}`, sha256: sha256(png) });
+      } catch (error) {
+        report.scenes.push({ id, ...options, viewport, passed: false, error: String(error) });
+        report.failures.push({ id, error: String(error) });
+      } finally { await scene.context.close(); }
+    }
+  }
+  for (const viewport of viewports) for (const locale of ['en', 'zh-CN']) {
+    const id = `interaction-${locale}-${viewport.width}`;
+    const scene = await openScene({ view: 'resource-list', state: 'ready', theme: 'light', locale }, viewport);
+    const { page } = scene;
+    try {
+      const search = page.getByRole('textbox', { name: locale === 'en' ? 'Search customers' : '搜索客户' });
+      await search.fill('Northstar');
+      await expect(page.getByTestId('count')).toHaveText(/1/u);
+      await page.getByTestId('open-demo_002').click();
+      await expect(page.getByTestId('specimen')).toContainText('Northstar Lab');
+      await page.getByTestId('back').click();
+      await expect(search).toHaveValue('Northstar');
+      await page.getByTestId('scenario').selectOption('error');
+      await page.getByRole('button', { name: locale === 'en' ? 'Retry' : '重试', exact: true }).click();
+      await expect(search).toHaveValue('Northstar');
+      await page.getByTestId('theme').selectOption('dark');
+      await page.getByTestId('density').selectOption('comfortable');
+      await expect(search).toHaveValue('Northstar');
+      await search.fill('nonexistent-record');
+      await expect(page.getByTestId('clear-filters')).toBeVisible();
+      await page.getByTestId('clear-filters').click();
+      await expect(page.getByTestId('count')).toHaveText(/4/u);
+      await page.getByTestId('allow-create').uncheck();
+      await expect(page.getByTestId('create')).toHaveCount(0);
+      await page.getByTestId('scenario').selectOption('forbidden');
+      await expect(page.getByTestId('specimen')).not.toContainText('Aster Studio');
+
+      await page.getByTestId('nav-components').click();
+      await page.getByTestId('input-default').fill('保持输入 · retained');
+      await page.getByTestId('input-default').focus();
+      await expect(page.getByTestId('input-default')).toBeFocused();
+      writeFileSync(resolve(evidence, 'screenshots', `${id}-focus.png`), await stableScreenshot(page.getByTestId('specimen')));
+      await page.getByTestId('input-file').setInputFiles({ name: 'customers.csv', mimeType: 'text/csv', buffer: Buffer.from('name\nAster\n') });
+      await expect(page.locator('.svadmin-file-input__name')).toHaveText('customers.csv');
+      await page.getByTestId('theme').selectOption('light');
+      await expect(page.getByTestId('input-default')).toHaveValue('保持输入 · retained');
+
+      await page.getByTestId('nav-settings').click();
+      await page.getByTestId('workspace-name').fill('Changed workspace');
+      await expect(page.getByTestId('save')).toBeEnabled();
+      await page.getByTestId('fail-save').check();
+      await page.getByTestId('save').click();
+      await expect(page.getByTestId('save-state')).toHaveAttribute('data-phase', 'error');
+      await expect(page.getByTestId('workspace-name')).toHaveValue('Changed workspace');
+      await page.getByTestId('fail-save').uncheck();
+      await page.getByTestId('save').click();
+      await expect(page.getByTestId('save-state')).toHaveAttribute('data-phase', 'saved');
+      await expect(page.getByTestId('save-state').getByRole('status')).toHaveCount(1);
+      await expect(page.getByTestId('save-state')).toHaveAttribute('data-phase', 'ready', { timeout: 5000 });
+      await expect(page.getByTestId('save-state').getByRole('status')).toHaveCount(0);
+      await page.getByTestId('workspace-name').fill('');
+      await page.getByTestId('save').click();
+      await expect(page.getByTestId('workspace-name')).toHaveAttribute('aria-invalid', 'true');
+      await expect(page.locator('#name-error')).toBeVisible();
+      await expect(page.getByTestId('billing-email')).toHaveValue('billing@aster.example');
+      await page.getByTestId('scenario').selectOption('readonly');
+      await expect(page.getByTestId('workspace-name')).toHaveAttribute('readonly', '');
+      await expect(page.getByTestId('save')).toBeDisabled();
+      assert.deepEqual(scene.errors, []);
+      assert.deepEqual(scene.unexpectedRequests, []);
+      report.interactions.push({ id, passed: true });
+    } catch (error) {
+      report.interactions.push({ id, passed: false, error: String(error) });
+      report.failures.push({ id, error: String(error) });
+    } finally { await scene.context.close(); }
+  }
+} catch (error) { report.failures.push({ id: 'setup', error: String(error) }); }
+finally {
+  await browser?.close();
+  if (server) await new Promise(resolveClose => server.httpServer.close(resolveClose));
+  writeFileSync(resolve(evidence, 'report.json'), JSON.stringify(report, null, 2) + '\n');
+  const passed = report.scenes.filter(scene => scene.passed);
+  writeFileSync(resolve(evidence, 'index.html'), '<!doctype html><meta charset="UTF-8"><title>svadmin browser specimens</title><h1>svadmin · Browser specimens</h1><p>Actual built components. Not synchronized to Figma. See report.json for exact revision and scope.</p>' + passed.map(scene => `<details><summary>${scene.id}</summary><img style="max-width:100%;height:auto" src="${scene.screenshot}" alt="${scene.id}"></details>`).join('\n'));
+  console.info(JSON.stringify({ revision: report.revision, scenes: report.scenes.length, passed: passed.length, interactions: report.interactions.filter(item => item.passed).length, failures: report.failures }));
+}
+assert.equal(report.scenes.length, 152, 'complete finite state matrix must run');
+assert.equal(report.interactions.length, 4, 'all interaction sequences must run');
+assert.equal(report.failures.length, 0, 'browser specimen checks failed; see report.json');
