@@ -1,7 +1,7 @@
 import { requireValue } from "../../../../scripts/test-assertions";
 import type { UseSubmitTaskMutateParams } from '@svadmin/core';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
+import { act, render, screen, fireEvent, waitFor } from '@testing-library/svelte';
 import TaskQueueDrawer from './TaskQueueDrawer.svelte';
 import LazyTaskQueueDrawer from './LazyTaskQueueDrawer.svelte';
 import TaskList from './TaskList.svelte';
@@ -181,6 +181,61 @@ describe('TaskQueueDrawer', () => {
         },
       });
     });
+    await waitFor(() => expect(refetchTasks).toHaveBeenCalledOnce());
+    expect(refetchDlq).toHaveBeenCalledOnce();
+    expect(screen.queryByLabelText('Task name')).toBeNull();
+  });
+
+  it.each(['provider', 'form', 'drawer', 'unmount'] as const)(
+    'ignores a delayed submission after changing the %s scope', async (scope) => {
+      let finish = () => {};
+      const pending = new Promise<void>(resolve => { finish = resolve; });
+      mutateAsync.mockImplementationOnce(async () => {
+        await pending;
+        return { id: 'old-result', wait: async () => ({ id: 'old-result', name: 'old', status: 'queued' }) };
+      });
+      const view = render(TaskQueueDrawer, { open: true, taskProvider: mockTaskProvider });
+      await fireEvent.click(requireValue(screen.getAllByRole('button', { name: 'Submit Task' })[0]));
+      await fireEvent.input(screen.getByLabelText('Task name'), { target: { value: 'old' } });
+      await fireEvent.input(screen.getByLabelText('Task payload (JSON)'), { target: { value: '{}' } });
+      await fireEvent.click(requireValue(screen.getAllByRole('button', { name: 'Submit Task' }).at(-1)));
+      await waitFor(() => expect(mutateAsync).toHaveBeenCalledOnce());
+      if (scope === 'provider') await view.rerender({ taskProvider: { ...mockTaskProvider } });
+      if (scope === 'form') await fireEvent.click(requireValue(screen.getAllByRole('button', { name: 'Cancel' })[0]));
+      if (scope === 'drawer') {
+        await view.rerender({ open: false });
+        await view.rerender({ open: true });
+      }
+      if (scope === 'unmount') view.unmount();
+      else {
+        await fireEvent.click(requireValue(screen.getAllByRole('button', { name: 'Submit Task' })[0]));
+        await fireEvent.input(screen.getByLabelText('Task name'), { target: { value: 'new-draft' } });
+      }
+      await act(async () => { finish(); await pending; });
+      expect(refetchTasks).not.toHaveBeenCalled();
+      expect(refetchDlq).not.toHaveBeenCalled();
+      if (scope !== 'unmount') expect(screen.getByDisplayValue('new-draft')).toBeTruthy();
+    },
+  );
+
+  it('does not show a previous provider submission error in the new form', async () => {
+    let finish = () => {};
+    const pending = new Promise<void>(resolve => { finish = resolve; });
+    mutateAsync.mockImplementationOnce(async () => {
+      await pending;
+      throw new Error('Old provider error');
+    });
+    const view = render(TaskQueueDrawer, { open: true, taskProvider: mockTaskProvider });
+    await fireEvent.click(requireValue(screen.getAllByRole('button', { name: 'Submit Task' })[0]));
+    await fireEvent.input(screen.getByLabelText('Task name'), { target: { value: 'old' } });
+    await fireEvent.input(screen.getByLabelText('Task payload (JSON)'), { target: { value: '{}' } });
+    await fireEvent.click(requireValue(screen.getAllByRole('button', { name: 'Submit Task' }).at(-1)));
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalledOnce());
+    await view.rerender({ taskProvider: { ...mockTaskProvider } });
+    await fireEvent.click(requireValue(screen.getAllByRole('button', { name: 'Submit Task' })[0]));
+    await act(async () => { finish(); await pending; });
+    expect(screen.queryByText('Old provider error')).toBeNull();
+    expect(screen.getByLabelText('Task name')).toBeTruthy();
   });
 
   for (const payload of ['null', '[]', '42', '"secret"', '{"amount":1e400}']) {

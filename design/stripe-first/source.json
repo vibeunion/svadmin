@@ -1,0 +1,39 @@
+{
+  "version": "0.1.1",
+  "repository": "vibeunion/svadmin",
+  "revision": "8f068fb093b48cd2410b3b28a6066b567a44690e",
+  "stylesheet": "packages/ui/src/components.css",
+  "stylesheetBlob": "149f55f3782470ec6a1c942917c09510bd55320a",
+  "recipeSource": "packages/ui/design/primitive-recipes.ts",
+  "recipeBlob": "11a4702b115035090dc21ec96fb963a12623e93f",
+  "recipeUpdate": {
+    "previousRevision": "c91936335e1a431f2ac37dec31da138afbbbc21f",
+    "previousRecipeBlob": "defd6b135e505e2b14e54b985e1a59f6fe7ad15a",
+    "reason": "Merged main repairs readable semantic fallbacks when color-mix is unavailable; existing supports-based variants, source colors and dimensions are retained.",
+    "figmaSynced": false,
+    "figmaStatus": "Existing Figma nodes and recorded readbacks remain historical. Reinspect and synchronize the changed Button/Badge fallback states before claiming code-design parity."
+  },
+  "rootFontSizePx": 16,
+  "colorRoles": ["background", "foreground", "card", "primary", "primary-foreground", "muted", "muted-foreground", "border", "input", "ring", "success", "destructive", "warning", "warning-foreground", "accent", "accent-foreground"],
+  "dimensions": {
+    "space/1": {"value": 4, "cssSyntax": "var(--spacing)", "source": "--spacing: 0.25rem"},
+    "space/1-5": {"value": 6, "cssSyntax": "calc(var(--spacing) * 1.5)", "source": "uiButton gap 0.375rem"},
+    "space/2": {"value": 8, "cssSyntax": "calc(var(--spacing) * 2)", "source": "base spacing rhythm"},
+    "space/3": {"value": 12, "cssSyntax": "calc(var(--spacing) * 3)", "source": "uiButton padding 0.75rem"},
+    "space/4": {"value": 16, "cssSyntax": "calc(var(--spacing) * 4)", "source": "panel spacing rhythm"},
+    "space/6": {"value": 24, "cssSyntax": "calc(var(--spacing) * 6)", "source": "page spacing rhythm"},
+    "space/8": {"value": 32, "cssSyntax": "calc(var(--spacing) * 8)", "source": "large spacing rhythm"},
+    "radius/sm": {"value": 4, "cssSyntax": "var(--radius-sm)", "source": "--radius minus 4px"},
+    "radius/md": {"value": 6, "cssSyntax": "var(--radius-md)", "source": "--radius minus 2px"},
+    "radius/lg": {"value": 8, "cssSyntax": "var(--radius-lg)", "source": "--radius: 0.5rem"},
+    "control/sm": {"value": 32, "cssSyntax": "calc(var(--spacing) * 8)", "source": "uiButton size sm 2rem"},
+    "control/default": {"value": 36, "cssSyntax": "calc(var(--spacing) * 9)", "source": "uiButton and uiInput 2.25rem"},
+    "control/lg": {"value": 40, "cssSyntax": "calc(var(--spacing) * 10)", "source": "uiButton size lg 2.5rem"},
+    "type/caption": {"value": 12, "cssSyntax": "var(--text-xs)", "source": "caption scale"},
+    "type/body": {"value": 14, "cssSyntax": "var(--text-sm)", "source": "uiButton and uiInput 0.875rem"},
+    "type/title": {"value": 20, "cssSyntax": "var(--text-xl)", "source": "content page heading"},
+    "type/metric": {"value": 24, "cssSyntax": "var(--text-2xl)", "source": "metric scale"}
+  },
+  "knownConflicts": [{"name": "unqualified spacing sm/lg", "designDocumentPx": [8, 24], "pandaRem": [0.75, 1.25], "decision": "Preserve current runtime values; use explicit numerical design scales."}],
+  "expectedClipping": ["Light/success", "Light/warning", "Dark/primary", "Dark/ring", "Dark/accent-foreground"]
+}

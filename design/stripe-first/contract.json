@@ -1,0 +1,13 @@
+{
+  "version": "0.1.0-draft",
+  "kind": "svadmin-design-pattern-contract",
+  "notRuntimeSurfaceSchema": true,
+  "tailwindAllowed": false,
+  "runtimeChanges": false,
+  "patterns": [
+    {"id": "resource-list", "figmaStatus": "pending", "components": ["ContentPageShell", "ContentPageHeader", "FilterToolbar"], "states": ["loading", "ready", "initial-empty", "filtered-empty", "error", "forbidden"], "rules": ["Keep the main action stable.", "Preserve filters on retry.", "Separate first use from zero search results.", "Creation actions require corresponding permission."]},
+    {"id": "record-detail", "figmaStatus": "pending", "components": ["ContentPageShell", "ContentPageHeader", "DescriptionList", "StatusBadge"], "states": ["loading", "ready", "partial", "error", "forbidden"], "rules": ["Group identity, state, attributes and related records.", "Represent status with text as well as color.", "Preserve list navigation context."]},
+    {"id": "settings", "figmaStatus": "pending", "components": ["SettingsGroup", "SettingsFieldRow"], "states": ["ready", "dirty", "invalid", "saving", "saved", "error", "readonly"], "rules": ["Preserve input after a failed save.", "One event has one primary feedback surface.", "Routine saves do not create persistent success banners."]}
+  ],
+  "aiBoundary": "Only approved component and semantic variant references; no arbitrary CSS, source execution or additional write authority. This document does not register new Surface widgets."
+}

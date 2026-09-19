@@ -26,6 +26,8 @@ export interface QuerySessionOptions {
   isTargetCurrent?: () => boolean;
   /** Allow a shared query function to delegate work to another live observer. */
   allowRetiredQueryFn?: boolean;
+  /** Internal domain adapter; must return a sanitized error without provider diagnostics. */
+  normalizeError?: (error: unknown) => Error;
 }
 
 export function supersededQuerySession(): HttpError {
@@ -88,6 +90,8 @@ export function createQuerySession<O extends QuerySessionOptions>(context: Admin
     origin.provider === context.authProvider && origin.tenant === context.tenantCacheKey?.__svadminTenant &&
     origin.router === context.routerProvider && (origin.isTargetCurrent === undefined || origin.isTargetCurrent() === true);
   const current = (origin: Origin) => targetCurrent(origin) && sessionCurrent(origin);
+  const errorFor = (origin: Origin, error: unknown): Error =>
+    origin.normalizeError ? origin.normalizeError(error) : querySessionError(error);
 
   function notify(origin: Origin, type: 'success' | 'error', value: unknown): void {
     try {
@@ -125,7 +129,7 @@ export function createQuerySession<O extends QuerySessionOptions>(context: Admin
       });
       return;
     }
-    const error = querySessionError(result.error);
+    const error = errorFor(origin, result.error);
     query.setState({
       error,
       errorUpdatedAt: now,
@@ -154,7 +158,7 @@ export function createQuerySession<O extends QuerySessionOptions>(context: Admin
         throw supersededQuerySession();
       }
       if (!current(origin)) settleDetached(origin, { success: false, error });
-      throw querySessionError(error);
+      throw errorFor(origin, error);
     }
   }
 
@@ -174,7 +178,7 @@ export function createQuerySession<O extends QuerySessionOptions>(context: Admin
         untrack(() => {
           void handleAuthError(querySessionError(result.error), context, () => targetCurrent(origin),
             () => clearAuthQueries(client, origin.provider), origin.auth).catch(() => {});
-          notify(origin, 'error', querySessionError(result.error));
+          notify(origin, 'error', errorFor(origin, result.error));
         });
       }
     });
@@ -186,12 +190,12 @@ export function createQuerySession<O extends QuerySessionOptions>(context: Admin
       if (query?.getObserversCount() === 0) void query.cancel();
     });
   });
-  return { get options() { return options; }, client, current, sessionCurrent, run, observe };
+  return { get options() { return options; }, client, current, sessionCurrent, run, observe, errorFor };
 }
 
 export function pendingQueryResult<T, F extends (settings?: RefetchOptions) => Promise<unknown> = QueryObserverResult<T, unknown>['refetch']>(
   refetch: F,
-): Omit<QueryObserverPendingResult<T, unknown>, 'refetch'> & { refetch: F } {
+): Omit<QueryObserverPendingResult<T, Error>, 'refetch'> & { refetch: F } {
   return {
     data: undefined, dataUpdatedAt: 0, error: null, errorUpdatedAt: 0,
     failureCount: 0, failureReason: null, errorUpdateCount: 0,
