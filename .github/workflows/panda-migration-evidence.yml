@@ -20,7 +20,8 @@ jobs:
       - uses: actions/checkout@v7
         with:
           ref: feat/panda-tokens-no-tailwind
-          fetch-depth: 0
+          fetch-depth: 1
+      - run: git fetch --no-tags --depth=1 origin cf6c4746578176ea773a17ef6f49f353292f7818
       - uses: actions/setup-node@v7
         with:
           node-version: '26'
@@ -40,28 +41,53 @@ jobs:
           PY
           node --check scripts/panda-seed.mjs
           PANDA_VERSION="$(npm view @pandacss/dev version)" node scripts/panda-seed.mjs
+          python3 - <<'PY'
+          from pathlib import Path
+          for f in ['packages/ui/THIRD_PARTY_NOTICES.md', 'packages/ai-elements/THIRD_PARTY_NOTICES.md']:
+              p = Path(f)
+              p.write_text(p.read_text().rstrip() + '\n')
+          PY
       - name: Resolve Panda dependency and update lockfile
         run: bun install
-      - name: Build native styles and component packages
+      - name: Build component packages
         id: build
         continue-on-error: true
         run: |
+          bun run --cwd packages/core build
           bun run --cwd packages/ai-elements build
           bun run --cwd packages/ui build
           bun run --cwd packages/surface build
+      - name: Focused CSS and Surface tests
+        id: tests
+        continue-on-error: true
+        run: |
+          status=0
+          bun run --cwd packages/ui test:css || status=1
+          (cd packages/ui && bunx --no-install vitest run --config vitest.config.ts src/app-css.test.ts src/page-chrome-css.test.ts) || status=1
+          bun run --cwd packages/surface test || status=1
+          exit "$status"
+      - name: Chromium component compatibility evidence
+        id: browser
+        continue-on-error: true
+        run: |
+          bunx --no-install playwright install --with-deps chromium
+          node scripts/check-panda-browser.mjs
       - name: Commit generated migration only to the feature branch
         run: |
           test "$(git branch --show-current)" = 'feat/panda-tokens-no-tailwind'
           git add -- .gitignore eslint.config.js bun.lock README.md packages/ui packages/ai-elements packages/surface packages/create-svadmin/src/index.ts example scripts/check-package-packs.ts
+          if test -f docs/pr-evidence/panda-styles/provenance.json; then git add docs/pr-evidence/panda-styles; fi
           git diff --cached --check
           git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'feat(styles): remove Tailwind and preserve CSS compatibility'
           git push origin HEAD:refs/heads/feat/panda-tokens-no-tailwind
-      - name: Archive generated source for independent inspection
+      - name: Archive generated source and styles for inspection
         if: always()
         run: |
           mkdir -p "$RUNNER_TEMP/panda-evidence"
-          git archive --format=tar.gz --output="$RUNNER_TEMP/panda-evidence/source.tar.gz" HEAD
+          git archive --format=tar.gz --output="$RUNNER_TEMP/panda-evidence/source.tar.gz" "$(git write-tree)"
           git rev-parse HEAD > "$RUNNER_TEMP/panda-evidence/commit.txt"
+          if test -d packages/ui/dist; then tar -czf "$RUNNER_TEMP/panda-evidence/ui-dist.tar.gz" -C packages/ui dist; fi
+          if test -d docs/pr-evidence/panda-styles; then cp -R docs/pr-evidence/panda-styles "$RUNNER_TEMP/panda-evidence/"; fi
       - uses: actions/upload-artifact@v6
         if: always()
         with:
@@ -69,6 +95,6 @@ jobs:
           path: ${{ runner.temp }}/panda-evidence/
           retention-days: 7
           compression-level: 0
-      - name: Report build result
-        if: steps.build.outcome == 'failure'
+      - name: Report verification result
+        if: steps.build.outcome == 'failure' || steps.tests.outcome == 'failure' || steps.browser.outcome == 'failure'
         run: exit 1
