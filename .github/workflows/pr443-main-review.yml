@@ -15,78 +15,123 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: 713d90db73373821ab6102eb694b3882cfd11d2e
-      - name: Download and validate exact successful run artifact
+          ref: 761310059dc0845311f3ffe9aec9c4a5bf53b6d2
+      - name: Verify ancestry and complete main-to-candidate diff
+        run: |
+          set -euo pipefail
+          git fetch --quiet --no-tags --unshallow origin
+          git fetch --quiet --no-tags origin 6348beb020e94bb5aecbe0934023fff51e18322d
+          git merge-base --is-ancestor 8f068fb093b48cd2410b3b28a6066b567a44690e HEAD
+          git merge-base --is-ancestor b39b4953af4166548b21b8ab7fd2c7af80d6a027 HEAD
+          git merge-base --is-ancestor 0f6c4ad148f69b501870f0c18c6ea94bd27a8349 HEAD
+          test "$(git rev-parse HEAD^{tree})" = "$(git rev-parse 6348beb020e94bb5aecbe0934023fff51e18322d^{tree})"
+          git diff --check 8f068fb093b48cd2410b3b28a6066b567a44690e HEAD
+      - name: Retain original bytes from successful exact-head browser runs
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
-          api=https://api.github.com/repos/vibeunion/svadmin
-          curl --fail --silent --show-error --max-time 60 -H "Authorization: Bearer $GH_TOKEN" "$api/actions/runs/35453565034" > /tmp/pr443-run.json
-          curl --fail --silent --show-error --max-time 60 -H "Authorization: Bearer $GH_TOKEN" "$api/actions/artifacts/10587437234" > /tmp/pr443-artifact.json
-          curl --fail --silent --show-error --location --max-time 60 -H "Authorization: Bearer $GH_TOKEN" "$api/actions/artifacts/10587437234/zip" > /tmp/pr443-evidence.zip
           python3 - <<'PY'
-          import hashlib, json, stat, struct, subprocess, zipfile
+          import hashlib, json, os, stat, struct, subprocess, zipfile
           from pathlib import Path, PurePosixPath
-          head = '713d90db73373821ab6102eb694b3882cfd11d2e'
-          tested = '65b516477d8720c75eedc236efe0da3d1eecba65'
-          expected_digest = '1e3d3cf6f69e4a6c439c4dc8faed3b952331e99b38abeb4e5027c691bbdb98aa'
-          run = json.loads(Path('/tmp/pr443-run.json').read_text())
-          artifact = json.loads(Path('/tmp/pr443-artifact.json').read_text())
-          assert run['id'] == 35453565034 and run['head_sha'] == head
-          assert run['status'] == 'completed' and run['conclusion'] == 'success'
-          assert artifact['id'] == 10587437234 and not artifact['expired']
-          assert artifact['name'] == 'surface-workflows-' + tested
-          assert artifact['workflow_run']['head_sha'] == head
-          assert artifact['digest'] == 'sha256:' + expected_digest
-          archive = Path('/tmp/pr443-evidence.zip').read_bytes()
-          assert hashlib.sha256(archive).hexdigest() == expected_digest
-          assert subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip() == head
-          out = Path('docs/pr-evidence/pr443-713d90d')
+          head = '761310059dc0845311f3ffe9aec9c4a5bf53b6d2'
+          tested = '6348beb020e94bb5aecbe0934023fff51e18322d'
+          base = '8f068fb093b48cd2410b3b28a6066b567a44690e'
+          api = 'https://api.github.com/repos/vibeunion/svadmin'
+          out = Path('docs/pr-evidence/pr443-7613100-merge-review')
           assert not out.exists()
           out.mkdir(parents=True)
+          records = []
           images = []
-          with zipfile.ZipFile('/tmp/pr443-evidence.zip') as z:
-              entries = z.infolist()
-              assert sum(e.file_size for e in entries) < 20000000
-              assert len({e.filename for e in entries}) == len(entries)
-              for e in entries:
-                  p = PurePosixPath(e.filename)
-                  assert not p.is_absolute() and '..' not in p.parts
-                  assert not stat.S_ISLNK(e.external_attr >> 16)
-              for width, height in [(1440, 900), (1920, 1080), (390, 844)]:
-                  name = f'surface-workflow-{width}x{height}.png'
-                  matches = [e for e in entries if PurePosixPath(e.filename).name == name]
-                  assert len(matches) == 1, (name, len(matches))
-                  data = z.read(matches[0])
-                  assert data[:8] == b'\x89PNG\r\n\x1a\n' and data[12:16] == b'IHDR'
-                  actual_width, actual_height = struct.unpack('>II', data[16:24])
-                  assert actual_width == width and actual_height >= height
-                  (out / name).write_bytes(data)
-                  images.append({'file': name, 'archivePath': matches[0].filename, 'viewport': [width, height], 'bitmap': [actual_width, actual_height], 'sha256': hashlib.sha256(data).hexdigest(), 'capture': 'original full-page PNG'})
-              reports = [e for e in entries if PurePosixPath(e.filename).name == 'packed-consumer.json']
-              assert len(reports) == 1
-              data = z.read(reports[0])
-              report = json.loads(data)
-              assert report['status'] == 'passed'
-              (out / 'packed-consumer.json').write_bytes(data)
-          source_paths = ['packages/core/src/query-session.svelte.ts', 'packages/core/src/session-query.svelte.ts', 'packages/core/src/task-hooks.svelte.ts', 'packages/ui/src/components/FileUpload.svelte', 'packages/ui/src/components/FilterBuilder.svelte', 'packages/ui/src/components/TreeSelect.svelte', 'packages/ui/src/components/JsonSchemaForm.svelte', 'packages/ui/design/product-recipes.ts', 'packages/ui/panda.config.ts', 'scripts/surface-workflows/workflow.e2e.ts', 'scripts/stripe-first-refactor-contract.test.ts']
-          provenance = {'sourceHead': head, 'testedMerge': tested, 'sourceTree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], text=True).strip(), 'workflowRun': run['id'], 'artifactId': artifact['id'], 'artifactSha256': expected_digest, 'artifactCreatedAt': artifact['created_at'], 'images': images, 'sourceSha256': {p: hashlib.sha256(Path(p).read_bytes()).hexdigest() for p in source_paths}, 'scope': 'Synthetic functional acceptance fixtures, not production backend evidence or final product visual approval.'}
+          def download(path, destination):
+              subprocess.run(['curl', '--fail', '--silent', '--show-error', '--location', '--max-time', '90', '-H', 'Authorization: Bearer ' + os.environ['GH_TOKEN'], api + path, '-o', str(destination)], check=True)
+          def read_json(z, name):
+              matches = [e for e in z.infolist() if PurePosixPath(e.filename).name == name]
+              assert len(matches) == 1, name
+              data = z.read(matches[0])
+              return data, json.loads(data)
+          def png(z, path, destination, viewport, expected_hash=None):
+              data = z.read(path)
+              digest = hashlib.sha256(data).hexdigest()
+              if expected_hash is not None: assert digest == expected_hash
+              assert data[:8] == b'\x89PNG\r\n\x1a\n' and data[12:16] == b'IHDR'
+              width, height = struct.unpack('>II', data[16:24])
+              assert width == viewport[0] and height >= viewport[1]
+              dest = out / destination
+              dest.parent.mkdir(parents=True, exist_ok=True)
+              dest.write_bytes(data)
+              images.append({'file': destination, 'archivePath': path, 'viewport': viewport, 'bitmap': [width, height], 'sha256': digest, 'capture': 'original full-page PNG'})
+          captures = [
+              ('surface', 35454111997, 10587662395, 'surface-workflows-', 'ffb36f0888927abb9e484e6ea328178550a4d7c499892527bc58b5d1f1147c25'),
+              ('stripe', 35454111987, 10588330136, 'stripe-first-browser-specimens-', 'ea57c7a3ec0adf4043caa9e189801803ca8d13c2ac60d7a8cbb7ec5b463ca999'),
+          ]
+          for kind, run_id, artifact_id, prefix, digest in captures:
+              run_path = Path('/tmp/pr443-' + kind + '-run.json')
+              metadata_path = Path('/tmp/pr443-' + kind + '-artifact.json')
+              archive_path = Path('/tmp/pr443-' + kind + '.zip')
+              download('/actions/runs/' + str(run_id), run_path)
+              download('/actions/artifacts/' + str(artifact_id), metadata_path)
+              run = json.loads(run_path.read_text())
+              artifact = json.loads(metadata_path.read_text())
+              assert run['id'] == run_id and run['head_sha'] == head
+              assert run['status'] == 'completed' and run['conclusion'] == 'success'
+              assert artifact['id'] == artifact_id and not artifact['expired']
+              assert artifact['name'] == prefix + tested
+              assert artifact['workflow_run']['head_sha'] == head
+              assert artifact['digest'] == 'sha256:' + digest
+              download('/actions/artifacts/' + str(artifact_id) + '/zip', archive_path)
+              assert hashlib.sha256(archive_path.read_bytes()).hexdigest() == digest
+              records.append({'kind': kind, 'runId': run_id, 'artifactId': artifact_id, 'sha256': digest, 'createdAt': artifact['created_at']})
+              with zipfile.ZipFile(archive_path) as z:
+                  entries = z.infolist()
+                  assert sum(e.file_size for e in entries) < 100000000
+                  assert len({e.filename for e in entries}) == len(entries)
+                  for e in entries:
+                      p = PurePosixPath(e.filename)
+                      assert not p.is_absolute() and '..' not in p.parts
+                      assert not stat.S_ISLNK(e.external_attr >> 16)
+                  if kind == 'surface':
+                      for width, height in [(1440, 900), (1920, 1080), (390, 844)]:
+                          name = f'surface-workflow-{width}x{height}.png'
+                          matches = [e for e in entries if PurePosixPath(e.filename).name == name]
+                          assert len(matches) == 1
+                          png(z, matches[0].filename, name, [width, height])
+                      data, report = read_json(z, 'packed-consumer.json')
+                      assert report['status'] == 'passed'
+                      (out / 'packed-consumer.json').write_bytes(data)
+                  else:
+                      data, report = read_json(z, 'report.json')
+                      assert report['revision'] == tested
+                      assert report['failures'] == []
+                      assert len(report['scenes']) == 152 and all(s['passed'] is True for s in report['scenes'])
+                      assert len(report['interactions']) == 4 and all(s['passed'] is True for s in report['interactions'])
+                      for path, source_digest in report['sourceHashes'].items():
+                          if '/dist/' not in path:
+                              assert hashlib.sha256(Path(path).read_bytes()).hexdigest() == source_digest, path
+                      (out / 'stripe-report.json').write_bytes(data)
+                      data, keyboard = read_json(z, 'keyboard.json')
+                      assert len(keyboard) == 2 and all(s['passed'] is True for s in keyboard)
+                      (out / 'stripe-keyboard.json').write_bytes(data)
+                      selected = [s for s in report['scenes'] if s['view'] in ['resource-list', 'record-detail', 'settings'] and s['state'] == 'ready' and s['locale'] == 'zh-CN']
+                      assert len(selected) == 12
+                      for scene in selected:
+                          png(z, scene['screenshot'], 'stripe/' + PurePosixPath(scene['screenshot']).name, [scene['viewport']['width'], scene['viewport']['height']], scene['sha256'])
+          source_paths = ['packages/core/src/query-session.svelte.ts', 'packages/core/src/session-query.svelte.ts', 'packages/core/src/task-hooks.svelte.ts', 'packages/ui/src/components/FileUpload.svelte', 'packages/ui/src/components/FilterBuilder.svelte', 'packages/ui/src/components/TreeSelect.svelte', 'packages/ui/src/components/JsonSchemaForm.svelte', 'packages/ui/design/primitive-recipes.ts', 'packages/ui/design/product-recipes.ts', 'packages/ui/panda.config.ts', 'scripts/surface-workflows/workflow.e2e.ts', 'scripts/stripe-first-refactor-contract.test.ts', 'design/stripe-first/source.json']
+          provenance = {'sourceHead': head, 'testedMerge': tested, 'base': base, 'sourceTree': subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], text=True).strip(), 'archives': records, 'images': images, 'sourceSha256': {p: hashlib.sha256(Path(p).read_bytes()).hexdigest() for p in source_paths}, 'checks': {'mainAndSourceAncestry': True, 'testedMergeTreeMatchesHead': True, 'completeDiffWhitespace': True, 'stripeScenes': 152, 'stripeInteractions': 4, 'keyboardChecks': 2}, 'scope': 'Real built Svelte components with synthetic fixtures; not live backend evidence, Figma synchronization, manual visual approval or accessibility certification.'}
           (out / 'provenance.json').write_text(json.dumps(provenance, indent=2) + '\n')
-          (out / 'README.md').write_text('# PR443 exact-head browser evidence\n\nOriginal PNG bytes from successful Surface workflow run 35453565034, artifact 10587437234. Source head `' + head + '`; tested PR merge `' + tested + '`. Archive digest, image hashes, bitmap dimensions, and selected source hashes are in provenance.json. These are full-page captures under the stated viewports; the narrow bitmap can be taller than the viewport. Synthetic functional fixtures do not certify final Stripe-style visual design or live production authorization. No source branch, main, baseline or test tolerance is changed by retention.\n')
-          print(json.dumps({'images': images, 'packedConsumer': report['status'], 'archiveDigestVerified': True}, indent=2))
+          (out / 'README.md').write_text('# PR443 current-candidate browser evidence\n\nSource `' + head + '`, tested PR merge `' + tested + '`, base `' + base + '`. Exact run/ZIP/source/image hashes and full-page dimensions are retained in provenance.json. Surface PNGs cover 1440x900, 1920x1080 and a 390x844 viewport. Stripe retained PNGs cover list/detail/settings in Chinese, both themes and 1440x1000/390x844 viewports. Its full original artifact and report cover all 152 states, four interactions and two keyboard/motion checks. The mobile bitmaps can exceed viewport height. These are synthetic functional acceptance fixtures, not live backend evidence or manual visual/Figma approval. No source branch, main, baseline or threshold is changed by archival.\n')
+          print(json.dumps({'head': head, 'tested': tested, 'retainedImages': len(images), 'stripeScenes': 152, 'stripeInteractions': 4, 'keyboardChecks': 2, 'archives': records}, indent=2))
           PY
-      - name: Retain only evidence on a new non-main branch
-        shell: bash
+      - name: Publish evidence-only branch
         run: |
           set -euo pipefail
-          branch=evidence/pr443-713d90d
+          branch=evidence/pr443-7613100-merge-review
           test -z "$(git ls-remote --heads origin "refs/heads/$branch")"
           git config user.name 'Integration review'
           git config user.email 'noreply@github.com'
-          git add -- docs/pr-evidence/pr443-713d90d
+          git add -- docs/pr-evidence/pr443-7613100-merge-review
           git diff --cached --check
-          git commit -m 'docs: retain exact-head PR443 Surface browser evidence'
+          git commit -m 'docs: retain current PR443 Surface and Stripe browser evidence'
           git push origin "HEAD:refs/heads/$branch"
           echo "EVIDENCE_COMMIT=$(git rev-parse HEAD)"
