@@ -59,3 +59,14 @@ test('preview uses built components, not an external theme or new backend client
   assert.doesNotMatch(css, /@(?:tailwind|theme|apply|source)\b|#[a-fA-F0-9]{3,8}\b|(?:rgb|hsl|oklch)\(/u);
   assert.match(source, /clearTimeout/u);
 });
+
+
+test('status and text filters intersect without modifying or expanding the dataset', () => {
+  const pending = customers.filter(record => record.status === 'pending');
+  assert.deepEqual(filterCustomers('', 'pending'), pending);
+  assert.deepEqual(filterCustomers('Northstar', 'pending'), []);
+  assert.equal(filterCustomers('Northstar', 'active')[0]?.id, 'demo_002');
+  assert.equal(filterCustomers('', 'all').length, customers.length);
+  for (const bad of ['__proto__', 'constructor', 'other']) assert.deepEqual(filterCustomers('', bad), []);
+  assert.ok(Object.isFrozen(customers));
+});

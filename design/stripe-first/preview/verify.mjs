@@ -5,7 +5,7 @@ import { createRequire } from 'node:module';
 import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { buildPreview, directory, evidence, root, servePreview } from './run.mjs';
-import { scenarios } from './model.mjs';
+import { customers, scenarios } from './model.mjs';
 import { captureSpecimen } from './capture.mjs';
 
 const require = createRequire(resolve(root, 'package.json'));
@@ -20,7 +20,7 @@ const report = {
 rmSync(evidence, { force: true, recursive: true });
 mkdirSync(resolve(evidence, 'screenshots'), { recursive: true });
 for (const file of readdirSync(directory).filter(name => /\.(svelte|css|mjs|js|json)$/u.test(name)).sort()) report.sourceHashes[`design/stripe-first/preview/${file}`] = sha256(readFileSync(resolve(directory, file)));
-for (const file of ['packages/ui/dist/app.css', 'packages/ui/design/primitive-recipes.ts']) report.sourceHashes[file] = sha256(readFileSync(resolve(root, file)));
+for (const file of ['packages/ui/dist/app.css', 'packages/ui/design/primitive-recipes.ts', 'packages/ui/design/product-recipes.ts']) report.sourceHashes[file] = sha256(readFileSync(resolve(root, file)));
 let server;
 let browser;
 
@@ -62,6 +62,21 @@ try {
           await expect(page.getByTestId('input-readonly')).toHaveAttribute('readonly', '');
           await expect(page.getByTestId('input-invalid')).toHaveAttribute('aria-describedby', 'invalid-hint');
         }
+        if ((view === 'record-detail' && ['ready', 'partial'].includes(state)) || view === 'settings') {
+          const workspace = page.locator('[data-svadmin-workspace-layout]');
+          const columns = workspace.locator(':scope > div').last();
+          const widths = await columns.evaluate(node => getComputedStyle(node).gridTemplateColumns.split(' ').length);
+          assert.equal(widths, viewport.width >= 1024 ? 2 : 1, 'responsive primary/secondary layout');
+          await expect(workspace.locator('[data-svadmin-workspace-secondary]')).toHaveCount(1);
+        }
+        if (view === 'resource-list' && state === 'ready') {
+          await expect(page.locator('tbody tr').first()).toHaveCSS('border-bottom-width', '1px');
+          await expect(page.locator('thead th').nth(2)).toHaveCSS('text-align', 'end');
+        }
+        if (view === 'settings') {
+          await expect(page.locator('#settings-developer')).toContainText('•••• •••• 001');
+          await expect(page.locator('#settings-developer button')).toHaveCount(0);
+        }
         if (view === 'settings') await expect(page.getByTestId('save-state')).toHaveAttribute('data-phase', state);
         if (view === 'settings' && state === 'readonly') await expect(page.getByTestId('save')).toBeDisabled();
         if (view === 'settings' && state === 'saving') await expect(page.getByTestId('workspace-name')).toBeDisabled();
@@ -87,12 +102,21 @@ try {
     const { page } = scene;
     try {
       const search = page.getByRole('textbox', { name: locale === 'en' ? 'Search customers' : '搜索客户' });
+      await page.getByTestId('filter-pending').click();
+      await expect(page.getByTestId('filter-pending')).toHaveAttribute('aria-pressed', 'true');
+      await expect(page.locator('tbody tr')).toHaveCount(customers.filter(record => record.status === 'pending').length);
       await search.fill('Northstar');
+      await expect(page.getByTestId('clear-filters')).toBeVisible();
+      await page.getByTestId('clear-status').click();
+      await expect(search).toHaveValue('Northstar');
+      await expect(page.getByTestId('filter-all')).toHaveAttribute('aria-pressed', 'true');
+      await page.getByTestId('filter-active').click();
       await expect(page.getByTestId('count')).toHaveText(/1/u);
       await page.getByTestId('open-demo_002').click();
       await expect(page.getByTestId('specimen')).toContainText('Northstar Lab');
       await page.getByTestId('back').click();
       await expect(search).toHaveValue('Northstar');
+      await expect(page.getByTestId('filter-active')).toHaveAttribute('aria-pressed', 'true');
       await page.getByTestId('scenario').selectOption('error');
       await page.getByRole('button', { name: locale === 'en' ? 'Retry' : '重试', exact: true }).click();
       await expect(search).toHaveValue('Northstar');
@@ -107,6 +131,7 @@ try {
       await expect(page.getByTestId('create')).toHaveCount(0);
       await page.getByTestId('scenario').selectOption('forbidden');
       await expect(page.getByTestId('specimen')).not.toContainText('Aster Studio');
+      await expect(page.getByTestId('filter-all')).toHaveCount(0);
 
       await page.getByTestId('nav-components').click();
       await page.getByTestId('input-default').fill('保持输入 · retained');
