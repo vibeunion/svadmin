@@ -24,6 +24,8 @@ export interface SvarGridApi {
 }
 /** 仅使用已核对的上游属性；不暴露任意 editor、template 或事件执行入口。 */
 export interface SvarGridEngineProps {
+  /** 上游声明带事件索引；适配层不直接转发任何事件 prop。 */
+  [event: `on${string}`]: never;
   columns: SvarEngineColumn[];
   data?: SvarRow[];
   tree?: boolean;

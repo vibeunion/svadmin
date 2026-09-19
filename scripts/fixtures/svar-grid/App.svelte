@@ -9,7 +9,7 @@
   import type { SvarColumn } from '../../../packages/ui/src/components/svar-grid-contract.js';
 
   let mode = $state('local');
-  let state = $state('ready');
+  let viewState = $state('ready');
   let dark = $state(false);
   let tenant = $state('alpha');
   let scope = $state(0);
@@ -52,7 +52,7 @@
     note: index === 0 ? '<img src=x onerror=alert(1)>' : `Row ${index}`,
   }));
   const treeRows = [{ id: 'root', name: 'Parent', stock: 5, children: [{ id: 'child', name: 'Child', stock: 2 }] }];
-  const items = $derived(state === 'empty' ? [] : mode === 'tree' ? treeRows : rows);
+  const items = $derived(viewState === 'empty' ? [] : mode === 'tree' ? treeRows : rows);
 
   function toggleAccess() {
     granted = !granted;
@@ -64,18 +64,18 @@
 <main class:dark>
   <h1>SVAR integration verification</h1>
   <nav aria-label="Fixture controls">
-    <button onclick={() => { mode = 'local'; state = 'ready'; }}>Local</button>
-    <button onclick={() => { mode = 'tree'; state = 'ready'; }}>Tree</button>
-    <button onclick={() => { mode = 'resource'; state = 'ready'; }}>Resource</button>
+    <button onclick={() => { mode = 'local'; viewState = 'ready'; }}>Local</button>
+    <button onclick={() => { mode = 'tree'; viewState = 'ready'; }}>Tree</button>
+    <button onclick={() => { mode = 'resource'; viewState = 'ready'; }}>Resource</button>
     <button onclick={() => { dark = !dark; }}>Theme</button>
     <button onclick={() => { tenant = tenant === 'alpha' ? 'beta' : 'alpha'; }}>Tenant</button>
     <button onclick={toggleAccess}>Access</button>
     <button onclick={() => { scope += 1; }}>Scope</button>
-    <button onclick={() => { state = 'loading'; }}>Loading</button>
-    <button onclick={() => { state = 'empty'; }}>Empty</button>
-    <button onclick={() => { state = 'error'; }}>Error</button>
-    <button onclick={() => { state = 'disabled'; }}>Disabled</button>
-    <button onclick={() => { state = 'ready'; }}>Restore</button>
+    <button onclick={() => { viewState = 'loading'; }}>Loading</button>
+    <button onclick={() => { viewState = 'empty'; }}>Empty</button>
+    <button onclick={() => { viewState = 'error'; }}>Error</button>
+    <button onclick={() => { viewState = 'disabled'; }}>Disabled</button>
+    <button onclick={() => { viewState = 'ready'; }}>Restore</button>
   </nav>
   <output data-testid="scope">{tenant}:{scope}</output>
   {#if mode === 'resource'}
@@ -85,8 +85,8 @@
   {:else}
     <SvarDataGrid
       {Grid} Theme={Willow} {items} {columns} height={420} freezeLeft={1}
-      loading={state === 'loading'} disabled={state === 'disabled'}
-      {...state === 'error' ? { error: 'Fixture data error' } : {}}
+      loading={viewState === 'loading'} disabled={viewState === 'disabled'}
+      {...viewState === 'error' ? { error: 'Fixture data error' } : {}}
       {...mode === 'tree' ? { childrenKey: 'children' } : {}}
       scopeKey={`${mode}:${tenant}:${scope}`}
     />

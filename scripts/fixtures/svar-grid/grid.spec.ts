@@ -47,6 +47,8 @@ test('tree expansion and left-frozen columns use the real engine', async ({ page
   await page.getByText('Child', { exact: true }).dblclick();
   await page.keyboard.press('Delete');
   expect(await page.getByRole('gridcell').count()).toBe(count);
+  await page.getByRole('button', { name: 'Scope', exact: true }).click();
+  await expect(page.getByText('Child', { exact: true })).toHaveCount(0);
 });
 
 test('resource adapter uses core queries for paging, sorting and filtering', async ({ page }) => {
