@@ -4,10 +4,10 @@ import { dirname, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parse } from 'svelte/compiler';
 import { bindResourceRendering, createResourceRenderers } from '@svadmin/ui/rendering';
-import { defineResource } from '@svadmin/core/resource-contract';
+import { defineResource, formatContractRouteId } from '@svadmin/core/resource-contract';
 import { Type } from '@sinclair/typebox';
 import inventory from './business-page-inventory.json';
-import { demoRenderers, demoRendering } from '../src/resource-rendering';
+import { demoRenderers, demoRendering, demoRouteId } from '../src/resource-rendering';
 import { demoSchemas, isDemoResource } from '../src/resource-schemas';
 import { demoContracts } from '../src/resource-contracts';
 import { createResources } from '../src/resources';
@@ -60,6 +60,8 @@ describe('business rendering migration inventory', () => {
     const app = source('../src/App.svelte');
     for (const action of ['create', 'edit', 'clone']) expect(app).toContain(`${action}: BusinessAutoForm`);
     expect(app).toContain('show: BusinessShowPage');
+    expect(source('../src/components/BusinessShowPage.svelte')).toContain('demoRouteId(resourceName, id)');
+    expect(source('../src/components/BusinessShowPage.svelte')).toContain('id={recordId}');
     for (const file of ['BusinessAutoForm', 'BusinessShowPage']) {
       expect(assertRenderingChildren(source(`../src/components/${file}.svelte`), ['AutoForm', 'ShowPage'])).toBe(1);
     }
@@ -96,6 +98,17 @@ describe('business rendering migration inventory', () => {
     expect(() => rendering.records([{ id: 'not a numeric demo id' }])).toThrow();
     expect(() => rendering.records({ data: result.data })).toThrow();
     expect(bindResourceRendering(rendering, demoContracts[name])).toBe(rendering);
+  });
+
+  it.each(Object.keys(demoSchemas))('parses detail route identity against the actual %s contract', name => {
+    const contract = demoRendering(name).resource;
+    expect(demoRouteId(name, '1')).toBe(1);
+    expect(demoRouteId(name, 1)).toBe(1);
+    expect(demoRouteId(name, formatContractRouteId(contract, 1))).toBe(1);
+    for (const id of [undefined, '', '01', '1e0', ' 1', '1 ', 'not-an-id', Number.NaN, Number.POSITIVE_INFINITY,
+      '~svadmin-id:["string","1"]', '~svadmin-id:invalid']) {
+      expect(() => demoRouteId(name, id)).toThrow(expect.objectContaining({ code: 'INVALID_RESOURCE_INPUT' }));
+    }
   });
 
   it('rejects a same-name different contract, retaining the opt-in legacy path', () => {

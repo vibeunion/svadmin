@@ -1,4 +1,5 @@
 import { createResourceRendering, type ResourceRendering } from '@svadmin/ui/rendering';
+import { parseContractId, parseContractRouteId } from '@svadmin/core/resource-contract';
 import { demoContracts } from './resource-contracts';
 import { isDemoResource } from './resource-schemas';
 
@@ -62,4 +63,10 @@ export const demoRenderers = Object.freeze({
 export function demoRendering(name: string): ResourceRendering {
   if (!isDemoResource(name)) throw new TypeError(`Unknown rendering resource: ${name}`);
   return demoRenderers[name];
+}
+
+/** 只在地址栏入口解析字符串；原生详情组件和抽屉继续严格校验已有身份。 */
+export function demoRouteId(name: string, id: string | number | undefined): string | number {
+  const contract = demoRendering(name).resource;
+  return typeof id === 'string' ? parseContractRouteId(contract, id) : parseContractId(contract, id);
 }
