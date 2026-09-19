@@ -137,16 +137,17 @@
         ? (current as Record<string, unknown>)[key] : undefined
     ), prepared.ok ? prepared.value : {});
   }
-  function writePath(path: string[], nextValue: unknown): void {
-    if (!editable() || !prepared.ok || pathReadonly(path)) return;
+  function writePath(path: string[], nextValue: unknown): boolean {
+    if (!editable() || !prepared.ok || pathReadonly(path)) return false;
     try {
       value = writeSchemaFormPath(prepared.value, path, nextValue);
       // Capture the actual bindable value after Svelte wraps it, not its raw source.
       internalValue = value;
       failure = null;
       validationIssues = [];
+      return true;
     }
-    catch { failure = 'invalid'; }
+    catch { failure = 'invalid'; return false; }
   }
   function choose(path: string[], raw: string, choices: JsonSchema['enum']): void {
     if (!editable()) return;
@@ -162,7 +163,22 @@
   function removeArrayItem(path: string[], index: number): void {
     if (!editable()) return;
     const current = readPath(path);
-    if (Array.isArray(current)) writePath(path, current.filter((_, itemIndex) => itemIndex !== index));
+    if (!Array.isArray(current) || !Number.isSafeInteger(index) || index < 0 || index >= current.length) return;
+    const prefix = schemaFormPointer(path) + '/';
+    const nextIssues = parseIssues.flatMap(issue => {
+      if (!issue.path.startsWith(prefix)) return [issue];
+      const tail = issue.path.slice(prefix.length);
+      const separator = tail.indexOf('/');
+      const segment = separator < 0 ? tail : tail.slice(0, separator);
+      if (!/^(0|[1-9][0-9]*)$/u.test(segment)) return [issue];
+      const itemIndex = Number(segment);
+      if (itemIndex === index) return [];
+      if (itemIndex < index) return [issue];
+      return [{ ...issue, path: prefix + String(itemIndex - 1) + (separator < 0 ? '' : tail.slice(separator)) }];
+    });
+    // Retire only the removed item's error and shift surviving descendants with their
+    // array item. A rejected readonly/disabled write must not clear any error.
+    if (writePath(path, current.filter((_, itemIndex) => itemIndex !== index))) parseIssues = nextIssues;
   }
   async function handleSubmit(event: SubmitEvent): Promise<void> {
     event.preventDefault();

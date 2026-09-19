@@ -258,3 +258,43 @@ describe('recursive form parse-error ownership', () => {
     expect(onsubmit).toHaveBeenCalledWith({ amount: 0, enabled: true, plan: 1 });
   });
 });
+
+const arrayOwnershipSchema = { type: 'object', properties: { rows: { type: 'array', items: { type: 'object', properties: { amount: { type: 'number' } }, required: ['amount'] } } } };
+function arrayOwnershipNumberInput(container: HTMLElement, index: number): HTMLInputElement {
+  const element = container.querySelector(`[name="rows.${index}.amount"]`);
+  if (!(element instanceof HTMLInputElement)) throw new Error('Missing numeric array field');
+  return element;
+}
+
+describe('array parse-error ownership', () => {
+  it('retires an invalid numeric draft when its array item is removed', async () => {
+    const onsubmit = vi.fn();
+    const view = render(JsonSchemaForm, { schema: arrayOwnershipSchema, value: { rows: [{ amount: 1 }, { amount: 2 }] }, onsubmit, locale: 'en' });
+    const first = arrayOwnershipNumberInput(view.container, 0);
+    Object.defineProperty(first, 'validity', { configurable: true, value: { badInput: true } });
+    await fireEvent.input(first, { target: { value: '' } });
+    const removeButton = view.getAllByRole('button', { name: 'Remove item', exact: true })[0];
+    if (!removeButton) throw new Error('Missing array removal control');
+    await fireEvent.click(removeButton);
+    await fireEvent.submit(view.getByTestId('json-schema-form'));
+    expect(onsubmit).toHaveBeenCalledTimes(1);
+    expect(onsubmit).toHaveBeenCalledWith({ rows: [{ amount: 2 }] });
+  });
+  it('reindexes a surviving invalid numeric draft when a previous array item is removed', async () => {
+    const onsubmit = vi.fn(), onvalidationerror = vi.fn();
+    const view = render(JsonSchemaForm, { schema: arrayOwnershipSchema, value: { rows: [{ amount: 1 }, { amount: 2 }] }, onsubmit, onvalidationerror, locale: 'en' });
+    const second = arrayOwnershipNumberInput(view.container, 1);
+    Object.defineProperty(second, 'validity', { configurable: true, value: { badInput: true } });
+    await fireEvent.input(second, { target: { value: '' } });
+    const removeButton = view.getAllByRole('button', { name: 'Remove item', exact: true })[0];
+    if (!removeButton) throw new Error('Missing array removal control');
+    await fireEvent.click(removeButton);
+    await fireEvent.submit(view.getByTestId('json-schema-form'));
+    expect(onsubmit).not.toHaveBeenCalled();
+    expect(onvalidationerror).toHaveBeenLastCalledWith([{ path: '/rows/0/amount', code: 'invalid-value' }]);
+    await fireEvent.input(arrayOwnershipNumberInput(view.container, 0), { target: { value: '3' } });
+    await fireEvent.submit(view.getByTestId('json-schema-form'));
+    expect(onsubmit).toHaveBeenCalledTimes(1);
+    expect(onsubmit).toHaveBeenCalledWith({ rows: [{ amount: 3 }] });
+  });
+});
