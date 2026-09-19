@@ -2,6 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { render } from '@testing-library/svelte';
 import LiteFileUpload from './LiteFileUpload.svelte';
 
+function inputElement(element: HTMLElement): HTMLInputElement {
+  if (!(element instanceof HTMLInputElement)) throw new Error('Expected a native file input');
+  return element;
+}
+
 describe('LiteFileUpload native form fallback', () => {
   it('keeps a visible native control with multipart field attributes and no nested form', () => {
     const view = render(LiteFileUpload, {
@@ -13,7 +18,7 @@ describe('LiteFileUpload native form fallback', () => {
       multiple: true,
       required: true,
     });
-    const input = view.getByLabelText<HTMLInputElement>('Attachments');
+    const input = inputElement(view.getByLabelText('Attachments'));
     expect(input.type).toBe('file');
     expect(input.name).toBe('attachments');
     expect(input.accept).toBe('.pdf,application/pdf');
@@ -29,7 +34,7 @@ describe('LiteFileUpload native form fallback', () => {
     const view = render(LiteFileUpload, {
       name: 'attachment', label: 'Attachment', required: true,
     });
-    const input = view.getByLabelText<HTMLInputElement>('Attachment');
+    const input = inputElement(view.getByLabelText('Attachment'));
     expect(input.checkValidity()).toBe(false);
     await view.rerender({ disabled: true });
     expect(input.disabled).toBe(true);
@@ -41,11 +46,11 @@ describe('LiteFileUpload native form fallback', () => {
     const view = render(LiteFileUpload, {
       name: 'attachment', label: 'Attachment', error: 'File is too large.',
     });
-    const input = view.getByLabelText<HTMLInputElement>('Attachment');
+    const input = inputElement(view.getByLabelText('Attachment'));
     expect(input.getAttribute('aria-invalid')).toBe('true');
     expect(view.getByRole('alert').id).toBe(input.getAttribute('aria-describedby'));
     expect(view.getByRole('alert').textContent).toBe('File is too large.');
-    await view.rerender({ error: undefined });
+    await view.rerender({ error: '' });
     expect(input.hasAttribute('aria-invalid')).toBe(false);
     expect(input.hasAttribute('aria-describedby')).toBe(false);
     expect(view.queryByRole('alert')).toBeNull();
@@ -54,8 +59,8 @@ describe('LiteFileUpload native form fallback', () => {
   it('generates distinct label targets for repeated fields', () => {
     const first = render(LiteFileUpload, { name: 'attachments', label: 'First' });
     const second = render(LiteFileUpload, { name: 'attachments', label: 'Second' });
-    const firstInput = first.getByLabelText<HTMLInputElement>('First');
-    const secondInput = second.getByLabelText<HTMLInputElement>('Second');
+    const firstInput = inputElement(first.getByLabelText('First'));
+    const secondInput = inputElement(second.getByLabelText('Second'));
     expect(firstInput.id).toBeTruthy();
     expect(firstInput.id).not.toBe(secondInput.id);
     expect(firstInput.multiple).toBe(false);
