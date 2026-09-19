@@ -15,7 +15,7 @@ const report = {
   revision: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(),
   scope: 'Built Svelte specimens, not production backend integration, Figma parity or WCAG certification',
   capture: { mode: 'full-page', attempts: 8, equality: 'consecutive PNG buffers, byte-for-byte', masks: false, baselineComparison: false },
-  figmaSynced: false, sourceHashes: {}, scenes: [], interactions: [], failures: [],
+  figmaSynced: false, sourceHashes: {}, statusContrast: [], scenes: [], interactions: [], failures: [],
 };
 rmSync(evidence, { force: true, recursive: true });
 mkdirSync(resolve(evidence, 'screenshots'), { recursive: true });
@@ -40,8 +40,9 @@ async function openScene(options, viewport) {
 try {
   await buildPreview();
   server = await servePreview();
-  browser = await chromium.launch();
-  const viewports = [{ width: 1440, height: 1000 }, { width: 390, height: 844 }];
+  browser = await chromium.launch(process.env['SVADMIN_CHROMIUM_EXECUTABLE_PATH'] ? { executablePath: process.env['SVADMIN_CHROMIUM_EXECUTABLE_PATH'] } : {});
+  report.browserVersion = browser.version();
+  const viewports = [{ width: 1440, height: 900 }, { width: 1920, height: 1080 }, { width: 390, height: 844 }];
   for (const viewport of viewports) for (const theme of ['light', 'dark']) for (const locale of ['en', 'zh-CN']) {
     for (const [view, states] of Object.entries(scenarios)) for (const state of states) {
       const options = { view, state, theme, locale };
@@ -61,6 +62,23 @@ try {
           await expect(page.getByTestId('input-disabled')).toBeDisabled();
           await expect(page.getByTestId('input-readonly')).toHaveAttribute('readonly', '');
           await expect(page.getByTestId('input-invalid')).toHaveAttribute('aria-describedby', 'invalid-hint');
+          const statuses = await page.locator('[data-svadmin-status]').evaluateAll(nodes => {
+            // 浏览器将实际解析后的 OKLCH 颜色投影至 sRGB；本样例标签背景为不透明色。
+            const canvas = document.createElement('canvas'); canvas.width = canvas.height = 1;
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            if (!ctx) throw new Error('Cannot resolve rendered colors');
+            const rgb = css => { ctx.clearRect(0, 0, 1, 1); ctx.fillStyle = css; ctx.fillRect(0, 0, 1, 1); return [...ctx.getImageData(0, 0, 1, 1).data]; };
+            const luminance = channels => channels.slice(0, 3).map(v => v / 255).map(v => v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4).reduce((total, v, i) => total + v * [0.2126, 0.7152, 0.0722][i], 0);
+            return nodes.map(node => {
+              const style = getComputedStyle(node); const foreground = rgb(style.color); const background = rgb(style.backgroundColor);
+              if (foreground[3] !== 255 || background[3] !== 255) throw new Error('Contrast requires opaque resolved colors');
+              const a = luminance(foreground), b = luminance(background);
+              return { status: node.getAttribute('data-svadmin-status'), text: node.textContent, foreground, background, ratio: (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05) };
+            });
+          });
+          assert.deepEqual(statuses.map(item => item.status), ['success', 'warning', 'danger', 'info', 'neutral']);
+          for (const item of statuses) { assert.ok(item.text.trim()); assert.ok(item.ratio >= 4.5, `${theme}/${item.status}: insufficient label contrast ${item.ratio}`); }
+          report.statusContrast.push({ id, statuses });
         }
         if ((view === 'record-detail' && ['ready', 'partial'].includes(state)) || view === 'settings') {
           const workspace = page.locator('[data-svadmin-workspace-layout]');
@@ -183,6 +201,6 @@ finally {
   writeFileSync(resolve(evidence, 'index.html'), '<!doctype html><meta charset="UTF-8"><title>svadmin browser specimens</title><h1>svadmin · Browser specimens</h1><p>Actual built components. Full-page captures; not synchronized to Figma. See report.json for exact revision and scope.</p>' + passed.map(scene => `<details><summary>${scene.id}</summary><img style="max-width:100%;height:auto" src="${scene.screenshot}" alt="${scene.id}"></details>`).join('\n'));
   console.info(JSON.stringify({ revision: report.revision, scenes: report.scenes.length, passed: passed.length, interactions: report.interactions.filter(item => item.passed).length, failures: report.failures }));
 }
-assert.equal(report.scenes.length, 152, 'complete finite state matrix must run');
-assert.equal(report.interactions.length, 4, 'all interaction sequences must run');
+assert.equal(report.scenes.length, 228, 'complete finite state matrix must run');
+assert.equal(report.interactions.length, 6, 'all interaction sequences must run');
 assert.equal(report.failures.length, 0, 'browser specimen checks failed; see report.json');

@@ -3,7 +3,7 @@ import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readFileSync } from 'node:fs';
-import { buildKit } from '../build.mjs';
+import { buildKit, source, verifyRuntimeSources } from '../build.mjs';
 
 export const directory = dirname(fileURLToPath(import.meta.url));
 export const root = resolve(directory, '../../..');
@@ -14,7 +14,9 @@ const { svelte } = await import(require.resolve('@sveltejs/vite-plugin-svelte'))
 
 export async function buildPreview() {
   // 预览始终消费真实包产物；不通过复制源 CSS 或重新实现控件来伪造渲染。
-  buildKit(readFileSync(resolve(root, 'packages/ui/src/components.css'), 'utf8'));
+  const css = readFileSync(resolve(root, source.stylesheet), 'utf8');
+  verifyRuntimeSources(css, readFileSync(resolve(root, source.recipeSource)));
+  buildKit(css);
   assert.deepEqual(readFileSync(resolve(root, 'packages/ui/dist/app.css')), readFileSync(resolve(root, 'packages/ui/dist/app.theme.css')));
   await build({
     configFile: false, root: directory, base: './',

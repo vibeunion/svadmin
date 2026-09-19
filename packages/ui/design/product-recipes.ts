@@ -110,3 +110,35 @@ export const productList = defineSlotRecipe({
     help: { ...caption, margin: '0', maxWidth: '65ch' },
   },
 });
+
+// 不把实心警告背景的 warning-foreground 用于浅色标签。
+// 与带显式色相的中性色混合时，使用矩形 Oklab 空间，避免 Oklch 色相旋转。
+// 不支持 color-mix 时保留可读的 foreground/muted 回退。
+export const productStatus = defineSlotRecipe({
+  className: 'product-status',
+  slots: ['root'],
+  base: {
+    root: {
+      '--svadmin-status-color': 'var(--muted-foreground)',
+      '&[data-slot=badge]': {
+        background: 'var(--muted)', color: 'var(--foreground)',
+        borderColor: 'var(--svadmin-status-color)', whiteSpace: 'nowrap',
+        '@supports (color: color-mix(in oklab, black, white))': {
+          background: 'color-mix(in oklab, var(--svadmin-status-color) 10%, var(--card))',
+          borderColor: 'color-mix(in oklab, var(--svadmin-status-color) 25%, var(--card))',
+          color: 'color-mix(in oklab, var(--svadmin-status-color) 35%, var(--foreground))',
+        },
+      },
+    },
+  },
+  variants: {
+    status: {
+      success: { root: { '--svadmin-status-color': 'var(--success)' } },
+      warning: { root: { '--svadmin-status-color': 'var(--warning)' } },
+      danger: { root: { '--svadmin-status-color': 'var(--destructive)' } },
+      info: { root: { '--svadmin-status-color': 'var(--info)' } },
+      neutral: { root: { '--svadmin-status-color': 'var(--muted-foreground)' } },
+    },
+  },
+  defaultVariants: { status: 'neutral' },
+});

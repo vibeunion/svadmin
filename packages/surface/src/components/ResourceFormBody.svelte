@@ -64,7 +64,7 @@
     <div role="alert"><ul>{#each errors as error, index (`${index}:${error}`)}<li>{error}</li>{/each}</ul></div>
   {/if}
   <fieldset disabled={!scope.enabled || formState.busy || !!formState.proposal} class="form-fields">
-    <JsonSchemaForm {schema} bind:value onsubmit={submit} submitText={labels.submit} idPrefix={`surface-${widgetId}-${instanceId}`} />
+    <JsonSchemaForm {schema} {locale} bind:value onsubmit={submit} submitText={labels.submit} idPrefix={`surface-${widgetId}-${instanceId}`} />
   </fieldset>
   {#if formState.error}<p role="alert">{labels.error}</p>{/if}
   {#if formState.proposal}

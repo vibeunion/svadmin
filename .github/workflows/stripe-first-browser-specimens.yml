@@ -37,7 +37,7 @@ jobs:
           set -euo pipefail
           node --test packages/ui/scripts/product-recipes.test.mjs
           (cd packages/ui && node ../../node_modules/vitest/vitest.mjs run src/components/content/product-layout.test.svelte.ts)
-          node node_modules/eslint/bin/eslint.js packages/ui/design/product-recipes.ts packages/ui/src/components/content/{SectionHeader,PageToolbar,SettingsGroup,SettingsFieldRow,WorkspaceLayout,product-layout.test-host}.svelte packages/ui/src/components/content/product-layout.test.svelte.ts design/stripe-first/preview/Preview.svelte --max-warnings 0
+          node node_modules/eslint/bin/eslint.js packages/ui/design/product-recipes.ts packages/ui/src/components/content/{SectionHeader,PageToolbar,SettingsGroup,SettingsFieldRow,WorkspaceLayout,StatusBadge,product-layout.test-host}.svelte packages/ui/src/components/content/product-layout.test.svelte.ts design/stripe-first/preview/Preview.svelte design/stripe-first/preview/status-colors.mjs --max-warnings 0
       - name: Type-check the actual specimen
         run: node node_modules/svelte-check/bin/svelte-check --tsconfig design/stripe-first/preview/tsconfig.json --fail-on-warnings
       - name: Install Chromium
@@ -50,6 +50,10 @@ jobs:
         id: keyboard
         continue-on-error: true
         run: node design/stripe-first/preview/keyboard.mjs
+      - name: Verify semantic status colors
+        id: colors
+        continue-on-error: true
+        run: node design/stripe-first/preview/status-colors.mjs
       - name: Verify no source or dependency mutations
         id: unchanged
         continue-on-error: true
@@ -69,9 +73,11 @@ jobs:
         env:
           SCENES: ${{ steps.scenes.outcome }}
           KEYBOARD: ${{ steps.keyboard.outcome }}
+          COLORS: ${{ steps.colors.outcome }}
           UNCHANGED: ${{ steps.unchanged.outcome }}
         run: |
           set -euo pipefail
           test "$SCENES" = success
           test "$KEYBOARD" = success
+          test "$COLORS" = success
           test "$UNCHANGED" = success
