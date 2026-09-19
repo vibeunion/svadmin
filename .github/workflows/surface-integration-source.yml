@@ -1,0 +1,37 @@
+name: Surface integration source snapshot
+on:
+  push:
+    branches: [codex/openui-surface-contracts-20260919]
+    paths: ['.github/workflows/surface-integration-source.yml']
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    if: github.repository == 'vibeunion/svadmin' && github.ref == 'refs/heads/codex/openui-surface-contracts-20260919'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+          show-progress: false
+      - name: Capture only the three integration histories
+        run: |
+          set -euo pipefail
+          git fetch --quiet --no-tags --unshallow origin main:refs/remotes/origin/main fix/surface-incremental-source-loading:refs/remotes/origin/source-loading
+          test "$(git rev-parse HEAD^)" = a318cebd0f40a93a34f826a274d758847d5c66f7
+          test "$(git rev-parse origin/main)" = bdef00a9c9a7340c70b3002d379f5104401e4493
+          test "$(git rev-parse origin/source-loading)" = 58abed0b3e89f172d5b0051fc0bd0d52a60dfe40
+          mkdir -p "$RUNNER_TEMP/surface-integration"
+          git rev-parse HEAD origin/main origin/source-loading > "$RUNNER_TEMP/surface-integration/refs.txt"
+          git bundle create "$RUNNER_TEMP/surface-integration/source.bundle" HEAD refs/remotes/origin/main refs/remotes/origin/source-loading
+          git bundle verify "$RUNNER_TEMP/surface-integration/source.bundle"
+          sha256sum "$RUNNER_TEMP/surface-integration/source.bundle"
+          git status --porcelain
+      - uses: actions/upload-artifact@v7
+        with:
+          name: surface-integration-source
+          path: ${{ runner.temp }}/surface-integration/
+          retention-days: 3
+          if-no-files-found: error
