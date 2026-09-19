@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.15.1](https://github.com/vibeunion/svadmin/compare/supabase-v0.15.0...supabase-v0.15.1) (2026-09-19)
+
+
+### 🐛 Bug Fixes
+
+* **i18n:** reconcile processing labels when syncing main into Panda migration ([7b2f036](https://github.com/vibeunion/svadmin/commit/7b2f036ca797e2c9349fc041c3b640d1138fdaba))
+* **surface:** integrate edit preview with native main and scoped source loading ([0a6d22d](https://github.com/vibeunion/svadmin/commit/0a6d22dbbfbfa68615f99dffa4966062acbc683f))
+* **ui:** integrate enterprise components with current Panda contracts ([1565f54](https://github.com/vibeunion/svadmin/commit/1565f549af42a04bc63d9189a267e01c58ffedf2))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.11.7
+  * peerDependencies
+    * @svadmin/core bumped to 0.53.0
+
 ## [0.15.0](https://github.com/vibeunion/svadmin/compare/supabase-v0.14.5...supabase-v0.15.0) (2026-09-19)
 
 

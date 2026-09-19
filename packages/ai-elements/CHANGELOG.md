@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.8.0](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.7.4...ai-elements-v0.8.0) (2026-09-19)
+
+
+### 🚀 Features
+
+* **styles:** generate repository-wide finite Panda utility recipes ([addeefd](https://github.com/vibeunion/svadmin/commit/addeefda3f7d2c6f794891409502114b8981e54d))
+* **styles:** remove class engines and own finite native runtime ([8b899b4](https://github.com/vibeunion/svadmin/commit/8b899b4dc806bbc48463e5ae577f93d55e43cb1a))
+* **ui:** replace shadcn styling with native Panda primitives ([#435](https://github.com/vibeunion/svadmin/issues/435)) ([6aeb107](https://github.com/vibeunion/svadmin/commit/6aeb107f851a7cd50ecc5fd2d6d67edc0262b00b))
+
+
+### 🐛 Bug Fixes
+
+* **ai-elements:** preserve base code styles for null variants ([ce6335e](https://github.com/vibeunion/svadmin/commit/ce6335ebb0143cc85812ce41f8e6112c026c2873))
+* **ai-elements:** remove compiler scanning from the legacy CSS entry ([c391fdd](https://github.com/vibeunion/svadmin/commit/c391fddfbb43e26a9114b20b99e5e77ba618d260))
+* **i18n:** reconcile processing labels when syncing main into Panda migration ([7b2f036](https://github.com/vibeunion/svadmin/commit/7b2f036ca797e2c9349fc041c3b640d1138fdaba))
+* **styles:** repair legacy CSS metadata and verify frozen compatibility assets ([e3a8269](https://github.com/vibeunion/svadmin/commit/e3a82693bc5d71ff91c23a690994fb4d478fba6d))
+* **styles:** verify compiler-free tarballs and preserve vendor CSS side effects ([150a0d0](https://github.com/vibeunion/svadmin/commit/150a0d04b0822ff6bc38ed4c5407d93a4eb81ecb))
+* **surface:** integrate edit preview with native main and scoped source loading ([0a6d22d](https://github.com/vibeunion/svadmin/commit/0a6d22dbbfbfa68615f99dffa4966062acbc683f))
+* **ui:** integrate enterprise components with current Panda contracts ([1565f54](https://github.com/vibeunion/svadmin/commit/1565f549af42a04bc63d9189a267e01c58ffedf2))
+
+
+### 🔧 Miscellaneous Chores
+
+* **styles:** reconcile content recipes with native primitives on main ([ae608de](https://github.com/vibeunion/svadmin/commit/ae608de888de8e06c3f6aeebd92e5de1b8ae9af3))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.53.0
+
 ## [0.7.4](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.7.3...ai-elements-v0.7.4) (2026-09-19)
 
 
