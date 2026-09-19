@@ -12,7 +12,7 @@ permissions:
   contents: read
 concurrency:
   group: complete-ui-migration-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   migration:
     if: github.repository == 'vibeunion/svadmin' && github.ref == 'refs/heads/feat/ui-panda-complete-20260919'
@@ -24,14 +24,17 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-          fetch-depth: 0
+          fetch-depth: 1
       - uses: actions/setup-node@v7
         with:
           node-version: '26'
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: '1.4.2'
-      - run: mkdir -p "$RUNNER_TEMP/complete-ui/logs"
+      - name: Start with an empty evidence directory
+        run: |
+          mkdir -p "$RUNNER_TEMP/complete-ui/logs"
+          rm -rf docs/pr-evidence/panda-styles
       - name: Install locked dependencies
         run: bun install --frozen-lockfile
       - name: Generate finite recipes without changing public selectors
@@ -84,12 +87,13 @@ jobs:
         run: |
           bunx --no-install playwright install --with-deps chromium > "$RUNNER_TEMP/complete-ui/logs/browser-install.log" 2>&1
           node scripts/check-panda-browser.mjs
-      - name: Record bounded dependency diagnostics
+      - name: Collect only this run's generated evidence
         if: always()
         run: |
-          node --input-type=module -e "import fs from 'node:fs'; for (const name of ['cn','streamdown-svelte']) { const p='node_modules/'+name; if(fs.existsSync(p+'/package.json')) console.info(name,fs.readFileSync(p+'/package.json','utf8')); } if(fs.existsSync('node_modules/streamdown-svelte/dist/theme.js')) console.info('STREAMDOWN_THEME_HEAD',fs.readFileSync('node_modules/streamdown-svelte/dist/theme.js','utf8').slice(0,1300));"
           mkdir -p "$RUNNER_TEMP/complete-ui/screenshots"
-          cp docs/pr-evidence/panda-styles/*.png docs/pr-evidence/panda-styles/*.json "$RUNNER_TEMP/complete-ui/screenshots/" 2>/dev/null || true
+          if test -d docs/pr-evidence/panda-styles; then
+            cp docs/pr-evidence/panda-styles/*.png docs/pr-evidence/panda-styles/*.json "$RUNNER_TEMP/complete-ui/screenshots/" 2>/dev/null || true
+          fi
       - uses: actions/upload-artifact@v7
         if: always()
         with:
