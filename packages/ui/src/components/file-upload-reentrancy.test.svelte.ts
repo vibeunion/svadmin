@@ -6,13 +6,13 @@ afterEach(cleanup);
 
 describe('FileUpload reentrant host callbacks', () => {
   it.each(['queued', 'uploading'] as const)('does not dispatch after unmount from the %s notification', async phase => {
-    let teardown: (() => void) | undefined;
+    const lifecycle: { teardown?: () => void } = {};
     const upload = vi.fn(async () => undefined);
     const onChange = vi.fn((items: UploadItem[]) => {
-      if (items[0]?.status === phase) teardown?.();
+      if (items[0]?.status === phase) lifecycle.teardown?.();
     });
     const view = render(FileUpload, { upload, onChange });
-    teardown = () => { view.unmount(); };
+    lifecycle.teardown = () => { view.unmount(); };
     const input = view.container.querySelector('input[type="file"]');
     if (!(input instanceof HTMLInputElement)) throw new Error('Expected a native file input');
     await fireEvent.change(input, { target: { files: [new File(['draft'], 'draft.txt', { type: 'text/plain' })] } });

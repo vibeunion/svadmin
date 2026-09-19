@@ -18,6 +18,15 @@ interface SessionQueryOptions<TQuery, T> extends QuerySessionOptions {
   refetchIntervalInBackground?: boolean;
 }
 
+// 只有显式提供错误归一化器的内部领域查询才承诺 Error；普通查询保留 unknown 契约。
+export function createSessionQuery<TQuery, T = TQuery>(
+  context: AdminContextAccessor,
+  getOptions: () => SessionQueryOptions<TQuery, T> & { normalizeError: (error: unknown) => Error },
+): QueryObserverResult<T, Error>;
+export function createSessionQuery<TQuery, T = TQuery>(
+  context: AdminContextAccessor,
+  getOptions: () => SessionQueryOptions<TQuery, T>,
+): QueryObserverResult<T, unknown>;
 /** Ordinary reads keep their public result shape while cache and effects own an auth revision. */
 export function createSessionQuery<TQuery, T = TQuery>(
   context: AdminContextAccessor,
