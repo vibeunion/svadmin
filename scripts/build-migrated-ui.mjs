@@ -15,7 +15,7 @@ const panda = resolve(dirname(pandaPackage), pandaManifest.bin.panda);
 const targets = {
   ui: ['packages/ui/design/migrated-utilities', 'packages/ui/src/styles/compatibility.prelude.css'],
   'ai-elements': ['packages/ai-elements/design/migrated-utilities', 'packages/ai-elements/src/utilities.css'],
-  example: ['example/design/migrated-utilities', 'example/src/compatibility.css'],
+  example: ['example/design/migrated-utilities', 'example/styles/compatibility.css'],
 };
 
 // 只重新绑定本次构建生成的类名，保留现有 DOM/CSS 选择器接口。
@@ -95,7 +95,10 @@ export function compileMigratedUtilities(name, check = false) {
   assert.ok(!css.includes('svadmin-recipe:'), 'Unexpanded stylesheet recipe');
   assert.ok(!/\bsvmigration[0-9]+\b/.test(css), 'Internal compiler class leaked into public CSS');
   if (check) assert.equal(readFileSync(outputPath, 'utf8'), css, `${name}: generated CSS drift`);
-  else writeFileSync(outputPath, css);
+  else {
+    mkdirSync(dirname(outputPath), { recursive: true });
+    writeFileSync(outputPath, css);
+  }
   console.info(`[migrated-ui] ${name}: ${records.length} finite Panda recipes, ${Buffer.byteLength(css)} bytes`);
 }
 
