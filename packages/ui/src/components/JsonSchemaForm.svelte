@@ -57,6 +57,7 @@
     for (const [key, child] of Object.entries(node.properties ?? {})) {
       const next = mergeDefaults(child, result[key]);
       if (next !== undefined) result[key] = next;
+      else if (child.type === 'boolean' && node.required?.includes(key)) result[key] = false;
     }
     return result;
   }
@@ -92,7 +93,7 @@
   function addArrayItem(path: string[], itemSchema: JsonSchema): void {
     const current = readPath(path);
     const items = Array.isArray(current) ? current : [];
-    writePath(path, [...items, cloneDefault(itemSchema) ?? (itemSchema.type === 'object' ? {} : '')]);
+    writePath(path, [...items, cloneDefault(itemSchema) ?? (itemSchema.type === 'object' ? {} : itemSchema.type === 'boolean' ? false : '')]);
   }
 
   function removeArrayItem(path: string[], index: number): void {
@@ -166,7 +167,7 @@
         {:else if node.type === 'boolean'}
           <input id={id} type="checkbox" checked={Boolean(current)} onchange={(event) => writePath(path, event.currentTarget.checked)} />
         {:else if node.type === 'number' || node.type === 'integer'}
-          <input id={id} type="number" required={required} value={current === undefined ? '' : String(current)} oninput={(event) => writePath(path, event.currentTarget.value === '' ? undefined : Number(event.currentTarget.value))} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529" />
+          <input id={id} type="number" step={node.type === 'integer' ? 1 : 'any'} required={required} value={current === undefined ? '' : String(current)} oninput={(event) => writePath(path, event.currentTarget.value === '' ? undefined : Number(event.currentTarget.value))} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529" />
         {:else}
           <input id={id} type="text" required={required} value={String(current ?? '')} oninput={(event) => writePath(path, event.currentTarget.value)} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529" />
         {/if}

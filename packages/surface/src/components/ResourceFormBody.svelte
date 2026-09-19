@@ -11,6 +11,7 @@
   let { widgetId, host, action, title, locale }: {
     widgetId: string; host: SurfaceWorkflowHost; action: SurfaceActionDescriptor; title: string; locale: string;
   } = $props();
+  const instanceId = $props.id();
   let value = $state<Record<string, unknown>>({});
   let formState = $state<SurfaceWorkflowClientState>({ busy: false });
   let errors = $state<string[]>([]);
@@ -31,10 +32,14 @@
   const controller = untrack(() => createSurfaceFormController({ action, getScope: host.getScope,
     onState: (next) => { formState = next; }, onCommitted: host.committed }));
   let identity: readonly unknown[] = [];
-  $effect(() => {
+  $effect.pre(() => {
     const next = [scope.scopeKey, scope.surfaceId, scope.revision, scope.transport, scope.enabled];
     untrack(() => {
-      if (identity.length && next.some((part, index) => part !== identity[index])) controller.reset();
+      if (identity.length && next.some((part, index) => part !== identity[index])) {
+        controller.reset();
+        value = {};
+        errors = [];
+      }
       identity = next;
     });
   });
@@ -52,14 +57,14 @@
   }
 </script>
 
-<section class="svadmin-surface-editor {editorClasses.comfortable}" aria-labelledby="{widgetId}-form-title" aria-busy={formState.busy}>
-  <h3 id="{widgetId}-form-title">{title}</h3>
+<section class="svadmin-surface-editor {editorClasses.comfortable}" aria-labelledby="{instanceId}-form-title" aria-busy={formState.busy}>
+  <h3 id="{instanceId}-form-title">{title}</h3>
   {#if !scope.enabled}<p role="status">{labels.disabled}</p>{/if}
   {#if errors.length}
     <div role="alert"><ul>{#each errors as error, index (`${index}:${error}`)}<li>{error}</li>{/each}</ul></div>
   {/if}
   <fieldset disabled={!scope.enabled || formState.busy || !!formState.proposal} class="form-fields">
-    <JsonSchemaForm {schema} bind:value onsubmit={submit} submitText={labels.submit} idPrefix={`surface-${widgetId}`} />
+    <JsonSchemaForm {schema} bind:value onsubmit={submit} submitText={labels.submit} idPrefix={`surface-${widgetId}-${instanceId}`} />
   </fieldset>
   {#if formState.error}<p role="alert">{labels.error}</p>{/if}
   {#if formState.proposal}

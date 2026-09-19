@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { createI18nScope, provideI18nScope } from '@svadmin/core/i18n';
+  provideI18nScope(createI18nScope({ locale: 'en' }));
   import { provideAdminContext, type DataProvider, type ResourceDefinition, type AccessControlProvider } from '@svadmin/core';
   import { definedReactiveOptions } from '@svadmin/core/options';
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
@@ -33,5 +35,5 @@
 </script>
 
 <QueryClientProvider client={queryClient}>
-  <ImportWizard {resourceName} {open} {onSuccess} />
+  <ImportWizard {resourceName} {open} {...(onSuccess ? { onSuccess } : {})} />
 </QueryClientProvider>

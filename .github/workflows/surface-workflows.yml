@@ -4,7 +4,10 @@ on:
     branches: [main]
     paths:
       - 'packages/surface/**'
-      - 'packages/ui/src/components/JsonSchemaForm.svelte'
+      - 'packages/ui/src/components/**'
+      - 'packages/lite/src/components/LiteFilterBuilder*'
+      - 'packages/lite/src/filter-form.ts'
+      - 'packages/core/src/types.ts'
       - 'scripts/surface-workflows/**'
       - '.github/workflows/surface-workflows.yml'
   workflow_dispatch:
@@ -32,6 +35,14 @@ jobs:
         run: bun run build:packages
       - name: Surface contracts, components, actions and durable storage
         run: bun run --cwd packages/surface test
+      - name: Strict Surface and UI contracts
+        run: |
+          bun run --cwd packages/surface check
+          bunx --no-install svelte-check --tsgo-experimental-api --tsconfig packages/ui/tsconfig.json --threshold error
+      - name: Real UI and Lite workflow regression components
+        run: |
+          bun run --cwd packages/ui test src/components/workflow-boundaries.test.svelte.ts src/components/import-wizard.test.svelte.ts src/components/resource-workspace.test.svelte.ts src/components/combobox-field.test.svelte.ts src/components/numeric-input.test.svelte.ts
+          bun run --cwd packages/lite test:components src/components/LiteFilterBuilder.apply.test.svelte.ts
       - name: Install isolated optional parser (not a new workspace dependency)
         run: |
           npm install --prefix "$RUNNER_TEMP/surface-openui" --ignore-scripts --no-audit --no-fund --save-exact @openuidev/lang-core@0.3.0

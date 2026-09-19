@@ -36,19 +36,34 @@ export function createSurfaceFormController(options: {
   let notified: string | undefined;
   let draft: { serialized: string; requestKey: string } | undefined;
   const action = options.action;
+  let activeScope: SurfaceWorkflowClientScope = { ...options.getScope() };
   function publish(next: SurfaceWorkflowClientState) { state = next; options.onState(next); }
   function same(a: SurfaceWorkflowClientScope, b: SurfaceWorkflowClientScope): boolean {
-    return a.scopeKey === b.scopeKey && a.surfaceId === b.surfaceId && a.revision === b.revision && a.transport === b.transport && b.enabled;
+    return a.scopeKey === b.scopeKey && a.surfaceId === b.surfaceId && a.revision === b.revision && a.transport === b.transport && a.enabled === b.enabled;
+  }
+  function reset() {
+    if (disposed) return;
+    generation += 1;
+    draft = undefined;
+    abort.abort(); abort = new AbortController();
+    activeScope = { ...options.getScope() };
+    publish({ busy: false });
+  }
+  function syncScope(): SurfaceWorkflowClientScope {
+    const next = { ...options.getScope() };
+    if (!same(activeScope, next)) reset();
+    return next;
   }
   async function run(work: (scope: SurfaceWorkflowClientScope, signal: AbortSignal) => Promise<SurfaceActionProposal>) {
-    const scope = options.getScope();
+    const scope = syncScope();
     if (disposed || state.busy || !scope.enabled) return;
     const ticket = ++generation;
     publish({ busy: true, ...(state.proposal ? { proposal: state.proposal } : {}) });
     try {
+      if (!same(scope, options.getScope())) { reset(); return; }
       const proposal = await work(scope, abort.signal);
       if (disposed || ticket !== generation) return;
-      if (!same(scope, options.getScope())) { publish({ busy: false }); return; }
+      if (!same(scope, options.getScope())) { reset(); return; }
       if (proposal.actionId !== action.id || proposal.actionVersion !== action.version || proposal.surfaceId !== scope.surfaceId || proposal.surfaceRevision !== scope.revision) {
         throw new Error('Proposal does not belong to the active form');
       }
@@ -59,12 +74,13 @@ export function createSurfaceFormController(options: {
       }
     } catch {
       if (disposed || ticket !== generation) return;
-      if (!same(scope, options.getScope())) { publish({ busy: false }); return; }
+      if (!same(scope, options.getScope())) { reset(); return; }
       publish({ ...state, busy: false, error: 'Operation failed. Check status before retrying.' });
     }
   }
   return {
     submit(args: JsonObject) {
+      syncScope();
       if (disposed || state.busy || state.proposal || !options.getScope().enabled) return Promise.resolve();
       const captured = structuredClone(args);
       const serialized = JSON.stringify(captured);
@@ -74,31 +90,30 @@ export function createSurfaceFormController(options: {
         surfaceId: scope.surfaceId, surfaceRevision: scope.revision, requestKey }, signal));
     },
     confirm() {
+      syncScope();
       const p = state.proposal;
       if (!p || p.status !== 'pending' || p.approval !== 'confirm') return Promise.resolve();
       return run((scope, signal) => scope.transport.approve(p.id, p.digest, signal));
     },
     execute() {
+      syncScope();
       const p = state.proposal;
       if (!p || p.status !== 'approved') return Promise.resolve();
       return run((scope, signal) => scope.transport.execute(p.id, p.digest, signal));
     },
     refresh() {
+      syncScope();
       const p = state.proposal;
       if (!p) return Promise.resolve();
       return run((scope, signal) => scope.transport.inspect(p.id, signal));
     },
     reject() {
+      syncScope();
       const p = state.proposal;
       if (!p || !['pending', 'approved'].includes(p.status)) return Promise.resolve();
       return run((scope, signal) => scope.transport.reject(p.id, p.digest, signal));
     },
-    reset() {
-      generation += 1;
-      draft = undefined;
-      abort.abort(); abort = new AbortController();
-      publish({ busy: false });
-    },
+    reset,
     dispose() { disposed = true; generation += 1; abort.abort(); },
   };
 }

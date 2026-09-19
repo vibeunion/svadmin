@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte';
   import { X, Upload, RotateCw, Ban } from '@lucide/svelte';
   import { Button } from './ui/button/index.js';
 
@@ -27,7 +28,7 @@
     maxSize?: number;
     disabled?: boolean;
     required?: boolean;
-    upload?: (file: File, session: UploadSession) => Promise<{ url?: string } | void>;
+    upload?: (file: File, session: UploadSession) => Promise<{ url?: string } | undefined> | Promise<void>;
     onChange?: (items: UploadItem[]) => void;
     onReject?: (file: File, reason: string) => void;
     class?: string;
@@ -52,6 +53,12 @@
   let items = $state<UploadItem[]>([]);
   let sequence = 0;
   const controllers = new Map<string, AbortController>();
+  let disposed = false;
+  onDestroy(() => {
+    disposed = true;
+    for (const controller of controllers.values()) controller.abort();
+    controllers.clear();
+  });
 
   function emitChange(): void {
     onChange?.(items.map(item => ({ ...item })));
@@ -79,31 +86,40 @@
     return undefined;
   }
 
-  function updateItem(id: string, update: Partial<UploadItem>): void {
-    items = items.map(item => item.id === id ? { ...item, ...update } : item);
+  function updateItem(id: string, update: Partial<UploadItem>, clear: readonly ('url' | 'error')[] = []): void {
+    if (disposed || !items.some(item => item.id === id)) return;
+    items = items.map(item => {
+      if (item.id !== id) return item;
+      const next = { ...item, ...update };
+      for (const field of clear) delete next[field];
+      return next;
+    });
     emitChange();
   }
 
   async function process(item: UploadItem): Promise<void> {
-    if (!upload || disabled) return;
+    if (!upload || disabled || disposed || controllers.has(item.id)) return;
     const controller = new AbortController();
     controllers.set(item.id, controller);
-    updateItem(item.id, { status: 'uploading', progress: 0, error: undefined });
+    // 取消、替换、重试或卸载后，旧请求不再拥有更新状态的权限。
+    const current = () => !disposed && !controller.signal.aborted && controllers.get(item.id) === controller;
+    updateItem(item.id, { status: 'uploading', progress: 0 }, ['error', 'url']);
     try {
       const result = await upload(item.file, {
         signal: controller.signal,
-        onProgress: progress => updateItem(item.id, {
-          progress: Number.isFinite(progress) ? Math.max(0, Math.min(100, Math.round(progress))) : 0,
-        }),
+        onProgress: progress => {
+          if (current()) updateItem(item.id, {
+            progress: Number.isFinite(progress) ? Math.max(0, Math.min(100, Math.round(progress))) : 0,
+          });
+        },
       });
-      updateItem(item.id, { status: 'success', progress: 100, url: result?.url });
+      if (current()) updateItem(item.id, { status: 'success', progress: 100,
+        ...(result?.url === undefined ? {} : { url: result.url }) });
     } catch (error) {
-      updateItem(item.id, {
-        status: controller.signal.aborted ? 'cancelled' : 'error',
-        error: controller.signal.aborted ? 'Upload cancelled.' : error instanceof Error ? error.message : 'Upload failed.',
-      });
+      if (current()) updateItem(item.id, { status: 'error',
+        error: error instanceof Error ? error.message : 'Upload failed.' });
     } finally {
-      controllers.delete(item.id);
+      if (controllers.get(item.id) === controller) controllers.delete(item.id);
     }
   }
 
@@ -117,6 +133,10 @@
         continue;
       }
       const item: UploadItem = { id: nextId(), file, status: 'queued', progress: 0 };
+      if (!multiple) {
+        for (const controller of controllers.values()) controller.abort();
+        controllers.clear();
+      }
       items = multiple ? [...items, item] : [item];
       emitChange();
       void process(item);
@@ -131,16 +151,21 @@
 
   function remove(id: string): void {
     controllers.get(id)?.abort();
+    controllers.delete(id);
     items = items.filter(item => item.id !== id);
     emitChange();
   }
 
   function cancel(id: string): void {
-    controllers.get(id)?.abort();
+    const controller = controllers.get(id);
+    if (!controller) return;
+    controller.abort();
+    controllers.delete(id);
+    updateItem(id, { status: 'cancelled', error: 'Upload cancelled.' });
   }
 
   function retry(item: UploadItem): void {
-    void process({ ...item, status: 'queued', error: undefined });
+    if (item.status === 'error' || item.status === 'cancelled') void process(item);
   }
 
   function handleKeydown(event: KeyboardEvent): void {
