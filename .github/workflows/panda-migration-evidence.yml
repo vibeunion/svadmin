@@ -1,0 +1,44 @@
+name: Panda migration evidence
+
+on:
+  push:
+    branches: [feat/panda-tokens-no-tailwind]
+
+permissions:
+  contents: read
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Archive tracked sources
+        run: |
+          mkdir -p "$RUNNER_TEMP/panda-evidence"
+          git archive --format=tar.gz --output="$RUNNER_TEMP/panda-evidence/source.tar.gz" HEAD
+          git rev-parse HEAD > "$RUNNER_TEMP/panda-evidence/commit.txt"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - name: Install unchanged dependency baseline
+        run: bun install --frozen-lockfile
+      - name: Capture existing published CSS before migration
+        run: |
+          node packages/ui/scripts/build-static-css.mjs
+          node packages/ui/scripts/postbuild-css.mjs
+          cp packages/ui/dist/app.css "$RUNNER_TEMP/panda-evidence/ui.baseline.css"
+          cp packages/ui/dist/app.theme.css "$RUNNER_TEMP/panda-evidence/ui-theme.baseline.css"
+      - name: Preserve baseline evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: panda-migration-baseline
+          path: ${{ runner.temp }}/panda-evidence/
+          retention-days: 7
+          compression-level: 0
