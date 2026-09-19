@@ -1,47 +1,5 @@
 @layer sv-surface.reset, sv-surface.base, sv-surface.tokens, sv-surface.recipes, sv-surface.utilities;
 
-@layer sv-surface.base{
-  :root {
-    --made-with-panda: '🐼';
-}
-
-  *,::before,::after,::backdrop {
-    --blur: /*-*/ /*-*/;
-    --brightness: /*-*/ /*-*/;
-    --contrast: /*-*/ /*-*/;
-    --grayscale: /*-*/ /*-*/;
-    --hue-rotate: /*-*/ /*-*/;
-    --invert: /*-*/ /*-*/;
-    --saturate: /*-*/ /*-*/;
-    --sepia: /*-*/ /*-*/;
-    --drop-shadow: /*-*/ /*-*/;
-    --backdrop-blur: /*-*/ /*-*/;
-    --backdrop-brightness: /*-*/ /*-*/;
-    --backdrop-contrast: /*-*/ /*-*/;
-    --backdrop-grayscale: /*-*/ /*-*/;
-    --backdrop-hue-rotate: /*-*/ /*-*/;
-    --backdrop-invert: /*-*/ /*-*/;
-    --backdrop-opacity: /*-*/ /*-*/;
-    --backdrop-saturate: /*-*/ /*-*/;
-    --backdrop-sepia: /*-*/ /*-*/;
-    --gradient-from-position: /*-*/ /*-*/;
-    --gradient-to-position: /*-*/ /*-*/;
-    --gradient-via-position: /*-*/ /*-*/;
-    --scroll-snap-strictness: proximity;
-    --border-spacing-x: 0;
-    --border-spacing-y: 0;
-    --translate-x: 0;
-    --translate-y: 0;
-    --rotate: 0;
-    --rotate-x: 0;
-    --rotate-y: 0;
-    --skew-x: 0;
-    --skew-y: 0;
-    --scale-x: 1;
-    --scale-y: 1;
-}
-}
-
 @layer sv-surface.tokens{
   .svadmin-surface-editor {
     --svsurface-colors-background: var(--card, #ffffff);
