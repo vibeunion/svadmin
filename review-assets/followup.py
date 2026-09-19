@@ -30,6 +30,19 @@ edit(tests, """  it('renders initial empty state and allows adding rules', async
       locale: 'zh',
     });""")
 
+builder = 'packages/ui/src/components/FilterBuilder.svelte'
+edit(builder, '''            {:else}
+              <Input id={`${uid}-${node.id}-value`} type={!collection && field?.type === 'number' ? 'number' : 'text'} step="any" aria-invalid={invalid} value={valueText(node.value)} placeholder={collection ? '[1, 2]' : ''}
+                oninput={(event) => { if (event.currentTarget instanceof HTMLInputElement) changeValue(node, event.currentTarget.value); }} />''', '''            {:else if !collection && field?.type === 'number'}
+              <Input id={`${uid}-${node.id}-value`} type="number" step="any" aria-invalid={invalid} value={typeof node.value === 'number' ? node.value : undefined}
+                oninput={(event) => { if (event.currentTarget instanceof HTMLInputElement) changeValue(node, event.currentTarget.value); }} />
+            {:else}
+              <Input id={`${uid}-${node.id}-value`} type="text" aria-invalid={invalid} value={valueText(node.value)} placeholder={collection ? '[1, 2]' : ''}
+                oninput={(event) => { if (event.currentTarget instanceof HTMLInputElement) changeValue(node, event.currentTarget.value); }} />''')
+
+adapter = 'packages/ui/src/components/enterprise/recursive-schema-form.ts'
+edit(adapter, "      function bound(key: string): number | undefined {\n        const value = raw[key];", "      const definition = raw;\n      function bound(key: string): number | undefined {\n        const value = definition[key];")
+
 p = Path('packages/ui/src/components/enterprise-components.test.svelte.ts')
 p.write_text(p.read_text() + '''
 
@@ -53,7 +66,7 @@ describe('recursive form parse-error ownership', () => {
 ''')
 subprocess.run(['git', 'diff', '--check'], check=True)
 changed = subprocess.check_output(['git', 'diff', '--name-only'], text=True).splitlines()
-expected = [form, tests, str(p)]
+expected = [form, tests, builder, adapter, str(p)]
 if set(changed) != set(expected):
     raise RuntimeError('Unexpected file set')
 
@@ -68,7 +81,7 @@ base = api('/git/commits/' + HEAD)
 tree = api('/git/trees', {'base_tree': base['tree']['sha'], 'tree': [
     {'path': name, 'mode': '100644', 'type': 'blob', 'content': Path(name).read_text()} for name in changed
 ]})
-commit = api('/git/commits', {'message': 'fix(ui): preserve numeric error ownership and scope filter locale tests', 'tree': tree['sha'], 'parents': [HEAD]})
+commit = api('/git/commits', {'message': 'fix(ui): preserve form error ownership and strict input contracts', 'tree': tree['sha'], 'parents': [HEAD]})
 print('CANDIDATE_HEAD=' + commit['sha'])
 print('CANDIDATE_TREE=' + tree['sha'])
 print('PARENT=' + HEAD)
