@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render, fireEvent } from '@testing-library/svelte';
+import { getLocale, setLocale } from '@svadmin/core/i18n';
 import FilterBuilder from './FilterBuilder.svelte';
 import type { FieldDefinition } from '@svadmin/core';
 
@@ -10,19 +11,19 @@ const testFields: FieldDefinition[] = [
 ];
 
 describe('FilterBuilder component', () => {
-  it('renders initial empty state and allows adding rules', async () => {
-    const view = render(FilterBuilder, {
-      fields: testFields,
-      filters: [],
-    });
-
-    expect(view.container.textContent).toContain('暂无筛选条件');
-
-    const addBtn = view.container.querySelector('[data-testid="filter-builder-add-rule"]');
-    expect(addBtn).not.toBeNull();
-    if (addBtn) await fireEvent.click(addBtn);
-
-    expect(view.container.textContent).not.toContain('暂无筛选条件');
+  it.each([['en', 'No filters yet.'], ['zh', '暂无筛选条件']])('renders %s empty state and allows adding rules', async (locale, emptyText) => {
+    const previousLocale = getLocale();
+    setLocale(locale);
+    const view = render(FilterBuilder, { fields: testFields, filters: [] });
+    try {
+      expect(view.container.textContent).toContain(emptyText);
+      await fireEvent.click(view.getByTestId('filter-builder-add-rule'));
+      expect(view.container.textContent).not.toContain(emptyText);
+      expect(view.container.querySelectorAll('[data-filter-rule]')).toHaveLength(1);
+    } finally {
+      view.unmount();
+      setLocale(previousLocale);
+    }
   });
 
   it('compiles rules into filters and triggers onApply', async () => {
@@ -32,14 +33,8 @@ describe('FilterBuilder component', () => {
       filters: [{ field: 'title', operator: 'contains', value: 'Svelte' }],
       onApply,
     });
-
-    const applyBtn = view.container.querySelector('[data-testid="filter-builder-apply"]');
-    expect(applyBtn).not.toBeNull();
-    if (applyBtn) await fireEvent.click(applyBtn);
-
+    await fireEvent.click(view.getByTestId('filter-builder-apply'));
     expect(onApply).toHaveBeenCalledOnce();
-    expect(onApply).toHaveBeenCalledWith([
-      { field: 'title', operator: 'contains', value: 'Svelte' },
-    ]);
+    expect(onApply).toHaveBeenCalledWith([{ field: 'title', operator: 'contains', value: 'Svelte' }]);
   });
 });

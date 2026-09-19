@@ -28,10 +28,9 @@
     activeSheetId = $bindable('sheet1'), readonly = false, onchange, onexport, class: className = '',
   }: Props = $props();
   let selectedCell = $state('A1');
-  let formulaInput = $state('');
   let nextSheetId = 0;
   const currentSheet = $derived(sheets.find((sheet) => sheet.id === activeSheetId) ?? sheets[0]);
-  $effect(() => { formulaInput = currentSheet?.cells[selectedCell] ?? ''; });
+  const formulaInput = $derived(currentSheet?.cells[selectedCell] ?? '');
 
   function getColName(index: number): string {
     let result = '', current = index;
@@ -43,12 +42,11 @@
     const computed = evaluateFormula(currentSheet.cells[key] ?? '', currentSheet.cells);
     return typeof computed === 'number' ? computed.toLocaleString(undefined, { maximumFractionDigits: 2 }) : computed;
   }
-  function selectCell(key: string): void { selectedCell = key; formulaInput = currentSheet?.cells[key] ?? ''; }
+  function selectCell(key: string): void { selectedCell = key; }
   function updateCellValue(key: string, next: string): void {
     if (readonly || !currentSheet) return;
     const id = currentSheet.id;
     sheets = sheets.map((sheet) => sheet.id === id ? { ...sheet, cells: { ...sheet.cells, [key]: next } } : sheet);
-    if (key === selectedCell) formulaInput = next;
     onchange?.(sheets);
   }
   function addRow(): void {

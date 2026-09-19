@@ -206,7 +206,7 @@ describe('enterprise spreadsheet interactions', () => {
   });
   it('resets the formula bar when switching worksheets', async () => {
     const view = render(SpreadsheetView, { sheets: sheets(), activeSheetId: 'one' });
-    await fireEvent.click(view.getByRole('button', { name: 'Second', exact: true }));
+    await fireEvent.click(view.getByRole('button', { name: 'Second' }));
     expect(input(view.container, '[aria-label="Formula A1"]').value).toBe('99');
   });
   it('does not mutate readonly sheets even for synthetic input events', async () => {
@@ -215,7 +215,7 @@ describe('enterprise spreadsheet interactions', () => {
     await fireEvent.input(view.getByLabelText('Formula A1'), { target: { value: '123' } });
     await fireEvent.input(view.getByLabelText('Cell A1'), { target: { value: '456' } });
     expect(onchange).not.toHaveBeenCalled();
-    expect(view.queryByRole('button', { name: 'Row', exact: true })).toBeNull();
+    expect(view.queryByRole('button', { name: 'Row' })).toBeNull();
   });
   it('exports precise numbers and neutralizes formula-like text with CSV escaping', async () => {
     const onexport = vi.fn();
@@ -223,7 +223,7 @@ describe('enterprise spreadsheet interactions', () => {
       A1: '=1/3', B1: '@SUM(1,2)', C1: 'ACME "Tokyo"', D1: '-42',
     } }];
     const view = render(SpreadsheetView, { sheets: data, activeSheetId: 'csv', onexport });
-    await fireEvent.click(view.getByRole('button', { name: 'Export CSV', exact: true }));
+    await fireEvent.click(view.getByRole('button', { name: 'Export CSV' }));
     expect(onexport).toHaveBeenCalledWith('"0.3333333333333333","\'@SUM(1,2)","ACME ""Tokyo""","-42"');
   });
 });
