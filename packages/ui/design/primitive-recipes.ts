@@ -15,10 +15,12 @@ const controlStates = {
   '&::placeholder': { color: 'var(--muted-foreground)' },
 } as const;
 const subtle = (token: string) => ({
-  borderColor: `var(--${token})`, background: `var(--${token})`, color: `var(--${token})`,
+  // 不支持 color-mix 时仍需可读；语义由边框与标签表达，不能前景/背景同色。
+  borderColor: `var(--${token})`, background: 'var(--muted)', color: 'var(--foreground)',
   [supportsMix]: {
     borderColor: `color-mix(in oklch, var(--${token}) 20%, transparent)`,
     background: `color-mix(in oklch, var(--${token}) 10%, transparent)`,
+    color: `var(--${token})`,
   },
 });
 
@@ -47,9 +49,9 @@ export const uiButton = {
       secondary: { background: 'var(--secondary)', color: 'var(--secondary-foreground)', '&:hover': { background: 'var(--muted)', color: 'var(--foreground)' } },
       ghost: { '&:hover': { background: 'var(--muted)', color: 'var(--foreground)' } },
       destructive: {
-        background: 'var(--destructive)', color: 'var(--destructive)',
-        [supportsMix]: { background: 'color-mix(in oklch, var(--destructive) 10%, transparent)' },
-        '&:hover': { background: 'var(--destructive)', [supportsMix]: { background: 'color-mix(in oklch, var(--destructive) 20%, transparent)' } },
+        background: 'var(--muted)', color: 'var(--foreground)', borderColor: 'var(--destructive)',
+        [supportsMix]: { background: 'color-mix(in oklch, var(--destructive) 10%, transparent)', color: 'var(--destructive)', borderColor: 'transparent' },
+        '&:hover': { background: 'var(--muted)', [supportsMix]: { background: 'color-mix(in oklch, var(--destructive) 20%, transparent)' } },
       },
       link: { color: 'var(--primary)', textDecoration: 'underline', textUnderlineOffset: '0.25rem' },
     },

@@ -7,6 +7,7 @@ import { createServer } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { chromium } from '@playwright/test';
 import { stableScreenshot } from './stable-screenshot.mjs';
+import { verifyPrimitiveFallbacks } from './ui-fallback-evidence.mjs';
 
 const root = process.cwd();
 const output = resolve(root, 'docs/pr-evidence/panda-styles');
@@ -14,7 +15,8 @@ mkdirSync(output, { recursive: true });
 // Never upload screenshots left over from a different commit after a failed case.
 for (const file of readdirSync(output)) {
   if (/^\d+x\d+-(light|dark)(-(baseline|published))?\.(png|json)$/.test(file)
-    || ['provenance.json', 'results.json', 'conditional-styles.json'].includes(file)) {
+    || /^fallback-.*\.png$/.test(file)
+    || ['provenance.json', 'results.json', 'conditional-styles.json', 'fallback-contrast.json'].includes(file)) {
     rmSync(resolve(output, file));
   }
 }
@@ -177,6 +179,7 @@ try {
       } finally { await page?.close(); }
     }
   }
+  await verifyPrimitiveFallbacks(browser, { 'app.css': publishedCss, 'app.theme.css': read('packages/ui/dist/app.theme.css') }, output);
   const result = {
     testedCommit: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
     baselineCommit: manifest.baseCommit,
