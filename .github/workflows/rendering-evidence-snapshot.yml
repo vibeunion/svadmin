@@ -12,22 +12,24 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
-      - name: Read only the exact source run's browser artifact
+      - name: Read only the exact passing source run's browser artifact
         uses: actions/github-script@v9
         with:
           script: |
             const fs = require('node:fs');
             const crypto = require('node:crypto');
-            const run_id = 35421515002;
-            const source_sha = 'cae3d37f51801d1a1a653504d1891dba8cd9748e';
+            const run_id = 35422877456;
+            const source_sha = 'da3c6b6a3971173f23601f4065d73499b99dfd90';
             let selected;
             for (let attempt = 0; attempt < 40; attempt++) {
               const { data: run } = await github.rest.actions.getWorkflowRun({ ...context.repo, run_id });
-              if (run.head_sha !== source_sha || run.head_branch !== 'feat/typed-svelte-renderers') throw new Error('Unexpected source run');
-              const { data } = await github.rest.actions.listWorkflowRunArtifacts({ ...context.repo, run_id });
-              selected = data.artifacts.find(item => item.name === 'typed-business-page-evidence');
-              if (selected) break;
-              if (run.status === 'completed') throw new Error('Source run completed without browser evidence');
+              if (run.head_sha !== source_sha || run.head_branch !== 'feat/typed-svelte-renderers' || run.event !== 'pull_request') throw new Error('Unexpected source run');
+              if (run.status === 'completed') {
+                if (run.conclusion !== 'success') throw new Error('Source verification did not pass');
+                const { data } = await github.rest.actions.listWorkflowRunArtifacts({ ...context.repo, run_id });
+                selected = data.artifacts.find(item => item.name === 'typed-business-page-evidence');
+                break;
+              }
               await new Promise(resolve => setTimeout(resolve, 15000));
             }
             if (!selected || selected.expired || selected.size_in_bytes > 150000000 || selected.workflow_run.head_sha !== source_sha) throw new Error('Unavailable or unexpected artifact');
@@ -48,6 +50,7 @@ jobs:
               report = json.loads(archive.read(report_info))
               stats = report['stats']
               assert stats['expected'] == 58 and stats['unexpected'] == 0 and stats['skipped'] == 0 and stats['flaky'] == 0, stats
+              assert not report.get('errors'), report.get('errors')
               images = []
               for width, height in [(1440, 900), (1920, 1080)]:
                   name = f'screenshots/typed-rendering-{width}x{height}.png'
@@ -76,7 +79,7 @@ jobs:
             }
             tree.push({ path: 'provenance.json', type: 'blob', mode: '100644', content: fs.readFileSync('/tmp/rendering-provenance.json', 'utf8') });
             const { data: object } = await github.rest.git.createTree({ ...context.repo, tree });
-            const { data: commit } = await github.rest.git.createCommit({ ...context.repo, tree: object.sha, parents: [], message: 'docs: verified business rendering evidence for cae3d37' });
+            const { data: commit } = await github.rest.git.createCommit({ ...context.repo, tree: object.sha, parents: [], message: 'docs: verified business rendering evidence for da3c6b6' });
             fs.writeFileSync('/tmp/rendering-evidence-result.json', JSON.stringify({ sha: commit.sha, tree: object.sha, images: images.map(({ path, sha256 }) => ({ path, sha256 })) }, null, 2));
             core.info(`Evidence-only commit: ${commit.sha}. No branch, PR, release or deployment updated.`);
       - uses: actions/upload-artifact@v7
