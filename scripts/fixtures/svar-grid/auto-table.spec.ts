@@ -75,11 +75,11 @@ test('AutoTable saved views and hidden columns persist without a parallel prefer
   await backend(page); await open(page); await expect(names(page).first()).toHaveText('SKU:Item 01');
   await page.getByRole('button', { name: 'Columns', exact: true }).click(); await page.getByRole('menuitemcheckbox', { name: 'Stock', exact: true }).click(); await page.keyboard.press('Escape');
   await expect(page.locator('[data-svar-pane="center"]').getByText('Stock', { exact: true })).toHaveCount(0);
-  await page.getByRole('button', { name: 'Saved Views', exact: true }).click(); await page.getByRole('textbox', { name: 'View name', exact: true }).fill('Compatible view');
+  await page.getByRole('button', { name: 'Views', exact: true }).click(); await page.getByRole('textbox', { name: 'View name', exact: true }).fill('Compatible view');
   await page.getByRole('button', { name: 'Save', exact: true }).click(); await page.keyboard.press('Escape');
   await page.reload(); await expect(names(page).first()).toHaveText('SKU:Item 01');
   await expect(page.locator('[data-svar-pane="center"]').getByText('Stock', { exact: true })).toHaveCount(0);
-  await page.getByRole('button', { name: 'Saved Views', exact: true }).click(); await expect(page.locator('#saved-list-view')).toContainText('Compatible view'); await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: 'Views', exact: true }).click(); await expect(page.locator('#saved-list-view')).toContainText('Compatible view'); await page.keyboard.press('Escape');
   await page.getByRole('button', { name: 'Tenant', exact: true }).click(); await expect(page.getByTestId('compat-tenant')).toHaveText('beta');
   await expect(page.locator('[data-svar-pane="center"]').getByText('Stock', { exact: true })).toBeVisible();
 });

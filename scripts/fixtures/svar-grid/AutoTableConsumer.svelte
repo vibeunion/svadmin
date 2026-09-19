@@ -42,9 +42,9 @@
   provideAdminContext({ dataProvider: provider, get accessControlProvider() { return access; }, routerProvider: createHashRouterProvider(),
     get tenant() { return { tenantId: tenant }; },
     resources: [{ name: 'inventory', label: 'Compatible inventory', contract, canCreate: false, pageSize: 10, fields: [
-      { key: 'id', label: 'ID', type: 'number', width: 80, showInEdit: false },
-      { key: 'name', label: 'Name', type: 'text', width: 240, searchable: true, filterable: true, sortable: true, showInEdit: false },
-      { key: 'stock', label: 'Stock', type: 'number', width: 160, sortable: true },
+      { key: 'id', label: 'ID', type: 'number', width: '80', showInEdit: false },
+      { key: 'name', label: 'Name', type: 'text', width: '240', searchable: true, filterable: true, sortable: true, showInEdit: false },
+      { key: 'stock', label: 'Stock', type: 'number', width: '160', sortable: true },
     ] }],
   });
   type ColumnSnippet = Snippet<[{ value: unknown; record: Record<string, unknown> }]>;
