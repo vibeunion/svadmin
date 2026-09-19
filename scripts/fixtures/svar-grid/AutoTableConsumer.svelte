@@ -57,7 +57,7 @@
 {#snippet hostRows({ id }: { record: Record<string, unknown>; id: string | number })}<button type="button" aria-label={`Host row ${id}`} onclick={() => { output = `row:${id}`; }}>Open {id}</button>{/snippet}
 {#snippet fallbackCell({ field, value }: { field: { key: string }; value: unknown; record: Record<string, unknown> })}<span data-compat-fallback={field.key}>Fallback:{String(value)}</span>{/snippet}
 
-<main class:dark>
+<main class="svadmin-theme" class:dark>
   <nav aria-label="Compatibility fixture controls">
     <button type="button" onclick={() => { fallback = !fallback; }}>Fallback cells</button>
     <button type="button" onclick={() => { defaultActions = !defaultActions; }}>Default actions</button>

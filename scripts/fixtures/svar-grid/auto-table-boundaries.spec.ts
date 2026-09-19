@@ -50,7 +50,8 @@ test('AutoTable default actions retain detail URL navigation and the original qu
   const right = page.locator('[data-svar-pane="right"]');
   await right.getByRole('button', { name: 'Detail', exact: true }).first().click();
   const detail = page.locator('[data-svadmin-record-detail]');
-  await expect(detail).toBeVisible(); await expect(page).toHaveURL(/detail=1/);
+  await expect(detail).toBeVisible();
+  await expect(page).toHaveURL(url => new URLSearchParams(url.hash.split('?')[1] ?? '').get('detail') === '~svadmin-id:["number",1]');
   await expect(detail.getByText('First', { exact: true })).toBeVisible();
   await detail.getByRole('button', { name: 'Close', exact: true }).click();
   await expect(detail).toHaveCount(0); await expect(page).not.toHaveURL(/detail=/);
@@ -62,4 +63,20 @@ test('AutoTable default actions retain detail URL navigation and the original qu
   await expect.poll(() => state.writes).toEqual([{ method: 'PATCH', id: 1, variables: { stock: 7 } }]);
   await expect(form).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Edit Stock', exact: true }).first()).toHaveText('7');
+});
+
+test('AutoTable semantic colors follow a nested host theme at desktop and mobile widths', async ({ page }) => {
+  await backend(page); await open(page);
+  const heading = page.getByRole('heading', { name: 'Compatible inventory', exact: true });
+  for (const width of [1440, 1920, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const dark of [false, true]) {
+      if (dark) await page.getByRole('button', { name: 'Theme', exact: true }).click();
+      const hostColor = await page.locator('main').evaluate(element => getComputedStyle(element).color);
+      await expect(heading).toHaveCSS('color', hostColor);
+      const sizes = await page.evaluate(() => ({ viewport: innerWidth, document: document.documentElement.scrollWidth }));
+      expect(sizes.document).toBeLessThanOrEqual(sizes.viewport);
+    }
+    await page.getByRole('button', { name: 'Theme', exact: true }).click();
+  }
 });
