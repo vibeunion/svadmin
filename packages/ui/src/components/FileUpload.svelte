@@ -28,8 +28,7 @@
     maxSize?: number;
     disabled?: boolean;
     required?: boolean;
-    // eslint-disable-next-line @typescript-eslint/no-invalid-void-type -- 保留已有无返回值上传回调的兼容性。
-    upload?: (file: File, session: UploadSession) => Promise<{ url?: string } | void>;
+    upload?: (file: File, session: UploadSession) => Promise<{ url?: string } | undefined> | Promise<void>;
     onChange?: (items: UploadItem[]) => void;
     onReject?: (file: File, reason: string) => void;
     class?: string;
@@ -54,15 +53,11 @@
   let items = $state<UploadItem[]>([]);
   let sequence = 0;
   const controllers = new Map<string, AbortController>();
-
-  function retire(id: string): void {
-    const controller = controllers.get(id);
-    controllers.delete(id);
-    controller?.abort();
-  }
-
+  let disposed = false;
   onDestroy(() => {
-    for (const id of controllers.keys()) retire(id);
+    disposed = true;
+    for (const controller of controllers.values()) controller.abort();
+    controllers.clear();
   });
 
   function emitChange(): void {
@@ -91,38 +86,41 @@
     return undefined;
   }
 
-  function updateItem(id: string, update: Partial<UploadItem>): void {
-    items = items.map(item => item.id === id ? { ...item, ...update } : item);
+  function updateItem(id: string, update: Partial<UploadItem>, clear: readonly ('url' | 'error')[] = []): void {
+    if (disposed || !items.some(item => item.id === id)) return;
+    items = items.map(item => {
+      if (item.id !== id) return item;
+      const next = { ...item, ...update };
+      if (clear.includes('error')) delete next.error;
+      if (clear.includes('url')) delete next.url;
+      return next;
+    });
     emitChange();
   }
 
   async function process(item: UploadItem): Promise<void> {
-    if (!upload || disabled) return;
-    if (controllers.has(item.id) || !items.some(candidate => candidate.id === item.id)) return;
+    if (!upload || disabled || disposed || controllers.has(item.id) || !items.some(candidate => candidate.id === item.id)) return;
     const controller = new AbortController();
     controllers.set(item.id, controller);
-    // 每次尝试由独立控制器持有；旧回执和 finally 不得影响新尝试。
-    const current = () => controllers.get(item.id) === controller;
-    const updateCurrent = (update: Partial<UploadItem>) => {
-      if (current() && !controller.signal.aborted) updateItem(item.id, update);
-    };
-    updateItem(item.id, { status: 'uploading', progress: 0, error: undefined });
+    // 取消、替换、重试或卸载后，旧请求不再拥有更新状态的权限。
+    const current = () => !disposed && !controller.signal.aborted && controllers.get(item.id) === controller;
+    updateItem(item.id, { status: 'uploading', progress: 0 }, ['error', 'url']);
     try {
       const result = await upload(item.file, {
         signal: controller.signal,
-        onProgress: progress => updateCurrent({
-          progress: Number.isFinite(progress) ? Math.max(0, Math.min(100, Math.round(progress))) : 0,
-        }),
+        onProgress: progress => {
+          if (current()) updateItem(item.id, {
+            progress: Number.isFinite(progress) ? Math.max(0, Math.min(100, Math.round(progress))) : 0,
+          });
+        },
       });
-      updateCurrent({ status: 'success', progress: 100, url: result?.url });
+      if (current()) updateItem(item.id, { status: 'success', progress: 100,
+        ...(result?.url === undefined ? {} : { url: result.url }) });
     } catch (error) {
-      if (!current()) return;
-      updateItem(item.id, {
-        status: controller.signal.aborted ? 'cancelled' : 'error',
-        error: controller.signal.aborted ? 'Upload cancelled.' : error instanceof Error ? error.message : 'Upload failed.',
-      });
+      if (current()) updateItem(item.id, { status: 'error',
+        error: error instanceof Error ? error.message : 'Upload failed.' });
     } finally {
-      if (current()) controllers.delete(item.id);
+      if (controllers.get(item.id) === controller) controllers.delete(item.id);
     }
   }
 
@@ -137,7 +135,8 @@
       }
       const item: UploadItem = { id: nextId(), file, status: 'queued', progress: 0 };
       if (!multiple) {
-        for (const previous of items) retire(previous.id);
+        for (const controller of controllers.values()) controller.abort();
+        controllers.clear();
       }
       items = multiple ? [...items, item] : [item];
       emitChange();
@@ -152,8 +151,9 @@
   }
 
   function remove(id: string): void {
-    if (disabled) return;
-    retire(id);
+    if (disabled || disposed) return;
+    controllers.get(id)?.abort();
+    controllers.delete(id);
     items = items.filter(item => item.id !== id);
     emitChange();
   }
@@ -161,12 +161,13 @@
   function cancel(id: string): void {
     const controller = controllers.get(id);
     if (!controller) return;
-    retire(id);
+    controller.abort();
+    controllers.delete(id);
     updateItem(id, { status: 'cancelled', error: 'Upload cancelled.' });
   }
 
   function retry(item: UploadItem): void {
-    void process({ ...item, status: 'queued', error: undefined });
+    if (item.status === 'error' || item.status === 'cancelled') void process(item);
   }
 
   function handleKeydown(event: KeyboardEvent): void {

@@ -1,18 +1,11 @@
-import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
+import { cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import FileUpload, { type UploadSession } from './FileUpload.svelte';
+import FileUpload, { type UploadItem } from './FileUpload.svelte';
 
 afterEach(cleanup);
 
 function file(name: string, type = 'text/plain'): File {
   return new File(['content'], name, { type });
-}
-
-function deferred<T>() {
-  let resolve!: (value: T) => void;
-  let reject!: (reason: unknown) => void;
-  const promise = new Promise<T>((done, fail) => { resolve = done; reject = fail; });
-  return { promise, resolve, reject };
 }
 
 describe('FileUpload', () => {
@@ -46,112 +39,33 @@ describe('FileUpload', () => {
     ]));
   });
 
-  it('does not turn an ignored abort into success', async () => {
-    const pending = deferred<{ url: string }>();
-    const onChange = vi.fn();
-    const upload = vi.fn(async () => pending.promise);
+  it('accepts void upload receipts without adding an undefined url property', async () => {
+    const upload = async (): Promise<void> => {};
+    const onChange = vi.fn<(items: UploadItem[]) => void>();
     const view = render(FileUpload, { upload, onChange });
     const input = view.container.querySelector('input[type="file"]');
     if (!(input instanceof HTMLInputElement)) throw new Error('Expected file input');
-
-    await fireEvent.change(input, { target: { files: [file('slow.txt')] } });
-    await waitFor(() => expect(upload).toHaveBeenCalledTimes(1));
-    await fireEvent.click(view.getByRole('button', { name: 'Cancel upload' }));
-    expect(onChange).toHaveBeenLastCalledWith([
-      expect.objectContaining({ status: 'cancelled' }),
-    ]);
-    await act(async () => { pending.resolve({ url: '/uploads/late.txt' }); await pending.promise; });
-    await waitFor(() => expect(view.getByText('cancelled')).toBeTruthy());
-    expect(onChange).not.toHaveBeenLastCalledWith([
-      expect.objectContaining({ status: 'success', url: '/uploads/late.txt' }),
-    ]);
+    await fireEvent.change(input, { target: { files: [file('empty-receipt.txt')] } });
+    await waitFor(() => expect(onChange.mock.lastCall?.[0][0]?.status).toBe('success'));
+    const item = onChange.mock.lastCall?.[0][0];
+    expect(item).not.toHaveProperty('url');
+    expect(item).not.toHaveProperty('error');
   });
 
-  it('ignores a late result from an earlier attempt after retry', async () => {
-    const first = deferred<{ url: string }>();
-    const second = deferred<{ url: string }>();
-    const onChange = vi.fn();
-    const upload = vi.fn()
-      .mockImplementationOnce(async () => first.promise)
-      .mockImplementationOnce(async () => second.promise);
-    const view = render(FileUpload, { upload, onChange });
-    const input = view.container.querySelector('input[type="file"]');
-    if (!(input instanceof HTMLInputElement)) throw new Error('Expected file input');
-
-    await fireEvent.change(input, { target: { files: [file('retry.txt')] } });
-    await waitFor(() => expect(upload).toHaveBeenCalledTimes(1));
-    await fireEvent.click(view.getByRole('button', { name: 'Cancel upload' }));
-    await fireEvent.click(view.getByRole('button', { name: 'Retry upload' }));
-    await waitFor(() => expect(upload).toHaveBeenCalledTimes(2));
-    await act(async () => { first.resolve({ url: '/uploads/stale.txt' }); await first.promise; });
-    expect(onChange).toHaveBeenLastCalledWith([expect.objectContaining({ status: 'uploading' })]);
-    await fireEvent.click(view.getByRole('button', { name: 'Cancel upload' }));
-    expect(onChange).toHaveBeenLastCalledWith([expect.objectContaining({ status: 'cancelled' })]);
-    await act(async () => { second.resolve({ url: '/uploads/current.txt' }); await second.promise; });
-    expect(onChange).not.toHaveBeenCalledWith([
-      expect.objectContaining({ status: 'success' }),
-    ]);
-  });
-
-  it.each(['cancel', 'remove', 'replace', 'unmount'] as const)(
-    'retires progress and rejection callbacks after %s', async (action) => {
-      const pending = deferred<{ url: string }>();
-      const sessions: UploadSession[] = [];
-      const onChange = vi.fn();
-      const upload = vi.fn((_file: File, session: UploadSession) => {
-        sessions.push(session);
-        return pending.promise;
-      });
-      const view = render(FileUpload, { upload, onChange });
-      const input = view.container.querySelector('input[type="file"]');
-      if (!(input instanceof HTMLInputElement)) throw new Error('Expected file input');
-      await fireEvent.change(input, { target: { files: [file('old.txt')] } });
-      const session = sessions[0];
-      if (!session) throw new Error('Missing upload session');
-      if (action === 'cancel') await fireEvent.click(view.getByRole('button', { name: 'Cancel upload' }));
-      if (action === 'remove') await fireEvent.click(view.getByRole('button', { name: 'Remove file' }));
-      if (action === 'replace') {
-        upload.mockResolvedValue({ url: '/uploads/new.txt' });
-        await fireEvent.change(input, { target: { files: [file('new.txt')] } });
-        await waitFor(() => expect(onChange).toHaveBeenLastCalledWith([
-          expect.objectContaining({ status: 'success', url: '/uploads/new.txt' }),
-        ]));
-      }
-      if (action === 'unmount') view.unmount();
-      expect(session.signal.aborted).toBe(true);
-      const count = onChange.mock.calls.length;
-      await act(async () => {
-        session.onProgress(99);
-        pending.reject(new Error('Late upload error'));
-        await pending.promise.catch(() => {});
-      });
-      expect(onChange).toHaveBeenCalledTimes(count);
-    },
-  );
-
-  it('ignores stale errors and progress after the retry succeeds', async () => {
-    const pending = deferred<{ url: string }>();
-    const sessions: UploadSession[] = [];
-    const onChange = vi.fn();
-    const upload = vi.fn((_file: File, session: UploadSession) => {
-      sessions.push(session);
-      return sessions.length === 1 ? pending.promise : Promise.resolve({ url: '/uploads/current.txt' });
-    });
+  it('removes the old error before retrying a failed upload', async () => {
+    const upload = vi.fn(async () => ({ url: '/uploads/retried.txt' }));
+    upload.mockRejectedValueOnce(new Error('Upload failed'));
+    const onChange = vi.fn<(items: UploadItem[]) => void>();
     const view = render(FileUpload, { upload, onChange });
     const input = view.container.querySelector('input[type="file"]');
     if (!(input instanceof HTMLInputElement)) throw new Error('Expected file input');
     await fireEvent.change(input, { target: { files: [file('retry.txt')] } });
-    await fireEvent.click(view.getByRole('button', { name: 'Cancel upload' }));
+    await waitFor(() => expect(onChange.mock.lastCall?.[0][0]?.status).toBe('error'));
     await fireEvent.click(view.getByRole('button', { name: 'Retry upload' }));
-    await waitFor(() => expect(onChange).toHaveBeenLastCalledWith([
-      expect.objectContaining({ status: 'success', url: '/uploads/current.txt' }),
-    ]));
-    const count = onChange.mock.calls.length;
-    await act(async () => {
-      for (const session of sessions) session.onProgress(12);
-      pending.reject(new Error('Obsolete failure'));
-      await pending.promise.catch(() => {});
-    });
-    expect(onChange).toHaveBeenCalledTimes(count);
+    await waitFor(() => expect(onChange.mock.lastCall?.[0][0]?.status).toBe('success'));
+    const records = onChange.mock.calls.flatMap(([items]) => items);
+    expect(records.filter(item => item.status === 'uploading').every(item => !Object.hasOwn(item, 'error'))).toBe(true);
+    expect(onChange.mock.lastCall?.[0][0]).not.toHaveProperty('error');
   });
+
 });

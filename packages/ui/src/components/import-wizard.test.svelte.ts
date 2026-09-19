@@ -1,5 +1,4 @@
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
-import { setLocale } from '@svadmin/core/i18n';
 import userEvent from '@testing-library/user-event';
 import { QueryClient } from '@tanstack/svelte-query';
 import { Type } from '@sinclair/typebox';
@@ -48,7 +47,6 @@ function provider(overrides: Partial<DataProvider> = {}): DataProvider {
 }
 
 function mount(source = provider(), options: { resourceName?: string; onSuccess?: (result: { succeeded: number; failed: number }) => void } = {}) {
-  setLocale('en');
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   clients.push(client);
   const view = render(ImportWizardHost, {
@@ -179,7 +177,11 @@ describe('ImportWizard component workflow', () => {
   it.each(['tenant', 'provider', 'close'] as const)(
     'retires an in-flight import after %s changes', async change => {
       let resolveWrite: (value: { data: { id: number; title: string; quantity: number } }) => void = () => {};
-      const source = provider({ create: vi.fn(() => new Promise(resolve => { resolveWrite = resolve; })) });
+      const source = provider({
+        create: vi.fn(async () => await new Promise<{ data: { id: number; title: string; quantity: number } }>((resolve) => {
+          resolveWrite = resolve;
+        })),
+      });
       const onSuccess = vi.fn();
       const app = mount(source, { onSuccess });
       await selectFile(csvFile('title,quantity\nPrivate,1\nLater,2'));
