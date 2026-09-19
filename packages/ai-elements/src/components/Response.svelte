@@ -1,5 +1,5 @@
 <script module lang="ts">
-  import type { StreamdownProps } from 'streamdown-svelte';
+  import type { StreamdownProps } from '../../vendor/streamdown/index.js';
 
   export type ResponseProps = Omit<
     StreamdownProps<Record<string, unknown>>,
@@ -14,7 +14,7 @@
 
 <script lang="ts">
   import { definedReactiveOptions } from '@svadmin/core/options';
-  import { Streamdown } from 'streamdown-svelte';
+  import { Streamdown } from '../../vendor/streamdown/index.js';
   import { cn } from '../utils.js';
 
   let {

@@ -6,6 +6,7 @@ import { resolve } from 'node:path';
 import { createServer } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { chromium } from '@playwright/test';
+import { stableScreenshot } from './stable-screenshot.mjs';
 
 const root = process.cwd();
 const output = resolve(root, 'docs/pr-evidence/panda-styles');
@@ -19,7 +20,7 @@ for (const file of readdirSync(output)) {
 }
 const read = (path) => readFileSync(resolve(root, path), 'utf8');
 const manifest = JSON.parse(read('packages/ui/styles-compatibility.json'));
-const baselineCss = Object.keys(manifest.files).map((path) => read(`packages/ui/src/${path}`)).join('\n');
+const baselineCss = Object.keys(manifest.files).map((path) => read(`packages/ui/test/style-baselines/${path}`)).join('\n');
 const publishedCss = read('packages/ui/dist/app.css');
 const server = await createServer({
   configFile: false,
@@ -57,8 +58,6 @@ try {
   await server.listen();
   browser = await chromium.launch({ args: screenshotLaunchArgs });
   async function open(viewport, query) {
-    // Each capture gets fresh focus, mouse, file-input and scroll state. Never compare pages
-    // left at different scroll offsets by the preceding interaction test.
     const page = await browser.newPage({ viewport, reducedMotion: 'reduce' });
     page.setDefaultTimeout(15_000);
     page.on('pageerror', (error) => pageErrors.push(error.message));
@@ -161,7 +160,8 @@ try {
         });
         assert.equal(nestedStyle.actual, nestedStyle.expected);
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true, `${name}: horizontal overflow`);
-        await page.screenshot({ path: resolve(output, `${name}.png`), fullPage: true, animations: 'disabled', caret: 'hide' });
+        const image = await stableScreenshot(() => page.screenshot({ fullPage: true, animations: 'disabled', caret: 'hide' }));
+        writeFileSync(resolve(output, `${name}.png`), image);
         await page.getByText('Advanced details', { exact: true }).click();
         assert.equal(await page.locator('details').evaluate((el) => el.open), true);
         await page.getByText('Advanced details', { exact: true }).click();

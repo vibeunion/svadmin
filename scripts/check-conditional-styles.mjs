@@ -57,7 +57,21 @@ try {
           assert.equal(await value('content', 'marginLeft'), '0px');
           assert.equal(await value('content', 'marginRight'), '70px');
         }
-        checks.push({ width, dark, expanded: true, collapsed: true, responsive: true, controls: true });
+        // 新语义 class 单独验证，不以旧兼容 class 掩盖缺失规则。
+        await page.locator('html').evaluate((element) => { element.dir = 'ltr'; });
+        for (const [state, size] of [['expanded', '252px'], ['collapsed', '70px']]) {
+          await page.locator('#sidebar').evaluate((element, state) => { element.className = `svadmin-sidebar--${state}`; }, state);
+          await page.locator('#content').evaluate((element, state) => { element.className = `sidebar-content-${state}`; }, state);
+          assert.equal(await value('sidebar', 'width'), size);
+          assert.equal(await value('content', 'marginLeft'), width >= 768 ? size : '0px');
+          await page.locator('html').evaluate((element) => { element.dir = 'rtl'; });
+          assert.equal(await value('content', 'marginLeft'), '0px');
+          assert.equal(await value('content', 'marginRight'), width >= 768 ? size : '0px');
+          await page.locator('html').evaluate((element) => { element.dir = 'ltr'; });
+        }
+        await page.locator('#tools').evaluate((element) => { element.className = 'svadmin-devtools--collapsed-width svadmin-devtools--collapsed-min-width'; });
+        assert.equal(await value('tools', 'minWidth'), '200px');
+        checks.push({ width, dark, expanded: true, collapsed: true, responsive: true, controls: true, semanticStates: true });
       } finally { await page.close(); }
     }
   }

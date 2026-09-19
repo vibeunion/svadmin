@@ -85,71 +85,115 @@ const expectations: PackageExpectation[] = [
     directory: 'packages/ai-elements',
     name: '@svadmin/ai-elements',
     requiredFiles: [
-      'dist/index.js',
-      'dist/index.d.ts',
-      'dist/contracts.js',
-      'dist/contracts.d.ts',
-      'dist/generated-components.js',
-      'dist/generated-components.d.ts',
-      'dist/parity-manifest.js',
-      'dist/parity-manifest.d.ts',
-      'dist/components/context/index.js',
-      'dist/components/context/index.d.ts',
-      'dist/components/context/Context.svelte',
-      'dist/components/context/Context.svelte.d.ts',
-      'dist/components/context/context-state.svelte.js',
-      'dist/components/context/context-state.svelte.d.ts',
-      'dist/components/loader/index.js',
-      'dist/components/loader/index.d.ts',
-      'dist/components/copy-button/index.js',
-      'dist/components/copy-button/index.d.ts',
-      'dist/components/Response.svelte',
-      'dist/components/Response.svelte.d.ts',
-      'dist/ai.css',
-    ],
+  "dist/index.js",
+  "dist/index.d.ts",
+  "dist/contracts.js",
+  "dist/contracts.d.ts",
+  "dist/generated-components.js",
+  "dist/generated-components.d.ts",
+  "dist/parity-manifest.js",
+  "dist/parity-manifest.d.ts",
+  "dist/components/context/index.js",
+  "dist/components/context/index.d.ts",
+  "dist/components/context/Context.svelte",
+  "dist/components/context/Context.svelte.d.ts",
+  "dist/components/context/context-state.svelte.js",
+  "dist/components/context/context-state.svelte.d.ts",
+  "dist/components/loader/index.js",
+  "dist/components/loader/index.d.ts",
+  "dist/components/copy-button/index.js",
+  "dist/components/copy-button/index.d.ts",
+  "dist/components/Response.svelte",
+  "dist/components/Response.svelte.d.ts",
+  "dist/ai.css",
+  "dist/ai.theme.css",
+  "dist/classnames.js",
+  "dist/classnames.d.ts",
+  "vendor/streamdown/index.js",
+  "vendor/streamdown/index.d.ts",
+  "vendor/streamdown/theme.js",
+  "vendor/streamdown/LICENSE",
+  "vendor/streamdown/provenance.json",
+  "vendor/streamdown/README.svadmin.md"
+],
     contentAssertions: [
-      {
-        path: 'dist/ai.theme.css',
-        includes: [
-          '@source "./components";',
-          '@source "../node_modules/streamdown-svelte/dist/**/*.{js,svelte,ts}";',
-          '@source "../../../node_modules/streamdown-svelte/dist/**/*.{js,svelte,ts}";',
-          '@source "../../../streamdown-svelte/dist/**/*.{js,svelte,ts}";',
-        ],
-        excludes: ['@source "./src";'],
-      },
+  {
+    "path": "dist/ai.theme.css",
+    "includes": [
+      "@import \"./ai.css\";"
     ],
+    "excludes": [
+      "@theme",
+      "@source",
+      "@apply",
+      "@utility",
+      "@custom-variant",
+      "@import \"tailwindcss\""
+    ]
+  },
+  {
+    "path": "vendor/streamdown/theme.js",
+    "includes": [
+      "from '../../dist/classnames.js'"
+    ],
+    "excludes": [
+      "from 'tailwind-merge'",
+      "twMerge("
+    ]
+  }
+],
   },
   {
     directory: 'packages/ui',
     name: '@svadmin/ui',
     requiredFiles: [
-      'dist/index.js',
-      'dist/index.d.ts',
-      'dist/components/AdminApp.svelte',
-      'dist/components/AdminApp.svelte.d.ts',
-      'dist/components/LazyPage.svelte',
-      'dist/components/LazyPage.svelte.d.ts',
-      'dist/app.css',
-      'dist/app.theme.css',
-    ],
+  "dist/index.js",
+  "dist/index.d.ts",
+  "dist/components/AdminApp.svelte",
+  "dist/components/AdminApp.svelte.d.ts",
+  "dist/components/LazyPage.svelte",
+  "dist/components/LazyPage.svelte.d.ts",
+  "dist/app.css",
+  "dist/app.theme.css",
+  "dist/classnames.js",
+  "dist/classnames.d.ts"
+],
     contentAssertions: [
-      {
-        path: 'dist/app.theme.css',
-        includes: ['@theme', '@source "./components";'],
-        excludes: ['@source "./src";'],
-      },
-      {
-        path: 'dist/app.css',
-        includes: [
-          ':root',
-          '.svadmin-theme',
-          '--color-primary: var(--primary);',
-          '.svadmin-button',
-        ],
-        excludes: ['@theme', '@source', '@import "tailwindcss"'],
-      },
+  {
+    "path": "dist/app.css",
+    "includes": [
+      ":root",
+      ".svadmin-theme",
+      "--color-primary: var(--primary);",
+      ".svadmin-button"
     ],
+    "excludes": [
+      "@theme",
+      "@source",
+      "@apply",
+      "@utility",
+      "@custom-variant",
+      "@import \"tailwindcss\""
+    ]
+  },
+  {
+    "path": "dist/app.theme.css",
+    "includes": [
+      ":root",
+      ".svadmin-theme",
+      "--color-primary: var(--primary);",
+      ".svadmin-button"
+    ],
+    "excludes": [
+      "@theme",
+      "@source",
+      "@apply",
+      "@utility",
+      "@custom-variant",
+      "@import \"tailwindcss\""
+    ]
+  }
+],
   },
   {
     directory: 'packages/editor',

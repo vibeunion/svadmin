@@ -2,7 +2,7 @@
 
 Svelte 5 admin components using semantic design tokens and Bits UI primitives.
 
-## CSS Integration
+## CSS integration
 
 Import the precompiled stylesheet once:
 
@@ -10,51 +10,61 @@ Import the precompiled stylesheet once:
 import '@svadmin/ui/app.css';
 ```
 
-Consumers do not need Tailwind or Panda. Both component styles and the existing
-utility aliases are included in the published native stylesheet. Theme overrides
-continue to use public semantic CSS variables; nested themes use `.svadmin-theme`.
+Consumers need neither Tailwind nor Panda compiler plugins. Component styles,
+finite utility aliases, animation rules and public theme variables are included.
+Nested theme scopes continue to use `.svadmin-theme`.
 
-Existing Tailwind v4 hosts may opt into the legacy metadata entry instead:
+The old `@svadmin/ui/app.theme.css` path remains available, but now contains
+**the same plain CSS as `app.css`**. It no longer supplies `@theme`, `@source`,
+or any other compiler metadata. Import one entry, not both. A host using its
+own styling compiler must configure that compiler independently.
 
-```css
-@import "@svadmin/ui/app.theme.css";
-```
+## Authoring and compatibility
 
-This entry includes the same component CSS plus `@theme` and `@source` metadata.
-Import one UI CSS entry, not both. The metadata does not add a Tailwind dependency
-to SVAdmin, and plain-CSS hosts should use `app.css`.
+UI, AI-elements and example utility styles are now authored from the owned finite
+registries under each package's `design/migrated-utilities` directory and emitted
+by Panda during repository builds. They are not copied from a historical compiled
+stylesheet during production builds. Original selector names and cascade positions
+remain stable, so existing components do not require a mechanical class-name rewrite.
+Native semantic CSS in Lite, flow and editor remains native CSS.
 
-## Migration Boundary
+Panda is build-only. No Tailwind compiler, `cn` class engine, `tailwind-merge`, or
+`tailwind-variants` is required in the active dependency graph. The public helper
+name `cn` remains, but its implementation uses generic conditional class composition
+and finite property metadata generated from the owned stylesheet. It removes an
+earlier known class only when all its declarations are covered by later known
+classes. Unknown host classes are kept; arbitrary utility syntax is not interpreted.
+Use semantic variants, native CSS or finite recipes for new styles.
 
-Tailwind, its Vite plugin and animation compiler are no longer build dependencies.
-Panda is a development dependency for the new semantic tokens and slot recipes;
-its runtime class helpers and type declarations do not import the compiler.
+Existing `svadmin-u-*` aliases and some compiled custom-property names are compatibility
+interfaces, not compiler dependencies. Historical snapshots and license notices are
+retained for regression tests and attribution. Do not delete them to make a text
+search appear empty.
 
-Existing `svadmin-u-*` aliases, animation rules and compiled `--tw-*` variables
-remain native compatibility CSS. Do not rename or delete them mechanically.
-New styles should use native CSS or reviewed Panda recipes, not new uncompiled
-Tailwind class strings. This is not a wholesale rewrite of every UI component.
+The `surfaceMetric` and `surfaceTable` slot recipes pre-generate their public
+variants. Surface hosts opt into `styledSurfaceCatalog` and import
+`@svadmin/surface/styles.css`. Default Surface v1 props stay compatible.
 
-The initial `surfaceMetric` and `surfaceTable` recipes pre-generate every public
-variant. Surface applications opt into `styledSurfaceCatalog` and load
-`@svadmin/surface/styles.css`; see the Surface package's `STYLING.md`. Default
-Surface v1 props and the no-variant rendering path stay unchanged.
+## Verification
 
-## Validation
+From the repository root:
 
 ```sh
-bun run build
-bun run test
-bun run test:css
+bun install --frozen-lockfile
+bun run build:packages
+bun run --cwd packages/ui test:css
+node scripts/build-migrated-ui.mjs ui ai-elements example --check
+node scripts/build-native-classnames.mjs ui ai-elements --check
+node scripts/check-recipe-declarations.mjs
+node scripts/check-style-boundary.mjs
 ```
 
-CSS tests pin the original native compatibility rule tree, declarations and
-cascade order, check every referenced utility alias, verify the declarations for
-all styled recipe slots and variants, and exercise a deliberately missing rule.
-They also check nested layer flattening, isolation of generated CSS variables,
-postbuild idempotence and both public stylesheet entries.
+Checks cover both CSS entries, referenced selectors, every finite recipe's source
+declarations, deterministic regeneration, known-class conflict metadata, dependency
+aliases and the resolved/installed graph. Historical baselines remain immutable.
+Real Svelte fixture tests compare Chromium screenshots and computed styles across
+viewport and theme variants. Fixture parity is not a claim of every application
+page, every interaction or every browser being pixel-identical.
 
-The repository's Panda compatibility workflow additionally checks strict Surface
-types, generated helpers in a dependency-free consumer, and Chromium screenshot
-and computed-style comparisons. Its viewport/theme matrix uses actual Svelte
-components; it is not a claim of full-application or cross-browser coverage.
+See `docs/architecture/native-ui-styles.md` for the full migration boundary and
+Markdown dependency ownership.
