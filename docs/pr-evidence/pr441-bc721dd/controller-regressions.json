@@ -1,0 +1,9 @@
+{
+  "before-f0c9400": { "exitCode": 1, "passed": 1, "failed": 14 },
+  "after-bc721dd": { "exitCode": 0, "passed": 15, "failed": 0 },
+  "scope": "actual transpiled Surface form controller; independent Node regression probes, not workspace Vitest",
+  "implementation": "bc721dd17c777fe7708268306cd9d3da8a00ee02",
+  "tree": "bc27ef6f5c3cc34b204ad59ed2cd5b84e5eb37d5",
+  "priorHead": "f0c94009c159d55f1860e6d14d7f33da10059fe8",
+  "workspaceDependenciesInstalledLocally": false
+}

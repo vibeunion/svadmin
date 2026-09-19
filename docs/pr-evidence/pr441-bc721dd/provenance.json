@@ -1,0 +1,35 @@
+{
+  "implementationHead": "bc721dd17c777fe7708268306cd9d3da8a00ee02",
+  "testedCheckout": "0278051c9a2b2048685450213e9b3b7b5a9fd04b",
+  "base": "cac09fdaf23a82aa00c01667035ba3f37e9bfd38",
+  "run": 35449863573,
+  "artifact": 10585884583,
+  "archiveSha256": "9041e5fa85c452dfd0427f5ca70b87e4052cac5aa9246615705251ece6d984ff",
+  "images": [
+    {
+      "file": "surface-workflow-1440x900.png",
+      "bytes": 64404,
+      "dimensions": [1440, 900],
+      "gitBlob": "76913cf3e84755b842599788400a304a1302a8a9",
+      "sha256": "dc1a90409e9746c39e1616e92435e62038b6c81c8f1eaf311bbaab04dc4ad2d5",
+      "matchesPriorBlob": true
+    },
+    {
+      "file": "surface-workflow-1920x1080.png",
+      "bytes": 68167,
+      "dimensions": [1920, 1080],
+      "gitBlob": "7e8b5405e034ac63e981c940fac49761f69ffe8b",
+      "sha256": "1e9699b814e6dc71ef1fa60f8c9329d7fa599bc7bfd8a8d78ff9dc37a5bb86ad",
+      "matchesPriorBlob": true
+    },
+    {
+      "file": "surface-workflow-390x844.png",
+      "bytes": 60199,
+      "dimensions": [390, 1456],
+      "gitBlob": "bc4f31e62ad69678ba456af4991895d58946cf16",
+      "sha256": "7c24eb31134319f321b51cd2dec1474b8b4d2e84cea82b7792d6553ffae30e96",
+      "matchesPriorBlob": true
+    }
+  ],
+  "note": "Fresh original PNGs downloaded from this passing run. Exact matching Git blob hashes permit deduplicated storage; older run results are not reused. Narrow image is a full-page capture of a 390x844 viewport."
+}
