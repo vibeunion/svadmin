@@ -187,7 +187,7 @@ export function auditNoTailwind(root, paths) {
       const config = JSON.parse(readFileSync(resolve(root, path), 'utf8'));
       if ('tailwind' in config || String(config.$schema ?? '').includes('shadcn-svelte')) found.push(`${path}: shadcn-svelte/Tailwind generator configuration`);
     }
-    if (/(?:^|[/.\-])(?:test|spec)(?:[/.\-]|$)/i.test(path)) continue;
+    if (/(?:^|[/.-])(?:test|spec)(?:[/.-]|$)/i.test(path)) continue;
     if (path.endsWith('.css')) found.push(...cssViolations(readFileSync(resolve(root, path), 'utf8')).map(reason => `${path}: ${reason}`));
     if (/\.(?:svelte|[cm]?[jt]sx?)$/.test(path)) {
       const source = readFileSync(resolve(root, path), 'utf8');

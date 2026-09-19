@@ -1,6 +1,6 @@
 import postcss from 'postcss';
 
-export const primitiveClass = /\.svadmin-ui-(?:button|badge|input|textarea)(?=[\s.\[:#>+~_-]|$)/;
+export const primitiveClass = /\.svadmin-ui-(?:button|badge|input|textarea)(?=[\s.\x5B:#>+~_-]|$)/;
 
 /** 基础组件保留 components 层；Surface 的增强 recipes 仍然是非分层规则。 */
 export function layerPrimitiveRecipes(root) {

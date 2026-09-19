@@ -93,7 +93,7 @@ test('variant coverage detects a missing rule rather than passing vacuously', ()
 
 test('Panda recipes do not introduce global resets or theme scoping regressions', () => {
   const root = postcss.parse(read('src/styles/recipes.css'));
-  const primitive = /\.svadmin-ui-(?:button|badge|input|textarea)(?=[\s.\[:#>+~_-]|$)/;
+  const primitive = /\.svadmin-ui-(?:button|badge|input|textarea)(?=[\s.\x5B:#>+~_-]|$)/;
   root.walkAtRules('layer', (layer) => {
     assert.equal(layer.params, 'components');
     layer.walkRules((rule) => {
