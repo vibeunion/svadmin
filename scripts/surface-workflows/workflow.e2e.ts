@@ -12,7 +12,7 @@ test('real streaming preview cannot submit; nested forms preserve state; explici
   const before = await state(page); expect(before.writes).toBe(0);
   await accept(page);
   await primary.getByLabel('Contact name', { exact: false }).fill('Nested test contact');
-  await primary.getByRole('button', { name: '添加项目', exact: false }).click();
+  await primary.getByRole('button', { name: 'Add item', exact: false }).click();
   await primary.getByLabel('City', { exact: false }).fill('Synthetic City');
   const stable = await state(page);
   await page.getByRole('button', { name: 'Change presentation only' }).click();
