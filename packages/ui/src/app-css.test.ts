@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import postcss from 'postcss';
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 
@@ -32,8 +33,12 @@ describe('native component CSS', () => {
   it('uses the semantic border token in the global reset', () => {
     const css = readAppCss();
 
-    expect(css).toContain('border-color: var(--color-border, var(--border));');
-    expect(css).not.toMatch(/border-color:\s*var\(--border\);/);
+    const values: string[] = [];
+    postcss.parse(css).walkRules((rule) => {
+      if (rule.selector !== '*, ::after, ::before') return;
+      rule.walkDecls('border-color', (decl) => { values.push(decl.value); });
+    });
+    expect(values).toEqual(['var(--color-border, var(--border))']);
   });
 
   it('does not require component source scanning', () => {

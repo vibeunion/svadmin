@@ -32,9 +32,9 @@
 <article class={metricClasses?.root} data-surface-tone={metricProps.tone} data-surface-density={metricProps.density} aria-labelledby="{widgetId}-label" aria-busy={data.status === 'loading'}>
   <span id="{widgetId}-label" class="visually-hidden">{metricProps.label}</span>
   {#if data.status === 'loading'}
-    <StatsCard class={metricClasses?.card} label={metricProps.label} value="" loading />
+    <StatsCard class={metricClasses?.card ?? ''} label={metricProps.label} value="" loading />
   {:else if data.status === 'ready' && typeof data.value === 'number'}
-    <StatsCard class={metricClasses?.card} label={metricProps.label} value={formattedValue} />
+    <StatsCard class={metricClasses?.card ?? ''} label={metricProps.label} value={formattedValue} />
     {#if metricProps.description}
       <p class={"metric-description " + (metricClasses?.description ?? "")}>{metricProps.description}</p>
     {/if}
@@ -71,6 +71,7 @@
     min-height: var(--svadmin-metric-state-height, 6rem);
     padding: var(--svadmin-metric-state-padding, 1.25rem);
     border: 1px solid var(--border);
+    border-inline-start: var(--svadmin-metric-state-border-width, 1px) solid var(--svadmin-metric-state-accent, var(--border));
     border-radius: 0.75rem;
     background: var(--card);
     color: var(--muted-foreground);

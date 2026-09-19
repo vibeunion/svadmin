@@ -33,26 +33,62 @@ test('native compatibility CSS preserves the complete baseline cascade and decla
   assert.equal(digest(JSON.stringify(semantic(root))), manifest.cascadeSha256);
 });
 
-test('every public runtime recipe variant has pre-generated CSS', () => {
-  const classes = new Set();
-  postcss.parse(read('dist/app.css')).walkRules((rule) => {
-    selectorParser((selectors) => selectors.walkClasses((node) => classes.add(node.value))).processSync(rule.selector);
+function assertVariantDeclarations(css) {
+  const rulesByClass = new Map();
+  postcss.parse(css).walkRules((rule) => {
+    selectorParser((selectors) => selectors.walkClasses((node) => {
+      const rules = rulesByClass.get(node.value) ?? [];
+      rules.push(rule);
+      rulesByClass.set(node.value, rules);
+    })).processSync(rule.selector);
   });
-  let variants = 0;
-  function assertSlots(slots) {
-    for (const value of Object.values(slots)) {
-      for (const name of value.split(/\s+/)) {
-        if (!name.includes('--')) continue;
-        assert.ok(classes.has(name), `Missing static CSS for ${name}`);
-        variants++;
-      }
+  let checked = 0;
+  function declaration(slotClasses, suffix, property, expected) {
+    const names = slotClasses.split(/\s+/).filter((name) => name.endsWith(suffix));
+    assert.equal(names.length, 1, `Expected one ${suffix} class in ${slotClasses}`);
+    const name = names[0];
+    const values = (rulesByClass.get(name) ?? []).flatMap((rule) => {
+      const found = [];
+      rule.walkDecls(property, (decl) => found.push(decl.value));
+      return found;
+    });
+    assert.ok(values.includes(expected), `${name}: missing ${property}: ${expected}`);
+    checked++;
+  }
+  const tones = { neutral: 'border', success: 'success', warning: 'warning', danger: 'danger', info: 'info' };
+  for (const tone of surfaceDesignContract.metric.tone) {
+    for (const density of surfaceDesignContract.metric.density) {
+      const slots = surfaceMetric({ tone, density });
+      declaration(slots.root, '__root', 'min-width', '0');
+      declaration(slots.card, '__card', 'border-inline-start-width', '3px');
+      declaration(slots.card, `--tone_${tone}`, 'border-inline-start-color', `var(--svadmin-colors-${tones[tone]})`);
+      declaration(slots.state, `--tone_${tone}`, '--svadmin-metric-state-accent', `var(--svadmin-colors-${tones[tone]})`);
+      declaration(slots.card, `--density_${density}`, 'padding', `var(--svadmin-spacing-${density === 'compact' ? 'sm' : 'lg'})`);
+      declaration(slots.state, `--density_${density}`, '--svadmin-metric-state-height', density === 'compact' ? '4.5rem' : '6rem');
     }
   }
-  for (const tone of surfaceDesignContract.metric.tone) {
-    for (const density of surfaceDesignContract.metric.density) assertSlots(surfaceMetric({ tone, density }));
+  for (const density of surfaceDesignContract.table.density) {
+    const slots = surfaceTable({ density });
+    for (const slot of ['head', 'cell']) {
+      declaration(slots[slot], `--density_${density}`, 'padding-block', density === 'compact' ? 'var(--svadmin-spacing-xs)' : '0.5rem');
+      declaration(slots[slot], `--density_${density}`, 'font-size', `var(--svadmin-font-sizes-${density === 'compact' ? 'compact' : 'body'})`);
+    }
+    for (const slot of ['header', 'content']) declaration(slots[slot], `--density_${density}`, 'padding-inline', `var(--svadmin-spacing-${density === 'compact' ? 'sm' : 'md'})`);
+    declaration(slots.state, `--density_${density}`, '--svadmin-table-state-height', density === 'compact' ? '6rem' : '8rem');
   }
-  for (const density of surfaceDesignContract.table.density) assertSlots(surfaceTable({ density }));
-  assert.ok(variants > 20, 'The recipe coverage assertion must not pass without exercising variants');
+  assert.equal(checked, 74);
+}
+
+test('every styled slot and public runtime variant has its required CSS declarations', () => {
+  assertVariantDeclarations(read('dist/app.css'));
+});
+
+test('variant coverage detects a missing rule rather than passing vacuously', () => {
+  const css = postcss.parse(read('dist/app.css'));
+  css.walkRules((rule) => {
+    if (rule.selector.includes('__card--tone_warning')) rule.remove();
+  });
+  assert.throws(() => assertVariantDeclarations(css.toString()), /missing border-inline-start-color/);
 });
 
 test('Panda recipes do not introduce global resets or theme scoping regressions', () => {
@@ -63,6 +99,9 @@ test('Panda recipes do not introduce global resets or theme scoping regressions'
   assert.ok(root.toString().includes('var(--card)'));
   assert.ok(!root.toString().includes('box-sizing: border-box'));
   assert.ok(!root.toString().includes('!important'));
+  root.walkDecls((decl) => {
+    if (decl.prop.startsWith('--')) assert.ok(decl.prop.startsWith('--svadmin-'), decl.prop);
+  });
 });
 
 test('published components and plain stylesheet require neither compiler', () => {

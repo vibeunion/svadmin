@@ -12,12 +12,12 @@ export const surfaceMetric = defineSlotRecipe({
     root: { minWidth: '0' },
     card: { borderInlineStartStyle: 'solid', borderInlineStartWidth: '3px' },
     description: { color: 'muted' },
-    state: { borderInlineStartStyle: 'solid', borderInlineStartWidth: '3px' },
+    state: { '--svadmin-metric-state-border-width': '3px' },
   },
   variants: {
     tone: Object.fromEntries(surfaceDesignContract.metric.tone.map((tone) => [tone, {
       card: { borderInlineStartColor: toneTokens[tone] },
-      state: { borderInlineStartColor: toneTokens[tone] },
+      state: { '--svadmin-metric-state-accent': `var(--svadmin-colors-${toneTokens[tone]})` },
     }])),
     density: Object.fromEntries(surfaceDesignContract.metric.density.map((density) => [density, {
       card: { padding: density === 'compact' ? 'sm' : 'lg' },

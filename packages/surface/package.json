@@ -3,13 +3,16 @@
   "version": "0.8.18",
   "description": "Validated declarative surfaces for svadmin dashboards",
   "type": "module",
-  "sideEffects": ["./dist/styles.css"],
+  "sideEffects": [
+    "./dist/styles.css"
+  ],
   "files": [
     "dist",
     "README.md",
     "compatibility.json",
     "!dist/**/*.test.*",
-    "!dist/**/*.spec.*"
+    "!dist/**/*.spec.*",
+    "STYLING.md"
   ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
