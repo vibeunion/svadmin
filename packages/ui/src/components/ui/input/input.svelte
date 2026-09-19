@@ -63,10 +63,7 @@
 	<input
 		bind:this={ref}
 		data-slot={dataSlot}
-		class={cn(
-			"svadmin-input",
-			className
-		)}
+			class={cn("svadmin-input", className)}
 			{type}
 			lang={isDateInput ? i18n.locale : undefined}
 			bind:value

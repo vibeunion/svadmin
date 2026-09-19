@@ -87,57 +87,115 @@
     return { col: match[1], row: parseInt(match[2], 10) };
   }
 
-  function evaluateFormula(formula: string, cells: Record<string, string>): number | string {
-    const sumMatch = formula.match(/^=SUM\(([A-Z]+\d+):([A-Z]+\d+)\)$/i);
-    const avgMatch = formula.match(/^=AVG\(([A-Z]+\d+):([A-Z]+\d+)\)$/i);
-    const countMatch = formula.match(/^=COUNT\(([A-Z]+\d+):([A-Z]+\d+)\)$/i);
+  function evaluateFormula(formula: string, cells: Record<string, string>, visiting = new Set<string>()): number | string {
+    if (!formula.startsWith('=')) return formula;
 
-    const match = sumMatch || avgMatch || countMatch;
-    if (match && match[1] && match[2]) {
-      const start = parseCellKey(match[1].toUpperCase());
-      const end = parseCellKey(match[2].toUpperCase());
-      if (!start || !end) return '#ERROR!';
+    const source = formula.slice(1).replace(/\s+/g, '');
+    let cursor = 0;
 
-      const startCol = colNameToIndex(start.col);
-      const endCol = colNameToIndex(end.col);
-      const minCol = Math.min(startCol, endCol);
-      const maxCol = Math.max(startCol, endCol);
-      const minRow = Math.min(start.row, end.row);
-      const maxRow = Math.max(start.row, end.row);
+    function readNumber(): number {
+      const start = cursor;
+      while (cursor < source.length && /[\d.]/.test(source[cursor] ?? '')) cursor += 1;
+      const result = Number(source.slice(start, cursor));
+      if (!Number.isFinite(result)) throw new Error('number');
+      return result;
+    }
 
-      const numbers: number[] = [];
-      for (let c = minCol; c <= maxCol; c++) {
-        for (let r = minRow; r <= maxRow; r++) {
-          const k = `${getColName(c)}${r}`;
-          const raw = cells[k] ?? '';
-          const val = raw.startsWith('=') ? evaluateFormula(raw, cells) : Number(raw);
-          if (typeof val === 'number' && !isNaN(val)) {
-            numbers.push(val);
-          }
+    function readIdentifier(): string {
+      const start = cursor;
+      while (cursor < source.length && /[A-Za-z0-9_]/.test(source[cursor] ?? '')) cursor += 1;
+      return source.slice(start, cursor).toUpperCase();
+    }
+
+    function cellValue(key: string): number {
+      if (visiting.has(key)) throw new Error('cycle');
+      const raw = cells[key] ?? '';
+      if (raw.startsWith('=')) {
+        const next = new Set(visiting);
+        next.add(key);
+        const computed = evaluateFormula(raw, cells, next);
+        if (typeof computed !== 'number') {
+          throw new Error(computed === '#CYCLE!' ? 'cycle' : computed);
+        }
+        return computed;
+      }
+      const result = Number(raw);
+      return Number.isFinite(result) ? result : 0;
+    }
+
+    function readRange(): number[] {
+      const start = readIdentifier();
+      if (source[cursor] !== ':') throw new Error('range');
+      cursor += 1;
+      const end = readIdentifier();
+      const startCell = parseCellKey(start);
+      const endCell = parseCellKey(end);
+      if (!startCell || !endCell) throw new Error('range');
+      const values: number[] = [];
+      for (let col = Math.min(colNameToIndex(startCell.col), colNameToIndex(endCell.col)); col <= Math.max(colNameToIndex(startCell.col), colNameToIndex(endCell.col)); col += 1) {
+        for (let row = Math.min(startCell.row, endCell.row); row <= Math.max(startCell.row, endCell.row); row += 1) {
+          values.push(cellValue(`${getColName(col)}${row}`));
         }
       }
-
-      if (sumMatch) return numbers.reduce((a, b) => a + b, 0);
-      if (avgMatch) return numbers.length ? numbers.reduce((a, b) => a + b, 0) / numbers.length : 0;
-      if (countMatch) return numbers.length;
+      return values;
     }
 
-    // Direct arithmetic
-    if (formula.startsWith('=')) {
-      try {
-        const expr = formula.slice(1).replace(/([A-Z]+\d+)/g, (k) => {
-          const val = cells[k.toUpperCase()] ?? '0';
-          return String(Number(val) || 0);
-        });
-        const sanitized = expr.replace(/[^0-9+\-*/(). ]/g, '');
-        const fn = new Function(`return (${sanitized || 0})`);
-        return Number(fn());
-      } catch {
-        return '#VALUE!';
+    function readPrimary(): number {
+      if (source[cursor] === '(') {
+        cursor += 1;
+        const result = readExpression();
+        if (source[cursor] !== ')') throw new Error('parenthesis');
+        cursor += 1;
+        return result;
       }
+      if (source[cursor] === '-' || source[cursor] === '+') {
+        const sign = source[cursor++] === '-' ? -1 : 1;
+        return sign * readPrimary();
+      }
+      if (/[0-9.]/.test(source[cursor] ?? '')) return readNumber();
+
+      const identifier = readIdentifier();
+      if (['SUM', 'AVG', 'COUNT'].includes(identifier) && source[cursor] === '(') {
+        cursor += 1;
+        const values = readRange();
+        if (source[cursor] !== ')') throw new Error('function');
+        cursor += 1;
+        if (identifier === 'SUM') return values.reduce((sum, value) => sum + value, 0);
+        if (identifier === 'AVG') return values.length > 0 ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+        return values.length;
+      }
+      if (!parseCellKey(identifier)) throw new Error('identifier');
+      return cellValue(identifier);
     }
 
-    return formula;
+    function readTerm(): number {
+      let result = readPrimary();
+      while (source[cursor] === '*' || source[cursor] === '/') {
+        const operator = source[cursor++];
+        const next = readPrimary();
+        if (operator === '/' && next === 0) throw new Error('division');
+        result = operator === '*' ? result * next : result / next;
+      }
+      return result;
+    }
+
+    function readExpression(): number {
+      let result = readTerm();
+      while (source[cursor] === '+' || source[cursor] === '-') {
+        const operator = source[cursor++];
+        const next = readTerm();
+        result = operator === '+' ? result + next : result - next;
+      }
+      return result;
+    }
+
+    try {
+      const result = readExpression();
+      if (cursor !== source.length || !Number.isFinite(result)) return '#VALUE!';
+      return result;
+    } catch (error) {
+      return error instanceof Error && error.message === 'cycle' ? '#CYCLE!' : '#VALUE!';
+    }
   }
 
   function getRenderedValue(key: string): string {

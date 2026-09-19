@@ -19,22 +19,21 @@ test('both published CSS entries contain migrated utility and variant styles', (
       '.svadmin-badge--subtle-success',
       '.svadmin-alert--warning',
       '.svadmin-avatar-size--sm',
+      '.svadmin-surface-metric__root',
+      '.svadmin-surface-table__root',
     ]) assert.ok(css.includes(selector), `${name}: missing ${selector}`);
+    assert.ok(css.includes('--svadmin-colors-'), `${name}: missing Panda semantic token aliases`);
     assert.ok(css.includes('.svadmin-theme'), `${name}: missing nested aliases`);
   }
 });
 
-test('both public entries are identical plain CSS with no compiler metadata', () => {
-  const forbidden = new Set(['import', 'theme', 'source', 'apply', 'utility', 'custom-variant', 'tailwind', 'plugin', 'config']);
+test('both public CSS entries are native and contain identical styles', () => {
   for (const name of ['app.css', 'app.theme.css']) {
-    let primary = false;
     postcss.parse(read(name)).walkAtRules((rule) => {
-      assert.ok(!forbidden.has(rule.name), `${name}: @${rule.name}`);
+      assert.ok(!['import', 'theme', 'source', 'apply', 'utility', 'tailwind', 'custom-variant', 'reference', 'variant', 'config', 'plugin'].includes(rule.name), `${name}: ${rule.name}`);
     });
-    postcss.parse(read(name)).walkDecls('--color-primary', () => { primary = true; });
-    assert.ok(primary, `${name}: missing public theme variable`);
   }
-  assert.equal(read('app.css'), read('app.theme.css'));
+  assert.equal(read('app.theme.css'), read('app.css'));
 });
 
 test('every migrated utility referenced by a component has a published CSS selector', () => {

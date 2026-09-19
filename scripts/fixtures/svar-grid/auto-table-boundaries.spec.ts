@@ -70,12 +70,12 @@ test('AutoTable semantic colors follow a nested host theme at desktop and mobile
   const heading = page.getByRole('heading', { name: 'Compatible inventory', exact: true });
   for (const width of [1440, 1920, 390]) {
     await page.setViewportSize({ width, height: 900 });
-    // 窄屏会真正卸载不可见列，先像用户一样横向滚动，不能假设 Stock 永远在 DOM 中。
+    // 窄屏可能虚拟化不可见列；仅在存在横向溢出时滚动，随后仍验证 Stock 可见。
     if (width === 390) {
       await page.locator('[data-svar-pane="center"]').evaluate(root => {
         const viewport = [...root.querySelectorAll<HTMLElement>('*')].find(element =>
           element.scrollWidth > element.clientWidth + 20 && ['auto', 'scroll'].includes(getComputedStyle(element).overflowX));
-        if (!viewport) throw new Error('Horizontal grid viewport not found');
+        if (!viewport) return;
         viewport.scrollLeft = viewport.scrollWidth;
         viewport.dispatchEvent(new Event('scroll'));
       });

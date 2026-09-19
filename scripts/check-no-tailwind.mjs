@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { readFileSync, realpathSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const compiler = /^(?:tailwindcss|@tailwindcss\/[^/]+|tw-animate-css)$/;
 const dependencySections = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies'];
@@ -21,7 +21,6 @@ export function assertNoCompilerDependencies(pkg, path = 'package.json') {
   for (const section of dependencySections) {
     for (const [name, specifier] of Object.entries(pkg[section] ?? {})) {
       assert.ok(!compiler.test(name), `${path}: ${section}.${name} reintroduces a removed compiler`);
-      // npm 别名的键不是实际包名，必须同时检查解析目标。
       if (typeof specifier === 'string' && specifier.trim().startsWith('npm:')) {
         const target = packageName(specifier.trim().slice(4));
         assert.ok(!compiler.test(target ?? ''), `${path}: ${section}.${name} aliases removed compiler ${target}`);
@@ -31,8 +30,6 @@ export function assertNoCompilerDependencies(pkg, path = 'package.json') {
 }
 
 export function assertNoCompilerInLockfile(lock) {
-  // Bun 的包表可用别名或嵌套路径作键；元组首项才是实际解析的包。
-  // 只解码 JSON 字符串，不执行 lockfile，也不改写其 JSONC 内容。
   const entries = lock.matchAll(/("(?:[^"\\]|\\.)*")\s*:\s*\[\s*("(?:[^"\\]|\\.)*")?/g);
   for (const [, key, resolved] of entries) {
     const name = JSON.parse(key);
@@ -57,7 +54,7 @@ export function checkNoTailwind(root = process.cwd()) {
   assertNoCompilerInLockfile(readFileSync(join(root, 'bun.lock'), 'utf8'));
 }
 
-if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {
+if (process.argv[1] && realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url))) {
   checkNoTailwind();
   console.info('No Tailwind compiler dependency or active stylesheet entry directive remains. Legacy opt-in theme metadata is allowed.');
 }

@@ -1,5 +1,8 @@
 // @svadmin/ui — Pre-built admin UI components
 
+export { surfaceDesignContract } from "./design-contract.js";
+export type { SurfaceTone, SurfaceDensity } from "./design-contract.js";
+
 // Entry component
 export { default as AdminApp } from './components/AdminApp.svelte';
 
@@ -127,6 +130,14 @@ export type { PendingMutation } from './components/OfflineSyncBanner.svelte';
 export { default as InfiniteList } from './components/InfiniteList.svelte';
 export { default as ComboboxField } from './components/ComboboxField.svelte';
 export { default as PasswordInput } from './components/PasswordInput.svelte';
+export { default as NumericInput } from './components/NumericInput.svelte';
+export { default as NumberInput } from './components/NumberInput.svelte';
+export { default as MoneyInput } from './components/MoneyInput.svelte';
+export { default as PercentInput } from './components/PercentInput.svelte';
+export { default as DateTimeInput } from './components/DateTimeInput.svelte';
+export type { DateTimeInputMode } from './components/DateTimeInput.svelte';
+export { default as DateRangeInput } from './components/DateRangeInput.svelte';
+export type { DateRangeInputValue } from './components/DateRangeInput.svelte';
 export { default as AnomalyBadge } from "./components/AnomalyBadge.svelte";
 export { default as AnimatedCounter } from "./components/AnimatedCounter.svelte";
 export { default as KeyboardShortcuts } from "./components/KeyboardShortcuts.svelte";
@@ -319,6 +330,8 @@ export type { SecurityEvent } from './components/content/SecurityEventTable.svel
 export { default as MemberList } from './components/content/MemberList.svelte';
 export type { MemberSummary } from './components/content/MemberList.svelte';
 export { default as ImportDropzone } from './components/content/ImportDropzone.svelte';
+export { default as FileUpload } from './components/FileUpload.svelte';
+export type { UploadItem, UploadItemStatus, UploadSession } from './components/FileUpload.svelte';
 export { default as NetworkUserCard } from './components/content/NetworkUserCard.svelte';
 export type { NetworkUser, NetworkMetric } from './components/content/NetworkUserCard.svelte';
 export { default as NetworkTable } from './components/content/NetworkTable.svelte';
@@ -347,3 +360,5 @@ export type { RatingSize } from './components/fields/RatingField.svelte';
 export type { CurrencyTone } from './components/fields/CurrencyField.svelte';
 export { default as MediaThumbnail } from './components/content/MediaThumbnail.svelte';
 export type { MediaThumbnailSize, MediaThumbnailFit } from './components/content/MediaThumbnail.svelte';
+export { default as FileBrowser } from './components/content/FileBrowser.svelte';
+export type { FileBrowserData, FileBrowserInit, FileBrowserMenuOptions, FileBrowserProps } from './components/content/FileBrowser.svelte';

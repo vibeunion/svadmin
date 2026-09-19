@@ -3,20 +3,35 @@ import { fileURLToPath } from 'node:url';
 import postcss from 'postcss';
 
 const distDir = new URL('../dist/', import.meta.url);
+// The native mapping is the source of truth; neither public entry needs a compiler.
 const source = postcss.parse(readFileSync(new URL('../src/styles/aliases.css', import.meta.url), 'utf8'));
 const aliases = postcss.rule({ selector: ':root,\n.svadmin-theme' });
-source.walkDecls((declaration) => aliases.append(declaration.clone()));
-if (!aliases.nodes.length) throw new Error('Missing native semantic theme aliases');
+source.walkAtRules((rule) => {
+  throw new Error(`Unexpected directive in native semantic aliases: @${rule.name}`);
+});
+source.walkDecls((declaration) => {
+  const owner = declaration.parent;
+  if (owner?.type !== 'rule' || owner.parent !== source ||
+      !owner.selectors.every((selector) => [':root', '.svadmin-theme'].includes(selector)) ||
+      !declaration.prop.startsWith('--')) {
+    throw new Error('Native semantic aliases must be custom properties at theme roots');
+  }
+  aliases.append(declaration.clone());
+});
+if (!aliases.nodes?.some((node) => node.prop === '--color-primary')) {
+  throw new Error('Missing native semantic --color-primary alias');
+}
 
-// 嵌套主题必须重新绑定变量，不能继承根节点已经求值的颜色。
-// 两个公开入口保持同样的纯 CSS 内容；不再读取或创建 @theme。
+// Rebind at nested theme roots instead of inheriting resolved root colors.
+// Remove only our exact, unlayered mapping; never touch the frozen reset layers.
 for (const name of ['app.css', 'app.theme.css']) {
   const path = fileURLToPath(new URL(name, distDir));
   const root = postcss.parse(readFileSync(path, 'utf8'));
   root.walkRules((rule) => {
-    if (rule.selector === aliases.selector) rule.remove();
+    if (rule.parent === root && rule.selectors.length === 2 &&
+        rule.selectors.includes(':root') && rule.selectors.includes('.svadmin-theme')) rule.remove();
   });
   root.append(aliases.clone());
   writeFileSync(path, `${root.toString().trim()}\n`, 'utf8');
 }
-console.info('[postbuild-css] preserved native theme aliases in both CSS entry points');
+console.info('[postbuild-css] preserved native semantic aliases in both CSS entry points');

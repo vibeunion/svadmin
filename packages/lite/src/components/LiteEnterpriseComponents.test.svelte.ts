@@ -138,12 +138,31 @@ describe('Lite Enterprise Components SSR rendering', () => {
     const view = render(LiteFilterBuilder, {
       fields,
       filters,
-      logicalOperator: 'and',
     });
 
-    expect(view.container.textContent).toContain('AND');
     expect(view.container.textContent).toContain('Name');
-    expect(view.container.querySelector('input[type="text"]')).toBeTruthy();
+    expect((view.container.querySelector('input[type="text"]') as HTMLInputElement).value).toBe('Alice');
+    expect(view.container.querySelector('[name="logical_op"]')).toBeNull();
+  });
+
+  it('renders nested LiteFilterBuilder groups without flattening them', () => {
+    const view = render(LiteFilterBuilder, {
+      fields: [
+        { key: 'name', label: 'Name', type: 'text' as const },
+        { key: 'age', label: 'Age', type: 'number' as const },
+      ],
+      filters: [{
+        operator: 'or',
+        value: [
+          { field: 'name', operator: 'contains', value: 'Alice' },
+          { operator: 'and', value: [{ field: 'age', operator: 'gte', value: 18 }] },
+        ],
+      }],
+    });
+
+    expect(view.container.querySelectorAll('[data-testid="lite-filter-group"], [data-testid="lite-filter-root"]')).toHaveLength(2);
+    expect(view.container.querySelector('[name="filters[0][operator]"]')).toBeTruthy();
+    expect(view.container.querySelector('[name="filters[0.value.1.value.0][field]"]')).toBeTruthy();
   });
 
   it('renders LiteDynamicFormList with item cards and actions', () => {
@@ -373,11 +392,26 @@ describe('Lite Enterprise Components SSR rendering', () => {
         title: 'Project Form',
         properties: {
           projectName: { type: 'string', title: 'Project Name' },
+          settings: {
+            type: 'object',
+            title: 'Settings',
+            properties: {
+              retries: { type: 'number', default: 2 },
+            },
+          },
+          tags: {
+            type: 'array',
+            items: { type: 'string' },
+            default: ['admin'],
+          },
         },
       },
     });
     expect(schemaView.container.textContent).toContain('Project Form');
     expect(schemaView.container.textContent).toContain('Project Name');
+    expect(schemaView.container.querySelector('[id="lite_json_settings_retries"]')).toBeTruthy();
+    expect(schemaView.container.querySelector('[id="lite_json_tags_0"]')).toBeTruthy();
+    expect((schemaView.container.querySelector('[id="lite_json_settings_retries"]') as HTMLInputElement).value).toBe('2');
   });
 
   it('renders LiteMentionsInput, LiteKanbanBoard, LitePivotTable, LiteMultiTabKeepAlive, and LiteGanttChart', () => {
