@@ -70,6 +70,17 @@ test('AutoTable semantic colors follow a nested host theme at desktop and mobile
   const heading = page.getByRole('heading', { name: 'Compatible inventory', exact: true });
   for (const width of [1440, 1920, 390]) {
     await page.setViewportSize({ width, height: 900 });
+    // 窄屏会真正卸载不可见列，先像用户一样横向滚动，不能假设 Stock 永远在 DOM 中。
+    if (width === 390) {
+      await page.locator('[data-svar-pane="center"]').evaluate(root => {
+        const viewport = [...root.querySelectorAll<HTMLElement>('*')].find(element =>
+          element.scrollWidth > element.clientWidth + 20 && ['auto', 'scroll'].includes(getComputedStyle(element).overflowX));
+        if (!viewport) throw new Error('Horizontal grid viewport not found');
+        viewport.scrollLeft = viewport.scrollWidth;
+        viewport.dispatchEvent(new Event('scroll'));
+      });
+    }
+    await expect(page.getByRole('button', { name: 'Edit Stock', exact: true }).first()).toBeVisible();
     for (const dark of [false, true]) {
       if (dark) await page.getByRole('button', { name: 'Theme', exact: true }).click();
       const hostColor = await page.locator('main').evaluate(element => getComputedStyle(element).color);
