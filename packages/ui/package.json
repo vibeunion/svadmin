@@ -85,8 +85,8 @@
     "@tanstack/svelte-table": "^9.2.3",
     "@tanstack/table-core": "^9.2.3",
     "bits-ui": "^2.19.0",
-    "cn": "^0.2.4",
-    "svelte-sonner": "^1.2.1"
+    "svelte-sonner": "^1.2.1",
+    "clsx": "^2.1.1"
   },
   "license": "MIT",
   "author": "zuohuadong",
@@ -119,7 +119,7 @@
     "build": "bun run build:styles && node ../../node_modules/@sveltejs/package/svelte-package.js -i src -o dist && node scripts/build-static-css.mjs && node scripts/postbuild-css.mjs",
     "test": "vitest run --config ./vitest.config.ts",
     "test:css": "node --test scripts/static-css.test.mjs scripts/panda-css.test.mjs scripts/panda-css-layers.test.mjs scripts/panda-css-isolation.test.mjs",
-    "build:styles": "panda codegen && panda cssgen --outfile src/styled-system/styles.css && node scripts/flatten-panda-css.mjs && node scripts/prepare-panda-runtime.mjs && node ../../scripts/build-migrated-ui.mjs ui",
+    "build:styles": "panda codegen && panda cssgen --outfile src/styled-system/styles.css && node scripts/flatten-panda-css.mjs && node scripts/prepare-panda-runtime.mjs && node ../../scripts/build-migrated-ui.mjs ui && node ../../scripts/build-native-classnames.mjs ui",
     "styles:migrated:check": "node ../../scripts/build-migrated-ui.mjs ui --check"
   }
 }

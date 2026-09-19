@@ -1,4 +1,4 @@
-export { cn } from "cn";
+export { cn } from './classnames.js';
 
 /**
 * A utility type that makes the `ref` prop optional and adds it to the given props type.
