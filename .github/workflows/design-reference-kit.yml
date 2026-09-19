@@ -31,3 +31,24 @@ jobs:
         run: |
           python3 design/reference-kit/render_preview.py
           python3 design/reference-kit/render_preview.py --check
+
+  figma-offline:
+    name: Offline Figma plugin and analysis contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - name: Test bounded exporter, analyzer and staged importer
+        run: node --test design/figma-offline/test/*.test.mjs
+      - name: Check executable syntax
+        shell: bash
+        run: |
+          node --check design/figma-offline/core.cjs
+          node --check design/figma-offline/runtime.cjs
+          node --check design/figma-offline/analyze.mjs
+          node --check design/figma-offline/prepare-plugin.mjs

@@ -1,0 +1,121 @@
+{
+  "format": "svadmin/figma-blueprint-v1",
+  "id": "offline-smoke-demo-v1",
+  "ownership": "self-authored",
+  "title": "Offline bridge — synthetic smoke demo",
+  "tokens": {
+    "primitive/white": {
+      "type": "COLOR",
+      "value": {
+        "r": 1,
+        "g": 1,
+        "b": 1
+      },
+      "css": "var(--demo-white)",
+      "scopes": []
+    },
+    "surface": {
+      "type": "COLOR",
+      "alias": "primitive/white",
+      "css": "var(--demo-surface)",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ]
+    },
+    "ink": {
+      "type": "COLOR",
+      "value": {
+        "r": 0.1,
+        "g": 0.1,
+        "b": 0.1
+      },
+      "css": "var(--demo-ink)",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ]
+    },
+    "space": {
+      "type": "FLOAT",
+      "value": 16,
+      "css": "var(--demo-space)",
+      "scopes": [
+        "GAP"
+      ]
+    },
+    "radius": {
+      "type": "FLOAT",
+      "value": 6,
+      "css": "var(--demo-radius)",
+      "scopes": [
+        "CORNER_RADIUS"
+      ]
+    },
+    "body": {
+      "type": "FLOAT",
+      "value": 14,
+      "css": "var(--demo-body)",
+      "scopes": [
+        "FONT_SIZE"
+      ]
+    }
+  },
+  "nodes": [
+    {
+      "key": "action",
+      "kind": "COMPONENT",
+      "name": "Demo Action",
+      "layout": "HORIZONTAL",
+      "width": 240,
+      "fill": "ink",
+      "padding": "space",
+      "gap": "space",
+      "radius": "radius",
+      "children": [
+        {
+          "key": "label",
+          "kind": "TEXT",
+          "name": "Label",
+          "text": "Editable demo action",
+          "width": 208,
+          "fill": "surface",
+          "fontSize": "body"
+        }
+      ]
+    },
+    {
+      "key": "page",
+      "kind": "FRAME",
+      "name": "Synthetic example — not svadmin UI Kit",
+      "layout": "VERTICAL",
+      "width": 400,
+      "fill": "surface",
+      "stroke": "ink",
+      "padding": "space",
+      "gap": "space",
+      "radius": "radius",
+      "children": [
+        {
+          "key": "title",
+          "kind": "TEXT",
+          "name": "Title",
+          "text": "Local import smoke test",
+          "width": 368,
+          "fill": "ink",
+          "fontSize": "body"
+        },
+        {
+          "key": "instance",
+          "kind": "INSTANCE",
+          "name": "Action instance",
+          "component": "action"
+        }
+      ]
+    }
+  ]
+}
