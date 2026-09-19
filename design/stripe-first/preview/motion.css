@@ -1,0 +1,6 @@
+/* 减少动态效果时保留骨架占位和加载语义，但停止无限脉冲。
+ * 不能只把无限动画缩短至 0.01ms；这会持续闪烁并破坏稳定捕获。
+ * 这是预览实际交付的样式，不是测试注入、截图遮罩或阈值豁免。 */
+@media (prefers-reduced-motion: reduce) {
+  .kit-root [data-slot="skeleton"] { animation: none; }
+}
