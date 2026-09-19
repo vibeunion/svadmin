@@ -17,29 +17,30 @@ function readCleanFlatCss(): string {
   return uiCss.slice(markerIndex);
 }
 
-describe('@svadmin/ui Tailwind source contract', () => {
-  it('keeps source discovery inside the published UI stylesheet', () => {
+describe('@svadmin/ui standalone Panda CSS contract', () => {
+  it('keeps generated Panda layers inside the published UI stylesheet', () => {
     const uiCss = readRepositoryFile('packages/ui/src/app.css');
     const exampleCss = readRepositoryFile('example/src/app.css');
     const templateCss = readRepositoryFile('packages/create-svadmin/template/src/app.css');
     const readme = readRepositoryFile('README.md');
 
-    expect(uiCss).toContain('@source "./components";');
+    expect(uiCss).toContain('@import "./panda.css";');
+    expect(uiCss).toContain('@import "./panda-tokens.css";');
+    expect(uiCss).not.toContain('@source');
+    expect(uiCss).not.toContain('@theme');
     expect(uiCss).not.toContain('linear-gradient(');
-    expect(exampleCss).not.toContain('@source "../node_modules/@svadmin/ui";');
-    expect(templateCss).not.toContain('@source "../node_modules/@svadmin/ui";');
-    expect(readme).not.toContain('@source "../node_modules/@svadmin/ui";');
-    expect(readme).toContain('registers its published `dist/components` directory');
+    expect(exampleCss).not.toContain('@source');
+    expect(templateCss).not.toContain('@source');
+    expect(readme).not.toContain('registers its published `dist/components` directory');
   });
 
-  it('uses the published theme for the Tailwind example and precompiled CSS for generated apps', () => {
+  it('uses a standalone published CSS entry for examples and generated apps', () => {
     const exampleCss = readRepositoryFile('example/src/app.css');
     const templateCss = readRepositoryFile('packages/create-svadmin/template/src/app.css');
     const exampleApp = readRepositoryFile('example/src/App.svelte');
 
     expect(exampleCss).toContain('@import "@svadmin/ui/app.theme.css";');
     expect(templateCss).toContain('@import "@svadmin/ui/app.css";');
-    expect(templateCss).not.toContain('tailwindcss');
     expect(templateCss).not.toContain('@svadmin/ui/app.theme.css');
     expect(exampleCss).not.toMatch(/--primary\s*:/);
     expect(templateCss).not.toMatch(/--primary\s*:/);

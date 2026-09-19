@@ -37,6 +37,23 @@ describe('PdfDocumentViewer, SpreadsheetView, DecisionTable, and OfflineSyncBann
     expect(view.container.querySelector('table')).not.toBeNull();
   });
 
+  it('reports circular formula references without executing dynamic code', () => {
+    const view = render(SpreadsheetView, {
+      sheets: [
+        {
+          id: 's1',
+          name: 'Cycle',
+          rows: 2,
+          cols: 2,
+          cells: { A1: '=B1+1', B1: '=A1+1' },
+        },
+      ],
+    });
+
+    const values = Array.from(view.container.querySelectorAll('input')).map((input) => input.value);
+    expect(values).toContain('#CYCLE!');
+  });
+
   it('renders DecisionTable with condition and action columns', () => {
     const view = render(DecisionTable, {
       title: 'Discount Policy',

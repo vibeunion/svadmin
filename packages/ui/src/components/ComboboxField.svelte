@@ -23,12 +23,13 @@
 
   interface Props extends Omit<HTMLButtonAttributes, 'value' | 'onchange' | 'children' | 'onclick' | 'type'> {
     resource: string;
-    value?: string | number | null;
-    onchange?: (value: string | number | null) => void;
+    value?: string | number | null | (string | number)[];
+    onchange?: (value: string | number | null | (string | number)[]) => void;
     optionLabel?: string;
     optionValue?: string;
     placeholder?: string;
     searchable?: boolean;
+    multiple?: boolean;
     onSearch?: (value: string) => Filter[];
     id?: string;
     class?: string;
@@ -42,6 +43,7 @@
     optionValue = 'id',
     placeholder = 'Select...',
     searchable = true,
+    multiple = false,
     onSearch,
     disabled = false,
     ...restProps
@@ -67,7 +69,10 @@
       };
     },
     get projectionKey() { return `combobox:${optionLabel}:${optionValue}`; },
-    get defaultValue() { return value === null ? [] : [value]; },
+    get defaultValue() {
+      if (Array.isArray(value)) return value;
+      return value === null || value === undefined ? [] : [value];
+    },
     get onSearch() { return onSearch ?? (searchable ? defaultSearch : undefined); },
   }));
 
@@ -81,11 +86,23 @@
     open = false;
   });
 
-  const selectedLabel = $derived(
-    select.options.find(o => o.value === value)?.label ?? ''
+  const selectedValues = $derived(
+    Array.isArray(value) ? value : value === null || value === undefined ? [] : [value],
   );
+  const selectedLabels = $derived(selectedValues.flatMap(selectedValue => {
+    const option = select.options.find(candidate => candidate.value === selectedValue);
+    return option ? [option.label] : [];
+  }));
+  const selectedLabel = $derived(selectedLabels.join(', '));
 
   function handleSelect(optValue: string | number) {
+    if (multiple) {
+      const next = selectedValues.includes(optValue)
+        ? selectedValues.filter(selectedValue => selectedValue !== optValue)
+        : [...selectedValues, optValue];
+      onchange?.(next);
+      return;
+    }
     onchange?.(optValue === value ? null : optValue);
     open = false;
     searchInputValue = '';
@@ -94,7 +111,7 @@
 
   function handleClear(e: Event) {
     e.stopPropagation();
-    onchange?.(null);
+    onchange?.(multiple ? [] : null);
     open = false;
     searchInputValue = '';
     select.onSearchChange('');
@@ -119,6 +136,7 @@
     {disabled}
     aria-haspopup="listbox"
     aria-expanded={open}
+    aria-multiselectable={multiple || undefined}
     aria-busy={select.isFetching}
     aria-invalid={select.isError}
   >
@@ -129,7 +147,7 @@
     {/if}
     <ChevronsUpDown class="svadmin-u-fb56d9cff341 svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-012fbd121f37 svadmin-u-0b8c506a0596" />
   </Button>
-  {#if value !== null}
+  {#if selectedValues.length}
     <Button type="button" variant="ghost" size="icon-sm" {disabled}
       title={i18n.t('common.clear')} aria-label={i18n.t('common.clear')} onclick={handleClear}>
       <X class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29" />
@@ -160,7 +178,11 @@
             />
           </div>
         {/if}
-        <Command.List class="svadmin-u-558f64349245 svadmin-u-92bf82f493b1 svadmin-u-eb6a3cef9686">
+        <Command.List
+          role="listbox"
+          aria-multiselectable={multiple || undefined}
+          class="svadmin-u-558f64349245 svadmin-u-92bf82f493b1 svadmin-u-eb6a3cef9686"
+        >
           {#if select.isLoading}
             {#each Array(3) as _, _i (_i)}
               <div class="svadmin-u-d5eab218aa34 svadmin-u-ec0091ee009b"><Skeleton class="svadmin-u-cd0d9c512cdc svadmin-u-6da6a3c3f741" /></div>
@@ -177,7 +199,7 @@
                 onSelect={() => handleSelect(opt.value)}
                 class="svadmin-u-d89972fe17d6 svadmin-u-60fbb7713999 svadmin-u-50ca6ba56aa3 svadmin-u-7f6912283f11 svadmin-u-3960ffc248d9 svadmin-u-36d4469299aa svadmin-u-d5eab218aa34 svadmin-u-ec0091ee009b svadmin-u-fc7473ca09eb svadmin-u-df37b1fd9495 svadmin-u-99afb1cc3b47 svadmin-u-529780e25268"
               >
-                <Check class="svadmin-u-d2347e8497a9 svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c {value === opt.value ? 'svadmin-u-3972e98dc84f' : 'svadmin-u-7065497e1ca0'}" />
+                <Check class="svadmin-u-d2347e8497a9 svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c {selectedValues.includes(opt.value) ? 'svadmin-u-3972e98dc84f' : 'svadmin-u-7065497e1ca0'}" />
                 {opt.label}
               </Command.Item>
             {/each}

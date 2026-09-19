@@ -263,24 +263,27 @@ declare module "@svadmin/core" {
 const dataProvider = createElysiaDataProvider<App>("http://localhost:3000");
 ```
 
-### Tailwind CSS v4 Integration / Tailwind CSS v4 集成
+### Standalone Panda CSS / 独立 Panda CSS
 
-> **Important / 重要**: Tailwind CSS v4 does not scan `node_modules` by default. `@svadmin/ui` registers its published `dist/components` directory from its own CSS entry, so consumers no longer need a separate `@source` directive for the UI package.
->
-> Tailwind CSS v4 默认不扫描 `node_modules`。`@svadmin/ui` 会在自己的 CSS 入口中注册已发布的 `dist/components` 目录，因此消费者不再需要为 UI 包单独添加 `@source` 指令。
+`@svadmin/ui` publishes standalone Panda CSS. The host does not need a
+Tailwind plugin, CSS framework import, or source-registration directive.
+
+`@svadmin/ui` 发布的是独立的 Panda CSS。宿主项目无需安装 Tailwind 插件、
+引入 CSS 框架，也无需额外注册组件源码扫描路径。
 
 **1. Import the UI stylesheet / 引入 UI 样式:**
 
 ```css
 /* app.css */
-@import "tailwindcss";
-@import "@svadmin/ui/app.theme.css";
+@import "@svadmin/ui/app.css";
 @import "@svadmin/ai-elements/ai.css";
 ```
 
-If an existing app still contains `@source "../node_modules/@svadmin/ui/src";`, remove that line or point it at `dist`; the published package contains `dist`, not the workspace-only `src` directory.
+`app.theme.css` remains as a compatibility-named entry with the same
+standalone output. Import only one SVAdmin UI stylesheet.
 
-如果已有项目仍包含 `@source "../node_modules/@svadmin/ui/src";`，请删除该行或改为指向 `dist`；npm 发布包只包含 `dist`，不包含工作区中的 `src` 目录。
+`app.theme.css` 作为兼容名称保留，内容同样是独立 CSS 输出。SVAdmin UI 样式入口
+只需引入一个。
 
 **2. Configure Vite `optimizeDeps` / 配置 Vite `optimizeDeps`:**
 

@@ -137,8 +137,8 @@ const expectations: PackageExpectation[] = [
     contentAssertions: [
       {
         path: 'dist/app.theme.css',
-        includes: ['@theme', '@source "./components";'],
-        excludes: ['@source "./src";'],
+        includes: ['.svadmin-theme', '--color-primary: var(--primary);'],
+        excludes: ['@import', '@theme', '@source', '@tailwind'],
       },
       {
         path: 'dist/app.css',
@@ -148,7 +148,7 @@ const expectations: PackageExpectation[] = [
           '--color-primary: var(--primary);',
           '.svadmin-button',
         ],
-        excludes: ['@theme', '@source', '@import "tailwindcss"'],
+        excludes: ['@import', '@theme', '@source', '@tailwind'],
       },
     ],
   },

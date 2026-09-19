@@ -18,6 +18,12 @@
   import { Button } from './ui/button/index.js';
   import TooltipButton from './TooltipButton.svelte';
   import ComboboxField from './ComboboxField.svelte';
+  import NumberInput from './NumberInput.svelte';
+  import MoneyInput from './MoneyInput.svelte';
+  import PercentInput from './PercentInput.svelte';
+  import DateTimeInput from './DateTimeInput.svelte';
+  import DateRangeInput, { type DateRangeInputValue } from './DateRangeInput.svelte';
+  import FileUpload from './FileUpload.svelte';
   import TreeSelect, { type TreeSelectOption } from './TreeSelect.svelte';
   import Cascader, { type CascaderOption } from './Cascader.svelte';
   import Transfer, { type TransferItem } from './Transfer.svelte';
@@ -209,19 +215,52 @@
     </div>
 
   {:else if field.type === 'number'}
-    <Input
+    <NumberInput
       id={field.key}
       name={field.key}
-      type="number"
       value={numVal}
-      oninput={(e) => {
-        const input = e.currentTarget;
-        if (!(input instanceof HTMLInputElement)) return;
-        onchange(input.value === '' ? null : numericInputValue(input.valueAsNumber));
-      }}
+      min={field.min}
+      max={field.max}
+      step={field.step}
+      precision={field.precision}
+      onchange={onchange}
       required={field.required}
-      aria-invalid={invalid || undefined}
-      aria-describedby={errorId}
+      invalid={invalid}
+      describedby={errorId}
+      {disabled}
+    />
+
+  {:else if field.type === 'currency'}
+    <MoneyInput
+      id={field.key}
+      name={field.key}
+      value={numVal}
+      currency={field.currency ?? 'USD'}
+      min={field.min}
+      max={field.max}
+      step={field.step}
+      precision={field.precision ?? 2}
+      onchange={onchange}
+      required={field.required}
+      invalid={invalid}
+      describedby={errorId}
+      {disabled}
+    />
+
+  {:else if field.type === 'percent'}
+    <PercentInput
+      id={field.key}
+      name={field.key}
+      value={numVal}
+      scale={field.scale ?? '100'}
+      min={field.min}
+      max={field.max}
+      step={field.step}
+      precision={field.precision ?? 1}
+      onchange={onchange}
+      required={field.required}
+      invalid={invalid}
+      describedby={errorId}
       {disabled}
     />
 
@@ -300,14 +339,21 @@
     />
 
   {:else if field.type === 'relation' && field.resource}
-    <input type="hidden" name={field.key} value={value == null ? '' : String(value)} />
+    {#if field.multiple}
+      {#each multiVal as selectedValue, _i (selectedValue)}
+        <input type="hidden" name={field.key} value={String(selectedValue)} />
+      {/each}
+    {:else}
+      <input type="hidden" name={field.key} value={value == null ? '' : String(value)} />
+    {/if}
     <ComboboxField
       id={field.key}
       resource={field.resource}
-      value={value as string | number | null}
+      value={field.multiple ? multiVal : value as string | number | null}
       onchange={(v) => onchange(v)}
       optionLabel={field.optionLabel ?? 'title'}
       optionValue={field.optionValue ?? 'id'}
+      multiple={field.multiple}
       placeholder={i18n.t('field.selectPlaceholder')}
       aria-invalid={invalid || undefined}
       aria-describedby={errorId}
@@ -434,17 +480,43 @@
       />
     </div>
 
-  {:else if field.type === 'date'}
-    <Input
+  {:else if field.type === 'date' || field.type === 'time' || field.type === 'datetime'}
+    <DateTimeInput
       id={field.key}
       name={field.key}
-      type="date"
-      value={strVal}
-      oninput={(e) => onchange((e.target as HTMLInputElement).value)}
+      mode={field.type}
+      value={strVal || null}
+      onchange={(next) => onchange(next)}
       required={field.required}
-      aria-invalid={invalid || undefined}
-      aria-describedby={errorId}
+      invalid={invalid}
+      describedby={errorId}
       {disabled}
+    />
+
+  {:else if field.type === 'daterange'}
+    <DateRangeInput
+      startId={`${field.key}-start`}
+      endId={`${field.key}-end`}
+      startName={`${field.key}.start`}
+      endName={`${field.key}.end`}
+      value={value as DateRangeInputValue | null}
+      onchange={(next) => onchange(next)}
+      required={field.required}
+      invalid={invalid}
+      describedby={errorId}
+      {disabled}
+    />
+
+  {:else if field.type === 'file'}
+    <FileUpload
+      id={field.key}
+      name={field.key}
+      multiple={field.multiple}
+      required={field.required && !value}
+      disabled={disabled}
+      accept={field.accept}
+      maxSize={field.maxSize}
+      onChange={(items) => onchange(field.multiple ? items.map(item => item.file) : items[0]?.file ?? null)}
     />
 
   {:else if field.type === 'images'}

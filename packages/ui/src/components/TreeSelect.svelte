@@ -2,7 +2,7 @@
   import { definedOptions } from '@svadmin/core/options';
 
   import { SvelteSet } from 'svelte/reactivity';
-  import { ChevronRight, ChevronDown, Check, X, Search, ChevronsUpDown } from '@lucide/svelte';
+import { ChevronRight, ChevronDown, Check, X, Search, ChevronsUpDown, Loader2, Minus } from '@lucide/svelte';
   import { cn } from '../utils.js';
   import * as Popover from './ui/popover/index.js';
   import { Input } from './ui/input/index.js';
@@ -13,6 +13,7 @@
     value: string | number;
     label: string;
     children?: TreeSelectOption[];
+    hasChildren?: boolean;
     disabled?: boolean;
     expanded?: boolean;
   }
@@ -28,12 +29,13 @@
     onlyLeafSelectable?: boolean;
     disabled?: boolean;
     allowClear?: boolean;
+    loadChildren?: (node: TreeSelectOption) => Promise<TreeSelectOption[]>;
     class?: string;
     onchange?: (value: string | number | (string | number)[] | undefined) => void;
   }
 
   let {
-    options = [],
+    options = $bindable([]),
     value = $bindable(undefined),
     multiple = false,
     placeholder,
@@ -41,12 +43,14 @@
     onlyLeafSelectable = false,
     disabled = false,
     allowClear = true,
+    loadChildren,
     class: className,
     onchange,
   }: Props = $props();
 
   let open = $state(false);
   let searchQuery = $state('');
+  let loadingValues = new SvelteSet<string | number>();
   let expandedNodes = new SvelteSet<string | number>();
 
   // Map to quickly look up option info by value
@@ -81,37 +85,148 @@
     }
   }
 
+  function hasChildren(node: TreeSelectOption): boolean {
+    return Boolean(node.hasChildren ?? (node.children && node.children.length > 0));
+  }
+
   function isNodeExpanded(node: TreeSelectOption): boolean {
     if (searchQuery.trim()) return true; // Auto expand all on search
     return expandedNodes.has(node.value) || !!node.expanded;
+  }
+
+  function selectableLeaves(node: TreeSelectOption): TreeSelectOption[] {
+    if (!hasChildren(node)) return node.disabled ? [] : [node];
+    if (!node.children) return [];
+    return (node.children ?? []).flatMap(selectableLeaves);
   }
 
   function isSelected(val: string | number): boolean {
     return selectedValues.includes(val);
   }
 
-  function handleSelect(node: TreeSelectOption) {
+  function isNodeSelected(node: TreeSelectOption): boolean {
+    if (!multiple || !hasChildren(node)) return isSelected(node.value);
+    const leaves = selectableLeaves(node);
+    return leaves.length > 0 && leaves.every((leaf) => isSelected(leaf.value));
+  }
+
+  function isPartiallySelected(node: TreeSelectOption): boolean {
+    if (!multiple || !hasChildren(node)) return false;
+    const leaves = selectableLeaves(node);
+    const count = leaves.filter((leaf) => isSelected(leaf.value)).length;
+    return count > 0 && count < leaves.length;
+  }
+
+  function updateOptionsChildren(nodes: TreeSelectOption[], target: string | number, children: TreeSelectOption[]): TreeSelectOption[] {
+    return nodes.map((node) => {
+      if (node.value === target) return { ...node, children, hasChildren: children.length > 0 };
+      return node.children ? { ...node, children: updateOptionsChildren(node.children, target, children) } : node;
+    });
+  }
+
+  async function ensureChildren(node: TreeSelectOption): Promise<void> {
+    if (!loadChildren || !node.hasChildren || node.children || loadingValues.has(node.value)) return;
+    loadingValues.add(node.value);
+    try {
+      const children = await loadChildren(node);
+      options = updateOptionsChildren(options, node.value, children);
+    } finally {
+      loadingValues.delete(node.value);
+    }
+  }
+
+  async function toggleExpandAsync(node: TreeSelectOption, event?: MouseEvent): Promise<void> {
+    event?.stopPropagation();
+    await ensureChildren(node);
+    toggleExpand(node.value);
+  }
+
+  function setMultipleSelection(node: TreeSelectOption): void {
+    const leaves = selectableLeaves(node);
+    const leafValues = new Set(leaves.map((leaf) => leaf.value));
+    const shouldRemove = leaves.length > 0 && leaves.every((leaf) => isSelected(leaf.value));
+    const next = shouldRemove
+      ? selectedValues.filter((value) => !leafValues.has(value))
+      : [...selectedValues, ...leaves.map((leaf) => leaf.value).filter((value) => !isSelected(value))];
+    value = next;
+    onchange?.(next);
+  }
+
+  async function handleSelect(node: TreeSelectOption): Promise<void> {
     if (node.disabled) return;
-    const hasChildren = node.children && node.children.length > 0;
-    if (onlyLeafSelectable && hasChildren) {
-      toggleExpand(node.value);
+    const nodeHasChildren = hasChildren(node);
+    if (onlyLeafSelectable && nodeHasChildren) {
+      await toggleExpandAsync(node);
       return;
     }
 
     if (multiple) {
-      let next: (string | number)[];
-      if (isSelected(node.value)) {
-        next = selectedValues.filter((v) => v !== node.value);
-      } else {
-        next = [...selectedValues, node.value];
+      if (nodeHasChildren) setMultipleSelection(node);
+      else {
+        const next = isSelected(node.value)
+          ? selectedValues.filter((selected) => selected !== node.value)
+          : [...selectedValues, node.value];
+        value = next;
+        onchange?.(next);
       }
-      value = next;
-      onchange?.(next);
     } else {
       const next = node.value;
       value = next;
       onchange?.(next);
       open = false;
+    }
+  }
+
+  function findParent(nodes: TreeSelectOption[], target: string | number, parent?: TreeSelectOption): TreeSelectOption | undefined {
+    for (const node of nodes) {
+      if (node.value === target) return parent;
+      const match = node.children ? findParent(node.children, target, node) : undefined;
+      if (match) return match;
+    }
+    return undefined;
+  }
+
+  function focusTreeNode(valueToFocus: string | number): void {
+    const element = document.querySelector<HTMLElement>(`[data-tree-value="${CSS.escape(String(valueToFocus))}"]`);
+    element?.focus();
+  }
+
+  function focusSibling(nodeValue: string | number, offset: number): void {
+    const nodes = Array.from(document.querySelectorAll<HTMLElement>('[data-tree-value]'));
+    const index = nodes.findIndex((node) => node.dataset.treeValue === String(nodeValue));
+    const target = nodes[index + offset];
+    target?.focus();
+  }
+
+  function handleTreeKeydown(event: KeyboardEvent, node: TreeSelectOption, expanded: boolean): void {
+    const nodeHasChildren = hasChildren(node);
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      void handleSelect(node);
+    } else if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      focusSibling(node.value, 1);
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      focusSibling(node.value, -1);
+    } else if (event.key === 'Home') {
+      event.preventDefault();
+      document.querySelector<HTMLElement>('[data-tree-value]')?.focus();
+    } else if (event.key === 'End') {
+      event.preventDefault();
+      const nodes = document.querySelectorAll<HTMLElement>('[data-tree-value]');
+      nodes[nodes.length - 1]?.focus();
+    } else if (event.key === 'ArrowRight' && nodeHasChildren) {
+      event.preventDefault();
+      if (!expanded) void toggleExpandAsync(node);
+      else focusTreeNode(node.children?.[0]?.value ?? node.value);
+    } else if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      if (nodeHasChildren && expanded) toggleExpand(node.value);
+      else {
+        const parent = findParent(options, node.value);
+        if (parent) focusTreeNode(parent.value);
+      }
     }
   }
 
@@ -155,17 +270,21 @@
 </script>
 
 {#snippet treeNode(node: TreeSelectOption, level: number)}
-  {@const hasChildren = Boolean(node.children && node.children.length > 0)}
+  {@const nodeHasChildren = hasChildren(node)}
   {@const expanded = isNodeExpanded(node)}
-  {@const selected = isSelected(node.value)}
-  {@const selectable = !node.disabled && (!onlyLeafSelectable || !hasChildren)}
+  {@const selected = isNodeSelected(node)}
+  {@const partial = isPartiallySelected(node)}
+  {@const selectable = !node.disabled && (!onlyLeafSelectable || !nodeHasChildren)}
 
   <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed">
     <div
       role="treeitem"
       tabindex="0"
       aria-selected={selected}
-      aria-expanded={hasChildren ? expanded : undefined}
+      aria-checked={multiple ? (partial ? 'mixed' : selected) : undefined}
+      aria-level={level + 1}
+      aria-expanded={nodeHasChildren ? expanded : undefined}
+      data-tree-value={String(node.value)}
       class={cn(
         'group svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-58284b4ea568 svadmin-u-421ac2be5045 svadmin-u-d5eab218aa34 svadmin-u-ec0091ee009b svadmin-u-359090c2d529 svadmin-u-ceb69a6b0e5f svadmin-u-34516836730d svadmin-u-7f6912283f11',
         selected ? 'svadmin-u-375dc44df6e9 svadmin-u-20aaf08a7ed1 svadmin-u-2689f3958069' : 'svadmin-u-68646cdcc246 svadmin-u-d4108abe6359',
@@ -175,21 +294,18 @@
       onclick={() => {
         if (selectable) handleSelect(node);
       }}
-      onkeydown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          if (selectable) handleSelect(node);
-        }
-      }}
+      onkeydown={(e) => handleTreeKeydown(e, node, expanded)}
     >
       <div class="svadmin-u-60fbb7713999 svadmin-u-7e0b7cdf1a94 svadmin-u-3960ffc248d9 svadmin-u-58284b4ea568">
-        {#if hasChildren}
+        {#if nodeHasChildren}
           <button
             type="button"
             class="svadmin-u-60fbb7713999 svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-012fbd121f37 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-07389a777c1f svadmin-u-bfa603190748 svadmin-u-8e551981c8d7"
-            onclick={(e) => toggleExpand(node.value, e)}
+            onclick={(e) => void toggleExpandAsync(node, e)}
           >
-            {#if expanded}
+            {#if loadingValues.has(node.value)}
+              <Loader2 class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-afbdd13a380e" />
+            {:else if expanded}
               <ChevronDown class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
             {:else}
               <ChevronRight class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
@@ -202,12 +318,14 @@
         <span class="svadmin-u-f283ea9bea0e">{node.label}</span>
       </div>
 
-      {#if selected}
+      {#if partial}
+        <Minus class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-012fbd121f37 svadmin-u-20aaf08a7ed1" />
+      {:else if selected}
         <Check class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-012fbd121f37 svadmin-u-20aaf08a7ed1" />
       {/if}
     </div>
 
-    {#if hasChildren && expanded && node.children}
+    {#if nodeHasChildren && expanded && node.children}
       <div role="group" class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed">
         {#each node.children as child (child.value)}
           {@render treeNode(child, level + 1)}

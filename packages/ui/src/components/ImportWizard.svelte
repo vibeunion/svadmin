@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { getResource, captureAdminContext } from '@svadmin/core';
+  import { captureAdminContext, captureAuthSession, useCan, useImport, useResourceContract } from '@svadmin/core';
+  import { untrack } from 'svelte';
+  import { definedReactiveOptions } from '@svadmin/core/options';
   import { useTranslation } from '@svadmin/core/i18n';
   import { parseCSV, toCsv } from '@svadmin/core';
   import * as Dialog from './ui/dialog/index.js';
@@ -23,65 +25,117 @@
   }: Props = $props();
 
   const i18n = useTranslation();
-  const adminContext = captureAdminContext();
-  const resource = $derived(getResource(resourceName));
+  const context = captureAdminContext();
+  const binding = useResourceContract(() => resourceName);
+  const resource = $derived(context.getResource(resourceName));
+  const can = useCan(() => ({ resource: resourceName, action: 'import' }));
+  const session = $derived(captureAuthSession(context.authProvider));
+  const allowed = $derived(can.allowed === true && resource.canCreate !== false && session.available);
+  const scope = $derived({
+    contract: binding.resource, provider: context.providers?.[binding.dataProviderName],
+    tenant: context.tenantCacheKey?.__svadminTenant, meta: binding.meta,
+    auth: context.authProvider, router: context.routerProvider, session, allowed,
+  });
   const availableFields = $derived(
     resource.fields.filter((f) => f.key !== (resource.primaryKey ?? 'id') && f.showInForm !== false)
   );
 
   let currentStep = $state<1 | 2 | 3>(1);
   let fileName = $state('');
+  let selectedFile = $state<File | null>(null);
   let rawHeaders = $state<string[]>([]);
-  let rawRows = $state<string[][]>([]);
+  let rawRows = $state<unknown[][]>([]);
   let columnMapping = $state<Record<string, string>>({}); // header -> fieldKey or ''
+  let fileError = $state<string | null>(null);
+  let importError = $state<string | null>(null);
+  let parseToken = 0;
+  let mounted = true;
 
-  let isImporting = $state(false);
-  let processedCount = $state(0);
+  let importResult = $state<{ succeeded: number; failed: number } | null>(null);
   let succeededCount = $state(0);
   let failedRecords = $state<Array<{ row: Record<string, unknown>; error: string }>>([]);
 
+  const importer = useImport(definedReactiveOptions({
+    get resource() { return binding.resource; },
+    get dataProviderName() { return binding.dataProviderName; },
+    get batchSize() { return batchSize; },
+    get enabled() { return open && allowed; },
+  }));
+  const isImporting = $derived(importer.isLoading);
+  const processedCount = $derived(importer.progress.processedAmount);
+  const totalCount = $derived(importer.progress.totalAmount || rawRows.length);
   const progressPercent = $derived(
-    rawRows.length > 0 ? Math.min(100, Math.round((processedCount / rawRows.length) * 100)) : 0
+    totalCount > 0 ? Math.min(100, Math.round((processedCount / totalCount) * 100)) : 0
   );
 
-  async function handleFileSelect(selectedFile: File) {
-    fileName = selectedFile.name;
-    const text = await selectedFile.text();
-    const cleanText = text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
+  async function handleFileSelect(file: File) {
+    if (!open || !allowed || isImporting) return;
+    const origin = scope;
+    const token = ++parseToken;
+    fileError = null;
+    importError = null;
+    selectedFile = null;
+    fileName = file.name;
+    rawHeaders = [];
+    rawRows = [];
+    columnMapping = {};
+    try {
+      const text = await file.text();
+      if (!current(origin, token)) return;
+      const cleanText = text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
 
-    if (fileName.endsWith('.json')) {
-      try {
-        const json = JSON.parse(cleanText);
-        if (Array.isArray(json) && json.length > 0) {
-          const keys = Object.keys(json[0]);
-          rawHeaders = keys;
-          rawRows = json.map((item) => keys.map((k) => String(item[k] ?? '')));
+      if (file.name.toLowerCase().endsWith('.json')) {
+        const json: unknown = JSON.parse(cleanText);
+        if (!Array.isArray(json) || json.length === 0 || json.some((item) => (
+          typeof item !== 'object' || item === null || Array.isArray(item)
+        ))) {
+          throw new Error('The JSON file must contain a non-empty array of records.');
         }
-      } catch {
-        /* invalid json */
-      }
-    } else {
-      const rows = parseCSV(cleanText);
-      const firstRow = rows[0];
-      if (firstRow) {
+        const records = json as Record<string, unknown>[];
+        const keys = [...new Set(records.flatMap(item => Object.keys(item)))];
+        if (keys.length === 0) throw new Error('The import file has no columns.');
+        rawHeaders = keys;
+        rawRows = records.map((item) => keys.map((key) => item[key]));
+      } else if (file.name.toLowerCase().endsWith('.csv')) {
+        const rows = parseCSV(cleanText);
+        const firstRow = rows[0];
+        if (!firstRow || firstRow.length === 0 || firstRow.every((cell) => !cell.trim())) {
+          throw new Error('The CSV file has no header row.');
+        }
+        if (firstRow.some(header => !header.trim()) || new Set(firstRow).size !== firstRow.length) {
+          throw new Error('CSV column names must be non-empty and unique.');
+        }
+        const records = rows.slice(1).filter((r: string[]) =>
+          r.some((cell: string) => cell.trim().length > 0));
+        if (records.length === 0) throw new Error('The import file has no records.');
+        if (records.some((row) => row.length !== firstRow.length)) {
+          throw new Error('The CSV file contains rows with inconsistent column counts.');
+        }
         rawHeaders = firstRow;
-        rawRows = rows.slice(1).filter((r: string[]) => r.some((cell: string) => cell.trim().length > 0));
+        rawRows = records;
+      } else {
+        throw new Error('Only CSV and JSON files are supported.');
       }
-    }
 
-    // Auto-match headers to fields by key or label
-    const initialMapping: Record<string, string> = {};
-    for (const h of rawHeaders) {
-      const normalized = h.toLowerCase().trim().replace(/[-_]/g, '');
-      const match = availableFields.find(
-        (f) =>
-          f.key.toLowerCase().replace(/[-_]/g, '') === normalized ||
-          f.label.toLowerCase().replace(/[-_]/g, '') === normalized
-      );
-      initialMapping[h] = match ? match.key : '';
+      if (!current(origin, token)) return;
+      selectedFile = file;
+      const initialMapping: Record<string, string> = {};
+      for (const h of rawHeaders) {
+        const normalized = h.toLowerCase().trim().replace(/[-_]/g, '');
+        const match = availableFields.find(
+          (f) =>
+            f.key.toLowerCase().replace(/[-_]/g, '') === normalized ||
+            f.label.toLowerCase().replace(/[-_]/g, '') === normalized
+        );
+        initialMapping[h] = match ? match.key : '';
+      }
+      columnMapping = initialMapping;
+      currentStep = 2;
+    } catch (error) {
+      if (!current(origin, token)) return;
+      fileError = error instanceof Error ? error.message : 'Unable to read the import file.';
+      currentStep = 1;
     }
-    columnMapping = initialMapping;
-    currentStep = 2;
   }
 
   function handleDrop(e: DragEvent) {
@@ -91,63 +145,72 @@
     }
   }
 
-  async function startImport() {
-    currentStep = 3;
-    isImporting = true;
-    processedCount = 0;
-    succeededCount = 0;
-    failedRecords = [];
-
-    const provider = adminContext.getDataProviderForResource(resourceName);
-
-    // Build mapped records
-    const recordsToImport: Record<string, unknown>[] = [];
-    for (const row of rawRows) {
+  function mappedRows(): Record<string, unknown>[] {
+    return rawRows.map((row) => {
       const record: Record<string, unknown> = {};
       rawHeaders.forEach((header, idx) => {
         const targetFieldKey = columnMapping[header];
-        if (targetFieldKey) {
-          const fieldDef = availableFields.find((f) => f.key === targetFieldKey);
-          let val: unknown = row[idx] ?? '';
-          if (fieldDef?.type === 'number') {
-            const num = Number(val);
-            val = isNaN(num) ? val : num;
+        if (!targetFieldKey) return;
+        const fieldDef = availableFields.find((f) => f.key === targetFieldKey);
+        let val: unknown = row[idx];
+        if (typeof val === 'string') {
+          if (fieldDef?.type === 'number' || fieldDef?.type === 'currency' || fieldDef?.type === 'percent') {
+            const num = val.trim() === '' ? NaN : Number(val);
+            val = val.trim() === '' ? undefined : Number.isFinite(num) ? num : val;
           } else if (fieldDef?.type === 'boolean') {
-            val = val === 'true' || val === '1' || val === 'yes' || val === '是';
+            const normalized = val.trim().toLowerCase();
+            if (['true', '1', 'yes', '是'].includes(normalized)) val = true;
+            else if (['false', '0', 'no', '否'].includes(normalized)) val = false;
           }
-          record[targetFieldKey] = val;
         }
+        Object.defineProperty(record, targetFieldKey, { value: val, enumerable: true });
       });
-      recordsToImport.push(record);
-    }
+      return record;
+    });
+  }
 
-    // Execute in batches
-    for (let i = 0; i < recordsToImport.length; i += batchSize) {
-      const batch = recordsToImport.slice(i, i + batchSize);
-      if (provider.createMany) {
-        try {
-          await provider.createMany({ resource: resourceName, variables: batch });
-          succeededCount += batch.length;
-        } catch (err) {
-          batch.forEach((item) => {
-            failedRecords.push({ row: item, error: err instanceof Error ? err.message : String(err) });
-          });
-        }
-      } else {
-        for (const item of batch) {
-          try {
-            await provider.create({ resource: resourceName, variables: item });
-            succeededCount++;
-          } catch (err) {
-            failedRecords.push({ row: item, error: err instanceof Error ? err.message : String(err) });
-          }
-        }
-      }
-      processedCount = Math.min(recordsToImport.length, i + batch.length);
+  async function startImport() {
+    if (!selectedFile || rawRows.length === 0 || isImporting || !open || !allowed) return;
+    const targets = Object.values(columnMapping).filter(Boolean);
+    if (targets.length === 0 || new Set(targets).size !== targets.length) {
+      fileError = 'Map at least one column, and use each target field only once.';
+      return;
     }
+    const origin = scope;
+    const token = parseToken;
+    const notifySuccess = onSuccess;
+    currentStep = 3;
+    succeededCount = 0;
+    failedRecords = [];
+    importResult = null;
+    importError = null;
+    const mappedFile = new File(
+      [JSON.stringify(mappedRows())],
+      `${fileName || 'import'}.json`,
+      { type: 'application/json' },
+    );
+    try {
+      const result = await importer.handleChange({ file: mappedFile });
+      if (!current(origin, token)) return;
+      succeededCount = result.succeeded.length;
+      failedRecords = result.errored.map(item => ({
+        row: item.request as Record<string, unknown>,
+        error: item.error.message,
+      }));
+      importResult = { succeeded: succeededCount, failed: failedRecords.length };
+    } catch (error) {
+      if (!current(origin, token)) return;
+      importError = error instanceof Error ? error.message : 'Import failed.';
+      importResult = null;
+    }
+    if (importResult) {
+      try { notifySuccess?.(importResult); }
+      catch { /* 消费方回调失败不能把已完成的写入改判为导入失败。 */ }
+    }
+  }
 
-    isImporting = false;
-    onSuccess?.({ succeeded: succeededCount, failed: failedRecords.length });
+  function current(origin: typeof scope, token: number): boolean {
+    return mounted && open && allowed && origin === scope && origin.session.isCurrent() && token === parseToken;
   }
 
   function downloadErrors() {
@@ -167,16 +230,27 @@
   }
 
   function reset() {
+    parseToken += 1;
     currentStep = 1;
     fileName = '';
+    selectedFile = null;
     rawHeaders = [];
     rawRows = [];
     columnMapping = {};
-    processedCount = 0;
     succeededCount = 0;
     failedRecords = [];
-    isImporting = false;
+    importResult = null;
+    fileError = null;
+    importError = null;
+    importer.reset();
   }
+
+  $effect.pre(() => {
+    void scope;
+    void open;
+    untrack(reset);
+  });
+  $effect(() => () => { mounted = false; parseToken += 1; });
 </script>
 
 {#if open}
@@ -199,6 +273,9 @@
       </div>
 
       <!-- Step 1: Upload -->
+      {#if !allowed}
+        <p role="status">{i18n.t('common.operationFailed', { defaultValue: 'Import is unavailable.' })}</p>
+      {/if}
       {#if currentStep === 1}
         <div
           class="svadmin-u-65935df577ba svadmin-u-a29b7a649c77 svadmin-u-c9ed8c5f79ae svadmin-u-8b9d5d768973 svadmin-u-a217b4eaa918 svadmin-u-845f53365c8d svadmin-u-ca6bf63030aa svadmin-u-ceb69a6b0e5f svadmin-u-34516836730d svadmin-u-967d113a1451"
@@ -218,6 +295,7 @@
             <input
               type="file"
               accept=".csv,.json"
+              disabled={!allowed}
               class="svadmin-u-99d72c7fc3e2"
               onchange={(e) => {
                 const target = e.currentTarget;
@@ -228,12 +306,16 @@
               {i18n.t('common.selectFile', { defaultValue: 'Browse File' })}
             </span>
           </label>
+          {#if fileError}
+            <p role="alert">{fileError}</p>
+          {/if}
         </div>
       {/if}
 
       <!-- Step 2: Column Mapping -->
       {#if currentStep === 2}
         <div class="svadmin-u-3e7ce58d64fa">
+          {#if fileError}<p role="alert">{fileError}</p>{/if}
           <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-359090c2d529 svadmin-u-bfa603190748 svadmin-u-2859c861d7de svadmin-u-9fe52d5d506c svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-05faf5c801ff">
             <span>{i18n.t('common.detectedRows', { defaultValue: 'Detected' })}: <strong class="svadmin-u-d4108abe6359">{rawRows.length}</strong> {i18n.t('common.records', { defaultValue: 'records' })}</span>
             <Badge variant="secondary" class="svadmin-u-d058ca6de60f svadmin-u-0e65706bcccd">{fileName}</Badge>
@@ -252,6 +334,7 @@
                 </div>
                 <div class="svadmin-u-74b2435a1d40 svadmin-u-012fbd121f37">
                   <select
+                    aria-label={`Map ${header}`}
                     class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529 svadmin-u-f10f771f87e9 svadmin-u-3e94a98e1466 svadmin-u-9c1295a6914a"
                     bind:value={columnMapping[header]}
                   >
@@ -272,7 +355,7 @@
               <ArrowLeft class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-618162408e7a" />
               {i18n.t('common.back', { defaultValue: 'Back' })}
             </Button>
-            <Button size="sm" onclick={startImport}>
+            <Button size="sm" disabled={!allowed || isImporting} onclick={startImport}>
               {i18n.t('common.startImport', { defaultValue: 'Start Import' })}
               <ArrowRight class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-f58b02572ab2" />
             </Button>
@@ -285,7 +368,7 @@
         <div class="svadmin-u-b43b4c086d9a svadmin-u-03b4dd7f172b">
           <div class="svadmin-u-6f7e013d6499">
             <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-359090c2d529">
-              <span class="svadmin-u-bfa603190748">{isImporting ? i18n.t('common.importing', { defaultValue: 'Importing...' }) : i18n.t('common.completed', { defaultValue: 'Completed' })}</span>
+              <span class="svadmin-u-bfa603190748">{isImporting ? i18n.t('common.importing', { defaultValue: 'Importing...' }) : importError ? i18n.t('common.operationFailed', { defaultValue: 'Import failed' }) : i18n.t('common.completed', { defaultValue: 'Completed' })}</span>
               <span class="svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359 svadmin-u-3032cae0badb">{progressPercent}%</span>
             </div>
             <Progress value={progressPercent} class="svadmin-u-2f2a842e50fa" />
@@ -301,6 +384,10 @@
               <span class="svadmin-u-d5c9b0001e7e svadmin-u-69450ef1487e svadmin-u-811148b13d1e svadmin-u-3032cae0badb">{failedRecords.length}</span>
             </div>
           </div>
+
+          {#if importError}
+            <p role="alert">{importError}</p>
+          {/if}
 
           {#if failedRecords.length > 0}
             <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-eb6e8b881acd svadmin-u-5f22e64f2282 svadmin-u-7a0854fdbc30 svadmin-u-ca6bcd4b6f3f svadmin-u-e09a917c4c3b svadmin-u-359090c2d529">

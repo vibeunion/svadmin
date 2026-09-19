@@ -408,7 +408,7 @@ export interface MenuItem {
 export interface FieldDefinition {
   key: string;
   label: string;
-  type: 'text' | 'number' | 'boolean' | 'date' | 'select' | 'multiselect' | 'tags'
+  type: 'text' | 'number' | 'boolean' | 'date' | 'time' | 'datetime' | 'daterange' | 'select' | 'multiselect' | 'tags'
     | 'textarea' | 'richtext' | 'image' | 'images' | 'json' | 'relation' | 'color'
     | 'url' | 'email' | 'phone' | 'currency' | 'file' | 'markdown' | 'password' | 'array'
     | 'tree-select' | 'treeselect' | 'cascader' | 'transfer' | 'rate' | 'rating' | 'avatar' | 'copy' | 'code';
@@ -430,6 +430,17 @@ export interface FieldDefinition {
   changeOnSelect?: boolean;
   separator?: string;
   defaultValue?: unknown;
+  // Numeric input contract
+  min?: number;
+  max?: number;
+  step?: number;
+  precision?: number;
+  currency?: string;
+  locale?: string;
+  scale?: '100' | '1';
+  // File upload contract
+  accept?: string;
+  maxSize?: number;
   // Relation support
   resource?: string;       // related resource name
   optionLabel?: string;    // field to use as label

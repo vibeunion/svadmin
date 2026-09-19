@@ -42,4 +42,28 @@ describe('FilterBuilder component', () => {
       { field: 'title', operator: 'contains', value: 'Svelte' },
     ]);
   });
+
+  it('preserves nested logical groups when applying', async () => {
+    const onApply = vi.fn();
+    const filters = [{
+      operator: 'or' as const,
+      value: [
+        { field: 'title', operator: 'contains' as const, value: 'Svelte' },
+        {
+          operator: 'and' as const,
+          value: [
+            { field: 'status', operator: 'eq' as const, value: 'published' },
+            { field: 'views', operator: 'gte' as const, value: 100 },
+          ],
+        },
+      ],
+    }];
+
+    const view = render(FilterBuilder, { fields: testFields, filters, onApply });
+    const applyBtn = view.container.querySelector('[data-testid="filter-builder-apply"]');
+    expect(view.container.querySelectorAll('[data-testid="filter-builder-group"]')).toHaveLength(1);
+    if (applyBtn) await fireEvent.click(applyBtn);
+
+    expect(onApply).toHaveBeenCalledWith(filters);
+  });
 });

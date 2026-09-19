@@ -7,7 +7,7 @@
   import ComboboxField from './ComboboxField.svelte';
 
   let { provider, resources, queryClient, onReady = () => {}, settings = {},
-    resource = 'posts', tenant = 'first', field = false, value = null, onchange,
+    resource = 'posts', tenant = 'first', field = false, value = null, onchange, multiple = false,
     optionLabel = 'title', optionValue = 'id', disabled = false,
     authProvider = null, notificationProvider = null,
     routerProvider = { go: () => {}, back: () => {}, parse: () => ({ pathname: '/', params: {} }) },
@@ -20,8 +20,9 @@
     resource?: string;
     tenant?: string;
     field?: boolean;
-    value?: string | number | null;
-    onchange?: (value: string | number | null) => void;
+    value?: string | number | null | (string | number)[];
+    onchange?: (value: string | number | null | (string | number)[]) => void;
+    multiple?: boolean;
     optionLabel?: string;
     optionValue?: string;
     disabled?: boolean;
@@ -42,7 +43,7 @@
 <QueryClientProvider client={queryClient}>
   {#if field}
     <ComboboxField {resource} {value} onchange={(next) => { value = next; onchange?.(next); }}
-      {optionLabel} {optionValue} {disabled} aria-label="Record" />
+      {optionLabel} {optionValue} {multiple} {disabled} aria-label="Record" />
   {:else}
     <Probe {resource} {settings} {onReady} />
   {/if}

@@ -5,7 +5,6 @@ import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import postcss from 'postcss';
 import selectorParser from 'postcss-selector-parser';
-import { compile } from '@tailwindcss/node';
 
 const root = new URL('../', import.meta.url);
 const read = (name) => readFileSync(new URL(`dist/${name}`, root), 'utf8');
@@ -20,29 +19,25 @@ test('both published CSS entries contain migrated utility and variant styles', (
       '.svadmin-badge--subtle-success',
       '.svadmin-alert--warning',
       '.svadmin-avatar-size--sm',
+      '.svadmin-panda-button',
+      '.svadmin-panda-metric__root',
+      '.svadmin-panda-table__root',
     ]) assert.ok(css.includes(selector), `${name}: missing ${selector}`);
+    assert.ok(css.includes('--colors-primary: var(--primary)'), `${name}: missing Panda semantic token aliases`);
     assert.ok(css.includes('.svadmin-theme'), `${name}: missing nested aliases`);
   }
 });
 
-test('plain CSS has no Tailwind directives, while the theme entry keeps valid metadata', () => {
-  postcss.parse(read('app.css')).walkAtRules((rule) => {
-    assert.ok(!['import', 'theme', 'source', 'apply', 'utility'].includes(rule.name), rule.name);
-  });
-  let themes = 0;
-  let sources = 0;
-  postcss.parse(read('app.theme.css')).walkAtRules((rule) => {
-    if (rule.name === 'theme') {
-      themes++;
-      assert.ok(rule.nodes.some((node) => node.prop === '--color-primary'));
-    }
-    if (rule.name === 'source') {
-      sources++;
-      assert.equal(rule.params, '"./components"');
-    }
-  });
-  assert.equal(themes, 1);
-  assert.equal(sources, 1);
+test('both published CSS entries are standalone Panda stylesheets', () => {
+  for (const name of ['app.css', 'app.theme.css']) {
+    const root = postcss.parse(read(name));
+    root.walkAtRules((rule) => {
+      assert.ok(
+        !['import', 'theme', 'source', 'tailwind', 'apply', 'utility'].includes(rule.name),
+        `${name}: unexpected build-time directive @${rule.name}`,
+      );
+    });
+  }
 });
 
 test('every migrated utility referenced by a component has a published CSS selector', () => {
@@ -62,18 +57,6 @@ test('every migrated utility referenced by a component has a published CSS selec
     }
   }
   assert.deepEqual([...missing], []);
-});
-
-test('Tailwind hosts can compile new utilities without losing prebuilt component styles', async () => {
-  const compiler = await compile(`@import "tailwindcss";\n${read('app.theme.css')}`, {
-    base: fileURLToPath(new URL('dist/', root)),
-    onDependency() {},
-  });
-  const css = compiler.build(['text-primary', 'bg-success']);
-  assert.ok(css.includes('.text-primary'));
-  assert.ok(css.includes('.bg-success'));
-  assert.ok(css.includes('.svadmin-u-ed8a5df7b2fb'));
-  assert.ok(css.includes('.svadmin-button--outline'));
 });
 
 test('postbuild is idempotent and preserves both CSS side effects', () => {

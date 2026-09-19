@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Skeleton } from './ui/skeleton/index.js';
   import { cn } from '../utils.js';
+  import { metricSurfaceClasses } from '../design-system.js';
   import type { Snippet } from 'svelte';
 
   export type MetricTone = 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info';
@@ -53,15 +54,16 @@
   {:else}
     {#each items as item, index (item.id || index)}
       {@const isInteractive = Boolean(item.href)}
+      {@const surface = metricSurfaceClasses(item.tone || 'default')}
       <svelte:element
         this={isInteractive ? 'a' : 'div'}
         href={item.href}
         data-interactive={isInteractive ? 'true' : undefined}
         data-tone={item.tone || 'default'}
-        class={cn('svadmin-metric-item', item.class)}
+        class={cn('svadmin-metric-item', surface.root, item.class)}
       >
-        <div class="svadmin-metric-heading">
-          <span class="svadmin-metric-label">{item.label}</span>
+        <div class={cn('svadmin-metric-heading', surface.heading)}>
+          <span class={cn('svadmin-metric-label', surface.label)}>{item.label}</span>
           {#if item.icon}
             <span class="svadmin-metric-icon">
               <item.icon />
@@ -76,7 +78,7 @@
         {:else}
           <div class="svadmin-metric-value-row">
             <strong
-              class="svadmin-metric-value"
+              class={cn('svadmin-metric-value', surface.value)}
             >
               {item.value}
             </strong>
@@ -84,14 +86,14 @@
             {#if item.badge}
               <span
                 data-tone={item.badge.tone || 'default'}
-                class="svadmin-metric-badge"
+                class={cn('svadmin-metric-badge', surface.badge)}
               >
                 {item.badge.text}
               </span>
             {:else if item.trend}
               <span
                 data-direction={item.trend.value >= 0 ? 'up' : 'down'}
-                class="svadmin-metric-trend"
+                class={cn('svadmin-metric-trend', surface.trend)}
                 aria-label="{item.trend.value >= 0 ? '上升' : '下降'} {Math.abs(item.trend.value)}%"
               >
                 <span aria-hidden="true">{item.trend.value >= 0 ? '↑' : '↓'}</span>

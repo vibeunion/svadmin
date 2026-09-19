@@ -1,35 +1,70 @@
-<script module lang="ts">
-  import type { ComponentProps } from 'svelte';
-  import { Filemanager, Willow } from '@svar-ui/svelte-filemanager';
+<script lang="ts">
+  import { Filemanager, Willow, type IApi, type TMode } from '@svar-ui/svelte-filemanager';
   import { Locale } from '@svar-ui/svelte-core';
 
-  export type FileBrowserData = ComponentProps<typeof Filemanager>['data'];
-  export type FileBrowserInit = ComponentProps<typeof Filemanager>['init'];
-  export type FileBrowserMenuOptions = ComponentProps<typeof Filemanager>['menuOptions'];
-  export type FileBrowserProps = ComponentProps<typeof Filemanager> & {
-    words?: ComponentProps<typeof Locale>['words'];
+  export type FileBrowserData = Record<string, unknown>[];
+  export type FileBrowserInit = (api: IApi) => void;
+  export type FileBrowserMenuOptions = Parameters<typeof Filemanager>[0]['menuOptions'];
+
+  interface Props {
+    data?: FileBrowserData;
+    mode?: TMode;
+    drive?: unknown;
+    preview?: boolean;
+    panels?: unknown[];
+    activePanel?: number;
+    readonly?: boolean;
+    menuOptions?: FileBrowserMenuOptions;
+    extraInfo?: unknown;
+    init?: FileBrowserInit;
+    icons?: 'simple' | ((file: Record<string, unknown>, size: string) => string | false);
+    previews?: unknown;
+    words?: Record<string, unknown>;
     fonts?: boolean;
     class?: string;
-  };
-</script>
+  }
 
-<script lang="ts">
   let {
-    words, fonts = false, class: className = '',
-    mode = 'table', icons = 'simple', readonly = true,
-    ...managerProps
-  }: FileBrowserProps = $props();
+    data = [],
+    mode = 'table',
+    drive = null,
+    preview = false,
+    panels = [],
+    activePanel = 0,
+    readonly = false,
+    menuOptions,
+    extraInfo = null,
+    init,
+    icons = 'simple',
+    previews = null,
+    words,
+    fonts = false,
+    class: className = '',
+  }: Props = $props();
 </script>
 
 <div class={'svadmin-file-browser ' + className} data-slot="file-browser">
   <Willow {fonts}>
-    <Locale words={words ?? {}}>
-      <Filemanager {...managerProps} {mode} {icons} {readonly} />
+    <Locale {words}>
+      <Filemanager
+        {data}
+        {mode}
+        {drive}
+        {preview}
+        {panels}
+        {activePanel}
+        {readonly}
+        {menuOptions}
+        {extraInfo}
+        {init}
+        {icons}
+        {previews}
+      />
     </Locale>
   </Willow>
 </div>
 
 <style>
-  .svadmin-file-browser { height: 32rem; min-width: 0; max-width: 100%; overflow: hidden; }
+  .svadmin-file-browser { min-width: 0; max-width: 100%; overflow: hidden; }
   .svadmin-file-browser :global(.wx-willow-theme) { --wx-font-family: inherit; --wx-fm-box-shadow: none; }
 </style>

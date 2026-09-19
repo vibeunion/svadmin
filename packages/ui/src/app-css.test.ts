@@ -22,11 +22,16 @@ function readSidebar(): string {
   return readFileSync(join(currentDir, 'components', 'Sidebar.svelte'), 'utf8');
 }
 
-describe('src/app.css (Tailwind source)', () => {
-  it('keeps @theme block so Tailwind v4 generates utility classes', () => {
+describe('src/app.css (Panda source)', () => {
+  it('loads the generated Panda layers without build-time directives', () => {
     const css = readAppCss();
 
-    expect(css).toContain('@theme');
+    expect(css).toContain('@import "./panda-preflight.css";');
+    expect(css).toContain('@import "./panda-tokens.css";');
+    expect(css).toContain('@import "./panda.css";');
+    expect(css).not.toContain('@theme');
+    expect(css).not.toContain('@source');
+    expect(css).not.toContain('@tailwind');
   });
 
   it('uses the semantic border token in the global reset', () => {
@@ -34,13 +39,6 @@ describe('src/app.css (Tailwind source)', () => {
 
     expect(css).toContain('border-color: var(--color-border, var(--border));');
     expect(css).not.toMatch(/border-color:\s*var\(--border\);/);
-  });
-
-  it('registers the published component directory as its own Tailwind source', () => {
-    const css = readAppCss();
-
-    expect(css).toContain('@source "./components";');
-    expect(css).not.toContain('@source "./src";');
   });
 
   it('scopes collapsed container defenses to svadmin-owned state hooks', () => {

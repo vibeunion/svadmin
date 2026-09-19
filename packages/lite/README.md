@@ -13,7 +13,7 @@ The main `@svadmin/ui` package delivers a premium SPA experience using Svelte 5,
 **What Lite is:**
 - A **Zero-JS SSR-first admin component suite** designed with an IE11-safe CSS baseline.
 - 100% interoperable with `@svadmin/core` — sharing the same `DataProvider`, `AuthProvider`, `Resource`, and `FieldDefinition` contracts.
-- An architectural companion to `@svadmin/ui` achieving **100% component parity (103/103 components)** through 1:1 server-rendered matches, deliberate semantic fallbacks, or explicit SPA-only classification.
+- An architectural companion to `@svadmin/ui` with tracked server-rendered mappings, semantic fallbacks, and explicit SPA-only classifications in `PARITY.md`. Coverage measures the listed mappings, not a complete public-export inventory or verified behavioral equivalence.
 - **Not** a generic Tailwind-to-IE11 compiler or a full client-side port of shadcn-svelte (which depends on modern browser JS runtimes and CSS custom properties).
 
 `@svadmin/lite` provides a server-rendered fallback that **shares the same DataProvider, AuthProvider, and Resource definitions** — only the rendering layer is different.

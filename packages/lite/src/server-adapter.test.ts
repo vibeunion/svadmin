@@ -98,6 +98,40 @@ describe('createListLoader search compatibility', () => {
       currentOrder: 'desc',
     });
   });
+
+  test('parses recursive FilterBuilder query names without flattening groups', async () => {
+    const getList = mock(async () => ({ data: [], total: 0 }));
+    const provider = { getList } as unknown as DataProvider;
+    const filterResource: ResourceDefinition = {
+      name: 'posts',
+      label: 'Posts',
+      fields: [
+        { key: 'name', label: 'Name', type: 'text' },
+        { key: 'age', label: 'Age', type: 'number' },
+      ],
+    };
+    const url = new URL('https://admin.example/lite/posts');
+    url.searchParams.set('filters[0][operator]', 'or');
+    url.searchParams.set('filters[0.value.0][field]', 'name');
+    url.searchParams.set('filters[0.value.0][operator]', 'contains');
+    url.searchParams.set('filters[0.value.0][value]', 'Alice');
+    url.searchParams.set('filters[0.value.1][operator]', 'and');
+    url.searchParams.set('filters[0.value.1.value.0][field]', 'age');
+    url.searchParams.set('filters[0.value.1.value.0][operator]', 'gte');
+    url.searchParams.set('filters[0.value.1.value.0][value]', '18');
+
+    await createListLoader(provider, filterResource)({ url });
+
+    expect(getList).toHaveBeenCalledWith(expect.objectContaining({
+      filters: [{
+        operator: 'or',
+        value: [
+          { field: 'name', operator: 'contains', value: 'Alice' },
+          { operator: 'and', value: [{ field: 'age', operator: 'gte', value: 18 }] },
+        ],
+      }],
+    }));
+  });
 });
 
 describe('createAuthGuard AuthProvider compatibility', () => {

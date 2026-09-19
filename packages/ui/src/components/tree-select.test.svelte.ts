@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { render, fireEvent } from '@testing-library/svelte';
 import TreeSelect, { type TreeSelectOption } from './TreeSelect.svelte';
 
@@ -63,5 +63,59 @@ describe('TreeSelect component', () => {
     const content = document.body.textContent;
     expect(content).toContain('研发部');
     expect(content).toContain('市场部');
+  });
+
+  it('selects all descendant leaves and exposes a mixed parent state', async () => {
+    const onchange = vi.fn();
+    const view = render(TreeSelect, {
+      options: testOptions,
+      multiple: true,
+      value: ['team-fe'],
+      onchange,
+    });
+
+    const trigger = view.container.querySelector('button');
+    if (trigger) await fireEvent.click(trigger);
+
+    const parent = document.querySelector<HTMLElement>('[data-tree-value="dept-1"]');
+    expect(parent?.getAttribute('aria-checked')).toBe('mixed');
+    if (parent) await fireEvent.click(parent);
+
+    expect(onchange).toHaveBeenCalledWith(['team-fe', 'team-be']);
+  });
+
+  it('supports tree keyboard navigation', async () => {
+    const view = render(TreeSelect, { options: testOptions });
+    const trigger = view.container.querySelector('button');
+    if (trigger) await fireEvent.click(trigger);
+
+    const first = document.querySelector<HTMLElement>('[data-tree-value="dept-1"]');
+    const second = document.querySelector<HTMLElement>('[data-tree-value="dept-2"]');
+    expect(first).not.toBeNull();
+    expect(second).not.toBeNull();
+    if (first && second) {
+      first.focus();
+      await fireEvent.keyDown(first, { key: 'ArrowDown' });
+      expect(document.activeElement).toBe(second);
+      await fireEvent.keyDown(second, { key: 'Home' });
+      expect(document.activeElement).toBe(first);
+    }
+  });
+
+  it('loads lazy children before expanding', async () => {
+    const loadChildren = vi.fn(async () => [{ value: 'lazy-child', label: '懒加载节点' }]);
+    const view = render(TreeSelect, {
+      options: [{ value: 'lazy', label: '懒加载部门', hasChildren: true }],
+      loadChildren,
+    });
+    const trigger = view.container.querySelector('button');
+    if (trigger) await fireEvent.click(trigger);
+
+    const expand = document.querySelector<HTMLButtonElement>('[data-tree-value="lazy"] button');
+    expect(expand).not.toBeNull();
+    if (expand) await fireEvent.click(expand);
+
+    expect(loadChildren).toHaveBeenCalledOnce();
+    expect(document.body.textContent).toContain('懒加载节点');
   });
 });
