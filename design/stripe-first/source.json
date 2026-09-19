@@ -1,11 +1,18 @@
 {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "repository": "vibeunion/svadmin",
-  "revision": "c91936335e1a431f2ac37dec31da138afbbbc21f",
+  "revision": "8f068fb093b48cd2410b3b28a6066b567a44690e",
   "stylesheet": "packages/ui/src/components.css",
   "stylesheetBlob": "149f55f3782470ec6a1c942917c09510bd55320a",
   "recipeSource": "packages/ui/design/primitive-recipes.ts",
-  "recipeBlob": "defd6b135e505e2b14e54b985e1a59f6fe7ad15a",
+  "recipeBlob": "11a4702b115035090dc21ec96fb963a12623e93f",
+  "recipeUpdate": {
+    "previousRevision": "c91936335e1a431f2ac37dec31da138afbbbc21f",
+    "previousRecipeBlob": "defd6b135e505e2b14e54b985e1a59f6fe7ad15a",
+    "reason": "Merged main repairs readable semantic fallbacks when color-mix is unavailable; existing supports-based variants, source colors and dimensions are retained.",
+    "figmaSynced": false,
+    "figmaStatus": "Existing Figma nodes and recorded readbacks remain historical. Reinspect and synchronize the changed Button/Badge fallback states before claiming code-design parity."
+  },
   "rootFontSizePx": 16,
   "colorRoles": ["background", "foreground", "card", "primary", "primary-foreground", "muted", "muted-foreground", "border", "input", "ring", "success", "destructive", "warning", "warning-foreground", "accent", "accent-foreground"],
   "dimensions": {
