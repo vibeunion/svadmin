@@ -347,3 +347,5 @@ export type { RatingSize } from './components/fields/RatingField.svelte';
 export type { CurrencyTone } from './components/fields/CurrencyField.svelte';
 export { default as MediaThumbnail } from './components/content/MediaThumbnail.svelte';
 export type { MediaThumbnailSize, MediaThumbnailFit } from './components/content/MediaThumbnail.svelte';
+export { default as FileBrowser } from './components/content/FileBrowser.svelte';
+export type { FileBrowserData, FileBrowserInit, FileBrowserMenuOptions, FileBrowserProps } from './components/content/FileBrowser.svelte';
