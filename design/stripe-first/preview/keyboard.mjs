@@ -10,7 +10,7 @@ let server;
 let browser;
 try {
   server = await servePreview();
-  browser = await chromium.launch();
+  browser = await chromium.launch(process.env['SVADMIN_CHROMIUM_EXECUTABLE_PATH'] ? { executablePath: process.env['SVADMIN_CHROMIUM_EXECUTABLE_PATH'] } : {});
   for (const locale of ['en', 'zh-CN']) {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
     const page = await context.newPage();
