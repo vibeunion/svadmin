@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import { Plus, Trash2, RotateCcw, Filter as FilterIcon, Check } from '@lucide/svelte';
   import { cn } from '../utils.js';
   import { numericInputValue } from '../numeric-input.js';
@@ -24,6 +25,7 @@
 
   interface FilterRule extends FilterRuleItem {
     kind: 'rule';
+    readonly?: boolean;
   }
 
   type FilterNode = FilterGroup | FilterRule;
@@ -65,11 +67,23 @@
     children: [],
   });
   let lastInputFilters: Filter[] | undefined;
+  let validationError = $state(false);
+  let explicitRootGroup = $state(false);
 
   const availableFields = $derived(fields.filter((field) => field.filterable !== false));
 
   function newId(prefix: string): string {
     return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  }
+
+  function isEditableFilter(filter: Omit<FilterRuleItem, 'id'>): boolean {
+    const field = availableFields.find((candidate) => candidate.key === filter.field);
+    if (!field || !operatorOptions.some((option) => option.value === filter.operator)) return false;
+    if (filter.operator === 'null' || filter.operator === 'nnull') return filter.value === null;
+    if (field.type === 'number') return typeof filter.value === 'number' && Number.isFinite(filter.value);
+    if (field.type === 'boolean') return typeof filter.value === 'boolean';
+    if (field.type === 'select') return field.options?.some((option) => option.value === filter.value) === true;
+    return typeof filter.value === 'string' && filter.value !== '';
   }
 
   function filterToNode(filter: Filter, index: number): FilterNode {
@@ -80,6 +94,7 @@
         field: filter.field,
         operator: filter.operator,
         value: filter.value,
+        readonly: !isEditableFilter(filter),
       };
     }
     return {
@@ -88,6 +103,14 @@
       operator: filter.operator,
       children: filter.value.map((child, childIndex) => filterToNode(child, childIndex)),
     };
+  }
+
+  function refreshReadonly(node: FilterNode): void {
+    if (node.kind === 'group') {
+      node.children.forEach(refreshReadonly);
+      return;
+    }
+    node.readonly = !isEditableFilter(node);
   }
 
   function filtersToRoot(input: Filter[]): FilterGroup {
@@ -104,25 +127,30 @@
     };
   }
 
-  function nodeToFilter(node: FilterNode): Filter | null {
+  function nodeToFilter(node: FilterNode): Filter {
     if (node.kind === 'rule') {
-      if (!node.field || (node.operator !== 'null' && node.operator !== 'nnull' && (node.value === '' || node.value === undefined))) {
-        return null;
-      }
       return {
         field: node.field,
         operator: node.operator,
-        value: node.operator === 'null' || node.operator === 'nnull' ? null : node.value,
+        value: !node.readonly && (node.operator === 'null' || node.operator === 'nnull') ? null : node.value,
       };
     }
-    const children = node.children.map(nodeToFilter).filter((child): child is Filter => child !== null);
-    return children.length > 0 ? { operator: node.operator, value: children } : null;
+    return { operator: node.operator, value: node.children.map(nodeToFilter) };
   }
 
   $effect(() => {
+    const currentFields = availableFields;
     if (filters !== lastInputFilters) {
       lastInputFilters = filters;
+      explicitRootGroup = filters.length === 1 && filters[0] !== undefined && !('field' in filters[0]);
+      validationError = false;
       root = filtersToRoot(filters ?? []);
+    } else {
+      // 元数据更新时重新判定，不订阅草稿编辑以免将未完成输入锁成只读。
+      untrack(() => {
+        void currentFields;
+        refreshReadonly(root);
+      });
     }
   });
 
@@ -134,7 +162,7 @@
         kind: 'rule',
         id: newId('rule'),
         field: field?.key ?? 'id',
-        operator: field?.type === 'number' ? 'eq' : 'contains',
+        operator: field?.type === 'text' ? 'contains' : 'eq',
         value: '',
       },
     ];
@@ -168,24 +196,55 @@
 
   function reset(): void {
     root = { kind: 'group', id: 'root', operator: 'and', children: [] };
+    explicitRootGroup = false;
     filters = [];
     lastInputFilters = filters;
+    validationError = false;
     onReset?.();
   }
 
+  function hasIncompleteRule(node: FilterNode): boolean {
+    if (node.kind === 'group') return node.children.some(hasIncompleteRule);
+    if (node.readonly) return false;
+    return !node.field || (
+      node.operator !== 'null' && node.operator !== 'nnull'
+      && (node.value === '' || node.value === undefined || node.value === null)
+    );
+  }
+
   function apply(): void {
-    const compiled = root.children.map(nodeToFilter).filter((child): child is Filter => child !== null);
-    const result: Filter[] = compiled.length > 0 && root.operator === 'or'
-      ? [{ operator: 'or', value: compiled }]
+    if (hasIncompleteRule(root)) {
+      validationError = true;
+      return;
+    }
+    const compiled = root.children.map(nodeToFilter);
+    const result: Filter[] = explicitRootGroup || root.operator === 'or'
+      ? [{ operator: root.operator, value: compiled }]
       : compiled;
     filters = result;
     lastInputFilters = filters;
+    validationError = false;
     onApply?.(result);
   }
 
   function updateRuleField(rule: FilterRule, field: string): void {
     rule.field = field;
     rule.value = '';
+    rule.operator = availableFields.find((candidate) => candidate.key === field)?.type === 'text' ? 'contains' : 'eq';
+    validationError = false;
+  }
+
+  function updateSelectValue(rule: FilterRule, field: FieldDefinition | undefined, raw: string): void {
+    if (field?.type === 'select') {
+      const option = raw === '' ? undefined : field.options?.[Number(raw)];
+      if (option?.disabled) return;
+      rule.value = option?.value ?? '';
+    } else if (field?.type === 'boolean') {
+      rule.value = raw === 'true' ? true : raw === 'false' ? false : '';
+    } else {
+      rule.value = raw;
+    }
+    validationError = false;
   }
 </script>
 
@@ -206,6 +265,11 @@
       </Button>
     </div>
   </div>
+  {#if validationError}
+    <p role="alert" class="svadmin-u-b6b02c0ebef6 svadmin-u-bfa603190748">
+      {i18n.t('filter.incomplete')}
+    </p>
+  {/if}
 
   {#snippet renderGroup(group: FilterGroup, isRoot = false)}
     <div class={cn('svadmin-u-6f7e013d6499 svadmin-u-5f22e64f2282', !isRoot && 'svadmin-u-ca6bcd4b6f3f svadmin-u-421ac2be5045')} data-testid={isRoot ? 'filter-builder-root' : 'filter-builder-group'}>
@@ -227,6 +291,11 @@
           {:else}
             {@const fieldDef = availableFields.find((field) => field.key === node.field)}
             <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3fd0f778c8d9 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-421ac2be5045 svadmin-u-967d113a1451 svadmin-u-7660b450905a svadmin-u-ca6bcd4b6f3f svadmin-u-6ee2d41e2d2d" data-testid="filter-builder-rule">
+              {#if node.readonly}
+                <output aria-label={i18n.t('filter.readonly')}>
+                  {node.field} {node.operator} {JSON.stringify(node.value)}
+                </output>
+              {:else}
               <Select value={node.field} onchange={(e: Event) => updateRuleField(node, (e.currentTarget as HTMLSelectElement).value)}>
                 {#each availableFields as field (field.key)}
                   <option value={field.key}>{field.label || field.key}</option>
@@ -240,17 +309,14 @@
               {#if node.operator === 'null' || node.operator === 'nnull'}
                 <span class="svadmin-u-bfa603190748">无需填值</span>
               {:else if fieldDef?.type === 'select' && fieldDef.options}
-                <Select value={String(node.value ?? '')} onchange={(e: Event) => (node.value = (e.currentTarget as HTMLSelectElement).value)}>
+                <Select value={node.value === '' ? '' : String(fieldDef.options.findIndex((option) => option.value === node.value))} onchange={(e: Event) => updateSelectValue(node, fieldDef, (e.currentTarget as HTMLSelectElement).value)}>
                   <option value="">请选择</option>
-                  {#each fieldDef.options as option (String(option.value))}
-                    <option value={String(option.value)}>{option.label}</option>
+                  {#each fieldDef.options as option, optionIndex (optionIndex)}
+                    <option value={String(optionIndex)} disabled={option.disabled}>{option.label}</option>
                   {/each}
                 </Select>
               {:else if fieldDef?.type === 'boolean'}
-                <Select value={String(node.value ?? '')} onchange={(e: Event) => {
-                  const selected = (e.currentTarget as HTMLSelectElement).value;
-                  node.value = selected === 'true' ? true : selected === 'false' ? false : '';
-                }}>
+                <Select value={String(node.value ?? '')} onchange={(e: Event) => updateSelectValue(node, fieldDef, (e.currentTarget as HTMLSelectElement).value)}>
                   <option value="">请选择</option>
                   <option value="true">是 (true)</option>
                   <option value="false">否 (false)</option>
@@ -265,6 +331,7 @@
                   const input = e.currentTarget;
                   if (input instanceof HTMLInputElement) node.value = input.value;
                 }} />
+              {/if}
               {/if}
               <Button type="button" variant="ghost" size="icon-sm" onclick={() => removeChild(group, node.id)} aria-label="删除筛选条件">
                 <Trash2 class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
