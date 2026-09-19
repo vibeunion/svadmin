@@ -1,4 +1,4 @@
-name: Native UI final diagnostics
+name: Native UI integration diagnostics
 on:
   push:
     branches: [feat/ui-panda-complete-20260919]
@@ -9,35 +9,40 @@ jobs:
   inspect:
     if: github.repository == 'vibeunion/svadmin' && github.ref == 'refs/heads/feat/ui-panda-complete-20260919'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
-        with:
-          node-version: '26'
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: '1.4.2'
-      - name: Read bounded source and instruction context
+          fetch-depth: 0
+          show-progress: false
+      - name: Inspect a local-only merge, never update branch refs
         run: |
-          git rev-parse HEAD
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rev-parse HEAD origin/main
+          git merge-base HEAD origin/main
+          git -c core.hooksPath=/dev/null merge --no-commit --no-ff origin/main || test -n "$(git ls-files -u)"
           git status --short
-          if test -f .agents/AGENTS.local.md; then cat .agents/AGENTS.local.md; fi
-          git ls-files '*AGENTS*' '*form-builder*' '*FormBuilder*'
-          test ! -f packages/ui/src/components/form-builder.test.svelte.ts || cat packages/ui/src/components/form-builder.test.svelte.ts
-          git grep -n 'schema-output' -- packages/ui || true
-          cat package.json
-          grep -n 'fast-xml-parser\|@kapso-whatsapp' bun.lock || true
-      - run: bun install --frozen-lockfile
-      - name: Inspect actual advisory response and patched releases
-        run: |
-          npm view fast-xml-parser version --json
-          npm view fast-xml-parser@5.7.2 version dist.integrity dependencies --json
-          bun audit --json > "$RUNNER_TEMP/audit.json" 2>&1 || true
-          head -c 24000 "$RUNNER_TEMP/audit.json"
-      - name: Check branch divergence without changing code
-        run: |
-          git fetch --no-tags --depth=1 origin main
-          git diff --name-status FETCH_HEAD HEAD -- packages/ui/src/components/form-builder.test.svelte.ts package.json bun.lock
+          echo '=== CONFLICT CONTENT ==='
+          python3 - <<'PY'
+          import subprocess, pathlib
+          names = subprocess.check_output(['git','diff','--name-only','--diff-filter=U','-z']).decode().split('\0')
+          for name in filter(None,names):
+              print('FILE',name)
+              print(subprocess.check_output(['git','ls-files','-u','--',name]).decode())
+              path = pathlib.Path(name)
+              if path.exists() and path.suffix not in ('.png','.jpg') and name != 'bun.lock':
+                  text = path.read_text()
+                  if len(text) <= 18000: print(text)
+                  else:
+                      lines = text.splitlines()
+                      indices = {j for i,line in enumerate(lines) if line.startswith(('<<<<<<<','=======','>>>>>>>')) for j in range(max(0,i-8),min(len(lines),i+12))}
+                      for i in sorted(indices): print(f'{i+1}: {lines[i]}')
+          PY
+          echo '=== CURRENT FORM FILES ==='
+          git ls-files '*form*' '*Form*' | head -60
+          echo '=== MAIN OVERRIDES ==='
+          git show origin/main:package.json | sed -n '85,125p'
+          echo '=== MERGE STAT ==='
+          git diff --cached --stat HEAD
