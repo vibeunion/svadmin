@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { Elysia, t } from 'elysia';
 import { Cookie } from 'elysia/cookies';
 import { getSchemaValidator } from 'elysia/schema';
-import { z } from 'zod';
+import { typeboxAsyncStandard, typeboxStandard } from '../test/typebox-standard-schema.mjs';
 
 describe('Elysia declaration contracts', () => {
   test('validates route responses and preserves named error statuses', async () => {
@@ -65,8 +65,8 @@ describe('Elysia declaration contracts', () => {
     expect(validator.safeParse({ id: 'invalid' }).success).toBe(false);
   });
 
-  test.each([false, true])('parses Standard Schema values and rejects invalid data with dynamic=%s', dynamic => {
-    const validator = getSchemaValidator(z.object({ id: z.number() }), { dynamic });
+  test.each([false, true])('parses TypeBox-backed Standard Schema values with dynamic=%s', dynamic => {
+    const validator = getSchemaValidator(typeboxStandard(t.Object({ id: t.Number() })), { dynamic });
     expect(validator.parse({ id: 1 })).toEqual({ id: 1 });
     expect(validator.safeParse({ id: 1 })).toEqual({ success: true, data: { id: 1 }, error: null });
     expect(validator.safeParse({ id: 'invalid' })).toMatchObject({
@@ -81,7 +81,8 @@ describe('Elysia declaration contracts', () => {
   test('supports mixed model registries without importing Standard Schema into TypeBox', () => {
     const app = new Elysia().model({
       User: t.Object({ id: t.Number() }),
-      Label: z.string().transform(value => value.length),
+      Label: typeboxStandard(t.Transform(t.String())
+        .Decode(value => value.length).Encode(value => String(value))),
     });
     expect(app.models.User.parse({ id: 1 })).toEqual({ id: 1 });
     expect(app.models.Label.parse('label')).toBe(5);
@@ -102,13 +103,38 @@ describe('Elysia declaration contracts', () => {
     expect(mapped.models.UserId.parse({ id: 1 })).toEqual({ id: 1 });
   });
 
-  test('requires async schemas to use Validate instead of returning promises as parsed data', async () => {
-    const validator = getSchemaValidator(z.string().refine(async value => value.length > 0));
+  test.each([false, true])('requires async schemas to use Validate with dynamic=%s', async dynamic => {
+    const validator = getSchemaValidator(typeboxAsyncStandard(t.String({ minLength: 1 })), { dynamic });
     expect(() => validator.parse('value')).toThrow('Use Validate');
     expect(() => validator.safeParse('value')).toThrow('Use Validate');
     if (!validator.Validate) throw new Error('Expected a Standard Schema validator');
     expect(await validator.Validate('value')).toEqual({ value: 'value' });
     expect(await validator.Validate('')).toHaveProperty('issues');
+    expect(await validator.Validate(123)).toHaveProperty('issues');
+  });
+
+  test.each([false, true])('keeps TypeBox validation strict through Standard Schema with dynamic=%s', dynamic => {
+    const validator = getSchemaValidator(typeboxStandard(t.Object({
+      id: t.Number(),
+      label: t.Optional(t.String()),
+    }, { additionalProperties: false })), { dynamic });
+    expect(validator.parse({ id: 1 })).toEqual({ id: 1 });
+    expect(validator.safeParse({ id: '1' }).success).toBe(false);
+    expect(validator.safeParse({ id: 1, extra: true }).success).toBe(false);
+    expect(validator.safeParse({ id: 1, label: null }).success).toBe(false);
+  });
+
+  test.each([false, true])('preserves TypeBox escaped paths without exposing input with dynamic=%s', dynamic => {
+    const validator = getSchemaValidator(typeboxStandard(t.Object({
+      'a/b': t.Object({ '~name': t.Array(t.Number()) }),
+    })), { dynamic });
+    const failure = validator.safeParse({ 'a/b': { '~name': ['private-payload'] } });
+    expect(failure).toMatchObject({
+      success: false,
+      data: null,
+      errors: [{ path: '/a~1b/~0name/0' }],
+    });
+    expect(JSON.stringify(failure)).not.toContain('private-payload');
   });
 
   test('combines nested macros and resolver arrays', async () => {
@@ -136,7 +162,7 @@ describe('Elysia declaration contracts', () => {
   test('normalizes Standard Schema issue paths without retaining extra payload fields', () => {
     const validator = getSchemaValidator({
       '~standard': {
-        ...z.never()['~standard'],
+        ...typeboxStandard(t.Never())['~standard'],
         validate: () => ({
           issues: [{ message: 'Invalid field', path: [{ key: 'a/b' }, '~name', 0], input: 'private-payload' }],
         }),
@@ -161,7 +187,7 @@ describe('Elysia declaration contracts', () => {
     'private-payload',
   ].map(issues => ({ issues })))('rejects malformed Standard Schema issues %#', ({ issues }) => {
     const validator = getSchemaValidator({
-      '~standard': { ...z.never()['~standard'], validate: () => ({ issues }) },
+      '~standard': { ...typeboxStandard(t.Never())['~standard'], validate: () => ({ issues }) },
     });
     expect(() => validator.safeParse({})).toThrow(TypeError);
   });
