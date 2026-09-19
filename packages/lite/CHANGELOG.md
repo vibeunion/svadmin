@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.12.0](https://github.com/vibeunion/svadmin/compare/lite-v0.11.5...lite-v0.12.0) (2026-09-19)
+
+
+### 🐛 Bug Fixes
+
+* **lite:** restore compatible file-picker spacing, focus feedback and native overlay bounds; guard single-file labels under strict indexed-access checks ([#425](https://github.com/vibeunion/svadmin/issues/425)) ([49a1433](https://github.com/vibeunion/svadmin/commit/49a143383a10df6be8b5f8e4b02e9af8dccc161f))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.34.2 <0.52.0 to >=0.34.2 <0.53.0
+
 ## [0.11.5](https://github.com/vibeunion/svadmin/compare/lite-v0.11.4...lite-v0.11.5) (2026-09-16)
 
 

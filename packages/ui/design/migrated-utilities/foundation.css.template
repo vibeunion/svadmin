@@ -1,0 +1,1572 @@
+/*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
+@layer properties;
+@layer theme, base, components, utilities;
+@layer theme {
+  :root, :host {
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+      "Noto Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+      "Segoe UI Symbol", "Noto Color Emoji";
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+      "Courier New", monospace;
+    --color-amber-500: oklch(76.9% 0.188 70.08);
+    --color-green-400: oklch(79.2% 0.209 151.711);
+    --color-green-500: oklch(72.3% 0.219 149.579);
+    --color-emerald-500: oklch(69.6% 0.17 162.48);
+    --color-rose-500: oklch(64.5% 0.246 16.439);
+    --color-zinc-800: oklch(27.4% 0.006 286.033);
+    --color-black: #000;
+    --color-white: #fff;
+    --spacing: 0.25rem;
+    --container-xs: 20rem;
+    --container-sm: 24rem;
+    --container-md: 28rem;
+    --container-lg: 32rem;
+    --container-xl: 36rem;
+    --container-2xl: 42rem;
+    --container-3xl: 48rem;
+    --container-4xl: 56rem;
+    --container-6xl: 72rem;
+    --text-xs: 0.75rem;
+    --text-xs--line-height: calc(1 / 0.75);
+    --text-sm: 0.875rem;
+    --text-sm--line-height: calc(1.25 / 0.875);
+    --text-base: 1rem;
+    --text-base--line-height: calc(1.5 / 1);
+    --text-lg: 1.125rem;
+    --text-lg--line-height: calc(1.75 / 1.125);
+    --text-xl: 1.25rem;
+    --text-xl--line-height: calc(1.75 / 1.25);
+    --text-2xl: 1.5rem;
+    --text-2xl--line-height: calc(2 / 1.5);
+    --text-3xl: 1.875rem;
+    --text-3xl--line-height: calc(2.25 / 1.875);
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --tracking-tight: -0.025em;
+    --tracking-normal: 0em;
+    --tracking-wide: 0.025em;
+    --tracking-wider: 0.05em;
+    --tracking-widest: 0.1em;
+    --leading-tight: 1.25;
+    --leading-snug: 1.375;
+    --leading-relaxed: 1.625;
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+    --radius-2xl: 1rem;
+    --drop-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.15);
+    --animate-spin: spin 1s linear infinite;
+    --animate-ping: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+    --animate-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    --blur-sm: 8px;
+    --default-transition-duration: 150ms;
+    --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    --default-font-family: var(--font-sans);
+    --default-mono-font-family: var(--font-mono);
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-success: var(--success);
+    --color-success-foreground: var(--success-foreground);
+    --color-warning: var(--warning);
+    --color-warning-foreground: var(--warning-foreground);
+    --color-info: var(--info);
+    --shadow-control: var(--svadmin-shadow-control);
+    --shadow-surface: var(--svadmin-shadow-surface);
+    --shadow-surface-hover: var(--svadmin-shadow-surface-hover);
+    --shadow-overlay: var(--svadmin-shadow-overlay);
+  }
+}
+@layer base {
+  *, ::after, ::before, ::backdrop, ::file-selector-button {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0 solid;
+  }
+  html, :host {
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+    tab-size: 4;
+    font-family: var(--default-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji");
+    font-feature-settings: var(--default-font-feature-settings, normal);
+    font-variation-settings: var(--default-font-variation-settings, normal);
+    -webkit-tap-highlight-color: transparent;
+  }
+  hr {
+    height: 0;
+    color: inherit;
+    border-top-width: 1px;
+  }
+  abbr:where([title]) {
+    -webkit-text-decoration: underline dotted;
+    text-decoration: underline dotted;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+  a {
+    color: inherit;
+    -webkit-text-decoration: inherit;
+    text-decoration: inherit;
+  }
+  b, strong {
+    font-weight: bolder;
+  }
+  code, kbd, samp, pre {
+    font-family: var(--default-mono-font-family, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
+    font-feature-settings: var(--default-mono-font-feature-settings, normal);
+    font-variation-settings: var(--default-mono-font-variation-settings, normal);
+    font-size: 1em;
+  }
+  small {
+    font-size: 80%;
+  }
+  sub, sup {
+    font-size: 75%;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+  }
+  sub {
+    bottom: -0.25em;
+  }
+  sup {
+    top: -0.5em;
+  }
+  table {
+    text-indent: 0;
+    border-color: inherit;
+    border-collapse: collapse;
+  }
+  :-moz-focusring:where(:not(iframe)) {
+    outline: auto;
+  }
+  progress {
+    vertical-align: baseline;
+  }
+  summary {
+    display: list-item;
+  }
+  ol, ul, menu {
+    list-style: none;
+  }
+  img, svg, video, canvas, audio, iframe, embed, object {
+    display: block;
+    vertical-align: middle;
+  }
+  img, video {
+    max-width: 100%;
+    height: auto;
+  }
+  button, input, select, optgroup, textarea, ::file-selector-button {
+    font: inherit;
+    font-feature-settings: inherit;
+    font-variation-settings: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    border-radius: 0;
+    background-color: transparent;
+    opacity: 1;
+  }
+  :where(select:is([multiple], [size])) optgroup {
+    font-weight: bolder;
+  }
+  :where(select:is([multiple], [size])) optgroup option {
+    padding-inline-start: 20px;
+  }
+  ::file-selector-button {
+    margin-inline-end: 4px;
+  }
+  ::placeholder {
+    opacity: 1;
+  }
+  @supports (not (-webkit-appearance: -apple-pay-button))  or (contain-intrinsic-size: 1px) {
+    ::placeholder {
+      color: currentcolor;
+      @supports (color: color-mix(in lab, red, red)) {
+        color: color-mix(in oklab, currentcolor 50%, transparent);
+      }
+    }
+  }
+  textarea {
+    resize: vertical;
+  }
+  ::-webkit-search-decoration {
+    -webkit-appearance: none;
+  }
+  ::-webkit-date-and-time-value {
+    min-height: 1lh;
+    text-align: inherit;
+  }
+  ::-webkit-datetime-edit {
+    display: inline-flex;
+  }
+  ::-webkit-datetime-edit-fields-wrapper {
+    padding: 0;
+  }
+  ::-webkit-datetime-edit, ::-webkit-datetime-edit-year-field, ::-webkit-datetime-edit-month-field, ::-webkit-datetime-edit-day-field, ::-webkit-datetime-edit-hour-field, ::-webkit-datetime-edit-minute-field, ::-webkit-datetime-edit-second-field, ::-webkit-datetime-edit-millisecond-field, ::-webkit-datetime-edit-meridiem-field {
+    padding-block: 0;
+  }
+  ::-webkit-calendar-picker-indicator {
+    line-height: 1;
+  }
+  :-moz-ui-invalid {
+    box-shadow: none;
+  }
+  button, input:where([type="button"], [type="reset"], [type="submit"]), ::file-selector-button {
+    appearance: button;
+  }
+  ::-webkit-inner-spin-button, ::-webkit-outer-spin-button {
+    height: auto;
+  }
+  [hidden]:where(:not([hidden="until-found"])) {
+    display: none !important;
+  }
+}
+@layer utilities {
+  /*svadmin-recipe:migrated00000 */
+  /*svadmin-recipe:migrated00001 */
+  /*svadmin-recipe:migrated00002 */
+  /*svadmin-recipe:migrated00003 */
+  /*svadmin-recipe:migrated00004 */
+  /*svadmin-recipe:migrated00005 */
+  /*svadmin-recipe:migrated00006 */
+  /*svadmin-recipe:migrated00007 */
+  /*svadmin-recipe:migrated00008 */
+  /*svadmin-recipe:migrated00009 */
+  /*svadmin-recipe:migrated00010 */
+  /*svadmin-recipe:migrated00011 */
+  /*svadmin-recipe:migrated00012 */
+  /*svadmin-recipe:migrated00013 */
+  /*svadmin-recipe:migrated00014 */
+  /*svadmin-recipe:migrated00015 */
+  /*svadmin-recipe:migrated00016 */
+  /*svadmin-recipe:migrated00017 */
+  /*svadmin-recipe:migrated00018 */
+  /*svadmin-recipe:migrated00019 */
+  /*svadmin-recipe:migrated00020 */
+  /*svadmin-recipe:migrated00021 */
+  /*svadmin-recipe:migrated00022 */
+  /*svadmin-recipe:migrated00023 */
+  /*svadmin-recipe:migrated00024 */
+  /*svadmin-recipe:migrated00025 */
+  /*svadmin-recipe:migrated00026 */
+  /*svadmin-recipe:migrated00027 */
+  /*svadmin-recipe:migrated00028 */
+  /*svadmin-recipe:migrated00029 */
+  /*svadmin-recipe:migrated00030 */
+  /*svadmin-recipe:migrated00031 */
+  /*svadmin-recipe:migrated00032 */
+  /*svadmin-recipe:migrated00033 */
+  /*svadmin-recipe:migrated00034 */
+  /*svadmin-recipe:migrated00035 */
+  /*svadmin-recipe:migrated00036 */
+  /*svadmin-recipe:migrated00037 */
+  /*svadmin-recipe:migrated00038 */
+  /*svadmin-recipe:migrated00039 */
+  /*svadmin-recipe:migrated00040 */
+  /*svadmin-recipe:migrated00041 */
+  /*svadmin-recipe:migrated00042 */
+  /*svadmin-recipe:migrated00043 */
+  /*svadmin-recipe:migrated00044 */
+  /*svadmin-recipe:migrated00045 */
+  /*svadmin-recipe:migrated00046 */
+  /*svadmin-recipe:migrated00047 */
+  /*svadmin-recipe:migrated00048 */
+  /*svadmin-recipe:migrated00049 */
+  /*svadmin-recipe:migrated00050 */
+  /*svadmin-recipe:migrated00051 */
+  /*svadmin-recipe:migrated00052 */
+  /*svadmin-recipe:migrated00053 */
+  /*svadmin-recipe:migrated00054 */
+  /*svadmin-recipe:migrated00055 */
+  /*svadmin-recipe:migrated00056 */
+  /*svadmin-recipe:migrated00057 */
+  /*svadmin-recipe:migrated00058 */
+  /*svadmin-recipe:migrated00059 */
+  /*svadmin-recipe:migrated00060 */
+  /*svadmin-recipe:migrated00061 */
+  /*svadmin-recipe:migrated00062 */
+  /*svadmin-recipe:migrated00063 */
+  /*svadmin-recipe:migrated00064 */
+  /*svadmin-recipe:migrated00065 */
+  /*svadmin-recipe:migrated00066 */
+  /*svadmin-recipe:migrated00067 */
+  /*svadmin-recipe:migrated00068 */
+  /*svadmin-recipe:migrated00069 */
+  /*svadmin-recipe:migrated00070 */
+  /*svadmin-recipe:migrated00071 */
+  /*svadmin-recipe:migrated00072 */
+  /*svadmin-recipe:migrated00073 */
+  /*svadmin-recipe:migrated00074 */
+  /*svadmin-recipe:migrated00075 */
+  /*svadmin-recipe:migrated00076 */
+  /*svadmin-recipe:migrated00077 */
+  /*svadmin-recipe:migrated00078 */
+  /*svadmin-recipe:migrated00079 */
+  /*svadmin-recipe:migrated00080 */
+  /*svadmin-recipe:migrated00081 */
+  /*svadmin-recipe:migrated00082 */
+  /*svadmin-recipe:migrated00083 */
+  /*svadmin-recipe:migrated00084 */
+  /*svadmin-recipe:migrated00085 */
+  /*svadmin-recipe:migrated00086 */
+  /*svadmin-recipe:migrated00087 */
+  /*svadmin-recipe:migrated00088 */
+  /*svadmin-recipe:migrated00089 */
+  /*svadmin-recipe:migrated00090 */
+  /*svadmin-recipe:migrated00091 */
+  /*svadmin-recipe:migrated00092 */
+  /*svadmin-recipe:migrated00093 */
+  /*svadmin-recipe:migrated00094 */
+  /*svadmin-recipe:migrated00095 */
+  /*svadmin-recipe:migrated00096 */
+  /*svadmin-recipe:migrated00097 */
+  /*svadmin-recipe:migrated00098 */
+  /*svadmin-recipe:migrated00099 */
+  /*svadmin-recipe:migrated00100 */
+  /*svadmin-recipe:migrated00101 */
+  /*svadmin-recipe:migrated00102 */
+  /*svadmin-recipe:migrated00103 */
+  /*svadmin-recipe:migrated00104 */
+  /*svadmin-recipe:migrated00105 */
+  /*svadmin-recipe:migrated00106 */
+  /*svadmin-recipe:migrated00107 */
+  /*svadmin-recipe:migrated00108 */
+  /*svadmin-recipe:migrated00109 */
+  /*svadmin-recipe:migrated00110 */
+  /*svadmin-recipe:migrated00111 */
+  /*svadmin-recipe:migrated00112 */
+  /*svadmin-recipe:migrated00113 */
+  /*svadmin-recipe:migrated00114 */
+  /*svadmin-recipe:migrated00115 */
+  /*svadmin-recipe:migrated00116 */
+  /*svadmin-recipe:migrated00117 */
+  /*svadmin-recipe:migrated00118 */
+  /*svadmin-recipe:migrated00119 */
+  /*svadmin-recipe:migrated00120 */
+  /*svadmin-recipe:migrated00121 */
+  /*svadmin-recipe:migrated00122 */
+  /*svadmin-recipe:migrated00123 */
+  /*svadmin-recipe:migrated00124 */
+  /*svadmin-recipe:migrated00125 */
+  /*svadmin-recipe:migrated00126 */
+  /*svadmin-recipe:migrated00127 */
+  /*svadmin-recipe:migrated00128 */
+  /*svadmin-recipe:migrated00129 */
+  /*svadmin-recipe:migrated00130 */
+  /*svadmin-recipe:migrated00131 */
+  /*svadmin-recipe:migrated00132 */
+  /*svadmin-recipe:migrated00133 */
+  /*svadmin-recipe:migrated00134 */
+  /*svadmin-recipe:migrated00135 */
+  /*svadmin-recipe:migrated00136 */
+  /*svadmin-recipe:migrated00137 */
+  /*svadmin-recipe:migrated00138 */
+  /*svadmin-recipe:migrated00139 */
+  /*svadmin-recipe:migrated00140 */
+  /*svadmin-recipe:migrated00141 */
+  /*svadmin-recipe:migrated00142 */
+  /*svadmin-recipe:migrated00143 */
+  /*svadmin-recipe:migrated00144 */
+  /*svadmin-recipe:migrated00145 */
+  /*svadmin-recipe:migrated00146 */
+  /*svadmin-recipe:migrated00147 */
+  /*svadmin-recipe:migrated00148 */
+  /*svadmin-recipe:migrated00149 */
+  /*svadmin-recipe:migrated00150 */
+  /*svadmin-recipe:migrated00151 */
+  /*svadmin-recipe:migrated00152 */
+  /*svadmin-recipe:migrated00153 */
+  /*svadmin-recipe:migrated00154 */
+  /*svadmin-recipe:migrated00155 */
+  /*svadmin-recipe:migrated00156 */
+  /*svadmin-recipe:migrated00157 */
+  /*svadmin-recipe:migrated00158 */
+  /*svadmin-recipe:migrated00159 */
+  /*svadmin-recipe:migrated00160 */
+  /*svadmin-recipe:migrated00161 */
+  /*svadmin-recipe:migrated00162 */
+  /*svadmin-recipe:migrated00163 */
+  /*svadmin-recipe:migrated00164 */
+  /*svadmin-recipe:migrated00165 */
+  /*svadmin-recipe:migrated00166 */
+  /*svadmin-recipe:migrated00167 */
+  /*svadmin-recipe:migrated00168 */
+  /*svadmin-recipe:migrated00169 */
+  /*svadmin-recipe:migrated00170 */
+  /*svadmin-recipe:migrated00171 */
+  /*svadmin-recipe:migrated00172 */
+  /*svadmin-recipe:migrated00173 */
+  /*svadmin-recipe:migrated00174 */
+  /*svadmin-recipe:migrated00175 */
+  /*svadmin-recipe:migrated00176 */
+  /*svadmin-recipe:migrated00177 */
+  /*svadmin-recipe:migrated00178 */
+  /*svadmin-recipe:migrated00179 */
+  /*svadmin-recipe:migrated00180 */
+  /*svadmin-recipe:migrated00181 */
+  /*svadmin-recipe:migrated00182 */
+  /*svadmin-recipe:migrated00183 */
+  /*svadmin-recipe:migrated00184 */
+  /*svadmin-recipe:migrated00185 */
+  /*svadmin-recipe:migrated00186 */
+  /*svadmin-recipe:migrated00187 */
+  /*svadmin-recipe:migrated00188 */
+  /*svadmin-recipe:migrated00189 */
+  /*svadmin-recipe:migrated00190 */
+  /*svadmin-recipe:migrated00191 */
+  /*svadmin-recipe:migrated00192 */
+  /*svadmin-recipe:migrated00193 */
+  /*svadmin-recipe:migrated00194 */
+  /*svadmin-recipe:migrated00195 */
+  /*svadmin-recipe:migrated00196 */
+  /*svadmin-recipe:migrated00197 */
+  /*svadmin-recipe:migrated00198 */
+  /*svadmin-recipe:migrated00199 */
+  /*svadmin-recipe:migrated00200 */
+  /*svadmin-recipe:migrated00201 */
+  /*svadmin-recipe:migrated00202 */
+  /*svadmin-recipe:migrated00203 */
+  /*svadmin-recipe:migrated00204 */
+  /*svadmin-recipe:migrated00205 */
+  /*svadmin-recipe:migrated00206 */
+  /*svadmin-recipe:migrated00207 */
+  /*svadmin-recipe:migrated00208 */
+  /*svadmin-recipe:migrated00209 */
+  /*svadmin-recipe:migrated00210 */
+  /*svadmin-recipe:migrated00211 */
+  /*svadmin-recipe:migrated00212 */
+  /*svadmin-recipe:migrated00213 */
+  /*svadmin-recipe:migrated00214 */
+  /*svadmin-recipe:migrated00215 */
+  /*svadmin-recipe:migrated00216 */
+  /*svadmin-recipe:migrated00217 */
+  /*svadmin-recipe:migrated00218 */
+  /*svadmin-recipe:migrated00219 */
+  /*svadmin-recipe:migrated00220 */
+  /*svadmin-recipe:migrated00221 */
+  /*svadmin-recipe:migrated00222 */
+  /*svadmin-recipe:migrated00223 */
+  /*svadmin-recipe:migrated00224 */
+  /*svadmin-recipe:migrated00225 */
+  /*svadmin-recipe:migrated00226 */
+  /*svadmin-recipe:migrated00227 */
+  /*svadmin-recipe:migrated00228 */
+  /*svadmin-recipe:migrated00229 */
+  /*svadmin-recipe:migrated00230 */
+  /*svadmin-recipe:migrated00231 */
+  /*svadmin-recipe:migrated00232 */
+  /*svadmin-recipe:migrated00233 */
+  /*svadmin-recipe:migrated00234 */
+  /*svadmin-recipe:migrated00235 */
+  /*svadmin-recipe:migrated00236 */
+  /*svadmin-recipe:migrated00237 */
+  /*svadmin-recipe:migrated00238 */
+  /*svadmin-recipe:migrated00239 */
+  /*svadmin-recipe:migrated00240 */
+  /*svadmin-recipe:migrated00241 */
+  /*svadmin-recipe:migrated00242 */
+  /*svadmin-recipe:migrated00243 */
+  /*svadmin-recipe:migrated00244 */
+  /*svadmin-recipe:migrated00245 */
+  /*svadmin-recipe:migrated00246 */
+  /*svadmin-recipe:migrated00247 */
+  /*svadmin-recipe:migrated00248 */
+  /*svadmin-recipe:migrated00249 */
+  /*svadmin-recipe:migrated00250 */
+  /*svadmin-recipe:migrated00251 */
+  /*svadmin-recipe:migrated00252 */
+  /*svadmin-recipe:migrated00253 */
+  /*svadmin-recipe:migrated00254 */
+  /*svadmin-recipe:migrated00255 */
+  /*svadmin-recipe:migrated00256 */
+  /*svadmin-recipe:migrated00257 */
+  /*svadmin-recipe:migrated00258 */
+  /*svadmin-recipe:migrated00259 */
+  /*svadmin-recipe:migrated00260 */
+  /*svadmin-recipe:migrated00261 */
+  /*svadmin-recipe:migrated00262 */
+  /*svadmin-recipe:migrated00263 */
+  /*svadmin-recipe:migrated00264 */
+  /*svadmin-recipe:migrated00265 */
+  /*svadmin-recipe:migrated00266 */
+  /*svadmin-recipe:migrated00267 */
+  /*svadmin-recipe:migrated00268 */
+  /*svadmin-recipe:migrated00269 */
+  /*svadmin-recipe:migrated00270 */
+  /*svadmin-recipe:migrated00271 */
+  /*svadmin-recipe:migrated00272 */
+  /*svadmin-recipe:migrated00273 */
+  /*svadmin-recipe:migrated00274 */
+  /*svadmin-recipe:migrated00275 */
+  /*svadmin-recipe:migrated00276 */
+  /*svadmin-recipe:migrated00277 */
+  /*svadmin-recipe:migrated00278 */
+  /*svadmin-recipe:migrated00279 */
+  /*svadmin-recipe:migrated00280 */
+  /*svadmin-recipe:migrated00281 */
+  /*svadmin-recipe:migrated00282 */
+  /*svadmin-recipe:migrated00283 */
+  /*svadmin-recipe:migrated00284 */
+  /*svadmin-recipe:migrated00285 */
+  /*svadmin-recipe:migrated00286 */
+  /*svadmin-recipe:migrated00287 */
+  /*svadmin-recipe:migrated00288 */
+  /*svadmin-recipe:migrated00289 */
+  /*svadmin-recipe:migrated00290 */
+  /*svadmin-recipe:migrated00291 */
+  /*svadmin-recipe:migrated00292 */
+  /*svadmin-recipe:migrated00293 */
+  /*svadmin-recipe:migrated00294 */
+  /*svadmin-recipe:migrated00295 */
+  /*svadmin-recipe:migrated00296 */
+  /*svadmin-recipe:migrated00297 */
+  /*svadmin-recipe:migrated00298 */
+  /*svadmin-recipe:migrated00299 */
+  /*svadmin-recipe:migrated00300 */
+  /*svadmin-recipe:migrated00301 */
+  /*svadmin-recipe:migrated00302 */
+  /*svadmin-recipe:migrated00303 */
+  /*svadmin-recipe:migrated00304 */
+  /*svadmin-recipe:migrated00305 */
+  /*svadmin-recipe:migrated00306 */
+  /*svadmin-recipe:migrated00307 */
+  /*svadmin-recipe:migrated00308 */
+  /*svadmin-recipe:migrated00309 */
+  /*svadmin-recipe:migrated00310 */
+  /*svadmin-recipe:migrated00311 */
+  /*svadmin-recipe:migrated00312 */
+  /*svadmin-recipe:migrated00313 */
+  /*svadmin-recipe:migrated00314 */
+  /*svadmin-recipe:migrated00315 */
+  /*svadmin-recipe:migrated00316 */
+  /*svadmin-recipe:migrated00317 */
+  /*svadmin-recipe:migrated00318 */
+  /*svadmin-recipe:migrated00319 */
+  /*svadmin-recipe:migrated00320 */
+  /*svadmin-recipe:migrated00321 */
+  /*svadmin-recipe:migrated00322 */
+  /*svadmin-recipe:migrated00323 */
+  /*svadmin-recipe:migrated00324 */
+  /*svadmin-recipe:migrated00325 */
+  /*svadmin-recipe:migrated00326 */
+  /*svadmin-recipe:migrated00327 */
+  /*svadmin-recipe:migrated00328 */
+  /*svadmin-recipe:migrated00329 */
+  /*svadmin-recipe:migrated00330 */
+  /*svadmin-recipe:migrated00331 */
+  /*svadmin-recipe:migrated00332 */
+  /*svadmin-recipe:migrated00333 */
+  /*svadmin-recipe:migrated00334 */
+  /*svadmin-recipe:migrated00335 */
+  /*svadmin-recipe:migrated00336 */
+  /*svadmin-recipe:migrated00337 */
+  /*svadmin-recipe:migrated00338 */
+  /*svadmin-recipe:migrated00339 */
+  /*svadmin-recipe:migrated00340 */
+  /*svadmin-recipe:migrated00341 */
+  /*svadmin-recipe:migrated00342 */
+  /*svadmin-recipe:migrated00343 */
+  /*svadmin-recipe:migrated00344 */
+  /*svadmin-recipe:migrated00345 */
+  /*svadmin-recipe:migrated00346 */
+  /*svadmin-recipe:migrated00347 */
+  /*svadmin-recipe:migrated00348 */
+  /*svadmin-recipe:migrated00349 */
+  /*svadmin-recipe:migrated00350 */
+  /*svadmin-recipe:migrated00351 */
+  /*svadmin-recipe:migrated00352 */
+  /*svadmin-recipe:migrated00353 */
+  /*svadmin-recipe:migrated00354 */
+  /*svadmin-recipe:migrated00355 */
+  /*svadmin-recipe:migrated00356 */
+  /*svadmin-recipe:migrated00357 */
+  /*svadmin-recipe:migrated00358 */
+  /*svadmin-recipe:migrated00359 */
+  /*svadmin-recipe:migrated00360 */
+  /*svadmin-recipe:migrated00361 */
+  /*svadmin-recipe:migrated00362 */
+  /*svadmin-recipe:migrated00363 */
+  /*svadmin-recipe:migrated00364 */
+  /*svadmin-recipe:migrated00365 */
+  /*svadmin-recipe:migrated00366 */
+  /*svadmin-recipe:migrated00367 */
+  /*svadmin-recipe:migrated00368 */
+  /*svadmin-recipe:migrated00369 */
+  /*svadmin-recipe:migrated00370 */
+  /*svadmin-recipe:migrated00371 */
+  /*svadmin-recipe:migrated00372 */
+  /*svadmin-recipe:migrated00373 */
+  /*svadmin-recipe:migrated00374 */
+  /*svadmin-recipe:migrated00375 */
+  /*svadmin-recipe:migrated00376 */
+  /*svadmin-recipe:migrated00377 */
+  /*svadmin-recipe:migrated00378 */
+  /*svadmin-recipe:migrated00379 */
+  /*svadmin-recipe:migrated00380 */
+  /*svadmin-recipe:migrated00381 */
+  /*svadmin-recipe:migrated00382 */
+  /*svadmin-recipe:migrated00383 */
+  /*svadmin-recipe:migrated00384 */
+  /*svadmin-recipe:migrated00385 */
+  /*svadmin-recipe:migrated00386 */
+  /*svadmin-recipe:migrated00387 */
+  /*svadmin-recipe:migrated00388 */
+  /*svadmin-recipe:migrated00389 */
+  /*svadmin-recipe:migrated00390 */
+  /*svadmin-recipe:migrated00391 */
+  /*svadmin-recipe:migrated00392 */
+  /*svadmin-recipe:migrated00393 */
+  /*svadmin-recipe:migrated00394 */
+  /*svadmin-recipe:migrated00395 */
+  /*svadmin-recipe:migrated00396 */
+  /*svadmin-recipe:migrated00397 */
+  /*svadmin-recipe:migrated00398 */
+  /*svadmin-recipe:migrated00399 */
+  /*svadmin-recipe:migrated00400 */
+  /*svadmin-recipe:migrated00401 */
+  /*svadmin-recipe:migrated00402 */
+  /*svadmin-recipe:migrated00403 */
+  /*svadmin-recipe:migrated00404 */
+  /*svadmin-recipe:migrated00405 */
+  /*svadmin-recipe:migrated00406 */
+  /*svadmin-recipe:migrated00407 */
+  /*svadmin-recipe:migrated00408 */
+  /*svadmin-recipe:migrated00409 */
+  /*svadmin-recipe:migrated00410 */
+  /*svadmin-recipe:migrated00411 */
+  /*svadmin-recipe:migrated00412 */
+  /*svadmin-recipe:migrated00413 */
+  /*svadmin-recipe:migrated00414 */
+  /*svadmin-recipe:migrated00415 */
+  /*svadmin-recipe:migrated00416 */
+  /*svadmin-recipe:migrated00417 */
+  /*svadmin-recipe:migrated00418 */
+  /*svadmin-recipe:migrated00419 */
+  /*svadmin-recipe:migrated00420 */
+  /*svadmin-recipe:migrated00421 */
+  /*svadmin-recipe:migrated00422 */
+  /*svadmin-recipe:migrated00423 */
+  /*svadmin-recipe:migrated00424 */
+  /*svadmin-recipe:migrated00425 */
+  /*svadmin-recipe:migrated00426 */
+  /*svadmin-recipe:migrated00427 */
+  /*svadmin-recipe:migrated00428 */
+  /*svadmin-recipe:migrated00429 */
+  /*svadmin-recipe:migrated00430 */
+  /*svadmin-recipe:migrated00431 */
+  /*svadmin-recipe:migrated00432 */
+  /*svadmin-recipe:migrated00433 */
+  /*svadmin-recipe:migrated00434 */
+  /*svadmin-recipe:migrated00435 */
+  /*svadmin-recipe:migrated00436 */
+  /*svadmin-recipe:migrated00437 */
+  /*svadmin-recipe:migrated00438 */
+  /*svadmin-recipe:migrated00439 */
+  /*svadmin-recipe:migrated00440 */
+  /*svadmin-recipe:migrated00441 */
+  /*svadmin-recipe:migrated00442 */
+  /*svadmin-recipe:migrated00443 */
+  /*svadmin-recipe:migrated00444 */
+  /*svadmin-recipe:migrated00445 */
+  /*svadmin-recipe:migrated00446 */
+  /*svadmin-recipe:migrated00447 */
+  /*svadmin-recipe:migrated00448 */
+  /*svadmin-recipe:migrated00449 */
+  /*svadmin-recipe:migrated00450 */
+  /*svadmin-recipe:migrated00451 */
+  /*svadmin-recipe:migrated00452 */
+  /*svadmin-recipe:migrated00453 */
+  /*svadmin-recipe:migrated00454 */
+  /*svadmin-recipe:migrated00455 */
+  /*svadmin-recipe:migrated00456 */
+  /*svadmin-recipe:migrated00457 */
+  /*svadmin-recipe:migrated00458 */
+  /*svadmin-recipe:migrated00459 */
+  /*svadmin-recipe:migrated00460 */
+  /*svadmin-recipe:migrated00461 */
+  /*svadmin-recipe:migrated00462 */
+  /*svadmin-recipe:migrated00463 */
+  /*svadmin-recipe:migrated00464 */
+  /*svadmin-recipe:migrated00465 */
+  /*svadmin-recipe:migrated00466 */
+  /*svadmin-recipe:migrated00467 */
+  /*svadmin-recipe:migrated00468 */
+  /*svadmin-recipe:migrated00469 */
+  /*svadmin-recipe:migrated00470 */
+  /*svadmin-recipe:migrated00471 */
+  /*svadmin-recipe:migrated00472 */
+  /*svadmin-recipe:migrated00473 */
+  /*svadmin-recipe:migrated00474 */
+  /*svadmin-recipe:migrated00475 */
+  /*svadmin-recipe:migrated00476 */
+  /*svadmin-recipe:migrated00477 */
+  /*svadmin-recipe:migrated00478 */
+  /*svadmin-recipe:migrated00479 */
+  /*svadmin-recipe:migrated00480 */
+  /*svadmin-recipe:migrated00481 */
+  /*svadmin-recipe:migrated00482 */
+  /*svadmin-recipe:migrated00483 */
+  /*svadmin-recipe:migrated00484 */
+  /*svadmin-recipe:migrated00485 */
+  /*svadmin-recipe:migrated00486 */
+  /*svadmin-recipe:migrated00487 */
+  /*svadmin-recipe:migrated00488 */
+  /*svadmin-recipe:migrated00489 */
+  /*svadmin-recipe:migrated00490 */
+  /*svadmin-recipe:migrated00491 */
+  /*svadmin-recipe:migrated00492 */
+  /*svadmin-recipe:migrated00493 */
+  /*svadmin-recipe:migrated00494 */
+  /*svadmin-recipe:migrated00495 */
+  /*svadmin-recipe:migrated00496 */
+  /*svadmin-recipe:migrated00497 */
+  /*svadmin-recipe:migrated00498 */
+  /*svadmin-recipe:migrated00499 */
+  /*svadmin-recipe:migrated00500 */
+  /*svadmin-recipe:migrated00501 */
+  /*svadmin-recipe:migrated00502 */
+  /*svadmin-recipe:migrated00503 */
+  /*svadmin-recipe:migrated00504 */
+  /*svadmin-recipe:migrated00505 */
+  /*svadmin-recipe:migrated00506 */
+  /*svadmin-recipe:migrated00507 */
+  /*svadmin-recipe:migrated00508 */
+  /*svadmin-recipe:migrated00509 */
+  /*svadmin-recipe:migrated00510 */
+  /*svadmin-recipe:migrated00511 */
+  /*svadmin-recipe:migrated00512 */
+  /*svadmin-recipe:migrated00513 */
+  /*svadmin-recipe:migrated00514 */
+  /*svadmin-recipe:migrated00515 */
+  /*svadmin-recipe:migrated00516 */
+  /*svadmin-recipe:migrated00517 */
+  /*svadmin-recipe:migrated00518 */
+  /*svadmin-recipe:migrated00519 */
+  /*svadmin-recipe:migrated00520 */
+  /*svadmin-recipe:migrated00521 */
+  /*svadmin-recipe:migrated00522 */
+  /*svadmin-recipe:migrated00523 */
+  /*svadmin-recipe:migrated00524 */
+  /*svadmin-recipe:migrated00525 */
+  /*svadmin-recipe:migrated00526 */
+  /*svadmin-recipe:migrated00527 */
+  /*svadmin-recipe:migrated00528 */
+  /*svadmin-recipe:migrated00529 */
+  /*svadmin-recipe:migrated00530 */
+  /*svadmin-recipe:migrated00531 */
+  /*svadmin-recipe:migrated00532 */
+  /*svadmin-recipe:migrated00533 */
+  /*svadmin-recipe:migrated00534 */
+  /*svadmin-recipe:migrated00535 */
+  /*svadmin-recipe:migrated00536 */
+  /*svadmin-recipe:migrated00537 */
+  /*svadmin-recipe:migrated00538 */
+  /*svadmin-recipe:migrated00539 */
+  /*svadmin-recipe:migrated00540 */
+  /*svadmin-recipe:migrated00541 */
+  /*svadmin-recipe:migrated00542 */
+  /*svadmin-recipe:migrated00543 */
+  /*svadmin-recipe:migrated00544 */
+  /*svadmin-recipe:migrated00545 */
+  /*svadmin-recipe:migrated00546 */
+  /*svadmin-recipe:migrated00547 */
+  /*svadmin-recipe:migrated00548 */
+  /*svadmin-recipe:migrated00549 */
+  /*svadmin-recipe:migrated00550 */
+  /*svadmin-recipe:migrated00551 */
+  /*svadmin-recipe:migrated00552 */
+  /*svadmin-recipe:migrated00553 */
+  /*svadmin-recipe:migrated00554 */
+  /*svadmin-recipe:migrated00555 */
+  /*svadmin-recipe:migrated00556 */
+  /*svadmin-recipe:migrated00557 */
+  /*svadmin-recipe:migrated00558 */
+  /*svadmin-recipe:migrated00559 */
+  /*svadmin-recipe:migrated00560 */
+  /*svadmin-recipe:migrated00561 */
+  /*svadmin-recipe:migrated00562 */
+  /*svadmin-recipe:migrated00563 */
+  /*svadmin-recipe:migrated00564 */
+  /*svadmin-recipe:migrated00565 */
+  /*svadmin-recipe:migrated00566 */
+  /*svadmin-recipe:migrated00567 */
+  /*svadmin-recipe:migrated00568 */
+  /*svadmin-recipe:migrated00569 */
+  /*svadmin-recipe:migrated00570 */
+  /*svadmin-recipe:migrated00571 */
+  /*svadmin-recipe:migrated00572 */
+  /*svadmin-recipe:migrated00573 */
+  /*svadmin-recipe:migrated00574 */
+  /*svadmin-recipe:migrated00575 */
+  /*svadmin-recipe:migrated00576 */
+  /*svadmin-recipe:migrated00577 */
+  /*svadmin-recipe:migrated00578 */
+  /*svadmin-recipe:migrated00579 */
+  /*svadmin-recipe:migrated00580 */
+  /*svadmin-recipe:migrated00581 */
+  /*svadmin-recipe:migrated00582 */
+  /*svadmin-recipe:migrated00583 */
+  /*svadmin-recipe:migrated00584 */
+  /*svadmin-recipe:migrated00585 */
+  /*svadmin-recipe:migrated00586 */
+  /*svadmin-recipe:migrated00587 */
+  /*svadmin-recipe:migrated00588 */
+  /*svadmin-recipe:migrated00589 */
+  /*svadmin-recipe:migrated00590 */
+  /*svadmin-recipe:migrated00591 */
+  /*svadmin-recipe:migrated00592 */
+  /*svadmin-recipe:migrated00593 */
+  /*svadmin-recipe:migrated00594 */
+  /*svadmin-recipe:migrated00595 */
+  /*svadmin-recipe:migrated00596 */
+  /*svadmin-recipe:migrated00597 */
+  /*svadmin-recipe:migrated00598 */
+  /*svadmin-recipe:migrated00599 */
+  /*svadmin-recipe:migrated00600 */
+  /*svadmin-recipe:migrated00601 */
+  /*svadmin-recipe:migrated00602 */
+  /*svadmin-recipe:migrated00603 */
+  /*svadmin-recipe:migrated00604 */
+  /*svadmin-recipe:migrated00605 */
+  /*svadmin-recipe:migrated00606 */
+  /*svadmin-recipe:migrated00607 */
+  /*svadmin-recipe:migrated00608 */
+  /*svadmin-recipe:migrated00609 */
+  /*svadmin-recipe:migrated00610 */
+  /*svadmin-recipe:migrated00611 */
+  /*svadmin-recipe:migrated00612 */
+  /*svadmin-recipe:migrated00613 */
+  /*svadmin-recipe:migrated00614 */
+  /*svadmin-recipe:migrated00615 */
+  /*svadmin-recipe:migrated00616 */
+  /*svadmin-recipe:migrated00617 */
+  /*svadmin-recipe:migrated00618 */
+  /*svadmin-recipe:migrated00619 */
+  /*svadmin-recipe:migrated00620 */
+  /*svadmin-recipe:migrated00621 */
+  /*svadmin-recipe:migrated00622 */
+  /*svadmin-recipe:migrated00623 */
+  /*svadmin-recipe:migrated00624 */
+  /*svadmin-recipe:migrated00625 */
+  /*svadmin-recipe:migrated00626 */
+  /*svadmin-recipe:migrated00627 */
+  /*svadmin-recipe:migrated00628 */
+  /*svadmin-recipe:migrated00629 */
+  /*svadmin-recipe:migrated00630 */
+  /*svadmin-recipe:migrated00631 */
+  /*svadmin-recipe:migrated00632 */
+  /*svadmin-recipe:migrated00633 */
+  /*svadmin-recipe:migrated00634 */
+  /*svadmin-recipe:migrated00635 */
+  /*svadmin-recipe:migrated00636 */
+  /*svadmin-recipe:migrated00637 */
+  /*svadmin-recipe:migrated00638 */
+  /*svadmin-recipe:migrated00639 */
+  /*svadmin-recipe:migrated00640 */
+  /*svadmin-recipe:migrated00641 */
+  /*svadmin-recipe:migrated00642 */
+  /*svadmin-recipe:migrated00643 */
+  /*svadmin-recipe:migrated00644 */
+  /*svadmin-recipe:migrated00645 */
+  /*svadmin-recipe:migrated00646 */
+  /*svadmin-recipe:migrated00647 */
+  /*svadmin-recipe:migrated00648 */
+  /*svadmin-recipe:migrated00649 */
+  /*svadmin-recipe:migrated00650 */
+  /*svadmin-recipe:migrated00651 */
+  /*svadmin-recipe:migrated00652 */
+  /*svadmin-recipe:migrated00653 */
+  /*svadmin-recipe:migrated00654 */
+  /*svadmin-recipe:migrated00655 */
+  /*svadmin-recipe:migrated00656 */
+  /*svadmin-recipe:migrated00657 */
+  /*svadmin-recipe:migrated00658 */
+  /*svadmin-recipe:migrated00659 */
+  /*svadmin-recipe:migrated00660 */
+  /*svadmin-recipe:migrated00661 */
+  /*svadmin-recipe:migrated00662 */
+  /*svadmin-recipe:migrated00663 */
+  /*svadmin-recipe:migrated00664 */
+  /*svadmin-recipe:migrated00665 */
+  /*svadmin-recipe:migrated00666 */
+  /*svadmin-recipe:migrated00667 */
+  /*svadmin-recipe:migrated00668 */
+  /*svadmin-recipe:migrated00669 */
+  /*svadmin-recipe:migrated00670 */
+  /*svadmin-recipe:migrated00671 */
+  /*svadmin-recipe:migrated00672 */
+  /*svadmin-recipe:migrated00673 */
+  /*svadmin-recipe:migrated00674 */
+  /*svadmin-recipe:migrated00675 */
+  /*svadmin-recipe:migrated00676 */
+  /*svadmin-recipe:migrated00677 */
+  /*svadmin-recipe:migrated00678 */
+  /*svadmin-recipe:migrated00679 */
+  /*svadmin-recipe:migrated00680 */
+  /*svadmin-recipe:migrated00681 */
+  /*svadmin-recipe:migrated00682 */
+  /*svadmin-recipe:migrated00683 */
+  /*svadmin-recipe:migrated00684 */
+  /*svadmin-recipe:migrated00685 */
+  /*svadmin-recipe:migrated00686 */
+  /*svadmin-recipe:migrated00687 */
+  /*svadmin-recipe:migrated00688 */
+  /*svadmin-recipe:migrated00689 */
+  /*svadmin-recipe:migrated00690 */
+  /*svadmin-recipe:migrated00691 */
+  /*svadmin-recipe:migrated00692 */
+  /*svadmin-recipe:migrated00693 */
+  /*svadmin-recipe:migrated00694 */
+  /*svadmin-recipe:migrated00695 */
+  /*svadmin-recipe:migrated00696 */
+  /*svadmin-recipe:migrated00697 */
+  /*svadmin-recipe:migrated00698 */
+  /*svadmin-recipe:migrated00699 */
+  /*svadmin-recipe:migrated00700 */
+  /*svadmin-recipe:migrated00701 */
+  /*svadmin-recipe:migrated00702 */
+  /*svadmin-recipe:migrated00703 */
+  /*svadmin-recipe:migrated00704 */
+  /*svadmin-recipe:migrated00705 */
+  /*svadmin-recipe:migrated00706 */
+  /*svadmin-recipe:migrated00707 */
+  /*svadmin-recipe:migrated00708 */
+  /*svadmin-recipe:migrated00709 */
+  /*svadmin-recipe:migrated00710 */
+  /*svadmin-recipe:migrated00711 */
+  /*svadmin-recipe:migrated00712 */
+  /*svadmin-recipe:migrated00713 */
+  /*svadmin-recipe:migrated00714 */
+  /*svadmin-recipe:migrated00715 */
+  /*svadmin-recipe:migrated00716 */
+  /*svadmin-recipe:migrated00717 */
+  /*svadmin-recipe:migrated00718 */
+  /*svadmin-recipe:migrated00719 */
+  /*svadmin-recipe:migrated00720 */
+  /*svadmin-recipe:migrated00721 */
+  /*svadmin-recipe:migrated00722 */
+  /*svadmin-recipe:migrated00723 */
+  /*svadmin-recipe:migrated00724 */
+  /*svadmin-recipe:migrated00725 */
+  /*svadmin-recipe:migrated00726 */
+  /*svadmin-recipe:migrated00727 */
+  /*svadmin-recipe:migrated00728 */
+  /*svadmin-recipe:migrated00729 */
+  /*svadmin-recipe:migrated00730 */
+  /*svadmin-recipe:migrated00731 */
+  /*svadmin-recipe:migrated00732 */
+  /*svadmin-recipe:migrated00733 */
+  /*svadmin-recipe:migrated00734 */
+  /*svadmin-recipe:migrated00735 */
+  /*svadmin-recipe:migrated00736 */
+  /*svadmin-recipe:migrated00737 */
+  /*svadmin-recipe:migrated00738 */
+  /*svadmin-recipe:migrated00739 */
+  /*svadmin-recipe:migrated00740 */
+  /*svadmin-recipe:migrated00741 */
+  /*svadmin-recipe:migrated00742 */
+  /*svadmin-recipe:migrated00743 */
+  /*svadmin-recipe:migrated00744 */
+  /*svadmin-recipe:migrated00745 */
+  /*svadmin-recipe:migrated00746 */
+  /*svadmin-recipe:migrated00747 */
+  /*svadmin-recipe:migrated00748 */
+  /*svadmin-recipe:migrated00749 */
+  /*svadmin-recipe:migrated00750 */
+  /*svadmin-recipe:migrated00751 */
+  /*svadmin-recipe:migrated00752 */
+  /*svadmin-recipe:migrated00753 */
+  /*svadmin-recipe:migrated00754 */
+  /*svadmin-recipe:migrated00755 */
+  /*svadmin-recipe:migrated00756 */
+  /*svadmin-recipe:migrated00757 */
+  /*svadmin-recipe:migrated00758 */
+  /*svadmin-recipe:migrated00759 */
+  /*svadmin-recipe:migrated00760 */
+  /*svadmin-recipe:migrated00761 */
+  /*svadmin-recipe:migrated00762 */
+  /*svadmin-recipe:migrated00763 */
+  /*svadmin-recipe:migrated00764 */
+  /*svadmin-recipe:migrated00765 */
+  /*svadmin-recipe:migrated00766 */
+  /*svadmin-recipe:migrated00767 */
+  /*svadmin-recipe:migrated00768 */
+  /*svadmin-recipe:migrated00769 */
+  /*svadmin-recipe:migrated00770 */
+  /*svadmin-recipe:migrated00771 */
+  /*svadmin-recipe:migrated00772 */
+  /*svadmin-recipe:migrated00773 */
+  /*svadmin-recipe:migrated00774 */
+  /*svadmin-recipe:migrated00775 */
+  /*svadmin-recipe:migrated00776 */
+  /*svadmin-recipe:migrated00777 */
+  /*svadmin-recipe:migrated00778 */
+  /*svadmin-recipe:migrated00779 */
+  /*svadmin-recipe:migrated00780 */
+  /*svadmin-recipe:migrated00781 */
+  /*svadmin-recipe:migrated00782 */
+  /*svadmin-recipe:migrated00783 */
+  /*svadmin-recipe:migrated00784 */
+  /*svadmin-recipe:migrated00785 */
+  /*svadmin-recipe:migrated00786 */
+  /*svadmin-recipe:migrated00787 */
+  /*svadmin-recipe:migrated00788 */
+  /*svadmin-recipe:migrated00789 */
+  /*svadmin-recipe:migrated00790 */
+  /*svadmin-recipe:migrated00791 */
+  /*svadmin-recipe:migrated00792 */
+  /*svadmin-recipe:migrated00793 */
+  /*svadmin-recipe:migrated00794 */
+  /*svadmin-recipe:migrated00795 */
+  /*svadmin-recipe:migrated00796 */
+  /*svadmin-recipe:migrated00797 */
+  /*svadmin-recipe:migrated00798 */
+  /*svadmin-recipe:migrated00799 */
+  /*svadmin-recipe:migrated00800 */
+  /*svadmin-recipe:migrated00801 */
+  /*svadmin-recipe:migrated00802 */
+  /*svadmin-recipe:migrated00803 */
+  /*svadmin-recipe:migrated00804 */
+  /*svadmin-recipe:migrated00805 */
+  /*svadmin-recipe:migrated00806 */
+  /*svadmin-recipe:migrated00807 */
+  /*svadmin-recipe:migrated00808 */
+  /*svadmin-recipe:migrated00809 */
+  /*svadmin-recipe:migrated00810 */
+  /*svadmin-recipe:migrated00811 */
+  /*svadmin-recipe:migrated00812 */
+  /*svadmin-recipe:migrated00813 */
+  /*svadmin-recipe:migrated00814 */
+  /*svadmin-recipe:migrated00815 */
+  /*svadmin-recipe:migrated00816 */
+  /*svadmin-recipe:migrated00817 */
+  /*svadmin-recipe:migrated00818 */
+  /*svadmin-recipe:migrated00819 */
+  /*svadmin-recipe:migrated00820 */
+  /*svadmin-recipe:migrated00821 */
+  /*svadmin-recipe:migrated00822 */
+  /*svadmin-recipe:migrated00823 */
+  /*svadmin-recipe:migrated00824 */
+  /*svadmin-recipe:migrated00825 */
+  /*svadmin-recipe:migrated00826 */
+  /*svadmin-recipe:migrated00827 */
+  /*svadmin-recipe:migrated00828 */
+  /*svadmin-recipe:migrated00829 */
+  /*svadmin-recipe:migrated00830 */
+  /*svadmin-recipe:migrated00831 */
+  /*svadmin-recipe:migrated00832 */
+  /*svadmin-recipe:migrated00833 */
+  /*svadmin-recipe:migrated00834 */
+  /*svadmin-recipe:migrated00835 */
+  /*svadmin-recipe:migrated00836 */
+  /*svadmin-recipe:migrated00837 */
+  /*svadmin-recipe:migrated00838 */
+  /*svadmin-recipe:migrated00839 */
+  /*svadmin-recipe:migrated00840 */
+  /*svadmin-recipe:migrated00841 */
+  /*svadmin-recipe:migrated00842 */
+  /*svadmin-recipe:migrated00843 */
+  /*svadmin-recipe:migrated00844 */
+  /*svadmin-recipe:migrated00845 */
+  /*svadmin-recipe:migrated00846 */
+  /*svadmin-recipe:migrated00847 */
+  /*svadmin-recipe:migrated00848 */
+  /*svadmin-recipe:migrated00849 */
+  /*svadmin-recipe:migrated00850 */
+  /*svadmin-recipe:migrated00851 */
+  /*svadmin-recipe:migrated00852 */
+  /*svadmin-recipe:migrated00853 */
+  /*svadmin-recipe:migrated00854 */
+  /*svadmin-recipe:migrated00855 */
+  /*svadmin-recipe:migrated00856 */
+  /*svadmin-recipe:migrated00857 */
+  /*svadmin-recipe:migrated00858 */
+  /*svadmin-recipe:migrated00859 */
+  /*svadmin-recipe:migrated00860 */
+  /*svadmin-recipe:migrated00861 */
+  /*svadmin-recipe:migrated00862 */
+  /*svadmin-recipe:migrated00863 */
+  /*svadmin-recipe:migrated00864 */
+  /*svadmin-recipe:migrated00865 */
+  /*svadmin-recipe:migrated00866 */
+  /*svadmin-recipe:migrated00867 */
+  /*svadmin-recipe:migrated00868 */
+  /*svadmin-recipe:migrated00869 */
+  /*svadmin-recipe:migrated00870 */
+  /*svadmin-recipe:migrated00871 */
+  /*svadmin-recipe:migrated00872 */
+  /*svadmin-recipe:migrated00873 */
+  /*svadmin-recipe:migrated00874 */
+  @media (hover: hover) {
+    /*svadmin-recipe:migrated00875 */
+    /*svadmin-recipe:migrated00876 */
+    /*svadmin-recipe:migrated00877 */
+    /*svadmin-recipe:migrated00878 */
+    @supports (color: color-mix(in lab, red, red)) {
+      /*svadmin-recipe:migrated00879 */
+    }
+    /*svadmin-recipe:migrated00880 */
+  }
+  /*svadmin-recipe:migrated00881 */
+  /*svadmin-recipe:migrated00882 */
+  /*svadmin-recipe:migrated00883 */
+  /*svadmin-recipe:migrated00884 */
+  /*svadmin-recipe:migrated00885 */
+  /*svadmin-recipe:migrated00886 */
+  /*svadmin-recipe:migrated00887 */
+  /*svadmin-recipe:migrated00888 */
+  /*svadmin-recipe:migrated00889 */
+  /*svadmin-recipe:migrated00890 */
+  /*svadmin-recipe:migrated00891 */
+  /*svadmin-recipe:migrated00892 */
+  /*svadmin-recipe:migrated00893 */
+  /*svadmin-recipe:migrated00894 */
+  /*svadmin-recipe:migrated00895 */
+  /*svadmin-recipe:migrated00896 */
+  /*svadmin-recipe:migrated00897 */
+  /*svadmin-recipe:migrated00898 */
+  @media (hover: hover) {
+    /*svadmin-recipe:migrated00899 */
+    /*svadmin-recipe:migrated00900 */
+    /*svadmin-recipe:migrated00901 */
+    /*svadmin-recipe:migrated00902 */
+    /*svadmin-recipe:migrated00903 */
+    /*svadmin-recipe:migrated00904 */
+    @supports (color: color-mix(in lab, red, red)) {
+      /*svadmin-recipe:migrated00905 */
+    }
+    /*svadmin-recipe:migrated00906 */
+    @supports (color: color-mix(in lab, red, red)) {
+      /*svadmin-recipe:migrated00907 */
+    }
+    /*svadmin-recipe:migrated00908 */
+    @supports (color: color-mix(in lab, red, red)) {
+      /*svadmin-recipe:migrated00909 */
+    }
+    /*svadmin-recipe:migrated00910 */
+    /*svadmin-recipe:migrated00911 */
+    @supports (color: color-mix(in lab, red, red)) {
+      /*svadmin-recipe:migrated00912 */
+    }
+    /*svadmin-recipe:migrated00913 */
+    @supports (color: color-mix(in lab, red, red)) {
+      /*svadmin-recipe:migrated00914 */
+    }
+    /*svadmin-recipe:migrated00915 */
+    @supports (color: color-mix(in lab, red, red)) {
+      /*svadmin-recipe:migrated00916 */
+    }
+    /*svadmin-recipe:migrated00917 */
+    @supports (color: color-mix(in lab, red, red)) {
+      /*svadmin-recipe:migrated00918 */
+    }
+    /*svadmin-recipe:migrated00919 */
+    /*svadmin-recipe:migrated00920 */
+    @supports (color: color-mix(in lab, red, red)) {
+      /*svadmin-recipe:migrated00921 */
+    }
+    /*svadmin-recipe:migrated00922 */
+    /*svadmin-recipe:migrated00923 */
+    @supports (color: color-mix(in lab, red, red)) {
+      /*svadmin-recipe:migrated00924 */
+    }
+    /*svadmin-recipe:migrated00925 */
+    @supports (color: color-mix(in lab, red, red)) {
+      /*svadmin-recipe:migrated00926 */
+    }
+    /*svadmin-recipe:migrated00927 */
+    @supports (color: color-mix(in lab, red, red)) {
+      /*svadmin-recipe:migrated00928 */
+    }
+    /*svadmin-recipe:migrated00929 */
+    @supports (color: color-mix(in lab, red, red)) {
+      /*svadmin-recipe:migrated00930 */
+    }
+    /*svadmin-recipe:migrated00931 */
+    @supports (color: color-mix(in lab, red, red)) {
+      /*svadmin-recipe:migrated00932 */
+    }
+    /*svadmin-recipe:migrated00933 */
+    @supports (color: color-mix(in lab, red, red)) {
+      /*svadmin-recipe:migrated00934 */
+    }
+    /*svadmin-recipe:migrated00935 */
+    @supports (color: color-mix(in lab, red, red)) {
+      /*svadmin-recipe:migrated00936 */
+    }
+    /*svadmin-recipe:migrated00937 */
+    @supports (color: color-mix(in lab, red, red)) {
+      /*svadmin-recipe:migrated00938 */
+    }
+    /*svadmin-recipe:migrated00939 */
+    @supports (color: color-mix(in lab, red, red)) {
+      /*svadmin-recipe:migrated00940 */
+    }
+    /*svadmin-recipe:migrated00941 */
+    @supports (color: color-mix(in lab, red, red)) {
+      /*svadmin-recipe:migrated00942 */
+    }
+    /*svadmin-recipe:migrated00943 */
+    @supports (color: color-mix(in lab, red, red)) {
+      /*svadmin-recipe:migrated00944 */
+    }
+    /*svadmin-recipe:migrated00945 */
+    @supports (color: color-mix(in lab, red, red)) {
+      /*svadmin-recipe:migrated00946 */
+    }
+    /*svadmin-recipe:migrated00947 */
+    @supports (color: color-mix(in lab, red, red)) {
+      /*svadmin-recipe:migrated00948 */
+    }
+    /*svadmin-recipe:migrated00949 */
+    /*svadmin-recipe:migrated00950 */
+    /*svadmin-recipe:migrated00951 */
+    /*svadmin-recipe:migrated00952 */
+    /*svadmin-recipe:migrated00953 */
+    /*svadmin-recipe:migrated00954 */
+    @supports (color: color-mix(in lab, red, red)) {
+      /*svadmin-recipe:migrated00955 */
+    }
+    /*svadmin-recipe:migrated00956 */
+    /*svadmin-recipe:migrated00957 */
+    /*svadmin-recipe:migrated00958 */
+    /*svadmin-recipe:migrated00959 */
+    /*svadmin-recipe:migrated00960 */
+    /*svadmin-recipe:migrated00961 */
+    /*svadmin-recipe:migrated00962 */
+  }
+  /*svadmin-recipe:migrated00963 */
+  /*svadmin-recipe:migrated00964 */
+  /*svadmin-recipe:migrated00965 */
+  /*svadmin-recipe:migrated00966 */
+  /*svadmin-recipe:migrated00967 */
+  /*svadmin-recipe:migrated00968 */
+  /*svadmin-recipe:migrated00969 */
+  /*svadmin-recipe:migrated00970 */
+  /*svadmin-recipe:migrated00971 */
+  /*svadmin-recipe:migrated00972 */
+  /*svadmin-recipe:migrated00973 */
+  /*svadmin-recipe:migrated00974 */
+  /*svadmin-recipe:migrated00975 */
+  /*svadmin-recipe:migrated00976 */
+  /*svadmin-recipe:migrated00977 */
+  /*svadmin-recipe:migrated00978 */
+  /*svadmin-recipe:migrated00979 */
+  /*svadmin-recipe:migrated00980 */
+  /*svadmin-recipe:migrated00981 */
+  /*svadmin-recipe:migrated00982 */
+  /*svadmin-recipe:migrated00983 */
+  /*svadmin-recipe:migrated00984 */
+  /*svadmin-recipe:migrated00985 */
+  /*svadmin-recipe:migrated00986 */
+  /*svadmin-recipe:migrated00987 */
+  /*svadmin-recipe:migrated00988 */
+  /*svadmin-recipe:migrated00989 */
+  /*svadmin-recipe:migrated00990 */
+  /*svadmin-recipe:migrated00991 */
+  /*svadmin-recipe:migrated00992 */
+  /*svadmin-recipe:migrated00993 */
+  /*svadmin-recipe:migrated00994 */
+  /*svadmin-recipe:migrated00995 */
+  /*svadmin-recipe:migrated00996 */
+  /*svadmin-recipe:migrated00997 */
+  /*svadmin-recipe:migrated00998 */
+  /*svadmin-recipe:migrated00999 */
+  /*svadmin-recipe:migrated01000 */
+  @media (prefers-reduced-motion: reduce) {
+    /*svadmin-recipe:migrated01001 */
+  }
+  @media (width >= 40rem) {
+    /*svadmin-recipe:migrated01002 */
+    /*svadmin-recipe:migrated01003 */
+    /*svadmin-recipe:migrated01004 */
+    /*svadmin-recipe:migrated01005 */
+    /*svadmin-recipe:migrated01006 */
+    /*svadmin-recipe:migrated01007 */
+    /*svadmin-recipe:migrated01008 */
+    /*svadmin-recipe:migrated01009 */
+    /*svadmin-recipe:migrated01010 */
+    /*svadmin-recipe:migrated01011 */
+    /*svadmin-recipe:migrated01012 */
+    /*svadmin-recipe:migrated01013 */
+    /*svadmin-recipe:migrated01014 */
+    /*svadmin-recipe:migrated01015 */
+    /*svadmin-recipe:migrated01016 */
+    /*svadmin-recipe:migrated01017 */
+    /*svadmin-recipe:migrated01018 */
+    /*svadmin-recipe:migrated01019 */
+    /*svadmin-recipe:migrated01020 */
+    /*svadmin-recipe:migrated01021 */
+    /*svadmin-recipe:migrated01022 */
+    /*svadmin-recipe:migrated01023 */
+    /*svadmin-recipe:migrated01024 */
+    /*svadmin-recipe:migrated01025 */
+    /*svadmin-recipe:migrated01026 */
+    /*svadmin-recipe:migrated01027 */
+    /*svadmin-recipe:migrated01028 */
+    /*svadmin-recipe:migrated01029 */
+    /*svadmin-recipe:migrated01030 */
+    /*svadmin-recipe:migrated01031 */
+    /*svadmin-recipe:migrated01032 */
+    /*svadmin-recipe:migrated01033 */
+    /*svadmin-recipe:migrated01034 */
+    /*svadmin-recipe:migrated01035 */
+    /*svadmin-recipe:migrated01036 */
+    /*svadmin-recipe:migrated01037 */
+    /*svadmin-recipe:migrated01038 */
+    /*svadmin-recipe:migrated01039 */
+    /*svadmin-recipe:migrated01040 */
+    /*svadmin-recipe:migrated01041 */
+    /*svadmin-recipe:migrated01042 */
+    /*svadmin-recipe:migrated01043 */
+    /*svadmin-recipe:migrated01044 */
+    /*svadmin-recipe:migrated01045 */
+    /*svadmin-recipe:migrated01046 */
+    /*svadmin-recipe:migrated01047 */
+    /*svadmin-recipe:migrated01048 */
+    /*svadmin-recipe:migrated01049 */
+    /*svadmin-recipe:migrated01050 */
+    /*svadmin-recipe:migrated01051 */
+    /*svadmin-recipe:migrated01052 */
+    /*svadmin-recipe:migrated01053 */
+    /*svadmin-recipe:migrated01054 */
+    /*svadmin-recipe:migrated01055 */
+    /*svadmin-recipe:migrated01056 */
+    /*svadmin-recipe:migrated01057 */
+    /*svadmin-recipe:migrated01058 */
+    /*svadmin-recipe:migrated01059 */
+    /*svadmin-recipe:migrated01060 */
+    /*svadmin-recipe:migrated01061 */
+    /*svadmin-recipe:migrated01062 */
+    /*svadmin-recipe:migrated01063 */
+    /*svadmin-recipe:migrated01064 */
+    /*svadmin-recipe:migrated01065 */
+  }
+  @media (width >= 48rem) {
+    /*svadmin-recipe:migrated01066 */
+    /*svadmin-recipe:migrated01067 */
+    /*svadmin-recipe:migrated01068 */
+    /*svadmin-recipe:migrated01069 */
+    /*svadmin-recipe:migrated01070 */
+    /*svadmin-recipe:migrated01071 */
+    /*svadmin-recipe:migrated01072 */
+    /*svadmin-recipe:migrated01073 */
+    /*svadmin-recipe:migrated01074 */
+    /*svadmin-recipe:migrated01075 */
+    /*svadmin-recipe:migrated01076 */
+  }
+  @media (width >= 64rem) {
+    /*svadmin-recipe:migrated01077 */
+    /*svadmin-recipe:migrated01078 */
+    /*svadmin-recipe:migrated01079 */
+    /*svadmin-recipe:migrated01080 */
+    /*svadmin-recipe:migrated01081 */
+    /*svadmin-recipe:migrated01082 */
+    /*svadmin-recipe:migrated01083 */
+    /*svadmin-recipe:migrated01084 */
+    /*svadmin-recipe:migrated01085 */
+    /*svadmin-recipe:migrated01086 */
+    /*svadmin-recipe:migrated01087 */
+    /*svadmin-recipe:migrated01088 */
+    /*svadmin-recipe:migrated01089 */
+    /*svadmin-recipe:migrated01090 */
+    /*svadmin-recipe:migrated01091 */
+    /*svadmin-recipe:migrated01092 */
+    /*svadmin-recipe:migrated01093 */
+    /*svadmin-recipe:migrated01094 */
+    /*svadmin-recipe:migrated01095 */
+    /*svadmin-recipe:migrated01096 */
+    /*svadmin-recipe:migrated01097 */
+    /*svadmin-recipe:migrated01098 */
+    /*svadmin-recipe:migrated01099 */
+    /*svadmin-recipe:migrated01100 */
+    /*svadmin-recipe:migrated01101 */
+    /*svadmin-recipe:migrated01102 */
+    /*svadmin-recipe:migrated01103 */
+    /*svadmin-recipe:migrated01104 */
+    /*svadmin-recipe:migrated01105 */
+    /*svadmin-recipe:migrated01106 */
+    /*svadmin-recipe:migrated01107 */
+    /*svadmin-recipe:migrated01108 */
+    /*svadmin-recipe:migrated01109 */
+    /*svadmin-recipe:migrated01110 */
+    /*svadmin-recipe:migrated01111 */
+  }
+  @media (width >= 80rem) {
+    /*svadmin-recipe:migrated01112 */
+    /*svadmin-recipe:migrated01113 */
+    /*svadmin-recipe:migrated01114 */
+    /*svadmin-recipe:migrated01115 */
+    /*svadmin-recipe:migrated01116 */
+    /*svadmin-recipe:migrated01117 */
+    /*svadmin-recipe:migrated01118 */
+    /*svadmin-recipe:migrated01119 */
+    /*svadmin-recipe:migrated01120 */
+    /*svadmin-recipe:migrated01121 */
+    /*svadmin-recipe:migrated01122 */
+    /*svadmin-recipe:migrated01123 */
+  }
+  @media (prefers-color-scheme: dark) {
+    /*svadmin-recipe:migrated01124 */
+    @supports (color: color-mix(in lab, red, red)) {
+      /*svadmin-recipe:migrated01125 */
+    }
+    /*svadmin-recipe:migrated01126 */
+    /*svadmin-recipe:migrated01127 */
+    /*svadmin-recipe:migrated01128 */
+    /*svadmin-recipe:migrated01129 */
+    /*svadmin-recipe:migrated01130 */
+  }
+  @media print {
+    /*svadmin-recipe:migrated01131 */
+    /*svadmin-recipe:migrated01132 */
+    /*svadmin-recipe:migrated01133 */
+    /*svadmin-recipe:migrated01134 */
+    /*svadmin-recipe:migrated01135 */
+  }
+  /*svadmin-recipe:migrated01136 */
+  /*svadmin-recipe:migrated01137 */
+  /*svadmin-recipe:migrated01138 */
+  /*svadmin-recipe:migrated01139 */
+  /*svadmin-recipe:migrated01140 */
+  /*svadmin-recipe:migrated01141 */
+  /*svadmin-recipe:migrated01142 */
+  /*svadmin-recipe:migrated01143 */
+  /*svadmin-recipe:migrated01144 */
+  /*svadmin-recipe:migrated01145 */
+  /*svadmin-recipe:migrated01146 */
+  /*svadmin-recipe:migrated01147 */
+  /*svadmin-recipe:migrated01148 */
+  /*svadmin-recipe:migrated01149 */
+  /*svadmin-recipe:migrated01150 */
+  /*svadmin-recipe:migrated01151 */
+  /*svadmin-recipe:migrated01152 */
+  /*svadmin-recipe:migrated01153 */
+  /*svadmin-recipe:migrated01154 */
+  /*svadmin-recipe:migrated01155 */
+  /*svadmin-recipe:migrated01156 */
+  /*svadmin-recipe:migrated01157 */
+  /*svadmin-recipe:migrated01158 */
+  /*svadmin-recipe:migrated01159 */
+  /*svadmin-recipe:migrated01160 */
+  /*svadmin-recipe:migrated01161 */
+  /*svadmin-recipe:migrated01162 */
+  /*svadmin-recipe:migrated01163 */
+  /*svadmin-recipe:migrated01164 */
+  /*svadmin-recipe:migrated01165 */
+  /*svadmin-recipe:migrated01166 */
+}
+@property --tw-animation-delay {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0s;
+}
+@property --tw-animation-direction {
+  syntax: "*";
+  inherits: false;
+  initial-value: normal;
+}
+@property --tw-animation-duration {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-animation-fill-mode {
+  syntax: "*";
+  inherits: false;
+  initial-value: none;
+}
+@property --tw-animation-iteration-count {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-enter-blur {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-enter-opacity {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-enter-rotate {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-enter-scale {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-enter-translate-x {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-enter-translate-y {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-exit-blur {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-exit-opacity {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-exit-rotate {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-exit-scale {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-exit-translate-x {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
+@property --tw-exit-translate-y {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}

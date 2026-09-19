@@ -1,0 +1,28 @@
+/* Native state styles for dynamic Svelte classes, including compiler-free hosts. */
+.svadmin-sidebar--expanded {
+  width: 252px;
+}
+.svadmin-sidebar--collapsed {
+  width: 70px;
+}
+.sidebar-content-expanded,
+.sidebar-content-collapsed {
+  min-width: 0;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
+}
+/* Logical offsets handle LTR and RTL without desktop margins leaking onto mobile. */
+@media (min-width: 48rem) {
+  .sidebar-content-expanded {
+    margin-inline-start: 252px;
+  }
+  .sidebar-content-collapsed {
+    margin-inline-start: 70px;
+  }
+}
+.svadmin-devtools--collapsed-width {
+  width: auto;
+}
+.svadmin-devtools--collapsed-min-width {
+  min-width: 200px;
+}

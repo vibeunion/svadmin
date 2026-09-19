@@ -42,7 +42,7 @@ export function surfaceSchemaToJson(schema: TSchema): JsonObject {
     }
     if (value === null || typeof value === 'string' || typeof value === 'boolean') return value;
     if (typeof value === 'number' && Number.isFinite(value)) return value;
-    if (typeof value !== 'object' || value === null || ancestors.has(value)) {
+    if (typeof value !== 'object' || ancestors.has(value)) {
       throw new Error('Surface schema must be serializable without transforms or cycles');
     }
     const prototype = Object.getPrototypeOf(value);

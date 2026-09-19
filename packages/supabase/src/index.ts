@@ -3,6 +3,11 @@
 export { createSupabaseDataProvider } from './data-provider';
 export type { CreateSupabaseDataProviderOptions } from './data-provider';
 export { createSupabaseAuthProvider } from './auth-provider';
+export {
+  createSupabasePermissionAccessControlProvider,
+  registerSupabasePermissionAccessControl,
+} from './permission-adapter';
+export type { SupabasePermissionSnapshot, SupabasePermissionAdapterOptions } from './permission-adapter';
 export type {
   SupabaseAuthProviderOptions,
   SupabaseAuthClient,

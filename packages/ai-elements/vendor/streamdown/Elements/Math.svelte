@@ -1,0 +1,100 @@
+<script lang="ts">
+	import { BROWSER } from 'esm-env';
+	import { onMount, untrack } from 'svelte';
+	import { useStreamdown } from '../context.svelte.js';
+	import type { MathToken } from '../marked/index.js';
+	import { getMathPluginOptions } from '../plugins.js';
+	import { isTestMode } from '../utils/runtime-env.js';
+	import type { KatexOptions } from 'katex';
+	import 'katex/dist/katex.min.css';
+
+	type KatexRenderer = Pick<typeof import('katex'), 'renderToString'>;
+
+	const {
+		token,
+		id
+	}: {
+		token: MathToken;
+		id: string;
+	} = $props();
+
+	const streamdown = useStreamdown();
+	const mathPluginOptions = $derived(getMathPluginOptions(streamdown.plugins?.math));
+	let katexInstance = $state<KatexRenderer | null>(null);
+	const loadKatex = async (): Promise<KatexRenderer | null> => {
+		if (!BROWSER) {
+			return null;
+		}
+
+		return await import('katex');
+	};
+	const escapeHtml = (value: string): string =>
+		value
+			.replaceAll('&', '&amp;')
+			.replaceAll('<', '&lt;')
+			.replaceAll('>', '&gt;')
+			.replaceAll('"', '&quot;')
+			.replaceAll("'", '&#39;');
+
+	onMount(() => {
+		void loadKatex().then((instance) => {
+			if (instance) {
+				katexInstance = instance;
+			}
+		});
+	});
+
+	let inner = $state<HTMLElement | null>(null);
+	const html = $derived.by(() => {
+		const code = token.text;
+		if (!katexInstance) {
+			return '';
+		}
+		const config: KatexOptions = {
+			output: 'htmlAndMathml',
+			displayMode: !token.isInline,
+			throwOnError: false,
+			errorColor: mathPluginOptions.errorColor,
+			...(typeof streamdown.katexConfig === 'function'
+				? streamdown.katexConfig(token.isInline)
+				: streamdown.katexConfig || {})
+		};
+
+		if (config.strict === undefined && isTestMode()) {
+			config.strict = 'ignore';
+		}
+
+		try {
+			return katexInstance.renderToString(code, config);
+		} catch (error) {
+			const message = error instanceof Error ? error.message : 'KaTeX render failed';
+			return untrack(() => {
+				return `<span title="${escapeHtml(`ParseError: ${message}`)}">${inner?.innerHTML || escapeHtml(code)}</span>`;
+			});
+		}
+	});
+</script>
+
+{#if token.isInline}
+	<span
+		data-streamdown-inline-math={id}
+		style={streamdown.isMounted ? streamdown.animationBlockStyle : ''}
+		bind:this={inner}
+		class={streamdown.theme.math.inline}
+	>
+		{@html html}
+	</span>
+{:else}
+	<div
+		data-streamdown-block-math={id}
+		style={streamdown.isMounted ? streamdown.animationBlockStyle : ''}
+		style:height="fit-content"
+		style:width="100%"
+	>
+		<div class="overflow-x-auto">
+			<div bind:this={inner} class={streamdown.theme.math.block}>
+				{@html html}
+			</div>
+		</div>
+	</div>
+{/if}

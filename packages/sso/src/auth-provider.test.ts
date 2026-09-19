@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { createSSOAuthProvider, type TokenStorage } from './auth-provider';
 
+let originalWindow: PropertyDescriptor | undefined;
+let originalFetch: PropertyDescriptor | undefined;
+
 const STORAGE_PREFIX = `svadmin_sso:${encodeURIComponent('https://idp.test')}:${encodeURIComponent('admin-console')}_`;
 
 type FetchCall = {
@@ -39,7 +42,8 @@ function installWindow(href = 'http://app.test/'): void {
 }
 
 function uninstallWindow(): void {
-  Reflect.deleteProperty(globalThis, 'window');
+  if (originalWindow) Object.defineProperty(globalThis, 'window', originalWindow);
+  else Reflect.deleteProperty(globalThis, 'window');
 }
 
 function jsonResponse(data: unknown, init?: ResponseInit): Response {
@@ -77,7 +81,8 @@ function createDeferred<T>(): {
 }
 
 function uninstallFetch(): void {
-  Reflect.deleteProperty(globalThis, 'fetch');
+  if (originalFetch) Object.defineProperty(globalThis, 'fetch', originalFetch);
+  else Reflect.deleteProperty(globalThis, 'fetch');
 }
 
 function formBody(init?: RequestInit): URLSearchParams {
@@ -106,12 +111,16 @@ const manualEndpoints = {
 
 describe('createSSOAuthProvider', () => {
   beforeEach(() => {
+    originalWindow = Object.getOwnPropertyDescriptor(globalThis, 'window');
+    originalFetch = Object.getOwnPropertyDescriptor(globalThis, 'fetch');
     installWindow();
   });
 
   afterEach(() => {
     uninstallWindow();
     uninstallFetch();
+    expect(Object.getOwnPropertyDescriptor(globalThis, 'window')).toEqual(originalWindow);
+    expect(Object.getOwnPropertyDescriptor(globalThis, 'fetch')).toEqual(originalFetch);
   });
 
   test('starts OIDC authorization code flow with PKCE and custom params', async () => {

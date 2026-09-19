@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { canAccessAsync, captureAdminContext, getAccessControlProvider, getLogoutVersion } from '@svadmin/core';
+  import { captureAdminContext, getLogoutVersion } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { onDestroy, untrack } from 'svelte';
   import { SvelteMap } from 'svelte/reactivity';
@@ -55,7 +55,7 @@
     validation.ok ? validation.value.surfaceId : undefined,
     catalog.version, scopeKey, dataScopeKey, getLogoutVersion(),
     adminContext.tenantCacheKey?.__svadminTenant,
-    adminContext.authProvider, adminContext.accessControlProvider, getAccessControlProvider(),
+    adminContext.authProvider, adminContext.accessControlProvider,
   ]);
   // 复用 PR #428 的请求所有权与会话隔离实现，不维护第二套缓存。
   const sourceCache = createSurfaceSourceCache({
@@ -71,6 +71,7 @@
 
   const sourceRequests: SurfaceSourceRequest[] = $derived.by(() => {
     if (!validation.ok) return [];
+    const accessControl = adminContext.accessControlProvider;
     const scope = sessionIdentity;
     return validation.value.dataSources.map((source): SurfaceSourceRequest => {
       const resourcePolicy = Object.hasOwn(policy.resources, source.resource) ? policy.resources[source.resource] : undefined;
@@ -93,7 +94,11 @@
               source: snapshot.source, resourcePolicy: snapshot.resourcePolicy, provider,
               async authorize(resource, action) {
                 if (!isRequestCurrent()) return { can: false };
-                const decision = await canAccessAsync(resource, action);
+                // 授权检查与缓存身份必须使用同一个所属上下文，不能回退到无关全局授权。
+                const meta = adminContext.getProviderMeta(resource);
+                const decision = accessControl
+                  ? await accessControl.can({ resource, action, ...(meta === undefined ? {} : { meta }) })
+                  : { can: true };
                 return isRequestCurrent() ? decision : { can: false };
               },
             });

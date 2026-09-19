@@ -1,75 +1,38 @@
-import { compile } from '@tailwindcss/node';
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { resolve, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import postcss from 'postcss';
-import selectorParser from 'postcss-selector-parser';
 
 const packageRoot = fileURLToPath(new URL('..', import.meta.url));
-const sourceRoot = join(packageRoot, 'src');
-const cssPath = join(sourceRoot, 'app.css');
-const distDir = join(packageRoot, 'dist');
-const outputPath = join(distDir, 'app.css');
-const themeOutputPath = join(distDir, 'app.theme.css');
-const utilityMapPath = join(packageRoot, 'scripts', 'utility-class-map.json');
+const sourceRoot = resolve(packageRoot, 'src');
+const dist = resolve(packageRoot, 'dist');
 
-function collectFiles(root) {
-  const files = [];
-  for (const entry of readdirSync(root)) {
-    const path = join(root, entry);
-    if (statSync(path).isDirectory()) files.push(...collectFiles(path));
-    else if (path.endsWith('.svelte') || path.endsWith('.ts')) files.push(path);
-  }
-  return files;
-}
-
-const candidates = new Set();
-for (const file of collectFiles(sourceRoot)) {
-  const source = readFileSync(file, 'utf8');
-  const strings = [
-    ...source.matchAll(/(?:class|className)\s*=\s*["'`]([^"'`]+)["'`]/g),
-    ...source.matchAll(/['"`]([^'"`\r\n]+)['"`]/g),
-  ];
-  for (const match of strings) {
-    for (const candidate of match[1].split(/\s+/u)) {
-      const normalized = candidate.replace(/^[{(]+|[})]+$/g, '');
-      if (normalized && !/[{}$]/u.test(normalized)) candidates.add(normalized);
+function inlineCss(path, ancestors = new Set()) {
+  if (ancestors.has(path)) throw new Error(`Circular CSS import: ${path}`);
+  const stack = new Set([...ancestors, path]);
+  const root = postcss.parse(readFileSync(path, 'utf8'), { from: path });
+  root.walkAtRules('import', (rule) => {
+    const match = /^['"](\.\.?\/[^'"]+\.css)['"]$/.exec(rule.params);
+    if (!match) throw new Error(`Only local plain-CSS imports are allowed: ${rule.params}`);
+    const target = resolve(dirname(path), match[1]);
+    if (relative(sourceRoot, target).startsWith('..')) throw new Error('CSS import escapes the package source');
+    rule.replaceWith(...inlineCss(target, stack).nodes);
+  });
+  root.walkAtRules((rule) => {
+    if (['theme', 'source', 'apply', 'utility', 'custom-variant', 'tailwind', 'plugin', 'config'].includes(rule.name)) {
+      throw new Error(`Unexpected compiler directive @${rule.name}`);
     }
-  }
+  });
+  return root;
 }
 
-const sourceCss = readFileSync(cssPath, 'utf8');
-const utilityMap = existsSync(utilityMapPath)
-  ? JSON.parse(readFileSync(utilityMapPath, 'utf8'))
-  : {};
-const legacyCandidates = Object.keys(utilityMap);
-const compiler = await compile(sourceCss, {
-  base: sourceRoot,
-  from: cssPath,
-  onDependency: () => {},
-});
-mkdirSync(distDir, { recursive: true });
-let compiledCss = compiler.build([...candidates, ...legacyCandidates]);
-
-if (legacyCandidates.length) {
-  const renameSelectors = selectorParser((selectors) => {
-    selectors.walkClasses((classNode) => {
-      const alias = utilityMap[classNode.value];
-      if (alias) classNode.value = alias;
-    });
-  });
-  const root = postcss.parse(compiledCss);
-  root.walkRules((rule) => {
-    rule.selector = renameSelectors.processSync(rule.selector);
-  });
-  compiledCss = root.toString();
-}
-
-writeFileSync(outputPath, compiledCss, 'utf8');
-// Tailwind hosts need the same compiled aliases as plain-CSS hosts.
-const themeMetadata = postcss.root();
-postcss.parse(sourceCss).walkAtRules((rule) => {
-  if (rule.name === 'theme' || rule.name === 'source') themeMetadata.append(rule.clone());
-});
-writeFileSync(themeOutputPath, `${compiledCss}\n${themeMetadata.toString()}\n`, 'utf8');
-console.info(`[build-static-css] wrote ${candidates.size} candidates and ${legacyCandidates.length} utility aliases to dist/app.css`);
+const css = `${inlineCss(resolve(sourceRoot, 'app.css')).toString().trim()}\n`;
+const aliases = postcss.parse(readFileSync(resolve(sourceRoot, 'styles/aliases.css'), 'utf8'));
+let hasPrimaryAlias = false;
+aliases.walkDecls('--color-primary', () => { hasPrimaryAlias = true; });
+if (!hasPrimaryAlias) throw new Error('Missing public theme aliases');
+mkdirSync(dist, { recursive: true });
+// 保留旧入口路径，但两个入口都只发布浏览器可直接执行的 CSS。
+// 主题变量仍由 styles/aliases.css 提供，不再向宿主注入编译器元数据。
+for (const name of ['app.css', 'app.theme.css']) writeFileSync(resolve(dist, name), css);
+console.info('[build-static-css] published compiler-free CSS through both public entry points');

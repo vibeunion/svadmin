@@ -5,7 +5,6 @@ import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import postcss from 'postcss';
 import selectorParser from 'postcss-selector-parser';
-import { compile } from '@tailwindcss/node';
 
 const root = new URL('../', import.meta.url);
 const read = (name) => readFileSync(new URL(`dist/${name}`, root), 'utf8');
@@ -25,24 +24,17 @@ test('both published CSS entries contain migrated utility and variant styles', (
   }
 });
 
-test('plain CSS has no Tailwind directives, while the theme entry keeps valid metadata', () => {
-  postcss.parse(read('app.css')).walkAtRules((rule) => {
-    assert.ok(!['import', 'theme', 'source', 'apply', 'utility'].includes(rule.name), rule.name);
-  });
-  let themes = 0;
-  let sources = 0;
-  postcss.parse(read('app.theme.css')).walkAtRules((rule) => {
-    if (rule.name === 'theme') {
-      themes++;
-      assert.ok(rule.nodes.some((node) => node.prop === '--color-primary'));
-    }
-    if (rule.name === 'source') {
-      sources++;
-      assert.equal(rule.params, '"./components"');
-    }
-  });
-  assert.equal(themes, 1);
-  assert.equal(sources, 1);
+test('both public entries are identical plain CSS with no compiler metadata', () => {
+  const forbidden = new Set(['import', 'theme', 'source', 'apply', 'utility', 'custom-variant', 'tailwind', 'plugin', 'config']);
+  for (const name of ['app.css', 'app.theme.css']) {
+    let primary = false;
+    postcss.parse(read(name)).walkAtRules((rule) => {
+      assert.ok(!forbidden.has(rule.name), `${name}: @${rule.name}`);
+    });
+    postcss.parse(read(name)).walkDecls('--color-primary', () => { primary = true; });
+    assert.ok(primary, `${name}: missing public theme variable`);
+  }
+  assert.equal(read('app.css'), read('app.theme.css'));
 });
 
 test('every migrated utility referenced by a component has a published CSS selector', () => {
@@ -62,18 +54,6 @@ test('every migrated utility referenced by a component has a published CSS selec
     }
   }
   assert.deepEqual([...missing], []);
-});
-
-test('Tailwind hosts can compile new utilities without losing prebuilt component styles', async () => {
-  const compiler = await compile(`@import "tailwindcss";\n${read('app.theme.css')}`, {
-    base: fileURLToPath(new URL('dist/', root)),
-    onDependency() {},
-  });
-  const css = compiler.build(['text-primary', 'bg-success']);
-  assert.ok(css.includes('.text-primary'));
-  assert.ok(css.includes('.bg-success'));
-  assert.ok(css.includes('.svadmin-u-ed8a5df7b2fb'));
-  assert.ok(css.includes('.svadmin-button--outline'));
 });
 
 test('postbuild is idempotent and preserves both CSS side effects', () => {
