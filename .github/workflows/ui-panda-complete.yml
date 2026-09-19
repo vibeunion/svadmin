@@ -44,8 +44,8 @@ jobs:
         run: node scripts/check-panda-runtime.mjs
       - name: Strict UI and AI package checks
         run: |
-          bun run --cwd packages/ui check
-          bun run --cwd packages/ai-elements check
+          bunx --no-install svelte-check --tsgo-experimental-api --tsconfig packages/ui/tsconfig.json --threshold error
+          bunx --no-install svelte-check --tsgo-experimental-api --tsconfig packages/ai-elements/tsconfig.json --threshold error
       - name: Chromium comparison with immutable baseline
         run: |
           bunx --no-install playwright install --with-deps chromium
