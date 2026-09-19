@@ -11,7 +11,8 @@ const root = resolve(ui, '../..');
 const require = createRequire(join(ui, 'package.json'));
 const { build, preview } = await import(require.resolve('vite'));
 const { svelte } = await import(require.resolve('@sveltejs/vite-plugin-svelte'));
-const { chromium } = await import(require.resolve('@playwright/test'));
+// require.resolve selects the CommonJS entry, so consume that entry as CommonJS.
+const { chromium } = require('@playwright/test');
 const baseline = 'ee01ea0b52285bd3129447cd0b2ddb0c114f45ce';
 const work = join(ui, '.content-recipe-verification');
 const evidence = resolve(process.env.CONTENT_RECIPE_EVIDENCE ?? join(root, 'test-results/content-recipes'));
@@ -174,7 +175,7 @@ try {
       await context.close();
     }
   }
-  console.log(JSON.stringify({ cases: report.cases.length, passed: report.cases.filter((entry) => entry.passed).length, failed: report.errors.length }));
+  console.info(JSON.stringify({ cases: report.cases.length, passed: report.cases.filter((entry) => entry.passed).length, failed: report.errors.length }));
   if (report.errors.length) throw new Error(report.errors.join('\n').slice(0, 16000));
 } finally {
   writeFileSync(join(evidence, 'report.json'), JSON.stringify(report, null, 2) + '\n');
