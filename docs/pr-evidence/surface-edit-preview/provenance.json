@@ -1,0 +1,30 @@
+{
+  "implementationHead": "e153f71bab911a8d48f0f5eebd2ba0930d4435ab",
+  "testedMergeCommit": "5b51c07461411dfcf22af2cf157279c54f89471f",
+  "baseCommit": "510d0b5afe00651916f841a6a4218654d3d6e150",
+  "workflowRun": 35412114507,
+  "artifactId": 10574579085,
+  "artifactName": "surface-browser-evidence",
+  "artifactZipSha256": "94f29a28fb5aad22f7c0b656eb1c7147ae79005d3e9f20c44f969f3839d2003e",
+  "browser": "151.0.7922.34",
+  "compilerPlugins": ["svelte"],
+  "surfaceTests": { "files": 13, "passed": 108, "failed": 0 },
+  "nodeContractSubset": { "files": 6, "passed": 62, "failed": 0 },
+  "surfaceTypecheck": { "errors": 0, "warnings": 0 },
+  "editorCssBytes": 3647,
+  "hashes": {
+    "src/components/SurfaceEditPreview.svelte": "5b06fb4be5d1aed577fe17bd411353daabeb714293564f4a26cdc25a588c48ce",
+    "src/components/SurfaceRenderer.svelte": "c5e525a9bb1b615ced224f35018616f9fe91ac696bdc73abe0aabbd1fe5086b3",
+    "panda.config.ts": "9a407125cfff630daedcc8ce424b85b86ead925289ac4530f1ee2072e6230476",
+    "src/styles/editor.css": "4ae69167e62cd776c1f3cd349a2b3a2fec2315849b2a6d59e839dbf06315e00b"
+  },
+  "cssOrders": [
+    { "editorFirst": true, "defaultPadding": 16, "hostUtilityOverride": 24 },
+    { "editorFirst": false, "defaultPadding": 16, "hostUtilityOverride": 24 }
+  ],
+  "cases": [
+    { "width": 1440, "height": 900, "theme": "light", "density": "comfortable", "inputPreserved": true, "requests": 1, "applyCount": 1, "overflow": false, "errors": [] },
+    { "width": 1920, "height": 1080, "theme": "dark", "density": "compact", "inputPreserved": true, "requests": 1, "applyCount": 1, "overflow": false, "errors": [] },
+    { "width": 390, "height": 900, "theme": "light", "density": "compact", "inputPreserved": true, "requests": 1, "applyCount": 1, "overflow": false, "errors": [] }
+  ]
+}
