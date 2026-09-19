@@ -1,0 +1,3 @@
+# Exact integration browser evidence
+
+Original unmodified synthetic-fixture Chromium PNGs and reports, tied to the exact implementation heads and successful workflow runs in provenance.json. Product full-page capture sizes may exceed the named viewport heights. These are not Figma synchronization, production acceptance, medical-service validation, published-peer compatibility, or independent-human accessibility/design certification. Browser checks do not waive full CI/E2E gates. The 438 archive contains a selected three-image subset plus reports; the complete 228-scene ZIP remains in its original Actions artifact and the collection artifact.

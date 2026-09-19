@@ -1,0 +1,4565 @@
+{
+  "revision": "a36b6be7a7703873e06854c7bbe18e50412bdafd",
+  "scope": "Built Svelte specimens, not production backend integration, Figma parity or WCAG certification",
+  "capture": {
+    "mode": "full-page",
+    "attempts": 8,
+    "equality": "consecutive PNG buffers, byte-for-byte",
+    "masks": false,
+    "baselineComparison": false
+  },
+  "figmaSynced": false,
+  "sourceHashes": {
+    "design/stripe-first/preview/Preview.svelte": "023af224dba5685d6d1e78277f76f1cfd1d143e8c337a95b496080e444675056",
+    "design/stripe-first/preview/capture.mjs": "a12460d9b665cd816c0959e38b115e3f11753abb2b715fedaa6ead3523a85414",
+    "design/stripe-first/preview/capture.test.mjs": "5dce5078f8899e7f46c594f3f8d16a5a69bf963db7528c1710b3f4bcbdc73711",
+    "design/stripe-first/preview/closeout.json": "d91a2495c02513e5a22aff3e2d52b97a7469ac416bf445616689ba39199954c4",
+    "design/stripe-first/preview/keyboard.mjs": "5f1780b358d4068ed89372f448bbd09446c6684278dd68431ea83099c46a158b",
+    "design/stripe-first/preview/main.js": "56187a41a7eccf851f16904b30d4b9b44b6edc227ecac701a5ab00fac23e4243",
+    "design/stripe-first/preview/model.mjs": "2da72daa4e41bc4444190209fa2d52dafce5aec03812dfed0ffbf61ddeae2e63",
+    "design/stripe-first/preview/model.test.mjs": "21c4ecb4b38460ec7728daa3b516d457c11c3f01e1d18881a71cc5b04ec7216a",
+    "design/stripe-first/preview/motion.css": "b30a433d754812caa2c31bd42c30809d2248e31663a18e058596d46f16d4ee7b",
+    "design/stripe-first/preview/preview.css": "7c3630f6a020ddda77433b3eb431427d577b64a63f98a70f37b13c2054df5686",
+    "design/stripe-first/preview/run.mjs": "5c74b25902b545712deae16ce2deba03ae1829132cb4adf95d50c160f9ec60b4",
+    "design/stripe-first/preview/scroll.css": "45329f33cf4395d5f686a9c4572245504d1472b715b2b8b98f368a2a42e90ae2",
+    "design/stripe-first/preview/status-colors.mjs": "17cb299273cfe7e3de99ff3e3898baa29ea271c97f28d8b7afe8bfb811541e76",
+    "design/stripe-first/preview/task.json": "c8bb48e538ce188dd47614a82b3a82ee84c8af91abd7351287bd1eb5f5badd92",
+    "design/stripe-first/preview/tsconfig.json": "c2781b1ebf949948ee1f7ea868697e021f0d5b97ddc6aa865debc8123a8e6c7e",
+    "design/stripe-first/preview/verify.mjs": "adbb954a3301939e06688a09c0a8823bdae735da05c89a474057ba34d86ecebd",
+    "packages/ui/dist/app.css": "e6a3aad9f1edc603927ade731d201ebbce9dcd8fa7b5541476ccf31b06c6b35d",
+    "packages/ui/design/primitive-recipes.ts": "b103f4c1a0b9a4004c5e1c3ef90209a275dfc819d7ad8862f12313c774b6efe8",
+    "packages/ui/design/product-recipes.ts": "a2a57f97a82b436a6431535b2519029c8cb7cacd9b2f3db7f7ce9d5c570d5af4"
+  },
+  "statusContrast": [
+    {
+      "id": "components-ready-light-en-1440",
+      "statuses": [
+        {
+          "status": "success",
+          "text": "Active",
+          "foreground": [
+            25,
+            61,
+            42,
+            255
+          ],
+          "background": [
+            233,
+            243,
+            235,
+            255
+          ],
+          "ratio": 10.609517583457949
+        },
+        {
+          "status": "warning",
+          "text": "Pending review",
+          "foreground": [
+            80,
+            62,
+            38,
+            255
+          ],
+          "background": [
+            251,
+            244,
+            234,
+            255
+          ],
+          "ratio": 9.343529270493969
+        },
+        {
+          "status": "danger",
+          "text": "Failed",
+          "foreground": [
+            87,
+            38,
+            38,
+            255
+          ],
+          "background": [
+            255,
+            236,
+            233,
+            255
+          ],
+          "ratio": 10.772889034443436
+        },
+        {
+          "status": "info",
+          "text": "Processing",
+          "foreground": [
+            29,
+            57,
+            82,
+            255
+          ],
+          "background": [
+            234,
+            242,
+            250,
+            255
+          ],
+          "ratio": 10.560689439395134
+        },
+        {
+          "status": "neutral",
+          "text": "Archived",
+          "foreground": [
+            44,
+            47,
+            55,
+            255
+          ],
+          "background": [
+            237,
+            238,
+            239,
+            255
+          ],
+          "ratio": 11.522398072144346
+        }
+      ]
+    },
+    {
+      "id": "components-ready-light-zh-CN-1440",
+      "statuses": [
+        {
+          "status": "success",
+          "text": "已启用",
+          "foreground": [
+            25,
+            61,
+            42,
+            255
+          ],
+          "background": [
+            233,
+            243,
+            235,
+            255
+          ],
+          "ratio": 10.609517583457949
+        },
+        {
+          "status": "warning",
+          "text": "待审核",
+          "foreground": [
+            80,
+            62,
+            38,
+            255
+          ],
+          "background": [
+            251,
+            244,
+            234,
+            255
+          ],
+          "ratio": 9.343529270493969
+        },
+        {
+          "status": "danger",
+          "text": "失败",
+          "foreground": [
+            87,
+            38,
+            38,
+            255
+          ],
+          "background": [
+            255,
+            236,
+            233,
+            255
+          ],
+          "ratio": 10.772889034443436
+        },
+        {
+          "status": "info",
+          "text": "处理中",
+          "foreground": [
+            29,
+            57,
+            82,
+            255
+          ],
+          "background": [
+            234,
+            242,
+            250,
+            255
+          ],
+          "ratio": 10.560689439395134
+        },
+        {
+          "status": "neutral",
+          "text": "已归档",
+          "foreground": [
+            44,
+            47,
+            55,
+            255
+          ],
+          "background": [
+            237,
+            238,
+            239,
+            255
+          ],
+          "ratio": 11.522398072144346
+        }
+      ]
+    },
+    {
+      "id": "components-ready-dark-en-1440",
+      "statuses": [
+        {
+          "status": "success",
+          "text": "Active",
+          "foreground": [
+            185,
+            220,
+            194,
+            255
+          ],
+          "background": [
+            22,
+            32,
+            32,
+            255
+          ],
+          "ratio": 11.159964041203839
+        },
+        {
+          "status": "warning",
+          "text": "Pending review",
+          "foreground": [
+            241,
+            220,
+            190,
+            255
+          ],
+          "background": [
+            34,
+            32,
+            31,
+            255
+          ],
+          "ratio": 12.145312849350539
+        },
+        {
+          "status": "danger",
+          "text": "Failed",
+          "foreground": [
+            250,
+            193,
+            190,
+            255
+          ],
+          "background": [
+            36,
+            27,
+            31,
+            255
+          ],
+          "ratio": 10.7355543509814
+        },
+        {
+          "status": "info",
+          "text": "Processing",
+          "foreground": [
+            187,
+            216,
+            242,
+            255
+          ],
+          "background": [
+            23,
+            31,
+            41,
+            255
+          ],
+          "ratio": 11.244034170753366
+        },
+        {
+          "status": "neutral",
+          "text": "Archived",
+          "foreground": [
+            209,
+            212,
+            216,
+            255
+          ],
+          "background": [
+            28,
+            30,
+            36,
+            255
+          ],
+          "ratio": 11.201397791627326
+        }
+      ]
+    },
+    {
+      "id": "components-ready-dark-zh-CN-1440",
+      "statuses": [
+        {
+          "status": "success",
+          "text": "已启用",
+          "foreground": [
+            185,
+            220,
+            194,
+            255
+          ],
+          "background": [
+            22,
+            32,
+            32,
+            255
+          ],
+          "ratio": 11.159964041203839
+        },
+        {
+          "status": "warning",
+          "text": "待审核",
+          "foreground": [
+            241,
+            220,
+            190,
+            255
+          ],
+          "background": [
+            34,
+            32,
+            31,
+            255
+          ],
+          "ratio": 12.145312849350539
+        },
+        {
+          "status": "danger",
+          "text": "失败",
+          "foreground": [
+            250,
+            193,
+            190,
+            255
+          ],
+          "background": [
+            36,
+            27,
+            31,
+            255
+          ],
+          "ratio": 10.7355543509814
+        },
+        {
+          "status": "info",
+          "text": "处理中",
+          "foreground": [
+            187,
+            216,
+            242,
+            255
+          ],
+          "background": [
+            23,
+            31,
+            41,
+            255
+          ],
+          "ratio": 11.244034170753366
+        },
+        {
+          "status": "neutral",
+          "text": "已归档",
+          "foreground": [
+            209,
+            212,
+            216,
+            255
+          ],
+          "background": [
+            28,
+            30,
+            36,
+            255
+          ],
+          "ratio": 11.201397791627326
+        }
+      ]
+    },
+    {
+      "id": "components-ready-light-en-1920",
+      "statuses": [
+        {
+          "status": "success",
+          "text": "Active",
+          "foreground": [
+            25,
+            61,
+            42,
+            255
+          ],
+          "background": [
+            233,
+            243,
+            235,
+            255
+          ],
+          "ratio": 10.609517583457949
+        },
+        {
+          "status": "warning",
+          "text": "Pending review",
+          "foreground": [
+            80,
+            62,
+            38,
+            255
+          ],
+          "background": [
+            251,
+            244,
+            234,
+            255
+          ],
+          "ratio": 9.343529270493969
+        },
+        {
+          "status": "danger",
+          "text": "Failed",
+          "foreground": [
+            87,
+            38,
+            38,
+            255
+          ],
+          "background": [
+            255,
+            236,
+            233,
+            255
+          ],
+          "ratio": 10.772889034443436
+        },
+        {
+          "status": "info",
+          "text": "Processing",
+          "foreground": [
+            29,
+            57,
+            82,
+            255
+          ],
+          "background": [
+            234,
+            242,
+            250,
+            255
+          ],
+          "ratio": 10.560689439395134
+        },
+        {
+          "status": "neutral",
+          "text": "Archived",
+          "foreground": [
+            44,
+            47,
+            55,
+            255
+          ],
+          "background": [
+            237,
+            238,
+            239,
+            255
+          ],
+          "ratio": 11.522398072144346
+        }
+      ]
+    },
+    {
+      "id": "components-ready-light-zh-CN-1920",
+      "statuses": [
+        {
+          "status": "success",
+          "text": "已启用",
+          "foreground": [
+            25,
+            61,
+            42,
+            255
+          ],
+          "background": [
+            233,
+            243,
+            235,
+            255
+          ],
+          "ratio": 10.609517583457949
+        },
+        {
+          "status": "warning",
+          "text": "待审核",
+          "foreground": [
+            80,
+            62,
+            38,
+            255
+          ],
+          "background": [
+            251,
+            244,
+            234,
+            255
+          ],
+          "ratio": 9.343529270493969
+        },
+        {
+          "status": "danger",
+          "text": "失败",
+          "foreground": [
+            87,
+            38,
+            38,
+            255
+          ],
+          "background": [
+            255,
+            236,
+            233,
+            255
+          ],
+          "ratio": 10.772889034443436
+        },
+        {
+          "status": "info",
+          "text": "处理中",
+          "foreground": [
+            29,
+            57,
+            82,
+            255
+          ],
+          "background": [
+            234,
+            242,
+            250,
+            255
+          ],
+          "ratio": 10.560689439395134
+        },
+        {
+          "status": "neutral",
+          "text": "已归档",
+          "foreground": [
+            44,
+            47,
+            55,
+            255
+          ],
+          "background": [
+            237,
+            238,
+            239,
+            255
+          ],
+          "ratio": 11.522398072144346
+        }
+      ]
+    },
+    {
+      "id": "components-ready-dark-en-1920",
+      "statuses": [
+        {
+          "status": "success",
+          "text": "Active",
+          "foreground": [
+            185,
+            220,
+            194,
+            255
+          ],
+          "background": [
+            22,
+            32,
+            32,
+            255
+          ],
+          "ratio": 11.159964041203839
+        },
+        {
+          "status": "warning",
+          "text": "Pending review",
+          "foreground": [
+            241,
+            220,
+            190,
+            255
+          ],
+          "background": [
+            34,
+            32,
+            31,
+            255
+          ],
+          "ratio": 12.145312849350539
+        },
+        {
+          "status": "danger",
+          "text": "Failed",
+          "foreground": [
+            250,
+            193,
+            190,
+            255
+          ],
+          "background": [
+            36,
+            27,
+            31,
+            255
+          ],
+          "ratio": 10.7355543509814
+        },
+        {
+          "status": "info",
+          "text": "Processing",
+          "foreground": [
+            187,
+            216,
+            242,
+            255
+          ],
+          "background": [
+            23,
+            31,
+            41,
+            255
+          ],
+          "ratio": 11.244034170753366
+        },
+        {
+          "status": "neutral",
+          "text": "Archived",
+          "foreground": [
+            209,
+            212,
+            216,
+            255
+          ],
+          "background": [
+            28,
+            30,
+            36,
+            255
+          ],
+          "ratio": 11.201397791627326
+        }
+      ]
+    },
+    {
+      "id": "components-ready-dark-zh-CN-1920",
+      "statuses": [
+        {
+          "status": "success",
+          "text": "已启用",
+          "foreground": [
+            185,
+            220,
+            194,
+            255
+          ],
+          "background": [
+            22,
+            32,
+            32,
+            255
+          ],
+          "ratio": 11.159964041203839
+        },
+        {
+          "status": "warning",
+          "text": "待审核",
+          "foreground": [
+            241,
+            220,
+            190,
+            255
+          ],
+          "background": [
+            34,
+            32,
+            31,
+            255
+          ],
+          "ratio": 12.145312849350539
+        },
+        {
+          "status": "danger",
+          "text": "失败",
+          "foreground": [
+            250,
+            193,
+            190,
+            255
+          ],
+          "background": [
+            36,
+            27,
+            31,
+            255
+          ],
+          "ratio": 10.7355543509814
+        },
+        {
+          "status": "info",
+          "text": "处理中",
+          "foreground": [
+            187,
+            216,
+            242,
+            255
+          ],
+          "background": [
+            23,
+            31,
+            41,
+            255
+          ],
+          "ratio": 11.244034170753366
+        },
+        {
+          "status": "neutral",
+          "text": "已归档",
+          "foreground": [
+            209,
+            212,
+            216,
+            255
+          ],
+          "background": [
+            28,
+            30,
+            36,
+            255
+          ],
+          "ratio": 11.201397791627326
+        }
+      ]
+    },
+    {
+      "id": "components-ready-light-en-390",
+      "statuses": [
+        {
+          "status": "success",
+          "text": "Active",
+          "foreground": [
+            25,
+            61,
+            42,
+            255
+          ],
+          "background": [
+            233,
+            243,
+            235,
+            255
+          ],
+          "ratio": 10.609517583457949
+        },
+        {
+          "status": "warning",
+          "text": "Pending review",
+          "foreground": [
+            80,
+            62,
+            38,
+            255
+          ],
+          "background": [
+            251,
+            244,
+            234,
+            255
+          ],
+          "ratio": 9.343529270493969
+        },
+        {
+          "status": "danger",
+          "text": "Failed",
+          "foreground": [
+            87,
+            38,
+            38,
+            255
+          ],
+          "background": [
+            255,
+            236,
+            233,
+            255
+          ],
+          "ratio": 10.772889034443436
+        },
+        {
+          "status": "info",
+          "text": "Processing",
+          "foreground": [
+            29,
+            57,
+            82,
+            255
+          ],
+          "background": [
+            234,
+            242,
+            250,
+            255
+          ],
+          "ratio": 10.560689439395134
+        },
+        {
+          "status": "neutral",
+          "text": "Archived",
+          "foreground": [
+            44,
+            47,
+            55,
+            255
+          ],
+          "background": [
+            237,
+            238,
+            239,
+            255
+          ],
+          "ratio": 11.522398072144346
+        }
+      ]
+    },
+    {
+      "id": "components-ready-light-zh-CN-390",
+      "statuses": [
+        {
+          "status": "success",
+          "text": "已启用",
+          "foreground": [
+            25,
+            61,
+            42,
+            255
+          ],
+          "background": [
+            233,
+            243,
+            235,
+            255
+          ],
+          "ratio": 10.609517583457949
+        },
+        {
+          "status": "warning",
+          "text": "待审核",
+          "foreground": [
+            80,
+            62,
+            38,
+            255
+          ],
+          "background": [
+            251,
+            244,
+            234,
+            255
+          ],
+          "ratio": 9.343529270493969
+        },
+        {
+          "status": "danger",
+          "text": "失败",
+          "foreground": [
+            87,
+            38,
+            38,
+            255
+          ],
+          "background": [
+            255,
+            236,
+            233,
+            255
+          ],
+          "ratio": 10.772889034443436
+        },
+        {
+          "status": "info",
+          "text": "处理中",
+          "foreground": [
+            29,
+            57,
+            82,
+            255
+          ],
+          "background": [
+            234,
+            242,
+            250,
+            255
+          ],
+          "ratio": 10.560689439395134
+        },
+        {
+          "status": "neutral",
+          "text": "已归档",
+          "foreground": [
+            44,
+            47,
+            55,
+            255
+          ],
+          "background": [
+            237,
+            238,
+            239,
+            255
+          ],
+          "ratio": 11.522398072144346
+        }
+      ]
+    },
+    {
+      "id": "components-ready-dark-en-390",
+      "statuses": [
+        {
+          "status": "success",
+          "text": "Active",
+          "foreground": [
+            185,
+            220,
+            194,
+            255
+          ],
+          "background": [
+            22,
+            32,
+            32,
+            255
+          ],
+          "ratio": 11.159964041203839
+        },
+        {
+          "status": "warning",
+          "text": "Pending review",
+          "foreground": [
+            241,
+            220,
+            190,
+            255
+          ],
+          "background": [
+            34,
+            32,
+            31,
+            255
+          ],
+          "ratio": 12.145312849350539
+        },
+        {
+          "status": "danger",
+          "text": "Failed",
+          "foreground": [
+            250,
+            193,
+            190,
+            255
+          ],
+          "background": [
+            36,
+            27,
+            31,
+            255
+          ],
+          "ratio": 10.7355543509814
+        },
+        {
+          "status": "info",
+          "text": "Processing",
+          "foreground": [
+            187,
+            216,
+            242,
+            255
+          ],
+          "background": [
+            23,
+            31,
+            41,
+            255
+          ],
+          "ratio": 11.244034170753366
+        },
+        {
+          "status": "neutral",
+          "text": "Archived",
+          "foreground": [
+            209,
+            212,
+            216,
+            255
+          ],
+          "background": [
+            28,
+            30,
+            36,
+            255
+          ],
+          "ratio": 11.201397791627326
+        }
+      ]
+    },
+    {
+      "id": "components-ready-dark-zh-CN-390",
+      "statuses": [
+        {
+          "status": "success",
+          "text": "已启用",
+          "foreground": [
+            185,
+            220,
+            194,
+            255
+          ],
+          "background": [
+            22,
+            32,
+            32,
+            255
+          ],
+          "ratio": 11.159964041203839
+        },
+        {
+          "status": "warning",
+          "text": "待审核",
+          "foreground": [
+            241,
+            220,
+            190,
+            255
+          ],
+          "background": [
+            34,
+            32,
+            31,
+            255
+          ],
+          "ratio": 12.145312849350539
+        },
+        {
+          "status": "danger",
+          "text": "失败",
+          "foreground": [
+            250,
+            193,
+            190,
+            255
+          ],
+          "background": [
+            36,
+            27,
+            31,
+            255
+          ],
+          "ratio": 10.7355543509814
+        },
+        {
+          "status": "info",
+          "text": "处理中",
+          "foreground": [
+            187,
+            216,
+            242,
+            255
+          ],
+          "background": [
+            23,
+            31,
+            41,
+            255
+          ],
+          "ratio": 11.244034170753366
+        },
+        {
+          "status": "neutral",
+          "text": "已归档",
+          "foreground": [
+            209,
+            212,
+            216,
+            255
+          ],
+          "background": [
+            28,
+            30,
+            36,
+            255
+          ],
+          "ratio": 11.201397791627326
+        }
+      ]
+    }
+  ],
+  "scenes": [
+    {
+      "id": "components-ready-light-en-1440",
+      "view": "components",
+      "state": "ready",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/components-ready-light-en-1440.png",
+      "sha256": "8289c439231236f1828f3ed1b78ba4ba1f14b85e9b550a01878507c0c81cb06c",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-ready-light-en-1440",
+      "view": "resource-list",
+      "state": "ready",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-ready-light-en-1440.png",
+      "sha256": "ff2322635b53cc9935aa2bb30124cfef538bc1780422106e7bf8a6f2f1945945",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-loading-light-en-1440",
+      "view": "resource-list",
+      "state": "loading",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-loading-light-en-1440.png",
+      "sha256": "7c55af347131102f6965d6805af31277f0444658cd835b4ad21b2bc60d081a3c",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-initial-empty-light-en-1440",
+      "view": "resource-list",
+      "state": "initial-empty",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-initial-empty-light-en-1440.png",
+      "sha256": "6af647bfcf4f959283d07d1ac1832fbfbdf405aca9d499b3a404f72f656f5a75",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-filtered-empty-light-en-1440",
+      "view": "resource-list",
+      "state": "filtered-empty",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-filtered-empty-light-en-1440.png",
+      "sha256": "09127b4a703cc22ab0f161675c85021c420469ec438d88638a5c6515d6bfecff",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-error-light-en-1440",
+      "view": "resource-list",
+      "state": "error",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-error-light-en-1440.png",
+      "sha256": "daff1558ae568dca83b8f0dd62792159375dda03b622cfe12292708cfed1aae8",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-forbidden-light-en-1440",
+      "view": "resource-list",
+      "state": "forbidden",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-forbidden-light-en-1440.png",
+      "sha256": "376ec763b23f5a459fe8df212688499177057dae8ad924838c4d689fb8504d85",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-ready-light-en-1440",
+      "view": "record-detail",
+      "state": "ready",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-ready-light-en-1440.png",
+      "sha256": "5543a8503a03a4a4b803d3154882b619b5878de9e9802f3919af500deada82bc",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-loading-light-en-1440",
+      "view": "record-detail",
+      "state": "loading",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-loading-light-en-1440.png",
+      "sha256": "598eb61863087ab04d6b091ef0ea546b4b4414e1bae77a377716f6976b38ab61",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-partial-light-en-1440",
+      "view": "record-detail",
+      "state": "partial",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-partial-light-en-1440.png",
+      "sha256": "abae441fb3de8a4f749600593ab3bb4863433c11f3dae6adf37e5d4cb592da5a",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-error-light-en-1440",
+      "view": "record-detail",
+      "state": "error",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-error-light-en-1440.png",
+      "sha256": "315d623b5ae2ac7bb024cc3fa935a6152513be794607a9d6dd78a77d4d6ea48e",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-forbidden-light-en-1440",
+      "view": "record-detail",
+      "state": "forbidden",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-forbidden-light-en-1440.png",
+      "sha256": "1845295b218b20bd2c57fe791417edac81994f9bc34bcb31eaea8738752253c7",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-ready-light-en-1440",
+      "view": "settings",
+      "state": "ready",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-ready-light-en-1440.png",
+      "sha256": "5aa3fb74c65ac7e8f09de5fd7c8b7d52bfaea5a1087b03b00756468cfccf6259",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-dirty-light-en-1440",
+      "view": "settings",
+      "state": "dirty",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-dirty-light-en-1440.png",
+      "sha256": "3dfeae29e1fd49f41517947b319e5f1ab1b9ee6eba1251dd70d3258e750af641",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-invalid-light-en-1440",
+      "view": "settings",
+      "state": "invalid",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-invalid-light-en-1440.png",
+      "sha256": "738adf407735e7cb33367de4f5b2289e285d827f1b9a4a28b9e1f180750459f2",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-saving-light-en-1440",
+      "view": "settings",
+      "state": "saving",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-saving-light-en-1440.png",
+      "sha256": "a59000577dbd45f3550b307dec3b8dc65390224e0d59d5fc9d33f534d89e42ca",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-saved-light-en-1440",
+      "view": "settings",
+      "state": "saved",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-saved-light-en-1440.png",
+      "sha256": "70a88c14f78a3746d2cd370bd67bee4b67329cd37c595be38254189ced763e4e",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-error-light-en-1440",
+      "view": "settings",
+      "state": "error",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-error-light-en-1440.png",
+      "sha256": "9873c67e3c18e62746ac9b72596d1ad2fa5878981c07510869d79b921e7c2239",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-readonly-light-en-1440",
+      "view": "settings",
+      "state": "readonly",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-readonly-light-en-1440.png",
+      "sha256": "1b8cc5427f18a8e4404a1cd1859762c1d3be4c8c05982412bf9913b8504ddad9",
+      "captureAttempts": 2
+    },
+    {
+      "id": "components-ready-light-zh-CN-1440",
+      "view": "components",
+      "state": "ready",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/components-ready-light-zh-CN-1440.png",
+      "sha256": "c66e635b77a6c1431af89ab62542f81890cd33f33923000f0c43ac49d6ae06d6",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-ready-light-zh-CN-1440",
+      "view": "resource-list",
+      "state": "ready",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-ready-light-zh-CN-1440.png",
+      "sha256": "e6ff326cd320e03a0502a70879333db915b45a9a72a4cd24c8d0aeaaa5a11c04",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-loading-light-zh-CN-1440",
+      "view": "resource-list",
+      "state": "loading",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-loading-light-zh-CN-1440.png",
+      "sha256": "ebec12340ae13179bfff0f14de60831ea8a596f6c49b411e182aec658378bd68",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-initial-empty-light-zh-CN-1440",
+      "view": "resource-list",
+      "state": "initial-empty",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-initial-empty-light-zh-CN-1440.png",
+      "sha256": "c79988b4ff3cc4395bde12224d69a0d8ffb46ca11d92a7d97a226bb89e56e07a",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-filtered-empty-light-zh-CN-1440",
+      "view": "resource-list",
+      "state": "filtered-empty",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-filtered-empty-light-zh-CN-1440.png",
+      "sha256": "b7e559249823e12a42277be897dc442491c5358d4aeeed77f86d2928d8e44765",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-error-light-zh-CN-1440",
+      "view": "resource-list",
+      "state": "error",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-error-light-zh-CN-1440.png",
+      "sha256": "647b36179cff29f72bdaaf0cefc452a0abf6247869ec9a77c832f492ea45b29f",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-forbidden-light-zh-CN-1440",
+      "view": "resource-list",
+      "state": "forbidden",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-forbidden-light-zh-CN-1440.png",
+      "sha256": "08089e7446b71b0e337c4d3fb063507c861306a045184ea936eff4c966c4bb2d",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-ready-light-zh-CN-1440",
+      "view": "record-detail",
+      "state": "ready",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-ready-light-zh-CN-1440.png",
+      "sha256": "bdc255e24450bd82107d1a13c04814744b4150afde01bc17710552144cf6ad02",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-loading-light-zh-CN-1440",
+      "view": "record-detail",
+      "state": "loading",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-loading-light-zh-CN-1440.png",
+      "sha256": "9bdfa7a95c4ac930e83cf7efefc423ac4c12ab2475a6ca736a74dfad1b411ae8",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-partial-light-zh-CN-1440",
+      "view": "record-detail",
+      "state": "partial",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-partial-light-zh-CN-1440.png",
+      "sha256": "e0cb38936b1cc159fc917a4a5d1337a9402401f3f27422b25c892f552f03945f",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-error-light-zh-CN-1440",
+      "view": "record-detail",
+      "state": "error",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-error-light-zh-CN-1440.png",
+      "sha256": "070d16af06ef5f97edcdf3665aeab2a58fab7da7894ba0940ada406055181047",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-forbidden-light-zh-CN-1440",
+      "view": "record-detail",
+      "state": "forbidden",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-forbidden-light-zh-CN-1440.png",
+      "sha256": "f9a374fbf600967460e5ef5d6467291c3cf89dfe5d552c2f9a7cbcff864f0eb2",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-ready-light-zh-CN-1440",
+      "view": "settings",
+      "state": "ready",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-ready-light-zh-CN-1440.png",
+      "sha256": "b86f31525a7228a1666689e790618044797b9936604057068b20c6afc4c13037",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-dirty-light-zh-CN-1440",
+      "view": "settings",
+      "state": "dirty",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-dirty-light-zh-CN-1440.png",
+      "sha256": "6b40328802165c30476752eae5913b8f5eb3ac2cd6b28ffb01f41b74167067d3",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-invalid-light-zh-CN-1440",
+      "view": "settings",
+      "state": "invalid",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-invalid-light-zh-CN-1440.png",
+      "sha256": "6ac7113e682f13dfc75d6607e59e8f22c67a84d83d2614f62156e61894abca65",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-saving-light-zh-CN-1440",
+      "view": "settings",
+      "state": "saving",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-saving-light-zh-CN-1440.png",
+      "sha256": "34222e85b41bc854022a22888f8358e71a39afac55116ab191f9b9947e8af900",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-saved-light-zh-CN-1440",
+      "view": "settings",
+      "state": "saved",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-saved-light-zh-CN-1440.png",
+      "sha256": "328043fd432e11743efd7ce8556182262277d2139b3a49dcf05cfbafde104137",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-error-light-zh-CN-1440",
+      "view": "settings",
+      "state": "error",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-error-light-zh-CN-1440.png",
+      "sha256": "6a58e3ddde29c7ee04cf0a3e5c33071f3540c4a0ce83edcc74e71a27567f1ee1",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-readonly-light-zh-CN-1440",
+      "view": "settings",
+      "state": "readonly",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-readonly-light-zh-CN-1440.png",
+      "sha256": "0f8e8398e95f8ebb55015260339afbfb35ec2536a449b0b56e6387481d98afbb",
+      "captureAttempts": 2
+    },
+    {
+      "id": "components-ready-dark-en-1440",
+      "view": "components",
+      "state": "ready",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/components-ready-dark-en-1440.png",
+      "sha256": "323fe1ae4ddb04d77b344465ece2accb0242dabe19b33769e964a6126dea0ab4",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-ready-dark-en-1440",
+      "view": "resource-list",
+      "state": "ready",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-ready-dark-en-1440.png",
+      "sha256": "5eb538a19c1255e59ca43ea40544d5db9991e314d542a9437e23d15b9e9c0d8e",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-loading-dark-en-1440",
+      "view": "resource-list",
+      "state": "loading",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-loading-dark-en-1440.png",
+      "sha256": "0240694f5ea5145a88191cc5e4841aa945ac029fbc767a562fd8aaee15cf0fdb",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-initial-empty-dark-en-1440",
+      "view": "resource-list",
+      "state": "initial-empty",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-initial-empty-dark-en-1440.png",
+      "sha256": "08bbe9a3add795d4f492e7699c0b68400f6027e854c9e7ead6a3a07c0f7d172c",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-filtered-empty-dark-en-1440",
+      "view": "resource-list",
+      "state": "filtered-empty",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-filtered-empty-dark-en-1440.png",
+      "sha256": "a8d8f30e7a37d8d079d60fd00c64dc965f234215ae7bd322cf82c05c44378da9",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-error-dark-en-1440",
+      "view": "resource-list",
+      "state": "error",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-error-dark-en-1440.png",
+      "sha256": "d2a97d4b113f82a613cf8d81465de3c19e3d0e31355df93a81f18eaccb5ab568",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-forbidden-dark-en-1440",
+      "view": "resource-list",
+      "state": "forbidden",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-forbidden-dark-en-1440.png",
+      "sha256": "874d7fb4165d40eb15000f7cb9803995dfdb5bde26836a6aded1ca1cc8b787dd",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-ready-dark-en-1440",
+      "view": "record-detail",
+      "state": "ready",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-ready-dark-en-1440.png",
+      "sha256": "b83617a46b8d61b14fe3cd8b3d46079c7ebb2d23e6955a2852ef968c5ada5309",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-loading-dark-en-1440",
+      "view": "record-detail",
+      "state": "loading",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-loading-dark-en-1440.png",
+      "sha256": "aba308e4beabb1e815afbe3eb9f2973b20666f6b9aee90319b8901f98a65cff3",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-partial-dark-en-1440",
+      "view": "record-detail",
+      "state": "partial",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-partial-dark-en-1440.png",
+      "sha256": "a80314dbd92cb194ef55956f126231e3a047b423a71aa3b6e8c6273509043e9c",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-error-dark-en-1440",
+      "view": "record-detail",
+      "state": "error",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-error-dark-en-1440.png",
+      "sha256": "80c727cc69439d3d5ce721e35fb21c10cc139170fc74d15e694543ad0e630506",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-forbidden-dark-en-1440",
+      "view": "record-detail",
+      "state": "forbidden",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-forbidden-dark-en-1440.png",
+      "sha256": "b1328a386a6f79fe0fd012d1c552867f53de33f8f8d1afc306185e28c6bd0b4c",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-ready-dark-en-1440",
+      "view": "settings",
+      "state": "ready",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-ready-dark-en-1440.png",
+      "sha256": "7306ae48c76bbae86fb343f6b8dabc8b8cd70c4b24f0048361dc25a9e49216cc",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-dirty-dark-en-1440",
+      "view": "settings",
+      "state": "dirty",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-dirty-dark-en-1440.png",
+      "sha256": "0f9580fdd370c744003333748a2a55d6058639d193ec342ea513191d1c593220",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-invalid-dark-en-1440",
+      "view": "settings",
+      "state": "invalid",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-invalid-dark-en-1440.png",
+      "sha256": "a052bf8b1e7ebd230537bdd5ae749bfd64a26488bd4ae2e2addfcae85b509898",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-saving-dark-en-1440",
+      "view": "settings",
+      "state": "saving",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-saving-dark-en-1440.png",
+      "sha256": "5506d3a4e0317b4196db7dbf2e42986a213b14f023be4308e857a8356a90870f",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-saved-dark-en-1440",
+      "view": "settings",
+      "state": "saved",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-saved-dark-en-1440.png",
+      "sha256": "803248dd139bd9862e6d5bfc7a0e63a1b72a2c054c95c384969da1ee291340dd",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-error-dark-en-1440",
+      "view": "settings",
+      "state": "error",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-error-dark-en-1440.png",
+      "sha256": "301385585fa7a9a8250c9cd5340f5dea995bf142a99aa842d809e1f36479952c",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-readonly-dark-en-1440",
+      "view": "settings",
+      "state": "readonly",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-readonly-dark-en-1440.png",
+      "sha256": "a96cdc7afaf3279264e63cdd41ab57d22c2167e04ddd999d7c1425ee5be3f09f",
+      "captureAttempts": 2
+    },
+    {
+      "id": "components-ready-dark-zh-CN-1440",
+      "view": "components",
+      "state": "ready",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/components-ready-dark-zh-CN-1440.png",
+      "sha256": "f2fc5a68f83d6528103c21ef5d9b6e91916c24fa0653b0292606dc7cb7db30e0",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-ready-dark-zh-CN-1440",
+      "view": "resource-list",
+      "state": "ready",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-ready-dark-zh-CN-1440.png",
+      "sha256": "f5b42b400d3826f4fb697adb4e6a2075f4b93e9123195f24a37530d2d1ace999",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-loading-dark-zh-CN-1440",
+      "view": "resource-list",
+      "state": "loading",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-loading-dark-zh-CN-1440.png",
+      "sha256": "b1a50031c2bdce4f4eed1c12f5367edff9f3cc08b3e1bb6d2e89c28977ecbd6d",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-initial-empty-dark-zh-CN-1440",
+      "view": "resource-list",
+      "state": "initial-empty",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-initial-empty-dark-zh-CN-1440.png",
+      "sha256": "de65b93054a660f64060e2922cd308eac1a5d48231f79233f18af04c3f58d903",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-filtered-empty-dark-zh-CN-1440",
+      "view": "resource-list",
+      "state": "filtered-empty",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-filtered-empty-dark-zh-CN-1440.png",
+      "sha256": "9c64a05e71511e46f054ad439ea25d9b03c7002c41e7004c637e1e0aa183fc5d",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-error-dark-zh-CN-1440",
+      "view": "resource-list",
+      "state": "error",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-error-dark-zh-CN-1440.png",
+      "sha256": "efe88343f87afbcaca2a9edc482ae3c2e38c4d96b896487f8be686e7fbeb355e",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-forbidden-dark-zh-CN-1440",
+      "view": "resource-list",
+      "state": "forbidden",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-forbidden-dark-zh-CN-1440.png",
+      "sha256": "dbf748aace2d4b334dc2ef0b5de526c25d1720fc097d9e15647de9d4fd219e6c",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-ready-dark-zh-CN-1440",
+      "view": "record-detail",
+      "state": "ready",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-ready-dark-zh-CN-1440.png",
+      "sha256": "0651bc26bf57d6f9f0c7f30d1c1b9a67c1aa8b36d3d5c7ad8ea90d6c555e6914",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-loading-dark-zh-CN-1440",
+      "view": "record-detail",
+      "state": "loading",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-loading-dark-zh-CN-1440.png",
+      "sha256": "4253ce7bb46b4dd30438a7fbdfc4fa3c59bcee04b9a40dcd7b13f4ebf87cb84a",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-partial-dark-zh-CN-1440",
+      "view": "record-detail",
+      "state": "partial",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-partial-dark-zh-CN-1440.png",
+      "sha256": "353fb51e9005f84856753b80edceb1b6bf320b1525ca39679a92743e0609a71e",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-error-dark-zh-CN-1440",
+      "view": "record-detail",
+      "state": "error",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-error-dark-zh-CN-1440.png",
+      "sha256": "abfbdee6134a483bfa37049184ba630609fe4cf00d69301f73546483ed3fd1a7",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-forbidden-dark-zh-CN-1440",
+      "view": "record-detail",
+      "state": "forbidden",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-forbidden-dark-zh-CN-1440.png",
+      "sha256": "ed7bf50ed6ca03dba1871069ffba6f11869b88f61fd95c9d38d1b465d5a11fbb",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-ready-dark-zh-CN-1440",
+      "view": "settings",
+      "state": "ready",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-ready-dark-zh-CN-1440.png",
+      "sha256": "505353fbfd894f68c542dee8bd5e94a6bc50d4e89c41c02ed9aec81146ba2448",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-dirty-dark-zh-CN-1440",
+      "view": "settings",
+      "state": "dirty",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-dirty-dark-zh-CN-1440.png",
+      "sha256": "f62bf115b51dd3aeb47bbd9c321d7380fec4af7d9dc7be74261d3a9ae615400c",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-invalid-dark-zh-CN-1440",
+      "view": "settings",
+      "state": "invalid",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-invalid-dark-zh-CN-1440.png",
+      "sha256": "37fed7a8762225f0b491bb3d05d8332927b84603f50eed1718bda558eecc9b61",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-saving-dark-zh-CN-1440",
+      "view": "settings",
+      "state": "saving",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-saving-dark-zh-CN-1440.png",
+      "sha256": "65b60cd632eff9126c0307c0531ca3339b4330284cc597578d69246a55e0a05e",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-saved-dark-zh-CN-1440",
+      "view": "settings",
+      "state": "saved",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-saved-dark-zh-CN-1440.png",
+      "sha256": "41bc33a8467ac5c5e2364a320bc0f711d53a420d021f1f034e2802ba29fef483",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-error-dark-zh-CN-1440",
+      "view": "settings",
+      "state": "error",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-error-dark-zh-CN-1440.png",
+      "sha256": "e88193db37aac0d041c6f60ccdc2123b76d9d79295a92d258e702501037f7152",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-readonly-dark-zh-CN-1440",
+      "view": "settings",
+      "state": "readonly",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-readonly-dark-zh-CN-1440.png",
+      "sha256": "50f8247922a207b583f11145d800cf72f244e460109a50917047e9d794ea7ff4",
+      "captureAttempts": 2
+    },
+    {
+      "id": "components-ready-light-en-1920",
+      "view": "components",
+      "state": "ready",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/components-ready-light-en-1920.png",
+      "sha256": "eadd68cdd73bc91ea061f01395e9943b0e9c5fc21bae4e36f2d85e17d6c46085",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-ready-light-en-1920",
+      "view": "resource-list",
+      "state": "ready",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-ready-light-en-1920.png",
+      "sha256": "81ca99f53b61a2d6f90b91012910233dbe25ea6b109302d34a0722e52ce48128",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-loading-light-en-1920",
+      "view": "resource-list",
+      "state": "loading",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-loading-light-en-1920.png",
+      "sha256": "37c8e1321a635a7416474a6361384491f389c7c2ae37ec6f42648a1328e89bfb",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-initial-empty-light-en-1920",
+      "view": "resource-list",
+      "state": "initial-empty",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-initial-empty-light-en-1920.png",
+      "sha256": "20d969565005b7036fa770967763f909f4071f9389cb002803559260b69e3a9f",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-filtered-empty-light-en-1920",
+      "view": "resource-list",
+      "state": "filtered-empty",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-filtered-empty-light-en-1920.png",
+      "sha256": "d90038b29393769db86fe4807428b55da19dfdbd0fa6d14cd68ff41ff321637d",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-error-light-en-1920",
+      "view": "resource-list",
+      "state": "error",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-error-light-en-1920.png",
+      "sha256": "484774a87a180b840b9109ffa2b179644f8fa373c0322fc38a3c6fed3f04448b",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-forbidden-light-en-1920",
+      "view": "resource-list",
+      "state": "forbidden",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-forbidden-light-en-1920.png",
+      "sha256": "7bb4d4e257fe1f2d03f5d7e3db2f8bcaac180f8214ad46bfb14285321c66e266",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-ready-light-en-1920",
+      "view": "record-detail",
+      "state": "ready",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-ready-light-en-1920.png",
+      "sha256": "ee3fe72427af0a005970929c72426c9f48ebc704bbd3502018adc65f3f5269e9",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-loading-light-en-1920",
+      "view": "record-detail",
+      "state": "loading",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-loading-light-en-1920.png",
+      "sha256": "702608c4b6c0d0ca0b8d1cf8db5885e5bd63af5dcf7bb8321adb0281e6e4e5a0",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-partial-light-en-1920",
+      "view": "record-detail",
+      "state": "partial",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-partial-light-en-1920.png",
+      "sha256": "2d6e85047885506c7a94dc74cace1fd8b3ddb4f733387422ad5124c4b0654d1b",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-error-light-en-1920",
+      "view": "record-detail",
+      "state": "error",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-error-light-en-1920.png",
+      "sha256": "65f4d64bf146cf7a46d5f8978e19abd3a0d9e7212d1e7502dd7bd694c6d85655",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-forbidden-light-en-1920",
+      "view": "record-detail",
+      "state": "forbidden",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-forbidden-light-en-1920.png",
+      "sha256": "c5b58e2536d698d81a059c95ea8622d00f993b7d71b37219785d8439f872f2b1",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-ready-light-en-1920",
+      "view": "settings",
+      "state": "ready",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-ready-light-en-1920.png",
+      "sha256": "aa6357d771048105e437cc5a8ba4d27c350c9516ea59b2a49f93aa92caae4705",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-dirty-light-en-1920",
+      "view": "settings",
+      "state": "dirty",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-dirty-light-en-1920.png",
+      "sha256": "29b011b76b105974fa2f285b8384b05224db665077eb69e5154435c7bfca351d",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-invalid-light-en-1920",
+      "view": "settings",
+      "state": "invalid",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-invalid-light-en-1920.png",
+      "sha256": "72a38054bb368e2fb93aff2a19e8c1dfe4121f09db382a75123eefebd653a1c8",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-saving-light-en-1920",
+      "view": "settings",
+      "state": "saving",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-saving-light-en-1920.png",
+      "sha256": "d150daa1a92867bb14dc2813c7fd5f13586804ffcab91f9b03a96583b93ed7b8",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-saved-light-en-1920",
+      "view": "settings",
+      "state": "saved",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-saved-light-en-1920.png",
+      "sha256": "cd961dae4cedaa43c1c25d51cffe572737431e53d06d38d57b9ed9250d2ceb50",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-error-light-en-1920",
+      "view": "settings",
+      "state": "error",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-error-light-en-1920.png",
+      "sha256": "8fd30acd4d6e3cddc9cf1129712ee1e93dfa9ad6ae829a3b36bc93ebeed39c6a",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-readonly-light-en-1920",
+      "view": "settings",
+      "state": "readonly",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-readonly-light-en-1920.png",
+      "sha256": "3f2ab2bb358bf82fcf47c9c29e5e83515d44c69f8076a113c211d7f441f69c31",
+      "captureAttempts": 2
+    },
+    {
+      "id": "components-ready-light-zh-CN-1920",
+      "view": "components",
+      "state": "ready",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/components-ready-light-zh-CN-1920.png",
+      "sha256": "73d8fcd34e7e1e7515ba6c40016c4e0d6d5816795ff8fa7e6fb7afcb2441bd5a",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-ready-light-zh-CN-1920",
+      "view": "resource-list",
+      "state": "ready",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-ready-light-zh-CN-1920.png",
+      "sha256": "84d1683925ac568f8b0099aba02f70030197ae407c9c70bb4983c653cd504bb8",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-loading-light-zh-CN-1920",
+      "view": "resource-list",
+      "state": "loading",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-loading-light-zh-CN-1920.png",
+      "sha256": "b37e64fe6d37e275a285123b70e60cd0882b47c01e411f22027bfc045bb633aa",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-initial-empty-light-zh-CN-1920",
+      "view": "resource-list",
+      "state": "initial-empty",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-initial-empty-light-zh-CN-1920.png",
+      "sha256": "63e18ea82fb14977816ecfe8903f9764afecdecc0b8a3db335082e179b1bb947",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-filtered-empty-light-zh-CN-1920",
+      "view": "resource-list",
+      "state": "filtered-empty",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-filtered-empty-light-zh-CN-1920.png",
+      "sha256": "98eecabcbc1edef35f967dfc007e3d1faae2437716bbea18ea213925d9cb16fd",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-error-light-zh-CN-1920",
+      "view": "resource-list",
+      "state": "error",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-error-light-zh-CN-1920.png",
+      "sha256": "c2035eda75e927330b982ff43128ea6c077d80f8b65cffd5af30287e8f3b8a67",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-forbidden-light-zh-CN-1920",
+      "view": "resource-list",
+      "state": "forbidden",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-forbidden-light-zh-CN-1920.png",
+      "sha256": "77204ee00858abb30dc00027b30af4fcdc398224298e1edd9eec6663e670404c",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-ready-light-zh-CN-1920",
+      "view": "record-detail",
+      "state": "ready",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-ready-light-zh-CN-1920.png",
+      "sha256": "c2cd8bcd40745301cc846e4887c7866091092c41ee7569a8533b3991265fab7d",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-loading-light-zh-CN-1920",
+      "view": "record-detail",
+      "state": "loading",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-loading-light-zh-CN-1920.png",
+      "sha256": "9ad1e6ec3ce3b12fe107b97df052f4b714f4c93e8cec4dd4289ebc80e647ce4e",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-partial-light-zh-CN-1920",
+      "view": "record-detail",
+      "state": "partial",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-partial-light-zh-CN-1920.png",
+      "sha256": "4aec9c9ef453ddd400168c34b01680510b93b3cb0cb1dc8847bcf1cfab41c372",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-error-light-zh-CN-1920",
+      "view": "record-detail",
+      "state": "error",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-error-light-zh-CN-1920.png",
+      "sha256": "6c67636591798f1101f024840a4933e1c4cd2b90501c9b41cc498cae12816aae",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-forbidden-light-zh-CN-1920",
+      "view": "record-detail",
+      "state": "forbidden",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-forbidden-light-zh-CN-1920.png",
+      "sha256": "d00ef02727c2ab961b03c6fb608c540e1ebf357123d4351cd79e501aae11e5bf",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-ready-light-zh-CN-1920",
+      "view": "settings",
+      "state": "ready",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-ready-light-zh-CN-1920.png",
+      "sha256": "b38b45150270e1030af7a761f86558860701e3b01ff11c1207462836223d00c3",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-dirty-light-zh-CN-1920",
+      "view": "settings",
+      "state": "dirty",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-dirty-light-zh-CN-1920.png",
+      "sha256": "461174c641b52c90aed06e6a29712ffdd3fc35e56c2b2f827e46cb3ecdb0c0df",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-invalid-light-zh-CN-1920",
+      "view": "settings",
+      "state": "invalid",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-invalid-light-zh-CN-1920.png",
+      "sha256": "77a48664c8f3af8b1cceb77902771660a9c8422c860793cecf16f388cfc866fb",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-saving-light-zh-CN-1920",
+      "view": "settings",
+      "state": "saving",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-saving-light-zh-CN-1920.png",
+      "sha256": "8f4978ec5c0a2272809a35583a7b30bf8477d04e31ff0e2ac8b6c8cdc4c44355",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-saved-light-zh-CN-1920",
+      "view": "settings",
+      "state": "saved",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-saved-light-zh-CN-1920.png",
+      "sha256": "f429e05fe29058dc38f9c5d832efa8bcccf9719d74cd49b8087303800b7b6fb0",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-error-light-zh-CN-1920",
+      "view": "settings",
+      "state": "error",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-error-light-zh-CN-1920.png",
+      "sha256": "843f36cbd20d06f7fec2c23ca9dfe43dbc94b2c13d258a4fc7315a7137ade205",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-readonly-light-zh-CN-1920",
+      "view": "settings",
+      "state": "readonly",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-readonly-light-zh-CN-1920.png",
+      "sha256": "f045294c0561571336d0431cb357ef217b4fc0b8521d8bbeb47b71209a3db2be",
+      "captureAttempts": 2
+    },
+    {
+      "id": "components-ready-dark-en-1920",
+      "view": "components",
+      "state": "ready",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/components-ready-dark-en-1920.png",
+      "sha256": "7617a5a5a1d17e5d47d38a9a32463a8e8e0f00f836dfd4cd82b2efccc2df348c",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-ready-dark-en-1920",
+      "view": "resource-list",
+      "state": "ready",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-ready-dark-en-1920.png",
+      "sha256": "b31d6984cc2dcc7c13c6892fc206c2c1bd16b574c8ba255a1f73863f623bbf11",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-loading-dark-en-1920",
+      "view": "resource-list",
+      "state": "loading",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-loading-dark-en-1920.png",
+      "sha256": "4d97421f10b874dcd234afc024f4dce92ee0daf286034af30e3fe16751b8de06",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-initial-empty-dark-en-1920",
+      "view": "resource-list",
+      "state": "initial-empty",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-initial-empty-dark-en-1920.png",
+      "sha256": "a0d6e8f82548151db50329c44e9b6117204041aab6f96dccc4a74514701e169d",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-filtered-empty-dark-en-1920",
+      "view": "resource-list",
+      "state": "filtered-empty",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-filtered-empty-dark-en-1920.png",
+      "sha256": "5523ce1e9e44e26f02b078897d97c20274fd25564fd3e07f4dc3289d2497da72",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-error-dark-en-1920",
+      "view": "resource-list",
+      "state": "error",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-error-dark-en-1920.png",
+      "sha256": "191ee203d234da8a0f06e94ec4ff2ff37a9d21e0078276183a8bfd4dfee72917",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-forbidden-dark-en-1920",
+      "view": "resource-list",
+      "state": "forbidden",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-forbidden-dark-en-1920.png",
+      "sha256": "5a001e08597a0b0963dc208ab1643c9d6bbcfbb25444efc85d6a7bf59f6925a6",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-ready-dark-en-1920",
+      "view": "record-detail",
+      "state": "ready",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-ready-dark-en-1920.png",
+      "sha256": "e9051e7e4f5ee105398c07e90e15dfbbfc72f80c2be7ae5dceb86e6c35bc59e0",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-loading-dark-en-1920",
+      "view": "record-detail",
+      "state": "loading",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-loading-dark-en-1920.png",
+      "sha256": "4eee975bff503f4b50b44a79bb69e9e5d0dd6ce33eaa39029978991fd5f73b41",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-partial-dark-en-1920",
+      "view": "record-detail",
+      "state": "partial",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-partial-dark-en-1920.png",
+      "sha256": "36c42cd06841bcca60d9886854bc6655d277fe05746c678b2f1dae12c633c95c",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-error-dark-en-1920",
+      "view": "record-detail",
+      "state": "error",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-error-dark-en-1920.png",
+      "sha256": "8c32a3a6cdeb2550cf37f0b05a575dd686331f5b0f2d2d0756121a1b2a49473a",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-forbidden-dark-en-1920",
+      "view": "record-detail",
+      "state": "forbidden",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-forbidden-dark-en-1920.png",
+      "sha256": "63315a19273023b182799ea9f5e1402a19c411a2ebf1899bcf3ad884ef26fd6b",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-ready-dark-en-1920",
+      "view": "settings",
+      "state": "ready",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-ready-dark-en-1920.png",
+      "sha256": "3d761c8af7f0d8e550bebb8bd6453fb461f353a7e226e512b5368e116e090224",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-dirty-dark-en-1920",
+      "view": "settings",
+      "state": "dirty",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-dirty-dark-en-1920.png",
+      "sha256": "0335f8a900f639003265e7f3f7c4069a92c36ce4ea4a893dd41d7286bdd9a4db",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-invalid-dark-en-1920",
+      "view": "settings",
+      "state": "invalid",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-invalid-dark-en-1920.png",
+      "sha256": "ddc079d68da75b1db44da30496793b7be04b5f09ab76f816482465c4575d7168",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-saving-dark-en-1920",
+      "view": "settings",
+      "state": "saving",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-saving-dark-en-1920.png",
+      "sha256": "e7f38aa36e495f4ec5c5142f9ff2e01a044592147bbd9f3f3684994b6cffa8cc",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-saved-dark-en-1920",
+      "view": "settings",
+      "state": "saved",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-saved-dark-en-1920.png",
+      "sha256": "5fda2f971d9efc5c4897943cc9ad6a4fce5ae7a3b26cecf2a5c1729108080582",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-error-dark-en-1920",
+      "view": "settings",
+      "state": "error",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-error-dark-en-1920.png",
+      "sha256": "d932aa8900b876e27bb0cf9ad09127ae36b90419f27e43905f21db8c37917792",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-readonly-dark-en-1920",
+      "view": "settings",
+      "state": "readonly",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-readonly-dark-en-1920.png",
+      "sha256": "6b5d8eda5019504ccc340d55b85d21adc5f67de7cf6647cdd1c706717f1d03f2",
+      "captureAttempts": 2
+    },
+    {
+      "id": "components-ready-dark-zh-CN-1920",
+      "view": "components",
+      "state": "ready",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/components-ready-dark-zh-CN-1920.png",
+      "sha256": "05033a1fadcfa891a52f6c48dd791ee1c58e7716c8508e06cb486889ee3ff18d",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-ready-dark-zh-CN-1920",
+      "view": "resource-list",
+      "state": "ready",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-ready-dark-zh-CN-1920.png",
+      "sha256": "beb7697b0fd3d7ad5b63849adc5e4ac47ae2bb985b466005d372cd80b98d605a",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-loading-dark-zh-CN-1920",
+      "view": "resource-list",
+      "state": "loading",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-loading-dark-zh-CN-1920.png",
+      "sha256": "8b7bef5089e4d5537e3359874e81ea59e64055ea9d4acac4ef2eb9ee3d86644d",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-initial-empty-dark-zh-CN-1920",
+      "view": "resource-list",
+      "state": "initial-empty",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-initial-empty-dark-zh-CN-1920.png",
+      "sha256": "97cba30dad2e5457f4527565a39ba3a2ed1ee68da831ce30e0ad1bc495bb8b0b",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-filtered-empty-dark-zh-CN-1920",
+      "view": "resource-list",
+      "state": "filtered-empty",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-filtered-empty-dark-zh-CN-1920.png",
+      "sha256": "e605ed566b0a53a664b12841ee977291c64aac1a5e93c0d06d742b2c8ebb8934",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-error-dark-zh-CN-1920",
+      "view": "resource-list",
+      "state": "error",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-error-dark-zh-CN-1920.png",
+      "sha256": "c55c2f007b2681bc5c5a372db17197756867b244b769eff657e262ae8069f092",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-forbidden-dark-zh-CN-1920",
+      "view": "resource-list",
+      "state": "forbidden",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-forbidden-dark-zh-CN-1920.png",
+      "sha256": "2bbe78284a5065ece9064002d3ecf7813c373c438dbdfbaceb9d8791cb386576",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-ready-dark-zh-CN-1920",
+      "view": "record-detail",
+      "state": "ready",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-ready-dark-zh-CN-1920.png",
+      "sha256": "a5089c366e20659219d49d2e3fa22178641c940cd681650a7000e7d7c363e81e",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-loading-dark-zh-CN-1920",
+      "view": "record-detail",
+      "state": "loading",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-loading-dark-zh-CN-1920.png",
+      "sha256": "5365f2a627e58608aa926bb43f7a07eafa33c47abdb7a0a49adeaf7d12fb30b4",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-partial-dark-zh-CN-1920",
+      "view": "record-detail",
+      "state": "partial",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-partial-dark-zh-CN-1920.png",
+      "sha256": "d67c4fdb1322430ed79c2eabe8e56d48162575e5e9a1a344ffe35b5ef0efd206",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-error-dark-zh-CN-1920",
+      "view": "record-detail",
+      "state": "error",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-error-dark-zh-CN-1920.png",
+      "sha256": "66ff4766ec4820929b184e226a9fc8f90df1d548a3cbd24179c8e51664790185",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-forbidden-dark-zh-CN-1920",
+      "view": "record-detail",
+      "state": "forbidden",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-forbidden-dark-zh-CN-1920.png",
+      "sha256": "f46e768846b3cd8157a95656ef4aaead776c7c39bd61645a8bef3acd4904fd7a",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-ready-dark-zh-CN-1920",
+      "view": "settings",
+      "state": "ready",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-ready-dark-zh-CN-1920.png",
+      "sha256": "bc177763cc92c1f9982a9b9910cfdc196b070afab0a503529ed5d12b4328d05a",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-dirty-dark-zh-CN-1920",
+      "view": "settings",
+      "state": "dirty",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-dirty-dark-zh-CN-1920.png",
+      "sha256": "b7fedcc5181a1207f4fd75ba3f0c99b3dc8f1e6d9fc85672e3d510f90a367e24",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-invalid-dark-zh-CN-1920",
+      "view": "settings",
+      "state": "invalid",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-invalid-dark-zh-CN-1920.png",
+      "sha256": "e77ce57b9e902ae36b951c7eb81ffa063a898d241c4f966ffb5f56eec7d50f16",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-saving-dark-zh-CN-1920",
+      "view": "settings",
+      "state": "saving",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-saving-dark-zh-CN-1920.png",
+      "sha256": "3bb3d8916c0f4efe7f26b7d46bf541e91e740624d9e962d8cdfbb174e1743fc5",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-saved-dark-zh-CN-1920",
+      "view": "settings",
+      "state": "saved",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-saved-dark-zh-CN-1920.png",
+      "sha256": "7be225ce3a4c28fe8cab1c7020f15b2f86a4aab9423449731b445f195bcaef09",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-error-dark-zh-CN-1920",
+      "view": "settings",
+      "state": "error",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-error-dark-zh-CN-1920.png",
+      "sha256": "f7068c2ae3779a7392d2d5d6c9485223eb39a1387c406b73e0c0eebd091833da",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-readonly-dark-zh-CN-1920",
+      "view": "settings",
+      "state": "readonly",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-readonly-dark-zh-CN-1920.png",
+      "sha256": "e21a218dd755fe5245e24b9fa7d473fd4d7de2f444668ab01bebe328bacec38f",
+      "captureAttempts": 2
+    },
+    {
+      "id": "components-ready-light-en-390",
+      "view": "components",
+      "state": "ready",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/components-ready-light-en-390.png",
+      "sha256": "d15ed19ea7bfdcca89edb7f05bda01e846f241f019abc7012dc75e5904bd51d2",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-ready-light-en-390",
+      "view": "resource-list",
+      "state": "ready",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-ready-light-en-390.png",
+      "sha256": "6954d3b0055fe82c7ee23e9532edb222bb29bea66c0b5c9253187cca25b9b636",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-loading-light-en-390",
+      "view": "resource-list",
+      "state": "loading",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-loading-light-en-390.png",
+      "sha256": "dfebbef5f750d8b8ddd43f6c61befb88d19098b447e522cded37603489eaaaed",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-initial-empty-light-en-390",
+      "view": "resource-list",
+      "state": "initial-empty",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-initial-empty-light-en-390.png",
+      "sha256": "1b94f0e9061635dc72bb7f9a880ce467359c2d6fc410f64f0fc2e8e651173931",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-filtered-empty-light-en-390",
+      "view": "resource-list",
+      "state": "filtered-empty",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-filtered-empty-light-en-390.png",
+      "sha256": "155422f3b0eac936dca66dc10400a6162e7606f1b6b999a74e121d1c9ced0fbb",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-error-light-en-390",
+      "view": "resource-list",
+      "state": "error",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-error-light-en-390.png",
+      "sha256": "b25cdf0827ad2e2b35151db160dd60650422387f6401aa917c4205270ac70be5",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-forbidden-light-en-390",
+      "view": "resource-list",
+      "state": "forbidden",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-forbidden-light-en-390.png",
+      "sha256": "c2bdb07e04be32515e175784a09b18b998b782fbf70cf623c47e89d1b61276da",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-ready-light-en-390",
+      "view": "record-detail",
+      "state": "ready",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-ready-light-en-390.png",
+      "sha256": "3f795490da96d05dd84bc80339502cae44e9cb61c75286e3037ae89831a1a48c",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-loading-light-en-390",
+      "view": "record-detail",
+      "state": "loading",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-loading-light-en-390.png",
+      "sha256": "c4669927a840e334acb1dea05e683b60cd257757d62472e4db54cd90d00b1153",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-partial-light-en-390",
+      "view": "record-detail",
+      "state": "partial",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-partial-light-en-390.png",
+      "sha256": "5b2071f8a6d11fffde733fa0fcce557f8a3b97db02c6c9d90e51d724a1fcedeb",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-error-light-en-390",
+      "view": "record-detail",
+      "state": "error",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-error-light-en-390.png",
+      "sha256": "845831ed30125954010f8db1ac1e9c660008b1bc3fe4b96b5a19c6d012ed43a7",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-forbidden-light-en-390",
+      "view": "record-detail",
+      "state": "forbidden",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-forbidden-light-en-390.png",
+      "sha256": "264fb7be2b21dc824a2f104826edbdebc87c1210362d0171c0207b201d25b366",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-ready-light-en-390",
+      "view": "settings",
+      "state": "ready",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-ready-light-en-390.png",
+      "sha256": "4160cf83c03fe36d53f2c091a7bd39f26dabfb760526298575082100c7e919e9",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-dirty-light-en-390",
+      "view": "settings",
+      "state": "dirty",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-dirty-light-en-390.png",
+      "sha256": "cadd7983b49dd1154ed8d047188bdab72a2137e13a63c89aea6c16d023366167",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-invalid-light-en-390",
+      "view": "settings",
+      "state": "invalid",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-invalid-light-en-390.png",
+      "sha256": "c3de5e57e365f819a96354960f3a0c3be80a1ab71c474bababc6a479ac24c8cc",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-saving-light-en-390",
+      "view": "settings",
+      "state": "saving",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-saving-light-en-390.png",
+      "sha256": "18121d9b5ea17c3a78e0246d70f9136fe095183ffc3381f0d297afd03a2948f1",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-saved-light-en-390",
+      "view": "settings",
+      "state": "saved",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-saved-light-en-390.png",
+      "sha256": "96cdb71aef1f2fa3d1f0d6e9117847bbbf120aa2ed5513240ec56acb0c2aa44c",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-error-light-en-390",
+      "view": "settings",
+      "state": "error",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-error-light-en-390.png",
+      "sha256": "56048538f6918018dd8e115cae6bd6e79b7ae31ee9cdbe0b148c9462de118b5b",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-readonly-light-en-390",
+      "view": "settings",
+      "state": "readonly",
+      "theme": "light",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-readonly-light-en-390.png",
+      "sha256": "1bf2c70bfd68bfeb49d5908c2a7591577523b2553cd066c4caa64860932f67aa",
+      "captureAttempts": 2
+    },
+    {
+      "id": "components-ready-light-zh-CN-390",
+      "view": "components",
+      "state": "ready",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/components-ready-light-zh-CN-390.png",
+      "sha256": "487a13299347cd64155ce5e25a74aae86a5031eec909c6132a1ff279011261d1",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-ready-light-zh-CN-390",
+      "view": "resource-list",
+      "state": "ready",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-ready-light-zh-CN-390.png",
+      "sha256": "947a8f70431079a7a0ee678925241c132ec13676a8801c25a295cf99af9647cc",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-loading-light-zh-CN-390",
+      "view": "resource-list",
+      "state": "loading",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-loading-light-zh-CN-390.png",
+      "sha256": "42c1726d81c977b602b6e99faefdd8a12057770f858d927529eafde0aabff2e4",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-initial-empty-light-zh-CN-390",
+      "view": "resource-list",
+      "state": "initial-empty",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-initial-empty-light-zh-CN-390.png",
+      "sha256": "3a2e1f85f2078c642489be250544f07b08a83f97ab11e99150f17cc22915d2c3",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-filtered-empty-light-zh-CN-390",
+      "view": "resource-list",
+      "state": "filtered-empty",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-filtered-empty-light-zh-CN-390.png",
+      "sha256": "0639ef881bb53adbff4d7f3f119417df3a3fd000e6943a2863da7608d4f26b08",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-error-light-zh-CN-390",
+      "view": "resource-list",
+      "state": "error",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-error-light-zh-CN-390.png",
+      "sha256": "ea55ef0bd8c9e2f8d0739090d4792e1644dc95f622837fd7b1293c02aa681aba",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-forbidden-light-zh-CN-390",
+      "view": "resource-list",
+      "state": "forbidden",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-forbidden-light-zh-CN-390.png",
+      "sha256": "1c9d752008c042b6aea9fff96d6c5ceeb02ccc74a99e275fbed2d98dc883a440",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-ready-light-zh-CN-390",
+      "view": "record-detail",
+      "state": "ready",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-ready-light-zh-CN-390.png",
+      "sha256": "f1259ecfd4044ad0f23c1a6f97e214e365a9448da592bd3f233ba5da25e54f98",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-loading-light-zh-CN-390",
+      "view": "record-detail",
+      "state": "loading",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-loading-light-zh-CN-390.png",
+      "sha256": "0f893e7031897be43ff3b7bf31d9e025ae564e4a3a472be81084a8a763670f19",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-partial-light-zh-CN-390",
+      "view": "record-detail",
+      "state": "partial",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-partial-light-zh-CN-390.png",
+      "sha256": "eb2a658799c2f88bc9d904034b6c6ce2b078f193bcecb912c0c300afe4c40f4b",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-error-light-zh-CN-390",
+      "view": "record-detail",
+      "state": "error",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-error-light-zh-CN-390.png",
+      "sha256": "dcf24ae211868c3fbfdd3bc0d81a8d6e7d80d43742a33e43cb9d38e76b482221",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-forbidden-light-zh-CN-390",
+      "view": "record-detail",
+      "state": "forbidden",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-forbidden-light-zh-CN-390.png",
+      "sha256": "0e6b90ac5376171797e17367740f01d833727bd8eb12c09eab0b7b2cf2893914",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-ready-light-zh-CN-390",
+      "view": "settings",
+      "state": "ready",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-ready-light-zh-CN-390.png",
+      "sha256": "6ca53e777a624639df7f48e656fd8a35a8281e3f77ef6ba7ee31dc02283dce0b",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-dirty-light-zh-CN-390",
+      "view": "settings",
+      "state": "dirty",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-dirty-light-zh-CN-390.png",
+      "sha256": "cf98b6a101d8f5ab5db6309caa006b5d3a242596ceadb97edf79fef88402207d",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-invalid-light-zh-CN-390",
+      "view": "settings",
+      "state": "invalid",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-invalid-light-zh-CN-390.png",
+      "sha256": "539fca54c589667919d80b6a78ea6c3dc8481c4c4dcd2507e71e6a19fcb15196",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-saving-light-zh-CN-390",
+      "view": "settings",
+      "state": "saving",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-saving-light-zh-CN-390.png",
+      "sha256": "15b28a7d511c8d2411cbfb12dbf8b645591006a02a05e589a42b3f9ffc39f24c",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-saved-light-zh-CN-390",
+      "view": "settings",
+      "state": "saved",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-saved-light-zh-CN-390.png",
+      "sha256": "596c93b1a82bb5a4a99325eceb21276991f92f5815364020020330715bbade1a",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-error-light-zh-CN-390",
+      "view": "settings",
+      "state": "error",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-error-light-zh-CN-390.png",
+      "sha256": "6a399fa3adcef1848cf6b66814d9fa803836fc95cb0ca182f5c5827c886efb44",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-readonly-light-zh-CN-390",
+      "view": "settings",
+      "state": "readonly",
+      "theme": "light",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-readonly-light-zh-CN-390.png",
+      "sha256": "1bf56ac0366f196e2587fcffd592449b60a4fe745076406dc058cc3eb5062fdd",
+      "captureAttempts": 2
+    },
+    {
+      "id": "components-ready-dark-en-390",
+      "view": "components",
+      "state": "ready",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/components-ready-dark-en-390.png",
+      "sha256": "f23e3fbda90c4e46db163548d39eccd6cb32701dff5c9c8d1ce0a7482da5cc86",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-ready-dark-en-390",
+      "view": "resource-list",
+      "state": "ready",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-ready-dark-en-390.png",
+      "sha256": "89627dc95e02a1afc788e56be64e2ac4ce267fa24562f7ff6fbfa67528d44dab",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-loading-dark-en-390",
+      "view": "resource-list",
+      "state": "loading",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-loading-dark-en-390.png",
+      "sha256": "adba984f5cbd75d900ccd68ef370241cfed0f064f0dc03afd89c7a5fd2c4e9aa",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-initial-empty-dark-en-390",
+      "view": "resource-list",
+      "state": "initial-empty",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-initial-empty-dark-en-390.png",
+      "sha256": "b00ed8e45415a243491a39b0c204f3a392033f11dcabebbe732606d1d1a4d6ec",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-filtered-empty-dark-en-390",
+      "view": "resource-list",
+      "state": "filtered-empty",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-filtered-empty-dark-en-390.png",
+      "sha256": "c7fdade475b2bda92a11ec2eb2c4020f7b08cb7f7d91c17f920a4fcf1af6a8d8",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-error-dark-en-390",
+      "view": "resource-list",
+      "state": "error",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-error-dark-en-390.png",
+      "sha256": "ad0465dc5c0176fad56dc963a341607d3cf66848d29d6e819093af02b556f938",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-forbidden-dark-en-390",
+      "view": "resource-list",
+      "state": "forbidden",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-forbidden-dark-en-390.png",
+      "sha256": "d321b135c8552a023e31165f4eff1209367c9ef1f250e3e1acd1b882bc821dcd",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-ready-dark-en-390",
+      "view": "record-detail",
+      "state": "ready",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-ready-dark-en-390.png",
+      "sha256": "ab1d9ed21c93008370a60312e32ff7bf419e873e21d61e94f4993febde6c5b1d",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-loading-dark-en-390",
+      "view": "record-detail",
+      "state": "loading",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-loading-dark-en-390.png",
+      "sha256": "bf34f865acd777d0ea318a281c39bb43176225a097b62e0e99a0444800eea80c",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-partial-dark-en-390",
+      "view": "record-detail",
+      "state": "partial",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-partial-dark-en-390.png",
+      "sha256": "c8d9c0f9b7a6f1f6945f8aabbcb1c7eaaf8e18735b1df171897efe059a4f18c4",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-error-dark-en-390",
+      "view": "record-detail",
+      "state": "error",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-error-dark-en-390.png",
+      "sha256": "39eb6c2ace85c066d380c19c95eff3ab0f6b2e3a7e0f4a92a9b03569272c827a",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-forbidden-dark-en-390",
+      "view": "record-detail",
+      "state": "forbidden",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-forbidden-dark-en-390.png",
+      "sha256": "67ba06fa856eb45c70bea0db3d07b8dfc16b715df8aca2596463620a9b42dfaa",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-ready-dark-en-390",
+      "view": "settings",
+      "state": "ready",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-ready-dark-en-390.png",
+      "sha256": "e6bb9bc64b6482b8b54decbb1f1083fc88f183041d54721c6acef1c8e2e97be9",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-dirty-dark-en-390",
+      "view": "settings",
+      "state": "dirty",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-dirty-dark-en-390.png",
+      "sha256": "df7e5af8e9582e0beed6a29fa01fc622053c98d95ceab3cae800bcd284e9f7e8",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-invalid-dark-en-390",
+      "view": "settings",
+      "state": "invalid",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-invalid-dark-en-390.png",
+      "sha256": "6f83dfdac544017b7397118131bdd8748483e87ed11414113e4d8a3cc5a31b9f",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-saving-dark-en-390",
+      "view": "settings",
+      "state": "saving",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-saving-dark-en-390.png",
+      "sha256": "c18f92337043d0e86cc47b947c732efc83e3ddfd2710f7f6d3a8b1963985c6f6",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-saved-dark-en-390",
+      "view": "settings",
+      "state": "saved",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-saved-dark-en-390.png",
+      "sha256": "504424f66d59498794c1a37496c62ce21d378ac1a1e7283a36b025dbcb40f9a5",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-error-dark-en-390",
+      "view": "settings",
+      "state": "error",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-error-dark-en-390.png",
+      "sha256": "b4ab87ae55ce8cdf720d295a5bfe654505709156241c568505f25e496bb93025",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-readonly-dark-en-390",
+      "view": "settings",
+      "state": "readonly",
+      "theme": "dark",
+      "locale": "en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-readonly-dark-en-390.png",
+      "sha256": "f562c449c35d83a6da23452babc27b9938200a406ad8f776965e4436ca0e284d",
+      "captureAttempts": 2
+    },
+    {
+      "id": "components-ready-dark-zh-CN-390",
+      "view": "components",
+      "state": "ready",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/components-ready-dark-zh-CN-390.png",
+      "sha256": "dc9c5e3f6859aa382802f450e57c8c75a8c85372d6b4b09347349efc5e8b5088",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-ready-dark-zh-CN-390",
+      "view": "resource-list",
+      "state": "ready",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-ready-dark-zh-CN-390.png",
+      "sha256": "5e8856b1a60ac47ed5525dc9a269fc8fd492c3bb0ae6a4cafd5b0fe100cb519d",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-loading-dark-zh-CN-390",
+      "view": "resource-list",
+      "state": "loading",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-loading-dark-zh-CN-390.png",
+      "sha256": "094e19285faab5088d276a93c4b50e184559b6ac16ab752ba1a8df1fa353912d",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-initial-empty-dark-zh-CN-390",
+      "view": "resource-list",
+      "state": "initial-empty",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-initial-empty-dark-zh-CN-390.png",
+      "sha256": "fd66a5e102f5ad26b6bd9e8ea4c4bf1f060ae07bb0ed09488958d0c5f49bfc1e",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-filtered-empty-dark-zh-CN-390",
+      "view": "resource-list",
+      "state": "filtered-empty",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-filtered-empty-dark-zh-CN-390.png",
+      "sha256": "8f5df9a51c1b71fa35ab63ec2a374b5cfedba71aedca2b6955128df90a2550ad",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-error-dark-zh-CN-390",
+      "view": "resource-list",
+      "state": "error",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-error-dark-zh-CN-390.png",
+      "sha256": "a7b7d6e45798046af547eb92be6ce84c177cf38ca73ba98daea3a5905cdc0a50",
+      "captureAttempts": 2
+    },
+    {
+      "id": "resource-list-forbidden-dark-zh-CN-390",
+      "view": "resource-list",
+      "state": "forbidden",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/resource-list-forbidden-dark-zh-CN-390.png",
+      "sha256": "6cf868f8be9b8a176596866c3a7194c7d3b7a28d05a245f0f078952a87f84fa2",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-ready-dark-zh-CN-390",
+      "view": "record-detail",
+      "state": "ready",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-ready-dark-zh-CN-390.png",
+      "sha256": "e1346b418031e7b3dcb80bb9da9a30a5a59dc5eb353438a1b9f8a48e335dbbde",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-loading-dark-zh-CN-390",
+      "view": "record-detail",
+      "state": "loading",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-loading-dark-zh-CN-390.png",
+      "sha256": "cdc752fa2ca8e964c609d600110f19183d2ff2084724fb2f0d98196196e0fded",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-partial-dark-zh-CN-390",
+      "view": "record-detail",
+      "state": "partial",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-partial-dark-zh-CN-390.png",
+      "sha256": "0f4cf8ca8d16c11fb022273a304e4fc86da60a484efc9e9f62f1fc0f8284f5b0",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-error-dark-zh-CN-390",
+      "view": "record-detail",
+      "state": "error",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-error-dark-zh-CN-390.png",
+      "sha256": "086f54839cb7e380e1fe9b2862b804e575e512246a92761d9fb4b221af8a0e97",
+      "captureAttempts": 2
+    },
+    {
+      "id": "record-detail-forbidden-dark-zh-CN-390",
+      "view": "record-detail",
+      "state": "forbidden",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/record-detail-forbidden-dark-zh-CN-390.png",
+      "sha256": "85857d397d00cd4736be8c7db21c4f6715fdcd50c4848e17cb2a306ceb942e96",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-ready-dark-zh-CN-390",
+      "view": "settings",
+      "state": "ready",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-ready-dark-zh-CN-390.png",
+      "sha256": "fc4df19d193b34e93f5a27fae5d6a5439bac2bc087d42bf57f3834b98f4079d5",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-dirty-dark-zh-CN-390",
+      "view": "settings",
+      "state": "dirty",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-dirty-dark-zh-CN-390.png",
+      "sha256": "6c9ac471a71d440813786b12c7498be2d88b267b3df899665186de4daf025062",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-invalid-dark-zh-CN-390",
+      "view": "settings",
+      "state": "invalid",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-invalid-dark-zh-CN-390.png",
+      "sha256": "25cdab8761d7b725c750eeb805d3929d2bc1d8e2fbd31831e38a76ea30d57cc3",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-saving-dark-zh-CN-390",
+      "view": "settings",
+      "state": "saving",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-saving-dark-zh-CN-390.png",
+      "sha256": "8da902d7a3219c189e579bc212cb3131fe6ff0ff1fb544f2204751b2a04be2f8",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-saved-dark-zh-CN-390",
+      "view": "settings",
+      "state": "saved",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-saved-dark-zh-CN-390.png",
+      "sha256": "e8eab3c5528f46bd5c640d1e3467453cd421f3d6116921ae1b2d66b76e4d1fc1",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-error-dark-zh-CN-390",
+      "view": "settings",
+      "state": "error",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-error-dark-zh-CN-390.png",
+      "sha256": "2680cccc23c97ac124508295fefaecefee8d84c0b4f1d4141476a3f3975d49df",
+      "captureAttempts": 2
+    },
+    {
+      "id": "settings-readonly-dark-zh-CN-390",
+      "view": "settings",
+      "state": "readonly",
+      "theme": "dark",
+      "locale": "zh-CN",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "passed": true,
+      "screenshot": "screenshots/settings-readonly-dark-zh-CN-390.png",
+      "sha256": "732578d4f8bafc9401d673eea8998cc40ef36a1f43efc13bbda730b45f6bc329",
+      "captureAttempts": 2
+    }
+  ],
+  "interactions": [
+    {
+      "id": "interaction-en-1440",
+      "passed": true
+    },
+    {
+      "id": "interaction-zh-CN-1440",
+      "passed": true
+    },
+    {
+      "id": "interaction-en-1920",
+      "passed": true
+    },
+    {
+      "id": "interaction-zh-CN-1920",
+      "passed": true
+    },
+    {
+      "id": "interaction-en-390",
+      "passed": true
+    },
+    {
+      "id": "interaction-zh-CN-390",
+      "passed": true
+    }
+  ],
+  "failures": [],
+  "browserVersion": "151.0.7922.34"
+}

@@ -1,0 +1,1832 @@
+{
+  "config": {
+    "argv": [
+      "/opt/hostedtoolcache/node/26.9.0/x64/bin/node",
+      "/home/runner/work/svadmin/svadmin/node_modules/.bin/playwright",
+      "test",
+      "--config",
+      "scripts/fixtures/svar-grid/playwright.config.ts",
+      "--reporter=line,html,json"
+    ],
+    "configFile": "/home/runner/work/svadmin/svadmin/scripts/fixtures/svar-grid/playwright.config.ts",
+    "rootDir": "/home/runner/work/svadmin/svadmin/scripts/fixtures/svar-grid",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "ci": {
+        "commitHref": "https://github.com/vibeunion/svadmin/commit/de19296d34d17cd72f23327500f317c8e970a61c",
+        "commitHash": "de19296d34d17cd72f23327500f317c8e970a61c",
+        "prHref": "https://github.com/vibeunion/svadmin/pull/445",
+        "prTitle": "fix(ui): preserve nested form drafts and submission ownership",
+        "prBaseHash": "626a85c8a541af295f1db9dee022007a2bf107ca",
+        "buildHref": "https://github.com/vibeunion/svadmin/actions/runs/35474151353"
+      },
+      "gitCommit": {
+        "shortHash": "de19296",
+        "hash": "de19296d34d17cd72f23327500f317c8e970a61c",
+        "subject": "Merge f40fe385d627c02b5a4c286d06c1e1f93af52b72 into 626a85c8a541af295f1db9dee022007a2bf107ca",
+        "body": "Merge f40fe385d627c02b5a4c286d06c1e1f93af52b72 into 626a85c8a541af295f1db9dee022007a2bf107ca\n",
+        "author": {
+          "name": "BoYan Jin",
+          "email": "348985087@qq.com",
+          "time": 1789857823000
+        },
+        "committer": {
+          "name": "GitHub",
+          "email": "noreply@github.com",
+          "time": 1789857823000
+        },
+        "branch": "HEAD"
+      },
+      "gitDiff": "diff --git a/.github/workflows/surface-workflows.yml b/.github/workflows/surface-workflows.yml\nindex 56ff7c9..d6d288b 100644\n--- a/.github/workflows/surface-workflows.yml\n+++ b/.github/workflows/surface-workflows.yml\n@@ -5,6 +5,7 @@ on:\n     paths:\n       - 'packages/surface/**'\n       - 'packages/ui/src/components/**'\n+      - 'packages/ui/scripts/schema-form-state.test.mjs'\n       - 'packages/lite/src/components/LiteFilterBuilder*'\n       - 'packages/lite/src/filter-form.ts'\n       - 'packages/core/src/types.ts'\n@@ -39,9 +40,11 @@ jobs:\n         run: |\n           bun run --cwd packages/surface check\n           bunx --no-install svelte-check --tsgo-experimental-api --tsconfig packages/ui/tsconfig.json --threshold error\n+      - name: Nested form draft and JSON transport contracts\n+        run: node --test packages/ui/scripts/schema-form-state.test.mjs\n       - name: Real UI and Lite workflow regression components\n         run: |\n-          bun run --cwd packages/ui test src/components/workflow-boundaries.test.svelte.ts src/components/import-wizard.test.svelte.ts src/components/resource-workspace.test.svelte.ts src/components/combobox-field.test.svelte.ts src/components/numeric-input.test.svelte.ts\n+          bun run --cwd packages/ui test src/components/json-schema-form-lifecycle.test.svelte.ts src/components/workflow-boundaries.test.svelte.ts src/components/import-wizard.test.svelte.ts src/components/resource-workspace.test.svelte.ts src/components/combobox-field.test.svelte.ts src/components/numeric-input.test.svelte.ts\n           bun run --cwd packages/lite test:components src/components/LiteFilterBuilder.apply.test.svelte.ts src/components/LiteFileUpload.test.svelte.ts\n       - name: Install isolated optional parser (not a new workspace dependency)\n         run: |\ndiff --git a/docs/architecture/nested-form-submission.md b/docs/architecture/nested-form-submission.md\nnew file mode 100644\nindex 0000000..7a20684\n--- /dev/null\n+++ b/docs/architecture/nested-form-submission.md\n@@ -0,0 +1,55 @@\n+# Nested form drafts and submission ownership\n+\n+This continues #441/#444 without replacing the current nested JsonSchemaForm with\n+the scalar-only implementation in #434. It does not overwrite the product\n+recipes, layouts or async resource work being integrated separately in #443.\n+\n+## Runtime changes\n+\n+- Defaults are applied only to missing object keys. Explicit `undefined`, `null`,\n+  `false`, `0` and empty strings are not refilled. The wire snapshot omits only\n+  undefined object fields; an undefined/sparse array element is rejected, not\n+  silently converted to null. Nested object/array defaults remain supported.\n+- New object array entries initialize nested defaults and untouched required\n+  false booleans. Numeric entries start empty, never guessed as zero.\n+- Select values use choice indices internally, preserving the identity of\n+  numbers, strings, booleans and null. Display labels remain the original values.\n+- The submit handler receives an independent, bounded JSON copy, not live Svelte\n+  state. Cycles, non-finite numbers, functions, exotic objects, getters, symbol\n+  fields, unsafe property names and incomplete arrays fail before dispatch.\n+- All fields and array mutations are disabled during submission and in explicit\n+  `disabled`/`readonly` mode. Synchronous/reentrant submit is guarded in code.\n+  Ancestor disabled fieldsets are respected even for synthetic submit events.\n+- A rejected callback preserves the draft and exposes a localized generic alert\n+  plus optional `onerror`. Retry requires another explicit user submission. Late\n+  errors from replaced/disabled/unmounted contexts do not notify the new context.\n+  An already dispatched callback is NOT cancelled or undone by these UI guards.\n+- Default field IDs use Svelte's instance identity; explicit `idPrefix` is still\n+  honored. Optional `locale` scopes array/error labels to one form; Surface passes\n+  its trusted locale rather than relying on the global language singleton.\n+\n+The fieldset wrapper retains the previous field/action spacing. Existing public\n+classes and components remain; this is not a visual redesign or the completion\n+of semantic recipes for every form component. English Surface fixtures now show\n+English array-action labels intentionally. Fresh browser evidence is required.\n+\n+## Boundaries and verification\n+\n+The internal helper is a draft/JSON transport contract, NOT a new JSON Schema\n+validator. Native required/number checks remain and Surface still validates the\n+registered TypeBox input schema on client and server. Additional JSON Schema\n+assertions in the generic form are not claimed newly supported. Server approval,\n+idempotency, scope authorization and audit are unchanged. A failed business\n+response may still need inspection/reconciliation instead of blind resubmission.\n+\n+Limits are 32 traversal levels, 10,000 visited nodes and 1 Mi characters in a JSON\n+copy. Surface may enforce stricter limits. These are conservative UI safeguards,\n+not a replacement for API request limits or backend field authorization.\n+\n+`node --test packages/ui/scripts/schema-form-state.test.mjs` runs actual helper\n+contracts. `json-schema-form-lifecycle.test.svelte.ts` exercises the actual Svelte\n+component; Surface's existing real parser/browser workflow exercises proposal,\n+approval and execution. The workflow explicitly runs all three layers and packed\n+consumer checks. A local source-only result is not a substitute for current-head\n+CI or browser evidence. #434's spreadsheet/filter changes, generic full-schema\n+validation, table lifetime warnings and final Figma acceptance remain separate.\ndiff --git a/packages/surface/src/components/ResourceFormBody.svelte b/packages/surface/src/components/ResourceFormBody.svelte\nindex ec8db61..e92135e 100644\n--- a/packages/surface/src/components/ResourceFormBody.svelte\n+++ b/packages/surface/src/components/ResourceFormBody.svelte\n@@ -64,7 +64,7 @@\n     <div role=\"alert\"><ul>{#each errors as error, index (`${index}:${error}`)}<li>{error}</li>{/each}</ul></div>\n   {/if}\n   <fieldset disabled={!scope.enabled || formState.busy || !!formState.proposal} class=\"form-fields\">\n-    <JsonSchemaForm {schema} bind:value onsubmit={submit} submitText={labels.submit} idPrefix={`surface-${widgetId}-${instanceId}`} />\n+    <JsonSchemaForm {schema} {locale} bind:value onsubmit={submit} submitText={labels.submit} idPrefix={`surface-${widgetId}-${instanceId}`} />\n   </fieldset>\n   {#if formState.error}<p role=\"alert\">{labels.error}</p>{/if}\n   {#if formState.proposal}\ndiff --git a/packages/ui/scripts/schema-form-state.test.mjs b/packages/ui/scripts/schema-form-state.test.mjs\nnew file mode 100644\nindex 0000000..a496da1\n--- /dev/null\n+++ b/packages/ui/scripts/schema-form-state.test.mjs\n@@ -0,0 +1,110 @@\n+import { test } from 'node:test';\n+import assert from 'node:assert/strict';\n+import {\n+  initializeSchemaForm, schemaFormArrayItem, schemaFormSnapshot,\n+  writeSchemaFormPath, schemaFormEnumIndex, schemaFormEnumValue, SCHEMA_FORM_LIMITS,\n+} from '../src/components/json-schema-form-state.ts';\n+\n+const schema = { properties: {\n+  quota: { type: 'number', default: 10 },\n+  profile: { type: 'object', required: ['active'], properties: { active: { type: 'boolean' }, name: { type: 'string', default: 'Initial' } } },\n+  addresses: { type: 'array', items: { type: 'object', required: ['active'], properties: { active: { type: 'boolean' }, city: { type: 'string', default: 'Tokyo' } } } },\n+} };\n+\n+test('nested missing defaults and required false initialize without mutating the host', () => {\n+  const input = Object.freeze({});\n+  const value = initializeSchemaForm(schema, input);\n+  assert.deepEqual(value, { quota: 10, profile: { active: false, name: 'Initial' }, addresses: [] });\n+  assert.deepEqual(input, {});\n+  assert.equal(initializeSchemaForm(schema, value), value);\n+});\n+for (const intentional of [undefined, null, false, 0, '']) {\n+  test(`explicit ${String(intentional)} does not become a default`, () => {\n+    const input = { quota: intentional, profile: { active: false, name: intentional }, addresses: [] };\n+    const value = initializeSchemaForm(schema, input);\n+    assert.equal(value, input);\n+    assert.equal(value.quota, intentional); assert.equal(value.profile.name, intentional);\n+  });\n+}\n+test('cleared nested numbers remain omitted in JSON after sibling edits', () => {\n+  const nested = { properties: { profile: { properties: { quota: { type: 'number', default: 10 }, name: { type: 'string' } } } } };\n+  let value = initializeSchemaForm(nested, {});\n+  value = writeSchemaFormPath(value, ['profile', 'quota'], undefined);\n+  value = writeSchemaFormPath(value, ['profile', 'name'], 'Changed');\n+  assert.ok(Object.hasOwn(initializeSchemaForm(nested, value).profile, 'quota'));\n+  assert.deepEqual(schemaFormSnapshot(initializeSchemaForm(nested, value)), { profile: { name: 'Changed' } });\n+});\n+test('array object children receive defaults and required false', () => {\n+  const item = schemaFormArrayItem(schema.properties.addresses.items);\n+  assert.deepEqual(item, { active: false, city: 'Tokyo' });\n+  const existing = initializeSchemaForm(schema, { addresses: [{ city: 'Kyoto' }] });\n+  assert.deepEqual(existing.addresses, [{ city: 'Kyoto', active: false }]);\n+});\n+test('default arrays are independently owned and initialized recursively', () => {\n+  const s = { properties: { rows: { ...schema.properties.addresses, default: [{}] } } };\n+  const first = initializeSchemaForm(s, {}), second = initializeSchemaForm(s, {});\n+  first.rows[0].city = 'Changed';\n+  assert.equal(second.rows[0].city, 'Tokyo'); assert.deepEqual(s.properties.rows.default, [{}]);\n+});\n+test('new numeric array item is not fabricated as zero; incomplete wire arrays are rejected', () => {\n+  assert.equal(schemaFormArrayItem({ type: 'number' }), undefined);\n+  assert.throws(() => schemaFormSnapshot({ values: [undefined] }));\n+  assert.throws(() => schemaFormSnapshot({ values: new Array(1) }));\n+  assert.deepEqual(schemaFormSnapshot({ values: [0, false, null, ''] }), { values: [0, false, null, ''] });\n+});\n+test('wire snapshots own nested object and array references and omit only undefined object fields', () => {\n+  const input = { profile: { name: 'Alice', omitted: undefined }, rows: [{ value: 1 }] };\n+  const payload = schemaFormSnapshot(input);\n+  payload.profile.name = 'Bob'; payload.rows[0].value = 2;\n+  assert.equal(input.profile.name, 'Alice'); assert.equal(input.rows[0].value, 1);\n+  assert.equal(Object.hasOwn(payload.profile, 'omitted'), false);\n+});\n+test('safe updates inside nested arrays preserve shape and undefined markers', () => {\n+  const before = { rows: [{ quota: undefined, name: 'A' }] };\n+  const after = writeSchemaFormPath(before, ['rows', '0', 'name'], 'B');\n+  assert.ok(Object.hasOwn(after.rows[0], 'quota')); assert.equal(after.rows[0].quota, undefined);\n+  assert.equal(before.rows[0].name, 'A'); assert.equal(after.rows[0].name, 'B');\n+});\n+const choices = [1, '1', null, 'null', false, 'false', ''];\n+for (const [index, choice] of choices.entries()) test(`enum index ${index} retains JSON identity`, () => {\n+  assert.equal(schemaFormEnumIndex(choices, choice), String(index));\n+  assert.equal(schemaFormEnumValue(choices, String(index)), choice);\n+});\n+test('empty enum selection means absence, not a fabricated string or null', () => {\n+  assert.equal(schemaFormEnumValue(choices, ''), undefined);\n+  assert.equal(schemaFormEnumIndex(choices, undefined), '');\n+  for (const index of ['-1', '01', '1.0', '7', 'NaN']) assert.throws(() => schemaFormEnumValue(choices, index));\n+});\n+test('non JSON and cyclic data cannot reach an executor', () => {\n+  const cyclic = {}; cyclic.self = cyclic;\n+  for (const value of [NaN, Infinity, 1n, () => {}, new Date(), new Map(), cyclic]) {\n+    assert.throws(() => schemaFormSnapshot({ value }));\n+  }\n+});\n+test('getters are rejected before invocation rather than evaluated while copying', () => {\n+  let reads = 0; const value = {};\n+  Object.defineProperty(value, 'secret', { enumerable: true, get() { reads++; return 'secret'; } });\n+  assert.throws(() => schemaFormSnapshot(value)); assert.equal(reads, 0);\n+});\n+test('prototype fields and invalid array paths are rejected', () => {\n+  for (const key of ['__proto__', 'constructor', 'prototype']) {\n+    assert.throws(() => schemaFormSnapshot(JSON.parse(`{\"${key}\":{}}`)));\n+    assert.throws(() => writeSchemaFormPath({}, [key, 'polluted'], true));\n+    assert.throws(() => initializeSchemaForm({ properties: JSON.parse(`{\"${key}\":{\"type\":\"string\"}}`) }, {}));\n+  }\n+  for (const key of ['-1', '2', '1.5', '01']) assert.throws(() => writeSchemaFormPath({ rows: [0] }, ['rows', key], 2));\n+  assert.equal({}.polluted, undefined);\n+});\n+test('cyclic schemas and oversized values terminate with a clear failure', () => {\n+  const recursive = { properties: {} }; recursive.properties.self = recursive;\n+  assert.throws(() => initializeSchemaForm(recursive, {}));\n+  assert.throws(() => schemaFormSnapshot({ rows: new Array(SCHEMA_FORM_LIMITS.nodes + 1).fill(0) }));\n+  assert.throws(() => schemaFormSnapshot({ text: 'x'.repeat(SCHEMA_FORM_LIMITS.characters + 1) }));\n+});\n+\n+// 明确的用户编辑可以创建之前为 null 的父对象，初始化本身则保留 null。\n+test('editing a child can materialize an explicitly empty parent without changing the original', () => {\n+  const original = { profile: null };\n+  const next = writeSchemaFormPath(original, ['profile', 'city'], 'Osaka');\n+  assert.deepEqual(next, { profile: { city: 'Osaka' } }); assert.equal(original.profile, null);\n+});\ndiff --git a/packages/ui/src/components/JsonSchemaForm.svelte b/packages/ui/src/components/JsonSchemaForm.svelte\nindex 91be6e7..728d850 100644\n--- a/packages/ui/src/components/JsonSchemaForm.svelte\n+++ b/packages/ui/src/components/JsonSchemaForm.svelte\n@@ -3,23 +3,25 @@\n   import { Button } from './ui/button/index.js';\n   import { Loader2, Plus, Trash2 } from '@lucide/svelte';\n   import { cn } from '../utils.js';\n+  import { onDestroy, untrack } from 'svelte';\n+  import {\n+    initializeSchemaForm, schemaFormArrayItem, schemaFormEnumIndex,\n+    schemaFormEnumValue, schemaFormSnapshot, writeSchemaFormPath,\n+    type JsonSchemaFormSchema,\n+  } from './json-schema-form-state.js';\n \n-  interface JsonSchema {\n-    type?: string;\n-    title?: string;\n-    description?: string;\n-    properties?: Record<string, JsonSchema>;\n-    items?: JsonSchema;\n-    enum?: Array<string | number | boolean | null>;\n-    default?: unknown;\n-    required?: string[];\n-  }\n+  type JsonSchema = JsonSchemaFormSchema;\n \n   interface Props {\n     schema: JsonSchema;\n     value?: Record<string, unknown>;\n     onsubmit?: (data: Record<string, unknown>) => void | Promise<void>;\n     submitText?: string;\n+    disabled?: boolean;\n+    readonly?: boolean;\n+    /** 只决定此实例文案；不修改全局语言。 */\n+    locale?: string;\n+    onerror?: (error: unknown) => void;\n     /** Use a unique stable prefix when several schema forms share a page. */\n     idPrefix?: string;\n     class?: string;\n@@ -30,89 +32,117 @@\n     value = $bindable({}),\n     onsubmit,\n     submitText = 'Submit Form',\n-    idPrefix = 'json_field',\n+    disabled = false,\n+    readonly = false,\n+    locale,\n+    onerror,\n+    idPrefix,\n     class: className = '',\n   }: Props = $props();\n \n   const i18n = useTranslation();\n+  const instanceId = $props.id();\n+  const prefix = $derived(idPrefix ?? `json-form-${instanceId}`);\n+  const isZh = $derived((locale ?? i18n.locale).startsWith('zh'));\n+  const labels = $derived(isZh ? {\n+    add: '添加项目', remove: '删除', empty: '暂无项目',\n+    failed: '提交未完成，请检查状态后重试。', invalid: '请检查表单输入。',\n+  } : {\n+    add: 'Add item', remove: 'Remove item', empty: 'No items',\n+    failed: 'Submission did not complete. Check its status before retrying.', invalid: 'Check the form input.',\n+  });\n   let isSubmitting = $state(false);\n-\n-  function cloneDefault(node: JsonSchema): unknown {\n-    if (node.default !== undefined) return structuredClone(node.default);\n-    if (node.type === 'object' || node.properties) {\n-      return Object.fromEntries(\n-        Object.entries(node.properties ?? {})\n-          .map(([key, child]) => [key, cloneDefault(child)])\n-          .filter(([, child]) => child !== undefined),\n-      );\n-    }\n-    if (node.type === 'array') return [];\n-    return undefined;\n-  }\n-\n-  function mergeDefaults(node: JsonSchema, current: unknown): unknown {\n-    if (node.type !== 'object' && !node.properties) return current ?? cloneDefault(node);\n-    const source = current && typeof current === 'object' ? current as Record<string, unknown> : {};\n-    const result: Record<string, unknown> = { ...source };\n-    for (const [key, child] of Object.entries(node.properties ?? {})) {\n-      const next = mergeDefaults(child, result[key]);\n-      if (next !== undefined) result[key] = next;\n-      else if (child.type === 'boolean' && node.required?.includes(key)) result[key] = false;\n-    }\n-    return result;\n-  }\n-\n-  $effect(() => {\n-    const next = mergeDefaults(schema, value);\n-    if (JSON.stringify(next) !== JSON.stringify(value)) value = next as Record<string, unknown>;\n+  let failure = $state<'invalid' | 'failed' | null>(null);\n+  let formElement: HTMLFormElement | undefined;\n+  let destroyed = false;\n+  let authorityRevision = 0;\n+  let identity: readonly unknown[] = [];\n+  const prepared = $derived.by(() => {\n+    try { return { ok: true as const, value: initializeSchemaForm(schema, value) }; }\n+    catch { return { ok: false as const }; }\n   });\n+  const locked = $derived(disabled || readonly || isSubmitting || !prepared.ok);\n+  // 按键是否存在初始化，不能每次输入都用 ?? 把清空的默认值补回来。\n+  $effect.pre(() => {\n+    if (prepared.ok && prepared.value !== value) value = prepared.value;\n+  });\n+  $effect.pre(() => {\n+    const next = [schema, value, disabled, readonly, onsubmit];\n+    untrack(() => {\n+      if (next.some((part, index) => part !== identity[index])) {\n+        authorityRevision += 1;\n+        failure = null;\n+      }\n+      identity = next;\n+    });\n+  });\n+  onDestroy(() => { destroyed = true; });\n \n+  function editable(): boolean {\n+    return !destroyed && !disabled && !readonly && !isSubmitting && prepared.ok\n+      && !formElement?.closest('fieldset[disabled]');\n+  }\n   function readPath(path: string[]): unknown {\n     return path.reduce<unknown>((current, key) => (\n-      current && typeof current === 'object' ? (current as Record<string, unknown>)[key] : undefined\n-    ), value);\n+      current && typeof current === 'object' && Object.hasOwn(current, key)\n+        ? (current as Record<string, unknown>)[key] : undefined\n+    ), prepared.ok ? prepared.value : {});\n   }\n-\n   function writePath(path: string[], nextValue: unknown): void {\n-    const next = structuredClone($state.snapshot(value));\n-    let target: Record<string, unknown> = next;\n-    for (const key of path.slice(0, -1)) {\n-      const child = target[key];\n-      target[key] = child && typeof child === 'object' ? child : {};\n-      target = target[key] as Record<string, unknown>;\n-    }\n-    const lastKey = path[path.length - 1];\n-    if (lastKey !== undefined) target[lastKey] = nextValue;\n-    value = next;\n+    if (!editable() || !prepared.ok) return;\n+    try { value = writeSchemaFormPath(prepared.value, path, nextValue); failure = null; }\n+    catch { failure = 'invalid'; }\n   }\n-\n-  function enumValue(raw: string, options: JsonSchema['enum']): unknown {\n-    return options?.find((option) => String(option) === raw) ?? raw;\n+  function choose(path: string[], raw: string, choices: JsonSchema['enum']): void {\n+    if (!editable()) return;\n+    try { writePath(path, schemaFormEnumValue(choices ?? [], raw)); }\n+    catch { failure = 'invalid'; }\n   }\n-\n   function addArrayItem(path: string[], itemSchema: JsonSchema): void {\n+    if (!editable()) return;\n     const current = readPath(path);\n-    const items = Array.isArray(current) ? current : [];\n-    writePath(path, [...items, cloneDefault(itemSchema) ?? (itemSchema.type === 'object' ? {} : itemSchema.type === 'boolean' ? false : '')]);\n+    try { writePath(path, [...(Array.isArray(current) ? current : []), schemaFormArrayItem(itemSchema)]); }\n+    catch { failure = 'invalid'; }\n   }\n-\n   function removeArrayItem(path: string[], index: number): void {\n+    if (!editable()) return;\n     const current = readPath(path);\n     if (Array.isArray(current)) writePath(path, current.filter((_, itemIndex) => itemIndex !== index));\n   }\n-\n   async function handleSubmit(event: SubmitEvent): Promise<void> {\n     event.preventDefault();\n+    // 同步置锁，防止同一帧的双击/重入 submit；遵循宿主 fieldset 的预览禁用状态；权限仍需服务端校验。\n+    if (!editable() || !prepared.ok || !onsubmit) return;\n+    if (formElement && !formElement.checkValidity()) { failure = 'invalid'; return; }\n+    let payload: Record<string, unknown>;\n+    try { payload = schemaFormSnapshot(prepared.value); }\n+    catch { failure = 'invalid'; return; }\n+    const currentValue = value, currentSchema = schema, handler = onsubmit, revision = authorityRevision;\n+    const fingerprint = JSON.stringify(payload);\n+    failure = null;\n     isSubmitting = true;\n     try {\n-      await onsubmit?.(value);\n+      await handler(payload);\n+    } catch (error) {\n+      // 回调只能拿到副本；被替换/卸载实例的失败不能污染新的表单上下文。\n+      if (!destroyed && revision === authorityRevision && !disabled && !readonly && currentValue === value && currentSchema === schema && handler === onsubmit) {\n+        try {\n+          if (JSON.stringify(schemaFormSnapshot(prepared.ok ? prepared.value : value)) === fingerprint) {\n+            failure = 'failed';\n+            try { onerror?.(error); } catch { /* 错误观察者不改变提交状态。 */ }\n+          }\n+        } catch { /* 新上下文不再是可比较的 JSON 草稿，不发布旧错误。 */ }\n+      }\n     } finally {\n-      isSubmitting = false;\n+      if (!destroyed) isSubmitting = false;\n     }\n   }\n+\n </script>\n \n <form\n+  bind:this={formElement}\n+  aria-busy={isSubmitting}\n   onsubmit={handleSubmit}\n   class={cn('svadmin-u-3e7ce58d64fa svadmin-u-a217b4eaa918 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-0478c89a150f svadmin-u-cef5b893cf23 svadmin-u-359090c2d529', className)}\n >\n@@ -123,9 +153,13 @@\n     </div>\n   {/if}\n \n+  {#if !prepared.ok || failure}\n+    <p role=\"alert\">{labels[!prepared.ok ? 'invalid' : failure ?? 'invalid']}</p>\n+  {/if}\n+\n   {#snippet renderField(node: JsonSchema, path: string[], title: string, required = false)}\n     {@const current = readPath(path)}\n-    {@const id = `${idPrefix}_${path.map(encodeURIComponent).join('/')}`}\n+    {@const id = `${prefix}_${path.map(encodeURIComponent).join('/')}`}\n     {#if node.type === 'object' || node.properties}\n       <fieldset class=\"svadmin-u-da7c36cd8867 svadmin-u-421ac2be5045\">\n         <legend class=\"svadmin-u-0214b4b355d1 svadmin-u-2689f3958069\">{title}</legend>\n@@ -142,15 +176,15 @@\n         <legend class=\"svadmin-u-0214b4b355d1 svadmin-u-2689f3958069\">{title}</legend>\n         {#if node.description}<p class=\"svadmin-u-d058ca6de60f svadmin-u-bfa603190748\">{node.description}</p>{/if}\n         {#each items as _, index (index)}\n-          {@render renderField(node.items ?? { type: 'string' }, [...path, String(index)], `${title} ${index + 1}`)}\n-          <Button type=\"button\" variant=\"ghost\" size=\"sm\" onclick={() => removeArrayItem(path, index)}>\n-            <Trash2 class=\"svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c\" /> 删除\n+          {@render renderField(node.items ?? { type: 'string' }, [...path, String(index)], `${title} ${index + 1}`, true)}\n+          <Button type=\"button\" disabled={locked} variant=\"ghost\" size=\"sm\" onclick={() => removeArrayItem(path, index)}>\n+            <Trash2 class=\"svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c\" /> {labels.remove}\n           </Button>\n         {:else}\n-          <span class=\"svadmin-u-bfa603190748\">暂无项目</span>\n+          <span class=\"svadmin-u-bfa603190748\">{labels.empty}</span>\n         {/each}\n-        <Button type=\"button\" variant=\"outline\" size=\"sm\" onclick={() => addArrayItem(path, node.items ?? { type: 'string' })}>\n-          <Plus class=\"svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c\" /> 添加项目\n+        <Button type=\"button\" disabled={locked} variant=\"outline\" size=\"sm\" onclick={() => addArrayItem(path, node.items ?? { type: 'string' })}>\n+          <Plus class=\"svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c\" /> {labels.add}\n         </Button>\n       </fieldset>\n     {:else}\n@@ -160,21 +194,23 @@\n         </label>\n         {#if node.description}<p class=\"svadmin-u-d058ca6de60f svadmin-u-bfa603190748\">{node.description}</p>{/if}\n         {#if node.enum}\n-          <select id={id} required={required} value={String(current ?? '')} onchange={(event) => writePath(path, enumValue(event.currentTarget.value, node.enum))} class=\"svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529\">\n+          <select id={id} disabled={locked} required={required} value={schemaFormEnumIndex(node.enum, current)} onchange={(event) => choose(path, event.currentTarget.value, node.enum)} class=\"svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529\">\n             <option value=\"\">{i18n.t('common.selectOption')}</option>\n-            {#each node.enum as option (String(option))}<option value={String(option)}>{String(option)}</option>{/each}\n+            {#each node.enum as option, optionIndex (optionIndex)}<option value={String(optionIndex)}>{String(option)}</option>{/each}\n           </select>\n         {:else if node.type === 'boolean'}\n-          <input id={id} type=\"checkbox\" checked={Boolean(current)} onchange={(event) => writePath(path, event.currentTarget.checked)} />\n+          <input id={id} disabled={locked} type=\"checkbox\" checked={Boolean(current)} onchange={(event) => writePath(path, event.currentTarget.checked)} />\n         {:else if node.type === 'number' || node.type === 'integer'}\n-          <input id={id} type=\"number\" step={node.type === 'integer' ? 1 : 'any'} required={required} value={current === undefined ? '' : String(current)} oninput={(event) => writePath(path, event.currentTarget.value === '' ? undefined : Number(event.currentTarget.value))} class=\"svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529\" />\n+          <input id={id} disabled={locked} type=\"number\" step={node.type === 'integer' ? 1 : 'any'} required={required} value={current === undefined ? '' : String(current)} oninput={(event) => writePath(path, event.currentTarget.value === '' ? undefined : Number(event.currentTarget.value))} class=\"svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529\" />\n         {:else}\n-          <input id={id} type=\"text\" required={required} value={String(current ?? '')} oninput={(event) => writePath(path, event.currentTarget.value)} class=\"svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529\" />\n+          <input id={id} disabled={locked} type=\"text\" required={required} value={String(current ?? '')} oninput={(event) => writePath(path, event.currentTarget.value)} class=\"svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529\" />\n         {/if}\n       </div>\n     {/if}\n   {/snippet}\n \n+  <fieldset class=\"schema-form-fields svadmin-u-3e7ce58d64fa\" disabled={locked}>\n+  {#if prepared.ok}\n   <div class=\"svadmin-u-9c6cdfa2ba3d\">\n     {#each Object.entries(schema.properties ?? {}) as [key, node] (key)}\n       {@render renderField(node, [key], node.title ?? key, schema.required?.includes(key) ?? false)}\n@@ -182,9 +218,15 @@\n   </div>\n \n   <div class=\"svadmin-u-173fa8f06789 svadmin-u-b950dda299d3 svadmin-u-05faf5c801ff svadmin-u-60fbb7713999 svadmin-u-77c08e015d14\">\n-    <Button type=\"submit\" size=\"sm\" disabled={isSubmitting} class=\"svadmin-u-44ee8ba0a421 svadmin-u-25effcb585ab\">\n+    <Button type=\"submit\" size=\"sm\" disabled={locked} class=\"svadmin-u-44ee8ba0a421 svadmin-u-25effcb585ab\">\n       {#if isSubmitting}<Loader2 class=\"svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-afbdd13a380e\" />{/if}\n       {submitText}\n     </Button>\n   </div>\n+  {/if}\n+  </fieldset>\n </form>\n+\n+<style>\n+  .schema-form-fields { min-width: 0; margin: 0; padding: 0; border: 0; }\n+</style>\ndiff --git a/packages/ui/src/components/json-schema-form-disabled.test-host.svelte b/packages/ui/src/components/json-schema-form-disabled.test-host.svelte\nnew file mode 100644\nindex 0000000..93f6f58\n--- /dev/null\n+++ b/packages/ui/src/components/json-schema-form-disabled.test-host.svelte\n@@ -0,0 +1,5 @@\n+<script lang=\"ts\">\n+  import JsonSchemaForm from './JsonSchemaForm.svelte';\n+  let { onsubmit }: { onsubmit: (value: Record<string, unknown>) => void } = $props();\n+</script>\n+<fieldset disabled><JsonSchemaForm schema={{ properties: { name: { type: 'string', default: 'Preview' } } }} {onsubmit} /></fieldset>\ndiff --git a/packages/ui/src/components/json-schema-form-lifecycle.test.svelte.ts b/packages/ui/src/components/json-schema-form-lifecycle.test.svelte.ts\nnew file mode 100644\nindex 0000000..8d2c2e8\n--- /dev/null\n+++ b/packages/ui/src/components/json-schema-form-lifecycle.test.svelte.ts\n@@ -0,0 +1,139 @@\n+import { cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';\n+import { afterEach, describe, expect, it, vi } from 'vitest';\n+import JsonSchemaForm from './JsonSchemaForm.svelte';\n+import DisabledHost from './json-schema-form-disabled.test-host.svelte';\n+\n+const schema = { properties: {\n+  name: { type: 'string', title: 'Name', default: 'Original' },\n+  quota: { type: 'number', title: 'Quota', default: 10 },\n+  profile: { type: 'object', properties: { city: { type: 'string', title: 'City', default: 'Tokyo' } } },\n+  rows: { type: 'array', title: 'Rows', items: { type: 'object', required: ['active'], properties: { active: { type: 'boolean', title: 'Active' } } } },\n+} };\n+const form = (view: { container: HTMLElement }): HTMLFormElement => {\n+  const element = view.container.querySelector('form');\n+  if (!element) throw new Error('Missing form');\n+  return element;\n+};\n+afterEach(cleanup);\n+\n+describe('nested schema form draft and submission ownership', () => {\n+  it('does not repopulate cleared defaults after editing a sibling or submitting', async () => {\n+    const onsubmit = vi.fn();\n+    const view = render(JsonSchemaForm, { schema, onsubmit, locale: 'en-US' });\n+    const quota = view.getByLabelText('Quota');\n+    await fireEvent.input(quota, { target: { value: '' } });\n+    await fireEvent.input(view.getByLabelText('Name'), { target: { value: 'Changed' } });\n+    expect((quota as HTMLInputElement).value).toBe('');\n+    await fireEvent.submit(form(view));\n+    expect(onsubmit).toHaveBeenCalledOnce();\n+    expect(onsubmit.mock.calls[0]?.[0]).not.toHaveProperty('quota');\n+    expect((quota as HTMLInputElement).value).toBe('');\n+  });\n+  it('uses independent submission data and preserves nested UI state when a handler mutates its input', async () => {\n+    const onsubmit = vi.fn((input: Record<string, unknown>) => {\n+      (input['profile'] as Record<string, unknown>)['city'] = 'Callback copy';\n+      input['name'] = 'Mutated';\n+    });\n+    const view = render(JsonSchemaForm, { schema, onsubmit });\n+    await fireEvent.submit(form(view));\n+    expect((view.getByLabelText('City') as HTMLInputElement).value).toBe('Tokyo');\n+    expect((view.getByLabelText('Name') as HTMLInputElement).value).toBe('Original');\n+    expect(onsubmit).toHaveBeenCalledOnce();\n+  });\n+  it('initializes untouched required false values inside newly added object arrays', async () => {\n+    const onsubmit = vi.fn(); const view = render(JsonSchemaForm, { schema, onsubmit, locale: 'en-US' });\n+    await fireEvent.click(view.getByRole('button', { name: 'Add item' }));\n+    await fireEvent.submit(form(view));\n+    expect(onsubmit).toHaveBeenCalledWith(expect.objectContaining({ rows: [{ active: false }] }));\n+  });\n+  it.each([[0, 1], [1, '1'], [2, null], [3, 'null'], [4, false], [5, 'false'], [6, '']] as const)(\n+    'retains enum option %s without string coercion', async (index, expected) => {\n+      const onsubmit = vi.fn();\n+      const view = render(JsonSchemaForm, { schema: { properties: { choice: { title: 'Choice', enum: [1, '1', null, 'null', false, 'false', ''] } } }, onsubmit });\n+      await fireEvent.change(view.getByLabelText('Choice'), { target: { value: String(index) } });\n+      await fireEvent.submit(form(view));\n+      expect(onsubmit).toHaveBeenCalledWith({ choice: expected });\n+    },\n+  );\n+  it('locks all controls before same-frame and reentrant submissions can dispatch', async () => {\n+    let finish: () => void = () => { throw new Error('Not started'); };\n+    const pending = new Promise<void>(resolve => { finish = resolve; });\n+    const onsubmit = vi.fn<(input: Record<string, unknown>) => Promise<void>>(() => pending);\n+    const view = render(JsonSchemaForm, { schema, onsubmit, locale: 'en-US' });\n+    const element = form(view);\n+    element.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));\n+    element.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));\n+    await waitFor(() => expect(element.getAttribute('aria-busy')).toBe('true'));\n+    expect(onsubmit).toHaveBeenCalledOnce();\n+    const name = view.getByLabelText('Name');\n+    expect(name.matches(':disabled')).toBe(true);\n+    for (const control of element.querySelectorAll('input, select, button')) {\n+      expect(control.hasAttribute('disabled')).toBe(true);\n+    }\n+    await fireEvent.input(name, { target: { value: 'Synthetic event while busy' } });\n+    finish(); await waitFor(() => expect(element.getAttribute('aria-busy')).toBe('false'));\n+    await fireEvent.submit(element);\n+    expect(onsubmit.mock.calls[1]?.[0]).toEqual(onsubmit.mock.calls[0]?.[0]);\n+  });\n+  it('rejects synchronous callback reentry', async () => {\n+    const target: { element?: HTMLFormElement } = {};\n+    const onsubmit = vi.fn(() => { target.element?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })); });\n+    const view = render(JsonSchemaForm, { schema, onsubmit });\n+    const element = form(view);\n+    target.element = element;\n+    await fireEvent.submit(element); expect(onsubmit).toHaveBeenCalledOnce();\n+  });\n+  it('surfaces callback failure without losing the draft and permits an explicit retry', async () => {\n+    const onsubmit = vi.fn().mockRejectedValueOnce(new Error('Synthetic failure')).mockResolvedValueOnce(undefined);\n+    const onerror = vi.fn();\n+    const view = render(JsonSchemaForm, { schema, onsubmit, onerror, locale: 'en-US' });\n+    await fireEvent.input(view.getByLabelText('Name'), { target: { value: 'Keep draft' } });\n+    await fireEvent.submit(form(view));\n+    await waitFor(() => expect(view.getByRole('alert').textContent).toContain('Submission did not complete'));\n+    expect(onerror).toHaveBeenCalledOnce();\n+    expect((view.getByLabelText('Name') as HTMLInputElement).value).toBe('Keep draft');\n+    await fireEvent.submit(form(view));\n+    await waitFor(() => expect(view.queryByRole('alert')).toBeNull());\n+    expect(onsubmit).toHaveBeenCalledTimes(2);\n+  });\n+  it.each(['disabled', 'readonly'] as const)('blocks synthetic input and submission when %s', async mode => {\n+    const onsubmit = vi.fn(); const view = render(JsonSchemaForm, { schema, onsubmit, [mode]: true, locale: 'en-US' });\n+    await fireEvent.input(view.getByLabelText('Name'), { target: { value: 'Blocked' } });\n+    await fireEvent.click(view.getByRole('button', { name: 'Add item' }));\n+    await fireEvent.submit(form(view)); expect(onsubmit).not.toHaveBeenCalled();\n+    await view.rerender({ [mode]: false }); await fireEvent.submit(form(view));\n+    expect(onsubmit).toHaveBeenCalledWith(expect.objectContaining({ name: 'Original', rows: [] }));\n+  });\n+  it('also respects an ancestor disabled fieldset without relying on native event suppression', async () => {\n+    const onsubmit = vi.fn(); const view = render(DisabledHost, { onsubmit });\n+    await fireEvent.submit(form(view)); expect(onsubmit).not.toHaveBeenCalled();\n+  });\n+  it.each(['replacement', 'unmount', 'disable'] as const)('does not publish stale failures after %s', async transition => {\n+    let reject: (error: Error) => void = () => { throw new Error('Not started'); };\n+    const onsubmit = vi.fn(() => new Promise<void>((_, fail) => { reject = fail; })); const onerror = vi.fn();\n+    const view = render(JsonSchemaForm, { schema, onsubmit, onerror });\n+    await fireEvent.submit(form(view));\n+    if (transition === 'unmount') view.unmount();\n+    else if (transition === 'disable') await view.rerender({ disabled: true });\n+    else await view.rerender({ value: { name: 'New context' } });\n+    reject(new Error('Old context')); await Promise.resolve(); await Promise.resolve();\n+    expect(onerror).not.toHaveBeenCalled();\n+    expect(view.queryByRole('alert')).toBeNull();\n+  });\n+  it('creates unique default IDs but preserves explicit host prefixes', () => {\n+    const a = render(JsonSchemaForm, { schema }), b = render(JsonSchemaForm, { schema });\n+    const ids = [...a.container.querySelectorAll('input'), ...b.container.querySelectorAll('input')].map(input => input.id);\n+    expect(new Set(ids).size).toBe(ids.length);\n+    const explicit = render(JsonSchemaForm, { schema, idPrefix: 'host-owned' });\n+    expect(explicit.container.querySelector('input')?.id).toBe('host-owned_name');\n+  });\n+  it('supports independent Chinese and English array-action labels', () => {\n+    const a = render(JsonSchemaForm, { schema, locale: 'zh-CN' }), b = render(JsonSchemaForm, { schema, locale: 'en-US' });\n+    expect(a.getByRole('button', { name: '添加项目' })).toBeTruthy();\n+    expect(b.getByRole('button', { name: 'Add item' })).toBeTruthy();\n+  });\n+  it('refuses non-JSON submission values instead of silently coercing them', async () => {\n+    const onsubmit = vi.fn(); const view = render(JsonSchemaForm, { schema: { properties: {} }, value: { hidden: Infinity }, onsubmit });\n+    await fireEvent.submit(form(view)); expect(onsubmit).not.toHaveBeenCalled(); expect(view.getByRole('alert')).toBeTruthy();\n+  });\n+});\ndiff --git a/packages/ui/src/components/json-schema-form-state.ts b/packages/ui/src/components/json-schema-form-state.ts\nnew file mode 100644\nindex 0000000..887e4a0\n--- /dev/null\n+++ b/packages/ui/src/components/json-schema-form-state.ts\n@@ -0,0 +1,154 @@\n+/** 嵌套表单的草稿与传输语义；不是替代服务端的 JSON Schema 校验器。 */\n+export interface JsonSchemaFormSchema {\n+  type?: string;\n+  title?: string;\n+  description?: string;\n+  properties?: Record<string, JsonSchemaFormSchema>;\n+  items?: JsonSchemaFormSchema;\n+  enum?: Array<string | number | boolean | null>;\n+  default?: unknown;\n+  required?: string[];\n+}\n+\n+export const SCHEMA_FORM_LIMITS = Object.freeze({ depth: 32, nodes: 10_000, characters: 1_048_576 });\n+const unsafe = new Set(['__proto__', 'prototype', 'constructor']);\n+const record = (value: unknown): value is Record<string, unknown> => value !== null\n+  && typeof value === 'object' && !Array.isArray(value)\n+  && (Object.getPrototypeOf(value) === Object.prototype || Object.getPrototypeOf(value) === null);\n+function safeKey(key: string): void {\n+  if (unsafe.has(key)) throw new Error('Unsafe form field');\n+}\n+\n+/** wire 模式仅省略对象的 undefined；数组的空洞/undefined 不能偷偷转成 null。 */\n+function copy(value: unknown, wire: boolean): unknown {\n+  const active = new Set<object>();\n+  let nodes = 0, characters = 0;\n+  function visit(current: unknown, depth: number): unknown {\n+    if (++nodes > SCHEMA_FORM_LIMITS.nodes || depth > SCHEMA_FORM_LIMITS.depth) throw new Error('Form value exceeds limits');\n+    if (current === undefined && !wire) return undefined;\n+    if (current === null || typeof current === 'boolean') return current;\n+    if (typeof current === 'number' && Number.isFinite(current)) return current;\n+    if (typeof current === 'string') {\n+      characters += current.length;\n+      if (characters > SCHEMA_FORM_LIMITS.characters) throw new Error('Form text exceeds limits');\n+      return current;\n+    }\n+    if ((!record(current) && !Array.isArray(current)) || active.has(current)) throw new Error('Expected acyclic plain form data');\n+    active.add(current);\n+    try {\n+      if (Reflect.ownKeys(current).some(key => typeof key === 'symbol')) throw new Error('Symbol values are not JSON fields');\n+      if (Array.isArray(current)) {\n+        if (current.length > SCHEMA_FORM_LIMITS.nodes) throw new Error('Form array exceeds limits');\n+        const result: unknown[] = [];\n+        for (let index = 0; index < current.length; index++) {\n+          const descriptor = Object.getOwnPropertyDescriptor(current, String(index));\n+          if (!descriptor || !('value' in descriptor)) throw new Error('Sparse arrays and accessors are not form data');\n+          result.push(visit(descriptor.value, depth + 1));\n+        }\n+        if (Object.keys(current).some(key => !/^(0|[1-9][0-9]*)$/u.test(key) || Number(key) >= current.length)) {\n+          throw new Error('Array properties are not JSON fields');\n+        }\n+        return result;\n+      }\n+      const result: Record<string, unknown> = {};\n+      for (const key of Object.keys(current)) {\n+        safeKey(key);\n+        characters += key.length;\n+        if (characters > SCHEMA_FORM_LIMITS.characters) throw new Error('Form text exceeds limits');\n+        const descriptor = Object.getOwnPropertyDescriptor(current, key);\n+        if (!descriptor || !('value' in descriptor)) throw new Error('Accessors are not form data');\n+        if (!wire || descriptor.value !== undefined) result[key] = visit(descriptor.value, depth + 1);\n+      }\n+      return result;\n+    } finally { active.delete(current); }\n+  }\n+  return visit(value, 0);\n+}\n+\n+/** Svelte 代理也通过普通数据属性读取；回调永远收不到活跃草稿的引用。 */\n+export function schemaFormSnapshot(value: unknown): Record<string, unknown> {\n+  if (!record(value)) throw new Error('Form root must be an object');\n+  return copy(value, true) as Record<string, unknown>;\n+}\n+\n+/** 默认值只填“缺失的键”；显式 undefined/null/false/0/空串都表示调用方的决定。 */\n+export function initializeSchemaForm(schema: JsonSchemaFormSchema, value: Record<string, unknown>): Record<string, unknown> {\n+  if (!record(value)) throw new Error('Form root must be an object');\n+  const active = new Set<object>();\n+  let nodes = 0;\n+  function visit(node: JsonSchemaFormSchema, current: unknown, present: boolean, required: boolean, depth: number): unknown {\n+    if (++nodes > SCHEMA_FORM_LIMITS.nodes || depth > SCHEMA_FORM_LIMITS.depth || !record(node as unknown) || active.has(node)) {\n+      throw new Error('Form schema exceeds supported traversal limits');\n+    }\n+    active.add(node);\n+    try {\n+      if (!present) {\n+        if (Object.hasOwn(node, 'default')) current = copy(node.default, false);\n+        else if (node.type === 'object' || node.properties) current = {};\n+        else if (node.type === 'array') current = [];\n+        else if (node.type === 'boolean' && required) current = false;\n+      }\n+      if (record(current) && (node.type === 'object' || node.properties)) {\n+        let result = current;\n+        for (const [key, child] of Object.entries(node.properties ?? {})) {\n+          safeKey(key);\n+          const exists = Object.hasOwn(current, key);\n+          const next = visit(child, exists ? current[key] : undefined, exists, node.required?.includes(key) ?? false, depth + 1);\n+          if ((!exists && next !== undefined) || (exists && next !== current[key])) {\n+            if (result === current) result = { ...current };\n+            result[key] = next;\n+          }\n+        }\n+        return result;\n+      }\n+      if (Array.isArray(current) && node.type === 'array' && node.items) {\n+        if (current.length > SCHEMA_FORM_LIMITS.nodes) throw new Error('Form array exceeds limits');\n+        const array = current;\n+        const items = array.map(item => visit(node.items as JsonSchemaFormSchema, item, true, true, depth + 1));\n+        return items.some((item, index) => item !== array[index]) ? items : array;\n+      }\n+      return current;\n+    } finally { active.delete(node); }\n+  }\n+  return visit(schema, value, true, true, 0) as Record<string, unknown>;\n+}\n+\n+export function schemaFormArrayItem(schema: JsonSchemaFormSchema): unknown {\n+  // 新增对象项也初始化其嵌套默认值及必填 false；数字留空，不猜测为 0。\n+  const seed = Object.hasOwn(schema, 'default') ? copy(schema.default, false)\n+    : schema.type === 'object' || schema.properties ? {}\n+    : schema.type === 'array' ? [] : schema.type === 'boolean' ? false : schema.type === 'number' || schema.type === 'integer' ? undefined : '';\n+  return initializeSchemaForm({ properties: { item: schema }, required: ['item'] }, { item: seed })['item'];\n+}\n+\n+export function writeSchemaFormPath(value: Record<string, unknown>, path: readonly string[], nextValue: unknown): Record<string, unknown> {\n+  if (!path.length || path.length > SCHEMA_FORM_LIMITS.depth) throw new Error('Invalid form path');\n+  const next = copy(value, false) as Record<string, unknown>;\n+  let target: Record<string, unknown> | unknown[] = next;\n+  for (const [index, key] of path.entries()) {\n+    safeKey(key);\n+    if (Array.isArray(target) && (!/^(0|[1-9][0-9]*)$/u.test(key) || Number(key) >= target.length)) throw new Error('Invalid array field');\n+    if (index === path.length - 1) {\n+      Reflect.set(target, key, copy(nextValue, false));\n+    } else {\n+      let child: unknown = Object.hasOwn(target, key) ? Reflect.get(target, key) : undefined;\n+      if (!record(child) && !Array.isArray(child)) {\n+        child = {};\n+        Reflect.set(target, key, child);\n+      }\n+      target = child as Record<string, unknown> | unknown[];\n+    }\n+  }\n+  return next;\n+}\n+\n+/** option.value 是索引，不是 String(value)：1 与 \"1\"、null 与 \"null\" 必须可区分。 */\n+export function schemaFormEnumIndex(choices: readonly unknown[], value: unknown): string {\n+  const index = choices.findIndex(choice => choice === value);\n+  return index === -1 ? '' : String(index);\n+}\n+export function schemaFormEnumValue(choices: readonly unknown[], index: string): unknown {\n+  if (index === '') return undefined;\n+  if (!/^(0|[1-9][0-9]*)$/u.test(index) || !Object.hasOwn(choices, Number(index))) throw new Error('Invalid form choice');\n+  return choices[Number(index)];\n+}\ndiff --git a/scripts/fixtures/svar-grid/auto-table-boundaries.spec.ts b/scripts/fixtures/svar-grid/auto-table-boundaries.spec.ts\nindex 15ba31a..5a98ce1 100644\n--- a/scripts/fixtures/svar-grid/auto-table-boundaries.spec.ts\n+++ b/scripts/fixtures/svar-grid/auto-table-boundaries.spec.ts\n@@ -80,10 +80,24 @@ test('AutoTable semantic colors follow a nested host theme at desktop and mobile\n           viewport.scrollLeft = viewport.scrollWidth;\n           viewport.dispatchEvent(new Event('scroll'));\n         });\n-        return page.getByRole('button', { name: 'Edit Stock', exact: true }).first().isVisible();\n+        // isVisible 只要求布局框存在，旧虚拟列即使已被滚动窗裁切也会返回 true。\n+        // 在浏览器完成布局后检查真实交集，避免缩小视口时过早结束轮询。\n+        return page.getByRole('button', { name: 'Edit Stock', exact: true }).first().evaluateAll(async elements => {\n+          const button = elements[0];\n+          if (!button) return false;\n+          return new Promise<boolean>(resolve => {\n+            const observer = new IntersectionObserver(entries => {\n+              observer.disconnect();\n+              const entry = entries[0];\n+              resolve(entry?.isIntersecting === true && entry.intersectionRatio === 1);\n+            });\n+            observer.observe(button);\n+          });\n+        });\n       }, { timeout: 5_000 }).toBe(true);\n     }\n     await expect(page.getByRole('button', { name: 'Edit Stock', exact: true }).first()).toBeVisible();\n+    await expect(page.getByRole('button', { name: 'Edit Stock', exact: true }).first()).toBeInViewport();\n     for (const dark of [false, true]) {\n       if (dark) await page.getByRole('button', { name: 'Theme', exact: true }).click();\n       const hostColor = await page.locator('main').evaluate(element => getComputedStyle(element).color);\ndiff --git a/scripts/surface-workflows/workflow.e2e.ts b/scripts/surface-workflows/workflow.e2e.ts\nindex 92fbe80..aada6b9 100644\n--- a/scripts/surface-workflows/workflow.e2e.ts\n+++ b/scripts/surface-workflows/workflow.e2e.ts\n@@ -12,7 +12,7 @@ test('real streaming preview cannot submit; nested forms preserve state; explici\n   const before = await state(page); expect(before.writes).toBe(0);\n   await accept(page);\n   await primary.getByLabel('Contact name', { exact: false }).fill('Nested test contact');\n-  await primary.getByRole('button', { name: '添加项目', exact: false }).click();\n+  await primary.getByRole('button', { name: 'Add item', exact: false }).click();\n   await primary.getByLabel('City', { exact: false }).fill('Synthetic City');\n   const stable = await state(page);\n   await page.getByRole('button', { name: 'Change presentation only' }).click();",
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/runner/work/svadmin/svadmin/scripts/fixtures/svar-grid/results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "ci": {
+            "commitHref": "https://github.com/vibeunion/svadmin/commit/de19296d34d17cd72f23327500f317c8e970a61c",
+            "commitHash": "de19296d34d17cd72f23327500f317c8e970a61c",
+            "prHref": "https://github.com/vibeunion/svadmin/pull/445",
+            "prTitle": "fix(ui): preserve nested form drafts and submission ownership",
+            "prBaseHash": "626a85c8a541af295f1db9dee022007a2bf107ca",
+            "buildHref": "https://github.com/vibeunion/svadmin/actions/runs/35474151353"
+          },
+          "gitCommit": {
+            "shortHash": "de19296",
+            "hash": "de19296d34d17cd72f23327500f317c8e970a61c",
+            "subject": "Merge f40fe385d627c02b5a4c286d06c1e1f93af52b72 into 626a85c8a541af295f1db9dee022007a2bf107ca",
+            "body": "Merge f40fe385d627c02b5a4c286d06c1e1f93af52b72 into 626a85c8a541af295f1db9dee022007a2bf107ca\n",
+            "author": {
+              "name": "BoYan Jin",
+              "email": "348985087@qq.com",
+              "time": 1789857823000
+            },
+            "committer": {
+              "name": "GitHub",
+              "email": "noreply@github.com",
+              "time": 1789857823000
+            },
+            "branch": "HEAD"
+          },
+          "gitDiff": "diff --git a/.github/workflows/surface-workflows.yml b/.github/workflows/surface-workflows.yml\nindex 56ff7c9..d6d288b 100644\n--- a/.github/workflows/surface-workflows.yml\n+++ b/.github/workflows/surface-workflows.yml\n@@ -5,6 +5,7 @@ on:\n     paths:\n       - 'packages/surface/**'\n       - 'packages/ui/src/components/**'\n+      - 'packages/ui/scripts/schema-form-state.test.mjs'\n       - 'packages/lite/src/components/LiteFilterBuilder*'\n       - 'packages/lite/src/filter-form.ts'\n       - 'packages/core/src/types.ts'\n@@ -39,9 +40,11 @@ jobs:\n         run: |\n           bun run --cwd packages/surface check\n           bunx --no-install svelte-check --tsgo-experimental-api --tsconfig packages/ui/tsconfig.json --threshold error\n+      - name: Nested form draft and JSON transport contracts\n+        run: node --test packages/ui/scripts/schema-form-state.test.mjs\n       - name: Real UI and Lite workflow regression components\n         run: |\n-          bun run --cwd packages/ui test src/components/workflow-boundaries.test.svelte.ts src/components/import-wizard.test.svelte.ts src/components/resource-workspace.test.svelte.ts src/components/combobox-field.test.svelte.ts src/components/numeric-input.test.svelte.ts\n+          bun run --cwd packages/ui test src/components/json-schema-form-lifecycle.test.svelte.ts src/components/workflow-boundaries.test.svelte.ts src/components/import-wizard.test.svelte.ts src/components/resource-workspace.test.svelte.ts src/components/combobox-field.test.svelte.ts src/components/numeric-input.test.svelte.ts\n           bun run --cwd packages/lite test:components src/components/LiteFilterBuilder.apply.test.svelte.ts src/components/LiteFileUpload.test.svelte.ts\n       - name: Install isolated optional parser (not a new workspace dependency)\n         run: |\ndiff --git a/docs/architecture/nested-form-submission.md b/docs/architecture/nested-form-submission.md\nnew file mode 100644\nindex 0000000..7a20684\n--- /dev/null\n+++ b/docs/architecture/nested-form-submission.md\n@@ -0,0 +1,55 @@\n+# Nested form drafts and submission ownership\n+\n+This continues #441/#444 without replacing the current nested JsonSchemaForm with\n+the scalar-only implementation in #434. It does not overwrite the product\n+recipes, layouts or async resource work being integrated separately in #443.\n+\n+## Runtime changes\n+\n+- Defaults are applied only to missing object keys. Explicit `undefined`, `null`,\n+  `false`, `0` and empty strings are not refilled. The wire snapshot omits only\n+  undefined object fields; an undefined/sparse array element is rejected, not\n+  silently converted to null. Nested object/array defaults remain supported.\n+- New object array entries initialize nested defaults and untouched required\n+  false booleans. Numeric entries start empty, never guessed as zero.\n+- Select values use choice indices internally, preserving the identity of\n+  numbers, strings, booleans and null. Display labels remain the original values.\n+- The submit handler receives an independent, bounded JSON copy, not live Svelte\n+  state. Cycles, non-finite numbers, functions, exotic objects, getters, symbol\n+  fields, unsafe property names and incomplete arrays fail before dispatch.\n+- All fields and array mutations are disabled during submission and in explicit\n+  `disabled`/`readonly` mode. Synchronous/reentrant submit is guarded in code.\n+  Ancestor disabled fieldsets are respected even for synthetic submit events.\n+- A rejected callback preserves the draft and exposes a localized generic alert\n+  plus optional `onerror`. Retry requires another explicit user submission. Late\n+  errors from replaced/disabled/unmounted contexts do not notify the new context.\n+  An already dispatched callback is NOT cancelled or undone by these UI guards.\n+- Default field IDs use Svelte's instance identity; explicit `idPrefix` is still\n+  honored. Optional `locale` scopes array/error labels to one form; Surface passes\n+  its trusted locale rather than relying on the global language singleton.\n+\n+The fieldset wrapper retains the previous field/action spacing. Existing public\n+classes and components remain; this is not a visual redesign or the completion\n+of semantic recipes for every form component. English Surface fixtures now show\n+English array-action labels intentionally. Fresh browser evidence is required.\n+\n+## Boundaries and verification\n+\n+The internal helper is a draft/JSON transport contract, NOT a new JSON Schema\n+validator. Native required/number checks remain and Surface still validates the\n+registered TypeBox input schema on client and server. Additional JSON Schema\n+assertions in the generic form are not claimed newly supported. Server approval,\n+idempotency, scope authorization and audit are unchanged. A failed business\n+response may still need inspection/reconciliation instead of blind resubmission.\n+\n+Limits are 32 traversal levels, 10,000 visited nodes and 1 Mi characters in a JSON\n+copy. Surface may enforce stricter limits. These are conservative UI safeguards,\n+not a replacement for API request limits or backend field authorization.\n+\n+`node --test packages/ui/scripts/schema-form-state.test.mjs` runs actual helper\n+contracts. `json-schema-form-lifecycle.test.svelte.ts` exercises the actual Svelte\n+component; Surface's existing real parser/browser workflow exercises proposal,\n+approval and execution. The workflow explicitly runs all three layers and packed\n+consumer checks. A local source-only result is not a substitute for current-head\n+CI or browser evidence. #434's spreadsheet/filter changes, generic full-schema\n+validation, table lifetime warnings and final Figma acceptance remain separate.\ndiff --git a/packages/surface/src/components/ResourceFormBody.svelte b/packages/surface/src/components/ResourceFormBody.svelte\nindex ec8db61..e92135e 100644\n--- a/packages/surface/src/components/ResourceFormBody.svelte\n+++ b/packages/surface/src/components/ResourceFormBody.svelte\n@@ -64,7 +64,7 @@\n     <div role=\"alert\"><ul>{#each errors as error, index (`${index}:${error}`)}<li>{error}</li>{/each}</ul></div>\n   {/if}\n   <fieldset disabled={!scope.enabled || formState.busy || !!formState.proposal} class=\"form-fields\">\n-    <JsonSchemaForm {schema} bind:value onsubmit={submit} submitText={labels.submit} idPrefix={`surface-${widgetId}-${instanceId}`} />\n+    <JsonSchemaForm {schema} {locale} bind:value onsubmit={submit} submitText={labels.submit} idPrefix={`surface-${widgetId}-${instanceId}`} />\n   </fieldset>\n   {#if formState.error}<p role=\"alert\">{labels.error}</p>{/if}\n   {#if formState.proposal}\ndiff --git a/packages/ui/scripts/schema-form-state.test.mjs b/packages/ui/scripts/schema-form-state.test.mjs\nnew file mode 100644\nindex 0000000..a496da1\n--- /dev/null\n+++ b/packages/ui/scripts/schema-form-state.test.mjs\n@@ -0,0 +1,110 @@\n+import { test } from 'node:test';\n+import assert from 'node:assert/strict';\n+import {\n+  initializeSchemaForm, schemaFormArrayItem, schemaFormSnapshot,\n+  writeSchemaFormPath, schemaFormEnumIndex, schemaFormEnumValue, SCHEMA_FORM_LIMITS,\n+} from '../src/components/json-schema-form-state.ts';\n+\n+const schema = { properties: {\n+  quota: { type: 'number', default: 10 },\n+  profile: { type: 'object', required: ['active'], properties: { active: { type: 'boolean' }, name: { type: 'string', default: 'Initial' } } },\n+  addresses: { type: 'array', items: { type: 'object', required: ['active'], properties: { active: { type: 'boolean' }, city: { type: 'string', default: 'Tokyo' } } } },\n+} };\n+\n+test('nested missing defaults and required false initialize without mutating the host', () => {\n+  const input = Object.freeze({});\n+  const value = initializeSchemaForm(schema, input);\n+  assert.deepEqual(value, { quota: 10, profile: { active: false, name: 'Initial' }, addresses: [] });\n+  assert.deepEqual(input, {});\n+  assert.equal(initializeSchemaForm(schema, value), value);\n+});\n+for (const intentional of [undefined, null, false, 0, '']) {\n+  test(`explicit ${String(intentional)} does not become a default`, () => {\n+    const input = { quota: intentional, profile: { active: false, name: intentional }, addresses: [] };\n+    const value = initializeSchemaForm(schema, input);\n+    assert.equal(value, input);\n+    assert.equal(value.quota, intentional); assert.equal(value.profile.name, intentional);\n+  });\n+}\n+test('cleared nested numbers remain omitted in JSON after sibling edits', () => {\n+  const nested = { properties: { profile: { properties: { quota: { type: 'number', default: 10 }, name: { type: 'string' } } } } };\n+  let value = initializeSchemaForm(nested, {});\n+  value = writeSchemaFormPath(value, ['profile', 'quota'], undefined);\n+  value = writeSchemaFormPath(value, ['profile', 'name'], 'Changed');\n+  assert.ok(Object.hasOwn(initializeSchemaForm(nested, value).profile, 'quota'));\n+  assert.deepEqual(schemaFormSnapshot(initializeSchemaForm(nested, value)), { profile: { name: 'Changed' } });\n+});\n+test('array object children receive defaults and required false', () => {\n+  const item = schemaFormArrayItem(schema.properties.addresses.items);\n+  assert.deepEqual(item, { active: false, city: 'Tokyo' });\n+  const existing = initializeSchemaForm(schema, { addresses: [{ city: 'Kyoto' }] });\n+  assert.deepEqual(existing.addresses, [{ city: 'Kyoto', active: false }]);\n+});\n+test('default arrays are independently owned and initialized recursively', () => {\n+  const s = { properties: { rows: { ...schema.properties.addresses, default: [{}] } } };\n+  const first = initializeSchemaForm(s, {}), second = initializeSchemaForm(s, {});\n+  first.rows[0].city = 'Changed';\n+  assert.equal(second.rows[0].city, 'Tokyo'); assert.deepEqual(s.properties.rows.default, [{}]);\n+});\n+test('new numeric array item is not fabricated as zero; incomplete wire arrays are rejected', () => {\n+  assert.equal(schemaFormArrayItem({ type: 'number' }), undefined);\n+  assert.throws(() => schemaFormSnapshot({ values: [undefined] }));\n+  assert.throws(() => schemaFormSnapshot({ values: new Array(1) }));\n+  assert.deepEqual(schemaFormSnapshot({ values: [0, false, null, ''] }), { values: [0, false, null, ''] });\n+});\n+test('wire snapshots own nested object and array references and omit only undefined object fields', () => {\n+  const input = { profile: { name: 'Alice', omitted: undefined }, rows: [{ value: 1 }] };\n+  const payload = schemaFormSnapshot(input);\n+  payload.profile.name = 'Bob'; payload.rows[0].value = 2;\n+  assert.equal(input.profile.name, 'Alice'); assert.equal(input.rows[0].value, 1);\n+  assert.equal(Object.hasOwn(payload.profile, 'omitted'), false);\n+});\n+test('safe updates inside nested arrays preserve shape and undefined markers', () => {\n+  const before = { rows: [{ quota: undefined, name: 'A' }] };\n+  const after = writeSchemaFormPath(before, ['rows', '0', 'name'], 'B');\n+  assert.ok(Object.hasOwn(after.rows[0], 'quota')); assert.equal(after.rows[0].quota, undefined);\n+  assert.equal(before.rows[0].name, 'A'); assert.equal(after.rows[0].name, 'B');\n+});\n+const choices = [1, '1', null, 'null', false, 'false', ''];\n+for (const [index, choice] of choices.entries()) test(`enum index ${index} retains JSON identity`, () => {\n+  assert.equal(schemaFormEnumIndex(choices, choice), String(index));\n+  assert.equal(schemaFormEnumValue(choices, String(index)), choice);\n+});\n+test('empty enum selection means absence, not a fabricated string or null', () => {\n+  assert.equal(schemaFormEnumValue(choices, ''), undefined);\n+  assert.equal(schemaFormEnumIndex(choices, undefined), '');\n+  for (const index of ['-1', '01', '1.0', '7', 'NaN']) assert.throws(() => schemaFormEnumValue(choices, index));\n+});\n+test('non JSON and cyclic data cannot reach an executor', () => {\n+  const cyclic = {}; cyclic.self = cyclic;\n+  for (const value of [NaN, Infinity, 1n, () => {}, new Date(), new Map(), cyclic]) {\n+    assert.throws(() => schemaFormSnapshot({ value }));\n+  }\n+});\n+test('getters are rejected before invocation rather than evaluated while copying', () => {\n+  let reads = 0; const value = {};\n+  Object.defineProperty(value, 'secret', { enumerable: true, get() { reads++; return 'secret'; } });\n+  assert.throws(() => schemaFormSnapshot(value)); assert.equal(reads, 0);\n+});\n+test('prototype fields and invalid array paths are rejected', () => {\n+  for (const key of ['__proto__', 'constructor', 'prototype']) {\n+    assert.throws(() => schemaFormSnapshot(JSON.parse(`{\"${key}\":{}}`)));\n+    assert.throws(() => writeSchemaFormPath({}, [key, 'polluted'], true));\n+    assert.throws(() => initializeSchemaForm({ properties: JSON.parse(`{\"${key}\":{\"type\":\"string\"}}`) }, {}));\n+  }\n+  for (const key of ['-1', '2', '1.5', '01']) assert.throws(() => writeSchemaFormPath({ rows: [0] }, ['rows', key], 2));\n+  assert.equal({}.polluted, undefined);\n+});\n+test('cyclic schemas and oversized values terminate with a clear failure', () => {\n+  const recursive = { properties: {} }; recursive.properties.self = recursive;\n+  assert.throws(() => initializeSchemaForm(recursive, {}));\n+  assert.throws(() => schemaFormSnapshot({ rows: new Array(SCHEMA_FORM_LIMITS.nodes + 1).fill(0) }));\n+  assert.throws(() => schemaFormSnapshot({ text: 'x'.repeat(SCHEMA_FORM_LIMITS.characters + 1) }));\n+});\n+\n+// 明确的用户编辑可以创建之前为 null 的父对象，初始化本身则保留 null。\n+test('editing a child can materialize an explicitly empty parent without changing the original', () => {\n+  const original = { profile: null };\n+  const next = writeSchemaFormPath(original, ['profile', 'city'], 'Osaka');\n+  assert.deepEqual(next, { profile: { city: 'Osaka' } }); assert.equal(original.profile, null);\n+});\ndiff --git a/packages/ui/src/components/JsonSchemaForm.svelte b/packages/ui/src/components/JsonSchemaForm.svelte\nindex 91be6e7..728d850 100644\n--- a/packages/ui/src/components/JsonSchemaForm.svelte\n+++ b/packages/ui/src/components/JsonSchemaForm.svelte\n@@ -3,23 +3,25 @@\n   import { Button } from './ui/button/index.js';\n   import { Loader2, Plus, Trash2 } from '@lucide/svelte';\n   import { cn } from '../utils.js';\n+  import { onDestroy, untrack } from 'svelte';\n+  import {\n+    initializeSchemaForm, schemaFormArrayItem, schemaFormEnumIndex,\n+    schemaFormEnumValue, schemaFormSnapshot, writeSchemaFormPath,\n+    type JsonSchemaFormSchema,\n+  } from './json-schema-form-state.js';\n \n-  interface JsonSchema {\n-    type?: string;\n-    title?: string;\n-    description?: string;\n-    properties?: Record<string, JsonSchema>;\n-    items?: JsonSchema;\n-    enum?: Array<string | number | boolean | null>;\n-    default?: unknown;\n-    required?: string[];\n-  }\n+  type JsonSchema = JsonSchemaFormSchema;\n \n   interface Props {\n     schema: JsonSchema;\n     value?: Record<string, unknown>;\n     onsubmit?: (data: Record<string, unknown>) => void | Promise<void>;\n     submitText?: string;\n+    disabled?: boolean;\n+    readonly?: boolean;\n+    /** 只决定此实例文案；不修改全局语言。 */\n+    locale?: string;\n+    onerror?: (error: unknown) => void;\n     /** Use a unique stable prefix when several schema forms share a page. */\n     idPrefix?: string;\n     class?: string;\n@@ -30,89 +32,117 @@\n     value = $bindable({}),\n     onsubmit,\n     submitText = 'Submit Form',\n-    idPrefix = 'json_field',\n+    disabled = false,\n+    readonly = false,\n+    locale,\n+    onerror,\n+    idPrefix,\n     class: className = '',\n   }: Props = $props();\n \n   const i18n = useTranslation();\n+  const instanceId = $props.id();\n+  const prefix = $derived(idPrefix ?? `json-form-${instanceId}`);\n+  const isZh = $derived((locale ?? i18n.locale).startsWith('zh'));\n+  const labels = $derived(isZh ? {\n+    add: '添加项目', remove: '删除', empty: '暂无项目',\n+    failed: '提交未完成，请检查状态后重试。', invalid: '请检查表单输入。',\n+  } : {\n+    add: 'Add item', remove: 'Remove item', empty: 'No items',\n+    failed: 'Submission did not complete. Check its status before retrying.', invalid: 'Check the form input.',\n+  });\n   let isSubmitting = $state(false);\n-\n-  function cloneDefault(node: JsonSchema): unknown {\n-    if (node.default !== undefined) return structuredClone(node.default);\n-    if (node.type === 'object' || node.properties) {\n-      return Object.fromEntries(\n-        Object.entries(node.properties ?? {})\n-          .map(([key, child]) => [key, cloneDefault(child)])\n-          .filter(([, child]) => child !== undefined),\n-      );\n-    }\n-    if (node.type === 'array') return [];\n-    return undefined;\n-  }\n-\n-  function mergeDefaults(node: JsonSchema, current: unknown): unknown {\n-    if (node.type !== 'object' && !node.properties) return current ?? cloneDefault(node);\n-    const source = current && typeof current === 'object' ? current as Record<string, unknown> : {};\n-    const result: Record<string, unknown> = { ...source };\n-    for (const [key, child] of Object.entries(node.properties ?? {})) {\n-      const next = mergeDefaults(child, result[key]);\n-      if (next !== undefined) result[key] = next;\n-      else if (child.type === 'boolean' && node.required?.includes(key)) result[key] = false;\n-    }\n-    return result;\n-  }\n-\n-  $effect(() => {\n-    const next = mergeDefaults(schema, value);\n-    if (JSON.stringify(next) !== JSON.stringify(value)) value = next as Record<string, unknown>;\n+  let failure = $state<'invalid' | 'failed' | null>(null);\n+  let formElement: HTMLFormElement | undefined;\n+  let destroyed = false;\n+  let authorityRevision = 0;\n+  let identity: readonly unknown[] = [];\n+  const prepared = $derived.by(() => {\n+    try { return { ok: true as const, value: initializeSchemaForm(schema, value) }; }\n+    catch { return { ok: false as const }; }\n   });\n+  const locked = $derived(disabled || readonly || isSubmitting || !prepared.ok);\n+  // 按键是否存在初始化，不能每次输入都用 ?? 把清空的默认值补回来。\n+  $effect.pre(() => {\n+    if (prepared.ok && prepared.value !== value) value = prepared.value;\n+  });\n+  $effect.pre(() => {\n+    const next = [schema, value, disabled, readonly, onsubmit];\n+    untrack(() => {\n+      if (next.some((part, index) => part !== identity[index])) {\n+        authorityRevision += 1;\n+        failure = null;\n+      }\n+      identity = next;\n+    });\n+  });\n+  onDestroy(() => { destroyed = true; });\n \n+  function editable(): boolean {\n+    return !destroyed && !disabled && !readonly && !isSubmitting && prepared.ok\n+      && !formElement?.closest('fieldset[disabled]');\n+  }\n   function readPath(path: string[]): unknown {\n     return path.reduce<unknown>((current, key) => (\n-      current && typeof current === 'object' ? (current as Record<string, unknown>)[key] : undefined\n-    ), value);\n+      current && typeof current === 'object' && Object.hasOwn(current, key)\n+        ? (current as Record<string, unknown>)[key] : undefined\n+    ), prepared.ok ? prepared.value : {});\n   }\n-\n   function writePath(path: string[], nextValue: unknown): void {\n-    const next = structuredClone($state.snapshot(value));\n-    let target: Record<string, unknown> = next;\n-    for (const key of path.slice(0, -1)) {\n-      const child = target[key];\n-      target[key] = child && typeof child === 'object' ? child : {};\n-      target = target[key] as Record<string, unknown>;\n-    }\n-    const lastKey = path[path.length - 1];\n-    if (lastKey !== undefined) target[lastKey] = nextValue;\n-    value = next;\n+    if (!editable() || !prepared.ok) return;\n+    try { value = writeSchemaFormPath(prepared.value, path, nextValue); failure = null; }\n+    catch { failure = 'invalid'; }\n   }\n-\n-  function enumValue(raw: string, options: JsonSchema['enum']): unknown {\n-    return options?.find((option) => String(option) === raw) ?? raw;\n+  function choose(path: string[], raw: string, choices: JsonSchema['enum']): void {\n+    if (!editable()) return;\n+    try { writePath(path, schemaFormEnumValue(choices ?? [], raw)); }\n+    catch { failure = 'invalid'; }\n   }\n-\n   function addArrayItem(path: string[], itemSchema: JsonSchema): void {\n+    if (!editable()) return;\n     const current = readPath(path);\n-    const items = Array.isArray(current) ? current : [];\n-    writePath(path, [...items, cloneDefault(itemSchema) ?? (itemSchema.type === 'object' ? {} : itemSchema.type === 'boolean' ? false : '')]);\n+    try { writePath(path, [...(Array.isArray(current) ? current : []), schemaFormArrayItem(itemSchema)]); }\n+    catch { failure = 'invalid'; }\n   }\n-\n   function removeArrayItem(path: string[], index: number): void {\n+    if (!editable()) return;\n     const current = readPath(path);\n     if (Array.isArray(current)) writePath(path, current.filter((_, itemIndex) => itemIndex !== index));\n   }\n-\n   async function handleSubmit(event: SubmitEvent): Promise<void> {\n     event.preventDefault();\n+    // 同步置锁，防止同一帧的双击/重入 submit；遵循宿主 fieldset 的预览禁用状态；权限仍需服务端校验。\n+    if (!editable() || !prepared.ok || !onsubmit) return;\n+    if (formElement && !formElement.checkValidity()) { failure = 'invalid'; return; }\n+    let payload: Record<string, unknown>;\n+    try { payload = schemaFormSnapshot(prepared.value); }\n+    catch { failure = 'invalid'; return; }\n+    const currentValue = value, currentSchema = schema, handler = onsubmit, revision = authorityRevision;\n+    const fingerprint = JSON.stringify(payload);\n+    failure = null;\n     isSubmitting = true;\n     try {\n-      await onsubmit?.(value);\n+      await handler(payload);\n+    } catch (error) {\n+      // 回调只能拿到副本；被替换/卸载实例的失败不能污染新的表单上下文。\n+      if (!destroyed && revision === authorityRevision && !disabled && !readonly && currentValue === value && currentSchema === schema && handler === onsubmit) {\n+        try {\n+          if (JSON.stringify(schemaFormSnapshot(prepared.ok ? prepared.value : value)) === fingerprint) {\n+            failure = 'failed';\n+            try { onerror?.(error); } catch { /* 错误观察者不改变提交状态。 */ }\n+          }\n+        } catch { /* 新上下文不再是可比较的 JSON 草稿，不发布旧错误。 */ }\n+      }\n     } finally {\n-      isSubmitting = false;\n+      if (!destroyed) isSubmitting = false;\n     }\n   }\n+\n </script>\n \n <form\n+  bind:this={formElement}\n+  aria-busy={isSubmitting}\n   onsubmit={handleSubmit}\n   class={cn('svadmin-u-3e7ce58d64fa svadmin-u-a217b4eaa918 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-0478c89a150f svadmin-u-cef5b893cf23 svadmin-u-359090c2d529', className)}\n >\n@@ -123,9 +153,13 @@\n     </div>\n   {/if}\n \n+  {#if !prepared.ok || failure}\n+    <p role=\"alert\">{labels[!prepared.ok ? 'invalid' : failure ?? 'invalid']}</p>\n+  {/if}\n+\n   {#snippet renderField(node: JsonSchema, path: string[], title: string, required = false)}\n     {@const current = readPath(path)}\n-    {@const id = `${idPrefix}_${path.map(encodeURIComponent).join('/')}`}\n+    {@const id = `${prefix}_${path.map(encodeURIComponent).join('/')}`}\n     {#if node.type === 'object' || node.properties}\n       <fieldset class=\"svadmin-u-da7c36cd8867 svadmin-u-421ac2be5045\">\n         <legend class=\"svadmin-u-0214b4b355d1 svadmin-u-2689f3958069\">{title}</legend>\n@@ -142,15 +176,15 @@\n         <legend class=\"svadmin-u-0214b4b355d1 svadmin-u-2689f3958069\">{title}</legend>\n         {#if node.description}<p class=\"svadmin-u-d058ca6de60f svadmin-u-bfa603190748\">{node.description}</p>{/if}\n         {#each items as _, index (index)}\n-          {@render renderField(node.items ?? { type: 'string' }, [...path, String(index)], `${title} ${index + 1}`)}\n-          <Button type=\"button\" variant=\"ghost\" size=\"sm\" onclick={() => removeArrayItem(path, index)}>\n-            <Trash2 class=\"svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c\" /> 删除\n+          {@render renderField(node.items ?? { type: 'string' }, [...path, String(index)], `${title} ${index + 1}`, true)}\n+          <Button type=\"button\" disabled={locked} variant=\"ghost\" size=\"sm\" onclick={() => removeArrayItem(path, index)}>\n+            <Trash2 class=\"svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c\" /> {labels.remove}\n           </Button>\n         {:else}\n-          <span class=\"svadmin-u-bfa603190748\">暂无项目</span>\n+          <span class=\"svadmin-u-bfa603190748\">{labels.empty}</span>\n         {/each}\n-        <Button type=\"button\" variant=\"outline\" size=\"sm\" onclick={() => addArrayItem(path, node.items ?? { type: 'string' })}>\n-          <Plus class=\"svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c\" /> 添加项目\n+        <Button type=\"button\" disabled={locked} variant=\"outline\" size=\"sm\" onclick={() => addArrayItem(path, node.items ?? { type: 'string' })}>\n+          <Plus class=\"svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c\" /> {labels.add}\n         </Button>\n       </fieldset>\n     {:else}\n@@ -160,21 +194,23 @@\n         </label>\n         {#if node.description}<p class=\"svadmin-u-d058ca6de60f svadmin-u-bfa603190748\">{node.description}</p>{/if}\n         {#if node.enum}\n-          <select id={id} required={required} value={String(current ?? '')} onchange={(event) => writePath(path, enumValue(event.currentTarget.value, node.enum))} class=\"svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529\">\n+          <select id={id} disabled={locked} required={required} value={schemaFormEnumIndex(node.enum, current)} onchange={(event) => choose(path, event.currentTarget.value, node.enum)} class=\"svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529\">\n             <option value=\"\">{i18n.t('common.selectOption')}</option>\n-            {#each node.enum as option (String(option))}<option value={String(option)}>{String(option)}</option>{/each}\n+            {#each node.enum as option, optionIndex (optionIndex)}<option value={String(optionIndex)}>{String(option)}</option>{/each}\n           </select>\n         {:else if node.type === 'boolean'}\n-          <input id={id} type=\"checkbox\" checked={Boolean(current)} onchange={(event) => writePath(path, event.currentTarget.checked)} />\n+          <input id={id} disabled={locked} type=\"checkbox\" checked={Boolean(current)} onchange={(event) => writePath(path, event.currentTarget.checked)} />\n         {:else if node.type === 'number' || node.type === 'integer'}\n-          <input id={id} type=\"number\" step={node.type === 'integer' ? 1 : 'any'} required={required} value={current === undefined ? '' : String(current)} oninput={(event) => writePath(path, event.currentTarget.value === '' ? undefined : Number(event.currentTarget.value))} class=\"svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529\" />\n+          <input id={id} disabled={locked} type=\"number\" step={node.type === 'integer' ? 1 : 'any'} required={required} value={current === undefined ? '' : String(current)} oninput={(event) => writePath(path, event.currentTarget.value === '' ? undefined : Number(event.currentTarget.value))} class=\"svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529\" />\n         {:else}\n-          <input id={id} type=\"text\" required={required} value={String(current ?? '')} oninput={(event) => writePath(path, event.currentTarget.value)} class=\"svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529\" />\n+          <input id={id} disabled={locked} type=\"text\" required={required} value={String(current ?? '')} oninput={(event) => writePath(path, event.currentTarget.value)} class=\"svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529\" />\n         {/if}\n       </div>\n     {/if}\n   {/snippet}\n \n+  <fieldset class=\"schema-form-fields svadmin-u-3e7ce58d64fa\" disabled={locked}>\n+  {#if prepared.ok}\n   <div class=\"svadmin-u-9c6cdfa2ba3d\">\n     {#each Object.entries(schema.properties ?? {}) as [key, node] (key)}\n       {@render renderField(node, [key], node.title ?? key, schema.required?.includes(key) ?? false)}\n@@ -182,9 +218,15 @@\n   </div>\n \n   <div class=\"svadmin-u-173fa8f06789 svadmin-u-b950dda299d3 svadmin-u-05faf5c801ff svadmin-u-60fbb7713999 svadmin-u-77c08e015d14\">\n-    <Button type=\"submit\" size=\"sm\" disabled={isSubmitting} class=\"svadmin-u-44ee8ba0a421 svadmin-u-25effcb585ab\">\n+    <Button type=\"submit\" size=\"sm\" disabled={locked} class=\"svadmin-u-44ee8ba0a421 svadmin-u-25effcb585ab\">\n       {#if isSubmitting}<Loader2 class=\"svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-afbdd13a380e\" />{/if}\n       {submitText}\n     </Button>\n   </div>\n+  {/if}\n+  </fieldset>\n </form>\n+\n+<style>\n+  .schema-form-fields { min-width: 0; margin: 0; padding: 0; border: 0; }\n+</style>\ndiff --git a/packages/ui/src/components/json-schema-form-disabled.test-host.svelte b/packages/ui/src/components/json-schema-form-disabled.test-host.svelte\nnew file mode 100644\nindex 0000000..93f6f58\n--- /dev/null\n+++ b/packages/ui/src/components/json-schema-form-disabled.test-host.svelte\n@@ -0,0 +1,5 @@\n+<script lang=\"ts\">\n+  import JsonSchemaForm from './JsonSchemaForm.svelte';\n+  let { onsubmit }: { onsubmit: (value: Record<string, unknown>) => void } = $props();\n+</script>\n+<fieldset disabled><JsonSchemaForm schema={{ properties: { name: { type: 'string', default: 'Preview' } } }} {onsubmit} /></fieldset>\ndiff --git a/packages/ui/src/components/json-schema-form-lifecycle.test.svelte.ts b/packages/ui/src/components/json-schema-form-lifecycle.test.svelte.ts\nnew file mode 100644\nindex 0000000..8d2c2e8\n--- /dev/null\n+++ b/packages/ui/src/components/json-schema-form-lifecycle.test.svelte.ts\n@@ -0,0 +1,139 @@\n+import { cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';\n+import { afterEach, describe, expect, it, vi } from 'vitest';\n+import JsonSchemaForm from './JsonSchemaForm.svelte';\n+import DisabledHost from './json-schema-form-disabled.test-host.svelte';\n+\n+const schema = { properties: {\n+  name: { type: 'string', title: 'Name', default: 'Original' },\n+  quota: { type: 'number', title: 'Quota', default: 10 },\n+  profile: { type: 'object', properties: { city: { type: 'string', title: 'City', default: 'Tokyo' } } },\n+  rows: { type: 'array', title: 'Rows', items: { type: 'object', required: ['active'], properties: { active: { type: 'boolean', title: 'Active' } } } },\n+} };\n+const form = (view: { container: HTMLElement }): HTMLFormElement => {\n+  const element = view.container.querySelector('form');\n+  if (!element) throw new Error('Missing form');\n+  return element;\n+};\n+afterEach(cleanup);\n+\n+describe('nested schema form draft and submission ownership', () => {\n+  it('does not repopulate cleared defaults after editing a sibling or submitting', async () => {\n+    const onsubmit = vi.fn();\n+    const view = render(JsonSchemaForm, { schema, onsubmit, locale: 'en-US' });\n+    const quota = view.getByLabelText('Quota');\n+    await fireEvent.input(quota, { target: { value: '' } });\n+    await fireEvent.input(view.getByLabelText('Name'), { target: { value: 'Changed' } });\n+    expect((quota as HTMLInputElement).value).toBe('');\n+    await fireEvent.submit(form(view));\n+    expect(onsubmit).toHaveBeenCalledOnce();\n+    expect(onsubmit.mock.calls[0]?.[0]).not.toHaveProperty('quota');\n+    expect((quota as HTMLInputElement).value).toBe('');\n+  });\n+  it('uses independent submission data and preserves nested UI state when a handler mutates its input', async () => {\n+    const onsubmit = vi.fn((input: Record<string, unknown>) => {\n+      (input['profile'] as Record<string, unknown>)['city'] = 'Callback copy';\n+      input['name'] = 'Mutated';\n+    });\n+    const view = render(JsonSchemaForm, { schema, onsubmit });\n+    await fireEvent.submit(form(view));\n+    expect((view.getByLabelText('City') as HTMLInputElement).value).toBe('Tokyo');\n+    expect((view.getByLabelText('Name') as HTMLInputElement).value).toBe('Original');\n+    expect(onsubmit).toHaveBeenCalledOnce();\n+  });\n+  it('initializes untouched required false values inside newly added object arrays', async () => {\n+    const onsubmit = vi.fn(); const view = render(JsonSchemaForm, { schema, onsubmit, locale: 'en-US' });\n+    await fireEvent.click(view.getByRole('button', { name: 'Add item' }));\n+    await fireEvent.submit(form(view));\n+    expect(onsubmit).toHaveBeenCalledWith(expect.objectContaining({ rows: [{ active: false }] }));\n+  });\n+  it.each([[0, 1], [1, '1'], [2, null], [3, 'null'], [4, false], [5, 'false'], [6, '']] as const)(\n+    'retains enum option %s without string coercion', async (index, expected) => {\n+      const onsubmit = vi.fn();\n+      const view = render(JsonSchemaForm, { schema: { properties: { choice: { title: 'Choice', enum: [1, '1', null, 'null', false, 'false', ''] } } }, onsubmit });\n+      await fireEvent.change(view.getByLabelText('Choice'), { target: { value: String(index) } });\n+      await fireEvent.submit(form(view));\n+      expect(onsubmit).toHaveBeenCalledWith({ choice: expected });\n+    },\n+  );\n+  it('locks all controls before same-frame and reentrant submissions can dispatch', async () => {\n+    let finish: () => void = () => { throw new Error('Not started'); };\n+    const pending = new Promise<void>(resolve => { finish = resolve; });\n+    const onsubmit = vi.fn<(input: Record<string, unknown>) => Promise<void>>(() => pending);\n+    const view = render(JsonSchemaForm, { schema, onsubmit, locale: 'en-US' });\n+    const element = form(view);\n+    element.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));\n+    element.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));\n+    await waitFor(() => expect(element.getAttribute('aria-busy')).toBe('true'));\n+    expect(onsubmit).toHaveBeenCalledOnce();\n+    const name = view.getByLabelText('Name');\n+    expect(name.matches(':disabled')).toBe(true);\n+    for (const control of element.querySelectorAll('input, select, button')) {\n+      expect(control.hasAttribute('disabled')).toBe(true);\n+    }\n+    await fireEvent.input(name, { target: { value: 'Synthetic event while busy' } });\n+    finish(); await waitFor(() => expect(element.getAttribute('aria-busy')).toBe('false'));\n+    await fireEvent.submit(element);\n+    expect(onsubmit.mock.calls[1]?.[0]).toEqual(onsubmit.mock.calls[0]?.[0]);\n+  });\n+  it('rejects synchronous callback reentry', async () => {\n+    const target: { element?: HTMLFormElement } = {};\n+    const onsubmit = vi.fn(() => { target.element?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })); });\n+    const view = render(JsonSchemaForm, { schema, onsubmit });\n+    const element = form(view);\n+    target.element = element;\n+    await fireEvent.submit(element); expect(onsubmit).toHaveBeenCalledOnce();\n+  });\n+  it('surfaces callback failure without losing the draft and permits an explicit retry', async () => {\n+    const onsubmit = vi.fn().mockRejectedValueOnce(new Error('Synthetic failure')).mockResolvedValueOnce(undefined);\n+    const onerror = vi.fn();\n+    const view = render(JsonSchemaForm, { schema, onsubmit, onerror, locale: 'en-US' });\n+    await fireEvent.input(view.getByLabelText('Name'), { target: { value: 'Keep draft' } });\n+    await fireEvent.submit(form(view));\n+    await waitFor(() => expect(view.getByRole('alert').textContent).toContain('Submission did not complete'));\n+    expect(onerror).toHaveBeenCalledOnce();\n+    expect((view.getByLabelText('Name') as HTMLInputElement).value).toBe('Keep draft');\n+    await fireEvent.submit(form(view));\n+    await waitFor(() => expect(view.queryByRole('alert')).toBeNull());\n+    expect(onsubmit).toHaveBeenCalledTimes(2);\n+  });\n+  it.each(['disabled', 'readonly'] as const)('blocks synthetic input and submission when %s', async mode => {\n+    const onsubmit = vi.fn(); const view = render(JsonSchemaForm, { schema, onsubmit, [mode]: true, locale: 'en-US' });\n+    await fireEvent.input(view.getByLabelText('Name'), { target: { value: 'Blocked' } });\n+    await fireEvent.click(view.getByRole('button', { name: 'Add item' }));\n+    await fireEvent.submit(form(view)); expect(onsubmit).not.toHaveBeenCalled();\n+    await view.rerender({ [mode]: false }); await fireEvent.submit(form(view));\n+    expect(onsubmit).toHaveBeenCalledWith(expect.objectContaining({ name: 'Original', rows: [] }));\n+  });\n+  it('also respects an ancestor disabled fieldset without relying on native event suppression', async () => {\n+    const onsubmit = vi.fn(); const view = render(DisabledHost, { onsubmit });\n+    await fireEvent.submit(form(view)); expect(onsubmit).not.toHaveBeenCalled();\n+  });\n+  it.each(['replacement', 'unmount', 'disable'] as const)('does not publish stale failures after %s', async transition => {\n+    let reject: (error: Error) => void = () => { throw new Error('Not started'); };\n+    const onsubmit = vi.fn(() => new Promise<void>((_, fail) => { reject = fail; })); const onerror = vi.fn();\n+    const view = render(JsonSchemaForm, { schema, onsubmit, onerror });\n+    await fireEvent.submit(form(view));\n+    if (transition === 'unmount') view.unmount();\n+    else if (transition === 'disable') await view.rerender({ disabled: true });\n+    else await view.rerender({ value: { name: 'New context' } });\n+    reject(new Error('Old context')); await Promise.resolve(); await Promise.resolve();\n+    expect(onerror).not.toHaveBeenCalled();\n+    expect(view.queryByRole('alert')).toBeNull();\n+  });\n+  it('creates unique default IDs but preserves explicit host prefixes', () => {\n+    const a = render(JsonSchemaForm, { schema }), b = render(JsonSchemaForm, { schema });\n+    const ids = [...a.container.querySelectorAll('input'), ...b.container.querySelectorAll('input')].map(input => input.id);\n+    expect(new Set(ids).size).toBe(ids.length);\n+    const explicit = render(JsonSchemaForm, { schema, idPrefix: 'host-owned' });\n+    expect(explicit.container.querySelector('input')?.id).toBe('host-owned_name');\n+  });\n+  it('supports independent Chinese and English array-action labels', () => {\n+    const a = render(JsonSchemaForm, { schema, locale: 'zh-CN' }), b = render(JsonSchemaForm, { schema, locale: 'en-US' });\n+    expect(a.getByRole('button', { name: '添加项目' })).toBeTruthy();\n+    expect(b.getByRole('button', { name: 'Add item' })).toBeTruthy();\n+  });\n+  it('refuses non-JSON submission values instead of silently coercing them', async () => {\n+    const onsubmit = vi.fn(); const view = render(JsonSchemaForm, { schema: { properties: {} }, value: { hidden: Infinity }, onsubmit });\n+    await fireEvent.submit(form(view)); expect(onsubmit).not.toHaveBeenCalled(); expect(view.getByRole('alert')).toBeTruthy();\n+  });\n+});\ndiff --git a/packages/ui/src/components/json-schema-form-state.ts b/packages/ui/src/components/json-schema-form-state.ts\nnew file mode 100644\nindex 0000000..887e4a0\n--- /dev/null\n+++ b/packages/ui/src/components/json-schema-form-state.ts\n@@ -0,0 +1,154 @@\n+/** 嵌套表单的草稿与传输语义；不是替代服务端的 JSON Schema 校验器。 */\n+export interface JsonSchemaFormSchema {\n+  type?: string;\n+  title?: string;\n+  description?: string;\n+  properties?: Record<string, JsonSchemaFormSchema>;\n+  items?: JsonSchemaFormSchema;\n+  enum?: Array<string | number | boolean | null>;\n+  default?: unknown;\n+  required?: string[];\n+}\n+\n+export const SCHEMA_FORM_LIMITS = Object.freeze({ depth: 32, nodes: 10_000, characters: 1_048_576 });\n+const unsafe = new Set(['__proto__', 'prototype', 'constructor']);\n+const record = (value: unknown): value is Record<string, unknown> => value !== null\n+  && typeof value === 'object' && !Array.isArray(value)\n+  && (Object.getPrototypeOf(value) === Object.prototype || Object.getPrototypeOf(value) === null);\n+function safeKey(key: string): void {\n+  if (unsafe.has(key)) throw new Error('Unsafe form field');\n+}\n+\n+/** wire 模式仅省略对象的 undefined；数组的空洞/undefined 不能偷偷转成 null。 */\n+function copy(value: unknown, wire: boolean): unknown {\n+  const active = new Set<object>();\n+  let nodes = 0, characters = 0;\n+  function visit(current: unknown, depth: number): unknown {\n+    if (++nodes > SCHEMA_FORM_LIMITS.nodes || depth > SCHEMA_FORM_LIMITS.depth) throw new Error('Form value exceeds limits');\n+    if (current === undefined && !wire) return undefined;\n+    if (current === null || typeof current === 'boolean') return current;\n+    if (typeof current === 'number' && Number.isFinite(current)) return current;\n+    if (typeof current === 'string') {\n+      characters += current.length;\n+      if (characters > SCHEMA_FORM_LIMITS.characters) throw new Error('Form text exceeds limits');\n+      return current;\n+    }\n+    if ((!record(current) && !Array.isArray(current)) || active.has(current)) throw new Error('Expected acyclic plain form data');\n+    active.add(current);\n+    try {\n+      if (Reflect.ownKeys(current).some(key => typeof key === 'symbol')) throw new Error('Symbol values are not JSON fields');\n+      if (Array.isArray(current)) {\n+        if (current.length > SCHEMA_FORM_LIMITS.nodes) throw new Error('Form array exceeds limits');\n+        const result: unknown[] = [];\n+        for (let index = 0; index < current.length; index++) {\n+          const descriptor = Object.getOwnPropertyDescriptor(current, String(index));\n+          if (!descriptor || !('value' in descriptor)) throw new Error('Sparse arrays and accessors are not form data');\n+          result.push(visit(descriptor.value, depth + 1));\n+        }\n+        if (Object.keys(current).some(key => !/^(0|[1-9][0-9]*)$/u.test(key) || Number(key) >= current.length)) {\n+          throw new Error('Array properties are not JSON fields');\n+        }\n+        return result;\n+      }\n+      const result: Record<string, unknown> = {};\n+      for (const key of Object.keys(current)) {\n+        safeKey(key);\n+        characters += key.length;\n+        if (characters > SCHEMA_FORM_LIMITS.characters) throw new Error('Form text exceeds limits');\n+        const descriptor = Object.getOwnPropertyDescriptor(current, key);\n+        if (!descriptor || !('value' in descriptor)) throw new Error('Accessors are not form data');\n+        if (!wire || descriptor.value !== undefined) result[key] = visit(descriptor.value, depth + 1);\n+      }\n+      return result;\n+    } finally { active.delete(current); }\n+  }\n+  return visit(value, 0);\n+}\n+\n+/** Svelte 代理也通过普通数据属性读取；回调永远收不到活跃草稿的引用。 */\n+export function schemaFormSnapshot(value: unknown): Record<string, unknown> {\n+  if (!record(value)) throw new Error('Form root must be an object');\n+  return copy(value, true) as Record<string, unknown>;\n+}\n+\n+/** 默认值只填“缺失的键”；显式 undefined/null/false/0/空串都表示调用方的决定。 */\n+export function initializeSchemaForm(schema: JsonSchemaFormSchema, value: Record<string, unknown>): Record<string, unknown> {\n+  if (!record(value)) throw new Error('Form root must be an object');\n+  const active = new Set<object>();\n+  let nodes = 0;\n+  function visit(node: JsonSchemaFormSchema, current: unknown, present: boolean, required: boolean, depth: number): unknown {\n+    if (++nodes > SCHEMA_FORM_LIMITS.nodes || depth > SCHEMA_FORM_LIMITS.depth || !record(node as unknown) || active.has(node)) {\n+      throw new Error('Form schema exceeds supported traversal limits');\n+    }\n+    active.add(node);\n+    try {\n+      if (!present) {\n+        if (Object.hasOwn(node, 'default')) current = copy(node.default, false);\n+        else if (node.type === 'object' || node.properties) current = {};\n+        else if (node.type === 'array') current = [];\n+        else if (node.type === 'boolean' && required) current = false;\n+      }\n+      if (record(current) && (node.type === 'object' || node.properties)) {\n+        let result = current;\n+        for (const [key, child] of Object.entries(node.properties ?? {})) {\n+          safeKey(key);\n+          const exists = Object.hasOwn(current, key);\n+          const next = visit(child, exists ? current[key] : undefined, exists, node.required?.includes(key) ?? false, depth + 1);\n+          if ((!exists && next !== undefined) || (exists && next !== current[key])) {\n+            if (result === current) result = { ...current };\n+            result[key] = next;\n+          }\n+        }\n+        return result;\n+      }\n+      if (Array.isArray(current) && node.type === 'array' && node.items) {\n+        if (current.length > SCHEMA_FORM_LIMITS.nodes) throw new Error('Form array exceeds limits');\n+        const array = current;\n+        const items = array.map(item => visit(node.items as JsonSchemaFormSchema, item, true, true, depth + 1));\n+        return items.some((item, index) => item !== array[index]) ? items : array;\n+      }\n+      return current;\n+    } finally { active.delete(node); }\n+  }\n+  return visit(schema, value, true, true, 0) as Record<string, unknown>;\n+}\n+\n+export function schemaFormArrayItem(schema: JsonSchemaFormSchema): unknown {\n+  // 新增对象项也初始化其嵌套默认值及必填 false；数字留空，不猜测为 0。\n+  const seed = Object.hasOwn(schema, 'default') ? copy(schema.default, false)\n+    : schema.type === 'object' || schema.properties ? {}\n+    : schema.type === 'array' ? [] : schema.type === 'boolean' ? false : schema.type === 'number' || schema.type === 'integer' ? undefined : '';\n+  return initializeSchemaForm({ properties: { item: schema }, required: ['item'] }, { item: seed })['item'];\n+}\n+\n+export function writeSchemaFormPath(value: Record<string, unknown>, path: readonly string[], nextValue: unknown): Record<string, unknown> {\n+  if (!path.length || path.length > SCHEMA_FORM_LIMITS.depth) throw new Error('Invalid form path');\n+  const next = copy(value, false) as Record<string, unknown>;\n+  let target: Record<string, unknown> | unknown[] = next;\n+  for (const [index, key] of path.entries()) {\n+    safeKey(key);\n+    if (Array.isArray(target) && (!/^(0|[1-9][0-9]*)$/u.test(key) || Number(key) >= target.length)) throw new Error('Invalid array field');\n+    if (index === path.length - 1) {\n+      Reflect.set(target, key, copy(nextValue, false));\n+    } else {\n+      let child: unknown = Object.hasOwn(target, key) ? Reflect.get(target, key) : undefined;\n+      if (!record(child) && !Array.isArray(child)) {\n+        child = {};\n+        Reflect.set(target, key, child);\n+      }\n+      target = child as Record<string, unknown> | unknown[];\n+    }\n+  }\n+  return next;\n+}\n+\n+/** option.value 是索引，不是 String(value)：1 与 \"1\"、null 与 \"null\" 必须可区分。 */\n+export function schemaFormEnumIndex(choices: readonly unknown[], value: unknown): string {\n+  const index = choices.findIndex(choice => choice === value);\n+  return index === -1 ? '' : String(index);\n+}\n+export function schemaFormEnumValue(choices: readonly unknown[], index: string): unknown {\n+  if (index === '') return undefined;\n+  if (!/^(0|[1-9][0-9]*)$/u.test(index) || !Object.hasOwn(choices, Number(index))) throw new Error('Invalid form choice');\n+  return choices[Number(index)];\n+}\ndiff --git a/scripts/fixtures/svar-grid/auto-table-boundaries.spec.ts b/scripts/fixtures/svar-grid/auto-table-boundaries.spec.ts\nindex 15ba31a..5a98ce1 100644\n--- a/scripts/fixtures/svar-grid/auto-table-boundaries.spec.ts\n+++ b/scripts/fixtures/svar-grid/auto-table-boundaries.spec.ts\n@@ -80,10 +80,24 @@ test('AutoTable semantic colors follow a nested host theme at desktop and mobile\n           viewport.scrollLeft = viewport.scrollWidth;\n           viewport.dispatchEvent(new Event('scroll'));\n         });\n-        return page.getByRole('button', { name: 'Edit Stock', exact: true }).first().isVisible();\n+        // isVisible 只要求布局框存在，旧虚拟列即使已被滚动窗裁切也会返回 true。\n+        // 在浏览器完成布局后检查真实交集，避免缩小视口时过早结束轮询。\n+        return page.getByRole('button', { name: 'Edit Stock', exact: true }).first().evaluateAll(async elements => {\n+          const button = elements[0];\n+          if (!button) return false;\n+          return new Promise<boolean>(resolve => {\n+            const observer = new IntersectionObserver(entries => {\n+              observer.disconnect();\n+              const entry = entries[0];\n+              resolve(entry?.isIntersecting === true && entry.intersectionRatio === 1);\n+            });\n+            observer.observe(button);\n+          });\n+        });\n       }, { timeout: 5_000 }).toBe(true);\n     }\n     await expect(page.getByRole('button', { name: 'Edit Stock', exact: true }).first()).toBeVisible();\n+    await expect(page.getByRole('button', { name: 'Edit Stock', exact: true }).first()).toBeInViewport();\n     for (const dark of [false, true]) {\n       if (dark) await page.getByRole('button', { name: 'Theme', exact: true }).click();\n       const hostColor = await page.locator('main').evaluate(element => getComputedStyle(element).color);\ndiff --git a/scripts/surface-workflows/workflow.e2e.ts b/scripts/surface-workflows/workflow.e2e.ts\nindex 92fbe80..aada6b9 100644\n--- a/scripts/surface-workflows/workflow.e2e.ts\n+++ b/scripts/surface-workflows/workflow.e2e.ts\n@@ -12,7 +12,7 @@ test('real streaming preview cannot submit; nested forms preserve state; explici\n   const before = await state(page); expect(before.writes).toBe(0);\n   await accept(page);\n   await primary.getByLabel('Contact name', { exact: false }).fill('Nested test contact');\n-  await primary.getByRole('button', { name: '添加项目', exact: false }).click();\n+  await primary.getByRole('button', { name: 'Add item', exact: false }).click();\n   await primary.getByLabel('City', { exact: false }).fill('Synthetic City');\n   const stable = await state(page);\n   await page.getByRole('button', { name: 'Change presentation only' }).click();",
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/home/runner/work/svadmin/svadmin/scripts/fixtures/svar-grid",
+        "testIgnore": [],
+        "testMatch": [
+          "*.spec.ts"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "line"
+      ],
+      [
+        "html"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.1",
+    "workers": 1,
+    "webServer": {
+      "command": "node ../../../node_modules/vite/bin/vite.js --config vite.config.ts",
+      "url": "http://127.0.0.1:4175",
+      "reuseExistingServer": false,
+      "timeout": 60000
+    }
+  },
+  "suites": [
+    {
+      "title": "advanced.spec.ts",
+      "file": "advanced.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "real inline editing uses the checked core mutation and rejects invalid numeric input",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1216,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:45:27.435Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1e27b6f2dd5d928d283d-7e41e7dbdd3c17f91edc",
+          "file": "advanced.spec.ts",
+          "line": 63,
+          "column": 1
+        },
+        {
+          "title": "batch permissions are preflighted before writes and deletes require confirmation",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1110,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:45:28.887Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1e27b6f2dd5d928d283d-c1752b2299d1751c80cf",
+          "file": "advanced.spec.ts",
+          "line": 72,
+          "column": 1
+        },
+        {
+          "title": "partial failures are reported without auto-retrying failed writes",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 992,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:45:30.010Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1e27b6f2dd5d928d283d-c849b5b43e30663d161e",
+          "file": "advanced.spec.ts",
+          "line": 83,
+          "column": 1
+        },
+        {
+          "title": "changing scope during a batch prevents subsequent dispatches",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1006,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:45:31.021Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1e27b6f2dd5d928d283d-416030d89fafdb41e095",
+          "file": "advanced.spec.ts",
+          "line": 90,
+          "column": 1
+        },
+        {
+          "title": "tree CSV checks descendants and exports only the frozen authorized snapshot",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 881,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:45:32.036Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1e27b6f2dd5d928d283d-b3977241df07896916e8",
+          "file": "advanced.spec.ts",
+          "line": 102,
+          "column": 1
+        },
+        {
+          "title": "saved views survive remounts and remain separated by tenant",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1506,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:45:32.932Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1e27b6f2dd5d928d283d-02d8e8b6a5d2395afaee",
+          "file": "advanced.spec.ts",
+          "line": 114,
+          "column": 1
+        },
+        {
+          "title": "right pane synchronizes actual vertical scrolling, sorting and filtering",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 975,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:45:34.450Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1e27b6f2dd5d928d283d-de9a76caeec4ca272ca1",
+          "file": "advanced.spec.ts",
+          "line": 122,
+          "column": 1
+        },
+        {
+          "title": "keyboard focus crosses the center and right pane boundary",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 808,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:45:35.435Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1e27b6f2dd5d928d283d-db6254afc7c03a456506",
+          "file": "advanced.spec.ts",
+          "line": 132,
+          "column": 1
+        },
+        {
+          "title": "lazy loading deduplicates expansion and drops an old scope response",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 940,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:45:36.262Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1e27b6f2dd5d928d283d-12008cc5f76cf22d0441",
+          "file": "advanced.spec.ts",
+          "line": 141,
+          "column": 1
+        },
+        {
+          "title": "server windows request bounded exact slices, support retry and reset on scope changes",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 930,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:45:37.217Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1e27b6f2dd5d928d283d-01bc167b1d95db13439a",
+          "file": "advanced.spec.ts",
+          "line": 156,
+          "column": 1
+        },
+        {
+          "title": "infinite loading appends without resetting scroll and exposes a keyboard-accessible action",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 831,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:45:38.156Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1e27b6f2dd5d928d283d-ddecb804d77438dff8a7",
+          "file": "advanced.spec.ts",
+          "line": 172,
+          "column": 1
+        },
+        {
+          "title": "advanced real UI states at 1440",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1604,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:45:38.995Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1e27b6f2dd5d928d283d-952a6cec8b296d7e536e",
+          "file": "advanced.spec.ts",
+          "line": 185,
+          "column": 3
+        },
+        {
+          "title": "advanced real UI states at 1920",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1676,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:45:40.606Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1e27b6f2dd5d928d283d-7f03eaab46fd2da0ab9b",
+          "file": "advanced.spec.ts",
+          "line": 185,
+          "column": 3
+        },
+        {
+          "title": "advanced real UI states at 390",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1622,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:45:42.292Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1e27b6f2dd5d928d283d-12c409a059f7e9d9965b",
+          "file": "advanced.spec.ts",
+          "line": 185,
+          "column": 3
+        }
+      ]
+    },
+    {
+      "title": "auto-table-boundaries.spec.ts",
+      "file": "auto-table-boundaries.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "AutoTable rejects invalid delete input before Provider dispatch and accepts the explicit object contract",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3799,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:45:43.934Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "207687fff539cea48f1f-ef9a5b313f2dee03d2df",
+          "file": "auto-table-boundaries.spec.ts",
+          "line": 34,
+          "column": 1
+        },
+        {
+          "title": "AutoTable default actions retain detail URL navigation and the original quick-edit form",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2786,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:45:47.745Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "207687fff539cea48f1f-880b305cda811ae1f1d0",
+          "file": "auto-table-boundaries.spec.ts",
+          "line": 47,
+          "column": 1
+        },
+        {
+          "title": "AutoTable semantic colors follow a nested host theme at desktop and mobile widths",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3055,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:45:50.560Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "207687fff539cea48f1f-d03f71543cda5ebf4d54",
+          "file": "auto-table-boundaries.spec.ts",
+          "line": 68,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "auto-table.spec.ts",
+      "file": "auto-table.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "AutoTable host snippets, row actions, summary and expanded content survive the native grid body",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2211,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:45:53.635Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "368ff5e8023c62981bd1-fe71f265425e29d5b231",
+          "file": "auto-table.spec.ts",
+          "line": 31,
+          "column": 1
+        },
+        {
+          "title": "AutoTable server pagination, grid sorting and search continue to synchronize the URL",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3408,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:45:55.855Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "368ff5e8023c62981bd1-b4132044f3be7cb035ed",
+          "file": "auto-table.spec.ts",
+          "line": 41,
+          "column": 1
+        },
+        {
+          "title": "AutoTable native checkboxes feed existing batch actions and confirmed core deletion",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3202,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:45:59.273Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "368ff5e8023c62981bd1-6f6f529b93cebc1aedfd",
+          "file": "auto-table.spec.ts",
+          "line": 52,
+          "column": 1
+        },
+        {
+          "title": "AutoTable original inline editor retains mutation validation and permission denial",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2825,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:02.489Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "368ff5e8023c62981bd1-ba5777165607bbfb8e3c",
+          "file": "auto-table.spec.ts",
+          "line": 64,
+          "column": 1
+        },
+        {
+          "title": "AutoTable saved views and hidden columns persist without a parallel preference store",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4846,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:05.325Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "368ff5e8023c62981bd1-27fff8effe16dc8b71f4",
+          "file": "auto-table.spec.ts",
+          "line": 74,
+          "column": 1
+        },
+        {
+          "title": "AutoTable accepts controlled pagination and sorters in the compatibility wrapper",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2019,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:10.193Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "368ff5e8023c62981bd1-9cef2d24f882e795aac2",
+          "file": "auto-table.spec.ts",
+          "line": 87,
+          "column": 1
+        },
+        {
+          "title": "AutoTable denies list reads and retains the host empty state",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1767,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:12.220Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "368ff5e8023c62981bd1-147e2814e30b8ff4bcb4",
+          "file": "auto-table.spec.ts",
+          "line": 94,
+          "column": 1
+        },
+        {
+          "title": "AutoTable compatibility screenshots cover light dark and required viewports",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2799,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:13.996Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "368ff5e8023c62981bd1-57a978b06af5938fdc35",
+          "file": "auto-table.spec.ts",
+          "line": 103,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "grid.spec.ts",
+      "file": "grid.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "real SVAR virtualizes 20,000 rows, sorts/filters locally and escapes cell text",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 791,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:16.815Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "baa43c0a339bdbe5146d-2e2238e7190f610b213a",
+          "file": "grid.spec.ts",
+          "line": 23,
+          "column": 1
+        },
+        {
+          "title": "tree expansion and left-frozen columns use the real engine",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 940,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:17.619Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "baa43c0a339bdbe5146d-da8a4ebad2fb83b9304a",
+          "file": "grid.spec.ts",
+          "line": 38,
+          "column": 1
+        },
+        {
+          "title": "resource adapter uses core queries for paging, sorting and filtering",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1107,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:18.567Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "baa43c0a339bdbe5146d-07caa047aefc413658d3",
+          "file": "grid.spec.ts",
+          "line": 54,
+          "column": 1
+        },
+        {
+          "title": "permission revocation clears records without another data read; tenant resets query UI",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1217,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:19.687Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "baa43c0a339bdbe5146d-48ff073c9aae0ff4a57d",
+          "file": "grid.spec.ts",
+          "line": 74,
+          "column": 1
+        },
+        {
+          "title": "a delayed old-tenant response cannot enter the new grid",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 932,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:20.916Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "baa43c0a339bdbe5146d-5ceb436a5a3b322460cf",
+          "file": "grid.spec.ts",
+          "line": 101,
+          "column": 1
+        },
+        {
+          "title": "light/dark state evidence at 1440",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1852,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:21.856Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "baa43c0a339bdbe5146d-f904daedfdfad8a462f3",
+          "file": "grid.spec.ts",
+          "line": 121,
+          "column": 3
+        },
+        {
+          "title": "light/dark state evidence at 1920",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1969,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:23.718Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "baa43c0a339bdbe5146d-6e0b1c75f7ab73c7be46",
+          "file": "grid.spec.ts",
+          "line": 121,
+          "column": 3
+        },
+        {
+          "title": "light/dark state evidence at 390",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1662,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:25.695Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "baa43c0a339bdbe5146d-f16acff97a42a7490a23",
+          "file": "grid.spec.ts",
+          "line": 121,
+          "column": 3
+        }
+      ]
+    },
+    {
+      "title": "native-cells.spec.ts",
+      "file": "native-cells.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "real SVAR renders native snippets and keeps callback records independent",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1074,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:27.376Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "280ab087de27960d5878-e8482102bf7761255f04",
+          "file": "native-cells.spec.ts",
+          "line": 3,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "resource-loading.spec.ts",
+      "file": "resource-loading.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "resource windows reuse core pagination and expose the synchronized right pane",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1022,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:28.470Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "afb87f9bc61ef941f2f5-fbb4fdbec767ee93f929",
+          "file": "resource-loading.spec.ts",
+          "line": 32,
+          "column": 1
+        },
+        {
+          "title": "infinite resource selection and CSV include the appended records, not only page one",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1134,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:29.501Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "afb87f9bc61ef941f2f5-06351b1184b7145b5534",
+          "file": "resource-loading.spec.ts",
+          "line": 43,
+          "column": 1
+        },
+        {
+          "title": "lazy resource branches use parent filters and descendant export permission checks",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1120,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:30.645Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "afb87f9bc61ef941f2f5-9103beb6ccf1982069a8",
+          "file": "resource-loading.spec.ts",
+          "line": 56,
+          "column": 1
+        },
+        {
+          "title": "permission revocation unmounts resource windows without further Provider reads",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 994,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:31.774Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "afb87f9bc61ef941f2f5-924cdb1a4a23f37fa272",
+          "file": "resource-loading.spec.ts",
+          "line": 72,
+          "column": 1
+        },
+        {
+          "title": "a held old-scope resource window cannot populate the new scope",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1094,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:32.777Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "afb87f9bc61ef941f2f5-e24f96c205becc8fea37",
+          "file": "resource-loading.spec.ts",
+          "line": 83,
+          "column": 1
+        },
+        {
+          "title": "capture the resource-level window integration at required viewports",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1139,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:33.884Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "afb87f9bc61ef941f2f5-3254f59c2f88c6f42dd5",
+          "file": "resource-loading.spec.ts",
+          "line": 99,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "surface.spec.ts",
+      "file": "surface.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "AI catalog renders real SVAR and rejects field and mutation escalation",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1187,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:35.039Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "7387f18eb7e0b24c642c-a72ed8d0ad4a49c7d8af",
+          "file": "surface.spec.ts",
+          "line": 3,
+          "column": 1
+        },
+        {
+          "title": "Surface real grid evidence at 1440",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 940,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:36.237Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "7387f18eb7e0b24c642c-22f5970e41631dea47e7",
+          "file": "surface.spec.ts",
+          "line": 27,
+          "column": 3
+        },
+        {
+          "title": "Surface real grid evidence at 1920",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 976,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:37.185Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "7387f18eb7e0b24c642c-519b4fcba702a97cc8b5",
+          "file": "surface.spec.ts",
+          "line": 27,
+          "column": 3
+        },
+        {
+          "title": "Surface real grid evidence at 390",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 855,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:38.175Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "7387f18eb7e0b24c642c-ba4e70deab4f4617e987",
+          "file": "surface.spec.ts",
+          "line": 27,
+          "column": 3
+        }
+      ]
+    },
+    {
+      "title": "typed-rendering.spec.ts",
+      "file": "typed-rendering.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "SVAR AutoTable passes the same rendering contract through native cells, details and quick-edit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2528,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:39.049Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1bfb291f6253f972856d-d8da9b0bcb628fcba82a",
+          "file": "typed-rendering.spec.ts",
+          "line": 23,
+          "column": 1
+        },
+        {
+          "title": "a same-name different contract is rejected before any Provider request and can recover",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1805,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:41.586Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1bfb291f6253f972856d-35cde6428ff0fb65f2da",
+          "file": "typed-rendering.spec.ts",
+          "line": 42,
+          "column": 1
+        },
+        {
+          "title": "changing an active rendering contract clears the old Grid without another read or write",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1783,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:43.401Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1bfb291f6253f972856d-798734459f6694cf24e6",
+          "file": "typed-rendering.spec.ts",
+          "line": 53,
+          "column": 1
+        },
+        {
+          "title": "invalid Provider records do not reach typed cell snippets and retry restores the grid",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1839,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-19T22:46:45.194Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "1bfb291f6253f972856d-486f0d6fd4ec33f0142d",
+          "file": "typed-rendering.spec.ts",
+          "line": 65,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-09-19T22:45:25.972Z",
+    "duration": 81191.347,
+    "expected": 48,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}
