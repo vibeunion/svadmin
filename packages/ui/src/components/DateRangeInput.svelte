@@ -1,6 +1,7 @@
 <script lang="ts">
   import DateTimeInput, { type DateTimeInputMode } from './DateTimeInput.svelte';
   import { cn } from '../utils.js';
+  import { definedOptions } from '@svadmin/core/options';
 
   export interface DateRangeInputValue {
     start: string | null;
@@ -44,7 +45,8 @@
   }: Props = $props();
 
   function update(part: 'start' | 'end', next: string | null): void {
-    const result = { ...value, [part]: next };
+    // null 范围首次编辑也必须返回两个明确的端点。
+    const result: DateRangeInputValue = { start: value?.start ?? null, end: value?.end ?? null, [part]: next };
     value = result;
     onchange?.(result);
   }
@@ -52,32 +54,22 @@
 
 <div class={cn('svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-421ac2be5045', className)} data-date-range-input>
   <DateTimeInput
-    value={value?.start}
+    value={value?.start ?? null}
     {mode}
-    {min}
-    {max}
-    {step}
-    id={startId}
-    name={startName}
+    {...definedOptions({ min, max, step, id: startId, name: startName, describedby })}
     {disabled}
     {required}
     {invalid}
-    describedby={describedby}
     onchange={(next) => update('start', next)}
   />
   <span aria-hidden="true">至</span>
   <DateTimeInput
-    value={value?.end}
+    value={value?.end ?? null}
     {mode}
-    {min}
-    {max}
-    {step}
-    id={endId}
-    name={endName}
+    {...definedOptions({ min, max, step, id: endId, name: endName, describedby })}
     {disabled}
     {required}
     {invalid}
-    describedby={describedby}
     onchange={(next) => update('end', next)}
   />
 </div>
