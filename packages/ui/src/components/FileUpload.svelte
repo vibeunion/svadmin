@@ -99,13 +99,15 @@
   }
 
   async function process(item: UploadItem): Promise<void> {
-    if (!upload || disabled || disposed || controllers.has(item.id)) return;
+    if (!upload || disabled || disposed || controllers.has(item.id) || !items.some(candidate => candidate.id === item.id)) return;
     const controller = new AbortController();
     controllers.set(item.id, controller);
     // 取消、替换、重试或卸载后，旧请求不再拥有更新状态的权限。
     const current = () => !disposed && !controller.signal.aborted && controllers.get(item.id) === controller;
     updateItem(item.id, { status: 'uploading', progress: 0 }, ['error', 'url']);
     try {
+      // onChange may synchronously unmount the component or retire this attempt.
+      if (!current()) return;
       const result = await upload(item.file, {
         signal: controller.signal,
         onProgress: progress => {
@@ -125,9 +127,11 @@
   }
 
   function addFiles(selected: File[]): void {
-    if (disabled) return;
+    if (disabled || disposed) return;
     const available = Math.max(0, maxFiles - items.length);
     for (const file of selected.slice(0, multiple ? available : 1)) {
+      // Host notifications may synchronously disable or unmount this batch.
+      if (disabled || disposed) return;
       const reason = validate(file);
       if (reason) {
         onReject?.(file, reason);
@@ -151,6 +155,7 @@
   }
 
   function remove(id: string): void {
+    if (disabled || disposed) return;
     controllers.get(id)?.abort();
     controllers.delete(id);
     items = items.filter(item => item.id !== id);
@@ -220,11 +225,11 @@
               <Ban aria-hidden="true" />
             </Button>
           {:else if item.status === 'error' || item.status === 'cancelled'}
-            <Button type="button" variant="ghost" size="icon-sm" aria-label="Retry upload" onclick={() => retry(item)}>
+            <Button type="button" variant="ghost" size="icon-sm" aria-label="Retry upload" {disabled} onclick={() => retry(item)}>
               <RotateCw aria-hidden="true" />
             </Button>
           {/if}
-          <Button type="button" variant="ghost" size="icon-sm" aria-label="Remove file" onclick={() => remove(item.id)}>
+          <Button type="button" variant="ghost" size="icon-sm" aria-label="Remove file" {disabled} onclick={() => remove(item.id)}>
             <X aria-hidden="true" />
           </Button>
           {#if item.error}<span role="alert">{item.error}</span>{/if}

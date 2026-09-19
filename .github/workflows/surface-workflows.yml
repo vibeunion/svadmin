@@ -5,6 +5,7 @@ on:
     paths:
       - 'packages/surface/**'
       - 'packages/ui/src/components/**'
+      - 'packages/ui/scripts/schema-form-state.test.mjs'
       - 'packages/lite/src/components/LiteFilterBuilder*'
       - 'packages/lite/src/filter-form.ts'
       - 'packages/core/src/types.ts'
@@ -39,9 +40,11 @@ jobs:
         run: |
           bun run --cwd packages/surface check
           bunx --no-install svelte-check --tsgo-experimental-api --tsconfig packages/ui/tsconfig.json --threshold error
+      - name: Nested form draft and JSON transport contracts
+        run: node --test packages/ui/scripts/schema-form-state.test.mjs
       - name: Real UI and Lite workflow regression components
         run: |
-          bun run --cwd packages/ui test src/components/workflow-boundaries.test.svelte.ts src/components/import-wizard.test.svelte.ts src/components/resource-workspace.test.svelte.ts src/components/combobox-field.test.svelte.ts src/components/numeric-input.test.svelte.ts
+          bun run --cwd packages/ui test src/components/json-schema-form-lifecycle.test.svelte.ts src/components/workflow-boundaries.test.svelte.ts src/components/import-wizard.test.svelte.ts src/components/resource-workspace.test.svelte.ts src/components/combobox-field.test.svelte.ts src/components/numeric-input.test.svelte.ts
           bun run --cwd packages/lite test:components src/components/LiteFilterBuilder.apply.test.svelte.ts src/components/LiteFileUpload.test.svelte.ts
       - name: Install isolated optional parser (not a new workspace dependency)
         run: |

@@ -31,21 +31,36 @@ for (const [name, definition] of Object.entries(definitions)) {
     assert.doesNotMatch(JSON.stringify(definition), /#[0-9a-f]{3,8}\b|--tw-|svadmin-u-|!important|@(?:theme|apply|tailwind)\b/iu);
   });
 }
-test('workspace stays top-aligned and only adds a responsive column for an aside', () => {
+test('workspace default stays one column without an aside', () => {
+  assert.equal(definitions.productWorkspace.defaultVariants.hasSecondary, false);
+  assert.equal(declarations(published, runtime.productWorkspace().columns).get('align-items'), 'start');
+  assert.equal(declarations(published, runtime.productWorkspace().columns).get('grid-template-columns'), 'minmax(0, 1fr)');
+  assert.match(declarations(published, runtime.productWorkspace({ hasSecondary: true }).columns).get('grid-template-columns'), /--workspace-secondary-width/u);
+});
+test('workspace recipe preserves top alignment, responsive columns and slot order', () => {
+  // These assertions belong with the actual build-tool definitions and CSS,
+  // not in Core's source-only contract test or public dependency type graph.
   const workspace = definitions.productWorkspace;
+  assert.equal(workspace.defaultVariants.hasSecondary, false);
   assert.equal(workspace.base.columns.display, 'grid');
   assert.equal(workspace.base.columns.alignItems, 'start');
   assert.equal(workspace.base.columns.gridTemplateColumns, 'minmax(0, 1fr)');
-  assert.deepEqual(workspace.variants.hasSecondary.true.columns, {
+  const desktop = workspace.variants.hasSecondary.true;
+  assert.deepEqual(desktop.columns, {
     '@media (min-width: 64rem)': {
       gridTemplateColumns: 'minmax(0, 1fr) minmax(0, var(--workspace-secondary-width, 22rem))',
     },
   });
-  // 与真实发布 CSS 交叉核验，不让仅定义正确但遗漏生成的样式通过。
-  assert.equal(declarations(published, runtime.productWorkspace().columns).get('align-items'), 'start');
-  assert.equal(definitions.productWorkspace.defaultVariants.hasSecondary, false);
-  assert.equal(declarations(published, runtime.productWorkspace().columns).get('grid-template-columns'), 'minmax(0, 1fr)');
-  assert.match(declarations(published, runtime.productWorkspace({ hasSecondary: true }).columns).get('grid-template-columns'), /--workspace-secondary-width/u);
+  assert.deepEqual(desktop.columns['@media (min-width: 64rem)'], {
+    gridTemplateColumns: 'minmax(0, 1fr) minmax(0, var(--workspace-secondary-width, 22rem))',
+  });
+  assert.deepEqual(desktop.primary['@media (min-width: 64rem)'], { order: '1' });
+  assert.deepEqual(desktop.secondary['@media (min-width: 64rem)'], { order: '2' });
+  const styles = runtime.productWorkspace({ hasSecondary: true });
+  assert.equal(declarations(published, styles.columns).get('display'), 'grid');
+  assert.equal(declarations(published, styles.columns).get('align-items'), 'start');
+  assert.equal(declarations(published, styles.primary).get('order'), '1');
+  assert.equal(declarations(published, styles.secondary).get('order'), '2');
 });
 test('both field separation variants are explicitly generated', () => {
   assert.equal(declarations(published, runtime.productSettingsRow({ separated: true }).root).get('border-top'), '1px solid');
@@ -71,7 +86,6 @@ test('published aliases stay identical; generated variables remain namespaced', 
     if (decl.prop.startsWith('--')) assert.match(decl.prop, /^--svadmin-/u);
   });
 });
-
 
 for (const status of ['success', 'warning', 'danger', 'info', 'neutral']) {
   test(`status ${status} is published, with a readable no-color-mix fallback`, () => {
