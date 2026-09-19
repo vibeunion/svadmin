@@ -155,6 +155,7 @@
               {#snippet action()}<Button data-testid="clear-filters" variant="outline" onclick={() => { query = ''; scenario = 'ready'; }}>{tx('清除筛选', 'Clear filters')}</Button>{/snippet}
             </DataState>
             {:else}
+              <!-- svelte-ignore a11y_no_noninteractive_tabindex (命名滚动区域需支持原生键盘滚动；keyboard.mjs 验证 Tab、方向键与焦点退出。) -->
               <div class="kit-table-scroll" role="region" aria-label={tx('客户数据', 'Customer data')} tabindex="0"><Table.Root {density}>
                 <Table.Caption>{tx('合成数据，仅用于设计评审', 'Synthetic data for design review only')}</Table.Caption>
                 <Table.Header><Table.Row><Table.Head>{tx('客户', 'Customer')}</Table.Head><Table.Head>{tx('状态', 'Status')}</Table.Head><Table.Head class="kit-number">{tx('交易总额', 'Volume')}</Table.Head><Table.Head><span class="kit-visually-hidden">{tx('操作', 'Actions')}</span></Table.Head></Table.Row></Table.Header>

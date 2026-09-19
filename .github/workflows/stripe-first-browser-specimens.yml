@@ -38,6 +38,8 @@ jobs:
         run: bunx playwright install --with-deps chromium
       - name: Verify complete state matrix and interactions
         run: node design/stripe-first/preview/verify.mjs
+      - name: Verify keyboard-only table scrolling
+        run: node design/stripe-first/preview/keyboard.mjs
       - name: Verify no source or dependency mutations
         run: |
           git diff --exit-code -- packages bun.lock
