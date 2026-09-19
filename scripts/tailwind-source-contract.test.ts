@@ -3,52 +3,49 @@ import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 const repositoryRoot = resolve(import.meta.dir, '..');
-
 function readRepositoryFile(path: string): string {
   return readFileSync(join(repositoryRoot, path), 'utf8');
 }
-
 function readCleanFlatCss(): string {
-  const uiCss = readRepositoryFile('packages/ui/src/app.css');
+  const uiCss = readRepositoryFile('packages/ui/src/components.css');
   const marker = '/* --- Stripe-first layout preset (clean-flat) --- */';
   const markerIndex = uiCss.indexOf(marker);
-
   expect(markerIndex).toBeGreaterThanOrEqual(0);
-  return uiCss.slice(markerIndex);
+  const nextSection = uiCss.indexOf('/* Business components', markerIndex);
+  return uiCss.slice(markerIndex, nextSection === -1 ? undefined : nextSection);
 }
 
-describe('@svadmin/ui Tailwind source contract', () => {
-  it('keeps source discovery inside the published UI stylesheet', () => {
-    const uiCss = readRepositoryFile('packages/ui/src/app.css');
-    const exampleCss = readRepositoryFile('example/src/app.css');
-    const templateCss = readRepositoryFile('packages/create-svadmin/template/src/app.css');
+describe('@svadmin/ui native stylesheet contract', () => {
+  it('ships plain CSS without requiring component scanning or compiler imports', () => {
+    for (const path of [
+      'packages/ui/src/app.css',
+      'example/src/app.css',
+      'packages/create-svadmin/template/src/app.css',
+    ]) {
+      const css = readRepositoryFile(path);
+      expect(css).not.toMatch(/@(?:source|theme|apply|tailwind|utility|custom-variant)\b/);
+      expect(css).not.toMatch(/@import\s+["'](?:tailwindcss|tw-animate-css)/);
+    }
     const readme = readRepositoryFile('README.md');
-
-    expect(uiCss).toContain('@source "./components";');
-    expect(uiCss).not.toContain('linear-gradient(');
-    expect(exampleCss).not.toContain('@source "../node_modules/@svadmin/ui";');
-    expect(templateCss).not.toContain('@source "../node_modules/@svadmin/ui";');
-    expect(readme).not.toContain('@source "../node_modules/@svadmin/ui";');
-    expect(readme).toContain('registers its published `dist/components` directory');
+    expect(readme).toContain('No host CSS compiler required');
+    expect(readme).not.toContain('registers its published `dist/components` directory');
   });
 
-  it('uses the published theme for the Tailwind example and precompiled CSS for generated apps', () => {
-    const exampleCss = readRepositoryFile('example/src/app.css');
-    const templateCss = readRepositoryFile('packages/create-svadmin/template/src/app.css');
-    const exampleApp = readRepositoryFile('example/src/App.svelte');
-
-    expect(exampleCss).toContain('@import "@svadmin/ui/app.theme.css";');
-    expect(templateCss).toContain('@import "@svadmin/ui/app.css";');
-    expect(templateCss).not.toContain('tailwindcss');
-    expect(templateCss).not.toContain('@svadmin/ui/app.theme.css');
-    expect(exampleCss).not.toMatch(/--primary\s*:/);
-    expect(templateCss).not.toMatch(/--primary\s*:/);
-    expect(exampleApp).toContain("colorPreset: 'indigo'");
+  it('uses precompiled CSS for both the example and generated apps', () => {
+    for (const path of [
+      'example/src/app.css',
+      'packages/create-svadmin/template/src/app.css',
+    ]) {
+      const css = readRepositoryFile(path);
+      expect(css).toContain('@import "@svadmin/ui/app.css";');
+      expect(css).not.toContain('@svadmin/ui/app.theme.css');
+      expect(css).not.toMatch(/--primary\s*:/);
+    }
+    expect(readRepositoryFile('example/src/App.svelte')).toContain("colorPreset: 'indigo'");
   });
 
-  it('keeps clean-flat semantic and bounded', () => {
+  it('keeps clean-flat semantic and bounded after the native CSS split', () => {
     const cleanFlatCss = readCleanFlatCss();
-
     expect(cleanFlatCss).toContain('.layout-clean-flat');
     expect(cleanFlatCss).toContain('background: var(--primary);');
     expect(cleanFlatCss).toContain('--svadmin-focus-ring: var(--ring);');
@@ -62,7 +59,6 @@ describe('@svadmin/ui Tailwind source contract', () => {
 
   it('records the Stripe-first visual authority boundary', () => {
     const designContract = readRepositoryFile('DESIGN.md');
-
     expect(designContract).toContain('Stripe-first');
     expect(designContract).toContain('Metronic is a capability reference only');
   });
