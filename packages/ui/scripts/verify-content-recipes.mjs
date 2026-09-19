@@ -12,7 +12,7 @@ const root = resolve(ui, '../..');
 const require = createRequire(join(ui, 'package.json'));
 const { build, preview } = await import(require.resolve('vite'));
 const { svelte } = await import(require.resolve('@sveltejs/vite-plugin-svelte'));
-const { chromium } = require('@playwright/test');
+const { chromium, expect } = require('@playwright/test');
 const baseline = 'ee01ea0b52285bd3129447cd0b2ddb0c114f45ce';
 const work = join(ui, '.content-recipe-verification');
 const evidence = resolve(process.env.CONTENT_RECIPE_EVIDENCE ?? join(root, 'test-results/content-recipes'));
@@ -68,7 +68,7 @@ try {
   const Metric = $derived(candidate ? CandidateMetric : BaselineMetric);
 </script>
 <button id="implementation" onclick={() => candidate = !candidate}>{candidate ? 'candidate' : 'baseline'}</button>
-<button id="width" onclick={() => width = width === 'narrow' ? 'wide' : 'narrow'}>Change width</button>
+<button id="width" data-current-width={width} onclick={() => width = width === 'narrow' ? 'wide' : 'narrow'}>Change width</button>
 <button id="loading" onclick={() => loading = !loading}>Change loading</button>
 <div class={'svadmin-theme ' + parentMode + ' ' + layout} data-theme={parentMode} {dir}>
   <main id="stage" class={'svadmin-theme ' + mode} data-theme={mode}>
@@ -163,18 +163,16 @@ try {
       const before = await stableScreenshot(page.locator('#stage'));
       const oldStyles = await snapshot(page);
       await page.locator('#implementation').click();
-      assert.equal(await page.locator('#implementation').textContent(), 'candidate');
+      await expect(page.locator('#implementation')).toHaveText('candidate');
       const after = await stableScreenshot(page.locator('#stage'));
       const newStyles = await snapshot(page);
       writeFileSync(join(evidence, `${id}-baseline.png`), before);
       writeFileSync(join(evidence, `${id}-candidate.png`), after);
       writeFileSync(join(evidence, `${id}-styles.json`), JSON.stringify({ baseline: oldStyles, candidate: newStyles, resolved }, null, 2));
       const { expected, changes } = assertContentParity(oldStyles, newStyles, resolved);
-
-      // Retain the original historical capture. A THIRD capture shows precisely
-      // the specified color repair on the old DOM, not a rewritten baseline.
+      // A THIRD capture records only the intentional trend-color correction.
       await page.locator('#implementation').click();
-      assert.equal(await page.locator('#implementation').textContent(), 'baseline');
+      await expect(page.locator('#implementation')).toHaveText('baseline');
       await page.locator('#stage').evaluate((stage, bindings) => {
         const nodes = [stage, ...stage.querySelectorAll('*')];
         for (const binding of bindings) nodes[binding.index].style.color = binding.expectedColor;
@@ -184,16 +182,21 @@ try {
       assert.deepEqual(await snapshot(page), expected, 'reference correction changed more than foreground colors');
       assert.ok(reference.equals(after), `${id}: PNG differs from the explicitly corrected reference`);
       await page.locator('#implementation').click();
-      assert.equal(await page.locator('[aria-label="Long value"] > p').evaluate((el) => getComputedStyle(el).whiteSpace), 'nowrap');
-      assert.equal(await page.locator('[aria-label="Long value"] > p').evaluate((el) => getComputedStyle(el).textOverflow), 'ellipsis');
+      await expect(page.locator('#implementation')).toHaveText('candidate');
+      await expect(page.locator('[aria-label="Long value"] > p')).toHaveCSS('white-space', 'nowrap');
+      await expect(page.locator('[aria-label="Long value"] > p')).toHaveCSS('text-overflow', 'ellipsis');
       await page.locator('[data-action]').click();
-      assert.equal(await page.locator('#summary').textContent(), 'Visible actions: 1');
-      assert.equal(await page.locator('[data-action]').evaluate((el) => el === document.activeElement), true);
+      await expect(page.locator('#summary')).toHaveText('Visible actions: 1');
+      await expect(page.locator('[data-action]')).toBeFocused();
       await page.locator('#loading').click();
-      assert.ok((await page.locator('[aria-label="Loading"]').textContent()).includes('42'));
+      await expect(page.locator('[aria-label="Loading"]')).toContainText('42');
       await page.locator('#width').click();
-      const expectedWidth = scene.width === 'narrow' ? 92 * 16 : 48 * 16;
-      assert.equal(await page.locator('[data-svadmin-content-page]').evaluate((el) => parseFloat(getComputedStyle(el).maxWidth)), expectedWidth);
+      const nextWidth = scene.width === 'narrow' ? 'wide' : 'narrow';
+      await expect(page.locator('#width')).toHaveAttribute('data-current-width', nextWidth);
+      const expectedWidth = nextWidth === 'wide' ? 92 * 16 : 48 * 16;
+      // The click is not the render flush. Wait for the observable CSS result,
+      // without changing its expected value or suppressing a persistent failure.
+      await expect(page.locator('[data-svadmin-content-page]')).toHaveCSS('max-width', `${expectedWidth}px`);
       assert.deepEqual(pageErrors, []);
       report.cases.push({ id, ...scene, passed: true, nodes: newStyles.length, colorCorrections: changes, historicalPngIdentical: before.equals(after), baselinePngSha256: sha256(before), candidatePngSha256: sha256(after), correctedReferencePngSha256: sha256(reference) });
     } catch (error) {
