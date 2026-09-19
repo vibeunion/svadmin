@@ -4,7 +4,8 @@
   "description": "Composable Svelte 5 AI interaction components for SVAdmin",
   "type": "module",
   "sideEffects": [
-    "./dist/*.css"
+    "./dist/*.css",
+    "./vendor/**/*.css"
   ],
   "files": [
     "dist",
