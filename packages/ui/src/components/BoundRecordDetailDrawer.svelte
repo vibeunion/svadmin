@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { ResourceRendering } from '../rendering/index.js';
   import { definedOptions } from '@svadmin/core/options';
 
   import { useCan, useNavigation, type FieldDefinition } from '@svadmin/core';
@@ -12,11 +13,13 @@
 
   let {
     resourceName,
+    rendering,
     open = $bindable(false),
     recordId,
     onClose,
   }: {
     resourceName: string;
+    rendering?: ResourceRendering | undefined;
     open?: boolean;
     recordId: string | number;
     onClose?: () => void;
@@ -24,7 +27,7 @@
 
   const i18n = useTranslation();
   const navigation = useNavigation();
-  const detail = useRecordDetail(() => ({ resourceName, id: recordId }));
+  const detail = useRecordDetail(() => ({ resourceName, id: recordId, rendering }));
   const resource = $derived(detail.resource);
   const showFields = $derived(detail.fields);
   const fieldGroups = $derived.by(() => {
@@ -68,12 +71,13 @@
 
 {#snippet fieldsList(fields: FieldDefinition[])}
   {#if query.isSuccess}
+    {@const record = detail.rendering ? detail.rendering.record(query.data.data) : query.data.data}
     <dl class="svadmin-u-fa6acbf81d74 svadmin-u-d2c3932343f5">
       {#each fields as field (field.key)}
         <div class="svadmin-u-f3c543ad5fe9 svadmin-u-58284b4ea568 svadmin-u-cb11fec3bb46 svadmin-u-d9bdd3d643a2 svadmin-u-022e8076dfea">
           <dt class="svadmin-u-359090c2d529 svadmin-u-2689f3958069 svadmin-u-bfa603190748 svadmin-u-e2327d142859">{field.label}</dt>
           <dd class="svadmin-u-7e0b7cdf1a94 svadmin-u-170cee3ff4e4 svadmin-u-fc7473ca09eb svadmin-u-d4108abe6359">
-            <FieldDisplay type={field.type} value={query.data.data[field.key]} options={field.options} resourceName={field.resource} />
+            <FieldDisplay type={field.type} value={record[field.key]} options={field.options} resourceName={field.resource} />
           </dd>
         </div>
       {/each}
@@ -83,6 +87,8 @@
 
 <DetailDrawer
   bind:open
+  data-svadmin-rendering-resource={detail.rendering?.resource.name}
+  data-svadmin-rendering-kind={detail.rendering ? 'detail-drawer' : undefined}
   title="{resource.label} {i18n.t('common.detail')}"
   description={`#${recordId}`}
   closeLabel={i18n.t('common.close')}

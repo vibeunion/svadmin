@@ -178,7 +178,15 @@ jobs:
             );
             if (!affectsUi) return;
 
-            const body = context.payload.pull_request.body || '';
+            // 重跑时读取刚补齐的证据，但不允许旧提交借用新提交的 PR 描述。
+            const { data: pull } = await github.rest.pulls.get({
+              ...context.repo, pull_number: context.issue.number,
+            });
+            if (pull.head.sha !== context.payload.pull_request.head.sha) {
+              core.setFailed('PR head changed; run the evidence check on the current commit.');
+              return;
+            }
+            const body = pull.body || '';
             const requirements = [
               ['state matrix', /状态矩阵|state matrix/i],
               ['1440x900 evidence', /1440\s*[x×]\s*900/i],

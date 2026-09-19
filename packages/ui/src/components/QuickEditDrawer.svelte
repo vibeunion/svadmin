@@ -1,11 +1,13 @@
 <script lang="ts">
+  import type { ResourceRendering } from '../rendering/index.js';
   import { captureAdminContext } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import AutoForm from './AutoForm.svelte';
   import DetailDrawer from './DetailDrawer.svelte';
 
-  let { resourceName, recordId, onClose }: {
+  let { resourceName, rendering, recordId, onClose }: {
     resourceName: string;
+    rendering?: ResourceRendering | undefined;
     recordId: string | number;
     onClose: () => void;
   } = $props();
@@ -26,6 +28,7 @@
   data-svadmin-quick-edit
 >
   <AutoForm
+    {rendering}
     {resourceName}
     id={recordId}
     mode="edit"

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { demoRenderers } from '../resource-rendering';
   import { demoContracts } from '../resource-contracts';
 
   import { useList } from '@svadmin/core';
@@ -27,7 +28,7 @@
   const locale = $derived(i18n.locale);
   const isZh = $derived(locale === 'zh-CN');
   const query = useList({ resource: demoContracts.ai_conversations, pagination: { mode: 'off' }, sorters: [{ field: 'updatedAt', order: 'desc' }] });
-  const conversations = $derived((query.data?.data ?? []));
+  const conversations = $derived(demoRenderers.ai_conversations.records(query.data?.data ?? []));
   const active = $derived(conversations[0]);
   const selectedThread = $derived(conversations.find((thread) => thread.id === selectedThreadId) ?? active);
   const openCount = $derived(conversations.filter((item) => item.status !== 'resolved').length);
