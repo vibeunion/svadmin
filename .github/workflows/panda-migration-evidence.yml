@@ -10,7 +10,8 @@ on:
       - 'packages/ai-elements/**'
       - 'example/**'
       - 'scripts/check-panda-browser.mjs'
-      - 'scripts/check-no-tailwind.mjs'
+      - 'scripts/check-conditional-styles.mjs'
+      - 'scripts/check-no-tailwind*.mjs'
       - 'scripts/check-panda-runtime.mjs'
       - 'packages/core/src/i18n.svelte.ts'
       - 'bun.lock'
@@ -45,7 +46,9 @@ jobs:
       - name: Install locked dependencies
         run: bun install --frozen-lockfile
       - name: Reject Tailwind compiler dependencies and active directives
-        run: node scripts/check-no-tailwind.mjs
+        run: |
+          node --test scripts/check-no-tailwind.test.mjs
+          node scripts/check-no-tailwind.mjs
       - name: Build component packages
         run: |
           bun run --cwd packages/ai-elements build
@@ -75,6 +78,7 @@ jobs:
         run: |
           bunx --no-install playwright install --with-deps chromium
           node scripts/check-panda-browser.mjs 2>&1 | tee "$RUNNER_TEMP/panda-evidence/logs/browser.log"
+          node scripts/check-conditional-styles.mjs 2>&1 | tee "$RUNNER_TEMP/panda-evidence/logs/conditional-styles.log"
       - name: Preserve evidence for this exact commit
         if: always()
         run: |
