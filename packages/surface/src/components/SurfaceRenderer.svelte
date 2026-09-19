@@ -1,20 +1,16 @@
 <script lang="ts">
   import { canAccessAsync, captureAdminContext } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
-  import { untrack } from 'svelte';
+  import { onDestroy, untrack } from 'svelte';
   import { resolveSurfaceWidgetData } from '../binding.js';
   import { defaultSurfaceCatalog } from '../catalog.js';
   import type { SurfaceRenderCatalog } from '../catalog.js';
-  import { loadSurfaceSource } from '../runtime.js';
+  import { createSurfaceSourceController } from '../source-controller.js';
   import { resolveSurfaceMessages } from '../localization.js';
   import type { SurfaceMessages } from '../localization.js';
   import type {
-    SurfaceDataError,
-    SurfaceDataProvider,
-    SurfaceDataSource,
-    SurfacePolicy,
-    SurfaceSourceDataState,
-    SurfaceValidationIssue,
+    SurfaceDataError, SurfaceDataProvider, SurfacePolicy,
+    SurfaceSourceDataState, SurfaceValidationIssue,
   } from '../types.js';
   import { validateSurfaceSpec } from '../validation.js';
 
@@ -27,6 +23,8 @@
     readonly policy: SurfacePolicy;
     readonly catalog?: SurfaceRenderCatalog;
     readonly dataProvider?: SurfaceDataProvider;
+    /** 可信宿主在用户、租户或授权会话切换时更新；不是模型可提供的字段。 */
+    readonly scopeKey?: string;
     readonly locale?: string;
     readonly messages?: Partial<SurfaceMessages>;
     readonly class?: string;
@@ -34,14 +32,8 @@
   }
 
   let {
-    spec,
-    policy,
-    catalog = defaultSurfaceCatalog,
-    dataProvider,
-    locale,
-    messages,
-    class: className = '',
-    onError,
+    spec, policy, catalog = defaultSurfaceCatalog, dataProvider, scopeKey = '',
+    locale, messages, class: className = '', onError,
   }: SurfaceRendererProps = $props();
 
   const adminContext = captureAdminContext();
@@ -50,93 +42,38 @@
   const activeMessages = $derived(resolveSurfaceMessages(activeLocale, messages));
   const validation = $derived(validateSurfaceSpec(spec, catalog, policy));
   const widgetRegistrations = $derived(new Map(catalog.widgets.map((widget) => [widget.type, widget])));
-  const currentSpec = $derived(validation.ok ? validation.value : null);
-  const sourceGenerations: Record<string, number> = Object.create(null) as Record<string, number>;
-  let sourceStates = $state.raw<Record<string, SurfaceSourceDataState>>({});
-
-  function nextGeneration(sourceId: string): number {
-    const generation = (sourceGenerations[sourceId] ?? 0) + 1;
-    sourceGenerations[sourceId] = generation;
-    return generation;
-  }
-
-  function setSourceState(sourceId: string, state: SurfaceSourceDataState): void {
-    sourceStates = { ...sourceStates, [sourceId]: state };
-  }
-
-  function providerFor(resource: string): SurfaceDataProvider {
-    return dataProvider ?? adminContext.getDataProviderForResource(resource);
-  }
-
-  async function authorize(resource: string, action: 'list' | 'show') {
-    return canAccessAsync(resource, action);
-  }
-
-  function providerError(sourceId: string, failure: unknown): SurfaceSourceDataState {
-    const message = failure instanceof Error ? failure.message : activeMessages.providerUnavailable;
-    return {
-      status: 'error',
-      sourceId,
-      error: { code: 'provider_failed', sourceId, message },
-    };
-  }
-
-  async function loadSource(source: SurfaceDataSource): Promise<void> {
-    const generation = nextGeneration(source.id);
-    setSourceState(source.id, { status: 'loading', sourceId: source.id });
-
-    let result: SurfaceSourceDataState;
-    try {
-      const resourcePolicy = Object.hasOwn(policy.resources, source.resource)
-        ? policy.resources[source.resource]
-        : undefined;
-      if (!resourcePolicy) throw new Error(`Resource "${source.resource}" is not allowed`);
-      result = await loadSurfaceSource({
-        source,
-        resourcePolicy,
-        provider: providerFor(source.resource),
-        authorize,
-      });
-    } catch (failure) {
-      result = providerError(source.id, failure);
-    }
-
-    if (sourceGenerations[source.id] !== generation) return;
-    setSourceState(source.id, result);
-    if (result.status === 'error') onError?.({ type: 'data', error: result.error });
-  }
-
-  async function loadSources(sources: readonly SurfaceDataSource[]): Promise<void> {
-    await Promise.all(sources.map(loadSource));
-  }
-
-  function invalidateCurrentSources(): void {
-    for (const sourceId of Object.keys(sourceGenerations)) nextGeneration(sourceId);
-    sourceStates = {};
-  }
+  // 单独写入数据源键，避免每次响应替换整个状态对象。
+  const sourceStates = $state<Record<string, SurfaceSourceDataState>>({});
+  const controller = createSurfaceSourceController({
+    authorize: (resource, action) => canAccessAsync(resource, action),
+    onState(id, state) {
+      if (state === undefined) delete sourceStates[id];
+      else sourceStates[id] = state;
+    },
+    onError: (error) => onError?.({ type: 'data', error }),
+  });
 
   export async function refresh(sourceId?: string): Promise<void> {
-    const activeSpec = currentSpec;
-    if (!activeSpec) return;
-    const sources = sourceId === undefined
-      ? activeSpec.dataSources
-      : activeSpec.dataSources.filter((source) => source.id === sourceId);
-    await loadSources(sources);
+    if (!validation.ok) return;
+    await controller.refresh(sourceId);
   }
 
   $effect(() => {
     const validatedSpec = validation;
-    void dataProvider;
-    invalidateCurrentSources();
-    if (!validatedSpec.ok) {
-      onError?.({ type: 'validation', issues: validatedSpec.issues });
-      return;
-    }
-
+    const provider = dataProvider;
+    const activeScope = scopeKey;
+    const activePolicy = policy;
     untrack(() => {
-      void loadSources(validatedSpec.value.dataSources);
+      if (!validatedSpec.ok) {
+        controller.clear();
+        onError?.({ type: 'validation', issues: validatedSpec.issues });
+        return;
+      }
+      void controller.reconcile(validatedSpec.value, activePolicy,
+        (resource) => provider ?? adminContext.getDataProviderForResource(resource), activeScope);
     });
   });
+  onDestroy(() => controller.dispose());
 </script>
 
 {#if validation.ok}
@@ -149,24 +86,26 @@
       <h2 id="surface-{validation.value.surfaceId}-title">{validation.value.title}</h2>
     </header>
     <div class="surface-grid surface-gap-{validation.value.layout.gap ?? 'md'}">
-      {#each validation.value.widgets as widget (widget.id)}
-        {@const registration = widgetRegistrations.get(widget.type)}
-        {@const WidgetComponent = registration?.component}
-        <div
-          class="surface-widget surface-span-{widget.placement?.columnSpan ?? 12}"
-          data-testid="surface-widget-{widget.id}"
-        >
-          {#if WidgetComponent}
-            <WidgetComponent
-              widgetId={widget.id}
-              props={widget.props}
-              data={resolveSurfaceWidgetData(widget, sourceStates)}
-              locale={activeLocale}
-              messages={activeMessages}
-            />
-          {/if}
-        </div>
-      {/each}
+      {#key JSON.stringify([validation.value.surfaceId, catalog.version, scopeKey])}
+        {#each validation.value.widgets as widget (widget.id)}
+          {@const registration = widgetRegistrations.get(widget.type)}
+          {@const WidgetComponent = registration?.component}
+          <div
+            class="surface-widget surface-span-{widget.placement?.columnSpan ?? 12}"
+            data-testid="surface-widget-{widget.id}"
+          >
+            {#if WidgetComponent}
+              <WidgetComponent
+                widgetId={widget.id}
+                props={widget.props}
+                data={resolveSurfaceWidgetData(widget, sourceStates)}
+                locale={activeLocale}
+                messages={activeMessages}
+              />
+            {/if}
+          </div>
+        {/each}
+      {/key}
     </div>
   </section>
 {:else}
@@ -186,11 +125,7 @@
     width: 100%;
     min-width: 0;
   }
-
-  .surface-header {
-    margin-bottom: 1rem;
-  }
-
+  .surface-header { margin-bottom: 1rem; }
   .surface-header h2,
   .surface-error h2 {
     margin: 0;
@@ -198,21 +133,14 @@
     font-size: clamp(1.25rem, 2vw, 1.75rem);
     line-height: 1.2;
   }
-
   .surface-grid {
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
   }
-
   .surface-gap-sm { gap: 0.5rem; }
   .surface-gap-md { gap: 1rem; }
   .surface-gap-lg { gap: 1.5rem; }
-
-  .surface-widget {
-    grid-column: 1 / -1;
-    min-width: 0;
-  }
-
+  .surface-widget { grid-column: 1 / -1; min-width: 0; }
   .surface-error {
     padding: 1rem;
     border: 1px solid var(--destructive);
@@ -220,12 +148,7 @@
     background: var(--card);
     color: var(--destructive);
   }
-
-  .surface-error ul {
-    margin: 0.75rem 0 0;
-    padding-left: 1.25rem;
-  }
-
+  .surface-error ul { margin: 0.75rem 0 0; padding-left: 1.25rem; }
   @media (min-width: 48rem) {
     .surface-span-1 { grid-column: span 1; }
     .surface-span-2 { grid-column: span 2; }
