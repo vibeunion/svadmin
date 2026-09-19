@@ -1,0 +1,32 @@
+name: Apply reviewed Panda compatibility fixes once
+
+on:
+  push:
+    branches: [feat/panda-tokens-no-tailwind]
+    paths: ['scripts/panda-continue-once.py']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: panda-reviewed-source-write
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    if: github.ref == 'refs/heads/feat/panda-tokens-no-tailwind'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+      - name: Apply exact edits without changing the compatibility baseline
+        run: |
+          test "$(git ls-remote origin refs/heads/feat/panda-tokens-no-tailwind | cut -f1)" = "$GITHUB_SHA"
+          python3 scripts/panda-continue-once.py
+          git add -- packages/core/src/i18n.svelte.ts packages/surface/package.json packages/surface/src/components/MetricWidget.svelte packages/ui/design/recipes.ts packages/ui/package.json packages/ui/scripts/flatten-panda-css.mjs packages/ui/scripts/panda-css.test.mjs packages/ui/src/app-css.test.ts
+          git rm scripts/panda-continue-once.py
+          git diff --cached --check
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'fix(styles): isolate Panda runtime and preserve semantic state styling'
+          git push origin HEAD:refs/heads/feat/panda-tokens-no-tailwind
