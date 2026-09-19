@@ -1,3 +1,4 @@
+import type { Component } from 'svelte';
 import type { SvarInteractiveApi, SvarInteractiveEngineProps } from './svar-grid-interactions.js';
 
 export interface SvarManagedApi extends SvarInteractiveApi {
@@ -10,7 +11,7 @@ export interface SvarManagedApi extends SvarInteractiveApi {
   };
 }
 export interface SvarManagedEngineProps extends Omit<SvarInteractiveEngineProps, 'init' | 'columns'> {
-  columns: (SvarInteractiveEngineProps['columns'][number] & { hidden?: boolean })[];
+  columns: (SvarInteractiveEngineProps['columns'][number] & { hidden?: boolean; cell?: Component<{ row: unknown; column: unknown }> })[];
   dynamic?: { rowCount?: number };
   init?: (api: SvarManagedApi) => void;
 }

@@ -1,7 +1,9 @@
 <script lang="ts">
-  import { onMount, onDestroy, untrack, type Component, type Snippet } from 'svelte';
+  import { onMount, onDestroy, untrack, setContext, type Component, type Snippet } from 'svelte';
   import { SvelteMap } from 'svelte/reactivity';
-  import { projectSvarRows, svarSortMarks, svarFilterValues, type SvarSort, type SvarTextFilter } from './svar-grid-contract.js';
+  import SvarGridCell from './SvarGridCell.svelte';
+  import { SVAR_CELL_CONTEXT, type SvarCellContext, type SvarCellContent } from './svar-grid-cells.js';
+  import { projectSvarRows, svarColumnId, svarSortMarks, svarFilterValues, type SvarSort, type SvarTextFilter } from './svar-grid-contract.js';
   import { checkedSvarInteractiveColumns, buildSvarInteractiveColumns, installSvarInteractions, type SvarInteractiveColumn, type SvarCellEdit } from './svar-grid-interactions.js';
   import { svarRecordKey, svarRecordIndex, type SvarRecordId } from './svar-grid-operations.js';
   import { createSvarPanePair, type SvarManagedApi, type SvarManagedEngineProps } from './svar-grid-panes.js';
@@ -29,6 +31,10 @@
     selectable?: boolean;
     selectedIds?: readonly SvarRecordId[];
     onSelectionChange?: (ids: SvarRecordId[]) => void;
+    /** 仅可信宿主可注入的原生单元格内容。 */
+    cellContent?: Snippet<[SvarCellContent]>;
+    /** 已加载记录的独立快照，含已加载后代，不包含尚未请求的行。 */
+    onRecordsChange?: (records: readonly Record<string, unknown>[]) => void;
     windowSource?: SvarWindowSource;
     loadChildren?: SvarChildrenLoader;
     hasChildrenKey?: string;
@@ -47,7 +53,7 @@
     fallbackLabel?: string;
   }
   let { Grid, Theme, items = [], columns, primaryKey = 'id', childrenKey, height = 420, density = 'comfortable', freezeLeft = 0, freezeRight = 0, queryMode = 'local',
-    sorters = [], filters = [], onSortChange, onFilterChange, onCellEdit, selectable = false, selectedIds = [], onSelectionChange,
+    sorters = [], filters = [], onSortChange, onFilterChange, onCellEdit, selectable = false, selectedIds = [], onSelectionChange, onRecordsChange, cellContent,
     windowSource, loadChildren, hasChildrenKey = 'hasChildren', onLoadMore, hasMore = false, scopeKey = 0,
     loading = false, error, disabled = false, locale = 'en-US', label = 'Data grid', emptyLabel = 'No records', loadingLabel = 'Loading',
     disabledLabel = 'Grid is disabled', fallbackLabel = 'Static preview (up to 20 rows)',
@@ -100,7 +106,8 @@
       if (windowSource && (queryMode !== 'server' || treeKey !== undefined || onLoadMore)) throw new Error('Window loading requires a flat server grid');
       if (onLoadMore && queryMode !== 'server') throw new Error('Infinite loading requires server query mode');
       if (windowSource) checkedSvarRange({ row: { start: 0, end: 0 } }, windowSource.total);
-      const engineColumns = buildSvarInteractiveColumns(checked, treeKey !== undefined, onCellEdit !== undefined, locale);
+      const engineColumns = buildSvarInteractiveColumns(checked, treeKey !== undefined, onCellEdit !== undefined, locale)
+        .map(column => cellContent ? { ...column, cell: SvarGridCell } : column);
       const rightIds = new Set(engineColumns.slice(engineColumns.length - freezeRight).map(column => column.id));
       return { ok: true as const, columns: checked, engineColumns, rightIds,
         center: engineColumns.map(column => ({ ...column, hidden: freezeRight > 0 && rightIds.has(column.id) })),
@@ -117,6 +124,23 @@
       return { ok: true as const, value, rows };
     } catch (failure) { return { ok: false as const, message: failure instanceof Error ? failure.message : 'Invalid grid data' }; }
   });
+  const cellRecords = $derived.by(() => cellContent && records.ok
+    ? svarRecordIndex(snapshotSvarRecords(records.value, primaryKey, treeKey), primaryKey, treeKey) : new Map<string, Record<string, unknown>>());
+  setContext<SvarCellContext>(SVAR_CELL_CONTEXT, {
+    render: () => cellContent,
+    resolve(row, column) {
+      if (!model.ok || loading || error || windowLoading || windowError) return;
+      const rowId: unknown = row && typeof row === 'object' ? Object.getOwnPropertyDescriptor(row, 'id')?.value : undefined;
+      const columnId: unknown = column && typeof column === 'object' ? Object.getOwnPropertyDescriptor(column, 'id')?.value : undefined;
+      const source = typeof rowId === 'string' ? cellRecords.get(rowId) : undefined;
+      const field = model.columns.find(item => svarColumnId(item.key) === columnId);
+      if (!source || !field) return;
+      // 每个调用取得独立副本，snippet 不能修改 Provider 或其他单元格的记录。
+      const record = snapshotSvarRecords([source], primaryKey, treeKey)[0];
+      if (!record) return;
+      return { id: svarRowId(record, primaryKey), field: field.key, value: record[field.key], record };
+    },
+  });
   const rightRows = $derived.by(() => {
     if (!records.ok || !model.ok || !freezeRight) return [];
     return loadChildren && treeKey ? projectSvarLazyRows(records.value, model.columns, primaryKey, treeKey, hasChildrenKey, branches, opened)
@@ -127,6 +151,13 @@
   const selectedRows = $derived(selectedIds.map(svarRecordKey));
   const isLoading = $derived(loading || windowLoading);
   const activeError = $derived(error || windowError);
+  $effect(() => {
+    const callback = onRecordsChange, value = records;
+    const unavailable = isLoading || activeError || !value.ok;
+    untrack(() => {
+      if (callback) callback(unavailable || !value.ok ? [] : snapshotSvarRecords(value.value, primaryKey, treeKey));
+    });
+  });
 
   function current(owner: typeof dataOwner): boolean { return alive && dataOwner === owner && !disabled && !loading && !error && model.ok && records.ok; }
   function requestWindow(event: unknown, force = false): void {

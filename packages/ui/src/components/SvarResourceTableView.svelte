@@ -4,6 +4,10 @@
   import { useTranslation } from '@svadmin/core/i18n';
   import { snapshotPlainData, decodeBaseRecord } from '@svadmin/core/schema';
   import SvarDataGrid from './SvarDataGrid.svelte';
+  import SvarResourceRead from './SvarResourceRead.svelte';
+  import { createSvarResourceReads } from './svar-grid-resource-session.svelte.js';
+  import { loadSvarResourceWindow, loadSvarResourceChildren, appendSvarResourcePage } from './svar-grid-resource-loading.js';
+  import { SvarLoadCancelled, type SvarWindowSource, type SvarChildrenLoader } from './svar-grid-loading.js';
   import type { SvarSort, SvarTextFilter } from './svar-grid-contract.js';
   import type { SvarInteractiveColumn, SvarCellEdit } from './svar-grid-interactions.js';
   import { runSvarBatch, checkedSvarSelection, svarRecordIndex, svarRecordKey, prepareSvarExport, authorizeSvarExport, downloadSvarCsv, type SvarRecordId, type SvarBatchResult } from './svar-grid-operations.js';
@@ -11,7 +15,7 @@
   import type { SvarResourceTableProps } from './SvarResourceTable.svelte';
 
   let { Grid, Theme, resourceName, pageSize = 25, filters = [], initialSorters = [], height = 420,
-    freezeLeft = 0, density = 'comfortable', childrenKey, dataScopeKey = 0, disabled = false,
+    freezeLeft = 0, freezeRight = 0, loadingMode = 'page', lazyTree, density = 'comfortable', childrenKey: providedChildrenKey, dataScopeKey = 0, disabled = false,
     editable = false, selectable = false, batchUpdate = false, batchDelete = false, exportable = false,
     savedViews = false, preferenceScopeKey, migrateAutoTableViews = false, deleteVariables, formats = {},
   }: SvarResourceTableProps = $props();
@@ -20,6 +24,7 @@
   const zh = $derived(i18n.locale.startsWith('zh'));
   const binding = useResourceContract(() => resourceName);
   const resource = $derived(context.getResource(resourceName));
+  const childrenKey = $derived(lazyTree ? providedChildrenKey ?? 'children' : providedChildrenKey);
   const primaryKey = $derived(resource.primaryKey ?? 'id');
   const permission = useCan(() => ({ resource: resourceName, action: 'list', meta: { svadminSvarScope: dataScopeKey } }));
   const editPermission = useCan(() => ({ resource: resourceName, action: 'edit', meta: { svadminSvarScope: dataScopeKey }, queryOptions: { enabled: editable || batchUpdate } }));
@@ -57,18 +62,29 @@
   const searchable = $derived(resource.fields.filter(field => field.searchable));
   const queryFilters = $derived<Filter[]>([...filters, ...viewFilters, ...textFilters,
     ...(viewSearch && searchable.length ? [{ operator: 'or' as const, value: searchable.map(field => ({ field: field.key, operator: 'contains' as const, value: viewSearch })) }] : [])]);
+  const rootFilters = $derived<Filter[]>([...queryFilters, ...(lazyTree ? [{ field: lazyTree.parentField, operator: 'eq' as const, value: lazyTree.rootValue ?? null }] : [])]);
+  const validLoading = $derived(['page', 'window', 'infinite'].includes(loadingMode)
+    && !(loadingMode !== 'page' && childrenKey !== undefined)
+    && (!lazyTree || resource.fields.some(field => field.key === lazyTree.parentField)));
   const queryPagination = $derived({ current, pageSize: effectivePageSize });
   const query = useList({
     get resource() { return binding.resource; }, get dataProviderName() { return binding.dataProviderName; },
     get meta() { return { svadminSvarScope: dataScopeKey }; },
-    get queryOptions() { return { enabled: permission.allowed && validPageSize && !disabled }; },
-    get pagination() { return queryPagination; }, get sorters() { return sorters; }, get filters() { return queryFilters; },
+    get queryOptions() { return { enabled: permission.allowed && validPageSize && validLoading && !disabled }; },
+    get pagination() { return queryPagination; }, get sorters() { return sorters; }, get filters() { return rootFilters; },
   });
-  $effect.pre(() => { void pageSize; void filters; untrack(() => { current = 1; viewPageSize = undefined; }); });
-  const records = $derived(permission.allowed && !query.isError ? query.data?.data ?? [] : []);
+  $effect.pre(() => { void pageSize; void filters; void loadingMode; void lazyTree; untrack(() => { current = 1; viewPageSize = undefined; }); });
+  const baseRecords = $derived(permission.allowed && !query.isError ? query.data?.data ?? [] : []);
+  let loadedRecords = $state.raw<readonly Record<string, unknown>[]>([]);
+  let infiniteRecords = $state.raw<readonly Record<string, unknown>[]>([]);
+  let refreshVersion = $state(0);
+  let dataVersion = $state(0);
+  const advanced = $derived(loadingMode !== 'page' || lazyTree !== undefined);
+  const records = $derived(advanced ? loadedRecords : baseRecords);
+  const gridItems = $derived(loadingMode === 'window' ? [] : loadingMode === 'infinite' ? infiniteRecords : baseRecords);
   const total = $derived(permission.allowed ? query.data?.total ?? 0 : 0);
   const pageCount = $derived(validPageSize ? Math.max(1, Math.ceil(total / effectivePageSize)) : 1);
-  const queryIdentity = $derived(JSON.stringify([resourceName, dataScopeKey, queryPagination, queryFilters, sorters]));
+  const queryIdentity = $derived(JSON.stringify([resourceName, dataScopeKey, queryPagination, rootFilters, sorters, loadingMode, lazyTree]));
   const error = $derived(query.isError ? (query.error instanceof Error ? query.error.message : zh ? '数据加载失败' : 'Data request failed') : undefined);
   let selectedIds = $state<SvarRecordId[]>([]);
   let busy = $state(false);
@@ -83,11 +99,55 @@
   onDestroy(() => { alive = false; authorizedWrite = false; });
   const operationScope = $derived({ resource: binding.resource, provider: context.getDataProviderForResource(resourceName),
     auth: captureAuthSession(context.authProvider), access: context.accessControlProvider,
-    tenant: context.tenantCacheKey?.__svadminTenant, dataScopeKey, queryIdentity, columns,
+    tenant: context.tenantCacheKey?.__svadminTenant, dataScopeKey, queryIdentity, refreshVersion, columns,
     permission: permission.allowed, disabled, editable, batchUpdate, batchDelete, exportable });
   const update = useUpdate({ get resource() { return binding.resource; }, get id() { return activeId; }, get enabled() { return alive && authorizedWrite && permission.allowed && !disabled; } });
   const deletion = useDelete({ get resource() { return binding.resource; }, get id() { return activeId; }, get enabled() { return alive && authorizedWrite && permission.allowed && !disabled; } });
   $effect.pre(() => { void queryIdentity; untrack(() => { selectedIds = []; confirmation = undefined; }); });
+
+  const reads = createSvarResourceReads({
+    scope: () => operationScope, current: scopeCurrent,
+    authorize: (scope, id) => allowed('list', id, scope),
+    resourceName: () => resourceName, dataScopeKey: () => dataScopeKey,
+    primaryKey: () => primaryKey, childrenKey: () => childrenKey,
+  });
+  $effect.pre(() => {
+    const root = baseRecords; void queryIdentity; void refreshVersion;
+    untrack(() => { infiniteRecords = root; loadedRecords = []; dataVersion++; if (advanced) selectedIds = []; });
+  });
+  const gridScope = $derived(`${queryIdentity}:${refreshVersion}:${dataVersion}`);
+  const windowSource = $derived.by((): SvarWindowSource | undefined => {
+    if (loadingMode !== 'window') return undefined;
+    // 每次分派捕获当前作用域，不在配置创建时固定暂态作用域。
+    void gridScope;
+    return { total, load: async ({ start, end, signal }) => {
+      const scope = operationScope;
+      return loadSvarResourceWindow({ start, end }, effectivePageSize,
+        pagination => reads.read({ scope, signal, pagination, filters: [...rootFilters], sorters: [...sorters] }), signal, primaryKey);
+    } };
+  });
+  const loadChildren: SvarChildrenLoader = async ({ id, signal }) => {
+    if (!lazyTree || !childrenKey) throw new Error('Lazy tree is not configured');
+    const scope = operationScope;
+    const branchFilters: Filter[] = [...queryFilters, { field: lazyTree.parentField, operator: 'eq', value: id }];
+    return loadSvarResourceChildren(effectivePageSize, lazyTree.maxChildren ?? 10_000,
+      pagination => reads.read({ scope, signal, pagination, filters: branchFilters, sorters: [...sorters], parentId: id }), signal, primaryKey, childrenKey);
+  };
+  async function loadMore({ signal }: { signal: AbortSignal }): Promise<void> {
+    const scope = operationScope, before = infiniteRecords;
+    if (loadingMode !== 'infinite' || before.length >= total) return;
+    if (before.length % effectivePageSize !== 0) throw new Error('Provider returned a truncated page; refresh');
+    const page = await reads.read({ scope, signal, pagination: { current: before.length / effectivePageSize + 1, pageSize: effectivePageSize }, filters: [...rootFilters], sorters: [...sorters] });
+    if (!scopeCurrent(scope) || signal.aborted || infiniteRecords !== before) throw new SvarLoadCancelled();
+    infiniteRecords = appendSvarResourcePage(before, page, total, primaryKey);
+  }
+  function loaded(next: readonly Record<string, unknown>[]): void {
+    loadedRecords = next;
+    if (!advanced) return;
+    const index = svarRecordIndex(next, primaryKey, childrenKey);
+    selectedIds = selectedIds.filter(id => index.has(svarRecordKey(id)));
+  }
+  function refresh(): void { reads.cancelAll(); refreshVersion++; void query.refetch(); }
 
   function selection(next: SvarRecordId[]): void {
     if (busy || disabled || !permission.allowed || query.isFetching) return;
@@ -129,7 +189,7 @@
     if (input !== undefined && Object.keys(input).some(key => !editableFields.some(field => field.key === key))) throw new Error('Field is not writable');
     const idsCopy = checkedSvarSelection(ids);
     const index = svarRecordIndex(records, primaryKey, childrenKey);
-    if (idsCopy.some(id => !index.has(svarRecordKey(id)))) throw new Error('Selection is no longer in the current page');
+    if (idsCopy.some(id => !index.has(svarRecordKey(id)))) throw new Error('Selection is no longer loaded');
     const removeInput = snapshotPlainData(deleteVariables ?? {});
     const currentScope = () => scopeCurrent(scope);
     busy = true; feedback = ''; result = undefined; confirmation = undefined;
@@ -150,6 +210,7 @@
         const done = new Set(outcome.succeeded.map(svarRecordKey));
         selectedIds = selectedIds.filter(id => !done.has(svarRecordKey(id)));
       }
+      if (advanced && currentScope() && outcome.succeeded.length) refresh();
       if (outcome.failed.length || outcome.cancelled) throw new Error('Operation incomplete');
     } finally { if (alive) { busy = false; authorizedWrite = false; } }
   }
@@ -229,13 +290,15 @@
 
 <section class="svar-resource-table" aria-label={resource.label}>
   <header><h2>{resource.label}</h2>
-    <button type="button" disabled={!permission.allowed || !validPageSize || query.isFetching || busy || disabled} onclick={() => { void query.refetch(); }}>{zh ? '刷新' : 'Refresh'}</button>
-    {#if exportable}<button type="button" disabled={!permission.allowed || !exportPermission.allowed || busy || disabled || query.isFetching || query.isError} onclick={exportPage}>{zh ? '导出当前页 CSV' : 'Export page CSV'}</button>{/if}
+    <button type="button" disabled={!permission.allowed || !validPageSize || query.isFetching || busy || disabled} onclick={refresh}>{zh ? '刷新' : 'Refresh'}</button>
+    {#if exportable}<button type="button" disabled={!permission.allowed || !exportPermission.allowed || busy || disabled || query.isFetching || query.isError} onclick={exportPage}>{advanced ? (zh ? '导出已加载记录 CSV' : 'Export loaded CSV') : (zh ? '导出当前页 CSV' : 'Export page CSV')}</button>{/if}
   </header>
-  {#if !validPageSize}<p role="alert">{zh ? '每页数量必须为 1–1000 的整数' : 'Page size must be an integer between 1 and 1000'}</p>
+  {#if !validLoading}<p role="alert">{zh ? '高级加载配置无效；窗口和无限加载仅支持平面资源，异步树必须声明父字段' : 'Invalid loading configuration: window/infinite modes require flat resources; lazy trees require a declared parent field'}</p>
+  {:else if !validPageSize}<p role="alert">{zh ? '每页数量必须为 1–1000 的整数' : 'Page size must be an integer between 1 and 1000'}</p>
   {:else if permission.isLoading}<p role="status">{zh ? '正在检查权限' : 'Checking access'}</p>
   {:else if !permission.allowed}<p role="alert">{permission.reason ?? (zh ? '没有读取权限' : 'Read access denied')}</p>
   {:else}
+    {#each [...reads.requests] as [id, request] (id)}<SvarResourceRead {request} />{/each}
     {#if savedViews}
       <div class="toolbar" aria-label={zh ? '保存视图' : 'Saved views'}>
         <select aria-label={zh ? '当前视图' : 'Current view'} value={activeView} disabled={busy || disabled} onchange={event => applyView(event.currentTarget.value)}>
@@ -252,7 +315,7 @@
     {/if}
     {#if selectable || batchUpdate || batchDelete}
       <div class="toolbar" aria-label={zh ? '批量操作' : 'Batch actions'}>
-        <button type="button" disabled={busy || disabled || query.isFetching || records.length === 0} onclick={selectPage}>{zh ? '选择当前页' : 'Select page'}</button>
+        <button type="button" disabled={busy || disabled || query.isFetching || records.length === 0} onclick={selectPage}>{advanced ? (zh ? '选择已加载记录' : 'Select loaded') : (zh ? '选择当前页' : 'Select page')}</button>
         <button type="button" disabled={busy || disabled || selectedIds.length === 0} onclick={() => { selectedIds = []; }}>{zh ? '清除选择' : 'Clear selection'}</button>
         <span role="status">{zh ? '已选' : 'Selected'}: {selectedIds.length}</span>
         {#if batchUpdate}<button type="button" disabled={!selectedIds.length || busy || disabled || query.isFetching || !editPermission.allowed || resource.canEdit === false} onclick={() => { confirmation = 'update'; }}>{zh ? '批量修改' : 'Update selected'}</button>{/if}
@@ -270,18 +333,21 @@
     </div>{/if}
     {#if feedback}<p role="alert">{feedback}</p>{/if}
     {#if result}<p role="status">{zh ? '成功 / 失败 / 未执行' : 'Succeeded / failed / skipped'}: {result.succeeded.length} / {result.failed.length} / {result.skipped.length}</p>{/if}
-    <SvarDataGrid {Grid} {Theme} items={records} {columns} {primaryKey} {height} freezeLeft={Math.min(freezeLeft, columns.length)} {density}
+    <SvarDataGrid {Grid} {Theme} items={gridItems} {columns} {primaryKey} {height} freezeRight={Math.min(freezeRight, Math.max(0, columns.length - 1))} freezeLeft={Math.min(freezeLeft, columns.length - Math.min(freezeRight, Math.max(0, columns.length - 1)))} {density}
       queryMode="server" {sorters} filters={textFilters} onSortChange={changeSort} onFilterChange={changeFilter}
-      selectable={selectable || batchUpdate || batchDelete} {selectedIds} onSelectionChange={selection}
+      selectable={selectable || batchUpdate || batchDelete} {selectedIds} onSelectionChange={selection} {...advanced ? { onRecordsChange: loaded } : {}} scopeKey={gridScope}
+      {...windowSource ? { windowSource } : {}}
+      {...lazyTree ? { loadChildren, hasChildrenKey: lazyTree.hasChildrenKey ?? 'hasChildren' } : {}}
+      {...loadingMode === 'infinite' ? { onLoadMore: loadMore, hasMore: infiniteRecords.length < total } : {}}
       {...editable ? { onCellEdit: editCell } : {}} disabled={disabled || busy} locale={i18n.locale}
       loading={query.isLoading} {...error === undefined ? {} : { error }} {...childrenKey === undefined ? {} : { childrenKey }}
       label={resource.label} loadingLabel={zh ? '正在加载' : 'Loading'} emptyLabel={zh ? '暂无记录' : 'No records'}
       disabledLabel={zh ? '暂时不可操作' : 'Grid is disabled'} fallbackLabel={zh ? '静态预览（最多 20 行）' : 'Static preview (up to 20 rows)'} />
-    <footer aria-label={zh ? '分页' : 'Pagination'}>
+    {#if loadingMode === 'page'}<footer aria-label={zh ? '分页' : 'Pagination'}>
       <button type="button" disabled={current <= 1 || query.isFetching || busy || disabled} onclick={() => { current -= 1; }}>{zh ? '上一页' : 'Previous'}</button>
       <span>{current} / {pageCount} · {total} {zh ? '条记录' : 'records'}</span>
       <button type="button" disabled={current >= pageCount || query.isFetching || busy || disabled} onclick={() => { current += 1; }}>{zh ? '下一页' : 'Next'}</button>
-    </footer>
+    </footer>{:else}<p role="status">{zh ? '已加载 / 总计' : 'Loaded / total'}: {records.length} / {total}</p>{/if}
   {/if}
 </section>
 

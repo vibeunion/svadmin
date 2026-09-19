@@ -65,6 +65,7 @@ export async function loadSvarResourceChildren(
 export function appendSvarResourcePage(
   rows: readonly Record<string, unknown>[], page: SvarWindowPage, expectedTotal: number, primaryKey = 'id',
 ): readonly Record<string, unknown>[] {
+  if (!Number.isSafeInteger(expectedTotal) || expectedTotal < 0 || expectedTotal > 10_000_000) throw new Error('Invalid expected total');
   if (page.total !== expectedTotal) throw new Error('Resource changed during infinite loading; refresh');
   if (rows.length + page.data.length > expectedTotal || (!page.data.length && rows.length < expectedTotal)) throw new Error('Invalid next resource page');
   return snapshotSvarRecords([...rows, ...page.data], primaryKey);
