@@ -76,9 +76,11 @@ describe('nested schema form draft and submission ownership', () => {
     expect(onsubmit.mock.calls[1]?.[0]).toEqual(onsubmit.mock.calls[0]?.[0]);
   });
   it('rejects synchronous callback reentry', async () => {
-    let element: HTMLFormElement | undefined;
-    const onsubmit = vi.fn(() => { element?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })); });
-    const view = render(JsonSchemaForm, { schema, onsubmit }); element = form(view);
+    const target: { element?: HTMLFormElement } = {};
+    const onsubmit = vi.fn(() => { target.element?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })); });
+    const view = render(JsonSchemaForm, { schema, onsubmit });
+    const element = form(view);
+    target.element = element;
     await fireEvent.submit(element); expect(onsubmit).toHaveBeenCalledOnce();
   });
   it('surfaces callback failure without losing the draft and permits an explicit retry', async () => {
