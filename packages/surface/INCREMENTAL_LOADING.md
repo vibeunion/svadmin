@@ -8,7 +8,7 @@
 | Equivalent JSON, omitted/default page size, reordered policy allowlists | Reuse current results and in-flight requests |
 | One source's resource, record ID, filters, sorting, or page size | Reload only that source |
 | One resource's readable/filterable/sortable fields or limits | Reload sources for that resource, after whole-spec validation |
-| Provider identity/methods, registered access control, auth-provider identity, logout version, tenant cache identity, surface ID, or `dataScopeKey` | Invalidate the affected source identities |
+| Provider identity/methods, owning registered access control, auth-provider identity, logout version, tenant cache identity, surface ID, or `dataScopeKey` | Invalidate the affected source identities |
 | Removed source | Remove its state and retire its pending response |
 | Invalid spec | Clear all source state; issue no new queries |
 | `refresh(sourceId)` / `refresh()` | Force a named / complete refresh |
@@ -31,9 +31,15 @@ When credentials, login identity, authorization decisions, or other provider-int
 />
 ```
 
-`dataScopeKey?: string | number` is a trusted host prop, not part of `SurfaceSpec` and not an AI-controlled action. This change does not add mutations, change the existing authorization path, or replace backend authorization.
+`dataScopeKey?: string | number` is a trusted host prop, not part of `SurfaceSpec` and not an AI-controlled action. This change does not add mutations or replace backend authorization.
 
 Equivalent edits also preserve a current error instead of retrying it automatically. Use `refresh()` to retry. No TTL, automatic polling, or global query cache is added.
+
+## Owning permission context
+
+Permission checks now use the same checked `AdminContext` provider as the cache identity, rather than calling the module-global provider inside a scoped tree. Scoped denial blocks both list and get-one reads even when a global provider allows them. Tenant metadata follows the owning context. Malformed decisions and provider failures still fail closed through the registered provider's decoder.
+
+Without a scoped context, the accessor preserves the module-level compatibility provider. An explicit null provider inside a scoped context remains authoritative, matching the core context contract; it does not inherit an unrelated global provider. Unrelated global registrations no longer refetch scoped sources. Replacing the owning provider still invalidates its results and pending permission checks. These are browser-side read controls, not server authorization.
 
 ## Race handling
 

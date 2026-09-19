@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { canAccessAsync, captureAdminContext, getAccessControlProvider, getLogoutVersion } from '@svadmin/core';
+  import { captureAdminContext, getLogoutVersion } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { onDestroy, untrack } from 'svelte';
   import { SvelteMap } from 'svelte/reactivity';
@@ -76,14 +76,14 @@
     if (!validation.ok) return [];
     // Read context here (not inside untrack) so provider/permission changes reconcile
     // even when the host does not replace its spec. No credentials enter a JSON key.
+    const accessControl = adminContext.accessControlProvider;
     const scope = [
       validation.value.surfaceId,
       dataScopeKey,
       getLogoutVersion(),
       adminContext.tenantCacheKey?.__svadminTenant,
       adminContext.authProvider,
-      adminContext.accessControlProvider,
-      getAccessControlProvider(),
+      accessControl,
     ];
     return validation.value.dataSources.map((source): SurfaceSourceRequest => {
       const resourcePolicy = Object.hasOwn(policy.resources, source.resource)
@@ -115,7 +115,12 @@
               provider,
               async authorize(resource, action) {
                 if (!isRequestCurrent()) return { can: false };
-                const decision = await canAccessAsync(resource, action);
+                // Use the checked provider captured from this component tree. The
+                // accessor supplies the legacy provider only when no tree exists.
+                const meta = adminContext.getProviderMeta(resource);
+                const decision = accessControl
+                  ? await accessControl.can({ resource, action, ...(meta === undefined ? {} : { meta }) })
+                  : { can: true };
                 // An invalidated/deleted source must not start a provider request
                 // after an already-running permission check finishes.
                 return isRequestCurrent() ? decision : { can: false };
