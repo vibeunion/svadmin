@@ -1,0 +1,21 @@
+name: Rendering migration workspace
+on:
+  push:
+    branches: [feat/typed-svelte-renderers]
+    paths: [.github/workflows/rendering-workspace.yml]
+permissions:
+  contents: read
+jobs:
+  workspace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Export tracked source only
+        run: git archive --format=tar HEAD > /tmp/svadmin-source.tar
+      - uses: actions/upload-artifact@v7
+        with:
+          name: rendering-source
+          path: /tmp/svadmin-source.tar
+          retention-days: 1
