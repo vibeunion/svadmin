@@ -47,7 +47,7 @@
   const candidateKey = $derived(candidate?.ok ? JSON.stringify([scopeKey, candidate.value]) : '');
   let selectedPreview = $state('');
   let applying = $state(false);
-  let applicationFailed = $state(false);
+  let failureKey = $state('');
   const previewing = $derived(candidateKey !== '' && selectedPreview === candidateKey && !streaming);
   const visibleSpec = $derived(previewing && candidate?.ok ? candidate.value.spec : revision.spec);
   const status = $derived(streaming ? labels.loading : applying ? labels.applying : candidate === null
@@ -58,13 +58,14 @@
     // 点击时使用最新 revision/policy 重新校验，不复用旧预览作为权限凭据。
     const latest = applySurfaceEditProposal(revision, proposal, catalog, policy);
     if (!latest.ok) return;
+    const submittedKey = candidateKey;
     applying = true;
-    applicationFailed = false;
+    failureKey = '';
     try {
       await onApply(latest.value);
       selectedPreview = '';
     } catch {
-      applicationFailed = true;
+      failureKey = submittedKey;
     } finally {
       applying = false;
     }
@@ -78,19 +79,13 @@
       <p data-part="status" role="status" aria-live="polite">{status} · {labels.current} {revision.revision}</p>
     </div>
     <div data-part="actions">
-      <button
-        type="button"
-        class={editorButtonClasses.secondary}
-        disabled={streaming || applying || !candidate?.ok}
-        aria-pressed={previewing}
+      <button type="button" class={editorButtonClasses.secondary}
+        disabled={streaming || applying || !candidate?.ok} aria-pressed={previewing}
         onclick={() => { selectedPreview = previewing ? '' : candidateKey; }}
       >{previewing ? labels.back : labels.preview}</button>
-      <button
-        type="button"
-        class={editorButtonClasses.primary}
+      <button type="button" class={editorButtonClasses.primary}
         disabled={streaming || applying || !candidate?.ok || !onApply}
-        title={onApply ? undefined : labels.readonly}
-        onclick={apply}
+        title={onApply ? undefined : labels.readonly} onclick={apply}
       >{applying ? labels.applying : labels.apply}</button>
     </div>
   </div>
@@ -102,10 +97,11 @@
       {/each}</ul>
     </div>
   {/if}
-  {#if applicationFailed}
+  {#if failureKey !== '' && failureKey === candidateKey}
     <div data-part="error" role="alert">{labels.failed}</div>
   {/if}
   <div data-part="viewport" data-preview={previewing}>
-    <SurfaceRenderer spec={visibleSpec} {policy} {catalog} {dataProvider} {scopeKey} locale={activeLocale} />
+    <SurfaceRenderer spec={visibleSpec} {policy} {catalog} {scopeKey} locale={activeLocale}
+      {...(dataProvider === undefined ? {} : { dataProvider })} />
   </div>
 </section>

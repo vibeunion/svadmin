@@ -39,7 +39,7 @@ describe('SurfaceEditPreview', () => {
     expect(screen.getByRole('button', { name: 'Apply changes' }).hasAttribute('disabled')).toBe(true);
     expect(screen.queryByRole('alert')).toBeNull();
     await view.rerender({ proposal: '{', streaming: false });
-    expect(screen.getByRole('alert').textContent).toContain('invalid_edit');
+    expect(screen.getByRole('alert').textContent).toContain('invalid_json');
     expect(onApply).not.toHaveBeenCalled();
   });
   test('rejects a stale proposal after the controlled revision changes', async () => {
