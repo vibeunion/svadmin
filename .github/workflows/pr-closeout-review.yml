@@ -12,8 +12,10 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          fetch-depth: 0
-      - name: Collect immutable evidence and clean integration candidates
+          ref: 626a85c8a541af295f1db9dee022007a2bf107ca
+          fetch-depth: 1
+          show-progress: false
+      - name: Archive pinned browser evidence and audit diagnostics
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -21,63 +23,45 @@ jobs:
           git config user.name 'svadmin PR review'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           python3 - <<'PY'
-          import hashlib, json, os, pathlib, shutil, subprocess, urllib.request, zipfile
+          import hashlib, json, os, pathlib, subprocess, urllib.parse, urllib.request, zipfile
+          # Delegation Decision: native, low-risk evidence-only, one writer, external=0.
+          # 不更新 main 或任何功能分支；不执行下载的代码或日志内容。
           root = pathlib.Path.cwd()
           out = pathlib.Path(os.environ['RUNNER_TEMP']) / 'pr-closeout'
           out.mkdir()
-          main = '626a85c8a541af295f1db9dee022007a2bf107ca'
-          heads = {'445': '03c78b91b28413989aefa11b576d37143c0d0765', '446': 'a87136dd3f83f813a4261f177886e8a689d14af1', '438': 'b9f01e1af5eb97744b3808990f7574050e2830a8'}
-          def git(*args, check=True):
-              return subprocess.run(['git', *args], check=check, capture_output=True, text=True)
+          class SafeRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self, req, fp, code, msg, headers, newurl):
+                  if urllib.parse.urlsplit(newurl).scheme != 'https':
+                      raise RuntimeError('Reject non-HTTPS redirect')
+                  redirected = super().redirect_request(req, fp, code, msg, headers, newurl)
+                  if redirected is not None and urllib.parse.urlsplit(req.full_url).netloc != urllib.parse.urlsplit(newurl).netloc:
+                      redirected.remove_header('Authorization')
+                  return redirected
+          opener = urllib.request.build_opener(SafeRedirect())
           def get(path):
               req = urllib.request.Request('https://api.github.com/repos/vibeunion/svadmin/' + path, headers={'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Accept': 'application/vnd.github+json'})
-              with urllib.request.urlopen(req, timeout=60) as r:
-                  return r.read()
-          report = {'main': main, 'sources': {}, 'candidates': {}, 'artifacts': []}
-          # 仅读取固定修订；仅创建全新的候选分支，不更新任何 PR 分支或 main。
-          for name, sha in {'main': main, **heads}.items():
-              tree = git('rev-parse', sha + '^{tree}').stdout.strip()
-              subprocess.run(['git', 'archive', '--format=tar.gz', '-o', str(out / (name + '.tar.gz')), sha], check=True)
-              report['sources'][name] = {'commit': sha, 'tree': tree}
-          for number, head in heads.items():
-              base = git('merge-base', main, head).stdout.strip()
-              subprocess.run(['git', 'archive', '--format=tar.gz', '-o', str(out / (number + '-base.tar.gz')), base], check=True)
-              merged = git('merge-tree', '--write-tree', '--messages', head, main, check=False)
-              (out / (number + '-merge.txt')).write_text(merged.stdout + merged.stderr)
-              if merged.returncode != 0:
-                  report['candidates'][number] = {'status': 'conflict', 'base': base}
-                  continue
-              tree = merged.stdout.splitlines()[0]
-              if number == '438':
-                  report['candidates'][number] = {'status': 'clean-readonly', 'base': base, 'tree': tree}
-                  continue
-              candidate = subprocess.run(['git', 'commit-tree', tree, '-p', head, '-p', main], input='chore(review): integrate current main into PR #' + number + ' without altering either side\n', text=True, check=True, capture_output=True).stdout.strip()
-              branch = 'review/candidate-' + number + '-' + head[:7] + '-626a85c'
-              exists = git('ls-remote', '--heads', 'origin', branch).stdout.strip()
-              if exists:
-                  raise RuntimeError('Candidate branch already exists: ' + branch)
-              git('push', 'origin', candidate + ':refs/heads/' + branch)
-              subprocess.run(['git', 'archive', '--format=tar.gz', '-o', str(out / (number + '-candidate.tar.gz')), candidate], check=True)
-              report['candidates'][number] = {'status': 'clean', 'base': base, 'head': head, 'main': main, 'commit': candidate, 'tree': tree, 'branch': branch}
-          # 将通过的原始 PNG 与来源记录保存到独立证据分支，不修改图像内容。
-          git('checkout', '--detach', main)
+              with opener.open(req, timeout=60) as response:
+                  return response.read()
+          # 确认跨主机重定向不携带凭证；不真实发送此合成请求。
+          fake = urllib.request.Request('https://api.github.com/test', headers={'Authorization': 'Bearer synthetic'})
+          redirected = SafeRedirect().redirect_request(fake, None, 302, 'Found', {}, 'https://example.com/object')
+          assert not redirected.has_header('Authorization')
           evidence = root / 'docs/pr-evidence/closeout-20260920'
           evidence.mkdir(parents=True)
-          specs = [('445', 10588422651, 35456028680, '7152926de88785f1fcc0bcba195319f4020e6b4ec9ca68578332b55cde6cb64c'), ('446', 10588584070, 35457386396, '287fec7cc8f55e37bd5de7802bf9d22c9df4474a9f0391c58426fc218fd8e703')]
-          for number, artifact, run, digest in specs:
+          report = {'artifacts': []}
+          specs = [('445', '03c78b91b28413989aefa11b576d37143c0d0765', 10588422651, 35456028680, '7152926de88785f1fcc0bcba195319f4020e6b4ec9ca68578332b55cde6cb64c'), ('446', 'a87136dd3f83f813a4261f177886e8a689d14af1', 10588584070, 35457386396, '287fec7cc8f55e37bd5de7802bf9d22c9df4474a9f0391c58426fc218fd8e703')]
+          for number, head, artifact, run, digest in specs:
               meta = json.loads(get('actions/artifacts/' + str(artifact)))
-              if meta['workflow_run']['head_sha'] != heads[number] or meta['workflow_run']['id'] != run:
-                  raise RuntimeError('Artifact source does not match pinned PR')
+              assert meta['workflow_run']['head_sha'] == head and meta['workflow_run']['id'] == run
               payload = get('actions/artifacts/' + str(artifact) + '/zip')
-              if hashlib.sha256(payload).hexdigest() != digest:
-                  raise RuntimeError('Artifact checksum mismatch')
+              assert hashlib.sha256(payload).hexdigest() == digest, 'Artifact checksum mismatch'
               archive = out / ('evidence-' + number + '.zip')
               archive.write_bytes(payload)
-              item = {'pr': int(number), 'head': heads[number], 'run': run, 'artifact': artifact, 'sha256': digest, 'files': []}
+              item = {'pr': int(number), 'head': head, 'run': run, 'artifact': artifact, 'sha256': digest, 'files': []}
               with zipfile.ZipFile(archive) as z:
                   for info in z.infolist():
                       path = pathlib.PurePosixPath(info.filename)
-                      if info.is_dir() or path.is_absolute() or '..' in path.parts or path.suffix.lower() not in ['.png', '.json', '.txt']:
+                      if info.is_dir() or path.is_absolute() or '..' in path.parts or path.suffix.lower() not in ['.png', '.json']:
                           continue
                       if info.file_size > 20_000_000:
                           raise RuntimeError('Unexpected evidence file size')
@@ -88,26 +72,25 @@ jobs:
                       item['files'].append({'path': str(dest.relative_to(root)), 'sha256': hashlib.sha256(data).hexdigest()})
               report['artifacts'].append(item)
           (evidence / 'provenance.json').write_text(json.dumps(report['artifacts'], indent=2) + '\n')
-          (evidence / 'README.md').write_text('# Pinned browser evidence\n\nUnmodified synthetic-fixture Chromium PNGs from PR #445 head 03c78b91 and PR #446 head a87136dd. These validate their original tested revisions, not later integration candidates. Complete original ZIPs and SHA-256 checks are in the review artifact. This is not production, medical, independent-human design or complete accessibility approval.\n')
+          (evidence / 'README.md').write_text('# Pinned browser evidence\n\nUnmodified synthetic-fixture Chromium PNGs from PR #445 head 03c78b91 and PR #446 head a87136dd. These validate their original tested revisions, not later integration candidates. Original ZIP checksums and paths are in provenance.json. Not production, medical, independent-human design or complete accessibility approval.\n')
+          def git(*args):
+              return subprocess.run(['git', *args], check=True, capture_output=True, text=True).stdout.strip()
           git('add', '--', str(evidence.relative_to(root)))
           git('commit', '-m', 'docs(review): archive verified original form and health-office screenshots')
-          evidence_sha = git('rev-parse', 'HEAD').stdout.strip()
-          evidence_branch = 'evidence/pr-closeout-20260920'
-          if git('ls-remote', '--heads', 'origin', evidence_branch).stdout.strip():
-              raise RuntimeError('Evidence branch already exists')
-          git('push', 'origin', 'HEAD:refs/heads/' + evidence_branch)
-          report['evidence_commit'] = evidence_sha
-          # 限定读取本仓库失败任务，归档末尾诊断，避免改动审计策略。
-          for job in [105934980583]:
-              text = get('actions/jobs/' + str(job) + '/logs').decode('utf-8', errors='replace')
-              (out / ('job-' + str(job) + '-tail.txt')).write_text('\n'.join(text.splitlines()[-180:]) + '\n')
+          report['evidence_commit'] = git('rev-parse', 'HEAD')
+          branch = 'evidence/pr-closeout-20260920'
+          if git('ls-remote', '--heads', 'origin', branch):
+              raise RuntimeError('Evidence branch already exists; refusing overwrite')
+          git('push', 'origin', 'HEAD:refs/heads/' + branch)
           (out / 'report.json').write_text(json.dumps(report, indent=2) + '\n')
-          print(json.dumps({'candidates': report['candidates'], 'evidence_commit': evidence_sha}, indent=2))
+          text = get('actions/jobs/105934980583/logs').decode('utf-8', errors='replace')
+          (out / 'audit-failure-tail.txt').write_text('\n'.join(text.splitlines()[-180:]) + '\n')
+          print('Evidence commit:', report['evidence_commit'])
           PY
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
-          name: pinned-pr-closeout-review
+          name: pinned-pr-closeout-evidence
           path: ${{ runner.temp }}/pr-closeout/
           retention-days: 14
           if-no-files-found: error
