@@ -53,8 +53,8 @@ describe('workflow prerequisite regressions', () => {
   });
   it('clears obsolete metadata and accepts a successful upload without a URL', async () => {
     let items: UploadItem[] = [];
-    let attempts = 0;
-    const upload = vi.fn(async (): Promise<void> => { if (++attempts === 1) throw new Error('Try again'); });
+    const upload = vi.fn<(file: File, session: UploadSession) => Promise<void>>()
+      .mockRejectedValueOnce(new Error('Try again')).mockResolvedValueOnce(undefined);
     const view = render(FileUpload, { upload, onChange: next => { items = next; } });
     await select(view); await waitFor(() => expect(items[0]?.status).toBe('error'));
     await fireEvent.click(view.getByRole('button', { name: 'Retry upload' }));
