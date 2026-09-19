@@ -2,12 +2,10 @@
   import { onMount, onDestroy, untrack, type Component, type Snippet } from 'svelte';
   import { SvelteMap } from 'svelte/reactivity';
   import { projectSvarRows, svarSortMarks, svarFilterValues, type SvarSort, type SvarTextFilter } from './svar-grid-contract.js';
-  import { checkedSvarInteractiveColumns, buildSvarInteractiveColumns, installSvarInteractions,
-    type SvarInteractiveColumn, type SvarCellEdit } from './svar-grid-interactions.js';
+  import { checkedSvarInteractiveColumns, buildSvarInteractiveColumns, installSvarInteractions, type SvarInteractiveColumn, type SvarCellEdit } from './svar-grid-interactions.js';
   import { svarRecordKey, svarRecordIndex, type SvarRecordId } from './svar-grid-operations.js';
   import { createSvarPanePair, type SvarManagedApi, type SvarManagedEngineProps } from './svar-grid-panes.js';
-  import { createSvarLoadCache, checkedSvarRange, snapshotSvarRecords, snapshotSvarWindow,
-    mergeSvarBranches, projectSvarLazyRows, svarRowId, SvarLoadCancelled,
+  import { createSvarLoadCache, checkedSvarRange, snapshotSvarRecords, snapshotSvarWindow, mergeSvarBranches, projectSvarLazyRows, svarRowId, SvarLoadCancelled,
     type SvarRange, type SvarWindowPage, type SvarWindowSource, type SvarChildrenLoader } from './svar-grid-loading.js';
 
   export interface SvarDataGridProps {
@@ -20,7 +18,7 @@
     height?: number;
     density?: 'compact' | 'comfortable';
     freezeLeft?: number;
-    /** 独立右侧 Grid 面板，不使用上游 split.right。 */
+    /** 独立右侧面板，不使用上游 split.right。 */
     freezeRight?: number;
     queryMode?: 'local' | 'server';
     sorters?: readonly SvarSort[];
@@ -31,14 +29,12 @@
     selectable?: boolean;
     selectedIds?: readonly SvarRecordId[];
     onSelectionChange?: (ids: SvarRecordId[]) => void;
-    /** 已知总量时按视口范围加载。回调只由可信宿主提供。 */
     windowSource?: SvarWindowSource;
-    /** 异步子节点；空数组表示该分支加载完成且没有子节点。 */
     loadChildren?: SvarChildrenLoader;
     hasChildrenKey?: string;
-    /** 追加式无限加载；宿主维护 items 和 hasMore，回调不可来自 AI spec。 */
     onLoadMore?: (request: { signal: AbortSignal }) => Promise<void>;
     hasMore?: boolean;
+    /** 查询、租户或会话切换必须改变此宿主版本；追加同一数据集则无需改变。 */
     scopeKey?: string | number;
     loading?: boolean;
     error?: string;
@@ -50,19 +46,17 @@
     disabledLabel?: string;
     fallbackLabel?: string;
   }
-  let { Grid, Theme, items = [], columns, primaryKey = 'id', childrenKey,
-    height = 420, density = 'comfortable', freezeLeft = 0, freezeRight = 0, queryMode = 'local',
-    sorters = [], filters = [], onSortChange, onFilterChange, onCellEdit,
-    selectable = false, selectedIds = [], onSelectionChange, windowSource, loadChildren,
-    hasChildrenKey = 'hasChildren', onLoadMore, hasMore = false, scopeKey = 0,
-    loading = false, error, disabled = false, locale = 'en-US', label = 'Data grid',
-    emptyLabel = 'No records', loadingLabel = 'Loading', disabledLabel = 'Grid is disabled', fallbackLabel = 'Static preview (up to 20 rows)',
+  let { Grid, Theme, items = [], columns, primaryKey = 'id', childrenKey, height = 420, density = 'comfortable', freezeLeft = 0, freezeRight = 0, queryMode = 'local',
+    sorters = [], filters = [], onSortChange, onFilterChange, onCellEdit, selectable = false, selectedIds = [], onSelectionChange,
+    windowSource, loadChildren, hasChildrenKey = 'hasChildren', onLoadMore, hasMore = false, scopeKey = 0,
+    loading = false, error, disabled = false, locale = 'en-US', label = 'Data grid', emptyLabel = 'No records', loadingLabel = 'Loading',
+    disabledLabel = 'Grid is disabled', fallbackLabel = 'Static preview (up to 20 rows)',
   }: SvarDataGridProps = $props();
-
   const treeKey = $derived(loadChildren ? childrenKey ?? 'children' : childrenKey);
   const rowHeight = $derived(density === 'compact' ? 32 : 44);
-  const dataOwner = $derived({ scopeKey, items: windowSource ? undefined : items, source: windowSource,
-    loadChildren, primaryKey, treeKey, hasChildrenKey, freezeRight, Grid });
+  // 普通追加不重建引擎，否则无限加载会把滚动位置重置。懒树根替换必须清理分支缓存。
+  const dataOwner = $derived({ scopeKey, items: loadChildren ? items : undefined, source: windowSource,
+    loadChildren, onLoadMore, primaryKey, treeKey, hasChildrenKey, freezeRight, Grid });
   let resetOwner = untrack(() => dataOwner);
   let mounted = $state(false);
   let alive = true;
@@ -86,9 +80,7 @@
   let pairOwner: object | undefined;
   let pair = createSvarPanePair(() => false);
   onMount(() => { mounted = true; });
-  onDestroy(() => {
-    alive = false; pair.dispose(); childCache.dispose(); windowCache.dispose(); moreController?.abort();
-  });
+  onDestroy(() => { alive = false; pair.dispose(); childCache.dispose(); windowCache.dispose(); moreController?.abort(); });
   $effect.pre(() => {
     const owner = dataOwner;
     if (owner === resetOwner) return;
@@ -103,11 +95,8 @@
     try {
       const checked = checkedSvarInteractiveColumns(columns);
       if (!Number.isFinite(height) || height < 160 || height > 4096 || !Number.isInteger(freezeLeft) || freezeLeft < 0
-        || !Number.isInteger(freezeRight) || freezeRight < 0 || freezeLeft + freezeRight > checked.length || freezeRight >= checked.length) {
-        throw new Error('Invalid grid height or frozen-column count');
-      }
-      if (queryMode === 'server' && ((checked.some(c => c.sortable) && !onSortChange)
-        || (checked.some(c => c.filterable) && !onFilterChange))) throw new Error('Server grids require query callbacks');
+        || !Number.isInteger(freezeRight) || freezeRight < 0 || freezeLeft + freezeRight > checked.length || freezeRight >= checked.length) throw new Error('Invalid grid height or frozen-column count');
+      if (queryMode === 'server' && ((checked.some(c => c.sortable) && !onSortChange) || (checked.some(c => c.filterable) && !onFilterChange))) throw new Error('Server grids require query callbacks');
       if (windowSource && (queryMode !== 'server' || treeKey !== undefined || onLoadMore)) throw new Error('Window loading requires a flat server grid');
       if (onLoadMore && queryMode !== 'server') throw new Error('Infinite loading requires server query mode');
       if (windowSource) checkedSvarRange({ row: { start: 0, end: 0 } }, windowSource.total);
@@ -117,21 +106,17 @@
         center: engineColumns.map(column => ({ ...column, hidden: freezeRight > 0 && rightIds.has(column.id) })),
         right: engineColumns.map(column => ({ ...column, hidden: !rightIds.has(column.id), width: column.width ?? 160, flexgrow: 0, resize: false })),
         rightWidth: engineColumns.slice(engineColumns.length - freezeRight).reduce((sum, column) => sum + (column.width ?? 160), 0) + 2 };
-    } catch (failure) {
-      return { ok: false as const, message: failure instanceof Error ? failure.message : 'Invalid grid configuration' };
-    }
+    } catch (failure) { return { ok: false as const, message: failure instanceof Error ? failure.message : 'Invalid grid configuration' }; }
   });
   const records = $derived.by(() => {
     if (!model.ok) return { ok: false as const, message: model.message };
     try {
-      const value = windowSource ? windowRows : loadChildren && treeKey
-        ? mergeSvarBranches(items, branches, primaryKey, treeKey) : items;
+      const value = windowSource ? windowRows : loadChildren && treeKey ? mergeSvarBranches(items, branches, primaryKey, treeKey) : items;
       const rows = loadChildren && treeKey ? projectSvarLazyRows(value, model.columns, primaryKey, treeKey, hasChildrenKey, branches, opened)
         : projectSvarRows(value, model.columns, primaryKey, treeKey);
       return { ok: true as const, value, rows };
     } catch (failure) { return { ok: false as const, message: failure instanceof Error ? failure.message : 'Invalid grid data' }; }
   });
-  // 上游会修改树展开数据，两个面板分别持有自己的投影。
   const rightRows = $derived.by(() => {
     if (!records.ok || !model.ok || !freezeRight) return [];
     return loadChildren && treeKey ? projectSvarLazyRows(records.value, model.columns, primaryKey, treeKey, hasChildrenKey, branches, opened)
@@ -143,39 +128,45 @@
   const isLoading = $derived(loading || windowLoading);
   const activeError = $derived(error || windowError);
 
-  function current(owner: typeof dataOwner): boolean {
-    return alive && dataOwner === owner && !disabled && !loading && !error && model.ok && records.ok;
-  }
+  function current(owner: typeof dataOwner): boolean { return alive && dataOwner === owner && !disabled && !loading && !error && model.ok && records.ok; }
   function requestWindow(event: unknown, force = false): void {
     const source = windowSource, owner = dataOwner;
     if (!source || !current(owner)) return;
     let range: SvarRange;
     try { range = checkedSvarRange(event, windowTotal ?? source.total); }
     catch { windowError = 'Invalid grid window'; return; }
+    // 布局测量也会发出新窗口，不能因此自动重试失败或移除用户的重试按钮。
+    if (windowError && !force) { lastRange = range; return; }
     const key = `${range.start}:${range.end}`;
     if (!force && desiredWindow === key) return;
     desiredWindow = key; lastRange = range;
     if (force) windowCache.invalidate(key);
-    windowCache.abortPendingExcept(key);
-    windowLoading = true; windowError = ''; windowRows = [];
+    windowCache.abortPendingExcept(key); windowLoading = true; windowError = ''; windowRows = [];
     void windowCache.request(key, async signal => snapshotSvarWindow(await source.load({ ...range, signal }), range, primaryKey)).then(page => {
-      if (!current(owner) || desiredWindow !== key) return;
+      if (!alive || dataOwner !== owner || desiredWindow !== key) return;
+      if (!current(owner)) { windowLoading = false; desiredWindow = ''; return; }
       windowRows = page.data; windowTotal = page.total; windowLoading = false;
       if (range.start >= page.total && range.start > 0) void pair.get(0)?.exec('scroll-to', { top: 0 }).catch(() => {});
     }).catch((failure: unknown) => {
-      if (!current(owner) || desiredWindow !== key || failure instanceof SvarLoadCancelled) return;
-      windowRows = []; windowLoading = false; windowError = locale.startsWith('zh') ? '窗口加载失败，请重试' : 'Window load failed; retry';
+      if (!alive || dataOwner !== owner || desiredWindow !== key || failure instanceof SvarLoadCancelled) return;
+      windowRows = []; windowLoading = false;
+      if (!current(owner)) { desiredWindow = ''; return; }
+      windowError = locale.startsWith('zh') ? '窗口加载失败，请重试' : 'Window load failed; retry';
     });
   }
+  $effect(() => {
+    const available = mounted && !disabled && !loading && !error;
+    const source = windowSource;
+    if (available && source) untrack(() => { if (!desiredWindow && lastRange) requestWindow({ row: lastRange }); });
+  });
   function retryWindow(): void { if (lastRange) requestWindow({ row: lastRange }, true); }
-
   function openBranch(key: string, force = false): boolean {
     const loader = loadChildren, owner = dataOwner;
     if (!loader || !treeKey || !current(owner) || !records.ok) return false;
     const raw = svarRecordIndex(records.value, primaryKey, treeKey).get(key);
     if (!raw) return false;
     if (branches.has(key) && !force) return true;
-    const native = Object.getOwnPropertyDescriptor(raw, treeKey)?.value;
+    const native: unknown = Object.getOwnPropertyDescriptor(raw, treeKey)?.value;
     const marker: unknown = Object.getOwnPropertyDescriptor(raw, hasChildrenKey)?.value;
     if (!force && ((Array.isArray(native) && native.length > 0) || marker !== true)) return true;
     opened.add(key);
@@ -184,13 +175,15 @@
     if (force) childCache.invalidate(key);
     branchPending.set(key, id); branchErrors.delete(key);
     void childCache.request(key, signal => loader({ id, signal })).then(children => {
+      if (!alive || dataOwner !== owner) return;
+      branchPending.delete(key);
       if (!current(owner) || !treeKey) return;
       const candidate = new Map(branches); candidate.set(key, children);
-      mergeSvarBranches(items, candidate, primaryKey, treeKey);
-      branches.set(key, children); branchPending.delete(key);
+      mergeSvarBranches(items, candidate, primaryKey, treeKey); branches.set(key, children);
     }).catch((failure: unknown) => {
-      if (!current(owner) || failure instanceof SvarLoadCancelled) return;
+      if (!alive || dataOwner !== owner) return;
       branchPending.delete(key);
+      if (!current(owner) || failure instanceof SvarLoadCancelled) return;
       branchErrors.set(key, { id, message: locale.startsWith('zh') ? '子节点加载失败' : 'Child loading failed' });
     });
     return false;
@@ -200,8 +193,7 @@
     if (!load || !hasMore || morePending || !current(owner)) return;
     const controller = new AbortController(); moreController = controller; morePending = true; moreError = '';
     void Promise.resolve().then(() => {
-      if (!current(owner) || controller.signal.aborted) throw new SvarLoadCancelled();
-      return load({ signal: controller.signal });
+      if (!current(owner) || controller.signal.aborted) throw new SvarLoadCancelled(); return load({ signal: controller.signal });
     }).catch((failure: unknown) => {
       if (current(owner) && !(failure instanceof SvarLoadCancelled)) moreError = locale.startsWith('zh') ? '追加加载失败，请重试' : 'Loading more rows failed; retry';
     }).finally(() => { if (alive && moreController === controller) { morePending = false; moreController = undefined; } });
@@ -222,12 +214,9 @@
         const write = onCellEdit;
         if (!write || pending || !active()) return;
         pending = true; editFailure = '';
-        void Promise.resolve().then(() => {
-          if (!active()) throw new Error('Scope changed'); return write(edit);
-        }).then(() => {
+        void Promise.resolve().then(() => { if (!active()) throw new Error('Scope changed'); return write(edit); }).then(() => {
           if (active() && windowSource && lastRange) requestWindow({ row: lastRange }, true);
-        }).catch(() => {
-          if (current(owner)) editFailure = locale.startsWith('zh') ? '保存失败，请刷新确认后重试' : 'Save failed; refresh before retrying';
+        }).catch(() => { if (current(owner)) editFailure = locale.startsWith('zh') ? '保存失败，请刷新确认后重试' : 'Save failed; refresh before retrying';
         }).finally(() => { if (alive && dataOwner === owner) pending = false; });
       },
     });
@@ -235,7 +224,7 @@
       if (!active()) return false;
       const key: unknown = event && typeof event === 'object' ? Object.getOwnPropertyDescriptor(event, 'id')?.value : undefined;
       if (typeof key !== 'string') return false;
-      if (loadChildren && !openBranch(key)) return false;
+      try { if (loadChildren && !openBranch(key)) return false; } catch { return false; }
     });
     api.on('open-row', event => {
       const key: unknown = event && typeof event === 'object' ? Object.getOwnPropertyDescriptor(event, 'id')?.value : undefined;
@@ -256,8 +245,8 @@
   }
   function navigatePane(event: KeyboardEvent, side: 0 | 1): void {
     if (!freezeRight || !model.ok || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
-    if (event.target instanceof HTMLElement && (event.target.closest('input,textarea,select,[contenteditable="true"]'))) return;
-    const api = pair.get(side), focus = api?.getState().focusCell;
+    if (event.target instanceof HTMLElement && event.target.closest('input,textarea,select,[contenteditable="true"]')) return;
+    const focus = pair.get(side)?.getState().focusCell;
     if (focus?.row === undefined || typeof focus.column !== 'string') return;
     const center = model.center.filter(column => !column.hidden), right = model.right.filter(column => !column.hidden);
     const target = side === 0 && event.key === 'ArrowRight' && center.at(-1)?.id === focus.column ? right[0]
@@ -268,7 +257,7 @@
 </script>
 
 <Theme fonts={false}>
-  <div class="svadmin-svar-grid" data-svadmin-svar-grid data-density={density} role="region" aria-label={label} aria-busy={isLoading || pending || morePending} aria-disabled={disabled}>
+  <div class="svadmin-svar-grid" data-svadmin-svar-grid data-density={density} role="group" aria-label={label} aria-busy={isLoading || pending || morePending} aria-disabled={disabled}>
     {#if !model.ok || !records.ok}<p role="alert">{!model.ok ? model.message : !records.ok ? records.message : ''}</p>
     {:else}
       {#if activeError}<p role="alert">{activeError}</p>
@@ -279,31 +268,22 @@
       {#if editFailure}<p role="alert">{editFailure}</p>{/if}
       {#if pending}<p role="status">{locale.startsWith('zh') ? '正在保存' : 'Saving'}</p>{/if}
       {#if branchPending.size}<p role="status">{locale.startsWith('zh') ? '正在加载子节点' : 'Loading children'}</p>{/if}
-      {#each [...branchErrors] as [key, failure] (key)}
-        <p role="alert">{failure.message}: {failure.id} <button type="button" disabled={disabled} onclick={() => openBranch(key, true)}>{locale.startsWith('zh') ? '重试' : 'Retry children'}</button></p>
-      {/each}
+      {#each [...branchErrors] as [key, failure] (key)}<p role="alert">{failure.message}: {failure.id} <button type="button" disabled={disabled} onclick={() => openBranch(key, true)}>{locale.startsWith('zh') ? '重试' : 'Retry children'}</button></p>{/each}
       {#if mounted}
-        {#key dataOwner}
-          <div class="grid-panes" class:has-right={freezeRight > 0} inert={disabled}>
-            <div class="grid-viewport center-pane" data-svar-pane="center" style:height="{height}px" role="region" aria-label="Scrollable columns" onkeydowncapture={event => navigatePane(event, 0)}>
-              <Grid columns={model.center} data={activeError || isLoading ? [] : records.rows}
-                tree={treeKey !== undefined} split={{ left: freezeLeft }} sizes={{ rowHeight, headerHeight: 36, columnWidth: 160 }}
-                select={selectable} multiselect={selectable} {selectedRows} reorder={false} draggableRows={false} undo={false}
-                {...queryProps} {...dynamicProps} init={api => init(api, 0)} />
-            </div>
-            {#if freezeRight > 0}
-              <div class="grid-viewport right-pane" data-svar-pane="right" style:height="{height}px" style:width="{model.rightWidth}px" role="region" aria-label="Frozen right columns" onkeydowncapture={event => navigatePane(event, 1)}>
-                <Grid columns={model.right} data={activeError || isLoading ? [] : rightRows}
-                  tree={treeKey !== undefined} split={{ left: 0 }} sizes={{ rowHeight, headerHeight: 36, columnWidth: 160 }}
-                  select={selectable} multiselect={selectable} {selectedRows} reorder={false} draggableRows={false} undo={false}
-                  {...queryProps} {...dynamicProps} init={api => init(api, 1)} />
-              </div>
-            {/if}
+        {#key dataOwner}<div class="grid-panes" class:has-right={freezeRight > 0} inert={disabled}>
+          <div class="grid-viewport center-pane" data-svar-pane="center" style:height="{height}px" role="region" aria-label="Scrollable columns" onkeydowncapture={event => navigatePane(event, 0)}>
+            <Grid columns={model.center} data={activeError || isLoading ? [] : records.rows} tree={treeKey !== undefined}
+              split={{ left: freezeLeft }} sizes={{ rowHeight, headerHeight: 36, columnWidth: 160 }} select={selectable} multiselect={selectable} {selectedRows}
+              reorder={false} draggableRows={false} undo={false} {...queryProps} {...dynamicProps} init={api => init(api, 0)} />
           </div>
-        {/key}
+          {#if freezeRight > 0}<div class="grid-viewport right-pane" data-svar-pane="right" style:height="{height}px" style:width="{model.rightWidth}px" role="region" aria-label="Frozen right columns" onkeydowncapture={event => navigatePane(event, 1)}>
+            <Grid columns={model.right} data={activeError || isLoading ? [] : rightRows} tree={treeKey !== undefined}
+              split={{ left: 0 }} sizes={{ rowHeight, headerHeight: 36, columnWidth: 160 }} select={selectable} multiselect={selectable} {selectedRows}
+              reorder={false} draggableRows={false} undo={false} {...queryProps} {...dynamicProps} init={api => init(api, 1)} />
+          </div>{/if}
+        </div>{/key}
       {:else if !loading && !error}
-        <div class="static-preview"><table>
-          <caption>{fallbackLabel}</caption>
+        <div class="static-preview"><table><caption>{fallbackLabel}</caption>
           <thead><tr>{#each model.engineColumns as column, index (column.id)}<th scope="col">{model.columns[index]?.label}</th>{/each}</tr></thead>
           <tbody>{#each records.rows.slice(0, 20) as row (row.id)}<tr>{#each model.engineColumns as column (column.id)}<td>{row[column.id] ?? ''}</td>{/each}</tr>{/each}</tbody>
         </table></div>

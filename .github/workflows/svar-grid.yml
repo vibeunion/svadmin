@@ -4,7 +4,7 @@ on:
     paths:
       - 'packages/ui/src/components/Svar*'
       - 'packages/ui/src/components/svar-grid-*'
-      - 'packages/surface/src/**'
+      - 'packages/surface/**'
       - 'packages/core/src/**'
       - 'scripts/fixtures/svar-grid/**'
       - '.github/workflows/svar-grid.yml'
@@ -30,11 +30,14 @@ jobs:
         run: bun install --frozen-lockfile
       - name: Install pinned real SVAR in isolated consumer
         run: npm ci --prefix scripts/fixtures/svar-grid --ignore-scripts --no-audit --no-fund
-      - name: Verify adapter lint
-        run: bun x --no-install eslint packages/ui/src/components/Svar*.svelte packages/ui/src/components/svar-grid-*.ts scripts/fixtures/svar-grid --max-warnings 0
+      - name: Verify adapter and Surface lint
+        run: bun x --no-install eslint packages/ui/src/components/Svar*.svelte packages/ui/src/components/svar-grid-*.ts packages/surface/src/svar*.ts packages/surface/src/components/Svar*.svelte scripts/fixtures/svar-grid --max-warnings 0
       - name: Verify all adapter unit tests
         working-directory: packages/ui
         run: bun run test src/components/svar-grid
+      - name: Verify AI Surface schema boundaries
+        working-directory: packages/surface
+        run: bun run test src/svar-schema.test.ts
       - name: Verify real upstream types and resource adapter
         run: bun x --no-install svelte-check --tsgo-experimental-api --tsconfig scripts/fixtures/svar-grid/tsconfig.json --threshold error
       - name: Verify SSR fallback
