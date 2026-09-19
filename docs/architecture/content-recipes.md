@@ -1,79 +1,91 @@
 # Content component recipes
 
-This change continues the no-Tailwind migration on main `ee01ea0b52285bd3129447cd0b2ddb0c114f45ce`.
-It does not apply the old 646-file stage3 patch over newer Surface, typed-rendering, SVAR,
-or enterprise changes. It does not replace the parallel native primitive migration.
+This continues the no-Tailwind migration from main `ee01ea0b52285bd3129447cd0b2ddb0c114f45ce`,
+reconciled with native primitive recipes on main `c91936335e1a431f2ac37dec31da138afbbbc21f`.
+It does not apply the old 646-file stage3 patch over newer Surface, typed rendering,
+SVAR or enterprise work. No release or deployment is performed by this change.
 
 ## Implemented boundary
 
-`ContentPageShell`, `ContentPageHeader`, and `MetricBlock` now use named Panda slot recipes.
-The recipes are maintained in `packages/ui/design/content-recipes.ts`; theme-bound content
-spacing, width, typography and color definitions live in `content-tokens.ts`.
+`ContentPageShell`, `ContentPageHeader` and `MetricBlock` now use named Panda slot
+recipes in `packages/ui/design/content-recipes.ts`. Theme-bound content spacing,
+width, typography and color tokens live in `content-tokens.ts`.
 
-Public component imports, props and snippets are unchanged. Width remains
-`narrow | default | wide`; metric trend meaning remains
-`positive | negative | warning | neutral`. No new arbitrary CSS or style-definition
-input is accepted from AI. Surface schemas, permissions, source loading and business
-mutations are unchanged. Generated helpers are internal implementation details,
-not new public `@svadmin/ui/recipes` exports.
+The three components retain their public imports, props, snippets and DOM structure.
+Width is `narrow | default | wide`; metric trend meaning is
+`positive | negative | warning | neutral`. Every variant is generated explicitly.
+Consumers import ordinary `@svadmin/ui/app.css`; neither Panda nor Tailwind is needed
+in the host app. Helpers are internal, not new public package exports. No AI style
+or executable-code inputs, Surface permissions or business-write authority change.
 
-The build explicitly generates every supported width and trend variant. Consumers
-continue to import precompiled `@svadmin/ui/app.css`; neither Panda nor Tailwind is
-required in an application. Existing CSS and selectors remain for unmigrated components.
-This is not a claim that all components or pages use semantic recipes already.
+## An intentional color bug fix, not historical zero-difference parity
 
-## Compatibility details
+Actual Chromium comparison exposed a legacy defect: the original MetricBlock emitted
+raw `text-success`, `text-destructive`, `text-warning-foreground` and
+`text-muted-foreground` names while owned CSS uses mapped classes. The trend meanings
+therefore did not reliably select their intended colors. The new recipe binds each
+meaning directly to its existing public semantic token. This visible repair is
+intentional; the original historical PNGs are NOT claimed identical to the candidate.
 
-- A long metric value remains a single ellipsized line. The previous local stage3
-  proposal's `overflowWrap: anywhere` changed this behavior and is not adopted.
-- The clean-flat card treatment follows component semantics instead of requiring the
-  removed `bg-card` alias on the metric root.
-- Header alignment still changes at 40rem. Breadcrumbs do not gain new wrapping,
-  and loading skeleton geometry is retained.
-- Existing public theme variables supply the new namespaced tokens. Nested theme
-  roots must use the established `.svadmin-theme`, `.dark`, or `[data-theme]` boundary.
-- This migration does not preserve undocumented internal `--tw-*` composition hooks
-  on the three migrated components. Host-owned ordinary classes remain accepted.
+The verifier retains THREE captures per scene:
+
+1. Unmodified historical components, read from immutable Git revision `ee01ea0`.
+2. Actual candidate components from the built package.
+3. The historical DOM with ONLY the four fixture trend leaves' foreground colors set
+   to the independently resolved public theme tokens, recorded as the expected repair.
+
+Candidate node text, geometry and all selected computed properties must equal the
+historical snapshot with only those four explicit leaf color substitutions. The
+candidate PNG must then equal the third capture byte-for-byte. No masks, pixel
+thresholds, broad ignored properties or rewritten historical source/CSS baselines are
+used. A per-scene record names every changed color and keeps all three PNG hashes.
+Eight negative/positive tests prove that unrelated colors, geometry, typography, text,
+missing nodes, wrong trend colors and invalid correction targets still fail.
+
+Other compatibility details: long values remain single-line ellipsized; clean-flat
+card treatment follows semantic anatomy rather than a deleted bg-card alias; header
+alignment still changes at 40rem; loading skeleton geometry and consumer class
+hooks stay intact. Undocumented internal utility-composition variables are not a
+new supported customization interface.
+
+## Integration corrections
+
+Real full-repository checks also exposed inherited main defects. This slice restores
+`percent` to FieldDefinition's finite union (the renderer and scale option already
+exist), keeps both fields when editing a null date range, omits absent forwarded
+props, removes upload error/URL fields instead of assigning undefined, and gives
+import/workspace test hosts independent English i18n scopes. The upload callback
+accepts receipt/undefined promises and ordinary Promise<void> callbacks explicitly.
+Existing tests and strict compiler/lint rules are retained. New component regressions
+cover null date edits, preserved dates/limits, all upload receipt forms and retries.
+LiteFilterBuilder retains its native form submission; its unused callback is no
+longer destructured. No client hydration is introduced to Lite.
 
 ## Reproduction
-
-From a checkout with the repository's pinned Node and Bun versions:
 
 ```sh
 bun install --frozen-lockfile
 bun run build:packages
 bun run --cwd packages/ui test:css
-node --test packages/ui/scripts/content-recipes.test.mjs
+node --test packages/ui/scripts/content-recipes.test.mjs packages/ui/scripts/content-trend-parity.test.mjs
 bunx playwright install --with-deps chromium
 node packages/ui/scripts/verify-content-recipes.mjs
 ```
 
-The browser verifier reads the three original Svelte components directly from immutable
-Git revision `ee01ea0`, changing only the baseline Skeleton import's location. It builds
-both baseline and candidate components using Vite/Svelte and the candidate's plain CSS,
-then serves the production bundle. No Panda compiler plugin runs in the fixture app.
-The historical components still use unchanged legacy rules; candidate components use
-only the new recipes. This tests actual generated component output, not fabricated DOM.
+The browser app is built with production Vite/Svelte, not fabricated DOM. The only
+historical source relocation is Skeleton's import path; Shell still resolves the
+historical Header. Both versions consume the candidate's plain stylesheet: historical
+components exercise retained legacy rules; candidate components exercise new recipes.
+This does not compare all historic application DOM/CSS bundles.
 
-There are 48 planned cases: three viewports (1440x900, 1920x1080, 390x844), light/dark,
-three widths, ordinary/clean-flat layout, plus RTL and opposite-parent nested-theme
-cases. Each contains all trend meanings, zero, long text, loading, and action snippets.
-Each screenshot must independently stabilize; PNG bytes and selected computed styles
-and geometry must match exactly. Animation is disabled only for screenshot capture.
-Action callbacks, focus, loading and width changes are also exercised.
+The 48 scenes cover three viewports (1440x900, 1920x1080, 390x844), both themes, three
+widths, ordinary/clean-flat layouts, RTL and opposite-parent nested themes. They
+include all trends, zero, long text, loading and action snippets. Each PNG stabilizes
+independently. Actions, focus, loading and width changes also have assertions.
 
-The Node contracts require published declarations for slots/variants and include a
-missing-variant negative test. A class mentioned only inside `:not()` is not evidence
-that its required style exists.
-
-`Content recipe checks` collects step logs and exact source/CSS hashes. Its final job
-fails unless contracts, strict types, lint and browser checks all succeed, even though
-individual checks continue to collect diagnostics. A planned or running case is never
-recorded as passing. Current results are the exact-revision workflow artifact, not
-historical screenshots or earlier PR green checks.
-
-## Not certified by this slice
-
-Full stage3 migration, all application routes, non-Chromium rendering, assistive
-technology coverage, arbitrary host utility overrides, and release/deployment are
-not certified by the dedicated fixture. Full repository CI remains a separate gate.
+`Content recipe checks` retains exact revision, source/CSS hashes and failure logs.
+Its final aggregator requires every attempted CSS contract, strict type, lint and
+browser check to succeed. A running/planned check is not a passing result. Full
+repository CI and application E2E remain separate gates. Non-Chromium, assistive
+technology, every application route and the remaining stage3 migration are not
+certified by this focused fixture.

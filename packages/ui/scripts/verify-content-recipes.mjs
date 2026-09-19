@@ -5,13 +5,13 @@ import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { assertContentParity, trendBindings } from './content-trend-parity.mjs';
 
 const ui = fileURLToPath(new URL('../', import.meta.url));
 const root = resolve(ui, '../..');
 const require = createRequire(join(ui, 'package.json'));
 const { build, preview } = await import(require.resolve('vite'));
 const { svelte } = await import(require.resolve('@sveltejs/vite-plugin-svelte'));
-// require.resolve selects the CommonJS entry, so consume that entry as CommonJS.
 const { chromium } = require('@playwright/test');
 const baseline = 'ee01ea0b52285bd3129447cd0b2ddb0c114f45ce';
 const work = join(ui, '.content-recipe-verification');
@@ -19,7 +19,11 @@ const evidence = resolve(process.env.CONTENT_RECIPE_EVIDENCE ?? join(root, 'test
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');
 const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim();
 const names = ['ContentPageShell', 'ContentPageHeader', 'MetricBlock'];
-const report = { baseline, head: git('rev-parse', 'HEAD'), baselineSources: {}, candidateSources: {}, css: {}, cases: [], errors: [] };
+const report = {
+  baseline, head: git('rev-parse', 'HEAD'), baselineSources: {}, candidateSources: {}, css: {},
+  comparison: 'Exact geometry/styles and PNG versus historical components plus four explicit trend-color corrections. Original historical PNGs are retained, not overwritten.',
+  cases: [], errors: [],
+};
 let server;
 let browser;
 mkdirSync(evidence, { recursive: true });
@@ -32,8 +36,6 @@ try {
     const original = execFileSync('git', ['show', `${baseline}:${path}`], { cwd: root, encoding: 'utf8' });
     report.baselineSources[path] = sha256(original);
     report.candidateSources[path] = sha256(readFileSync(join(root, path)));
-    // Baseline components are the actual historical sources. Only relocate the
-    // Skeleton import; Shell still resolves the historical Header beside it.
     const relocated = original.replace("'../ui/skeleton/index.js'", "'../../dist/components/ui/skeleton/index.js'");
     writeFileSync(join(work, 'baseline', `${name}.svelte`), relocated);
   }
@@ -41,7 +43,6 @@ try {
   assert.deepEqual(css, readFileSync(join(ui, 'dist/app.theme.css')), 'public CSS aliases must remain identical');
   report.css.published = sha256(css);
   report.css.recipes = sha256(readFileSync(join(ui, 'src/styles/recipes.css')));
-
   writeFileSync(join(work, 'index.html'), '<!doctype html><html lang="en"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Content recipe parity</title><div id="app"></div><script type="module" src="/main.js"></script></html>');
   writeFileSync(join(work, 'main.js'), `import { mount } from 'svelte';\nimport '../dist/app.css';\nimport Fixture from './Fixture.svelte';\nmount(Fixture, { target: document.getElementById('app') });\n`);
   writeFileSync(join(work, 'Fixture.svelte'), `<script lang="ts">
@@ -101,7 +102,6 @@ try {
   [data-action], [data-header-action] { border: 1px solid var(--border); padding: 4px 8px; }
 </style>
 `);
-
   await build({ configFile: false, root: work, plugins: [svelte({ configFile: false })], resolve: { conditions: ['browser'] }, build: { outDir: 'build', emptyOutDir: true }, logLevel: 'warn' });
   server = await preview({ configFile: false, root: work, build: { outDir: 'build' }, preview: { host: '127.0.0.1', port: 4187, strictPort: true }, logLevel: 'warn' });
   browser = await chromium.launch();
@@ -145,6 +145,21 @@ try {
     try {
       await page.goto(`http://127.0.0.1:4187/?${query}`, { waitUntil: 'networkidle' });
       await page.evaluate(() => document.fonts.ready);
+      const resolved = await page.locator('#stage').evaluate((stage, bindings) => {
+        const nodes = [stage, ...stage.querySelectorAll('*')];
+        return bindings.map((binding) => {
+          const root = stage.querySelector(`[data-svadmin-metric-card][aria-label="${binding.label}"]`);
+          const trend = root?.lastElementChild?.firstElementChild;
+          if (!trend || trend.tagName !== 'SPAN' || trend.textContent !== binding.text) throw new Error(`Missing historical trend ${binding.label}`);
+          const probe = document.createElement('span');
+          probe.style.display = 'none';
+          probe.style.color = `var(${binding.token})`;
+          trend.parentElement.append(probe);
+          const expectedColor = getComputedStyle(probe).color;
+          probe.remove();
+          return { label: binding.label, index: nodes.indexOf(trend), classes: trend.className, expectedColor };
+        });
+      }, trendBindings);
       const before = await stableScreenshot(page.locator('#stage'));
       const oldStyles = await snapshot(page);
       await page.locator('#implementation').click();
@@ -153,9 +168,22 @@ try {
       const newStyles = await snapshot(page);
       writeFileSync(join(evidence, `${id}-baseline.png`), before);
       writeFileSync(join(evidence, `${id}-candidate.png`), after);
-      writeFileSync(join(evidence, `${id}-styles.json`), JSON.stringify({ baseline: oldStyles, candidate: newStyles }, null, 2));
-      assert.deepEqual(newStyles, oldStyles, `${id}: computed styles or DOM geometry changed`);
-      assert.ok(before.equals(after), `${id}: zero-tolerance PNG comparison failed`);
+      writeFileSync(join(evidence, `${id}-styles.json`), JSON.stringify({ baseline: oldStyles, candidate: newStyles, resolved }, null, 2));
+      const { expected, changes } = assertContentParity(oldStyles, newStyles, resolved);
+
+      // Retain the original historical capture. A THIRD capture shows precisely
+      // the specified color repair on the old DOM, not a rewritten baseline.
+      await page.locator('#implementation').click();
+      assert.equal(await page.locator('#implementation').textContent(), 'baseline');
+      await page.locator('#stage').evaluate((stage, bindings) => {
+        const nodes = [stage, ...stage.querySelectorAll('*')];
+        for (const binding of bindings) nodes[binding.index].style.color = binding.expectedColor;
+      }, resolved);
+      const reference = await stableScreenshot(page.locator('#stage'));
+      writeFileSync(join(evidence, `${id}-expected-color-fix.png`), reference);
+      assert.deepEqual(await snapshot(page), expected, 'reference correction changed more than foreground colors');
+      assert.ok(reference.equals(after), `${id}: PNG differs from the explicitly corrected reference`);
+      await page.locator('#implementation').click();
       assert.equal(await page.locator('[aria-label="Long value"] > p').evaluate((el) => getComputedStyle(el).whiteSpace), 'nowrap');
       assert.equal(await page.locator('[aria-label="Long value"] > p').evaluate((el) => getComputedStyle(el).textOverflow), 'ellipsis');
       await page.locator('[data-action]').click();
@@ -164,19 +192,20 @@ try {
       await page.locator('#loading').click();
       assert.ok((await page.locator('[aria-label="Loading"]').textContent()).includes('42'));
       await page.locator('#width').click();
-      const expected = scene.width === 'narrow' ? 92 * 16 : 48 * 16;
-      assert.equal(await page.locator('[data-svadmin-content-page]').evaluate((el) => parseFloat(getComputedStyle(el).maxWidth)), expected);
+      const expectedWidth = scene.width === 'narrow' ? 92 * 16 : 48 * 16;
+      assert.equal(await page.locator('[data-svadmin-content-page]').evaluate((el) => parseFloat(getComputedStyle(el).maxWidth)), expectedWidth);
       assert.deepEqual(pageErrors, []);
-      report.cases.push({ id, ...scene, passed: true, nodes: newStyles.length, pngSha256: sha256(after) });
+      report.cases.push({ id, ...scene, passed: true, nodes: newStyles.length, colorCorrections: changes, historicalPngIdentical: before.equals(after), baselinePngSha256: sha256(before), candidatePngSha256: sha256(after), correctedReferencePngSha256: sha256(reference) });
     } catch (error) {
-      report.cases.push({ id, ...scene, passed: false, error: String(error) });
-      report.errors.push(String(error));
+      const message = error instanceof Error ? error.message : String(error);
+      report.cases.push({ id, ...scene, passed: false, error: message });
+      report.errors.push({ id, error: message });
     } finally {
       await context.close();
     }
   }
-  console.info(JSON.stringify({ cases: report.cases.length, passed: report.cases.filter((entry) => entry.passed).length, failed: report.errors.length }));
-  if (report.errors.length) throw new Error(report.errors.join('\n').slice(0, 16000));
+  console.info(JSON.stringify({ cases: report.cases.length, passed: report.cases.filter((entry) => entry.passed).length, failed: report.errors.length, comparison: report.comparison }));
+  if (report.errors.length) throw new Error(JSON.stringify(report.errors).slice(0, 16000));
 } finally {
   writeFileSync(join(evidence, 'report.json'), JSON.stringify(report, null, 2) + '\n');
   await browser?.close();

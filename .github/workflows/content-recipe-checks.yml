@@ -2,18 +2,10 @@ name: Content recipe checks
 on:
   push:
     branches: [main, fix/panda-stage3-validation-20260919]
-    paths:
-      - 'packages/ui/**'
-      - 'scripts/**'
-      - 'bun.lock'
-      - '.github/workflows/content-recipe-checks.yml'
+    paths: ['packages/ui/**', 'packages/core/**', 'scripts/**', 'bun.lock', '.github/workflows/content-recipe-checks.yml']
   pull_request:
     branches: [main]
-    paths:
-      - 'packages/ui/**'
-      - 'scripts/**'
-      - 'bun.lock'
-      - '.github/workflows/content-recipe-checks.yml'
+    paths: ['packages/ui/**', 'packages/core/**', 'scripts/**', 'bun.lock', '.github/workflows/content-recipe-checks.yml']
 permissions:
   contents: read
 concurrency:
@@ -26,8 +18,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           persist-credentials: false
+      - name: Fetch immutable comparison sources
+        run: git fetch --quiet --no-tags --depth=1 origin ee01ea0b52285bd3129447cd0b2ddb0c114f45ce
       - uses: actions/setup-node@v7
         with:
           node-version: '26'
@@ -52,14 +46,14 @@ jobs:
         run: |
           set -euo pipefail
           bun run --cwd packages/ui test:css > test-results/content-recipes/logs/existing-css.log 2>&1 || { tail -100 test-results/content-recipes/logs/existing-css.log; exit 1; }
-          node --test packages/ui/scripts/content-recipes.test.mjs > test-results/content-recipes/logs/content-css.log 2>&1 || { tail -120 test-results/content-recipes/logs/content-css.log; exit 1; }
+          node --test packages/ui/scripts/content-recipes.test.mjs packages/ui/scripts/content-trend-parity.test.mjs > test-results/content-recipes/logs/content-css.log 2>&1 || { tail -200 test-results/content-recipes/logs/content-css.log; exit 1; }
           tail -12 test-results/content-recipes/logs/content-css.log
       - name: Strict UI types
         id: types
         continue-on-error: true
         run: |
           set -euo pipefail
-          node node_modules/svelte-check/bin/svelte-check --tsconfig packages/ui/tsconfig.json > test-results/content-recipes/logs/types.log 2>&1 || { tail -100 test-results/content-recipes/logs/types.log; exit 1; }
+          node node_modules/svelte-check/bin/svelte-check --tsconfig packages/ui/tsconfig.json > test-results/content-recipes/logs/types.log 2>&1 || { tail -300 test-results/content-recipes/logs/types.log; exit 1; }
           tail -8 test-results/content-recipes/logs/types.log
       - name: Repository lint
         id: lint
