@@ -4,7 +4,7 @@ import { chromium, expect } from '@playwright/test';
 import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { join, resolve } from 'node:path';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
@@ -19,11 +19,28 @@ const server = await createServer({
 await server.listen();
 const browser = await chromium.launch({ headless: true });
 const evidence = { commit: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: repository, encoding: 'utf8' }).trim(),
-  browser: browser.version(), compilerPlugins: ['svelte'], hashes: {}, cases: [] };
+  browser: browser.version(), compilerPlugins: ['svelte'], hashes: {}, cssOrders: [], cases: [] };
 for (const file of ['src/components/SurfaceEditPreview.svelte', 'src/components/SurfaceRenderer.svelte', 'panda.config.ts', 'src/styles/editor.css']) {
   evidence.hashes[file] = createHash('sha256').update(readFileSync(join(root, file))).digest('hex');
 }
 try {
+  const uiCss = readFileSync(join(repository, 'packages/ui/dist/app.css'), 'utf8');
+  const editorCss = readFileSync(join(root, 'dist/styles/editor.css'), 'utf8');
+  const { editorClasses, editorButtonClasses } = await import(pathToFileURL(join(root, 'dist/styles/editor.generated.js')).href);
+  // 在两个真实导入顺序下检查完整发布 CSS，不以删掉宿主 reset 的方式修复冲突。
+  for (const editorFirst of [true, false]) {
+    const page = await browser.newPage();
+    await page.setContent(`<section class="svadmin-surface-editor ${editorClasses.comfortable}"><button class="${editorButtonClasses.primary}">Action</button></section>`);
+    for (const content of editorFirst ? [editorCss, uiCss] : [uiCss, editorCss]) await page.addStyleTag({ content });
+    const panel = page.locator('section');
+    expect(await panel.evaluate((element) => getComputedStyle(element).paddingTop)).toBe('16px');
+    expect(await page.locator('button').evaluate((element) => getComputedStyle(element).paddingTop)).toBe('8px');
+    await page.addStyleTag({ content: '@layer utilities { .surface-host-spacing { padding: 24px; } }' });
+    await panel.evaluate((element) => element.classList.add('surface-host-spacing'));
+    expect(await panel.evaluate((element) => getComputedStyle(element).paddingTop)).toBe('24px');
+    evidence.cssOrders.push({ editorFirst, defaultPadding: 16, hostUtilityOverride: 24 });
+    await page.close();
+  }
   for (const config of [
     { width: 1440, height: 900, theme: 'light', density: 'comfortable' },
     { width: 1920, height: 1080, theme: 'dark', density: 'compact' },
@@ -71,9 +88,16 @@ try {
     evidence.cases.push({ ...config, inputPreserved: true, requests: 1, applyCount: 1, overflow, errors });
     await page.close();
   }
-  writeFileSync(join(output, 'provenance.json'), JSON.stringify(evidence, null, 2));
   console.info(JSON.stringify(evidence, null, 2));
+} catch (failure) {
+  evidence.failure = failure instanceof Error ? failure.message : String(failure);
+  for (const [index, context] of browser.contexts().entries()) {
+    const page = context.pages()[0];
+    if (page) await page.screenshot({ path: join(output, `failure-${index}.png`), fullPage: true }).catch(() => {});
+  }
+  throw failure;
 } finally {
+  writeFileSync(join(output, 'provenance.json'), JSON.stringify(evidence, null, 2));
   await browser.close();
   await server.close();
 }

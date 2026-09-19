@@ -1,6 +1,6 @@
-@layer sv-surface.reset, sv-surface.base, sv-surface.tokens, sv-surface.recipes, sv-surface.utilities;
+@layer theme, base, components, utilities;
 
-@layer sv-surface.tokens{
+@layer theme.sv-surface{
   .svadmin-surface-editor {
     --svsurface-colors-background: var(--card, #ffffff);
     --svsurface-colors-foreground: var(--foreground, #18181b);
@@ -17,7 +17,7 @@
 }
 }
 
-@layer sv-surface.recipes{
+@layer components.sv-surface{
   @layer _base{
 
     .svsurface-surface-editor {

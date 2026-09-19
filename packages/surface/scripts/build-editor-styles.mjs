@@ -20,8 +20,17 @@ const recipes = await import(pathToFileURL(join(generated, 'recipes/index.mjs'))
 const editorClasses = Object.fromEntries(['compact', 'comfortable'].map((density) => [density, recipes.surfaceEditor({ density })]));
 const editorButtonClasses = Object.fromEntries(['secondary', 'primary'].map((variant) => [variant, recipes.surfaceEditorButton({ variant })]));
 const rootCss = postcss.parse(readFileSync(stylesheet, 'utf8'));
-// preset-base 的变换/滤镜变量初始化是全局选择器，本组件不用这些能力；明确去掉该层。
-rootCss.walkAtRules('layer', (rule) => { if (rule.params === 'sv-surface.base') rule.remove(); });
+rootCss.walkAtRules('layer', (rule) => {
+  // preset-base 的全局变量初始化未被本组件使用，不能泄漏到宿主。
+  if (rule.params === 'sv-surface.base' || (!rule.nodes && rule.params.startsWith('sv-surface.'))) {
+    rule.remove();
+    return;
+  }
+  // 使用宿主共享的层次，防止后加载的 base/reset 覆盖先加载的组件样式。
+  if (rule.params === 'sv-surface.tokens') rule.params = 'theme.sv-surface';
+  if (rule.params === 'sv-surface.recipes') rule.params = 'components.sv-surface';
+});
+rootCss.prepend(postcss.atRule({ name: 'layer', params: 'theme, base, components, utilities' }));
 rootCss.walkRules((rule) => {
   if (!rule.selector.startsWith('.svsurface-') && rule.selector !== '.svadmin-surface-editor') {
     throw new Error(`Unscoped selector in Surface CSS: ${rule.selector}`);
