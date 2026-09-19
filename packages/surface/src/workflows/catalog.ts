@@ -28,7 +28,7 @@ function withAppearance(schema: TSchema): TSchema {
 export function withSurfaceAppearance<T extends SurfaceWidgetDefinition>(catalog: { version: string; widgets: readonly T[] }) {
   return { version: `${catalog.version}+appearance/v1`, widgets: catalog.widgets.map((widget): T => ({
     ...widget, presentation: 'surface-appearance/v1', propsSchema: withAppearance(widget.propsSchema),
-    ...(widget.getReferencedFields ? { getReferencedFields: (props: JsonObject) => widget.getReferencedFields!(withoutSurfaceAppearance(props)) } : {}),
+    ...(widget.getReferencedFields ? { getReferencedFields: (props: JsonObject) => widget.getReferencedFields?.(withoutSurfaceAppearance(props)) ?? [] } : {}),
   })) };
 }
 

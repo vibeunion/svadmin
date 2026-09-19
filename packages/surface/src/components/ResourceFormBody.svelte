@@ -56,7 +56,7 @@
   <h3 id="{widgetId}-form-title">{title}</h3>
   {#if !scope.enabled}<p role="status">{labels.disabled}</p>{/if}
   {#if errors.length}
-    <div role="alert"><ul>{#each errors as error}<li>{error}</li>{/each}</ul></div>
+    <div role="alert"><ul>{#each errors as error, index (`${index}:${error}`)}<li>{error}</li>{/each}</ul></div>
   {/if}
   <fieldset disabled={!scope.enabled || state.busy || !!state.proposal} class="form-fields">
     <JsonSchemaForm {schema} bind:value onsubmit={submit} submitText={labels.submit} idPrefix={`surface-${widgetId}`} />

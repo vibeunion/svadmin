@@ -42,5 +42,5 @@ for (const text of [program + 'evil = Mutation("erase", {})\n', program.replace(
 }
 const messages = buildSurfaceOpenUIMessages('显示客户数量和创建表单', catalog, policy);
 assert.equal(messages[0].role, 'system'); assert.ok(messages[0].content.includes('Create contact')); checks += 2;
-console.log(JSON.stringify({ integration: '@openuidev/lang-core@0.3.0 (real parser factory)', checks,
+console.info(JSON.stringify({ integration: '@openuidev/lang-core@0.3.0 (real parser factory)', checks,
   scope: 'Constrained static OpenUI subset. Deterministic protocol tests, not real-model generation accuracy.' }, null, 2));

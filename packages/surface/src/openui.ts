@@ -1,7 +1,7 @@
 import { SURFACE_AGENT_LIMITS, createSurfaceCatalogManifest } from './agent-contract.js';
 import { validateSurfaceSpec } from './validation.js';
 import { isJsonValue } from './json.js';
-import type { JsonObject, SurfaceCatalog, SurfacePolicy, SurfaceSpec, SurfaceWidget, SurfaceDataSource } from './types.js';
+import type { SurfaceCatalog, SurfacePolicy, SurfaceSpec, SurfaceWidget, SurfaceDataSource } from './types.js';
 import { createOpenUIStatementGuard, SurfaceOpenUIError, OPENUI_LIMITS } from './workflows/openui-guard.js';
 
 export { SurfaceOpenUIError, OPENUI_LIMITS };
@@ -55,7 +55,8 @@ export function createSurfaceOpenUISchema(catalog: SurfaceCatalog): SurfaceOpenU
     Source: { properties: { value: { type: 'object' } }, required: ['value'] },
   };
   for (const [name, type] of names) {
-    const definition = catalog.widgets.find((widget) => widget.type === type)!;
+    const definition = catalog.widgets.find((widget) => widget.type === type);
+    if (!definition) throw new Error(`Missing component definition: ${type}`);
     defs[name] = { properties: {
       id: { type: 'string' }, props: JSON.parse(JSON.stringify(definition.propsSchema)) as unknown,
       binding: { anyOf: [{ type: 'object' }, { type: 'null' }] },

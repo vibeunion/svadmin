@@ -12,7 +12,8 @@ describe('one catalog for forms, appearance, generation and validation', () => {
   it('adds finite frame variants to every registered widget without changing the default catalog', () => {
     const catalog = withSurfaceAppearance(defaultSurfaceDefinitions);
     for (const widget of catalog.widgets) {
-      const base = defaultSurfaceDefinitions.widgets.find((w) => w.type === widget.type)!;
+      const base = defaultSurfaceDefinitions.widgets.find((w) => w.type === widget.type);
+      if (!base) throw new Error('Missing default definition');
       const props = widget.type === 'metric' ? { label: 'Count', format: 'number' }
         : widget.type === 'resource-table' ? { title: 'Records', columns: [{ field: 'id', label: 'ID' }] }
         : { title: 'Chart', labelField: 'name', valueField: 'value' };
@@ -27,12 +28,13 @@ describe('one catalog for forms, appearance, generation and validation', () => {
   it('retains field policy selectors but does not pass frame props to components', () => {
     const catalog = withSurfaceAppearance(defaultSurfaceDefinitions);
     const props = { title: 'Table', columns: [{ field: 'name', label: 'Name' }], appearance: { density: 'compact' } };
-    expect(catalog.widgets.find((w) => w.type === 'resource-table')!.getReferencedFields!(props)).toEqual(['name']);
+    expect(catalog.widgets.find((w) => w.type === 'resource-table')?.getReferencedFields?.(props)).toEqual(['name']);
     expect(withoutSurfaceAppearance(props)).toEqual({ title: 'Table', columns: props.columns });
   });
   it('describes actual registered actions without exposing handlers or allowing model schemas', () => {
     const catalog = createInteractiveSurfaceDefinitions([action], defaultSurfaceDefinitions);
-    const form = catalog.widgets.find((w) => w.type === 'resource-form')!;
+    const form = catalog.widgets.find((w) => w.type === 'resource-form');
+    if (!form) throw new Error('Missing form definition');
     expect(Value.Check(form.propsSchema, { actionId: action.id, appearance: { tone: 'info' } })).toBe(true);
     expect(Value.Check(form.propsSchema, { actionId: 'admin.delete' })).toBe(false);
     expect(Value.Check(form.propsSchema, { actionId: action.id, inputSchema: {} })).toBe(false);

@@ -16,7 +16,8 @@ const forbidden = new Set(['__proto__', 'prototype', 'constructor']);
 
 function checkStatement(text: string, calls: ReadonlySet<string>): string {
   const tokens: string[] = [];
-  const lexer = /\s+|"(?:[^"\\\u0000-\u001f]|\\(?:["\\/bfnrt]|u[0-9a-fA-F]{4}))*"|-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?|[A-Za-z_][A-Za-z0-9_]*|[=(),\[\]{}:]/uy;
+  // JSON.parse rejects unescaped control characters in string tokens below.
+  const lexer = /\s+|"(?:[^"\\]|\\(?:["\\/bfnrt]|u[0-9a-fA-F]{4}))*"|-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?|[A-Za-z_][A-Za-z0-9_]*|[=(),[\]{}:]/uy;
   let offset = 0;
   while (offset < text.length) {
     lexer.lastIndex = offset;

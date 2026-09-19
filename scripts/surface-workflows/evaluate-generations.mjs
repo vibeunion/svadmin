@@ -35,4 +35,4 @@ const groups = Object.fromEntries([...new Set(results.map((row) => row.model))].
   return [model, { samples: rows.length, protocolPassRate: passed('protocolPassed', rows), intentPassRate: passed('intentPassed', rows), missingCases: cases.filter((task) => !rows.some((row) => row.caseId === task.id)).map((task) => task.id) }];
 }));
 writeFileSync(outputPath, JSON.stringify({ generatedAt: new Date().toISOString(), evidence: 'User-supplied model outputs; no provider call made by this evaluator', groups, results }, null, 2) + '\n');
-console.log(JSON.stringify(groups, null, 2));
+console.info(JSON.stringify(groups, null, 2));
