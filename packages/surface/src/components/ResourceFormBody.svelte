@@ -12,7 +12,7 @@
     widgetId: string; host: SurfaceWorkflowHost; action: SurfaceActionDescriptor; title: string; locale: string;
   } = $props();
   let value = $state<Record<string, unknown>>({});
-  let state = $state<SurfaceWorkflowClientState>({ busy: false });
+  let formState = $state<SurfaceWorkflowClientState>({ busy: false });
   let errors = $state<string[]>([]);
   const schema = $derived(JSON.parse(JSON.stringify(action.inputSchema)));
   const zh = $derived(locale.startsWith('zh'));
@@ -29,7 +29,7 @@
   });
   const scope = $derived(host.getScope());
   const controller = untrack(() => createSurfaceFormController({ action, getScope: host.getScope,
-    onState: (next) => { state = next; }, onCommitted: host.committed }));
+    onState: (next) => { formState = next; }, onCommitted: host.committed }));
   let identity: readonly unknown[] = [];
   $effect(() => {
     const next = [scope.scopeKey, scope.surfaceId, scope.revision, scope.transport, scope.enabled];
@@ -52,34 +52,34 @@
   }
 </script>
 
-<section class="svadmin-surface-editor {editorClasses.comfortable}" aria-labelledby="{widgetId}-form-title" aria-busy={state.busy}>
+<section class="svadmin-surface-editor {editorClasses.comfortable}" aria-labelledby="{widgetId}-form-title" aria-busy={formState.busy}>
   <h3 id="{widgetId}-form-title">{title}</h3>
   {#if !scope.enabled}<p role="status">{labels.disabled}</p>{/if}
   {#if errors.length}
     <div role="alert"><ul>{#each errors as error, index (`${index}:${error}`)}<li>{error}</li>{/each}</ul></div>
   {/if}
-  <fieldset disabled={!scope.enabled || state.busy || !!state.proposal} class="form-fields">
+  <fieldset disabled={!scope.enabled || formState.busy || !!formState.proposal} class="form-fields">
     <JsonSchemaForm {schema} bind:value onsubmit={submit} submitText={labels.submit} idPrefix={`surface-${widgetId}`} />
   </fieldset>
-  {#if state.error}<p role="alert">{labels.error}</p>{/if}
-  {#if state.proposal}
-    {@const p = state.proposal}
+  {#if formState.error}<p role="alert">{labels.error}</p>{/if}
+  {#if formState.proposal}
+    {@const p = formState.proposal}
     <section aria-label={p.actionLabel}>
       <p role="status" data-workflow-status={p.status}>{labels[p.status]}</p>
       <strong>{p.actionLabel}</strong>
       <details><summary>{labels.args}</summary><pre>{JSON.stringify(p.args, null, 2)}</pre></details>
       <div data-part="actions">
         {#if p.status === 'pending' && p.approval === 'confirm'}
-          <button class={editorButtonClasses.secondary} disabled={state.busy || !scope.enabled} onclick={() => controller.confirm()}>{labels.confirm}</button>
+          <button class={editorButtonClasses.secondary} disabled={formState.busy || !scope.enabled} onclick={() => controller.confirm()}>{labels.confirm}</button>
         {/if}
         {#if p.status === 'approved'}
-          <button class={editorButtonClasses.primary} disabled={state.busy || !scope.enabled} onclick={() => controller.execute()}>{labels.execute}</button>
+          <button class={editorButtonClasses.primary} disabled={formState.busy || !scope.enabled} onclick={() => controller.execute()}>{labels.execute}</button>
         {/if}
-        <button class={editorButtonClasses.secondary} disabled={state.busy || !scope.enabled} onclick={() => controller.refresh()}>{labels.refresh}</button>
+        <button class={editorButtonClasses.secondary} disabled={formState.busy || !scope.enabled} onclick={() => controller.refresh()}>{labels.refresh}</button>
         {#if p.status === 'pending' || p.status === 'approved'}
-          <button class={editorButtonClasses.secondary} disabled={state.busy || !scope.enabled} onclick={() => controller.reject()}>{labels.reject}</button>
+          <button class={editorButtonClasses.secondary} disabled={formState.busy || !scope.enabled} onclick={() => controller.reject()}>{labels.reject}</button>
         {:else if p.status === 'succeeded' || p.status === 'rejected'}
-          <button class={editorButtonClasses.secondary} disabled={state.busy} onclick={() => controller.reset()}>{labels.reset}</button>
+          <button class={editorButtonClasses.secondary} disabled={formState.busy} onclick={() => controller.reset()}>{labels.reset}</button>
         {/if}
       </div>
     </section>

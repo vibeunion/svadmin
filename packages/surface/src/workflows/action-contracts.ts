@@ -15,22 +15,22 @@ export function validateSurfaceActionDescriptor(action: SurfaceActionDescriptor)
   let fields = 0;
   function visit(schema: TSchema, depth: number): void {
     if (++fields > 128 || depth > 8) throw new Error('Surface form schema exceeds supported limits');
-    if (schema.anyOf || schema.oneOf || schema.allOf || schema.not || schema.if || schema.writeOnly
-      || !['object', 'array', 'string', 'number', 'integer', 'boolean'].includes(schema.type)) {
+    if (schema['anyOf'] || schema['oneOf'] || schema['allOf'] || schema['not'] || schema['if'] || schema.writeOnly
+      || !['object', 'array', 'string', 'number', 'integer', 'boolean'].includes(schema['type'])) {
       throw new Error('Unsupported Surface form schema; use a registered custom widget instead');
     }
-    if (schema.type === 'object') {
-      if (schema.additionalProperties !== false || !schema.properties) throw new Error('Surface actions require closed object schemas');
-      for (const [name, child] of Object.entries(schema.properties)) {
+    if (schema['type'] === 'object') {
+      if (schema['additionalProperties'] !== false || !schema['properties']) throw new Error('Surface actions require closed object schemas');
+      for (const [name, child] of Object.entries(schema['properties'])) {
         if (!/^[A-Za-z][A-Za-z0-9_-]{0,63}$/u.test(name)) throw new Error('Invalid Surface form field');
         visit(child as TSchema, depth + 1);
       }
-    } else if (schema.type === 'array') {
-      if (!schema.items || Array.isArray(schema.items)) throw new Error('Surface forms require homogeneous array items');
-      visit(schema.items, depth + 1);
+    } else if (schema['type'] === 'array') {
+      if (!schema['items'] || Array.isArray(schema['items'])) throw new Error('Surface forms require homogeneous array items');
+      visit(schema['items'], depth + 1);
     }
   }
-  if (action.inputSchema.type !== 'object') throw new Error('Surface actions require an object input schema');
+  if (action.inputSchema['type'] !== 'object') throw new Error('Surface actions require an object input schema');
   visit(action.inputSchema, 0);
 }
 

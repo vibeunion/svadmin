@@ -21,7 +21,7 @@ function canonical(value: JsonValue): string {
   if (value === null || typeof value !== 'object') return JSON.stringify(value);
   if (Array.isArray(value)) return '[' + value.map(canonical).join(',') + ']';
   const object = value as JsonObject;
-  return '{' + Object.keys(object).sort().map((key) => JSON.stringify(key) + ':' + canonical(object[key])).join(',') + '}';
+  return '{' + Object.entries(object).sort(([left], [right]) => left < right ? -1 : left > right ? 1 : 0).map(([key, child]) => JSON.stringify(key) + ':' + canonical(child)).join(',') + '}';
 }
 function json(input: unknown): asserts input is JsonValue {
   if (jsonValueIssue(input) || JSON.stringify(input).length > 131_072) throw new SurfaceWorkflowError('invalid_input', 'Expected bounded, plain JSON');
@@ -84,7 +84,7 @@ export function createSurfaceWorkflowService(options: SurfaceWorkflowOptions) {
     if (p.expiresAt <= now()) throw new SurfaceWorkflowError('expired');
     if (!action.validateInput(p.args)) throw new SurfaceWorkflowError('invalid_input');
     const saved = latest(tx, ctx, p.surfaceId, p.surfaceRevision);
-    if (!saved.spec.widgets.some((w) => w.type === 'resource-form' && w.props.actionId === action.id)) throw new SurfaceWorkflowError('denied');
+    if (!saved.spec.widgets.some((w) => w.type === 'resource-form' && w.props['actionId'] === action.id)) throw new SurfaceWorkflowError('denied');
   }
 
   return {
@@ -93,7 +93,7 @@ export function createSurfaceWorkflowService(options: SurfaceWorkflowOptions) {
       input = { spec: input.spec, expectedRevision: input.expectedRevision };
       json(input.spec);
       const spec = clone(input.spec);
-      const surfaceId = (spec as JsonObject)?.surfaceId;
+      const surfaceId = (spec as JsonObject)?.['surfaceId'];
       key(surfaceId);
       if (!Number.isSafeInteger(input.expectedRevision) || input.expectedRevision < 0) throw new SurfaceWorkflowError('invalid_input');
       const { catalog, policy } = await access(ctx, surfaceId, 'save');

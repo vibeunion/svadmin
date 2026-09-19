@@ -4,13 +4,13 @@
   import ResourceFormBody from './ResourceFormBody.svelte';
   let { widgetId, props, locale = 'en-US' }: SurfaceWidgetRendererProps = $props();
   const host = getSurfaceWorkflowHost();
-  const action = $derived(host?.getAction(String(props.actionId)));
+  const action = $derived(host?.getAction(String(props['actionId'])));
   const zh = $derived(locale.startsWith('zh'));
 </script>
 
 {#if host && action}
   {#key `${action.id}:${action.version}`}
-    <ResourceFormBody {widgetId} {host} {action} title={typeof props.title === 'string' ? props.title : action.label} {locale} />
+    <ResourceFormBody {widgetId} {host} {action} title={typeof props['title'] === 'string' ? props['title'] : action.label} {locale} />
   {/key}
 {:else}
   <section role="status" data-surface-form-unavailable>

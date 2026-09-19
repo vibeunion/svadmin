@@ -40,7 +40,11 @@ const components: Readonly<Record<string, Component<SurfaceWidgetRendererProps>>
   metric: MetricWidget, 'resource-table': ResourceTableWidget, 'bar-chart': BarChartWidget, 'line-chart': LineChartWidget,
 };
 function rendered(definitions: SurfaceCatalog): SurfaceRenderCatalog {
-  return defineSurfaceCatalog({ ...definitions, widgets: definitions.widgets.map((widget) => ({ ...widget, component: components[widget.type] })) });
+  return defineSurfaceCatalog({ ...definitions, widgets: definitions.widgets.map((widget) => {
+    const component = components[widget.type];
+    if (!component) throw new Error(`Missing built-in component: ${widget.type}`);
+    return { ...widget, component };
+  }) });
 }
 export const defaultSurfaceCatalog = rendered(defaultSurfaceDefinitions);
 export const styledSurfaceCatalog = rendered(styledSurfaceDefinitions);

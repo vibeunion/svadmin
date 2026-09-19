@@ -66,7 +66,9 @@ describe('resource form client lifecycle', () => {
     vi.mocked(h.transport.propose).mockRejectedValueOnce(new Error('network'));
     await h.controller.submit({}); await h.controller.submit({});
     const calls = vi.mocked(h.transport.propose).mock.calls;
-    expect(calls[0][0].requestKey).toBe(calls[1][0].requestKey);
+    const first = calls[0]; const second = calls[1];
+    if (!first || !second) throw new Error('Expected two proposal attempts');
+    expect(first[0].requestKey).toBe(second[0].requestKey);
   });
   it('coalesces double submission and rejects replies for another surface', async () => {
     const h = setup();

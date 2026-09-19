@@ -14,11 +14,11 @@ export function withoutSurfaceAppearance(props: JsonObject): JsonObject {
 }
 
 function withAppearance(schema: TSchema): TSchema {
-  if (Array.isArray(schema.anyOf)) return { ...schema, anyOf: schema.anyOf.map((part: TSchema) => withAppearance(part)) };
-  if (schema.type !== 'object' || schema.additionalProperties !== false || !schema.properties || 'appearance' in schema.properties) {
+  if (Array.isArray(schema['anyOf'])) return { ...schema, anyOf: schema['anyOf'].map((part: TSchema) => withAppearance(part)) };
+  if (schema['type'] !== 'object' || schema['additionalProperties'] !== false || !schema['properties'] || 'appearance' in schema['properties']) {
     throw new Error('Surface appearance requires closed object schemas without a reserved appearance property');
   }
-  return { ...schema, properties: { ...schema.properties, appearance: Type.Optional(surfaceAppearanceSchema) } };
+  return { ...schema, properties: { ...schema['properties'], appearance: Type.Optional(surfaceAppearanceSchema) } };
 }
 
 /** Adds frame-level semantic appearance to every registered widget without
@@ -34,7 +34,8 @@ export function withSurfaceAppearance<T extends SurfaceWidgetDefinition>(catalog
 
 /** DOM-free definitions reused by server validation, prompts and Svelte catalog. */
 export function createInteractiveSurfaceDefinitions(actions: readonly SurfaceActionDescriptor[], base: SurfaceCatalog): SurfaceCatalog {
-  if (!actions.length || actions.length > 32) throw new Error('Register between one and 32 Surface actions');
+  const firstAction = actions[0];
+  if (!firstAction || actions.length > 32) throw new Error('Register between one and 32 Surface actions');
   if (new Set(actions.map((action) => action.id)).size !== actions.length) throw new Error('Duplicate Surface action');
   if (base.widgets.some((widget) => widget.type === 'resource-form')) throw new Error('resource-form is reserved by the interactive catalog');
   for (const action of actions) validateSurfaceActionDescriptor(action);
@@ -46,6 +47,6 @@ export function createInteractiveSurfaceDefinitions(actions: readonly SurfaceAct
       actionId: Type.Union(actionIds),
       title: Type.Optional(Type.String({ minLength: 1, maxLength: 120 })),
     }, { additionalProperties: false }),
-    examples: [{ actionId: actions[0].id }],
+    examples: [{ actionId: firstAction.id }],
   }] });
 }

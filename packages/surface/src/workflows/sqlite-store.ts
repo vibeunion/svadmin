@@ -53,7 +53,7 @@ export class SqliteSurfaceWorkflowStore implements SurfaceWorkflowStore {
     const row = revision === undefined
       ? this.db.prepare('SELECT document FROM svadmin_surface_revisions WHERE tenant = ? AND surface = ? ORDER BY revision DESC LIMIT 1').get(tenantId, surfaceId)
       : this.db.prepare('SELECT document FROM svadmin_surface_revisions WHERE tenant = ? AND surface = ? AND revision = ?').get(tenantId, surfaceId, revision);
-    return row ? JSON.parse(String(row.document)) as SurfaceStoredRevision : undefined;
+    return row ? JSON.parse(String(row['document'])) as SurfaceStoredRevision : undefined;
   }
   putRevision(revision: SurfaceStoredRevision): void {
     this.writing();
@@ -62,12 +62,12 @@ export class SqliteSurfaceWorkflowStore implements SurfaceWorkflowStore {
   }
   getProposal(tenantId: string, id: string): SurfaceActionProposal | undefined {
     const row = this.db.prepare('SELECT document FROM svadmin_surface_proposals WHERE tenant = ? AND id = ?').get(tenantId, id);
-    return row ? JSON.parse(String(row.document)) as SurfaceActionProposal : undefined;
+    return row ? JSON.parse(String(row['document'])) as SurfaceActionProposal : undefined;
   }
   findRequest(tenantId: string, requesterId: string, requestKey: string): SurfaceActionProposal | undefined {
     const row = this.db.prepare('SELECT document FROM svadmin_surface_proposals WHERE tenant = ? AND requester = ? AND request_key = ?')
       .get(tenantId, requesterId, requestKey);
-    return row ? JSON.parse(String(row.document)) as SurfaceActionProposal : undefined;
+    return row ? JSON.parse(String(row['document'])) as SurfaceActionProposal : undefined;
   }
   putProposal(proposal: SurfaceActionProposal): void {
     this.writing();
@@ -83,7 +83,7 @@ export class SqliteSurfaceWorkflowStore implements SurfaceWorkflowStore {
   listAudit(tenantId: string, surfaceId: string, after: number, limit: number): readonly SurfaceWorkflowAuditEvent[] {
     return this.db.prepare('SELECT sequence, document FROM svadmin_surface_audit WHERE tenant = ? AND surface = ? AND sequence > ? ORDER BY sequence LIMIT ?')
       .all(tenantId, surfaceId, after, limit)
-      .map((row) => ({ ...JSON.parse(String(row.document)) as SurfaceWorkflowAuditEvent, sequence: Number(row.sequence) }));
+      .map((row) => ({ ...JSON.parse(String(row['document'])) as SurfaceWorkflowAuditEvent, sequence: Number(row['sequence']) }));
   }
   close(): void { this.db.close(); }
 }

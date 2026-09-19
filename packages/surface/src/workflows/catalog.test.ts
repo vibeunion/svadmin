@@ -54,6 +54,6 @@ describe('one catalog for forms, appearance, generation and validation', () => {
     const registered = defineSurfaceAction({ ...action, inputSchema, authorize: () => true, execute: () => null });
     inputSchema.properties.name.minLength = 0;
     expect(registered.validateInput({ name: '' })).toBe(false);
-    expect(Object.isFrozen(registered.inputSchema.properties.name)).toBe(true);
+    expect(Object.isFrozen(registered.inputSchema['properties'].name)).toBe(true);
   });
 });

@@ -145,7 +145,7 @@ describe('durable Surface approval and execution boundary', () => {
   it('copies submitted arguments before awaiting authorization', async () => {
     const f = fixture(); await f.api.saveSurface(alice, { spec: f.spec, expectedRevision: 0 });
     const work = f.api.propose(alice, f.request); f.args.profile.name = 'Changed after submission';
-    expect((await work).args.profile).toEqual({ name: 'Synthetic User', active: true });
+    expect((await work).args['profile']).toEqual({ name: 'Synthetic User', active: true });
   });
   it('cancels without executing and uses a separate reject authorization phase', async () => {
     const f = fixture(); const p = await f.pending(); await f.api.reject(alice, p.id, p.digest);

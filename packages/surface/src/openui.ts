@@ -34,7 +34,7 @@ export type SurfaceOpenUIResult =
 function componentNames(catalog: SurfaceCatalog): Map<string, string> {
   const names = new Map<string, string>();
   for (const widget of catalog.widgets) {
-    const name = widget.type.split(/[^A-Za-z0-9]+/u).filter(Boolean).map((part) => part[0].toUpperCase() + part.slice(1)).join('');
+    const name = widget.type.split(/[^A-Za-z0-9]+/u).filter(Boolean).map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join('');
     if (!/^[A-Z][A-Za-z0-9]*$/u.test(name) || ['Surface', 'Source'].includes(name) || names.has(name)) {
       throw new Error(`Surface widget cannot be mapped to a unique OpenUI name: ${widget.type}`);
     }
@@ -107,10 +107,10 @@ export function createSurfaceOpenUIStream(options: {
     const dataSources: SurfaceDataSource[] = [];
     for (const source of sources) {
       if (source === null && !final) continue;
-      if (!element(source) || source.typeName !== 'Source' || source.partial || !isJsonValue(source.props.value)) {
+      if (!element(source) || source.typeName !== 'Source' || source.partial || !isJsonValue(source.props['value'])) {
         throw new SurfaceOpenUIError('syntax', 'Invalid Source node');
       }
-      dataSources.push(source.props.value as unknown as SurfaceDataSource);
+      dataSources.push(source.props['value'] as unknown as SurfaceDataSource);
     }
     const normalized: SurfaceWidget[] = [];
     for (const widget of widgets) {

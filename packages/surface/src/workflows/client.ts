@@ -44,7 +44,7 @@ export function createSurfaceFormController(options: {
     const scope = options.getScope();
     if (disposed || state.busy || !scope.enabled) return;
     const ticket = ++generation;
-    publish({ ...state, busy: true, error: undefined });
+    publish({ busy: true, ...(state.proposal ? { proposal: state.proposal } : {}) });
     try {
       const proposal = await work(scope, abort.signal);
       if (disposed || ticket !== generation) return;

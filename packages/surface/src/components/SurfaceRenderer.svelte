@@ -20,7 +20,7 @@
   import { withoutSurfaceAppearance } from '../workflows/catalog.js';
 
   function appearanceClasses(props: JsonObject): string {
-    const appearance = props.appearance as { tone?: 'neutral' | 'success' | 'warning' | 'danger' | 'info'; density?: 'compact' | 'comfortable' } | undefined;
+    const appearance = props['appearance'] as { tone?: 'neutral' | 'success' | 'warning' | 'danger' | 'info'; density?: 'compact' | 'comfortable' } | undefined;
     if (!appearance) return '';
     const classes = surfaceMetric(appearance);
     return `surface-appearance ${classes.root} ${classes.card}`;
