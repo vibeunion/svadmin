@@ -1,0 +1,106 @@
+name: Renderer and current main integration
+on:
+  push:
+    branches: [evidence/typed-rendering-cae3d37-build]
+    paths: [.github/workflows/rendering-main-integration.yml]
+permissions:
+  contents: read
+jobs:
+  integration:
+    if: github.repository == 'vibeunion/svadmin' && github.ref == 'refs/heads/evidence/typed-rendering-cae3d37-build'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [contracts, browsers]
+    env:
+      BASE_SHA: 4a8cbee801a112a707f9d6c4051892fdb99cb2c1
+      FEATURE_SHA: da3c6b6a3971173f23601f4065d73499b99dfd90
+      PREVIOUS_BASE_SHA: bdef00a9c9a7340c70b3002d379f5104401e4493
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: 4a8cbee801a112a707f9d6c4051892fdb99cb2c1
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Form an exact local merge without updating any remote ref
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$BASE_SHA"
+          git cat-file -e "$FEATURE_SHA^{commit}"
+          git merge-base --is-ancestor "$PREVIOUS_BASE_SHA" "$BASE_SHA"
+          python3 - <<'PY'
+          import os, subprocess
+          changed = subprocess.check_output(['git', 'diff', '--name-only', os.environ['PREVIOUS_BASE_SHA'], os.environ['BASE_SHA']], text=True).splitlines()
+          assert changed and len(changed) < 100
+          for name in changed:
+              assert name.startswith(('packages/surface/', 'docs/architecture/', 'docs/pr-evidence/surface-edit-preview/')) or name in ['bun.lock', '.github/workflows/surface-contracts.yml'], name
+          print(f'Checked all {len(changed)} files added or changed on the newer main baseline.')
+          PY
+          git -c user.name='svadmin integration verification' -c user.email='noreply@github.com' merge --no-ff --no-commit "$FEATURE_SHA"
+          git diff --cached --check
+          mkdir -p /tmp/rendering-integration
+          python3 - <<'PY'
+          import json, os, pathlib, subprocess
+          tree = subprocess.check_output(['git', 'write-tree'], text=True).strip()
+          result = {'base_sha': os.environ['BASE_SHA'], 'feature_sha': os.environ['FEATURE_SHA'], 'tree_sha': tree, 'previous_base_sha': os.environ['PREVIOUS_BASE_SHA']}
+          pathlib.Path('/tmp/rendering-integration/source.json').write_text(json.dumps(result, indent=2))
+          print(json.dumps(result))
+          PY
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - run: bun install --frozen-lockfile
+      - name: Build the integrated workspace
+        run: bun run build:packages
+      - name: Verify the affected contracts and native components
+        if: matrix.suite == 'contracts'
+        run: |
+          set -euo pipefail
+          {
+            bun run --cwd example test
+            bun run --cwd packages/ui test src/rendering src/components/detail-contract src/components/auto-table-interactions.test.svelte.ts src/components/auto-form-accessibility.test.svelte.ts src/components/form-contract src/components/ResourceOperationsPage.test.svelte.ts
+            bun run --cwd packages/surface test
+            (cd packages/surface && bun x vitest run --config vitest.contracts.config.ts)
+            bun run --cwd packages/surface check
+            bun run --cwd example check
+            node node_modules/@typescript/native/bin/tsc --noEmit --pretty false -p scripts/fixtures/ui-rendering/published/tsconfig.json
+            bun run --cwd packages/surface styles:check
+            git diff --exit-code -- bun.lock packages/surface/src/styles
+            git diff --cached --check
+          } 2>&1 | tee /tmp/rendering-integration/contracts.log
+      - name: Build the integrated production example without raising budgets
+        if: matrix.suite == 'browsers'
+        run: |
+          set -euo pipefail
+          { bun run --cwd example build && bun run bundle:check; } 2>&1 | tee /tmp/rendering-integration/production.log
+      - name: Install real Chromium
+        if: matrix.suite == 'browsers'
+        run: bun run playwright install --with-deps chromium
+      - name: Verify every production business route and preserve fresh screenshots
+        if: matrix.suite == 'browsers'
+        env:
+          UI_SCREENSHOT_DIR: test-results/screenshots
+        run: bun run playwright test --config playwright.rendering.config.ts
+      - name: Verify the complete development-server E2E suite
+        if: matrix.suite == 'browsers'
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: test-results/integrated-dev-results.json
+        run: bun run playwright test --reporter=list,json --output test-results/integrated-dev
+      - name: Verify Surface built-package preview without CSS compiler plugins
+        if: matrix.suite == 'browsers'
+        run: node packages/surface/scripts/browser-evidence.mjs
+      - name: Preserve source identity, logs and real browser evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: renderer-main-integration-${{ matrix.suite }}
+          path: |
+            /tmp/rendering-integration
+            test-results
+          retention-days: 7
+          if-no-files-found: error
