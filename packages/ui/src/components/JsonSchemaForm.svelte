@@ -20,6 +20,8 @@
     value?: Record<string, unknown>;
     onsubmit?: (data: Record<string, unknown>) => void | Promise<void>;
     submitText?: string;
+    /** Use a unique stable prefix when several schema forms share a page. */
+    idPrefix?: string;
     class?: string;
   }
 
@@ -28,6 +30,7 @@
     value = $bindable({}),
     onsubmit,
     submitText = 'Submit Form',
+    idPrefix = 'json_field',
     class: className = '',
   }: Props = $props();
 
@@ -70,7 +73,7 @@
   }
 
   function writePath(path: string[], nextValue: unknown): void {
-    const next = structuredClone(value);
+    const next = structuredClone($state.snapshot(value));
     let target: Record<string, unknown> = next;
     for (const key of path.slice(0, -1)) {
       const child = target[key];
@@ -121,7 +124,7 @@
 
   {#snippet renderField(node: JsonSchema, path: string[], title: string, required = false)}
     {@const current = readPath(path)}
-    {@const id = `json_field_${path.join('_')}`}
+    {@const id = `${idPrefix}_${path.map(encodeURIComponent).join('/')}`}
     {#if node.type === 'object' || node.properties}
       <fieldset class="svadmin-u-da7c36cd8867 svadmin-u-421ac2be5045">
         <legend class="svadmin-u-0214b4b355d1 svadmin-u-2689f3958069">{title}</legend>

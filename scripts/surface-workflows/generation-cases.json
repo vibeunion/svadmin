@@ -1,0 +1,5 @@
+[
+  {"id":"contact-count","prompt":"显示客户总数，使用紧凑的信息语义样式。","requiredTypes":["metric"],"requireCount":true,"tone":"info","density":"compact"},
+  {"id":"contact-form","prompt":"生成创建客户的交互表单，使用系统已注册的客户创建操作。","requiredTypes":["resource-form"],"actionId":"contacts.create"},
+  {"id":"contact-workspace","prompt":"展示客户姓名列表，并在同一个页面放置创建客户表单。","requiredTypes":["resource-table","resource-form"],"actionId":"contacts.create","requireNameColumn":true}
+]
