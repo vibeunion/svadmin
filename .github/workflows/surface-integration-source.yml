@@ -1,4 +1,4 @@
-name: Surface integration source snapshot
+name: Surface integration objects
 on:
   push:
     branches: [codex/openui-surface-contracts-20260919]
@@ -6,32 +6,88 @@ on:
 permissions:
   contents: read
 jobs:
-  snapshot:
+  objects:
     if: github.repository == 'vibeunion/svadmin' && github.ref == 'refs/heads/codex/openui-surface-contracts-20260919'
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
           fetch-depth: 1
           show-progress: false
-      - name: Capture only the three integration histories
+      - name: Verify exact integration parents
         run: |
           set -euo pipefail
           git fetch --quiet --no-tags --unshallow origin main:refs/remotes/origin/main fix/surface-incremental-source-loading:refs/remotes/origin/source-loading
-          test "$(git rev-parse HEAD^)" = a318cebd0f40a93a34f826a274d758847d5c66f7
+          test "$(git rev-parse HEAD^)" = bc14e8455f5c2d0b3c5361f5338d5eeeb3d7e3b9
           test "$(git rev-parse origin/main)" = bdef00a9c9a7340c70b3002d379f5104401e4493
           test "$(git rev-parse origin/source-loading)" = 58abed0b3e89f172d5b0051fc0bd0d52a60dfe40
-          mkdir -p "$RUNNER_TEMP/surface-integration"
-          git rev-parse HEAD origin/main origin/source-loading > "$RUNNER_TEMP/surface-integration/refs.txt"
-          git bundle create "$RUNNER_TEMP/surface-integration/source.bundle" HEAD refs/remotes/origin/main refs/remotes/origin/source-loading
-          git bundle verify "$RUNNER_TEMP/surface-integration/source.bundle"
-          sha256sum "$RUNNER_TEMP/surface-integration/source.bundle"
-          git status --porcelain
-      - uses: actions/upload-artifact@v7
-        with:
-          name: surface-integration-source
-          path: ${{ runner.temp }}/surface-integration/
-          retention-days: 3
-          if-no-files-found: error
+      - name: Reproduce locally reviewed blobs and require exact hashes
+        run: |
+          python3 - <<'PY'
+          import subprocess,pathlib,json,tempfile
+          BASE='cf6c4746578176ea773a17ef6f49f353292f7818'
+          MAIN='bdef00a9c9a7340c70b3002d379f5104401e4493'
+          HEAD='bc14e8455f5c2d0b3c5361f5338d5eeeb3d7e3b9'
+          def get(ref,name): return subprocess.check_output(['git','show',ref+':'+name]).decode()
+          files={}
+          name='packages/surface/package.json'
+          main=json.loads(get(MAIN,name)); feature=json.loads(get(HEAD,name))
+          main['sideEffects'].append('./dist/styles/editor.css')
+          main['exports']['./editor.css']=feature['exports']['./editor.css']
+          main['devDependencies'].update({k:feature['devDependencies'][k] for k in ['@pandacss/dev','postcss']})
+          main['devDependencies']=dict(sorted(main['devDependencies'].items()))
+          main['scripts']['styles:build']=feature['scripts']['styles:build']
+          main['scripts']['styles:check']=feature['scripts']['styles:check']
+          main['scripts']['build']='node scripts/build-editor-styles.mjs && '+main['scripts']['build']
+          files[name]=json.dumps(main,ensure_ascii=False,indent=2)+'\n'
+          name='bun.lock';lock=get(MAIN,name)
+          start=lock.index('    "packages/surface": {');end=lock.index('    "packages/sveltekit": {',start)
+          part=lock[start:end]
+          for dep in ['@pandacss/dev','postcss']: assert f'"{dep}":' not in part
+          marker='      "devDependencies": {\n';assert part.count(marker)==1
+          part=part.replace(marker,marker+'        "@pandacss/dev": "1.12.1",\n')
+          marker='        "happy-dom": "^20.11.12",\n';assert part.count(marker)==1
+          part=part.replace(marker,marker+'        "postcss": "^8.5.26",\n')
+          files[name]=lock[:start]+part+lock[end:]
+          name='packages/surface/src/agent-contract.ts';s=get(HEAD,name)
+          a="typeof value !== 'object' || value === null || ancestors.has(value)";assert s.count(a)==1
+          files[name]=s.replace(a,"typeof value !== 'object' || ancestors.has(value)")
+          name='packages/surface/src/components/SurfaceRenderer.svelte';s=get(HEAD,name)
+          pairs=[('canAccessAsync, captureAdminContext, getAccessControlProvider, getLogoutVersion','captureAdminContext, getLogoutVersion'),('adminContext.authProvider, adminContext.accessControlProvider, getAccessControlProvider(),','adminContext.authProvider, adminContext.accessControlProvider,'),('    const scope = sessionIdentity;\n    return validation.value.dataSources.map','    const accessControl = adminContext.accessControlProvider;\n    const scope = sessionIdentity;\n    return validation.value.dataSources.map'),('                const decision = await canAccessAsync(resource, action);',"                // 授权检查与缓存身份必须使用同一个所属上下文，不能回退到无关全局授权。\n                const meta = adminContext.getProviderMeta(resource);\n                const decision = accessControl\n                  ? await accessControl.can({ resource, action, ...(meta === undefined ? {} : { meta }) })\n                  : { can: true };")]
+          for a,b in pairs: assert s.count(a)==1;s=s.replace(a,b)
+          files[name]=s
+          for name in ['packages/surface/src/catalog.ts','packages/surface/src/svelte.ts']:
+           with tempfile.TemporaryDirectory() as d:
+            paths=[pathlib.Path(d)/str(i) for i in range(3)]
+            for p,ref in zip(paths,[HEAD,BASE,MAIN]): p.write_text(get(ref,name))
+            files[name]=subprocess.check_output(['git','merge-file','-p',*map(str,paths)]).decode()
+          expected={'bun.lock':'63e7dcfc8884cd191f2c2956baa2716ef4b614be','packages/surface/package.json':'5b8bbbab8c3aec900f7f2bce7e7dd9bd085d97cf','packages/surface/src/agent-contract.ts':'0f576e156f02bc0980caed72034952c1120de3b8','packages/surface/src/catalog.ts':'cc73ccbd5d903f39dc7f72511c0918ee468e5e24','packages/surface/src/components/SurfaceRenderer.svelte':'59d70b0aa3421b61779b24d7bb9011d5a061523f','packages/surface/src/svelte.ts':'2b37d94c95fd6ddcfb347d7e952e93abd3624496'}
+          for name,content in files.items():
+           sha=subprocess.check_output(['git','hash-object','-w','--stdin'],input=content.encode()).decode().strip()
+           assert sha==expected[name],(name,sha,expected[name])
+          print(json.dumps(expected))
+          PY
+      - name: Store only immutable blobs; never write trees, commits or refs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import {execFileSync} from 'node:child_process';
+          const hashes=['63e7dcfc8884cd191f2c2956baa2716ef4b614be','5b8bbbab8c3aec900f7f2bce7e7dd9bd085d97cf','0f576e156f02bc0980caed72034952c1120de3b8','cc73ccbd5d903f39dc7f72511c0918ee468e5e24','59d70b0aa3421b61779b24d7bb9011d5a061523f','2b37d94c95fd6ddcfb347d7e952e93abd3624496'];
+          for(const sha of hashes){
+            const content=execFileSync('git',['cat-file','blob',sha],{maxBuffer:2*1024*1024});
+            const response=await fetch('https://api.github.com/repos/vibeunion/svadmin/git/blobs',{
+              method:'POST',redirect:'error',signal:AbortSignal.timeout(30000),
+              headers:{Authorization:`Bearer ${process.env.GH_TOKEN}`,Accept:'application/vnd.github+json','Content-Type':'application/json'},
+              body:JSON.stringify({content:content.toString('base64'),encoding:'base64'})
+            });
+            if(!response.ok)throw new Error(`Blob storage failed: HTTP ${response.status}`);
+            const stored=await response.json();assert.equal(stored.sha,sha);console.info(`Verified blob ${sha}`);
+          }
+          console.info('No branch, tree or commit was updated. Full final-tree CI remains required.');
+          NODE
