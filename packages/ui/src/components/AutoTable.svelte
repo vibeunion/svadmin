@@ -1,5 +1,6 @@
 <script lang="ts">
   import { bindResourceRendering, type ResourceRendering } from '../rendering/index.js';
+  import type { AutoTableGridState } from './auto-table-grid.js';
   import { definedOptions } from '@svadmin/core/options';
 
   import { onDestroy, tick, untrack } from 'svelte';
@@ -24,6 +25,7 @@
   import { createAtom, useSelector } from '@tanstack/svelte-store';
   import {
     column_getCanSort,
+    column_getSize,
     column_getIsSorted,
     column_toggleSorting,
     header_getSize,
@@ -106,6 +108,8 @@
   interface Props {
     resourceName: string;
     rendering?: ResourceRendering | undefined;
+    /** 可选主体渲染器：不替换资源、权限、工具栏和持久化逻辑。 */
+    gridBody?: Snippet<[AutoTableGridState]>;
     selectable?: boolean;
     density?: 'compact' | 'comfortable';
     showHeader?: boolean;
@@ -139,6 +143,7 @@
   let {
     resourceName,
     rendering,
+    gridBody,
     selectable = true,
     density = 'comfortable',
     showHeader = true,
@@ -1181,7 +1186,204 @@
   function refreshList() {
     if (canRead && !query.isFetching) void listResult.refetch();
   }
+  const gridRowIndex = $derived(new Map(tableView.rows.map(row => [rowIdValue(row), row])));
+  const gridColumns = $derived.by(() => {
+    void tableColumnOrder.current; void tableColumnVisibility.current;
+    return table_getAllLeafColumns(tbl).filter(column => isColumnVisible(column.id)).map(column => ({
+      key: column.id,
+      label: column.id === '_actions' ? i18n.t('common.actions') : column.id === '_select' ? i18n.t('common.selectAll') : column.id === '_expand' ? i18n.t('common.expand') : visibleFields.find(field => field.key === column.id)?.label ?? column.id,
+      width: Math.max(40, Math.min(4096, column_getSize(column))),
+      sortable: column_getCanSort(column),
+    }));
+  });
+  function changeGridSort(next: readonly Sort[]): void {
+    if (!canRead || query.isFetching || deleteManyMutation.isPending) return;
+    markSavedViewDirty();
+    const accepted = next.filter(sort => gridColumns.some(column => column.key === sort.field && column.sortable));
+    sorters = accepted.map(sort => ({ ...sort }));
+    sortingAtom.set(accepted.map(sort => ({ id: sort.field, desc: sort.order === 'desc' })));
+    pagination = { ...pagination, current: 1 };
+  }
 </script>
+
+{#snippet renderGridCell({ id, field }: { id: string | number; field: string })}
+  {@const row = gridRowIndex.get(id)}
+  {#if row}
+    {@const record = copyTableRecord(row.original)}
+    {@const cell = row_getVisibleCells(row).find(item => item.column.id === field)}
+    {#if cell}
+      <ContextMenu.Root>
+        <ContextMenu.Trigger>
+          {#snippet child({ props })}
+            <div {...props}>
+                          {#if cell.column.id === '_select'}
+                            {#if batchActions}
+                              <Checkbox
+                                aria-label={i18n.t('common.selectRow', { id })}
+                                checked={rowIsSelected(row.id)}
+                                onCheckedChange={() => toggleRowSelection(row)}
+                              />
+                            {:else}
+                              <CanAccess resource={resourceName} action="delete" params={{ id }}>
+                                <Checkbox
+                                  aria-label={i18n.t('common.selectRow', { id })}
+                                  checked={rowIsSelected(row.id)}
+                                  onCheckedChange={() => toggleRowSelection(row)}
+                                />
+                              </CanAccess>
+                            {/if}
+                          {:else if cell.column.id === '_expand'}
+                            <TooltipButton tooltip={rowIsExpanded(row.id) ? i18n.t('common.collapse') : i18n.t('common.expand')} variant="ghost" size="icon" class="svadmin-u-d0a52b312f7d svadmin-u-cbbf90f9a828" onclick={() => toggleRowExpanded(row.id)}>
+                              {#if rowIsExpanded(row.id)}
+                                <ChevronUp class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+                              {:else}
+                                <ChevronDown class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+                              {/if}
+                            </TooltipButton>
+                          {:else if cell.column.id === '_actions'}
+                            <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77c08e015d14 svadmin-u-44ee8ba0a421">
+                              {#if rowActions}
+                                {@render rowActions({ record, id })}
+                              {:else}
+                                {@render defaultRowActions(id)}
+                              {/if}
+                            </div>
+                          {:else}
+                            {@const field = visibleFields.find(f => f.key === cell.column.id)}
+                            {@const customColumn = field ? customColumns?.[field.key] : undefined}
+                            {#if customColumn}
+                              {@render customColumn({ value: clonePlainValue(cell_getValue(cell)), record: copyTableRecord(record) })}
+                            {:else if defaultCellRenderer && field}
+                              {@render defaultCellRenderer({ field, value: clonePlainValue(cell_getValue(cell)), record: copyTableRecord(record) })}
+                            {:else if canEdit && field && field.showInEdit !== false && writableFields.has(field.key) && field.key !== primaryKey && field.key !== 'id' && ['text', 'number', 'email', 'url'].includes(field.type)}
+                              <CanAccess resource={resourceName} action="edit" params={{ id }}>
+                                <InlineEdit
+                                  {resourceName}
+                                  recordId={id}
+                                  {field}
+                                  value={cell_getValue(cell)}
+                                />
+                                {#snippet fallback()}
+                                  <FieldDisplay type={field.type} value={cell_getValue(cell)} options={field.options} />
+                                {/snippet}
+                              </CanAccess>
+                            {:else if field?.key === 'id'}
+                              <span class="svadmin-u-0214b4b355d1 svadmin-u-f283ea9bea0e svadmin-u-0e65706bcccd svadmin-u-359090c2d529" title={String(cell_getValue(cell) ?? '—')}>{cell_getValue(cell) ?? '—'}</span>
+                            {:else if field}
+                              <FieldDisplay type={field.type} value={cell_getValue(cell)} options={field.options} resourceName={field.resource} />
+                            {/if}
+                          {/if}
+            </div>
+          {/snippet}
+        </ContextMenu.Trigger>
+                <ContextMenu.Content class="svadmin-u-74b2435a1d40">
+                  {#if canEdit}
+                    <CanAccess resource={resourceName} action="edit" params={{ id }}>
+                      <ContextMenu.Item onclick={() => navigation.edit(resourceName, id)} class="svadmin-u-77a2a20e90d4">
+                        <Pencil class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" /> {i18n.t('common.edit')}
+                      </ContextMenu.Item>
+                    </CanAccess>
+                  {/if}
+                  {#if canShow}
+                    <CanAccess resource={resourceName} action="show" params={{ id }}>
+                      <ContextMenu.Item onclick={() => openDetail(id)} class="svadmin-u-77a2a20e90d4">
+                        <Eye class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" /> {i18n.t('common.detail')}
+                      </ContextMenu.Item>
+                    </CanAccess>
+                  {/if}
+                  <ContextMenu.Item onclick={() => navigator.clipboard?.writeText(String(id))} class="svadmin-u-77a2a20e90d4">
+                    <Copy class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" /> {i18n.t('common.copyId')}
+                  </ContextMenu.Item>
+                  {#if canDelete}
+                    <CanAccess resource={resourceName} action="delete" params={{ id }}>
+                      <ContextMenu.Separator />
+                      <ContextMenu.Item onclick={() => confirmDelete(id)} class="svadmin-u-77a2a20e90d4 svadmin-u-811148b13d1e">
+                        <Trash2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" /> {i18n.t('common.delete')}
+                      </ContextMenu.Item>
+                    </CanAccess>
+                  {/if}
+                </ContextMenu.Content>
+      </ContextMenu.Root>
+    {/if}
+  {/if}
+{/snippet}
+
+{#snippet renderGridControls()}
+  <Table.Root density={currentDensity}>
+          <Table.Header>
+            {#each tableView.headerGroups as headerGroup, _i (_i)}
+              {@const visibleHeaders = headerGroup.headers.filter((header: Header<TableFeatures, TableRecord, unknown>) => isColumnVisible(header.column.id))}
+              <DraggableHeader
+                columns={visibleHeaders.map((header) => ({ id: header.column.id, header }))}
+                onReorder={setColumnOrder}
+              >
+                {#snippet header(col, _index, dragProps)}
+                  {@const header = col.header}
+                  <Table.Head
+                    {...dragProps}
+                    class={cn('svadmin-u-65fdbade2025 svadmin-u-18049387f0af svadmin-u-b247a17a0d75 svadmin-u-2689f3958069 svadmin-u-d9256981a032 svadmin-u-bfa603190748 svadmin-u-f6e31b39b8e4', dragProps.class)}
+                    style={header_getSize(header) != null && header_getSize(header) !== 150 ? `width:${header_getSize(header)}px` : undefined}
+                  >
+                    {#if header.id === '_select'}
+                      {#if batchActions}
+                        <Checkbox
+                          aria-label={i18n.t('common.selectAll')}
+                          checked={table_getIsAllRowsSelected(tbl)}
+                          onCheckedChange={toggleAllRowsSelection}
+                        />
+                      {:else if !acEnabled || deleteResourcePermission.isLoading || deleteResourcePermission.allowed}
+                          <Checkbox
+                            aria-label={i18n.t('common.selectAll')}
+                            checked={table_getIsAllRowsSelected(tbl)}
+                            onCheckedChange={toggleAllRowsSelection}
+                          />
+                      {/if}
+                    {:else if header.id === '_expand'}
+                      <!-- empty -->
+                    {:else if header.id === '_actions'}
+                      <span class="svadmin-u-308fc069e46e svadmin-u-0214b4b355d1">{i18n.t('common.actions')}</span>
+                    {:else if column_getCanSort(header.column)}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421 svadmin-u-ea7b2e9e070e svadmin-u-8ffe7a29179a svadmin-u-b8f0a08ece1e svadmin-u-660d2effb880 svadmin-u-d5eab218aa34 uppercase svadmin-u-8baf13a3e9d7 svadmin-u-7357df2b2e0c svadmin-u-e83a7042bc91"
+                        onclick={() => toggleColumnSort(header.column)}
+                      >
+                        {visibleFields.find(f => f.key === header.id)?.label ?? header.id}
+                        <span class="svadmin-u-359090c2d529 svadmin-u-0b8c506a0596">
+                          {#if column_getIsSorted(header.column) === 'asc'}↑
+                          {:else if column_getIsSorted(header.column) === 'desc'}↓
+                          {:else}⇅
+                          {/if}
+                        </span>
+                      </Button>
+                    {:else}
+                      {visibleFields.find(f => f.key === header.id)?.label ?? header.id}
+                    {/if}
+                  </Table.Head>
+                {/snippet}
+              </DraggableHeader>
+            {/each}
+          </Table.Header>
+  </Table.Root>
+{/snippet}
+
+{#snippet renderGridAfter()}
+  <Table.Root density={currentDensity}>
+    <Table.Body>
+      {#each tableView.rows as row (row.id)}
+        {#if expandedRowRender && rowIsExpanded(row.id)}
+          <Table.Row><Table.Cell colspan={Math.max(1, gridColumns.length)}>
+            {@render expandedRowRender({ record: copyTableRecord(row.original) })}
+          </Table.Cell></Table.Row>
+        {/if}
+      {/each}
+    </Table.Body>
+    {#if summary}<Table.Footer>
+      {@render summary({ data: pageRecords.data.map(copyTableRecord), total: query.data?.total ?? 0, visibleColumnsCount: gridColumns.length })}
+    </Table.Footer>{/if}
+  </Table.Root>
+{/snippet}
 
 {#snippet defaultRowActions(id: string | number)}
   <RecordRowActions
@@ -1593,6 +1795,12 @@
         description={i18n.t('common.operationFailed')}
         retry={refreshList}
       />
+    {:else if gridBody && pageRecords.data.length > 0}
+      {@render gridBody({ records: pageRecords.data.map(copyTableRecord), columns: gridColumns, primaryKey: 'id',
+        sorters: querySorters, density: currentDensity, locale: i18n.locale, label: resource.label,
+        scopeKey: JSON.stringify([resourceName, queryPagination, querySorters, queryFilters, adminContext.tenantCacheKey?.__svadminTenant]),
+        disabled: query.isFetching || deleteManyMutation.isPending,
+        onSortChange: changeGridSort, cell: renderGridCell, controls: renderGridControls, after: renderGridAfter })}
     {:else}
       <div in:fade={{ duration: 150 }}>
         <!-- Desktop Table (hidden on mobile) -->

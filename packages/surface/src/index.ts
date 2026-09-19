@@ -71,3 +71,6 @@ export type {
   SurfaceRevision,
   SurfaceRevisionResult,
 } from './edits.js';
+// 只导出 JSON schema，不将可选 SVAR 渲染器加载到协议入口。
+export { svarGridPropsSchema, svarGridDefinition } from './svar-schema.js';
+export type { SvarGridProps } from './svar-schema.js';

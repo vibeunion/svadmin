@@ -36,6 +36,11 @@
     "./editor.css": {
       "style": "./dist/styles/editor.css",
       "default": "./dist/styles/editor.css"
+    },
+    "./svar": {
+      "types": "./dist/svar.d.ts",
+      "svelte": "./dist/svar.js",
+      "default": "./dist/svar.js"
     }
   },
   "peerDependencies": {

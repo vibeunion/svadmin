@@ -1,0 +1,12 @@
+{
+  "name": "svadmin-svar-grid-verification",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@svar-ui/svelte-grid": "2.7.3",
+    "svelte": "5.56.10"
+  },
+  "overrides": {
+    "@svar-ui/lib-state": "1.9.7"
+  }
+}
