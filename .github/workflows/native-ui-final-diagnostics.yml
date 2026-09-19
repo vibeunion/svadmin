@@ -1,4 +1,4 @@
-name: Native UI integration diagnostics
+name: Validate native UI integration tree
 on:
   push:
     branches: [feat/ui-panda-complete-20260919]
@@ -6,43 +6,129 @@ on:
 permissions:
   contents: read
 jobs:
-  inspect:
+  integration:
     if: github.repository == 'vibeunion/svadmin' && github.ref == 'refs/heads/feat/ui-panda-complete-20260919'
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 12
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-          fetch-depth: 0
-          show-progress: false
-      - name: Inspect a local-only merge, never update branch refs
+          fetch-depth: 1
+      - name: Fetch only the reviewed histories
         run: |
+          git fetch --quiet --no-tags --unshallow origin
+          git fetch --quiet --no-tags origin main:refs/remotes/origin/main
+          test "$(git rev-parse origin/main)" = cc93559112d08866182ef8a4f6c81ff6f5bc7b7e
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git rev-parse HEAD origin/main
-          git merge-base HEAD origin/main
           git -c core.hooksPath=/dev/null merge --no-commit --no-ff origin/main || test -n "$(git ls-files -u)"
-          git status --short
-          echo '=== CONFLICT CONTENT ==='
+      - name: Resolve only the three reviewed conflicts
+        run: |
           python3 - <<'PY'
-          import subprocess, pathlib
-          names = subprocess.check_output(['git','diff','--name-only','--diff-filter=U','-z']).decode().split('\0')
-          for name in filter(None,names):
-              print('FILE',name)
-              print(subprocess.check_output(['git','ls-files','-u','--',name]).decode())
-              path = pathlib.Path(name)
-              if path.exists() and path.suffix not in ('.png','.jpg') and name != 'bun.lock':
-                  text = path.read_text()
-                  if len(text) <= 18000: print(text)
-                  else:
-                      lines = text.splitlines()
-                      indices = {j for i,line in enumerate(lines) if line.startswith(('<<<<<<<','=======','>>>>>>>')) for j in range(max(0,i-8),min(len(lines),i+12))}
-                      for i in sorted(indices): print(f'{i+1}: {lines[i]}')
+          import subprocess, pathlib, json, re
+          def git(*args):
+              return subprocess.check_output(['git', *args]).decode()
+          expected = {
+              'packages/ai-elements/src/ai.theme.css',
+              'packages/ui/package.json',
+              'scripts/check-panda-browser.mjs',
+          }
+          conflicts = set(filter(None, git('diff','--name-only','--diff-filter=U','-z').split('\0')))
+          assert conflicts == expected, f'Unreviewed conflict set: {conflicts}'
+          stages = {
+              'packages/ai-elements/src/ai.theme.css': '1175cd9f227f86475687306cfdda2289c1748352',
+              'packages/ui/package.json': 'de9750826fd2f0ab859c1fff80ca90636876d2c4',
+              'scripts/check-panda-browser.mjs': '4b9bd48632a9b0f226da53db73977e859e969e8b',
+          }
+          for name, sha in stages.items():
+              assert git('rev-parse', ':2:'+name).strip() == sha, f'Concurrent change: {name}'
+          ai = 'packages/ai-elements/src/ai.theme.css'
+          pathlib.Path(ai).write_text(git('show', ':2:'+ai))
+          assert '@source' not in pathlib.Path(ai).read_text()
+          ui = 'packages/ui/package.json'
+          manifest = json.loads(git('show', ':2:'+ui))
+          test = manifest['scripts']['test:css']
+          assert 'scripts/conditional-css.test.mjs' not in test
+          manifest['scripts']['test:css'] = test + ' scripts/conditional-css.test.mjs'
+          assert 'build-migrated-ui.mjs' in manifest['scripts']['build:styles']
+          assert 'build-native-classnames.mjs' in manifest['scripts']['build:styles']
+          pathlib.Path(ui).write_text(json.dumps(manifest, indent=2, ensure_ascii=False)+'\n')
+          browser = pathlib.Path('scripts/check-panda-browser.mjs')
+          merged, count = re.subn(r'^<<<<<<< HEAD\n.*?^=======\n(.*?)^>>>>>>> origin/main\n', lambda m:m.group(1), browser.read_text(), flags=re.M|re.S)
+          assert count == 2, f'Unexpected browser conflict blocks: {count}'
+          assert 'packages/ui/test/style-baselines/${path}' in merged
+          assert 'assert.deepEqual(after.styles, before.styles' in merged
+          assert 'before.image.equals(after.image)' in merged
+          assert 'screenshotLaunchArgs' in merged
+          assert '<<<<<<<' not in merged
+          browser.write_text(merged)
+          subprocess.check_call(['git','add',*sorted(expected)])
+          assert not git('ls-files','-u').strip()
           PY
-          echo '=== CURRENT FORM FILES ==='
-          git ls-files '*form*' '*Form*' | head -60
-          echo '=== MAIN OVERRIDES ==='
-          git show origin/main:package.json | sed -n '85,125p'
-          echo '=== MERGE STAT ==='
+          git diff --check
+          git diff --cached --check
           git diff --cached --stat HEAD
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - name: Verify frozen install and audit on the integrated sources
+        run: |
+          bun install --frozen-lockfile
+          git diff --exit-code -- bun.lock
+          bun audit
+          node scripts/check-style-boundary.mjs --source
+          bun test packages/core/src/i18n-source-regression.test.ts
+          node --test scripts/check-no-tailwind.test.mjs scripts/native-classnames.test.mjs scripts/style-boundary.test.mjs scripts/recipe-declarations.test.mjs scripts/stable-screenshot.test.mjs
+          bunx --no-install eslint scripts/check-panda-browser.mjs
+      - name: Remove the temporary workflow from the candidate tree
+        run: |
+          git rm .github/workflows/native-ui-final-diagnostics.yml
+          git diff --cached --check
+          git diff --cached --check origin/main
+          git write-tree
+      - name: Store verified Git objects only; no commit or ref writes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { execFileSync } from 'node:child_process';
+          const git = (...args) => execFileSync('git', args, { maxBuffer: 8 * 1024 * 1024 });
+          const text = (...args) => git(...args).toString('utf8').trim();
+          const parent = text('rev-parse','HEAD');
+          const main = text('rev-parse','MERGE_HEAD');
+          assert.equal(main, 'cc93559112d08866182ef8a4f6c81ff6f5bc7b7e');
+          assert.equal(text('rev-parse','--abbrev-ref','HEAD'), 'feat/ui-panda-complete-20260919');
+          const names = git('diff','--cached','--name-only','-z','HEAD').toString('utf8').split('\0').filter(Boolean);
+          assert.ok(names.length > 0 && names.length <= 25, 'Unexpected merge scope');
+          const request = async (kind, body) => {
+            assert.ok(['blobs','trees'].includes(kind));
+            const response = await fetch(`https://api.github.com/repos/vibeunion/svadmin/git/${kind}`, {
+              method:'POST', redirect:'error', signal:AbortSignal.timeout(30_000),
+              headers:{ Authorization:`Bearer ${process.env.GH_TOKEN}`, Accept:'application/vnd.github+json', 'Content-Type':'application/json' },
+              body:JSON.stringify(body),
+            });
+            if (!response.ok) throw new Error(`Git ${kind} storage failed: HTTP ${response.status}`);
+            return response.json();
+          };
+          const entries = [];
+          for (const path of names) {
+            const stage = text('ls-files','--stage','--',path);
+            if (!stage) { entries.push({ path, mode:'100644', type:'blob', sha:null }); continue; }
+            const match = /^(\d+) ([a-f0-9]{40}) 0\t/.exec(stage);
+            assert.ok(match, `Unexpected index stage: ${path}`);
+            const [, mode, expected] = match;
+            const stored = await request('blobs',{ content:git('show',`:${path}`).toString('base64'), encoding:'base64' });
+            assert.equal(stored.sha, expected, `Blob differs: ${path}`);
+            entries.push({ path, mode, type:'blob', sha:stored.sha });
+          }
+          const stored = await request('trees',{ base_tree:text('rev-parse','HEAD^{tree}'), tree:entries });
+          assert.equal(stored.sha, text('write-tree'), 'Remote and locally reviewed tree differ');
+          console.info(JSON.stringify({ parent, main, tree:stored.sha, entries, verified:['frozen-install','audit','native-boundary','locale-regression','boundary-unit-tests','browser-script-lint','merge-diff-whitespace'], refsUpdated:false },null,2));
+          NODE
