@@ -6,31 +6,58 @@ on:
 permissions:
   contents: read
 jobs:
-  diagnose:
+  verify-repair:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: c1b5aa834dd06b00e2666d2319415add0b787015
+          ref: 713d90db73373821ab6102eb694b3882cfd11d2e
           persist-credentials: false
-      - name: Inspect exact main merge without modifying any remote branch
-        shell: bash
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 26
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Verify exact ancestry and complete diff
         run: |
           set -euo pipefail
           git fetch --quiet --no-tags --unshallow origin
-          git fetch --quiet --no-tags origin c02ac0dab6edc081b4175d17a46fdeff98e1267d
-          git config user.name 'Integration review'
-          git config user.email 'noreply@github.com'
-          git status --short
-          for path in .agents/AGENTS.local.md .agents/state/coordination.json; do
-            if test -f "$path"; then echo "--- $path"; head -100 "$path"; fi
-          done
-          if git merge --no-commit --no-ff c02ac0dab6edc081b4175d17a46fdeff98e1267d; then
-            echo 'MERGE_DIAGNOSTIC=clean'
-            git diff --cached --stat
-          else
-            echo 'MERGE_DIAGNOSTIC=conflicts; this is not a passing acceptance run'
-            git diff --name-only --diff-filter=U
-            git diff --cc
+          git merge-base --is-ancestor c02ac0dab6edc081b4175d17a46fdeff98e1267d HEAD
+          git merge-base --is-ancestor b39b4953af4166548b21b8ab7fd2c7af80d6a027 HEAD
+          git merge-base --is-ancestor 0f6c4ad148f69b501870f0c18c6ea94bd27a8349 HEAD
+          git diff --check c02ac0dab6edc081b4175d17a46fdeff98e1267d HEAD
+          git diff HEAD^ HEAD -- scripts/stripe-first-refactor-contract.test.ts
+      - name: Install unchanged dependencies
+        run: |
+          bun install
+          git diff --exit-code -- bun.lock
+      - name: Verify corrected contract and lint
+        run: |
+          bunx --no-install eslint scripts/stripe-first-refactor-contract.test.ts --max-warnings 0
+          bun test scripts/stripe-first-refactor-contract.test.ts
+      - name: Prove the contract rejects lost top alignment
+        shell: bash
+        run: |
+          set -euo pipefail
+          file=packages/ui/design/product-recipes.ts
+          cp "$file" /tmp/pr443-product-recipes.ts
+          trap 'cp /tmp/pr443-product-recipes.ts "$file"' EXIT
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('packages/ui/design/product-recipes.ts')
+          source = p.read_text()
+          old = "columns: { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', alignItems: 'start',"
+          assert source.count(old) == 1
+          p.write_text(source.replace(old, old.replace("alignItems: 'start'", "alignItems: 'stretch'")))
+          PY
+          if bun test scripts/stripe-first-refactor-contract.test.ts >/tmp/pr443-negative.log 2>&1; then
+            echo 'ERROR: removed top-alignment contract was not detected'
+            exit 1
           fi
+          grep -F '1 fail' /tmp/pr443-negative.log
+          grep -F 'stretch' /tmp/pr443-negative.log
+          cp /tmp/pr443-product-recipes.ts "$file"
+          git diff --exit-code
+          echo 'Exact-head positive test and intentional-mutation negative test passed; no source changes retained.'
