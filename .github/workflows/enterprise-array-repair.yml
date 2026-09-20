@@ -1,6 +1,6 @@
 name: Prepare enterprise array ownership candidate
 
-# Temporary review helper. Creates source objects and tests them, never moves refs.
+# Temporary object-only helper. Does not move main or any feature ref.
 on:
   push:
     branches: [review/enterprise-reconcile-20260920]
@@ -9,37 +9,22 @@ permissions:
 jobs:
   prepare:
     if: >-
-      github.event.head_commit.message == 'review: prepare guarded array ownership candidate'
+      github.event.head_commit.message == 'review: construct final enterprise main candidate'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
-        with:
-          node-version: '26'
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: '1.4.2'
-      - name: Prepare bounded source and regression changes
+      - name: Combine disjoint reviewed source changes and current main without dropping either history
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          cp -R review-assets "$RUNNER_TEMP/array-ownership-assets"
-          git fetch --quiet --no-tags --depth=1 origin a21bdfc8121715f5d148454657daf687f17e2414
-          git switch --detach a21bdfc8121715f5d148454657daf687f17e2414
-          export REVIEW_ASSETS="$RUNNER_TEMP/array-ownership-assets"
-          python3 "$REVIEW_ASSETS/array-ownership-repair.py"
-          git diff --check
-          test -z "$(git diff --name-only -- .github/workflows)"
-      - run: bun install --frozen-lockfile
-      - name: Build real UI dependencies
-        run: bun run --cwd packages/ai-elements build && bun run --cwd packages/ui build
-      - name: Run all enterprise component regressions including both array cases
-        run: bun run --cwd packages/ui test src/components/enterprise-components.test.svelte.ts
-      - name: Verify no dependency changes
-        run: git diff --exit-code -- bun.lock package.json packages/ui/package.json
+          cp review-assets/integrate-current-main.py "$RUNNER_TEMP/integrate-enterprise-main.py"
+          for sha in db24c47be854d3788edca6c86bf1b76940a6fd42 d9726c4a850768e7e30bdf62e18add6c9a856056 467ec8a8c36040d82eb4ebe0b091c685ac47248a; do
+            git fetch --quiet --no-tags --depth=1 origin "$sha"
+          done
+          python3 "$RUNNER_TEMP/integrate-enterprise-main.py"
