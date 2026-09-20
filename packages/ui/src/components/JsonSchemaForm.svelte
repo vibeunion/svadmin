@@ -10,6 +10,8 @@
     type JsonSchemaFormSchema,
   } from './json-schema-form-state.js';
 
+  import { readRecursiveSchemaForm, validateRecursiveSchemaForm, schemaFormPointer } from './enterprise/recursive-schema-form.js';
+  import { parseSchemaNumber, type SchemaFormIssue } from './enterprise/json-schema-form.js';
   type JsonSchema = JsonSchemaFormSchema;
 
   interface Props {
@@ -22,6 +24,7 @@
     /** 只决定此实例文案；不修改全局语言。 */
     locale?: string;
     onerror?: (error: unknown) => void;
+    onvalidationerror?: (issues: SchemaFormIssue[]) => void;
     /** Use a unique stable prefix when several schema forms share a page. */
     idPrefix?: string;
     class?: string;
@@ -36,6 +39,7 @@
     readonly = false,
     locale,
     onerror,
+    onvalidationerror,
     idPrefix,
     class: className = '',
   }: Props = $props();
@@ -51,6 +55,10 @@
     add: 'Add item', remove: 'Remove item', empty: 'No items',
     failed: 'Submission did not complete. Check its status before retrying.', invalid: 'Check the form input.',
   });
+  const model = $derived(readRecursiveSchemaForm(schema));
+  let validationIssues = $state<SchemaFormIssue[]>([]);
+  let parseIssues = $state<SchemaFormIssue[]>([]);
+  let internalValue: Record<string, unknown> | undefined;
   let isSubmitting = $state(false);
   let failure = $state<'invalid' | 'failed' | null>(null);
   let formElement: HTMLFormElement | undefined;
@@ -58,7 +66,10 @@
   let authorityRevision = 0;
   let identity: readonly unknown[] = [];
   const prepared = $derived.by(() => {
-    try { return { ok: true as const, value: initializeSchemaForm(schema, value) }; }
+    try {
+      if (model.issues.length) return { ok: false as const };
+      return { ok: true as const, value: initializeSchemaForm(schema, value) };
+    }
     catch { return { ok: false as const }; }
   });
   const locked = $derived(disabled || readonly || isSubmitting || !prepared.ok);
@@ -72,6 +83,9 @@
       if (next.some((part, index) => part !== identity[index])) {
         authorityRevision += 1;
         failure = null;
+        validationIssues = [];
+        if (schema !== identity[0] || value !== internalValue) parseIssues = [];
+        internalValue = undefined;
       }
       identity = next;
     });
@@ -82,16 +96,58 @@
     return !destroyed && !disabled && !readonly && !isSubmitting && prepared.ok
       && !formElement?.closest('fieldset[disabled]');
   }
+  function nodeType(node: JsonSchema): string | undefined {
+    return Array.isArray(node.type) ? node.type.find(type => type !== 'null') : node.type;
+  }
+  function choices(node: JsonSchema): JsonSchema['enum'] {
+    return node.enum ?? (Object.hasOwn(node, 'const') ? [node.const ?? null] : undefined);
+  }
+  function pathReadonly(path: readonly string[]): boolean {
+    let node: JsonSchema | undefined = schema;
+    if (node.readOnly) return true;
+    for (const key of path) {
+      node = node && (nodeType(node) === 'array' ? node.items : node.properties?.[key]);
+      if (node?.readOnly) return true;
+    }
+    return false;
+  }
+  function invalid(issues: SchemaFormIssue[]): void {
+    failure = 'invalid';
+    validationIssues = issues;
+    try { onvalidationerror?.(issues); } catch { /* Observers do not authorize submission. */ }
+  }
+  function fieldInvalid(path: readonly string[]): boolean {
+    return [...validationIssues, ...parseIssues].some(issue => issue.path === schemaFormPointer(path));
+  }
+  function writeNumber(path: string[], input: HTMLInputElement): void {
+    if (!editable() || pathReadonly(path)) return;
+    const pointer = schemaFormPointer(path);
+    parseIssues = parseIssues.filter(issue => issue.path !== pointer);
+    try {
+      if (input.validity.badInput) throw new Error('Invalid numeric input');
+      writePath(path, parseSchemaNumber(input.value));
+    } catch {
+      parseIssues = [...parseIssues, { path: pointer, code: 'invalid-value' }];
+      invalid(parseIssues);
+    }
+  }
   function readPath(path: string[]): unknown {
     return path.reduce<unknown>((current, key) => (
       current && typeof current === 'object' && Object.hasOwn(current, key)
         ? (current as Record<string, unknown>)[key] : undefined
     ), prepared.ok ? prepared.value : {});
   }
-  function writePath(path: string[], nextValue: unknown): void {
-    if (!editable() || !prepared.ok) return;
-    try { value = writeSchemaFormPath(prepared.value, path, nextValue); failure = null; }
-    catch { failure = 'invalid'; }
+  function writePath(path: string[], nextValue: unknown): boolean {
+    if (!editable() || !prepared.ok || pathReadonly(path)) return false;
+    try {
+      value = writeSchemaFormPath(prepared.value, path, nextValue);
+      // Capture the actual bindable value after Svelte wraps it, not its raw source.
+      internalValue = value;
+      failure = null;
+      validationIssues = [];
+      return true;
+    }
+    catch { failure = 'invalid'; return false; }
   }
   function choose(path: string[], raw: string, choices: JsonSchema['enum']): void {
     if (!editable()) return;
@@ -107,16 +163,33 @@
   function removeArrayItem(path: string[], index: number): void {
     if (!editable()) return;
     const current = readPath(path);
-    if (Array.isArray(current)) writePath(path, current.filter((_, itemIndex) => itemIndex !== index));
+    if (!Array.isArray(current) || !Number.isSafeInteger(index) || index < 0 || index >= current.length) return;
+    const prefix = schemaFormPointer(path) + '/';
+    const nextIssues = parseIssues.flatMap(issue => {
+      if (!issue.path.startsWith(prefix)) return [issue];
+      const tail = issue.path.slice(prefix.length);
+      const separator = tail.indexOf('/');
+      const segment = separator < 0 ? tail : tail.slice(0, separator);
+      if (!/^(0|[1-9][0-9]*)$/u.test(segment)) return [issue];
+      const itemIndex = Number(segment);
+      if (itemIndex === index) return [];
+      if (itemIndex < index) return [issue];
+      return [{ ...issue, path: prefix + String(itemIndex - 1) + (separator < 0 ? '' : tail.slice(separator)) }];
+    });
+    // Retire only the removed item's error and shift surviving descendants with their
+    // array item. A rejected readonly/disabled write must not clear any error.
+    if (writePath(path, current.filter((_, itemIndex) => itemIndex !== index))) parseIssues = nextIssues;
   }
   async function handleSubmit(event: SubmitEvent): Promise<void> {
     event.preventDefault();
     // 同步置锁，防止同一帧的双击/重入 submit；遵循宿主 fieldset 的预览禁用状态；权限仍需服务端校验。
     if (!editable() || !prepared.ok || !onsubmit) return;
-    if (formElement && !formElement.checkValidity()) { failure = 'invalid'; return; }
+    const problems = [...parseIssues, ...validateRecursiveSchemaForm(model, prepared.value)];
+    if (problems.length) { invalid(problems); return; }
+    if (formElement && !formElement.checkValidity()) { invalid([{ path: '', code: 'invalid-value' }]); return; }
     let payload: Record<string, unknown>;
     try { payload = schemaFormSnapshot(prepared.value); }
-    catch { failure = 'invalid'; return; }
+    catch { invalid([{ path: '', code: 'invalid-value' }]); return; }
     const currentValue = value, currentSchema = schema, handler = onsubmit, revision = authorityRevision;
     const fingerprint = JSON.stringify(payload);
     failure = null;
@@ -141,6 +214,8 @@
 </script>
 
 <form
+  novalidate
+  data-testid="json-schema-form"
   bind:this={formElement}
   aria-busy={isSubmitting}
   onsubmit={handleSubmit}
@@ -154,13 +229,16 @@
   {/if}
 
   {#if !prepared.ok || failure}
-    <p role="alert">{labels[!prepared.ok ? 'invalid' : failure ?? 'invalid']}</p>
+    <p role="alert" data-testid="schema-form-errors">{labels[!prepared.ok ? 'invalid' : failure ?? 'invalid']}</p>
   {/if}
 
   {#snippet renderField(node: JsonSchema, path: string[], title: string, required = false)}
     {@const current = readPath(path)}
+    {@const options = choices(node)}
+    {@const type = nodeType(node)}
+    {@const fieldLocked = locked || pathReadonly(path)}
     {@const id = `${prefix}_${path.map(encodeURIComponent).join('/')}`}
-    {#if node.type === 'object' || node.properties}
+    {#if type === 'object' || node.properties}
       <fieldset class="svadmin-u-da7c36cd8867 svadmin-u-421ac2be5045">
         <legend class="svadmin-u-0214b4b355d1 svadmin-u-2689f3958069">{title}</legend>
         {#if node.description}<p class="svadmin-u-d058ca6de60f svadmin-u-bfa603190748">{node.description}</p>{/if}
@@ -170,20 +248,20 @@
           {/each}
         </div>
       </fieldset>
-    {:else if node.type === 'array'}
+    {:else if type === 'array'}
       {@const items = Array.isArray(current) ? current : []}
       <fieldset class="svadmin-u-da7c36cd8867 svadmin-u-421ac2be5045">
         <legend class="svadmin-u-0214b4b355d1 svadmin-u-2689f3958069">{title}</legend>
         {#if node.description}<p class="svadmin-u-d058ca6de60f svadmin-u-bfa603190748">{node.description}</p>{/if}
         {#each items as _, index (index)}
           {@render renderField(node.items ?? { type: 'string' }, [...path, String(index)], `${title} ${index + 1}`, true)}
-          <Button type="button" disabled={locked} variant="ghost" size="sm" onclick={() => removeArrayItem(path, index)}>
+          <Button type="button" disabled={fieldLocked} variant="ghost" size="sm" onclick={() => removeArrayItem(path, index)}>
             <Trash2 class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" /> {labels.remove}
           </Button>
         {:else}
           <span class="svadmin-u-bfa603190748">{labels.empty}</span>
         {/each}
-        <Button type="button" disabled={locked} variant="outline" size="sm" onclick={() => addArrayItem(path, node.items ?? { type: 'string' })}>
+        <Button type="button" disabled={fieldLocked} variant="outline" size="sm" onclick={() => addArrayItem(path, node.items ?? { type: 'string' })}>
           <Plus class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" /> {labels.add}
         </Button>
       </fieldset>
@@ -193,17 +271,17 @@
           {title}{#if required}<span class="svadmin-u-811148b13d1e">*</span>{/if}
         </label>
         {#if node.description}<p class="svadmin-u-d058ca6de60f svadmin-u-bfa603190748">{node.description}</p>{/if}
-        {#if node.enum}
-          <select id={id} disabled={locked} required={required} value={schemaFormEnumIndex(node.enum, current)} onchange={(event) => choose(path, event.currentTarget.value, node.enum)} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529">
+        {#if options}
+          <select id={id} name={path.join('.')} aria-invalid={fieldInvalid(path)} disabled={fieldLocked} required={required} value={schemaFormEnumIndex(options, current)} onchange={(event) => choose(path, event.currentTarget.value, options)} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529">
             <option value="">{i18n.t('common.selectOption')}</option>
-            {#each node.enum as option, optionIndex (optionIndex)}<option value={String(optionIndex)}>{String(option)}</option>{/each}
+            {#each options as option, optionIndex (optionIndex)}<option value={String(optionIndex)}>{String(option)}</option>{/each}
           </select>
-        {:else if node.type === 'boolean'}
-          <input id={id} disabled={locked} type="checkbox" checked={Boolean(current)} onchange={(event) => writePath(path, event.currentTarget.checked)} />
-        {:else if node.type === 'number' || node.type === 'integer'}
-          <input id={id} disabled={locked} type="number" step={node.type === 'integer' ? 1 : 'any'} required={required} value={current === undefined ? '' : String(current)} oninput={(event) => writePath(path, event.currentTarget.value === '' ? undefined : Number(event.currentTarget.value))} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529" />
+        {:else if type === 'boolean'}
+          <input id={id} name={path.join('.')} aria-invalid={fieldInvalid(path)} disabled={fieldLocked} type="checkbox" checked={Boolean(current)} onchange={(event) => writePath(path, event.currentTarget.checked)} />
+        {:else if type === 'number' || type === 'integer'}
+          <input id={id} name={path.join('.')} aria-invalid={fieldInvalid(path)} disabled={fieldLocked} type="number" step={type === 'integer' ? 1 : 'any'} required={required} value={current === undefined ? '' : String(current)} oninput={(event) => writeNumber(path, event.currentTarget)} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529" />
         {:else}
-          <input id={id} disabled={locked} type="text" required={required} value={String(current ?? '')} oninput={(event) => writePath(path, event.currentTarget.value)} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529" />
+          <input id={id} name={path.join('.')} aria-invalid={fieldInvalid(path)} disabled={fieldLocked} type="text" required={required} value={String(current ?? '')} oninput={(event) => writePath(path, event.currentTarget.value)} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529" />
         {/if}
       </div>
     {/if}
@@ -217,13 +295,13 @@
     {/each}
   </div>
 
+  {/if}
   <div class="svadmin-u-173fa8f06789 svadmin-u-b950dda299d3 svadmin-u-05faf5c801ff svadmin-u-60fbb7713999 svadmin-u-77c08e015d14">
     <Button type="submit" size="sm" disabled={locked} class="svadmin-u-44ee8ba0a421 svadmin-u-25effcb585ab">
       {#if isSubmitting}<Loader2 class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-afbdd13a380e" />{/if}
       {submitText}
     </Button>
   </div>
-  {/if}
   </fieldset>
 </form>
 

@@ -1,6 +1,18 @@
 /** 嵌套表单的草稿与传输语义；不是替代服务端的 JSON Schema 校验器。 */
 export interface JsonSchemaFormSchema {
-  type?: string;
+  type?: string | string[];
+  const?: string | number | boolean | null;
+  readOnly?: boolean;
+  minimum?: number;
+  maximum?: number;
+  exclusiveMinimum?: number;
+  exclusiveMaximum?: number;
+  multipleOf?: number;
+  minLength?: number;
+  maxLength?: number;
+  minItems?: number;
+  maxItems?: number;
+  additionalProperties?: boolean;
   title?: string;
   description?: string;
   properties?: Record<string, JsonSchemaFormSchema>;
