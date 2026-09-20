@@ -62,8 +62,8 @@ describe('real read-only business widgets', () => {
       const data: SurfaceWidgetDataState = status === 'error'
         ? { status, sourceId: 'x', error: { sourceId: 'x', code: 'provider_failed', message: 'private-backend-diagnostic' } }
         : { status, sourceId: 'x' };
-      const detail = render(ResourceDetailWidget, { widgetId: 'd', props: detailProps, data, locale: 'zh-CN' });
-      const activity = render(ActivityFeedWidget, { widgetId: 'a', props: activityProps, data, locale: 'zh-CN' });
+      const detail = render(ResourceDetailWidget, { props: { widgetId: 'd', props: detailProps, data, locale: 'zh-CN' } });
+      const activity = render(ActivityFeedWidget, { props: { widgetId: 'a', props: activityProps, data, locale: 'zh-CN' } });
       expect(detail.container.textContent).toContain(status === 'loading' ? '正在加载记录' : status === 'empty' ? '暂无记录' : '记录不可用');
       expect(activity.container.textContent).toContain(status === 'loading' ? '正在加载动态' : status === 'empty' ? '暂无动态' : '动态不可用');
       expect(detail.container.textContent).not.toContain('private-backend'); expect(activity.container.textContent).not.toContain('private-backend');
