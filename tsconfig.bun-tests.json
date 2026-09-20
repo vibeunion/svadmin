@@ -13,6 +13,7 @@
   "exclude": [
     "node_modules", "dist",
     "packages/ai-elements/src/**/*.test.ts",
+    "packages/devtools-contract/src/**/*.test.ts",
     "packages/flow/src/**/*.test.ts",
     "packages/surface/src/**/*.test.ts",
     "packages/ui/src/**/*.test.ts",
