@@ -1,5 +1,41 @@
 # Changelog
 
+## [0.53.0](https://github.com/vibeunion/svadmin/compare/core-v0.52.0...core-v0.53.0) (2026-09-20)
+
+
+### 🚀 Features
+
+* **ui:** migrate admin styling to Panda CSS ([f23e290](https://github.com/vibeunion/svadmin/commit/f23e2909b1dd6ec3ca89339cb2eb72f75149e8ad))
+
+
+### 🐛 Bug Fixes
+
+* **ci:** restore strict PR contracts ([5155153](https://github.com/vibeunion/svadmin/commit/5155153faef9c2edb12be86eb291114ae35f36e9))
+* **core:** preserve temporal shapes in generated schemas ([5129935](https://github.com/vibeunion/svadmin/commit/51299356dd2eca0636094baefabadc63c0fbb1d8))
+* **core:** restore processing labels in both built-in locales ([ee581b8](https://github.com/vibeunion/svadmin/commit/ee581b873106ec341872e30a0d169f26348e3777))
+* **i18n:** reconcile processing labels when syncing main into Panda migration ([7b2f036](https://github.com/vibeunion/svadmin/commit/7b2f036ca797e2c9349fc041c3b640d1138fdaba))
+* preserve query error contracts and integrate current main ([b7f11be](https://github.com/vibeunion/svadmin/commit/b7f11be5e57ed60337df1f87358d587f00b35fdb))
+* reconcile reviewed UI, Surface and Panda PRs for combined validation ([d298ace](https://github.com/vibeunion/svadmin/commit/d298ace8dbca35eb898a0157427a31bbb232a80b))
+* reconcile TypeBox migration with merged field contracts ([1a30604](https://github.com/vibeunion/svadmin/commit/1a3060434f5a59bdb8d84510ba5044e48fe1f83e))
+* **styles:** reconcile content recipes with current strict field contracts ([3431127](https://github.com/vibeunion/svadmin/commit/34311272a1b5dd556049645e57d108123a9902d7))
+* **surface:** enforce pre-dispatch scope isolation and repair workflow prerequisites ([0994a52](https://github.com/vibeunion/svadmin/commit/0994a52e9faf44e6baf56a33fc55855dcad43bcb))
+* **surface:** integrate edit preview with native main and scoped source loading ([0a6d22d](https://github.com/vibeunion/svadmin/commit/0a6d22dbbfbfa68615f99dffa4966062acbc683f))
+* **ui:** close strict optional, field and scoped-locale integration gaps ([469ed93](https://github.com/vibeunion/svadmin/commit/469ed9351000bddc6fc7b3994d811714eb8bd198))
+* **ui:** integrate enterprise components with current Panda contracts ([1565f54](https://github.com/vibeunion/svadmin/commit/1565f549af42a04bc63d9189a267e01c58ffedf2))
+* **ui:** preserve async session and enterprise interaction correctness ([19c8b94](https://github.com/vibeunion/svadmin/commit/19c8b94c31b6123db1060dc494fd8e6de42775eb))
+* **ui:** reconcile async interaction repairs with current main ([b39b495](https://github.com/vibeunion/svadmin/commit/b39b4953af4166548b21b8ab7fd2c7af80d6a027))
+* **ui:** reconcile enterprise validation with recursive form and host-filter contracts ([034eb73](https://github.com/vibeunion/svadmin/commit/034eb737b1ad4caca02fcd42c5f83559aaedb592))
+* **ui:** reconcile product recipes and nested forms with current main ([f1f46c5](https://github.com/vibeunion/svadmin/commit/f1f46c5c48832f29f5ff7695d0d7faf6db82ba73))
+* **ui:** repair typed field contracts and isolate regression test state ([ec4f273](https://github.com/vibeunion/svadmin/commit/ec4f27340a95bc8152bc7657d647e340b67ea623))
+
+
+### 🔧 Miscellaneous Chores
+
+* **design:** reconcile Stripe specimens with merged reference assets on main ([3a9bbad](https://github.com/vibeunion/svadmin/commit/3a9bbad1ea829b32ef25c094e071a1113bde5f8c))
+* **review:** integrate current main into PR [#445](https://github.com/vibeunion/svadmin/issues/445) without altering either side ([3e156fb](https://github.com/vibeunion/svadmin/commit/3e156fb050f926514c41e62f86b30a4eebc2c517))
+* **review:** integrate current main into PR [#446](https://github.com/vibeunion/svadmin/issues/446) without altering either side ([5578055](https://github.com/vibeunion/svadmin/commit/5578055d65d9e0264f43f9fc7bd473860776ee3f))
+* **styles:** reconcile content recipes with native primitives on main ([ae608de](https://github.com/vibeunion/svadmin/commit/ae608de888de8e06c3f6aeebd92e5de1b8ae9af3))
+
 ## [0.52.0](https://github.com/vibeunion/svadmin/compare/core-v0.51.6...core-v0.52.0) (2026-09-19)
 
 

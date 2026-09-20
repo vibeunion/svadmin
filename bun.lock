@@ -71,7 +71,7 @@
     },
     "packages/ai-elements": {
       "name": "@svadmin/ai-elements",
-      "version": "0.7.4",
+      "version": "0.8.0",
       "dependencies": {
         "@floating-ui/dom": "^1.7.4",
         "@lucide/svelte": "^1.35.0",
@@ -122,7 +122,7 @@
     },
     "packages/airtable": {
       "name": "@svadmin/airtable",
-      "version": "0.10.6",
+      "version": "0.10.7",
       "dependencies": {
         "@svadmin/refine-adapter": "workspace:*",
       },
@@ -137,7 +137,7 @@
     },
     "packages/appwrite": {
       "name": "@svadmin/appwrite",
-      "version": "0.9.6",
+      "version": "0.9.7",
       "dependencies": {
         "@svadmin/refine-adapter": "workspace:*",
       },
@@ -161,7 +161,7 @@
     },
     "packages/core": {
       "name": "@svadmin/core",
-      "version": "0.52.0",
+      "version": "0.53.0",
       "dependencies": {
         "@sinclair/typebox": "^0.34.52",
         "papaparse": "^5.5.4",
@@ -189,7 +189,7 @@
     },
     "packages/create-svadmin": {
       "name": "@svadmin/create",
-      "version": "0.28.7",
+      "version": "0.29.0",
       "bin": {
         "create-svadmin": "./dist/index.js",
       },
@@ -206,7 +206,7 @@
     },
     "packages/directus": {
       "name": "@svadmin/directus",
-      "version": "0.10.6",
+      "version": "0.10.7",
       "peerDependencies": {
         "@svadmin/core": "workspace:*",
       },
@@ -216,7 +216,7 @@
     },
     "packages/drizzle": {
       "name": "@svadmin/drizzle",
-      "version": "0.12.6",
+      "version": "0.12.7",
       "dependencies": {
         "@sinclair/typebox": "^0.34.52",
         "@svadmin/refine-adapter": "workspace:*",
@@ -240,7 +240,7 @@
     },
     "packages/editor": {
       "name": "@svadmin/editor",
-      "version": "0.5.6",
+      "version": "0.5.7",
       "dependencies": {
         "@lucide/svelte": "^1.35.0",
         "@tiptap/core": "^3.30.5",
@@ -281,7 +281,7 @@
     },
     "packages/elysia": {
       "name": "@svadmin/elysia",
-      "version": "0.13.6",
+      "version": "0.13.7",
       "devDependencies": {
         "@elysiajs/eden": ">=1.4.9",
         "@sinclair/typebox": "^0.34.52",
@@ -300,7 +300,7 @@
     },
     "packages/firebase": {
       "name": "@svadmin/firebase",
-      "version": "0.10.6",
+      "version": "0.10.7",
       "dependencies": {
         "@svadmin/refine-adapter": "workspace:*",
       },
@@ -336,7 +336,7 @@
     },
     "packages/graphql": {
       "name": "@svadmin/graphql",
-      "version": "0.10.6",
+      "version": "0.10.7",
       "dependencies": {
         "@svadmin/refine-adapter": "workspace:*",
         "graphql-request": "^7.4.0",
@@ -352,7 +352,7 @@
     },
     "packages/hasura": {
       "name": "@svadmin/hasura",
-      "version": "0.10.6",
+      "version": "0.10.7",
       "dependencies": {
         "@svadmin/refine-adapter": "workspace:*",
       },
@@ -369,7 +369,7 @@
     },
     "packages/lite": {
       "name": "@svadmin/lite",
-      "version": "0.12.0",
+      "version": "0.13.0",
       "dependencies": {
         "@lucide/svelte": "^1.35.0",
         "@sinclair/typebox": "^0.34.52",
@@ -384,14 +384,14 @@
         "vitest": "^4.1.11",
       },
       "peerDependencies": {
-        "@svadmin/core": ">=0.34.2 <0.53.0",
+        "@svadmin/core": ">=0.34.2 <0.54.0",
         "@sveltejs/kit": "^2.70.3",
         "svelte": "^5.56.10",
       },
     },
     "packages/mcp": {
       "name": "@svadmin/mcp",
-      "version": "0.4.6",
+      "version": "0.4.7",
       "peerDependencies": {
         "@svadmin/core": "workspace:*",
       },
@@ -401,7 +401,7 @@
     },
     "packages/medusa": {
       "name": "@svadmin/medusa",
-      "version": "0.10.6",
+      "version": "0.10.7",
       "dependencies": {
         "@svadmin/refine-adapter": "workspace:*",
       },
@@ -416,7 +416,7 @@
     },
     "packages/nestjs-query": {
       "name": "@svadmin/nestjs-query",
-      "version": "0.10.6",
+      "version": "0.10.7",
       "dependencies": {
         "@svadmin/refine-adapter": "workspace:*",
       },
@@ -431,7 +431,7 @@
     },
     "packages/nestjsx-crud": {
       "name": "@svadmin/nestjsx-crud",
-      "version": "0.10.6",
+      "version": "0.10.7",
       "dependencies": {
         "@svadmin/refine-adapter": "workspace:*",
       },
@@ -446,7 +446,7 @@
     },
     "packages/pocketbase": {
       "name": "@svadmin/pocketbase",
-      "version": "0.11.6",
+      "version": "0.11.7",
       "dependencies": {
         "@sinclair/typebox": "^0.34.52",
       },
@@ -464,7 +464,7 @@
     },
     "packages/refine-adapter": {
       "name": "@svadmin/refine-adapter",
-      "version": "0.11.6",
+      "version": "0.11.7",
       "peerDependencies": {
         "@svadmin/core": "workspace:*",
       },
@@ -474,7 +474,7 @@
     },
     "packages/sanity": {
       "name": "@svadmin/sanity",
-      "version": "0.10.6",
+      "version": "0.10.7",
       "peerDependencies": {
         "@svadmin/core": "workspace:*",
       },
@@ -484,7 +484,7 @@
     },
     "packages/simple-rest": {
       "name": "@svadmin/simple-rest",
-      "version": "0.10.6",
+      "version": "0.10.7",
       "dependencies": {
         "@svadmin/refine-adapter": "workspace:*",
       },
@@ -503,7 +503,7 @@
     },
     "packages/sso": {
       "name": "@svadmin/sso",
-      "version": "0.12.6",
+      "version": "0.12.7",
       "devDependencies": {
         "typescript": "^7.0.2",
       },
@@ -516,7 +516,7 @@
     },
     "packages/strapi": {
       "name": "@svadmin/strapi",
-      "version": "0.10.6",
+      "version": "0.10.7",
       "dependencies": {
         "@svadmin/refine-adapter": "workspace:*",
       },
@@ -531,7 +531,7 @@
     },
     "packages/supabase": {
       "name": "@svadmin/supabase",
-      "version": "0.15.0",
+      "version": "0.15.1",
       "dependencies": {
         "@sinclair/typebox": "^0.34.52",
         "@svadmin/refine-adapter": "workspace:*",
@@ -555,7 +555,7 @@
     },
     "packages/surface": {
       "name": "@svadmin/surface",
-      "version": "0.8.19",
+      "version": "0.9.0",
       "dependencies": {
         "@sinclair/typebox": "^0.34.52",
       },
@@ -570,16 +570,16 @@
         "vitest": "^4.1.11",
       },
       "peerDependencies": {
-        "@svadmin/core": ">=0.34.2 <0.53.0",
-        "@svadmin/ui": ">=0.40.6 <0.73.0",
+        "@svadmin/core": ">=0.34.2 <0.54.0",
+        "@svadmin/ui": ">=0.40.6 <0.74.0",
         "svelte": "^5.56.8",
       },
     },
     "packages/sveltekit": {
       "name": "@svadmin/sveltekit",
-      "version": "0.11.6",
+      "version": "0.11.7",
       "peerDependencies": {
-        "@svadmin/core": ">=0.32.2 <0.53.0",
+        "@svadmin/core": ">=0.32.2 <0.54.0",
         "@sveltejs/kit": "^2.70.3",
         "svelte": "^5.56.10",
       },
@@ -591,7 +591,7 @@
     },
     "packages/ui": {
       "name": "@svadmin/ui",
-      "version": "0.72.0",
+      "version": "0.73.0",
       "dependencies": {
         "@floating-ui/dom": "^1.8.0",
         "@lucide/svelte": "^1.35.0",
