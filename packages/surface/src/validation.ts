@@ -146,15 +146,15 @@ function referencedFieldIssue(
   }
 
   const readableFields = resourcePolicyFor(policy, source.resource)?.readFields ?? [];
-  const deniedField = referencedFields.find((field) => (
+  const deniedIndex = referencedFields.findIndex((field) => (
     typeof field !== "string" || !readableFields.includes(field)
   ));
-  return deniedField === undefined
+  return deniedIndex === -1
     ? null
     : {
         code: "field_denied",
         path: `/widgets/${widgetIndex}/props`,
-        message: `Field "${String(deniedField)}" is not readable`,
+        message: `Field "${String(referencedFields[deniedIndex])}" is not readable`,
         widgetId: widget.id,
         sourceId: source.id,
       };

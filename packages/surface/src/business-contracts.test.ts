@@ -89,6 +89,16 @@ describe('opt-in business component contracts', () => {
     const empty = { ...catalog, widgets: catalog.widgets.map((widget) => widget.type === 'resource-detail' ? { ...widget, getReferencedFields: () => [] } : widget) };
     expect(validateSurfaceSpec(spec(), empty, policy).ok).toBe(false);
   });
+  it.each([undefined, null, 1, 'secret'].map((field) => ({ field })))('rejects malformed custom selector entries $field', ({ field }) => {
+    const malformed: SurfaceCatalog = { ...catalog, widgets: catalog.widgets.map((widget) => widget.type === 'resource-detail'
+      ? { ...widget, getReferencedFields: () => [field] as unknown as readonly string[] } : widget) };
+    expect(validateSurfaceSpec(spec(), malformed, policy).ok).toBe(false);
+  });
+  it('rejects sparse custom record selectors rather than treating holes as readable fields', () => {
+    const malformed: SurfaceCatalog = { ...catalog, widgets: catalog.widgets.map((widget) => widget.type === 'resource-detail'
+      ? { ...widget, getReferencedFields: () => new Array<string>(1) } : widget) };
+    expect(validateSurfaceSpec(spec(), malformed, policy).ok).toBe(false);
+  });
   it('projects a root-bound record before delivery and never invokes unreadable getters', async () => {
     const secret = vi.fn(() => 'hidden');
     const record = Object.defineProperty({ id: 'c1', name: 'A', active: false, balance: 0 }, 'secret', { enumerable: true, get: secret });
