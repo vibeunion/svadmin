@@ -5,7 +5,7 @@ on:
       - 'example/src/office/**'
       - 'example/src/components/LazyOfficeWorkspace.svelte'
       - 'example/src/App.svelte'
-      - 'e2e/health-office.spec.ts'
+      - 'e2e/health-office*.spec.ts'
       - 'playwright.office.config.ts'
       - '.github/workflows/health-office.yml'
 permissions:
@@ -30,9 +30,9 @@ jobs:
       - name: Install locked dependencies
         run: bun install --frozen-lockfile
       - name: Lint changed workspace
-        run: bunx eslint example/src/App.svelte example/src/office example/src/components/LazyOfficeWorkspace.svelte e2e/health-office.spec.ts playwright.office.config.ts --max-warnings 0
+        run: bunx eslint example/src/App.svelte example/src/office example/src/components/LazyOfficeWorkspace.svelte e2e/health-office*.spec.ts playwright.office.config.ts --max-warnings 0
       - name: Domain state tests
-        run: bun test example/src/office/domain.test.ts
+        run: bun test example/src/office/domain.test.ts example/src/office/zh-CN.test.ts
       - name: Build workspace dependencies
         run: bun run build:packages
       - name: Type check example and business tests

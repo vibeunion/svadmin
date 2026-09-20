@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ComponentProps } from 'svelte';
+  import { onMount, type ComponentProps } from 'svelte';
   import type { MenuItem, ResourceDefinition } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import AdminApp from '@svadmin/ui/components/AdminApp.svelte';
@@ -18,6 +18,9 @@
   import LazyChatDialog from './components/LazyChatDialog.svelte';
   import LazyOfficeWorkspace from './components/LazyOfficeWorkspace.svelte';
 
+  import { createOfficeAuthProvider, createOfficeI18nProvider } from './office/shell';
+  import { chineseMenuLabel, isOfficeLocation, isOfficeAuthRoute } from './office/zh-CN';
+
   // DesignPrinciplesPage and other showcase resources are lazy-loaded via LazyResourcePage
   registerExampleMenuTranslations();
   setRichTextEditor(LazyRichTextEditor);
@@ -25,18 +28,52 @@
   const i18n = useTranslation();
   // Keep the example's derived resources in sync with AdminApp's browser-detected locale.
   let currentLocale = $state(i18n.locale);
-  const baseResources = $derived.by(() => createResources(currentLocale));
-  const officeLabel = $derived(currentLocale === 'zh-CN' ? '智能辅助办公' : 'Health Office');
+  let officeMode = $state(typeof window !== 'undefined' && isOfficeLocation(window.location.hash, window.location.search));
+  const officeI18n = createOfficeI18nProvider();
+  const officeAuth = createOfficeAuthProvider(mockAuthProvider);
+  const displayLocale = $derived(officeMode ? 'zh-CN' : currentLocale);
+  const localeOptions = $derived(officeMode ? { i18nProvider: officeI18n } : {});
+  function readLocale(): string { return displayLocale; }
+  function writeLocale(locale: string | undefined): void {
+    if (!officeMode && locale !== undefined) currentLocale = locale;
+  }
+  onMount(() => {
+    const synchronize = () => {
+      const { hash, search } = window.location;
+      if (isOfficeLocation(hash, search)) officeMode = true;
+      else if (!isOfficeAuthRoute(hash)) officeMode = false;
+    };
+    window.addEventListener('hashchange', synchronize);
+    window.addEventListener('popstate', synchronize);
+    return () => {
+      window.removeEventListener('hashchange', synchronize);
+      window.removeEventListener('popstate', synchronize);
+    };
+  });
+  $effect(() => {
+    const locale = displayLocale;
+    const previous = document.documentElement.lang;
+    document.documentElement.lang = locale;
+    return () => { document.documentElement.lang = previous; };
+  });
+  const baseResources = $derived.by(() => createResources(displayLocale));
+  const officeLabel = '智能辅助办公';
+  function localizeMenu(items: MenuItem[]): MenuItem[] {
+    return items.map((item) => ({ ...item,
+      ...(item.label ? { label: chineseMenuLabel(item.label) } : {}),
+      ...(item.children ? { children: localizeMenu(item.children) } : {}),
+    }));
+  }
   const resources = $derived.by<ResourceDefinition[]>(() => [
     ...baseResources,
     { name: 'health_office', label: officeLabel, icon: 'file', fields: [], showInMenu: false },
   ]);
   const menu = $derived.by<MenuItem[]>(() => [
     { name: 'health_office', label: officeLabel, icon: 'file', href: '/health_office' },
-    ...createExampleMenu(currentLocale),
+    ...(officeMode ? localizeMenu(createExampleMenu(displayLocale)) : createExampleMenu(displayLocale)),
   ]);
-  const appTitle = 'svadmin example';
-  const loginHint = $derived(currentLocale === 'zh-CN' ? '已预填演示账号，方便快速测试。' : 'Demo credentials are prefilled for quick testing.');
+  const appTitle = $derived(officeMode ? '智能辅助办公系统' : 'svadmin example');
+  const loginHint = $derived(displayLocale === 'zh-CN' ? '已预填演示账号，方便快速测试。' : 'Demo credentials are prefilled for quick testing.');
 
   // 办公工作区不注册到库存 AI，避免业务数据意外进入无关助手的资源上下文。
   const chatProvider = $derived.by(() => createInventoryChatProvider(inMemoryDataProvider, baseResources));
@@ -56,15 +93,18 @@
   });
 </script>
 
+<svelte:head><title>{appTitle}</title></svelte:head>
+
 <AdminApp
   dataProvider={inMemoryDataProvider}
   {resources}
-  authProvider={mockAuthProvider}
+  authProvider={officeMode ? officeAuth : mockAuthProvider}
   {chatProvider}
   {resourcePages}
   {menu}
   title={appTitle}
-  bind:locale={currentLocale}
+  bind:locale={readLocale, writeLocale}
+  {...localeOptions}
   themeConfig={{ layoutPreset: 'clean-flat', colorPreset: 'indigo' }}
   loginDefaults={{
     identifier: 'demo@example.com',
