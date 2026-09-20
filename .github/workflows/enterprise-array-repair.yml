@@ -1,30 +1,30 @@
 name: Prepare enterprise array ownership candidate
 
-# Temporary object-only helper. Does not move main or any feature ref.
+# Temporary evidence-only helper. Never moves feature or main refs.
 on:
   push:
     branches: [review/enterprise-reconcile-20260920]
 permissions:
   contents: read
 jobs:
-  prepare:
+  retain:
     if: >-
-      github.event.head_commit.message == 'review: construct final enterprise main candidate'
+      github.event.head_commit.message == 'review: retain final enterprise candidate evidence'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
       contents: write
+      actions: read
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - name: Combine disjoint reviewed source changes and current main without dropping either history
+      - name: Verify exact final checkout, all 187 unit tests, ten browser passes and original PNGs
         env:
           GH_TOKEN: ${{ github.token }}
+          SOURCE_HEAD: 51b54446612869c334888b46eec53ec0873b7e68
+          EVIDENCE_RUN_ID: '35477652253'
         run: |
           set -euo pipefail
-          cp review-assets/integrate-current-main.py "$RUNNER_TEMP/integrate-enterprise-main.py"
-          for sha in db24c47be854d3788edca6c86bf1b76940a6fd42 d9726c4a850768e7e30bdf62e18add6c9a856056 467ec8a8c36040d82eb4ebe0b091c685ac47248a; do
-            git fetch --quiet --no-tags --depth=1 origin "$sha"
-          done
-          python3 "$RUNNER_TEMP/integrate-enterprise-main.py"
+          git fetch --quiet --no-tags --depth=1 origin "$SOURCE_HEAD"
+          python3 review-assets/retain-evidence.py
