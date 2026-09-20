@@ -273,7 +273,7 @@ describe('array parse-error ownership', () => {
     const first = arrayOwnershipNumberInput(view.container, 0);
     Object.defineProperty(first, 'validity', { configurable: true, value: { badInput: true } });
     await fireEvent.input(first, { target: { value: '' } });
-    const removeButton = view.getAllByRole('button', { name: 'Remove item', exact: true })[0];
+    const removeButton = view.getAllByRole('button', { name: /^Remove item$/u })[0];
     if (!removeButton) throw new Error('Missing array removal control');
     await fireEvent.click(removeButton);
     await fireEvent.submit(view.getByTestId('json-schema-form'));
@@ -286,7 +286,7 @@ describe('array parse-error ownership', () => {
     const second = arrayOwnershipNumberInput(view.container, 1);
     Object.defineProperty(second, 'validity', { configurable: true, value: { badInput: true } });
     await fireEvent.input(second, { target: { value: '' } });
-    const removeButton = view.getAllByRole('button', { name: 'Remove item', exact: true })[0];
+    const removeButton = view.getAllByRole('button', { name: /^Remove item$/u })[0];
     if (!removeButton) throw new Error('Missing array removal control');
     await fireEvent.click(removeButton);
     await fireEvent.submit(view.getByTestId('json-schema-form'));
