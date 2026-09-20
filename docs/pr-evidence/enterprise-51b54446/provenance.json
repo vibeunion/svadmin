@@ -1,0 +1,213 @@
+{
+  "source_head": "51b54446612869c334888b46eec53ec0873b7e68",
+  "source_tree": "28e06827b6f4d6ed7f5dde40dde49b3d36e08526",
+  "run_id": 35477652253,
+  "run_url": "https://github.com/vibeunion/svadmin/actions/runs/35477652253",
+  "artifact_id": 10594777509,
+  "archive_sha256": "b15748014020bffa7e239031f8c9cc8c18318ec353321d42ac88aaa2d59cda99",
+  "source_hashes": {
+    "packages/ui/src/components/enterprise/correctness.test.ts": "7ec672920c43f070a15acfd171a36aac5ea400fd92d2626ffaeaba52b2ddab1a",
+    "packages/ui/src/components/enterprise/filter-tree.ts": "da98c0dc6a34ebfe61a35ac475035cc70378a773e7929db94ea30a815c70b148",
+    "packages/ui/src/components/enterprise/json-schema-form.ts": "f098dd19548d40f920730b8993219e4b1d32f36955462556016c91672c03ce1e",
+    "packages/ui/src/components/enterprise/recursive-schema-form.test.ts": "dc6d8ab40440123bb7f176c66c4174da602933eb4694497c6dd83f23a6195c5a",
+    "packages/ui/src/components/enterprise/recursive-schema-form.ts": "cf232c5030ab6bddaea52ad3cb2c7275f477fdb9b847d165b2881ce4829e32b0",
+    "packages/ui/src/components/enterprise/spreadsheet-formula.ts": "70c61a23718a39f6ad66c61b9e8d8f1371173146c777f1f9fbeb27522d9e772d",
+    "packages/ui/src/components/JsonSchemaForm.svelte": "08b568a63118f80e32996f52eb54cbb1690d28866ffb3d8972aba059b232ed20",
+    "packages/ui/src/components/FilterBuilder.svelte": "f1cc717dd4f2a35ec71619ac6ba752697ec9c0b9c35001fd41a8a1297bc6ddb3",
+    "packages/ui/src/components/SpreadsheetView.svelte": "d571602b953020b7d1512ac2a8ce835d8c2af1b112e228357316dd519d915f20"
+  },
+  "unit_tests": {
+    "passed": 187,
+    "failed": 0,
+    "pending": 0
+  },
+  "browser": {
+    "passed": 10,
+    "failed": 0,
+    "flaky": 0,
+    "skipped": 0,
+    "test_titles": [
+      "typed defaults, enum edits, required clear and retry",
+      "nested editing preserves grouping and blocks partial queries",
+      "formula updates and errors work under a CSP without unsafe-eval",
+      "readonly state blocks editing and schema errors disable submission",
+      "states and screenshot 1440x900 light",
+      "states and screenshot 1440x900 dark",
+      "states and screenshot 1920x1080 light",
+      "states and screenshot 1920x1080 dark",
+      "states and screenshot 390x844 light",
+      "states and screenshot 390x844 dark"
+    ]
+  },
+  "captures": [
+    {
+      "file": "ready-1440x900-light.png",
+      "viewport": [
+        1440,
+        900
+      ],
+      "bitmap": [
+        1440,
+        1475
+      ],
+      "sha256": "e462caff3a9f2318198793374435d14879a0ff191c9237f4816c98cb53f99847",
+      "theme": "light",
+      "state": "ready"
+    },
+    {
+      "file": "invalid-1440x900-light.png",
+      "viewport": [
+        1440,
+        900
+      ],
+      "bitmap": [
+        1440,
+        1569
+      ],
+      "sha256": "301a951298c949cfeee4dcd830db102a60348c104cfa7f9480bef206932b5c5b",
+      "theme": "light",
+      "state": "invalid"
+    },
+    {
+      "file": "ready-1440x900-dark.png",
+      "viewport": [
+        1440,
+        900
+      ],
+      "bitmap": [
+        1440,
+        1475
+      ],
+      "sha256": "05c5c53bc2a418beec4154c1597382df4b8b6c397d1a97256d43c06d9c4c38b1",
+      "theme": "dark",
+      "state": "ready"
+    },
+    {
+      "file": "invalid-1440x900-dark.png",
+      "viewport": [
+        1440,
+        900
+      ],
+      "bitmap": [
+        1440,
+        1569
+      ],
+      "sha256": "22a1cb9b6d069a51728e7d1d0821e3aa9269b3183bbd25d98119236f2226765d",
+      "theme": "dark",
+      "state": "invalid"
+    },
+    {
+      "file": "ready-1920x1080-light.png",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "bitmap": [
+        1920,
+        1475
+      ],
+      "sha256": "1ed39f95c2da297f32593813f195008704c191800c31d37adf30429a5c074d32",
+      "theme": "light",
+      "state": "ready"
+    },
+    {
+      "file": "invalid-1920x1080-light.png",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "bitmap": [
+        1920,
+        1569
+      ],
+      "sha256": "55a99e6045d45366be15120aa2f0996c961ea7953ebc0f6581169d9e620c7e5e",
+      "theme": "light",
+      "state": "invalid"
+    },
+    {
+      "file": "ready-1920x1080-dark.png",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "bitmap": [
+        1920,
+        1475
+      ],
+      "sha256": "b15168a2e561adbe6daa2cf004db0e05b89704cf8298aa610df72bd4e49a4477",
+      "theme": "dark",
+      "state": "ready"
+    },
+    {
+      "file": "invalid-1920x1080-dark.png",
+      "viewport": [
+        1920,
+        1080
+      ],
+      "bitmap": [
+        1920,
+        1569
+      ],
+      "sha256": "fb36c99fe170db2537724e2e5908104695e43a641ef1a1b276a7a6e097371e11",
+      "theme": "dark",
+      "state": "invalid"
+    },
+    {
+      "file": "ready-390x844-light.png",
+      "viewport": [
+        390,
+        844
+      ],
+      "bitmap": [
+        390,
+        2747
+      ],
+      "sha256": "24bcee56ac1f37e19078e399302a1f69f77acf108dfd14f22a410d0bd4844b61",
+      "theme": "light",
+      "state": "ready"
+    },
+    {
+      "file": "invalid-390x844-light.png",
+      "viewport": [
+        390,
+        844
+      ],
+      "bitmap": [
+        390,
+        3040
+      ],
+      "sha256": "64a102ece898d1a9dafa1ad49782d24926235147f9890e8962a581cd7c30e3f0",
+      "theme": "light",
+      "state": "invalid"
+    },
+    {
+      "file": "ready-390x844-dark.png",
+      "viewport": [
+        390,
+        844
+      ],
+      "bitmap": [
+        390,
+        2747
+      ],
+      "sha256": "c800b70d5fe2bd1743e65acd2ddefd2103c3797790a5553567f397f0b8569da2",
+      "theme": "dark",
+      "state": "ready"
+    },
+    {
+      "file": "invalid-390x844-dark.png",
+      "viewport": [
+        390,
+        844
+      ],
+      "bitmap": [
+        390,
+        3040
+      ],
+      "sha256": "172983cbbadc7bf59c8a0406465d1556eb8fc663fceb974a85cd2684532ed73d",
+      "theme": "dark",
+      "state": "invalid"
+    }
+  ],
+  "boundaries": "Unmodified synthetic production-browser fixture captures, full-page bitmaps under the stated viewports. Not deployed customer data, Figma synchronization or independent-human visual/accessibility certification. This helper creates evidence-only Git objects; no implementation ref or main is updated."
+}

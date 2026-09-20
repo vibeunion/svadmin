@@ -1,0 +1,25 @@
+ .github/workflows/enterprise-ui.yml                |  65 +++
+ docs/architecture/enterprise-ui-reconciliation.md  |  11 +
+ docs/evaluations/enterprise-ui-correctness.md      |  53 ++
+ docs/evaluations/enterprise-ui-plan.md             |  64 +++
+ packages/ui/src/components/FilterBuilder.svelte    | 537 +++++++++------------
+ .../src/components/FilterBuilderLocale.test.svelte |   9 +
+ packages/ui/src/components/JsonSchemaForm.svelte   | 122 ++++-
+ packages/ui/src/components/SpreadsheetView.svelte  | 425 ++++------------
+ .../enterprise-components.test.svelte.ts           | 300 ++++++++++++
+ .../enterprise-filter-legacy.test.svelte.ts        |  41 ++
+ .../src/components/enterprise/correctness.test.ts  | 195 ++++++++
+ .../ui/src/components/enterprise/filter-tree.ts    | 149 ++++++
+ .../src/components/enterprise/json-schema-form.ts  | 161 ++++++
+ .../enterprise/recursive-schema-form.test.ts       | 119 +++++
+ .../components/enterprise/recursive-schema-form.ts | 145 ++++++
+ .../components/enterprise/spreadsheet-formula.ts   | 199 ++++++++
+ .../src/components/filter-builder.test.svelte.ts   |   5 +-
+ .../ui/src/components/json-schema-form-state.ts    |  14 +-
+ playwright.enterprise.config.ts                    |   9 +
+ scripts/fixtures/enterprise-ui/App.svelte          |  71 +++
+ scripts/fixtures/enterprise-ui/browser.spec.ts     |  84 ++++
+ scripts/fixtures/enterprise-ui/index.html          |   2 +
+ scripts/fixtures/enterprise-ui/main.ts             |   6 +
+ scripts/fixtures/enterprise-ui/vite.config.ts      |  15 +
+ 24 files changed, 2122 insertions(+), 679 deletions(-)
