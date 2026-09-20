@@ -67,6 +67,7 @@
 | ------------------------ | ------------------------------------------------------------ |
 | `@svadmin/core`          | Hooks, providers, types, utilities, Resource Type Registry   |
 | `@svadmin/ai-elements`   | Composable Svelte 5 AI conversation and agent UI components |
+| `@svadmin/devtools-contract` | JSON-safe DevTools trace, diagnostic, event, and redaction contracts |
 | `@svadmin/ui`            | Pre-built admin components / 预构建管理组件（shadcn-svelte） |
 | `@svadmin/create`        | CLI scaffolding tool / CLI 脚手架工具                        |
 | `@svadmin/refine-adapter`| Bridge any @refinedev/* data provider to svadmin / 桥接 Refine 生态数据源 |

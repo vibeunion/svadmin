@@ -36,6 +36,25 @@ export { default as CanAccess } from './components/CanAccess.svelte';
 export { default as Can } from './components/CanAccess.svelte';
 export { default as UndoableNotification } from './components/UndoableNotification.svelte';
 export { default as DevTools } from './components/DevTools.svelte';
+export { default as DevframePanel } from './components/DevframePanel.svelte';
+export {
+  attachSvadminDevtoolsQueryClient,
+  createSvadminDevtoolsCacheActions,
+  getSvadminDevtoolsSnapshot,
+  installSvadminDevtoolsBridge,
+  publishSvadminDevtoolsSnapshot,
+  subscribeSvadminDevtools,
+  SVADMIN_DEVFRAME_CHANNEL,
+} from './devtools-bridge.js';
+export type {
+  DevtoolsCacheDiagnostics,
+  DevtoolsProviderDiagnostic,
+  DevtoolsQueryDiagnostic,
+  SvadminDevtoolsBridge,
+  SvadminDevtoolsSnapshot,
+  DevtoolsQuerySelector,
+  SvadminDevframeProtocol,
+} from './devtools-bridge.js';
 export { default as Authenticated } from './components/Authenticated.svelte';
 export { default as UpdatePasswordPage } from './components/UpdatePasswordPage.svelte';
 export { default as ProfilePage } from './components/ProfilePage.svelte';

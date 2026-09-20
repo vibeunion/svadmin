@@ -93,6 +93,7 @@
     "@tanstack/svelte-table": "^9.2.3",
     "@tanstack/table-core": "^9.2.3",
     "bits-ui": "^2.19.0",
+    "devframe": "1.0.0",
     "svelte-sonner": "^1.2.1",
     "clsx": "^2.1.1"
   },

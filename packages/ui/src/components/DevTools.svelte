@@ -10,6 +10,11 @@
     parseQueryKey,
   } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
+  import {
+    attachSvadminDevtoolsQueryClient,
+    installSvadminDevtoolsBridge,
+    publishSvadminDevtoolsSnapshot,
+  } from '../devtools-bridge.js';
 
   import TooltipButton from './TooltipButton.svelte';
   import * as Tabs from './ui/tabs/index.js';
@@ -19,29 +24,13 @@
   import { X, Bug, ChevronDown, ChevronUp, Wand2 } from '@lucide/svelte';
   import InferencerPanel from './InferencerPanel.svelte';
 
-  type CacheDiagnostics = {
-    queries: { total: number; fetching: number; stale: number; errors: number };
-    mutations: { total: number; pending: number; paused: number; errors: number };
-  };
+  import type {
+    DevtoolsCacheDiagnostics,
+    DevtoolsProviderDiagnostic,
+    DevtoolsQueryDiagnostic,
+  } from '../devtools-bridge.js';
 
-  type ProviderDiagnostic = {
-    name: string;
-    configured: boolean;
-    capabilities: string;
-  };
-
-  type SafeQueryDiagnostic = {
-    provider: string;
-    resource: string;
-    operation: string;
-    status: string;
-    retries: number;
-    duration: string;
-    cacheAge: string;
-    invalidation: string;
-  };
-
-  const EMPTY_CACHE_DIAGNOSTICS: CacheDiagnostics = {
+  const EMPTY_CACHE_DIAGNOSTICS: DevtoolsCacheDiagnostics = {
     queries: { total: 0, fetching: 0, stale: 0, errors: 0 },
     mutations: { total: 0, pending: 0, paused: 0, errors: 0 },
   };
@@ -54,8 +43,8 @@
   let { docked = false }: { docked?: boolean } = $props();
   let visible = $state(false);
   let collapsed = $state(false);
-  let cacheDiagnostics = $state.raw<CacheDiagnostics>(EMPTY_CACHE_DIAGNOSTICS);
-  let safeQueryDiagnostics = $state.raw<SafeQueryDiagnostic[]>([]);
+  let cacheDiagnostics = $state.raw<DevtoolsCacheDiagnostics>(EMPTY_CACHE_DIAGNOSTICS);
+  let safeQueryDiagnostics = $state.raw<DevtoolsQueryDiagnostic[]>([]);
   const queryTimings = new SvelteMap<string, { startedAt?: number; duration?: number }>();
 
   function toggle() {
@@ -109,6 +98,8 @@
 
   onMount(() => {
     if (!isDev) return;
+    attachSvadminDevtoolsQueryClient(queryClient);
+    installSvadminDevtoolsBridge();
     refreshCacheDiagnostics();
     const unsubscribeQueries = queryClient.getQueryCache().subscribe((event) => {
       // Observer events arrive in pairs during component rerenders. Refreshing diagnostics triggers another render,
@@ -163,7 +154,7 @@
     }
   });
 
-  const frameworkProviders = $derived.by((): ProviderDiagnostic[] => {
+  const frameworkProviders = $derived.by((): DevtoolsProviderDiagnostic[] => {
     const access = adminContext.accessControlProvider;
     const audit = adminContext.auditLogProvider;
     const notification = adminContext.notificationProvider;
@@ -232,6 +223,22 @@
         capabilities: adminContext.tenant ? 'tree scoped (identifier hidden)' : 'not configured',
       },
     ];
+  });
+
+  $effect(() => {
+    if (!isDev) return;
+    publishSvadminDevtoolsSnapshot({
+      version: 1,
+      environment: 'development',
+      route: path,
+      locale,
+      theme,
+      colorTheme,
+      resourceCount: resources.length,
+      providers: frameworkProviders,
+      cache: cacheDiagnostics,
+      queries: safeQueryDiagnostics,
+    });
   });
 </script>
 
