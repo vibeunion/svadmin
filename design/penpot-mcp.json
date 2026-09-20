@@ -1,0 +1,210 @@
+{
+  "version": 1,
+  "platform": "penpot",
+  "project": {
+    "name": "svadmin / Core design system / 核心设计体系",
+    "workspaceUrl": null,
+    "fileId": null,
+    "status": "baseline-created"
+  },
+  "localMcp": {
+    "mcpEndpoint": "http://localhost:4401/mcp",
+    "legacySseEndpoint": "http://localhost:4401/sse",
+    "websocketEndpoint": "ws://localhost:4402",
+    "pluginManifest": "http://localhost:4400/manifest.json",
+    "replEndpoint": "http://localhost:4403"
+  },
+  "remoteMcp": {
+    "streamEndpoint": "https://design.penpot.app/mcp/stream",
+    "connectionMode": "remote",
+    "status": "endpoint-recorded-token-not-stored"
+  },
+  "sourceOfTruth": {
+    "tokens": "packages/ui/src/app.css",
+    "componentContracts": "packages/ui/src/design-system-components.ts",
+    "stories": "packages/ui/stories",
+    "tests": "packages/ui/src/**/*.test.*"
+  },
+  "pages": [
+    {
+      "id": "foundations",
+      "name": "00 Foundations / 基础",
+      "status": "created",
+      "scope": [
+        "semantic color tokens / 语义颜色变量",
+        "typography / 字体",
+        "spacing / 间距",
+        "radii and borders / 圆角与边框",
+        "light and dark themes / 浅色与暗色主题"
+      ]
+    },
+    {
+      "id": "components",
+      "name": "10 Components / 组件",
+      "status": "created",
+      "scope": [
+        "component sets / 组件集",
+        "size variants / 尺寸变体",
+        "interaction states / 交互状态",
+        "keyboard and overflow states / 键盘与溢出状态"
+      ]
+    },
+    {
+      "id": "patterns",
+      "name": "20 Page patterns / 页面模式",
+      "status": "created",
+      "scope": [
+        "navigation / 导航",
+        "forms / 表单",
+        "tables and filters / 表格与筛选器",
+        "dialogs and workspaces / 弹窗与工作台"
+      ]
+    },
+    {
+      "id": "acceptance",
+      "name": "30 Acceptance / 验收",
+      "status": "created",
+      "scope": [
+        "browser screenshots / 浏览器截图",
+        "component comparison / 逐组件对照",
+        "acceptance matrix / 验收矩阵",
+        "open defects / 未解决问题"
+      ]
+    },
+    {
+      "id": "code-inventory",
+      "name": "40 Code inventory / 代码目录",
+      "status": "created",
+      "scope": [
+        "public exports / 公开导出",
+        "code paths / 代码路径",
+        "component categories / 组件分类"
+      ]
+    }
+  ],
+  "naming": {
+    "displayLanguage": "English / 中文",
+    "componentFormat": "Component / 中文 / Property=Value / 属性=值",
+    "layerFormat": "English / 中文",
+    "componentContentLanguage": "single-language specimen copy; bilingual structure and contract labels",
+    "forbiddenTerms": []
+  },
+  "components": [
+    {
+      "id": "ui.button",
+      "name": "Button / 按钮",
+      "codePath": "packages/ui/src/components/ui/button/index.ts",
+      "codeExport": "Button",
+      "states": ["default", "hover", "focus", "disabled", "loading"],
+      "themes": ["light", "dark"],
+      "sizes": ["default", "compact"],
+      "status": "registered"
+    },
+    {
+      "id": "ui.input",
+      "name": "Input / 输入",
+      "codePath": "packages/ui/src/components/ui/input/index.ts",
+      "codeExport": "Input",
+      "states": ["empty", "value", "focus", "disabled", "error", "readonly"],
+      "themes": ["light", "dark"],
+      "sizes": ["default", "compact"],
+      "status": "registered"
+    },
+    {
+      "id": "ui.select",
+      "name": "Select / 选择",
+      "codePath": "packages/ui/src/components/ui/select/index.ts",
+      "codeExport": "Select",
+      "states": ["empty", "value", "focus", "disabled", "error"],
+      "themes": ["light", "dark"],
+      "sizes": ["default", "compact"],
+      "status": "registered"
+    },
+    {
+      "id": "ui.checkbox",
+      "name": "Checkbox / 复选框",
+      "codePath": "packages/ui/src/components/ui/checkbox/index.ts",
+      "codeExport": "Checkbox",
+      "states": ["unchecked", "checked", "focus", "disabled", "mixed"],
+      "themes": ["light", "dark"],
+      "sizes": ["default", "compact"],
+      "status": "registered"
+    },
+    {
+      "id": "ui.tabs",
+      "name": "Tabs / 标签页",
+      "codePath": "packages/ui/src/components/ui/tabs/index.ts",
+      "codeExport": "Tabs",
+      "states": ["active", "inactive", "focus", "disabled"],
+      "themes": ["light", "dark"],
+      "sizes": ["default", "compact"],
+      "status": "registered"
+    },
+    {
+      "id": "ui.badge",
+      "name": "Badge / 徽标",
+      "codePath": "packages/ui/src/components/ui/badge/index.ts",
+      "codeExport": "Badge",
+      "states": ["success", "warning", "danger", "neutral"],
+      "themes": ["light", "dark"],
+      "sizes": ["default", "compact"],
+      "status": "registered"
+    },
+    {
+      "id": "ui.menu",
+      "name": "Menu / 菜单",
+      "codePath": "packages/ui/src/components/ui/dropdown-menu/index.ts",
+      "codeExport": "DropdownMenu",
+      "states": ["closed", "open", "focus", "overflow"],
+      "themes": ["light", "dark"],
+      "sizes": ["default", "compact"],
+      "status": "registered"
+    },
+    {
+      "id": "ui.dialog",
+      "name": "Dialog / 对话框",
+      "codePath": "packages/ui/src/components/ui/dialog/index.ts",
+      "codeExport": "Dialog",
+      "states": ["closed", "open", "focus-restore", "overflow"],
+      "themes": ["light", "dark"],
+      "sizes": ["default", "compact"],
+      "status": "registered"
+    },
+    {
+      "id": "ui.tooltip",
+      "name": "Tooltip / 提示",
+      "codePath": "packages/ui/src/components/ui/tooltip/index.ts",
+      "codeExport": "Tooltip",
+      "states": ["closed", "open", "boundary"],
+      "themes": ["light", "dark"],
+      "sizes": ["default", "compact"],
+      "status": "registered"
+    },
+    {
+      "id": "ui.table",
+      "name": "Table / 表格",
+      "codePath": "packages/ui/src/components/ui/table/index.ts",
+      "codeExport": "Table",
+      "states": ["loading", "default", "empty", "filtered-empty", "error", "forbidden"],
+      "themes": ["light", "dark"],
+      "sizes": ["default", "compact"],
+      "status": "registered"
+    },
+    {
+      "id": "ui.status-badge",
+      "name": "StatusBadge / 状态徽标",
+      "codePath": "packages/ui/src/components/content/StatusBadge.svelte",
+      "codeExport": "StatusBadge",
+      "states": ["success", "warning", "danger", "neutral"],
+      "themes": ["light", "dark"],
+      "sizes": ["default", "compact"],
+      "status": "registered"
+    }
+  ],
+  "codeInventory": {
+    "page": "40 Code inventory / 代码目录",
+    "publicExports": 251,
+    "status": "registered",
+    "source": "packages/ui/src/index.ts"
+  }
+}
