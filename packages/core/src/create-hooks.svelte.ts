@@ -25,7 +25,7 @@ export interface ContractCreateOptions<S extends ContractSchemas> {
   overtimeOptions?: OvertimeOptions;
 }
 type Result<S extends ContractSchemas> = { data: ContractRecord<S> };
-interface Callbacks<S extends ContractSchemas> {
+export interface Callbacks<S extends ContractSchemas> {
   onSuccess?: (data: Result<S>, params: ContractCreateParams<S>) => void | Promise<void>;
   onError?: (error: HttpError, params: ContractCreateParams<S> | undefined) => void | Promise<void>;
   onSettled?: (data: Result<S> | undefined, error: HttpError | null, params: ContractCreateParams<S> | undefined) => void | Promise<void>;

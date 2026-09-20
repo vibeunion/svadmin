@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, waitFor, within } from '@testing-library/svelte';
+import { createRawSnippet } from 'svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Type } from '@sinclair/typebox';
 import { QueryClient } from '@tanstack/svelte-query';
@@ -100,6 +101,15 @@ describe('contract-bound detail views', () => {
     expect(() => render(Host, { mode, provider: provider(),
       resources: [{ name: 'posts', label: 'Posts', fields: [] }], queryClient: app.client,
     })).toThrowError(expect.objectContaining({ code: 'RESOURCE_CONTRACT_REQUIRED' }));
+  });
+
+  it('renders authorized detail extensions only after the record succeeds', async () => {
+    const extension = createRawSnippet(() => ({ render: () => '<p data-testid="activity">Authorized activity</p>' }));
+    const app = mount('drawer', provider(), true, 1);
+    await app.view.rerender({ extraSections: extension });
+    await waitFor(() => expect(app.view.getByTestId('activity')).toBeTruthy());
+    await app.view.rerender({ permission: { can: async () => ({ can: false }) } });
+    await waitFor(() => expect(app.view.queryByTestId('activity')).toBeNull());
   });
 
   it('does not fetch closed or unselected drawers, even with a route record ID', async () => {

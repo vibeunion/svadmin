@@ -1417,7 +1417,7 @@ describe('AutoForm contract consumer', () => {
     const title = await app.view.findByRole('textbox', { name: /^Title/ });
     await fireEvent.click(app.view.getByRole('button', { name: /^save$/i }));
     await waitFor(() => expect(title.getAttribute('aria-invalid')).toBe('true'));
-    expect(title.getAttribute('aria-describedby')).toBe('posts-title-error');
+    expect(title.getAttribute('aria-describedby')).toMatch(/posts-title-error$/);
     await waitFor(() => expect(document.activeElement).toBe(title));
     expect(source.create).not.toHaveBeenCalled();
     expect(success).not.toHaveBeenCalled();

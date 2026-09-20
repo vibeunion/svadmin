@@ -53,3 +53,6 @@ CODEBUDDY.md
 HERMES.md
 .agents/docs/
 output/
+.wt/
+storybook-static/
+figma-*.png

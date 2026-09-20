@@ -160,7 +160,8 @@ describe('contract-bound import', () => {
       '../../../core/src/unsafe.ts', 'import-contract.test.svelte.ts',
       'import-contract.test.types.ts', 'import-contract.test.type-fixture.ts',
     ].map(path => resolve(directory, path));
-    const virtual = new Map(['buttons/ImportButton.svelte', 'import-contract.test-probe.svelte', 'import-contract.test-host.svelte'].map(name => {
+    const virtual = new Map(['buttons/ImportButton.svelte', 'import-contract.test-probe.svelte', 'import-contract.test-host.svelte',
+      'ImportWizard.svelte', 'import-wizard.test-host.svelte'].map(name => {
       const filename = resolve(directory, name);
       return [`${filename}.tsx`, svelte2tsx(readFileSync(filename, 'utf8'), { filename, isTsFile: true, mode: 'ts' }).code];
     }));

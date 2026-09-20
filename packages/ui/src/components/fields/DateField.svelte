@@ -4,6 +4,7 @@
 
 <script lang="ts">
   import { cn } from '../../utils.js';
+  import { parseDisplayDate } from './date-display';
 
   interface Props {
     value: string | number | Date | null | undefined;
@@ -43,13 +44,13 @@
     return new Intl.DateTimeFormat(loc, { dateStyle: 'medium' }).format(date);
   }
 
+  const parsed = $derived(parseDisplayDate(value));
   const formatted = $derived.by(() => {
-    if (value == null || value === '') return nullLabel;
-    const d = value instanceof Date ? value : new Date(value);
-    if (isNaN(d.getTime())) return nullLabel;
+    if (!parsed) return nullLabel;
+    const d = parsed.date;
 
-    if (format === 'iso') return d.toISOString();
-    if (format === 'relative') return formatRelative(d, locale);
+    if (format === 'iso') return parsed.title;
+    if (format === 'relative' && !parsed.civil) return formatRelative(d, locale);
 
     const defaultOptions: Intl.DateTimeFormatOptions =
       options ??
@@ -60,17 +61,16 @@
           : { dateStyle: 'medium' });
 
     try {
-      return new Intl.DateTimeFormat(locale, defaultOptions).format(d);
+      return new Intl.DateTimeFormat(locale, {
+        ...defaultOptions,
+        ...(parsed.civil ? { timeZone: 'UTC' } : {}),
+      }).format(d);
     } catch {
-      return d.toLocaleDateString();
+      return parsed.title;
     }
   });
 
-  const fullIsoTitle = $derived.by(() => {
-    if (value == null || value === '') return undefined;
-    const d = value instanceof Date ? value : new Date(value);
-    return isNaN(d.getTime()) ? undefined : d.toISOString();
-  });
+  const fullIsoTitle = $derived(parsed?.title);
 </script>
 
 <span class={cn('field-date svadmin-u-fc7473ca09eb', className)} title={fullIsoTitle}>{formatted}</span>

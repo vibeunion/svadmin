@@ -1,17 +1,15 @@
 <script lang="ts">
-  import { captureAdminContext, queryKeyMatches, withValidatedTaskProvider } from '@svadmin/core';
-  import { useQueryClient } from '@tanstack/svelte-query';
   import { useTranslation } from '@svadmin/core/i18n';
 
   import { Button } from './ui/button/index.js';
   import { Loader2, RotateCcw } from '@lucide/svelte';
+  import { createTaskAction } from './task-action.svelte.js';
 
   const i18n = useTranslation();
-  const adminContext = captureAdminContext();
 
   let {
     taskId,
-    taskProvider = adminContext.taskProvider ?? undefined,
+    taskProvider,
     onSuccess,
     onError,
     disabled = false,
@@ -29,46 +27,18 @@
     children?: import('svelte').Snippet;
   }>();
 
-  const queryClient = useQueryClient();
-  let pending = $state(false);
-
-  async function handleRetry() {
-    if (!taskProvider?.retry || pending) return;
-    const scopedTaskId = taskId;
-    const scope = adminContext.queryKeyMatcher();
-    pending = true;
-    try {
-      const provider = withValidatedTaskProvider(taskProvider);
-      if (!provider.retry) return;
-      await provider.retry(scopedTaskId);
-      await Promise.all([
-        queryClient.invalidateQueries({
-          predicate: (query) => queryKeyMatches(query.queryKey, {
-            ...scope,
-            kind: 'task',
-            action: 'list',
-          }),
-        }),
-        queryClient.invalidateQueries({
-          predicate: (query) => queryKeyMatches(query.queryKey, {
-            ...scope,
-            kind: 'task',
-            action: 'one',
-            id: scopedTaskId,
-          }),
-        }),
-      ]);
-      onSuccess?.();
-    } catch (error) {
-      onError?.(error);
-    } finally {
-      pending = false;
-    }
-  }
+  const action = createTaskAction({
+    action: 'retry',
+    get taskId() { return taskId; },
+    get provider() { return taskProvider; },
+    get disabled() { return disabled; },
+    get onSuccess() { return onSuccess; },
+    get onError() { return onError; },
+  });
 </script>
 
-<Button {variant} {size} onclick={handleRetry} disabled={disabled || pending || !taskProvider?.retry}>
-  {#if pending}
+<Button {variant} {size} onclick={action.run} disabled={!action.available || action.pending}>
+  {#if action.pending}
     <Loader2 class="svadmin-u-82cc6c6581cd svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-afbdd13a380e" />
   {:else}
     <RotateCcw class="svadmin-u-82cc6c6581cd svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />

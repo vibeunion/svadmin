@@ -49,6 +49,8 @@ export { default as LiteLogin } from './components/LiteLogin.svelte';
 export { default as LiteShow } from './components/LiteShow.svelte';
 export { default as LiteSearch } from './components/LiteSearch.svelte';
 export { default as LiteAlert } from './components/LiteAlert.svelte';
+export { default as LiteErrorSummary } from './components/LiteErrorSummary.svelte';
+export type { LiteFormErrorEntry } from './components/LiteErrorSummary.svelte';
 export { default as LitePermissionMatrix } from './components/LitePermissionMatrix.svelte';
 export { default as LiteAuditLog } from './components/LiteAuditLog.svelte';
 export { default as LiteArrayField } from './components/LiteArrayField.svelte';
@@ -96,6 +98,15 @@ export { default as LiteActivityFeed } from './components/LiteActivityFeed.svelt
 export { default as LitePresenceAvatarGroup } from './components/LitePresenceAvatarGroup.svelte';
 export { default as LitePrintableBill } from './components/LitePrintableBill.svelte';
 export { default as LiteJsonSchemaForm } from './components/LiteJsonSchemaForm.svelte';
+export {
+  decodeSchemaFormArrayAction,
+  decodeSchemaFormData,
+  decodeSchemaFormSubmission,
+  encodeSchemaFormArrayAction,
+  schemaFormActionName,
+  schemaFormFieldName,
+} from './schema-form-data';
+export type { SchemaFormArrayAction, SchemaFormSchema } from './schema-form-data';
 export { default as LiteMentionsInput } from './components/LiteMentionsInput.svelte';
 export { default as LiteKanbanBoard } from './components/LiteKanbanBoard.svelte';
 export { default as LitePivotTable } from './components/LitePivotTable.svelte';

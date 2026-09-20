@@ -4,8 +4,9 @@
 
 	// Use HTMLElement instead of HTMLSelectElement to avoid TS error:
 	// HTMLSelectElement.remove() returns void, incompatible with HTMLElement's Element return
-	type Props = WithElementRef<HTMLSelectAttributes, HTMLElement> & {
+	type Props = Omit<WithElementRef<HTMLSelectAttributes, HTMLElement>, "size"> & {
 		placeholder?: string;
+		size?: "default" | "compact";
 	};
 
 	let {
@@ -13,6 +14,7 @@
 		value = $bindable(""),
 		class: className,
 		placeholder,
+		size = "default",
 		children,
 		...restProps
 	}: Props = $props();
@@ -21,6 +23,7 @@
 <select
 	bind:this={ref}
 	data-slot="select"
+	data-size={size}
 	class={cn(
 		"svadmin-select",
 		className

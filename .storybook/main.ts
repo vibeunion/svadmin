@@ -1,15 +1,24 @@
 /** @type { import('@storybook/svelte-vite').StorybookConfig } */
+import { svelte } from '@sveltejs/vite-plugin-svelte';
+
 const config = {
   stories: [
-    '../packages/ui/src/**/*.stories.@(svelte|ts)',
+    '../packages/ui/stories/**/*.stories.@(svelte|ts)',
   ],
   addons: [
-    '@storybook/addon-essentials',
     '@storybook/addon-a11y',
   ],
   framework: {
     name: '@storybook/svelte-vite',
-    options: {},
+    options: {
+      docgen: false,
+    },
+  },
+  async viteFinal(config) {
+    return {
+      ...config,
+      plugins: [...(config.plugins ?? []), svelte()],
+    };
   },
 };
 

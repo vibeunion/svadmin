@@ -1,4 +1,6 @@
 // Core barrel exports
+export { decodeApprovalRecord, decodeApprovalList, decodeApprovalTransition, decodeApprovalReceipt, ApprovalContractError } from './approval-contract';
+export type { ApprovalRecord, ApprovalTransition, ApprovalList, ApprovalReceipt, ApprovalProvider } from './approval-contract';
 
 export {
   setDataProvider, getDataProvider, getDataProviderForResource, getDataProviderNames,
@@ -102,6 +104,12 @@ export {
 export type { NotificationParams } from './notification.svelte';
 export { t, setLocale, getLocale, getAvailableLocales, addTranslations, useTranslation, setI18nProvider, getI18nProvider, createI18nScope, provideI18nScope, getI18nScope, resetI18n } from './i18n.svelte';
 export type { I18nProvider, I18nScope, I18nScopeOptions } from './i18n.svelte';
+export { buildPivot, buildPivotCacheKey, buildPivotDrilldown, buildPivotExportRequest, decodePivotResult, snapshotPivotQuery, snapshotPivotExportTaskResult, formatPivotValue, PIVOT_LIMITS } from './pivot';
+export type { PivotAggregation, PivotCache, PivotDimension, PivotDimensionValue, PivotOptions, PivotPayload, PivotProvider, PivotQuery, PivotResult, PivotDrilldown, PivotExportRequest, PivotExportTaskResult } from './pivot';
+export { civilDateTimeToInstant, parseDateTimeInstant, formatCivilDateTime } from './date-time';
+export type { DateTimeValueMode, DateTimeDisambiguation } from './date-time';
+export { validateGantt, GANTT_LIMITS } from './gantt';
+export type { GanttTaskShape, GanttValidationError } from './gantt';
 export { audit, auditWithProvider, writeAuditEntry, recordMutationRollback, setAuditHandler, setAuditLogProvider, getAuditLogProvider, withValidatedAuditProvider, AuditError } from './audit';
 export type { AuditLogProvider, AuditLogTransport, AuditCreateParams, AuditQueryParams, AuditDraft } from './audit';
 export { TaskError } from './task-contract';
@@ -131,7 +139,17 @@ export type {
   WebhookSummary,
 } from './enterprise';
 export { assertEnterpriseRequestContext, createEnterpriseRequestContext } from './enterprise';
+export {
+  DashboardContractError, decodeDashboardQuery, decodeDashboardSnapshot,
+  type DashboardMetric, type DashboardProvider, type DashboardQuery, type DashboardSnapshot, type DashboardWidget,
+} from './dashboard-contract';
 export { setChatProvider, getChatProvider, setChatContext, getChatContext, setAgentProvider, getAgentProvider, registerApproval, resolveApproval, hasPendingApprovals, resetChatProvider, defineAdminTool, decodeAdminToolArgs, executeAdminTool, projectAdminToolSchema } from './chatProvider.svelte';
+export { ENTERPRISE_MATURITY, enterpriseMaturityFor } from './enterprise-maturity';
+export type {
+  EnterpriseMaturityEntry,
+  EnterpriseMaturityStatus,
+  EnterpriseMaturityTier,
+} from './enterprise-maturity';
 export type {
   ChatProvider, ChatMessage, ChatMessagePart, ChatContext, ChatAttachment, ChatSource,
   MessageStatus, ToolState, AgentProvider, AgentEvent, AgentOptions, ApprovalResponseOptions,
@@ -163,7 +181,7 @@ export type {
   DeleteManyParams, DeleteManyResult,
   Pagination, Sort, Filter, Identity,
   ResourceDefinition, ResourceProviderConfig, ResourceTransportConfig, ResourceAdapterConfig,
-  FieldDefinition, MenuItem,
+  FieldDefinition, DateInputOptions, MenuItem,
   AuthActionResult, CheckResult,
   ResourceTypeMap, ResourceInputMap, ResourceInputOperation, InferResourceInput, KnownResources, InferData,
   BaseRecord, Role, AuditLog
@@ -178,9 +196,26 @@ export { createCaslAccessControl } from './adapters/casl';
 export { createCasbinAccessControl } from './adapters/casbin';
 export type { CasbinAdapterOptions } from './adapters/casbin';
 export { downloadData, toCsv, toJson, toXlsx, parseCSV } from './data-transfer.svelte';
+export { parseSpreadsheetClipboard, serializeSpreadsheetClipboard } from './spreadsheet-clipboard';
+export { parseSpreadsheetWorkbook, serializeSpreadsheetWorkbook, snapshotSpreadsheetWorkbook, SPREADSHEET_WORKBOOK_LIMITS } from './spreadsheet-workbook';
+export type { SpreadsheetCellFormat, SpreadsheetSheet, SpreadsheetWorkbook } from './spreadsheet-workbook';
+export { FILTER_COLLECTION_LIMIT, isNumericFilterField, isCollectionFilterOperator,
+  filterOperatorsForField, isFilterScalarValue, isFilterCollectionValue } from './filter-values';
+export {
+  assertSchemaFormSchema, prepareSchemaFormValue, readSchemaFormPath,
+  matchesSchemaFormCondition, isSchemaFormNodeVisible, validateSchemaFormValue,
+} from './schema-form';
+export type {
+  SchemaFormScalar, SchemaFormCondition, SchemaFormSchema, SchemaFormValidationError,
+} from './schema-form';
 export { useExport } from './export-hooks.svelte';
+export { snapshotExportTaskResult, downloadExportArtifact, safeArtifactUrl } from './export-format';
+export type { ExportTaskResult } from './export-format';
 export type { UseExportOptions } from './export-hooks.svelte';
 export { useImport } from './import-hooks.svelte';
+export type { ImportArtifact, ImportArtifactProvider, ImportTaskResult } from './import-contract';
+export { snapshotImportArtifact, snapshotImportTaskResult } from './import-contract';
+export { IMPORT_LIMITS } from './import-contract';
 export type { UseImportOptions, ImportProgress, ImportResult } from './import-hooks.svelte';
 export type { ExportFormat } from './data-transfer.svelte';
 export {

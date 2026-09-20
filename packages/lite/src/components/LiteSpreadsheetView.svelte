@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { useTranslation } from '@svadmin/core/i18n';
+  const i18n = useTranslation();
+
   export interface SheetData {
     id: string;
     name: string;
@@ -11,6 +14,8 @@
     sheets?: SheetData[];
     activeSheetId?: string;
     formAction?: string;
+    readonly?: boolean;
+    limits?: Partial<{ maxRows: number; maxCols: number; maxCells: number; maxSheets: number; maxCellLength: number }>;
     class?: string;
   }
 
@@ -26,25 +31,63 @@
     ],
     activeSheetId = 'sheet1',
     formAction = '',
+    readonly = false,
+    limits: limitOverrides = {},
     class: className = '',
   }: Props = $props();
 
-  const currentSheet = $derived(
-    sheets.find((s) => s.id === activeSheetId) ?? sheets[0]
-  );
+  const limits = $derived.by(() => {
+    const bounded = (value: number | undefined, ceiling: number) =>
+      typeof value === 'number' && Number.isSafeInteger(value) && value > 0 ? Math.min(value, ceiling) : ceiling;
+    return {
+      maxRows: bounded(limitOverrides.maxRows, 1000),
+      maxCols: bounded(limitOverrides.maxCols, 100),
+      maxCells: bounded(limitOverrides.maxCells, 10_000),
+      maxSheets: bounded(limitOverrides.maxSheets, 32),
+      maxCellLength: bounded(limitOverrides.maxCellLength, 10_000),
+    };
+  });
+  const validWorkbook = $derived(sheets.length <= limits.maxSheets && new Set(sheets.map(sheet => sheet.id)).size === sheets.length);
+  const currentSheet = $derived(validWorkbook ? (sheets.find(s => s.id === activeSheetId) ?? sheets[0]) : undefined);
+  const canRender = $derived.by(() => {
+    if (!currentSheet || !currentSheet.cells || typeof currentSheet.cells !== 'object'
+      || !Number.isSafeInteger(currentSheet.rows) || currentSheet.rows < 1 || currentSheet.rows > limits.maxRows
+      || !Number.isSafeInteger(currentSheet.cols) || currentSheet.cols < 1 || currentSheet.cols > limits.maxCols
+      || currentSheet.rows * currentSheet.cols > limits.maxCells) return false;
+    let textLength = 0;
+    for (let row = 1; row <= currentSheet.rows; row++) {
+      for (let col = 0; col < currentSheet.cols; col++) {
+        const key = `${getColName(col)}${row}`;
+        const raw = Object.hasOwn(currentSheet.cells, key) ? currentSheet.cells[key] : '';
+        if (typeof raw !== 'string' || raw.length > limits.maxCellLength) return false;
+        textLength += raw.length;
+        if (textLength > 1_000_000) return false;
+      }
+    }
+    return true;
+  });
 
   function getColName(index: number): string {
-    return String.fromCharCode(index + 65);
+    let result = '';
+    for (let i = index; i >= 0; i = Math.floor(i / 26) - 1) {
+      result = String.fromCharCode(i % 26 + 65) + result;
+    }
+    return result;
   }
 </script>
 
 <div class="sv-lite-sheet-container {className}">
   <div class="sv-lite-sheet-header">
-    <strong>Spreadsheet: {currentSheet?.name ?? 'Sheet'}</strong>
+    <strong>{i18n.t('spreadsheet.title')}: {currentSheet?.name ?? ''}</strong>
   </div>
 
-  {#if currentSheet}
+  {#if !validWorkbook || (currentSheet && !canRender)}
+    <p role="alert">{i18n.t('spreadsheet.invalid')}</p>
+  {:else if !currentSheet}
+    <p role="status">{i18n.t('spreadsheet.empty')}</p>
+  {:else}
     <form method="POST" action={formAction}>
+      <input type="hidden" name="sheetId" value={currentSheet.id} />
       <table class="sv-lite-sheet-table">
         <thead>
           <tr>
@@ -64,8 +107,11 @@
                 <td class="sv-lite-sheet-td">
                   <input
                     type="text"
+                    {readonly}
+                    aria-label={key}
+                    maxlength={limits.maxCellLength}
                     name={`cell_${key}`}
-                    value={currentSheet.cells[key] ?? ''}
+                    value={Object.hasOwn(currentSheet.cells, key) ? currentSheet.cells[key] ?? '' : ''}
                     class="sv-lite-cell-input"
                   />
                 </td>
@@ -75,9 +121,9 @@
         </tbody>
       </table>
 
-      {#if formAction}
+      {#if formAction && !readonly}
         <div class="sv-lite-sheet-footer">
-          <button type="submit" class="sv-lite-sheet-save">Save Spreadsheet</button>
+          <button type="submit" class="sv-lite-sheet-save">{i18n.t('common.save')}</button>
         </div>
       {/if}
     </form>

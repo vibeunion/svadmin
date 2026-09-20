@@ -24,6 +24,9 @@
   import DateTimeInput from './DateTimeInput.svelte';
   import DateRangeInput, { type DateRangeInputValue } from './DateRangeInput.svelte';
   import FileUpload from './FileUpload.svelte';
+  import ColorPicker from './ColorPicker.svelte';
+  import Rate from './Rate.svelte';
+  import TagsInput from './TagsInput.svelte';
   import TreeSelect, { type TreeSelectOption } from './TreeSelect.svelte';
   import Cascader, { type CascaderOption } from './Cascader.svelte';
   import Transfer, { type TransferItem } from './Transfer.svelte';
@@ -56,6 +59,10 @@
   const boolVal = $derived((value as boolean) ?? false);
   const tagsVal = $derived((value as string[]) ?? []);
   const multiVal = $derived((value as (string | number)[]) ?? []);
+  const selectToken = $derived.by(() => {
+    const index = field.options?.findIndex(option => option.value === value) ?? -1;
+    return index < 0 ? '' : `option:${index}`;
+  });
   const imagesVal = $derived((value as string[]) ?? []);
   let jsonEditText = $state('');
   let jsonEditing = false;
@@ -81,8 +88,20 @@
     onchange(tagsVal.filter((_: string, i: number) => i !== index));
   }
 
-  // Multiselect toggle
+  function changeSelect(event: Event) {
+    if (disabled || !(event.currentTarget instanceof HTMLSelectElement)) return;
+    const token = event.currentTarget.value;
+    if (token === '') {
+      onchange(null);
+      return;
+    }
+    const option = field.options?.find((_, index) => token === `option:${index}`);
+    if (option && !option.disabled) onchange(option.value);
+  }
+
+  // 禁用值保留回显，但不能从复选框或标签删除入口修改。
   function toggleMulti(optValue: string | number) {
+    if (disabled || field.options?.find(option => option.value === optValue)?.disabled) return;
     if (multiVal.includes(optValue)) {
       onchange(multiVal.filter((v: string | number) => v !== optValue));
     } else {
@@ -186,33 +205,17 @@
     />
 
   {:else if field.type === 'color'}
-    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-1004c0c3954c">
-      <input
-        id={field.key}
-        name={field.key}
-        type="color"
-        value={strVal || '#000000'}
-        oninput={(e) => onchange((e.target as HTMLInputElement).value)}
-        class="svadmin-u-426b8b75185b svadmin-u-7e74e5fe798a svadmin-u-34516836730d svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-eb6a3cef9686"
-        disabled={disabled}
-        aria-invalid={invalid || undefined}
-        aria-describedby={errorId}
-      />
-      <Input
-        type="text"
-        value={strVal}
-        oninput={(e) => onchange((e.target as HTMLInputElement).value)}
-        placeholder="#000000"
-        class="svadmin-u-1d274d2422d8 svadmin-u-0e65706bcccd svadmin-u-fc7473ca09eb"
-        {disabled}
-      />
-      {#if strVal}
-        <span
-          class="svadmin-u-ed8a5df7b2fb svadmin-u-2bbcfc3b5179 svadmin-u-ac204c108886 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-438b2237b8d6"
-          style="background-color: {strVal}"
-        ></span>
-      {/if}
-    </div>
+    <ColorPicker
+      id={field.key}
+      name={field.key}
+      value={strVal}
+      onchange={onchange}
+      required={field.required}
+      invalid={invalid}
+      describedby={errorId}
+      ariaLabel={field.label}
+      {disabled}
+    />
 
   {:else if field.type === 'number'}
     <NumberInput
@@ -361,14 +364,14 @@
     />
 
   {:else if field.type === 'select'}
+    <input type="hidden" name={field.key} value={value == null ? '' : String(value)} {disabled} />
     {#if (field.options?.length ?? 0) > 8}
       <select
         id={field.key}
-        name={field.key}
         data-slot="select"
         class="svadmin-u-60fbb7713999 svadmin-u-426b8b75185b svadmin-u-6da6a3c3f741 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b svadmin-u-fc7473ca09eb svadmin-u-582e6ef4b245 svadmin-u-9c24ab70af61 svadmin-u-55d048ebfb1c svadmin-u-608dd26cd5ba svadmin-u-80b9d0ae125f svadmin-u-6b22a22a9752 svadmin-u-5f533b3a7de7 svadmin-u-b29d8adbad2e"
-        value={strVal}
-        onchange={(e) => onchange((e.target as HTMLSelectElement).value)}
+        value={selectToken}
+        onchange={changeSelect}
         required={field.required}
         aria-invalid={invalid || undefined}
         aria-describedby={errorId}
@@ -376,30 +379,29 @@
       >
         <option value="">{i18n.t('field.selectPlaceholder')}</option>
         {#each field.options ?? [] as opt, _i (_i)}
-          <option value={opt.value}>{opt.label}</option>
+          <option value={`option:${_i}`} disabled={opt.disabled}>{opt.label}</option>
         {/each}
       </select>
     {:else}
       <Select
         id={field.key}
-        name={field.key}
-        value={strVal}
-        onchange={(e) => onchange((e.target as HTMLSelectElement).value)}
+        value={selectToken}
+        onchange={changeSelect}
         required={field.required}
         aria-invalid={invalid || undefined}
         aria-describedby={errorId}
         {disabled}
-        placeholder={i18n.t('field.selectPlaceholder')}
       >
+        <option value="">{i18n.t('field.selectPlaceholder')}</option>
         {#each field.options ?? [] as opt, _i (_i)}
-          <option value={opt.value}>{opt.label}</option>
+          <option value={`option:${_i}`} disabled={opt.disabled}>{opt.label}</option>
         {/each}
       </Select>
     {/if}
 
   {:else if field.type === 'multiselect'}
     {#each multiVal as selectedValue, selectedIndex (`${selectedValue}-${selectedIndex}`)}
-      <input type="hidden" name={`${field.key}[]`} value={String(selectedValue)} />
+      <input type="hidden" name={`${field.key}[]`} value={String(selectedValue)} {disabled} />
     {/each}
     <div 
       class="svadmin-u-6f7e013d6499 svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-eb6e8b881acd svadmin-u-558f64349245 svadmin-u-92bf82f493b1"
@@ -411,12 +413,12 @@
       {#each field.options ?? [] as opt, _i (_i)}
         <label class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-fc7473ca09eb svadmin-u-34516836730d svadmin-u-39f703dbe296 svadmin-u-07389a777c1f svadmin-u-d8e0e382c67b svadmin-u-465609a240a8 svadmin-u-ceb69a6b0e5f">
           <Checkbox
-            id={`${field.key}-${opt.value}`}
+            id={`${field.key}-option-${_i}`}
             checked={multiVal.includes(opt.value)}
             onCheckedChange={() => toggleMulti(opt.value)}
             aria-invalid={invalid || undefined}
             aria-describedby={errorId}
-            disabled={disabled}
+            disabled={disabled || opt.disabled}
           />
           {opt.label}
         </label>
@@ -431,7 +433,7 @@
           {@const label = field.options?.find((o: { label: string; value: string | number }) => o.value === v)?.label ?? String(v)}
           <Badge variant="secondary" class="svadmin-u-44ee8ba0a421">
             {label}
-            <button type="button" onclick={() => toggleMulti(v)} class="svadmin-u-b45ce4b65d53 svadmin-u-36d4469299aa svadmin-u-51e95020d6f2 svadmin-u-8db899b4e072 svadmin-u-ceb69a6b0e5f" aria-label={i18n.t('common.clear')}>×</button>
+            <button type="button" disabled={disabled || field.options?.find(option => option.value === v)?.disabled} onclick={() => toggleMulti(v)} class="svadmin-u-b45ce4b65d53 svadmin-u-36d4469299aa svadmin-u-51e95020d6f2 svadmin-u-8db899b4e072 svadmin-u-ceb69a6b0e5f" aria-label={i18n.t('common.clear')}>×</button>
           </Badge>
         {/each}
       </div>
@@ -452,39 +454,30 @@
     </div>
 
   {:else if field.type === 'tags'}
-    {#each tagsVal as tag, tagIndex (`${tag}-${tagIndex}`)}
-      <input type="hidden" name={`${field.key}[]`} value={tag} />
-    {/each}
-    <div class="svadmin-u-6f7e013d6499">
-      <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-58284b4ea568">
-        {#each tagsVal as tag, i (i)}
-          <Badge variant="secondary" class="svadmin-u-44ee8ba0a421">
-            {tag}
-            <button
-              type="button"
-              onclick={() => removeTag(i)}
-              class="svadmin-u-b45ce4b65d53 svadmin-u-36d4469299aa svadmin-u-51e95020d6f2 svadmin-u-8db899b4e072 svadmin-u-ceb69a6b0e5f"
-              aria-label={i18n.t('common.clear')}
-            >×</button>
-          </Badge>
-        {/each}
-      </div>
-      <Input
-        id={field.key}
-        type="text"
-        placeholder={i18n.t('field.tagsPlaceholder')}
-        onkeydown={handleTagKeydown}
-        aria-invalid={invalid || undefined}
-        aria-describedby={errorId}
-        {disabled}
-      />
-    </div>
+    <TagsInput
+      name={`${field.key}[]`}
+      value={tagsVal}
+      onchange={onchange}
+      placeholder={i18n.t('field.tagsPlaceholder')}
+      required={field.required}
+      invalid={invalid}
+      describedby={errorId}
+      ariaLabel={field.label}
+      {disabled}
+    />
 
   {:else if field.type === 'date' || field.type === 'time' || field.type === 'datetime'}
     <DateTimeInput
       id={field.key}
       name={field.key}
       mode={field.type}
+      min={field.dateInput?.min}
+      max={field.dateInput?.max}
+      step={field.dateInput?.step}
+      disabledDate={field.dateInput?.disabledDate}
+      valueMode={field.dateInput?.valueMode}
+      timeZone={field.dateInput?.timeZone}
+      disambiguation={field.dateInput?.disambiguation}
       value={strVal || null}
       onchange={(next) => onchange(next)}
       required={field.required}
@@ -496,7 +489,18 @@
   {:else if field.type === 'daterange'}
     <DateRangeInput
       startId={`${field.key}-start`}
+      mode={field.dateInput?.rangeMode ?? 'date'}
+      valueMode={field.dateInput?.valueMode}
+      timeZone={field.dateInput?.timeZone}
+      disambiguation={field.dateInput?.disambiguation}
+      min={field.dateInput?.min}
+      max={field.dateInput?.max}
+      step={field.dateInput?.step}
+      disabledDate={field.dateInput?.disabledDate}
+      presets={field.dateInput?.presets}
       endId={`${field.key}-end`}
+      startAriaLabel={`${field.label} ${i18n.t('common.startDate')}`}
+      endAriaLabel={`${field.label} ${i18n.t('common.endDate')}`}
       startName={`${field.key}.start`}
       endName={`${field.key}.end`}
       value={value as DateRangeInputValue | null}
@@ -504,6 +508,18 @@
       required={field.required}
       invalid={invalid}
       describedby={errorId}
+      {disabled}
+    />
+
+  {:else if field.type === 'rate' || field.type === 'rating'}
+    <Rate
+      name={field.key}
+      value={numVal ?? 0}
+      onchange={onchange}
+      required={field.required}
+      invalid={invalid}
+      describedby={errorId}
+      ariaLabel={field.label}
       {disabled}
     />
 

@@ -139,6 +139,25 @@ interaction or pixel parity. `JSXPreview` intentionally uses a restricted,
 TypeBox-validated parser instead of executing arbitrary JSX. `Tool.getStatusBadge`
 returns Svelte-renderable status metadata instead of a React element.
 
+## Ant Design X-inspired AI workspace boundary
+
+SVAdmin adopts the interaction model of Ant Design X for enterprise admin
+workflows, while keeping a Svelte-native API and the existing
+`ChatProvider`/`AgentProvider` boundaries. The stable core loop is:
+
+- welcome and suggestion entry points;
+- conversation, message, sender, streaming, stop, retry, and persistence;
+- reasoning and structured tool-call presentation;
+- explicit confirmation before privileged or mutating operations;
+- a command bar that falls back to ordinary navigation search when AI is
+  unavailable.
+
+Long-running task progress is currently `experimental`. React component APIs,
+direct model mutations, and visual 1:1 compatibility with Ant Design X are not
+part of the SVAdmin contract. The machine-readable boundary is exported as
+`AI_WORKSPACE_CAPABILITIES`; its acceptance conditions must remain satisfied
+when these surfaces evolve.
+
 ## AdminApp Integration
 
 Pass providers through the owning Svelte tree and render the assistant through

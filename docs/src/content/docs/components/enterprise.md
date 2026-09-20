@@ -40,6 +40,25 @@ Every organization, identity-governance, session, and credential provider method
 
 The trusted backend remains responsible for authentication, authorization, tenant isolation, secret hashing and rotation, webhook delivery, idempotency, rate limiting, retention enforcement, and durable audit storage. Credential, session, identity-policy, and role mutations should write their business change and audit record in one backend transaction or equivalent atomic workflow. UI callbacks and `writeAuditEntry()` cannot make two independent remote writes atomic.
 
+## Product maturity boundaries
+
+Exporting a component does not mean the product capability is complete. The enterprise product uses these delivery boundaries:
+
+These tiers describe targets and acceptance gates, not completed releases. Focused tests prove only their covered scenarios; API freeze, complete type checks, browser acceptance, publication, and online acceptance require separate evidence.
+
+The machine-readable boundary is exported from `@svadmin/core` as
+`ENTERPRISE_MATURITY`: P0 is `stable`, P1 is `verified`, and P2 remains
+`experimental` or `planned`. This prevents an export count from being mistaken
+for complete product delivery.
+
+| Tier | Product commitment | Current acceptance bar |
+|---|---|---|
+| P0 stable delivery | App shell, resource CRUD, tables and forms, permission and tenant governance, import/export, audit, and Provider/SSR/Lite foundations | Public APIs are frozen; direct behavior, type, and SSR/Lite tests exist; failures never fabricate success |
+| P1 verified capability | Advanced tables, saved views, import wizard, task queue, approvals, version diff, dashboard, and multi-tab workspace | Focused UI/Core/Lite coverage exists; tenant, Provider, async receipt, and error boundaries are verified |
+| P2 extension modules | Kanban, Gantt, Pivot, Spreadsheet, decision tables, PDF, printing, signatures, annotations, media, collaboration, and offline sync | Optional and scenario-driven; does not block P0/P1 and does not promise complete domain backends or equal Lite behavior by default |
+
+P2 components may be used, but their status should be managed as `experimental` or `planned` until the relevant API, SSR/Lite, integration, and online acceptance work is complete. No tier means that browser components automatically provide authentication, authorization, tenant isolation, or durable audit storage.
+
 ## Enterprise Interaction Catalog
 
 The current UI and Lite releases include the following enterprise-oriented building blocks. Each listed Lite component is SSR-safe and is either a direct server-rendered counterpart or an explicitly documented semantic fallback. The full status matrix is generated in `packages/lite/PARITY.md`.

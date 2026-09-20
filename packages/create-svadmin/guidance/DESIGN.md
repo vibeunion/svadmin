@@ -187,10 +187,10 @@ may increase slightly for genuinely clickable items, without translation or
 glow. Dialogs and menus receive stronger depth because they are floating
 layers. Dark mode keeps the same hierarchy with low-chroma surfaces.
 
-- **Control Shadow**: `0 1px 2px rgb(15 23 42 / 0.05), 0 0 0 1px rgb(15 23 42 / 0.025)`
-- **Surface Shadow**: `0 1px 2px rgb(15 23 42 / 0.035), 0 1px 3px rgb(15 23 42 / 0.025)`
-- **Surface Hover Shadow**: `0 2px 5px rgb(15 23 42 / 0.055), 0 1px 2px rgb(15 23 42 / 0.035)`
-- **Overlay Shadow**: `0 18px 48px rgb(15 23 42 / 0.14), 0 4px 12px rgb(15 23 42 / 0.08)`
+- **Control Shadow**: `0 1px 2px rgb(15 23 42 / 0.09), 0 0 0 1px rgb(15 23 42 / 0.045)`
+- **Surface Shadow**: `0 1px 2px rgb(15 23 42 / 0.08), 0 10px 24px rgb(15 23 42 / 0.07)`
+- **Surface Hover Shadow**: `0 3px 8px rgb(15 23 42 / 0.1), 0 16px 32px rgb(15 23 42 / 0.08)`
+- **Overlay Shadow**: `0 20px 52px rgb(15 23 42 / 0.18), 0 6px 16px rgb(15 23 42 / 0.1)`
 
 ## Shapes
 

@@ -8,14 +8,18 @@
 		ref = $bindable(null),
 		checked = $bindable(false),
 		indeterminate = $bindable(false),
+		size = "default",
 		class: className,
 		...restProps
-	}: WithoutChildrenOrChild<CheckboxPrimitive.RootProps> = $props();
+	}: Omit<WithoutChildrenOrChild<CheckboxPrimitive.RootProps>, "size"> & {
+		size?: "default" | "compact";
+	} = $props();
 </script>
 
 <CheckboxPrimitive.Root
 	bind:ref
 	data-slot="checkbox"
+	data-size={size}
 	class={cn("svadmin-checkbox", className)}
 	bind:checked
 	bind:indeterminate

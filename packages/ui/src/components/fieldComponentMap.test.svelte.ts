@@ -12,6 +12,8 @@ import JsonField from './fields/JsonField.svelte';
 import CodeField from './fields/CodeField.svelte';
 import FieldDisplay from './FieldDisplay.svelte';
 import { formatJsonValue } from './fields/json-value';
+import DateField from './fields/DateField.svelte';
+import { parseDisplayDate } from './fields/date-display';
 
 function required(fieldType: string): Component<FieldDisplayProps> {
   const component = getDisplayComponent(fieldType);
@@ -37,6 +39,8 @@ describe('validated field displays', () => {
     ['relation', {}],
     ['date', {}],
     ['date', new Date(Number.NaN)],
+    ['time', {}],
+    ['datetime', false],
     ['daterange', ['2026-01-01']],
     ['daterange', { start: undefined }],
     ['daterange', { start: '2026-01-01', unexpected: true }],
@@ -115,6 +119,64 @@ describe('validated field displays', () => {
     const range = render(required('daterange'), { value: { start: '2026-01-01', end: '2026-01-02' } });
     expect(range.container.textContent).toContain('2026');
     expect(range.container.querySelector('[data-svadmin-invalid-field]')).toBeNull();
+  });
+
+  it.each([
+    ['date', '2026-09-19', 'Sep 19, 2026'],
+    ['time', '10:30:45', '10:30:45 AM'],
+    ['datetime', '2026-09-19T10:30', 'Sep 19, 2026, 10:30 AM'],
+  ])('renders native %s values through the registered detail renderer', (type, value, expected) => {
+    const view = render(FieldDisplay, { type, value });
+    expect(view.container.textContent).toBe(expected);
+    expect(view.container.querySelector('[data-svadmin-invalid-field]')).toBeNull();
+    expect(view.container.querySelector('[title]')?.getAttribute('title')).toBe(value);
+  });
+
+  it.each(['America/Los_Angeles', 'Pacific/Kiritimati'])(
+    'does not reinterpret civil dates in %s', timeZone => {
+      const view = render(DateField, {
+        value: '2026-01-01', options: { dateStyle: 'medium', timeZone },
+      });
+      expect(view.container.textContent).toBe('Jan 1, 2026');
+    },
+  );
+
+  it('formats actual instants in the explicitly requested timezone', async () => {
+    const view = render(DateField, {
+      value: '2026-01-01T01:00:00Z', options: { dateStyle: 'medium', timeZone: 'America/Los_Angeles' },
+    });
+    expect(view.container.textContent).toBe('Dec 31, 2025');
+    await view.rerender({ options: { dateStyle: 'medium', timeZone: 'Pacific/Kiritimati' } });
+    expect(view.container.textContent).toBe('Jan 1, 2026');
+  });
+
+  it.each(['2026-02-29', '2026-02-30T10:30', '2026-13-01', '24:00', '10:60', '12:00:60'])(
+    'rejects invalid civil value %s instead of normalizing it', value => {
+      const view = render(DateField, { value, nullLabel: 'Invalid' });
+      expect(view.container.textContent).toBe('Invalid');
+      expect(view.container.querySelector('[title]')).toBeNull();
+    },
+  );
+
+  it.each(['2024-02-29', '0001-01-01', '2026-03-08T02:30', '10:30:45.12'])(
+    'preserves civil ISO values without inventing an offset: %s', value => {
+      const view = render(DateField, { value, format: 'iso' });
+      expect(view.container.textContent).toBe(value);
+      expect(parseDisplayDate(value)?.civil).toBe(true);
+    },
+  );
+
+  it('keeps timestamps and Date instances as instants including epoch zero', () => {
+    expect(parseDisplayDate(0)?.title).toBe('1970-01-01T00:00:00.000Z');
+    expect(parseDisplayDate(new Date(0))?.civil).toBe(false);
+    expect(parseDisplayDate('2026-01-01T08:00:00+08:00')?.title).toBe('2026-01-01T00:00:00.000Z');
+  });
+
+  it('recovers from invalid civil values and uses deterministic formatting fallback', async () => {
+    const view = render(DateField, { value: '2026-02-30', nullLabel: 'Invalid' });
+    expect(view.container.textContent).toBe('Invalid');
+    await view.rerender({ value: '2026-02-28', locale: 'invalid_locale' });
+    expect(view.container.textContent).toBe('2026-02-28');
   });
 
   it('does not resolve prototype names and prevents mutation of builtin definitions', () => {

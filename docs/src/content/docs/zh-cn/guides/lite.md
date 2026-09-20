@@ -24,7 +24,8 @@ description: 零 JS 服务端渲染降级方案、IE11 兼容纯 CSS 基线与 1
 
 ## 组件体系与 100% 对齐覆盖
 
-`@svadmin/lite` 实现了与 `@svadmin/ui` **100% 的组件对齐（103/103 个组件）**。现代 SPA 中的每一个 UI 组件，都有 1:1 服务端渲染组件、明确的语义降级方案，或明确标记为仅适用于 SPA。
+当前对齐清单的 **104/104 项**均已归类为直接适配、语义降级或仅 SPA。
+该覆盖率只统计清单映射，不表示涵盖所有公开组件，也不表示所有行为已通过企业级验收。
 
 ### 模块对齐看板
 
@@ -32,16 +33,16 @@ description: 零 JS 服务端渲染降级方案、IE11 兼容纯 CSS 基线与 1
 ===============================================================
        @svadmin/ui ↔ @svadmin/lite 组件对齐进度看板
 ===============================================================
-  [fields]        32/32 (100.0%)  [██████████████]
+  [fields]        33/33 (100.0%)  [██████████████]
   [buttons]       10/10 (100.0%)  [██████████████]
   [pages]          12/12 (100.0%)  [██████████████]
   [layout]          9/9 (100.0%)  [██████████████]
   [widgets]       10/10 (100.0%)  [██████████████]
   [advanced]      30/30 (100.0%)  [██████████████]
 ---------------------------------------------------------------
-  总体覆盖率: 100% (103/103)
-  - 1:1 对齐 (Exact): 91
-  - 语义降级 (Fallback): 10
+  总体覆盖率: 100% (104/104)
+  - 1:1 对齐 (Exact): 85
+  - 语义降级 (Fallback): 17
   - 免适配 (SPA Only): 2
   - 待补齐 (Missing): 0
 ===============================================================
@@ -51,11 +52,11 @@ description: 零 JS 服务端渲染降级方案、IE11 兼容纯 CSS 基线与 1
 
 1. **核心页面 (Pages - 12 个)**:
    - `LiteListPage`、`LiteCreatePage`、`LiteEditPage`、`LiteShowPage`、`LiteLogin`、`LiteRegisterPage`、`LiteForgotPasswordPage`、`LiteUpdatePasswordPage`、`LiteProfilePage`、`LiteMasterDetailView`、`LitePrintableBill`、`LitePdfDocumentViewer`。
-2. **字段与复合选择器组件 (Fields - 32 个)**:
+2. **字段与复合选择器组件 (Fields - 33 个)**:
    - **文本与数值类**: `LiteTextField`、`LiteNumberField`、`LiteCurrencyField`、`LitePercentField`、`LitePhoneField`、`LiteEmailField`、`LiteUrlField`、`LiteRatingField`、`LiteCopyField`。
    - **选项与关联类**: `LiteBooleanField`、`LiteDateField`、`LiteDateRangeField`、`LiteSelectField`、`LiteMultiSelectField`、`LiteTreeSelect`、`LiteCascader`、`LiteTagField`、`LiteRelationField`。
    - **媒体与复杂数据**: `LiteAvatarField`、`LiteImageField`、`LiteFileField`、`LiteJsonField`、`LiteArrayField`、`LiteDynamicFormList`、`LiteTransfer`、`LiteImageCropper`、`LiteJsonSchemaForm`、`LiteMentionsInput`、`LiteSignaturePad`。
-   - **语义降级字段**: `LiteCodeField`、`LiteMarkdownField`、`LiteRichTextField`。
+   - **语义降级字段**: `LiteCodeField`、`LiteMarkdownField`、`LiteRichTextField`、`LiteFileUpload`。
 3. **操作按钮 (Buttons - 10 个)**:
    - `LiteListButton`、`LiteCreateButton`、`LiteEditButton`、`LiteShowButton`、`LiteCloneButton`（原生 `<a>` 链接）。
    - `LiteDeleteButton`（纯 CSS 锚点弹窗确认 + 原生 POST 表单）。
@@ -69,11 +70,13 @@ description: 零 JS 服务端渲染降级方案、IE11 兼容纯 CSS 基线与 1
    - `LiteInsightCard` 继续作为 Lite 独有的 SSR 基础组件提供，不计入 `@svadmin/ui` 对齐矩阵。
 6. **高级交互与查询构造器 (Advanced UX - 30 个)**:
    - `LiteTable`（原生排序表格、横向滚动与可选固定边缘/操作列）。
-   - `LiteConfirmDialog`、`LiteFilterBuilder`、`LiteDrawerForm`、`LiteModalForm`、`LiteVirtualTable`。
+   - `LiteConfirmDialog`、`LiteFilterBuilder`、`LiteDrawerForm`、`LiteModalForm`、`LiteVirtualTable`（原生表格输出，不提供 SPA 虚拟窗口；服务端应分页或限制数据量）。
    - `LiteInlineEdit`、`LiteAutoSaveIndicator`、`LiteToast`、`LiteUndoableNotification`（服务端语义降级）。
    - `LiteWatermark`、`LiteColumnSettings`、`LiteImportWizard`、`LiteColumnHeaderFilter`、`LiteTreeTable`、`LiteSensitiveDataMask`、`LiteApprovalActionCard`。
+   - `LiteTreeTable` 输出传入的完整层级树，不提供 SPA 展开折叠、选择、半选或层级键盘导航；服务端必须校验树结构并限制节点量。
    - `LiteStepForm`、`LiteTableSummary`、`LiteVersionDiffViewer`、`LiteEditableTable`、`LiteDraggableRowTable`、`LiteMediaLibraryModal`、`LiteActivityFeed`。
    - `LiteKanbanBoard`、`LitePivotTable`、`LiteCanvasAnnotation`、`LiteSpreadsheetView`、`LiteDecisionTable`。
+   - `LiteSpreadsheetView` 是有界原生表单降级，不提供 SPA 公式计算、交互切表或客户端导出；服务端承接这些操作。
    - `DevTools` 明确为仅 SPA 组件，不提供 Lite 对应物。
 
 ---

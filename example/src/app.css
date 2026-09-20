@@ -1,7 +1,8 @@
+@layer reset, theme, base, tokens, recipes, components, utilities;
+
+@source "./";
+
 @import "tailwindcss";
 @import "tw-animate-css";
-
-/* Tailwind source tokens and component discovery are owned by @svadmin/ui. */
-@import "@svadmin/ui/app.theme.css";
-
-@custom-variant dark (&:is(.dark *));
+@import "@svadmin/ui/app.css";
+@import "./example-layout.css";

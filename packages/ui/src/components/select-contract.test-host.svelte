@@ -8,7 +8,7 @@
 
   let { provider, resources, queryClient, onReady = () => {}, settings = {},
     resource = 'posts', tenant = 'first', field = false, value = null, onchange, multiple = false,
-    optionLabel = 'title', optionValue = 'id', disabled = false,
+    optionLabel = 'title', optionValue = 'id', disabled = false, fetchSize = 50,
     authProvider = null, notificationProvider = null,
     routerProvider = { go: () => {}, back: () => {}, parse: () => ({ pathname: '/', params: {} }) },
   }: {
@@ -26,6 +26,7 @@
     optionLabel?: string;
     optionValue?: string;
     disabled?: boolean;
+    fetchSize?: number;
     authProvider?: AuthProvider | null;
     notificationProvider?: NotificationProvider | null;
     routerProvider?: RouterProvider;
@@ -43,7 +44,7 @@
 <QueryClientProvider client={queryClient}>
   {#if field}
     <ComboboxField {resource} {value} onchange={(next) => { value = next; onchange?.(next); }}
-      {optionLabel} {optionValue} {multiple} {disabled} aria-label="Record" />
+      {optionLabel} {optionValue} {multiple} {disabled} {fetchSize} aria-label="Record" />
   {:else}
     <Probe {resource} {settings} {onReady} />
   {/if}

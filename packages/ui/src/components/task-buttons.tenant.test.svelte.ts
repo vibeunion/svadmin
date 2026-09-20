@@ -1,4 +1,4 @@
-import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { act, fireEvent, render, waitFor } from '@testing-library/svelte';
 import { keys, resetContext } from '@svadmin/core';
 import type { TaskProvider, TaskRecord } from '@svadmin/core';
 import { QueryClient, type InvalidateQueryFilters } from '@tanstack/svelte-query';
@@ -52,26 +52,27 @@ describe('tenant-scoped task buttons', () => {
       expect(invalidate).not.toHaveBeenCalled();
     });
 
-    it(`retains the originating tenant and task while ${action} is pending`, async () => {
+    it(`suppresses the old receipt after the tenant and task change during ${action}`, async () => {
       const queryClient = new QueryClient();
       const invalidate = vi.spyOn(queryClient, 'invalidateQueries').mockResolvedValue(undefined);
       const { provider } = createTaskProvider();
       let finish = () => {};
       const pending = new Promise<void>(resolve => { finish = resolve; });
-      provider[action] = async id => { await pending; return { id, status: 'running' }; };
+      const operation = vi.fn(async (id: string) => { await pending; return { id, status: 'running' }; });
+      provider[action] = operation;
       const onSuccess = vi.fn();
+      const onError = vi.fn();
       const view = render(TaskButtonHost, {
         action, taskId: 'original', taskProvider: provider,
-        tenant: { tenantId: 'tenant-a' }, queryClient, onSuccess,
+        tenant: { tenantId: 'tenant-a' }, queryClient, onSuccess, onError,
       });
       await fireEvent.click(view.getByRole('button'));
       await view.rerender({ taskId: 'later', tenant: { tenantId: 'tenant-b' } });
-      finish();
-      await waitFor(() => expect(onSuccess).toHaveBeenCalledOnce());
-      expect(matchesQuery(invalidate.mock.calls[0]?.[0], keys({ tenant: 'tenant-a' }).task.list())).toBe(true);
-      expect(matchesQuery(invalidate.mock.calls[0]?.[0], keys({ tenant: 'tenant-b' }).task.list())).toBe(false);
-      expect(matchesQuery(invalidate.mock.calls[1]?.[0], keys({ tenant: 'tenant-a' }).task.one('original'))).toBe(true);
-      expect(matchesQuery(invalidate.mock.calls[1]?.[0], keys({ tenant: 'tenant-b' }).task.one('later'))).toBe(false);
+      await act(async () => { finish(); await pending; });
+      expect(operation).toHaveBeenCalledExactlyOnceWith('original');
+      expect(onSuccess).not.toHaveBeenCalled();
+      expect(onError).not.toHaveBeenCalled();
+      expect(invalidate).not.toHaveBeenCalled();
     });
   }
 
@@ -109,7 +110,7 @@ describe('tenant-scoped task buttons', () => {
     expect(firstProvider.retry).not.toHaveBeenCalled();
     expect(secondProvider.retry).toHaveBeenCalledWith('shared-task');
     expect(secondProvider.cancel).not.toHaveBeenCalled();
-    expect(invalidateQueries).toHaveBeenCalledTimes(4);
+    expect(invalidateQueries).toHaveBeenCalledTimes(2);
 
     const tenantAList = keys({ tenant: 'tenant-a' }).task.list();
     const tenantBList = keys({ tenant: 'tenant-b' }).task.list();
@@ -119,14 +120,14 @@ describe('tenant-scoped task buttons', () => {
 
     expect(matchesQuery(invalidateQueries.mock.calls[0]?.[0], tenantAList)).toBe(true);
     expect(matchesQuery(invalidateQueries.mock.calls[0]?.[0], tenantBList)).toBe(false);
-    expect(matchesQuery(invalidateQueries.mock.calls[1]?.[0], tenantATask)).toBe(true);
-    expect(matchesQuery(invalidateQueries.mock.calls[1]?.[0], tenantBTask)).toBe(false);
-    expect(matchesQuery(invalidateQueries.mock.calls[1]?.[0], tenantAOtherTask)).toBe(false);
+    expect(matchesQuery(invalidateQueries.mock.calls[0]?.[0], tenantATask)).toBe(true);
+    expect(matchesQuery(invalidateQueries.mock.calls[0]?.[0], tenantBTask)).toBe(false);
+    expect(matchesQuery(invalidateQueries.mock.calls[0]?.[0], tenantAOtherTask)).toBe(false);
 
-    expect(matchesQuery(invalidateQueries.mock.calls[2]?.[0], tenantBList)).toBe(true);
-    expect(matchesQuery(invalidateQueries.mock.calls[2]?.[0], tenantAList)).toBe(false);
-    expect(matchesQuery(invalidateQueries.mock.calls[3]?.[0], tenantBTask)).toBe(true);
-    expect(matchesQuery(invalidateQueries.mock.calls[3]?.[0], tenantATask)).toBe(false);
-    expect(matchesQuery(invalidateQueries.mock.calls[3]?.[0], tenantAOtherTask)).toBe(false);
+    expect(matchesQuery(invalidateQueries.mock.calls[1]?.[0], tenantBList)).toBe(true);
+    expect(matchesQuery(invalidateQueries.mock.calls[1]?.[0], tenantAList)).toBe(false);
+    expect(matchesQuery(invalidateQueries.mock.calls[1]?.[0], tenantBTask)).toBe(true);
+    expect(matchesQuery(invalidateQueries.mock.calls[1]?.[0], tenantATask)).toBe(false);
+    expect(matchesQuery(invalidateQueries.mock.calls[1]?.[0], tenantAOtherTask)).toBe(false);
   });
 });

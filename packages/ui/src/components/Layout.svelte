@@ -203,9 +203,9 @@
 
     <div
       class="svadmin-u-36e579c0b41c svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-2cd02d11d1af svadmin-u-0fe7d7d814d0 svadmin-u-7890552ecd63"
-      class:md:ml-[252px]={!collapsed}
+      class:svadmin-sidebar-content-expanded={!collapsed}
       class:sidebar-content-expanded={!collapsed}
-      class:md:ml-[70px]={collapsed}
+      class:svadmin-sidebar-content-collapsed={collapsed}
       class:sidebar-content-collapsed={collapsed}
     >
       <!-- Header with mobile hamburger -->

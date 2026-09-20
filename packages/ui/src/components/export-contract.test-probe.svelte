@@ -19,6 +19,12 @@
     get format() { return settings.format; },
     get download() { return settings.download; },
     get mapData() { return settings.mapData; },
+    get enabled() { return settings.enabled; },
+    get taskName() { return settings.taskName; },
+    get taskProvider() { return settings.taskProvider; },
+    get taskIdempotencyKey() { return settings.taskIdempotencyKey; },
+    get initialTaskId() { return settings.initialTaskId; },
+    get onTaskSubmitted() { return settings.onTaskSubmitted; },
     get onError() { return settings.onError; },
   }));
   $effect(() => onReady(exporter));

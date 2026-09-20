@@ -309,8 +309,8 @@
   aria-label="Sidebar navigation"
   class="svadmin-u-7bc555991dba svadmin-u-5f89f14a26db svadmin-u-c78facc7a0a6 svadmin-u-0f2fff0ae96e svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-5ceb636bd9f3 svadmin-u-6ee2d41e2d2d svadmin-u-0fe7d7d814d0 svadmin-u-7890552ecd63"
   style="background-color: var(--sidebar);"
-  class:w-[252px]={!collapsed}
-  class:w-[70px]={collapsed}
+  class:svadmin-sidebar-expanded={!collapsed}
+  class:svadmin-sidebar-collapsed={collapsed}
 >
   <div class="svadmin-u-60fbb7713999 svadmin-u-07017cde3e97 svadmin-u-3960ffc248d9 svadmin-u-012fbd121f37" class:px-5={!collapsed} class:justify-center={collapsed}>
     {#if !collapsed}

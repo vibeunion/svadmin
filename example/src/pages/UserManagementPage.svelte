@@ -305,7 +305,7 @@
 <ContentPageShell pageId="user-management" width="wide">
   <ContentPageHeader title={pageCopy.title} actions={headerActions} />
   {#if activeResource !== 'roles'}
-  <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+  <section class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
     <MetricBlock label={isZh ? '成员总数' : 'Members'} value={users.length} detail={isZh ? '当前组织成员' : 'Current organization'} />
     <MetricBlock label={isZh ? '角色数量' : 'Roles'} value={roles.length} detail={isZh ? '权限边界' : 'Permission boundaries'} />
     <MetricBlock label={isZh ? '权限策略' : 'Policies'} value={permissions.length} detail={isZh ? '可审计规则' : 'Auditable rules'} />
@@ -324,7 +324,7 @@
       }} />
     {:else}
     <section class="grid gap-4" data-role-workspace>
-      <div class="grid gap-4 xl:grid-cols-[1fr_1fr]">
+      <div class="grid min-w-0 gap-4 lg:grid-cols-[1fr_1fr]">
         <div class="divide-y">
           {#each roleCards as role (role.id)}
             <button
@@ -342,7 +342,7 @@
           {/if}
         </div>
 
-        <aside class="min-w-0 border-t pt-4 xl:border-l xl:border-t-0 xl:pl-4 xl:pt-0" data-role-details>
+        <aside class="min-w-0 border-t pt-4 lg:border-l lg:border-t-0 lg:pl-4 lg:pt-0" data-role-details>
           <header class="pb-4">
             <h2 class="text-base font-semibold">{selectedRole?.name ?? (isZh ? '选择角色' : 'Select a role')}</h2>
             {#if selectedRole?.description}<p class="mt-1 text-sm text-muted-foreground">{selectedRole.description}</p>{/if}
@@ -508,17 +508,17 @@
       </div>
     </section>
   {:else if activeResource === 'user_accounts'}
-    <section class="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
+    <section class="grid min-w-0 gap-4 lg:grid-cols-[0.8fr_1.2fr]">
       <Card.Root><Card.Header><Card.Title class="text-base">{isZh ? '账户风险概览' : 'Account Risk Overview'}</Card.Title></Card.Header><Card.Content class="grid gap-3 sm:grid-cols-3 xl:grid-cols-1"><div class="rounded-lg border p-3"><p class="text-xs text-muted-foreground">{isZh ? '账户' : 'Accounts'}</p><p class="text-2xl font-semibold">{accounts.length}</p></div><div class="rounded-lg border p-3"><p class="text-xs text-muted-foreground">{isZh ? '锁定' : 'Locked'}</p><p class="text-2xl font-semibold">{lockedAccounts}</p></div><div class="rounded-lg border p-3"><p class="text-xs text-muted-foreground">{isZh ? '活跃成员' : 'Active members'}</p><p class="text-2xl font-semibold">{activeUsers}</p></div></Card.Content></Card.Root>
       <Card.Root class="overflow-hidden"><Card.Header class="border-b"><Card.Title class="text-base">{isZh ? '登录状态' : 'Sign-in Status'}</Card.Title></Card.Header><Card.Content class="divide-y p-0">{#each accounts as account (account.id)}<div class="grid gap-2 px-5 py-4 md:grid-cols-[1fr_auto_auto]"><div><p class="font-medium">{userName(account.userId)}</p><p class="text-xs text-muted-foreground">{account.notes}</p></div><Badge variant="outline">{statusLabel(account.accountType)}</Badge><span class="text-xs text-muted-foreground">{account.lastSignInAt}</span></div>{/each}</Card.Content></Card.Root>
     </section>
   {:else if activeResource === 'user_logs'}
-    <section class="grid gap-4 xl:grid-cols-[1fr_0.42fr]">
+    <section class="grid min-w-0 gap-4 lg:grid-cols-[1fr_0.42fr]">
       <Card.Root class="overflow-hidden"><Card.Header class="border-b"><Card.Title class="text-base">{isZh ? '安全时间线' : 'Security Timeline'}</Card.Title></Card.Header><Card.Content class="divide-y p-0">{#each logs as log (log.id)}<div class="grid gap-3 px-5 py-4 md:grid-cols-[auto_1fr_auto]"><span class="mt-1 flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary"><Clock3 class="h-4 w-4" /></span><div><p class="font-medium">{log.event}</p><p class="text-xs text-muted-foreground">{userName(log.userId)} · {log.ipAddress} · {log.details}</p></div><Badge variant="outline">{statusLabel(log.severity)}</Badge></div>{/each}</Card.Content></Card.Root>
       <Card.Root><Card.Header><Card.Title class="text-base">{isZh ? '审计摘要' : 'Audit Summary'}</Card.Title></Card.Header><Card.Content class="space-y-3"><div class="rounded-lg border p-3"><p class="text-xs text-muted-foreground">{isZh ? '日志总数' : 'Logs'}</p><p class="text-2xl font-semibold">{logs.length}</p></div><div class="rounded-lg border p-3"><p class="text-xs text-muted-foreground">{isZh ? '需关注' : 'Needs attention'}</p><p class="text-2xl font-semibold">{criticalLogs}</p></div></Card.Content></Card.Root>
     </section>
   {:else if activeResource === 'user_settings'}
-    <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <section class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {#each settings as setting (setting.id)}
         <Card.Root>
           <Card.Header><div class="flex items-center justify-between gap-3"><SlidersHorizontal class="h-5 w-5 text-primary" /><Badge variant="outline">{statusLabel(setting.status)}</Badge></div><Card.Title class="text-base">{setting.setting}</Card.Title><Card.Description>{setting.scope}</Card.Description></Card.Header>
@@ -579,7 +579,7 @@
       </Card.Header>
       <Card.Content class="p-0">
         <div class="overflow-x-auto">
-          <table class="w-full min-w-[760px] text-sm" aria-label={isZh ? '用户目录' : 'User directory'}>
+          <table class="w-full min-w-[760px] whitespace-nowrap text-sm" aria-label={isZh ? '用户目录' : 'User directory'}>
             <thead class="border-b bg-muted/35 text-xs font-semibold text-muted-foreground">
               <tr><th class="px-5 py-3 text-left">{isZh ? '用户' : 'User'}</th><th class="px-5 py-3 text-left">{isZh ? '角色' : 'Role'}</th><th class="px-5 py-3 text-left">{isZh ? '状态' : 'Status'}</th><th class="px-5 py-3 text-left">{isZh ? '加入日期' : 'Joined'}</th><th class="px-5 py-3 text-left">{isZh ? '最近登录' : 'Last Sign In'}</th><th class="px-5 py-3 text-right">{isZh ? '操作' : 'Actions'}</th></tr>
             </thead>
@@ -597,7 +597,7 @@
   {/if}
 
   {#if activeResource !== 'roles'}
-    <section class="grid gap-4 xl:grid-cols-[1fr_0.72fr]">
+    <section class="grid min-w-0 gap-4 lg:grid-cols-[1fr_0.72fr]">
       <Card.Root class="overflow-hidden">
         <Card.Header class="border-b"><Card.Title class="text-base">{isZh ? '团队成员' : 'Team Members'}</Card.Title></Card.Header>
         <Card.Content class="p-0">

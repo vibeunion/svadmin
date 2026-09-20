@@ -16,18 +16,44 @@
     "@testing-library/user-event": "^14.6.6",
     "@types/bun": "^1.4.2",
     "@types/jsdom": "^30.0.0",
+    "exceljs": "4.4.0",
     "happy-dom": "^20.11.12",
     "jsdom": "^30.0.1",
     "vitest": "^4.1.11"
   },
   "peerDependencies": {
+    "exceljs": "^4.4.0",
     "svelte": "^5.56.10",
     "@tanstack/svelte-query": "^6.1.48"
   },
   "exports": {
+    "./spreadsheet-xlsx": {
+      "types": "./src/spreadsheet-xlsx.ts",
+      "default": "./src/spreadsheet-xlsx.ts"
+    },
+    "./filter-values": {
+      "types": "./src/filter-values.ts",
+      "default": "./src/filter-values.ts"
+    },
+    "./date-time": {
+      "types": "./src/date-time.ts",
+      "default": "./src/date-time.ts"
+    },
+    "./pivot": {
+      "types": "./src/pivot.ts",
+      "default": "./src/pivot.ts"
+    },
+    "./gantt": {
+      "types": "./src/gantt.ts",
+      "default": "./src/gantt.ts"
+    },
     "./schema": {
       "types": "./src/schema.ts",
       "default": "./src/schema.ts"
+    },
+    "./schema-form": {
+      "types": "./src/schema-form.ts",
+      "default": "./src/schema-form.ts"
     },
     "./options": {
       "types": "./src/defined-options.ts",
@@ -107,10 +133,14 @@
   "type": "module",
   "types": "src/index.ts",
   "dependencies": {
+    "@internationalized/date": "^3.12.3",
     "@sinclair/typebox": "^0.34.52",
     "papaparse": "^5.5.4"
   },
   "peerDependenciesMeta": {
+    "exceljs": {
+      "optional": true
+    },
     "svelte": {
       "optional": true
     },

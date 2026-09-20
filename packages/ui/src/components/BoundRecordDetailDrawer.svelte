@@ -1,5 +1,6 @@
 <script lang="ts">
   import { definedOptions } from '@svadmin/core/options';
+  import type { Snippet } from 'svelte';
 
   import { useCan, useNavigation, type FieldDefinition } from '@svadmin/core';
   import { useRecordDetail } from './record-detail.svelte';
@@ -15,11 +16,13 @@
     open = $bindable(false),
     recordId,
     onClose,
+    extraSections,
   }: {
     resourceName: string;
     open?: boolean;
     recordId: string | number;
     onClose?: () => void;
+    extraSections?: Snippet;
   } = $props();
 
   const i18n = useTranslation();
@@ -141,6 +144,12 @@
     <div class="svadmin-u-61357c0c2f29 svadmin-u-ca6bf63030aa">
       <p class="svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">{i18n.t('common.noData')}</p>
     </div>
+  {/if}
+
+  {#if extraSections && canReadRecord && query.isSuccess}
+    <section data-svadmin-detail-extensions aria-label={i18n.t('common.additionalDetails')}>
+      {@render extraSections()}
+    </section>
   {/if}
 
   {#snippet footer()}

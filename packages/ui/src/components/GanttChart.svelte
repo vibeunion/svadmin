@@ -1,6 +1,10 @@
 <script lang="ts">
   import { Badge } from './ui/badge/index.js';
   import { cn } from '../utils.js';
+  import { useTranslation } from '@svadmin/core/i18n';
+  import { GANTT_LIMITS, validateGantt } from '@svadmin/core/gantt';
+  import { Diamond, RotateCw } from '@lucide/svelte';
+  import { Button } from './ui/button/index.js';
 
   export interface GanttTask {
     id: string;
@@ -11,6 +15,8 @@
     category?: string;
     assignee?: string;
     status?: 'planned' | 'in_progress' | 'completed' | 'delayed';
+    dependencies?: string[];
+    milestone?: boolean;
   }
 
   interface Props {
@@ -18,6 +24,10 @@
     totalDays?: number;
     dayLabelPrefix?: string;
     onselecttask?: (task: GanttTask) => void;
+    loading?: boolean;
+    error?: string;
+    onRetry?: () => void;
+    ariaLabel?: string;
     class?: string;
   }
 
@@ -26,12 +36,32 @@
     totalDays = 14,
     dayLabelPrefix = 'D',
     onselecttask,
+    loading = false,
+    error,
+    onRetry,
+    ariaLabel,
     class: className = '',
   }: Props = $props();
 
   const days = $derived(
-    Array.from({ length: totalDays }, (_, i) => `${dayLabelPrefix}${i + 1}`)
+    Array.from({ length: Number.isSafeInteger(totalDays) && totalDays > 0 && totalDays <= GANTT_LIMITS.days ? totalDays : 0 }, (_, i) => `${dayLabelPrefix}${i + 1}`)
   );
+  const i18n = useTranslation();
+  const validationError = $derived(validateGantt(loading || error ? [] : tasks, totalDays));
+  const displayError = $derived(error || (validationError ? i18n.t(`gantt.${validationError}`) : ''));
+  const available = $derived(!loading && !displayError);
+  function taskLabel(task: GanttTask): string {
+    const range = task.milestone ? i18n.t('gantt.milestone', { day: task.startDay + 1 })
+      : i18n.t('gantt.range', { start: task.startDay + 1, end: task.startDay + task.durationDays });
+    const progress = task.progress === undefined ? '' : `, ${i18n.t('gantt.progress', { progress: task.progress })}`;
+    const dependencies = task.dependencies?.length
+      ? `, ${i18n.t('gantt.dependsOn', { tasks: task.dependencies.join(', ') })}` : '';
+    return `${task.title}, ${range}, ${i18n.t(`gantt.${task.status ?? 'planned'}`)}${progress}${dependencies}`;
+  }
+
+  function selectTask(task: GanttTask): void {
+    if (available) onselecttask?.(task);
+  }
 
   function getStatusBadgeVariant(status?: string) {
     switch (status) {
@@ -58,18 +88,28 @@
   }
 </script>
 
-<div class={cn('svadmin-u-a217b4eaa918 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-8e63407b5ceb svadmin-u-cef5b893cf23 svadmin-u-359090c2d529 svadmin-u-6ed543e2fbbb', className)}>
+<div role="region" aria-label={ariaLabel ?? i18n.t('gantt.title')} aria-busy={loading} class={cn('svadmin-u-a217b4eaa918 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-8e63407b5ceb svadmin-u-cef5b893cf23 svadmin-u-359090c2d529 svadmin-u-6ed543e2fbbb', className)}>
   <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-f4cc511ff0c1 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff">
     <div class="svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">
-      Project Gantt Schedule <span class="svadmin-u-bfa603190748 svadmin-u-8ecebc9f80e6">({tasks.length} tasks / {totalDays} days)</span>
+      {i18n.t('gantt.title')} <span class="svadmin-u-bfa603190748 svadmin-u-8ecebc9f80e6">({i18n.t('gantt.summary', { tasks: tasks.length, days: totalDays })})</span>
     </div>
   </div>
 
-  <div class="svadmin-u-1384f66f41d0 svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-05faf5c801ff">
+  {#if loading}
+    <div role="status">{i18n.t('common.loading')}</div>
+  {:else if displayError}
+    <div role="alert">{displayError}</div>
+    {#if error && onRetry}
+      <Button type="button" variant="ghost" size="sm" onclick={onRetry}><RotateCw aria-hidden="true" />{i18n.t('common.retry')}</Button>
+    {/if}
+  {:else if tasks.length === 0}
+    <div role="status">{i18n.t('gantt.noData')}</div>
+  {:else}
+  <div class="svadmin-u-1384f66f41d0 svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-05faf5c801ff" style="overflow-x: auto;">
     <div class="svadmin-u-c05fcc7c4caa">
       <!-- Timeline Header -->
       <div class="svadmin-u-60fbb7713999 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff svadmin-u-b00f43c30c2b svadmin-u-e83a7042bc91 svadmin-u-bfa603190748">
-        <div class="svadmin-u-d16aae848835 svadmin-u-9fe52d5d506c svadmin-u-5ceb636bd9f3 svadmin-u-05faf5c801ff svadmin-u-2eba0d65d059 svadmin-u-012fbd121f37">Task Name</div>
+        <div class="svadmin-u-d16aae848835 svadmin-u-9fe52d5d506c svadmin-u-5ceb636bd9f3 svadmin-u-05faf5c801ff svadmin-u-2eba0d65d059 svadmin-u-012fbd121f37">{i18n.t('gantt.task')}</div>
         <div class="svadmin-u-36e579c0b41c svadmin-u-60fbb7713999">
           {#each days as day (day)}
             <div class="svadmin-u-36e579c0b41c svadmin-u-7660b450905a svadmin-u-ca6bf63030aa svadmin-u-5ceb636bd9f3 svadmin-u-6ee2d41e2d2d svadmin-u-d058ca6de60f svadmin-u-0e65706bcccd svadmin-u-bb5b5fc23bd9">
@@ -84,19 +124,27 @@
         {#each tasks as task (task.id)}
           {@const leftPct = (task.startDay / totalDays) * 100}
           {@const widthPct = (task.durationDays / totalDays) * 100}
+          <!-- 只有配置选择回调时才同时启用按钮角色和键盘焦点。 -->
+          <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
           <div
-            role="button"
-            tabindex="0"
+            role={onselecttask ? 'button' : 'group'}
+            tabindex={onselecttask ? 0 : undefined}
+            aria-label={taskLabel(task)}
             class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-c4b5eaba40e3 svadmin-u-ceb69a6b0e5f svadmin-u-34516836730d"
-            onclick={() => onselecttask?.(task)}
-            onkeydown={(e) => { if (e.key === 'Enter') onselecttask?.(task); }}
+            onclick={() => selectTask(task)}
+            onkeydown={(e) => {
+              if (onselecttask && (e.key === 'Enter' || e.key === ' ') && !e.repeat && !e.isComposing) {
+                e.preventDefault();
+                selectTask(task);
+              }
+            }}
           >
             <!-- Task Info Column -->
             <div class="svadmin-u-d16aae848835 svadmin-u-9fe52d5d506c svadmin-u-5ceb636bd9f3 svadmin-u-05faf5c801ff svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4 svadmin-u-012fbd121f37">
               <div class="svadmin-u-f283ea9bea0e svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{task.title}</div>
               {#if task.status}
                 <Badge variant="outline" class={cn('svadmin-u-e09880869d1f svadmin-u-d8e0e382c67b svadmin-u-68ecb30dbec6 uppercase', getStatusBadgeVariant(task.status))}>
-                  {task.status}
+                  {i18n.t(`gantt.${task.status}`)}
                 </Badge>
               {/if}
             </div>
@@ -111,12 +159,17 @@
               </div>
 
               <!-- Bar element -->
+              {#if task.milestone}
+                <span data-gantt-milestone style={`position: absolute; left: ${leftPct}%; width: 16px; height: 16px;`}>
+                  <Diamond aria-hidden="true" size={16} />
+                </span>
+              {:else}
               <div
                 class={cn(
                   'svadmin-u-d89972fe17d6 svadmin-u-f6fe902450dc svadmin-u-421ac2be5045 svadmin-u-cef5b893cf23 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-d5eab218aa34 svadmin-u-1dc571a3609f svadmin-u-2689f3958069 svadmin-u-2cd02d11d1af svadmin-u-0fe7d7d814d0 group svadmin-u-7703298183eb',
                   getBarColor(task.status)
                 )}
-                style={`margin-left: ${leftPct}%; width: ${Math.max(widthPct, 4)}%;`}
+                style={`margin-left: ${leftPct}%; width: ${widthPct}%; flex-shrink: 0;`}
               >
                 <!-- Inner progress fill -->
                 {#if task.progress !== undefined}
@@ -131,14 +184,13 @@
                   <span class="svadmin-u-d89972fe17d6 svadmin-u-236812d64c82 svadmin-u-e09880869d1f svadmin-u-4f5874c554b6 svadmin-u-0e65706bcccd">{task.progress}%</span>
                 {/if}
               </div>
+              {/if}
             </div>
           </div>
         {/each}
 
-        {#if tasks.length === 0}
-          <div class="svadmin-u-a1f611f027dd svadmin-u-ca6bf63030aa svadmin-u-bfa603190748">No schedule tasks available</div>
-        {/if}
       </div>
     </div>
   </div>
+  {/if}
 </div>

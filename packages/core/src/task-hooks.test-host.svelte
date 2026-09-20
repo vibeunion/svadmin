@@ -2,18 +2,26 @@
   import { QueryClientProvider, type QueryClient } from '@tanstack/svelte-query';
   import { definedOptions, definedReactiveOptions } from './defined-options';
   import { provideAdminContext } from './context.svelte';
-  import type { TaskProvider, DataProvider, TaskRecord, ResourceDefinition } from './types';
+  import type { TaskProvider, DataProvider, TaskRecord, ResourceDefinition, AuthProvider, NotificationProvider } from './types';
   import type { TaskError } from './task-contract';
   import TaskHookProbe from './task-hooks.test-probe.svelte';
   import type { TaskHookState } from './task-hooks.test.types';
 
-  let { provider, queryClient, taskId = 'task-1', queryParams, enabled = true, tenant = 'tenant-1', onTask, onError, onReady }: {
+  let { provider, queryClient, taskId = 'task-1', queryParams, dlq = false, enabled = true, tenant = 'tenant-1', onTask, onError, onReady,
+    authProvider, notificationProvider, notifyReads = false, refetchInterval = false, onSubmitSuccess, onSubmitError }: {
     provider?: TaskProvider;
     enabled?: boolean;
     queryClient: QueryClient;
     taskId?: string;
     queryParams?: Record<string, unknown>;
+    dlq?: boolean;
     tenant?: string;
+    authProvider?: AuthProvider;
+    notificationProvider?: NotificationProvider;
+    notifyReads?: boolean;
+    refetchInterval?: number | false;
+    onSubmitSuccess?: () => void;
+    onSubmitError?: () => void;
     onTask?: (task: TaskRecord) => void;
     onError?: (error: TaskError) => void;
     onReady: (state: TaskHookState) => void;
@@ -31,9 +39,11 @@
     dataProvider, resources,
     get taskProvider() { return provider; },
     get tenant() { return { tenantId: tenant }; },
+    get authProvider() { return authProvider; },
+    get notificationProvider() { return notificationProvider; },
   }));
 </script>
 
 <QueryClientProvider client={queryClient}>
-  <TaskHookProbe {enabled} {taskId} {onReady} {...definedOptions({ provider, queryParams, onTask, onError })} />
+  <TaskHookProbe {dlq} {enabled} {taskId} {onReady} {notifyReads} {refetchInterval} {...definedOptions({ provider, queryParams, onTask, onError, onSubmitSuccess, onSubmitError })} />
 </QueryClientProvider>

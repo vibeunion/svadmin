@@ -1,12 +1,15 @@
 import { captureAdminContext } from './context.svelte';
-import { definedOptions } from './defined-options';
-import { HttpError } from './types';
+import { definedOptions, definedReactiveOptions } from './defined-options';
+import { HttpError, type TaskProvider, type TaskRecord } from './types';
+import { untrack } from 'svelte';
+import { captureAuthLiveScope } from './auth-hooks.svelte';
 import { contractKey, parseContractRecord, type ResourceContract, type ContractSchemas, type ContractRecord } from './resource-contract';
 import type { ContractFilter, ContractSort } from './strict-hooks.svelte';
 import { captureQueryProvider, snapshotListParams } from './query-snapshot';
 import { decodeBaseRecord, decodeListResult } from './record-decoder';
 import { snapshotPlainData } from './plain-data';
-import { downloadData, type ExportFormat } from './export-format';
+import { downloadData, downloadExportArtifact, snapshotExportTaskResult, safeArtifactUrl, type ExportFormat } from './export-format';
+import { useSubmitTask, useTask } from './task-hooks.svelte';
 
 export interface UseExportOptions<S extends ContractSchemas> {
   resource: ResourceContract<S>;
@@ -19,6 +22,12 @@ export interface UseExportOptions<S extends ContractSchemas> {
   format?: ExportFormat;
   meta?: Record<string, unknown>;
   dataProviderName?: string;
+  enabled?: boolean;
+  taskName?: string;
+  taskProvider?: TaskProvider;
+  taskIdempotencyKey?: string;
+  initialTaskId?: string;
+  onTaskSubmitted?: (taskId: string) => void | Promise<void>;
   onError?: (error: HttpError) => void | Promise<void>;
 }
 
@@ -53,6 +62,10 @@ export function useExport<S extends ContractSchemas>(options: UseExportOptions<S
   let isLoading = $state(false);
   let error = $state<HttpError | null>(null);
   let mounted = true;
+  let taskId = $state<string | undefined>(untrack(() => options.initialTaskId));
+  let taskHandledId = $state<string | undefined>();
+  const submitTask = useSubmitTask();
+  const taskMode = $derived(options.taskName !== undefined);
 
   function captureScope() {
     const contract = options.resource;
@@ -63,16 +76,52 @@ export function useExport<S extends ContractSchemas>(options: UseExportOptions<S
     });
     return {
       contract, ...captured,
+      authProvider: context.authProvider, auth: captureAuthLiveScope(context.authProvider),
+      router: context.routerProvider, access: context.accessControlProvider,
+      taskProvider: options.taskProvider ?? context.taskProvider,
+      taskName: options.taskName, idempotencyKey: options.taskIdempotencyKey, format: options.format ?? 'csv',
+      taskQueryKey: options.taskName === undefined ? undefined : JSON.stringify(snapshotPlainData({
+        filters: options.filters ?? [], sorters: options.sorters ?? [],
+        maxItemCount: options.maxItemCount ?? null,
+      })),
       key: JSON.stringify([key, captured.source, context.tenantCacheKey?.__svadminTenant, captured.meta]),
     };
   }
   type Scope = ReturnType<typeof captureScope>;
+  let taskOrigin = $state.raw<Scope | undefined>(
+    untrack(() => {
+      try { return taskId && taskMode ? captureScope() : undefined; }
+      catch { return undefined; }
+    }),
+  );
+  let taskPolling = $state(true);
   let current: { token: object; scope: Scope; promise: Promise<ContractRecord<S>[]> } | undefined;
+  const taskProvider = $derived(options.taskProvider ?? context.taskProvider);
+  const ownedTaskId = $derived(taskOrigin && scopeCurrent(taskOrigin) ? taskId : undefined);
+  const taskQuery = useTask(definedReactiveOptions({
+    get taskId() { return ownedTaskId; },
+    get taskProvider() { return taskProvider; },
+    get queryOptions() {
+      return { enabled: taskMode && !!ownedTaskId && !!taskProvider,
+        refetchInterval: ownedTaskId && taskPolling ? 2000 : false as const };
+    },
+  }));
+
+  function scopeCurrent(scope: Scope, requireEnabled = true): boolean {
+    if (!mounted || (requireEnabled && options.enabled === false) || !scope.auth.isCurrent()) return false;
+    try {
+      const next = captureScope();
+      return next.key === scope.key && next.authProvider === scope.authProvider &&
+        next.router === scope.router && next.access === scope.access &&
+        next.taskName === scope.taskName &&
+        (scope.taskName === undefined || (next.taskProvider === scope.taskProvider &&
+          next.taskName === scope.taskName && next.idempotencyKey === scope.idempotencyKey &&
+          next.format === scope.format && next.taskQueryKey === scope.taskQueryKey));
+    } catch { return false; }
+  }
 
   function isActive(token: object, scope: Scope): boolean {
-    if (!mounted || current?.token !== token) return false;
-    try { return captureScope().key === scope.key; }
-    catch { return false; }
+    return current?.token === token && scopeCurrent(scope);
   }
 
   let initialized = false;
@@ -88,6 +137,23 @@ export function useExport<S extends ContractSchemas>(options: UseExportOptions<S
     }
     previousScope = nextScope;
     initialized = true;
+  });
+  let wasEnabled = untrack(() => options.enabled !== false);
+  $effect.pre(() => {
+    const enabled = options.enabled !== false;
+    const revoked = wasEnabled && !enabled;
+    wasEnabled = enabled;
+    if (current && !scopeCurrent(current.scope)) {
+      current = undefined;
+      isLoading = false;
+      error = null;
+    }
+    if (taskOrigin && (revoked || !scopeCurrent(taskOrigin, false))) {
+      taskOrigin = undefined;
+      taskId = undefined;
+      taskHandledId = undefined;
+      error = null;
+    }
   });
   $effect(() => () => {
     mounted = false;
@@ -106,12 +172,54 @@ export function useExport<S extends ContractSchemas>(options: UseExportOptions<S
     }
   }
 
+  function taskStatus(value: TaskRecord | undefined): 'queued' | 'processing' | 'completed' | 'failed' | 'cancelled' | 'unknown' {
+    const status = String(value?.status ?? '').trim().toLowerCase();
+    if (['pending', 'queued', 'scheduled', 'retry_scheduled'].includes(status)) return 'queued';
+    if (['running', 'processing', 'active', 'leased'].includes(status)) return 'processing';
+    if (['completed', 'complete', 'success', 'succeeded', 'done'].includes(status)) return 'completed';
+    if (['failed', 'error', 'dead_lettered'].includes(status)) return 'failed';
+    if (['cancelled', 'canceled', 'aborted'].includes(status)) return 'cancelled';
+    return 'unknown';
+  }
+
+  const artifact = $derived.by(() => {
+    const task = taskQuery.data;
+    if (!ownedTaskId || !task || taskStatus(task) !== 'completed') return undefined;
+    const result = snapshotExportTaskResult(task.result ?? task.result_data);
+    return result && result.format === taskOrigin?.format && safeArtifactUrl(result.downloadUrl) ? result : undefined;
+  });
+
+  $effect(() => {
+    const task = taskQuery.data;
+    if (!taskMode || !task || !ownedTaskId || taskHandledId === ownedTaskId) return;
+    const status = taskStatus(task);
+    if (status === 'queued' || status === 'processing' || status === 'unknown') return;
+    taskHandledId = ownedTaskId;
+    taskPolling = false;
+    if (status === 'completed' && !artifact) report(new HttpError(
+      'Invalid export task result', 502, undefined, { code: 'INVALID_PROVIDER_RESPONSE' }), options.onError);
+    else if (status === 'failed') report(exportFailure(undefined), options.onError);
+  });
+
+  function downloadTask(): boolean {
+    if (!artifact || !taskOrigin || !scopeCurrent(taskOrigin)) return false;
+    try {
+      downloadExportArtifact(artifact, taskOrigin.contract.name);
+      return true;
+    } catch {
+      report(new HttpError('Invalid export artifact', 502, undefined, { code: 'INVALID_PROVIDER_RESPONSE' }), options.onError);
+      return false;
+    }
+  }
+
   function triggerExport(): Promise<ContractRecord<S>[]> {
     if (!mounted) return Promise.reject(cancelled());
     let onError: UseExportOptions<S>['onError'];
     try {
       const scope = captureScope();
-      if (current?.scope.key === scope.key) return current.promise;
+      if (!scopeCurrent(scope)) return Promise.reject(cancelled());
+      if (current && scopeCurrent(current.scope)) return current.promise;
+      if (scope.taskName !== undefined && ownedTaskId) return Promise.resolve([]);
       previousScope = scope.key;
       initialized = true;
       const batchSize = options.pageSize ?? 20;
@@ -119,6 +227,10 @@ export function useExport<S extends ContractSchemas>(options: UseExportOptions<S
       const format = options.format ?? 'csv';
       const download = options.download ?? true;
       const mapData = options.mapData;
+      const taskName = scope.taskName;
+      const taskSource = scope.taskProvider;
+      const idempotencyKey = scope.idempotencyKey;
+      const onTaskSubmitted = options.onTaskSubmitted;
       onError = options.onError;
       if (!Number.isSafeInteger(batchSize) || batchSize <= 0 ||
           (maxItems !== Infinity && (!Number.isSafeInteger(maxItems) || maxItems < 0)) ||
@@ -141,6 +253,34 @@ export function useExport<S extends ContractSchemas>(options: UseExportOptions<S
       const promise = Promise.resolve().then(async () => {
         try {
           ensureActive();
+          if (taskName !== undefined) {
+            if (!taskName.trim() || !taskSource || !idempotencyKey?.trim() || mapData !== undefined) invalidInput();
+            const task = await submitTask.mutation.mutateAsync({
+              taskName: taskName.trim(),
+              taskProvider: taskSource,
+              successNotification: false,
+              errorNotification: false,
+              options: {
+                idempotencyKey,
+                body: {
+                  protocolVersion: 1,
+                  resource: scope.contract.name,
+                  format,
+                  filters: params.filters ?? [],
+                  sorters: params.sorters ?? [],
+                  ...definedOptions(maxItems === Infinity ? {} : { maxItemCount: maxItems }),
+                },
+                ...definedOptions(scope.meta === undefined ? {} : { meta: scope.meta }),
+              },
+            });
+            ensureActive();
+            taskId = task.id;
+            taskOrigin = scope;
+            taskHandledId = undefined;
+            taskPolling = true;
+            try { void Promise.resolve(onTaskSubmitted?.(task.id)).catch(() => {}); } catch { /* Observer failures do not re-submit. */ }
+            return [];
+          }
           const records: ContractRecord<S>[] = [];
           let page = 1;
           while (records.length < maxItems) {
@@ -187,5 +327,26 @@ export function useExport<S extends ContractSchemas>(options: UseExportOptions<S
     }
   }
 
-  return { triggerExport, get isLoading() { return isLoading; }, get error() { return error; } };
+  return {
+    triggerExport,
+    get isLoading() { return isLoading; },
+    get error() { return error; },
+    get taskId() { return ownedTaskId; },
+    get task() { return ownedTaskId ? taskQuery.data : undefined; },
+    get artifact() { return artifact; },
+    get taskError() { return ownedTaskId ? taskQuery.error : null; },
+    get isTaskPending() {
+      return !!ownedTaskId && !['completed', 'failed', 'cancelled'].includes(taskStatus(taskQuery.data));
+    },
+    get refetchTask() {
+      const origin = taskOrigin;
+      const id = ownedTaskId;
+      const refetch = taskQuery.refetch;
+      return () => {
+        if (!origin || !id || id !== ownedTaskId || !scopeCurrent(origin)) return Promise.reject(cancelled());
+        return refetch();
+      };
+    },
+    downloadTask,
+  };
 }

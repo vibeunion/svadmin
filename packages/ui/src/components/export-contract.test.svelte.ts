@@ -1,15 +1,15 @@
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Type } from '@sinclair/typebox';
-import { defineResource, resetContext, HttpError, type ContractSchemas, type DataProvider, type GetListParams, type GetListResult, type ResourceDefinition, type UseExportOptions, type useExport } from '@svadmin/core';
+import { defineResource, resetContext, HttpError, type ContractSchemas, type DataProvider, type GetListParams, type GetListResult, type ResourceDefinition, type UseExportOptions, type useExport, type TaskProvider, type TaskRecord } from '@svadmin/core';
 import * as unsafe from '../../../core/src/unsafe';
-import { downloadData } from '../../../core/src/export-format';
+import { downloadData, downloadExportArtifact } from '../../../core/src/export-format';
 import Host from './export-contract.test-host.svelte';
 
-vi.mock('../../../core/src/export-format', async original => ({
-  ...await original<typeof import('../../../core/src/export-format')>(),
-  downloadData: vi.fn(),
-}));
+vi.mock('../../../core/src/export-format', async original => {
+  const actual = await original<typeof import('../../../core/src/export-format')>();
+  return { ...actual, downloadData: vi.fn(), downloadExportArtifact: vi.fn(actual.downloadExportArtifact) };
+});
 
 const posts = defineResource('posts', { record: Type.Object({ id: Type.Number(), title: Type.String() }) });
 const other = defineResource('other', { record: Type.Object({ id: Type.Number(), title: Type.String() }) });
@@ -23,6 +23,18 @@ function provider(getList: DataProvider['getList'] = async () => ({ data: [row],
     getList, getApiUrl: () => '/api',
     getOne: async () => ({ data: {} }), create: async () => ({ data: {} }),
     update: async () => ({ data: {} }), deleteOne: async () => ({ data: {} }),
+  };
+}
+
+function taskProvider(
+  tasks: Record<string, TaskRecord> = {},
+): TaskProvider & { submit: ReturnType<typeof vi.fn>; get: ReturnType<typeof vi.fn> } {
+  return {
+    submit: vi.fn(async (_name: string, options?: { body?: Record<string, unknown>; idempotencyKey?: string }) => {
+      const id = options?.idempotencyKey === 'resume-key' ? 'resume-1' : 'export-1';
+      return { id, wait: async () => tasks[id] ?? { id, status: 'queued' } };
+    }),
+    get: vi.fn(async (id: string) => tasks[id] ?? { id, status: 'processing' }),
   };
 }
 
@@ -46,7 +58,7 @@ function mount(source = provider(), settings: Settings = {}) {
 }
 
 beforeEach(() => vi.clearAllMocks());
-afterEach(() => { cleanup(); resetContext(); });
+afterEach(() => { cleanup(); resetContext(); vi.restoreAllMocks(); });
 
 describe('contract-bound exports', () => {
   it('removes the unchecked export entry point', () => {
@@ -329,4 +341,257 @@ describe('contract-bound exports', () => {
     expect(getList).not.toHaveBeenCalled();
     expect(downloadData).not.toHaveBeenCalled();
   });
+
+  it('submits a scoped export task without reading list pages and coalesces repeated triggers', async () => {
+    const getList = vi.fn<DataProvider['getList']>();
+    const tasks = taskProvider();
+    const submitted = vi.fn();
+    const app = mount(provider(getList), {
+      taskName: 'export-posts',
+      taskProvider: tasks,
+      taskIdempotencyKey: 'export-key',
+      format: 'xlsx',
+      filters: [{ field: 'title', operator: 'contains', value: 'first' }],
+      sorters: [{ field: 'id', order: 'desc' }],
+      maxItemCount: 25,
+      onTaskSubmitted: submitted,
+    });
+    const first = app.read().triggerExport();
+    const second = app.read().triggerExport();
+    await expect(first).resolves.toEqual([]);
+    await expect(second).resolves.toEqual([]);
+    expect(tasks.submit).toHaveBeenCalledOnce();
+    expect(tasks.submit).toHaveBeenCalledWith('export-posts', expect.objectContaining({
+      idempotencyKey: 'export-key',
+      body: {
+        protocolVersion: 1,
+        resource: 'posts',
+        format: 'xlsx',
+        filters: [{ field: 'title', operator: 'contains', value: 'first' }],
+        sorters: [{ field: 'id', order: 'desc' }],
+        maxItemCount: 25,
+      },
+    }));
+    expect(getList).not.toHaveBeenCalled();
+    expect(submitted).toHaveBeenCalledWith('export-1');
+    expect(app.read().isLoading).toBe(false);
+    expect(app.read().isTaskPending).toBe(true);
+    await app.read().triggerExport();
+    expect(tasks.submit).toHaveBeenCalledOnce();
+  });
+
+  it('forwards the actual button query, format and limit to the export task', async () => {
+    const getList = vi.fn<DataProvider['getList']>();
+    const tasks = taskProvider();
+    const view = render(Host, {
+      provider: provider(getList), resources,
+      settings: {
+        taskName: 'export-posts', taskProvider: tasks, taskIdempotencyKey: 'button-query',
+        format: 'xlsx', maxItemCount: 25,
+        filters: [{ field: 'title', operator: 'contains', value: 'selected-query' }],
+        sorters: [{ field: 'id', order: 'desc' }],
+      },
+    });
+    await waitFor(() => expect((view.getByRole('button') as HTMLButtonElement).disabled).toBe(false));
+    await fireEvent.click(view.getByRole('button'));
+    await waitFor(() => expect(tasks.submit).toHaveBeenCalledOnce());
+    expect(tasks.submit).toHaveBeenCalledWith('export-posts', expect.objectContaining({
+      idempotencyKey: 'button-query',
+      body: {
+        protocolVersion: 1, resource: 'posts', format: 'xlsx', maxItemCount: 25,
+        filters: [{ field: 'title', operator: 'contains', value: 'selected-query' }],
+        sorters: [{ field: 'id', order: 'desc' }],
+      },
+    }));
+    expect(getList).not.toHaveBeenCalled();
+  });
+
+  it('requires a mapped export to remain local and rejects it before task submission', async () => {
+    const tasks = taskProvider();
+    const app = mount(provider(), {
+      taskName: 'export-posts',
+      taskProvider: tasks,
+      taskIdempotencyKey: 'mapped-key',
+      mapData: () => ({ title: 'mapped' }),
+    });
+    await expect(app.read().triggerExport()).rejects.toMatchObject({ code: 'INVALID_RESOURCE_INPUT' });
+    expect(tasks.submit).not.toHaveBeenCalled();
+  });
+
+  it('recovers a completed task and only downloads after an explicit call', async () => {
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    const tasks = taskProvider({
+      'resume-1': {
+        id: 'resume-1',
+        status: 'completed',
+        result: { downloadUrl: '/artifacts/posts.csv', format: 'csv', fileName: 'posts.csv' },
+      },
+    });
+    const app = mount(provider(), {
+      taskName: 'export-posts',
+      taskProvider: tasks,
+      taskIdempotencyKey: 'resume-key',
+      initialTaskId: 'resume-1',
+    });
+    await waitFor(() => expect(app.read().artifact).toMatchObject({ fileName: 'posts.csv' }));
+    expect(downloadExportArtifact).not.toHaveBeenCalled();
+    expect(app.read().downloadTask()).toBe(true);
+    expect(downloadExportArtifact).toHaveBeenCalledWith(
+      { downloadUrl: '/artifacts/posts.csv', format: 'csv', fileName: 'posts.csv' },
+      'posts',
+    );
+    expect(click).toHaveBeenCalledOnce();
+    expect(app.read().isTaskPending).toBe(false);
+  });
+
+  it('fails closed for an invalid task result and does not activate a download', async () => {
+    const tasks = taskProvider({
+      'resume-1': {
+        id: 'resume-1',
+        status: 'completed',
+        result: { downloadUrl: 'https://evil.example/export.csv', format: 'csv' },
+      },
+    });
+    const onError = vi.fn();
+    const app = mount(provider(), {
+      taskName: 'export-posts',
+      taskProvider: tasks,
+      taskIdempotencyKey: 'resume-key',
+      initialTaskId: 'resume-1',
+      onError,
+    });
+    await waitFor(() => expect(onError).toHaveBeenCalledWith(expect.objectContaining({
+      code: 'INVALID_PROVIDER_RESPONSE',
+    })));
+    expect(app.read().artifact).toBeUndefined();
+    expect(app.read().downloadTask()).toBe(false);
+    expect(downloadExportArtifact).not.toHaveBeenCalled();
+  });
+
+  it.each(['tenant', 'provider', 'permission', 'key', 'filters', 'sorters', 'limit'] as const)(
+    'discards a restored artifact and saved refresh after a %s change', async change => {
+      const tasks = taskProvider({
+        'resume-1': { id: 'resume-1', status: 'completed', result: { downloadUrl: '/file.csv', format: 'csv' } },
+      });
+      const settings: Settings = {
+        taskName: 'export-posts', taskProvider: tasks, taskIdempotencyKey: 'resume-key', initialTaskId: 'resume-1',
+      };
+      const app = mount(provider(), settings);
+      await waitFor(() => expect(app.read().artifact).toBeDefined());
+      const refresh = app.read().refetchTask;
+      if (change === 'tenant') await app.view.rerender({ tenant: 'second' });
+      if (change === 'provider') await app.view.rerender({ settings: { ...settings, taskProvider: taskProvider() } });
+      if (change === 'permission') await app.view.rerender({ settings: { ...settings, enabled: false } });
+      if (change === 'key') await app.view.rerender({ settings: { ...settings, taskIdempotencyKey: 'new-key' } });
+      if (change === 'filters') await app.view.rerender({ settings: {
+        ...settings, filters: [{ field: 'title', operator: 'eq', value: 'changed' }],
+      } });
+      if (change === 'sorters') await app.view.rerender({ settings: {
+        ...settings, sorters: [{ field: 'id', order: 'desc' }],
+      } });
+      if (change === 'limit') await app.view.rerender({ settings: { ...settings, maxItemCount: 10 } });
+      expect(app.read().artifact).toBeUndefined();
+      expect(app.read().downloadTask()).toBe(false);
+      expect(app.read().taskId).toBeUndefined();
+      await expect(refresh()).rejects.toMatchObject({ code: 'EXPORT_CANCELLED' });
+      expect(downloadExportArtifact).not.toHaveBeenCalled();
+    },
+  );
+
+  it('ignores a submission that resolves after the tenant changes', async () => {
+    let resolve!: (value: Awaited<ReturnType<TaskProvider['submit']>>) => void;
+    const tasks = taskProvider();
+    tasks.submit.mockImplementation(() => new Promise(done => { resolve = done; }));
+    const submitted = vi.fn();
+    const app = mount(provider(), {
+      taskName: 'export-posts', taskProvider: tasks, taskIdempotencyKey: 'key', onTaskSubmitted: submitted,
+    });
+    const result = app.read().triggerExport().catch((error: unknown) => error);
+    await waitFor(() => expect(tasks.submit).toHaveBeenCalledOnce());
+    await app.view.rerender({ tenant: 'second' });
+    resolve({ id: 'old', wait: async () => ({ id: 'old' }) });
+    await expect(result).resolves.toMatchObject({ code: 'EXPORT_CANCELLED' });
+    expect(app.read().taskId).toBeUndefined();
+    expect(submitted).not.toHaveBeenCalled();
+  });
+
+  it.each((['filters', 'sorters', 'format', 'meta'] as const).flatMap(change =>
+    (['success', 'failure'] as const).map(outcome => ({ change, outcome }))))(
+    'isolates pending export $outcome after $change changes',
+    async ({ change, outcome }) => {
+      let resolve!: (value: Awaited<ReturnType<TaskProvider['submit']>>) => void;
+      let reject!: (cause: unknown) => void;
+      const tasks = taskProvider();
+      tasks.submit.mockImplementation(() => new Promise((done, fail) => { resolve = done; reject = fail; }));
+      const submitted = vi.fn();
+      const settings: Settings = {
+        taskName: 'export-posts', taskProvider: tasks, taskIdempotencyKey: `pending-${change}`,
+        filters: [{ field: 'title', operator: 'eq', value: 'before' }],
+        sorters: [{ field: 'id', order: 'asc' }], format: 'csv', meta: { view: 'before' },
+        onTaskSubmitted: submitted,
+      };
+      const app = mount(provider(), settings);
+      const result = app.read().triggerExport().catch((error: unknown) => error);
+      await waitFor(() => expect(tasks.submit).toHaveBeenCalledOnce());
+      if (change === 'filters') await app.view.rerender({ settings: {
+        ...settings, filters: [{ field: 'title', operator: 'eq', value: 'after' }],
+      } });
+      if (change === 'sorters') await app.view.rerender({ settings: {
+        ...settings, sorters: [{ field: 'id', order: 'desc' }],
+      } });
+      if (change === 'format') await app.view.rerender({ settings: { ...settings, format: 'xlsx' } });
+      if (change === 'meta') await app.view.rerender({ settings: { ...settings, meta: { view: 'after' } } });
+      if (outcome === 'success') resolve({ id: `old-${change}`, wait: async () => ({ id: `old-${change}` }) });
+      else reject(new Error('private obsolete failure'));
+      await expect(result).resolves.toMatchObject({ code: 'EXPORT_CANCELLED' });
+      expect(app.read().taskId).toBeUndefined();
+      expect(app.read().error).toBeNull();
+      expect(app.read().isLoading).toBe(false);
+      expect(tasks.submit).toHaveBeenCalledOnce();
+      expect(submitted).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([
+    { downloadUrl: '/file.csv', format: 'json' },
+    { downloadUrl: '/file.csv', format: 'csv', fileName: '../secret.csv' },
+    { downloadUrl: 'javascript:alert(1)', format: 'csv' },
+    { downloadUrl: '/file.csv', format: 'csv', extra: 'unknown' },
+  ])('rejects malformed or mismatched results: %j', async result => {
+    const tasks = taskProvider({ 'resume-1': { id: 'resume-1', status: 'completed', result } });
+    const app = mount(provider(), { taskName: 'export-posts', taskProvider: tasks, initialTaskId: 'resume-1' });
+    await waitFor(() => expect(app.read().error?.code).toBe('INVALID_PROVIDER_RESPONSE'));
+    expect(app.read().downloadTask()).toBe(false);
+  });
+
+  it('recovers through the actual authorized button and explicitly downloads without submitting', async () => {
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    const tasks = taskProvider({
+      'resume-1': { id: 'resume-1', status: 'completed', result: { downloadUrl: '/file.csv', format: 'csv' } },
+    });
+    const view = render(Host, { provider: provider(), resources, settings: {
+      taskName: 'export-posts', taskProvider: tasks, initialTaskId: 'resume-1',
+    } });
+    const button = await view.findByRole('button', { name: 'Download' });
+    expect(click).not.toHaveBeenCalled();
+    await fireEvent.click(button);
+    expect(click).toHaveBeenCalledOnce();
+    expect(tasks.submit).not.toHaveBeenCalled();
+  });
+
+  it.each(['failed', 'cancelled'])('settles a %s task without downloading', async status => {
+    const tasks = taskProvider({ 'resume-1': { id: 'resume-1', status, error: 'private' } });
+    const app = mount(provider(), { taskName: 'export-posts', taskProvider: tasks, initialTaskId: 'resume-1' });
+    await waitFor(() => expect(app.read().isTaskPending).toBe(false));
+    expect(app.read().downloadTask()).toBe(false);
+    if (status === 'failed') expect(app.read().error?.message).toBe('Export failed');
+  });
+
+  it.each(['https://evil.example/file.csv', 'javascript:alert(1)', '//evil.example/file.csv'])(
+    'rejects unsafe URLs again at download time: %s', downloadUrl => {
+      const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+      expect(() => downloadExportArtifact({ downloadUrl, format: 'csv' }, 'posts')).toThrow();
+      expect(click).not.toHaveBeenCalled();
+    },
+  );
 });

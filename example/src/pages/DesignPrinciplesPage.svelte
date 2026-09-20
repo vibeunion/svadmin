@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { definedOptions } from '@svadmin/core/options';
+import { definedOptions } from '@svadmin/core/options';
+  import { createEnterpriseRequestContext, type ApprovalProvider, type DashboardProvider } from '@svadmin/core';
 
   import { useTranslation } from '@svadmin/core/i18n';
   import {
@@ -27,6 +28,19 @@
     PageToolbar,
     SectionHeader,
     StatusBadge,
+    ApprovalCenter,
+    DashboardView,
+    ErrorSummary,
+    ColorPicker,
+    DatePicker,
+    DateRangePicker,
+    DateTimePicker,
+    RadioGroup,
+    RangeSlider,
+    Rate,
+    Slider,
+    TagsInput,
+    TimePicker,
   } from '@svadmin/ui';
   import { Badge } from '@svadmin/ui/components/ui/badge/index.js';
   import * as Table from '@svadmin/ui/components/ui/table/index.js';
@@ -43,7 +57,70 @@
   let viewState = $state<ViewState>('empty');
   let compact = $state(false);
   let showWarning = $state(true);
+  let demoVisibility = $state<'personal' | 'team'>('team');
+  let demoLabels = $state<string[]>(['review']);
+  let demoCompletion = $state(0.72);
+  let demoRange = $state({ min: 20, max: 80 });
+  let demoColor = $state('#635bff');
+  let demoDate = $state('2026-09-20');
+  let demoDateRange = $state({ start: '2026-09-01', end: '2026-09-20' });
+  let demoTime = $state('09:30');
+  let demoDateTime = $state('2026-09-20T09:30');
+  let demoRate = $state(4);
+  let focusedDemoField = $state('');
+  const demoFormErrors = $derived([
+    {
+      fieldKey: 'demo-name',
+      label: isZh ? '名称' : 'Name',
+      message: isZh ? '请输入名称' : 'Name is required',
+    },
+    {
+      fieldKey: 'demo-owner',
+      label: isZh ? '负责人' : 'Owner',
+      message: isZh ? '请选择负责人' : 'Owner is required',
+    },
+  ]);
+
+  function focusDemoField(fieldKey: string): void {
+    focusedDemoField = fieldKey;
+    document.getElementById(fieldKey)?.focus();
+  }
   const successImage = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="160" height="96" viewBox="0 0 160 96"%3E%3Crect width="160" height="96" fill="%23e0e7ff"/%3E%3Ccircle cx="42" cy="36" r="16" fill="%236366f1"/%3E%3Cpath d="M12 82 58 50l24 18 20-14 46 28H12Z" fill="%234f46e5"/%3E%3C/svg%3E';
+  const enterpriseRequestContext = createEnterpriseRequestContext({
+    tenantId: 'example-tenant',
+    requestId: 'example-design-principles',
+    traceId: 'example-design-principles',
+  });
+  const dashboardProvider: DashboardProvider = {
+    get: async () => ({
+      version: 1,
+      widgets: [{
+        id: 'operations',
+        title: isZh ? '运营指标' : 'Operations metrics',
+        kind: 'metric',
+        metrics: [
+          { id: 'open', label: isZh ? '待处理' : 'Open', value: 12, tone: 'warning' },
+          { id: 'completed', label: isZh ? '已完成' : 'Completed', value: 48, tone: 'success', href: '#completed' },
+        ],
+      }],
+    }),
+  };
+  const approvalProvider: ApprovalProvider = {
+    list: async () => ({
+      data: [{
+        id: 'example-approval',
+        version: 1,
+        title: isZh ? '示例采购申请' : 'Example purchase request',
+        status: 'pending',
+        applicant: 'Demo User',
+        allowedActions: [{ id: 'approve', label: isZh ? '批准' : 'Approve', commentRequired: false, targetRequired: false }],
+        attachments: [],
+        history: [],
+      }],
+      total: 1,
+    }),
+    get: async () => ({}),
+  };
 
   const principles = $derived([
     {
@@ -77,7 +154,7 @@
     {
       id: 'restraint',
       icon: Command,
-      title: isZh ? 'Stripe 式克制' : 'Stripe restraint',
+      title: isZh ? '克制而清晰' : 'Restrained and clear',
       summary: isZh ? '中性表面、细边框和精确层级承载工作，而不是装饰。' : 'Neutral surfaces, hairlines, and precise hierarchy carry the work.',
       rule: isZh ? '单一强调色；不使用渐变、glow、玻璃感或卡片套卡片。' : 'One accent; no gradients, glow, glass, or card-in-card decoration.',
     },
@@ -143,7 +220,7 @@
 <ContentPageShell pageId="design-principles" width="wide" class={compact ? 'text-sm' : ''}>
   <ContentPageHeader
     eyebrow={isZh ? 'svadmin 设计系统' : 'svadmin design system'}
-    title={isZh ? 'Stripe-first 设计原则' : 'Stripe-first design principles'}
+    title={isZh ? '核心设计原则' : 'Core design principles'}
     description={isZh ? '把视觉方向转成可复用组件、可审查状态和可验证示例。' : 'Turn a visual direction into reusable components, reviewable states, and verifiable examples.'}
     actions={headerActions}
   />
@@ -299,6 +376,119 @@
         <div class="flex flex-wrap items-center gap-2">
           <Button size="sm">{isZh ? '提交订单' : 'Submit order'}</Button>
           <Button size="sm" disabledReason={isZh ? '订单已冻结，解冻后才能提交' : 'Order is frozen; unfreeze it before submitting'}>{isZh ? '提交订单' : 'Submit order'}</Button>
+        </div>
+      </section>
+      <section class="example-section-stack" aria-labelledby="enterprise-components-heading" data-enterprise-component-fixture>
+        <SectionHeader
+          id="enterprise-components-heading"
+          title={isZh ? '企业组件组合示例' : 'Enterprise component composition'}
+          description={isZh ? '这里演示 UI 包的 Provider 接入方式；示例数据不代表真实后端能力。' : 'This demonstrates UI package Provider wiring; example data is not real backend capability.'}
+        />
+        <div class="example-card-grid">
+          <DashboardView
+            provider={dashboardProvider}
+            dashboardId="design-principles"
+            requestContext={enterpriseRequestContext}
+            title={isZh ? '运营仪表盘' : 'Operations dashboard'}
+          />
+          <ApprovalCenter
+            provider={approvalProvider}
+            requestContext={enterpriseRequestContext}
+            title={isZh ? '审批演示' : 'Approval demo'}
+          />
+        </div>
+      </section>
+      <section class="example-section-stack" aria-labelledby="enterprise-inputs-heading" data-enterprise-input-fixture>
+        <SectionHeader
+          id="enterprise-inputs-heading"
+          title={isZh ? '企业输入组件组合' : 'Enterprise input composition'}
+          description={isZh ? '这些控件来自 UI 包；状态只存在于示例页面。' : 'These controls come from the UI package; state belongs only to this example page.'}
+        />
+        <div class="example-control-grid">
+          <RadioGroup
+            legend={isZh ? '可见范围' : 'Visibility'}
+            ariaLabel={isZh ? '可见范围' : 'Visibility'}
+            options={[
+              { value: 'personal', label: isZh ? '仅自己' : 'Personal' },
+              { value: 'team', label: isZh ? '团队' : 'Team' },
+            ]}
+            bind:value={demoVisibility}
+          />
+          <TagsInput
+            ariaLabel={isZh ? '标签' : 'Labels'}
+            value={demoLabels}
+            onchange={(next) => { demoLabels = next; }}
+            placeholder={isZh ? '添加标签' : 'Add a label'}
+          />
+          <Slider
+            ariaLabel={isZh ? '完成率' : 'Completion'}
+            min={0}
+            max={1}
+            step={0.01}
+            bind:value={demoCompletion}
+            showValue
+          />
+          <RangeSlider
+            ariaLabel={isZh ? '价格范围' : 'Price range'}
+            min={0}
+            max={100}
+            bind:value={demoRange}
+            showValue
+          />
+          <ColorPicker
+            ariaLabel={isZh ? '强调色' : 'Accent color'}
+            bind:value={demoColor}
+          />
+          <DatePicker
+            ariaLabel={isZh ? '开始日期' : 'Start date'}
+            bind:value={demoDate}
+          />
+          <DateRangePicker
+            ariaLabel={isZh ? '日期范围' : 'Date range'}
+            bind:value={demoDateRange}
+          />
+          <TimePicker
+            ariaLabel={isZh ? '开始时间' : 'Start time'}
+            bind:value={demoTime}
+          />
+          <DateTimePicker
+            ariaLabel={isZh ? '开始日期时间' : 'Start date and time'}
+            bind:value={demoDateTime}
+          />
+          <Rate
+            ariaLabel={isZh ? '评分' : 'Rating'}
+            bind:value={demoRate}
+          />
+        </div>
+      </section>
+      <section class="example-section-stack" aria-labelledby="enterprise-errors-heading" data-enterprise-error-fixture>
+        <SectionHeader
+          id="enterprise-errors-heading"
+          title={isZh ? '表单错误汇总' : 'Form error summary'}
+          description={isZh ? 'ErrorSummary 来自 UI 包，输入值和聚焦状态只属于 example。' : 'ErrorSummary comes from the UI package; input values and focus state belong only to this example.'}
+        />
+        <div class="example-control-grid">
+          <div class="example-section-stack">
+            <label class="example-field" for="demo-name">
+              <span>{isZh ? '名称' : 'Name'}</span>
+              <input id="demo-name" class="example-field-control" placeholder={isZh ? '示例名称' : 'Example name'} />
+            </label>
+            <label class="example-field" for="demo-owner">
+              <span>{isZh ? '负责人' : 'Owner'}</span>
+              <input id="demo-owner" class="example-field-control" placeholder={isZh ? '示例负责人' : 'Example owner'} />
+            </label>
+            {#if focusedDemoField}
+              <p class="text-xs text-muted-foreground" data-focused-demo-field>
+                {isZh ? `最近定位：${focusedDemoField}` : `Focused: ${focusedDemoField}`}
+              </p>
+            {/if}
+          </div>
+          <ErrorSummary
+            errors={demoFormErrors}
+            title={isZh ? '请修正以下错误' : 'Please fix the following errors'}
+            id="design-principles-errors"
+            onfocusfield={focusDemoField}
+          />
         </div>
       </section>
       <div class="rounded-lg border border-border bg-card p-4 shadow-sm">

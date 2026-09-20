@@ -1,6 +1,7 @@
 import { requireValue } from "../../../../scripts/test-assertions";
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { TaskProvider } from '@svadmin/core';
 import AutoTableEnterpriseHarness from '../../test/fixtures/AutoTableEnterpriseHarness.svelte';
 import DescriptionList from './content/DescriptionList.svelte';
 
@@ -26,6 +27,36 @@ afterEach(() => {
 });
 
 describe('AutoTable enterprise enhancements', () => {
+  it('submits the active list query to the configured export task provider', async () => {
+    const submit = vi.fn(async () => ({
+      id: 'export-users',
+      wait: async () => ({ id: 'export-users', status: 'queued' as const }),
+    }));
+    const tasks: TaskProvider = {
+      submit,
+      get: async (taskId) => ({ id: taskId, status: 'queued' }),
+    };
+    const view = render(AutoTableEnterpriseHarness, {
+      viewMode: 'table',
+      exportTaskName: 'export-users',
+      exportTaskProvider: tasks,
+      exportTaskIdempotencyKey: 'users-filter-export',
+    });
+
+    const exportButton = await view.findByRole('button', { name: '导出' });
+    await waitFor(() => expect(exportButton.hasAttribute('disabled')).toBe(false));
+    await fireEvent.click(exportButton);
+    await waitFor(() => expect(submit).toHaveBeenCalledOnce());
+    expect(submit).toHaveBeenCalledWith('export-users', expect.objectContaining({
+      idempotencyKey: 'users-filter-export',
+      body: expect.objectContaining({
+        filters: [],
+        resource: 'users',
+        format: 'csv',
+      }),
+    }));
+  });
+
   it('renders table toolbar with density switcher and refresh button', async () => {
     const view = render(AutoTableEnterpriseHarness, {
       viewMode: 'table',
@@ -65,9 +96,8 @@ describe('AutoTable enterprise enhancements', () => {
     expect(view.queryByText(/已选择/)).toBeNull();
 
     // Check the first row checkbox
-    const checkboxes = view.getAllByRole('checkbox');
-    expect(checkboxes.length).toBeGreaterThan(1);
-    await fireEvent.click(requireValue(checkboxes[1])); // first row checkbox
+    const rowCheckboxes = await view.findAllByRole('checkbox', { name: '选择记录 user-1' });
+    await fireEvent.click(requireValue(rowCheckboxes[0]));
 
     await waitFor(async () => {
       expect(await view.findByText('已选择 1 条记录')).toBeTruthy();
@@ -98,8 +128,8 @@ describe('AutoTable enterprise enhancements', () => {
     expect(await view.findAllByText('管理员')).toBeTruthy();
 
     // Table data should render
-    expect(await view.findAllByText('user1@example.com')).toHaveLength(2);
-    expect(await view.findAllByText('user2@example.com')).toHaveLength(2);
+    expect(await view.findAllByText('user1@example.com')).toHaveLength(1);
+    expect(await view.findAllByText('user2@example.com')).toHaveLength(1);
   });
 
   it('gives active-filter clear buttons accessible names', async () => {

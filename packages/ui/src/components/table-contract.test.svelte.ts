@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, waitFor, within } from '@testing-library/sv
 import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
 import { Type } from '@sinclair/typebox';
 import { QueryClient } from '@tanstack/svelte-query';
-import { defineResource, resetContext, setAdminOptions, type DataProvider, type ResourceDefinition, type AccessControlProvider } from '@svadmin/core';
+import { defineResource, resetContext, setAdminOptions, type AuthProvider, type DataProvider, type ResourceDefinition, type AccessControlProvider } from '@svadmin/core';
 import { resetToast } from '@svadmin/core/toast';
 import { formatContractRouteId, parseContractRouteId } from '@svadmin/core/schema';
 import ts from 'typescript';
@@ -48,11 +48,12 @@ function deferred<T>() {
 function access(allowed: boolean): AccessControlProvider {
   return { can: async () => ({ can: allowed }) };
 }
-function mount(source: DataProvider = provider(), permission?: AccessControlProvider) {
+function mount(source: DataProvider = provider(), permission?: AccessControlProvider, authProvider?: AuthProvider) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity }, mutations: { retry: false } } });
   clients.push(client);
   const view = render(Host, { provider: source, resources: definitions, queryClient: client,
     ...(permission ? { access: permission } : {}),
+    ...(authProvider ? { authProvider } : {}),
   });
   return { view, client, source };
 }
@@ -377,6 +378,491 @@ describe('contract-bound AutoTable', () => {
     expect(app.view.queryByRole('button', { name: /Batch Delete/ })).toBeNull();
     expect(localStorage.getItem(savedListViewsStorageKey(scope))).toContain('saved-search');
   });
+
+  it('keeps saved views private to the authenticated identity', async () => {
+    let resolveIdentity: (value: { id: string }) => void = () => {};
+    const pendingIdentity = new Promise<{ id: string }>(resolve => { resolveIdentity = resolve; });
+    const alice: AuthProvider = {
+      login: async () => ({ success: true }),
+      logout: async () => ({ success: true }),
+      check: async () => ({ authenticated: true }),
+      getIdentity: () => pendingIdentity,
+    };
+    const bobScope = {
+      resourceName: 'posts', providerName: 'default', tenantIdentity: 'first', identityKey: 'id:bob',
+    };
+    localStorage.setItem(savedListViewsStorageKey(bobScope), JSON.stringify({ version: 1, views: [{
+      id: 'bob-view', name: 'Bob', state: {
+        search: 'bob-only', filters: [], sorters: [], pagination: { current: 1, pageSize: 10 },
+        columnVisibility: {}, columnOrder: [],
+      },
+    }] }));
+    localStorage.setItem(activeSavedListViewStorageKey(bobScope), 'bob-view');
+    const aliceScope = { ...bobScope, identityKey: 'id:alice' };
+    const oldScope = { resourceName: 'posts', providerName: 'default', tenantIdentity: 'first' };
+    const saved = localStorage.getItem(savedListViewsStorageKey(bobScope));
+    if (!saved) throw new Error('Missing saved view');
+    localStorage.setItem(savedListViewsStorageKey(oldScope), saved);
+    localStorage.setItem(activeSavedListViewStorageKey(oldScope), 'bob-view');
+    const app = mount(provider(), undefined, alice);
+    await ready(app);
+    expect(app.view.getByRole('button', { name: /^(Views|视图)$/ }).hasAttribute('disabled')).toBe(true);
+    expect((app.view.getByPlaceholderText(/搜索|Search/) as HTMLInputElement).value).toBe('');
+    resolveIdentity({ id: 'alice' });
+    await waitFor(() => expect(app.view.getByRole('button', { name: /^(Views|视图)$/ }).hasAttribute('disabled')).toBe(false));
+    expect((app.view.getByPlaceholderText(/搜索|Search/) as HTMLInputElement).value).not.toBe('bob-only');
+    expect(localStorage.getItem(savedListViewsStorageKey(aliceScope))).toBeNull();
+    await app.view.rerender({ authProvider: { ...alice, getIdentity: async () => ({ id: 'bob' }) } });
+    await waitFor(() => expect((app.view.getByPlaceholderText(/搜索|Search/) as HTMLInputElement).value).toBe('bob-only'));
+    await app.view.rerender({ authProvider: { ...alice, getIdentity: async () => ({ email: 'bob@example.com' }) } });
+    await waitFor(() => expect((app.view.getByPlaceholderText(/搜索|Search/) as HTMLInputElement).value).toBe(''));
+    expect(app.view.getByRole('button', { name: /^(Views|视图)$/ }).hasAttribute('disabled')).toBe(true);
+    expect(localStorage.getItem(savedListViewsStorageKey(bobScope))).toContain('bob-only');
+    expect(localStorage.getItem(savedListViewsStorageKey(oldScope))).toBe(saved);
+  });
+  it('applies read-only shared views without deleting or overwriting a colliding personal view', async () => {
+    const scope = { resourceName: 'posts', providerName: 'default', tenantIdentity: 'first' };
+    const state = {
+      search: 'team-search', filters: [], sorters: [], pagination: { current: 1, pageSize: 10 },
+      columnVisibility: {}, columnOrder: [],
+    };
+    const local = JSON.stringify({ version: 1, views: [{ id: 'shared', name: 'Personal', state }] });
+    localStorage.setItem(savedListViewsStorageKey(scope), local);
+    const pending = deferred<unknown>();
+    const list = vi.fn(() => pending.promise);
+    const app = mount();
+    await app.view.rerender({ savedViewProvider: { list } });
+    await ready(app);
+    await waitFor(() => expect(list).toHaveBeenCalledWith(scope));
+    await fireEvent.click(app.view.getByRole('button', { name: /^(Views|视图)$/ }));
+    pending.resolve([{ id: 'shared', name: 'Team', source: 'system', readOnly: false, state }]);
+    await app.view.findByRole('option', { name: 'Team' });
+    expect(app.view.queryByRole('option', { name: 'Personal' })).toBeNull();
+    const remove = app.view.getByRole('button', { name: /^(Delete|删除) Team$/ });
+    expect(remove.hasAttribute('disabled')).toBe(true);
+    await fireEvent.click(remove);
+    const viewSelect = app.view.getByRole('option', { name: 'Team' }).closest('select');
+    if (!(viewSelect instanceof HTMLSelectElement)) throw new Error('Missing saved view selector');
+    await fireEvent.change(viewSelect, { target: { value: 'shared' } });
+    expect(app.view.getByPlaceholderText(/搜索|Search/)).toHaveProperty('value', 'team-search');
+    expect(localStorage.getItem(savedListViewsStorageKey(scope))).toBe(local);
+  });
+
+  it.each([
+    [true, 1, 'remote-default'],
+    [false, 1, ''],
+    [true, 2, ''],
+    [true, 0, ''],
+  ] as const)('remote default opt-in=%s count=%s produces %s', async (enabled, count, expected) => {
+    const state = {
+      search: 'remote-default', filters: [], sorters: [], pagination: { current: 1, pageSize: 10 },
+      columnVisibility: {}, columnOrder: [],
+    };
+    const list = vi.fn(async () => Array.from({ length: count }, (_, index) => ({
+      id: `default-${index}`, name: `Default ${index}`, source: 'team', default: true, state,
+    })));
+    const app = mount();
+    await app.view.rerender({ savedViewProvider: { list }, applyRemoteDefaultView: enabled });
+    await ready(app);
+    await waitFor(() => expect(list).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(app.view.getByPlaceholderText(/搜索|Search/)).toHaveProperty('value', expected));
+  });
+
+  it.each([0, 2])('initializes once after replacing a response with %s default candidates', async count => {
+    const state = {
+      search: 'recovered-default', filters: [], sorters: [], pagination: { current: 1, pageSize: 10 },
+      columnVisibility: {}, columnOrder: [],
+    };
+    const candidate = { id: 'default', name: 'Recovered', source: 'team', default: true, state };
+    const initial = Array.from({ length: count }, (_, index) => ({
+      ...candidate, id: `initial-${index}`, name: `Initial ${index}`,
+    }));
+    const app = mount();
+    const list = vi.fn(async () => initial);
+    await app.view.rerender({ savedViewProvider: { list }, applyRemoteDefaultView: true });
+    await ready(app);
+    await fireEvent.click(app.view.getByRole('button', { name: /^(Views|视图)$/ }));
+    await waitFor(() => expect(list).toHaveBeenCalledTimes(1));
+    if (count) await app.view.findByRole('option', { name: 'Initial 0' });
+    expect(app.view.getByPlaceholderText(/搜索|Search/)).toHaveProperty('value', '');
+    await app.view.rerender({ savedViewProvider: { list: async () => [candidate] } });
+    await app.view.findByRole('option', { name: 'Recovered' });
+    await waitFor(() => expect(app.view.getByPlaceholderText(/搜索|Search/)).toHaveProperty('value', 'recovered-default'));
+    await app.view.rerender({ savedViewProvider: { list: async () => [{
+      ...candidate, id: 'replacement', name: 'Replacement', state: { ...state, search: 'must-not-reapply' },
+    }] } });
+    await app.view.findByRole('option', { name: 'Replacement' });
+    expect(app.view.getByPlaceholderText(/搜索|Search/)).toHaveProperty('value', 'recovered-default');
+  });
+
+  it('does not overwrite an in-progress search with a late default or a replacement provider', async () => {
+    const state = {
+      search: 'remote-default', filters: [], sorters: [], pagination: { current: 1, pageSize: 10 },
+      columnVisibility: {}, columnOrder: [],
+    };
+    const views = [{ id: 'default', name: 'Default', source: 'team', default: true, state }];
+    const pending = deferred<unknown>();
+    const list = vi.fn(() => pending.promise);
+    const app = mount();
+    await app.view.rerender({ savedViewProvider: { list }, applyRemoteDefaultView: true });
+    await ready(app);
+    await waitFor(() => expect(list).toHaveBeenCalled());
+    await fireEvent.input(app.view.getByPlaceholderText(/搜索|Search/), { target: { value: 'my-query' } });
+    pending.resolve(views);
+    await fireEvent.click(app.view.getByRole('button', { name: /^(Views|视图)$/ }));
+    await app.view.findByRole('option', { name: 'Default' });
+    expect(app.view.getByPlaceholderText(/搜索|Search/)).toHaveProperty('value', 'my-query');
+    await app.view.rerender({ savedViewProvider: { list: async () => [{ ...views[0], name: 'Replacement' }] } });
+    await app.view.findByRole('option', { name: 'Replacement' });
+    expect(app.view.getByPlaceholderText(/搜索|Search/)).toHaveProperty('value', 'my-query');
+  });
+
+  it('discards stale shared responses after scope changes and clears views when the provider fails', async () => {
+    const first = deferred<unknown>();
+    const second = deferred<unknown>();
+    const state = {
+      search: '', filters: [], sorters: [], pagination: { current: 1, pageSize: 10 },
+      columnVisibility: {}, columnOrder: [],
+    };
+    const list = vi.fn((scope: { tenantIdentity?: string | number }) =>
+      scope.tenantIdentity === 'first' ? first.promise : second.promise);
+    const app = mount();
+    await app.view.rerender({ savedViewProvider: { list } });
+    await ready(app);
+    await waitFor(() => expect(list).toHaveBeenCalled());
+    await app.view.rerender({ tenant: 'second' });
+    await waitFor(() => expect(list).toHaveBeenCalledWith(expect.objectContaining({ tenantIdentity: 'second' })));
+    second.resolve([{ id: 'new', name: 'New team', state }]);
+    await fireEvent.click(app.view.getByRole('button', { name: /^(Views|视图)$/ }));
+    await app.view.findByRole('option', { name: 'New team' });
+    first.resolve([{ id: 'old', name: 'Old team', state }]);
+    await Promise.resolve();
+    expect(app.view.queryByRole('option', { name: 'Old team' })).toBeNull();
+    const failedList = vi.fn(() => { throw new Error('Provider failed'); });
+    await app.view.rerender({ savedViewProvider: { list: failedList } });
+    await waitFor(() => expect(failedList).toHaveBeenCalled());
+    expect(app.view.queryByRole('option', { name: 'New team' })).toBeNull();
+  });
+
+  it('edits shared visibility separately from query state with a versioned receipt', async () => {
+    const state = { search: '', filters: [], sorters: [], pagination: { current: 1, pageSize: 10 },
+      columnVisibility: {}, columnOrder: [] };
+    const access = { mode: 'restricted' as const, subjectIds: ['alice', 'bob'] };
+    const remote = { id: 'access-edit', name: 'Shared team', state, source: 'team' as const,
+      version: 2, readOnly: false, access: { mode: 'team' as const, subjectIds: [] } };
+    const list = vi.fn(async () => [remote]);
+    const updateAccess = vi.fn(async () => ({ ok: true, version: 3, view: { ...remote, version: 3, access } }));
+    const app = mount();
+    await app.view.rerender({ savedViewProvider: { list, updateAccess } });
+    await ready(app);
+    await fireEvent.click(app.view.getByRole('button', { name: /^(Views|视图)$/ }));
+    const mode = await app.view.findByRole('combobox', { name: 'View visibility Shared team' });
+    await fireEvent.change(mode, { target: { value: 'restricted' } });
+    const input = app.view.getByRole('textbox', { name: 'Member IDs (comma separated) Shared team' });
+    await fireEvent.input(input, { target: { value: 'alice, bob' } });
+    await fireEvent.click(app.view.getByRole('button', { name: 'Save visibility Shared team' }));
+    await waitFor(() => expect(list).toHaveBeenCalledTimes(2));
+    expect(updateAccess).toHaveBeenCalledWith(expect.objectContaining({ tenantIdentity: 'first' }),
+      { id: 'access-edit', source: 'team', expectedVersion: 2, access });
+  });
+
+  it('uses the optional member directory for restricted visibility writes', async () => {
+    const state = { search: '', filters: [], sorters: [], pagination: { current: 1, pageSize: 10 },
+      columnVisibility: {}, columnOrder: [] };
+    const remote = { id: 'directory-edit', name: 'Directory team', state, source: 'team' as const,
+      version: 2, readOnly: false, access: { mode: 'team' as const, subjectIds: [] } };
+    const listAccessSubjects = vi.fn(async (_scope: unknown, input: { query?: string }) => (
+      input.query === 'bo' ? [{ id: 'bob', label: 'Bob', description: 'Operations' }] : [
+        { id: 'alice', label: 'Alice' }, { id: 'bob', label: 'Bob' },
+      ]
+    ));
+    const updateAccess = vi.fn(async () => ({
+      ok: true, version: 3, view: { ...remote, version: 3,
+        access: { mode: 'restricted' as const, subjectIds: ['bob'] } },
+    }));
+    const app = mount();
+    await app.view.rerender({ savedViewProvider: { list: async () => [remote], listAccessSubjects, updateAccess } });
+    await ready(app);
+    await fireEvent.click(app.view.getByRole('button', { name: /^(Views|视图)$/ }));
+    const mode = await app.view.findByRole('combobox', { name: 'View visibility Directory team' });
+    await fireEvent.change(mode, { target: { value: 'restricted' } });
+    await waitFor(() => expect(listAccessSubjects).toHaveBeenCalled());
+    await fireEvent.input(app.view.getByRole('textbox', { name: /Search.*Directory team/ }), { target: { value: 'bo' } });
+    await waitFor(() => expect(listAccessSubjects).toHaveBeenLastCalledWith(
+      expect.objectContaining({ tenantIdentity: 'first' }), { query: 'bo', limit: 50 },
+    ));
+    const bob = await app.view.findByRole('checkbox', { name: 'Bob' });
+    await fireEvent.click(bob);
+    await fireEvent.click(app.view.getByRole('button', { name: 'Save visibility Directory team' }));
+    await waitFor(() => expect(updateAccess).toHaveBeenCalledWith(expect.anything(), {
+      id: 'directory-edit', source: 'team', expectedVersion: 2,
+      access: { mode: 'restricted', subjectIds: ['bob'] },
+    }));
+  });
+
+  it.each(['conflict', 'wrong-access', 'read-only', 'stale'] as const)(
+    'does not apply %s visibility writes', async outcome => {
+      const state = { search: '', filters: [], sorters: [], pagination: { current: 1, pageSize: 10 },
+        columnVisibility: {}, columnOrder: [] };
+      const remote = { id: 'access-edit', name: 'Shared team', state, source: 'team' as const,
+        version: 2, readOnly: outcome === 'read-only', access: { mode: 'team' as const, subjectIds: [] } };
+      const pending = deferred<unknown>();
+      const list = vi.fn(async () => [remote]);
+      const updateAccess = vi.fn(() => pending.promise);
+      const app = mount();
+      await app.view.rerender({ savedViewProvider: { list, updateAccess } });
+      await ready(app);
+      await fireEvent.click(app.view.getByRole('button', { name: /^(Views|视图)$/ }));
+      const mode = await app.view.findByRole('combobox', { name: 'View visibility Shared team' });
+      if (outcome === 'read-only') {
+        expect(mode.hasAttribute('disabled')).toBe(true);
+        expect(app.view.getByRole('button', { name: 'Save visibility Shared team' }).hasAttribute('disabled')).toBe(true);
+        expect(updateAccess).not.toHaveBeenCalled();
+        return;
+      }
+      await fireEvent.change(mode, { target: { value: 'organization' } });
+      const button = app.view.getByRole('button', { name: 'Save visibility Shared team' });
+      await fireEvent.click(button);
+      await waitFor(() => expect(updateAccess).toHaveBeenCalledTimes(1));
+      expect(button.hasAttribute('disabled')).toBe(true);
+      if (outcome === 'stale') await app.view.rerender({ tenant: 'second' });
+      pending.resolve(outcome === 'conflict'
+        ? { ok: false, code: 'VERSION_CONFLICT', version: 3, current: { ...remote, version: 3 } }
+        : { ok: true, version: 3, view: { ...remote, version: 3 } });
+      if (outcome === 'stale') {
+        await new Promise(resolve => setTimeout(resolve, 0));
+        expect(app.view.queryByRole('alert')).toBeNull();
+      } else {
+        await app.view.findByRole('alert');
+        expect(list).toHaveBeenCalledTimes(1);
+        if (outcome === 'conflict') expect(button.hasAttribute('disabled')).toBe(true);
+      }
+    },
+  );
+
+  it('sets and unsets a remote default through versioned receipts and reloads the collection', async () => {
+    const state = {
+      search: 'remote', filters: [], sorters: [], pagination: { current: 1, pageSize: 10 },
+      columnVisibility: {}, columnOrder: [],
+    };
+    let remote = { id: 'default-edit', name: 'Default team', state, source: 'team' as const,
+      version: 2, readOnly: false, default: false };
+    const list = vi.fn(async () => [remote]);
+    const setDefault = vi.fn(async (_scope: unknown, input: { default: boolean }) => {
+      remote = { ...remote, default: input.default, version: remote.version + 1 };
+      return { ok: true, version: remote.version, view: remote };
+    });
+    const app = mount();
+    await app.view.rerender({ savedViewProvider: { list, setDefault }, applyRemoteDefaultView: true });
+    await ready(app);
+    await fireEvent.click(app.view.getByRole('button', { name: /^(Views|视图)$/ }));
+    await fireEvent.click(await app.view.findByRole('button', { name: 'Set as default view Default team' }));
+    await waitFor(() => expect(list).toHaveBeenCalledTimes(2));
+    expect(setDefault).toHaveBeenCalledWith(expect.objectContaining({ tenantIdentity: 'first' }),
+      { id: 'default-edit', source: 'team', expectedVersion: 2, default: true });
+    await fireEvent.click(await app.view.findByRole('button', { name: 'Unset default view Default team' }));
+    await waitFor(() => expect(list).toHaveBeenCalledTimes(3));
+    expect(setDefault).toHaveBeenLastCalledWith(expect.anything(),
+      { id: 'default-edit', source: 'team', expectedVersion: 3, default: false });
+    expect(app.view.getByPlaceholderText(/搜索|Search/)).not.toHaveProperty('value', 'remote');
+  });
+
+  it.each(['conflict', 'wrong-marker', 'throw', 'stale'] as const)(
+    'does not accept a %s default mutation', async outcome => {
+      const state = {
+        search: '', filters: [], sorters: [], pagination: { current: 1, pageSize: 10 },
+        columnVisibility: {}, columnOrder: [],
+      };
+      const remote = { id: 'default-edit', name: 'Default team', state, source: 'team' as const,
+        version: 2, readOnly: false, default: false };
+      const pending = deferred<unknown>();
+      const list = vi.fn(async () => [remote]);
+      const setDefault = vi.fn(() => {
+        if (outcome === 'throw') throw new Error('private default failure');
+        return pending.promise;
+      });
+      const app = mount();
+      await app.view.rerender({ savedViewProvider: { list, setDefault } });
+      await ready(app);
+      await fireEvent.click(app.view.getByRole('button', { name: /^(Views|视图)$/ }));
+      const button = await app.view.findByRole('button', { name: 'Set as default view Default team' });
+      await fireEvent.click(button);
+      await waitFor(() => expect(setDefault).toHaveBeenCalledTimes(1));
+      if (outcome === 'stale') await app.view.rerender({ tenant: 'second' });
+      pending.resolve(outcome === 'conflict'
+        ? { ok: false, code: 'VERSION_CONFLICT', version: 3, current: { ...remote, version: 3 } }
+        : { ok: true, version: 3, view: { ...remote, version: 3 } });
+      if (outcome === 'stale') {
+        await new Promise(resolve => setTimeout(resolve, 0));
+        expect(app.view.queryByRole('alert')).toBeNull();
+      } else {
+        await app.view.findByRole('alert');
+        expect(list).toHaveBeenCalledTimes(1);
+        expect(app.view.queryByText('private default failure')).toBeNull();
+        if (outcome === 'conflict') expect(button.hasAttribute('disabled')).toBe(true);
+      }
+    },
+  );
+
+  it('saves and deletes an explicitly selected team view using versioned receipts', async () => {
+    const state = {
+      search: '', filters: [], sorters: [], pagination: { current: 1, pageSize: 10 },
+      columnVisibility: {}, columnOrder: [],
+    };
+    const pending = deferred<unknown>();
+    const save = vi.fn(() => pending.promise);
+    const remove = vi.fn(async () => ({ ok: true, id: 'team-edit', version: 4 }));
+    const app = mount();
+    await app.view.rerender({ savedViewProvider: {
+      list: async () => [{ id: 'team-edit', name: 'Editable team', state, source: 'team', version: 2, readOnly: false }],
+      save, remove,
+    } });
+    await ready(app);
+    await fireEvent.click(app.view.getByRole('button', { name: /^(Views|视图)$/ }));
+    await app.view.findByRole('option', { name: 'Editable team' });
+    await fireEvent.change(app.view.getByRole('combobox', { name: /View ownership|视图归属/ }), { target: { value: 'team' } });
+    await fireEvent.input(app.view.getByRole('textbox', { name: /View name|视图名称/ }), { target: { value: 'Editable team' } });
+    const button = app.view.getByRole('button', { name: /^(Save|保存)$/ });
+    expect(app.view.getByRole('combobox', { name: /View ownership|视图归属/ })).toHaveProperty('value', 'team');
+    expect(button.hasAttribute('disabled')).toBe(false);
+    await fireEvent.click(button);
+    await fireEvent.click(button);
+    expect(save).toHaveBeenCalledTimes(1);
+    expect(save).toHaveBeenCalledWith(expect.objectContaining({ tenantIdentity: 'first' }),
+      expect.objectContaining({ id: 'team-edit', expectedVersion: 2, source: 'team' }));
+    expect(button.hasAttribute('disabled')).toBe(true);
+    pending.resolve({ ok: true, version: 3, view: {
+      id: 'team-edit', name: 'Editable team', state, source: 'team', version: 3, readOnly: false,
+    } });
+    const deleteButton = app.view.getByRole('button', { name: /^(Delete|删除) Editable team$/ });
+    await waitFor(() => expect(deleteButton.hasAttribute('disabled')).toBe(false));
+    await fireEvent.click(deleteButton);
+    await waitFor(() => expect(remove).toHaveBeenCalledWith(expect.objectContaining({ tenantIdentity: 'first' }),
+      { id: 'team-edit', expectedVersion: 3 }));
+    await waitFor(() => expect(app.view.queryByRole('option', { name: 'Editable team' })).toBeNull());
+  });
+
+  it.each(['conflict', 'stale'] as const)('preserves current queries on a %s shared save', async outcome => {
+    const state = {
+      search: 'remote', filters: [], sorters: [], pagination: { current: 1, pageSize: 10 },
+      columnVisibility: {}, columnOrder: [],
+    };
+    const pending = deferred<unknown>();
+    const save = vi.fn(() => pending.promise);
+    const app = mount();
+    await app.view.rerender({ savedViewProvider: { list: async () => [], save } });
+    await ready(app);
+    await fireEvent.click(app.view.getByRole('button', { name: /^(Views|视图)$/ }));
+    await fireEvent.change(app.view.getByRole('combobox', { name: /View ownership|视图归属/ }), { target: { value: 'team' } });
+    await fireEvent.input(app.view.getByRole('textbox', { name: /View name|视图名称/ }), { target: { value: 'New team' } });
+    await fireEvent.click(app.view.getByRole('button', { name: /^(Save|保存)$/ }));
+    await waitFor(() => expect(save).toHaveBeenCalledTimes(1));
+    const calls = save.mock.calls as unknown as [unknown, { id: string }][];
+    const id = calls[0]![1].id;
+    if (outcome === 'stale') await app.view.rerender({ tenant: 'second' });
+    pending.resolve({ ok: false, code: 'VERSION_CONFLICT', version: 2,
+      current: { id, name: 'New team', state, version: 2, source: 'team' } });
+    if (outcome === 'conflict') {
+      await app.view.findByRole('alert');
+      expect(app.view.getByRole('button', { name: /^(Save|保存)$/ }).hasAttribute('disabled')).toBe(true);
+    } else {
+      await new Promise(resolve => setTimeout(resolve, 0));
+      await fireEvent.click(app.view.getByRole('button', { name: /^(Views|视图)$/ }));
+      expect(app.view.queryByRole('alert')).toBeNull();
+    }
+    expect(app.view.getByPlaceholderText(/搜索|Search/)).not.toHaveProperty('value', 'remote');
+  });
+
+  it.each([
+    { ok: true, id: 'other-view', version: 4 },
+    { ok: true, id: 'protected-team', version: 2 },
+    { ok: true, id: 'protected-team', version: 4, private: 'detail' },
+    { ok: true, version: 4 },
+  ])('retains a shared view on an invalid delete receipt %j', async receipt => {
+    const state = {
+      search: '', filters: [], sorters: [], pagination: { current: 1, pageSize: 10 },
+      columnVisibility: {}, columnOrder: [],
+    };
+    const remove = vi.fn(async () => receipt);
+    const app = mount();
+    await app.view.rerender({ savedViewProvider: {
+      list: async () => [{
+        id: 'protected-team', name: 'Protected team', state, source: 'team', version: 2, readOnly: false,
+      }],
+      remove,
+    } });
+    await ready(app);
+    await fireEvent.click(app.view.getByRole('button', { name: /^(Views|视图)$/ }));
+    await app.view.findByRole('option', { name: 'Protected team' });
+    await fireEvent.click(app.view.getByRole('button', { name: /^(Delete|删除) Protected team$/ }));
+    await app.view.findByRole('alert');
+    expect(app.view.getByRole('option', { name: 'Protected team' })).toBeTruthy();
+    expect(app.view.queryByText('detail')).toBeNull();
+  });
+
+  it('retries failed shared view loads without losing personal views or exposing server details', async () => {
+    const pending = deferred<unknown>();
+    const state = {
+      search: '', filters: [], sorters: [], pagination: { current: 1, pageSize: 10 },
+      columnVisibility: {}, columnOrder: [],
+    };
+    localStorage.setItem(savedListViewsStorageKey({
+      resourceName: 'posts', providerName: 'default', tenantIdentity: 'first',
+    }), JSON.stringify({ version: 1, views: [{ id: 'personal', name: 'Personal retry', state }] }));
+    const list = vi.fn<() => Promise<unknown>>()
+      .mockRejectedValueOnce(new Error('private-provider-detail'))
+      .mockImplementation(() => pending.promise);
+    const app = mount();
+    await app.view.rerender({ savedViewProvider: { list } });
+    await ready(app);
+    await fireEvent.click(app.view.getByRole('button', { name: /^(Views|视图)$/ }));
+    const retry = await app.view.findByRole('button', { name: /^(Retry|重试)$/ });
+    expect(app.view.getByRole('option', { name: 'Personal retry' })).toBeTruthy();
+    expect(app.view.queryByText('private-provider-detail')).toBeNull();
+    expect(app.view.container.textContent).not.toContain('decodeRemoteSavedListViews,');
+    await fireEvent.click(retry);
+    await waitFor(() => expect(list).toHaveBeenCalledTimes(2));
+    expect(app.view.queryByRole('button', { name: /^(Retry|重试)$/ })).toBeNull();
+    expect(app.view.getByText(/^(Loading|加载中)\.\.\.$/)).toBeTruthy();
+    pending.resolve([{ id: 'recovered', name: 'Recovered team', state }]);
+    await app.view.findByRole('option', { name: 'Recovered team' });
+    expect(app.view.getByRole('option', { name: 'Personal retry' })).toBeTruthy();
+    expect(app.view.queryByText(/^(Loading|加载中)\.\.\.$/)).toBeNull();
+  });
+
+  it.each(['success', 'error'] as const)('ignores obsolete retry %s while the next tenant is loading', async outcome => {
+    const old = deferred<unknown>();
+    const next = deferred<unknown>();
+    const state = {
+      search: '', filters: [], sorters: [], pagination: { current: 1, pageSize: 10 },
+      columnVisibility: {}, columnOrder: [],
+    };
+    const list = vi.fn<() => Promise<unknown>>()
+      .mockRejectedValueOnce(new Error('initial failure'))
+      .mockImplementationOnce(() => old.promise.then(value => {
+        if (outcome === 'error') throw new Error('obsolete private detail');
+        return value;
+      }))
+      .mockImplementation(() => next.promise);
+    const app = mount();
+    await app.view.rerender({ savedViewProvider: { list } });
+    await ready(app);
+    await fireEvent.click(app.view.getByRole('button', { name: /^(Views|视图)$/ }));
+    await fireEvent.click(await app.view.findByRole('button', { name: /^(Retry|重试)$/ }));
+    await waitFor(() => expect(list).toHaveBeenCalledTimes(2));
+    await app.view.rerender({ tenant: 'next' });
+    await waitFor(() => expect(list).toHaveBeenCalledTimes(3));
+    await fireEvent.click(app.view.getByRole('button', { name: /^(Views|视图)$/ }));
+    old.resolve([{ id: 'obsolete', name: 'Obsolete retry', state }]);
+    await old.promise;
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(app.view.queryByRole('option', { name: 'Obsolete retry' })).toBeNull();
+    expect(app.view.queryByRole('button', { name: /^(Retry|重试)$/ })).toBeNull();
+    expect(app.view.getByText(/^(Loading|加载中)\.\.\.$/)).toBeTruthy();
+    next.resolve([{ id: 'current', name: 'Current tenant', state }]);
+    await app.view.findByRole('option', { name: 'Current tenant' });
+  });
+
   it('opens and reloads the same typed record through a detail link', async () => {
     const app = mount();
     const onNavigate = vi.fn();

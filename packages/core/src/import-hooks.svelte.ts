@@ -11,7 +11,7 @@ import { invalidateOwnedQueries } from './query-invalidation';
 import { captureAuthLiveScope, clearAuthQueries, handleAuthError } from './auth-hooks.svelte';
 import { HttpError } from './types';
 import { decodeImportReceipt, invalidImportInput, parseImportRows, snapshotImportFile,
-  newImportProgress, snapshotImportProgress, type ImportOperationProgress, type ImportFormat } from './import-contract';
+  importLimitExceeded, newImportProgress, snapshotImportProgress, IMPORT_LIMITS, type ImportOperationProgress, type ImportFormat } from './import-contract';
 
 export type ImportProgress = Pick<ImportOperationProgress, 'totalAmount' | 'processedAmount'>;
 export interface ImportResult<S extends ContractSchemas> {
@@ -23,6 +23,8 @@ export interface UseImportOptions<S extends ContractSchemas> {
   format?: ImportFormat;
   mapData?: (item: Record<string, unknown>) => NoInfer<ContractCreateInput<S>>;
   batchSize?: number;
+  maxRows?: number;
+  maxBytes?: number;
   enabled?: boolean;
   meta?: Record<string, unknown>;
   dataProviderName?: string;
@@ -50,10 +52,11 @@ function importFailure(cause: unknown, dispatched = false): HttpError {
   const input = code === 'INVALID_RESOURCE_INPUT' && !dispatched;
   const contract = code === 'INVALID_RESOURCE_CONTRACT' && !dispatched;
   const response = code === 'INVALID_PROVIDER_RESPONSE';
-  return new HttpError(input ? 'Invalid import input' : contract ? 'A create schema is required'
+  const limit = code === 'IMPORT_LIMIT_EXCEEDED' && !dispatched;
+  return new HttpError(limit ? 'Import exceeds the configured limit' : input ? 'Invalid import input' : contract ? 'A create schema is required'
     : response ? 'Invalid provider response' : 'Import failed', input ? 422 : contract ? 400 : response ? 502
-      : status === 401 || status === 403 ? status : 500, undefined, {
-    code: input ? 'INVALID_RESOURCE_INPUT' : contract ? 'INVALID_RESOURCE_CONTRACT'
+      : limit ? 413 : status === 401 || status === 403 ? status : 500, undefined, {
+    code: limit ? 'IMPORT_LIMIT_EXCEEDED' : input ? 'INVALID_RESOURCE_INPUT' : contract ? 'INVALID_RESOURCE_CONTRACT'
       : response ? 'INVALID_PROVIDER_RESPONSE' : 'IMPORT_FAILED',
     details: { phase: dispatched ? response ? 'response' : 'request' : 'input', writeMayHaveSucceeded: dispatched },
   });
@@ -197,13 +200,18 @@ export function useImport<S extends ContractSchemas>(options: UseImportOptions<S
       }
       requireContractCreateSchema(scope.contract);
       const batchSize = options.batchSize ?? 1;
+      const maxRows = options.maxRows ?? IMPORT_LIMITS.maxRows;
+      const maxBytes = options.maxBytes ?? IMPORT_LIMITS.maxBytes;
       const format = options.format ?? 'auto';
       const mapData = options.mapData;
       const onFinish = options.onFinish;
       const onProgress = options.onProgress;
       if (!Number.isSafeInteger(batchSize) || batchSize < 1 || !['auto', 'csv', 'json'].includes(format) ||
+          !Number.isSafeInteger(maxRows) || maxRows < 1 || maxRows > IMPORT_LIMITS.maxRows ||
+          !Number.isSafeInteger(maxBytes) || maxBytes < 1 || maxBytes > IMPORT_LIMITS.maxBytes ||
           (options.enabled !== undefined && typeof options.enabled !== 'boolean') ||
           [mapData, onFinish, onProgress].some(callback => callback !== undefined && typeof callback !== 'function')) invalidImportInput();
+      if (file.size > maxBytes) importLimitExceeded();
       if (!originCurrent(origin)) return Promise.reject(cancelled());
       latestToken = token;
       latest = Object.freeze({ token, origin, scope });
@@ -219,7 +227,7 @@ export function useImport<S extends ContractSchemas>(options: UseImportOptions<S
           ensureActive();
           const text = await file.read();
           ensureActive();
-          const records = parseImportRows(text, file.name, format).map((row, index) => {
+          const records = parseImportRows(text, file.name, format, maxRows).map((row, index) => {
             ensureActive();
             try {
               const input = mapData ? mapData(decodeBaseRecord(snapshotPlainData(row))) : row;

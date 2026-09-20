@@ -2,12 +2,14 @@
   import { provideAdminContext, type DataProvider, type ResourceDefinition, type AccessControlProvider,
     type RouterProvider } from '@svadmin/core';
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
+  import type { Snippet } from 'svelte';
   import { definedReactiveOptions, definedOptions } from '@svadmin/core/options';
   import ShowPage from './ShowPage.svelte';
   import RecordDetailDrawer from './RecordDetailDrawer.svelte';
 
   let { provider, resources, queryClient, mode = 'page', resource = 'posts', id = 1, open = true,
     tenant = 'first', permission, layout = 'list', onNavigate = () => {}, onClose = () => {},
+    extraSections,
   }: {
     provider: DataProvider | Record<string, DataProvider>;
     resources: ResourceDefinition[];
@@ -21,6 +23,7 @@
     layout?: 'list' | 'grid';
     onNavigate?: RouterProvider['go'];
     onClose?: () => void;
+    extraSections?: Snippet;
   } = $props();
   provideAdminContext(definedReactiveOptions({
     get dataProvider() { return provider; },
@@ -41,6 +44,6 @@
     </ShowPage>
   {:else if mode === 'drawer'}
     <RecordDetailDrawer resourceName={resource} bind:open
-      {...definedOptions({ recordId: id === null ? undefined : id })} {onClose} />
+      {...definedOptions({ recordId: id === null ? undefined : id, extraSections })} {onClose} />
   {/if}
 </QueryClientProvider>

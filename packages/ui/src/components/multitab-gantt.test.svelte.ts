@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { render } from '@testing-library/svelte';
+import { describe, expect, it, vi } from 'vitest';
+import { fireEvent, render } from '@testing-library/svelte';
 import MultiTabKeepAlive from './MultiTabKeepAlive.svelte';
 import GanttChart from './GanttChart.svelte';
 
@@ -17,6 +17,28 @@ describe('MultiTabKeepAlive and GanttChart Components', () => {
 
     expect(view.container.textContent).toContain('Dashboard');
     expect(view.container.textContent).toContain('Orders');
+    expect(view.getByRole('tablist', { name: 'Workspace tabs' })).toBeTruthy();
+    expect(view.getByRole('tab', { name: 'Dashboard' }).getAttribute('aria-selected')).toBe('true');
+    expect(view.getByRole('button', { name: 'Close Orders' })).toBeTruthy();
+  });
+
+  it('supports Space activation and names icon-only commands', async () => {
+    const onselect = vi.fn();
+    const onrefresh = vi.fn();
+    const tabs = [
+      { id: '1', title: 'Dashboard', path: '/dashboard', pinned: true },
+      { id: '2', title: 'Orders', path: '/orders', closable: true },
+    ];
+    const view = render(MultiTabKeepAlive, {
+      tabs,
+      activeTabId: '1',
+      onselect,
+      onrefresh,
+    });
+    await fireEvent.keyDown(view.getByRole('tab', { name: 'Orders' }), { key: ' ' });
+    expect(onselect).toHaveBeenCalledWith(tabs[1]);
+    await fireEvent.click(view.getByRole('button', { name: 'Refresh Orders' }));
+    expect(onrefresh).toHaveBeenCalledWith(tabs[1]);
   });
 
   it('renders GanttChart with tasks and schedule grid', () => {

@@ -34,16 +34,6 @@ const BARE_HEX = /(?<![\w&])#[0-9a-fA-F]{3,8}\b/;
 // must still exist in its file, so stale allowances fail loudly.
 const HEX_ALLOWLIST: { file: string; literal: string; reason: string }[] = [
   {
-    file: 'FieldRenderer.svelte',
-    literal: `'#000000'`,
-    reason: 'fallback value for a native <input type="color"> picker, which requires a concrete hex (user data, not a theme color)',
-  },
-  {
-    file: 'FieldRenderer.svelte',
-    literal: `"#000000"`,
-    reason: 'placeholder for the same native color picker input',
-  },
-  {
     file: 'Sidebar.svelte',
     literal: `'#6366f1'`,
     reason: 'fallback swatch for the runtime theme preview dot when no registered theme matches (documented in Sidebar.svelte)',

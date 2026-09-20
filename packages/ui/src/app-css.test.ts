@@ -111,4 +111,21 @@ describe('src/app.css (Panda source)', () => {
     expect(css).toContain('details[data-svadmin-filter]:not([open]) > :not(summary)');
     expect(css).toContain('details.svadmin-collapsible-filter:not([open]) > :not(summary)');
   });
+
+  it('keeps sidebar geometry explicit across desktop, mobile and RTL layouts', () => {
+    const css = readAppCss();
+    const sidebar = readSidebar();
+
+    expect(sidebar).toContain('class:svadmin-sidebar-expanded={!collapsed}');
+    expect(sidebar).toContain('class:svadmin-sidebar-collapsed={collapsed}');
+    expect(css).toContain('.svadmin-sidebar-expanded {\n  --svadmin-sidebar-width: 252px;');
+    expect(css).toContain('.svadmin-sidebar-collapsed {\n  --svadmin-sidebar-width: 70px;');
+    expect(css).toContain('.svadmin-sidebar-content-expanded {\n    margin-left: 252px;');
+    expect(css).toContain('.svadmin-sidebar-content-collapsed {\n    margin-left: 70px;');
+    expect(css).toContain('[dir="rtl"] .svadmin-sidebar-content-expanded {\n    margin-left: 0;\n    margin-right: 252px;');
+    expect(css).toContain('[dir="rtl"] .svadmin-sidebar-content-collapsed {\n    margin-left: 0;\n    margin-right: 70px;');
+    expect(css).toMatch(/@media \(min-width: 768px\) \{[\s\S]*?\.svadmin-sidebar-content-expanded/);
+    expect(css).not.toContain('class:w-[252px]');
+    expect(css).not.toContain('class:w-[70px]');
+  });
 });
