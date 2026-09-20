@@ -1,0 +1,106 @@
+name: Retain verified Surface business evidence a84114b
+on:
+  push:
+    branches: ['evidence/surface-business-a84114b']
+    paths: ['.github/workflows/retain-surface-business-a84114b.yml']
+permissions:
+  contents: read
+jobs:
+  retain:
+    if: github.repository == 'vibeunion/svadmin' && github.ref == 'refs/heads/evidence/surface-business-a84114b'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - name: Fetch only the successful immutable acceptance artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import { writeFileSync } from 'node:fs';
+          import { join } from 'node:path';
+          import { createHash } from 'node:crypto';
+          const base = 'https://api.github.com/repos/vibeunion/svadmin';
+          const headers = { Authorization: `Bearer ${process.env.GH_TOKEN}`, Accept: 'application/vnd.github+json' };
+          async function api(path) {
+            const response = await fetch(base + path, { headers, signal: AbortSignal.timeout(30000) });
+            assert.ok(response.ok, `Metadata request failed: ${response.status}`);
+            return response.json();
+          }
+          const run = await api('/actions/runs/35487698615');
+          assert.equal(run.conclusion, 'success');
+          assert.equal(run.head_sha, 'a84114b07ac7908b3ccac952ef14fadd6939255d');
+          const artifact = await api('/actions/artifacts/10598127826');
+          assert.equal(artifact.workflow_run.id, run.id);
+          assert.equal(artifact.expired, false);
+          assert.equal(artifact.digest, 'sha256:ec15763234006bc50cd5c9b33065f2150273df8606db8bf5cff72225c688da40');
+          assert.equal(artifact.size_in_bytes, 1101678);
+          const redirect = await fetch(base + '/actions/artifacts/10598127826/zip', { headers, redirect: 'manual', signal: AbortSignal.timeout(30000) });
+          assert.equal(redirect.status, 302);
+          const destination = new URL(redirect.headers.get('location'));
+          assert.equal(destination.protocol, 'https:');
+          // Do not forward repository authorization to the artifact storage host.
+          const response = await fetch(destination, { signal: AbortSignal.timeout(30000) });
+          assert.ok(response.ok, `Artifact transfer failed: ${response.status}`);
+          const bytes = Buffer.from(await response.arrayBuffer());
+          assert.equal(bytes.length, artifact.size_in_bytes);
+          assert.equal(createHash('sha256').update(bytes).digest('hex'), artifact.digest.slice(7));
+          writeFileSync(join(process.env.RUNNER_TEMP, 'surface-business-evidence.zip'), bytes);
+          JS
+      - name: Retain original PNG bytes and provenance only
+        run: |
+          python3 <<'PY'
+          import hashlib, json, os, pathlib, struct, zipfile
+          source = pathlib.Path(os.environ['RUNNER_TEMP']) / 'surface-business-evidence.zip'
+          expected = {
+            '1440x900-dark': '774afb6314bda5b098fefe1cd800c1b6b85d79ce636ce917f286bd7ff212ebd4',
+            '1440x900-light': '27d6df0b9e4f02688e9364a785828a41c9c059a2ff578de7aa0f919b650e6410',
+            '1920x1080-dark': '18a5a92cd343a2811e8090b131fb7541ecc255a37dfadc480a0bf9af9f654ad2',
+            '1920x1080-light': '118599ddd0791685bf26d1eb7b0955c6aa1a768361f1d493e4bf200ea83b3eff',
+            '390x844-dark': 'fd1ddf184f678b0d3c5f34fe562932a23e0ce5aa2afa649b38b7550514bfaa1d',
+            '390x844-light': '908f8ff54f1b7509a00eae34a77e0da1a1231fc2b06c3171921fc03ecb937f52',
+          }
+          root = pathlib.Path('docs/evidence/surface-business/a84114b')
+          root.mkdir(parents=True, exist_ok=True)
+          images = []
+          with zipfile.ZipFile(source) as archive:
+            assert archive.getinfo('packed-consumer.json').file_size < 10000
+            packed = json.loads(archive.read('packed-consumer.json'))
+            assert packed['status'] == 'passed'
+            assert packed['checkout'] == '90353a98617ac5cffa2466dc8a43bc3aa7732fb6'
+            for label, digest in expected.items():
+              name = f'surface-business-{label}.png'
+              member = f'workflow.e2e.ts-business-components-{label}/{name}'
+              assert archive.namelist().count(member) == 1
+              assert archive.getinfo(member).file_size < 150000
+              data = archive.read(member)
+              assert hashlib.sha256(data).hexdigest() == digest
+              assert data[:8] == b'\x89PNG\r\n\x1a\n'
+              width, height = struct.unpack('>II', data[16:24])
+              assert width == int(label.split('x')[0]) and 844 <= height <= 2000
+              (root / name).write_bytes(data)
+              images.append({'file': name, 'sha256': digest, 'width': width, 'height': height, 'sourceMember': member})
+          provenance = {'implementationHead': 'a84114b07ac7908b3ccac952ef14fadd6939255d',
+            'testedCheckout': packed['checkout'], 'runId': 35487698615, 'artifactId': 10598127826,
+            'artifactSha256': hashlib.sha256(source.read_bytes()).hexdigest(), 'images': images,
+            'scope': 'Original successful Chromium synthetic acceptance screenshots, not regenerated or edited; no real-model or production evidence.'}
+          (root / 'provenance.json').write_text(json.dumps(provenance, indent=2) + '\n')
+          (root / 'packed-consumer.json').write_text(json.dumps(packed, indent=2) + '\n')
+          PY
+      - name: Commit only evidence on its isolated branch
+        run: |
+          test "$GITHUB_REF" = 'refs/heads/evidence/surface-business-a84114b'
+          git add -- docs/evidence/surface-business/a84114b
+          git diff --cached --check
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'docs(evidence): retain original Surface business a84114b screenshots'
+          git push origin HEAD:refs/heads/evidence/surface-business-a84114b
