@@ -2,6 +2,12 @@
 
 Svelte 5 admin components using semantic design tokens and Bits UI primitives.
 
+The design-system boundary is intentionally split: Bits UI owns headless
+interaction primitives, while Panda CSS owns tokens, recipes, and generated
+styles. Park UI is a reference for Panda anatomy and recipe organization, not
+a runtime dependency of `@svadmin/ui`; Ark UI and Bits UI are not mixed for
+the same primitive.
+
 ## CSS Integration
 
 Import the standalone stylesheet once:
@@ -48,3 +54,13 @@ are standalone Panda CSS, and verify that postprocessing is idempotent.
 The utility migration script is an explicit maintenance operation, not a build
 step. It validates the full input set before writing and leaves dynamic
 template fragments unchanged for manual review.
+
+Reusable design contracts are exported from the package entry point. Use the
+slot helpers for shared field and surface styling instead of adding a second
+component styling system:
+
+```ts
+import { fieldClasses } from '@svadmin/ui';
+
+const classes = fieldClasses('error');
+```

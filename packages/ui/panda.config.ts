@@ -122,6 +122,57 @@ export default defineConfig({
 			},
 		},
 		slotRecipes: {
+			field: {
+				className: "svadmin-panda-field",
+				slots: ["root", "label", "description", "control", "message"],
+				base: {
+					root: {
+						display: "flex",
+						flexDirection: "column",
+						gap: "0.375rem",
+					},
+					label: {
+						color: "foreground",
+						fontSize: "sm",
+						fontWeight: "500",
+						lineHeight: "1.25rem",
+					},
+					description: {
+						color: "muted-foreground",
+						fontSize: "sm",
+						lineHeight: "1.25rem",
+					},
+					control: {
+						display: "flex",
+						alignItems: "center",
+						gap: "0.5rem",
+					},
+					message: {
+						color: "destructive",
+						fontSize: "sm",
+						lineHeight: "1.25rem",
+					},
+				},
+				variants: {
+					state: {
+						default: {},
+						error: {
+							label: { color: "destructive" },
+							control: { color: "destructive" },
+						},
+						success: {
+							label: { color: "success" },
+							control: { color: "success" },
+						},
+						disabled: {
+							root: { opacity: "0.6" },
+							label: { color: "muted-foreground" },
+							control: { color: "muted-foreground" },
+						},
+					},
+				},
+				defaultVariants: { state: "default" },
+			},
 			surfaceMetric: {
 				className: "svadmin-panda-metric",
 				slots: ["root", "heading", "label", "value", "badge", "trend"],
@@ -177,6 +228,7 @@ export default defineConfig({
 	staticCss: {
 		recipes: {
 			button: [{ variant: ["*"], size: ["*"] }],
+			field: [{ state: ["*"] }],
 			surfaceMetric: [{ tone: ["*"] }],
 			surfaceTable: [{ density: ["*"] }],
 		},

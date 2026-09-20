@@ -129,6 +129,38 @@
 
 @layer recipes.slots {
   @layer _base {
+    .svadmin-panda-field__root {
+      gap: 0.375rem;
+      display: flex;
+      flex-direction: column;
+}
+
+    .svadmin-panda-field__label {
+      color: var(--colors-foreground);
+      font-weight: 500;
+}
+
+    .svadmin-panda-field__label,.svadmin-panda-field__description {
+      font-size: var(--font-sizes-sm);
+      line-height: 1.25rem;
+}
+
+    .svadmin-panda-field__description {
+      color: var(--colors-muted-foreground);
+}
+
+    .svadmin-panda-field__control {
+      gap: 0.5rem;
+      display: flex;
+      align-items: center;
+}
+
+    .svadmin-panda-field__message {
+      color: var(--colors-destructive);
+      font-size: var(--font-sizes-sm);
+      line-height: 1.25rem;
+}
+
     .svadmin-panda-metric__root {
       background: var(--colors-card);
       padding: 1rem;
@@ -203,6 +235,22 @@
       color: var(--colors-foreground);
       font-size: var(--font-sizes-sm);
 }
+}
+
+  .svadmin-panda-field__label--state_error,.svadmin-panda-field__control--state_error {
+    color: var(--colors-destructive);
+}
+
+  .svadmin-panda-field__label--state_success,.svadmin-panda-field__control--state_success {
+    color: var(--colors-success);
+}
+
+  .svadmin-panda-field__root--state_disabled {
+    opacity: 0.6;
+}
+
+  .svadmin-panda-field__label--state_disabled,.svadmin-panda-field__control--state_disabled {
+    color: var(--colors-muted-foreground);
 }
 
   .svadmin-panda-metric__value--tone_default {

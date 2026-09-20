@@ -6,6 +6,9 @@ export type DesignTone = (typeof designTones)[number];
 export const surfaceDensities = ["comfortable", "compact"] as const;
 export type SurfaceDensity = (typeof surfaceDensities)[number];
 
+export const fieldStates = ["default", "error", "success", "disabled"] as const;
+export type FieldState = (typeof fieldStates)[number];
+
 export const semanticColorTokens = [
 	"background",
 	"foreground",
@@ -40,5 +43,6 @@ export const designContract = {
 	version: DESIGN_CONTRACT_VERSION,
 	tones: designTones,
 	densities: surfaceDensities,
+	fieldStates,
 	semanticColorTokens,
 } as const;
