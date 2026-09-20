@@ -18,7 +18,7 @@
   import LazyChatDialog from './components/LazyChatDialog.svelte';
   import LazyOfficeWorkspace from './components/LazyOfficeWorkspace.svelte';
 
-  import { createOfficeAuthProvider, createOfficeI18nProvider } from './office/shell';
+  import { createOfficeAuthProvider, createOfficeI18nProvider, createOfficeRouterProvider } from './office/shell';
   import { chineseMenuLabel, isOfficeLocation, isOfficeAuthRoute } from './office/zh-CN';
 
   // DesignPrinciplesPage and other showcase resources are lazy-loaded via LazyResourcePage
@@ -30,9 +30,10 @@
   let currentLocale = $state(i18n.locale);
   let officeMode = $state(typeof window !== 'undefined' && isOfficeLocation(window.location.hash, window.location.search));
   const officeI18n = createOfficeI18nProvider();
+  const officeRouter = createOfficeRouterProvider();
   const officeAuth = createOfficeAuthProvider(mockAuthProvider);
   const displayLocale = $derived(officeMode ? 'zh-CN' : currentLocale);
-  const localeOptions = $derived(officeMode ? { i18nProvider: officeI18n } : {});
+  const localeOptions = $derived(officeMode ? { i18nProvider: officeI18n, routerProvider: officeRouter } : {});
   function readLocale(): string { return displayLocale; }
   function writeLocale(locale: string | undefined): void {
     if (!officeMode && locale !== undefined) currentLocale = locale;

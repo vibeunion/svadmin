@@ -1,5 +1,5 @@
 import { createI18nScope, type I18nProvider } from '@svadmin/core/i18n';
-import type { AuthActionResult, AuthProvider } from '@svadmin/core';
+import { createHashRouterProvider, type AuthActionResult, type AuthProvider, type RouterProvider } from '@svadmin/core';
 import { chineseMenuLabel } from './zh-CN';
 
 /** 独立中文作用域，不改全局翻译表或其他示例应用的语言偏好。 */
@@ -44,5 +44,16 @@ export function createOfficeAuthProvider(source: AuthProvider): AuthProvider {
       localizeAuthResult(await source.forgotPassword?.(params) ?? { success: false }) } : {}),
     ...(source.updatePassword ? { updatePassword: async (params: Parameters<NonNullable<AuthProvider['updatePassword']>>[0]) =>
       localizeAuthResult(await source.updatePassword?.(params) ?? { success: false }) } : {}),
+  };
+}
+
+/** 办公模式的首页仍为办公工作区，覆盖框架登录成功后的通用首页跳转。 */
+export function createOfficeRouterProvider(): RouterProvider {
+  const router = createHashRouterProvider();
+  const officePath = (path: string) => path === '/' ? '/health_office' : path;
+  return {
+    ...router,
+    go(options) { router.go({ ...options, to: officePath(options.to) }); },
+    formatLink(path) { return router.formatLink?.(officePath(path)) ?? `#${officePath(path)}`; },
   };
 }
