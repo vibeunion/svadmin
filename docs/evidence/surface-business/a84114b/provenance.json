@@ -1,0 +1,52 @@
+{
+  "implementationHead": "a84114b07ac7908b3ccac952ef14fadd6939255d",
+  "testedCheckout": "90353a98617ac5cffa2466dc8a43bc3aa7732fb6",
+  "runId": 35487698615,
+  "artifactId": 10598127826,
+  "artifactSha256": "ec15763234006bc50cd5c9b33065f2150273df8606db8bf5cff72225c688da40",
+  "images": [
+    {
+      "file": "surface-business-1440x900-dark.png",
+      "sha256": "774afb6314bda5b098fefe1cd800c1b6b85d79ce636ce917f286bd7ff212ebd4",
+      "width": 1440,
+      "height": 900,
+      "sourceMember": "workflow.e2e.ts-business-components-1440x900-dark/surface-business-1440x900-dark.png"
+    },
+    {
+      "file": "surface-business-1440x900-light.png",
+      "sha256": "27d6df0b9e4f02688e9364a785828a41c9c059a2ff578de7aa0f919b650e6410",
+      "width": 1440,
+      "height": 900,
+      "sourceMember": "workflow.e2e.ts-business-components-1440x900-light/surface-business-1440x900-light.png"
+    },
+    {
+      "file": "surface-business-1920x1080-dark.png",
+      "sha256": "18a5a92cd343a2811e8090b131fb7541ecc255a37dfadc480a0bf9af9f654ad2",
+      "width": 1920,
+      "height": 1080,
+      "sourceMember": "workflow.e2e.ts-business-components-1920x1080-dark/surface-business-1920x1080-dark.png"
+    },
+    {
+      "file": "surface-business-1920x1080-light.png",
+      "sha256": "118599ddd0791685bf26d1eb7b0955c6aa1a768361f1d493e4bf200ea83b3eff",
+      "width": 1920,
+      "height": 1080,
+      "sourceMember": "workflow.e2e.ts-business-components-1920x1080-light/surface-business-1920x1080-light.png"
+    },
+    {
+      "file": "surface-business-390x844-dark.png",
+      "sha256": "fd1ddf184f678b0d3c5f34fe562932a23e0ce5aa2afa649b38b7550514bfaa1d",
+      "width": 390,
+      "height": 1548,
+      "sourceMember": "workflow.e2e.ts-business-components-390x844-dark/surface-business-390x844-dark.png"
+    },
+    {
+      "file": "surface-business-390x844-light.png",
+      "sha256": "908f8ff54f1b7509a00eae34a77e0da1a1231fc2b06c3171921fc03ecb937f52",
+      "width": 390,
+      "height": 1548,
+      "sourceMember": "workflow.e2e.ts-business-components-390x844-light/surface-business-390x844-light.png"
+    }
+  ],
+  "scope": "Original successful Chromium synthetic acceptance screenshots, not regenerated or edited; no real-model or production evidence."
+}

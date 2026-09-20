@@ -1,0 +1,27 @@
+{
+  "checkout": "90353a98617ac5cffa2466dc8a43bc3aa7732fb6",
+  "status": "passed",
+  "combination": "same-checkout tarballs; NOT proof of an older published UI version",
+  "packs": {
+    "core": {
+      "filename": "svadmin-core-0.52.0.tgz",
+      "integrity": "sha512-sYpGj9qMrQbTkU5q97zLeU6sKQ+wwsRRp+KR9hhZB4fbBL6dFI4wlabDBXlya6cfMEXRz8WxsS+C4XOoebZuMQ=="
+    },
+    "ui": {
+      "filename": "svadmin-ui-0.72.0.tgz",
+      "integrity": "sha512-uoN+RPsE3SWybQ9gQnRgcyVUtDVmI+q6Ti+3jfTk71a79+/Ps4SDv0lT7MrBwRi9aSirFTEpVQjRroOmgINYTQ=="
+    },
+    "surface": {
+      "filename": "svadmin-surface-0.8.19.tgz",
+      "integrity": "sha512-pV1i9XwNTWnnNBZsFVMCyuctBLNnmjlJdMFOV0Fy/U7P9up5KzmgrY31pRUIivvNJ1v332Ey/avKVuRejOodKg=="
+    }
+  },
+  "checks": [
+    "packed entry exports and declarations",
+    "strict peer install",
+    "DOM-free Node imports",
+    "SQLite tenant isolation",
+    "interactive browser library build",
+    "server code excluded from browser"
+  ]
+}
