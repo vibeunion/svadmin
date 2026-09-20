@@ -14,6 +14,7 @@ import zipfile
 
 HEAD = os.environ['SOURCE_HEAD']
 RUN_ID = int(os.environ['EVIDENCE_RUN_ID'])
+EXPECTED_UNIT_TESTS = 187
 assert re.fullmatch('[0-9a-f]{40}', HEAD)
 API = 'https://api.github.com/repos/vibeunion/svadmin'
 HEADERS = {'Authorization': 'Bearer ' + os.environ['GH_TOKEN'], 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', 'Content-Type': 'application/json'}
@@ -73,7 +74,7 @@ def read(name):
 require(read('commit.txt').decode().strip() == HEAD, 'Recorded tested checkout differs from source head')
 require(not read('diff-check.txt').strip(), 'Whitespace report contains errors')
 unit = json.loads(read('unit-results.json'))
-require(unit.get('success') is True and unit.get('numTotalTests') == 185 and unit.get('numPassedTests') == 185, 'Expected all 185 unit and component tests to pass')
+require(unit.get('success') is True and unit.get('numTotalTests') == EXPECTED_UNIT_TESTS and unit.get('numPassedTests') == EXPECTED_UNIT_TESTS, f'Expected all {EXPECTED_UNIT_TESTS} unit and component tests to pass')
 require(unit.get('numFailedTests', 0) == 0 and unit.get('numPendingTests', 0) == 0, 'Failed or pending unit tests')
 browser = json.loads(read('browser-results.json'))
 stats = browser['stats']
@@ -119,7 +120,7 @@ for width, height in [(1440, 900), (1920, 1080), (390, 844)]:
             captures.append({'file': filename, 'viewport': [width, height], 'bitmap': [bitmap_width, bitmap_height], 'sha256': hashlib.sha256(content).hexdigest(), 'theme': theme, 'state': state})
 
 source_commit = api('/git/commits/' + HEAD)
-provenance = {'source_head': HEAD, 'source_tree': source_commit['tree']['sha'], 'run_id': RUN_ID, 'run_url': run['html_url'], 'artifact_id': artifact['id'], 'archive_sha256': digest, 'source_hashes': source_hashes, 'unit_tests': {'passed': 185, 'failed': 0, 'pending': 0}, 'browser': {'passed': 10, 'failed': 0, 'flaky': 0, 'skipped': 0, 'test_titles': results}, 'captures': captures, 'boundaries': 'Unmodified synthetic production-browser fixture captures, full-page bitmaps under the stated viewports. Not deployed customer data, Figma synchronization or independent-human visual/accessibility certification. This helper creates evidence-only Git objects; no implementation ref or main is updated.'}
+provenance = {'source_head': HEAD, 'source_tree': source_commit['tree']['sha'], 'run_id': RUN_ID, 'run_url': run['html_url'], 'artifact_id': artifact['id'], 'archive_sha256': digest, 'source_hashes': source_hashes, 'unit_tests': {'passed': EXPECTED_UNIT_TESTS, 'failed': 0, 'pending': 0}, 'browser': {'passed': 10, 'failed': 0, 'flaky': 0, 'skipped': 0, 'test_titles': results}, 'captures': captures, 'boundaries': 'Unmodified synthetic production-browser fixture captures, full-page bitmaps under the stated viewports. Not deployed customer data, Figma synchronization or independent-human visual/accessibility certification. This helper creates evidence-only Git objects; no implementation ref or main is updated.'}
 retained[prefix + '/provenance.json'] = (json.dumps(provenance, indent=2, ensure_ascii=False) + '\n').encode()
 for name in ['unit-results.json', 'browser-results.json', 'source-sha256.txt', 'commit.txt', 'diff-check.txt', 'diff-stat.txt']:
     retained[prefix + '/' + name] = read(name)
@@ -129,4 +130,4 @@ for name, content in retained.items():
     entries.append({'path': name, 'mode': '100644', 'type': 'blob', 'sha': blob['sha']})
 tree = api('/git/trees', {'base_tree': source_commit['tree']['sha'], 'tree': entries})
 commit = api('/git/commits', {'message': f'docs: retain verified enterprise browser evidence for {HEAD[:8]}', 'tree': tree['sha'], 'parents': [HEAD]})
-print(json.dumps({'evidence_commit': commit['sha'], 'evidence_tree': tree['sha'], 'prefix': prefix, 'run_id': RUN_ID, 'artifact_id': artifact['id'], 'archive_sha256': digest, 'unit_passed': 185, 'browser_passed': 10, 'captures': captures}, indent=2))
+print(json.dumps({'evidence_commit': commit['sha'], 'evidence_tree': tree['sha'], 'prefix': prefix, 'run_id': RUN_ID, 'artifact_id': artifact['id'], 'archive_sha256': digest, 'unit_passed': EXPECTED_UNIT_TESTS, 'browser_passed': 10, 'captures': captures}, indent=2))
