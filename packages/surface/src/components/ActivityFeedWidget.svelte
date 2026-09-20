@@ -10,7 +10,7 @@
   let { props, data, locale = 'en-US', messages }: SurfaceWidgetRendererProps = $props();
   const baseProps = $derived(Object.fromEntries(Object.entries(props).filter(([key]) => key !== 'appearance')));
   const p = $derived(Value.Decode(activityFeedPropsSchema, baseProps));
-  const appearance = $derived(typeof props.appearance === 'object' && props.appearance !== null ? props.appearance as { tone?: typeof p.tone; density?: typeof p.density } : undefined);
+  const appearance = $derived(typeof props['appearance'] === 'object' && props['appearance'] !== null ? props['appearance'] as { tone?: typeof p.tone; density?: typeof p.density } : undefined);
   const tone = $derived(appearance?.tone ?? p.tone ?? 'neutral');
   const density = $derived(appearance?.density ?? p.density ?? 'comfortable');
   const classes = $derived(surfaceMetric({ tone, density }));
