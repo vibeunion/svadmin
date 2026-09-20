@@ -1,0 +1,100 @@
+name: Typed renderer contracts
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/ui/**'
+      - 'packages/core/**'
+      - 'example/**'
+      - 'e2e/business-rendering.spec.ts'
+      - 'playwright.rendering.config.ts'
+      - 'scripts/fixtures/ui-rendering/**'
+      - '.github/workflows/typed-renderers.yml'
+      - 'bun.lock'
+      - 'package.json'
+      - 'scripts/check-type-contracts.ts'
+      - 'tsconfig*.json'
+permissions:
+  contents: read
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - run: bun install --frozen-lockfile
+      - name: Generate current UI recipe runtime before source checks
+        run: bun run --cwd packages/ui build:styles
+      - name: Lint new adapters and fixtures
+        run: bun run eslint packages/ui/src/rendering scripts/fixtures/ui-rendering --max-warnings 0
+      - name: Runtime and native snippet regression tests
+        if: success() || failure()
+        run: bun run --cwd packages/ui test src/rendering
+      - name: Positive and negative TypeScript contracts
+        if: success() || failure()
+        run: node node_modules/@typescript/native/bin/tsc --noEmit --pretty false -p scripts/fixtures/ui-rendering/tsconfig.json
+      - name: Compile native Svelte consumers
+        if: success() || failure()
+        run: bun run svelte-check --tsgo-experimental-api --tsconfig scripts/fixtures/ui-rendering/tsconfig.svelte.json --fail-on-warnings
+      - name: Build and verify public rendering subpath
+        if: success() || failure()
+        run: |
+          bun run --cwd packages/ai-elements build
+          bun run --cwd packages/ui build
+          bun -e 'const api = await import("@svadmin/ui/rendering"); if (typeof api.createResourceRenderers !== "function" || typeof api.componentView !== "function") throw new Error("Missing rendering exports"); console.info("Public rendering subpath OK");'
+      - name: Verify emitted declaration contracts
+        if: success() || failure()
+        run: node node_modules/@typescript/native/bin/tsc --noEmit --pretty false -p scripts/fixtures/ui-rendering/published/tsconfig.json
+      - name: Check diff whitespace
+        if: success() || failure()
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: git diff --check "$BASE_SHA...HEAD"
+
+  business-pages:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - run: bun install --frozen-lockfile
+      - name: Build workspace and production example
+        run: bun run build:packages && bun run --cwd example build && bun run bundle:check
+      - name: Check every page and migration test type
+        run: |
+          bun run --cwd example check
+          node node_modules/@typescript/native/bin/tsc --noEmit -p example/tsconfig.rendering-tests.json
+      - name: Check inventory, all seed resources, and existing example regressions
+        run: bun run --cwd example test
+      - name: Verify native table interactions and accessible forms
+        run: bun run --cwd packages/ui test src/rendering src/components/detail-contract src/components/auto-table-interactions.test.svelte.ts src/components/auto-form-accessibility.test.svelte.ts src/components/form-contract src/components/ResourceOperationsPage.test.svelte.ts
+      - name: Install real Chromium
+        run: bun run playwright install --with-deps chromium
+      - name: All resource routes, inline editing, persistence, and screenshots
+        env:
+          UI_SCREENSHOT_DIR: test-results/screenshots
+        run: bun run playwright test --config playwright.rendering.config.ts
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: typed-business-page-evidence
+          path: test-results
+          retention-days: 7
+          if-no-files-found: warn

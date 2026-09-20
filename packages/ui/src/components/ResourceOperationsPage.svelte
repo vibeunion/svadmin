@@ -44,6 +44,7 @@
 
   interface Props {
     resourceName: string;
+    rendering?: ResourceRendering | undefined;
     eyebrow: string;
     title: string;
     description: string;
@@ -62,6 +63,7 @@
 
   let {
     resourceName,
+    rendering,
     eyebrow,
     title,
     description,

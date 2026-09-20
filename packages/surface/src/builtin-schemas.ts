@@ -1,3 +1,4 @@
+import { surfaceDesignContract } from './styled-system/design-contract.js';
 import { Type, type Static } from "@sinclair/typebox";
 
 const catalogFieldSchema = Type.String({
@@ -23,39 +24,52 @@ const otherMetric = Type.Object({
 export const metricPropsSchema = Type.Union([currencyMetric, otherMetric]);
 
 export const resourceTablePropsSchema = Type.Object({
-    title: Type.String({ minLength: 1, maxLength: 80 }),
-    emptyLabel: Type.Optional(Type.String({ minLength: 1, maxLength: 80 })),
-    columns: Type.Array(
-      Type.Object({
-        field: catalogFieldSchema,
-        label: Type.String({ minLength: 1, maxLength: 60 }),
-        format: Type.Optional(Type.Union([
-          Type.Literal("text"),
-          Type.Literal("number"),
-          Type.Literal("date"),
-          Type.Literal("boolean"),
-        ])),
-      }, { additionalProperties: false }),
-      { minItems: 1, maxItems: 8 },
-    ),
-  }, { additionalProperties: false });
+  title: Type.String({ minLength: 1, maxLength: 80 }),
+  emptyLabel: Type.Optional(Type.String({ minLength: 1, maxLength: 80 })),
+  columns: Type.Array(
+    Type.Object({
+      field: catalogFieldSchema,
+      label: Type.String({ minLength: 1, maxLength: 60 }),
+      format: Type.Optional(Type.Union([
+        Type.Literal("text"),
+        Type.Literal("number"),
+        Type.Literal("date"),
+        Type.Literal("boolean"),
+      ])),
+    }, { additionalProperties: false }),
+    { minItems: 1, maxItems: 8 },
+  ),
+}, { additionalProperties: false });
 
 export const barChartPropsSchema = Type.Object({
-    title: Type.String({ minLength: 1, maxLength: 80 }),
-    labelField: catalogFieldSchema,
-    valueField: catalogFieldSchema,
-    showValues: Type.Optional(Type.Boolean()),
-  }, { additionalProperties: false });
+  title: Type.String({ minLength: 1, maxLength: 80 }),
+  labelField: catalogFieldSchema,
+  valueField: catalogFieldSchema,
+  showValues: Type.Optional(Type.Boolean()),
+}, { additionalProperties: false });
 
 export const lineChartPropsSchema = Type.Object({
-    title: Type.String({ minLength: 1, maxLength: 80 }),
-    labelField: catalogFieldSchema,
-    valueField: catalogFieldSchema,
-    showDots: Type.Optional(Type.Boolean()),
-    fill: Type.Optional(Type.Boolean()),
-  }, { additionalProperties: false });
+  title: Type.String({ minLength: 1, maxLength: 80 }),
+  labelField: catalogFieldSchema,
+  valueField: catalogFieldSchema,
+  showDots: Type.Optional(Type.Boolean()),
+  fill: Type.Optional(Type.Boolean()),
+}, { additionalProperties: false });
 
 export type MetricProps = Static<typeof metricPropsSchema>;
 export type ResourceTableProps = Static<typeof resourceTablePropsSchema>;
 export type BarChartProps = Static<typeof barChartPropsSchema>;
 export type LineChartProps = Static<typeof lineChartPropsSchema>;
+
+const styledMetricProperties = {
+  tone: Type.Optional(Type.Union(surfaceDesignContract.metric.tone.map((value) => Type.Literal(value)))),
+  density: Type.Optional(Type.Union(surfaceDesignContract.metric.density.map((value) => Type.Literal(value)))),
+};
+export const styledMetricPropsSchema = Type.Union([
+  Type.Object({ ...currencyMetric.properties, ...styledMetricProperties }, { additionalProperties: false }),
+  Type.Object({ ...otherMetric.properties, ...styledMetricProperties }, { additionalProperties: false }),
+]);
+export const styledResourceTablePropsSchema = Type.Object({
+  ...resourceTablePropsSchema.properties,
+  density: Type.Optional(Type.Union(surfaceDesignContract.table.density.map((value) => Type.Literal(value)))),
+}, { additionalProperties: false });

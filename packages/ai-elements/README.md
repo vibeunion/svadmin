@@ -14,9 +14,15 @@ Import the package stylesheet once in your application CSS:
 @import '@svadmin/ai-elements/ai.css';
 ```
 
+The legacy `ai.theme.css` path is a plain-CSS alias of `ai.css`, not compiler
+metadata. Consumers need no Tailwind or Panda compiler plugin. Finite utility
+styles are generated from `design/migrated-utilities` by the repository build.
+Native conditional class composition preserves unknown host classes; it does
+not interpret arbitrary new utility-language strings.
+
 ## Vite SSR
 
-Vite SSR consumers must bundle the Svelte and ESM dependency boundary used by the complete package entry:
+Vite SSR consumers must bundle the Svelte and ESM dependency boundary used by the complete package entry, including the explicitly vendored Markdown renderer:
 
 ```ts
 import { defineConfig } from 'vite';
@@ -24,17 +30,18 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   ssr: {
     noExternal: [
+      '@svadmin/ai-elements',
       '@tanstack/svelte-query',
       '@xyflow/svelte',
       '@xyflow/system',
       'katex',
-      'streamdown-svelte',
     ],
   },
 });
 ```
 
-The packed-package verification loads the root entry through `vite.ssrLoadModule` and renders representative components with `svelte/server` using this exact boundary.
+The package's SSR verification loads the root entry through `vite.ssrLoadModule`
+and renders representative components with `svelte/server`.
 
 ## Core Components
 
@@ -103,6 +110,7 @@ export const componentRegistry = {
     schema: Type.Object({
       warehouse: Type.String(),
       count: Type.Number(),
+      limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 100 })),
     }),
   }),
 };
@@ -130,7 +138,7 @@ const searchInventory = defineAdminTool({
 await executeAdminTool(searchInventory, modelArguments);
 ```
 
-## Upstream parity
+## Upstream parity and Markdown ownership
 
 `AI_ELEMENT_PARITY` pins the audited `vercel/ai-elements` commit and verifies
 the 49-family, 398-export package surface. Export presence, behavior, and visual

@@ -46,3 +46,6 @@ export const designContract = {
 	fieldStates,
 	semanticColorTokens,
 } as const;
+
+export type SurfaceTone = typeof surfaceDesignContract.metric.tone[number];
+export type SurfaceDensity = typeof surfaceDesignContract.metric.density[number];

@@ -1,0 +1,36 @@
+<script lang="ts">
+	import { useStreamdown } from '../../context.svelte.js';
+	import type { Tokens } from 'marked';
+
+	const {
+		token,
+		id,
+		isIncomplete = false
+	}: {
+		token: Tokens.Code;
+		id: string;
+		isIncomplete?: boolean;
+	} = $props();
+
+	const streamdown = useStreamdown();
+</script>
+
+<div data-streamdown-mermaid={id} data-incomplete={isIncomplete || undefined}>
+	<div
+		style={streamdown.isMounted ? streamdown.animationBlockStyle : ''}
+		class={streamdown.theme.code.base}
+	>
+		<div class={streamdown.theme.code.header}>
+			<span class={streamdown.theme.code.language}>mermaid</span>
+		</div>
+		<div style="height: fit-content; width: 100%;" class={streamdown.theme.code.container}>
+			<pre class={streamdown.theme.code.pre}><code
+					>{#each token.text.split('\n') as line}<span class={streamdown.theme.code.line}
+							><span style={streamdown.isMounted ? streamdown.animationTextStyle : ''}
+								>{line.trim().length > 0 ? line : '\u200B'}</span
+							></span
+						>{/each}</code
+				></pre>
+		</div>
+	</div>
+</div>

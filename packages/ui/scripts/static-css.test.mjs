@@ -19,25 +19,21 @@ test('both published CSS entries contain migrated utility and variant styles', (
       '.svadmin-badge--subtle-success',
       '.svadmin-alert--warning',
       '.svadmin-avatar-size--sm',
-      '.svadmin-panda-button',
-      '.svadmin-panda-metric__root',
-      '.svadmin-panda-table__root',
+      '.svadmin-surface-metric__root',
+      '.svadmin-surface-table__root',
     ]) assert.ok(css.includes(selector), `${name}: missing ${selector}`);
-    assert.ok(css.includes('--colors-primary: var(--primary)'), `${name}: missing Panda semantic token aliases`);
+    assert.ok(css.includes('--svadmin-colors-'), `${name}: missing Panda semantic token aliases`);
     assert.ok(css.includes('.svadmin-theme'), `${name}: missing nested aliases`);
   }
 });
 
-test('both published CSS entries are standalone Panda stylesheets', () => {
+test('both public CSS entries are native and contain identical styles', () => {
   for (const name of ['app.css', 'app.theme.css']) {
-    const root = postcss.parse(read(name));
-    root.walkAtRules((rule) => {
-      assert.ok(
-        !['import', 'theme', 'source', 'tailwind', 'apply', 'utility'].includes(rule.name),
-        `${name}: unexpected build-time directive @${rule.name}`,
-      );
+    postcss.parse(read(name)).walkAtRules((rule) => {
+      assert.ok(!['import', 'theme', 'source', 'apply', 'utility', 'tailwind', 'custom-variant', 'reference', 'variant', 'config', 'plugin'].includes(rule.name), `${name}: ${rule.name}`);
     });
   }
+  assert.equal(read('app.theme.css'), read('app.css'));
 });
 
 test('every migrated utility referenced by a component has a published CSS selector', () => {

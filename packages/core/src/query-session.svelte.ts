@@ -195,7 +195,7 @@ export function createQuerySession<O extends QuerySessionOptions>(context: Admin
 
 export function pendingQueryResult<T, F extends (settings?: RefetchOptions) => Promise<unknown> = QueryObserverResult<T, unknown>['refetch']>(
   refetch: F,
-): Omit<QueryObserverPendingResult<T, unknown>, 'refetch'> & { refetch: F } {
+): Omit<QueryObserverPendingResult<T, Error>, 'refetch'> & { refetch: F } {
   return {
     data: undefined, dataUpdatedAt: 0, error: null, errorUpdatedAt: 0,
     failureCount: 0, failureReason: null, errorUpdateCount: 0,

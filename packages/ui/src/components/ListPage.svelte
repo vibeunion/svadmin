@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { ResourceRendering } from '../rendering/index.js';
   import { definedOptions } from '@svadmin/core/options';
 
   import { getResource } from '@svadmin/core';
@@ -12,6 +13,7 @@
 
   interface Props {
     resourceName: string;
+    rendering?: ResourceRendering | undefined;
     title?: string;
     canCreate?: boolean;
     density?: 'compact' | 'comfortable';
@@ -39,6 +41,7 @@
 
   let {
     resourceName,
+    rendering,
     title,
     canCreate,
     density = 'comfortable',
@@ -84,6 +87,7 @@
   {/if}
 
   <AutoTable
+    {rendering}
     {resourceName}
     showHeader={false}
     {density}

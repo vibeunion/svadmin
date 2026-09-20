@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.12.7](https://github.com/vibeunion/svadmin/compare/sso-v0.12.6...sso-v0.12.7) (2026-09-20)
+
+
+### 🐛 Bug Fixes
+
+* **i18n:** reconcile processing labels when syncing main into Panda migration ([7b2f036](https://github.com/vibeunion/svadmin/commit/7b2f036ca797e2c9349fc041c3b640d1138fdaba))
+* **styles:** separate generated styles and restore test globals ([0a7fa2c](https://github.com/vibeunion/svadmin/commit/0a7fa2c2560ab91848fec9dce2b12b965d964264))
+* **surface:** integrate edit preview with native main and scoped source loading ([0a6d22d](https://github.com/vibeunion/svadmin/commit/0a6d22dbbfbfa68615f99dffa4966062acbc683f))
+* **ui:** integrate enterprise components with current Panda contracts ([1565f54](https://github.com/vibeunion/svadmin/commit/1565f549af42a04bc63d9189a267e01c58ffedf2))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.53.0
+
+## [0.12.6](https://github.com/vibeunion/svadmin/compare/sso-v0.12.5...sso-v0.12.6) (2026-09-19)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.52.0
+
 ## [0.12.5](https://github.com/vibeunion/svadmin/compare/sso-v0.12.4...sso-v0.12.5) (2026-09-16)
 
 

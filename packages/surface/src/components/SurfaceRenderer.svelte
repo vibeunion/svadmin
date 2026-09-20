@@ -1,22 +1,30 @@
 <script lang="ts">
-  import { canAccessAsync, captureAdminContext } from '@svadmin/core';
+  import { captureAdminContext, getLogoutVersion } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
-  import { untrack } from 'svelte';
-  import { resolveSurfaceWidgetData } from '../binding.js';
+  import { onDestroy, untrack } from 'svelte';
+  import { SvelteMap } from 'svelte/reactivity';
+  import { resolveSurfaceSourceData } from '../binding.js';
   import { defaultSurfaceCatalog } from '../catalog.js';
   import type { SurfaceRenderCatalog } from '../catalog.js';
   import { loadSurfaceSource } from '../runtime.js';
   import { resolveSurfaceMessages } from '../localization.js';
   import type { SurfaceMessages } from '../localization.js';
   import type {
-    SurfaceDataError,
-    SurfaceDataProvider,
-    SurfaceDataSource,
-    SurfacePolicy,
-    SurfaceSourceDataState,
-    SurfaceValidationIssue,
+    SurfaceDataError, SurfaceDataProvider, SurfacePolicy,
+    SurfaceSourceDataState, SurfaceValidationIssue, JsonObject,
   } from '../types.js';
   import { validateSurfaceSpec } from '../validation.js';
+  import { createSurfaceSourceCache, sameSourceIdentity, snapshotSurfaceSource } from '../source-cache.js';
+  import type { SurfaceSourceRequest } from '../source-cache.js';
+  import { surfaceMetric } from '../styled-system/recipes/index.js';
+  import { withoutSurfaceAppearance } from '../workflows/catalog.js';
+
+  function appearanceClasses(props: JsonObject): string {
+    const appearance = props['appearance'] as { tone?: 'neutral' | 'success' | 'warning' | 'danger' | 'info'; density?: 'compact' | 'comfortable' } | undefined;
+    if (!appearance) return '';
+    const classes = surfaceMetric(appearance);
+    return `surface-appearance ${classes.root} ${classes.card}`;
+  }
 
   export type SurfaceRendererError =
     | { readonly type: 'validation'; readonly issues: readonly SurfaceValidationIssue[] }
@@ -27,6 +35,10 @@
     readonly policy: SurfacePolicy;
     readonly catalog?: SurfaceRenderCatalog;
     readonly dataProvider?: SurfaceDataProvider;
+    /** 可信宿主的用户/租户/授权会话标识；禁止使用凭证或模型提供的值。 */
+    readonly scopeKey?: string;
+    /** 与独立增量加载接口保持兼容；任一作用域标识变化都会清空状态。 */
+    readonly dataScopeKey?: string | number;
     readonly locale?: string;
     readonly messages?: Partial<SurfaceMessages>;
     readonly class?: string;
@@ -34,14 +46,8 @@
   }
 
   let {
-    spec,
-    policy,
-    catalog = defaultSurfaceCatalog,
-    dataProvider,
-    locale,
-    messages,
-    class: className = '',
-    onError,
+    spec, policy, catalog = defaultSurfaceCatalog, dataProvider, scopeKey = '', dataScopeKey,
+    locale, messages, class: className = '', onError,
   }: SurfaceRendererProps = $props();
 
   const adminContext = captureAdminContext();
@@ -50,182 +56,133 @@
   const activeMessages = $derived(resolveSurfaceMessages(activeLocale, messages));
   const validation = $derived(validateSurfaceSpec(spec, catalog, policy));
   const widgetRegistrations = $derived(new Map(catalog.widgets.map((widget) => [widget.type, widget])));
-  const currentSpec = $derived(validation.ok ? validation.value : null);
-  const sourceGenerations: Record<string, number> = Object.create(null) as Record<string, number>;
-  let sourceStates = $state.raw<Record<string, SurfaceSourceDataState>>({});
-
-  function nextGeneration(sourceId: string): number {
-    const generation = (sourceGenerations[sourceId] ?? 0) + 1;
-    sourceGenerations[sourceId] = generation;
-    return generation;
-  }
-
-  function setSourceState(sourceId: string, state: SurfaceSourceDataState): void {
-    sourceStates = { ...sourceStates, [sourceId]: state };
-  }
-
-  function providerFor(resource: string): SurfaceDataProvider {
-    return dataProvider ?? adminContext.getDataProviderForResource(resource);
-  }
-
-  async function authorize(resource: string, action: 'list' | 'show') {
-    return canAccessAsync(resource, action);
-  }
+  const sourceStates = new SvelteMap<string, SurfaceSourceDataState>();
+  let destroyed = false;
+  let previousScope: readonly unknown[] = [];
+  let widgetScopeRevision = $state(0);
+  const sessionIdentity = $derived([
+    validation.ok ? validation.value.surfaceId : undefined,
+    catalog.version, scopeKey, dataScopeKey, getLogoutVersion(),
+    adminContext.tenantCacheKey?.__svadminTenant,
+    adminContext.authProvider, adminContext.accessControlProvider,
+  ]);
+  // 复用 PR #428 的请求所有权与会话隔离实现，不维护第二套缓存。
+  const sourceCache = createSurfaceSourceCache({
+    set: (id, state) => { sourceStates.set(id, state); },
+    remove: (id) => { sourceStates.delete(id); },
+    onError: (state) => { onError?.({ type: 'data', error: state.error }); },
+  });
 
   function providerError(sourceId: string, failure: unknown): SurfaceSourceDataState {
     const message = failure instanceof Error ? failure.message : activeMessages.providerUnavailable;
-    return {
-      status: 'error',
-      sourceId,
-      error: { code: 'provider_failed', sourceId, message },
-    };
+    return { status: 'error', sourceId, error: { code: 'provider_failed', sourceId, message } };
   }
 
-  async function loadSource(source: SurfaceDataSource): Promise<void> {
-    const generation = nextGeneration(source.id);
-    setSourceState(source.id, { status: 'loading', sourceId: source.id });
-
-    let result: SurfaceSourceDataState;
-    try {
-      const resourcePolicy = Object.hasOwn(policy.resources, source.resource)
-        ? policy.resources[source.resource]
-        : undefined;
+  const sourceRequests: SurfaceSourceRequest[] = $derived.by(() => {
+    if (!validation.ok) return [];
+    const accessControl = adminContext.accessControlProvider;
+    const scope = sessionIdentity;
+    return validation.value.dataSources.map((source): SurfaceSourceRequest => {
+      const resourcePolicy = Object.hasOwn(policy.resources, source.resource) ? policy.resources[source.resource] : undefined;
       if (!resourcePolicy) throw new Error(`Resource "${source.resource}" is not allowed`);
-      result = await loadSurfaceSource({
-        source,
-        resourcePolicy,
-        provider: providerFor(source.resource),
-        authorize,
-      });
-    } catch (failure) {
-      result = providerError(source.id, failure);
-    }
-
-    if (sourceGenerations[source.id] !== generation) return;
-    setSourceState(source.id, result);
-    if (result.status === 'error') onError?.({ type: 'data', error: result.error });
-  }
-
-  async function loadSources(sources: readonly SurfaceDataSource[]): Promise<void> {
-    await Promise.all(sources.map(loadSource));
-  }
-
-  function invalidateCurrentSources(): void {
-    for (const sourceId of Object.keys(sourceGenerations)) nextGeneration(sourceId);
-    sourceStates = {};
-  }
-
-  export async function refresh(sourceId?: string): Promise<void> {
-    const activeSpec = currentSpec;
-    if (!activeSpec) return;
-    const sources = sourceId === undefined
-      ? activeSpec.dataSources
-      : activeSpec.dataSources.filter((source) => source.id === sourceId);
-    await loadSources(sources);
-  }
-
-  $effect(() => {
-    const validatedSpec = validation;
-    void dataProvider;
-    invalidateCurrentSources();
-    if (!validatedSpec.ok) {
-      onError?.({ type: 'validation', issues: validatedSpec.issues });
-      return;
-    }
-
-    untrack(() => {
-      void loadSources(validatedSpec.value.dataSources);
+      const snapshot = snapshotSurfaceSource(source, resourcePolicy);
+      let provider: SurfaceDataProvider | undefined;
+      let providerFailure: unknown;
+      try {
+        provider = dataProvider ?? adminContext.getDataProviderForResource(source.resource);
+      } catch (failure) { providerFailure = failure; }
+      const identity = [snapshot.key, provider, provider?.getList, provider?.getOne, ...scope];
+      const isCurrent = () => !destroyed && sourceRequests.some((request) =>
+        request.id === snapshot.source.id && sameSourceIdentity(request.identity, identity));
+      return {
+        id: snapshot.source.id, identity, isCurrent,
+        async load(isRequestCurrent) {
+          if (!provider) return providerError(snapshot.source.id, providerFailure);
+          try {
+            return await loadSurfaceSource({
+              source: snapshot.source, resourcePolicy: snapshot.resourcePolicy, provider,
+              async authorize(resource, action) {
+                if (!isRequestCurrent()) return { can: false };
+                // 授权检查与缓存身份必须使用同一个所属上下文，不能回退到无关全局授权。
+                const meta = adminContext.getProviderMeta(resource);
+                const decision = accessControl
+                  ? await accessControl.can({ resource, action, ...(meta === undefined ? {} : { meta }) })
+                  : { can: true };
+                return isRequestCurrent() ? decision : { can: false };
+              },
+            });
+          } catch (failure) { return providerError(snapshot.source.id, failure); }
+        },
+      };
     });
   });
+
+  export async function refresh(sourceId?: string): Promise<void> {
+    if (!validation.ok) { sourceCache.clear(); return; }
+    await untrack(() => sourceCache.reconcile(sourceRequests, sourceId ?? true));
+  }
+
+  $effect.pre(() => {
+    const validatedSpec = validation;
+    const requests = sourceRequests;
+    const scope = sessionIdentity;
+    untrack(() => {
+      if (!sameSourceIdentity(previousScope, scope)) {
+        previousScope = [...scope];
+        widgetScopeRevision += 1;
+      }
+      if (!validatedSpec.ok) {
+        sourceCache.clear();
+        onError?.({ type: 'validation', issues: validatedSpec.issues });
+        return;
+      }
+      void sourceCache.reconcile(requests);
+    });
+  });
+  onDestroy(() => { destroyed = true; sourceCache.dispose(); });
 </script>
 
 {#if validation.ok}
-  <section
-    class="surface {className}"
-    aria-labelledby="surface-{validation.value.surfaceId}-title"
-    data-surface-id={validation.value.surfaceId}
-  >
-    <header class="surface-header">
-      <h2 id="surface-{validation.value.surfaceId}-title">{validation.value.title}</h2>
-    </header>
+  <section class="surface {className}" aria-labelledby="surface-{validation.value.surfaceId}-title" data-surface-id={validation.value.surfaceId}>
+    <header class="surface-header"><h2 id="surface-{validation.value.surfaceId}-title">{validation.value.title}</h2></header>
     <div class="surface-grid surface-gap-{validation.value.layout.gap ?? 'md'}">
-      {#each validation.value.widgets as widget (widget.id)}
-        {@const registration = widgetRegistrations.get(widget.type)}
-        {@const WidgetComponent = registration?.component}
-        <div
-          class="surface-widget surface-span-{widget.placement?.columnSpan ?? 12}"
-          data-testid="surface-widget-{widget.id}"
-        >
-          {#if WidgetComponent}
-            <WidgetComponent
-              widgetId={widget.id}
-              props={widget.props}
-              data={resolveSurfaceWidgetData(widget, sourceStates)}
-              locale={activeLocale}
-              messages={activeMessages}
-            />
-          {/if}
-        </div>
-      {/each}
+      {#key widgetScopeRevision}
+        {#each validation.value.widgets as widget (widget.id)}
+          {@const registration = widgetRegistrations.get(widget.type)}
+          {@const WidgetComponent = registration?.component}
+          {@const semantic = registration?.presentation === 'surface-appearance/v1'}
+          <div class="surface-widget surface-span-{widget.placement?.columnSpan ?? 12} {semantic ? appearanceClasses(widget.props) : ''}" data-testid="surface-widget-{widget.id}">
+            {#if WidgetComponent}
+              <WidgetComponent widgetId={widget.id} props={semantic ? withoutSurfaceAppearance(widget.props) : widget.props}
+                data={resolveSurfaceSourceData(widget, widget.binding ? sourceStates.get(widget.binding.sourceId) : undefined)}
+                locale={activeLocale} messages={activeMessages} />
+            {/if}
+          </div>
+        {/each}
+      {/key}
     </div>
   </section>
 {:else}
   <section class="surface-error {className}" role="alert" data-surface-error>
     <h2>{activeMessages.renderErrorTitle}</h2>
-    <ul>
-      {#each validation.issues as issue, issueIndex (`${issue.code}:${issue.path}:${issueIndex}`)}
-        <li><code>{issue.code}</code>: {issue.message}</li>
-      {/each}
-    </ul>
+    <ul>{#each validation.issues as issue, issueIndex (`${issue.code}:${issue.path}:${issueIndex}`)}
+      <li><code>{issue.code}</code>: {issue.message}</li>
+    {/each}</ul>
   </section>
 {/if}
 
 <style>
-  .surface,
-  .surface-error {
-    width: 100%;
-    min-width: 0;
-  }
-
-  .surface-header {
-    margin-bottom: 1rem;
-  }
-
-  .surface-header h2,
-  .surface-error h2 {
-    margin: 0;
-    color: var(--foreground);
-    font-size: clamp(1.25rem, 2vw, 1.75rem);
-    line-height: 1.2;
-  }
-
-  .surface-grid {
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-  }
-
+  .surface, .surface-error { width: 100%; min-width: 0; }
+  .surface-header { margin-bottom: 1rem; }
+  .surface-header h2, .surface-error h2 { margin: 0; color: var(--foreground); font-size: clamp(1.25rem, 2vw, 1.75rem); line-height: 1.2; }
+  .surface-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); }
   .surface-gap-sm { gap: 0.5rem; }
   .surface-gap-md { gap: 1rem; }
   .surface-gap-lg { gap: 1.5rem; }
-
-  .surface-widget {
-    grid-column: 1 / -1;
-    min-width: 0;
-  }
-
-  .surface-error {
-    padding: 1rem;
-    border: 1px solid var(--destructive);
-    border-radius: 0.75rem;
-    background: var(--card);
-    color: var(--destructive);
-  }
-
-  .surface-error ul {
-    margin: 0.75rem 0 0;
-    padding-left: 1.25rem;
-  }
-
+  .surface-widget { grid-column: 1 / -1; min-width: 0; }
+  .surface-appearance { border-block: 1px solid var(--border); border-inline-end: 1px solid var(--border); border-inline-start-style: solid; border-radius: 0.75rem; background: var(--card); }
+  .surface-error { padding: 1rem; border: 1px solid var(--destructive); border-radius: 0.75rem; background: var(--card); color: var(--destructive); }
+  .surface-error ul { margin: 0.75rem 0 0; padding-left: 1.25rem; }
   @media (min-width: 48rem) {
     .surface-span-1 { grid-column: span 1; }
     .surface-span-2 { grid-column: span 2; }

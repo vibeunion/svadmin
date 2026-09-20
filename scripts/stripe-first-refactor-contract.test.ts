@@ -33,7 +33,7 @@ describe('Stripe-first refactor contract', () => {
     expect(source).toContain('MetricBlock');
     expect(source).toContain('useList');
     expect(source).toContain('data-operations-record-toggle');
-    expect(source).toMatch(/\{#if !hasError && !isLoading && showRecords\}[\s\S]*<AutoTable \{resourceName\} \/>[\s\S]*\{\/if\}/);
+    expect(source).toMatch(/\{#if !hasError && !isLoading && showRecords\}[\s\S]*<AutoTable \{resourceName\} rendering=\{demoRendering\(resourceName\)\} \/>[\s\S]*\{\/if\}/);
     for (const layout of [
       'data-stock-movement-layout',
       'data-stock-transfer-layout',
@@ -53,7 +53,7 @@ describe('Stripe-first refactor contract', () => {
     expect(source).toContain('MetricBlock');
     expect(source).toContain('useList');
     expect(source).toContain('data-domain-record-toggle');
-    expect(source).toMatch(/\{#if showRecords\}[\s\S]*<AutoTable \{resourceName\} \/>[\s\S]*\{\/if\}/);
+    expect(source).toMatch(/\{#if showRecords\}[\s\S]*<AutoTable \{resourceName\} rendering=\{demoRendering\(resourceName\)\} \/>[\s\S]*\{\/if\}/);
     for (const layout of [
       'data-product-catalog-layout',
       'data-sku-directory-layout',
@@ -86,7 +86,7 @@ describe('Stripe-first refactor contract', () => {
   it('keeps the user workspace focused and reveals CRUD records on demand', () => {
     const source = read('example/src/pages/UserManagementPage.svelte');
     expect(source).toContain('data-user-record-toggle');
-    expect(source).toMatch(/\{#if showRecords\}[\s\S]*<AutoTable \{resourceName\} \/>[\s\S]*\{\/if\}/);
+    expect(source).toMatch(/\{#if showRecords\}[\s\S]*<AutoTable \{resourceName\} rendering=\{demoRendering\(resourceName\)\} \/>[\s\S]*\{\/if\}/);
   });
 
   it('keeps auth flows on one restrained shell', () => {
@@ -134,7 +134,11 @@ describe('Stripe-first refactor contract', () => {
     expect(integrations).not.toContain("connected: false");
     expect(read('packages/ui/src/components/AboutSettings.svelte')).toContain('<SettingsGroup');
     expect(read('packages/ui/src/components/SettingsPage.svelte')).not.toContain('tracking-wider');
-    expect(read('packages/ui/src/components/content/WorkspaceLayout.svelte')).toContain(utilityClasses['items-start']);
+    const workspace = read('packages/ui/src/components/content/WorkspaceLayout.svelte');
+    expect(workspace).toContain('$derived(productWorkspace({ hasSecondary: Boolean(secondary) }))');
+    expect(workspace).toContain('class={styles.columns}');
+    // 配方几何与发布 CSS 由 packages/ui/scripts/product-recipes.test.mjs 验证，
+    // 此处只验证组件绑定，避免把 Panda 构建工具类型带入 core tooling。
     expect(read('packages/ui/src/components/account/CompanyProfilePage.svelte')).toContain('<WorkspaceLayout');
     expect(read('packages/ui/src/components/account/UserProfilePage.svelte')).toContain('<WorkspaceLayout');
     expect(read('packages/ui/src/components/account/SettingsEnterprisePage.svelte')).toContain(`${utilityClasses.grid} ${utilityClasses['items-start']}`);

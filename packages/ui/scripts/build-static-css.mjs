@@ -1,28 +1,40 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { resolve, dirname, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import postcss from 'postcss';
+import { retirePrimitiveFallbacks } from './retire-primitive-fallbacks.mjs';
 
 const packageRoot = fileURLToPath(new URL('..', import.meta.url));
-const sourceRoot = join(packageRoot, 'src');
-const cssPath = join(sourceRoot, 'app.css');
-const distDir = join(packageRoot, 'dist');
-const outputPath = join(distDir, 'app.css');
-const themeOutputPath = join(distDir, 'app.theme.css');
+const sourceRoot = resolve(packageRoot, 'src');
+const dist = resolve(packageRoot, 'dist');
 
-function inlineLocalImports(path, stack = []) {
-	const source = readFileSync(path, 'utf8');
-	return source.replace(/@import\s+["'](\.[^"']+)["'];?/gu, (statement, relativePath) => {
-		const importedPath = join(dirname(path), relativePath);
-		if (stack.includes(importedPath)) {
-			throw new Error(`Circular CSS import: ${[...stack, importedPath].join(' -> ')}`);
-		}
-		return inlineLocalImports(importedPath, [...stack, importedPath]);
-	});
+function inlineCss(path, ancestors = new Set()) {
+  if (ancestors.has(path)) throw new Error(`Circular CSS import: ${path}`);
+  const stack = new Set([...ancestors, path]);
+  const root = postcss.parse(readFileSync(path, 'utf8'), { from: path });
+  root.walkAtRules('import', (rule) => {
+    const match = /^['"](\.\.?\/[^'"]+\.css)['"]$/.exec(rule.params);
+    if (!match) throw new Error(`Only local plain-CSS imports are allowed: ${rule.params}`);
+    const target = resolve(dirname(path), match[1]);
+    if (relative(sourceRoot, target).startsWith('..')) throw new Error('CSS import escapes the package source');
+    rule.replaceWith(...inlineCss(target, stack).nodes);
+  });
+  root.walkAtRules((rule) => {
+    if (['theme', 'source', 'apply', 'utility', 'custom-variant', 'tailwind', 'reference', 'variant', 'config', 'plugin', 'screen', 'responsive', 'variants'].includes(rule.name)) {
+      throw new Error(`Unexpected compiler directive @${rule.name}`);
+    }
+  });
+  if (path === resolve(sourceRoot, 'components.css')) retirePrimitiveFallbacks(root);
+  return root;
 }
 
-const compiledCss = postcss.parse(inlineLocalImports(cssPath)).toString();
-mkdirSync(distDir, { recursive: true });
-writeFileSync(outputPath, `${compiledCss.trim()}\n`, 'utf8');
-writeFileSync(themeOutputPath, `${compiledCss.trim()}\n`, 'utf8');
-console.info(`[build-static-css] bundled Panda and native CSS into ${outputPath}`);
+const css = `${inlineCss(resolve(sourceRoot, 'app.css')).toString().trim()}\n`;
+const aliases = postcss.parse(readFileSync(resolve(sourceRoot, 'styles/aliases.css'), 'utf8'));
+let hasPrimaryAlias = false;
+aliases.walkDecls('--color-primary', () => { hasPrimaryAlias = true; });
+if (!hasPrimaryAlias) throw new Error('Missing public theme aliases');
+mkdirSync(dist, { recursive: true });
+// 两个公开入口保持同一原生 CSS；旧路径兼容不再意味着保留编译器元数据。
+writeFileSync(resolve(dist, 'app.css'), css);
+writeFileSync(resolve(dist, 'app.theme.css'), css);
+console.info('[build-static-css] published native CSS entries and pre-generated Panda recipes');

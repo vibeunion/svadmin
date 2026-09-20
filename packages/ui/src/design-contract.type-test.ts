@@ -1,9 +1,10 @@
-import { css } from "./styled-system/css/index.js";
+import type { SurfaceTone, SurfaceDensity } from "./design-contract.js";
 
-css({ color: "primary", display: "flex" });
+export const tone: SurfaceTone = "success";
+export const density: SurfaceDensity = "compact";
 
-// @ts-expect-error Panda must reject semantic tokens outside the contract.
-css({ color: "brand-typo" });
+// @ts-expect-error 公开契约不接受任意品牌颜色。
+export const invalidTone: SurfaceTone = "brand-typo";
 
-// @ts-expect-error Panda must reject invalid CSS property values.
-css({ display: "banana" });
+// @ts-expect-error 公开契约限定密度枚举。
+export const invalidDensity: SurfaceDensity = "banana";

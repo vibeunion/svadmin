@@ -1,4 +1,6 @@
 <script lang="ts">
+  import type { ComponentProps } from 'svelte';
+  import type { MenuItem, ResourceDefinition } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import AdminApp from '@svadmin/ui/components/AdminApp.svelte';
   import { setRichTextEditor } from '@svadmin/ui/editor-config';
@@ -8,10 +10,13 @@
   import { createResources } from './resources';
   import { createExampleMenu, registerExampleMenuTranslations } from './exampleMenuCatalog';
   import { mockAuthProvider } from './providers/mockAuth';
-  import Dashboard from './pages/Dashboard.svelte';
+  import LazyDashboard from './components/LazyDashboard.svelte';
   import LazyResourcePage from './components/LazyResourcePage.svelte';
+  import BusinessAutoForm from './components/BusinessAutoForm.svelte';
+  import BusinessShowPage from './components/BusinessShowPage.svelte';
   import LazyRichTextEditor from './components/LazyRichTextEditor.svelte';
   import LazyChatDialog from './components/LazyChatDialog.svelte';
+  import LazyOfficeWorkspace from './components/LazyOfficeWorkspace.svelte';
 
   // DesignPrinciplesPage and other showcase resources are lazy-loaded via LazyResourcePage
   registerExampleMenuTranslations();
@@ -20,17 +25,35 @@
   const i18n = useTranslation();
   // Keep the example's derived resources in sync with AdminApp's browser-detected locale.
   let currentLocale = $state(i18n.locale);
-  const resources = $derived.by(() => createResources(currentLocale));
-  const menu = $derived.by(() => createExampleMenu(currentLocale));
+  const baseResources = $derived.by(() => createResources(currentLocale));
+  const officeLabel = $derived(currentLocale === 'zh-CN' ? '智能辅助办公' : 'Health Office');
+  const resources = $derived.by<ResourceDefinition[]>(() => [
+    ...baseResources,
+    { name: 'health_office', label: officeLabel, icon: 'file', fields: [], showInMenu: false },
+  ]);
+  const menu = $derived.by<MenuItem[]>(() => [
+    { name: 'health_office', label: officeLabel, icon: 'file', href: '/health_office' },
+    ...createExampleMenu(currentLocale),
+  ]);
   const appTitle = 'svadmin example';
   const loginHint = $derived(currentLocale === 'zh-CN' ? '已预填演示账号，方便快速测试。' : 'Demo credentials are prefilled for quick testing.');
 
-  const chatProvider = $derived.by(() => createInventoryChatProvider(inMemoryDataProvider, resources));
+  // 办公工作区不注册到库存 AI，避免业务数据意外进入无关助手的资源上下文。
+  const chatProvider = $derived.by(() => createInventoryChatProvider(inMemoryDataProvider, baseResources));
 
-  const resourcePages = $derived.by(() => ({
-    ...Object.fromEntries(resources.map((resource) => [resource.name, { list: LazyResourcePage }])),
-    design_principles: { list: LazyResourcePage },
-  }));
+  const resourcePages = $derived.by(() => {
+    const pages: NonNullable<ComponentProps<typeof AdminApp>['resourcePages']> = {};
+    for (const resource of baseResources) {
+      pages[resource.name] = {
+        list: LazyResourcePage, create: BusinessAutoForm, edit: BusinessAutoForm,
+        clone: BusinessAutoForm, show: BusinessShowPage,
+      };
+    }
+    pages['design_principles'] = { list: LazyResourcePage };
+    // 仅暴露独立工作区，不为合成报告自动生成通用 CRUD 路由。
+    pages['health_office'] = { list: LazyOfficeWorkspace };
+    return pages;
+  });
 </script>
 
 <AdminApp
@@ -53,6 +76,6 @@
     <LazyChatDialog {docked} {scope} {ownerScope} />
   {/snippet}
   {#snippet dashboard()}
-    <Dashboard />
+    <LazyDashboard />
   {/snippet}
 </AdminApp>

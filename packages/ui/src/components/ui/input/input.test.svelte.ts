@@ -104,4 +104,27 @@ describe("Input", () => {
 		await fireEvent.input(input, { target: { value: "" } });
 		expect(screen.getByTestId("bound-number").textContent).toBe("empty");
 	});
+
+	it("keeps native and visual disabled states aligned when toggled", async () => {
+		const { rerender } = render(Input, { type: "file", disabled: true, "aria-label": "Disabled attachment" });
+		const input = screen.getByLabelText<HTMLInputElement>("Disabled attachment");
+		expect(input.disabled).toBe(true);
+		expect(input.closest(".svadmin-file-input")?.getAttribute("data-disabled")).toBe("true");
+		await rerender({ type: "file", disabled: false, "aria-label": "Disabled attachment" });
+		expect(input.disabled).toBe(false);
+		expect(input.closest(".svadmin-file-input")?.getAttribute("data-disabled")).toBeNull();
+	});
+
+	it("renders a single filename and restores the empty label after clearing", async () => {
+		render(InputHarness, { props: { locale: "en" } });
+		const input = screen.getByLabelText<HTMLInputElement>("Attachment");
+		expect(screen.getByText("No file chosen")).toBeTruthy();
+		const files = new DataTransfer();
+		files.items.add(new File(["report"], "report.csv"));
+		await fireEvent.change(input, { target: { files: files.files } });
+		expect(screen.getByText("report.csv", { selector: ".svadmin-file-input__name" })).toBeTruthy();
+		await fireEvent.change(input, { target: { files: new DataTransfer().files } });
+		expect(screen.getByText("No file chosen")).toBeTruthy();
+		expect(screen.getByTestId("bound-files").textContent).toBe("");
+	});
 });

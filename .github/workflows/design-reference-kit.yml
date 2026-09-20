@@ -1,0 +1,54 @@
+name: Design reference kit
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: design-reference-kit-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  reference-contract:
+    name: Reference metadata and source mappings
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Validate current source mappings
+        run: python3 design/reference-kit/validate.py
+      - name: Run positive and negative regression tests
+        run: python3 -m unittest discover -s design/reference-kit -p 'test_*.py' -v
+      - name: Generate and check deterministic offline review
+        shell: bash
+        run: |
+          python3 design/reference-kit/render_preview.py
+          python3 design/reference-kit/render_preview.py --check
+
+  figma-offline:
+    name: Offline Figma plugin and analysis contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - name: Test bounded exporter, analyzer and staged importer
+        run: node --test design/figma-offline/test/*.test.mjs
+      - name: Check executable syntax
+        shell: bash
+        run: |
+          node --check design/figma-offline/core.cjs
+          node --check design/figma-offline/runtime.cjs
+          node --check design/figma-offline/analyze.mjs
+          node --check design/figma-offline/prepare-plugin.mjs

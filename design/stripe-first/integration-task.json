@@ -1,0 +1,46 @@
+{
+  "id": "stripe-product-integration-20260919",
+  "parent": "stripe-reference-implementation-20260919",
+  "source": "User continuation 2026-09-19T16:17:11Z",
+  "reason": "Finish reference-driven product recipes, integrate current main without losing content/fallback fixes, validate current screenshots and CI.",
+  "risk": "low",
+  "orchestration": {
+    "mode": "native",
+    "writer": "single-owner",
+    "externalReviewers": 0
+  },
+  "state": "in-progress",
+  "baseMain": "8f068fb093b48cd2410b3b28a6066b567a44690e",
+  "basePr": "0f6c4ad148f69b501870f0c18c6ea94bd27a8349",
+  "scope": [
+    "design/stripe-first",
+    "packages/ui/panda.config.ts",
+    "packages/ui/design/product-recipes.ts",
+    "packages/ui/scripts/product-recipes.test.mjs",
+    ".github/workflows/stripe-first-*",
+    "packages/ui/src/recipes.ts",
+    "packages/ui/src/components/content/StatusBadge.svelte"
+  ],
+  "acceptance": [
+    "Preserve both main content recipes and all six product recipes",
+    "Retain current main semantic fallback corrections",
+    "Preserve Figma provenance instead of declaring new sync",
+    "Current frozen CI, state/interaction/keyboard tests and screenshot inspection",
+    "Push updates to existing PR #438",
+    "Readable status labels in both themes; 228 scene / 6 interaction matrix including required desktop widths"
+  ],
+  "figma": {
+    "fileKey": "r02lMyLBPoaNS3gep3TNRF",
+    "nodeId": "8:53",
+    "result": "Starter MCP tool call limit reached",
+    "mutations": false
+  },
+  "nonGoals": [
+    "merge main",
+    "publish/deploy",
+    "new dependencies or backend writes",
+    "copy paid template sources",
+    "bypass Figma quota",
+    "claim complete Figma kit or WCAG certification"
+  ]
+}

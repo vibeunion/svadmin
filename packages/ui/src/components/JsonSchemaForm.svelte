@@ -5,12 +5,26 @@
   import { Button } from './ui/button/index.js';
   import { Loader2, Plus, Trash2 } from '@lucide/svelte';
   import { cn } from '../utils.js';
+  import { onDestroy, untrack } from 'svelte';
+  import {
+    initializeSchemaForm, schemaFormArrayItem, schemaFormEnumIndex,
+    schemaFormEnumValue, schemaFormSnapshot, writeSchemaFormPath,
+    type JsonSchemaFormSchema,
+  } from './json-schema-form-state.js';
 
   interface Props {
     schema: JsonSchema;
     value?: Record<string, unknown>;
     onsubmit?: (data: Record<string, unknown>) => void | Promise<void>;
     submitText?: string;
+    disabled?: boolean;
+    readonly?: boolean;
+    /** 只决定此实例文案；不修改全局语言。 */
+    locale?: string;
+    onerror?: (error: unknown) => void;
+    onvalidationerror?: (issues: SchemaFormIssue[]) => void;
+    /** Use a unique stable prefix when several schema forms share a page. */
+    idPrefix?: string;
     class?: string;
   }
 
@@ -19,6 +33,12 @@
     value = $bindable(undefined),
     onsubmit,
     submitText = 'Submit Form',
+    disabled = false,
+    readonly = false,
+    locale,
+    onerror,
+    onvalidationerror,
+    idPrefix,
     class: className = '',
   }: Props = $props();
 
@@ -75,6 +95,45 @@
   });
   const resolvedValue = $derived(resolved.data);
 
+  function editable(): boolean {
+    return !destroyed && !disabled && !readonly && !isSubmitting && prepared.ok
+      && !formElement?.closest('fieldset[disabled]');
+  }
+  function nodeType(node: JsonSchema): string | undefined {
+    return Array.isArray(node.type) ? node.type.find(type => type !== 'null') : node.type;
+  }
+  function choices(node: JsonSchema): JsonSchema['enum'] {
+    return node.enum ?? (Object.hasOwn(node, 'const') ? [node.const ?? null] : undefined);
+  }
+  function pathReadonly(path: readonly string[]): boolean {
+    let node: JsonSchema | undefined = schema;
+    if (node.readOnly) return true;
+    for (const key of path) {
+      node = node && (nodeType(node) === 'array' ? node.items : node.properties?.[key]);
+      if (node?.readOnly) return true;
+    }
+    return false;
+  }
+  function invalid(issues: SchemaFormIssue[]): void {
+    failure = 'invalid';
+    validationIssues = issues;
+    try { onvalidationerror?.(issues); } catch { /* Observers do not authorize submission. */ }
+  }
+  function fieldInvalid(path: readonly string[]): boolean {
+    return [...validationIssues, ...parseIssues].some(issue => issue.path === schemaFormPointer(path));
+  }
+  function writeNumber(path: string[], input: HTMLInputElement): void {
+    if (!editable() || pathReadonly(path)) return;
+    const pointer = schemaFormPointer(path);
+    parseIssues = parseIssues.filter(issue => issue.path !== pointer);
+    try {
+      if (input.validity.badInput) throw new Error('Invalid numeric input');
+      writePath(path, parseSchemaNumber(input.value));
+    } catch {
+      parseIssues = [...parseIssues, { path: pointer, code: 'invalid-value' }];
+      invalid(parseIssues);
+    }
+  }
   function readPath(path: string[]): unknown {
     return path.reduce<unknown>((current, key) => (
       current && typeof current === 'object' && Object.hasOwn(current, key) ? (current as Record<string, unknown>)[key] : undefined
@@ -110,19 +169,33 @@
     const index = Number(raw.slice('__json_enum_'.length));
     return Number.isSafeInteger(index) ? options?.[index] : undefined;
   }
-
   function addArrayItem(path: string[], itemSchema: JsonSchema): void {
+    if (!editable()) return;
     const current = readPath(path);
     const items = Array.isArray(current) ? current : [];
     const item = cloneDefault(itemSchema);
     writePath(path, [...items, item === undefined ? (itemSchema.type === 'object' ? {} : '') : item]);
   }
-
   function removeArrayItem(path: string[], index: number): void {
+    if (!editable()) return;
     const current = readPath(path);
-    if (Array.isArray(current)) writePath(path, current.filter((_, itemIndex) => itemIndex !== index));
+    if (!Array.isArray(current) || !Number.isSafeInteger(index) || index < 0 || index >= current.length) return;
+    const prefix = schemaFormPointer(path) + '/';
+    const nextIssues = parseIssues.flatMap(issue => {
+      if (!issue.path.startsWith(prefix)) return [issue];
+      const tail = issue.path.slice(prefix.length);
+      const separator = tail.indexOf('/');
+      const segment = separator < 0 ? tail : tail.slice(0, separator);
+      if (!/^(0|[1-9][0-9]*)$/u.test(segment)) return [issue];
+      const itemIndex = Number(segment);
+      if (itemIndex === index) return [];
+      if (itemIndex < index) return [issue];
+      return [{ ...issue, path: prefix + String(itemIndex - 1) + (separator < 0 ? '' : tail.slice(separator)) }];
+    });
+    // Retire only the removed item's error and shift surviving descendants with their
+    // array item. A rejected readonly/disabled write must not clear any error.
+    if (writePath(path, current.filter((_, itemIndex) => itemIndex !== index))) parseIssues = nextIssues;
   }
-
   async function handleSubmit(event: SubmitEvent): Promise<void> {
     event.preventDefault();
     if (isSubmitting || resolved.invalid) return;
@@ -143,12 +216,17 @@
     } catch {
       submitFailed = true;
     } finally {
-      isSubmitting = false;
+      if (!destroyed) isSubmitting = false;
     }
   }
+
 </script>
 
 <form
+  novalidate
+  data-testid="json-schema-form"
+  bind:this={formElement}
+  aria-busy={isSubmitting}
   onsubmit={handleSubmit}
   novalidate
   class={cn('svadmin-u-3e7ce58d64fa svadmin-u-a217b4eaa918 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-0478c89a150f svadmin-u-cef5b893cf23 svadmin-u-359090c2d529', className)}
@@ -161,6 +239,10 @@
       <h3 class="svadmin-u-fc7473ca09eb svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{schema.title}</h3>
       {#if schema.description}<p class="svadmin-u-359090c2d529 svadmin-u-bfa603190748 svadmin-u-15e1b1f444fe">{schema.description}</p>{/if}
     </div>
+  {/if}
+
+  {#if !prepared.ok || failure}
+    <p role="alert" data-testid="schema-form-errors">{labels[!prepared.ok ? 'invalid' : failure ?? 'invalid']}</p>
   {/if}
 
   {#snippet renderField(node: JsonSchema, path: string[], title: string, required = false)}
@@ -180,7 +262,7 @@
           {/each}
         </div>
       </fieldset>
-    {:else if node.type === 'array'}
+    {:else if type === 'array'}
       {@const items = Array.isArray(current) ? current : []}
       <fieldset class="svadmin-u-da7c36cd8867 svadmin-u-421ac2be5045">
         <legend class="svadmin-u-0214b4b355d1 svadmin-u-2689f3958069">{title}</legend>
@@ -192,7 +274,7 @@
             <Trash2 class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" /> 删除
           </Button>
         {:else}
-          <span class="svadmin-u-bfa603190748">暂无项目</span>
+          <span class="svadmin-u-bfa603190748">{labels.empty}</span>
         {/each}
         <Button type="button" variant="outline" size="sm" disabled={node.maxItems !== undefined && items.length >= node.maxItems} onclick={() => addArrayItem(path, node.items ?? { type: 'string' })}>
           <Plus class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" /> 添加项目
@@ -223,16 +305,24 @@
     {/if}
   {/snippet}
 
+  <fieldset class="schema-form-fields svadmin-u-3e7ce58d64fa" disabled={locked}>
+  {#if prepared.ok}
   <div class="svadmin-u-9c6cdfa2ba3d">
     {#each Object.entries(resolved.invalid ? {} : schema.properties ?? {}) as [key, node] (key)}
       {@render renderField(node, [key], node.title ?? key, schema.required?.includes(key) ?? false)}
     {/each}
   </div>
 
+  {/if}
   <div class="svadmin-u-173fa8f06789 svadmin-u-b950dda299d3 svadmin-u-05faf5c801ff svadmin-u-60fbb7713999 svadmin-u-77c08e015d14">
     <Button type="submit" size="sm" disabled={isSubmitting || resolved.invalid} class="svadmin-u-44ee8ba0a421 svadmin-u-25effcb585ab">
       {#if isSubmitting}<Loader2 class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-afbdd13a380e" />{/if}
       {submitText}
     </Button>
   </div>
+  </fieldset>
 </form>
+
+<style>
+  .schema-form-fields { min-width: 0; margin: 0; padding: 0; border: 0; }
+</style>

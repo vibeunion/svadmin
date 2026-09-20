@@ -287,7 +287,7 @@ export interface UploadCancellation {
   }
 
   function retry(item: UploadItem): void {
-    void process({ ...item, status: 'queued', error: undefined });
+    if (item.status === 'error' || item.status === 'cancelled') void process(item);
   }
 
   function handleKeydown(event: KeyboardEvent): void {

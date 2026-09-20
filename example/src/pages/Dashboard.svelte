@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { demoRenderers } from '../resource-rendering';
   import { demoContracts } from '../resource-contracts';
   import type { DemoRow } from '../resource-schemas';
 
@@ -59,18 +60,18 @@
   const locale = $derived(i18n.locale);
   const isZh = $derived(locale === 'zh-CN');
 
-  const products = $derived((productsQuery.data?.data ?? []));
-  const movements = $derived((movementsQuery.data?.data ?? []));
-  const transfers = $derived((transfersQuery.data?.data ?? []));
-  const cycleCounts = $derived((cycleCountsQuery.data?.data ?? []));
-  const adjustments = $derived((adjustmentsQuery.data?.data ?? []));
-  const reorderRules = $derived((reorderRulesQuery.data?.data ?? []));
-  const todos = $derived((todosQuery.data?.data ?? []));
-  const users = $derived((usersQuery.data?.data ?? []));
-  const salesOrders = $derived((salesOrdersQuery.data?.data ?? []));
-  const calendarEvents = $derived((calendarQuery.data?.data ?? []));
-  const conversations = $derived((conversationsQuery.data?.data ?? []));
-  const notifications = $derived((notificationsQuery.data?.data ?? []));
+  const products = $derived(demoRenderers.products.records(productsQuery.data?.data ?? []));
+  const movements = $derived(demoRenderers.stock_movements.records(movementsQuery.data?.data ?? []));
+  const transfers = $derived(demoRenderers.stock_transfers.records(transfersQuery.data?.data ?? []));
+  const cycleCounts = $derived(demoRenderers.cycle_counts.records(cycleCountsQuery.data?.data ?? []));
+  const adjustments = $derived(demoRenderers.inventory_adjustments.records(adjustmentsQuery.data?.data ?? []));
+  const reorderRules = $derived(demoRenderers.reorder_rules.records(reorderRulesQuery.data?.data ?? []));
+  const todos = $derived(demoRenderers.todos.records(todosQuery.data?.data ?? []));
+  const users = $derived(demoRenderers.users.records(usersQuery.data?.data ?? []));
+  const salesOrders = $derived(demoRenderers.sales_orders.records(salesOrdersQuery.data?.data ?? []));
+  const calendarEvents = $derived(demoRenderers.calendar_events.records(calendarQuery.data?.data ?? []));
+  const conversations = $derived(demoRenderers.ai_conversations.records(conversationsQuery.data?.data ?? []));
+  const notifications = $derived(demoRenderers.notifications.records(notificationsQuery.data?.data ?? []));
 
   const queries = [
     productsQuery, suppliersQuery, warehousesQuery, movementsQuery, transfersQuery,

@@ -2,6 +2,7 @@ import { Type } from '@sinclair/typebox';
 import { checkExact } from './schema-validation';
 import { snapshotPlainData } from './plain-data';
 import { HttpError } from './types';
+import { permissionCatalogBindingSchema } from './permission-catalog';
 import type {
   CanParams, CanResult, AccessControlProvider, AccessControlOptions, RegisteredAccessControlProvider,
 } from './permissions.svelte';
@@ -24,6 +25,7 @@ const providerOptions = Type.Object({
     enableAccessControl: Type.Optional(Type.Boolean()),
     hideIfUnauthorized: Type.Optional(Type.Boolean()),
   }, { additionalProperties: false })),
+  permissionCatalog: Type.Optional(permissionCatalogBindingSchema),
 }, { additionalProperties: false });
 const registeredProviders = new WeakMap<object, RegisteredAccessControlProvider>();
 
@@ -32,6 +34,12 @@ export function snapshotAccessControlOptions(value: unknown): AccessControlOptio
     const candidate = snapshotPlainData(value);
     if (checkExact(providerOptions, candidate)) {
       if (candidate.buttons) Object.freeze(candidate.buttons);
+      if (candidate.permissionCatalog) {
+        if (candidate.permissionCatalog.digest !== undefined) {
+          candidate.permissionCatalog.digest = candidate.permissionCatalog.digest.toLowerCase();
+        }
+        Object.freeze(candidate.permissionCatalog);
+      }
       return Object.freeze(candidate);
     }
   } catch {

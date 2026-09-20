@@ -35,7 +35,7 @@
 	const i18n = useTranslation();
 	const isFileInput = $derived(type?.toLowerCase() === "file");
 	const isDateInput = $derived(["date", "datetime-local", "month", "week", "time"].includes(type?.toLowerCase() ?? ""));
-	const attributes = $derived(definedOptions(restProps));
+	const attributes = $derived(definedOptions({ ...restProps, disabled }));
 	const selectedFiles = $derived(files ? Array.from(files) : []);
 	const selectedFileLabel = $derived.by(() => {
 		if (selectedFiles.length === 0) return i18n.t("common.noFileChosen");

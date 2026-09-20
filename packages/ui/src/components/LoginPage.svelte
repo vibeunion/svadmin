@@ -155,7 +155,7 @@
           </span>
         </div>
 
-        <div class="svadmin-u-f3c543ad5fe9 svadmin-u-1004c0c3954c" class:grid-cols-2={socialProviders.length >= 2}>
+        <div class="svadmin-u-f3c543ad5fe9 svadmin-u-1004c0c3954c" class:svadmin-u-8e75e3db482b={socialProviders.length >= 2}>
           {#each socialProviders as provider (provider.name)}
             <Button
               variant="outline"

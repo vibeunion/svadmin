@@ -119,7 +119,7 @@
     </Select>
   {/if}
   <DateTimeInput
-    value={value?.start}
+    value={value?.start ?? null}
     {mode}
     {valueMode}
     {timeZone}
@@ -140,7 +140,7 @@
   />
   <span aria-hidden="true">{i18n.t('dateInput.to')}</span>
   <DateTimeInput
-    value={value?.end}
+    value={value?.end ?? null}
     {mode}
     {valueMode}
     {timeZone}

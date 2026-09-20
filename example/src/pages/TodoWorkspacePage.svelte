@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { demoRenderers } from '../resource-rendering';
   import { demoContracts } from '../resource-contracts';
   import type { DemoRow } from '../resource-schemas';
   type Todo = DemoRow<'todos'>;
@@ -20,7 +21,7 @@
   const locale = $derived(i18n.locale);
   const isZh = $derived(locale === 'zh-CN');
   const query = useList({ resource: demoContracts.todos, pagination: { mode: 'off' }, sorters: [{ field: 'dueDate', order: 'asc' }] });
-  const todos = $derived((query.data?.data ?? []));
+  const todos = $derived(demoRenderers.todos.records(query.data?.data ?? []));
   const boardTodos = $derived(todos.map((todo) => {
     const hasOverride = Object.hasOwn(statusOverrides, todo.id);
     const status = statusOverrides[todo.id] ?? todo.status;

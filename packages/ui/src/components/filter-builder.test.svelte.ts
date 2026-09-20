@@ -57,8 +57,24 @@ describe('FilterBuilder component', () => {
   }, 30_000);
   it('renders initial empty state and allows adding rules', async () => {
     const view = render(FilterBuilder, {
+      fields: [],
+      filters: [{ field: 'title', operator: 'contains', value: 'Svelte' }],
+      onApply,
+    });
+    expect(view.container.querySelector('output')).toBeTruthy();
+    await view.rerender({ fields: testFields });
+    expect(view.container.querySelector('output')).toBeNull();
+    const input = view.container.querySelector<HTMLInputElement>('input');
+    if (!input) throw new Error('Expected editable filter');
+    await fireEvent.input(input, { target: { value: 'Updated' } });
+    await fireEvent.click(view.getByTestId('filter-builder-apply'));
+    expect(onApply).toHaveBeenCalledWith([{ field: 'title', operator: 'contains', value: 'Updated' }]);
+  });
+
+  it('renders initial empty state and allows adding rules', async () => {
+    const view = render(FilterBuilderLocale, {
       fields: testFields,
-      filters: [],
+      locale: 'zh',
     });
 
     expect(view.container.textContent).toContain('暂无筛选条件');

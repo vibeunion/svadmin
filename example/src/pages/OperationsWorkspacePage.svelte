@@ -1,8 +1,11 @@
 <script lang="ts">
+  import { valueText as text, valueNumber as numeric, countBy, sumBy, absoluteSumBy, findLabel } from '../rendering-values';
+  import { demoRenderers } from '../resource-rendering';
+  import { demoRendering } from '../resource-rendering';
   import { demoContracts, demoContract } from '../resource-contracts';
 
   import { captureAdminContext } from '@svadmin/core';
-import { useList } from '@svadmin/core';
+  import { useList } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import {
     AutoTable,
@@ -29,7 +32,6 @@ import { useList } from '@svadmin/core';
   } from '@lucide/svelte';
   import { readHashParam, readHashView, replaceHashParam } from '../utils/hashView';
 
-  type Row = Record<string, unknown>;
   type OperationsResource =
     | 'stock_movements'
     | 'stock_transfers'
@@ -61,10 +63,10 @@ import { useList } from '@svadmin/core';
   const suppliersQuery = useList({ resource: demoContracts.suppliers, pagination: { mode: 'off' } });
 
   const isZh = $derived(i18n.locale === 'zh-CN');
-  const rows = $derived((query.data?.data ?? []));
-  const products = $derived((productsQuery.data?.data ?? []));
-  const warehouses = $derived((warehousesQuery.data?.data ?? []));
-  const suppliers = $derived((suppliersQuery.data?.data ?? []));
+  const rawRows = $derived(query.data?.data ?? []);
+  const products = $derived(demoRenderers.products.records(productsQuery.data?.data ?? []));
+  const warehouses = $derived(demoRenderers.warehouses.records(warehousesQuery.data?.data ?? []));
+  const suppliers = $derived(demoRenderers.suppliers.records(suppliersQuery.data?.data ?? []));
   const isLoading = $derived(query.isLoading || productsQuery.isLoading || warehousesQuery.isLoading || suppliersQuery.isLoading);
   const hasError = $derived(Boolean(query.error || productsQuery.error || warehousesQuery.error || suppliersQuery.error));
   const operationsResource = $derived(isOperationsResource(resourceName) ? resourceName : 'stock_movements');
@@ -138,13 +140,8 @@ import { useList } from '@svadmin/core';
     return profiles[operationsResource] ?? profiles.stock_movements;
   });
   const copy = (pair: [string, string]) => isZh ? pair[1] : pair[0];
-  const numeric = (row: Row, key: string) => Number(row[key] ?? 0);
-  const text = (row: Row, key: string) => String(row[key] ?? '—');
-  const recentMovements = $derived([...rows].sort((left, right) => text(right, 'date').localeCompare(text(left, 'date'))).slice(0, 5));
-  const countBy = (key: string, value: string) => rows.filter((row) => text(row, key) === value).length;
-  const sumBy = (key: string) => rows.reduce((sum, row) => sum + numeric(row, key), 0);
-  const absoluteSumBy = (key: string) => rows.reduce((sum, row) => sum + Math.abs(numeric(row, key)), 0);
-  const findName = (items: Row[], id: unknown, fallback: string) => String(items.find((item) => item['id'] === id)?.['name'] ?? fallback);
+  const findName = <T extends { id: number }>(items: readonly T[], id: unknown, fallback: string) =>
+    findLabel(items, id, fallback);
   const productName = (id: unknown) => findName(products, id, isZh ? '未知商品' : 'Unknown product');
   const warehouseName = (id: unknown) => findName(warehouses, id, isZh ? '未知仓库' : 'Unknown warehouse');
   const supplierName = (id: unknown) => findName(suppliers, id, isZh ? '未知供应商' : 'Unknown supplier');
@@ -210,6 +207,8 @@ import { useList } from '@svadmin/core';
   {:else if isLoading}
     <DataState state="loading" title={isZh ? '正在加载运营数据' : 'Loading operations data'} />
   {:else if operationsResource === 'stock_movements'}
+    {@const rows = demoRenderers.stock_movements.records(rawRows)}
+    {@const recentMovements = [...rows].sort((left, right) => right.date.localeCompare(left.date)).slice(0, 5)}
     {@const inbound = rows.filter((row) => text(row, 'type') === 'in')}
     {@const outbound = rows.filter((row) => text(row, 'type') === 'out')}
     {@const adjustments = rows.filter((row) => text(row, 'type') === 'adjustment')}
@@ -217,7 +216,7 @@ import { useList } from '@svadmin/core';
       <MetricBlock label={isZh ? '流水记录' : 'Movements'} value={rows.length} detail={isZh ? '当前台账范围' : 'Current ledger scope'} />
       <MetricBlock label={isZh ? '入库数量' : 'Inbound units'} value={inbound.reduce((sum, row) => sum + numeric(row, 'quantity'), 0)} detail={`${inbound.length} ${isZh ? '笔记录' : 'records'}`} trendTone="positive" />
       <MetricBlock label={isZh ? '出库数量' : 'Outbound units'} value={Math.abs(outbound.reduce((sum, row) => sum + numeric(row, 'quantity'), 0))} detail={`${outbound.length} ${isZh ? '笔记录' : 'records'}`} />
-      <MetricBlock label={isZh ? '净变化' : 'Net change'} value={sumBy('quantity')} detail={adjustments.length ? `${adjustments.length} ${isZh ? '笔调整' : 'adjustments'}` : (isZh ? '无人工调整' : 'No manual adjustments')} />
+      <MetricBlock label={isZh ? '净变化' : 'Net change'} value={sumBy(rows, 'quantity')} detail={adjustments.length ? `${adjustments.length} ${isZh ? '笔调整' : 'adjustments'}` : (isZh ? '无人工调整' : 'No manual adjustments')} />
     </section>
     <section class="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]" data-stock-movement-layout>
       <div class="rounded-lg border border-border bg-card">
@@ -239,25 +238,26 @@ import { useList } from '@svadmin/core';
       <aside class="rounded-lg border border-border bg-card p-4">
         <SectionHeader title={isZh ? '流向构成' : 'Flow composition'} description={isZh ? '按操作类型汇总当前台账。' : 'Current ledger grouped by movement type.'} />
         <div class="mt-5 space-y-5">
-          {#each [[isZh ? '入库' : 'Inbound', inbound.length, 'bg-primary'], [isZh ? '出库' : 'Outbound', outbound.length, 'bg-foreground'], [isZh ? '调整' : 'Adjustments', adjustments.length, 'bg-muted-foreground']] as item (String(item[0]))}
-            <div><div class="flex items-center justify-between text-sm"><span class="text-muted-foreground">{item[0]}</span><span class="font-medium text-foreground">{item[1]}</span></div><div class="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"><div class={`h-full rounded-full ${item[2]}`} style:width={`${percent(Number(item[1]), rows.length)}%`}></div></div></div>
+          {#each [[isZh ? '入库' : 'Inbound', inbound.length, 'bg-primary'], [isZh ? '出库' : 'Outbound', outbound.length, 'bg-foreground'], [isZh ? '调整' : 'Adjustments', adjustments.length, 'bg-muted-foreground']] satisfies [string, number, string][] as item (String(item[0]))}
+            <div><div class="flex items-center justify-between text-sm"><span class="text-muted-foreground">{item[0]}</span><span class="font-medium text-foreground">{item[1]}</span></div><div class="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"><div class={`h-full rounded-full ${item[2]}`} style:width={`${percent(item[1], rows.length)}%`}></div></div></div>
           {/each}
         </div>
       </aside>
     </section>
   {:else if operationsResource === 'stock_transfers'}
+    {@const rows = demoRenderers.stock_transfers.records(rawRows)}
     {@const activeTransfers = rows.filter((row) => !['received', 'cancelled'].includes(text(row, 'status')))}
     <section class="grid grid-cols-2 gap-3 xl:grid-cols-4" data-operations-metrics>
       <MetricBlock label={isZh ? '调拨任务' : 'Transfers'} value={rows.length} detail={isZh ? '当前计划' : 'Current plan'} />
-      <MetricBlock label={isZh ? '运输中' : 'In transit'} value={countBy('status', 'in_transit')} detail={isZh ? '正在跨仓移动' : 'Moving between warehouses'} trendTone="positive" />
-      <MetricBlock label={isZh ? '待放行' : 'Awaiting release'} value={countBy('status', 'draft') + countBy('status', 'approved')} detail={isZh ? '需要运营动作' : 'Needs an operations action'} />
-      <MetricBlock label={isZh ? '调拨件数' : 'Units planned'} value={sumBy('quantity')} detail={isZh ? '全部调拨数量' : 'Total transfer quantity'} />
+      <MetricBlock label={isZh ? '运输中' : 'In transit'} value={countBy(rows, 'status', 'in_transit')} detail={isZh ? '正在跨仓移动' : 'Moving between warehouses'} trendTone="positive" />
+      <MetricBlock label={isZh ? '待放行' : 'Awaiting release'} value={countBy(rows, 'status', 'draft') + countBy(rows, 'status', 'approved')} detail={isZh ? '需要运营动作' : 'Needs an operations action'} />
+      <MetricBlock label={isZh ? '调拨件数' : 'Units planned'} value={sumBy(rows, 'quantity')} detail={isZh ? '全部调拨数量' : 'Total transfer quantity'} />
     </section>
     <section class="rounded-lg border border-border bg-card" data-stock-transfer-layout>
       <div class="border-b border-border p-4"><SectionHeader title={isZh ? '仓间流转' : 'Warehouse transfer flow'} description={isZh ? '沿申请、放行、运输和收货阶段推进调拨。' : 'Move transfers through request, release, transit, and receiving.'} /></div>
       <div class="grid gap-px bg-border md:grid-cols-4">
         {#each [['draft', isZh ? '申请' : 'Requested'], ['approved', isZh ? '已放行' : 'Released'], ['in_transit', isZh ? '运输中' : 'In transit'], ['received', isZh ? '已收货' : 'Received']] as stage (String(stage[0]))}
-          <div class="bg-card p-4"><p class="text-xs text-muted-foreground">{stage[1]}</p><p class="mt-2 text-2xl font-semibold text-foreground">{countBy('status', String(stage[0]))}</p></div>
+          <div class="bg-card p-4"><p class="text-xs text-muted-foreground">{stage[1]}</p><p class="mt-2 text-2xl font-semibold text-foreground">{countBy(rows, 'status', String(stage[0]))}</p></div>
         {/each}
       </div>
       <div class="divide-y divide-border">
@@ -273,14 +273,15 @@ import { useList } from '@svadmin/core';
       </div>
     </section>
   {:else if operationsResource === 'cycle_counts'}
-    {@const expected = sumBy('expectedItems')}
-    {@const counted = sumBy('countedItems')}
-    {@const variance = sumBy('varianceItems')}
+    {@const rows = demoRenderers.cycle_counts.records(rawRows)}
+    {@const expected = sumBy(rows, 'expectedItems')}
+    {@const counted = sumBy(rows, 'countedItems')}
+    {@const variance = sumBy(rows, 'varianceItems')}
     <section class="grid grid-cols-2 gap-3 xl:grid-cols-4" data-operations-metrics>
       <MetricBlock label={isZh ? '盘点计划' : 'Count plans'} value={rows.length} detail={isZh ? '当前周期' : 'Current cycle'} />
       <MetricBlock label={isZh ? '盘点进度' : 'Completion'} value={`${percent(counted, expected)}%`} detail={`${counted} / ${expected} ${isZh ? '项' : 'items'}`} trendTone="positive" />
       <MetricBlock label={isZh ? '差异项' : 'Variance items'} value={variance} detail={isZh ? '需要复核' : 'Requires reconciliation'} trendTone={variance > 0 ? 'warning' : 'positive'} />
-      <MetricBlock label={isZh ? '进行中' : 'In progress'} value={countBy('status', 'in_progress')} detail={isZh ? '现场盘点' : 'Active count sessions'} />
+      <MetricBlock label={isZh ? '进行中' : 'In progress'} value={countBy(rows, 'status', 'in_progress')} detail={isZh ? '现场盘点' : 'Active count sessions'} />
     </section>
     <section class="grid gap-5 xl:grid-cols-[minmax(0,1.4fr)_18rem]" data-cycle-count-layout>
       <div class="rounded-lg border border-border bg-card">
@@ -295,12 +296,13 @@ import { useList } from '@svadmin/core';
       <aside class="space-y-4 rounded-lg border border-border bg-card p-4"><SectionHeader title={isZh ? '复核重点' : 'Review focus'} /><div class="space-y-3"><div class="flex items-start gap-3"><Clock3 class="mt-0.5 size-4 text-muted-foreground" /><div><p class="text-sm font-medium text-foreground">{isZh ? '计划窗口' : 'Scheduled windows'}</p><p class="text-xs text-muted-foreground">{rows.length} {isZh ? '个盘点任务待跟踪' : 'count sessions to track'}</p></div></div><div class="flex items-start gap-3"><AlertTriangle class="mt-0.5 size-4 text-muted-foreground" /><div><p class="text-sm font-medium text-foreground">{isZh ? '差异处理' : 'Variance review'}</p><p class="text-xs text-muted-foreground">{variance} {isZh ? '项需要核对库存记录' : 'items require reconciliation'}</p></div></div></div></aside>
     </section>
   {:else if operationsResource === 'inventory_adjustments'}
+    {@const rows = demoRenderers.inventory_adjustments.records(rawRows)}
     {@const pendingAdjustments = rows.filter((row) => text(row, 'status') === 'pending_approval')}
     <section class="grid grid-cols-2 gap-3 xl:grid-cols-4" data-operations-metrics>
       <MetricBlock label={isZh ? '调整申请' : 'Adjustments'} value={rows.length} detail={isZh ? '当前审批范围' : 'Current approval scope'} />
       <MetricBlock label={isZh ? '待审批' : 'Pending approval'} value={pendingAdjustments.length} detail={isZh ? '需要负责人处理' : 'Needs an owner decision'} trendTone={pendingAdjustments.length > 0 ? 'warning' : 'positive'} />
-      <MetricBlock label={isZh ? '净库存影响' : 'Net stock impact'} value={sumBy('quantityChange')} detail={isZh ? '所有调整合计' : 'Across all adjustments'} />
-      <MetricBlock label={isZh ? '变动总量' : 'Gross change'} value={absoluteSumBy('quantityChange')} detail={isZh ? '绝对数量变化' : 'Absolute quantity movement'} />
+      <MetricBlock label={isZh ? '净库存影响' : 'Net stock impact'} value={sumBy(rows, 'quantityChange')} detail={isZh ? '所有调整合计' : 'Across all adjustments'} />
+      <MetricBlock label={isZh ? '变动总量' : 'Gross change'} value={absoluteSumBy(rows, 'quantityChange')} detail={isZh ? '绝对数量变化' : 'Absolute quantity movement'} />
     </section>
     <section class="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]" data-adjustment-layout>
       <div class="rounded-lg border border-border bg-card">
@@ -324,12 +326,13 @@ import { useList } from '@svadmin/core';
       <aside class="rounded-lg border border-border bg-card p-4"><SectionHeader title={isZh ? '调整影响' : 'Adjustment impact'} /><div class="mt-5 space-y-4">{#each rows as row (String(row['id']))}<div class="flex items-center justify-between gap-3"><div class="min-w-0"><p class="truncate text-sm font-medium text-foreground">{productName(row['productId'])}</p><p class="text-xs text-muted-foreground">{warehouseName(row['warehouseId'])}</p></div><span class={`text-sm font-semibold ${numeric(row, 'quantityChange') < 0 ? 'text-destructive' : 'text-foreground'}`}>{numeric(row, 'quantityChange') > 0 ? '+' : ''}{numeric(row, 'quantityChange')}</span></div>{/each}</div></aside>
     </section>
   {:else if operationsResource === 'reorder_rules'}
+    {@const rows = demoRenderers.reorder_rules.records(rawRows)}
     {@const reviewRules = rows.filter((row) => text(row, 'status') === 'review')}
     <section class="grid grid-cols-2 gap-3 xl:grid-cols-4" data-operations-metrics>
       <MetricBlock label={isZh ? '补货策略' : 'Reorder policies'} value={rows.length} detail={isZh ? '已配置规则' : 'Configured rules'} />
-      <MetricBlock label={isZh ? '生效策略' : 'Active policies'} value={countBy('status', 'active')} detail={isZh ? '自动补货范围' : 'Automated replenishment'} trendTone="positive" />
+      <MetricBlock label={isZh ? '生效策略' : 'Active policies'} value={countBy(rows, 'status', 'active')} detail={isZh ? '自动补货范围' : 'Automated replenishment'} trendTone="positive" />
       <MetricBlock label={isZh ? '待复核' : 'Needs review'} value={reviewRules.length} detail={isZh ? '阈值或消耗变化' : 'Threshold or demand changed'} trendTone={reviewRules.length > 0 ? 'warning' : 'positive'} />
-      <MetricBlock label={isZh ? '计划补货量' : 'Planned reorder units'} value={sumBy('reorderQuantity')} detail={isZh ? '全部策略合计' : 'Across all policies'} />
+      <MetricBlock label={isZh ? '计划补货量' : 'Planned reorder units'} value={sumBy(rows, 'reorderQuantity')} detail={isZh ? '全部策略合计' : 'Across all policies'} />
     </section>
     <section class="rounded-lg border border-border bg-card" data-reorder-layout>
       <div class="border-b border-border p-4"><SectionHeader title={isZh ? '策略健康度' : 'Policy health'} description={isZh ? '对照最低库存、目标库存、补货量和供应商交期。' : 'Compare minimum stock, target coverage, reorder quantity, and supplier lead time.'} /></div>
@@ -342,34 +345,37 @@ import { useList } from '@svadmin/core';
     </section>
   {:else}
     {@const isPurchase = operationsResource === 'purchase_orders'}
-    {@const amount = sumBy('totalAmount')}
+    {@const rows = isPurchase
+      ? demoRenderers.purchase_orders.records(rawRows).map(row => ({ id: row.id, orderNumber: row.orderNumber, status: row.status, totalAmount: row.totalAmount, orderDate: row.orderDate, party: supplierName(row.supplierId), fulfillmentDate: row.deliveryDate }))
+      : demoRenderers.sales_orders.records(rawRows).map(row => ({ id: row.id, orderNumber: row.orderNumber, status: row.status, totalAmount: row.totalAmount, orderDate: row.orderDate, party: row.customerName, fulfillmentDate: row.shippingDate }))}
+    {@const amount = sumBy(rows, 'totalAmount')}
     {@const completedStatus = isPurchase ? 'received' : 'shipped'}
     {@const activeOrders = rows.filter((row) => ![completedStatus, 'cancelled'].includes(text(row, 'status')))}
     <section class="grid grid-cols-2 gap-3 xl:grid-cols-4" data-operations-metrics>
       <MetricBlock label={isPurchase ? (isZh ? '采购订单' : 'Purchase orders') : (isZh ? '销售订单' : 'Sales orders')} value={rows.length} detail={isZh ? '当前订单范围' : 'Current order scope'} />
       <MetricBlock label={isZh ? '订单金额' : 'Order value'} value={money(amount)} detail={isZh ? '全部订单合计' : 'Across all orders'} />
       <MetricBlock label={isZh ? '进行中' : 'Open orders'} value={activeOrders.length} detail={isZh ? '仍需履约动作' : 'Still requires fulfillment'} />
-      <MetricBlock label={isPurchase ? (isZh ? '已收货' : 'Received') : (isZh ? '已发货' : 'Shipped')} value={countBy('status', completedStatus)} detail={isZh ? '已完成履约' : 'Fulfillment completed'} trendTone="positive" />
+      <MetricBlock label={isPurchase ? (isZh ? '已收货' : 'Received') : (isZh ? '已发货' : 'Shipped')} value={countBy(rows, 'status', completedStatus)} detail={isZh ? '已完成履约' : 'Fulfillment completed'} trendTone="positive" />
     </section>
     <section class="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)]" data-order-layout={operationsResource}>
       <div class="rounded-lg border border-border bg-card">
         <div class="border-b border-border p-4"><SectionHeader title={isPurchase ? (isZh ? '供应商履约队列' : 'Supplier fulfillment queue') : (isZh ? '客户履约队列' : 'Customer fulfillment queue')} description={isPurchase ? (isZh ? '跟踪下单、到货窗口和收货状态。' : 'Track ordering, delivery windows, and receiving state.') : (isZh ? '跟踪客户需求、处理状态和发货窗口。' : 'Track customer demand, processing state, and shipment windows.')} /></div>
         <div class="divide-y divide-border">
           {#each activeOrders as row (String(row['id']))}
-            <article class="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"><div><div class="flex items-center gap-2">{#if isPurchase}<Truck class="size-4 text-muted-foreground" />{:else}<PackageCheck class="size-4 text-muted-foreground" />{/if}<p class="text-sm font-medium text-foreground">{text(row, 'orderNumber')}</p></div><p class="mt-1 text-xs text-muted-foreground">{isPurchase ? supplierName(row['supplierId']) : text(row, 'customerName')} · {isPurchase ? text(row, 'deliveryDate') : text(row, 'shippingDate')}</p></div><div class="flex items-center justify-between gap-3"><span class="text-sm font-semibold text-foreground">{money(numeric(row, 'totalAmount'))}</span><Badge variant={badgeVariant(row['status'])}>{statusLabel(row['status'])}</Badge></div></article>
+            <article class="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"><div><div class="flex items-center gap-2">{#if isPurchase}<Truck class="size-4 text-muted-foreground" />{:else}<PackageCheck class="size-4 text-muted-foreground" />{/if}<p class="text-sm font-medium text-foreground">{text(row, 'orderNumber')}</p></div><p class="mt-1 text-xs text-muted-foreground">{row.party} · {row.fulfillmentDate}</p></div><div class="flex items-center justify-between gap-3"><span class="text-sm font-semibold text-foreground">{money(numeric(row, 'totalAmount'))}</span><Badge variant={badgeVariant(row['status'])}>{statusLabel(row['status'])}</Badge></div></article>
           {:else}
             <DataState state="empty" title={isZh ? '暂无进行中的订单' : 'No active orders'} />
           {/each}
         </div>
       </div>
-      <aside class="rounded-lg border border-border bg-card p-4"><SectionHeader title={isZh ? '履约状态' : 'Fulfillment status'} /><div class="mt-5 space-y-4">{#each (isPurchase ? ['draft', 'ordered', 'received'] : ['pending', 'processing', 'shipped']) as status (status)}<div class="flex items-center justify-between gap-3"><div class="flex items-center gap-2">{#if status === completedStatus}<CheckCircle2 class="size-4 text-muted-foreground" />{:else}<Clock3 class="size-4 text-muted-foreground" />{/if}<span class="text-sm text-muted-foreground">{statusLabel(status)}</span></div><Badge variant="outline">{countBy('status', status)}</Badge></div>{/each}</div></aside>
+      <aside class="rounded-lg border border-border bg-card p-4"><SectionHeader title={isZh ? '履约状态' : 'Fulfillment status'} /><div class="mt-5 space-y-4">{#each (isPurchase ? ['draft', 'ordered', 'received'] : ['pending', 'processing', 'shipped']) as status (status)}<div class="flex items-center justify-between gap-3"><div class="flex items-center gap-2">{#if status === completedStatus}<CheckCircle2 class="size-4 text-muted-foreground" />{:else}<Clock3 class="size-4 text-muted-foreground" />{/if}<span class="text-sm text-muted-foreground">{statusLabel(status)}</span></div><Badge variant="outline">{countBy(rows, 'status', status)}</Badge></div>{/each}</div></aside>
     </section>
   {/if}
 
   {#if !hasError && !isLoading && showRecords}
     <section class="space-y-3" data-operations-table>
       <SectionHeader title={isZh ? '完整记录' : 'All records'} description={isZh ? '保留 svadmin 的筛选、排序、新建、编辑、详情和删除流程。' : 'Keep the complete svadmin filter, sort, create, edit, show, and delete workflow.'} />
-      <AutoTable {resourceName} />
+      <AutoTable {resourceName} rendering={demoRendering(resourceName)} />
     </section>
   {/if}
 </ContentPageShell>

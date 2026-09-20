@@ -55,7 +55,6 @@
     limits?: Partial<SpreadsheetLimits>;
     class?: string;
   }
-
   let {
     sheets = $bindable([
       {
@@ -256,12 +255,8 @@
   const canAddCol = $derived(canRender && gridCols < limits.maxCols && gridRows * (gridCols + 1) <= limits.maxCells);
 
   function getColName(index: number): string {
-    let result = '';
-    let i = index;
-    while (i >= 0) {
-      result = String.fromCharCode((i % 26) + 65) + result;
-      i = Math.floor(i / 26) - 1;
-    }
+    let result = '', current = index;
+    while (current >= 0) { result = String.fromCharCode(current % 26 + 65) + result; current = Math.floor(current / 26) - 1; }
     return result;
   }
 
@@ -929,6 +924,16 @@
         setTimeout(() => URL.revokeObjectURL(url), 10_000);
       }
     }
+    const csv = lines.join('\n');
+    if (onexport) { onexport(csv); return; }
+    if (typeof document === 'undefined') return;
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+    try {
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `${sheet.name}_${Date.now()}.csv`;
+      anchor.click();
+    } finally { setTimeout(() => URL.revokeObjectURL(url), 0); }
   }
 
   function exportWorkbook() {
@@ -1055,8 +1060,7 @@
   }
 </script>
 
-<div class={cn('svadmin-u-a217b4eaa918 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-cef5b893cf23 svadmin-u-359090c2d529 svadmin-u-6f7e013d6499 svadmin-u-eb6e8b881acd svadmin-u-2cd02d11d1af', className)}>
-  <!-- Header Toolbar -->
+<div data-testid="spreadsheet-view" class={cn('svadmin-u-a217b4eaa918 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-cef5b893cf23 svadmin-u-359090c2d529 svadmin-u-6f7e013d6499 svadmin-u-eb6e8b881acd svadmin-u-2cd02d11d1af', className)}>
   <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4 svadmin-u-f4cc511ff0c1 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff">
     <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
       <FileSpreadsheet class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-20aaf08a7ed1 svadmin-u-012fbd121f37" />
@@ -1151,9 +1155,7 @@
 
   <!-- Formula Bar -->
   <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-d5eab218aa34 svadmin-u-ec0091ee009b svadmin-u-5f22e64f2282 svadmin-u-b00f43c30c2b svadmin-u-ca6bcd4b6f3f svadmin-u-05faf5c801ff svadmin-u-0e65706bcccd">
-    <div class="svadmin-u-d5eab218aa34 svadmin-u-465609a240a8 svadmin-u-07389a777c1f svadmin-u-e6f9e383a762 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-d4108abe6359 svadmin-u-e83a7042bc91 svadmin-u-d058ca6de60f svadmin-u-28ae52cc20ae svadmin-u-ca6bf63030aa">
-      {selectedCell}
-    </div>
+    <div class="svadmin-u-d5eab218aa34 svadmin-u-465609a240a8 svadmin-u-07389a777c1f svadmin-u-e6f9e383a762 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-d4108abe6359 svadmin-u-e83a7042bc91 svadmin-u-d058ca6de60f svadmin-u-28ae52cc20ae svadmin-u-ca6bf63030aa">{selectedCell}</div>
     <span class="svadmin-u-bfa603190748 svadmin-u-359090c2d529">fx</span>
     <input
       type="text"
@@ -1243,8 +1245,6 @@
       </table>
     </div>
   {/if}
-
-  <!-- Sheet Tabs Footer -->
   <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4 svadmin-u-6b7d6e21ccbd svadmin-u-b950dda299d3 svadmin-u-05faf5c801ff">
     <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421 svadmin-u-1384f66f41d0">
       {#each (validWorkbook ? sheets : []) as sheet (sheet.id)}

@@ -5,10 +5,10 @@ export function fieldClasses(state: FieldState = "default"): Record<string, stri
 	return field({ state });
 }
 
-export function metricSurfaceClasses(tone: DesignTone = "default"): Record<string, string> {
+export function metricSurfaceClasses(tone: SurfaceTone = "neutral") {
 	return surfaceMetric({ tone });
 }
 
-export function tableSurfaceClasses(density: SurfaceDensity = "comfortable"): Record<string, string> {
+export function tableSurfaceClasses(density: SurfaceDensity = "comfortable") {
 	return surfaceTable({ density });
 }

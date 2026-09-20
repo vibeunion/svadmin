@@ -109,15 +109,9 @@ const expectations: PackageExpectation[] = [
     ],
     contentAssertions: [
       {
-        path: 'dist/ai.css',
-        includes: [
-          '@source "./components";',
-          '@source "../node_modules/streamdown-svelte/dist/**/*.{js,svelte,ts}";',
-          '@source "../../../node_modules/streamdown-svelte/dist/**/*.{js,svelte,ts}";',
-          '@source "../../../streamdown-svelte/dist/**/*.{js,svelte,ts}";',
-          '.svadmin-ai',
-        ],
-        excludes: ['@source "./src";'],
+        path: 'dist/ai.theme.css',
+        includes: ['@import "./ai.css";'],
+        excludes: ['@source', '@theme', '@apply', '@import "tailwindcss"'],
       },
     ],
   },
@@ -137,8 +131,8 @@ const expectations: PackageExpectation[] = [
     contentAssertions: [
       {
         path: 'dist/app.theme.css',
-        includes: ['.svadmin-theme', '--color-primary: var(--primary);'],
-        excludes: ['@import', '@theme', '@source', '@tailwind'],
+        includes: ['.svadmin-button', '--color-primary'],
+        excludes: ['@theme', '@source', '@apply', '@import "tailwindcss"'],
       },
       {
         path: 'dist/app.css',
@@ -148,7 +142,7 @@ const expectations: PackageExpectation[] = [
           '--color-primary: var(--primary);',
           '.svadmin-button',
         ],
-        excludes: ['@import', '@theme', '@source', '@tailwind'],
+        excludes: ['@theme', '@source', '@import "tailwindcss"'],
       },
     ],
   },

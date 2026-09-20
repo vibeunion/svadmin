@@ -1,0 +1,401 @@
+{
+  "schemaVersion": 1,
+  "id": "svadmin-stripe-first-reference-kit",
+  "version": "0.1.0",
+  "source": {
+    "repository": "vibeunion/svadmin",
+    "commit": "c91936335e1a431f2ac37dec31da138afbbbc21f",
+    "tokenPath": "packages/ui/design/tokens.ts",
+    "componentIndexPath": "packages/ui/src/components/content/index.ts"
+  },
+  "boundaries": {
+    "referenceOnly": true,
+    "runtimeRegistration": false,
+    "productionStyleChange": false,
+    "thirdPartyAssetsIncluded": false,
+    "arbitraryStyleOrCode": false,
+    "businessWriteAuthority": false
+  },
+  "tokens": {
+    "colors": {
+      "surface": "--card",
+      "foreground": "--foreground",
+      "muted": "--muted-foreground",
+      "border": "--border",
+      "success": "--success",
+      "warning": "--warning",
+      "danger": "--destructive",
+      "info": "--info"
+    },
+    "radii": {
+      "surface": "--radius-lg"
+    },
+    "spacing": {
+      "xs": "0.25rem",
+      "sm": "0.75rem",
+      "md": "1rem",
+      "lg": "1.25rem"
+    },
+    "fontSizes": {
+      "compact": "0.75rem",
+      "body": "0.875rem"
+    }
+  },
+  "discrepancies": [
+    {
+      "token": "spacing.sm",
+      "designMd": "8px",
+      "code": "0.75rem",
+      "decision": "保留代码值；16px 根字号时为 12px。不做隐式视觉迁移。"
+    },
+    {
+      "token": "spacing.lg",
+      "designMd": "24px",
+      "code": "1.25rem",
+      "decision": "保留代码值；16px 根字号时为 20px。后续单独统一命名与文档。"
+    }
+  ],
+  "components": {
+    "ContentPageShell": {
+      "figmaName": "ContentPageShell",
+      "sourcePath": "packages/ui/src/components/content/ContentPageShell.svelte"
+    },
+    "ContentPageHeader": {
+      "figmaName": "ContentPageHeader",
+      "sourcePath": "packages/ui/src/components/content/ContentPageHeader.svelte"
+    },
+    "FilterToolbar": {
+      "figmaName": "FilterToolbar",
+      "sourcePath": "packages/ui/src/components/content/FilterToolbar.svelte"
+    },
+    "DataState": {
+      "figmaName": "DataState",
+      "sourcePath": "packages/ui/src/components/content/DataState.svelte"
+    },
+    "DescriptionList": {
+      "figmaName": "DescriptionList",
+      "sourcePath": "packages/ui/src/components/content/DescriptionList.svelte"
+    },
+    "StatusBadge": {
+      "figmaName": "StatusBadge",
+      "sourcePath": "packages/ui/src/components/content/StatusBadge.svelte"
+    },
+    "SettingsGroup": {
+      "figmaName": "SettingsGroup",
+      "sourcePath": "packages/ui/src/components/content/SettingsGroup.svelte"
+    },
+    "SettingsFieldRow": {
+      "figmaName": "SettingsFieldRow",
+      "sourcePath": "packages/ui/src/components/content/SettingsFieldRow.svelte"
+    }
+  },
+  "patterns": [
+    {
+      "id": "resource-list",
+      "name": "资源列表",
+      "job": "筛选、识别并处理一组资源。",
+      "components": [
+        "ContentPageShell",
+        "ContentPageHeader",
+        "FilterToolbar",
+        "DataState"
+      ],
+      "regions": [
+        "header",
+        "toolbar",
+        "results"
+      ],
+      "primaryActionOwner": "header",
+      "compositionSlots": {
+        "results": "复用宿主已有资源表格及其权限、选择和分页契约；不创建第二套表格。"
+      },
+      "states": [
+        {
+          "id": "loading",
+          "label": "加载中",
+          "feedback": {
+            "owner": "results",
+            "mode": "inline",
+            "clearWhen": "当前查询完成或失败"
+          },
+          "recoveryAction": "等待；仅在宿主已有取消契约时提供取消",
+          "dataVisibility": "none",
+          "acceptance": "保持页头和工具栏位置；加载占位不伪装成无数据；不展示其他租户旧记录。"
+        },
+        {
+          "id": "ready",
+          "label": "正常",
+          "feedback": {
+            "owner": "results",
+            "mode": "none",
+            "clearWhen": "不适用：没有额外反馈"
+          },
+          "recoveryAction": "按宿主已有权限处理资源",
+          "dataVisibility": "authorized",
+          "acceptance": "筛选、分页和选择各有唯一归属；一个主导操作；状态列不用颜色作为唯一提示。"
+        },
+        {
+          "id": "empty-first-use",
+          "label": "首次无数据",
+          "feedback": {
+            "owner": "results",
+            "mode": "inline",
+            "clearWhen": "当前作用域首次有数据"
+          },
+          "recoveryAction": "有创建权限时引导创建，否则给出只读说明",
+          "dataVisibility": "none",
+          "acceptance": "没有活动筛选且资源确实为空；不得误导无创建权限用户。"
+        },
+        {
+          "id": "empty-filtered",
+          "label": "筛选无结果",
+          "feedback": {
+            "owner": "results",
+            "mode": "inline",
+            "clearWhen": "修改或清除筛选后有结果"
+          },
+          "recoveryAction": "清除筛选或调整条件",
+          "dataVisibility": "none",
+          "acceptance": "保留工具栏和输入；不使用首次创建文案替代无匹配结果。"
+        },
+        {
+          "id": "error",
+          "label": "读取失败",
+          "feedback": {
+            "owner": "results",
+            "mode": "inline",
+            "clearWhen": "同一查询成功或作用域变更"
+          },
+          "recoveryAction": "在当前查询与权限上下文中重试",
+          "dataVisibility": "none",
+          "acceptance": "保留筛选与导航；错误文案脱敏；无可证明有效的旧数据时不展示陈旧记录。"
+        },
+        {
+          "id": "forbidden",
+          "label": "无权限",
+          "feedback": {
+            "owner": "results",
+            "mode": "inline",
+            "clearWhen": "重新授权或切换到可访问作用域"
+          },
+          "recoveryAction": "说明所需权限；不提供能绕过权限的重试",
+          "dataVisibility": "none",
+          "acceptance": "停止本作用域读取并移除旧数据；隐藏不允许的操作；不泄露存在性或数量。"
+        }
+      ]
+    },
+    {
+      "id": "object-detail",
+      "name": "对象详情",
+      "job": "判断一个对象的当前状态并执行允许的下一步。",
+      "components": [
+        "ContentPageShell",
+        "ContentPageHeader",
+        "DescriptionList",
+        "StatusBadge",
+        "DataState"
+      ],
+      "regions": [
+        "header",
+        "summary",
+        "details"
+      ],
+      "primaryActionOwner": "header",
+      "compositionSlots": {
+        "details": "复用宿主已校验的详情记录及字段权限；设计状态不是新的 record API。"
+      },
+      "states": [
+        {
+          "id": "loading",
+          "label": "加载中",
+          "feedback": {
+            "owner": "details",
+            "mode": "inline",
+            "clearWhen": "当前对象完成读取或失败"
+          },
+          "recoveryAction": "等待当前对象结果",
+          "dataVisibility": "none",
+          "acceptance": "标题和动作区域稳定；不把上一个对象的信息留在新对象详情内。"
+        },
+        {
+          "id": "ready",
+          "label": "正常",
+          "feedback": {
+            "owner": "summary",
+            "mode": "none",
+            "clearWhen": "不适用：没有额外反馈"
+          },
+          "recoveryAction": "执行一个经授权的主导操作",
+          "dataVisibility": "authorized",
+          "acceptance": "状态只在摘要中主呈现，DescriptionList 负责属性；更新时间影响决策时明确展示。"
+        },
+        {
+          "id": "partial",
+          "label": "部分数据",
+          "feedback": {
+            "owner": "details",
+            "mode": "inline",
+            "clearWhen": "缺失部分恢复或作用域变更"
+          },
+          "recoveryAction": "只重试失败部分，不重置已确认内容",
+          "dataVisibility": "authorized-partial",
+          "acceptance": "明确缺失范围及影响；仅展示当前对象、当前权限允许的已知部分；不把缺失当作零。"
+        },
+        {
+          "id": "error",
+          "label": "读取失败",
+          "feedback": {
+            "owner": "details",
+            "mode": "inline",
+            "clearWhen": "同一对象读取成功或作用域变更"
+          },
+          "recoveryAction": "在原对象身份和权限下重试",
+          "dataVisibility": "none",
+          "acceptance": "错误反馈归属详情区；禁止旧对象值串入；不给出未经授权的字段。"
+        },
+        {
+          "id": "forbidden",
+          "label": "无权限",
+          "feedback": {
+            "owner": "details",
+            "mode": "inline",
+            "clearWhen": "重新授权或离开当前作用域"
+          },
+          "recoveryAction": "返回可访问列表或申请权限",
+          "dataVisibility": "none",
+          "acceptance": "不保留旧字段值、对象摘要、标识性标题或不允许的操作。"
+        }
+      ]
+    },
+    {
+      "id": "settings-form",
+      "name": "设置表单",
+      "job": "理解修改影响，校验并明确提交设置。",
+      "components": [
+        "ContentPageShell",
+        "ContentPageHeader",
+        "SettingsGroup",
+        "SettingsFieldRow"
+      ],
+      "regions": [
+        "header",
+        "fields",
+        "actions",
+        "transient-feedback"
+      ],
+      "primaryActionOwner": "actions",
+      "compositionSlots": {
+        "fields": "复用现有字段组件、验证和提交契约；只在可信宿主中绑定行为。"
+      },
+      "states": [
+        {
+          "id": "pristine",
+          "label": "未修改",
+          "feedback": {
+            "owner": "actions",
+            "mode": "none",
+            "clearWhen": "不适用：没有额外反馈"
+          },
+          "recoveryAction": "编辑具有写权限的字段",
+          "dataVisibility": "draft",
+          "acceptance": "说明影响范围；无变化时不伪造待保存状态；只读字段不依赖样式禁用。"
+        },
+        {
+          "id": "dirty",
+          "label": "待保存",
+          "feedback": {
+            "owner": "actions",
+            "mode": "inline",
+            "clearWhen": "保存成功、显式放弃或作用域失效"
+          },
+          "recoveryAction": "保存或显式放弃",
+          "dataVisibility": "draft",
+          "acceptance": "草稿保留；保存是唯一主导动作，取消为次操作；离开提示遵循宿主规则。"
+        },
+        {
+          "id": "invalid",
+          "label": "校验失败",
+          "feedback": {
+            "owner": "fields",
+            "mode": "inline",
+            "clearWhen": "对应字段修正且重新校验通过"
+          },
+          "recoveryAction": "聚焦首个错误并修正",
+          "dataVisibility": "draft",
+          "acceptance": "字段错误就地关联；阻止提交；不把同一错误复制到 Toast 和永久横幅。"
+        },
+        {
+          "id": "saving",
+          "label": "保存中",
+          "feedback": {
+            "owner": "actions",
+            "mode": "inline",
+            "clearWhen": "当前提交完成、失败或作用域失效"
+          },
+          "recoveryAction": "等待当前提交；禁止重复提交",
+          "dataVisibility": "draft",
+          "acceptance": "稳定按钮尺寸和动作位置；禁止重复提交；晚到结果不能改变新租户或新草稿。"
+        },
+        {
+          "id": "success",
+          "label": "保存成功",
+          "feedback": {
+            "owner": "transient-feedback",
+            "mode": "transient",
+            "clearWhen": "短暂提示结束；若流程已有完成页则不再显示此提示"
+          },
+          "recoveryAction": "继续编辑；不重复弹成功反馈",
+          "dataVisibility": "draft",
+          "acceptance": "普通成功短暂反馈；刷新已保存基线并清除 dirty；完成页与 Toast 二选一。"
+        },
+        {
+          "id": "error",
+          "label": "保存失败",
+          "feedback": {
+            "owner": "actions",
+            "mode": "inline",
+            "clearWhen": "显式重试成功、修正后成功或作用域失效"
+          },
+          "recoveryAction": "保留草稿并允许经授权重试",
+          "dataVisibility": "draft",
+          "acceptance": "不清空用户输入；区分字段校验与提交失败；错误脱敏；不宣称失败已持久化。"
+        },
+        {
+          "id": "readonly",
+          "label": "只读",
+          "feedback": {
+            "owner": "fields",
+            "mode": "inline",
+            "clearWhen": "获得写权限或离开当前作用域"
+          },
+          "recoveryAction": "阅读允许字段；说明不可修改原因",
+          "dataVisibility": "authorized",
+          "acceptance": "禁止提交路径和编辑行为，不仅使控件变灰；不给 AI 或设计稿增加写权限。"
+        }
+      ]
+    }
+  ],
+  "acceptanceTargets": {
+    "themes": [
+      "light",
+      "dark"
+    ],
+    "viewports": [
+      [
+        1440,
+        900
+      ],
+      [
+        1920,
+        1080
+      ],
+      [
+        390,
+        844
+      ]
+    ],
+    "designReview": "pending",
+    "applicationBrowserRegression": "not-run",
+    "accessibility": "WCAG 2.2 AA 目标；键盘、焦点与读屏需独立验证，不构成合规声明。"
+  }
+}

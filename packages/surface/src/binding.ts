@@ -44,10 +44,19 @@ export function resolveSurfaceWidgetData(
   widget: SurfaceWidget,
   sourceStates: Readonly<Record<string, SurfaceSourceDataState>>,
 ): SurfaceWidgetDataState {
-  if (!widget.binding) return { status: 'unbound' };
+  const sourceId = widget.binding?.sourceId;
+  return resolveSurfaceSourceData(widget, sourceId !== undefined && Object.hasOwn(sourceStates, sourceId)
+    ? sourceStates[sourceId]
+    : undefined);
+}
 
+/** Resolve one binding without subscribing the widget to unrelated source states. */
+export function resolveSurfaceSourceData(
+  widget: SurfaceWidget,
+  sourceState: SurfaceSourceDataState | undefined,
+): SurfaceWidgetDataState {
+  if (!widget.binding) return { status: 'unbound' };
   const sourceId = widget.binding.sourceId;
-  const sourceState = Object.hasOwn(sourceStates, sourceId) ? sourceStates[sourceId] : undefined;
   if (!sourceState) return { status: 'loading', sourceId };
   if (sourceState.status !== 'ready') return sourceState;
 

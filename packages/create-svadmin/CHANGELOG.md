@@ -1,5 +1,50 @@
 # Changelog
 
+## [0.29.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.28.7...create-svadmin-v0.29.0) (2026-09-20)
+
+
+### 🚀 Features
+
+* **ui:** replace shadcn styling with native Panda primitives ([#435](https://github.com/vibeunion/svadmin/issues/435)) ([6aeb107](https://github.com/vibeunion/svadmin/commit/6aeb107f851a7cd50ecc5fd2d6d67edc0262b00b))
+
+
+### 🐛 Bug Fixes
+
+* **ci:** restore strict PR contracts ([5155153](https://github.com/vibeunion/svadmin/commit/5155153faef9c2edb12be86eb291114ae35f36e9))
+* **core:** preserve temporal shapes in generated schemas ([5129935](https://github.com/vibeunion/svadmin/commit/51299356dd2eca0636094baefabadc63c0fbb1d8))
+* **design:** integrate merged field repairs without changing design assets ([fce177a](https://github.com/vibeunion/svadmin/commit/fce177a4ad39da3b7c5a9e2325fa7039c435033c))
+* **i18n:** reconcile processing labels when syncing main into Panda migration ([7b2f036](https://github.com/vibeunion/svadmin/commit/7b2f036ca797e2c9349fc041c3b640d1138fdaba))
+* reconcile TypeBox migration with merged field contracts ([1a30604](https://github.com/vibeunion/svadmin/commit/1a3060434f5a59bdb8d84510ba5044e48fe1f83e))
+* **styles:** reconcile content recipes with current strict field contracts ([3431127](https://github.com/vibeunion/svadmin/commit/34311272a1b5dd556049645e57d108123a9902d7))
+* **surface:** integrate edit preview with native main and scoped source loading ([0a6d22d](https://github.com/vibeunion/svadmin/commit/0a6d22dbbfbfa68615f99dffa4966062acbc683f))
+* **surface:** reconcile controlled workflows with merged TypeBox repairs ([d2494e8](https://github.com/vibeunion/svadmin/commit/d2494e863264d2ea34b2ea96898e105a307d1238))
+* **ui:** integrate enterprise components with current Panda contracts ([1565f54](https://github.com/vibeunion/svadmin/commit/1565f549af42a04bc63d9189a267e01c58ffedf2))
+* **ui:** reconcile async interaction repairs with current main ([b39b495](https://github.com/vibeunion/svadmin/commit/b39b4953af4166548b21b8ab7fd2c7af80d6a027))
+* **ui:** reconcile enterprise validation with recursive form and host-filter contracts ([034eb73](https://github.com/vibeunion/svadmin/commit/034eb737b1ad4caca02fcd42c5f83559aaedb592))
+* **ui:** repair typed field contracts and isolate regression test state ([ec4f273](https://github.com/vibeunion/svadmin/commit/ec4f27340a95bc8152bc7657d647e340b67ea623))
+
+
+### 🔧 Miscellaneous Chores
+
+* **design:** reconcile Stripe specimens with merged reference assets on main ([3a9bbad](https://github.com/vibeunion/svadmin/commit/3a9bbad1ea829b32ef25c094e071a1113bde5f8c))
+* **styles:** reconcile content recipes with native primitives on main ([ae608de](https://github.com/vibeunion/svadmin/commit/ae608de888de8e06c3f6aeebd92e5de1b8ae9af3))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/core bumped to 0.53.0
+
+## [0.28.7](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.28.6...create-svadmin-v0.28.7) (2026-09-19)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/core bumped to 0.52.0
+
 ## [0.28.6](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.28.5...create-svadmin-v0.28.6) (2026-09-18)
 
 

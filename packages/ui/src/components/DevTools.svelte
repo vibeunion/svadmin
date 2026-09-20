@@ -249,8 +249,8 @@
   {#if visible}
     <div
       class="svadmin-u-7bc555991dba svadmin-u-189f036c335c svadmin-u-5a438c30beec svadmin-u-f50571addf44 svadmin-u-11863ecc32e7 svadmin-u-c69e21ff5804 svadmin-u-1301e5c1ce71 svadmin-u-ca6bcd4b6f3f svadmin-u-d5e98261a758 svadmin-u-cd0ad9a56558 svadmin-u-14e46609fd68 svadmin-u-1d5904e7e755 svadmin-u-2cd02d11d1af"
-      class:w-auto={collapsed}
-      class:min-w-[200px]={collapsed}
+      class:svadmin-devtools--collapsed-width={collapsed}
+      class:svadmin-devtools--collapsed-min-width={collapsed}
       transition:fly={{ y: 400, duration: 300 }}
     >
       <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b svadmin-u-2ef11f1cb219 svadmin-u-65fdbade2025">

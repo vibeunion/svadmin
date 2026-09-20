@@ -1,80 +1,10 @@
-import { defineConfig } from "@pandacss/dev";
-
-const semanticColors = {
-	background: { value: "var(--background)" },
-	foreground: { value: "var(--foreground)" },
-	card: { value: "var(--card)" },
-	"card-foreground": { value: "var(--card-foreground)" },
-	popover: { value: "var(--popover)" },
-	"popover-foreground": { value: "var(--popover-foreground)" },
-	primary: { value: "var(--primary)" },
-	"primary-foreground": { value: "var(--primary-foreground)" },
-	secondary: { value: "var(--secondary)" },
-	"secondary-foreground": { value: "var(--secondary-foreground)" },
-	muted: { value: "var(--muted)" },
-	"muted-foreground": { value: "var(--muted-foreground)" },
-	accent: { value: "var(--accent)" },
-	"accent-foreground": { value: "var(--accent-foreground)" },
-	destructive: { value: "var(--destructive)" },
-	"destructive-foreground": { value: "var(--destructive-foreground)" },
-	border: { value: "var(--border)" },
-	input: { value: "var(--input)" },
-	ring: { value: "var(--ring)" },
-	success: { value: "var(--success)" },
-	"success-foreground": { value: "var(--success-foreground)" },
-	warning: { value: "var(--warning)" },
-	"warning-foreground": { value: "var(--warning-foreground)" },
-	info: { value: "var(--info)" },
-	"info-foreground": { value: "var(--info-foreground)" },
-};
-
-const buttonVariants = {
-	variant: {
-		default: {
-			background: "primary",
-			color: "primary-foreground",
-			_hover: { background: "color-mix(in srgb, var(--primary) 88%, black)" },
-		},
-		outline: {
-			background: "transparent",
-			color: "foreground",
-			borderWidth: "1px",
-			borderColor: "input",
-			_hover: { background: "accent", color: "accent-foreground" },
-		},
-		secondary: {
-			background: "secondary",
-			color: "secondary-foreground",
-			_hover: { background: "muted" },
-		},
-		ghost: {
-			background: "transparent",
-			color: "foreground",
-			_hover: { background: "accent", color: "accent-foreground" },
-		},
-		destructive: {
-			background: "destructive",
-			color: "destructive-foreground",
-			_hover: { background: "color-mix(in srgb, var(--destructive) 88%, black)" },
-		},
-		link: {
-			background: "transparent",
-			color: "primary",
-			textDecoration: "underline",
-			textUnderlineOffset: "4px",
-		},
-	},
-	size: {
-		default: { minHeight: "2.25rem", paddingInline: "0.75rem" },
-		xs: { minHeight: "1.5rem", paddingInline: "0.5rem", fontSize: "0.75rem" },
-		sm: { minHeight: "2rem", paddingInline: "0.75rem", fontSize: "0.8rem" },
-		lg: { minHeight: "2.5rem", paddingInline: "1rem" },
-		icon: { width: "2.25rem", height: "2.25rem", padding: "0" },
-		"icon-xs": { width: "1.5rem", height: "1.5rem", padding: "0" },
-		"icon-sm": { width: "2rem", height: "2rem", padding: "0" },
-		"icon-lg": { width: "2.5rem", height: "2.5rem", padding: "0" },
-	},
-};
+import { defineConfig } from '@pandacss/dev';
+import { designTokens, semanticTokens } from './design/tokens.js';
+import { surfaceMetric, surfaceTable } from './design/recipes.js';
+import { uiButton, uiBadge, uiInput, uiTextarea } from './design/primitive-recipes.js';
+import { productSection, productToolbar, productWorkspace, productSettings, productSettingsRow, productList, productStatus } from './design/product-recipes.js';
+import { contentTokens, contentSemanticTokens } from './design/content-tokens.js';
+import { contentPage, contentHeader, metricBlock } from './design/content-recipes.js';
 
 export default defineConfig({
 	preflight: true,

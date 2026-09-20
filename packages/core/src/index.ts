@@ -91,7 +91,19 @@ export {
   sanitizeListQueryParams,
   writeURLState,
 } from './url-sync';
-export { setAccessControlProvider, getAccessControlProvider, getAccessControlOptions, canAccessAsync, createFeatureGate } from './permissions.svelte';
+export { setAccessControlProvider, getAccessControlProvider, getAccessControlOptions, resetAccessControlProvider, canAccessAsync, createFeatureGate } from './permissions.svelte';
+export {
+  canonicalPermission,
+  createPermissionAccessControlProvider,
+  decodePermissionCatalog,
+  decodePermissionSnapshot,
+} from './permission-catalog';
+export type {
+  PermissionCatalog,
+  PermissionCatalogBinding,
+  PermissionProjectionOptions,
+  PermissionSnapshot,
+} from './permission-catalog';
 export { useLive, useSubscription, usePublish } from './live.svelte';
 export { toast, getToastQueue, consumeToastQueue, getPromiseQueue, consumePromiseQueue, getToasts, removeToast, resetToast } from './toast.svelte';
 export {

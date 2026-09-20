@@ -1,5 +1,5 @@
 {
-  "surface": "0.8.x",
+  "surface": "0.9.x",
   "minimumSupported": {
     "@svadmin/core": "0.34.2",
     "@svadmin/ui": "0.40.6",
@@ -18,5 +18,26 @@
       "ui": "workspace tarball",
       "svelte": "workspace override"
     }
-  ]
+  ],
+  "minimumSupportedAppliesTo": [
+    ".",
+    "./svelte"
+  ],
+  "entrypointCompatibility": {
+    "./interactive": {
+      "status": "experimental",
+      "requiredUiCapabilities": [
+        "JsonSchemaForm.idPrefix",
+        "proxy-safe nested field updates",
+        "required boolean and decimal input support"
+      ],
+      "minimumPublishedUi": null,
+      "verification": "same-checkout tarballs via scripts/surface-workflows/packed-consumer.mjs; inspect the current run result",
+      "releaseGate": "Coordinate a tested UI release and narrow the package peer floor before publishing this entry."
+    },
+    "./server/sqlite": {
+      "runtime": "Node.js",
+      "verification": "Current CI Node version with real node:sqlite; no browser or distributed-store support implied."
+    }
+  }
 }

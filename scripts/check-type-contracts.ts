@@ -38,6 +38,7 @@ for (const project of [
   'scripts/fixtures/drizzle-types/tsconfig.json',
   'scripts/fixtures/flow-types/tsconfig.json',
   'scripts/fixtures/bits-types/tsconfig.json',
+  'scripts/fixtures/ui-rendering/tsconfig.json',
   'scripts/fixtures/supabase-types/tsconfig.json',
   'scripts/fixtures/supabase-types/tsconfig.live.json',
   'scripts/fixtures/supabase-types/tsconfig.auth.json',
@@ -76,3 +77,12 @@ for (const name of ['registered', 'unregistered', 'mutations', 'strict']) {
   if (result.error) console.error(result.error.message);
   if (result.status !== 0) process.exit(result.status ?? 1);
 }
+
+// 原生模板也必须进入公共契约检查，不能只验证普通 TypeScript 文件。
+const rendererProject = 'scripts/fixtures/ui-rendering/tsconfig.svelte.json';
+assertStrictProject(rendererProject);
+const rendererCheck = spawnSync(process.execPath, [
+  'run', 'svelte-check', '--tsgo-experimental-api', '--tsconfig', rendererProject, '--fail-on-warnings',
+], { cwd: root, stdio: 'inherit' });
+if (rendererCheck.error) console.error(rendererCheck.error.message);
+if (rendererCheck.status !== 0) process.exit(rendererCheck.status ?? 1);

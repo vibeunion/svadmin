@@ -1,0 +1,85 @@
+name: SVAR adapter verification
+on:
+  pull_request:
+    paths:
+      - 'packages/ui/src/components/Svar*'
+      - 'packages/ui/src/components/svar-grid-*'
+      - 'packages/ui/src/components/AutoTable.svelte'
+      - 'packages/ui/src/components/auto-table-*'
+      - 'packages/surface/**'
+      - 'packages/core/src/**'
+      - 'scripts/fixtures/svar-grid/**'
+      - '.github/workflows/svar-grid.yml'
+      - 'bun.lock'
+permissions:
+  contents: read
+concurrency:
+  group: svar-grid-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 26
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Archive exact tested source (without credentials or dependencies)
+        run: |
+          mkdir -p scripts/fixtures/svar-grid/evidence
+          git archive --format=tar HEAD | gzip > scripts/fixtures/svar-grid/evidence/source.tar.gz
+          git rev-parse HEAD > scripts/fixtures/svar-grid/evidence/tested-commit.txt
+      - name: Install unchanged workspace dependencies
+        run: bun install --frozen-lockfile
+      - name: Prepare the existing Panda and Surface design runtime
+        run: |
+          bun run --cwd packages/ui build:styles
+          node packages/surface/scripts/prepare-design.mjs
+      - name: Install pinned real SVAR in isolated consumer
+        run: npm ci --prefix scripts/fixtures/svar-grid --ignore-scripts --no-audit --no-fund
+      - name: Verify adapter and Surface lint
+        run: bun x --no-install eslint packages/ui/src/components/Svar*.svelte packages/ui/src/components/svar-grid-*.ts packages/ui/src/components/AutoTable.svelte packages/ui/src/components/auto-table-grid.ts packages/surface/src/svar*.ts packages/surface/src/components/Svar*.svelte scripts/fixtures/svar-grid --max-warnings 0
+      - name: Verify all adapter unit tests
+        working-directory: packages/ui
+        run: bun run test src/components/svar-grid --reporter=default --reporter=json --outputFile=../../scripts/fixtures/svar-grid/evidence/ui-tests.json
+      - name: Verify existing AutoTable behavior remains compatible
+        working-directory: packages/ui
+        run: bun run test src/components/auto-table --reporter=default --reporter=json --outputFile=../../scripts/fixtures/svar-grid/evidence/auto-table-tests.json
+      - name: Verify AI Surface schema boundaries
+        working-directory: packages/surface
+        run: bun run test src/svar-schema.test.ts --reporter=default --reporter=json --outputFile=../../scripts/fixtures/svar-grid/evidence/surface-tests.json
+      - name: Verify real upstream types and resource adapter
+        run: bun x --no-install svelte-check --tsgo-experimental-api --tsconfig scripts/fixtures/svar-grid/tsconfig.json --threshold error
+      - name: Verify SSR fallback
+        run: node scripts/fixtures/svar-grid/ssr.mjs
+      - name: Build real SVAR consumer
+        run: node node_modules/vite/bin/vite.js build --config scripts/fixtures/svar-grid/vite.config.ts
+      - name: Install browser
+        run: bun x --no-install playwright install --with-deps chromium
+      - name: Run real browser integration and capture states
+        env:
+          PLAYWRIGHT_HTML_OUTPUT_DIR: scripts/fixtures/svar-grid/report
+          PLAYWRIGHT_JSON_OUTPUT_FILE: scripts/fixtures/svar-grid/evidence/browser-tests.json
+        run: bun x --no-install playwright test --config scripts/fixtures/svar-grid/playwright.config.ts --reporter=line,html,json
+      - name: Check dependency isolation and whitespace
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git diff --exit-code -- bun.lock package.json packages/ui/package.json
+          git fetch --depth=1 origin "$BASE_SHA"
+          git diff --check "$BASE_SHA" HEAD
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: svar-grid-verification
+          path: |
+            scripts/fixtures/svar-grid/results
+            scripts/fixtures/svar-grid/report
+            scripts/fixtures/svar-grid/evidence
+            scripts/fixtures/svar-grid/dist
+            scripts/fixtures/svar-grid/package-lock.json
+          if-no-files-found: ignore

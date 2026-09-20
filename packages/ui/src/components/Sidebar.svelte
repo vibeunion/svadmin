@@ -312,7 +312,7 @@
   class:svadmin-sidebar-expanded={!collapsed}
   class:svadmin-sidebar-collapsed={collapsed}
 >
-  <div class="svadmin-u-60fbb7713999 svadmin-u-07017cde3e97 svadmin-u-3960ffc248d9 svadmin-u-012fbd121f37" class:px-5={!collapsed} class:justify-center={collapsed}>
+  <div class="svadmin-u-60fbb7713999 svadmin-u-07017cde3e97 svadmin-u-3960ffc248d9 svadmin-u-012fbd121f37" class:svadmin-u-d139dd09e38d={!collapsed} class:svadmin-u-86843cf1e227={collapsed}>
     {#if !collapsed}
       <a href={formatSidebarLink('/')} class="group svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-7e9a2a250cc3" onclick={(e) => { e.preventDefault(); adminContext.navigate('/'); }}>
         <SvadminLogo />
@@ -331,7 +331,7 @@
   </div>
 
   <ScrollArea class="svadmin-u-36e579c0b41c sidebar-scroll">
-  <nav aria-label="Main menu" class="svadmin-u-9fcd8a13827e" class:px-[10px]={!collapsed} class:px-2={collapsed}>
+  <nav aria-label="Main menu" class="svadmin-u-9fcd8a13827e" class:svadmin-u-7597e11b4d4b={!collapsed} class:svadmin-u-d5eab218aa34={collapsed}>
     {#if menu && menu.length > 0}
       <div class="svadmin-u-a26339f4b89e">
         {#each customMenuItems as item (item.name)}
@@ -511,7 +511,7 @@
         <Tooltip.Root>
           <Tooltip.Trigger>
             {#snippet child({ props }: { props: Record<string, unknown> })}
-              <Button {...props} variant="ghost" size="icon" onclick={onToggle} class="svadmin-u-ed8a5df7b2fb svadmin-u-2bbcfc3b5179 svadmin-u-421ac2be5045 svadmin-u-68d55a736ff4 svadmin-u-55d1f8b9d318 svadmin-u-646e10356266">
+              <Button {...props} aria-label={i18n.t('common.toggleSidebar')} variant="ghost" size="icon" onclick={onToggle} class="svadmin-u-ed8a5df7b2fb svadmin-u-2bbcfc3b5179 svadmin-u-421ac2be5045 svadmin-u-68d55a736ff4 svadmin-u-55d1f8b9d318 svadmin-u-646e10356266">
                 <ChevronRight class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
               </Button>
             {/snippet}

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { ResourceRendering } from '../rendering/index.js';
   import { definedOptions } from '@svadmin/core/options';
   import type { Snippet } from 'svelte';
   import { captureAdminContext } from '@svadmin/core';
@@ -8,6 +9,7 @@
 
   let { resourceName, open = $bindable(false), recordId, onClose, extraSections }: {
     resourceName: string;
+    rendering?: ResourceRendering | undefined;
     open?: boolean;
     recordId?: string | number;
     onClose?: () => void;

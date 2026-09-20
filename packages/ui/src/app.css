@@ -1,12 +1,4 @@
-/* @svadmin/ui - Stripe-first product tokens
- * Imported by AdminApp and overridable by consumer CSS.
- * Metronic references inform capability coverage, never visual styling.
- */
-
-@import "./panda-preflight.css";
-@import "./legacy-utility.css";
-@import "./panda-tokens.css";
-@import "./panda.css";
+@import "./styles/compatibility.prelude.css";
 @import "./page-chrome.css";
 
 /* Panda semantic compatibility aliases for host overrides and nested themes. */

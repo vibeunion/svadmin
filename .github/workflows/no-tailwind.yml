@@ -1,0 +1,33 @@
+name: Tailwind compiler boundary
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: no-tailwind-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  boundary:
+    name: No Tailwind compiler
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      # 所有目标为 main 的 PR 都必须扫描，包括非 UI 包和脚手架；无需先安装依赖。
+      - name: Verify regression tests and repository compiler boundary
+        shell: bash
+        run: |
+          node --test scripts/check-no-tailwind.test.mjs
+          node scripts/check-no-tailwind.mjs

@@ -3,6 +3,7 @@
 </script>
 
 <script lang="ts">
+  import { dateFieldValue } from './date-field-value.js';
   import { cn } from '../../utils.js';
   import { parseDisplayDate } from './date-display';
 

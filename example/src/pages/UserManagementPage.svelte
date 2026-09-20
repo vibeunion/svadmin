@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { demoRenderers } from '../resource-rendering';
+  import { demoRendering } from '../resource-rendering';
   import { demoContracts } from '../resource-contracts';
   import type { DemoRow } from '../resource-schemas';
   type Permission = DemoRow<'permissions'>;
@@ -46,12 +48,12 @@
   const logsQuery = useList({ resource: demoContracts.user_logs, pagination: { mode: 'off' } });
   const settingsQuery = useList({ resource: demoContracts.user_settings, pagination: { mode: 'off' } });
 
-  const users = $derived((usersQuery.data?.data ?? []));
-  const roles = $derived((rolesQuery.data?.data ?? []));
-  const permissions = $derived((permissionsQuery.data?.data ?? []));
-  const accounts = $derived((accountsQuery.data?.data ?? []));
-  const logs = $derived((logsQuery.data?.data ?? []));
-  const settings = $derived((settingsQuery.data?.data ?? []));
+  const users = $derived(demoRenderers.users.records(usersQuery.data?.data ?? []));
+  const roles = $derived(demoRenderers.roles.records(rolesQuery.data?.data ?? []));
+  const permissions = $derived(demoRenderers.permissions.records(permissionsQuery.data?.data ?? []));
+  const accounts = $derived(demoRenderers.user_accounts.records(accountsQuery.data?.data ?? []));
+  const logs = $derived(demoRenderers.user_logs.records(logsQuery.data?.data ?? []));
+  const settings = $derived(demoRenderers.user_settings.records(settingsQuery.data?.data ?? []));
   const filteredUsers = $derived(users.filter((user) =>
     (userRoleFilter === null || user.roleId === userRoleFilter)
     && (!userStatusFilter || user.status === userStatusFilter)
@@ -628,7 +630,7 @@
 
     {#if showRecords}
       <section data-user-records>
-        <AutoTable {resourceName} />
+        <AutoTable {resourceName} rendering={demoRendering(resourceName)} />
       </section>
     {/if}
   {/if}
