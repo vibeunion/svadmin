@@ -50,6 +50,14 @@ describe('real read-only business widgets', () => {
     await view.rerender({ spec: { ...spec, title: 'New arrangement', widgets: spec.widgets.map((widget) => ({ ...widget, props: { ...widget.props, tone: 'warning', density: 'compact' } })) } });
     expect(screen.getByTestId('surface-widget-detail')).toBe(detail); expect(p.getOne).toHaveBeenCalledTimes(1); expect(p.getList).toHaveBeenCalledTimes(1);
   });
+  it('applies interactive frame appearance to business widgets', async () => {
+    const p = provider();
+    const detail = render(ResourceDetailWidget, { props: { widgetId: 'd', props: { ...detailProps, appearance: { tone: 'warning', density: 'compact' } }, data: { status: 'loading', sourceId: 'x' }, locale: 'en-US' } });
+    const activity = render(ActivityFeedWidget, { props: { widgetId: 'a', props: { ...activityProps, appearance: { tone: 'info', density: 'compact' } }, data: { status: 'loading', sourceId: 'x' }, locale: 'en-US' } });
+    expect(detail.container.querySelector('[data-surface-density="compact"]')).toBeTruthy();
+    expect(activity.container.querySelector('[data-surface-density="compact"]')).toBeTruthy();
+    expect(p.getOne).not.toHaveBeenCalled(); expect(p.getList).not.toHaveBeenCalled();
+  });
   it('removes old record contents immediately when read permissions are revoked', async () => {
     const p = provider(); const view = render(SurfaceRenderer, { spec, catalog, policy, dataProvider: p.dataProvider });
     await screen.findByText('Synthetic contact');
