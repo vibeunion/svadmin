@@ -42,6 +42,15 @@
       "svelte": "./dist/svar.js",
       "default": "./dist/svar.js"
     },
+    "./business-contracts": {
+      "types": "./dist/business-definitions.d.ts",
+      "default": "./dist/business-definitions.js"
+    },
+    "./business": {
+      "types": "./dist/business.d.ts",
+      "svelte": "./dist/business.js",
+      "default": "./dist/business.js"
+    },
     "./workflows": {
       "types": "./dist/workflows.d.ts",
       "default": "./dist/workflows.js"

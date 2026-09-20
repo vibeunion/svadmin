@@ -24,7 +24,7 @@ export interface SurfaceCatalogManifest {
   readonly catalogVersion: string;
   readonly widgets: readonly {
     readonly type: string;
-    readonly dataKind: 'none' | 'scalar' | 'items';
+    readonly dataKind: 'none' | 'scalar' | 'items' | 'record';
     readonly description?: string;
     readonly propsSchema: JsonObject;
     readonly examples?: readonly JsonObject[];
@@ -119,7 +119,8 @@ export function createSurfaceCatalogManifest(catalog: SurfaceCatalog): SurfaceCa
       throw new Error(`Invalid or duplicate surface widget type "${widget.type}"`);
     }
     known.add(widget.type);
-    if (!['none', 'scalar', 'items'].includes(widget.dataKind)) throw new Error('Invalid surface widget data kind');
+    if (!['none', 'scalar', 'items', 'record'].includes(widget.dataKind)) throw new Error('Invalid surface widget data kind');
+    if (widget.dataKind === 'record' && !widget.getReferencedFields) throw new Error('Record widgets require an explicit field selector');
     const propsSchema = surfaceSchemaToJson(widget.propsSchema);
     if (!isClosedObject(propsSchema)) throw new Error(`Widget "${widget.type}" must use a closed object props schema`);
     const examples = widget.examples?.map((props) => {
@@ -188,7 +189,8 @@ export function createSurfaceGenerationSpecSchema(catalog: SurfaceCatalog, polic
       ...(widget.dataKind === 'none' ? {} : {
         binding: Type.Object({
           sourceId: surfaceIdSchema,
-          pointer: widget.dataKind === 'items' ? Type.Literal('/items') : literals([...scalarPointers]),
+          pointer: widget.dataKind === 'items' ? Type.Literal('/items')
+            : widget.dataKind === 'record' ? Type.Literal('') : literals([...scalarPointers]),
         }, { additionalProperties: false }),
       }),
     }, { additionalProperties: false, ...(widget.description ? { description: widget.description } : {}) });

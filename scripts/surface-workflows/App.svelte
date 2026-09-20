@@ -2,15 +2,17 @@
   import { createStreamingParser } from '@surface-openui-fixture';
   import { SurfaceRenderer } from '../../packages/surface/src/svelte.js';
   import { createInteractiveSurfaceCatalog, SurfaceWorkflowProvider } from '../../packages/surface/src/interactive.js';
+  import { createBusinessSurfaceCatalog } from '../../packages/surface/src/business.js';
   import { defaultSurfaceCatalog } from '../../packages/surface/src/catalog.js';
   import { createSurfaceOpenUIStream } from '../../packages/surface/src/openui.js';
   import type { SurfaceSpec, SurfaceDataProvider } from '../../packages/surface/src/types.js';
   import type { SurfaceWorkflowTransport } from '../../packages/surface/src/workflows/client.js';
   import '@svadmin/ui/app.css';
   import '../../packages/surface/src/styles.css';
-  import { actionDescriptor, policy, firstChunk, lastChunk } from './fixture.js';
+  import { actionDescriptor, policy, firstChunk, lastChunk, businessFirstChunk, businessLastChunk } from './fixture.js';
   const actions = [actionDescriptor];
-  const catalog = createInteractiveSurfaceCatalog(actions, defaultSurfaceCatalog);
+  const catalog = createInteractiveSurfaceCatalog(actions, createBusinessSurfaceCatalog(defaultSurfaceCatalog));
+  const business = new URLSearchParams(location.search).has('business');
   let spec = $state<SurfaceSpec | null>(null);
   let enabled = $state(false), complete = $state(false), revision = $state(0), scopeKey = $state('tenant-a');
   let error = $state(''), notice = $state('No model is invoked. This fixture streams a deterministic test program through the real parser.');
@@ -25,16 +27,16 @@
     approve: (id, digest, signal) => rpc('approve', { id, digest }, signal), reject: (id, digest, signal) => rpc('reject', { id, digest }, signal),
     execute: (id, digest, signal) => rpc('execute', { id, digest }, signal),
   };
-  const provider = { getList: () => rpc('list'), getOne: async () => { throw new Error('Not used'); } } as SurfaceDataProvider;
+  const provider: SurfaceDataProvider = { getList: (params) => rpc(params.resource === 'events' ? 'events' : 'list'), getOne: (params) => rpc('one', { resource: params.resource, id: params.id }) };
   function start() {
     enabled = false; complete = false; error = '';
     stream = createSurfaceOpenUIStream({ catalog, policy, createStreamingParser });
-    const result = stream.push(firstChunk);
+    const result = stream.push(business ? businessFirstChunk : firstChunk);
     if (!result.ok) { error = result.error.message; spec = null; return; }
     spec = result.preview; notice = 'Streaming: incomplete program; business actions disabled';
   }
   function finish() {
-    const pushed = stream.push(lastChunk); const result = pushed.ok ? stream.finish() : pushed;
+    const pushed = stream.push(business ? businessLastChunk : lastChunk); const result = pushed.ok ? stream.finish() : pushed;
     if (!result.ok) { error = result.error.message; spec = null; return; }
     spec = result.preview; complete = true; notice = 'Complete validated proposal; explicit acceptance required';
   }
@@ -51,6 +53,12 @@
     spec = { ...spec, title: 'Rearranged contact operations', widgets: spec.widgets.map((widget) => ({ ...widget,
       props: { ...widget.props, appearance: { tone: 'warning', density: 'comfortable' } }, placement: { columnSpan: 12 } })) };
   }
+  function forbiddenField() {
+    if (!spec) return;
+    enabled = false;
+    spec = { ...spec, widgets: spec.widgets.map((widget) => widget.type === 'resource-detail'
+      ? { ...widget, props: { ...widget.props, fields: [{ field: 'secret', label: 'Secret' }] } } : widget) };
+  }
   function switchTenant() { scopeKey = 'tenant-b'; enabled = false; complete = false; spec = null; notice = 'Tenant changed; old drafts and proposals discarded'; }
 </script>
 
@@ -62,6 +70,7 @@
     <button onclick={finish} disabled={!spec || complete}>Finish stream</button>
     <button onclick={accept} disabled={!complete || enabled}>Accept surface</button>
     <button onclick={presentationEdit} disabled={!spec}>Change presentation only</button>
+    {#if business}<button onclick={forbiddenField} disabled={!spec}>Request forbidden field</button>{/if}
     <button onclick={switchTenant}>Switch tenant</button>
   </nav>
   {#if error}<p role="alert">{error}</p>{/if}

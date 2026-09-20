@@ -19,6 +19,9 @@
 
   interface Props {
     activities?: ActivityItem[];
+    title?: string;
+    emptyLabel?: string;
+    countLabel?: string;
     onaddcomment?: (comment: string) => void | Promise<void>;
     allowComment?: boolean;
     class?: string;
@@ -26,6 +29,9 @@
 
   let {
     activities = [],
+    title = 'Activity & Timeline Stream',
+    emptyLabel = 'No recent activities',
+    countLabel,
     onaddcomment,
     allowComment = true,
     class: className = '',
@@ -50,9 +56,9 @@
   <div class="svadmin-activity-feed__header">
     <h4 class="svadmin-activity-feed__title">
       <MessageSquare class="svadmin-activity-feed__icon" />
-      Activity & Timeline Stream
+      {title}
     </h4>
-    <span class="svadmin-activity-feed__count">{activities.length} event{activities.length === 1 ? '' : 's'}</span>
+    <span class="svadmin-activity-feed__count">{countLabel ?? `${activities.length} event${activities.length === 1 ? '' : 's'}`}</span>
   </div>
 
   <div class="svadmin-activity-feed__timeline">
@@ -92,7 +98,7 @@
 
     {#if activities.length === 0}
       <div class="svadmin-activity-feed__empty">
-        No recent activities
+        {emptyLabel}
       </div>
     {/if}
   </div>

@@ -11,11 +11,21 @@ export interface SurfaceMessages {
   readonly tableNoRecords: string;
   readonly tableInvalidData: string;
   readonly tableUnavailable: string;
+  readonly detailLoading?: string;
+  readonly detailEmpty?: string;
+  readonly detailUnavailable?: string;
+  readonly detailInvalidData?: string;
+  readonly activityLoading?: string;
+  readonly activityEmpty?: string;
+  readonly activityUnavailable?: string;
+  readonly activityInvalidData?: string;
+  readonly activityUnknownActor?: string;
+  readonly activityCount?: string;
   readonly booleanTrue: string;
   readonly booleanFalse: string;
 }
 
-const englishMessages: SurfaceMessages = {
+const englishMessages: Required<SurfaceMessages> = {
   renderErrorTitle: 'Surface could not be rendered',
   providerUnavailable: 'Data provider is unavailable',
   metricNoData: 'No data',
@@ -28,11 +38,21 @@ const englishMessages: SurfaceMessages = {
   tableNoRecords: 'No records',
   tableInvalidData: 'Table data is invalid',
   tableUnavailable: 'Table data is unavailable',
+  detailLoading: 'Loading record',
+  detailEmpty: 'No record',
+  detailUnavailable: 'Record is unavailable',
+  detailInvalidData: 'Record data is invalid',
+  activityLoading: 'Loading activity',
+  activityEmpty: 'No recent activity',
+  activityUnavailable: 'Activity is unavailable',
+  activityInvalidData: 'Activity data is invalid',
+  activityUnknownActor: 'Unknown actor',
+  activityCount: '{count} events',
   booleanTrue: 'Yes',
   booleanFalse: 'No',
 };
 
-const simplifiedChineseMessages: SurfaceMessages = {
+const simplifiedChineseMessages: Required<SurfaceMessages> = {
   renderErrorTitle: '无法渲染 Surface',
   providerUnavailable: '数据提供器不可用',
   metricNoData: '暂无数据',
@@ -45,6 +65,16 @@ const simplifiedChineseMessages: SurfaceMessages = {
   tableNoRecords: '暂无记录',
   tableInvalidData: '表格数据无效',
   tableUnavailable: '表格数据不可用',
+  detailLoading: '正在加载记录',
+  detailEmpty: '暂无记录',
+  detailUnavailable: '记录不可用',
+  detailInvalidData: '记录数据无效',
+  activityLoading: '正在加载动态',
+  activityEmpty: '暂无动态',
+  activityUnavailable: '动态不可用',
+  activityInvalidData: '动态数据无效',
+  activityUnknownActor: '未知操作者',
+  activityCount: '{count} 条动态',
   booleanTrue: '是',
   booleanFalse: '否',
 };
@@ -52,7 +82,7 @@ const simplifiedChineseMessages: SurfaceMessages = {
 export function resolveSurfaceMessages(
   locale: string,
   overrides?: Partial<SurfaceMessages>,
-): SurfaceMessages {
+): Required<SurfaceMessages> {
   const defaults = locale.toLowerCase().startsWith('zh')
     ? simplifiedChineseMessages
     : englishMessages;

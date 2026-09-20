@@ -71,7 +71,7 @@ export interface SurfaceResourcePolicy {
   readonly maxPageSize?: number;
 }
 export interface SurfacePolicy { readonly resources: Readonly<Record<string, SurfaceResourcePolicy>> }
-export type SurfaceCatalogDataKind = 'none' | 'scalar' | 'items';
+export type SurfaceCatalogDataKind = 'none' | 'scalar' | 'items' | 'record';
 export interface SurfaceWidgetDefinition {
   readonly type: string;
   readonly dataKind: SurfaceCatalogDataKind;

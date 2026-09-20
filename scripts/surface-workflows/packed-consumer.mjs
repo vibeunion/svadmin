@@ -24,7 +24,7 @@ try {
     dependencies[`@svadmin/${name}`] = `file:${join(temporary, pack.filename)}`;
     report.packs[name] = { filename: pack.filename, integrity: pack.integrity };
     if (name === 'surface') {
-      for (const entry of ['workflows', 'interactive', 'openui', 'server', 'server-sqlite']) {
+      for (const entry of ['business', 'business-definitions', 'workflows', 'interactive', 'openui', 'server', 'server-sqlite']) {
         assert.ok(pack.files.some(file => file.path === `dist/${entry}.js`), `Missing ${entry} JavaScript`);
         assert.ok(pack.files.some(file => file.path === `dist/${entry}.d.ts`), `Missing ${entry} declarations`);
       }
@@ -39,10 +39,12 @@ try {
   writeFileSync(join(temporary, 'server.mjs'), `
     import assert from 'node:assert/strict';
     import { validateSurfaceSpec } from '@svadmin/surface';
+    import { createBusinessSurfaceDefinitions } from '@svadmin/surface/business-contracts';
     import { createInteractiveSurfaceDefinitions } from '@svadmin/surface/workflows';
     import { createSurfaceOpenUIStream } from '@svadmin/surface/openui';
     import { createSurfaceWorkflowService } from '@svadmin/surface/server';
     import { SqliteSurfaceWorkflowStore } from '@svadmin/surface/server/sqlite';
+    assert.ok(createBusinessSurfaceDefinitions().widgets.some(widget => widget.dataKind === 'record'));
     for (const api of [validateSurfaceSpec, createInteractiveSurfaceDefinitions, createSurfaceOpenUIStream, createSurfaceWorkflowService]) assert.equal(typeof api, 'function');
     const store = new SqliteSurfaceWorkflowStore(':memory:');
     try {
@@ -54,11 +56,12 @@ try {
   run('node', ['server.mjs']);
   writeFileSync(join(temporary, 'entry.ts'), `
     import { Type } from '@sinclair/typebox';
+    import { createBusinessSurfaceCatalog } from '@svadmin/surface/business';
     import { createInteractiveSurfaceCatalog, SurfaceWorkflowProvider } from '@svadmin/surface/interactive';
     import { SurfaceRenderer } from '@svadmin/surface/svelte';
     import '@svadmin/ui/app.css';
     import '@svadmin/surface/styles.css';
-    export const catalog = createInteractiveSurfaceCatalog([{ id:'contacts.create',version:'1',label:'Create',approval:'confirm',inputSchema:Type.Object({name:Type.String()},{additionalProperties:false}) }]);
+    export const catalog = createInteractiveSurfaceCatalog([{ id:'contacts.create',version:'1',label:'Create',approval:'confirm',inputSchema:Type.Object({name:Type.String()},{additionalProperties:false}) }], createBusinessSurfaceCatalog());
     export { SurfaceWorkflowProvider, SurfaceRenderer };
   `);
   writeFileSync(join(temporary, 'vite.config.mjs'), `
