@@ -10,27 +10,22 @@
 	type InputValue = Type extends "number" | "range"
 		? number | null | undefined
 		: string | null | undefined;
-	type InputSize = "default" | "compact";
 
 	type Props = WithElementRef<Omit<HTMLInputAttributes, "type" | "value">> &
 			(Type extends "file"
 				? { type: "file"; files?: FileList; value?: never }
 				: { type?: Type; files?: undefined; value?: InputValue });
-	type InputProps = Omit<Props, "size" | "data-slot"> & {
-		size?: InputSize;
-		"data-slot"?: string;
-	};
 
 	let {
 		ref = $bindable(null),
 		value = $bindable(),
 		type,
 		files = $bindable(),
-		size = "default",
+		disabled,
 		class: className,
 		"data-slot": dataSlot = "input",
 		...restProps
-	}: InputProps = $props();
+	}: Props = $props();
 
 	const i18n = useTranslation();
 	const isFileInput = $derived(type?.toLowerCase() === "file");
@@ -38,8 +33,9 @@
 	const attributes = $derived(definedOptions({ ...restProps, disabled }));
 	const selectedFiles = $derived(files ? Array.from(files) : []);
 	const selectedFileLabel = $derived.by(() => {
-		if (selectedFiles.length === 0) return i18n.t("common.noFileChosen");
-		if (selectedFiles.length === 1) return selectedFiles[0]!.name;
+		const firstFile = selectedFiles[0];
+		if (firstFile === undefined) return i18n.t("common.noFileChosen");
+		if (selectedFiles.length === 1) return firstFile.name;
 		return i18n.t("common.filesSelected", { count: selectedFiles.length });
 	});
 </script>
@@ -47,7 +43,7 @@
 {#if isFileInput}
 	<div
 		class={cn("svadmin-file-input", className)}
-			data-disabled={restProps.disabled ? "true" : undefined}
+		data-disabled={disabled ? "true" : undefined}
 	>
 		<input
 			bind:this={ref}
@@ -67,11 +63,7 @@
 	<input
 		bind:this={ref}
 		data-slot={dataSlot}
-		class={cn(
-			"svadmin-input",
-			className
-		)}
-		data-size={size}
+			class={cn("svadmin-input", className)}
 			{type}
 			lang={isDateInput ? i18n.locale : undefined}
 			bind:value
