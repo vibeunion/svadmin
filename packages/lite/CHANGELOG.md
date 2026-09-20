@@ -1,5 +1,44 @@
 # Changelog
 
+## [0.13.0](https://github.com/vibeunion/svadmin/compare/lite-v0.12.0...lite-v0.13.0) (2026-09-20)
+
+
+### 🚀 Features
+
+* **design:** integrate Stripe-first patterns and readable status badges with current main ([fa5d10f](https://github.com/vibeunion/svadmin/commit/fa5d10f57603cc5709e4f140e7a1bb9e675fed81))
+* **ui:** migrate admin styling to Panda CSS ([f23e290](https://github.com/vibeunion/svadmin/commit/f23e2909b1dd6ec3ca89339cb2eb72f75149e8ad))
+
+
+### 🐛 Bug Fixes
+
+* **design:** integrate merged field repairs without changing design assets ([fce177a](https://github.com/vibeunion/svadmin/commit/fce177a4ad39da3b7c5a9e2325fa7039c435033c))
+* **i18n:** reconcile processing labels when syncing main into Panda migration ([7b2f036](https://github.com/vibeunion/svadmin/commit/7b2f036ca797e2c9349fc041c3b640d1138fdaba))
+* reconcile reviewed UI, Surface and Panda PRs for combined validation ([d298ace](https://github.com/vibeunion/svadmin/commit/d298ace8dbca35eb898a0157427a31bbb232a80b))
+* **styles:** reconcile content recipes with current strict field contracts ([3431127](https://github.com/vibeunion/svadmin/commit/34311272a1b5dd556049645e57d108123a9902d7))
+* **surface:** enforce pre-dispatch scope isolation and repair workflow prerequisites ([0994a52](https://github.com/vibeunion/svadmin/commit/0994a52e9faf44e6baf56a33fc55855dcad43bcb))
+* **surface:** integrate edit preview with native main and scoped source loading ([0a6d22d](https://github.com/vibeunion/svadmin/commit/0a6d22dbbfbfa68615f99dffa4966062acbc683f))
+* **surface:** reconcile controlled workflows with merged TypeBox repairs ([d2494e8](https://github.com/vibeunion/svadmin/commit/d2494e863264d2ea34b2ea96898e105a307d1238))
+* **types:** isolate workflow fixture config and narrow native file test elements ([f0c9400](https://github.com/vibeunion/svadmin/commit/f0c94009c159d55f1860e6d14d7f33da10059fe8))
+* **ui:** close strict optional, field and scoped-locale integration gaps ([469ed93](https://github.com/vibeunion/svadmin/commit/469ed9351000bddc6fc7b3994d811714eb8bd198))
+* **ui:** integrate enterprise components with current Panda contracts ([1565f54](https://github.com/vibeunion/svadmin/commit/1565f549af42a04bc63d9189a267e01c58ffedf2))
+* **ui:** reconcile async interaction repairs with current main ([b39b495](https://github.com/vibeunion/svadmin/commit/b39b4953af4166548b21b8ab7fd2c7af80d6a027))
+* **ui:** reconcile enterprise validation with recursive form and host-filter contracts ([034eb73](https://github.com/vibeunion/svadmin/commit/034eb737b1ad4caca02fcd42c5f83559aaedb592))
+* **ui:** repair typed field contracts and isolate regression test state ([ec4f273](https://github.com/vibeunion/svadmin/commit/ec4f27340a95bc8152bc7657d647e340b67ea623))
+* **ui:** resolve reference kit PR lint blockers ([6a9b7b1](https://github.com/vibeunion/svadmin/commit/6a9b7b10cfd42fbe32defba0ec58c506fc11661b))
+
+
+### 🔧 Miscellaneous Chores
+
+* **design:** reconcile Stripe specimens with merged reference assets on main ([3a9bbad](https://github.com/vibeunion/svadmin/commit/3a9bbad1ea829b32ef25c094e071a1113bde5f8c))
+* **styles:** reconcile content recipes with native primitives on main ([ae608de](https://github.com/vibeunion/svadmin/commit/ae608de888de8e06c3f6aeebd92e5de1b8ae9af3))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.34.2 <0.53.0 to >=0.34.2 <0.54.0
+
 ## [0.12.0](https://github.com/vibeunion/svadmin/compare/lite-v0.11.5...lite-v0.12.0) (2026-09-19)
 
 
