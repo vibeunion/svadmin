@@ -2,6 +2,7 @@
   import { definedOptions } from '@svadmin/core/options';
 
   import { onMount } from 'svelte';
+  import { useTranslation } from '@svadmin/core/i18n';
   import { Toaster, toast as sonner, type ToasterProps } from 'svelte-sonner';
   import {
     consumePromiseQueue,
@@ -15,6 +16,7 @@
   import { registerToastHost, type ToastHostRegistration } from './toast-host.svelte.js';
   import UndoableNotification from './UndoableNotification.svelte';
 
+  const i18n = useTranslation();
   let host = $state<ToastHostRegistration | null>(null);
   const isActiveHost = $derived(host?.isActive() ?? false);
   const theme = $derived(getResolvedTheme() === 'dark' ? 'dark' : 'light');
@@ -58,6 +60,8 @@
     position: "top-right",
     richColors: true,
     closeButton: true,
+    containerAriaLabel: i18n.locale === 'zh-CN' ? '通知' : 'Notifications',
+    closeButtonAriaLabel: i18n.t('common.close'),
     expand: false,
     visibleToasts: 3,
     theme,

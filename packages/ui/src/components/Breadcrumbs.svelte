@@ -87,7 +87,7 @@
 </script>
 
 {#if crumbs.length > 1}
-  <Breadcrumb.Root class={cn('svadmin-breadcrumbs', className)}>
+  <Breadcrumb.Root aria-label={i18n.locale === 'zh-CN' ? '面包屑导航' : 'breadcrumb'} class={cn('svadmin-breadcrumbs', className)}>
     <Breadcrumb.List>
       {#each crumbs as crumb, i (`${crumb.label}-${i}`)}
         {#if i > 0}

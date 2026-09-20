@@ -26,6 +26,10 @@
   } from '@lucide/svelte';
 
   const i18n = useTranslation();
+  // 导航地标和身份回退也使用当前语言，供屏幕阅读器与可见界面共同使用。
+  const shellCopy = $derived(i18n.locale === 'zh-CN'
+    ? { sidebar: '侧栏导航', menu: '主菜单', user: '用户' }
+    : { sidebar: 'Sidebar navigation', menu: 'Main menu', user: 'User' });
 
   let { collapsed, identity, title, onToggle, onLogout, menu, routeMode = 'auto' }: {
     collapsed: boolean;
@@ -306,7 +310,7 @@
 
 <aside
   data-svadmin-sidebar
-  aria-label="Sidebar navigation"
+  aria-label={shellCopy.sidebar}
   class="svadmin-u-7bc555991dba svadmin-u-5f89f14a26db svadmin-u-c78facc7a0a6 svadmin-u-0f2fff0ae96e svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-5ceb636bd9f3 svadmin-u-6ee2d41e2d2d svadmin-u-0fe7d7d814d0 svadmin-u-7890552ecd63"
   style="background-color: var(--sidebar);"
   class:svadmin-sidebar--expanded={!collapsed}
@@ -331,7 +335,7 @@
   </div>
 
   <ScrollArea class="svadmin-u-36e579c0b41c sidebar-scroll">
-  <nav aria-label="Main menu" class="svadmin-u-9fcd8a13827e" class:svadmin-u-7597e11b4d4b={!collapsed} class:svadmin-u-d5eab218aa34={collapsed}>
+  <nav aria-label={shellCopy.menu} class="svadmin-u-9fcd8a13827e" class:svadmin-u-7597e11b4d4b={!collapsed} class:svadmin-u-d5eab218aa34={collapsed}>
     {#if menu && menu.length > 0}
       <div class="svadmin-u-a26339f4b89e">
         {#each customMenuItems as item (item.name)}
@@ -457,15 +461,16 @@
         <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-7e9a2a250cc3 svadmin-u-5f22e64f2282 svadmin-u-7660b450905a svadmin-u-ceb69a6b0e5f svadmin-u-ace81495deee svadmin-u-34516836730d">
           <Avatar
             src={(identity as Record<string, unknown>)['avatar'] as string | undefined}
-            alt={identity.name ?? 'User'}
-            fallback={identity.name?.charAt(0).toUpperCase() ?? 'U'}
+            alt={identity.name ?? shellCopy.user}
+            fallback={identity.name?.charAt(0).toUpperCase() ?? (i18n.locale === 'zh-CN' ? '用' : 'U')}
             size="sm"
           />
           <div class="svadmin-u-36e579c0b41c svadmin-u-7e0b7cdf1a94">
             <p class="svadmin-u-f283ea9bea0e svadmin-u-a14daebf7748 svadmin-u-2689f3958069 svadmin-u-a7a63217e098">{identity.name}</p>
-            <p class="svadmin-u-f283ea9bea0e svadmin-u-d058ca6de60f svadmin-u-5f1ff8fe8768">{((identity as Record<string, unknown>)['role'] || (identity as Record<string, unknown>)['roleName']) ?? 'User'}</p>
+            <p class="svadmin-u-f283ea9bea0e svadmin-u-d058ca6de60f svadmin-u-5f1ff8fe8768">{((identity as Record<string, unknown>)['role'] || (identity as Record<string, unknown>)['roleName']) ?? shellCopy.user}</p>
           </div>
           <button
+            aria-label={i18n.t('common.logout')}
             class="svadmin-u-d0a52b312f7d svadmin-u-cbbf90f9a828 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-421ac2be5045 svadmin-u-3e3534b4c5df svadmin-u-646e10356266 svadmin-u-0b48b877be2a svadmin-u-ceb69a6b0e5f"
             onclick={onLogout}
           >

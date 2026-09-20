@@ -17,12 +17,17 @@ async function openOffice(page: Page, view = 'dashboard') {
 
 test('中文办公：英文浏览器与旧英文偏好不能覆盖产品语言', async ({ page }) => {
   const office = await openOffice(page);
-  await expect(page).toHaveTitle('智能辅助办公系统');
+  await expect(page).toHaveTitle('智能辅助办公 - 智能辅助办公系统');
   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
   await expect(page.locator('body')).not.toContainText('Health Office');
   await expect(page.locator('body')).not.toContainText('svadmin example');
   await expect(office.getByText('报告审核工作平台', { exact: true })).toBeVisible();
   await expect(office).toContainText('演示审核员');
+  await expect(page.getByRole('complementary', { name: '侧栏导航', exact: true })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: '主菜单', exact: true })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: '面包屑导航', exact: true })).toBeVisible();
+  await expect(page.getByRole('region', { name: /^通知 / })).toHaveCount(1);
+  await expect(page.getByText('User', { exact: true })).toHaveCount(0);
   await page.reload();
   await expect(office).toBeVisible({ timeout: 15000 });
   await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
@@ -61,7 +66,7 @@ test('中文办公：文件按钮和空表单错误使用中文', async ({ page 
 test('中文办公：完整中文登录及失败提示', async ({ page }) => {
   await page.goto('/?officeApp=1#/login');
   await expect(page.locator('#login-password')).toBeVisible();
-  await expect(page).toHaveTitle('智能辅助办公系统');
+  await expect(page).toHaveTitle('登录 - 智能辅助办公系统');
   await page.locator('#login-identifier').fill('demo@example.com');
   await page.locator('#login-password').fill('wrong-password');
   await page.locator('form button[type="submit"]').click();
@@ -76,7 +81,7 @@ test('中文办公：退出工作区不覆盖其他示例的英文偏好', async
   await openOffice(page);
   await page.goto('/#/');
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
-  await expect(page).toHaveTitle('svadmin example');
+  await expect(page).toHaveTitle(/ - svadmin example$/);
 });
 
 for (const viewport of [{ width: 1440, height: 900 }, { width: 1920, height: 1080 }]) {
