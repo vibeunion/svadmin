@@ -812,6 +812,36 @@ export function packedConsumerDependencies(
   return dependencies;
 }
 
+export function packedRuntimeOverrides(
+  dependencies: Readonly<Record<string, string>>,
+  manifests: ReadonlyMap<string, PackageManifest>,
+): Record<string, string> {
+  const overrides: Record<string, string> = {};
+  for (const [name, source] of Object.entries(dependencies)) {
+    if (!source.startsWith('file:')) continue;
+    const manifest = manifests.get(name);
+    if (!manifest) continue;
+    // 只替换本次消费者选中的运行时 tarball；不覆盖 peer 或最低发布版本。
+    for (const dependency of Object.keys({ ...manifest.dependencies, ...manifest.optionalDependencies })) {
+      const target = dependencies[dependency];
+      if (manifests.has(dependency) && target?.startsWith('file:')) {
+        overrides[`${name}>${dependency}`] = target;
+      }
+    }
+  }
+  return overrides;
+}
+
+async function configurePackedPnpmConsumer(
+  consumerDirectory: string,
+  manifests: ReadonlyMap<string, PackageManifest>,
+): Promise<void> {
+  const consumer = JSON.parse(await readFile(join(consumerDirectory, 'package.json'), 'utf8')) as PackageManifest;
+  await writeFile(join(consumerDirectory, 'pnpm-workspace.yaml'), `${JSON.stringify({
+    overrides: packedRuntimeOverrides(consumer.dependencies ?? {}, manifests),
+  }, null, 2)}\n`);
+}
+
 export function publishedWorkspaceManifest(
   manifest: PackageManifest,
   versions: ReadonlyMap<string, string>,
@@ -965,6 +995,7 @@ async function verifyUiPnpmPeerTree(
     }, null, 2)}\n`,
   );
 
+  await configurePackedPnpmConsumer(consumerDirectory, manifests);
   run(
     'npx',
     [
@@ -1108,6 +1139,7 @@ async function verifyAiElementsPnpmConsumer(
     }, null, 2)}\n`,
   );
 
+  await configurePackedPnpmConsumer(consumerDirectory, manifests);
   run(
     'npx',
     [
@@ -1467,6 +1499,7 @@ async function verifySurfaceCompatibility(
         `export default { plugins: [svelte()], build: { lib: { entry: 'entry.ts', formats: ['es'] } } };\n`,
     );
 
+    await configurePackedPnpmConsumer(consumerDirectory, manifests);
     run('npx', [
       '--yes',
       `pnpm@${pnpmVersion}`,
