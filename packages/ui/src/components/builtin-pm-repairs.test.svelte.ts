@@ -1,6 +1,7 @@
+import { requireValue } from '../../../../scripts/test-assertions';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { resetContext, type AuthProvider, type DataProvider } from '@svadmin/core';
+import { resetContext, type AuthProvider, type DataProvider, type Organization } from '@svadmin/core';
 import Host from './builtin-pm.test-host.svelte';
 import type { NotificationPreferences } from './NotificationsSettings.svelte';
 
@@ -50,7 +51,7 @@ describe('builtin capability boundaries', () => {
     };
     const first = render(Host, { bundle, page: 'notifications', preferences });
     await waitFor(() => expect(document.querySelector('fieldset')?.disabled).toBe(false));
-    await fireEvent.click(document.querySelector('#email-security')!);
+    await fireEvent.click(requireValue(document.querySelector('#email-security')));
     await fireEvent.click(screen.getByRole('button', { name: /Save/ }));
     await waitFor(() => expect(stored.email.security).toBe(false));
     first.unmount();
@@ -85,6 +86,7 @@ describe('builtin capability boundaries', () => {
       login: async () => ({ success: true }),
       logout: async () => ({ success: true }),
       check: async () => ({ authenticated: true }),
+      getIdentity: async () => ({ id: 'audit-user' }),
       onError: async () => ({}),
       getAuditLogs,
     } satisfies AuthProvider;
@@ -117,17 +119,20 @@ describe('builtin capability boundaries', () => {
   });
 
   it('saves company details without depending on identity governance', async () => {
-    const updateCurrentOrganization = vi.fn(async ({ name }: { name: string }) => ({ id: 'org-1', name }));
+    const organization: Organization = { id: 'org-1', name: 'Original company' };
+    const updateCurrentOrganization = vi.fn(async (input: Partial<Omit<Organization, 'id'>>): Promise<Organization> => ({
+      ...organization, ...input,
+    }));
     render(Host, { page: 'company', bundle: {
       ...bundle,
       organizationProvider: {
-        getCurrentOrganization: async () => ({ id: 'org-1', name: 'Original company' }),
+        getCurrentOrganization: async () => organization,
         updateCurrentOrganization,
       },
     } });
     const input = await screen.findByDisplayValue('Original company');
     await fireEvent.input(input, { target: { value: 'Updated company' } });
-    await fireEvent.submit(input.closest('form')!);
+    await fireEvent.submit(requireValue(input.closest('form')));
     expect(await screen.findByText('Organization saved')).toBeTruthy();
     expect(updateCurrentOrganization).toHaveBeenCalledWith({ name: 'Updated company' }, {});
   });
@@ -145,13 +150,13 @@ describe('builtin capability boundaries', () => {
     await screen.findByText('server-secret');
     const input = screen.getByRole('textbox');
     await fireEvent.input(input, { target: { value: 'abcdef' } });
-    await fireEvent.submit(input.closest('form')!);
+    await fireEvent.submit(requireValue(input.closest('form')));
     expect(verify).not.toHaveBeenCalled();
     await fireEvent.input(input, { target: { value: '123456' } });
-    await fireEvent.submit(input.closest('form')!);
+    await fireEvent.submit(requireValue(input.closest('form')));
     expect(await screen.findByRole('alert')).toHaveProperty('textContent', 'Invalid OTP');
     expect(screen.queryByText('server-recovery-code')).toBeNull();
-    await fireEvent.submit(input.closest('form')!);
+    await fireEvent.submit(requireValue(input.closest('form')));
     expect(await screen.findByText('server-recovery-code')).toBeTruthy();
     expect(verify).toHaveBeenCalledTimes(2);
   });
@@ -183,7 +188,7 @@ describe('builtin capability boundaries', () => {
     await screen.findByText('No matching members');
     const input = screen.getByLabelText('Member email');
     await fireEvent.input(input, { target: { value: 'member@example.com' } });
-    await fireEvent.submit(input.closest('form')!);
+    await fireEvent.submit(requireValue(input.closest('form')));
     expect(await screen.findByRole('alert')).toHaveProperty('textContent', 'Delivery failed');
     expect(screen.queryByText('Invitation submitted')).toBeNull();
     expect(invite).toHaveBeenCalledWith('member@example.com');

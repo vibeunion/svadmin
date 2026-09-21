@@ -27,7 +27,9 @@ REFERENCES = {
     'stripe-connect': ('1438614134095442934', 'https://docs.stripe.com/connect/embedded-appearance-options'),
     'park-foundations': ('1268615283036362769', 'https://park-ui.com/docs/figma'),
 }
-TOKEN_PATH = 'packages/ui/design/tokens.ts'
+TOKEN_PATH = 'packages/ui/src/app.css'
+THEME_PATH = 'packages/ui/styles/tailwind.css'
+RECIPE_PATH = 'packages/ui/src/recipes.ts'
 INDEX_PATH = 'packages/ui/src/components/content/index.ts'
 
 
@@ -96,8 +98,9 @@ def _source(root: Path, relative: str) -> str:
 # 这是有意受限的声明式解析器，不是完整 TypeScript AST。表达式、展开、转义字符串
 # 等未支持语法会失败，不能靠注释或字符串里的伪声明让映射检查通过。
 LEX = re.compile(r'(?P<space>\s+)|(?P<comment>//[^\n]*|/\*.*?\*/)|'
+                 r'(?P<template>`(?:[^`\\]|\\.)*`)|'
                  r'(?P<string>\'[^\'\\]*\'|"[^"\\]*")|'
-                 r'(?P<id>[A-Za-z_$][\w$]*)|(?P<sym>[{}:,;=])|(?P<other>.)', re.S)
+                 r'(?P<id>[A-Za-z_$][\w$]*)|(?P<sym>[{}:,;=()])|(?P<other>.)', re.S)
 
 
 def tokenize(source: str) -> list[tuple[str, str]]:
@@ -105,9 +108,11 @@ def tokenize(source: str) -> list[tuple[str, str]]:
             for m in LEX.finditer(source) if m.lastgroup not in ('space', 'comment')]
 
 
-def declaration(tokens: list[tuple[str, str]], name: str) -> dict:
-    prefix = [('id', 'export'), ('id', 'const'), ('id', name), ('sym', '=')]
-    starts = [i + 4 for i in range(len(tokens) - 3) if tokens[i:i + 4] == prefix]
+def declaration(tokens: list[tuple[str, str]], name: str, *, recipe: bool = False) -> dict:
+    prefix = ([] if recipe else [('id', 'export')]) + [('id', 'const'), ('id', name), ('sym', '=')]
+    if recipe:
+        prefix += [('id', 'tv'), ('sym', '(')]
+    starts = [i + len(prefix) for i in range(len(tokens)) if tokens[i:i + len(prefix)] == prefix]
     require(len(starts) == 1, name, '需要唯一 export const 声明')
     pos = starts[0]
 
@@ -140,21 +145,112 @@ def declaration(tokens: list[tuple[str, str]], name: str) -> dict:
         return result
 
     value = obj()
+    if recipe:
+        if pos < len(tokens) and tokens[pos] == ('sym', ','):
+            pos += 1
+        require(take() == ('sym', ')'), name, '不支持 recipe 后置表达式')
     require(pos < len(tokens) and tokens[pos] == ('sym', ';'), name, '不支持声明后置表达式')
     return value
 
 
+# 只读取规则块与字面量声明；字符串内的括号不能伪造规则，注释不参与匹配。
+CSS_LEX = re.compile(r'(?P<comment>/\*.*?\*/)|(?P<string>"(?:[^"\\]|\\.)*"|\'(?:[^\'\\]|\\.)*\')|'
+                     r'(?P<mark>[{};])|(?P<text>[^{};/"\']+)|(?P<other>.)', re.S)
+
+
+def css_rule(source: str, selector: str, *, within: tuple[str, ...] = ()) -> dict[str, str]:
+    stack: list[tuple[str, list[str], bool]] = []
+    matches = []
+    buffer: list[str] = []
+    for token in CSS_LEX.finditer(source):
+        kind, value = token.lastgroup, token.group()
+        if kind == 'comment':
+            buffer.append(' ')
+        elif kind == 'mark' and value == '{':
+            if stack:
+                header, declarations, _ = stack[-1]
+                stack[-1] = (header, declarations, True)
+            stack.append((' '.join(''.join(buffer).split()), [], False))
+            buffer = []
+        elif kind == 'mark' and value == ';':
+            if stack:
+                stack[-1][1].append(''.join(buffer).strip())
+            buffer = []
+        elif kind == 'mark' and value == '}':
+            require(bool(stack), selector, 'CSS 块未配对')
+            header, declarations, nested = stack.pop()
+            if ''.join(buffer).strip():
+                declarations.append(''.join(buffer).strip())
+            if header == selector and tuple(item[0] for item in stack) == within:
+                require(not nested, selector, '映射规则不能包含嵌套块')
+                matches.append(declarations)
+            buffer = []
+        else:
+            buffer.append(value)
+    require(not stack, selector, 'CSS 块未闭合')
+    require(len(matches) == 1, selector, '需要唯一 CSS 规则')
+    result = {}
+    for statement in matches[0]:
+        key, sep, value = statement.partition(':')
+        key, value = key.strip(), value.strip()
+        require(bool(sep) and bool(value) and key not in result, selector, '无效或重复 CSS 声明')
+        result[key] = value
+    return result
+
+
+def binding(value: dict, *path: str) -> str:
+    current = value
+    for part in path:
+        require(type(current) is dict and part in current, '.'.join(path), '源码缺少 recipe 绑定')
+        current = current[part]
+    require(type(current) is str, '.'.join(path), 'recipe 绑定必须是字符串')
+    return current
+
+
 def validate_sources(contract: dict, root: Path) -> None:
     source = contract['source']
-    tokens = tokenize(_source(root, source['tokenPath']))
-    design = declaration(tokens, 'designTokens')
-    semantic = declaration(tokens, 'semanticTokens')
-    for category, expected in contract['tokens'].items():
-        actual = (design if category in ('spacing', 'fontSizes') else semantic).get(category)
-        require(type(actual) is dict, category, '源码缺少 token 分类')
-        for key, value in expected.items():
-            wanted = value if category in ('spacing', 'fontSizes') else f'var({value})'
-            require(actual.get(key) == {'value': wanted}, f'{category}.{key}', '契约与源码 token 不一致')
+    css = _source(root, source['tokenPath'])
+    aliases = css_rule(css, ':root, .svadmin-theme')
+    theme = css_rule(_source(root, source['themePath']), '@theme inline')
+    light = css_rule(css, ':root', within=('@layer base',))
+    dark = css_rule(css, '.dark', within=('@layer base',))
+    mappings = contract['tokens']
+    for name, alias in {'surface': 'card', 'foreground': 'foreground', 'muted': 'muted-foreground',
+                        'border': 'border', 'success': 'success', 'warning': 'warning',
+                        'danger': 'destructive', 'info': 'info'}.items():
+        variable = mappings['colors'][name]
+        for origin in (aliases, theme):
+            require(origin.get(f'--color-{alias}') == f'var({variable})',
+                    f'colors.{name}', '契约与源码 token 不一致')
+        require(variable in light and variable in dark, f'colors.{name}', '明暗主题缺少实际变量声明')
+    radius = mappings['radii']['surface']
+    require(radius == '--radius-lg' and aliases.get(radius) == theme.get(radius) == 'var(--radius)',
+            'radii.surface', '契约与源码 token 不一致')
+    require('--radius' in light, 'radii.surface', '缺少基础圆角')
+
+    recipes = tokenize(_source(root, source['recipePath']))
+    metric = declaration(recipes, 'metricBlockRecipeStyles', recipe=True)
+    surface = declaration(recipes, 'surfaceMetricRecipeStyles', recipe=True)
+    status = declaration(recipes, 'productStatusRecipeStyles', recipe=True)
+    require({'rounded-lg', 'bg-card', 'text-foreground'} <=
+            set((binding(metric, 'slots', 'root') + ' ' + binding(metric, 'slots', 'value')).split()),
+            'metricBlockRecipeStyles', '语义圆角、表面或文字绑定漂移')
+    for name in ('success', 'warning', 'danger', 'info'):
+        require(binding(status, 'variants', 'status', name, 'root') ==
+                f'[--svadmin-status-color:var({mappings["colors"][name]})]',
+                f'colors.{name}', '状态 recipe 绑定漂移')
+    badge = css_rule(css, ':is([data-slot="badge"], .svadmin-badge).svadmin-badge', within=('@layer components',))
+    card = css_rule(css, '.svadmin-card', within=('@layer components',))
+    require(badge.get('gap') == mappings['spacing']['xs'], 'spacing.xs', '契约与源码尺度不一致')
+    require(card.get('gap') == mappings['spacing']['md'], 'spacing.md', '契约与源码尺度不一致')
+    for size, density in (('sm', 'compact'), ('lg', 'comfortable')):
+        classes = binding(surface, 'variants', 'density', density, 'state').split()
+        bindings = [item for item in classes if item.startswith('[--svadmin-metric-state-padding:')]
+        require(bindings == [f'[--svadmin-metric-state-padding:{mappings["spacing"][size]}]'],
+                f'spacing.{size}', '契约与源码尺度不一致')
+    for size, origin in (('compact', badge), ('body', card)):
+        require(origin.get('font-size') == mappings['fontSizes'][size],
+                f'fontSizes.{size}', '契约与源码字号不一致')
     exported = tokenize(_source(root, source['componentIndexPath']))
     for name, item in contract['components'].items():
         prefix = [('id', 'export'), ('sym', '{'), ('id', 'default'), ('id', 'as'),
@@ -205,10 +301,12 @@ def validate_bundle(manifest: dict, contract: dict, source_root: Path | None = N
     exact(figma['url'], f'https://www.figma.com/design/{figma["fileKey"]}', 'figma.url')
     for key, expected in {'status':'created-empty', 'blocker':'starter-mcp-quota', 'contentVerified':False, 'nodeIds':[]}.items():
         exact(figma[key], expected, f'figma.{key}')
-    source = fields(contract['source'], 'repository commit tokenPath componentIndexPath', 'source')
+    source = fields(contract['source'], 'repository commit tokenPath themePath recipePath componentIndexPath', 'source')
     exact(source['repository'], 'vibeunion/svadmin', 'source.repository')
     require(isinstance(source['commit'], str) and re.fullmatch(r'[0-9a-f]{40}', source['commit']) is not None, 'source.commit', '需要不可变提交 SHA')
     exact(source['tokenPath'], TOKEN_PATH, 'source.tokenPath')
+    exact(source['themePath'], THEME_PATH, 'source.themePath')
+    exact(source['recipePath'], RECIPE_PATH, 'source.recipePath')
     exact(source['componentIndexPath'], INDEX_PATH, 'source.componentIndexPath')
     bounds = fields(contract['boundaries'], 'referenceOnly runtimeRegistration productionStyleChange thirdPartyAssetsIncluded arbitraryStyleOrCode businessWriteAuthority', 'boundaries')
     for key, value in bounds.items():

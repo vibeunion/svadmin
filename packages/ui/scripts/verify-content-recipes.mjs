@@ -21,7 +21,7 @@ const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8'
 const names = ['ContentPageShell', 'ContentPageHeader', 'MetricBlock'];
 const report = {
   baseline, head: git('rev-parse', 'HEAD'), baselineSources: {}, candidateSources: {}, css: {},
-  comparison: 'Exact geometry/styles and PNG versus historical components plus four explicit trend-color corrections. Original historical PNGs are retained, not overwritten.',
+  comparison: 'Exact geometry/styles and PNG versus historical components with explicit Tailwind migration corrections: 24px header gap, wrapping breadcrumbs, semantic clean-flat metric surfaces and four trend colors. Original historical PNGs are retained.',
   cases: [], errors: [],
 };
 let server;
@@ -104,7 +104,31 @@ try {
 `);
   await build({ configFile: false, root: work, plugins: [svelte({ configFile: false })], resolve: { conditions: ['browser'] }, build: { outDir: 'build', emptyOutDir: true }, logLevel: 'warn' });
   server = await preview({ configFile: false, root: work, build: { outDir: 'build' }, preview: { host: '127.0.0.1', port: 4187, strictPort: true }, logLevel: 'warn' });
-  browser = await chromium.launch();
+  browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
+  async function applyMigrationReference(page) {
+    await page.locator('#stage').evaluate((stage) => {
+      // 独立的有限升级预期；不从候选元素读取样式，也不屏蔽其它几何差异。
+      const headers = stage.querySelectorAll('[data-svadmin-page-header]');
+      if (headers.length !== 2) throw new Error('Expected both historical headers');
+      for (const header of headers) {
+        const row = header.querySelector(':scope > div');
+        if (!(row instanceof HTMLElement)) throw new Error('Missing historical header row');
+        row.style.gap = '24px';
+        const breadcrumbs = header.querySelector(':scope > nav');
+        if (breadcrumbs instanceof HTMLElement) breadcrumbs.style.flexWrap = 'wrap';
+      }
+      if (stage.closest('.layout-clean-flat')) {
+        const metrics = stage.querySelectorAll('[data-svadmin-metric-card]');
+        if (metrics.length !== 6) throw new Error('Expected all historical metrics');
+        for (const metric of metrics) {
+          if (!(metric instanceof HTMLElement)) throw new Error('Invalid metric element');
+          metric.style.borderColor = 'var(--svadmin-border)';
+          metric.style.backgroundColor = 'var(--svadmin-surface)';
+          metric.style.boxShadow = 'var(--svadmin-surface-shadow)';
+        }
+      }
+    });
+  }
   const cases = [];
   for (const viewport of [{ width: 1440, height: 900 }, { width: 1920, height: 1080 }, { width: 390, height: 844 }]) {
     for (const theme of ['light', 'dark']) {
@@ -162,24 +186,28 @@ try {
       }, trendBindings);
       const before = await stableScreenshot(page.locator('#stage'));
       const oldStyles = await snapshot(page);
+      await applyMigrationReference(page);
+      await stableScreenshot(page.locator('#stage'));
+      const migrationStyles = await snapshot(page);
       await page.locator('#implementation').click();
       await expect(page.locator('#implementation')).toHaveText('candidate');
       const after = await stableScreenshot(page.locator('#stage'));
       const newStyles = await snapshot(page);
       writeFileSync(join(evidence, `${id}-baseline.png`), before);
       writeFileSync(join(evidence, `${id}-candidate.png`), after);
-      writeFileSync(join(evidence, `${id}-styles.json`), JSON.stringify({ baseline: oldStyles, candidate: newStyles, resolved }, null, 2));
-      const { expected, changes } = assertContentParity(oldStyles, newStyles, resolved);
-      // A THIRD capture records only the intentional trend-color correction.
+      writeFileSync(join(evidence, `${id}-styles.json`), JSON.stringify({ baseline: oldStyles, migrationReference: migrationStyles, candidate: newStyles, resolved }, null, 2));
+      const { expected, changes } = assertContentParity(migrationStyles, newStyles, resolved);
+      // 第三张图保留明确升级预期；原始历史截图始终保留。
       await page.locator('#implementation').click();
       await expect(page.locator('#implementation')).toHaveText('baseline');
+      await applyMigrationReference(page);
       await page.locator('#stage').evaluate((stage, bindings) => {
         const nodes = [stage, ...stage.querySelectorAll('*')];
         for (const binding of bindings) nodes[binding.index].style.color = binding.expectedColor;
       }, resolved);
       const reference = await stableScreenshot(page.locator('#stage'));
-      writeFileSync(join(evidence, `${id}-expected-color-fix.png`), reference);
-      assert.deepEqual(await snapshot(page), expected, 'reference correction changed more than foreground colors');
+      writeFileSync(join(evidence, `${id}-expected-migration.png`), reference);
+      assert.deepEqual(await snapshot(page), expected, 'reference correction exceeded the explicit migration contract');
       assert.ok(reference.equals(after), `${id}: PNG differs from the explicitly corrected reference`);
       await page.locator('#implementation').click();
       await expect(page.locator('#implementation')).toHaveText('candidate');

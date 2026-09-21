@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { requireValue } from '../../scripts/test-assertions';
 import { mount, tick, unmount } from 'svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AccessControlProvider, AuthProvider } from '@svadmin/core';
@@ -27,8 +28,8 @@ let mounted: ReturnType<typeof mount> | undefined;
 let target: HTMLDivElement;
 beforeEach(async () => {
   localStorage.clear();
-  moveInput = { source: 'mail_inbox', target: 'mail_archive', id: 1, expectedSource: mailSourceFingerprint((await rows('mail_inbox'))[0]!) };
-  sendInput = { draftId: 1, expectedSource: mailSourceFingerprint((await rows('mail_draft'))[0]!), to: 'reader@example.com', subject: 'Atomic send', body: 'Local only' };
+  moveInput = { source: 'mail_inbox', target: 'mail_archive', id: 1, expectedSource: mailSourceFingerprint(requireValue((await rows('mail_inbox'))[0])) };
+  sendInput = { draftId: 1, expectedSource: mailSourceFingerprint(requireValue((await rows('mail_draft'))[0])), to: 'reader@example.com', subject: 'Atomic send', body: 'Local only' };
   target = document.createElement('div'); document.body.append(target);
   Object.defineProperty(window, 'confirm', { configurable: true, writable: true, value: () => true });
   Object.defineProperty(Element.prototype, 'animate', { configurable: true, value: () => ({ cancel() {}, finished: Promise.resolve() }) });
@@ -86,7 +87,7 @@ describe('local atomic mail', () => {
     it(`${kind} leaves storage and memory unchanged on failure, then succeeds after a fresh read`, async () => {
       // 先建立已提交快照，以便检查拒绝写入之后的内存回退。
       await inMemoryDataProvider.update({ resource: 'mail_inbox', id: 1, variables: { unread: true } });
-      moveInput.expectedSource = mailSourceFingerprint((await rows('mail_inbox'))[0]!);
+      moveInput.expectedSource = mailSourceFingerprint(requireValue((await rows('mail_inbox'))[0]));
       const before = await state();
       const write = vi.spyOn(localStorage, 'setItem').mockImplementation(() => { throw new Error('Storage full'); });
       const execute = () => kind === 'move' ? moveLocalMail(moveInput) : sendLocalMail(sendInput);
@@ -145,7 +146,7 @@ describe('local atomic mail', () => {
   });
 
   it('rejects a replay after draft ID 2 is reused, including an identical body and timestamp', async () => {
-    const original = (await rows('mail_draft')).find(row => row.id === 2)!;
+    const original = requireValue((await rows('mail_draft')).find(row => row.id === 2));
     expect(original).toBeDefined();
     const stale = { ...sendInput, draftId: 2, expectedSource: mailSourceFingerprint(original) };
     sendLocalMail(stale);
@@ -159,14 +160,14 @@ describe('local atomic mail', () => {
   });
 
   it('rejects duplicate source IDs before either of two send attempts', async () => {
-    const original = (await rows('mail_draft'))[0]!;
-    await inMemoryDataProvider.update({ resource: 'mail_draft', id: original.id!, variables: { subject: original.subject } });
-    const key = localStorage.key(0)!;
-    const stored: Record<string, unknown> = JSON.parse(localStorage.getItem(key)!);
+    const original = requireValue((await rows('mail_draft'))[0]);
+    await inMemoryDataProvider.update({ resource: 'mail_draft', id: requireValue(original.id), variables: { subject: original.subject } });
+    const key = requireValue(localStorage.key(0));
+    const stored: Record<string, unknown> = JSON.parse(requireValue(localStorage.getItem(key)));
     const drafts = await rows('mail_draft');
     stored['mail_draft'] = [...drafts, structuredClone(drafts[0])];
     localStorage.setItem(key, JSON.stringify(stored));
-    const input = { ...sendInput, expectedSource: mailSourceFingerprint(drafts[0]!) };
+    const input = { ...sendInput, expectedSource: mailSourceFingerprint(requireValue(drafts[0])) };
     const before = await state();
     const write = vi.spyOn(localStorage, 'setItem');
     expect(() => sendLocalMail(input)).toThrow('ambiguous');
@@ -177,13 +178,13 @@ describe('local atomic mail', () => {
 
   it('rejects duplicate received IDs before moving either matching row', async () => {
     await inMemoryDataProvider.update({ resource: 'mail_inbox', id: 1, variables: { unread: true } });
-    const key = localStorage.key(0)!;
-    const stored: Record<string, unknown> = JSON.parse(localStorage.getItem(key)!);
+    const key = requireValue(localStorage.key(0));
+    const stored: Record<string, unknown> = JSON.parse(requireValue(localStorage.getItem(key)));
     const inbox = await rows('mail_inbox');
     stored['mail_inbox'] = [...inbox, structuredClone(inbox[0])];
     localStorage.setItem(key, JSON.stringify(stored));
     const before = await state();
-    expect(() => moveLocalMail({ ...moveInput, expectedSource: mailSourceFingerprint(inbox[0]!) })).toThrow('ambiguous');
+    expect(() => moveLocalMail({ ...moveInput, expectedSource: mailSourceFingerprint(requireValue(inbox[0])) })).toThrow('ambiguous');
     expect(await state()).toEqual(before);
   });
 
@@ -231,7 +232,7 @@ describe('local atomic mail', () => {
   it('rejects in-place canDelete revocation during the final permission check', async () => {
     const owner = context();
     owner.accessControlProvider = { options: {}, can: async ({ action }) => {
-      if (action === 'delete') owner.resources.find(resource => resource.name === 'mail_draft')!.canDelete = false;
+      if (action === 'delete') requireValue(owner.resources.find(resource => resource.name === 'mail_draft')).canDelete = false;
       return { can: true };
     } };
     const before = await state();
@@ -244,7 +245,7 @@ describe('local atomic mail', () => {
     owner.providers.default = { ...inMemoryDataProvider };
     await expect(executeLocalMail(owner, { kind: 'move', input: moveInput })).rejects.toThrow();
     const fresh = context();
-    fresh.resources.find(resource => resource.name === 'mail_sent')!.canCreate = false;
+    requireValue(fresh.resources.find(resource => resource.name === 'mail_sent')).canCreate = false;
     await expect(executeLocalMail(fresh, { kind: 'send', input: sendInput })).rejects.toThrow();
   });
 
@@ -273,11 +274,11 @@ describe('local atomic mail', () => {
   it('updates the inbox view and stays moved after page remount', async () => {
     await render('mail_inbox');
     await vi.waitFor(() => expect(button('Archive')).toBeDefined());
-    const subject = target.querySelector('article h2')!.textContent;
+    const subject = requireValue(target.querySelector('article h2')).textContent;
     button('Archive').click();
     await vi.waitFor(() => expect(target.textContent).toContain('Message moved.'));
     await vi.waitFor(() => expect(target.querySelector('article h2')?.textContent).not.toBe(subject));
-    await unmount(mounted!); mounted = undefined;
+    await unmount(requireValue(mounted)); mounted = undefined;
     await render('mail_archive');
     await vi.waitFor(() => expect(target.textContent).toContain(subject));
     expect((await rows('mail_archive')).filter(row => row.subject === subject)).toHaveLength(1);
@@ -288,13 +289,13 @@ describe('local atomic mail', () => {
     await vi.waitFor(() => expect(button('Continue draft')).toBeDefined());
     button('Continue draft').click(); await tick();
     const drafts = await rows('mail_draft');
-    const original = drafts[0]!;
-    await inMemoryDataProvider.deleteMany!({ resource: 'mail_draft', ids: drafts.map(row => Number(row.id)) });
+    const original = requireValue(drafts[0]);
+    await requireValue(inMemoryDataProvider.deleteMany)({ resource: 'mail_draft', ids: drafts.map(row => Number(row.id)) });
     const { id: _id, ...variables } = original;
     const replacement = (await inMemoryDataProvider.create({ resource: 'mail_draft', variables })).data;
     expect(replacement.id).toBe(original.id);
     const before = await state();
-    target.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    requireValue(target.querySelector('form')).dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     await vi.waitFor(() => expect(target.textContent).toContain('Operation incomplete'));
     expect(await state()).toEqual(before);
     expect(target.querySelector('textarea')).not.toBeNull();
@@ -306,16 +307,16 @@ describe('local atomic mail', () => {
     button('Continue draft').click(); await tick();
     const before = await state();
     const write = vi.spyOn(localStorage, 'setItem').mockImplementation(() => { throw new Error('Storage full'); });
-    target.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    requireValue(target.querySelector('form')).dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     await vi.waitFor(() => expect(target.textContent).toContain('Operation incomplete'));
     expect(await state()).toEqual(before);
-    expect(target.querySelector('textarea')!.value.length).toBeGreaterThan(0);
+    expect(requireValue(target.querySelector('textarea')).value.length).toBeGreaterThan(0);
     write.mockRestore();
-    await unmount(mounted!); mounted = undefined;
+    await unmount(requireValue(mounted)); mounted = undefined;
     await render('mail_draft');
     await vi.waitFor(() => expect(button('Continue draft')).toBeDefined());
     button('Continue draft').click(); await tick();
-    target.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    requireValue(target.querySelector('form')).dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     await vi.waitFor(() => expect(target.textContent).toContain('No real email was delivered'));
     expect(await rows('mail_sent')).toHaveLength(before.sent.length + 1);
     expect(await rows('mail_draft')).toHaveLength(before.drafts.length - 1);
@@ -328,7 +329,7 @@ describe('local atomic mail', () => {
     const before = await state();
     const write = vi.spyOn(localStorage, 'setItem');
     const reads = vi.spyOn(inMemoryDataProvider, 'getList').mockRejectedValue(new Error('Temporary query failure'));
-    target.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    requireValue(target.querySelector('form')).dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     await vi.waitFor(() => expect(target.textContent).toContain('Write completed, but list refresh failed'), { timeout: 12000 });
     expect(target.textContent).toContain('No real email was delivered');
     expect(target.textContent).not.toContain('Operation incomplete');

@@ -42,13 +42,13 @@ Input、Badge 和三类页面的 Figma 图层仍未创建；第三页是空的�
 
 视觉决定由根目录 `DESIGN.md` 与经过审查的 svadmin 实现共同管理。Stripe Connect 官方 Toolkit 参考产品结构，Park Foundations 参考变量与组件组织。本次不复制第三方图层、商标、字体或商业素材；文件级许可仍为 pending，不得随 npm 包再分发。
 
-运行时保持 Svelte + Bits UI + Panda CSS，不新增 Tailwind、React、Stripe SDK 或 Ark UI 依赖，不改动 PR #436。页面模式契约用于设计验收，不是 SurfaceRenderer schema；模拟权限也不代替后端授权。
+最初交付基于 Svelte + Bits UI + Panda CSS；这是历史背景，不是当前运行时约束。当前 UI 已迁移到 Tailwind，primitive/product recipe 合并于 `packages/ui/src/recipes.ts`。本套件不新增运行时依赖。页面模式契约用于设计验收，不是 SurfaceRenderer schema；模拟权限也不代替后端授权。
 
 ## 单一来源与生成格式
 
-`source.json` 固定代码来源及经过审查的尺寸映射。生成器从 `packages/ui/src/components.css` 读取明暗主题，检查 Git blob 哈希。来源改变时要求审查新的版本，不能继续给旧 Figma 文件贴“同步”标签。
+`source.json` 固定历史 Figma 代码来源及尺寸映射，其中已删除的 Panda recipe 路径仅为历史 provenance，不再作为文件读取目标。`runtime-source.json` 单独固定当前 stylesheet/recipe 路径与 Git blob，并关联历史基线。生成器读取当前明暗主题并检查运行时哈希；来源改变仍会失败，不能继续给旧 Figma 文件贴“同步”标签。
 
-生成 `light.tokens.json`、`dark.tokens.json` 与 `figma-seed.json`。前两者采用 DTCG 2025.10 结构化 color/dimension 及引用形式，仅支持本套件所需类型，不是完整 DTCG 校验器。它们是代码生成的设计快照，不取代现有 CSS/Panda 运行时来源。
+生成 `light.tokens.json`、`dark.tokens.json` 与 `figma-seed.json`。前两者采用 DTCG 2025.10 结构化 color/dimension 及引用形式，仅支持本套件所需类型，不是完整 DTCG 校验器。元数据分别记录运行时来源与历史 `dimensionsRevision`；17 个尺寸没有重新宣称为当前 recipe 几何验收结果。快照不取代现有 CSS/Tailwind 运行时来源。
 
 Figma 颜色采用 sRGB 投影；Light/success、Light/warning、Dark/primary、Dark/ring、Dark/accent-foreground 有色域裁剪。DTCG 保留原始 OKLCH，figma-seed 单独标记裁剪，不能宣称两个渲染器无损或像素一致。尺寸换算明确假设根字号16px。
 

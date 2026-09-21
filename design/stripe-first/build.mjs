@@ -12,11 +12,13 @@ export const runtimeSource = JSON.parse(readFileSync(resolve(directory, 'runtime
 export function verifyRuntimeSources(css, recipe, review = runtimeSource) {
   assert.equal(review.figmaBaselineRevision, source.revision, 'Figma baseline changed without synchronization');
   assert.equal(review.basedOnRecipeBlob, source.recipeBlob, 'Unrelated recipe baseline');
-  assert.equal(review.recipeSource, source.recipeSource, 'Unexpected recipe path');
+  assert.equal(review.basedOnRecipeSource, source.recipeSource, 'Unrelated historical recipe path');
+  assert.equal(review.recipeSource, 'packages/ui/src/recipes.ts', 'Unexpected runtime recipe path');
   assert.equal(review.figmaSynchronized, false, 'Runtime validation cannot assert Figma synchronization');
-  assert.equal(review.stylesheetBlob, source.stylesheetBlob, 'Theme baseline changed');
+  assert.equal(review.basedOnStylesheetBlob, source.stylesheetBlob, 'Theme baseline changed');
+  assert.equal(review.stylesheet, source.stylesheet, 'Unexpected stylesheet path');
   assert.equal(gitBlob(css), review.stylesheetBlob, 'Source changed: review theme baseline');
-  assert.equal(gitBlob(recipe), review.recipeBlob, 'Primitive recipe source changed: review runtime-source.json');
+  assert.equal(gitBlob(recipe), review.recipeBlob, 'Runtime recipe source changed: review runtime-source.json');
 }
 
 export function gitBlob(bytes) {
@@ -65,10 +67,15 @@ export function oklchToSrgb(components) {
 }
 
 export function buildKit(css) {
-  assert.equal(gitBlob(css), source.stylesheetBlob, 'Source changed: review the baseline before regenerating the design snapshot');
+  assert.equal(gitBlob(css), runtimeSource.stylesheetBlob, 'Source changed: inspect runtime-source.json before regenerating the design snapshot');
   const sourceSha256 = createHash('sha256').update(css).digest('hex');
   const files = {};
-  const seed = { runtimeSource: { revision: runtimeSource.revision, recipeBlob: runtimeSource.recipeBlob, figmaSynchronized: false }, revision: source.revision, sourceSha256, colors: {}, dimensions: source.dimensions, clipped: [] };
+  const provenance = {
+    revision: runtimeSource.revision, recipeSource: runtimeSource.recipeSource,
+    recipeBlob: runtimeSource.recipeBlob, stylesheet: runtimeSource.stylesheet,
+    stylesheetBlob: runtimeSource.stylesheetBlob, figmaSynchronized: false,
+  };
+  const seed = { runtimeSource: provenance, revision: source.revision, sourceSha256, dimensionsRevision: source.revision, colors: {}, dimensions: source.dimensions, clipped: [] };
   for (const [theme, selector] of [['Light', ':root'], ['Dark', '.dark']]) {
     const colors = parseTheme(css, selector);
     const primitive = {};
@@ -90,7 +97,7 @@ export function buildKit(css) {
     }
     files[`${theme.toLowerCase()}.tokens.json`] = {
       $description: 'Generated svadmin asset snapshot, not Stripe tokens or an independent runtime theme.',
-      $extensions: { 'org.svadmin': { revision: source.revision, sourceSha256, role: 'generated-snapshot', theme, rootFontSizePx: source.rootFontSizePx } },
+      $extensions: { 'org.svadmin': { revision: source.revision, runtimeSource: provenance, dimensionsRevision: source.revision, sourceSha256, role: 'generated-snapshot', theme, rootFontSizePx: source.rootFontSizePx } },
       primitive, color, dimension,
     };
   }

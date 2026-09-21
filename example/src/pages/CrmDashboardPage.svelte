@@ -30,8 +30,8 @@
     { resource: 'crm_contacts', title: isZh ? '联系人' : 'Contacts', query: contactsQuery },
     { resource: 'crm_deals', title: isZh ? '商机' : 'Deals', query: dealsQuery },
     { resource: 'crm_activities', title: isZh ? '跟进活动' : 'Activities', query: activitiesQuery },
-  ]);
-  const current = $derived(navigation.find(item => item.resource === resourceName) ?? navigation[0]!);
+  ] as const);
+  const current = $derived(navigation.find(item => item.resource === resourceName) ?? navigation[0]);
   const title = $derived(view === 'reports' || view === 'dashboard' ? (isZh ? 'CRM 经营快照' : 'CRM snapshot') : view === 'notes' ? (isZh ? '跟进记录' : 'Follow-up notes') : current.title);
   const matches = (value: string) => value.toLowerCase().includes(search.trim().toLowerCase());
   const visibleAccounts = $derived(accounts.filter(item => matches(`${item.accountName} ${item.notes}`)));

@@ -18,7 +18,9 @@
 
 ## 来源与同步
 
-`source.json` 与 `figma-map.json` 保留实际 Figma 创建时的 `c919363` 来源，不改写历史。新增 `runtime-source.json` 精确固定本次审查的主线 primitive blob，并明确 figmaSynchronized=false。颜色文件哈希及17个尺寸未变；主线 #444 的改变是 subtle/destructive 回退可读性，不自动赋予 Figma 已同步状态。
+`source.json` 与 `figma-map.json` 保留实际 Figma 创建时的 `c919363` 来源，不改写历史。最初 `runtime-source.json` 固定 #444 的 primitive blob，其 subtle/destructive 回退可读性检查不代表 Figma 同步。
+
+2026-09-21 源码合同续修：当前 d5196a87 已删除 Panda primitive/product recipe 文件，统一来源为 `packages/ui/src/recipes.ts`，生成器与浏览器证据哈希改读该文件。components.css 相对历史基线仅增加侧栏宽度/RTL 规则，16 个明暗颜色角色未变；完整 CSS blob 仍严格固定在 runtime-source 中，未来漂移仍失败。历史 source、Figma map、pending 状态均不改写，figmaSynchronized 继续为 false。17 个尺寸作为历史映射保留，不声称新 recipe 的几何或浏览器视觉已经审核通过。
 
 生成器和预览分别校验真实 CSS/recipe blob；未审查的漂移仍失败。新的运行时来源记录不包含第二套颜色值。Figma 本次读取 `8:53` 仍报 Starter MCP 限额，没有写入；其 Input、Badge 和三张页面图层继续待完成。
 

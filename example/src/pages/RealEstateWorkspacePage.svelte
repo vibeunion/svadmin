@@ -38,9 +38,9 @@
     { resource: 'property_agents', title: isZh ? '顾问' : 'Agents', query: agentsQuery },
     { resource: 'property_leads', title: isZh ? '线索' : 'Leads', query: leadsQuery },
     { resource: 'property_showings', title: isZh ? '看房' : 'Showings', query: showingsQuery },
-  ]);
+  ] as const);
   const isPropertyView = $derived(resourceName === 'properties' || view === 'saved');
-  const current = $derived(isPropertyView ? navigation[0]! : navigation.find(item => item.resource === resourceName) ?? navigation[0]!);
+  const current = $derived(isPropertyView ? navigation[0] : navigation.find(item => item.resource === resourceName) ?? navigation[0]);
   const matches = (text: string) => text.toLowerCase().includes(search.trim().toLowerCase());
   const visibleProperties = $derived(properties.filter(item => matches(`${item.propertyName} ${item.market} ${item.assetType}`)
     && (!market || item.market === market) && (!assetType || item.assetType === assetType)

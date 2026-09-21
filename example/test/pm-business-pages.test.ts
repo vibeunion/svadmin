@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { requireValue } from '../../scripts/test-assertions';
 import { mount, tick, unmount } from 'svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Harness from './fixtures/BusinessPmHarness.svelte';
@@ -70,13 +71,13 @@ describe('PM business acceptance', () => {
   it('persists Todo completion to the provider and survives remount', async () => {
     await render('todos');
     await waitFor(() => expect(target.querySelector('button[aria-label="Complete task"]')).not.toBeNull());
-    const candidate = target.querySelector<HTMLButtonElement>('button[aria-label="Complete task"]')!;
-    const article = candidate.closest('article')!;
-    const href = article.querySelector('a')!.getAttribute('href')!;
+    const candidate = requireValue(target.querySelector<HTMLButtonElement>('button[aria-label="Complete task"]'));
+    const article = requireValue(candidate.closest('article'));
+    const href = requireValue(requireValue(article.querySelector('a')).getAttribute('href'));
     const id = Number(href.split('/').pop());
     candidate.click();
     await waitFor(async () => expect(demoRenderers.todos.records(await rows('todos')).find(item => item.id === id)?.completed).toBe(true));
-    await unmount(mounted!); mounted = undefined;
+    await unmount(requireValue(mounted)); mounted = undefined;
     await render('todos', '#/todos?view=completed');
     await waitFor(() => expect(target.querySelector(`article a[href="#/todos/show/${id}"]`)).not.toBeNull());
     expect(target.querySelector('button[aria-label="Complete task"]')).toBeNull();
@@ -94,7 +95,7 @@ describe('PM business acceptance', () => {
     await waitFor(() => expect(target.querySelector('button[aria-label="Complete task"]')).not.toBeNull());
     const before = demoRenderers.todos.records(await rows('todos')).filter(item => item.completed).length;
     vi.spyOn(localStorage, 'setItem').mockImplementation(() => { throw new Error('Storage full'); });
-    target.querySelector<HTMLButtonElement>('button[aria-label="Complete task"]')!.click();
+    requireValue(target.querySelector<HTMLButtonElement>('button[aria-label="Complete task"]')).click();
     await waitFor(() => expect(target.querySelector('[role="alert"]')).not.toBeNull());
     expect(demoRenderers.todos.records(await rows('todos')).filter(item => item.completed)).toHaveLength(before);
   });
@@ -122,7 +123,7 @@ describe('PM business acceptance', () => {
   it('resolves reorder-rule warehouses without blocking sales on warehouse failures', async () => {
     await render('reorder_rules');
     await waitFor(() => expect(target.querySelector('[data-reorder-layout]')?.textContent).toContain('Main Warehouse'));
-    await unmount(mounted!); mounted = undefined;
+    await unmount(requireValue(mounted)); mounted = undefined;
     await render('sales_orders', '#/sales_orders', 'warehouses');
     await waitFor(() => expect(target.querySelector('[data-order-layout="sales_orders"]')).not.toBeNull());
     expect(target.textContent).not.toContain('Unknown warehouse');
@@ -133,10 +134,10 @@ describe('PM business acceptance', () => {
     await waitFor(() => expect(button('Compose')).toBeDefined());
     button('Compose').click();
     await tick();
-    const form = target.querySelector('form')!;
-    fill(form.querySelector<HTMLInputElement>('input[type="email"]')!, 'pm@example.com');
-    fill(form.querySelector<HTMLInputElement>('input:not([type="email"])')!, 'PM workflow draft');
-    fill(form.querySelector<HTMLTextAreaElement>('textarea')!, 'Local-only body.');
+    const form = requireValue(target.querySelector('form'));
+    fill(requireValue(form.querySelector<HTMLInputElement>('input[type="email"]')), 'pm@example.com');
+    fill(requireValue(form.querySelector<HTMLInputElement>('input:not([type="email"])')), 'PM workflow draft');
+    fill(requireValue(form.querySelector<HTMLTextAreaElement>('textarea')), 'Local-only body.');
     await tick();
     button('Save draft').click();
     await waitFor(async () => expect(demoRenderers.mail_draft.records(await rows('mail_draft')).some(item => item.subject === 'PM workflow draft')).toBe(true));
@@ -151,7 +152,7 @@ describe('PM business acceptance', () => {
     await render('mail_inbox');
     await waitFor(() => expect(button('Archive')).toBeDefined());
     const before = demoRenderers.mail_inbox.records(await rows('mail_inbox'));
-    const subject = target.querySelector('article h2')!.textContent;
+    const subject = requireValue(target.querySelector('article h2')).textContent;
     button('Archive').click();
     await waitFor(async () => expect((await rows('mail_inbox')).length).toBe(before.length - 1));
     expect(demoRenderers.mail_archive.records(await rows('mail_archive')).some(item => item.subject === subject)).toBe(true);
@@ -178,17 +179,17 @@ describe('PM business acceptance', () => {
     await waitFor(() => expect(button('Continue draft')).toBeDefined());
     button('Continue draft').click();
     await tick();
-    fill(target.querySelector('input[type="email"]')!, 'pm@example.com');
+    fill(requireValue(target.querySelector('input[type="email"]')), 'pm@example.com');
     await tick();
     const before = (await rows('mail_sent')).length;
     const draftsBefore = await rows('mail_draft');
     vi.spyOn(localStorage, 'setItem').mockImplementationOnce(() => { throw new Error('Storage full'); });
-    target.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    requireValue(target.querySelector('form')).dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     await waitFor(() => expect(target.textContent).toContain('Operation incomplete'));
     expect(await rows('mail_sent')).toHaveLength(before);
     expect(await rows('mail_draft')).toEqual(draftsBefore);
     await waitFor(() => expect(button('Send locally').disabled).toBe(false));
-    target.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    requireValue(target.querySelector('form')).dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     await waitFor(() => expect(target.textContent).toContain('No real email was delivered'));
     expect(await rows('mail_sent')).toHaveLength(before + 1);
     expect(await rows('mail_draft')).toHaveLength(draftsBefore.length - 1);
@@ -198,45 +199,45 @@ describe('PM business acceptance', () => {
     await render('mail_inbox');
     button('Compose').click();
     await tick();
-    fill(target.querySelector('textarea')!, 'Keep this unsaved message');
+    fill(requireValue(target.querySelector('textarea')), 'Keep this unsaved message');
     await tick();
     button('Collapse').click();
     await tick();
     button('Resume editing').click();
     await tick();
-    expect(target.querySelector('textarea')!.value).toBe('Keep this unsaved message');
+    expect(requireValue(target.querySelector('textarea')).value).toBe('Keep this unsaved message');
     button('Collapse').click();
     await tick();
     const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
     const event = new MouseEvent('click', { bubbles: true, cancelable: true });
-    target.querySelector('nav a[href="#/mail_draft"]')!.dispatchEvent(event);
+    requireValue(target.querySelector('nav a[href="#/mail_draft"]')).dispatchEvent(event);
     expect(confirm).toHaveBeenCalled();
     expect(event.defaultPrevented).toBe(true);
     button('Resume editing').click();
     await tick();
-    expect(target.querySelector('textarea')!.value).toBe('Keep this unsaved message');
+    expect(requireValue(target.querySelector('textarea')).value).toBe('Keep this unsaved message');
   });
 
   it('retains unsaved mail when local persistence rejects', async () => {
     await render('mail_inbox');
     button('Compose').click();
     await tick();
-    fill(target.querySelector('input:not([type="email"])')!, 'Storage failure');
-    fill(target.querySelector('textarea')!, 'Retain the body');
+    fill(requireValue(target.querySelector('input:not([type="email"])')), 'Storage failure');
+    fill(requireValue(target.querySelector('textarea')), 'Retain the body');
     await tick();
     vi.spyOn(localStorage, 'setItem').mockImplementation(() => { throw new Error('Storage full'); });
     button('Save draft').click();
     await waitFor(() => expect(target.textContent).toContain('Operation incomplete'));
-    expect(target.querySelector('textarea')!.value).toBe('Retain the body');
+    expect(requireValue(target.querySelector('textarea')).value).toBe('Retain the body');
     expect(target.textContent).not.toContain('Draft saved.');
   });
 
   it('runs the actual read-only chat provider and saves a new thread from an empty selection', async () => {
     await render('ai_conversations', '#/ai_conversations?view=new');
     await waitFor(() => expect(target.querySelector('textarea')).not.toBeNull());
-    fill(target.querySelector('textarea')!, 'Which products have low stock?');
+    fill(requireValue(target.querySelector('textarea')), 'Which products have low stock?');
     await tick();
-    target.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    requireValue(target.querySelector('form')).dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     await waitFor(async () => expect(demoRenderers.ai_conversations.records(await rows('ai_conversations')).some(item => item.title === 'Which products have low stock?' && item.lastMessage.includes('Low-stock products:'))).toBe(true));
     expect(window.location.hash).not.toBe('#/ai_conversations?view=new');
   });

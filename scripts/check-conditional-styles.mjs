@@ -6,19 +6,19 @@ import { chromium } from '@playwright/test';
 
 const css = readFileSync('packages/ui/dist/app.css', 'utf8');
 const checks = [];
-const browser = await chromium.launch();
+const browser = await chromium.launch(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
 try {
   for (const width of [390, 767, 768, 1440, 1920]) {
     for (const dark of [false, true]) {
       const page = await browser.newPage({ viewport: { width, height: 900 } });
       try {
         await page.setContent(`<!doctype html><html class="${dark ? 'dark' : ''}"><body>
-          <div id="sidebar" class="w-[252px]"></div>
-          <div id="content" class="sidebar-content-expanded md:ml-[252px]"></div>
+          <div id="sidebar" class="svadmin-sidebar-expanded"></div>
+          <div id="content" class="sidebar-content-expanded svadmin-sidebar-content-expanded"></div>
           <div id="step" class="bg-primary text-primary-foreground"></div>
-          <div id="social" style="display:grid;width:200px" class="grid-cols-2"><span>A</span><span>B</span></div>
-          <div id="tools" style="display:inline-block" class="w-auto min-w-[200px]">Tools</div>
-          <div id="spacing" style="display:flex" class="px-5 justify-center"></div>
+          <div id="social" style="display:grid;width:200px" class="svadmin-u-8e75e3db482b"><span>A</span><span>B</span></div>
+          <div id="tools" style="display:inline-block" class="svadmin-devtools--collapsed-width svadmin-devtools--collapsed-min-width">Tools</div>
+          <div id="spacing" style="display:flex" class="svadmin-u-d139dd09e38d svadmin-u-86843cf1e227"></div>
         </body></html>`);
         await page.addStyleTag({ content: css });
         const value = (id, property) => page.locator(`#${id}`).evaluate((element, property) => getComputedStyle(element)[property], property);
@@ -37,15 +37,15 @@ try {
         }
         assert.equal(await value('sidebar', 'width'), '252px');
         assert.equal(await value('content', 'marginLeft'), width >= 768 ? '252px' : '0px');
-        await page.locator('#sidebar').evaluate((element) => { element.className = 'w-[70px]'; });
-        await page.locator('#content').evaluate((element) => { element.className = 'sidebar-content-collapsed md:ml-[70px]'; });
+        await page.locator('#sidebar').evaluate((element) => { element.className = 'svadmin-sidebar-collapsed'; });
+        await page.locator('#content').evaluate((element) => { element.className = 'sidebar-content-collapsed svadmin-sidebar-content-collapsed'; });
         assert.equal(await value('sidebar', 'width'), '70px');
         assert.equal(await value('content', 'marginLeft'), width >= 768 ? '70px' : '0px');
         assert.equal(await value('social', 'gridTemplateColumns'), '100px 100px');
         assert.equal(await value('tools', 'minWidth'), '200px');
         assert.equal(await value('spacing', 'paddingLeft'), '20px');
         assert.equal(await value('spacing', 'justifyContent'), 'center');
-        for (const [name, padding] of [['px-2', '8px'], ['px-[10px]', '10px']]) {
+        for (const [name, padding] of [['svadmin-u-d5eab218aa34', '8px'], ['svadmin-u-7597e11b4d4b', '10px']]) {
           await page.locator('#spacing').evaluate((element, name) => { element.className = name; }, name);
           assert.equal(await value('spacing', 'paddingLeft'), padding);
         }
@@ -60,8 +60,8 @@ try {
         // 新语义 class 单独验证，不以旧兼容 class 掩盖缺失规则。
         await page.locator('html').evaluate((element) => { element.dir = 'ltr'; });
         for (const [state, size] of [['expanded', '252px'], ['collapsed', '70px']]) {
-          await page.locator('#sidebar').evaluate((element, state) => { element.className = `svadmin-sidebar--${state}`; }, state);
-          await page.locator('#content').evaluate((element, state) => { element.className = `sidebar-content-${state}`; }, state);
+          await page.locator('#sidebar').evaluate((element, state) => { element.className = `svadmin-sidebar-${state}`; }, state);
+          await page.locator('#content').evaluate((element, state) => { element.className = `svadmin-sidebar-content-${state}`; }, state);
           assert.equal(await value('sidebar', 'width'), size);
           assert.equal(await value('content', 'marginLeft'), width >= 768 ? size : '0px');
           await page.locator('html').evaluate((element) => { element.dir = 'rtl'; });

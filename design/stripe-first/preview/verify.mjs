@@ -7,6 +7,7 @@ import { resolve } from 'node:path';
 import { buildPreview, directory, evidence, root, servePreview } from './run.mjs';
 import { customers, scenarios } from './model.mjs';
 import { captureSpecimen } from './capture.mjs';
+import { runtimeSource } from '../build.mjs';
 
 const require = createRequire(resolve(root, 'package.json'));
 const { chromium, expect } = require('@playwright/test');
@@ -20,7 +21,7 @@ const report = {
 rmSync(evidence, { force: true, recursive: true });
 mkdirSync(resolve(evidence, 'screenshots'), { recursive: true });
 for (const file of readdirSync(directory).filter(name => /\.(svelte|css|mjs|js|json)$/u.test(name)).sort()) report.sourceHashes[`design/stripe-first/preview/${file}`] = sha256(readFileSync(resolve(directory, file)));
-for (const file of ['packages/ui/dist/app.css', 'packages/ui/design/primitive-recipes.ts', 'packages/ui/design/product-recipes.ts']) report.sourceHashes[file] = sha256(readFileSync(resolve(root, file)));
+for (const file of ['packages/ui/dist/app.css', runtimeSource.stylesheet, runtimeSource.recipeSource]) report.sourceHashes[file] = sha256(readFileSync(resolve(root, file)));
 let server;
 let browser;
 

@@ -19,10 +19,12 @@ for (const [theme, selector] of [['Light', ':root'], ['Dark', '.dark']]) {
   });
 }
 
-test('pins the actual stylesheet and primitive recipe blobs', () => {
-  assert.equal(gitBlob(css), source.stylesheetBlob);
-  verifyRuntimeSources(css, readFileSync(resolve(root, source.recipeSource)));
-  assert.equal(gitBlob(readFileSync(resolve(root, source.recipeSource))), runtimeSource.recipeBlob);
+test('pins actual runtime stylesheet and recipe blobs without rewriting historical provenance', () => {
+  assert.equal(gitBlob(css), runtimeSource.stylesheetBlob);
+  verifyRuntimeSources(css, readFileSync(resolve(root, runtimeSource.recipeSource)));
+  assert.equal(gitBlob(readFileSync(resolve(root, runtimeSource.recipeSource))), runtimeSource.recipeBlob);
+  assert.equal(source.recipeSource, 'packages/ui/design/primitive-recipes.ts');
+  assert.equal(source.stylesheetBlob, '149f55f3782470ec6a1c942917c09510bd55320a');
 });
 
 test('source changes cannot masquerade as a synchronized snapshot', () => {
@@ -80,7 +82,7 @@ test('sRGB projection preserves neutral endpoints and records clipping', () => {
 
 test('generation is deterministic and never changes the source asset', () => {
   assert.equal(JSON.stringify(buildKit(css)), JSON.stringify(buildKit(css)));
-  assert.equal(gitBlob(readFileSync(resolve(root, source.stylesheet))), source.stylesheetBlob);
+  assert.equal(gitBlob(readFileSync(resolve(root, runtimeSource.stylesheet))), runtimeSource.stylesheetBlob);
 });
 
 test('reference permissions remain separate from source availability', () => {
@@ -123,13 +125,18 @@ test('page contracts remain finite metadata, not new runtime authority', () => {
 
 
 test('runtime review retains historical Figma provenance and fails on unreviewed recipe drift', () => {
-  const recipe = readFileSync(resolve(root, source.recipeSource));
+  const recipe = readFileSync(resolve(root, runtimeSource.recipeSource));
   verifyRuntimeSources(css, recipe);
   assert.throws(() => verifyRuntimeSources(css, Buffer.concat([recipe, Buffer.from('/* drift */')])), /source changed/u);
   assert.throws(() => verifyRuntimeSources(css, recipe, { ...runtimeSource, figmaSynchronized: true }), /synchronization/u);
   assert.throws(() => verifyRuntimeSources(css, recipe, { ...runtimeSource, figmaBaselineRevision: runtimeSource.revision }), /baseline changed/u);
   assert.throws(() => verifyRuntimeSources(css, recipe, { ...runtimeSource, basedOnRecipeBlob: 'unrelated' }), /Unrelated/u);
+  assert.throws(() => verifyRuntimeSources(css + '\n/* drift */', recipe), /Source changed/u);
+  assert.throws(() => verifyRuntimeSources(css, recipe, { ...runtimeSource, recipeSource: source.recipeSource }), /Unexpected runtime/u);
+  assert.throws(() => verifyRuntimeSources(css, recipe, { ...runtimeSource, basedOnStylesheetBlob: 'unrelated' }), /Theme baseline changed/u);
   const seed = buildKit(css)['figma-seed.json'];
   assert.equal(seed.revision, read('figma-map.json').sourceRevision);
   assert.equal(seed.runtimeSource.figmaSynchronized, false);
+  assert.equal(seed.runtimeSource.stylesheetBlob, gitBlob(css));
+  assert.equal(seed.dimensionsRevision, source.revision);
 });

@@ -38,10 +38,6 @@
   const completedCount = $derived(boardTodos.filter((todo) => todo.completed).length);
   const highPriorityCount = $derived(boardTodos.filter((todo) => todo.priority === 'high' && !todo.completed).length);
   const progress = $derived(boardTodos.length ? Math.round(completedCount / boardTodos.length * 100) : 0);
-  const priorityGroups = $derived(['high', 'medium', 'low'].map((priority) => ({
-    priority,
-    count: boardTodos.filter((todo) => todo.priority === priority).length,
-  })));
   const todayTasks = $derived(boardTodos.filter((todo) => matchesTodoView(todo, 'today', today)).length);
   const upcomingTasks = $derived(boardTodos.filter((todo) => matchesTodoView(todo, 'upcoming', today)).length);
   const taskLists = $derived([

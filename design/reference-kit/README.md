@@ -41,9 +41,18 @@
 ## 保留现有实现，不暗改视觉
 
 初始源码基线：`c91936335e1a431f2ac37dec31da138afbbbc21f`。
-映射入口：`packages/ui/design/tokens.ts` 和 `packages/ui/src/components/content/index.ts`。
+Tailwind 迁移后的映射基线：`d5196a87e3f81a27bff421f86738fe91fb58e182`。
+当前映射入口：
 
-代码基础间距仍为 `0.25rem / 0.75rem / 1rem / 1.25rem`；根字号为 16px 时是 4 / 12 / 16 / 20px。
+- `packages/ui/src/app.css`：公开语义别名、明暗变量、实际控件尺度。
+- `packages/ui/styles/tailwind.css`：Tailwind 语义颜色及圆角绑定。
+- `packages/ui/src/recipes.ts`：实际 recipe 的表面、状态色和密度声明。
+- `packages/ui/src/components/content/index.ts`：8个内容组件的真实导出。
+
+参考尺度仍为 `0.25rem / 0.75rem / 1rem / 1.25rem`；根字号为 16px 时是 4 / 12 / 16 / 20px。
+迁移后不再声称它们是全局命名 spacing token：xs/md 分别核对 badge/card 的实际 gap，
+sm/lg 核对 surface metric 的 compact/comfortable 密度 padding；
+compact/body 字号核对 badge/card 的 font-size。语义颜色同时核对 CSS、Tailwind 别名和状态 recipe。
 `DESIGN.md` 的 `sm=8px`、`lg=24px` 与代码不同，差异在契约内保留，不通过修改现有数值消除。
 
 浏览器主题仍使用原公开 CSS 自定义属性。审阅页的少量明暗配色来自该基线
@@ -53,7 +62,7 @@
 
 ## 检查与生成
 
-在完整仓库根目录，使用 Python 3.10 或更高版本；不需要安装 npm、Panda 或 Python 依赖：
+在完整仓库根目录，使用 Python 3.10 或更高版本；不需要安装 npm 或 Python 依赖：
 
 ```sh
 python3 design/reference-kit/validate.py
@@ -69,13 +78,32 @@ python3 design/reference-kit/validate.py --metadata-only
 ```
 
 映射校验也支持 `--source-root /path/to/source`。回归测试的真实源码组可通过
-`SVADMIN_REFERENCE_SOURCE_ROOT=/path/to/source` 指向两份完整源码文件的快照；不得用残缺片段替代。
+`SVADMIN_REFERENCE_SOURCE_ROOT=/path/to/source` 指向上述四份完整源码文件的快照；不得用残缺片段替代。
 
 校验器拒绝重复 JSON 键、未知字段/组件/状态、缺失状态、错误反馈区域、无权限数据暴露要求、
 持久成功通知、未授权资产分发、虚假的 Figma 完成标记及非法路径/CSS 值。
-源码校验解析两个指定 `export const` 声明对象及内容组件默认导出，检查映射与字面量值。
-注释不能冒充声明；表达式、展开、转义字符串等未支持语法失败退出，需要显式扩展解析器。
+源码校验解析明确作用域内的 CSS 字面量规则、指定的 `const ... = tv({...})` recipe 对象及内容组件默认导出。
+源码缺失、重复声明、映射漂移均失败；注释、字符串、模板文本不能冒充声明，条件作用域中的规则不能冒充根级绑定。
+recipe 表达式、展开、转义字符串等未支持语法失败退出，需要显式扩展解析器；不执行TypeScript。
 这不是完整 TypeScript AST、包公开 API 验证、组件行为测试或服务端授权检查。
+
+### 2026-09-21 迁移残留修复证据
+
+在 `d5196a87` 工作树上移除对已删除 Panda token 文件的读取依赖，保留真实源码验证；
+未修改生产 token/recipe、stripe-first 或 workflow，也未提交或推送。
+
+| 定向命令 | 结果 |
+| --- | --- |
+| `python3 design/reference-kit/validate.py` | `sourceChecked: true`，8组件、3模式、18状态、15映射 |
+| `python3 -m unittest discover -s design/reference-kit -p test_validate.py` | 67/67通过 |
+| `python3 design/reference-kit/render_preview.py` | 离线预览生成成功 |
+| `python3 design/reference-kit/render_preview.py --check` | 确定性检查通过 |
+| `git diff --check -- design/reference-kit` | 通过 |
+
+新增负例覆盖 CSS/Tailwind 颜色漂移、圆角、实际间距/字号、状态 recipe、
+缺失 recipe 文件、注释/字符串/模板伪声明、重复 CSS 声明及错误条件作用域。
+预览 SHA-256：`2824ccdcab14c7a6f5e275e80e63a8032ea6c0ec1be884594a60b9532a167ae6`。
+仅完成本目录本地验证；集成提交、推送及远端 CI 由主任务负责，不提前标记通过。
 
 预览是无脚本、无表单、无外部资源请求的原生 HTML/CSS，所有文案经过 HTML 转义。
 它覆盖三类模式的 18 个状态说明，跟随系统明暗主题；可以直接打开生成文件审阅。

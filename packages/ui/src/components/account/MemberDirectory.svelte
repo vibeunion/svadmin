@@ -22,7 +22,7 @@
   import FeedbackNotice from '../content/FeedbackNotice.svelte';
   import { Copy, Send } from '@lucide/svelte';
 
-  let { provider }: { provider?: MemberDirectoryProvider } = $props();
+  let { provider }: { provider?: MemberDirectoryProvider | undefined } = $props();
   const context = captureAdminContext();
   const i18n = useTranslation();
   const isZh = $derived(i18n.locale === 'zh-CN');

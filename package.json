@@ -75,6 +75,7 @@
     "@types/bun": "^1.4.2",
     "@types/papaparse": "^5.5.2",
     "@typescript/native": "npm:typescript@^7.0.2",
+    "cac": "^7.0.0",
     "devframe": "1.0.0",
     "eslint": "^10.9.1",
     "eslint-plugin-svelte": "^3.23.0",

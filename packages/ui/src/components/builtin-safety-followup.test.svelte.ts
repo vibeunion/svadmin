@@ -1,3 +1,4 @@
+import { requireValue } from '../../../../scripts/test-assertions';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { resetContext, type CredentialProvider, type DataProvider, type NotificationProvider, type SessionProvider } from '@svadmin/core';
@@ -72,7 +73,7 @@ describe('builtin safety follow-up', () => {
     await waitFor(() => expect(notificationProvider.open).toHaveBeenCalledWith(expect.objectContaining({ message: 'MFA rejected', type: 'error' })));
     expect(toggle.getAttribute('aria-checked')).toBe('true');
     expect(sessionProvider.setMfaEnabled).toHaveBeenCalledWith(false, {});
-    vi.mocked(sessionProvider.setMfaEnabled!).mockResolvedValueOnce({ enabled: false });
+    vi.mocked(requireValue(sessionProvider.setMfaEnabled)).mockResolvedValueOnce({ enabled: false });
     await fireEvent.click(toggle); await confirm();
     await waitFor(() => expect(toggle.getAttribute('aria-checked')).toBe('false'));
   });
@@ -126,7 +127,7 @@ describe('builtin safety follow-up', () => {
     await screen.findByText('enrollment-secret');
     const code = screen.getByRole('textbox');
     await fireEvent.input(code, { target: { value: '123456' } });
-    await fireEvent.submit(code.closest('form')!);
+    await fireEvent.submit(requireValue(code.closest('form')));
     await screen.findByText('server-code');
     await fireEvent.click(screen.getByRole('button', { name: /^Copy$/ }));
     expect(await screen.findByRole('alert')).toHaveProperty('textContent', 'Copy failed. Save the recovery codes manually.');
@@ -158,12 +159,12 @@ describe('builtin safety follow-up', () => {
     const downloads: string[] = [];
     vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) { downloads.push(this.download); });
     if (page === 'security') render(SecurityLog); else render(TeamCrew);
-    const query = page === 'security' ? referenceDemoData.securityEvents[0]!.actor : 'sarah@acme.com';
+    const query = page === 'security' ? requireValue(referenceDemoData.securityEvents[0]).actor : 'sarah@acme.com';
     await fireEvent.input(screen.getByPlaceholderText('Search...'), { target: { value: query } });
     await fireEvent.click(screen.getByRole('button', { name: /^Export$/ }));
     expect(create).toHaveBeenCalledTimes(1);
-    expect(blobs[0]!.type).toBe('application/json');
-    const content: unknown = JSON.parse(await blobs[0]!.text());
+    expect(requireValue(blobs[0]).type).toBe('application/json');
+    const content: unknown = JSON.parse(await requireValue(blobs[0]).text());
     if (page === 'security') {
       expect(content).toEqual(referenceDemoData.securityEvents.filter(event =>
         `${event.event} ${event.actor} ${event.location}`.toLowerCase().includes(query.toLowerCase())));
@@ -173,7 +174,7 @@ describe('builtin safety follow-up', () => {
     expect(downloads).toEqual([page === 'security' ? 'sample-security-events.json' : 'sample-team.json']);
     await fireEvent.input(screen.getByPlaceholderText('Search...'), { target: { value: 'zz-no-match-938' } });
     await fireEvent.click(screen.getByRole('button', { name: /^Export$/ }));
-    expect(JSON.parse(await blobs[1]!.text())).toEqual([]);
+    expect(JSON.parse(await requireValue(blobs[1]).text())).toEqual([]);
     await waitFor(() => expect(revoke).toHaveBeenCalledTimes(2));
   });
 });
