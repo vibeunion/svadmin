@@ -42,7 +42,7 @@
     <section aria-label="Schema form">
       <h2>01 · Schema form</h2>
       <JsonSchemaForm {schema} {readonly} onsubmit={submit} submitText="Submit" />
-      <div class="fixture-actions"><button type="button" onclick={() => failNext = true}>Fail next submit</button><button type="button" onclick={() => schema = { properties: { unsupported: { type: 'string', pattern: '.*' } } }}>Unsupported schema</button><button type="button" onclick={() => schema = scalarSchema}>Restore schema</button></div>
+      <div class="fixture-actions"><button type="button" onclick={() => failNext = true}>Fail next submit</button><button type="button" onclick={() => schema = { properties: { invalid: { type: 'string', pattern: '[' } } }}>Invalid schema</button><button type="button" onclick={() => schema = scalarSchema}>Restore schema</button></div>
       <pre data-testid="form-result">{formResult}</pre>
     </section>
     <section aria-label="Query builder"><h2>02 · Recursive query</h2><FilterBuilder {fields} bind:filters disabled={readonly} onApply={(result) => queryResult = JSON.stringify(result)} />
