@@ -24,8 +24,10 @@ import { styledSurfaceCatalog, STYLED_SURFACE_CATALOG_VERSION } from '@svadmin/s
 
 以上只是 widget 片段；完整 spec 仍需要 schemaVersion、catalogVersion、数据源、绑定及布局等必要字段。
 
-Surface 自行打包预生成的 recipe 助手与 styles.css，避免让旧 UI peer 安装必须提供新增的 JS 导出入口。构建本仓库时先构建 UI 样式，再构建 Surface；消费发布包时不需要安装 Panda 或 Tailwind。配合尚未包含新 recipe CSS 的 UI 版本时必须加载 Surface 的 styles.css。
+Surface 使用本地有限 recipe helper 和静态 styles.css；design-contract 统一从 @svadmin/ui/design-contract 导入，要求 UI >=0.73.0 <0.74.0。不复制 UI 生成物，也不依赖样式编译器。渲染组件自动导入语义样式；原有 styles.css 子路径仍可显式导入。UI 基础样式仍由宿主通过 @svadmin/ui/app.css 加载。构建仅执行 svelte-package；styles:check 检查全部有限变体及静态 CSS 边界。
+
+editor.css 与本地 styles/editor.ts 一起维护，保留 density、button variant、禁用/焦点状态和语义变量覆盖；editor.css 子路径不变。宿主升级时应同时升级 UI 与 Surface，并重新执行消费侧构建。
 
 AI 只能选择公开枚举，不能指定 class/style、任意颜色、recipe 定义或可执行代码。字段权限、只读查询、版本匹配和宿主确认要求不因样式变体而改变。
 
-本次是两类 Surface 组件的 recipes 试点；其他 UI 继续使用保留的原生兼容样式。OpenUI Lang 的解析、流式渲染适配、全量 UI recipe 重写以及 DTCG 文件转换器不在本次已实现范围。不能把 CSS 编译器移除等同于以上功能已经完成。
+此次仅替换样式基础设施。OpenUI 入口、catalog/schema 校验、workflow 授权与执行、提案预览及宿主确认逻辑保持不变；去除样式编译器不代表增加新的协议能力。

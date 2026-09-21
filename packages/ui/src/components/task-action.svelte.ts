@@ -44,7 +44,7 @@ export function createTaskAction(options: {
     attempt = token;
     let error: unknown;
     let failed = false;
-    let deliver = false;
+    let deliver: boolean;
     try {
       const operation = withValidatedTaskProvider(provider)[options.action];
       if (!operation) return;

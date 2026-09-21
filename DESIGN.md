@@ -3,12 +3,12 @@ version: "alpha"
 name: "svadmin Stripe-first"
 description: "A restrained, precise product interface for repeated administrative work."
 colors:
-  background: "oklch(0.982 0.003 264)"
+  background: "oklch(0.985 0.001 264)"
   foreground: "oklch(0.205 0.012 264)"
   surface: "oklch(1 0 0)"
   surface-subtle: "oklch(0.968 0.004 264)"
   muted-foreground: "oklch(0.493 0.018 264)"
-  border: "oklch(0.914 0.006 264)"
+  border: "oklch(0.925 0.003 264)"
   primary: "oklch(0.558 0.22 278)"
   on-primary: "oklch(0.99 0 0)"
   success: "oklch(0.51 0.16 151)"
@@ -90,6 +90,16 @@ components:
 ---
 
 ## Overview
+
+### Visual update: September 21, 2026
+
+The current UI follows Metronic Tailwind demo1 for layout rhythm, light surfaces,
+thin borders and restrained shadows, as requested by the project owner.
+This supersedes the older capability-only reference limitation below.
+Keep SVAdmin's own branding, semantic tokens, OpenUI contracts and Bits UI behavior.
+App chrome must use explicit anatomy hooks; never style every business `header`.
+Package utilities live in sublayers of `utilities`, so host-authored responsive
+utilities win regardless of lazy package stylesheet load order.
 
 svadmin uses a Stripe-first product language: quiet neutral canvases, precise
 type, hairline borders, restrained elevation, compact controls, and clear

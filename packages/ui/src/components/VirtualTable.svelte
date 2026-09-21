@@ -23,7 +23,7 @@
     scopeKey?: string | number;
     ariaLabel?: string;
     loading?: boolean;
-    error?: string;
+    error?: string | undefined;
     onRetry?: () => void;
     class?: string;
     rowSnippet?: Snippet<[Record<string, unknown>, number]>;

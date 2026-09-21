@@ -25,7 +25,7 @@
     dayLabelPrefix?: string;
     onselecttask?: (task: GanttTask) => void;
     loading?: boolean;
-    error?: string;
+    error?: string | undefined;
     onRetry?: () => void;
     ariaLabel?: string;
     class?: string;

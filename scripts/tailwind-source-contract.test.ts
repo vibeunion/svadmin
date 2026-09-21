@@ -19,7 +19,6 @@ describe('@svadmin/ui native stylesheet contract', () => {
   it('ships plain CSS without requiring component scanning or compiler imports', () => {
     for (const path of [
       'packages/ui/src/app.css',
-      'example/src/app.css',
       'packages/create-svadmin/template/src/app.css',
     ]) {
       const css = readRepositoryFile(path);
@@ -33,6 +32,15 @@ describe('@svadmin/ui native stylesheet contract', () => {
     expect(readme).not.toContain(
       'registers its published `dist/components` directory',
     );
+  });
+
+  it('allows example-only Tailwind authoring without replacing current UI styles', () => {
+    const css = readRepositoryFile('example/src/app.css');
+    expect(css).toContain('@import "@svadmin/ui/app.css";');
+    expect(css).toContain('@source "./";');
+    expect(css).toContain('@import "tailwindcss/utilities.css"');
+    expect(css).not.toContain('tailwindcss/preflight.css');
+    expect(readRepositoryFile('example/vite.config.ts')).toContain('tailwindcss()');
   });
 
   it('uses precompiled CSS for both the example and generated apps', () => {

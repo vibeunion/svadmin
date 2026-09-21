@@ -16,7 +16,8 @@
   import { validateSurfaceSpec } from '../validation.js';
   import { createSurfaceSourceCache, sameSourceIdentity, snapshotSurfaceSource } from '../source-cache.js';
   import type { SurfaceSourceRequest } from '../source-cache.js';
-  import { surfaceMetric } from '../styled-system/recipes/index.js';
+  import { surfaceMetric } from '../recipes.js';
+  import '../styles.css';
   import { withoutSurfaceAppearance } from '../workflows/catalog.js';
 
   function appearanceClasses(props: JsonObject): string {

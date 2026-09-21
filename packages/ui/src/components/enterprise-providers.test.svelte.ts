@@ -66,6 +66,11 @@ describe('enterprise provider settings', () => {
     );
 
     await fireEvent.click(screen.getByRole('button', { name: /Delete Deployment key|删除 Deployment key/ }));
+    expect(credentialProvider.revokeApiCredential).not.toHaveBeenCalled();
+    await fireEvent.click(await screen.findByRole('button', { name: /^(Cancel|取消)$/ }));
+    expect(credentialProvider.revokeApiCredential).not.toHaveBeenCalled();
+    await fireEvent.click(screen.getByRole('button', { name: /Delete Deployment key|删除 Deployment key/ }));
+    await fireEvent.click(await screen.findByRole('button', { name: /^(Confirm|确认)$/ }));
     await waitFor(() => expect(credentialProvider.revokeApiCredential).toHaveBeenCalledWith(
       'key-1',
       {},
@@ -211,6 +216,8 @@ describe('enterprise provider settings', () => {
 
     expect(await screen.findByText(/Windows - Edge/)).toBeTruthy();
     await fireEvent.click(screen.getByTitle(/Sign out device|注销此设备/));
+    expect(sessionProvider.revokeSession).not.toHaveBeenCalled();
+    await fireEvent.click(await screen.findByRole('button', { name: /^(Confirm|确认)$/ }));
     await waitFor(() => expect(sessionProvider.revokeSession).toHaveBeenCalledWith(
       'other',
       {},

@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { AccessControlProvider, DataProvider, ResourceDefinition, RouterProvider, TaskProvider } from '@svadmin/core';
   import { defineResource } from '@svadmin/core';
+  import { definedOptions } from '@svadmin/core/options';
   import { Type } from '@sinclair/typebox';
   import AdminApp from '../../src/components/AdminApp.svelte';
   import AutoTable from '../../src/components/AutoTable.svelte';
@@ -83,7 +84,7 @@
 {#snippet dashboard()}
   {#if viewMode === 'table'}
     <AutoTable resourceName="users" {showHeader} {density} {selectable}
-      {exportTaskName} {exportTaskProvider} {exportTaskIdempotencyKey} />
+      {...definedOptions({ exportTaskName, exportTaskProvider, exportTaskIdempotencyKey })} />
   {:else if viewMode === 'list-page'}
     <ListPage resourceName="users" {density} selectable={selectable}>
       {#snippet statusTabs()}

@@ -13,6 +13,7 @@ import {
   createListLoader,
 } from './server-adapter';
 
+import { requireValue } from '../../../scripts/test-assertions';
 const fields: FieldDefinition[] = [
   {
     key: 'contacts',
@@ -216,7 +217,7 @@ describe('createListLoader search compatibility', () => {
     ['active', 'amount', 'priority'].forEach((field, index) => {
       url.searchParams.set(`filters[${index}][field]`, field);
       url.searchParams.set(`filters[${index}][operator]`, 'eq');
-      url.searchParams.set(`filters[${index}][value]`, ['false', '0', '2'][index]!);
+      url.searchParams.set(`filters[${index}][value]`, requireValue(['false', '0', '2'][index]));
     });
     const load = createListLoader({ getList } as unknown as DataProvider, filterResource);
     await load({ url });
@@ -225,7 +226,7 @@ describe('createListLoader search compatibility', () => {
       { field: 'amount', operator: 'eq', value: 0 },
       { field: 'priority', operator: 'eq', value: 2 },
     ] }));
-    filterResource.fields[2]!.options!.push({ label: 'String two', value: '2' });
+    requireValue(requireValue(filterResource.fields[2]).options).push({ label: 'String two', value: '2' });
     await expect(load({ url })).rejects.toMatchObject({ status: 400 });
     expect(getList).toHaveBeenCalledTimes(1);
   });

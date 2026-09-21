@@ -3,6 +3,7 @@
   import { filterOperatorsForField as operatorsForField, isNumericFilterField as isNumericField,
     isCollectionFilterOperator, isFilterCollectionValue } from '@svadmin/core';
   import { t } from '@svadmin/core/i18n';
+  import { readFilterForm } from '../filter-form.js';
 
   export interface FilterRuleItem {
     id: string;
@@ -32,6 +33,7 @@
     disabled = false,
     onApply,
   }: Props = $props();
+  let validationError = $state<string | undefined>();
 
   const instanceId = $props.id();
   const formId = `${instanceId}-filter-form`;
@@ -88,6 +90,19 @@
     return node.kind === 'rule' ? node.value : undefined;
   }
 
+  function handleSubmit(event: SubmitEvent): void {
+    if (!onApply) return;
+    const submitter = event.submitter;
+    if (submitter instanceof HTMLButtonElement && submitter.name === '_action') return;
+    event.preventDefault();
+    try {
+      validationError = undefined;
+      onApply(readFilterForm(filters, fields, new FormData(event.currentTarget as HTMLFormElement)));
+    } catch (error) {
+      validationError = error instanceof Error ? error.message : 'Invalid filters';
+    }
+  }
+
 </script>
 
 <div class="lite-filter-builder lite-form-group">
@@ -98,7 +113,8 @@
     </button>
   </div>
 
-  <form id={formId} {action} {method} class="lite-filter-form">
+  <form id={formId} {action} {method} class="lite-filter-form" onsubmit={handleSubmit}>
+    {#if validationError}<p role="alert" class="lite-error">{validationError}</p>{/if}
     {#snippet renderNode(node: FilterNode, path: string, isRoot = false)}
       {#if node.kind === 'group'}
         <fieldset class="lite-filter-group" data-testid={isRoot ? 'lite-filter-root' : 'lite-filter-group'}>

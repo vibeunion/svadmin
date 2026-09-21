@@ -9,6 +9,10 @@
   import type { NetworkColumn } from '../content/NetworkTable.types.js';
   import { Avatar } from '../ui/avatar/index.js';
   import { Badge } from '../ui/badge/index.js';
+  import ReferenceNotice from '../content/ReferenceNotice.svelte';
+  import { captureAdminContext } from '@svadmin/core';
+  import { downloadRows } from '../export-reference.js';
+  const context = captureAdminContext();
 
   interface CrewMember { id: string; name: string; email: string; role: string; department: string; status: 'active' | 'away' | 'offline'; projects: number; }
   const i18n = useTranslation();
@@ -31,7 +35,8 @@
 {/snippet}
 
 <ContentPageShell pageId="network-team-crew" width="wide">
-  <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-1004c0c3954c svadmin-u-020ba687fa12 svadmin-u-64cac80d2e9a svadmin-u-3b9871a0bf93"><ContentPageHeader title={i18n.t('network.teamCrew')} description={i18n.t('network.teamCrewDescription')} /><div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-77a2a20e90d4"><Button variant="outline" size="sm"><Download class="svadmin-u-783b0d9d1e2c" />{i18n.t('common.export')}</Button><Button size="sm"><UserPlus class="svadmin-u-783b0d9d1e2c" />{i18n.t('account.inviteMember')}</Button></div></div>
+  <ReferenceNotice />
+  <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-1004c0c3954c svadmin-u-020ba687fa12 svadmin-u-64cac80d2e9a svadmin-u-3b9871a0bf93"><ContentPageHeader title={i18n.t('network.teamCrew')} description={i18n.t('network.teamCrewDescription')} /><div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-77a2a20e90d4"><Button variant="outline" size="sm" onclick={() => downloadRows('sample-team.json', filtered)}><Download class="svadmin-u-783b0d9d1e2c" />{i18n.t('common.export')}</Button><Button size="sm" onclick={() => context.navigate('/account/members/team-members')}><UserPlus class="svadmin-u-783b0d9d1e2c" />{i18n.t('account.inviteMember')}</Button></div></div>
   <FilterToolbar bind:query placeholder={i18n.t('common.search')} />
   <NetworkTable rows={filtered} {columns} {row} />
 </ContentPageShell>

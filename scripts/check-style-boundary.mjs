@@ -5,33 +5,22 @@ import { existsSync, readFileSync, readdirSync, realpathSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { manifestViolations, lockViolations, isStyleInput, isBuildSource } from './no-tailwind-contract.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const require = createRequire(new URL('../packages/ui/package.json', import.meta.url));
 const postcss = require('postcss');
 const ts = require('typescript');
-const sections = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies', 'overrides', 'resolutions'];
 const forbiddenDirectives = new Set(['theme', 'source', 'apply', 'utility', 'custom-variant', 'tailwind', 'plugin', 'config']);
 
 export function forbiddenPackage(value) {
   if (typeof value !== 'string') return false;
   const text = value.replace(/^npm:/, '');
-  return /^(?:@tailwindcss\/[^/@]+|tailwindcss|tailwind-merge|tailwind-variants|tw-animate-css|cn)(?:@|\/|$)/.test(text);
+  return /^(?:@pandacss\/[^/@]+|@tailwindcss\/[^/@]+|tailwindcss|tw-animate-css|shadcn-svelte)(?:@|\/|$)/.test(text);
 }
 
 export function manifestProblems(manifest) {
-  const errors = [];
-  for (const section of sections) {
-    const walk = (value) => {
-      if (!value || typeof value !== 'object') return;
-      for (const [name, specifier] of Object.entries(value)) {
-        if (forbiddenPackage(name) || (typeof specifier === 'string' && specifier.startsWith('npm:') && forbiddenPackage(specifier))) errors.push(`${section}: ${name}`);
-        if (typeof specifier === 'object') walk(specifier);
-      }
-    };
-    walk(manifest[section]);
-  }
-  return errors;
+  return manifestViolations(manifest);
 }
 
 export function importProblems(text, filename = 'source.ts') {
@@ -73,38 +62,40 @@ function installedPackages(directory, visited = new Set()) {
     const manifest = resolve(path, 'package.json');
     if (!existsSync(manifest)) continue;
     const { name } = JSON.parse(readFileSync(manifest, 'utf8'));
-    if (forbiddenPackage(name)) problems.push(name);
+    if (name?.startsWith('@pandacss/')) problems.push(name);
     problems.push(...installedPackages(resolve(path, 'node_modules'), visited));
   }
   return problems;
 }
 
-export function verifyStyleBoundary({ sourceOnly = false } = {}) {
-  const tracked = execFileSync('git', ['ls-files', '-z'], { cwd: root, encoding: 'utf8' }).split('\0').filter(Boolean);
+export function verifyStyleBoundary({ sourceOnly = false, packages = ['ui', 'ai-elements', 'surface', 'lite', 'flow', 'editor'] } = {}) {
+  const tracked = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '-z'], { cwd: root, encoding: 'utf8' }).split('\0').filter(Boolean);
   const problems = [];
   const report = (file, values) => { for (const value of values) problems.push(`${file}: ${value}`); };
   for (const file of tracked) {
+    if (file.startsWith('packages/ui/shadcn/')) continue;
     if (!existsSync(resolve(root, file))) continue;
     if (/(?:^|\/)package\.json$/.test(file)) report(file, manifestProblems(JSON.parse(readFileSync(resolve(root, file), 'utf8'))));
     if (/style-baselines\//.test(file) || /\.(?:test|spec)\./.test(file)) continue;
     if (/\.(?:svelte|[cm]?js|[cm]?ts|css)$/.test(file)) {
       const content = readFileSync(resolve(root, file), 'utf8');
-      if (file.endsWith('.css')) report(file, cssProblems(content));
+      if (file.endsWith('.css')) {
+        if (!isStyleInput(file)) report(file, cssProblems(content));
+      }
       else if (file.endsWith('.svelte')) {
         for (const match of content.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)) report(file, importProblems(match[1], file));
         for (const match of content.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/g)) report(file, cssProblems(match[1]));
-      } else report(file, importProblems(content, file));
+      } else if (!isBuildSource(file)) report(file, importProblems(content, file));
     }
   }
   const locked = ts.parseConfigFileTextToJson('bun.lock', readFileSync(resolve(root, 'bun.lock'), 'utf8'));
   assert.ok(!locked.error, 'Lockfile must be valid JSONC');
-  for (const [name, value] of Object.entries(locked.config.packages ?? {})) {
-    if (forbiddenPackage(name) || (Array.isArray(value) && forbiddenPackage(value[0]))) report('bun.lock', [name]);
-  }
+  report('bun.lock', lockViolations(readFileSync(resolve(root, 'bun.lock'), 'utf8')));
   for (const [name, workspace] of Object.entries(locked.config.workspaces ?? {})) report(`bun.lock:${name}`, manifestProblems(workspace));
   report('installed dependency graph', installedPackages(resolve(root, 'node_modules')));
   if (!sourceOnly) {
-    for (const packageName of ['ui', 'ai-elements', 'surface', 'lite', 'flow', 'editor']) {
+    for (const packageName of packages) {
+      assert.ok(['ui', 'ai-elements', 'surface', 'lite', 'flow', 'editor'].includes(packageName), `Unknown package: ${packageName}`);
       const directory = resolve(root, 'packages', packageName, 'dist');
       assert.ok(existsSync(directory), `${packageName} must be built before published-style verification`);
       for (const file of readdirSync(directory, { recursive: true })) {
@@ -123,4 +114,10 @@ export function verifyStyleBoundary({ sourceOnly = false } = {}) {
   console.info('Style boundary passed: workspace manifests, aliases, lockfile, installed graph, production imports, CSS entries, and parser integrity.');
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) verifyStyleBoundary({ sourceOnly: process.argv.includes('--source') });
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const selected = process.argv.find(arg => arg.startsWith('--packages='));
+  verifyStyleBoundary({
+    sourceOnly: process.argv.includes('--source'),
+    ...(selected ? { packages: selected.slice('--packages='.length).split(',') } : {}),
+  });
+}

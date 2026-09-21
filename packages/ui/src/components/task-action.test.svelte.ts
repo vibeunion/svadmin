@@ -1,8 +1,8 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { act, cleanup, fireEvent, waitFor } from '@testing-library/svelte';
 import { QueryClient } from '@tanstack/svelte-query';
 import { resetContext, type TaskProvider, type TaskRecord } from '@svadmin/core';
-import { setLocale } from '@svadmin/core/i18n';
+import { renderWithI18n as render } from '../../test/fixtures/render-with-i18n';
 import Host from './task-action.test-host.svelte';
 
 const clients: QueryClient[] = [];
@@ -25,7 +25,6 @@ function deferred() {
   const promise = new Promise<TaskRecord>((done, fail) => { resolve = done; reject = fail; });
   return { promise, resolve, reject };
 }
-beforeEach(() => setLocale('en'));
 afterEach(() => {
   cleanup();
   clients.splice(0).forEach(client => client.clear());

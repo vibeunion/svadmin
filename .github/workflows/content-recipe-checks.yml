@@ -1,7 +1,7 @@
 name: Content recipe checks
 on:
   push:
-    branches: [main, fix/panda-stage3-validation-20260919]
+    branches: [main]
     paths: ['packages/ui/**', 'packages/core/**', 'scripts/**', 'bun.lock', '.github/workflows/content-recipe-checks.yml']
   pull_request:
     branches: [main]
@@ -46,7 +46,7 @@ jobs:
         run: |
           set -euo pipefail
           bun run --cwd packages/ui test:css > test-results/content-recipes/logs/existing-css.log 2>&1 || { tail -100 test-results/content-recipes/logs/existing-css.log; exit 1; }
-          node --test packages/ui/scripts/content-recipes.test.mjs packages/ui/scripts/content-trend-parity.test.mjs > test-results/content-recipes/logs/content-css.log 2>&1 || { tail -200 test-results/content-recipes/logs/content-css.log; exit 1; }
+          node --test packages/ui/scripts/tailwind-recipes.test.mjs packages/ui/scripts/content-trend-parity.test.mjs > test-results/content-recipes/logs/content-css.log 2>&1 || { tail -200 test-results/content-recipes/logs/content-css.log; exit 1; }
           tail -12 test-results/content-recipes/logs/content-css.log
       - name: Strict UI types
         id: types

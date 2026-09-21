@@ -123,7 +123,7 @@ describe('validated field displays', () => {
 
   it.each([
     ['date', '2026-09-19', 'Sep 19, 2026'],
-    ['time', '10:30:45', '10:30:45 AM'],
+    ['time', '10:30:45', '10:30:45'],
     ['datetime', '2026-09-19T10:30', 'Sep 19, 2026, 10:30 AM'],
   ])('renders native %s values through the registered detail renderer', (type, value, expected) => {
     const view = render(FieldDisplay, { type, value });

@@ -27,8 +27,8 @@ describe('schema form server decoder', () => {
   it.each([
     ['duplicate scalar', (form: FormData) => form.append(schemaFormFieldName(['count']), '4')],
     ['invalid number', (form: FormData) => form.set(schemaFormFieldName(['count']), '1.2')],
-    ['unknown field', (form: FormData) => form.set('data:[\"private\"]', 'secret')],
-    ['unbounded array', (form: FormData) => form.set('length:[\"rows\"]', '1001')],
+    ['unknown field', (form: FormData) => form.set('data:["private"]', 'secret')],
+    ['unbounded array', (form: FormData) => form.set('length:["rows"]', '1001')],
   ])('rejects %s', (_name, mutate) => {
     const form = new FormData();
     form.set(schemaFormFieldName(['count']), '3');

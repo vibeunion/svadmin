@@ -32,6 +32,10 @@ afterEach(() => {
 });
 
 describe('I18nScope', () => {
+  it('provides a translated dashboard document title in both built-in locales', () => {
+    expect(createI18nScope({ locale: 'en' }).translate('common.dashboard')).toBe('Dashboard');
+    expect(createI18nScope({ locale: 'zh-CN' }).translate('common.dashboard')).toBe('工作台');
+  });
   it('isolates locale and provider state across component trees', async () => {
     const firstProvider = createProvider('first', 'en');
     const secondProvider = createProvider('second', 'zh-CN');

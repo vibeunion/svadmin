@@ -5,14 +5,14 @@ on:
     paths:
       - 'design/stripe-first/**'
       - 'packages/ui/src/components.css'
-      - 'packages/ui/design/primitive-recipes.ts'
+      - 'packages/ui/src/recipes.ts'
       - '.github/workflows/stripe-first-design-assets.yml'
   pull_request:
     branches: [main]
     paths:
       - 'design/stripe-first/**'
       - 'packages/ui/src/components.css'
-      - 'packages/ui/design/primitive-recipes.ts'
+      - 'packages/ui/src/recipes.ts'
       - '.github/workflows/stripe-first-design-assets.yml'
 permissions:
   contents: read

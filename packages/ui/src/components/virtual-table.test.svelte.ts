@@ -1,9 +1,8 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, within } from '@testing-library/svelte';
-import { setLocale } from '@svadmin/core/i18n';
+import { describe, expect, it, vi } from 'vitest';
+import { fireEvent, within } from '@testing-library/svelte';
+import { renderWithI18n as render } from '../../test/fixtures/render-with-i18n';
 import VirtualTable from './VirtualTable.svelte';
 
-beforeEach(() => setLocale('en'));
 const columns = [{ key: 'name', label: 'Name' }];
 const items = Array.from({ length: 10000 }, (_, id) => ({ id, name: `Record ${id}` }));
 
@@ -157,8 +156,7 @@ describe('VirtualTable Component', () => {
   });
 
   it('localizes the label, count and empty state', () => {
-    setLocale('zh-CN');
-    const view = render(VirtualTable, { columns, items: [] });
+    const view = render(VirtualTable, { columns, items: [] }, 'zh-CN');
     expect(view.getByRole('table', { name: '数据表格' })).toBeTruthy();
     expect(view.getByRole('status').textContent).toBe('暂无数据');
     expect(view.container.textContent).toContain('共 0 行');

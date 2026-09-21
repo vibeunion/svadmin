@@ -82,7 +82,7 @@
           </div>
         {:else}
           <DataState state="empty">
-            {#snippet action()}<Button href="#/users/create">Create user</Button>{/snippet}
+            {#snippet action()}<Button href="#/users">View users</Button>{/snippet}
           </DataState>
         {/each}
       </div>

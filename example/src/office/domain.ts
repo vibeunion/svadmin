@@ -108,6 +108,7 @@ export type OfficeCommand =
   | { type: 'ack'; alertId: string; revision: number }
   | { type: 'propose'; alertId: string; revision: number; result: NonNullable<AlertTask['result']>; note: string; evidence: string }
   | { type: 'approve'; alertId: string; revision: number; note: string }
+  | { type: 'reject'; alertId: string; revision: number; note: string }
   | { type: 'suggestion'; suggestionId: string; revision: number; decision: 'accepted' | 'ignored'; note: string }
   | { type: 'draft'; reportId: string; revision: number; text: string; note: string }
   | { type: 'whitelist'; suggestionId: string; note: string }
@@ -178,6 +179,14 @@ export function executeOfficeCommand(input: OfficeData, actor: Actor, command: O
       ensure(alert.state === 'review', '任务尚未提交复核'); ensure(alert.proposedBy !== actor.id, '不能复核自己提交的处置');
       ensure(alert.result !== null, '缺少处置结论'); if (alert.result !== 'handled') reason(alert.evidence);
       alert.state = 'closed'; alert.revision += 1; log('独立复核通过并关闭预警', alert.id, alert.department); break;
+    }
+    case 'reject': {
+      permission('review'); reason(command.note); const alert = getAlert(command.alertId, command.revision);
+      ensure(alert.state === 'review', '任务尚未提交复核');
+      ensure(alert.proposedBy !== actor.id, '不能复核自己提交的处置');
+      // 保留上次处置及证据；退回原因写入变更记录，交由原负责人重新提交。
+      alert.state = 'processing'; alert.revision += 1;
+      log(`独立复核退回：${command.note.trim()}`, alert.id, alert.department); break;
     }
     case 'suggestion': {
       permission('proof'); const suggestion = data.suggestions.find((item) => item.id === command.suggestionId); ensure(suggestion, '建议不存在');

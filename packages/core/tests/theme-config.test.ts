@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, test, expect, beforeEach } from 'bun:test';
 
 /**
@@ -8,6 +7,7 @@ import { describe, test, expect, beforeEach } from 'bun:test';
  */
 
 // ── Replicate the pure applyTheme logic ──────────────────────
+import { requireValue } from '../../../scripts/test-assertions';
 
 type ThemeMode = 'light' | 'dark' | 'system';
 type ThemeStrategy = 'standard' | 'dark-first';
@@ -199,7 +199,7 @@ describe('CSS Overrides', () => {
     const config: ThemeConfig = {
       cssOverrides: { '--a': '1', '--b': '2' },
     };
-    applyCssOverrides(config.cssOverrides!);
+    applyCssOverrides(requireValue(config.cssOverrides));
     expect(cssVars.size).toBe(2);
 
     clearCssOverrides(config);
@@ -210,7 +210,7 @@ describe('CSS Overrides', () => {
     const config: ThemeConfig = {
       cssOverrides: { '--a': '1', '--b': '2' },
     };
-    applyCssOverrides(config.cssOverrides!);
+    applyCssOverrides(requireValue(config.cssOverrides));
     clearCssOverrides(config, ['--a']);
     expect(cssVars.has('--a')).toBe(false);
     expect(cssVars.has('--b')).toBe(true);
@@ -223,8 +223,8 @@ describe('Color Presets', () => {
   test('resolvePreset returns built-in by name', () => {
     const preset = resolvePreset('indigo');
     expect(preset).toBeDefined();
-    expect(preset!.name).toBe('indigo');
-    expect(preset!.label).toBe('Indigo');
+    expect(requireValue(preset).name).toBe('indigo');
+    expect(requireValue(preset).label).toBe('Indigo');
   });
 
   test('resolvePreset returns undefined for unknown name', () => {
@@ -268,7 +268,7 @@ describe('Color Presets', () => {
     };
     registerColorPreset(custom);
     expect(builtinPresets['teal']).toBeDefined();
-    expect(resolvePreset('teal')!.label).toBe('Teal');
+    expect(requireValue(resolvePreset('teal')).label).toBe('Teal');
     // Clean up
     delete builtinPresets['teal'];
   });

@@ -25,7 +25,8 @@ describe('FileUpload', () => {
     await fireEvent.change(input, { target: { files: [file('notes.txt')] } });
 
     expect(onReject).toHaveBeenCalledWith(expect.any(File), 'File type is not accepted.');
-    expect(view.container.querySelector('li')).toBeNull();
+    expect(view.container.querySelector('.svadmin-file-upload-list li')).toBeNull();
+    expect(view.getByText('notes.txt: File type is not accepted.')).toBeTruthy();
   });
 
   it('reports upload progress and exposes the successful result', async () => {

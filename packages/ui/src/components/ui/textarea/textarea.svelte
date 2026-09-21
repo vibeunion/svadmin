@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { HTMLTextareaAttributes } from "svelte/elements";
 	import { cn, type WithElementRef } from "../../../utils.js";
-	import { uiTextarea } from "../../../styled-system/recipes/index.js";
+	import { textareaRecipe as uiTextarea } from "../../../recipes.js";
 
 	type Props = WithElementRef<HTMLTextareaAttributes, HTMLTextAreaElement>;
 
@@ -16,7 +16,7 @@
 <textarea
 	bind:this={ref}
 	data-slot="textarea"
-	class={cn("svadmin-textarea", uiTextarea(), className)}
+	class={cn(uiTextarea().root, className)}
 	bind:value
 	{...restProps}
 ></textarea>

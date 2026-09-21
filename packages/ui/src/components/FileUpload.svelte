@@ -39,7 +39,7 @@ export interface UploadCancellation {
     maxSize?: number;
     disabled?: boolean;
     required?: boolean;
-    upload?: (file: File, session: UploadSession) => Promise<{ url?: string; uploadId?: string } | void>;
+    upload?: (file: File, session: UploadSession) => Promise<{ url?: string; uploadId?: string } | undefined> | Promise<void>;
     cancelUpload?: (file: File, cancellation: UploadCancellation) => Promise<void>;
     onChange?: (items: UploadItem[]) => void;
     onReject?: (file: File, reason: string) => void;
@@ -117,7 +117,7 @@ export interface UploadCancellation {
     if (!attempt.reason || attempt.cleanupStarted) return;
     if (attempt?.uploadId && attempt.cancelUpload) {
       attempt.cleanupStarted = true;
-      const publish = (cleanupStatus: UploadItem['cleanupStatus']) => {
+      const publish = (cleanupStatus: NonNullable<UploadItem['cleanupStatus']>) => {
         if (!destroyed && scopeEpoch === attempt.epoch && upload === attempt.upload
           && latestAttempts.get(id) === attempt && items.some(item => item.id === id)) {
           updateItem(id, { cleanupStatus });
@@ -171,13 +171,30 @@ export interface UploadCancellation {
     multiple ? (Number.isSafeInteger(maxFiles) && maxFiles > 0 ? maxFiles : 10) : 1,
   );
 
-  function updateItem(id: string, update: Partial<UploadItem>): void {
-    items = items.map(item => item.id === id ? { ...item, ...update } : item);
+  type UploadItemUpdate = Partial<Omit<UploadItem, 'error' | 'url' | 'uploadId' | 'cleanupStatus'>> & {
+    [K in 'error' | 'url' | 'uploadId' | 'cleanupStatus']?: UploadItem[K] | undefined;
+  };
+
+  function updateItem(id: string, update: UploadItemUpdate): void {
+    items = items.map(item => {
+      if (item.id !== id) return item;
+      const { error, url, uploadId, cleanupStatus, ...required } = update;
+      const next: UploadItem = { ...item, ...required };
+      if ('error' in update && error === undefined) delete next.error;
+      if ('url' in update && url === undefined) delete next.url;
+      if ('uploadId' in update && uploadId === undefined) delete next.uploadId;
+      if ('cleanupStatus' in update && cleanupStatus === undefined) delete next.cleanupStatus;
+      if (error !== undefined) next.error = error;
+      if (url !== undefined) next.url = url;
+      if (uploadId !== undefined) next.uploadId = uploadId;
+      if (cleanupStatus !== undefined) next.cleanupStatus = cleanupStatus;
+      return next;
+    });
     emitChange();
   }
 
   async function process(item: UploadItem): Promise<void> {
-    if (!upload || disabled) return;
+    if (destroyed || !upload || disabled) return;
     if (controllers.has(item.id) || !items.some(candidate => candidate.id === item.id)) return;
     const controller = new AbortController();
     controllers.set(item.id, controller);
@@ -192,7 +209,7 @@ export interface UploadCancellation {
     const current = () => attempts.get(item.id) === attempt
       && controllers.get(item.id) === controller
       && scopeEpoch === attempt.epoch && upload === attempt.upload;
-    const updateCurrent = (update: Partial<UploadItem>) => {
+    const updateCurrent = (update: UploadItemUpdate) => {
       if (current() && !controller.signal.aborted) updateItem(item.id, update);
     };
     const register = (uploadId: string) => {
@@ -203,9 +220,17 @@ export interface UploadCancellation {
       updateCurrent({ uploadId });
       cleanupAttempt(item.id, attempt);
     };
-    updateItem(item.id, { status: 'uploading', progress: 0, error: undefined, uploadId: undefined, cleanupStatus: undefined });
+    updateItem(item.id, {
+      status: 'uploading',
+      progress: 0,
+      error: undefined,
+      uploadId: undefined,
+      cleanupStatus: undefined,
+    });
     try {
-      const result = await attempt.upload!(item.file, {
+      // 宿主回调可以同步卸载或替换组件；通知返回后必须重新确认本次请求仍有效。
+      if (destroyed || !current() || controller.signal.aborted) return;
+      const result = await attempt.upload(item.file, {
         signal: controller.signal,
         idempotencyKey: attempt.idempotencyKey,
         setUploadId: register,
@@ -214,7 +239,13 @@ export interface UploadCancellation {
         }),
       });
       if (result?.uploadId !== undefined) register(result.uploadId);
-      updateCurrent({ status: 'success', progress: 100, url: result?.url, uploadId: result?.uploadId ?? attempt.uploadId });
+      const uploadId = result?.uploadId ?? attempt.uploadId;
+      updateCurrent({
+        status: 'success',
+        progress: 100,
+        ...(result?.url === undefined ? {} : { url: result.url }),
+        ...(uploadId === undefined ? {} : { uploadId }),
+      });
     } catch (error) {
       if (!current()) return;
       updateItem(item.id, {
@@ -231,18 +262,20 @@ export interface UploadCancellation {
   }
 
   function addFiles(selected: File[]): void {
-    if (disabled) return;
+    if (destroyed || disabled) return;
     const available = multiple
       ? Math.max(0, normalizedMaxFiles - items.length)
       : 1;
     rejected = [];
     if (selected.length > available) {
       for (const file of selected.slice(available)) {
+        if (destroyed) return;
         rejected = [...rejected, { name: file.name, reason: 'Maximum file count exceeded.' }];
         onReject?.(file, 'Maximum file count exceeded.');
       }
     }
     for (const file of selected.slice(0, multiple ? available : Math.min(available, 1))) {
+      if (destroyed) return;
       const reason = validate(file);
       if (reason) {
         rejected = [...rejected, { name: file.name, reason }];
@@ -333,7 +366,7 @@ export interface UploadCancellation {
   </div>
   {#if rejected.length}
     <ul aria-label={i18n.t('upload.rejectedFiles')}>
-      {#each rejected as rejection}
+      {#each rejected as rejection (rejection)}
         <li>{rejection.name}: {rejection.reason}</li>
       {/each}
     </ul>

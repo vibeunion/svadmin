@@ -1,13 +1,15 @@
-import { cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
-import { setLocale } from '@svadmin/core/i18n';
+import { cleanup, fireEvent, waitFor } from '@testing-library/svelte';
+import { renderWithI18n as render } from '../../test/fixtures/render-with-i18n';
 import userEvent from '@testing-library/user-event';
 import { QueryClient } from '@tanstack/svelte-query';
 import { Type } from '@sinclair/typebox';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { defineResource, resetContext, snapshotImportArtifact, snapshotImportTaskResult, type DataProvider, type ResourceDefinition, type HttpError, type ImportArtifactProvider, type TaskProvider } from '@svadmin/core';
 import ImportWizardHost from './import-wizard.test-host.svelte';
+import { definedOptions } from '@svadmin/core/options';
 import { parseImportRows, snapshotImportFile } from '../../../core/src/import-contract';
 
+import { requireValue } from '../../../../scripts/test-assertions';
 const record = Type.Object({ id: Type.Number(), title: Type.String(), quantity: Type.Number() });
 const create = Type.Object({ title: Type.String(), quantity: Type.Number() });
 const posts = defineResource('posts', { record, create });
@@ -64,7 +66,6 @@ function mount(source = provider(), options: {
   onTaskSubmitted?: (taskId: string) => void;
   onImportReady?: (driver: { handleChange(info: { file: File }): Promise<unknown>; readonly error: HttpError | null }) => void;
 } = {}) {
-  setLocale('en');
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   clients.push(client);
   const view = render(ImportWizardHost, {
@@ -409,7 +410,7 @@ describe('ImportWizard component workflow', () => {
       cancel: vi.fn(async id => { status = 'cancelled'; return { id, status }; }),
     });
     const app = mount(provider(), { taskName: 'import-posts', taskProvider: tasks, initialTaskId: 'cancel-1' });
-    await fireEvent.click(await app.view.findByRole('button', { name: 'Cancel', exact: true }));
+    await fireEvent.click(await app.view.findByRole('button', { name: 'Cancel' }));
     await waitFor(() => expect(tasks.cancel).toHaveBeenCalledWith('cancel-1'));
     await app.view.findByText('Cancelled');
     expect(tasks.submit).not.toHaveBeenCalled();
@@ -463,8 +464,10 @@ describe('ImportWizard component workflow', () => {
       onSuccess,
       coreProbe: true,
       onImportReady: driver => { importer = driver; },
-      maxBytes: limit === 'maxBytes' ? 1 : undefined,
-      maxRows: limit === 'maxRows' ? 1 : limit === 'invalid' ? 0 : undefined,
+      ...definedOptions({
+        maxBytes: limit === 'maxBytes' ? 1 : undefined,
+        maxRows: limit === 'maxRows' ? 1 : limit === 'invalid' ? 0 : undefined,
+      }),
     });
     if (!importer) throw new Error('Expected core import probe');
     const file = new File([JSON.stringify([{ title: 'First', quantity: 1 }, { title: 'Second', quantity: 2 }])], 'posts.json');
@@ -479,13 +482,13 @@ describe('ImportWizard component workflow', () => {
 
   it('stops subsequent submissions and ignores a late success after cancellation', async () => {
     let resolveWrite: (value: { data: { id: number; title: string; quantity: number } }) => void = () => {};
-    const source = provider({ create: vi.fn(() => new Promise(resolve => { resolveWrite = resolve; })) });
+    const source = provider({ create: vi.fn(() => new Promise<{ data: { id: number; title: string; quantity: number } }>(resolve => { resolveWrite = resolve; })) });
     const onSuccess = vi.fn();
     const app = mount(source, { onSuccess });
     await selectFile(csvFile('title,quantity\nFirst,1\nSecond,2'));
     await fireEvent.click(await app.view.findByRole('button', { name: /Start Import/i }));
     await waitFor(() => expect(source.create).toHaveBeenCalledTimes(1));
-    await fireEvent.click(app.view.getByRole('button', { name: 'Cancel', exact: true }));
+    await fireEvent.click(app.view.getByRole('button', { name: 'Cancel' }));
     expect(app.view.getByRole('status').textContent).toContain('may have been committed');
     expect(app.view.queryByText('Completed', { exact: true })).toBeNull();
     expect(app.view.queryByRole('progressbar')).toBeNull();
@@ -500,7 +503,7 @@ describe('ImportWizard component workflow', () => {
     const csv = 'title,quantity\nFirst,1\nSecond,2';
     expect(parseImportRows(csv, 'posts.csv', 'auto', 2)).toHaveLength(2);
     for (const [text, name] of [[csv, 'posts.csv'], [JSON.stringify([{ title: 'First' }, { title: 'Second' }]), 'posts.json']]) {
-      expect(() => parseImportRows(text!, name!, 'auto', 1)).toThrow(expect.objectContaining({
+      expect(() => parseImportRows(requireValue(text),requireValue( name), 'auto', 1)).toThrow(expect.objectContaining({
         code: 'IMPORT_LIMIT_EXCEEDED',
         details: expect.objectContaining({ writeMayHaveSucceeded: false }),
       }));
@@ -643,7 +646,7 @@ describe('ImportWizard component workflow', () => {
   it.each(['tenant', 'provider', 'close'] as const)(
     'retires an in-flight import after %s changes', async change => {
       let resolveWrite: (value: { data: { id: number; title: string; quantity: number } }) => void = () => {};
-      const source = provider({ create: vi.fn(() => new Promise(resolve => { resolveWrite = resolve; })) });
+      const source = provider({ create: vi.fn(() => new Promise<{ data: { id: number; title: string; quantity: number } }>(resolve => { resolveWrite = resolve; })) });
       const onSuccess = vi.fn();
       const app = mount(source, { onSuccess });
       await selectFile(csvFile('title,quantity\nPrivate,1\nLater,2'));

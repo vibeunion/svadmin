@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render, fireEvent, waitFor } from '@testing-library/svelte';
+import { fireEvent, waitFor } from '@testing-library/svelte';
+import { renderWithI18n as render } from '../../test/fixtures/render-with-i18n';
+import { parseCSV } from '@svadmin/core';
 import type { FieldDefinition, Filter } from '@svadmin/core';
 import JsonSchemaForm from './JsonSchemaForm.svelte';
 import FilterBuilder from './FilterBuilder.svelte';
@@ -47,6 +49,25 @@ describe('enterprise schema form interactions', () => {
     await fireEvent.input(input(view.container, '[name="amount"]'), { target: { value: '' } });
     await fireEvent.submit(view.getByTestId('json-schema-form'));
     expect(onsubmit).toHaveBeenCalledWith({ enabled: false, plan: 1 });
+  });
+  it.each([
+    [undefined, 'required'],
+    [1, 'minimum'],
+    ['3', 'type'],
+  ] as const)('preserves nested validation codes for %s without permitting submission', async (amount, code) => {
+    const onsubmit = vi.fn(), onvalidationerror = vi.fn();
+    const view = render(JsonSchemaForm, {
+      schema: { properties: {
+        nested: { type: 'object', properties: { 'amount/total': { type: 'number', minimum: 2 } }, required: ['amount/total'] },
+      } },
+      value: { nested: { 'amount/total': amount } },
+      onsubmit,
+      onvalidationerror,
+    });
+    await fireEvent.submit(view.getByTestId('json-schema-form'));
+    expect(onsubmit).not.toHaveBeenCalled();
+    expect(onvalidationerror).toHaveBeenCalledExactlyOnceWith([{ path: '/nested/amount~1total', code }]);
+    expect(view.getByLabelText(/amount\/total/).getAttribute('aria-invalid')).toBe('true');
   });
   it('preserves supported recursive objects instead of replacing them with a scalar form', async () => {
     const onsubmit = vi.fn();
@@ -200,43 +221,46 @@ function sheets(): SheetData[] {
 describe('enterprise spreadsheet interactions', () => {
   it('shows deterministic cyclic-reference errors rather than crashing', () => {
     const view = render(SpreadsheetView, { sheets: sheets(), activeSheetId: 'one' });
-    expect(input(view.container, '[aria-label="Cell C1"]').value).toBe('#CYCLE!');
-    expect(input(view.container, '[aria-label="Cell B1"]').value).toBe('4');
+    expect(input(view.container, '[aria-label="C1"]').value).toBe('#CYCLE!');
+    expect(input(view.container, '[aria-label="B1"]').value).toBe('4');
   });
   it('commits the latest formula bar event without a one-input lag', async () => {
     const onchange = vi.fn();
     const view = render(SpreadsheetView, { sheets: sheets(), activeSheetId: 'one', onchange });
-    await fireEvent.input(view.getByLabelText('Formula A1'), { target: { value: '12' } });
+    await fireEvent.input(view.getByLabelText('Cell value or formula'), { target: { value: '12' } });
     expect(onchange.mock.lastCall?.[0]?.[0]?.cells['A1']).toBe('12');
-    expect(input(view.container, '[aria-label="Cell B1"]').value).toBe('24');
+    expect(input(view.container, '[aria-label="B1"]').value).toBe('24');
   });
   it('synchronizes direct cell editing back to the formula bar', async () => {
     const view = render(SpreadsheetView, { sheets: sheets(), activeSheetId: 'one' });
-    await fireEvent.focus(view.getByLabelText('Cell B1'));
-    await fireEvent.input(view.getByLabelText('Cell B1'), { target: { value: '=A1+5' } });
-    expect(input(view.container, '[aria-label="Formula B1"]').value).toBe('=A1+5');
+    await fireEvent.focus(view.getByLabelText('B1'));
+    await fireEvent.input(view.getByLabelText('B1'), { target: { value: '=A1+5' } });
+    expect(input(view.container, '[aria-label="Cell value or formula"]').value).toBe('=A1+5');
   });
   it('resets the formula bar when switching worksheets', async () => {
     const view = render(SpreadsheetView, { sheets: sheets(), activeSheetId: 'one' });
     await fireEvent.click(view.getByRole('button', { name: 'Second' }));
-    expect(input(view.container, '[aria-label="Formula A1"]').value).toBe('99');
+    expect(input(view.container, '[aria-label="Cell value or formula"]').value).toBe('99');
   });
   it('does not mutate readonly sheets even for synthetic input events', async () => {
     const onchange = vi.fn();
     const view = render(SpreadsheetView, { sheets: sheets(), activeSheetId: 'one', readonly: true, onchange });
-    await fireEvent.input(view.getByLabelText('Formula A1'), { target: { value: '123' } });
-    await fireEvent.input(view.getByLabelText('Cell A1'), { target: { value: '456' } });
+    await fireEvent.input(view.getByLabelText('Cell value or formula'), { target: { value: '123' } });
+    await fireEvent.input(view.getByLabelText('A1'), { target: { value: '456' } });
     expect(onchange).not.toHaveBeenCalled();
     expect(view.queryByRole('button', { name: 'Row' })).toBeNull();
   });
   it('exports precise numbers and neutralizes formula-like text with CSV escaping', async () => {
     const onexport = vi.fn();
-    const data: SheetData[] = [{ id: 'csv', name: 'CSV', rows: 1, cols: 4, cells: {
-      A1: '=1/3', B1: '@SUM(1,2)', C1: 'ACME "Tokyo"', D1: '-42',
+    const data: SheetData[] = [{ id: 'csv', name: 'CSV', rows: 1, cols: 5, cells: {
+      A1: '=1/3', B1: '@SUM(1,2)', C1: 'ACME "Tokyo"', D1: '-42', E1: '=-42',
     } }];
     const view = render(SpreadsheetView, { sheets: data, activeSheetId: 'csv', onexport });
     await fireEvent.click(view.getByRole('button', { name: 'Export CSV' }));
-    expect(onexport).toHaveBeenCalledWith('"0.3333333333333333","\'@SUM(1,2)","ACME ""Tokyo""","-42"');
+    expect(onexport).toHaveBeenCalledTimes(1);
+    const csv: unknown = onexport.mock.calls[0]?.[0];
+    if (typeof csv !== 'string') throw new Error('Expected exported CSV');
+    expect(parseCSV(csv)).toEqual([['0.3333333333333333', "'@SUM(1,2)", 'ACME "Tokyo"', "'-42", '-42']]);
   });
 });
 

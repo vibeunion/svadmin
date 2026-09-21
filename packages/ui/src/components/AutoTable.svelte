@@ -1843,10 +1843,8 @@
             <ExportButton
               resource={resourceName}
               taskName={exportTaskName}
-              taskProvider={exportTaskProvider}
-              taskIdempotencyKey={exportTaskIdempotencyKey}
+              {...definedOptions({ taskProvider: exportTaskProvider, taskIdempotencyKey: exportTaskIdempotencyKey, maxItemCount: exportMaxItemCount })}
               format={exportFormat}
-              maxItemCount={exportMaxItemCount}
               filters={activeFilters}
               sorters={sorters}
               accessControl={{ enabled: acEnabled, hideIfUnauthorized: true }}
@@ -1997,10 +1995,8 @@
           <ExportButton
             resource={resourceName}
             taskName={exportTaskName}
-            taskProvider={exportTaskProvider}
-            taskIdempotencyKey={exportTaskIdempotencyKey}
+            {...definedOptions({ taskProvider: exportTaskProvider, taskIdempotencyKey: exportTaskIdempotencyKey, maxItemCount: exportMaxItemCount })}
             format={exportFormat}
-            maxItemCount={exportMaxItemCount}
             filters={activeFilters}
             sorters={sorters}
             hideText

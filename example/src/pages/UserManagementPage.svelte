@@ -21,6 +21,8 @@
     UserPlus,
   } from '@lucide/svelte';
   import { readHashParam, readHashView, replaceHashParam } from '../utils/hashView';
+  import WorkspaceQueryState from './WorkspaceQueryState.svelte';
+  import WorkspaceRecordLinks from './WorkspaceRecordLinks.svelte';
 
   const i18n = useTranslation();
 
@@ -53,7 +55,10 @@
   const permissions = $derived(demoRenderers.permissions.records(permissionsQuery.data?.data ?? []));
   const accounts = $derived(demoRenderers.user_accounts.records(accountsQuery.data?.data ?? []));
   const logs = $derived(demoRenderers.user_logs.records(logsQuery.data?.data ?? []));
+  const chronologicalLogs = $derived([...logs].sort((a, b) => b.createdAt.localeCompare(a.createdAt)));
   const settings = $derived(demoRenderers.user_settings.records(settingsQuery.data?.data ?? []));
+  const visibleSettings = $derived(settings.filter(setting => !['ai', 'mail'].includes(activeView) || `${setting.scope} ${setting.setting}`.toLowerCase().includes(activeView)));
+  const currentQuery = $derived(({ users: usersQuery, roles: rolesQuery, permissions: permissionsQuery, user_accounts: accountsQuery, user_logs: logsQuery, user_settings: settingsQuery })[activeResource]);
   const filteredUsers = $derived(users.filter((user) =>
     (userRoleFilter === null || user.roleId === userRoleFilter)
     && (!userStatusFilter || user.status === userStatusFilter)
@@ -306,12 +311,13 @@
 <div data-app-page="user-management" data-user-management-resource={activeResource} data-user-management-view={activeView}>
 <ContentPageShell pageId="user-management" width="wide">
   <ContentPageHeader title={pageCopy.title} actions={headerActions} />
+  <WorkspaceQueryState query={currentQuery}>
   {#if activeResource !== 'roles'}
   <section class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-    <MetricBlock label={isZh ? '成员总数' : 'Members'} value={users.length} detail={isZh ? '当前组织成员' : 'Current organization'} />
-    <MetricBlock label={isZh ? '角色数量' : 'Roles'} value={roles.length} detail={isZh ? '权限边界' : 'Permission boundaries'} />
-    <MetricBlock label={isZh ? '权限策略' : 'Policies'} value={permissions.length} detail={isZh ? '可审计规则' : 'Auditable rules'} />
-    <MetricBlock label={isZh ? '风险事件' : 'Risk events'} value={criticalLogs} detail={pageCopy.focus} trendTone={criticalLogs > 0 ? 'warning' : 'positive'} />
+    <MetricBlock label={isZh ? '成员总数' : 'Members'} value={usersQuery.isError || usersQuery.isLoading ? '—' : users.length} detail={isZh ? '当前组织成员' : 'Current organization'} />
+    <MetricBlock label={isZh ? '角色数量' : 'Roles'} value={rolesQuery.isError || rolesQuery.isLoading ? '—' : roles.length} detail={isZh ? '权限边界' : 'Permission boundaries'} />
+    <MetricBlock label={isZh ? '权限策略' : 'Policies'} value={permissionsQuery.isError || permissionsQuery.isLoading ? '—' : permissions.length} detail={isZh ? '可审计规则' : 'Auditable rules'} />
+    <MetricBlock label={isZh ? '风险事件' : 'Risk events'} value={logsQuery.isError || logsQuery.isLoading ? '—' : criticalLogs} detail={pageCopy.focus} trendTone={criticalLogs > 0 ? 'warning' : 'positive'} />
   </section>
   {/if}
 
@@ -369,7 +375,7 @@
                   </div>
                   <div class="mt-3 flex flex-wrap gap-1.5">
                     {#each domain.permissions as permission (permission.id)}
-                      <Badge variant="secondary">{permission.action}</Badge>
+                      <Badge variant={permission.effect === 'deny' ? 'destructive' : 'secondary'}>{permission.action} · {statusLabel(permission.effect)}</Badge>
                     {/each}
                   </div>
                 </div>
@@ -500,7 +506,7 @@
             <Card.Title class="text-base">{permission.action}</Card.Title>
             <Card.Description>{roleName(permission.roleId)}</Card.Description>
           </Card.Header>
-          <Card.Content><p class="text-sm text-muted-foreground">{permission.notes}</p><p class="mt-3 text-xs font-medium text-primary">{permission.updatedAt}</p></Card.Content>
+          <Card.Content><p class="text-sm text-muted-foreground">{permission.notes}</p><p class="mt-3 text-xs font-medium text-primary">{permission.updatedAt}</p><WorkspaceRecordLinks resource="permissions" id={permission.id} /></Card.Content>
         </Card.Root>
       {:else}
         <Card.Root class="lg:col-span-3">
@@ -511,21 +517,22 @@
     </section>
   {:else if activeResource === 'user_accounts'}
     <section class="grid min-w-0 gap-4 lg:grid-cols-[0.8fr_1.2fr]">
-      <Card.Root><Card.Header><Card.Title class="text-base">{isZh ? '账户风险概览' : 'Account Risk Overview'}</Card.Title></Card.Header><Card.Content class="grid gap-3 sm:grid-cols-3 xl:grid-cols-1"><div class="rounded-lg border p-3"><p class="text-xs text-muted-foreground">{isZh ? '账户' : 'Accounts'}</p><p class="text-2xl font-semibold">{accounts.length}</p></div><div class="rounded-lg border p-3"><p class="text-xs text-muted-foreground">{isZh ? '锁定' : 'Locked'}</p><p class="text-2xl font-semibold">{lockedAccounts}</p></div><div class="rounded-lg border p-3"><p class="text-xs text-muted-foreground">{isZh ? '活跃成员' : 'Active members'}</p><p class="text-2xl font-semibold">{activeUsers}</p></div></Card.Content></Card.Root>
-      <Card.Root class="overflow-hidden"><Card.Header class="border-b"><Card.Title class="text-base">{isZh ? '登录状态' : 'Sign-in Status'}</Card.Title></Card.Header><Card.Content class="divide-y p-0">{#each accounts as account (account.id)}<div class="grid gap-2 px-5 py-4 md:grid-cols-[1fr_auto_auto]"><div><p class="font-medium">{userName(account.userId)}</p><p class="text-xs text-muted-foreground">{account.notes}</p></div><Badge variant="outline">{statusLabel(account.accountType)}</Badge><span class="text-xs text-muted-foreground">{account.lastSignInAt}</span></div>{/each}</Card.Content></Card.Root>
+      <Card.Root><Card.Header><Card.Title class="text-base">{isZh ? '账户风险概览' : 'Account Risk Overview'}</Card.Title></Card.Header><Card.Content class="grid gap-3 sm:grid-cols-3 xl:grid-cols-1"><div class="border-b py-3"><p class="text-xs text-muted-foreground">{isZh ? '账户' : 'Accounts'}</p><p class="text-2xl font-semibold">{accounts.length}</p></div><div class="border-b py-3"><p class="text-xs text-muted-foreground">{isZh ? '锁定' : 'Locked'}</p><p class="text-2xl font-semibold">{lockedAccounts}</p></div><div class="border-b py-3"><p class="text-xs text-muted-foreground">{isZh ? '活跃成员' : 'Active members'}</p><p class="text-2xl font-semibold">{activeUsers}</p></div></Card.Content></Card.Root>
+      <Card.Root class="overflow-hidden"><Card.Header class="border-b"><Card.Title class="text-base">{isZh ? '登录状态' : 'Sign-in Status'}</Card.Title></Card.Header><Card.Content class="divide-y p-0">{#each accounts as account (account.id)}<div class="space-y-2 px-5 py-4"><div><p class="font-medium">{userName(account.userId)}</p><p class="text-xs text-muted-foreground">{account.notes}</p></div><Badge variant={account.status === 'locked' ? 'destructive' : 'outline'}>{statusLabel(account.status)}</Badge><span class="text-xs text-muted-foreground">{account.accountType} · {account.lastSignInAt}</span><WorkspaceRecordLinks resource="user_accounts" id={account.id} /></div>{:else}<p class="p-4">{isZh ? '暂无账户' : 'No accounts'}</p>{/each}</Card.Content></Card.Root>
     </section>
   {:else if activeResource === 'user_logs'}
     <section class="grid min-w-0 gap-4 lg:grid-cols-[1fr_0.42fr]">
-      <Card.Root class="overflow-hidden"><Card.Header class="border-b"><Card.Title class="text-base">{isZh ? '安全时间线' : 'Security Timeline'}</Card.Title></Card.Header><Card.Content class="divide-y p-0">{#each logs as log (log.id)}<div class="grid gap-3 px-5 py-4 md:grid-cols-[auto_1fr_auto]"><span class="mt-1 flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary"><Clock3 class="h-4 w-4" /></span><div><p class="font-medium">{log.event}</p><p class="text-xs text-muted-foreground">{userName(log.userId)} · {log.ipAddress} · {log.details}</p></div><Badge variant="outline">{statusLabel(log.severity)}</Badge></div>{/each}</Card.Content></Card.Root>
-      <Card.Root><Card.Header><Card.Title class="text-base">{isZh ? '审计摘要' : 'Audit Summary'}</Card.Title></Card.Header><Card.Content class="space-y-3"><div class="rounded-lg border p-3"><p class="text-xs text-muted-foreground">{isZh ? '日志总数' : 'Logs'}</p><p class="text-2xl font-semibold">{logs.length}</p></div><div class="rounded-lg border p-3"><p class="text-xs text-muted-foreground">{isZh ? '需关注' : 'Needs attention'}</p><p class="text-2xl font-semibold">{criticalLogs}</p></div></Card.Content></Card.Root>
+      <Card.Root class="overflow-hidden"><Card.Header class="border-b"><Card.Title class="text-base">{isZh ? '安全时间线' : 'Security Timeline'}</Card.Title></Card.Header><Card.Content class="divide-y p-0">{#each chronologicalLogs as log (log.id)}<div class="grid gap-3 px-5 py-4 md:grid-cols-[auto_1fr_auto]"><span class="mt-1 flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary"><Clock3 class="h-4 w-4" /></span><div><p class="font-medium">{log.event}</p><time class="text-xs">{log.createdAt}</time><p class="text-xs text-muted-foreground">{userName(log.userId)} · {log.ipAddress} · {log.details}</p><WorkspaceRecordLinks resource="user_logs" id={log.id} /></div><Badge variant="outline">{statusLabel(log.severity)}</Badge></div>{:else}<p class="p-4">{isZh ? '暂无日志' : 'No logs'}</p>{/each}</Card.Content></Card.Root>
+      <Card.Root><Card.Header><Card.Title class="text-base">{isZh ? '审计摘要' : 'Audit Summary'}</Card.Title></Card.Header><Card.Content class="space-y-3"><div class="border-b py-3"><p class="text-xs text-muted-foreground">{isZh ? '日志总数' : 'Logs'}</p><p class="text-2xl font-semibold">{logs.length}</p></div><div class="border-b py-3"><p class="text-xs text-muted-foreground">{isZh ? '需关注' : 'Needs attention'}</p><p class="text-2xl font-semibold">{criticalLogs}</p></div></Card.Content></Card.Root>
     </section>
   {:else if activeResource === 'user_settings'}
     <section class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {#each settings as setting (setting.id)}
+      {#each visibleSettings as setting (setting.id)}
         <Card.Root>
           <Card.Header><div class="flex items-center justify-between gap-3"><SlidersHorizontal class="h-5 w-5 text-primary" /><Badge variant="outline">{statusLabel(setting.status)}</Badge></div><Card.Title class="text-base">{setting.setting}</Card.Title><Card.Description>{setting.scope}</Card.Description></Card.Header>
-          <Card.Content><p class="text-sm text-muted-foreground">{isZh ? '负责人' : 'Owner'}: {userName(setting.ownerId)}</p><p class="mt-3 text-xs font-medium text-primary">{setting.updatedAt}</p></Card.Content>
+          <Card.Content><p class="text-sm text-muted-foreground">{isZh ? '负责人' : 'Owner'}: {userName(setting.ownerId)}</p><p class="mt-3 text-xs font-medium text-primary">{setting.updatedAt}</p><WorkspaceRecordLinks resource="user_settings" id={setting.id} /></Card.Content>
         </Card.Root>
+      {:else}<p class="text-sm text-muted-foreground">{isZh ? '当前范围没有设置记录。' : 'No settings in this scope.'}</p>
       {/each}
       <Card.Root class="border-primary/30"><Card.Content class="p-5"><CheckCircle2 class="h-5 w-5 text-primary" /><p class="mt-3 text-sm text-muted-foreground">{isZh ? `${enabledSettings} 条策略已启用，适合演示企业级账户治理。` : `${enabledSettings} policies are enabled for enterprise account governance demos.`}</p></Card.Content></Card.Root>
     </section>
@@ -535,7 +542,7 @@
         <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <Card.Title class="text-base">{isZh ? '用户目录' : 'User Directory'}</Card.Title>
-            <Card.Description>{isZh ? '按用户、角色、状态、加入日期和最近登录查看成员。' : 'Review members by user, role, status, joined date, and last sign-in.'}</Card.Description>
+            <Card.Description>{isZh ? '按用户、角色、状态、部门和最近登录查看成员。' : 'Review members by user, role, status, department, and last sign-in.'}</Card.Description>
           </div>
           <div class="flex flex-wrap gap-2">
             <DropdownMenu.Root>
@@ -583,11 +590,11 @@
         <div class="overflow-x-auto">
           <table class="w-full min-w-[760px] whitespace-nowrap text-sm" aria-label={isZh ? '用户目录' : 'User directory'}>
             <thead class="border-b bg-muted/35 text-xs font-semibold text-muted-foreground">
-              <tr><th class="px-5 py-3 text-left">{isZh ? '用户' : 'User'}</th><th class="px-5 py-3 text-left">{isZh ? '角色' : 'Role'}</th><th class="px-5 py-3 text-left">{isZh ? '状态' : 'Status'}</th><th class="px-5 py-3 text-left">{isZh ? '加入日期' : 'Joined'}</th><th class="px-5 py-3 text-left">{isZh ? '最近登录' : 'Last Sign In'}</th><th class="px-5 py-3 text-right">{isZh ? '操作' : 'Actions'}</th></tr>
+              <tr><th class="px-5 py-3 text-left">{isZh ? '用户' : 'User'}</th><th class="px-5 py-3 text-left">{isZh ? '角色' : 'Role'}</th><th class="px-5 py-3 text-left">{isZh ? '状态' : 'Status'}</th><th class="px-5 py-3 text-left">{isZh ? '部门' : 'Department'}</th><th class="px-5 py-3 text-left">{isZh ? '最近登录' : 'Last Sign In'}</th><th class="px-5 py-3 text-right">{isZh ? '操作' : 'Actions'}</th></tr>
             </thead>
             <tbody class="divide-y">
               {#each filteredUsers as user (user.id)}
-                <tr class="transition hover:bg-muted/25"><td class="px-5 py-4"><div class="flex min-w-0 items-center gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{initials(user.name)}</span><div class="min-w-0"><p class="truncate font-semibold">{user.name}</p><p class="truncate text-xs text-muted-foreground">{user.email}</p></div></div></td><td class="px-5 py-4 text-muted-foreground">{roleName(user.roleId)}</td><td class="px-5 py-4"><Badge variant="outline">{statusLabel(user.status)}</Badge></td><td class="px-5 py-4 text-muted-foreground">2026-06-{String(8 + user.id).padStart(2, '0')}</td><td class="px-5 py-4 text-muted-foreground">{user.lastActiveAt}</td><td class="px-5 py-4"><div class="flex justify-end gap-2"><a class="text-xs font-medium text-primary hover:underline" href={`#/users/show/${user.id}`} aria-label={`${isZh ? '查看' : 'View'} ${user.name}`}>{isZh ? '查看' : 'View'}</a><a class="text-xs font-medium text-primary hover:underline" href={`#/users/edit/${user.id}`} aria-label={`${isZh ? '编辑' : 'Edit'} ${user.name}`}>{isZh ? '编辑' : 'Edit'}</a></div></td></tr>
+                <tr class="transition hover:bg-muted/25"><td class="px-5 py-4"><div class="flex min-w-0 items-center gap-3"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{initials(user.name)}</span><div class="min-w-0"><p class="truncate font-semibold">{user.name}</p><p class="truncate text-xs text-muted-foreground">{user.email}</p></div></div></td><td class="px-5 py-4 text-muted-foreground">{roleName(user.roleId)}</td><td class="px-5 py-4"><Badge variant="outline">{statusLabel(user.status)}</Badge></td><td class="px-5 py-4 text-muted-foreground">{user.department}</td><td class="px-5 py-4 text-muted-foreground">{user.lastActiveAt}</td><td class="px-5 py-4"><div class="flex justify-end gap-2"><a class="text-xs font-medium text-primary hover:underline" href={`#/users/show/${user.id}`} aria-label={`${isZh ? '查看' : 'View'} ${user.name}`}>{isZh ? '查看' : 'View'}</a><a class="text-xs font-medium text-primary hover:underline" href={`#/users/edit/${user.id}`} aria-label={`${isZh ? '编辑' : 'Edit'} ${user.name}`}>{isZh ? '编辑' : 'Edit'}</a></div></td></tr>
               {:else}
                 <tr><td colspan="6" class="px-5 py-10 text-center text-sm text-muted-foreground">{isZh ? '没有匹配的用户。' : 'No users match the selected filters.'}</td></tr>
               {/each}
@@ -599,6 +606,8 @@
   {/if}
 
   {#if activeResource !== 'roles'}
+    <details class="border-y py-3">
+    <summary class="cursor-pointer text-sm">{isZh ? '组织背景资料' : 'Organization context'}</summary>
     <section class="grid min-w-0 gap-4 lg:grid-cols-[1fr_0.72fr]">
       <Card.Root class="overflow-hidden">
         <Card.Header class="border-b"><Card.Title class="text-base">{isZh ? '团队成员' : 'Team Members'}</Card.Title></Card.Header>
@@ -618,21 +627,29 @@
         <Card.Root>
           <Card.Header><Card.Title class="flex items-center gap-2 text-base"><UserCog class="h-4 w-4 text-primary" />{isZh ? '管理摘要' : 'Management Summary'}</Card.Title></Card.Header>
           <Card.Content class="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-            <div class="rounded-lg border p-3"><p class="text-xs text-muted-foreground">{isZh ? '角色' : 'Roles'}</p><p class="mt-1 text-xl font-semibold">{roles.length}</p></div>
-            <div class="rounded-lg border p-3"><p class="text-xs text-muted-foreground">{isZh ? '账户' : 'Accounts'}</p><p class="mt-1 text-xl font-semibold">{accounts.length}</p></div>
-            <div class="rounded-lg border p-3"><p class="text-xs text-muted-foreground">{isZh ? '日志' : 'Logs'}</p><p class="mt-1 text-xl font-semibold">{logs.length}</p></div>
-            <div class="rounded-lg border p-3"><p class="text-xs text-muted-foreground">{isZh ? '设置' : 'Settings'}</p><p class="mt-1 text-xl font-semibold">{settings.length}</p></div>
+            <div class="border-b py-3"><p class="text-xs text-muted-foreground">{isZh ? '角色' : 'Roles'}</p><p class="mt-1 text-xl font-semibold">{roles.length}</p></div>
+            <div class="border-b py-3"><p class="text-xs text-muted-foreground">{isZh ? '账户' : 'Accounts'}</p><p class="mt-1 text-xl font-semibold">{accounts.length}</p></div>
+            <div class="border-b py-3"><p class="text-xs text-muted-foreground">{isZh ? '日志' : 'Logs'}</p><p class="mt-1 text-xl font-semibold">{logs.length}</p></div>
+            <div class="border-b py-3"><p class="text-xs text-muted-foreground">{isZh ? '设置' : 'Settings'}</p><p class="mt-1 text-xl font-semibold">{settings.length}</p></div>
           </Card.Content>
         </Card.Root>
         <Card.Root><Card.Content class="p-5"><KeyRound class="h-5 w-5 text-primary" /><p class="mt-3 text-sm text-muted-foreground">{isZh ? '账户、日志与策略按各自任务组织；需要批量筛选或编辑时再打开记录视图。' : 'Accounts, logs, and policies follow their own tasks; open records only for bulk filtering or editing.'}</p></Card.Content></Card.Root>
       </div>
     </section>
+    </details>
 
     {#if showRecords}
       <section data-user-records>
-        <AutoTable {resourceName} rendering={demoRendering(resourceName)} />
+        {#if activeResource === 'permissions' && focusedRoleId !== null}
+          <div class="divide-y">{#each visiblePermissions as permission (permission.id)}<div class="flex flex-wrap items-center justify-between gap-3 py-3"><span>{permission.module} · {permission.action} · {statusLabel(permission.effect)}</span><WorkspaceRecordLinks resource="permissions" id={permission.id} /></div>{/each}</div>
+        {:else if activeResource === 'user_settings' && ['ai', 'mail'].includes(activeView)}
+          <div class="divide-y">{#each visibleSettings as setting (setting.id)}<div class="flex flex-wrap items-center justify-between gap-3 py-3"><span>{setting.setting} · {setting.scope}</span><WorkspaceRecordLinks resource="user_settings" id={setting.id} /></div>{/each}</div>
+        {:else}
+          <AutoTable {resourceName} rendering={demoRendering(resourceName)} />
+        {/if}
       </section>
     {/if}
   {/if}
+  </WorkspaceQueryState>
 </ContentPageShell>
 </div>

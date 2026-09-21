@@ -23,6 +23,10 @@ const resourceDefinitions: ResourceDefinition[] = [
     icon: 'layers',
     fields: [],
     showInMenu: false,
+    canCreate: false,
+    canEdit: false,
+    canDelete: false,
+    canShow: false,
   },
   {
     name: 'case_workspace',
@@ -30,6 +34,10 @@ const resourceDefinitions: ResourceDefinition[] = [
     icon: 'flask-conical',
     fields: [],
     showInMenu: false,
+    canCreate: false,
+    canEdit: false,
+    canDelete: false,
+    canShow: false,
   },
   {
     name: 'products',

@@ -24,7 +24,7 @@ const fieldTypes = {
   text: true, number: true, boolean: true, date: true, daterange: true, datetime: true, time: true,
   percent: true, select: true, multiselect: true,
   tags: true, textarea: true, richtext: true, image: true, images: true, json: true,
-  relation: true, color: true, url: true, email: true, phone: true, currency: true, percent: true,
+  relation: true, color: true, url: true, email: true, phone: true, currency: true,
   file: true, markdown: true, password: true, array: true, 'tree-select': true,
   treeselect: true, cascader: true, transfer: true, rate: true, rating: true,
   avatar: true, copy: true, code: true,

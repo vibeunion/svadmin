@@ -6,6 +6,7 @@ import FieldRenderer from './FieldRenderer.svelte';
 import { dateInputAllowed, dateInputNumber } from '../date-input-policy.js';
 import { civilDateTimeToInstant, formatCivilDateTime, parseDateTimeInstant } from '@svadmin/core/date-time';
 
+import { requireValue } from '../../../../scripts/test-assertions';
 describe('enterprise date and time inputs', () => {
   it('submits range instants and preserves the caller civil boundaries', async () => {
     const onchange = vi.fn();
@@ -19,16 +20,16 @@ describe('enterprise date and time inputs', () => {
     const form = document.createElement('form');
     form.append(view.container);
     const inputs = form.querySelectorAll<HTMLInputElement>('input[type="datetime-local"]');
-    expect(inputs[0]!.value).toBe('2026-09-19T09:00');
-    expect(inputs[0]!.min).toBe('2026-09-19T08:00');
-    expect(inputs[1]!.max).toBe('2026-09-19T18:00');
-    await fireEvent.input(inputs[1]!, { target: { value: '2026-09-19T08:30' } });
+    expect(requireValue(inputs[0]).value).toBe('2026-09-19T09:00');
+    expect(requireValue(inputs[0]).min).toBe('2026-09-19T08:00');
+    expect(requireValue(inputs[1]).max).toBe('2026-09-19T18:00');
+    await fireEvent.input(requireValue(inputs[1]), { target: { value: '2026-09-19T08:30' } });
     expect(onchange).not.toHaveBeenCalled();
-    expect(inputs[1]!.validity.customError).toBe(true);
-    await fireEvent.input(inputs[1]!, { target: { value: '2026-09-19T13:30' } });
+    expect(requireValue(inputs[1]).validity.customError).toBe(true);
+    await fireEvent.input(requireValue(inputs[1]), { target: { value: '2026-09-19T13:30' } });
     expect(onchange).toHaveBeenLastCalledWith({ start: '2026-09-19T01:00:00Z', end: '2026-09-19T05:30:00.000Z' });
     expect(new FormData(form).getAll('period.end')).toEqual(['2026-09-19T05:30:00.000Z']);
-    await fireEvent.input(inputs[1]!, { target: { value: '2026-09-19T19:00' } });
+    await fireEvent.input(requireValue(inputs[1]), { target: { value: '2026-09-19T19:00' } });
     expect(onchange).toHaveBeenCalledOnce();
   });
 
@@ -39,15 +40,15 @@ describe('enterprise date and time inputs', () => {
       value: { start: '2026-11-01T01:45:00-07:00', end: '2026-11-01T01:15:00-08:00' }, onchange,
     });
     const inputs = view.container.querySelectorAll<HTMLInputElement>('input[type="datetime-local"]');
-    expect(inputs[0]!.value).toBe('2026-11-01T01:45');
-    expect(inputs[1]!.value).toBe('2026-11-01T01:15');
-    expect(inputs[0]!.validity.customError).toBe(false);
-    expect(inputs[1]!.validity.customError).toBe(false);
-    await fireEvent.input(inputs[1]!, { target: { value: '2026-11-01T01:30' } });
+    expect(requireValue(inputs[0]).value).toBe('2026-11-01T01:45');
+    expect(requireValue(inputs[1]).value).toBe('2026-11-01T01:15');
+    expect(requireValue(inputs[0]).validity.customError).toBe(false);
+    expect(requireValue(inputs[1]).validity.customError).toBe(false);
+    await fireEvent.input(requireValue(inputs[1]), { target: { value: '2026-11-01T01:30' } });
     expect(onchange).not.toHaveBeenCalled();
-    expect(inputs[1]!.validity.customError).toBe(true);
+    expect(requireValue(inputs[1]).validity.customError).toBe(true);
     await view.rerender({ disambiguation: 'later' });
-    await fireEvent.input(inputs[1]!, { target: { value: '2026-11-01T01:30' } });
+    await fireEvent.input(requireValue(inputs[1]), { target: { value: '2026-11-01T01:30' } });
     expect(onchange).toHaveBeenLastCalledWith({ start: '2026-11-01T01:45:00-07:00', end: '2026-11-01T09:30:00.000Z' });
   });
 
@@ -65,7 +66,7 @@ describe('enterprise date and time inputs', () => {
     await fireEvent.change(view.getByRole('combobox'), { target: { value: '2' } });
     expect(onchange).not.toHaveBeenCalled();
     await fireEvent.change(view.getByRole('combobox'), { target: { value: '0' } });
-    expect(onchange).toHaveBeenCalledExactlyOnceWith(presets[0]!.value);
+    expect(onchange).toHaveBeenCalledExactlyOnceWith(requireValue(presets[0]).value);
     await view.rerender({ timeZone: 'invalid' });
     await fireEvent.change(view.getByRole('combobox'), { target: { value: '0' } });
     expect(onchange).toHaveBeenCalledOnce();
@@ -77,7 +78,7 @@ describe('enterprise date and time inputs', () => {
       mode: 'datetime', valueMode: 'instant', timeZone: 'America/Los_Angeles', onchange,
       value: { start: '2026-03-08T09:00:00Z', end: null },
     });
-    const end = view.container.querySelectorAll<HTMLInputElement>('input[type="datetime-local"]')[1]!;
+    const end =requireValue( view.container.querySelectorAll<HTMLInputElement>('input[type="datetime-local"]')[1]);
     await fireEvent.input(end, { target: { value: '2026-03-08T02:30' } });
     expect(onchange).not.toHaveBeenCalled();
     await fireEvent.input(end, { target: { value: '2026-03-08T03:30' } });
@@ -118,7 +119,7 @@ describe('enterprise date and time inputs', () => {
   it('blocks invalid configuration and retains invalid bound instants as validation errors', async () => {
     const onchange = vi.fn();
     const view = render(DateTimeInput, { mode: 'datetime', valueMode: 'instant', value: 'invalid', onchange });
-    const input = view.container.querySelector('input')!;
+    const input =requireValue( view.container.querySelector('input'));
     expect(input.validity.customError).toBe(true);
     await fireEvent.input(input, { target: { value: '2026-09-19T10:00' } });
     expect(onchange).not.toHaveBeenCalled();
@@ -136,7 +137,7 @@ describe('enterprise date and time inputs', () => {
     });
     const form = document.createElement('form');
     form.append(view.container);
-    const input = form.querySelector('input[type="datetime-local"]')!;
+    const input =requireValue( form.querySelector('input[type="datetime-local"]'));
     expect(input.getAttribute('name')).toBeNull();
     await fireEvent.input(input, { target: { value: '2026-09-19T09:00' } });
     expect(new FormData(form).getAll('occurredAt')).toEqual(['2026-09-19T01:00:00.000Z']);
@@ -146,7 +147,7 @@ describe('enterprise date and time inputs', () => {
         valueMode: 'instant', timeZone: 'America/Los_Angeles', disambiguation: 'later',
       } }, value: null, onchange,
     });
-    await fireEvent.input(field.container.querySelector('input[type="datetime-local"]')!, { target: { value: '2026-11-01T01:30' } });
+    await fireEvent.input(requireValue(field.container.querySelector('input[type="datetime-local"]')), { target: { value: '2026-11-01T01:30' } });
     expect(onchange).toHaveBeenCalledWith('2026-11-01T09:30:00.000Z');
   });
   it('uses resource date policy without confusing numeric bounds with calendar bounds', async () => {

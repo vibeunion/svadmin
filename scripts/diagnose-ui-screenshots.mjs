@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { chromium } from '@playwright/test';
 
-const output = resolve(process.argv[2] ?? 'docs/pr-evidence/panda-styles');
+const output = resolve(process.argv[2] ?? 'test-results/ui-styles');
 const results = JSON.parse(readFileSync(resolve(output, 'results.json'), 'utf8'));
 const diagnostics = [];
 const browser = await chromium.launch();

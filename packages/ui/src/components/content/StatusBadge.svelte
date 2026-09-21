@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Badge } from '../ui/badge/index.js';
-  import { productStatus } from '../../styled-system/recipes/index.js';
+  import { productStatusRecipe as productStatus } from '../../recipes.js';
   export type Status = 'success' | 'warning' | 'danger' | 'info' | 'neutral';
   interface Props {
     status: Status;

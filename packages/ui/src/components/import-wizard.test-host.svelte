@@ -58,7 +58,7 @@
 
 <QueryClientProvider client={queryClient}>
   {#if coreProbe}
-    <ImportLimitsProbe {resourceName} {maxRows} {maxBytes} onReady={onImportReady} />
+    <ImportLimitsProbe {resourceName} {...definedOptions({ maxRows, maxBytes, onReady: onImportReady })} />
   {:else}
     <ImportWizard {resourceName} {open} {...definedOptions({
       onSuccess, maxRows, maxBytes, taskProvider, taskArtifactProvider, taskName, retryTaskName, taskIdempotencyKey, initialTaskId, onTaskSubmitted,

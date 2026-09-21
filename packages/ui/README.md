@@ -3,10 +3,9 @@
 Svelte 5 admin components using semantic design tokens and Bits UI primitives.
 
 The design-system boundary is intentionally split: Bits UI owns headless
-interaction primitives, while Panda CSS owns tokens, recipes, and generated
-styles. Park UI is a reference for Panda anatomy and recipe organization, not
-a runtime dependency of `@svadmin/ui`; Ark UI and Bits UI are not mixed for
-the same primitive.
+interaction primitives, while Tailwind semantic classes and `tailwind-variants`
+own recipes and variant composition. shadcn-svelte is the authoring source for
+new components; it is not a parallel runtime library.
 
 ## CSS Integration
 
@@ -16,7 +15,7 @@ Import the precompiled stylesheet once:
 import '@svadmin/ui/app.css';
 ```
 
-Consumers do not need Tailwind or Panda. Both component styles and the existing
+Consumers do not need Tailwind. Both component styles and the existing
 utility aliases are included in the published native stylesheet. Theme overrides
 continue to use public semantic CSS variables; nested themes use `.svadmin-theme`.
 
@@ -26,29 +25,40 @@ directives can be removed; styles are pre-generated, not scanned at consumption.
 
 ## Migration Boundary
 
-Tailwind, its Vite plugin and animation compiler are no longer build dependencies.
-Panda is a development dependency for the new semantic tokens and slot recipes;
-its runtime class helpers and type declarations do not import the compiler.
+The package publishes precompiled CSS: consumers do not need to compile library
+sources. Tailwind is an authoring/build dependency only; generated APIs are not
+a new compatibility commitment.
 
-Existing `svadmin-u-*` aliases, animation rules and compiled `--tw-*` variables
-remain native compatibility CSS. Do not rename or delete them mechanically.
-New styles should use native CSS or reviewed Panda recipes, not new uncompiled
-Tailwind class strings. This is not a wholesale rewrite of every UI component.
+Existing `svadmin-u-*` aliases and compatibility rules remain native CSS. Do not
+rename or delete them mechanically. New styles should use semantic Tailwind
+classes and reviewed recipes. This is not a wholesale rewrite of every UI
+component.
 
-Button, Badge, Input and Textarea now select pre-generated Panda recipes. Their
-public props, bindings, semantic class markers and null-variant semantics remain
-compatible. Migrated instances are excluded from the old primitive defaults at
-CSS publication time; the original compatibility snapshot is not rewritten.
-Primitive recipes stay in the `components` layer so consumer overrides keep their
-priority. Shared theme/focus rules and unmigrated components remain native CSS.
+Button, Badge, content layouts and Surface appearance use the shared
+`tailwind-variants` registry. Public props, bindings, semantic class markers and
+null-variant semantics remain compatible. Existing component CSS state rules
+remain part of the published stylesheet.
 
-The strict repository check also rejects helper packages (`tailwind-merge`,
-`tailwind-variants`) and the shadcn-svelte generator, including transitive lockfile
-entries. **The current Streamdown dependency still brings `tailwind-merge`; the
-strict check intentionally fails until a behavior-preserving replacement is
-verified. Do not describe this migration as fully complete.**
+The package now permits the `tailwind-variants` recipe helper and the
+`shadcn-svelte` generator. The generator is only an authoring tool; published
+components continue to use the package's semantic tokens and Bits UI primitives.
+Panda configuration and generated helpers are no longer part of the build.
 
-The initial `surfaceMetric` and `surfaceTable` recipes pre-generate every public
+## shadcn Authoring
+
+Run `bun run --cwd packages/ui shadcn:add button` to generate candidate source
+under `shadcn/candidate`, not `src`. The isolated configuration uses `$lib` only
+inside that sandbox; it does not change published imports or package exports.
+Dependencies are recorded in the sandbox without installation.
+
+Review each candidate before adapting it into the existing component. Preserve
+semantic tokens, public props, data slots, bindings and accessibility enhancements.
+Convert candidate aliases to package-relative imports. Do not publish its CSS
+or utilities until they have a tested precompiled build. The generator is not an
+OpenUI runtime: schema validation, registry and controlled actions remain owned
+by the existing Surface implementation.
+
+The initial `surfaceMetric` and `surfaceTable` recipes cover every public
 variant. Surface applications opt into `styledSurfaceCatalog` and load
 `@svadmin/surface/styles.css`; see the Surface package's `STYLING.md`. Default
 Surface v1 props and the no-variant rendering path stay unchanged.

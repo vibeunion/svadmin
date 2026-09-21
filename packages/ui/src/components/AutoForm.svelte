@@ -258,6 +258,8 @@
   const pageTitle = $derived(
     mode === 'create'
       ? `${i18n.t('common.create')}${resource.label}`
+      : mode === 'clone'
+      ? `${i18n.t('common.clone')} ${resource.label}`
       : mode === 'show'
       ? `${i18n.t('common.detail')}${resource.label}`
       : `${i18n.t('common.edit')}${resource.label}`

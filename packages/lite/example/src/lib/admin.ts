@@ -110,6 +110,9 @@ export const menu: MenuItem[] = [
       { name: "mail_draft", label: "Mail Drafts", href: "/lite/mail_draft" },
       { name: "mail_sent", label: "Mail Sent", href: "/lite/mail_sent" },
       { name: "mail_archive", label: "Mail Archive", href: "/lite/mail_archive" },
+      { name: "mail_snoozed", label: "Mail Snoozed", href: "/lite/mail_snoozed" },
+      { name: "mail_spam", label: "Mail Spam", href: "/lite/mail_spam" },
+      { name: "mail_trash", label: "Mail Trash", href: "/lite/mail_trash" },
     ],
   },
   {

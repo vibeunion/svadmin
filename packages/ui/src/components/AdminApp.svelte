@@ -84,8 +84,14 @@
   import { Skeleton } from './ui/skeleton/index.js';
   import { provideRouterState } from '../router-state.svelte.js';
   import type { AdminProviderBundle } from '../types.js';
+  import type { MfaEnrollmentProvider } from './TwoFactorAuthPage.svelte';
+  import type { NotificationPreferencesProvider } from './NotificationsSettings.svelte';
+  import type { MemberDirectoryProvider } from './account/MemberDirectory.svelte';
 
   interface Props {
+    mfaEnrollmentProvider?: MfaEnrollmentProvider;
+    notificationPreferencesProvider?: NotificationPreferencesProvider;
+    memberDirectoryProvider?: MemberDirectoryProvider;
     /** Single provider, or named providers such as `{ default, analytics }`. */
     dataProvider?: DataProviderInput;
     /** Core canonical provider bundle. Existing top-level props take precedence. */
@@ -150,6 +156,9 @@
   }
 
   let {
+    mfaEnrollmentProvider,
+    notificationPreferencesProvider,
+    memberDirectoryProvider,
     dataProvider,
     providerBundle,
     providers,
@@ -545,7 +554,7 @@
     <ConfigErrorScreen title="{title} — {translation.t('common.configRequired')}" />
   {:else if (isAuthenticated || !resolvedAuthProvider) && isStandaloneTwoFactor && !authRechecking}
     <SystemPageShell {title}>
-      <LazyPage loader={loadTwoFactorAuthPage} props={{}} />
+      <LazyPage loader={loadTwoFactorAuthPage} props={mfaEnrollmentProvider ? { enrollmentProvider: mfaEnrollmentProvider } : {}} />
     </SystemPageShell>
   {:else if standaloneErrorStatus}
     <SystemPageShell {title}>
@@ -582,19 +591,19 @@
       {:else if renderedRoute === '/account/company-profile' || renderedRoute === '/account/home/company-profile'}
         <LazyPage loader={loadCompanyProfilePage} props={{}} />
       {:else if renderedRoute === '/account/settings-plain' || renderedRoute === '/account/home/settings-plain'}
-        <LazyPage loader={loadSettingsPlainPage} props={{}} />
+        <LazyPage loader={loadSettingsPlainPage} props={notificationPreferencesProvider ? { preferencesProvider: notificationPreferencesProvider } : {}} />
       {:else if renderedRoute === '/account/settings-sidebar' || renderedRoute === '/account/home/settings-sidebar'}
         <LazyPage loader={loadSettingsSidebarPage} props={{}} />
       {:else if renderedRoute === '/account/settings-enterprise' || renderedRoute === '/account/home/settings-enterprise'}
         <LazyPage loader={loadSettingsEnterprisePage} props={{}} />
       {:else if renderedRoute === '/account/:tab'}
-        <SettingsPage />
+        <SettingsPage {...notificationPreferencesProvider ? { preferencesProvider: notificationPreferencesProvider } : {}} />
       {:else if renderedRoute === '/account/import-members' || renderedRoute === '/account/members/import-members'}
         <LazyPage loader={loadImportMembersPage} props={{}} />
       {:else if renderedRoute === '/account/members-starter' || renderedRoute === '/account/members/members-starter'}
-        <LazyPage loader={loadMembersStarterPage} props={{}} />
+        <LazyPage loader={loadMembersStarterPage} props={memberDirectoryProvider ? { memberProvider: memberDirectoryProvider } : {}} />
       {:else if renderedRoute === '/account/team-members' || renderedRoute === '/account/members/team-members'}
-        <LazyPage loader={loadTeamMembersPage} props={{}} />
+        <LazyPage loader={loadTeamMembersPage} props={memberDirectoryProvider ? { memberProvider: memberDirectoryProvider } : {}} />
       {:else if renderedRoute === '/account/security-log' || renderedRoute === '/account/security/security-log'}
         <LazyPage loader={loadSecurityLogPage} props={{}} />
       {:else if renderedRoute === '/network/user-cards' || renderedRoute === '/network/user-cards/nft'}
@@ -602,7 +611,7 @@
       {:else if renderedRoute === '/network/team-crew' || renderedRoute === '/network/user-table/team-crew'}
         <LazyPage loader={loadTeamCrewTablePage} props={{}} />
       {:else if renderedRoute.startsWith('/settings')}
-        <SettingsPage />
+        <SettingsPage {...notificationPreferencesProvider ? { preferencesProvider: notificationPreferencesProvider } : {}} />
       {:else if renderedRoute === '/' || renderedRoute === '' || renderedRoute === '/inventory-dashboard'}
         {#if dashboard}
           {@render dashboard()}

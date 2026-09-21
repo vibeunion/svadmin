@@ -1,5 +1,5 @@
 import { Type, type TSchema } from '@sinclair/typebox';
-import { surfaceDesignContract } from '../styled-system/design-contract.js';
+import { surfaceDesignContract } from '../design-contract.js';
 import type { SurfaceCatalog, SurfaceWidgetDefinition, JsonObject } from '../types.js';
 import type { SurfaceActionDescriptor } from './types.js';
 import { validateSurfaceActionDescriptor } from './action-contracts.js';

@@ -1,10 +1,11 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, waitFor } from '@testing-library/svelte';
 import { buildPivot, buildPivotCacheKey, buildPivotDrilldown, buildPivotExportRequest, decodePivotResult, snapshotPivotQuery, formatPivotValue, PIVOT_LIMITS, type PivotAggregation, type PivotPayload } from '@svadmin/core/pivot';
-import { setLocale } from '@svadmin/core/i18n';
+import { renderWithI18n as render } from '../../test/fixtures/render-with-i18n';
 import { resetAccessControlProvider, setAccessControlProvider } from '@svadmin/core/permissions';
 import PivotTable from './PivotTable.svelte';
 import LitePivotTable from '../../../lite/src/components/LitePivotTable.svelte';
+import type { Component as SvelteComponent, ComponentProps } from 'svelte';
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -14,6 +15,7 @@ import { QueryClient } from '@tanstack/svelte-query';
 import type { AuthProvider } from '@svadmin/core';
 import PivotSessionHost from './pivot-session.test-host.svelte';
 
+import { requireValue } from '../../../../scripts/test-assertions';
 const fields = { rowField: 'r', columnField: 'c', valueField: 'v' };
 const data = [
   { r: 'A', c: 'X', v: 2 },
@@ -35,11 +37,9 @@ function deferred<T>() {
   return { promise, resolve };
 }
 const sessionClients: QueryClient[] = [];
-beforeEach(() => setLocale('en'));
 afterEach(() => {
   cleanup();
   for (const client of sessionClients.splice(0)) client.clear();
-  setLocale('en');
   resetAccessControlProvider();
 });
 
@@ -65,11 +65,11 @@ describe('bounded pivot model', () => {
       query: { ...query, aggregator: 'sum' },
       requestFingerprint: expect.any(String),
     });
-    expect(JSON.parse(request!.requestFingerprint)).toEqual({
+    expect(JSON.parse(requireValue(request).requestFingerprint)).toEqual({
       protocolVersion: 1, kind: 'pivot', scopeKey: 'tenant-a:orders', format,
       query: { ...query, aggregator: 'sum' },
-    });
-    query.filters[0]!.value = 'changed';
+    });requireValue(
+    query.filters[0]).value = 'changed';
     query.meta.tenant.id = 'b';
     expect(request?.query.filters).toEqual([{ field: 'status', operator: 'eq', value: 'paid' }]);
     expect(request?.query.meta).toEqual({ tenant: { id: 'a' } });
@@ -131,8 +131,8 @@ describe('bounded pivot model', () => {
   it('snapshots server queries and rejects invalid filters, fields and query-only pagination', () => {
     const query = { ...fields, resource: 'orders', filters: [{ field: 'v', operator: 'eq', value: 1 }] };
     const copy = snapshotPivotQuery(query);
-    expect(copy).toEqual({ ...query, aggregator: 'sum' });
-    query.filters[0]!.value = 2;
+    expect(copy).toEqual({ ...query, aggregator: 'sum' });requireValue(
+    query.filters[0]).value = 2;
     expect(copy?.filters?.[0]).toMatchObject({ value: 1 });
     for (const patch of [{ rowField: '' }, { filters: [{ field: 'v', operator: 'execute', value: 1 }] },
       { pagination: { pageSize: 10 } }, { aggregator: 'unknown' }]) {
@@ -196,7 +196,7 @@ describe('bounded pivot model', () => {
       pivot.columnTotals.get('string:X'),
       pivot.grandTotal,
     ];
-    actual.forEach((value, index) => expect(value).toBeCloseTo(expected[index]!));
+    actual.forEach((value, index) => expect(value).toBeCloseTo(requireValue(expected[index])));
     expect(pivot.cells.get('string:B')?.get('string:Y')).toBeUndefined();
   });
 
@@ -304,10 +304,11 @@ describe('bounded pivot model', () => {
   });
 });
 
-describe.each([['SPA', PivotTable], ['Lite', LitePivotTable]] as const)('%s pivot view', (_name, Component) => {
+describe.each([['SPA', PivotTable], ['Lite', LitePivotTable]] as const)('%s pivot view', (_name, View) => {
+  const Component: SvelteComponent<ComponentProps<typeof PivotTable> & ComponentProps<typeof LitePivotTable>> = View;
   it('renders server totals verbatim without averaging pre-aggregated groups', () => {
-    const value = payload();
-    value.cells[0]!.value = 12;
+    const value = payload();requireValue(
+    value.cells[0]).value = 12;
     value.grandTotal = 7;
     const view = render(Component, { ...fields, aggregator: 'avg', aggregateData: value });
     expect(view.container.querySelector('tbody td')?.textContent?.trim()).toBe('12');
@@ -319,8 +320,8 @@ describe.each([['SPA', PivotTable], ['Lite', LitePivotTable]] as const)('%s pivo
       data: [{ r: 1, c: 'X', v: 0 }, { r: '1', c: 'Y', v: 5 }],
     });
     expect(view.getByRole('table', { name: 'Revenue' })).toBeTruthy();
-    expect(view.getByRole('rowheader', { name: '1', exact: true })).toBeTruthy();
-    expect(view.getByRole('rowheader', { name: '"1"', exact: true })).toBeTruthy();
+    expect(view.getByRole('rowheader', { name: '1' })).toBeTruthy();
+    expect(view.getByRole('rowheader', { name: '"1"' })).toBeTruthy();
     expect(view.container.querySelector('tbody tr')?.textContent).toContain('0');
     expect(view.container.querySelector('tbody')?.textContent).toContain('—');
   });
@@ -333,7 +334,7 @@ describe.each([['SPA', PivotTable], ['Lite', LitePivotTable]] as const)('%s pivo
     expect(total()).toBe('4');
     await view.rerender({ data: [{ r: 'C', c: 'Z', v: 20 }] });
     expect(total()).toBe('20');
-    expect(view.queryByRole('rowheader', { name: 'A', exact: true })).toBeNull();
+    expect(view.queryByRole('rowheader', { name: 'A' })).toBeNull();
   });
 
   it('renders empty, loading and error states instead of stale tables', async () => {
@@ -353,7 +354,7 @@ describe.each([['SPA', PivotTable], ['Lite', LitePivotTable]] as const)('%s pivo
     const view = render(Component, { ...fields, data: [{ r: 'A', c: 'X', v: '5' }] });
     expect(view.getByRole('alert').textContent).toContain('invalid numbers');
     expect(view.queryByRole('table')).toBeNull();
-    await view.rerender({ data: Array.from({ length: 10_001 }, () => data[0]!) });
+    await view.rerender({ data: Array.from({ length: 10_001 }, () =>requireValue( data[0])) });
     expect(view.getByRole('alert').textContent).toContain('exceed');
   });
 
@@ -366,8 +367,7 @@ describe.each([['SPA', PivotTable], ['Lite', LitePivotTable]] as const)('%s pivo
   });
 
   it('uses Chinese labels and messages when requested', () => {
-    setLocale('zh-CN');
-    const view = render(Component, { ...fields, data });
+    const view = render(Component, { ...fields, data }, 'zh-CN');
     expect(view.container.textContent).toContain('透视分析');
     expect(view.container.textContent).toContain('求和');
     expect(view.getByRole('rowheader', { name: '总计' })).toBeTruthy();
@@ -478,6 +478,7 @@ it.each(['tenant', 'auth'] as const)('SPA isolates cached results when %s change
   const authProvider: AuthProvider = {
     login: async () => ({ success: true }), logout: async () => ({ success: true }),
     check: async () => ({ authenticated: true }),
+    getIdentity: async () => ({ id: 'test-user', name: 'Test User' }),
   };
   const values = new Map<string, unknown>();
   const cache = {
@@ -510,6 +511,7 @@ it('SPA hides results and rejects a late aggregate during and after logout', asy
     client, authProvider: {
       login: async () => ({ success: true }), logout: logoutCall,
       check: async () => ({ authenticated: true }),
+      getIdentity: async () => ({ id: 'test-user', name: 'Test User' }),
     },
     settings: { ...fields, resource: 'orders', scopeKey: 'fixed', provider: { aggregate }, cache },
   });
@@ -578,9 +580,9 @@ it('SPA exposes scoped typed drill-down values without leaking mutable inputs', 
     ],
   }));
   const received = onDrillDown.mock.calls[0]?.[0];
-  if (!received) throw new Error('Missing drill-down payload');
-  received.filters[0]!.value = 'mutated';
-  expect(filters[0]!.value).toBe('paid');
+  if (!received) throw new Error('Missing drill-down payload');requireValue(
+  received.filters[0]).value = 'mutated';
+  expect(requireValue(filters[0]).value).toBe('paid');
 });
 
 it('SPA sanitizes permission transport errors without dispatching aggregation', async () => {

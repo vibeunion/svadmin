@@ -31,6 +31,7 @@ const baseLocales: Record<string, Record<string, string>> = {
     'common.refresh': '刷新',
     'common.importData': '导入数据',
     'common.upload': '上传',
+    'common.processing': '处理中...',
     'common.returnHome': '返回首页',
     // Common
     'common.add': '添加',
@@ -263,6 +264,7 @@ const baseLocales: Record<string, Record<string, string>> = {
     'common.reset': '重置',
     'common.welcome': '欢迎使用 {title}',
     'common.dashboardHint': '从侧边栏选择一个资源开始。',
+    'common.dashboard': '工作台',
     'common.redirecting': '正在跳转到登录页...',
     'common.expand': '展开',
     'common.collapse': '收起',
@@ -864,6 +866,7 @@ const baseLocales: Record<string, Record<string, string>> = {
     'common.refresh': 'Refresh',
     'common.importData': 'Import data',
     'common.upload': 'Upload',
+    'common.processing': 'Processing...',
     'common.returnHome': 'Return to Home',
     // Common
     'common.add': 'Add',
@@ -1115,6 +1118,7 @@ const baseLocales: Record<string, Record<string, string>> = {
     'common.reset': 'Reset',
     'common.welcome': 'Welcome to {title}',
     'common.dashboardHint': 'Select a resource from the sidebar to get started.',
+    'common.dashboard': 'Dashboard',
     'common.redirecting': 'Redirecting to login...',
     'common.expand': 'Expand',
     'common.collapse': 'Collapse',

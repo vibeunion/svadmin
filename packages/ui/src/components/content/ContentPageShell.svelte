@@ -1,7 +1,7 @@
 <script lang="ts">
   import { definedOptions } from '@svadmin/core/options';
   import type { Snippet } from 'svelte';
-  import { contentPage } from '../../styled-system/recipes/index.js';
+  import { contentPageRecipe as contentPage } from '../../recipes.js';
   import ContentPageHeader from './ContentPageHeader.svelte';
 
   interface Props {

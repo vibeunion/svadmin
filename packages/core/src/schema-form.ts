@@ -91,7 +91,9 @@ export function assertSchemaFormSchema(schema: SchemaFormSchema): void {
       let controller = schema;
       for (const part of condition.path) {
         if (controller.visibleWhen || !controller.properties || !Object.hasOwn(controller.properties, part)) fail();
-        controller = controller.properties![part]!;
+        const next = controller.properties?.[part];
+        if (!next) return fail();
+        controller = next;
       }
       if (controller.visibleWhen || controller.properties || controller.type === 'object' || controller.type === 'array') fail();
     }

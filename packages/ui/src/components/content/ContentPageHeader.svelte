@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import { contentHeader } from '../../styled-system/recipes/index.js';
+  import { contentHeaderRecipe as contentHeader } from '../../recipes.js';
 
   interface Props {
     title: string;

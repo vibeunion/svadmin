@@ -12,6 +12,7 @@ import { dirname, resolve } from 'node:path';
 import { svelte2tsx } from 'svelte2tsx';
 import ts from 'typescript';
 
+import { requireValue } from '../../../scripts/test-assertions';
 const clients: QueryClient[] = [];
 function fixture(overrides: Partial<TaskProvider> = {}) {
   const listeners: ((task: TaskRecord) => void)[] = [];
@@ -431,7 +432,7 @@ describe('task hooks with the actual query runtime', () => {
     const onError = vi.fn();
     const app = mount(provider, onTask, onError, { authProvider: authProvider(() => loginResult) });
     await waitFor(() => expect(listeners).toHaveLength(1));
-    const old = listeners[0]!;
+    const old =requireValue( listeners[0]);
     const login = app.read().login.mutate({});
     old({ id: 'task-1', title: 'Old event before cleanup' });
     old({ id: 'wrong-task' });
@@ -442,8 +443,8 @@ describe('task hooks with the actual query runtime', () => {
     finish();
     await login;
     await waitFor(() => expect(listeners).toHaveLength(2));
-    old({ id: 'task-1', title: 'Old event after login' });
-    listeners[1]!({ id: 'task-1', title: 'Fresh event' });
+    old({ id: 'task-1', title: 'Old event after login' });requireValue(
+    listeners[1])({ id: 'task-1', title: 'Fresh event' });
     expect(onTask).toHaveBeenCalledExactlyOnceWith({ id: 'task-1', title: 'Fresh event' });
   });
 
@@ -453,8 +454,8 @@ describe('task hooks with the actual query runtime', () => {
     const app = mount(provider, onTask, undefined, { authProvider: authProvider(async () => ({ success: true })) });
     await waitFor(() => expect(listeners).toHaveLength(1));
     await app.read().logout.mutate();
-    await waitFor(() => expect(stop).toHaveBeenCalledOnce());
-    listeners[0]!({ id: 'task-1' });
+    await waitFor(() => expect(stop).toHaveBeenCalledOnce());requireValue(
+    listeners[0])({ id: 'task-1' });
     expect(onTask).not.toHaveBeenCalled();
     expect(listeners).toHaveLength(1);
     await app.read().login.mutate({});
@@ -464,8 +465,8 @@ describe('task hooks with the actual query runtime', () => {
     await app.view.rerender({ authProvider: authProvider(async () => ({ success: true })) });
     await waitFor(() => expect(listeners).toHaveLength(4));
     for (const listener of listeners.slice(0, 3)) listener({ id: 'task-1', title: 'Old' });
-    expect(onTask).not.toHaveBeenCalled();
-    listeners[3]!({ id: 'task-1', title: 'Fresh' });
+    expect(onTask).not.toHaveBeenCalled();requireValue(
+    listeners[3])({ id: 'task-1', title: 'Fresh' });
     expect(onTask).toHaveBeenCalledExactlyOnceWith({ id: 'task-1', title: 'Fresh' });
     expect(stop).toHaveBeenCalledTimes(3);
   });

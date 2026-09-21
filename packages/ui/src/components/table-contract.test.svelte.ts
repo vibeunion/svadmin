@@ -14,6 +14,7 @@ import { checkedTableRows, copyTableRecord, tableExportRows, tableRowKey } from 
 import Host from './table-contract.test-host.svelte';
 import { activeSavedListViewStorageKey, savedListViewsStorageKey, columnOrderStorageKey } from './saved-list-views';
 
+import { requireValue } from '../../../../scripts/test-assertions';
 const record = Type.Object({ id: Type.Union([Type.String(), Type.Number()]), title: Type.String() });
 const posts = defineResource('posts', { record, update: Type.Object({ title: Type.Optional(Type.String()) }) });
 const other = defineResource('other', { record });
@@ -758,7 +759,7 @@ describe('contract-bound AutoTable', () => {
     await fireEvent.click(app.view.getByRole('button', { name: /^(Save|保存)$/ }));
     await waitFor(() => expect(save).toHaveBeenCalledTimes(1));
     const calls = save.mock.calls as unknown as [unknown, { id: string }][];
-    const id = calls[0]![1].id;
+    const id =requireValue( calls[0])[1].id;
     if (outcome === 'stale') await app.view.rerender({ tenant: 'second' });
     pending.resolve({ ok: false, code: 'VERSION_CONFLICT', version: 2,
       current: { id, name: 'New team', state, version: 2, source: 'team' } });

@@ -2,8 +2,6 @@ import { parseQueryKey } from '@svadmin/core';
 import { createPageScriptChannel } from 'devframe/in-page-channel';
 import { DEV } from 'esm-env';
 import type {
-  DevtoolsCacheDiagnostics,
-  DevtoolsProviderDiagnostic,
   DevtoolsQueryDiagnostic,
   SvadminDevtoolsSnapshot,
 } from '@svadmin/devtools-contract';

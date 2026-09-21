@@ -53,6 +53,7 @@ import { definedOptions } from '@svadmin/core/options';
   const i18n = useTranslation();
   const isZh = $derived(i18n.locale === 'zh-CN');
   let query = $state('');
+  let principleFilter = $state('');
   type ViewState = 'loading' | 'empty' | 'error' | 'forbidden';
   let viewState = $state<ViewState>('empty');
   let compact = $state(false);
@@ -61,11 +62,11 @@ import { definedOptions } from '@svadmin/core/options';
   let demoLabels = $state<string[]>(['review']);
   let demoCompletion = $state(0.72);
   let demoRange = $state({ min: 20, max: 80 });
-  let demoColor = $state('#635bff');
-  let demoDate = $state('2026-09-20');
-  let demoDateRange = $state({ start: '2026-09-01', end: '2026-09-20' });
-  let demoTime = $state('09:30');
-  let demoDateTime = $state('2026-09-20T09:30');
+  let demoColor = $state('');
+  let demoDate = $state<string | null>('2026-09-20');
+  let demoDateRange = $state<{ start: string | null; end: string | null }>({ start: '2026-09-01', end: '2026-09-20' });
+  let demoTime = $state<string | null>('09:30');
+  let demoDateTime = $state<string | null>('2026-09-20T09:30');
   let demoRate = $state(4);
   let focusedDemoField = $state('');
   const demoFormErrors = $derived([
@@ -100,7 +101,7 @@ import { definedOptions } from '@svadmin/core/options';
         kind: 'metric',
         metrics: [
           { id: 'open', label: isZh ? '待处理' : 'Open', value: 12, tone: 'warning' },
-          { id: 'completed', label: isZh ? '已完成' : 'Completed', value: 48, tone: 'success', href: '#completed' },
+          { id: 'completed', label: isZh ? '已完成' : 'Completed', value: 48, tone: 'success', href: '#/todos?view=completed' },
         ],
       }],
     }),
@@ -189,7 +190,7 @@ import { definedOptions } from '@svadmin/core/options';
   });
 
   const visiblePrinciples = $derived(
-    principles.filter((principle) => `${principle.title} ${principle.summary} ${principle.rule}`.toLowerCase().includes(query.toLowerCase().trim())),
+    principles.filter((principle) => (!principleFilter || principle.id === principleFilter) && `${principle.title} ${principle.summary} ${principle.rule}`.toLowerCase().includes(query.toLowerCase().trim())),
   );
 
   const operationalMetrics = $derived([
@@ -202,6 +203,8 @@ import { definedOptions } from '@svadmin/core/options';
   function resetState() {
     viewState = 'empty';
     showWarning = false;
+    query = '';
+    principleFilter = '';
   }
 </script>
 
@@ -292,21 +295,14 @@ import { definedOptions } from '@svadmin/core/options';
       <SectionHeader title={isZh ? '七条原则' : 'Seven principles'} description={isZh ? '每一条都能落到组件 API、页面状态或验收证据。' : 'Each principle maps to a component API, page state, or acceptance evidence.'} />
       <PageToolbar>
         {#snippet leading()}
-          <FilterToolbar bind:query placeholder={isZh ? '搜索原则' : 'Search principles'} clearLabel={isZh ? '清除搜索' : 'Clear search'} advancedLabel={isZh ? '高级筛选' : 'Advanced filters'} activeFilterCount={1}>
+          <FilterToolbar bind:query placeholder={isZh ? '搜索原则' : 'Search principles'} clearLabel={isZh ? '清除搜索' : 'Clear search'} advancedLabel={isZh ? '高级筛选' : 'Advanced filters'} activeFilterCount={Number(Boolean(principleFilter))}>
             {#snippet advanced()}
               <div class="grid gap-3 sm:grid-cols-2" data-filter-advanced-content>
                 <label class="grid gap-1 text-xs font-medium text-muted-foreground">
-                  {isZh ? '状态' : 'State'}
-                  <select class="h-8 rounded-md border border-input bg-background px-2 text-xs text-foreground" aria-label={isZh ? '状态' : 'State'}>
-                    <option>{isZh ? '全部状态' : 'All states'}</option>
-                    <option>{isZh ? '已覆盖' : 'Covered'}</option>
-                  </select>
-                </label>
-                <label class="grid gap-1 text-xs font-medium text-muted-foreground">
-                  {isZh ? '负责人' : 'Owner'}
-                  <select class="h-8 rounded-md border border-input bg-background px-2 text-xs text-foreground" aria-label={isZh ? '负责人' : 'Owner'}>
-                    <option>{isZh ? '全部负责人' : 'All owners'}</option>
-                    <option>Design system</option>
+                  {isZh ? '原则' : 'Principle'}
+                  <select bind:value={principleFilter} class="h-8 rounded-md border border-input bg-background px-2 text-xs text-foreground" aria-label={isZh ? '原则' : 'Principle'}>
+                    <option value="">{isZh ? '全部原则' : 'All principles'}</option>
+                    {#each principles as principle (principle.id)}<option value={principle.id}>{principle.title}</option>{/each}
                   </select>
                 </label>
               </div>
@@ -441,19 +437,24 @@ import { definedOptions } from '@svadmin/core/options';
           />
           <DatePicker
             ariaLabel={isZh ? '开始日期' : 'Start date'}
-            bind:value={demoDate}
+            value={demoDate}
+            onchange={(value) => { demoDate = value; }}
           />
           <DateRangePicker
-            ariaLabel={isZh ? '日期范围' : 'Date range'}
-            bind:value={demoDateRange}
+            startAriaLabel={isZh ? '范围开始日期' : 'Range start date'}
+            endAriaLabel={isZh ? '范围结束日期' : 'Range end date'}
+            value={demoDateRange}
+            onchange={(value) => { demoDateRange = value; }}
           />
           <TimePicker
             ariaLabel={isZh ? '开始时间' : 'Start time'}
-            bind:value={demoTime}
+            value={demoTime}
+            onchange={(value) => { demoTime = value; }}
           />
           <DateTimePicker
             ariaLabel={isZh ? '开始日期时间' : 'Start date and time'}
-            bind:value={demoDateTime}
+            value={demoDateTime}
+            onchange={(value) => { demoDateTime = value; }}
           />
           <Rate
             ariaLabel={isZh ? '评分' : 'Rating'}
@@ -492,7 +493,7 @@ import { definedOptions } from '@svadmin/core/options';
         </div>
       </section>
       <div class="rounded-lg border border-border bg-card p-4 shadow-sm">
-        <div class="flex items-center justify-between gap-3"><div><p class="text-sm font-semibold text-foreground">{isZh ? '验收清单' : 'Acceptance checklist'}</p><p class="mt-1 text-xs text-muted-foreground">{isZh ? '示例页本身也是规范的可运行证明。' : 'The example is a runnable proof of the standard.'}</p></div><StatusBadge status="success" label={isZh ? '通过' : 'Pass'} /></div>
+        <div class="flex items-center justify-between gap-3"><div><p class="text-sm font-semibold text-foreground">{isZh ? '验收清单示例' : 'Example acceptance checklist'}</p><p class="mt-1 text-xs text-muted-foreground">{isZh ? '以下是验收目标，不代表自动化或浏览器检查已通过。' : 'These are acceptance targets, not automated or browser test results.'}</p></div><StatusBadge status="neutral" label={isZh ? '待核验' : 'To verify'} /></div>
         <ul class="mt-4 space-y-3 text-sm text-muted-foreground">
           <li class="flex gap-2"><Check class="mt-0.5 size-4 shrink-0 text-success" />{isZh ? '一个主任务和一个主反馈面' : 'One primary job and one primary feedback surface'}</li>
           <li class="flex gap-2"><Check class="mt-0.5 size-4 shrink-0 text-success" />{isZh ? '桌面与移动端不重叠、不横向滚动' : 'No overlap or horizontal scroll on desktop and mobile'}</li>

@@ -17,7 +17,7 @@
     totalDays?: number;
     dayLabelPrefix?: string;
     loading?: boolean;
-    error?: string;
+    error?: string | undefined;
     retryHref?: string;
     ariaLabel?: string;
     class?: string;
@@ -41,7 +41,8 @@
   const validationError = $derived(validateGantt(loading || error ? [] : tasks, totalDays));
   const displayError = $derived(error || (validationError ? i18n.t(`gantt.${validationError}`) : ''));
   const safeRetryHref = $derived(retryHref?.startsWith('/') && !/^\/[\\/]/.test(retryHref)
-    && !/[\\\u0000-\u0020\u007f]/.test(retryHref) ? retryHref : undefined);
+    && !retryHref.includes('\\')
+    && ![...retryHref].some(char => char.charCodeAt(0) <= 32 || char.charCodeAt(0) === 127) ? retryHref : undefined);
 </script>
 
 <div class="sv-lite-gantt-container {className}" aria-busy={loading}>

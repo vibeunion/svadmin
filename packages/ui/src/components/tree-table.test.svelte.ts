@@ -1,12 +1,11 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, fireEvent, waitFor } from '@testing-library/svelte';
-import { setLocale } from '@svadmin/core/i18n';
+import { describe, expect, it, vi } from 'vitest';
+import { fireEvent, waitFor } from '@testing-library/svelte';
+import { renderWithI18n as render } from '../../test/fixtures/render-with-i18n';
 import { tick } from 'svelte';
 import { indexTreeTable, treeTableSelection } from '../tree-table-model.js';
 import TreeTable from './TreeTable.svelte';
 import TreeTableHost from './tree-table.test-host.svelte';
 
-beforeEach(() => setLocale('en'));
 
 describe('TreeTable Component', () => {
   const treeData = [

@@ -1,5 +1,20 @@
-/* Example-only layout primitives. Runtime styling belongs to Panda in @svadmin/ui. */
+/* Example-only layout primitives. Runtime styling belongs to the published CSS in @svadmin/ui. */
 @layer components {
+  /* 列表区域由标题和数据行管理间距，避免 Card 默认留白重复叠加。 */
+  [data-slot="card"][data-dashboard-panel] {
+    gap: 0;
+    padding-block: 0;
+  }
+
+  [data-dashboard-panel] > [data-slot="card-header"] {
+    min-height: 3.5rem;
+    padding: 1rem 1.25rem;
+  }
+
+  [data-dashboard-panel] > [data-slot="card-content"] > .divide-y > div {
+    padding-inline: 1.25rem;
+  }
+
   .example-section-stack {
     display: grid;
     gap: 0.75rem;

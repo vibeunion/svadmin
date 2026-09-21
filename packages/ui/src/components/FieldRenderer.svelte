@@ -59,8 +59,9 @@
   const boolVal = $derived((value as boolean) ?? false);
   const tagsVal = $derived((value as string[]) ?? []);
   const multiVal = $derived((value as (string | number)[]) ?? []);
+  type FieldOption = NonNullable<FieldDefinition['options']>[number];
   const selectToken = $derived.by(() => {
-    const index = field.options?.findIndex(option => option.value === value) ?? -1;
+    const index = field.options?.findIndex((option: FieldOption) => option.value === value) ?? -1;
     return index < 0 ? '' : `option:${index}`;
   });
   const imagesVal = $derived((value as string[]) ?? []);
@@ -72,22 +73,6 @@
     jsonEditText = typeof value === 'string' ? String(value) : JSON.stringify(value, null, 2);
   });
 
-  function handleTagKeydown(e: KeyboardEvent) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      const input = e.target as HTMLInputElement;
-      const tag = input.value.trim();
-      if (tag) {
-        onchange([...tagsVal, tag]);
-        input.value = '';
-      }
-    }
-  }
-
-  function removeTag(index: number) {
-    onchange(tagsVal.filter((_: string, i: number) => i !== index));
-  }
-
   function changeSelect(event: Event) {
     if (disabled || !(event.currentTarget instanceof HTMLSelectElement)) return;
     const token = event.currentTarget.value;
@@ -95,13 +80,13 @@
       onchange(null);
       return;
     }
-    const option = field.options?.find((_, index) => token === `option:${index}`);
+    const option = field.options?.find((_option: FieldOption, index: number) => token === `option:${index}`);
     if (option && !option.disabled) onchange(option.value);
   }
 
   // 禁用值保留回显，但不能从复选框或标签删除入口修改。
   function toggleMulti(optValue: string | number) {
-    if (disabled || field.options?.find(option => option.value === optValue)?.disabled) return;
+    if (disabled || field.options?.find((option: FieldOption) => option.value === optValue)?.disabled) return;
     if (multiVal.includes(optValue)) {
       onchange(multiVal.filter((v: string | number) => v !== optValue));
     } else {
@@ -433,7 +418,7 @@
           {@const label = field.options?.find((o: { label: string; value: string | number }) => o.value === v)?.label ?? String(v)}
           <Badge variant="secondary" class="svadmin-u-44ee8ba0a421">
             {label}
-            <button type="button" disabled={disabled || field.options?.find(option => option.value === v)?.disabled} onclick={() => toggleMulti(v)} class="svadmin-u-b45ce4b65d53 svadmin-u-36d4469299aa svadmin-u-51e95020d6f2 svadmin-u-8db899b4e072 svadmin-u-ceb69a6b0e5f" aria-label={i18n.t('common.clear')}>×</button>
+            <button type="button" disabled={disabled || field.options?.find((option: FieldOption) => option.value === v)?.disabled} onclick={() => toggleMulti(v)} class="svadmin-u-b45ce4b65d53 svadmin-u-36d4469299aa svadmin-u-51e95020d6f2 svadmin-u-8db899b4e072 svadmin-u-ceb69a6b0e5f" aria-label={i18n.t('common.clear')}>×</button>
           </Badge>
         {/each}
       </div>

@@ -2,6 +2,7 @@ import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
 import { beforeEach, describe, expect, it } from 'vitest';
 import AutoFormAccessibilityHarness from '../../test/fixtures/AutoFormAccessibilityHarness.svelte';
 
+import { requireValue } from '../../../../scripts/test-assertions';
 beforeEach(() => {
   Object.defineProperty(Element.prototype, 'animate', {
     configurable: true,
@@ -21,13 +22,13 @@ describe('AutoForm accessibility', () => {
       await fireEvent.click(form.getByRole('button', { name: 'Save' }));
       await waitFor(() => expect(input.getAttribute('aria-invalid')).toBe('true'));
     }
-    expect(inputs[0]!.getAttribute('aria-describedby')).not.toBe(inputs[1]!.getAttribute('aria-describedby'));
+    expect(requireValue(inputs[0]).getAttribute('aria-describedby')).not.toBe(requireValue(inputs[1]).getAttribute('aria-describedby'));
     for (let index = 0; index < forms.length; index += 1) {
-      const summary = forms[index]!.getByRole('region', { name: 'Please fix the following errors' });
+      const summary = requireValue(forms[index]).getByRole('region', { name: 'Please fix the following errors' });
       await fireEvent.click(within(summary).getByRole('button', { name: /^Name:/ }));
       expect(document.activeElement).toBe(inputs[index]);
-      const error = document.getElementById(inputs[index]!.getAttribute('aria-describedby')!);
-      expect(error?.closest('form')).toBe(inputs[index]!.closest('form'));
+      const error = document.getElementById(requireValue(requireValue(inputs[index]).getAttribute('aria-describedby')));
+      expect(error?.closest('form')).toBe(requireValue(inputs[index]).closest('form'));
     }
   });
 
@@ -49,10 +50,10 @@ describe('AutoForm accessibility', () => {
       expect(document.activeElement).toBe(nameInput);
     });
 
-    const nameErrorId = nameInput.getAttribute('aria-describedby')!;
+    const nameErrorId = requireValue(nameInput.getAttribute('aria-describedby'));
     expect(view.getByText('This field is required', { selector: `#${nameErrorId}` })).toBeTruthy();
     expect(view.getByRole('region', { name: 'Please fix the following errors' })).toBeTruthy();
-    await fireEvent.click(view.getByRole('region', { name: 'Please fix the following errors' }).querySelector('button')!);
+    await fireEvent.click(requireValue(view.getByRole('region', { name: 'Please fix the following errors' }).querySelector('button')));
     expect(document.activeElement).toBe(nameInput);
     expect(view.getByTestId('success-count').textContent).toBe('0');
   });

@@ -30,6 +30,7 @@
   }
 
   interface Props {
+    preferencesProvider?: import('./NotificationsSettings.svelte').NotificationPreferencesProvider;
     customSections?: SettingsSection[];
     profile?: Snippet;
     appearance?: Snippet;
@@ -44,6 +45,7 @@
   }
 
   let {
+    preferencesProvider,
     customSections,
     profile,
     appearance,
@@ -197,7 +199,7 @@
     {:else if activeKey === "integrations"}
       {#if integrations}{@render integrations()}{:else}<IntegrationsSettings />{/if}
     {:else if activeKey === "notifications"}
-      {#if notifications}{@render notifications()}{:else}<NotificationsSettings />{/if}
+      {#if notifications}{@render notifications()}{:else}<NotificationsSettings {...preferencesProvider ? { preferencesProvider } : {}} />{/if}
     {:else if activeKey === "api"}
       {#if api}{@render api()}{:else}<ApiSettings />{/if}
     {:else if activeKey === "audit"}

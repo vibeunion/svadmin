@@ -3,6 +3,7 @@ import { parseSpreadsheetWorkbook, serializeSpreadsheetWorkbook, snapshotSpreads
 import { parseSpreadsheetXlsx, serializeSpreadsheetXlsx } from './spreadsheet-xlsx';
 import ExcelJS from 'exceljs';
 
+import { requireValue } from '../../../scripts/test-assertions';
 const sheet = () => ({ id: 'one', name: 'One', rows: 2, cols: 2, cells: { A1: '=1+1' } });
 const workbook = () => ({ protocolVersion: 1 as const, sheets: [sheet()], activeSheetId: 'one' });
 const xlsxBuffer = (bytes: Uint8Array): ArrayBuffer => bytes.slice().buffer as ArrayBuffer;
@@ -56,7 +57,7 @@ describe('spreadsheet workbook protocol', () => {
     ] };
     const json = serializeSpreadsheetWorkbook(input);
     expect(json).toBeDefined();
-    expect(parseSpreadsheetWorkbook(json!)).toEqual(input);
+    expect(parseSpreadsheetWorkbook(requireValue(json))).toEqual(input);
   });
 
   it('preserves the active worksheet and declared blank grid extents in XLSX', async () => {
@@ -113,8 +114,8 @@ describe('spreadsheet workbook protocol', () => {
   });
   it('isolates the snapshot from caller mutations', () => {
     const input = workbook();
-    const output = snapshotSpreadsheetWorkbook(input);
-    input.sheets[0]!.cells.A1 = 'changed';
+    const output = snapshotSpreadsheetWorkbook(input);requireValue(
+    input.sheets[0]).cells.A1 = 'changed';
     expect(output?.sheets[0]?.cells['A1']).toBe('=1+1');
   });
   it.each([

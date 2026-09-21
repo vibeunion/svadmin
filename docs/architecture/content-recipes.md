@@ -7,14 +7,14 @@ SVAR or enterprise work. No release or deployment is performed by this change.
 
 ## Implemented boundary
 
-`ContentPageShell`, `ContentPageHeader` and `MetricBlock` now use named Panda slot
-recipes in `packages/ui/design/content-recipes.ts`. Theme-bound content spacing,
-width, typography and color tokens live in `content-tokens.ts`.
+`ContentPageShell`, `ContentPageHeader` and `MetricBlock` now use named Tailwind
+slot recipes in `packages/ui/src/recipes.ts`. Theme-bound content spacing, width,
+typography and color tokens come from shared semantic CSS variables.
 
 The three components retain their public imports, props, snippets and DOM structure.
 Width is `narrow | default | wide`; metric trend meaning is
 `positive | negative | warning | neutral`. Every variant is generated explicitly.
-Consumers import ordinary `@svadmin/ui/app.css`; neither Panda nor Tailwind is needed
+Consumers import ordinary `@svadmin/ui/app.css`; no consumer-side compiler is needed
 in the host app. Helpers are internal, not new public package exports. No AI style
 or executable-code inputs, Surface permissions or business-write authority change.
 
@@ -67,7 +67,7 @@ longer destructured. No client hydration is introduced to Lite.
 bun install --frozen-lockfile
 bun run build:packages
 bun run --cwd packages/ui test:css
-node --test packages/ui/scripts/content-recipes.test.mjs packages/ui/scripts/content-trend-parity.test.mjs
+node --test packages/ui/scripts/tailwind-recipes.test.mjs packages/ui/scripts/content-trend-parity.test.mjs
 bunx playwright install --with-deps chromium
 node packages/ui/scripts/verify-content-recipes.mjs
 ```

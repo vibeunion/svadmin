@@ -1,7 +1,30 @@
 @import "./styles/compatibility.prelude.css";
+@import "./styles/tailwind.generated.css";
 @import "./page-chrome.css";
 
-/* Panda semantic compatibility aliases for host overrides and nested themes. */
+/* 保留状态对比度和 clean-flat 卡片表现，颜色始终来自宿主 token。 */
+.svadmin-product-status[data-slot="badge"] {
+  background: var(--muted);
+  color: var(--foreground);
+  border-color: var(--svadmin-status-color, var(--muted-foreground));
+  white-space: nowrap;
+}
+@supports (color: color-mix(in oklab, black, white)) {
+  .svadmin-product-status[data-slot="badge"] {
+    background: color-mix(in oklab, var(--svadmin-status-color) 10%, var(--card));
+    border-color: color-mix(in oklab, var(--svadmin-status-color) 25%, var(--card));
+    color: color-mix(in oklab, var(--svadmin-status-color) 35%, var(--foreground));
+  }
+}
+.layout-clean-flat [data-svadmin-content-page] .svadmin-metric-block {
+  border-color: var(--svadmin-border);
+  background: var(--svadmin-surface);
+  box-shadow: var(--svadmin-surface-shadow);
+}
+.svadmin-devtools--collapsed-width { width: auto; }
+.svadmin-devtools--collapsed-min-width { min-width: 200px; }
+
+/* Semantic aliases for host overrides and nested themes. */
 :root,
 .svadmin-theme {
   --color-background: var(--background);
@@ -63,9 +86,9 @@
 
   :root {
     --radius: 0.5rem;
-    --background: oklch(0.965 0.006 264);
+    --background: oklch(0.985 0.001 264);
     --foreground: oklch(0.205 0.012 264);
-    --card: oklch(0.995 0.001 264);
+    --card: oklch(1 0 0);
     --card-foreground: oklch(0.205 0.012 264);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.205 0.012 264);
@@ -79,7 +102,7 @@
     --accent-foreground: oklch(0.34 0.105 278);
     --destructive: oklch(0.58 0.22 27);
     --destructive-foreground: oklch(0.99 0 0);
-    --border: oklch(0.875 0.008 264);
+    --border: oklch(0.925 0.003 264);
     --input: oklch(0.84 0.01 264);
     --ring: oklch(0.558 0.22 278);
     --chart-1: oklch(0.558 0.22 278);
@@ -93,17 +116,17 @@
     --warning-foreground: oklch(0.25 0.04 60);
     --info: oklch(0.58 0.14 244);
     --info-foreground: oklch(0.99 0 0);
-    --sidebar: oklch(0.985 0.003 264);
+    --sidebar: oklch(1 0 0);
     --sidebar-foreground: oklch(0.265 0.014 264);
     --sidebar-primary: oklch(0.558 0.22 278);
     --sidebar-primary-foreground: oklch(0.99 0 0);
     --sidebar-accent: oklch(0.962 0.012 278);
     --sidebar-accent-foreground: oklch(0.34 0.105 278);
-    --sidebar-border: oklch(0.86 0.008 264);
+    --sidebar-border: var(--border);
     --sidebar-ring: oklch(0.558 0.22 278);
-    --svadmin-shadow-control: 0 1px 2px rgb(15 23 42 / 0.09), 0 0 0 1px rgb(15 23 42 / 0.045);
-    --svadmin-shadow-surface: 0 1px 2px rgb(15 23 42 / 0.08), 0 10px 24px rgb(15 23 42 / 0.07);
-    --svadmin-shadow-surface-hover: 0 3px 8px rgb(15 23 42 / 0.1), 0 16px 32px rgb(15 23 42 / 0.08);
+    --svadmin-shadow-control: 0 1px 2px rgb(15 23 42 / 0.04);
+    --svadmin-shadow-surface: 0 1px 2px rgb(15 23 42 / 0.035);
+    --svadmin-shadow-surface-hover: 0 2px 5px rgb(15 23 42 / 0.06);
     --svadmin-shadow-overlay: 0 20px 52px rgb(15 23 42 / 0.18), 0 6px 16px rgb(15 23 42 / 0.1);
   }
 
@@ -488,8 +511,9 @@ h6,
 
 :is([data-slot="button"], .svadmin-button):is([data-variant="destructive"], .svadmin-button--destructive),
 :is([data-svadmin-button], .svadmin-button):is([data-variant="destructive"], .svadmin-button--destructive) {
+  background: var(--muted);
   background: color-mix(in oklch, var(--destructive) 10%, transparent);
-  color: var(--destructive);
+  color: var(--foreground);
 }
 
 :is([data-slot="button"], .svadmin-button):is([data-variant="destructive"], .svadmin-button--destructive):hover,
@@ -632,24 +656,32 @@ h6,
 }
 :is([data-slot="badge"], .svadmin-badge).svadmin-badge:is([data-variant="destructive"], .svadmin-badge--destructive),
 :is([data-slot="badge"], .svadmin-badge).svadmin-badge:is([data-variant="subtle-destructive"], .svadmin-badge--subtle-destructive) {
+  border-color: var(--destructive);
   border-color: color-mix(in oklch, var(--destructive) 20%, transparent);
+  background: var(--muted);
   background: color-mix(in oklch, var(--destructive) 10%, transparent);
-  color: var(--destructive);
+  color: var(--foreground);
 }
 :is([data-slot="badge"], .svadmin-badge).svadmin-badge:is([data-variant="subtle"], .svadmin-badge--subtle) {
+  border-color: var(--primary);
   border-color: color-mix(in oklch, var(--primary) 20%, transparent);
+  background: var(--muted);
   background: color-mix(in oklch, var(--primary) 10%, transparent);
-  color: var(--primary);
+  color: var(--foreground);
 }
 :is([data-slot="badge"], .svadmin-badge).svadmin-badge:is([data-variant="subtle-success"], .svadmin-badge--subtle-success) {
+  border-color: var(--success);
   border-color: color-mix(in oklch, var(--success) 20%, transparent);
+  background: var(--muted);
   background: color-mix(in oklch, var(--success) 10%, transparent);
-  color: var(--success);
+  color: var(--foreground);
 }
 :is([data-slot="badge"], .svadmin-badge).svadmin-badge:is([data-variant="subtle-warning"], .svadmin-badge--subtle-warning) {
+  border-color: var(--warning);
   border-color: color-mix(in oklch, var(--warning) 20%, transparent);
+  background: var(--muted);
   background: color-mix(in oklch, var(--warning) 10%, transparent);
-  color: var(--warning);
+  color: var(--foreground);
 }
 :is([data-slot="badge"], .svadmin-badge).svadmin-badge:is([data-variant="subtle-pill"], .svadmin-badge--subtle-pill) {
   border-color: color-mix(in oklch, var(--border) 80%, transparent);
@@ -788,6 +820,16 @@ main {
   min-width: 0;
 }
 
+@media (max-width: 767px) {
+  .svadmin-sidebar-content-expanded,
+  .svadmin-sidebar-content-collapsed,
+  .sidebar-content-expanded,
+  .sidebar-content-collapsed {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
 @media (min-width: 768px) {
   .svadmin-sidebar-content-expanded {
     margin-left: 252px;
@@ -807,17 +849,17 @@ main {
   right: 0;
 }
 
-[dir="rtl"] .sidebar-content-expanded {
-  margin-left: 0;
-  margin-right: 252px;
-}
-
-[dir="rtl"] .sidebar-content-collapsed {
-  margin-left: 0;
-  margin-right: 70px;
-}
-
 @media (min-width: 768px) {
+  [dir="rtl"] .sidebar-content-expanded {
+    margin-left: 0;
+    margin-right: 252px;
+  }
+
+  [dir="rtl"] .sidebar-content-collapsed {
+    margin-left: 0;
+    margin-right: 70px;
+  }
+
   [dir="rtl"] .svadmin-sidebar-content-expanded {
     margin-left: 0;
     margin-right: 252px;
@@ -2458,13 +2500,13 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
 /* Keep this public class for layoutPreset API compatibility. The preset only
  * adjusts density and composition; color, focus, and elevation stay semantic. */
 .layout-clean-flat {
-  --radius: 0.625rem;
+  --radius: 0.5rem;
   --svadmin-content-width: 74rem;
   --svadmin-surface: var(--card);
   --svadmin-surface-muted: color-mix(in oklch, var(--muted) 72%, var(--card));
   --svadmin-surface-hover: color-mix(in oklch, var(--primary) 4%, var(--card));
   --svadmin-border: var(--border);
-  --svadmin-border-strong: color-mix(in oklch, var(--border) 74%, var(--foreground));
+  --svadmin-border-strong: color-mix(in oklch, var(--border) 90%, var(--foreground));
   --svadmin-text: var(--foreground);
   --svadmin-text-muted: var(--muted-foreground);
   --svadmin-focus-ring: var(--ring);
@@ -2493,14 +2535,12 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
   border-color: var(--sidebar-border);
   background: var(--sidebar);
   color: var(--sidebar-foreground);
-  box-shadow:
-    inset -1px 0 0 var(--sidebar-border),
-    8px 0 24px color-mix(in oklch, var(--foreground) 5%, transparent);
+  box-shadow: none;
 }
 
 .layout-clean-flat .sidebar-menu-item {
   border-radius: var(--radius-md);
-  color: var(--svadmin-text-muted);
+  color: color-mix(in oklch, var(--sidebar-foreground) 80%, var(--sidebar));
   box-shadow: none;
   transition:
     background-color 140ms ease,
@@ -2517,7 +2557,7 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
   background: var(--sidebar-accent);
   color: var(--sidebar-primary);
   font-weight: 600;
-  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--sidebar-primary) 10%, transparent);
+  box-shadow: none;
 }
 
 .layout-clean-flat .sidebar-menu-item-active::before {
@@ -2527,7 +2567,7 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
   width: 3px;
   border-radius: 0 999px 999px 0;
   background: var(--sidebar-primary);
-  content: "";
+  content: none;
 }
 
 .layout-clean-flat .sidebar-menu-item-active svg {
@@ -2535,7 +2575,6 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
   opacity: 1;
 }
 
-.layout-clean-flat [data-svadmin-content-page] .bg-card,
 .layout-clean-flat [data-slot="card"] {
   min-width: 0;
   border-color: var(--svadmin-border);
@@ -2552,6 +2591,10 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
 .layout-clean-flat :is([data-slot="button"], .svadmin-button) {
   border-radius: var(--radius-md);
   box-shadow: var(--svadmin-control-shadow);
+}
+
+.layout-clean-flat :is([data-slot="button"], .svadmin-button):is([data-variant="ghost"], [data-variant="link"], .svadmin-button--ghost, .svadmin-button--link) {
+  box-shadow: none;
 }
 
 .layout-clean-flat :is([data-slot="button"], .svadmin-button):is([data-variant="default"], .svadmin-button--default) {
@@ -2795,11 +2838,16 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
   padding-block: 0.25rem 2rem;
 }
 
-.layout-clean-flat header {
+.layout-clean-flat [data-svadmin-topbar] {
   border-bottom: 1px solid color-mix(in oklch, var(--border) 82%, transparent);
   background: color-mix(in oklch, var(--card) 86%, transparent);
   box-shadow: 0 1px 0 color-mix(in oklch, var(--card) 70%, transparent);
-  backdrop-filter: blur(14px);
+}
+
+.layout-clean-flat [data-svadmin-topbar] .svadmin-header-search {
+  color: var(--muted-foreground);
+  background: var(--card);
+  box-shadow: none;
 }
 
 .layout-clean-flat [data-svadmin-main] > div:first-child {
@@ -2891,7 +2939,7 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
 
 @media (max-width: 767px) {
   .layout-clean-flat [data-svadmin-main] h1 {
-    font-size: 1.625rem;
+    font-size: 1.25rem;
   }
 
   .layout-clean-flat [data-svadmin-list-actions] :is([data-slot="button"], .svadmin-button),
@@ -2909,11 +2957,6 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
     width: 100%;
   }
 
-.layout-clean-flat [data-svadmin-content-page] [data-slot="card-content"],
-.layout-clean-flat [data-svadmin-content-page] [data-slot="card-header"] {
-    padding-right: 1rem;
-    padding-left: 1rem;
-  }
 }
 
 /* Business components use semantic hooks so consumers do not need utility CSS. */
@@ -3184,7 +3227,7 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
 .svadmin-stats-card__trend-label { margin-left: 0.125rem; color: var(--muted-foreground); }
 .svadmin-stats-card__footer { margin-top: 0.5rem; }
 
-/* Auth form compatibility for the Panda CSS migration. */
+/* Auth form compatibility for existing consumers. */
 .layout-clean-flat [data-svadmin-auth-page] > main > div {
   display: flex;
   width: min(100%, 28.75rem);

@@ -15,7 +15,7 @@
 代码合并不更新 Figma 已同步状态。
 
 保留主线任务/认证查询、上传取消与重入、异步树/筛选和工作区回归。
-Core 的源码接线测试不导入 `@pandacss/dev`；WorkspaceLayout 的 grid、
+Core 的源码接线测试不导入样式编译器；WorkspaceLayout 的 grid、
 顶部对齐、默认单栏、桌面双栏与次序断言在真正的 UI recipe/CSS 套件验证。
 合入新状态颜色测试而不删掉已有断言，同时保留并行修复新增的完整 columns
 对象、默认顶部对齐发布 CSS 与 $derived 接线断言。

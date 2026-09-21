@@ -135,7 +135,11 @@ function decodeFields(schema: SchemaFormSchema, form: FormData, validate: boolea
     const path = node.visibleWhen?.path;
     if (path && !controllerValues.has(JSON.stringify(path))) {
       let definition = schema;
-      for (const key of path) definition = definition.properties![key]!;
+      for (const key of path) {
+        const next = definition.properties?.[key];
+        if (!next) return fail();
+        definition = next;
+      }
       const decoded = visit(definition, [...path], path.length);
       controllerValues.set(JSON.stringify(path), decoded);
       let target = controllers;
@@ -181,7 +185,9 @@ export function decodeSchemaFormSubmission(
     } else {
       if (!node.properties || !Object.hasOwn(node.properties, segment) ||
           current === null || typeof current !== 'object' || !Object.hasOwn(current, segment)) return fail();
-      node = node.properties[segment]!;
+      const next = node.properties[segment];
+      if (!next) return fail();
+      node = next;
       current = (current as Record<string, unknown>)[segment];
     }
     if (!isSchemaFormNodeVisible(node, data)) return fail();

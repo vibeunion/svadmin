@@ -7,6 +7,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { requireValue } from '../../../../scripts/test-assertions';
 afterEach(cleanup);
 
 describe('SegmentedControl', () => {
@@ -70,7 +71,7 @@ describe('SegmentedControl', () => {
     const radios = view.getAllByRole('radio');
     expect(radios[0]?.getAttribute('aria-checked')).toBe('true');
     expect((radios[2] as HTMLButtonElement).disabled).toBe(true);
-    await fireEvent.keyDown(radios[0]!, { key: 'ArrowRight' });
+    await fireEvent.keyDown(requireValue(radios[0]), { key: 'ArrowRight' });
     expect(onchange).toHaveBeenLastCalledWith('board');
     expect(document.activeElement).toBe(radios[1]);
     expect(radios[1]?.getAttribute('aria-checked')).toBe('true');
@@ -80,12 +81,12 @@ describe('SegmentedControl', () => {
     const onchange = vi.fn();
     const view = render(SegmentedControl, { options, ariaLabel: 'View mode', onchange, value: 'board' });
     const radios = view.getAllByRole('radio');
-    await fireEvent.keyDown(radios[1]!, { key: 'End' });
+    await fireEvent.keyDown(requireValue(radios[1]), { key: 'End' });
     expect(document.activeElement).toBe(radios[1]);
-    await fireEvent.keyDown(radios[1]!, { key: 'ArrowRight' });
+    await fireEvent.keyDown(requireValue(radios[1]), { key: 'ArrowRight' });
     expect(onchange).toHaveBeenLastCalledWith('table');
     expect(document.activeElement).toBe(radios[0]);
-    await fireEvent.click(radios[2]!);
+    await fireEvent.click(requireValue(radios[2]));
     expect(onchange).toHaveBeenLastCalledWith('table');
   });
 
@@ -93,9 +94,9 @@ describe('SegmentedControl', () => {
     render(SegmentedControl, { options, ariaLabel: 'First', value: 'table' });
     const view = render(SegmentedControl, { options, ariaLabel: 'Second', value: 'table', dir: 'rtl' });
     const radios = within(view.getByRole('radiogroup', { name: 'Second' })).getAllByRole('radio');
-    await fireEvent.keyDown(radios[0]!, { key: 'ArrowLeft' });
+    await fireEvent.keyDown(requireValue(radios[0]), { key: 'ArrowLeft' });
     expect(document.activeElement).toBe(radios[1]);
-    await fireEvent.keyDown(radios[1]!, { key: 'Home' });
+    await fireEvent.keyDown(requireValue(radios[1]), { key: 'Home' });
     expect(document.activeElement).toBe(radios[0]);
   });
 
@@ -105,11 +106,11 @@ describe('SegmentedControl', () => {
     const radios = view.getAllByRole('radio');
     expect(radios[0]?.getAttribute('tabindex')).toBe('0');
     expect(radios[2]?.getAttribute('tabindex')).toBe('-1');
-    await fireEvent.click(radios[0]!);
-    await fireEvent.click(radios[0]!);
+    await fireEvent.click(requireValue(radios[0]));
+    await fireEvent.click(requireValue(radios[0]));
     expect(onchange).toHaveBeenCalledTimes(1);
     await view.rerender({ disabled: true });
-    await fireEvent.keyDown(radios[0]!, { key: 'ArrowRight' });
+    await fireEvent.keyDown(requireValue(radios[0]), { key: 'ArrowRight' });
     expect(onchange).toHaveBeenCalledTimes(1);
   });
 

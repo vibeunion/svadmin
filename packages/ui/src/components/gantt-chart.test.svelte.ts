@@ -1,13 +1,14 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render } from '@testing-library/svelte';
-import { setLocale } from '@svadmin/core/i18n';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent } from '@testing-library/svelte';
+import { renderWithI18n as render } from '../../test/fixtures/render-with-i18n';
 import { GANTT_LIMITS, validateGantt } from '@svadmin/core/gantt';
 import GanttChart, { type GanttTask } from './GanttChart.svelte';
 import LiteGanttChart from '../../../lite/src/components/LiteGanttChart.svelte';
+import type { Component as SvelteComponent, ComponentProps } from 'svelte';
 
+import { requireValue } from '../../../../scripts/test-assertions';
 const task: GanttTask = { id: 'build', title: 'Build', startDay: 1, durationDays: 3, progress: 0, status: 'planned' };
-beforeEach(() => setLocale('en'));
-afterEach(() => { cleanup(); setLocale('en'); });
+afterEach(() => { cleanup(); });
 
 describe('bounded Gantt model', () => {
   it.each([0, -1, 1.5, NaN, Infinity, 367, 1_000_000_000])('rejects invalid timeline %s', days => {
@@ -50,8 +51,8 @@ describe('bounded Gantt model', () => {
       ...task, id: String(index), startDay: 0, durationDays: 0, milestone: true,
       dependencies: index ? [String(index - 1)] : [],
     }));
-    expect(validateGantt(tasks, 1)).toBeUndefined();
-    tasks[0]!.dependencies = ['999'];
+    expect(validateGantt(tasks, 1)).toBeUndefined();requireValue(
+    tasks[0]).dependencies = ['999'];
     expect(validateGantt(tasks, 1)).toBe('dependency');
   });
 
@@ -74,7 +75,8 @@ describe('bounded Gantt model', () => {
   });
 });
 
-describe.each([['SPA', GanttChart], ['Lite', LiteGanttChart]] as const)('%s Gantt view', (_name, Component) => {
+describe.each([['SPA', GanttChart], ['Lite', LiteGanttChart]] as const)('%s Gantt view', (_name, View) => {
+  const Component: SvelteComponent<ComponentProps<typeof GanttChart> & ComponentProps<typeof LiteGanttChart>> = View;
   it('renders a zero-duration milestone and rejects invalid dependencies atomically', async () => {
     const view = render(Component, { tasks: [{ ...task, title: 'Release', durationDays: 0, milestone: true }] });
     expect(view.getByRole(_name === 'SPA' ? 'group' : 'rowheader', { name: /Release, Milestone, Day 2/ })).toBeTruthy();
@@ -109,8 +111,7 @@ describe.each([['SPA', GanttChart], ['Lite', LiteGanttChart]] as const)('%s Gant
   });
 
   it('updates task snapshots and internationalizes status labels', async () => {
-    setLocale('zh-CN');
-    const view = render(Component, { tasks: [task] });
+    const view = render(Component, { tasks: [task] }, 'zh-CN');
     expect(view.container.textContent).toContain('项目甘特图');
     expect(view.container.textContent).toContain('1 个任务 / 14 天');
     expect(view.container.textContent).toContain('已计划');

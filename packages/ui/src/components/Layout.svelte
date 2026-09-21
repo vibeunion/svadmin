@@ -244,7 +244,8 @@
       <main id={mainContentId} tabindex="-1" data-svadmin-main class="svadmin-u-36e579c0b41c svadmin-u-92bf82f493b1 svadmin-u-2859c861d7de svadmin-u-f0faeb26d656 svadmin-u-c9b99cd93450 svadmin-u-cc06a6575385 svadmin-u-daf5dc5fac2b svadmin-u-e86fadb84483">
         <div class="svadmin-u-0e12dc7de920 svadmin-u-6da6a3c3f741 svadmin-u-9e3dc30c26a3">
           {#key getPath()}
-            <div in:fly={{ x: 20, duration: 150 }} out:fade={{ duration: 80 }}>
+            <!-- 路由切换立即释放旧页面，避免退出期间继续读取已失效的路由派生状态。 -->
+            <div in:fly={{ x: 20, duration: 150 }}>
               {@render children()}
             </div>
           {/key}

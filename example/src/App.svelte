@@ -10,6 +10,7 @@
   import { createResources } from './resources';
   import { createExampleMenu, registerExampleMenuTranslations } from './exampleMenuCatalog';
   import { mockAuthProvider } from './providers/mockAuth';
+  import { exampleMemberDirectory, exampleNotificationPreferences } from './providers/accountDemo';
   import LazyDashboard from './components/LazyDashboard.svelte';
   import LazyResourcePage from './components/LazyResourcePage.svelte';
   import BusinessAutoForm from './components/BusinessAutoForm.svelte';
@@ -29,7 +30,7 @@
   const officeLabel = $derived(currentLocale === 'zh-CN' ? '智能辅助办公' : 'Health Office');
   const resources = $derived.by<ResourceDefinition[]>(() => [
     ...baseResources,
-    { name: 'health_office', label: officeLabel, icon: 'file', fields: [], showInMenu: false },
+    { name: 'health_office', label: officeLabel, icon: 'file', fields: [], showInMenu: false, canCreate: false, canEdit: false, canDelete: false, canShow: false },
   ]);
   const menu = $derived.by<MenuItem[]>(() => [
     { name: 'health_office', label: officeLabel, icon: 'file', href: '/health_office' },
@@ -60,6 +61,8 @@
   dataProvider={inMemoryDataProvider}
   {resources}
   authProvider={mockAuthProvider}
+  memberDirectoryProvider={exampleMemberDirectory}
+  notificationPreferencesProvider={exampleNotificationPreferences}
   {chatProvider}
   {resourcePages}
   {menu}

@@ -88,6 +88,27 @@ describe('预警状态与复核门禁', () => {
     assert.throws(() => run(data, { type: 'propose', alertId: A, revision: 1, result: 'handled', note, evidence: '' }), /版本冲突/);
     assert.deepEqual(data, before);
   });
+  test('独立复核可有依据地退回并由原负责人重新提交', () => {
+    const before = submitted('referral');
+    const data = run(before, { type: 'reject', alertId: A, revision: 3, note: '缺少接收方确认，请补充凭证' }, reviewer);
+    assert.equal(required(data.alerts[0]).state, 'processing');
+    assert.equal(required(data.alerts[0]).owner, worker.id);
+    assert.equal(required(data.alerts[0]).evidence, required(before.alerts[0]).evidence);
+    assert.ok(data.audit.some(item => item.action.includes('缺少接收方确认')));
+    assert.equal(required(data.changes.at(-1)).reason, '缺少接收方确认，请补充凭证');
+    assert.throws(() => run(before, { type: 'reject', alertId: A, revision: 3, note: '' }, reviewer), /依据或原因/);
+    assert.throws(() => run(data, { type: 'approve', alertId: A, revision: 3, note }, reviewer), /版本冲突/);
+    const resubmitted = run(data, { type: 'propose', alertId: A, revision: 4, result: 'referral', note, evidence: '已收到合成接收方确认' });
+    assert.equal(required(resubmitted.alerts[0]).state, 'review');
+  });
+  test('退回同样要求独立权限、正确状态和部门范围', () => {
+    assert.throws(() => run(submitted(), { type: 'reject', alertId: A, revision: 3, note }), /权限/);
+    assert.throws(() => run(fixture(), { type: 'reject', alertId: A, revision: 1, note }, reviewer), /尚未提交/);
+    assert.throws(() => run(fixture(), { type: 'reject', alertId: 'DEMO-A003', revision: 1, note }, reviewer), /授权范围/);
+    let data = run(fixture(), { type: 'ack', alertId: A, revision: 1 }, reviewer);
+    data = run(data, { type: 'propose', alertId: A, revision: 2, result: 'handled', note, evidence: '' }, reviewer);
+    assert.throws(() => run(data, { type: 'reject', alertId: A, revision: 3, note }, reviewer), /不能复核自己/);
+  });
 });
 
 describe('报告、原件及校对版本', () => {

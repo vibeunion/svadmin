@@ -107,4 +107,20 @@ describe('demo schemas and storage boundary', () => {
     })).rejects.toThrow();
     expect(await provider.getList({ resource: 'todos' })).toEqual(before);
   });
+  test('storage failure rejects the write and preserves both persisted and memory data', async () => {
+    Reflect.deleteProperty(globalThis, 'localStorage');
+    const memoryBefore = await provider.getList({ resource: 'todos' });
+    const original = JSON.stringify(fixture());
+    storage.setItem(storageKey, original);
+    Object.defineProperty(globalThis, 'localStorage', {
+      configurable: true,
+      value: { ...storage, setItem() { throw new Error('Quota exceeded'); } },
+    });
+    await expect(provider.update({
+      resource: 'todos', id: 0, variables: { title: 'Must not be committed' },
+    })).rejects.toThrow('Quota exceeded');
+    expect(storage.getItem(storageKey)).toBe(original);
+    Reflect.deleteProperty(globalThis, 'localStorage');
+    expect(await provider.getList({ resource: 'todos' })).toEqual(memoryBefore);
+  });
 });

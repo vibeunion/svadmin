@@ -15,7 +15,7 @@
     aggregator?: AggregationFn;
     formatValue?: (value: number) => string;
     loading?: boolean;
-    error?: string;
+    error?: string | undefined;
     retryHref?: string;
     exportHref?: string;
     drilldownHref?: (input: import('@svadmin/core/pivot').PivotDrilldown) => string | undefined;
@@ -56,13 +56,12 @@
     : buildPivot(loading || error ? [] : data, { rowField, columnField, valueField, aggregator }));
   const displayError = $derived(error || (pivot.error ? i18n.t(`pivot.${pivot.error}`) : ''));
   // 重试仅接受站内绝对路径，避免在服务端页面输出可执行协议。
-  const safeRetryHref = $derived(retryHref?.startsWith('/') && !/^\/[\\/]/.test(retryHref)
-    && !/[\\\u0000-\u0020\u007f]/.test(retryHref) ? retryHref : undefined);
-  const safeExportHref = $derived(exportHref?.startsWith('/') && !/^\/[\\/]/.test(exportHref)
-    && !/[\\\u0000-\u0020\u007f]/.test(exportHref) ? exportHref : undefined);
+  const safeRetryHref = $derived(safeHref(retryHref));
+  const safeExportHref = $derived(safeHref(exportHref));
   function safeHref(value: string | undefined): string | undefined {
     return value?.startsWith('/') && !/^\/[\\/]/.test(value)
-      && !/[\\\u0000-\u0020\u007f]/.test(value) ? value : undefined;
+      && !value.includes('\\')
+      && ![...value].some(char => char.charCodeAt(0) <= 32 || char.charCodeAt(0) === 127) ? value : undefined;
   }
   function cellHref(rowKey: string, columnKey: string): string | undefined {
     if (!drilldownHref || !pivot.cells.get(rowKey)?.has(columnKey)) return;

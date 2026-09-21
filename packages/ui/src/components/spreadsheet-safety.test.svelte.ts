@@ -1,7 +1,7 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, waitFor } from '@testing-library/svelte';
 import { parseCSV, parseSpreadsheetWorkbook, parseSpreadsheetClipboard, serializeSpreadsheetClipboard } from '@svadmin/core';
-import { setLocale } from '@svadmin/core/i18n';
+import { renderWithI18n as render } from '../../test/fixtures/render-with-i18n';
 import SpreadsheetView, { type SheetData, type SpreadsheetLimits } from './SpreadsheetView.svelte';
 import LiteSpreadsheetView from '../../../lite/src/components/LiteSpreadsheetView.svelte';
 import { readFileSync } from 'node:fs';
@@ -10,6 +10,7 @@ import { dirname, resolve } from 'node:path';
 import { svelte2tsx } from 'svelte2tsx';
 import ts from 'typescript';
 
+import { requireValue } from '../../../../scripts/test-assertions';
 const sheet = (cells: Record<string, string> = {}, rows = 2, cols = 3): SheetData =>
   ({ id: 's', name: 'Report', rows, cols, cells });
 function input(element: HTMLElement): HTMLInputElement {
@@ -17,7 +18,6 @@ function input(element: HTMLElement): HTMLInputElement {
   return element;
 }
 
-beforeEach(() => setLocale('en'));
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
@@ -846,7 +846,7 @@ describe('SpreadsheetView safety and calculation boundaries', () => {
     for (const format of ['tsv', 'csv'] as const) {
       const encoded = serializeSpreadsheetClipboard(values, format);
       expect(encoded).toBeDefined();
-      expect(parseSpreadsheetClipboard(encoded!, format)).toEqual([
+      expect(parseSpreadsheetClipboard(requireValue(encoded), format)).toEqual([
         ['a\tb', 'a\n"b"', '\' =HYPERLINK("x")', String(-1 / 3), "'+cmd"],
       ]);
     }
@@ -889,8 +889,8 @@ describe('SpreadsheetView safety and calculation boundaries', () => {
   });
 
   it('provides bounded undo and redo transactions with isolated callback snapshots', async () => {
-    const onchange = vi.fn((value: SheetData[]) => {
-      value[0]!.cells['A1'] = 'observer mutation';
+    const onchange = vi.fn((value: SheetData[]) => {requireValue(
+      value[0]).cells['A1'] = 'observer mutation';
     });
     const view = render(SpreadsheetView, { sheets: [sheet({ A1: '2', B1: '=A1+1' })], onchange });
     const formula = view.getByRole('textbox', { name: 'Cell value or formula' });

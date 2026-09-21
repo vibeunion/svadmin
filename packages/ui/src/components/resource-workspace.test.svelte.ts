@@ -1,12 +1,13 @@
-import { cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
+import { cleanup, fireEvent, waitFor } from '@testing-library/svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { QueryClient } from '@tanstack/svelte-query';
 import { Type } from '@sinclair/typebox';
 import type { ComponentProps } from 'svelte';
 import { defineResource, resetContext, type DataProvider, type ResourceDefinition } from '@svadmin/core';
-import { setLocale } from '@svadmin/core/i18n';
+import { renderWithI18n as render } from '../../test/fixtures/render-with-i18n';
 import Host from './resource-workspace.test-host.svelte';
 
+import { requireValue } from '../../../../scripts/test-assertions';
 const record = Type.Object({ id: Type.Number(), title: Type.String() });
 const resources: ResourceDefinition[] = ['posts', 'other'].map(name => ({
   name, label: name, contract: defineResource(name, { record }),
@@ -36,7 +37,6 @@ function mount(options: Partial<Pick<ComponentProps<typeof Host>, 'workspaceStyl
   return { view, source, onBatch, onSelection };
 }
 beforeEach(() => {
-  setLocale('en');
   Object.defineProperty(Element.prototype, 'animate', {
     configurable: true, value: () => ({ cancel: () => {}, finished: Promise.resolve() }),
   });
@@ -231,20 +231,20 @@ describe('ResourceOperationsPage real table composition', () => {
     expect(app.view.getAllByRole('checkbox', { name: /Select record/i }).every(
       input => input.getAttribute('aria-checked') === 'true' && !input.hasAttribute('disabled')
     )).toBe(true);
-    await fireEvent.click(app.view.getAllByRole('checkbox', { name: /Select record 1/i })[0]!);
+    await fireEvent.click(requireValue(app.view.getAllByRole('checkbox', { name: /Select record 1/i })[0]));
     await fireEvent.click(app.view.getByRole('button', { name: 'Process selection' }));
     expect(app.onSelection).toHaveBeenLastCalledWith(expect.objectContaining({
       scope: 'all', excludedIds: [1], total: 30,
     }));
-    expect(app.view.getAllByRole('checkbox', { name: /Select record 1/i })[0]!.getAttribute('aria-checked')).toBe('false');
+    expect(requireValue(app.view.getAllByRole('checkbox', { name: /Select record 1/i })[0]).getAttribute('aria-checked')).toBe('false');
     await app.view.rerender({ tableProps: { ...tableProps, pagination: { current: 2, pageSize: 10 } } });
     await app.view.findAllByText('Page 2 record');
     await fireEvent.click(app.view.getByRole('button', { name: 'Process selection' }));
     expect(app.onSelection).toHaveBeenLastCalledWith(expect.objectContaining({ scope: 'all', total: 30, excludedIds: [1] }));
     await app.view.rerender({ tableProps: { ...tableProps, pagination: { current: 1, pageSize: 10 } } });
     await app.view.findAllByText('Page 1 record');
-    expect(app.view.getAllByRole('checkbox', { name: /^Select record 1$/i })[0]!.getAttribute('aria-checked')).toBe('false');
-    await fireEvent.click(app.view.getAllByRole('checkbox', { name: /^Select record 1$/i })[0]!);
+    expect(requireValue(app.view.getAllByRole('checkbox', { name: /^Select record 1$/i })[0]).getAttribute('aria-checked')).toBe('false');
+    await fireEvent.click(requireValue(app.view.getAllByRole('checkbox', { name: /^Select record 1$/i })[0]));
     await fireEvent.click(app.view.getByRole('button', { name: 'Process selection' }));
     expect(app.onSelection).toHaveBeenLastCalledWith(expect.objectContaining({ scope: 'all', excludedIds: [] }));
     await fireEvent.click(app.view.getByRole('button', { name: /Clear selection/i }));

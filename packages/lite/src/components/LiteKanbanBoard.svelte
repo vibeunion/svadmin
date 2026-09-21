@@ -19,7 +19,7 @@
     cards?: KanbanCard[];
     formAction?: string;
     loading?: boolean;
-    error?: string;
+    error?: string | undefined;
     retryHref?: string;
     ariaLabel?: string;
     class?: string;
@@ -58,7 +58,8 @@
   const displayError = $derived(error || (validationError ? i18n.t(validationError) : ''));
   function localPath(value: string | undefined): string | undefined {
     return value && (value.startsWith('/') || value.startsWith('?'))
-      && !/^\/[\\/]/.test(value) && !/[\\\u0000-\u0020\u007f]/.test(value) ? value : undefined;
+      && !/^\/[\\/]/.test(value) && !value.includes('\\')
+      && ![...value].some(char => char.charCodeAt(0) <= 32 || char.charCodeAt(0) === 127) ? value : undefined;
   }
   const safeAction = $derived(localPath(formAction));
   const safeRetry = $derived(localPath(retryHref));

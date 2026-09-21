@@ -1,9 +1,10 @@
-import { cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
+import { cleanup, fireEvent, waitFor } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createEnterpriseRequestContext, resetContext, type ApprovalProvider, type ApprovalRecord, type DataProvider } from '@svadmin/core';
 import Host from './approval-center.test-host.svelte';
-import { resetI18n, setLocale } from '@svadmin/core/i18n';
+import { renderWithI18n as render } from '../../test/fixtures/render-with-i18n';
 
+import { requireValue } from '../../../../scripts/test-assertions';
 const record: ApprovalRecord = {
   id: 'request-1',
   version: 2,
@@ -49,7 +50,6 @@ function provider(overrides: Partial<ApprovalProvider> = {}): ApprovalProvider {
 afterEach(() => {
   cleanup();
   resetContext();
-  resetI18n();
 });
 
 describe('ApprovalCenter', () => {
@@ -60,7 +60,7 @@ describe('ApprovalCenter', () => {
       settings: { provider: source, requestContext },
     });
     await view.findByRole('button', { name: 'Approve' });
-    setLocale('zh-CN');
+    await view.wrapper.setLocale('zh-CN');
     await view.findByRole('heading', { name: '审批中心' });
     expect(view.getByRole('textbox', { name: '搜索审批' })).toBeTruthy();
     expect(view.getByRole('button', { name: '上一页' })).toBeTruthy();
@@ -134,7 +134,7 @@ describe('ApprovalCenter', () => {
     await fireEvent.click(view.getByRole('button', { name: 'Confirm' }));
 
     await waitFor(() => expect(transition).toHaveBeenCalledOnce());
-    const input = transition.mock.calls[0]![1];
+    const input =requireValue( transition.mock.calls[0])[1];
     expect(input).toMatchObject({
       id: 'request-1',
       expectedVersion: 2,

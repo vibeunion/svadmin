@@ -42,11 +42,13 @@
   function moveFocus(index: number, direction: number): void {
     if (disabled || enabledOptions.length === 0) return;
     const next = (index + direction + enabledOptions.length) % enabledOptions.length;
+    const nextOption = enabledOptions[next];
+    if (!nextOption) return;
     const target = root.querySelector<HTMLButtonElement>(
-      `[data-svadmin-segment-value="${CSS.escape(enabledOptions[next]!.value)}"]`,
+      `[data-svadmin-segment-value="${CSS.escape(nextOption.value)}"]`,
     );
     target?.focus();
-    select(enabledOptions[next]!);
+    select(nextOption);
   }
 
   function handleKeydown(event: KeyboardEvent, option: SegmentedControlOption<T>, index: number): void {

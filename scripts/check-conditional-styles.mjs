@@ -76,8 +76,8 @@ try {
     }
   }
   assert.equal(checks.length, 10);
-  mkdirSync('docs/pr-evidence/panda-styles', { recursive: true });
-  writeFileSync('docs/pr-evidence/panda-styles/conditional-styles.json', `${JSON.stringify({
+  mkdirSync('test-results/ui-styles', { recursive: true });
+  writeFileSync('test-results/ui-styles/conditional-styles.json', `${JSON.stringify({
     testedCommit: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
     cssSha256: createHash('sha256').update(css).digest('hex'),
     scope: 'Computed native CSS for class names statically checked against real Svelte directives; not full component behavior',

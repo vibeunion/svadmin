@@ -337,7 +337,10 @@ export function buildPivot(data: readonly Record<string, unknown>[], options: Pi
     const raw = operator === 'count' ? 1 : own(options.valueField);
     if (raw == null) continue;
     if (typeof raw !== 'number' || !Number.isFinite(raw)) return result('invalidNumber');
-    const targets = [cell, rowTotals.get(row.key)!, columnTotals.get(column.key)!, grand];
+    const rowTotal = rowTotals.get(row.key);
+    const columnTotal = columnTotals.get(column.key);
+    if (!rowTotal || !columnTotal) return result('invalidData');
+    const targets = [cell, rowTotal, columnTotal, grand];
     for (const target of targets) {
       if (!add(target, raw, operator)) return result('overflow');
     }

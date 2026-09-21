@@ -141,7 +141,11 @@
     if (data.length > HISTORY_TEXT_LIMIT) return [];
     const next = [...history, { data, activeSheetId }].slice(-HISTORY_LIMIT);
     let size = next.reduce((total, entry) => total + entry.data.length, 0);
-    while (size > HISTORY_TEXT_LIMIT) size -= next.shift()!.data.length;
+    while (size > HISTORY_TEXT_LIMIT) {
+      const oldest = next.shift();
+      if (!oldest) break;
+      size -= oldest.data.length;
+    }
     return next;
   }
 
@@ -793,7 +797,8 @@
     const rows = parseSpreadsheetClipboard(text, csv ? 'csv' : 'tsv');
     const bounds = rangeBounds();
     selectionError = true;
-    if (!rows || !bounds) return;
+    const firstPastedRow = rows?.[0];
+    if (!rows || !firstPastedRow || !bounds) return;
     const firstRow = bounds.firstRow;
     const firstCol = bounds.firstCol;
     const values = new Map<string, string>();
@@ -808,7 +813,7 @@
     if (!applyCellValues(values)) return;
     selectionError = false;
     selectedCell = `${getColName(firstCol)}${firstRow}`;
-    selectedRangeEnd = `${getColName(firstCol + rows[0]!.length - 1)}${firstRow + rows.length - 1}`;
+    selectedRangeEnd = `${getColName(firstCol + firstPastedRow.length - 1)}${firstRow + rows.length - 1}`;
   }
 
   function handleCopy(event: ClipboardEvent) {
@@ -924,16 +929,6 @@
         setTimeout(() => URL.revokeObjectURL(url), 10_000);
       }
     }
-    const csv = lines.join('\n');
-    if (onexport) { onexport(csv); return; }
-    if (typeof document === 'undefined') return;
-    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
-    try {
-      const anchor = document.createElement('a');
-      anchor.href = url;
-      anchor.download = `${sheet.name}_${Date.now()}.csv`;
-      anchor.click();
-    } finally { setTimeout(() => URL.revokeObjectURL(url), 0); }
   }
 
   function exportWorkbook() {
@@ -1042,7 +1037,9 @@
     if (!importReady || !pendingWorkbook) return;
     const workbook = pendingWorkbook.workbook;
     pendingWorkbook = undefined;
-    commitSheets(workbook.sheets, workbook.activeSheetId ?? workbook.sheets[0]!.id);
+    const firstSheet = workbook.sheets[0];
+    if (!firstSheet) return;
+    commitSheets(workbook.sheets, workbook.activeSheetId ?? firstSheet.id);
   }
 
   function addSheet() {

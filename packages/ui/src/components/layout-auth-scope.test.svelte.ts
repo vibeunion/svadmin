@@ -1,6 +1,7 @@
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { resetContext, type AuthProvider } from '@svadmin/core';
-import { tick } from 'svelte';
+import { flushSync, tick } from 'svelte';
+import { initRouter } from '../router-state.svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('./Sidebar.svelte', async () => ({
@@ -61,6 +62,25 @@ afterEach(() => {
 });
 
 describe('Layout auth scope', () => {
+  it('removes the previous route immediately instead of retaining an inert page during an outro', async () => {
+    initRouter();
+    const view = render(LayoutAuthScopeHost, {
+      authProvider: undefined,
+      tenant: { tenantId: 'tenant-layout-route-lifetime' },
+    });
+    await waitFor(() => expect(view.getByTestId('layout-auth-content')).not.toBeNull());
+    const previousContent = view.getByTestId('layout-auth-content');
+
+    flushSync(() => {
+      window.history.replaceState(null, '', '#/next-route');
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    });
+
+    expect(previousContent.isConnected).toBe(false);
+    expect(view.getAllByTestId('layout-auth-content')).toHaveLength(1);
+    view.unmount();
+  });
+
   it('only exposes Ask AI when an assistant snippet is injected', async () => {
     const withoutAssistant = render(LayoutAuthScopeHost, {
       authProvider: undefined,

@@ -9,7 +9,7 @@
 
   let { provider, resources, queryClient, mode = 'page', resource = 'posts', id = 1, open = true,
     tenant = 'first', permission, layout = 'list', onNavigate = () => {}, onClose = () => {},
-    extraSections,
+    extraSections, returnTo, onBack, onHistoryBack = () => {},
   }: {
     provider: DataProvider | Record<string, DataProvider>;
     resources: ResourceDefinition[];
@@ -24,6 +24,9 @@
     onNavigate?: RouterProvider['go'];
     onClose?: () => void;
     extraSections?: Snippet;
+    returnTo?: string;
+    onBack?: () => void;
+    onHistoryBack?: () => void;
   } = $props();
   provideAdminContext(definedReactiveOptions({
     get dataProvider() { return provider; },
@@ -31,7 +34,7 @@
     get tenant() { return { tenantId: tenant }; },
     get accessControlProvider() { return permission; },
     routerProvider: {
-      go: (options: Parameters<RouterProvider['go']>[0]) => onNavigate(options), back: () => {},
+      go: (options: Parameters<RouterProvider['go']>[0]) => onNavigate(options), back: () => onHistoryBack(),
       parse: () => ({ pathname: '/posts/show/999', params: { id: '999' } }),
     },
   }));
@@ -39,7 +42,7 @@
 
 <QueryClientProvider client={queryClient}>
   {#if mode === 'page' && id !== null}
-    <ShowPage resourceName={resource} {id} {layout}>
+    <ShowPage resourceName={resource} {id} {layout} {...definedOptions({ returnTo, onBack })}>
       <p data-testid="detail-child">Checked detail extension</p>
     </ShowPage>
   {:else if mode === 'drawer'}

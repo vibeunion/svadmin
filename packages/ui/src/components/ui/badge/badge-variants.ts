@@ -1,20 +1,8 @@
-import { uiBadge } from '../../../styled-system/recipes/index.js';
+import { badgeRecipe as uiBadge, type BadgeRecipeProps } from '../../../recipes.js';
 
-export type BadgeVariant =
-  | "default"
-  | "secondary"
-  | "destructive"
-  | "subtle"
-  | "subtle-success"
-  | "subtle-warning"
-  | "subtle-destructive"
-  | "subtle-pill"
-  | "outline"
-  | "ghost"
-  | "link";
+export type BadgeVariant = NonNullable<BadgeRecipeProps["variant"]>;
 
 export const badgeVariants = ({
-  variant = "default", class: className = "", className: extraClassName = "",
-}: { variant?: BadgeVariant | null; class?: string; className?: string } = {}): string =>
-  ["svadmin-badge", variant && `svadmin-badge--${variant}`,
-    uiBadge(variant ? { variant } : {}), className, extraClassName].filter(Boolean).join(" ");
+  variant, class: className = "", className: extraClassName = "",
+}: { variant?: BadgeVariant | null | undefined; class?: string; className?: string } = {}): string =>
+  uiBadge({ variant, class: [className, extraClassName].filter(Boolean).join(" ") }).root;

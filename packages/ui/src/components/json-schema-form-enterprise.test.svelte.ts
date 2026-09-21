@@ -10,6 +10,7 @@ import { svelte2tsx } from 'svelte2tsx';
 import ts from 'typescript';
 import { prepareSchemaFormValue, assertSchemaFormSchema } from '@svadmin/core/schema-form';
 
+import { requireValue } from '../../../../scripts/test-assertions';
 const schema = {
   properties: {
     role: { enum: [2, '2'], default: 2 },
@@ -28,6 +29,11 @@ const schema = {
   },
 } satisfies SchemaFormSchema;
 
+function optionValue(element: HTMLElement, index: number): string {
+  if (!(element instanceof HTMLSelectElement)) throw new Error('Expected enum select');
+  return requireValue(element.querySelectorAll('option')[index + 1]).value;
+}
+
 describe('JSON Schema forms enterprise value contract', () => {
   const conditional: SchemaFormSchema = {
     properties: {
@@ -44,33 +50,33 @@ describe('JSON Schema forms enterprise value contract', () => {
     const onsubmit = vi.fn();
     const view = render(JsonSchemaForm, { schema: conditional, value: { mode: 'advanced', details: { name: 'saved' } }, onsubmit });
     expect(view.getByLabelText(/name/)).toBeTruthy();
-    await fireEvent.change(view.getByRole('combobox'), { target: { value: '__json_enum_0' } });
+    await fireEvent.change(view.getByRole('combobox'), { target: { value: optionValue(view.getByRole('combobox'), 0) } });
     expect(view.queryByLabelText(/name/)).toBeNull();
-    await fireEvent.submit(view.container.querySelector('form')!);
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
     expect(onsubmit).toHaveBeenLastCalledWith({ mode: 'basic' });
-    await fireEvent.change(view.getByRole('combobox'), { target: { value: '__json_enum_1' } });
+    await fireEvent.change(view.getByRole('combobox'), { target: { value: optionValue(view.getByRole('combobox'), 1) } });
     expect((view.getByLabelText(/name/) as HTMLInputElement).value).toBe('saved');
-    await fireEvent.submit(view.container.querySelector('form')!);
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
     expect(onsubmit).toHaveBeenLastCalledWith({ mode: 'advanced', details: { name: 'saved' } });
   });
 
   it('blocks invalid visible fields, associates errors and focuses the first invalid control', async () => {
     const onsubmit = vi.fn();
     const view = render(JsonSchemaForm, { schema: conditional, value: { mode: 'advanced', details: { name: 'x' } }, onsubmit });
-    await fireEvent.submit(view.container.querySelector('form')!);
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
     expect(onsubmit).not.toHaveBeenCalled();
     const input = view.getByLabelText(/name/);
     expect(input.getAttribute('aria-invalid')).toBe('true');
     expect(document.getElementById(input.getAttribute('aria-describedby') ?? '')).not.toBeNull();
     expect(document.activeElement).toBe(input);
     await fireEvent.input(input, { target: { value: 'valid' } });
-    await fireEvent.submit(view.container.querySelector('form')!);
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
     expect(onsubmit).toHaveBeenCalledExactlyOnceWith({ mode: 'advanced', details: { name: 'valid' } });
   });
 
   it.each(['basic', 'advanced'])('decodes conditional native groups independent of controller order: %s', mode => {
     const view = render(LiteJsonSchemaForm, { schema: conditional, value: { mode, details: { name: 'valid' } } });
-    const data = new FormData(view.container.querySelector('form')!);
+    const data = new FormData(requireValue(view.container.querySelector('form')));
     expect(decodeSchemaFormData(conditional, data)).toEqual(mode === 'basic'
       ? { mode } : { mode, details: { name: 'valid' } });
     if (mode === 'basic') {
@@ -128,9 +134,9 @@ describe('JSON Schema forms enterprise value contract', () => {
     const spa = render(JsonSchemaForm, { schema: nullSchema, onsubmit });
     const lite = render(LiteJsonSchemaForm, { schema: nullSchema });
     expect((spa.container.querySelector('input') as HTMLInputElement).value).toBe('null');
-    await fireEvent.submit(spa.container.querySelector('form')!);
+    await fireEvent.submit(requireValue(spa.container.querySelector('form')));
     expect(onsubmit).toHaveBeenCalledExactlyOnceWith({ marker: null });
-    expect(decodeSchemaFormData(nullSchema, new FormData(lite.container.querySelector('form')!))).toEqual({ marker: null });
+    expect(decodeSchemaFormData(nullSchema, new FormData(requireValue(lite.container.querySelector('form'))))).toEqual({ marker: null });
   });
 
   it.each([null, undefined, [], { properties: { rows: { type: 'array', items: null } } }])(
@@ -186,10 +192,10 @@ describe('JSON Schema forms enterprise value contract', () => {
       onsubmit,
     });
     const role = view.getByRole('combobox');
-    expect((role as HTMLSelectElement).value).toContain('__json_enum_1');
+    expect((role as HTMLSelectElement).value).toBe(optionValue(role, 1));
     expect((view.getByLabelText('quota') as HTMLInputElement).value).toBe('');
-    await fireEvent.change(role, { target: { value: '__json_enum_0' } });
-    await fireEvent.submit(view.container.querySelector('form')!);
+    await fireEvent.change(role, { target: { value: optionValue(role, 0) } });
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
     expect(onsubmit).toHaveBeenCalledExactlyOnceWith({
       role: 2,
       quota: undefined,
@@ -201,14 +207,14 @@ describe('JSON Schema forms enterprise value contract', () => {
   it('adds and removes nested array objects without losing typed defaults', async () => {
     const value = { tags: [] as unknown[] };
     const onsubmit = vi.fn();
-    const view = render(JsonSchemaForm, { schema, value, onsubmit });
+    const view = render(JsonSchemaForm, { schema, value, onsubmit, locale: 'zh-CN' });
     await fireEvent.click(view.getByRole('button', { name: /添加项目/ }));
     expect((view.getByLabelText('name') as HTMLInputElement).value).toBe('new');
     expect((view.getByLabelText('rank') as HTMLInputElement).value).toBe('1');
-    await fireEvent.submit(view.container.querySelector('form')!);
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
     expect(onsubmit.mock.calls[0]?.[0]?.tags).toEqual([{ name: 'new', rank: 1 }]);
     await fireEvent.click(view.getByRole('button', { name: /删除/ }));
-    await fireEvent.submit(view.container.querySelector('form')!);
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
     expect(onsubmit.mock.calls[1]?.[0]?.tags).toEqual([]);
     expect(value.tags).toEqual([]);
   });
@@ -219,7 +225,7 @@ describe('JSON Schema forms enterprise value contract', () => {
         rows: { type: 'array', minItems: 1, maxItems: 2, items: { type: 'string' }, default: ['first'] },
       },
     };
-    const view = render(JsonSchemaForm, { schema: bounded });
+    const view = render(JsonSchemaForm, { schema: bounded, locale: 'zh-CN' });
     const add = view.getByRole('button', { name: /添加项目/ });
     const remove = view.getByRole('button', { name: /删除/ });
     expect((remove as HTMLButtonElement).disabled).toBe(true);
@@ -252,7 +258,7 @@ describe('JSON Schema forms enterprise value contract', () => {
     await fireEvent.input(view.getByLabelText('quota'), { target: { value: '' } });
     await fireEvent.input(view.getByLabelText('code'), { target: { value: 'Changed' } });
     expect((view.getByLabelText('quota') as HTMLInputElement).value).toBe('');
-    await fireEvent.submit(view.container.querySelector('form')!);
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
     expect(onsubmit.mock.calls[0]?.[0]?.quota).toBeUndefined();
     expect(onsubmit.mock.calls[0]?.[0]?.profile.code).toBe('Changed');
   });
@@ -261,8 +267,8 @@ describe('JSON Schema forms enterprise value contract', () => {
     const choices = [null, 'null', false, 'false', ''];
     const onsubmit = vi.fn();
     const view = render(JsonSchemaForm, { schema: { properties: { choice: { enum: choices } } }, onsubmit });
-    await fireEvent.change(view.getByRole('combobox'), { target: { value: `__json_enum_${choices.indexOf(selected)}` } });
-    await fireEvent.submit(view.container.querySelector('form')!);
+    await fireEvent.change(view.getByRole('combobox'), { target: { value: optionValue(view.getByRole('combobox'), choices.indexOf(selected)) } });
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
     expect(onsubmit).toHaveBeenCalledExactlyOnceWith({ choice: selected });
   });
 
@@ -302,7 +308,7 @@ describe('JSON Schema forms enterprise value contract', () => {
     const native = render(LiteJsonSchemaForm, { schema, value: {
       role: 2, quota: 10, profile: { enabled: true, code: 'A' }, tags: [{ name: 'first', rank: 2 }],
     } });
-    const remove = new FormData(native.container.querySelector('form')!);
+    const remove = new FormData(requireValue(native.container.querySelector('form')));
     remove.set(schemaFormActionName, encodeSchemaFormArrayAction({ type: 'remove', path: ['tags'], index: 0 }));
     expect(decodeSchemaFormArrayAction(remove)).toEqual({ type: 'remove', path: ['tags'], index: 0 });
     expect(() => decodeSchemaFormData(schema, remove)).toThrow();
@@ -324,13 +330,13 @@ describe('JSON Schema forms enterprise value contract', () => {
     const button = view.getByRole('button', { name: 'Add item' }) as HTMLButtonElement;
     expect(button.type).toBe('submit');
     expect(button.formNoValidate).toBe(true);
-    const form = new FormData(view.container.querySelector('form')!);
+    const form = new FormData(requireValue(view.container.querySelector('form')));
     form.set(button.name, button.value);
     form.set('csrf', 'test-token');
     const result = decodeSchemaFormSubmission(definition, form);
     expect(result).toEqual({ kind: 'draft', data: { rows: [{ title: '' }] } });
     const next = render(LiteJsonSchemaForm, { schema: definition, value: result.data });
-    const final = new FormData(next.container.querySelector('form')!);
+    const final = new FormData(requireValue(next.container.querySelector('form')));
     expect(() => decodeSchemaFormSubmission(definition, final)).toThrow();
     final.set(schemaFormFieldName(['rows', '0', 'title']), 'ready');
     expect(decodeSchemaFormSubmission(definition, final).kind).toBe('submit');
@@ -345,7 +351,7 @@ describe('JSON Schema forms enterprise value contract', () => {
     { type: 'add', path: ['__proto__'] },
   ])('rejects invalid native action target %j', action => {
     const view = render(LiteJsonSchemaForm, { schema });
-    const form = new FormData(view.container.querySelector('form')!);
+    const form = new FormData(requireValue(view.container.querySelector('form')));
     form.set(schemaFormActionName, JSON.stringify(action));
     expect(() => decodeSchemaFormSubmission(schema, form)).toThrow();
   });
@@ -355,7 +361,7 @@ describe('JSON Schema forms enterprise value contract', () => {
       rows: { type: 'array', minItems: 1, items: { type: 'string' } },
     } };
     const view = render(LiteJsonSchemaForm, { schema: bounded, value: { rows: ['one'] } });
-    const form = new FormData(view.container.querySelector('form')!);
+    const form = new FormData(requireValue(view.container.querySelector('form')));
     const action = encodeSchemaFormArrayAction({ type: 'remove', path: ['rows'], index: 0 });
     form.set(schemaFormActionName, action);
     expect(() => decodeSchemaFormSubmission(bounded, form)).toThrow();
@@ -388,7 +394,7 @@ describe('JSON Schema forms enterprise value contract', () => {
       a: { type: 'object', properties: { b: { type: 'string', default: 'nested' } } },
     } };
     const view = render(LiteJsonSchemaForm, { schema: trusted });
-    const decoded = decodeSchemaFormData(trusted, new FormData(view.container.querySelector('form')!));
+    const decoded = decodeSchemaFormData(trusted, new FormData(requireValue(view.container.querySelector('form'))));
     expect(Object.getPrototypeOf(decoded)).toBe(Object.prototype);
     expect(Object.hasOwn(decoded, '__proto__')).toBe(true);
     expect(decoded['__proto__']).toBe('literal');

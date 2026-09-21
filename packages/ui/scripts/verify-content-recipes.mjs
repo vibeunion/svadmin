@@ -42,7 +42,7 @@ try {
   const css = readFileSync(join(ui, 'dist/app.css'));
   assert.deepEqual(css, readFileSync(join(ui, 'dist/app.theme.css')), 'public CSS aliases must remain identical');
   report.css.published = sha256(css);
-  report.css.recipes = sha256(readFileSync(join(ui, 'src/styles/recipes.css')));
+  report.css.recipes = sha256(readFileSync(join(ui, 'src/styles/tailwind.generated.css')));
   writeFileSync(join(work, 'index.html'), '<!doctype html><html lang="en"><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Content recipe parity</title><div id="app"></div><script type="module" src="/main.js"></script></html>');
   writeFileSync(join(work, 'main.js'), `import { mount } from 'svelte';\nimport '../dist/app.css';\nimport Fixture from './Fixture.svelte';\nmount(Fixture, { target: document.getElementById('app') });\n`);
   writeFileSync(join(work, 'Fixture.svelte'), `<script lang="ts">

@@ -22,13 +22,13 @@
     aggregator?: AggregationFn;
     formatValue?: (val: number) => string;
     loading?: boolean;
-    error?: string;
+    error?: string | undefined;
     onRetry?: () => void;
     onDrillDown?: (input: PivotDrilldown) => void | Promise<void>;
     ariaLabel?: string;
     class?: string;
     resource?: string;
-    provider?: PivotProvider;
+    provider?: PivotProvider | undefined;
     cache?: PivotCache;
     /** 由宿主提供的身份、租户和授权版本作用域键；服务端模式必须非空。 */
     scopeKey?: string;

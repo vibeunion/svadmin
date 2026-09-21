@@ -120,7 +120,7 @@ node node_modules/@typescript/native/bin/tsc --noEmit -p scripts/fixtures/ui-ren
 bun run svelte-check --tsgo-experimental-api --tsconfig scripts/fixtures/ui-rendering/tsconfig.svelte.json --fail-on-warnings
 ```
 
-适配器本身保持增量 API；示例应用的所有业务页面调用点已统一接入，详见 [迁移清单](./typed-rendering-migration.md)。不替换 AutoTable / AutoForm，不改变 Panda recipes，不合并并行样式或 SVAR 工作，也不扩展 Surface 的读写协议。TSX 将来仍可按明确需求单独试验，但不是当前组件主线依赖。
+适配器本身保持增量 API；示例应用的所有业务页面调用点已统一接入，详见 [迁移清单](./typed-rendering-migration.md)。不替换 AutoTable / AutoForm，不改变 Tailwind recipes，不合并并行样式或 SVAR 工作，也不扩展 Surface 的读写协议。TSX 将来仍可按明确需求单独试验，但不是当前组件主线依赖。
 
 
 ## 页面级接入

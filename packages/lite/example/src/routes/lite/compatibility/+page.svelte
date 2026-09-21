@@ -34,7 +34,7 @@
   </div>
 
   {#if form?.success}
-    <div class="lite-alert lite-alert-success">Server fallback action completed.</div>
+    <div class="lite-alert lite-alert-success">Demo request received. No files, ordering or computed results were persisted.</div>
   {/if}
 
   <div class="lite-card">

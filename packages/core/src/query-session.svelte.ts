@@ -183,10 +183,15 @@ export function createQuerySession<O extends QuerySessionOptions>(context: Admin
       }
     });
   }
+  // 清理微任务只读取普通快照，不访问已经销毁或退出动画中的派生状态。
+  let lastQueryKey: QueryKey | undefined;
+  $effect(() => { lastQueryKey = options.queryKey; });
   $effect(() => () => {
     disposed = true;
+    const queryKey = lastQueryKey;
+    if (!queryKey) return;
     queueMicrotask(() => {
-      const query = client.getQueryCache().find({ queryKey: options.queryKey, exact: true });
+      const query = client.getQueryCache().find({ queryKey, exact: true });
       if (query?.getObserversCount() === 0) void query.cancel();
     });
   });

@@ -76,7 +76,6 @@ export const mockAuthProvider: AuthProvider = {
       id: '1',
       name: auth.email.replace(/@.*$/, ''),
       email: auth.email,
-      avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${auth.email}`,
     };
   },
 

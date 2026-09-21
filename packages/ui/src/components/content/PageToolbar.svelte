@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import { productToolbar } from '../../styled-system/recipes/index.js';
+  import { productToolbarRecipe as productToolbar } from '../../recipes.js';
   interface Props { leading?: Snippet; trailing?: Snippet; children?: Snippet; class?: string; }
   let { leading, trailing, children, class: className = '' }: Props = $props();
   const styles = productToolbar();

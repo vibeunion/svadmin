@@ -70,8 +70,12 @@ export function validateGantt<T extends GanttTaskShape>(
   }
   // 有界迭代拓扑检查，零时长里程碑成环也必须被拒绝。
   for (let index = 0; index < ready.length; index++) {
-    for (const child of successors.get(ready[index]!) ?? []) {
-      const count = remaining.get(child)! - 1;
+    const id = ready[index];
+    if (id === undefined) return 'dependency';
+    for (const child of successors.get(id) ?? []) {
+      const pending = remaining.get(child);
+      if (pending === undefined) return 'dependency';
+      const count = pending - 1;
       remaining.set(child, count);
       if (count === 0) ready.push(child);
     }

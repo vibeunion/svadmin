@@ -1,6 +1,6 @@
-import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { setLocale } from '@svadmin/core/i18n';
+import { act, cleanup, fireEvent, waitFor } from '@testing-library/svelte';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { renderWithI18n as render } from '../../test/fixtures/render-with-i18n';
 import { Type } from '@sinclair/typebox';
 import { QueryClient } from '@tanstack/svelte-query';
 import { defineResource, resetContext, type DataProvider, type ResourceDefinition } from '@svadmin/core';
@@ -39,7 +39,7 @@ function mount(options: {
   multiple?: boolean;
   fetchSize?: number;
   onchange?: (value: string | number | null | (string | number)[]) => void;
-} = {}, overrides: Partial<DataProvider> = {}) {
+} = {}, overrides: Partial<DataProvider> = {}, locale = 'en') {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false, staleTime: Infinity } },
   });
@@ -50,10 +50,9 @@ function mount(options: {
     queryClient,
     field: true,
     ...options,
-  });
+  }, locale);
 }
 
-beforeEach(() => setLocale('en'));
 afterEach(() => {
   cleanup();
   for (const client of clients.splice(0)) client.clear();
@@ -149,8 +148,7 @@ describe('ComboboxField', () => {
   });
 
   it('localizes search and empty state', async () => {
-    setLocale('zh-CN');
-    const view = mount({}, { getList: async () => ({ data: [], total: 0 }) });
+    const view = mount({}, { getList: async () => ({ data: [], total: 0 }) }, 'zh-CN');
     await fireEvent.click(view.getByRole('button', { name: 'Record' }));
     expect(view.getByPlaceholderText('搜索...')).toBeTruthy();
     await view.findByText('无匹配结果。');

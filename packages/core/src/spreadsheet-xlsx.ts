@@ -136,7 +136,8 @@ export async function serializeSpreadsheetXlsx(
   const names = new Set<string>();
   for (const sheet of workbook.sheets) {
     const name = sheet.name.toLowerCase();
-    if (sheet.name.length > 31 || /[\\/*?:[\]\u0000-\u001f]/.test(sheet.name)
+    if (sheet.name.length > 31 || /[\\/*?:[\]]/.test(sheet.name)
+      || [...sheet.name].some(character => character.charCodeAt(0) < 32)
       || sheet.name.startsWith("'") || sheet.name.endsWith("'")
       || name === 'history' || names.has(name)) return;
     names.add(name);

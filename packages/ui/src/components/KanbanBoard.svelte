@@ -34,7 +34,7 @@
     oncardadd?: (columnId: string, title: string) => KanbanCard | Promise<KanbanCard>;
     scopeKey?: string | number;
     loading?: boolean;
-    error?: string;
+    error?: string | undefined;
     onRetry?: () => void;
     ariaLabel?: string;
     class?: string;

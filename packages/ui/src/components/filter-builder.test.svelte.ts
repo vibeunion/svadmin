@@ -1,16 +1,17 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render, fireEvent, within } from '@testing-library/svelte';
+import { fireEvent, within } from '@testing-library/svelte';
 import FilterBuilder from './FilterBuilder.svelte';
 import LiteFilterBuilder from '../../../lite/src/components/LiteFilterBuilder.svelte';
 import { createListLoader } from '../../../lite/src/server-adapter';
 import { isFilterCollectionValue, type FieldDefinition, type DataProvider, type CrudOperator, type Filter } from '@svadmin/core';
-import { setLocale } from '@svadmin/core/i18n';
+import { renderWithI18n as render } from '../../test/fixtures/render-with-i18n';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { svelte2tsx } from 'svelte2tsx';
 import ts from 'typescript';
 
+import { requireValue } from '../../../../scripts/test-assertions';
 const testFields: FieldDefinition[] = [
   { key: 'title', label: '标题', type: 'text', filterable: true },
   { key: 'status', label: '状态', type: 'select', options: [{ label: '草稿', value: 'draft' }, { label: '已发布', value: 'published' }], filterable: true },
@@ -55,7 +56,8 @@ describe('FilterBuilder component', () => {
       `${diagnostic.file?.fileName}:${diagnostic.start}: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`,
     )).toEqual([]);
   }, 30_000);
-  it('renders initial empty state and allows adding rules', async () => {
+  it('unlocks historical filters when field metadata becomes available', async () => {
+    const onApply = vi.fn();
     const view = render(FilterBuilder, {
       fields: [],
       filters: [{ field: 'title', operator: 'contains', value: 'Svelte' }],
@@ -72,10 +74,9 @@ describe('FilterBuilder component', () => {
   });
 
   it('renders initial empty state and allows adding rules', async () => {
-    const view = render(FilterBuilderLocale, {
+    const view = render(FilterBuilder, {
       fields: testFields,
-      locale: 'zh',
-    });
+    }, 'zh');
 
     expect(view.container.textContent).toContain('暂无筛选条件');
 
@@ -128,6 +129,58 @@ describe('FilterBuilder component', () => {
     expect(onApply).toHaveBeenCalledWith(filters);
   });
 
+  it('fails closed on malformed input instead of applying the valid remainder', async () => {
+    const onApply = vi.fn();
+    const onInvalid = vi.fn();
+    const filters = [
+      { field: 'title', operator: 'eq', value: 'valid' },
+      { operator: 'or', value: [{ field: 'views', operator: 'eq', value: { invalid: true } }] },
+    ] as unknown as Filter[];
+    const view = render(FilterBuilder, { fields: testFields, filters, onApply, onInvalid });
+    expect(view.queryByTestId('filter-builder-root')).toBeNull();
+    await fireEvent.click(view.getByTestId('filter-builder-apply'));
+    expect(onApply).not.toHaveBeenCalled();
+    expect(onInvalid).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ code: 'value' })]));
+    expect(filters).toHaveLength(2);
+  });
+
+  it('keeps one recursive editor and rejects an incomplete nested draft without dropping siblings', async () => {
+    const onApply = vi.fn();
+    const onInvalid = vi.fn();
+    const view = render(FilterBuilder, {
+      fields: testFields, filters: [{ field: 'title', operator: 'eq', value: 'keep' }], onApply, onInvalid,
+    });
+    expect(view.getAllByTestId('filter-builder-root')).toHaveLength(1);
+    await fireEvent.click(view.getByTestId('filter-builder-add-group'));
+    const group = within(view.getByTestId('filter-builder-group'));
+    await fireEvent.click(group.getByTestId('filter-group-add-rule'));
+    await fireEvent.click(view.getByTestId('filter-builder-apply'));
+    expect(onApply).not.toHaveBeenCalled();
+    expect(onInvalid).toHaveBeenCalled();
+    await fireEvent.input(group.getByRole('textbox'), { target: { value: 'nested' } });
+    await fireEvent.click(view.getByTestId('filter-builder-apply'));
+    expect(onApply).toHaveBeenCalledWith([
+      { field: 'title', operator: 'eq', value: 'keep' },
+      { operator: 'and', value: [{ field: 'title', operator: 'contains', value: 'nested' }] },
+    ]);
+  });
+
+  it('disabled public methods cannot alter or submit the editor', () => {
+    const onApply = vi.fn();
+    const onReset = vi.fn();
+    const view = render(FilterBuilder, {
+      fields: testFields, filters: [{ field: 'title', operator: 'eq', value: 'keep' }],
+      disabled: true, onApply, onReset,
+    });
+    view.component.addRule();
+    view.component.removeRule(0);
+    view.component.reset();
+    view.component.apply();
+    expect(view.getAllByTestId('filter-builder-rule')).toHaveLength(1);
+    expect(onApply).not.toHaveBeenCalled();
+    expect(onReset).not.toHaveBeenCalled();
+  });
+
   it('preserves typed select values and blocks incomplete rules', async () => {
     const onApply = vi.fn();
     const fields: FieldDefinition[] = [{
@@ -135,11 +188,11 @@ describe('FilterBuilder component', () => {
       options: [{ label: '高', value: 2 }, { label: '低', value: 'low' }],
     }];
     const view = render(FilterBuilder, { fields, filters: [{ field: 'priority', operator: 'eq', value: 2 }], onApply });
-    await fireEvent.click(view.container.querySelector('[data-testid="filter-builder-apply"]')!);
+    await fireEvent.click(requireValue(view.container.querySelector('[data-testid="filter-builder-apply"]')));
     expect(onApply).toHaveBeenCalledWith([{ field: 'priority', operator: 'eq', value: 2 }]);
 
-    await fireEvent.click(view.container.querySelector('[data-testid="filter-builder-add-rule"]')!);
-    await fireEvent.click(view.container.querySelector('[data-testid="filter-builder-apply"]')!);
+    await fireEvent.click(requireValue(view.container.querySelector('[data-testid="filter-builder-add-rule"]')));
+    await fireEvent.click(requireValue(view.container.querySelector('[data-testid="filter-builder-apply"]')));
     expect(onApply).toHaveBeenCalledTimes(1);
     expect(view.getByRole('alert')).toBeTruthy();
   });
@@ -148,7 +201,7 @@ describe('FilterBuilder component', () => {
     const onApply = vi.fn();
     const filters = [{ field: 'title', operator: 'between' as const, value: ['Svelte', 'SVAR'] }];
     const view = render(FilterBuilder, { fields: testFields, filters, onApply });
-    await fireEvent.click(view.container.querySelector('[data-testid="filter-builder-apply"]')!);
+    await fireEvent.click(requireValue(view.container.querySelector('[data-testid="filter-builder-apply"]')));
     expect(onApply).toHaveBeenCalledWith(filters);
     expect(view.getByRole('status', { name: /只读|read-only/i })).toBeTruthy();
   });
@@ -209,7 +262,7 @@ describe('FilterBuilder component', () => {
     });
     const rule = view.getByTestId('filter-builder-rule');
     const selects = rule.querySelectorAll('select');
-    await fireEvent.change(selects[0]!, { target: { value: 'views' } });
+    await fireEvent.change(requireValue(selects[0]), { target: { value: 'views' } });
     await fireEvent.input(view.getByRole('spinbutton'), { target: { value: '100' } });
     await fireEvent.click(view.getByTestId('filter-builder-apply'));
     expect(onApply).toHaveBeenLastCalledWith([{ field: 'views', operator: 'eq', value: 100 }]);
@@ -223,9 +276,9 @@ describe('FilterBuilder component', () => {
       onApply,
     });
     const input = view.getByRole('spinbutton');
-    const operator = view.getByTestId('filter-builder-rule').querySelectorAll('select')[1]!;
+    const operator =requireValue( view.getByTestId('filter-builder-rule').querySelectorAll('select')[1]);
     expect([...operator.options].map(option => option.value))
-      .toEqual(['eq', 'ne', 'gt', 'gte', 'lt', 'lte', 'in', 'nin', 'between', 'nbetween', 'null', 'nnull']);
+      .toEqual(['eq', 'ne', 'lt', 'gt', 'lte', 'gte', 'in', 'nin', 'between', 'nbetween', 'null', 'nnull']);
     await fireEvent.input(input, { target: { value: '' } });
     await fireEvent.click(view.getByTestId('filter-builder-apply'));
     expect(onApply).not.toHaveBeenCalled();
@@ -284,7 +337,6 @@ describe('FilterBuilder component', () => {
   });
 
   it('edits numeric ranges without coercing missing endpoints, sorting or applying field min/max', async () => {
-    setLocale('en');
     const onApply = vi.fn();
     const view = render(FilterBuilder, {
       fields: [{ key: 'amount', label: 'Amount', type: 'currency', min: 10, max: 100 }],
@@ -302,7 +354,6 @@ describe('FilterBuilder component', () => {
   });
 
   it('edits typed enum sets and adds and removes values', async () => {
-    setLocale('en');
     const fields: FieldDefinition[] = [{ key: 'priority', label: 'Priority', type: 'select',
       options: [{ value: 2, label: 'Number' }, { value: '2', label: 'String' }] }];
     const onApply = vi.fn();
@@ -311,7 +362,7 @@ describe('FilterBuilder component', () => {
     await fireEvent.change(view.getByRole('combobox', { name: 'Set value 2' }), { target: { value: '1' } });
     await fireEvent.click(view.getByTestId('filter-builder-apply'));
     expect(onApply).toHaveBeenLastCalledWith([{ field: 'priority', operator: 'in', value: [2, '2'] }]);
-    await fireEvent.click(view.getAllByRole('button', { name: 'Remove set value' })[0]!);
+    await fireEvent.click(requireValue(view.getAllByRole('button', { name: 'Remove set value' })[0]));
     await fireEvent.click(view.getByTestId('filter-builder-apply'));
     expect(onApply).toHaveBeenLastCalledWith([{ field: 'priority', operator: 'in', value: ['2'] }]);
   });
@@ -331,13 +382,12 @@ describe('FilterBuilder component', () => {
   });
 
   it('resets the value shape when changing operators and retains nested sets on apply', async () => {
-    setLocale('en');
     const onApply = vi.fn();
     const view = render(FilterBuilder, {
       fields: testFields,
       filters: [{ operator: 'or', value: [{ field: 'views', operator: 'eq', value: 2 }] }], onApply,
     });
-    const operator = view.getByTestId('filter-builder-rule').querySelectorAll('select')[1]!;
+    const operator =requireValue( view.getByTestId('filter-builder-rule').querySelectorAll('select')[1]);
     await fireEvent.change(operator, { target: { value: 'in' } });
     await fireEvent.click(view.getByTestId('filter-builder-apply'));
     expect(onApply).not.toHaveBeenCalled();
@@ -378,15 +428,15 @@ describe('FilterBuilder component', () => {
 
   it.each([
     ['sparse', 'in', [['values.1', '1']]],
-    , ['mixed', 'in', [['value', '1'], ['values.0', '1']]]
-    , ['duplicate', 'in', [['values.0', '1'], ['values.0', '2']]]
-    , ['wrong shape', 'eq', [['values.0', '1']]]
-    , ['infinite', 'in', [['values.0', '1e999']]]
-    , ['reversed range', 'between', [['values.0', '2'], ['values.1', '1']]]
-    , ['missing endpoint', 'nbetween', [['values.0', '1']]]
-    , ['too many endpoints', 'between', [['values.0', '1'], ['values.1', '2'], ['values.2', '3']]]
-    , ['noncanonical', 'in', [['values.00', '1']]]
-    , ['large index', 'in', [['values.100', '1']]]
+    ['mixed', 'in', [['value', '1'], ['values.0', '1']]],
+    ['duplicate', 'in', [['values.0', '1'], ['values.0', '2']]],
+    ['wrong shape', 'eq', [['values.0', '1']]],
+    ['infinite', 'in', [['values.0', '1e999']]],
+    ['reversed range', 'between', [['values.0', '2'], ['values.1', '1']]],
+    ['missing endpoint', 'nbetween', [['values.0', '1']]],
+    ['too many endpoints', 'between', [['values.0', '1'], ['values.1', '2'], ['values.2', '3']]],
+    ['noncanonical', 'in', [['values.00', '1']]],
+    ['large index', 'in', [['values.100', '1']]],
   ] as [string, CrudOperator, [string, string][]][])('rejects %s native collection before querying', async (_name, operator, values) => {
     const url = new URL('https://example.test/list');
     url.searchParams.set('filters[0][field]', 'amount');

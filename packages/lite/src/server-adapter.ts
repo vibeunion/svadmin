@@ -230,8 +230,9 @@ function parseStructuredFilters(resource: ResourceDefinition, url: URL): Filter[
       }
       if (field.type === 'select') {
         const matches = field.options?.filter(option => String(option.value) === raw && !option.disabled) ?? [];
-        if (!['eq', 'ne'].includes(operator) || matches.length !== 1) invalidStructuredFilters();
-        return { field: node.field, operator: operator as CrudOperator, value: matches[0]!.value };
+        const match = matches[0];
+        if (!['eq', 'ne'].includes(operator) || matches.length !== 1 || !match) return invalidStructuredFilters();
+        return { field: node.field, operator: operator as CrudOperator, value: match.value };
       }
       return { field: node.field, operator: operator as CrudOperator, value: raw };
     }

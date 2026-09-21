@@ -2,7 +2,7 @@ name: Native primitive migration
 
 on:
   push:
-    branches: [feat/panda-tokens-no-tailwind, feat/no-tailwind-native-primitives]
+    branches: [main]
   pull_request:
     paths:
       - 'packages/ui/**'
@@ -10,7 +10,6 @@ on:
       - 'packages/surface/**'
       - 'scripts/*tailwind*'
       - 'scripts/check-package-packs.ts'
-      - 'scripts/check-panda-*.mjs'
       - 'scripts/check-conditional-styles.mjs'
       - 'bun.lock'
       - '.github/workflows/native-primitives.yml'
@@ -75,11 +74,11 @@ jobs:
         continue-on-error: true
         working-directory: packages/ui
         run: bunx --no-install vitest run --config vitest.config.ts src/components/ui/button/button.test.ts src/components/ui/input/input.test.svelte.ts 2>&1 | tee "$RUNNER_TEMP/native-primitives/logs/behavior.log"
-      - name: Compiler-free generated runtime and declarations
+      - name: Compiler-free published CSS boundary
         id: runtime
         if: steps.build.outcome == 'success'
         continue-on-error: true
-        run: node scripts/check-panda-runtime.mjs 2>&1 | tee "$RUNNER_TEMP/native-primitives/logs/runtime.log"
+        run: node scripts/check-style-boundary.mjs --packages=ui,ai-elements,surface 2>&1 | tee "$RUNNER_TEMP/native-primitives/logs/runtime.log"
       - name: Surface type checks
         id: types
         if: steps.build.outcome == 'success'
@@ -91,7 +90,6 @@ jobs:
         continue-on-error: true
         run: |
           bunx --no-install playwright install --with-deps chromium
-          node scripts/check-panda-browser.mjs 2>&1 | tee "$RUNNER_TEMP/native-primitives/logs/browser.log"
           node scripts/check-conditional-styles.mjs 2>&1 | tee "$RUNNER_TEMP/native-primitives/logs/conditional-styles.log"
       - name: Preserve exact source and diagnostics
         if: always()
@@ -104,7 +102,7 @@ jobs:
           printf '%s\n' "$RESULTS" > "$RUNNER_TEMP/native-primitives/results.json"
           if test -d packages/ui/dist; then tar -czf "$RUNNER_TEMP/native-primitives/ui-dist.tar.gz" -C packages/ui dist; fi
           if test -d packages/surface/dist; then tar -czf "$RUNNER_TEMP/native-primitives/surface-dist.tar.gz" -C packages/surface dist; fi
-          if test -d docs/pr-evidence/panda-styles; then cp -R docs/pr-evidence/panda-styles "$RUNNER_TEMP/native-primitives/"; fi
+          if test -d test-results/ui-styles; then cp -R test-results/ui-styles "$RUNNER_TEMP/native-primitives/"; fi
       - uses: actions/upload-artifact@v6
         if: always()
         with:

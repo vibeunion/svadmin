@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import { productSettings } from '../../styled-system/recipes/index.js';
+  import { productSettingsRecipe as productSettings } from '../../recipes.js';
   interface Props { title: string; description?: string; actions?: Snippet; children: Snippet; class?: string; bodyClass?: string; }
   let { title, description, actions, children, class: className = '', bodyClass = '' }: Props = $props();
   const styles = productSettings();

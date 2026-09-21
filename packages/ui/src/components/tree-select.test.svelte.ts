@@ -1,8 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, render, fireEvent, waitFor } from '@testing-library/svelte';
-import { setLocale } from '@svadmin/core/i18n';
+import { describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, waitFor } from '@testing-library/svelte';
+import { renderWithI18n as render } from '../../test/fixtures/render-with-i18n';
 import TreeSelect, { type TreeSelectOption } from './TreeSelect.svelte';
 
+import { requireValue } from '../../../../scripts/test-assertions';
 const testOptions: TreeSelectOption[] = [
   {
     value: 'dept-1',
@@ -20,7 +21,6 @@ const testOptions: TreeSelectOption[] = [
     ],
   },
 ];
-beforeEach(() => setLocale('en'));
 
 function pendingLoad() {
   let resolve!: (children: TreeSelectOption[]) => void;
@@ -39,7 +39,7 @@ describe('TreeSelect component', () => {
       }],
       multiple: true, onchange,
     });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     const tree = view.getByRole('tree');
     tree.scrollTop = 240 * 36;
     await fireEvent.scroll(tree);
@@ -64,7 +64,7 @@ describe('TreeSelect component', () => {
       }, { value: 'allowed', label: 'Allowed' }],
       multiple, onchange, loadChildren: loader,
     });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     const leaf = view.getByRole('treeitem', { name: 'Leaf' });
     expect(leaf.getAttribute('aria-disabled')).toBe('true');
     await fireEvent.click(leaf);
@@ -90,7 +90,7 @@ describe('TreeSelect component', () => {
         children: [{ value: 'hidden', label: 'Hidden' }, { value: 'match', label: 'Match' }],
       }],
     });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     await fireEvent.input(view.getByRole('textbox'), { target: { value: 'Match' } });
     const parent = view.getByRole('treeitem', { name: 'Root' });
     parent.focus();
@@ -102,7 +102,7 @@ describe('TreeSelect component', () => {
     const view = render(TreeSelect, {
       options: Array.from({ length: 10000 }, (_, value) => ({ value, label: `Node ${value}` })),
     });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     const tree = view.getByRole('tree');
     expect(view.getAllByRole('treeitem').length).toBeLessThanOrEqual(18);
     expect(view.getByRole('treeitem', { name: 'Node 0' }).getAttribute('aria-setsize')).toBe('10000');
@@ -120,15 +120,15 @@ describe('TreeSelect component', () => {
       options: Array.from({ length: 1000 }, (_, value) => ({ value, label: `Node ${value}` })),
       onchange,
     });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     const first = view.getByRole('treeitem', { name: 'Node 0' });
     first.focus();
     await fireEvent.keyDown(first, { key: 'End' });
     await waitFor(() => expect(document.activeElement?.getAttribute('data-tree-key')).toBe('number:999'));
-    await fireEvent.keyDown(document.activeElement!, { key: 'Home' });
+    await fireEvent.keyDown(requireValue(document.activeElement), { key: 'Home' });
     await waitFor(() => expect(document.activeElement?.getAttribute('data-tree-key')).toBe('number:0'));
     for (let index = 1; index <= 30; index++) {
-      await fireEvent.keyDown(document.activeElement!, { key: 'ArrowDown' });
+      await fireEvent.keyDown(requireValue(document.activeElement), { key: 'ArrowDown' });
       await waitFor(() => expect(document.activeElement?.getAttribute('data-tree-key')).toBe(`number:${index}`));
     }
     expect(view.getAllByRole('treeitem').length).toBeLessThanOrEqual(19);
@@ -138,7 +138,7 @@ describe('TreeSelect component', () => {
   it('resets a scrolled window on search and external tree replacement', async () => {
     const options = Array.from({ length: 1000 }, (_, value) => ({ value, label: `Node ${value}` }));
     const view = render(TreeSelect, { options });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     const tree = view.getByRole('tree');
     tree.scrollTop = 18000;
     await fireEvent.scroll(tree);
@@ -163,7 +163,7 @@ describe('TreeSelect component', () => {
       options: [{ value: 'root', label: 'Root', expanded: true, children }],
       multiple: true, onchange,
     });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     await fireEvent.click(view.getByRole('treeitem', { name: 'Root' }));
     expect(onchange).toHaveBeenLastCalledWith(children.map(node => node.value));
     const tree = view.getByRole('tree');
@@ -181,7 +181,7 @@ describe('TreeSelect component', () => {
     const view = render(TreeSelect, {
       options, loadChildren: async () => [{ value: 'child', label: 'Loaded child' }],
     });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     const tree = view.getByRole('tree');
     tree.scrollTop = 235 * 36;
     await fireEvent.scroll(tree);
@@ -199,7 +199,7 @@ describe('TreeSelect component', () => {
       options: Array.from({ length: 250 }, (_, value) => ({ value, label: `Node ${value}` })),
       itemHeight: Number.NaN, viewportHeight: -1,
     });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     expect(view.getByRole('tree').style.height).toBe('280px');
     expect(view.getByRole('treeitem', { name: 'Node 0' }).style.height).toBe('36px');
     await view.rerender({ virtualized: false });
@@ -292,7 +292,7 @@ describe('TreeSelect component', () => {
     const view = render(TreeSelect, {
       options: [{ value: 'first', label: 'First' }, { value: 'second', label: 'Second' }],
     });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     const firstNode = document.querySelector<HTMLElement>('[data-tree-key="string:first"]');
     const secondNode = document.querySelector<HTMLElement>('[data-tree-key="string:second"]');
     expect(firstNode).not.toBeNull();
@@ -302,8 +302,8 @@ describe('TreeSelect component', () => {
     if (!tree) throw new Error('Missing tree');
     const before = document.createElement('div');
     before.tabIndex = 0;
-    before.dataset.treeValue = 'first';
-    before.dataset.treeKey = 'string:first';
+    before.dataset['treeValue'] = 'first';
+    before.dataset['treeKey'] = 'string:first';
     const after = before.cloneNode() as HTMLDivElement;
     tree.before(before);
     tree.after(after);
@@ -329,7 +329,7 @@ describe('TreeSelect component', () => {
         children: [{ value: '1', label: 'String child' }],
       }],
     });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     const parent = document.querySelector<HTMLElement>('[data-tree-key="number:1"]');
     expect(parent).not.toBeNull();
     if (!parent) return;
@@ -375,7 +375,7 @@ describe('TreeSelect component', () => {
       loadChildren,
       onchange,
     });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     const parent = view.getByRole('treeitem', { name: 'Lazy parent' });
     await fireEvent.click(parent);
 
@@ -395,7 +395,7 @@ describe('TreeSelect component', () => {
       loadChildren,
       onchange,
     });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     await fireEvent.click(view.getByRole('treeitem', { name: 'Lazy parent' }));
 
     await waitFor(() => expect(view.getByRole('alert')).toBeTruthy());
@@ -412,7 +412,7 @@ describe('TreeSelect component', () => {
       }],
       multiple: true, value: ['a'], onchange,
     });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     await fireEvent.input(view.getByRole('textbox'), { target: { value: 'Match' } });
     const parent = view.getByRole('treeitem', { name: 'Root' });
     expect(parent.getAttribute('aria-expanded')).toBe('true');
@@ -437,7 +437,7 @@ describe('TreeSelect component', () => {
       options: [{ value: 'root', label: 'Root', hasChildren: true }],
       multiple: true, loadChildren: loader, onchange,
     });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     const parent = view.getByRole('treeitem', { name: 'Root' });
     await fireEvent.click(parent);
     await waitFor(() => expect(loader).toHaveBeenCalledTimes(2));
@@ -462,7 +462,7 @@ describe('TreeSelect component', () => {
       }],
       multiple: true, value: ['a'], loadChildren: loader, onchange,
     });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     const parent = view.getByRole('treeitem', { name: 'Root' });
     expect(parent.getAttribute('aria-checked')).toBe('mixed');
     await fireEvent.click(parent);
@@ -485,7 +485,7 @@ describe('TreeSelect component', () => {
         options: [{ value: 'root', label: 'Root', hasChildren: true }, { value: 'other', label: 'Other' }],
         multiple: true, loadChildren: loader, onchange,
       });
-      await fireEvent.click(view.container.querySelector('button')!);
+      await fireEvent.click(requireValue(view.container.querySelector('button')));
       await fireEvent.click(view.getByRole('treeitem', { name: 'Root' }));
       if (change === 'options') await view.rerender({ options: [{ value: 'root', label: 'New root', hasChildren: true }] });
       if (change === 'loader') await view.rerender({ loadChildren: async () => [] });
@@ -510,7 +510,7 @@ describe('TreeSelect component', () => {
       multiple: true, onlyLeafSelectable: true,
       loadChildren: async () => [{ value: 'leaf', label: 'Leaf' }], onchange,
     });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     const parent = view.getByRole('treeitem', { name: 'Root' });
     if (action === 'click') await fireEvent.click(parent);
     else await fireEvent.keyDown(parent, { key: 'Enter' });
@@ -527,7 +527,7 @@ describe('TreeSelect component', () => {
       options: [{ value: 'root', label: 'Root', hasChildren: true }],
       loadChildren: loader, onchange,
     });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     await fireEvent.click(view.getByRole('treeitem', { name: 'Root' }));
     expect(onchange).toHaveBeenCalledWith('root');
     expect(loader).not.toHaveBeenCalled();
@@ -545,7 +545,7 @@ describe('TreeSelect component', () => {
       }],
       multiple: true, loadChildren: loader, onchange,
     });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     await fireEvent.click(view.getByRole('treeitem', { name: 'Root' }));
     await view.findByRole('alert');
     expect(loader).toHaveBeenCalledTimes(100);
@@ -562,7 +562,7 @@ describe('TreeSelect component', () => {
       options: [{ value: 0, label: 'Root', hasChildren: true }],
       multiple: true, loadChildren: loader, onchange,
     });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     await fireEvent.click(view.getByRole('treeitem', { name: 'Root' }));
     await view.findByRole('alert');
     expect(loader).toHaveBeenCalledTimes(65);
@@ -572,7 +572,7 @@ describe('TreeSelect component', () => {
   it('does not turn keyboard activation of an expansion button into parent selection', async () => {
     const onchange = vi.fn();
     const view = render(TreeSelect, { options: testOptions, multiple: true, onchange });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     const expand = view.getByRole('button', { name: '研发部: Expand or collapse children' });
     await fireEvent.keyDown(expand, { key: 'Enter' });
     await fireEvent.click(expand);
@@ -585,7 +585,7 @@ describe('TreeSelect component', () => {
     const view = render(TreeSelect, {
       options: [{ value: 'leaf', label: 'Leaf' }], multiple: true, onchange,
     });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     await view.rerender({ disabled: true });
     const leaf = view.getByRole('treeitem', { name: 'Leaf' });
     expect(leaf.getAttribute('aria-disabled')).toBe('true');
@@ -604,7 +604,7 @@ describe('TreeSelect component', () => {
       ],
       multiple: true, value: ['previous'], loadChildren: () => pending.promise, onchange,
     });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     await fireEvent.click(view.getByRole('treeitem', { name: 'Root' }));
     await fireEvent.keyDown(view.getByRole('button', {
       name: action === 'clear' ? 'Clear selection' : 'Remove Previous',
@@ -624,7 +624,7 @@ describe('TreeSelect component', () => {
       })),
       onchange,
     });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     await fireEvent.click(view.getByRole('treeitem', { name: 'Root' }));
     await view.findByRole('alert');
     expect(onchange).not.toHaveBeenCalled();
@@ -637,7 +637,7 @@ describe('TreeSelect component', () => {
       options: [{ value: 'lazy-error', label: '失败部门', hasChildren: true }],
       loadChildren,
     });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     const expand = document.querySelector<HTMLButtonElement>('[data-tree-value="lazy-error"] button');
     if (!expand) throw new Error('Expected expand control');
     await fireEvent.click(expand);
@@ -660,7 +660,7 @@ describe('TreeSelect component', () => {
       options: [{ value: 'lazy', label: 'Lazy', hasChildren: true }],
       loadChildren: () => pending.promise,
     });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     await fireEvent.click(view.getByRole('button', { name: 'Lazy: Expand or collapse children' }));
     view.unmount();
     await act(async () => {
@@ -679,7 +679,7 @@ describe('TreeSelect component', () => {
     const view = render(TreeSelect, {
       options: [{ value: 'root', label: 'Old', hasChildren: true }], loadChildren: loader,
     });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     await fireEvent.click(view.getByRole('button', { name: 'Old: Expand or collapse children' }));
     await view.rerender({ options: [{ value: 'root', label: 'New', hasChildren: true }] });
     const expand = view.getByRole('button', { name: 'New: Expand or collapse children' });
@@ -704,7 +704,7 @@ describe('TreeSelect component', () => {
       ],
       loadChildren: loader,
     });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     const firstExpand = view.getByRole('button', { name: 'First: Expand or collapse children' });
     await fireEvent.click(firstExpand);
     await fireEvent.click(firstExpand);
@@ -727,7 +727,7 @@ describe('TreeSelect component', () => {
       options: [{ value: 'root', label: 'Root', hasChildren: true }],
       loadChildren: loader,
     });
-    await fireEvent.click(view.container.querySelector('button')!);
+    await fireEvent.click(requireValue(view.container.querySelector('button')));
     await fireEvent.click(view.getByRole('button', { name: 'Root: Expand or collapse children' }));
     if (change === 'disabled') {
       await view.rerender({ disabled: true });

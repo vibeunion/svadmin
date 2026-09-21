@@ -40,6 +40,7 @@ import LiteSpreadsheetView from './LiteSpreadsheetView.svelte';
 import LiteDecisionTable from './LiteDecisionTable.svelte';
 import LiteOfflineSyncBanner from './LiteOfflineSyncBanner.svelte';
 
+import { requireValue } from '../../../../scripts/test-assertions';
 describe('Lite Enterprise Components SSR rendering', () => {
   it('renders LiteTreeSelect in show and edit mode', () => {
     const options = [
@@ -194,11 +195,11 @@ describe('Lite Enterprise Components SSR rendering', () => {
     expect(forms[0]?.id).not.toBe(forms[1]?.id);
     expect(second.container.querySelector('output')).toBeTruthy();
     for (const view of [first, second]) {
-      const form = view.container.querySelector('form')!;
-      const apply = view.container.querySelector<HTMLButtonElement>('button[form]')!;
+      const form =requireValue( view.container.querySelector('form'));
+      const apply =requireValue( view.container.querySelector<HTMLButtonElement>('button[form]'));
       expect(apply.form).toBe(form);
     }
-    const data = new FormData(second.container.querySelector('form')!);
+    const data = new FormData(requireValue(second.container.querySelector('form')));
     expect(data.get('filters[0][operator]')).toBe('between');
     expect(data.get('filters[0][value]')).toBe('["Alice","Bob"]');
     expect(data.get('filters[0][invalid]')).toBe('true');
@@ -212,7 +213,7 @@ describe('Lite Enterprise Components SSR rendering', () => {
     const view = render(LiteFilterBuilder, {
       fields: [{ key: 'name', label: 'Name', type: 'text' }], filters: [filter],
     });
-    const data = new FormData(view.container.querySelector('form')!);
+    const data = new FormData(requireValue(view.container.querySelector('form')));
     expect(data.get('filters[0][invalid]')).toBe('true');
     expect(data.get('filters[0][field]')).toBe(filter.field);
     expect(data.get('filters[0][operator]')).toBe(filter.operator);
@@ -225,7 +226,7 @@ describe('Lite Enterprise Components SSR rendering', () => {
       fields: [{ key: 'name', label: 'Name', type: 'text' }],
       filters: [{ field: 'name', operator: 'between', value: ['Alice', 'Bob'] }],
     });
-    expect([...new FormData(view.container.querySelector('form')!).entries()]).toEqual([]);
+    expect([...new FormData(requireValue(view.container.querySelector('form'))).entries()]).toEqual([]);
     expect(view.container.querySelector<HTMLButtonElement>('button[form]')?.disabled).toBe(true);
   });
 

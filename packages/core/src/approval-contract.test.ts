@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import { decodeApprovalRecord, decodeApprovalList, decodeApprovalTransition, decodeApprovalReceipt,
   type ApprovalRecord } from './approval-contract';
 
+import { requireValue } from '../../../scripts/test-assertions';
 const record: ApprovalRecord = {
   id: 'expense-1', version: 2, title: 'Expense', applicant: 'Alice', status: 'pending',
   allowedActions: [{ id: 'reject', label: 'Reject', commentRequired: true, targetRequired: false }],
@@ -12,9 +13,9 @@ const input = { id: record.id, expectedVersion: 2, action: 'reject', comment: 'M
 
 describe('approval contracts', () => {
   test('detaches records and preserves domain-defined status and actions', () => {
-    const result = decodeApprovalRecord(record);
-    result.attachments[0]!.name = 'Changed';
-    expect(record.attachments[0]!.name).toBe('Invoice.pdf');
+    const result = decodeApprovalRecord(record);requireValue(
+    result.attachments[0]).name = 'Changed';
+    expect(requireValue(record.attachments[0]).name).toBe('Invoice.pdf');
     expect(decodeApprovalTransition(input, record)).toEqual(input);
   });
   test.each([

@@ -2,6 +2,7 @@ import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/svelt
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import FileUpload, { type UploadSession } from './FileUpload.svelte';
 
+import { requireValue } from '../../../../scripts/test-assertions';
 afterEach(cleanup);
 
 function file(name: string, type = 'text/plain'): File {
@@ -250,7 +251,7 @@ describe('FileUpload', () => {
       upload: (_file, current) => { session = current; return pending.promise; },
       cancelUpload,
     });
-    const input = view.container.querySelector('input')!;
+    const input =requireValue( view.container.querySelector('input'));
     await fireEvent.change(input, { target: { files: [file('late.txt')] } });
     await fireEvent.click(view.getByRole('button', { name: 'Cancel upload' }));
     expect(cancelUpload).not.toHaveBeenCalled();
@@ -267,9 +268,9 @@ describe('FileUpload', () => {
   });
 
   it('isolates delayed cleanup from a new retry with a distinct idempotency key', async () => {
-    const cleanupResult = deferred<void>();
+    const cleanupResult = deferred<undefined>();
     const sessions: UploadSession[] = [];
-    const pending = deferred<void>();
+    const pending = deferred<undefined>();
     const onChange = vi.fn();
     const view = render(FileUpload, {
       upload: (_file, session) => {
@@ -279,21 +280,22 @@ describe('FileUpload', () => {
       },
       cancelUpload: () => cleanupResult.promise, onChange,
     });
-    await fireEvent.change(view.container.querySelector('input')!, { target: { files: [file('retry.txt')] } });
+    await fireEvent.change(requireValue(view.container.querySelector('input')), { target: { files: [file('retry.txt')] } });
     await fireEvent.click(view.getByRole('button', { name: 'Cancel upload' }));
     await fireEvent.click(view.getByRole('button', { name: 'Retry upload' }));
     expect(sessions[0]?.idempotencyKey).not.toBe(sessions[1]?.idempotencyKey);
     const calls = onChange.mock.calls.length;
-    await act(async () => { cleanupResult.resolve(); await cleanupResult.promise; });
+    await act(async () => { cleanupResult.resolve(undefined); await cleanupResult.promise; });
     expect(onChange).toHaveBeenCalledTimes(calls);
     expect(onChange).toHaveBeenLastCalledWith([expect.objectContaining({
-      status: 'uploading', uploadId: 'object-2', cleanupStatus: undefined,
+      status: 'uploading', uploadId: 'object-2',
     })]);
-    await act(async () => { pending.resolve(); await pending.promise; });
+    expect(onChange.mock.lastCall?.[0][0]).not.toHaveProperty('cleanupStatus');
+    await act(async () => { pending.resolve(undefined); await pending.promise; });
   });
 
   it('uses the captured cleanup provider on scope change and contains synchronous errors', async () => {
-    const pending = deferred<void>();
+    const pending = deferred<undefined>();
     const oldCleanup = vi.fn(() => { throw new Error('private server detail'); });
     const nextCleanup = vi.fn(async () => {});
     const onChange = vi.fn();
@@ -301,30 +303,30 @@ describe('FileUpload', () => {
       upload: (_file, session) => { session.setUploadId('old-object'); return pending.promise; },
       cancelUpload: oldCleanup, onChange,
     });
-    await fireEvent.change(view.container.querySelector('input')!, { target: { files: [file('old.txt')] } });
+    await fireEvent.change(requireValue(view.container.querySelector('input')), { target: { files: [file('old.txt')] } });
     await view.rerender({ upload: async () => {}, cancelUpload: nextCleanup, onChange });
     await waitFor(() => expect(oldCleanup).toHaveBeenCalledTimes(1));
     expect(nextCleanup).not.toHaveBeenCalled();
     expect(view.queryByText('private server detail')).toBeNull();
-    await act(async () => { pending.resolve(); await pending.promise; });
+    await act(async () => { pending.resolve(undefined); await pending.promise; });
   });
 
   it('starts cleanup on unmount without publishing changes after destruction', async () => {
-    const pending = deferred<void>();
-    const cleanupResult = deferred<void>();
+    const pending = deferred<undefined>();
+    const cleanupResult = deferred<undefined>();
     const cancelUpload = vi.fn(() => cleanupResult.promise);
     const onChange = vi.fn();
     const view = render(FileUpload, {
       upload: (_file, session) => { session.setUploadId('temporary'); return pending.promise; },
       cancelUpload, onChange,
     });
-    await fireEvent.change(view.container.querySelector('input')!, { target: { files: [file('unmount.txt')] } });
+    await fireEvent.change(requireValue(view.container.querySelector('input')), { target: { files: [file('unmount.txt')] } });
     const calls = onChange.mock.calls.length;
     view.unmount();
     await act(async () => {
       cleanupResult.reject(new Error('private'));
       await cleanupResult.promise.catch(() => {});
-      pending.resolve();
+      pending.resolve(undefined);
       await pending.promise;
     });
     expect(cancelUpload).toHaveBeenCalledWith(expect.any(File), expect.objectContaining({ reason: 'unmount' }));

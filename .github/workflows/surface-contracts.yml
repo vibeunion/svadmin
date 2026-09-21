@@ -42,8 +42,7 @@ jobs:
       - run: bun install --frozen-lockfile
       - name: Prepare shared design contracts from their real source
         run: |
-          bun run --cwd packages/ui build:styles
-          node packages/surface/scripts/prepare-design.mjs
+          bun run --cwd packages/ui build
       - name: Test DOM-free Surface contracts
         working-directory: packages/surface
         run: bun x vitest run --config vitest.contracts.config.ts

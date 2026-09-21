@@ -8,7 +8,7 @@
   import ContentPageHeader from '../content/ContentPageHeader.svelte';
 
   const i18n = useTranslation();
-  let completed = $state<string[]>(['profile', 'security']);
+  let completed = $state<string[]>([]);
   const isZh = $derived(i18n.locale === 'zh-CN');
   const entries = $derived([
     { id: 'profile', title: isZh ? '个人资料' : 'User profile', description: isZh ? '维护联系人、工作状态、文件和日历连接。' : 'Maintain contact details, work status, files, and calendar connections.', href: '#/account/home/user-profile', icon: UserRound },
@@ -26,6 +26,7 @@
 </script>
 
 <ContentPageShell pageId="account-get-started" width="wide">
+  <p role="note">{isZh ? '本会话的个人检查清单；手动勾选不代表组织或安全配置已生效。' : 'A personal checklist for this session. Checking an item does not activate organization or security settings.'}</p>
   <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-1004c0c3954c svadmin-u-020ba687fa12 svadmin-u-64cac80d2e9a svadmin-u-3b9871a0bf93">
     <ContentPageHeader title={i18n.t('account.getStarted')} description={isZh ? '从账户功能入口快速完成组织、成员、安全和集成配置。' : 'Use the account hub to complete organization, member, security, and integration setup.'} />
     <Badge variant="outline">{progress}% {isZh ? '已完成' : 'complete'}</Badge>

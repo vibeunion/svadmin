@@ -358,7 +358,7 @@ bun run dev
 
 ## Stack
 
-- **UI**: Svelte 5 + Bits UI + precompiled Panda CSS
+- **UI**: Svelte 5 + Bits UI + Tailwind semantic recipes (precompiled CSS)
 - **Data**: ${dpLabel} DataProvider
 - **Auth**: ${authLabel}
 - **State**: TanStack Query v6

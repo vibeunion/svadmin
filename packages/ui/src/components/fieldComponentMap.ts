@@ -94,8 +94,8 @@ export const builtinDisplayComponents: FieldComponentMap
     DateField, input => ({ value: input.value, format: 'datetime' }),
   ),
   time: validatedDisplay(
-    Type.Object({ value: date, format: Type.Literal('time') }, { additionalProperties: false }),
-    DateField, input => ({ value: input.value, format: 'time' }),
+    Type.Object({ value: date, format: Type.Literal('iso') }, { additionalProperties: false }),
+    DateField, input => ({ value: input.value, format: 'iso' }),
   ),
   daterange: validatedDisplay(props(nullable(Type.Union([
     Type.Tuple([date, date]),

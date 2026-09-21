@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render } from '@testing-library/svelte';
 import FieldRenderer from './FieldRenderer.svelte';
 import type { FieldDefinition } from '@svadmin/core';
+import { requireValue } from '../../../../scripts/test-assertions';
 
 describe('FieldRenderer advanced controls', () => {
   it.each([false, true])('keeps typed select values and disabled choices (large=%s)', async large => {
@@ -63,21 +64,23 @@ describe('FieldRenderer advanced controls', () => {
     });
 
     const checkboxes = view.getAllByRole('checkbox');
-    expect(checkboxes[0].getAttribute('aria-checked')).toBe('true');
-    expect(checkboxes[0].hasAttribute('disabled')).toBe(true);
+    const readCheckbox = requireValue(checkboxes[0]);
+    const writeCheckbox = requireValue(checkboxes[1]);
+    expect(readCheckbox.getAttribute('aria-checked')).toBe('true');
+    expect(readCheckbox.hasAttribute('disabled')).toBe(true);
     expect(view.container.textContent).toContain('读取');
 
-    await fireEvent.click(checkboxes[0]);
+    await fireEvent.click(readCheckbox);
     expect(onchange).not.toHaveBeenCalled();
     const remove = view.getByRole('button');
     expect(remove.hasAttribute('disabled')).toBe(true);
     await fireEvent.click(remove);
     expect(onchange).not.toHaveBeenCalled();
-    await fireEvent.click(checkboxes[1]);
+    await fireEvent.click(writeCheckbox);
     expect(onchange).toHaveBeenLastCalledWith(['read', 'write']);
     onchange.mockClear();
     await view.rerender({ disabled: true });
-    await fireEvent.click(checkboxes[1]);
+    await fireEvent.click(writeCheckbox);
     expect(onchange).not.toHaveBeenCalled();
   });
 
