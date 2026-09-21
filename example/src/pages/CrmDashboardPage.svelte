@@ -5,6 +5,7 @@
   import { demoContracts } from '../resource-contracts';
   import { demoRenderers } from '../resource-rendering';
   import { readHashView } from '../utils/hashView';
+  import CrmStageProgress from '../components/CrmStageProgress.svelte';
   import WorkspaceQueryState from './WorkspaceQueryState.svelte';
   import WorkspaceRecordLinks from './WorkspaceRecordLinks.svelte';
 
@@ -79,7 +80,7 @@
         <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {#each stages as stage (stage)}
             {@const count = deals.filter(item => item.stage === stage).length}
-            <div class="border-b py-3"><p class="flex justify-between text-sm"><span>{isZh ? stageLabels[stage] : stage}</span><span>{count}</span></p><progress class="mt-2 w-full" max={Math.max(1, deals.length)} value={count} aria-label={stage}></progress></div>
+            <CrmStageProgress label={isZh ? stageLabels[stage] : stage} {count} total={deals.length} />
           {/each}
         </section>
       </WorkspaceQueryState>
