@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.10.0](https://github.com/vibeunion/svadmin/compare/surface-v0.9.0...surface-v0.10.0) (2026-09-21)
+
+
+### 🚀 Features
+
+* **surface:** policy-bound record details and activity timelines ([5b6b727](https://github.com/vibeunion/svadmin/commit/5b6b727cb2a54716ab429ca4987f9bdd0055b10d))
+* **ui:** replace Panda with Tailwind OpenUI and complete example remediation ([d5196a8](https://github.com/vibeunion/svadmin/commit/d5196a87e3f81a27bff421f86738fe91fb58e182))
+
+
+### 🐛 Bug Fixes
+
+* **surface:** honor interactive business widget appearance ([13b7b8b](https://github.com/vibeunion/svadmin/commit/13b7b8b062a7ae796e83441b6972f9f6a1afc086))
+* **surface:** integrate business widgets with current Tailwind contracts ([db9aa62](https://github.com/vibeunion/svadmin/commit/db9aa62ba38a15b052cea869d64f1efff2e05df9))
+* **surface:** satisfy strict appearance access ([e1c7fc1](https://github.com/vibeunion/svadmin/commit/e1c7fc192cde0e0c131f9237df14afa4da243ed4))
+* **ui:** neutralize design naming and complete migration regressions ([36651a0](https://github.com/vibeunion/svadmin/commit/36651a03fa06bcf11046692d1e03c97cba67380c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.53.0 <0.54.0 to >=0.53.0 <0.55.0
+    * @svadmin/ui bumped from >=0.73.0 <0.74.0 to >=0.73.0 <0.75.0
+
 ## [0.9.0](https://github.com/vibeunion/svadmin/compare/surface-v0.8.19...surface-v0.9.0) (2026-09-20)
 
 

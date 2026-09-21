@@ -1,5 +1,42 @@
 # Changelog
 
+## [0.74.0](https://github.com/vibeunion/svadmin/compare/ui-v0.73.0...ui-v0.74.0) (2026-09-21)
+
+
+### 🚀 Features
+
+* **devtools:** structured DevTools bridge + @svadmin/devtools-contract ([#449](https://github.com/vibeunion/svadmin/issues/449)) ([6f36904](https://github.com/vibeunion/svadmin/commit/6f36904818fb3e3cdee038493b3cbd6ede4924b8))
+* **surface:** policy-bound record details and activity timelines ([5b6b727](https://github.com/vibeunion/svadmin/commit/5b6b727cb2a54716ab429ca4987f9bdd0055b10d))
+* **ui:** complete enterprise contracts and migration docs ([84e1549](https://github.com/vibeunion/svadmin/commit/84e1549c68e26f88d5a0b4f61c38bd9d3a412306))
+* **ui:** replace Panda with Tailwind OpenUI and complete example remediation ([d5196a8](https://github.com/vibeunion/svadmin/commit/d5196a87e3f81a27bff421f86738fe91fb58e182))
+
+
+### 🐛 Bug Fixes
+
+* **ci:** align migration source checks and strict validation ([def4da7](https://github.com/vibeunion/svadmin/commit/def4da770a5d024625c3e31127a2847257428105))
+* **example:** complete runtime and delivery acceptance ([85f1b21](https://github.com/vibeunion/svadmin/commit/85f1b210a45cec0721ed391a541ae4d264e4d1c9))
+* **surface:** integrate business widgets with current Tailwind contracts ([db9aa62](https://github.com/vibeunion/svadmin/commit/db9aa62ba38a15b052cea869d64f1efff2e05df9))
+* **test:** use supported exact role matchers ([fcfdb4b](https://github.com/vibeunion/svadmin/commit/fcfdb4b92a7955dd7cd861134929f98a3a0fddc3))
+* **ui:** align merged components with panda css ([7b83b89](https://github.com/vibeunion/svadmin/commit/7b83b892ca2ceb7479505af95992908b3a4fd6c8))
+* **ui:** neutralize design naming and complete migration regressions ([36651a0](https://github.com/vibeunion/svadmin/commit/36651a03fa06bcf11046692d1e03c97cba67380c))
+
+
+### 🔧 Miscellaneous Chores
+
+* **design:** remove external design integration artifacts ([9c24461](https://github.com/vibeunion/svadmin/commit/9c244614eb515a7ae94e7404264c1104695e6170))
+* **design:** remove external design integration artifacts ([def99f0](https://github.com/vibeunion/svadmin/commit/def99f04531125670b1a0b89a4582f41698d2190))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools-contract bumped to 0.2.0
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.9.0
+  * peerDependencies
+    * @svadmin/core bumped to 0.54.0
+
 ## [0.73.0](https://github.com/vibeunion/svadmin/compare/ui-v0.72.0...ui-v0.73.0) (2026-09-20)
 
 

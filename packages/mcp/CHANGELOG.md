@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.4.8](https://github.com/vibeunion/svadmin/compare/mcp-v0.4.7...mcp-v0.4.8) (2026-09-21)
+
+
+### 🐛 Bug Fixes
+
+* **surface:** integrate business widgets with current Tailwind contracts ([db9aa62](https://github.com/vibeunion/svadmin/commit/db9aa62ba38a15b052cea869d64f1efff2e05df9))
+
+
+### 🔧 Miscellaneous Chores
+
+* **packages:** finalize test assertions and repository metadata ([560c2d3](https://github.com/vibeunion/svadmin/commit/560c2d33cbef05197ae9e1eca080934ea9218634))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.54.0
+
 ## [0.4.7](https://github.com/vibeunion/svadmin/compare/mcp-v0.4.6...mcp-v0.4.7) (2026-09-20)
 
 

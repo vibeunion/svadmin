@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/devtools-contract",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Shared JSON-safe DevTools contracts for svadmin and SupaCloud adapters",
   "type": "module",
   "main": "./dist/index.js",
@@ -12,7 +12,10 @@
       "default": "./dist/index.js"
     }
   },
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "publishConfig": {
     "access": "public"
   },

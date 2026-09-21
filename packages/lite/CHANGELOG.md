@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.14.0](https://github.com/vibeunion/svadmin/compare/lite-v0.13.0...lite-v0.14.0) (2026-09-21)
+
+
+### 🚀 Features
+
+* **ui:** complete enterprise contracts and migration docs ([84e1549](https://github.com/vibeunion/svadmin/commit/84e1549c68e26f88d5a0b4f61c38bd9d3a412306))
+* **ui:** replace Panda with Tailwind OpenUI and complete example remediation ([d5196a8](https://github.com/vibeunion/svadmin/commit/d5196a87e3f81a27bff421f86738fe91fb58e182))
+
+
+### 🐛 Bug Fixes
+
+* **surface:** integrate business widgets with current Tailwind contracts ([db9aa62](https://github.com/vibeunion/svadmin/commit/db9aa62ba38a15b052cea869d64f1efff2e05df9))
+* **ui:** neutralize design naming and complete migration regressions ([36651a0](https://github.com/vibeunion/svadmin/commit/36651a03fa06bcf11046692d1e03c97cba67380c))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.34.2 <0.54.0 to >=0.34.2 <0.55.0
+
 ## [0.13.0](https://github.com/vibeunion/svadmin/compare/lite-v0.12.0...lite-v0.13.0) (2026-09-20)
 
 
