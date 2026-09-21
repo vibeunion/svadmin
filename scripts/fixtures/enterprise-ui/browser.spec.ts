@@ -43,9 +43,10 @@ test('formula updates and errors work under a CSP without unsafe-eval', async ({
   const csp = response?.headers()['content-security-policy'];
   expect(csp).toContain("script-src 'self'");
   expect(csp).not.toContain('unsafe-eval');
-  await expect(page.getByLabel('Cell D1', { exact: true })).toHaveValue('#CYCLE!');
-  await page.getByLabel('Formula A1', { exact: true }).fill('12');
-  await expect(page.getByLabel('Cell B1', { exact: true })).toHaveValue('24');
+  await expect(page.getByRole('textbox', { name: 'D1', exact: true })).toHaveValue('#CYCLE!');
+  await page.getByRole('textbox', { name: 'A1', exact: true }).click();
+  await page.getByRole('textbox', { name: 'Cell value or formula', exact: true }).fill('12');
+  await expect(page.getByRole('textbox', { name: 'B1', exact: true })).toHaveValue('24');
   await page.getByRole('button', { name: 'Export CSV', exact: true }).click();
   await expect(page.getByTestId('csv-result')).toContainText('0.3333333333333333');
   await expect(page.getByTestId('csv-result')).toContainText("'@SUM(1,2)");
@@ -56,9 +57,9 @@ test('readonly state blocks editing and schema errors disable submission', async
   await page.getByRole('button', { name: 'Toggle readonly', exact: true }).click();
   await expect(page.getByTestId('filter-builder-apply')).toBeDisabled();
   await expect(page.getByTestId('json-schema-form').locator('[name="amount"]')).toBeDisabled();
-  await expect(page.getByLabel('Formula A1', { exact: true })).toHaveAttribute('readonly', '');
+  await expect(page.getByRole('textbox', { name: 'Cell value or formula', exact: true })).toHaveAttribute('readonly', '');
   await page.getByRole('button', { name: 'Toggle readonly', exact: true }).click();
-  await page.getByRole('button', { name: 'Unsupported schema', exact: true }).click();
+  await page.getByRole('button', { name: 'Invalid schema', exact: true }).click();
   await expect(page.getByTestId('schema-form-errors')).toBeVisible();
   await expect(page.getByTestId('json-schema-form').getByRole('button', { name: 'Submit', exact: true })).toBeDisabled();
 });
@@ -71,7 +72,7 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 1920, height: 108
       await page.evaluate((dark) => document.documentElement.classList.toggle('dark', dark), theme === 'dark');
       await expect(page.getByTestId('filter-builder')).toBeVisible();
       await expect(page.getByTestId('json-schema-form')).toBeVisible();
-      await expect(page.getByLabel('Cell B1', { exact: true })).toHaveValue('4');
+      await expect(page.getByRole('textbox', { name: 'B1', exact: true })).toHaveValue('4');
       await page.evaluate(() => document.fonts.ready);
       await mkdir(screenshots, { recursive: true });
       await page.screenshot({ path: path.join(screenshots, `ready-${viewport.width}x${viewport.height}-${theme}.png`), fullPage: true });

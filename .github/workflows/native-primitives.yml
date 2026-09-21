@@ -103,7 +103,7 @@ jobs:
           if test -d packages/ui/dist; then tar -czf "$RUNNER_TEMP/native-primitives/ui-dist.tar.gz" -C packages/ui dist; fi
           if test -d packages/surface/dist; then tar -czf "$RUNNER_TEMP/native-primitives/surface-dist.tar.gz" -C packages/surface dist; fi
           if test -d test-results/ui-styles; then cp -R test-results/ui-styles "$RUNNER_TEMP/native-primitives/"; fi
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: native-primitives-evidence

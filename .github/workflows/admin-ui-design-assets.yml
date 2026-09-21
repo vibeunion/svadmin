@@ -55,7 +55,7 @@ jobs:
           find design/admin-ui -type f -print0 | sort -z | xargs -0 sha256sum > test-results/admin-ui-design-kit/source-hashes.txt
           # 只归档该修订的受版本控制源码；不含凭证、环境变量或依赖目录。
           git archive --format=tar.gz HEAD > test-results/admin-ui-design-kit/source.tar.gz
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         if: always()
         with:
           name: admin-ui-design-assets-${{ github.sha }}

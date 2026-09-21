@@ -3,6 +3,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { stableScreenshot } from '../scripts/stable-screenshot.mjs';
 import { join } from 'node:path';
 import { demoSchemas } from '../example/src/resource-schemas';
+import { createResources } from '../example/src/resources';
 import { inMemoryDataProvider } from '../example/src/providers/inMemoryDb';
 
 async function login(page: Page) {
@@ -38,16 +39,27 @@ for (const resource of Object.keys(demoSchemas)) {
       await expect(page.locator(`[data-svadmin-rendering-resource="${resource}"][data-svadmin-rendering-kind="table"]`)).toBeVisible();
       await expect(page.locator('table tbody tr').first()).toBeVisible();
     }
-    await page.goto(`/#/${resource}/create`);
-    const create = page.locator(`[data-svadmin-rendering-resource="${resource}"][data-svadmin-rendering-kind="form"]`);
-    await expect(create).toHaveCount(1);
-    await expect(create.locator('form')).toBeVisible();
+    const definition = createResources('en').find(item => item.name === resource);
+    if (!definition) throw new Error(`Missing resource definition: ${resource}`);
+    if (definition.canCreate !== false) {
+      await page.goto(`/#/${resource}/create`);
+      const create = page.locator(`[data-svadmin-rendering-resource="${resource}"][data-svadmin-rendering-kind="form"]`);
+      await expect(create).toHaveCount(1);
+      await expect(create.locator('form')).toBeVisible();
+    } else {
+      await page.goto(`/#/${resource}/create`);
+      await expect(page.getByRole('alert').filter({ hasText: /Access restricted|无权访问/ })).toBeVisible();
+      await expect(page.locator('[data-svadmin-rendering-kind="form"]')).toHaveCount(0);
+    }
     const result = await inMemoryDataProvider.getList({ resource, pagination: { current: 1, pageSize: 1 } });
     const first = result.data[0];
     if (first) {
       const id = first['id'];
       if (typeof id !== 'number') throw new TypeError('Demo routes require the checked numeric fixture ID');
       for (const action of ['edit', 'clone', 'show']) {
+        if ((action === 'edit' && definition.canEdit === false) ||
+          (action === 'clone' && (definition.canCreate === false || definition.canShow === false)) ||
+          (action === 'show' && definition.canShow === false)) continue;
         await page.goto(`/#/${resource}/${action}/${id}`);
         const kind = action === 'show' ? 'show' : 'form';
         const boundary = page.locator(`[data-svadmin-rendering-resource="${resource}"][data-svadmin-rendering-kind="${kind}"]`);

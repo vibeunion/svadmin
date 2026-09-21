@@ -79,7 +79,7 @@ jobs:
           git diff --stat ee01ea0b52285bd3129447cd0b2ddb0c114f45ce HEAD > test-results/content-recipes/diff-stat.txt
           git rev-parse HEAD HEAD^{tree} > test-results/content-recipes/revision.txt
           git diff --binary ee01ea0b52285bd3129447cd0b2ddb0c114f45ce HEAD > test-results/content-recipes/change.patch
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: content-recipe-evidence-${{ github.sha }}

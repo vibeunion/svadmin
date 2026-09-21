@@ -12,11 +12,19 @@ type Manifest = Parameters<typeof packedConsumerDependencies>[2] extends Readonl
 test('Surface declared minimum and peer floors agree with the published UI requirements', async () => {
   const surface = await Bun.file(new URL('../packages/surface/package.json', import.meta.url)).json();
   const compatibility = await Bun.file(new URL('../packages/surface/compatibility.json', import.meta.url)).json();
-  expect(surface.peerDependencies).toEqual({
-    '@svadmin/core': '>=0.53.0 <0.54.0',
-    '@svadmin/ui': '>=0.73.0 <0.74.0',
-    svelte: '^5.56.10',
-  });
+  expect(Object.keys(surface.peerDependencies).sort()).toEqual(['@svadmin/core', '@svadmin/ui', 'svelte']);
+  for (const [peer, minimum] of Object.entries<string>(compatibility.minimumSupported)) {
+    const range = surface.peerDependencies[peer];
+    expect(Bun.semver.satisfies(minimum, range)).toBe(true);
+    const manifestPath = peer === 'svelte'
+      ? '../node_modules/svelte/package.json'
+      : `../packages/${peer.slice('@svadmin/'.length)}/package.json`;
+    const current = await Bun.file(new URL(manifestPath, import.meta.url)).json();
+    expect(Bun.semver.satisfies(current.version, range)).toBe(true);
+  }
+  expect(Bun.semver.satisfies('0.52.999', surface.peerDependencies['@svadmin/core'])).toBe(false);
+  expect(Bun.semver.satisfies('0.72.999', surface.peerDependencies['@svadmin/ui'])).toBe(false);
+  expect(Bun.semver.satisfies('5.56.9', surface.peerDependencies.svelte)).toBe(false);
   expect(compatibility.minimumSupported).toEqual({
     '@svadmin/core': '0.53.0',
     '@svadmin/ui': '0.73.0',
