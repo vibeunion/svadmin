@@ -352,6 +352,29 @@ describe('npm trusted-publishing workflow contract', () => {
     }
   });
 
+  test('release recovery uses the immutable workflow pack verifier without replacing release packages', () => {
+    const workflow = readWorkflow('ci.yml');
+    const verifierStep = [
+      '        env:',
+      '          VERIFIER_SHA: ${{ github.sha }}',
+      '        run: |',
+      '          git fetch --no-tags origin "$VERIFIER_SHA"',
+      '          git restore --source="$VERIFIER_SHA" --worktree -- scripts/check-package-packs.ts',
+    ].join('\n');
+    expect(workflow.split(verifierStep)).toHaveLength(3);
+    expect(workflow).toContain(
+      "- name: Use workflow revision pack verifier\n" +
+      "        if: github.event_name == 'workflow_dispatch' && inputs.release_sha != ''\n" +
+      verifierStep,
+    );
+    for (const name of ['Verify npm tarballs and consumer imports', 'Verify publish tarballs and consumer imports']) {
+      expect(workflow).toContain(`${verifierStep}\n\n      - name: ${name}\n        run: bun run pack:check`);
+    }
+    expect(workflow).toContain('ref: ${{ inputs.release_sha || github.sha }}');
+    expect(workflow).toContain('ref: ${{ inputs.release_sha }}');
+    expect(workflow).not.toContain('git restore --source="$VERIFIER_SHA" --worktree -- packages');
+  });
+
   test('publishes only from an explicit ci.yml workflow dispatch using OIDC', () => {
     const ciWorkflow = readWorkflow('ci.yml');
 
