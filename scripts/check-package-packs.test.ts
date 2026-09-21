@@ -3,7 +3,7 @@ import { spawnSync } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { packedConsumerDependencies, publishedWorkspaceManifest, stagePublishedPack } from './check-package-packs';
+import { packedConsumerDependencies, packedRuntimeOverrides, publishedWorkspaceManifest, stagePublishedPack } from './check-package-packs';
 
 type Manifest = Parameters<typeof packedConsumerDependencies>[2] extends ReadonlyMap<string, infer M>
   ? M
@@ -32,6 +32,36 @@ test('Surface declared minimum and peer floors agree with the published UI requi
   });
   expect(compatibility.testedCombinations).toContainEqual({
     name: 'minimum-supported', core: '0.53.0', ui: '0.73.0', svelte: '5.56.10',
+  });
+});
+
+test('pnpm tarball overrides bind only selected runtime edges and preserve peer and published minimum constraints', () => {
+  const manifests = new Map<string, Manifest>([
+    ['@svadmin/ui', {
+      name: '@svadmin/ui',
+      dependencies: { '@svadmin/devtools-contract': 'workspace:*' },
+      optionalDependencies: { '@svadmin/editor': 'workspace:*' },
+      peerDependencies: { '@svadmin/core': 'workspace:*' },
+    }],
+    ['@svadmin/devtools-contract', { name: '@svadmin/devtools-contract' }],
+    ['@svadmin/editor', { name: '@svadmin/editor' }],
+    ['@svadmin/core', { name: '@svadmin/core' }],
+  ]);
+  const dependencies = {
+    '@svadmin/ui': 'file:/packs/ui.tgz',
+    '@svadmin/devtools-contract': 'file:/packs/devtools.tgz',
+    '@svadmin/core': 'file:/packs/core.tgz',
+  };
+  expect(packedRuntimeOverrides(dependencies, manifests)).toEqual({
+    '@svadmin/ui>@svadmin/devtools-contract': 'file:/packs/devtools.tgz',
+  });
+  expect(packedRuntimeOverrides({ ...dependencies, '@svadmin/ui': '0.73.0' }, manifests)).toEqual({});
+  expect(packedRuntimeOverrides({ ...dependencies, '@svadmin/devtools-contract': '0.1.0' }, manifests)).toEqual({});
+  expect(packedRuntimeOverrides({
+    ...dependencies, '@svadmin/editor': 'file:/packs/editor.tgz',
+  }, manifests)).toEqual({
+    '@svadmin/ui>@svadmin/devtools-contract': 'file:/packs/devtools.tgz',
+    '@svadmin/ui>@svadmin/editor': 'file:/packs/editor.tgz',
   });
 });
 
