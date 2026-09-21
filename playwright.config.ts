@@ -15,8 +15,11 @@ export default defineConfig({
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
   ],
   webServer: {
-    command: 'bun run dev',
+    command: process.env.CI
+      ? 'bun run build:example && bun run --cwd example preview --host 127.0.0.1 --port 5173 --strictPort'
+      : 'bun run dev',
     url: 'http://127.0.0.1:5173',
     reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
   },
 });
