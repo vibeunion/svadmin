@@ -6,6 +6,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineSurfaceAction, createSurfaceWorkflowService } from '../../packages/surface/src/server.js';
 import { SqliteSurfaceWorkflowStore } from '../../packages/surface/src/server-sqlite.js';
+import { createBusinessSurfaceDefinitions } from '../../packages/surface/src/business-definitions.js';
 import { createInteractiveSurfaceDefinitions, defaultSurfaceDefinitions } from '../../packages/surface/src/workflows.js';
 import { actionDescriptor, policy } from './fixture.js';
 
@@ -18,7 +19,7 @@ const action = defineSurfaceAction({ ...actionDescriptor,
   authorize: ({ context, requesterId }) => context.tenantId === 'tenant-a' && context.actorId === 'alice' && requesterId === 'alice',
   execute: async ({ args }) => { writes++; records.push({ id: `created-${writes}`, name: String((args.profile as { name: string }).name) }); return { id: `created-${writes}` }; },
 });
-const catalog = createInteractiveSurfaceDefinitions([action], defaultSurfaceDefinitions);
+const catalog = createInteractiveSurfaceDefinitions([action], createBusinessSurfaceDefinitions(defaultSurfaceDefinitions));
 const service = createSurfaceWorkflowService({ store, actions: [action],
   authorizeSurface: ({ context }) => context.tenantId === 'tenant-a' && context.actorId === 'alice' ? { catalog, policy } : null,
 });
@@ -48,6 +49,13 @@ export default defineConfig({
           else if (operation === 'audit') result = await service.audit(context, 'contacts');
           else if (operation === 'state') result = { writes, queries, revision: store.getRevision('tenant-a', 'contacts')?.revision ?? 0 };
           else if (operation === 'list') { if (context.tenantId !== 'tenant-a') throw new Error('Denied'); queries++; result = { data: records, total: records.length }; }
+          else if (operation === 'one') {
+            if (context.tenantId !== 'tenant-a' || context.actorId !== 'alice' || input.resource !== 'contacts' || input.id !== 'seed') throw new Error('Denied');
+            queries++; result = { data: { id: 'seed', name: 'Synthetic detail contact', active: false, balance: 0, secret: 'private-contact-value' } };
+          } else if (operation === 'events') {
+            if (context.tenantId !== 'tenant-a' || context.actorId !== 'alice') throw new Error('Denied');
+            queries++; result = { data: [{ id: 'event-1', action: 'Created contact', at: '2026-09-20T00:00:00Z', actor: 'Synthetic operator', comment: '<img src=x onerror=alert(1)>', secret: 'private-event-value' }], total: 1 };
+          }
           else throw new Error('Unknown fixture operation');
           res.end(JSON.stringify(result));
         } catch (error) { res.statusCode = 400; res.end(JSON.stringify({ error: error instanceof Error ? error.message : 'Request failed' })); }

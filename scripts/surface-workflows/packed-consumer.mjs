@@ -18,13 +18,15 @@ mkdirSync(output, { recursive: true });
 try {
   const dependencies = { svelte: root.overrides.svelte, '@tanstack/svelte-query': manifest('ui').peerDependencies['@tanstack/svelte-query'],
     '@sinclair/typebox': manifest('surface').dependencies['@sinclair/typebox'] };
-  for (const name of ['core', 'ui', 'surface']) {
-    const [pack] = JSON.parse(run('npm', ['pack', '--json', '--ignore-scripts', '--pack-destination', temporary], join(repository, 'packages', name)));
+  for (const name of ['devtools-contract', 'core', 'ui', 'surface']) {
+    // 发布打包器解析 workspace 协议；独立消费者不依赖仓库工作区。
+    const tarball = run('bun', ['pm', 'pack', '--quiet', '--ignore-scripts', '--destination', temporary], join(repository, 'packages', name)).trim();
+    const [pack] = JSON.parse(run('npm', ['pack', tarball, '--dry-run', '--json', '--ignore-scripts']));
     assert.ok(pack?.filename && pack.integrity, `Missing ${name} pack`);
     dependencies[`@svadmin/${name}`] = `file:${join(temporary, pack.filename)}`;
     report.packs[name] = { filename: pack.filename, integrity: pack.integrity };
     if (name === 'surface') {
-      for (const entry of ['workflows', 'interactive', 'openui', 'server', 'server-sqlite']) {
+      for (const entry of ['business', 'business-definitions', 'workflows', 'interactive', 'openui', 'server', 'server-sqlite']) {
         assert.ok(pack.files.some(file => file.path === `dist/${entry}.js`), `Missing ${entry} JavaScript`);
         assert.ok(pack.files.some(file => file.path === `dist/${entry}.d.ts`), `Missing ${entry} declarations`);
       }
@@ -35,14 +37,20 @@ try {
     packageManager: 'pnpm@11.11.0', dependencies, devDependencies: {
       vite: root.overrides.vite, '@sveltejs/vite-plugin-svelte': manifest('ui').devDependencies['@sveltejs/vite-plugin-svelte'],
     } }, null, 2));
+  // 仅替换运行时依赖来源，保留所有 peer 范围；JSON 也是合法的 YAML。
+  writeFileSync(join(temporary, 'pnpm-workspace.yaml'), JSON.stringify({
+    overrides: { '@svadmin/ui>@svadmin/devtools-contract': dependencies['@svadmin/devtools-contract'] },
+  }, null, 2));
   run('npx', ['--yes', 'pnpm@11.11.0', 'install', '--strict-peer-dependencies', '--ignore-scripts', '--reporter', 'append-only']);
   writeFileSync(join(temporary, 'server.mjs'), `
     import assert from 'node:assert/strict';
     import { validateSurfaceSpec } from '@svadmin/surface';
+    import { createBusinessSurfaceDefinitions } from '@svadmin/surface/business-contracts';
     import { createInteractiveSurfaceDefinitions } from '@svadmin/surface/workflows';
     import { createSurfaceOpenUIStream } from '@svadmin/surface/openui';
     import { createSurfaceWorkflowService } from '@svadmin/surface/server';
     import { SqliteSurfaceWorkflowStore } from '@svadmin/surface/server/sqlite';
+    assert.ok(createBusinessSurfaceDefinitions().widgets.some(widget => widget.dataKind === 'record'));
     for (const api of [validateSurfaceSpec, createInteractiveSurfaceDefinitions, createSurfaceOpenUIStream, createSurfaceWorkflowService]) assert.equal(typeof api, 'function');
     const store = new SqliteSurfaceWorkflowStore(':memory:');
     try {
@@ -54,11 +62,12 @@ try {
   run('node', ['server.mjs']);
   writeFileSync(join(temporary, 'entry.ts'), `
     import { Type } from '@sinclair/typebox';
+    import { createBusinessSurfaceCatalog } from '@svadmin/surface/business';
     import { createInteractiveSurfaceCatalog, SurfaceWorkflowProvider } from '@svadmin/surface/interactive';
     import { SurfaceRenderer } from '@svadmin/surface/svelte';
     import '@svadmin/ui/app.css';
     import '@svadmin/surface/styles.css';
-    export const catalog = createInteractiveSurfaceCatalog([{ id:'contacts.create',version:'1',label:'Create',approval:'confirm',inputSchema:Type.Object({name:Type.String()},{additionalProperties:false}) }]);
+    export const catalog = createInteractiveSurfaceCatalog([{ id:'contacts.create',version:'1',label:'Create',approval:'confirm',inputSchema:Type.Object({name:Type.String()},{additionalProperties:false}) }], createBusinessSurfaceCatalog());
     export { SurfaceWorkflowProvider, SurfaceRenderer };
   `);
   writeFileSync(join(temporary, 'vite.config.mjs'), `

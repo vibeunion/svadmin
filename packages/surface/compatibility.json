@@ -38,6 +38,17 @@
     "./server/sqlite": {
       "runtime": "Node.js",
       "verification": "Current CI Node version with real node:sqlite; no browser or distributed-store support implied."
+    },
+    "./business": {
+      "status": "experimental",
+      "requiredUiCapabilities": [
+        "ActivityFeed.title",
+        "ActivityFeed.emptyLabel",
+        "ActivityFeed.countLabel"
+      ],
+      "minimumPublishedUi": null,
+      "verification": "same-checkout business + interactive packed consumer; current Surface workflow reports",
+      "releaseGate": "Coordinate a tested UI release and verify the peer floor before publishing this new entry."
     }
   }
 }

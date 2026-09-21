@@ -3,6 +3,7 @@ import { pathToFileURL } from 'node:url';
 import { createSurfaceOpenUIStream, buildSurfaceOpenUIMessages } from '../../packages/surface/dist/openui.js';
 import { createInteractiveSurfaceDefinitions, defaultSurfaceDefinitions } from '../../packages/surface/dist/workflows.js';
 import { Type } from '@sinclair/typebox';
+import { createBusinessSurfaceDefinitions } from '../../packages/surface/dist/business-definitions.js';
 
 if (!process.env.SVADMIN_OPENUI_ENTRY) throw new Error('SVADMIN_OPENUI_ENTRY must resolve the real @openuidev/lang-core@0.3.0 entry');
 const { createStreamingParser } = await import(pathToFileURL(process.env.SVADMIN_OPENUI_ENTRY).href);
@@ -42,5 +43,30 @@ for (const text of [program + 'evil = Mutation("erase", {})\n', program.replace(
 }
 const messages = buildSurfaceOpenUIMessages('显示客户数量和创建表单', catalog, policy);
 assert.equal(messages[0].role, 'system'); assert.ok(messages[0].content.includes('Create contact')); checks += 2;
+// 同一个真实解析器验证新增目录，保留上方所有既有用例。
+const businessCatalog = createBusinessSurfaceDefinitions(defaultSurfaceDefinitions);
+const businessPolicy = { resources: {
+  contacts: { readFields: ['id', 'name'], allowGetOne: true, maxPageSize: 10 },
+  events: { readFields: ['id', 'action', 'at', 'actor'], maxPageSize: 10 },
+} };
+const businessProgram = 'root = Surface("contact", "Details and history", [person, events], [detail, timeline])\n'
+  + 'person = Source({"id":"person","type":"resource-one","resource":"contacts","recordId":"c1"})\n'
+  + 'events = Source({"id":"events","type":"resource-list","resource":"events","pageSize":10})\n'
+  + 'detail = ResourceDetail("detail", {"title":"Details","fields":[{"field":"name","label":"Name"}],"tone":"info","density":"compact"}, {"sourceId":"person","pointer":""}, 6)\n'
+  + 'timeline = ActivityFeed("timeline", {"title":"History","idField":"id","actionField":"action","timestampField":"at","actorField":"actor"}, {"sourceId":"events","pointer":"/items"}, 6)\n';
+const businessStream = () => createSurfaceOpenUIStream({ catalog: businessCatalog, policy: businessPolicy, createStreamingParser });
+const baseline = businessStream(); valid(baseline.push(businessProgram)); const businessExpected = baseline.finish(); valid(businessExpected);
+assert.deepEqual(businessExpected.preview.widgets.map(widget => widget.type), ['resource-detail', 'activity-feed']); checks++;
+for (let at = 0; at <= businessProgram.length; at++) {
+  const stream = businessStream(); valid(stream.push(businessProgram.slice(0, at))); valid(stream.push(businessProgram.slice(at)));
+  assert.deepEqual(stream.finish(), businessExpected); checks++;
+}
+for (const invalid of [businessProgram.replace('"field":"name"', '"field":"secret"'),
+  businessProgram.replace('"actorField":"actor"', '"actorField":"secret"'),
+  businessProgram.replace('"pointer":""', '"pointer":"/name"'),
+  businessProgram.replace('"tone":"info"', '"style":"raw"')]) {
+  const stream = businessStream(), result = stream.push(invalid);
+  assert.equal((result.ok ? stream.finish() : result).ok, false); checks++;
+}
 console.info(JSON.stringify({ integration: '@openuidev/lang-core@0.3.0 (real parser factory)', checks,
   scope: 'Constrained static OpenUI subset. Deterministic protocol tests, not real-model generation accuracy.' }, null, 2));

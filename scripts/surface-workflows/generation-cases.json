@@ -1,5 +1,54 @@
 [
-  {"id":"contact-count","prompt":"显示客户总数，使用紧凑的信息语义样式。","requiredTypes":["metric"],"requireCount":true,"tone":"info","density":"compact"},
-  {"id":"contact-form","prompt":"生成创建客户的交互表单，使用系统已注册的客户创建操作。","requiredTypes":["resource-form"],"actionId":"contacts.create"},
-  {"id":"contact-workspace","prompt":"展示客户姓名列表，并在同一个页面放置创建客户表单。","requiredTypes":["resource-table","resource-form"],"actionId":"contacts.create","requireNameColumn":true}
+  {
+    "id": "contact-count",
+    "prompt": "显示客户总数，使用紧凑的信息语义样式。",
+    "requiredTypes": [
+      "metric"
+    ],
+    "requireCount": true,
+    "tone": "info",
+    "density": "compact"
+  },
+  {
+    "id": "contact-form",
+    "prompt": "生成创建客户的交互表单，使用系统已注册的客户创建操作。",
+    "requiredTypes": [
+      "resource-form"
+    ],
+    "actionId": "contacts.create"
+  },
+  {
+    "id": "contact-workspace",
+    "prompt": "展示客户姓名列表，并在同一个页面放置创建客户表单。",
+    "requiredTypes": [
+      "resource-table",
+      "resource-form"
+    ],
+    "actionId": "contacts.create",
+    "requireNameColumn": true
+  },
+  {
+    "id": "contact-detail",
+    "prompt": "展示客户 c1 的姓名详情，数据必须来自系统记录，不要虚构字段值。",
+    "requiredTypes": [
+      "resource-detail"
+    ],
+    "detailFields": [
+      "name"
+    ],
+    "recordId": "c1"
+  },
+  {
+    "id": "contact-history",
+    "prompt": "展示 events 资源的活动时间线，包括操作者、动作和时间；不提供评论提交入口。",
+    "requiredTypes": [
+      "activity-feed"
+    ],
+    "activityFields": {
+      "idField": "id",
+      "actionField": "action",
+      "timestampField": "at",
+      "actorField": "actor"
+    }
+  }
 ]

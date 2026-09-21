@@ -126,11 +126,16 @@ function referencedFieldIssue(
   source: SurfaceDataSource,
   policy: SurfacePolicy,
 ): SurfaceValidationIssue | null {
-  if (!definition.getReferencedFields) return null;
+  if (!definition.getReferencedFields) return definition.dataKind === 'record'
+    ? { code: 'invalid_widget_props', path: `/widgets/${widgetIndex}/props`, message: 'Record widgets require an explicit field selector', widgetId: widget.id }
+    : null;
 
   let referencedFields: readonly string[];
   try {
     referencedFields = definition.getReferencedFields(widget.props);
+    if (!Array.isArray(referencedFields) || (definition.dataKind === 'record' && referencedFields.length === 0)) {
+      throw new Error('Record fields must be explicit');
+    }
   } catch {
     return {
       code: "invalid_widget_props",
@@ -141,15 +146,15 @@ function referencedFieldIssue(
   }
 
   const readableFields = resourcePolicyFor(policy, source.resource)?.readFields ?? [];
-  const deniedField = referencedFields.find((field) => (
+  const deniedIndex = referencedFields.findIndex((field) => (
     typeof field !== "string" || !readableFields.includes(field)
   ));
-  return deniedField === undefined
+  return deniedIndex === -1
     ? null
     : {
         code: "field_denied",
         path: `/widgets/${widgetIndex}/props`,
-        message: `Field "${String(deniedField)}" is not readable`,
+        message: `Field "${String(referencedFields[deniedIndex])}" is not readable`,
         widgetId: widget.id,
         sourceId: source.id,
       };
@@ -229,8 +234,9 @@ function widgetIssue(
   const resourceOneField = source.type === "resource-one" ? resourceOnePointerField(pointer) : null;
   const pointerIsValid = definition.dataKind === "items"
     ? source.type === "resource-list" && pointer === "/items"
-    : (source.type === "resource-list" && pointer === "/total")
-      || resourceOneField !== null;
+    : definition.dataKind === 'record'
+      ? source.type === 'resource-one' && pointer === ''
+      : definition.dataKind === 'scalar' && ((source.type === "resource-list" && pointer === "/total") || resourceOneField !== null);
   if (!pointerIsValid) {
     return {
       code: "invalid_binding_pointer",
