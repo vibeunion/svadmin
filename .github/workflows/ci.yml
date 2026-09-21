@@ -97,6 +97,14 @@ jobs:
             git diff --check
           fi
 
+      - name: Use workflow revision pack verifier
+        if: github.event_name == 'workflow_dispatch' && inputs.release_sha != ''
+        env:
+          VERIFIER_SHA: ${{ github.sha }}
+        run: |
+          git fetch --no-tags origin "$VERIFIER_SHA"
+          git restore --source="$VERIFIER_SHA" --worktree -- scripts/check-package-packs.ts
+
       - name: Verify npm tarballs and consumer imports
         run: bun run pack:check
 
@@ -294,6 +302,13 @@ jobs:
             }
           }
           NODE
+
+      - name: Use workflow revision pack verifier
+        env:
+          VERIFIER_SHA: ${{ github.sha }}
+        run: |
+          git fetch --no-tags origin "$VERIFIER_SHA"
+          git restore --source="$VERIFIER_SHA" --worktree -- scripts/check-package-packs.ts
 
       - name: Verify publish tarballs and consumer imports
         run: bun run pack:check
