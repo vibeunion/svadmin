@@ -105,7 +105,7 @@
     get pagination() { return { current: page, pageSize: normalizedFetchSize }; },
     get defaultValue() {
       if (Array.isArray(value)) return value;
-      return value === null || value === undefined ? [] : [value];
+      return value === null || value === undefined || value === '' ? [] : [value];
     },
     get filters() { return searchFilters.filters; },
     get queryOptions() { return { enabled: !searchFilters.invalid }; },

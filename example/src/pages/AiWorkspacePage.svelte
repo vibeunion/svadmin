@@ -134,7 +134,7 @@
               <div class="flex items-start gap-2 border-b py-3"><a class="min-w-0 flex-1 break-words text-sm text-primary" href={`#/ai_conversations?thread=${thread.id}`}>{thread.title}</a><Button size="icon" variant="ghost" aria-label={isZh ? '收藏会话' : 'Favorite thread'} aria-pressed={favorites.includes(thread.id)} onclick={() => toggleFavorite(thread.id)}><Heart class={favorites.includes(thread.id) ? 'size-4 fill-primary text-primary' : 'size-4'} /></Button></div>
             {/each}
           </WorkspaceQueryState>
-          <details class="mt-4 border-t pt-3"><summary class="cursor-pointer text-sm">{isZh ? '历史管理' : 'Manage history'}</summary><Button class="mt-3" variant="outline" disabled={busy || query.isLoading || query.isError || !conversations.length} onclick={() => void clearHistory()}>{isZh ? '清理本地历史' : 'Clear local history'}</Button></details>
+          <details class="svadmin-collapsible mt-4 border-t pt-3"><summary class="cursor-pointer text-sm">{isZh ? '历史管理' : 'Manage history'}</summary><Button class="mt-3" variant="outline" disabled={busy || query.isLoading || query.isError || !conversations.length} onclick={() => void clearHistory()}>{isZh ? '清理本地历史' : 'Clear local history'}</Button></details>
         </aside>
         <section class="min-w-0 space-y-4">
           <div class="flex flex-wrap justify-between gap-3"><h2 class="text-base font-semibold">{selected?.title ?? (isZh ? '新对话' : 'New conversation')}</h2>{#if messages.length}<Button size="icon" variant="outline" aria-label={isZh ? '复制对话' : 'Copy conversation'} onclick={() => void copyConversation()}><Copy class="size-4" /></Button>{/if}</div>

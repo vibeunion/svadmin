@@ -606,7 +606,7 @@
   {/if}
 
   {#if activeResource !== 'roles'}
-    <details class="border-y py-3">
+    <details class="svadmin-collapsible border-y py-3">
     <summary class="cursor-pointer text-sm">{isZh ? '组织背景资料' : 'Organization context'}</summary>
     <section class="grid min-w-0 gap-4 lg:grid-cols-[1fr_0.72fr]">
       <Card.Root class="overflow-hidden">

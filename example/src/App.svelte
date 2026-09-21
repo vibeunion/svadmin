@@ -13,8 +13,8 @@
   import { exampleMemberDirectory, exampleNotificationPreferences } from './providers/accountDemo';
   import LazyDashboard from './components/LazyDashboard.svelte';
   import LazyResourcePage from './components/LazyResourcePage.svelte';
-  import BusinessAutoForm from './components/BusinessAutoForm.svelte';
-  import BusinessShowPage from './components/BusinessShowPage.svelte';
+  import LazyBusinessAutoForm from './components/LazyBusinessAutoForm.svelte';
+  import LazyBusinessShowPage from './components/LazyBusinessShowPage.svelte';
   import LazyRichTextEditor from './components/LazyRichTextEditor.svelte';
   import LazyChatDialog from './components/LazyChatDialog.svelte';
   import LazyOfficeWorkspace from './components/LazyOfficeWorkspace.svelte';
@@ -46,8 +46,8 @@
     const pages: NonNullable<ComponentProps<typeof AdminApp>['resourcePages']> = {};
     for (const resource of baseResources) {
       pages[resource.name] = {
-        list: LazyResourcePage, create: BusinessAutoForm, edit: BusinessAutoForm,
-        clone: BusinessAutoForm, show: BusinessShowPage,
+        list: LazyResourcePage, create: LazyBusinessAutoForm, edit: LazyBusinessAutoForm,
+        clone: LazyBusinessAutoForm, show: LazyBusinessShowPage,
       };
     }
     pages['design_principles'] = { list: LazyResourcePage };

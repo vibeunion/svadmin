@@ -65,11 +65,15 @@ describe('business rendering migration inventory', () => {
 
   it('wires every dynamic CRUD route and both drawer paths', () => {
     const app = source('../src/App.svelte');
-    for (const action of ['create', 'edit', 'clone']) expect(app).toContain(`${action}: BusinessAutoForm`);
-    expect(app).toContain('show: BusinessShowPage');
+    for (const action of ['create', 'edit', 'clone']) expect(app).toContain(`${action}: LazyBusinessAutoForm`);
+    expect(app).toContain('show: LazyBusinessShowPage');
     expect(source('../src/components/BusinessShowPage.svelte')).toContain('demoRouteId(resourceName, id)');
     expect(source('../src/components/BusinessShowPage.svelte')).toContain('id={recordId}');
     for (const file of ['BusinessAutoForm', 'BusinessShowPage']) {
+      const lazy = source(`../src/components/Lazy${file}.svelte`);
+      expect(lazy).toContain(`import('./${file}.svelte')`);
+      expect(lazy).toContain(`ComponentProps<typeof ${file}>`);
+      expect(lazy).toContain('<module.default {...props} />');
       expect(assertRenderingChildren(source(`../src/components/${file}.svelte`), ['AutoForm', 'ShowPage'])).toBe(1);
     }
     const root = '../../packages/ui/src/components/';

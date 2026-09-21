@@ -80,7 +80,7 @@
         <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {#each stages as stage (stage)}
             {@const count = deals.filter(item => item.stage === stage).length}
-            <CrmStageProgress label={isZh ? stageLabels[stage] : stage} {count} total={deals.length} />
+            <CrmStageProgress label={isZh ? stageLabels[stage] ?? stage : stage} {count} total={deals.length} />
           {/each}
         </section>
       </WorkspaceQueryState>

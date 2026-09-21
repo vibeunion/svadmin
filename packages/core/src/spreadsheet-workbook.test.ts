@@ -2,12 +2,54 @@ import { describe, expect, it } from 'bun:test';
 import { parseSpreadsheetWorkbook, serializeSpreadsheetWorkbook, snapshotSpreadsheetWorkbook } from './spreadsheet-workbook';
 import { parseSpreadsheetXlsx, serializeSpreadsheetXlsx } from './spreadsheet-xlsx';
 import ExcelJS from 'exceljs';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
 import { requireValue } from '../../../scripts/test-assertions';
 const sheet = () => ({ id: 'one', name: 'One', rows: 2, cols: 2, cells: { A1: '=1+1' } });
 const workbook = () => ({ protocolVersion: 1 as const, sheets: [sheet()], activeSheetId: 'one' });
 const xlsxBuffer = (bytes: Uint8Array): ArrayBuffer => bytes.slice().buffer as ArrayBuffer;
 describe('spreadsheet workbook protocol', () => {
+  it('round-trips extended conditional formatting through the Node CommonJS UUID path', () => {
+    const result = spawnSync('node', ['-e', `
+      const assert = require('node:assert/strict');
+      const { createRequire } = require('node:module');
+      const ExcelJS = require('exceljs');
+      const excelRequire = createRequire(require.resolve('exceljs'));
+      const JSZip = excelRequire('jszip');
+      const uuid = excelRequire('uuid');
+      assert.match(uuid.v4(), /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+      (async () => {
+        const workbook = new ExcelJS.Workbook();
+        const sheet = workbook.addWorksheet('Conditional');
+        sheet.addRows([[1], [5], [10]]);
+        sheet.addConditionalFormatting({
+          ref: 'A1:A3',
+          rules: [{ type: 'dataBar', priority: 1, gradient: false,
+            cfvo: [{ type: 'min' }, { type: 'max' }] }],
+        });
+        const bytes = await workbook.xlsx.writeBuffer();
+        const zip = await JSZip.loadAsync(bytes);
+        const xml = await zip.file('xl/worksheets/sheet1.xml').async('string');
+        const id = /<x14:cfRule[^>]*id="([^"]+)"/.exec(xml)?.[1];
+        assert.match(id || '', /^\\{[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}\\}$/);
+        assert.ok(xml.includes('<x14:id>' + id + '</x14:id>'));
+        const reopened = new ExcelJS.Workbook();
+        await reopened.xlsx.load(bytes);
+        const output = reopened.getWorksheet('Conditional');
+        assert.equal(output.getCell('A3').value, 10);
+        assert.equal(output.conditionalFormattings.length, 1);
+        const formatting = output.conditionalFormattings[0];
+        assert.equal(formatting.ref, 'A1:A3');
+        assert.equal(formatting.rules[0].type, 'dataBar');
+        assert.equal(formatting.rules[0].gradient, false);
+      })().catch(error => { console.error(error); process.exitCode = 1; });
+    `], { cwd: fileURLToPath(new URL('..', import.meta.url)), encoding: 'utf8', timeout: 15_000 });
+    expect(result.error).toBeUndefined();
+    expect(result.stderr).toBe('');
+    expect(result.status).toBe(0);
+  });
+
   it('exports a validated workbook as a real XLSX binary through an injected engine', async () => {
     const result = await serializeSpreadsheetXlsx({
       protocolVersion: 1, sheets: [{ id: 'one', name: 'One', rows: 2, cols: 2,

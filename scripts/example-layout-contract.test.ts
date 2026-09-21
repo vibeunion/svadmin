@@ -6,17 +6,45 @@ import utilityClasses from '../packages/ui/scripts/utility-class-map.json' with 
 import { assertExampleLayoutCss } from './example-layout-contract.js';
 
 const root = resolve(import.meta.dir, '..');
-const states = readFileSync(resolve(root, 'packages/ui/src/styles/conditional-states.css'), 'utf8');
+const states = readFileSync(resolve(root, 'packages/ui/src/app.css'), 'utf8');
 const radius = '.svadmin-u-5f22e64f2282 { border-radius: var(--radius-lg) }';
 const css = states + radius;
 
-test('emitted layout contract requires both sidebar widths, logical responsive offsets and table radius', () => {
+test('emitted layout contract requires actual sidebar hooks, width bindings and table radius', () => {
   expect(() => assertExampleLayoutCss(css)).not.toThrow();
-  expect(() => assertExampleLayoutCss(css.replace('width: 70px', 'width: 71px'))).toThrow('collapsed sidebar width');
-  expect(() => assertExampleLayoutCss(css.replace('margin-inline-start: 252px', 'margin-inline-start: 253px'))).toThrow('expanded desktop');
-  expect(() => assertExampleLayoutCss(css.replace('@media (min-width: 48rem)', '@media (min-width: 80rem)'))).toThrow('desktop');
-  expect(() => assertExampleLayoutCss(css.replace('margin-inline-end: 0;', 'margin-inline-end: 70px;'))).toThrow('mobile end');
+  expect(() => assertExampleLayoutCss(css.replace('--svadmin-sidebar-width: 70px', '--svadmin-sidebar-width: 71px'))).toThrow('collapsed sidebar width');
+  expect(() => assertExampleLayoutCss(css.replace('--svadmin-sidebar-width: 252px', '--svadmin-sidebar-width: 253px'))).toThrow('expanded sidebar width');
+  expect(() => assertExampleLayoutCss(css.replace('width: var(--svadmin-sidebar-width)', 'width: 252px'))).toThrow('width binding');
   expect(() => assertExampleLayoutCss(states)).toThrow('table container radius');
+});
+
+test('desktop, mobile and RTL offsets retain exact breakpoint and direction coverage', () => {
+  expect(() => assertExampleLayoutCss(css.replaceAll('margin-left: 252px', 'margin-left: 253px'))).toThrow('expanded desktop');
+  expect(() => assertExampleLayoutCss(css.replaceAll('margin-left: 70px', 'margin-left: 71px'))).toThrow('collapsed desktop');
+  expect(() => assertExampleLayoutCss(css.replaceAll('(min-width: 768px)', '(min-width: 769px)'))).toThrow('desktop');
+  expect(() => assertExampleLayoutCss(css.replaceAll('(max-width: 767px)', '(max-width: 766px)'))).toThrow('mobile');
+  expect(() => assertExampleLayoutCss(css.replaceAll('margin-right: 0;', 'margin-right: 70px;'))).toThrow('mobile margin-right');
+  expect(() => assertExampleLayoutCss(css.replaceAll('margin-left: 0;', 'margin-left: 70px;'))).toThrow('RTL left reset');
+  expect(() => assertExampleLayoutCss(css.replaceAll('margin-right: 252px', 'margin-right: 253px'))).toThrow('RTL right offset');
+  expect(() => assertExampleLayoutCss(css.replaceAll('margin-right: 70px', 'margin-right: 71px'))).toThrow('RTL right offset');
+  expect(() => assertExampleLayoutCss(css.replaceAll('[dir="rtl"]', '[dir="ltr"]'))).toThrow('RTL');
+});
+
+test('comments, conditional or qualified hooks cannot satisfy unconditional declarations', () => {
+  expect(() => assertExampleLayoutCss('/* .svadmin-sidebar-expanded { --svadmin-sidebar-width: 252px; } */')).toThrow();
+  expect(() => assertExampleLayoutCss(`@supports (display: grid) { ${css} }`)).toThrow();
+  expect(() => assertExampleLayoutCss(css.replaceAll('.svadmin-sidebar-expanded', '.host .svadmin-sidebar-expanded'))).toThrow('expanded sidebar width');
+  expect(() => assertExampleLayoutCss(css.replace('--svadmin-sidebar-width: 70px;', '--svadmin-sidebar-width: 70px !important;'))).toThrow('collapsed sidebar width');
+});
+
+test('production components bind the exact expanded and collapsed state hooks', () => {
+  const sidebar = classDirectives(readFileSync(resolve(root, 'packages/ui/src/components/Sidebar.svelte'), 'utf8'));
+  const layout = classDirectives(readFileSync(resolve(root, 'packages/ui/src/components/Layout.svelte'), 'utf8'));
+  for (const state of ['expanded', 'collapsed']) {
+    expect(sidebar).toContain(`svadmin-sidebar-${state}`);
+    expect(layout).toContain(`svadmin-sidebar-content-${state}`);
+    expect(layout).toContain(`sidebar-content-${state}`);
+  }
 });
 
 function classDirectives(source: string): string[] {
