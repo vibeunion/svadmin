@@ -1,4 +1,4 @@
-/* @svadmin/ui - Stripe-first product tokens
+/* @svadmin/ui - Admin UI product tokens
  * Imported by AdminApp and overridable by consumer CSS.
  * Metronic references inform capability coverage, never visual styling.
  */
@@ -667,6 +667,37 @@ h1, h2, h3, h4, h5, h6, [data-slot="card-title"] {
 }
 main {
   scroll-behavior: smooth;
+}
+.svadmin-sidebar-expanded,
+.svadmin-sidebar-collapsed {
+  flex: 0 0 auto;
+  width: var(--svadmin-sidebar-width);
+}
+.svadmin-sidebar-expanded {
+  --svadmin-sidebar-width: 252px;
+}
+.svadmin-sidebar-collapsed {
+  --svadmin-sidebar-width: 70px;
+}
+.svadmin-sidebar-content-expanded,
+.svadmin-sidebar-content-collapsed {
+  min-width: 0;
+}
+@media (min-width: 768px) {
+  .svadmin-sidebar-content-expanded {
+    margin-left: 252px;
+  }
+  .svadmin-sidebar-content-collapsed {
+    margin-left: 70px;
+  }
+  [dir="rtl"] .svadmin-sidebar-content-expanded {
+    margin-left: 0;
+    margin-right: 252px;
+  }
+  [dir="rtl"] .svadmin-sidebar-content-collapsed {
+    margin-left: 0;
+    margin-right: 70px;
+  }
 }
 [dir="rtl"] {
   direction: rtl;
@@ -2114,7 +2145,7 @@ details[data-svadmin-filter]:not([open]) > :not(summary), details.svadmin-collap
   display: none !important;
 }
 
-/* --- Stripe-first layout preset (clean-flat) --- */
+/* --- Admin UI layout preset (clean-flat) --- */
 /* Keep this public class for layoutPreset API compatibility. The preset only
  * adjusts density and composition; color, focus, and elevation stay semantic. */
 .layout-clean-flat {

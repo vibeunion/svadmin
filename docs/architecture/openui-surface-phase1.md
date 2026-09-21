@@ -105,14 +105,15 @@ policy limit below the host's default size does not create invalid proposals.
 2. True OpenUI Lang parsing/streaming rendering or an OpenUI compatibility claim.
    Future adapters must normalize supported input into Surface and fail on any
    unsupported operation; they must not bypass the same policy checks.
-3. Panda CSS dependency/build integration and component migration. Panda is the
+3. Tailwind CSS dependency/build integration and component migration. Tailwind is the
    planned build-time recipe/token system, **not yet the default implementation**.
    A separate tested migration must pre-generate every allowed semantic variant
-   and publish plain CSS; consumers and runtime AI must not need a Panda compiler.
+   and publish plain CSS; consumers and runtime AI must not need a compiler.
 4. Form-state-preserving renderer integration, a complete orders CRUD pilot, visual
    evidence and browser acceptance for those future UI changes.
 
-Do not report this phase as a Tailwind removal or complete OpenUI/Panda migration.
+Do not report this phase as a complete OpenUI migration; the current implementation
+uses Tailwind authoring and keeps the runtime contract compiler-free.
 
 ## Acceptance and validation
 
@@ -140,5 +141,5 @@ the exact PR head commit, not to an earlier commit or the main branch.
 ## Architecture references
 
 - OpenUI generation/execution separation: https://www.openui.com/docs/openui-lang/architecture
-- Panda Svelte integration: https://panda-css.com/docs/installation/svelte
-- Panda finite static recipes: https://panda-css.com/docs/guides/static
+- Tailwind CSS: https://tailwindcss.com/docs
+- shadcn-svelte: https://shadcn-svelte.com/

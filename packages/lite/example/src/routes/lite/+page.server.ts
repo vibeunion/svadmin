@@ -14,7 +14,7 @@ export const load = (async (event) => {
   const [productsRes, usersRes, ordersRes, suppliersRes, warehousesRes] = await Promise.all([
     dataProvider.getList({ resource: "products", pagination: { current: 1, pageSize: 10 } }),
     dataProvider.getList({ resource: "users", pagination: { current: 1, pageSize: 10 } }),
-    dataProvider.getList({ resource: "sales_orders", pagination: { current: 1, pageSize: 10 } }),
+    dataProvider.getList({ resource: "sales_orders", pagination: { current: 1, pageSize: 10 }, sorters: [{ field: 'orderDate', order: 'desc' }] }),
     dataProvider.getList({ resource: "suppliers", pagination: { current: 1, pageSize: 10 } }),
     dataProvider.getList({ resource: "warehouses", pagination: { current: 1, pageSize: 10 } }),
   ]);
@@ -31,7 +31,8 @@ export const load = (async (event) => {
       ordersTotal: ordersRes.total,
       suppliersTotal: suppliersRes.total,
       warehousesTotal: warehousesRes.total,
-      totalRevenue,
+      sampleRevenue: totalRevenue,
+      sampledOrders: orders.length,
       resourcesCount: resources.length,
     },
     recentOrders: orders.slice(0, 5),

@@ -29,6 +29,7 @@ import { isDemoResource, type DemoResource, type DemoDatabase } from '../resourc
 import { parseDemoDatabase } from '../demo-database';
 import { Type } from '@sinclair/typebox';
 import { Value } from '@sinclair/typebox/value';
+import { mailSourceFingerprint } from './mail-source';
 
 const STORAGE_KEY = 'svadmin_inventory_demo_db_v5';
 
@@ -1054,13 +1055,16 @@ function getStorage(): Storage | null {
   return globalThis.localStorage;
 }
 
-function getDb(): DbState {
+function getDb(requireStorageRead = false): DbState {
   const storage = getStorage();
   if (!storage) return cloneDb(memoryDb);
 
   let raw: string | null;
   try { raw = storage.getItem(STORAGE_KEY); }
-  catch { return cloneDb(memoryDb); }
+  catch (error) {
+    if (requireStorageRead) throw error;
+    return cloneDb(memoryDb);
+  }
   if (raw === null) return cloneDb(initialDbState);
   const stored: unknown = JSON.parse(raw);
   return parseDemoDatabase(stored);
@@ -1068,15 +1072,10 @@ function getDb(): DbState {
 
 function saveDb(db: DbState): void {
   const validated = parseDemoDatabase(db);
-  memoryDb = cloneDb(validated);
   const storage = getStorage();
-  if (!storage) return;
-
-  try {
-    storage.setItem(STORAGE_KEY, JSON.stringify(validated));
-  } catch {
-    // The demo remains usable in memory if browser storage is unavailable.
-  }
+  // 浏览器持久化失败必须由调用方反馈；失败时不提前提交内存快照。
+  if (storage) storage.setItem(STORAGE_KEY, JSON.stringify(validated));
+  memoryDb = cloneDb(validated);
 }
 
 function getResource(db: DbState, resource: string): BaseRecord[] {
@@ -1220,6 +1219,7 @@ function updateOneRecord<TVariables>(db: DbState, resourceName: string, id: stri
     ...previous,
     ...toVariablesRecord(variables),
     id: previous['id'],
+    ...newMailRevision(resourceName),
   };
 
   resource[index] = updated;
@@ -1236,6 +1236,66 @@ function deleteOneRecord(db: DbState, resourceName: string, id: string | number)
 
   resource.splice(index, 1);
   return deleted;
+}
+
+const receivedMailFolderSchema = Type.Union([
+  Type.Literal('mail_inbox'), Type.Literal('mail_archive'), Type.Literal('mail_snoozed'),
+  Type.Literal('mail_spam'), Type.Literal('mail_trash'),
+]);
+const mailMoveSchema = Type.Object({
+  source: receivedMailFolderSchema,
+  target: Type.Union([Type.Literal('mail_archive'), Type.Literal('mail_inbox')]),
+  id: Type.Integer({ minimum: 1 }),
+  expectedSource: Type.String({ minLength: 1 }),
+}, { additionalProperties: false });
+const mailSendSchema = Type.Object({
+  draftId: Type.Optional(Type.Integer({ minimum: 1 })),
+  expectedSource: Type.Optional(Type.String({ minLength: 1 })),
+  to: Type.String({ pattern: '^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$' }),
+  subject: Type.String({ minLength: 1 }),
+  body: Type.String({ minLength: 1 }),
+}, { additionalProperties: false });
+
+export type ReceivedMailFolder = 'mail_inbox' | 'mail_archive' | 'mail_snoozed' | 'mail_spam' | 'mail_trash';
+export type LocalMailMove = { source: ReceivedMailFolder; target: 'mail_archive' | 'mail_inbox'; id: number; expectedSource: string };
+export type LocalMailSend = { draftId?: number; expectedSource?: string; to: string; subject: string; body: string };
+
+function newMailRevision(resource: string): { mailRevision?: string } {
+  return ['mail_inbox', 'mail_archive', 'mail_snoozed', 'mail_spam', 'mail_trash', 'mail_draft', 'mail_sent'].includes(resource)
+    ? { mailRevision: crypto.randomUUID() } : {};
+}
+
+function deleteExpectedMail(db: DbState, resource: string, id: number, expectedSource: string): BaseRecord {
+  const matches = getResource(db, resource).filter(row => row['id'] === id);
+  if (matches.length !== 1 || !matches[0] || mailSourceFingerprint(matches[0]) !== expectedSource) {
+    throw new Error('Mail source changed or its ID is ambiguous. Reload the source before retrying.');
+  }
+  return deleteOneRecord(db, resource, id);
+}
+
+// 仅限本地示例：同一同步调用内校验整库并单次保存，不提供跨浏览器事务或真实投递。
+// 授权由 mail-operations 的当前宿主前置检查承担，与普通 DataProvider 一样不是服务器接口。
+export function moveLocalMail(input: LocalMailMove): { id: number } {
+  if (!Value.Check(mailMoveSchema, input) || input.source === input.target) throw new Error('Invalid mail move');
+  const db = getDb(true);
+  const source = deleteExpectedMail(db, input.source, input.id, input.expectedSource);
+  const target = getResource(db, input.target);
+  const id = getNextId(target);
+  target.push({ ...source, id, ...newMailRevision(input.target) });
+  saveDb(db);
+  return { id };
+}
+
+export function sendLocalMail(input: LocalMailSend): { id: number } {
+  if (!Value.Check(mailSendSchema, input) || !input.subject.trim() || !input.body.trim() ||
+    (input.draftId === undefined) !== (input.expectedSource === undefined)) throw new Error('Invalid local mail');
+  const db = getDb(true);
+  if (input.draftId !== undefined && input.expectedSource !== undefined) deleteExpectedMail(db, 'mail_draft', input.draftId, input.expectedSource);
+  const target = getResource(db, 'mail_sent');
+  const id = getNextId(target);
+  target.push({ id, to: input.to, subject: input.subject, body: input.body, sentAt: new Date().toISOString(), ...newMailRevision('mail_sent') });
+  saveDb(db);
+  return { id };
 }
 
 export const inMemoryDataProvider: DataProvider = {
@@ -1271,6 +1331,7 @@ export const inMemoryDataProvider: DataProvider = {
     const created: BaseRecord = {
       ...toVariablesRecord(params.variables),
       id: getNextId(resource),
+      ...newMailRevision(params.resource),
     };
 
     resource.push(created);
@@ -1287,6 +1348,7 @@ export const inMemoryDataProvider: DataProvider = {
       const record: BaseRecord = {
         ...toVariablesRecord(variables),
         id: getNextId(resource),
+        ...newMailRevision(params.resource),
       };
       resource.push(record);
       return record;

@@ -24,7 +24,8 @@ To maintain clarity across modern SPA and fallback boundaries, it is crucial to 
 
 ## Component System & 100% Parity
 
-`@svadmin/lite` achieves **100% component parity (103/103 components)** with `@svadmin/ui`. Every component in the modern SPA has either a 1:1 server-rendered equivalent, a defined semantic fallback, or an explicit SPA-only classification.
+The current inventory classifies **104/104 entries** as direct counterparts, semantic fallbacks, or SPA-only components.
+This measures inventory mappings, not coverage of every public export or verified enterprise behavior.
 
 ### Parity Breakdown by Module
 
@@ -32,16 +33,16 @@ To maintain clarity across modern SPA and fallback boundaries, it is crucial to 
 ===============================================================
        @svadmin/ui <-> @svadmin/lite Parity Status
 ===============================================================
-  [fields]        32/32 (100.0%)  [##############]
+  [fields]        33/33 (100.0%)  [##############]
   [buttons]       10/10 (100.0%)  [##############]
   [pages]          12/12 (100.0%)  [##############]
   [layout]          9/9 (100.0%)  [##############]
   [widgets]       10/10 (100.0%)  [##############]
   [advanced]      30/30 (100.0%)  [##############]
 ---------------------------------------------------------------
-  Overall Coverage: 100% (103/103)
-  - 1:1 Exact Matches: 91
-  - Semantic Fallbacks: 10
+  Overall Coverage: 100% (104/104)
+  - 1:1 Exact Matches: 85
+  - Semantic Fallbacks: 17
   - SPA-Only (No SSR Needed): 2
   - Missing: 0
 ===============================================================
@@ -51,11 +52,11 @@ To maintain clarity across modern SPA and fallback boundaries, it is crucial to 
 
 1. **Pages & Views (12 Components)**:
    - `LiteListPage`, `LiteCreatePage`, `LiteEditPage`, `LiteShowPage`, `LiteLogin`, `LiteRegisterPage`, `LiteForgotPasswordPage`, `LiteUpdatePasswordPage`, `LiteProfilePage`, `LiteMasterDetailView`, `LitePrintableBill`, `LitePdfDocumentViewer`.
-2. **Field & Complex Select Components (32 Components)**:
+2. **Field & Complex Select Components (33 Components)**:
    - **Text & Numeric**: `LiteTextField`, `LiteNumberField`, `LiteCurrencyField`, `LitePercentField`, `LitePhoneField`, `LiteEmailField`, `LiteUrlField`, `LiteRatingField`, `LiteCopyField`.
    - **Choice & Relations**: `LiteBooleanField`, `LiteDateField`, `LiteDateRangeField`, `LiteSelectField`, `LiteMultiSelectField`, `LiteTreeSelect`, `LiteCascader`, `LiteTagField`, `LiteRelationField`.
    - **Rich Media & Arrays**: `LiteAvatarField`, `LiteImageField`, `LiteFileField`, `LiteJsonField`, `LiteArrayField`, `LiteDynamicFormList`, `LiteTransfer`, `LiteImageCropper`, `LiteJsonSchemaForm`, `LiteMentionsInput`, `LiteSignaturePad`.
-   - **Semantic Fallbacks**: `LiteCodeField`, `LiteMarkdownField`, `LiteRichTextField`.
+   - **Semantic Fallbacks**: `LiteCodeField`, `LiteMarkdownField`, `LiteRichTextField`, `LiteFileUpload`.
 3. **Action Buttons (10 Buttons)**:
    - `LiteListButton`, `LiteCreateButton`, `LiteEditButton`, `LiteShowButton`, `LiteCloneButton` (native `<a>` links).
    - `LiteDeleteButton` (fragment-target confirmation modal + native POST form).
@@ -69,11 +70,13 @@ To maintain clarity across modern SPA and fallback boundaries, it is crucial to 
    - `LiteInsightCard` remains available as a Lite-only SSR primitive and is not counted in the `@svadmin/ui` parity matrix.
 6. **Advanced UX Degradations & Query (30 Components)**:
    - `LiteTable` with optional sticky edge/action columns.
-   - `LiteConfirmDialog`, `LiteFilterBuilder`, `LiteDrawerForm`, `LiteModalForm`, `LiteVirtualTable`.
+   - `LiteConfirmDialog`, `LiteFilterBuilder`, `LiteDrawerForm`, `LiteModalForm`, `LiteVirtualTable` (native table fallback without SPA virtualization; paginate or bound data on the server).
    - `LiteInlineEdit`, `LiteAutoSaveIndicator`, `LiteToast`, `LiteUndoableNotification` (semantic server-driven fallbacks).
    - `LiteWatermark`, `LiteColumnSettings`, `LiteImportWizard`, `LiteColumnHeaderFilter`, `LiteTreeTable`, `LiteSensitiveDataMask`, `LiteApprovalActionCard`.
+   - `LiteTreeTable` renders the whole supplied hierarchy. It does not implement SPA expansion, selection, mixed checkboxes or hierarchical keyboard navigation; validate and bound the tree on the server.
    - `LiteStepForm`, `LiteTableSummary`, `LiteVersionDiffViewer`, `LiteEditableTable`, `LiteDraggableRowTable`, `LiteMediaLibraryModal`, `LiteActivityFeed`.
    - `LiteKanbanBoard`, `LitePivotTable`, `LiteCanvasAnnotation`, `LiteSpreadsheetView`, `LiteDecisionTable`.
+   - `LiteSpreadsheetView` is a bounded native form fallback. Formula calculation, sheet navigation and exports must be handled by the server, not a client-side spreadsheet engine.
    - `DevTools` is explicitly SPA-only and has no Lite counterpart.
 
 ---

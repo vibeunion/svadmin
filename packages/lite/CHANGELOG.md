@@ -5,7 +5,7 @@
 
 ### 🚀 Features
 
-* **design:** integrate Stripe-first patterns and readable status badges with current main ([fa5d10f](https://github.com/vibeunion/svadmin/commit/fa5d10f57603cc5709e4f140e7a1bb9e675fed81))
+* **design:** integrate Admin UI patterns and readable status badges with current main ([fa5d10f](https://github.com/vibeunion/svadmin/commit/fa5d10f57603cc5709e4f140e7a1bb9e675fed81))
 * **ui:** migrate admin styling to Panda CSS ([f23e290](https://github.com/vibeunion/svadmin/commit/f23e2909b1dd6ec3ca89339cb2eb72f75149e8ad))
 
 
@@ -29,7 +29,7 @@
 
 ### 🔧 Miscellaneous Chores
 
-* **design:** reconcile Stripe specimens with merged reference assets on main ([3a9bbad](https://github.com/vibeunion/svadmin/commit/3a9bbad1ea829b32ef25c094e071a1113bde5f8c))
+* **design:** reconcile svadmin specimens with merged reference assets on main ([3a9bbad](https://github.com/vibeunion/svadmin/commit/3a9bbad1ea829b32ef25c094e071a1113bde5f8c))
 * **styles:** reconcile content recipes with native primitives on main ([ae608de](https://github.com/vibeunion/svadmin/commit/ae608de888de8e06c3f6aeebd92e5de1b8ae9af3))
 
 

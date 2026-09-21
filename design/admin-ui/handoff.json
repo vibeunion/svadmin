@@ -1,0 +1,25 @@
+{
+  "task": "admin-ui-design-kit-20260919",
+  "parent": "reference-only-delivery",
+  "authorization": "User explicitly requested resolving repository writes and Figma design creation, then continued the same task.",
+  "risk": "low",
+  "orchestration": {"mode": "native", "writer": "single-owner", "externalReviewers": 0},
+  "state": "partial",
+  "completed": ["Figma design file creation", "81 variables with scopes and WEB syntax", "six text and six effect styles", "foundation and Button screenshot inspection", "24 Button variant metadata inspection", "Built Svelte browser specimens for components, customer list, record detail and settings", "152 state scenes, four interaction sequences and two keyboard/motion checks passed at 8fa038b"],
+  "figmaReadbacks": [
+    {"nodeId": "7:10", "kind": "screenshot", "width": 1120, "height": 1328, "inspection": "No observed overlap or clipping in the foundation documentation."},
+    {"nodeId": "8:53", "kind": "metadata", "variantCount": 24},
+    {"nodeId": "8:2", "kind": "screenshot", "width": 1120, "height": 670, "inspection": "Button subset rendered; complete public API and browser parity not certified."}
+  ],
+  "screenshotsArchived": false,
+  "screenshotsArchivedScope": "Historical Figma captures; browser captures are archived separately in the workflow artifact.",
+  "browserVerification": {"status": "passed-at-recorded-revision", "commit": "8fa038bfe373b86e9259a0a66b4f17514f6312f0", "testedMergeCommit": "4bfb57e103b756a5110eb0e81f81c284c580b8f9", "workflowRun": 35443723957, "artifactId": 10584846256, "report": "preview/verification.md", "contract": "preview/closeout.json", "figmaSynced": false, "visualApproval": "pending"},
+  "blockers": [
+    {"operation": "create more pages", "resolution": "Reorganized into three pages; no content claimed for the reserved patterns page."},
+    {"operation": "Input prerequisite design-system search", "error": "Starter MCP tool call limit reached", "status": "blocked", "latestRetry": "get_metadata(6:4) still limited after user continuation at 2026-09-19T12:33:50Z"},
+    {"operation": "Code Connect context", "error": "Requires Dev or Full seat on Organization or Enterprise plan", "status": "blocked"},
+    {"operation": "full-repository CI", "run": 35443723958, "status": "failed", "reason": "Four unchanged production/test lint errors. See preview/verification.md; not repaired or waived in the asset-only slice."}
+  ],
+  "resume": ["Restore authorized Figma read access; do not bypass quotas.", "Read this file and figma-map.json, then inspect existing nodes before writing.", "Use the verified browser specimens as code reference; they are not synchronized Figma layers.", "Search before creating Input; finish and validate each component before the next.", "Build and review list, detail and settings patterns from the approved component set.", "Recheck source hashes and token differences before declaring synchronization.", "Reconcile the parallel production integration work before claiming full-repository CI or merge readiness."],
+  "nonGoals": ["merge main", "release or deploy", "change runtime theme", "copy unapproved third-party assets", "certify full application accessibility"]
+}

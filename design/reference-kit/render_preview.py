@@ -123,18 +123,18 @@ def render(manifest: dict, contract: dict) -> str:
     return f'''<!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
-<meta name="color-scheme" content="light dark"><title>svadmin · Stripe-first 参考契约</title>
+<meta name="color-scheme" content="light dark"><title>svadmin · Admin UI 参考契约</title>
 <style>{numeric}{STYLE}</style></head><body><a class="skip" href="#main">跳到主要内容</a>
 <header><div class="top"><div class="wordmark">svadmin <span class="muted">/ 设计参考</span></div>
-<div class="tag">Stripe-first · v0.1<br>基线 {contract['source']['commit'][:8]}</div></div></header>
+<div class="tag">Admin UI · v0.1<br>基线 {contract['source']['commit'][:8]}</div></div></header>
 <div class="layout"><nav aria-label="参考契约目录"><h2>页面模式</h2>{nav}<a href="#tokens">Token 映射</a><a href="#references">来源与边界</a></nav>
 <main id="main"><p class="kicker">自有设计语言 · 参考资产入口</p><h1>明确任务，可信状态。</h1>
-<p class="lead">把页面结构、组件名称、反馈归属和恢复路径放在同一份可审查契约中。沿用自己的 Svelte / Bits UI / Panda，不叠加第二套运行时。</p>
+<p class="lead">把页面结构、组件名称、反馈归属和恢复路径放在同一份可审查契约中。沿用自己的 Svelte / Bits UI / Tailwind，不叠加第二套运行时。</p>
 <div class="summary"><div><strong>{result['patterns']}</strong><span>页面模式</span></div><div><strong>{result['states']}</strong><span>设计状态</span></div><div><strong>{result['tokenMappings']}</strong><span>Token 映射</span></div></div>
 <aside class="notice" aria-label="完成范围"><p><strong>这是离线契约审阅页，不是应用截图或已完成的 UI Kit。</strong></p>
 <p>Figma 文件已创建，但图层写入因 Starter MCP 额度耗尽受阻；当前文件仍为空。状态要求不代表组件行为、无障碍或应用回归已经通过。</p></aside>
 {''.join(pages)}
-<section id="tokens"><h2>沿用代码中的尺度与语义</h2><p class="muted">权威入口：<code>{TOKEN_PATH_LABEL}</code>。rem 不预先固定根字号。</p>
+<section id="tokens"><h2>沿用代码中的尺度与语义</h2><p class="muted">来源入口：<code>{esc(contract['source']['tokenPath'])}</code>、<code>{esc(contract['source']['themePath'])}</code>、<code>{esc(contract['source']['recipePath'])}</code>。rem 不预先固定根字号。</p>
 <div class="table-wrap"><table><thead><tr><th scope="col">Token</th><th scope="col">现有值或公开 CSS 变量</th></tr></thead><tbody>{token_rows}</tbody></table></div>
 <div class="notice">{gaps}</div></section>
 <section id="references"><h2>来源与许可边界</h2><div class="sources">{refs}</div>
@@ -143,9 +143,6 @@ def render(manifest: dict, contract: dict) -> str:
 <footer>元数据审阅日期：{manifest['reviewedOn']} · 源码基线：{contract['source']['commit']}<br>生成输入：manifest.json + contract.json；修改后重新运行 render_preview.py。</footer>
 </main></div></body></html>
 '''
-
-
-TOKEN_PATH_LABEL = 'packages/ui/design/tokens.ts'
 
 
 def main() -> int:

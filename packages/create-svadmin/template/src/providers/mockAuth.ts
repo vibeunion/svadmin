@@ -44,7 +44,7 @@ export const mockAuthProvider: AuthProvider = {
     if (!auth) return null;
     return {
       id: '1',
-      name: auth.email.split('@')[0],
+      name: auth.email.split('@')[0] ?? auth.email,
       email: auth.email,
       avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${auth.email}`,
     };

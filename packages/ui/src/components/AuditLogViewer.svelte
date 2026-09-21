@@ -58,7 +58,8 @@
       total = result.total;
     } catch (e) {
       if (currentId !== requestId) return;
-      toast.error((e as Error).message);
+      error = e instanceof Error ? e.message : String(e);
+      toast.error(error);
     } finally {
       if (currentId === requestId) loading = false;
     }
@@ -118,6 +119,7 @@
   {#if error}
     <div class="svadmin-u-0478c89a150f svadmin-u-ca6bcd4b6f3f svadmin-u-f0c1e65bd6f2 svadmin-u-7a0854fdbc30 svadmin-u-811148b13d1e svadmin-u-5f22e64f2282 svadmin-u-ca6bf63030aa">
       <p>{error}</p>
+      <button type="button" onclick={() => void loadLogs(authProvider, page)}>{i18n.t('common.retry')}</button>
     </div>
   {:else}
     <!-- Search Bar -->

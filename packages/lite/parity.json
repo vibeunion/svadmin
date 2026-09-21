@@ -1,18 +1,54 @@
 {
-  "timestamp": "2026-09-19T08:59:45.334Z",
-  "totalComponents": 104,
-  "adaptedCount": 91,
-  "fallbackCount": 11,
+  "timestamp": "2026-09-20T06:36:18.597Z",
+  "totalComponents": 125,
+  "adaptedCount": 85,
+  "fallbackCount": 38,
   "spaOnlyCount": 2,
   "missingCount": 0,
   "overallCoveragePercentage": 100,
   "categories": {
-    "fields": {
-      "category": "fields",
-      "total": 33,
-      "adapted": 29,
+    "pages": {
+      "category": "pages",
+      "total": 16,
+      "adapted": 12,
       "fallback": 4,
       "spaOnly": 0,
+      "missing": 0,
+      "percentage": 100
+    },
+    "advanced": {
+      "category": "advanced",
+      "total": 34,
+      "adapted": 20,
+      "fallback": 13,
+      "spaOnly": 1,
+      "missing": 0,
+      "percentage": 100
+    },
+    "widgets": {
+      "category": "widgets",
+      "total": 11,
+      "adapted": 6,
+      "fallback": 5,
+      "spaOnly": 0,
+      "missing": 0,
+      "percentage": 100
+    },
+    "fields": {
+      "category": "fields",
+      "total": 44,
+      "adapted": 29,
+      "fallback": 15,
+      "spaOnly": 0,
+      "missing": 0,
+      "percentage": 100
+    },
+    "layout": {
+      "category": "layout",
+      "total": 10,
+      "adapted": 8,
+      "fallback": 1,
+      "spaOnly": 1,
       "missing": 0,
       "percentage": 100
     },
@@ -24,45 +60,97 @@
       "spaOnly": 0,
       "missing": 0,
       "percentage": 100
-    },
-    "pages": {
-      "category": "pages",
-      "total": 12,
-      "adapted": 12,
-      "fallback": 0,
-      "spaOnly": 0,
-      "missing": 0,
-      "percentage": 100
-    },
-    "layout": {
-      "category": "layout",
-      "total": 9,
-      "adapted": 8,
-      "fallback": 0,
-      "spaOnly": 1,
-      "missing": 0,
-      "percentage": 100
-    },
-    "widgets": {
-      "category": "widgets",
-      "total": 10,
-      "adapted": 7,
-      "fallback": 3,
-      "spaOnly": 0,
-      "missing": 0,
-      "percentage": 100
-    },
-    "advanced": {
-      "category": "advanced",
-      "total": 30,
-      "adapted": 25,
-      "fallback": 4,
-      "spaOnly": 1,
-      "missing": 0,
-      "percentage": 100
     }
   },
   "items": [
+    {
+      "name": "AutoTable",
+      "uiComponent": "AutoTable.svelte",
+      "liteComponent": "pages/LiteListPage.svelte",
+      "category": "pages",
+      "status": "fallback",
+      "strategy": "Lite 使用服务端分页原生表格；筛选、批量命令和导出由宿主页面承接"
+    },
+    {
+      "name": "AutoForm",
+      "uiComponent": "AutoForm.svelte",
+      "liteComponent": "LiteForm.svelte",
+      "category": "pages",
+      "status": "fallback",
+      "strategy": "Lite 使用原生 POST 表单；字段契约和服务端错误回显由宿主承接"
+    },
+    {
+      "name": "ErrorSummary",
+      "uiComponent": "ErrorSummary.svelte",
+      "liteComponent": "LiteErrorSummary.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "Lite 使用静态错误区域与原生锚点；校验和服务端错误映射由宿主承接"
+    },
+    {
+      "name": "ResourceOperationsPage",
+      "uiComponent": "ResourceOperationsPage.svelte",
+      "liteComponent": "pages/LiteListPage.svelte",
+      "category": "pages",
+      "status": "fallback",
+      "strategy": "Lite 组合原生列表、操作链接和服务端表单，不提供 SPA 抽屉状态"
+    },
+    {
+      "name": "RecordDetailDrawer",
+      "uiComponent": "RecordDetailDrawer.svelte",
+      "liteComponent": "pages/LiteShowPage.svelte",
+      "category": "pages",
+      "status": "fallback",
+      "strategy": "Lite 使用独立详情页；宿主通过链接保留资源和记录上下文"
+    },
+    {
+      "name": "DashboardView",
+      "uiComponent": "DashboardView.svelte",
+      "liteComponent": "LiteMetricStrip.svelte",
+      "category": "widgets",
+      "status": "fallback",
+      "strategy": "Lite 使用服务端指标条和原生链接；查询、聚合和权限由宿主承接"
+    },
+    {
+      "name": "ApprovalCenter",
+      "uiComponent": "ApprovalCenter.svelte",
+      "liteComponent": "LiteApprovalActionCard.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "Lite 使用审批列表页与原生 POST 动作；审批规则、事务和审计由宿主承接"
+    },
+    {
+      "name": "PivotExportButton",
+      "uiComponent": "PivotExportButton.svelte",
+      "liteComponent": "LitePivotTable.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "Lite 使用服务端导出链接；任务回执和下载授权由宿主承接"
+    },
+    {
+      "name": "RelationPicker",
+      "uiComponent": "RelationPicker.svelte",
+      "liteComponent": "fields/LiteRelationField.svelte",
+      "category": "fields",
+      "status": "fallback",
+      "strategy": "Lite 使用原生关联选择或详情链接；服务端负责查询和授权"
+    },
+    {
+      "name": "FilterCollectionInput",
+      "uiComponent": "FilterCollectionInput.svelte",
+      "liteComponent": "LiteFilterBuilder.svelte",
+      "category": "advanced",
+      "status": "fallback",
+      "strategy": "Lite 使用原生筛选表单；完整递归交互由服务端回显承接"
+    },
+    {
+      "name": "SegmentedControl",
+      "uiComponent": "SegmentedControl.svelte",
+      "liteComponent": "LiteTabs.svelte",
+      "category": "layout",
+      "status": "fallback",
+      "strategy": "Lite 使用原生链接或 tabs 导航；不承诺 SPA 内联状态切换"
+    },
     {
       "name": "FileUpload",
       "uiComponent": "FileUpload.svelte",
@@ -294,6 +382,86 @@
       "category": "fields",
       "status": "exact",
       "strategy": "子表单卡片/表格与服务端索引数组解析"
+    },
+    {
+      "name": "DatePicker",
+      "uiComponent": "DatePicker.svelte",
+      "liteComponent": "fields/LiteDateField.svelte",
+      "category": "fields",
+      "status": "fallback",
+      "strategy": "Lite 复用原生 date 字段；宿主通过 FieldDefinition 承接日期格式和服务端校验"
+    },
+    {
+      "name": "DateRangePicker",
+      "uiComponent": "DateRangePicker.svelte",
+      "liteComponent": "fields/LiteDateRangeField.svelte",
+      "category": "fields",
+      "status": "fallback",
+      "strategy": "Lite 复用双原生 date 输入；区间顺序和业务时区由宿主校验"
+    },
+    {
+      "name": "TimePicker",
+      "uiComponent": "TimePicker.svelte",
+      "liteComponent": "fields/LiteTextField.svelte",
+      "category": "fields",
+      "status": "fallback",
+      "strategy": "Lite 使用受限文本输入；宿主负责时间格式、步进和时区解释"
+    },
+    {
+      "name": "DateTimePicker",
+      "uiComponent": "DateTimePicker.svelte",
+      "liteComponent": "fields/LiteTextField.svelte",
+      "category": "fields",
+      "status": "fallback",
+      "strategy": "Lite 使用受限文本输入；宿主负责本地时间、时区和消歧规则"
+    },
+    {
+      "name": "RadioGroup",
+      "uiComponent": "RadioGroup.svelte",
+      "liteComponent": "LiteSelectField.svelte",
+      "category": "fields",
+      "status": "fallback",
+      "strategy": "Lite 使用原生 select 提交互斥值；服务端仍按资源契约校验枚举"
+    },
+    {
+      "name": "TagsInput",
+      "uiComponent": "TagsInput.svelte",
+      "liteComponent": "fields/LiteTagField.svelte",
+      "category": "fields",
+      "status": "fallback",
+      "strategy": "Lite 使用逗号分隔标签字段；宿主负责数量、长度和允许值校验"
+    },
+    {
+      "name": "Slider",
+      "uiComponent": "Slider.svelte",
+      "liteComponent": "fields/LiteNumberField.svelte",
+      "category": "fields",
+      "status": "fallback",
+      "strategy": "Lite 使用带 min/max/step 的原生 number 输入"
+    },
+    {
+      "name": "RangeSlider",
+      "uiComponent": "RangeSlider.svelte",
+      "liteComponent": "fields/LiteNumberField.svelte",
+      "category": "fields",
+      "status": "fallback",
+      "strategy": "Lite 使用两个受限数值字段；宿主负责范围完整性和精度校验"
+    },
+    {
+      "name": "ColorPicker",
+      "uiComponent": "ColorPicker.svelte",
+      "liteComponent": "fields/LiteTextField.svelte",
+      "category": "fields",
+      "status": "fallback",
+      "strategy": "Lite 使用受限文本输入；宿主负责颜色格式和品牌白名单校验"
+    },
+    {
+      "name": "Rate",
+      "uiComponent": "Rate.svelte",
+      "liteComponent": "fields/LiteRatingField.svelte",
+      "category": "fields",
+      "status": "fallback",
+      "strategy": "Lite 使用原生数值输入与星级展示；宿主负责评分范围校验"
     },
     {
       "name": "ListButton",
@@ -588,8 +756,8 @@
       "uiComponent": "VirtualTable.svelte",
       "liteComponent": "LiteVirtualTable.svelte",
       "category": "advanced",
-      "status": "exact",
-      "strategy": "固定表头与超长数据表格展示"
+      "status": "fallback",
+      "strategy": "SPA 固定高度虚拟窗口；Lite 使用完整原生表格，需由服务端分页或限制数据量"
     },
     {
       "name": "Table",
@@ -668,8 +836,8 @@
       "uiComponent": "TreeTable.svelte",
       "liteComponent": "LiteTreeTable.svelte",
       "category": "advanced",
-      "status": "exact",
-      "strategy": "递归层级缩进表格展示"
+      "status": "fallback",
+      "strategy": "完整原生层级表格；展开、半选及键盘树导航由 SPA 提供，服务端负责裁剪和校验"
     },
     {
       "name": "SensitiveDataMask",
@@ -804,16 +972,16 @@
       "uiComponent": "KanbanBoard.svelte",
       "liteComponent": "LiteKanbanBoard.svelte",
       "category": "advanced",
-      "status": "exact",
-      "strategy": "多列任务看板与泳道视图"
+      "status": "fallback",
+      "strategy": "SPA 受控权限、乐观预览与回执回滚；Lite 仅提供原生新增表单，不提供客户端移动与回滚"
     },
     {
       "name": "PivotTable",
       "uiComponent": "PivotTable.svelte",
       "liteComponent": "LitePivotTable.svelte",
       "category": "advanced",
-      "status": "exact",
-      "strategy": "多维交叉透视分析表"
+      "status": "fallback",
+      "strategy": "共享有界聚合与类型化维度；Lite 原生链接重试、导出和安全钻取链接，SPA 支持回调钻取；不含服务端全量分析引擎"
     },
     {
       "name": "MultiTabKeepAlive",
@@ -828,8 +996,8 @@
       "uiComponent": "GanttChart.svelte",
       "liteComponent": "LiteGanttChart.svelte",
       "category": "widgets",
-      "status": "exact",
-      "strategy": "项目甘特图排期进度表"
+      "status": "fallback",
+      "strategy": "共享有界时间线校验；Lite 原生表格与链接恢复，SPA 交互选择与回调，不含依赖/工作日历/自动排程引擎"
     },
     {
       "name": "CanvasAnnotation",
@@ -860,8 +1028,8 @@
       "uiComponent": "SpreadsheetView.svelte",
       "liteComponent": "LiteSpreadsheetView.svelte",
       "category": "advanced",
-      "status": "exact",
-      "strategy": "多页签在线电子表格与公式计算"
+      "status": "fallback",
+      "strategy": "有界原生单表 POST，提交 sheetId 与原始公式；计算、切表及导出由服务端承接，无客户端公式引擎"
     },
     {
       "name": "DecisionTable",

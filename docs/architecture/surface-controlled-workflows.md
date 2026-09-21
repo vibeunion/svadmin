@@ -3,7 +3,7 @@
 This is an opt-in extension, not a replacement for the read-only default catalog.
 It preserves `surface/v1`, existing default/styled catalog versions, the owning
 admin context, and the existing per-renderer data-source cache. It does not add
-Tailwind, React, a second renderer, or a consumer-side Panda compiler.
+React, a second renderer, or a consumer-side CSS compiler.
 
 ## Public boundaries
 
@@ -32,7 +32,7 @@ browser component module.
 `withSurfaceAppearance(catalog)` adds an optional `appearance` object to every
 registered widget with a closed props schema (including unions of closed objects).
 The vocabulary comes from the existing shared design contract: five semantic
-tones and two densities. It selects the existing, precompiled Panda frame recipe.
+tones and two densities. It selects the existing, precompiled Surface frame recipe.
 No model-provided class, raw CSS, color or recipe is executed. Existing components
 receive their original props, and field-policy selectors are preserved.
 

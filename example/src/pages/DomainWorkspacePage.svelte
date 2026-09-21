@@ -34,6 +34,7 @@
     Users,
   } from '@lucide/svelte';
   import { readHashParam, replaceHashParam } from '../utils/hashView';
+  import WorkspaceRecordLinks from './WorkspaceRecordLinks.svelte';
 
   type CopyPair = readonly [string, string];
   type SummaryMetric = readonly [string, string | number];
@@ -52,12 +53,14 @@
   const i18n = useTranslation();
   const adminContext = captureAdminContext();
   const currentQuery = useList({ get resource() { return demoContract(resourceName); }, pagination: { mode: 'off' } });
-  const productsQuery = useList({ resource: demoContracts.products, pagination: { mode: 'off' } });
-  const categoriesQuery = useList({ resource: demoContracts.categories, pagination: { mode: 'off' } });
-  const suppliersQuery = useList({ resource: demoContracts.suppliers, pagination: { mode: 'off' } });
-  const usersQuery = useList({ resource: demoContracts.users, pagination: { mode: 'off' } });
-  const plansQuery = useList({ resource: demoContracts.billing_plans, pagination: { mode: 'off' } });
+  const productsQuery = useList({ resource: demoContracts.products, pagination: { mode: 'off' }, get queryOptions() { return { enabled: ['skus', 'categories', 'suppliers'].includes(resourceName) }; } });
+  const categoriesQuery = useList({ resource: demoContracts.categories, pagination: { mode: 'off' }, get queryOptions() { return { enabled: resourceName === 'products' }; } });
+  const suppliersQuery = useList({ resource: demoContracts.suppliers, pagination: { mode: 'off' }, get queryOptions() { return { enabled: resourceName === 'products' }; } });
+  const usersQuery = useList({ resource: demoContracts.users, pagination: { mode: 'off' }, get queryOptions() { return { enabled: ['project_planning', 'store_admin', 'security_devices', 'referral_invites'].includes(resourceName) }; } });
+  const plansQuery = useList({ resource: demoContracts.billing_plans, pagination: { mode: 'off' }, get queryOptions() { return { enabled: resourceName === 'billing_subscriptions' }; } });
   const sessionUpdate = useUpdateMany({ resource: demoContracts.security_sessions });
+  const notificationUpdate = useUpdateMany({ resource: demoContracts.notifications });
+  let updatingNotification = $state(false);
   let revokingSessionId = $state<string | number | null>(null);
   let revokeConfirmOpen = $state(false);
   let pendingSessionRevoke = $state<DemoRow<'security_sessions'> | 'others' | null>(null);
@@ -70,8 +73,15 @@
   const suppliers = $derived(demoRenderers.suppliers.records(suppliersQuery.data?.data ?? []));
   const users = $derived(demoRenderers.users.records(usersQuery.data?.data ?? []));
   const plans = $derived(demoRenderers.billing_plans.records(plansQuery.data?.data ?? []));
-  const isLoading = $derived(currentQuery.isLoading || productsQuery.isLoading || categoriesQuery.isLoading || suppliersQuery.isLoading || usersQuery.isLoading || plansQuery.isLoading);
-  const hasError = $derived(Boolean(currentQuery.error || productsQuery.error || categoriesQuery.error || suppliersQuery.error || usersQuery.error || plansQuery.error));
+  const isLoading = $derived(currentQuery.isLoading);
+  const hasError = $derived(currentQuery.isError);
+  const relatedQueries = $derived([
+    ...(['skus', 'categories', 'suppliers'].includes(resourceName) ? [productsQuery] : []),
+    ...(resourceName === 'products' ? [categoriesQuery, suppliersQuery] : []),
+    ...(['project_planning', 'store_admin', 'security_devices', 'referral_invites'].includes(resourceName) ? [usersQuery] : []),
+    ...(resourceName === 'billing_subscriptions' ? [plansQuery] : []),
+  ]);
+  let actionFeedback = $state('');
   const domainResource = $derived(isDomainResource(resourceName) ? resourceName : 'products');
 
   function isDomainResource(name: string): name is DomainResource {
@@ -133,7 +143,7 @@
       const rows = demoRenderers.products.records(rawRows);
       return [
       [isZh ? '商品' : 'Products', rows.length],
-      [isZh ? '低库存' : 'Low stock', rows.filter((row) => valueNumber(row, 'stock') < valueNumber(row, 'minStock')).length],
+      [isZh ? '低库存' : 'Low stock', rows.filter((row) => valueNumber(row, 'stock') <= valueNumber(row, 'minStock')).length],
       [isZh ? '库存件数' : 'Units in stock', sumBy(rows, 'stock')],
       [isZh ? '目录货值' : 'Catalog value', money(rows.reduce((sum, row) => sum + valueNumber(row, 'price') * valueNumber(row, 'stock'), 0))],
       ];
@@ -316,6 +326,20 @@
   function createRecord(): void {
     adminContext.navigate(`/${resourceName}/create`);
   }
+  async function markNotificationRead(id: number): Promise<void> {
+    if (updatingNotification) return;
+    updatingNotification = true;
+    try {
+      await notificationUpdate.mutation.mutateAsync({ ids: [id], variables: { read: true } });
+      await currentQuery.refetch();
+      actionFeedback = isZh ? '已标为已读。' : 'Marked as read.';
+    } catch { actionFeedback = isZh ? '未能标为已读，请重试。' : 'Unable to mark as read. Please retry.'; }
+    finally { updatingNotification = false; }
+  }
+  async function copyValue(value: string): Promise<void> {
+    try { await navigator.clipboard.writeText(value); actionFeedback = isZh ? '已复制。' : 'Copied.'; }
+    catch { actionFeedback = isZh ? '复制失败，请选择原文复制。' : 'Copy failed. Select the original text to copy.'; }
+  }
 
   function toggleRecords(): void {
     showRecords = !showRecords;
@@ -340,18 +364,26 @@
       return row['id'];
     });
     revokingSessionId = target === 'others' ? '*' : ids[0] ?? null;
+    let completed = 0;
     try {
       for (const id of ids) {
         await sessionUpdate.mutation.mutateAsync({
           ids: [id],
           variables: { status: 'revoked' },
         });
+        completed += 1;
       }
+      actionFeedback = isZh ? `已撤销 ${completed} 个会话。` : `Revoked ${completed} sessions.`;
+    } catch {
+      actionFeedback = isZh ? `已撤销 ${completed}/${ids.length} 个会话，其余未完成，请重试。` : `Revoked ${completed}/${ids.length} sessions. Retry the remaining sessions.`;
     } finally {
+      await currentQuery.refetch();
       revokingSessionId = null;
     }
   }
 </script>
+
+<svelte:window onhashchange={() => showRecords = readHashParam('records') === '1'} onpopstate={() => showRecords = readHashParam('records') === '1'} />
 
 {#snippet actions()}
   <div class="flex flex-wrap items-center justify-end gap-2">
@@ -359,16 +391,22 @@
       <Table2 class="size-4" />
       {showRecords ? (isZh ? '收起记录' : 'Hide records') : (isZh ? '查看记录' : 'View records')}
     </Button>
-    <Button size="sm" onclick={createRecord}>{copy(profile.action)}</Button>
+    {#if resourceName !== 'security_sessions'}<Button size="sm" onclick={createRecord}>{copy(profile.action)}</Button>{/if}
   </div>
 {/snippet}
 
 <ContentPageShell pageId={`domain-${resourceName}`} width="wide" eyebrow={copy(profile.eyebrow)} title={copy(profile.title)} description={copy(profile.description)} {actions}>
   {#if hasError}
     <DataState state="error" title={isZh ? '业务数据加载失败' : 'Unable to load workspace data'} />
+    <Button variant="outline" onclick={() => void currentQuery.refetch()}>{isZh ? '重试' : 'Retry'}</Button>
   {:else if isLoading}
     <DataState state="loading" title={isZh ? '正在加载业务数据' : 'Loading workspace data'} />
   {:else}
+    {#if actionFeedback}<p role="status">{actionFeedback}</p>{/if}
+    {#if relatedQueries.some(query => query.isError)}
+      <p role="alert">{isZh ? '部分关联资料不可用，当前记录仍可处理。' : 'Some related data is unavailable. Current records remain available.'} <Button variant="outline" onclick={() => relatedQueries.forEach(query => { if (query.isError) void query.refetch(); })}>{isZh ? '重试关联资料' : 'Retry related data'}</Button></p>
+    {/if}
+    {#if rawRows.length === 0}<DataState state="empty" title={isZh ? '暂无记录，可新建第一条记录' : 'No records. Create the first record.'} />{/if}
     <section class="grid grid-cols-2 gap-3 xl:grid-cols-4" data-domain-metrics>
       {#each summaryMetrics as metric (String(metric[0]))}
         <MetricBlock label={String(metric[0])} value={metric[1]} />
@@ -378,8 +416,8 @@
     {#if domainResource === 'products'}
     {@const rows = demoRenderers.products.records(rawRows)}
       <section class="grid gap-5 xl:grid-cols-[minmax(0,1.4fr)_18rem]" data-product-catalog-layout>
-        <div class="grid gap-3 md:grid-cols-2">{#each rows as row (String(row['id']))}<article class="rounded-lg border border-border bg-card p-4"><div class="flex items-start justify-between gap-3"><div><p class="text-sm font-semibold text-foreground">{valueText(row, 'name')}</p><p class="mt-1 font-mono text-xs text-muted-foreground">{valueText(row, 'sku')}</p></div><Badge variant={valueNumber(row, 'stock') < valueNumber(row, 'minStock') ? 'destructive' : 'outline'}>{valueNumber(row, 'stock')} {isZh ? '件' : 'units'}</Badge></div><div class="mt-4 flex items-end justify-between"><div><p class="text-xs text-muted-foreground">{findName(categories, row['categoryId'])}</p><p class="mt-1 text-sm text-foreground">{findName(suppliers, row['supplierId'])}</p></div><p class="text-lg font-semibold">{money(valueNumber(row, 'price'))}</p></div></article>{/each}</div>
-        <aside class="rounded-lg border border-border bg-card p-4"><SectionHeader title={isZh ? '库存风险' : 'Stock exposure'} description={isZh ? '按最低库存检查目录风险。' : 'Catalog risk measured against minimum stock.'} /><div class="mt-4 space-y-4">{#each rows.filter((row) => valueNumber(row, 'stock') < valueNumber(row, 'minStock')) as row (String(row['id']))}<div><div class="flex items-center justify-between gap-3 text-sm"><span class="truncate">{valueText(row, 'name')}</span><Badge variant="destructive">-{valueNumber(row, 'minStock') - valueNumber(row, 'stock')}</Badge></div><div class="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"><div class="h-full rounded-full bg-destructive" style:width={`${percent(valueNumber(row, 'stock'), valueNumber(row, 'minStock'))}%`}></div></div></div>{:else}<DataState state="empty" title={isZh ? '没有低库存商品' : 'No low-stock products'} />{/each}</div></aside>
+        <div class="grid gap-3 md:grid-cols-2">{#each rows as row (String(row['id']))}<article class="rounded-lg border border-border bg-card p-4"><div class="flex items-start justify-between gap-3"><div><p class="text-sm font-semibold text-foreground">{valueText(row, 'name')}</p><p class="mt-1 font-mono text-xs text-muted-foreground">{valueText(row, 'sku')}</p></div><Badge variant={valueNumber(row, 'stock') <= valueNumber(row, 'minStock') ? 'destructive' : 'outline'}>{valueNumber(row, 'stock')} {isZh ? '件' : 'units'}</Badge></div><div class="mt-4 flex items-end justify-between"><div><p class="text-xs text-muted-foreground">{findName(categories, row['categoryId'])}</p><p class="mt-1 text-sm text-foreground">{findName(suppliers, row['supplierId'])}</p></div><p class="text-lg font-semibold">{money(valueNumber(row, 'price'))}</p></div><WorkspaceRecordLinks resource="products" id={row.id} /></article>{/each}</div>
+        <aside class="border-l p-4"><SectionHeader title={isZh ? '库存风险' : 'Stock exposure'} description={isZh ? '库存低于或等于最低库存。' : 'Stock at or below minimum.'} /><div class="mt-4 space-y-4">{#each rows.filter((row) => valueNumber(row, 'stock') <= valueNumber(row, 'minStock')) as row (String(row['id']))}<div><div class="flex items-center justify-between gap-3 text-sm"><a class="text-primary" href={`#/products/show/${row.id}`}>{valueText(row, 'name')}</a><Badge variant="destructive">{valueNumber(row, 'stock')} / {valueNumber(row, 'minStock')}</Badge></div></div>{:else}<DataState state="empty" title={isZh ? '没有低库存商品' : 'No low-stock products'} />{/each}</div></aside>
       </section>
     {:else if domainResource === 'skus'}
     {@const rows = demoRenderers.skus.records(rawRows)}
@@ -450,7 +488,7 @@
       <section class="grid gap-5 lg:grid-cols-[15rem_minmax(0,1fr)]" data-notification-center-layout><aside class="rounded-lg border border-border bg-card p-4"><SectionHeader title={isZh ? '处理队列' : 'Triage queue'} /><div class="mt-4 space-y-3">{#each ['critical', 'warning', 'info'] as severity (severity)}<div class="flex items-center justify-between"><span class="text-sm text-muted-foreground">{severity}</span><Badge variant="outline">{countBy(rows, 'severity', severity)}</Badge></div>{/each}</div></aside><div class="rounded-lg border border-border bg-card"><div class="divide-y divide-border">{#each rows as row (String(row['id']))}<article class="grid gap-3 p-4 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center"><Bell class="size-4 text-muted-foreground" /><div><p class="text-sm font-semibold">{valueText(row, 'title')}</p><p class="mt-1 text-xs text-muted-foreground">{valueText(row, 'body')}</p></div><div class="flex items-center gap-2"><Badge variant={valueText(row, 'severity') === 'critical' ? 'destructive' : 'outline'}>{valueText(row, 'severity')}</Badge><Badge variant={row['read'] ? 'secondary' : 'default'}>{row['read'] ? (isZh ? '已读' : 'Read') : (isZh ? '未读' : 'Unread')}</Badge></div></article>{/each}</div></div></section>
     {:else if domainResource === 'project_planning'}
     {@const rows = demoRenderers.project_planning.records(rawRows)}
-      <section class="grid gap-4 lg:grid-cols-3" data-project-plan-layout>{#each ['planned', 'in_progress', 'review'] as status (status)}<div class="rounded-lg border border-border bg-muted/15"><div class="flex items-center justify-between border-b border-border px-4 py-3"><h2 class="text-sm font-semibold">{statusLabel(status)}</h2><Badge variant="outline">{countBy(rows, 'status', status)}</Badge></div><div class="space-y-3 p-3">{#each rows.filter((row) => valueText(row, 'status') === status) as row (String(row['id']))}<article class="rounded-md border border-border bg-card p-3"><p class="text-sm font-semibold">{valueText(row, 'milestone')}</p><p class="mt-1 text-xs text-muted-foreground">{findName(users, row['ownerId'])} · {valueText(row, 'dueDate')}</p><div class="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"><div class="h-full rounded-full bg-primary" style:width={`${valueNumber(row, 'confidence')}%`}></div></div><p class="mt-1 text-right text-xs text-muted-foreground">{valueNumber(row, 'confidence')}%</p></article>{/each}</div></div>{/each}</section>
+      <section class="grid gap-4" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));" data-project-plan-layout>{#each ['planned', 'in_progress', 'review', 'completed'] as status (status)}<div class="border-t"><div class="flex items-center justify-between border-b border-border px-4 py-3"><h2 class="text-sm font-semibold">{statusLabel(status)}</h2><Badge variant="outline">{countBy(rows, 'status', status)}</Badge></div><div class="space-y-3 p-3">{#each rows.filter((row) => valueText(row, 'status') === status) as row (String(row['id']))}<article class="rounded-md border border-border bg-card p-3"><p class="text-sm font-semibold">{valueText(row, 'milestone')}</p><p class="mt-1 text-xs text-muted-foreground">{findName(users, row['ownerId'])} · {valueText(row, 'dueDate')}</p><progress class="mt-3 w-full" max="100" value={valueNumber(row, 'confidence')} aria-label={isZh ? '信心度' : 'Confidence'}></progress><p class="mt-1 text-right text-xs text-muted-foreground">{valueNumber(row, 'confidence')}%</p><WorkspaceRecordLinks resource="project_planning" id={row.id} /></article>{:else}<p class="text-sm text-muted-foreground">{isZh ? '暂无里程碑' : 'No milestones'}</p>{/each}</div></div>{/each}</section>
     {:else if domainResource === 'store_admin'}
     {@const rows = demoRenderers.store_admin.records(rawRows)}
       <section class="rounded-lg border border-border bg-card" data-store-admin-layout><div class="border-b border-border p-4"><SectionHeader title={isZh ? '后台模块交付' : 'Admin module delivery'} description={isZh ? '按负责人、目标日期和评审状态推进商城能力。' : 'Deliver store capabilities by owner, target date, and review state.'} /></div><div class="divide-y divide-border">{#each rows as row (String(row['id']))}<article class="grid gap-3 p-4 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center"><ServerCog class="size-5 text-muted-foreground" /><div><p class="text-sm font-semibold">{valueText(row, 'module')}</p><p class="mt-1 text-xs text-muted-foreground">{findName(users, row['ownerId'])} · {valueText(row, 'targetDate')}</p></div><Badge variant={badgeVariant(row['status'])}>{statusLabel(row['status'])}</Badge></article>{/each}</div></section>
@@ -462,6 +500,7 @@
       <section class="grid gap-5 xl:grid-cols-[17rem_minmax(0,1fr)]" data-prompt-library-layout><aside class="rounded-lg border border-border bg-card p-4"><SectionHeader title={isZh ? '受众分布' : 'Audience mix'} /><div class="mt-4 space-y-3">{#each [...new Set(rows.map((row) => valueText(row, 'audience')))] as audience (audience)}<div class="flex items-center justify-between"><span class="text-sm text-muted-foreground">{audience}</span><Badge variant="outline">{countBy(rows, 'audience', audience)}</Badge></div>{/each}</div></aside><div class="divide-y divide-border rounded-lg border border-border bg-card">{#each rows as row (String(row['id']))}<article class="p-4"><div class="flex items-start justify-between gap-3"><div class="flex items-start gap-3"><Sparkles class="mt-0.5 size-4 text-muted-foreground" /><div><p class="text-sm font-semibold">{valueText(row, 'promptName')}</p><p class="mt-1 text-sm text-muted-foreground">{valueText(row, 'content')}</p></div></div><Badge variant={badgeVariant(row['status'])}>{statusLabel(row['status'])}</Badge></div><p class="mt-3 text-xs text-muted-foreground">{valueText(row, 'audience')} · {valueNumber(row, 'usageCount')} {isZh ? '次使用' : 'uses'}</p></article>{/each}</div></section>
     {:else if domainResource === 'invoice_generator'}
     {@const rows = demoRenderers.invoice_generator.records(rawRows)}
+      <p class="text-sm text-muted-foreground">{isZh ? '生成计划演示：尚未接入实际开票、定时执行或文件交付。' : 'Generation plan demo: actual invoicing, scheduled execution and file delivery are not connected.'}</p>
       <section class="rounded-lg border border-border bg-card" data-invoice-generation-layout><div class="grid gap-px bg-border sm:grid-cols-3">{#each ['planned', 'in_progress', 'review'] as status (status)}<div class="bg-card p-4"><p class="text-xs text-muted-foreground">{statusLabel(status)}</p><p class="mt-2 text-2xl font-semibold">{countBy(rows, 'status', status)}</p></div>{/each}</div><div class="divide-y divide-border">{#each rows as row (String(row['id']))}<article class="grid gap-3 p-4 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center"><FileClock class="size-5 text-muted-foreground" /><div><p class="text-sm font-semibold">{valueText(row, 'templateName')}</p><p class="mt-1 text-xs text-muted-foreground">{valueText(row, 'channel')} · {isZh ? '下次运行' : 'Next run'} {valueText(row, 'nextRunAt')}</p></div><Badge variant={badgeVariant(row['status'])}>{statusLabel(row['status'])}</Badge></article>{/each}</div></section>
     {:else if domainResource === 'referral_invites'}
     {@const rows = demoRenderers.referral_invites.records(rawRows)}
@@ -469,6 +508,19 @@
 
     {/if}
 
+    <section class="divide-y border-y" aria-label={isZh ? '记录操作' : 'Record actions'}>
+      {#each rawRows as row (String(row.id))}
+        <div class="flex flex-wrap items-center justify-between gap-3 py-3">
+          <span class="min-w-0 break-words text-sm">{String(row['name'] ?? row['title'] ?? row['milestone'] ?? row['orderNumber'] ?? row['promptName'] ?? row['invoiceNumber'] ?? row['device'] ?? row['cidr'] ?? row['id'])}</span>
+          <div class="flex flex-wrap items-center gap-3">
+            <WorkspaceRecordLinks resource={resourceName} id={String(row.id)} />
+            {#if resourceName === 'notifications' && !row['read']}<Button size="sm" variant="outline" disabled={updatingNotification} onclick={() => void markNotificationRead(Number(row.id))}>{isZh ? '标为已读' : 'Mark read'}</Button>{/if}
+            {#if resourceName === 'ai_prompt'}<Button size="sm" variant="outline" onclick={() => void copyValue(String(row['content']))}>{isZh ? '复制提示词' : 'Copy prompt'}</Button>{/if}
+            {#if resourceName === 'referral_invites'}<Button size="sm" variant="outline" onclick={() => void copyValue(String(row['code']))}>{isZh ? '复制邀请码' : 'Copy invite code'}</Button>{/if}
+          </div>
+        </div>
+      {/each}
+    </section>
     {#if showRecords}
       <section class="space-y-3" data-domain-table>
         <SectionHeader title={isZh ? '完整记录' : 'All records'} description={isZh ? '保留筛选、排序、新建、编辑、详情和删除流程。' : 'Keep filtering, sorting, create, edit, show, and delete workflows.'} />

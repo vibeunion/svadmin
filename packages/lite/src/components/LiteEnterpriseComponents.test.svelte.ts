@@ -40,6 +40,7 @@ import LiteSpreadsheetView from './LiteSpreadsheetView.svelte';
 import LiteDecisionTable from './LiteDecisionTable.svelte';
 import LiteOfflineSyncBanner from './LiteOfflineSyncBanner.svelte';
 
+import { requireValue } from '../../../../scripts/test-assertions';
 describe('Lite Enterprise Components SSR rendering', () => {
   it('renders LiteTreeSelect in show and edit mode', () => {
     const options = [
@@ -163,6 +164,70 @@ describe('Lite Enterprise Components SSR rendering', () => {
     expect(view.container.querySelectorAll('[data-testid="lite-filter-group"], [data-testid="lite-filter-root"]')).toHaveLength(2);
     expect(view.container.querySelector('[name="filters[0][operator]"]')).toBeTruthy();
     expect(view.container.querySelector('[name="filters[0.value.1.value.0][field]"]')).toBeTruthy();
+  });
+
+  it('limits Lite filter operators and numeric editors by field type', () => {
+    const view = render(LiteFilterBuilder, {
+      fields: [
+        { key: 'amount', label: 'Amount', type: 'currency' },
+        { key: 'active', label: 'Active', type: 'boolean' },
+      ],
+      filters: [{ field: 'amount', operator: 'gte', value: 2 }],
+    });
+    const operator = view.container.querySelector('[name="filters[0][operator]"]') as HTMLSelectElement | null;
+    const value = view.container.querySelector('[name="filters[0][value]"]') as HTMLInputElement | null;
+    expect(operator ? [...operator.options].map(option => option.value) : []).toEqual([
+      'eq', 'ne', 'gt', 'gte', 'lt', 'lte', 'in', 'nin', 'between', 'nbetween', 'null', 'nnull',
+    ]);
+    expect(value?.type).toBe('number');
+  });
+
+  it('isolates multiple filter forms and keeps unsupported conditions read-only', () => {
+    const fields = [{ key: 'name', label: 'Name', type: 'text' as const }];
+    const first = render(LiteFilterBuilder, {
+      fields, filters: [{ field: 'name', operator: 'contains', value: 'Alice' }],
+    });
+    const second = render(LiteFilterBuilder, {
+      fields, filters: [{ field: 'name', operator: 'between' as const, value: ['Alice', 'Bob'] }],
+    });
+    const forms = document.querySelectorAll('form.lite-filter-form');
+    expect(forms).toHaveLength(2);
+    expect(forms[0]?.id).not.toBe(forms[1]?.id);
+    expect(second.container.querySelector('output')).toBeTruthy();
+    for (const view of [first, second]) {
+      const form =requireValue( view.container.querySelector('form'));
+      const apply =requireValue( view.container.querySelector<HTMLButtonElement>('button[form]'));
+      expect(apply.form).toBe(form);
+    }
+    const data = new FormData(requireValue(second.container.querySelector('form')));
+    expect(data.get('filters[0][operator]')).toBe('between');
+    expect(data.get('filters[0][value]')).toBe('["Alice","Bob"]');
+    expect(data.get('filters[0][invalid]')).toBe('true');
+  });
+
+  it.each([
+    { field: 'name', operator: 'eq' as const, value: 2 },
+    { field: 'name', operator: 'null' as const, value: 'not-null' },
+    { field: 'removed', operator: 'eq' as const, value: 'private' },
+  ])('marks an unrepresentable historical filter for rejection: %j', filter => {
+    const view = render(LiteFilterBuilder, {
+      fields: [{ key: 'name', label: 'Name', type: 'text' }], filters: [filter],
+    });
+    const data = new FormData(requireValue(view.container.querySelector('form')));
+    expect(data.get('filters[0][invalid]')).toBe('true');
+    expect(data.get('filters[0][field]')).toBe(filter.field);
+    expect(data.get('filters[0][operator]')).toBe(filter.operator);
+    expect(view.container.querySelector('[data-testid="lite-filter-rule"] select')).toBeNull();
+  });
+
+  it('excludes disabled historical conditions from native form data', () => {
+    const view = render(LiteFilterBuilder, {
+      disabled: true,
+      fields: [{ key: 'name', label: 'Name', type: 'text' }],
+      filters: [{ field: 'name', operator: 'between', value: ['Alice', 'Bob'] }],
+    });
+    expect([...new FormData(requireValue(view.container.querySelector('form'))).entries()]).toEqual([]);
+    expect(view.container.querySelector<HTMLButtonElement>('button[form]')?.disabled).toBe(true);
   });
 
   it('renders LiteDynamicFormList with item cards and actions', () => {
@@ -409,9 +474,9 @@ describe('Lite Enterprise Components SSR rendering', () => {
     });
     expect(schemaView.container.textContent).toContain('Project Form');
     expect(schemaView.container.textContent).toContain('Project Name');
-    expect(schemaView.container.querySelector('[id="lite_json_settings_retries"]')).toBeTruthy();
-    expect(schemaView.container.querySelector('[id="lite_json_tags_0"]')).toBeTruthy();
-    expect((schemaView.container.querySelector('[id="lite_json_settings_retries"]') as HTMLInputElement).value).toBe('2');
+    expect(schemaView.getByLabelText('retries')).toBeTruthy();
+    expect(schemaView.getByLabelText('tags 1')).toBeTruthy();
+    expect((schemaView.getByLabelText('retries') as HTMLInputElement).value).toBe('2');
   });
 
   it('renders LiteMentionsInput, LiteKanbanBoard, LitePivotTable, LiteMultiTabKeepAlive, and LiteGanttChart', () => {
@@ -447,7 +512,7 @@ describe('Lite Enterprise Components SSR rendering', () => {
     const ganttView = render(LiteGanttChart, {
       tasks: [{ id: 'gt1', title: 'Sprint 1', startDay: 0, durationDays: 5 }],
     });
-    expect(ganttView.container.textContent).toContain('Project Schedule');
+    expect(ganttView.container.textContent).toContain('Project Gantt Schedule');
     expect(ganttView.container.textContent).toContain('Sprint 1');
 
     const annoView = render(LiteCanvasAnnotation, {

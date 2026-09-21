@@ -18,8 +18,10 @@ mkdirSync(output, { recursive: true });
 try {
   const dependencies = { svelte: root.overrides.svelte, '@tanstack/svelte-query': manifest('ui').peerDependencies['@tanstack/svelte-query'],
     '@sinclair/typebox': manifest('surface').dependencies['@sinclair/typebox'] };
-  for (const name of ['core', 'ui', 'surface']) {
-    const [pack] = JSON.parse(run('npm', ['pack', '--json', '--ignore-scripts', '--pack-destination', temporary], join(repository, 'packages', name)));
+  for (const name of ['devtools-contract', 'core', 'ui', 'surface']) {
+    // 发布打包器解析 workspace 协议；独立消费者不依赖仓库工作区。
+    const tarball = run('bun', ['pm', 'pack', '--quiet', '--ignore-scripts', '--destination', temporary], join(repository, 'packages', name)).trim();
+    const [pack] = JSON.parse(run('npm', ['pack', tarball, '--dry-run', '--json', '--ignore-scripts']));
     assert.ok(pack?.filename && pack.integrity, `Missing ${name} pack`);
     dependencies[`@svadmin/${name}`] = `file:${join(temporary, pack.filename)}`;
     report.packs[name] = { filename: pack.filename, integrity: pack.integrity };

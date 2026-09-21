@@ -1,0 +1,10 @@
+{
+  "name": "svadmin-shadcn-authoring",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "svelte": "^5.56.10",
+    "tailwind-variants": "^3.3.0",
+    "tailwindcss": "^4.3.3"
+  }
+}

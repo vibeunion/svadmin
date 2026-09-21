@@ -27,5 +27,6 @@
   "packages/strapi": "0.10.7",
   "packages/lite": "0.13.0",
   "packages/mcp": "0.4.7",
+  "packages/devtools-contract": "0.1.0",
   "packages/surface": "0.9.0"
 }

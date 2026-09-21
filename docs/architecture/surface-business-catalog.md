@@ -50,8 +50,8 @@ a keyed render or invent a successful event. Backend order and timestamp text
 are preserved; the widget does not authenticate events or claim that an arbitrary
 activity resource is a trusted audit log. Missing actor is explicitly unknown.
 
-Both widgets select finite native tone/density props from the shared generated
-design contract and existing precompiled Panda card/frame recipe. Internal
+Both widgets select finite native tone/density props from the shared
+design contract and existing static semantic card/frame recipe. Internal
 ActivityFeed slots do not acquire a new density recipe in this change. Existing
 UI ActivityFeed defaults remain unchanged; optional header/count/empty text lets
 the wrapper use Surface-local language. New Surface message keys are optional to

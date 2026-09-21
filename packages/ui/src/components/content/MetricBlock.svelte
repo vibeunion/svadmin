@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import { metricBlock } from '../../styled-system/recipes/index.js';
+  import { metricBlockRecipe as metricBlock } from '../../recipes.js';
   import { Skeleton } from '../ui/skeleton/index.js';
 
   export type MetricTrendTone = 'positive' | 'negative' | 'warning' | 'neutral';

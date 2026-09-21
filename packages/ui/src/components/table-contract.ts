@@ -1,8 +1,12 @@
 import { Type } from '@sinclair/typebox';
 import { checkExact, decodeBaseRecord, snapshotPlainData, rejectProviderResponse } from '@svadmin/core/schema';
-import type { BaseRecord } from '@svadmin/core';
+import type { BaseRecord, Filter, Sort } from '@svadmin/core';
 
 export type TableRecord = BaseRecord & { id: string | number };
+
+export type BatchSelection =
+  | { scope: 'selected'; ids: (string | number)[]; currentPageIds: (string | number)[] }
+  | { scope: 'all'; filters: Filter[]; sorters: Sort[]; total: number; excludedIds: (string | number)[] };
 const recordShape = Type.Intersect([
   Type.Record(Type.String(), Type.Unknown()),
   Type.Object({ id: Type.Union([Type.String(), Type.Number()]) }),

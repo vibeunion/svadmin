@@ -1,14 +1,14 @@
 ---
 version: "alpha"
-name: "svadmin Stripe-first"
+name: "svadmin Admin UI"
 description: "A restrained, precise product interface for repeated administrative work."
 colors:
-  background: "oklch(0.982 0.003 264)"
+  background: "oklch(0.985 0.001 264)"
   foreground: "oklch(0.205 0.012 264)"
   surface: "oklch(1 0 0)"
   surface-subtle: "oklch(0.968 0.004 264)"
   muted-foreground: "oklch(0.493 0.018 264)"
-  border: "oklch(0.914 0.006 264)"
+  border: "oklch(0.925 0.003 264)"
   primary: "oklch(0.558 0.22 278)"
   on-primary: "oklch(0.99 0 0)"
   success: "oklch(0.51 0.16 151)"
@@ -91,7 +91,17 @@ components:
 
 ## Overview
 
-svadmin uses a Stripe-first product language: quiet neutral canvases, precise
+### Visual update: September 21, 2026
+
+The current UI follows Metronic Tailwind demo1 for layout rhythm, light surfaces,
+thin borders and restrained shadows, as requested by the project owner.
+This supersedes the older capability-only reference limitation below.
+Keep SVAdmin's own branding, semantic tokens, OpenUI contracts and Bits UI behavior.
+App chrome must use explicit anatomy hooks; never style every business `header`.
+Package utilities live in sublayers of `utilities`, so host-authored responsive
+utilities win regardless of lazy package stylesheet load order.
+
+svadmin defines its own Admin UI product language: quiet neutral canvases, precise
 type, hairline borders, restrained elevation, compact controls, and clear
 feedback for repeated operational work. The interface should feel like a real
 administrative product with trustworthy states, not a collection of dashboard
@@ -104,7 +114,7 @@ visual authority.
 
 ### Design principles
 
-Seven principles turn the Stripe-first direction into reviewable product
+Seven principles turn svadmin's design direction into reviewable product
 decisions. They apply to built-in components, examples, generated applications,
 and documentation:
 
@@ -121,7 +131,7 @@ and documentation:
    destructive, reversible, and completed states expose their scope and next
    step. Data freshness, permission boundaries, and action consequences must be
    visible when they affect a decision.
-5. **Restrained like Stripe:** neutral surfaces and precise hierarchy carry the
+5. **Restrained by purpose:** neutral surfaces and precise hierarchy carry the
    interface. Accent, elevation, radius, animation, and decoration are used only
    when they clarify priority or interaction.
 6. **Accessible by construction:** keyboard access, visible focus, semantic
@@ -187,10 +197,10 @@ may increase slightly for genuinely clickable items, without translation or
 glow. Dialogs and menus receive stronger depth because they are floating
 layers. Dark mode keeps the same hierarchy with low-chroma surfaces.
 
-- **Control Shadow**: `0 1px 2px rgb(15 23 42 / 0.05), 0 0 0 1px rgb(15 23 42 / 0.025)`
-- **Surface Shadow**: `0 1px 2px rgb(15 23 42 / 0.035), 0 1px 3px rgb(15 23 42 / 0.025)`
-- **Surface Hover Shadow**: `0 2px 5px rgb(15 23 42 / 0.055), 0 1px 2px rgb(15 23 42 / 0.035)`
-- **Overlay Shadow**: `0 18px 48px rgb(15 23 42 / 0.14), 0 4px 12px rgb(15 23 42 / 0.08)`
+- **Control Shadow**: `0 1px 2px rgb(15 23 42 / 0.09), 0 0 0 1px rgb(15 23 42 / 0.045)`
+- **Surface Shadow**: `0 1px 2px rgb(15 23 42 / 0.08), 0 10px 24px rgb(15 23 42 / 0.07)`
+- **Surface Hover Shadow**: `0 3px 8px rgb(15 23 42 / 0.1), 0 16px 32px rgb(15 23 42 / 0.08)`
+- **Overlay Shadow**: `0 20px 52px rgb(15 23 42 / 0.18), 0 6px 16px rgb(15 23 42 / 0.1)`
 
 ## Shapes
 
@@ -226,7 +236,7 @@ Transitions provide clear state confirmation without delaying user action:
 
 The reference stack is layered. It is not a visual mixture:
 
-- **Stripe is the visual authority:** hierarchy, restraint, neutral surfaces,
+- **svadmin owns its visual principles:** hierarchy, restraint, neutral surfaces,
   typography, density, and interaction tone.
 - **Refine is an application-model reference:** resource routing, CRUD flows,
   provider state, access control, and mutation ownership.

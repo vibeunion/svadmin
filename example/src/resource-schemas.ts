@@ -5,8 +5,9 @@ const text = Type.String();
 const number = Type.Number();
 const boolean = Type.Boolean();
 const nullableNumber = Type.Union([number, Type.Null()]);
+const mailRevision = Type.Optional(Type.String({ minLength: 1 }));
 const receivedMail = Type.Object({
-  id, sender: text, subject: text, body: text, date: text, unread: boolean,
+  id, sender: text, subject: text, body: text, date: text, unread: boolean, mailRevision,
 }, { additionalProperties: false });
 
 // Demo records, stored data, and page types share these closed schemas.
@@ -43,8 +44,8 @@ export const demoSchemas = {
   property_leads: Type.Object({ id, leadName: text, propertyId: number, agentId: number, source: text, budget: number, status: text, targetMoveDate: text, notes: text }, { additionalProperties: false }),
   property_showings: Type.Object({ id, showingNumber: text, propertyId: number, leadId: number, agentId: number, scheduledDate: text, status: text, feedbackScore: nullableNumber, notes: text }, { additionalProperties: false }),
   mail_inbox: receivedMail,
-  mail_draft: Type.Object({ id, to: text, subject: text, body: text, updatedAt: text }, { additionalProperties: false }),
-  mail_sent: Type.Object({ id, to: text, subject: text, body: text, sentAt: text }, { additionalProperties: false }),
+  mail_draft: Type.Object({ id, to: text, subject: text, body: text, updatedAt: text, mailRevision }, { additionalProperties: false }),
+  mail_sent: Type.Object({ id, to: text, subject: text, body: text, sentAt: text, mailRevision }, { additionalProperties: false }),
   mail_archive: receivedMail,
   mail_snoozed: receivedMail,
   mail_spam: receivedMail,

@@ -9,29 +9,41 @@ const directives = new Map();
 for (const file of readdirSync(sourceRoot, { recursive: true })) {
   if (!file.endsWith('.svelte')) continue;
   const source = readFileSync(new URL(file, sourceRoot), 'utf8');
+  const localClasses = new Set();
+  for (const style of source.matchAll(/<style(?:\s[^>]*)?>([\s\S]*?)<\/style>/g)) {
+    for (const name of classesWithDeclarations(style[1])) localClasses.add(name);
+  }
   for (const match of source.matchAll(/\bclass:([^\s={}>]+)/g)) {
+    if (localClasses.has(match[1])) continue;
     const owners = directives.get(match[1]) ?? [];
     owners.push(file);
     directives.set(match[1], owners);
   }
 }
-const legacyClasses = ['bg-primary', 'bg-muted', 'text-primary-foreground', 'text-muted-foreground',
-  'grid-cols-2', 'w-auto', 'min-w-[200px]', 'w-[252px]', 'w-[70px]', 'px-5', 'px-2',
-  'px-[10px]', 'justify-center', 'md:ml-[252px]', 'md:ml-[70px]'];
-function assertCoverage(css) {
+function classesWithDeclarations(css) {
   const selectors = new Set();
   postcss.parse(css).walkRules((rule) => {
-    selectorParser((root) => root.walkClasses((node) => selectors.add(node.value))).processSync(rule.selector);
+    if (!rule.nodes?.some(node => node.type === 'decl')) return;
+    selectorParser((root) => root.walkClasses((node) => {
+      for (let parent = node.parent; parent; parent = parent.parent) {
+        if (parent.type === 'pseudo' && parent.value === ':not') return;
+      }
+      selectors.add(node.value);
+    })).processSync(rule.selector);
   });
-  for (const name of legacyClasses) assert.ok(selectors.has(name), `Missing legacy conditional class ${name}`);
-  for (const [name, owners] of directives) {
+  return selectors;
+}
+
+function assertCoverage(css, required = directives) {
+  const selectors = classesWithDeclarations(css);
+  for (const [name, owners] of required) {
     assert.ok(selectors.has(name), `Missing conditional class ${name} used by ${owners.join(', ')}`);
   }
 }
 
-test('all Svelte class directives have published native CSS in both entries', () => {
+test('Svelte class directives without component-local styles have CSS in both public entries', () => {
   assert.ok(directives.size >= 15, 'Source scan must include migrated sidebar and form directives');
-  for (const name of ['svadmin-sidebar--expanded', 'svadmin-sidebar--collapsed', 'sidebar-content-expanded', 'sidebar-content-collapsed', 'svadmin-devtools--collapsed-width', 'svadmin-devtools--collapsed-min-width']) {
+  for (const name of ['svadmin-sidebar-expanded', 'svadmin-sidebar-collapsed', 'svadmin-sidebar-content-expanded', 'svadmin-sidebar-content-collapsed', 'sidebar-content-expanded', 'sidebar-content-collapsed', 'svadmin-devtools--collapsed-width', 'svadmin-devtools--collapsed-min-width']) {
     assert.ok(directives.has(name), `Missing component source coverage for ${name}`);
   }
   for (const file of ['app.css', 'app.theme.css']) {
@@ -41,19 +53,21 @@ test('all Svelte class directives have published native CSS in both entries', ()
 
 test('removing collapsed-sidebar CSS is detected even when expanded styles remain', () => {
   const root = postcss.parse(readFileSync(new URL('../dist/app.css', import.meta.url), 'utf8'));
+  assertCoverage(root.toString());
   root.walkRules((rule) => {
     let remove = false;
     selectorParser((selectors) => selectors.walkClasses((node) => {
-      if (node.value === 'w-[70px]') remove = true;
+      if (node.value === 'svadmin-sidebar-collapsed') remove = true;
     })).processSync(rule.selector);
     if (remove) rule.remove();
   });
-  assert.throws(() => assertCoverage(root.toString()), /Missing legacy conditional class w-\[70px\]/);
+  assert.throws(() => assertCoverage(root.toString()), /Missing conditional class svadmin-sidebar-collapsed used by/);
 });
 
 test('removing any current component state rule is detected', () => {
   for (const name of directives.keys()) {
     const root = postcss.parse(readFileSync(new URL('../dist/app.css', import.meta.url), 'utf8'));
+    assertCoverage(root.toString());
     root.walkRules((rule) => {
       let remove = false;
       selectorParser((selectors) => selectors.walkClasses((node) => {
@@ -61,6 +75,7 @@ test('removing any current component state rule is detected', () => {
       })).processSync(rule.selector);
       if (remove) rule.remove();
     });
-    assert.throws(() => assertCoverage(root.toString()), /Missing (?:legacy )?conditional class/);
+    assert.throws(() => assertCoverage(root.toString(), new Map([[name, directives.get(name)]])), error =>
+      error instanceof assert.AssertionError && error.message.startsWith(`Missing conditional class ${name} used by `));
   }
 });

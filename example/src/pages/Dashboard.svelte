@@ -5,7 +5,7 @@
 
   type Movement = DemoRow<'stock_movements'>;
 
-  import { useList } from '@svadmin/core';
+  import { captureAdminContext, useList } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { ContentPageHeader, ContentPageShell, DataState, MetricBlock } from '@svadmin/ui';
   import * as Card from '@svadmin/ui/components/ui/card/index.js';
@@ -26,34 +26,37 @@
   } from '@lucide/svelte';
 
   const i18n = useTranslation();
+  const adminContext = captureAdminContext();
+  import WorkspaceQueryState from './WorkspaceQueryState.svelte';
+  import { recordLink } from './workspace-links';
   const declarativeSurfacePromise = import('../components/DeclarativeSurfaceExample.svelte');
 
   const productsQuery = useList({ resource: demoContracts.products, pagination: { mode: 'off' } });
   const suppliersQuery = useList({ resource: demoContracts.suppliers, pagination: { current: 1, pageSize: 1 } });
   const warehousesQuery = useList({ resource: demoContracts.warehouses, pagination: { current: 1, pageSize: 1 } });
-  const movementsQuery = useList({ resource: demoContracts.stock_movements, pagination: { current: 1, pageSize: 5 }, sorters: [{ field: 'date', order: 'desc' }] });
+  const movementsQuery = useList({ resource: demoContracts.stock_movements, pagination: { mode: 'off' }, sorters: [{ field: 'date', order: 'desc' }] });
   const transfersQuery = useList({ resource: demoContracts.stock_transfers, pagination: { mode: 'off' } });
   const cycleCountsQuery = useList({ resource: demoContracts.cycle_counts, pagination: { mode: 'off' } });
   const adjustmentsQuery = useList({ resource: demoContracts.inventory_adjustments, pagination: { mode: 'off' } });
   const reorderRulesQuery = useList({ resource: demoContracts.reorder_rules, pagination: { mode: 'off' } });
   const purchaseOrdersQuery = useList({ resource: demoContracts.purchase_orders, pagination: { current: 1, pageSize: 1 } });
-  const salesOrdersQuery = useList({ resource: demoContracts.sales_orders, pagination: { current: 1, pageSize: 5 }, sorters: [{ field: 'orderDate', order: 'desc' }] });
+  const salesOrdersQuery = useList({ resource: demoContracts.sales_orders, pagination: { mode: 'off' }, sorters: [{ field: 'orderDate', order: 'desc' }] });
   const todosQuery = useList({ resource: demoContracts.todos, pagination: { mode: 'off' } });
   const usersQuery = useList({ resource: demoContracts.users, pagination: { mode: 'off' } });
   const rolesQuery = useList({ resource: demoContracts.roles, pagination: { current: 1, pageSize: 1 } });
   const calendarQuery = useList({
     resource: demoContracts.calendar_events,
-    pagination: { current: 1, pageSize: 3 },
+    pagination: { mode: 'off' },
     sorters: [{ field: 'startDate', order: 'asc' }],
   });
   const conversationsQuery = useList({
     resource: demoContracts.ai_conversations,
-    pagination: { current: 1, pageSize: 3 },
+    pagination: { mode: 'off' },
     sorters: [{ field: 'updatedAt', order: 'desc' }],
   });
   const notificationsQuery = useList({
     resource: demoContracts.notifications,
-    pagination: { current: 1, pageSize: 3 },
+    pagination: { mode: 'off' },
     sorters: [{ field: 'createdAt', order: 'desc' }],
   });
 
@@ -79,9 +82,21 @@
     salesOrdersQuery, todosQuery, usersQuery, rolesQuery, calendarQuery,
     conversationsQuery, notificationsQuery,
   ];
-  const isLoading = $derived(queries.some((query) => query.isLoading));
   const isRefreshing = $derived(queries.some((query) => query.isFetching));
   const hasError = $derived(queries.some((query) => query.isError));
+  const queryByRoute = {
+    products: productsQuery, suppliers: suppliersQuery, warehouses: warehousesQuery,
+    purchase_orders: purchaseOrdersQuery, sales_orders: salesOrdersQuery, todos: todosQuery,
+    stock_transfers: transfersQuery, cycle_counts: cycleCountsQuery,
+    inventory_adjustments: adjustmentsQuery, reorder_rules: reorderRulesQuery,
+    users: usersQuery, calendar_events: calendarQuery, ai_conversations: conversationsQuery,
+    notifications: notificationsQuery,
+  };
+  function displayValue(href: string, value: string | number): string | number {
+    const key = href.replace('#/', '');
+    const query = Object.entries(queryByRoute).find(([route]) => route === key)?.[1];
+    return query && (query.isError || query.isLoading) ? '—' : value;
+  }
   function retryFailedQueries(): void {
     for (const query of queries) {
       if (query.isError && !query.isFetching) void query.refetch();
@@ -242,43 +257,33 @@
 </script>
 
 <ContentPageShell pageId="operations-dashboard" width="wide">
-  <ContentPageHeader title={isZh ? '运营工作台' : 'Operations workspace'} />
+  <ContentPageHeader title={isZh ? '运营工作台' : 'Operations workspace'}
+    description={isZh ? '库存风险、订单与团队待办' : 'Inventory health, orders and team priorities'}>
+    {#snippet actions()}
+      <span role="status" class="flex items-center gap-2 text-xs text-muted-foreground">
+        <span aria-hidden="true" class="h-1.5 w-1.5 rounded-full {hasError ? 'bg-destructive' : isRefreshing ? 'bg-warning' : 'bg-success'}"></span>
+        {hasError ? (isZh ? '部分数据不可用' : 'Some data unavailable') : isRefreshing ? (isZh ? '更新中' : 'Updating') : (isZh ? '已同步' : 'Up to date')}
+      </span>
+    {/snippet}
+  </ContentPageHeader>
 
   {#if hasError}
     <DataState state="error" title={isZh ? '部分数据未能更新' : 'Some data could not be updated'}
       description={isZh ? '暂不可用的指标显示为 —，请重试后再作判断。' : 'Unavailable metrics show —. Retry before making a decision.'}
       retry={retryFailedQueries} />
   {/if}
-  <section class="grid gap-3 sm:grid-cols-3" data-dashboard-decisions>
+  <section class="grid grid-cols-2 gap-3 sm:grid-cols-3" data-dashboard-decisions>
     <MetricBlock label={isZh ? '库存风险' : 'Stock at risk'} value={productsQuery.isError ? '—' : lowStockProducts.length}
       detail={productsQuery.isError ? '' : (isZh ? `其中 ${outOfStockProducts.length} 项缺货` : `${outOfStockProducts.length} out of stock`)}
       loading={productsQuery.isLoading} />
     <MetricBlock label={isZh ? '待处理' : 'Open work'}
       value={todosQuery.isError || transfersQuery.isError || adjustmentsQuery.isError ? '—' : openTodos + activeTransfers + pendingAdjustments}
       detail={isZh ? '待办、调拨与审批' : 'Todos, transfers, approvals'} loading={todosQuery.isLoading || transfersQuery.isLoading || adjustmentsQuery.isLoading} />
-    <MetricBlock label={isZh ? '数据状态' : 'Data status'}
-      value={hasError ? (isZh ? '部分失败' : 'Partial failure') : isRefreshing ? (isZh ? '更新中' : 'Refreshing') : (isZh ? '已加载' : 'Loaded')}
-      loading={isLoading} />
+    <MetricBlock class="col-span-2 sm:col-span-1" label={isZh ? '库存资产' : 'Inventory value'}
+      value={productsQuery.isError ? '—' : `$${Math.round(totalAssetValue).toLocaleString(locale)}`}
+      detail={productsQuery.isError ? '' : isZh ? `${totalStock} 件库存` : `${totalStock.toLocaleString(locale)} units in stock`}
+      loading={productsQuery.isLoading} />
   </section>
-
-  <details class="border-y" data-dashboard-summary data-svadmin-collapsible>
-    <summary class="cursor-pointer py-3 text-sm font-medium">{isZh ? '资源概览' : 'Resource overview'}</summary>
-  <section class="grid grid-cols-2 gap-x-6 gap-y-3 pb-4 xl:grid-cols-3">
-    {#each stats as stat (stat.label)}
-      <a href={stat.href} class="block py-2 hover:text-primary">
-        <div class="flex items-center justify-between gap-3">
-          <div class="min-w-0">
-            <p class="min-h-7 text-xs font-medium leading-tight text-muted-foreground sm:min-h-0">{stat.label}</p>
-            <p class="mt-1 text-lg font-semibold tabular-nums text-foreground">{hasError ? '—' : stat.value}</p>
-          </div>
-          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border {stat.tone}">
-            <stat.Icon class="h-5 w-5" />
-          </span>
-        </div>
-      </a>
-    {/each}
-  </section>
-  </details>
 
   <!-- Inventory Health + Operations Queue -->
   <section class="grid items-start gap-6 lg:grid-cols-[1.2fr_0.8fr]">
@@ -296,7 +301,7 @@
           {#each lowStockProducts as product (product.id)}
             <div class="flex items-center justify-between gap-4 py-3">
               <div class="min-w-0">
-                <p class="truncate text-sm font-medium text-foreground">{product.name}</p>
+                <a href={recordLink('products', product.id, adminContext.currentPath())} class="block truncate text-sm font-medium text-foreground hover:text-primary hover:underline">{product.name}</a>
                 <p class="text-xs text-muted-foreground">{product.sku}</p>
               </div>
               <div class="text-right">
@@ -315,31 +320,50 @@
       <header class="border-b py-3">
         <h2 class="text-sm font-semibold">{isZh ? '运营队列' : 'Operations Queue'}</h2>
       </header>
-        <div class="divide-y">
+        <div class="grid gap-x-5 sm:grid-cols-2" data-dashboard-queue>
           {#each orderSummary as item (item.label)}
-            <a href={item.href} class="flex items-center justify-between gap-3 py-3 transition hover:bg-muted/50">
+            <a href={item.href} class="flex items-center justify-between gap-3 border-b border-border py-3 transition hover:bg-muted/50">
               <div class="flex items-center gap-3">
                 <item.Icon class="h-4 w-4 text-muted-foreground" />
                 <span class="text-sm font-medium">{item.label}</span>
               </div>
-              <span class="text-sm font-semibold tabular-nums text-foreground">{hasError ? '—' : item.value}</span>
+              <span class="text-sm font-semibold tabular-nums text-foreground">{displayValue(item.href, item.value)}</span>
             </a>
           {/each}
         </div>
     </section>
   </section>
 
+  <details class="border-y" data-dashboard-summary data-svadmin-collapsible>
+    <summary class="cursor-pointer py-3 text-sm font-medium">{isZh ? '资源概览' : 'Resource overview'}</summary>
+    <section class="grid grid-cols-2 gap-x-6 gap-y-3 pb-4 xl:grid-cols-3">
+      {#each stats as stat (stat.label)}
+        <a href={stat.href} class="block py-2 hover:text-primary">
+          <div class="flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <p class="min-h-7 text-xs font-medium leading-tight text-muted-foreground sm:min-h-0">{stat.label}</p>
+              <p class="mt-1 text-lg font-semibold tabular-nums text-foreground">{displayValue(stat.href, stat.value)}</p>
+            </div>
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center text-muted-foreground">
+              <stat.Icon class="h-4 w-4" />
+            </span>
+          </div>
+        </a>
+      {/each}
+    </section>
+  </details>
+
   <!-- Roadmap modules -->
   <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
     {#each roadmapModules as module (module.label)}
-      <a href={module.href} class="rounded-lg border bg-card px-6 py-4 shadow-sm transition hover:border-primary/50 hover:bg-muted/50">
+      <a href={module.href} class="dashboard-module border-b py-3 transition hover:bg-muted/50">
         <div class="flex items-center justify-between gap-3">
-          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border {module.tone}">
-            <module.Icon class="h-5 w-5" />
+          <span class="flex h-8 w-8 shrink-0 items-center justify-center text-muted-foreground">
+            <module.Icon class="h-4 w-4" />
           </span>
-          <span class="text-2xl font-semibold text-foreground">{module.value}</span>
+          <span class="text-lg font-semibold tabular-nums text-foreground">{displayValue(module.href, module.value)}</span>
         </div>
-        <div class="mt-3">
+        <div class="mt-2">
           <p class="text-sm font-semibold text-foreground">{module.label}</p>
           <p class="mt-1 text-xs text-muted-foreground">{module.meta}</p>
         </div>
@@ -349,14 +373,15 @@
 
   <!-- Calendar / AI / Notifications columns -->
   <section class="grid gap-4 xl:grid-cols-3">
-    <Card.Root class="overflow-hidden border-border/40">
+    <Card.Root data-dashboard-panel class="overflow-hidden border-border/40">
       <Card.Header class="flex flex-row items-center justify-between border-b px-6 py-4">
         <Card.Title class="text-sm font-semibold">{isZh ? '日历' : 'Calendar'}</Card.Title>
         <a class="text-sm font-medium text-primary hover:underline" href="#/calendar_events">{isZh ? '查看全部' : 'View all'}</a>
       </Card.Header>
       <Card.Content class="p-0">
+        <WorkspaceQueryState query={calendarQuery}>
         <div class="divide-y">
-          {#each calendarEvents as event (event.id)}
+          {#each calendarEvents.slice(0, 3) as event (event.id)}
             <div class="px-6 py-4">
               <p class="truncate text-sm font-medium text-foreground">{eventTitle(event.title)}</p>
               <p class="mt-1 text-xs text-muted-foreground">{event.startDate} / {eventTypeLabel(event.type)}</p>
@@ -365,17 +390,19 @@
             <div class="px-6 py-8 text-sm text-muted-foreground">{isZh ? '暂无计划日程。' : 'No scheduled events.'}</div>
           {/each}
         </div>
+        </WorkspaceQueryState>
       </Card.Content>
     </Card.Root>
 
-    <Card.Root class="overflow-hidden border-border/40">
+    <Card.Root data-dashboard-panel class="overflow-hidden border-border/40">
       <Card.Header class="flex flex-row items-center justify-between border-b px-6 py-4">
         <Card.Title class="text-sm font-semibold">{isZh ? 'AI 运营' : 'AI Operations'}</Card.Title>
         <a class="text-sm font-medium text-primary hover:underline" href="#/ai_conversations">{isZh ? '查看全部' : 'View all'}</a>
       </Card.Header>
       <Card.Content class="p-0">
+        <WorkspaceQueryState query={conversationsQuery}>
         <div class="divide-y">
-          {#each conversations as conversation (conversation.id)}
+          {#each conversations.slice(0, 3) as conversation (conversation.id)}
             <div class="flex items-center justify-between gap-4 px-6 py-4">
               <div class="min-w-0">
                 <p class="truncate text-sm font-medium text-foreground">{conversationTitle(conversation.title)}</p>
@@ -387,17 +414,19 @@
             <div class="px-6 py-8 text-sm text-muted-foreground">{isZh ? '暂无 AI 对话。' : 'No AI threads yet.'}</div>
           {/each}
         </div>
+        </WorkspaceQueryState>
       </Card.Content>
     </Card.Root>
 
-    <Card.Root class="overflow-hidden border-border/40">
+    <Card.Root data-dashboard-panel class="overflow-hidden border-border/40">
       <Card.Header class="flex flex-row items-center justify-between border-b px-6 py-4">
         <Card.Title class="text-sm font-semibold">{isZh ? '通知' : 'Notifications'}</Card.Title>
         <a class="text-sm font-medium text-primary hover:underline" href="#/notifications">{isZh ? '查看全部' : 'View all'}</a>
       </Card.Header>
       <Card.Content class="p-0">
+        <WorkspaceQueryState query={notificationsQuery}>
         <div class="divide-y">
-          {#each notifications as notification (notification.id)}
+          {#each notifications.slice(0, 3) as notification (notification.id)}
             <div class="flex items-center justify-between gap-4 px-6 py-4">
               <div class="min-w-0">
                 <p class="truncate text-sm font-medium text-foreground">{notificationTitle(notification.title)}</p>
@@ -411,12 +440,13 @@
             <div class="px-6 py-8 text-sm text-muted-foreground">{isZh ? '暂无通知。' : 'No notifications yet.'}</div>
           {/each}
         </div>
+        </WorkspaceQueryState>
       </Card.Content>
     </Card.Root>
   </section>
 
   <section class="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
-    <Card.Root class="overflow-hidden border-border/40">
+    <Card.Root data-dashboard-panel class="overflow-hidden border-border/40">
       <Card.Header class="flex flex-row items-center justify-between border-b px-6 py-4">
         <Card.Title class="text-sm font-semibold">{isZh ? '库存排行' : 'Stock ranking'}</Card.Title>
         <a class="text-sm font-medium text-primary hover:underline" href="#/products">{isZh ? '商品档案' : 'Products'}</a>
@@ -435,7 +465,7 @@
                   <span>{product.stock}</span>
                 </div>
                 <div class="mt-2 h-2 rounded-full bg-muted">
-                  <div class="h-2 rounded-full bg-primary" style:width={`${Math.min(100, Math.max(16, product.stock))}%`}></div>
+                  <div class="h-2 rounded-full bg-primary" style:width={`${totalStock ? product.stock / totalStock * 100 : 0}%`} aria-label={isZh ? '占总库存比例' : 'Share of total stock'}></div>
                 </div>
               </div>
             </div>
@@ -444,7 +474,7 @@
       </Card.Content>
     </Card.Root>
 
-    <Card.Root class="overflow-hidden border-border/40">
+    <Card.Root data-dashboard-panel class="overflow-hidden border-border/40">
       <Card.Header class="flex flex-row items-center justify-between border-b px-6 py-4">
         <Card.Title class="text-sm font-semibold">{isZh ? '团队成员' : 'Team members'}</Card.Title>
         <a class="text-sm font-medium text-primary hover:underline" href="#/users">{isZh ? '用户管理' : 'Users'}</a>
@@ -458,7 +488,7 @@
                 <p class="text-xs text-muted-foreground">{member.department}</p>
               </div>
               <div class="flex items-center gap-3">
-                <a class="text-sm text-primary hover:underline" href={`#/users/show/${member.id}`}>{isZh ? '查看成员' : 'View member'}</a>
+                <a class="text-sm text-primary hover:underline" href={recordLink('users', member.id, adminContext.currentPath())}>{isZh ? '查看成员' : 'View member'}</a>
               </div>
             </div>
           {/each}
@@ -468,26 +498,26 @@
   </section>
 
   <section class="grid gap-4 xl:grid-cols-[0.72fr_1.28fr]">
-    <Card.Root class="overflow-hidden border-border/40">
+    <Card.Root data-dashboard-panel class="overflow-hidden border-border/40">
       <Card.Header class="border-b px-6 py-4">
         <Card.Title class="text-sm font-semibold">{isZh ? '销售活动' : 'Sales Activity'}</Card.Title>
       </Card.Header>
       <Card.Content class="space-y-4 p-6">
-        <div class="rounded-lg border bg-muted/20 p-4">
-          <p class="text-xs font-semibold text-muted-foreground">{isZh ? '今日履约节奏' : 'Today flow'}</p>
+        <div class="border-b pb-4">
+          <p class="text-xs font-semibold text-muted-foreground">{isZh ? '销售与流水记录' : 'Sales and movement records'}</p>
           <p class="mt-2 text-3xl font-semibold text-foreground">{salesOrders.length + movements.length}</p>
           <p class="mt-1 text-xs text-muted-foreground">{isZh ? '订单与库存动作合计' : 'orders and inventory actions'}</p>
         </div>
         <div class="grid grid-cols-3 gap-2 text-center">
-          <div class="rounded-lg border p-3">
+          <div class="p-3">
             <p class="text-lg font-semibold">{salesOrders.filter((order) => order.status === 'pending').length}</p>
             <p class="text-xs text-muted-foreground">{isZh ? '待处理' : 'Pending'}</p>
           </div>
-          <div class="rounded-lg border p-3">
+          <div class="border-x p-3">
             <p class="text-lg font-semibold">{salesOrders.filter((order) => order.status === 'processing').length}</p>
             <p class="text-xs text-muted-foreground">{isZh ? '处理中' : 'Processing'}</p>
           </div>
-          <div class="rounded-lg border p-3">
+          <div class="p-3">
             <p class="text-lg font-semibold">{salesOrders.filter((order) => order.status === 'shipped').length}</p>
             <p class="text-xs text-muted-foreground">{isZh ? '已发货' : 'Shipped'}</p>
           </div>
@@ -495,7 +525,7 @@
       </Card.Content>
     </Card.Root>
 
-    <Card.Root class="overflow-hidden border-border/40">
+    <Card.Root data-dashboard-panel class="overflow-hidden border-border/40">
       <Card.Header class="flex flex-row items-center justify-between border-b px-6 py-4">
         <Card.Title class="text-sm font-semibold">{isZh ? '近期订单' : 'Recent Orders'}</Card.Title>
         <a class="text-sm font-medium text-primary hover:underline" href="#/sales_orders">{isZh ? '销售订单' : 'Sales Orders'}</a>
@@ -520,7 +550,7 @@
   </section>
 
   <!-- Recent Stock Movements -->
-  <Card.Root class="overflow-hidden border-border/40">
+  <Card.Root data-dashboard-panel class="overflow-hidden border-border/40">
     <Card.Header class="flex flex-row items-center justify-between border-b px-6 py-4">
       <Card.Title class="text-sm font-semibold">{isZh ? '近期库存流水' : 'Recent Stock Movements'}</Card.Title>
       <a class="text-sm font-medium text-primary hover:underline" href="#/stock_movements">{isZh ? '查看全部' : 'View all'}</a>

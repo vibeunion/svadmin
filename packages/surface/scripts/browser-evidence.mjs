@@ -11,7 +11,7 @@ const root = fileURLToPath(new URL('..', import.meta.url));
 const repository = resolve(root, '../..');
 const output = join(repository, 'test-results/surface-evidence');
 mkdirSync(output, { recursive: true });
-// 只用 Svelte 插件，消费构建后的包和预编译 CSS；不配置 Panda/Tailwind 插件。
+// 只用 Svelte 插件，消费构建后的包和静态 CSS；不配置样式编译插件。
 const server = await createServer({
   configFile: false, root: join(root, 'evidence'), plugins: [svelte()],
   server: { host: '127.0.0.1', port: 5187, strictPort: true, fs: { allow: [repository] } },
@@ -20,13 +20,13 @@ await server.listen();
 const browser = await chromium.launch({ headless: true });
 const evidence = { commit: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: repository, encoding: 'utf8' }).trim(),
   browser: browser.version(), compilerPlugins: ['svelte'], hashes: {}, cssOrders: [], cases: [] };
-for (const file of ['src/components/SurfaceEditPreview.svelte', 'src/components/SurfaceRenderer.svelte', 'panda.config.ts', 'src/styles/editor.css']) {
+for (const file of ['src/components/SurfaceEditPreview.svelte', 'src/components/SurfaceRenderer.svelte', 'src/styles/editor.ts', 'src/styles/editor.css']) {
   evidence.hashes[file] = createHash('sha256').update(readFileSync(join(root, file))).digest('hex');
 }
 try {
   const uiCss = readFileSync(join(repository, 'packages/ui/dist/app.css'), 'utf8');
   const editorCss = readFileSync(join(root, 'dist/styles/editor.css'), 'utf8');
-  const { editorClasses, editorButtonClasses } = await import(pathToFileURL(join(root, 'dist/styles/editor.generated.js')).href);
+  const { editorClasses, editorButtonClasses } = await import(pathToFileURL(join(root, 'dist/styles/editor.js')).href);
   // 在两个真实导入顺序下检查完整发布 CSS，不以删掉宿主 reset 的方式修复冲突。
   for (const editorFirst of [true, false]) {
     const page = await browser.newPage();

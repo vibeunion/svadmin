@@ -1,9 +1,8 @@
 <script lang="ts">
-  import { getAuthProvider } from '@svadmin/core';
-  import { navigate } from '@svadmin/core/router';
+  import { useLogin } from '@svadmin/core';
   import { Loader2, Shield } from '@lucide/svelte';
 
-  const auth = getAuthProvider();
+  const login = useLogin({ successNotification: false, errorMessage: false });
 
   let email = $state('');
   let password = $state('');
@@ -12,16 +11,20 @@
 
   async function handleLogin(e: Event) {
     e.preventDefault();
+    if (loading) return;
     loading = true;
     error = null;
 
-    const result = await auth.login({ email, password });
-    if (result.success) {
-      navigate(result.redirectTo ?? '/');
-    } else {
-      error = result.error?.message ?? 'Login failed';
+    try {
+      const result = await login.mutate({ email, password });
+      if (!result.success) {
+        error = result.error?.message ?? 'Login failed';
+      }
+    } catch {
+      error = 'Unable to sign in. Please try again.';
+    } finally {
+      loading = false;
     }
-    loading = false;
   }
 </script>
 
@@ -38,7 +41,7 @@
 
     <!-- Error -->
     {#if error}
-      <div class="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+      <div role="alert" class="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
         {error}
       </div>
     {/if}

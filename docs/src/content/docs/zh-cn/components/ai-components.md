@@ -134,6 +134,31 @@ export default defineConfig({
 <ChatDialog {componentRegistry} />
 ```
 
+## Ant Design X 参考边界
+
+Ant Design X 值得参考的是 AI 对话产品模型：欢迎态和建议、会话列表、
+`Sender` 输入、消息流式输出、推理过程、工具调用、任务进度和命令行入口。
+SVAdmin 已将这些能力映射到 Svelte 原生组件：
+
+| Ant Design X 交互模型 | SVAdmin 实现 | 当前状态 |
+| --- | --- | --- |
+| Welcome / Suggestion | `ConversationEmptyState`、`Suggestion`、`SmartSuggest` | `stable` |
+| Conversation / Message / Bubble | `Conversation`、`Message`、`Response` | `stable` |
+| Sender | `PromptInput` 复合组件 | `stable` |
+| Streaming / Stop / Retry | `ChatProvider`、`ChatDialog` | `stable` |
+| Thought / Tool | `Reasoning`、`ChainOfThought`、`Tool`、`AgentProvider` | `stable` |
+| Confirmation | `Confirmation`、`needsApproval`、`executeAdminTool` | `stable` |
+| Task / Plan / Queue | `Task`、`Plan`、`Queue`、`Checkpoint` | `experimental` |
+| 命令行工具 | `AICommandBar` | `stable` |
+
+这里的“参考”是交互与产品模型，不是引入 React 或复制 Ant Design X 的
+API。企业级边界必须保持：当前租户/资源/权限上下文、服务端二次授权、
+敏感数据脱敏、写操作确认、审计记录和会话隔离。模型输出不能直接成为
+可信 mutation。
+
+`AI_WORKSPACE_CAPABILITIES` 是可测试的机器契约；只有 `stable` 能力属于
+当前企业级 AI 工作台核心闭环，`experimental` 能力不得对外宣称为稳定交付。
+
 Agent 工具使用同一套 TypeBox 边界。必须通过 `executeAdminTool` 执行来自模型的参数，
 确保工具实现接收到的是已经过 `Value.Decode` 校验和转换的数据：
 

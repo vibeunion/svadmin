@@ -9,7 +9,7 @@ import { badgeVariants } from '../packages/ui/dist/components/ui/badge/badge-var
 import { stableScreenshot } from './stable-screenshot.mjs';
 
 /** 在 Chromium 中显式模拟不支持 color-mix；不改生产文件，不伪称旧浏览器实测。 */
-function withoutColorMix(css) {
+export function withoutColorMix(css) {
   const root = postcss.parse(css);
   let removedConditions = 0;
   root.walkAtRules('supports', rule => {
@@ -47,6 +47,7 @@ export async function verifyPrimitiveFallbacks(browser, stylesheets, output) {
         const name = `fallback-${entry.replace('.css', '')}-${width}-${dark ? 'dark' : 'light'}`;
         const page = await browser.newPage({ viewport: { width, height: 900 }, reducedMotion: 'reduce' });
         const pageErrors = [];
+        const diagnostics = {};
         page.on('pageerror', error => pageErrors.push(error.message));
         try {
           await page.setContent('<!doctype html><html><head><title>UI fallback verification</title></head><body><main><h1>State controls without color-mix</h1><p>Actual published helpers and CSS · simulated unsupported feature</p><section aria-label="State variants"></section></main></body></html>');
@@ -88,9 +89,11 @@ export async function verifyPrimitiveFallbacks(browser, stylesheets, output) {
             });
           }
           const normal = await inspect();
+          diagnostics.normal = normal;
           const button = page.getByRole('button', { name: 'button: destructive', exact: true });
           await button.hover();
           const hover = await inspect();
+          diagnostics.hover = hover;
           for (const sample of [...normal, ...hover]) {
             assert.equal(sample.foreground[3], 255, `${name}: text must be opaque`);
             assert.equal(sample.background[3], 255, `${name}: fallback background must be opaque`);
@@ -98,19 +101,23 @@ export async function verifyPrimitiveFallbacks(browser, stylesheets, output) {
           }
           await page.mouse.move(0, 0);
           await page.keyboard.press('Tab');
-          assert.equal(await button.evaluate(element => document.activeElement === element), true);
+          diagnostics.focused = await button.evaluate(element => document.activeElement === element);
+          assert.equal(diagnostics.focused, true);
           const outline = await button.evaluate(element => {
             const style = getComputedStyle(element);
-            return { style: style.outlineStyle, width: parseFloat(style.outlineWidth) };
+            return { style: style.outlineStyle, width: parseFloat(style.outlineWidth),
+              color: style.outlineColor, shadow: style.boxShadow, focusVisible: element.matches(':focus-visible') };
           });
-          assert.notEqual(outline.style, 'none'); assert.ok(outline.width >= 2);
+          diagnostics.outline = outline;
+          assert.notEqual(outline.style, 'none', `${name}: keyboard focus outline is absent without color-mix`);
+          assert.ok(outline.width >= 2, `${name}: keyboard focus outline must be at least 2px`);
           assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true);
           assert.deepEqual(pageErrors, []);
           writeFileSync(resolve(output, `${name}.png`), await stableScreenshot(() => page.screenshot({ animations: 'disabled', caret: 'hide' })));
           report.checks.push({ name, entry, width, dark, removedConditions: fallback.removedConditions,
             publishedSha256: createHash('sha256').update(original).digest('hex'), normal, hover, outline });
         } catch (error) {
-          report.failures.push({ name, error: String(error), pageErrors });
+          report.failures.push({ name, error: String(error), pageErrors, diagnostics });
         } finally { await page.close(); }
       }
     }

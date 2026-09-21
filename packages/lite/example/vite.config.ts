@@ -14,6 +14,9 @@ function ie11CssSelectors() {
 }
 
 export default {
+  ssr: {
+    noExternal: ['@tanstack/svelte-query'],
+  },
   server: {
     host: '127.0.0.1',
     port: 5174,

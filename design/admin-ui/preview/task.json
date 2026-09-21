@@ -1,0 +1,14 @@
+{
+  "id": "admin-ui-browser-specimens-20260919",
+  "parent": "admin-ui-design-kit-20260919",
+  "source": "User continuation after PR #438 and Figma rate-limit handoff",
+  "reason": "Continue approved component/state and list/detail/settings design work while Figma read access remains blocked.",
+  "state": "in-progress",
+  "risk": "low",
+  "orchestration": {"mode": "native", "writer": "single-owner", "externalReviewers": 0},
+  "scope": ["design/admin-ui/preview", ".github/workflows/admin-ui-browser-specimens.yml", "design/admin-ui/README.md"],
+  "acceptance": ["Use real built Svelte components and ordinary package CSS", "Finite scenes cover Input, Badge and the three agreed patterns", "Desktop/mobile, light/dark and Chinese/English evidence", "Search retention, permission presentation and simulated save lifecycle tests", "No production writes, added dependencies, Figma quota bypass or false synchronization claims"],
+  "figma": {"fileKey": "r02lMyLBPoaNS3gep3TNRF", "readAttempt": "get_metadata(6:4)", "result": "Starter MCP tool call limit reached", "mutationsThisContinuation": false},
+  "execution": {"localContainer": "TransportTimeoutError", "localPython": "TransportTimeoutError", "verificationTarget": "GitHub Actions on the exact candidate revision"},
+  "nonGoals": ["merge main", "release", "deploy", "new acceptance framework", "register new Surface capabilities", "claim complete Figma kit"]
+}

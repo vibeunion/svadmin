@@ -4,7 +4,26 @@
   import type { RoleInfo, ResourceInfo, ActionInfo } from '../types.js';
   import { useTranslation } from '@svadmin/core/i18n';
 
-  const i18n = useTranslation();
+  const translation = useTranslation();
+  const fallback: Record<string, [string, string]> = {
+    title: ['Permission Matrix', '权限矩阵'],
+    description: ['Configure authorization rules for system modules and roles.', '配置系统模块与角色的授权规则。'],
+    roles: ['Roles', '角色'],
+    noRoles: ['No roles available', '暂无角色'],
+    currentRole: ['Current role', '当前角色'],
+    noneSelected: ['None selected', '未选择'],
+    toggleHint: ['Toggle checkboxes to grant or revoke permissions', '勾选或取消勾选以授予或撤销权限'],
+    conflicts: ['conflicting rules', '条冲突规则'],
+    resources: ['Resources', '资源'],
+    noResources: ['No resources available', '暂无资源'],
+  };
+  const i18n = {
+    t(key: string) {
+      const value = translation.t(key);
+      const labels = fallback[key.replace(/^permissions\./, '')];
+      return value === key && labels ? labels[translation.locale === 'zh-CN' ? 1 : 0] : value;
+    },
+  };
 
   
   let {

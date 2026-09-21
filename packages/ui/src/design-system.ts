@@ -1,4 +1,4 @@
-import { surfaceMetric, surfaceTable } from "./styled-system/recipes/index.js";
+import { surfaceMetricRecipe as surfaceMetric, surfaceTableRecipe as surfaceTable } from "./recipes.js";
 import type { SurfaceTone, SurfaceDensity } from "./design-contract.js";
 
 export function metricSurfaceClasses(tone: SurfaceTone = "neutral") {

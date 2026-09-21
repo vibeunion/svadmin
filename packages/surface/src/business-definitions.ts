@@ -1,7 +1,7 @@
 import { Type, type Static } from '@sinclair/typebox';
 import { Value } from '@sinclair/typebox/value';
 import { styledSurfaceDefinitions } from './builtin-definitions.js';
-import { surfaceDesignContract } from './styled-system/design-contract.js';
+import { surfaceDesignContract } from './design-contract.js';
 import type { JsonObject, SurfaceCatalog, SurfaceWidgetDefinition } from './types.js';
 
 const field = Type.String({ minLength: 1, maxLength: 64, pattern: '^[A-Za-z][A-Za-z0-9_-]*$' });

@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, waitFor, within } from '@testing-library/svelte';
+import { createRawSnippet } from 'svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Type } from '@sinclair/typebox';
 import { QueryClient } from '@tanstack/svelte-query';
@@ -51,6 +52,42 @@ afterEach(() => {
 });
 
 describe('contract-bound detail views', () => {
+  it.each([undefined, 'https://external.example/path', '//external.example/path', '/\\external.example'])(
+    'returns to the resource list without trusting browser history (%s)', async returnTo => {
+      vi.spyOn(window.history, 'length', 'get').mockReturnValue(10);
+      const onNavigate = vi.fn();
+      const onHistoryBack = vi.fn();
+      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      clients.push(queryClient);
+      const view = render(Host, {
+        provider: provider(), resources, queryClient, onNavigate, onHistoryBack,
+        ...(returnTo === undefined ? {} : { returnTo }),
+      });
+      await fireEvent.click(view.getByRole('button', { name: 'Back' }));
+      expect(onNavigate).toHaveBeenCalledWith(expect.objectContaining({ to: '/posts' }));
+      expect(onHistoryBack).not.toHaveBeenCalled();
+    },
+  );
+
+  it('preserves an explicit internal return destination and prioritizes the host callback', async () => {
+    const onNavigate = vi.fn();
+    const onBack = vi.fn();
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    clients.push(queryClient);
+    const props = {
+      provider: provider(), resources, queryClient, onNavigate,
+      returnTo: '/workspace?tab=queue&filter=open',
+    };
+    const view = render(Host, props);
+    await fireEvent.click(view.getByRole('button', { name: 'Back' }));
+    expect(onNavigate).toHaveBeenCalledWith(expect.objectContaining({ to: props.returnTo }));
+    onNavigate.mockClear();
+    await view.rerender({ ...props, onBack });
+    await fireEvent.click(view.getByRole('button', { name: 'Back' }));
+    expect(onBack).toHaveBeenCalledTimes(1);
+    expect(onNavigate).not.toHaveBeenCalled();
+  });
+
   it('strictly compiles the detail boundary, views and migrated negative type fixtures', () => {
     const directory = dirname(fileURLToPath(import.meta.url));
     const sources = ['../../../core/src/query-hooks.svelte.ts', 'record-detail.svelte.ts', 'detail-contract.test.type-fixture.ts',
@@ -100,6 +137,15 @@ describe('contract-bound detail views', () => {
     expect(() => render(Host, { mode, provider: provider(),
       resources: [{ name: 'posts', label: 'Posts', fields: [] }], queryClient: app.client,
     })).toThrowError(expect.objectContaining({ code: 'RESOURCE_CONTRACT_REQUIRED' }));
+  });
+
+  it('renders authorized detail extensions only after the record succeeds', async () => {
+    const extension = createRawSnippet(() => ({ render: () => '<p data-testid="activity">Authorized activity</p>' }));
+    const app = mount('drawer', provider(), true, 1);
+    await app.view.rerender({ extraSections: extension });
+    await waitFor(() => expect(app.view.getByTestId('activity')).toBeTruthy());
+    await app.view.rerender({ permission: { can: async () => ({ can: false }) } });
+    await waitFor(() => expect(app.view.queryByTestId('activity')).toBeNull());
   });
 
   it('does not fetch closed or unselected drawers, even with a route record ID', async () => {

@@ -9,6 +9,7 @@
   import ContentPageShell from '../content/ContentPageShell.svelte';
   import ContentPageHeader from '../content/ContentPageHeader.svelte';
   import { referenceDemoData } from '../../reference-data.js';
+  import ReferenceNotice from '../content/ReferenceNotice.svelte';
 
   type ProfileVariant = 'default' | 'company' | 'gamer';
   type ProfileTab = 'projects' | 'activity' | 'teams';
@@ -35,6 +36,7 @@
 </script>
 
 <ContentPageShell {pageId} width="wide">
+  <ReferenceNotice />
   <ContentPageHeader title={profileData.name} eyebrow={i18n.t('publicProfile.title')} description={profileData.tagline} />
   {#if showSections}
     <div class="svadmin-u-f3c543ad5fe9 svadmin-u-0d304f904cb0 svadmin-u-bf1b5b54929e"><ProfileCard {...profileData} {variant} /><ProfileVariantSections {variant} /></div>

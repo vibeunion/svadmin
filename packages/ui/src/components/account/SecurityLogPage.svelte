@@ -10,6 +10,8 @@
   import SecurityEventTable from '../content/SecurityEventTable.svelte';
   import type { SecurityEvent } from '../content/SecurityEventTable.svelte';
   import { referenceDemoData } from '../../reference-data.js';
+  import ReferenceNotice from '../content/ReferenceNotice.svelte';
+  import { downloadRows } from '../export-reference.js';
   const i18n = useTranslation();
   let query = $state('');
   const events: SecurityEvent[] = referenceDemoData.securityEvents;
@@ -17,8 +19,9 @@
 </script>
 
 <ContentPageShell pageId="account-security-log" width="wide">
+  <ReferenceNotice />
   <ContentPageHeader title={i18n.t('account.securityLog')} description={i18n.t('account.securityLogDescription')} {...definedOptions({ "actions": undefined })} />
-  <div class="svadmin-u-60fbb7713999 svadmin-u-77c08e015d14"><Button variant="outline" size="sm"><Download class="svadmin-u-783b0d9d1e2c" />{i18n.t('common.export')}</Button></div>
+  <div class="svadmin-u-60fbb7713999 svadmin-u-77c08e015d14"><Button variant="outline" size="sm" onclick={() => downloadRows('sample-security-events.json', filtered)}><Download class="svadmin-u-783b0d9d1e2c" />{i18n.t('common.export')}</Button></div>
   <FilterToolbar bind:query placeholder={i18n.t('common.search')} />
   <SecurityEventTable events={filtered} />
 </ContentPageShell>

@@ -9,6 +9,19 @@ import selectorParser from 'postcss-selector-parser';
 const root = new URL('../', import.meta.url);
 const read = (name) => readFileSync(new URL(`dist/${name}`, root), 'utf8');
 
+test('published utilities cannot override the host utility layer', () => {
+  for (const name of ['app.css', 'app.theme.css']) {
+    let hasScopedUtilities = false;
+    postcss.parse(read(name)).walkAtRules('layer', rule => {
+      if (!rule.nodes) return;
+      assert.notEqual(rule.params, 'utilities', `${name}: unscoped utility block`);
+      if (rule.params === 'utilities.svadmin-ui') hasScopedUtilities = true;
+    });
+    assert.ok(hasScopedUtilities, `${name}: missing package utility sublayer`);
+    assert.doesNotMatch(read(name), /\.layout-clean-flat\s+header\s*\{/);
+  }
+});
+
 test('both published CSS entries contain migrated utility and variant styles', () => {
   for (const name of ['app.css', 'app.theme.css']) {
     const css = read(name);
@@ -19,10 +32,10 @@ test('both published CSS entries contain migrated utility and variant styles', (
       '.svadmin-badge--subtle-success',
       '.svadmin-alert--warning',
       '.svadmin-avatar-size--sm',
-      '.svadmin-surface-metric__root',
-      '.svadmin-surface-table__root',
+      '.text-success',
+      '.text-muted-foreground',
     ]) assert.ok(css.includes(selector), `${name}: missing ${selector}`);
-    assert.ok(css.includes('--svadmin-colors-'), `${name}: missing Panda semantic token aliases`);
+    assert.ok(css.includes('--color-primary'), `${name}: missing semantic token aliases`);
     assert.ok(css.includes('.svadmin-theme'), `${name}: missing nested aliases`);
   }
 });
@@ -62,6 +75,7 @@ test('postbuild is idempotent and preserves both CSS side effects', () => {
   const manifest = JSON.parse(readFileSync(new URL('package.json', root), 'utf8'));
   assert.ok(manifest.sideEffects.includes('./dist/app.css'));
   assert.ok(manifest.sideEffects.includes('./dist/app.theme.css'));
-  assert.ok(!manifest.dependencies['tailwind-variants']);
+  assert.ok(manifest.dependencies['tailwind-variants']);
+  assert.ok(!manifest.dependencies['tailwindcss']);
   assert.ok(!manifest.dependencies['tailwind-merge']);
 });

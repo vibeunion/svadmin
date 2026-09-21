@@ -1,9 +1,9 @@
 ---
 title: 设计原则
-description: 面向可信管理产品的七条 Stripe-first 原则
+description: 面向可信管理产品的七条 svadmin 设计原则
 ---
 
-svadmin 把 Stripe 作为视觉权威，而不是品牌模板。中性表面、精确层级、克制
+svadmin 自身的设计原则决定 Admin UI 的视觉方向。中性表面、精确层级、克制
 景深和紧凑控件服务于高频运营工作。以下七条原则把视觉方向转成可审查的
 产品决策。
 
@@ -53,7 +53,7 @@ svadmin 把 Stripe 作为视觉权威，而不是品牌模板。中性表面、�
 
 核心不变量：**one event -> one primary feedback surface**。
 
-## 5. Stripe 式克制
+## 5. 为任务保持克制
 
 让内容和层级承担界面表达。
 

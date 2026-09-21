@@ -2,12 +2,44 @@
 
 export { surfaceDesignContract } from "./design-contract.js";
 export type { SurfaceTone, SurfaceDensity } from "./design-contract.js";
+export {
+	designSystemComponents,
+	type DesignComponentContract,
+	type DesignComponentId,
+	type DesignComponentState,
+} from "./design-system-components.js";
+export { metricSurfaceClasses, tableSurfaceClasses } from "./design-system.js";
 
 // Entry component
 export { default as AdminApp } from './components/AdminApp.svelte';
 
 // Admin components
 export { default as AutoTable } from './components/AutoTable.svelte';
+export { default as SegmentedControl } from './components/SegmentedControl.svelte';
+export type { SegmentedControlOption } from './components/SegmentedControl.svelte';
+export { default as RadioGroup } from './components/RadioGroup.svelte';
+export type { RadioGroupOption } from './components/RadioGroup.svelte';
+export { default as TagsInput } from './components/TagsInput.svelte';
+export { default as Slider } from './components/Slider.svelte';
+export { default as RangeSlider } from './components/RangeSlider.svelte';
+export type { RangeSliderValue } from './components/RangeSlider.svelte';
+export { default as ColorPicker } from './components/ColorPicker.svelte';
+export { default as Rate } from './components/Rate.svelte';
+export { default as PivotExportButton } from './components/PivotExportButton.svelte';
+export type { PivotCache } from '@svadmin/core/pivot';
+export {
+  decodeSavedListViewMutationResult,
+  decodeSavedListViewRemoveResult,
+  decodeSavedListViewAccess,
+} from './components/saved-list-views.js';
+export type {
+  SavedListView, SavedListViewState, SavedListViewProvider, SavedListViewMutation,
+  SavedListViewMutationSuccess, SavedListViewMutationConflict, SavedListViewRemoveSuccess,
+  ListPreferenceScope,
+  SavedListViewAccess, SavedListViewAccessMode,
+  SavedListViewSubject,
+} from './components/saved-list-views.js';
+export type { BatchSelection } from './components/table-contract.js';
 export { default as AutoForm } from './components/AutoForm.svelte';
 export { default as ShowPage } from './components/ShowPage.svelte';
 export { default as ConfirmDialog } from './components/ConfirmDialog.svelte';
@@ -36,6 +68,25 @@ export { default as CanAccess } from './components/CanAccess.svelte';
 export { default as Can } from './components/CanAccess.svelte';
 export { default as UndoableNotification } from './components/UndoableNotification.svelte';
 export { default as DevTools } from './components/DevTools.svelte';
+export { default as DevframePanel } from './components/DevframePanel.svelte';
+export {
+  attachSvadminDevtoolsQueryClient,
+  createSvadminDevtoolsCacheActions,
+  getSvadminDevtoolsSnapshot,
+  installSvadminDevtoolsBridge,
+  publishSvadminDevtoolsSnapshot,
+  subscribeSvadminDevtools,
+  SVADMIN_DEVFRAME_CHANNEL,
+} from './devtools-bridge.js';
+export type {
+  DevtoolsCacheDiagnostics,
+  DevtoolsProviderDiagnostic,
+  DevtoolsQueryDiagnostic,
+  SvadminDevtoolsBridge,
+  SvadminDevtoolsSnapshot,
+  DevtoolsQuerySelector,
+  SvadminDevframeProtocol,
+} from './devtools-bridge.js';
 export { default as Authenticated } from './components/Authenticated.svelte';
 export { default as UpdatePasswordPage } from './components/UpdatePasswordPage.svelte';
 export { default as ProfilePage } from './components/ProfilePage.svelte';
@@ -52,13 +103,15 @@ export { default as CreatePage } from './components/CreatePage.svelte';
 export { default as EditPage } from './components/EditPage.svelte';
 export { default as AutoSaveIndicator } from './components/AutoSaveIndicator.svelte';
 export { default as ErrorComponent } from './components/ErrorComponent.svelte';
+export { default as ErrorSummary } from './components/ErrorSummary.svelte';
+export type { FormErrorEntry } from './components/ErrorSummary.svelte';
 export { default as PageSkeleton } from './components/PageSkeleton.svelte';
 export { default as NavigateToResource } from './components/NavigateToResource.svelte';
 export { default as CatchAllNavigate } from './components/CatchAllNavigate.svelte';
 export { default as ThemedTitle } from './components/ThemedTitle.svelte';
 export { default as CommandPalette } from './components/CommandPalette.svelte';
 export { default as StepsForm } from './components/StepsForm.svelte';
-// Advanced Form & Data Controls (Refine/Antd Parity)
+// Advanced form and data controls
 export { default as DynamicFormList } from './components/DynamicFormList.svelte';
 export { default as TreeSelect } from './components/TreeSelect.svelte';
 export type { TreeSelectOption } from './components/TreeSelect.svelte';
@@ -76,10 +129,13 @@ export { default as ImportWizard } from './components/ImportWizard.svelte';
 export { default as ColumnHeaderFilter } from './components/ColumnHeaderFilter.svelte';
 export { default as TreeTable } from './components/TreeTable.svelte';
 export type { TreeTableColumn } from './components/TreeTable.svelte';
+export type { TreeTableSort } from './tree-table-model.js';
 export { default as SensitiveDataMask } from './components/SensitiveDataMask.svelte';
 export type { MaskType } from './components/SensitiveDataMask.svelte';
 export { default as ApprovalActionCard } from './components/ApprovalActionCard.svelte';
 export type { ApprovalStatus } from './components/ApprovalActionCard.svelte';
+export { default as ApprovalCenter } from './components/ApprovalCenter.svelte';
+export { default as DashboardView } from './components/DashboardView.svelte';
 export { default as StepForm } from './components/StepForm.svelte';
 export type { FormStep } from './components/StepForm.svelte';
 export { default as ModalForm } from './components/ModalForm.svelte';
@@ -121,7 +177,7 @@ export { default as SignaturePad } from './components/SignaturePad.svelte';
 export { default as PdfDocumentViewer } from './components/PdfDocumentViewer.svelte';
 export type { DocumentStamp } from './components/PdfDocumentViewer.svelte';
 export { default as SpreadsheetView } from './components/SpreadsheetView.svelte';
-export type { SheetData } from './components/SpreadsheetView.svelte';
+export type { SheetData, SpreadsheetLimits } from './components/SpreadsheetView.svelte';
 export { default as DecisionTable } from './components/DecisionTable.svelte';
 export type { DecisionColumn, DecisionRule } from './components/DecisionTable.svelte';
 export { default as OfflineSyncBanner } from './components/OfflineSyncBanner.svelte';
@@ -129,6 +185,8 @@ export type { PendingMutation } from './components/OfflineSyncBanner.svelte';
 
 export { default as InfiniteList } from './components/InfiniteList.svelte';
 export { default as ComboboxField } from './components/ComboboxField.svelte';
+export { default as RelationPicker } from './components/RelationPicker.svelte';
+export type { RelationPickerOption } from './components/RelationPicker.svelte';
 export { default as PasswordInput } from './components/PasswordInput.svelte';
 export { default as NumericInput } from './components/NumericInput.svelte';
 export { default as NumberInput } from './components/NumberInput.svelte';
@@ -137,7 +195,15 @@ export { default as PercentInput } from './components/PercentInput.svelte';
 export { default as DateTimeInput } from './components/DateTimeInput.svelte';
 export type { DateTimeInputMode } from './components/DateTimeInput.svelte';
 export { default as DateRangeInput } from './components/DateRangeInput.svelte';
-export type { DateRangeInputValue } from './components/DateRangeInput.svelte';
+export type { DateRangeInputValue, DateRangePreset } from './components/DateRangeInput.svelte';
+export { default as DatePicker } from './components/DatePicker.svelte';
+export type { DatePickerProps } from './components/DatePicker.svelte';
+export { default as DateRangePicker } from './components/DateRangePicker.svelte';
+export type { DateRangePickerProps } from './components/DateRangePicker.svelte';
+export { default as TimePicker } from './components/TimePicker.svelte';
+export type { TimePickerProps } from './components/TimePicker.svelte';
+export { default as DateTimePicker } from './components/DateTimePicker.svelte';
+export type { DateTimePickerProps } from './components/DateTimePicker.svelte';
 export { default as AnomalyBadge } from "./components/AnomalyBadge.svelte";
 export { default as AnimatedCounter } from "./components/AnimatedCounter.svelte";
 export { default as KeyboardShortcuts } from "./components/KeyboardShortcuts.svelte";
@@ -288,7 +354,7 @@ export { default as TeamCrewTablePage } from './components/network/TeamCrewTable
 // Auth extensions
 export { default as TwoFactorAuthPage } from './components/TwoFactorAuthPage.svelte';
 
-// Stripe-first content page and domain primitives
+// Admin UI content page and domain primitives
 export { default as ContentPageShell } from './components/content/ContentPageShell.svelte';
 export { default as ContentPageHeader } from './components/content/ContentPageHeader.svelte';
 export { default as SectionHeader } from './components/content/SectionHeader.svelte';

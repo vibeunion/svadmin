@@ -2,12 +2,14 @@
   import { provideAdminContext, type DataProvider, type ResourceDefinition, type AccessControlProvider,
     type RouterProvider } from '@svadmin/core';
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
+  import type { Snippet } from 'svelte';
   import { definedReactiveOptions, definedOptions } from '@svadmin/core/options';
   import ShowPage from './ShowPage.svelte';
   import RecordDetailDrawer from './RecordDetailDrawer.svelte';
 
   let { provider, resources, queryClient, mode = 'page', resource = 'posts', id = 1, open = true,
     tenant = 'first', permission, layout = 'list', onNavigate = () => {}, onClose = () => {},
+    extraSections, returnTo, onBack, onHistoryBack = () => {},
   }: {
     provider: DataProvider | Record<string, DataProvider>;
     resources: ResourceDefinition[];
@@ -21,6 +23,10 @@
     layout?: 'list' | 'grid';
     onNavigate?: RouterProvider['go'];
     onClose?: () => void;
+    extraSections?: Snippet;
+    returnTo?: string;
+    onBack?: () => void;
+    onHistoryBack?: () => void;
   } = $props();
   provideAdminContext(definedReactiveOptions({
     get dataProvider() { return provider; },
@@ -28,7 +34,7 @@
     get tenant() { return { tenantId: tenant }; },
     get accessControlProvider() { return permission; },
     routerProvider: {
-      go: (options: Parameters<RouterProvider['go']>[0]) => onNavigate(options), back: () => {},
+      go: (options: Parameters<RouterProvider['go']>[0]) => onNavigate(options), back: () => onHistoryBack(),
       parse: () => ({ pathname: '/posts/show/999', params: { id: '999' } }),
     },
   }));
@@ -36,11 +42,11 @@
 
 <QueryClientProvider client={queryClient}>
   {#if mode === 'page' && id !== null}
-    <ShowPage resourceName={resource} {id} {layout}>
+    <ShowPage resourceName={resource} {id} {layout} {...definedOptions({ returnTo, onBack })}>
       <p data-testid="detail-child">Checked detail extension</p>
     </ShowPage>
   {:else if mode === 'drawer'}
     <RecordDetailDrawer resourceName={resource} bind:open
-      {...definedOptions({ recordId: id === null ? undefined : id })} {onClose} />
+      {...definedOptions({ recordId: id === null ? undefined : id, extraSections })} {onClose} />
   {/if}
 </QueryClientProvider>

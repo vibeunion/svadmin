@@ -1,0 +1,43 @@
+/* 独立的有限语义样式；保持旧 UI peer 和无宿主编译器的消费方式。 */
+.svadmin-surface-metric__root,
+.svadmin-surface-table__root { min-width: 0; }
+.svadmin-surface-tone--neutral { --svadmin-surface-accent: var(--border); }
+.svadmin-surface-tone--success { --svadmin-surface-accent: var(--success); }
+.svadmin-surface-tone--warning { --svadmin-surface-accent: var(--warning); }
+.svadmin-surface-tone--danger { --svadmin-surface-accent: var(--destructive); }
+.svadmin-surface-tone--info { --svadmin-surface-accent: var(--info); }
+.svadmin-surface-density--compact {
+  --svadmin-surface-padding: 0.75rem;
+  --svadmin-surface-cell-padding: 0.25rem;
+  --svadmin-surface-cell-font: 0.75rem;
+  --svadmin-metric-state-padding: 0.75rem;
+  --svadmin-metric-state-height: 4.5rem;
+  --svadmin-table-state-height: 6rem;
+}
+.svadmin-surface-density--comfortable {
+  --svadmin-surface-padding: 1.25rem;
+  --svadmin-surface-cell-padding: 0.5rem;
+  --svadmin-surface-cell-font: 0.875rem;
+  --svadmin-metric-state-padding: 1.25rem;
+  --svadmin-metric-state-height: 6rem;
+  --svadmin-table-state-height: 8rem;
+}
+.svadmin-surface-metric__card.svadmin-surface-metric__card {
+  border-inline-start: 3px solid var(--svadmin-surface-accent);
+  padding: var(--svadmin-surface-padding);
+}
+.svadmin-surface-metric__description,
+.svadmin-surface-table__state { color: var(--muted-foreground); }
+.svadmin-surface-metric__state {
+  --svadmin-metric-state-border-width: 3px;
+  --svadmin-metric-state-accent: var(--svadmin-surface-accent);
+}
+.svadmin-surface-table__header.svadmin-surface-density--compact,
+.svadmin-surface-table__content.svadmin-surface-density--compact { padding-inline: 0.75rem; }
+.svadmin-surface-table__header.svadmin-surface-density--comfortable,
+.svadmin-surface-table__content.svadmin-surface-density--comfortable { padding-inline: 1rem; }
+.svadmin-surface-table__head[data-slot="table-head"],
+.svadmin-surface-table__cell[data-slot="table-cell"] {
+  padding-block: var(--svadmin-surface-cell-padding);
+  font-size: var(--svadmin-surface-cell-font);
+}

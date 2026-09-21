@@ -1,7 +1,0 @@
-{
-  "baselineCommit": "4e7f62ce98af8b50c92a8218f1b3060f52ac42c0",
-  "originalFile": "src/styles/compatibility.prelude.css",
-  "originalSha256": "90119df86530830a2e364abb163ed8e55af97165572977a5bc588620097d1f56",
-  "recipes": 1167,
-  "retainsPublicSelectors": true
-}

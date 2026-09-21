@@ -1,0 +1,94 @@
+name: Native UI Styles
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/ui-styles.yml', 'scripts/**', 'packages/**', 'example/**', 'bun.lock']
+  pull_request:
+    paths: ['.github/workflows/ui-styles.yml', 'scripts/**', 'packages/**', 'example/**', 'bun.lock']
+permissions:
+  contents: read
+concurrency:
+  group: native-ui-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  styles:
+    name: Native dependency and CSS contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Discard old evidence before any verification
+        run: rm -rf test-results/ui-styles
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - run: bun install --frozen-lockfile
+      - run: node scripts/check-style-boundary.mjs --source
+      - run: node --test scripts/native-classnames.test.mjs scripts/style-boundary.test.mjs scripts/no-tailwind-contract.test.mjs scripts/stable-screenshot.test.mjs
+      - name: Build every workspace package
+        run: bun run build:packages
+      - name: Verify migration reference and unsupported-color fallback contracts
+        run: node --test scripts/ui-browser-migration-reference.test.mjs scripts/ui-fallback-evidence.test.mjs
+      - name: Check both published CSS entries and finite recipes
+        run: |
+          bun run --cwd packages/ui test:css
+          node scripts/check-native-style-sources.mjs ui ai-elements example
+          node scripts/build-native-classnames.mjs ui ai-elements --check
+          node scripts/check-style-boundary.mjs
+          git diff --exit-code -- bun.lock packages/ui/src/styles packages/ui/src/class-properties.generated.ts packages/ai-elements/src/utilities.css packages/ai-elements/src/class-properties.generated.ts example/styles/compatibility.css
+      - name: Verify compiler-free published CSS boundary
+        run: node scripts/check-no-tailwind.mjs
+      - name: Strict UI and AI package checks
+        run: |
+          bunx --no-install svelte-check --tsgo-experimental-api --tsconfig packages/ui/tsconfig.json --threshold error
+          bunx --no-install svelte-check --tsgo-experimental-api --tsconfig packages/ai-elements/tsconfig.json --threshold error
+      - name: Chromium comparison with historical baseline and explicit migration reference
+        run: |
+          bunx --no-install playwright install --with-deps chromium
+          node scripts/check-ui-browser.mjs || { node scripts/diagnose-ui-screenshots.mjs; exit 1; }
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: native-ui-browser-${{ github.sha }}
+          path: test-results/ui-styles/
+          if-no-files-found: ignore
+          retention-days: 14
+  components:
+    name: UI and AI component regressions
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '26'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - run: bun install --frozen-lockfile
+      - run: bun run build:packages
+      - run: bun run lint
+      - run: bun test packages/core/src/i18n-source-regression.test.ts
+      - name: Run all UI, AI and Surface tests
+        run: |
+          mkdir -p test-results/native-ui-logs
+          status=0
+          for package in ui ai-elements surface; do
+            bun run --cwd "packages/$package" test > "test-results/native-ui-logs/$package.log" 2>&1 || status=1
+            tail -45 "test-results/native-ui-logs/$package.log"
+          done
+          exit "$status"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: native-ui-component-logs-${{ github.sha }}
+          path: test-results/native-ui-logs/
+          if-no-files-found: ignore
+          retention-days: 14

@@ -3,6 +3,7 @@
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
   import ExportButton from './buttons/ExportButton.svelte';
   import Probe from './export-contract.test-probe.svelte';
+  import { definedOptions } from '@svadmin/core/options';
 
   let { provider, resources, resource = 'posts', tenant = 'first', denied = false, settings = {}, onReady }: {
     provider: DataProvider;
@@ -27,6 +28,12 @@
   {#if onReady}
     <Probe {resource} {settings} {onReady} />
   {:else}
-    <ExportButton {resource} accessControl={{ enabled: true, hideIfUnauthorized: false }} />
+    <ExportButton {resource} {...definedOptions({
+      taskName: settings.taskName, taskProvider: settings.taskProvider,
+      taskIdempotencyKey: settings.taskIdempotencyKey, initialTaskId: settings.initialTaskId,
+      onTaskSubmitted: settings.onTaskSubmitted,
+      filters: settings.filters, sorters: settings.sorters, format: settings.format,
+      maxItemCount: settings.maxItemCount, meta: settings.meta,
+    })} accessControl={{ enabled: true, hideIfUnauthorized: false }} />
   {/if}
 </QueryClientProvider>

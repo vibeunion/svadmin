@@ -22,7 +22,10 @@ describe('strict integration regressions', () => {
     const view = render(DateRangeInput, { value: { start: '2026-09-01', end: null }, min: '2026-01-01', startName: 'from', endName: 'to', onchange });
     const input = view.container.querySelector('input[name="to"]');
     if (!(input instanceof HTMLInputElement)) throw new Error('Expected named date input');
-    expect(input.min).toBe('2026-01-01');
+    expect(input.min).toBe('2026-09-01');
+    const start = view.container.querySelector('input[name="from"]');
+    if (!(start instanceof HTMLInputElement)) throw new Error('Expected start date input');
+    expect(start.min).toBe('2026-01-01');
     await fireEvent.input(input, { target: { value: '2026-09-19' } });
     expect(onchange).toHaveBeenLastCalledWith({ start: '2026-09-01', end: '2026-09-19' });
   });

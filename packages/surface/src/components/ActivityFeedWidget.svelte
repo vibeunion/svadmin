@@ -4,7 +4,7 @@
   import { activityFeedPropsSchema } from '../business-definitions.js';
   import { asSurfaceActivities } from '../business-data.js';
   import type { SurfaceWidgetRendererProps } from '../catalog.js';
-  import { surfaceMetric } from '../styled-system/recipes/index.js';
+  import { surfaceMetric } from '../recipes.js';
   import { formatSurfaceMessage, resolveSurfaceMessages } from '../localization.js';
 
   let { props, data, locale = 'en-US', messages }: SurfaceWidgetRendererProps = $props();

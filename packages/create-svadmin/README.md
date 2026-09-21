@@ -127,7 +127,7 @@ bun src/sync-template.ts
 bun run build
 ```
 Generated projects include root-level `DESIGN.md` and `AGENTS.md` files. They
-define the Stripe-first visual language, page information budget, feedback
+define svadmin's Admin UI design principles, page information budget, feedback
 ownership, and AI generation acceptance rules.
 
 Existing projects can preview and install any missing guidance files without

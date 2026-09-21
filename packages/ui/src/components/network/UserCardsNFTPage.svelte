@@ -4,6 +4,7 @@
   import ContentPageHeader from '../content/ContentPageHeader.svelte';
   import FilterToolbar from '../content/FilterToolbar.svelte';
   import DataState from '../content/DataState.svelte';
+  import ReferenceNotice from '../content/ReferenceNotice.svelte';
   import NetworkUserCard from '../content/NetworkUserCard.svelte';
   import type { NetworkUser } from '../content/NetworkUserCard.svelte';
 
@@ -24,6 +25,7 @@
 </script>
 
 <ContentPageShell pageId="network-user-cards" width="wide">
+  <ReferenceNotice />
   <ContentPageHeader title={i18n.t('network.userCards')} description={i18n.t('network.userCardsDescription')} />
   <FilterToolbar bind:query placeholder={i18n.t('common.search')} clearLabel={i18n.locale === 'zh-CN' ? '清除搜索' : 'Clear search'} />
   {#if filtered.length === 0}

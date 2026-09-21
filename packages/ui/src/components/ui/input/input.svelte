@@ -11,7 +11,8 @@
 		? number | null | undefined
 		: string | null | undefined;
 
-	type Props = WithElementRef<Omit<HTMLInputAttributes, "type" | "value">> &
+	type Props = WithElementRef<Omit<HTMLInputAttributes, "type" | "value" | "size">> &
+			{ size?: "default" | "compact"; nativeSize?: number } &
 			(Type extends "file"
 				? { type: "file"; files?: FileList; value?: never }
 				: { type?: Type; files?: undefined; value?: InputValue });
@@ -22,6 +23,8 @@
 		type,
 		files = $bindable(),
 		disabled,
+		size = "default",
+		nativeSize,
 		class: className,
 		"data-slot": dataSlot = "input",
 		...restProps
@@ -30,7 +33,7 @@
 	const i18n = useTranslation();
 	const isFileInput = $derived(type?.toLowerCase() === "file");
 	const isDateInput = $derived(["date", "datetime-local", "month", "week", "time"].includes(type?.toLowerCase() ?? ""));
-	const attributes = $derived(definedOptions({ ...restProps, disabled }));
+	const attributes = $derived(definedOptions({ ...restProps, disabled, size: nativeSize }));
 	const selectedFiles = $derived(files ? Array.from(files) : []);
 	const selectedFileLabel = $derived.by(() => {
 		const firstFile = selectedFiles[0];
@@ -48,6 +51,7 @@
 		<input
 			bind:this={ref}
 			data-slot={dataSlot}
+			data-size={size}
 			data-input-type="file"
 			class={cn("svadmin-input", className)}
 			type="file"
@@ -63,6 +67,7 @@
 	<input
 		bind:this={ref}
 		data-slot={dataSlot}
+		data-size={size}
 			class={cn("svadmin-input", className)}
 			{type}
 			lang={isDateInput ? i18n.locale : undefined}

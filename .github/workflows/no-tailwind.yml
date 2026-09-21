@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   boundary:
-    name: No Tailwind compiler
+    name: Precompiled CSS boundary
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -25,7 +25,11 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '26'
-      # 所有目标为 main 的 PR 都必须扫描，包括非 UI 包和脚手架；无需先安装依赖。
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - run: bun install --frozen-lockfile
+      # 所有目标为 main 的 PR 都扫描，包括非 UI 包和脚手架。
       - name: Verify regression tests and repository compiler boundary
         shell: bash
         run: |

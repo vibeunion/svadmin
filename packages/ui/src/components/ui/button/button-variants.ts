@@ -1,20 +1,22 @@
-import { uiButton } from '../../../styled-system/recipes/index.js';
+import { buttonRecipe, type ButtonRecipeProps } from '../../../recipes.js';
 
-export type ButtonVariant = "default" | "outline" | "secondary" | "ghost" | "destructive" | "link";
-export type ButtonSize = "default" | "xs" | "sm" | "lg" | "icon" | "icon-xs" | "icon-sm" | "icon-lg";
+export type ButtonVariant = NonNullable<ButtonRecipeProps["variant"]>;
+export type ButtonSize = NonNullable<ButtonRecipeProps["size"]>;
 
-// 保留公开 helper、语义标记和 null 行为；样式由预生成 Panda recipe 提供。
+// 只组合语义类，不要求消费者安装 Tailwind 编译器或 class merger。
 export const buttonVariants = ({
-  variant = "default",
-  size = "default",
+  variant,
+  size,
   class: className = "",
   className: extraClassName = "",
 }: {
-  variant?: ButtonVariant | null;
-  size?: ButtonSize | null;
+  variant?: ButtonVariant | null | undefined;
+  size?: ButtonSize | null | undefined;
   class?: string;
   className?: string;
 } = {}): string =>
-  ["svadmin-button", variant && `svadmin-button--${variant}`, size && `svadmin-button-size--${size}`,
-    uiButton({ ...(variant ? { variant } : {}), ...(size ? { size } : {}) }),
-    className, extraClassName].filter(Boolean).join(" ");
+  buttonRecipe({
+    variant,
+    size,
+    class: [className, extraClassName].filter(Boolean).join(" "),
+  }).root;

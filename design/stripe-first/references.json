@@ -1,9 +1,0 @@
-{
-  "version": "0.1.0",
-  "thirdPartyAssetsIncluded": false,
-  "assets": [],
-  "references": [
-    {"id": "stripe-connect-toolkit", "officialSource": "https://docs.stripe.com/connect/embedded-appearance-options", "designFile": "https://www.figma.com/community/file/1438614134095442934", "sourceVerifiedOn": "2026-09-19", "role": "product-reference", "fileInspection": "not-completed", "licenseReview": "pending", "redistributionApproved": false, "notes": "Official Connect embedded UI toolkit; not the entire internal Dashboard design system. Appearance values are examples, not svadmin defaults."},
-    {"id": "park-foundations", "officialSource": "https://park-ui.com/docs/figma", "designFile": "https://www.figma.com/community/file/1268615283036362769", "sourceVerifiedOn": "2026-09-19", "role": "foundation-organization-reference", "fileInspection": "not-completed", "licenseReview": "pending", "redistributionApproved": false, "notes": "Study variables, styles and component organization. The code repository license does not establish the Figma asset license."}
-  ]
-}

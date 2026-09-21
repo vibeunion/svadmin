@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'bun:test';
 import { existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { metricBlock as metricRecipe } from '../packages/ui/design/content-recipes';
-import { contentSemanticTokens } from '../packages/ui/design/content-tokens';
+import { metricBlockRecipe as metricRecipe } from '../packages/ui/src/recipes';
 
 const root = resolve(import.meta.dir, '..');
 const contentDir = join(root, 'packages/ui/src/components/content');
@@ -20,7 +19,7 @@ const components = [
   'AuditTimeline.svelte', 'MediaThumbnail.svelte',
 ];
 
-describe('Stripe-first content component contract', () => {
+describe('Admin UI content component contract', () => {
   it('ships every reference-family primitive as a typed Svelte component', () => {
     for (const name of components) {
       expect(existsSync(join(contentDir, name))).toBe(true);
@@ -55,27 +54,21 @@ describe('Stripe-first content component contract', () => {
     expect(dataState).toContain('loadingLabel');
     expect(filterToolbar).toContain('clearLabel');
     expect(metricBlock).toContain('MetricTrendTone');
-    expect(metricBlock).toContain("import { metricBlock } from '../../styled-system/recipes/index.js'");
+    expect(metricBlock).toContain("import { metricBlockRecipe as metricBlock } from '../../recipes.js'");
     expect(metricBlock).toContain('$derived(metricBlock({ trendTone }))');
     // Follow actual recipe definitions through to public theme tokens instead of
     // requiring an old, uncompiled utility-class string in the Svelte source.
-    expect(metricRecipe.variants?.['trendTone']).toEqual({
-      positive: { trend: { color: 'content.positive' } },
-      negative: { trend: { color: 'content.negative' } },
-      warning: { trend: { color: 'content.warning' } },
-      neutral: { trend: { color: 'content.muted' } },
-    });
-    expect(contentSemanticTokens.colors.content.positive.value).toBe('var(--color-success)');
-    expect(contentSemanticTokens.colors.content.negative.value).toBe('var(--color-destructive)');
-    expect(contentSemanticTokens.colors.content.warning.value).toBe('var(--color-warning-foreground)');
-    expect(contentSemanticTokens.colors.content.muted.value).toBe('var(--color-muted-foreground)');
+    expect(metricRecipe({ trendTone: 'positive' }).trend).toContain('text-success');
+    expect(metricRecipe({ trendTone: 'negative' }).trend).toContain('text-destructive');
+    expect(metricRecipe({ trendTone: 'warning' }).trend).toContain('text-warning-foreground');
+    expect(metricRecipe({ trendTone: 'neutral' }).trend).toContain('text-muted-foreground');
     for (const name of dataLists) expect(readFileSync(join(contentDir, name), 'utf8')).toContain('<DataState');
   });
 
   it('uses semantic tokens and bounded primitives instead of a second palette', () => {
     const sources = components.map(name => readFileSync(join(contentDir, name), 'utf8'));
     // The moved style definitions remain subject to the same palette gate.
-    sources.push(readFileSync(join(root, 'packages/ui/design/content-recipes.ts'), 'utf8'));
+    sources.push(readFileSync(join(root, 'packages/ui/src/recipes.ts'), 'utf8'));
     for (const source of sources) {
       expect(source).not.toMatch(/#[0-9a-f]{3,8}\b/i);
       expect(source).not.toMatch(/\b(?:rgb|rgba|hsl|hsla|oklab|oklch)\(/i);

@@ -672,6 +672,14 @@ export * as SourcesParts from "./components/sources/index.js";
 export * as SpeechInputParts from "./components/speech-input/index.js";
 export * as StackTraceParts from "./components/stack-trace/index.js";
 export * as SuggestionParts from "./components/suggestion/index.js";
+export {
+  AI_WORKSPACE_CAPABILITIES,
+  AI_WORKSPACE_STABLE_CAPABILITIES,
+} from "./ai-workspace-contract.js";
+export type {
+  AIWorkspaceCapability,
+  AIWorkspaceCapabilityStage,
+} from "./ai-workspace-contract.js";
 export * as TaskParts from "./components/task/index.js";
 export * as TerminalParts from "./components/terminal/index.js";
 export * as TestResultsParts from "./components/test-results/index.js";

@@ -13,10 +13,12 @@
 		href,
 		class: className,
 		variant = "default",
+		size = "default",
 		children,
 		...restProps
 	}: WithElementRef<HTMLAnchorAttributes> & {
 		variant?: BadgeVariantValue;
+		size?: "default" | "compact";
 	} = $props();
 </script>
 
@@ -25,6 +27,7 @@
 	bind:this={ref}
 	data-slot="badge"
 	data-variant={variant}
+	data-size={size}
 	{href}
 	class={cn(resolveBadgeVariants({ variant }), className)}
 	{...restProps}

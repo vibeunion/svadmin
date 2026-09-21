@@ -8,7 +8,7 @@ function readRepositoryFile(path: string): string {
 }
 function readCleanFlatCss(): string {
   const uiCss = readRepositoryFile('packages/ui/src/components.css');
-  const marker = '/* --- Stripe-first layout preset (clean-flat) --- */';
+  const marker = '/* --- Admin UI layout preset (clean-flat) --- */';
   const markerIndex = uiCss.indexOf(marker);
   expect(markerIndex).toBeGreaterThanOrEqual(0);
   const nextSection = uiCss.indexOf('/* Business components', markerIndex);
@@ -19,7 +19,6 @@ describe('@svadmin/ui native stylesheet contract', () => {
   it('ships plain CSS without requiring component scanning or compiler imports', () => {
     for (const path of [
       'packages/ui/src/app.css',
-      'example/src/app.css',
       'packages/create-svadmin/template/src/app.css',
     ]) {
       const css = readRepositoryFile(path);
@@ -33,6 +32,15 @@ describe('@svadmin/ui native stylesheet contract', () => {
     expect(readme).not.toContain(
       'registers its published `dist/components` directory',
     );
+  });
+
+  it('allows example-only Tailwind authoring without replacing current UI styles', () => {
+    const css = readRepositoryFile('example/src/app.css');
+    expect(css).toContain('@import "@svadmin/ui/app.css";');
+    expect(css).toContain('@source "./";');
+    expect(css).toContain('@import "tailwindcss/utilities.css"');
+    expect(css).not.toContain('tailwindcss/preflight.css');
+    expect(readRepositoryFile('example/vite.config.ts')).toContain('tailwindcss()');
   });
 
   it('uses precompiled CSS for both the example and generated apps', () => {
@@ -63,9 +71,9 @@ describe('@svadmin/ui native stylesheet contract', () => {
     expect(cleanFlatCss).not.toContain(':has(');
   });
 
-  it('records the Stripe-first visual authority boundary', () => {
+  it('records the Admin UI visual authority boundary', () => {
     const designContract = readRepositoryFile('DESIGN.md');
-    expect(designContract).toContain('Stripe-first');
+    expect(designContract).toContain('Admin UI');
     expect(designContract).toContain('Metronic is a capability reference only');
   });
 });

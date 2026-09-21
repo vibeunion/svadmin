@@ -10,6 +10,7 @@
   import SettingsFieldRow from './content/SettingsFieldRow.svelte';
   import DataState from './content/DataState.svelte';
   import FeedbackNotice from './content/FeedbackNotice.svelte';
+  import ConfirmDialog from './ConfirmDialog.svelte';
 
   const i18n = useTranslation();
   const adminContext = captureAdminContext();
@@ -29,6 +30,11 @@
   let passwordErrorMessage = $state('');
   let changingPassword = $state(false);
   let requestId = 0;
+  let pendingDanger = $state<{ label: string; run: () => Promise<void> } | null>(null);
+  function requestDanger(label: string, run: () => Promise<void>): void {
+    const epoch = requestId;
+    pendingDanger = { label, run: async () => { if (epoch === requestId) await run(); } };
+  }
 
   function message(error: unknown): string {
     return error instanceof Error ? error.message : String(error);
@@ -70,11 +76,16 @@
     changingPassword = false;
     updatingMfa = false;
     revoking = null;
+    pendingDanger = null;
     void loadSecurity();
     return () => { requestId += 1; };
   });
 
-  async function handleMfaChange(enabled: boolean): Promise<void> {
+  async function handleMfaChange(enabled: boolean, confirmed = false): Promise<void> {
+    if (!enabled && !confirmed) {
+      requestDanger(isZh ? '关闭两步验证' : 'Disable two-factor authentication', () => handleMfaChange(false, true));
+      return;
+    }
     const provider = sessionProvider;
     const currentRequest = requestId;
     const context = adminContext.enterpriseRequestContext;
@@ -120,7 +131,11 @@
     }
   }
 
-  async function revokeSession(id: string): Promise<void> {
+  async function revokeSession(id: string, confirmed = false): Promise<void> {
+    if (!confirmed) {
+      requestDanger(`${i18n.t('security.revokeSession')}: ${id}`, () => revokeSession(id, true));
+      return;
+    }
     const provider = sessionProvider;
     const currentRequest = requestId;
     const context = adminContext.enterpriseRequestContext;
@@ -139,7 +154,11 @@
     }
   }
 
-  async function revokeAllOthers(): Promise<void> {
+  async function revokeAllOthers(confirmed = false): Promise<void> {
+    if (!confirmed) {
+      requestDanger(i18n.t('security.revokeOthers'), () => revokeAllOthers(true));
+      return;
+    }
     const provider = sessionProvider;
     const currentRequest = requestId;
     const context = adminContext.enterpriseRequestContext;
@@ -166,7 +185,7 @@
   {/if}
   <SettingsGroup title={i18n.t('security.twoFactorAuth')} description={i18n.t('security.twoFactorDescription')}>
     <SettingsFieldRow label={i18n.t('security.enable2fa')} description={is2faEnabled ? i18n.t('security.twoFactorActive') : i18n.t('security.twoFactorInactive')}>
-      {#snippet control()}<Switch checked={is2faEnabled} disabled={!sessionProvider?.setMfaEnabled || updatingMfa} onCheckedChange={handleMfaChange} />{/snippet}
+      {#snippet control()}<Switch bind:checked={() => is2faEnabled, (enabled) => { void handleMfaChange(enabled); }} disabled={!sessionProvider?.setMfaEnabled || updatingMfa} />{/snippet}
     </SettingsFieldRow>
   </SettingsGroup>
   <SettingsGroup title={i18n.t('profile.changePassword')} description={isZh ? '密码修改由 AuthProvider 持久化。' : 'Password changes are persisted by AuthProvider.'}>
@@ -180,7 +199,7 @@
     </form>
   </SettingsGroup>
   <SettingsGroup title={i18n.t('security.activeSessions')} description={i18n.t('security.sessionsDescription')}>
-    {#snippet actions()}{#if sessions.some((session) => !session.current)}<Button variant="outline" size="sm" disabled={revoking !== null} onclick={revokeAllOthers}>{i18n.t('security.revokeOthers')}</Button>{/if}{/snippet}
+    {#snippet actions()}{#if sessions.some((session) => !session.current)}<Button variant="outline" size="sm" disabled={revoking !== null} onclick={() => revokeAllOthers()}>{i18n.t('security.revokeOthers')}</Button>{/if}{/snippet}
     {#if loadingSessions}
       <DataState state="loading" />
     {:else if sessionError}
@@ -199,3 +218,8 @@
     {/if}
   </SettingsGroup>
 </div>
+<ConfirmDialog open={pendingDanger !== null}
+  title={pendingDanger?.label ?? ''}
+  message={isZh ? '此操作将立即影响登录访问。确认继续？' : 'This immediately affects sign-in access. Continue?'}
+  oncancel={() => pendingDanger = null}
+  onconfirm={() => { const action = pendingDanger; pendingDanger = null; void action?.run(); }} />

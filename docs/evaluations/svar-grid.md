@@ -12,7 +12,7 @@ SVAR 是可选引擎，不是默认 AutoTable 的强制替换。资源契约、P
 | `@svadmin/ui/components/SvarResourceTable.svelte` | 资源级分页、窗口/无限加载、懒树、受控编辑/批量/导出 | 现有 core 资源契约及查询/mutation hooks |
 | `@svadmin/ui/components/SvarAutoTable.svelte` | 迁移已有 AutoTable 页面，保留工具栏、URL、偏好和 snippets | 原有 AutoTable；SVAR 只替换非空列表的表体 |
 
-宿主显式注入真正的 `Grid` 和 `Willow`。这些组件不进入 UI 根 barrel，未选择 SVAR 的应用不需要安装 SVAR。Panda 和已迁移的原生 CSS 保持现有构建边界，不恢复 Tailwind 编译器。
+宿主显式注入真正的 `Grid` 和 `Willow`。这些组件不进入 UI 根 barrel，未选择 SVAR 的应用不需要安装 SVAR。Surface 原生 CSS 与 UI Tailwind 产物保持各自构建边界。
 
 ## 安装与基本用法
 
@@ -130,7 +130,7 @@ SVAR 是可选引擎，不是默认 AutoTable 的强制替换。资源契约、P
 ```sh
 bun install --frozen-lockfile
 bun run --cwd packages/ui build:styles
-node packages/surface/scripts/prepare-design.mjs
+bun run --cwd packages/surface build
 npm ci --prefix scripts/fixtures/svar-grid --ignore-scripts --no-audit --no-fund
 bun run --cwd packages/ui test src/components/svar-grid
 bun run --cwd packages/ui test src/components/auto-table

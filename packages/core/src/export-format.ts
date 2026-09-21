@@ -1,8 +1,52 @@
 // Pure export formatting helpers with no Svelte rune or browser API dependencies except downloadData.
 // These helpers can be tested directly with bun:test.
 
+import { Type, type Static } from '@sinclair/typebox';
+import { checkExact } from './schema-validation';
+import { snapshotPlainData } from './plain-data';
+
 /** Supported export and import formats. */
 export type ExportFormat = 'csv' | 'json' | 'xlsx';
+const exportTaskResultSchema = Type.Object({
+  downloadUrl: Type.String({ minLength: 1, maxLength: 4096 }),
+  format: Type.Union([Type.Literal('csv'), Type.Literal('json'), Type.Literal('xlsx')]),
+  fileName: Type.Optional(Type.String({ minLength: 1, maxLength: 200 })),
+}, { additionalProperties: false });
+export type ExportTaskResult = Static<typeof exportTaskResultSchema>;
+
+export function snapshotExportTaskResult(value: unknown): ExportTaskResult | undefined {
+  try {
+    const snapshot = snapshotPlainData(value);
+    if (!checkExact(exportTaskResultSchema, snapshot)) return undefined;
+    if (snapshot.fileName && !/^[A-Za-z0-9][A-Za-z0-9._-]{0,199}$/.test(snapshot.fileName)) return undefined;
+    return snapshot;
+  } catch {
+    return undefined;
+  }
+}
+
+export function safeArtifactUrl(value: string): string | undefined {
+  try {
+    const url = new URL(value, document.baseURI);
+    if (url.origin !== location.origin || !['http:', 'https:'].includes(url.protocol) ||
+        url.username || url.password) return undefined;
+    return url.href;
+  } catch {
+    return undefined;
+  }
+}
+
+export function downloadExportArtifact(result: ExportTaskResult, resource: string): void {
+  if (typeof document === 'undefined' || typeof location === 'undefined') throw new Error('Browser required');
+  const checked = snapshotExportTaskResult(result);
+  const href = checked && safeArtifactUrl(checked.downloadUrl);
+  if (!href) throw new Error('Invalid export artifact URL');
+  const anchor = document.createElement('a');
+  anchor.href = href;
+  anchor.download = checked.fileName ?? `${resource.replace(/[^A-Za-z0-9_-]/g, '_')}_export.${checked.format}`;
+  anchor.rel = 'noopener';
+  anchor.click();
+}
 
 /** Escapes a CSV field and prevents formula injection. */
 export function escapeCsvField(fieldValue: string): string {

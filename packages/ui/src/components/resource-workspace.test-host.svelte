@@ -4,13 +4,11 @@
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
   import type { ComponentProps } from 'svelte';
   import ResourceOperationsPage from './ResourceOperationsPage.svelte';
-  import { createI18nScope, provideI18nScope } from '@svadmin/core/i18n';
-
-  provideI18nScope(createI18nScope({ locale: 'en' }));
+  import type { BatchSelection } from './table-contract';
 
   let {
     provider, resources, queryClient, resourceName = 'posts', tenant = 'first', access,
-    tableProps = {}, onBatch = () => {}, workspaceStyle = 'operations',
+    tableProps = {}, onBatch = () => {}, onSelection = () => {}, workspaceStyle = 'operations',
   }: {
     provider: DataProvider;
     resources: ResourceDefinition[];
@@ -21,6 +19,7 @@
     tableProps?: ComponentProps<typeof ResourceOperationsPage>['tableProps'];
     workspaceStyle?: ComponentProps<typeof ResourceOperationsPage>['workspaceStyle'];
     onBatch?: (ids: (string | number)[]) => void;
+    onSelection?: (selection: BatchSelection) => void;
   } = $props();
   let params = $state<Record<string, string>>({});
   const router = {
@@ -37,8 +36,8 @@
   }));
 </script>
 
-{#snippet batchActions({ selectedIds }: { selectedIds: (string | number)[] })}
-  <button type="button" onclick={() => onBatch([...selectedIds])}>Process selection</button>
+{#snippet batchActions({ selectedIds, selection }: { selectedIds: (string | number)[]; selection: BatchSelection })}
+  <button type="button" onclick={() => { onBatch([...selectedIds]); onSelection(selection); }}>Process selection</button>
 {/snippet}
 
 <QueryClientProvider client={queryClient}>

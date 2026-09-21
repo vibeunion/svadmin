@@ -10,10 +10,11 @@
   import { createResources } from './resources';
   import { createExampleMenu, registerExampleMenuTranslations } from './exampleMenuCatalog';
   import { mockAuthProvider } from './providers/mockAuth';
+  import { exampleMemberDirectory, exampleNotificationPreferences } from './providers/accountDemo';
   import LazyDashboard from './components/LazyDashboard.svelte';
   import LazyResourcePage from './components/LazyResourcePage.svelte';
-  import BusinessAutoForm from './components/BusinessAutoForm.svelte';
-  import BusinessShowPage from './components/BusinessShowPage.svelte';
+  import LazyBusinessAutoForm from './components/LazyBusinessAutoForm.svelte';
+  import LazyBusinessShowPage from './components/LazyBusinessShowPage.svelte';
   import LazyRichTextEditor from './components/LazyRichTextEditor.svelte';
   import LazyChatDialog from './components/LazyChatDialog.svelte';
   import LazyOfficeWorkspace from './components/LazyOfficeWorkspace.svelte';
@@ -29,7 +30,7 @@
   const officeLabel = $derived(currentLocale === 'zh-CN' ? '智能辅助办公' : 'Health Office');
   const resources = $derived.by<ResourceDefinition[]>(() => [
     ...baseResources,
-    { name: 'health_office', label: officeLabel, icon: 'file', fields: [], showInMenu: false },
+    { name: 'health_office', label: officeLabel, icon: 'file', fields: [], showInMenu: false, canCreate: false, canEdit: false, canDelete: false, canShow: false },
   ]);
   const menu = $derived.by<MenuItem[]>(() => [
     { name: 'health_office', label: officeLabel, icon: 'file', href: '/health_office' },
@@ -45,8 +46,8 @@
     const pages: NonNullable<ComponentProps<typeof AdminApp>['resourcePages']> = {};
     for (const resource of baseResources) {
       pages[resource.name] = {
-        list: LazyResourcePage, create: BusinessAutoForm, edit: BusinessAutoForm,
-        clone: BusinessAutoForm, show: BusinessShowPage,
+        list: LazyResourcePage, create: LazyBusinessAutoForm, edit: LazyBusinessAutoForm,
+        clone: LazyBusinessAutoForm, show: LazyBusinessShowPage,
       };
     }
     pages['design_principles'] = { list: LazyResourcePage };
@@ -60,6 +61,8 @@
   dataProvider={inMemoryDataProvider}
   {resources}
   authProvider={mockAuthProvider}
+  memberDirectoryProvider={exampleMemberDirectory}
+  notificationPreferencesProvider={exampleNotificationPreferences}
   {chatProvider}
   {resourcePages}
   {menu}

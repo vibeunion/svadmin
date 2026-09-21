@@ -1,4 +1,4 @@
-import { surfaceDesignContract } from './styled-system/design-contract.js';
+import { surfaceDesignContract } from './design-contract.js';
 import { Type, type Static } from "@sinclair/typebox";
 
 const catalogFieldSchema = Type.String({

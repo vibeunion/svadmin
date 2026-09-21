@@ -13,6 +13,7 @@ import {
   createListLoader,
 } from './server-adapter';
 
+import { requireValue } from '../../../scripts/test-assertions';
 const fields: FieldDefinition[] = [
   {
     key: 'contacts',
@@ -131,6 +132,126 @@ describe('createListLoader search compatibility', () => {
         ],
       }],
     }));
+  });
+
+  test('preserves empty logical groups instead of silently dropping them', async () => {
+    const getList = mock(async () => ({ data: [], total: 0 }));
+    const provider = { getList } as unknown as DataProvider;
+    const url = new URL('https://admin.example/lite/posts');
+    url.searchParams.set('filters[0][operator]', 'and');
+    await createListLoader(provider, {
+      ...resource,
+      fields: [{ key: 'name', label: 'Name', type: 'text' }],
+    })({ url });
+    expect(getList).toHaveBeenCalledWith(expect.objectContaining({
+      filters: [{ operator: 'and', value: [] }],
+    }));
+  });
+
+  test.each([
+    ['unknown field', { 'filters[0][field]': 'private', 'filters[0][operator]': 'eq', 'filters[0][value]': 'x' }],
+    ['invalid boolean', { 'filters[0][field]': 'active', 'filters[0][operator]': 'eq', 'filters[0][value]': 'maybe' }],
+    ['missing field', { 'filters[0][operator]': 'eq', 'filters[0][value]': 'x' }],
+    ['malformed path', { 'filters[bad][operator]': 'and' }],
+    ['sparse roots', { 'filters[1][operator]': 'and' }],
+    ['sparse children', { 'filters[0][operator]': 'and', 'filters[0.value.1][operator]': 'or' }],
+    ['noncanonical index', { 'filters[00][operator]': 'and' }],
+    ['unknown operator', { 'filters[0][field]': 'name', 'filters[0][operator]': 'execute', 'filters[0][value]': 'x' }],
+    ['unknown null field', { 'filters[0][field]': 'private', 'filters[0][operator]': 'null' }],
+    ['disabled field', { 'filters[0][field]': 'secret', 'filters[0][operator]': 'null' }],
+    ['mixed group and rule', { 'filters[0][field]': 'name', 'filters[0][operator]': 'and' }],
+    ['infinite number', { 'filters[0][field]': 'amount', 'filters[0][operator]': 'eq', 'filters[0][value]': '1e999' }],
+    ['blank number', { 'filters[0][field]': 'amount', 'filters[0][operator]': 'eq', 'filters[0][value]': ' ' }],
+    ['text operator on number', { 'filters[0][field]': 'amount', 'filters[0][operator]': 'contains', 'filters[0][value]': '2' }],
+    ['scalar array operator', { 'filters[0][field]': 'name', 'filters[0][operator]': 'in', 'filters[0][value]': 'a,b' }],
+  ])('rejects %s structured filter queries', async (_name, entries) => {
+    const getList = mock(async () => ({ data: [], total: 0 }));
+    const provider = { getList } as unknown as DataProvider;
+    const filterResource: ResourceDefinition = {
+      name: 'posts', label: 'Posts',
+      fields: [
+        { key: 'name', label: 'Name', type: 'text' },
+        { key: 'active', label: 'Active', type: 'boolean' },
+        { key: 'secret', label: 'Secret', type: 'text', filterable: false },
+        { key: 'amount', label: 'Amount', type: 'currency' },
+      ],
+    };
+    const url = new URL('https://admin.example/lite/posts');
+    for (const [key, value] of Object.entries(entries)) url.searchParams.append(key, value);
+    await expect(createListLoader(provider, filterResource)({ url })).rejects.toMatchObject({ status: 400 });
+    expect(getList).not.toHaveBeenCalled();
+  });
+
+  test('rejects duplicate entries and oversized trees before querying', async () => {
+    const getList = mock(async () => ({ data: [], total: 0 }));
+    const load = createListLoader({ getList } as unknown as DataProvider, resource);
+    for (const kind of ['duplicate', 'depth', 'text', 'count', 'index']) {
+      const url = new URL('https://admin.example/lite/posts');
+      if (kind === 'duplicate') {
+        url.searchParams.append('filters[0][operator]', 'and');
+        url.searchParams.append('filters[0][operator]', 'or');
+      } else if (kind === 'depth') {
+        url.searchParams.set(`filters[0${'.value.0'.repeat(33)}][operator]`, 'and');
+      } else if (kind === 'text') {
+        url.searchParams.set('filters[0][value]', 'x'.repeat(64_001));
+      } else if (kind === 'count') {
+        for (let index = 0; index < 301; index++) url.searchParams.set(`filters[${index}][operator]`, 'and');
+      } else {
+        url.searchParams.set('filters[4294967294][operator]', 'and');
+      }
+      await expect(load({ url })).rejects.toMatchObject({ status: 400 });
+    }
+    expect(getList).not.toHaveBeenCalled();
+  });
+
+  test('keeps false, zero and numeric enum types when decoding native values', async () => {
+    const getList = mock(async () => ({ data: [], total: 0 }));
+    const filterResource: ResourceDefinition = {
+      name: 'posts', label: 'Posts', fields: [
+        { key: 'active', label: 'Active', type: 'boolean' },
+        { key: 'amount', label: 'Amount', type: 'currency' },
+        { key: 'priority', label: 'Priority', type: 'select', options: [{ label: 'Two', value: 2 }] },
+      ],
+    };
+    const url = new URL('https://admin.example/lite/posts');
+    ['active', 'amount', 'priority'].forEach((field, index) => {
+      url.searchParams.set(`filters[${index}][field]`, field);
+      url.searchParams.set(`filters[${index}][operator]`, 'eq');
+      url.searchParams.set(`filters[${index}][value]`, requireValue(['false', '0', '2'][index]));
+    });
+    const load = createListLoader({ getList } as unknown as DataProvider, filterResource);
+    await load({ url });
+    expect(getList).toHaveBeenLastCalledWith(expect.objectContaining({ filters: [
+      { field: 'active', operator: 'eq', value: false },
+      { field: 'amount', operator: 'eq', value: 0 },
+      { field: 'priority', operator: 'eq', value: 2 },
+    ] }));
+    requireValue(requireValue(filterResource.fields[2]).options).push({ label: 'String two', value: '2' });
+    await expect(load({ url })).rejects.toMatchObject({ status: 400 });
+    expect(getList).toHaveBeenCalledTimes(1);
+  });
+
+  test('preserves empty text and rejects a missing child value without broadening the query', async () => {
+    const getList = mock(async () => ({ data: [], total: 0 }));
+    const load = createListLoader({ getList } as unknown as DataProvider, {
+      name: 'posts', label: 'Posts', fields: [{ key: 'name', label: 'Name', type: 'text' }],
+    });
+    const url = new URL('https://admin.example/lite/posts?q=fallback');
+    url.searchParams.set('filters[0][operator]', 'or');
+    url.searchParams.set('filters[0.value.0][field]', 'name');
+    url.searchParams.set('filters[0.value.0][operator]', 'eq');
+    url.searchParams.set('filters[0.value.0][value]', '');
+    url.searchParams.set('filters[0.value.1][operator]', 'and');
+    await load({ url });
+    expect(getList).toHaveBeenLastCalledWith(expect.objectContaining({ filters: [{
+      operator: 'or', value: [
+        { field: 'name', operator: 'eq', value: '' },
+        { operator: 'and', value: [] },
+      ],
+    }] }));
+    url.searchParams.delete('filters[0.value.0][value]');
+    await expect(load({ url })).rejects.toMatchObject({ status: 400 });
+    expect(getList).toHaveBeenCalledTimes(1);
   });
 });
 

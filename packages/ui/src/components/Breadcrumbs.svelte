@@ -17,6 +17,12 @@
 
   interface Crumb { label: string; href?: string; }
 
+  // 仅复用 AdminApp 明确支持的成员页别名，宿主精确菜单项始终优先。
+  const memberAliases: Readonly<Record<string, string>> = {
+    '/account/members-starter': '/account/members/members-starter',
+    '/account/team-members': '/account/members/team-members',
+  };
+
   function normalizePath(path: string): string {
     const normalized = path.replace(/^#/, '').replace(/[?#].*$/, '').replace(/\/$/, '');
     return normalized || '/';
@@ -38,7 +44,11 @@
     const currentPathname = normalizePath(getPath());
     if (currentPathname === '/') return result;
 
-    const menuTrail = menu ? findMenuTrail(menu, currentPathname) : undefined;
+    const canonicalPath = memberAliases[currentPathname];
+    const menuTrail = menu
+      ? findMenuTrail(menu, currentPathname)
+        ?? (canonicalPath ? findMenuTrail(menu, canonicalPath) : undefined)
+      : undefined;
     if (menuTrail) {
       for (const item of menuTrail) {
         result.push(definedOptions({

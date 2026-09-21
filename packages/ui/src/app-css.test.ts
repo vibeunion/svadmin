@@ -12,7 +12,7 @@ function readAppCss(): string {
 
 function readCleanFlatCss(): string {
   const css = readAppCss();
-  const marker = '/* --- Stripe-first layout preset (clean-flat) --- */';
+  const marker = '/* --- Admin UI layout preset (clean-flat) --- */';
   const markerIndex = css.indexOf(marker);
 
   expect(markerIndex).toBeGreaterThanOrEqual(0);
@@ -24,6 +24,19 @@ function readSidebar(): string {
 }
 
 describe('native component CSS', () => {
+  it('preserves a semantic keyboard focus outline without color-mix support', () => {
+    const css = postcss.parse(readFileSync(join(currentDir, 'app.css'), 'utf8'));
+    const outlines: string[] = [];
+    css.walkRules((rule) => {
+      if (!rule.selector.includes('.sidebar-menu-item:focus-visible')) return;
+      rule.walkDecls('outline', (decl) => { outlines.push(decl.value); });
+    });
+    expect(outlines).toEqual([
+      '2px solid var(--ring)',
+      '2px solid color-mix(in oklch, var(--ring) 48%, transparent)',
+    ]);
+  });
+
   it('keeps compiler directives out of native component CSS', () => {
     const css = readAppCss();
 
@@ -57,7 +70,7 @@ describe('native component CSS', () => {
     expect(css).not.toMatch(/^\s*details:not\(\[open\]\)/m);
   });
 
-  it('keeps clean-flat as a semantic Stripe-first compatibility preset', () => {
+  it('keeps clean-flat as a semantic Admin UI compatibility preset', () => {
     const cleanFlatCss = readCleanFlatCss();
 
     expect(cleanFlatCss).toContain('--svadmin-surface: var(--card);');
@@ -105,10 +118,10 @@ describe('native component CSS', () => {
     }
   });
 
-  it('documents Stripe as the visual authority and Metronic as capability reference only', () => {
+  it('documents svadmin as the visual authority and Metronic as capability reference only', () => {
     const designContract = readFileSync(join(currentDir, '../../../DESIGN.md'), 'utf8');
 
-    expect(designContract).toContain('Stripe-first');
+    expect(designContract).toContain('Admin UI');
     expect(designContract).toContain('Metronic is a capability reference only');
   });
 
@@ -117,5 +130,22 @@ describe('native component CSS', () => {
     expect(css).not.toMatch(/^details:not\(\[open\]\)/m);
     expect(css).toContain('details[data-svadmin-filter]:not([open]) > :not(summary)');
     expect(css).toContain('details.svadmin-collapsible-filter:not([open]) > :not(summary)');
+  });
+
+  it('keeps sidebar geometry explicit across desktop, mobile and RTL layouts', () => {
+    const css = readAppCss();
+    const sidebar = readSidebar();
+
+    expect(sidebar).toContain('class:svadmin-sidebar-expanded={!collapsed}');
+    expect(sidebar).toContain('class:svadmin-sidebar-collapsed={collapsed}');
+    expect(css).toContain('.svadmin-sidebar-expanded {\n  --svadmin-sidebar-width: 252px;');
+    expect(css).toContain('.svadmin-sidebar-collapsed {\n  --svadmin-sidebar-width: 70px;');
+    expect(css).toContain('.svadmin-sidebar-content-expanded {\n    margin-left: 252px;');
+    expect(css).toContain('.svadmin-sidebar-content-collapsed {\n    margin-left: 70px;');
+    expect(css).toContain('[dir="rtl"] .svadmin-sidebar-content-expanded {\n    margin-left: 0;\n    margin-right: 252px;');
+    expect(css).toContain('[dir="rtl"] .svadmin-sidebar-content-collapsed {\n    margin-left: 0;\n    margin-right: 70px;');
+    expect(css).toMatch(/@media \(min-width: 768px\) \{[\s\S]*?\.svadmin-sidebar-content-expanded/);
+    expect(css).not.toContain('class:w-[252px]');
+    expect(css).not.toContain('class:w-[70px]');
   });
 });

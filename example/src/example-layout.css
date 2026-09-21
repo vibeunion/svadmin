@@ -1,0 +1,74 @@
+/* Example-only layout primitives. Runtime styling belongs to the published CSS in @svadmin/ui. */
+@layer components {
+  /* 列表区域由标题和数据行管理间距，避免 Card 默认留白重复叠加。 */
+  [data-slot="card"][data-dashboard-panel] {
+    gap: 0;
+    padding-block: 0;
+  }
+
+  [data-dashboard-panel] > [data-slot="card-header"] {
+    min-height: 3.5rem;
+    padding: 1rem 1.25rem;
+  }
+
+  [data-dashboard-panel] > [data-slot="card-content"] > .divide-y > div {
+    padding-inline: 1.25rem;
+  }
+
+  .example-section-stack {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .example-card-grid {
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .example-card {
+    min-width: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card);
+    padding: 1rem;
+    box-shadow: var(--shadow-surface);
+  }
+
+  .example-control-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .example-field {
+    display: grid;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+  }
+
+  .example-field-control {
+    height: 2.25rem;
+    border: 1px solid var(--input);
+    border-radius: calc(var(--radius) - 2px);
+    background: var(--background);
+    padding-inline: 0.75rem;
+  }
+
+  .example-table-shell {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+
+  .example-muted {
+    color: var(--muted-foreground);
+  }
+
+  @media (max-width: 767px) {
+    .example-card-grid,
+    .example-control-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+}

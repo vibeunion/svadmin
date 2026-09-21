@@ -7,10 +7,18 @@
   import { Select } from './ui/select/index.js';
   import { useTranslation } from '@svadmin/core/i18n';
   import type { CrudOperator, FieldDefinition, Filter } from '@svadmin/core';
+  import { isNumericFilterField as isNumericField } from '@svadmin/core';
+  import FilterCollectionInput from './FilterCollectionInput.svelte';
   import { readFilterTree, compileFilterTree, filterOperators, parseFilterInput, isCollectionOperator, isNullOperator,
     FILTER_EDITOR_LIMITS, type FilterGroupNode, type FilterNode, type FilterRuleNode, type FilterEditorIssue, type FilterIssueCode } from './enterprise/filter-tree.js';
 
-  export interface FilterRuleItem { id: string; field: string; operator: CrudOperator; value: unknown }
+  export interface FilterRuleItem {
+    id: string;
+    field: string;
+    operator: CrudOperator;
+    value: unknown;
+  }
+
   interface Props {
     fields?: FieldDefinition[];
     filters?: Filter[];
@@ -27,13 +35,15 @@
   const i18n = useTranslation();
   const chinese = $derived(i18n.locale.startsWith('zh'));
   const availableFields = $derived(fields.filter((field) => field.filterable !== false));
+  // 金额、评分等数字字段沿用 core 的输入语义；树编译器统一按 number 验证。
+  const editorFields = $derived(fields.map(field => isNumericField(field) ? { ...field, type: 'number' as const } : field));
   let root = $state<FilterGroupNode>({ kind: 'group', id: 'root', operator: 'and', children: [], wrapped: false });
   let loadIssues = $state<FilterEditorIssue[]>([]);
   let attempted = $state(false);
   let nextId = 0;
   let lastInputFilters: Filter[] | undefined;
   let preserved = $state.raw<ReadonlyMap<string, Filter>>(new Map());
-  const compilation = $derived(compileFilterTree({ ...root, operator: logicalOperator }, fields, preserved));
+  const compilation = $derived(compileFilterTree({ ...root, operator: logicalOperator }, editorFields, preserved));
   const issues = $derived(loadIssues.length ? loadIssues : attempted && !compilation.ok ? compilation.issues : []);
   function countNodes(node: FilterNode): number { return 1 + (node.kind === 'group' ? node.children.reduce((sum, child) => sum + countNodes(child), 0) : 0); }
   const nodeCount = $derived(countNodes(root));
@@ -43,94 +53,75 @@
     return node.kind === 'group' ? { operator: node.operator, value: node.children.map(snapshotNode) }
       : { field: node.field, operator: node.operator, value: Array.isArray(node.value) ? [...node.value] : node.value };
   }
+
   function cannotEdit(node: FilterRuleNode): boolean {
-    return isCollectionOperator(node.operator) || node.value === ''
-      || !compileFilterTree({ kind: 'group', id: 'probe', operator: 'and', children: [{ ...node, readonly: false }] }, fields).ok;
+    return !compileFilterTree({ kind: 'group', id: 'probe', operator: 'and', children: [node] }, editorFields).ok;
   }
   function remember(node: FilterNode, saved: Map<string, Filter>): void {
     saved.set(node.id, snapshotNode(node));
     if (node.kind === 'group') node.children.forEach(child => remember(child, saved));
     else node.readonly = cannotEdit(node);
   }
-  function refreshReadonly(node: FilterNode): void {
-    if (node.kind === 'group') { node.children.forEach(refreshReadonly); return; }
-    const original = preserved.get(node.id);
-    node.readonly = original !== undefined && JSON.stringify(original) === JSON.stringify(snapshotNode(node)) && cannotEdit(node);
-  }
+
   $effect(() => {
-    const metadata = availableFields;
-    if (filters !== lastInputFilters) {
-      lastInputFilters = filters;
-      const parsed = readFilterTree(filters);
-      if (parsed.ok) {
+    const input = filters;
+    const metadata = editorFields;
+    untrack(() => {
+      if (input !== lastInputFilters) {
+        lastInputFilters = input;
+        const parsed = readFilterTree(input);
         const saved = new Map<string, Filter>();
-        untrack(() => remember(parsed.root, saved));
-        root = parsed.root;
+        if (parsed.ok) {
+          root = parsed.root;
+          remember(root, saved);
+          loadIssues = [];
+          if (input.length) logicalOperator = root.operator;
+        } else {
+          root = { kind: 'group', id: 'root', operator: 'and', children: [], wrapped: false };
+          loadIssues = parsed.issues;
+        }
         preserved = saved;
-        loadIssues = [];
-        if (filters.length) logicalOperator = parsed.root.operator;
+        attempted = false;
       } else {
-        preserved = new Map();
-        loadIssues = parsed.issues;
-        root = { kind: 'group', id: 'root', operator: 'and', children: [], wrapped: false };
+        // 元数据加载后只解锁已支持的历史条件；不能把失效草稿改成只读而绕过校验。
+        function unlock(node: FilterNode): void {
+          if (node.kind === 'group') node.children.forEach(unlock);
+          else if (node.readonly && compileFilterTree({ kind: 'group', id: 'probe', operator: 'and', children: [node] }, metadata).ok) node.readonly = false;
+        }
+        unlock(root);
       }
-      attempted = false;
-    } else {
-      untrack(() => { void metadata; refreshReadonly(root); });
-    }
+    });
   });
-  function depthOf(target: FilterGroupNode, node: FilterGroupNode = root, depth = root.wrapped || logicalOperator === 'or' ? 1 : 0): number {
-    if (node === target) return depth;
-    for (const child of node.children) if (child.kind === 'group') {
-      const found = depthOf(target, child, depth + 1);
-      if (found >= 0) return found;
-    }
-    return -1;
-  }
 
   function message(code: FilterIssueCode): string {
     const labels: Record<FilterIssueCode, [string, string]> = {
       'invalid-filter': ['条件结构不受支持，原条件未被修改', 'Unsupported filter structure; the original query is unchanged'],
       limit: ['条件数量或深度超过限制', 'Filter count or depth exceeds the limit'],
-      'unknown-field': ['字段不可用于筛选', 'Field is unavailable for filtering'], operator: ['操作符不适用于此字段', 'Operator is not supported for this field'],
-      value: ['请输入有效的类型化值；集合与范围使用 JSON 数组', 'Enter a valid typed value; sets and ranges use JSON arrays'],
+      'unknown-field': ['字段不可用于筛选', 'Field is unavailable for filtering'],
+      operator: ['操作符不适用于此字段', 'Operator is not supported for this field'],
+      value: ['请输入有效的类型化值', 'Enter a valid typed value'],
       'empty-group': ['条件组不能为空', 'A filter group cannot be empty'],
     };
     return labels[code][chinese ? 0 : 1];
   }
   function appendRule(group: FilterGroupNode): void {
-    if (disabled || loadIssues.length || full || depthOf(group) < 0 || depthOf(group) >= FILTER_EDITOR_LIMITS.depth) return;
-    const first = availableFields[0];
-    if (!first) return;
-    group.children = [...group.children, { kind: 'rule', id: `draft-${++nextId}`, field: first.key,
-      operator: filterOperators(first).includes('contains') ? 'contains' : 'eq', value: undefined }];
+    if (disabled || loadIssues.length || full) return;
+    const field = availableFields[0];
+    if (!field) return;
+    group.children = [...group.children, { kind: 'rule', id: `draft-${++nextId}`, field: field.key,
+      operator: filterOperators(editorFields.find(item => item.key === field.key)).includes('contains') ? 'contains' : 'eq', value: undefined }];
   }
+
   function appendGroup(group: FilterGroupNode): void {
-    if (disabled || loadIssues.length || full || depthOf(group) < 0 || depthOf(group) >= FILTER_EDITOR_LIMITS.depth) return;
+    if (disabled || loadIssues.length || full) return;
     group.children = [...group.children, { kind: 'group', id: `draft-${++nextId}`, operator: 'and', children: [] }];
   }
+
   function removeNode(group: FilterGroupNode, id: string): void {
     if (disabled || loadIssues.length) return;
-    group.children = group.children.filter((node) => node.id !== id);
+    group.children = group.children.filter(child => child.id !== id);
   }
-  function changeField(rule: FilterRuleNode, key: string): void {
-    if (disabled || rule.readonly) return;
-    rule.field = key;
-    rule.operator = filterOperators(fields.find((field) => field.key === key)).includes('contains') ? 'contains' : 'eq';
-    rule.value = undefined;
-  }
-  function changeOperator(rule: FilterRuleNode, next: CrudOperator): void {
-    if (disabled || rule.readonly) return;
-    if (isNullOperator(next)) rule.value = null;
-    else if (isNullOperator(rule.operator) || isCollectionOperator(rule.operator) !== isCollectionOperator(next)) rule.value = undefined;
-    rule.operator = next;
-  }
-  function changeValue(rule: FilterRuleNode, raw: string): void {
-    if (disabled || rule.readonly) return;
-    try { rule.value = parseFilterInput(raw, fields.find((field) => field.key === rule.field), rule.operator); }
-    catch { rule.value = raw; }
-  }
-  function valueText(value: unknown): string { return Array.isArray(value) ? JSON.stringify(value) : value === undefined || value === null ? '' : String(value); }
+
   export function addRule(): void { appendRule(root); }
   export function removeRule(index: number): void { const node = root.children[index]; if (node) removeNode(root, node.id); }
   export function reset(): void {
@@ -138,20 +129,47 @@
     root = { kind: 'group', id: 'root', operator: 'and', children: [], wrapped: false };
     loadIssues = [];
     preserved = new Map();
-    logicalOperator = 'and';
     filters = [];
+    lastInputFilters = filters;
     attempted = false;
     onReset?.();
   }
+
   export function apply(): void {
     if (disabled) return;
     attempted = true;
     if (loadIssues.length) { onInvalid?.(loadIssues); return; }
     if (!compilation.ok) { onInvalid?.(compilation.issues); return; }
-    // 失败时绝不输出“剩余的有效条件”，避免改变查询的逻辑含义。
+    // 失败时不输出部分条件，避免改变查询含义。
     filters = compilation.filters;
     lastInputFilters = filters;
     onApply?.(compilation.filters);
+  }
+
+  function changeField(rule: FilterRuleNode, key: string): void {
+    if (disabled || rule.readonly) return;
+    rule.field = key;
+    rule.operator = filterOperators(editorFields.find(field => field.key === key)).includes('contains') ? 'contains' : 'eq';
+    rule.value = undefined;
+  }
+
+  function changeValue(rule: FilterRuleNode, raw: string): void {
+    if (disabled || rule.readonly) return;
+    try { rule.value = parseFilterInput(raw, editorFields.find(field => field.key === rule.field), rule.operator); }
+    catch { rule.value = raw; }
+  }
+  function valueText(value: unknown): string { return Array.isArray(value) ? JSON.stringify(value) : value === undefined || value === null ? '' : String(value); }
+
+  function changeOperator(rule: FilterRuleNode, operator: CrudOperator): void {
+    if (disabled || rule.readonly) return;
+    const previous = rule.operator;
+    rule.operator = operator;
+    if (isNullOperator(operator)) rule.value = null;
+    else if (operator === 'between' || operator === 'nbetween') {
+      if (previous !== 'between' && previous !== 'nbetween') rule.value = [null, null];
+    } else if (isCollectionOperator(operator)) {
+      if (previous !== 'in' && previous !== 'nin') rule.value = [null];
+    } else if (isCollectionOperator(previous) || isNullOperator(previous)) rule.value = undefined;
   }
 </script>
 
@@ -185,7 +203,7 @@
         </div>
       {:else}
         {@const field = availableFields.find((item) => item.key === node.field)}
-        {@const allowed = filterOperators(field)}
+        {@const allowed = filterOperators(editorFields.find(item => item.key === node.field))}
         {@const collection = isCollectionOperator(node.operator)}
         {@const invalid = issues.some((issue) => issue.path === node.id)}
         <div class="filter-rule" data-testid="filter-builder-rule" data-filter-rule={node.id}>
@@ -210,6 +228,10 @@
             <label for={`${uid}-${node.id}-value`}>{collection ? (chinese ? '值（JSON 数组）' : 'Value (JSON array)') : (chinese ? '值' : 'Value')}</label>
             {#if isNullOperator(node.operator)}
               <Input id={`${uid}-${node.id}-value`} value={chinese ? '无需填值' : 'No value required'} disabled />
+            {:else if collection && field}
+              <FilterCollectionInput {field} value={node.value}
+                range={node.operator === 'between' || node.operator === 'nbetween'}
+                onchange={(value) => { if (!disabled && !node.readonly) node.value = value; }} />
             {:else if !collection && field?.options?.length}
               <Select id={`${uid}-${node.id}-value`} aria-invalid={invalid}
                 value={field.options.findIndex((option) => option.value === node.value) < 0 ? '' : String(field.options.findIndex((option) => option.value === node.value))}
@@ -229,12 +251,12 @@
                 onchange={(event: Event) => { if (event.currentTarget instanceof HTMLSelectElement) changeValue(node, event.currentTarget.value); }}>
                 <option value="">{chinese ? '请选择' : 'Choose'}</option><option value="true">true</option><option value="false">false</option>
               </Select>
-            {:else if !collection && field?.type === 'number'}
+            {:else if !collection && isNumericField(field)}
               <Input id={`${uid}-${node.id}-value`} type="number" step="any" aria-invalid={invalid} value={typeof node.value === 'number' ? node.value : undefined}
-                oninput={(event) => { if (event.currentTarget instanceof HTMLInputElement) changeValue(node, event.currentTarget.value); }} />
+                oninput={(event: Event) => { if (event.currentTarget instanceof HTMLInputElement) changeValue(node, event.currentTarget.value); }} />
             {:else}
               <Input id={`${uid}-${node.id}-value`} type="text" aria-invalid={invalid} value={valueText(node.value)} placeholder={collection ? '[1, 2]' : ''}
-                oninput={(event) => { if (event.currentTarget instanceof HTMLInputElement) changeValue(node, event.currentTarget.value); }} />
+                oninput={(event: Event) => { if (event.currentTarget instanceof HTMLInputElement) changeValue(node, event.currentTarget.value); }} />
             {/if}
           </div>
           {/if}

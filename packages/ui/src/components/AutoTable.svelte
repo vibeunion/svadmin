@@ -40,9 +40,16 @@
     cell_getValue,
   } from '@tanstack/table-core/static-functions';
 
-  import { captureAdminContext, DeleteManyPartialError, getAdminOptions, getContractFormFields, useNavigation, useParsed, useResourceContract, useList, useDeleteMany, downloadData } from '@svadmin/core';
+  import { captureAdminContext, captureAuthSession, useGetIdentity, DeleteManyPartialError, getAdminOptions, getContractFormFields, useNavigation, useParsed, useResourceContract, useList, useDeleteMany, downloadData, type ExportFormat, type TaskProvider } from '@svadmin/core';
   import { decodeBaseRecord, snapshotPlainData, parseContractRouteId, formatContractRouteId } from '@svadmin/core/schema';
-  import { checkedTableRows, copyTableRecord, tableExportRows, tableRowKey, type TableRecord } from './table-contract';
+  import {
+    checkedTableRows,
+    copyTableRecord,
+    tableExportRows,
+    tableRowKey,
+    type BatchSelection,
+    type TableRecord,
+  } from './table-contract';
   import type {
     BaseRecord,
     FieldDefinition,
@@ -60,6 +67,11 @@
     cloneSavedListViewState,
     columnOrderStorageKey,
     columnVisibilityStorageKey,
+    decodeRemoteSavedListViews,
+    decodeSavedListViewMutationResult,
+    decodeSavedListViewRemoveResult,
+    decodeSavedListViewAccess,
+    decodeSavedListViewSubjects,
     legacyActiveSavedListViewStorageKey,
     legacyColumnOrderStorageKey,
     legacyColumnVisibilityStorageKey,
@@ -70,7 +82,10 @@
     serializeSavedListViews,
     type ListPreferenceScope,
     type SavedListView,
+    type SavedListViewAccess,
+    type SavedListViewSubject,
     type SavedListViewState,
+    type SavedListViewProvider,
   } from './saved-list-views.js';
 
   import { fade } from 'svelte/transition';
@@ -86,7 +101,7 @@
   import * as ContextMenu from './ui/context-menu/index.js';
   import * as Select from './ui/select/index.js';
   import {
-    Plus, Pencil, Trash2,
+    Plus, Pencil, Trash2, Star,
     Search, Download, ChevronDown, ChevronUp, SlidersHorizontal, Filter as FilterIcon,
     Eye, Copy, RefreshCw, Rows, X, Bookmark, Check
   } from '@lucide/svelte';
@@ -97,6 +112,7 @@
   import CanAccess from './CanAccess.svelte';
   import TooltipButton from './TooltipButton.svelte';
   import InlineEdit from './InlineEdit.svelte';
+  import ExportButton from './buttons/ExportButton.svelte';
   import FieldDisplay from './FieldDisplay.svelte';
   import DraggableHeader from './DraggableHeader.svelte';
   import DataState from './content/DataState.svelte';
@@ -111,6 +127,8 @@
     /** 可选主体渲染器：不替换资源、权限、工具栏和持久化逻辑。 */
     gridBody?: Snippet<[AutoTableGridState]>;
     selectable?: boolean;
+    /** 仅在业务回调支持按查询执行服务端命令时启用。 */
+    allowSelectAllMatching?: boolean;
     density?: 'compact' | 'comfortable';
     showHeader?: boolean;
     title?: string;
@@ -133,11 +151,21 @@
     pagination?: { current: number; pageSize: number };
     /** Externally controlled sorters */
     sorters?: Sort[];
-    /** Custom batch actions to render when rows are selected */
-    batchActions?: Snippet<[{ selectedIds: (string | number)[] }]>;
+    /** 批量操作必须按 selection.scope 区分明确 ID 与全部查询结果。 */
+    batchActions?: Snippet<[{ selectedIds: (string | number)[]; selection: BatchSelection }]>;
     /** Summary row rendered at table footer */
     summary?: Snippet<[{ data: BaseRecord[]; total: number; visibleColumnsCount: number }]>;
     deleteVariables?: unknown;
+    /** 团队/系统视图；写入需要 Provider 能力和显式可写标记。 */
+    savedViewProvider?: SavedListViewProvider;
+    /** 显式允许唯一的远程默认视图在无 URL/个人活动视图时初始化页面。 */
+    applyRemoteDefaultView?: boolean;
+    /** 提供任务名后按当前筛选/排序提交全量导出；未提供时仍导出当前已加载页。 */
+    exportTaskName?: string;
+    exportTaskProvider?: TaskProvider;
+    exportTaskIdempotencyKey?: string;
+    exportFormat?: ExportFormat;
+    exportMaxItemCount?: number;
   }
 
   let {
@@ -145,6 +173,7 @@
     rendering,
     gridBody,
     selectable = true,
+    allowSelectAllMatching = false,
     density = 'comfortable',
     showHeader = true,
     title,
@@ -162,9 +191,18 @@
     pagination: externalPagination,
     sorters: externalSorters,
     deleteVariables,
+    savedViewProvider,
+    applyRemoteDefaultView = false,
+    exportTaskName,
+    exportTaskProvider,
+    exportTaskIdempotencyKey,
+    exportFormat = 'csv',
+    exportMaxItemCount,
   }: Props = $props();
 
   let densityOverride = $state<'compact' | 'comfortable' | undefined>(undefined);
+  let allMatchingSelected = $state(false);
+  const excludedMatchingIds = new SvelteMap<string, string | number>();
   const currentDensity = $derived(densityOverride ?? density);
   const adminContext = captureAdminContext();
   const parsed = useParsed();
@@ -176,12 +214,20 @@
   const primaryKey = $derived(resource.primaryKey ?? 'id');
   const listPermission = useCan(() => ({ resource: resourceName, action: 'list' }));
   const canRead = $derived(listPermission.allowed);
+  const preferenceIdentity = useGetIdentity();
+  const preferenceSession = $derived(captureAuthSession(adminContext.authProvider));
+  const preferenceIdentityReady = $derived(!adminContext.authProvider || (
+    preferenceSession.available && !preferenceIdentity.isLoading && !preferenceIdentity.error
+    && typeof preferenceIdentity.data?.id === 'string' && !!preferenceIdentity.data.id.trim()
+  ));
   const listPreferenceScope = $derived.by(() => {
-    const matcher = adminContext.queryKeyMatcher(resourceName);
     return definedOptions({
       resourceName,
-      providerName: matcher.provider ?? 'default',
-      tenantIdentity: matcher.tenant,
+      providerName: binding.dataProviderName,
+      tenantIdentity: adminContext.queryKeyMatcher(resourceName).tenant,
+      identityKey: adminContext.authProvider
+        ? preferenceIdentityReady ? `id:${preferenceIdentity.data?.id}` : `unresolved:${preferenceSession.cacheKey}`
+        : undefined,
     });
   });
 
@@ -195,6 +241,7 @@
   }
 
   function readScopedPreference(scope: ListPreferenceScope, scopedKey: string, legacyKey: string): string | null {
+    if (!preferenceIdentityReady) return null;
     const scoped = readLocalPreference(scopedKey);
     if (scoped !== null || !canMigrateLegacyListPreferences(scope)) return scoped;
     const legacy = readLocalPreference(legacyKey);
@@ -222,6 +269,19 @@
     savedViewColumnIds,
   ));
   let savedViews = $state<SavedListView[]>(storedSavedViews);
+  let remoteSavedViews = $state<SavedListView[]>([]);
+  let remoteViewsLoading = $state(false);
+  let remoteViewsFailed = $state(false);
+  let remoteViewsReload = $state(0);
+  let remoteDefaultEligible = true;
+  const availableSavedViews = $derived.by(() => {
+    const ids = new Set<string>();
+    return [...remoteSavedViews, ...savedViews].filter(view => {
+      if (ids.has(view.id)) return false;
+      ids.add(view.id);
+      return true;
+    });
+  });
   const storedActiveSavedViewId = untrack(() => {
     const candidate = readScopedPreference(
       listPreferenceScope,
@@ -232,6 +292,16 @@
   });
   let savedViewName = $state('');
   let savedViewsOpen = $state(false);
+  let savedViewSource = $state<'local' | 'team' | 'system'>('local');
+  let savedViewMutationPending = $state(false);
+  let savedViewMutationError = $state<'failure' | 'conflict' | undefined>();
+  const accessDrafts = new SvelteMap<string, SavedListViewAccess>();
+  const accessSubjects = new SvelteMap<string, SavedListViewSubject[]>();
+  const accessSubjectsLoading = new SvelteMap<string, boolean>();
+  const accessSubjectsFailed = new SvelteMap<string, boolean>();
+  const accessSubjectQueries = new SvelteMap<string, string>();
+  const accessSubjectRequests = new Map<string, object>();
+  let savedViewMutationEpoch = 0;
 
   const hasExplicitURLState = untrack(() => (
     urlState.page !== undefined
@@ -241,7 +311,7 @@
     || urlState.filters !== undefined
   ));
   let activeSavedViewId = $state<string | undefined>(hasExplicitURLState ? undefined : storedActiveSavedViewId);
-  const activeSavedViewName = $derived(savedViews.find((view) => view.id === activeSavedViewId)?.name);
+  const activeSavedViewName = $derived(availableSavedViews.find((view) => view.id === activeSavedViewId)?.name);
   const initialSavedView = untrack(() => (
     !hasExplicitURLState && storedActiveSavedViewId
       ? storedSavedViews.find((view) => view.id === storedActiveSavedViewId)
@@ -371,6 +441,7 @@
 
   function scheduleSearch(event: Event) {
     if (!(event.currentTarget instanceof HTMLInputElement)) return;
+    markSavedViewDirty();
     searchText = event.currentTarget.value;
     if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
     searchDebounceTimer = setTimeout(() => {
@@ -622,7 +693,7 @@
   const selectedIdValueByKey = new SvelteMap<string, string | number>();
 
   function preferenceScopeIsLoaded(): boolean {
-    return loadedPreferenceScopeId === listPreferenceScopeId(listPreferenceScope);
+    return preferenceIdentityReady && loadedPreferenceScopeId === listPreferenceScopeId(listPreferenceScope);
   }
 
   function rowIsExpanded(rowId: string): boolean {
@@ -631,7 +702,7 @@
   }
 
   function rowIsSelected(rowId: string): boolean {
-    return rowSelection[rowId] === true;
+    return allMatchingSelected ? !excludedMatchingIds.has(rowId) : rowSelection[rowId] === true;
   }
 
   function rowIdValue(row: Row<TableFeatures, TableRecord>): string | number {
@@ -640,6 +711,11 @@
 
   function toggleRowSelection(row: Row<TableFeatures, TableRecord>): void {
     if (confirmPending || !canRead) return;
+    if (allMatchingSelected) {
+      if (excludedMatchingIds.has(row.id)) excludedMatchingIds.delete(row.id);
+      else excludedMatchingIds.set(row.id, rowIdValue(row));
+      return;
+    }
     const wasSelected = rowIsSelected(row.id);
     if (!wasSelected) {
       selectedIdValueByKey.set(row.id, rowIdValue(row));
@@ -694,6 +770,7 @@
   }
 
   function markSavedViewDirty(): void {
+    remoteDefaultEligible = false;
     if (!activeSavedViewId) return;
     activeSavedViewId = undefined;
     persistActiveSavedView();
@@ -714,6 +791,7 @@
   }
 
   function applySavedView(view: SavedListView): void {
+    remoteDefaultEligible = false;
     if (searchDebounceTimer) {
       clearTimeout(searchDebounceTimer);
       searchDebounceTimer = undefined;
@@ -748,6 +826,8 @@
     columnOrderAtom.set(state.columnOrder);
     persistColumnOrder(state.columnOrder);
     rowSelection = {};
+    allMatchingSelected = false;
+    excludedMatchingIds.clear();
     selectedIdValueByKey.clear();
   }
 
@@ -775,8 +855,12 @@
     const scopeId = listPreferenceScopeId(scope);
     if (scopeId === loadedPreferenceScopeId) return;
 
+    remoteDefaultEligible = true;
     const preferences = readScopedSavedViewPreferences(scope);
+    savedViewName = '';
+    savedViewsOpen = false;
     savedViews = preferences.savedViews;
+    remoteSavedViews = [];
     activeSavedViewId = preferences.activeSavedViewId;
 
     if (!hasExplicitURLState && preferences.activeSavedView) {
@@ -786,19 +870,84 @@
       columnVisibilityAtom.set(preferences.columnVisibility);
       columnOrderAtom.set(preferences.columnOrder);
       rowSelection = {};
+      allMatchingSelected = false;
+      excludedMatchingIds.clear();
       selectedIdValueByKey.clear();
     }
 
     loadedPreferenceScopeId = scopeId;
   });
 
+  let remoteViewEpoch = 0;
+  $effect(() => {
+    const provider = savedViewProvider;
+    const scope = listPreferenceScope;
+    const columns = savedViewColumnIds;
+    void remoteViewsReload;
+    remoteSavedViews = [];
+    remoteViewsLoading = false;
+    remoteViewsFailed = false;
+    accessDrafts.clear();
+    accessSubjects.clear();
+    accessSubjectsLoading.clear();
+    accessSubjectsFailed.clear();
+    accessSubjectQueries.clear();
+    accessSubjectRequests.clear();
+    savedViewMutationEpoch += 1;
+    savedViewMutationPending = false;
+    savedViewMutationError = undefined;
+    savedViewSource = 'local';
+    if (!provider || !preferenceScopeIsLoaded()) {
+      remoteSavedViews = [];
+      return;
+    }
+    const epoch = ++remoteViewEpoch;
+    remoteViewsLoading = true;
+    void Promise.resolve().then(() => provider.list({ ...scope })).then(value => {
+      if (epoch !== remoteViewEpoch || !preferenceScopeIsLoaded()) return;
+      remoteSavedViews = decodeRemoteSavedListViews(value, columns, !!(provider.save || provider.remove || provider.setDefault || provider.updateAccess));
+      if (applyRemoteDefaultView && remoteDefaultEligible) {
+        const defaults = remoteSavedViews.filter(view => view.default === true);
+        if (!hasExplicitURLState && !activeSavedViewId && !externalPagination && !externalSorters
+          && defaults.length === 1 && defaults[0]) {
+          applySavedView(defaults[0]);
+          remoteDefaultEligible = false;
+        }
+      }
+    }).catch(() => {
+      if (epoch === remoteViewEpoch) {
+        remoteSavedViews = [];
+        remoteViewsFailed = true;
+      }
+    }).finally(() => {
+      if (epoch === remoteViewEpoch) remoteViewsLoading = false;
+    });
+    return () => {
+      remoteViewEpoch += 1;
+      savedViewMutationEpoch += 1;
+      accessSubjectRequests.clear();
+    };
+  });
+
   function saveCurrentView(): void {
+    if (!preferenceScopeIsLoaded() || savedViewMutationPending) return;
+    remoteDefaultEligible = false;
     const name = savedViewName.trim().slice(0, 60);
     if (!name) return;
     if (searchDebounceTimer) {
       clearTimeout(searchDebounceTimer);
       searchDebounceTimer = undefined;
       appliedSearchText = searchText;
+    }
+    if (savedViewSource !== 'local') {
+      const existing = remoteSavedViews.find(view => view.source === savedViewSource
+        && view.name.toLocaleLowerCase() === name.toLocaleLowerCase());
+      if (!savedViewProvider?.save || (existing && (existing.readOnly || !existing.version))) return;
+      void mutateRemoteView({
+        id: existing?.id ?? crypto.randomUUID(), name, state: getCurrentSavedViewState(),
+        source: savedViewSource, expectedVersion: existing?.version ?? null,
+      });
+      return;
     }
     const existing = savedViews.find((view) => view.name.toLocaleLowerCase() === name.toLocaleLowerCase());
     const view: SavedListView = {
@@ -816,10 +965,182 @@
   }
 
   function deleteSavedView(id: string): void {
+    if (!preferenceScopeIsLoaded() || savedViewMutationPending) return;
+    const remote = remoteSavedViews.find(view => view.id === id);
+    if (remote) {
+      if (!savedViewProvider?.remove || remote.readOnly || !remote.version) return;
+      void mutateRemoteView({
+        id, expectedVersion: remote.version, source: remote.source === 'system' ? 'system' : 'team',
+        name: remote.name, state: remote.state,
+      }, true);
+      return;
+    }
     savedViews = savedViews.filter((view) => view.id !== id);
     if (activeSavedViewId === id) activeSavedViewId = undefined;
     persistSavedViews();
     persistActiveSavedView();
+  }
+
+  async function mutateRemoteView(
+    mutation: import('./saved-list-views').SavedListViewMutation, remove = false,
+  ): Promise<void> {
+    const provider = savedViewProvider;
+    if (!provider || savedViewMutationPending || !preferenceScopeIsLoaded()
+      || (remove && (mutation.expectedVersion === null || !provider.remove))
+      || (!remove && !provider.save)) return;
+    const scope = { ...listPreferenceScope };
+    const scopeId = listPreferenceScopeId(scope);
+    const columns = savedViewColumnIds;
+    const epoch = ++savedViewMutationEpoch;
+    const current = () => epoch === savedViewMutationEpoch && provider === savedViewProvider
+      && scopeId === listPreferenceScopeId(listPreferenceScope) && preferenceScopeIsLoaded();
+    savedViewMutationPending = true;
+    savedViewMutationError = undefined;
+    try {
+      const result = remove
+        ? await provider.remove?.(scope, { id: mutation.id, expectedVersion: mutation.expectedVersion ?? 0 })
+        : await provider.save?.(scope, { ...mutation, state: cloneSavedListViewState(mutation.state) });
+      if (!current()) return;
+      if (remove && mutation.expectedVersion !== null && decodeSavedListViewRemoveResult(result, {
+        id: mutation.id, expectedVersion: mutation.expectedVersion,
+      })) {
+        remoteSavedViews = remoteSavedViews.filter(view => view.id !== mutation.id);
+        if (activeSavedViewId === mutation.id) activeSavedViewId = undefined;
+        persistActiveSavedView();
+        return;
+      }
+      const decoded = decodeSavedListViewMutationResult(result, columns, mutation);
+      if (!decoded || (remove && decoded.ok)) {
+        savedViewMutationError = 'failure';
+        return;
+      }
+      if (!decoded.ok) {
+        savedViewMutationError = 'conflict';
+        // 保留本地查询；用户必须重新读取后再决定如何修改。
+        return;
+      }
+      const view = { ...decoded.view, readOnly: decoded.view.readOnly !== false };
+      remoteSavedViews = [view, ...remoteSavedViews.filter(candidate => candidate.id !== view.id)];
+      savedViewName = '';
+    } catch {
+      if (current()) savedViewMutationError = 'failure';
+    } finally {
+      if (current()) savedViewMutationPending = false;
+    }
+  }
+
+  function setRemoteDefault(view: SavedListView): void {
+    const provider = savedViewProvider;
+    if (!provider?.setDefault || savedViewMutationPending || view.readOnly || !view.version
+      || savedViewMutationError === 'conflict' || !preferenceScopeIsLoaded()
+      || (view.source !== 'team' && view.source !== 'system')) return;
+    const source = view.source;
+    const expectedVersion = view.version;
+    const defaultValue = view.default !== true;
+    remoteDefaultEligible = false;
+    const scope = { ...listPreferenceScope };
+    const scopeId = listPreferenceScopeId(scope);
+    const epoch = ++savedViewMutationEpoch;
+    const current = () => epoch === savedViewMutationEpoch && provider === savedViewProvider
+      && scopeId === listPreferenceScopeId(listPreferenceScope) && preferenceScopeIsLoaded();
+    savedViewMutationPending = true;
+    savedViewMutationError = undefined;
+    void Promise.resolve().then(() => provider.setDefault?.(scope, {
+      id: view.id, source, expectedVersion, default: defaultValue,
+    })).then(result => {
+      if (!current()) return;
+      const decoded = decodeSavedListViewMutationResult(result, savedViewColumnIds, {
+        id: view.id, source, expectedVersion,
+      });
+      if (!decoded) {
+        savedViewMutationError = 'failure';
+      } else if (!decoded.ok) {
+        savedViewMutationError = 'conflict';
+      } else if (decoded.view.default !== defaultValue) {
+        savedViewMutationError = 'failure';
+      } else {
+        // 默认标记会同时改变同一作用域的其他视图，成功后重新读取完整集合。
+        remoteViewsReload += 1;
+      }
+    }).catch(() => {
+      if (current()) savedViewMutationError = 'failure';
+    }).finally(() => {
+      if (current()) savedViewMutationPending = false;
+    });
+  }
+
+  function saveRemoteAccess(view: SavedListView): void {
+    const provider = savedViewProvider;
+    const draft = accessDrafts.get(view.id);
+    if (!provider?.updateAccess || !draft || view.readOnly !== false || !view.version
+      || savedViewMutationPending || savedViewMutationError === 'conflict' || !preferenceScopeIsLoaded()
+      || (view.source !== 'team' && view.source !== 'system')) return;
+    const access = decodeSavedListViewAccess({
+      mode: draft.mode,
+      subjectIds: draft.mode === 'restricted' ? draft.subjectIds : [],
+    });
+    if (!access) { savedViewMutationError = 'failure'; return; }
+    const source = view.source;
+    const expectedVersion = view.version;
+    const scope = { ...listPreferenceScope };
+    const scopeId = listPreferenceScopeId(scope);
+    const epoch = ++savedViewMutationEpoch;
+    const current = () => epoch === savedViewMutationEpoch && provider === savedViewProvider
+      && scopeId === listPreferenceScopeId(listPreferenceScope) && preferenceScopeIsLoaded();
+    remoteDefaultEligible = false;
+    savedViewMutationPending = true;
+    savedViewMutationError = undefined;
+    void Promise.resolve().then(() => {
+      if (!current()) return;
+      return provider.updateAccess?.(scope, {
+        id: view.id, source, expectedVersion, access: { ...access, subjectIds: [...access.subjectIds] },
+      });
+    }).then(result => {
+      if (!current()) return;
+      const decoded = decodeSavedListViewMutationResult(result, savedViewColumnIds, {
+        id: view.id, source, expectedVersion,
+      });
+      if (!decoded) savedViewMutationError = 'failure';
+      else if (!decoded.ok) savedViewMutationError = 'conflict';
+      else if (decoded.view.access?.mode !== access.mode
+        || decoded.view.access.subjectIds.length !== access.subjectIds.length
+        || !decoded.view.access.subjectIds.every(id => access.subjectIds.includes(id))) {
+        savedViewMutationError = 'failure';
+      } else remoteViewsReload += 1;
+    }).catch(() => {
+      if (current()) savedViewMutationError = 'failure';
+    }).finally(() => {
+      if (current()) savedViewMutationPending = false;
+    });
+  }
+
+  function loadAccessSubjects(view: SavedListView, query = ''): void {
+    const provider = savedViewProvider;
+    if (!provider?.listAccessSubjects || view.readOnly !== false
+      || view.source === 'local' || !preferenceScopeIsLoaded()) return;
+    const scope = { ...listPreferenceScope };
+    const scopeId = listPreferenceScopeId(scope);
+    const request = {};
+    accessSubjectRequests.set(view.id, request);
+    const current = () => accessSubjectRequests.get(view.id) === request
+      && scopeId === listPreferenceScopeId(listPreferenceScope)
+      && provider === savedViewProvider && preferenceScopeIsLoaded();
+    accessSubjectsLoading.set(view.id, true);
+    accessSubjectsFailed.delete(view.id);
+    accessSubjects.delete(view.id);
+    void Promise.resolve().then(() => {
+      if (current()) return provider.listAccessSubjects?.(scope, { query: query.trim(), limit: 50 });
+    })
+      .then(result => {
+        if (!current()) return;
+        const subjects = decodeSavedListViewSubjects(result);
+        if (!subjects) accessSubjectsFailed.set(view.id, true);
+        else accessSubjects.set(view.id, subjects);
+      })
+      .catch(() => {
+        if (current()) accessSubjectsFailed.set(view.id, true);
+      })
+      .finally(() => { if (current()) accessSubjectsLoading.delete(view.id); });
   }
 
   function setColumnVisibility(columnId: string, visible: boolean): void {
@@ -939,6 +1260,10 @@
 
   function toggleAllRowsSelection(): void {
     if (confirmPending || !canRead) return;
+    if (allMatchingSelected) {
+      clearSelection();
+      return;
+    }
     const willSelect = !table_getIsAllRowsSelected(tbl);
     for (const row of tableView.rows) {
       if (willSelect) {
@@ -957,7 +1282,58 @@
         return id === undefined ? [] : [id];
       })
   );
-  const selectedCount = $derived(Object.keys(rowSelection).filter(key => rowSelection[key] === true).length);
+  const matchingTotal = $derived(query.data?.total ?? 0);
+  const selectedCount = $derived(allMatchingSelected
+    ? Math.max(0, matchingTotal - excludedMatchingIds.size)
+    : selectedIds.length);
+  const selectionLabel = $derived(i18n.t(
+    allMatchingSelected ? 'common.allMatchingSelected' : 'common.selectedCount',
+    { count: selectedCount },
+  ));
+  const selectionReady = $derived(
+    canRead && selectable && pageRecords.ok && !query.isError && !query.isFetching
+  );
+  const canSelectAllMatching = $derived(
+    allowSelectAllMatching && !!batchActions && selectionReady
+    && Number.isSafeInteger(matchingTotal) && matchingTotal > 0
+  );
+  function batchSelectionSnapshot(): BatchSelection {
+    if (allMatchingSelected) return {
+      scope: 'all', filters: queryFilters.map(cloneFilter),
+      sorters: querySorters.map(sorter => ({ ...sorter })), total: matchingTotal,
+      excludedIds: [...excludedMatchingIds.values()],
+    };
+    return {
+      scope: 'selected', ids: [...selectedIds],
+      currentPageIds: tableView.rows.filter(row => rowSelection[row.id] === true).map(rowIdValue),
+    };
+  }
+  const selectionCriteria = $derived(JSON.stringify(queryFilters));
+  let previousSelectionCriteria = untrack(() => selectionCriteria);
+  $effect.pre(() => {
+    const criteria = selectionCriteria;
+    if (criteria !== previousSelectionCriteria) {
+      allMatchingSelected = false;
+      excludedMatchingIds.clear();
+      rowSelection = {};
+      selectedIdValueByKey.clear();
+      if (deleteRequest?.batch && !confirmPending) {
+        confirmOpen = false;
+        deleteRequest = null;
+      }
+    }
+    previousSelectionCriteria = criteria;
+  });
+  $effect.pre(() => {
+    if (!selectable || !allowSelectAllMatching || !batchActions) {
+      allMatchingSelected = false;
+      excludedMatchingIds.clear();
+    }
+    if (!selectable) {
+      rowSelection = {};
+      selectedIdValueByKey.clear();
+    }
+  });
   const batchDeletePerm = useCan(() => ({
     resource: resourceName,
     action: 'delete',
@@ -965,14 +1341,24 @@
     queryOptions: { enabled: acEnabled && canDelete && selectedIds.length > 0 },
   }));
   const canBatchDelete = $derived(
-    canDelete && (!acEnabled || batchDeletePerm.isLoading || batchDeletePerm.allowed)
+    !allMatchingSelected && canDelete && (!acEnabled || batchDeletePerm.isLoading || batchDeletePerm.allowed)
   );
 
   function clearSelection(): void {
     if (!deleteManyMutation.isPending) {
+      allMatchingSelected = false;
+      excludedMatchingIds.clear();
       selectedIdValueByKey.clear();
       table_resetRowSelection(tbl, true);
     }
+  }
+
+  function selectAllMatching(): void {
+    if (!canSelectAllMatching || confirmPending || confirmOpen) return;
+    selectedIdValueByKey.clear();
+    excludedMatchingIds.clear();
+    rowSelection = {};
+    allMatchingSelected = true;
   }
 
   function isColumnVisible(columnId: string): boolean {
@@ -1049,6 +1435,19 @@
     variables: deleteVariables,
   });
   let previousTableScope: typeof tableScope | undefined;
+  function tableScopesEqual(left: typeof tableScope, right: typeof tableScope): boolean {
+    return left.contract === right.contract
+      && left.resourceName === right.resourceName
+      && left.provider === right.provider
+      && left.meta === right.meta
+      && left.tenant === right.tenant
+      && left.auth === right.auth
+      && left.router === right.router
+      && left.permissionProvider === right.permissionProvider
+      && left.canRead === right.canRead
+      && left.canDelete === right.canDelete
+      && left.variables === right.variables;
+  }
   const detailState = $derived.by(() => {
     const route = parsed.params['detail'];
     if (route === undefined || !canRead) return { id: undefined, invalid: false };
@@ -1059,24 +1458,14 @@
   const detailOpen = $derived(detailRecordId != null);
   $effect.pre(() => {
     const scope = tableScope;
-    if (previousTableScope && (
-      previousTableScope.contract !== scope.contract ||
-      previousTableScope.resourceName !== scope.resourceName ||
-      previousTableScope.provider !== scope.provider ||
-      previousTableScope.meta !== scope.meta ||
-      previousTableScope.tenant !== scope.tenant ||
-      previousTableScope.auth !== scope.auth ||
-      previousTableScope.router !== scope.router ||
-      previousTableScope.permissionProvider !== scope.permissionProvider ||
-      previousTableScope.canRead !== scope.canRead ||
-      previousTableScope.canDelete !== scope.canDelete ||
-      previousTableScope.variables !== scope.variables
-    )) {
+    if (previousTableScope && !tableScopesEqual(previousTableScope, scope)) {
       activeDelete = undefined;
       confirmOpen = false;
       confirmPending = false;
       deleteRequest = null;
       operationError = null;
+      allMatchingSelected = false;
+      excludedMatchingIds.clear();
       selectedIdValueByKey.clear();
       rowSelection = {};
       expandedAtom.set({});
@@ -1450,9 +1839,21 @@
       <h1 class="svadmin-u-42536e69e639 svadmin-u-998e0b29fe9e svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{title ?? resource.label}</h1>
       <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
         {#if canExport}
-          <Button variant="outline" size="sm" onclick={exportCSV}>
-            <Download class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" data-icon="inline-start" /> {i18n.t("common.export")}
-          </Button>
+          {#if exportTaskName}
+            <ExportButton
+              resource={resourceName}
+              taskName={exportTaskName}
+              {...definedOptions({ taskProvider: exportTaskProvider, taskIdempotencyKey: exportTaskIdempotencyKey, maxItemCount: exportMaxItemCount })}
+              format={exportFormat}
+              filters={activeFilters}
+              sorters={sorters}
+              accessControl={{ enabled: acEnabled, hideIfUnauthorized: true }}
+            />
+          {:else}
+            <Button variant="outline" size="sm" onclick={exportCSV}>
+              <Download class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" data-icon="inline-start" /> {i18n.t("common.export")}
+            </Button>
+          {/if}
         {/if}
         {#if headerActions}
           {@render headerActions()}
@@ -1467,21 +1868,27 @@
   {/if}
 
   <!-- Selection Banner (Enterprise Batch Actions) -->
-  {#if selectedCount > 0}
+  {#if selectedCount > 0 || allMatchingSelected}
 <div
       class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-1004c0c3954c svadmin-u-ca6bcd4b6f3f svadmin-u-a6afccfc915b svadmin-u-375dc44df6e9 svadmin-u-e0d9cc7f0647 svadmin-u-03b4dd7f172b svadmin-u-5f22e64f2282 svadmin-u-fc7473ca09eb svadmin-u-d4108abe6359 svadmin-u-40137e897961 fade-in svadmin-u-625a4c3fbeb2 svadmin-u-259ce51fc8f3 svadmin-u-020ba687fa12 svadmin-u-9f76a62f4f44 svadmin-u-3b9871a0bf93"
-      aria-label={i18n.t("common.selectedCount", { count: selectedCount })}
+      aria-label={selectionLabel}
       data-svadmin-batch-toolbar
     >
       <div class="svadmin-u-60fbb7713999 svadmin-u-7e0b7cdf1a94 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-fc7473ca09eb">
-        <span class="svadmin-u-2689f3958069 svadmin-u-d4108abe6359 svadmin-u-3032cae0badb">{i18n.t("common.selectedCount", { count: selectedCount })}</span>
+        <span class="svadmin-u-2689f3958069 svadmin-u-d4108abe6359 svadmin-u-3032cae0badb">{selectionLabel}</span>
         {#if deleteManyMutation.isPending}
           <span class="svadmin-u-bfa603190748" role="status">{i18n.t("common.processing")}</span>
         {/if}
       </div>
       <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
-        {#if batchActions}
-          {@render batchActions({ selectedIds })}
+        {#if batchActions && selectionReady && selectedCount > 0}
+          {@render batchActions({ selectedIds: [...selectedIds], selection: batchSelectionSnapshot() })}
+        {/if}
+        {#if !allMatchingSelected && canSelectAllMatching && selectedCount < matchingTotal}
+          <Button variant="outline" size="sm" disabled={confirmPending || confirmOpen} onclick={selectAllMatching}>
+            <Rows class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" data-icon="inline-start" aria-hidden="true" />
+            {i18n.t('common.selectAllMatching', { count: matchingTotal })}
+          </Button>
         {/if}
         {#if canBatchDelete}
           <Button
@@ -1584,9 +1991,22 @@
     <!-- Right: Table Controls (Density, Columns, Saved Views, Refresh, Export if !showHeader) -->
     <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-58284b4ea568 svadmin-u-012fbd121f37">
       {#if !showHeader && canExport}
-        <TooltipButton tooltip={i18n.t("common.export")} variant="outline" size="sm" class="svadmin-u-e7a768f922d2 svadmin-u-0b91436debbd" onclick={exportCSV}>
-          <Download class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" aria-hidden="true" />
-        </TooltipButton>
+        {#if exportTaskName}
+          <ExportButton
+            resource={resourceName}
+            taskName={exportTaskName}
+            {...definedOptions({ taskProvider: exportTaskProvider, taskIdempotencyKey: exportTaskIdempotencyKey, maxItemCount: exportMaxItemCount })}
+            format={exportFormat}
+            filters={activeFilters}
+            sorters={sorters}
+            hideText
+            accessControl={{ enabled: acEnabled, hideIfUnauthorized: true }}
+          />
+        {:else}
+          <TooltipButton tooltip={i18n.t("common.export")} variant="outline" size="sm" class="svadmin-u-e7a768f922d2 svadmin-u-0b91436debbd" onclick={exportCSV}>
+            <Download class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" aria-hidden="true" />
+          </TooltipButton>
+        {/if}
       {/if}
 
       {#if showDensitySwitcher}
@@ -1634,7 +2054,7 @@
       <Popover.Root bind:open={savedViewsOpen}>
         <Popover.Trigger>
           {#snippet child({ props })}
-            <Button variant="outline" size="sm" class="svadmin-u-e7a768f922d2 svadmin-u-0b91436debbd" {...props} aria-label={i18n.t("common.savedViews")}>
+            <Button variant="outline" size="sm" class="svadmin-u-e7a768f922d2 svadmin-u-0b91436debbd" {...props} disabled={!preferenceIdentityReady} aria-label={i18n.t("common.savedViews")}>
               <Bookmark class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" data-icon="inline-start" /> {activeSavedViewName ?? i18n.t("common.savedViews")}
             </Button>
           {/snippet}
@@ -1645,6 +2065,34 @@
               <h4 class="svadmin-u-2689f3958069 svadmin-u-fc7473ca09eb">{i18n.t("common.savedViews")}</h4>
               <p class="svadmin-u-b6b02c0ebef6 svadmin-u-359090c2d529 svadmin-u-bfa603190748">{i18n.t("common.savedViewsHint")}</p>
             </div>
+            {#if remoteViewsLoading}
+              <p role="status">{i18n.t('common.loading')}</p>
+            {:else if remoteViewsFailed}
+              <p role="alert">{i18n.t('common.operationFailed')}</p>
+              <Button type="button" variant="outline" size="sm" onclick={() => remoteViewsReload += 1}>
+                {i18n.t('common.retry')}
+              </Button>
+            {/if}
+            {#if savedViewMutationPending}
+              <p role="status">{i18n.t('common.loading')}</p>
+            {:else if savedViewMutationError}
+              <p role="alert">{i18n.t(savedViewMutationError === 'conflict' ? 'common.viewConflict' : 'common.operationFailed')}</p>
+              <Button type="button" variant="outline" size="sm" onclick={() => remoteViewsReload += 1}>
+                {i18n.t('common.refresh')}
+              </Button>
+            {/if}
+            {#if savedViewProvider?.save}
+              <Select.Root aria-label={i18n.t('common.viewSource')} value={savedViewSource} disabled={savedViewMutationPending}
+                onchange={(event: Event) => {
+                  if (!(event.currentTarget instanceof HTMLSelectElement)) return;
+                  const value = event.currentTarget.value;
+                  if (value === 'local' || value === 'team' || value === 'system') savedViewSource = value;
+                }}>
+                <option value="local">{i18n.t('common.personalView')}</option>
+                <option value="team">{i18n.t('common.teamView')}</option>
+                <option value="system">{i18n.t('common.systemView')}</option>
+              </Select.Root>
+            {/if}
             <div class="svadmin-u-da7c36cd8867">
               <label class="svadmin-u-359090c2d529 svadmin-u-bfa603190748" for="saved-list-view">{i18n.t("common.currentView")}</label>
               <Select.Root
@@ -1654,16 +2102,17 @@
                 onchange={(event: Event) => {
                   if (!(event.currentTarget instanceof HTMLSelectElement)) return;
                   const id = event.currentTarget.value;
-                  const view = savedViews.find((candidate) => candidate.id === id);
+                  const view = availableSavedViews.find((candidate) => candidate.id === id);
                   if (view) applySavedView(view);
                   else {
+                    remoteDefaultEligible = false;
                     activeSavedViewId = undefined;
                     persistActiveSavedView();
                   }
                 }}
               >
                 <option value="">{i18n.t("common.currentView")}</option>
-                {#each savedViews as view (view.id)}
+                {#each availableSavedViews as view (view.id)}
                   <option value={view.id}>{view.name}</option>
                 {/each}
               </Select.Root>
@@ -1674,22 +2123,132 @@
                 placeholder={i18n.t("common.viewName")}
                 maxlength={60}
                 bind:value={savedViewName}
+                disabled={savedViewMutationPending}
                 class="svadmin-u-e7a768f922d2"
               />
-              <Button size="sm" class="svadmin-u-012fbd121f37" disabled={!savedViewName.trim()} onclick={saveCurrentView}>
+              <Button size="sm" class="svadmin-u-012fbd121f37" disabled={!savedViewName.trim() || savedViewMutationPending || savedViewMutationError === 'conflict'} onclick={saveCurrentView}>
                 <Check class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" data-icon="inline-start" /> {i18n.t("common.saveView")}
               </Button>
             </div>
-            {#if savedViews.length > 0}
+            {#if availableSavedViews.length > 0}
               <div class="svadmin-u-da7c36cd8867 svadmin-u-b950dda299d3 svadmin-u-18049387f0af svadmin-u-f46b61a9b310">
-                {#each savedViews as view (view.id)}
+                {#each availableSavedViews as view (view.id)}
                   <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4 svadmin-u-fc7473ca09eb">
                     <span class="svadmin-u-7e0b7cdf1a94 svadmin-u-f283ea9bea0e">{view.name}</span>
+                    {#if (view.source === 'team' || view.source === 'system') && savedViewProvider?.setDefault}
+                      <button
+                        type="button"
+                        class="svadmin-u-52083e7da442 svadmin-u-012fbd121f37 svadmin-u-bfa603190748"
+                        aria-label={`${i18n.t(view.default ? 'common.unsetDefaultView' : 'common.setDefaultView')} ${view.name}`}
+                        aria-pressed={view.default === true}
+                        title={i18n.t(view.default ? 'common.unsetDefaultView' : 'common.setDefaultView')}
+                        disabled={view.readOnly === true || !view.version || savedViewMutationPending || savedViewMutationError === 'conflict'}
+                        onclick={() => setRemoteDefault(view)}
+                      >
+                        <Star class={view.default ? "svadmin-u-e83a7042bc91" : ""} fill={view.default ? "currentColor" : "none"} />
+                      </button>
+                    {/if}
+                    {#if (view.source === 'team' || view.source === 'system') && savedViewProvider?.updateAccess}
+                      {@const draft = accessDrafts.get(view.id)}
+                      {@const accessMode = draft?.mode ?? view.access?.mode ?? ''}
+                      <Select.Root
+                        aria-label={`${i18n.t('common.viewAccess')} ${view.name}`}
+                        value={accessMode}
+                        disabled={view.readOnly !== false || !view.version || savedViewMutationPending || savedViewMutationError === 'conflict'}
+                        onchange={(event: Event) => {
+                          if (!(event.currentTarget instanceof HTMLSelectElement)) return;
+                          const mode = event.currentTarget.value;
+                          if (mode === 'team' || mode === 'organization' || mode === 'restricted') {
+                            accessDrafts.set(view.id, {
+                              mode,
+                              subjectIds: draft?.subjectIds ?? view.access?.subjectIds ?? [],
+                            });
+                            if (mode === 'restricted') loadAccessSubjects(view);
+                          }
+                        }}
+                      >
+                        <option value="" disabled>{i18n.t('common.selectOption')}</option>
+                        <option value="team">{i18n.t('common.teamView')}</option>
+                        <option value="organization">{i18n.t('common.accessOrganization')}</option>
+                        <option value="restricted">{i18n.t('common.accessRestricted')}</option>
+                      </Select.Root>
+                      {#if accessMode === 'restricted'}
+                        {#if savedViewProvider.listAccessSubjects}
+                          {@const selected = draft?.subjectIds ?? view.access?.subjectIds ?? []}
+                          <div>
+                            <Input
+                              aria-label={`${i18n.t('common.search')} ${view.name}`}
+                              value={accessSubjectQueries.get(view.id) ?? ''}
+                              disabled={view.readOnly !== false || savedViewMutationPending}
+                              oninput={(event: Event) => {
+                                if (!(event.currentTarget instanceof HTMLInputElement)) return;
+                                accessSubjectQueries.set(view.id, event.currentTarget.value);
+                                loadAccessSubjects(view, event.currentTarget.value);
+                              }}
+                            />
+                            <Button type="button" size="sm" variant="outline"
+                              aria-label={`${i18n.t('common.refresh')} ${view.name}`}
+                              disabled={view.readOnly !== false || savedViewMutationPending}
+                              onclick={() => loadAccessSubjects(view, accessSubjectQueries.get(view.id) ?? '')}>
+                              <RefreshCw />
+                            </Button>
+                            {#if accessSubjectsLoading.get(view.id)}
+                              <span role="status">{i18n.t('common.loading')}</span>
+                            {:else if accessSubjectsFailed.get(view.id)}
+                              <span role="alert">{i18n.t('common.operationFailed')}</span>
+                            {:else if accessSubjects.has(view.id) && !accessSubjects.get(view.id)?.length}
+                              <span role="status">{i18n.t('common.noData')}</span>
+                            {/if}
+                            {#each selected as id (id)}
+                              <label>
+                                <input type="checkbox" checked
+                                  disabled={view.readOnly !== false || savedViewMutationPending || savedViewMutationError === 'conflict'}
+                                  onchange={() => accessDrafts.set(view.id, {
+                                    mode: 'restricted', subjectIds: selected.filter(candidate => candidate !== id),
+                                  })} />
+                                {accessSubjects.get(view.id)?.find(subject => subject.id === id)?.label ?? id}
+                              </label>
+                            {/each}
+                            {#each (accessSubjects.get(view.id) ?? []).filter(subject => !selected.includes(subject.id)) as subject (subject.id)}
+                              <label>
+                                <input type="checkbox"
+                                  disabled={view.readOnly !== false || savedViewMutationPending || savedViewMutationError === 'conflict' || selected.length >= 200}
+                                  onchange={() => accessDrafts.set(view.id, {
+                                    mode: 'restricted', subjectIds: [...selected, subject.id],
+                                  })} />
+                                {subject.label}
+                              </label>
+                            {/each}
+                          </div>
+                        {:else}
+                        <Input
+                          aria-label={`${i18n.t('common.accessSubjects')} ${view.name}`}
+                          value={(draft?.subjectIds ?? view.access?.subjectIds ?? []).join(', ')}
+                          disabled={view.readOnly !== false || !view.version || savedViewMutationPending || savedViewMutationError === 'conflict'}
+                          oninput={(event: Event) => {
+                            if (event.currentTarget instanceof HTMLInputElement) {
+                              accessDrafts.set(view.id, { mode: 'restricted', subjectIds: event.currentTarget.value.split(',').map(id => id.trim()) });
+                            }
+                          }}
+                        />
+                        {/if}
+                      {/if}
+                      <Button type="button" size="sm"
+                        aria-label={`${i18n.t('common.saveAccess')} ${view.name}`}
+                        disabled={!draft || view.readOnly !== false || !view.version
+                          || savedViewMutationPending || savedViewMutationError === 'conflict'
+                          || (draft.mode === 'restricted' && !decodeSavedListViewAccess(draft))}
+                        onclick={() => saveRemoteAccess(view)}>
+                        {i18n.t('common.saveAccess')}
+                      </Button>
+                    {/if}
                     <button
                       type="button"
                       class="svadmin-u-52083e7da442 svadmin-u-cc46d0fa277d svadmin-u-012fbd121f37 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-421ac2be5045 svadmin-u-bfa603190748 svadmin-u-8e551981c8d7 svadmin-u-ea7b2e9e070e svadmin-u-f10f771f87e9 svadmin-u-793c80e97ffb svadmin-u-9c1295a6914a"
                       aria-label="{i18n.t("common.delete")} {view.name}"
                       title="{i18n.t("common.delete")} {view.name}"
+                      disabled={view.readOnly === true || savedViewMutationPending || savedViewMutationError === 'conflict'
+                        || (!!view.source && !savedViewProvider?.remove)}
                       onclick={() => deleteSavedView(view.id)}
                     >
                       <Trash2 class="svadmin-u-783b0d9d1e2c" />
@@ -1850,14 +2409,14 @@
                     {#if header.id === '_select'}
                       {#if batchActions}
                         <Checkbox
-                          aria-label={i18n.t('common.selectAll')}
-                          checked={table_getIsAllRowsSelected(tbl)}
+                          aria-label={i18n.t(allMatchingSelected ? 'common.clearSelection' : 'common.selectAllOnPage')}
+                          checked={allMatchingSelected || table_getIsAllRowsSelected(tbl)}
                           onCheckedChange={toggleAllRowsSelection}
                         />
                       {:else if !acEnabled || deleteResourcePermission.isLoading || deleteResourcePermission.allowed}
                           <Checkbox
-                            aria-label={i18n.t('common.selectAll')}
-                            checked={table_getIsAllRowsSelected(tbl)}
+                            aria-label={i18n.t(allMatchingSelected ? 'common.clearSelection' : 'common.selectAllOnPage')}
+                            checked={allMatchingSelected || table_getIsAllRowsSelected(tbl)}
                             onCheckedChange={toggleAllRowsSelection}
                           />
                       {/if}
@@ -1904,6 +2463,7 @@
                               <Checkbox
                                 aria-label={i18n.t('common.selectRow', { id })}
                                 checked={rowIsSelected(row.id)}
+                                disabled={confirmPending}
                                 onCheckedChange={() => toggleRowSelection(row)}
                               />
                             {:else}
@@ -1911,6 +2471,7 @@
                                 <Checkbox
                                   aria-label={i18n.t('common.selectRow', { id })}
                                   checked={rowIsSelected(row.id)}
+                                  disabled={confirmPending}
                                   onCheckedChange={() => toggleRowSelection(row)}
                                 />
                               </CanAccess>
@@ -2032,6 +2593,7 @@
                       <Checkbox
                         aria-label={i18n.t('common.selectRow', { id })}
                         checked={rowIsSelected(row.id)}
+                        disabled={confirmPending}
                         onCheckedChange={() => toggleRowSelection(row)}
                       />
                     {:else}
@@ -2039,6 +2601,7 @@
                         <Checkbox
                           aria-label={i18n.t('common.selectRow', { id })}
                           checked={rowIsSelected(row.id)}
+                          disabled={confirmPending}
                           onCheckedChange={() => toggleRowSelection(row)}
                         />
                       </CanAccess>

@@ -1,4 +1,4 @@
-# svadmin Stripe-first · Reference Kit v0.1
+# svadmin Admin UI · Reference Kit v0.1
 
 这是**设计参考资产入口**，不是新的组件库、运行时 Surface Catalog 或 DTCG token 包。
 本批只补齐参考来源、三类页面的状态契约、现有组件/主题映射及机械校验；不修改生产组件、尺寸、颜色、依赖、权限或发布行为。
@@ -7,7 +7,7 @@
 
 | 产物 | 状态与用途 |
 | --- | --- |
-| `manifest.json` | Stripe Connect Toolkit、Park UI Foundations 的来源及待审许可状态 |
+| `manifest.json` | Park UI Foundations 的来源及待审许可状态 |
 | `contract.json` | 3 类页面、18 个状态、8 个内容组件、15 项现有 token 映射 |
 | `validate.py` / `test_validate.py` | 无第三方依赖的元数据、源码映射及负例回归 |
 | `render_preview.py` | 从已校验元数据确定性生成离线 `preview.html`，不执行组件代码 |
@@ -29,21 +29,31 @@
 
 ## 来源与素材许可
 
-只采用两套主要参考：
+活动清单只保留以下参考：
 
-- [Stripe 官方 Appearance 文档](https://docs.stripe.com/connect/embedded-appearance-options)链接的 [Connect Toolkit](https://www.figma.com/community/file/1438614134095442934)：研究层级、状态和组合。它不是整个 Stripe Dashboard 内部设计系统；文档的 Example Value 不是应复制的默认 token。
 - [Park UI Figma 文档](https://park-ui.com/docs/figma)中的 [Foundations](https://www.figma.com/community/file/1268615283036362769)：研究基础组件、变量和明暗模式的组织。
 
-两份外部文件的内部图层均未完成检查，文件级许可均待审，`redistributionApproved` 均为 `false`。
+该外部文件的内部图层未完成检查，文件级许可待审，`redistributionApproved` 为 `false`。
+已移除来源、旧命名和历史用户原文请查 Git 历史；当前中性命名不是历史用户引文，
+也不代表存在同名官方工具包。不会为新名称编造官方 URL。
 本目录没有复制、改造或再分发第三方图层、字体、图片或组件素材。代码许可证不自动覆盖 Figma 文件。
 “参考入口核验”不等于许可批准；v0.1 校验器不接受直接将审批状态改为通过。未来需同时补充真实证据与相应校验规则。
 
 ## 保留现有实现，不暗改视觉
 
 初始源码基线：`c91936335e1a431f2ac37dec31da138afbbbc21f`。
-映射入口：`packages/ui/design/tokens.ts` 和 `packages/ui/src/components/content/index.ts`。
+Tailwind 迁移后的映射基线：`d5196a87e3f81a27bff421f86738fe91fb58e182`。
+当前映射入口：
 
-代码基础间距仍为 `0.25rem / 0.75rem / 1rem / 1.25rem`；根字号为 16px 时是 4 / 12 / 16 / 20px。
+- `packages/ui/src/app.css`：公开语义别名、明暗变量、实际控件尺度。
+- `packages/ui/styles/tailwind.css`：Tailwind 语义颜色及圆角绑定。
+- `packages/ui/src/recipes.ts`：实际 recipe 的表面、状态色和密度声明。
+- `packages/ui/src/components/content/index.ts`：8个内容组件的真实导出。
+
+参考尺度仍为 `0.25rem / 0.75rem / 1rem / 1.25rem`；根字号为 16px 时是 4 / 12 / 16 / 20px。
+迁移后不再声称它们是全局命名 spacing token：xs/md 分别核对 badge/card 的实际 gap，
+sm/lg 核对 surface metric 的 compact/comfortable 密度 padding；
+compact/body 字号核对 badge/card 的 font-size。语义颜色同时核对 CSS、Tailwind 别名和状态 recipe。
 `DESIGN.md` 的 `sm=8px`、`lg=24px` 与代码不同，差异在契约内保留，不通过修改现有数值消除。
 
 浏览器主题仍使用原公开 CSS 自定义属性。审阅页的少量明暗配色来自该基线
@@ -53,7 +63,7 @@
 
 ## 检查与生成
 
-在完整仓库根目录，使用 Python 3.10 或更高版本；不需要安装 npm、Panda 或 Python 依赖：
+在完整仓库根目录，使用 Python 3.10 或更高版本；不需要安装 npm 或 Python 依赖：
 
 ```sh
 python3 design/reference-kit/validate.py
@@ -69,19 +79,61 @@ python3 design/reference-kit/validate.py --metadata-only
 ```
 
 映射校验也支持 `--source-root /path/to/source`。回归测试的真实源码组可通过
-`SVADMIN_REFERENCE_SOURCE_ROOT=/path/to/source` 指向两份完整源码文件的快照；不得用残缺片段替代。
+`SVADMIN_REFERENCE_SOURCE_ROOT=/path/to/source` 指向上述四份完整源码文件的快照；不得用残缺片段替代。
 
 校验器拒绝重复 JSON 键、未知字段/组件/状态、缺失状态、错误反馈区域、无权限数据暴露要求、
 持久成功通知、未授权资产分发、虚假的 Figma 完成标记及非法路径/CSS 值。
-源码校验解析两个指定 `export const` 声明对象及内容组件默认导出，检查映射与字面量值。
-注释不能冒充声明；表达式、展开、转义字符串等未支持语法失败退出，需要显式扩展解析器。
+源码校验解析明确作用域内的 CSS 字面量规则、指定的 `const ... = tv({...})` recipe 对象及内容组件默认导出。
+源码缺失、重复声明、映射漂移均失败；注释、字符串、模板文本不能冒充声明，条件作用域中的规则不能冒充根级绑定。
+recipe 表达式、展开、转义字符串等未支持语法失败退出，需要显式扩展解析器；不执行TypeScript。
 这不是完整 TypeScript AST、包公开 API 验证、组件行为测试或服务端授权检查。
+
+### 2026-09-21 迁移残留修复证据
+
+在 `d5196a87` 工作树上移除对已删除 Panda token 文件的读取依赖，保留真实源码验证；
+未修改生产 token/recipe、其他设计目录或 workflow，也未提交或推送。
+
+| 定向命令 | 结果 |
+| --- | --- |
+| `python3 design/reference-kit/validate.py` | `sourceChecked: true`，8组件、3模式、18状态、15映射 |
+| `python3 -m unittest discover -s design/reference-kit -p test_validate.py` | 67/67通过 |
+| `python3 design/reference-kit/render_preview.py` | 离线预览生成成功 |
+| `python3 design/reference-kit/render_preview.py --check` | 确定性检查通过 |
+| `git diff --check -- design/reference-kit` | 通过 |
+
+新增负例覆盖 CSS/Tailwind 颜色漂移、圆角、实际间距/字号、状态 recipe、
+缺失 recipe 文件、注释/字符串/模板伪声明、重复 CSS 声明及错误条件作用域。
+预览 SHA-256：`2824ccdcab14c7a6f5e275e80e63a8032ea6c0ec1be884594a60b9532a167ae6`。
+仅完成本目录本地验证；集成提交、推送及远端 CI 由主任务负责，不提前标记通过。
 
 预览是无脚本、无表单、无外部资源请求的原生 HTML/CSS，所有文案经过 HTML 转义。
 它覆盖三类模式的 18 个状态说明，跟随系统明暗主题；可以直接打开生成文件审阅。
 `--check` 在文件缺失或过期时退出非零，不自动重写产物掩盖差异。
 
 ## 尚未完成与接续条件
+
+### 2026-09-21 中性命名清理验收
+
+当前契约 ID 为 `svadmin-admin-ui-reference-kit`，预览标题为 `svadmin · Admin UI 参考契约`。
+活动 manifest 精确保留一个 Park 来源，官方文档 URL、社区文件 ID/URL、
+未检查状态、待审许可和禁止再分发仍逐项严格校验。
+新增缺失/额外来源、未知来源替换、虚假许可批准和社区 URL 漂移负例；
+历史原文与旧来源留在 Git 历史，不伪造用户引文或官方来源。
+
+| 定向命令 | 结果 |
+| --- | --- |
+| `python3 -m unittest discover -s design/reference-kit -p test_validate.py` | 72/72通过 |
+| `python3 design/reference-kit/validate.py` | `sourceChecked: true`，8组件、3模式、18状态、15映射 |
+| `node --test design/figma-offline/test/offline.test.mjs` | 64/64通过 |
+| `python3 design/reference-kit/render_preview.py` | 生成成功 |
+| `python3 design/reference-kit/render_preview.py --check` | 一致性通过 |
+| `git diff --check -- design/reference-kit design/figma-offline` | 通过 |
+
+本轮预览 SHA-256：`78fc7db9331e68831c0918847996c603f52973fc4e21c8c133b75329bf1ddc03`。
+修改边界仅为本目录及 `design/figma-offline` 的说明和合成夹具注释；
+未提交、推送或修改其他 writer 的目录。当前本地验证不代表远端 CI 已通过。
+
+### 后续验收
 
 Figma 内容写入可在恢复 MCP 后继续，也可通过新增的[本地离线插件](../figma-offline/README.md)
 导出参考数据、分析并导入受限的自有蓝图。后者不消耗官方 MCP 调用，但仍需在桌面编辑器手动运行、

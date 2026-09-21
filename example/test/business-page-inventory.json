@@ -86,5 +86,13 @@
   {
     "file": "UserManagementPage.svelte",
     "mode": "query-rendering"
+  },
+  {
+    "file": "WorkspaceQueryState.svelte",
+    "mode": "workspace-helper"
+  },
+  {
+    "file": "WorkspaceRecordLinks.svelte",
+    "mode": "workspace-helper"
   }
 ]

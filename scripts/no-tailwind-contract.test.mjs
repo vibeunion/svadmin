@@ -5,20 +5,38 @@ import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { cssViolations, manifestViolations, lockViolations, moduleSpecifiers, auditNoTailwind } from './no-tailwind-contract.mjs';
 
-test('rejects compiler, styling helpers and component generator in every dependency section', () => {
-  for (const section of ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies', 'overrides', 'resolutions']) {
-    for (const pkg of ['tailwindcss', '@tailwindcss/vite', '@tailwindcss/node', 'tw-animate-css', 'tailwind-variants', 'shadcn-svelte']) assert.equal(manifestViolations({ [section]: { [pkg]: '1.0.0' } }).length, 1);
+test('rejects compiler packages outside devDependencies', () => {
+  for (const section of ['dependencies', 'peerDependencies', 'optionalDependencies', 'overrides', 'resolutions']) {
+    for (const pkg of ['tailwindcss', '@tailwindcss/vite', '@tailwindcss/node', 'tw-animate-css']) assert.equal(manifestViolations({ [section]: { [pkg]: '1.0.0' } }).length, 1);
   }
 });
 test('npm aliases cannot hide removed packages', () => {
   assert.deepEqual(manifestViolations({ dependencies: { themeEngine: 'npm:tailwindcss@4.0.0' } }), ['dependencies.themeEngine']);
   assert.deepEqual(manifestViolations({ dependencies: { merge: 'npm:tailwindcss@4.0.0' } }), ['dependencies.merge']);
 });
-test('ordinary class joining, Bits UI and Panda build tooling are allowed', () => {
-  assert.deepEqual(manifestViolations({ dependencies: { 'bits-ui': '2', clsx: '2', cn: '0.2' }, devDependencies: { '@pandacss/dev': '1' }, scripts: { check: 'node scripts/check-no-tailwind.mjs' } }), []);
+test('ordinary class joining, Bits UI and Tailwind build tooling are allowed', () => {
+  assert.deepEqual(manifestViolations({
+    dependencies: { 'bits-ui': '2', clsx: '2', cn: '0.2' },
+    devDependencies: { 'tailwindcss': '4', 'shadcn-svelte': '1' },
+    scripts: { check: 'node scripts/check-no-tailwind.mjs', styles: 'tailwindcss -i input.css' },
+  }), []);
 });
-test('rejects shadcn and Tailwind execution in npm scripts', () => {
-  for (const command of ['bunx shadcn-svelte@latest add button', 'npx tailwindcss -i app.css', 'pnpm dlx shadcn-svelte add']) assert.equal(manifestViolations({ scripts: { generate: command } }).length, 1);
+test('authoring and compiler packages are forbidden outside development tooling', () => {
+  assert.deepEqual(manifestViolations({ dependencies: { 'tailwindcss': '4' } }), ['dependencies.tailwindcss']);
+  assert.deepEqual(manifestViolations({ dependencies: { 'shadcn-svelte': '1' } }), ['dependencies.shadcn-svelte']);
+  assert.deepEqual(manifestViolations({ dependencies: { '@pandacss/dev': '1' } }), ['dependencies.@pandacss/dev']);
+});
+test('allows Tailwind execution in build scripts', () => {
+  assert.deepEqual(manifestViolations({ scripts: { generate: 'npx tailwindcss -i app.css' } }), []);
+});
+test('runtime recipes are allowed while compilers remain development-only', () => {
+  for (const section of ['dependencies', 'peerDependencies', 'optionalDependencies']) {
+    assert.deepEqual(manifestViolations({ [section]: { 'tailwind-variants': '3', recipes: 'npm:tailwind-variants@3' } }), []);
+  }
+  for (const pkg of ['tailwindcss', '@tailwindcss/vite', '@tailwindcss/node', 'tw-animate-css']) {
+    assert.deepEqual(manifestViolations({ devDependencies: { [pkg]: '4' } }), []);
+    assert.deepEqual(manifestViolations({ dependencies: { compiler: `npm:${pkg}@4` } }), ['dependencies.compiler']);
+  }
 });
 test('all compiler CSS directives are rejected, including theme-only exports', () => {
   for (const directive of ['theme', 'source', 'apply', 'utility', 'custom-variant', 'tailwind', 'reference', 'variant', 'config', 'plugin', 'screen', 'responsive', 'variants']) assert.equal(cssViolations(`@${directive} x;`).length, 1);
@@ -35,7 +53,7 @@ test('resolved transitive dependencies and alias values are checked in Bun lockf
   assert.deepEqual(lockViolations(lock), []);
 });
 test('unrelated package names and versions are not mistaken for banned packages', () => {
-  assert.deepEqual(lockViolations('{"packages":{"@pandacss/dev":["@pandacss/dev@1.12.1", "", {}],"tailwindcss-other":["tailwindcss-other@1", "", {}]}}'), []);
+  assert.deepEqual(lockViolations('{"packages":{"tailwindcss-other":["tailwindcss-other@1", "", {}]}}'), []);
 });
 
 test('runtime class merging remains allowed when supplied by a renderer dependency', () => {
@@ -43,21 +61,21 @@ test('runtime class merging remains allowed when supplied by a renderer dependen
   assert.deepEqual(lockViolations('{"packages":{"tailwind-merge":["tailwind-merge@3.6.0", "", {}]}}'), []);
 });
 
-test('repository audit catches nested theme CSS and Svelte style directives', () => {
+test('repository audit rejects CSS directives but allows generator configuration', () => {
   const root = mkdtempSync(join(tmpdir(), 'svadmin-no-tailwind-'));
   try {
     const files = {
       'package.json': '{}', 'bun.lock': '{"packages":{}}',
       'packages/ai-elements/src/ai.theme.css': '@source "./components";',
       'packages/ui/src/Foo.svelte': '<style>.x { @apply px-2; }</style>',
-      'packages/ui/components.json': '{"tailwind":{}}',
+      'packages/ui/components.json': '{"$schema":"https://shadcn-svelte.com/schema.json","tailwind":{}}',
     };
     for (const [path, text] of Object.entries(files)) { mkdirSync(dirname(join(root, path)), { recursive: true }); writeFileSync(join(root, path), text); }
     const results = auditNoTailwind(root, Object.keys(files));
-    assert.equal(results.length, 3);
+    assert.equal(results.length, 2);
     assert.ok(results.some(x => x.includes('ai.theme.css')));
     assert.ok(results.some(x => x.includes('Foo.svelte')));
-    assert.ok(results.some(x => x.includes('components.json')));
+    assert.ok(!results.some(x => x.includes('components.json')));
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 test('a missing lockfile cannot result in a clean bill of health', () => {

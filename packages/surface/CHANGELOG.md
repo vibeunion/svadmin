@@ -5,7 +5,7 @@
 
 ### 🚀 Features
 
-* **design:** integrate Stripe-first patterns and readable status badges with current main ([fa5d10f](https://github.com/vibeunion/svadmin/commit/fa5d10f57603cc5709e4f140e7a1bb9e675fed81))
+* **design:** integrate Admin UI patterns and readable status badges with current main ([fa5d10f](https://github.com/vibeunion/svadmin/commit/fa5d10f57603cc5709e4f140e7a1bb9e675fed81))
 * **surface:** add controlled OpenUI streaming and audited form actions ([baae627](https://github.com/vibeunion/svadmin/commit/baae627c35d68dc754b60237d3ab79f394914810))
 * **ui:** integrate optional SVAR resource grid and AutoTable adapter ([ee01ea0](https://github.com/vibeunion/svadmin/commit/ee01ea0b52285bd3129447cd0b2ddb0c114f45ce))
 

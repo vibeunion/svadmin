@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { ResourceRendering } from '../rendering/index.js';
-  import { useNavigation } from '@svadmin/core';
+  import { captureAdminContext, useNavigation } from '@svadmin/core';
   import { useRecordDetail } from './record-detail.svelte';
   import { useTranslation } from '@svadmin/core/i18n';
   import type { Snippet } from 'svelte';
@@ -27,6 +27,9 @@
     headerActions?: Snippet;
     children?: Snippet;
     class?: string;
+    /** 宿主明确提供来源时优先使用，拒绝外部地址。 */
+    returnTo?: string;
+    onBack?: () => void;
   }
 
   let {
@@ -40,9 +43,21 @@
     headerActions,
     children,
     class: className = '',
+    returnTo,
+    onBack,
   }: Props = $props();
 
   const navigation = useNavigation();
+  const context = captureAdminContext();
+  function goBack() {
+    if (onBack) { onBack(); return; }
+    const target = returnTo ?? context.routerProvider?.parse().params['returnTo'];
+    if (target?.startsWith('/') && !target.startsWith('//') && !/[\\\r\n]/.test(target)) {
+      navigation.push(target);
+      return;
+    }
+    navigation.list(resourceName);
+  }
   const isCompact = $derived(density === 'compact');
 
   const detail = useRecordDetail(() => ({ resourceName, id, rendering }));
@@ -65,8 +80,8 @@
   <PageHeader
     title="{resource.label} {i18n.t('common.detail')} #{id}"
     {density}
-    onBack={() => navigation.list(resourceName)}
-    backLabel={i18n.t('common.backToList')}
+    onBack={goBack}
+    backLabel={i18n.t('common.back')}
   >
     {#snippet actions()}
       {#if detail.canRead && query.isSuccess && resource.canEdit !== false}

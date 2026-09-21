@@ -7,6 +7,9 @@ export default defineConfig({
   resolve: {
     conditions: ['browser'],
   },
+  ssr: {
+    noExternal: ['@tanstack/svelte-query'],
+  },
   test: {
     environment: 'happy-dom',
     globals: true,

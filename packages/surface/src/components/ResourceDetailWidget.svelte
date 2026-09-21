@@ -7,7 +7,7 @@
   import { resourceDetailPropsSchema } from '../business-definitions.js';
   import type { SurfaceWidgetRendererProps } from '../catalog.js';
   import type { JsonObject } from '../types.js';
-  import { surfaceMetric } from '../styled-system/recipes/index.js';
+  import { surfaceMetric } from '../recipes.js';
   import { resolveSurfaceMessages } from '../localization.js';
   import { displayTableValue } from '../widget-data.js';
 

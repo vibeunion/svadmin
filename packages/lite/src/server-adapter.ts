@@ -1,4 +1,6 @@
 import { definedOptions } from '@svadmin/core/options';
+import { FILTER_COLLECTION_LIMIT, isFilterCollectionValue, isCollectionFilterOperator,
+  filterOperatorsForField } from '@svadmin/core/filter-values';
 /**
  * @svadmin/lite — Server Adapter
  *
@@ -11,7 +13,7 @@ import type {
   ResourceDefinition, FieldDefinition,
   Sort, Filter, CrudOperator,
 } from '@svadmin/core';
-import { redirect, isRedirect, type RequestEvent } from '@sveltejs/kit';
+import { error, redirect, isRedirect, type RequestEvent } from '@sveltejs/kit';
 import { resourceToTypeBoxSchema } from './schema-generator';
 import { parseExplicitBoolean } from './value-normalization';
 
@@ -106,56 +108,137 @@ function listRequestFilters(resource: ResourceDefinition, url: URL): Filter[] {
   return structured.length > 0 ? structured : filters;
 }
 
+function invalidStructuredFilters(): never {
+  throw error(400, 'Invalid structured filter query.');
+}
+
 function parseStructuredFilters(resource: ResourceDefinition, url: URL): Filter[] {
+  const structuredKeys = [...url.searchParams.keys()].filter(key => key.startsWith('filters['));
+  const entryPattern = /^filters\[([0-9]+(?:\.value\.[0-9]+)*)\]\[(field|operator|value|values\.(?:0|[1-9]\d*))\]$/;
+  if (structuredKeys.some(key => !entryPattern.test(key))) invalidStructuredFilters();
   const entries = [...url.searchParams.entries()]
     .map(([key, value]) => {
-      const match = /^filters\[([0-9]+(?:\.value\.[0-9]+)*)\]\[(field|operator|value)\]$/.exec(key);
+      const match = entryPattern.exec(key);
       return match ? { path: match[1], property: match[2], value } : undefined;
     })
-    .filter((entry): entry is { path: string; property: 'field' | 'operator' | 'value'; value: string } => entry !== undefined);
+    .filter((entry): entry is { path: string; property: string; value: string } => entry !== undefined);
   if (entries.length === 0) return [];
+  if (entries.length > 300) invalidStructuredFilters();
 
-  type Node = { field?: string; operator?: string; value?: string; children?: Node[] };
+  type Node = { field?: string; operator?: string; value?: string; values?: string[]; children?: Node[] };
   const roots: Node[] = [];
+  const seen = new Set<string>();
+  let textLength = 0;
   for (const entry of entries) {
-    const segments = [...entry.path.matchAll(/\d+/g)].map(match => Number(match[0]));
+    textLength += entry.path.length + entry.property.length + entry.value.length;
+    if (textLength > 64_000 || entry.path.length > 400) invalidStructuredFilters();
+    const entryKey = `${entry.path}:${entry.property}`;
+    if (seen.has(entryKey)) invalidStructuredFilters();
+    seen.add(entryKey);
+    const parts = entry.path.split('.value.');
+    if (parts.length > 33 || parts.some(part => !/^(0|[1-9]\d*)$/.test(part))) invalidStructuredFilters();
+    const segments = parts.map(Number);
     const rootIndex = segments.shift();
-    if (rootIndex === undefined || !Number.isSafeInteger(rootIndex) || rootIndex < 0) continue;
+    if (rootIndex === undefined || !Number.isSafeInteger(rootIndex) || rootIndex < 0 || rootIndex > 1000) invalidStructuredFilters();
     let node = roots[rootIndex];
     if (!node) {
       node = {};
       roots[rootIndex] = node;
     }
     for (const childIndex of segments) {
-      if (!Number.isSafeInteger(childIndex) || childIndex < 0) break;
+      if (!Number.isSafeInteger(childIndex) || childIndex < 0 || childIndex > 1000) invalidStructuredFilters();
       node.children ??= [];
       node = node.children[childIndex] ??= {};
     }
-    node[entry.property] = entry.value;
+    if (entry.property.startsWith('values.')) {
+      const index = Number(entry.property.slice('values.'.length));
+      if (!Number.isSafeInteger(index) || index >= FILTER_COLLECTION_LIMIT) invalidStructuredFilters();
+      (node.values ??= [])[index] = entry.value;
+    } else if (entry.property === 'field' || entry.property === 'operator' || entry.property === 'value') {
+      node[entry.property] = entry.value;
+    } else invalidStructuredFilters();
   }
 
-  function compile(node: Node): Filter | undefined {
+  const validOperators = new Set<CrudOperator>([
+    'eq', 'ne', 'lt', 'gt', 'lte', 'gte', 'contains', 'ncontains',
+    'startswith', 'endswith', 'in', 'nin', 'null', 'nnull', 'between', 'nbetween',
+  ]);
+  let visited = 0;
+  function compileList(nodes: Node[], depth: number): Filter[] {
+    // 数组迭代方法会跳过空洞，显式逐索引拒绝稀疏路径。
+    const filters: Filter[] = [];
+    for (let index = 0; index < nodes.length; index++) {
+      const node = nodes[index];
+      if (!node) invalidStructuredFilters();
+      filters.push(compile(node, depth));
+    }
+    return filters;
+  }
+  function compile(node: Node, depth: number): Filter {
+    if (++visited > 1000 || depth > 32) invalidStructuredFilters();
     const operator = node.operator;
-    if (node.field && operator && operator !== 'and' && operator !== 'or') {
-      const field = resource.fields.find(candidate => candidate.key === node.field);
-      if (!field) return undefined;
-      if (operator === 'null' || operator === 'nnull') {
-        return { field: node.field, operator: operator as 'null' | 'nnull', value: null };
+    if (operator === 'and' || operator === 'or') {
+      if (node.field !== undefined || node.value !== undefined || node.values !== undefined) invalidStructuredFilters();
+      const children = node.children ?? [];
+      return { operator, value: compileList(children, depth + 1) };
+    }
+    if (node.children !== undefined || !node.field || !operator || !validOperators.has(operator as CrudOperator)) {
+      invalidStructuredFilters();
+    }
+    const field = resource.fields.find(candidate => candidate.key === node.field);
+    if (!field || field.filterable === false) invalidStructuredFilters();
+    if (isCollectionFilterOperator(operator)) {
+      if (node.value !== undefined || !node.values) invalidStructuredFilters();
+      const values: unknown[] = [];
+      for (let index = 0; index < node.values.length; index++) {
+        const raw = node.values[index];
+        if (raw === undefined) invalidStructuredFilters();
+        if (['number', 'currency', 'percent', 'rating', 'rate'].includes(field.type)) {
+          if (!/^-?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(raw)) invalidStructuredFilters();
+          values.push(Number(raw));
+        } else if (field.type === 'boolean') {
+          if (raw !== 'true' && raw !== 'false') invalidStructuredFilters();
+          values.push(raw === 'true');
+        } else if (field.type === 'select') {
+          // 集合枚举使用 JSON 标量令牌，数值 2 与字符串 "2" 不再碰撞。
+          try { values.push(JSON.parse(raw)); } catch { invalidStructuredFilters(); }
+        } else values.push(raw);
       }
-      if (node.value === undefined || node.value === '') return undefined;
-      const value = field.type === 'number' || field.type === 'currency' || field.type === 'percent'
-        ? Number(node.value)
-        : field.type === 'boolean' ? node.value === 'true' : node.value;
-      return { field: node.field, operator: operator as CrudOperator, value };
+      if (!isFilterCollectionValue(field, operator, values)) invalidStructuredFilters();
+      return { field: node.field, operator: operator as CrudOperator, value: values };
     }
-    if ((operator === 'and' || operator === 'or') && node.children) {
-      const children = node.children.map(compile).filter((child): child is Filter => child !== undefined);
-      return children.length > 0 ? { operator, value: children } : undefined;
+    if (node.values !== undefined || !filterOperatorsForField(field).includes(operator as CrudOperator)) invalidStructuredFilters();
+    if (operator === 'null' || operator === 'nnull') {
+      if (node.value !== undefined) invalidStructuredFilters();
+      return { field: node.field, operator, value: null };
     }
-    return undefined;
+    if (node.value === undefined) invalidStructuredFilters();
+    {
+      if ((field.type === 'boolean' && !['eq', 'ne'].includes(operator))
+        || (['in', 'nin', 'between', 'nbetween'].includes(operator))) invalidStructuredFilters();
+      const raw = node.value;
+      if (['number', 'currency', 'percent', 'rating', 'rate'].includes(field.type)) {
+        if (!['eq', 'ne', 'lt', 'gt', 'lte', 'gte'].includes(operator)) invalidStructuredFilters();
+        if (!/^-?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(raw)) invalidStructuredFilters();
+        const value = Number(raw);
+        if (!Number.isFinite(value)) invalidStructuredFilters();
+        return { field: node.field, operator: operator as CrudOperator, value };
+      }
+      if (field.type === 'boolean') {
+        if (raw !== 'true' && raw !== 'false') invalidStructuredFilters();
+        return { field: node.field, operator: operator as CrudOperator, value: raw === 'true' };
+      }
+      if (field.type === 'select') {
+        const matches = field.options?.filter(option => String(option.value) === raw && !option.disabled) ?? [];
+        const match = matches[0];
+        if (!['eq', 'ne'].includes(operator) || matches.length !== 1 || !match) return invalidStructuredFilters();
+        return { field: node.field, operator: operator as CrudOperator, value: match.value };
+      }
+      return { field: node.field, operator: operator as CrudOperator, value: raw };
+    }
   }
 
-  return roots.map(compile).filter((filter): filter is Filter => filter !== undefined);
+  return compileList(roots, 0);
 }
 
 /**

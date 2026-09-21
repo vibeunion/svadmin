@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { surfaceDesignContract } from "./design-contract.js";
 import { metricSurfaceClasses, tableSurfaceClasses } from "./design-system.js";
 
-describe("Panda design contract", () => {
+describe("Semantic design contract", () => {
 	it("publishes the constrained semantic surface contract", () => {
 		expect(surfaceDesignContract.version).toBe("svadmin/design-v1");
 		expect(surfaceDesignContract.metric.tone).toEqual(["neutral", "success", "warning", "danger", "info"]);

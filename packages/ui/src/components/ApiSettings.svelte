@@ -1,4 +1,5 @@
 <script lang="ts">
+  import ConfirmDialog from './ConfirmDialog.svelte';
   import { definedOptions } from '@svadmin/core/options';
   import { captureAdminContext, notifyWithProvider, type ApiCredentialSummary, type WebhookSummary } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
@@ -25,6 +26,7 @@
   let newKeyPermissions = $state({ Read: true, Write: false, Delete: false, Admin: false });
   let generatedSecret = $state('');
   let copied = $state(false);
+  let copyError = $state('');
   let newWebhookName = $state('');
   let newWebhookUrl = $state('');
   let newWebhookEvent = $state('resource.created');
@@ -32,6 +34,16 @@
   let error = $state<string | null>(null);
   let submitting = $state(false);
   let requestId = 0;
+  let pendingDanger = $state<{ label: string; run: () => Promise<void> } | null>(null);
+  let deleting = $state(false);
+  function requestDanger(label: string, run: () => Promise<void>) {
+    const epoch = requestId;
+    pendingDanger = { label, run: async () => {
+      if (epoch !== requestId || deleting) return;
+      deleting = true;
+      try { await run(); } finally { if (epoch === requestId) deleting = false; }
+    } };
+  }
 
   function message(error: unknown): string {
     return error instanceof Error ? error.message : String(error);
@@ -45,7 +57,10 @@
     webhooks = [];
     generatedSecret = '';
     copied = false;
+    copyError = '';
     error = null;
+    pendingDanger = null;
+    deleting = false;
     loading = false;
     submitting = false;
     if (!provider) return;
@@ -104,6 +119,7 @@
       keys = [...keys, created.credential];
       generatedSecret = created.secret;
       copied = false;
+      copyError = '';
       newKeyName = '';
       newKeyPermissions = { Read: true, Write: false, Delete: false, Admin: false };
     } catch (caught) {
@@ -114,7 +130,11 @@
     }
   }
 
-  async function revokeKey(id: string): Promise<void> {
+  async function revokeKey(id: string, confirmed = false): Promise<void> {
+    if (!confirmed) {
+      requestDanger(`${i18n.t('common.delete')}: ${keys.find(key => key.id === id)?.name ?? id}`, () => revokeKey(id, true));
+      return;
+    }
     const provider = credentialProvider;
     const currentRequest = requestId;
     const context = adminContext.enterpriseRequestContext;
@@ -130,7 +150,11 @@
     }
   }
 
-  async function deleteWebhook(id: string): Promise<void> {
+  async function deleteWebhook(id: string, confirmed = false): Promise<void> {
+    if (!confirmed) {
+      requestDanger(`${i18n.t('common.delete')}: ${webhooks.find(hook => hook.id === id)?.name ?? id}`, () => deleteWebhook(id, true));
+      return;
+    }
     const provider = credentialProvider;
     const currentRequest = requestId;
     const context = adminContext.enterpriseRequestContext;
@@ -147,11 +171,17 @@
   }
 
   async function copySecret(): Promise<void> {
+    const currentRequest = requestId;
+    const secret = generatedSecret;
+    copyError = '';
+    copied = false;
     try {
-      await navigator.clipboard.writeText(generatedSecret);
-      copied = true;
+      await navigator.clipboard.writeText(secret);
+      if (currentRequest === requestId && generatedSecret === secret) copied = true;
     } catch {
-      copied = false;
+      if (currentRequest === requestId && generatedSecret === secret) {
+        copyError = isZh ? '复制失败，请手动保存密钥。' : 'Copy failed. Save the secret manually.';
+      }
     }
   }
 </script>
@@ -161,6 +191,7 @@
   <WorkspaceLayout secondaryWidth="21rem">
     {#snippet summary()}
       {#if generatedSecret}
+        {#if copyError}<p role="alert">{copyError}</p>{/if}
         <section class="svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-a6afccfc915b svadmin-u-989c466fdbe7 svadmin-u-8e63407b5ceb" role="status" aria-live="polite">
           <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-0c3bc98565dd svadmin-u-020ba687fa12 svadmin-u-9f76a62f4f44 svadmin-u-3b9871a0bf93"><div class="svadmin-u-60fbb7713999 svadmin-u-7e0b7cdf1a94 svadmin-u-60541e1e26f8 svadmin-u-1004c0c3954c"><ShieldCheck class="svadmin-u-15e1b1f444fe svadmin-u-add63bc6753d svadmin-u-012fbd121f37 svadmin-u-20aaf08a7ed1" /><div class="svadmin-u-7e0b7cdf1a94"><h2 class="svadmin-u-fc7473ca09eb svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{i18n.t('api.successTitle')}</h2><p class="svadmin-u-b6b02c0ebef6 svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">{i18n.t('api.successHint')}</p></div></div><Button variant="ghost" size="sm" onclick={() => { generatedSecret = ''; copied = false; }}>{i18n.t('common.close')}</Button></div>
           <div class="svadmin-u-0ab8667228fd svadmin-u-60fbb7713999 svadmin-u-7e0b7cdf1a94 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4"><Input readonly value={generatedSecret} class="svadmin-u-7e0b7cdf1a94 svadmin-u-0e65706bcccd svadmin-u-359090c2d529" aria-label={i18n.t('api.successTitle')} /><Button size="icon" onclick={copySecret} aria-label={i18n.t('common.copy')}>{#if copied}<Check class="svadmin-u-f7b5fa971871" />{:else}<Copy class="svadmin-u-f7b5fa971871" />{/if}</Button></div>
@@ -202,3 +233,8 @@
     {/snippet}
   </WorkspaceLayout>
 </ContentPageShell>
+<ConfirmDialog open={pendingDanger !== null}
+  title={pendingDanger?.label ?? ''}
+  message={isZh ? '撤销或删除后，使用此凭据或 Webhook 的服务将受影响。确认继续？' : 'Services using this credential or webhook will be affected. Continue?'}
+  oncancel={() => pendingDanger = null}
+  onconfirm={() => { const action = pendingDanger; pendingDanger = null; void action?.run(); }} />

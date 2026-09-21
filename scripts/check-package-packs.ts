@@ -27,12 +27,14 @@ interface PackageExpectation {
 
 interface PackageManifest {
   name: string;
+  version?: string;
   main?: string;
   types?: string;
   svelte?: string;
   bin?: string | Record<string, string>;
   exports?: unknown;
   dependencies?: Record<string, string>;
+  optionalDependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   peerDependencies?: Record<string, string>;
   peerDependenciesMeta?: Record<string, { optional?: boolean }>;
@@ -239,6 +241,15 @@ const expectations: PackageExpectation[] = [
       'guidance/DESIGN.md',
       'template/src/App.svelte',
       'template/vite.config.ts',
+    ],
+  },
+  {
+    directory: 'packages/devtools-contract',
+    name: '@svadmin/devtools-contract',
+    requiredFiles: [
+      'dist/index.js',
+      'dist/index.d.ts',
+      'README.md',
     ],
   },
   {
@@ -750,8 +761,118 @@ export async function verifyCreateSvadminPackedCli(tarballPath: string): Promise
   }
 }
 
+export function packedConsumerDependencies(
+  packDirectory: string,
+  results: ReadonlyMap<string, PackResult>,
+  manifests: ReadonlyMap<string, PackageManifest>,
+  roots: readonly string[],
+  selected: Readonly<Record<string, string>> = {},
+): Record<string, string> {
+  const dependencies: Record<string, string> = { ...selected };
+  const visited = new Set<string>();
+
+  function visit(name: string): void {
+    if (visited.has(name)) return;
+    const pack = results.get(name);
+    const manifest = manifests.get(name);
+    assert(pack, `${name}: missing tarball for packed consumer`);
+    assert(manifest, `${name}: missing manifest for packed consumer`);
+    visited.add(name);
+    dependencies[name] = `file:${resolve(packDirectory, pack.filename)}`;
+
+    // 只展开本地运行时依赖；显式选择的最低兼容版本和外部 peer 约束保持原样。
+    const runtimeDependencies = {
+      ...manifest.dependencies,
+      ...manifest.optionalDependencies,
+    };
+    const requiredPeers = Object.fromEntries(
+      Object.entries(manifest.peerDependencies ?? {}).filter(
+        ([peer]) => manifest.peerDependenciesMeta?.[peer]?.optional !== true,
+      ),
+    );
+    for (const [dependency, version] of Object.entries({
+      ...requiredPeers,
+      ...runtimeDependencies,
+    })) {
+      if (selected[dependency] !== undefined) {
+        assert(
+          !selected[dependency]?.startsWith('workspace:'),
+          `${dependency}: packed consumer cannot use workspace protocol`,
+        );
+        continue;
+      }
+      if (manifests.has(dependency) || version.startsWith('workspace:')) visit(dependency);
+    }
+  }
+
+  for (const root of roots) visit(root);
+  for (const [name, version] of Object.entries(dependencies)) {
+    assert(!version.startsWith('workspace:'), `${name}: packed consumer cannot use workspace protocol`);
+  }
+  return dependencies;
+}
+
+export function publishedWorkspaceManifest(
+  manifest: PackageManifest,
+  versions: ReadonlyMap<string, string>,
+): PackageManifest {
+  const published = structuredClone(manifest);
+  for (const section of [
+    'dependencies', 'optionalDependencies', 'peerDependencies', 'devDependencies',
+  ] as const) {
+    for (const [name, specifier] of Object.entries(published[section] ?? {})) {
+      if (!specifier.startsWith('workspace:')) continue;
+      const version = versions.get(name);
+      assert(version, `${manifest.name}: unknown workspace dependency ${name}`);
+      const range = specifier.slice('workspace:'.length);
+      assert(
+        range === '*' || range === '^' || range === '~' || /^[~^<>=\d]/.test(range),
+        `${manifest.name}: unsupported workspace specifier ${name}@${specifier}`,
+      );
+      const dependencies = published[section];
+      assert(dependencies, `${manifest.name}: missing ${section}`);
+      dependencies[name] = range === '*' ? version
+        : range === '^' || range === '~' ? `${range}${version}` : range;
+    }
+  }
+  return published;
+}
+
+export async function stagePublishedPack(
+  packDirectory: string,
+  result: PackResult,
+  versions: ReadonlyMap<string, string>,
+): Promise<PackResult> {
+  const staging = await mkdtemp(join(packDirectory, 'publish-stage-'));
+  try {
+    run('tar', ['-xzf', join(packDirectory, result.filename), '-C', staging], repositoryRoot);
+    const packageDirectory = join(staging, 'package');
+    const manifestPath = join(packageDirectory, 'package.json');
+    const original = JSON.parse(await readFile(manifestPath, 'utf8')) as PackageManifest;
+    const published = publishedWorkspaceManifest(original, versions);
+    // 仅改解包后的临时清单；源目录和实际发布版本不变，禁止再次执行生命周期脚本。
+    await writeFile(manifestPath, `${JSON.stringify(published, null, 2)}\n`);
+    const packed = parsePackResult(run('npm', [
+      'pack', '--ignore-scripts', '--json', '--pack-destination', packDirectory,
+    ], packageDirectory), original.name);
+    assert(
+      JSON.stringify(packed.files.map(({ path }) => path).sort()) ===
+        JSON.stringify(result.files.map(({ path }) => path).sort()),
+      `${original.name}: staging changed tarball file inventory`,
+    );
+    const verified = JSON.parse(run('tar', [
+      '-xOf', join(packDirectory, packed.filename), 'package/package.json',
+    ], repositoryRoot)) as PackageManifest;
+    assert(JSON.stringify(verified) === JSON.stringify(published), `${original.name}: staged manifest mismatch`);
+    return packed;
+  } finally {
+    await rm(staging, { recursive: true, force: true });
+  }
+}
+
 async function verifyUiPeerTree(
   packDirectory: string,
+  results: Map<string, PackResult>,
   manifests: Map<string, PackageManifest>,
 ): Promise<string> {
   const uiManifest = manifests.get('@svadmin/ui');
@@ -772,7 +893,7 @@ async function verifyUiPeerTree(
     `${JSON.stringify({
       private: true,
       dependencies: {
-        ...uiManifest.dependencies,
+        ...packedConsumerDependencies(packDirectory, results, manifests, ['@svadmin/ui', '@svadmin/core']),
         '@tanstack/svelte-query': queryVersion,
         svelte: svelteVersion,
       },
@@ -833,8 +954,7 @@ async function verifyUiPnpmPeerTree(
       private: true,
       packageManager: `pnpm@${pnpmVersion}`,
       dependencies: {
-        '@svadmin/core': `file:${join(packDirectory, corePack.filename)}`,
-        '@svadmin/ui': `file:${join(packDirectory, uiPack.filename)}`,
+        ...packedConsumerDependencies(packDirectory, results, manifests, ['@svadmin/ui', '@svadmin/core']),
         '@tanstack/svelte-query': queryVersion,
         svelte: svelteVersion,
       },
@@ -977,8 +1097,7 @@ async function verifyAiElementsPnpmConsumer(
       private: true,
       packageManager: `pnpm@${pnpmVersion}`,
       dependencies: {
-        '@svadmin/core': `file:${join(packDirectory, corePack.filename)}`,
-        '@svadmin/ai-elements': `file:${join(packDirectory, aiElementsPack.filename)}`,
+        ...packedConsumerDependencies(packDirectory, results, manifests, ['@svadmin/ai-elements', '@svadmin/core']),
         '@tanstack/svelte-query': queryVersion,
         svelte: svelteVersion,
       },
@@ -1317,9 +1436,17 @@ async function verifySurfaceCompatibility(
       type: 'module',
       packageManager: `pnpm@${pnpmVersion}`,
       dependencies: {
-        '@svadmin/core': combination.core,
-        '@svadmin/surface': `file:${join(packDirectory, surfacePack.filename)}`,
-        '@svadmin/ui': combination.ui,
+        ...packedConsumerDependencies(
+          packDirectory,
+          results,
+          manifests,
+          combination.name === 'workspace-packed'
+            ? ['@svadmin/surface', '@svadmin/core', '@svadmin/ui']
+            : ['@svadmin/surface'],
+          combination.name === 'minimum-supported'
+            ? { '@svadmin/core': combination.core, '@svadmin/ui': combination.ui }
+            : {},
+        ),
         '@tanstack/svelte-query': queryVersion,
         svelte: combination.svelte,
       },
@@ -1374,6 +1501,10 @@ async function main(): Promise<void> {
       expectations.map((expectation) => [join(repositoryRoot, expectation.directory), expectation]),
     );
     const workspacePackages = await discoverWorkspacePackages();
+    const versions = new Map(workspacePackages.map(({ manifest }) => {
+      assert(manifest.version, `${manifest.name}: missing workspace version`);
+      return [manifest.name, manifest.version] as const;
+    }));
     const uiPackage = workspacePackages.find(({ manifest }) => manifest.name === '@svadmin/ui');
     assert(uiPackage, '@svadmin/ui: workspace package was not discovered');
     assertUiDependencyContract(uiPackage.manifest);
@@ -1386,7 +1517,9 @@ async function main(): Promise<void> {
         ['pack', '--json', '--pack-destination', temporaryDirectory],
         packageDirectory,
       );
-      const result = parsePackResult(output, manifest.name);
+      const result = await stagePublishedPack(
+        temporaryDirectory, parsePackResult(output, manifest.name), versions,
+      );
       const filePaths = new Set(result.files.map((file) => file.path));
 
       for (const target of collectManifestTargets(manifest)) {
@@ -1458,7 +1591,7 @@ async function main(): Promise<void> {
       join(temporaryDirectory, createSvadminPack.filename),
     );
     console.info(createSvadminOutput.trim());
-    const peerTreeOutput = await verifyUiPeerTree(temporaryDirectory, manifests);
+    const peerTreeOutput = await verifyUiPeerTree(temporaryDirectory, results, manifests);
     console.info(peerTreeOutput.trim());
     const pnpmPeerTreeOutput = await verifyUiPnpmPeerTree(temporaryDirectory, results, manifests);
     console.info(pnpmPeerTreeOutput.trim());

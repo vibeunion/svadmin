@@ -9,7 +9,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from validate import KIT, ValidationError, declaration, load_json, tokenize, validate_bundle
+from validate import KIT, ValidationError, css_rule, declaration, load_json, tokenize, validate_bundle
 
 
 class ContractTests(unittest.TestCase):
@@ -109,8 +109,8 @@ class ContractTests(unittest.TestCase):
             self.check()
 
     def test_reference_url_cannot_change_authority(self):
-        for url in ['javascript:alert(1)', 'https://docs.stripe.com.evil.invalid/x',
-                    'https://user:password@docs.stripe.com/connect/embedded-appearance-options']:
+        for url in ['javascript:alert(1)', 'https://park-ui.com.evil.invalid/docs/figma',
+                    'https://user:password@park-ui.com/docs/figma']:
             with self.subTest(url=url):
                 self.manifest['references'][0]['documentationUrl'] = url
                 with self.assertRaises(ValidationError):
@@ -122,8 +122,34 @@ class ContractTests(unittest.TestCase):
             self.check()
 
     def test_duplicate_reference(self):
-        self.manifest['references'][1] = copy.deepcopy(self.manifest['references'][0])
-        with self.assertRaisesRegex(ValidationError, '重复项'):
+        self.manifest['references'].append(copy.deepcopy(self.manifest['references'][0]))
+        with self.assertRaisesRegex(ValidationError, '必须且仅包含已登记参考'):
+            self.check()
+
+    def test_exact_active_reference(self):
+        self.assertEqual([ref['id'] for ref in self.manifest['references']], ['park-foundations'])
+        self.assertEqual(self.manifest['id'], 'svadmin-admin-ui-reference-kit')
+        self.assertEqual(self.contract['id'], self.manifest['id'])
+        self.check()
+
+    def test_missing_reference(self):
+        self.manifest['references'].clear()
+        with self.assertRaisesRegex(ValidationError, '必须且仅包含已登记参考'):
+            self.check()
+
+    def test_unknown_reference_cannot_replace_active_source(self):
+        self.manifest['references'][0]['id'] = 'unregistered-toolkit'
+        with self.assertRaisesRegex(ValidationError, '未知参考'):
+            self.check()
+
+    def test_license_cannot_be_claimed_approved(self):
+        self.manifest['references'][0]['licenseReview'] = 'approved'
+        with self.assertRaisesRegex(ValidationError, 'licenseReview'):
+            self.check()
+
+    def test_community_url_must_match_registered_source(self):
+        self.manifest['references'][0]['communityUrl'] = 'https://www.figma.com/community/file/123'
+        with self.assertRaisesRegex(ValidationError, 'communityUrl'):
             self.check()
 
     def test_unknown_fields(self):
@@ -230,6 +256,36 @@ class SourceTests(unittest.TestCase):
         with self.assertRaisesRegex(ValidationError, '唯一 export const'):
             declaration(tokenize(source), 't')
 
+    def test_template_text_cannot_forge_recipe(self):
+        with self.assertRaisesRegex(ValidationError, '唯一 export const'):
+            declaration(tokenize('const example = `const t = tv({a:"fake"});`;'), 't', recipe=True)
+
+    def test_recipe_requires_literal_factory_body(self):
+        self.assertEqual(declaration(tokenize('const t = tv({a:"real"});'), 't', recipe=True), {'a': 'real'})
+        for source in ['const t = tv({...other});', 'const t = tv({a:read()});',
+                       'const t = other({a:"fake"});', 'const t = tv({a:"real"}) || other;']:
+            with self.subTest(source=source), self.assertRaises(ValidationError):
+                declaration(tokenize(source), 't', recipe=True)
+
+    def test_css_comments_and_strings_cannot_forge_rule(self):
+        for source in ['/* :root { --card: white; } */',
+                       '.example { content: ":root { --card: white; }"; }']:
+            with self.subTest(source=source), self.assertRaisesRegex(ValidationError, '唯一 CSS'):
+                css_rule(source, ':root')
+
+    def test_css_duplicate_declarations_and_rules_fail_closed(self):
+        for source in [':root { --card: white; --card: red; }',
+                       ':root { --card: white; } :root { --card: red; }',
+                       ':root { --card: white;']:
+            with self.subTest(source=source), self.assertRaises(ValidationError):
+                css_rule(source, ':root')
+
+    def test_css_in_unrelated_conditional_scope_is_not_the_root_binding(self):
+        with self.assertRaisesRegex(ValidationError, '唯一 CSS'):
+            css_rule('@media (width: 0px) { :root { --card: white; } }', ':root')
+        self.assertEqual(css_rule('@layer base { :root { --card: white; } }',
+                                  ':root', within=('@layer base',)), {'--card': 'white'})
+
     def test_duplicate_token_keys(self):
         with self.assertRaisesRegex(ValidationError, '重复对象键'):
             declaration(tokenize("export const t = {a:'ok',a:'bad'};"), 't')
@@ -277,16 +333,18 @@ class SourceMappingTests(unittest.TestCase):
     def setUp(self):
         import os
         import shutil
-        from validate import TOKEN_PATH, INDEX_PATH
+        from validate import TOKEN_PATH, THEME_PATH, RECIPE_PATH, INDEX_PATH
         source = Path(os.environ.get('SVADMIN_REFERENCE_SOURCE_ROOT', KIT.parents[1]))
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.root = Path(self.tmp.name)
-        for name in (TOKEN_PATH, INDEX_PATH):
+        for name in (TOKEN_PATH, THEME_PATH, RECIPE_PATH, INDEX_PATH):
             target = self.root / name
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(source / name, target)
         self.token = self.root / TOKEN_PATH
+        self.theme = self.root / THEME_PATH
+        self.recipe = self.root / RECIPE_PATH
         self.index = self.root / INDEX_PATH
         self.manifest = load_json(KIT / 'manifest.json')
         self.contract = load_json(KIT / 'contract.json')
@@ -303,8 +361,58 @@ class SourceMappingTests(unittest.TestCase):
             self.check()
 
     def test_source_spacing_drift(self):
-        self.token.write_text(self.token.read_text().replace("sm: { value: '0.75rem' }", "sm: { value: '0.5rem' }"))
+        self.recipe.write_text(self.recipe.read_text().replace(
+            '[--svadmin-metric-state-padding:0.75rem]', '[--svadmin-metric-state-padding:0.5rem]'))
         with self.assertRaisesRegex(ValidationError, 'spacing.sm'):
+            self.check()
+
+    def test_theme_color_drift(self):
+        self.theme.write_text(self.theme.read_text().replace('--color-card: var(--card)', '--color-card: var(--other)'))
+        with self.assertRaisesRegex(ValidationError, 'colors.surface'):
+            self.check()
+
+    def test_css_color_alias_comment_is_not_a_binding(self):
+        self.token.write_text(self.token.read_text().replace(
+            '--color-card: var(--card);', '/* --color-card: var(--card); */'))
+        with self.assertRaisesRegex(ValidationError, 'colors.surface'):
+            self.check()
+
+    def test_missing_actual_dark_variable(self):
+        self.token.write_text(self.token.read_text().replace('--success:', '--removed-success:'))
+        with self.assertRaisesRegex(ValidationError, 'colors.success'):
+            self.check()
+
+    def test_radius_drift(self):
+        self.theme.write_text(self.theme.read_text().replace('--radius-lg: var(--radius);', '--radius-lg: 1rem;'))
+        with self.assertRaisesRegex(ValidationError, 'radii.surface'):
+            self.check()
+
+    def test_recipe_status_color_drift(self):
+        self.recipe.write_text(self.recipe.read_text().replace(
+            '[--svadmin-status-color:var(--success)]', '[--svadmin-status-color:var(--warning)]'))
+        with self.assertRaisesRegex(ValidationError, 'colors.success'):
+            self.check()
+
+    def test_recipe_surface_binding_drift(self):
+        self.recipe.write_text(self.recipe.read_text().replace('bg-card p-4', 'bg-primary p-4'))
+        with self.assertRaisesRegex(ValidationError, 'metricBlockRecipeStyles'):
+            self.check()
+
+    def test_css_spacing_and_font_drift(self):
+        original = self.token.read_text()
+        for old, new, error in [('gap: 0.25rem;', 'gap: 0.5rem;', 'spacing.xs'),
+                                ('gap: 1rem;', 'gap: 2rem;', 'spacing.md'),
+                                ('font-size: 0.75rem;', 'font-size: 1rem;', 'fontSizes.compact'),
+                                ('font-size: 0.875rem;', 'font-size: 1rem;', 'fontSizes.body')]:
+            with self.subTest(error=error):
+                self.token.write_text(original.replace(old, new))
+                with self.assertRaisesRegex(ValidationError, error):
+                    self.check()
+        self.token.write_text(original)
+
+    def test_missing_recipe_source_fails(self):
+        self.recipe.unlink()
+        with self.assertRaises(OSError):
             self.check()
 
     def test_removed_export_cannot_be_replaced_by_comment(self):
@@ -338,6 +446,9 @@ class PreviewTests(unittest.TestCase):
         self.assertEqual(first.count('data-pattern='), 3)
         self.assertNotIn('<script', first)
         self.assertNotIn('<form', first)
+        self.assertNotIn('packages/ui/design/tokens.ts', first)
+        for name in ('tokenPath', 'themePath', 'recipePath'):
+            self.assertIn(contract['source'][name], first)
 
     def test_text_is_escaped_not_executed(self):
         from render_preview import render

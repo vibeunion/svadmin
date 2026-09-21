@@ -6,7 +6,7 @@
   import type { SurfaceRenderCatalog } from '../catalog.js';
   import type { SurfaceDataProvider, SurfacePolicy } from '../types.js';
   import SurfaceRenderer from './SurfaceRenderer.svelte';
-  import { editorClasses, editorButtonClasses } from '../styles/editor.generated.js';
+  import { editorClasses, editorButtonClasses } from '../styles/editor.js';
   import '../styles/editor.css';
 
   export interface SurfaceEditPreviewProps {

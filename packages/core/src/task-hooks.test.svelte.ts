@@ -12,6 +12,7 @@ import { dirname, resolve } from 'node:path';
 import { svelte2tsx } from 'svelte2tsx';
 import ts from 'typescript';
 
+import { requireValue } from '../../../scripts/test-assertions';
 const clients: QueryClient[] = [];
 function fixture(overrides: Partial<TaskProvider> = {}) {
   const listeners: ((task: TaskRecord) => void)[] = [];
@@ -31,7 +32,8 @@ function fixture(overrides: Partial<TaskProvider> = {}) {
   return { provider, listeners, stop };
 }
 function mount(provider: TaskProvider, onTask?: (task: TaskRecord) => void, onError?: (error: Error) => void,
-  options: { authProvider?: AuthProvider; notificationProvider?: NotificationProvider; notifyReads?: boolean; refetchInterval?: number | false } = {}) {
+  options: { authProvider?: AuthProvider; notificationProvider?: NotificationProvider; notifyReads?: boolean; refetchInterval?: number | false;
+    onSubmitSuccess?: () => void; onSubmitError?: () => void } = {}) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   clients.push(queryClient);
   let state: TaskHookState | undefined;
@@ -71,6 +73,42 @@ afterEach(() => {
 });
 
 describe('task hooks with the actual query runtime', () => {
+  it('detaches tenant metadata for each dispatch even when a provider mutates its input', async () => {
+    const seen: unknown[] = [];
+    const { provider } = fixture({
+      list: async params => {
+        seen.push(structuredClone(params));
+        const meta = params?.['meta'];
+        if (typeof meta === 'object' && meta !== null) Reflect.set(meta, 'tenantId', 'changed-by-provider');
+        return { data: [], total: 0 };
+      },
+    });
+    const app = mount(provider);
+    await waitFor(() => expect(app.read().list.isSuccess).toBe(true));
+    await app.read().list.refetch();
+    expect(seen).toEqual([
+      { meta: { tenantId: 'tenant-1' } },
+      { meta: { tenantId: 'tenant-1' } },
+    ]);
+  });
+
+  it.each([false, true])('passes authoritative tenant metadata to task lists (dlq=%s)', async dlq => {
+    const list = vi.fn(async (_params?: Record<string, unknown>) => ({ data: [], total: 0 }));
+    const { provider } = fixture({ list, listDlq: list });
+    const app = mount(provider);
+    await waitFor(() => expect(app.read().list.isSuccess).toBe(true));
+    const queryParams = { limit: 10, meta: { tenantId: 'forged', trace: 'retained' } };
+    await app.view.rerender({ dlq, queryParams });
+    await waitFor(() => expect(list).toHaveBeenLastCalledWith({
+      limit: 10, meta: { tenantId: 'tenant-1', trace: 'retained' },
+    }));
+    expect(queryParams.meta.tenantId).toBe('forged');
+    await app.view.rerender({ tenant: 'tenant-2' });
+    await waitFor(() => expect(list).toHaveBeenLastCalledWith({
+      limit: 10, meta: { tenantId: 'tenant-2', trace: 'retained' },
+    }));
+  });
+
   it('strictly compiles task hooks and their reactive fixture contracts', () => {
     const directory = dirname(fileURLToPath(import.meta.url));
     const virtual = new Map(['task-hooks.test-host.svelte', 'task-hooks.test-probe.svelte'].map(file => {
@@ -191,6 +229,63 @@ describe('task hooks with the actual query runtime', () => {
     expect(provider.get).toHaveBeenCalledTimes(2);
     expect(provider.list).toHaveBeenCalledTimes(2);
     await expect(saved()).resolves.toMatchObject({ data: undefined, status: 'pending' });
+  });
+
+  it.each([
+    ['login', 'success'], ['login', 'error'],
+    ['tenant', 'success'], ['tenant', 'error'],
+    ['unmount', 'success'], ['unmount', 'error'],
+  ] as const)('suppresses submit callbacks after %s on late %s', async (change, outcome) => {
+    let finish = () => {};
+    let fail = (_error: Error) => {};
+    const pending = new Promise<void>((resolve, reject) => { finish = resolve; fail = reject; });
+    const { provider } = fixture({
+      submit: vi.fn(async () => {
+        await pending;
+        return { id: 'submitted', wait: async () => ({ id: 'submitted' }) };
+      }),
+    });
+    const notificationProvider = { open: vi.fn(), close: vi.fn() };
+    const onSubmitSuccess = vi.fn();
+    const onSubmitError = vi.fn();
+    const app = mount(provider, undefined, undefined, {
+      authProvider: authProvider(async () => ({ success: true })),
+      notificationProvider, onSubmitSuccess, onSubmitError,
+    });
+    const result = app.read().submit.mutation.mutateAsync({ taskName: 'job' }).catch(error => error);
+    await waitFor(() => expect(provider.submit).toHaveBeenCalledOnce());
+    if (change === 'login') await app.read().login.mutate({});
+    else if (change === 'tenant') await app.view.rerender({ tenant: 'tenant-2' });
+    else app.view.unmount();
+    const invalidate = vi.spyOn(app.queryClient, 'invalidateQueries');
+    if (outcome === 'success') finish();
+    else fail(new Error('Private upstream error'));
+    const receipt: unknown = await result;
+    expect(receipt).toMatchObject(outcome === 'success' ? { id: 'submitted' } : { code: 'TASK_PROVIDER_FAILED' });
+    expect(onSubmitSuccess).not.toHaveBeenCalled();
+    expect(onSubmitError).not.toHaveBeenCalled();
+    expect(notificationProvider.open).not.toHaveBeenCalled();
+    if (change === 'login') expect(invalidate).not.toHaveBeenCalled();
+  });
+
+  it('blocks signed-out submits and retains current-session failure callbacks', async () => {
+    const { provider } = fixture({ submit: vi.fn(async () => { throw new Error('Private'); }) });
+    const onSubmitError = vi.fn();
+    const notificationProvider = { open: vi.fn(), close: vi.fn() };
+    const app = mount(provider, undefined, undefined, {
+      authProvider: authProvider(async () => ({ success: true })), onSubmitError, notificationProvider,
+    });
+    await expect(app.read().submit.mutation.mutateAsync({ taskName: 'job' }))
+      .rejects.toMatchObject({ code: 'TASK_PROVIDER_FAILED', message: 'Task request failed.' });
+    expect(onSubmitError).toHaveBeenCalledOnce();
+    expect(notificationProvider.open).toHaveBeenCalledOnce();
+    await app.read().logout.mutate();
+    const notices = notificationProvider.open.mock.calls.length;
+    await expect(app.read().submit.mutation.mutateAsync({ taskName: 'job' }))
+      .rejects.toMatchObject({ code: 'QUERY_SESSION_SUPERSEDED' });
+    expect(provider.submit).toHaveBeenCalledOnce();
+    expect(onSubmitError).toHaveBeenCalledOnce();
+    expect(notificationProvider.open).toHaveBeenCalledTimes(notices);
   });
 
   it.each(['success', 'error'] as const)('ignores old %s data and notifications after a same-provider login', async outcome => {
@@ -327,6 +422,53 @@ describe('task hooks with the actual query runtime', () => {
     listener({ id: 'task-1', status: 'done' });
     expect(onTask).toHaveBeenCalledTimes(1);
     expect(stop).toHaveBeenCalledTimes(1);
+  });
+
+  it('masks subscription events immediately during login and resumes only in the new session', async () => {
+    let finish = () => {};
+    const loginResult = new Promise<AuthActionResult>(resolve => { finish = () => resolve({ success: true }); });
+    const { provider, listeners, stop } = fixture();
+    const onTask = vi.fn();
+    const onError = vi.fn();
+    const app = mount(provider, onTask, onError, { authProvider: authProvider(() => loginResult) });
+    await waitFor(() => expect(listeners).toHaveLength(1));
+    const old =requireValue( listeners[0]);
+    const login = app.read().login.mutate({});
+    old({ id: 'task-1', title: 'Old event before cleanup' });
+    old({ id: 'wrong-task' });
+    expect(onTask).not.toHaveBeenCalled();
+    expect(onError).not.toHaveBeenCalled();
+    await waitFor(() => expect(stop).toHaveBeenCalledOnce());
+    expect(listeners).toHaveLength(1);
+    finish();
+    await login;
+    await waitFor(() => expect(listeners).toHaveLength(2));
+    old({ id: 'task-1', title: 'Old event after login' });requireValue(
+    listeners[1])({ id: 'task-1', title: 'Fresh event' });
+    expect(onTask).toHaveBeenCalledExactlyOnceWith({ id: 'task-1', title: 'Fresh event' });
+  });
+
+  it('stops subscriptions while signed out and replaces them after tenant and auth-provider changes', async () => {
+    const { provider, listeners, stop } = fixture();
+    const onTask = vi.fn();
+    const app = mount(provider, onTask, undefined, { authProvider: authProvider(async () => ({ success: true })) });
+    await waitFor(() => expect(listeners).toHaveLength(1));
+    await app.read().logout.mutate();
+    await waitFor(() => expect(stop).toHaveBeenCalledOnce());requireValue(
+    listeners[0])({ id: 'task-1' });
+    expect(onTask).not.toHaveBeenCalled();
+    expect(listeners).toHaveLength(1);
+    await app.read().login.mutate({});
+    await waitFor(() => expect(listeners).toHaveLength(2));
+    await app.view.rerender({ tenant: 'tenant-2' });
+    await waitFor(() => expect(listeners).toHaveLength(3));
+    await app.view.rerender({ authProvider: authProvider(async () => ({ success: true })) });
+    await waitFor(() => expect(listeners).toHaveLength(4));
+    for (const listener of listeners.slice(0, 3)) listener({ id: 'task-1', title: 'Old' });
+    expect(onTask).not.toHaveBeenCalled();requireValue(
+    listeners[3])({ id: 'task-1', title: 'Fresh' });
+    expect(onTask).toHaveBeenCalledExactlyOnceWith({ id: 'task-1', title: 'Fresh' });
+    expect(stop).toHaveBeenCalledTimes(3);
   });
 
   it('reports malformed subscription data and terminates that subscription', async () => {

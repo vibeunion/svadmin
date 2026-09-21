@@ -1,0 +1,4 @@
+candidate/
+node_modules/
+*-lock.*
+bun.lock

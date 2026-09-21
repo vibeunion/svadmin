@@ -1,9 +1,89 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
 import FieldRenderer from './FieldRenderer.svelte';
 import type { FieldDefinition } from '@svadmin/core';
+import { requireValue } from '../../../../scripts/test-assertions';
 
 describe('FieldRenderer advanced controls', () => {
+  it.each([false, true])('keeps typed select values and disabled choices (large=%s)', async large => {
+    const onchange = vi.fn();
+    const view = render(FieldRenderer, {
+      field: {
+        key: 'status',
+        label: '状态',
+        type: 'select',
+        options: [
+          { label: '草稿', value: 2 },
+          { label: '已发布', value: 'published', disabled: true },
+          { label: '文本编号', value: '2' },
+          ...(large ? Array.from({ length: 7 }, (_, index) => ({
+            label: `Extra ${index}`, value: `extra-${index}`,
+          })) : []),
+        ],
+      },
+      value: 2,
+      onchange,
+    });
+
+    const select = view.container.querySelector('select') as HTMLSelectElement;
+    expect(select.value).toBe('option:0');
+    expect(view.container.querySelector('input[type="hidden"]')?.getAttribute('value')).toBe('2');
+    expect(select.querySelector('option[value="option:1"]')?.hasAttribute('disabled')).toBe(true);
+
+    await fireEvent.change(select, { target: { value: 'option:1' } });
+    expect(onchange).not.toHaveBeenCalled();
+    await fireEvent.change(select, { target: { value: 'option:0' } });
+    expect(onchange).toHaveBeenCalledWith(2);
+    await fireEvent.change(select, { target: { value: 'option:2' } });
+    expect(onchange).toHaveBeenLastCalledWith('2');
+    await view.rerender({ value: '2' });
+    expect(select.value).toBe('option:2');
+    await fireEvent.change(select, { target: { value: '' } });
+    expect(onchange).toHaveBeenLastCalledWith(null);
+    onchange.mockClear();
+    await view.rerender({ disabled: true });
+    await fireEvent.change(select, { target: { value: 'option:0' } });
+    expect(onchange).not.toHaveBeenCalled();
+    expect(view.container.querySelector('input[type="hidden"]')?.hasAttribute('disabled')).toBe(true);
+  });
+
+  it('keeps disabled multi-select values visible and blocks toggles', async () => {
+    const onchange = vi.fn();
+    const view = render(FieldRenderer, {
+      field: {
+        key: 'permissions',
+        label: '权限',
+        type: 'multiselect',
+        options: [
+          { label: '读取', value: 'read', disabled: true },
+          { label: '写入', value: 'write' },
+        ],
+      },
+      value: ['read'],
+      onchange,
+    });
+
+    const checkboxes = view.getAllByRole('checkbox');
+    const readCheckbox = requireValue(checkboxes[0]);
+    const writeCheckbox = requireValue(checkboxes[1]);
+    expect(readCheckbox.getAttribute('aria-checked')).toBe('true');
+    expect(readCheckbox.hasAttribute('disabled')).toBe(true);
+    expect(view.container.textContent).toContain('读取');
+
+    await fireEvent.click(readCheckbox);
+    expect(onchange).not.toHaveBeenCalled();
+    const remove = view.getByRole('button');
+    expect(remove.hasAttribute('disabled')).toBe(true);
+    await fireEvent.click(remove);
+    expect(onchange).not.toHaveBeenCalled();
+    await fireEvent.click(writeCheckbox);
+    expect(onchange).toHaveBeenLastCalledWith(['read', 'write']);
+    onchange.mockClear();
+    await view.rerender({ disabled: true });
+    await fireEvent.click(writeCheckbox);
+    expect(onchange).not.toHaveBeenCalled();
+  });
+
   it('renders TreeSelect component when field.type is tree-select', () => {
     const field: FieldDefinition = {
       key: 'departmentId',

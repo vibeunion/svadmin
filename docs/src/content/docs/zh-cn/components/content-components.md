@@ -1,6 +1,6 @@
 ---
 title: 内容组件
-description: Stripe-first 页面组合、指标、工具栏、状态和数据状态
+description: Admin UI 页面组合、指标、工具栏、状态和数据状态
 ---
 
 内容组件为不适合默认 CRUD 包装器的自定义管理工作流提供稳定页面契约。

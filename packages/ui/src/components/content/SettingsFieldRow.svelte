@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import { productSettingsRow } from '../../styled-system/recipes/index.js';
+  import { productSettingsRowRecipe as productSettingsRow } from '../../recipes.js';
   interface Props { label: string; description?: string; control: Snippet; separated?: boolean; class?: string; }
   let { label, description, control, separated = false, class: className = '' }: Props = $props();
   const styles = $derived(productSettingsRow({ separated }));

@@ -15,12 +15,10 @@
 
   let { data, form }: PageProps = $props();
 
-  const revenueChartData = [
-    { label: "Hardware & Laptops", value: 6495, color: "#4f46e5" },
-    { label: "Office Accessories", value: 499, color: "#06b6d4" },
-    { label: "Maintenance & Support", value: 1250, color: "#10b981" },
-    { label: "Direct Services", value: 820, color: "#f59e0b" },
-  ];
+  const revenueChartData = $derived(data.recentOrders.map(order => ({
+    label: order.orderNumber,
+    value: order.totalAmount,
+  })));
 </script>
 
 <div class="lite-page">
@@ -47,10 +45,9 @@
     columns={4}
     items={[
       {
-        label: "Total Revenue",
-        value: "$" + Number(data.stats.totalRevenue).toLocaleString(),
+        label: `Revenue from ${data.stats.sampledOrders} latest orders`,
+        value: "$" + Number(data.stats.sampleRevenue).toLocaleString(),
         tone: "primary",
-        trend: { value: 14.2, label: "MoM" },
       },
       {
         label: "Active Products",
@@ -61,7 +58,6 @@
       {
         label: "Sales Orders",
         value: data.stats.ordersTotal,
-        trend: { value: 0, label: "fulfillment" },
       },
       {
         label: "Connected Resources",
@@ -74,7 +70,7 @@
   <!-- Analytics & Breakdown Section -->
   <div class="lite-dashboard-split">
     <LiteBarChart
-      title="Revenue Distribution by Category ($)"
+      title="Recent order amounts ($)"
       data={revenueChartData}
     />
 
@@ -96,8 +92,8 @@
           <span style="font-weight: 600;">{data.stats.warehousesTotal}</span>
         </div>
         <div style="display: flex; justify-content: space-between; font-size: 13px; padding-top: 8px; border-top: 1px solid #f1f5f9;">
-          <span style="color: #64748b;">SSR Rendering Latency</span>
-          <span class="lite-badge lite-badge-success">&lt; 5ms</span>
+          <span style="color: #64748b;">Revenue sample / all orders</span>
+          <span>{data.stats.sampledOrders} / {data.stats.ordersTotal}</span>
         </div>
       </div>
     </div>
@@ -113,6 +109,7 @@
       <a href="/lite/sales_orders" class="lite-btn lite-btn-sm">View All Orders &rarr;</a>
     </div>
 
+    <div class="lite-table-scroll" role="region" aria-label="Recent sales orders">
     <table class="lite-table" style="border: none; border-radius: 0;">
       <thead>
         <tr>
@@ -141,9 +138,12 @@
               <a href={"/lite/sales_orders/edit/" + order.id} class="lite-btn lite-btn-sm">Edit</a>
             </td>
           </tr>
+        {:else}
+          <tr><td colspan="6">No sales orders found. <a href="/lite/sales_orders/create">Create sales order</a></td></tr>
         {/each}
       </tbody>
     </table>
+    </div>
   </div>
 
   <!-- Quick Domain Navigation Cards -->

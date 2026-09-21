@@ -1,0 +1,38 @@
+import { expect, test } from '@playwright/test';
+
+test('package styles preserve host responsive layouts and header boundaries', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto('/#/login');
+  await page.locator('#login-identifier').fill('demo@example.com');
+  await page.locator('#login-password').fill('demo');
+  await page.locator('form button[type="submit"]').click();
+  await expect(page).toHaveURL(/#\/$/);
+  const dashboard = page.locator('[data-svadmin-content-page="operations-dashboard"]');
+  await expect(dashboard.locator('[data-dashboard-decisions] [data-svadmin-metric-card]')).toHaveCount(3);
+  await expect(dashboard.getByRole('status')).toBeVisible();
+  await expect(dashboard.locator('a[href^="#/products/show/"]').first()).toBeVisible();
+  await expect(dashboard.locator('[data-dashboard-panel]').first()).toHaveCSS('padding-top', '0px');
+  await expect(dashboard.locator('[data-dashboard-panel]').first()).toHaveCSS('row-gap', '0px');
+  await expect(page.locator('[data-svadmin-topbar] [data-variant="ghost"]').first()).toHaveCSS('box-shadow', 'none');
+  await page.screenshot({ path: testInfo.outputPath('dashboard-desktop.png'), animations: 'disabled' });
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await expect(dashboard.locator('h1')).toHaveCSS('font-size', '20px');
+  await page.screenshot({ path: testInfo.outputPath('dashboard-mobile.png'), animations: 'disabled' });
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto('/#/case_workspace');
+  const header = page.locator('[data-case-mission-header]');
+  const row = header.locator(':scope > div').first();
+  await expect(row).toHaveCSS('flex-direction', 'row');
+  await expect(header).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+  await expect(header).toHaveCSS('backdrop-filter', 'none');
+  await expect(header).toHaveCSS('box-shadow', 'none');
+  await expect(page.getByRole('button', { name: /^(Menu|菜单)$/ })).toBeHidden();
+  await page.screenshot({ path: testInfo.outputPath('case-desktop.png') });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(row).toHaveCSS('flex-direction', 'column');
+  await expect(page.getByRole('button', { name: /^(Menu|菜单)$/ })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await expect.poll(() => page.locator('[data-svadmin-main]').evaluate(element => element.getBoundingClientRect().width)).toBeGreaterThan(380);
+  await page.screenshot({ path: testInfo.outputPath('case-mobile.png'), animations: 'disabled' });
+});

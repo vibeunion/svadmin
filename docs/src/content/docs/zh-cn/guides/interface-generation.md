@@ -3,7 +3,7 @@ title: 界面生成规范
 description: 信息预算、反馈归属、页面状态与 AI 验收规则
 ---
 
-svadmin 使用 **Stripe-first 视觉语言**。外部设计系统只补齐特定行为与场景，
+svadmin 遵循**自身的 Admin UI 设计原则**。外部设计系统只补齐特定行为与场景，
 不能混合成一套新的视觉主题。
 
 先阅读七条[设计原则](/zh-cn/guides/design-principles/)，再使用本文确定状态归属
@@ -13,7 +13,7 @@ svadmin 使用 **Stripe-first 视觉语言**。外部设计系统只补齐特定
 
 | 参考对象 | 参考内容 | 不复制的内容 |
 | --- | --- | --- |
-| Stripe | 层级、克制、中性表面、精确的产品语气 | Stripe 自身品牌表达 |
+| svadmin 设计原则 | 层级、克制、中性表面、精确的产品语气 | 外部品牌视觉身份 |
 | [Refine](https://refine.dev/docs/) | Resource、CRUD 流程、Provider 状态、变更归属 | React 实现与 UI 主题 |
 | [Ant Design](https://ant.design/components/overview/) | 反馈选择、表单、结果页、空/加载状态、数据密度 | 蓝色主题、圆角、阴影、组件外观 |
 | [shadcn/ui](https://ui.shadcn.com/docs) | 可访问组合、语义变体、源码归属组件 | React API 与默认样式 |

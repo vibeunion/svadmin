@@ -1,3 +1,4 @@
+import { snapshotPlainData } from '@svadmin/core/schema';
 import type { CrudOperator, Filter, Sort } from '@svadmin/core';
 
 const STORAGE_VERSION = 1;
@@ -25,12 +26,81 @@ export interface SavedListView {
   id: string;
   name: string;
   state: SavedListViewState;
+  version?: number;
+  source?: 'local' | 'team' | 'system';
+  readOnly?: boolean;
+  default?: boolean;
+  access?: SavedListViewAccess;
+}
+
+export type SavedListViewAccessMode = 'team' | 'organization' | 'restricted';
+export interface SavedListViewAccess {
+  mode: SavedListViewAccessMode;
+  subjectIds: string[];
+}
+
+export interface SavedListViewSubject {
+  id: string;
+  label: string;
+  description?: string;
+}
+
+export interface SavedListViewMutation {
+  id: string;
+  name: string;
+  state: SavedListViewState;
+  /** null 仅允许创建；更新必须提供读取到的版本。 */
+  expectedVersion: number | null;
+  source: 'team' | 'system';
+}
+
+export interface SavedListViewMutationSuccess {
+  ok: true;
+  view: SavedListView;
+  version: number;
+}
+
+export interface SavedListViewMutationConflict {
+  ok: false;
+  code: 'VERSION_CONFLICT';
+  current: SavedListView;
+  version: number;
+}
+
+export interface SavedListViewRemoveSuccess {
+  ok: true;
+  id: string;
+  version: number;
+}
+
+export interface SavedListViewProvider {
+  list: (scope: ListPreferenceScope) => Promise<unknown>;
+  /** 可选的成员目录查询；授权仍由宿主服务端负责。 */
+  listAccessSubjects?: (scope: ListPreferenceScope, input: {
+    query?: string;
+    limit?: number;
+  }) => Promise<unknown>;
+  save?: (scope: ListPreferenceScope, mutation: SavedListViewMutation) => Promise<unknown>;
+  remove?: (scope: ListPreferenceScope, input: { id: string; expectedVersion: number }) => Promise<unknown>;
+  setDefault?: (scope: ListPreferenceScope, input: {
+    id: string;
+    source: 'team' | 'system';
+    expectedVersion: number;
+    default: boolean;
+  }) => Promise<unknown>;
+  updateAccess?: (scope: ListPreferenceScope, input: {
+    id: string;
+    source: 'team' | 'system';
+    expectedVersion: number;
+    access: SavedListViewAccess;
+  }) => Promise<unknown>;
 }
 
 export interface ListPreferenceScope {
   resourceName: string;
   providerName: string;
   tenantIdentity?: string | number;
+  identityKey?: string;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -123,7 +193,56 @@ function parseState(value: unknown, allowedColumnIds: Set<string>): SavedListVie
   };
 }
 
-export function readSavedListViews(raw: string | null, allowedColumnIds: Set<string>): SavedListView[] {
+function parseAccess(value: unknown): SavedListViewAccess | undefined {
+  if (!isRecord(value) || Object.keys(value).some(key => key !== 'mode' && key !== 'subjectIds')) return;
+  const mode = value['mode'];
+  const ids = value['subjectIds'];
+  if ((mode !== 'team' && mode !== 'organization' && mode !== 'restricted')
+    || !Array.isArray(ids) || ids.length > 200) return;
+  const subjectIds: string[] = [];
+  for (const id of ids) {
+    if (typeof id !== 'string' || !id.trim() || id !== id.trim() || id.length > 200
+      || subjectIds.includes(id)) return;
+    subjectIds.push(id);
+  }
+  if ((mode === 'restricted') !== (subjectIds.length > 0)) return;
+  return { mode, subjectIds };
+}
+
+export function decodeSavedListViewAccess(value: unknown): SavedListViewAccess | undefined {
+  try { return parseAccess(snapshotPlainData(value)); } catch { return; }
+}
+
+export function decodeSavedListViewSubjects(value: unknown): SavedListViewSubject[] | undefined {
+  try {
+    const snapshot = snapshotPlainData(value);
+    if (!Array.isArray(snapshot) || snapshot.length > 200) return;
+    const seen = new Set<string>();
+    const subjects: SavedListViewSubject[] = [];
+    for (const entry of snapshot) {
+      if (!isRecord(entry)
+        || Object.keys(entry).some(key => !['id', 'label', 'description'].includes(key))
+        || typeof entry['id'] !== 'string' || !entry['id'].trim() || entry['id'] !== entry['id'].trim()
+        || entry['id'].length > 200 || seen.has(entry['id'])
+        || typeof entry['label'] !== 'string' || !entry['label'].trim() || entry['label'].length > 200
+        || (entry['description'] !== undefined
+          && (typeof entry['description'] !== 'string' || entry['description'].length > 500))) return;
+      seen.add(entry['id']);
+      subjects.push({
+        id: entry['id'],
+        label: entry['label'].trim(),
+        ...(entry['description'] === undefined ? {} : { description: entry['description'] }),
+      });
+    }
+    return subjects;
+  } catch {
+    return;
+  }
+}
+
+export function readSavedListViews(
+  raw: string | null, allowedColumnIds: Set<string>, source: SavedListView['source'] = 'local',
+): SavedListView[] {
   if (!raw) return [];
   try {
     const parsed: unknown = JSON.parse(raw);
@@ -137,13 +256,132 @@ export function readSavedListViews(raw: string | null, allowedColumnIds: Set<str
       if (typeof entry['name'] !== 'string' || !entry['name'].trim() || entry['name'].length > 60) continue;
       const state = parseState(entry['state'], allowedColumnIds);
       if (!state) continue;
+      const access = entry['access'] === undefined ? undefined : parseAccess(entry['access']);
+      if (entry['access'] !== undefined && !access) continue;
       seenIds.add(entry['id']);
-      views.push({ id: entry['id'], name: entry['name'].trim(), state });
+      views.push({
+        id: entry['id'], name: entry['name'].trim(), state,
+        ...(isPositiveInteger(entry['version'], Number.MAX_SAFE_INTEGER) ? { version: entry['version'] } : {}),
+        ...(source !== 'local' ? {
+          source: entry['source'] === 'system' ? 'system' as const : 'team' as const,
+          readOnly: true,
+          ...(entry['default'] === true ? { default: true } : {}),
+          ...(access === undefined ? {} : { access }),
+        } : {}),
+      });
     }
     return views;
   } catch (error) {
     if (error instanceof SyntaxError) return [];
     throw error;
+  }
+}
+
+export function decodeSavedListViewMutationResult(
+  value: unknown, allowedColumnIds: Set<string>,
+  expected?: Pick<SavedListViewMutation, 'id' | 'source' | 'expectedVersion'>,
+): SavedListViewMutationSuccess | SavedListViewMutationConflict | undefined {
+  try {
+    if (expected && (!expected.id.trim()
+      || !['team', 'system'].includes(expected.source)
+      || (expected.expectedVersion !== null
+        && !isPositiveInteger(expected.expectedVersion, Number.MAX_SAFE_INTEGER)))) return;
+    const snapshot = snapshotPlainData(value);
+    if (!isRecord(snapshot) || typeof snapshot['ok'] !== 'boolean') return;
+    const keys = snapshot['ok'] ? ['ok', 'version', 'view'] : ['ok', 'code', 'version', 'current'];
+    if (Object.keys(snapshot).some(key => !keys.includes(key))) return;
+    const parseReceiptView = (candidate: unknown, version: number): SavedListView | undefined => {
+      if (!isRecord(candidate)
+        || Object.keys(candidate).some(key => !['id', 'name', 'state', 'version', 'source', 'readOnly', 'default', 'access'].includes(key))
+        || candidate['version'] !== version
+        || (candidate['readOnly'] !== undefined && typeof candidate['readOnly'] !== 'boolean')
+        || (candidate['default'] !== undefined && typeof candidate['default'] !== 'boolean')
+        || (candidate['source'] !== undefined && candidate['source'] !== 'team' && candidate['source'] !== 'system')) return;
+      const access = candidate['access'] === undefined ? undefined : parseAccess(candidate['access']);
+      if (candidate['access'] !== undefined && !access) return;
+      const state = candidate['state'];
+      if (!isRecord(state) || Object.keys(state).some(key =>
+        !['search', 'filters', 'sorters', 'pagination', 'columnVisibility', 'columnOrder'].includes(key))) return;
+      if (!isRecord(state['pagination']) || Object.keys(state['pagination']).some(key =>
+        !['current', 'pageSize'].includes(key))) return;
+      if (!isRecord(state['columnVisibility']) || Object.entries(state['columnVisibility'])
+        .some(([key, visible]) => !allowedColumnIds.has(key) || typeof visible !== 'boolean')) return;
+      if (!Array.isArray(state['columnOrder']) || state['columnOrder'].some(key =>
+        typeof key !== 'string' || !allowedColumnIds.has(key))
+        || new Set(state['columnOrder']).size !== state['columnOrder'].length) return;
+      if (!Array.isArray(state['sorters']) || state['sorters'].some(sorter =>
+        !isRecord(sorter) || Object.keys(sorter).some(key => !['field', 'order'].includes(key)))) return;
+      const exactFilter = (filter: unknown, depth = 0): boolean => {
+        if (!isRecord(filter) || depth > 20) return false;
+        if ('field' in filter) return Object.keys(filter).every(key => ['field', 'operator', 'value'].includes(key));
+        return Object.keys(filter).every(key => ['operator', 'value'].includes(key))
+          && Array.isArray(filter['value']) && filter['value'].every(child => exactFilter(child, depth + 1));
+      };
+      if (!Array.isArray(state['filters']) || !state['filters'].every(filter => exactFilter(filter))) return;
+      const views = readSavedListViews(JSON.stringify({ version: STORAGE_VERSION, views: [candidate] }), allowedColumnIds);
+      const view = views[0];
+      if (!view || view.name !== candidate['name']) return;
+      if (expected && (view.id !== expected.id || candidate['source'] !== expected.source)) return;
+      return {
+        ...view,
+        ...(candidate['source'] === undefined ? {} : { source: candidate['source'] }),
+        ...(candidate['readOnly'] === undefined ? {} : { readOnly: candidate['readOnly'] }),
+        ...(candidate['default'] === undefined ? {} : { default: candidate['default'] }),
+        ...(access === undefined ? {} : { access }),
+      };
+    };
+    if (snapshot['ok'] === true) {
+      if (!isPositiveInteger(snapshot['version'], Number.MAX_SAFE_INTEGER)) return;
+      if (expected?.expectedVersion !== undefined && expected.expectedVersion !== null
+        && snapshot['version'] <= expected.expectedVersion) return;
+      const view = parseReceiptView(snapshot['view'], snapshot['version']);
+      if (!view) return;
+      return { ok: true, view, version: snapshot['version'] };
+    }
+    if (snapshot['code'] !== 'VERSION_CONFLICT' || !isPositiveInteger(snapshot['version'], Number.MAX_SAFE_INTEGER)) return;
+    const current = parseReceiptView(snapshot['current'], snapshot['version']);
+    if (!current) return;
+    return { ok: false, code: 'VERSION_CONFLICT', current, version: snapshot['version'] };
+  } catch {
+    return;
+  }
+}
+
+export function decodeSavedListViewRemoveResult(
+  value: unknown, expected: { id: string; expectedVersion: number },
+): SavedListViewRemoveSuccess | undefined {
+  try {
+    const snapshot = snapshotPlainData(value);
+    if (!isRecord(snapshot) || snapshot['ok'] !== true
+      || Object.keys(snapshot).some(key => !['ok', 'id', 'version'].includes(key))
+      || snapshot['id'] !== expected.id
+      || !isPositiveInteger(expected.expectedVersion, Number.MAX_SAFE_INTEGER)
+      || !isPositiveInteger(snapshot['version'], Number.MAX_SAFE_INTEGER)
+      || snapshot['version'] <= expected.expectedVersion) return;
+    return { ok: true, id: expected.id, version: snapshot['version'] };
+  } catch {
+    return;
+  }
+}
+
+export function decodeRemoteSavedListViews(
+  value: unknown, allowedColumnIds: Set<string>,
+  writable = false,
+): SavedListView[] {
+  try {
+    const snapshot = snapshotPlainData(value);
+    if (!Array.isArray(snapshot)) return [];
+    return readSavedListViews(JSON.stringify({ version: STORAGE_VERSION, views: snapshot }), allowedColumnIds, 'team')
+      .map(view => {
+        const entry = snapshot.find(entry => isRecord(entry) && entry['id'] === view.id);
+        return {
+          ...view,
+          readOnly: !writable || !view.version || !isRecord(entry) || entry['readOnly'] !== false,
+          ...(isRecord(entry) && entry['default'] === true ? { default: true } : {}),
+        };
+      });
+  } catch {
+    return [];
   }
 }
 
@@ -165,11 +403,12 @@ export function listPreferenceScopeId(scope: ListPreferenceScope): string {
     `r:${encodeURIComponent(scope.resourceName)}`,
     `p:${encodeURIComponent(scope.providerName)}`,
     `t:${encodeScopeValue(scope.tenantIdentity)}`,
+    ...(scope.identityKey === undefined ? [] : [`u:${encodeScopeValue(scope.identityKey)}`]),
   ].join('|');
 }
 
 export function canMigrateLegacyListPreferences(scope: ListPreferenceScope): boolean {
-  return scope.providerName === 'default' && scope.tenantIdentity === undefined;
+  return scope.providerName === 'default' && scope.tenantIdentity === undefined && scope.identityKey === undefined;
 }
 
 export function savedListViewsStorageKey(scope: ListPreferenceScope): string {

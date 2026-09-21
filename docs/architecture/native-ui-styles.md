@@ -1,8 +1,8 @@
-# Native UI styling after the Panda migration
+# Native UI styling after the Tailwind migration
 
 ## Runtime boundary
 
-Consumers import published CSS. No Tailwind or Panda plugin is required in their
+Consumers import published CSS. No Tailwind compiler plugin is required in their
 Vite configuration. The root/UI/AI/example manifests and lockfile must contain no
 Tailwind compiler/plugin or class-engine dependency, including npm aliases and
 transitive installations. `scripts/check-style-boundary.mjs` also checks production
@@ -16,9 +16,9 @@ utility-language tokens or scan package components.
 ## Authoring sources
 
 UI, AI-elements and example finite utility declarations live in
-`design/migrated-utilities/recipes.json`. The adjacent foundation template owns
-native reset/theme/keyframe/registration CSS and records each recipe's original
-cascade position. Panda builds the declarations; the assembly step restores stable
+`src/recipes.ts` and owned semantic CSS. The adjacent source owns native
+reset/theme/keyframe/registration CSS and records each recipe's original cascade
+position. Tailwind builds finite declarations; the assembly step restores stable
 public selectors and positions. Build scripts do not read test/style-baselines.
 
 New semantic variants should use the reviewed token/slot recipe contracts. Keeping

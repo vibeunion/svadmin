@@ -1,0 +1,5 @@
+{
+  "extends": "../../tsconfig.json",
+  "include": ["./*.svelte", "./workspace-policy.ts", "./workspace-session.ts"],
+  "exclude": ["./*.test.ts"]
+}

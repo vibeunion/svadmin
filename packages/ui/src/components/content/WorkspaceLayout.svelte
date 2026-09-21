@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import { productWorkspace } from '../../styled-system/recipes/index.js';
+  import { productWorkspaceRecipe as productWorkspace } from '../../recipes.js';
 
   interface Props {
     primary: Snippet;

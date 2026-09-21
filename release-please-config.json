@@ -215,6 +215,11 @@
       "component": "mcp",
       "changelog-path": "CHANGELOG.md"
     },
+    "packages/devtools-contract": {
+      "release-type": "node",
+      "component": "devtools-contract",
+      "changelog-path": "CHANGELOG.md"
+    },
     "packages/surface": {
       "release-type": "node",
       "component": "surface",

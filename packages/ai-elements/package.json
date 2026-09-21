@@ -105,11 +105,11 @@
     "vitest": "^4.1.11"
   },
   "scripts": {
-    "build": "node ../../scripts/build-migrated-ui.mjs ai-elements && node ../../scripts/build-native-classnames.mjs ai-elements && node ../../node_modules/@sveltejs/package/svelte-package.js -i src -o dist && bun scripts/clean-dist.ts",
+    "build": "node ../../scripts/check-native-style-sources.mjs ai-elements && node ../../scripts/build-native-classnames.mjs ai-elements && node ../../node_modules/@sveltejs/package/svelte-package.js -i src -o dist && bun scripts/clean-dist.ts",
     "check": "svelte-check --tsgo-experimental-api --tsconfig ./tsconfig.json --threshold error",
     "test": "vitest run --config ./vitest.config.ts && bun test scripts/clean-dist.test.ts scripts/audit-upstream-parity.test.ts",
     "audit:upstream": "bun scripts/audit-upstream-parity.ts",
-    "styles:migrated:check": "node ../../scripts/build-migrated-ui.mjs ai-elements --check"
+    "styles:migrated:check": "node ../../scripts/check-native-style-sources.mjs ai-elements"
   },
   "license": "MIT",
   "publishConfig": {

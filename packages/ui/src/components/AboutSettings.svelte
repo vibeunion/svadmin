@@ -9,7 +9,13 @@
   const adminContext = captureAdminContext();
   const resources = $derived(adminContext.resources);
   const providerNames = $derived(adminContext.getDataProviderNames());
-  const version = '__SVADMIN_VERSION__';
+  let { version: suppliedVersion }: { version?: string } = $props();
+  const buildVersion = '__SVADMIN_VERSION__';
+  const version = $derived(suppliedVersion ?? (
+    buildVersion.startsWith('__')
+      ? (i18n.locale === 'zh-CN' ? '开发构建（未提供版本）' : 'Development build (version unavailable)')
+      : buildVersion
+  ));
 </script>
 
 <div class="svadmin-u-b3542e058833">

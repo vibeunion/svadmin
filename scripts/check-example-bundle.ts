@@ -2,16 +2,7 @@ import { readFile, readdir, stat } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { gzipSync } from 'node:zlib';
 import { assertExampleLayoutCss } from './example-layout-contract.js';
-
-interface ManifestChunk {
-  file: string;
-  imports?: string[];
-  dynamicImports?: string[];
-  isEntry?: boolean;
-  isDynamicEntry?: boolean;
-}
-
-type Manifest = Record<string, ManifestChunk>;
+import { collectExampleStartupFiles, type Manifest } from './example-bundle-contract.js';
 
 const repositoryRoot = resolve(import.meta.dir, '..');
 const outputDirectory = join(repositoryRoot, 'example', 'dist');
@@ -48,40 +39,7 @@ for (const assetName of javascriptAssets) {
 }
 
 const manifest = JSON.parse(await readFile(manifestPath, 'utf8')) as Manifest;
-const entry = Object.values(manifest).find((chunk) => chunk.isEntry);
-assert(entry, 'Example build manifest has no entry chunk');
-
-const initialFiles = new Set<string>();
-function collectInitialFiles(chunk: ManifestChunk): void {
-  if (initialFiles.has(chunk.file)) return;
-  initialFiles.add(chunk.file);
-  for (const importKey of chunk.imports ?? []) {
-    const importedChunk = manifest[importKey];
-    assert(importedChunk, `Example manifest references missing import ${importKey}`);
-    collectInitialFiles(importedChunk);
-  }
-}
-collectInitialFiles(entry);
-
-const editorEntryRecord = Object.entries(manifest).find(([key]) =>
-  key.endsWith('/packages/editor/dist/components/Editor.svelte')
-);
-assert(editorEntryRecord, 'Example manifest has no lazy rich-text editor entry');
-const [editorEntryKey, editorEntry] = editorEntryRecord;
-assert(editorEntry.isDynamicEntry, 'Rich-text editor must remain a dynamic entry');
-assert(
-  entry.dynamicImports?.includes(editorEntryKey),
-  'Example entry must load the rich-text editor through a dynamic import',
-);
-
-for (const editorChunkPrefix of ['editor-tiptap-', 'editor-prosemirror-', 'editor-support-']) {
-  const editorAsset = javascriptAssets.find((name) => name.startsWith(editorChunkPrefix));
-  assert(editorAsset, `Example build produced no ${editorChunkPrefix} chunk`);
-  assert(
-    !initialFiles.has(`assets/${editorAsset}`),
-    `${editorAsset} leaked into the initial JavaScript dependency graph`,
-  );
-}
+const initialFiles = collectExampleStartupFiles(manifest, javascriptAssets);
 
 let initialBytes = 0;
 let initialGzipBytes = 0;

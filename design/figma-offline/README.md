@@ -7,9 +7,12 @@
 ## 完成范围与未验证边界
 
 本目录实现可构建的插件、离线 CLI、受限蓝图导入、合成回归及插件 iframe 浏览器检查。
-**尚未在真实 Figma 编辑器运行，尚未获得 Stripe/Park 的实际导出，不能宣称文件解析保真、
+**尚未在真实 Figma 编辑器运行，尚未获得 Park 的实际导出，不能宣称文件解析保真、
 组件视觉验收或完整 UI Kit 完成。** `test/fixtures.cjs` 和 `demo.blueprint.json` 均为自有合成数据，
-`--demo-*` 仅供工具冒烟测试，不是 svadmin 的新主题、生产 token 或 Stripe 设计资产。
+`--demo-*` 仅供工具冒烟测试，不是 svadmin 的新主题、生产 token 或第三方设计资产。
+
+活动参考来源以 `../reference-kit/manifest.json` 为准；已移除来源与历史原文请查 Git 历史，
+不将过去的用户引文改写为当前命名，也不把合成样例归属为第三方资产。
 
 导出插件使用官方标准 Plugin API，不使用 `use_figma` 扩展方法。开发插件需 Figma 桌面端
 （macOS/Windows）；在 Design 文件内运行需可编辑权限。只读 Community 预览不能直接运行，

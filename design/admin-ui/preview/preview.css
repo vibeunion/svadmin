@@ -1,0 +1,94 @@
+/* 只定义样例的布局，组件外观来自实际发布 CSS；不另起调色板。 */
+html { font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; font-size: 16px; }
+body { margin: 0; }
+* { box-sizing: border-box; }
+.kit-root { color: var(--foreground); background: var(--background); min-height: 100vh; font-size: .875rem; line-height: 1.5; }
+.kit-controls { min-height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 16px 32px; background: var(--card); border-bottom: 1px solid var(--border); }
+.kit-brand { display: flex; align-items: baseline; gap: 12px; }
+.kit-brand strong { font-size: 20px; font-weight: 600; }
+.kit-brand span, .kit-muted, .kit-cell-sub, .kit-scenario > span { color: var(--muted-foreground); }
+.kit-options { display: flex; flex-wrap: wrap; gap: 16px; }
+.kit-options label, .kit-scenario label { display: flex; align-items: center; gap: 8px; }
+.kit-options select, .kit-scenario select { font: inherit; color: var(--foreground); background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md); min-height: 32px; padding: 4px 8px; }
+.kit-layout { display: grid; grid-template-columns: 208px minmax(0, 1fr); }
+.kit-nav { padding: 24px 16px; background: var(--background); border-right: 1px solid var(--border); }
+.kit-eyebrow { text-transform: none; color: var(--muted-foreground); font-size: 11px; margin: 0 12px 16px; }
+.kit-nav button { display: flex; align-items: center; gap: 10px; width: 100%; text-align: start; min-height: 40px; border: 0; border-radius: var(--radius-md); padding: 8px 12px; font: inherit; cursor: pointer; background: transparent; color: var(--foreground); }
+.kit-nav button:hover { background: var(--muted); }
+.kit-nav button[aria-current='page'] { background: var(--accent); color: var(--accent-foreground); font-weight: 600; }
+.kit-nav-note { white-space: pre-line; margin: 32px 12px; color: var(--muted-foreground); font-size: 12px; }
+.kit-workspace { min-width: 0; background: var(--card); }
+.kit-scenario { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; min-height: 60px; padding: 12px 32px; border-bottom: 1px solid var(--border); }
+.kit-scenario > span { font-size: 12px; margin-inline-start: auto; }
+.kit-check { font-size: 12px; }
+#kit-main { max-width: 1184px; min-height: 720px; margin: 0 auto; padding: 32px; display: flex; flex-direction: column; align-items: stretch; gap: 24px; outline-offset: -2px; }
+.kit-section { display: flex; flex-direction: column; gap: 16px; padding: 24px 0; border-top: 1px solid var(--border); min-width: 0; }
+.kit-section h2 { font-size: 16px; font-weight: 600; margin: 0; }
+.kit-section p { margin: 0; }
+.kit-demo-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.kit-field-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.kit-field { display: flex; flex-direction: column; min-width: 0; gap: 8px; font-weight: 500; }
+.kit-field > span { font-weight: 400; font-size: 12px; }
+.kit-table-scroll { max-width: 100%; overflow-x: auto; border-block: 1px solid var(--border); background: var(--card); }
+.kit-customer-name { display: block; white-space: normal; overflow-wrap: anywhere; max-width: 340px; font-weight: 500; }
+.kit-cell-sub { display: block; font-size: 12px; }
+.kit-number { text-align: end; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.kit-list-filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.kit-list-filter { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 8px 12px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted-foreground); font: inherit; cursor: pointer; }
+.kit-list-filter[aria-pressed='true'] { border-bottom-color: var(--primary); color: var(--foreground); font-weight: 600; }
+.kit-list-filter:hover { background: var(--muted); }
+.kit-list-filter:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.kit-list-filter-count { font-size: 12px; font-variant-numeric: tabular-nums; }
+.kit-list-table { min-width: 0; }
+.kit-list-table tbody tr { border-bottom: 1px solid var(--border); }
+.kit-list-identity { display: flex; align-items: center; gap: 12px; }
+.kit-list-avatar { display: grid; place-items: center; flex: 0 0 32px; height: 32px; border-radius: var(--radius-md); background: var(--muted); color: var(--muted-foreground); font-size: 12px; }
+.kit-list-footer { margin: 12px 0 0; color: var(--muted-foreground); font-size: 12px; }
+.kit-timeline { display: grid; gap: 20px; padding-inline-start: 20px; margin: 0; }
+.kit-timeline li > span { display: block; font-size: 12px; margin-top: 4px; }
+.kit-form-control { width: 300px; max-width: 100%; }
+.kit-form-control p { margin: 4px 0 0; font-size: 12px; }
+.kit-save-bar { display: flex; gap: 16px; justify-content: space-between; align-items: center; min-height: 80px; }
+.kit-save-bar p { margin: 0; }
+.kit-error { color: var(--destructive); }
+.kit-inline-status { padding: 8px 0; margin: 0; }
+.kit-visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.kit-skip { position: absolute; left: 12px; top: -100px; padding: 12px; background: var(--card); color: var(--foreground); z-index: 10; }
+.kit-skip:focus { top: 8px; }
+.kit-nav button:focus-visible, .kit-options select:focus-visible, .kit-scenario select:focus-visible, .kit-check input:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+@media (max-width: 700px) {
+  .kit-controls { padding: 16px; flex-wrap: wrap; gap: 12px; }
+  .kit-brand { flex-wrap: wrap; }
+  .kit-options { gap: 8px; }
+  .kit-options label { font-size: 12px; gap: 4px; }
+  .kit-layout { grid-template-columns: minmax(0, 1fr); }
+  .kit-nav { display: flex; flex-wrap: wrap; gap: 4px; border-right: 0; border-bottom: 1px solid var(--border); padding: 8px 12px; }
+  .kit-nav button { width: auto; flex: 1 1 auto; }
+  .kit-eyebrow, .kit-nav-note { display: none; }
+  .kit-scenario { padding: 12px 16px; gap: 8px 16px; }
+  .kit-scenario > span { flex-basis: 100%; margin: 0; }
+  #kit-main { padding: 24px 16px; gap: 20px; }
+  .kit-field-grid { grid-template-columns: minmax(0, 1fr); }
+  .kit-form-control { width: min(260px, 100%); }
+  .kit-save-bar { align-items: flex-start; padding-block: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { .kit-root *, .kit-root *::before, .kit-root *::after { animation-duration: .01ms; transition-duration: .01ms; } }
+
+/* 产品页只用组合规则；控件外观及表格部件由公开的 Panda recipes 提供。 */
+[data-svadmin-table-toolbar] .svadmin-filter-toolbar { width: min(100%, 28rem); }
+.kit-section:first-child { border-top: 0; }
+.kit-timeline { padding: 0; list-style: none; gap: 0; }
+.kit-timeline li { position: relative; padding: 0 0 28px 24px; border-left: 1px solid var(--border); }
+.kit-timeline li::before { content: ''; position: absolute; left: -4px; top: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--muted-foreground); }
+.kit-timeline li:last-child { border-left-color: transparent; }
+.kit-timeline strong { font-weight: 500; }
+.kit-save-bar { border-top: 1px solid var(--border); }
+.kit-developer { margin-top: 32px; }
+.kit-settings-nav { display: flex; flex-direction: column; gap: 12px; padding-top: 20px; font-size: 13px; }
+.kit-settings-nav p { margin: 0; font-weight: 500; }
+.kit-settings-nav a { color: var(--foreground); text-decoration: none; padding: 4px 0; }
+.kit-settings-nav a:hover { color: var(--primary); text-decoration: underline; }
+.kit-settings-nav a:focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
+.kit-form-control { width: 100%; }
+[data-svadmin-workspace-secondary] .kit-section { padding-top: 0; }
+@media (max-width: 700px) { .kit-settings-nav { padding-top: 0; } }

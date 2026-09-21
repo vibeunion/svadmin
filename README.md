@@ -67,6 +67,7 @@
 | ------------------------ | ------------------------------------------------------------ |
 | `@svadmin/core`          | Hooks, providers, types, utilities, Resource Type Registry   |
 | `@svadmin/ai-elements`   | Composable Svelte 5 AI conversation and agent UI components |
+| `@svadmin/devtools-contract` | JSON-safe DevTools trace, diagnostic, event, and redaction contracts |
 | `@svadmin/ui`            | Pre-built admin components / 预构建管理组件（shadcn-svelte） |
 | `@svadmin/create`        | CLI scaffolding tool / CLI 脚手架工具                        |
 | `@svadmin/refine-adapter`| Bridge any @refinedev/* data provider to svadmin / 桥接 Refine 生态数据源 |
@@ -265,9 +266,9 @@ const dataProvider = createElysiaDataProvider<App>("http://localhost:3000");
 
 ### Precompiled CSS Integration / 预生成 CSS 集成
 
-> **No host CSS compiler required / 消费端无需 CSS 编译器**: UI and AI Elements ship precompiled CSS. Import their styles once; do not install Tailwind or Panda just to use SVAdmin. Panda is used only when building the UI package from source.
+> **No host CSS compiler required / 消费端无需 CSS 编译器**: UI and AI Elements ship precompiled CSS. Import their styles once; no consumer compiler is required. Tailwind builds UI styles from source.
 >
-> UI 与 AI Elements 发布预生成 CSS。消费端只需引入样式，不需要安装 Tailwind 或 Panda；Panda 仅用于从源码构建 UI 的语义 tokens / recipes。
+> UI 与 AI Elements 发布预生成 CSS。消费端只需引入样式，不需要安装 Tailwind；Tailwind 仅用于从源码构建 UI。
 
 **1. Import the UI stylesheet / 引入 UI 样式:**
 
@@ -279,7 +280,7 @@ const dataProvider = createElysiaDataProvider<App>("http://localhost:3000");
 
 The CSS entries do not scan component sources. Remove obsolete SVAdmin `@source` directives. `app.theme.css` and `ai.theme.css` are retained as native-CSS compatibility entry names; neither emits Tailwind metadata. Import only one entry per package.
 
-普通 CSS 入口不扫描组件源码，请删除旧的 SVAdmin `@source` 指令。`app.theme.css` 与 `ai.theme.css` 仅保留旧导入路径，不再生成 Tailwind 指令。新样式使用原生 CSS 或受控 Panda recipes；不得运行 shadcn-svelte CLI 重新引入 Tailwind。旧兼容样式仍逐批迁移，Streamdown 的传递依赖清理仍未完成，详见 [迁移状态](docs/no-tailwind-component-migration.md)。
+普通 CSS 入口不扫描组件源码，请删除旧的 SVAdmin `@source` 指令。`app.theme.css` 与 `ai.theme.css` 仅保留旧导入路径。新组件以 Tailwind 语义类、`tailwind-variants` recipes、tokens 和 Bits UI primitives 为基础；`shadcn-svelte` 仅用于生成器和规范，不覆盖已有增强组件。旧兼容样式仍逐批迁移，详见 [迁移状态](docs/no-tailwind-component-migration.md)。
 
 For the opt-in Surface semantic variants, also import `@svadmin/surface/styles.css` and follow [Surface styling](packages/surface/STYLING.md). The default `svadmin/v1` contract is unchanged.
 

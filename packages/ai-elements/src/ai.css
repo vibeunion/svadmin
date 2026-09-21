@@ -1,4 +1,5 @@
-@import "./utilities.css";
+@layer theme, base, components, utilities;
+@import "./utilities.css" layer(utilities.svadmin-ai);
 .svadmin-ai,
 .svadmin-ai * {
   box-sizing: border-box;

@@ -1,6 +1,7 @@
 <script lang="ts">
-  import type { DataProvider, ResourceDefinition, RouterProvider } from '@svadmin/core';
+  import type { AccessControlProvider, DataProvider, ResourceDefinition, RouterProvider, TaskProvider } from '@svadmin/core';
   import { defineResource } from '@svadmin/core';
+  import { definedOptions } from '@svadmin/core/options';
   import { Type } from '@sinclair/typebox';
   import AdminApp from '../../src/components/AdminApp.svelte';
   import AutoTable from '../../src/components/AutoTable.svelte';
@@ -15,6 +16,9 @@
     density?: 'compact' | 'comfortable';
     selectable?: boolean;
     locale?: string;
+    exportTaskName?: string;
+    exportTaskProvider?: TaskProvider;
+    exportTaskIdempotencyKey?: string;
   }
 
   let {
@@ -23,6 +27,9 @@
     density = 'comfortable',
     selectable = true,
     locale = 'zh-CN',
+    exportTaskName,
+    exportTaskProvider,
+    exportTaskIdempotencyKey,
   }: Props = $props();
 
   const dataProvider = {
@@ -68,11 +75,16 @@
     back: () => {},
     parse: () => ({ pathname: '/', params: {} }),
   };
+
+  const accessControlProvider: AccessControlProvider = {
+    can: async () => ({ can: true }),
+  };
 </script>
 
 {#snippet dashboard()}
   {#if viewMode === 'table'}
-    <AutoTable resourceName="users" {showHeader} {density} {selectable} />
+    <AutoTable resourceName="users" {showHeader} {density} {selectable}
+      {...definedOptions({ exportTaskName, exportTaskProvider, exportTaskIdempotencyKey })} />
   {:else if viewMode === 'list-page'}
     <ListPage resourceName="users" {density} selectable={selectable}>
       {#snippet statusTabs()}
@@ -96,4 +108,11 @@
   {/if}
 {/snippet}
 
-<AdminApp {dataProvider} {resources} {routerProvider} {locale} dashboard={dashboard as never} />
+<AdminApp
+  {dataProvider}
+  {resources}
+  {routerProvider}
+  {accessControlProvider}
+  {locale}
+  dashboard={dashboard as never}
+/>

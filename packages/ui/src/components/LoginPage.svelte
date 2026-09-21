@@ -74,7 +74,7 @@
 
 <AuthPageShell brand={title} title={i18n.t('auth.welcomeBack')} description={i18n.t('auth.welcomeMessage')} {footer}>
       {#if loginHint || defaultIdentifier || defaultPassword}
-        <aside class="svadmin-u-fb88ccaacf5b svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-60ed9c3ef326 svadmin-u-eb6e8b881acd">
+        <aside data-svadmin-demo-credentials class="svadmin-u-fb88ccaacf5b svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-60ed9c3ef326 svadmin-u-eb6e8b881acd">
           {#if loginHint}
             <p class="svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{loginHint}</p>
           {/if}

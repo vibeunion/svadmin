@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { useTranslation } from '@svadmin/core/i18n';
+  import { GANTT_LIMITS, validateGantt } from '@svadmin/core/gantt';
   export interface GanttTask {
     id: string;
     title: string;
@@ -6,12 +8,18 @@
     durationDays: number;
     progress?: number;
     status?: 'planned' | 'in_progress' | 'completed' | 'delayed';
+    dependencies?: string[];
+    milestone?: boolean;
   }
 
   interface Props {
     tasks?: GanttTask[];
     totalDays?: number;
     dayLabelPrefix?: string;
+    loading?: boolean;
+    error?: string | undefined;
+    retryHref?: string;
+    ariaLabel?: string;
     class?: string;
   }
 
@@ -19,48 +27,73 @@
     tasks = [],
     totalDays = 14,
     dayLabelPrefix = 'D',
+    loading = false,
+    error,
+    retryHref,
+    ariaLabel,
     class: className = '',
   }: Props = $props();
 
   const days = $derived(
-    Array.from({ length: totalDays }, (_, i) => `${dayLabelPrefix}${i + 1}`)
+    Array.from({ length: Number.isSafeInteger(totalDays) && totalDays > 0 && totalDays <= GANTT_LIMITS.days ? totalDays : 0 }, (_, i) => `${dayLabelPrefix}${i + 1}`)
   );
+  const i18n = useTranslation();
+  const validationError = $derived(validateGantt(loading || error ? [] : tasks, totalDays));
+  const displayError = $derived(error || (validationError ? i18n.t(`gantt.${validationError}`) : ''));
+  const safeRetryHref = $derived(retryHref?.startsWith('/') && !/^\/[\\/]/.test(retryHref)
+    && !retryHref.includes('\\')
+    && ![...retryHref].some(char => char.charCodeAt(0) <= 32 || char.charCodeAt(0) === 127) ? retryHref : undefined);
 </script>
 
-<div class="sv-lite-gantt-container {className}">
+<div class="sv-lite-gantt-container {className}" aria-busy={loading}>
   <div class="sv-lite-gantt-title">
-    <strong>Project Schedule</strong> ({tasks.length} tasks / {totalDays} days)
+    <strong>{i18n.t('gantt.title')}</strong> ({i18n.t('gantt.summary', { tasks: tasks.length, days: totalDays })})
   </div>
 
-  <table class="sv-lite-gantt-table">
+  {#if loading}
+    <div role="status">{i18n.t('common.loading')}</div>
+  {:else if displayError}
+    <div role="alert">{displayError}</div>
+    {#if error && safeRetryHref}<a href={safeRetryHref}>{i18n.t('common.retry')}</a>{/if}
+  {:else if tasks.length === 0}
+    <div role="status">{i18n.t('gantt.noData')}</div>
+  {:else}
+  <table class="sv-lite-gantt-table" aria-label={ariaLabel ?? i18n.t('gantt.title')}>
     <thead>
       <tr>
-        <th class="sv-lite-th-task">Task</th>
-        <th class="sv-lite-th-status">Status</th>
+        <th scope="col" class="sv-lite-th-task">{i18n.t('gantt.task')}</th>
+        <th scope="col" class="sv-lite-th-status">{i18n.t('gantt.status')}</th>
         {#each days as day (day)}
-          <th class="sv-lite-th-day">{day}</th>
+          <th scope="col" class="sv-lite-th-day">{day}</th>
         {/each}
       </tr>
     </thead>
     <tbody>
       {#each tasks as task (task.id)}
         <tr>
-          <td class="sv-lite-td-task">{task.title}</td>
+          <th scope="row" class="sv-lite-td-task" aria-label={`${task.title}, ${task.milestone
+            ? i18n.t('gantt.milestone', { day: task.startDay + 1 })
+            : i18n.t('gantt.range', { start: task.startDay + 1, end: task.startDay + task.durationDays })}`}>{task.title}</th>
           <td class="sv-lite-td-status">
-            <span class="sv-lite-gantt-badge sv-lite-{task.status ?? 'planned'}">{task.status ?? 'planned'}</span>
+            <span class="sv-lite-gantt-badge sv-lite-{task.status ?? 'planned'}">{i18n.t(`gantt.${task.status ?? 'planned'}`)}</span>
           </td>
           {#each days as _, dIdx (dIdx)}
             {@const isCovered = dIdx >= task.startDay && dIdx < task.startDay + task.durationDays}
-            <td class="sv-lite-td-cell {isCovered ? 'sv-lite-cell-active sv-lite-bg-' + (task.status ?? 'planned') : ''}">
+            {@const isMilestone = task.milestone && dIdx === task.startDay}
+            <td aria-label={isMilestone ? `${task.title}, ${i18n.t('gantt.milestone', { day: dIdx + 1 })}`
+              : isCovered ? `${task.title}, ${days[dIdx]}, ${i18n.t(`gantt.${task.status ?? 'planned'}`)}` : undefined}
+              class="sv-lite-td-cell {isCovered ? 'sv-lite-cell-active sv-lite-bg-' + (task.status ?? 'planned') : ''}">
               {#if isCovered && dIdx === task.startDay && task.progress !== undefined}
                 <span class="sv-lite-cell-progress">{task.progress}%</span>
               {/if}
+              {#if isMilestone}<span aria-hidden="true">◆</span>{/if}
             </td>
           {/each}
         </tr>
       {/each}
     </tbody>
   </table>
+  {/if}
 </div>
 
 <style>

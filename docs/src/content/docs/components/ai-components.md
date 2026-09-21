@@ -135,6 +135,29 @@ default, so undeclared fields are rejected without requiring callers to repeat
 <ChatDialog {componentRegistry} />
 ```
 
+## Ant Design X-inspired boundary
+
+SVAdmin uses Ant Design X as an interaction and product-model reference for
+enterprise AI workspaces, not as a React dependency or a promise of API or
+pixel-level compatibility. The mapped core loop is:
+
+| Interaction model | SVAdmin surface | Status |
+| --- | --- | --- |
+| Welcome / Suggestion | `ConversationEmptyState`, `Suggestion`, `SmartSuggest` | `stable` |
+| Conversation / Message / Bubble | `Conversation`, `Message`, `Response` | `stable` |
+| Sender | `PromptInput` compound components | `stable` |
+| Streaming / Stop / Retry | `ChatProvider`, `ChatDialog` | `stable` |
+| Thought / Tool | `Reasoning`, `ChainOfThought`, `Tool`, `AgentProvider` | `stable` |
+| Confirmation | `Confirmation`, `needsApproval`, `executeAdminTool` | `stable` |
+| Task / Plan / Queue | `Task`, `Plan`, `Queue`, `Checkpoint` | `experimental` |
+| Command tool | `AICommandBar` | `stable` |
+
+The enterprise boundary remains mandatory: tenant, resource, permission,
+server-side authorization, redaction, audit, and conversation isolation. Model
+output must never be treated as a trusted mutation. The machine-readable
+contract is exported as `AI_WORKSPACE_CAPABILITIES`; only `stable` capabilities
+are part of the current enterprise AI workspace commitment.
+
 The exported `AI_ELEMENT_PARITY` manifest separately tracks package-surface,
 behavioral, and visual verification against its pinned upstream commit. An
 exact export name does not by itself imply interaction or pixel parity.

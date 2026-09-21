@@ -8,6 +8,7 @@
   import type { FieldDefinition } from '@svadmin/core';
   import PageHeader from './PageHeader.svelte';
   import AutoTable from './AutoTable.svelte';
+  import type { BatchSelection } from './table-contract';
   import CreateButton from './buttons/CreateButton.svelte';
 
   interface Props {
@@ -18,6 +19,7 @@
     density?: 'compact' | 'comfortable';
     /** Passthrough: enable row selection checkboxes */
     selectable?: boolean;
+    allowSelectAllMatching?: boolean;
     /** Passthrough: custom header actions */
     headerActions?: Snippet;
     /** Optional status tabs slot above filter/table */
@@ -25,7 +27,7 @@
     /** Optional filter toolbar slot between status tabs and table */
     filterToolbar?: Snippet;
     /** Passthrough: custom batch actions to render when rows are selected */
-    batchActions?: Snippet<[{ selectedIds: (string | number)[] }]>;
+    batchActions?: Snippet<[{ selectedIds: (string | number)[]; selection: BatchSelection }]>;
     /** Passthrough: custom cell renderer per field */
     cellRenderer?: Snippet<[{ field: FieldDefinition; value: unknown; record: Record<string, unknown> }]>;
     /** Passthrough: custom row actions */
@@ -44,6 +46,7 @@
     canCreate,
     density = 'comfortable',
     selectable,
+    allowSelectAllMatching,
     headerActions,
     statusTabs,
     filterToolbar,
@@ -89,6 +92,7 @@
     showHeader={false}
     {density}
     {...definedOptions({ "selectable": selectable })}
+    {...definedOptions({ allowSelectAllMatching })}
     {...definedOptions({ batchActions })}
     {...definedOptions({ "defaultCellRenderer": cellRenderer })}
     {...definedOptions({ "rowActions": rowActions })}

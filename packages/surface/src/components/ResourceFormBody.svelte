@@ -6,7 +6,7 @@
   import type { SurfaceWorkflowHost } from '../workflows/context.js';
   import type { SurfaceActionDescriptor } from '../workflows/types.js';
   import type { JsonObject } from '../types.js';
-  import { editorClasses, editorButtonClasses } from '../styles/editor.generated.js';
+  import { editorClasses, editorButtonClasses } from '../styles/editor.js';
   import '../styles/editor.css';
   let { widgetId, host, action, title, locale }: {
     widgetId: string; host: SurfaceWorkflowHost; action: SurfaceActionDescriptor; title: string; locale: string;

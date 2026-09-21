@@ -405,6 +405,22 @@ export interface MenuItem {
   children?: MenuItem[];
 }
 
+export interface DateInputOptions {
+  min?: string;
+  max?: string;
+  step?: number;
+  /** 仅用于 daterange；其他日期字段由 field.type 决定输入模式。 */
+  rangeMode?: 'date' | 'time' | 'datetime';
+  disabledDate?: (date: string) => boolean;
+  presets?: { label: string; value: { start: string; end: string } }[];
+  /** datetime 字段的输出语义；默认保留本地 datetime-local 字符串。 */
+  valueMode?: 'civil' | 'instant';
+  /** valueMode=instant 时必填的 IANA 时区。 */
+  timeZone?: string;
+  /** 仅用于 datetime，重复本地时刻默认拒绝，允许明确选择较早或较晚的一次。 */
+  disambiguation?: 'reject' | 'earlier' | 'later';
+}
+
 export interface FieldDefinition {
   key: string;
   label: string;
@@ -438,6 +454,8 @@ export interface FieldDefinition {
   currency?: string;
   locale?: string;
   scale?: '100' | '1';
+  // 日期输入策略与数值上下限分离，不隐式转换时区。
+  dateInput?: DateInputOptions;
   // File upload contract
   accept?: string;
   maxSize?: number;

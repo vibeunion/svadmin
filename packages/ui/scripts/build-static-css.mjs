@@ -29,12 +29,19 @@ function inlineCss(path, ancestors = new Set()) {
 }
 
 const css = `${inlineCss(resolve(sourceRoot, 'app.css')).toString().trim()}\n`;
+const published = postcss.parse(css);
+// 包内工具类低于宿主 utilities，避免晚加载包覆盖响应式布局。
+published.walkAtRules('layer', rule => {
+  rule.params = rule.params.split(',').map(name =>
+    name.trim() === 'utilities' ? 'utilities.svadmin-ui' : name.trim(),
+  ).join(', ');
+});
 const aliases = postcss.parse(readFileSync(resolve(sourceRoot, 'styles/aliases.css'), 'utf8'));
 let hasPrimaryAlias = false;
 aliases.walkDecls('--color-primary', () => { hasPrimaryAlias = true; });
 if (!hasPrimaryAlias) throw new Error('Missing public theme aliases');
 mkdirSync(dist, { recursive: true });
 // 两个公开入口保持同一原生 CSS；旧路径兼容不再意味着保留编译器元数据。
-writeFileSync(resolve(dist, 'app.css'), css);
-writeFileSync(resolve(dist, 'app.theme.css'), css);
-console.info('[build-static-css] published native CSS entries and pre-generated Panda recipes');
+writeFileSync(resolve(dist, 'app.css'), published.toString());
+writeFileSync(resolve(dist, 'app.theme.css'), published.toString());
+console.info('[build-static-css] published native CSS entries and compiled Tailwind recipes');

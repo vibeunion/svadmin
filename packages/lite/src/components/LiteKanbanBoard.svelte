@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { useTranslation } from '@svadmin/core/i18n';
   export interface KanbanCard {
     id: string;
     title: string;
@@ -17,6 +18,10 @@
     columns: KanbanColumn[];
     cards?: KanbanCard[];
     formAction?: string;
+    loading?: boolean;
+    error?: string | undefined;
+    retryHref?: string;
+    ariaLabel?: string;
     class?: string;
   }
 
@@ -24,14 +29,54 @@
     columns = [],
     cards = [],
     formAction = '',
+    loading = false,
+    error,
+    retryHref,
+    ariaLabel,
     class: className = '',
   }: Props = $props();
+  const i18n = useTranslation();
+  function text(value: unknown): value is string {
+    return typeof value === 'string' && value.trim().length > 0 && value.length <= 1000;
+  }
+  const validationError = $derived.by(() => {
+    if (!Array.isArray(columns) || !Array.isArray(cards)) return 'kanban.invalidData';
+    if (columns.length > 200 || cards.length > 1000) return 'kanban.limit';
+    if (columns.some(column => !column || !text(column.id) || !text(column.title))) return 'kanban.invalidData';
+    const ids = new Set(columns.map(column => column.id));
+    if (ids.size !== columns.length) return 'kanban.invalidData';
+    const cardIds = new Set<string>();
+    for (const card of cards) {
+      if (!card || !text(card.id) || !text(card.title) || !ids.has(card.columnId) || cardIds.has(card.id)
+        || (card.description !== undefined && (typeof card.description !== 'string' || card.description.length > 10_000))
+        || (card.tags !== undefined && (!Array.isArray(card.tags) || card.tags.length > 100 || !card.tags.every(text)))
+        || (card.priority !== undefined && !['low', 'medium', 'high', 'urgent'].includes(card.priority))) return 'kanban.invalidData';
+      cardIds.add(card.id);
+    }
+    return '';
+  });
+  const displayError = $derived(error || (validationError ? i18n.t(validationError) : ''));
+  function localPath(value: string | undefined): string | undefined {
+    return value && (value.startsWith('/') || value.startsWith('?'))
+      && !/^\/[\\/]/.test(value) && !value.includes('\\')
+      && ![...value].some(char => char.charCodeAt(0) <= 32 || char.charCodeAt(0) === 127) ? value : undefined;
+  }
+  const safeAction = $derived(localPath(formAction));
+  const safeRetry = $derived(localPath(retryHref));
 </script>
 
-<div class="sv-lite-kanban-board {className}">
+<div class="sv-lite-kanban-board {className}" role="region" aria-label={ariaLabel ?? i18n.t('kanban.label')} aria-busy={loading}>
+  {#if loading}
+    <div role="status">{i18n.t('common.loading')}</div>
+  {:else if displayError}
+    <div role="alert">{displayError}</div>
+    {#if error && safeRetry}<a href={safeRetry}>{i18n.t('common.retry')}</a>{/if}
+  {:else if columns.length === 0}
+    <div role="status">{i18n.t('common.noData')}</div>
+  {:else}
   {#each columns as col (col.id)}
     {@const colCards = cards.filter((c) => c.columnId === col.id)}
-    <div class="sv-lite-kanban-column">
+    <div class="sv-lite-kanban-column" role="region" aria-label={col.title}>
       <div class="sv-lite-column-header">
         <span class="sv-lite-column-title">{col.title}</span>
         <span class="sv-lite-column-count">({colCards.length})</span>
@@ -39,7 +84,7 @@
 
       <div class="sv-lite-column-cards">
         {#each colCards as card (card.id)}
-          <div class="sv-lite-kanban-card">
+          <div class="sv-lite-kanban-card" role="group" aria-label={card.title}>
             <div class="sv-lite-card-title">{card.title}</div>
             {#if card.description}
               <div class="sv-lite-card-desc">{card.description}</div>
@@ -48,23 +93,26 @@
               {#if card.priority}
                 <span class="sv-lite-priority-badge sv-lite-{card.priority}">{card.priority}</span>
               {/if}
-              {#each card.tags ?? [] as tag (tag)}
+              {#each card.tags ?? [] as tag, index (index)}
                 <span class="sv-lite-tag-badge">#{tag}</span>
               {/each}
             </div>
           </div>
+        {:else}
+          <div role="status">{i18n.t('common.noData')}</div>
         {/each}
       </div>
 
-      {#if formAction}
-        <form method="POST" action={formAction} class="sv-lite-card-form">
+      {#if safeAction && cards.length < 1000}
+        <form method="POST" action={safeAction} class="sv-lite-card-form" aria-label={i18n.t('kanban.addTo', { column: col.title })}>
           <input type="hidden" name="columnId" value={col.id} />
-          <input type="text" name="title" placeholder="+ Add card..." class="sv-lite-card-input" />
-          <button type="submit" class="sv-lite-card-btn">Add</button>
+          <input type="text" name="title" aria-label={i18n.t('kanban.cardTitle')} placeholder={i18n.t('kanban.cardTitle')} required maxlength={1000} class="sv-lite-card-input" />
+          <button type="submit" class="sv-lite-card-btn">{i18n.t('common.add')}</button>
         </form>
       {/if}
     </div>
   {/each}
+  {/if}
 </div>
 
 <style>

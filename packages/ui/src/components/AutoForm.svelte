@@ -18,6 +18,7 @@
   import * as Alert from './ui/alert/index.js';
   import { Skeleton } from './ui/skeleton/index.js';
   import ConfirmDialog from './ConfirmDialog.svelte';
+  import ErrorSummary from './ErrorSummary.svelte';
   import { cn } from '../utils.js';
   import type { Snippet } from 'svelte';
 
@@ -38,6 +39,7 @@
     redirect?: 'list' | false;
     onCancel?: () => void;
     onNavigationGuardReady?: (guard: (fn: () => void) => void) => void;
+    showErrorSummary?: boolean;
   }
 
   let {
@@ -55,6 +57,7 @@
     redirect = 'list',
     onCancel,
     onNavigationGuardReady,
+    showErrorSummary = true,
   }: Props = $props();
   const navigation = useNavigation();
   const context = captureAdminContext();
@@ -62,6 +65,7 @@
   const activeRendering = $derived(bindResourceRendering(rendering, binding.resource));
   const isReadonly = $derived(mode === 'show');
   const isCompact = $derived(density === 'compact');
+  const instanceId = $props.id();
 
   // ─── Resource metadata ────────────────────────────────────────────
   const resource = $derived(context.getResource(resourceName));
@@ -132,6 +136,7 @@
       case 'boolean': return false;
       case 'tags': case 'images': case 'multiselect': return [];
       case 'select': return field.options?.[0]?.value ?? '';
+      case 'relation': return field.multiple ? [] : null;
       case 'json': return {};
       default: return '';
     }
@@ -160,6 +165,11 @@
       const callback = onSuccess;
       return callback ? () => callback() : undefined;
     },
+  }));
+  const errorEntries = $derived(formFields.flatMap(field => {
+    const message = form.errors[field.key];
+    return typeof message === 'string' && message.length > 0
+      ? [{ fieldKey: field.key, label: field.label || field.key, message }] : [];
   }));
 
   const renderedDraft = $derived.by(() => {
@@ -192,12 +202,21 @@
   $effect(() => () => { mounted = false; submission = undefined; });
 
   function fieldErrorId(fieldKey: string): string {
-    return `${resourceName}-${fieldKey}-error`;
+    return `${instanceId}-${resourceName}-${fieldKey}-error`;
   }
 
   function focusFirstInvalidField(): void {
     const firstInvalid = formElement?.querySelector<HTMLElement>('[aria-invalid="true"]');
     firstInvalid?.focus();
+  }
+
+  function focusField(fieldKey: string): void {
+    const field = formElement?.querySelector<HTMLElement>(
+      `[data-svadmin-field-key="${CSS.escape(fieldKey)}"]`,
+    );
+    field?.querySelector<HTMLElement>(
+      'input:not([type="hidden"]):not([disabled]), textarea:not([disabled]), select:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])',
+    )?.focus();
   }
 
   const handleSubmit = $derived.by(() => {
@@ -240,6 +259,8 @@
   const pageTitle = $derived(
     mode === 'create'
       ? `${i18n.t('common.create')}${resource.label}`
+      : mode === 'clone'
+      ? `${i18n.t('common.clone')} ${resource.label}`
       : mode === 'show'
       ? `${i18n.t('common.detail')}${resource.label}`
       : `${i18n.t('common.edit')}${resource.label}`
@@ -344,6 +365,15 @@
         </div>
       {/if}
 
+      {#if showErrorSummary && errorEntries.length > 0}
+        <ErrorSummary
+          errors={errorEntries}
+          title={i18n.t('common.formErrors')}
+          id={`${instanceId}-error-summary`}
+          onfocusfield={focusField}
+        />
+      {/if}
+
       {#if hasGroups}
         {#each groups as group, _i (_i)}
           <Card.Root class="svadmin-u-6ee2d41e2d2d svadmin-u-438b2237b8d6">
@@ -355,7 +385,7 @@
             <Card.Content class={isCompact ? 'svadmin-u-f0faeb26d656 svadmin-u-9fcd8a13827e svadmin-u-9335c39f6eff' : 'svadmin-u-f0faeb26d656 svadmin-u-7a9aabfcd059 svadmin-u-9fcd8a13827e svadmin-u-050494726fba svadmin-u-9335c39f6eff'}>
               <div class={gridClass}>
                 {#each group.fields as field (field.key)}
-                  <div class={cn(columns > 1 && isFullWidthField(field) && 'svadmin-u-2c955d1b45df', !!form.errors[field.key] && 'svadmin-u-ee1a5af3aa10')}>
+                  <div data-svadmin-field-key={field.key} class={cn(columns > 1 && isFullWidthField(field) && 'svadmin-u-2c955d1b45df', !!form.errors[field.key] && 'svadmin-u-ee1a5af3aa10')}>
                     {#if fieldRenderer}
                       {@render fieldRenderer({ field, value: renderedDraft.values[field.key], onchange: fieldChange(field.key) })}
                     {:else}
@@ -383,7 +413,7 @@
           <Card.Content class={isCompact ? 'svadmin-u-8e63407b5ceb' : 'svadmin-u-f0faeb26d656 svadmin-u-52be28846b5f svadmin-u-9fcd8a13827e svadmin-u-7a9aabfcd059 svadmin-u-0a58453f3755 svadmin-u-050494726fba'}>
               <div class={gridClass} data-svadmin-form-grid data-columns={columns} data-density={density}>
               {#each formFields as field (field.key)}
-                <div class={cn(columns > 1 && isFullWidthField(field) && 'svadmin-u-2c955d1b45df', !!form.errors[field.key] && 'svadmin-u-ee1a5af3aa10')}>
+                <div data-svadmin-field-key={field.key} class={cn(columns > 1 && isFullWidthField(field) && 'svadmin-u-2c955d1b45df', !!form.errors[field.key] && 'svadmin-u-ee1a5af3aa10')}>
                   {#if fieldRenderer}
                     {@render fieldRenderer({ field, value: renderedDraft.values[field.key], onchange: fieldChange(field.key) })}
                   {:else}

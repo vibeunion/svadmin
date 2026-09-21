@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte';
+  import { onDestroy, untrack } from 'svelte';
   import { X, Upload, RotateCw, Ban } from '@lucide/svelte';
   import { Button } from './ui/button/index.js';
+  import { useTranslation } from '@svadmin/core/i18n';
 
   export type UploadItemStatus = 'queued' | 'uploading' | 'success' | 'error' | 'cancelled';
 
@@ -9,15 +10,25 @@
     id: string;
     file: File;
     status: UploadItemStatus;
-    progress: number;
-    url?: string;
-    error?: string;
-  }
+  progress: number;
+  url?: string;
+  error?: string;
+  uploadId?: string;
+  cleanupStatus?: 'pending' | 'success' | 'error';
+}
 
-  export interface UploadSession {
-    signal: AbortSignal;
-    onProgress: (progress: number) => void;
-  }
+export interface UploadSession {
+  signal: AbortSignal;
+  idempotencyKey: string;
+  setUploadId: (uploadId: string) => void;
+  onProgress: (progress: number) => void;
+}
+
+export interface UploadCancellation {
+  uploadId: string;
+  idempotencyKey: string;
+  reason: 'cancel' | 'remove' | 'replace' | 'scope-change' | 'unmount';
+}
 
   interface Props {
     id?: string;
@@ -28,7 +39,8 @@
     maxSize?: number;
     disabled?: boolean;
     required?: boolean;
-    upload?: (file: File, session: UploadSession) => Promise<{ url?: string } | undefined> | Promise<void>;
+    upload?: (file: File, session: UploadSession) => Promise<{ url?: string; uploadId?: string } | undefined> | Promise<void>;
+    cancelUpload?: (file: File, cancellation: UploadCancellation) => Promise<void>;
     onChange?: (items: UploadItem[]) => void;
     onReject?: (file: File, reason: string) => void;
     class?: string;
@@ -44,20 +56,89 @@
     disabled = false,
     required = false,
     upload,
+    cancelUpload,
     onChange,
     onReject,
     class: className = '',
   }: Props = $props();
 
+  const i18n = useTranslation();
   let input: HTMLInputElement | undefined = $state();
   let items = $state<UploadItem[]>([]);
+  let rejected = $state<{ name: string; reason: string }[]>([]);
   let sequence = 0;
   const controllers = new Map<string, AbortController>();
-  let disposed = false;
+  interface UploadAttempt {
+    controller: AbortController;
+    upload: NonNullable<Props['upload']>;
+    cancelUpload?: Props['cancelUpload'];
+    epoch: number;
+    file: File;
+    idempotencyKey: string;
+    uploadId?: string;
+    reason?: UploadCancellation['reason'];
+    cleanupStarted?: boolean;
+    settled?: boolean;
+  }
+  const attempts = new Map<string, UploadAttempt>();
+  const latestAttempts = new Map<string, UploadAttempt>();
+  let scopeEpoch = 0;
+  let observedUpload = untrack(() => upload);
+  let destroyed = false;
+
+  $effect.pre(() => {
+    if (upload === observedUpload) return;
+    observedUpload = upload;
+    scopeEpoch += 1;
+    untrack(() => {
+      const activeIds = [...controllers.keys()];
+      for (const id of activeIds) retire(id, 'scope-change');
+      const cancelledIds = new Set(activeIds);
+      if (cancelledIds.size > 0) {
+        items = items.map(item => cancelledIds.has(item.id) && item.status === 'uploading'
+          ? { ...item, status: 'cancelled', error: 'Upload cancelled.' }
+          : item);
+        emitChange();
+      }
+    });
+  });
+
+  function retire(id: string, reason: UploadCancellation['reason'] = 'cancel'): void {
+    const attempt = attempts.get(id);
+    const controller = controllers.get(id);
+    controllers.delete(id);
+    attempts.delete(id);
+    if (attempt) attempt.reason = reason;
+    controller?.abort();
+    if (attempt) cleanupAttempt(id, attempt);
+  }
+
+  function cleanupAttempt(id: string, attempt: UploadAttempt): void {
+    if (!attempt.reason || attempt.cleanupStarted) return;
+    if (attempt?.uploadId && attempt.cancelUpload) {
+      attempt.cleanupStarted = true;
+      const publish = (cleanupStatus: NonNullable<UploadItem['cleanupStatus']>) => {
+        if (!destroyed && scopeEpoch === attempt.epoch && upload === attempt.upload
+          && latestAttempts.get(id) === attempt && items.some(item => item.id === id)) {
+          updateItem(id, { cleanupStatus });
+        }
+      };
+      publish('pending');
+      const cancellation: UploadCancellation = {
+        uploadId: attempt.uploadId,
+        idempotencyKey: attempt.idempotencyKey,
+        reason: attempt.reason,
+      };
+      const cancel = attempt.cancelUpload;
+      void Promise.resolve().then(() => cancel(attempt.file, cancellation))
+        .then(() => publish('success'), () => publish('error'));
+    }
+  }
+
   onDestroy(() => {
-    disposed = true;
-    for (const controller of controllers.values()) controller.abort();
-    controllers.clear();
+    destroyed = true;
+    for (const id of controllers.keys()) retire(id, 'unmount');
+    latestAttempts.clear();
   });
 
   function emitChange(): void {
@@ -86,61 +167,127 @@
     return undefined;
   }
 
-  function updateItem(id: string, update: Partial<UploadItem>, clear: readonly ('url' | 'error')[] = []): void {
-    if (disposed || !items.some(item => item.id === id)) return;
+  const normalizedMaxFiles = $derived(
+    multiple ? (Number.isSafeInteger(maxFiles) && maxFiles > 0 ? maxFiles : 10) : 1,
+  );
+
+  type UploadItemUpdate = Partial<Omit<UploadItem, 'error' | 'url' | 'uploadId' | 'cleanupStatus'>> & {
+    [K in 'error' | 'url' | 'uploadId' | 'cleanupStatus']?: UploadItem[K] | undefined;
+  };
+
+  function updateItem(id: string, update: UploadItemUpdate): void {
     items = items.map(item => {
       if (item.id !== id) return item;
-      const next = { ...item, ...update };
-      if (clear.includes('error')) delete next.error;
-      if (clear.includes('url')) delete next.url;
+      const { error, url, uploadId, cleanupStatus, ...required } = update;
+      const next: UploadItem = { ...item, ...required };
+      if ('error' in update && error === undefined) delete next.error;
+      if ('url' in update && url === undefined) delete next.url;
+      if ('uploadId' in update && uploadId === undefined) delete next.uploadId;
+      if ('cleanupStatus' in update && cleanupStatus === undefined) delete next.cleanupStatus;
+      if (error !== undefined) next.error = error;
+      if (url !== undefined) next.url = url;
+      if (uploadId !== undefined) next.uploadId = uploadId;
+      if (cleanupStatus !== undefined) next.cleanupStatus = cleanupStatus;
       return next;
     });
     emitChange();
   }
 
   async function process(item: UploadItem): Promise<void> {
-    if (!upload || disabled || disposed || controllers.has(item.id) || !items.some(candidate => candidate.id === item.id)) return;
+    if (destroyed || !upload || disabled) return;
+    if (controllers.has(item.id) || !items.some(candidate => candidate.id === item.id)) return;
     const controller = new AbortController();
     controllers.set(item.id, controller);
-    // 取消、替换、重试或卸载后，旧请求不再拥有更新状态的权限。
-    const current = () => !disposed && !controller.signal.aborted && controllers.get(item.id) === controller;
-    updateItem(item.id, { status: 'uploading', progress: 0 }, ['error', 'url']);
+    const attempt: UploadAttempt = {
+      controller, upload, epoch: scopeEpoch, file: item.file,
+      cancelUpload,
+      idempotencyKey: crypto.randomUUID(),
+    };
+    attempts.set(item.id, attempt);
+    latestAttempts.set(item.id, attempt);
+    // 每次尝试由独立控制器持有；旧回执和 finally 不得影响新尝试。
+    const current = () => attempts.get(item.id) === attempt
+      && controllers.get(item.id) === controller
+      && scopeEpoch === attempt.epoch && upload === attempt.upload;
+    const updateCurrent = (update: UploadItemUpdate) => {
+      if (current() && !controller.signal.aborted) updateItem(item.id, update);
+    };
+    const register = (uploadId: string) => {
+      if (attempt.settled) return;
+      if (typeof uploadId !== 'string' || !uploadId.trim() || uploadId.length > 200
+        || (attempt.uploadId !== undefined && attempt.uploadId !== uploadId)) throw new Error('Invalid upload session.');
+      attempt.uploadId = uploadId;
+      updateCurrent({ uploadId });
+      cleanupAttempt(item.id, attempt);
+    };
+    updateItem(item.id, {
+      status: 'uploading',
+      progress: 0,
+      error: undefined,
+      uploadId: undefined,
+      cleanupStatus: undefined,
+    });
     try {
-      // onChange may synchronously unmount the component or retire this attempt.
-      if (!current()) return;
-      const result = await upload(item.file, {
+      // 宿主回调可以同步卸载或替换组件；通知返回后必须重新确认本次请求仍有效。
+      if (destroyed || !current() || controller.signal.aborted) return;
+      const result = await attempt.upload(item.file, {
         signal: controller.signal,
-        onProgress: progress => {
-          if (current()) updateItem(item.id, {
-            progress: Number.isFinite(progress) ? Math.max(0, Math.min(100, Math.round(progress))) : 0,
-          });
-        },
+        idempotencyKey: attempt.idempotencyKey,
+        setUploadId: register,
+        onProgress: progress => updateCurrent({
+          progress: Number.isFinite(progress) ? Math.max(0, Math.min(100, Math.round(progress))) : 0,
+        }),
       });
-      if (current()) updateItem(item.id, { status: 'success', progress: 100,
-        ...(result?.url === undefined ? {} : { url: result.url }) });
+      if (result?.uploadId !== undefined) register(result.uploadId);
+      const uploadId = result?.uploadId ?? attempt.uploadId;
+      updateCurrent({
+        status: 'success',
+        progress: 100,
+        ...(result?.url === undefined ? {} : { url: result.url }),
+        ...(uploadId === undefined ? {} : { uploadId }),
+      });
     } catch (error) {
-      if (current()) updateItem(item.id, { status: 'error',
-        error: error instanceof Error ? error.message : 'Upload failed.' });
+      if (!current()) return;
+      updateItem(item.id, {
+        status: controller.signal.aborted ? 'cancelled' : 'error',
+        error: controller.signal.aborted ? 'Upload cancelled.' : error instanceof Error ? error.message : 'Upload failed.',
+      });
     } finally {
-      if (controllers.get(item.id) === controller) controllers.delete(item.id);
+      attempt.settled = true;
+      if (current()) {
+        controllers.delete(item.id);
+        attempts.delete(item.id);
+      }
     }
   }
 
   function addFiles(selected: File[]): void {
-    if (disabled || disposed) return;
-    const available = Math.max(0, maxFiles - items.length);
-    for (const file of selected.slice(0, multiple ? available : 1)) {
-      // Host notifications may synchronously disable or unmount this batch.
-      if (disabled || disposed) return;
+    if (destroyed || disabled) return;
+    const available = multiple
+      ? Math.max(0, normalizedMaxFiles - items.length)
+      : 1;
+    rejected = [];
+    if (selected.length > available) {
+      for (const file of selected.slice(available)) {
+        if (destroyed) return;
+        rejected = [...rejected, { name: file.name, reason: 'Maximum file count exceeded.' }];
+        onReject?.(file, 'Maximum file count exceeded.');
+      }
+    }
+    for (const file of selected.slice(0, multiple ? available : Math.min(available, 1))) {
+      if (destroyed) return;
       const reason = validate(file);
       if (reason) {
+        rejected = [...rejected, { name: file.name, reason }];
         onReject?.(file, reason);
         continue;
       }
       const item: UploadItem = { id: nextId(), file, status: 'queued', progress: 0 };
       if (!multiple) {
-        for (const controller of controllers.values()) controller.abort();
-        controllers.clear();
+        for (const previous of items) {
+          retire(previous.id, 'replace');
+          latestAttempts.delete(previous.id);
+        }
       }
       items = multiple ? [...items, item] : [item];
       emitChange();
@@ -152,21 +299,23 @@
     const target = event.currentTarget;
     if (!(target instanceof HTMLInputElement)) return;
     addFiles(Array.from(target.files ?? []));
+    // 异步模式的文件由队列持有，清空输入以允许再次选择同名文件。
+    if (upload) target.value = '';
   }
 
   function remove(id: string): void {
-    if (disabled || disposed) return;
-    controllers.get(id)?.abort();
-    controllers.delete(id);
+    if (disabled) return;
+    retire(id, 'remove');
+    latestAttempts.delete(id);
     items = items.filter(item => item.id !== id);
+    if (input) input.value = '';
     emitChange();
   }
 
   function cancel(id: string): void {
     const controller = controllers.get(id);
     if (!controller) return;
-    controller.abort();
-    controllers.delete(id);
+    retire(id, 'cancel');
     updateItem(id, { status: 'cancelled', error: 'Upload cancelled.' });
   }
 
@@ -183,15 +332,15 @@
 </script>
 
 <div class={`svadmin-file-upload ${className}`}>
-  <input
+    <input
     bind:this={input}
     type="file"
     {id}
-    {name}
+    name={upload ? undefined : name}
     {accept}
     {multiple}
     disabled={disabled}
-    {required}
+    required={upload ? false : required}
     class="svadmin-file-upload-input"
     onchange={handleInput}
   />
@@ -209,8 +358,19 @@
     }}
   >
     <Upload aria-hidden="true" />
-    <span>Select or drop files</span>
+    <span>{i18n.t('upload.selectOrDrop')}</span>
   </div>
+
+  <div role="status" aria-live="polite">
+    {i18n.t('upload.selectedCount', { count: String(items.length), max: String(normalizedMaxFiles) })}
+  </div>
+  {#if rejected.length}
+    <ul aria-label={i18n.t('upload.rejectedFiles')}>
+      {#each rejected as rejection (rejection)}
+        <li>{rejection.name}: {rejection.reason}</li>
+      {/each}
+    </ul>
+  {/if}
 
   {#if items.length}
     <ul class="svadmin-file-upload-list" aria-label="Selected files">
@@ -233,6 +393,8 @@
             <X aria-hidden="true" />
           </Button>
           {#if item.error}<span role="alert">{item.error}</span>{/if}
+          {#if item.cleanupStatus === 'pending'}<span role="status">{i18n.t('upload.cleanupPending')}</span>{/if}
+          {#if item.cleanupStatus === 'error'}<span role="alert">{i18n.t('upload.cleanupFailed')}</span>{/if}
         </li>
       {/each}
     </ul>

@@ -1,47 +1,83 @@
 <script lang="ts">
+  import { captureAdminContext, type Organization } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
-  import { Loader2 } from '@lucide/svelte';
-  import { Button } from '../ui/button/index.js';
-  import { Input } from '../ui/input/index.js';
-  import { Label } from '../ui/label/index.js';
-  import { Textarea } from '../ui/textarea/index.js';
   import ContentPageShell from '../content/ContentPageShell.svelte';
   import ContentPageHeader from '../content/ContentPageHeader.svelte';
-  import DescriptionList from '../content/DescriptionList.svelte';
-  import MemberList from '../content/MemberList.svelte';
-  import SectionHeader from '../content/SectionHeader.svelte';
-  import SettingsGroup from '../content/SettingsGroup.svelte';
-  import WorkspaceLayout from '../content/WorkspaceLayout.svelte';
-  import type { MemberSummary } from '../content/MemberList.svelte';
+  import DataState from '../content/DataState.svelte';
+  import FeedbackNotice from '../content/FeedbackNotice.svelte';
+  import { Input } from '../ui/input/index.js';
+  import { Button } from '../ui/button/index.js';
+
+  const context = captureAdminContext();
   const i18n = useTranslation();
-  let companyName = $state('Acme Corporation');
-  let industry = $state('Technology');
-  let website = $state('https://acme.com');
-  let description = $state('Building the future of enterprise software with dependable AI and cloud workflows.');
+  const isZh = $derived(i18n.locale === 'zh-CN');
+  const provider = $derived(context.organizationProvider);
+  let organization = $state<Organization | null>(null);
+  let name = $state('');
+  let loading = $state(false);
   let saving = $state(false);
-  const members: MemberSummary[] = [
-    { id: '1', name: 'Alex Chen', email: 'alex@acme.com', role: 'Admin', status: 'success' },
-    { id: '2', name: 'Sarah Kim', email: 'sarah@acme.com', role: 'Editor', status: 'success' },
-    { id: '3', name: 'Mike Johnson', email: 'mike@acme.com', role: 'Viewer', status: 'neutral' },
-    { id: '4', name: 'Emma Davis', email: 'emma@acme.com', role: 'Admin', status: 'success' },
-  ];
-  async function save() { saving = true; await new Promise((resolve) => setTimeout(resolve, 400)); saving = false; }
+  let error = $state('');
+  let loadError = $state('');
+  let status = $state('');
+  let epoch = 0;
+  async function load() {
+    const current = provider;
+    const request = ++epoch;
+    organization = null; name = ''; error = ''; loadError = ''; status = ''; saving = false;
+    loading = Boolean(current);
+    if (!current) return;
+    try {
+      const result = await current.getCurrentOrganization(context.enterpriseRequestContext);
+      if (request !== epoch) return;
+      organization = result; name = result?.name ?? '';
+    } catch (caught) {
+      if (request === epoch) loadError = caught instanceof Error ? caught.message : String(caught);
+    } finally {
+      if (request === epoch) loading = false;
+    }
+  }
+  $effect(() => {
+    void provider; void context.authProvider; void context.tenantCacheKey?.__svadminTenant;
+    void load();
+    return () => { epoch += 1; };
+  });
+  async function save(event: SubmitEvent) {
+    event.preventDefault();
+    const current = provider;
+    if (!current?.updateCurrentOrganization || !organization || !name.trim() || saving) return;
+    const request = epoch;
+    saving = true; error = ''; status = '';
+    try {
+      const result = await current.updateCurrentOrganization({ name: name.trim() }, context.enterpriseRequestContext);
+      if (request !== epoch) return;
+      organization = result; name = result.name;
+      status = isZh ? '组织信息已保存' : 'Organization saved';
+    } catch (caught) {
+      if (request === epoch) error = caught instanceof Error ? caught.message : String(caught);
+    } finally {
+      if (request === epoch) saving = false;
+    }
+  }
 </script>
 
-{#snippet headerActions()}
-  <Button onclick={save} disabled={saving} size="sm">{#if saving}<Loader2 class="svadmin-u-783b0d9d1e2c svadmin-u-afbdd13a380e" />{/if}{i18n.t('common.save')}</Button>
-{/snippet}
-
-{#snippet primary()}
-  <SettingsGroup title={i18n.t('account.basicSettings')} description={i18n.t('account.companyProfileDescription')} bodyClass="space-y-4"><div class="svadmin-u-f3c543ad5fe9 svadmin-u-0c3bc98565dd svadmin-u-e00ad81645a2"><div class="svadmin-u-6f7e013d6499"><Label for="company-name">{i18n.t('profile.companyName')}</Label><Input id="company-name" bind:value={companyName} /></div><div class="svadmin-u-6f7e013d6499"><Label for="company-industry">{i18n.t('profile.industry')}</Label><Input id="company-industry" bind:value={industry} /></div><div class="svadmin-u-6f7e013d6499 svadmin-u-d378a2461dc3"><Label for="company-website">{i18n.t('profile.website')}</Label><Input id="company-website" bind:value={website} type="url" /></div></div><div class="svadmin-u-6f7e013d6499"><Label for="company-description">{i18n.t('profile.companyDescription')}</Label><Textarea id="company-description" bind:value={description} rows={4} /></div></SettingsGroup>
-{/snippet}
-
-{#snippet secondary()}
-  <SettingsGroup title={i18n.t('profile.companyName')} description={industry} bodyClass="space-y-4"><p class="svadmin-u-42536e69e639 svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{companyName}</p><DescriptionList columns={1} items={[{ label: i18n.t('profile.website'), value: website, href: website }, { label: i18n.t('profile.employees'), value: '1,250' }, { label: i18n.t('profile.founded'), value: '2015' }]} /></SettingsGroup>
-{/snippet}
-
-<ContentPageShell pageId="account-company-profile" width="wide">
-  <ContentPageHeader title={i18n.t('account.companyProfile')} description={i18n.t('account.companyProfileDescription')} actions={headerActions} />
-  <WorkspaceLayout {primary} {secondary} secondaryWidth="20rem" />
-  <section class="svadmin-u-6ed543e2fbbb"><SectionHeader title={i18n.t('profileSections.members')} /><MemberList {members} emptyTitle={i18n.t('common.noData')} emptyDescription={i18n.t('empty.description')} /></section>
+<ContentPageShell pageId="account-company-profile" width="narrow">
+  <ContentPageHeader title={i18n.t('account.companyProfile')} />
+  {#if !provider}
+    <FeedbackNotice tone="warning" message={isZh ? '未配置组织资料服务，无法加载或保存公司资料。' : 'OrganizationProvider is not configured. Company details cannot be loaded or saved.'} />
+  {:else if loading}
+    <DataState state="loading" />
+  {:else if loadError}
+    <DataState state="error" description={loadError} retry={load} />
+  {:else if !organization}
+    <DataState state="empty" title={isZh ? '暂无组织资料' : 'No organization details'} />
+  {:else}
+    <form onsubmit={save}>
+      <label for="company-name">{isZh ? '组织名称' : 'Organization name'}</label>
+      <Input id="company-name" bind:value={name} required disabled={saving || !provider.updateCurrentOrganization} />
+      {#if !provider.updateCurrentOrganization}<p>{isZh ? '当前组织资料为只读。' : 'Organization details are read-only.'}</p>{/if}
+      <Button type="submit" disabled={saving || !provider.updateCurrentOrganization || !name.trim() || name.trim() === organization.name}>{saving ? i18n.t('common.loading') : i18n.t('common.save')}</Button>
+      {#if error}<p role="alert">{error}</p>{/if}
+      {#if status}<p role="status">{status}</p>{/if}
+    </form>
+  {/if}
 </ContentPageShell>
