@@ -24,7 +24,6 @@ PATTERN_COMPONENTS = {
 COMPONENTS = ('ContentPageShell', 'ContentPageHeader', 'FilterToolbar', 'DataState',
               'DescriptionList', 'StatusBadge', 'SettingsGroup', 'SettingsFieldRow')
 REFERENCES = {
-    'stripe-connect': ('1438614134095442934', 'https://docs.stripe.com/connect/embedded-appearance-options'),
     'park-foundations': ('1268615283036362769', 'https://park-ui.com/docs/figma'),
 }
 TOKEN_PATH = 'packages/ui/src/app.css'
@@ -269,7 +268,7 @@ def validate_bundle(manifest: dict, contract: dict, source_root: Path | None = N
     fields(contract, 'schemaVersion id version source boundaries tokens discrepancies components patterns acceptanceTargets', 'contract')
     for doc in (manifest, contract):
         exact(doc['schemaVersion'], 1, 'schemaVersion')
-        exact(doc['id'], 'svadmin-stripe-first-reference-kit', 'id')
+        exact(doc['id'], 'svadmin-admin-ui-reference-kit', 'id')
         exact(doc['version'], '0.1.0', 'version')
     exact(manifest['purpose'], 'reference-only', 'purpose')
     require(isinstance(manifest['reviewedOn'], str), 'reviewedOn', '需要日期字符串')
@@ -279,7 +278,7 @@ def validate_bundle(manifest: dict, contract: dict, source_root: Path | None = N
     except ValueError as exc:
         raise ValidationError('reviewedOn: 无效日期') from exc
     refs = manifest['references']
-    require(type(refs) is list and len(refs) == 2, 'references', '只采用两套参考')
+    require(type(refs) is list and len(refs) == len(REFERENCES), 'references', '必须且仅包含已登记参考')
     ids = []
     for ref in refs:
         fields(ref, 'id name documentationUrl communityFileId communityUrl role fileInspection licenseReview redistributionApproved', 'reference')

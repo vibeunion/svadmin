@@ -94,6 +94,14 @@ test('reference permissions remain separate from source availability', () => {
   const bundled = structuredClone(references);
   bundled.assets.push({ name: 'third-party-file' });
   assert.throws(() => validateManifest(bundled));
+  for (const field of ['licenseReview', 'fileInspection', 'officialSource', 'designFile']) {
+    const changed = structuredClone(references);
+    changed.references[0][field] = 'unreviewed-change';
+    assert.throws(() => validateManifest(changed));
+  }
+  const extra = structuredClone(references);
+  extra.references.push({ ...extra.references[0], id: 'unexpected-reference' });
+  assert.throws(() => validateManifest(extra));
 });
 
 test('Figma handoff cannot claim pending components or Code Connect are complete', () => {

@@ -8,14 +8,16 @@
 - Source：用户授权完成后提交、推送、合入 main，允许强制推送。
 - 首次交付：`560c2d33` 为测试断言及包元数据整理；`d5196a87` 为 Tailwind/OpenUI 迁移与 example 整改。两条提交已普通快进到远端 main，未强推、未删除历史、未改原工作区。
 - 后续范围：仅修复该提交实际触发的 CI 失败，不恢复 Panda、不关闭检查、不发布 npm。
-- 风险中等，managed：主 writer 集成；三个不重叠 writer 分别负责 reference-kit、stripe-first、指定测试文件，完成后切换只读复核。
+- 风险中等，managed：主 writer 集成；三个不重叠 writer 分别负责 reference-kit、Admin UI 设计资产与样例、指定测试文件，完成后切换只读复核。
 
 ## 实际发现及修复
 
-| 远端检查 | 失败原因 | 修复 |
+以下按职责归类远端检查，不逐字引用历史 Actions 名称；原始日志与提交记录不改写。
+
+| 远端检查类别 | 失败原因 | 修复 |
 | --- | --- | --- |
 | Design reference kit | 读取已删除的 Panda tokens/recipes | 映射到实际 app.css、Tailwind 主题映射和 recipes.ts；保留来源验证与负向回归 |
-| Stripe-first design assets / specimens | 旧 recipe 路径及 CSS blob 已失效 | 当前来源单独记录；历史 Figma revision、blob、未同步状态保留，不宣称新视觉已获 Figma 验收 |
+| Admin UI 设计资产与样例 | 旧 recipe 路径及 CSS blob 已失效 | 当前来源单独记录；历史 Figma revision、blob、未同步状态保留，不宣称新视觉已获 Figma 验收 |
 | CI / Native UI Styles lint | 新测试非空断言、三个页面的断言和未使用变量 | 使用已有 requireValue；静态导航改为非空 tuple；删除未使用派生变量 |
 | Native UI Styles strict types | devframe 可选 peer cac 类型缺失、成员目录 undefined、测试 provider mock 不完整 | 声明开发依赖；明确支持移除 provider；修正 mock 契约，不降低类型检查 |
 | Native primitive migration browser | 探针使用已退出组件的工具类和错误语义类名 | 对齐实际组件类，保留尺寸、断点、颜色和 RTL 断言 |
@@ -35,3 +37,19 @@
 - 首轮远端日志下载在忽略目录 `output/ci/d5196a87/`；本地 browser 证据在 `test-results/content-recipes/` 和 `test-results/ui-styles/conditional-styles.json`，不自动随 Git 提交。
 
 首轮远端失败不能被本地通过改写为远端成功；追加提交后的 Actions 状态需要另行读回。Git 合入、CI 完成、npm 发布和生产部署是不同状态。
+
+## 中性命名与第二轮验收
+
+- Source：用户要求系统及文件名不包含已退出的外部品牌命名。
+- 当前设计资产目录统一为 `design/admin-ui`；两个设计工作流及重构契约测试同步改名，更新路径过滤、命令和产物引用。
+- 文档以 SVAdmin 自身设计原则为准，保留 OpenUI 方向。仓库与生成器的 DESIGN.md 同步；移除不再采用的活动参考，不伪造第三方链接或历史引文。
+- 当前版本 3,041 个文件的路径和文本扫描零残留；历史 Git 对象及原始 CI 日志不改写。
+- 命名关联契约 16/16、样式来源契约 5/5、app.css 单文件测试 10/10 通过；定向 lint 和差异检查通过。
+- Reference-kit 单文件 72/72，离线插件 64/64；设计资产生成器 17/17、Preview model 13/13，Preview 类型检查无错误或警告。
+- `def4da77` 的远端验收仍有三个失败检查类别：主 CI 的旧页面源码断言、设计预览的废弃 recipe 导入、Native UI 的浏览器对比和旧组件断言。本轮逐项修复；这些旧结果不作为新提交已通过的证据。
+- 保留并行提交 `b9e7774c` 的 CRM 进度修复；不覆盖其他作者改动，不重写 main 历史。
+- 修复不支持 `color-mix` 时消失的键盘焦点轮廓：先声明 `var(--ring)` 回退，再使用增强色值；app.css 单文件测试增加至 11/11。
+- 历史基线到升级后目标的累计差异以 11 个固定浅色 token 记录独立 reference，其中 7 项在本次升级提交改变、4 项此前已达目标；禁止从候选样式取期望。保留原始 baseline、reference、published 三组截图，仍严格比对计算样式与 PNG；浏览器 6/6、焦点与对比度回退 12/12。证明范围限于当前夹具，并非全应用历史外观不变。
+- 真实 provider 行为的 reference-pages 回归 7/7，返回导航回归 19/19；不再期待已移除的模拟 MFA 流程。
+- 设计预览 228/228 场景、6/6 交互、2/2 键盘场景、2/2 主题颜色检查通过。
+- UI 和 example 构建成功；本地 5191 预览已更新，1440px / 390px 首页无横向溢出、无页面运行错误。

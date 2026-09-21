@@ -1,4 +1,4 @@
-/* @svadmin/ui - Stripe-first product tokens
+/* @svadmin/ui - Admin UI product tokens
  * Imported by AdminApp and overridable by consumer CSS.
  * Metronic references inform capability coverage, never visual styling.
  */
@@ -2145,7 +2145,7 @@ details[data-svadmin-filter]:not([open]) > :not(summary), details.svadmin-collap
   display: none !important;
 }
 
-/* --- Stripe-first layout preset (clean-flat) --- */
+/* --- Admin UI layout preset (clean-flat) --- */
 /* Keep this public class for layoutPreset API compatibility. The preset only
  * adjusts density and composition; color, focus, and elevation stay semantic. */
 .layout-clean-flat {

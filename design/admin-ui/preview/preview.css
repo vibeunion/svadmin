@@ -33,6 +33,17 @@ body { margin: 0; }
 .kit-customer-name { display: block; white-space: normal; overflow-wrap: anywhere; max-width: 340px; font-weight: 500; }
 .kit-cell-sub { display: block; font-size: 12px; }
 .kit-number { text-align: end; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.kit-list-filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.kit-list-filter { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 8px 12px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted-foreground); font: inherit; cursor: pointer; }
+.kit-list-filter[aria-pressed='true'] { border-bottom-color: var(--primary); color: var(--foreground); font-weight: 600; }
+.kit-list-filter:hover { background: var(--muted); }
+.kit-list-filter:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.kit-list-filter-count { font-size: 12px; font-variant-numeric: tabular-nums; }
+.kit-list-table { min-width: 0; }
+.kit-list-table tbody tr { border-bottom: 1px solid var(--border); }
+.kit-list-identity { display: flex; align-items: center; gap: 12px; }
+.kit-list-avatar { display: grid; place-items: center; flex: 0 0 32px; height: 32px; border-radius: var(--radius-md); background: var(--muted); color: var(--muted-foreground); font-size: 12px; }
+.kit-list-footer { margin: 12px 0 0; color: var(--muted-foreground); font-size: 12px; }
 .kit-timeline { display: grid; gap: 20px; padding-inline-start: 20px; margin: 0; }
 .kit-timeline li > span { display: block; font-size: 12px; margin-top: 4px; }
 .kit-form-control { width: 300px; max-width: 100%; }

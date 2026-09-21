@@ -1,6 +1,6 @@
 {
-  "id": "stripe-product-integration-20260919",
-  "parent": "stripe-reference-implementation-20260919",
+  "id": "admin-ui-product-integration-20260919",
+  "parent": "admin-ui-reference-implementation-20260919",
   "source": "User continuation 2026-09-19T16:17:11Z",
   "reason": "Finish reference-driven product recipes, integrate current main without losing content/fallback fixes, validate current screenshots and CI.",
   "risk": "low",
@@ -13,11 +13,11 @@
   "baseMain": "8f068fb093b48cd2410b3b28a6066b567a44690e",
   "basePr": "0f6c4ad148f69b501870f0c18c6ea94bd27a8349",
   "scope": [
-    "design/stripe-first",
+    "design/admin-ui",
     "packages/ui/panda.config.ts",
     "packages/ui/design/product-recipes.ts",
     "packages/ui/scripts/product-recipes.test.mjs",
-    ".github/workflows/stripe-first-*",
+    ".github/workflows/admin-ui-*",
     "packages/ui/src/recipes.ts",
     "packages/ui/src/components/content/StatusBadge.svelte"
   ],

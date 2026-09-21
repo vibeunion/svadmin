@@ -43,7 +43,7 @@ SVAR `35450707257`。合并提交为 `c02ac0dab6edc081b4175d17a46fdeff98e1267d`�
 
 ## 产品方向
 
-继续 Svelte、Bits UI 与 Tailwind recipes，不再更换整套组件技术栈。保留 Stripe-first 的克制风格，
+继续 Svelte、Bits UI 与 Tailwind recipes，不再更换整套组件技术栈。遵循 svadmin 自身的克制设计原则，
 优先减少信息层级和重复操作：列表让查询、筛选、记录和一个主操作优先于大面积概览卡；
 详情强调状态、关键属性和有权限的上下文操作；设置区分未修改、脏表单、保存中、成功、
 失败及只读。大范围布局或 token 变更需独立 diff 与新的真实截图，不能混入兼容修复。

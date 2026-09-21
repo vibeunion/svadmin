@@ -7,7 +7,7 @@ import { buildKit, runtimeSource, verifyRuntimeSources } from '../build.mjs';
 
 export const directory = dirname(fileURLToPath(import.meta.url));
 export const root = resolve(directory, '../../..');
-export const evidence = resolve(root, 'test-results/stripe-first-browser');
+export const evidence = resolve(root, 'test-results/admin-ui-browser');
 const require = createRequire(resolve(root, 'packages/ui/package.json'));
 const { build, preview } = await import(require.resolve('vite'));
 const { svelte } = await import(require.resolve('@sveltejs/vite-plugin-svelte'));

@@ -20,7 +20,7 @@ const report = {
 };
 rmSync(evidence, { force: true, recursive: true });
 mkdirSync(resolve(evidence, 'screenshots'), { recursive: true });
-for (const file of readdirSync(directory).filter(name => /\.(svelte|css|mjs|js|json)$/u.test(name)).sort()) report.sourceHashes[`design/stripe-first/preview/${file}`] = sha256(readFileSync(resolve(directory, file)));
+for (const file of readdirSync(directory).filter(name => /\.(svelte|css|mjs|js|json)$/u.test(name)).sort()) report.sourceHashes[`design/admin-ui/preview/${file}`] = sha256(readFileSync(resolve(directory, file)));
 for (const file of ['packages/ui/dist/app.css', runtimeSource.stylesheet, runtimeSource.recipeSource]) report.sourceHashes[file] = sha256(readFileSync(resolve(root, file)));
 let server;
 let browser;

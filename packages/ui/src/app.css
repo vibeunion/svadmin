@@ -420,6 +420,7 @@ h6,
 [data-slot="select-trigger"]:focus-visible,
 .sidebar-menu-item:focus-visible {
   border-color: var(--ring);
+  outline: 2px solid var(--ring);
   outline: 2px solid color-mix(in oklch, var(--ring) 48%, transparent);
   outline-offset: 2px;
 }
@@ -2496,7 +2497,7 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
   display: none !important;
 }
 
-/* --- Stripe-first layout preset (clean-flat) --- */
+/* --- Admin UI layout preset (clean-flat) --- */
 /* Keep this public class for layoutPreset API compatibility. The preset only
  * adjusts density and composition; color, focus, and elevation stay semantic. */
 .layout-clean-flat {

@@ -354,7 +354,7 @@ export { default as TeamCrewTablePage } from './components/network/TeamCrewTable
 // Auth extensions
 export { default as TwoFactorAuthPage } from './components/TwoFactorAuthPage.svelte';
 
-// Stripe-first content page and domain primitives
+// Admin UI content page and domain primitives
 export { default as ContentPageShell } from './components/content/ContentPageShell.svelte';
 export { default as ContentPageHeader } from './components/content/ContentPageHeader.svelte';
 export { default as SectionHeader } from './components/content/SectionHeader.svelte';

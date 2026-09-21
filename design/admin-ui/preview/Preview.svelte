@@ -17,7 +17,6 @@
   import SectionHeader from '../../../packages/ui/dist/components/content/SectionHeader.svelte';
   import PageToolbar from '../../../packages/ui/dist/components/content/PageToolbar.svelte';
   import ApiKeyList from '../../../packages/ui/dist/components/content/ApiKeyList.svelte';
-  import { productList } from '../../../packages/ui/dist/recipes.js';
   import { ChevronRight, Users, Settings2, PanelsTopLeft, UserRound } from '@lucide/svelte';
   import { customers, filterCustomers, readPreviewOptions, scenarios, settingsSeed } from './model.mjs';
 
@@ -39,7 +38,13 @@
     const labels: Record<string, string> = { ready: tx('正常', 'Ready'), loading: tx('加载中', 'Loading'), 'initial-empty': tx('首次无数据', 'First use'), 'filtered-empty': tx('筛选无结果', 'No matches'), error: tx('请求失败', 'Error'), forbidden: tx('无权限', 'Forbidden'), partial: tx('部分数据', 'Partial'), dirty: tx('待保存', 'Unsaved'), invalid: tx('校验失败', 'Invalid'), saving: tx('保存中', 'Saving'), saved: tx('保存成功', 'Saved'), readonly: tx('只读', 'Read only') };
     return Object.hasOwn(labels, key) ? labels[key] : key;
   }
-  const listStyles = productList();
+  // 样例专属布局不依赖已删除的 Panda productList；控件仍使用真实发布组件。
+  const listStyles = {
+    filters: 'kit-list-filters', filter: 'kit-list-filter', filterCount: 'kit-list-filter-count',
+    table: 'kit-list-table', numeric: 'kit-number', identity: 'kit-list-identity',
+    avatar: 'kit-list-avatar', name: 'kit-customer-name', secondary: 'kit-cell-sub',
+    footer: 'kit-list-footer', help: 'kit-muted',
+  };
   let statusFilter = $state<'all' | 'active' | 'pending'>('all');
   const statuses = ['all', 'active', 'pending'] as const;
   const statusLabel = (status: string) => status === 'active' ? tx('已启用', 'Active') : status === 'pending' ? tx('待审核', 'Pending') : tx('全部客户', 'All customers');
@@ -112,7 +117,7 @@
 <div class:dark={theme === 'dark'} class="svadmin-theme kit-root" data-theme={theme} data-preview-density={density}>
   <a class="kit-skip" href="#kit-main">{tx('跳到样例内容', 'Skip to preview')}</a>
   <header class="kit-controls" aria-label={tx('设计预览控制', 'Preview controls')}>
-    <div class="kit-brand"><strong>svadmin</strong><span>Stripe-first · v0.1</span></div>
+    <div class="kit-brand"><strong>svadmin</strong><span>Admin UI · v0.1</span></div>
     <div class="kit-options">
       <label>{tx('主题', 'Theme')}<select data-testid="theme" bind:value={theme}><option value="light">Light</option><option value="dark">Dark</option></select></label>
       <label>{tx('语言', 'Language')}<select data-testid="locale" bind:value={locale}><option value="zh-CN">中文</option><option value="en">English</option></select></label>

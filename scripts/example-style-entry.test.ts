@@ -17,7 +17,7 @@ test('active workflows use current native style and recipe entry points', () => 
   for (const file of ['surface-contracts.yml', 'svar-grid.yml']) {
     expect(read(`.github/workflows/${file}`)).toContain('bun run --cwd packages/ui build\n');
   }
-  expect(read('.github/workflows/stripe-first-browser-specimens.yml'))
+  expect(read('.github/workflows/admin-ui-browser-specimens.yml'))
     .toContain('node --test packages/ui/scripts/tailwind-recipes.test.mjs');
 });
 

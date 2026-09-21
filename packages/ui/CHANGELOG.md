@@ -5,9 +5,9 @@
 
 ### 🚀 Features
 
-* **design:** implement Stripe-led product patterns with reusable Panda anatomy ([5f2d2ee](https://github.com/vibeunion/svadmin/commit/5f2d2eefd0d1f3cd50bc5e18b5cc80c59bdcb69b))
-* **design:** integrate Stripe-first patterns and readable status badges with current main ([fa5d10f](https://github.com/vibeunion/svadmin/commit/fa5d10f57603cc5709e4f140e7a1bb9e675fed81))
-* **design:** integrate Stripe-first product recipes without overwriting concurrent repairs ([0f6c4ad](https://github.com/vibeunion/svadmin/commit/0f6c4ad148f69b501870f0c18c6ea94bd27a8349))
+* **design:** implement svadmin-led product patterns with reusable Panda anatomy ([5f2d2ee](https://github.com/vibeunion/svadmin/commit/5f2d2eefd0d1f3cd50bc5e18b5cc80c59bdcb69b))
+* **design:** integrate Admin UI patterns and readable status badges with current main ([fa5d10f](https://github.com/vibeunion/svadmin/commit/fa5d10f57603cc5709e4f140e7a1bb9e675fed81))
+* **design:** integrate Admin UI product recipes without overwriting concurrent repairs ([0f6c4ad](https://github.com/vibeunion/svadmin/commit/0f6c4ad148f69b501870f0c18c6ea94bd27a8349))
 * **styles:** add finite content page header and metric slot recipes ([1603ef4](https://github.com/vibeunion/svadmin/commit/1603ef46931a80da6f707bd5dadbdc7918b62c8b))
 * **styles:** define theme-bound content layout and typography tokens ([64bd1bc](https://github.com/vibeunion/svadmin/commit/64bd1bc740602b4f37006ddf74abd9c2f165793a))
 * **styles:** generate repository-wide finite Panda utility recipes ([addeefd](https://github.com/vibeunion/svadmin/commit/addeefda3f7d2c6f794891409502114b8981e54d))
@@ -87,10 +87,10 @@
 
 ### 🔧 Miscellaneous Chores
 
-* **design:** reconcile Stripe specimens with merged reference assets on main ([3a9bbad](https://github.com/vibeunion/svadmin/commit/3a9bbad1ea829b32ef25c094e071a1113bde5f8c))
+* **design:** reconcile svadmin specimens with merged reference assets on main ([3a9bbad](https://github.com/vibeunion/svadmin/commit/3a9bbad1ea829b32ef25c094e071a1113bde5f8c))
 * **review:** integrate current main into PR [#445](https://github.com/vibeunion/svadmin/issues/445) without altering either side ([3e156fb](https://github.com/vibeunion/svadmin/commit/3e156fb050f926514c41e62f86b30a4eebc2c517))
 * **review:** integrate current main into PR [#446](https://github.com/vibeunion/svadmin/issues/446) without altering either side ([5578055](https://github.com/vibeunion/svadmin/commit/5578055d65d9e0264f43f9fc7bd473860776ee3f))
-* **review:** reconcile nested form follow-up with merged Stripe main ([f88e93e](https://github.com/vibeunion/svadmin/commit/f88e93e7bc4dc072fd13b0fd3c47c3d508a961e8))
+* **review:** reconcile nested form follow-up with merged svadmin main ([f88e93e](https://github.com/vibeunion/svadmin/commit/f88e93e7bc4dc072fd13b0fd3c47c3d508a961e8))
 * **styles:** reconcile content recipes with native primitives on main ([ae608de](https://github.com/vibeunion/svadmin/commit/ae608de888de8e06c3f6aeebd92e5de1b8ae9af3))
 * **ui:** synchronize health office with verified product and nested-form main ([bb2edb2](https://github.com/vibeunion/svadmin/commit/bb2edb2a9597e6fd3a4569b937f40f647789404e))
 
@@ -589,7 +589,7 @@
 * **ui:** add Metronic-inspired admin pages ([bfa10db](https://github.com/vibeunion/svadmin/commit/bfa10db87a80c6781e4668340437259705ed6fdc))
 * **ui:** add Settings sub-pages, ErrorPage, Dashboard expansion and i18n ([eb55054](https://github.com/vibeunion/svadmin/commit/eb55054458928ae2033113e8fd577628a9261819))
 * **ui:** add siteUrl prop to optionally render a Go To Site button in the header ([#97](https://github.com/vibeunion/svadmin/issues/97)) ([abf5de0](https://github.com/vibeunion/svadmin/commit/abf5de07d581b1b59a8deab4e01657591dc10025))
-* **ui:** adopt Stripe-first design system ([eee648c](https://github.com/vibeunion/svadmin/commit/eee648ca9ac83576f8dcf9ef86c969c09a882d48))
+* **ui:** adopt Admin UI design system ([eee648c](https://github.com/vibeunion/svadmin/commit/eee648ca9ac83576f8dcf9ef86c969c09a882d48))
 * **ui:** diversify example application layouts ([f74f47b](https://github.com/vibeunion/svadmin/commit/f74f47b855f5640899e203bf9181fafcb399a689))
 * **ui:** enhance Sidebar group typography and expand default icon map ([#95](https://github.com/vibeunion/svadmin/issues/95)) ([2b80b64](https://github.com/vibeunion/svadmin/commit/2b80b64af8ae3f69eb03f3c9cb90ab80ca1634ed))
 * **ui:** expand admin example pages ([7d7dc5e](https://github.com/vibeunion/svadmin/commit/7d7dc5eb1039191d606bf0deea0fd87bc51772f6))
@@ -603,7 +603,7 @@
 * **ui:** remove default border classes in favor of shadow-based depth ([748de0a](https://github.com/vibeunion/svadmin/commit/748de0a6ecd5dc8f9e02e127fd4f6331b29f2947))
 * **ui:** support component icons in menu & migrate tanstack v9 standalone functions ([#134](https://github.com/vibeunion/svadmin/issues/134)) ([e47ca73](https://github.com/vibeunion/svadmin/commit/e47ca7389c631eb7772b0583697c1b083e015a2f))
 * **ui:** support passing Svelte components directly as menu/sidebar icons ([af54e3e](https://github.com/vibeunion/svadmin/commit/af54e3e7d0bc0fee06f0d25d1a42ad1cf7624177))
-* **ui:** unify stripe-first reference pages ([9378ab1](https://github.com/vibeunion/svadmin/commit/9378ab16875ce339bd6928733fa4585059b3ffb6))
+* **ui:** unify admin-ui reference pages ([9378ab1](https://github.com/vibeunion/svadmin/commit/9378ab16875ce339bd6928733fa4585059b3ffb6))
 * **ui:** upgrade marked optional peerDependencies strictly to newest major versions (v17) ([0bab9e4](https://github.com/vibeunion/svadmin/commit/0bab9e474d1473edfa19bbe6624a9653f250b37b))
 
 
@@ -647,7 +647,7 @@
 * **ui:** add timer cleanup to ChatDialog, i18n all PermissionMatrix strings ([2b7e8a0](https://github.com/vibeunion/svadmin/commit/2b7e8a0a9eee8cde4aa949f067fddc5dcdb3ab7a))
 * **ui:** add types for component deep imports ([#146](https://github.com/vibeunion/svadmin/issues/146)) ([1d26161](https://github.com/vibeunion/svadmin/commit/1d261614e96e3937e8609396c6a76d5d0bf95e27))
 * **ui:** add types for component deep imports ([#150](https://github.com/vibeunion/svadmin/issues/150)) ([5bd587a](https://github.com/vibeunion/svadmin/commit/5bd587a04601a1638cf6007dd9d26a368566efb6))
-* **ui:** apply Stripe-style design tokens — subtler borders and card-fill inputs ([636594d](https://github.com/vibeunion/svadmin/commit/636594dd463ded7224fd072943a615192620fed8))
+* **ui:** apply svadmin-style design tokens — subtler borders and card-fill inputs ([636594d](https://github.com/vibeunion/svadmin/commit/636594dd463ded7224fd072943a615192620fed8))
 * **ui:** avoid value binding for file inputs ([#222](https://github.com/vibeunion/svadmin/issues/222)) ([8e180f9](https://github.com/vibeunion/svadmin/commit/8e180f9b74d1b8beed30feb30811f819704aa9b6))
 * **ui:** build before publish to include dist ([ca25048](https://github.com/vibeunion/svadmin/commit/ca250484a583968609e07b937ceadb1b4863249c))
 * **ui:** bypass svelte 5 props_invalid_value crash on undefined filter values by manually managing select and input state bindings ([c800d66](https://github.com/vibeunion/svadmin/commit/c800d6675ee57fde7bafa3e467cb0bdf7f45b188))
@@ -693,7 +693,7 @@
 * **ui:** respect ComponentRegistry DI overrides in AdminApp routing ([b53ff55](https://github.com/vibeunion/svadmin/commit/b53ff5530d2d013662be44469aa2d50b213857a5))
 * **ui:** restore sidebar expand button when collapsed ([7342bf0](https://github.com/vibeunion/svadmin/commit/7342bf06bef3c10abc79a626858df61847a4271e))
 * **ui:** restore sidebar expand button when collapsed ([086fb29](https://github.com/vibeunion/svadmin/commit/086fb29768dd7518d4677afd30e69f1428d6323d))
-* **ui:** revert borderless PR [#82](https://github.com/vibeunion/svadmin/issues/82), apply proper Stripe-style design tokens ([492e19e](https://github.com/vibeunion/svadmin/commit/492e19ed4419aefb68fe461813c9f18f104234ba))
+* **ui:** revert borderless PR [#82](https://github.com/vibeunion/svadmin/issues/82), apply proper svadmin-style design tokens ([492e19e](https://github.com/vibeunion/svadmin/commit/492e19ed4419aefb68fe461813c9f18f104234ba))
 * **ui:** scope clean-flat styles to svadmin nodes ([7a26f53](https://github.com/vibeunion/svadmin/commit/7a26f53e3c2e8656103c7c6e84298ee1c1b3d93c))
 * **ui:** scope clean-flat styles to svadmin nodes ([4acde6b](https://github.com/vibeunion/svadmin/commit/4acde6b102dc562f9454df29254f5b3c4835b03e))
 * **ui:** self-register Tailwind component sources ([c68028f](https://github.com/vibeunion/svadmin/commit/c68028fcebaf80a54e1d708a1b28daf93098c10d))
@@ -971,7 +971,7 @@
 
 ### 🚀 Features
 
-* **ui:** adopt Stripe-first design system ([eee648c](https://github.com/vibeunion/svadmin/commit/eee648ca9ac83576f8dcf9ef86c969c09a882d48))
+* **ui:** adopt Admin UI design system ([eee648c](https://github.com/vibeunion/svadmin/commit/eee648ca9ac83576f8dcf9ef86c969c09a882d48))
 
 ## [0.45.0](https://github.com/vibeunion/svadmin/compare/ui-v0.44.0...ui-v0.45.0) (2026-08-25)
 
@@ -992,7 +992,7 @@
 
 ### 🚀 Features
 
-* **ui:** unify stripe-first reference pages ([9378ab1](https://github.com/vibeunion/svadmin/commit/9378ab16875ce339bd6928733fa4585059b3ffb6))
+* **ui:** unify admin-ui reference pages ([9378ab1](https://github.com/vibeunion/svadmin/commit/9378ab16875ce339bd6928733fa4585059b3ffb6))
 
 
 ### 🐛 Bug Fixes
@@ -1581,8 +1581,8 @@
 
 ### 🐛 Bug Fixes
 
-* **ui:** apply Stripe-style design tokens — subtler borders and card-fill inputs ([636594d](https://github.com/zuohuadong/svadmin/commit/636594dd463ded7224fd072943a615192620fed8))
-* **ui:** revert borderless PR [#82](https://github.com/zuohuadong/svadmin/issues/82), apply proper Stripe-style design tokens ([492e19e](https://github.com/zuohuadong/svadmin/commit/492e19ed4419aefb68fe461813c9f18f104234ba))
+* **ui:** apply svadmin-style design tokens — subtler borders and card-fill inputs ([636594d](https://github.com/zuohuadong/svadmin/commit/636594dd463ded7224fd072943a615192620fed8))
+* **ui:** revert borderless PR [#82](https://github.com/zuohuadong/svadmin/issues/82), apply proper svadmin-style design tokens ([492e19e](https://github.com/zuohuadong/svadmin/commit/492e19ed4419aefb68fe461813c9f18f104234ba))
 
 ## [0.25.3](https://github.com/zuohuadong/svadmin/compare/ui-v0.25.2...ui-v0.25.3) (2026-04-02)
 

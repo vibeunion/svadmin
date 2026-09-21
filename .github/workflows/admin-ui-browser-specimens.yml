@@ -1,15 +1,15 @@
-name: Stripe-first browser specimens
+name: Admin UI browser specimens
 on:
   push:
-    branches: [main, feat/stripe-first-design-kit-20260919]
-    paths: ['design/stripe-first/**', 'packages/ui/**', 'packages/core/**', 'scripts/stable-screenshot*', 'bun.lock', '.github/workflows/stripe-first-browser-specimens.yml']
+    branches: [main, feat/admin-ui-design-kit-20260919]
+    paths: ['design/admin-ui/**', 'packages/ui/**', 'packages/core/**', 'scripts/stable-screenshot*', 'bun.lock', '.github/workflows/admin-ui-browser-specimens.yml']
   pull_request:
     branches: [main]
-    paths: ['design/stripe-first/**', 'packages/ui/**', 'packages/core/**', 'scripts/stable-screenshot*', 'bun.lock', '.github/workflows/stripe-first-browser-specimens.yml']
+    paths: ['design/admin-ui/**', 'packages/ui/**', 'packages/core/**', 'scripts/stable-screenshot*', 'bun.lock', '.github/workflows/admin-ui-browser-specimens.yml']
 permissions:
   contents: read
 concurrency:
-  group: stripe-first-browser-${{ github.event.pull_request.number || github.ref }}
+  group: admin-ui-browser-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 jobs:
   specimens:
@@ -23,7 +23,7 @@ jobs:
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6
         with: {bun-version: '1.4.2'}
       - name: Unit contracts before installation
-        run: node --test design/stripe-first/build.test.mjs design/stripe-first/preview/model.test.mjs design/stripe-first/preview/capture.test.mjs scripts/stable-screenshot.test.mjs
+        run: node --test design/admin-ui/build.test.mjs design/admin-ui/preview/model.test.mjs design/admin-ui/preview/capture.test.mjs scripts/stable-screenshot.test.mjs
       - name: Install frozen dependencies and build actual packages
         env: {HUSKY: '0'}
         run: |
@@ -37,23 +37,23 @@ jobs:
           set -euo pipefail
           node --test packages/ui/scripts/tailwind-recipes.test.mjs
           (cd packages/ui && node ../../node_modules/vitest/vitest.mjs run src/components/content/product-layout.test.svelte.ts)
-          node node_modules/eslint/bin/eslint.js packages/ui/src/recipes.ts packages/ui/src/components/content/{SectionHeader,PageToolbar,SettingsGroup,SettingsFieldRow,WorkspaceLayout,StatusBadge,product-layout.test-host}.svelte packages/ui/src/components/content/product-layout.test.svelte.ts design/stripe-first/preview/Preview.svelte design/stripe-first/preview/status-colors.mjs --max-warnings 0
+          node node_modules/eslint/bin/eslint.js packages/ui/src/recipes.ts packages/ui/src/components/content/{SectionHeader,PageToolbar,SettingsGroup,SettingsFieldRow,WorkspaceLayout,StatusBadge,product-layout.test-host}.svelte packages/ui/src/components/content/product-layout.test.svelte.ts design/admin-ui/preview/Preview.svelte design/admin-ui/preview/status-colors.mjs --max-warnings 0
       - name: Type-check the actual specimen
-        run: node node_modules/svelte-check/bin/svelte-check --tsconfig design/stripe-first/preview/tsconfig.json --fail-on-warnings
+        run: node node_modules/svelte-check/bin/svelte-check --tsconfig design/admin-ui/preview/tsconfig.json --fail-on-warnings
       - name: Install Chromium
         run: bunx playwright install --with-deps chromium
       - name: Verify complete state matrix and interactions
         id: scenes
         continue-on-error: true
-        run: node design/stripe-first/preview/verify.mjs
+        run: node design/admin-ui/preview/verify.mjs
       - name: Verify keyboard-only table scrolling
         id: keyboard
         continue-on-error: true
-        run: node design/stripe-first/preview/keyboard.mjs
+        run: node design/admin-ui/preview/keyboard.mjs
       - name: Verify semantic status colors
         id: colors
         continue-on-error: true
-        run: node design/stripe-first/preview/status-colors.mjs
+        run: node design/admin-ui/preview/status-colors.mjs
       - name: Verify no source or dependency mutations
         id: unchanged
         continue-on-error: true
@@ -64,8 +64,8 @@ jobs:
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
-          name: stripe-first-browser-specimens-${{ github.sha }}
-          path: test-results/stripe-first-browser/
+          name: admin-ui-browser-specimens-${{ github.sha }}
+          path: test-results/admin-ui-browser/
           if-no-files-found: error
           retention-days: 14
       - name: Require all checks, including failures collected above

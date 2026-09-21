@@ -12,7 +12,7 @@ let browser;
 let server;
 try {
   server = await servePreview();
-  browser = await chromium.launch();
+  browser = await chromium.launch(process.env['SVADMIN_CHROMIUM_EXECUTABLE_PATH'] ? { executablePath: process.env['SVADMIN_CHROMIUM_EXECUTABLE_PATH'] } : {});
   for (const theme of ['light', 'dark']) {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
     const page = await context.newPage();

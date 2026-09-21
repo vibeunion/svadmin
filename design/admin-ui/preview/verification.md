@@ -46,7 +46,7 @@ This removes the observed failure in the recorded run; it does not prove the his
 
 ## Boundaries still open
 
-This is automated verification of real built component specimens, not human approval of visual aesthetics, cross-browser certification, server authorization testing, whole-product E2E or WCAG certification. Repeated PNG equality proves capture stability, not visual equivalence to Stripe, Figma or a previous version.
+This is automated verification of real built component specimens, not human approval of visual aesthetics, cross-browser certification, server authorization testing, whole-product E2E or WCAG certification. Repeated PNG equality proves capture stability, not visual equivalence to third-party products, Figma or a previous version.
 
 Figma `r02lMyLBPoaNS3gep3TNRF` was not changed in this continuation: `get_metadata(6:4)` again returned the Starter MCP limit. Input, Badge and the three page patterns remain pending in Figma. Browser completion never changes `figma-map.json` into a false synchronization claim.
 

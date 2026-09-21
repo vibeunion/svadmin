@@ -19,7 +19,7 @@ const components = [
   'AuditTimeline.svelte', 'MediaThumbnail.svelte',
 ];
 
-describe('Stripe-first content component contract', () => {
+describe('Admin UI content component contract', () => {
   it('ships every reference-family primitive as a typed Svelte component', () => {
     for (const name of components) {
       expect(existsSync(join(contentDir, name))).toBe(true);

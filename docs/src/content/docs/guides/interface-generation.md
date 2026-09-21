@@ -3,7 +3,7 @@ title: Interface Generation Standard
 description: Information budgets, feedback ownership, page states, and AI acceptance rules
 ---
 
-svadmin uses a **Stripe-first visual language**. External systems fill specific
+svadmin defines its own **Admin UI design principles**. External systems fill specific
 behavior and coverage gaps; they are not mixed into a new visual theme.
 
 Start with the seven [Design Principles](/guides/design-principles/), then use
@@ -13,7 +13,7 @@ this standard for state ownership and AI acceptance details.
 
 | Reference | Use it for | Do not copy |
 | --- | --- | --- |
-| Stripe | Hierarchy, restraint, neutral surfaces, precise product tone | Product-specific branding |
+| svadmin design principles | Hierarchy, restraint, neutral surfaces, precise product tone | External brand identity |
 | [Refine](https://refine.dev/docs/) | Resources, CRUD flows, provider state, mutation ownership | React implementation or UI theme |
 | [Ant Design](https://ant.design/components/overview/) | Feedback selection, forms, results, empty/loading states, data density | Blue palette, radius, shadow, component chrome |
 | [shadcn/ui](https://ui.shadcn.com/docs) | Accessible composition, semantic variants, source-owned components | React-only APIs or default styling |

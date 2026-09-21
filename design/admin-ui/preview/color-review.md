@@ -1,6 +1,6 @@
 # Status color review
 
-Parent task: stripe-product-integration-20260919. Same user continuation and writer; low risk, native mode, no external verifier. Scope is the productStatus blend, targeted browser checks and evidence. No new dependency, backend write, Figma mutation, merge or deployment.
+Parent task: admin-ui-product-integration-20260919. Same user continuation and writer; low risk, native mode, no external verifier. Scope is the productStatus blend, targeted browser checks and evidence. No new dependency, backend write, Figma mutation, merge or deployment.
 
 The fa5d10f browser run passed 228 scenes, six interaction sequences, two keyboard scenarios and status-text contrast. Visual inspection of its actual light customer-list screenshot nevertheless found pink backgrounds for success and warning. Contrast alone did not protect semantic color meaning.
 

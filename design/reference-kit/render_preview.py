@@ -123,10 +123,10 @@ def render(manifest: dict, contract: dict) -> str:
     return f'''<!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
-<meta name="color-scheme" content="light dark"><title>svadmin · Stripe-first 参考契约</title>
+<meta name="color-scheme" content="light dark"><title>svadmin · Admin UI 参考契约</title>
 <style>{numeric}{STYLE}</style></head><body><a class="skip" href="#main">跳到主要内容</a>
 <header><div class="top"><div class="wordmark">svadmin <span class="muted">/ 设计参考</span></div>
-<div class="tag">Stripe-first · v0.1<br>基线 {contract['source']['commit'][:8]}</div></div></header>
+<div class="tag">Admin UI · v0.1<br>基线 {contract['source']['commit'][:8]}</div></div></header>
 <div class="layout"><nav aria-label="参考契约目录"><h2>页面模式</h2>{nav}<a href="#tokens">Token 映射</a><a href="#references">来源与边界</a></nav>
 <main id="main"><p class="kicker">自有设计语言 · 参考资产入口</p><h1>明确任务，可信状态。</h1>
 <p class="lead">把页面结构、组件名称、反馈归属和恢复路径放在同一份可审查契约中。沿用自己的 Svelte / Bits UI / Tailwind，不叠加第二套运行时。</p>

@@ -8,13 +8,14 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { chromium } from '@playwright/test';
 import { stableScreenshot } from './stable-screenshot.mjs';
 import { verifyPrimitiveFallbacks } from './ui-fallback-evidence.mjs';
+import { createMigrationReference, lightTokenMigration } from './ui-browser-migration-reference.mjs';
 
 const root = process.cwd();
 const output = resolve(root, 'test-results/ui-styles');
 mkdirSync(output, { recursive: true });
 // Never upload screenshots left over from a different commit after a failed case.
 for (const file of readdirSync(output)) {
-  if (/^\d+x\d+-(light|dark)(-(baseline|published))?\.(png|json)$/.test(file)
+  if (/^\d+x\d+-(light|dark)(-(baseline|reference|published))?\.(png|json)$/.test(file)
     || /^fallback-.*\.png$/.test(file)
     || ['provenance.json', 'results.json', 'conditional-styles.json', 'fallback-contrast.json'].includes(file)) {
     rmSync(resolve(output, file));
@@ -22,7 +23,12 @@ for (const file of readdirSync(output)) {
 }
 const read = (path) => readFileSync(resolve(root, path), 'utf8');
 const manifest = JSON.parse(read('packages/ui/styles-compatibility.json'));
-const baselineCss = Object.keys(manifest.files).map((path) => read(`packages/ui/test/style-baselines/${path}`)).join('\n');
+const baselineSources = Object.entries(manifest.files).map(([path, historicalSha256]) => {
+  const css = read(`packages/ui/test/style-baselines/${path}`);
+  return { path, historicalSha256, actualSha256: createHash('sha256').update(css).digest('hex'), css };
+});
+const baselineCss = baselineSources.map(({ css }) => css).join('\n');
+const referenceCss = createMigrationReference(baselineCss);
 const publishedCss = read('packages/ui/dist/app.css');
 const server = await createServer({
   configFile: false,
@@ -35,7 +41,8 @@ const server = await createServer({
         const url = new URL(request.url, 'http://localhost');
         response.setHeader('Content-Type', 'text/css');
         response.setHeader('Cache-Control', 'no-store');
-        response.end(url.searchParams.get('baseline') === '1' ? baselineCss : publishedCss);
+        response.end(url.searchParams.get('baseline') === '1' ? baselineCss :
+          url.searchParams.get('reference') === '1' ? referenceCss : publishedCss);
       });
     },
   }],
@@ -58,7 +65,10 @@ const screenshotLaunchArgs = [
 let browser;
 try {
   await server.listen();
-  browser = await chromium.launch({ args: screenshotLaunchArgs });
+  browser = await chromium.launch({
+    args: screenshotLaunchArgs,
+    ...(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {}),
+  });
   async function open(viewport, query) {
     const page = await browser.newPage({ viewport, reducedMotion: 'reduce' });
     page.setDefaultTimeout(15_000);
@@ -101,23 +111,28 @@ try {
     // Separate fresh pages are still used for later interactive state tests.
     const page = await open(viewport, `variants=0&baseline=1&dark=${dark}`);
     try {
-      const before = await capture(page, `${name}-baseline`);
-      await page.evaluate(async (dark) => {
-        const link = document.querySelector('link[rel="stylesheet"][href^="/__ui.css"]');
-        if (!(link instanceof HTMLLinkElement)) throw new Error('Missing comparison stylesheet');
-        await new Promise((resolve, reject) => {
-          link.onload = () => resolve();
-          link.onerror = () => reject(new Error('Published stylesheet failed to load'));
-          link.href = `/__ui.css?variants=0&dark=${dark}`;
-        });
-        if (link.href.includes('baseline=1')) throw new Error('Baseline stylesheet was not replaced');
-        await document.fonts.ready;
-        window.scrollTo(0, 0);
-        await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
-      }, dark);
+      await capture(page, `${name}-baseline`);
+      async function replaceStylesheet(query) {
+        await page.evaluate(async (query) => {
+          const link = document.querySelector('link[rel="stylesheet"][href^="/__ui.css"]');
+          if (!(link instanceof HTMLLinkElement)) throw new Error('Missing comparison stylesheet');
+          await new Promise((resolve, reject) => {
+            link.onload = () => resolve();
+            link.onerror = () => reject(new Error('Published stylesheet failed to load'));
+            link.href = `/__ui.css?${query}`;
+          });
+          if (link.href.includes('baseline=1')) throw new Error('Baseline stylesheet was not replaced');
+          await document.fonts.ready;
+          window.scrollTo(0, 0);
+          await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)));
+        }, query);
+      }
+      await replaceStylesheet(`variants=0&reference=1&dark=${dark}`);
+      const reference = await capture(page, `${name}-reference`);
+      await replaceStylesheet(`variants=0&dark=${dark}`);
       const after = await capture(page, `${name}-published`);
-      assert.deepEqual(after.styles, before.styles, `${name}: published CSS changed default computed styles or layout`);
-      assert.ok(before.image.equals(after.image), `${name}: published CSS changed default widget/control screenshots`);
+      assert.deepEqual(after.styles, reference.styles, `${name}: published CSS exceeded the finite token migration reference`);
+      assert.ok(reference.image.equals(after.image), `${name}: published screenshot differs from the finite token migration reference`);
     } finally { await page.close(); }
   }
   for (const viewport of [{ width: 1440, height: 900 }, { width: 1920, height: 1080 }, { width: 390, height: 844 }]) {
@@ -172,22 +187,33 @@ try {
         assert.equal(await page.getByRole('button', { name: 'Primary action' }).evaluate((el) => el === document.activeElement), true);
         await page.getByLabel('Attachment', { exact: true }).setInputFiles({ name: 'invoice.csv', mimeType: 'text/csv', buffer: Buffer.from('id,total\n1,42\n') });
         assert.ok((await page.locator('.svadmin-file-input__name').textContent())?.includes('invoice.csv'));
-        checks.push({ viewport, mode: dark ? 'dark' : 'light', defaultScreenshotsIdentical: true, semanticVariants: true, states: true, nestedTheme: true, noHorizontalOverflow: true, controls: true });
+        checks.push({ viewport, mode: dark ? 'dark' : 'light', migrationReferenceScreenshotsIdentical: true, semanticVariants: true, states: true, nestedTheme: true, noHorizontalOverflow: true, controls: true });
       } catch (error) {
         failures.push({ name, error: String(error) });
         console.error(`${name}: ${error}`);
       } finally { await page?.close(); }
     }
   }
-  await verifyPrimitiveFallbacks(browser, { 'app.css': publishedCss, 'app.theme.css': read('packages/ui/dist/app.theme.css') }, output);
+  try {
+    await verifyPrimitiveFallbacks(browser, { 'app.css': publishedCss, 'app.theme.css': read('packages/ui/dist/app.theme.css') }, output);
+  } catch (error) {
+    failures.push({ name: 'primitive-fallbacks', error: String(error) });
+    console.error(`primitive-fallbacks: ${error}`);
+  }
   const result = {
     testedCommit: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
     baselineCommit: manifest.baseCommit,
+    baselineSources: baselineSources.map(({ path, historicalSha256, actualSha256 }) => ({
+      path, historicalSha256, actualSha256, matchesHistoricalBytes: historicalSha256 === actualSha256,
+    })),
+    baselineHashScope: 'Manifest hashes describe historical bytes; actual hashes identify the current comparison files. A mismatch is not evidence of comment-only equivalence.',
     publishedCssSha256: createHash('sha256').update(publishedCss).digest('hex'),
+    migrationReferenceCssSha256: createHash('sha256').update(referenceCss).digest('hex'),
+    lightTokenMigration,
     browser: browser.version(),
     screenshotLaunchArgs,
-    comparison: 'Same DOM with only the stylesheet replaced; two identical consecutive frames required; exact PNG and computed-style equality',
-    scope: 'Current real Svelte widget/control fixture under baseline vs published CSS; Chromium only; not a full application or historical DOM comparison',
+    comparison: 'Original baseline retained; independent reference changes only eleven approved light base tokens. Same DOM; two stable frames; exact reference/candidate PNG and computed-style equality.',
+    scope: 'Current real Svelte widget/control fixture under baseline, migration reference and published CSS; Chromium only; not full application or unchanged historical appearance certification',
     checks, failures, pageErrors,
   };
   writeFileSync(resolve(output, 'results.json'), `${JSON.stringify(result, null, 2)}\n`);

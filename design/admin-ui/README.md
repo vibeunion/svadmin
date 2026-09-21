@@ -1,15 +1,15 @@
-# svadmin Stripe-first Design Kit v0.1
+# svadmin Admin UI Design Kit v0.1
 
 本目录把可追溯的设计参考、现有代码资产与实际创建的 Figma 文件关联起来。
 这是设计资产交付，不是另一套运行时主题，也不是全站视觉改版。
 
 ## 打开已有 Figma 文件
 
-[Figma：svadmin · Stripe-first Design Kit v0.1](https://www.figma.com/design/r02lMyLBPoaNS3gep3TNRF)
+[已有 Figma 文件（本地迁名不代表远程文件已更名）](https://www.figma.com/design/r02lMyLBPoaNS3gep3TNRF)
 
 [基础样张](https://www.figma.com/design/r02lMyLBPoaNS3gep3TNRF?node-id=7-10) · [Button 组件集](https://www.figma.com/design/r02lMyLBPoaNS3gep3TNRF?node-id=8-53)
 
-已创建81个变量（32个基础颜色、32个语义颜色别名、17个尺寸变量）、6种文本样式、6种明暗阴影样式和24个 Button 变体。颜色与尺寸来自现有代码，不是从 Stripe 截图猜测的值。变量均设定用途范围和 WEB code syntax。
+已创建81个变量（32个基础颜色、32个语义颜色别名、17个尺寸变量）、6种文本样式、6种明暗阴影样式和24个 Button 变体。颜色与尺寸来自现有代码，不是从第三方截图猜测的值。变量均设定用途范围和 WEB code syntax。
 
 前一轮已读取基础样张与 Button 结构并检查截图。Button 提供可编辑 Label，变体覆盖 Light/Dark、default/outline、sm/default/lg 和 default/disabled。这是公开 API 子集，不含全部外观、图标、加载与焦点状态；样张宽度140px，未认证为完整自适应实现。
 
@@ -23,7 +23,7 @@
 bun install --frozen-lockfile
 bun run --cwd packages/ai-elements build
 bun run --cwd packages/ui build
-node design/stripe-first/preview/run.mjs
+node design/admin-ui/preview/run.mjs
 ```
 
 预览地址为 `http://127.0.0.1:4179`。专项工作流会生成可运行静态站点、状态截图、完整结果及源码哈希；以对应提交的实际结果为准，不引用旧提交绿灯证明新代码。
@@ -40,7 +40,7 @@ Input、Badge 和三类页面的 Figma 图层仍未创建；第三页是空的�
 
 ## 设计来源与边界
 
-视觉决定由根目录 `DESIGN.md` 与经过审查的 svadmin 实现共同管理。Stripe Connect 官方 Toolkit 参考产品结构，Park Foundations 参考变量与组件组织。本次不复制第三方图层、商标、字体或商业素材；文件级许可仍为 pending，不得随 npm 包再分发。
+视觉决定由根目录 `DESIGN.md` 与经过审查的 svadmin 实现共同管理。当前资产参考清单仅保留 Park Foundations，用于参考变量与组件组织。本次不复制第三方图层、商标、字体或商业素材；文件级许可仍为 pending，不得随 npm 包再分发。目录与任务标识已规范为 admin-ui；历史需求仅作摘要，原始记录保留在 Git 历史。
 
 最初交付基于 Svelte + Bits UI + Panda CSS；这是历史背景，不是当前运行时约束。当前 UI 已迁移到 Tailwind，primitive/product recipe 合并于 `packages/ui/src/recipes.ts`。本套件不新增运行时依赖。页面模式契约用于设计验收，不是 SurfaceRenderer schema；模拟权限也不代替后端授权。
 
@@ -59,11 +59,11 @@ Figma 颜色采用 sRGB 投影；Light/success、Light/warning、Dark/primary、
 只需 Node.js 22 或更新版本，不安装项目依赖：
 
 ```sh
-node --test design/stripe-first/build.test.mjs design/stripe-first/preview/model.test.mjs
-node design/stripe-first/build.mjs
-node design/stripe-first/build.mjs --check
+node --test design/admin-ui/build.test.mjs design/admin-ui/preview/model.test.mjs
+node design/admin-ui/build.mjs
+node design/admin-ui/build.mjs --check
 ```
 
-快照输出位于 `test-results/stripe-first-design-kit/`；真实组件浏览器样例输出位于 `test-results/stripe-first-browser/`。专项通过仅证明各自声明的检查，不代表全部应用、无障碍合规、完整 Figma 库或发布验收通过。
+快照输出位于 `test-results/admin-ui-design-kit/`；真实组件浏览器样例输出位于 `test-results/admin-ui-browser/`。专项通过仅证明各自声明的检查，不代表全部应用、无障碍合规、完整 Figma 库或发布验收通过。
 
 文件职责：`source.json` 固定来源；`references.json` 记录许可；`contract.json` 是页面目标；`figma-map.json` 记录已知节点；`handoff.json` 保留 Figma 阻断；`build.mjs` 与 `build.test.mjs` 负责快照；`preview/` 负责实际浏览器样例及独立验收。

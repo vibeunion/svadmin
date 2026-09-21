@@ -31,7 +31,7 @@
 
 ### 🔧 Miscellaneous Chores
 
-* **design:** reconcile Stripe specimens with merged reference assets on main ([3a9bbad](https://github.com/vibeunion/svadmin/commit/3a9bbad1ea829b32ef25c094e071a1113bde5f8c))
+* **design:** reconcile svadmin specimens with merged reference assets on main ([3a9bbad](https://github.com/vibeunion/svadmin/commit/3a9bbad1ea829b32ef25c094e071a1113bde5f8c))
 * **review:** integrate current main into PR [#445](https://github.com/vibeunion/svadmin/issues/445) without altering either side ([3e156fb](https://github.com/vibeunion/svadmin/commit/3e156fb050f926514c41e62f86b30a4eebc2c517))
 * **review:** integrate current main into PR [#446](https://github.com/vibeunion/svadmin/issues/446) without altering either side ([5578055](https://github.com/vibeunion/svadmin/commit/5578055d65d9e0264f43f9fc7bd473860776ee3f))
 * **styles:** reconcile content recipes with native primitives on main ([ae608de](https://github.com/vibeunion/svadmin/commit/ae608de888de8e06c3f6aeebd92e5de1b8ae9af3))

@@ -216,7 +216,7 @@ describe('AdminApp authenticated navigation', () => {
       resources,
     });
 
-    await fireEvent.click(await view.findByRole('button', { name: 'Back to List' }));
+    await fireEvent.click(await view.findByRole('button', { name: 'Back', exact: true }));
 
     await waitFor(() => expect(window.location.hash).toBe('#/posts?page=2&q=review'));
   });

@@ -96,7 +96,7 @@ export function buildKit(css) {
       dimension[category][key] = { $type: 'dimension', $value: { value: entry.value, unit: 'px' }, $description: entry.source, $extensions: { 'org.svadmin': { cssSyntax: entry.cssSyntax } } };
     }
     files[`${theme.toLowerCase()}.tokens.json`] = {
-      $description: 'Generated svadmin asset snapshot, not Stripe tokens or an independent runtime theme.',
+      $description: 'Generated svadmin asset snapshot, not third-party tokens or an independent runtime theme.',
       $extensions: { 'org.svadmin': { revision: source.revision, runtimeSource: provenance, dimensionsRevision: source.revision, sourceSha256, role: 'generated-snapshot', theme, rootFontSizePx: source.rootFontSizePx } },
       primitive, color, dimension,
     };
@@ -108,21 +108,21 @@ export function buildKit(css) {
 export function validateManifest(references) {
   assert.equal(references.thirdPartyAssetsIncluded, false);
   assert.deepEqual(references.assets, []);
-  assert.deepEqual(references.references.map(entry => entry.id), ['stripe-connect-toolkit', 'park-foundations']);
+  assert.deepEqual(references.references.map(entry => entry.id), ['park-foundations']);
   for (const entry of references.references) {
     assert.equal(entry.redistributionApproved, false, 'Unreviewed assets cannot be approved');
     assert.equal(entry.licenseReview, 'pending');
     assert.equal(entry.fileInspection, 'not-completed');
     assert.equal(new URL(entry.officialSource).protocol, 'https:');
-    assert.ok(['docs.stripe.com', 'park-ui.com'].includes(new URL(entry.officialSource).hostname));
-    assert.match(entry.designFile, /^https:\/\/www\.figma\.com\/community\/file\/\d+$/u);
+    assert.equal(entry.officialSource, 'https://park-ui.com/docs/figma');
+    assert.equal(entry.designFile, 'https://www.figma.com/community/file/1268615283036362769');
   }
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   assert.ok(process.argv.slice(2).every(argument => argument === '--check'), 'Only --check is supported');
   const root = resolve(directory, '../..');
-  const output = resolve(root, 'test-results/stripe-first-design-kit');
+  const output = resolve(root, 'test-results/admin-ui-design-kit');
   const css = readFileSync(resolve(root, source.stylesheet), 'utf8');
   verifyRuntimeSources(css, readFileSync(resolve(root, runtimeSource.recipeSource)));
   validateManifest(JSON.parse(readFileSync(resolve(directory, 'references.json'), 'utf8')));

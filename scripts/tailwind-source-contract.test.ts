@@ -8,7 +8,7 @@ function readRepositoryFile(path: string): string {
 }
 function readCleanFlatCss(): string {
   const uiCss = readRepositoryFile('packages/ui/src/components.css');
-  const marker = '/* --- Stripe-first layout preset (clean-flat) --- */';
+  const marker = '/* --- Admin UI layout preset (clean-flat) --- */';
   const markerIndex = uiCss.indexOf(marker);
   expect(markerIndex).toBeGreaterThanOrEqual(0);
   const nextSection = uiCss.indexOf('/* Business components', markerIndex);
@@ -71,9 +71,9 @@ describe('@svadmin/ui native stylesheet contract', () => {
     expect(cleanFlatCss).not.toContain(':has(');
   });
 
-  it('records the Stripe-first visual authority boundary', () => {
+  it('records the Admin UI visual authority boundary', () => {
     const designContract = readRepositoryFile('DESIGN.md');
-    expect(designContract).toContain('Stripe-first');
+    expect(designContract).toContain('Admin UI');
     expect(designContract).toContain('Metronic is a capability reference only');
   });
 });

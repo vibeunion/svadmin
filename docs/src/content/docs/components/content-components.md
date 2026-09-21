@@ -1,6 +1,6 @@
 ---
 title: Content Components
-description: Stripe-first page composition, metrics, toolbars, status, and data states
+description: Admin UI page composition, metrics, toolbars, status, and data states
 ---
 
 The content component family provides a stable page contract for custom admin

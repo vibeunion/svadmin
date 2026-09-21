@@ -1,21 +1,10 @@
 {
   "schemaVersion": 1,
-  "id": "svadmin-stripe-first-reference-kit",
+  "id": "svadmin-admin-ui-reference-kit",
   "version": "0.1.0",
   "reviewedOn": "2026-09-19",
   "purpose": "reference-only",
   "references": [
-    {
-      "id": "stripe-connect",
-      "name": "Stripe Connect Embedded Components UI Toolkit",
-      "documentationUrl": "https://docs.stripe.com/connect/embedded-appearance-options",
-      "communityFileId": "1438614134095442934",
-      "communityUrl": "https://www.figma.com/community/file/1438614134095442934",
-      "role": "研究信息层级、列表、表单、状态与常见组合；不是整个 Stripe Dashboard 的内部设计系统。",
-      "fileInspection": "unavailable",
-      "licenseReview": "pending",
-      "redistributionApproved": false
-    },
     {
       "id": "park-foundations",
       "name": "Park UI Foundations",

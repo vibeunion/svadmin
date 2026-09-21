@@ -32,6 +32,8 @@ jobs:
       - run: node --test scripts/native-classnames.test.mjs scripts/style-boundary.test.mjs scripts/no-tailwind-contract.test.mjs scripts/stable-screenshot.test.mjs
       - name: Build every workspace package
         run: bun run build:packages
+      - name: Verify migration reference and unsupported-color fallback contracts
+        run: node --test scripts/ui-browser-migration-reference.test.mjs scripts/ui-fallback-evidence.test.mjs
       - name: Check both published CSS entries and finite recipes
         run: |
           bun run --cwd packages/ui test:css
@@ -45,7 +47,7 @@ jobs:
         run: |
           bunx --no-install svelte-check --tsgo-experimental-api --tsconfig packages/ui/tsconfig.json --threshold error
           bunx --no-install svelte-check --tsgo-experimental-api --tsconfig packages/ai-elements/tsconfig.json --threshold error
-      - name: Chromium comparison with immutable baseline
+      - name: Chromium comparison with historical baseline and explicit migration reference
         run: |
           bunx --no-install playwright install --with-deps chromium
           node scripts/check-ui-browser.mjs || { node scripts/diagnose-ui-screenshots.mjs; exit 1; }

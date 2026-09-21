@@ -109,8 +109,8 @@ class ContractTests(unittest.TestCase):
             self.check()
 
     def test_reference_url_cannot_change_authority(self):
-        for url in ['javascript:alert(1)', 'https://docs.stripe.com.evil.invalid/x',
-                    'https://user:password@docs.stripe.com/connect/embedded-appearance-options']:
+        for url in ['javascript:alert(1)', 'https://park-ui.com.evil.invalid/docs/figma',
+                    'https://user:password@park-ui.com/docs/figma']:
             with self.subTest(url=url):
                 self.manifest['references'][0]['documentationUrl'] = url
                 with self.assertRaises(ValidationError):
@@ -122,8 +122,34 @@ class ContractTests(unittest.TestCase):
             self.check()
 
     def test_duplicate_reference(self):
-        self.manifest['references'][1] = copy.deepcopy(self.manifest['references'][0])
-        with self.assertRaisesRegex(ValidationError, '重复项'):
+        self.manifest['references'].append(copy.deepcopy(self.manifest['references'][0]))
+        with self.assertRaisesRegex(ValidationError, '必须且仅包含已登记参考'):
+            self.check()
+
+    def test_exact_active_reference(self):
+        self.assertEqual([ref['id'] for ref in self.manifest['references']], ['park-foundations'])
+        self.assertEqual(self.manifest['id'], 'svadmin-admin-ui-reference-kit')
+        self.assertEqual(self.contract['id'], self.manifest['id'])
+        self.check()
+
+    def test_missing_reference(self):
+        self.manifest['references'].clear()
+        with self.assertRaisesRegex(ValidationError, '必须且仅包含已登记参考'):
+            self.check()
+
+    def test_unknown_reference_cannot_replace_active_source(self):
+        self.manifest['references'][0]['id'] = 'unregistered-toolkit'
+        with self.assertRaisesRegex(ValidationError, '未知参考'):
+            self.check()
+
+    def test_license_cannot_be_claimed_approved(self):
+        self.manifest['references'][0]['licenseReview'] = 'approved'
+        with self.assertRaisesRegex(ValidationError, 'licenseReview'):
+            self.check()
+
+    def test_community_url_must_match_registered_source(self):
+        self.manifest['references'][0]['communityUrl'] = 'https://www.figma.com/community/file/123'
+        with self.assertRaisesRegex(ValidationError, 'communityUrl'):
             self.check()
 
     def test_unknown_fields(self):

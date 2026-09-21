@@ -1,0 +1,14 @@
+{
+  "id": "admin-ui-reference-implementation-20260919",
+  "parent": "admin-ui-design-kit-20260919",
+  "source": "历史需求摘要（非用户原话）：完成管理界面参考研究与实施。原始用户记录（2026-09-19T14:31:30Z）保留在 Git 历史。",
+  "reason": "Move from research and unreviewed specimens to source-linked, independently implemented Admin UI product patterns.",
+  "state": "in-progress",
+  "risk": "low",
+  "orchestration": {"mode": "native", "writer": "single-owner", "externalReviewers": 0},
+  "scope": ["design/admin-ui", "packages/ui/design", "packages/ui/src/components/content", "packages/ui/panda.config.ts", "packages/ui/scripts", ".github/workflows/admin-ui-*"],
+  "acceptance": ["Record reference research and separate historical observations from svadmin decisions; original records remain in Git history", "Implement reusable token-backed product layout and component anatomy without new runtime dependencies", "Polish the existing component/list/detail/settings specimens and preserve state, localization and keyboard behavior", "Inspect real light/dark desktop/mobile screenshots and run the existing complete browser matrix", "Commit to PR #438 and report exact remaining Figma and full-CI boundaries"],
+  "nonGoals": ["purchase or copy paid template source/assets", "new backend writes or permissions", "change public component contracts incompatibly", "merge main or release/deploy", "bypass Figma limits", "claim pixel equivalence to third-party products"],
+  "baseMain": "cac09fdaf23a82aa00c01667035ba3f37e9bfd38",
+  "baseSpecimens": "cd79b75a42ba08f402b7f085eea92ab41a8f0059"
+}

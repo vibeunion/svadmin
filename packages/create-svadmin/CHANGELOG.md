@@ -26,7 +26,7 @@
 
 ### 🔧 Miscellaneous Chores
 
-* **design:** reconcile Stripe specimens with merged reference assets on main ([3a9bbad](https://github.com/vibeunion/svadmin/commit/3a9bbad1ea829b32ef25c094e071a1113bde5f8c))
+* **design:** reconcile svadmin specimens with merged reference assets on main ([3a9bbad](https://github.com/vibeunion/svadmin/commit/3a9bbad1ea829b32ef25c094e071a1113bde5f8c))
 * **styles:** reconcile content recipes with native primitives on main ([ae608de](https://github.com/vibeunion/svadmin/commit/ae608de888de8e06c3f6aeebd92e5de1b8ae9af3))
 
 
@@ -109,12 +109,12 @@
 * **lite:** implement dynamic catch-all routes and example resources support ([d94a481](https://github.com/vibeunion/svadmin/commit/d94a481da67c1ae6440e7c360afe901d6d23313d))
 * **ui,create-svadmin:** add navigation menu component and lite init command ([745b86f](https://github.com/vibeunion/svadmin/commit/745b86f772f82d2f9929e7f0bdcb95d3d10dbb64))
 * **ui,lite,cli:** add enterprise data interaction components and generate command ([41c233e](https://github.com/vibeunion/svadmin/commit/41c233e1a9a313eaf0cc58d66801d90a649b0b34))
-* **ui:** adopt Stripe-first design system ([eee648c](https://github.com/vibeunion/svadmin/commit/eee648ca9ac83576f8dcf9ef86c969c09a882d48))
+* **ui:** adopt Admin UI design system ([eee648c](https://github.com/vibeunion/svadmin/commit/eee648ca9ac83576f8dcf9ef86c969c09a882d48))
 * **ui:** apply ui-ux-pro-max design guidelines and accessibility standards ([02badd4](https://github.com/vibeunion/svadmin/commit/02badd45374df1b8913786fc9241315fbc07cdcd))
 * **ui:** formalize feedback and generation guidance ([26db9da](https://github.com/vibeunion/svadmin/commit/26db9da44f8b9961a6d59c70e41a64bc51f11ad1))
 * **ui:** implement design system density dials and accessible components polish ([4297429](https://github.com/vibeunion/svadmin/commit/429742940d17771a440b668cc8f83dd9399a6422))
 * **ui:** refine sidebar and content pages ([bba29e0](https://github.com/vibeunion/svadmin/commit/bba29e0e6c00b0dc05aac4d499e9fef88623f29e))
-* **ui:** unify stripe-first reference pages ([9378ab1](https://github.com/vibeunion/svadmin/commit/9378ab16875ce339bd6928733fa4585059b3ffb6))
+* **ui:** unify admin-ui reference pages ([9378ab1](https://github.com/vibeunion/svadmin/commit/9378ab16875ce339bd6928733fa4585059b3ffb6))
 
 
 ### 🐛 Bug Fixes
@@ -271,12 +271,12 @@
 * **lite:** implement dynamic catch-all routes and example resources support ([d94a481](https://github.com/vibeunion/svadmin/commit/d94a481da67c1ae6440e7c360afe901d6d23313d))
 * **ui,create-svadmin:** add navigation menu component and lite init command ([745b86f](https://github.com/vibeunion/svadmin/commit/745b86f772f82d2f9929e7f0bdcb95d3d10dbb64))
 * **ui,lite,cli:** add enterprise data interaction components and generate command ([41c233e](https://github.com/vibeunion/svadmin/commit/41c233e1a9a313eaf0cc58d66801d90a649b0b34))
-* **ui:** adopt Stripe-first design system ([eee648c](https://github.com/vibeunion/svadmin/commit/eee648ca9ac83576f8dcf9ef86c969c09a882d48))
+* **ui:** adopt Admin UI design system ([eee648c](https://github.com/vibeunion/svadmin/commit/eee648ca9ac83576f8dcf9ef86c969c09a882d48))
 * **ui:** apply ui-ux-pro-max design guidelines and accessibility standards ([02badd4](https://github.com/vibeunion/svadmin/commit/02badd45374df1b8913786fc9241315fbc07cdcd))
 * **ui:** formalize feedback and generation guidance ([26db9da](https://github.com/vibeunion/svadmin/commit/26db9da44f8b9961a6d59c70e41a64bc51f11ad1))
 * **ui:** implement design system density dials and accessible components polish ([4297429](https://github.com/vibeunion/svadmin/commit/429742940d17771a440b668cc8f83dd9399a6422))
 * **ui:** refine sidebar and content pages ([bba29e0](https://github.com/vibeunion/svadmin/commit/bba29e0e6c00b0dc05aac4d499e9fef88623f29e))
-* **ui:** unify stripe-first reference pages ([9378ab1](https://github.com/vibeunion/svadmin/commit/9378ab16875ce339bd6928733fa4585059b3ffb6))
+* **ui:** unify admin-ui reference pages ([9378ab1](https://github.com/vibeunion/svadmin/commit/9378ab16875ce339bd6928733fa4585059b3ffb6))
 
 
 ### 🐛 Bug Fixes
@@ -413,12 +413,12 @@
 * **lite:** implement dynamic catch-all routes and example resources support ([d94a481](https://github.com/vibeunion/svadmin/commit/d94a481da67c1ae6440e7c360afe901d6d23313d))
 * **ui,create-svadmin:** add navigation menu component and lite init command ([745b86f](https://github.com/vibeunion/svadmin/commit/745b86f772f82d2f9929e7f0bdcb95d3d10dbb64))
 * **ui,lite,cli:** add enterprise data interaction components and generate command ([41c233e](https://github.com/vibeunion/svadmin/commit/41c233e1a9a313eaf0cc58d66801d90a649b0b34))
-* **ui:** adopt Stripe-first design system ([eee648c](https://github.com/vibeunion/svadmin/commit/eee648ca9ac83576f8dcf9ef86c969c09a882d48))
+* **ui:** adopt Admin UI design system ([eee648c](https://github.com/vibeunion/svadmin/commit/eee648ca9ac83576f8dcf9ef86c969c09a882d48))
 * **ui:** apply ui-ux-pro-max design guidelines and accessibility standards ([02badd4](https://github.com/vibeunion/svadmin/commit/02badd45374df1b8913786fc9241315fbc07cdcd))
 * **ui:** formalize feedback and generation guidance ([26db9da](https://github.com/vibeunion/svadmin/commit/26db9da44f8b9961a6d59c70e41a64bc51f11ad1))
 * **ui:** implement design system density dials and accessible components polish ([4297429](https://github.com/vibeunion/svadmin/commit/429742940d17771a440b668cc8f83dd9399a6422))
 * **ui:** refine sidebar and content pages ([bba29e0](https://github.com/vibeunion/svadmin/commit/bba29e0e6c00b0dc05aac4d499e9fef88623f29e))
-* **ui:** unify stripe-first reference pages ([9378ab1](https://github.com/vibeunion/svadmin/commit/9378ab16875ce339bd6928733fa4585059b3ffb6))
+* **ui:** unify admin-ui reference pages ([9378ab1](https://github.com/vibeunion/svadmin/commit/9378ab16875ce339bd6928733fa4585059b3ffb6))
 
 
 ### 🐛 Bug Fixes
@@ -542,12 +542,12 @@
 * **lite:** implement dynamic catch-all routes and example resources support ([d94a481](https://github.com/vibeunion/svadmin/commit/d94a481da67c1ae6440e7c360afe901d6d23313d))
 * **ui,create-svadmin:** add navigation menu component and lite init command ([745b86f](https://github.com/vibeunion/svadmin/commit/745b86f772f82d2f9929e7f0bdcb95d3d10dbb64))
 * **ui,lite,cli:** add enterprise data interaction components and generate command ([41c233e](https://github.com/vibeunion/svadmin/commit/41c233e1a9a313eaf0cc58d66801d90a649b0b34))
-* **ui:** adopt Stripe-first design system ([eee648c](https://github.com/vibeunion/svadmin/commit/eee648ca9ac83576f8dcf9ef86c969c09a882d48))
+* **ui:** adopt Admin UI design system ([eee648c](https://github.com/vibeunion/svadmin/commit/eee648ca9ac83576f8dcf9ef86c969c09a882d48))
 * **ui:** apply ui-ux-pro-max design guidelines and accessibility standards ([02badd4](https://github.com/vibeunion/svadmin/commit/02badd45374df1b8913786fc9241315fbc07cdcd))
 * **ui:** formalize feedback and generation guidance ([26db9da](https://github.com/vibeunion/svadmin/commit/26db9da44f8b9961a6d59c70e41a64bc51f11ad1))
 * **ui:** implement design system density dials and accessible components polish ([4297429](https://github.com/vibeunion/svadmin/commit/429742940d17771a440b668cc8f83dd9399a6422))
 * **ui:** refine sidebar and content pages ([bba29e0](https://github.com/vibeunion/svadmin/commit/bba29e0e6c00b0dc05aac4d499e9fef88623f29e))
-* **ui:** unify stripe-first reference pages ([9378ab1](https://github.com/vibeunion/svadmin/commit/9378ab16875ce339bd6928733fa4585059b3ffb6))
+* **ui:** unify admin-ui reference pages ([9378ab1](https://github.com/vibeunion/svadmin/commit/9378ab16875ce339bd6928733fa4585059b3ffb6))
 
 
 ### 🐛 Bug Fixes
@@ -677,12 +677,12 @@
 * **lite:** implement dynamic catch-all routes and example resources support ([d94a481](https://github.com/vibeunion/svadmin/commit/d94a481da67c1ae6440e7c360afe901d6d23313d))
 * **ui,create-svadmin:** add navigation menu component and lite init command ([745b86f](https://github.com/vibeunion/svadmin/commit/745b86f772f82d2f9929e7f0bdcb95d3d10dbb64))
 * **ui,lite,cli:** add enterprise data interaction components and generate command ([41c233e](https://github.com/vibeunion/svadmin/commit/41c233e1a9a313eaf0cc58d66801d90a649b0b34))
-* **ui:** adopt Stripe-first design system ([eee648c](https://github.com/vibeunion/svadmin/commit/eee648ca9ac83576f8dcf9ef86c969c09a882d48))
+* **ui:** adopt Admin UI design system ([eee648c](https://github.com/vibeunion/svadmin/commit/eee648ca9ac83576f8dcf9ef86c969c09a882d48))
 * **ui:** apply ui-ux-pro-max design guidelines and accessibility standards ([02badd4](https://github.com/vibeunion/svadmin/commit/02badd45374df1b8913786fc9241315fbc07cdcd))
 * **ui:** formalize feedback and generation guidance ([26db9da](https://github.com/vibeunion/svadmin/commit/26db9da44f8b9961a6d59c70e41a64bc51f11ad1))
 * **ui:** implement design system density dials and accessible components polish ([4297429](https://github.com/vibeunion/svadmin/commit/429742940d17771a440b668cc8f83dd9399a6422))
 * **ui:** refine sidebar and content pages ([bba29e0](https://github.com/vibeunion/svadmin/commit/bba29e0e6c00b0dc05aac4d499e9fef88623f29e))
-* **ui:** unify stripe-first reference pages ([9378ab1](https://github.com/vibeunion/svadmin/commit/9378ab16875ce339bd6928733fa4585059b3ffb6))
+* **ui:** unify admin-ui reference pages ([9378ab1](https://github.com/vibeunion/svadmin/commit/9378ab16875ce339bd6928733fa4585059b3ffb6))
 
 
 ### 🐛 Bug Fixes
@@ -982,7 +982,7 @@
 
 ### 🚀 Features
 
-* **ui:** adopt Stripe-first design system ([eee648c](https://github.com/vibeunion/svadmin/commit/eee648ca9ac83576f8dcf9ef86c969c09a882d48))
+* **ui:** adopt Admin UI design system ([eee648c](https://github.com/vibeunion/svadmin/commit/eee648ca9ac83576f8dcf9ef86c969c09a882d48))
 
 ## [0.15.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.14.1...create-svadmin-v0.15.0) (2026-08-25)
 
@@ -1003,7 +1003,7 @@
 
 ### 🚀 Features
 
-* **ui:** unify stripe-first reference pages ([9378ab1](https://github.com/vibeunion/svadmin/commit/9378ab16875ce339bd6928733fa4585059b3ffb6))
+* **ui:** unify admin-ui reference pages ([9378ab1](https://github.com/vibeunion/svadmin/commit/9378ab16875ce339bd6928733fa4585059b3ffb6))
 
 ## [0.13.8](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.13.7...create-svadmin-v0.13.8) (2026-08-24)
 

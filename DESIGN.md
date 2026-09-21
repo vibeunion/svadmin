@@ -1,6 +1,6 @@
 ---
 version: "alpha"
-name: "svadmin Stripe-first"
+name: "svadmin Admin UI"
 description: "A restrained, precise product interface for repeated administrative work."
 colors:
   background: "oklch(0.985 0.001 264)"
@@ -101,7 +101,7 @@ App chrome must use explicit anatomy hooks; never style every business `header`.
 Package utilities live in sublayers of `utilities`, so host-authored responsive
 utilities win regardless of lazy package stylesheet load order.
 
-svadmin uses a Stripe-first product language: quiet neutral canvases, precise
+svadmin defines its own Admin UI product language: quiet neutral canvases, precise
 type, hairline borders, restrained elevation, compact controls, and clear
 feedback for repeated operational work. The interface should feel like a real
 administrative product with trustworthy states, not a collection of dashboard
@@ -114,7 +114,7 @@ visual authority.
 
 ### Design principles
 
-Seven principles turn the Stripe-first direction into reviewable product
+Seven principles turn svadmin's design direction into reviewable product
 decisions. They apply to built-in components, examples, generated applications,
 and documentation:
 
@@ -131,7 +131,7 @@ and documentation:
    destructive, reversible, and completed states expose their scope and next
    step. Data freshness, permission boundaries, and action consequences must be
    visible when they affect a decision.
-5. **Restrained like Stripe:** neutral surfaces and precise hierarchy carry the
+5. **Restrained by purpose:** neutral surfaces and precise hierarchy carry the
    interface. Accent, elevation, radius, animation, and decoration are used only
    when they clarify priority or interaction.
 6. **Accessible by construction:** keyboard access, visible focus, semantic
@@ -236,7 +236,7 @@ Transitions provide clear state confirmation without delaying user action:
 
 The reference stack is layered. It is not a visual mixture:
 
-- **Stripe is the visual authority:** hierarchy, restraint, neutral surfaces,
+- **svadmin owns its visual principles:** hierarchy, restraint, neutral surfaces,
   typography, density, and interaction tone.
 - **Refine is an application-model reference:** resource routing, CRUD flows,
   provider state, access control, and mutation ownership.

@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 const root = resolve(import.meta.dir, '..');
 const read = (path: string) => readFileSync(resolve(root, path), 'utf8');
 
-describe('Stripe-first design principles contract', () => {
+describe('Admin UI design principles contract', () => {
   it('keeps repository and generated guidance synchronized', () => {
     expect(read('packages/create-svadmin/guidance/DESIGN.md')).toBe(read('DESIGN.md'));
     expect(read('DESIGN.md')).toContain('Clear by default');

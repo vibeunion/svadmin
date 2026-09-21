@@ -1,9 +1,9 @@
 ---
 title: Design Principles
-description: Seven Stripe-first principles for trustworthy admin products
+description: Seven svadmin design principles for trustworthy admin products
 ---
 
-svadmin uses Stripe as a visual authority, not as a brand template. Neutral
+svadmin defines its own design principles for Admin UI. Neutral
 surfaces, precise hierarchy, restrained depth, and compact controls support
 repeated operational work. These seven principles turn that direction into
 reviewable product decisions.
@@ -56,7 +56,7 @@ states must communicate scope and the next step.
 
 The invariant is **one event -> one primary feedback surface**.
 
-## 5. Restrained like Stripe
+## 5. Restrained by purpose
 
 Content and hierarchy carry the interface.
 

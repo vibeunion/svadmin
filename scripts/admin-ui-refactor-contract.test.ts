@@ -6,7 +6,7 @@ import utilityClasses from '../packages/ui/scripts/utility-class-map.json' with 
 const root = resolve(import.meta.dir, '..');
 const read = (path: string) => readFileSync(resolve(root, path), 'utf8');
 
-describe('Stripe-first refactor contract', () => {
+describe('Admin UI refactor contract', () => {
   it('keeps the primary example workspaces on the shared page contract', () => {
     for (const page of [
       'Dashboard.svelte',
@@ -27,7 +27,7 @@ describe('Stripe-first refactor contract', () => {
     }
   });
 
-  it('keeps operations pages data-driven, layout-specific, and Stripe-first', () => {
+  it('keeps operations pages data-driven, layout-specific, and Admin UI', () => {
     const source = read('example/src/pages/OperationsWorkspacePage.svelte');
     expect(source).toContain('ContentPageShell');
     expect(source).toContain('MetricBlock');
@@ -47,7 +47,7 @@ describe('Stripe-first refactor contract', () => {
     expect(source).not.toMatch(/rounded-(?:xl|2xl|3xl)/);
   });
 
-  it('keeps domain pages resource-specific, data-driven, and Stripe-first', () => {
+  it('keeps domain pages resource-specific, data-driven, and Admin UI', () => {
     const source = read('example/src/pages/DomainWorkspacePage.svelte');
     expect(source).toContain('ContentPageShell');
     expect(source).toContain('MetricBlock');
@@ -74,12 +74,12 @@ describe('Stripe-first refactor contract', () => {
 
   it('keeps CRM and property entity routes focused on their own workflows', () => {
     const crm = read('example/src/pages/CrmDashboardPage.svelte');
-    for (const layout of ['data-crm-account-layout', 'data-crm-contact-layout', 'data-crm-deal-layout', 'data-crm-activity-layout']) {
-      expect(crm).toContain(layout);
-    }
     const property = read('example/src/pages/RealEstateWorkspacePage.svelte');
-    for (const layout of ['data-property-agent-layout', 'data-property-lead-layout', 'data-property-showing-layout']) {
-      expect(property).toContain(layout);
+    // 页面已扁平化；资源隔离、筛选与导航由 pm-business-pages 的挂载测试验证。
+    for (const source of [crm, property]) {
+      expect(source).toContain('data-resource-name={resourceName}');
+      expect(source).toContain('<WorkspaceQueryState');
+      expect(source).toContain('<WorkspaceRecordLinks');
     }
   });
 
@@ -101,9 +101,16 @@ describe('Stripe-first refactor contract', () => {
   });
 
   it('keeps settings, list states, and network cards on shared primitives', () => {
-    for (const page of ['SettingsPlainPage.svelte', 'SettingsSidebarPage.svelte', 'SettingsEnterprisePage.svelte', 'CompanyProfilePage.svelte']) {
+    for (const page of ['SettingsSidebarPage.svelte', 'SettingsEnterprisePage.svelte']) {
       expect(read(`packages/ui/src/components/account/${page}`)).toContain('<SettingsGroup');
     }
+    const plainSettings = read('packages/ui/src/components/account/SettingsPlainPage.svelte');
+    for (const component of ['ContentPageShell', 'ProfilePage', 'NotificationsSettings', 'SecuritySettings']) {
+      expect(plainSettings).toContain(`<${component}`);
+    }
+    const company = read('packages/ui/src/components/account/CompanyProfilePage.svelte');
+    expect(company).toContain('<ContentPageShell');
+    expect(company).toContain('<DataState');
     for (const component of ['ApiKeyList.svelte', 'MemberList.svelte', 'FileList.svelte', 'SecurityEventTable.svelte', 'NetworkTable.svelte']) {
       expect(read(`packages/ui/src/components/content/${component}`)).toContain('<DataState');
     }
@@ -137,10 +144,9 @@ describe('Stripe-first refactor contract', () => {
     const workspace = read('packages/ui/src/components/content/WorkspaceLayout.svelte');
     expect(workspace).toContain('$derived(productWorkspace({ hasSecondary: Boolean(secondary) }))');
     expect(workspace).toContain('class={styles.columns}');
-    // 配方几何与发布 CSS 由 packages/ui/scripts/product-recipes.test.mjs 验证，
-    // 此处只验证组件绑定，避免把 Panda 构建工具类型带入 core tooling。
-    expect(read('packages/ui/src/components/account/CompanyProfilePage.svelte')).toContain('<WorkspaceLayout');
-    expect(read('packages/ui/src/components/account/UserProfilePage.svelte')).toContain('<WorkspaceLayout');
+    // 配方几何与发布 CSS 由 tailwind-recipes 和浏览器检查验证；这里仅检查装配边界。
+    expect(read('packages/ui/src/components/account/CompanyProfilePage.svelte')).toContain('<ContentPageShell');
+    expect(read('packages/ui/src/components/account/UserProfilePage.svelte')).toContain('<ProfilePage');
     expect(read('packages/ui/src/components/account/SettingsEnterprisePage.svelte')).toContain(`${utilityClasses.grid} ${utilityClasses['items-start']}`);
   });
 

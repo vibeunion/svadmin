@@ -1,12 +1,12 @@
-# Stripe-first 产品设计整合（2026-09-19）
+# Admin UI 产品设计整合（2026-09-19）
 
-延续用户的「请完成参考和实施，以 Stripe 风格为主」及继续指令。不是重做技术选型，也不是把付费模板改名分发。
+历史需求摘要（非用户原话）：完成管理界面的参考研究与实施，并继续整合。原始用户记录保留在 Git 历史。不是重做技术选型，也不是把付费模板改名分发。
 
 ## 主线与参考
 
 在 `0f6c4ad` 的六组产品布局 recipes 上整合 main `8f068fb`，保留主线 ContentPageShell、ContentPageHeader、MetricBlock 的 recipes、可读的 primitive 回退以及 Surface 工作流修复。唯一的双方源码冲突为 `packages/ui/panda.config.ts`：同时登记两组 recipes，所有有限变体都预生成。不回退主线、强推或改变后端权限。
 
-参考决定继续以 `reference-decisions.md` 为准：Stripe 官方列表/详情、筛选、空状态和操作层级为主；Metronic 仅补充账户/API 页面组织，DashLite/Vuexy 仅补充公开可见的页面范围与组件组织。当前参考页面已再次核对。不引入供应商 CSS、Tailwind、React、SDK、字体或未授权 Figma 图层。
+历史参考研究摘要见 `reference-decisions.md`，原始记录保留在 Git 历史。列表/详情、筛选、空状态和操作层级是本项目的实现决定；Metronic 仅补充账户/API 页面组织，DashLite/Vuexy 仅补充公开可见的页面范围与组件组织。此处不声称本次重新核对远程页面。当前资产参考清单仅保留 Park 及其未完成许可门禁，不引入供应商 CSS、React、SDK、字体或未授权 Figma 图层。
 
 ## 新的可见修正
 

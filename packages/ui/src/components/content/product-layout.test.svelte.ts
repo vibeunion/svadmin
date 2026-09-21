@@ -4,7 +4,7 @@ import Host from './product-layout.test-host.svelte';
 import StatusBadge from './StatusBadge.svelte';
 
 afterEach(cleanup);
-describe('Stripe-first product layout compatibility', () => {
+describe('Admin UI product layout compatibility', () => {
   it('keeps primary/summary snippets and omits the optional aside', () => {
     const view = render(Host, { secondary: false });
     expect(view.getByTestId('primary').textContent).toBe('Primary 0');

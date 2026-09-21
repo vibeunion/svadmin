@@ -58,8 +58,8 @@ describe('Deterministic zero-key fixture replay', () => {
 
   // Fixture: offline data with hidden/unauthorized fields
   const fixtureRecords = [
-    { id: 101, customer: 'Acme Corp', amount: 1500, status: 'completed', internalSecret: 'stripe_sk_test_123' },
-    { id: 102, customer: 'Beta LLC', amount: 820, status: 'pending', internalSecret: 'stripe_sk_test_456' },
+    { id: 101, customer: 'Acme Corp', amount: 1500, status: 'completed', internalSecret: 'demo_secret_123' },
+    { id: 102, customer: 'Beta LLC', amount: 820, status: 'pending', internalSecret: 'demo_secret_456' },
   ];
 
   test('validates offline spec without network or credentials', () => {
