@@ -226,7 +226,7 @@
       {/each}
     </div>
 
-    <details class="border-y py-3">
+    <details class="svadmin-collapsible border-y py-3">
       <summary class="cursor-pointer text-sm">{isZh ? '任务复盘与建议' : 'Task recap and suggestions'}</summary>
       <Card.Header class="border-b"><Card.Title class="flex items-center gap-2 text-base"><Bot class="h-5 w-5 text-primary" />{isZh ? '任务助手' : 'Task Assistant'}</Card.Title></Card.Header>
       <Card.Content class="space-y-4 p-4">
@@ -244,7 +244,7 @@
     </details>
   </section>
 
-  <details class="border-y py-3">
+  <details class="svadmin-collapsible border-y py-3">
     <summary class="cursor-pointer text-sm">{isZh ? '当前视图摘要' : 'Current view summary'}</summary>
     <Card.Header>
       <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

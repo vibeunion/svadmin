@@ -915,6 +915,41 @@ describe('Combobox contract consumer', () => {
     await waitFor(() => expect(trigger.textContent).toContain('Select...'));
   });
 
+  it.each([null, undefined, ''] as const)('loads relation options without fetching an empty selection (%s)', async value => {
+    const source = provider();
+    const getOne = vi.spyOn(source, 'getOne');
+    const app = mount(source);
+    await app.view.rerender({ field: true, ...(value === undefined ? {} : { value }) });
+    await fireEvent.click(app.view.getByRole('button', { name: 'Record' }));
+    await waitFor(() => expect(app.view.getAllByRole('option')).toHaveLength(1));
+    expect(getOne).not.toHaveBeenCalled();
+    expect(app.view.queryByRole('alert')).toBeNull();
+  });
+
+  it('preserves zero as a selected relation ID', async () => {
+    const source = provider();
+    const getOne = vi.spyOn(source, 'getOne');
+    const app = mount(source);
+    await app.view.rerender({ field: true, value: 0 });
+    await waitFor(() => expect(app.view.getByRole('button', { name: 'Record' }).textContent).toContain('Selected 0'));
+    expect(getOne).toHaveBeenCalledWith(expect.objectContaining({ id: 0 }));
+    expect(app.view.queryByRole('alert')).toBeNull();
+  });
+
+  it('preserves nonempty string relation IDs without numeric coercion', async () => {
+    const contract = defineResource('posts', { record: Type.Object({ id: Type.String(), title: Type.String() }) });
+    const source = provider(async () => ({ data: [{ id: 'first', title: 'First' }], total: 1 }));
+    const getOne = vi.spyOn(source, 'getOne');
+    const app = mount(source);
+    await app.view.rerender({
+      resources: [{ ...postDefinition, contract }],
+      field: true, value: '0',
+    });
+    await waitFor(() => expect(app.view.getByRole('button', { name: 'Record' }).textContent).toContain('Selected 0'));
+    expect(getOne).toHaveBeenCalledWith(expect.objectContaining({ id: '0' }));
+    expect(app.view.queryByRole('alert')).toBeNull();
+  });
+
   it('renders a sanitized default-query error and recovers through the retry control', async () => {
     const source = provider();
     source.getOne = vi.fn<DataProvider['getOne']>()

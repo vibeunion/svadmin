@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
   import { useTranslation } from '@svadmin/core/i18n';
-  import { Badge, Button, ContentPageShell, ContentPageHeader, MetricBlock, StatusBadge, WorkspaceStageStepper, type WorkspaceStage } from '@svadmin/ui';
+  import { Badge, Button, ContentPageShell, ContentPageHeader, MediaThumbnail, MetricBlock, StatusBadge, WorkspaceStageStepper, type WorkspaceStage } from '@svadmin/ui';
   import { createCaseWorkspaceState, isCaseStageId } from './case-workspace.svelte';
   import { createCaseActions } from './case-actions';
 
@@ -86,15 +86,15 @@
     {#if caseState.activeStage === 'overview'}
       <section class="space-y-3 border-y py-4"><h2 class="text-base font-semibold">{isZh ? '受理检查' : 'Intake review'}</h2><p class="text-sm">{isZh ? '样例：3件样品，批次B24-07。确认受理后填写试验记录，再补齐证据。' : 'Sample: 3 units, batch B24-07. Accept intake, record execution, then attach evidence.'}</p><StatusBadge status={caseState.caseAccepted ? 'success' : 'neutral'} label={caseState.caseAccepted ? (isZh ? '已受理' : 'Accepted') : (isZh ? '待受理' : 'Awaiting intake')} /></section>
     {:else if caseState.activeStage === 'execution'}
-      <section class="space-y-3"><h2 class="text-base font-semibold">{isZh ? '试验记录' : 'Execution record'}</h2><label class="block text-sm">{isZh ? '方法、设备与观察结果（至少4个字符）' : 'Method, equipment and observations (at least 4 characters)'}<textarea class="mt-2 min-h-40 w-full rounded-md border bg-background p-3" bind:value={note} oninput={() => { caseState.recordExecution(note); technical = false; quality = false; delivered = false; }}></textarea></label></section>
+      <section class="space-y-3"><h2 class="text-base font-semibold">{isZh ? '试验记录' : 'Execution record'}</h2><label class="block text-sm">{isZh ? '方法、设备与观察结果（至少4个字符）' : 'Method, equipment and observations (at least 4 characters)'}<textarea rows={6} class="mt-2 w-full rounded-md border bg-background p-3" bind:value={note} oninput={() => { caseState.recordExecution(note); technical = false; quality = false; delivered = false; }}></textarea></label></section>
     {:else if caseState.activeStage === 'evidence'}
       <section class="grid gap-5 md:grid-cols-2">
         <div class="space-y-4"><h2 class="text-base font-semibold">{isZh ? '本地证据' : 'Local evidence'}</h2><label class="block text-sm">{isZh ? '图片' : 'Image'}<input class="mt-2 block w-full" type="file" accept="image/png,image/jpeg,image/webp" onchange={chooseEvidence} /></label><label class="block text-sm">{isZh ? '放大倍数' : 'Magnification'}<input class="mt-2 w-full rounded-md border bg-background p-2" bind:value={magnification} oninput={() => { caseState.recordEvidence(evidenceName, magnification); technical = false; quality = false; delivered = false; }} placeholder="4x" /></label><p class="text-sm text-muted-foreground">{evidenceName || (isZh ? '尚未提供图片' : 'No image provided')}</p></div>
-        {#if preview}<img src={preview} alt={isZh ? '本地案件证据预览' : 'Local case evidence preview'} class="max-h-96 w-full object-contain" />{:else}<p class="self-center text-sm text-muted-foreground">{isZh ? '缺少证据时不能进入报告。' : 'Evidence is required before proceeding to the report.'}</p>{/if}
+        {#if preview}<MediaThumbnail src={preview} alt={isZh ? '本地案件证据预览' : 'Local case evidence preview'} size="full" fit="contain" aspectRatio="4 / 3" showOverlay={false} loadingLabel={isZh ? '正在加载本地证据' : 'Loading local evidence'} errorLabel={isZh ? '图片无法加载，请重新选择有效图片。' : 'Image unavailable. Choose a valid image again.'} class="max-h-96" />{:else}<p class="self-center text-sm text-muted-foreground">{isZh ? '缺少证据时不能进入报告。' : 'Evidence is required before proceeding to the report.'}</p>{/if}
       </section>
     {:else}
       <section class="space-y-4 border-y py-4"><h2 class="text-base font-semibold">{isZh ? '报告审核模拟' : 'Report review simulation'}</h2><p class="whitespace-pre-wrap text-sm">{caseState.executionNote}</p><p class="text-sm">{caseState.evidenceName} · {caseState.magnification}</p><label class="flex items-center gap-2 text-sm"><input type="checkbox" bind:checked={technical} onchange={() => delivered = false} />{isZh ? '模拟技术审核完成' : 'Simulated technical review complete'}</label><label class="flex items-center gap-2 text-sm"><input type="checkbox" bind:checked={quality} onchange={() => delivered = false} />{isZh ? '模拟质量审核完成' : 'Simulated quality review complete'}</label></section>
     {/if}
-    <details class="border-y py-3"><summary class="cursor-pointer text-sm">{isZh ? '本页操作记录（刷新清空）' : 'Page-session activity (resets on refresh)'}</summary><div class="divide-y">{#each events as event, index (index)}<p class="py-2 text-sm">{event.time} · {event.action}</p>{:else}<p class="py-3 text-sm">{isZh ? '暂无操作' : 'No activity'}</p>{/each}</div></details>
+    <details class="svadmin-collapsible border-y py-3"><summary class="cursor-pointer text-sm">{isZh ? '本页操作记录（刷新清空）' : 'Page-session activity (resets on refresh)'}</summary><div class="divide-y">{#each events as event, index (index)}<p class="py-2 text-sm">{event.time} · {event.action}</p>{:else}<p class="py-3 text-sm">{isZh ? '暂无操作' : 'No activity'}</p>{/each}</div></details>
   </ContentPageShell>
 </div>

@@ -136,6 +136,7 @@
       case 'boolean': return false;
       case 'tags': case 'images': case 'multiselect': return [];
       case 'select': return field.options?.[0]?.value ?? '';
+      case 'relation': return field.multiple ? [] : null;
       case 'json': return {};
       default: return '';
     }

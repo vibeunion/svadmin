@@ -62,7 +62,7 @@ describe('reference page compatibility', () => {
     expect(verify).not.toHaveBeenCalled();
     expect(twoFactor.queryByText('Two-factor authentication is enabled')).toBeNull();
     await fireEvent.input(twoFactor.getByRole('textbox'), { target: { value: '123456' } });
-    await fireEvent.click(twoFactor.getByRole('button', { name: 'Confirm', exact: true }));
+    await fireEvent.click(twoFactor.getByRole('button', { name: /^Confirm$/ }));
 
     expect(await twoFactor.findByText('Two-factor authentication is enabled')).not.toBeNull();
     expect(verify).toHaveBeenCalledExactlyOnceWith('123456');

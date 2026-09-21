@@ -216,7 +216,9 @@ describe('AdminApp authenticated navigation', () => {
       resources,
     });
 
-    await fireEvent.click(await view.findByRole('button', { name: 'Back', exact: true }));
+    // 等待真实懒加载模块编译完成，按钮查询仍保留默认超时与失败断言。
+    await vi.dynamicImportSettled();
+    await fireEvent.click(await view.findByRole('button', { name: /^Back$/ }));
 
     await waitFor(() => expect(window.location.hash).toBe('#/posts?page=2&q=review'));
   });
@@ -228,6 +230,7 @@ describe('AdminApp authenticated navigation', () => {
       resources,
     });
 
+    await vi.dynamicImportSettled();
     await fireEvent.click(await view.findByRole('button', { name: 'Back' }));
 
     await waitFor(() => expect(window.location.hash).toBe('#/posts?page=2&q=review'));
