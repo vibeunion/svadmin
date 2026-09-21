@@ -1,6 +1,5 @@
 import { definedOptions } from '@svadmin/core/options';
 import { requireValue } from "../../../scripts/test-assertions";
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, test, expect } from 'bun:test';
 import { createMCPServer } from './index';
 import type { MCPRequest } from './index';
@@ -99,7 +98,7 @@ describe('createMCPServer', () => {
 
   test('tool resource enum matches configured resources', () => {
     const tools = server.getTools();
-    const getListTool = tools.find(t => t.name === 'svadmin_getList')!;
+    const getListTool =requireValue( tools.find(t => t.name === 'svadmin_getList'));
     expect(requireValue(getListTool.inputSchema.properties['resource']).enum).toEqual(['posts', 'users']);
   });
 
@@ -236,19 +235,19 @@ describe('MCP JSON-RPC handling', () => {
     }));
 
     expect(res.error).toBeDefined();
-    expect(res.error!.code).toBe(-32602);
+    expect(requireValue(res.error).code).toBe(-32602);
   });
 
   test('unknown method returns error', async () => {
     const res = await server.handleRequest(makeRequest('whatever'));
     expect(res.error).toBeDefined();
-    expect(res.error!.code).toBe(-32601);
+    expect(requireValue(res.error).code).toBe(-32601);
   });
 
   test('missing tool name returns error', async () => {
     const res = await server.handleRequest(makeRequest('tools/call', {}));
     expect(res.error).toBeDefined();
-    expect(res.error!.code).toBe(-32602);
+    expect(requireValue(res.error).code).toBe(-32602);
   });
 });
 
@@ -271,9 +270,9 @@ describe('Tool safety and concurrency metadata', () => {
 
   test('mutation tools are marked non-concurrent, and delete is marked destructive', () => {
     const tools = server.getTools();
-    const createTool = tools.find(t => t.name === 'svadmin_create')!;
-    const updateTool = tools.find(t => t.name === 'svadmin_update')!;
-    const deleteTool = tools.find(t => t.name === 'svadmin_delete')!;
+    const createTool =requireValue( tools.find(t => t.name === 'svadmin_create'));
+    const updateTool =requireValue( tools.find(t => t.name === 'svadmin_update'));
+    const deleteTool =requireValue( tools.find(t => t.name === 'svadmin_delete'));
 
     expect(createTool.readOnly).toBe(false);
     expect(createTool.concurrent).toBe(false);

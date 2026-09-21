@@ -1,7 +1,6 @@
 import { requireValue } from "../../../scripts/test-assertions";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // @svadmin/appwrite — Unit Tests
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, test, expect, mock } from 'bun:test';
 import { createAppwriteDataProvider } from './data-provider';
 import { createAppwriteAuthProvider } from './auth-provider';
@@ -139,14 +138,14 @@ describe('Appwrite DataProvider', () => {
   test('getMany fetches by ids', async () => {
     const db = createMockDatabases();
     const dp = await createAppwriteDataProvider({ databases: db, databaseId: 'main' });
-    const result = await dp.getMany!({ resource: 'posts', ids: ['1', '2'] });
+    const result = await requireValue(dp.getMany)({ resource: 'posts', ids: ['1', '2'] });
     expect(result.data).toHaveLength(2);
   });
 
   test('deleteMany deletes each id', async () => {
     const db = createMockDatabases();
     const dp = await createAppwriteDataProvider({ databases: db, databaseId: 'main' });
-    await dp.deleteMany!({ resource: 'posts', ids: ['1', '2'] });
+    await requireValue(dp.deleteMany)({ resource: 'posts', ids: ['1', '2'] });
     expect(db.deleteDocument).toHaveBeenCalledTimes(2);
   });
 });
@@ -201,21 +200,21 @@ describe('Appwrite AuthProvider', () => {
     const auth = createAppwriteAuthProvider({ account });
     const identity = await auth.getIdentity();
     expect(identity).not.toBeNull();
-    expect(identity!.name).toBe('Admin');
-    expect(identity!.email).toBe('admin@test.com');
+    expect(requireValue(identity).name).toBe('Admin');
+    expect(requireValue(identity).email).toBe('admin@test.com');
   });
 
   test('register success', async () => {
     const account = createMockAccount();
     const auth = createAppwriteAuthProvider({ account });
-    const result = await auth.register!({ email: 'new@test.com', password: 'pass123' });
+    const result = await requireValue(auth.register)({ email: 'new@test.com', password: 'pass123' });
     expect(result.success).toBe(true);
   });
 
   test('onError with 401', async () => {
     const account = createMockAccount();
     const auth = createAppwriteAuthProvider({ account });
-    const result = await auth.onError!(new Error('401 Unauthorized'));
+    const result = await requireValue(auth.onError)(new Error('401 Unauthorized'));
     expect(result.logout).toBe(true);
   });
 });
@@ -251,8 +250,7 @@ describe('Appwrite LiveProvider', () => {
     const lp = createAppwriteLiveProvider({ client: mockClient, databaseId: 'main' });
     const cb = mock(() => {});
     lp.subscribe({ resource: 'posts', callback: cb });
-
-    handler!({ events: ['databases.main.collections.posts.documents.*.create'], payload: { $id: '1' } });
+    requireValue<(payload: unknown) => void>(handler)({ events: ['databases.main.collections.posts.documents.*.create'], payload: { $id: '1' } });
     expect(cb).toHaveBeenCalledTimes(1);
     expect((cb.mock.calls as any)[0][0].type).toBe('INSERT');
   });
