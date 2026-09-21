@@ -68,23 +68,29 @@ test.describe('UI state contracts', () => {
       await page.screenshot({ path: join(screenshotDirectory, `command-action-${viewport.width}x${viewport.height}.png`), fullPage: false });
 
       await page.goto('/#/case_workspace');
-      await page.getByRole('button', { name: /证据治理: Blocked|Evidence: Blocked/ }).click();
+      const workspace = page.locator('[data-app-page="case-workspace"]');
+      await page.getByRole('button', { name: /Accept case|确认受理/, exact: true }).click();
+      await expect(workspace).toHaveAttribute('data-active-stage', 'execution');
+      await workspace.getByRole('textbox').fill('Recorded test method, equipment and observations');
+      await page.getByRole('button', { name: /Submit execution record|提交试验记录/, exact: true }).click();
+      await expect(workspace).toHaveAttribute('data-active-stage', 'evidence');
 
-      const evidence = page.locator('[data-media-state="empty"]');
+      const evidence = workspace.getByText(/Evidence is required before proceeding to the report\.|缺少证据时不能进入报告。/, { exact: true });
       await expect(evidence).toBeVisible();
+      await page.getByRole('button', { name: /Confirm local evidence|确认本地证据/, exact: true }).click();
+      await expect(workspace).toHaveAttribute('data-active-stage', 'evidence');
+      await expect(workspace.getByRole('status')).toBeVisible();
       const layout = await page.locator('main').evaluate((main) => {
-        const empty = main.querySelector<HTMLElement>('[data-media-state="empty"]');
         const content = main.querySelector<HTMLElement>('[data-svadmin-content-page]') ?? main;
         return {
           horizontalOverflow: content.scrollWidth > content.clientWidth + 1,
-          emptyHeight: empty?.getBoundingClientRect().height ?? 0,
           documentOverflow: document.documentElement.scrollWidth > window.innerWidth + 1,
         };
       });
 
       expect(layout.horizontalOverflow).toBe(false);
       expect(layout.documentOverflow).toBe(false);
-      expect(layout.emptyHeight).toBeLessThan(48);
+      expect(await evidence.evaluate(element => element.getBoundingClientRect().height)).toBeLessThan(48);
 
       await page.screenshot({ path: join(screenshotDirectory, `case-empty-media-${viewport.width}x${viewport.height}.png`), fullPage: false });
     });

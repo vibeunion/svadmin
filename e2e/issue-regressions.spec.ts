@@ -22,8 +22,15 @@ test.describe('Issue regression coverage', () => {
     await form.locator('button[type="submit"]').click();
 
     await expect(nameInput).toHaveAttribute('aria-invalid', 'true');
-    await expect(nameInput).toHaveAttribute('aria-describedby', 'products-name-error');
-    await expect(page.locator('#products-name-error')).toBeVisible();
+    await expect(nameInput).toHaveAttribute('aria-describedby', /\S+/);
+    const descriptionIds = (await nameInput.getAttribute('aria-describedby'))?.split(/\s+/) ?? [];
+    expect(descriptionIds.length).toBeGreaterThan(0);
+    for (const id of descriptionIds) {
+      const description = form.locator(`[id=${JSON.stringify(id)}]`);
+      await expect(description).toHaveCount(1);
+      await expect(description).toBeVisible();
+      await expect(description).not.toBeEmpty();
+    }
     await expect(nameInput).toBeFocused();
   });
 
