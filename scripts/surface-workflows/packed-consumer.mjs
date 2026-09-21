@@ -37,6 +37,10 @@ try {
     packageManager: 'pnpm@11.11.0', dependencies, devDependencies: {
       vite: root.overrides.vite, '@sveltejs/vite-plugin-svelte': manifest('ui').devDependencies['@sveltejs/vite-plugin-svelte'],
     } }, null, 2));
+  // 仅替换运行时依赖来源，保留所有 peer 范围；JSON 也是合法的 YAML。
+  writeFileSync(join(temporary, 'pnpm-workspace.yaml'), JSON.stringify({
+    overrides: { '@svadmin/ui>@svadmin/devtools-contract': dependencies['@svadmin/devtools-contract'] },
+  }, null, 2));
   run('npx', ['--yes', 'pnpm@11.11.0', 'install', '--strict-peer-dependencies', '--ignore-scripts', '--reporter', 'append-only']);
   writeFileSync(join(temporary, 'server.mjs'), `
     import assert from 'node:assert/strict';
