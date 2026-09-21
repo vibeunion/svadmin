@@ -1,0 +1,43 @@
+{
+  "pr": 448,
+  "sourceHead": "2b4c1dcb5c5d3ea2b32d9b9c5ebfb82e4a0d5c0c",
+  "recordedAt": "2026-09-21T12:32:35Z",
+  "sourceWorktreeCleanBeforeAndAfter": true,
+  "evidenceBranch": "codex/pr-448-ui-evidence-2b4c1dcb",
+  "command": "SVADMIN_OPENUI_ENTRY=<isolated @openuidev/lang-core@0.3.0 dist/index.mjs> bun run playwright test --config scripts/surface-workflows/playwright.config.ts",
+  "browser": "Chromium",
+  "result": { "passed": 11, "failed": 0, "durationSeconds": 8.6 },
+  "diffCheck": {
+    "command": "git diff --check origin/main...HEAD",
+    "exitCode": 0
+  },
+  "scope": "Synthetic local workflow fixture. Screenshots are unmodified full-page captures, not production or real-model evidence. No PR source changes.",
+  "exclusions": "Does not validate subsequent packed-consumer.mjs changes, transitive dependency overrides, or later PR448 heads. Browser evidence is bound only to sourceHead.",
+  "visualReview": "Inspected both desktop images and both mobile themes. Detail, activity and forms render; mobile stacks vertically without horizontal overflow or overlapping text. HTML-like activity text remains literal text.",
+  "screenshots": [
+    {
+      "file": "surface-business-1440x900-light.png",
+      "viewport": [1440, 900],
+      "theme": "light",
+      "sha256": "2d34807646f81c07377d8126a4a09bd99be65647c006147e1f8110f4ab0ebd76"
+    },
+    {
+      "file": "surface-business-1920x1080-dark.png",
+      "viewport": [1920, 1080],
+      "theme": "dark",
+      "sha256": "276b491a34f65b579b28fc36c491aa1b3139a8dd1d50d79eb45353e134f9887f"
+    },
+    {
+      "file": "surface-business-390x844-light.png",
+      "viewport": [390, 844],
+      "theme": "light",
+      "sha256": "1630ad7d3bd22609b605be281f89403e666642c6ff741358c2edd9b62f3866b3"
+    },
+    {
+      "file": "surface-business-390x844-dark.png",
+      "viewport": [390, 844],
+      "theme": "dark",
+      "sha256": "8b1df0624c3bee25cfd93b79e5c4eac2f9c8d344cd32bfeeb2087dfa6b80c824"
+    }
+  ]
+}
