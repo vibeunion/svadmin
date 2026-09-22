@@ -15,6 +15,13 @@ import {
 
 const scaffold = loadScaffoldManifest(resolve(import.meta.dir, '..', 'scaffold-manifest.json'));
 
+/** Derives a caret range that overlaps the scaffold requirement but is not equal to it. */
+function driftedCaret(range: string | undefined): string {
+  const match = typeof range === 'string' ? /^\^(\d+)\.(\d+)\.(\d+)$/.exec(range) : null;
+  if (!match) throw new Error(`Expected a caret range in the scaffold manifest, received ${String(range)}`);
+  return `^${match[1]}.${match[2]}.${Number(match[3]) + 1}`;
+}
+
 describe('create-svadmin doctor', () => {
   test('reports a generated project as clean', () => {
     const project = createProjectPackageJson(scaffold, {
@@ -37,7 +44,9 @@ describe('create-svadmin doctor', () => {
       authProvider: 'mock',
     });
     project.dependencies['@svadmin/core'] = '^0.1.0';
-    project.dependencies['@svadmin/simple-rest'] = '^0.10.0';
+    project.dependencies['@svadmin/simple-rest'] = driftedCaret(
+      scaffold.svadmin.dependencyPacks['simple-rest']?.['@svadmin/simple-rest'],
+    );
     delete project.dependencies['@tanstack/svelte-query'];
     delete project.dependencies['@refinedev/core'];
 

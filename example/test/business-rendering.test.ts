@@ -94,7 +94,6 @@ describe('business rendering migration inventory', () => {
     ] as const) expect(assertRenderingChildren(
       source(`${root}${file}.svelte`),
       children,
-      file === 'ResourceOperationsPage',
     )).toBeGreaterThan(0);
   });
 
