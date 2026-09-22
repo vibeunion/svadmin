@@ -68,6 +68,39 @@ export {
   useInvalidate,
 } from './strict-hooks.svelte';
 export { defineResource, getContractFormFields, withContractProjection } from './resource-contract';
+export {
+  defineAdminConfig,
+  defineSvadminPlugin,
+  resolveAdminConfig,
+  assertAdminConfig,
+  toAdminContextSource,
+  normalizeAdminResource,
+} from './admin-config';
+export type {
+  AdminConfig,
+  AdminConfigDiagnostic,
+  AdminConfigDiagnosticCode,
+  AdminConfigInput,
+  AdminPluginCapability,
+  AdminPluginContribution,
+  AdminPluginDescriptor,
+  AdminPluginDocs,
+  AdminResourceDefinition,
+  AdminResourceInput,
+  ResolvedAdminConfig,
+  ResolvedAdminContextSource,
+} from './admin-config';
+export { provideAdminConfig } from './admin-config-runtime.svelte';
+export { provideResourceScope } from './resource-scope.svelte';
+export type { ResourceScope } from './resource-scope.svelte';
+export { buildAdminManifest } from './admin-manifest';
+export type {
+  AdminManifest,
+  AdminManifestField,
+  AdminManifestPlugin,
+  AdminManifestProject,
+  AdminManifestResource,
+} from './admin-manifest';
 export { UpdateManyPartialError } from './update-many-contract';
 export { CreateManyPartialError } from './create-many-contract';
 export type { ContractCreateOptions as UseCreateOptions } from './create-hooks.svelte';

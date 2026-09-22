@@ -45,6 +45,28 @@
         }
       ]
     },
+    "packages/app": {
+      "release-type": "node",
+      "component": "app",
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "/packages/create-svadmin/scaffold-manifest.json",
+          "jsonpath": "$.dependencies[\"@svadmin/app\"]"
+        }
+      ]
+    },
+    "packages/devtools": {
+      "release-type": "node",
+      "component": "devtools",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "packages/rest": {
+      "release-type": "node",
+      "component": "rest",
+      "changelog-path": "CHANGELOG.md"
+    },
     "packages/ai-elements": {
       "release-type": "node",
       "component": "ai-elements",

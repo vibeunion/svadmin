@@ -60,6 +60,20 @@ const workspaceProviderByChoice = {
   'simple-rest': '@svadmin/simple-rest',
   supabase: '@svadmin/supabase',
   graphql: '@svadmin/graphql',
+  rest: '@svadmin/rest',
+  airtable: '@svadmin/airtable',
+  appwrite: '@svadmin/appwrite',
+  directus: '@svadmin/directus',
+  drizzle: '@svadmin/drizzle',
+  elysia: '@svadmin/elysia',
+  firebase: '@svadmin/firebase',
+  hasura: '@svadmin/hasura',
+  medusa: '@svadmin/medusa',
+  'nestjs-query': '@svadmin/nestjs-query',
+  'nestjsx-crud': '@svadmin/nestjsx-crud',
+  pocketbase: '@svadmin/pocketbase',
+  sanity: '@svadmin/sanity',
+  strapi: '@svadmin/strapi',
   none: null,
 } as const;
 
@@ -70,6 +84,14 @@ const refineCorePeerByProvider = {
   '@refinedev/simple-rest': '^5.0.0',
   '@refinedev/supabase': '^5.0.0',
   '@refinedev/graphql': '^5.0.0',
+  '@refinedev/rest': '^5.0.0',
+  '@refinedev/airtable': '^5.0.0',
+  '@refinedev/appwrite': '^5.0.0',
+  '@refinedev/hasura': '^5.0.0',
+  '@refinedev/medusa': '^5.0.0',
+  '@refinedev/nestjs-query': '^5.0.0',
+  '@refinedev/nestjsx-crud': '^5.0.0',
+  '@refinedev/strapi-v4': '^5.0.0',
 } as const;
 
 const toolchainPackageNames = [
@@ -219,12 +241,24 @@ async function loadCompatibilityContext(repositoryRoot: string): Promise<Compati
     readPackageManifest(join(repositoryRoot, 'example', 'package.json')),
   ]);
   const workspacePackages = [core, aiElements, ui, simpleRest, supabase, graphql];
+  const providerDirectories = new Set(
+    Object.values(workspaceProviderByChoice)
+      .filter((name) => name !== null)
+      .map((name) => name.replace('@svadmin/', '')),
+  );
+  const providerManifests = await Promise.all(
+    [...providerDirectories].map((directory) => readPackageManifest(packagePath(directory))),
+  );
+  const byName = new Map<string, PackageManifest>();
+  for (const manifest of [...workspacePackages, ...providerManifests]) {
+    byName.set(manifest.name, manifest);
+  }
   return {
     repositoryRoot,
     rootManifest,
     exampleManifest,
     workspace: {
-      byName: new Map(workspacePackages.map((manifest) => [manifest.name, manifest])),
+      byName,
       core,
       aiElements,
       ui,
@@ -455,5 +489,7 @@ if (import.meta.main) {
   if (issues.length > 0) {
     throw new Error(`create-svadmin dependency compatibility failed:\n- ${issues.join('\n- ')}`);
   }
-  console.info('create-svadmin dependency compatibility passed for all 16 provider/auth combinations');
+  console.info(
+    `create-svadmin dependency compatibility passed for all ${DATA_PROVIDER_CHOICES.length * AUTH_PROVIDER_CHOICES.length} provider/auth combinations`,
+  );
 }

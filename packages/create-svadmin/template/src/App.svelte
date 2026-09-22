@@ -1,24 +1,21 @@
 <script lang="ts">
-  import { AdminApp, DataState } from '@svadmin/ui';
-  import { createSimpleRestDataProvider } from '@svadmin/simple-rest';
-  import { resources } from './resources';
-  import { mockAuthProvider } from './providers/mockAuth';
+  import { AdminApp } from '@svadmin/ui';
+  import { resolveAdminConfig } from '@svadmin/app';
+  import config from './svadmin.config';
   import Dashboard from './pages/Dashboard.svelte';
   import Login from './pages/Login.svelte';
 
-  function connect() {
-    return createSimpleRestDataProvider('https://jsonplaceholder.typicode.com');
-  }
-  let connection = $state(connect());
+  // svadmin.config.ts resolves its providers (including async ones) before this
+  // module is evaluated, so the platform snapshot is available synchronously.
+  const resolved = resolveAdminConfig(config);
 </script>
 
-{#await connection}
-  <DataState state="loading" />
-{:then dataProvider}
-  <AdminApp {dataProvider} {resources} authProvider={mockAuthProvider} title="svadmin Demo" locale="en">
-    {#snippet dashboard()}<Dashboard />{/snippet}
-    {#snippet loginPage()}<Login />{/snippet}
-  </AdminApp>
-{:catch}
-  <DataState state="error" title="Unable to initialize data provider" retry={() => { connection = connect(); }} />
-{/await}
+<AdminApp
+  providerBundle={resolved.providers}
+  resources={[...resolved.resources]}
+  title="svadmin Demo"
+  locale="en"
+>
+  {#snippet dashboard()}<Dashboard />{/snippet}
+  {#snippet loginPage()}<Login />{/snippet}
+</AdminApp>

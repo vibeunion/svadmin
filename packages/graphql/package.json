@@ -19,6 +19,12 @@
       "default": "./src/index.ts"
     }
   },
+  "svadmin": {
+    "capabilities": ["data", "graphql"],
+    "core": "^0.55.0",
+    "stability": "stable",
+    "migration": null
+  },
   "peerDependencies": {
     "@svadmin/core": "workspace:*",
     "@refinedev/graphql": "^8.0.1"

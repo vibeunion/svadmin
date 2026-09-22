@@ -51,5 +51,14 @@
     "@svadmin/core": {
       "optional": true
     }
+  },
+  "svadmin": {
+    "capabilities": [
+      "server-data",
+      "migrations"
+    ],
+    "core": "^0.55.0",
+    "stability": "stable",
+    "migration": null
   }
 }

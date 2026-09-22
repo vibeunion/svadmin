@@ -1,0 +1,53 @@
+{
+  "name": "@svadmin/app",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Application composition layer for svadmin — defineAdminConfig, plugins, runtime binding, and the AI manifest",
+  "license": "MIT",
+  "keywords": [
+    "svadmin",
+    "admin",
+    "svelte",
+    "application",
+    "plugin",
+    "ai"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vibeunion/svadmin.git",
+    "directory": "packages/app"
+  },
+  "sideEffects": false,
+  "svadmin": {
+    "capabilities": ["app-config", "plugin-registry", "runtime-binding", "ai-manifest"],
+    "core": "^0.55.0",
+    "stability": "experimental",
+    "migration": null
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "peerDependencies": {
+    "@svadmin/core": "workspace:*"
+  },
+  "peerDependenciesMeta": {
+    "@svadmin/core": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  },
+  "scripts": {
+    "build": "bun ../../scripts/build-node-package.ts"
+  }
+}

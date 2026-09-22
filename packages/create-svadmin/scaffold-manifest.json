@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@svadmin/core": "^0.55.0",
+    "@svadmin/app": "^0.1.0",
     "@svadmin/ai-elements": "^0.10.0",
     "@svadmin/ui": "^0.75.0",
     "@sinclair/typebox": "^0.34.52",
@@ -43,6 +44,64 @@
         "@refinedev/graphql": "^8.0.1",
         "graphql-request": "^7.4.0",
         "graphql": "^16.8.0"
+      },
+      "rest": {
+        "@svadmin/rest": "^0.1.0",
+        "@refinedev/rest": "^2.1.1",
+        "@nestjsx/crud-request": "^5.0.0-alpha.3"
+      },
+      "airtable": {
+        "@svadmin/airtable": "^0.11.0",
+        "@refinedev/airtable": "^5.0.1"
+      },
+      "appwrite": {
+        "@svadmin/appwrite": "^0.10.0",
+        "appwrite": ">=26.2.0",
+        "@refinedev/appwrite": "^8.0.1"
+      },
+      "directus": {
+        "@svadmin/directus": "^0.10.9"
+      },
+      "drizzle": {
+        "@svadmin/drizzle": "^0.12.9",
+        "drizzle-orm": "^1.0.0-rc.1",
+        "refine-sqlx": "^0.10.3"
+      },
+      "elysia": {
+        "@svadmin/elysia": "^0.13.9",
+        "elysia": ">=1.4.30",
+        "@elysiajs/eden": ">=1.4.9"
+      },
+      "firebase": {
+        "@svadmin/firebase": "^0.11.0"
+      },
+      "hasura": {
+        "@svadmin/hasura": "^0.11.0",
+        "@refinedev/hasura": "^7.0.1",
+        "graphql-request": "^7.4.0"
+      },
+      "medusa": {
+        "@svadmin/medusa": "^0.11.0",
+        "@refinedev/medusa": "^5.0.0"
+      },
+      "nestjs-query": {
+        "@svadmin/nestjs-query": "^0.11.0",
+        "@refinedev/nestjs-query": "^5.0.0"
+      },
+      "nestjsx-crud": {
+        "@svadmin/nestjsx-crud": "^0.11.0",
+        "@refinedev/nestjsx-crud": "^6.0.1"
+      },
+      "pocketbase": {
+        "@svadmin/pocketbase": "^0.11.9",
+        "pocketbase": ">=0.28.0"
+      },
+      "sanity": {
+        "@svadmin/sanity": "^0.10.9"
+      },
+      "strapi": {
+        "@svadmin/strapi": "^0.11.0",
+        "@refinedev/strapi-v4": "^7.0.1"
       }
     },
     "dataProviders": {
@@ -57,6 +116,56 @@
       "graphql": [
         "refine-core",
         "graphql"
+      ],
+      "rest": [
+        "refine-core",
+        "rest"
+      ],
+      "airtable": [
+        "refine-core",
+        "airtable"
+      ],
+      "appwrite": [
+        "refine-core",
+        "appwrite"
+      ],
+      "directus": [
+        "directus"
+      ],
+      "drizzle": [
+        "drizzle"
+      ],
+      "elysia": [
+        "elysia"
+      ],
+      "firebase": [
+        "firebase"
+      ],
+      "hasura": [
+        "refine-core",
+        "hasura"
+      ],
+      "medusa": [
+        "refine-core",
+        "medusa"
+      ],
+      "nestjs-query": [
+        "refine-core",
+        "nestjs-query"
+      ],
+      "nestjsx-crud": [
+        "refine-core",
+        "nestjsx-crud"
+      ],
+      "pocketbase": [
+        "pocketbase"
+      ],
+      "sanity": [
+        "sanity"
+      ],
+      "strapi": [
+        "refine-core",
+        "strapi"
       ],
       "none": []
     },

@@ -17,6 +17,12 @@ import {
 import { inferCommand } from "./infer-command";
 import { generateCommand } from './generate-command';
 import { liteInitCommand } from './lite-init';
+import { parseInitArguments, resolvePresetSelections } from './init-arguments';
+import { addCommand } from './add-command';
+import {
+  buildScaffoldPlatformFiles,
+  checkAdminManifest,
+} from './scaffold-platform';
 import {
   doctorProjectPackageJson,
   planProjectPackageFileUpgrade,
@@ -46,6 +52,17 @@ interface UpgradeCommandArguments {
 
 function loadShippedScaffoldManifest(): ScaffoldManifest {
   return loadScaffoldManifest(path.join(__dirname, '..', 'scaffold-manifest.json'));
+}
+
+function shippedCliVersion(): string {
+  try {
+    const raw = fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf8');
+    const parsed: unknown = JSON.parse(raw);
+    const version = typeof parsed === 'object' && parsed !== null ? Reflect.get(parsed, 'version') : undefined;
+    return typeof version === 'string' ? version : '0.0.0';
+  } catch {
+    return '0.0.0';
+  }
 }
 
 function projectDirectoryFromArguments(positional: string[]): string {
@@ -120,7 +137,16 @@ function doctor(args: string[]): void {
   const project = readMaintainedPackageJson(path.join(projectDirectory, 'package.json'));
   const report = doctorProjectPackageJson(project, loadShippedScaffoldManifest());
   printDoctorReport(report, projectDirectory);
-  process.exitCode = report.exitCode;
+  const manifestIssues = checkAdminManifest(projectDirectory, project);
+  if (manifestIssues.length > 0) {
+    console.log(pc.bold('  Platform entrypoints:'));
+    for (const issue of manifestIssues) {
+      console.log(pc.yellow(`  ⚠ ${issue.message}`));
+      console.log(pc.dim(`    → ${issue.action}`));
+    }
+    console.log();
+  }
+  process.exitCode = report.exitCode === 0 && manifestIssues.length === 0 ? 0 : 1;
 }
 
 function printUpgradeChanges(upgradeExecution: UpgradeResult): void {
@@ -221,7 +247,7 @@ function guidance(args: string[]): void {
 }
 
 // ─── Scaffold (init) ───────────────────────────────────────────
-async function init(): Promise<void> {
+async function init(args: string[]): Promise<void> {
   console.log();
   console.log(pc.cyan('  ╔═══════════════════════════════════╗'));
   console.log(pc.cyan('  ║  ') + pc.bold('create-svadmin') + pc.cyan('                    ║'));
@@ -229,8 +255,12 @@ async function init(): Promise<void> {
   console.log(pc.cyan('  ╚═══════════════════════════════════╝'));
   console.log();
 
-  const response = await prompts([
-    {
+  const parsed = parseInitArguments(args);
+  const presetSelections = resolvePresetSelections(parsed);
+  const questions: Array<Record<string, unknown>> = [];
+
+  if (parsed.projectName === undefined) {
+    questions.push({
       type: 'text',
       name: 'projectName',
       message: 'Project name:',
@@ -241,44 +271,67 @@ async function init(): Promise<void> {
           return 'Directory already exists and is not empty';
         }
         return true;
-      }
-    },
-    {
-      type: 'select',
-      name: 'dataProvider',
-      message: 'Data Provider:',
-      choices: [
-        { title: 'Simple REST', value: 'simple-rest', description: 'Standard JSON APIs / JSON Server' },
-        { title: 'Supabase', value: 'supabase', description: 'PostgreSQL Backend-as-a-Service' },
-        { title: 'GraphQL', value: 'graphql', description: 'Generic GraphQL endpoints' },
-        { title: 'Custom', value: 'none', description: 'Implement your own DataProvider' }
-      ],
-      initial: 0
-    },
-    {
-      type: 'select',
-      name: 'authProvider',
-      message: 'Auth Provider:',
-      choices: [
-        { title: 'Mock (Demo)', value: 'mock', description: 'Built-in mock for development' },
-        { title: 'Simple REST JWT', value: 'jwt', description: 'JWT-based auth via REST API' },
-        { title: 'Supabase Auth', value: 'supabase', description: 'Supabase authentication' },
-        { title: 'None', value: 'none', description: 'No authentication' }
-      ],
-      initial: 0
-    },
-    {
+      },
+    });
+  }
+  if (presetSelections === undefined) {
+    if (parsed.dataProvider === undefined) {
+      questions.push({
+        type: 'select',
+        name: 'dataProvider',
+        message: 'Data Provider:',
+        choices: [
+          { title: 'Simple REST', value: 'simple-rest', description: 'Standard JSON APIs / JSON Server' },
+          { title: 'Supabase', value: 'supabase', description: 'PostgreSQL Backend-as-a-Service' },
+          { title: 'GraphQL', value: 'graphql', description: 'Generic GraphQL endpoints' },
+          { title: 'Custom', value: 'none', description: 'Implement your own DataProvider' },
+        ],
+        initial: 0,
+      });
+    }
+    if (parsed.authProvider === undefined) {
+      questions.push({
+        type: 'select',
+        name: 'authProvider',
+        message: 'Auth Provider:',
+        choices: [
+          { title: 'Mock (Demo)', value: 'mock', description: 'Built-in mock for development' },
+          { title: 'Simple REST JWT', value: 'jwt', description: 'JWT-based auth via REST API' },
+          { title: 'Supabase Auth', value: 'supabase', description: 'Supabase authentication' },
+          { title: 'None', value: 'none', description: 'No authentication' },
+        ],
+        initial: 0,
+      });
+    }
+  }
+  if (parsed.installDependencies === undefined) {
+    questions.push({
       type: 'confirm',
       name: 'installDeps',
       message: 'Install dependencies now?',
-      initial: true
-    }
-  ]) as InitResponse;
+      initial: true,
+    });
+  }
 
-  if (!response.projectName) {
+  const answers = questions.length > 0
+    ? await prompts(questions as unknown as Parameters<typeof prompts>[0]) as Partial<InitResponse>
+    : {};
+
+  const resolvedDataProvider = parsed.dataProvider ?? presetSelections?.dataProvider ?? answers.dataProvider;
+  const resolvedAuthProvider = parsed.authProvider ?? presetSelections?.authProvider ?? answers.authProvider;
+  const projectName = parsed.projectName ?? answers.projectName;
+
+  if (!projectName || resolvedDataProvider === undefined || resolvedAuthProvider === undefined) {
     console.log(pc.red('\nOperation cancelled.\n'));
     return;
   }
+
+  const response: InitResponse = {
+    projectName,
+    dataProvider: resolvedDataProvider,
+    authProvider: resolvedAuthProvider,
+    installDeps: parsed.installDependencies ?? answers.installDeps ?? true,
+  };
 
   const projectDir = path.resolve(process.cwd(), response.projectName.trim());
 
@@ -316,6 +369,23 @@ async function init(): Promise<void> {
     copyDir(guidanceDir, projectDir);
     console.log(pc.green('  ✔') + ' AI and design guidance copied');
   }
+
+  // 2. Generate the platform entrypoints (svadmin.config.ts + svadmin.ai.json)
+  const platformFiles = buildScaffoldPlatformFiles({
+    projectName: response.projectName.trim(),
+    dataProvider: response.dataProvider,
+    authProvider: response.authProvider,
+    scaffoldVersion: shippedCliVersion(),
+    ...(scaffoldManifest.dependencies['@svadmin/core'] === undefined
+      ? {}
+      : { coreVersionRange: scaffoldManifest.dependencies['@svadmin/core'] }),
+  });
+  for (const file of [platformFiles.config, platformFiles.aiManifest, platformFiles.schema]) {
+    const target = path.join(projectDir, file.path);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(target, file.content);
+  }
+  console.log(pc.green('  ✔') + ' svadmin.config.ts, svadmin.ai.json and svadmin.schema.json generated');
 
   // 2. Generate package.json
   const packageJson = createProjectPackageJson(scaffoldManifest, {
@@ -509,10 +579,14 @@ if (subcommand === 'eject') {
   runCommand(() => doctor(rest));
 } else if (subcommand === 'upgrade') {
   runCommand(() => upgrade(rest));
+} else if (subcommand === 'migrate') {
+  runCommand(() => upgrade(rest));
 } else if (subcommand === 'guidance') {
   runCommand(() => guidance(rest));
 } else if (subcommand === 'infer') {
   runCommand(() => inferCommand(rest));
+} else if (subcommand === 'add') {
+  runCommand(() => addCommand(rest, loadShippedScaffoldManifest()));
 } else if (subcommand === 'generate' || subcommand === 'gen') {
   runCommand(() => generateCommand(rest));
 } else if (subcommand === 'lite') {
@@ -523,6 +597,8 @@ if (subcommand === 'eject') {
   } else {
     runCommand(() => liteInitCommand(rest.slice(1)));
   }
+} else if (subcommand === 'init') {
+  runCommand(() => init(rest));
 } else {
-  runCommand(init);
+  runCommand(() => init(subcommand === undefined ? rest : [subcommand, ...rest]));
 }

@@ -17,6 +17,42 @@ Follow the interactive prompts to:
 2. Choose a default Data Provider (Simple REST, Supabase, GraphQL, or Custom).
 3. Choose an Auth Provider (Mock, JWT, Supabase, or None).
 
+### Golden-path presets
+
+Skip the prompts with a curated preset:
+
+```bash
+npx @svadmin/create init my-admin-app --preset supabase
+npx @svadmin/create init my-admin-app --preset rest
+npx @svadmin/create init my-admin-app --preset graphql
+```
+
+| Preset | Data provider | Auth provider |
+| --- | --- | --- |
+| `supabase` | Supabase | Supabase Auth |
+| `rest` | Simple REST | REST JWT |
+| `graphql` | GraphQL | Mock (demo) |
+
+Override any field explicitly: `--data-provider graphql --auth-provider none`, and
+skip install with `--no-install`. Explicit flags always win over the preset.
+
+The `init` prompt and presets stay on the golden paths. To add any of the other
+official providers later, use the CLI catalog (also published in
+`svadmin.ai.json` → `providerCatalog`):
+
+```bash
+npx @svadmin/create add provider pocketbase --write
+npx @svadmin/create add provider hasura --write
+npx @svadmin/create add provider appwrite --write
+```
+
+Official data providers: `simple-rest`, `supabase`, `graphql`, `rest`, `airtable`,
+`appwrite`, `directus`, `drizzle`, `elysia`, `firebase`, `hasura`, `medusa`,
+`nestjs-query`, `nestjsx-crud`, `pocketbase`, `sanity`, `strapi`. `add provider`
+updates `package.json` + `svadmin.ai.json` and prints the remaining
+`src/svadmin.config.ts` wiring step; the generated config leaves a clearly marked
+TODO placeholder for non-golden providers.
+
 ## What's Included
 
 The generated project is pre-configured with:
@@ -26,6 +62,52 @@ The generated project is pre-configured with:
 - **@svadmin/ai-elements**: Composable Svelte 5 AI conversation, tool, reasoning, and source components.
 - **@svadmin/ui**: Beautiful default dashboard UI, standalone CRUD buttons, and data tables.
 - Pre-wired **TanStack Query** for client-state management.
+
+### Platform entrypoints
+
+Two stable files are generated for humans and AI tooling:
+
+- `src/svadmin.config.ts` — the application entrypoint. It composes the selected
+  data/auth providers into one `defineAdminConfig(...)` bundle and exports the
+  resource registry. Async providers are resolved with top-level await, so the
+  exported config is always a fully-resolved static bundle.
+- `svadmin.ai.json` — the machine-readable manifest: provider capability matrix,
+  resource fields and operations, project commands, and forbidden internal imports.
+
+`src/App.svelte` consumes the config through `resolveAdminConfig(config)` and passes
+`providerBundle` + `resources` to `AdminApp`.
+
+- `svadmin.schema.json` — JSON Schema (draft 2020-12) describing `svadmin.ai.json`.
+  Editors and AI tools can validate the manifest against it.
+
+`create-svadmin doctor` validates the manifest when it exists: it must be valid
+JSON with `version: 1`, its provider packages must be present in `package.json`,
+and `svadmin.schema.json` must sit beside it. Legacy projects without
+`src/svadmin.config.ts` are unaffected.
+
+## Add Platform Pieces / 追加平台能力
+
+Add a business feature module or a provider dependency pack without rewriting the
+project. Every command is idempotent, dry-run by default, and preserves existing
+files; pass `--write` to apply.
+
+```bash
+# Scaffold src/features/orders/{index.ts,orders.resource.ts}
+npx @svadmin/create add resource orders --write
+
+# Add the Supabase data provider dependency pack
+npx @svadmin/create add provider supabase --write
+
+# Add the JWT auth dependency pack
+npx @svadmin/create add auth jwt --write
+
+# Target a project directory other than the current one
+npx @svadmin/create add resource orders --project-dir ./my-admin-app --write
+```
+
+`add provider` / `add auth` update `package.json` and `svadmin.ai.json` and print
+the remaining step: wire the provider in `src/svadmin.config.ts`. `add resource`
+creates the module and prints the `src/resources.ts` registration snippet.
 
 ## Start Developing
 
@@ -113,6 +195,12 @@ Apply the plan explicitly. The CLI creates a timestamped `package.json.svadmin-b
 
 ```bash
 npx @svadmin/create upgrade --write
+```
+
+`migrate` is an alias for `upgrade` and runs the same dependency-migration plan:
+
+```bash
+npx @svadmin/create migrate --write
 ```
 
 Both commands accept an optional project-directory argument. Upgrade only manages dependencies known by the shipped scaffold; custom dependencies, scripts, and other package fields are preserved.

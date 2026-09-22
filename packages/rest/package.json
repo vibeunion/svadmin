@@ -1,0 +1,61 @@
+{
+  "name": "@svadmin/rest",
+  "version": "0.1.0",
+  "description": "Generic REST adapters — bridge @refinedev/rest to a svadmin DataProvider",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "src/**/*.ts",
+    "!src/**/*.test.*",
+    "!src/**/*.spec.*",
+    "!src/**/vitest.config.*",
+    "!src/**/setupTest.*"
+  ],
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "svadmin": {
+    "capabilities": ["data", "rest", "custom-endpoints"],
+    "core": "^0.55.0",
+    "stability": "experimental",
+    "migration": null
+  },
+  "peerDependencies": {
+    "@svadmin/core": "workspace:*",
+    "@refinedev/rest": "^2.1.1",
+    "@nestjsx/crud-request": "^5.0.0-alpha.3"
+  },
+  "license": "MIT",
+  "author": "zuohuadong",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vibeunion/svadmin.git",
+    "directory": "packages/rest"
+  },
+  "homepage": "https://github.com/vibeunion/svadmin#readme",
+  "bugs": {
+    "url": "https://github.com/vibeunion/svadmin/issues"
+  },
+  "peerDependenciesMeta": {
+    "@svadmin/core": {
+      "optional": true
+    },
+    "@refinedev/rest": {
+      "optional": true
+    },
+    "@nestjsx/crud-request": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@svadmin/refine-adapter": "workspace:*"
+  },
+  "devDependencies": {
+    "@refinedev/rest": "^2.1.1"
+  }
+}

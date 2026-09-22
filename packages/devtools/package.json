@@ -1,0 +1,55 @@
+{
+  "name": "@svadmin/devtools",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Headless diagnostics core for svadmin — query traces, provider diagnostics, permission/resource/route inspection",
+  "license": "MIT",
+  "keywords": [
+    "svadmin",
+    "devtools",
+    "diagnostics",
+    "observability",
+    "admin"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vibeunion/svadmin.git",
+    "directory": "packages/devtools"
+  },
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "svadmin": {
+    "capabilities": ["devtools-traces", "provider-diagnostics", "resource-diagnostics"],
+    "core": "^0.55.0",
+    "stability": "experimental",
+    "migration": null
+  },
+  "dependencies": {
+    "@svadmin/devtools-contract": "workspace:*"
+  },
+  "peerDependencies": {
+    "@svadmin/core": "workspace:*"
+  },
+  "peerDependenciesMeta": {
+    "@svadmin/core": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  },
+  "scripts": {
+    "build": "bun ../../scripts/build-node-package.ts"
+  }
+}

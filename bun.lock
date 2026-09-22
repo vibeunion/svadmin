@@ -143,6 +143,19 @@
         "@svadmin/core",
       ],
     },
+    "packages/app": {
+      "name": "@svadmin/app",
+      "version": "0.1.0",
+      "devDependencies": {
+        "typescript": "^7.0.2",
+      },
+      "peerDependencies": {
+        "@svadmin/core": "workspace:*",
+      },
+      "optionalPeers": [
+        "@svadmin/core",
+      ],
+    },
     "packages/appwrite": {
       "name": "@svadmin/appwrite",
       "version": "0.10.0",
@@ -215,6 +228,22 @@
         "@types/prompts": "^2.4.9",
         "typescript": "^7.0.2",
       },
+    },
+    "packages/devtools": {
+      "name": "@svadmin/devtools",
+      "version": "0.1.0",
+      "dependencies": {
+        "@svadmin/devtools-contract": "workspace:*",
+      },
+      "devDependencies": {
+        "typescript": "^7.0.2",
+      },
+      "peerDependencies": {
+        "@svadmin/core": "workspace:*",
+      },
+      "optionalPeers": [
+        "@svadmin/core",
+      ],
     },
     "packages/devtools-contract": {
       "name": "@svadmin/devtools-contract",
@@ -485,6 +514,26 @@
         "@svadmin/core": "workspace:*",
       },
       "optionalPeers": [
+        "@svadmin/core",
+      ],
+    },
+    "packages/rest": {
+      "name": "@svadmin/rest",
+      "version": "0.1.0",
+      "dependencies": {
+        "@svadmin/refine-adapter": "workspace:*",
+      },
+      "devDependencies": {
+        "@refinedev/rest": "^2.1.1",
+      },
+      "peerDependencies": {
+        "@nestjsx/crud-request": "^5.0.0-alpha.3",
+        "@refinedev/rest": "^2.1.1",
+        "@svadmin/core": "workspace:*",
+      },
+      "optionalPeers": [
+        "@nestjsx/crud-request",
+        "@refinedev/rest",
         "@svadmin/core",
       ],
     },
@@ -1172,6 +1221,8 @@
 
     "@refinedev/devtools-shared": ["@refinedev/devtools-shared@2.0.2", "https://registry.npmmirror.com/@refinedev/devtools-shared/-/devtools-shared-2.0.2.tgz", { "dependencies": { "@tanstack/react-query": "^5.81.5", "error-stack-parser": "^2.1.4" }, "peerDependencies": { "@types/react": "^18.0.0 || ^19.0.0", "@types/react-dom": "^18.0.0 || ^19.0.0", "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" } }, "sha512-3cTjR1mEWn0tHFZBfPD5aVpBGLUhpAkfjqYCwKrijIicr1Utp/j0BqiPRnNqTf+W71HTng3znBpUhnR83u+tuA=="],
 
+    "@refinedev/rest": ["@refinedev/rest@2.1.1", "https://registry.npmmirror.com/@refinedev/rest/-/rest-2.1.1.tgz", { "dependencies": { "deepmerge": "^4.3.1", "ky": "^1.10.0", "qs": "^6.10.1" }, "peerDependencies": { "@nestjsx/crud-request": "^5.0.0-alpha.3", "@refinedev/core": "^5.0.0" }, "optionalPeers": ["@nestjsx/crud-request"] }, "sha512-FvGanLHqzimqQ4Tmj++3qpipuhHnaOEjW2z2mOlzeBofjbjQhUSsKzy/SpxjNyIdP37PkA2q7zVid0wz3k42Bw=="],
+
     "@refinedev/simple-rest": ["@refinedev/simple-rest@6.0.1", "https://registry.npmmirror.com/@refinedev/simple-rest/-/simple-rest-6.0.1.tgz", { "dependencies": { "axios": "^1.11.0", "query-string": "^7.1.1" }, "peerDependencies": { "@refinedev/core": "^5.0.0" } }, "sha512-/xx/SiZ2aaA3KJO7PWFxWXvgG5n8roEay6BBdRHhwCMYFuHIOob82pl5KBGbRi+KLuFLUj+nSt9Q76D0uyIOlg=="],
 
     "@rive-app/webgl2": ["@rive-app/webgl2@2.41.0", "https://registry.npmmirror.com/@rive-app/webgl2/-/webgl2-2.41.0.tgz", {}, "sha512-SCfy5u2q6SCyyH6H2pWYU2iEqkrQVlItxpVKks2Nk9RXQAoaFYQTTkfJHCfcrpyew/o2QxEk43HYTnQNlSMIGw=="],
@@ -1268,6 +1319,8 @@
 
     "@svadmin/airtable": ["@svadmin/airtable@workspace:packages/airtable"],
 
+    "@svadmin/app": ["@svadmin/app@workspace:packages/app"],
+
     "@svadmin/appwrite": ["@svadmin/appwrite@workspace:packages/appwrite"],
 
     "@svadmin/auth-utils": ["@svadmin/auth-utils@workspace:packages/auth-utils"],
@@ -1275,6 +1328,8 @@
     "@svadmin/core": ["@svadmin/core@workspace:packages/core"],
 
     "@svadmin/create": ["@svadmin/create@workspace:packages/create-svadmin"],
+
+    "@svadmin/devtools": ["@svadmin/devtools@workspace:packages/devtools"],
 
     "@svadmin/devtools-contract": ["@svadmin/devtools-contract@workspace:packages/devtools-contract"],
 
@@ -1309,6 +1364,8 @@
     "@svadmin/pocketbase": ["@svadmin/pocketbase@workspace:packages/pocketbase"],
 
     "@svadmin/refine-adapter": ["@svadmin/refine-adapter@workspace:packages/refine-adapter"],
+
+    "@svadmin/rest": ["@svadmin/rest@workspace:packages/rest"],
 
     "@svadmin/sanity": ["@svadmin/sanity@workspace:packages/sanity"],
 
@@ -2430,6 +2487,8 @@
 
     "known-css-properties": ["known-css-properties@0.37.0", "https://registry.npmmirror.com/known-css-properties/-/known-css-properties-0.37.0.tgz", {}, "sha512-JCDrsP4Z1Sb9JwG0aJ8Eo2r7k4Ou5MwmThS/6lcIe1ICyb7UBJKGRIUUdqc2ASdE/42lgz6zFUnzAIhtXnBVrQ=="],
 
+    "ky": ["ky@1.14.3", "https://registry.npmmirror.com/ky/-/ky-1.14.3.tgz", {}, "sha512-9zy9lkjac+TR1c2tG+mkNSVlyOpInnWdSMiue4F+kq8TwJSgv6o8jhLRg8Ho6SnZ9wOYUq/yozts9qQCfk7bIw=="],
+
     "layout-base": ["layout-base@1.0.2", "https://registry.npmmirror.com/layout-base/-/layout-base-1.0.2.tgz", {}, "sha512-8h2oVEZNktL4BH2JCOI90iD1yXwL6iNW7KcCKT2QZgQJR2vbqDsldCTPRU9NifTCqHZci57XvQQ15YTu+sTYPg=="],
 
     "lazystream": ["lazystream@1.0.1", "https://registry.npmmirror.com/lazystream/-/lazystream-1.0.1.tgz", { "dependencies": { "readable-stream": "^2.0.5" } }, "sha512-b94GiNHQNy6JNTrt5w6zNyffMrNkXZb3KTkCZJb2V1xaEGCk093vkZ2jk3tpaeP33/OiXC+WvK9AxUebnf5nbw=="],
@@ -3316,9 +3375,13 @@
 
     "@storybook/svelte-vite/typescript": ["typescript@5.9.3", "https://registry.npmmirror.com/typescript/-/typescript-5.9.3.tgz", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
 
+    "@svadmin/app/typescript": ["typescript@7.0.2", "https://registry.npmmirror.com/typescript/-/typescript-7.0.2.tgz", { "optionalDependencies": { "@typescript/typescript-aix-ppc64": "7.0.2", "@typescript/typescript-darwin-arm64": "7.0.2", "@typescript/typescript-darwin-x64": "7.0.2", "@typescript/typescript-freebsd-arm64": "7.0.2", "@typescript/typescript-freebsd-x64": "7.0.2", "@typescript/typescript-linux-arm": "7.0.2", "@typescript/typescript-linux-arm64": "7.0.2", "@typescript/typescript-linux-loong64": "7.0.2", "@typescript/typescript-linux-mips64el": "7.0.2", "@typescript/typescript-linux-ppc64": "7.0.2", "@typescript/typescript-linux-riscv64": "7.0.2", "@typescript/typescript-linux-s390x": "7.0.2", "@typescript/typescript-linux-x64": "7.0.2", "@typescript/typescript-netbsd-arm64": "7.0.2", "@typescript/typescript-netbsd-x64": "7.0.2", "@typescript/typescript-openbsd-arm64": "7.0.2", "@typescript/typescript-openbsd-x64": "7.0.2", "@typescript/typescript-sunos-x64": "7.0.2", "@typescript/typescript-win32-arm64": "7.0.2", "@typescript/typescript-win32-x64": "7.0.2" }, "bin": { "tsc": "bin/tsc" } }, "sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA=="],
+
     "@svadmin/auth-utils/typescript": ["typescript@7.0.2", "https://registry.npmmirror.com/typescript/-/typescript-7.0.2.tgz", { "optionalDependencies": { "@typescript/typescript-aix-ppc64": "7.0.2", "@typescript/typescript-darwin-arm64": "7.0.2", "@typescript/typescript-darwin-x64": "7.0.2", "@typescript/typescript-freebsd-arm64": "7.0.2", "@typescript/typescript-freebsd-x64": "7.0.2", "@typescript/typescript-linux-arm": "7.0.2", "@typescript/typescript-linux-arm64": "7.0.2", "@typescript/typescript-linux-loong64": "7.0.2", "@typescript/typescript-linux-mips64el": "7.0.2", "@typescript/typescript-linux-ppc64": "7.0.2", "@typescript/typescript-linux-riscv64": "7.0.2", "@typescript/typescript-linux-s390x": "7.0.2", "@typescript/typescript-linux-x64": "7.0.2", "@typescript/typescript-netbsd-arm64": "7.0.2", "@typescript/typescript-netbsd-x64": "7.0.2", "@typescript/typescript-openbsd-arm64": "7.0.2", "@typescript/typescript-openbsd-x64": "7.0.2", "@typescript/typescript-sunos-x64": "7.0.2", "@typescript/typescript-win32-arm64": "7.0.2", "@typescript/typescript-win32-x64": "7.0.2" }, "bin": { "tsc": "bin/tsc" } }, "sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA=="],
 
     "@svadmin/create/typescript": ["typescript@7.0.2", "https://registry.npmmirror.com/typescript/-/typescript-7.0.2.tgz", { "optionalDependencies": { "@typescript/typescript-aix-ppc64": "7.0.2", "@typescript/typescript-darwin-arm64": "7.0.2", "@typescript/typescript-darwin-x64": "7.0.2", "@typescript/typescript-freebsd-arm64": "7.0.2", "@typescript/typescript-freebsd-x64": "7.0.2", "@typescript/typescript-linux-arm": "7.0.2", "@typescript/typescript-linux-arm64": "7.0.2", "@typescript/typescript-linux-loong64": "7.0.2", "@typescript/typescript-linux-mips64el": "7.0.2", "@typescript/typescript-linux-ppc64": "7.0.2", "@typescript/typescript-linux-riscv64": "7.0.2", "@typescript/typescript-linux-s390x": "7.0.2", "@typescript/typescript-linux-x64": "7.0.2", "@typescript/typescript-netbsd-arm64": "7.0.2", "@typescript/typescript-netbsd-x64": "7.0.2", "@typescript/typescript-openbsd-arm64": "7.0.2", "@typescript/typescript-openbsd-x64": "7.0.2", "@typescript/typescript-sunos-x64": "7.0.2", "@typescript/typescript-win32-arm64": "7.0.2", "@typescript/typescript-win32-x64": "7.0.2" }, "bin": { "tsc": "bin/tsc" } }, "sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA=="],
+
+    "@svadmin/devtools/typescript": ["typescript@7.0.2", "https://registry.npmmirror.com/typescript/-/typescript-7.0.2.tgz", { "optionalDependencies": { "@typescript/typescript-aix-ppc64": "7.0.2", "@typescript/typescript-darwin-arm64": "7.0.2", "@typescript/typescript-darwin-x64": "7.0.2", "@typescript/typescript-freebsd-arm64": "7.0.2", "@typescript/typescript-freebsd-x64": "7.0.2", "@typescript/typescript-linux-arm": "7.0.2", "@typescript/typescript-linux-arm64": "7.0.2", "@typescript/typescript-linux-loong64": "7.0.2", "@typescript/typescript-linux-mips64el": "7.0.2", "@typescript/typescript-linux-ppc64": "7.0.2", "@typescript/typescript-linux-riscv64": "7.0.2", "@typescript/typescript-linux-s390x": "7.0.2", "@typescript/typescript-linux-x64": "7.0.2", "@typescript/typescript-netbsd-arm64": "7.0.2", "@typescript/typescript-netbsd-x64": "7.0.2", "@typescript/typescript-openbsd-arm64": "7.0.2", "@typescript/typescript-openbsd-x64": "7.0.2", "@typescript/typescript-sunos-x64": "7.0.2", "@typescript/typescript-win32-arm64": "7.0.2", "@typescript/typescript-win32-x64": "7.0.2" }, "bin": { "tsc": "bin/tsc" } }, "sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA=="],
 
     "@svadmin/sso/typescript": ["typescript@7.0.2", "https://registry.npmmirror.com/typescript/-/typescript-7.0.2.tgz", { "optionalDependencies": { "@typescript/typescript-aix-ppc64": "7.0.2", "@typescript/typescript-darwin-arm64": "7.0.2", "@typescript/typescript-darwin-x64": "7.0.2", "@typescript/typescript-freebsd-arm64": "7.0.2", "@typescript/typescript-freebsd-x64": "7.0.2", "@typescript/typescript-linux-arm": "7.0.2", "@typescript/typescript-linux-arm64": "7.0.2", "@typescript/typescript-linux-loong64": "7.0.2", "@typescript/typescript-linux-mips64el": "7.0.2", "@typescript/typescript-linux-ppc64": "7.0.2", "@typescript/typescript-linux-riscv64": "7.0.2", "@typescript/typescript-linux-s390x": "7.0.2", "@typescript/typescript-linux-x64": "7.0.2", "@typescript/typescript-netbsd-arm64": "7.0.2", "@typescript/typescript-netbsd-x64": "7.0.2", "@typescript/typescript-openbsd-arm64": "7.0.2", "@typescript/typescript-openbsd-x64": "7.0.2", "@typescript/typescript-sunos-x64": "7.0.2", "@typescript/typescript-win32-arm64": "7.0.2", "@typescript/typescript-win32-x64": "7.0.2" }, "bin": { "tsc": "bin/tsc" } }, "sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA=="],
 
@@ -3440,7 +3503,7 @@
 
     "estree-util-to-js/source-map": ["source-map@0.7.6", "https://registry.npmmirror.com/source-map/-/source-map-0.7.6.tgz", {}, "sha512-i5uvt8C3ikiWeNZSVZNWcfZPItFQOsYTUAOkcUPGd8DqDy1uOUikjt5dG+uRlwyvR108Fb9DOd4GvXfT0N2/uQ=="],
 
-    "exceljs/uuid": ["uuid@11.1.1", "", { "bin": { "uuid": "dist/esm/bin/uuid" } }, "sha512-vIYxrBCC/N/K+Js3qSN88go7kIfNPssr/hHCesKCQNAjmgvYS2oqr69kIufEG+O4+PfezOH4EbIeHCfFov8ZgQ=="],
+    "exceljs/uuid": ["uuid@11.1.1", "https://registry.npmmirror.com/uuid/-/uuid-11.1.1.tgz", { "bin": { "uuid": "dist/esm/bin/uuid" } }, "sha512-vIYxrBCC/N/K+Js3qSN88go7kIfNPssr/hHCesKCQNAjmgvYS2oqr69kIufEG+O4+PfezOH4EbIeHCfFov8ZgQ=="],
 
     "glob/minimatch": ["minimatch@3.1.5", "https://registry.npmmirror.com/minimatch/-/minimatch-3.1.5.tgz", { "dependencies": { "brace-expansion": "^1.1.7" } }, "sha512-VgjWUsnnT6n+NUk6eZq77zeFdpW2LWDzP6zFGrCbHXiYNul5Dzqk2HHQ5uFH2DNW5Xbp8+jVzaeNt94ssEEl4w=="],
 

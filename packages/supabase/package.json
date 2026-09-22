@@ -23,6 +23,12 @@
       "default": "./src/supacloud.ts"
     }
   },
+  "svadmin": {
+    "capabilities": ["data", "auth", "live", "storage", "audit"],
+    "core": "^0.55.0",
+    "stability": "stable",
+    "migration": null
+  },
   "peerDependencies": {
     "@svadmin/core": "workspace:*",
     "@supabase/supabase-js": "^2.112.4",

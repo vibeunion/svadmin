@@ -32,5 +32,14 @@
     "@svadmin/core": {
       "optional": true
     }
+  },
+  "svadmin": {
+    "capabilities": [
+      "data",
+      "auth"
+    ],
+    "core": "^0.55.0",
+    "stability": "stable",
+    "migration": null
   }
 }

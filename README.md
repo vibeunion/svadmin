@@ -66,11 +66,14 @@
 | Package                  | Description / 描述                                           |
 | ------------------------ | ------------------------------------------------------------ |
 | `@svadmin/core`          | Hooks, providers, types, utilities, Resource Type Registry   |
+| `@svadmin/app`           | Application composition layer: `defineAdminConfig`, plugins, runtime binding, AI manifest |
 | `@svadmin/ai-elements`   | Composable Svelte 5 AI conversation and agent UI components |
 | `@svadmin/devtools-contract` | JSON-safe DevTools trace, diagnostic, event, and redaction contracts |
+| `@svadmin/devtools`     | Headless diagnostics core: collector, provider/resource/route/permission diagnostics |
 | `@svadmin/ui`            | Pre-built admin components / 预构建管理组件（shadcn-svelte） |
 | `@svadmin/create`        | CLI scaffolding tool / CLI 脚手架工具                        |
 | `@svadmin/refine-adapter`| Bridge any @refinedev/* data provider to svadmin / 桥接 Refine 生态数据源 |
+| `@svadmin/rest`         | Generic REST data provider bridging @refinedev/rest |
 | `@svadmin/sveltekit`     | SvelteKit router integration / SvelteKit 路由集成            |
 | `@svadmin/lite`          | SSR-first variant with optional progressive enhancement / SSR 优先，可选渐进增强 |
 | `@svadmin/sso`           | OIDC/OAuth2 SSO plugin / 单点登录插件                        |
