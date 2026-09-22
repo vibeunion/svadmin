@@ -29,7 +29,8 @@ describe('Admin UI design principles contract', () => {
 
   it('keeps the runnable workbench connected through the example resource contract', () => {
     expect(read('example/src/App.svelte')).toContain('DesignPrinciplesPage');
-    expect(read('example/src/resources.ts')).toContain("name: 'design_principles'");
+    expect(read('example/src/features/showcase/resources.ts')).toContain("name: 'design_principles'");
+    expect(read('example/src/resources.ts')).toContain('...showcaseResources');
     expect(read('example/src/exampleMenuCatalog.ts')).toContain("'/design_principles'");
   });
 

@@ -1,6 +1,6 @@
 import { requireValue } from "../../../scripts/test-assertions";
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // @svadmin/appwrite — Unit Tests
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { describe, test, expect, mock } from 'bun:test';
 import { createAppwriteDataProvider } from './data-provider';
 import { createAppwriteAuthProvider } from './auth-provider';
@@ -10,24 +10,24 @@ import type { DeleteManyParams } from '@svadmin/core';
 // ─── Mock Appwrite Databases ────────────────────────────────
 mock.module('@refinedev/appwrite', () => {
   return {
-    dataProvider: (args: any) => {
+    dataProvider: (args: { databases: ReturnType<typeof createMockDatabases>; databaseId: string }) => {
       const { databases, databaseId } = args;
-      const mockDp: any = {
-        getList: async (params: any) => {
+      const mockDp = {
+        getList: async (params: { pagination?: { pageSize: number }; sorters?: unknown[]; filters?: unknown[]; resource: string }) => {
           if (params.pagination) databases.listDocuments(databaseId, params.resource, [`limit(${params.pagination.pageSize})`, `offset(${params.pagination.pageSize})`]);
           else if (params.sorters) databases.listDocuments(databaseId, params.resource, [`orderDesc`]);
           else if (params.filters) databases.listDocuments(databaseId, params.resource, [`equal`]);
           else databases.listDocuments(databaseId, params.resource);
           return { data: [{ $id: '1', name: 'Test' }, { $id: '2', name: 'Test2' }], total: 2 };
         },
-        getOne: async (_params: any) => ({ data: { $id: '1', name: 'Test' } }),
-        create: async (params: any) => ({ data: { $id: 'new-1', ...params.variables } }),
-        update: async (params: any) => ({ data: { $id: params.id, ...params.variables } }),
-        deleteOne: async (params: any) => { await databases.deleteDocument(databaseId, params.resource, params.id); return { data: {} }; },
+        getOne: async (_params: { resource: string; id: string }) => ({ data: { $id: '1', name: 'Test' } }),
+        create: async (params: { variables: Record<string, unknown> }) => ({ data: { $id: 'new-1', ...params.variables } }),
+        update: async (params: { id: string; variables: Record<string, unknown> }) => ({ data: { $id: params.id, ...params.variables } }),
+        deleteOne: async (params: { resource: string; id: string }) => { await databases.deleteDocument(databaseId, params.resource, params.id); return { data: {} }; },
         getApiUrl: () => '',
-        getMany: async (params: any) => ({ data: params.ids.map((id: string) => ({ $id: id })) }),
+        getMany: async (params: { ids: string[] }) => ({ data: params.ids.map((id: string) => ({ $id: id })) }),
         deleteMany: async ({ resource, ids }: DeleteManyParams) => {
-          for (const id of ids) await databases.deleteDocument(databaseId, resource, id);
+          for (const id of ids) await databases.deleteDocument(databaseId, resource, String(id));
           return { data: ids.map(id => ({ $id: id })) };
         },
       };
@@ -52,7 +52,7 @@ function createMockDatabases() {
     updateDocument: mock(async (_db: string, _col: string, _docId: string, data: Record<string, unknown>) => ({
       $id: _docId, ...data,
     })),
-    deleteDocument: mock(async () => {}),
+    deleteDocument: mock(async (_db: string, _col: string, _id: string) => {}),
   };
 }
 
@@ -138,14 +138,14 @@ describe('Appwrite DataProvider', () => {
   test('getMany fetches by ids', async () => {
     const db = createMockDatabases();
     const dp = await createAppwriteDataProvider({ databases: db, databaseId: 'main' });
-    const result = await requireValue(dp.getMany)({ resource: 'posts', ids: ['1', '2'] });
+    const result = await dp.getMany!({ resource: 'posts', ids: ['1', '2'] });
     expect(result.data).toHaveLength(2);
   });
 
   test('deleteMany deletes each id', async () => {
     const db = createMockDatabases();
     const dp = await createAppwriteDataProvider({ databases: db, databaseId: 'main' });
-    await requireValue(dp.deleteMany)({ resource: 'posts', ids: ['1', '2'] });
+    await dp.deleteMany!({ resource: 'posts', ids: ['1', '2'] });
     expect(db.deleteDocument).toHaveBeenCalledTimes(2);
   });
 });
@@ -200,21 +200,21 @@ describe('Appwrite AuthProvider', () => {
     const auth = createAppwriteAuthProvider({ account });
     const identity = await auth.getIdentity();
     expect(identity).not.toBeNull();
-    expect(requireValue(identity).name).toBe('Admin');
-    expect(requireValue(identity).email).toBe('admin@test.com');
+    expect(identity!.name).toBe('Admin');
+    expect(identity!.email).toBe('admin@test.com');
   });
 
   test('register success', async () => {
     const account = createMockAccount();
     const auth = createAppwriteAuthProvider({ account });
-    const result = await requireValue(auth.register)({ email: 'new@test.com', password: 'pass123' });
+    const result = await auth.register!({ email: 'new@test.com', password: 'pass123' });
     expect(result.success).toBe(true);
   });
 
   test('onError with 401', async () => {
     const account = createMockAccount();
     const auth = createAppwriteAuthProvider({ account });
-    const result = await requireValue(auth.onError)(new Error('401 Unauthorized'));
+    const result = await auth.onError!(new Error('401 Unauthorized'));
     expect(result.logout).toBe(true);
   });
 });
@@ -250,8 +250,13 @@ describe('Appwrite LiveProvider', () => {
     const lp = createAppwriteLiveProvider({ client: mockClient, databaseId: 'main' });
     const cb = mock(() => {});
     lp.subscribe({ resource: 'posts', callback: cb });
-    requireValue<(payload: unknown) => void>(handler)({ events: ['databases.main.collections.posts.documents.*.create'], payload: { $id: '1' } });
+
+    const eventHandler: (payload: unknown) => void = handler ?? (() => {
+      throw new Error('Subscription handler was not registered');
+    });
+    eventHandler({ events: ['databases.main.collections.posts.documents.*.create'], payload: { $id: '1' } });
     expect(cb).toHaveBeenCalledTimes(1);
-    expect((cb.mock.calls as any)[0][0].type).toBe('INSERT');
+    const firstCall = (cb.mock.calls as unknown as Array<Array<{ type: string }>>)[0];
+    expect(firstCall?.[0]?.type).toBe('INSERT');
   });
 });

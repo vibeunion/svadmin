@@ -1,11 +1,10 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, within } from '@testing-library/svelte';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, within } from '@testing-library/svelte';
 import { tick } from 'svelte';
-import { renderWithI18n as render } from '../../test/fixtures/render-with-i18n';
+import { setLocale } from '@svadmin/core/i18n';
 import KanbanBoard, { type KanbanCard } from './KanbanBoard.svelte';
 import LiteKanbanBoard from '../../../lite/src/components/LiteKanbanBoard.svelte';
 
-import { requireValue } from '../../../../scripts/test-assertions';
 const columns = [{ id: 'todo', title: 'To do' }, { id: 'done', title: 'Done' }];
 const initial: KanbanCard[] = [
   { id: 'a', title: 'Alpha', columnId: 'todo' },
@@ -18,11 +17,12 @@ function deferred<T>() {
   const promise = new Promise<T>((yes, no) => { resolve = yes; reject = no; });
   return { promise, resolve, reject };
 }
-afterEach(() => { cleanup(); });
+beforeEach(() => setLocale('en'));
+afterEach(() => { cleanup(); setLocale('en'); });
 
 describe('Kanban mutation lifecycle', () => {
   it('previews a move, serializes writes and commits after confirmation', async () => {
-    const pending = deferred<undefined>();
+    const pending = deferred<void>();
     const oncardmove = vi.fn(() => pending.promise);
     const view = render(KanbanBoard, { columns, cards: initial, oncardmove });
     await fireEvent.change(view.getByRole('combobox', { name: 'Move Alpha' }), { target: { value: 'done' } });
@@ -32,14 +32,14 @@ describe('Kanban mutation lifecycle', () => {
     await fireEvent.change(view.getByRole('combobox', { name: 'Move Beta' }), { target: { value: 'done' } });
     expect(oncardmove).toHaveBeenCalledTimes(1);
     expect(oncardmove).toHaveBeenCalledWith('a', 'done', 1);
-    pending.resolve(undefined);
+    pending.resolve();
     await tick();
     expect(view.getByRole('region', { name: 'Kanban board' }).getAttribute('aria-busy')).toBe('false');
     expect(within(view.getByRole('region', { name: 'Done' })).getByRole('group', { name: 'Alpha' })).toBeTruthy();
   });
 
   it('rolls back a rejected preview without hiding the board or raw-error disclosure', async () => {
-    const pending = deferred<undefined>();
+    const pending = deferred<void>();
     const observer = vi.fn(() => { throw new Error('observer failed'); });
     const view = render(KanbanBoard, { columns, cards: initial, oncardmove: () => pending.promise, oncardmoveerror: observer });
     await fireEvent.change(view.getByRole('combobox', { name: 'Move Alpha' }), { target: { value: 'done' } });
@@ -52,27 +52,27 @@ describe('Kanban mutation lifecycle', () => {
   });
 
   it.each(['success', 'failure'] as const)('ignores old %s after scope switch and a newer move', async settlement => {
-    const old = deferred<undefined>();
-    const newer = deferred<undefined>();
+    const old = deferred<void>();
+    const newer = deferred<void>();
     const oncardmove = vi.fn().mockImplementationOnce(() => old.promise).mockImplementationOnce(() => newer.promise);
     const oncardmoveerror = vi.fn();
     const view = render(KanbanBoard, { columns, cards: initial, oncardmove, oncardmoveerror, scopeKey: 'tenant-a' });
     await fireEvent.change(view.getByRole('combobox', { name: 'Move Alpha' }), { target: { value: 'done' } });
     await view.rerender({ scopeKey: 'tenant-b', cards: [{ id: 'new', title: 'New', columnId: 'todo' }] });
     await fireEvent.change(view.getByRole('combobox', { name: 'Move New' }), { target: { value: 'done' } });
-    if (settlement === 'success') old.resolve(undefined); else old.reject(new Error('old failure'));
+    if (settlement === 'success') old.resolve(); else old.reject(new Error('old failure'));
     await tick();
     expect(view.queryByRole('group', { name: 'Alpha' })).toBeNull();
     expect(view.queryByRole('alert')).toBeNull();
     expect(oncardmoveerror).not.toHaveBeenCalled();
     expect(view.getByRole('region', { name: 'Kanban board' }).getAttribute('aria-busy')).toBe('true');
-    newer.resolve(undefined);
+    newer.resolve();
     await tick();
     expect(within(view.getByRole('region', { name: 'Done' })).getByRole('group', { name: 'New' })).toBeTruthy();
   });
 
   it('preserves an authoritative external refresh when a move fails', async () => {
-    const pending = deferred<undefined>();
+    const pending = deferred<void>();
     const view = render(KanbanBoard, { columns, cards: initial, oncardmove: () => pending.promise });
     await fireEvent.change(view.getByRole('combobox', { name: 'Move Alpha' }), { target: { value: 'done' } });
     await view.rerender({ cards: [{ id: 'a', title: 'Server changed title', columnId: 'done' }] });
@@ -113,7 +113,7 @@ describe('Kanban mutation lifecycle', () => {
     const view = render(KanbanBoard, { columns, cards: initial, oncardadd });
     await fireEvent.click(view.getByRole('button', { name: 'Add card to To do' }));
     await fireEvent.input(view.getByRole('textbox', { name: 'Card title' }), { target: { value: 'New task' } });
-    await fireEvent.click(view.getByRole('button', { name: 'Add' }));
+    await fireEvent.click(view.getByRole('button', { name: /^Add$/ }));
     expect(view.queryByRole('group', { name: 'New task' })).toBeNull();
     expect(oncardadd).toHaveBeenCalledWith('todo', 'New task');
     pending.resolve({ id: 'server-123', title: 'New task', columnId: 'todo' });
@@ -122,10 +122,10 @@ describe('Kanban mutation lifecycle', () => {
   });
 
   it('rejects duplicate creation receipts and retains the editable draft', async () => {
-    const view = render(KanbanBoard, { columns, cards: initial, oncardadd: async () =>requireValue( initial[0]) });
+    const view = render(KanbanBoard, { columns, cards: initial, oncardadd: async () => initial[0]! });
     await fireEvent.click(view.getByRole('button', { name: 'Add card to To do' }));
     await fireEvent.input(view.getByRole('textbox', { name: 'Card title' }), { target: { value: 'Draft' } });
-    await fireEvent.click(view.getByRole('button', { name: 'Add' }));
+    await fireEvent.click(view.getByRole('button', { name: /^Add$/ }));
     expect(view.getByRole('alert').textContent).toContain('Creation not confirmed');
     expect((view.getByRole('textbox', { name: 'Card title' }) as HTMLTextAreaElement).value).toBe('Draft');
     expect(view.getAllByRole('group', { name: 'Alpha' })).toHaveLength(1);
@@ -163,11 +163,11 @@ describe('Kanban state boundaries', () => {
   });
 
   it.each([
-    { cards: [requireValue(initial[0]),requireValue( initial[0])] },
-    { cards: [{ ...requireValue(initial[0]), columnId: 'missing' }] },
-    { cards: [{ ...requireValue(initial[0]), title: '' }] },
-    { columns: [requireValue(columns[0]),requireValue( columns[0])] },
-    { cards: Array.from({ length: 1001 }, (_, i) => ({ ...requireValue(initial[0]), id: String(i) })) },
+    { cards: [initial[0]!, initial[0]!] },
+    { cards: [{ ...initial[0]!, columnId: 'missing' }] },
+    { cards: [{ ...initial[0]!, title: '' }] },
+    { columns: [columns[0]!, columns[0]!] },
+    { cards: Array.from({ length: 1001 }, (_, i) => ({ ...initial[0]!, id: String(i) })) },
   ])('rejects invalid inputs without a partial board', patch => {
     const view = render(KanbanBoard, { columns, cards: initial, ...patch });
     expect(view.getByRole('alert')).toBeTruthy();
@@ -187,7 +187,7 @@ describe('Lite Kanban native boundaries', () => {
   });
 
   it('rejects invalid data, supports error recovery and suppresses unsafe actions', async () => {
-    const view = render(LiteKanbanBoard, { columns, cards: [requireValue(initial[0]),requireValue( initial[0])], formAction: '/create' });
+    const view = render(LiteKanbanBoard, { columns, cards: [initial[0]!, initial[0]!], formAction: '/create' });
     expect(view.getByRole('alert')).toBeTruthy();
     expect(view.queryByRole('group')).toBeNull();
     await view.rerender({ cards: initial, error: 'Failed', retryHref: '/board' });
@@ -197,7 +197,8 @@ describe('Lite Kanban native boundaries', () => {
   });
 
   it('uses localized state labels', () => {
-    const view = render(LiteKanbanBoard, { columns, cards: [], formAction: '/create' }, 'zh-CN');
+    setLocale('zh-CN');
+    const view = render(LiteKanbanBoard, { columns, cards: [], formAction: '/create' });
     expect(view.getByRole('region', { name: '看板' })).toBeTruthy();
     expect(view.getAllByRole('status')[0]?.textContent).toContain('暂无数据');
     expect(view.getByRole('form', { name: '向 To do 新增卡片' })).toBeTruthy();

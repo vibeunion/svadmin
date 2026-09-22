@@ -1,0 +1,14 @@
+{
+  "sourceRoots": ["example/src", "packages"],
+  "maxSourceLines": 800,
+  "largeFileBaseline": {
+    "packages/ui/src/components/AutoTable.svelte": 2743,
+    "packages/ui/src/components/SpreadsheetView.svelte": 1280,
+    "example/src/features/resource/ExampleResourcePage.svelte": 981,
+    "example/src/providers/inMemoryDb.ts": 1399,
+    "packages/core/src/i18n.svelte.ts": 1967,
+    "packages/lite/src/server-adapter.ts": 981,
+    "packages/ai-elements/src/components/ChatDialog.svelte": 1417,
+    "packages/sso/src/auth-provider.ts": 808
+  }
+}

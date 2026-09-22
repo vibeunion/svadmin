@@ -3,7 +3,8 @@
 
   const i18n = useTranslation();
   // 登录页不需要下载仪表盘；保持原生组件类型，不经过无类型 props 转发。
-  let dashboard = $state.raw(import('../pages/Dashboard.svelte'));
+  const loadDashboard = () => import('../features/dashboard/index.js').then((module) => ({ default: module.Dashboard }));
+  let dashboard = $state.raw(loadDashboard());
 </script>
 
 {#await dashboard}
@@ -13,7 +14,7 @@
 {:catch}
   <div role="alert">
     <p>{i18n.t('common.operationFailed')}</p>
-    <button type="button" onclick={() => dashboard = import('../pages/Dashboard.svelte')}>
+    <button type="button" onclick={() => dashboard = loadDashboard()}>
       {i18n.t('common.retry')}
     </button>
   </div>

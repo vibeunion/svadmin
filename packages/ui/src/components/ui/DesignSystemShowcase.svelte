@@ -29,7 +29,7 @@
 		<h2 id="fields-heading">Fields and selection / 字段与选择</h2>
 		<div class="svadmin-design-system-showcase__grid">
 			<Input aria-label="Default input" placeholder="Default" />
-			<Input aria-label="Compact input" size="compact" placeholder="Compact" />
+			<Input aria-label="Compact input" data-size="compact" placeholder="Compact" />
 			<Select aria-label="Status" size="compact" placeholder="Choose a status" />
 			<label class="svadmin-design-system-showcase__checkbox">
 				<Checkbox aria-label="Enabled" size="compact" />

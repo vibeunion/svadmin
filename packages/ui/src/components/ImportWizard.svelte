@@ -230,9 +230,8 @@
           else if (['false', '0', 'no', '否'].includes(normalized)) val = false;
         } else if (fieldDef?.type === 'select' && fieldDef.options && selectedFile?.name.toLowerCase().endsWith('.csv')) {
           const matches = fieldDef.options.filter(option => String(option.value) === val);
-          const match = matches[0];
-          if (matches.length !== 1 || !match || match.disabled) throw new Error('Invalid import option.');
-          val = match.value;
+          if (matches.length !== 1 || matches[0]!.disabled) throw new Error('Invalid import option.');
+          val = matches[0]!.value;
         } else if (fieldDef?.type === 'json' && selectedFile?.name.toLowerCase().endsWith('.csv')) {
           val = JSON.parse(val);
         }
@@ -562,8 +561,9 @@
             <p role="alert">{i18n.t('task.fetchFailed')}</p>
             <Button type="button" onclick={() => taskQuery.refetch()}>{i18n.t('common.retry')}</Button>
           {:else if taskQuery.data && allowed}
-            <TaskStatusBadge status={taskQuery.data.status ?? 'pending'} />
+            {@const status = taskQuery.data.status ?? 'pending'}
             {@const progress = resolveTaskProgress(taskQuery.data)}
+            <TaskStatusBadge {status} />
             {#if progress !== undefined}
               <Progress value={progress} />
             {/if}

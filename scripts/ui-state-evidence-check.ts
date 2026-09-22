@@ -84,7 +84,7 @@ for (const mediaFile of mediaFiles) {
 }
 
 const fixedFormatOwners = new Set([
-  'example/src/pages/TodoWorkspacePage.svelte',
+  'example/src/features/planning/TodoWorkspacePage.svelte',
   'packages/ui/src/components/PermissionMatrix.svelte',
   'packages/ui/src/components/ResourceOperationsPage.svelte',
   'packages/ui/src/components/LazyPage.svelte',

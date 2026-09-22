@@ -1,5 +1,4 @@
 import { requireValue } from "../../../scripts/test-assertions";
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, test, expect } from 'bun:test';
 import { createFirebaseDataProvider } from './data-provider';
 
@@ -8,9 +7,9 @@ describe('Firebase DataProvider', () => {
     const mockRefineProvider = {
       getList: async () => ({ data: [{ id: 'doc-1', title: 'Test' }], total: 1 }),
       getOne: async () => ({ data: { id: 'doc-1', title: 'Test' } }),
-      create: async (params: any) => ({ data: { id: 'doc-2', ...params.variables } }),
-      update: async (params: any) => ({ data: { id: params.id, ...params.variables } }),
-      deleteOne: async (params: any) => ({ data: { id: params.id } }),
+      create: async (params: { variables: Record<string, unknown> }) => ({ data: { id: 'doc-2', ...params.variables } }),
+      update: async (params: { id: string; variables: Record<string, unknown> }) => ({ data: { id: params.id, ...params.variables } }),
+      deleteOne: async (params: { id: string }) => ({ data: { id: params.id } }),
     };
 
     const dp = createFirebaseDataProvider(mockRefineProvider);

@@ -4,7 +4,7 @@
 
   export type DateRangePickerProps = Omit<ComponentProps<typeof DateRangeInput>, 'mode'>;
 
-  let props: DateRangePickerProps = $props();
+  let { value = $bindable({ start: null, end: null }), ...props }: DateRangePickerProps = $props();
 </script>
 
-<DateRangeInput {...props} mode="date" />
+<DateRangeInput {...props} bind:value mode="date" />

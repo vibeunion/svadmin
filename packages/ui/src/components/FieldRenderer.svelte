@@ -38,6 +38,7 @@
   import { cn } from '../utils.js';
   import { numericInputValue } from '../numeric-input.js';
 
+  type FieldOption = NonNullable<FieldDefinition['options']>[number];
   const i18n = useTranslation();
 
   let { field, value, onchange, disabled, invalid = false, errorId, density = 'comfortable', children } = $props<{
@@ -59,7 +60,6 @@
   const boolVal = $derived((value as boolean) ?? false);
   const tagsVal = $derived((value as string[]) ?? []);
   const multiVal = $derived((value as (string | number)[]) ?? []);
-  type FieldOption = NonNullable<FieldDefinition['options']>[number];
   const selectToken = $derived.by(() => {
     const index = field.options?.findIndex((option: FieldOption) => option.value === value) ?? -1;
     return index < 0 ? '' : `option:${index}`;

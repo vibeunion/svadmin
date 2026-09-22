@@ -1,6 +1,5 @@
 import { requireValue } from '../test/assertions';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe,it,expect,vi } from 'vitest';
 import { useList,useOne } from './query-hooks.svelte';
 import { flushSync } from 'svelte';
@@ -45,9 +44,9 @@ vi.mock('@tanstack/svelte-query',async (importOriginal) => {
   const actual=await importOriginal<typeof import('@tanstack/svelte-query')>();
   const client = new actual.QueryClient();
   return {
-    ...actual as any,
+    ...actual,
     useQueryClient: () => client,
-    createQuery: (factory: any) => {
+    createQuery: (factory: () => { queryKey: readonly unknown[] }) => {
       const options = factory();
       const data = parseQueryKey(options.queryKey)?.action === 'one'
         ? { data: { id: 1, title: 'One' } }
@@ -96,7 +95,7 @@ describe('useList & useOne - Headless Svelte 5 Compatibility',() => {
     flushSync();
 
     expect(requireValue(oneQuery).data).toBeDefined();
-    expect((requireValue(requireValue(oneQuery).data).data as any).title).toBe('One');
+    expect((requireValue(requireValue(oneQuery).data).data as { title: string }).title).toBe('One');
 
     cleanup();
   });

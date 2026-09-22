@@ -78,8 +78,12 @@
     emptyLanesText = 'No grouped records yet.',
     highlightsLabel = 'Focus queue',
     workspaceStyle = 'operations',
-    tableProps = {},
+    tableProps: rawTableProps = {},
   }: Props = $props();
+  const tableProps = $derived({
+    ...rawTableProps,
+    ...(rendering === undefined ? {} : { rendering }),
+  });
   const navigation = useNavigation();
   const context = captureAdminContext();
   const resource = $derived(context.getResource(resourceName));

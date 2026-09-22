@@ -2,7 +2,7 @@
   import type { ResourceDefinition, RouterProvider } from '@svadmin/core';
   import { AdminApp } from '@svadmin/ui';
   import { demoContracts } from '../../src/resource-contracts';
-  import UserManagementPage from '../../src/pages/UserManagementPage.svelte';
+  import UserManagementPage from '../../src/features/people/UserManagementPage.svelte';
   import { inMemoryDataProvider as dataProvider } from '../../src/providers/inMemoryDb';
 
   const resourceNames = ['users', 'roles', 'permissions', 'user_accounts', 'user_logs', 'user_settings'] as const;

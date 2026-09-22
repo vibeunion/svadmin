@@ -1,11 +1,11 @@
 <script module lang="ts">
   import type { Component } from 'svelte';
 
+  export type LazyPageRenderable = Component<never>;
   export type LazyPageModule = {
-    default: Component<never>;
+    default: LazyPageRenderable;
   };
 
-  export type LazyPageRenderable = Component<Record<string, unknown>>;
   export type LazyPageLoader = () => Promise<LazyPageModule>;
 
   const pagePromises = new WeakMap<object, Promise<unknown>>();
@@ -38,7 +38,7 @@
     <span class="svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">Loading...</span>
   </div>
 {:then pageModule}
-  {@const Page = pageModule.default as unknown as LazyPageRenderable}
+  {@const Page = pageModule.default as unknown as Component<Record<string, unknown>>}
   <Page {...props} />
 {:catch}
   <div class="svadmin-u-60fbb7713999 svadmin-u-8a7a926578c8 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227" role="alert">

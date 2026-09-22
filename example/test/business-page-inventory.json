@@ -1,90 +1,86 @@
 [
   {
-    "file": "AiWorkspacePage.svelte",
+    "file": "features/ai/AiWorkspacePage.svelte",
     "mode": "query-rendering"
   },
   {
-    "file": "CalendarPage.svelte",
+    "file": "features/calendar/CalendarPage.svelte",
     "mode": "delegated-rendering"
   },
   {
-    "file": "CalendarWorkspacePage.svelte",
+    "file": "features/calendar/CalendarWorkspacePage.svelte",
     "mode": "query-rendering"
   },
   {
-    "file": "CaseWorkspacePage.svelte",
+    "file": "features/case/CaseWorkspacePage.svelte",
     "mode": "local-state"
   },
   {
-    "file": "CrmDashboardPage.svelte",
+    "file": "features/crm/CrmDashboardPage.svelte",
     "mode": "query-rendering"
   },
   {
-    "file": "CrmOperationsPage.svelte",
+    "file": "features/crm/CrmOperationsPage.svelte",
     "mode": "delegated-rendering"
   },
   {
-    "file": "Dashboard.svelte",
+    "file": "features/dashboard/Dashboard.svelte",
     "mode": "query-rendering"
   },
   {
-    "file": "DesignPrinciplesPage.svelte",
+    "file": "features/showcase/DesignPrinciplesPage.svelte",
     "mode": "static-showcase"
   },
   {
-    "file": "DomainWorkspacePage.svelte",
+    "file": "features/domain/DomainWorkspacePage.svelte",
     "mode": "query-rendering"
   },
   {
-    "file": "ExampleResourcePage.svelte",
+    "file": "features/resource/ExampleResourcePage.svelte",
     "mode": "delegated-rendering"
   },
   {
-    "file": "InventoryDirectoryPage.svelte",
+    "file": "features/domain/InventoryDirectoryPage.svelte",
     "mode": "delegated-rendering"
   },
   {
-    "file": "MailWorkspacePage.svelte",
+    "file": "features/mail/MailWorkspacePage.svelte",
     "mode": "query-rendering"
   },
   {
-    "file": "MessagesPage.svelte",
+    "file": "features/messaging/MessagesPage.svelte",
     "mode": "delegated-rendering"
   },
   {
-    "file": "OperationsPage.svelte",
+    "file": "features/operations/OperationsPage.svelte",
     "mode": "delegated-rendering"
   },
   {
-    "file": "OperationsWorkspacePage.svelte",
+    "file": "features/operations/OperationsWorkspacePage.svelte",
     "mode": "query-rendering"
   },
   {
-    "file": "OrdersPage.svelte",
+    "file": "features/orders/OrdersPage.svelte",
     "mode": "delegated-rendering"
   },
   {
-    "file": "PeoplePage.svelte",
+    "file": "features/catalog/ProductsPage.svelte",
     "mode": "delegated-rendering"
   },
   {
-    "file": "ProductsPage.svelte",
+    "file": "features/property/PropertyOperationsPage.svelte",
     "mode": "delegated-rendering"
   },
   {
-    "file": "PropertyOperationsPage.svelte",
-    "mode": "delegated-rendering"
-  },
-  {
-    "file": "RealEstateWorkspacePage.svelte",
+    "file": "features/property/RealEstateWorkspacePage.svelte",
     "mode": "query-rendering"
   },
   {
-    "file": "TodoWorkspacePage.svelte",
+    "file": "features/planning/TodoWorkspacePage.svelte",
     "mode": "query-rendering"
   },
   {
-    "file": "UserManagementPage.svelte",
+    "file": "features/people/UserManagementPage.svelte",
     "mode": "query-rendering"
   },
   {

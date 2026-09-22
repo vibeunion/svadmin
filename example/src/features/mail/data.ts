@@ -1,0 +1,1 @@
+export { mailResources } from './resources';

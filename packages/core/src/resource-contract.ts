@@ -2,8 +2,8 @@ import { CloneType, Kind, TransformKind, Type, type Static, type TObject, type T
 import { checkExact, createExactSchemaValidator } from './schema-validation';
 import { TypeGuard } from '@sinclair/typebox/type';
 import { DeleteManyPartialError, HttpError, type DataProvider, type KnownResources, type BaseRecord,
-  type GetManyParams, type CreateManyParams, type UpdateManyParams, type DeleteManyParams,
-  type GetOneResult, type GetManyResult } from './types';
+  type GetListResult, type GetManyParams, type CreateManyParams, type UpdateManyParams, type DeleteManyParams,
+  type GetOneParams, type GetOneResult, type GetManyResult } from './types';
 import { withResourceSchemas, createResourceRequestValidator, type ResourceSchemas } from './resource-schemas';
 import { decodeBaseRecord } from './record-decoder';
 import { snapshotPlainData } from './plain-data';
@@ -164,6 +164,115 @@ export function parseContractRecord(contract: ResourceContract, value: unknown):
     // Malformed transport values must not escape as raw reflection errors.
   }
   throw new HttpError('Invalid provider response', 502, undefined, { code: 'INVALID_PROVIDER_RESPONSE' });
+}
+
+export interface ContractProjectionOptions {
+  /** Supplies the id when the backend record has no declared contract id. */
+  readonly getId?: (input: {
+    resource: string;
+    requestedId: string | number | undefined;
+    record: unknown;
+    index: number;
+  }) => string | number | undefined;
+}
+
+function projectBySchema(schema: TSchema, value: unknown): unknown {
+  if (TypeGuard.IsObject(schema)) {
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) return value;
+    const source = value as Record<string, unknown>;
+    const projected: Record<string, unknown> = {};
+    for (const [key, property] of Object.entries(schema.properties)) {
+      if (Object.hasOwn(source, key)) projected[key] = projectBySchema(property, source[key]);
+    }
+    return projected;
+  }
+  if (TypeGuard.IsArray(schema)) {
+    return Array.isArray(value) ? value.map(item => projectBySchema(schema.items, item)) : value;
+  }
+  if (TypeGuard.IsTuple(schema)) {
+    return Array.isArray(value)
+      ? value.map((item, index) => schema.items?.[index] ? projectBySchema(schema.items[index], item) : item)
+      : value;
+  }
+  if (TypeGuard.IsUnion(schema)) {
+    const branch = schema.anyOf.find(candidate => checkExact(candidate, value));
+    return branch ? projectBySchema(branch, value) : value;
+  }
+  return value;
+}
+
+function projectRecord(
+  contract: ResourceContract,
+  resource: string,
+  record: unknown,
+  index: number,
+  requestedId: string | number | undefined,
+  options: ContractProjectionOptions,
+): unknown {
+  const projected = projectBySchema(definitionOf(contract).schemas.record, record);
+  if (typeof projected !== 'object' || projected === null || Array.isArray(projected)) return projected;
+  const result = projected as Record<string, unknown>;
+  if (!Object.hasOwn(result, 'id')) {
+    const id = options.getId?.({ resource, requestedId, record, index })
+      ?? requestedId
+      ?? (typeof record === 'object' && record !== null && !Array.isArray(record)
+        ? ['id', '_id', 'uuid', 'key', 'name'].map(key => (record as Record<string, unknown>)[key])
+          .find(candidate => typeof candidate === 'string' || typeof candidate === 'number')
+        : undefined)
+      ?? `${resource}:${index}`;
+    result['id'] = id;
+  }
+  return result;
+}
+
+/**
+ * Projects read responses into the exact closed shape required by resource contracts.
+ * Write responses remain untouched so mutation validation keeps its existing semantics.
+ */
+export function withContractProjection(
+  provider: DataProvider,
+  contracts: Readonly<Record<string, ResourceContract>>,
+  options: ContractProjectionOptions = {},
+): Readonly<DataProvider> {
+  function contractFor(resource: string): ResourceContract | undefined {
+    return contracts[resource];
+  }
+  function projectList(resource: string, result: GetListResult): GetListResult {
+    const contract = contractFor(resource);
+    if (!contract) return result;
+    return {
+      ...result,
+      data: result.data.map((record, index) =>
+        projectRecord(contract, resource, record, index, undefined, options) as BaseRecord),
+    };
+  }
+  function projectMany(resource: string, result: GetManyResult): GetManyResult {
+    const contract = contractFor(resource);
+    if (!contract) return result;
+    return {
+      ...result,
+      data: result.data.map((record, index) =>
+        projectRecord(contract, resource, record, index, undefined, options) as BaseRecord),
+    };
+  }
+  function projectOne(params: GetOneParams, result: GetOneResult): GetOneResult {
+    const contract = contractFor(params.resource);
+    return contract
+      ? { ...result, data: projectRecord(contract, params.resource, result.data, 0, params.id, options) as BaseRecord }
+      : result;
+  }
+
+  const adapted: DataProvider = {
+    ...provider,
+    getList: async params => projectList(params.resource, await provider.getList(params)),
+    getOne: async params => projectOne(params, await provider.getOne(params)),
+    getApiUrl: () => provider.getApiUrl(),
+  };
+  if (provider.getMany) {
+    const getMany = provider.getMany.bind(provider);
+    adapted.getMany = async params => projectMany(params.resource, await getMany(params));
+  }
+  return Object.freeze(adapted);
 }
 
 function idSchema(schemas: ContractSchemas): TSchema {

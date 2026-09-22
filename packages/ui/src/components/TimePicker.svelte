@@ -4,7 +4,7 @@
 
   export type TimePickerProps = Omit<ComponentProps<typeof DateTimeInput>, 'mode'>;
 
-  let props: TimePickerProps = $props();
+  let { value = $bindable(null), ...props }: TimePickerProps = $props();
 </script>
 
-<DateTimeInput {...props} mode="time" />
+<DateTimeInput {...props} bind:value mode="time" />

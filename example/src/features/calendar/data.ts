@@ -1,0 +1,1 @@
+export { calendarResources } from './resources';

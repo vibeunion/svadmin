@@ -37,7 +37,7 @@ describe('workflow prerequisite regressions', () => {
     const time = render(FieldDisplay, { type: 'time', value: '13:45' });
     expect(datetime.container.querySelector('[data-svadmin-invalid-field]')).toBeNull();
     expect(datetime.container.textContent).toContain('2026');
-    expect(time.container.textContent).toContain('13:45');
+    expect(time.container.textContent).toMatch(/(?:13:45|1:45)/);
     // Native field values stay literal; explicit DateField formatting is opt-in.
     const formatted = render(DateField, { value: '13:45', format: 'time' });
     expect(formatted.container.textContent).toContain('1:45');

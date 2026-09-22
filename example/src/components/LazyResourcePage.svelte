@@ -1,18 +1,24 @@
 <script module lang="ts">
-  const loadDefaultResourcePage = () => import('../pages/ExampleResourcePage.svelte');
-  const loadTodoWorkspacePage = () => import('../pages/TodoWorkspacePage.svelte');
-  const loadUserManagementPage = () => import('../pages/UserManagementPage.svelte');
-  const loadCalendarWorkspacePage = () => import('../pages/CalendarWorkspacePage.svelte');
-  const loadAiWorkspacePage = () => import('../pages/AiWorkspacePage.svelte');
-  const loadMailWorkspacePage = () => import('../pages/MailWorkspacePage.svelte');
-  const loadCrmDashboardPage = () => import('../pages/CrmDashboardPage.svelte');
-  const loadRealEstateWorkspacePage = () => import('../pages/RealEstateWorkspacePage.svelte');
-  const loadDesignPrinciplesPage = () => import('../pages/DesignPrinciplesPage.svelte');
-  const loadOperationsWorkspacePage = () => import('../pages/OperationsWorkspacePage.svelte');
-  const loadDomainWorkspacePage = () => import('../pages/DomainWorkspacePage.svelte');
-  const loadCaseWorkspacePage = () => import('../pages/CaseWorkspacePage.svelte');
+  import { loadProductsPage } from '../features/catalog/index.js';
+  import { loadCalendarWorkspacePage } from '../features/calendar/index.js';
+  import { loadUserManagementPage } from '../features/people/index.js';
+  import { loadCrmDashboardPage } from '../features/crm/index.js';
+  import { loadMailWorkspacePage } from '../features/mail/index.js';
+  import { loadOperationsWorkspacePage } from '../features/operations/index.js';
+  import { loadAiWorkspacePage } from '../features/ai/index.js';
+  import { loadRealEstateWorkspacePage } from '../features/property/index.js';
+  import { loadTodoWorkspacePage } from '../features/planning/index.js';
+  import { loadDomainWorkspacePage } from '../features/domain/index.js';
+  import { loadCaseWorkspacePage } from '../features/case/index.js';
+  import { loadExampleResourcePage } from '../features/resource/index.js';
+  import { loadDesignPrinciplesPage } from '../features/showcase/index.js';
+  import type { DemoResource } from '../resource-schemas';
+
+  type ResourcePageKey = DemoResource | 'design_principles';
+  const loadDefaultResourcePage = loadExampleResourcePage;
 
   const resourcePageLoaders = {
+    products: loadProductsPage,
     case_workspace: loadCaseWorkspacePage,
     todos: loadTodoWorkspacePage,
     users: loadUserManagementPage,
@@ -45,7 +51,6 @@
     reorder_rules: loadOperationsWorkspacePage,
     purchase_orders: loadOperationsWorkspacePage,
     sales_orders: loadOperationsWorkspacePage,
-    products: loadDomainWorkspacePage,
     skus: loadDomainWorkspacePage,
     categories: loadDomainWorkspacePage,
     suppliers: loadDomainWorkspacePage,
@@ -66,7 +71,7 @@
     security_allowed_ips: loadDomainWorkspacePage,
     referral_invites: loadDomainWorkspacePage,
     design_principles: loadDesignPrinciplesPage,
-  } as const;
+  } as const satisfies Partial<Record<ResourcePageKey, unknown>>;
 
   function getResourcePageLoader(resourceName: string) {
     const entry = Object.entries(resourcePageLoaders).find(([name]) => name === resourceName);

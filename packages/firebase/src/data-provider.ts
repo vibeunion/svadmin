@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { DataProvider } from '@svadmin/core';
 import { createRefineAdapter } from '../../refine-adapter/src/index';
 // Note: @refinedev/simple-rest is often used as the base for custom Firebase REST, 
@@ -9,6 +8,6 @@ import { createRefineAdapter } from '../../refine-adapter/src/index';
 // Since refine doesn't have a single official "firestore" package in monorepo often, 
 // they usually have community packages or one you can use. 
 // Assuming a generic `RefineFirebaseProvider` exists.
-export function createFirebaseDataProvider(firebaseDataProvider: any): DataProvider {
+export function createFirebaseDataProvider(firebaseDataProvider: unknown): DataProvider {
   return createRefineAdapter(firebaseDataProvider);
 }

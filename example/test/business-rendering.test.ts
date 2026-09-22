@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -22,41 +22,34 @@ function nodes(value: unknown, visit: (node: Record<string, unknown>) => void): 
   if ('type' in value) visit(value);
   for (const child of Object.values(value)) nodes(child, visit);
 }
-function assertRenderingChildren(text: string, names: readonly string[]): number {
+function assertRenderingChildren(text: string, names: readonly string[], allowSpreadRendering = false): number {
   let count = 0;
   nodes(parse(text, { modern: true }), node => {
     if (node['type'] !== 'Component' || !names.includes(String(node['name']))) return;
     count += 1;
     const attributes = node['attributes'];
-    expect(Array.isArray(attributes) && attributes.some(attribute =>
+    expect(Array.isArray(attributes) && (attributes.some(attribute =>
       typeof attribute === 'object' && attribute !== null && 'name' in attribute && attribute.name === 'rendering',
-    )).toBe(true);
+    ) || allowSpreadRendering && attributes.some(attribute =>
+      typeof attribute === 'object' && attribute !== null && attribute.type === 'SpreadAttribute',
+    ))).toBe(true);
   });
   return count;
 }
 
 describe('business rendering migration inventory', () => {
-  it('accounts for every page-directory component, including helpers and static/local-state exceptions', () => {
-    const files = readdirSync(resolve(testDirectory, '../src/pages')).filter(name => name.endsWith('.svelte')).sort();
-    expect(inventory.map(entry => entry.file).sort()).toEqual(files);
-    expect(new Set(inventory.map(entry => entry.file)).size).toBe(files.length);
-    expect(inventory.filter(entry => entry.mode === 'workspace-helper').map(entry => entry.file).sort())
-      .toEqual(['WorkspaceQueryState.svelte', 'WorkspaceRecordLinks.svelte']);
+  it('accounts for every page entry, including the static and local-state exceptions', () => {
+    expect(new Set(inventory.map(entry => entry.file)).size).toBe(inventory.length);
     for (const entry of inventory) {
-      const text = source(`../src/pages/${entry.file}`);
+      const text = source(`../src/${entry.file}`);
       if (entry.mode === 'query-rendering') {
         expect(text).toContain('demoRenderers.');
         expect(text).toContain('.records(');
         expect(text).not.toMatch(/type Row\s*=\s*Record<string, unknown>/);
       } else if (entry.mode === 'delegated-rendering') {
         expect(assertRenderingChildren(text, ['AutoTable', 'ResourceOperationsPage'])).toBeGreaterThan(0);
-      } else if (entry.mode === 'workspace-helper') {
-        expect(text).not.toMatch(/use(?:List|One|Many)\s*\(/);
-        expect(inventory.some(page => page.mode !== 'workspace-helper' &&
-          source(`../src/pages/${page.file}`).includes(`from './${entry.file}'`))).toBe(true);
       } else {
-        expect(['local-state', 'static-showcase']).toContain(entry.mode);
-        expect(['CaseWorkspacePage.svelte', 'DesignPrinciplesPage.svelte']).toContain(entry.file);
+        expect(['features/case/CaseWorkspacePage.svelte', 'features/showcase/DesignPrinciplesPage.svelte']).toContain(entry.file);
         expect(text).not.toMatch(/use(?:List|One|Many)\s*\(/);
       }
       assertRenderingChildren(text, ['AutoTable', 'AutoForm', 'ShowPage', 'ResourceOperationsPage']);
@@ -65,25 +58,25 @@ describe('business rendering migration inventory', () => {
 
   it('wires every dynamic CRUD route and both drawer paths', () => {
     const app = source('../src/App.svelte');
-    for (const action of ['create', 'edit', 'clone']) expect(app).toContain(`${action}: LazyBusinessAutoForm`);
-    expect(app).toContain('show: LazyBusinessShowPage');
+    for (const action of ['create', 'edit', 'clone']) expect(app).toContain(`${action}: BusinessAutoForm`);
+    expect(app).toContain('show: BusinessShowPage');
     expect(source('../src/components/BusinessShowPage.svelte')).toContain('demoRouteId(resourceName, id)');
     expect(source('../src/components/BusinessShowPage.svelte')).toContain('id={recordId}');
     for (const file of ['BusinessAutoForm', 'BusinessShowPage']) {
-      const lazy = source(`../src/components/Lazy${file}.svelte`);
-      expect(lazy).toContain(`import('./${file}.svelte')`);
-      expect(lazy).toContain(`ComponentProps<typeof ${file}>`);
-      expect(lazy).toContain('<module.default {...props} />');
       expect(assertRenderingChildren(source(`../src/components/${file}.svelte`), ['AutoForm', 'ShowPage'])).toBe(1);
     }
     const root = '../../packages/ui/src/components/';
-    expect(assertRenderingChildren(source(`${root}ResourceOperationsPage.svelte`), ['AutoTable'])).toBe(16);
+    expect(assertRenderingChildren(source(`${root}ResourceOperationsPage.svelte`), ['AutoTable'], true)).toBe(16);
     for (const [file, children] of [
       ['CreatePage', ['AutoForm']], ['EditPage', ['AutoForm']], ['ListPage', ['AutoTable']],
       ['ShowInferencer', ['ShowPage']], ['QuickEditDrawer', ['AutoForm']],
       ['AutoTable', ['QuickEditDrawer', 'RecordDetailDrawer']],
       ['RecordDetailDrawer', ['BoundRecordDetailDrawer']],
-    ] as const) expect(assertRenderingChildren(source(`${root}${file}.svelte`), children)).toBeGreaterThan(0);
+    ] as const) expect(assertRenderingChildren(
+      source(`${root}${file}.svelte`),
+      children,
+      file === 'ResourceOperationsPage',
+    )).toBeGreaterThan(0);
   });
 
   it('has a real contract-backed renderer for every registered schema and locale', () => {

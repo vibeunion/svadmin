@@ -1,0 +1,1 @@
+export { aiResources } from './resources';

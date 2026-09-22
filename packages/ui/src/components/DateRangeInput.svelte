@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { definedOptions } from '@svadmin/core/options';
   import DateTimeInput, { type DateTimeInputMode } from './DateTimeInput.svelte';
   import { cn } from '../utils.js';
   import { useTranslation } from '@svadmin/core/i18n';
@@ -114,7 +113,7 @@
   {#if presets.length > 0}
     <Select value="" {disabled} aria-label={i18n.t('dateInput.presets')} onchange={choosePreset}>
       <option value="">{i18n.t('dateInput.presets')}</option>
-      {#each presets as preset, index (index)}
+      {#each presets as preset, index (preset.label)}
         <option value={String(index)} disabled={!presetAllowed(preset)}>{preset.label}</option>
       {/each}
     </Select>
@@ -123,15 +122,19 @@
     value={value?.start ?? null}
     {mode}
     {valueMode}
+    {timeZone}
     {disambiguation}
-    {...definedOptions({
-      timeZone, min, max: startMax, step, disabledDate,
-      id: startId, name: startName, describedby,
-      maxInstant: instantMode ? validInstant(value?.end) : undefined,
-    })}
+    {...(instantMode && validInstant(value?.end) !== undefined ? { maxInstant: validInstant(value?.end) } : {})}
+    {...(min === undefined ? {} : { min })}
+    {...(startMax === undefined ? {} : { max: startMax })}
+    {step}
+    {disabledDate}
+    id={startId}
+    name={startName}
     {disabled}
     {required}
     {invalid}
+    describedby={describedby}
     ariaLabel={startAriaLabel ?? i18n.t('common.startDate')}
     onchange={(next) => update('start', next)}
   />
@@ -140,15 +143,19 @@
     value={value?.end ?? null}
     {mode}
     {valueMode}
+    {timeZone}
     {disambiguation}
-    {...definedOptions({
-      timeZone, min: endMin, max, step, disabledDate,
-      id: endId, name: endName, describedby,
-      minInstant: instantMode ? validInstant(value?.start) : undefined,
-    })}
+    {...(instantMode && validInstant(value?.start) !== undefined ? { minInstant: validInstant(value?.start) } : {})}
+    {...(endMin === undefined ? {} : { min: endMin })}
+    {...(max === undefined ? {} : { max })}
+    {step}
+    {disabledDate}
+    id={endId}
+    name={endName}
     {disabled}
     {required}
     {invalid}
+    describedby={describedby}
     ariaLabel={endAriaLabel ?? i18n.t('common.endDate')}
     onchange={(next) => update('end', next)}
   />

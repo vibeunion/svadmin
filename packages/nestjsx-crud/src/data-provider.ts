@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { DataProvider } from '@svadmin/core';
 import { createRefineAdapter } from '@svadmin/refine-adapter';
 
@@ -10,9 +9,19 @@ import { createRefineAdapter } from '@svadmin/refine-adapter';
  * @param args Arguments required by @refinedev/nestjsx-crud
  * @returns A fully compatible svadmin DataProvider
  */
-export async function createNestjsxCrudDataProvider(...args: any[]): Promise<DataProvider> {
+export async function createNestjsxCrudDataProvider(...args: unknown[]): Promise<DataProvider> {
   const pkg = await import('@refinedev/nestjsx-crud');
-  const init = (pkg as any).default || (pkg as any).dataProvider || (pkg as any).DataProvider;
+  const init = resolveInitializer(pkg);
   const refineProvider = init(...args);
   return createRefineAdapter(refineProvider);
+}
+
+function resolveInitializer(pkg: unknown): (...args: unknown[]) => unknown {
+  if (typeof pkg !== 'object' || pkg === null) throw new TypeError('Invalid NestJS CRUD provider module');
+  const exports = pkg as Record<string, unknown>;
+  for (const key of ['default', 'dataProvider', 'DataProvider']) {
+    const candidate = exports[key];
+    if (typeof candidate === 'function') return candidate as (...args: unknown[]) => unknown;
+  }
+  throw new Error('[svadmin] Failed to resolve @refinedev/nestjsx-crud data provider. Ensure the package is installed correctly.');
 }

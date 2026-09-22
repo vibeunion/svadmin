@@ -12,6 +12,15 @@
   interface DomPurifyLike {
     sanitize(source: string | Node, config?: Record<string, unknown>): string;
   }
+  interface DomPurifyModule {
+    default?: DomPurifyLike;
+    sanitize?: DomPurifyLike["sanitize"];
+  }
+
+  function isDomPurifyModule(value: unknown): value is DomPurifyModule {
+    return typeof value === 'object' && value !== null;
+  }
+
   let DOMPurify: DomPurifyLike | null = $state(null);
 
   onMount(() => {
@@ -19,12 +28,12 @@
     import("isomorphic-dompurify")
       .then((pkg) => {
         if (!cancelled) {
-          const mod = pkg as unknown as { default?: DomPurifyLike; sanitize?: DomPurifyLike["sanitize"] };
+          if (!isDomPurifyModule(pkg)) return;
           const loaded: DomPurifyLike | undefined =
-            mod.default && typeof mod.default.sanitize === "function"
-              ? mod.default
-              : typeof mod.sanitize === "function"
-                ? (mod as DomPurifyLike)
+            pkg.default && typeof pkg.default.sanitize === "function"
+              ? pkg.default
+              : typeof pkg.sanitize === "function"
+                ? { sanitize: pkg.sanitize }
                 : undefined;
           if (loaded) {
             DOMPurify = loaded;
