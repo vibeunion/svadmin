@@ -74,8 +74,8 @@
     }
   },
   "peerDependencies": {
-    "@svadmin/core": ">=0.56.0",
-    "@svadmin/ui": ">=0.76.0",
+    "@svadmin/core": ">=0.53.0 <0.57.0",
+    "@svadmin/ui": ">=0.73.0 <0.77.0",
     "svelte": "^5.56.10"
   },
   "dependencies": {
