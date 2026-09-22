@@ -76,6 +76,40 @@ export interface AdminManifestMigration {
   notes: readonly string[];
 }
 
+export interface AdminManifestProviderCatalogEntry {
+  name: string;
+  package: string;
+  capabilities: readonly string[];
+  stability: string;
+}
+
+/**
+ * The official provider ecosystem. This is the capability catalog AI tooling and
+ * `svadmin add provider` consult; each entry mirrors the package's `svadmin`
+ * metadata in package.json.
+ */
+export const SCAFFOLD_OFFICIAL_PROVIDERS: readonly AdminManifestProviderCatalogEntry[] = [
+  { name: 'simple-rest', package: '@svadmin/simple-rest', capabilities: ['data', 'jwt-auth', 'session'], stability: 'stable' },
+  { name: 'supabase', package: '@svadmin/supabase', capabilities: ['data', 'auth', 'live', 'storage', 'audit'], stability: 'stable' },
+  { name: 'graphql', package: '@svadmin/graphql', capabilities: ['data', 'graphql'], stability: 'stable' },
+  { name: 'airtable', package: '@svadmin/airtable', capabilities: ['data'], stability: 'stable' },
+  { name: 'appwrite', package: '@svadmin/appwrite', capabilities: ['data', 'auth', 'storage', 'live'], stability: 'stable' },
+  { name: 'directus', package: '@svadmin/directus', capabilities: ['data', 'auth'], stability: 'stable' },
+  { name: 'drizzle', package: '@svadmin/drizzle', capabilities: ['server-data', 'migrations'], stability: 'stable' },
+  { name: 'elysia', package: '@svadmin/elysia', capabilities: ['server-data'], stability: 'stable' },
+  { name: 'firebase', package: '@svadmin/firebase', capabilities: ['data', 'auth', 'storage', 'live'], stability: 'stable' },
+  { name: 'hasura', package: '@svadmin/hasura', capabilities: ['data', 'graphql', 'live'], stability: 'stable' },
+  { name: 'medusa', package: '@svadmin/medusa', capabilities: ['data', 'auth'], stability: 'stable' },
+  { name: 'nestjs-query', package: '@svadmin/nestjs-query', capabilities: ['data', 'graphql'], stability: 'stable' },
+  { name: 'nestjsx-crud', package: '@svadmin/nestjsx-crud', capabilities: ['data'], stability: 'stable' },
+  { name: 'pocketbase', package: '@svadmin/pocketbase', capabilities: ['data', 'auth', 'storage', 'live'], stability: 'stable' },
+  { name: 'sanity', package: '@svadmin/sanity', capabilities: ['data', 'live'], stability: 'stable' },
+  { name: 'strapi', package: '@svadmin/strapi', capabilities: ['data', 'auth'], stability: 'stable' },
+  { name: 'refine-adapter', package: '@svadmin/refine-adapter', capabilities: ['adapter', 'refine-bridge'], stability: 'stable' },
+  { name: 'sso', package: '@svadmin/sso', capabilities: ['auth', 'oidc', 'oauth2'], stability: 'stable' },
+  { name: 'sveltekit', package: '@svadmin/sveltekit', capabilities: ['router', 'ssr'], stability: 'stable' },
+];
+
 export interface AdminAiManifest {
   $schema: string;
   version: 1;
@@ -96,6 +130,7 @@ export interface AdminAiManifest {
   resources: readonly ScaffoldResource[];
   routes: readonly AdminManifestRoute[];
   components: readonly AdminManifestComponent[];
+  providerCatalog: readonly AdminManifestProviderCatalogEntry[];
   migration: AdminManifestMigration;
   plugins: readonly unknown[];
   guidance: readonly string[];
@@ -353,6 +388,7 @@ export function buildAdminAiManifest(options: ScaffoldPlatformOptions): AdminAiM
       operations: resource.operations,
     })),
     components: SCAFFOLD_UI_COMPONENTS,
+    providerCatalog: SCAFFOLD_OFFICIAL_PROVIDERS,
     migration: {
       scaffoldVersion: options.scaffoldVersion ?? '0.0.0',
       coreVersionRange: options.coreVersionRange ?? null,
@@ -462,6 +498,19 @@ export function buildAdminSchemaJson(): Record<string, unknown> {
             name: { type: 'string' },
             package: { type: 'string' },
             import: { type: 'string' },
+          },
+        },
+      },
+      providerCatalog: {
+        type: 'array',
+        items: {
+          type: 'object',
+          required: ['name', 'package', 'capabilities', 'stability'],
+          properties: {
+            name: { type: 'string' },
+            package: { type: 'string' },
+            capabilities: { type: 'array', items: { type: 'string' } },
+            stability: { type: 'string' },
           },
         },
       },

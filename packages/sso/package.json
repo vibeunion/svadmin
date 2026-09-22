@@ -46,5 +46,15 @@
     "@svadmin/core": {
       "optional": true
     }
+  },
+  "svadmin": {
+    "capabilities": [
+      "auth",
+      "oidc",
+      "oauth2"
+    ],
+    "core": "^0.55.0",
+    "stability": "stable",
+    "migration": null
   }
 }

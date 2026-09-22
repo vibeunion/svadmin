@@ -55,5 +55,16 @@
   },
   "dependencies": {
     "@svadmin/refine-adapter": "workspace:*"
+  },
+  "svadmin": {
+    "capabilities": [
+      "data",
+      "auth",
+      "storage",
+      "live"
+    ],
+    "core": "^0.55.0",
+    "stability": "stable",
+    "migration": null
   }
 }

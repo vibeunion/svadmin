@@ -54,5 +54,16 @@
     "pocketbase": {
       "optional": true
     }
+  },
+  "svadmin": {
+    "capabilities": [
+      "data",
+      "auth",
+      "storage",
+      "live"
+    ],
+    "core": "^0.55.0",
+    "stability": "stable",
+    "migration": null
   }
 }

@@ -40,5 +40,14 @@
     "svelte": {
       "optional": true
     }
+  },
+  "svadmin": {
+    "capabilities": [
+      "router",
+      "ssr"
+    ],
+    "core": "^0.55.0",
+    "stability": "stable",
+    "migration": null
   }
 }

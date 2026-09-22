@@ -72,6 +72,8 @@ test('AI manifest captures providers, resources, and guardrails', () => {
   expect(manifest.resources.map((resource) => resource.name)).toEqual(['posts', 'users', 'comments', 'todos']);
   expect(manifest.routes[0]).toEqual({ resource: 'posts', path: '/posts', operations: ['list', 'create', 'edit', 'show', 'delete'] });
   expect(manifest.components.some((component) => component.name === 'AdminApp')).toBe(true);
+  expect(manifest.providerCatalog.map((entry) => entry.name)).toContain('pocketbase');
+  expect(manifest.providerCatalog.find((entry) => entry.name === 'hasura')?.capabilities).toEqual(['data', 'graphql', 'live']);
   expect(manifest.migration.scaffoldVersion).toBe('0.0.0');
   expect(manifest.migration.notes.length).toBeGreaterThan(0);
   expect(manifest.project.forbiddenImports).toContain('@svadmin/ui/src');

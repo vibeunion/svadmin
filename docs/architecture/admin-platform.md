@@ -70,6 +70,7 @@ export default defineAdminConfig({
 | 黄金路径 preset（`init --preset supabase\|rest\|graphql`） | 已落地 |
 | `svadmin.ai.json` 路由、组件目录、迁移规则；plugin `configSchema` | 已落地 |
 | Provider 包级 capability/compat 元数据（`package.json` 的 `svadmin` 字段）+ `doctor` 校验 | 已落地 |
+| 官方 Provider 目录：19 个包补齐 `svadmin` 元数据，写入 `svadmin.ai.json` 的 `providerCatalog` | 已落地 |
 | 四层作用域覆盖（`provideResourceScope`） | 已落地 |
 | 黄金路径 preset（`init --preset supabase\|rest\|graphql`） | 已落地 |
 | `svadmin.ai.json` 路由、组件目录、迁移规则；plugin `configSchema` | 已落地 |
