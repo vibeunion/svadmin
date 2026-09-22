@@ -57,6 +57,11 @@
         }
       ]
     },
+    "packages/devtools": {
+      "release-type": "node",
+      "component": "devtools",
+      "changelog-path": "CHANGELOG.md"
+    },
     "packages/ai-elements": {
       "release-type": "node",
       "component": "ai-elements",
