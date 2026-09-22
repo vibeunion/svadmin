@@ -62,6 +62,11 @@
       "component": "devtools",
       "changelog-path": "CHANGELOG.md"
     },
+    "packages/rest": {
+      "release-type": "node",
+      "component": "rest",
+      "changelog-path": "CHANGELOG.md"
+    },
     "packages/ai-elements": {
       "release-type": "node",
       "component": "ai-elements",

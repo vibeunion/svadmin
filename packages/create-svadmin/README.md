@@ -46,7 +46,7 @@ npx @svadmin/create add provider hasura --write
 npx @svadmin/create add provider appwrite --write
 ```
 
-Official data providers: `simple-rest`, `supabase`, `graphql`, `airtable`,
+Official data providers: `simple-rest`, `supabase`, `graphql`, `rest`, `airtable`,
 `appwrite`, `directus`, `drizzle`, `elysia`, `firebase`, `hasura`, `medusa`,
 `nestjs-query`, `nestjsx-crud`, `pocketbase`, `sanity`, `strapi`. `add provider`
 updates `package.json` + `svadmin.ai.json` and prints the remaining

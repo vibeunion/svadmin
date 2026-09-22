@@ -24,6 +24,7 @@
     "packages/nestjsx-crud/src/**/*.test.ts",
     "packages/pocketbase/src/**/*.test.ts",
     "packages/refine-adapter/src/**/*.test.ts",
+    "packages/rest/src/**/*.test.ts",
     "packages/sanity/src/**/*.test.ts",
     "packages/simple-rest/src/**/*.test.ts",
     "packages/sso/src/**/*.test.ts",

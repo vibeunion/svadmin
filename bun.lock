@@ -517,6 +517,26 @@
         "@svadmin/core",
       ],
     },
+    "packages/rest": {
+      "name": "@svadmin/rest",
+      "version": "0.1.0",
+      "dependencies": {
+        "@svadmin/refine-adapter": "workspace:*",
+      },
+      "devDependencies": {
+        "@refinedev/rest": "^2.1.1",
+      },
+      "peerDependencies": {
+        "@nestjsx/crud-request": "^5.0.0-alpha.3",
+        "@refinedev/rest": "^2.1.1",
+        "@svadmin/core": "workspace:*",
+      },
+      "optionalPeers": [
+        "@nestjsx/crud-request",
+        "@refinedev/rest",
+        "@svadmin/core",
+      ],
+    },
     "packages/sanity": {
       "name": "@svadmin/sanity",
       "version": "0.10.9",
@@ -1201,6 +1221,8 @@
 
     "@refinedev/devtools-shared": ["@refinedev/devtools-shared@2.0.2", "https://registry.npmmirror.com/@refinedev/devtools-shared/-/devtools-shared-2.0.2.tgz", { "dependencies": { "@tanstack/react-query": "^5.81.5", "error-stack-parser": "^2.1.4" }, "peerDependencies": { "@types/react": "^18.0.0 || ^19.0.0", "@types/react-dom": "^18.0.0 || ^19.0.0", "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" } }, "sha512-3cTjR1mEWn0tHFZBfPD5aVpBGLUhpAkfjqYCwKrijIicr1Utp/j0BqiPRnNqTf+W71HTng3znBpUhnR83u+tuA=="],
 
+    "@refinedev/rest": ["@refinedev/rest@2.1.1", "https://registry.npmmirror.com/@refinedev/rest/-/rest-2.1.1.tgz", { "dependencies": { "deepmerge": "^4.3.1", "ky": "^1.10.0", "qs": "^6.10.1" }, "peerDependencies": { "@nestjsx/crud-request": "^5.0.0-alpha.3", "@refinedev/core": "^5.0.0" }, "optionalPeers": ["@nestjsx/crud-request"] }, "sha512-FvGanLHqzimqQ4Tmj++3qpipuhHnaOEjW2z2mOlzeBofjbjQhUSsKzy/SpxjNyIdP37PkA2q7zVid0wz3k42Bw=="],
+
     "@refinedev/simple-rest": ["@refinedev/simple-rest@6.0.1", "https://registry.npmmirror.com/@refinedev/simple-rest/-/simple-rest-6.0.1.tgz", { "dependencies": { "axios": "^1.11.0", "query-string": "^7.1.1" }, "peerDependencies": { "@refinedev/core": "^5.0.0" } }, "sha512-/xx/SiZ2aaA3KJO7PWFxWXvgG5n8roEay6BBdRHhwCMYFuHIOob82pl5KBGbRi+KLuFLUj+nSt9Q76D0uyIOlg=="],
 
     "@rive-app/webgl2": ["@rive-app/webgl2@2.41.0", "https://registry.npmmirror.com/@rive-app/webgl2/-/webgl2-2.41.0.tgz", {}, "sha512-SCfy5u2q6SCyyH6H2pWYU2iEqkrQVlItxpVKks2Nk9RXQAoaFYQTTkfJHCfcrpyew/o2QxEk43HYTnQNlSMIGw=="],
@@ -1342,6 +1364,8 @@
     "@svadmin/pocketbase": ["@svadmin/pocketbase@workspace:packages/pocketbase"],
 
     "@svadmin/refine-adapter": ["@svadmin/refine-adapter@workspace:packages/refine-adapter"],
+
+    "@svadmin/rest": ["@svadmin/rest@workspace:packages/rest"],
 
     "@svadmin/sanity": ["@svadmin/sanity@workspace:packages/sanity"],
 
@@ -2462,6 +2486,8 @@
     "klona": ["klona@2.0.6", "https://registry.npmmirror.com/klona/-/klona-2.0.6.tgz", {}, "sha512-dhG34DXATL5hSxJbIexCft8FChFXtmskoZYnoPWjXQuebWYCNkVeV3KkGegCK9CP1oswI/vQibS2GY7Em/sJJA=="],
 
     "known-css-properties": ["known-css-properties@0.37.0", "https://registry.npmmirror.com/known-css-properties/-/known-css-properties-0.37.0.tgz", {}, "sha512-JCDrsP4Z1Sb9JwG0aJ8Eo2r7k4Ou5MwmThS/6lcIe1ICyb7UBJKGRIUUdqc2ASdE/42lgz6zFUnzAIhtXnBVrQ=="],
+
+    "ky": ["ky@1.14.3", "https://registry.npmmirror.com/ky/-/ky-1.14.3.tgz", {}, "sha512-9zy9lkjac+TR1c2tG+mkNSVlyOpInnWdSMiue4F+kq8TwJSgv6o8jhLRg8Ho6SnZ9wOYUq/yozts9qQCfk7bIw=="],
 
     "layout-base": ["layout-base@1.0.2", "https://registry.npmmirror.com/layout-base/-/layout-base-1.0.2.tgz", {}, "sha512-8h2oVEZNktL4BH2JCOI90iD1yXwL6iNW7KcCKT2QZgQJR2vbqDsldCTPRU9NifTCqHZci57XvQQ15YTu+sTYPg=="],
 

@@ -46,6 +46,12 @@ declare module '@refinedev/strapi-v4' {
   export default defaultExport;
 }
 
+declare module '@refinedev/rest' {
+  export const dataProvider: (...args: unknown[]) => unknown;
+  const defaultExport: (...args: unknown[]) => unknown;
+  export default defaultExport;
+}
+
 declare module '@refinedev/supabase' {
   export const dataProvider: (...args: unknown[]) => unknown;
   const defaultExport: (...args: unknown[]) => unknown;

@@ -4,6 +4,7 @@ export const DATA_PROVIDER_CHOICES = [
   'simple-rest',
   'supabase',
   'graphql',
+  'rest',
   'airtable',
   'appwrite',
   'directus',

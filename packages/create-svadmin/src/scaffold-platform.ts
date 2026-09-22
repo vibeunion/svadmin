@@ -92,6 +92,7 @@ export const SCAFFOLD_OFFICIAL_PROVIDERS: readonly AdminManifestProviderCatalogE
   { name: 'simple-rest', package: '@svadmin/simple-rest', capabilities: ['data', 'jwt-auth', 'session'], stability: 'stable' },
   { name: 'supabase', package: '@svadmin/supabase', capabilities: ['data', 'auth', 'live', 'storage', 'audit'], stability: 'stable' },
   { name: 'graphql', package: '@svadmin/graphql', capabilities: ['data', 'graphql'], stability: 'stable' },
+  { name: 'rest', package: '@svadmin/rest', capabilities: ['data', 'rest', 'custom-endpoints'], stability: 'experimental' },
   { name: 'airtable', package: '@svadmin/airtable', capabilities: ['data'], stability: 'stable' },
   { name: 'appwrite', package: '@svadmin/appwrite', capabilities: ['data', 'auth', 'storage', 'live'], stability: 'stable' },
   { name: 'directus', package: '@svadmin/directus', capabilities: ['data', 'auth'], stability: 'stable' },
@@ -154,6 +155,10 @@ export const SCAFFOLD_DATA_PROVIDERS: Record<DataProviderChoice, ScaffoldProvide
   graphql: {
     package: '@svadmin/graphql',
     capabilities: ['data', 'graphql'],
+  },
+  rest: {
+    package: '@svadmin/rest',
+    capabilities: ['data', 'rest', 'custom-endpoints'],
   },
   airtable: {
     package: '@svadmin/airtable',
