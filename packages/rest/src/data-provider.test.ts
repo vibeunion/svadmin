@@ -11,7 +11,10 @@ const refineInit = mock((..._args: unknown[]) => ({
 }));
 
 mock.module('@refinedev/rest', () => ({
-  default: refineInit,
+  createDataProvider: mock((...args: unknown[]) => ({
+    kyInstance: {},
+    dataProvider: refineInit(...args),
+  })),
 }));
 
 describe('createRestDataProvider', () => {

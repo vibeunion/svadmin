@@ -17,10 +17,7 @@ bun add @svadmin/rest @refinedev/rest @nestjsx/crud-request
 ```ts
 import { createRestDataProvider } from '@svadmin/rest';
 
-const dataProvider = await createRestDataProvider({
-  posts: { path: '/api/posts' },
-  users: { path: '/api/users' },
-});
+const dataProvider = await createRestDataProvider('https://api.example.test');
 ```
 
 All arguments are forwarded to `@refinedev/rest`; the result is adapted to the
