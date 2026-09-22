@@ -51,6 +51,25 @@
       "default": "./dist/components/*.svelte"
     },
     "./components/*": "./dist/components/*",
+    "./code-editor": {
+      "types": "./dist/components/CodeEditor.svelte.d.ts",
+      "svelte": "./dist/components/CodeEditor.svelte",
+      "default": "./dist/components/CodeEditor.svelte"
+    },
+    "./code-editor/presets": {
+      "types": "./dist/components/code-editor-presets.d.ts",
+      "default": "./dist/components/code-editor-presets.js"
+    },
+    "./json-editor": {
+      "types": "./dist/components/JsonEditor.svelte.d.ts",
+      "svelte": "./dist/components/JsonEditor.svelte",
+      "default": "./dist/components/JsonEditor.svelte"
+    },
+    "./qr-code": {
+      "types": "./dist/components/QRCode.svelte.d.ts",
+      "svelte": "./dist/components/QRCode.svelte",
+      "default": "./dist/components/QRCode.svelte"
+    },
     "./design-contract": {
       "types": "./dist/design-contract.d.ts",
       "default": "./dist/design-contract.js"
@@ -65,10 +84,18 @@
     }
   },
   "peerDependencies": {
+    "@codemirror/lang-javascript": "^6.0.0",
+    "@codemirror/lang-json": "^6.0.0",
+    "@codemirror/lang-markdown": "^6.0.0",
+    "@codemirror/lang-sql": "^6.0.0",
     "@svadmin/core": "workspace:*",
     "@tanstack/svelte-query": "^6.1.48",
+    "codemirror": "^6.0.0",
     "isomorphic-dompurify": "^3.23.0",
-    "svelte": "^5.56.10"
+    "qrcode": "^1.5.4",
+    "svelte": "^5.56.10",
+    "svelte-codemirror-editor": "^2.1.0",
+    "svelte-jsoneditor": "^3.13.0"
   },
   "peerDependenciesMeta": {
     "isomorphic-dompurify": {
@@ -84,6 +111,30 @@
       "optional": true
     },
     "svelte": {
+      "optional": true
+    },
+    "codemirror": {
+      "optional": true
+    },
+    "qrcode": {
+      "optional": true
+    },
+    "svelte-codemirror-editor": {
+      "optional": true
+    },
+    "@codemirror/lang-javascript": {
+      "optional": true
+    },
+    "@codemirror/lang-json": {
+      "optional": true
+    },
+    "@codemirror/lang-markdown": {
+      "optional": true
+    },
+    "@codemirror/lang-sql": {
+      "optional": true
+    },
+    "svelte-jsoneditor": {
       "optional": true
     }
   },
@@ -119,6 +170,10 @@
     "access": "public"
   },
   "devDependencies": {
+    "@codemirror/lang-javascript": "^6.2.5",
+    "@codemirror/lang-json": "^6.0.2",
+    "@codemirror/lang-markdown": "^6.5.2",
+    "@codemirror/lang-sql": "^6.10.0",
     "@happy-dom/global-registrator": "^20.11.12",
     "@svadmin/ai-elements": "workspace:*",
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
@@ -126,10 +181,15 @@
     "@testing-library/dom": "^10.4.1",
     "@testing-library/svelte": "^5.4.2",
     "@testing-library/user-event": "^14.6.6",
+    "@types/qrcode": "^1.5.6",
+    "codemirror": "^6.0.2",
     "happy-dom": "^20.11.12",
     "postcss": "^8.5.26",
     "postcss-selector-parser": "^7.1.1",
+    "qrcode": "^1.5.4",
     "shadcn-svelte": "^1.7.0",
+    "svelte-codemirror-editor": "^2.1.0",
+    "svelte-jsoneditor": "^3.13.0",
     "tailwindcss": "4.3.3",
     "vitest": "^4.1.11"
   },
