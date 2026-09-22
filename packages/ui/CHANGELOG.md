@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.75.0](https://github.com/vibeunion/svadmin/compare/ui-v0.74.0...ui-v0.75.0) (2026-09-22)
+
+
+### 🚀 Features
+
+* **architecture:** enforce feature and type boundaries ([34430d8](https://github.com/vibeunion/svadmin/commit/34430d87a49706fae4530da488301c9fd548b36a))
+
+
+### 🐛 Bug Fixes
+
+* **merge:** restore Tailwind integration lost in architecture merge ([0db9c58](https://github.com/vibeunion/svadmin/commit/0db9c58e7053f4d5fe3e6e761f85fd14cc5e86ec))
+
+
+### 🔧 Miscellaneous Chores
+
+* **merge:** integrate architecture and type safety ([cc77e09](https://github.com/vibeunion/svadmin/commit/cc77e09192c916a1b123f8ceb483d70fb7edff41))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.10.0
+  * peerDependencies
+    * @svadmin/core bumped to 0.55.0
+
 ## [0.74.0](https://github.com/vibeunion/svadmin/compare/ui-v0.73.0...ui-v0.74.0) (2026-09-21)
 
 

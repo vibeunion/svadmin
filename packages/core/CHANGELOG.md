@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.55.0](https://github.com/vibeunion/svadmin/compare/core-v0.54.0...core-v0.55.0) (2026-09-22)
+
+
+### 🚀 Features
+
+* **architecture:** enforce feature and type boundaries ([34430d8](https://github.com/vibeunion/svadmin/commit/34430d87a49706fae4530da488301c9fd548b36a))
+
+
+### 🔧 Miscellaneous Chores
+
+* **merge:** integrate architecture and type safety ([cc77e09](https://github.com/vibeunion/svadmin/commit/cc77e09192c916a1b123f8ceb483d70fb7edff41))
+
 ## [0.54.0](https://github.com/vibeunion/svadmin/compare/core-v0.53.0...core-v0.54.0) (2026-09-21)
 
 

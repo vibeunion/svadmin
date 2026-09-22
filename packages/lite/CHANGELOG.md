@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.15.0](https://github.com/vibeunion/svadmin/compare/lite-v0.14.0...lite-v0.15.0) (2026-09-22)
+
+
+### 🚀 Features
+
+* **architecture:** enforce feature and type boundaries ([34430d8](https://github.com/vibeunion/svadmin/commit/34430d87a49706fae4530da488301c9fd548b36a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.34.2 <0.55.0 to >=0.34.2 <0.56.0
+
 ## [0.14.0](https://github.com/vibeunion/svadmin/compare/lite-v0.13.0...lite-v0.14.0) (2026-09-21)
 
 
