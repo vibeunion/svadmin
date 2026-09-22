@@ -243,7 +243,7 @@ async function loadCompatibilityContext(repositoryRoot: string): Promise<Compati
   const workspacePackages = [core, aiElements, ui, simpleRest, supabase, graphql];
   const providerDirectories = new Set(
     Object.values(workspaceProviderByChoice)
-      .filter((name): name is string => name !== null)
+      .filter((name) => name !== null)
       .map((name) => name.replace('@svadmin/', '')),
   );
   const providerManifests = await Promise.all(
