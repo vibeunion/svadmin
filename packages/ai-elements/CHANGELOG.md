@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.10.0](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.9.0...ai-elements-v0.10.0) (2026-09-22)
+
+
+### 🚀 Features
+
+* **architecture:** enforce feature and type boundaries ([34430d8](https://github.com/vibeunion/svadmin/commit/34430d87a49706fae4530da488301c9fd548b36a))
+
+
+### 🔧 Miscellaneous Chores
+
+* **merge:** integrate architecture and type safety ([cc77e09](https://github.com/vibeunion/svadmin/commit/cc77e09192c916a1b123f8ceb483d70fb7edff41))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.55.0
+
 ## [0.9.0](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.8.0...ai-elements-v0.9.0) (2026-09-21)
 
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.13.9](https://github.com/vibeunion/svadmin/compare/elysia-v0.13.8...elysia-v0.13.9) (2026-09-22)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.55.0
+
 ## [0.13.8](https://github.com/vibeunion/svadmin/compare/elysia-v0.13.7...elysia-v0.13.8) (2026-09-21)
 
 

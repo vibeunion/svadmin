@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.31.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.30.0...create-svadmin-v0.31.0) (2026-09-22)
+
+
+### 🚀 Features
+
+* **architecture:** enforce feature and type boundaries ([34430d8](https://github.com/vibeunion/svadmin/commit/34430d87a49706fae4530da488301c9fd548b36a))
+
+
+### 🐛 Bug Fixes
+
+* **ci:** keep doctor drift test and renderer loop version-agnostic ([0c2eb9f](https://github.com/vibeunion/svadmin/commit/0c2eb9f2e52e54bc5cc0acbb193837a3200511cb))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/core bumped to 0.55.0
+
 ## [0.30.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.29.0...create-svadmin-v0.30.0) (2026-09-21)
 
 
