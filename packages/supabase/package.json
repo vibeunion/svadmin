@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/supabase",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "description": "Supabase adapters — DataProvider, AuthProvider, LiveProvider, AuditHandler",
   "type": "module",
   "sideEffects": false,
@@ -24,7 +24,13 @@
     }
   },
   "svadmin": {
-    "capabilities": ["data", "auth", "live", "storage", "audit"],
+    "capabilities": [
+      "data",
+      "auth",
+      "live",
+      "storage",
+      "audit"
+    ],
     "core": "^0.55.0",
     "stability": "stable",
     "migration": null

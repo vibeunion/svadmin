@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/simple-rest",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "Simple REST adapters — fetch-based DataProvider and JWT/Cookie AuthProvider",
   "type": "module",
   "sideEffects": false,
@@ -20,7 +20,11 @@
     }
   },
   "svadmin": {
-    "capabilities": ["data", "jwt-auth", "session"],
+    "capabilities": [
+      "data",
+      "jwt-auth",
+      "session"
+    ],
     "core": "^0.55.0",
     "stability": "stable",
     "migration": null
