@@ -1,6 +1,5 @@
 <script lang="ts">
   import { demoRenderers } from '../../resource-rendering';
-  import { definedOptions } from '@svadmin/core/options';
 
   import { demoContracts } from '../../resource-contracts';
   import type { DemoRow } from '../../resource-schemas';
@@ -8,16 +7,18 @@
 
   import { useList } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
-  import { Badge, Button, ContentPageHeader, ContentPageShell, MetricBlock, SectionHeader } from '@svadmin/ui';
+  import { Badge, Button, ContentPageHeader, ContentPageShell, SectionHeader } from '@svadmin/ui';
   import * as Card from '@svadmin/ui/components/ui/card/index.js';
   import { CalendarDays, ChevronLeft, ChevronRight, Clock, Filter, Plus } from '@lucide/svelte';
-  import type { ResourcesForFeature } from '../resource-registry';
 
   const i18n = useTranslation();
 
-  let { resourceName = 'calendar_events' } = $props<{ resourceName?: ResourcesForFeature<'calendar'> }>();
+  let { resourceName = 'calendar_events' } = $props<{ resourceName?: string }>();
+  import { localDateKey, mondayOffset } from '../../workspace/workspace-policy';
+  import WorkspaceQueryState from '../../workspace/WorkspaceQueryState.svelte';
+  const today = new Date();
   let monthOffset = $state(0);
-  let selectedDay = $state(12);
+  let selectedDay = $state(today.getDate());
   let selectedType = $state<string | null>(null);
   let viewMode = $state<'month' | 'agenda'>('month');
 
@@ -25,7 +26,7 @@
   const isZh = $derived(locale === 'zh-CN');
   const query = useList({ resource: demoContracts.calendar_events, pagination: { mode: 'off' }, sorters: [{ field: 'startDate', order: 'asc' }] });
   const events = $derived(demoRenderers.calendar_events.records(query.data?.data ?? []));
-  const displayDate = $derived(new Date(Date.UTC(2026, 5 + monthOffset, 1)));
+  const displayDate = $derived(new Date(Date.UTC(today.getFullYear(), today.getMonth() + monthOffset, 1)));
   const displayYear = $derived(displayDate.getUTCFullYear());
   const displayMonth = $derived(displayDate.getUTCMonth() + 1);
   const daysInMonth = $derived(new Date(Date.UTC(displayYear, displayMonth, 0)).getUTCDate());
@@ -42,7 +43,7 @@
     status,
     count: events.filter((event) => event.status === status).length,
   })));
-  const nextEvent = $derived(events[0]);
+  const nextEvent = $derived(events.find(event => event.startDate >= localDateKey(today) && event.status !== 'completed'));
 
   function eventsForDay(day: number): CalendarEvent[] {
     const dayKey = `${monthKey()}-${String(day).padStart(2, '0')}`;
@@ -87,28 +88,29 @@
 
 {#snippet headerActions()}
   <Button variant="outline" size="sm" onclick={() => selectedType = selectedType ? null : 'purchase'}><Filter class="h-4 w-4" />{selectedType ? typeLabel(selectedType) : (isZh ? '筛选' : 'Filter')}</Button>
-  <Button size="sm"><Plus class="h-4 w-4" />{isZh ? '新建日程' : 'New event'}</Button>
+  <Button size="sm" onclick={() => window.location.hash = '/calendar_events/create'}><Plus class="h-4 w-4" />{isZh ? '新建日程' : 'New event'}</Button>
 {/snippet}
 
 <div data-app-page="calendar-workspace" data-resource-name={resourceName}>
 <ContentPageShell pageId="calendar-workspace" width="wide">
   <ContentPageHeader eyebrow={isZh ? '日程应用' : 'Calendar app'} title={isZh ? '运营日程控制台' : 'Operations schedule console'} description={isZh ? '用月视图、议程列表、类型过滤和状态摘要管理计划作业。' : 'Manage planned work with month view, agenda, type filters, and status summaries.'} actions={headerActions} />
-  <section class="grid gap-3 sm:grid-cols-3">
-    <MetricBlock label={isZh ? '日程总数' : 'Total events'} value={events.length} detail={isZh ? '当前计划作业' : 'Planned work'} />
-    <MetricBlock label={isZh ? '下一项' : 'Next event'} value={nextEvent?.title ?? '-'} {...definedOptions({ "detail": nextEvent?.startDate })} />
-    <MetricBlock label={isZh ? '当前视图' : 'Current view'} value={viewMode === 'month' ? (isZh ? '月' : 'Month') : (isZh ? '议程' : 'Agenda')} detail={selectedType ? typeLabel(selectedType) : (isZh ? '全部类型' : 'All types')} />
-  </section>
+  <WorkspaceQueryState {query}>
+  <dl class="grid grid-cols-3 gap-3 border-y py-3">
+    <div class="min-w-0"><dt class="text-xs text-muted-foreground">{isZh ? '日程总数' : 'Total events'}</dt><dd class="mt-1 text-base font-semibold">{events.length}</dd></div>
+    <div class="min-w-0"><dt class="text-xs text-muted-foreground">{isZh ? '下一项' : 'Next event'}</dt><dd class="mt-1 break-words text-sm font-medium">{nextEvent?.title ?? '-'}</dd></div>
+    <div class="min-w-0"><dt class="text-xs text-muted-foreground">{isZh ? '当前视图' : 'Current view'}</dt><dd class="mt-1 text-base font-semibold">{viewMode === 'month' ? (isZh ? '月' : 'Month') : (isZh ? '议程' : 'Agenda')}</dd></div>
+  </dl>
   <section class="space-y-3"><SectionHeader title={isZh ? '类型过滤' : 'Type filters'} /><div class="flex flex-wrap gap-2">{#each typeStats as item (item.type)}<Button size="sm" variant={selectedType === item.type ? 'default' : 'outline'} onclick={() => selectedType = selectedType === item.type ? null : item.type}>{typeLabel(item.type)}<Badge variant="secondary">{item.count}</Badge></Button>{/each}<Button size="sm" variant={viewMode === 'month' ? 'default' : 'outline'} onclick={() => viewMode = 'month'}>{isZh ? '月视图' : 'Month'}</Button><Button size="sm" variant={viewMode === 'agenda' ? 'default' : 'outline'} onclick={() => viewMode = 'agenda'}>{isZh ? '议程' : 'Agenda'}</Button></div></section>
 
   <section class="grid gap-4 xl:grid-cols-[1fr_0.36fr]">
     <Card.Root class="overflow-hidden">
-      <Card.Header class="flex flex-row items-center justify-between border-b">
-        <div>
+      <Card.Header class="flex flex-col items-stretch gap-3 border-b sm:flex-row sm:items-center sm:justify-between">
+        <div class="min-w-0">
           <Badge>{isZh ? '计划日程' : 'Calendar'}</Badge>
-          <Card.Title class="mt-3 flex items-center gap-2 text-2xl"><CalendarDays class="h-6 w-6 text-primary" />{monthTitle()}</Card.Title>
+          <Card.Title class="mt-3 flex items-start gap-2 text-base"><CalendarDays class="h-5 w-5 shrink-0 text-primary" /><span class="min-w-0 break-words">{monthTitle()}</span></Card.Title>
           <Card.Description>{isZh ? '把采购、盘点、收货和复盘落到月视图。' : 'Map purchasing, counts, receiving, and reviews into a month view.'}</Card.Description>
         </div>
-        <div class="hidden gap-2 sm:flex"><Button variant="outline" size="icon" onclick={() => shiftMonth(-1)} aria-label={isZh ? '上个月' : 'Previous month'}><ChevronLeft class="h-4 w-4" /></Button><Button variant="outline" size="icon" onclick={() => shiftMonth(1)} aria-label={isZh ? '下个月' : 'Next month'}><ChevronRight class="h-4 w-4" /></Button></div>
+        <div class="flex shrink-0 gap-2"><Button variant="outline" size="icon" onclick={() => shiftMonth(-1)} aria-label={isZh ? '上个月' : 'Previous month'}><ChevronLeft class="h-4 w-4" /></Button><Button variant="outline" size="icon" onclick={() => shiftMonth(1)} aria-label={isZh ? '下个月' : 'Next month'}><ChevronRight class="h-4 w-4" /></Button></div>
       </Card.Header>
       <Card.Content class="p-0">
         <div class="grid grid-cols-7 border-b bg-muted/30 text-center text-xs font-semibold text-muted-foreground">
@@ -118,7 +120,7 @@
         </div>
         <div class={`${viewMode === 'agenda' ? 'block' : 'block sm:hidden'} divide-y`}>
           {#each visibleEvents as event (event.id)}
-            <a href="#/calendar_events" class="block px-4 py-3">
+            <a href={`#/calendar_events/show/${event.id}`} class="block px-4 py-3">
               <div class="flex items-center justify-between gap-3">
                 <p class="text-sm font-semibold">{event.title}</p>
                 <Badge variant="outline">{typeLabel(event.type)}</Badge>
@@ -130,6 +132,7 @@
           {/each}
         </div>
         <div class={`${viewMode === 'month' ? 'hidden sm:grid sm:grid-cols-7' : 'hidden'}`}>
+          {#each Array.from({ length: mondayOffset(displayYear, displayMonth) }) as _, index (index)}<div aria-hidden="true"></div>{/each}
           {#each monthDays as day (day)}
             <button
               class={`min-h-28 border-b border-r p-3 text-left transition ${selectedDay === day ? 'bg-primary/5 ring-1 ring-inset ring-primary/30' : 'hover:bg-muted/35'}`}
@@ -152,12 +155,12 @@
         <Card.Header><Card.Title class="text-base">{isZh ? '选中日期' : 'Selected Day'}</Card.Title></Card.Header>
         <Card.Content class="space-y-3">
           {#each selectedDayEvents as event (event.id)}
-            <div class="rounded-lg border bg-card p-3">
+            <div class="border-b py-3">
               <div class="flex items-center justify-between gap-3"><p class="text-sm font-semibold">{event.title}</p><Badge variant="outline">{typeLabel(event.type)}</Badge></div>
               <p class="mt-1 text-xs text-muted-foreground">{event.startDate} · {statusLabel(event.status)}</p>
             </div>
           {:else}
-            <div class="rounded-lg border bg-card p-3 text-sm text-muted-foreground">
+            <div class="py-3 text-sm text-muted-foreground">
               {selectedDate} · {isZh ? '暂无日程' : 'No events'}
             </div>
           {/each}
@@ -165,7 +168,7 @@
       </Card.Root>
       <Card.Root>
         <Card.Content class="p-5">
-          <p class="text-xs font-semibold text-muted-foreground">{isZh ? '本周焦点' : 'This week'}</p>
+          <p class="text-xs font-semibold text-muted-foreground">{isZh ? '本月日程' : 'This month'}</p>
           <p class="mt-2 text-3xl font-semibold">{visibleEvents.length}</p>
           <p class="mt-1 text-xs text-muted-foreground">{isZh ? '个当前月份日程需要跟进' : 'events in the current month to follow'}</p>
         </Card.Content>
@@ -174,7 +177,7 @@
         <Card.Header><Card.Title class="flex items-center gap-2 text-base"><Clock class="h-4 w-4 text-primary" />{isZh ? '状态摘要' : 'Status Summary'}</Card.Title></Card.Header>
         <Card.Content class="space-y-2">
           {#each statusStats as item (item.status)}
-            <div class="flex items-center justify-between rounded-lg border px-3 py-2 text-sm">
+            <div class="flex items-center justify-between border-b py-2 text-sm">
               <span>{statusLabel(item.status)}</span>
               <Badge variant="outline">{item.count}</Badge>
             </div>
@@ -183,5 +186,6 @@
       </Card.Root>
     </div>
   </section>
+  </WorkspaceQueryState>
 </ContentPageShell>
 </div>

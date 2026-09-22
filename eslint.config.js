@@ -9,6 +9,9 @@ export default ts.config(
   ...svelte.configs.recommended,
   {
     languageOptions: {
+      parserOptions: {
+        tsconfigRootDir: import.meta.dirname,
+      },
       globals: {
         ...globals.browser,
         ...globals.node,
@@ -234,6 +237,7 @@ export default ts.config(
       '**/dist/**',
       '**/.svelte-kit/**',
       '**/.astro/**',
+      'storybook-static/**',
       'test-results/**',
       'playwright-report/**',
       'docs/.astro/**',

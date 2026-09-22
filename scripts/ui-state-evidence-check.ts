@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 
 const matrixPath = 'docs/ui-state-matrix.md';
 const e2ePath = 'e2e/ui-state-contracts.spec.ts';
@@ -28,15 +28,22 @@ for (const token of ['状态矩阵', '1440x900', '1920x1080', 'git diff --check'
   if (!pullRequestTemplate.includes(token)) throw new Error(`Missing PR evidence requirement: ${token}`);
 }
 
-const pageDirectory = 'example/src/pages';
-const pageFiles = readdirSync(pageDirectory).filter((name) => name.endsWith('.svelte'));
+const pageDirectory = 'example/src/features';
+const pageFiles = (function collect(directory: string): string[] {
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(directory, entry.name);
+    if (entry.isDirectory()) return collect(path);
+    return entry.isFile() && entry.name.endsWith('.svelte') ? [path] : [];
+  });
+})(pageDirectory);
 const violations: string[] = [];
 for (const pageFile of pageFiles) {
-  const source = readFileSync(join(pageDirectory, pageFile), 'utf8');
-  if (/<img\b/u.test(source)) violations.push(`${pageFile}: use MediaThumbnail or a semantic media component instead of a page-level img preview`);
-  if (/<details\b(?![^>]*(?:svadmin-collapsible|data-svadmin-collapsible))/u.test(source)) violations.push(`${pageFile}: scope details collapse styling with an svadmin hook`);
+  const source = readFileSync(pageFile, 'utf8');
+  const label = relative(process.cwd(), pageFile);
+  if (/<img\b/u.test(source)) violations.push(`${label}: use MediaThumbnail or a semantic media component instead of a page-level img preview`);
+  if (/<details\b(?![^>]*(?:svadmin-collapsible|data-svadmin-collapsible))/u.test(source)) violations.push(`${label}: scope details collapse styling with an svadmin hook`);
   for (const match of source.matchAll(/min-h-\[(\d+)px\]/gu)) {
-    if (Number(match[1]) >= 160) violations.push(`${pageFile}: remove fixed empty-shell minimum height ${match[0]}`);
+    if (Number(match[1]) >= 160) violations.push(`${label}: remove fixed empty-shell minimum height ${match[0]}`);
   }
 }
 for (const sharedFile of ['packages/ui/src/components/EmptyState.svelte', 'packages/ui/src/components/ErrorComponent.svelte', 'packages/ui/src/components/account/MembersStarterPage.svelte', 'packages/ui/src/components/content/SystemErrorState.svelte', 'packages/ui/src/components/TaskQueueDrawer.svelte']) {
@@ -105,7 +112,7 @@ const fixedFormatOwners = new Set([
   'packages/lite/src/components/fields/LiteRichTextField.svelte',
 ]);
 const layoutFiles = [
-  ...pageFiles.map((name) => join(pageDirectory, name)),
+  ...pageFiles,
   ...mediaFiles,
 ];
 for (const layoutFile of layoutFiles) {

@@ -3,7 +3,6 @@
   import { demoRenderers } from '../../resource-rendering';
   import { demoRendering } from '../../resource-rendering';
   import { demoContracts, demoContract } from '../../resource-contracts';
-  import type { ResourcesForFeature } from '../resource-registry';
 
   import { captureAdminContext } from '@svadmin/core';
   import { useList } from '@svadmin/core';
@@ -32,8 +31,16 @@
     Truck,
   } from '@lucide/svelte';
   import { readHashParam, readHashView, replaceHashParam } from '../../utils/hashView';
+  import WorkspaceRecordLinks from '../../workspace/WorkspaceRecordLinks.svelte';
 
-  type OperationsResource = ResourcesForFeature<'operations'>;
+  type OperationsResource =
+    | 'stock_movements'
+    | 'stock_transfers'
+    | 'cycle_counts'
+    | 'inventory_adjustments'
+    | 'reorder_rules'
+    | 'purchase_orders'
+    | 'sales_orders';
 
   interface PageProfile {
     eyebrow: [string, string];
@@ -42,7 +49,7 @@
     action: [string, string];
   }
 
-  let { resourceName }: { resourceName: OperationsResource } = $props();
+  let { resourceName }: { resourceName: string } = $props();
   let activeView = $state(readHashView('default'));
   let showRecords = $state(readHashParam('records') === '1');
 
@@ -52,17 +59,22 @@
     get resource() { return demoContract(resourceName); },
     pagination: { mode: 'off' },
   });
-  const productsQuery = useList({ resource: demoContracts.products, pagination: { mode: 'off' } });
-  const warehousesQuery = useList({ resource: demoContracts.warehouses, pagination: { mode: 'off' } });
-  const suppliersQuery = useList({ resource: demoContracts.suppliers, pagination: { mode: 'off' } });
+  const productsQuery = useList({ resource: demoContracts.products, pagination: { mode: 'off' }, get queryOptions() { return { enabled: !['purchase_orders', 'sales_orders'].includes(resourceName) }; } });
+  const warehousesQuery = useList({ resource: demoContracts.warehouses, pagination: { mode: 'off' }, get queryOptions() { return { enabled: !['purchase_orders', 'sales_orders'].includes(resourceName) }; } });
+  const suppliersQuery = useList({ resource: demoContracts.suppliers, pagination: { mode: 'off' }, get queryOptions() { return { enabled: ['reorder_rules', 'purchase_orders'].includes(resourceName) }; } });
 
   const isZh = $derived(i18n.locale === 'zh-CN');
   const rawRows = $derived(query.data?.data ?? []);
   const products = $derived(demoRenderers.products.records(productsQuery.data?.data ?? []));
   const warehouses = $derived(demoRenderers.warehouses.records(warehousesQuery.data?.data ?? []));
   const suppliers = $derived(demoRenderers.suppliers.records(suppliersQuery.data?.data ?? []));
-  const isLoading = $derived(query.isLoading || productsQuery.isLoading || warehousesQuery.isLoading || suppliersQuery.isLoading);
-  const hasError = $derived(Boolean(query.error || productsQuery.error || warehousesQuery.error || suppliersQuery.error));
+  const isLoading = $derived(query.isLoading);
+  const hasError = $derived(query.isError);
+  const relatedQueries = $derived([
+    ...(!['purchase_orders', 'sales_orders'].includes(resourceName) ? [productsQuery] : []),
+    ...(!['purchase_orders', 'sales_orders'].includes(resourceName) ? [warehousesQuery] : []),
+    ...(['reorder_rules', 'purchase_orders'].includes(resourceName) ? [suppliersQuery] : []),
+  ]);
   const operationsResource = $derived(isOperationsResource(resourceName) ? resourceName : 'stock_movements');
 
   function isOperationsResource(name: string): name is OperationsResource {
@@ -173,6 +185,7 @@
 
   function syncView(): void {
     activeView = readHashView('default');
+    showRecords = readHashParam('records') === '1';
   }
 </script>
 
@@ -198,6 +211,7 @@
 >
   {#if hasError}
     <DataState state="error" title={isZh ? '运营数据加载失败' : 'Unable to load operations data'} />
+    <Button variant="outline" onclick={() => void query.refetch()}>{isZh ? '重试' : 'Retry'}</Button>
   {:else if isLoading}
     <DataState state="loading" title={isZh ? '正在加载运营数据' : 'Loading operations data'} />
   {:else if operationsResource === 'stock_movements'}
@@ -366,6 +380,21 @@
     </section>
   {/if}
 
+  {#if !hasError && !isLoading}
+    {#if relatedQueries.some(item => item.isError)}
+      <p role="alert">{isZh ? '部分关联资料不可用，当前单据仍可处理。' : 'Some related data is unavailable. Current records remain available.'} <Button variant="outline" onclick={() => relatedQueries.forEach(item => { if (item.isError) void item.refetch(); })}>{isZh ? '重试关联资料' : 'Retry related data'}</Button></p>
+    {/if}
+    <section class="divide-y border-y" aria-label={isZh ? '单据处理' : 'Record actions'}>
+      {#each rawRows as row (String(row.id))}
+        <div class="flex flex-wrap items-center justify-between gap-3 py-3">
+          <span class="text-sm">{String(row['orderNumber'] ?? row['transferNumber'] ?? row['countNumber'] ?? row['adjustmentNumber'] ?? row['id'])}</span>
+          <WorkspaceRecordLinks resource={resourceName} id={String(row.id)} />
+        </div>
+      {:else}
+        <DataState state="empty" title={isZh ? '暂无记录，可新建第一条记录' : 'No records. Create the first record.'} />
+      {/each}
+    </section>
+  {/if}
   {#if !hasError && !isLoading && showRecords}
     <section class="space-y-3" data-operations-table>
       <SectionHeader title={isZh ? '完整记录' : 'All records'} description={isZh ? '保留 svadmin 的筛选、排序、新建、编辑、详情和删除流程。' : 'Keep the complete svadmin filter, sort, create, edit, show, and delete workflow.'} />

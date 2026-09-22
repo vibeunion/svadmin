@@ -161,9 +161,9 @@
     /** 显式允许唯一的远程默认视图在无 URL/个人活动视图时初始化页面。 */
     applyRemoteDefaultView?: boolean;
     /** 提供任务名后按当前筛选/排序提交全量导出；未提供时仍导出当前已加载页。 */
-    exportTaskName?: string | undefined;
-    exportTaskProvider?: TaskProvider | undefined;
-    exportTaskIdempotencyKey?: string | undefined;
+    exportTaskName?: string;
+    exportTaskProvider?: TaskProvider;
+    exportTaskIdempotencyKey?: string;
     exportFormat?: ExportFormat;
     exportMaxItemCount?: number;
   }
@@ -1843,10 +1843,8 @@
             <ExportButton
               resource={resourceName}
               taskName={exportTaskName}
-              {...(exportTaskProvider === undefined ? {} : { taskProvider: exportTaskProvider })}
-              {...(exportTaskIdempotencyKey === undefined ? {} : { taskIdempotencyKey: exportTaskIdempotencyKey })}
+              {...definedOptions({ taskProvider: exportTaskProvider, taskIdempotencyKey: exportTaskIdempotencyKey, maxItemCount: exportMaxItemCount })}
               format={exportFormat}
-              {...(exportMaxItemCount === undefined ? {} : { maxItemCount: exportMaxItemCount })}
               filters={activeFilters}
               sorters={sorters}
               accessControl={{ enabled: acEnabled, hideIfUnauthorized: true }}
@@ -1997,10 +1995,8 @@
           <ExportButton
             resource={resourceName}
             taskName={exportTaskName}
-            {...(exportTaskProvider === undefined ? {} : { taskProvider: exportTaskProvider })}
-            {...(exportTaskIdempotencyKey === undefined ? {} : { taskIdempotencyKey: exportTaskIdempotencyKey })}
+            {...definedOptions({ taskProvider: exportTaskProvider, taskIdempotencyKey: exportTaskIdempotencyKey, maxItemCount: exportMaxItemCount })}
             format={exportFormat}
-            {...(exportMaxItemCount === undefined ? {} : { maxItemCount: exportMaxItemCount })}
             filters={activeFilters}
             sorters={sorters}
             hideText

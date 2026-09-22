@@ -2,7 +2,7 @@
 import { mount, tick, unmount } from 'svelte';
 import { afterEach, expect, it, vi } from 'vitest';
 import { requireValue } from '../../scripts/test-assertions';
-import CaseWorkspacePage from '../src/pages/CaseWorkspacePage.svelte';
+import CaseWorkspacePage from '../src/features/case/CaseWorkspacePage.svelte';
 
 vi.mock('@svadmin/core/i18n', () => ({
   useTranslation: () => ({ locale: 'en', t: (key: string) => key }),

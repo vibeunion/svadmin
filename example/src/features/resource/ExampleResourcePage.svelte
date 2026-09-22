@@ -1,6 +1,7 @@
 <script lang="ts">
   import { demoRendering } from '../../resource-rendering';
   import { definedOptions } from '@svadmin/core/options';
+
   import { getResource } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { ResourceOperationsPage } from '@svadmin/ui';
@@ -19,7 +20,6 @@
   } from '@lucide/svelte';
   import { readHashView } from '../../utils/hashView';
   import { resolveApplicationLayout, type SpecializedApplicationLayout } from '../../applicationLayouts';
-  import { type DemoResource } from '../../resource-schemas';
 
   const i18n = useTranslation();
 
@@ -43,7 +43,7 @@
     highlights: Array<{ title: string; description?: string; meta?: string; badge?: string }>;
   }
 
-  let { resourceName }: { resourceName: DemoResource } = $props();
+  let { resourceName }: { resourceName: string } = $props();
   let activeView = $state(readHashView('default'));
 
   const locale = $derived(i18n.locale);

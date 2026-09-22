@@ -24,8 +24,9 @@
     update: async () => ({ data: {} }),
     deleteOne: async () => ({ data: {} }),
   };
+  const resources: ResourceDefinition[] = [];
   provideAdminContext(definedReactiveOptions({
-    dataProvider, resources: [] as ResourceDefinition[],
+    dataProvider, resources,
     get taskProvider() { return provider; },
     get tenant() { return { tenantId: tenant }; },
     get accessControlProvider() { return access; },

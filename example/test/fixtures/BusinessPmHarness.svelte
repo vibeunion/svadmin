@@ -4,15 +4,15 @@
   import { createResources } from '../../src/resources';
   import { inMemoryDataProvider } from '../../src/providers/inMemoryDb';
   import { createInventoryChatProvider } from '../../src/providers/inventoryAssistant';
-  import TodoWorkspacePage from '../../src/pages/TodoWorkspacePage.svelte';
-  import MailWorkspacePage from '../../src/pages/MailWorkspacePage.svelte';
-  import CrmDashboardPage from '../../src/pages/CrmDashboardPage.svelte';
-  import DomainWorkspacePage from '../../src/pages/DomainWorkspacePage.svelte';
-  import AiWorkspacePage from '../../src/pages/AiWorkspacePage.svelte';
-  import CalendarWorkspacePage from '../../src/pages/CalendarWorkspacePage.svelte';
-  import RealEstateWorkspacePage from '../../src/pages/RealEstateWorkspacePage.svelte';
-  import UserManagementPage from '../../src/pages/UserManagementPage.svelte';
-  import OperationsWorkspacePage from '../../src/pages/OperationsWorkspacePage.svelte';
+  import TodoWorkspacePage from '../../src/features/planning/TodoWorkspacePage.svelte';
+  import MailWorkspacePage from '../../src/features/mail/MailWorkspacePage.svelte';
+  import CrmDashboardPage from '../../src/features/crm/CrmDashboardPage.svelte';
+  import DomainWorkspacePage from '../../src/features/domain/DomainWorkspacePage.svelte';
+  import AiWorkspacePage from '../../src/features/ai/AiWorkspacePage.svelte';
+  import CalendarWorkspacePage from '../../src/features/calendar/CalendarWorkspacePage.svelte';
+  import RealEstateWorkspacePage from '../../src/features/property/RealEstateWorkspacePage.svelte';
+  import UserManagementPage from '../../src/features/people/UserManagementPage.svelte';
+  import OperationsWorkspacePage from '../../src/features/operations/OperationsWorkspacePage.svelte';
 
   let { resourceName }: { resourceName: string } = $props();
   const resources = createResources('en');

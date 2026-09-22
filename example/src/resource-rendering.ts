@@ -60,16 +60,12 @@ export const demoRenderers = Object.freeze({
 } satisfies { [Name in DemoResource]: ResourceRendering });
 
 /** 只有动态路由入口擦除类型；具体业务视图使用 demoRenderers.<resource>。 */
-export function demoRendering(name: DemoResource): ResourceRendering;
-export function demoRendering(name: string): ResourceRendering;
 export function demoRendering(name: string): ResourceRendering {
   if (!isDemoResource(name)) throw new TypeError(`Unknown rendering resource: ${name}`);
   return demoRenderers[name];
 }
 
 /** 只在地址栏入口解析字符串；原生详情组件和抽屉继续严格校验已有身份。 */
-export function demoRouteId(name: DemoResource, id: string | number | undefined): string | number;
-export function demoRouteId(name: string, id: string | number | undefined): string | number;
 export function demoRouteId(name: string, id: string | number | undefined): string | number {
   const contract = demoRendering(name).resource;
   return typeof id === 'string' ? parseContractRouteId(contract, id) : parseContractId(contract, id);

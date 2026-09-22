@@ -18,11 +18,6 @@ vi.mock('../src/features/operations/OperationsWorkspacePage.svelte', async () =>
   return { default: page.default };
 });
 
-vi.mock('../src/features/catalog/ProductsPage.svelte', async () => {
-  const page = await import('./fixtures/LazyResourceProductsDouble.svelte');
-  return { default: page.default };
-});
-
 vi.mock('../src/features/domain/DomainWorkspacePage.svelte', async () => {
   const page = await import('./fixtures/LazyResourceDomainDouble.svelte');
   return { default: page.default };
@@ -53,6 +48,7 @@ describe('LazyResourcePage', () => {
   });
 
   it.each([
+    'products',
     'skus',
     'categories',
     'suppliers',
@@ -77,15 +73,6 @@ describe('LazyResourcePage', () => {
     const page = mount(LazyResourcePage, { target, props: { resourceName } });
 
     await vi.waitFor(() => expect(target.textContent).toContain(`domain:${resourceName}`));
-
-    await unmount(page);
-  });
-
-  it('loads the catalog feature for products', async () => {
-    const target = document.createElement('div');
-    const page = mount(LazyResourcePage, { target, props: { resourceName: 'products' } });
-
-    await vi.waitFor(() => expect(target.textContent).toContain('products:products'));
 
     await unmount(page);
   });

@@ -5,8 +5,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Harness from './fixtures/BusinessPmHarness.svelte';
 import { inMemoryDataProvider } from '../src/providers/inMemoryDb';
 import { demoRenderers } from '../src/resource-rendering';
-import { localDateKey, matchesTodoView, mondayOffset } from '../src/pages/workspace-policy';
-import { recordLink } from '../src/pages/workspace-links';
+import { localDateKey, matchesTodoView, mondayOffset } from '../src/workspace/workspace-policy';
+import { recordLink } from '../src/workspace/workspace-links';
 import type { BaseRecord, DataProvider } from '@svadmin/core';
 
 let mounted: ReturnType<typeof mount> | undefined;

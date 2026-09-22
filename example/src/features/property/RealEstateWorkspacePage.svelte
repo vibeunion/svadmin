@@ -1,23 +1,30 @@
 <script lang="ts">
-  import { demoRenderers } from '../../resource-rendering';
-  import { demoContracts } from '../../resource-contracts';
-
+  import { onMount } from 'svelte';
   import { useList } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
-  import { Badge, Button, ContentPageHeader, ContentPageShell, FilterToolbar, MetricBlock } from '@svadmin/ui';
-  import * as Card from '@svadmin/ui/components/ui/card/index.js';
-  import { Building2, CalendarClock, Heart, MapPin, SlidersHorizontal, UserRoundCheck } from '@lucide/svelte';
+  import { Badge, Button, ContentPageHeader, ContentPageShell, MetricBlock } from '@svadmin/ui';
+  import { Heart, Plus } from '@lucide/svelte';
+  import { demoContracts } from '../../resource-contracts';
+  import { demoRenderers } from '../../resource-rendering';
   import { readHashView } from '../../utils/hashView';
-  import type { ResourcesForFeature } from '../resource-registry';
+  import { localDateKey } from '../../workspace/workspace-policy';
+  import { readSavedIds, saveIds } from '../../workspace/workspace-session';
+  import WorkspaceQueryState from '../../workspace/WorkspaceQueryState.svelte';
+  import WorkspaceRecordLinks from '../../workspace/WorkspaceRecordLinks.svelte';
 
+  let { resourceName = 'properties' } = $props<{ resourceName?: string }>();
   const i18n = useTranslation();
-
-  let { resourceName = 'properties' } = $props<{ resourceName?: ResourcesForFeature<'property'> }>();
-  let activeView = $state(readHashView('portfolio'));
-  let searchQuery = $state('');
-
-  const locale = $derived(i18n.locale);
-  const isZh = $derived(locale === 'zh-CN');
+  const isZh = $derived(i18n.locale === 'zh-CN');
+  let view = $state(readHashView('portfolio'));
+  let search = $state('');
+  let market = $state('');
+  let assetType = $state('');
+  let status = $state('');
+  let maximumPrice = $state<number | undefined>();
+  let saved = $state<number[]>([]);
+  let feedback = $state('');
+  const savedKey = 'svadmin-example-property-favorites';
+  onMount(() => { saved = readSavedIds(savedKey); });
   const propertiesQuery = useList({ resource: demoContracts.properties, pagination: { mode: 'off' } });
   const agentsQuery = useList({ resource: demoContracts.property_agents, pagination: { mode: 'off' } });
   const leadsQuery = useList({ resource: demoContracts.property_leads, pagination: { mode: 'off' } });
@@ -26,279 +33,93 @@
   const agents = $derived(demoRenderers.property_agents.records(agentsQuery.data?.data ?? []));
   const leads = $derived(demoRenderers.property_leads.records(leadsQuery.data?.data ?? []));
   const showings = $derived(demoRenderers.property_showings.records(showingsQuery.data?.data ?? []));
-  const filteredProperties = $derived(searchQuery.trim() ? properties.filter((property) => `${property.propertyName} ${property.market} ${property.assetType}`.toLowerCase().includes(searchQuery.trim().toLowerCase())) : properties);
-  const showingCount = $derived(showings.length);
-  const avgOccupancy = $derived(properties.length ? Math.round(properties.reduce((sum, property) => sum + property.occupancy, 0) / properties.length) : 0);
-  const activeResource = $derived((['properties', 'property_agents', 'property_leads', 'property_showings'] as const).find(name => name === resourceName) ?? 'properties');
-  const resourceDefaultView = $derived(({ properties: 'portfolio', property_agents: 'advisors', property_leads: 'leads', property_showings: 'tours' } as const)[activeResource]);
-  const normalizedView = $derived((['buy', 'rent', 'sell', 'commercial', 'saved', 'map', 'filters', 'advisors', 'leads', 'tours'] as const).find(view => view === activeView) ?? resourceDefaultView);
-  const marketTabs = $derived([
-    { key: 'buy', label: isZh ? '购买' : 'Buy', href: '#/properties?view=buy' },
-    { key: 'rent', label: isZh ? '租赁' : 'Rent', href: '#/properties?view=rent' },
-    { key: 'sell', label: isZh ? '出售' : 'Sell', href: '#/properties?view=sell' },
-    { key: 'commercial', label: isZh ? '商业' : 'Commercial', href: '#/properties?view=commercial' },
-    { key: 'saved', label: isZh ? '已收藏' : 'Saved', href: '#/property_leads?view=saved' },
-  ]);
-  const filterChips = $derived([
-    { label: isZh ? '类型' : 'Type', value: isZh ? '多户 / 办公 / 工业' : 'multifamily / office / industrial' },
-    { label: isZh ? '状态' : 'Condition', value: isZh ? '挂牌 / 运营 / 翻新' : 'listed / active / renovation' },
-    { label: isZh ? '位置' : 'Where', value: 'San Diego, Austin, Portland' },
-    { label: isZh ? '价格' : 'Price', value: '$19M - $34M' },
-    { label: isZh ? '时间' : 'When', value: isZh ? '本周看房' : 'this week tours' },
-  ]);
-
-  function money(value: number): string {
-    if (Math.abs(value) >= 1_000_000) return `$${Number((value / 1_000_000).toFixed(1))}M`;
-    if (Math.abs(value) >= 1_000) return `$${Number((value / 1_000).toFixed(1))}K`;
-    return `$${value}`;
+  const navigation = $derived([
+    { resource: 'properties', title: isZh ? '房源' : 'Properties', query: propertiesQuery },
+    { resource: 'property_agents', title: isZh ? '顾问' : 'Agents', query: agentsQuery },
+    { resource: 'property_leads', title: isZh ? '线索' : 'Leads', query: leadsQuery },
+    { resource: 'property_showings', title: isZh ? '看房' : 'Showings', query: showingsQuery },
+  ] as const);
+  const isPropertyView = $derived(resourceName === 'properties' || view === 'saved');
+  const current = $derived(isPropertyView ? navigation[0] : navigation.find(item => item.resource === resourceName) ?? navigation[0]);
+  const matches = (text: string) => text.toLowerCase().includes(search.trim().toLowerCase());
+  const visibleProperties = $derived(properties.filter(item => matches(`${item.propertyName} ${item.market} ${item.assetType}`)
+    && (!market || item.market === market) && (!assetType || item.assetType === assetType)
+    && (!status || item.status === status) && (maximumPrice === undefined || item.askingPrice <= maximumPrice)
+    && (view !== 'saved' || saved.includes(item.id))
+    && (!['buy', 'sell'].includes(view) || item.status === 'listed')
+    && (view !== 'rent' || item.occupancy < 100)
+    && (view !== 'commercial' || ['office', 'industrial', 'retail', 'mixed_use'].includes(item.assetType))));
+  const visibleAgents = $derived(agents.filter(item => matches(`${item.name} ${item.territory}`)));
+  const visibleLeads = $derived(leads.filter(item => matches(`${item.leadName} ${item.notes}`)));
+  const visibleShowings = $derived(showings.filter(item => matches(`${item.showingNumber} ${item.notes}`)));
+  const visibleCount = $derived(isPropertyView ? visibleProperties.length : resourceName === 'property_agents' ? visibleAgents.length : resourceName === 'property_leads' ? visibleLeads.length : visibleShowings.length);
+  const money = (value: number) => new Intl.NumberFormat(isZh ? 'zh-CN' : 'en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+  function toggleSaved(id: number): void {
+    const next = saved.includes(id) ? saved.filter(value => value !== id) : [...saved, id];
+    if (!saveIds(savedKey, next)) { feedback = isZh ? '收藏未保存，请检查浏览器存储设置后重试。' : 'Favorites were not saved. Check browser storage and retry.'; return; }
+    saved = next; feedback = '';
   }
-  function statusLabel(status: string): string {
-    if (!isZh) return status.replace('_', ' ');
-    if (status === 'listed') return '挂牌';
-    if (status === 'active') return '运营';
-    if (status === 'renovation') return '翻新';
-    if (status === 'under_contract') return '签约中';
-    if (status === 'tour_scheduled') return '已约看房';
-    if (status === 'qualified') return '已合格';
-    if (status === 'new') return '新线索';
-    if (status === 'offer') return '报价';
-    if (status === 'scheduled') return '已排期';
-    if (status === 'completed') return '已完成';
-    if (status === 'on_leave') return '休假';
-    return status;
-  }
-
-  const viewCopy = $derived.by(() => {
-    const copies = {
-      portfolio: {
-        badge: isZh ? '资产运营' : 'Real Estate',
-        title: isZh ? '资产搜索与看房工作台' : 'Property Search and Tour Workspace',
-        description: isZh ? '把买/租筛选、资产卡片、地图态势和线索跟进放到一个页面。' : 'Combine buy/rent filters, property cards, map context, and lead follow-up.',
-        action: isZh ? '新增看房' : 'New tour',
-      },
-      buy: {
-        badge: isZh ? '购买' : 'Buy',
-        title: isZh ? '购买资产筛选' : 'Buy-side Property Search',
-        description: isZh ? '聚焦可购买资产、预算窗口、出租率和投资回报信号。' : 'Focus on purchasable assets, budget windows, occupancy, and return signals.',
-        action: isZh ? '新增购买线索' : 'New buyer lead',
-      },
-      rent: {
-        badge: isZh ? '租赁' : 'Rent',
-        title: isZh ? '租赁需求工作台' : 'Rental Demand Workspace',
-        description: isZh ? '按区域、预算和看房日程跟进租赁客户。' : 'Track rental clients by region, budget, and tour schedule.',
-        action: isZh ? '安排租赁看房' : 'Schedule rental tour',
-      },
-      sell: {
-        badge: isZh ? '出售' : 'Sell',
-        title: isZh ? '出售委托视图' : 'Seller Listing View',
-        description: isZh ? '关注挂牌状态、报价、买方反馈和成交风险。' : 'Watch listing state, offers, buyer feedback, and closing risk.',
-        action: isZh ? '新增出售委托' : 'New seller listing',
-      },
-      commercial: {
-        badge: isZh ? '商业' : 'Commercial',
-        title: isZh ? '商业资产雷达' : 'Commercial Asset Radar',
-        description: isZh ? '按办公、工业、多户和租约状态筛选商业机会。' : 'Filter commercial opportunities by office, industrial, multifamily, and lease status.',
-        action: isZh ? '新增商业机会' : 'New commercial lead',
-      },
-      saved: {
-        badge: isZh ? '已收藏' : 'Saved',
-        title: isZh ? '收藏资产与线索' : 'Saved Properties and Leads',
-        description: isZh ? '复盘收藏资产、线索预算和下一次联系计划。' : 'Review saved assets, lead budgets, and next-contact plans.',
-        action: isZh ? '复盘收藏' : 'Review saved items',
-      },
-      map: {
-        badge: isZh ? '地图视图' : 'Map View',
-        title: isZh ? '地图态势视图' : 'Map Context View',
-        description: isZh ? '用区域热区、资产点位和看房节奏判断下一步动作。' : 'Use market hot spots, property pins, and tour cadence to decide next actions.',
-        action: isZh ? '打开地图筛选' : 'Open map filters',
-      },
-      filters: {
-        badge: isZh ? '筛选器' : 'Filters',
-        title: isZh ? '资产筛选器' : 'Property Filters',
-        description: isZh ? '按类型、状态、位置、价格和时间窗口组合筛选条件。' : 'Combine type, condition, location, price, and timing filters.',
-        action: isZh ? '保存筛选' : 'Save filters',
-      },
-      advisors: {
-        badge: isZh ? '资产顾问' : 'Advisors',
-        title: isZh ? '顾问区域与容量' : 'Advisor Territory and Capacity',
-        description: isZh ? '按区域、状态和容量分数分配新线索与看房。' : 'Assign new leads and tours by territory, status, and capacity score.',
-        action: isZh ? '新增顾问' : 'New advisor',
-      },
-      leads: {
-        badge: isZh ? '资产线索' : 'Property Leads',
-        title: isZh ? '资产需求与预算队列' : 'Property Demand and Budget Queue',
-        description: isZh ? '按预算、阶段和后续动作推进资产线索。' : 'Advance property leads by budget, stage, and next action.',
-        action: isZh ? '新增线索' : 'New lead',
-      },
-      tours: {
-        badge: isZh ? '看房排期' : 'Showings',
-        title: isZh ? '看房日程与反馈' : 'Tour Schedule and Feedback',
-        description: isZh ? '按日期、状态和反馈分数协调看房履约。' : 'Coordinate tours by date, state, and feedback score.',
-        action: isZh ? '新增看房' : 'New showing',
-      },
-    } satisfies Record<string, { badge: string; title: string; description: string; action: string }>;
-    return copies[normalizedView];
-  });
-  const resourceMetrics = $derived.by((): [string, string | number, string][] => {
-    if (activeResource === 'property_agents') return [
-      [isZh ? '顾问' : 'Advisors', agents.length, isZh ? '当前团队' : 'Current team'],
-      [isZh ? '可接单' : 'Available', agents.filter((agent) => agent.status === 'active').length, isZh ? '活跃状态' : 'Active status'],
-      [isZh ? '平均容量' : 'Avg capacity', agents.length ? Math.round(agents.reduce((sum, agent) => sum + agent.capacityScore, 0) / agents.length) : 0, isZh ? '负载分数' : 'Load score'],
-      [isZh ? '覆盖区域' : 'Territories', new Set(agents.map((agent) => agent.territory)).size, isZh ? '服务市场' : 'Service markets'],
-    ];
-    if (activeResource === 'property_leads') return [
-      [isZh ? '线索' : 'Leads', leads.length, isZh ? '全部需求' : 'All demand'],
-      [isZh ? '预算总额' : 'Total budget', money(leads.reduce((sum, lead) => sum + lead.budget, 0)), isZh ? '需求规模' : 'Demand value'],
-      [isZh ? '已合格' : 'Qualified', leads.filter((lead) => lead.status === 'qualified').length, isZh ? '可推进线索' : 'Ready to advance'],
-      [isZh ? '新线索' : 'New', leads.filter((lead) => lead.status === 'new').length, isZh ? '需要首次触达' : 'Needs first touch'],
-    ];
-    if (activeResource === 'property_showings') return [
-      [isZh ? '看房' : 'Tours', showings.length, isZh ? '全部排期' : 'All schedules'],
-      [isZh ? '已排期' : 'Scheduled', showings.filter((showing) => showing.status === 'scheduled').length, isZh ? '等待执行' : 'Awaiting tour'],
-      [isZh ? '已完成' : 'Completed', showings.filter((showing) => showing.status === 'completed').length, isZh ? '已有结果' : 'Result available'],
-      [isZh ? '平均反馈' : 'Avg feedback', showings.filter((showing) => showing.feedbackScore).length ? (showings.reduce((sum, showing) => sum + (showing.feedbackScore ?? 0), 0) / showings.filter((showing) => showing.feedbackScore).length).toFixed(1) : '—', isZh ? '满分 10' : 'Out of 10'],
-    ];
-    return [
-      [isZh ? '资产' : 'Assets', properties.length, isZh ? '当前组合' : 'Current portfolio'],
-      [isZh ? '挂牌' : 'Listed', properties.filter((property) => property.status === 'listed').length, isZh ? '市场供应' : 'Market supply'],
-      [isZh ? '出租率' : 'Occupancy', `${avgOccupancy}%`, isZh ? '组合平均值' : 'Portfolio average'],
-      [isZh ? '组合价值' : 'Portfolio value', money(properties.reduce((sum, property) => sum + property.askingPrice, 0)), isZh ? '挂牌价格合计' : 'Combined asking price'],
-    ];
-  });
-
-  function syncView(): void {
-    activeView = readHashView('portfolio');
-  }
+  function resetFilters(): void { search = ''; market = ''; assetType = ''; status = ''; maximumPrice = undefined; }
 </script>
 
-<svelte:window onhashchange={syncView} onpopstate={syncView} />
-
-{#snippet headerActions()}
-  <a href="#/properties?view=filters"><Button variant="outline" size="sm"><SlidersHorizontal class="h-4 w-4" />{isZh ? '筛选' : 'Filters'}</Button></a>
-  <Button size="sm">{viewCopy.action}</Button>
+<svelte:window onhashchange={() => view = readHashView('portfolio')} onpopstate={() => view = readHashView('portfolio')} />
+{#snippet actions()}
+  <Button onclick={() => window.location.hash = `/${current.resource}/create`}><Plus class="size-4" />{isZh ? '新建' : 'Create'} {current.title}</Button>
 {/snippet}
 
-<div data-app-page="real-estate-workspace" data-property-view={normalizedView} data-resource-name={resourceName}>
-<ContentPageShell pageId="real-estate-workspace" width="wide">
-  <ContentPageHeader eyebrow={viewCopy.badge} title={viewCopy.title} description={viewCopy.description} actions={headerActions} />
-  <section class="grid grid-cols-2 gap-3 xl:grid-cols-4" data-property-resource-metrics>
-    {#each resourceMetrics as metric (String(metric[0]))}
-      <MetricBlock label={String(metric[0])} value={metric[1]} detail={String(metric[2])} />
-    {/each}
-  </section>
-  {#if activeResource === 'property_agents'}
-    <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-3" data-property-agent-layout>
-      {#each agents as agent (agent.id)}
-        <article class="rounded-lg border bg-card p-4"><div class="flex items-start justify-between gap-3"><div class="flex items-center gap-3"><UserRoundCheck class="size-5 text-muted-foreground" /><div><p class="text-sm font-semibold">{agent.name}</p><p class="mt-1 text-xs text-muted-foreground">{agent.territory}</p></div></div><Badge variant="outline">{statusLabel(agent.status)}</Badge></div><div class="mt-5 flex items-center justify-between text-xs text-muted-foreground"><span>{isZh ? '可用容量' : 'Available capacity'}</span><span>{agent.capacityScore}%</span></div><div class="mt-2 h-2 rounded-full bg-muted"><div class="h-2 rounded-full bg-primary" style:width={`${agent.capacityScore}%`}></div></div><p class="mt-4 text-sm text-muted-foreground">{agent.notes}</p></article>
-      {/each}
-    </section>
-  {:else if activeResource === 'property_leads'}
-    <section class="grid gap-5 xl:grid-cols-[minmax(0,1.3fr)_18rem]" data-property-lead-layout><div class="divide-y divide-border rounded-lg border bg-card">{#each leads as lead (lead.id)}<article class="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"><div><p class="text-sm font-semibold">{lead.leadName}</p><p class="mt-1 text-xs text-muted-foreground">{isZh ? '需求预算' : 'Demand budget'} · {money(lead.budget)}</p></div><Badge variant="outline">{statusLabel(lead.status)}</Badge></article>{/each}</div><aside class="rounded-lg border bg-card p-4"><p class="text-sm font-semibold">{isZh ? '线索阶段' : 'Lead stages'}</p><div class="mt-4 space-y-3">{#each ['new', 'qualified', 'offer'] as status (status)}<div class="flex items-center justify-between"><span class="text-sm text-muted-foreground">{statusLabel(status)}</span><Badge variant="outline">{leads.filter((lead) => lead.status === status).length}</Badge></div>{/each}</div></aside></section>
-  {:else if activeResource === 'property_showings'}
-    <section class="rounded-lg border bg-card" data-property-showing-layout><div class="border-b border-border p-4"><p class="text-sm font-semibold">{isZh ? '看房执行队列' : 'Tour execution queue'}</p></div><div class="divide-y divide-border">{#each showings as showing (showing.id)}<article class="grid gap-3 p-4 sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center"><CalendarClock class="size-5 text-muted-foreground" /><div><p class="text-sm font-semibold">{showing.showingNumber}</p><p class="mt-1 text-xs text-muted-foreground">{showing.scheduledDate} · {showing.notes}</p></div><div class="flex items-center gap-2"><Badge variant="outline">{statusLabel(showing.status)}</Badge>{#if showing.feedbackScore}<Badge>{showing.feedbackScore}/10</Badge>{/if}</div></article>{/each}</div></section>
-  {:else}
-  <section class="space-y-3">
-    <div class="flex flex-wrap items-center gap-2">
-      {#each marketTabs as tab (tab.key)}
-        <a href={tab.href} class={`rounded-md border px-3 py-1.5 text-sm transition ${normalizedView === tab.key ? 'border-primary bg-primary text-primary-foreground' : 'bg-background text-muted-foreground hover:bg-muted/50 hover:text-foreground'}`}>{tab.label}</a>
-      {/each}
-      <a href="#/properties?view=map" class={`ml-auto rounded-md border px-3 py-1.5 text-sm ${normalizedView === 'map' ? 'border-primary bg-primary text-primary-foreground' : 'bg-background text-muted-foreground'}`}>{isZh ? '地图视图' : 'Map view'}</a>
-    </div>
-    <FilterToolbar bind:query={searchQuery} placeholder={isZh ? '搜索城市、资产或类型' : 'Search city, asset, or type'} clearLabel={isZh ? '清除搜索' : 'Clear search'} />
-    <div class="grid gap-2 md:grid-cols-5">
-      {#each filterChips as chip (chip.label)}
-        <div class="rounded-lg border bg-card p-3 shadow-sm">
-          <p class="text-xs font-medium text-muted-foreground">{chip.label}</p>
-          <p class="mt-1 truncate text-sm font-medium">{chip.value}</p>
-        </div>
-      {/each}
-    </div>
-  </section>
-
-  <section class="grid gap-4 xl:grid-cols-[1fr_0.42fr]">
-    <div class="grid gap-4 md:grid-cols-2">
-      {#each filteredProperties as property (property.id)}
-        <article class="overflow-hidden rounded-lg border bg-card shadow-sm">
-          <div class="flex items-center justify-between border-b border-border bg-muted/20 px-4 py-3"><span class="flex items-center gap-2 text-sm font-medium"><Building2 class="h-4 w-4 text-primary" />{property.assetType}</span><span class="text-xs text-muted-foreground">{property.market}</span></div>
-          <div class="space-y-3 p-4">
-            <div class="flex items-start justify-between gap-3"><div><h2 class="font-semibold">{property.propertyName}</h2><p class="mt-1 flex items-center gap-1 text-xs text-muted-foreground"><MapPin class="h-3.5 w-3.5" />{property.market} · {property.assetType}</p></div><Button variant="outline" size="icon"><Heart class="h-4 w-4" /></Button></div>
-            <div class="flex items-center justify-between gap-3"><p class="text-xl font-semibold">{money(property.askingPrice)}</p><Badge variant="outline">{statusLabel(property.status)}</Badge></div>
-            <p class="text-xs text-muted-foreground">{property.units} {isZh ? '个单元' : 'units'} · {property.occupancy}% {isZh ? '出租率' : 'occupied'}</p>
-          </div>
-        </article>
-      {/each}
-    </div>
-    <div class="grid gap-4 content-start">
-      <Card.Root class="overflow-hidden">
-        <Card.Header>
-          <Card.Title class="text-base">{isZh ? '地图态势' : 'Map Context'}</Card.Title>
-          <Card.Description>{isZh ? '用可读 pin、区域热度和看房路线模拟地图工作台。' : 'A map-like workspace with readable pins, heat zones, and tour routes.'}</Card.Description>
-        </Card.Header>
-        <Card.Content class="space-y-3">
-          <div class="flex flex-wrap gap-2">
-            <Badge variant="outline">{isZh ? '挂牌' : 'Listed'}</Badge>
-            <Badge variant="outline">{isZh ? '线索热区' : 'Lead heat'}</Badge>
-            <Badge variant="outline">{isZh ? '今日路线' : 'Today route'}</Badge>
-          </div>
-          <div class="relative mx-auto h-72 w-full max-w-md overflow-hidden rounded-lg border bg-[linear-gradient(90deg,hsl(var(--border))_1px,transparent_1px),linear-gradient(0deg,hsl(var(--border))_1px,transparent_1px),radial-gradient(circle_at_30%_25%,hsl(var(--primary)/0.22),transparent_22%),radial-gradient(circle_at_70%_55%,hsl(var(--success)/0.18),transparent_18%),linear-gradient(135deg,hsl(var(--muted)),hsl(var(--background)))] bg-[size:44px_44px,44px_44px,auto,auto,auto]">
-            <div class="absolute left-[20%] top-[18%] rounded-lg border bg-card/95 px-3 py-2 text-xs shadow-sm">
-              <p class="font-semibold">{isZh ? '南湾资产' : 'South Bay'}</p>
-              <p class="text-muted-foreground">$24M</p>
-            </div>
-            <div class="absolute right-[12%] top-[42%] rounded-lg border bg-card/95 px-3 py-2 text-xs shadow-sm">
-              <p class="font-semibold">{isZh ? '租赁热区' : 'Rent heat'}</p>
-              <p class="text-muted-foreground">{leads.length} {isZh ? '线索' : 'leads'}</p>
-            </div>
-            <div class="absolute bottom-[13%] left-[34%] rounded-lg border bg-card/95 px-3 py-2 text-xs shadow-sm">
-              <p class="font-semibold">{isZh ? '今日看房' : 'Tours today'}</p>
-              <p class="text-muted-foreground">{showingCount} {isZh ? '条路线' : 'routes'}</p>
-            </div>
-            <span class="absolute left-[32%] top-[28%] h-4 w-4 rounded-full border-2 border-background bg-primary shadow"></span>
-            <span class="absolute left-[68%] top-[54%] h-4 w-4 rounded-full border-2 border-background bg-success shadow"></span>
-            <span class="absolute left-[48%] top-[72%] h-4 w-4 rounded-full border-2 border-background bg-warning shadow"></span>
-            <svg class="pointer-events-none absolute inset-0 h-full w-full text-primary/45" viewBox="0 0 400 288" aria-hidden="true">
-              <path d="M128 82 C180 116 204 178 272 156 C304 148 280 214 192 208" fill="none" stroke="currentColor" stroke-width="3" stroke-dasharray="8 8" />
-            </svg>
-          </div>
-        </Card.Content>
-      </Card.Root>
-      <Card.Root><Card.Header><Card.Title class="text-base">{isZh ? '活跃线索' : 'Active Leads'}</Card.Title></Card.Header><Card.Content class="space-y-3">{#each leads.slice(0, 3) as lead (lead.id)}<div class="rounded-lg border p-3"><div class="flex items-center justify-between"><p class="font-semibold">{lead.leadName}</p><Badge>{money(lead.budget)}</Badge></div><p class="mt-1 text-xs text-muted-foreground">{statusLabel(lead.status)}</p></div>{/each}</Card.Content></Card.Root>
-    </div>
-  </section>
-
-  <section class="grid gap-4 xl:grid-cols-[0.82fr_1.18fr]">
-    <Card.Root>
-      <Card.Header><Card.Title class="flex items-center gap-2 text-base"><UserRoundCheck class="h-4 w-4 text-primary" />{isZh ? '顾问负载' : 'Advisor Capacity'}</Card.Title><Card.Description>{isZh ? '按区域、状态和容量分配新线索。' : 'Route new leads by territory, status, and capacity.'}</Card.Description></Card.Header>
-      <Card.Content class="space-y-3">
-        {#each agents as agent (agent.id)}
-          <div class="rounded-lg border p-3">
-            <div class="flex items-center justify-between gap-3">
-              <div><p class="font-semibold">{agent.name}</p><p class="mt-1 text-xs text-muted-foreground">{agent.territory} · {statusLabel(agent.status)}</p></div>
-              <Badge variant="outline">{agent.capacityScore}</Badge>
-            </div>
-            <div class="mt-3 h-2 rounded-full bg-muted"><div class="h-2 rounded-full bg-primary" style:width={`${agent.capacityScore}%`}></div></div>
-          </div>
-        {/each}
-      </Card.Content>
-    </Card.Root>
-    <Card.Root>
-      <Card.Header><Card.Title class="flex items-center gap-2 text-base"><CalendarClock class="h-4 w-4 text-primary" />{isZh ? '看房日程' : 'Tour Schedule'}</Card.Title><Card.Description>{isZh ? `未来和历史看房共 ${showingCount} 条。` : `${showingCount} scheduled and historical tours.`}</Card.Description></Card.Header>
-      <Card.Content class="space-y-3">
-        {#each showings as showing (showing.id)}
-          <div class="grid gap-3 rounded-lg border p-3 md:grid-cols-[1fr_auto] md:items-center">
-            <div>
-              <p class="font-semibold">{showing.showingNumber}</p>
-              <p class="mt-1 text-xs text-muted-foreground">{showing.scheduledDate} · {showing.notes}</p>
-            </div>
-            <div class="flex items-center gap-2">
-              <Badge variant="outline">{statusLabel(showing.status)}</Badge>
-              {#if showing.feedbackScore}<Badge>{showing.feedbackScore}/10</Badge>{/if}
-            </div>
-          </div>
-        {/each}
-      </Card.Content>
-    </Card.Root>
-  </section>
-  {/if}
-</ContentPageShell>
+<div data-app-page="real-estate-workspace" data-property-view={view} data-resource-name={resourceName}>
+  <ContentPageShell pageId="real-estate-workspace" width="wide">
+    <ContentPageHeader title={current.title} actions={actions} />
+    <nav class="flex flex-wrap gap-4 border-b pb-3" aria-label={isZh ? '房产业务' : 'Property workspace'}>
+      {#each navigation as item (item.resource)}<a class="text-sm font-medium text-primary" href={`#/${item.resource}`}>{item.title}</a>{/each}
+      <a class="text-sm text-primary" href="#/properties?view=saved">{isZh ? '收藏' : 'Saved'}</a>
+      <a class="text-sm text-primary" href="#/properties?view=map">{isZh ? '区域分布' : 'Markets'}</a>
+    </nav>
+    <label class="flex flex-wrap items-center gap-3 text-sm">{isZh ? '搜索' : 'Search'}<input class="min-w-0 flex-1 rounded-md border bg-background px-3 py-2" bind:value={search} /></label>
+    {#if isPropertyView}
+      <nav class="flex flex-wrap gap-4 text-sm" aria-label={isZh ? '房源视图' : 'Property views'}>
+        <a href="#/properties" class="text-primary">{isZh ? '全部' : 'All'}</a>
+        <a href="#/properties?view=buy" class="text-primary">{isZh ? '挂牌资产' : 'Listed assets'}</a>
+        <a href="#/properties?view=rent" class="text-primary">{isZh ? '有空置资产' : 'Assets with vacancies'}</a>
+        <a href="#/properties?view=commercial" class="text-primary">{isZh ? '商业资产' : 'Commercial'}</a>
+      </nav>
+      {#if ['buy', 'sell', 'rent'].includes(view)}<p class="text-sm text-muted-foreground">{isZh ? '按挂牌状态或出租率筛选；样例未记录买卖/租赁委托类型。' : 'Filtered by listing status or occupancy. Transaction mandates are not recorded in this sample.'}</p>{/if}
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <label class="text-sm">{isZh ? '区域' : 'Market'}<select class="mt-1 w-full rounded-md border bg-background p-2" bind:value={market}><option value="">{isZh ? '全部' : 'All'}</option>{#each [...new Set(properties.map(item => item.market))] as value (value)}<option>{value}</option>{/each}</select></label>
+        <label class="text-sm">{isZh ? '类型' : 'Type'}<select class="mt-1 w-full rounded-md border bg-background p-2" bind:value={assetType}><option value="">{isZh ? '全部' : 'All'}</option>{#each [...new Set(properties.map(item => item.assetType))] as value (value)}<option>{value}</option>{/each}</select></label>
+        <label class="text-sm">{isZh ? '状态' : 'Status'}<select class="mt-1 w-full rounded-md border bg-background p-2" bind:value={status}><option value="">{isZh ? '全部' : 'All'}</option>{#each [...new Set(properties.map(item => item.status))] as value (value)}<option>{value}</option>{/each}</select></label>
+        <label class="text-sm">{isZh ? '最高价格 USD' : 'Maximum price USD'}<input type="number" min="0" class="mt-1 w-full rounded-md border bg-background p-2" bind:value={maximumPrice} /></label>
+      </div>
+      <Button variant="ghost" onclick={resetFilters}>{isZh ? '清除筛选' : 'Clear filters'}</Button>
+    {/if}
+    {#if feedback}<p role="alert">{feedback}</p>{/if}
+    <WorkspaceQueryState query={current.query} count={visibleCount}>
+      {#if isPropertyView}
+        {#if view === 'map'}
+          <section class="border-y py-4">
+            <h2 class="text-base font-semibold">{isZh ? '区域分布 · 无地理坐标' : 'Market distribution · no coordinates'}</h2>
+            <div class="mt-3 grid gap-3 sm:grid-cols-3">{#each [...new Set(visibleProperties.map(item => item.market))] as value (value)}<MetricBlock label={value} value={visibleProperties.filter(item => item.market === value).length} />{/each}</div>
+          </section>
+        {/if}
+        <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {#each visibleProperties as item (item.id)}
+            <article class="min-w-0 rounded-lg border p-4">
+              <div class="flex items-start justify-between gap-3"><h2 class="break-words text-base font-semibold">{item.propertyName}</h2><Button size="icon" variant="ghost" aria-pressed={saved.includes(item.id)} aria-label={isZh ? '收藏房源' : 'Save property'} onclick={() => toggleSaved(item.id)}><Heart class={saved.includes(item.id) ? 'size-4 fill-primary text-primary' : 'size-4'} /></Button></div>
+              <p class="mt-2 text-sm text-muted-foreground">{item.market} · {item.assetType}</p>
+              <div class="mt-3 flex flex-wrap justify-between gap-2"><strong>{money(item.askingPrice)}</strong><Badge variant="outline">{item.status}</Badge></div>
+              <p class="mt-2 text-sm">{isZh ? '出租率' : 'Occupancy'}: {item.occupancy}%</p>
+              <WorkspaceRecordLinks resource="properties" id={item.id} />
+            </article>
+          {/each}
+        </section>
+      {:else if resourceName === 'property_agents'}
+        <section class="divide-y">{#each visibleAgents as item (item.id)}<article class="py-4"><h2 class="text-base font-semibold">{item.name}</h2><p class="text-sm">{item.territory} · {item.status} · {item.capacityScore}%</p><a class="text-sm text-primary" href={`mailto:${item.email}`}>{item.email}</a><WorkspaceRecordLinks resource={resourceName} id={item.id} /></article>{/each}</section>
+      {:else if resourceName === 'property_leads'}
+        <section class="divide-y">{#each visibleLeads as item (item.id)}<article class="py-4"><h2 class="text-base font-semibold">{item.leadName}</h2><p class="text-sm">{money(item.budget)} · {item.status} · {item.targetMoveDate}</p><p class="text-sm text-muted-foreground">{item.notes}</p><WorkspaceRecordLinks resource={resourceName} id={item.id} /></article>{/each}</section>
+      {:else}
+        <MetricBlock label={isZh ? '今日看房' : 'Today’s showings'} value={showings.filter(item => item.scheduledDate.slice(0, 10) === localDateKey()).length} />
+        <section class="divide-y">{#each visibleShowings as item (item.id)}<article class="py-4"><h2 class="text-base font-semibold">{item.showingNumber}</h2><p class="text-sm">{item.scheduledDate} · {item.status}</p><p class="text-sm text-muted-foreground">{item.notes}</p><WorkspaceRecordLinks resource={resourceName} id={item.id} /></article>{/each}</section>
+      {/if}
+    </WorkspaceQueryState>
+  </ContentPageShell>
 </div>

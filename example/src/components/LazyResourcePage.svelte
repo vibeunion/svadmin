@@ -1,5 +1,4 @@
 <script module lang="ts">
-  import { loadProductsPage } from '../features/catalog/index.js';
   import { loadCalendarWorkspacePage } from '../features/calendar/index.js';
   import { loadUserManagementPage } from '../features/people/index.js';
   import { loadCrmDashboardPage } from '../features/crm/index.js';
@@ -18,7 +17,7 @@
   const loadDefaultResourcePage = loadExampleResourcePage;
 
   const resourcePageLoaders = {
-    products: loadProductsPage,
+    products: loadDomainWorkspacePage,
     case_workspace: loadCaseWorkspacePage,
     todos: loadTodoWorkspacePage,
     users: loadUserManagementPage,

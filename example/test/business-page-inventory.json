@@ -84,11 +84,11 @@
     "mode": "query-rendering"
   },
   {
-    "file": "WorkspaceQueryState.svelte",
+    "file": "workspace/WorkspaceQueryState.svelte",
     "mode": "workspace-helper"
   },
   {
-    "file": "WorkspaceRecordLinks.svelte",
+    "file": "workspace/WorkspaceRecordLinks.svelte",
     "mode": "workspace-helper"
   }
 ]

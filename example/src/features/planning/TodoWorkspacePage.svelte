@@ -5,19 +5,18 @@
   type Todo = DemoRow<'todos'>;
 
   import { useList, useUpdateMany } from '@svadmin/core';
-  import { localDateKey, matchesTodoView } from './workspace-policy';
-  import WorkspaceQueryState from './WorkspaceQueryState.svelte';
-  import WorkspaceRecordLinks from './WorkspaceRecordLinks.svelte';
+  import { localDateKey, matchesTodoView } from '../../workspace/workspace-policy';
+  import WorkspaceQueryState from '../../workspace/WorkspaceQueryState.svelte';
+  import WorkspaceRecordLinks from '../../workspace/WorkspaceRecordLinks.svelte';
   import { useTranslation } from '@svadmin/core/i18n';
   import { Badge, Button, ContentPageHeader, ContentPageShell } from '@svadmin/ui';
   import * as Card from '@svadmin/ui/components/ui/card/index.js';
   import { Bot, CalendarDays, CheckCircle2, Circle, Flag, ListTodo, Tag } from '@lucide/svelte';
   import { readHashView } from '../../utils/hashView';
-  import type { ResourcesForFeature } from '../resource-registry';
 
   const i18n = useTranslation();
 
-  let { resourceName = 'todos' } = $props<{ resourceName?: ResourcesForFeature<'planning'> }>();
+  let { resourceName = 'todos' } = $props<{ resourceName?: string }>();
   let activeView = $state(readHashView('all'));
   const update = useUpdateMany({ resource: demoContracts.todos });
   let saving = $state(false);

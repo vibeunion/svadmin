@@ -67,8 +67,6 @@ export const demoContracts = {
 } satisfies { [Name in DemoResource]: ResourceContract };
 
 /** Dynamic pages keep fields unknown, but still validate against the selected schema. */
-export function demoContract(name: DemoResource): ResourceContract;
-export function demoContract(name: string): ResourceContract;
 export function demoContract(name: string): ResourceContract {
   if (!isDemoResource(name)) throw new Error(`Unknown demo resource: ${name}`);
   return demoContracts[name];

@@ -1,13 +1,14 @@
-import { afterEach, beforeEach, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
-import { setLocale } from '@svadmin/core/i18n';
+import { afterEach, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, waitFor } from '@testing-library/svelte';
+import { renderWithI18n as render } from '../../test/fixtures/render-with-i18n';
 import type { TaskProvider } from '@svadmin/core';
 import { buildPivotExportRequest } from '@svadmin/core/pivot';
 import Host from './pivot-export.test-host.svelte';
 
+import { requireValue } from '../../../../scripts/test-assertions';
 const query = { resource: 'orders', rowField: 'region', columnField: 'status', valueField: 'amount' };
 const settings = { query, scopeKey: 'user-a:tenant-a', taskName: 'pivot-export', idempotencyKey: 'request-1' };
-const request = buildPivotExportRequest(query, settings.scopeKey)!;
+const request =requireValue( buildPivotExportRequest(query, settings.scopeKey));
 const result = {
   format: 'csv', downloadUrl: '/exports/1.csv', kind: 'pivot', taskName: settings.taskName,
   idempotencyKey: settings.idempotencyKey, scopeKey: settings.scopeKey,
@@ -19,7 +20,6 @@ function provider(): TaskProvider {
     get: vi.fn(async id => ({ id, status: 'completed', result })),
   };
 }
-beforeEach(() => setLocale('en'));
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
 it('submits the complete pivot request and waits for an explicit download', async () => {
@@ -89,7 +89,7 @@ it.each(['https://evil.example/file.csv', 'javascript:alert(1)', 'data:text/plai
 it('blocks duplicate submission and ignores a late handle after scope change', async () => {
   const tasks = provider();
   let finish!: (value: Awaited<ReturnType<TaskProvider['submit']>>) => void;
-  tasks.submit = vi.fn<NonNullable<TaskProvider['submit']>>(() => new Promise(resolve => { finish = resolve; }));
+  tasks.submit = vi.fn(() => new Promise<Awaited<ReturnType<TaskProvider['submit']>>>(resolve => { finish = resolve; }));
   const notified = vi.fn();
   const view = render(Host, { settings: { ...settings, taskProvider: tasks, onTaskSubmitted: notified } });
   const button = view.getByRole('button', { name: 'Export' });

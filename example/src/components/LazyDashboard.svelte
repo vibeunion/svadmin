@@ -3,7 +3,7 @@
 
   const i18n = useTranslation();
   // 登录页不需要下载仪表盘；保持原生组件类型，不经过无类型 props 转发。
-  const loadDashboard = () => import('../features/dashboard/index.js').then((module) => ({ default: module.Dashboard }));
+  const loadDashboard = () => import('../features/dashboard/index.js').then((module) => module.loadDashboard());
   let dashboard = $state.raw(loadDashboard());
 </script>
 

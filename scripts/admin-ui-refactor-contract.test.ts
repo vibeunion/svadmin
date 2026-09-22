@@ -6,24 +6,15 @@ import utilityClasses from '../packages/ui/scripts/utility-class-map.json' with 
 const root = resolve(import.meta.dir, '..');
 const read = (path: string) => readFileSync(resolve(root, path), 'utf8');
 
-describe('Stripe-first refactor contract', () => {
+describe('Admin UI refactor contract', () => {
   it('keeps the primary example workspaces on the shared page contract', () => {
     for (const page of [
       'features/dashboard/Dashboard.svelte',
-    ]) {
-      const source = read(`example/src/${page}`);
-      expect(source).toContain('ContentPageShell');
-      expect(source).toContain('ContentPageHeader');
-      expect(source).not.toMatch(/bg-gradient|backdrop-blur/);
-      expect(source).not.toMatch(/tracking-(?:tight|wide|wider|\[[^\]]+\])/);
-      expect(source).not.toMatch(/rounded-(?:xl|2xl|3xl)/);
-    }
-    for (const page of [
-      'features/people/UserManagementPage.svelte',
-      'features/calendar/CalendarWorkspacePage.svelte',
       'features/crm/CrmDashboardPage.svelte',
-      'features/mail/MailWorkspacePage.svelte',
+      'features/people/UserManagementPage.svelte',
       'features/ai/AiWorkspacePage.svelte',
+      'features/mail/MailWorkspacePage.svelte',
+      'features/calendar/CalendarWorkspacePage.svelte',
       'features/property/RealEstateWorkspacePage.svelte',
       'features/planning/TodoWorkspacePage.svelte',
     ]) {
@@ -36,7 +27,7 @@ describe('Stripe-first refactor contract', () => {
     }
   });
 
-  it('keeps operations pages data-driven, layout-specific, and Stripe-first', () => {
+  it('keeps operations pages data-driven, layout-specific, and Admin UI', () => {
     const source = read('example/src/features/operations/OperationsWorkspacePage.svelte');
     expect(source).toContain('ContentPageShell');
     expect(source).toContain('MetricBlock');
@@ -56,7 +47,7 @@ describe('Stripe-first refactor contract', () => {
     expect(source).not.toMatch(/rounded-(?:xl|2xl|3xl)/);
   });
 
-  it('keeps domain pages resource-specific, data-driven, and Stripe-first', () => {
+  it('keeps domain pages resource-specific, data-driven, and Admin UI', () => {
     const source = read('example/src/features/domain/DomainWorkspacePage.svelte');
     expect(source).toContain('ContentPageShell');
     expect(source).toContain('MetricBlock');
@@ -83,12 +74,12 @@ describe('Stripe-first refactor contract', () => {
 
   it('keeps CRM and property entity routes focused on their own workflows', () => {
     const crm = read('example/src/features/crm/CrmDashboardPage.svelte');
-    for (const layout of ['data-crm-account-layout', 'data-crm-contact-layout', 'data-crm-deal-layout', 'data-crm-activity-layout']) {
-      expect(crm).toContain(layout);
-    }
     const property = read('example/src/features/property/RealEstateWorkspacePage.svelte');
-    for (const layout of ['data-property-agent-layout', 'data-property-lead-layout', 'data-property-showing-layout']) {
-      expect(property).toContain(layout);
+    // 页面已扁平化；资源隔离、筛选与导航由 pm-business-pages 的挂载测试验证。
+    for (const source of [crm, property]) {
+      expect(source).toContain('data-resource-name={resourceName}');
+      expect(source).toContain('<WorkspaceQueryState');
+      expect(source).toContain('<WorkspaceRecordLinks');
     }
   });
 
@@ -110,9 +101,16 @@ describe('Stripe-first refactor contract', () => {
   });
 
   it('keeps settings, list states, and network cards on shared primitives', () => {
-    for (const page of ['SettingsPlainPage.svelte', 'SettingsSidebarPage.svelte', 'SettingsEnterprisePage.svelte', 'CompanyProfilePage.svelte']) {
+    for (const page of ['SettingsSidebarPage.svelte', 'SettingsEnterprisePage.svelte']) {
       expect(read(`packages/ui/src/components/account/${page}`)).toContain('<SettingsGroup');
     }
+    const plainSettings = read('packages/ui/src/components/account/SettingsPlainPage.svelte');
+    for (const component of ['ContentPageShell', 'ProfilePage', 'NotificationsSettings', 'SecuritySettings']) {
+      expect(plainSettings).toContain(`<${component}`);
+    }
+    const company = read('packages/ui/src/components/account/CompanyProfilePage.svelte');
+    expect(company).toContain('<ContentPageShell');
+    expect(company).toContain('<DataState');
     for (const component of ['ApiKeyList.svelte', 'MemberList.svelte', 'FileList.svelte', 'SecurityEventTable.svelte', 'NetworkTable.svelte']) {
       expect(read(`packages/ui/src/components/content/${component}`)).toContain('<DataState');
     }
@@ -146,10 +144,9 @@ describe('Stripe-first refactor contract', () => {
     const workspace = read('packages/ui/src/components/content/WorkspaceLayout.svelte');
     expect(workspace).toContain('$derived(productWorkspace({ hasSecondary: Boolean(secondary) }))');
     expect(workspace).toContain('class={styles.columns}');
-    // 配方几何与发布 CSS 由 packages/ui/scripts/product-recipes.test.mjs 验证，
-    // 此处只验证组件绑定，避免把 Panda 构建工具类型带入 core tooling。
-    expect(read('packages/ui/src/components/account/CompanyProfilePage.svelte')).toContain('<WorkspaceLayout');
-    expect(read('packages/ui/src/components/account/UserProfilePage.svelte')).toContain('<WorkspaceLayout');
+    // 配方几何与发布 CSS 由 tailwind-recipes 和浏览器检查验证；这里仅检查装配边界。
+    expect(read('packages/ui/src/components/account/CompanyProfilePage.svelte')).toContain('<ContentPageShell');
+    expect(read('packages/ui/src/components/account/UserProfilePage.svelte')).toContain('<ProfilePage');
     expect(read('packages/ui/src/components/account/SettingsEnterprisePage.svelte')).toContain(`${utilityClasses.grid} ${utilityClasses['items-start']}`);
   });
 
@@ -162,8 +159,6 @@ describe('Stripe-first refactor contract', () => {
     const bareHex = /(?<![\w&])#[0-9a-fA-F]{3,8}\b/;
 
     const violations: string[] = [];
-    // 原生 color input 需要具体颜色值；该演示值是唯一允许的例外。
-    const allowedConcreteColorDemo = 'let demoColor = $state(\'#635bff\');';
     const walk = (dir: string): void => {
       for (const entry of readdirSync(dir, { withFileTypes: true })) {
         const path = resolve(dir, entry.name);
@@ -175,9 +170,7 @@ describe('Stripe-first refactor contract', () => {
             .split('\n')
             .forEach((line, index) => {
               if (paletteUtility.test(line)) violations.push(`${rel}:${index + 1} bare palette utility: ${line.trim()}`);
-              if (bareHex.test(line) && !(rel === 'example/src/features/showcase/DesignPrinciplesPage.svelte' && line.includes(allowedConcreteColorDemo))) {
-                violations.push(`${rel}:${index + 1} bare hex color: ${line.trim()}`);
-              }
+              if (bareHex.test(line)) violations.push(`${rel}:${index + 1} bare hex color: ${line.trim()}`);
             });
         }
       }
@@ -186,8 +179,9 @@ describe('Stripe-first refactor contract', () => {
 
     // Semantic utilities (text-success, bg-warning/10, text-muted-foreground,
     // …), chart-* decorative tokens, and var() references are allowed —
-    // including behind variant prefixes like dark:. All other concrete colors
-    // remain rejected by this contract.
+    // including behind variant prefixes like dark:. Demo data colors that must
+    // be concrete (e.g. user-provided values) need an explicit allowlist entry
+    // here with a reason; keep it empty unless one is genuinely required.
     expect(violations).toEqual([]);
   });
 });

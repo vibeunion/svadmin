@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import RangeSlider from './RangeSlider.svelte';
+import { requireValue } from '../../../../scripts/test-assertions';
 
 afterEach(() => cleanup());
 
@@ -17,9 +18,7 @@ describe('RangeSlider', () => {
       onchange,
     });
     const sliders = view.getAllByRole('slider') as HTMLInputElement[];
-    const minSlider = sliders[0];
-    if (!minSlider) throw new Error('Missing minimum slider');
-    await fireEvent.input(minSlider, { target: { value: '90' } });
+    await fireEvent.input(requireValue(sliders[0]), { target: { value: '90' } });
     expect(onchange).toHaveBeenLastCalledWith({ min: 80, max: 80 });
     expect([...view.container.querySelectorAll('input[type="hidden"]')].map(input => (input as HTMLInputElement).value))
       .toEqual(['80', '80']);
