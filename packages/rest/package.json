@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/rest",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Generic REST adapters — bridge @refinedev/rest to a svadmin DataProvider",
   "type": "module",
   "sideEffects": false,

@@ -29,7 +29,7 @@
   "packages/mcp": "0.4.10",
   "packages/devtools-contract": "0.2.0",
   "packages/surface": "0.11.1",
-  "packages/app": "1.0.0",
-  "packages/devtools": "1.0.0",
-  "packages/rest": "1.0.0"
+  "packages/app": "0.1.0",
+  "packages/devtools": "0.1.0",
+  "packages/rest": "0.1.0"
 }

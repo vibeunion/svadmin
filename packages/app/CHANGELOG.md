@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0 (2026-09-22)
+## 0.1.0 (2026-09-22)
 
 
 ### 🚀 Features
@@ -18,10 +18,3 @@
 * The following workspace dependencies were updated
   * peerDependencies
     * @svadmin/core bumped to 0.56.0
-
-## 0.1.0
-
-- Initial application composition layer: re-exports `defineAdminConfig`,
-  `defineSvadminPlugin`, `resolveAdminConfig`, `assertAdminConfig`,
-  `provideAdminConfig`, `buildAdminManifest`, `createProviderBundle`, and adds
-  the `createAdminApp` convenience.
