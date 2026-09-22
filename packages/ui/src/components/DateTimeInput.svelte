@@ -11,24 +11,24 @@
   interface Props {
     value?: string | null;
     mode?: DateTimeInputMode;
-    min?: string;
-    max?: string;
-    minInstant?: string;
-    maxInstant?: string;
-    step?: number;
-    disabledDate?: (date: string) => boolean;
-    id?: string;
-    name?: string;
-    disabled?: boolean;
-    required?: boolean;
-    invalid?: boolean;
-    describedby?: string;
-    ariaLabel?: string;
-    class?: string;
-    onchange?: (value: string | null) => void;
-    timeZone?: string;
-    valueMode?: DateTimeValueMode;
-    disambiguation?: DateTimeDisambiguation;
+    min?: string | undefined;
+    max?: string | undefined;
+    minInstant?: string | undefined;
+    maxInstant?: string | undefined;
+    step?: number | undefined;
+    disabledDate?: ((date: string) => boolean) | undefined;
+    id?: string | undefined;
+    name?: string | undefined;
+    disabled?: boolean | undefined;
+    required?: boolean | undefined;
+    invalid?: boolean | undefined;
+    describedby?: string | undefined;
+    ariaLabel?: string | undefined;
+    class?: string | undefined;
+    onchange?: ((value: string | null) => void) | undefined;
+    timeZone?: string | undefined;
+    valueMode?: DateTimeValueMode | undefined;
+    disambiguation?: DateTimeDisambiguation | undefined;
   }
 
   let {

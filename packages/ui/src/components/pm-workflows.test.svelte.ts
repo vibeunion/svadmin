@@ -42,7 +42,7 @@ describe('PM workflow acceptance', () => {
       'AutoTable.svelte', 'AutoForm.svelte', 'DetailDrawer.svelte',
       'QuickEditDrawer.svelte', 'RecordRowActions.svelte', 'BoundRecordDetailDrawer.svelte',
       'ui/sheet/sheet.svelte', 'pm-workflows.test-host.svelte', 'RowActions.svelte', 'DraggableHeader.svelte',
-      '../../../../example/src/pages/Dashboard.svelte', '../../../../example/src/pages/UserManagementPage.svelte',
+      '../../../../example/src/features/dashboard/Dashboard.svelte', '../../../../example/src/features/people/UserManagementPage.svelte',
       '../../../create-svadmin/template/src/pages/Dashboard.svelte',
     ].map(file => {
       const filename = resolve(directory, file);

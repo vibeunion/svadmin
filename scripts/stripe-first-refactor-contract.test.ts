@@ -9,16 +9,25 @@ const read = (path: string) => readFileSync(resolve(root, path), 'utf8');
 describe('Stripe-first refactor contract', () => {
   it('keeps the primary example workspaces on the shared page contract', () => {
     for (const page of [
-      'Dashboard.svelte',
-      'CrmDashboardPage.svelte',
-      'UserManagementPage.svelte',
-      'AiWorkspacePage.svelte',
-      'MailWorkspacePage.svelte',
-      'CalendarWorkspacePage.svelte',
-      'RealEstateWorkspacePage.svelte',
-      'TodoWorkspacePage.svelte',
+      'features/dashboard/Dashboard.svelte',
     ]) {
-      const source = read(`example/src/pages/${page}`);
+      const source = read(`example/src/${page}`);
+      expect(source).toContain('ContentPageShell');
+      expect(source).toContain('ContentPageHeader');
+      expect(source).not.toMatch(/bg-gradient|backdrop-blur/);
+      expect(source).not.toMatch(/tracking-(?:tight|wide|wider|\[[^\]]+\])/);
+      expect(source).not.toMatch(/rounded-(?:xl|2xl|3xl)/);
+    }
+    for (const page of [
+      'features/people/UserManagementPage.svelte',
+      'features/calendar/CalendarWorkspacePage.svelte',
+      'features/crm/CrmDashboardPage.svelte',
+      'features/mail/MailWorkspacePage.svelte',
+      'features/ai/AiWorkspacePage.svelte',
+      'features/property/RealEstateWorkspacePage.svelte',
+      'features/planning/TodoWorkspacePage.svelte',
+    ]) {
+      const source = read(`example/src/${page}`);
       expect(source).toContain('ContentPageShell');
       expect(source).toContain('ContentPageHeader');
       expect(source).not.toMatch(/bg-gradient|backdrop-blur/);
@@ -28,7 +37,7 @@ describe('Stripe-first refactor contract', () => {
   });
 
   it('keeps operations pages data-driven, layout-specific, and Stripe-first', () => {
-    const source = read('example/src/pages/OperationsWorkspacePage.svelte');
+    const source = read('example/src/features/operations/OperationsWorkspacePage.svelte');
     expect(source).toContain('ContentPageShell');
     expect(source).toContain('MetricBlock');
     expect(source).toContain('useList');
@@ -48,7 +57,7 @@ describe('Stripe-first refactor contract', () => {
   });
 
   it('keeps domain pages resource-specific, data-driven, and Stripe-first', () => {
-    const source = read('example/src/pages/DomainWorkspacePage.svelte');
+    const source = read('example/src/features/domain/DomainWorkspacePage.svelte');
     expect(source).toContain('ContentPageShell');
     expect(source).toContain('MetricBlock');
     expect(source).toContain('useList');
@@ -73,18 +82,18 @@ describe('Stripe-first refactor contract', () => {
   });
 
   it('keeps CRM and property entity routes focused on their own workflows', () => {
-    const crm = read('example/src/pages/CrmDashboardPage.svelte');
+    const crm = read('example/src/features/crm/CrmDashboardPage.svelte');
     for (const layout of ['data-crm-account-layout', 'data-crm-contact-layout', 'data-crm-deal-layout', 'data-crm-activity-layout']) {
       expect(crm).toContain(layout);
     }
-    const property = read('example/src/pages/RealEstateWorkspacePage.svelte');
+    const property = read('example/src/features/property/RealEstateWorkspacePage.svelte');
     for (const layout of ['data-property-agent-layout', 'data-property-lead-layout', 'data-property-showing-layout']) {
       expect(property).toContain(layout);
     }
   });
 
   it('keeps the user workspace focused and reveals CRUD records on demand', () => {
-    const source = read('example/src/pages/UserManagementPage.svelte');
+    const source = read('example/src/features/people/UserManagementPage.svelte');
     expect(source).toContain('data-user-record-toggle');
     expect(source).toMatch(/\{#if showRecords\}[\s\S]*<AutoTable \{resourceName\} rendering=\{demoRendering\(resourceName\)\} \/>[\s\S]*\{\/if\}/);
   });
@@ -153,6 +162,8 @@ describe('Stripe-first refactor contract', () => {
     const bareHex = /(?<![\w&])#[0-9a-fA-F]{3,8}\b/;
 
     const violations: string[] = [];
+    // 原生 color input 需要具体颜色值；该演示值是唯一允许的例外。
+    const allowedConcreteColorDemo = 'let demoColor = $state(\'#635bff\');';
     const walk = (dir: string): void => {
       for (const entry of readdirSync(dir, { withFileTypes: true })) {
         const path = resolve(dir, entry.name);
@@ -164,7 +175,9 @@ describe('Stripe-first refactor contract', () => {
             .split('\n')
             .forEach((line, index) => {
               if (paletteUtility.test(line)) violations.push(`${rel}:${index + 1} bare palette utility: ${line.trim()}`);
-              if (bareHex.test(line)) violations.push(`${rel}:${index + 1} bare hex color: ${line.trim()}`);
+              if (bareHex.test(line) && !(rel === 'example/src/features/showcase/DesignPrinciplesPage.svelte' && line.includes(allowedConcreteColorDemo))) {
+                violations.push(`${rel}:${index + 1} bare hex color: ${line.trim()}`);
+              }
             });
         }
       }
@@ -173,9 +186,8 @@ describe('Stripe-first refactor contract', () => {
 
     // Semantic utilities (text-success, bg-warning/10, text-muted-foreground,
     // …), chart-* decorative tokens, and var() references are allowed —
-    // including behind variant prefixes like dark:. Demo data colors that must
-    // be concrete (e.g. user-provided values) need an explicit allowlist entry
-    // here with a reason; keep it empty unless one is genuinely required.
+    // including behind variant prefixes like dark:. All other concrete colors
+    // remain rejected by this contract.
     expect(violations).toEqual([]);
   });
 });

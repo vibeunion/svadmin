@@ -3,27 +3,32 @@ import { mount, unmount } from 'svelte';
 import { describe, expect, it, vi } from 'vitest';
 import LazyResourcePage from '../src/components/LazyResourcePage.svelte';
 
-vi.mock('../src/pages/ExampleResourcePage.svelte', async () => {
+vi.mock('../src/features/resource/ExampleResourcePage.svelte', async () => {
   const page = await import('./fixtures/LazyResourceDefaultDouble.svelte');
   return { default: page.default };
 });
 
-vi.mock('../src/pages/TodoWorkspacePage.svelte', async () => {
+vi.mock('../src/features/planning/TodoWorkspacePage.svelte', async () => {
   const page = await import('./fixtures/LazyResourceTodoDouble.svelte');
   return { default: page.default };
 });
 
-vi.mock('../src/pages/OperationsWorkspacePage.svelte', async () => {
+vi.mock('../src/features/operations/OperationsWorkspacePage.svelte', async () => {
   const page = await import('./fixtures/LazyResourceOperationsDouble.svelte');
   return { default: page.default };
 });
 
-vi.mock('../src/pages/DomainWorkspacePage.svelte', async () => {
+vi.mock('../src/features/catalog/ProductsPage.svelte', async () => {
+  const page = await import('./fixtures/LazyResourceProductsDouble.svelte');
+  return { default: page.default };
+});
+
+vi.mock('../src/features/domain/DomainWorkspacePage.svelte', async () => {
   const page = await import('./fixtures/LazyResourceDomainDouble.svelte');
   return { default: page.default };
 });
 
-vi.mock('../src/pages/CaseWorkspacePage.svelte', async () => {
+vi.mock('../src/features/case/CaseWorkspacePage.svelte', async () => {
   const page = await import('./fixtures/LazyResourceCaseWorkspaceDouble.svelte');
   return { default: page.default };
 });
@@ -48,7 +53,6 @@ describe('LazyResourcePage', () => {
   });
 
   it.each([
-    'products',
     'skus',
     'categories',
     'suppliers',
@@ -73,6 +77,15 @@ describe('LazyResourcePage', () => {
     const page = mount(LazyResourcePage, { target, props: { resourceName } });
 
     await vi.waitFor(() => expect(target.textContent).toContain(`domain:${resourceName}`));
+
+    await unmount(page);
+  });
+
+  it('loads the catalog feature for products', async () => {
+    const target = document.createElement('div');
+    const page = mount(LazyResourcePage, { target, props: { resourceName: 'products' } });
+
+    await vi.waitFor(() => expect(target.textContent).toContain('products:products'));
 
     await unmount(page);
   });

@@ -15,7 +15,7 @@
     aggregator?: AggregationFn;
     formatValue?: (value: number) => string;
     loading?: boolean;
-    error?: string;
+    error?: string | undefined;
     retryHref?: string;
     exportHref?: string;
     drilldownHref?: (input: import('@svadmin/core/pivot').PivotDrilldown) => string | undefined;

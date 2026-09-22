@@ -1,0 +1,1 @@
+export { crmResources } from './resources';

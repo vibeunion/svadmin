@@ -30,6 +30,8 @@ export interface UploadCancellation {
   reason: 'cancel' | 'remove' | 'replace' | 'scope-change' | 'unmount';
 }
 
+export type UploadResult = { url?: string; uploadId?: string } | void;
+
   interface Props {
     id?: string;
     name?: string;
@@ -39,7 +41,7 @@ export interface UploadCancellation {
     maxSize?: number;
     disabled?: boolean;
     required?: boolean;
-    upload?: (file: File, session: UploadSession) => Promise<{ url?: string; uploadId?: string } | void>;
+    upload?: (file: File, session: UploadSession) => Promise<UploadResult>;
     cancelUpload?: (file: File, cancellation: UploadCancellation) => Promise<void>;
     onChange?: (items: UploadItem[]) => void;
     onReject?: (file: File, reason: string) => void;
@@ -117,7 +119,7 @@ export interface UploadCancellation {
     if (!attempt.reason || attempt.cleanupStarted) return;
     if (attempt?.uploadId && attempt.cancelUpload) {
       attempt.cleanupStarted = true;
-      const publish = (cleanupStatus: UploadItem['cleanupStatus']) => {
+      const publish = (cleanupStatus: Exclude<UploadItem['cleanupStatus'], undefined>) => {
         if (!destroyed && scopeEpoch === attempt.epoch && upload === attempt.upload
           && latestAttempts.get(id) === attempt && items.some(item => item.id === id)) {
           updateItem(id, { cleanupStatus });
@@ -178,11 +180,12 @@ export interface UploadCancellation {
 
   async function process(item: UploadItem): Promise<void> {
     if (!upload || disabled) return;
+    const uploadFn = upload;
     if (controllers.has(item.id) || !items.some(candidate => candidate.id === item.id)) return;
     const controller = new AbortController();
     controllers.set(item.id, controller);
     const attempt: UploadAttempt = {
-      controller, upload, epoch: scopeEpoch, file: item.file,
+      controller, upload: uploadFn, epoch: scopeEpoch, file: item.file,
       cancelUpload,
       idempotencyKey: crypto.randomUUID(),
     };
@@ -203,9 +206,9 @@ export interface UploadCancellation {
       updateCurrent({ uploadId });
       cleanupAttempt(item.id, attempt);
     };
-    updateItem(item.id, { status: 'uploading', progress: 0, error: undefined, uploadId: undefined, cleanupStatus: undefined });
+    updateItem(item.id, { status: 'uploading', progress: 0 });
     try {
-      const result = await attempt.upload!(item.file, {
+      const result = await uploadFn(item.file, {
         signal: controller.signal,
         idempotencyKey: attempt.idempotencyKey,
         setUploadId: register,
@@ -214,7 +217,21 @@ export interface UploadCancellation {
         }),
       });
       if (result?.uploadId !== undefined) register(result.uploadId);
-      updateCurrent({ status: 'success', progress: 100, url: result?.url, uploadId: result?.uploadId ?? attempt.uploadId });
+      if (current()) {
+        const nextItem: UploadItem = { ...items.find(candidate => candidate.id === item.id) ?? item, status: 'success', progress: 100 };
+        delete nextItem.error;
+        delete nextItem.url;
+        delete nextItem.cleanupStatus;
+        if (result?.url !== undefined) nextItem.url = result.url;
+        const uploadId = result?.uploadId ?? attempt.uploadId;
+        if (uploadId !== undefined) {
+          nextItem.uploadId = uploadId;
+        } else {
+          delete nextItem.uploadId;
+        }
+        items = items.map(candidate => candidate.id === item.id ? nextItem : candidate);
+        emitChange();
+      }
     } catch (error) {
       if (!current()) return;
       updateItem(item.id, {
@@ -333,7 +350,7 @@ export interface UploadCancellation {
   </div>
   {#if rejected.length}
     <ul aria-label={i18n.t('upload.rejectedFiles')}>
-      {#each rejected as rejection}
+      {#each rejected as rejection (rejection.name)}
         <li>{rejection.name}: {rejection.reason}</li>
       {/each}
     </ul>

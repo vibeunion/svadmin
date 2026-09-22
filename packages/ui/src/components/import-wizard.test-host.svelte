@@ -34,10 +34,10 @@
     onSuccess?: (result: { succeeded: number; failed: number }) => void;
     tenant?: string;
     permission?: AccessControlProvider;
-    maxRows?: number;
-    maxBytes?: number;
+    maxRows?: number | undefined;
+    maxBytes?: number | undefined;
     coreProbe?: boolean;
-    onImportReady?: (driver: { handleChange(info: { file: File }): Promise<unknown>; readonly error: HttpError | null }) => void;
+    onImportReady?: ((driver: { handleChange(info: { file: File }): Promise<unknown>; readonly error: HttpError | null }) => void) | undefined;
     taskProvider?: TaskProvider;
     taskArtifactProvider?: ImportArtifactProvider;
     taskName?: string;

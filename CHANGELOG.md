@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+### Breaking Changes
+
+* **types:** remove historical explicit `any` boundaries from providers, UI component contracts,
+  and tests. Dynamic provider arguments now use `unknown[]`, external provider inputs require
+  caller-side narrowing, and the Rich Text Editor registration uses an explicit component props
+  type. This release does not provide source-compatibility aliases; see
+  [零 any 类型迁移](docs/src/content/docs/zh-cn/guides/no-any-migration.md).
+
 ### Features
 
 * **ui,lite:** expand the enterprise component parity catalog to 103/103 components across fields, buttons, pages, layout, widgets, and advanced workflows.

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // Unit tests for RouterProvider implementations
 // Router provider tests need a DOM environment or a mock.
 import { describe, test, expect, beforeEach } from 'bun:test';
@@ -33,12 +32,12 @@ describe('createHashRouterProvider (with mock DOM)', () => {
   beforeEach(() => {
     if (typeof globalThis.window === 'undefined') {
       let _hash = '';
-      (globalThis as any).window = {
+      (globalThis as typeof globalThis & { window: Window & typeof globalThis }).window = {
         location: {
           get hash() { return _hash ? (_hash.startsWith('#') ? _hash : '#' + _hash) : ''; },
           set hash(val) { _hash = val; }
-        }
-      };
+        } as unknown as Location
+      } as unknown as Window & typeof globalThis;
     }
   });
 

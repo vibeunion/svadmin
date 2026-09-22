@@ -924,16 +924,6 @@
         setTimeout(() => URL.revokeObjectURL(url), 10_000);
       }
     }
-    const csv = lines.join('\n');
-    if (onexport) { onexport(csv); return; }
-    if (typeof document === 'undefined') return;
-    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
-    try {
-      const anchor = document.createElement('a');
-      anchor.href = url;
-      anchor.download = `${sheet.name}_${Date.now()}.csv`;
-      anchor.click();
-    } finally { setTimeout(() => URL.revokeObjectURL(url), 0); }
   }
 
   function exportWorkbook() {

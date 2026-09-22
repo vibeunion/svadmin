@@ -1,7 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Component } from 'svelte';
 
-let registeredEditor: Component<any> | undefined = $state(undefined);
+type EditorProps = Record<string, unknown>;
+
+let registeredEditor: Component<EditorProps> | undefined = $state(undefined);
 
 /**
  * Register a global Rich Text Editor component.
@@ -15,10 +16,10 @@ let registeredEditor: Component<any> | undefined = $state(undefined);
  * setRichTextEditor(Editor);
  * ```
  */
-export function setRichTextEditor(editorComponent: Component<any>): void {
+export function setRichTextEditor(editorComponent: Component<EditorProps>): void {
   registeredEditor = editorComponent;
 }
 
-export function getRichTextEditor(): Component<any> | undefined {
+export function getRichTextEditor(): Component<EditorProps> | undefined {
   return registeredEditor;
 }

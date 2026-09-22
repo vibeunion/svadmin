@@ -73,6 +73,18 @@ function element(value: unknown): value is SurfaceOpenUIElement {
     && !!(value as SurfaceOpenUIElement).props && typeof (value as SurfaceOpenUIElement).props === 'object';
 }
 
+function surfaceDataSource(value: unknown): value is SurfaceDataSource {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const source = value as Record<string, unknown>;
+  if (typeof source['id'] !== 'string' || typeof source['resource'] !== 'string') return false;
+  if (source['type'] === 'resource-one') {
+    return typeof source['recordId'] === 'string' || typeof source['recordId'] === 'number';
+  }
+  if (source['type'] !== 'resource-list') return false;
+  if (source['pageSize'] !== undefined && typeof source['pageSize'] !== 'number') return false;
+  return true;
+}
+
 export function createSurfaceOpenUIStream(options: {
   readonly catalog: SurfaceCatalog;
   readonly policy: SurfacePolicy;
@@ -107,10 +119,11 @@ export function createSurfaceOpenUIStream(options: {
     const dataSources: SurfaceDataSource[] = [];
     for (const source of sources) {
       if (source === null && !final) continue;
-      if (!element(source) || source.typeName !== 'Source' || source.partial || !isJsonValue(source.props['value'])) {
+      if (!element(source) || source.typeName !== 'Source' || source.partial
+        || !isJsonValue(source.props['value']) || !surfaceDataSource(source.props['value'])) {
         throw new SurfaceOpenUIError('syntax', 'Invalid Source node');
       }
-      dataSources.push(source.props['value'] as unknown as SurfaceDataSource);
+      dataSources.push(source.props['value']);
     }
     const normalized: SurfaceWidget[] = [];
     for (const widget of widgets) {

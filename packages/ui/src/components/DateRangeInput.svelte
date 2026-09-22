@@ -113,7 +113,7 @@
   {#if presets.length > 0}
     <Select value="" {disabled} aria-label={i18n.t('dateInput.presets')} onchange={choosePreset}>
       <option value="">{i18n.t('dateInput.presets')}</option>
-      {#each presets as preset, index}
+      {#each presets as preset, index (preset.label)}
         <option value={String(index)} disabled={!presetAllowed(preset)}>{preset.label}</option>
       {/each}
     </Select>
@@ -124,9 +124,9 @@
     {valueMode}
     {timeZone}
     {disambiguation}
-    maxInstant={instantMode ? validInstant(value?.end) : undefined}
-    {min}
-    max={startMax}
+    {...(instantMode && validInstant(value?.end) !== undefined ? { maxInstant: validInstant(value?.end) } : {})}
+    {...(min === undefined ? {} : { min })}
+    {...(startMax === undefined ? {} : { max: startMax })}
     {step}
     {disabledDate}
     id={startId}
@@ -145,9 +145,9 @@
     {valueMode}
     {timeZone}
     {disambiguation}
-    minInstant={instantMode ? validInstant(value?.start) : undefined}
-    min={endMin}
-    {max}
+    {...(instantMode && validInstant(value?.start) !== undefined ? { minInstant: validInstant(value?.start) } : {})}
+    {...(endMin === undefined ? {} : { min: endMin })}
+    {...(max === undefined ? {} : { max })}
     {step}
     {disabledDate}
     id={endId}

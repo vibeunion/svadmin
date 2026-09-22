@@ -1,7 +1,7 @@
 <script lang="ts">
   import { QueryClientProvider, type QueryClient } from '@tanstack/svelte-query';
   import { provideAdminContext, type DataProvider } from '@svadmin/core';
-  import DesignPrinciplesPage from '../src/pages/DesignPrinciplesPage.svelte';
+  import DesignPrinciplesPage from '../src/features/showcase/DesignPrinciplesPage.svelte';
 
   let { client, resourceName }: { client: QueryClient; resourceName?: string } = $props();
   const dataProvider: DataProvider = {

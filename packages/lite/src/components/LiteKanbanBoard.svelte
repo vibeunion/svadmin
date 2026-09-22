@@ -19,7 +19,7 @@
     cards?: KanbanCard[];
     formAction?: string;
     loading?: boolean;
-    error?: string;
+    error?: string | undefined;
     retryHref?: string;
     ariaLabel?: string;
     class?: string;

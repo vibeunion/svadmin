@@ -1,0 +1,4 @@
+{
+  "sourceRoots": ["example/src", "packages"],
+  "legacyAny": {}
+}

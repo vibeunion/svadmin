@@ -1,5 +1,4 @@
 import { requireValue } from "../../../scripts/test-assertions";
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // @svadmin/supabase — Unit Tests
 import { describe, test, expect, mock } from 'bun:test';
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -14,8 +13,8 @@ mock.module('@svadmin/core', () => {
 // ─── Mock Refine Supabase Provider ────────────────────────────────
 mock.module('@refinedev/supabase', () => {
   return {
-    dataProvider: (..._args: any[]) => {
-      const mockDp: any = {
+    dataProvider: (..._args: unknown[]) => {
+      const mockDp: Record<string, unknown> = {
         getList: async () => ({ data: [{ id: 1, title: 'Item 1' }], total: 1 }),
         getOne: async () => ({ data: { id: 1, title: 'Item 1' } }),
         create: async () => ({ data: { id: 2, title: 'New Item' } }),
@@ -28,8 +27,8 @@ mock.module('@refinedev/supabase', () => {
 });
 
 // ─── Mock Supabase Client ──────────────────────────────────────────
-function createMockSupabaseClient(overrides: Record<string, any> = {}) {
-  const client: any = {
+function createMockSupabaseClient(overrides: Record<string, unknown> = {}) {
+  const client: Record<string, unknown> = {
     auth: {
       signInWithPassword: mock(async ({ _email, password }) => {
         if (password === 'bad') return { error: { message: 'Invalid credentials' } };
@@ -54,14 +53,14 @@ function createMockSupabaseClient(overrides: Record<string, any> = {}) {
       updateUser: mock(async () => ({ error: null })),
       ...(overrides['auth'] || {}),
     },
-    rpc: mock(async (fnName: string, args: any, options?: any) => {
+    rpc: mock(async (fnName: string, args: unknown, options?: unknown) => {
       if (fnName === 'fail_proc') {
         return { data: null, error: { message: 'Database error occurred' } };
       }
       return { data: { procResult: true, fnName, args, options }, error: null };
     }),
     functions: {
-      invoke: mock(async (fnName: string, options?: any) => {
+      invoke: mock(async (fnName: string, options?: unknown) => {
         if (fnName === 'fail-fn') {
           return { data: null, error: { message: 'Edge Function timeout' } };
         }
@@ -70,41 +69,41 @@ function createMockSupabaseClient(overrides: Record<string, any> = {}) {
       ...(overrides['functions'] || {}),
     },
     from: mock((tableName: string) => {
-      const builder: any = {
+      const builder: Record<string, unknown> = {
         tableName,
         select: mock((fields: string) => {
-          builder.selectedFields = fields;
+          builder['selectedFields'] = fields;
           return builder;
         }),
-        insert: mock((values: any) => {
-          builder.insertedValues = values;
+        insert: mock((values: unknown) => {
+          builder['insertedValues'] = values;
           return builder;
         }),
-        update: mock((values: any) => {
-          builder.updatedValues = values;
+        update: mock((values: unknown) => {
+          builder['updatedValues'] = values;
           return builder;
         }),
         delete: mock(() => {
-          builder.isDelete = true;
+          builder['isDelete'] = true;
           return builder;
         }),
-        eq: mock((col: string, val: any) => {
-          builder.filterEq = { col, val };
+        eq: mock((col: string, val: unknown) => {
+          builder['filterEq'] = { col, val };
           return builder;
         }),
-        order: mock((col: string, opt: any) => {
-          builder.orderBy = { col, opt };
+        order: mock((col: string, opt: unknown) => {
+          builder['orderBy'] = { col, opt };
           return builder;
         }),
-        then: (onfulfilled: any) => {
-          if (builder.isDelete) {
+        then: (onfulfilled: (value: unknown) => unknown) => {
+          if (builder['isDelete']) {
             return Promise.resolve({ data: [{ id: 1 }], error: null }).then(onfulfilled);
           }
-          if (builder.updatedValues) {
-            return Promise.resolve({ data: [{ id: 1, ...builder.updatedValues }], error: null }).then(onfulfilled);
+          if (builder['updatedValues']) {
+            return Promise.resolve({ data: [{ id: 1, ...builder['updatedValues'] }], error: null }).then(onfulfilled);
           }
-          if (builder.insertedValues) {
-            return Promise.resolve({ data: [{ id: 10, ...builder.insertedValues }], error: null }).then(onfulfilled);
+          if (builder['insertedValues']) {
+            return Promise.resolve({ data: [{ id: 10, ...builder['insertedValues'] }], error: null }).then(onfulfilled);
           }
           return Promise.resolve({
             data: [{ id: 1, name: 'Table Record', table: tableName }],
@@ -115,20 +114,22 @@ function createMockSupabaseClient(overrides: Record<string, any> = {}) {
       return builder;
     }),
     schema: mock((schemaName: string) => {
-      const scopedClient: any = {
+      const scopedClient: Record<string, unknown> = {
         ...client,
         schemaName,
-        rpc: mock(async (fnName: string, args: any, options?: any) => {
+        rpc: mock(async (fnName: string, args: unknown, options?: unknown) => {
           return { data: { schema: schemaName, fnName, args, options }, error: null };
         }),
         from: mock((tableName: string) => {
-          return client.from(`${schemaName}.${tableName}`);
+          const parentFrom = client['from'];
+          if (typeof parentFrom !== 'function') throw new Error('Mock client is missing from()');
+          return parentFrom(`${schemaName}.${tableName}`);
         }),
       };
       return scopedClient;
     }),
     channel: mock((name: string) => {
-      const c: any = {
+      const c: Record<string, unknown> = {
         name,
         on: mock(() => c),
         subscribe: mock(() => c),
@@ -140,7 +141,7 @@ function createMockSupabaseClient(overrides: Record<string, any> = {}) {
   };
   // If there are top-level overrides besides auth/functions, merge them
   for (const [key, val] of Object.entries(overrides)) {
-    if (key !== 'auth' && key !== 'functions') (client as any)[key] = val;
+    if (key !== 'auth' && key !== 'functions') client[key] = val;
   }
   return client as unknown as SupabaseClient;
 }
@@ -150,7 +151,7 @@ function createMockSupabaseClient(overrides: Record<string, any> = {}) {
 describe('Supabase DataProvider', () => {
   test('getList routes through refine-adapter', async () => {
     const { createSupabaseDataProvider } = await import('./data-provider');
-    const dp = await createSupabaseDataProvider({} as any);
+    const dp = await createSupabaseDataProvider({} as unknown);
     const result = await dp.getList({ resource: 'posts' });
     expect(result.data).toHaveLength(1);
     expect(result.total).toBe(1);
@@ -159,7 +160,7 @@ describe('Supabase DataProvider', () => {
 
   test('create returns new record', async () => {
     const { createSupabaseDataProvider } = await import('./data-provider');
-    const dp = await createSupabaseDataProvider({} as any);
+    const dp = await createSupabaseDataProvider({} as unknown);
     const result = await dp.create({ resource: 'posts', variables: { title: 'New Item' } });
     expect(result.data['id']).toBe(2);
   });
@@ -177,8 +178,8 @@ describe('Supabase DataProvider', () => {
     });
 
     expect(client.rpc).toHaveBeenCalled();
-    expect((res.data as any).fnName).toBe('calculate_order_stats');
-    expect((res.data as any).args).toEqual({ order_id: 123 });
+    expect((res.data as { fnName: string; args: unknown }).fnName).toBe('calculate_order_stats');
+    expect((res.data as { fnName: string; args: unknown }).args).toEqual({ order_id: 123 });
   });
 
   test('custom invokes RPC with meta.rpc and schema targeting', async () => {
@@ -195,8 +196,8 @@ describe('Supabase DataProvider', () => {
     });
 
     expect(client.schema).toHaveBeenCalledWith('api');
-    expect((res.data as any).schema).toBe('api');
-    expect((res.data as any).fnName).toBe('atomic_intake');
+    expect((res.data as { schema: string; fnName: string }).schema).toBe('api');
+    expect((res.data as { schema: string; fnName: string }).fnName).toBe('atomic_intake');
   });
 
   test('custom throws descriptive error on RPC failure', async () => {
@@ -227,9 +228,9 @@ describe('Supabase DataProvider', () => {
     });
 
     expect(client.functions.invoke).toHaveBeenCalled();
-    expect((res.data as any).fnName).toBe('generate-report');
-    expect((res.data as any).options.body).toEqual({ report_id: 'r100' });
-    expect((res.data as any).options.headers).toEqual({ 'X-Custom-Header': 'test' });
+    expect((res.data as { fnName: string; options: { body: unknown; headers: unknown } }).fnName).toBe('generate-report');
+    expect((res.data as { fnName: string; options: { body: unknown; headers: unknown } }).options.body).toEqual({ report_id: 'r100' });
+    expect((res.data as { fnName: string; options: { body: unknown; headers: unknown } }).options.headers).toEqual({ 'X-Custom-Header': 'test' });
   });
 
   test('custom throws descriptive error on Edge Function failure', async () => {
@@ -301,8 +302,8 @@ describe('Supabase RPC Helper', () => {
 
     const result = await rpc.call('get_user_metrics', { user_id: 'u1' });
     expect(client.rpc).toHaveBeenCalledWith('get_user_metrics', { user_id: 'u1' }, {});
-    expect((result as any).procResult).toBe(true);
-    expect((result as any).fnName).toBe('get_user_metrics');
+    expect((result as { procResult: boolean; fnName: string }).procResult).toBe(true);
+    expect((result as { procResult: boolean; fnName: string }).fnName).toBe('get_user_metrics');
   });
 
   test('createSupabaseRpc respects default options and schema override', async () => {
@@ -312,8 +313,8 @@ describe('Supabase RPC Helper', () => {
 
     const result = await rpc.call('daily_active_users', { day: '2026-08-20' });
     expect(client.schema).toHaveBeenCalledWith('analytics');
-    expect((result as any).schema).toBe('analytics');
-    expect((result as any).options.get).toBe(true);
+    expect((result as { schema: string; options: { get: boolean } }).schema).toBe('analytics');
+    expect((result as { schema: string; options: { get: boolean } }).options.get).toBe(true);
   });
 
   test('createSupabaseRpc throws formatted error on RPC failure', async () => {

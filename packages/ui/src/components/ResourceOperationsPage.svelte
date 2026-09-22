@@ -1,6 +1,7 @@
 <script lang="ts">
   import { captureAdminContext, useCan, useNavigation } from '@svadmin/core';
   import type { Component, ComponentProps } from 'svelte';
+  import type { ResourceRendering } from '../rendering/index.js';
   import AutoTable from './AutoTable.svelte';
   import { Badge } from './ui/badge/index.js';
   import { Button } from './ui/button/index.js';
@@ -77,8 +78,12 @@
     emptyLanesText = 'No grouped records yet.',
     highlightsLabel = 'Focus queue',
     workspaceStyle = 'operations',
-    tableProps = {},
+    tableProps: rawTableProps = {},
   }: Props = $props();
+  const tableProps = $derived({
+    ...rawTableProps,
+    ...(rendering === undefined ? {} : { rendering }),
+  });
   const navigation = useNavigation();
   const context = captureAdminContext();
   const resource = $derived(context.getResource(resourceName));

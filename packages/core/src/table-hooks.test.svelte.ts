@@ -1,6 +1,5 @@
 import { requireValue } from '../test/assertions';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe,it,expect,vi } from 'vitest';
 import { useTable } from './table-hooks.svelte';
 import { flushSync } from 'svelte';
@@ -46,9 +45,9 @@ vi.mock('@tanstack/svelte-query',async (importOriginal) => {
   const actual=await importOriginal<typeof import('@tanstack/svelte-query')>();
   const client=new actual.QueryClient();
   return {
-    ...actual as any,
+    ...actual,
     useQueryClient: () => client,
-    createQuery: (factory: any) => {
+    createQuery: (factory: () => { queryKey: readonly unknown[] }) => {
       const options=factory();
       const data={ data: [{ id: 1,title: 'Row' }],total: 1 };
       client.setQueryData(options.queryKey,data);

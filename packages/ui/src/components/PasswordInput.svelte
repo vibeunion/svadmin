@@ -1,10 +1,10 @@
 <script lang="ts">
-/* eslint-disable @typescript-eslint/no-explicit-any */
   import { Input } from './ui/input/index.js';
   import TooltipButton from './TooltipButton.svelte';
   import { Label } from './ui/label/index.js';
   import { Lock, Eye, EyeOff } from '@lucide/svelte';
   import { useTranslation } from '@svadmin/core/i18n';
+  import type { FullAutoFill } from 'svelte/elements';
 
   const i18n = useTranslation();
 
@@ -13,7 +13,7 @@
     label: string;
     value: string;
     placeholder?: string;
-    autocomplete?: string;
+    autocomplete?: FullAutoFill;
     showStrength?: boolean;
     disabled?: boolean;
     class?: string;
@@ -67,7 +67,7 @@
       {placeholder}
       bind:value
       class="svadmin-u-9e83b2412bc9 svadmin-u-1b1df78e4d0a"
-      autocomplete={autocomplete as any}
+      {autocomplete}
       {disabled}
     />
     <TooltipButton

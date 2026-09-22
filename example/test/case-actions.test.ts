@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { createCaseActions } from '../src/pages/case-actions.js';
-import { createCaseWorkspaceState } from '../src/pages/case-workspace.svelte.js';
+import { createCaseActions } from '../src/features/case/case-actions.js';
+import { createCaseWorkspaceState } from '../src/features/case/case-workspace.svelte.js';
 
 describe('case workspace actions', () => {
   it('advances through execution and completes the evidence gate', () => {

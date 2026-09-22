@@ -7,7 +7,7 @@ import Select from "./select/select.svelte";
 
 describe("design system size contract", () => {
 	it("exposes the compact size on native form primitives", () => {
-		const input = render(Input, { size: "compact", "aria-label": "Name" });
+		const input = render(Input, { "data-size": "compact", "aria-label": "Name" });
 		expect(input.getByLabelText("Name").getAttribute("data-size")).toBe("compact");
 
 		const select = render(Select, { size: "compact", "aria-label": "Status" });

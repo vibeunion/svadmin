@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { provideAdminContext, type TaskProvider, type DataProvider, type AccessControlProvider } from '@svadmin/core';
+  import { provideAdminContext, type TaskProvider, type DataProvider, type AccessControlProvider, type ResourceDefinition } from '@svadmin/core';
   import { definedReactiveOptions } from '@svadmin/core/options';
   import { QueryClientProvider, type QueryClient } from '@tanstack/svelte-query';
   import CancelTaskButton from './CancelTaskButton.svelte';
@@ -25,7 +25,7 @@
     deleteOne: async () => ({ data: {} }),
   };
   provideAdminContext(definedReactiveOptions({
-    dataProvider, resources: [],
+    dataProvider, resources: [] as ResourceDefinition[],
     get taskProvider() { return provider; },
     get tenant() { return { tenantId: tenant }; },
     get accessControlProvider() { return access; },

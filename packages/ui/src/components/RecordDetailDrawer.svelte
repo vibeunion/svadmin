@@ -7,7 +7,7 @@
   import BoundRecordDetailDrawer from './BoundRecordDetailDrawer.svelte';
   import DetailDrawer from './DetailDrawer.svelte';
 
-  let { resourceName, open = $bindable(false), recordId, onClose, extraSections }: {
+  let { resourceName, rendering, open = $bindable(false), recordId, onClose, extraSections }: {
     resourceName: string;
     rendering?: ResourceRendering | undefined;
     open?: boolean;
@@ -21,7 +21,7 @@
 
 {#if open}
   {#if recordId != null}
-    <BoundRecordDetailDrawer {resourceName} {recordId} bind:open {...definedOptions({ onClose, extraSections })} />
+    <BoundRecordDetailDrawer {resourceName} {recordId} {rendering} bind:open {...definedOptions({ onClose, extraSections })} />
   {:else}
     <DetailDrawer bind:open title="{context.getResource(resourceName).label} {i18n.t('common.detail')}"
       closeLabel={i18n.t('common.close')} {...definedOptions({ onClose })} data-svadmin-record-detail>

@@ -319,8 +319,8 @@ describe.each([['SPA', PivotTable], ['Lite', LitePivotTable]] as const)('%s pivo
       data: [{ r: 1, c: 'X', v: 0 }, { r: '1', c: 'Y', v: 5 }],
     });
     expect(view.getByRole('table', { name: 'Revenue' })).toBeTruthy();
-    expect(view.getByRole('rowheader', { name: '1', exact: true })).toBeTruthy();
-    expect(view.getByRole('rowheader', { name: '"1"', exact: true })).toBeTruthy();
+    expect(view.getByRole('rowheader', { name: /^1$/ })).toBeTruthy();
+    expect(view.getByRole('rowheader', { name: /^"1"$/ })).toBeTruthy();
     expect(view.container.querySelector('tbody tr')?.textContent).toContain('0');
     expect(view.container.querySelector('tbody')?.textContent).toContain('—');
   });
@@ -333,7 +333,7 @@ describe.each([['SPA', PivotTable], ['Lite', LitePivotTable]] as const)('%s pivo
     expect(total()).toBe('4');
     await view.rerender({ data: [{ r: 'C', c: 'Z', v: 20 }] });
     expect(total()).toBe('20');
-    expect(view.queryByRole('rowheader', { name: 'A', exact: true })).toBeNull();
+    expect(view.queryByRole('rowheader', { name: /^A$/ })).toBeNull();
   });
 
   it('renders empty, loading and error states instead of stale tables', async () => {
@@ -478,6 +478,7 @@ it.each(['tenant', 'auth'] as const)('SPA isolates cached results when %s change
   const authProvider: AuthProvider = {
     login: async () => ({ success: true }), logout: async () => ({ success: true }),
     check: async () => ({ authenticated: true }),
+    getIdentity: async () => null,
   };
   const values = new Map<string, unknown>();
   const cache = {
@@ -510,6 +511,7 @@ it('SPA hides results and rejects a late aggregate during and after logout', asy
     client, authProvider: {
       login: async () => ({ success: true }), logout: logoutCall,
       check: async () => ({ authenticated: true }),
+      getIdentity: async () => null,
     },
     settings: { ...fields, resource: 'orders', scopeKey: 'fixed', provider: { aggregate }, cache },
   });

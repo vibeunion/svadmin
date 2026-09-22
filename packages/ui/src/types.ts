@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type {
   I18nProvider,
   ProviderBundle,
@@ -15,9 +14,9 @@ export type AdminProviderBundle = ProviderBundle & {
   readonly i18nProvider?: I18nProvider;
 };
 
-export type RoleInfo = { code: string; name: string; [key: string]: any };
-export type ResourceInfo = { code: string; name: string; section?: string; [key: string]: any };
-export type ActionInfo = { code: string; name: string; [key: string]: any };
+export type RoleInfo = { code: string; name: string; [key: string]: unknown };
+export type ResourceInfo = { code: string; name: string; section?: string; [key: string]: unknown };
+export type ActionInfo = { code: string; name: string; [key: string]: unknown };
 
 export interface Tenant {
   id: string;
@@ -33,5 +32,5 @@ export interface GridModule {
   x: number;
   y: number;
   title?: string;
-  componentProps?: any; // Component specific props
+  componentProps?: Record<string, unknown>; // Component specific props
 }

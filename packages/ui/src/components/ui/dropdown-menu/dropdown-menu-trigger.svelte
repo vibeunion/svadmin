@@ -1,5 +1,4 @@
 <script lang="ts">
-/* eslint-disable @typescript-eslint/no-explicit-any */
 	import { cn, type WithElementRef } from "../../../utils.js";
 	import type { HTMLButtonAttributes } from "svelte/elements";
 	import { getContext } from "svelte";
@@ -19,7 +18,7 @@
 	function handleClick(e: MouseEvent) {
 		e.stopPropagation();
 		toggle?.();
-		restProps.onclick?.(e as any);
+		restProps.onclick?.(e as Parameters<NonNullable<typeof restProps.onclick>>[0]);
 	}
 </script>
 

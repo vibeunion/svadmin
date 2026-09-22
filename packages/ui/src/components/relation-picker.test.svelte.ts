@@ -7,7 +7,7 @@ import { type ComponentProps } from 'svelte';
 import Host from './relation-picker.test-host.svelte';
 
 const contract = defineResource('posts', { record: Type.Object({ id: Type.Number(), title: Type.String() }) });
-const resources: ResourceDefinition[] = [{ name: 'posts', fields: [], contract }];
+const resources: ResourceDefinition[] = [{ name: 'posts', label: 'Posts', fields: [], contract }];
 const clients: QueryClient[] = [];
 function provider(): DataProvider {
   return {

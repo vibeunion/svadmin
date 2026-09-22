@@ -56,6 +56,7 @@ describe('FilterBuilder component', () => {
     )).toEqual([]);
   }, 30_000);
   it('renders initial empty state and allows adding rules', async () => {
+    const onApply = vi.fn();
     const view = render(FilterBuilder, {
       fields: [],
       filters: [{ field: 'title', operator: 'contains', value: 'Svelte' }],
@@ -72,9 +73,8 @@ describe('FilterBuilder component', () => {
   });
 
   it('renders initial empty state and allows adding rules', async () => {
-    const view = render(FilterBuilderLocale, {
+    const view = render(FilterBuilder, {
       fields: testFields,
-      locale: 'zh',
     });
 
     expect(view.container.textContent).toContain('暂无筛选条件');

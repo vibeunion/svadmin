@@ -113,7 +113,7 @@ describe('Kanban mutation lifecycle', () => {
     const view = render(KanbanBoard, { columns, cards: initial, oncardadd });
     await fireEvent.click(view.getByRole('button', { name: 'Add card to To do' }));
     await fireEvent.input(view.getByRole('textbox', { name: 'Card title' }), { target: { value: 'New task' } });
-    await fireEvent.click(view.getByRole('button', { name: 'Add', exact: true }));
+    await fireEvent.click(view.getByRole('button', { name: /^Add$/ }));
     expect(view.queryByRole('group', { name: 'New task' })).toBeNull();
     expect(oncardadd).toHaveBeenCalledWith('todo', 'New task');
     pending.resolve({ id: 'server-123', title: 'New task', columnId: 'todo' });
@@ -125,7 +125,7 @@ describe('Kanban mutation lifecycle', () => {
     const view = render(KanbanBoard, { columns, cards: initial, oncardadd: async () => initial[0]! });
     await fireEvent.click(view.getByRole('button', { name: 'Add card to To do' }));
     await fireEvent.input(view.getByRole('textbox', { name: 'Card title' }), { target: { value: 'Draft' } });
-    await fireEvent.click(view.getByRole('button', { name: 'Add', exact: true }));
+    await fireEvent.click(view.getByRole('button', { name: /^Add$/ }));
     expect(view.getByRole('alert').textContent).toContain('Creation not confirmed');
     expect((view.getByRole('textbox', { name: 'Card title' }) as HTMLTextAreaElement).value).toBe('Draft');
     expect(view.getAllByRole('group', { name: 'Alpha' })).toHaveLength(1);

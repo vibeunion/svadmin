@@ -67,7 +67,7 @@ export {
   useCreate, useUpdate, useDelete, useCreateMany, useUpdateMany, useDeleteMany, useForm,
   useInvalidate,
 } from './strict-hooks.svelte';
-export { defineResource, getContractFormFields } from './resource-contract';
+export { defineResource, getContractFormFields, withContractProjection } from './resource-contract';
 export { UpdateManyPartialError } from './update-many-contract';
 export { CreateManyPartialError } from './create-many-contract';
 export type { ContractCreateOptions as UseCreateOptions } from './create-hooks.svelte';
@@ -77,6 +77,7 @@ export type { ContractUpdateParams as UseUpdateMutateParams } from './update-con
 export type { ContractDeleteOptions as UseDeleteOptions } from './delete-hooks.svelte';
 export type { ContractDeleteParams as UseDeleteMutateParams } from './delete-contract';
 export type { ContractFormAction, ContractFormDraft, ContractFormValues } from './resource-contract';
+export type { ContractProjectionOptions } from './resource-contract';
 export type { ResourceContract, ContractSchemas, ContractRecord, ContractId, ContractInput } from './resource-contract';
 export type { ContractFilter, ContractSort } from './strict-hooks.svelte';
 export { defineCommand } from './command-contract';

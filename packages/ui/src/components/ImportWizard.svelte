@@ -561,9 +561,11 @@
             <p role="alert">{i18n.t('task.fetchFailed')}</p>
             <Button type="button" onclick={() => taskQuery.refetch()}>{i18n.t('common.retry')}</Button>
           {:else if taskQuery.data && allowed}
-            <TaskStatusBadge status={taskQuery.data.status} />
-            {#if resolveTaskProgress(taskQuery.data) !== undefined}
-              <Progress value={resolveTaskProgress(taskQuery.data)} />
+            {@const status = taskQuery.data.status ?? 'pending'}
+            {@const progress = resolveTaskProgress(taskQuery.data)}
+            <TaskStatusBadge {status} />
+            {#if progress !== undefined}
+              <Progress value={progress} />
             {/if}
             {#if importResult}
               <p role="status">{i18n.t('common.succeeded')}: {importResult.succeeded};

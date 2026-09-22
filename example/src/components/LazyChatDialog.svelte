@@ -1,8 +1,6 @@
 <script lang="ts">
   import { definedOptions } from '@svadmin/core/options';
 
-  import type { Component } from 'svelte';
-
   type ChatDialogProps = {
     docked?: boolean;
     scope?: string;
@@ -11,12 +9,12 @@
 
   let { docked, scope, ownerScope }: ChatDialogProps = $props();
 
-  let dialogModulePromise = $state<Promise<{ ChatDialog: Component<ChatDialogProps> }> | undefined>(undefined);
+  let dialogModulePromise = $state<
+    Promise<{ ChatDialog: typeof import('@svadmin/ai-elements').ChatDialog }> | undefined
+  >(undefined);
 
   $effect(() => {
-    dialogModulePromise ??= import('@svadmin/ai-elements').then((m) => ({
-      ChatDialog: m.ChatDialog as unknown as Component<ChatDialogProps>,
-    }));
+    dialogModulePromise ??= import('@svadmin/ai-elements').then((m) => ({ ChatDialog: m.ChatDialog }));
   });
 </script>
 

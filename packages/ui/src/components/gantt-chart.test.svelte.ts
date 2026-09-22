@@ -76,14 +76,16 @@ describe('bounded Gantt model', () => {
 
 describe.each([['SPA', GanttChart], ['Lite', LiteGanttChart]] as const)('%s Gantt view', (_name, Component) => {
   it('renders a zero-duration milestone and rejects invalid dependencies atomically', async () => {
-    const view = render(Component, { tasks: [{ ...task, title: 'Release', durationDays: 0, milestone: true }] });
+    const renderable = Component as unknown as typeof GanttChart;
+    const view = render(renderable, { tasks: [{ ...task, title: 'Release', durationDays: 0, milestone: true }] });
     expect(view.getByRole(_name === 'SPA' ? 'group' : 'rowheader', { name: /Release, Milestone, Day 2/ })).toBeTruthy();
     await view.rerender({ tasks: [{ ...task, dependencies: ['missing'] }] });
     expect(view.getByRole('alert').textContent).toContain('dependencies');
     expect(view.queryByRole('group', { name: /Build/ })).toBeNull();
   });
   it('handles empty, loading and external failure without showing stale task content', async () => {
-    const view = render(Component, { tasks: [] });
+    const renderable = Component as unknown as typeof GanttChart;
+    const view = render(renderable, { tasks: [] });
     expect(view.getByRole('status').textContent).toContain('No schedule tasks');
     await view.rerender({ tasks: [task], loading: true });
     expect(view.getByRole('status').textContent).toContain('Loading');
@@ -96,7 +98,8 @@ describe.each([['SPA', GanttChart], ['Lite', LiteGanttChart]] as const)('%s Gant
   });
 
   it('rejects invalid durations, duplicate keys and oversized grids without partial rows', async () => {
-    const view = render(Component, { tasks: [{ ...task, durationDays: 0 }] });
+    const renderable = Component as unknown as typeof GanttChart;
+    const view = render(renderable, { tasks: [{ ...task, durationDays: 0 }] });
     expect(view.getByRole('alert').textContent).toContain('Invalid Gantt');
     expect(view.container.textContent).not.toContain('Build');
     await view.rerender({ tasks: [task, task] });
@@ -110,7 +113,8 @@ describe.each([['SPA', GanttChart], ['Lite', LiteGanttChart]] as const)('%s Gant
 
   it('updates task snapshots and internationalizes status labels', async () => {
     setLocale('zh-CN');
-    const view = render(Component, { tasks: [task] });
+    const renderable = Component as unknown as typeof GanttChart;
+    const view = render(renderable, { tasks: [task] });
     expect(view.container.textContent).toContain('项目甘特图');
     expect(view.container.textContent).toContain('1 个任务 / 14 天');
     expect(view.container.textContent).toContain('已计划');

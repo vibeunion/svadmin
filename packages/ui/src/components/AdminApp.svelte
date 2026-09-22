@@ -566,15 +566,15 @@
       {#key renderedRoute + (renderedParams['resource'] ?? '') + (renderedParams['id'] ?? '') + (renderedParams['variant'] ?? '') + (renderedParams['columns'] ?? '')}
       <div class="svadmin-page-enter">
       {#if renderedRoute === '/public-profile'}
-        <LazyPage loader={loadPublicProfilePage} props={{ variant: 'default', initialTab: 'projects' }} />
+        <LazyPage loader={loadPublicProfilePage} props={{ variant: 'default', initialTab: 'projects' } as const} />
       {:else if renderedRoute === '/public-profile/projects/:columns'}
-        <LazyPage loader={loadPublicProfilePage} props={{ variant: 'default', initialTab: 'projects', columns: renderedParams['columns']?.includes('3') ? 3 : 2 }} />
+        <LazyPage loader={loadPublicProfilePage} props={{ variant: 'default', initialTab: 'projects', columns: renderedParams['columns']?.includes('3') ? 3 : 2 } as const} />
       {:else if renderedRoute === '/public-profile/activity'}
-        <LazyPage loader={loadPublicProfilePage} props={{ variant: 'default', initialTab: 'activity' }} />
+        <LazyPage loader={loadPublicProfilePage} props={{ variant: 'default', initialTab: 'activity' } as const} />
       {:else if renderedRoute === '/public-profile/teams'}
-        <LazyPage loader={loadPublicProfilePage} props={{ variant: 'default', initialTab: 'teams' }} />
+        <LazyPage loader={loadPublicProfilePage} props={{ variant: 'default', initialTab: 'teams' } as const} />
       {:else if renderedRoute === '/public-profile/profiles/:variant'}
-        <LazyPage loader={loadPublicProfilePage} props={{ variant: (renderedParams['variant'] === 'company' || renderedParams['variant'] === 'gamer' || renderedParams['variant'] === 'default' ? renderedParams['variant'] : 'default') as 'company' | 'gamer' | 'default', showSections: true }} />
+        <LazyPage loader={loadPublicProfilePage} props={{ variant: (renderedParams['variant'] === 'company' || renderedParams['variant'] === 'gamer' || renderedParams['variant'] === 'default' ? renderedParams['variant'] : 'default') as 'company' | 'gamer' | 'default', showSections: true } as const} />
       {:else if renderedRoute === '/account/get-started' || renderedRoute === '/account/home/get-started'}
         <LazyPage loader={loadGetStartedPage} props={{}} />
       {:else if renderedRoute === '/account/home/user-profile'}

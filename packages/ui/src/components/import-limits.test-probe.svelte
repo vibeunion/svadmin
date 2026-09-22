@@ -4,9 +4,9 @@
 
   let { resourceName, maxRows, maxBytes, onReady }: {
     resourceName: string;
-    maxRows?: number;
-    maxBytes?: number;
-    onReady?: (driver: { handleChange(info: { file: File }): Promise<unknown>; readonly error: HttpError | null }) => void;
+    maxRows?: number | undefined;
+    maxBytes?: number | undefined;
+    onReady?: ((driver: { handleChange(info: { file: File }): Promise<unknown>; readonly error: HttpError | null }) => void) | undefined;
   } = $props();
   const binding = useResourceContract(() => resourceName);
   const importer = useImport(definedReactiveOptions({

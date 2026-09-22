@@ -1,0 +1,1 @@
+export { peopleResources } from './resources';

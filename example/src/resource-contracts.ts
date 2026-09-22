@@ -1,6 +1,6 @@
 import { defineResource, type ResourceContract } from '@svadmin/core/resource-contract';
 import { Type, type TObject } from '@sinclair/typebox';
-import { demoSchemas as schemas, isDemoResource } from './resource-schemas';
+import { demoSchemas as schemas, isDemoResource, type DemoResource } from './resource-schemas';
 
 /** 演示资源从表记录派生 create/update，否则 AutoForm 无法渲染。 */
 function writable<T extends TObject>(record: T) {
@@ -64,9 +64,11 @@ export const demoContracts = {
   security_devices: defineResource('security_devices', writable(schemas.security_devices)),
   security_allowed_ips: defineResource('security_allowed_ips', writable(schemas.security_allowed_ips)),
   referral_invites: defineResource('referral_invites', writable(schemas.referral_invites)),
-};
+} satisfies { [Name in DemoResource]: ResourceContract };
 
 /** Dynamic pages keep fields unknown, but still validate against the selected schema. */
+export function demoContract(name: DemoResource): ResourceContract;
+export function demoContract(name: string): ResourceContract;
 export function demoContract(name: string): ResourceContract {
   if (!isDemoResource(name)) throw new Error(`Unknown demo resource: ${name}`);
   return demoContracts[name];

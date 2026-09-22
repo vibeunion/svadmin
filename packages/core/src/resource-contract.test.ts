@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import { Type } from '@sinclair/typebox';
-import { contractProvider, contractFormValues, defineResource, contractKey, type ResourceContract } from './resource-contract';
+import { contractProvider, contractFormValues, defineResource, contractKey, type ResourceContract, withContractProjection } from './resource-contract';
 import { defineCommand, executeCommand } from './command-contract';
 import { keys, queryKeyMatches } from './query-keys';
 import { DeleteManyPartialError, type DataProvider } from './types';
@@ -11,6 +11,55 @@ import { fileURLToPath } from 'node:url';
 const record = Type.Object({ id: Type.Number(), title: Type.String(), count: Type.Number() });
 const row = { id: 1, title: 'Hello', count: 2 };
 const rows = [row, { ...row, id: 2 }];
+
+test('projects provider reads into closed contract records and synthesizes ids', async () => {
+  const contract = defineResource('settings_projection', {
+    record: Type.Object({
+      id: Type.String(),
+      config: Type.Object({
+        theme: Type.String(),
+        flags: Type.Array(Type.Object({ name: Type.String() })),
+      }),
+    }),
+  });
+  const provider: DataProvider = {
+    getApiUrl: () => '/api',
+    getList: async () => ({
+      data: [{
+        config: {
+          theme: 'dark',
+          flags: [{ name: 'beta', ignored: true }],
+          secret: 'must not escape',
+        },
+        serverOnly: true,
+      }],
+      total: 1,
+      cursor: 'next',
+    }),
+    getOne: async () => ({
+      data: { config: { theme: 'light', flags: [], serverOnly: true } },
+    }),
+    create: async () => ({ data: row }),
+    update: async () => ({ data: row }),
+    deleteOne: async () => ({ data: row }),
+  };
+  const projected = withContractProjection(provider, { settings_projection: contract });
+
+  await expect(projected.getList({ resource: 'settings_projection' })).resolves.toEqual({
+    data: [{
+      id: 'settings_projection:0',
+      config: { theme: 'dark', flags: [{ name: 'beta' }] },
+    }],
+    total: 1,
+    cursor: 'next',
+  });
+  await expect(projected.getOne({ resource: 'settings_projection', id: 'account' })).resolves.toEqual({
+    data: {
+      id: 'account',
+      config: { theme: 'light', flags: [] },
+    },
+  });
+});
 function fixture(configure?: (provider: DataProvider) => void, options: { contract?: ResourceContract; native?: boolean } = {}) {
   const calls: { method: string; params: unknown }[] = [];
   let response: unknown;

@@ -302,8 +302,8 @@ describe('TreeSelect component', () => {
     if (!tree) throw new Error('Missing tree');
     const before = document.createElement('div');
     before.tabIndex = 0;
-    before.dataset.treeValue = 'first';
-    before.dataset.treeKey = 'string:first';
+    before.dataset['treeValue'] = 'first';
+    before.dataset['treeKey'] = 'string:first';
     const after = before.cloneNode() as HTMLDivElement;
     tree.before(before);
     tree.after(after);

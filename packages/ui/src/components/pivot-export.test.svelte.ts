@@ -89,7 +89,7 @@ it.each(['https://evil.example/file.csv', 'javascript:alert(1)', 'data:text/plai
 it('blocks duplicate submission and ignores a late handle after scope change', async () => {
   const tasks = provider();
   let finish!: (value: Awaited<ReturnType<TaskProvider['submit']>>) => void;
-  tasks.submit = vi.fn(() => new Promise(resolve => { finish = resolve; }));
+  tasks.submit = vi.fn<NonNullable<TaskProvider['submit']>>(() => new Promise(resolve => { finish = resolve; }));
   const notified = vi.fn();
   const view = render(Host, { settings: { ...settings, taskProvider: tasks, onTaskSubmitted: notified } });
   const button = view.getByRole('button', { name: 'Export' });

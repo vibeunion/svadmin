@@ -63,21 +63,24 @@ describe('FieldRenderer advanced controls', () => {
     });
 
     const checkboxes = view.getAllByRole('checkbox');
-    expect(checkboxes[0].getAttribute('aria-checked')).toBe('true');
-    expect(checkboxes[0].hasAttribute('disabled')).toBe(true);
+    const firstCheckbox = checkboxes[0];
+    const secondCheckbox = checkboxes[1];
+    if (!firstCheckbox || !secondCheckbox) throw new Error('Expected two permission checkboxes');
+    expect(firstCheckbox.getAttribute('aria-checked')).toBe('true');
+    expect(firstCheckbox.hasAttribute('disabled')).toBe(true);
     expect(view.container.textContent).toContain('读取');
 
-    await fireEvent.click(checkboxes[0]);
+    await fireEvent.click(firstCheckbox);
     expect(onchange).not.toHaveBeenCalled();
     const remove = view.getByRole('button');
     expect(remove.hasAttribute('disabled')).toBe(true);
     await fireEvent.click(remove);
     expect(onchange).not.toHaveBeenCalled();
-    await fireEvent.click(checkboxes[1]);
+    await fireEvent.click(secondCheckbox);
     expect(onchange).toHaveBeenLastCalledWith(['read', 'write']);
     onchange.mockClear();
     await view.rerender({ disabled: true });
-    await fireEvent.click(checkboxes[1]);
+    await fireEvent.click(secondCheckbox);
     expect(onchange).not.toHaveBeenCalled();
   });
 

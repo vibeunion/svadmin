@@ -1,0 +1,1 @@
+export { domainResources } from './resources';

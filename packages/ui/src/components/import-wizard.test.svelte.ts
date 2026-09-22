@@ -52,8 +52,8 @@ function mount(source = provider(), options: {
   resourceName?: string;
   resources?: ResourceDefinition[];
   onSuccess?: (result: { succeeded: number; failed: number }) => void;
-  maxRows?: number;
-  maxBytes?: number;
+  maxRows?: number | undefined;
+  maxBytes?: number | undefined;
   coreProbe?: boolean;
   taskProvider?: TaskProvider;
   taskArtifactProvider?: ImportArtifactProvider;
@@ -409,7 +409,7 @@ describe('ImportWizard component workflow', () => {
       cancel: vi.fn(async id => { status = 'cancelled'; return { id, status }; }),
     });
     const app = mount(provider(), { taskName: 'import-posts', taskProvider: tasks, initialTaskId: 'cancel-1' });
-    await fireEvent.click(await app.view.findByRole('button', { name: 'Cancel', exact: true }));
+    await fireEvent.click(await app.view.findByRole('button', { name: /^Cancel$/ }));
     await waitFor(() => expect(tasks.cancel).toHaveBeenCalledWith('cancel-1'));
     await app.view.findByText('Cancelled');
     expect(tasks.submit).not.toHaveBeenCalled();
@@ -479,13 +479,15 @@ describe('ImportWizard component workflow', () => {
 
   it('stops subsequent submissions and ignores a late success after cancellation', async () => {
     let resolveWrite: (value: { data: { id: number; title: string; quantity: number } }) => void = () => {};
-    const source = provider({ create: vi.fn(() => new Promise(resolve => { resolveWrite = resolve; })) });
+    const source = provider({
+      create: vi.fn<NonNullable<DataProvider['create']>>(() => new Promise(resolve => { resolveWrite = resolve; })),
+    });
     const onSuccess = vi.fn();
     const app = mount(source, { onSuccess });
     await selectFile(csvFile('title,quantity\nFirst,1\nSecond,2'));
     await fireEvent.click(await app.view.findByRole('button', { name: /Start Import/i }));
     await waitFor(() => expect(source.create).toHaveBeenCalledTimes(1));
-    await fireEvent.click(app.view.getByRole('button', { name: 'Cancel', exact: true }));
+    await fireEvent.click(app.view.getByRole('button', { name: /^Cancel$/ }));
     expect(app.view.getByRole('status').textContent).toContain('may have been committed');
     expect(app.view.queryByText('Completed', { exact: true })).toBeNull();
     expect(app.view.queryByRole('progressbar')).toBeNull();
@@ -643,7 +645,9 @@ describe('ImportWizard component workflow', () => {
   it.each(['tenant', 'provider', 'close'] as const)(
     'retires an in-flight import after %s changes', async change => {
       let resolveWrite: (value: { data: { id: number; title: string; quantity: number } }) => void = () => {};
-      const source = provider({ create: vi.fn(() => new Promise(resolve => { resolveWrite = resolve; })) });
+      const source = provider({
+        create: vi.fn<NonNullable<DataProvider['create']>>(() => new Promise(resolve => { resolveWrite = resolve; })),
+      });
       const onSuccess = vi.fn();
       const app = mount(source, { onSuccess });
       await selectFile(csvFile('title,quantity\nPrivate,1\nLater,2'));
