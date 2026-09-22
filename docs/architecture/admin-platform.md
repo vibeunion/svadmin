@@ -50,7 +50,8 @@ export default defineAdminConfig({
 - `resolveAdminConfig()` 是纯函数：把插件贡献折叠成确定性快照，并返回
   `diagnostics`，不抛异常。`assertAdminConfig()` 在启动与 `doctor` 中用于快速失败。
 - `toAdminContextSource()` 产出可直接传给 `provideAdminContext` 的形状；
-  `provideAdminConfig()` 在组件初始化时一次性安装到 scoped `AdminContext`。
+  `provideAdminConfig()` 在组件初始化时一次性安装到 scoped `AdminContext`；
+  `provideResourceScope()` 在任意子树叠加 Application→Route→Resource→Component 的覆盖。
 - `buildAdminManifest()` 把 resolved config 序列化成 `svadmin.ai.json` 的稳定内容
   （provider、资源字段、contract 字段、插件能力、项目命令与禁止 import）。
 
@@ -66,6 +67,13 @@ export default defineAdminConfig({
 | `svadmin add resource\|provider\|auth` 幂等命令 + `src/features/*` 模块模板 | 已落地 |
 | `svadmin.schema.json` JSON Schema + `migrate` 别名 | 已落地 |
 | `@svadmin/app` 应用层包（含 `createAdminApp`），脚手架已消费 | 已落地 |
+| 黄金路径 preset（`init --preset supabase\|rest\|graphql`） | 已落地 |
+| `svadmin.ai.json` 路由、组件目录、迁移规则；plugin `configSchema` | 已落地 |
+| Provider 包级 capability/compat 元数据（`package.json` 的 `svadmin` 字段）+ `doctor` 校验 | 已落地 |
+| 四层作用域覆盖（`provideResourceScope`） | 已落地 |
+| 黄金路径 preset（`init --preset supabase\|rest\|graphql`） | 已落地 |
+| `svadmin.ai.json` 路由、组件目录、迁移规则；plugin `configSchema` | 已落地 |
+| `@svadmin/devtools` 完整诊断应用 | 待办（现有 `@svadmin/devtools-contract` + UI `DevTools`） |
 
 ## 插件契约
 
@@ -124,7 +132,7 @@ src/
 2. Simple REST + JWT + Vite
 3. GraphQL + SvelteKit + `@svadmin/ui`
 
-CLI 提供预设：`svadmin init my-app --preset supabase|rest|graphql`。
+CLI 提供预设：`svadmin init my-app --preset supabase|rest|graphql`（已落地）。
 
 ## CLI 合约
 
@@ -143,9 +151,12 @@ CLI 提供预设：`svadmin init my-app --preset supabase|rest|graphql`。
 
 - `src/svadmin.config.ts`：应用组合。数据/认证 provider 在模块顶层解析
   （异步 provider 用 top-level await），导出完整静态配置。
-- `svadmin.ai.json`：可用 Provider 能力矩阵、资源字段与操作、项目与测试命令、
-  禁止的内部 import。由 `buildScaffoldPlatformFiles()` 生成。
+- `svadmin.ai.json`：可用 Provider 能力矩阵、资源字段与操作、路由、组件目录、
+  迁移规则、项目与测试命令、禁止的内部 import。由 `buildScaffoldPlatformFiles()` 生成。
 - `svadmin.schema.json`：`svadmin.ai.json` 的 JSON Schema（draft 2020-12）。
+
+Provider 包在 `package.json` 声明 `svadmin` 元数据（`capabilities`、`core`、`stability`、
+`migration`）；`doctor` 在包已安装时校验其 core 范围与项目一致。
 
 AI 只需读取这些入口，不需要扫描整个仓库。`generate` 与 `doctor` 必须真正执行
 现有 guidance 规则（schema-first、禁止猜字段、禁止 `any`、显式绑定资源）。

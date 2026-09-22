@@ -91,6 +91,8 @@ export type {
   ResolvedAdminContextSource,
 } from './admin-config';
 export { provideAdminConfig } from './admin-config-runtime.svelte';
+export { provideResourceScope } from './resource-scope.svelte';
+export type { ResourceScope } from './resource-scope.svelte';
 export { buildAdminManifest } from './admin-manifest';
 export type {
   AdminManifest,

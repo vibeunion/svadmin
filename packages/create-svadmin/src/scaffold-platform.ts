@@ -22,6 +22,10 @@ export interface ScaffoldPlatformOptions {
   projectName: string;
   dataProvider: DataProviderChoice;
   authProvider: AuthProviderChoice;
+  /** `@svadmin/create` version, recorded in the manifest migration section. */
+  scaffoldVersion?: string;
+  /** `@svadmin/core` range the project targets. */
+  coreVersionRange?: string;
 }
 
 export interface ScaffoldPlatformFile {
@@ -54,6 +58,24 @@ export interface ScaffoldResource {
   operations: readonly string[];
 }
 
+export interface AdminManifestRoute {
+  resource: string;
+  path: string;
+  operations: readonly string[];
+}
+
+export interface AdminManifestComponent {
+  name: string;
+  package: string;
+  import: string;
+}
+
+export interface AdminManifestMigration {
+  scaffoldVersion: string;
+  coreVersionRange: string | null;
+  notes: readonly string[];
+}
+
 export interface AdminAiManifest {
   $schema: string;
   version: 1;
@@ -72,6 +94,9 @@ export interface AdminAiManifest {
     auth: { choice: AuthProviderChoice } & ScaffoldProviderDescriptor;
   };
   resources: readonly ScaffoldResource[];
+  routes: readonly AdminManifestRoute[];
+  components: readonly AdminManifestComponent[];
+  migration: AdminManifestMigration;
   plugins: readonly unknown[];
   guidance: readonly string[];
 }
@@ -170,6 +195,34 @@ export const SCAFFOLD_RESOURCES: readonly ScaffoldResource[] = [
     ],
   },
 ];
+
+const SCAFFOLD_MIGRATION_NOTES = [
+  'Run `create-svadmin doctor` after changing providers or dependencies.',
+  'Apply dependency migrations with `create-svadmin migrate --write`.',
+  'Keep src/svadmin.config.ts and svadmin.ai.json in sync.',
+] as const;
+
+/** Curated public UI surface for AI page generation. */
+export const SCAFFOLD_UI_COMPONENTS: readonly AdminManifestComponent[] = [
+  'AdminApp',
+  'AutoTable',
+  'AutoForm',
+  'ShowPage',
+  'Layout',
+  'Sidebar',
+  'Header',
+  'CommandPalette',
+  'DataState',
+  'CreateButton',
+  'EditButton',
+  'DeleteButton',
+  'ShowButton',
+  'RefreshButton',
+  'ExportButton',
+  'ImportButton',
+  'FilterBuilder',
+  'ConfigErrorScreen',
+].map((name) => ({ name, package: '@svadmin/ui', import: '@svadmin/ui' }));
 
 const CUSTOM_DATA_PROVIDER_BODY = [
   'const unsupported = (): never => {',
@@ -294,6 +347,17 @@ export function buildAdminAiManifest(options: ScaffoldPlatformOptions): AdminAiM
       auth: { choice: options.authProvider, ...SCAFFOLD_AUTH_PROVIDERS[options.authProvider] },
     },
     resources: SCAFFOLD_RESOURCES,
+    routes: SCAFFOLD_RESOURCES.map((resource) => ({
+      resource: resource.name,
+      path: `/${resource.name}`,
+      operations: resource.operations,
+    })),
+    components: SCAFFOLD_UI_COMPONENTS,
+    migration: {
+      scaffoldVersion: options.scaffoldVersion ?? '0.0.0',
+      coreVersionRange: options.coreVersionRange ?? null,
+      notes: SCAFFOLD_MIGRATION_NOTES,
+    },
     plugins: [],
     guidance: ['AGENTS.md', 'DESIGN.md'],
   };
@@ -377,6 +441,39 @@ export function buildAdminSchemaJson(): Record<string, unknown> {
         properties: { data: provider, auth: provider },
       },
       resources: { type: 'array', items: resource },
+      routes: {
+        type: 'array',
+        items: {
+          type: 'object',
+          required: ['resource', 'path', 'operations'],
+          properties: {
+            resource: { type: 'string' },
+            path: { type: 'string' },
+            operations: { type: 'array', items: { type: 'string' } },
+          },
+        },
+      },
+      components: {
+        type: 'array',
+        items: {
+          type: 'object',
+          required: ['name', 'package', 'import'],
+          properties: {
+            name: { type: 'string' },
+            package: { type: 'string' },
+            import: { type: 'string' },
+          },
+        },
+      },
+      migration: {
+        type: 'object',
+        required: ['scaffoldVersion', 'notes'],
+        properties: {
+          scaffoldVersion: { type: 'string' },
+          coreVersionRange: { type: ['string', 'null'] },
+          notes: { type: 'array', items: { type: 'string' } },
+        },
+      },
       plugins: { type: 'array' },
       guidance: { type: 'array', items: { type: 'string' } },
     },
@@ -421,6 +518,42 @@ function declaredDependencies(project: MaintainedPackageJson): Set<string> {
   ]);
 }
 
+interface InstalledSvadminMeta {
+  capabilities?: unknown;
+  core?: unknown;
+  stability?: unknown;
+}
+
+function readInstalledProviderMeta(
+  projectDirectory: string,
+  packageName: string,
+): InstalledSvadminMeta | null {
+  const manifestPath = join(projectDirectory, 'node_modules', ...packageName.split('/'), 'package.json');
+  if (!existsSync(manifestPath)) return null;
+  try {
+    const parsed: unknown = JSON.parse(readFileSync(manifestPath, 'utf8'));
+    const meta = typeof parsed === 'object' && parsed !== null ? Reflect.get(parsed, 'svadmin') : undefined;
+    return typeof meta === 'object' && meta !== null ? meta as InstalledSvadminMeta : null;
+  } catch {
+    return null;
+  }
+}
+
+function firstVersion(range: string): [number, number, number] | null {
+  const match = /(\d+)\.(\d+)\.(\d+)/u.exec(range);
+  if (match === null) return null;
+  return [Number(match[1]), Number(match[2]), Number(match[3])];
+}
+
+/** Conservative compatibility: different major, or different minor on 0.x, is incompatible. */
+function coreRangesCompatible(projectRange: string, moduleRange: string): boolean {
+  const project = firstVersion(projectRange);
+  const module = firstVersion(moduleRange);
+  if (project === null || module === null) return true;
+  if (project[0] !== module[0]) return false;
+  return project[0] !== 0 || project[1] === module[1];
+}
+
 /**
  * Validates the AI manifest against the project. Only runs when the project
  * opted into the platform entrypoints, so legacy projects stay clean.
@@ -458,6 +591,7 @@ export function checkAdminManifest(
     manifest.providers.data.package,
     manifest.providers.auth.package,
   ].filter((name): name is string => name !== null);
+  const declaredCore = project.dependencies?.['@svadmin/core'] ?? project.devDependencies?.['@svadmin/core'];
 
   for (const packageName of new Set(providerPackages)) {
     if (!dependencies.has(packageName)) {
@@ -465,6 +599,23 @@ export function checkAdminManifest(
         path: manifestPath,
         message: `svadmin.ai.json declares provider "${packageName}" but package.json does not depend on it`,
         action: `add ${packageName} to package.json or update svadmin.ai.json`,
+      });
+      continue;
+    }
+    const meta = readInstalledProviderMeta(projectDirectory, packageName);
+    if (meta === null) continue;
+    if (meta.capabilities !== undefined && !Array.isArray(meta.capabilities)) {
+      issues.push({
+        path: manifestPath,
+        message: `${packageName} declares a non-array svadmin.capabilities`,
+        action: 'fix the provider package metadata',
+      });
+    }
+    if (typeof meta.core === 'string' && declaredCore !== undefined && !coreRangesCompatible(declaredCore, meta.core)) {
+      issues.push({
+        path: manifestPath,
+        message: `${packageName} declares @svadmin/core ${meta.core}, incompatible with the project range ${declaredCore}`,
+        action: `align @svadmin/core with ${meta.core} or upgrade ${packageName}`,
       });
     }
   }

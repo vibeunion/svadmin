@@ -15,6 +15,7 @@ export {
   normalizeAdminResource,
   buildAdminManifest,
   provideAdminConfig,
+  provideResourceScope,
   createProviderBundle,
 } from '@svadmin/core';
 export type {
@@ -36,6 +37,7 @@ export type {
   ProviderBundle,
   ResolvedAdminConfig,
   ResolvedAdminContextSource,
+  ResourceScope,
 } from '@svadmin/core';
 
 import {

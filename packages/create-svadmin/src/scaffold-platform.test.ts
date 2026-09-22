@@ -70,6 +70,10 @@ test('AI manifest captures providers, resources, and guardrails', () => {
   });
   expect(manifest.providers.auth.package).toBe('@svadmin/simple-rest');
   expect(manifest.resources.map((resource) => resource.name)).toEqual(['posts', 'users', 'comments', 'todos']);
+  expect(manifest.routes[0]).toEqual({ resource: 'posts', path: '/posts', operations: ['list', 'create', 'edit', 'show', 'delete'] });
+  expect(manifest.components.some((component) => component.name === 'AdminApp')).toBe(true);
+  expect(manifest.migration.scaffoldVersion).toBe('0.0.0');
+  expect(manifest.migration.notes.length).toBeGreaterThan(0);
   expect(manifest.project.forbiddenImports).toContain('@svadmin/ui/src');
   expect(() => JSON.stringify(manifest)).not.toThrow();
 });
@@ -90,6 +94,42 @@ test('buildScaffoldPlatformFiles emits the config, manifest, and schema entrypoi
 test('buildAdminSchemaJson requires the core manifest fields', () => {
   const schema = buildAdminSchemaJson();
   expect(schema['required']).toEqual(['version', 'project', 'providers', 'resources']);
+});
+
+test('checkAdminManifest flags provider core-range mismatches', async () => {
+  const projectDirectory = await mkdtemp(join(tmpdir(), 'create-svadmin-provider-meta-'));
+  try {
+    await mkdir(join(projectDirectory, 'src'), { recursive: true });
+    await writeFile(join(projectDirectory, SCAFFOLD_CONFIG_PATH), 'export default {};\n');
+    await writeFile(
+      join(projectDirectory, ADMIN_AI_MANIFEST_FILENAME),
+      `${JSON.stringify(buildAdminAiManifest({ projectName: 'demo', dataProvider: 'simple-rest', authProvider: 'mock' }))}\n`,
+    );
+    await writeFile(join(projectDirectory, ADMIN_SCHEMA_FILENAME), `${JSON.stringify(buildAdminSchemaJson())}\n`);
+    const project = {
+      name: 'demo',
+      dependencies: { '@svadmin/simple-rest': '^0.11.0', '@svadmin/core': '^0.55.0' },
+    };
+
+    const providerDirectory = join(projectDirectory, 'node_modules', '@svadmin', 'simple-rest');
+    await mkdir(providerDirectory, { recursive: true });
+    await writeFile(
+      join(providerDirectory, 'package.json'),
+      `${JSON.stringify({ name: '@svadmin/simple-rest', svadmin: { capabilities: ['data'], core: '^0.40.0' } })}\n`,
+    );
+
+    const issues = checkAdminManifest(projectDirectory, project);
+    expect(issues).toHaveLength(1);
+    expect(issues[0]?.message).toContain('@svadmin/core ^0.40.0');
+
+    await writeFile(
+      join(providerDirectory, 'package.json'),
+      `${JSON.stringify({ name: '@svadmin/simple-rest', svadmin: { capabilities: ['data'], core: '^0.55.0' } })}\n`,
+    );
+    expect(checkAdminManifest(projectDirectory, project)).toEqual([]);
+  } finally {
+    await rm(projectDirectory, { recursive: true, force: true });
+  }
 });
 
 test('checkAdminManifest is opt-in and validates provider dependencies', async () => {

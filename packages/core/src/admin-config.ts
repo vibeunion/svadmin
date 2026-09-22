@@ -48,6 +48,8 @@ export interface AdminPluginDescriptor {
   readonly name: string;
   readonly version: string;
   readonly capabilities: readonly AdminPluginCapability[];
+  /** Optional JSON-schema-like config contract (for example a TypeBox schema). */
+  readonly configSchema?: unknown;
   readonly providers?: readonly string[];
   readonly commands?: readonly string[];
   readonly generators?: readonly string[];

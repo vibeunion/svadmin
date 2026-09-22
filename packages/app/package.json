@@ -18,6 +18,12 @@
     "directory": "packages/app"
   },
   "sideEffects": false,
+  "svadmin": {
+    "capabilities": ["app-config", "plugin-registry", "runtime-binding", "ai-manifest"],
+    "core": "^0.55.0",
+    "stability": "experimental",
+    "migration": null
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

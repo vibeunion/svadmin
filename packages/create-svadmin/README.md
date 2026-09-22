@@ -17,6 +17,25 @@ Follow the interactive prompts to:
 2. Choose a default Data Provider (Simple REST, Supabase, GraphQL, or Custom).
 3. Choose an Auth Provider (Mock, JWT, Supabase, or None).
 
+### Golden-path presets
+
+Skip the prompts with a curated preset:
+
+```bash
+npx @svadmin/create init my-admin-app --preset supabase
+npx @svadmin/create init my-admin-app --preset rest
+npx @svadmin/create init my-admin-app --preset graphql
+```
+
+| Preset | Data provider | Auth provider |
+| --- | --- | --- |
+| `supabase` | Supabase | Supabase Auth |
+| `rest` | Simple REST | REST JWT |
+| `graphql` | GraphQL | Mock (demo) |
+
+Override any field explicitly: `--data-provider graphql --auth-provider none`, and
+skip install with `--no-install`. Explicit flags always win over the preset.
+
 ## What's Included
 
 The generated project is pre-configured with:

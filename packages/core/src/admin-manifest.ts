@@ -42,6 +42,7 @@ export interface AdminManifestPlugin {
   readonly name: string;
   readonly version: string;
   readonly capabilities: readonly AdminPluginCapability[];
+  readonly configSchema?: unknown;
 }
 
 export interface AdminManifest {
@@ -125,6 +126,7 @@ export function buildAdminManifest(
       name: plugin.name,
       version: plugin.version,
       capabilities: plugin.capabilities,
+      ...(plugin.configSchema !== undefined ? { configSchema: plugin.configSchema } : {}),
     })),
   };
 }
