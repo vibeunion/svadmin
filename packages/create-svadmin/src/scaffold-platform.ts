@@ -137,11 +137,6 @@ export interface AdminAiManifest {
   guidance: readonly string[];
 }
 
-interface MaintainedPackageJsonLike extends MaintainedPackageJson {
-  dependencies?: Record<string, string>;
-  devDependencies?: Record<string, string>;
-}
-
 /** Provider capability matrix; the single source the CLI and doctor share. */
 export const SCAFFOLD_DATA_PROVIDERS: Record<DataProviderChoice, ScaffoldProviderDescriptor> = {
   'simple-rest': {
