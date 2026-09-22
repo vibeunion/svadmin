@@ -291,7 +291,7 @@ const SCAFFOLD_MIGRATION_NOTES = [
 
 /** Curated public UI surface for AI page generation. */
 export const SCAFFOLD_UI_COMPONENTS: readonly AdminManifestComponent[] = [
-  ...[ 
+  ...[
     'AdminApp',
     'AutoTable',
     'AutoForm',
