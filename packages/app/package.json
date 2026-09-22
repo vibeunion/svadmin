@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/app",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "Application composition layer for svadmin — defineAdminConfig, plugins, runtime binding, and the AI manifest",
   "license": "MIT",
@@ -19,7 +19,12 @@
   },
   "sideEffects": false,
   "svadmin": {
-    "capabilities": ["app-config", "plugin-registry", "runtime-binding", "ai-manifest"],
+    "capabilities": [
+      "app-config",
+      "plugin-registry",
+      "runtime-binding",
+      "ai-manifest"
+    ],
     "core": "^0.55.0",
     "stability": "experimental",
     "migration": null

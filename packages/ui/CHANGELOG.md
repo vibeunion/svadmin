@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.76.0](https://github.com/vibeunion/svadmin/compare/ui-v0.75.0...ui-v0.76.0) (2026-09-22)
+
+
+### 🚀 Features
+
+* **ui:** add ecosystem components and browser hooks ([#458](https://github.com/vibeunion/svadmin/issues/458)) ([68d698f](https://github.com/vibeunion/svadmin/commit/68d698f98feecccebfbbb4f846dd565f065e7633))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.10.1
+  * peerDependencies
+    * @svadmin/core bumped to 0.56.0
+
 ## [0.75.0](https://github.com/vibeunion/svadmin/compare/ui-v0.74.0...ui-v0.75.0) (2026-09-22)
 
 

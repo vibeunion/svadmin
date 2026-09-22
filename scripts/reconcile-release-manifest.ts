@@ -91,6 +91,7 @@ function assertChangelogEntry(
   component: string,
   version: string,
   previousVersion: string | undefined,
+  previousTagExists: boolean,
 ): void {
   const changelogPath = resolve(repositoryRoot, packagePath, 'CHANGELOG.md');
   let changelog: string;
@@ -100,23 +101,33 @@ function assertChangelogEntry(
     throw new Error(`${packagePath} is missing changelog entry for ${version}`);
   }
 
-  const headingPattern = new RegExp(`^## \\[${escapeRegExp(version)}\\]\\(([^)]+)\\)`, 'm');
-  const heading = changelog.match(headingPattern);
-  const firstHeading = changelog.match(/^## \[[^\n]+\]\([^\n]+\)/m);
-  if (!heading || !firstHeading || heading.index !== firstHeading.index) {
+  const escapedVersion = escapeRegExp(version);
+  const linkedHeading = changelog.match(new RegExp(`^## \\[${escapedVersion}\\]\\(([^)]+)\\)`, 'm'));
+  // release-please omits the compare link when the previous tag does not exist
+  // (for example the first stable release of a freshly bootstrapped package).
+  const plainHeading = changelog.match(new RegExp(`^## ${escapedVersion}(?=\\s|\\(|$)`, 'm'));
+  const heading = linkedHeading ?? plainHeading;
+  const firstHeadingIndex = changelog.search(/^## /m);
+  if (!heading || heading.index !== firstHeadingIndex) {
     throw new Error(`${packagePath} is missing changelog entry for ${version}`);
   }
 
   if (previousVersion) {
     const expectedCompare = `/compare/${component}-v${previousVersion}...${component}-v${version}`;
-    if (!heading[1].includes(expectedCompare)) {
-      throw new Error(`${packagePath} changelog entry for ${version} has an invalid compare link`);
+    if (linkedHeading) {
+      if (!linkedHeading[1].includes(expectedCompare)) {
+        throw new Error(`${packagePath} changelog entry for ${version} has an invalid compare link`);
+      }
+    } else if (previousTagExists) {
+      throw new Error(`${packagePath} changelog entry for ${version} is missing its compare link`);
     }
   }
 
   const contentStart = (heading.index ?? 0) + heading[0].length;
-  const nextHeading = changelog.indexOf('\n## [', contentStart);
-  const content = changelog.slice(contentStart, nextHeading < 0 ? undefined : nextHeading).trim();
+  const nextHeadingOffset = changelog.slice(contentStart).search(/\n## /);
+  const content = changelog
+    .slice(contentStart, nextHeadingOffset < 0 ? undefined : contentStart + nextHeadingOffset)
+    .trim();
   if (!content) {
     throw new Error(`${packagePath} changelog entry for ${version} has no content`);
   }
@@ -189,6 +200,8 @@ export function reconcileReleaseManifest({
     }
     const parentManifest = readParentPackageManifest(packagePath);
     const previousVersion = parentManifest ? packageVersion(parentManifest, packagePath) : undefined;
+    const previousTagExists = previousVersion !== undefined &&
+      resolveTagSha(`${component}-v${previousVersion}`) !== undefined;
     const changed = previousVersion !== currentVersion;
     const rawRelease = rawByPath.get(packagePath);
     if (rawRelease && !changed) {
@@ -196,7 +209,7 @@ export function reconcileReleaseManifest({
     }
     if (!changed) continue;
 
-    assertChangelogEntry(repositoryRoot, packagePath, component, currentVersion, previousVersion);
+    assertChangelogEntry(repositoryRoot, packagePath, component, currentVersion, previousVersion, previousTagExists);
     const expectedTag = `${component}-v${currentVersion}`;
     if (rawRelease && rawRelease.tag !== expectedTag) {
       throw new Error(`Release tag ${rawRelease.tag} does not match ${packagePath}; expected ${expectedTag}`);

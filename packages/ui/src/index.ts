@@ -244,7 +244,7 @@ export { default as DraggableGrid } from "./components/DraggableGrid.svelte";
 export type { GridModule } from "./types.js";
 
 // Dashboard Charts (zero-dependency SVG)
-export { BarChart, LineChart, PieChart } from './components/charts/index.js';
+export { BarChart, LineChart, PieChart, AreaChart, ScatterChart } from './components/charts/index.js';
 // Field display components
 export { default as NumberField } from './components/fields/NumberField.svelte';
 export { default as DateField } from './components/fields/DateField.svelte';
@@ -428,3 +428,52 @@ export { default as MediaThumbnail } from './components/content/MediaThumbnail.s
 export type { MediaThumbnailSize, MediaThumbnailFit } from './components/content/MediaThumbnail.svelte';
 export { default as FileBrowser } from './components/content/FileBrowser.svelte';
 export type { FileBrowserData, FileBrowserInit, FileBrowserMenuOptions, FileBrowserProps } from './components/content/FileBrowser.svelte';
+
+// Ecosystem utilities: highlighting, marquee, media, progress, phone, responsive
+export { default as HighlightText } from './components/HighlightText.svelte';
+export { splitHighlights, escapeRegExp } from './components/highlight.js';
+export type { HighlightSegment, SplitHighlightsOptions } from './components/highlight.js';
+export { default as Marquee } from './components/Marquee.svelte';
+export { default as MediaPlayer } from './components/MediaPlayer.svelte';
+export { default as TopProgressBar } from './components/TopProgressBar.svelte';
+export { default as PhoneInput } from './components/PhoneInput.svelte';
+export {
+  PHONE_DIAL_CODES,
+  findDialCodeByCountry,
+  toE164,
+  splitE164,
+  formatNationalNumber,
+} from './components/phone-dial-codes.js';
+export type { PhoneDialCode } from './components/phone-dial-codes.js';
+export {
+  useMediaQuery,
+  useDeviceDetect,
+  MOBILE_QUERY,
+  TABLET_QUERY,
+  TOUCH_QUERY,
+  REDUCED_MOTION_QUERY,
+  DARK_QUERY,
+} from './components/media.svelte.js';
+export type { MediaQueryState, DeviceDetectState } from './components/media.svelte.js';
+export {
+  useClipboard,
+  useLocalStorage,
+  useDebouncedValue,
+  useInterval,
+  useEventListener,
+  useOnClickOutside,
+  useWindowSize,
+} from './components/browser.svelte.js';
+export type {
+  ClipboardState,
+  ClipboardOptions,
+  LocalStorageState,
+  DebouncedValue,
+  WindowSize,
+  SwipeHandlers,
+} from './components/browser.svelte.js';
+export { useSwipe } from './components/browser.svelte.js';
+export { default as AppFooter } from './components/AppFooter.svelte';
+export type { FooterLink, FooterColumn } from './components/AppFooter.svelte';
+export { default as ResizableGrid } from './components/ResizableGrid.svelte';
+export type { GridItem } from './components/ResizableGrid.svelte';

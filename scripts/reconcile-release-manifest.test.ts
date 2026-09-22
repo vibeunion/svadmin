@@ -69,6 +69,78 @@ test('adds a version-changed package omitted by release-please', () => {
   }
 });
 
+test('accepts an unlinked first-release changelog entry when no previous tag exists', () => {
+  const root = mkdtempSync(join(tmpdir(), 'svadmin-reconcile-release-'));
+  try {
+    mkdirSync(join(root, 'packages/app'), { recursive: true });
+    writeJson(join(root, 'release-please-config.json'), {
+      packages: { 'packages/app': { component: 'app' } },
+    });
+    writeJson(join(root, '.release-please-manifest.json'), { 'packages/app': '1.0.0' });
+    writeJson(join(root, 'packages/app/package.json'), { name: '@svadmin/app', version: '1.0.0' });
+    writeFileSync(
+      join(root, 'packages/app/CHANGELOG.md'),
+      [
+        '# Changelog',
+        '',
+        '## 1.0.0 (2026-09-22)',
+        '',
+        '### Features',
+        '',
+        '* First stable release.',
+        '',
+      ].join('\n'),
+    );
+
+    const result = reconcileReleaseManifest({
+      repositoryRoot: root,
+      releaseSha: '2'.repeat(40),
+      releaseManifest: '[]',
+      readParentPackageManifest: () => ({ name: '@svadmin/app', version: '0.1.0' }),
+      resolveTagSha: () => undefined,
+    });
+
+    expect(result.releaseManifest).toEqual([{ path: 'packages/app', tag: 'app-v1.0.0' }]);
+    expect(result.missingReleases).toEqual([
+      {
+        path: 'packages/app',
+        tag: 'app-v1.0.0',
+        name: '@svadmin/app',
+        version: '1.0.0',
+        previousVersion: '0.1.0',
+      },
+    ]);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('requires a compare link when the previous tag exists', () => {
+  const root = mkdtempSync(join(tmpdir(), 'svadmin-reconcile-release-'));
+  try {
+    mkdirSync(join(root, 'packages/app'), { recursive: true });
+    writeJson(join(root, 'release-please-config.json'), {
+      packages: { 'packages/app': { component: 'app' } },
+    });
+    writeJson(join(root, '.release-please-manifest.json'), { 'packages/app': '1.0.0' });
+    writeJson(join(root, 'packages/app/package.json'), { name: '@svadmin/app', version: '1.0.0' });
+    writeFileSync(
+      join(root, 'packages/app/CHANGELOG.md'),
+      '# Changelog\n\n## 1.0.0 (2026-09-22)\n\n### Features\n\n* First stable release.\n',
+    );
+
+    expect(() => reconcileReleaseManifest({
+      repositoryRoot: root,
+      releaseSha: '3'.repeat(40),
+      releaseManifest: '[]',
+      readParentPackageManifest: () => ({ name: '@svadmin/app', version: '0.1.0' }),
+      resolveTagSha: () => '4'.repeat(40),
+    })).toThrow('missing its compare link');
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test('fails closed when a changed package has no matching changelog entry', () => {
   const root = mkdtempSync(join(tmpdir(), 'svadmin-reconcile-release-'));
   try {

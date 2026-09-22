@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.5.0](https://github.com/vibeunion/svadmin/compare/flow-v0.4.1...flow-v0.5.0) (2026-09-22)
+
+
+### 🚀 Features
+
+* **core:** close out schema-based type safety and strict gates ([#391](https://github.com/vibeunion/svadmin/issues/391)) ([2a84e3d](https://github.com/vibeunion/svadmin/commit/2a84e3d32835b7f91d0990a303f9f3b1e4c8bb09))
+* **lite:** implement dynamic catch-all routes and example resources support ([d94a481](https://github.com/vibeunion/svadmin/commit/d94a481da67c1ae6440e7c360afe901d6d23313d))
+
+
+### 🐛 Bug Fixes
+
+* **ci:** close workspace validation gates ([#403](https://github.com/vibeunion/svadmin/issues/403)) ([9e92f77](https://github.com/vibeunion/svadmin/commit/9e92f7772ff1eb69e3a660e48ceee8f834387822))
+
+
+### 🔧 Miscellaneous Chores
+
+* refresh PR evidence ([f9b928b](https://github.com/vibeunion/svadmin/commit/f9b928b57be04e33f136859a903ccf1d827b958f))
+* release main ([#293](https://github.com/vibeunion/svadmin/issues/293)) ([3acaf94](https://github.com/vibeunion/svadmin/commit/3acaf940a29c27ed63d26479692651890f54727a))
+
 ## [0.4.1](https://github.com/vibeunion/svadmin/compare/flow-v0.4.0...flow-v0.4.1) (2026-09-13)
 
 

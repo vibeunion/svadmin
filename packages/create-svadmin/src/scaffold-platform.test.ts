@@ -72,6 +72,12 @@ test('AI manifest captures providers, resources, and guardrails', () => {
   expect(manifest.resources.map((resource) => resource.name)).toEqual(['posts', 'users', 'comments', 'todos']);
   expect(manifest.routes[0]).toEqual({ resource: 'posts', path: '/posts', operations: ['list', 'create', 'edit', 'show', 'delete'] });
   expect(manifest.components.some((component) => component.name === 'AdminApp')).toBe(true);
+  expect(manifest.components.find((component) => component.name === 'ResizableGrid')?.import).toBe('@svadmin/ui');
+  expect(manifest.components.find((component) => component.name === 'AppFooter')?.import).toBe('@svadmin/ui');
+  expect(manifest.components.find((component) => component.name === 'CodeEditor')?.import).toBe('@svadmin/ui/code-editor');
+  expect(manifest.components.find((component) => component.name === 'JsonEditor')?.import).toBe('@svadmin/ui/json-editor');
+  expect(manifest.components.find((component) => component.name === 'QRCode')?.import).toBe('@svadmin/ui/qr-code');
+  expect(manifest.components.find((component) => component.name === 'CodeEditorPresets')?.import).toBe('@svadmin/ui/code-editor/presets');
   expect(manifest.providerCatalog.map((entry) => entry.name)).toContain('pocketbase');
   expect(manifest.providerCatalog.find((entry) => entry.name === 'hasura')?.capabilities).toEqual(['data', 'graphql', 'live']);
   expect(manifest.migration.scaffoldVersion).toBe('0.0.0');
