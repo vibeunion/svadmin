@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.32.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.31.0...create-svadmin-v0.32.0) (2026-09-22)
+
+
+### 🚀 Features
+
+* **app:** application platform layer (defineAdminConfig, plugins, AI manifest, CLI add) ([#455](https://github.com/vibeunion/svadmin/issues/455)) ([960cc2e](https://github.com/vibeunion/svadmin/commit/960cc2ea633feb9d2c49d9e43b45b27bd2457d68))
+* **ui:** add ecosystem components and browser hooks ([#458](https://github.com/vibeunion/svadmin/issues/458)) ([68d698f](https://github.com/vibeunion/svadmin/commit/68d698f98feecccebfbbb4f846dd565f065e7633))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/core bumped to 0.56.0
+
 ## [0.31.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.30.0...create-svadmin-v0.31.0) (2026-09-22)
 
 

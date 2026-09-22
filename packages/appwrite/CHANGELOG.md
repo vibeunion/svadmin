@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.11.0](https://github.com/vibeunion/svadmin/compare/appwrite-v0.10.0...appwrite-v0.11.0) (2026-09-22)
+
+
+### 🚀 Features
+
+* **app:** application platform layer (defineAdminConfig, plugins, AI manifest, CLI add) ([#455](https://github.com/vibeunion/svadmin/issues/455)) ([960cc2e](https://github.com/vibeunion/svadmin/commit/960cc2ea633feb9d2c49d9e43b45b27bd2457d68))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.12.0
+  * peerDependencies
+    * @svadmin/core bumped to 0.56.0
+
 ## [0.10.0](https://github.com/vibeunion/svadmin/compare/appwrite-v0.9.8...appwrite-v0.10.0) (2026-09-22)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/devtools",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "description": "Headless diagnostics core for svadmin — query traces, provider diagnostics, permission/resource/route inspection",
   "license": "MIT",
@@ -30,7 +30,11 @@
     "README.md"
   ],
   "svadmin": {
-    "capabilities": ["devtools-traces", "provider-diagnostics", "resource-diagnostics"],
+    "capabilities": [
+      "devtools-traces",
+      "provider-diagnostics",
+      "resource-diagnostics"
+    ],
     "core": "^0.55.0",
     "stability": "experimental",
     "migration": null

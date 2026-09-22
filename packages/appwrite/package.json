@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/appwrite",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "Appwrite adapters — DataProvider, AuthProvider, LiveProvider for svadmin",
   "type": "module",
   "sideEffects": false,
