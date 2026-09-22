@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@svadmin/core": "^0.55.0",
+    "@svadmin/app": "^0.1.0",
     "@svadmin/ai-elements": "^0.10.0",
     "@svadmin/ui": "^0.75.0",
     "@sinclair/typebox": "^0.34.52",

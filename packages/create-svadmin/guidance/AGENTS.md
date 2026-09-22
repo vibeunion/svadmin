@@ -4,6 +4,26 @@ Read `DESIGN.md` before creating, revising, or reviewing any UI. It is the
 authority for visual language, page hierarchy, feedback ownership, and
 acceptance checks in this project.
 
+## Platform entrypoints
+
+Before generating or modifying application code, read these stable files
+instead of scanning the repository:
+
+- `svadmin.ai.json` — provider capability matrix, resource fields/operations,
+  project commands, and forbidden internal imports.
+- `src/svadmin.config.ts` — the application composition entrypoint. Add resources
+  and plugins here; do not reintroduce ad-hoc provider wiring in `App.svelte`.
+- `src/resources.ts` — the generated `ResourceDefinition[]` consumed by the config.
+
+Keep `svadmin.ai.json` and `src/svadmin.config.ts` consistent when you add a
+provider or resource. `create-svadmin doctor` fails when the manifest is missing,
+invalid, or declares a provider package that `package.json` does not depend on.
+
+Use `npx @svadmin/create add resource <name> --write` to scaffold a
+`src/features/<name>/` module (contract + definition + public `index.ts`). Keep
+business code inside `src/features/<module>/` and expose it through the module's
+`index.ts`; do not add new pages under `src/pages`.
+
 ## Required workflow
 
 1. Name the page's single primary workflow and dominant next action.

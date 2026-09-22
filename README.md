@@ -66,6 +66,7 @@
 | Package                  | Description / 描述                                           |
 | ------------------------ | ------------------------------------------------------------ |
 | `@svadmin/core`          | Hooks, providers, types, utilities, Resource Type Registry   |
+| `@svadmin/app`           | Application composition layer: `defineAdminConfig`, plugins, runtime binding, AI manifest |
 | `@svadmin/ai-elements`   | Composable Svelte 5 AI conversation and agent UI components |
 | `@svadmin/devtools-contract` | JSON-safe DevTools trace, diagnostic, event, and redaction contracts |
 | `@svadmin/ui`            | Pre-built admin components / 预构建管理组件（shadcn-svelte） |

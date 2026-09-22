@@ -253,6 +253,15 @@ const expectations: PackageExpectation[] = [
     ],
   },
   {
+    directory: 'packages/app',
+    name: '@svadmin/app',
+    requiredFiles: [
+      'dist/index.js',
+      'dist/index.d.ts',
+      'README.md',
+    ],
+  },
+  {
     directory: 'packages/surface',
     name: '@svadmin/surface',
     requiredFiles: [

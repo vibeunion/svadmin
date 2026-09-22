@@ -17,6 +17,11 @@ import {
 import { inferCommand } from "./infer-command";
 import { generateCommand } from './generate-command';
 import { liteInitCommand } from './lite-init';
+import { addCommand } from './add-command';
+import {
+  buildScaffoldPlatformFiles,
+  checkAdminManifest,
+} from './scaffold-platform';
 import {
   doctorProjectPackageJson,
   planProjectPackageFileUpgrade,
@@ -120,7 +125,16 @@ function doctor(args: string[]): void {
   const project = readMaintainedPackageJson(path.join(projectDirectory, 'package.json'));
   const report = doctorProjectPackageJson(project, loadShippedScaffoldManifest());
   printDoctorReport(report, projectDirectory);
-  process.exitCode = report.exitCode;
+  const manifestIssues = checkAdminManifest(projectDirectory, project);
+  if (manifestIssues.length > 0) {
+    console.log(pc.bold('  Platform entrypoints:'));
+    for (const issue of manifestIssues) {
+      console.log(pc.yellow(`  ⚠ ${issue.message}`));
+      console.log(pc.dim(`    → ${issue.action}`));
+    }
+    console.log();
+  }
+  process.exitCode = report.exitCode === 0 && manifestIssues.length === 0 ? 0 : 1;
 }
 
 function printUpgradeChanges(upgradeExecution: UpgradeResult): void {
@@ -317,6 +331,19 @@ async function init(): Promise<void> {
     console.log(pc.green('  ✔') + ' AI and design guidance copied');
   }
 
+  // 2. Generate the platform entrypoints (svadmin.config.ts + svadmin.ai.json)
+  const platformFiles = buildScaffoldPlatformFiles({
+    projectName: response.projectName.trim(),
+    dataProvider: response.dataProvider,
+    authProvider: response.authProvider,
+  });
+  for (const file of [platformFiles.config, platformFiles.aiManifest, platformFiles.schema]) {
+    const target = path.join(projectDir, file.path);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(target, file.content);
+  }
+  console.log(pc.green('  ✔') + ' svadmin.config.ts, svadmin.ai.json and svadmin.schema.json generated');
+
   // 2. Generate package.json
   const packageJson = createProjectPackageJson(scaffoldManifest, {
     projectName: response.projectName,
@@ -509,10 +536,14 @@ if (subcommand === 'eject') {
   runCommand(() => doctor(rest));
 } else if (subcommand === 'upgrade') {
   runCommand(() => upgrade(rest));
+} else if (subcommand === 'migrate') {
+  runCommand(() => upgrade(rest));
 } else if (subcommand === 'guidance') {
   runCommand(() => guidance(rest));
 } else if (subcommand === 'infer') {
   runCommand(() => inferCommand(rest));
+} else if (subcommand === 'add') {
+  runCommand(() => addCommand(rest, loadShippedScaffoldManifest()));
 } else if (subcommand === 'generate' || subcommand === 'gen') {
   runCommand(() => generateCommand(rest));
 } else if (subcommand === 'lite') {
