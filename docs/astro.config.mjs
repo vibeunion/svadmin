@@ -64,6 +64,7 @@ export default defineConfig({
             { slug: 'guides/design-principles' },
             { slug: 'guides/interface-generation' },
             { slug: 'guides/comparison' },
+            { slug: 'guides/ecosystem-coverage' },
             { slug: 'guides/lite' },
           ],
         },
@@ -89,6 +90,7 @@ export default defineConfig({
             { slug: 'hooks/data' },
             { slug: 'hooks/auth' },
             { slug: 'hooks/form-table' },
+            { slug: 'hooks/browser' },
           ],
         },
         {
@@ -102,6 +104,7 @@ export default defineConfig({
             { slug: 'components/feedback' },
             { slug: 'components/enterprise' },
             { slug: 'components/ai-components' },
+            { slug: 'components/ecosystem-adapters' },
           ],
         },
         {
