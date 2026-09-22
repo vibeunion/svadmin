@@ -88,6 +88,20 @@ test('planAddProvider adds missing dependency packs only once and updates the ma
   }
 });
 
+test('planAddProvider supports the extended official provider catalog', async () => {
+  const projectDirectory = await makeProject();
+  try {
+    const plan = planAddProvider(projectDirectory, scaffold, 'provider', 'pocketbase');
+    expect(plan.addedDependencies.map((dependency) => dependency.packageName)).toContain('@svadmin/pocketbase');
+    expect(plan.addedDependencies.map((dependency) => dependency.packageName)).toContain('pocketbase');
+
+    const hasura = planAddProvider(projectDirectory, scaffold, 'provider', 'hasura');
+    expect(hasura.addedDependencies.map((dependency) => dependency.packageName)).toContain('@refinedev/hasura');
+  } finally {
+    await rm(projectDirectory, { recursive: true, force: true });
+  }
+});
+
 test('planAddProvider rejects unknown choices', async () => {
   const projectDirectory = await makeProject();
   try {

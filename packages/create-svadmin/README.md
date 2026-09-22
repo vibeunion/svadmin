@@ -36,6 +36,23 @@ npx @svadmin/create init my-admin-app --preset graphql
 Override any field explicitly: `--data-provider graphql --auth-provider none`, and
 skip install with `--no-install`. Explicit flags always win over the preset.
 
+The `init` prompt and presets stay on the golden paths. To add any of the other
+official providers later, use the CLI catalog (also published in
+`svadmin.ai.json` → `providerCatalog`):
+
+```bash
+npx @svadmin/create add provider pocketbase --write
+npx @svadmin/create add provider hasura --write
+npx @svadmin/create add provider appwrite --write
+```
+
+Official data providers: `simple-rest`, `supabase`, `graphql`, `airtable`,
+`appwrite`, `directus`, `drizzle`, `elysia`, `firebase`, `hasura`, `medusa`,
+`nestjs-query`, `nestjsx-crud`, `pocketbase`, `sanity`, `strapi`. `add provider`
+updates `package.json` + `svadmin.ai.json` and prints the remaining
+`src/svadmin.config.ts` wiring step; the generated config leaves a clearly marked
+TODO placeholder for non-golden providers.
+
 ## What's Included
 
 The generated project is pre-configured with:

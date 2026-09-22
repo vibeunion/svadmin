@@ -155,6 +155,58 @@ export const SCAFFOLD_DATA_PROVIDERS: Record<DataProviderChoice, ScaffoldProvide
     package: '@svadmin/graphql',
     capabilities: ['data', 'graphql'],
   },
+  airtable: {
+    package: '@svadmin/airtable',
+    capabilities: ['data'],
+  },
+  appwrite: {
+    package: '@svadmin/appwrite',
+    capabilities: ['data', 'auth', 'storage', 'live'],
+  },
+  directus: {
+    package: '@svadmin/directus',
+    capabilities: ['data', 'auth'],
+  },
+  drizzle: {
+    package: '@svadmin/drizzle',
+    capabilities: ['server-data', 'migrations'],
+  },
+  elysia: {
+    package: '@svadmin/elysia',
+    capabilities: ['server-data'],
+  },
+  firebase: {
+    package: '@svadmin/firebase',
+    capabilities: ['data', 'auth', 'storage', 'live'],
+  },
+  hasura: {
+    package: '@svadmin/hasura',
+    capabilities: ['data', 'graphql', 'live'],
+  },
+  medusa: {
+    package: '@svadmin/medusa',
+    capabilities: ['data', 'auth'],
+  },
+  'nestjs-query': {
+    package: '@svadmin/nestjs-query',
+    capabilities: ['data', 'graphql'],
+  },
+  'nestjsx-crud': {
+    package: '@svadmin/nestjsx-crud',
+    capabilities: ['data'],
+  },
+  pocketbase: {
+    package: '@svadmin/pocketbase',
+    capabilities: ['data', 'auth', 'storage', 'live'],
+  },
+  sanity: {
+    package: '@svadmin/sanity',
+    capabilities: ['data', 'live'],
+  },
+  strapi: {
+    package: '@svadmin/strapi',
+    capabilities: ['data', 'auth'],
+  },
   none: {
     package: null,
     capabilities: ['custom'],
@@ -304,6 +356,19 @@ export function buildSvadminConfigSource(options: ScaffoldPlatformOptions): stri
       imports.add("import type { DataProvider } from '@svadmin/core';");
       body.push(...CUSTOM_DATA_PROVIDER_BODY);
       break;
+    default: {
+      const descriptor = SCAFFOLD_DATA_PROVIDERS[options.dataProvider];
+      const packageName = descriptor.package ?? '@svadmin/core';
+      imports.add("import type { DataProvider } from '@svadmin/core';");
+      body.push(
+        `// TODO: configure ${packageName} in src/svadmin.config.ts.`,
+        'async function createDataProvider(): Promise<DataProvider> {',
+        `  throw new Error('Configure the ${options.dataProvider} data provider before running the app.');`,
+        '}',
+        'const dataProvider = await createDataProvider();',
+      );
+      break;
+    }
   }
 
   let authExpression: string | null = null;

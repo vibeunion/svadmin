@@ -1,6 +1,24 @@
 import { readFileSync } from 'node:fs';
 
-export const DATA_PROVIDER_CHOICES = ['simple-rest', 'supabase', 'graphql', 'none'] as const;
+export const DATA_PROVIDER_CHOICES = [
+  'simple-rest',
+  'supabase',
+  'graphql',
+  'airtable',
+  'appwrite',
+  'directus',
+  'drizzle',
+  'elysia',
+  'firebase',
+  'hasura',
+  'medusa',
+  'nestjs-query',
+  'nestjsx-crud',
+  'pocketbase',
+  'sanity',
+  'strapi',
+  'none',
+] as const;
 export const AUTH_PROVIDER_CHOICES = ['mock', 'jwt', 'supabase', 'none'] as const;
 
 export type DataProviderChoice = typeof DATA_PROVIDER_CHOICES[number];
