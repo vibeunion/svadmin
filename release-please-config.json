@@ -65,7 +65,14 @@
     "packages/rest": {
       "release-type": "node",
       "component": "rest",
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "/packages/create-svadmin/scaffold-manifest.json",
+          "jsonpath": "$.svadmin.dependencyPacks[\"rest\"][\"@svadmin/rest\"]"
+        }
+      ]
     },
     "packages/ai-elements": {
       "release-type": "node",
@@ -109,7 +116,14 @@
     "packages/drizzle": {
       "release-type": "node",
       "component": "drizzle",
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "/packages/create-svadmin/scaffold-manifest.json",
+          "jsonpath": "$.svadmin.dependencyPacks[\"drizzle\"][\"@svadmin/drizzle\"]"
+        }
+      ]
     },
     "packages/simple-rest": {
       "release-type": "node",
@@ -136,7 +150,14 @@
     "packages/pocketbase": {
       "release-type": "node",
       "component": "pocketbase",
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "/packages/create-svadmin/scaffold-manifest.json",
+          "jsonpath": "$.svadmin.dependencyPacks[\"pocketbase\"][\"@svadmin/pocketbase\"]"
+        }
+      ]
     },
     "packages/supabase": {
       "release-type": "node",
@@ -153,7 +174,14 @@
     "packages/elysia": {
       "release-type": "node",
       "component": "elysia",
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "/packages/create-svadmin/scaffold-manifest.json",
+          "jsonpath": "$.svadmin.dependencyPacks[\"elysia\"][\"@svadmin/elysia\"]"
+        }
+      ]
     },
     "packages/create-svadmin": {
       "release-type": "node",
@@ -163,12 +191,26 @@
     "packages/airtable": {
       "release-type": "node",
       "component": "airtable",
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "/packages/create-svadmin/scaffold-manifest.json",
+          "jsonpath": "$.svadmin.dependencyPacks[\"airtable\"][\"@svadmin/airtable\"]"
+        }
+      ]
     },
     "packages/appwrite": {
       "release-type": "node",
       "component": "appwrite",
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "/packages/create-svadmin/scaffold-manifest.json",
+          "jsonpath": "$.svadmin.dependencyPacks[\"appwrite\"][\"@svadmin/appwrite\"]"
+        }
+      ]
     },
     "packages/auth-utils": {
       "release-type": "node",
@@ -178,12 +220,26 @@
     "packages/directus": {
       "release-type": "node",
       "component": "directus",
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "/packages/create-svadmin/scaffold-manifest.json",
+          "jsonpath": "$.svadmin.dependencyPacks[\"directus\"][\"@svadmin/directus\"]"
+        }
+      ]
     },
     "packages/firebase": {
       "release-type": "node",
       "component": "firebase",
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "/packages/create-svadmin/scaffold-manifest.json",
+          "jsonpath": "$.svadmin.dependencyPacks[\"firebase\"][\"@svadmin/firebase\"]"
+        }
+      ]
     },
     "packages/graphql": {
       "release-type": "node",
@@ -200,32 +256,74 @@
     "packages/hasura": {
       "release-type": "node",
       "component": "hasura",
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "/packages/create-svadmin/scaffold-manifest.json",
+          "jsonpath": "$.svadmin.dependencyPacks[\"hasura\"][\"@svadmin/hasura\"]"
+        }
+      ]
     },
     "packages/medusa": {
       "release-type": "node",
       "component": "medusa",
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "/packages/create-svadmin/scaffold-manifest.json",
+          "jsonpath": "$.svadmin.dependencyPacks[\"medusa\"][\"@svadmin/medusa\"]"
+        }
+      ]
     },
     "packages/nestjs-query": {
       "release-type": "node",
       "component": "nestjs-query",
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "/packages/create-svadmin/scaffold-manifest.json",
+          "jsonpath": "$.svadmin.dependencyPacks[\"nestjs-query\"][\"@svadmin/nestjs-query\"]"
+        }
+      ]
     },
     "packages/nestjsx-crud": {
       "release-type": "node",
       "component": "nestjsx-crud",
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "/packages/create-svadmin/scaffold-manifest.json",
+          "jsonpath": "$.svadmin.dependencyPacks[\"nestjsx-crud\"][\"@svadmin/nestjsx-crud\"]"
+        }
+      ]
     },
     "packages/sanity": {
       "release-type": "node",
       "component": "sanity",
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "/packages/create-svadmin/scaffold-manifest.json",
+          "jsonpath": "$.svadmin.dependencyPacks[\"sanity\"][\"@svadmin/sanity\"]"
+        }
+      ]
     },
     "packages/strapi": {
       "release-type": "node",
       "component": "strapi",
-      "changelog-path": "CHANGELOG.md"
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "/packages/create-svadmin/scaffold-manifest.json",
+          "jsonpath": "$.svadmin.dependencyPacks[\"strapi\"][\"@svadmin/strapi\"]"
+        }
+      ]
     },
     "packages/lite": {
       "release-type": "node",
