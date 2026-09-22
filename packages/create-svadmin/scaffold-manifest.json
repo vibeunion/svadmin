@@ -46,61 +46,61 @@
         "graphql": "^16.8.0"
       },
       "rest": {
-        "@svadmin/rest": "^0.1.0",
+        "@svadmin/rest": "^1.0.0",
         "@refinedev/rest": "^2.1.1",
         "@nestjsx/crud-request": "^5.0.0-alpha.3"
       },
       "airtable": {
-        "@svadmin/airtable": "^0.11.0",
+        "@svadmin/airtable": "^0.12.0",
         "@refinedev/airtable": "^5.0.1"
       },
       "appwrite": {
-        "@svadmin/appwrite": "^0.10.0",
+        "@svadmin/appwrite": "^0.11.0",
         "appwrite": ">=26.2.0",
         "@refinedev/appwrite": "^8.0.1"
       },
       "directus": {
-        "@svadmin/directus": "^0.10.9"
+        "@svadmin/directus": "^0.11.0"
       },
       "drizzle": {
-        "@svadmin/drizzle": "^0.12.9",
+        "@svadmin/drizzle": "^0.13.0",
         "drizzle-orm": "^1.0.0-rc.1",
         "refine-sqlx": "^0.10.3"
       },
       "elysia": {
-        "@svadmin/elysia": "^0.13.9",
+        "@svadmin/elysia": "^0.14.0",
         "elysia": ">=1.4.30",
         "@elysiajs/eden": ">=1.4.9"
       },
       "firebase": {
-        "@svadmin/firebase": "^0.11.0"
+        "@svadmin/firebase": "^0.12.0"
       },
       "hasura": {
-        "@svadmin/hasura": "^0.11.0",
+        "@svadmin/hasura": "^0.12.0",
         "@refinedev/hasura": "^7.0.1",
         "graphql-request": "^7.4.0"
       },
       "medusa": {
-        "@svadmin/medusa": "^0.11.0",
+        "@svadmin/medusa": "^0.12.0",
         "@refinedev/medusa": "^5.0.0"
       },
       "nestjs-query": {
-        "@svadmin/nestjs-query": "^0.11.0",
+        "@svadmin/nestjs-query": "^0.12.0",
         "@refinedev/nestjs-query": "^5.0.0"
       },
       "nestjsx-crud": {
-        "@svadmin/nestjsx-crud": "^0.11.0",
+        "@svadmin/nestjsx-crud": "^0.12.0",
         "@refinedev/nestjsx-crud": "^6.0.1"
       },
       "pocketbase": {
-        "@svadmin/pocketbase": "^0.11.9",
+        "@svadmin/pocketbase": "^0.12.0",
         "pocketbase": ">=0.28.0"
       },
       "sanity": {
-        "@svadmin/sanity": "^0.10.9"
+        "@svadmin/sanity": "^0.11.0"
       },
       "strapi": {
-        "@svadmin/strapi": "^0.11.0",
+        "@svadmin/strapi": "^0.12.0",
         "@refinedev/strapi-v4": "^7.0.1"
       }
     },
