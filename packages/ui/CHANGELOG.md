@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.77.0](https://github.com/vibeunion/svadmin/compare/ui-v0.76.0...ui-v0.77.0) (2026-09-23)
+
+
+### 🚀 Features
+
+* **ui:** unify Stripe-inspired design system ([09a5ef0](https://github.com/vibeunion/svadmin/commit/09a5ef023619a0c43a90679d0649771775ef8fa2))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** add density and layout contracts ([c8f8a92](https://github.com/vibeunion/svadmin/commit/c8f8a925e82dad1d46d928c59b8d0546244884da))
+* **ui:** add density and layout contracts ([87a8e3a](https://github.com/vibeunion/svadmin/commit/87a8e3a44c8118bbfe816e75f91c8a9f2d252e45))
+* **ui:** record Stripe style migration contract ([aa2e4c7](https://github.com/vibeunion/svadmin/commit/aa2e4c758864df430adb46fdb28649e38d43af28))
+* **ui:** stabilize mobile stripe layout contract ([f362a30](https://github.com/vibeunion/svadmin/commit/f362a3002c6dfa484b39c13dfafc7e46a8276583))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.10.2
+  * peerDependencies
+    * @svadmin/core bumped to 0.57.0
+
 ## [0.76.0](https://github.com/vibeunion/svadmin/compare/ui-v0.75.0...ui-v0.76.0) (2026-09-22)
 
 

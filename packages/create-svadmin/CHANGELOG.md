@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.33.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.32.0...create-svadmin-v0.33.0) (2026-09-23)
+
+
+### 🚀 Features
+
+* **ui:** unify Stripe-inspired design system ([09a5ef0](https://github.com/vibeunion/svadmin/commit/09a5ef023619a0c43a90679d0649771775ef8fa2))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/core bumped to 0.57.0
+
 ## [0.32.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.31.0...create-svadmin-v0.32.0) (2026-09-22)
 
 

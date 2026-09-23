@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.57.0](https://github.com/vibeunion/svadmin/compare/core-v0.56.0...core-v0.57.0) (2026-09-23)
+
+
+### 🚀 Features
+
+* **ui:** unify Stripe-inspired design system ([09a5ef0](https://github.com/vibeunion/svadmin/commit/09a5ef023619a0c43a90679d0649771775ef8fa2))
+
 ## [0.56.0](https://github.com/vibeunion/svadmin/compare/core-v0.55.0...core-v0.56.0) (2026-09-22)
 
 
