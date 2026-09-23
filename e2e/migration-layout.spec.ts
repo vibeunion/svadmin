@@ -9,7 +9,7 @@ test('package styles preserve host responsive layouts and header boundaries', as
   await expect(page).toHaveURL(/#\/$/);
   const dashboard = page.locator('[data-svadmin-content-page="operations-dashboard"]');
   await expect(dashboard.locator('[data-dashboard-decisions] [data-svadmin-metric-card]')).toHaveCount(3);
-  await expect(dashboard.getByRole('status')).toBeVisible();
+  await expect(dashboard.locator('[data-svadmin-content-header] [role="status"]')).toBeVisible();
   await expect(dashboard.locator('a[href^="#/products/show/"]').first()).toBeVisible();
   await expect(dashboard.locator('[data-dashboard-panel]').first()).toHaveCSS('padding-top', '0px');
   await expect(dashboard.locator('[data-dashboard-panel]').first()).toHaveCSS('row-gap', '0px');

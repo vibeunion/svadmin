@@ -3679,6 +3679,13 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
     padding-block: 1rem 2rem;
   }
 
+  .layout-clean-flat[data-theme="stripe"] [data-svadmin-page-header] h1,
+  .layout-clean-flat[data-theme="stripe"] [data-svadmin-list-header] h1,
+  .layout-clean-flat[data-theme="stripe"] [data-svadmin-form-header] h1,
+  .layout-clean-flat[data-theme="stripe"] [data-svadmin-resource-operations] h1 {
+    font-size: 1.25rem;
+  }
+
   .layout-clean-flat[data-theme="stripe"] [data-svadmin-topbar] .svadmin-header-search {
     min-width: 0;
   }
