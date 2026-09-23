@@ -194,10 +194,10 @@ import { definedOptions } from '@svadmin/core/options';
   ]);
 
   const visualTokens = [
-    { label: 'Primary', value: '#635bff' },
-    { label: 'Ink', value: '#0a2540' },
-    { label: 'Canvas', value: '#f6f9fc' },
-    { label: 'Border', value: '#e6ebf1' },
+    { label: 'Primary', value: 'var(--primary)' },
+    { label: 'Ink', value: 'var(--foreground)' },
+    { label: 'Canvas', value: 'var(--background)' },
+    { label: 'Border', value: 'var(--border)' },
   ];
 
   const stateLabels = $derived({
