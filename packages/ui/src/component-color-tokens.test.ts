@@ -35,7 +35,7 @@ const BARE_HEX = /(?<![\w&])#[0-9a-fA-F]{3,8}\b/;
 const HEX_ALLOWLIST: { file: string; literal: string; reason: string }[] = [
   {
     file: 'Sidebar.svelte',
-    literal: `'#6366f1'`,
+    literal: `'#635bff'`,
     reason: 'fallback swatch for the runtime theme preview dot when no registered theme matches (documented in Sidebar.svelte)',
   },
 ];
