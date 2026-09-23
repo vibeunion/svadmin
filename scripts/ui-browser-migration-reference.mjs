@@ -29,21 +29,67 @@ export const lightTokenMigration = Object.freeze({
 });
 for (const values of Object.values(lightTokenMigration)) Object.freeze(values);
 
-export function createMigrationReference(baselineCss) {
-  const root = postcss.parse(baselineCss);
-  for (const [property, [before, after]] of Object.entries(lightTokenMigration)) {
+// Stripe's default preset is a separate, auditable migration from the earlier
+// neutral token cleanup above. Keep the historical baseline intact and record
+// every changed root binding explicitly.
+export const stripeLightTokenMigration = Object.freeze({
+  '--primary': ['oklch(0.558 0.22 278)', 'oklch(0.54 0.24 293)'],
+  '--ring': ['oklch(0.558 0.22 278)', 'oklch(0.54 0.24 293)'],
+  '--chart-1': ['oklch(0.558 0.22 278)', 'oklch(0.54 0.24 293)'],
+  '--sidebar-primary': ['oklch(0.558 0.22 278)', 'oklch(0.54 0.24 293)'],
+  '--sidebar-ring': ['oklch(0.558 0.22 278)', 'oklch(0.54 0.24 293)'],
+});
+
+export const stripeDarkTokenMigration = Object.freeze({
+  '--primary': ['oklch(0.68 0.18 278)', 'oklch(0.72 0.19 293)'],
+  '--primary-foreground': ['oklch(0.15 0.03 278)', 'oklch(0.16 0.02 270)'],
+  '--ring': ['oklch(0.68 0.18 278)', 'oklch(0.72 0.19 293)'],
+  '--chart-1': ['oklch(0.68 0.18 278)', 'oklch(0.72 0.19 293)'],
+  '--sidebar-primary': ['oklch(0.68 0.18 278)', 'oklch(0.72 0.19 293)'],
+  '--sidebar-primary-foreground': ['oklch(0.15 0.03 278)', 'oklch(0.16 0.02 270)'],
+  '--sidebar-ring': ['oklch(0.68 0.18 278)', 'oklch(0.72 0.19 293)'],
+});
+
+export const bodyStyleMigration = Object.freeze({
+  'font-family': [
+    "'Inter', ui-sans-serif, system-ui, sans-serif",
+    'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  ],
+});
+
+for (const migration of [stripeLightTokenMigration, stripeDarkTokenMigration, bodyStyleMigration]) {
+  for (const values of Object.values(migration)) Object.freeze(values);
+}
+
+function replaceDeclarations(root, selector, migrations, isBaseToken) {
+  for (const [property, [before, after]] of Object.entries(migrations)) {
     const matches = [];
     root.walkDecls(property, declaration => {
       const rule = declaration.parent;
-      const layer = rule?.parent;
-      if (rule?.type === 'rule' && rule.selector === ':root' &&
-        layer?.type === 'atrule' && layer.name === 'layer' && layer.params === 'base' &&
-        layer.parent === root) matches.push(declaration);
+      if (rule?.type !== 'rule' || rule.selector !== selector || !isBaseToken(rule)) return;
+      matches.push(declaration);
     });
-    assert.equal(matches.length, 1, `${property}: expected one historical base :root declaration`);
-    assert.equal(matches[0].value, before, `${property}: historical token drift`);
-    assert.equal(Boolean(matches[0].important), false, `${property}: unexpected priority`);
+    assert.equal(matches.length, 1, `${selector} ${property}: expected one historical declaration`);
+    assert.equal(matches[0].value, before, `${selector} ${property}: historical token drift`);
+    assert.equal(Boolean(matches[0].important), false, `${selector} ${property}: unexpected priority`);
     matches[0].value = after;
   }
+}
+
+function isBaseToken(rule) {
+  const layer = rule.parent;
+  return layer?.type === 'atrule' && layer.name === 'layer' && layer.params === 'base' && layer.parent?.type === 'root';
+}
+
+function isRootRule(rule) {
+  return rule.parent?.type === 'root';
+}
+
+export function createMigrationReference(baselineCss) {
+  const root = postcss.parse(baselineCss);
+  replaceDeclarations(root, ':root', lightTokenMigration, isBaseToken);
+  replaceDeclarations(root, ':root', stripeLightTokenMigration, isBaseToken);
+  replaceDeclarations(root, '.dark', stripeDarkTokenMigration, isBaseToken);
+  replaceDeclarations(root, 'body', bodyStyleMigration, isRootRule);
   return root.toString();
 }

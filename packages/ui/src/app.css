@@ -3591,6 +3591,10 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
   transition: transform 200ms ease-out, box-shadow 200ms ease-out, background-color 200ms ease-out, border-color 200ms ease-out;
 }
 
+.layout-clean-flat[data-theme="stripe"] :is([data-slot="button"], .svadmin-button):is([data-variant="ghost"], [data-variant="link"], .svadmin-button--ghost, .svadmin-button--link) {
+  box-shadow: none;
+}
+
 .layout-clean-flat[data-theme="stripe"] :is([data-slot="button"], .svadmin-button)[data-variant="default"],
 .layout-clean-flat[data-theme="stripe"] :is([data-slot="button"], .svadmin-button).svadmin-button--default {
   box-shadow:

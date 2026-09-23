@@ -8,7 +8,13 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { chromium } from '@playwright/test';
 import { stableScreenshot } from './stable-screenshot.mjs';
 import { verifyPrimitiveFallbacks } from './ui-fallback-evidence.mjs';
-import { createMigrationReference, lightTokenMigration } from './ui-browser-migration-reference.mjs';
+import {
+  bodyStyleMigration,
+  createMigrationReference,
+  lightTokenMigration,
+  stripeDarkTokenMigration,
+  stripeLightTokenMigration,
+} from './ui-browser-migration-reference.mjs';
 
 const root = process.cwd();
 const output = resolve(root, 'test-results/ui-styles');
@@ -209,10 +215,15 @@ try {
     baselineHashScope: 'Manifest hashes describe historical bytes; actual hashes identify the current comparison files. A mismatch is not evidence of comment-only equivalence.',
     publishedCssSha256: createHash('sha256').update(publishedCss).digest('hex'),
     migrationReferenceCssSha256: createHash('sha256').update(referenceCss).digest('hex'),
-    lightTokenMigration,
+    migrations: {
+      lightTokenMigration,
+      stripeLightTokenMigration,
+      stripeDarkTokenMigration,
+      bodyStyleMigration,
+    },
     browser: browser.version(),
     screenshotLaunchArgs,
-    comparison: 'Original baseline retained; independent reference changes only eleven approved light base tokens. Same DOM; two stable frames; exact reference/candidate PNG and computed-style equality.',
+    comparison: 'Original baseline retained; independent reference applies the eleven approved neutral light tokens, five Stripe light tokens, seven Stripe dark tokens, and one body font migration. Same DOM; two stable frames; exact reference/candidate PNG and computed-style equality.',
     scope: 'Current real Svelte widget/control fixture under baseline, migration reference and published CSS; Chromium only; not full application or unchanged historical appearance certification',
     checks, failures, pageErrors,
   };
