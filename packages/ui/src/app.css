@@ -2855,14 +2855,6 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
   min-height: 4.25rem;
 }
 
-.layout-clean-flat [data-svadmin-content-page] > :is(div, section, form) {
-  margin-bottom: 1.25rem;
-}
-
-.layout-clean-flat [data-svadmin-content-page] > :is(div, section, form):last-child {
-  margin-bottom: 0;
-}
-
 .layout-clean-flat [data-svadmin-content-page] > div:first-child,
 .layout-clean-flat [data-svadmin-content-page] > .flex:first-child,
 .layout-clean-flat [data-svadmin-content-page] > .relative:first-child {

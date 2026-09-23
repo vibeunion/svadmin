@@ -10,9 +10,17 @@ description: Admin UI 页面组合、指标、工具栏、状态和数据状态
 使用 `ContentPageShell` 负责宽度和间距，再加入一个
 `ContentPageHeader`，并按真实任务划分 Section。
 
+两个组件都支持 `density="comfortable"`（默认）和
+`density="compact"`。需要高频扫描的运营页面使用 `compact`；独立使用
+`ContentPageHeader` 时传入相同密度，保证标题节奏与页面内容一致。
+
+Shell 提供 `data-svadmin-content-page`、
+`data-svadmin-content-page-width` 和 `data-density`；Header 提供
+`data-svadmin-content-header`，同时保留 `data-svadmin-page-header` 兼容现有集成。
+
 ```svelte
-<ContentPageShell pageId="access-review" width="wide">
-  <ContentPageHeader title="访问审查" description="批准前处理仍未解决的访问项。" />
+<ContentPageShell pageId="access-review" width="wide" density="compact">
+  <ContentPageHeader density="compact" title="访问审查" description="批准前处理仍未解决的访问项。" />
   <SectionHeader id="exceptions" title="例外项" />
   <!-- 主工作区 -->
 </ContentPageShell>

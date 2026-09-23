@@ -9,10 +9,14 @@ SVAR or enterprise work. No release or deployment is performed by this change.
 
 `ContentPageShell`, `ContentPageHeader` and `MetricBlock` now use named Tailwind
 slot recipes in `packages/ui/src/recipes.ts`. Theme-bound content spacing, width,
-typography and color tokens come from shared semantic CSS variables.
+typography and color tokens come from shared semantic CSS variables. The page
+shell owns the vertical stack, while `ContentPageHeader` owns its internal
+heading rhythm; clean-flat does not add a second child margin layer.
 
-The three components retain their public imports, props, snippets and DOM structure.
-Width is `narrow | default | wide`; metric trend meaning is
+The three components retain their existing public imports, props, snippets and
+DOM structure; density and stable data hooks are additive.
+Width is `narrow | default | wide`; page/header density is
+`compact | comfortable`; metric trend meaning is
 `positive | negative | warning | neutral`. Every variant is generated explicitly.
 Consumers import ordinary `@svadmin/ui/app.css`; no consumer-side compiler is needed
 in the host app. Helpers are internal, not new public package exports. No AI style

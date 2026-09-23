@@ -19,11 +19,13 @@
     authProvider,
     tenant,
     withAIAssistant = false,
+    layoutClass = '',
   }: {
     // A present undefined value removes a previously supplied provider on rerender.
     authProvider?: AuthProvider | undefined;
     tenant: TenantContext;
     withAIAssistant?: boolean;
+    layoutClass?: string;
   } = $props();
 
   const fallbackDataProvider = {
@@ -63,5 +65,5 @@
 {/snippet}
 
 <QueryClientProvider client={queryClient}>
-  <Layout children={content} {...definedOptions({ "aiAssistant": withAIAssistant ? aiAssistant : undefined })} />
+  <Layout class={layoutClass} children={content} {...definedOptions({ "aiAssistant": withAIAssistant ? aiAssistant : undefined })} />
 </QueryClientProvider>

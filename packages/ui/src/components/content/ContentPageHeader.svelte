@@ -8,13 +8,27 @@
     description?: string;
     breadcrumbs?: string[];
     actions?: Snippet;
+    density?: 'compact' | 'comfortable';
     class?: string;
   }
-  let { title, eyebrow, description, breadcrumbs = [], actions, class: className = '' }: Props = $props();
-  const styles = contentHeader();
+  let {
+    title,
+    eyebrow,
+    description,
+    breadcrumbs = [],
+    actions,
+    density = 'comfortable',
+    class: className = '',
+  }: Props = $props();
+  const styles = $derived(contentHeader({ density }));
 </script>
 
-<header class={styles.root + ' ' + className} data-svadmin-page-header>
+<header
+  class={styles.root + ' ' + className}
+  data-svadmin-page-header
+  data-svadmin-content-header
+  data-density={density}
+>
   {#if breadcrumbs.length > 0}
     <nav aria-label="Breadcrumb" class={styles.breadcrumbs}>
       {#each breadcrumbs as crumb, index (crumb)}

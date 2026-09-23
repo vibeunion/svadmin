@@ -19,6 +19,10 @@ function readCleanFlatCss(): string {
   return css.slice(markerIndex);
 }
 
+function readPublishedAppCss(): string {
+  return readFileSync(join(currentDir, 'app.css'), 'utf8');
+}
+
 function readSidebar(): string {
   return readFileSync(join(currentDir, 'components', 'Sidebar.svelte'), 'utf8');
 }
@@ -100,6 +104,13 @@ describe('native component CSS', () => {
     );
     expect(cleanFlatCss).toContain('.layout-clean-flat [data-svadmin-content-page] .svadmin-u-cd0ad9a56558');
     expect(readSidebar()).toMatch(/<aside\s+data-svadmin-sidebar/);
+  });
+
+  it('leaves content-page stack spacing to ContentPageShell recipes', () => {
+    const css = readPublishedAppCss();
+
+    expect(css).not.toContain('.layout-clean-flat [data-svadmin-content-page] > :is(div, section, form)');
+    expect(css).not.toContain('.layout-clean-flat [data-svadmin-content-page] > :is(div, section, form):last-child');
   });
 
   it('keeps clean-flat svadmin surface rules behind the layout preset', () => {
