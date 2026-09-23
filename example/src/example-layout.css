@@ -50,7 +50,7 @@
   .example-field-control {
     height: 2.25rem;
     border: 1px solid var(--input);
-    border-radius: calc(var(--radius) - 2px);
+    border-radius: var(--radius-md);
     background: var(--background);
     padding-inline: 0.75rem;
   }
@@ -63,6 +63,16 @@
 
   .example-muted {
     color: var(--muted-foreground);
+  }
+
+  .layout-clean-flat[data-theme="stripe"] .example-card,
+  .layout-clean-flat[data-theme="stripe"] .example-table-shell {
+    box-shadow: var(--shadow-surface);
+  }
+
+  .layout-clean-flat[data-theme="stripe"] :is(.example-card, .example-table-shell):focus-within {
+    outline: 2px solid var(--ring);
+    outline-offset: var(--svadmin-focus-offset, 2px);
   }
 
   @media (max-width: 767px) {

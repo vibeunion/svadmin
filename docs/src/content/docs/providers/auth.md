@@ -59,7 +59,7 @@ the backend must enforce those separately.
 
 ## Auth Pages
 
-Built-in glassmorphism auth pages included:
+Built-in auth pages use the shared Stripe-inspired shell and semantic tokens:
 - `LoginPage` — Email/password login
 - `RegisterPage` — User registration
 - `ForgotPasswordPage` — Password reset request

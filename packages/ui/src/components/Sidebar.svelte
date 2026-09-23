@@ -427,7 +427,7 @@
             <span class="svadmin-u-36e579c0b41c svadmin-u-2eba0d65d059">{i18n.t('common.toggleTheme')}</span>
             <span
               class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29 svadmin-u-ac204c108886 svadmin-u-3daca9af0861 svadmin-u-823f000e740a svadmin-u-6f8ab8abb126"
-              style="background-color: {getColorThemes().find(c => c.id === getColorTheme())?.color ?? '#6366f1'}; --tw-ring-color: {getColorThemes().find(c => c.id === getColorTheme())?.color ?? '#6366f1'}"
+              style="background-color: {getColorThemes().find(c => c.id === getColorTheme())?.color ?? '#635bff'}; --tw-ring-color: {getColorThemes().find(c => c.id === getColorTheme())?.color ?? '#635bff'}"
             ></span>
             <!-- The dot previews the user-selected runtime theme swatch; the hex
                  fallback only covers the case where no registered theme matches. -->

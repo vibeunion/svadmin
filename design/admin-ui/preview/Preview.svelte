@@ -38,7 +38,7 @@
     const labels: Record<string, string> = { ready: tx('正常', 'Ready'), loading: tx('加载中', 'Loading'), 'initial-empty': tx('首次无数据', 'First use'), 'filtered-empty': tx('筛选无结果', 'No matches'), error: tx('请求失败', 'Error'), forbidden: tx('无权限', 'Forbidden'), partial: tx('部分数据', 'Partial'), dirty: tx('待保存', 'Unsaved'), invalid: tx('校验失败', 'Invalid'), saving: tx('保存中', 'Saving'), saved: tx('保存成功', 'Saved'), readonly: tx('只读', 'Read only') };
     return Object.hasOwn(labels, key) ? labels[key] : key;
   }
-  // 样例专属布局不依赖已删除的 Panda productList；控件仍使用真实发布组件。
+  // 样例专属布局不依赖旧 productList；控件仍使用真实发布组件。
   const listStyles = {
     filters: 'kit-list-filters', filter: 'kit-list-filter', filterCount: 'kit-list-filter-count',
     table: 'kit-list-table', numeric: 'kit-number', identity: 'kit-list-identity',
@@ -114,7 +114,7 @@
 </script>
 
 <svelte:head><title>svadmin · {viewLabel(view)}</title></svelte:head>
-<div class:dark={theme === 'dark'} class="svadmin-theme kit-root" data-theme={theme} data-preview-density={density}>
+<div class:dark={theme === 'dark'} class="svadmin-theme layout-clean-flat kit-root" data-theme="stripe" data-theme-mode={theme} data-preview-density={density}>
   <a class="kit-skip" href="#kit-main">{tx('跳到样例内容', 'Skip to preview')}</a>
   <header class="kit-controls" aria-label={tx('设计预览控制', 'Preview controls')}>
     <div class="kit-brand"><strong>svadmin</strong><span>Admin UI · v0.1</span></div>

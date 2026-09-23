@@ -35,7 +35,7 @@
   {#if loading}
     <Skeleton class={styles.skeleton} />
   {:else}
-    <p class={styles.value}>{value}</p>
+    <p data-svadmin-metric-value class={styles.value}>{value}</p>
     {#if detail || trend}<div class={styles.meta}>{#if trend}<span class={styles.trend}>{trend}</span>{/if}{#if detail}<span class={styles.detail}>{detail}</span>{/if}</div>{/if}
   {/if}
 </div>

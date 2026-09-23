@@ -20,9 +20,9 @@ svadmin 原生基于 **Svelte 5 runes** 构建，采用基于 Provider 的架构
 - ⚡ **TanStack Query** — 自动缓存、请求去重、后台刷新
 - 🧩 **预构建组件** — AutoTable、AutoForm、CRUD 页面、认证页面、CommandPalette、Sheet、Drawer、StepsForm
 - 🔠 **16 个字段组件** — 完整的字段显示和输入组件集（Text、Image、JSON、RichText、Combobox、MultiSelect 等）
-- 🔑 **认证系统** — 9 个 Hook + 4 个毛玻璃风格认证页面
+- 🔑 **认证系统** — 9 个 Hook + 4 个可配置认证页面变体
 - 📡 **实时数据** — WebSocket 和 SSE 实时 Provider，支持自动重连
-- 🎨 **可主题化** — 7 套配色主题、亮/暗色模式、毛玻璃效果
+- 🎨 **可主题化** — 8 套配色预设、亮/暗色模式和可配置布局风格
 - 🛡️ **访问控制** — 基于角色和属性的权限管理
 - 🔍 **推断器** — 从示例数据或 OpenAPI 3.x 规范自动生成管理界面
 - 🧱 **声明式 Surface** — 使用可信 Svelte 组件渲染经过校验和策略约束的仪表盘协议

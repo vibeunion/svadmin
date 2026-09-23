@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   configureTheme,
+  getColorTheme,
   getResolvedTheme,
   getTheme,
   getThemeConfig,
@@ -63,6 +64,7 @@ function resetBrowserThemeState(): void {
   root.className = '';
   root.removeAttribute('style');
   root.removeAttribute('data-theme');
+  root.removeAttribute('data-theme-mode');
   resetTheme();
 }
 
@@ -93,6 +95,7 @@ describe('theme owners', () => {
     expect(getTheme()).toBe('light');
     expect(document.documentElement.style.getPropertyValue('--owner')).toBe('second');
     expect(document.documentElement.style.getPropertyValue('--owner-preset')).toBe('second-light');
+    expect(document.documentElement.getAttribute('data-theme-mode')).toBe('light');
     expect(document.documentElement.classList.contains('layout-clean-flat')).toBe(false);
     expect(document.documentElement.style.colorScheme).toBe('');
 
@@ -163,6 +166,22 @@ describe('theme owners', () => {
     expect(document.documentElement.style.colorScheme).toBe(getResolvedTheme());
   });
 
+  it('exposes the resolved mode for dark-first stylesheet fallbacks', () => {
+    configureTheme({ strategy: 'dark-first', colorPreset: firstPreset });
+
+    setTheme('dark');
+
+    expect(document.documentElement.classList.contains('dark')).toBe(false);
+    expect(document.documentElement.classList.contains('svadmin-theme-dark')).toBe(true);
+    expect(document.documentElement.getAttribute('data-theme-mode')).toBe('dark');
+
+    setTheme('light');
+
+    expect(document.documentElement.classList.contains('light')).toBe(true);
+    expect(document.documentElement.classList.contains('svadmin-theme-light')).toBe(true);
+    expect(document.documentElement.getAttribute('data-theme-mode')).toBe('light');
+  });
+
   it('does not let an owner with omitted values override active configuration', () => {
     configureTheme({ cssOverrides: { '--legacy-owner': 'legacy' } });
     const token = registerThemeOwner({});
@@ -224,6 +243,17 @@ describe('theme owners', () => {
     expect(getTheme()).toBe('light');
     expect(window.localStorage.getItem('svadmin-theme')).toBeNull();
     unregisterThemeOwner(defaultOwner);
+  });
+
+  it('uses Stripe as the color default while preserving persisted presets', () => {
+    expect(getColorTheme()).toBe('stripe');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('stripe');
+
+    window.localStorage.setItem('svadmin-color-theme', 'blue');
+    resetTheme();
+
+    expect(getColorTheme()).toBe('blue');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('blue');
   });
 
   it('avoids duplicate persistence writes for unchanged selections', () => {

@@ -6,7 +6,7 @@ import { definedOptions } from './defined-options';
 //   - 'dark-first': adds 'light' class for light mode (dark-first)
 
 export type ThemeMode='light'|'dark'|'system';
-export type ColorTheme='blue'|'green'|'rose'|'orange'|'violet'|'neutral';
+export type ColorTheme='blue'|'green'|'rose'|'orange'|'violet'|'neutral'|'indigo'|'stripe';
 
 /** Controls how the theme class is applied to <html> */
 export type ThemeStrategy='standard'|'dark-first';
@@ -190,6 +190,29 @@ export const builtinPresets: Record<string,ColorPreset>=$state({
       '--chart-1': 'oklch(0.65 0.25 293)',
     },
   },
+  stripe: {
+    name: 'stripe',
+    label: 'Stripe',
+    color: '#635bff',
+    light: {
+      '--primary': 'oklch(0.54 0.24 293)',
+      '--primary-foreground': 'oklch(0.99 0 0)',
+      '--ring': 'oklch(0.54 0.24 293)',
+      '--sidebar-primary': 'oklch(0.54 0.24 293)',
+      '--sidebar-primary-foreground': 'oklch(0.99 0 0)',
+      '--sidebar-ring': 'oklch(0.54 0.24 293)',
+      '--chart-1': 'oklch(0.54 0.24 293)',
+    },
+    dark: {
+      '--primary': 'oklch(0.72 0.19 293)',
+      '--primary-foreground': 'oklch(0.16 0.02 270)',
+      '--ring': 'oklch(0.72 0.19 293)',
+      '--sidebar-primary': 'oklch(0.72 0.19 293)',
+      '--sidebar-primary-foreground': 'oklch(0.16 0.02 270)',
+      '--sidebar-ring': 'oklch(0.72 0.19 293)',
+      '--chart-1': 'oklch(0.72 0.19 293)',
+    },
+  },
 });
 
 /** Register a custom color preset. Overwrites any built-in preset with the same name. */
@@ -297,7 +320,8 @@ function readStoredTheme(): ThemeMode|undefined {
 
 function readStoredColorTheme(): ColorTheme {
   const stored=getStorage()?.getItem(COLOR_STORAGE_KEY);
-  return stored&&builtinPresets[stored]? stored as ColorTheme:'blue';
+  // Stripe is the product default; an existing persisted preset remains authoritative.
+  return stored&&builtinPresets[stored]? stored as ColorTheme:'stripe';
 }
 
 function persistSelection(key: string,value: string): void {
@@ -331,9 +355,10 @@ function clearAppliedArtifacts(): void {
   removeCssProperties(activePresetVars);
   activeCssOverrideVars=[];
   activePresetVars=[];
-  root.classList.remove('layout-clean-flat','light','dark');
+  root.classList.remove('layout-clean-flat','light','dark','svadmin-theme-light','svadmin-theme-dark');
   root.style.removeProperty('color-scheme');
   root.removeAttribute('data-theme');
+  root.removeAttribute('data-theme-mode');
 }
 
 function applyThemeClasses(themeMode: ThemeMode,config: ThemeConfig): void {
@@ -350,6 +375,9 @@ function applyThemeClasses(themeMode: ThemeMode,config: ThemeConfig): void {
     root.classList.toggle('dark',resolved==='dark');
     root.classList.remove('light');
   }
+  root.classList.toggle('svadmin-theme-light',resolved==='light');
+  root.classList.toggle('svadmin-theme-dark',resolved==='dark');
+  root.setAttribute('data-theme-mode',resolved);
 
   if(!config.disableColorScheme) root.style.colorScheme=resolved;
 }

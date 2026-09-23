@@ -4,7 +4,9 @@ description: Information budgets, feedback ownership, page states, and AI accept
 ---
 
 svadmin defines its own **Admin UI design principles**. External systems fill specific
-behavior and coverage gaps; they are not mixed into a new visual theme.
+behavior and coverage gaps; they are not mixed into a new visual theme. The runtime
+visual profile is Stripe-inspired and corporate-clean; the complete precedence
+matrix lives in `DESIGN.md`.
 
 Start with the seven [Design Principles](/guides/design-principles/), then use
 this standard for state ownership and AI acceptance details.
@@ -14,6 +16,9 @@ this standard for state ownership and AI acceptance details.
 | Reference | Use it for | Do not copy |
 | --- | --- | --- |
 | svadmin design principles | Hierarchy, restraint, neutral surfaces, precise product tone | External brand identity |
+| Stripe style prompt | Controlled purple accent, technical grid, layered shadows, lift/depress feedback | Stripe brand assets and marketing gradients |
+| Corporate-clean prompt | Neutral enterprise surfaces, spacing, focus offset, motion <= 200ms | A blue-only palette or copied utility recipes |
+| Fuse / Midone / Skote | Navigation anatomy, page-family coverage, toolbar/table/form composition | Vendor CSS, fonts, logos, palette, and markup |
 | [Refine](https://refine.dev/docs/) | Resources, CRUD flows, provider state, mutation ownership | React implementation or UI theme |
 | [Ant Design](https://ant.design/components/overview/) | Feedback selection, forms, results, empty/loading states, data density | Blue palette, radius, shadow, component chrome |
 | [shadcn/ui](https://ui.shadcn.com/docs) | Accessible composition, semantic variants, source-owned components | React-only APIs or default styling |

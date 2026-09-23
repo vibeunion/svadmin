@@ -1,5 +1,5 @@
 /* 只定义样例的布局，组件外观来自实际发布 CSS；不另起调色板。 */
-html { font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; font-size: 16px; }
+html { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 16px; }
 body { margin: 0; }
 * { box-sizing: border-box; }
 .kit-root { color: var(--foreground); background: var(--background); min-height: 100vh; font-size: .875rem; line-height: 1.5; }
@@ -13,11 +13,11 @@ body { margin: 0; }
 .kit-layout { display: grid; grid-template-columns: 208px minmax(0, 1fr); }
 .kit-nav { padding: 24px 16px; background: var(--background); border-right: 1px solid var(--border); }
 .kit-eyebrow { text-transform: none; color: var(--muted-foreground); font-size: 11px; margin: 0 12px 16px; }
-.kit-nav button { display: flex; align-items: center; gap: 10px; width: 100%; text-align: start; min-height: 40px; border: 0; border-radius: var(--radius-md); padding: 8px 12px; font: inherit; cursor: pointer; background: transparent; color: var(--foreground); }
+.kit-nav button { display: flex; align-items: center; gap: 10px; width: 100%; text-align: start; min-height: 40px; border: 0; border-radius: var(--radius-md); padding: 8px 12px; font: inherit; cursor: pointer; background: transparent; color: var(--foreground); transition: background-color var(--svadmin-motion-fast, 150ms) ease-out, color var(--svadmin-motion-fast, 150ms) ease-out; }
 .kit-nav button:hover { background: var(--muted); }
 .kit-nav button[aria-current='page'] { background: var(--accent); color: var(--accent-foreground); font-weight: 600; }
 .kit-nav-note { white-space: pre-line; margin: 32px 12px; color: var(--muted-foreground); font-size: 12px; }
-.kit-workspace { min-width: 0; background: var(--card); }
+.kit-workspace { min-width: 0; background: var(--background); background-image: linear-gradient(to right, color-mix(in lch, var(--primary) 4%, transparent) 1px, transparent 1px), linear-gradient(to bottom, color-mix(in lch, var(--primary) 4%, transparent) 1px, transparent 1px); background-size: var(--svadmin-grid-size, 40px) var(--svadmin-grid-size, 40px); }
 .kit-scenario { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center; min-height: 60px; padding: 12px 32px; border-bottom: 1px solid var(--border); }
 .kit-scenario > span { font-size: 12px; margin-inline-start: auto; }
 .kit-check { font-size: 12px; }
@@ -34,7 +34,7 @@ body { margin: 0; }
 .kit-cell-sub { display: block; font-size: 12px; }
 .kit-number { text-align: end; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .kit-list-filters { display: flex; flex-wrap: wrap; gap: 8px; }
-.kit-list-filter { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 8px 12px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted-foreground); font: inherit; cursor: pointer; }
+.kit-list-filter { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 8px 12px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted-foreground); font: inherit; cursor: pointer; transition: background-color var(--svadmin-motion-fast, 150ms) ease-out, color var(--svadmin-motion-fast, 150ms) ease-out; }
 .kit-list-filter[aria-pressed='true'] { border-bottom-color: var(--primary); color: var(--foreground); font-weight: 600; }
 .kit-list-filter:hover { background: var(--muted); }
 .kit-list-filter:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
@@ -74,7 +74,7 @@ body { margin: 0; }
 }
 @media (prefers-reduced-motion: reduce) { .kit-root *, .kit-root *::before, .kit-root *::after { animation-duration: .01ms; transition-duration: .01ms; } }
 
-/* 产品页只用组合规则；控件外观及表格部件由公开的 Panda recipes 提供。 */
+/* 产品页只用组合规则；控件外观及表格部件由公开的发布 CSS 与 recipes 提供。 */
 [data-svadmin-table-toolbar] .svadmin-filter-toolbar { width: min(100%, 28rem); }
 .kit-section:first-child { border-top: 0; }
 .kit-timeline { padding: 0; list-style: none; gap: 0; }

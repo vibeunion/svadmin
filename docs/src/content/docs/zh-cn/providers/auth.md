@@ -56,7 +56,7 @@ RLS 或动作请求；后端必须独立强制授权。
 
 ## 认证页面
 
-内置毛玻璃风格认证页面：
+内置认证页面使用共享的 Stripe 风格外壳和语义化 token：
 - `LoginPage` — 邮箱/密码登录
 - `RegisterPage` — 用户注册
 - `ForgotPasswordPage` — 密码重置请求

@@ -1,41 +1,41 @@
 ---
 version: "alpha"
 name: "svadmin Admin UI"
-description: "A restrained, precise product interface for repeated administrative work."
+description: "A restrained, precise Stripe-inspired product interface for repeated administrative work."
 colors:
-  background: "oklch(0.985 0.001 264)"
-  foreground: "oklch(0.205 0.012 264)"
-  surface: "oklch(1 0 0)"
-  surface-subtle: "oklch(0.968 0.004 264)"
-  muted-foreground: "oklch(0.493 0.018 264)"
-  border: "oklch(0.925 0.003 264)"
-  primary: "oklch(0.558 0.22 278)"
-  on-primary: "oklch(0.99 0 0)"
+  background: "#f6f9fc"
+  foreground: "#0a2540"
+  surface: "#ffffff"
+  surface-subtle: "#f1f4f8"
+  muted-foreground: "#425466"
+  border: "#e6ebf1"
+  primary: "#635bff"
+  on-primary: "#ffffff"
   success: "oklch(0.51 0.16 151)"
   warning: "oklch(0.7 0.15 75)"
   danger: "oklch(0.58 0.22 27)"
 typography:
   body:
-    fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
     fontSize: "0.875rem"
     fontWeight: 400
     lineHeight: 1.5
     letterSpacing: "0px"
   label:
-    fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
     fontSize: "0.8125rem"
     fontWeight: 500
     lineHeight: 1.35
     letterSpacing: "0px"
   heading:
-    fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
     fontSize: "1.25rem"
     fontWeight: 600
     lineHeight: 1.3
     letterSpacing: "0px"
 rounded:
   sm: "4px"
-  md: "6px"
+  md: "8px"
   lg: "8px"
 spacing:
   xs: "4px"
@@ -91,11 +91,13 @@ components:
 
 ## Overview
 
-### Visual update: September 21, 2026
+### Visual update: September 23, 2026
 
-The current UI follows Metronic Tailwind demo1 for layout rhythm, light surfaces,
-thin borders and restrained shadows, as requested by the project owner.
-This supersedes the older capability-only reference limitation below.
+The current UI follows a Stripe-inspired and corporate-clean visual direction:
+neutral canvas, Stripe purple as the single action accent, hairline borders,
+layered but restrained shadows, a subtle technical grid on the work canvas, and
+short ease-out feedback for interactive controls. This supersedes the older
+capability-only reference limitation below.
 Keep SVAdmin's own branding, semantic tokens, OpenUI contracts and Bits UI behavior.
 App chrome must use explicit anatomy hooks; never style every business `header`.
 Package utilities live in sublayers of `utilities`, so host-authored responsive
@@ -110,7 +112,45 @@ templates.
 Metronic is a capability reference only. Its page families, information
 architecture, and scenario coverage may expose missing components or examples,
 but its palette, decoration, card treatment, typography, and branding are not
-visual authority.
+visual authority. Fuse, Midone and Skote are also reference-only sources for
+spacing and component anatomy; their template branding and decorative treatment
+must not enter the product.
+
+### Reference integration and precedence
+
+The supplied references are intentionally assigned different jobs so they do
+not become a mixed visual theme:
+
+| Reference | Adopted responsibility | Explicitly excluded |
+| --- | --- | --- |
+| Stripe style prompt | `#635bff` action accent, technical grid, hairline borders, layered elevation, lift/depress feedback | Stripe brand assets, marketing gradients, oversized hero treatment |
+| Corporate-clean prompt | neutral enterprise surfaces, readable hierarchy, generous spacing, focus-ring offset, motion capped at 200ms | blue-only palette, rigid utility-class recipes, decorative cards |
+| Fuse / Midone / Skote | navigation anatomy, page-family coverage, toolbar/table/form composition, density observations | vendor palette, logos, fonts, CSS, copied markup or component chrome |
+| svadmin | semantic tokens, component API, state ownership, accessibility, responsive contracts | no second visual authority |
+
+When references conflict, svadmin semantics and accessibility win first, the
+Stripe prompt controls the action accent and grid, and the corporate-clean
+prompt controls restraint, spacing, and motion limits. The result is one
+product language rather than a collage of template styles.
+
+### Runtime integration map
+
+The same contract is used at every delivery surface:
+
+- `packages/ui/src/app.css` owns published semantic tokens and the
+  `clean-flat + stripe` refinement; host applications consume this stylesheet.
+- `packages/core/src/theme.svelte.ts` owns the `stripe` color preset and mode
+  attributes; it must stay aligned with the CSS fallback values.
+- `example/src/App.svelte` is the reference application and starts with
+  `layoutPreset: 'clean-flat'` and `colorPreset: 'stripe'`.
+- `packages/create-svadmin/template` starts new projects with the same theme
+  and guidance document, so generated apps do not drift from the example.
+- `design/admin-ui/preview` renders the published package CSS and uses the same
+  Stripe preset for component and state review.
+
+Do not add page-local palettes or shadow values when a semantic token exists.
+If a new reference suggests a different treatment, record its responsibility
+here before changing runtime CSS.
 
 ### Design principles
 
@@ -153,6 +193,15 @@ not a page background. Success, warning, and danger are reserved for semantic
 status and feedback. Consumer themes may replace the primary hue while keeping
 the neutral hierarchy and contrast relationships intact.
 
+The reference Stripe preset uses `#635bff`, `#0a2540`, `#f6f9fc`, and
+`#e6ebf1`. The grid is a low-contrast canvas texture only; buttons and data
+surfaces remain solid, and gradients are not used to communicate status. The
+runtime names for the shared depth and motion tokens are
+`--svadmin-shadow-control`, `--svadmin-shadow-surface`,
+`--svadmin-shadow-surface-hover`, `--svadmin-motion-fast`,
+`--svadmin-motion-standard`, `--svadmin-motion-slow`, and
+`--svadmin-focus-offset`.
+
 - **WCAG 2.2 AA Contrast**: Normal text maintains at least 4.5:1 against its
   canvas; large text, icons, and focus rings maintain at least 3:1. Enhanced AAA
   screens target 7:1 for normal text.
@@ -162,7 +211,7 @@ the neutral hierarchy and contrast relationships intact.
 
 ## Typography
 
-Use Inter or the consumer's compatible system sans. Product pages use compact
+Use a compatible system sans. Product pages use compact
 headings and normal letter spacing. Uppercase table labels, negative tracking,
 and oversized dashboard numerals are not defaults.
 
@@ -197,14 +246,14 @@ may increase slightly for genuinely clickable items, without translation or
 glow. Dialogs and menus receive stronger depth because they are floating
 layers. Dark mode keeps the same hierarchy with low-chroma surfaces.
 
-- **Control Shadow**: `0 1px 2px rgb(15 23 42 / 0.09), 0 0 0 1px rgb(15 23 42 / 0.045)`
-- **Surface Shadow**: `0 1px 2px rgb(15 23 42 / 0.08), 0 10px 24px rgb(15 23 42 / 0.07)`
-- **Surface Hover Shadow**: `0 3px 8px rgb(15 23 42 / 0.1), 0 16px 32px rgb(15 23 42 / 0.08)`
+- **Control Shadow**: `0 1px 2px rgb(15 23 42 / 0.04), 0 0 0 1px rgb(15 23 42 / 0.02)`
+- **Surface Shadow**: `0 2px 4px rgb(15 23 42 / 0.04), 0 8px 16px rgb(15 23 42 / 0.08)`
+- **Surface Hover Shadow**: `0 4px 8px rgb(15 23 42 / 0.06), 0 16px 32px rgb(15 23 42 / 0.1)`
 - **Overlay Shadow**: `0 20px 52px rgb(15 23 42 / 0.18), 0 6px 16px rgb(15 23 42 / 0.1)`
 
 ## Shapes
 
-Controls use 6px radii and bounded surfaces use 8px radii. Pills are limited to
+Controls use 8px radii and bounded surfaces use 8px radii. Pills are limited to
 status badges, avatar groups, and controls whose geometry carries meaning.
 
 ## Components
@@ -219,8 +268,10 @@ focus, or elevation with hard-coded values.
 
 Transitions provide clear state confirmation without delaying user action:
 
-- **Timing**: Micro-transitions use 140ms–250ms with `cubic-bezier(0.16, 1, 0.3, 1)`
-  or standard ease-out curves.
+- **Timing**: Micro-transitions use 150ms–200ms with `ease-out`; never use
+  `ease-in-out` for routine controls.
+- **Feedback**: Buttons may lift by 2px on hover and depress to `scale(0.98)`
+  on press. Interactive cards may lift by 4px; hover never scales a card.
 - **Focus Rings**: Operable controls declare `:focus-visible` with a 2px solid
   ring and a 2px offset.
 - **Accessibility**: All transitions and keyframe animations collapse to 0.01ms
@@ -320,6 +371,8 @@ Before accepting an AI-generated application page, verify all of the following:
 - Don't repeat a success fact across Toast, title, description, banner, badge,
   and table data.
 - Don't use persistent success banners for routine mutations.
-- Don't use gradients, glow, glassmorphism, negative letter spacing, or blanket
-  `!important` overrides as the default product language.
+- Don't use decorative gradients, glow, glassmorphism, negative letter spacing,
+  or blanket `!important` overrides as the default product language. A subtle
+  two-line grid is allowed on the work canvas because it is part of the current
+  Stripe-inspired reference direction.
 - Don't use cards inside cards or make every section a floating card.

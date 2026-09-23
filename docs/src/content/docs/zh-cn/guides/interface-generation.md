@@ -4,7 +4,8 @@ description: 信息预算、反馈归属、页面状态与 AI 验收规则
 ---
 
 svadmin 遵循**自身的 Admin UI 设计原则**。外部设计系统只补齐特定行为与场景，
-不能混合成一套新的视觉主题。
+不能混合成一套新的视觉主题。运行时视觉采用 Stripe 风格与企业简洁风；完整的
+优先级矩阵见仓库的 `DESIGN.md`。
 
 先阅读七条[设计原则](/zh-cn/guides/design-principles/)，再使用本文确定状态归属
 和 AI 验收细节。
@@ -14,6 +15,9 @@ svadmin 遵循**自身的 Admin UI 设计原则**。外部设计系统只补齐�
 | 参考对象 | 参考内容 | 不复制的内容 |
 | --- | --- | --- |
 | svadmin 设计原则 | 层级、克制、中性表面、精确的产品语气 | 外部品牌视觉身份 |
+| Stripe 风格提示词 | 受控紫色主色、技术网格、分层阴影、上浮/按压反馈 | Stripe 品牌素材与营销渐变 |
+| 企业简洁风提示词 | 中性企业表面、间距、焦点偏移、不超过 200ms 的动效 | 纯蓝配色或复制 utility 规则 |
+| Fuse / Midone / Skote | 导航解剖、页面家族、工具栏/表格/表单组合 | 供应商 CSS、字体、Logo、配色和标记 |
 | [Refine](https://refine.dev/docs/) | Resource、CRUD 流程、Provider 状态、变更归属 | React 实现与 UI 主题 |
 | [Ant Design](https://ant.design/components/overview/) | 反馈选择、表单、结果页、空/加载状态、数据密度 | 蓝色主题、圆角、阴影、组件外观 |
 | [shadcn/ui](https://ui.shadcn.com/docs) | 可访问组合、语义变体、源码归属组件 | React API 与默认样式 |

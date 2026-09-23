@@ -103,34 +103,46 @@ Using `border-color: var(--border)` with channel-only values is invalid CSS and 
 | `strategy` | `'standard' \| 'dark-first'` | `'standard'` | Class toggle strategy / 类名切换策略 |
 | `cssOverrides` | `Record<string, string>` | — | CSS variables to inject on `<html>` / 注入到 `<html>` 的 CSS 变量 |
 | `disableColorScheme` | `boolean` | `false` | Skip setting `color-scheme` attribute / 跳过 `color-scheme` 属性 |
+| `colorPreset` | `ColorPreset \| string` | `'stripe'` | Built-in or registered color preset; Stripe is used when no selection exists / 内置或注册的配色预设；未选择时默认使用 Stripe |
+| `layoutPreset` | `'default' \| 'clean-flat'` | `'default'` | Layout density and composition / 布局密度与结构 |
 
 ## Color Themes / 多色主题
 
-6 built-in color palettes, switchable via sidebar picker or API:
+8 built-in color palettes, switchable via sidebar picker or API:
 
-6 种内置配色，通过侧边栏选色器或 API 切换：
+8 种内置配色，通过侧边栏选色器或 API 切换：
+
+The Stripe-inspired example combines both presets:
+
+Stripe 风格示例同时使用以下两个预设：
+
+```svelte
+<AdminApp themeConfig={{ colorPreset: 'stripe', layoutPreset: 'clean-flat' }} />
+```
 
 ```typescript
-import { getColorTheme, setColorTheme, colorThemes } from '@svadmin/core';
+import { getColorTheme, setColorTheme, getColorThemes } from '@svadmin/core';
 import type { ColorTheme } from '@svadmin/core';
 
 setColorTheme('rose');    // set active color theme
 getColorTheme();          // current color theme id
 
 // Available themes
-colorThemes.forEach(ct => {
+getColorThemes().forEach(ct => {
   console.log(ct.id, ct.label, ct.color);
 });
 ```
 
 | Theme | ID | Hex |
 |-------|----|-----|
-| Blue (default) | `blue` | `#3b82f6` |
+| Neutral | `neutral` | `#71717a` |
+| Indigo | `indigo` | `#4f46e5` |
+| Blue | `blue` | `#3b82f6` |
 | Green | `green` | `#22c55e` |
 | Rose | `rose` | `#f43f5e` |
 | Orange | `orange` | `#f97316` |
 | Violet | `violet` | `#8b5cf6` |
-| Zinc | `zinc` | `#71717a` |
+| Stripe | `stripe` | `#635bff` |
 
 ### How It Works / 工作原理
 

@@ -12,6 +12,26 @@
 
 ## 已核对的来源与采用方式
 
+本轮新增的本地参考按职责接入，不把供应商模板当作运行时依赖：
+
+| 本地参考 | 采用方式 | 不复制 |
+| --- | --- | --- |
+| Stripe 风格提示词 | 作为主色、网格、边框、阴影和按钮状态的视觉来源 | 品牌素材、营销渐变、页面文案 |
+| 企业简洁风提示词 | 作为企业级层级、间距、焦点偏移和动效上限的约束 | 纯蓝主题、固定 utility class 组合 |
+| Fuse / Midone / Skote 压缩包 | 仅抽取导航、页面家族、工具栏/表格/表单的结构观察 | CSS、字体、Logo、供应商组件与代码 |
+
+本地压缩包的结构观察记录如下，便于后续 example 和页面模式复查：
+
+| 文件 | 结构观察 | 纳入 svadmin 的方式 |
+| --- | --- | --- |
+| `themeforest-CVu6DCVh-fuse-angularjs-material-design-admin-template.zip` | 分组导航带描述、图标、徽标和子项；Dashboard 按项目/分析/财务等页面家族拆分 | `Sidebar` 分组、资源菜单徽标、Dashboard/Workspace 页面目录 |
+| `themeforest-O9g2H9hv-midone-vuejs-admin-dashboard-template.zip` | 侧栏支持紧凑/悬停展开、移动端开关和滚动状态；Table/Menu 独立为可复用部件 | `WorkspaceLayout`、移动端 Sheet、`Table`/`DropdownMenu` 等公开组件 |
+| `themeforest-t6W10071-skote-angular-9-admin-dashboard-template.zip` | 同时覆盖垂直/水平 Shell、认证页、仪表盘、表格和表单页面族 | `AdminApp` 外壳、认证状态、页面模式和 example 路由覆盖 |
+
+这些观察只登记信息架构和交互解剖，不把压缩包中的 CSS、字体、Logo、图片或
+组件代码带入仓库。最终颜色、圆角、阴影、动效和焦点规则仍以根目录
+`DESIGN.md` 及 `packages/ui/src/app.css` 的语义 token 为准。
+
 | 来源 | 来源支持的观察 | svadmin 的实现决定 | 不照搬或尚未实现 |
 | --- | --- | --- | --- |
 | [Metronic API Keys 演示](https://keenthemes.com/metronic/tailwind/demo1/account/api-keys) | 公开演示分开组织账户设置、团队、安全和 API 访问，密钥列表含状态等元信息。 | 设置按“基本信息/开发者访问”分组；复用现有 `ApiKeyList`，仅提供明确为合成的掩码和只读元信息。 | 不复制示例 key、供应商样式或运行时；不提供复制/撤销回调，不以演示内容认证安全实现。 |

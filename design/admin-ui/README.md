@@ -1,7 +1,8 @@
 # svadmin Admin UI Design Kit v0.1
 
 本目录把可追溯的设计参考、现有代码资产与实际创建的 Figma 文件关联起来。
-这是设计资产交付，不是另一套运行时主题，也不是全站视觉改版。
+这是设计资产交付，不是另一套运行时主题，也不是全站视觉改版。运行时视觉
+统一遵循根目录 `DESIGN.md` 的 Stripe 风格 + 企业简洁风职责矩阵。
 
 ## 打开已有 Figma 文件
 
@@ -40,7 +41,11 @@ Input、Badge 和三类页面的 Figma 图层仍未创建；第三页是空的�
 
 ## 设计来源与边界
 
-视觉决定由根目录 `DESIGN.md` 与经过审查的 svadmin 实现共同管理。当前资产参考清单仅保留 Park Foundations，用于参考变量与组件组织。本次不复制第三方图层、商标、字体或商业素材；文件级许可仍为 pending，不得随 npm 包再分发。目录与任务标识已规范为 admin-ui；历史需求仅作摘要，原始记录保留在 Git 历史。
+视觉决定由根目录 `DESIGN.md` 与经过审查的 svadmin 实现共同管理。Stripe 和
+企业简洁提示词负责视觉方向，Fuse、Midone、Skote 只用于结构和组件解剖；当前
+资产参考清单仅保留 Park Foundations，用于参考变量与组件组织。本次不复制第三方
+图层、商标、字体或商业素材；文件级许可仍为 pending，不得随 npm 包再分发。
+目录与任务标识已规范为 admin-ui；历史需求仅作摘要，原始记录保留在 Git 历史。
 
 最初交付基于 Svelte + Bits UI + Panda CSS；这是历史背景，不是当前运行时约束。当前 UI 已迁移到 Tailwind，primitive/product recipe 合并于 `packages/ui/src/recipes.ts`。本套件不新增运行时依赖。页面模式契约用于设计验收，不是 SurfaceRenderer schema；模拟权限也不代替后端授权。
 

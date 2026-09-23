@@ -19,7 +19,8 @@ description: Complete configuration reference for svadmin
 | `resources` | `ResourceDefinition[]` | ✅ | — |
 | `routerProvider` | `RouterProvider` | — | Hash router |
 | `title` | `string` | — | `'Admin'` |
-| `colorTheme` | `ColorTheme` | — | `'blue'` |
+| `defaultTheme` | `'light' \| 'dark' \| 'system'` | — | `'system'` |
+| `themeConfig` | `ThemeConfig` | — | — |
 
 `providerBundle.dataProvider` satisfies the required data provider when the top-level `dataProvider` prop is omitted. For incremental migration, top-level provider props override fields with the same name in `providerBundle`. Enterprise providers are tree-scoped; missing providers leave the corresponding built-in settings controls unavailable rather than using demo persistence.
 
@@ -110,13 +111,49 @@ interface FieldDefinition {
 }
 ```
 
-## Color Themes
+## Theme Configuration
 
-Available: `blue`, `green`, `purple`, `orange`, `rose`, `teal`, `slate`
+Use `themeConfig` to select the color preset and layout style. The default
+layout is `default`; `clean-flat` enables the restrained, high-contrast panel
+layout used by the Stripe-inspired example.
 
-```typescript
-<AdminApp colorTheme="purple" ... />
+```svelte
+<AdminApp
+  {dataProvider}
+  {resources}
+  defaultTheme="system"
+  themeConfig={{
+    colorPreset: 'stripe',
+    layoutPreset: 'clean-flat',
+  }}
+/>
 ```
+
+`ThemeConfig` supports the following options:
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `strategy` | `'standard' \| 'dark-first'` | `'standard'` | Controls whether dark mode adds `.dark` or light mode adds `.light` |
+| `colorPreset` | `ColorPreset \| string` | `'stripe'` | Built-in or registered color preset; persisted or explicit selections still take precedence |
+| `layoutPreset` | `'default' \| 'clean-flat'` | `'default'` | Layout treatment for the application shell |
+| `cssOverrides` | `Record<string, string>` | — | CSS variables injected on `<html>` |
+| `disableColorScheme` | `boolean` | `false` | Skip the built-in `color-scheme` attribute |
+
+Eight color presets are built in:
+
+| Theme | ID | Preview color |
+|-------|----|---------------|
+| Neutral | `neutral` | `#71717a` |
+| Indigo | `indigo` | `#4f46e5` |
+| Blue | `blue` | `#3b82f6` |
+| Green | `green` | `#22c55e` |
+| Rose | `rose` | `#f43f5e` |
+| Orange | `orange` | `#f97316` |
+| Violet | `violet` | `#8b5cf6` |
+| Stripe | `stripe` | `#635bff` |
+
+Use `registerColorPreset()` to add a custom preset, or use
+`setColorTheme()`/`getColorThemes()` for runtime selection.
 
 ## Internationalization (I18n)
 

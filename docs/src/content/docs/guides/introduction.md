@@ -20,9 +20,9 @@ svadmin is built natively for **Svelte 5 runes** and uses a provider-based archi
 - ⚡ **TanStack Query** — Automatic caching, deduplication, background refetch
 - 🧩 **Pre-built Components** — AutoTable, AutoForm, CRUD pages, auth pages, CommandPalette, Sheet, Drawer, StepsForm
 - 🔠 **16 Field Components** — Complete set of mapped display and input fields (Text, Image, JSON, RichText, Combobox, MultiSelect, etc.)
-- 🔑 **Auth System** — 9 hooks + 4 glassmorphism auth pages
+- 🔑 **Auth System** — 9 hooks + 4 configurable auth page variants
 - 📡 **Real-time** — WebSocket & SSE live providers with auto-reconnect
-- 🎨 **Themeable** — 7 color themes, light/dark mode, glassmorphism
+- 🎨 **Themeable** — 8 color presets, light/dark mode, and configurable layout presets
 - 🛡️ **Access Control** — Role-based and attribute-based permissions
 - 🔍 **Inferencer** — Auto-generate admin UI from sample data or OpenAPI 3.x specs
 - 🧱 **Declarative Surfaces** — Render validated, policy-constrained dashboard specs with trusted Svelte components

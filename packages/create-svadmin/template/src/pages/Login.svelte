@@ -28,58 +28,230 @@
   }
 </script>
 
-<div class="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-  <div class="w-full max-w-sm space-y-6 rounded-2xl bg-white p-8 shadow-xl shadow-blue-900/5">
+<div class="scaffold-login">
+  <div class="scaffold-login__panel">
     <!-- Logo -->
-    <div class="text-center">
-      <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-primary-50">
-        <Shield class="h-7 w-7 text-primary" />
+    <div class="scaffold-login__header">
+      <div class="scaffold-login__mark" aria-hidden="true">
+        <Shield size={28} strokeWidth={1.8} />
       </div>
-      <h1 class="mt-4 text-xl font-bold text-gray-900">Admin Panel</h1>
-      <p class="mt-1 text-sm text-gray-500">Sign in to continue</p>
+      <h1>Admin Panel</h1>
+      <p>Sign in to continue</p>
     </div>
 
     <!-- Error -->
     {#if error}
-      <div role="alert" class="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+      <div role="alert" class="scaffold-login__error">
         {error}
       </div>
     {/if}
 
     <!-- Form -->
-    <form onsubmit={handleLogin} class="space-y-4">
-      <div>
-        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+    <form onsubmit={handleLogin} class="scaffold-login__form">
+      <label>
+        <span>Email</span>
         <input
           id="email"
           type="email"
           bind:value={email}
           required
-          class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          class="scaffold-login__input"
           placeholder="admin@example.com"
         />
-      </div>
-      <div>
-        <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+      </label>
+      <label>
+        <span>Password</span>
         <input
           id="password"
           type="password"
           bind:value={password}
           required
-          class="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-          placeholder="••••••••"
+          class="scaffold-login__input"
+          placeholder="Enter your password"
         />
-      </div>
+      </label>
       <button
         type="submit"
         disabled={loading}
-        class="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 text-sm font-medium text-white hover:bg-primary-700 disabled:opacity-50 transition"
+        class="scaffold-login__submit"
       >
         {#if loading}
-          <Loader2 class="h-4 w-4 animate-spin" />
+          <span class="scaffold-login__spinner" aria-hidden="true"><Loader2 size={16} /></span>
         {/if}
         Sign in
       </button>
     </form>
   </div>
 </div>
+
+<style>
+  .scaffold-login {
+    display: grid;
+    min-height: 100dvh;
+    place-items: center;
+    padding: 2rem 1rem;
+    background: var(--background);
+    background-image:
+      linear-gradient(to right, color-mix(in oklch, var(--primary) 4%, transparent) 1px, transparent 1px),
+      linear-gradient(to bottom, color-mix(in oklch, var(--primary) 4%, transparent) 1px, transparent 1px);
+    background-size: var(--svadmin-grid-size) var(--svadmin-grid-size);
+    color: var(--foreground);
+  }
+
+  .scaffold-login__panel {
+    width: min(100%, 28rem);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--card);
+    padding: 2rem;
+    box-shadow: var(--shadow-surface);
+  }
+
+  .scaffold-login__header {
+    display: grid;
+    justify-items: center;
+    gap: 0.5rem;
+    text-align: center;
+  }
+
+  .scaffold-login__mark {
+    display: grid;
+    width: 3.5rem;
+    height: 3.5rem;
+    place-items: center;
+    border: 1px solid color-mix(in oklch, var(--primary) 20%, var(--border));
+    border-radius: var(--radius-md);
+    background: color-mix(in oklch, var(--primary) 10%, var(--card));
+    color: var(--primary);
+  }
+
+  .scaffold-login__header h1 {
+    margin: 0.75rem 0 0;
+    color: var(--foreground);
+    font-size: 1.25rem;
+    font-weight: 650;
+    line-height: 1.3;
+  }
+
+  .scaffold-login__header p {
+    margin: 0;
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+  }
+
+  .scaffold-login__error {
+    margin-top: 1.5rem;
+    border: 1px solid color-mix(in oklch, var(--destructive) 28%, var(--border));
+    border-radius: var(--radius-md);
+    background: color-mix(in oklch, var(--destructive) 8%, var(--card));
+    color: var(--destructive);
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .scaffold-login__form {
+    display: grid;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .scaffold-login__form label {
+    display: grid;
+    gap: 0.5rem;
+    color: var(--foreground);
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  .scaffold-login__input {
+    min-height: 2.75rem;
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--card);
+    color: var(--foreground);
+    padding: 0.625rem 0.75rem;
+    font: inherit;
+    font-size: 0.875rem;
+    box-shadow: var(--shadow-control);
+    transition: border-color var(--svadmin-motion-fast) ease-out, box-shadow var(--svadmin-motion-fast) ease-out;
+  }
+
+  .scaffold-login__input::placeholder {
+    color: var(--muted-foreground);
+    opacity: 0.75;
+  }
+
+  .scaffold-login__input:focus-visible {
+    border-color: var(--ring);
+    outline: 2px solid color-mix(in oklch, var(--ring) 42%, transparent);
+    outline-offset: var(--svadmin-focus-offset);
+  }
+
+  .scaffold-login__submit {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    border: 1px solid color-mix(in oklch, var(--primary) 70%, var(--border));
+    border-radius: var(--radius-md);
+    background: var(--primary);
+    color: var(--primary-foreground);
+    padding: 0.625rem 1rem;
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 650;
+    box-shadow: var(--shadow-control);
+    transition: transform var(--svadmin-motion-standard) ease-out, box-shadow var(--svadmin-motion-standard) ease-out, background-color var(--svadmin-motion-standard) ease-out;
+  }
+
+  .scaffold-login__submit:hover:not(:disabled) {
+    transform: translateY(-0.125rem);
+  }
+
+  .scaffold-login__submit:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+    box-shadow: var(--shadow-control);
+  }
+
+  .scaffold-login__submit:focus-visible {
+    outline: 2px solid color-mix(in oklch, var(--ring) 78%, transparent);
+    outline-offset: var(--svadmin-focus-offset);
+  }
+
+  .scaffold-login__submit:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  .scaffold-login__spinner {
+    animation: scaffold-login-spin var(--svadmin-motion-slow) linear infinite;
+  }
+
+  @keyframes scaffold-login-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scaffold-login__input,
+    .scaffold-login__submit {
+      transition-duration: 0.01ms;
+    }
+
+    .scaffold-login__spinner {
+      animation-duration: 0.01ms;
+    }
+  }
+
+  @media (max-width: 32rem) {
+    .scaffold-login {
+      padding: 1rem;
+    }
+
+    .scaffold-login__panel {
+      padding: 1.5rem;
+    }
+  }
+</style>

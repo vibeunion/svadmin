@@ -86,7 +86,7 @@ import { definedOptions } from '@svadmin/core/options';
     focusedDemoField = fieldKey;
     document.getElementById(fieldKey)?.focus();
   }
-  const successImage = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="160" height="96" viewBox="0 0 160 96"%3E%3Crect width="160" height="96" fill="%23e0e7ff"/%3E%3Ccircle cx="42" cy="36" r="16" fill="%236366f1"/%3E%3Cpath d="M12 82 58 50l24 18 20-14 46 28H12Z" fill="%234f46e5"/%3E%3C/svg%3E';
+  const successImage = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="160" height="96" viewBox="0 0 160 96"%3E%3Crect width="160" height="96" fill="%23eef0ff"/%3E%3Ccircle cx="42" cy="36" r="16" fill="%23635bff"/%3E%3Cpath d="M12 82 58 50l24 18 20-14 46 28H12Z" fill="%235147d9"/%3E%3C/svg%3E';
   const enterpriseRequestContext = createEnterpriseRequestContext({
     tenantId: 'example-tenant',
     requestId: 'example-design-principles',
@@ -175,6 +175,31 @@ import { definedOptions } from '@svadmin/core/options';
     },
   ]);
 
+  const referenceLayers = $derived([
+    {
+      title: isZh ? '视觉权威' : 'Visual authority',
+      label: 'Stripe + Corporate Clean',
+      detail: isZh ? 'Stripe 负责紫色主色、技术网格和精致反馈；企业简洁风负责中性表面、间距、焦点偏移和动效上限。' : 'Stripe owns the purple accent, technical grid, and precise feedback; Corporate Clean owns neutral surfaces, spacing, focus offsets, and the motion ceiling.',
+    },
+    {
+      title: isZh ? '结构参考' : 'Structure references',
+      label: 'Fuse · Midone · Skote',
+      detail: isZh ? '只吸收导航、页面家族、工具栏、表格和表单的结构观察，不复制供应商品牌、CSS 或字体。' : 'Only navigation, page-family, toolbar, table, and form anatomy are observed; vendor branding, CSS, and fonts stay out.',
+    },
+    {
+      title: isZh ? '产品契约' : 'Product contract',
+      label: 'svadmin tokens + states',
+      detail: isZh ? '语义 Token、组件 API、状态归属、响应式和可访问性在所有页面与生成模板中保持一致。' : 'Semantic tokens, component APIs, state ownership, responsive behavior, and accessibility stay consistent across pages and generated apps.',
+    },
+  ]);
+
+  const visualTokens = [
+    { label: 'Primary', value: '#635bff' },
+    { label: 'Ink', value: '#0a2540' },
+    { label: 'Canvas', value: '#f6f9fc' },
+    { label: 'Border', value: '#e6ebf1' },
+  ];
+
   const stateLabels = $derived({
     loading: isZh ? '加载' : 'Loading',
     empty: isZh ? '空状态' : 'Empty',
@@ -227,6 +252,36 @@ import { definedOptions } from '@svadmin/core/options';
     description={isZh ? '把视觉方向转成可复用组件、可审查状态和可验证示例。' : 'Turn a visual direction into reusable components, reviewable states, and verifiable examples.'}
     actions={headerActions}
   />
+
+  <section class="space-y-3" aria-labelledby="style-system-heading" data-style-system-reference>
+    <SectionHeader
+      id="style-system-heading"
+      title={isZh ? '统一视觉参考' : 'Unified visual references'}
+      description={isZh ? '所有 example、组件预览和生成模板都从同一份职责矩阵读取风格。' : 'The example, component preview, and generated template all follow the same responsibility matrix.'}
+    />
+    <div class="grid gap-3 lg:grid-cols-3">
+      {#each referenceLayers as layer (layer.title)}
+        <article class="min-w-0 rounded-lg border border-border bg-card p-4 shadow-sm">
+          <div class="flex items-center justify-between gap-3">
+            <h3 class="text-sm font-semibold text-foreground">{layer.title}</h3>
+            <Badge variant="outline">{layer.label}</Badge>
+          </div>
+          <p class="mt-2 text-xs leading-5 text-muted-foreground">{layer.detail}</p>
+        </article>
+      {/each}
+    </div>
+    <div class="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-muted/40 p-3" data-style-token-strip>
+      <span class="text-xs font-semibold text-foreground">{isZh ? '核心 Token' : 'Core tokens'}</span>
+      {#each visualTokens as token (token.label)}
+        <span class="inline-flex items-center gap-2 rounded-md border border-border bg-card px-2 py-1 text-xs text-muted-foreground">
+          <span class="size-3 rounded-sm border border-border" style:background={token.value} aria-hidden="true"></span>
+          <span>{token.label}</span>
+          <code class="font-mono text-[0.6875rem] text-foreground">{token.value}</code>
+        </span>
+      {/each}
+      <span class="text-xs text-muted-foreground">{isZh ? '控件上浮 2px · 卡片上浮 4px · 按压 0.98 · 焦点偏移 2px' : 'Controls lift 2px · cards lift 4px · press 0.98 · focus offset 2px'}</span>
+    </div>
+  </section>
 
   {#if showWarning}
     <FeedbackNotice

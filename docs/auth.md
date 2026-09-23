@@ -140,7 +140,7 @@ authenticate and authorize every request.
 
 ## Auth Pages
 
-Built-in glassmorphism auth pages:
+Built-in auth pages use the shared Stripe-inspired shell and semantic tokens:
 
 ```svelte
 <AdminApp {dataProvider} {authProvider} {resources} title="My App" />

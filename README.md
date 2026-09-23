@@ -20,12 +20,12 @@
 - 🔠 **16 Field Components** — TextField, UrlField, EmailField, BooleanField, TagField, FileField, ImageField, MarkdownField, RichTextField, SelectField, MultiSelectField, RelationField, JsonField, ComboboxField, PasswordInput
 - 🔘 **CRUD Buttons** — CreateButton, EditButton, DeleteButton, ShowButton, ListButton, RefreshButton, ExportButton, ImportButton, SaveButton, CloneButton
 - 🛡️ **`<Authenticated>`** — Conditionally render based on auth state with loading/fallback
-- ⚙️ **ConfigErrorScreen** — Glassmorphism screen for missing env vars with copy-to-clipboard
+- ⚙️ **ConfigErrorScreen** — Restrained configuration error screen for missing env vars with copy-to-clipboard
 - 🌍 **i18n** — Built-in zh-CN/en with browser auto-detection, one-click locale toggle
 - 🔐 **Auth & RBAC** — AuthProvider + permission system with resource-level access control
 - 🌓 **Dark Mode** — Light / Dark / System with one-click toggle, persisted to localStorage
-- 🎨 **Multi-Color Themes** — 6 color palettes (Blue, Green, Rose, Orange, Violet, Zinc) with sidebar picker
-- 🪟 **Glassmorphism UI** — Translucent sidebar with backdrop blur for a premium look
+- 🎨 **Multi-Color Themes** — 8 color palettes (Neutral, Indigo, Blue, Green, Rose, Orange, Violet, Stripe) with sidebar picker
+- 🎨 **Stripe-inspired UI** — Neutral canvases, crisp surfaces, and consistent interaction feedback
 - 📡 **Real-time** — LiveProvider interface with WebSocket & SSE built-in providers
 - 🔀 **RouterProvider** — Pluggable routing with hash and history router providers
 - 📋 **Audit Logging** — Pluggable audit handler for tracking admin operations
@@ -44,12 +44,12 @@
 - 🔠 **16 种字段组件** — TextField、UrlField、EmailField、BooleanField、TagField、FileField、ImageField、MarkdownField、RichTextField、SelectField、MultiSelectField、RelationField、JsonField、ComboboxField、PasswordInput
 - 🔘 **CRUD 按钮** — CreateButton、EditButton、DeleteButton、ShowButton、ListButton、RefreshButton、ExportButton、ImportButton、SaveButton、CloneButton
 - 🛡️ **`<Authenticated>`** — 根据认证状态条件渲染，支持 loading/fallback
-- ⚙️ **ConfigErrorScreen** — 环境变量缺失提示页，毛玻璃风格，支持一键复制
+- ⚙️ **ConfigErrorScreen** — 环境变量缺失提示页，克制的企业风格，支持一键复制
 - 🌍 **国际化** — 内置中英文，浏览器自动检测，侧边栏一键切换语言
 - 🔐 **认证与权限** — AuthProvider + 资源级权限控制
 - 🌓 **暗色模式** — 亮色 / 暗色 / 跟随系统，一键切换，持久化到 localStorage
-- 🎨 **多色主题** — 6 种配色方案（Blue、Green、Rose、Orange、Violet、Zinc），侧边栏选色器切换
-- 🪟 **毛玻璃 UI** — 半透明侧边栏 + 背景模糊，质感拉满
+- 🎨 **多色主题** — 8 种配色方案（Neutral、Indigo、Blue、Green、Rose、Orange、Violet、Stripe），侧边栏选色器切换
+- 🎨 **Stripe 风格 UI** — 中性画布、清晰表面、细边框和一致的交互反馈
 - 📡 **实时订阅** — LiveProvider 接口，内置 WebSocket 及 SSE 实现，自动重连
 - 🔀 **RouterProvider** — 可插拔路由，内置 Hash 和 History 路由
 - 📋 **审计日志** — 可插拔的审计处理器
@@ -363,20 +363,20 @@ getResolvedTheme(); // resolved to 'light' or 'dark'
 
 ## 🎨 Color Themes / 多色主题
 
-Switch between 6 color palettes via sidebar picker or programmatically:
+Switch between 8 color palettes via sidebar picker or programmatically:
 
-通过侧边栏选色器或编程式切换 6 种配色：
+通过侧边栏选色器或编程式切换 8 种配色：
 
 ```typescript
-import { getColorTheme, setColorTheme, colorThemes } from "@svadmin/core";
+import { getColorTheme, setColorTheme, getColorThemes } from "@svadmin/core";
 import type { ColorTheme } from "@svadmin/core";
 
-setColorTheme("rose"); // 'blue' | 'green' | 'rose' | 'orange' | 'violet' | 'zinc'
+setColorTheme("rose"); // 'neutral' | 'indigo' | 'blue' | 'green' | 'rose' | 'orange' | 'violet' | 'stripe'
 getColorTheme(); // current color theme
-console.log(colorThemes); // [{ id: 'blue', label: 'Blue', color: '#3b82f6' }, ...]
+console.log(getColorThemes()); // [{ id: 'neutral', label: 'Neutral', color: '#71717a' }, ...]
 ```
 
-Available themes / 可用主题: `blue` (default), `green`, `rose`, `orange`, `violet`, `zinc`
+Available themes / 可用主题: `stripe` (default), `neutral`, `indigo`, `blue`, `green`, `rose`, `orange`, `violet`
 
 ## 🏷️ Resource Type Registry / 资源类型注册表
 

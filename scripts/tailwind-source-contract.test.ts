@@ -54,8 +54,13 @@ describe('@svadmin/ui native stylesheet contract', () => {
       expect(css).not.toMatch(/--primary\s*:/);
     }
     expect(readRepositoryFile('example/src/App.svelte')).toContain(
-      "colorPreset: 'indigo'",
+      "colorPreset: 'stripe'",
     );
+    expect(readRepositoryFile('packages/create-svadmin/template/src/App.svelte')).toContain(
+      "colorPreset: 'stripe'",
+    );
+    const scaffoldLogin = readRepositoryFile('packages/create-svadmin/template/src/pages/Login.svelte');
+    expect(scaffoldLogin).not.toMatch(/bg-gradient|backdrop-blur|rounded-(?:xl|2xl|3xl)|shadow-xl/);
   });
 
   it('keeps clean-flat semantic and bounded after the native CSS split', () => {
@@ -75,5 +80,19 @@ describe('@svadmin/ui native stylesheet contract', () => {
     const designContract = readRepositoryFile('DESIGN.md');
     expect(designContract).toContain('Admin UI');
     expect(designContract).toContain('Metronic is a capability reference only');
+  });
+
+  it('keeps the Stripe preset scoped to the clean-flat layout', () => {
+    const css = readRepositoryFile('packages/ui/src/app.css');
+    expect(css).toContain('--primary: oklch(0.54 0.24 293);');
+    expect(css).toContain('--ring: oklch(0.54 0.24 293);');
+    expect(readRepositoryFile('packages/core/src/theme.svelte.ts')).toContain("? stored as ColorTheme:'stripe'");
+    expect(css).toContain('.layout-clean-flat[data-theme="stripe"]');
+    expect(css).toContain('--svadmin-grid-size: 40px;');
+    expect(css).toContain('background-size: var(--svadmin-grid-size) var(--svadmin-grid-size);');
+    expect(css).toContain('--svadmin-shadow-control: 0 1px 2px rgb(15 23 42 / 0.04), 0 0 0 1px rgb(15 23 42 / 0.02);');
+    expect(css).toContain('inset 0 1px 0 rgb(255 255 255 / 0.2)');
+    expect(css).toContain('transition: background-color 180ms ease-out, color 180ms ease-out;');
+    expect(css).not.toContain('.layout-default[data-theme="stripe"]');
   });
 });

@@ -19,7 +19,8 @@ description: svadmin 完整配置参考
 | `resources` | `ResourceDefinition[]` | ✅ | — |
 | `routerProvider` | `RouterProvider` | — | Hash 路由 |
 | `title` | `string` | — | `'Admin'` |
-| `colorTheme` | `ColorTheme` | — | `'blue'` |
+| `defaultTheme` | `'light' \| 'dark' \| 'system'` | — | `'system'` |
+| `themeConfig` | `ThemeConfig` | — | — |
 
 顶层未传 `dataProvider` 时，`providerBundle.dataProvider` 可满足必填数据源。为便于渐进迁移，顶层 Provider 属性会覆盖 `providerBundle` 内同名字段。企业 Provider 按组件树隔离；缺失时，对应的内置设置操作保持不可用，不会使用演示数据伪造持久化。
 
@@ -106,13 +107,48 @@ interface FieldDefinition {
 }
 ```
 
-## 配色主题
+## 主题配置
 
-可用主题：`blue`、`green`、`purple`、`orange`、`rose`、`teal`、`slate`
+使用 `themeConfig` 选择配色预设和布局风格。默认布局为 `default`；
+`clean-flat` 提供 Stripe 风格示例使用的克制、高对比后台布局。
 
-```typescript
-<AdminApp colorTheme="purple" ... />
+```svelte
+<AdminApp
+  {dataProvider}
+  {resources}
+  defaultTheme="system"
+  themeConfig={{
+    colorPreset: 'stripe',
+    layoutPreset: 'clean-flat',
+  }}
+/>
 ```
+
+`ThemeConfig` 支持以下选项：
+
+| 属性 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `strategy` | `'standard' \| 'dark-first'` | `'standard'` | 控制暗色模式添加 `.dark`，还是亮色模式添加 `.light` |
+| `colorPreset` | `ColorPreset \| string` | `'stripe'` | 内置或注册的配色预设；已持久化或显式选择的主题优先 |
+| `layoutPreset` | `'default' \| 'clean-flat'` | `'default'` | 应用外壳的布局风格 |
+| `cssOverrides` | `Record<string, string>` | — | 注入 `<html>` 的 CSS 变量 |
+| `disableColorScheme` | `boolean` | `false` | 跳过内置的 `color-scheme` 属性 |
+
+内置 8 套配色预设：
+
+| 主题 | ID | 预览色 |
+|------|----|--------|
+| Neutral | `neutral` | `#71717a` |
+| Indigo | `indigo` | `#4f46e5` |
+| Blue | `blue` | `#3b82f6` |
+| Green | `green` | `#22c55e` |
+| Rose | `rose` | `#f43f5e` |
+| Orange | `orange` | `#f97316` |
+| Violet | `violet` | `#8b5cf6` |
+| Stripe | `stripe` | `#635bff` |
+
+可使用 `registerColorPreset()` 添加自定义预设，或使用
+`setColorTheme()`/`getColorThemes()` 在运行时切换。
 
 ## 国际化 (I18n)
 

@@ -8,6 +8,13 @@ surfaces, precise hierarchy, restrained depth, and compact controls support
 repeated operational work. These seven principles turn that direction into
 reviewable product decisions.
 
+The visual authority is the shared **Stripe-inspired + corporate-clean**
+profile: Stripe supplies the controlled purple accent, technical grid, and
+layered feedback; corporate-clean supplies neutral surfaces, spacing, focus
+offsets, and a 200ms motion ceiling. Fuse, Midone, and Skote are anatomy and
+coverage references only. See the repository `DESIGN.md` for the complete
+responsibility matrix.
+
 ## 1. Clear by default
 
 Every page has one primary job, one dominant next action, and one owner for each
@@ -61,7 +68,7 @@ The invariant is **one event -> one primary feedback surface**.
 Content and hierarchy carry the interface.
 
 - Use neutral canvases and one controlled interaction accent.
-- Use hairline borders, subtle shadows, 6px controls, and 8px bounded surfaces.
+- Use hairline borders, subtle shadows, 8px controls, and 8px bounded surfaces.
 - Cards represent objects or bounded tools; page sections are not decorative cards.
 - Do not use gradients, glow, glassmorphism, negative tracking, or card-in-card decoration.
 

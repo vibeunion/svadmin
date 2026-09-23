@@ -42,7 +42,7 @@
   align-items: center;
   background: var(--muted);
   border: 1px solid var(--border);
-  border-radius: 0.5rem;
+  border-radius: var(--radius-lg);
   padding: 0.6rem 0.9rem;
   font-size: 0.75rem;
 }
@@ -93,7 +93,7 @@
   font: inherit;
   color: var(--muted-foreground);
   cursor: pointer;
-  border-radius: 0.35rem 0.35rem 0 0;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
 }
 .office-nav button:hover,
 .office-subnav button:hover {
@@ -109,7 +109,7 @@
 .office-nav button span {
   margin-left: 0.4rem;
   padding: 0.05rem 0.35rem;
-  border-radius: 0.3rem;
+  border-radius: var(--radius-sm);
   background: var(--muted);
   font-size: 0.7rem;
 }
@@ -127,7 +127,7 @@
   padding: 0.75rem 1rem;
   border: 1px solid var(--border);
   border-left: 3px solid var(--primary);
-  border-radius: 0.4rem;
+  border-radius: var(--radius-lg);
   background: var(--card);
 }
 .office-feedback.error {
@@ -173,7 +173,7 @@
   place-items: center;
   width: 2.25rem;
   height: 2.25rem;
-  border-radius: 0.5rem;
+  border-radius: var(--radius-lg);
   background: var(--muted);
   color: var(--foreground);
   font-weight: 700;
@@ -287,7 +287,7 @@
   padding: 0.5rem 0.65rem;
   background: var(--background);
   border: 1px solid var(--border);
-  border-radius: 0.4rem;
+  border-radius: var(--radius-lg);
   color: var(--foreground);
   font: inherit;
   font-size: 0.8rem;
@@ -359,7 +359,7 @@
 .office-import {
   border: 1px dashed var(--border);
   padding: 1.4rem;
-  border-radius: 0.5rem;
+  border-radius: var(--radius-lg);
   justify-items: start;
 }
 .office-import label {

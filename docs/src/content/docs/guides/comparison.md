@@ -73,8 +73,9 @@ svadmin is a compile-time admin framework — no virtual DOM, no runtime diffing
 | AutoTable | ✅ Zero-config | ❌ DIY | ✅ `<DataGrid>` |
 | AutoForm | ✅ Zero-config | ❌ DIY | ✅ `<SimpleForm>` |
 | Field components | 16 types (incl ArrayField) | UI kit dependent | 20+ types |
-| Dark mode | ✅ 7 themes | UI kit dependent | ✅ |
-| Glassmorphism | ✅ Auth pages | ❌ | ❌ |
+| Dark mode | ✅ Light / Dark / System | UI kit dependent | ✅ |
+| Color presets | ✅ 8 built-in presets | UI kit dependent | ✅ |
+| Stripe-inspired auth shell | ✅ Auth pages | ❌ | ❌ |
 | Command palette | ✅ Built-in | ✅ `@refinedev/kbar` | ❌ |
 | Permission Matrix | ✅ Built-in component | ❌ Official unspecified | ❌ DIY |
 | Audit JSON Snapshot Viewer | ✅ Built-in component | ✅ Paid feature | ❌ DIY |
