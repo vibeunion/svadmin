@@ -27,6 +27,7 @@
   import { Menu } from '@lucide/svelte';
   import { getComponentRegistry } from '../component-registry.svelte.js';
   import { Button } from './ui/button/index.js';
+  import { cn } from '../utils.js';
 
   const i18n = useTranslation();
 
@@ -34,7 +35,25 @@
   let shortcutsOpen = $state(false);
   let mobileMenuOpen = $state(false);
 
-  let { children, title = 'Admin', menu, siteUrl, routeMode = 'auto', aiAssistant }: { children: Snippet; title?: string; menu?: MenuItem[]; siteUrl?: string; routeMode?: 'hash' | 'path' | 'auto'; aiAssistant?: Snippet<[LayoutAIAssistantProps]> } = $props();
+  interface Props {
+    children: Snippet;
+    title?: string;
+    menu?: MenuItem[];
+    siteUrl?: string;
+    routeMode?: 'hash' | 'path' | 'auto';
+    aiAssistant?: Snippet<[LayoutAIAssistantProps]>;
+    class?: string;
+  }
+
+  let {
+    children,
+    title = 'Admin',
+    menu,
+    siteUrl,
+    routeMode = 'auto',
+    aiAssistant,
+    class: className = '',
+  }: Props = $props();
   const layoutId = $props.id();
   const layoutScope = `svadmin-layout-${layoutId}`;
   const mainContentId = `${layoutScope}-main`;
@@ -150,7 +169,14 @@
   ontouchend={handleTouchEnd}
 />
 {#if loading}
-  <div data-svadmin-layout-scope={layoutScope} class="svadmin-u-60fbb7713999 svadmin-u-ef114b5f5ad1" in:fade={{ duration: 150 }}>
+  <div
+    data-svadmin-layout-scope={layoutScope}
+    data-svadmin-layout
+    data-svadmin-layout-state="loading"
+    aria-busy="true"
+    class={cn('svadmin-u-60fbb7713999 svadmin-u-ef114b5f5ad1', className)}
+    in:fade={{ duration: 150 }}
+  >
     <div class="svadmin-u-99d72c7fc3e2 svadmin-u-9d60be3a6d80 svadmin-u-e2fe2012a697 svadmin-u-ac402894e356 svadmin-u-8e63407b5ceb svadmin-u-3e7ce58d64fa">
       <Skeleton class="svadmin-u-ed8a5df7b2fb svadmin-u-516b03df0b7c" />
       <div class="svadmin-u-6f7e013d6499 svadmin-u-31f2553311b6">
@@ -172,7 +198,14 @@
     <DevTools docked />
   </div>
 {:else}
-  <div data-svadmin-layout-scope={layoutScope} class="svadmin-u-60fbb7713999 svadmin-u-ef114b5f5ad1 svadmin-u-e6f9e383a762" in:fade={{ duration: 200, delay: 50 }}>
+  <div
+    data-svadmin-layout-scope={layoutScope}
+    data-svadmin-layout
+    data-svadmin-layout-state="ready"
+    aria-busy="false"
+    class={cn('svadmin-u-60fbb7713999 svadmin-u-ef114b5f5ad1 svadmin-u-e6f9e383a762', className)}
+    in:fade={{ duration: 200, delay: 50 }}
+  >
     <button
       type="button"
       data-svadmin-skip-link={mainContentId}
@@ -241,7 +274,7 @@
 
       <!-- Content area: responsive padding + centered max-width container
            so wide screens don't stretch content indefinitely (avoids sparse layouts) -->
-      <main id={mainContentId} tabindex="-1" data-svadmin-main class="svadmin-u-36e579c0b41c svadmin-u-92bf82f493b1 svadmin-u-2859c861d7de svadmin-u-f0faeb26d656 svadmin-u-c9b99cd93450 svadmin-u-cc06a6575385 svadmin-u-daf5dc5fac2b svadmin-u-e86fadb84483">
+      <main id={mainContentId} tabindex="-1" data-svadmin-main data-svadmin-layout-content class="svadmin-u-36e579c0b41c svadmin-u-92bf82f493b1 svadmin-u-2859c861d7de svadmin-u-f0faeb26d656 svadmin-u-c9b99cd93450 svadmin-u-cc06a6575385 svadmin-u-daf5dc5fac2b svadmin-u-e86fadb84483">
         <div class="svadmin-u-0e12dc7de920 svadmin-u-6da6a3c3f741 svadmin-u-9e3dc30c26a3">
           {#key getPath()}
             <!-- 路由切换立即释放旧页面，避免退出期间继续读取已失效的路由派生状态。 -->
@@ -252,7 +285,7 @@
         </div>
       </main>
 
-      <footer class="svadmin-u-60fbb7713999 svadmin-u-0cfe3fb5e434 svadmin-u-012fbd121f37 svadmin-u-3960ffc248d9 svadmin-u-77c08e015d14 svadmin-u-77a2a20e90d4 svadmin-u-b950dda299d3 svadmin-u-05faf5c801ff svadmin-u-e6f9e383a762 svadmin-u-f0faeb26d656 svadmin-u-472f43d3a27b">
+      <footer data-svadmin-layout-footer class="svadmin-u-60fbb7713999 svadmin-u-0cfe3fb5e434 svadmin-u-012fbd121f37 svadmin-u-3960ffc248d9 svadmin-u-77c08e015d14 svadmin-u-77a2a20e90d4 svadmin-u-b950dda299d3 svadmin-u-05faf5c801ff svadmin-u-e6f9e383a762 svadmin-u-f0faeb26d656 svadmin-u-472f43d3a27b">
         <DevTools docked />
         {@render aiAssistant?.({ docked: true, scope: chatScope, ownerScope: layoutScope })}
       </footer>

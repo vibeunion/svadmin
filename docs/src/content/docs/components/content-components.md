@@ -11,9 +11,19 @@ workflows that do not fit the default CRUD wrappers.
 Use `ContentPageShell` as the width and spacing owner, then add a single
 `ContentPageHeader` and task-based sections.
 
+Both components accept `density="comfortable"` (the default) or
+`density="compact"`. Choose `compact` for scan-heavy operational pages and pass
+the same value to a standalone `ContentPageHeader` so the heading rhythm stays
+aligned with the page stack.
+
+The shell exposes `data-svadmin-content-page`,
+`data-svadmin-content-page-width`, and `data-density`; the header exposes
+`data-svadmin-content-header` while retaining `data-svadmin-page-header` for
+existing integrations.
+
 ```svelte
-<ContentPageShell pageId="access-review" width="wide">
-  <ContentPageHeader title="Access review" description="Review unresolved access before approval." />
+<ContentPageShell pageId="access-review" width="wide" density="compact">
+  <ContentPageHeader density="compact" title="Access review" description="Review unresolved access before approval." />
   <SectionHeader id="exceptions" title="Exceptions" />
   <!-- primary work area -->
 </ContentPageShell>

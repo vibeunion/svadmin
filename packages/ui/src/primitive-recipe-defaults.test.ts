@@ -45,6 +45,10 @@ describe('primitive recipe defaults', () => {
     expect(describeRecipe('badgeRecipe').slots).toEqual(['root']);
     expect(describeRecipe('textareaRecipe').slots).toEqual(['root']);
     expect(describeRecipe('contentHeaderRecipe').slots).toContain('heading');
+    expect(describeRecipe('contentPageRecipe').defaults).toEqual({ width: 'default', density: 'comfortable' });
+    expect(describeRecipe('contentPageRecipe').variants['density']).toEqual(['compact', 'comfortable']);
+    expect(describeRecipe('contentHeaderRecipe').defaults).toEqual({ density: 'comfortable' });
+    expect(describeRecipe('contentHeaderRecipe').variants['density']).toEqual(['compact', 'comfortable']);
     expect(describeRecipe('badgeRecipe').variants['variant']).toContain('subtle-success');
     expect(describeRecipe('productWorkspaceRecipe').defaults).toEqual({ hasSecondary: false });
   });

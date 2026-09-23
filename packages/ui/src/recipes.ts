@@ -73,29 +73,54 @@ export type BadgeRecipeProps = OmitVariantProps<NonNullable<Parameters<typeof ba
 const textareaRecipeStyles = tv({ base: "svadmin-textarea" });
 
 const contentPageRecipeStyles = tv({
-  slots: { root: `${semantic.page} svadmin-content-page space-y-6` },
+  slots: { root: `${semantic.page} svadmin-content-page` },
   variants: {
     width: {
       narrow: { root: "max-w-3xl" },
       default: { root: "max-w-[74rem]" },
       wide: { root: "max-w-[92rem]" },
     },
+    density: {
+      compact: { root: "space-y-4" },
+      comfortable: { root: "space-y-6" },
+    },
   },
-  defaultVariants: { width: "default" },
+  defaultVariants: { width: "default", density: "comfortable" },
 });
 
 const contentHeaderRecipeStyles = tv({
   slots: {
-    root: "svadmin-content-header space-y-3",
+    root: "svadmin-content-header",
     breadcrumbs: `${semantic.group} text-xs text-muted-foreground`,
     currentCrumb: "text-foreground",
-    row: "flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between",
-    heading: "min-w-0 space-y-1",
+    row: "flex flex-col sm:flex-row sm:items-start sm:justify-between",
+    heading: "min-w-0",
     eyebrow: "text-xs font-medium text-muted-foreground",
-    title: "text-xl font-semibold leading-tight text-foreground",
-    description: "max-w-2xl text-sm leading-6 text-muted-foreground",
-    actions: "flex shrink-0 flex-wrap items-center gap-2",
+    title: "font-semibold leading-tight text-foreground",
+    description: "max-w-2xl text-muted-foreground",
+    actions: "flex shrink-0 flex-wrap items-center",
   },
+  variants: {
+    density: {
+      compact: {
+        root: "space-y-2",
+        row: "gap-3",
+        heading: "space-y-0.5",
+        title: "text-lg leading-tight",
+        description: "text-[0.8125rem] leading-5",
+        actions: "gap-1.5",
+      },
+      comfortable: {
+        root: "space-y-3",
+        row: "gap-6",
+        heading: "space-y-1",
+        title: "text-xl leading-tight",
+        description: "text-sm leading-6",
+        actions: "gap-2",
+      },
+    },
+  },
+  defaultVariants: { density: "comfortable" },
 });
 
 const metricBlockRecipeStyles = tv({

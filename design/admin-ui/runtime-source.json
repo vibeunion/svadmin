@@ -6,9 +6,9 @@
   "basedOnRecipeSource": "packages/ui/design/primitive-recipes.ts",
   "basedOnStylesheetBlob": "149f55f3782470ec6a1c942917c09510bd55320a",
   "recipeSource": "packages/ui/src/recipes.ts",
-  "recipeBlob": "d99de49cd78bfdd54b511925e68bbeb2e6c17ee8",
+  "recipeBlob": "02b2373f90f8f13e319285ffdaadd37a461ab5b1",
   "stylesheet": "packages/ui/src/components.css",
   "stylesheetBlob": "06566f4b613c830acf5ab92e1d4473e5c025c1e4",
   "figmaSynchronized": false,
-  "review": "2026-09-21 source-contract inspection based on d5196a87: current primitive/product recipe exports are in packages/ui/src/recipes.ts (tailwind-variants). components.css differs from the Figma baseline by sidebar sizing/RTL rules and subsequent comment-only naming cleanup; extracted Light/Dark color roles are unchanged. The stylesheet blob records the inspected working-tree content, not a new committed revision. This records source hashes, not visual approval, browser parity, or Figma synchronization. The 17 dimensions remain the historical baseline, not newly certified runtime recipe geometry."
+  "review": "2026-09-23 source-contract inspection after the density/layout contract repair: current primitive/product recipe exports remain in packages/ui/src/recipes.ts (tailwind-variants), now pinned to the reviewed 02b2373f90f8f13e319285ffdaadd37a461ab5b1 blob. components.css differs from the Figma baseline by sidebar sizing/RTL rules and subsequent comment-only naming cleanup; extracted Light/Dark color roles are unchanged. The stylesheet blob records the inspected working-tree content, not a new committed revision. This records source hashes, not visual approval, browser parity, or Figma synchronization. The 17 dimensions remain the historical baseline, not newly certified runtime recipe geometry."
 }

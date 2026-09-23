@@ -128,11 +128,35 @@ describe('Layout auth scope', () => {
     const view = render(LayoutAuthScopeHost, {
       authProvider: undefined,
       tenant: { tenantId: 'tenant-layout-style-scope' },
+      layoutClass: 'host-layout',
     });
 
     await waitFor(() => expect(view.getByTestId('layout-auth-content')).not.toBeNull());
 
+    const layout = view.container.querySelector<HTMLElement>('[data-svadmin-layout]');
+    expect(layout?.dataset['svadminLayoutState']).toBe('ready');
+    expect(layout?.getAttribute('aria-busy')).toBe('false');
+    expect(layout?.className).toContain('host-layout');
     expect(view.container.querySelector('main[data-svadmin-main]')).not.toBeNull();
+    expect(view.container.querySelector('main[data-svadmin-layout-content]')).not.toBeNull();
+    expect(view.container.querySelector('footer[data-svadmin-layout-footer]')).not.toBeNull();
+  });
+
+  it('publishes a loading state while identity is pending', async () => {
+    const pendingIdentity = createDeferred<{ id: string; name: string }>();
+    const auth = createLayoutAuthProvider(pendingIdentity.promise);
+    const view = render(LayoutAuthScopeHost, {
+      authProvider: auth.provider,
+      tenant: { tenantId: 'tenant-layout-loading-state' },
+    });
+
+    await waitFor(() => expect(auth.getIdentity).toHaveBeenCalledTimes(1));
+    const loadingLayout = view.container.querySelector<HTMLElement>('[data-svadmin-layout]');
+    expect(loadingLayout?.dataset['svadminLayoutState']).toBe('loading');
+    expect(loadingLayout?.getAttribute('aria-busy')).toBe('true');
+
+    pendingIdentity.resolve({ id: 'ready', name: 'ready layout user' });
+    await waitFor(() => expect(view.container.querySelector('[data-svadmin-layout-state="ready"]')).not.toBeNull());
   });
 
   it('focuses each layout main without changing the hash route', async () => {

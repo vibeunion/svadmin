@@ -130,6 +130,22 @@ Use `create-svadmin eject` to extract component source for customization. See [@
 
 使用 `create-svadmin eject` 提取组件源码进行深度定制。
 
+### Layout surface contract / Layout 表面契约
+
+The built-in `Layout` accepts an optional `class` for a host-owned root hook.
+Its root exposes `data-svadmin-layout` and
+`data-svadmin-layout-state="loading" | "ready"`, with `aria-busy` kept in sync.
+The main content and footer expose `data-svadmin-layout-content` and
+`data-svadmin-layout-footer`; use these hooks for scoped integration styling or
+tests instead of relying on generated utility class names.
+
+内置 `Layout` 支持可选的 `class`，用于挂载宿主自己的根节点样式钩子。根节点
+提供 `data-svadmin-layout` 和
+`data-svadmin-layout-state="loading" | "ready"`，并同步维护 `aria-busy`。
+主内容和页脚分别提供 `data-svadmin-layout-content` 与
+`data-svadmin-layout-footer`；集成样式和测试应使用这些钩子，不要依赖生成的
+工具类名。
+
 ## Built-in Routing / 内置路由
 
 AdminApp uses hash-based routing:
