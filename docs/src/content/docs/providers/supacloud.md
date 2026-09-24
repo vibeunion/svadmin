@@ -20,7 +20,7 @@ Keeping these APIs under `@svadmin/supabase/supacloud` avoids breaking the exist
 ## Installation
 
 ```bash
-bun add @svadmin/supabase @supabase/supabase-js @supacloud/js
+bun add @svadmin/supabase @supabase/supabase-js@^2.115.0 @supacloud/js@^0.33.0
 ```
 
 ## Create the Clients
@@ -51,6 +51,40 @@ import { createSupaCloudTaskProvider } from '@svadmin/supabase/supacloud';
 const taskProvider = createSupaCloudTaskProvider({ supacloud });
 ```
 
+### Subscription Transport
+
+SDK `0.33.0` polls the Management API by default. It does not assume a
+`public.tasks` Realtime table exists. Set `subscription` on the factory to
+configure polling or explicitly subscribe to your own published task table:
+
+```ts
+const subscription = {
+  pollingIntervalMs: 2_000,
+  realtime: { schema: 'public', table: 'business_tasks' },
+  realtimeTimeoutMs: 10_000,
+  reconcileIntervalMs: 30_000,
+  stopOnTerminal: true,
+};
+
+const taskProvider = createSupaCloudTaskProvider({ supacloud, subscription });
+```
+
+Omit `realtime` to use polling only. Realtime rows must satisfy the SDK task
+contract, including the matching `id` and `project_ref`; publish and authorize the
+application-owned table yourself. Do not expose platform-internal task tables.
+The same factory option is supported by `createSupaCloudTaskLiveProvider` and
+applies to subscriptions made through submitted task handles.
+
+Options are validated and captured when the provider is created. Poll intervals
+must be positive integers; timeout/reconciliation intervals also accept zero.
+All intervals are limited to `2_147_483_647` milliseconds. Schema/table names use
+ASCII identifiers up to 63 characters. User callbacks belong in `subscribe` or
+the factory's `onError`, not in `subscription`.
+
+Keep the returned cleanup function and call it when the view or target changes.
+Cleanup aborts an active polling read and suppresses late callbacks; it does not
+cancel the server task or prove that a write was rolled back.
+
 ### Supported Methods
 
 - `submit(taskName, options)`
@@ -65,8 +99,17 @@ const taskProvider = createSupaCloudTaskProvider({ supacloud });
 
 Only the modern `{ tasks: ... }` client is accepted. Bare legacy task clients and
 caller-selected result generics are removed. The installed SDK contract is tested
-with `@supacloud/js` 0.23.1; these tests use injected HTTP and realtime transports,
-not a hosted deployment.
+with `@supacloud/js` 0.33.0 and `@supabase/supabase-js` 2.117.1; these tests use
+injected HTTP, polling and realtime transports, not a hosted deployment.
+The optional SDK peer range is now `^0.33.0`, not `^0.23.1`. Upgrade the SDK and
+adapter together. SDK task submission expects HTTP 202, and task responses must
+carry the configured `project_ref`. The DLQ uses the task-list endpoint with
+`dlq=true`, not a separate `/tasks/dlq` route.
+
+This migration does not add a browser business-command adapter. The published
+SDK 0.33.0 does not export `@supacloud/js/contracts`; the upstream browser entry
+must be released and validated before a follow-up can depend on it. Never wire
+the service-role-only `supacloud.commands` namespace into a browser action.
 
 All SDK responses enter as `unknown`. Records, list results, submit handles,
 subscription snapshots, and custom live events are validated before use.
