@@ -13,7 +13,7 @@
     "@svadmin/core": "^0.57.0",
     "@svadmin/app": "^0.2.0",
     "@svadmin/ai-elements": "^0.10.2",
-    "@svadmin/ui": "^0.77.0",
+    "@svadmin/ui": "^0.78.0",
     "@sinclair/typebox": "^0.34.52",
     "@tanstack/svelte-query": "^6.1.48",
     "@lucide/svelte": "^1.35.0"
