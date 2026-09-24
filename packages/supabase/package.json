@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/supabase",
-  "version": "0.17.1",
+  "version": "0.18.0",
   "description": "Supabase adapters — DataProvider, AuthProvider, LiveProvider, AuditHandler",
   "type": "module",
   "sideEffects": false,

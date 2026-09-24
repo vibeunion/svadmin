@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.58.0](https://github.com/vibeunion/svadmin/compare/core-v0.57.0...core-v0.58.0) (2026-09-24)
+
+
+### 🚀 Features
+
+* **create-svadmin:** ship vibe workspace catalog and read-only MCP ([10325c9](https://github.com/vibeunion/svadmin/commit/10325c9c5903e28dccca33c71c0f4a4d30ac227d))
+
+
+### 🐛 Bug Fixes
+
+* **ci:** retain shipped acceptance tests and install strict consumer compiler peers ([10325c9](https://github.com/vibeunion/svadmin/commit/10325c9c5903e28dccca33c71c0f4a4d30ac227d))
+* **core:** deliver CSV declaration dependency to published source consumers ([10325c9](https://github.com/vibeunion/svadmin/commit/10325c9c5903e28dccca33c71c0f4a4d30ac227d))
+
 ## [0.57.0](https://github.com/vibeunion/svadmin/compare/core-v0.56.0...core-v0.57.0) (2026-09-23)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/sanity",
-  "version": "0.11.1",
+  "version": "0.11.2",
   "description": "Sanity DataProvider for svadmin",
   "type": "module",
   "sideEffects": false,
