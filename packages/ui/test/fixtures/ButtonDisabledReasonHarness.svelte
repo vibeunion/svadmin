@@ -6,6 +6,7 @@
   let {
     disabled = false,
     disabledReason = '',
+    disabledReasonDisplay = 'tooltip',
     href,
     label = 'Command action',
     onclick,
@@ -15,6 +16,7 @@
   }: {
     disabled?: boolean;
     disabledReason?: string;
+    disabledReasonDisplay?: ButtonProps['disabledReasonDisplay'];
     href?: string;
     label?: string;
     onclick?: ButtonProps['onclick'];
@@ -24,4 +26,4 @@
   } = $props();
 </script>
 
-<Button {disabled} {disabledReason} {...definedOptions({ href, onclick, restrictionClass, restrictionStyle, 'aria-label': ariaLabel })}>{label}</Button>
+<Button {disabled} {disabledReason} {disabledReasonDisplay} {...definedOptions({ href, onclick, restrictionClass, restrictionStyle, 'aria-label': ariaLabel })}>{label}</Button>

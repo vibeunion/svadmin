@@ -22,6 +22,28 @@ svadmin includes 10 action buttons that integrate with data hooks and routing.
 
 ## Usage
 
+### Visible reasons for blocked actions
+
+The base `Button` disables its button or link whenever `disabledReason` is nonempty.
+The default `disabledReasonDisplay="tooltip"` preserves existing behavior. Use
+`disabledReasonDisplay="inline"` for critical prerequisites that must be visible
+without hovering, such as missing approval comments. The description stays linked
+through `aria-describedby`. The tooltip wrapper is keyboard-focusable; inline mode
+adds no inactive Tab stop. Restricted links cannot navigate or invoke their click callback.
+
+```svelte
+<Button
+  disabledReason={!comment.trim() ? 'Enter an approval comment before submitting.' : ''}
+  disabledReasonDisplay="inline"
+  onclick={submitReview}
+>Submit review</Button>
+```
+
+Clear the reason when the condition is resolved. Do not pass a constant reason and
+only toggle `disabled`. Business rules and recovery actions remain owned by the
+application; use `FeedbackNotice` for a shared workflow blocker instead of repeating
+the same notice below every action.
+
 ```svelte
 <script>
   import { EditButton, DeleteButton } from '@svadmin/ui';
