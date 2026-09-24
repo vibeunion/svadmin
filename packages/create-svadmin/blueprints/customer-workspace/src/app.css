@@ -1,0 +1,8 @@
+@import "@svadmin/ui/app.css";
+
+html { letter-spacing: 0; }
+body { margin: 0; }
+
+/* 跳转链接只在键盘聚焦时进入视口，避免遮住移动端菜单。 */
+[data-svadmin-skip-link] { transform: translateY(calc(-100% - 1rem)); }
+[data-svadmin-skip-link]:focus { transform: translateY(0); }

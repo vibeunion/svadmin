@@ -3,6 +3,9 @@ import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+import { CallToolResultSchema } from '@modelcontextprotocol/sdk/types.js';
 import {
   createProjectPackageJson,
   loadScaffoldManifest,
@@ -33,6 +36,36 @@ function packedTarballFilename(packOutput: string): string {
     throw new Error('npm pack output is missing the tarball filename');
   }
   return filename;
+}
+
+async function verifyPackedVibeMcp(cli: string, directory: string) {
+  const client = new Client({ name: 'packed-vibe-test', version: '1' });
+  const transport = new StdioClientTransport({
+    command: 'node', args: [cli, 'vibe', 'mcp'], cwd: directory, stderr: 'pipe',
+  });
+  let stderr = '';
+  transport.stderr?.on('data', chunk => { stderr += String(chunk); });
+  const protocolErrors: Error[] = [];
+  client.onerror = error => { protocolErrors.push(error); };
+  try {
+    await client.connect(transport);
+    expect((await client.listTools()).tools).toHaveLength(3);
+    const search = await client.callTool({ name: 'svadmin_vibe_search' }, CallToolResultSchema);
+    expect(search.isError).not.toBe(true);
+    const searchText = search.content.find(block => block.type === 'text');
+    expect(JSON.parse(searchText?.text ?? '{}').pages).toHaveLength(6);
+    const context = await client.callTool({ name: 'svadmin_vibe_inspect', arguments: { page: 'approval' } }, CallToolResultSchema);
+    expect(context.isError).not.toBe(true);
+    expect(context.content.some(block => block.type === 'text' && block.text.includes('ARCHITECTURE.md'))).toBe(true);
+    const preview = await client.callTool({ name: 'svadmin_vibe_preview', arguments: { page: 'approval', viewport: 'mobile' } }, CallToolResultSchema);
+    expect(preview.isError).not.toBe(true);
+    expect(preview.content.some(block => block.type === 'image' && block.mimeType === 'image/png')).toBe(true);
+    expect(stderr).toBe('');
+    expect(protocolErrors).toEqual([]);
+  } finally {
+    await client.close();
+    await transport.close();
+  }
 }
 
 test('doctor exits 0 for clean projects, 1 for drift, and 2 for invalid input', async () => {
@@ -172,6 +205,35 @@ test('release pack gate runs maintenance commands from the packed Node CLI', asy
     expect(smokeOutput).toContain('packed upgrade dry-run passed');
     expect(smokeOutput).toContain('packed guidance migration passed');
     expect(smokeOutput).toContain('packed infer generation passed');
+    const unpack = spawnSync('tar', ['-xzf', tarballPath, '-C', packDirectory], { encoding: 'utf8' });
+    expect(unpack.status, unpack.stderr).toBe(0);
+    const packedCli = join(packDirectory, 'package/dist/index.js');
+    const inspect = spawnSync('node', [packedCli, 'vibe', 'inspect', 'approval'], { encoding: 'utf8', cwd: packDirectory });
+    expect(inspect.status, inspect.stderr).toBe(0);
+    const context = JSON.parse(inspect.stdout);
+    expect(context.page.id).toBe('approval');
+    expect(context.files['ARCHITECTURE.md']).toContain('Customer Application Boundaries');
+    expect(context.files['src/features/customers/Review.svelte']).toContain('AutoForm');
+    const search = spawnSync('node', [packedCli, 'vibe', 'catalog', '--query', '审批'], { encoding: 'utf8', cwd: packDirectory });
+    expect(search.status, search.stderr).toBe(0);
+    expect(JSON.parse(search.stdout).pages.map((page: { id: string }) => page.id)).toEqual(['approval']);
+    const generated = join(packDirectory, 'customer-app');
+    const init = spawnSync('node', [packedCli, 'vibe', 'init', generated, '--write'], { encoding: 'utf8', cwd: packDirectory });
+    expect(init.status, init.stderr).toBe(0);
+    expect(await readFile(join(generated, 'scripts/check-architecture.mjs'), 'utf8')).toContain('checkArchitecture');
+    const generatedPackage = JSON.parse(await readFile(join(generated, 'package.json'), 'utf8'));
+    expect(generatedPackage.scripts.check).toStartWith('bun run check:architecture && ');
+    await writeFile(join(packDirectory, 'package.json'), JSON.stringify({ name: 'vibe-mcp-consumer', private: true }));
+    const install = spawnSync('npm', [
+      'install', '--ignore-scripts', '--no-audit', '--no-fund', '--package-lock=false', tarballPath,
+    ], { cwd: packDirectory, encoding: 'utf8', timeout: 120_000 });
+    expect(install.status, install.stderr).toBe(0);
+    const installedCli = join(packDirectory, 'node_modules/@svadmin/create/dist/index.js');
+    await verifyPackedVibeMcp(installedCli, packDirectory);
+    const eof = spawnSync('node', [installedCli, 'vibe', 'mcp'], { cwd: packDirectory, encoding: 'utf8', input: '', timeout: 5000 });
+    expect(eof.status, eof.stderr).toBe(0);
+    expect(eof.stdout).toBe('');
+    expect(eof.stderr).toBe('');
   } finally {
     await rm(packDirectory, { recursive: true, force: true });
   }

@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "id": "customer-workspace",
+  "status": "starter",
+  "framework": "svelte5-vite",
+  "design": "src/design.svelte.ts",
+  "selection": "src/design-selection.ts",
+  "presets": ["operations", "enterprise", "collaboration"],
+  "contracts": "src/features/customers/contracts.ts",
+  "resources": "src/resources.ts",
+  "provider": "src/svadmin.config.ts",
+  "dataMode": "in-memory-demo",
+  "previews": {
+    "desktop": "previews/{pageId}-desktop.png",
+    "mobile": "previews/{pageId}-mobile.png",
+    "note": "Reference captures of this starter, not proof that subsequent customer edits passed acceptance."
+  },
+  "pages": [
+    { "id": "list", "source": "src/features/customers/List.svelte", "route": "/customers", "intent": "检索、筛选和进入客户记录", "tags": ["列表", "客户", "search", "filter", "table", "crud"], "components": ["ContentPageShell", "AutoTable"] },
+    { "id": "detail", "source": "src/features/customers/Detail.svelte", "route": "/customers/show/c1", "intent": "查看客户与最近跟进", "tags": ["详情", "跟进", "record", "activity"], "components": ["ShowPage", "PageSection", "DataState"] },
+    { "id": "form", "source": "src/features/customers/Form.svelte", "route": "/customers/create", "intent": "分组录入并校验客户信息", "tags": ["表单", "创建", "编辑", "create", "edit", "validation"], "components": ["AutoForm", "ContentPageShell"] },
+    { "id": "dashboard", "source": "src/features/customers/Dashboard.svelte", "route": "/", "intent": "查看业务总量并处理下一项工作", "tags": ["概览", "工作台", "指标", "overview", "metrics"], "components": ["DashboardPage", "MetricBlock", "PageSection", "AutoTable"] },
+    { "id": "settings", "source": "src/features/customers/Settings.svelte", "route": "/workspace_settings", "intent": "调整会话内品牌和应用级设计预设", "tags": ["设置", "品牌", "主题", "brand", "theme"], "components": ["SettingsGroup", "SettingsFieldRow", "Input"] },
+    { "id": "approval", "source": "src/features/customers/Review.svelte", "route": "/approvals/show/a1", "intent": "审阅申请、记录决定与意见", "tags": ["审批", "审核", "review", "decision"], "components": ["ShowPage", "AutoForm", "PageSection"] }
+  ],
+  "states": ["normal", "empty", "error", "loading", "denied", "partial", "readonly"],
+  "acceptance": {
+    "commands": ["bun run check", "bun run build", "bun run test:ui"],
+    "viewports": [{"width": 1440, "height": 900}, {"width": 390, "height": 844}],
+    "screenshots": "test-results",
+    "maxRepairRounds": 2,
+    "humanReview": ["视觉层级与品牌契合度", "真实业务字段与审批权限", "接入生产前的数据边界"]
+  },
+  "componentApi": {
+    "package": "@svadmin/ui",
+    "metadata": "@svadmin/ui/component-registry",
+    "rule": "Read the installed version's declarations for components absent from the registry; never invent props."
+  },
+  "boundaries": [
+    "No model credentials or production writes",
+    "No generic application generation through Surface",
+    "No claims of server authorization or durable data",
+    "Do not replace existing business workflows during visual edits"
+  ]
+}

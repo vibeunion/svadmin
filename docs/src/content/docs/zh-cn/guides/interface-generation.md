@@ -112,3 +112,100 @@ OCR 完成后，文件名、识别字段数、已确认数量和表格已经证�
 bunx @svadmin/create guidance .
 bunx @svadmin/create guidance . --write
 ```
+
+## Vibe Coding 页面样板
+
+`vibe` 提供开发者优先的客户管理 starter，包含列表、详情、分组表单、工作台、
+设置和审批六类可修改 Svelte 页面。先查看机器可读目录，再预览生成计划：
+
+```bash
+bunx @svadmin/create vibe catalog
+bunx @svadmin/create vibe catalog --query "审批"
+bunx @svadmin/create vibe inspect approval
+bunx @svadmin/create vibe init customer-admin --preset enterprise
+bunx @svadmin/create vibe init customer-admin --preset enterprise --write
+```
+
+目标目录必须不存在；命令不覆盖已有项目，不安装依赖，不连接模型或生产服务。
+`catalog --query` 按页面 ID、组件名和中英文标签检索，多个词必须全部匹配；
+`inspect <pageId>` 输出 JSON，包含实际页面源码、资源契约、应用装配、
+设计规则、预览路径和验收要求。它是只读参考上下文，不是单页安装器，
+也不会读取或覆盖客户当前项目。修改已有项目时，必须先核对客户自己的实现。
+
+### 编码助手 MCP 接入
+
+`vibe mcp` 通过标准输入输出提供独立的只读页面材料服务。它不启动 HTTP 端口，
+不连接模型，不读取客户项目，也不复用面向业务数据的 `@svadmin/mcp` 服务。
+
+当前源码可先在仓库中运行 `bun run --cwd packages/create-svadmin build`。
+在支持 stdio MCP 的编码助手中，配置 `node` 和构建产物的绝对路径。
+以下为常见 JSON 配置格式，具体配置位置和字段以客户端为准：
+
+```json
+{
+  "mcpServers": {
+    "svadmin-vibe": {
+      "command": "node",
+      "args": [
+        "/absolute/path/to/svadmin/packages/create-svadmin/dist/index.js",
+        "vibe",
+        "mcp"
+      ]
+    }
+  }
+}
+```
+
+这不会自动修改编码助手的全局配置。使用 npm 安装版本时，应指向该安装的
+`dist/index.js`，并先确认所用版本已发布这一功能；本地构建通过不代表已发布。
+服务的依赖必须随 CLI 一起安装，不能只复制 `dist/index.js`。
+
+| 工具 | 参数 | 返回 |
+| --- | --- | --- |
+| `svadmin_vibe_search` | `{"query":"审批"}`；`{}` 列出全部 | 六类页面的匹配元数据 |
+| `svadmin_vibe_inspect` | `{"page":"approval"}` | 源码、契约、演示 Provider、设计和验收约束 |
+| `svadmin_vibe_preview` | `{"page":"approval","viewport":"mobile"}` | 随包 PNG，可选 `desktop` / `mobile` |
+
+工具只接受已知页面和有限参数；不能传入任意文件路径、项目目录、URL 或写入指令。
+推荐顺序是检索页面、读取上下文、查看桌面与移动参考，再修改客户自己的代码。
+参考图不是客户当前界面的截图，也不是本次修改已通过验收的证据。
+
+### 生成项目验证
+
+在生成目录中运行：
+
+```bash
+bun install
+bun run check
+bun run dev
+```
+
+可选预设：`operations`（高密度运营）、`enterprise`（标准企业）、
+`collaboration`（轻量协作）。预设统一控制页面密度、内容宽度、表单列数、
+详情布局和主题，不是仅换主色。
+
+编码助手先读取 `svadmin.vibe.json`、`svadmin.ai.json`、`DESIGN.md`，
+再按 `.agents/skills/svadmin-vibe/SKILL.md` 选择页面、读取实际组件 API、
+修改源码并验收。客户源码无需依赖模型即可运行。
+
+### 模块边界
+
+生成项目的 `ARCHITECTURE.md` 明确应用装配、业务模块、资源契约和
+Provider 的职责。跨模块只能引用公开 `index.ts` 或不依赖 Svelte 的 `data.ts`；
+不允许引用其他模块的私有组件、Store 或 `@svadmin/*/src`、`dist`。
+
+`bun run check` 先运行 `check:architecture`，再做类型检查。
+检查器解析 TypeScript 与 Svelte 的两个脚本块，覆盖静态引用、重导出、
+类型引用和字符串动态导入；计算型动态导入与无法解析的路径别名会失败。
+这是代码组织约束，不是安全沙箱，也不代替服务端权限、租户隔离或审计。
+
+```bash
+bun run build
+bunx playwright install chromium
+bun run test:ui
+```
+
+浏览器验收生成桌面和移动端截图，并检查基础交互和页面级横向溢出。
+截图不自动证明审美合格；品牌契合度仍由客户确认。
+预览使用内存数据，刷新即恢复；审批仅为 UI 样板，真实权限、审计、持久化
+和服务端审批规则必须另行接入。无代码生成仍限定在 Surface 支持的目录与策略内。

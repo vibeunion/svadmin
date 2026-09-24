@@ -19,6 +19,7 @@ import { generateCommand } from './generate-command';
 import { liteInitCommand } from './lite-init';
 import { parseInitArguments, resolvePresetSelections } from './init-arguments';
 import { addCommand } from './add-command';
+import { vibeCommand } from './vibe-command';
 import {
   buildScaffoldPlatformFiles,
   checkAdminManifest,
@@ -584,6 +585,8 @@ if (subcommand === 'eject') {
   runCommand(() => upgrade(rest));
 } else if (subcommand === 'guidance') {
   runCommand(() => guidance(rest));
+} else if (subcommand === 'vibe') {
+  runCommand(() => vibeCommand(rest, path.join(__dirname, '..'), loadShippedScaffoldManifest()));
 } else if (subcommand === 'infer') {
   runCommand(() => inferCommand(rest));
 } else if (subcommand === 'add') {
