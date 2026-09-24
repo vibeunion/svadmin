@@ -1,5 +1,75 @@
 # Changelog
 
+## [0.34.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.33.1...create-svadmin-v0.34.0) (2026-09-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* **ai-elements:** remove legacy AI component exports from @svadmin/ui.
+* **ai-elements:** ChatMessage uses parts and createdAt instead of content and timestamp.
+
+### 🚀 Features
+
+* **ai-elements:** add Svelte 5 AI component library ([81fb450](https://github.com/vibeunion/svadmin/commit/81fb450b4fa89db414acc54243ee66bdd4ebb2fe))
+* **ai-elements:** add Svelte 5 AI component library ([#362](https://github.com/vibeunion/svadmin/issues/362)) ([6ae760d](https://github.com/vibeunion/svadmin/commit/6ae760dba8da58052654326b51ae4673bf2da385))
+* **app:** add application platform layer and CLI integration ([05aac62](https://github.com/vibeunion/svadmin/commit/05aac62bf46bc9c2add4fd4c741568e851ea0042))
+* **app:** application platform layer (defineAdminConfig, plugins, AI manifest, CLI add) ([#455](https://github.com/vibeunion/svadmin/issues/455)) ([960cc2e](https://github.com/vibeunion/svadmin/commit/960cc2ea633feb9d2c49d9e43b45b27bd2457d68))
+* **app:** golden-path presets, provider metadata, AI manifest, and scoped overrides ([cef47f2](https://github.com/vibeunion/svadmin/commit/cef47f24cee76fbbbcd8e2248cbbf4ad2c88d875))
+* **architecture:** enforce feature and type boundaries ([34430d8](https://github.com/vibeunion/svadmin/commit/34430d87a49706fae4530da488301c9fd548b36a))
+* **core,create:** add graphql inferencer and automated inference cli ([6512c94](https://github.com/vibeunion/svadmin/commit/6512c9435ad91bdc83c13bd0e874db82b7cb6ac4))
+* **core:** close out schema-based type safety and strict gates ([#391](https://github.com/vibeunion/svadmin/issues/391)) ([2a84e3d](https://github.com/vibeunion/svadmin/commit/2a84e3d32835b7f91d0990a303f9f3b1e4c8bb09))
+* **create:** support the full official provider catalog in add provider ([d7042e8](https://github.com/vibeunion/svadmin/commit/d7042e879f5c58045b5767642fe7af64978b9c48))
+* **lite:** implement dynamic catch-all routes and example resources support ([d94a481](https://github.com/vibeunion/svadmin/commit/d94a481da67c1ae6440e7c360afe901d6d23313d))
+* **providers:** expand official provider capability catalog ([9405c2a](https://github.com/vibeunion/svadmin/commit/9405c2add04c4f317dee8a302987fccbbbae7897))
+* **rest:** add @svadmin/rest provider bridging @refinedev/rest ([644e86d](https://github.com/vibeunion/svadmin/commit/644e86de8232e64d0bc4a9b5219a222c0c961741))
+* **styles:** remove Tailwind and preserve CSS compatibility ([1019f99](https://github.com/vibeunion/svadmin/commit/1019f990f71b5c6471d8b8a9828db28521fc37dd))
+* **ui,create-svadmin:** add navigation menu component and lite init command ([745b86f](https://github.com/vibeunion/svadmin/commit/745b86f772f82d2f9929e7f0bdcb95d3d10dbb64))
+* **ui,lite,cli:** add enterprise data interaction components and generate command ([41c233e](https://github.com/vibeunion/svadmin/commit/41c233e1a9a313eaf0cc58d66801d90a649b0b34))
+* **ui:** add ecosystem components and browser hooks ([#458](https://github.com/vibeunion/svadmin/issues/458)) ([68d698f](https://github.com/vibeunion/svadmin/commit/68d698f98feecccebfbbb4f846dd565f065e7633))
+* **ui:** apply ui-ux-pro-max design guidelines and accessibility standards ([02badd4](https://github.com/vibeunion/svadmin/commit/02badd45374df1b8913786fc9241315fbc07cdcd))
+* **ui:** complete enterprise contracts and migration docs ([84e1549](https://github.com/vibeunion/svadmin/commit/84e1549c68e26f88d5a0b4f61c38bd9d3a412306))
+* **ui:** implement design system density dials and accessible components polish ([4297429](https://github.com/vibeunion/svadmin/commit/429742940d17771a440b668cc8f83dd9399a6422))
+* **ui:** replace Panda with Tailwind OpenUI and complete example remediation ([d5196a8](https://github.com/vibeunion/svadmin/commit/d5196a87e3f81a27bff421f86738fe91fb58e182))
+* **ui:** replace shadcn styling with native Panda primitives ([#435](https://github.com/vibeunion/svadmin/issues/435)) ([6aeb107](https://github.com/vibeunion/svadmin/commit/6aeb107f851a7cd50ecc5fd2d6d67edc0262b00b))
+* **ui:** unify Stripe-inspired design system ([09a5ef0](https://github.com/vibeunion/svadmin/commit/09a5ef023619a0c43a90679d0649771775ef8fa2))
+
+
+### 🐛 Bug Fixes
+
+* **ci:** close workspace validation gates ([#403](https://github.com/vibeunion/svadmin/issues/403)) ([9e92f77](https://github.com/vibeunion/svadmin/commit/9e92f7772ff1eb69e3a660e48ceee8f834387822))
+* **ci:** keep doctor drift test and renderer loop version-agnostic ([0c2eb9f](https://github.com/vibeunion/svadmin/commit/0c2eb9f2e52e54bc5cc0acbb193837a3200511cb))
+* **ci:** repair lite and contract test failures ([ed986a5](https://github.com/vibeunion/svadmin/commit/ed986a556a7dd10f4e45e5c7538583b015ae92ee))
+* **ci:** restore green main — SSR-safe resource serialization and scaffold hygiene ([912836c](https://github.com/vibeunion/svadmin/commit/912836ca814d7ba6408fef6fd3cf78e6d90a0097))
+* **ci:** restore green main — SSR-safe resource serialization and scaffold hygiene ([f78dcaa](https://github.com/vibeunion/svadmin/commit/f78dcaaace500ba98a6ef6d337ea306a5f9f8919))
+* **ci:** restore strict PR contracts ([5155153](https://github.com/vibeunion/svadmin/commit/5155153faef9c2edb12be86eb291114ae35f36e9))
+* **core:** preserve temporal shapes in generated schemas ([5129935](https://github.com/vibeunion/svadmin/commit/51299356dd2eca0636094baefabadc63c0fbb1d8))
+* **create:** remove unused scaffold type ([ebd0d4f](https://github.com/vibeunion/svadmin/commit/ebd0d4fffabaca675acfa8c512cc347db513057d))
+* **design:** integrate merged field repairs without changing design assets ([fce177a](https://github.com/vibeunion/svadmin/commit/fce177a4ad39da3b7c5a9e2325fa7039c435033c))
+* **i18n:** reconcile processing labels when syncing main into Panda migration ([7b2f036](https://github.com/vibeunion/svadmin/commit/7b2f036ca797e2c9349fc041c3b640d1138fdaba))
+* reconcile TypeBox migration with merged field contracts ([1a30604](https://github.com/vibeunion/svadmin/commit/1a3060434f5a59bdb8d84510ba5044e48fe1f83e))
+* **styles:** reconcile content recipes with current strict field contracts ([3431127](https://github.com/vibeunion/svadmin/commit/34311272a1b5dd556049645e57d108123a9902d7))
+* **surface:** integrate business widgets with current Tailwind contracts ([db9aa62](https://github.com/vibeunion/svadmin/commit/db9aa62ba38a15b052cea869d64f1efff2e05df9))
+* **surface:** integrate edit preview with native main and scoped source loading ([0a6d22d](https://github.com/vibeunion/svadmin/commit/0a6d22dbbfbfa68615f99dffa4966062acbc683f))
+* **surface:** reconcile controlled workflows with merged TypeBox repairs ([d2494e8](https://github.com/vibeunion/svadmin/commit/d2494e863264d2ea34b2ea96898e105a307d1238))
+* **ui:** integrate enterprise components with current Panda contracts ([1565f54](https://github.com/vibeunion/svadmin/commit/1565f549af42a04bc63d9189a267e01c58ffedf2))
+* **ui:** neutralize design naming and complete migration regressions ([36651a0](https://github.com/vibeunion/svadmin/commit/36651a03fa06bcf11046692d1e03c97cba67380c))
+* **ui:** reconcile async interaction repairs with current main ([b39b495](https://github.com/vibeunion/svadmin/commit/b39b4953af4166548b21b8ab7fd2c7af80d6a027))
+* **ui:** reconcile enterprise validation with recursive form and host-filter contracts ([034eb73](https://github.com/vibeunion/svadmin/commit/034eb737b1ad4caca02fcd42c5f83559aaedb592))
+* **ui:** repair typed field contracts and isolate regression test state ([ec4f273](https://github.com/vibeunion/svadmin/commit/ec4f27340a95bc8152bc7657d647e340b67ea623))
+
+
+### 🔧 Miscellaneous Chores
+
+* **design:** reconcile Stripe specimens with merged reference assets on main ([3a9bbad](https://github.com/vibeunion/svadmin/commit/3a9bbad1ea829b32ef25c094e071a1113bde5f8c))
+* refresh PR evidence ([f9b928b](https://github.com/vibeunion/svadmin/commit/f9b928b57be04e33f136859a903ccf1d827b958f))
+* release main ([#310](https://github.com/vibeunion/svadmin/issues/310)) ([fcbbb76](https://github.com/vibeunion/svadmin/commit/fcbbb76a3a25d8bcbb629fd807a8b494959f765b))
+* release main ([#315](https://github.com/vibeunion/svadmin/issues/315)) ([5d70361](https://github.com/vibeunion/svadmin/commit/5d703615b3c4e74f8603babbd9c3185e98d7aca2))
+* release main ([#316](https://github.com/vibeunion/svadmin/issues/316)) ([f2c38a5](https://github.com/vibeunion/svadmin/commit/f2c38a5819d186b108857eedb4f95c410125da46))
+* release main ([#326](https://github.com/vibeunion/svadmin/issues/326)) ([cea194b](https://github.com/vibeunion/svadmin/commit/cea194bc29458682e1b9469b1fac7b89870d8b28))
+* **release:** synchronize workspace metadata ([0b1e8c1](https://github.com/vibeunion/svadmin/commit/0b1e8c1489936013c317a8f191a24133eefa3eb0))
+* **release:** synchronize workspace metadata ([b720dd8](https://github.com/vibeunion/svadmin/commit/b720dd83089cb7568520209b45a064eae2b84712))
+* **styles:** reconcile content recipes with native primitives on main ([ae608de](https://github.com/vibeunion/svadmin/commit/ae608de888de8e06c3f6aeebd92e5de1b8ae9af3))
+
 ## [0.33.1](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.33.0...create-svadmin-v0.33.1) (2026-09-24)
 
 
