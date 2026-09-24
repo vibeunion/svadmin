@@ -50,3 +50,13 @@
   rejected the intentionally shipped customer acceptance test. The correction
   permits only its exact path in `@svadmin/create`, requires that file in the
   archive, and retains rejection of other test artifacts.
+- Candidate `2395e428` passed source tests, builds, type checking and all package
+  archive-entry checks. Its remaining pack failure was the AI Elements pnpm
+  consumer's `esrap@2.3.10` declaration importing an uninstalled optional peer.
+  That strict tooling fixture now installs `@typescript-eslint/types` and the
+  same TypeScript range as the repository. A pnpm 11.11.0 reproduction with
+  exact esrap 2.3.10 passes `skipLibCheck: false`; no compiler check was disabled.
+- Pack/core regressions pass 12 tests / 66 assertions; ESLint and diff checks
+  pass. A separate fresh npm-only app consumer also passes strict TypeScript,
+  SSR build and runtime smoke, but still has the explicitly recorded CSV type
+  workaround, so original-manifest customer acceptance remains pending.
