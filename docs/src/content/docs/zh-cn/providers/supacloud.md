@@ -24,7 +24,7 @@ description: 为 @svadmin/supabase 提供可选的任务编排增强
 ## 安装
 
 ```bash
-bun add @svadmin/supabase @supabase/supabase-js @supacloud/js
+bun add @svadmin/supabase @supabase/supabase-js@^2.115.0 @supacloud/js@^0.33.0
 ```
 
 ## 创建客户端
@@ -55,6 +55,34 @@ import { createSupaCloudTaskProvider } from '@svadmin/supabase/supacloud';
 const taskProvider = createSupaCloudTaskProvider({ supacloud });
 ```
 
+### 订阅传输
+
+SDK `0.33.0` 默认轮询 Management API，不再假设存在 `public.tasks` Realtime 表。
+通过工厂的 `subscription` 配置轮询参数，或显式订阅应用自己的已发布任务表：
+
+```ts
+const subscription = {
+  pollingIntervalMs: 2_000,
+  realtime: { schema: 'public', table: 'business_tasks' },
+  realtimeTimeoutMs: 10_000,
+  reconcileIntervalMs: 30_000,
+  stopOnTerminal: true,
+};
+
+const taskProvider = createSupaCloudTaskProvider({ supacloud, subscription });
+```
+
+省略 `realtime` 即只使用轮询。Realtime 行必须符合 SDK 的任务契约，包括匹配的
+`id` 和 `project_ref`；由应用自行发布任务表并设置授权，不应暴露平台内部任务表。
+`createSupaCloudTaskLiveProvider` 支持同一工厂选项，提交后任务句柄的订阅也会使用它。
+
+工厂创建时会校验并快照配置。轮询间隔必须为正整数，超时与对账间隔还可以为零；
+所有间隔最多为 `2_147_483_647` 毫秒。schema/table 使用不超过 63 个字符的 ASCII 标识符。
+用户回调仍通过 `subscribe` 或工厂的 `onError` 提供，不能塞进 `subscription` 覆盖校验逻辑。
+
+保留返回的清理函数，并在视图或目标变化时调用。退订会中止正在进行的轮询读取，
+并阻止迟到回调，但不会取消服务端任务，也不能证明写操作已经回滚。
+
 ### 支持的方法
 
 - `submit(taskName, options)`
@@ -68,8 +96,15 @@ const taskProvider = createSupaCloudTaskProvider({ supacloud });
 ### 经校验的契约
 
 仅接受现代 `{ tasks: ... }` 客户端，不再支持旧版裸任务客户端或由调用方任意指定结果类型的泛型。
-已安装的 `@supacloud/js` 0.23.1 契约通过了注入 HTTP 和实时传输的测试；
-这些测试不代表真实部署环境已经验收。
+已安装的 `@supacloud/js` 0.33.0 与 `@supabase/supabase-js` 2.117.1 契约通过了
+注入 HTTP、轮询和实时传输的测试；这些测试不代表真实部署环境已经验收。
+可选 SDK peer 范围现在是 `^0.33.0`，不再是 `^0.23.1`，请同时升级 SDK 与适配器。
+SDK 要求任务提交返回 HTTP 202，任务回执带上匹配配置的 `project_ref`。
+死信队列使用任务列表端点的 `dlq=true` 参数，不再调用独立的 `/tasks/dlq` 路由。
+
+本次迁移尚未增加浏览器业务命令适配器。已发布的 SDK 0.33.0 不导出
+`@supacloud/js/contracts`，需要上游浏览器入口发布并验证后再通过后续改动接入。
+不能把仅限 service-role 的 `supacloud.commands` 命名空间接成浏览器操作。
 
 所有 SDK 回执先视为 `unknown`，任务记录、列表、提交句柄、订阅摘要和自定义实时事件
 均在使用前校验。`payload`、`result` 和扩展字段仍为 `unknown`，

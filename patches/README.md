@@ -33,12 +33,13 @@ repository-wide type safety. `check:types:dependencies` must remain enabled.
 - `svelte-toolbelt@0.10.6`: import `Expand` explicitly in the box declarations and
   derive the sleep handle from `ReturnType<typeof setTimeout>`. Browser-only
   fixtures no longer depend on an accidental global utility or Node timer type.
-- `@supabase/auth-js@2.112.4`: distinguish native binary WebAuthn extensions from
+- `@supabase/auth-js@2.117.1`: distinguish native binary WebAuthn extensions from
   JSON output, require the current attestation fields, and align fallback
   serialization with those declarations. The new helper validates supported
   extensions and encodes large-blob/PRF bytes with correct view boundaries.
   It rejects unknown/malformed extension fields; legacy extension passthrough is
   intentionally removed. Both module formats include the same compiled helper.
+  Reapplied unchanged from 2.112.4 for the SupaCloud SDK 0.33.0 compatibility tuple.
 - `elysia@1.4.30`: guard generic indexes, isolate TypeBox definitions from
   Standard Schema definitions, and preserve macro context, registered errors,
   numeric/quoted/named status codes, and schema-derived response types.

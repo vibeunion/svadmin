@@ -26,6 +26,17 @@ const snapshotSchema = Type.Object({
   updatedAt: Type.Optional(Type.Union([text, Type.Null()])),
 }, { additionalProperties: false });
 const liveParamsSchema = Type.Object({ taskId: idSchema }, { additionalProperties: false });
+const timerSchema = Type.Integer({ minimum: 0, maximum: 2_147_483_647 });
+const subscriptionSchema = Type.Object({
+  realtime: Type.Optional(Type.Object({
+    schema: Type.String({ pattern: '^[A-Za-z_][A-Za-z0-9_]{0,62}$' }),
+    table: Type.String({ pattern: '^[A-Za-z_][A-Za-z0-9_]{0,62}$' }),
+  }, { additionalProperties: false })),
+  pollingIntervalMs: Type.Optional(Type.Integer({ minimum: 1, maximum: 2_147_483_647 })),
+  realtimeTimeoutMs: Type.Optional(timerSchema),
+  reconcileIntervalMs: Type.Optional(timerSchema),
+  stopOnTerminal: Type.Optional(Type.Boolean()),
+}, { additionalProperties: false });
 const eventSchema = Type.Object({
   type: Type.Union([Type.Literal('INSERT'), Type.Literal('UPDATE'), Type.Literal('DELETE')]),
   resource: text, payload: Type.Record(Type.String(), Type.Unknown()),
@@ -43,7 +54,9 @@ export interface SupaCloudTaskSdkSubmitOptions {
   metadata?: Record<string, unknown>;
 }
 
-export interface SupaCloudTaskSubscribeOptions {
+export type SupaCloudTaskSubscriptionOptions = Static<typeof subscriptionSchema>;
+
+export interface SupaCloudTaskSubscribeOptions extends SupaCloudTaskSubscriptionOptions {
   onUpdate: (snapshot: unknown) => void;
   onError: (error: unknown) => void;
 }
@@ -80,6 +93,7 @@ export interface SupaCloudTaskProvider extends TaskProvider<SupaCloudTaskRecord>
 export interface CreateSupaCloudTaskProviderOptions {
   supacloud: SupaCloudTaskClient;
   onError?: (error: TaskError) => void;
+  subscription?: SupaCloudTaskSubscriptionOptions;
 }
 
 export interface CreateSupaCloudTaskLiveProviderOptions {
@@ -87,6 +101,7 @@ export interface CreateSupaCloudTaskLiveProviderOptions {
   resource?: string;
   mapTaskToEvent?: (task: SupaCloudTaskRecord, resource: string) => unknown;
   onError?: (error: TaskError) => void;
+  subscription?: SupaCloudTaskSubscriptionOptions;
 }
 
 function decode<S extends TSchema>(schema: S, value: unknown, input = false, write = false): Static<S> {
@@ -179,7 +194,10 @@ function submitOptions(value: SubmitTaskOptions | undefined): SupaCloudTaskSdkSu
   });
 }
 
-function receipt(value: unknown, onError?: (error: TaskError) => void): SupaCloudTaskHandle {
+function receipt(
+  value: unknown, subscription: SupaCloudTaskSubscriptionOptions,
+  onError?: (error: TaskError) => void,
+): SupaCloudTaskHandle {
   const id = decode(idSchema, ownField(value, 'taskId', true), false, true);
   decode(statusSchema, ownField(value, 'status', true), false, true);
   const wait = method(value, 'wait', true);
@@ -196,7 +214,7 @@ function receipt(value: unknown, onError?: (error: TaskError) => void): SupaClou
     async cancel() { return taskRecord(await request(() => cancel(), true), id, true); },
     async retry() { return taskRecord(await request(() => retry(), true), id, true); },
     subscribe(callback, subscriptionError) {
-      return listen(options => subscribe(options), id, callback, subscriptionError ?? onError);
+      return listen(options => subscribe({ ...subscription, ...options }), id, callback, subscriptionError ?? onError);
     },
   };
 }
@@ -211,6 +229,7 @@ export function createSupaCloudTaskProvider(options: CreateSupaCloudTaskProvider
   const retry = requiredTaskClientMethod(sdk, 'retry');
   const subscribe = requiredTaskClientMethod(sdk, 'subscribe');
   const onError = errorCallback(taskClientField(options, 'onError'));
+  const subscription = subscriptionOptions(options);
   const listResult = (value: unknown) => {
     const values = decode(Type.Array(Type.Unknown()), value);
     const data = values.map(value => taskRecord(value));
@@ -220,7 +239,7 @@ export function createSupaCloudTaskProvider(options: CreateSupaCloudTaskProvider
     async submit(name, options) {
       const taskName = decode(nameSchema, name, true);
       const params = submitOptions(options);
-      return receipt(await request(() => submit(taskName, params), true), onError);
+      return receipt(await request(() => submit(taskName, params), true), subscription, onError);
     },
     async get(taskId) {
       const id = decode(idSchema, taskId, true);
@@ -244,7 +263,7 @@ export function createSupaCloudTaskProvider(options: CreateSupaCloudTaskProvider
     },
     subscribe(taskId, callback, subscriptionError) {
       const id = decode(idSchema, taskId, true);
-      return listen(options => subscribe(id, options), id, callback, subscriptionError ?? onError);
+      return listen(options => subscribe(id, { ...subscription, ...options }), id, callback, subscriptionError ?? onError);
     },
   };
 }
@@ -255,6 +274,13 @@ function errorCallback(value: unknown): ((error: TaskError) => unknown) | undefi
   return error => { const result: unknown = Reflect.apply(value, undefined, [error]); return result; };
 }
 
+function subscriptionOptions(options: unknown): SupaCloudTaskSubscriptionOptions {
+  const value = taskClientField(options, 'subscription');
+  const subscription = decode(subscriptionSchema, value === undefined ? {} : value, true);
+  if (subscription.realtime) Object.freeze(subscription.realtime);
+  return Object.freeze(subscription);
+}
+
 export function createSupaCloudTaskLiveProvider(options: CreateSupaCloudTaskLiveProviderOptions): LiveProvider {
   const sdk = taskClientField(taskClientField(options, 'supacloud'), 'tasks');
   const subscribe = requiredTaskClientMethod(sdk, 'subscribe');
@@ -263,12 +289,13 @@ export function createSupaCloudTaskLiveProvider(options: CreateSupaCloudTaskLive
   const map = taskClientField(options, 'mapTaskToEvent');
   if (map !== undefined && typeof map !== 'function') throw new TaskError('INVALID_TASK_INPUT');
   const onError = errorCallback(taskClientField(options, 'onError'));
+  const subscription = subscriptionOptions(options);
   return {
     subscribe({ resource, liveParams, callback }) {
       const resourceId = decode(text, resource === undefined ? resourceName : resource, true);
       const { taskId } = decode(liveParamsSchema, liveParams, true);
       return validatedTaskSubscription(
-        (onUpdate, onError) => subscribe(taskId, { onUpdate, onError }),
+        (onUpdate, onError) => subscribe(taskId, { ...subscription, onUpdate, onError }),
         value => {
           const task = taskSnapshot(value, taskId);
           let mapped: unknown;

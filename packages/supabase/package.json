@@ -39,7 +39,7 @@
     "@svadmin/core": "workspace:*",
     "@supabase/supabase-js": "^2.112.4",
     "@refinedev/supabase": "^6.0.2",
-    "@supacloud/js": "^0.23.1"
+    "@supacloud/js": "^0.33.0"
   },
   "license": "MIT",
   "author": "zuohuadong",
@@ -71,7 +71,7 @@
     "@svadmin/refine-adapter": "workspace:*"
   },
   "devDependencies": {
-    "@supacloud/js": "0.23.1",
-    "@supabase/supabase-js": "^2.112.4"
+    "@supacloud/js": "0.33.0",
+    "@supabase/supabase-js": "2.117.1"
   }
 }
