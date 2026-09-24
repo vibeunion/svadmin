@@ -50,14 +50,14 @@ async function verifyPackedVibeMcp(cli: string, directory: string) {
   try {
     await client.connect(transport);
     expect((await client.listTools()).tools).toHaveLength(3);
-    const search = await client.callTool({ name: 'svadmin_vibe_search' }, CallToolResultSchema);
+    const search = CallToolResultSchema.parse(await client.callTool({ name: 'svadmin_vibe_search' }, CallToolResultSchema));
     expect(search.isError).not.toBe(true);
     const searchText = search.content.find(block => block.type === 'text');
     expect(JSON.parse(searchText?.text ?? '{}').pages).toHaveLength(6);
-    const context = await client.callTool({ name: 'svadmin_vibe_inspect', arguments: { page: 'approval' } }, CallToolResultSchema);
+    const context = CallToolResultSchema.parse(await client.callTool({ name: 'svadmin_vibe_inspect', arguments: { page: 'approval' } }, CallToolResultSchema));
     expect(context.isError).not.toBe(true);
     expect(context.content.some(block => block.type === 'text' && block.text.includes('ARCHITECTURE.md'))).toBe(true);
-    const preview = await client.callTool({ name: 'svadmin_vibe_preview', arguments: { page: 'approval', viewport: 'mobile' } }, CallToolResultSchema);
+    const preview = CallToolResultSchema.parse(await client.callTool({ name: 'svadmin_vibe_preview', arguments: { page: 'approval', viewport: 'mobile' } }, CallToolResultSchema));
     expect(preview.isError).not.toBe(true);
     expect(preview.content.some(block => block.type === 'image' && block.mimeType === 'image/png')).toBe(true);
     expect(stderr).toBe('');

@@ -96,17 +96,48 @@
   and ESLint passed. The complete local test output is
   `/tmp/svadmin-vibe-authorized-cli-tests.log`.
 
+### Final Publication Blocker (2026-09-24)
+
+- User authorization has been granted and exercised; it is no longer a blocker.
+  Implementation and TypeBox fixes are committed and pushed in PR #465.
+  The production-code candidate is `49a00482af53adf405cfb08a70b4ed128438e6fc`.
+- Run `36013026945` completed its lint/test, type, pack and E2E gates successfully,
+  then failed in `Publish released packages` at 14:57:59 UTC:
+  npm rejected PUT `@svadmin/app@0.2.0` with E404. Provenance generation did
+  succeed, but npm package publication did not.
+- Local `npm whoami` returned E401 from the official registry. The exact
+  account/package authorization problem requires the npm owner to resolve;
+  neither an invalid local session nor a provenance receipt proves permission.
+- Global Codex MCP configuration is persisted with the three-tool allowlist.
+  Its actual local command passed SDK discovery/search/inspect/preview again
+  after the TypeBox migration. No other global MCP entries were changed.
+- Final code candidate passed local frozen-lock installation, architecture
+  checks (1799 sources), strict TypeScript, ESLint, diff checks and the 104-test
+  CLI suite. The PR TypeBox gate passed. One unrelated mobile-dark focus check
+  failed, then passed on an unchanged-code rerun; no CSS or assertion was changed.
+  Main PR CI then identified strict typing errors in the new test fixtures.
+  The follow-up explicitly parses SDK call results with its public result
+  schema, preserves the valid status literal, and uses index-signature access.
+  No unchecked casts or compiler suppressions were added. The corrected CLI suite
+  passed **104/104**, **1142 assertions**, in 20.14 seconds
+  (`/tmp/svadmin-vibe-authorized-final-tests.log`).
+- Broad local type-contract validation is not accepted: the existing local
+  dependency tree reports duplicate dependency declarations and core Query
+  type errors. These are separate from the corrected new test diagnostics.
+  Isolated validation and the latest PR CI must supply the remaining receipt.
+
 Overall delivery is `PARTIAL`, state `blocked`, not "all complete".
+PR #465 remains unmerged and the new CLI release has not been published.
 
-Required next authorization: commit/push or PR, controlled Release Please/npm
-publication including the missing application dependency, and any requested
-global coding-assistant configuration write.
+Required external action: authenticate a local npm account with `@svadmin`
+publication rights (`npm login`) or repair the package's GitHub trusted-publisher
+authorization. Do not place credentials in source, chat or this record.
 
-After authorization, reconcile against current remote main without overwriting
-dirty work, use the repository's release workflow and a new immutable release
-version, then repeat installation with the original generated dependency
-manifest. Do not substitute local tarballs or claim a successful Release Please
-run proves an absent registry package is available.
+After the owner resolves npm access, verify identity and package permission,
+complete the immutable app release through the existing gated workflow, then
+finish PR/release checks and publish the new CLI version. Repeat public
+installation using the original generated manifest; do not substitute local
+tarballs or equate an action/tag/provenance receipt with registry availability.
 
 Real backend authorization, persistence and customer aesthetic sign-off remain
 the documented starter boundaries, not silently implemented production features.

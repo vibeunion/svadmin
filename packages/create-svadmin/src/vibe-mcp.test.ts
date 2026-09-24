@@ -55,7 +55,7 @@ describe('read-only vibe MCP', () => {
       expect(tool.annotations).toEqual({
         readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false,
       });
-      expect(tool.inputSchema.additionalProperties).toBe(false);
+      expect(tool.inputSchema['additionalProperties']).toBe(false);
     }
   });
 
@@ -72,7 +72,7 @@ describe('read-only vibe MCP', () => {
   it('returns actual desktop and mobile PNGs with a reference-only warning', async () => {
     const client = await connect();
     for (const viewport of ['desktop', 'mobile'] as const) {
-      const result = await client.callTool({ name: 'svadmin_vibe_preview', arguments: { page: 'list', viewport } }, CallToolResultSchema);
+      const result = CallToolResultSchema.parse(await client.callTool({ name: 'svadmin_vibe_preview', arguments: { page: 'list', viewport } }, CallToolResultSchema));
       expect(result.isError).not.toBe(true);
       const text = result.content.find(block => block.type === 'text');
       expect(text?.text).toContain('Not current customer acceptance evidence');

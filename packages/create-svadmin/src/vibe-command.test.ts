@@ -89,7 +89,7 @@ describe('vibe starter', () => {
   });
 
   it('uses closed schemas and limits approval edits', () => {
-    const input = { name: 'Test', contact: 'Lin', email: 'test@example.test', status: 'active', owner: 'Chen', notes: '' };
+    const input = { name: 'Test', contact: 'Lin', email: 'test@example.test', status: 'active' as const, owner: 'Chen', notes: '' };
     expect(parseContractCreateInput(customers, input)).toEqual(input);
     expect(() => parseContractCreateInput(customers, { ...input, role: 'admin' })).toThrow();
     expect(() => parseContractCreateInput(customers, { ...input, name: '' })).toThrow();
