@@ -88,6 +88,12 @@ describe('vibe starter', () => {
     expect(readFileSync(join(directory, 'previews/test.png'))).toEqual(image);
   });
 
+  it('keeps shipped blueprint metadata inside the CLI compiler root', () => {
+    const config = JSON.parse(readFileSync(join(root, 'tsconfig.json'), 'utf8'));
+    expect(resolve(root, config.compilerOptions.rootDir)).toBe(root);
+    expect(config.compilerOptions.skipLibCheck).toBe(false);
+  });
+
   it('uses closed schemas and limits approval edits', () => {
     const input = { name: 'Test', contact: 'Lin', email: 'test@example.test', status: 'active' as const, owner: 'Chen', notes: '' };
     expect(parseContractCreateInput(customers, input)).toEqual(input);
