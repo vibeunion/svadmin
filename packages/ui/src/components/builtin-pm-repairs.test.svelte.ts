@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { resetContext, type AuthProvider, type DataProvider, type Organization } from '@svadmin/core';
 import Host from './builtin-pm.test-host.svelte';
 import type { NotificationPreferences } from './NotificationsSettings.svelte';
+import userEvent from '@testing-library/user-event';
 
 const dataProvider = {
   getList: async () => ({ data: [], total: 0 }),
@@ -51,14 +52,44 @@ describe('builtin capability boundaries', () => {
     };
     const first = render(Host, { bundle, page: 'notifications', preferences });
     await waitFor(() => expect(document.querySelector('fieldset')?.disabled).toBe(false));
-    await fireEvent.click(requireValue(document.querySelector('#email-security')));
+    expect(screen.getByRole('heading', { level: 1, name: /Notifications/ })).toBeTruthy();
+    const switches = screen.getAllByRole('switch');
+    expect(switches).toHaveLength(7);
+    for (const control of switches) {
+      expect(document.querySelector(`label[for="${control.id}"]`)?.textContent?.trim()).toBeTruthy();
+    }
+    await fireEvent.click(requireValue(document.querySelector('[id$="-email-security"]')));
     await fireEvent.click(screen.getByRole('button', { name: /Save/ }));
     await waitFor(() => expect(stored.email.security).toBe(false));
     first.unmount();
     render(Host, { bundle, page: 'notifications', preferences });
     await waitFor(() => expect(document.querySelector('fieldset')?.disabled).toBe(false));
-    expect(document.querySelector('#email-security')?.getAttribute('aria-checked')).toBe('false');
+    expect(document.querySelector('[id$="-email-security"]')?.getAttribute('aria-checked')).toBe('false');
     expect(preferences.load).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps notification label activation within its component instance', async () => {
+    const preferences = {
+      load: async (): Promise<NotificationPreferences> => ({
+        email: { security: true, activity: true, reports: true },
+        push: { security: true, activity: true, reports: true },
+        sms: { security: true },
+      }),
+      save: async () => {},
+    };
+    const first = render(Host, { bundle, page: 'notifications', preferences });
+    const second = render(Host, { bundle, page: 'notifications', preferences });
+    await waitFor(() => {
+      expect(first.container.querySelector('fieldset')?.disabled).toBe(false);
+      expect(second.container.querySelector('fieldset')?.disabled).toBe(false);
+    });
+    const firstSwitch = requireValue(first.container.querySelector('[id$="-email-security"]'));
+    const secondSwitch = requireValue(second.container.querySelector('[id$="-email-security"]'));
+    expect(firstSwitch.id).not.toBe(secondSwitch.id);
+    const label = requireValue(second.container.querySelector('label[for$="-email-security"]'));
+    await userEvent.setup().click(label);
+    expect(firstSwitch.getAttribute('aria-checked')).toBe('true');
+    expect(secondSwitch.getAttribute('aria-checked')).toBe('false');
   });
 
   it('renders real directory rows without requiring invitation capability', async () => {

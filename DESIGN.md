@@ -141,12 +141,43 @@ The same contract is used at every delivery surface:
   `clean-flat + stripe` refinement; host applications consume this stylesheet.
 - `packages/core/src/theme.svelte.ts` owns the `stripe` color preset and mode
   attributes; it must stay aligned with the CSS fallback values.
-- `example/src/App.svelte` is the reference application and starts with
-  `layoutPreset: 'clean-flat'` and `colorPreset: 'stripe'`.
+- `AdminApp` supplies `clean-flat` as a fallback layout without taking over an
+  explicit theme owner. Core supplies the default Stripe color and preserves
+  saved user selections; `layoutPreset: 'default'` remains an explicit opt-out.
+- `example/src/App.svelte` consumes these defaults without repeating theme
+  configuration. A bare `AdminApp` renders `ResourceOverview` on its home route.
+- `DashboardPage`, `PageSection`, `WorkspaceLayout`, and the content components
+  own reusable page composition in the published UI package. Example modules
+  own business queries and decisions, not private replacements for these layouts.
 - `packages/create-svadmin/template` starts new projects with the same theme
   and guidance document, so generated apps do not drift from the example.
 - `design/admin-ui/preview` renders the published package CSS and uses the same
   Stripe preset for component and state review.
+- `packages/flow` resolves explicit flow overrides first, then host semantic
+  tokens, then standalone Stripe-compatible fallback colors.
+- `packages/editor`, `packages/surface`, and `packages/ai-elements` consume
+  complete CSS color tokens, not HSL channel tuples. Independent stylesheets
+  use motion-token fallbacks so they also work without the full UI package.
+- `packages/lite` mirrors the palette with literal colors. Its legacy-browser
+  contract deliberately excludes custom properties and modern selectors;
+  visual alignment must not remove that compatibility.
+
+Theme refinements must preserve component density, invalid and selected states.
+Focus belongs to the active control, not every enclosing card. Search icons and
+clear actions use logical positioning so the same layout works in RTL.
+
+Settings pages use `ContentPageHeader` with one page-level `h1`. When embedded
+inside another page, pass `headingLevel="h2"` and use `h3` for nested
+`SettingsGroup` headings. `SettingsFieldRow.controlId` associates the visible
+label with its native control; IDs must be unique per component instance.
+Segmented settings expose their selected option with `aria-pressed`, retain
+their value after reload, and normalize unsupported persisted values.
+Invalid fields expose `aria-invalid` and associate the visible error through
+`aria-describedby`; valid sibling fields stay neutral. Clearing an error also
+removes its association. Verify label activation with two mounted instances,
+not only matching label text. Provider-backed settings retain their disabled
+state when no provider is configured; demo screenshots are not persistence
+evidence.
 
 Do not add page-local palettes or shadow values when a semantic token exists.
 If a new reference suggests a different treatment, record its responsibility
@@ -247,8 +278,8 @@ glow. Dialogs and menus receive stronger depth because they are floating
 layers. Dark mode keeps the same hierarchy with low-chroma surfaces.
 
 - **Control Shadow**: `0 1px 2px rgb(15 23 42 / 0.04), 0 0 0 1px rgb(15 23 42 / 0.02)`
-- **Surface Shadow**: `0 2px 4px rgb(15 23 42 / 0.04), 0 8px 16px rgb(15 23 42 / 0.08)`
-- **Surface Hover Shadow**: `0 4px 8px rgb(15 23 42 / 0.06), 0 16px 32px rgb(15 23 42 / 0.1)`
+- **Surface Shadow**: `0 1px 3px rgb(15 23 42 / 0.04), 0 4px 8px rgb(15 23 42 / 0.04)`
+- **Surface Hover Shadow**: `0 2px 4px rgb(15 23 42 / 0.06), 0 6px 12px rgb(15 23 42 / 0.06)`
 - **Overlay Shadow**: `0 20px 52px rgb(15 23 42 / 0.18), 0 6px 16px rgb(15 23 42 / 0.1)`
 
 ## Shapes
@@ -270,8 +301,10 @@ Transitions provide clear state confirmation without delaying user action:
 
 - **Timing**: Micro-transitions use 150ms–200ms with `ease-out`; never use
   `ease-in-out` for routine controls.
-- **Feedback**: Buttons may lift by 2px on hover and depress to `scale(0.98)`
-  on press. Interactive cards may lift by 4px; hover never scales a card.
+- **Feedback**: Enabled buttons may lift by 2px on fine-pointer hover and
+  depress to `scale(0.98)` on press. Neither transform runs with reduced
+  motion. Interactive cards change border and shadow only, without moving.
+  Disabled controls never lift or depress.
 - **Focus Rings**: Operable controls declare `:focus-visible` with a 2px solid
   ring and a 2px offset.
 - **Accessibility**: All transitions and keyframe animations collapse to 0.01ms

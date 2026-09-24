@@ -68,7 +68,6 @@
   {menu}
   title={appTitle}
   bind:locale={currentLocale}
-  themeConfig={{ layoutPreset: 'clean-flat', colorPreset: 'stripe' }}
   loginDefaults={{
     identifier: 'demo@example.com',
     password: 'demo',

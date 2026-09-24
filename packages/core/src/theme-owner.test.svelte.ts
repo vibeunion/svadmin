@@ -71,6 +71,20 @@ function resetBrowserThemeState(): void {
 beforeEach(resetBrowserThemeState);
 
 describe('theme owners', () => {
+  it('uses UI fallbacks without taking over explicit owners or changing headless defaults', () => {
+    expect(getThemeConfig()).toEqual({});
+    const fallback = registerThemeOwner({ fallbackThemeConfig: { layoutPreset: 'clean-flat' } });
+    expect(getThemeConfig()).toEqual({ layoutPreset: 'clean-flat' });
+    const explicit = registerThemeOwner({ themeConfig: { layoutPreset: 'default', colorPreset: 'green' } });
+    const secondFallback = registerThemeOwner({ fallbackThemeConfig: { layoutPreset: 'clean-flat' } });
+    expect(getThemeConfig()).toEqual({ layoutPreset: 'default', colorPreset: 'green' });
+    unregisterThemeOwner(explicit);
+    expect(getThemeConfig()).toEqual({ layoutPreset: 'clean-flat' });
+    unregisterThemeOwner(secondFallback);
+    unregisterThemeOwner(fallback);
+    expect(getThemeConfig()).toEqual({});
+  });
+
   it('uses the last explicit owner and supports non-LIFO cleanup', () => {
     const first = registerThemeOwner({
       defaultTheme: 'dark',

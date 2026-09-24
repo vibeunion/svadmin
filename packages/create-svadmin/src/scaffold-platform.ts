@@ -293,6 +293,17 @@ const SCAFFOLD_MIGRATION_NOTES = [
 export const SCAFFOLD_UI_COMPONENTS: readonly AdminManifestComponent[] = [
   ...[
     'AdminApp',
+    'ResourceOverview',
+    'DashboardPage',
+    'PageSection',
+    'ContentPageShell',
+    'ContentPageHeader',
+    'SectionHeader',
+    'WorkspaceLayout',
+    'MetricBlock',
+    'FilterToolbar',
+    'SettingsGroup',
+    'SettingsFieldRow',
     'AutoTable',
     'AutoForm',
     'ShowPage',

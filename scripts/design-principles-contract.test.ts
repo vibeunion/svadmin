@@ -47,9 +47,9 @@ describe('Admin UI design principles contract', () => {
     for (const reference of ['Stripe style prompt', 'Corporate-clean prompt', 'Fuse / Midone / Skote', 'Runtime integration map']) {
       expect(design).toContain(reference);
     }
-    expect(read('example/src/App.svelte')).toContain("layoutPreset: 'clean-flat'");
-    expect(read('example/src/App.svelte')).toContain("colorPreset: 'stripe'");
-    expect(read('packages/create-svadmin/template/src/App.svelte')).toContain("colorPreset: 'stripe'");
+    expect(read('packages/ui/src/default-theme.ts')).toContain("config?.layoutPreset ?? 'clean-flat'");
+    expect(read('example/src/App.svelte')).not.toContain('themeConfig=');
+    expect(read('packages/create-svadmin/template/src/App.svelte')).not.toContain('themeConfig=');
     expect(read('design/admin-ui/preview/Preview.svelte')).toContain('data-theme="stripe"');
     expect(read('design/admin-ui/preview/preview.css')).toContain('var(--svadmin-grid-size, 40px)');
   });

@@ -7,7 +7,7 @@
 
   import { captureAdminContext, useList } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
-  import { ContentPageHeader, ContentPageShell, DataState, MetricBlock } from '@svadmin/ui';
+  import { DashboardPage, DataState, MetricBlock } from '@svadmin/ui';
   import * as Card from '@svadmin/ui/components/ui/card/index.js';
   import {
     Bell,
@@ -256,8 +256,7 @@
   }
 </script>
 
-<ContentPageShell pageId="operations-dashboard" width="wide">
-  <ContentPageHeader title={isZh ? '运营工作台' : 'Operations workspace'}
+<DashboardPage pageId="operations-dashboard" title={isZh ? '运营工作台' : 'Operations workspace'}
     description={isZh ? '库存风险、订单与团队待办' : 'Inventory health, orders and team priorities'}>
     {#snippet actions()}
       <span role="status" class="flex items-center gap-2 text-xs text-muted-foreground">
@@ -265,25 +264,24 @@
         {hasError ? (isZh ? '部分数据不可用' : 'Some data unavailable') : isRefreshing ? (isZh ? '更新中' : 'Updating') : (isZh ? '已同步' : 'Up to date')}
       </span>
     {/snippet}
-  </ContentPageHeader>
 
   {#if hasError}
     <DataState state="error" title={isZh ? '部分数据未能更新' : 'Some data could not be updated'}
       description={isZh ? '暂不可用的指标显示为 —，请重试后再作判断。' : 'Unavailable metrics show —. Retry before making a decision.'}
       retry={retryFailedQueries} />
   {/if}
-  <section class="grid grid-cols-2 gap-3 sm:grid-cols-3" data-dashboard-decisions>
+  {#snippet metrics()}
     <MetricBlock label={isZh ? '库存风险' : 'Stock at risk'} value={productsQuery.isError ? '—' : lowStockProducts.length}
       detail={productsQuery.isError ? '' : (isZh ? `其中 ${outOfStockProducts.length} 项缺货` : `${outOfStockProducts.length} out of stock`)}
       loading={productsQuery.isLoading} />
     <MetricBlock label={isZh ? '待处理' : 'Open work'}
       value={todosQuery.isError || transfersQuery.isError || adjustmentsQuery.isError ? '—' : openTodos + activeTransfers + pendingAdjustments}
       detail={isZh ? '待办、调拨与审批' : 'Todos, transfers, approvals'} loading={todosQuery.isLoading || transfersQuery.isLoading || adjustmentsQuery.isLoading} />
-    <MetricBlock class="col-span-2 sm:col-span-1" label={isZh ? '库存资产' : 'Inventory value'}
+    <MetricBlock label={isZh ? '库存资产' : 'Inventory value'}
       value={productsQuery.isError ? '—' : `$${Math.round(totalAssetValue).toLocaleString(locale)}`}
       detail={productsQuery.isError ? '' : isZh ? `${totalStock} 件库存` : `${totalStock.toLocaleString(locale)} units in stock`}
       loading={productsQuery.isLoading} />
-  </section>
+  {/snippet}
 
   <!-- Inventory Health + Operations Queue -->
   <section class="grid items-start gap-6 lg:grid-cols-[1.2fr_0.8fr]">
@@ -582,4 +580,4 @@
   {:catch}
     <DataState state="error" title={isZh ? '声明式 Surface 加载失败' : 'Unable to load the declarative Surface'} />
   {/await}
-</ContentPageShell>
+</DashboardPage>

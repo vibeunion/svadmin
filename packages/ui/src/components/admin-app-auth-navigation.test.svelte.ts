@@ -101,6 +101,40 @@ afterEach(() => {
 });
 
 describe('AdminApp authenticated navigation', () => {
+  it('decodes numeric route IDs before permission checks and default detail reads', async () => {
+    window.location.hash = '#/posts/show/3';
+    const getOne = vi.fn<DataProvider['getOne']>(async ({ id }) => ({ data: { id, title: 'Numeric record' } }));
+    const can = vi.fn<AccessControlProvider['can']>(async () => ({ can: true }));
+    const view = render(AdminApp, {
+      locale: 'en',
+      dataProvider: { ...createDataProvider(), getOne },
+      accessControlProvider: { can },
+      resources: [{
+        name: 'posts', label: 'Posts', canCreate: false, canEdit: false, canDelete: false,
+        fields: [{ key: 'title', label: 'Title', type: 'text' }],
+        contract: defineResource('posts', { record: Type.Object({ id: Type.Number(), title: Type.String() }) }),
+      }],
+    });
+    expect(await view.findByText('Numeric record')).toBeTruthy();
+    expect(getOne).toHaveBeenCalledWith(expect.objectContaining({ id: 3 }));
+    expect(can).toHaveBeenCalledWith(expect.objectContaining({ action: 'show', params: { id: 3 } }));
+  });
+
+  it('rejects malformed numeric route IDs before rendering a resource page', async () => {
+    window.location.hash = '#/posts/show/not-a-number';
+    const getOne = vi.fn<DataProvider['getOne']>();
+    const view = render(AdminApp, {
+      locale: 'en',
+      dataProvider: { ...createDataProvider(), getOne },
+      resources: [{
+        name: 'posts', label: 'Posts', fields: [],
+        contract: defineResource('posts', { record: Type.Object({ id: Type.Number() }) }),
+      }],
+    });
+    expect(await view.findByRole('alert')).toBeTruthy();
+    expect(getOne).not.toHaveBeenCalled();
+  });
+
   it.each([
     ['#/posts', 'list', undefined, 'list'],
     ['#/posts/create', 'create', undefined, 'create'],

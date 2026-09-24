@@ -1,4 +1,6 @@
 export { default as ContentPageShell } from './ContentPageShell.svelte';
+export { default as DashboardPage } from './DashboardPage.svelte';
+export { default as PageSection } from './PageSection.svelte';
 export { default as ContentPageHeader } from './ContentPageHeader.svelte';
 export { default as SectionHeader } from './SectionHeader.svelte';
 export { default as PageToolbar } from './PageToolbar.svelte';

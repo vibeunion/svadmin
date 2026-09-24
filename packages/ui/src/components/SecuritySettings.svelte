@@ -11,7 +11,10 @@
   import DataState from './content/DataState.svelte';
   import FeedbackNotice from './content/FeedbackNotice.svelte';
   import ConfirmDialog from './ConfirmDialog.svelte';
+  import ContentPageHeader from './content/ContentPageHeader.svelte';
 
+  let { headingLevel = 'h1' }: { headingLevel?: 'h1' | 'h2' } = $props();
+  const controlId = $props.id();
   const i18n = useTranslation();
   const adminContext = captureAdminContext();
   const authProvider = $derived(adminContext.authProvider);
@@ -179,16 +182,16 @@
 </script>
 
 <div class="svadmin-u-b3542e058833">
-  <div><h2 class="svadmin-u-d5c9b0001e7e svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{i18n.t('settings.security')}</h2><p class="svadmin-u-b6b02c0ebef6 svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">{i18n.t('settings.securityDescription')}</p></div>
+  <ContentPageHeader title={i18n.t('settings.security')} description={i18n.t('settings.securityDescription')} {headingLevel} />
   {#if !sessionProvider}
     <FeedbackNotice tone="warning" message={isZh ? '未配置 SessionProvider。会话和 MFA 设置不会使用模拟数据。' : 'SessionProvider is not configured. Session and MFA controls do not use simulated data.'} />
   {/if}
-  <SettingsGroup title={i18n.t('security.twoFactorAuth')} description={i18n.t('security.twoFactorDescription')}>
-    <SettingsFieldRow label={i18n.t('security.enable2fa')} description={is2faEnabled ? i18n.t('security.twoFactorActive') : i18n.t('security.twoFactorInactive')}>
-      {#snippet control()}<Switch bind:checked={() => is2faEnabled, (enabled) => { void handleMfaChange(enabled); }} disabled={!sessionProvider?.setMfaEnabled || updatingMfa} />{/snippet}
+  <SettingsGroup title={i18n.t('security.twoFactorAuth')} description={i18n.t('security.twoFactorDescription')} headingLevel={headingLevel === 'h1' ? 'h2' : 'h3'}>
+    <SettingsFieldRow controlId={`${controlId}-mfa`} label={i18n.t('security.enable2fa')} description={is2faEnabled ? i18n.t('security.twoFactorActive') : i18n.t('security.twoFactorInactive')}>
+      {#snippet control()}<Switch id={`${controlId}-mfa`} bind:checked={() => is2faEnabled, (enabled) => { void handleMfaChange(enabled); }} disabled={!sessionProvider?.setMfaEnabled || updatingMfa} />{/snippet}
     </SettingsFieldRow>
   </SettingsGroup>
-  <SettingsGroup title={i18n.t('profile.changePassword')} description={isZh ? '密码修改由 AuthProvider 持久化。' : 'Password changes are persisted by AuthProvider.'}>
+  <SettingsGroup title={i18n.t('profile.changePassword')} description={isZh ? '密码修改由 AuthProvider 持久化。' : 'Password changes are persisted by AuthProvider.'} headingLevel={headingLevel === 'h1' ? 'h2' : 'h3'}>
     {#if !authProvider?.updatePassword}<FeedbackNotice tone="warning" message={isZh ? '当前 AuthProvider 不支持修改密码。' : 'The current AuthProvider does not support password updates.'} />{/if}
     <form onsubmit={handlePasswordChange} class="svadmin-u-6199866f612f svadmin-u-3e7ce58d64fa">
       {#if passwordErrorMessage}<Alert.Root variant="destructive"><AlertTriangle class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" /><Alert.Description>{passwordErrorMessage}</Alert.Description></Alert.Root>{/if}
@@ -198,7 +201,7 @@
       <Button type="submit" disabled={!authProvider?.updatePassword || changingPassword}>{changingPassword ? (isZh ? '更新中...' : 'Updating...') : i18n.t('profile.updatePassword')}</Button>
     </form>
   </SettingsGroup>
-  <SettingsGroup title={i18n.t('security.activeSessions')} description={i18n.t('security.sessionsDescription')}>
+  <SettingsGroup title={i18n.t('security.activeSessions')} description={i18n.t('security.sessionsDescription')} headingLevel={headingLevel === 'h1' ? 'h2' : 'h3'}>
     {#snippet actions()}{#if sessions.some((session) => !session.current)}<Button variant="outline" size="sm" disabled={revoking !== null} onclick={() => revokeAllOthers()}>{i18n.t('security.revokeOthers')}</Button>{/if}{/snippet}
     {#if loadingSessions}
       <DataState state="loading" />

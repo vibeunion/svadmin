@@ -62,6 +62,10 @@
   import { setComponentRegistry, type ComponentRegistry } from '../component-registry.svelte.js';
   import Layout, { type LayoutAIAssistantProps } from './Layout.svelte';
   import AutoTable from './LazyAutoTable.svelte';
+  import ResourceOverview from './ResourceOverview.svelte';
+  import DataState from './content/DataState.svelte';
+  import { parseContractRouteId } from '@svadmin/core/schema';
+  import { resolveAdminThemeConfig } from '../default-theme.js';
   import AutoForm from './LazyAutoForm.svelte';
   import ShowPage from './LazyShowPage.svelte';
   import Toast from './Toast.svelte';
@@ -270,11 +274,13 @@
   });
 
   let themeOwner = $state.raw<ReturnType<typeof registerThemeOwner>>(undefined);
+  const resolvedThemeConfig = $derived(userThemeConfig === undefined ? undefined : resolveAdminThemeConfig(userThemeConfig));
 
   onMount(() => {
     themeOwner = registerThemeOwner(definedOptions({
       defaultTheme,
-      themeConfig: userThemeConfig,
+      themeConfig: resolvedThemeConfig,
+      fallbackThemeConfig: resolveAdminThemeConfig(),
     }));
 
     return () => {
@@ -287,7 +293,8 @@
     const owner = themeOwner;
     const ownerOptions = definedOptions({
       defaultTheme,
-      themeConfig: userThemeConfig,
+      themeConfig: resolvedThemeConfig,
+      fallbackThemeConfig: resolveAdminThemeConfig(),
     });
     untrack(() => updateThemeOwner(owner, ownerOptions));
   });
@@ -364,6 +371,15 @@
   const renderedRoute = $derived(route);
   const renderedParams = $derived(params);
   const renderedResourceName = $derived(renderedParams['resource']);
+  const renderedRecord = $derived.by(() => {
+    const id = renderedParams['id'];
+    const contract = resources.find(resource => resource.name === renderedResourceName)?.contract;
+    try {
+      return { id: id === undefined || !contract ? id : parseContractRouteId(contract, id), invalid: false };
+    } catch {
+      return { id: undefined, invalid: true };
+    }
+  });
   const renderedHasRouteResource = $derived(renderedResourceName !== undefined && resourceNames.has(renderedResourceName));
   const renderedResourcePages = $derived(renderedParams['resource'] ? resourcePages?.[renderedParams['resource']] : undefined);
   const documentTitle = $derived.by(() => {
@@ -616,10 +632,7 @@
         {#if dashboard}
           {@render dashboard()}
         {:else}
-          <div class="svadmin-u-3e7ce58d64fa">
-            <h1 class="svadmin-u-d5c9b0001e7e svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{translation.t('common.welcome', { title })}</h1>
-            <p class="svadmin-u-bfa603190748">{translation.t('common.dashboardHint')}</p>
-          </div>
+          <ResourceOverview />
         {/if}
       {:else if (renderedRoute === '/:resource' || renderedRoute === '/:parent/:parentId/:resource') && renderedHasRouteResource && renderedResourceName !== undefined}
         {#key renderedParams['resource']}
@@ -635,25 +648,27 @@
             <Comp resourceName={renderedResourceName} mode="create" />
           </ResourceAccessGuard>
         {/key}
-      {:else if (renderedRoute === '/:resource/edit/:id' || renderedRoute === '/:resource/:id/edit' || renderedRoute === '/:parent/:parentId/:resource/edit/:id') && renderedHasRouteResource && renderedResourceName !== undefined && renderedParams['id'] !== undefined}
+      {:else if renderedHasRouteResource && renderedRecord.invalid}
+        <DataState state="error" title={translation.t('common.operationFailed')} />
+      {:else if (renderedRoute === '/:resource/edit/:id' || renderedRoute === '/:resource/:id/edit' || renderedRoute === '/:parent/:parentId/:resource/edit/:id') && renderedHasRouteResource && renderedResourceName !== undefined && renderedRecord.id !== undefined}
         {#key `${renderedParams['resource']}-${renderedParams['id']}`}
           {@const Comp = renderedResourcePages?.edit ?? mergedComponents.AutoForm}
-          <ResourceAccessGuard resourceName={renderedResourceName} action="edit" {...definedOptions({ "id": renderedParams['id'] })}>
-            <Comp resourceName={renderedResourceName} mode="edit" {...definedOptions({ "id": renderedParams['id'] })} />
+          <ResourceAccessGuard resourceName={renderedResourceName} action="edit" id={renderedRecord.id}>
+            <Comp resourceName={renderedResourceName} mode="edit" id={renderedRecord.id} />
           </ResourceAccessGuard>
         {/key}
-      {:else if (renderedRoute === '/:resource/show/:id' || renderedRoute === '/:resource/:id' || renderedRoute === '/:parent/:parentId/:resource/show/:id') && renderedHasRouteResource && renderedResourceName !== undefined && renderedParams['id'] !== undefined}
+      {:else if (renderedRoute === '/:resource/show/:id' || renderedRoute === '/:resource/:id' || renderedRoute === '/:parent/:parentId/:resource/show/:id') && renderedHasRouteResource && renderedResourceName !== undefined && renderedRecord.id !== undefined}
         {#key `${renderedParams['resource']}-${renderedParams['id']}`}
           {@const Comp = renderedResourcePages?.show ?? mergedComponents.ShowPage}
-          <ResourceAccessGuard resourceName={renderedResourceName} action="show" {...definedOptions({ "id": renderedParams['id'] })}>
-            <Comp resourceName={renderedResourceName} id={renderedParams['id']} />
+          <ResourceAccessGuard resourceName={renderedResourceName} action="show" id={renderedRecord.id}>
+            <Comp resourceName={renderedResourceName} id={renderedRecord.id} />
           </ResourceAccessGuard>
         {/key}
-      {:else if (renderedRoute === '/:resource/clone/:id' || renderedRoute === '/:parent/:parentId/:resource/clone/:id') && renderedHasRouteResource && renderedResourceName !== undefined && renderedParams['id'] !== undefined}
+      {:else if (renderedRoute === '/:resource/clone/:id' || renderedRoute === '/:parent/:parentId/:resource/clone/:id') && renderedHasRouteResource && renderedResourceName !== undefined && renderedRecord.id !== undefined}
         {#key `${renderedParams['resource']}-clone-${renderedParams['id']}`}
           {@const Comp = renderedResourcePages?.clone ?? mergedComponents.AutoForm}
-          <ResourceAccessGuard resourceName={renderedResourceName} action="create" {...definedOptions({ "id": renderedParams['id'] })} requireSourceRead>
-            <Comp resourceName={renderedResourceName} mode="clone" {...definedOptions({ "id": renderedParams['id'] })} />
+          <ResourceAccessGuard resourceName={renderedResourceName} action="create" id={renderedRecord.id} requireSourceRead>
+            <Comp resourceName={renderedResourceName} mode="clone" id={renderedRecord.id} />
           </ResourceAccessGuard>
         {/key}
       {:else}

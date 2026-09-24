@@ -351,6 +351,8 @@ async function init(args: string[]): Promise<void> {
     const entries = fs.readdirSync(src, { withFileTypes: true });
     for (const entry of entries) {
       const srcPath = path.join(src, entry.name);
+      if (srcPath === path.join(templateDir, 'src', 'providers', 'supabase.ts')
+        && response.dataProvider !== 'supabase' && response.authProvider !== 'supabase') continue;
       const destPath = path.join(dest, entry.name === '_gitignore' ? '.gitignore' : entry.name);
       if (entry.isDirectory()) {
         copyDir(srcPath, destPath);
@@ -436,24 +438,23 @@ bun run dev
   console.log(pc.green('  ✔') + ' README.md generated');
 
   // 5. Install dependencies
+  let dependenciesInstalled = false;
   if (response.installDeps) {
     console.log(`\n${pc.bold('Installing dependencies...')}\n`);
     const bunInstall = spawnSync('bun', ['install'], { cwd: projectDir, stdio: 'inherit' });
-    if (bunInstall.status !== 0) {
-      const npmInstall = spawnSync('npm', ['install'], { cwd: projectDir, stdio: 'inherit' });
-      if (npmInstall.status !== 0) {
-        console.log(pc.yellow('\n  ⚠ Auto-install failed. Run `bun install` or `npm install` manually.'));
-      }
+    dependenciesInstalled = bunInstall.status === 0;
+    if (!dependenciesInstalled) {
+      console.log(pc.yellow('\n  ⚠ Auto-install failed. Run `bun install` manually; this template requires Bun to apply dependency patches.'));
     }
   }
 
   // 6. Done!
   console.log();
-  console.log(pc.green(pc.bold('  ✔ Project ready!')));
+  console.log(pc.green(pc.bold(dependenciesInstalled ? '  ✔ Project ready!' : '  ✔ Project generated. Dependencies still need installation.')));
   console.log();
   console.log('  Next steps:');
   console.log(`    ${pc.cyan(`cd ${response.projectName}`)}`);
-  if (!response.installDeps) {
+  if (!dependenciesInstalled) {
     console.log(`    ${pc.cyan('bun install')}`);
   }
   console.log(`    ${pc.cyan('bun run dev')}`);

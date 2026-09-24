@@ -41,6 +41,34 @@ afterEach(() => {
 });
 
 describe('AutoTable interactions', () => {
+  it('opens and closes embedded detail drawers without changing router history', async () => {
+    const onNavigate = vi.fn();
+    const onBack = vi.fn();
+    const view = render(AutoTableInteractionsHarness, { onNavigate, onBack, syncWithLocation: false });
+    await fireEvent.click(requireValue((await view.findAllByRole('button', { name: '详情' }))[0]));
+    const dialog = await view.findByRole('dialog', { name: 'Users 详情' });
+    expect(await within(dialog).findByText('user@example.com')).toBeTruthy();
+    await fireEvent.click(within(dialog).getByRole('button', { name: '关闭' }));
+    await waitFor(() => expect(view.queryByRole('dialog')).toBeNull());
+    expect(onNavigate).not.toHaveBeenCalled();
+    expect(onBack).not.toHaveBeenCalled();
+  });
+
+  it('keeps embedded tables independent of route query state', async () => {
+    const onNavigate = vi.fn();
+    const view = render(AutoTableInteractionsHarness, {
+      onNavigate,
+      locale: 'en',
+      syncWithLocation: false,
+      initialParams: { q: 'unrelated', page: '9', detail: 'unrelated' },
+    });
+    const search = await view.findByPlaceholderText(/search/i);
+    expect((search as HTMLInputElement).value).toBe('');
+    expect(view.queryByRole('dialog')).toBeNull();
+    await fireEvent.input(search, { target: { value: 'Ada' } });
+    await new Promise(resolve => setTimeout(resolve, 400));
+    expect(onNavigate).not.toHaveBeenCalled();
+  });
   it('uses the active locale for built-in table labels', async () => {
     const view = render(AutoTableInteractionsHarness, {
       locale: 'en',

@@ -18,6 +18,39 @@ describe('create-svadmin AI guidance contract', () => {
     expect(readFileSync(guidanceDesignPath, 'utf8')).toBe(readFileSync(rootDesignPath, 'utf8'));
   });
 
+  it('generates pages from the public default-first composition API', () => {
+    const agents = readFileSync(guidanceAgentsPath, 'utf8');
+    const app = readFileSync(resolve(packageRoot, 'template/src/App.svelte'), 'utf8');
+    const dashboard = readFileSync(resolve(packageRoot, 'template/src/pages/Dashboard.svelte'), 'utf8');
+    expect(agents).toContain('Default-first page composition');
+    expect(agents).toContain('Never import example files');
+    expect(app).not.toContain('themeConfig=');
+    expect(dashboard).toContain('<DashboardPage');
+    expect(dashboard).toContain('<PageSection');
+    expect(dashboard).toContain('<AutoTable');
+    expect(dashboard).toContain('syncWithLocation={false}');
+    expect(dashboard).not.toContain('class=');
+  });
+
+  it('ships the validated dependency declarations without weakening strict checks', () => {
+    const manifest = JSON.parse(readFileSync(resolve(packageRoot, 'scaffold-manifest.json'), 'utf8'));
+    const tsconfig = JSON.parse(readFileSync(resolve(packageRoot, 'template/tsconfig.json'), 'utf8'));
+    expect(tsconfig.compilerOptions.skipLibCheck).toBe(false);
+    expect(manifest.devDependencies['@types/node']).toBeDefined();
+    expect(manifest.devDependencies['esbuild']).toBeDefined();
+    for (const patch of Object.values(manifest.patchedDependencies) as string[]) {
+      expect(readFileSync(resolve(packageRoot, 'template', patch), 'utf8'))
+        .toBe(readFileSync(resolve(repositoryRoot, patch), 'utf8'));
+    }
+  });
+
+  it('does not fall back to an installer that ignores the shipped Bun patches', () => {
+    const source = readFileSync(resolve(packageRoot, 'src/index.ts'), 'utf8');
+    expect(source).not.toContain("spawnSync('npm', ['install']");
+    expect(source).toContain('this template requires Bun to apply dependency patches');
+    expect(source).toContain('if (!dependenciesInstalled)');
+  });
+
   it('makes feedback ownership and information budget executable for AI', () => {
     const agents = readFileSync(guidanceAgentsPath, 'utf8');
     expect(agents).toContain('Read `DESIGN.md` before');

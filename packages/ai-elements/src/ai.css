@@ -34,7 +34,7 @@
   font: inherit;
   font-size: 0.875rem;
   cursor: pointer;
-  transition: background-color 120ms ease, border-color 120ms ease, opacity 120ms ease;
+  transition: background-color var(--svadmin-motion-fast, 150ms) ease-out, border-color var(--svadmin-motion-fast, 150ms) ease-out, opacity var(--svadmin-motion-fast, 150ms) ease-out;
 }
 
 .svadmin-ai__button:hover:not(:disabled) { opacity: 0.88; }
@@ -67,7 +67,7 @@
   color: var(--muted-foreground, currentColor);
   font: inherit;
   cursor: pointer;
-  transition: background-color 120ms ease, color 120ms ease, box-shadow 120ms ease, transform 80ms ease;
+  transition: background-color var(--svadmin-motion-fast, 150ms) ease-out, color var(--svadmin-motion-fast, 150ms) ease-out, box-shadow var(--svadmin-motion-fast, 150ms) ease-out, transform var(--svadmin-motion-fast, 150ms) ease-out;
 }
 
 .svadmin-ai__icon-button:hover:not(:disabled) {
@@ -148,4 +148,5 @@
 @media (prefers-reduced-motion: reduce) {
   .svadmin-ai__button,
   .svadmin-ai__icon-button { transition: none; }
+  .svadmin-ai__icon-button:active:not(:disabled) { transform: none; }
 }

@@ -53,12 +53,8 @@ describe('@svadmin/ui native stylesheet contract', () => {
       expect(css).not.toContain('@svadmin/ui/app.theme.css');
       expect(css).not.toMatch(/--primary\s*:/);
     }
-    expect(readRepositoryFile('example/src/App.svelte')).toContain(
-      "colorPreset: 'stripe'",
-    );
-    expect(readRepositoryFile('packages/create-svadmin/template/src/App.svelte')).toContain(
-      "colorPreset: 'stripe'",
-    );
+    expect(readRepositoryFile('example/src/App.svelte')).not.toContain('themeConfig=');
+    expect(readRepositoryFile('packages/create-svadmin/template/src/App.svelte')).not.toContain('themeConfig=');
     const scaffoldLogin = readRepositoryFile('packages/create-svadmin/template/src/pages/Login.svelte');
     expect(scaffoldLogin).not.toMatch(/bg-gradient|backdrop-blur|rounded-(?:xl|2xl|3xl)|shadow-xl/);
   });
@@ -92,7 +88,7 @@ describe('@svadmin/ui native stylesheet contract', () => {
     expect(css).toContain('background-size: var(--svadmin-grid-size) var(--svadmin-grid-size);');
     expect(css).toContain('--svadmin-shadow-control: 0 1px 2px rgb(15 23 42 / 0.04), 0 0 0 1px rgb(15 23 42 / 0.02);');
     expect(css).toContain('inset 0 1px 0 rgb(255 255 255 / 0.2)');
-    expect(css).toContain('transition: background-color 180ms ease-out, color 180ms ease-out;');
+    expect(css).toContain('transition: background-color var(--svadmin-motion-fast) var(--svadmin-motion-easing), color var(--svadmin-motion-fast) var(--svadmin-motion-easing);');
     expect(css).not.toContain('.layout-default[data-theme="stripe"]');
   });
 });

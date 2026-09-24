@@ -1,5 +1,6 @@
 import { requireValue } from "../../../../scripts/test-assertions";
-import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
+import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type {
   AuthProvider,
@@ -75,6 +76,36 @@ describe('enterprise provider settings', () => {
       'key-1',
       {},
     ));
+  });
+
+  it('keeps API labels and permission changes scoped to their page instance', async () => {
+    const credentialProvider: CredentialProvider = {
+      listApiCredentials: vi.fn(async () => []),
+      createApiCredential: vi.fn(),
+      revokeApiCredential: vi.fn(),
+      listWebhooks: vi.fn(async () => []),
+      createWebhook: vi.fn(),
+      deleteWebhook: vi.fn(),
+    };
+    const props = { page: 'api' as const, providerBundle: bundle({ credentialProvider }) };
+    const first = render(EnterpriseProvidersTestHost, { props });
+    const second = render(EnterpriseProvidersTestHost, { props });
+    const firstRead = within(first.container).getByRole('checkbox', { name: 'Read' });
+    const secondRead = within(second.container).getByRole('checkbox', { name: 'Read' });
+    const ids = new Set<string>();
+    for (const container of [first.container, second.container]) {
+      const labels = container.querySelectorAll('label');
+      expect(labels.length).toBe(8);
+      for (const label of labels) {
+        expect(container.contains(document.getElementById(label.htmlFor))).toBe(true);
+        expect(ids.has(label.htmlFor)).toBe(false);
+        ids.add(label.htmlFor);
+      }
+    }
+    const secondLabel = Array.from(second.container.querySelectorAll('label')).find(label => label.htmlFor === secondRead.id);
+    await userEvent.setup().click(requireValue(secondLabel));
+    expect(firstRead.getAttribute('aria-checked')).toBe('true');
+    expect(secondRead.getAttribute('aria-checked')).toBe('false');
   });
 
   it('passes the active tenant context when one provider serves multiple tenants', async () => {
@@ -245,10 +276,23 @@ describe('enterprise provider settings', () => {
     render(EnterpriseProvidersTestHost, { props: { page: 'enterprise', providerBundle: bundle({ identityGovernanceProvider }) } });
 
     const timeout = await screen.findByLabelText(/Session Timeout|会话超时/);
+    const retention = screen.getByLabelText(/Data Retention|数据保留/);
+    expect(timeout.getAttribute('aria-invalid')).toBe('false');
     await fireEvent.input(timeout, { target: { value: '' } });
+    expect(timeout.getAttribute('aria-invalid')).toBe('true');
+    expect(retention.getAttribute('aria-invalid')).toBe('false');
+    expect(document.getElementById(timeout.getAttribute('aria-describedby') ?? '')?.textContent).toContain('positive integers');
     expect((screen.getByRole('button', { name: /Save|保存/ }) as HTMLButtonElement).disabled).toBe(true);
     expect(updateSecurityPolicy).not.toHaveBeenCalled();
     await fireEvent.input(timeout, { target: { value: '45' } });
+    expect(timeout.getAttribute('aria-invalid')).toBe('false');
+    expect(timeout.hasAttribute('aria-describedby')).toBe(false);
+    for (const value of ['0', '1.5', '-1']) {
+      await fireEvent.input(retention, { target: { value } });
+      expect(retention.getAttribute('aria-invalid')).toBe('true');
+      expect((screen.getByRole('button', { name: /Save|保存/ }) as HTMLButtonElement).disabled).toBe(true);
+    }
+    await fireEvent.input(retention, { target: { value: '365' } });
     await fireEvent.click(screen.getByRole('button', { name: /Save|保存/ }));
 
     await waitFor(() => expect(updateSecurityPolicy).toHaveBeenCalledWith(
@@ -265,6 +309,28 @@ describe('enterprise provider settings', () => {
       },
       {},
     ));
+  });
+
+  it('keeps enterprise field labels unique across page instances', async () => {
+    const first = render(EnterpriseProvidersTestHost, { props: { page: 'enterprise', providerBundle: bundle() } });
+    const second = render(EnterpriseProvidersTestHost, { props: { page: 'enterprise', providerBundle: bundle() } });
+    await waitFor(() => {
+      expect(first.container.querySelectorAll('label').length).toBe(5);
+      expect(second.container.querySelectorAll('label').length).toBe(5);
+    });
+    const ids = new Set<string>();
+    for (const container of [first.container, second.container]) {
+      for (const label of container.querySelectorAll('label')) {
+        const control = document.getElementById(label.htmlFor);
+        expect(control).not.toBeNull();
+        expect(container.contains(control)).toBe(true);
+        expect(ids.has(label.htmlFor)).toBe(false);
+        ids.add(label.htmlFor);
+        if (control?.getAttribute('role') === 'switch') {
+          expect(control.getAttribute('aria-label')).toBeNull();
+        }
+      }
+    }
   });
 
   it('updates organization details without requiring identity governance', async () => {

@@ -19,16 +19,27 @@
     "@lucide/svelte": "^1.35.0"
   },
   "devDependencies": {
+    "@types/node": "^22.0.0",
+    "esbuild": "^0.28.2",
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
     "svelte": "^5.56.10",
     "svelte-check": "^4.7.6",
     "typescript": "~6.0.3",
     "vite": "^8.2.2"
   },
+  "overrides": {
+    "bits-ui": "2.19.0",
+    "@refinedev/core": "5.0.12"
+  },
+  "patchedDependencies": {
+    "bits-ui@2.19.0": "patches/bits-ui@2.19.0.patch",
+    "@refinedev/core@5.0.12": "patches/@refinedev%2Fcore@5.0.12.patch"
+  },
   "svadmin": {
     "dependencyPacks": {
       "refine-core": {
-        "@refinedev/core": "^5.0.12"
+        "@refinedev/core": "^5.0.12",
+        "graphql": "^16.8.0"
       },
       "simple-rest": {
         "@svadmin/simple-rest": "^0.12.1",

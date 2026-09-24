@@ -622,7 +622,7 @@ describe('AdminApp context isolation', () => {
     second.unmount();
     await waitFor(() => {
       expect(getTheme()).toBe('dark');
-      expect(document.documentElement.classList.contains('layout-clean-flat')).toBe(false);
+      expect(document.documentElement.classList.contains('layout-clean-flat')).toBe(true);
       expect(document.documentElement.style.getPropertyValue('--admin-owner')).toBe('first');
     });
 

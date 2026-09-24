@@ -13,8 +13,10 @@
   import * as Card from './ui/card/index.js';
   import * as Alert from './ui/alert/index.js';
   import PasswordInput from './PasswordInput.svelte';
+  import ContentPageHeader from './content/ContentPageHeader.svelte';
   import { User, Mail, Lock, Loader2, AlertCircle, Camera } from '@lucide/svelte';
 
+  let { headingLevel = 'h1' }: { headingLevel?: 'h1' | 'h2' } = $props();
   const i18n = useTranslation();
   const adminContext = captureAdminContext();
 
@@ -150,9 +152,7 @@
 </script>
 
 <div class="svadmin-u-b3542e058833">
-  <div>
-    <h2 class="svadmin-u-d5c9b0001e7e svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{i18n.t('profile.title')}</h2>
-  </div>
+  <ContentPageHeader title={i18n.t('profile.title')} {headingLevel} />
 
   <!-- Profile Info -->
   <Card.Card>

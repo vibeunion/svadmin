@@ -27,7 +27,7 @@
     tone === 'danger'
       ? 'svadmin-u-26e4f7bdbd56 svadmin-u-7a0854fdbc30 svadmin-u-811148b13d1e'
       : tone === 'warning'
-        ? 'svadmin-u-d008dee27eaa svadmin-u-283481e780bb svadmin-u-3a4ff758c2ab'
+        ? 'svadmin-u-d008dee27eaa svadmin-u-283481e780bb svadmin-u-d4108abe6359'
         : 'svadmin-u-18049387f0af svadmin-u-b00f43c30c2b svadmin-u-d4108abe6359',
   );
 </script>

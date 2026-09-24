@@ -102,7 +102,7 @@ test.describe('UI state contracts', () => {
 
       // The page runs without a CredentialProvider in the example app: the
       // webhook form is disabled but must still render untruncated.
-      const urlInput = page.locator('#webhook-url');
+      const urlInput = page.getByRole('textbox', { name: 'Webhook URL', exact: true });
       await expect(urlInput).toBeVisible();
       await expect(page.getByRole('heading', { name: /API Settings|API 设置/ })).toBeVisible();
       // Let the lazy page chunk settle so the evidence screenshot is complete.
@@ -111,7 +111,7 @@ test.describe('UI state contracts', () => {
       const languageSelect = page.locator('[data-svadmin-sidebar] select').first();
       await expect(languageSelect).toBeVisible();
 
-      const metrics = await page.evaluate(() => {
+      const metrics = await page.evaluate((inputId) => {
         const measure = (text: string, style: CSSStyleDeclaration) => {
           const context = document.createElement('canvas').getContext('2d');
           if (!context) return 0;
@@ -119,7 +119,7 @@ test.describe('UI state contracts', () => {
           return context.measureText(text).width;
         };
 
-        const input = document.querySelector<HTMLInputElement>('#webhook-url');
+        const input = document.getElementById(inputId) as HTMLInputElement | null;
         const inputStyle = input ? getComputedStyle(input) : null;
         const placeholder = input && inputStyle
           ? {
@@ -145,7 +145,7 @@ test.describe('UI state contracts', () => {
           contentOverflow: content ? content.scrollWidth > content.clientWidth + 1 : false,
           documentOverflow: document.documentElement.scrollWidth > window.innerWidth + 1,
         };
-      });
+      }, await urlInput.getAttribute('id') ?? '');
 
       expect(metrics.contentOverflow).toBe(false);
       expect(metrics.documentOverflow).toBe(false);
@@ -175,3 +175,126 @@ test.describe('UI state contracts', () => {
     });
   }
 });
+
+for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
+  test(`settings hierarchy and theme controls at ${viewport.width}px`, async ({ page }, testInfo) => {
+    test.setTimeout(90_000);
+    await page.setViewportSize(viewport);
+    await login(page);
+    await page.goto('/#/account/appearance');
+    const main = page.locator('[data-svadmin-main]');
+    await expect(main.getByRole('heading', { level: 1 })).toHaveCount(1);
+    await expect(main.getByRole('combobox', { name: /^(Language|语言)$/ })).toBeVisible();
+
+    const density = main.getByRole('group', { name: /Sidebar density|侧边栏密度/i });
+    await density.getByRole('button', { name: /^(Compact|紧凑)$/ }).click();
+    await expect(density.getByRole('button', { pressed: true })).toHaveText(/Compact|紧凑/);
+    const pageSize = main.getByRole('group', { name: /Default page size|默认每页条数/i });
+    await pageSize.getByRole('button', { name: '50', exact: true }).click();
+    await expect(pageSize.getByRole('button', { pressed: true })).toHaveText('50');
+    await page.reload();
+    await expect(density.getByRole('button', { pressed: true })).toHaveText(/Compact|紧凑/);
+    await expect(pageSize.getByRole('button', { pressed: true })).toHaveText('50');
+
+    for (const mode of ['light', 'dark'] as const) {
+      await main.getByRole('button', { name: mode === 'light' ? /^(Light|浅色)$/ : /^(Dark|深色)$/ }).click();
+      await expect(page.locator('html')).toHaveAttribute('data-theme-mode', mode);
+      for (const preset of ['Neutral', 'Indigo', 'Blue', 'Green', 'Rose', 'Orange', 'Violet', 'Stripe']) {
+        const swatch = main.getByRole('button', { name: preset, exact: true });
+        await swatch.click();
+        await expect(swatch).toHaveAttribute('aria-pressed', 'true');
+        await expect(page.locator('html')).toHaveAttribute('data-theme', preset.toLowerCase());
+        await expect(main.getByRole('heading', { level: 1 })).toHaveCSS('font-size', '20px');
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+      }
+      await page.screenshot({ path: testInfo.outputPath(`settings-${mode}-${viewport.width}.png`), animations: 'disabled' });
+    }
+
+    for (const route of [
+      '/account/home/user-profile', '/settings/account', '/account/notifications',
+      '/account/integrations', '/account/home/settings-plain', '/account/home/settings-sidebar',
+    ]) {
+      await page.goto(`/#${route}`);
+      await expect(main.getByRole('heading', { level: 1 })).toHaveCount(1);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+    }
+    await page.goto('/#/account/notifications');
+    const switches = main.getByRole('switch');
+    await expect(switches).toHaveCount(7);
+    for (const control of await switches.all()) {
+      await expect(control).toHaveAccessibleName(/\S/);
+    }
+
+    for (const mode of ['light', 'dark'] as const) {
+      await page.goto('/#/account/appearance');
+      await main.getByRole('button', { name: mode === 'light' ? /^(Light|浅色)$/ : /^(Dark|深色)$/ }).click();
+      await expect(page.locator('html')).toHaveAttribute('data-theme-mode', mode);
+      for (const [name, route, expectedLabels] of [
+      ['enterprise', '/account/home/settings-enterprise', 5],
+      ['api', '/account/api-keys', 8],
+    ] as const) {
+      await page.goto(`/#${route}`);
+      await expect(main.getByRole('heading', { level: 1 })).toHaveCount(1);
+      const labels = main.locator('label[for]');
+      await expect(labels).toHaveCount(expectedLabels);
+      const warning = main.locator('[data-svadmin-feedback-notice][data-tone="warning"]').first();
+      await expect(warning).toBeVisible();
+      expect(await warning.evaluate((element) => {
+        const probe = document.createElement('span');
+        probe.style.color = 'var(--foreground)';
+        element.append(probe);
+        const matches = getComputedStyle(element).color === getComputedStyle(probe).color;
+        probe.remove();
+        return matches;
+      })).toBe(true);
+      const contrast = await warning.evaluate((element) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = canvas.height = 1;
+        const context = canvas.getContext('2d', { willReadFrequently: true });
+        if (!context) throw new Error('Canvas is required for color contrast verification');
+        const ancestors: Element[] = [];
+        for (let node: Element | null = element; node; node = node.parentElement) ancestors.unshift(node);
+        context.fillStyle = '#fff';
+        context.fillRect(0, 0, 1, 1);
+        for (const ancestor of ancestors) {
+          context.fillStyle = getComputedStyle(ancestor).backgroundColor;
+          context.fillRect(0, 0, 1, 1);
+        }
+        const luminance = (pixel: Uint8ClampedArray) => {
+          const channel = (index: number) => {
+            const value = (pixel[index] ?? 0) / 255;
+            return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+          };
+          return 0.2126 * channel(0) + 0.7152 * channel(1) + 0.0722 * channel(2);
+        };
+        const background = luminance(context.getImageData(0, 0, 1, 1).data);
+        context.fillStyle = getComputedStyle(element).color;
+        context.fillRect(0, 0, 1, 1);
+        const foreground = luminance(context.getImageData(0, 0, 1, 1).data);
+        return (Math.max(background, foreground) + 0.05) / (Math.min(background, foreground) + 0.05);
+      });
+      expect(contrast).toBeGreaterThanOrEqual(4.5);
+      for (const label of await labels.all()) {
+        expect(await label.evaluate((element: HTMLLabelElement) => {
+          const control = element.control;
+          return control !== null
+            && document.querySelectorAll(`[id="${CSS.escape(element.htmlFor)}"]`).length === 1;
+        })).toBe(true);
+      }
+      const controls = main.locator('input:not([type="hidden"]), select, button[role="switch"], button[role="checkbox"]');
+      for (const control of await controls.all()) {
+        await expect(control).toHaveAccessibleName(/\S/);
+        await expect(control).toBeDisabled();
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+      await main.evaluate(element => {
+        for (let node: HTMLElement | null = element; node; node = node.parentElement) node.scrollTo({ top: 0, behavior: 'instant' });
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      });
+      await main.getByRole('heading', { level: 1 }).scrollIntoViewIfNeeded();
+      await expect(main.getByRole('heading', { level: 1 })).toBeInViewport();
+      await page.screenshot({ path: testInfo.outputPath(`settings-${name}-${mode}-${viewport.width}.png`), animations: 'disabled' });
+      }
+    }
+  });
+}

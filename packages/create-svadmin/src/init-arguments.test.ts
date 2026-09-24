@@ -51,6 +51,8 @@ test('init runs non-interactively with a preset and writes platform files', asyn
     expect(existsSync(join(projectDirectory, SCAFFOLD_CONFIG_PATH))).toBe(true);
     expect(existsSync(join(projectDirectory, ADMIN_AI_MANIFEST_FILENAME))).toBe(true);
     expect(existsSync(join(projectDirectory, ADMIN_SCHEMA_FILENAME))).toBe(true);
+    expect(existsSync(join(projectDirectory, 'src/providers/supabase.ts'))).toBe(false);
+    expect(existsSync(join(projectDirectory, 'patches/bits-ui@2.19.0.patch'))).toBe(true);
 
     const manifest = JSON.parse(readFileSync(join(projectDirectory, ADMIN_AI_MANIFEST_FILENAME), 'utf8'));
     expect(manifest.providers.data.choice).toBe('simple-rest');

@@ -8,7 +8,7 @@ test('package styles preserve host responsive layouts and header boundaries', as
   await page.locator('form button[type="submit"]').click();
   await expect(page).toHaveURL(/#\/$/);
   const dashboard = page.locator('[data-svadmin-content-page="operations-dashboard"]');
-  await expect(dashboard.locator('[data-dashboard-decisions] [data-svadmin-metric-card]')).toHaveCount(3);
+  await expect(dashboard.locator('[data-svadmin-dashboard-metrics] [data-svadmin-metric-card]')).toHaveCount(3);
   await expect(dashboard.locator('[data-svadmin-content-header] [role="status"]')).toBeVisible();
   await expect(dashboard.locator('a[href^="#/products/show/"]').first()).toBeVisible();
   await expect(dashboard.locator('[data-dashboard-panel]').first()).toHaveCSS('padding-top', '0px');

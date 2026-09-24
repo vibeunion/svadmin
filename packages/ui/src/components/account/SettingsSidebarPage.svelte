@@ -27,11 +27,11 @@
     </nav>
     <div class="svadmin-u-7e0b7cdf1a94">
       {#if active === 'profile'}
-        <ProfilePage />
+        <ProfilePage headingLevel="h2" />
       {:else if active === 'signin'}
-        <IntegrationsSettings />
+        <IntegrationsSettings headingLevel="h2" />
       {:else if active === 'preferences'}
-        <AppearanceSettings />
+        <AppearanceSettings headingLevel="h2" />
       {:else}
         <SettingsGroup title={i18n.t('account.manageApi')} description={isZh ? '使用有作用域的真实凭据，并在权限变更时轮换。' : 'Use scoped credentials and rotate them when access changes.'} bodyClass="space-y-3">
           {#if credentialProvider}

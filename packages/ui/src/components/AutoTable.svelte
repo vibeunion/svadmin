@@ -123,6 +123,8 @@
   // ─── Props with Snippet composability ─────────────────────────
   interface Props {
     resourceName: string;
+    /** 嵌入仪表盘的多个表格应关闭 URL 同步，避免互相覆盖筛选与分页。 */
+    syncWithLocation?: boolean;
     rendering?: ResourceRendering | undefined;
     /** 可选主体渲染器：不替换资源、权限、工具栏和持久化逻辑。 */
     gridBody?: Snippet<[AutoTableGridState]>;
@@ -170,6 +172,7 @@
 
   let {
     resourceName,
+    syncWithLocation = true,
     rendering,
     gridBody,
     selectable = true,
@@ -254,7 +257,7 @@
   }
 
   // ─── URL state + server-side state ────────────────────────────
-  const urlState = readURLState(adminContext);
+  const urlState: ReturnType<typeof readURLState> = untrack(() => syncWithLocation ? readURLState(adminContext) : {});
 
   const savedViewColumnIds = $derived(new Set([
     ...resource.fields.map((field) => field.key),
@@ -504,9 +507,8 @@
     }
     return result;
   });
-
-  // URL sync
   $effect(() => {
+    if (!syncWithLocation) return;
     writeURLState({
       page: pagination.current,
       pageSize: pagination.pageSize,
@@ -1448,7 +1450,9 @@
       && left.canDelete === right.canDelete
       && left.variables === right.variables;
   }
+  let localDetailId = $state<string | number>();
   const detailState = $derived.by(() => {
+    if (!syncWithLocation) return { id: canRead ? localDetailId : undefined, invalid: false };
     const route = parsed.params['detail'];
     if (route === undefined || !canRead) return { id: undefined, invalid: false };
     try { return { id: parseContractRouteId(binding.resource, route), invalid: false }; }
@@ -1470,6 +1474,7 @@
       rowSelection = {};
       expandedAtom.set({});
       detailOpenedInHistory = false;
+      localDetailId = undefined;
       quickEditId = undefined;
       if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
       searchDebounceTimer = undefined;
@@ -1563,14 +1568,14 @@
       await tick();
     }
   }
-
   function openDetail(id: string | number): void {
     if (!canRead || !canShow) return;
+    if (!syncWithLocation) { localDetailId = id; return; }
     detailOpenedInHistory = true;
     writeURLState({ detailId: formatContractRouteId(binding.resource, id) }, adminContext, 'push');
   }
-
   function closeDetail(): void {
+    if (!syncWithLocation) { localDetailId = undefined; return; }
     if (detailOpenedInHistory && adminContext.routerProvider) {
       detailOpenedInHistory = false;
       adminContext.routerProvider.back();
@@ -1579,7 +1584,6 @@
     detailOpenedInHistory = false;
     writeURLState({ detailId: undefined }, adminContext);
   }
-
   // ─── CSV Export ───────────────────────────────────────────────
   function exportCSV() {
     if (!canRead || !canExport || !pageRecords.ok || query.isError || query.isFetching || !pageRecords.data.length) return;

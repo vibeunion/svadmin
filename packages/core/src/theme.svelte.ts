@@ -246,6 +246,8 @@ export interface ThemeConfig {
 
 /** Explicit document-level values contributed by one mounted AdminApp. */
 export interface ThemeOwnerOptions {
+  /** 仅在没有显式主题 owner 或 legacy 配置时使用，不接管其他实例的主题。 */
+  fallbackThemeConfig?: ThemeConfig;
   themeConfig?: ThemeConfig;
   defaultTheme?: ThemeMode;
 }
@@ -285,6 +287,9 @@ function cloneThemeConfig(config: ThemeConfig={}): ThemeConfig {
 
 function cloneOwnerOptions(options: ThemeOwnerOptions): ThemeOwnerOptions {
   return definedOptions({
+    fallbackThemeConfig: options.fallbackThemeConfig === undefined
+      ? undefined
+      : cloneThemeConfig(options.fallbackThemeConfig),
     defaultTheme: options.defaultTheme,
     themeConfig: options.themeConfig===undefined
       ? undefined
@@ -409,8 +414,10 @@ function applyCssOverrides(overrides: Record<string,string>): void {
 function applyEffectiveTheme(): void {
   const owner=getActiveOwner();
   const nextConfig=owner
-    ? cloneThemeConfig(owner.options.themeConfig)
-    :cloneThemeConfig(legacyThemeConfig);
+    ? cloneThemeConfig(owner.options.themeConfig ?? owner.options.fallbackThemeConfig)
+    :cloneThemeConfig(Object.keys(legacyThemeConfig).length
+      ? legacyThemeConfig
+      : themeOwners.at(-1)?.options.fallbackThemeConfig);
   const nextMode=selectedMode??owner?.options.defaultTheme??'system';
   const configuredPreset=!colorSelectionOverridesConfig&&nextConfig.colorPreset
     ? resolvePreset(nextConfig.colorPreset)
@@ -513,8 +520,8 @@ export function registerThemeOwner(options: ThemeOwnerOptions): ThemeOwnerToken|
 
   if(isExplicitOwner(entry.options)) {
     colorSelectionOverridesConfig=false;
-    applyEffectiveTheme();
   }
+  if(isExplicitOwner(entry.options)||entry.options.fallbackThemeConfig) applyEffectiveTheme();
 
   return token;
 }
@@ -529,11 +536,12 @@ export function updateThemeOwner(
   if(!owner) return;
 
   const wasExplicit=isExplicitOwner(owner.options);
+  const hadFallback=owner.options.fallbackThemeConfig!==undefined;
   owner.options=cloneOwnerOptions(options);
   if(wasExplicit||isExplicitOwner(owner.options)) {
     colorSelectionOverridesConfig=false;
-    applyEffectiveTheme();
   }
+  if(wasExplicit||isExplicitOwner(owner.options)||hadFallback||owner.options.fallbackThemeConfig) applyEffectiveTheme();
 }
 
 /** Remove an owner safely regardless of its position in the stack. */
@@ -545,8 +553,8 @@ export function unregisterThemeOwner(token: ThemeOwnerToken|undefined): void {
   const [removed]=themeOwners.splice(index,1);
   if(removed&&isExplicitOwner(removed.options)) {
     colorSelectionOverridesConfig=false;
-    applyEffectiveTheme();
   }
+  if(removed&&(isExplicitOwner(removed.options)||removed.options.fallbackThemeConfig)) applyEffectiveTheme();
 }
 
 export function resetTheme(): void {

@@ -16,6 +16,7 @@
   import WorkspaceLayout from './content/WorkspaceLayout.svelte';
 
   const i18n = useTranslation();
+  const controlId = $props.id();
   const adminContext = captureAdminContext();
   const credentialProvider = $derived(adminContext.credentialProvider);
   const isZh = $derived(i18n.locale === 'zh-CN');
@@ -221,14 +222,50 @@
           {/if}
         </SettingsGroup>
         <SettingsGroup title={i18n.t('api.webhooks')} description={i18n.t('api.webhooksDesc')} bodyClass="space-y-5">
-          <form class="svadmin-u-f3c543ad5fe9 svadmin-u-7e0b7cdf1a94 svadmin-u-0c3bc98565dd svadmin-u-e4d6f343b9ff" onsubmit={handleAddWebhook}><div class="svadmin-u-6f7e013d6499"><Label for="webhook-name">{i18n.t('api.webhookName')}</Label><Input id="webhook-name" bind:value={newWebhookName} placeholder="Order Events" disabled={!credentialProvider || submitting} /></div><div class="svadmin-u-6f7e013d6499 svadmin-u-eea04c60c0ca"><Label for="webhook-url">{i18n.t('api.webhookUrl')}</Label><Input id="webhook-url" type="url" bind:value={newWebhookUrl} placeholder="https://api.example.com/hooks" disabled={!credentialProvider || submitting} /></div><div class="svadmin-u-6f7e013d6499"><Label for="webhook-event">{i18n.t('api.eventType')}</Label><select id="webhook-event" bind:value={newWebhookEvent} disabled={!credentialProvider || submitting} class="svadmin-u-60fbb7713999 svadmin-u-e7a768f922d2 svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b svadmin-u-fc7473ca09eb svadmin-u-582e6ef4b245 svadmin-u-55d048ebfb1c svadmin-u-608dd26cd5ba svadmin-u-80b9d0ae125f svadmin-u-6b22a22a9752 svadmin-u-b29d8adbad2e"><option value="resource.created">resource.created</option><option value="resource.updated">resource.updated</option><option value="resource.deleted">resource.deleted</option><option value="auth.login">auth.login</option></select></div><div class="svadmin-u-60fbb7713999 svadmin-u-6f27f4f79e55"><Button type="submit" class="svadmin-u-6da6a3c3f741" disabled={!credentialProvider || submitting || !newWebhookName.trim() || !newWebhookUrl.trim()}><Plus class="svadmin-u-f7b5fa971871" />{i18n.t('api.addWebhook')}</Button></div></form>
+          <form class="svadmin-u-f3c543ad5fe9 svadmin-u-7e0b7cdf1a94 svadmin-u-0c3bc98565dd svadmin-u-e4d6f343b9ff" onsubmit={handleAddWebhook}>
+            <div class="svadmin-u-6f7e013d6499">
+              <Label for={`${controlId}-webhook-name`}>{i18n.t('api.webhookName')}</Label>
+              <Input id={`${controlId}-webhook-name`} bind:value={newWebhookName} placeholder="Order Events" disabled={!credentialProvider || submitting} />
+            </div>
+            <div class="svadmin-u-6f7e013d6499 svadmin-u-eea04c60c0ca">
+              <Label for={`${controlId}-webhook-url`}>{i18n.t('api.webhookUrl')}</Label>
+              <Input id={`${controlId}-webhook-url`} type="url" bind:value={newWebhookUrl} placeholder="https://api.example.com/hooks" disabled={!credentialProvider || submitting} />
+            </div>
+            <div class="svadmin-u-6f7e013d6499">
+              <Label for={`${controlId}-webhook-event`}>{i18n.t('api.eventType')}</Label>
+              <select id={`${controlId}-webhook-event`} bind:value={newWebhookEvent} disabled={!credentialProvider || submitting} class="svadmin-u-60fbb7713999 svadmin-u-e7a768f922d2 svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b svadmin-u-fc7473ca09eb svadmin-u-582e6ef4b245 svadmin-u-55d048ebfb1c svadmin-u-608dd26cd5ba svadmin-u-80b9d0ae125f svadmin-u-6b22a22a9752 svadmin-u-b29d8adbad2e">
+                <option value="resource.created">resource.created</option>
+                <option value="resource.updated">resource.updated</option>
+                <option value="resource.deleted">resource.deleted</option>
+                <option value="auth.login">auth.login</option>
+              </select>
+            </div>
+            <div class="svadmin-u-60fbb7713999 svadmin-u-6f27f4f79e55">
+              <Button type="submit" class="svadmin-u-6da6a3c3f741" disabled={!credentialProvider || submitting || !newWebhookName.trim() || !newWebhookUrl.trim()}><Plus class="svadmin-u-f7b5fa971871" />{i18n.t('api.addWebhook')}</Button>
+            </div>
+          </form>
           {#if webhooks.length === 0}<DataState state="empty" title={i18n.t('api.noWebhooks')} description={credentialProvider ? i18n.t('api.webhooksDesc') : (isZh ? '配置 CredentialProvider 后可管理真实 Webhook。' : 'Configure CredentialProvider to manage real webhooks.')} />{:else}<div class="svadmin-u-fa6acbf81d74 svadmin-u-e783642739e3 svadmin-u-b950dda299d3 svadmin-u-18049387f0af">{#each webhooks as hook (hook.id)}<div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-1004c0c3954c svadmin-u-cb11fec3bb46 svadmin-u-020ba687fa12 svadmin-u-9f76a62f4f44 svadmin-u-3b9871a0bf93"><div class="svadmin-u-7e0b7cdf1a94"><p class="svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{hook.name}</p><p class="svadmin-u-f283ea9bea0e svadmin-u-0e65706bcccd svadmin-u-359090c2d529 svadmin-u-bfa603190748">{hook.url}</p></div><div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-1004c0c3954c svadmin-u-1f51d781e606"><span class="svadmin-u-07389a777c1f svadmin-u-2ef11f1cb219 svadmin-u-d5eab218aa34 svadmin-u-660d2effb880 svadmin-u-0e65706bcccd svadmin-u-359090c2d529 svadmin-u-bfa603190748">{hook.eventType}</span><Button variant="ghost" size="icon-sm" onclick={() => deleteWebhook(hook.id)} aria-label={i18n.t('common.delete') + ' ' + hook.name}><Trash2 class="svadmin-u-f7b5fa971871" /></Button></div></div>{/each}</div>{/if}
         </SettingsGroup>
       </div>
     {/snippet}
     {#snippet secondary()}
       <SettingsGroup title={i18n.t('api.generateTitle')} description={i18n.t('api.generateDesc')}>
-        <form onsubmit={handleGenerateKey} class="svadmin-u-b43b4c086d9a"><div class="svadmin-u-6f7e013d6499"><Label for="api-key-name">{i18n.t('api.keyName')}</Label><Input id="api-key-name" placeholder="CI deployment token" bind:value={newKeyName} required disabled={!credentialProvider || submitting} /></div><fieldset class="svadmin-u-6ed543e2fbbb" disabled={!credentialProvider || submitting}><legend class="svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{i18n.t('api.permissions')}</legend>{#each Object.keys(newKeyPermissions) as permission (permission)}<div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4"><Checkbox id={`perm-${permission}`} bind:checked={newKeyPermissions[permission as keyof typeof newKeyPermissions]} /><Label for={`perm-${permission}`} class="svadmin-u-34516836730d svadmin-u-fc7473ca09eb svadmin-u-8ecebc9f80e6">{permission}</Label></div>{/each}</fieldset><Button type="submit" class="svadmin-u-6da6a3c3f741" disabled={!credentialProvider || submitting || !newKeyName.trim()}>{i18n.t('api.generateButton')}</Button></form>
+        <form onsubmit={handleGenerateKey} class="svadmin-u-b43b4c086d9a">
+          <div class="svadmin-u-6f7e013d6499">
+            <Label for={`${controlId}-api-key-name`}>{i18n.t('api.keyName')}</Label>
+            <Input id={`${controlId}-api-key-name`} placeholder="CI deployment token" bind:value={newKeyName} required disabled={!credentialProvider || submitting} />
+          </div>
+          <fieldset class="svadmin-u-6ed543e2fbbb" disabled={!credentialProvider || submitting}>
+            <legend class="svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{i18n.t('api.permissions')}</legend>
+            {#each Object.keys(newKeyPermissions) as permission (permission)}
+              <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
+                <Checkbox id={`${controlId}-perm-${permission}`} bind:checked={newKeyPermissions[permission as keyof typeof newKeyPermissions]} />
+                <Label for={`${controlId}-perm-${permission}`} class="svadmin-u-34516836730d svadmin-u-fc7473ca09eb svadmin-u-8ecebc9f80e6">{permission}</Label>
+              </div>
+            {/each}
+          </fieldset>
+          <Button type="submit" class="svadmin-u-6da6a3c3f741" disabled={!credentialProvider || submitting || !newKeyName.trim()}>{i18n.t('api.generateButton')}</Button>
+        </form>
       </SettingsGroup>
     {/snippet}
   </WorkspaceLayout>

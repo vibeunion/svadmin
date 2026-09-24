@@ -63,6 +63,8 @@ describe('RowActions and DetailDrawer', () => {
     const view = render(RowActionsDetailDrawerHarness);
     const dialog = view.getByRole('dialog', { name: 'Record details' });
 
+    expect(view.container.contains(dialog)).toBe(false);
+    expect(document.body.contains(dialog)).toBe(true);
     expect(dialog.getAttribute('aria-labelledby')).toBe('record-details-title');
     expect(dialog.getAttribute('aria-describedby')).toBe('record-details-description');
     expect(within(dialog).getByTestId('drawer-extra-badge').textContent).toBe('Active');

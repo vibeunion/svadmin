@@ -4,12 +4,13 @@
   import { Badge } from './ui/badge/index.js';
   import DescriptionList from './content/DescriptionList.svelte';
   import SettingsGroup from './content/SettingsGroup.svelte';
+  import ContentPageHeader from './content/ContentPageHeader.svelte';
 
   const i18n = useTranslation();
   const adminContext = captureAdminContext();
   const resources = $derived(adminContext.resources);
   const providerNames = $derived(adminContext.getDataProviderNames());
-  let { version: suppliedVersion }: { version?: string } = $props();
+  let { version: suppliedVersion, headingLevel = 'h1' }: { version?: string; headingLevel?: 'h1' | 'h2' } = $props();
   const buildVersion = '__SVADMIN_VERSION__';
   const version = $derived(suppliedVersion ?? (
     buildVersion.startsWith('__')
@@ -19,8 +20,8 @@
 </script>
 
 <div class="svadmin-u-b3542e058833">
-  <div><h2 class="svadmin-u-d5c9b0001e7e svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{i18n.t('settings.about')}</h2></div>
-  <SettingsGroup title="svadmin" description={i18n.t('settings.currentEnvironment')} bodyClass="space-y-6">
+  <ContentPageHeader title={i18n.t('settings.about')} {headingLevel} />
+  <SettingsGroup title="svadmin" description={i18n.t('settings.currentEnvironment')} bodyClass="space-y-6" headingLevel={headingLevel === 'h1' ? 'h2' : 'h3'}>
     <DescriptionList columns={2} items={[
       { label: i18n.t('settings.version'), value: version },
       { label: i18n.t('settings.language'), value: i18n.locale },

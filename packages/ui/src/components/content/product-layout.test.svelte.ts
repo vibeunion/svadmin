@@ -27,6 +27,8 @@ describe('Admin UI product layout compatibility', () => {
     const view = render(Host);
     expect(view.getByRole('heading', { name: 'Settings' }).id).toBe('section-label');
     expect((view.getByRole('textbox', { name: 'Name' }) as HTMLInputElement).value).toBe('Preserved');
+    expect(view.getByLabelText('Name', { selector: 'input' })).toBe(view.getByRole('textbox', { name: 'Name' }));
+    expect(view.getByRole('group', { name: 'Name' }).contains(view.getByRole('textbox', { name: 'Name' }))).toBe(true);
     for (const hook of ['consumer-toolbar', 'consumer-heading', 'consumer-body', 'consumer-row', 'consumer-group']) expect(view.container.querySelector('.' + hook)).not.toBeNull();
     expect(view.getByText('Field description')).toBeTruthy();
     expect(view.getByText('Leading')).toBeTruthy();

@@ -133,6 +133,7 @@
   "type": "module",
   "types": "src/index.ts",
   "dependencies": {
+    "@types/papaparse": "^5.5.2",
     "@internationalized/date": "^3.12.3",
     "@sinclair/typebox": "^0.34.52",
     "papaparse": "^5.5.4"

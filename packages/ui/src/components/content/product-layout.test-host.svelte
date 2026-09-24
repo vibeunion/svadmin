@@ -21,7 +21,7 @@
 </PageToolbar>
 <SettingsGroup title="General" description="Description" class="consumer-group" bodyClass="consumer-body">
   {#snippet actions()}<button onclick={() => count++}>Group action</button>{/snippet}
-  <SettingsFieldRow label="Name" description="Field description" separated={collapsed} class="consumer-row">
-    {#snippet control()}<input aria-label="Name" value="Preserved" />{/snippet}
+  <SettingsFieldRow label="Name" controlId="settings-name" description="Field description" separated={collapsed} class="consumer-row">
+    {#snippet control()}<input id="settings-name" value="Preserved" />{/snippet}
   </SettingsFieldRow>
 </SettingsGroup>

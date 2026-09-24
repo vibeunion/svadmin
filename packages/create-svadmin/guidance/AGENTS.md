@@ -26,6 +26,29 @@ business code inside `src/features/<module>/` and expose it through the module's
 
 ## Required workflow
 
+### Default-first page composition
+
+- Start with `AdminApp`, a provider bundle, and schema-backed resources. Its
+  default layout is clean-flat; the default color is Stripe unless the user has
+  saved another selection. Keep explicit theme overrides only for intentional changes.
+- Keep the built-in list/create/edit/show routes unless the business workflow
+  needs a different composition. Do not replace CRUD with static demo tables.
+- Use `ResourceOverview` for a permission-aware resource entry page.
+- Use `DashboardPage` with `metrics`, `actions`, `secondary`, and default snippets
+  for dashboards; use `PageSection`, `WorkspaceLayout`, `FilterToolbar`,
+  `SettingsGroup`, and `SettingsFieldRow` for other page compositions.
+- Import components from `@svadmin/ui` and styles from `@svadmin/ui/app.css`.
+  Never import example files or copy example-only CSS into a consumer.
+- Metrics must come from the application's provider. Do not manufacture totals,
+  success states, actions, or backend capabilities to fill a layout.
+- Verify a generated application without resource-page overrides or custom CSS
+  before adding domain-specific presentation. Check list, create, edit, show,
+  validation, denied permissions, empty/error/loading states, and mobile layouts.
+- Keep the generated Bun dependency overrides and `patches/` together. They
+  carry tested upstream declaration fixes; do not remove them or enable
+  `skipLibCheck` merely to silence dependency errors. Re-run `bun run check`
+  and `bun run build` after upgrading a patched dependency.
+
 1. Name the page's single primary workflow and dominant next action.
 2. Inventory every heading, description, notice, metric, badge, and data view.
 3. Assign each fact and event to one primary UI surface.

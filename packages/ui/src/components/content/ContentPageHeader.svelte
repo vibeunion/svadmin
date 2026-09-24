@@ -9,6 +9,7 @@
     breadcrumbs?: string[];
     actions?: Snippet;
     density?: 'compact' | 'comfortable';
+    headingLevel?: 'h1' | 'h2';
     class?: string;
   }
   let {
@@ -18,6 +19,7 @@
     breadcrumbs = [],
     actions,
     density = 'comfortable',
+    headingLevel = 'h1',
     class: className = '',
   }: Props = $props();
   const styles = $derived(contentHeader({ density }));
@@ -40,7 +42,7 @@
   <div class={styles.row}>
     <div class={styles.heading}>
       {#if eyebrow}<p class={styles.eyebrow}>{eyebrow}</p>{/if}
-      <h1 class={styles.title}>{title}</h1>
+      <svelte:element this={headingLevel} class={styles.title}>{title}</svelte:element>
       {#if description}<p class={styles.description}>{description}</p>{/if}
     </div>
     {#if actions}<div class={styles.actions}>{@render actions()}</div>{/if}

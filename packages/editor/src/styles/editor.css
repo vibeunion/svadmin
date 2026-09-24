@@ -2,13 +2,13 @@
 
 /* Base editor container */
 .svadmin-editor {
-  --editor-border: hsl(var(--border));
-  --editor-bg: hsl(var(--background));
-  --editor-fg: hsl(var(--foreground));
-  --editor-muted: hsl(var(--muted-foreground));
-  --editor-primary: hsl(var(--primary));
-  --editor-primary-fg: hsl(var(--primary-foreground));
-  --editor-ring: hsl(var(--ring));
+  --editor-border: var(--border);
+  --editor-bg: var(--background);
+  --editor-fg: var(--foreground);
+  --editor-muted: var(--muted-foreground);
+  --editor-primary: var(--primary);
+  --editor-primary-fg: var(--primary-foreground);
+  --editor-ring: var(--ring);
   --editor-radius: var(--radius, 0.5rem);
 
   position: relative;
@@ -16,12 +16,12 @@
   border-radius: var(--editor-radius);
   background: var(--editor-bg);
   overflow: hidden;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color var(--svadmin-motion-standard, 200ms) var(--svadmin-motion-easing, ease-out), box-shadow var(--svadmin-motion-standard, 200ms) var(--svadmin-motion-easing, ease-out);
 }
 
 .svadmin-editor:focus-within {
   border-color: var(--editor-ring);
-  box-shadow: 0 0 0 2px hsl(var(--ring) / 0.15);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ring) 15%, transparent);
 }
 
 /* ─── Toolbar ─────────────────────────────────────────────────── */
@@ -33,7 +33,7 @@
   gap: 1px;
   padding: 4px 6px;
   border-bottom: 1px solid var(--editor-border);
-  background: hsl(var(--muted) / 0.3);
+  background: color-mix(in srgb, var(--muted) 30%, transparent);
   min-height: 40px;
 }
 
@@ -64,21 +64,21 @@
   background: transparent;
   color: var(--editor-fg);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color var(--svadmin-motion-fast, 150ms) var(--svadmin-motion-easing, ease-out), color var(--svadmin-motion-fast, 150ms) var(--svadmin-motion-easing, ease-out);
   position: relative;
   flex-shrink: 0;
 }
 
 .svadmin-toolbar-btn:hover {
-  background: hsl(var(--muted) / 0.7);
+  background: color-mix(in srgb, var(--muted) 70%, transparent);
 }
 
-.svadmin-toolbar-btn:active {
+.svadmin-toolbar-btn:active:not(:disabled, [aria-disabled="true"]) {
   transform: scale(0.95);
 }
 
 .svadmin-toolbar-btn[data-active="true"] {
-  background: hsl(var(--primary) / 0.1);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
   color: var(--editor-primary);
 }
 
@@ -119,16 +119,16 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 6px center;
-  transition: background-color 0.15s ease;
+  transition: background-color var(--svadmin-motion-fast, 150ms) var(--svadmin-motion-easing, ease-out);
 }
 
 .svadmin-toolbar-select:hover {
-  background-color: hsl(var(--muted) / 0.7);
+  background-color: color-mix(in srgb, var(--muted) 70%, transparent);
 }
 
 .svadmin-toolbar-select:focus {
   outline: none;
-  background-color: hsl(var(--muted) / 0.7);
+  background-color: color-mix(in srgb, var(--muted) 70%, transparent);
 }
 
 /* ─── Editor Content Area ─────────────────────────────────────── */
@@ -233,7 +233,7 @@
   text-decoration: underline;
   text-underline-offset: 2px;
   cursor: pointer;
-  transition: opacity 0.15s;
+  transition: opacity var(--svadmin-motion-fast, 150ms);
 }
 
 .svadmin-editor-content .tiptap a:hover {
@@ -303,8 +303,8 @@
 /* ─── Code ────────────────────────────────────────────────────── */
 
 .svadmin-editor-content .tiptap code {
-  background: hsl(var(--muted) / 0.5);
-  color: hsl(var(--destructive, 0 84% 60%));
+  background: color-mix(in srgb, var(--muted) 50%, transparent);
+  color: var(--destructive, #dc2626);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 0.875em;
@@ -312,7 +312,7 @@
 }
 
 .svadmin-editor-content .tiptap pre {
-  background: hsl(var(--card));
+  background: var(--card);
   border: 1px solid var(--editor-border);
   border-radius: 8px;
   padding: 16px 20px;
@@ -346,7 +346,7 @@
   border-radius: 8px;
   margin: 0.5em 0;
   cursor: pointer;
-  transition: box-shadow 0.2s ease;
+  transition: box-shadow var(--svadmin-motion-standard, 200ms) var(--svadmin-motion-easing, ease-out);
 }
 
 .svadmin-editor-content .tiptap img:hover {
@@ -378,7 +378,7 @@
 }
 
 .svadmin-editor-content .tiptap table th {
-  background: hsl(var(--muted) / 0.4);
+  background: color-mix(in srgb, var(--muted) 40%, transparent);
   font-weight: 600;
   text-align: left;
 }
@@ -389,14 +389,14 @@
 }
 
 .svadmin-editor-content .tiptap table .selectedCell {
-  background: hsl(var(--primary) / 0.08);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
 }
 
 .svadmin-editor-content .tiptap table .selectedCell::after {
   content: '';
   position: absolute;
   inset: 0;
-  border: 2px solid hsl(var(--primary) / 0.3);
+  border: 2px solid color-mix(in srgb, var(--primary) 30%, transparent);
   pointer-events: none;
 }
 
@@ -446,7 +446,7 @@
   align-items: center;
   gap: 2px;
   padding: 4px 6px;
-  background: hsl(var(--popover));
+  background: var(--popover);
   border: 1px solid var(--editor-border);
   border-radius: 8px;
   box-shadow:
@@ -473,7 +473,7 @@
   align-items: center;
   gap: 2px;
   padding: 4px 6px;
-  background: hsl(var(--popover));
+  background: var(--popover);
   border: 1px solid var(--editor-border);
   border-radius: 8px;
   box-shadow:
@@ -500,7 +500,7 @@
   min-width: 220px;
   max-height: 320px;
   overflow-y: auto;
-  background: hsl(var(--popover));
+  background: var(--popover);
   border: 1px solid var(--editor-border);
   border-radius: 8px;
   box-shadow:
@@ -523,13 +523,13 @@
   color: var(--editor-fg);
   font-size: 13px;
   cursor: pointer;
-  transition: background-color 0.1s ease;
+  transition: background-color var(--svadmin-motion-fast, 150ms) var(--svadmin-motion-easing, ease-out);
   text-align: left;
 }
 
 .svadmin-slash-menu-item:hover,
 .svadmin-slash-menu-item[data-selected="true"] {
-  background: hsl(var(--muted) / 0.5);
+  background: color-mix(in srgb, var(--muted) 50%, transparent);
 }
 
 .svadmin-slash-menu-item-icon {
@@ -539,7 +539,7 @@
   width: 28px;
   height: 28px;
   border-radius: 6px;
-  background: hsl(var(--muted) / 0.5);
+  background: color-mix(in srgb, var(--muted) 50%, transparent);
   flex-shrink: 0;
 }
 
@@ -570,7 +570,7 @@
 
 .svadmin-color-picker {
   padding: 8px;
-  background: hsl(var(--popover));
+  background: var(--popover);
   border: 1px solid var(--editor-border);
   border-radius: 8px;
   box-shadow:
@@ -592,7 +592,7 @@
   border-radius: 4px;
   border: 1px solid hsl(0 0% 0% / 0.1);
   cursor: pointer;
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  transition: transform var(--svadmin-motion-fast, 150ms) var(--svadmin-motion-easing, ease-out), box-shadow var(--svadmin-motion-fast, 150ms) var(--svadmin-motion-easing, ease-out);
 }
 
 .svadmin-color-swatch:hover {
@@ -608,7 +608,7 @@
   align-items: center;
   gap: 6px;
   padding: 6px 8px;
-  background: hsl(var(--popover));
+  background: var(--popover);
   border: 1px solid var(--editor-border);
   border-radius: 8px;
   box-shadow:
@@ -628,7 +628,7 @@
   font-size: 13px;
   min-width: 240px;
   outline: none;
-  transition: border-color 0.15s ease;
+  transition: border-color var(--svadmin-motion-fast, 150ms) var(--svadmin-motion-easing, ease-out);
 }
 
 .svadmin-link-input:focus {
@@ -644,7 +644,7 @@
   gap: 12px;
   padding: 4px 12px;
   border-top: 1px solid var(--editor-border);
-  background: hsl(var(--muted) / 0.2);
+  background: color-mix(in srgb, var(--muted) 20%, transparent);
   font-size: 11px;
   color: var(--editor-muted);
 }
@@ -674,7 +674,7 @@
 
 /* Drag handle indicator */
 .svadmin-editor-content .ProseMirror .is-empty::before {
-  transition: opacity 0.15s ease;
+  transition: opacity var(--svadmin-motion-fast, 150ms) var(--svadmin-motion-easing, ease-out);
 }
 
 /* ─── Scrollbar styling ───────────────────────────────────────── */
@@ -688,10 +688,26 @@
 }
 
 .svadmin-editor-content::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.3);
+  background: color-mix(in srgb, var(--muted-foreground) 30%, transparent);
   border-radius: 3px;
 }
 
 .svadmin-editor-content::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.5);
+  background: color-mix(in srgb, var(--muted-foreground) 50%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .svadmin-editor,
+  .svadmin-editor * {
+    transition: none;
+    animation: none;
+  }
+
+  .svadmin-toolbar-btn:active:not(:disabled, [aria-disabled="true"]) {
+    transform: none;
+  }
+
+  .svadmin-color-swatch:hover {
+    transform: none;
+  }
 }

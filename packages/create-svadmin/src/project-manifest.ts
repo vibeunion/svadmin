@@ -33,6 +33,8 @@ export interface ProjectPackageJson {
   scripts: Record<string, string>;
   dependencies: Record<string, string>;
   devDependencies: Record<string, string>;
+  overrides?: Record<string, string>;
+  patchedDependencies?: Record<string, string>;
 }
 
 export interface ScaffoldManifest extends ProjectPackageJson {
@@ -116,6 +118,9 @@ function assertScaffoldManifest(candidate: unknown): asserts candidate is Scaffo
   assertStringRecord(candidate['scripts'], 'scaffold manifest.scripts');
   assertStringRecord(candidate['dependencies'], 'scaffold manifest.dependencies');
   assertStringRecord(candidate['devDependencies'], 'scaffold manifest.devDependencies');
+  for (const key of ['overrides', 'patchedDependencies'] as const) {
+    if (candidate[key] !== undefined) assertStringRecord(candidate[key], `scaffold manifest.${key}`);
+  }
   assertJsonObject(candidate['svadmin'], 'scaffold manifest.svadmin');
   assertDependencyPacks(candidate['svadmin']['dependencyPacks']);
   assertSelectionMap(
@@ -180,5 +185,7 @@ export function createProjectPackageJson(
     scripts: { ...scaffold.scripts },
     dependencies,
     devDependencies: { ...scaffold.devDependencies },
+    ...(scaffold.overrides ? { overrides: { ...scaffold.overrides } } : {}),
+    ...(scaffold.patchedDependencies ? { patchedDependencies: { ...scaffold.patchedDependencies } } : {}),
   };
 }

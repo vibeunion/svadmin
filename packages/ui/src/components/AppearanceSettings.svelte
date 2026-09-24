@@ -4,7 +4,10 @@
   import { Check, Monitor, Moon, Sun } from '@lucide/svelte';
   import SettingsGroup from './content/SettingsGroup.svelte';
   import SettingsFieldRow from './content/SettingsFieldRow.svelte';
+  import ContentPageHeader from './content/ContentPageHeader.svelte';
 
+  let { headingLevel = 'h1' }: { headingLevel?: 'h1' | 'h2' } = $props();
+  const controlId = $props.id();
   const i18n = useTranslation();
   const themeOptions = [
     { value: 'light' as const, icon: Sun, label: 'settings.light' },
@@ -17,18 +20,20 @@
   const availableLocales = i18n.getAvailableLocales();
   const presets = getColorPresets();
   const DENSITY_KEY = 'svadmin-sidebar-density';
-  let density = $state<'compact' | 'standard'>((typeof window !== 'undefined' ? localStorage.getItem(DENSITY_KEY) : null) as 'compact' | 'standard' ?? 'standard');
+  const storedDensity = typeof window !== 'undefined' ? localStorage.getItem(DENSITY_KEY) : null;
+  let density = $state<'compact' | 'standard'>(storedDensity === 'compact' ? 'compact' : 'standard');
   const PAGE_SIZE_KEY = 'svadmin-default-page-size';
   const pageSizeOptions = [10, 20, 50];
-  let pageSize = $state(typeof window !== 'undefined' ? parseInt(localStorage.getItem(PAGE_SIZE_KEY) ?? '10', 10) : 10);
+  const storedPageSize = typeof window !== 'undefined' ? Number(localStorage.getItem(PAGE_SIZE_KEY) ?? '10') : 10;
+  let pageSize = $state(pageSizeOptions.includes(storedPageSize) ? storedPageSize : 10);
   const localeNames: Record<string, string> = { 'zh-CN': '中文（简体）', en: 'English', ja: '日本語', ko: '한국어' };
   function setDensity(value: 'compact' | 'standard') { density = value; if (typeof window !== 'undefined') { localStorage.setItem(DENSITY_KEY, value); window.dispatchEvent(new CustomEvent('svadmin-density-change', { detail: value })); } }
   function setPageSize(size: number) { pageSize = size; if (typeof window !== 'undefined') localStorage.setItem(PAGE_SIZE_KEY, String(size)); }
 </script>
 
 <div class="svadmin-u-b3542e058833">
-  <div><h2 class="svadmin-u-d5c9b0001e7e svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{i18n.t('settings.appearance')}</h2><p class="svadmin-u-b6b02c0ebef6 svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">{i18n.t('settings.settingsDescription')}</p></div>
-  <SettingsGroup title={i18n.t('settings.themeMode')}>
+  <ContentPageHeader title={i18n.t('settings.appearance')} description={i18n.t('settings.settingsDescription')} {headingLevel} />
+  <SettingsGroup title={i18n.t('settings.themeMode')} headingLevel={headingLevel === 'h1' ? 'h2' : 'h3'}>
     <div class="svadmin-u-f3c543ad5fe9 svadmin-u-be2e831be5dd svadmin-u-1004c0c3954c">
       {#each themeOptions as option (option.value)}
         {@const active = currentTheme === option.value}
@@ -40,7 +45,7 @@
       {/each}
     </div>
   </SettingsGroup>
-  <SettingsGroup title={i18n.t('settings.colorAccent')}>
+  <SettingsGroup title={i18n.t('settings.colorAccent')} headingLevel={headingLevel === 'h1' ? 'h2' : 'h3'}>
     <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-1004c0c3954c">
       {#each presets as preset (preset.name)}
         {@const active = currentColor === preset.name}
@@ -48,11 +53,32 @@
       {/each}
     </div>
   </SettingsGroup>
-  <SettingsGroup title={i18n.t('settings.interface')}>
+  <SettingsGroup title={i18n.t('settings.interface')} headingLevel={headingLevel === 'h1' ? 'h2' : 'h3'}>
     <div class="svadmin-u-fa6acbf81d74 svadmin-u-e783642739e3">
-      <SettingsFieldRow label={i18n.t('settings.language')} description={localeNames[currentLocale] ?? currentLocale}>{#snippet control()}<select class="svadmin-u-e7a768f922d2 svadmin-u-3713c4c7843d svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-0e17f2bd9074 svadmin-u-fc7473ca09eb svadmin-u-582e6ef4b245 svadmin-u-55d048ebfb1c svadmin-u-608dd26cd5ba svadmin-u-80b9d0ae125f svadmin-u-6b22a22a9752" value={currentLocale} onchange={(event) => i18n.setLocale((event.target as HTMLSelectElement).value)}>{#each availableLocales as locale (locale)}<option value={locale}>{localeNames[locale] ?? locale}</option>{/each}</select>{/snippet}</SettingsFieldRow>
-      <SettingsFieldRow label={i18n.t('settings.sidebarDensity')}>{#snippet control()}<div class="svadmin-u-60fbb7713999 svadmin-u-2cd02d11d1af svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22"><button class="svadmin-u-0e17f2bd9074 svadmin-u-ec0091ee009b svadmin-u-359090c2d529 svadmin-u-2689f3958069 {density === 'compact' ? 'svadmin-u-75b1bec3ea0e svadmin-u-30ca335ae9c2' : 'svadmin-u-e6f9e383a762 svadmin-u-bfa603190748 svadmin-u-0557b88819cd'}" onclick={() => setDensity('compact')}>{i18n.t('settings.compact')}</button><button class="svadmin-u-0e17f2bd9074 svadmin-u-ec0091ee009b svadmin-u-359090c2d529 svadmin-u-2689f3958069 {density === 'standard' ? 'svadmin-u-75b1bec3ea0e svadmin-u-30ca335ae9c2' : 'svadmin-u-e6f9e383a762 svadmin-u-bfa603190748 svadmin-u-0557b88819cd'}" onclick={() => setDensity('standard')}>{i18n.t('settings.standard')}</button></div>{/snippet}</SettingsFieldRow>
-      <SettingsFieldRow label={i18n.t('settings.defaultPageSize')}>{#snippet control()}<div class="svadmin-u-60fbb7713999 svadmin-u-2cd02d11d1af svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22">{#each pageSizeOptions as size (size)}<button class="svadmin-u-0e17f2bd9074 svadmin-u-ec0091ee009b svadmin-u-0e65706bcccd svadmin-u-359090c2d529 svadmin-u-2689f3958069 {pageSize === size ? 'svadmin-u-75b1bec3ea0e svadmin-u-30ca335ae9c2' : 'svadmin-u-e6f9e383a762 svadmin-u-bfa603190748 svadmin-u-0557b88819cd'}" onclick={() => setPageSize(size)}>{size}</button>{/each}</div>{/snippet}</SettingsFieldRow>
+      <SettingsFieldRow label={i18n.t('settings.language')} description={localeNames[currentLocale] ?? currentLocale} controlId={`${controlId}-language`}>
+        {#snippet control()}
+          <select id={`${controlId}-language`} class="svadmin-u-e7a768f922d2 svadmin-u-3713c4c7843d svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-0e17f2bd9074 svadmin-u-fc7473ca09eb svadmin-u-582e6ef4b245 svadmin-u-55d048ebfb1c svadmin-u-608dd26cd5ba svadmin-u-80b9d0ae125f svadmin-u-6b22a22a9752" value={currentLocale} onchange={(event) => i18n.setLocale((event.target as HTMLSelectElement).value)}>
+            {#each availableLocales as locale (locale)}<option value={locale}>{localeNames[locale] ?? locale}</option>{/each}
+          </select>
+        {/snippet}
+      </SettingsFieldRow>
+      <SettingsFieldRow label={i18n.t('settings.sidebarDensity')}>
+        {#snippet control()}
+          <div class="svadmin-u-60fbb7713999 svadmin-u-2cd02d11d1af svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22">
+            <button type="button" aria-pressed={density === 'compact'} class="svadmin-u-0e17f2bd9074 svadmin-u-ec0091ee009b svadmin-u-359090c2d529 svadmin-u-2689f3958069 {density === 'compact' ? 'svadmin-u-75b1bec3ea0e svadmin-u-30ca335ae9c2' : 'svadmin-u-e6f9e383a762 svadmin-u-bfa603190748 svadmin-u-0557b88819cd'}" onclick={() => setDensity('compact')}>{i18n.t('settings.compact')}</button>
+            <button type="button" aria-pressed={density === 'standard'} class="svadmin-u-0e17f2bd9074 svadmin-u-ec0091ee009b svadmin-u-359090c2d529 svadmin-u-2689f3958069 {density === 'standard' ? 'svadmin-u-75b1bec3ea0e svadmin-u-30ca335ae9c2' : 'svadmin-u-e6f9e383a762 svadmin-u-bfa603190748 svadmin-u-0557b88819cd'}" onclick={() => setDensity('standard')}>{i18n.t('settings.standard')}</button>
+          </div>
+        {/snippet}
+      </SettingsFieldRow>
+      <SettingsFieldRow label={i18n.t('settings.defaultPageSize')}>
+        {#snippet control()}
+          <div class="svadmin-u-60fbb7713999 svadmin-u-2cd02d11d1af svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22">
+            {#each pageSizeOptions as size (size)}
+              <button type="button" aria-pressed={pageSize === size} class="svadmin-u-0e17f2bd9074 svadmin-u-ec0091ee009b svadmin-u-0e65706bcccd svadmin-u-359090c2d529 svadmin-u-2689f3958069 {pageSize === size ? 'svadmin-u-75b1bec3ea0e svadmin-u-30ca335ae9c2' : 'svadmin-u-e6f9e383a762 svadmin-u-bfa603190748 svadmin-u-0557b88819cd'}" onclick={() => setPageSize(size)}>{size}</button>
+            {/each}
+          </div>
+        {/snippet}
+      </SettingsFieldRow>
     </div>
   </SettingsGroup>
 </div>

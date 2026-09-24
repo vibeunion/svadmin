@@ -76,6 +76,7 @@
   /* Shared design-system primitives consumed by examples and host layouts. */
   --svadmin-motion-fast: 150ms;
   --svadmin-motion-standard: 200ms;
+  --svadmin-motion-easing: ease-out;
   --svadmin-motion-slow: 900ms;
   --svadmin-focus-offset: 2px;
   --svadmin-grid-size: 40px;
@@ -409,10 +410,10 @@ h6,
 [data-slot="textarea"] {
   box-shadow: var(--shadow-control);
   transition:
-    background-color 140ms ease,
-    border-color 140ms ease,
-    color 140ms ease,
-    box-shadow 140ms ease;
+    background-color var(--svadmin-motion-fast) var(--svadmin-motion-easing),
+    border-color var(--svadmin-motion-fast) var(--svadmin-motion-easing),
+    color var(--svadmin-motion-fast) var(--svadmin-motion-easing),
+    box-shadow var(--svadmin-motion-fast) var(--svadmin-motion-easing);
 }
 
 [data-slot="input"],
@@ -425,8 +426,8 @@ h6,
 [data-slot="card"] {
   box-shadow: var(--shadow-surface);
   transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease;
+    border-color var(--svadmin-motion-fast) var(--svadmin-motion-easing),
+    box-shadow var(--svadmin-motion-fast) var(--svadmin-motion-easing);
 }
 
 [data-slot="card"][data-interactive="true"]:hover {
@@ -474,11 +475,11 @@ h6,
   user-select: none;
   outline: none;
   transition:
-    background-color 140ms ease,
-    border-color 140ms ease,
-    color 140ms ease,
-    box-shadow 140ms ease,
-    transform 140ms ease;
+    background-color var(--svadmin-motion-fast) var(--svadmin-motion-easing),
+    border-color var(--svadmin-motion-fast) var(--svadmin-motion-easing),
+    color var(--svadmin-motion-fast) var(--svadmin-motion-easing),
+    box-shadow var(--svadmin-motion-fast) var(--svadmin-motion-easing),
+    transform var(--svadmin-motion-fast) var(--svadmin-motion-easing);
 }
 
 :is([data-slot="button"], .svadmin-button) > svg,
@@ -489,8 +490,8 @@ h6,
   pointer-events: none;
 }
 
-:is([data-slot="button"], .svadmin-button):active,
-:is([data-svadmin-button], .svadmin-button):active {
+:is([data-slot="button"], .svadmin-button):not(:disabled, [aria-disabled="true"], [data-disabled]):active,
+:is([data-svadmin-button], .svadmin-button):not(:disabled, [aria-disabled="true"], [data-disabled]):active {
   transform: translateY(1px);
 }
 
@@ -661,7 +662,7 @@ h6,
   font-weight: 600;
   line-height: 1;
   white-space: nowrap;
-  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+  transition: background-color var(--svadmin-motion-fast) var(--svadmin-motion-easing), border-color var(--svadmin-motion-fast) var(--svadmin-motion-easing), color var(--svadmin-motion-fast) var(--svadmin-motion-easing);
 }
 
 :is([data-slot="badge"], .svadmin-badge).svadmin-badge > svg {
@@ -761,7 +762,7 @@ h6,
 }
 
 [data-slot="table-row"] {
-  transition: background-color 140ms ease;
+  transition: background-color var(--svadmin-motion-fast) var(--svadmin-motion-easing);
 }
 
 [data-slot="table-row"]:hover {
@@ -794,7 +795,7 @@ h6,
 }
 
 [data-sonner-toaster] [data-sonner-toast] {
-  transition-duration: 180ms;
+  transition-duration: var(--svadmin-motion-fast);
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -985,10 +986,10 @@ main {
   color: var(--muted-foreground);
   pointer-events: none;
   transition:
-    background-color 140ms ease,
-    border-color 140ms ease,
-    color 140ms ease,
-    box-shadow 140ms ease;
+    background-color var(--svadmin-motion-fast) var(--svadmin-motion-easing),
+    border-color var(--svadmin-motion-fast) var(--svadmin-motion-easing),
+    color var(--svadmin-motion-fast) var(--svadmin-motion-easing),
+    box-shadow var(--svadmin-motion-fast) var(--svadmin-motion-easing);
 }
 
 .svadmin-file-input__button {
@@ -1025,7 +1026,7 @@ main {
   background: transparent;
   color: var(--foreground);
   outline: none;
-  transition: border-color 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+  transition: border-color var(--svadmin-motion-fast) var(--svadmin-motion-easing), box-shadow var(--svadmin-motion-fast) var(--svadmin-motion-easing), background-color var(--svadmin-motion-fast) var(--svadmin-motion-easing);
 }
 
 .svadmin-input:not([data-input-type="file"]) {
@@ -1151,14 +1152,14 @@ main {
   width: 100%;
   max-width: min(32rem, calc(100% - 2rem));
   gap: 1rem;
-  border-radius: 0.75rem;
+  border-radius: var(--radius-lg);
   padding: 1.5rem;
   background: var(--background);
   color: var(--foreground);
   outline: none;
   box-shadow: var(--svadmin-shadow-overlay);
   transform: translate(-50%, -50%);
-  transition: opacity 300ms ease, transform 300ms ease;
+  transition: opacity var(--svadmin-motion-standard) var(--svadmin-motion-easing), transform var(--svadmin-motion-standard) var(--svadmin-motion-easing);
 }
 
 .svadmin-dialog-content[data-state="closed"] {
@@ -1250,7 +1251,7 @@ main {
   color: inherit;
   opacity: 0.7;
   cursor: pointer;
-  transition: opacity 120ms ease, box-shadow 120ms ease;
+  transition: opacity var(--svadmin-motion-fast) var(--svadmin-motion-easing), box-shadow var(--svadmin-motion-fast) var(--svadmin-motion-easing);
 }
 
 .svadmin-sheet-close:hover {
@@ -1307,7 +1308,7 @@ main {
   font: inherit;
   font-size: 0.875rem;
   outline: none;
-  transition: border-color 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+  transition: border-color var(--svadmin-motion-fast) var(--svadmin-motion-easing), box-shadow var(--svadmin-motion-fast) var(--svadmin-motion-easing), background-color var(--svadmin-motion-fast) var(--svadmin-motion-easing);
 }
 
 .svadmin-textarea:focus-visible {
@@ -1355,7 +1356,7 @@ main {
   height: 100%;
   flex: 1;
   background: var(--primary);
-  transition: transform 200ms ease;
+  transition: transform var(--svadmin-motion-standard) var(--svadmin-motion-easing);
 }
 
 .svadmin-separator {
@@ -1408,7 +1409,7 @@ main {
 .svadmin-card-footer {
   display: flex;
   align-items: center;
-  border-radius: 0 0 0.75rem 0.75rem;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
   padding: 1rem;
   background: color-mix(in srgb, var(--muted) 50%, transparent);
 }
@@ -1470,7 +1471,7 @@ main {
 }
 
 .svadmin-breadcrumb-link {
-  transition: color 120ms ease;
+  transition: color var(--svadmin-motion-fast) var(--svadmin-motion-easing);
 }
 
 .svadmin-breadcrumb-link:hover {
@@ -1549,7 +1550,7 @@ main {
   gap: 0.5rem;
   margin: 0 -1.5rem -1.5rem;
   border-top: 1px solid var(--border);
-  border-radius: 0 0 0.75rem 0.75rem;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
   padding: 1rem;
   background: color-mix(in srgb, var(--muted) 50%, transparent);
 }
@@ -1611,7 +1612,7 @@ main {
   font: inherit;
   font-size: 0.875rem;
   outline: none;
-  transition: border-color 120ms ease, box-shadow 120ms ease;
+  transition: border-color var(--svadmin-motion-fast) var(--svadmin-motion-easing), box-shadow var(--svadmin-motion-fast) var(--svadmin-motion-easing);
 }
 
 .svadmin-select:focus-visible {
@@ -1665,7 +1666,7 @@ main {
   font-weight: 500;
   outline: none;
   cursor: pointer;
-  transition: color 120ms ease, background-color 120ms ease, box-shadow 120ms ease;
+  transition: color var(--svadmin-motion-fast) var(--svadmin-motion-easing), background-color var(--svadmin-motion-fast) var(--svadmin-motion-easing), box-shadow var(--svadmin-motion-fast) var(--svadmin-motion-easing);
 }
 
 .svadmin-tabs-trigger[data-state="active"] {
@@ -1803,7 +1804,7 @@ main {
   outline: none;
   cursor: pointer;
   user-select: none;
-  transition: background-color 120ms ease, color 120ms ease;
+  transition: background-color var(--svadmin-motion-fast) var(--svadmin-motion-easing), color var(--svadmin-motion-fast) var(--svadmin-motion-easing);
 }
 
 .svadmin-dropdown-item[data-inset="true"] {
@@ -1876,7 +1877,7 @@ main {
   color: var(--primary-foreground);
   outline: none;
   cursor: pointer;
-  transition: background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+  transition: background-color var(--svadmin-motion-fast) var(--svadmin-motion-easing), border-color var(--svadmin-motion-fast) var(--svadmin-motion-easing), box-shadow var(--svadmin-motion-fast) var(--svadmin-motion-easing);
 }
 
 .svadmin-checkbox[data-state="checked"],
@@ -1925,7 +1926,7 @@ main {
   outline: none;
   cursor: pointer;
   box-shadow: var(--svadmin-shadow-control);
-  transition: background-color 160ms ease, box-shadow 160ms ease;
+  transition: background-color var(--svadmin-motion-fast) var(--svadmin-motion-easing), box-shadow var(--svadmin-motion-fast) var(--svadmin-motion-easing);
 }
 
 .svadmin-switch[data-state="checked"] {
@@ -1949,7 +1950,7 @@ main {
   background: var(--background);
   box-shadow: var(--svadmin-shadow-overlay);
   transform: translateX(0);
-  transition: transform 160ms ease;
+  transition: transform var(--svadmin-motion-fast) var(--svadmin-motion-easing);
   pointer-events: none;
 }
 
@@ -2000,7 +2001,7 @@ main {
   font-weight: 500;
   outline: none;
   cursor: pointer;
-  transition: background-color 120ms ease, color 120ms ease;
+  transition: background-color var(--svadmin-motion-fast) var(--svadmin-motion-easing), color var(--svadmin-motion-fast) var(--svadmin-motion-easing);
 }
 
 .svadmin-navigation-link:hover,
@@ -2027,7 +2028,7 @@ main {
   width: 0.75rem;
   height: 0.75rem;
   margin-left: 0.25rem;
-  transition: transform 160ms ease;
+  transition: transform var(--svadmin-motion-fast) var(--svadmin-motion-easing);
 }
 
 .svadmin-navigation-trigger[data-state="open"] .svadmin-navigation-trigger-icon {
@@ -2080,7 +2081,7 @@ main {
   color: var(--popover-foreground);
   box-shadow: var(--svadmin-shadow-overlay);
   backdrop-filter: blur(12px);
-  transition: width 300ms ease, height 300ms ease;
+  transition: width var(--svadmin-motion-standard) var(--svadmin-motion-easing), height var(--svadmin-motion-standard) var(--svadmin-motion-easing);
 }
 
 .svadmin-popover-content {
@@ -2216,7 +2217,7 @@ main {
   color: var(--foreground);
   text-align: left;
   text-decoration: none;
-  transition: background-color 150ms ease;
+  transition: background-color var(--svadmin-motion-fast) var(--svadmin-motion-easing);
 }
 
 .svadmin-metric-item[data-interactive="true"] {
@@ -2577,8 +2578,8 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
   color: color-mix(in oklch, var(--sidebar-foreground) 80%, var(--sidebar));
   box-shadow: none;
   transition:
-    background-color 140ms ease,
-    color 140ms ease;
+    background-color var(--svadmin-motion-fast) var(--svadmin-motion-easing),
+    color var(--svadmin-motion-fast) var(--svadmin-motion-easing);
 }
 
 .layout-clean-flat .sidebar-menu-item:hover {
@@ -2680,7 +2681,7 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
 }
 
 .layout-clean-flat [data-svadmin-table-head] [data-slot="table-head"] {
-  height: 3rem;
+  height: 2.75rem;
   border-bottom-color: var(--svadmin-border);
   background: var(--svadmin-surface-muted);
   color: var(--svadmin-text-muted);
@@ -2695,10 +2696,17 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
 }
 
 .layout-clean-flat [data-svadmin-table-row] [data-slot="table-cell"] {
-  height: 3.5rem;
+  height: 3rem;
   border-bottom-color: var(--svadmin-border);
   color: var(--svadmin-text);
   font-size: 0.8125rem;
+}
+
+.layout-clean-flat [data-svadmin-table-head] [data-slot="table-head"][data-density="compact"],
+.layout-clean-flat [data-svadmin-table-row] [data-slot="table-cell"][data-density="compact"] {
+  height: 2rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
 }
 
 .layout-clean-flat [data-svadmin-table-row]:hover [data-slot="table-cell"] {
@@ -2991,7 +2999,7 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
   flex-direction: column;
   gap: 1rem;
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
+  border-radius: var(--radius-lg);
   background: var(--card);
   padding: 1rem;
   color: var(--foreground);
@@ -3180,7 +3188,7 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
   flex-direction: column;
   gap: 0.75rem;
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
+  border-radius: var(--radius-lg);
   background: var(--card);
   padding: 1rem;
   color: var(--foreground);
@@ -3231,7 +3239,7 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
 .svadmin-anomaly-badge:is([data-slot="badge"], .svadmin-badge)[data-good="true"]:hover { background: color-mix(in oklch, var(--success) 90%, transparent); }
 
 .svadmin-stats-card { gap: 1rem; border-radius: 0.5rem; padding: 1.25rem; }
-.svadmin-stats-card[data-variant="default"] { background: var(--card); box-shadow: var(--shadow-surface); transition: box-shadow 300ms; }
+.svadmin-stats-card[data-variant="default"] { background: var(--card); box-shadow: var(--shadow-surface); transition: box-shadow var(--svadmin-motion-standard); }
 .svadmin-stats-card[data-variant="default"]:hover { box-shadow: var(--shadow-surface-hover); }
 .svadmin-stats-card[data-variant="outline"] { border: 2px solid var(--border); background: transparent; }
 .svadmin-stats-card[data-variant="filled"] { border: 0; background: color-mix(in srgb, var(--muted) 50%, transparent); box-shadow: var(--shadow-surface); }
@@ -3417,8 +3425,8 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
   --sidebar-accent-foreground: #0a2540;
   --sidebar-border: #e6ebf1;
   --svadmin-shadow-control: 0 1px 2px rgb(15 23 42 / 0.04), 0 0 0 1px rgb(15 23 42 / 0.02);
-  --svadmin-shadow-surface: 0 2px 4px rgb(15 23 42 / 0.04), 0 8px 16px rgb(15 23 42 / 0.08);
-  --svadmin-shadow-surface-hover: 0 4px 8px rgb(15 23 42 / 0.06), 0 16px 32px rgb(15 23 42 / 0.1);
+  --svadmin-shadow-surface: 0 1px 3px rgb(15 23 42 / 0.04), 0 4px 8px rgb(15 23 42 / 0.04);
+  --svadmin-shadow-surface-hover: 0 2px 4px rgb(15 23 42 / 0.06), 0 6px 12px rgb(15 23 42 / 0.06);
   --svadmin-control-shadow: var(--svadmin-shadow-control);
   --svadmin-surface-shadow: var(--svadmin-shadow-surface);
   --svadmin-surface-hover-shadow: var(--svadmin-shadow-surface-hover);
@@ -3459,8 +3467,8 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
   background: var(--background);
   color: var(--foreground);
   background-image:
-    linear-gradient(to right, color-mix(in oklch, var(--primary) 4%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in oklch, var(--primary) 4%, transparent) 1px, transparent 1px);
+    linear-gradient(to right, color-mix(in oklch, var(--primary) 2%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklch, var(--primary) 2%, transparent) 1px, transparent 1px);
   background-size: var(--svadmin-grid-size) var(--svadmin-grid-size);
 }
 
@@ -3481,7 +3489,7 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
   color: var(--sidebar-foreground);
   font-size: 0.8125rem;
   font-weight: 500;
-  transition: background-color 180ms ease-out, color 180ms ease-out;
+  transition: background-color var(--svadmin-motion-fast) var(--svadmin-motion-easing), color var(--svadmin-motion-fast) var(--svadmin-motion-easing);
 }
 
 .layout-clean-flat[data-theme="stripe"] .sidebar-menu-item:hover {
@@ -3545,8 +3553,6 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
 .layout-clean-flat[data-theme="stripe"] [data-svadmin-form-header] h1,
 .layout-clean-flat[data-theme="stripe"] [data-svadmin-resource-operations] h1 {
   color: var(--foreground);
-  font-size: 1.5rem;
-  font-weight: 650;
   letter-spacing: 0;
 }
 
@@ -3564,11 +3570,10 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
 }
 
 .layout-clean-flat[data-theme="stripe"] [data-slot="card"][data-interactive="true"] {
-  transition: transform 200ms ease-out, box-shadow 200ms ease-out, border-color 200ms ease-out;
+  transition: box-shadow var(--svadmin-motion-standard) var(--svadmin-motion-easing), border-color var(--svadmin-motion-standard) var(--svadmin-motion-easing);
 }
 
 .layout-clean-flat[data-theme="stripe"] [data-slot="card"][data-interactive="true"]:hover {
-  transform: translateY(-0.25rem);
   box-shadow: var(--svadmin-surface-hover-shadow);
 }
 
@@ -3588,7 +3593,7 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
   border-radius: 0.5rem;
   box-shadow: var(--svadmin-control-shadow);
   font-weight: 600;
-  transition: transform 200ms ease-out, box-shadow 200ms ease-out, background-color 200ms ease-out, border-color 200ms ease-out;
+  transition: transform var(--svadmin-motion-standard) var(--svadmin-motion-easing), box-shadow var(--svadmin-motion-standard) var(--svadmin-motion-easing), background-color var(--svadmin-motion-standard) var(--svadmin-motion-easing), border-color var(--svadmin-motion-standard) var(--svadmin-motion-easing);
 }
 
 .layout-clean-flat[data-theme="stripe"] :is([data-slot="button"], .svadmin-button):is([data-variant="ghost"], [data-variant="link"], .svadmin-button--ghost, .svadmin-button--link) {
@@ -3602,38 +3607,38 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
     inset 0 1px 0 rgb(255 255 255 / 0.2);
 }
 
-.layout-clean-flat[data-theme="stripe"] :is([data-slot="button"], .svadmin-button):active {
+.layout-clean-flat[data-theme="stripe"] :is([data-slot="button"], .svadmin-button):not(:disabled, [aria-disabled="true"], [data-disabled]):active {
   transform: translateY(0) scale(0.98);
 }
 
-.layout-clean-flat[data-theme="stripe"] :is([data-slot="button"], .svadmin-button):is([data-variant="default"], [data-variant="outline"], .svadmin-button--default, .svadmin-button--outline):active {
+.layout-clean-flat[data-theme="stripe"] :is([data-slot="button"], .svadmin-button):is([data-variant="default"], [data-variant="outline"], .svadmin-button--default, .svadmin-button--outline):not(:disabled, [aria-disabled="true"], [data-disabled]):active {
   box-shadow: inset 0 2px 4px rgb(0 0 0 / 0.18);
 }
 
 .layout-clean-flat[data-theme="stripe"] :is([data-slot="button"], .svadmin-button):focus-visible,
 .layout-clean-flat[data-theme="stripe"] [data-slot="input"]:focus-visible,
 .layout-clean-flat[data-theme="stripe"] [data-slot="textarea"]:focus-visible,
+.layout-clean-flat[data-theme="stripe"] [data-slot="select"]:focus-visible,
 .layout-clean-flat[data-theme="stripe"] [data-slot="select-trigger"]:focus-visible {
-  outline: 2px solid color-mix(in oklch, var(--ring) 78%, transparent);
-  outline-offset: 2px;
+  outline: 2px solid var(--ring);
+  outline-offset: var(--svadmin-focus-offset);
 }
 
 .layout-clean-flat[data-theme="stripe"] :is(.transition, .transition-all, .transition-colors, .transition-transform, .transition-opacity) {
-  transition-duration: 200ms;
-  transition-timing-function: ease-out;
+  transition-duration: var(--svadmin-motion-standard);
+  transition-timing-function: var(--svadmin-motion-easing);
 }
 
 .layout-clean-flat[data-theme="stripe"] [data-slot="input"],
 .layout-clean-flat[data-theme="stripe"] [data-slot="textarea"],
+.layout-clean-flat[data-theme="stripe"] [data-slot="select"],
 .layout-clean-flat[data-theme="stripe"] [data-slot="select-trigger"] {
-  min-height: 2.5rem;
   border-radius: 0.5rem;
   background: var(--card);
   box-shadow: var(--svadmin-control-shadow);
 }
 
 .layout-clean-flat[data-theme="stripe"] [data-svadmin-table-head] [data-slot="table-head"] {
-  height: 2.75rem;
   background: var(--muted);
   color: var(--muted-foreground);
   font-size: 0.75rem;
@@ -3643,17 +3648,29 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
 }
 
 .layout-clean-flat[data-theme="stripe"] [data-svadmin-table-row] [data-slot="table-cell"] {
-  height: 3.25rem;
   background: var(--card);
   color: var(--foreground);
 }
 
 .layout-clean-flat[data-theme="stripe"] [data-svadmin-table-row] {
-  transition: background-color 160ms ease-out;
+  transition: background-color var(--svadmin-motion-fast) var(--svadmin-motion-easing);
 }
 
 .layout-clean-flat[data-theme="stripe"] [data-svadmin-table-row]:hover [data-slot="table-cell"] {
   background: color-mix(in oklch, var(--primary) 3%, var(--card));
+}
+
+.layout-clean-flat[data-theme="stripe"] [data-svadmin-table-row][data-state="selected"] [data-slot="table-cell"] {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.layout-clean-flat[data-theme="stripe"] :is([data-slot="input"], [data-slot="textarea"], [data-slot="select"], [data-slot="select-trigger"])[aria-invalid="true"] {
+  border-color: var(--destructive);
+}
+
+.layout-clean-flat[data-theme="stripe"] :is([data-slot="input"], [data-slot="textarea"], [data-slot="select"], [data-slot="select-trigger"])[aria-invalid="true"]:focus-visible {
+  outline-color: var(--destructive);
 }
 
 .layout-clean-flat[data-theme="stripe"] [data-svadmin-table-toolbar] {
@@ -3679,13 +3696,6 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
     padding-block: 1rem 2rem;
   }
 
-  .layout-clean-flat[data-theme="stripe"] [data-svadmin-page-header] h1,
-  .layout-clean-flat[data-theme="stripe"] [data-svadmin-list-header] h1,
-  .layout-clean-flat[data-theme="stripe"] [data-svadmin-form-header] h1,
-  .layout-clean-flat[data-theme="stripe"] [data-svadmin-resource-operations] h1 {
-    font-size: 1.25rem;
-  }
-
   .layout-clean-flat[data-theme="stripe"] [data-svadmin-topbar] .svadmin-header-search {
     min-width: 0;
   }
@@ -3695,8 +3705,15 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
   }
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .layout-clean-flat[data-theme="stripe"] :is([data-slot="button"], .svadmin-button):is([data-variant="default"], [data-variant="outline"], .svadmin-button--default, .svadmin-button--outline):hover {
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .layout-clean-flat[data-theme="stripe"] :is([data-slot="button"], .svadmin-button):is([data-variant="default"], [data-variant="outline"], .svadmin-button--default, .svadmin-button--outline):not(:disabled, [aria-disabled="true"], [data-disabled]):hover:not(:active) {
     transform: translateY(-0.125rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is([data-slot="button"], [data-svadmin-button], .svadmin-button):not(:disabled, [aria-disabled="true"], [data-disabled]):active,
+  .layout-clean-flat[data-theme="stripe"] :is([data-slot="button"], .svadmin-button):not(:disabled, [aria-disabled="true"], [data-disabled]):active {
+    transform: none;
   }
 }

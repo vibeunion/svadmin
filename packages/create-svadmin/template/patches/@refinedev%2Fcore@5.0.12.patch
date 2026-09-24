@@ -1,0 +1,30 @@
+diff --git a/dist/hooks/useKeys/index.d.cts b/dist/hooks/useKeys/index.d.cts
+index 84d443c471dbcf0d4206dd7130703eec3be0b19d..bb4574fcee52c3f0588a18f78ec5d8a0e2059bf5 100644
+--- a/dist/hooks/useKeys/index.d.cts
++++ b/dist/hooks/useKeys/index.d.cts
+@@ -1,4 +1,4 @@
+ export declare const useKeys: () => {
+-    keys: () => import("@definitions/index").KeyBuilder;
++    keys: () => import("../../definitions/index").KeyBuilder;
+ };
+ //# sourceMappingURL=index.d.ts.map
+diff --git a/dist/hooks/useKeys/index.d.mts b/dist/hooks/useKeys/index.d.mts
+index 84d443c471dbcf0d4206dd7130703eec3be0b19d..bb4574fcee52c3f0588a18f78ec5d8a0e2059bf5 100644
+--- a/dist/hooks/useKeys/index.d.mts
++++ b/dist/hooks/useKeys/index.d.mts
+@@ -1,4 +1,4 @@
+ export declare const useKeys: () => {
+-    keys: () => import("@definitions/index").KeyBuilder;
++    keys: () => import("../../definitions/index").KeyBuilder;
+ };
+ //# sourceMappingURL=index.d.ts.map
+diff --git a/dist/hooks/useKeys/index.d.ts b/dist/hooks/useKeys/index.d.ts
+index 84d443c471dbcf0d4206dd7130703eec3be0b19d..bb4574fcee52c3f0588a18f78ec5d8a0e2059bf5 100644
+--- a/dist/hooks/useKeys/index.d.ts
++++ b/dist/hooks/useKeys/index.d.ts
+@@ -1,4 +1,4 @@
+ export declare const useKeys: () => {
+-    keys: () => import("@definitions/index").KeyBuilder;
++    keys: () => import("../../definitions/index").KeyBuilder;
+ };
+ //# sourceMappingURL=index.d.ts.map

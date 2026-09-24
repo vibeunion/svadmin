@@ -15,6 +15,7 @@
   import RecordDetailDrawer from '../../src/components/RecordDetailDrawer.svelte';
 
   interface Props {
+    syncWithLocation?: boolean;
     onNavigate: RouterProvider['go'];
     onBack?: () => void;
     initialParams?: Record<string, string>;
@@ -48,6 +49,7 @@
 
   let {
     onNavigate,
+    syncWithLocation = true,
     onBack,
     initialParams = {},
     locale = 'zh-CN',
@@ -195,9 +197,9 @@
   {#if standaloneDetailId != null}
     <RecordDetailDrawer resourceName="users" open={true} recordId={standaloneDetailId} />
   {:else if customBatchAction}
-    <AutoTable {rendering} resourceName="users" {selectable} {density} {expandedRowRender} {batchActions} />
+    <AutoTable {rendering} resourceName="users" {selectable} {density} {expandedRowRender} {batchActions} {syncWithLocation} />
   {:else}
-    <AutoTable {rendering} resourceName="users" {selectable} {density} {expandedRowRender} />
+    <AutoTable {rendering} resourceName="users" {selectable} {density} {expandedRowRender} {syncWithLocation} />
   {/if}
 {/snippet}
 

@@ -15,7 +15,6 @@
   resources={[...resolved.resources]}
   title="svadmin Demo"
   locale="en"
-  themeConfig={{ layoutPreset: 'clean-flat', colorPreset: 'stripe' }}
 >
   {#snippet dashboard()}<Dashboard />{/snippet}
   {#snippet loginPage()}<Login />{/snippet}

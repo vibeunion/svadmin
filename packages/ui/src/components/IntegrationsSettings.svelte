@@ -6,6 +6,7 @@
   import SettingsGroup from './content/SettingsGroup.svelte';
   import SettingsFieldRow from './content/SettingsFieldRow.svelte';
   import StatusBadge from './content/StatusBadge.svelte';
+  import ContentPageHeader from './content/ContentPageHeader.svelte';
 
   const i18n = useTranslation();
 
@@ -18,11 +19,12 @@
   }
 
   interface Props {
+    headingLevel?: 'h1' | 'h2';
     integrations?: Integration[];
     onConnectionChange?: (id: string, connected: boolean) => void | Promise<void>;
   }
 
-  let { integrations, onConnectionChange }: Props = $props();
+  let { integrations, onConnectionChange, headingLevel = 'h1' }: Props = $props();
   const defaultIntegrations = $derived<Integration[]>([
     { id: 'source-control', name: i18n.t('integrations.sourceControl'), description: i18n.t('integrations.sourceControlDescription'), Icon: FolderGit },
     { id: 'chatops', name: 'ChatOps', description: i18n.t('integrations.chatOpsDescription'), Icon: MessageCircle },
@@ -33,8 +35,8 @@
 </script>
 
 <div class="svadmin-u-b3542e058833">
-  <div><h2 class="svadmin-u-d5c9b0001e7e svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{i18n.t('settings.integrations')}</h2><p class="svadmin-u-b6b02c0ebef6 svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">{i18n.t('settings.integrationsDescription')}</p></div>
-  <SettingsGroup title={i18n.t('settings.integrations')} description={i18n.t('integrations.addMoreHint')}>
+  <ContentPageHeader title={i18n.t('settings.integrations')} description={i18n.t('settings.integrationsDescription')} {headingLevel} />
+  <SettingsGroup title={i18n.t('settings.integrations')} description={i18n.t('integrations.addMoreHint')} headingLevel={headingLevel === 'h1' ? 'h2' : 'h3'}>
     <div class="svadmin-u-fa6acbf81d74 svadmin-u-e783642739e3">
       {#each displayedIntegrations as integration (integration.id)}
         <SettingsFieldRow label={integration.name} description={integration.description}>

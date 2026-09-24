@@ -25,6 +25,7 @@
   import FeedbackNotice from '../content/FeedbackNotice.svelte';
 
   const i18n = useTranslation();
+  const controlId = $props.id();
   const adminContext = captureAdminContext();
   const identityProvider = $derived(adminContext.identityGovernanceProvider);
   const organizationProvider = $derived(adminContext.organizationProvider);
@@ -50,16 +51,12 @@
     && organizationName.trim()
     && organizationName.trim() !== organization.name,
   ));
-  const policyNumbersValid = $derived.by(() => {
-    const sessionTimeout = Number(sessionTimeoutValue);
-    const auditRetention = Number(auditRetentionValue);
-    return /^\d+$/.test(sessionTimeoutValue)
-      && /^\d+$/.test(auditRetentionValue)
-      && Number.isSafeInteger(sessionTimeout)
-      && Number.isSafeInteger(auditRetention)
-      && sessionTimeout > 0
-      && auditRetention > 0;
-  });
+  function isPositiveInteger(value: string): boolean {
+    return /^\d+$/.test(value) && Number.isSafeInteger(Number(value)) && Number(value) > 0;
+  }
+  const sessionTimeoutValid = $derived(isPositiveInteger(sessionTimeoutValue));
+  const auditRetentionValid = $derived(isPositiveInteger(auditRetentionValue));
+  const policyNumbersValid = $derived(sessionTimeoutValid && auditRetentionValid);
 
   function message(error: unknown): string {
     return error instanceof Error ? error.message : String(error);
@@ -202,11 +199,11 @@
 </script>
 
 {#snippet auditControl()}
-  <Switch checked={policy?.auditLoggingEnabled ?? false} disabled={!policy || saving} aria-label={i18n.t('account.auditLogging')} onCheckedChange={(checked) => { if (policy) policy = { ...policy, auditLoggingEnabled: checked }; }} />
+  <Switch id={`${controlId}-audit`} checked={policy?.auditLoggingEnabled ?? false} disabled={!policy || saving} onCheckedChange={(checked) => { if (policy) policy = { ...policy, auditLoggingEnabled: checked }; }} />
 {/snippet}
 
 {#snippet ssoControl()}
-  <Switch checked={policy?.requireSso ?? false} disabled={!policy || saving} aria-label={i18n.t('account.enableSso')} onCheckedChange={(checked) => { if (policy) policy = { ...policy, requireSso: checked }; }} />
+  <Switch id={`${controlId}-sso`} checked={policy?.requireSso ?? false} disabled={!policy || saving} onCheckedChange={(checked) => { if (policy) policy = { ...policy, requireSso: checked }; }} />
 {/snippet}
 
 <ContentPageShell pageId="account-settings-enterprise" width="wide">
@@ -222,19 +219,22 @@
     <div class="svadmin-u-f3c543ad5fe9 svadmin-u-60541e1e26f8 svadmin-u-0c3bc98565dd svadmin-u-2f27a80ed92b">
       <SettingsGroup title={i18n.t('account.securityPolicy')} description={isZh ? '配置组织级身份、会话与审计策略。' : 'Configure organization-wide identity, session, and audit controls.'} bodyClass="space-y-4">
         {#if organizationProvider}
-          <div class="svadmin-u-6f7e013d6499"><Label for="organization-name">{isZh ? '组织名称' : 'Organization name'}</Label><div class="svadmin-u-60fbb7713999 svadmin-u-77a2a20e90d4"><Input id="organization-name" bind:value={organizationName} disabled={!organizationProvider.updateCurrentOrganization || savingOrganization} /><Button variant="outline" size="sm" disabled={!organizationChanged || savingOrganization} onclick={saveOrganization}>{savingOrganization ? (isZh ? '保存中...' : 'Saving...') : i18n.t('common.save')}</Button></div></div>
+          <div class="svadmin-u-6f7e013d6499"><Label for={`${controlId}-organization-name`}>{isZh ? '组织名称' : 'Organization name'}</Label><div class="svadmin-u-60fbb7713999 svadmin-u-77a2a20e90d4"><Input id={`${controlId}-organization-name`} bind:value={organizationName} disabled={!organizationProvider.updateCurrentOrganization || savingOrganization} /><Button variant="outline" size="sm" disabled={!organizationChanged || savingOrganization} onclick={saveOrganization}>{savingOrganization ? (isZh ? '保存中...' : 'Saving...') : i18n.t('common.save')}</Button></div></div>
         {/if}
         <div class="svadmin-u-f3c543ad5fe9 svadmin-u-0c3bc98565dd svadmin-u-e00ad81645a2">
-          <div class="svadmin-u-6f7e013d6499"><Label for="session-timeout">{i18n.t('account.sessionTimeout')}</Label><Input id="session-timeout" type="number" min="1" step="1" bind:value={sessionTimeoutValue} disabled={!policy || saving} /></div>
-          <div class="svadmin-u-6f7e013d6499"><Label for="retention">{i18n.t('account.dataRetention')}</Label><Input id="retention" type="number" min="1" step="1" bind:value={auditRetentionValue} disabled={!policy || saving} /></div>
+          <div class="svadmin-u-6f7e013d6499"><Label for={`${controlId}-session-timeout`}>{i18n.t('account.sessionTimeout')}</Label><Input id={`${controlId}-session-timeout`} type="number" min="1" step="1" bind:value={sessionTimeoutValue} disabled={!policy || saving} aria-invalid={policy ? !sessionTimeoutValid : undefined} aria-describedby={policy && !sessionTimeoutValid ? `${controlId}-policy-error` : undefined} /></div>
+          <div class="svadmin-u-6f7e013d6499"><Label for={`${controlId}-retention`}>{i18n.t('account.dataRetention')}</Label><Input id={`${controlId}-retention`} type="number" min="1" step="1" bind:value={auditRetentionValue} disabled={!policy || saving} aria-invalid={policy ? !auditRetentionValid : undefined} aria-describedby={policy && !auditRetentionValid ? `${controlId}-policy-error` : undefined} /></div>
         </div>
-        {#if policy && !policyNumbersValid}<FeedbackNotice tone="warning" message={isZh ? '会话超时和审计保留天数必须为正整数。' : 'Session timeout and audit retention must be positive integers.'} />{/if}
-        <SettingsFieldRow label={i18n.t('account.auditLogging')} description={isZh ? '由后端持久化组织级审计策略。' : 'Persist the organization audit policy through the backend provider.'} control={auditControl} separated />
+        {#if policy && !policyNumbersValid}<div id={`${controlId}-policy-error`}><FeedbackNotice tone="warning" message={isZh ? '会话超时和审计保留天数必须为正整数。' : 'Session timeout and audit retention must be positive integers.'} /></div>{/if}
+        <SettingsFieldRow label={i18n.t('account.auditLogging')} controlId={`${controlId}-audit`} description={isZh ? '由后端持久化组织级审计策略。' : 'Persist the organization audit policy through the backend provider.'} control={auditControl} separated />
         <Button size="sm" disabled={!identityProvider || !policy || !policyNumbersValid || saving} onclick={saveSettings}>{saving ? (isZh ? '保存中...' : 'Saving...') : i18n.t('common.save')}</Button>
       </SettingsGroup>
       <SettingsGroup title={i18n.t('account.singleSignOn')} description={i18n.t('account.ssoDescription')} bodyClass="space-y-4">
-        <SettingsFieldRow label={i18n.t('account.enableSso')} description={isZh ? '启用后由已配置身份源执行组织登录策略。' : 'Require the configured identity provider for organization members.'} control={ssoControl} />
-        <Input bind:value={metadataUrl} placeholder="https://idp.example.com/.well-known/openid-configuration" aria-label={i18n.t('account.ssoProvider')} disabled={!identityProvider || testing} />
+        <SettingsFieldRow label={i18n.t('account.enableSso')} controlId={`${controlId}-sso`} description={isZh ? '启用后由已配置身份源执行组织登录策略。' : 'Require the configured identity provider for organization members.'} control={ssoControl} />
+        <div class="svadmin-u-6f7e013d6499">
+          <Label for={`${controlId}-metadata-url`}>{i18n.t('account.ssoProvider')}</Label>
+          <Input id={`${controlId}-metadata-url`} type="url" bind:value={metadataUrl} placeholder="https://idp.example.com/.well-known/openid-configuration" disabled={!identityProvider || testing} />
+        </div>
         <Button variant="outline" size="sm" disabled={!identityProvider || testing} onclick={() => testConnection()}>{testing ? (isZh ? '测试中...' : 'Testing...') : i18n.t('common.test')}</Button>
       </SettingsGroup>
     </div>

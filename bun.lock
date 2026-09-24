@@ -186,6 +186,7 @@
       "dependencies": {
         "@internationalized/date": "^3.12.3",
         "@sinclair/typebox": "^0.34.52",
+        "@types/papaparse": "^5.5.2",
         "papaparse": "^5.5.4",
       },
       "devDependencies": {

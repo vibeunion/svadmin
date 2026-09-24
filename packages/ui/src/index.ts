@@ -136,6 +136,7 @@ export { default as ApprovalActionCard } from './components/ApprovalActionCard.s
 export type { ApprovalStatus } from './components/ApprovalActionCard.svelte';
 export { default as ApprovalCenter } from './components/ApprovalCenter.svelte';
 export { default as DashboardView } from './components/DashboardView.svelte';
+export { default as ResourceOverview } from './components/ResourceOverview.svelte';
 export { default as StepForm } from './components/StepForm.svelte';
 export type { FormStep } from './components/StepForm.svelte';
 export { default as ModalForm } from './components/ModalForm.svelte';
@@ -356,6 +357,8 @@ export { default as TwoFactorAuthPage } from './components/TwoFactorAuthPage.sve
 
 // Admin UI content page and domain primitives
 export { default as ContentPageShell } from './components/content/ContentPageShell.svelte';
+export { default as DashboardPage } from './components/content/DashboardPage.svelte';
+export { default as PageSection } from './components/content/PageSection.svelte';
 export { default as ContentPageHeader } from './components/content/ContentPageHeader.svelte';
 export { default as SectionHeader } from './components/content/SectionHeader.svelte';
 export { default as PageToolbar } from './components/content/PageToolbar.svelte';
