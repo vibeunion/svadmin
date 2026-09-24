@@ -34,3 +34,19 @@
 - The prior interrupted clean-install worktree still lacks transitive packages,
   so its attempted compiler run is not accepted as typecheck evidence.
   Complete candidate CI remains required.
+
+## Publication And Remaining Gates
+
+- Authenticated manual bootstrap published `@svadmin/app@0.2.0` from the
+  immutable source above. The registry now reports version/latest `0.2.0`
+  and integrity matching the locally verified archive:
+  `sha512-Xoz5Wc2aVEdAIit8rh7aLxiJWMD/SVHLEBpAMH/N+kfoXgZ1eAbSQH91JDw2F7HTVjMaI79BZwWCh9IoLPPbVA==`.
+  This upload has no CI provenance; it does not repair future OIDC configuration.
+- The isolated app consumer passed strict TypeScript, Vite SSR build and runtime
+  smoke after explicitly adding `@types/papaparse`. This auxiliary result is not
+  original-manifest customer acceptance: public core `0.57.0` lacks that dependency.
+  Source already declares it, so a core patch release remains required.
+- Candidate `9dfa7988` passed type checking but failed the pack gate because it
+  rejected the intentionally shipped customer acceptance test. The correction
+  permits only its exact path in `@svadmin/create`, requires that file in the
+  archive, and retains rejection of other test artifacts.

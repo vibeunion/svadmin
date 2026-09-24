@@ -241,6 +241,7 @@ const expectations: PackageExpectation[] = [
       'guidance/DESIGN.md',
       'template/src/App.svelte',
       'template/vite.config.ts',
+      'blueprints/customer-workspace/tests/workspace.spec.ts',
     ],
   },
   {
@@ -301,6 +302,14 @@ function isTestArtifactPath(path: string): boolean {
     /TestHost(?:[.-]|$)/.test(fileName) ||
     /^setupTest(?:[.-]|$)/.test(fileName)
   );
+}
+
+export function isUnexpectedPackedTestArtifact(packageName: string, path: string): boolean {
+  if (
+    packageName === '@svadmin/create' &&
+    path === 'blueprints/customer-workspace/tests/workspace.spec.ts'
+  ) return false;
+  return isTestArtifactPath(path);
 }
 
 function parsePackResult(output: string, packageName: string): PackResult {
@@ -1578,7 +1587,7 @@ async function main(): Promise<void> {
       }
 
       assert(
-        !result.files.some((file) => isTestArtifactPath(file.path)),
+        !result.files.some((file) => isUnexpectedPackedTestArtifact(manifest.name, file.path)),
         `${manifest.name}: tarball unexpectedly publishes test or fixture files`,
       );
 
