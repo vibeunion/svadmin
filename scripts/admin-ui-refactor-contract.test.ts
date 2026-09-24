@@ -19,8 +19,11 @@ describe('Admin UI refactor contract', () => {
       'features/planning/TodoWorkspacePage.svelte',
     ]) {
       const source = read(`example/src/${page}`);
-      expect(source).toContain('ContentPageShell');
-      expect(source).toContain('ContentPageHeader');
+      // The dashboard composes the shared DashboardPage shell, which itself wraps
+      // ContentPageShell; the other workspaces use ContentPageShell directly.
+      const usesDashboardShell = page === 'features/dashboard/Dashboard.svelte';
+      expect(source).toContain(usesDashboardShell ? 'DashboardPage' : 'ContentPageShell');
+      if (!usesDashboardShell) expect(source).toContain('ContentPageHeader');
       expect(source).not.toMatch(/bg-gradient|backdrop-blur/);
       expect(source).not.toMatch(/tracking-(?:tight|wide|wider|\[[^\]]+\])/);
       expect(source).not.toMatch(/rounded-(?:xl|2xl|3xl)/);
