@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.18.0](https://github.com/vibeunion/svadmin/compare/supabase-v0.17.1...supabase-v0.18.0) (2026-09-24)
+
+
+### 🚀 Features
+
+* **supabase:** support SupaCloud SDK 0.33 task subscriptions ([8c6be50](https://github.com/vibeunion/svadmin/commit/8c6be50bc013b6088ade46df122a1747fa8013cb))
+* **supabase:** support SupaCloud SDK 0.33 task subscriptions ([2c18568](https://github.com/vibeunion/svadmin/commit/2c18568277fae088f08fee6b9221581c9c4d61b2))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.12.2
+  * peerDependencies
+    * @svadmin/core bumped to 0.58.0
+
 ## [0.17.1](https://github.com/vibeunion/svadmin/compare/supabase-v0.17.0...supabase-v0.17.1) (2026-09-23)
 
 
