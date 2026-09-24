@@ -9,7 +9,7 @@
     "skipLibCheck": false,
     "types": ["node"],
     "outDir": "dist",
-    "rootDir": "src",
+    "rootDir": ".",
     "declaration": true,
     "declarationDir": "dist",
     "sourceMap": true

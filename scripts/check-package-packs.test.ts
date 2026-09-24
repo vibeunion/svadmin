@@ -3,7 +3,24 @@ import { spawnSync } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { packedConsumerDependencies, packedRuntimeOverrides, publishedWorkspaceManifest, stagePublishedPack } from './check-package-packs';
+import { isUnexpectedPackedTestArtifact, packedConsumerDependencies, packedRuntimeOverrides, publishedWorkspaceManifest, stagePublishedPack } from './check-package-packs';
+
+test('only the shipped customer acceptance test is exempt from the packed test exclusion', () => {
+  const shipped = 'blueprints/customer-workspace/tests/workspace.spec.ts';
+  expect(isUnexpectedPackedTestArtifact('@svadmin/create', shipped)).toBe(false);
+  expect(isUnexpectedPackedTestArtifact('@svadmin/core', shipped)).toBe(true);
+  for (const path of [
+    'src/workspace.spec.ts',
+    'blueprints/customer-workspace/tests/other.spec.ts',
+    'blueprints/customer-workspace/tests/workspace.spec.js',
+    'blueprints/other/tests/workspace.spec.ts',
+    'src/component.test-host.svelte',
+    'src/setupTest.ts',
+  ]) {
+    expect(isUnexpectedPackedTestArtifact('@svadmin/create', path)).toBe(true);
+  }
+  expect(isUnexpectedPackedTestArtifact('@svadmin/create', 'dist/index.js')).toBe(false);
+});
 
 type Manifest = Parameters<typeof packedConsumerDependencies>[2] extends ReadonlyMap<string, infer M>
   ? M

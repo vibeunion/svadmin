@@ -241,6 +241,7 @@ const expectations: PackageExpectation[] = [
       'guidance/DESIGN.md',
       'template/src/App.svelte',
       'template/vite.config.ts',
+      'blueprints/customer-workspace/tests/workspace.spec.ts',
     ],
   },
   {
@@ -301,6 +302,14 @@ function isTestArtifactPath(path: string): boolean {
     /TestHost(?:[.-]|$)/.test(fileName) ||
     /^setupTest(?:[.-]|$)/.test(fileName)
   );
+}
+
+export function isUnexpectedPackedTestArtifact(packageName: string, path: string): boolean {
+  if (
+    packageName === '@svadmin/create' &&
+    path === 'blueprints/customer-workspace/tests/workspace.spec.ts'
+  ) return false;
+  return isTestArtifactPath(path);
 }
 
 function parsePackResult(output: string, packageName: string): PackResult {
@@ -1117,7 +1126,9 @@ async function verifyAiElementsPnpmConsumer(
 
   const rootManifest = JSON.parse(
     await readFile(join(repositoryRoot, 'package.json'), 'utf8'),
-  ) as { overrides?: Record<string, string> };
+  ) as { overrides?: Record<string, string>; dependencies?: Record<string, string> };
+  const typescriptVersion = rootManifest.dependencies?.['typescript'];
+  assert(typescriptVersion, 'root package.json: dependencies.typescript is required for strict consumer verification');
   const svelteVersion = rootManifest.overrides?.['svelte'];
   const viteVersion = rootManifest.overrides?.['vite'];
   const queryVersion = aiElementsManifest.peerDependencies?.['@tanstack/svelte-query'];
@@ -1152,6 +1163,9 @@ async function verifyAiElementsPnpmConsumer(
       },
       devDependencies: {
         '@sveltejs/vite-plugin-svelte': sveltePluginVersion,
+        // Svelte 编译器经 esrap 暴露此可选 peer，严格声明检查需要显式安装。
+        '@typescript-eslint/types': '^8.2.0',
+        typescript: typescriptVersion,
         vite: viteVersion,
       },
     }, null, 2)}\n`,
@@ -1578,7 +1592,7 @@ async function main(): Promise<void> {
       }
 
       assert(
-        !result.files.some((file) => isTestArtifactPath(file.path)),
+        !result.files.some((file) => isUnexpectedPackedTestArtifact(manifest.name, file.path)),
         `${manifest.name}: tarball unexpectedly publishes test or fixture files`,
       );
 
