@@ -36,6 +36,62 @@ describe('buttonVariants', () => {
 });
 
 describe('disabledReason', () => {
+	it('renders critical reasons inline without requiring hover or duplicating a tooltip', async () => {
+		render(ButtonDisabledReasonHarness, {
+			props: {
+				disabledReason: 'Choose a future deadline before claiming',
+				disabledReasonDisplay: 'inline',
+				ariaLabel: 'Claim task',
+				restrictionClass: 'parent-layout',
+				restrictionStyle: 'grid-column: span 2;',
+			},
+		});
+		const button = screen.getByRole('button', { name: 'Claim task' });
+		const wrapper = screen.getByRole('group', { name: 'Claim task' });
+		const description = document.getElementById(button.getAttribute('aria-describedby') ?? '');
+		expect(description?.textContent).toBe('Choose a future deadline before claiming');
+		expect(description?.getAttribute('data-slot')).toBe('button-restriction-description');
+		expect(description?.classList.contains('svadmin-sr-only')).toBe(false);
+		expect(button.hasAttribute('disabled')).toBe(true);
+		expect(button.getAttribute('disabledreasondisplay')).toBeNull();
+		expect(wrapper.classList.contains('parent-layout')).toBe(true);
+		expect(wrapper.style.gridColumn).toBe('span 2');
+		expect(wrapper.tabIndex).toBe(-1);
+		await fireEvent.pointerEnter(wrapper, { pointerType: 'mouse' });
+		expect(screen.queryByRole('tooltip')).toBeNull();
+	});
+
+	it('keeps inline restricted links inert and removes the notice when resolved', async () => {
+		const onclick = vi.fn();
+		const { rerender } = render(ButtonDisabledReasonHarness, {
+			props: { href: '#submit', disabledReason: 'Approval required', disabledReasonDisplay: 'inline', onclick },
+		});
+		const link = screen.getByRole('link', { name: 'Command action' });
+		expect(link.hasAttribute('href')).toBe(false);
+		await fireEvent.click(link);
+		expect(onclick).not.toHaveBeenCalled();
+		await rerender({ href: '#submit', disabledReason: '', disabledReasonDisplay: 'inline', onclick });
+		expect(screen.queryByText('Approval required')).toBeNull();
+		expect(screen.queryByRole('group')).toBeNull();
+		const enabled = screen.getByRole('link', { name: 'Command action' });
+		expect(enabled.getAttribute('href')).toBe('#submit');
+		await fireEvent.click(enabled);
+		expect(onclick).toHaveBeenCalledOnce();
+	});
+
+	it('switches reason presentation without changing the disabled control', async () => {
+		const { rerender } = render(ButtonDisabledReasonHarness, {
+			props: { disabledReason: 'Required field', disabledReasonDisplay: 'inline' },
+		});
+		expect(document.querySelector('[data-slot="button-restriction-description"]')).not.toBeNull();
+		await rerender({ disabledReason: 'Required field', disabledReasonDisplay: 'tooltip' });
+		expect(document.querySelector('[data-slot="button-restriction-description"]')).toBeNull();
+		expect(screen.getByRole('button').hasAttribute('disabled')).toBe(true);
+		const wrapper = screen.getByRole('group');
+		wrapper.focus();
+		expect((await screen.findByRole('tooltip')).textContent?.trim()).toBe('Required field');
+	});
+
 	it('names the focusable restriction and accepts parent layout attributes', () => {
 		render(ButtonDisabledReasonHarness, {
 			props: {
