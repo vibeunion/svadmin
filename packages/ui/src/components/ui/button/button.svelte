@@ -16,6 +16,7 @@
 			variant?: ButtonVariantValue;
 			size?: ButtonSizeValue;
 			disabledReason?: string;
+			disabledReasonDisplay?: "tooltip" | "inline";
 			restrictionClass?: string;
 			restrictionStyle?: string;
 		};
@@ -34,6 +35,7 @@
 		type = "button",
 		disabled,
 		disabledReason = "",
+		disabledReasonDisplay = "tooltip",
 		restrictionClass,
 		restrictionStyle,
 		children,
@@ -100,7 +102,21 @@
 	{/if}
 {/snippet}
 
-{#if restriction}
+{#if restriction && disabledReasonDisplay === "inline"}
+	<span
+		data-slot="button-restriction"
+		data-disabled-reason={restriction}
+		role="group"
+		aria-label={restProps["aria-label"]}
+		aria-labelledby={restProps["aria-labelledby"]}
+		aria-describedby={describedBy}
+		class={restrictionClass}
+		style={`display: inline-flex; flex-direction: column; align-items: flex-start; gap: .375rem; min-width: 0; max-width: 100%; ${restrictionStyle ?? ""}`}
+	>
+		{@render control()}
+		<span id={restrictionId} data-slot="button-restriction-description" style="font-size: .875rem; line-height: 1.4; overflow-wrap: anywhere;">{restriction}</span>
+	</span>
+{:else if restriction}
 	<Tooltip.Root>
 		<Tooltip.Trigger>
 			{#snippet child({ props })}

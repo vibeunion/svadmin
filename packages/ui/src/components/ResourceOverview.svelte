@@ -10,7 +10,7 @@
   const i18n = useTranslation();
   const resources = $derived(context.resources
     .filter(resource => resource.showInMenu !== false && !resource.parentName)
-    .toSorted((left, right) => (left.menuOrder ?? 0) - (right.menuOrder ?? 0)));
+    .sort((left, right) => (left.menuOrder ?? 0) - (right.menuOrder ?? 0)));
 </script>
 
 <ContentPageShell title={title ?? i18n.t('common.dashboard')} pageId="resource-overview" width="wide">
