@@ -48,6 +48,13 @@ function firstListener(listeners: SupaCloudTaskSubscribeOptions[]) {
   return listener;
 }
 
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason: unknown) => void;
+  const promise = new Promise<T>((yes, no) => { resolve = yes; reject = no; });
+  return { promise, resolve, reject };
+}
+
 describe('SupaCloud validated task bridge', () => {
   test('rejects legacy and incomplete clients instead of asserting compatibility', () => {
     for (const client of [
@@ -101,6 +108,55 @@ describe('SupaCloud validated task bridge', () => {
     await expect(handle.retry()).resolves.toEqual({ id: 'task-1', status: 'retry_scheduled' });
     original.wait = async () => ({ id: 'wrong', status: 'succeeded' });
     await expect(handle.wait()).resolves.toEqual({ id: 'task-1', status: 'succeeded' });
+  });
+
+  test('validates subscription configuration before either factory starts work', () => {
+    const { client } = fixture();
+    for (const subscription of [
+      null, [], { pollingIntervalMs: 0 }, { pollingIntervalMs: 1.5 },
+      { pollingIntervalMs: 2_147_483_648 }, { realtimeTimeoutMs: -1 },
+      { reconcileIntervalMs: Number.NaN }, { stopOnTerminal: 1 },
+      { realtime: { schema: 'public' } }, { realtime: { schema: 'public', table: 'a.b' } },
+      { realtime: { schema: 'public', table: 'a'.repeat(64) } },
+      { onUpdate() {} }, { onError() {} }, { onStateChange() {} },
+      { get realtime() { throw new Error('private config'); } },
+    ]) {
+      for (const factory of [createSupaCloudTaskProvider, createSupaCloudTaskLiveProvider]) {
+        expect(() => Reflect.apply(factory, undefined, [{ supacloud: client, subscription }]))
+          .toThrow('Invalid task input.');
+      }
+    }
+    expect(client.tasks.subscribe).not.toHaveBeenCalled();
+    expect(client.tasks.submit).not.toHaveBeenCalled();
+  });
+
+  test('snapshots and forwards subscription options through provider, receipt and live subscriptions', async () => {
+    const receiptSubscribe = mock((_options: SupaCloudTaskSubscribeOptions) => ({ unsubscribe() {} }));
+    const { client, listeners } = fixture({
+      submit: async () => ({ ...receipt(), subscribe: receiptSubscribe }),
+    });
+    const subscription = {
+      realtime: { schema: 'public', table: 'business_tasks' },
+      pollingIntervalMs: 50, realtimeTimeoutMs: 0, reconcileIntervalMs: 0, stopOnTerminal: false,
+    };
+    const expected = { ...subscription, realtime: { ...subscription.realtime } };
+    const provider = createSupaCloudTaskProvider({ supacloud: client, subscription });
+    const live = createSupaCloudTaskLiveProvider({ supacloud: client, subscription });
+    subscription.realtime.table = 'changed_tasks';
+    subscription.pollingIntervalMs = 500;
+    const handle = await provider.submit('function');
+    const stops = [
+      provider.subscribe('task-1', () => {}),
+      handle.subscribe(() => {}),
+      live.subscribe({ resource: 'tasks', liveParams: { taskId: 'task-1' }, callback() {} }),
+    ];
+    try {
+      expect(firstListener(listeners)).toMatchObject(expected);
+      expect(listeners[1]).toMatchObject(expected);
+      expect(receiptSubscribe).toHaveBeenCalledWith(expect.objectContaining(expected));
+      expect(typeof firstListener(listeners).onUpdate).toBe('function');
+      expect(typeof firstListener(listeners).onError).toBe('function');
+    } finally { for (const stop of stops) stop(); }
   });
 
   test('rejects invalid submission names, payloads and conflicting transport headers before dispatch', async () => {
@@ -394,7 +450,7 @@ describe('SupaCloud task subscriptions', () => {
 const originalFetch = globalThis.fetch;
 afterEach(() => { globalThis.fetch = originalFetch; });
 
-describe('installed SupaCloud SDK', () => {
+describe('installed SupaCloud SDK 0.33.0', () => {
   test('decodes real SDK subscription summaries and blocks SDK callbacks after unsubscribe', async () => {
     const supabase = createClient('https://sdk.example.test', 'test-anon-key', {
       auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
@@ -405,13 +461,20 @@ describe('installed SupaCloud SDK', () => {
       supabase, managementApiUrl: 'https://management.example.test', projectRef: 'project-1',
       getAccessToken: () => 'test-management-token',
     });
-    const provider = createSupaCloudTaskProvider({ supacloud: sdk });
+    const provider = createSupaCloudTaskProvider({
+      supacloud: sdk,
+      subscription: {
+        realtime: { schema: 'public', table: 'business_tasks' },
+        realtimeTimeoutMs: 0, reconcileIntervalMs: 0,
+      },
+    });
     const received: SupaCloudTaskRecord[] = [];
     const stop = provider.subscribe('task-1', task => received.push(task));
     try {
       const binding = channel.bindings['postgres_changes']?.[0];
       if (!binding) throw new Error('Expected the real SDK postgres binding.');
-      const raw = { ...task, result: { ok: true } };
+      expect(binding.filter).toMatchObject({ schema: 'public', table: 'business_tasks' });
+      const raw = { ...task, project_ref: 'project-1', result: { ok: true } };
       binding.callback({ new: raw, old: {} }, undefined, 'test-join');
       expect(received).toEqual([raw]);
       stop();
@@ -432,12 +495,14 @@ describe('installed SupaCloud SDK', () => {
         metadata: request.headers.get('x-supacloud-task-metadata'), body,
       });
       const path = new URL(request.url).pathname;
-      const data = path.startsWith('/functions/v1/') ? { task_id: 'task-1', status: 'enqueued' }
-        : path.endsWith('/cancel') ? { id: 'task-1', status: 'cancelled' }
-        : path.endsWith('/retry') ? { id: 'task-1', status: 'retry_scheduled' }
-        : path.endsWith('/tasks') || path.endsWith('/dlq') ? [{ ...task, status: 'succeeded' }]
-        : { ...task, status: 'succeeded' };
-      return Response.json(data);
+      const current = { ...task, project_ref: 'project-1' };
+      const submitting = path.startsWith('/functions/v1/');
+      const data = submitting ? { task_id: 'task-1', project_ref: 'project-1', status: 'enqueued' }
+        : path.endsWith('/cancel') ? { ...current, status: 'cancelled' }
+        : path.endsWith('/retry') ? { ...current, status: 'retry_scheduled' }
+        : path.endsWith('/tasks') ? [{ ...current, status: 'succeeded' }]
+        : { ...current, status: 'succeeded' };
+      return Response.json(data, { status: submitting ? 202 : 200 });
     }, { preconnect() {} });
     const supabase = createClient('https://sdk.example.test', 'test-anon-key', {
       auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
@@ -463,7 +528,165 @@ describe('installed SupaCloud SDK', () => {
       'https://management.example.test/v1/projects/project-1/tasks?status=succeeded&limit=2',
     );
     expect(requests.map(request => request.url)).toContain(
-      'https://management.example.test/v1/projects/project-1/tasks/dlq?limit=7',
+      'https://management.example.test/v1/projects/project-1/tasks?dlq=true&limit=7',
     );
+  });
+
+  test('polls by default without opening a Realtime channel and stops on terminal state', async () => {
+    const requests: string[] = [];
+    globalThis.fetch = Object.assign(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const request = new Request(input, init);
+      requests.push(request.url);
+      return Response.json({ ...task, project_ref: 'project-1', status: 'succeeded' });
+    }, { preconnect() {} });
+    const supabase = createClient('https://sdk.example.test', 'test-anon-key', {
+      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    });
+    const sdk = createSupaCloudClient({
+      supabase, managementApiUrl: 'https://management.example.test', projectRef: 'project-1',
+      getAccessToken: () => 'test-management-token',
+    });
+    const provider = createSupaCloudTaskProvider({ supacloud: sdk, subscription: { pollingIntervalMs: 1 } });
+    const received = deferred<SupaCloudTaskRecord>();
+    const stop = provider.subscribe('task-1', received.resolve, received.reject);
+    try {
+      expect((await received.promise).status).toBe('succeeded');
+      await new Promise(resolve => setTimeout(resolve, 10));
+      expect(requests).toEqual(['https://management.example.test/v1/projects/project-1/tasks/task-1']);
+      expect(supabase.getChannels()).toHaveLength(0);
+    } finally { stop(); }
+  });
+
+  test('unsubscribe aborts an active polling request and suppresses its late update', async () => {
+    const started = deferred<AbortSignal>();
+    const response = deferred<Response>();
+    globalThis.fetch = Object.assign(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const request = new Request(input, init);
+      started.resolve(request.signal);
+      return response.promise;
+    }, { preconnect() {} });
+    const supabase = createClient('https://sdk.example.test', 'test-anon-key', {
+      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    });
+    const sdk = createSupaCloudClient({
+      supabase, managementApiUrl: 'https://management.example.test', projectRef: 'project-1',
+      getAccessToken: () => 'test-management-token',
+    });
+    const live = createSupaCloudTaskLiveProvider({ supacloud: sdk });
+    const callback = mock(() => {});
+    const stop = live.subscribe({ resource: 'tasks', liveParams: { taskId: 'task-1' }, callback });
+    try {
+      const signal = await started.promise;
+      stop();
+      expect(signal.aborted).toBe(true);
+      response.resolve(Response.json({ ...task, project_ref: 'project-1', status: 'succeeded' }));
+      await new Promise(resolve => setTimeout(resolve, 10));
+      expect(callback).not.toHaveBeenCalled();
+    } finally {
+      stop();
+      response.resolve(Response.json(null));
+    }
+  });
+
+  test('real SDK failures remain sanitized and uncertain writes are not retried', async () => {
+    const methods: string[] = [];
+    globalThis.fetch = Object.assign(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const request = new Request(input, init);
+      methods.push(request.method);
+      return Response.json({ ...task, project_ref: 'foreign-project', status: 'cancelled' });
+    }, { preconnect() {} });
+    const supabase = createClient('https://sdk.example.test', 'test-anon-key', {
+      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    });
+    const sdk = createSupaCloudClient({
+      supabase, managementApiUrl: 'https://management.example.test', projectRef: 'project-1',
+      getAccessToken: () => 'test-management-token',
+    });
+    const provider = createSupaCloudTaskProvider({ supacloud: sdk });
+    await expect(provider.get('task-1')).rejects.toMatchObject({
+      code: 'TASK_PROVIDER_FAILED', writeMayHaveSucceeded: false,
+    });
+    await expect(provider.cancel('task-1')).rejects.toMatchObject({
+      code: 'TASK_PROVIDER_FAILED', writeMayHaveSucceeded: true,
+    });
+    expect(methods).toEqual(['GET', 'POST']);
+  });
+
+  test('real receipt subscriptions fall back to polling and retain stopOnTerminal false until cleanup', async () => {
+    const secondRead = deferred<AbortSignal>();
+    const late = deferred<Response>();
+    let reads = 0;
+    globalThis.fetch = Object.assign(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const request = new Request(input, init);
+      if (new URL(request.url).pathname.startsWith('/functions/v1/')) {
+        return Response.json({ task_id: 'task-1', project_ref: 'project-1', status: 'enqueued' }, { status: 202 });
+      }
+      if (++reads === 1) return Response.json({ ...task, project_ref: 'project-1', status: 'succeeded' });
+      secondRead.resolve(request.signal);
+      return late.promise;
+    }, { preconnect() {} });
+    const supabase = createClient('https://sdk.example.test', 'test-anon-key', {
+      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    });
+    const channel = supabase.channel('supacloud-task:project-1:task-1');
+    channel.subscribe = () => channel;
+    const sdk = createSupaCloudClient({
+      supabase, managementApiUrl: 'https://management.example.test', projectRef: 'project-1',
+      getAccessToken: () => 'test-management-token',
+    });
+    const provider = createSupaCloudTaskProvider({
+      supacloud: sdk,
+      subscription: {
+        realtime: { schema: 'public', table: 'business_tasks' },
+        realtimeTimeoutMs: 1, pollingIntervalMs: 1, reconcileIntervalMs: 0, stopOnTerminal: false,
+      },
+    });
+    const handle = await provider.submit('function');
+    const callback = mock((_task: SupaCloudTaskRecord) => {});
+    const onError = mock((_error: TaskError) => {});
+    const stop = handle.subscribe(callback, onError);
+    try {
+      const signal = await secondRead.promise;
+      expect(reads).toBe(2);
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(callback.mock.calls[0]?.[0].status).toBe('succeeded');
+      expect(supabase.getChannels()).toHaveLength(0);
+      stop();
+      expect(signal.aborted).toBe(true);
+      late.reject(new Error('private late failure'));
+      await new Promise(resolve => setTimeout(resolve, 10));
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(onError).not.toHaveBeenCalled();
+    } finally {
+      stop();
+      late.resolve(Response.json(null));
+    }
+  });
+
+  test('foreign-project polling data never reaches the callback and closes the subscription', async () => {
+    let requests = 0;
+    globalThis.fetch = Object.assign(async () => {
+      requests++;
+      return Response.json({ ...task, project_ref: 'foreign-project' });
+    }, { preconnect() {} });
+    const supabase = createClient('https://sdk.example.test', 'test-anon-key', {
+      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    });
+    const sdk = createSupaCloudClient({
+      supabase, managementApiUrl: 'https://management.example.test', projectRef: 'project-1',
+      getAccessToken: () => 'test-management-token',
+    });
+    const provider = createSupaCloudTaskProvider({ supacloud: sdk, subscription: { pollingIntervalMs: 1 } });
+    const failed = deferred<TaskError>();
+    const callback = mock(() => {});
+    const stop = provider.subscribe('task-1', callback, failed.resolve);
+    try {
+      const error = await failed.promise;
+      expect(error.code).toBe('TASK_SUBSCRIPTION_FAILED');
+      expect(error.message).not.toContain('foreign-project');
+      await new Promise(resolve => setTimeout(resolve, 10));
+      expect(requests).toBe(1);
+      expect(callback).not.toHaveBeenCalled();
+    } finally { stop(); }
   });
 });

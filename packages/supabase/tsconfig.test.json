@@ -1,0 +1,7 @@
+{
+  "extends": "../../tsconfig.bun-tests.json",
+  "include": [
+    "src/**/*.ts",
+    "../refine-adapter/src/refinedev-optional.d.ts"
+  ]
+}

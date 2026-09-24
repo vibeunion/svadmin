@@ -37,6 +37,7 @@ export type {
   SupaCloudTaskListParams,
   SupaCloudTaskDlqParams,
   SupaCloudTaskSubscribeOptions,
+  SupaCloudTaskSubscriptionOptions,
   CreateSupaCloudTaskProviderOptions,
   CreateSupaCloudTaskLiveProviderOptions,
 } from './supacloud';

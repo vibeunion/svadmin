@@ -132,7 +132,7 @@
     "elysia@1.4.30": "patches/elysia@1.4.30.patch",
     "bits-ui@2.19.0": "patches/bits-ui@2.19.0.patch",
     "svelte-toolbelt@0.10.6": "patches/svelte-toolbelt@0.10.6.patch",
-    "@supabase/auth-js@2.112.4": "patches/@supabase%2Fauth-js@2.112.4.patch"
+    "@supabase/auth-js@2.117.1": "patches/@supabase%2Fauth-js@2.117.1.patch"
   },
   "main": "eslint.config.js",
   "directories": {
