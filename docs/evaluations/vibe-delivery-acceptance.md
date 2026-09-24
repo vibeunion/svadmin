@@ -69,6 +69,33 @@
 - The authorization supersedes the permission blocker below, not the missing
   package or installation evidence. Outcome stays PARTIAL until verified.
 
+### Authorized Execution
+
+- Preserved the implementation in commit `30caa05c`, merged remote main
+  `f4e210e8` without conflicts, and pushed `codex/vibe-customer-delivery`.
+  Review and CI are tracked in PR #465.
+- Dispatched gated app back-publication run `36013026945`, using immutable
+  `app-v0.2.0` SHA `16860e083b1970692b0f0640bc6cd82716b038e9`,
+  an app-only manifest and `force_publish=false`.
+- Historical run `35935084576` reached npm publication but npm rejected
+  `@svadmin/app@0.2.0` with PUT E404. This is not resolved by a release tag.
+- Added global Codex MCP entry `svadmin-vibe` through `codex mcp add`, using
+  Node and the local built CLI. Read back the persisted configuration and used
+  that exact command from `/tmp` with an official SDK client: tool discovery,
+  search, inspection and preview passed. This is a local checkout integration,
+  not a registry-backed installation or a model-driven host acceptance test.
+- The CLI suite initially hit the first architecture test's 5-second process
+  timeout repeatedly. Increased that integration case's budget to 30 seconds,
+  matching the neighboring multi-process case; no assertions were removed.
+  The resulting suite passed 104 tests / 1142 assertions before the subsequent
+  TypeBox migration.
+- PR CI caught a direct Zod dependency forbidden by repository policy.
+  Replaced MCP input schemas with TypeBox and retained the SDK protocol layer.
+  Post-migration CLI/packed Node/MCP regression passed **104/104**, with
+  **1142 assertions** in 57.10 seconds. Strict TypeScript (`skipLibCheck=false`)
+  and ESLint passed. The complete local test output is
+  `/tmp/svadmin-vibe-authorized-cli-tests.log`.
+
 Overall delivery is `PARTIAL`, state `blocked`, not "all complete".
 
 Required next authorization: commit/push or PR, controlled Release Please/npm

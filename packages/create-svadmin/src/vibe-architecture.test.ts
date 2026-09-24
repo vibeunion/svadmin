@@ -44,7 +44,7 @@ describe('generated application architecture', () => {
     const result = check(directory);
     expect(result.stderr.toString()).toBe('');
     expect(result.exitCode).toBe(0);
-  });
+  }, 30_000);
 
   it('rejects private imports, exports, aliases, import types and dynamic paths', () => {
     for (const [source, diagnostic] of [

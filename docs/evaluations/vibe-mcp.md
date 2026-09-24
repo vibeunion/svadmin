@@ -26,14 +26,17 @@
 
 ## Implementation Decisions
 
-- SDK `1.30.1` is pinned; Zod is a declared production dependency. The stdio
-  entry loads them dynamically and the build leaves them external. Other CLI
+- SDK `1.30.1` is pinned; TypeBox is a declared production dependency, matching
+  the repository schema boundary. The stdio entry loads them dynamically and
+  the build leaves the SDK external. Other CLI
   commands do not initialize an MCP server or load a customer's configuration.
 - An independent read-only reviewer reproduced a high-level SDK limitation:
   omitting `arguments` failed a search with all-optional fields. The server now
   uses the SDK's public low-level `Server` API, normalizes omitted arguments to
   `{}`, and derives advertised JSON schemas and runtime checks from the same
-  strict Zod objects. No SDK internals or protocol framing are reimplemented.
+  strict TypeBox objects with `Value.Check`. No SDK internals or protocol
+  framing are reimplemented. The initial Zod implementation was replaced after
+  the release PR's TypeBox contract gate rejected direct Zod dependencies.
 - Three tools only: search metadata, inspect reference context, read a
   desktop/mobile reference PNG. No model credentials, writes, HTTP listener,
   arbitrary path or DataProvider operations are exposed.

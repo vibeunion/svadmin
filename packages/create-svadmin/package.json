@@ -14,7 +14,7 @@
     "scaffold-manifest.json"
   ],
   "scripts": {
-    "build": "bun build src/index.ts --outdir dist --target node --format esm --external @modelcontextprotocol/sdk --external zod",
+    "build": "bun build src/index.ts --outdir dist --target node --format esm --external @modelcontextprotocol/sdk",
     "test": "bun test src",
     "check:compat": "bun ../../scripts/check-create-svadmin-compat.ts",
     "sync-template": "bun src/sync-template.ts",
@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.30.1",
-    "zod": "^4.0.0",
+    "@sinclair/typebox": "^0.34.52",
     "prompts": "^2.4.2",
     "picocolors": "^1.1.1"
   },

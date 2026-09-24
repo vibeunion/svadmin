@@ -221,9 +221,9 @@
       },
       "dependencies": {
         "@modelcontextprotocol/sdk": "1.30.1",
+        "@sinclair/typebox": "^0.34.52",
         "picocolors": "^1.1.1",
         "prompts": "^2.4.2",
-        "zod": "^4.0.0",
       },
       "devDependencies": {
         "@svadmin/core": "workspace:*",
