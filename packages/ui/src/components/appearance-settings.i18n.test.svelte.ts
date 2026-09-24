@@ -86,7 +86,7 @@ describe('AppearanceSettings locale scope', () => {
 
     const pageSize = within(screen.getByRole('group', { name: 'first:en:settings.defaultPageSize' }));
     expect(pageSize.getByRole('button', { pressed: true }).textContent).toBe('10');
-    await fireEvent.click(pageSize.getByRole('button', { name: '50', exact: true }));
+    await fireEvent.click(pageSize.getByRole('button', { name: '50' }));
     expect(pageSize.getByRole('button', { pressed: true }).textContent).toBe('50');
     expect(localStorage.getItem('svadmin-default-page-size')).toBe('50');
   });

@@ -173,7 +173,9 @@ describe('contract-bound detail views', () => {
     expect(source.getOne).not.toHaveBeenCalled();
     expect(app.view.queryByText('Record 1')).toBeNull();
     allow.resolve({ can: false });
-    await waitFor(() => expect(app.view.container.querySelector('[data-svadmin-access-denied]')).toBeTruthy());
+    // Drawer content renders through a Portal into document.body, so scope the
+    // access-denied lookup to the document rather than the render container.
+    await waitFor(() => expect(app.view.baseElement.querySelector('[data-svadmin-access-denied]')).toBeTruthy());
     expect(source.getOne).not.toHaveBeenCalled();
     if (mode === 'page') {
       const refresh = app.view.getByRole('button', { name: /^refresh$/i });
@@ -198,7 +200,7 @@ describe('contract-bound detail views', () => {
     const source = provider();
     const app = mount('drawer', source, false);
     await app.view.rerender({ mode, open: true, resources: [{ ...postDefinition, canShow: false }] });
-    await waitFor(() => expect(app.view.container.querySelector('[data-svadmin-access-denied]')).toBeTruthy());
+    await waitFor(() => expect(app.view.baseElement.querySelector('[data-svadmin-access-denied]')).toBeTruthy());
     expect(source.getOne).not.toHaveBeenCalled();
   });
 
@@ -235,8 +237,8 @@ describe('contract-bound detail views', () => {
     const app = mount(mode, first);
     await waitFor(() => expect(app.view.getByText('First provider')).toBeTruthy());
     const next = render(Host, { mode, provider: second, resources, queryClient: app.client });
-    await waitFor(() => expect(within(next.container).getByText('Second provider')).toBeTruthy());
-    expect(within(app.view.container).getByText('First provider')).toBeTruthy();
+    await waitFor(() => expect(within(next.baseElement).getByText('Second provider')).toBeTruthy());
+    expect(within(app.view.baseElement).getByText('First provider')).toBeTruthy();
     expect(first.getOne).toHaveBeenCalledOnce();
     expect(second.getOne).toHaveBeenCalledOnce();
   });
