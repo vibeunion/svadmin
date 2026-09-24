@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.78.0](https://github.com/vibeunion/svadmin/compare/ui-v0.77.0...ui-v0.78.0) (2026-09-24)
+
+
+### 🚀 Features
+
+* **ui:** add inline disabled reason presentation for buttons ([a0f168c](https://github.com/vibeunion/svadmin/commit/a0f168c6571e194421e1a5422dfeea3fb45e24b7))
+* **ui:** add inline disabled reason presentation for buttons ([c4ef8b9](https://github.com/vibeunion/svadmin/commit/c4ef8b99f2f4ae764a0ae45b3d4878d18c447144))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** restore green main after admin workspace update ([3e102da](https://github.com/vibeunion/svadmin/commit/3e102da53c379041d1a5b18b75940508ad8f4053))
+* **ui:** restore green main after admin workspace update ([9a58b49](https://github.com/vibeunion/svadmin/commit/9a58b4975f3c4835171b4b185d9699e09b5663c6))
+
 ## [0.77.0](https://github.com/vibeunion/svadmin/compare/ui-v0.76.0...ui-v0.77.0) (2026-09-23)
 
 
