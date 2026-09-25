@@ -124,3 +124,19 @@
 
 Real backend persistence, production authorization and customer aesthetic
 sign-off remain starter integration boundaries, not delivered backend features.
+
+## Loading Acceptance Follow-Up
+
+- Parent: persistent demo acceptance above.
+- Source: user explicitly requested "修复和全部完成" on 2026-09-25.
+- Reason: resolve the remaining loading test failure in the shipped blueprint,
+  then complete source, release and registry-consumer verification.
+- Scope: loading-test synchronization, regression coverage and acceptance
+  evidence; no changes to demo provider delay or customer runtime behavior.
+- Risk/orchestration: medium, native, single writer plus one read-only verifier.
+- Coordination: no running tasks in the read-only coordination DB snapshot.
+  The agmesh executable is unavailable; no framework install or DB mutation
+  is needed for this bounded follow-up.
+- Acceptance: focused repeated desktop/mobile loading tests, complete generated
+  workspace browser suite, check/build, source CI and published CLI verification.
+- State: in progress.

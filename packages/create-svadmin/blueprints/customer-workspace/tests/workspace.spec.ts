@@ -5,6 +5,11 @@ function visibleText(page: Page, text: string | RegExp) {
   return page.getByText(text, { exact: typeof text === 'string' }).filter({ visible: true });
 }
 
+test.beforeEach(async ({ page }) => {
+  // 隔离外部字体服务，页面验收仅依赖本地应用和系统备用字体。
+  await page.route('https://fonts.bunny.net/**', route => route.abort());
+});
+
 test('keyboard skip link does not cover navigation', async ({ page, isMobile }) => {
   await page.goto('/#/customers');
   const skip = page.locator('[data-svadmin-skip-link]');
@@ -117,6 +122,11 @@ test('read-only access allows detail but refuses edits', async ({ page }) => {
 
 for (const scenario of ['empty', 'error', 'denied', 'loading', 'partial']) {
   test(`provider state: ${scenario}`, async ({ page }, testInfo) => {
+    if (scenario === 'loading') {
+      // 在导航前暂停演示延迟，避免慢速加载错过骨架屏。
+      await page.clock.install({ time: new Date('2026-09-25T00:00:00Z') });
+      await page.clock.pauseAt(new Date('2026-09-25T00:01:00Z'));
+    }
     await page.goto(`/?scenario=${scenario}#${scenario === 'partial' ? '/' : '/customers'}`);
     if (scenario === 'loading') {
       await expect(page.locator('[data-slot="skeleton"]').filter({ visible: true }).first()).toBeVisible();
@@ -131,5 +141,10 @@ for (const scenario of ['empty', 'error', 'denied', 'loading', 'partial']) {
       await expect(page.getByText(/失败|不可用|错误/).first()).toBeVisible();
     }
     await page.screenshot({ path: testInfo.outputPath(`${scenario}.png`), fullPage: true, animations: 'disabled' });
+    if (scenario === 'loading') {
+      await page.clock.runFor(2500);
+      await expect(visibleText(page, '澄川科技')).toBeVisible();
+      await expect(page.locator('[data-slot="skeleton"]').filter({ visible: true })).toHaveCount(0);
+    }
   });
 }
