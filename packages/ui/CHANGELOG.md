@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.78.2](https://github.com/vibeunion/svadmin/compare/ui-v0.78.1...ui-v0.78.2) (2026-09-25)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** access index-signature list state with bracket notation ([b1028f9](https://github.com/vibeunion/svadmin/commit/b1028f93f447147c73c9b81d5f40a2ae84577607))
+* **ui:** access index-signature list state with bracket notation ([cd1bc2c](https://github.com/vibeunion/svadmin/commit/cd1bc2c98003a5a6facc99f5a1ef4ef2f847b2fd))
+
+
+### 💅 Elegance & Refactoring
+
+* **ui:** compose AutoTable state and guard stale deletion results ([f4cb912](https://github.com/vibeunion/svadmin/commit/f4cb9120005405ed36595c8b588b324eac885456))
+
 ## [0.78.1](https://github.com/vibeunion/svadmin/compare/ui-v0.78.0...ui-v0.78.1) (2026-09-24)
 
 
