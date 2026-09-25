@@ -68,6 +68,21 @@ describe('vibe starter', () => {
     expect(ai.project.testCommand).toBe('bun run test:ui');
   });
 
+  it('ships deterministic loading and loaded-state acceptance', () => {
+    const files = planVibeProject(root, manifest, 'enterprise');
+    const acceptance = file(files, 'tests/workspace.spec.ts');
+    expect(acceptance).toContain("page.route('https://fonts.bunny.net/**', route => route.abort())");
+    expect(acceptance).toContain('await page.clock.pauseAt(');
+    expect(acceptance).toContain('await page.goto(`/?scenario=${scenario}');
+    expect(acceptance.indexOf('await page.clock.pauseAt(')).toBeLessThan(
+      acceptance.indexOf('await page.goto(`/?scenario=${scenario}'),
+    );
+    expect(acceptance).toContain('await page.clock.install(');
+    expect(acceptance).toContain('await page.clock.runFor(2500)');
+    expect(acceptance).toContain("await expect(visibleText(page, '澄川科技')).toBeVisible()");
+    expect(acceptance).toContain("await expect(page.locator('[data-slot=\"skeleton\"]').filter({ visible: true })).toHaveCount(0)");
+  });
+
   it('refuses existing directories and symlinks without touching existing files', () => {
     const directory = temp();
     writeFileSync(join(directory, 'keep.txt'), 'customer work');
