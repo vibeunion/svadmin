@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.35.1](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.35.0...create-svadmin-v0.35.1) (2026-09-25)
+
+
+### 🐛 Bug Fixes
+
+* **create-svadmin:** make loading acceptance deterministic ([#468](https://github.com/vibeunion/svadmin/issues/468)) ([224ab65](https://github.com/vibeunion/svadmin/commit/224ab65e6768117a353cf19120ca6f73b0f6e89c))
+
 ## [0.35.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.34.0...create-svadmin-v0.35.0) (2026-09-24)
 
 
