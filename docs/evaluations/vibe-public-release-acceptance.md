@@ -5,9 +5,10 @@
   completed npm login and asked to continue.
 - Reason: close the release and original-manifest customer acceptance gates.
 - Mode: panel; one writer with independent read-only release review.
-- State: publication complete; all 30 registry versions are available and
-  registry-backed package consumers pass. Persistent demo acceptance is PARTIAL:
-  check/build pass, but the mobile loading assertion remains unresolved.
+- State: original publication complete; all 30 registry versions are available
+  and registry-backed package consumers pass. The persistent loading acceptance
+  gap is resolved by the follow-up below; CLI patch delivery is tracked in
+  release PR #469.
   Authorization URLs and credentials are not recorded.
 
 ## Source And Release
@@ -78,8 +79,8 @@
   was changed to obtain a pass. Persistent browser acceptance is not 38/38.
 - Desktop dashboard and mobile form screenshots from the second run were
   inspected: controls remain readable, without page-level horizontal overflow.
-- Remaining acceptance: diagnose and deterministically verify mobile loading.
-  This is separate from the completed publication and package-consumer gates.
+- At this checkpoint, mobile loading remained unresolved. The follow-up below
+  supersedes this historical PARTIAL result without discarding failure evidence.
 
 ## Registry-Backed MCP
 
@@ -139,4 +140,36 @@ sign-off remain starter integration boundaries, not delivered backend features.
   is needed for this bounded follow-up.
 - Acceptance: focused repeated desktop/mobile loading tests, complete generated
   workspace browser suite, check/build, source CI and published CLI verification.
-- State: in progress.
+- State: local and source acceptance complete. Source PR #468 merged as
+  `224ab65e6768117a353cf19120ca6f73b0f6e89c`; patch release PR #469 tracks
+  `@svadmin/create@0.35.1`.
+- Fix: pause the Playwright clock before navigating the loading scenario,
+  assert the visible skeleton, advance the real demo delay by 2500 ms, then
+  assert visible customer data and no visible skeleton. Isolate Bunny Fonts
+  requests only in browser tests, using the existing system font fallback.
+  Runtime behavior, DEV-only scenario restrictions and timeouts are unchanged.
+- A production-preview experiment was rejected because scenarios intentionally
+  remain DEV-only. Its configuration change was fully reverted.
+- Final generated-consumer suite: 38/38 passed without retries. Evidence:
+  `verified-test-results/` in the persistent demo workspace.
+- Final focused loading repetitions: 10/10 passed (5 desktop, 5 mobile), without
+  retries. Evidence: `verified-loading-test-results/` in the same workspace.
+- Both final runs use the identical installed Chromium revision 1243 copied
+  from the external-volume cache to
+  `/Users/zhd/Library/Caches/ms-playwright-svadmin`. Earlier initialization
+  failures remain recorded; they are not counted as passing retries.
+- The tested acceptance file is byte-identical to the source blueprint.
+  Check/build pass; focused CLI regression tests pass. Broader local source
+  tests encountered external-volume process-start timeouts, and an older
+  bootstrap install resolved TypeScript 7 instead of the root's TypeScript 6.
+  Neither failed local setup is counted as successful source verification.
+- Source CI run `36135598568` passed tests, types, build, audit, packed consumers
+  and E2E. All 12 check runs on candidate `a961929c` completed without failure.
+- Independent review found no blocking issue. Its regression-test false-positive
+  finding was corrected before merge. The mobile loading screenshot was
+  inspected; screenshot evidence covers fallback-font layout, not remote-font
+  availability.
+- Release PR #469 was independently reviewed at
+  `aaac8c9e2f9ace1ef92d359347672cc636789385`: only the CLI manifest/package/lock
+  versions and changelog change. Publication and public-package receipts belong
+  to that release, not to the local test results above.
