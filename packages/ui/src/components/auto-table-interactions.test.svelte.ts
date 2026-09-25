@@ -41,6 +41,36 @@ afterEach(() => {
 });
 
 describe('AutoTable interactions', () => {
+  it('synchronizes changed controlled pagination and sorting with queries and the router', async () => {
+    const onNavigate = vi.fn();
+    const onGetList = vi.fn();
+    const view = render(AutoTableInteractionsHarness, {
+      onNavigate, onGetList,
+      pagination: { current: 2, pageSize: 20 },
+      sorters: [{ field: 'email', order: 'asc' }],
+    });
+    await waitFor(() => expect(onGetList).toHaveBeenLastCalledWith(expect.objectContaining({
+      pagination: expect.objectContaining({ current: 2, pageSize: 20 }),
+      sorters: [{ field: 'email', order: 'asc' }],
+    })));
+    await view.rerender({
+      pagination: { current: 3, pageSize: 50 },
+      sorters: [{ field: 'email', order: 'desc' }],
+    });
+    await waitFor(() => expect(onGetList).toHaveBeenLastCalledWith(expect.objectContaining({
+      pagination: expect.objectContaining({ current: 3, pageSize: 50 }),
+      sorters: [{ field: 'email', order: 'desc' }],
+    })));
+    await waitFor(() => expect(onNavigate).toHaveBeenLastCalledWith(expect.objectContaining({
+      query: expect.objectContaining({ page: '3', pageSize: '50', sort: 'email', order: 'desc' }),
+    })));
+    await view.rerender({ sorters: [] });
+    await waitFor(() => expect(onGetList).toHaveBeenLastCalledWith(expect.objectContaining({ sorters: [] })));
+    await waitFor(() => expect(onNavigate).toHaveBeenLastCalledWith(expect.objectContaining({
+      query: { page: '3', pageSize: '50' },
+    })));
+  });
+
   it('opens and closes embedded detail drawers without changing router history', async () => {
     const onNavigate = vi.fn();
     const onBack = vi.fn();
@@ -332,6 +362,21 @@ describe('AutoTable interactions', () => {
     expect(await view.findByRole('columnheader', { name: /^ID/ })).toBeTruthy();
     await fireEvent.click(view.getByRole('button', { name: '视图' }));
     expect((await view.findByLabelText('当前未保存视图') as HTMLSelectElement).value).toBe('');
+  });
+
+  it('keeps the in-memory saved view usable when local persistence fails', async () => {
+    const view = render(AutoTableInteractionsHarness, { onNavigate: vi.fn() });
+    await fireEvent.click(await view.findByRole('button', { name: '视图' }));
+    const write = vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
+      throw new DOMException('Storage unavailable', 'QuotaExceededError');
+    });
+    await fireEvent.input(await view.findByLabelText('视图名称'), { target: { value: 'Offline view' } });
+    await fireEvent.click(view.getByRole('button', { name: '保存' }));
+    await waitFor(() => expect(view.getByRole('option', { name: 'Offline view' })).toBeTruthy());
+    expect(localStorage.getItem(savedListViewsStorageKey(defaultScope))).toBeNull();
+    expect(write).toHaveBeenCalledWith(savedListViewsStorageKey(defaultScope), expect.any(String));
+    await fireEvent.click(view.getByRole('button', { name: '删除 Offline view' }));
+    expect(view.queryByRole('option', { name: 'Offline view' })).toBeNull();
   });
 
   it('applies and deletes a saved view from the view picker', async () => {
@@ -887,6 +932,31 @@ describe('AutoTable interactions', () => {
       message: '成功删除 1 条记录',
     }));
     expect(onNotify).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(['tenant', 'provider'] as const)('keeps a new confirmation intact after a previous-%s deletion fails late', async change => {
+    let rejectDelete!: (error: Error) => void;
+    const pending = new Promise<void>((_resolve, reject) => { rejectDelete = reject; });
+    const onDeleteMany = vi.fn(() => pending);
+    const view = render(AutoTableInteractionsHarness, {
+      onNavigate: vi.fn(), canDelete: true, deleteAllowed: true, batchDeleteAllowed: true,
+      selectable: true, onDeleteMany,
+    });
+    await fireEvent.click(requireValue((await view.findAllByRole('checkbox', { name: '选择记录 user-1' }))[0]));
+    await fireEvent.click(view.getByRole('button', { name: '批量删除 (1)' }));
+    await fireEvent.click(within(await view.findByRole('alertdialog')).getByRole('button', { name: '删除' }));
+    await waitFor(() => expect(onDeleteMany).toHaveBeenCalledOnce());
+
+    await view.rerender(change === 'tenant' ? { tenantIdentity: 'new-tenant' } : { providerName: 'reporting' });
+    await waitFor(() => expect(view.queryByText('已选择 1 条记录')).toBeNull());
+    await fireEvent.click(requireValue((await view.findAllByRole('checkbox', { name: '选择记录 user-1' }))[0]));
+    await fireEvent.click(await view.findByRole('button', { name: '批量删除 (1)' }));
+    const currentDialog = await view.findByRole('alertdialog');
+    rejectDelete(new Error('previous scope failed'));
+    await waitFor(() => expect(view.queryByRole('status')).toBeNull());
+    expect(view.getByRole('alertdialog')).toBe(currentDialog);
+    expect(view.getByText('已选择 1 条记录')).toBeTruthy();
+    expect(onDeleteMany).toHaveBeenCalledOnce();
   });
 
   it('preserves numeric primary keys across batch actions, permissions, and the data provider', async () => {

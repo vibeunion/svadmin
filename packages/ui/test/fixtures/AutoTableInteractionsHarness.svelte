@@ -6,7 +6,7 @@
 
   import { defineResource, syncGlobalPath } from '@svadmin/core';
   import { Type } from '@sinclair/typebox';
-  import type { AccessControlProvider, DataProvider, NotificationProvider, ResourceDefinition, RouterProvider } from '@svadmin/core';
+  import type { AccessControlProvider, DataProvider, NotificationProvider, ResourceDefinition, RouterProvider, Sort } from '@svadmin/core';
   import { untrack } from 'svelte';
   import { SvelteSet } from 'svelte/reactivity';
   import { Button } from '../../src/components/ui/button/index.js';
@@ -16,6 +16,9 @@
 
   interface Props {
     syncWithLocation?: boolean;
+    pagination?: { current: number; pageSize: number };
+    sorters?: Sort[];
+    onGetList?: (params: Parameters<DataProvider['getList']>[0]) => void;
     onNavigate: RouterProvider['go'];
     onBack?: () => void;
     initialParams?: Record<string, string>;
@@ -50,6 +53,9 @@
   let {
     onNavigate,
     syncWithLocation = true,
+    pagination,
+    sorters,
+    onGetList,
     onBack,
     initialParams = {},
     locale = 'zh-CN',
@@ -82,7 +88,8 @@
 
   const deletedIds = new SvelteSet<string>();
   const dataProvider: DataProvider = $derived({
-    getList: async () => {
+    getList: async (params: Parameters<DataProvider['getList']>[0]) => {
+      onGetList?.(params);
       const data = (emptyData ? [] : [
         { id: numericIds ? 1 : 'user-1', email: 'user@example.com' },
         ...(includeSecondRecord ? [{ id: numericIds ? 2 : 'user-2', email: 'second@example.com' }] : []),
@@ -197,9 +204,9 @@
   {#if standaloneDetailId != null}
     <RecordDetailDrawer resourceName="users" open={true} recordId={standaloneDetailId} />
   {:else if customBatchAction}
-    <AutoTable {rendering} resourceName="users" {selectable} {density} {expandedRowRender} {batchActions} {syncWithLocation} />
+    <AutoTable {rendering} resourceName="users" {selectable} {density} {expandedRowRender} {batchActions} {syncWithLocation} {...definedOptions({ pagination, sorters })} />
   {:else}
-    <AutoTable {rendering} resourceName="users" {selectable} {density} {expandedRowRender} {syncWithLocation} />
+    <AutoTable {rendering} resourceName="users" {selectable} {density} {expandedRowRender} {syncWithLocation} {...definedOptions({ pagination, sorters })} />
   {/if}
 {/snippet}
 

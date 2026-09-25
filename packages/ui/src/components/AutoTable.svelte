@@ -3,8 +3,7 @@
   import type { AutoTableGridState } from './auto-table-grid.js';
   import { definedOptions } from '@svadmin/core/options';
 
-  import { onDestroy, tick, untrack } from 'svelte';
-  import { SvelteMap } from 'svelte/reactivity';
+  import { untrack } from 'svelte';
   import { cn } from '../utils.js';
   import {
     createTable,
@@ -17,8 +16,6 @@
     rowSortingFeature,
     type ColumnDef,
     type SortingState,
-    type RowSelectionState,
-    type ColumnVisibilityState,
     type ExpandedState,
   } from '@tanstack/svelte-table';
   import type { Column, Header, Row, TableFeatures } from '@tanstack/table-core';
@@ -40,8 +37,8 @@
     cell_getValue,
   } from '@tanstack/table-core/static-functions';
 
-  import { captureAdminContext, captureAuthSession, useGetIdentity, DeleteManyPartialError, getAdminOptions, getContractFormFields, useNavigation, useParsed, useResourceContract, useList, useDeleteMany, downloadData, type ExportFormat, type TaskProvider } from '@svadmin/core';
-  import { decodeBaseRecord, snapshotPlainData, parseContractRouteId, formatContractRouteId } from '@svadmin/core/schema';
+  import { captureAdminContext, captureAuthSession, useGetIdentity, getContractFormFields, useNavigation, useParsed, useResourceContract, useList, useDeleteMany, downloadData, type ExportFormat, type TaskProvider } from '@svadmin/core';
+  import { snapshotPlainData, parseContractRouteId, formatContractRouteId } from '@svadmin/core/schema';
   import {
     checkedTableRows,
     copyTableRecord,
@@ -53,37 +50,21 @@
   import type {
     BaseRecord,
     FieldDefinition,
-    Filter,
-    LogicalFilter,
-    Pagination as PaginationState,
     Sort,
   } from '@svadmin/core';
   import { useCan } from '@svadmin/core';
   import { readURLState, writeURLState } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
+  import { createSavedListViews } from './saved-list-views.svelte.js';
+  import { createListState } from './list-state.svelte.js';
+  import { createListSelection } from './list-selection.svelte.js';
+  import { createListColumnPreferences } from './list-column-preferences.svelte.js';
+  import { createListDeletion } from './list-deletion.svelte.js';
   import {
-    activeSavedListViewStorageKey,
     canMigrateLegacyListPreferences,
-    cloneSavedListViewState,
-    columnOrderStorageKey,
-    columnVisibilityStorageKey,
-    decodeRemoteSavedListViews,
-    decodeSavedListViewMutationResult,
-    decodeSavedListViewRemoveResult,
     decodeSavedListViewAccess,
-    decodeSavedListViewSubjects,
-    legacyActiveSavedListViewStorageKey,
-    legacyColumnOrderStorageKey,
-    legacyColumnVisibilityStorageKey,
-    legacySavedListViewsStorageKey,
     listPreferenceScopeId,
-    readSavedListViews,
-    savedListViewsStorageKey,
-    serializeSavedListViews,
     type ListPreferenceScope,
-    type SavedListView,
-    type SavedListViewAccess,
-    type SavedListViewSubject,
     type SavedListViewState,
     type SavedListViewProvider,
   } from './saved-list-views.js';
@@ -204,8 +185,6 @@
   }: Props = $props();
 
   let densityOverride = $state<'compact' | 'comfortable' | undefined>(undefined);
-  let allMatchingSelected = $state(false);
-  const excludedMatchingIds = new SvelteMap<string, string | number>();
   const currentDensity = $derived(densityOverride ?? density);
   const adminContext = captureAdminContext();
   const parsed = useParsed();
@@ -263,49 +242,6 @@
     ...resource.fields.map((field) => field.key),
     '_select', '_expand', '_actions',
   ]));
-  const storedSavedViews = untrack(() => readSavedListViews(
-    readScopedPreference(
-      listPreferenceScope,
-      savedListViewsStorageKey(listPreferenceScope),
-      legacySavedListViewsStorageKey(resourceName),
-    ),
-    savedViewColumnIds,
-  ));
-  let savedViews = $state<SavedListView[]>(storedSavedViews);
-  let remoteSavedViews = $state<SavedListView[]>([]);
-  let remoteViewsLoading = $state(false);
-  let remoteViewsFailed = $state(false);
-  let remoteViewsReload = $state(0);
-  let remoteDefaultEligible = true;
-  const availableSavedViews = $derived.by(() => {
-    const ids = new Set<string>();
-    return [...remoteSavedViews, ...savedViews].filter(view => {
-      if (ids.has(view.id)) return false;
-      ids.add(view.id);
-      return true;
-    });
-  });
-  const storedActiveSavedViewId = untrack(() => {
-    const candidate = readScopedPreference(
-      listPreferenceScope,
-      activeSavedListViewStorageKey(listPreferenceScope),
-      legacyActiveSavedListViewStorageKey(resourceName),
-    );
-    return storedSavedViews.some((view) => view.id === candidate) ? candidate ?? undefined : undefined;
-  });
-  let savedViewName = $state('');
-  let savedViewsOpen = $state(false);
-  let savedViewSource = $state<'local' | 'team' | 'system'>('local');
-  let savedViewMutationPending = $state(false);
-  let savedViewMutationError = $state<'failure' | 'conflict' | undefined>();
-  const accessDrafts = new SvelteMap<string, SavedListViewAccess>();
-  const accessSubjects = new SvelteMap<string, SavedListViewSubject[]>();
-  const accessSubjectsLoading = new SvelteMap<string, boolean>();
-  const accessSubjectsFailed = new SvelteMap<string, boolean>();
-  const accessSubjectQueries = new SvelteMap<string, string>();
-  const accessSubjectRequests = new Map<string, object>();
-  let savedViewMutationEpoch = 0;
-
   const hasExplicitURLState = untrack(() => (
     urlState.page !== undefined
     || urlState.pageSize !== undefined
@@ -313,237 +249,64 @@
     || urlState.search !== undefined
     || urlState.filters !== undefined
   ));
-  let activeSavedViewId = $state<string | undefined>(hasExplicitURLState ? undefined : storedActiveSavedViewId);
-  const activeSavedViewName = $derived(availableSavedViews.find((view) => view.id === activeSavedViewId)?.name);
-  const initialSavedView = untrack(() => (
-    !hasExplicitURLState && storedActiveSavedViewId
-      ? storedSavedViews.find((view) => view.id === storedActiveSavedViewId)
-      : undefined
-  ));
-  const initialViewState = initialSavedView?.state;
+  const savedViewModel = createSavedListViews({
+    scope: () => listPreferenceScope,
+    columns: () => savedViewColumnIds,
+    provider: () => savedViewProvider,
+    isScopeLoaded: preferenceScopeIsLoaded,
+    readPreference: readScopedPreference,
+    hasExplicitURLState,
+    canApplyRemoteDefault: () => applyRemoteDefaultView && !externalPagination && !externalSorters,
+    captureState: () => {
+      listState.flushSearch();
+      return getCurrentSavedViewState();
+    },
+    applyState: applySavedViewState,
+  });
+  const {
+    markSavedViewDirty, applySavedView, saveCurrentView, deleteSavedView,
+    setRemoteDefault, saveRemoteAccess, loadAccessSubjects,
+    accessDrafts, accessSubjects, accessSubjectsLoading, accessSubjectsFailed, accessSubjectQueries,
+  } = savedViewModel;
+  const initialViewState = savedViewModel.initialSavedView?.state;
 
   // The table can stay mounted while the surrounding tenant/provider changes.
   // Keep persistence effects paused until the new scope has been loaded.
   let loadedPreferenceScopeId = $state(untrack(() => listPreferenceScopeId(listPreferenceScope)));
 
-  function readColumnVisibilityPreference(scope: ListPreferenceScope): ColumnVisibilityState {
-    const stored = readScopedPreference(
-      scope,
-      columnVisibilityStorageKey(scope),
-      legacyColumnVisibilityStorageKey(resourceName),
-    );
-    if (stored) {
-      try {
-        const parsed: unknown = JSON.parse(stored);
-        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-          const visibility: ColumnVisibilityState = {};
-          for (const [columnId, visible] of Object.entries(decodeBaseRecord(parsed))) {
-            if (savedViewColumnIds.has(columnId) && typeof visible === 'boolean') {
-              visibility[columnId] = visible;
-            }
-          }
-          return visibility;
-        }
-      } catch { /* fall through to resource defaults */ }
-    }
-
-    const visibility: ColumnVisibilityState = {};
-    for (const field of resource.fields) {
-      if (field.showInList === false) visibility[field.key] = false;
-    }
-    return visibility;
-  }
-
-  function readColumnOrderPreference(scope: ListPreferenceScope): string[] {
-    const stored = readScopedPreference(
-      scope,
-      columnOrderStorageKey(scope),
-      legacyColumnOrderStorageKey(resourceName),
-    );
-    if (!stored) return [];
-    try {
-      const parsed: unknown = JSON.parse(stored);
-      return Array.isArray(parsed)
-        ? [...new Set(parsed.filter((columnId: unknown): columnId is string => (
-          typeof columnId === 'string' && savedViewColumnIds.has(columnId)
-        )))]
-        : [];
-    } catch {
-      return [];
-    }
-  }
-
-  function readScopedSavedViewPreferences(scope: ListPreferenceScope): {
-    savedViews: SavedListView[];
-    activeSavedViewId?: string;
-    activeSavedView?: SavedListView;
-    columnVisibility: ColumnVisibilityState;
-    columnOrder: string[];
-  } {
-    const scopedSavedViews = readSavedListViews(
-      readScopedPreference(
-        scope,
-        savedListViewsStorageKey(scope),
-        legacySavedListViewsStorageKey(resourceName),
-      ),
-      savedViewColumnIds,
-    );
-    const candidate = readScopedPreference(
-      scope,
-      activeSavedListViewStorageKey(scope),
-      legacyActiveSavedListViewStorageKey(resourceName),
-    );
-    const activeSavedView = scopedSavedViews.find((view) => view.id === candidate);
-    return definedOptions({
-      savedViews: scopedSavedViews,
-      activeSavedViewId: activeSavedView?.id,
-      activeSavedView,
-      columnVisibility: readColumnVisibilityPreference(scope),
-      columnOrder: readColumnOrderPreference(scope),
-    });
-  }
-
   // Snapshot resource values for initial state (untrack to avoid reactive tracking)
   const storedPageSize = parseInt(readLocalPreference('svadmin-default-page-size') ?? '', 10);
   const initPageSize = $derived(resource.pageSize ?? (Number.isSafeInteger(storedPageSize) && storedPageSize > 0 ? storedPageSize : 10));
-  const initDefaultSort = $derived(resource.defaultSort);
-
-  let pagination = $state<PaginationState>(untrack(() => externalPagination ?? {
-    current: urlState.page ?? initialViewState?.pagination.current ?? 1,
-    pageSize: urlState.pageSize ?? initialViewState?.pagination.pageSize ?? initPageSize,
-  }));
-  let sorters = $state<Sort[]>(untrack(() =>
-    externalSorters ??
-    (urlState.sortField
-      ? [{ field: urlState.sortField, order: urlState.sortOrder ?? 'asc' }]
-      : initialViewState?.sorters ?? (initDefaultSort ? [initDefaultSort] : [])))
-  );
-  const initialURLFilters = untrack(() => urlState.filters ?? initialViewState?.filters ?? []);
-  const editableFilterKeys = $derived(new Set(resource.fields.filter((field) => field.filterable).map((field) => field.key)));
-  const editableFilterCounts: Record<string, number> = {};
-  for (const filter of initialURLFilters) {
-    if ('field' in filter && filter.operator === 'contains' && typeof filter.value === 'string' && untrack(() => editableFilterKeys.has(filter.field))) {
-      editableFilterCounts[filter.field] = (editableFilterCounts[filter.field] ?? 0) + 1;
-    }
-  }
-  const initialFilterValues: Record<string, string> = {};
-  for (const filter of initialURLFilters) {
-    if (
-      'field' in filter
-      && filter.operator === 'contains'
-      && typeof filter.value === 'string'
-      && editableFilterCounts[filter.field] === 1
-    ) {
-      initialFilterValues[filter.field] = filter.value;
-    }
-  }
-  let filters = $state<Filter[]>(initialURLFilters);
-  let searchText = $state(urlState.search ?? initialViewState?.search ?? '');
-  let appliedSearchText = $state(untrack(() => searchText));
-  let searchDebounceTimer: ReturnType<typeof setTimeout> | undefined;
+  const listState = createListState({
+    fields: () => resource.fields,
+    defaultPageSize: () => initPageSize,
+    defaultSort: () => resource.defaultSort,
+    externalPagination: () => externalPagination,
+    externalSorters: () => externalSorters,
+    initialURLState: urlState,
+    initialViewState,
+    syncWithLocation: () => syncWithLocation,
+    writeURLState: (state) => writeURLState(state, adminContext),
+    onDirty: markSavedViewDirty,
+  });
+  const pagination = $derived(listState.pagination);
+  const sorters = $derived(listState.sorters);
+  const searchText = $derived(listState.searchText);
+  const appliedSearchText = $derived(listState.appliedSearchText);
+  const searchableFields = $derived(listState.searchableFields);
+  const filterableFields = $derived(listState.filterableFields);
+  const filterValues = $derived(listState.filterValues);
+  const activeFilterCount = $derived(listState.activeFilterCount);
+  const activeFilterItems = $derived(listState.activeFilterItems);
+  const activeFilters = $derived(listState.activeFilters);
+  const queryPagination = $derived(listState.queryPagination);
+  const querySorters = $derived(listState.querySorters);
+  const queryFilters = $derived(listState.queryFilters);
+  const { clearFilters, setFilterValue, removeActiveFilter } = listState;
 
   function scheduleSearch(event: Event) {
     if (!(event.currentTarget instanceof HTMLInputElement)) return;
-    markSavedViewDirty();
-    searchText = event.currentTarget.value;
-    if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
-    searchDebounceTimer = setTimeout(() => {
-      appliedSearchText = searchText;
-      markSavedViewDirty();
-      pagination = { ...pagination, current: 1 };
-      searchDebounceTimer = undefined;
-    }, 300);
-  }
-
-  onDestroy(() => {
-    if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
-  });
-
-  // Sync external controlled state
-  $effect(() => {
-    if (externalPagination) {
-      pagination = externalPagination;
-    }
-  });
-
-  $effect(() => {
-    if (externalSorters) {
-      sorters = externalSorters;
-    }
-  });
-
-  // ─── Build active filters with search ─────────────────────────
-  const searchableFields = $derived(resource.fields.filter(f => f.searchable));
-  const filterableFields = $derived(resource.fields.filter(f => f.filterable));
-  let filterValues = $state<Record<string, string>>(initialFilterValues);
-  const locationFilters = $derived<Filter[]>(filters);
-  const activeFilterCount = $derived(locationFilters.length);
-  const activeFilterItems = $derived.by(() => {
-    const labels = new Map(resource.fields.map((field) => [field.key, field.label]));
-    return locationFilters.map((filter, index) => {
-      if ('field' in filter) {
-        return { index, label: `${labels.get(filter.field) ?? filter.field}: ${String(filter.value)}` };
-      }
-      return { index, label: filter.operator };
-    });
-  });
-  const activeFilters = $derived.by(() => {
-    const result: Filter[] = [...locationFilters];
-    if (appliedSearchText.trim() && searchableFields.length > 0) {
-      const firstSearchableField = searchableFields[0];
-      if (searchableFields.length === 1 && firstSearchableField) {
-        result.push({ field: firstSearchableField.key, operator: 'contains', value: appliedSearchText });
-      } else {
-        const searchFilter: LogicalFilter = {
-          operator: 'or',
-          value: searchableFields.map(f => ({
-            field: f.key,
-            operator: 'contains',
-            value: appliedSearchText
-          }))
-        };
-        result.push(searchFilter);
-      }
-    }
-    return result;
-  });
-  $effect(() => {
-    if (!syncWithLocation) return;
-    writeURLState({
-      page: pagination.current,
-      pageSize: pagination.pageSize,
-      sortField: sorters[0]?.field,
-      sortOrder: sorters[0]?.order,
-      search: appliedSearchText || undefined,
-      filters: locationFilters,
-    }, adminContext);
-  });
-
-  function clearFilters(): void {
-    markSavedViewDirty();
-    if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
-    searchDebounceTimer = undefined;
-    searchText = '';
-    appliedSearchText = '';
-    filters = [];
-    filterValues = {};
-    pagination = { ...pagination, current: 1 };
-  }
-
-  function setFilterValue(field: string, value: string): void {
-    markSavedViewDirty();
-    const trimmedValue = value.trim();
-    const nextFilter = { field, operator: 'contains' as const, value: trimmedValue };
-    let replaced = false;
-    filters = filters.flatMap((filter) => {
-      if (!('field' in filter) || filter.field !== field || filter.operator !== 'contains') return [filter];
-      if (!trimmedValue || replaced) return [];
-      replaced = true;
-      return [nextFilter];
-    });
-    if (trimmedValue && !replaced) filters = [...filters, nextFilter];
-    filterValues[field] = value;
-    pagination = { ...pagination, current: 1 };
+    listState.scheduleSearch(event.currentTarget.value);
   }
 
   function setFilterFromEvent(field: string, event: Event): void {
@@ -552,55 +315,9 @@
     }
   }
 
-  function removeActiveFilter(index: number): void {
-    markSavedViewDirty();
-    const filter = locationFilters[index];
-    if (!filter) return;
-    const nextFilters = filters.filter((_, filterIndex) => filterIndex !== index);
-    filters = nextFilters;
-    if ('field' in filter && filter.operator === 'contains') {
-      const remaining = nextFilters.filter((candidate) => (
-        'field' in candidate
-        && candidate.field === filter.field
-        && candidate.operator === 'contains'
-        && typeof candidate.value === 'string'
-      ));
-      const remainingFilter = remaining[0];
-      filterValues[filter.field] = remaining.length === 1 && remainingFilter && 'field' in remainingFilter
-        ? String(remainingFilter.value)
-        : '';
-    }
-    pagination = { ...pagination, current: 1 };
-  }
-
   function clonePlainValue(value: unknown): unknown {
     return value === undefined ? undefined : snapshotPlainData(value);
   }
-
-  function cloneFilter(filter: Filter): Filter {
-    if ('field' in filter) {
-      return {
-        field: filter.field,
-        operator: filter.operator,
-        value: clonePlainValue(filter.value),
-      };
-    }
-    return {
-      operator: filter.operator,
-      value: filter.value.map(cloneFilter),
-    };
-  }
-
-  const queryPagination = $derived<PaginationState>(definedOptions({
-    current: pagination.current,
-    pageSize: pagination.pageSize,
-    mode: pagination.mode,
-  }));
-  const querySorters = $derived<Sort[]>(sorters.map(sorter => ({
-    field: sorter.field,
-    order: sorter.order,
-  })));
-  const queryFilters = $derived<Filter[]>(activeFilters.map(cloneFilter));
 
   // ─── Data fetching ────────────────────────────────────────────
   const listResult = useList({
@@ -631,7 +348,46 @@
       }
     },
   };
-  let deleteRequest = $state<{ ids: (string | number)[]; batch: boolean } | null>(null);
+  const deletionModel = createListDeletion({
+    canRequestSingle: () => canRead && pageRecords.ok && !query.isError && canDelete,
+    canRequestBatch: () => canRead && pageRecords.ok && !query.isError && canBatchDelete,
+    canConfirm: () => pageRecords.ok && !query.isError && deleteAllowed,
+    permission: () => deletePermission,
+    selection: () => selectionModel,
+    clearSelection: () => {
+      selectionModel.clearExplicit();
+      table_resetRowSelection(tbl, true);
+    },
+    captureScope: () => {
+      const scope = tableScope;
+      return () => tableScope.contract === scope.contract
+        && tableScope.resourceName === scope.resourceName
+        && tableScope.provider === scope.provider
+        && tableScope.meta === scope.meta
+        && tableScope.tenant === scope.tenant
+        && tableScope.auth === scope.auth
+        && tableScope.router === scope.router
+        && tableScope.permissionProvider === scope.permissionProvider;
+    },
+    mutate: (ids) => deleteManyMutation.mutateAsync({
+      ids,
+      ...definedOptions({ variables: deleteVariables, dataProviderName: binding.dataProviderName }),
+    }),
+    reportError: (message) => { operationError = message; },
+    messages: {
+      single: () => i18n.t('common.deleteConfirm'),
+      batch: (count) => i18n.t('common.batchDeleteConfirm', { count }),
+      failure: () => i18n.t('common.operationFailed'),
+      partial: (failed, total) => i18n.t('common.batchDeletePartialFail', { failed, total }),
+    },
+  });
+  const deleteRequest = $derived(deletionModel.request);
+  const confirmOpen = $derived(deletionModel.open);
+  const confirmPending = $derived(deletionModel.pending);
+  const confirmMessage = $derived(deletionModel.message);
+  const {
+    requestDelete: confirmDelete, requestBatchDelete: confirmBatchDelete, confirm: confirmAction,
+  } = deletionModel;
   const deletePermission = useCan(() => definedOptions({
     resource: resourceName, action: 'delete',
     id: deleteRequest?.batch === false ? deleteRequest.ids[0] : undefined,
@@ -666,19 +422,34 @@
   const initialSorting = untrack<SortingState>(() =>
     sorters.map(s => ({ id: s.field, desc: s.order === 'desc' }))
   );
-  const initialColumnVisibility = untrack(() => (
-    initialViewState?.columnVisibility ?? readColumnVisibilityPreference(listPreferenceScope)
-  ));
   const sortingAtom = createAtom(initialSorting);
-  const columnVisibilityAtom = createAtom(initialColumnVisibility);
-  let rowSelection = $state<RowSelectionState>({});
+  const columnPreferences = createListColumnPreferences({
+    scope: () => listPreferenceScope,
+    columns: () => savedViewColumnIds,
+    fields: () => resource.fields,
+    isScopeLoaded: preferenceScopeIsLoaded,
+    readPreference: readScopedPreference,
+    initialViewState,
+    onDirty: markSavedViewDirty,
+  });
+  const {
+    visibility: tableColumnVisibility, order: tableColumnOrder,
+    setVisibility: setColumnVisibility, setOrder: setColumnOrder,
+  } = columnPreferences;
+  const selectionModel = createListSelection({
+    filters: () => queryFilters,
+    sorters: () => querySorters,
+    total: () => query.data?.total ?? 0,
+    selectable: () => selectable,
+    allowAllMatching: () => allowSelectAllMatching && !!batchActions,
+    onCriteriaChange: deletionModel.cancelBatchOnCriteriaChange,
+  });
+  const rowSelection = $derived(selectionModel.rowSelection);
+  const allMatchingSelected = $derived(selectionModel.allMatchingSelected);
+  const selectedIds = $derived(selectionModel.selectedIds);
+  const selectedCount = $derived(selectionModel.selectedCount);
+  const { rowIsSelected } = selectionModel;
   const expandedAtom = createAtom<ExpandedState>({});
-  const initialColumnOrder = untrack(() => (
-    initialViewState?.columnOrder?.length
-      ? initialViewState.columnOrder
-      : readColumnOrderPreference(listPreferenceScope)
-  ));
-  const columnOrderAtom = createAtom(initialColumnOrder);
   const features = tableFeatures({
     columnOrderingFeature,
     columnSizingFeature,
@@ -689,10 +460,7 @@
   });
 
   const tableSorting = useSelector(sortingAtom);
-  const tableColumnVisibility = useSelector(columnVisibilityAtom);
   const tableExpanded = useSelector(expandedAtom);
-  const tableColumnOrder = useSelector(columnOrderAtom);
-  const selectedIdValueByKey = new SvelteMap<string, string | number>();
 
   function preferenceScopeIsLoaded(): boolean {
     return preferenceIdentityReady && loadedPreferenceScopeId === listPreferenceScopeId(listPreferenceScope);
@@ -703,10 +471,6 @@
     return expanded === true || expanded[rowId] === true;
   }
 
-  function rowIsSelected(rowId: string): boolean {
-    return allMatchingSelected ? !excludedMatchingIds.has(rowId) : rowSelection[rowId] === true;
-  }
-
   function rowIdValue(row: Row<TableFeatures, TableRecord>): string | number {
     return row.original.id;
   }
@@ -714,16 +478,11 @@
   function toggleRowSelection(row: Row<TableFeatures, TableRecord>): void {
     if (confirmPending || !canRead) return;
     if (allMatchingSelected) {
-      if (excludedMatchingIds.has(row.id)) excludedMatchingIds.delete(row.id);
-      else excludedMatchingIds.set(row.id, rowIdValue(row));
+      selectionModel.toggleExcluded(row.id, rowIdValue(row));
       return;
     }
     const wasSelected = rowIsSelected(row.id);
-    if (!wasSelected) {
-      selectedIdValueByKey.set(row.id, rowIdValue(row));
-    } else if (wasSelected) {
-      selectedIdValueByKey.delete(row.id);
-    }
+    selectionModel.trackRow(row.id, rowIdValue(row), !wasSelected);
     row_toggleSelected(row);
   }
 
@@ -734,121 +493,28 @@
     }));
 
     if (JSON.stringify(nextSorters) !== JSON.stringify(sorters)) {
-      sorters = nextSorters;
+      listState.sorters = nextSorters;
     }
   });
-
-  // Persist column visibility to localStorage
-  $effect(() => {
-    if (!preferenceScopeIsLoaded()) return;
-    const storageKey = columnVisibilityStorageKey(listPreferenceScope);
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem(storageKey, JSON.stringify(tableColumnVisibility.current));
-      } catch { /* ignore quota errors */ }
-    }
-  });
-
-  $effect(() => {
-    if (!preferenceScopeIsLoaded()) return;
-    const ids = tableColumnOrder.current;
-    persistColumnOrder(ids);
-  });
-
-  function persistSavedViews(): void {
-    if (typeof window === 'undefined' || !preferenceScopeIsLoaded()) return;
-    try {
-      localStorage.setItem(savedListViewsStorageKey(listPreferenceScope), serializeSavedListViews(savedViews));
-    } catch { /* ignore quota errors */ }
-  }
-
-  function persistActiveSavedView(): void {
-    if (typeof window === 'undefined' || !preferenceScopeIsLoaded()) return;
-    try {
-      const key = activeSavedListViewStorageKey(listPreferenceScope);
-      if (activeSavedViewId) localStorage.setItem(key, activeSavedViewId);
-      else localStorage.removeItem(key);
-    } catch { /* ignore quota errors */ }
-  }
-
-  function markSavedViewDirty(): void {
-    remoteDefaultEligible = false;
-    if (!activeSavedViewId) return;
-    activeSavedViewId = undefined;
-    persistActiveSavedView();
-  }
 
   function getCurrentSavedViewState(): SavedListViewState {
     return {
-      search: appliedSearchText,
-      filters: locationFilters.map(cloneFilter),
-      sorters: sorters.map((sorter) => ({ ...sorter })),
-      pagination: {
-        current: pagination.current ?? 1,
-        pageSize: pagination.pageSize ?? initPageSize,
-      },
-      columnVisibility: { ...tableColumnVisibility.current },
-      columnOrder: [...tableColumnOrder.current],
+      ...listState.captureState(),
+      ...columnPreferences.captureState(),
     };
   }
 
-  function applySavedView(view: SavedListView): void {
-    remoteDefaultEligible = false;
-    if (searchDebounceTimer) {
-      clearTimeout(searchDebounceTimer);
-      searchDebounceTimer = undefined;
-    }
-    const state = cloneSavedListViewState(view.state);
-    activeSavedViewId = view.id;
-    persistActiveSavedView();
-    searchText = state.search;
-    appliedSearchText = state.search;
-    filters = state.filters;
-    const restoredFilterCounts: Record<string, number> = {};
-    for (const filter of state.filters) {
-      if ('field' in filter && filter.operator === 'contains' && typeof filter.value === 'string' && editableFilterKeys.has(filter.field)) {
-        restoredFilterCounts[filter.field] = (restoredFilterCounts[filter.field] ?? 0) + 1;
-      }
-    }
-    filterValues = {};
-    for (const filter of state.filters) {
-      if (
-        'field' in filter
-        && filter.operator === 'contains'
-        && typeof filter.value === 'string'
-        && restoredFilterCounts[filter.field] === 1
-      ) {
-        filterValues[filter.field] = filter.value;
-      }
-    }
-    pagination = { ...pagination, ...state.pagination };
-    sorters = state.sorters;
+  function applySavedViewState(state: SavedListViewState): void {
+    listState.applyState(state);
     sortingAtom.set(state.sorters.map((sorter) => ({ id: sorter.field, desc: sorter.order === 'desc' })));
-    columnVisibilityAtom.set(state.columnVisibility);
-    columnOrderAtom.set(state.columnOrder);
-    persistColumnOrder(state.columnOrder);
-    rowSelection = {};
-    allMatchingSelected = false;
-    excludedMatchingIds.clear();
-    selectedIdValueByKey.clear();
+    columnPreferences.applyState(state);
+    selectionModel.reset();
   }
 
   function resetToDefaultListState(): void {
-    if (searchDebounceTimer) {
-      clearTimeout(searchDebounceTimer);
-      searchDebounceTimer = undefined;
-    }
-    searchText = '';
-    appliedSearchText = '';
-    filters = [];
-    filterValues = {};
-    if (!externalPagination) {
-      pagination = { current: 1, pageSize: initPageSize };
-    }
+    listState.resetToDefaults();
     if (!externalSorters) {
-      const defaultSorters = initDefaultSort ? [{ ...initDefaultSort }] : [];
-      sorters = defaultSorters;
-      sortingAtom.set(defaultSorters.map((sorter) => ({ id: sorter.field, desc: sorter.order === 'desc' })));
+      sortingAtom.set(listState.sorters.map((sorter) => ({ id: sorter.field, desc: sorter.order === 'desc' })));
     }
   }
 
@@ -857,309 +523,19 @@
     const scopeId = listPreferenceScopeId(scope);
     if (scopeId === loadedPreferenceScopeId) return;
 
-    remoteDefaultEligible = true;
-    const preferences = readScopedSavedViewPreferences(scope);
-    savedViewName = '';
-    savedViewsOpen = false;
-    savedViews = preferences.savedViews;
-    remoteSavedViews = [];
-    activeSavedViewId = preferences.activeSavedViewId;
+    const activeSavedView = savedViewModel.restoreScope(scope);
+    const restoredColumns = columnPreferences.readScope(scope);
 
-    if (!hasExplicitURLState && preferences.activeSavedView) {
-      applySavedView(preferences.activeSavedView);
+    if (!hasExplicitURLState && activeSavedView) {
+      applySavedView(activeSavedView);
     } else {
       if (!hasExplicitURLState) resetToDefaultListState();
-      columnVisibilityAtom.set(preferences.columnVisibility);
-      columnOrderAtom.set(preferences.columnOrder);
-      rowSelection = {};
-      allMatchingSelected = false;
-      excludedMatchingIds.clear();
-      selectedIdValueByKey.clear();
+      columnPreferences.applyState(restoredColumns);
+      selectionModel.reset();
     }
 
     loadedPreferenceScopeId = scopeId;
   });
-
-  let remoteViewEpoch = 0;
-  $effect(() => {
-    const provider = savedViewProvider;
-    const scope = listPreferenceScope;
-    const columns = savedViewColumnIds;
-    void remoteViewsReload;
-    remoteSavedViews = [];
-    remoteViewsLoading = false;
-    remoteViewsFailed = false;
-    accessDrafts.clear();
-    accessSubjects.clear();
-    accessSubjectsLoading.clear();
-    accessSubjectsFailed.clear();
-    accessSubjectQueries.clear();
-    accessSubjectRequests.clear();
-    savedViewMutationEpoch += 1;
-    savedViewMutationPending = false;
-    savedViewMutationError = undefined;
-    savedViewSource = 'local';
-    if (!provider || !preferenceScopeIsLoaded()) {
-      remoteSavedViews = [];
-      return;
-    }
-    const epoch = ++remoteViewEpoch;
-    remoteViewsLoading = true;
-    void Promise.resolve().then(() => provider.list({ ...scope })).then(value => {
-      if (epoch !== remoteViewEpoch || !preferenceScopeIsLoaded()) return;
-      remoteSavedViews = decodeRemoteSavedListViews(value, columns, !!(provider.save || provider.remove || provider.setDefault || provider.updateAccess));
-      if (applyRemoteDefaultView && remoteDefaultEligible) {
-        const defaults = remoteSavedViews.filter(view => view.default === true);
-        if (!hasExplicitURLState && !activeSavedViewId && !externalPagination && !externalSorters
-          && defaults.length === 1 && defaults[0]) {
-          applySavedView(defaults[0]);
-          remoteDefaultEligible = false;
-        }
-      }
-    }).catch(() => {
-      if (epoch === remoteViewEpoch) {
-        remoteSavedViews = [];
-        remoteViewsFailed = true;
-      }
-    }).finally(() => {
-      if (epoch === remoteViewEpoch) remoteViewsLoading = false;
-    });
-    return () => {
-      remoteViewEpoch += 1;
-      savedViewMutationEpoch += 1;
-      accessSubjectRequests.clear();
-    };
-  });
-
-  function saveCurrentView(): void {
-    if (!preferenceScopeIsLoaded() || savedViewMutationPending) return;
-    remoteDefaultEligible = false;
-    const name = savedViewName.trim().slice(0, 60);
-    if (!name) return;
-    if (searchDebounceTimer) {
-      clearTimeout(searchDebounceTimer);
-      searchDebounceTimer = undefined;
-      appliedSearchText = searchText;
-    }
-    if (savedViewSource !== 'local') {
-      const existing = remoteSavedViews.find(view => view.source === savedViewSource
-        && view.name.toLocaleLowerCase() === name.toLocaleLowerCase());
-      if (!savedViewProvider?.save || (existing && (existing.readOnly || !existing.version))) return;
-      void mutateRemoteView({
-        id: existing?.id ?? crypto.randomUUID(), name, state: getCurrentSavedViewState(),
-        source: savedViewSource, expectedVersion: existing?.version ?? null,
-      });
-      return;
-    }
-    const existing = savedViews.find((view) => view.name.toLocaleLowerCase() === name.toLocaleLowerCase());
-    const view: SavedListView = {
-      id: existing?.id ?? `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      name,
-      state: getCurrentSavedViewState(),
-    };
-    savedViews = existing
-      ? savedViews.map((candidate) => candidate.id === existing.id ? view : candidate)
-      : [view, ...savedViews].slice(0, 25);
-    activeSavedViewId = view.id;
-    savedViewName = '';
-    persistSavedViews();
-    persistActiveSavedView();
-  }
-
-  function deleteSavedView(id: string): void {
-    if (!preferenceScopeIsLoaded() || savedViewMutationPending) return;
-    const remote = remoteSavedViews.find(view => view.id === id);
-    if (remote) {
-      if (!savedViewProvider?.remove || remote.readOnly || !remote.version) return;
-      void mutateRemoteView({
-        id, expectedVersion: remote.version, source: remote.source === 'system' ? 'system' : 'team',
-        name: remote.name, state: remote.state,
-      }, true);
-      return;
-    }
-    savedViews = savedViews.filter((view) => view.id !== id);
-    if (activeSavedViewId === id) activeSavedViewId = undefined;
-    persistSavedViews();
-    persistActiveSavedView();
-  }
-
-  async function mutateRemoteView(
-    mutation: import('./saved-list-views').SavedListViewMutation, remove = false,
-  ): Promise<void> {
-    const provider = savedViewProvider;
-    if (!provider || savedViewMutationPending || !preferenceScopeIsLoaded()
-      || (remove && (mutation.expectedVersion === null || !provider.remove))
-      || (!remove && !provider.save)) return;
-    const scope = { ...listPreferenceScope };
-    const scopeId = listPreferenceScopeId(scope);
-    const columns = savedViewColumnIds;
-    const epoch = ++savedViewMutationEpoch;
-    const current = () => epoch === savedViewMutationEpoch && provider === savedViewProvider
-      && scopeId === listPreferenceScopeId(listPreferenceScope) && preferenceScopeIsLoaded();
-    savedViewMutationPending = true;
-    savedViewMutationError = undefined;
-    try {
-      const result = remove
-        ? await provider.remove?.(scope, { id: mutation.id, expectedVersion: mutation.expectedVersion ?? 0 })
-        : await provider.save?.(scope, { ...mutation, state: cloneSavedListViewState(mutation.state) });
-      if (!current()) return;
-      if (remove && mutation.expectedVersion !== null && decodeSavedListViewRemoveResult(result, {
-        id: mutation.id, expectedVersion: mutation.expectedVersion,
-      })) {
-        remoteSavedViews = remoteSavedViews.filter(view => view.id !== mutation.id);
-        if (activeSavedViewId === mutation.id) activeSavedViewId = undefined;
-        persistActiveSavedView();
-        return;
-      }
-      const decoded = decodeSavedListViewMutationResult(result, columns, mutation);
-      if (!decoded || (remove && decoded.ok)) {
-        savedViewMutationError = 'failure';
-        return;
-      }
-      if (!decoded.ok) {
-        savedViewMutationError = 'conflict';
-        // 保留本地查询；用户必须重新读取后再决定如何修改。
-        return;
-      }
-      const view = { ...decoded.view, readOnly: decoded.view.readOnly !== false };
-      remoteSavedViews = [view, ...remoteSavedViews.filter(candidate => candidate.id !== view.id)];
-      savedViewName = '';
-    } catch {
-      if (current()) savedViewMutationError = 'failure';
-    } finally {
-      if (current()) savedViewMutationPending = false;
-    }
-  }
-
-  function setRemoteDefault(view: SavedListView): void {
-    const provider = savedViewProvider;
-    if (!provider?.setDefault || savedViewMutationPending || view.readOnly || !view.version
-      || savedViewMutationError === 'conflict' || !preferenceScopeIsLoaded()
-      || (view.source !== 'team' && view.source !== 'system')) return;
-    const source = view.source;
-    const expectedVersion = view.version;
-    const defaultValue = view.default !== true;
-    remoteDefaultEligible = false;
-    const scope = { ...listPreferenceScope };
-    const scopeId = listPreferenceScopeId(scope);
-    const epoch = ++savedViewMutationEpoch;
-    const current = () => epoch === savedViewMutationEpoch && provider === savedViewProvider
-      && scopeId === listPreferenceScopeId(listPreferenceScope) && preferenceScopeIsLoaded();
-    savedViewMutationPending = true;
-    savedViewMutationError = undefined;
-    void Promise.resolve().then(() => provider.setDefault?.(scope, {
-      id: view.id, source, expectedVersion, default: defaultValue,
-    })).then(result => {
-      if (!current()) return;
-      const decoded = decodeSavedListViewMutationResult(result, savedViewColumnIds, {
-        id: view.id, source, expectedVersion,
-      });
-      if (!decoded) {
-        savedViewMutationError = 'failure';
-      } else if (!decoded.ok) {
-        savedViewMutationError = 'conflict';
-      } else if (decoded.view.default !== defaultValue) {
-        savedViewMutationError = 'failure';
-      } else {
-        // 默认标记会同时改变同一作用域的其他视图，成功后重新读取完整集合。
-        remoteViewsReload += 1;
-      }
-    }).catch(() => {
-      if (current()) savedViewMutationError = 'failure';
-    }).finally(() => {
-      if (current()) savedViewMutationPending = false;
-    });
-  }
-
-  function saveRemoteAccess(view: SavedListView): void {
-    const provider = savedViewProvider;
-    const draft = accessDrafts.get(view.id);
-    if (!provider?.updateAccess || !draft || view.readOnly !== false || !view.version
-      || savedViewMutationPending || savedViewMutationError === 'conflict' || !preferenceScopeIsLoaded()
-      || (view.source !== 'team' && view.source !== 'system')) return;
-    const access = decodeSavedListViewAccess({
-      mode: draft.mode,
-      subjectIds: draft.mode === 'restricted' ? draft.subjectIds : [],
-    });
-    if (!access) { savedViewMutationError = 'failure'; return; }
-    const source = view.source;
-    const expectedVersion = view.version;
-    const scope = { ...listPreferenceScope };
-    const scopeId = listPreferenceScopeId(scope);
-    const epoch = ++savedViewMutationEpoch;
-    const current = () => epoch === savedViewMutationEpoch && provider === savedViewProvider
-      && scopeId === listPreferenceScopeId(listPreferenceScope) && preferenceScopeIsLoaded();
-    remoteDefaultEligible = false;
-    savedViewMutationPending = true;
-    savedViewMutationError = undefined;
-    void Promise.resolve().then(() => {
-      if (!current()) return;
-      return provider.updateAccess?.(scope, {
-        id: view.id, source, expectedVersion, access: { ...access, subjectIds: [...access.subjectIds] },
-      });
-    }).then(result => {
-      if (!current()) return;
-      const decoded = decodeSavedListViewMutationResult(result, savedViewColumnIds, {
-        id: view.id, source, expectedVersion,
-      });
-      if (!decoded) savedViewMutationError = 'failure';
-      else if (!decoded.ok) savedViewMutationError = 'conflict';
-      else if (decoded.view.access?.mode !== access.mode
-        || decoded.view.access.subjectIds.length !== access.subjectIds.length
-        || !decoded.view.access.subjectIds.every(id => access.subjectIds.includes(id))) {
-        savedViewMutationError = 'failure';
-      } else remoteViewsReload += 1;
-    }).catch(() => {
-      if (current()) savedViewMutationError = 'failure';
-    }).finally(() => {
-      if (current()) savedViewMutationPending = false;
-    });
-  }
-
-  function loadAccessSubjects(view: SavedListView, query = ''): void {
-    const provider = savedViewProvider;
-    if (!provider?.listAccessSubjects || view.readOnly !== false
-      || view.source === 'local' || !preferenceScopeIsLoaded()) return;
-    const scope = { ...listPreferenceScope };
-    const scopeId = listPreferenceScopeId(scope);
-    const request = {};
-    accessSubjectRequests.set(view.id, request);
-    const current = () => accessSubjectRequests.get(view.id) === request
-      && scopeId === listPreferenceScopeId(listPreferenceScope)
-      && provider === savedViewProvider && preferenceScopeIsLoaded();
-    accessSubjectsLoading.set(view.id, true);
-    accessSubjectsFailed.delete(view.id);
-    accessSubjects.delete(view.id);
-    void Promise.resolve().then(() => {
-      if (current()) return provider.listAccessSubjects?.(scope, { query: query.trim(), limit: 50 });
-    })
-      .then(result => {
-        if (!current()) return;
-        const subjects = decodeSavedListViewSubjects(result);
-        if (!subjects) accessSubjectsFailed.set(view.id, true);
-        else accessSubjects.set(view.id, subjects);
-      })
-      .catch(() => {
-        if (current()) accessSubjectsFailed.set(view.id, true);
-      })
-      .finally(() => { if (current()) accessSubjectsLoading.delete(view.id); });
-  }
-
-  function setColumnVisibility(columnId: string, visible: boolean): void {
-    markSavedViewDirty();
-    columnVisibilityAtom.set({ ...tableColumnVisibility.current, [columnId]: visible });
-  }
-
-  function persistColumnOrder(ids: string[]): void {
-    if (typeof window === 'undefined' || !preferenceScopeIsLoaded()) return;
-    try { localStorage.setItem(columnOrderStorageKey(listPreferenceScope), JSON.stringify(ids)); } catch { /* ignore */ }
-  }
-
-  function setColumnOrder(newOrder: Array<{ id: string }>): void {
-    markSavedViewDirty();
-    const ids = newOrder.map((column) => column.id);
-    columnOrderAtom.set(ids);
-  }
 
   function toggleColumnSort(column: Column<TableFeatures, TableRecord, unknown>): void {
     markSavedViewDirty();
@@ -1170,7 +546,7 @@
   $effect(() => {
     if (!externalSorters) return;
     if (JSON.stringify(externalSorters) !== JSON.stringify(sorters)) {
-      sorters = externalSorters;
+      listState.sorters = externalSorters;
     }
     const nextSorting = externalSorters.map(s => ({ id: s.field, desc: s.order === 'desc' }));
     if (JSON.stringify(nextSorting) !== JSON.stringify(tableSorting.current)) {
@@ -1248,7 +624,7 @@
         sortingAtom.set(typeof updater === 'function' ? updater(tableSorting.current) : updater);
       },
       onRowSelectionChange: (updater) => {
-        rowSelection = typeof updater === 'function' ? updater(rowSelection) : updater;
+        selectionModel.rowSelection = typeof updater === 'function' ? updater(rowSelection) : updater;
       },
       atoms: {
         expanded: expandedAtom,
@@ -1268,26 +644,12 @@
     }
     const willSelect = !table_getIsAllRowsSelected(tbl);
     for (const row of tableView.rows) {
-      if (willSelect) {
-        selectedIdValueByKey.set(row.id, rowIdValue(row));
-      } else if (!willSelect) {
-        selectedIdValueByKey.delete(row.id);
-      }
+      selectionModel.trackRow(row.id, rowIdValue(row), willSelect);
     }
     table_toggleAllRowsSelected(tbl);
   }
 
-  const selectedIds = $derived(
-    Object.keys(rowSelection).filter(key => rowSelection[key] === true)
-      .flatMap(key => {
-        const id = selectedIdValueByKey.get(key);
-        return id === undefined ? [] : [id];
-      })
-  );
   const matchingTotal = $derived(query.data?.total ?? 0);
-  const selectedCount = $derived(allMatchingSelected
-    ? Math.max(0, matchingTotal - excludedMatchingIds.size)
-    : selectedIds.length);
   const selectionLabel = $derived(i18n.t(
     allMatchingSelected ? 'common.allMatchingSelected' : 'common.selectedCount',
     { count: selectedCount },
@@ -1300,42 +662,8 @@
     && Number.isSafeInteger(matchingTotal) && matchingTotal > 0
   );
   function batchSelectionSnapshot(): BatchSelection {
-    if (allMatchingSelected) return {
-      scope: 'all', filters: queryFilters.map(cloneFilter),
-      sorters: querySorters.map(sorter => ({ ...sorter })), total: matchingTotal,
-      excludedIds: [...excludedMatchingIds.values()],
-    };
-    return {
-      scope: 'selected', ids: [...selectedIds],
-      currentPageIds: tableView.rows.filter(row => rowSelection[row.id] === true).map(rowIdValue),
-    };
+    return selectionModel.snapshot(tableView.rows.map(row => ({ key: row.id, id: rowIdValue(row) })));
   }
-  const selectionCriteria = $derived(JSON.stringify(queryFilters));
-  let previousSelectionCriteria = untrack(() => selectionCriteria);
-  $effect.pre(() => {
-    const criteria = selectionCriteria;
-    if (criteria !== previousSelectionCriteria) {
-      allMatchingSelected = false;
-      excludedMatchingIds.clear();
-      rowSelection = {};
-      selectedIdValueByKey.clear();
-      if (deleteRequest?.batch && !confirmPending) {
-        confirmOpen = false;
-        deleteRequest = null;
-      }
-    }
-    previousSelectionCriteria = criteria;
-  });
-  $effect.pre(() => {
-    if (!selectable || !allowSelectAllMatching || !batchActions) {
-      allMatchingSelected = false;
-      excludedMatchingIds.clear();
-    }
-    if (!selectable) {
-      rowSelection = {};
-      selectedIdValueByKey.clear();
-    }
-  });
   const batchDeletePerm = useCan(() => ({
     resource: resourceName,
     action: 'delete',
@@ -1348,19 +676,14 @@
 
   function clearSelection(): void {
     if (!deleteManyMutation.isPending) {
-      allMatchingSelected = false;
-      excludedMatchingIds.clear();
-      selectedIdValueByKey.clear();
+      selectionModel.reset();
       table_resetRowSelection(tbl, true);
     }
   }
 
   function selectAllMatching(): void {
     if (!canSelectAllMatching || confirmPending || confirmOpen) return;
-    selectedIdValueByKey.clear();
-    excludedMatchingIds.clear();
-    rowSelection = {};
-    allMatchingSelected = true;
+    selectionModel.selectAllMatching();
   }
 
   function isColumnVisible(columnId: string): boolean {
@@ -1422,11 +745,7 @@
   });
 
   // ─── Confirm dialog ───────────────────────────────────────────
-  let confirmOpen = $state(false);
-  let confirmMessage = $state('');
-  let confirmPending = $state(false);
   let operationError = $state<string | null>(null);
-  let activeDelete: object | undefined;
   let detailOpenedInHistory = $state(false);
   let quickEditId = $state<string | number | undefined>();
   const tableScope = $derived({
@@ -1463,111 +782,17 @@
   $effect.pre(() => {
     const scope = tableScope;
     if (previousTableScope && !tableScopesEqual(previousTableScope, scope)) {
-      activeDelete = undefined;
-      confirmOpen = false;
-      confirmPending = false;
-      deleteRequest = null;
-      operationError = null;
-      allMatchingSelected = false;
-      excludedMatchingIds.clear();
-      selectedIdValueByKey.clear();
-      rowSelection = {};
+      deletionModel.reset();
+      selectionModel.reset();
       expandedAtom.set({});
       detailOpenedInHistory = false;
       localDetailId = undefined;
       quickEditId = undefined;
-      if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
-      searchDebounceTimer = undefined;
+      listState.cancelSearch();
       if (previousTableScope.resourceName !== scope.resourceName) resetToDefaultListState();
     }
     previousTableScope = scope;
   });
-  $effect(() => {
-    if (deleteRequest && !deletePermission.isLoading && !deletePermission.allowed) {
-      confirmOpen = false;
-      deleteRequest = null;
-      operationError = i18n.t('common.operationFailed');
-    }
-  });
-  onDestroy(() => { activeDelete = undefined; });
-
-  function confirmDelete(id: string | number) {
-    if (!canRead || !pageRecords.ok || query.isError || !canDelete || confirmPending) return;
-    confirmMessage = i18n.t('common.deleteConfirm');
-    deleteRequest = { ids: [id], batch: false };
-    operationError = null;
-    confirmOpen = true;
-  }
-
-  function confirmBatchDelete() {
-    const ids = [...selectedIds];
-    if (!canRead || !pageRecords.ok || query.isError || !canBatchDelete || ids.length === 0 || confirmPending) return;
-    confirmMessage = i18n.t('common.batchDeleteConfirm', { count: ids.length });
-    deleteRequest = { ids, batch: true };
-    operationError = null;
-    confirmOpen = true;
-  }
-
-  async function confirmAction() {
-    if (!confirmOpen || !pageRecords.ok || query.isError || !deleteAllowed || confirmPending || !deleteRequest) return;
-    const request = deleteRequest;
-    if (request.batch && JSON.stringify(request.ids) !== JSON.stringify(selectedIds)) {
-      confirmOpen = false;
-      deleteRequest = null;
-      return;
-    }
-    const scope = tableScope;
-    const token = {};
-    activeDelete = token;
-    confirmPending = true;
-    confirmOpen = false;
-    const clearBatchSelectionBeforeMutation = request.batch && getAdminOptions().mutationMode === 'undoable';
-    const selectionBeforeDelete = clearBatchSelectionBeforeMutation ? new Map(selectedIdValueByKey) : undefined;
-    if (clearBatchSelectionBeforeMutation) {
-      selectedIdValueByKey.clear();
-      table_resetRowSelection(tbl, true);
-    }
-    const current = () => activeDelete === token &&
-      tableScope.contract === scope.contract &&
-      tableScope.resourceName === scope.resourceName &&
-      tableScope.provider === scope.provider &&
-      tableScope.meta === scope.meta &&
-      tableScope.tenant === scope.tenant &&
-      tableScope.auth === scope.auth &&
-      tableScope.router === scope.router &&
-      tableScope.permissionProvider === scope.permissionProvider;
-    try {
-      await deleteManyMutation.mutateAsync({
-        ids: [...request.ids],
-        ...definedOptions({ variables: deleteVariables, dataProviderName: binding.dataProviderName }),
-      });
-      if (!current()) return;
-      selectedIdValueByKey.clear();
-      table_resetRowSelection(tbl, true);
-      await tick();
-      confirmOpen = false;
-    } catch (error) {
-      if (!current()) return;
-      if (error instanceof DeleteManyPartialError) {
-        rowSelection = Object.fromEntries(error.failedIds.map(id => [tableRowKey(id), true as const]));
-        selectedIdValueByKey.clear();
-        for (const id of error.failedIds) selectedIdValueByKey.set(tableRowKey(id), id);
-        operationError = i18n.t('common.batchDeletePartialFail', { failed: error.failedIds.length, total: request.ids.length });
-      } else {
-        if (selectionBeforeDelete) {
-          selectedIdValueByKey.clear();
-          for (const [key, id] of selectionBeforeDelete) selectedIdValueByKey.set(key, id);
-          rowSelection = Object.fromEntries([...selectionBeforeDelete.keys()].map(key => [key, true as const]));
-        }
-        operationError = i18n.t('common.operationFailed');
-      }
-      confirmOpen = false;
-    } finally {
-      if (activeDelete === token) { activeDelete = undefined; confirmPending = false; deleteRequest = null; }
-      await tick();
-      await tick();
-    }
-  }
   function openDetail(id: string | number): void {
     if (!canRead || !canShow) return;
     if (!syncWithLocation) { localDetailId = id; return; }
@@ -1601,7 +826,7 @@
   function goToPage(page: number) {
     if (!Number.isSafeInteger(page) || page < 1 || page > Math.max(1, totalPages)) return;
     markSavedViewDirty();
-    pagination = { ...pagination, current: page };
+    listState.pagination = { ...pagination, current: page };
   }
   function refreshList() {
     if (canRead && !query.isFetching) void listResult.refetch();
@@ -1620,9 +845,9 @@
     if (!canRead || query.isFetching || deleteManyMutation.isPending) return;
     markSavedViewDirty();
     const accepted = next.filter(sort => gridColumns.some(column => column.key === sort.field && column.sortable));
-    sorters = accepted.map(sort => ({ ...sort }));
+    listState.sorters = accepted.map(sort => ({ ...sort }));
     sortingAtom.set(accepted.map(sort => ({ id: sort.field, desc: sort.order === 'desc' })));
-    pagination = { ...pagination, current: 1 };
+    listState.pagination = { ...pagination, current: 1 };
   }
 </script>
 
@@ -1979,7 +1204,7 @@
                 </div>
               {/each}
               <div class="svadmin-u-60fbb7713999 svadmin-u-77a2a20e90d4 svadmin-u-f46b61a9b310">
-                <Button size="sm" class="svadmin-u-36e579c0b41c" onclick={() => { pagination = { ...pagination, current: 1 }; }}>
+                <Button size="sm" class="svadmin-u-36e579c0b41c" onclick={() => { listState.pagination = { ...pagination, current: 1 }; }}>
                   {i18n.t("common.confirm")}
                 </Button>
                 <Button variant="outline" size="sm" onclick={clearFilters}>
@@ -2055,11 +1280,11 @@
       </DropdownMenu.Root>
 
       <!-- Saved Views -->
-      <Popover.Root bind:open={savedViewsOpen}>
+      <Popover.Root bind:open={savedViewModel.savedViewsOpen}>
         <Popover.Trigger>
           {#snippet child({ props })}
             <Button variant="outline" size="sm" class="svadmin-u-e7a768f922d2 svadmin-u-0b91436debbd" {...props} disabled={!preferenceIdentityReady} aria-label={i18n.t("common.savedViews")}>
-              <Bookmark class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" data-icon="inline-start" /> {activeSavedViewName ?? i18n.t("common.savedViews")}
+              <Bookmark class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" data-icon="inline-start" /> {savedViewModel.activeSavedViewName ?? i18n.t("common.savedViews")}
             </Button>
           {/snippet}
         </Popover.Trigger>
@@ -2069,28 +1294,28 @@
               <h4 class="svadmin-u-2689f3958069 svadmin-u-fc7473ca09eb">{i18n.t("common.savedViews")}</h4>
               <p class="svadmin-u-b6b02c0ebef6 svadmin-u-359090c2d529 svadmin-u-bfa603190748">{i18n.t("common.savedViewsHint")}</p>
             </div>
-            {#if remoteViewsLoading}
+            {#if savedViewModel.remoteViewsLoading}
               <p role="status">{i18n.t('common.loading')}</p>
-            {:else if remoteViewsFailed}
+            {:else if savedViewModel.remoteViewsFailed}
               <p role="alert">{i18n.t('common.operationFailed')}</p>
-              <Button type="button" variant="outline" size="sm" onclick={() => remoteViewsReload += 1}>
+              <Button type="button" variant="outline" size="sm" onclick={() => savedViewModel.reload()}>
                 {i18n.t('common.retry')}
               </Button>
             {/if}
-            {#if savedViewMutationPending}
+            {#if savedViewModel.savedViewMutationPending}
               <p role="status">{i18n.t('common.loading')}</p>
-            {:else if savedViewMutationError}
-              <p role="alert">{i18n.t(savedViewMutationError === 'conflict' ? 'common.viewConflict' : 'common.operationFailed')}</p>
-              <Button type="button" variant="outline" size="sm" onclick={() => remoteViewsReload += 1}>
+            {:else if savedViewModel.savedViewMutationError}
+              <p role="alert">{i18n.t(savedViewModel.savedViewMutationError === 'conflict' ? 'common.viewConflict' : 'common.operationFailed')}</p>
+              <Button type="button" variant="outline" size="sm" onclick={() => savedViewModel.reload()}>
                 {i18n.t('common.refresh')}
               </Button>
             {/if}
             {#if savedViewProvider?.save}
-              <Select.Root aria-label={i18n.t('common.viewSource')} value={savedViewSource} disabled={savedViewMutationPending}
+              <Select.Root aria-label={i18n.t('common.viewSource')} value={savedViewModel.savedViewSource} disabled={savedViewModel.savedViewMutationPending}
                 onchange={(event: Event) => {
                   if (!(event.currentTarget instanceof HTMLSelectElement)) return;
                   const value = event.currentTarget.value;
-                  if (value === 'local' || value === 'team' || value === 'system') savedViewSource = value;
+                  if (value === 'local' || value === 'team' || value === 'system') savedViewModel.savedViewSource = value;
                 }}>
                 <option value="local">{i18n.t('common.personalView')}</option>
                 <option value="team">{i18n.t('common.teamView')}</option>
@@ -2102,21 +1327,17 @@
               <Select.Root
                 id="saved-list-view"
                 class="svadmin-u-e7a768f922d2 svadmin-u-6da6a3c3f741"
-                value={activeSavedViewId ?? ""}
+                value={savedViewModel.activeSavedViewId ?? ""}
                 onchange={(event: Event) => {
                   if (!(event.currentTarget instanceof HTMLSelectElement)) return;
                   const id = event.currentTarget.value;
-                  const view = availableSavedViews.find((candidate) => candidate.id === id);
+                  const view = savedViewModel.availableSavedViews.find((candidate) => candidate.id === id);
                   if (view) applySavedView(view);
-                  else {
-                    remoteDefaultEligible = false;
-                    activeSavedViewId = undefined;
-                    persistActiveSavedView();
-                  }
+                  else savedViewModel.clearActiveSavedView();
                 }}
               >
                 <option value="">{i18n.t("common.currentView")}</option>
-                {#each availableSavedViews as view (view.id)}
+                {#each savedViewModel.availableSavedViews as view (view.id)}
                   <option value={view.id}>{view.name}</option>
                 {/each}
               </Select.Root>
@@ -2126,17 +1347,17 @@
                 aria-label={i18n.t("common.viewName")}
                 placeholder={i18n.t("common.viewName")}
                 maxlength={60}
-                bind:value={savedViewName}
-                disabled={savedViewMutationPending}
+                bind:value={savedViewModel.savedViewName}
+                disabled={savedViewModel.savedViewMutationPending}
                 class="svadmin-u-e7a768f922d2"
               />
-              <Button size="sm" class="svadmin-u-012fbd121f37" disabled={!savedViewName.trim() || savedViewMutationPending || savedViewMutationError === 'conflict'} onclick={saveCurrentView}>
+              <Button size="sm" class="svadmin-u-012fbd121f37" disabled={!savedViewModel.savedViewName.trim() || savedViewModel.savedViewMutationPending || savedViewModel.savedViewMutationError === 'conflict'} onclick={saveCurrentView}>
                 <Check class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" data-icon="inline-start" /> {i18n.t("common.saveView")}
               </Button>
             </div>
-            {#if availableSavedViews.length > 0}
+            {#if savedViewModel.availableSavedViews.length > 0}
               <div class="svadmin-u-da7c36cd8867 svadmin-u-b950dda299d3 svadmin-u-18049387f0af svadmin-u-f46b61a9b310">
-                {#each availableSavedViews as view (view.id)}
+                {#each savedViewModel.availableSavedViews as view (view.id)}
                   <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-77a2a20e90d4 svadmin-u-fc7473ca09eb">
                     <span class="svadmin-u-7e0b7cdf1a94 svadmin-u-f283ea9bea0e">{view.name}</span>
                     {#if (view.source === 'team' || view.source === 'system') && savedViewProvider?.setDefault}
@@ -2146,7 +1367,7 @@
                         aria-label={`${i18n.t(view.default ? 'common.unsetDefaultView' : 'common.setDefaultView')} ${view.name}`}
                         aria-pressed={view.default === true}
                         title={i18n.t(view.default ? 'common.unsetDefaultView' : 'common.setDefaultView')}
-                        disabled={view.readOnly === true || !view.version || savedViewMutationPending || savedViewMutationError === 'conflict'}
+                        disabled={view.readOnly === true || !view.version || savedViewModel.savedViewMutationPending || savedViewModel.savedViewMutationError === 'conflict'}
                         onclick={() => setRemoteDefault(view)}
                       >
                         <Star class={view.default ? "svadmin-u-e83a7042bc91" : ""} fill={view.default ? "currentColor" : "none"} />
@@ -2158,7 +1379,7 @@
                       <Select.Root
                         aria-label={`${i18n.t('common.viewAccess')} ${view.name}`}
                         value={accessMode}
-                        disabled={view.readOnly !== false || !view.version || savedViewMutationPending || savedViewMutationError === 'conflict'}
+                        disabled={view.readOnly !== false || !view.version || savedViewModel.savedViewMutationPending || savedViewModel.savedViewMutationError === 'conflict'}
                         onchange={(event: Event) => {
                           if (!(event.currentTarget instanceof HTMLSelectElement)) return;
                           const mode = event.currentTarget.value;
@@ -2183,7 +1404,7 @@
                             <Input
                               aria-label={`${i18n.t('common.search')} ${view.name}`}
                               value={accessSubjectQueries.get(view.id) ?? ''}
-                              disabled={view.readOnly !== false || savedViewMutationPending}
+                              disabled={view.readOnly !== false || savedViewModel.savedViewMutationPending}
                               oninput={(event: Event) => {
                                 if (!(event.currentTarget instanceof HTMLInputElement)) return;
                                 accessSubjectQueries.set(view.id, event.currentTarget.value);
@@ -2192,7 +1413,7 @@
                             />
                             <Button type="button" size="sm" variant="outline"
                               aria-label={`${i18n.t('common.refresh')} ${view.name}`}
-                              disabled={view.readOnly !== false || savedViewMutationPending}
+                              disabled={view.readOnly !== false || savedViewModel.savedViewMutationPending}
                               onclick={() => loadAccessSubjects(view, accessSubjectQueries.get(view.id) ?? '')}>
                               <RefreshCw />
                             </Button>
@@ -2206,7 +1427,7 @@
                             {#each selected as id (id)}
                               <label>
                                 <input type="checkbox" checked
-                                  disabled={view.readOnly !== false || savedViewMutationPending || savedViewMutationError === 'conflict'}
+                                  disabled={view.readOnly !== false || savedViewModel.savedViewMutationPending || savedViewModel.savedViewMutationError === 'conflict'}
                                   onchange={() => accessDrafts.set(view.id, {
                                     mode: 'restricted', subjectIds: selected.filter(candidate => candidate !== id),
                                   })} />
@@ -2216,7 +1437,7 @@
                             {#each (accessSubjects.get(view.id) ?? []).filter(subject => !selected.includes(subject.id)) as subject (subject.id)}
                               <label>
                                 <input type="checkbox"
-                                  disabled={view.readOnly !== false || savedViewMutationPending || savedViewMutationError === 'conflict' || selected.length >= 200}
+                                  disabled={view.readOnly !== false || savedViewModel.savedViewMutationPending || savedViewModel.savedViewMutationError === 'conflict' || selected.length >= 200}
                                   onchange={() => accessDrafts.set(view.id, {
                                     mode: 'restricted', subjectIds: [...selected, subject.id],
                                   })} />
@@ -2228,7 +1449,7 @@
                         <Input
                           aria-label={`${i18n.t('common.accessSubjects')} ${view.name}`}
                           value={(draft?.subjectIds ?? view.access?.subjectIds ?? []).join(', ')}
-                          disabled={view.readOnly !== false || !view.version || savedViewMutationPending || savedViewMutationError === 'conflict'}
+                          disabled={view.readOnly !== false || !view.version || savedViewModel.savedViewMutationPending || savedViewModel.savedViewMutationError === 'conflict'}
                           oninput={(event: Event) => {
                             if (event.currentTarget instanceof HTMLInputElement) {
                               accessDrafts.set(view.id, { mode: 'restricted', subjectIds: event.currentTarget.value.split(',').map(id => id.trim()) });
@@ -2240,7 +1461,7 @@
                       <Button type="button" size="sm"
                         aria-label={`${i18n.t('common.saveAccess')} ${view.name}`}
                         disabled={!draft || view.readOnly !== false || !view.version
-                          || savedViewMutationPending || savedViewMutationError === 'conflict'
+                          || savedViewModel.savedViewMutationPending || savedViewModel.savedViewMutationError === 'conflict'
                           || (draft.mode === 'restricted' && !decodeSavedListViewAccess(draft))}
                         onclick={() => saveRemoteAccess(view)}>
                         {i18n.t('common.saveAccess')}
@@ -2251,7 +1472,7 @@
                       class="svadmin-u-52083e7da442 svadmin-u-cc46d0fa277d svadmin-u-012fbd121f37 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-421ac2be5045 svadmin-u-bfa603190748 svadmin-u-8e551981c8d7 svadmin-u-ea7b2e9e070e svadmin-u-f10f771f87e9 svadmin-u-793c80e97ffb svadmin-u-9c1295a6914a"
                       aria-label="{i18n.t("common.delete")} {view.name}"
                       title="{i18n.t("common.delete")} {view.name}"
-                      disabled={view.readOnly === true || savedViewMutationPending || savedViewMutationError === 'conflict'
+                      disabled={view.readOnly === true || savedViewModel.savedViewMutationPending || savedViewModel.savedViewMutationError === 'conflict'
                         || (!!view.source && !savedViewProvider?.remove)}
                       onclick={() => deleteSavedView(view.id)}
                     >
@@ -2301,7 +1522,7 @@
             class="svadmin-u-ea7b2e9e070e svadmin-u-34516836730d svadmin-u-52083e7da442 svadmin-u-f7b5fa971871 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-36d4469299aa"
             aria-label="{i18n.t('common.clear')}: {i18n.t('common.search')}"
             title="{i18n.t('common.clear')}: {i18n.t('common.search')}"
-            onclick={() => { searchText = ""; appliedSearchText = ""; pagination = { ...pagination, current: 1 }; }}
+            onclick={listState.clearSearch}
           >
             <X class="svadmin-u-ef2d6f74d3d0" />
           </button>
@@ -2671,7 +1892,7 @@
           const size = Number(e.currentTarget.value);
           if (Number.isSafeInteger(size) && size > 0) {
             markSavedViewDirty();
-            pagination = { ...pagination, pageSize: size, current: 1 };
+            listState.pagination = { ...pagination, pageSize: size, current: 1 };
           }
         }}
       >
@@ -2722,7 +1943,7 @@
   confirmText={i18n.t('common.delete')}
   confirming={confirmPending || deletePermission.isLoading}
   onconfirm={confirmAction}
-  oncancel={() => { if (!confirmPending) { confirmOpen = false; deleteRequest = null; } }}
+  oncancel={deletionModel.cancel}
 />
 
 {#if detailRecordId != null}
