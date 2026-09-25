@@ -171,7 +171,7 @@ describe('list state model', () => {
     expect(model.captureState().filters).toEqual([
       logical, equal, { field: 'email', operator: 'contains', value: 'replacement' },
     ]);
-    expect(model.filterValues.email).toBe('  replacement  ');
+    expect(model.filterValues['email']).toBe('  replacement  ');
     model.setFilterValue('email', ' ');
     expect(model.captureState().filters).toEqual([logical, equal]);
   });
@@ -184,10 +184,10 @@ describe('list state model', () => {
     ] } });
     expect(model.activeFilterItems.map(item => item.label)).toEqual(['Email: a', 'Email: b', 'or']);
     model.removeActiveFilter(0);
-    expect(model.filterValues.email).toBe('b');
+    expect(model.filterValues['email']).toBe('b');
     expect(model.activeFilterCount).toBe(2);
     model.removeActiveFilter(0);
-    expect(model.filterValues.email).toBe('');
+    expect(model.filterValues['email']).toBe('');
     expect(model.activeFilterCount).toBe(1);
   });
 

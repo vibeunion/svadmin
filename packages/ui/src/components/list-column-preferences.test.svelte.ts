@@ -151,7 +151,7 @@ describe('list column preferences', () => {
   it('returns detached state for saving a view', () => {
     const { model } = setup();
     const snapshot = model.captureState();
-    snapshot.columnVisibility.hidden = true;
+    snapshot.columnVisibility['hidden'] = true;
     snapshot.columnOrder.push('email');
     expect(model.captureState()).toEqual({ columnVisibility: { hidden: false }, columnOrder: [] });
   });
