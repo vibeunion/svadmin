@@ -1,5 +1,62 @@
 /* Example-only layout primitives. Runtime styling belongs to the published CSS in @svadmin/ui. */
 @layer components {
+  [data-svadmin-content-page="operations-dashboard"] {
+    font-variant-numeric: tabular-nums;
+  }
+  .dashboard-primary-grid,
+  .dashboard-support-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+  }
+  .dashboard-secondary {
+    min-width: 0;
+    border-block-end: 1px solid var(--border);
+  }
+  .dashboard-secondary > summary {
+    min-height: 44px;
+    padding-block: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .dashboard-secondary > summary:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  .dashboard-secondary[open] > :not(summary) {
+    margin-block-end: 1rem;
+  }
+  [data-svadmin-content-page="operations-dashboard"] .svadmin-audit-section__body > .divide-y > div {
+    padding: 0.75rem 1rem;
+  }
+  [data-svadmin-content-page="operations-dashboard"] .svadmin-audit-section__header {
+    flex-wrap: wrap;
+  }
+  [data-svadmin-content-page="operations-dashboard"] [data-dashboard-queue],
+  .dashboard-sales {
+    padding-inline: 1rem;
+  }
+  .dashboard-sales {
+    padding-block: 0.75rem;
+  }
+  [data-svadmin-content-page="operations-dashboard"] .truncate {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  [data-svadmin-content-page="operations-dashboard"] [data-svadmin-metric-value] {
+    font-size: 1.5rem;
+    line-height: 1.3;
+  }
+  @media (min-width: 768px) {
+    .dashboard-primary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .dashboard-support-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (min-width: 1200px) {
+    .dashboard-primary-grid { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); }
+    .dashboard-support-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
   /* 列表区域由标题和数据行管理间距，避免 Card 默认留白重复叠加。 */
   [data-slot="card"][data-dashboard-panel] {
     gap: 0;
@@ -103,4 +160,14 @@
       grid-template-columns: minmax(0, 1fr);
     }
   }
+}
+
+/* 包的兼容主题规则未分层，这些仅限首页的覆盖也必须保持同层。 */
+.layout-clean-flat [data-svadmin-content-page="operations-dashboard"] [data-svadmin-metric-card] {
+  border-radius: 0;
+  border-inline-start: 4px solid var(--border);
+  box-shadow: none;
+}
+.layout-clean-flat [data-svadmin-content-page="operations-dashboard"] .dashboard-risk {
+  border-inline-start-color: var(--warning);
 }

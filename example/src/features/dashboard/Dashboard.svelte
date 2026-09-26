@@ -7,8 +7,7 @@
 
   import { captureAdminContext, useList } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
-  import { DashboardPage, DataState, MetricBlock } from '@svadmin/ui';
-  import * as Card from '@svadmin/ui/components/ui/card/index.js';
+  import { AuditSection, ChartContainer, DashboardPage, DataState, MetricBlock, StatusPill, type AuditDataState } from '@svadmin/ui';
   import {
     Bell,
     Bot,
@@ -27,7 +26,6 @@
 
   const i18n = useTranslation();
   const adminContext = captureAdminContext();
-  import WorkspaceQueryState from '../../workspace/WorkspaceQueryState.svelte';
   import { recordLink } from '../../workspace/workspace-links';
   const declarativeSurfacePromise = import('../../components/DeclarativeSurfaceExample.svelte');
 
@@ -84,6 +82,11 @@
   ];
   const isRefreshing = $derived(queries.some((query) => query.isFetching));
   const hasError = $derived(queries.some((query) => query.isError));
+  function sectionState(query: { isLoading: boolean; isError: boolean; data?: unknown }, count: number): AuditDataState {
+    if (query.isLoading) return 'loading';
+    if (query.isError) return query.data ? 'partial' : 'error';
+    return count === 0 ? 'empty' : 'ready';
+  }
   const queryByRoute = {
     products: productsQuery, suppliers: suppliersQuery, warehouses: warehousesQuery,
     purchase_orders: purchaseOrdersQuery, sales_orders: salesOrdersQuery, todos: todosQuery,
@@ -183,12 +186,6 @@
     return String(movement.quantity);
   }
 
-  function notificationTone(severity: string): string {
-    if (severity === 'critical') return 'bg-destructive/10 text-destructive';
-    if (severity === 'warning') return 'bg-warning/10 text-warning';
-    return 'bg-muted text-muted-foreground';
-  }
-
   function eventTypeLabel(type: string): string {
     if (!isZh) return type;
     if (type === 'cycle_count') return '盘点';
@@ -259,9 +256,9 @@
 <DashboardPage pageId="operations-dashboard" title={isZh ? '运营工作台' : 'Operations workspace'}
     description={isZh ? '库存风险、订单与团队待办' : 'Inventory health, orders and team priorities'}>
     {#snippet actions()}
-      <span role="status" class="flex items-center gap-2 text-xs text-muted-foreground">
-        <span aria-hidden="true" class="h-1.5 w-1.5 rounded-full {hasError ? 'bg-destructive' : isRefreshing ? 'bg-warning' : 'bg-success'}"></span>
-        {hasError ? (isZh ? '部分数据不可用' : 'Some data unavailable') : isRefreshing ? (isZh ? '更新中' : 'Updating') : (isZh ? '已同步' : 'Up to date')}
+      <span role="status">
+        <StatusPill tone={hasError ? 'warning' : isRefreshing ? 'info' : 'success'}
+          label={hasError ? (isZh ? '部分数据不可用' : 'Some data unavailable') : isRefreshing ? (isZh ? '更新中' : 'Updating') : (isZh ? '已同步' : 'Up to date')} />
       </span>
     {/snippet}
 
@@ -272,6 +269,7 @@
   {/if}
   {#snippet metrics()}
     <MetricBlock label={isZh ? '库存风险' : 'Stock at risk'} value={productsQuery.isError ? '—' : lowStockProducts.length}
+      class={!productsQuery.isLoading && !productsQuery.isError && lowStockProducts.length > 0 ? 'dashboard-risk' : ''}
       detail={productsQuery.isError ? '' : (isZh ? `其中 ${outOfStockProducts.length} 项缺货` : `${outOfStockProducts.length} out of stock`)}
       loading={productsQuery.isLoading} />
     <MetricBlock label={isZh ? '待处理' : 'Open work'}
@@ -284,17 +282,15 @@
   {/snippet}
 
   <!-- Inventory Health + Operations Queue -->
-  <section class="grid items-start gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-    <section class="min-w-0">
-      <header class="flex items-center justify-between border-b py-3">
-        <h2 class="text-sm font-semibold">{isZh ? '库存风险清单' : 'Stock risk queue'}</h2>
+  <div class="dashboard-primary-grid">
+    <AuditSection title={isZh ? '库存风险清单' : 'Stock risk queue'}
+      accent={lowStockProducts.length ? 'warning' : 'neutral'}
+      state={sectionState(productsQuery, lowStockProducts.length)}
+      message={!productsQuery.isError && !productsQuery.isLoading && !lowStockProducts.length ? (isZh ? '所有跟踪商品均高于库存下限' : 'All tracked products are above threshold') : undefined}
+      retry={() => void productsQuery.refetch()}>
+      {#snippet actions()}
         <a class="text-sm font-medium text-primary hover:underline" href="#/products">{isZh ? '商品档案' : 'Products'}</a>
-      </header>
-      {#if productsQuery.isLoading}
-        <DataState state="loading" />
-      {:else if productsQuery.isError}
-        <p class="py-4 text-sm text-muted-foreground">{isZh ? '库存清单暂不可用' : 'Stock queue unavailable'}</p>
-      {:else}
+      {/snippet}
         <div class="divide-y">
           {#each lowStockProducts as product (product.id)}
             <div class="flex items-center justify-between gap-4 py-3">
@@ -311,13 +307,9 @@
             <div class="px-6 py-8 text-sm text-muted-foreground">{isZh ? '所有跟踪商品均高于库存下限。' : 'All tracked products are above threshold.'}</div>
           {/each}
         </div>
-      {/if}
-    </section>
+    </AuditSection>
 
-    <section class="min-w-0">
-      <header class="border-b py-3">
-        <h2 class="text-sm font-semibold">{isZh ? '运营队列' : 'Operations Queue'}</h2>
-      </header>
+    <AuditSection title={isZh ? '运营队列' : 'Operations Queue'} accent="neutral">
         <div class="grid gap-x-5 sm:grid-cols-2" data-dashboard-queue>
           {#each orderSummary as item (item.label)}
             <a href={item.href} class="flex items-center justify-between gap-3 border-b border-border py-3 transition hover:bg-muted/50">
@@ -329,10 +321,10 @@
             </a>
           {/each}
         </div>
-    </section>
-  </section>
+    </AuditSection>
+  </div>
 
-  <details class="border-y" data-dashboard-summary data-svadmin-collapsible>
+  <details class="dashboard-secondary" data-dashboard-summary>
     <summary class="cursor-pointer py-3 text-sm font-medium">{isZh ? '资源概览' : 'Resource overview'}</summary>
     <section class="grid grid-cols-2 gap-x-6 gap-y-3 pb-4 xl:grid-cols-3">
       {#each stats as stat (stat.label)}
@@ -349,7 +341,6 @@
         </a>
       {/each}
     </section>
-  </details>
 
   <!-- Roadmap modules -->
   <section class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -368,16 +359,17 @@
       </a>
     {/each}
   </section>
+  </details>
 
   <!-- Calendar / AI / Notifications columns -->
-  <section class="grid gap-4 xl:grid-cols-3">
-    <Card.Root data-dashboard-panel class="overflow-hidden border-border/40">
-      <Card.Header class="flex flex-row items-center justify-between border-b px-6 py-4">
-        <Card.Title class="text-sm font-semibold">{isZh ? '日历' : 'Calendar'}</Card.Title>
+  <details class="dashboard-secondary">
+  <summary>{isZh ? '日程与协作' : 'Schedule and collaboration'}</summary>
+  <div class="dashboard-support-grid">
+    <AuditSection title={isZh ? '日历' : 'Calendar'} accent="neutral"
+      state={sectionState(calendarQuery, calendarEvents.length)} retry={() => void calendarQuery.refetch()}>
+      {#snippet actions()}
         <a class="text-sm font-medium text-primary hover:underline" href="#/calendar_events">{isZh ? '查看全部' : 'View all'}</a>
-      </Card.Header>
-      <Card.Content class="p-0">
-        <WorkspaceQueryState query={calendarQuery}>
+      {/snippet}
         <div class="divide-y">
           {#each calendarEvents.slice(0, 3) as event (event.id)}
             <div class="px-6 py-4">
@@ -388,17 +380,13 @@
             <div class="px-6 py-8 text-sm text-muted-foreground">{isZh ? '暂无计划日程。' : 'No scheduled events.'}</div>
           {/each}
         </div>
-        </WorkspaceQueryState>
-      </Card.Content>
-    </Card.Root>
+    </AuditSection>
 
-    <Card.Root data-dashboard-panel class="overflow-hidden border-border/40">
-      <Card.Header class="flex flex-row items-center justify-between border-b px-6 py-4">
-        <Card.Title class="text-sm font-semibold">{isZh ? 'AI 运营' : 'AI Operations'}</Card.Title>
+    <AuditSection title={isZh ? 'AI 运营' : 'AI Operations'} accent="neutral"
+      state={sectionState(conversationsQuery, conversations.length)} retry={() => void conversationsQuery.refetch()}>
+      {#snippet actions()}
         <a class="text-sm font-medium text-primary hover:underline" href="#/ai_conversations">{isZh ? '查看全部' : 'View all'}</a>
-      </Card.Header>
-      <Card.Content class="p-0">
-        <WorkspaceQueryState query={conversationsQuery}>
+      {/snippet}
         <div class="divide-y">
           {#each conversations.slice(0, 3) as conversation (conversation.id)}
             <div class="flex items-center justify-between gap-4 px-6 py-4">
@@ -406,23 +394,19 @@
                 <p class="truncate text-sm font-medium text-foreground">{conversationTitle(conversation.title)}</p>
                 <p class="text-xs text-muted-foreground">{conversation.updatedAt}</p>
               </div>
-              <span class="rounded-md bg-primary/10 px-2 py-1 text-xs font-semibold text-primary">{conversationStatusLabel(conversation.status)}</span>
+              <StatusPill tone={conversation.status === 'resolved' ? 'success' : 'info'} label={conversationStatusLabel(conversation.status)} />
             </div>
           {:else}
             <div class="px-6 py-8 text-sm text-muted-foreground">{isZh ? '暂无 AI 对话。' : 'No AI threads yet.'}</div>
           {/each}
         </div>
-        </WorkspaceQueryState>
-      </Card.Content>
-    </Card.Root>
+    </AuditSection>
 
-    <Card.Root data-dashboard-panel class="overflow-hidden border-border/40">
-      <Card.Header class="flex flex-row items-center justify-between border-b px-6 py-4">
-        <Card.Title class="text-sm font-semibold">{isZh ? '通知' : 'Notifications'}</Card.Title>
+    <AuditSection title={isZh ? '通知' : 'Notifications'} accent="neutral"
+      state={sectionState(notificationsQuery, notifications.length)} retry={() => void notificationsQuery.refetch()}>
+      {#snippet actions()}
         <a class="text-sm font-medium text-primary hover:underline" href="#/notifications">{isZh ? '查看全部' : 'View all'}</a>
-      </Card.Header>
-      <Card.Content class="p-0">
-        <WorkspaceQueryState query={notificationsQuery}>
+      {/snippet}
         <div class="divide-y">
           {#each notifications.slice(0, 3) as notification (notification.id)}
             <div class="flex items-center justify-between gap-4 px-6 py-4">
@@ -430,26 +414,21 @@
                 <p class="truncate text-sm font-medium text-foreground">{notificationTitle(notification.title)}</p>
                 <p class="text-xs text-muted-foreground">{notification.createdAt}</p>
               </div>
-              <span class="rounded-md px-2 py-1 text-xs font-semibold {notificationTone(notification.severity)}">
-                {severityLabel(notification.severity)}
-              </span>
+              <StatusPill tone={notification.severity === 'critical' ? 'danger' : notification.severity === 'warning' ? 'warning' : 'info'} label={severityLabel(notification.severity)} />
             </div>
           {:else}
             <div class="px-6 py-8 text-sm text-muted-foreground">{isZh ? '暂无通知。' : 'No notifications yet.'}</div>
           {/each}
         </div>
-        </WorkspaceQueryState>
-      </Card.Content>
-    </Card.Root>
-  </section>
+    </AuditSection>
+  </div>
 
-  <section class="grid gap-4 xl:grid-cols-[0.95fr_1.05fr]">
-    <Card.Root data-dashboard-panel class="overflow-hidden border-border/40">
-      <Card.Header class="flex flex-row items-center justify-between border-b px-6 py-4">
-        <Card.Title class="text-sm font-semibold">{isZh ? '库存排行' : 'Stock ranking'}</Card.Title>
+  <div class="dashboard-primary-grid">
+    <ChartContainer title={isZh ? '库存排行' : 'Stock ranking'}
+      state={sectionState(productsQuery, bestSellers.length)} retry={() => void productsQuery.refetch()}>
+      {#snippet actions()}
         <a class="text-sm font-medium text-primary hover:underline" href="#/products">{isZh ? '商品档案' : 'Products'}</a>
-      </Card.Header>
-      <Card.Content class="p-0">
+      {/snippet}
         <div class="divide-y">
           {#each bestSellers as product (product.id)}
             <div class="grid gap-3 px-6 py-4 sm:grid-cols-[1fr_auto] sm:items-center">
@@ -469,15 +448,13 @@
             </div>
           {/each}
         </div>
-      </Card.Content>
-    </Card.Root>
+    </ChartContainer>
 
-    <Card.Root data-dashboard-panel class="overflow-hidden border-border/40">
-      <Card.Header class="flex flex-row items-center justify-between border-b px-6 py-4">
-        <Card.Title class="text-sm font-semibold">{isZh ? '团队成员' : 'Team members'}</Card.Title>
+    <AuditSection title={isZh ? '团队成员' : 'Team members'} accent="neutral"
+      state={sectionState(usersQuery, teamMembers.length)} retry={() => void usersQuery.refetch()}>
+      {#snippet actions()}
         <a class="text-sm font-medium text-primary hover:underline" href="#/users">{isZh ? '用户管理' : 'Users'}</a>
-      </Card.Header>
-      <Card.Content class="p-0">
+      {/snippet}
         <div class="divide-y">
           {#each teamMembers as member (member.id)}
             <div class="grid gap-3 px-6 py-4 sm:grid-cols-[1fr_auto] sm:items-center">
@@ -491,20 +468,17 @@
             </div>
           {/each}
         </div>
-      </Card.Content>
-    </Card.Root>
-  </section>
+    </AuditSection>
+  </div>
+  </details>
 
-  <section class="grid gap-4 xl:grid-cols-[0.72fr_1.28fr]">
-    <Card.Root data-dashboard-panel class="overflow-hidden border-border/40">
-      <Card.Header class="border-b px-6 py-4">
-        <Card.Title class="text-sm font-semibold">{isZh ? '销售活动' : 'Sales Activity'}</Card.Title>
-      </Card.Header>
-      <Card.Content class="space-y-4 p-6">
+  <div class="dashboard-primary-grid">
+    <AuditSection title={isZh ? '销售活动' : 'Sales Activity'} accent="neutral"
+      state={sectionState(salesOrdersQuery, salesOrders.length)} retry={() => void salesOrdersQuery.refetch()}>
+      <div class="dashboard-sales">
         <div class="border-b pb-4">
-          <p class="text-xs font-semibold text-muted-foreground">{isZh ? '销售与流水记录' : 'Sales and movement records'}</p>
-          <p class="mt-2 text-3xl font-semibold text-foreground">{salesOrders.length + movements.length}</p>
-          <p class="mt-1 text-xs text-muted-foreground">{isZh ? '订单与库存动作合计' : 'orders and inventory actions'}</p>
+          <p class="text-xs font-medium text-muted-foreground">{isZh ? '销售订单' : 'Sales orders'}</p>
+          <p class="mt-2 text-xl font-semibold tabular-nums text-foreground">{salesOrders.length}</p>
         </div>
         <div class="grid grid-cols-3 gap-2 text-center">
           <div class="p-3">
@@ -520,42 +494,41 @@
             <p class="text-xs text-muted-foreground">{isZh ? '已发货' : 'Shipped'}</p>
           </div>
         </div>
-      </Card.Content>
-    </Card.Root>
+      </div>
+    </AuditSection>
 
-    <Card.Root data-dashboard-panel class="overflow-hidden border-border/40">
-      <Card.Header class="flex flex-row items-center justify-between border-b px-6 py-4">
-        <Card.Title class="text-sm font-semibold">{isZh ? '近期订单' : 'Recent Orders'}</Card.Title>
+    <AuditSection title={isZh ? '近期订单' : 'Recent Orders'} accent="neutral"
+      state={sectionState(salesOrdersQuery, salesOrders.length)} retry={() => void salesOrdersQuery.refetch()}>
+      {#snippet actions()}
         <a class="text-sm font-medium text-primary hover:underline" href="#/sales_orders">{isZh ? '销售订单' : 'Sales Orders'}</a>
-      </Card.Header>
-      <Card.Content class="p-0">
+      {/snippet}
         <div class="divide-y">
-          {#each salesOrders as order (order.id)}
+          {#each salesOrders.slice(0, 5) as order (order.id)}
             <div class="grid gap-3 px-6 py-4 sm:grid-cols-[1fr_auto_auto] sm:items-center">
               <div class="min-w-0">
                 <p class="truncate text-sm font-medium text-foreground">{order.orderNumber}</p>
                 <p class="text-xs text-muted-foreground">{order.customerName} · {order.orderDate}</p>
               </div>
-              <span class="rounded-md bg-muted px-2 py-1 text-xs font-semibold text-muted-foreground">{orderStatusLabel(order.status)}</span>
-              <p class="text-sm font-semibold text-foreground">${order.totalAmount}</p>
+              <StatusPill label={orderStatusLabel(order.status)} tone={order.status === 'cancelled' ? 'danger' : order.status === 'shipped' ? 'success' : 'neutral'} />
+              <p class="text-sm font-semibold tabular-nums text-foreground">${order.totalAmount}</p>
             </div>
           {:else}
             <div class="px-6 py-8 text-sm text-muted-foreground">{isZh ? '暂无近期订单。' : 'No recent orders.'}</div>
           {/each}
         </div>
-      </Card.Content>
-    </Card.Root>
-  </section>
+    </AuditSection>
+  </div>
 
   <!-- Recent Stock Movements -->
-  <Card.Root data-dashboard-panel class="overflow-hidden border-border/40">
-    <Card.Header class="flex flex-row items-center justify-between border-b px-6 py-4">
-      <Card.Title class="text-sm font-semibold">{isZh ? '近期库存流水' : 'Recent Stock Movements'}</Card.Title>
+  <details class="dashboard-secondary">
+    <summary>{isZh ? '库存流水与扩展' : 'Stock movements and extensions'}</summary>
+  <AuditSection title={isZh ? '近期库存流水' : 'Recent Stock Movements'} accent="neutral"
+    state={sectionState(movementsQuery, movements.length)} retry={() => void movementsQuery.refetch()}>
+    {#snippet actions()}
       <a class="text-sm font-medium text-primary hover:underline" href="#/stock_movements">{isZh ? '查看全部' : 'View all'}</a>
-    </Card.Header>
-    <Card.Content class="p-0">
+    {/snippet}
       <div class="divide-y">
-        {#each movements as movement (movement.id)}
+        {#each movements.slice(0, 5) as movement (movement.id)}
           <div class="flex items-center justify-between gap-4 px-6 py-4">
             <div class="min-w-0">
               <p class="truncate text-sm font-medium text-foreground">{movementNote(movement.note)}</p>
@@ -569,8 +542,7 @@
           <div class="px-6 py-8 text-sm text-muted-foreground">{isZh ? '暂无库存流水。' : 'No movements recorded yet.'}</div>
       {/each}
       </div>
-    </Card.Content>
-  </Card.Root>
+  </AuditSection>
 
   {#await declarativeSurfacePromise}
     <DataState state="loading" title={isZh ? '正在加载声明式 Surface' : 'Loading declarative Surface'} />
@@ -580,4 +552,5 @@
   {:catch}
     <DataState state="error" title={isZh ? '声明式 Surface 加载失败' : 'Unable to load the declarative Surface'} />
   {/await}
+  </details>
 </DashboardPage>

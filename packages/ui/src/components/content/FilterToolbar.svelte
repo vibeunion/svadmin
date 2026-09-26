@@ -1,5 +1,7 @@
 <script lang="ts">
-  import type { Snippet } from 'svelte';
+  import { onMount, type Snippet } from 'svelte';
+  import { useTranslation } from '@svadmin/core/i18n';
+  import * as Sheet from '../ui/sheet/index.js';
   import { Search, X, SlidersHorizontal, ChevronDown, ChevronUp } from '@lucide/svelte';
   import { Button } from '../ui/button/index.js';
   import { Input } from '../ui/input/index.js';
@@ -40,6 +42,15 @@
 
   const isCompact = $derived(density === 'compact');
   const advancedPanelId = `svadmin-filter-toolbar-advanced-${uid}`;
+  const i18n = useTranslation();
+  let mobile = $state(false);
+  onMount(() => {
+    const media = window.matchMedia('(max-width: 767px)');
+    const update = () => { mobile = media.matches; };
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  });
 </script>
 
 <div class={cn('svadmin-filter-toolbar', className)} data-density={density} data-svadmin-filter-toolbar data-advanced-open={advanced && advancedOpen ? 'true' : 'false'}>
@@ -67,12 +78,12 @@
         {/if}
       </div>
     {/if}
-    {#if filters}
+    {#if filters && !mobile}
       <div class="svadmin-filter-toolbar__filters">
         {@render filters()}
       </div>
     {/if}
-    {#if advanced}
+    {#if advanced || (mobile && filters)}
       <Button
         variant={advancedOpen ? 'secondary' : 'outline'}
         size={isCompact ? 'sm' : 'default'}
@@ -101,7 +112,16 @@
       </div>
     {/if}
   </div>
-  {#if advanced && advancedOpen}
+  {#if mobile && (advanced || filters)}
+    <Sheet.Root bind:open={advancedOpen} class="svadmin-filter-bottom-sheet" role="dialog" aria-modal="true"
+      aria-label={advancedLabel} id={advancedPanelId} closeLabel={i18n.t('common.close')}>
+      <Sheet.Header><Sheet.Title>{advancedLabel}</Sheet.Title></Sheet.Header>
+      <Sheet.Content>
+        {@render filters?.()}
+        {@render advanced?.()}
+      </Sheet.Content>
+    </Sheet.Root>
+  {:else if advanced && advancedOpen}
     <div id={advancedPanelId} role="region" aria-label={advancedLabel} class="svadmin-filter-toolbar-advanced" aria-hidden="false">
       {@render advanced()}
     </div>
