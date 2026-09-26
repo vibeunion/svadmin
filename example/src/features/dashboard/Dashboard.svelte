@@ -324,7 +324,7 @@
     </AuditSection>
   </div>
 
-  <details class="dashboard-secondary" data-dashboard-summary>
+  <details class="svadmin-collapsible dashboard-secondary" data-dashboard-summary>
     <summary class="cursor-pointer py-3 text-sm font-medium">{isZh ? '资源概览' : 'Resource overview'}</summary>
     <section class="grid grid-cols-2 gap-x-6 gap-y-3 pb-4 xl:grid-cols-3">
       {#each stats as stat (stat.label)}
@@ -362,7 +362,7 @@
   </details>
 
   <!-- Calendar / AI / Notifications columns -->
-  <details class="dashboard-secondary">
+  <details class="svadmin-collapsible dashboard-secondary">
   <summary>{isZh ? '日程与协作' : 'Schedule and collaboration'}</summary>
   <div class="dashboard-support-grid">
     <AuditSection title={isZh ? '日历' : 'Calendar'} accent="neutral"
@@ -520,7 +520,7 @@
   </div>
 
   <!-- Recent Stock Movements -->
-  <details class="dashboard-secondary">
+  <details class="svadmin-collapsible dashboard-secondary">
     <summary>{isZh ? '库存流水与扩展' : 'Stock movements and extensions'}</summary>
   <AuditSection title={isZh ? '近期库存流水' : 'Recent Stock Movements'} accent="neutral"
     state={sectionState(movementsQuery, movements.length)} retry={() => void movementsQuery.refetch()}>
