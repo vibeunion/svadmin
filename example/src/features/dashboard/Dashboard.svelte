@@ -544,6 +544,8 @@
       </div>
   </AuditSection>
 
+  </details>
+
   {#await declarativeSurfacePromise}
     <DataState state="loading" title={isZh ? '正在加载声明式 Surface' : 'Loading declarative Surface'} />
   {:then declarativeSurfaceModule}
@@ -552,5 +554,4 @@
   {:catch}
     <DataState state="error" title={isZh ? '声明式 Surface 加载失败' : 'Unable to load the declarative Surface'} />
   {/await}
-  </details>
 </DashboardPage>
