@@ -11,8 +11,8 @@ test('package styles preserve host responsive layouts and header boundaries', as
   await expect(dashboard.locator('[data-svadmin-dashboard-metrics] [data-svadmin-metric-card]')).toHaveCount(3);
   await expect(dashboard.locator('[data-svadmin-content-header] [role="status"]')).toBeVisible();
   await expect(dashboard.locator('a[href^="#/products/show/"]').first()).toBeVisible();
-  await expect(dashboard.locator('[data-dashboard-panel]').first()).toHaveCSS('padding-top', '0px');
-  await expect(dashboard.locator('[data-dashboard-panel]').first()).toHaveCSS('row-gap', '0px');
+  await expect(dashboard.locator('.dashboard-primary-grid').first()).toHaveCSS('padding-top', '0px');
+  await expect(dashboard.locator('.dashboard-primary-grid').first()).toHaveCSS('row-gap', '16px');
   await expect(page.locator('[data-svadmin-topbar] [data-variant="ghost"]').first()).toHaveCSS('box-shadow', 'none');
   await page.screenshot({ path: testInfo.outputPath('dashboard-desktop.png'), animations: 'disabled' });
   await page.setViewportSize({ width: 390, height: 844 });

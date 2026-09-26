@@ -8,10 +8,10 @@
 
   interface Props {
     title: string;
-    description?: string;
+    description?: string | undefined;
     eyebrow?: string;
     accent?: AuditAccent;
-    actions?: Snippet;
+    actions?: Snippet | undefined;
     children?: Snippet;
     class?: string;
     state?: AuditDataState;
