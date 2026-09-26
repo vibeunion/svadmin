@@ -1,7 +1,7 @@
 {
   "name": "@svadmin/devtools-contract",
   "version": "0.2.0",
-  "description": "Shared JSON-safe DevTools contracts for svadmin and SupaCloud adapters",
+  "description": "Re-export of @vibeunion/devtools-protocol for svadmin DevTools adapters",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -22,6 +22,9 @@
   "scripts": {
     "build": "bun build src/index.ts --outdir dist --target browser && tsc -p tsconfig.json --emitDeclarationOnly",
     "test": "vitest run"
+  },
+  "dependencies": {
+    "@vibeunion/devtools-protocol": "^0.1.0"
   },
   "license": "MIT",
   "repository": {

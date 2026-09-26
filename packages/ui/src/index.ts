@@ -75,18 +75,18 @@ export {
   getSvadminDevtoolsSnapshot,
   installSvadminDevtoolsBridge,
   publishSvadminDevtoolsSnapshot,
+  runSvadminDevtoolsCacheAction,
   subscribeSvadminDevtools,
-  SVADMIN_DEVFRAME_CHANNEL,
 } from './devtools-bridge.js';
 export type {
   DevtoolsCacheDiagnostics,
   DevtoolsProviderDiagnostic,
   DevtoolsQueryDiagnostic,
-  SvadminDevtoolsBridge,
   SvadminDevtoolsSnapshot,
   DevtoolsQuerySelector,
   SvadminDevframeProtocol,
 } from './devtools-bridge.js';
+export type { DevtoolsPageBridge } from '@vibeunion/devtools-devframe';
 export { default as Authenticated } from './components/Authenticated.svelte';
 export { default as UpdatePasswordPage } from './components/UpdatePasswordPage.svelte';
 export { default as ProfilePage } from './components/ProfilePage.svelte';
