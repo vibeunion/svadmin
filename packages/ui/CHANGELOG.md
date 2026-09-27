@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.80.0](https://github.com/vibeunion/svadmin/compare/ui-v0.79.0...ui-v0.80.0) (2026-09-27)
+
+
+### 🚀 Features
+
+* **devtools:** use shared [@vibeunion](https://github.com/vibeunion) protocol and Devframe transport ([#474](https://github.com/vibeunion/svadmin/issues/474)) ([fba7803](https://github.com/vibeunion/svadmin/commit/fba7803612353f67efb33b78fa11b904049bb5ef))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools-contract bumped to 0.3.0
+
 ## [0.79.0](https://github.com/vibeunion/svadmin/compare/ui-v0.78.2...ui-v0.79.0) (2026-09-26)
 
 
