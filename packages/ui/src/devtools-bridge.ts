@@ -1,12 +1,16 @@
 import { parseQueryKey } from '@svadmin/core';
-import { createPageScriptChannel } from 'devframe/in-page-channel';
+import {
+  installDevtoolsPageBridge,
+  type DevtoolsPageBridge,
+} from '@vibeunion/devtools-devframe';
 import { DEV } from 'esm-env';
 import type {
+  DevtoolsCacheActionRequest,
+  DevtoolsCacheActionResult,
   DevtoolsQueryDiagnostic,
   SvadminDevtoolsSnapshot,
 } from '@svadmin/devtools-contract';
 
-export const SVADMIN_DEVFRAME_CHANNEL = 'svadmin:devtools';
 export type {
   DevtoolsCacheDiagnostics,
   DevtoolsProviderDiagnostic,
@@ -14,22 +18,11 @@ export type {
   SvadminDevtoolsSnapshot,
 } from '@svadmin/devtools-contract';
 
-export type SvadminDevtoolsBridge = {
-  getSnapshot: () => SvadminDevtoolsSnapshot | null;
-  subscribe: (listener: (snapshot: SvadminDevtoolsSnapshot) => void) => () => void;
-  cache: {
-    cancel: (selector?: DevtoolsQuerySelector) => Promise<void>;
-    invalidate: (selector?: DevtoolsQuerySelector) => Promise<void>;
-    refetch: (selector?: DevtoolsQuerySelector) => Promise<void>;
-    remove: (selector?: DevtoolsQuerySelector) => void;
-    reset: (selector?: DevtoolsQuerySelector) => Promise<void>;
-    clear: () => void;
-    clearMutations: () => void;
-  };
-  devframe: {
-    channelName: typeof SVADMIN_DEVFRAME_CHANNEL;
-  };
-};
+export type {
+  DevtoolsCacheActionRequest,
+  DevtoolsCacheActionResult,
+  DevtoolsCacheMutation,
+} from '@svadmin/devtools-contract';
 
 export type DevtoolsQuerySelector = Partial<Pick<DevtoolsQueryDiagnostic, 'provider' | 'resource' | 'operation'>>;
 
@@ -43,20 +36,19 @@ type QueryClientLike = {
   refetchQueries: (filters: { queryKey?: readonly unknown[] }) => Promise<void>;
   removeQueries: (filters: { queryKey?: readonly unknown[] }) => void;
   resetQueries: (filters: { queryKey?: readonly unknown[] }) => Promise<void>;
-  getMutationCache: () => { clear: () => void };
+  getMutationCache: () => { clear: () => void; getAll?: () => readonly unknown[] };
 };
 
+/**
+ * Page-script protocol as seen by a panel. It mirrors the shared DevTools wire
+ * (`getSnapshot` + `cacheAction`); the shared bridge installs the same shape on
+ * `window.__VIBEUNION_DEVTOOLS__`.
+ */
 export type SvadminDevframeProtocol = {
   functions: {
     pageScript: {
       getSnapshot: () => SvadminDevtoolsSnapshot | null;
-      cacheCancel: (selector?: DevtoolsQuerySelector) => Promise<void>;
-      cacheInvalidate: (selector?: DevtoolsQuerySelector) => Promise<void>;
-      cacheRefetch: (selector?: DevtoolsQuerySelector) => Promise<void>;
-      cacheRemove: (selector?: DevtoolsQuerySelector) => void;
-      cacheReset: (selector?: DevtoolsQuerySelector) => Promise<void>;
-      cacheClear: () => void;
-      clearMutations: () => void;
+      cacheAction: (request: DevtoolsCacheActionRequest) => Promise<DevtoolsCacheActionResult>;
     };
   };
 };
@@ -64,7 +56,6 @@ export type SvadminDevframeProtocol = {
 const listeners = new Set<(snapshot: SvadminDevtoolsSnapshot) => void>();
 let snapshot: SvadminDevtoolsSnapshot | null = null;
 let queryClient: QueryClientLike | null = null;
-let devframeChannel: ReturnType<typeof createPageScriptChannel<SvadminDevframeProtocol>> | null = null;
 
 export function publishSvadminDevtoolsSnapshot(next: SvadminDevtoolsSnapshot): void {
   snapshot = next;
@@ -138,43 +129,56 @@ export function createSvadminDevtoolsCacheActions() {
   };
 }
 
-export function installSvadminDevtoolsBridge(): void {
-  if (typeof window === 'undefined' || !DEV) return;
-
-  if (!devframeChannel) {
-    const cache = createSvadminDevtoolsCacheActions();
-    devframeChannel = createPageScriptChannel<SvadminDevframeProtocol>({
-      name: SVADMIN_DEVFRAME_CHANNEL,
-      functions: {
-        getSnapshot: { type: 'query', handler: getSvadminDevtoolsSnapshot },
-        cacheCancel: { type: 'action', handler: cache.cancel },
-        cacheInvalidate: { type: 'action', handler: cache.invalidate },
-        cacheRefetch: { type: 'action', handler: cache.refetch },
-        cacheRemove: { type: 'action', handler: cache.remove },
-        cacheReset: { type: 'action', handler: cache.reset },
-        cacheClear: { type: 'action', handler: cache.clear },
-        clearMutations: { type: 'action', handler: cache.clearMutations },
-      },
-    });
+/**
+ * Executes a shared-protocol cache action against the attached query client and
+ * reports how many entries matched. Only the operations svadmin implements are
+ * accepted; mutation-variant operations the panel never advertises throw.
+ */
+export async function runSvadminDevtoolsCacheAction(
+  request: DevtoolsCacheActionRequest,
+): Promise<DevtoolsCacheActionResult> {
+  const { action, selector } = request;
+  const actions = createSvadminDevtoolsCacheActions();
+  let matched: number;
+  switch (action) {
+    case 'cancel':
+      matched = matchingQueryKeys(selector).length;
+      await actions.cancel(selector);
+      break;
+    case 'invalidate':
+      matched = matchingQueryKeys(selector).length;
+      await actions.invalidate(selector);
+      break;
+    case 'refetch':
+      matched = matchingQueryKeys(selector).length;
+      await actions.refetch(selector);
+      break;
+    case 'remove':
+      matched = matchingQueryKeys(selector).length;
+      actions.remove(selector);
+      break;
+    case 'reset':
+      matched = matchingQueryKeys(selector).length;
+      await actions.reset(selector);
+      break;
+    case 'clear':
+      matched = matchingQueryKeys().length;
+      actions.clear();
+      break;
+    case 'clearMutations':
+      matched = queryClient?.getMutationCache().getAll?.().length ?? 0;
+      actions.clearMutations();
+      break;
+    default:
+      throw new Error(`Unsupported svadmin cache action: ${String(action)}`);
   }
-
-  const bridge: SvadminDevtoolsBridge = {
-    getSnapshot: getSvadminDevtoolsSnapshot,
-    subscribe: subscribeSvadminDevtools,
-    cache: createSvadminDevtoolsCacheActions(),
-    devframe: { channelName: SVADMIN_DEVFRAME_CHANNEL },
-  };
-
-  Object.defineProperty(window, '__SVADMIN_DEVTOOLS__', {
-    configurable: true,
-    enumerable: false,
-    value: bridge,
-    writable: false,
-  });
+  return { action, matched, changed: matched };
 }
 
-declare global {
-  interface Window {
-    __SVADMIN_DEVTOOLS__?: SvadminDevtoolsBridge;
-  }
+export function installSvadminDevtoolsBridge(): DevtoolsPageBridge | null {
+  return installDevtoolsPageBridge({
+    development: DEV,
+    getSnapshot: getSvadminDevtoolsSnapshot,
+    cacheAction: runSvadminDevtoolsCacheAction,
+  });
 }

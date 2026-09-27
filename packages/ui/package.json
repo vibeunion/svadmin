@@ -140,6 +140,7 @@
   },
   "dependencies": {
     "@svadmin/devtools-contract": "workspace:*",
+    "@vibeunion/devtools-devframe": "^0.1.0",
     "@sinclair/typebox": "^0.34.52",
     "@floating-ui/dom": "^1.8.0",
     "esm-env": "^1.2.2",

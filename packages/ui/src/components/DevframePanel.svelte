@@ -1,8 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { connectPanelChannel, type PanelChannel } from 'devframe/in-page-channel';
+  import { DEVTOOLS_CHANNEL } from '@vibeunion/devtools-devframe';
   import {
-    SVADMIN_DEVFRAME_CHANNEL,
+    type DevtoolsCacheMutation,
     type DevtoolsQuerySelector,
     type SvadminDevframeProtocol,
     type SvadminDevtoolsSnapshot,
@@ -22,11 +23,14 @@
     ...(selectedOperation ? { operation: selectedOperation } : {}),
   });
 
-  async function run(action: (selector?: DevtoolsQuerySelector) => Promise<void> | void): Promise<void> {
+  async function run(action: DevtoolsCacheMutation, selector?: DevtoolsQuerySelector): Promise<void> {
     if (!channel || !snapshot) return;
     busy = true;
     try {
-      await action(Object.keys(selector).length > 0 ? selector : undefined);
+      await channel.call('cacheAction', {
+        action,
+        ...(selector && Object.keys(selector).length > 0 ? { selector } : {}),
+      });
       snapshot = await channel.call('getSnapshot');
     } finally {
       busy = false;
@@ -35,7 +39,7 @@
 
   onMount(() => {
     const nextChannel = connectPanelChannel<SvadminDevframeProtocol>({
-      name: SVADMIN_DEVFRAME_CHANNEL,
+      name: DEVTOOLS_CHANNEL,
       functions: {},
     });
     channel = nextChannel;
@@ -109,13 +113,13 @@
       </ul>
     {/if}
     <div>
-      <button type="button" disabled={busy} onclick={() => run((selector) => channel?.call('cacheInvalidate', selector))}>Invalidate</button>
-      <button type="button" disabled={busy} onclick={() => run((selector) => channel?.call('cacheRefetch', selector))}>Refetch</button>
-      <button type="button" disabled={busy} onclick={() => run((selector) => channel?.call('cacheCancel', selector))}>Cancel</button>
-      <button type="button" disabled={busy} onclick={() => run((selector) => channel?.call('cacheReset', selector))}>Reset</button>
-      <button type="button" disabled={busy} onclick={() => run((selector) => channel?.call('cacheRemove', selector))}>Remove</button>
-      <button type="button" disabled={busy} onclick={() => run(() => channel?.call('cacheClear'))}>Clear cache</button>
-      <button type="button" disabled={busy} onclick={() => run(() => channel?.call('clearMutations'))}>Clear mutations</button>
+      <button type="button" disabled={busy} onclick={() => run('invalidate', selector)}>Invalidate</button>
+      <button type="button" disabled={busy} onclick={() => run('refetch', selector)}>Refetch</button>
+      <button type="button" disabled={busy} onclick={() => run('cancel', selector)}>Cancel</button>
+      <button type="button" disabled={busy} onclick={() => run('reset', selector)}>Reset</button>
+      <button type="button" disabled={busy} onclick={() => run('remove', selector)}>Remove</button>
+      <button type="button" disabled={busy} onclick={() => run('clear')}>Clear cache</button>
+      <button type="button" disabled={busy} onclick={() => run('clearMutations')}>Clear mutations</button>
     </div>
   {:else}
     <p>Waiting for an svadmin page.</p>

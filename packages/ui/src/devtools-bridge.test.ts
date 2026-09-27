@@ -4,7 +4,9 @@ import {
   attachSvadminDevtoolsQueryClient,
   createSvadminDevtoolsCacheActions,
   getSvadminDevtoolsSnapshot,
+  installSvadminDevtoolsBridge,
   publishSvadminDevtoolsSnapshot,
+  runSvadminDevtoolsCacheAction,
   subscribeSvadminDevtools,
 } from './devtools-bridge.js';
 import type { SvadminDevtoolsSnapshot } from './devtools-bridge.js';
@@ -71,5 +73,37 @@ describe('svadmin DevTools bridge', () => {
     expect(queryClient.getQueryCache().findAll()[0]?.queryKey).toEqual([
       { namespace: 'svadmin', version: 2, provider: 'default', kind: 'data', action: 'list', resource: 'orders' },
     ]);
+  });
+
+  it('installs the shared page bridge on the standard channel and replaces it on re-install', () => {
+    installSvadminDevtoolsBridge();
+    const first = window.__VIBEUNION_DEVTOOLS__;
+    expect(first).toBeDefined();
+    expect(typeof first?.cacheAction).toBe('function');
+
+    installSvadminDevtoolsBridge();
+    const second = window.__VIBEUNION_DEVTOOLS__;
+    expect(second).toBeDefined();
+    expect(second).not.toBe(first);
+
+    second?.dispose();
+    expect(window.__VIBEUNION_DEVTOOLS__).toBeUndefined();
+  });
+
+  it('reports matched and changed counts for shared cache actions', async () => {
+    const queryClient = new QueryClient();
+    queryClient.setQueryData(
+      [{ namespace: 'svadmin', version: 2, provider: 'default', kind: 'data', action: 'list', resource: 'users' }],
+      { data: ['users'] },
+    );
+    attachSvadminDevtoolsQueryClient(queryClient);
+
+    await expect(runSvadminDevtoolsCacheAction({
+      action: 'remove',
+      selector: { provider: 'default', resource: 'users', operation: 'data:list' },
+    })).resolves.toEqual({ action: 'remove', matched: 1, changed: 1 });
+
+    await expect(runSvadminDevtoolsCacheAction({ action: 'resetMutations' }))
+      .rejects.toThrow('Unsupported svadmin cache action');
   });
 });
