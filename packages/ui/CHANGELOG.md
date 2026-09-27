@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.79.0](https://github.com/vibeunion/svadmin/compare/ui-v0.78.2...ui-v0.79.0) (2026-09-26)
+
+
+### 🚀 Features
+
+* **ui:** align dashboard with audit visual system ([c0143b5](https://github.com/vibeunion/svadmin/commit/c0143b53585dbe527c9c9ba4652a45fdaed18589))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** forward optional audit props without undefined ([6df62c2](https://github.com/vibeunion/svadmin/commit/6df62c2257e8772e610f31d8b46e60f5da25521e))
+* **ui:** restore green main after audit visual system update ([887eee8](https://github.com/vibeunion/svadmin/commit/887eee8476dbd3ac3ec63e68cf5887c36500cc86))
+
 ## [0.78.2](https://github.com/vibeunion/svadmin/compare/ui-v0.78.1...ui-v0.78.2) (2026-09-25)
 
 

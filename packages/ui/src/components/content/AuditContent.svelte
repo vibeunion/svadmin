@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import { definedOptions } from '@svadmin/core/options';
   import { useTranslation } from '@svadmin/core/i18n';
   import DataState from './DataState.svelte';
   import { Button } from '../ui/button/index.js';
@@ -10,13 +11,13 @@
     state?: AuditDataState;
     message?: string | undefined;
     retry?: (() => void) | undefined;
-    children?: Snippet;
+    children?: Snippet | undefined;
   } = $props();
   const i18n = useTranslation();
 </script>
 
 {#if state === 'loading' || state === 'empty' || state === 'error' || state === 'forbidden'}
-  <DataState {state} title={message} retry={state === 'error' ? retry : undefined} />
+  <DataState {state} {...definedOptions({ title: message, retry: state === 'error' ? retry : undefined })} />
 {:else}
   {#if state === 'partial' || state === 'readonly'}
     <div class="svadmin-audit-notice" data-state={state} role="status">
