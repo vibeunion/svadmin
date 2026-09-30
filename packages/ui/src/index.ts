@@ -57,6 +57,8 @@ export { default as StatsCard } from './components/StatsCard.svelte';
 export { default as MetricStrip } from './components/MetricStrip.svelte';
 export type { MetricStripItem, MetricTone } from './components/MetricStrip.svelte';
 export { default as PageHeader } from './components/PageHeader.svelte';
+export { default as PagePattern } from './components/PagePattern.svelte';
+export type { PagePatternKind } from './components/PagePattern.svelte';
 export { default as ResourceOperationsPage } from './components/ResourceOperationsPage.svelte';
 export { default as RecordDetailDrawer } from './components/RecordDetailDrawer.svelte';
 export { default as ResourceAccessGuard } from './components/ResourceAccessGuard.svelte';
@@ -360,6 +362,7 @@ export { default as ContentPageShell } from './components/content/ContentPageShe
 export { default as DashboardPage } from './components/content/DashboardPage.svelte';
 export { default as PageSection } from './components/content/PageSection.svelte';
 export { default as ContentPageHeader } from './components/content/ContentPageHeader.svelte';
+export { default as ConfigurationPage } from './components/ConfigurationPage.svelte';
 export { default as SectionHeader } from './components/content/SectionHeader.svelte';
 export { default as PageToolbar } from './components/content/PageToolbar.svelte';
 export { default as WorkspaceLayout } from './components/content/WorkspaceLayout.svelte';

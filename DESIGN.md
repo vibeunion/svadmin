@@ -289,6 +289,85 @@ status badges, avatar groups, and controls whose geometry carries meaning.
 
 ## Components
 
+### Page pattern assembly
+
+First select the existing page family. Resource-backed CRUD must keep
+`ListPage`, `CreatePage`, `EditPage`, and `ShowPage`: these own permissions,
+queries, navigation guards, and mutations. Never wrap these full pages inside
+another titled page shell. Keep `DashboardPage` for existing dashboards.
+
+Use `PagePattern` for custom business compositions that do not fit those
+resource routes. It supplies layout only, not querying, permissions, form
+submission, or loading/error handling:
+
+- `list`: compact title, toolbar, table/list content, and list empty states.
+- `form`: narrow reading width, comfortable grouped fields and a single save area.
+- `detail`: read-only summary and related content.
+- `workspace`: primary work area plus an optional secondary panel.
+- `dashboard`: wide layout with optional metrics and secondary context.
+
+Optional `secondary` content renders beside the primary content for every kind.
+For advanced resizable, collapsible, or independently scrolling work areas,
+compose `WorkspaceLayout` or `MasterDetailView` directly. The pattern does not
+replace those interaction contracts.
+
+The pattern supplies the page shell and named composition regions. The caller
+supplies business data, permissions, mutations, and state-specific content.
+Do not recreate these page families with arbitrary nested cards or repeated
+gray title bars.
+
+| Workflow | First choice | Business-owned state |
+| --- | --- | --- |
+| Resource list | ListPage | Resource contract and access policy |
+| Create/edit | CreatePage / EditPage | Validation and mutation result |
+| Resource detail | ShowPage | Resource contract and related records |
+| Settings | ConfigurationPage + SettingsGroup | Dirty/pending/success/error |
+| Custom list/form/detail | PagePattern | Query, access, validation, pagination |
+| Master/detail | PagePattern + MasterDetailView | Selection and scope changes |
+| Approval | ApprovalCenter / ApprovalActionCard | Authorization and decision result |
+| Dashboard | DashboardPage | Real metrics and drill-down destinations |
+| Audit log | SecurityLogPage / AuditLogViewer | Permission, time range, pagination |
+
+Acceptance scenarios for every custom page:
+
+- Given a populated page with long business labels, when rendered in a narrow
+  or wide container, then content wraps without hiding controls or overflowing.
+- Given an empty collection, when filters are absent, then show an initial-empty
+  message; when filters exclude records, show no-results and an available reset.
+- Given a failed request, when retry is selected, then rerun the query without
+  displaying stale content as current or suggesting the request succeeded.
+- Given a denied operation, when rendering actions, then omit/disable the
+  operation according to policy; a layout component never grants permission.
+- Given form edits, when saving fails, then retain the edits and show one
+  actionable error; show success only after confirmed persistence.
+
+### Configuration page assembly
+
+For configuration workflows, start with `ConfigurationPage`, then compose
+`SettingsGroup` and `SettingsFieldRow`. Do not recreate the page shell using
+cards, repeated title bars, or unrestricted two-column fields.
+
+- Use one page title and group related settings under descriptive headings.
+- Connect each field label to its control through `controlId`.
+- Put one transaction's save/reset controls in the `footer` snippet. For
+  independently saved sections, use each group's `actions` instead; do not
+  duplicate the same save command in both places.
+- The caller owns dirty, pending, success, validation, and failure states.
+  Disable duplicate submissions while pending. Only show success after the
+  persistence request succeeds; preserve edits after failure.
+- Separate initial-empty content from filtered-no-results content. Offer
+  creation only when permitted, and clearing filters only when filters exist.
+- Use compact density for operational work and comfortable density for forms.
+- Reference `packages/ui/stories/ConfigurationExample.svelte` in the SVAdmin
+  source for a working composition; its save action is in-memory demo state,
+  not a persistence implementation.
+
+Before generating a page, select the existing page family (list, configuration,
+detail, or workspace), identify its primary action, and reuse its components.
+Verify populated, empty, loading, and failed states with realistic long labels.
+Inspect rendered alignment, overflow, duplicate headings, and excessive space;
+passing component tests alone does not establish visual acceptance.
+
 Buttons, fields, tabs, tables, badges, empty states, skeletons, alerts, and
 feedback use shared components and semantic tokens. Layout presets may adjust
 density and composition, but they must not replace component color, typography,
