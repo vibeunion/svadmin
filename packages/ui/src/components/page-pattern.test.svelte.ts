@@ -75,7 +75,7 @@ describe('PagePattern', () => {
     render(PagePatternExample);
     await fireEvent.click(screen.getByRole('button', { name: '新建项目' }));
     await fireEvent.input(screen.getByRole('textbox', { name: '客户名称' }), { target: { value: '新建验证项目' } });
-    await fireEvent.click(screen.getByRole('button', { name: '保存', exact: true }));
+    await fireEvent.click(screen.getByRole('button', { name: /^保存$/ }));
     expect(screen.getByRole('table').textContent).toContain('新建验证项目');
     expect((screen.getByRole('textbox', { name: '搜索客户项目' }) as HTMLInputElement).value).toBe('新建验证项目');
   });
