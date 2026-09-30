@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.39.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.38.0...create-svadmin-v0.39.0) (2026-09-30)
+
+
+### 🚀 Features
+
+* **ui:** add consistent page patterns and generation guidance ([#483](https://github.com/vibeunion/svadmin/issues/483)) ([dc6257f](https://github.com/vibeunion/svadmin/commit/dc6257f610892e466ef6d2c87d2695629b192c0f))
+
 ## [0.38.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.37.1...create-svadmin-v0.38.0) (2026-09-27)
 
 
