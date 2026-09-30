@@ -215,7 +215,7 @@
     },
     "packages/create-svadmin": {
       "name": "@svadmin/create",
-      "version": "0.38.0",
+      "version": "0.39.0",
       "bin": {
         "create-svadmin": "./dist/index.js",
       },
@@ -626,7 +626,7 @@
     },
     "packages/surface": {
       "name": "@svadmin/surface",
-      "version": "0.11.7",
+      "version": "0.11.8",
       "dependencies": {
         "@sinclair/typebox": "^0.34.52",
       },
@@ -641,7 +641,7 @@
       },
       "peerDependencies": {
         "@svadmin/core": ">=0.53.0 <0.59.0",
-        "@svadmin/ui": ">=0.73.0 <0.81.0",
+        "@svadmin/ui": ">=0.73.0 <0.82.0",
         "svelte": "^5.56.10",
       },
     },
@@ -661,7 +661,7 @@
     },
     "packages/ui": {
       "name": "@svadmin/ui",
-      "version": "0.80.0",
+      "version": "0.81.0",
       "dependencies": {
         "@floating-ui/dom": "^1.8.0",
         "@lucide/svelte": "^1.35.0",
