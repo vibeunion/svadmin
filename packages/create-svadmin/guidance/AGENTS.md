@@ -28,6 +28,19 @@ business code inside `src/features/<module>/` and expose it through the module's
 
 ### Default-first page composition
 
+- Select the page family using the coverage matrix in `DESIGN.md` before
+  generating markup. Keep resource-driven `ListPage`, `CreatePage`, `EditPage`,
+  and `ShowPage`; never nest complete titled pages.
+- For custom business pages, use `PagePattern` with `kind="list"`, `"form"`,
+  `"detail"`, `"workspace"`, or `"dashboard"` only when the installed
+  `@svadmin/ui` exports it. Otherwise compose the documented `ContentPageShell`
+  and `WorkspaceLayout`; do not invent imports or bypass permission checks.
+- Use `ConfigurationPage` for settings when available. Provide business-owned
+  pending, dirty, failure, and confirmed-success states. A layout supplies
+  neither persistence nor access control.
+- Start from the matching composition example, not a blank canvas. Keep
+  presentation unframed, use existing semantic tokens, and inspect rendered
+  long labels, dense data, empty results, and errors before calling it complete.
 - Start with `AdminApp`, a provider bundle, and schema-backed resources. Its
   default layout is clean-flat; the default color is Stripe unless the user has
   saved another selection. Keep explicit theme overrides only for intentional changes.
