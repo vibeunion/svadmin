@@ -20,7 +20,7 @@ Keeping these APIs under `@svadmin/supabase/supacloud` avoids breaking the exist
 ## Installation
 
 ```bash
-bun add @svadmin/supabase @supabase/supabase-js@^2.115.0 @supacloud/js@^0.33.0
+bun add @svadmin/supabase @supabase/supabase-js@^2.115.0 @supacloud/js@^0.36.0
 ```
 
 ## Create the Clients
@@ -53,7 +53,7 @@ const taskProvider = createSupaCloudTaskProvider({ supacloud });
 
 ### Subscription Transport
 
-SDK `0.33.0` polls the Management API by default. It does not assume a
+The tested SDK versions poll the Management API by default. They do not assume a
 `public.tasks` Realtime table exists. Set `subscription` on the factory to
 configure polling or explicitly subscribe to your own published task table:
 
@@ -99,16 +99,20 @@ cancel the server task or prove that a write was rolled back.
 
 Only the modern `{ tasks: ... }` client is accepted. Bare legacy task clients and
 caller-selected result generics are removed. The installed SDK contract is tested
-with `@supacloud/js` 0.33.0 and `@supabase/supabase-js` 2.117.1; these tests use
+with `@supacloud/js` 0.33.0, 0.34.0, and 0.36.0 against
+`@supabase/supabase-js` 2.117.1; these tests use
 injected HTTP, polling and realtime transports, not a hosted deployment.
-The optional SDK peer range is now `^0.33.0`, not `^0.23.1`. Upgrade the SDK and
-adapter together. SDK task submission expects HTTP 202, and task responses must
+The optional SDK peer range is `^0.33.0 || ^0.34.0 || ^0.36.0`.
+The test-only npm aliases keep all three versions installed so the same transport
+suite runs against each SDK. Untested minor lines, including 0.35.x, are not
+declared compatible; this does not imply they are known to be broken.
+Upgrade the SDK and adapter together. SDK task submission expects HTTP 202, and task responses must
 carry the configured `project_ref`. The DLQ uses the task-list endpoint with
 `dlq=true`, not a separate `/tasks/dlq` route.
 
-This migration does not add a browser business-command adapter. The published
-SDK 0.33.0 does not export `@supacloud/js/contracts`; the upstream browser entry
-must be released and validated before a follow-up can depend on it. Never wire
+This compatibility matrix covers task adapters only, not a browser
+business-command adapter or the SDK's other entry points. Those need separate
+validation before a follow-up can depend on them. Never wire
 the service-role-only `supacloud.commands` namespace into a browser action.
 
 All SDK responses enter as `unknown`. Records, list results, submit handles,

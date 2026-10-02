@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, mock, test } from 'bun:test';
-import { createClient } from '@supabase/supabase-js';
-import { createSupaCloudClient } from '@supacloud/js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { createSupaCloudClient as createSupaCloudClient033 } from '@supacloud/js';
+import { createSupaCloudClient as createSupaCloudClient034 } from '@supacloud/js-034';
+import { createSupaCloudClient as createSupaCloudClient036 } from '@supacloud/js-036';
+import packageManifest from '../package.json';
 import {
   createSupaCloudTaskProvider, createSupaCloudTaskLiveProvider,
   type SupaCloudTaskClient, type SupaCloudTaskSubscribeOptions,
@@ -450,7 +453,24 @@ describe('SupaCloud task subscriptions', () => {
 const originalFetch = globalThis.fetch;
 afterEach(() => { globalThis.fetch = originalFetch; });
 
-describe('installed SupaCloud SDK 0.33.0', () => {
+const sdkVersions = [
+  ['0.33.0', createSupaCloudClient033<SupabaseClient>],
+  ['0.34.0', createSupaCloudClient034<SupabaseClient>],
+  ['0.36.0', createSupaCloudClient036<SupabaseClient>],
+] as const;
+
+test('declares the tested SDK minor lines without admitting unverified minor releases', () => {
+  const range = packageManifest.peerDependencies['@supacloud/js'];
+  for (const [version] of sdkVersions) {
+    expect(Bun.semver.satisfies(version, range)).toBe(true);
+  }
+  for (const version of ['0.32.0', '0.35.0', '0.37.0', '1.0.0']) {
+    expect(Bun.semver.satisfies(version, range)).toBe(false);
+  }
+  expect(packageManifest.peerDependenciesMeta['@supacloud/js'].optional).toBe(true);
+});
+
+describe.each(sdkVersions)('installed SupaCloud SDK %s', (_version, createSupaCloudClient) => {
   test('decodes real SDK subscription summaries and blocks SDK callbacks after unsubscribe', async () => {
     const supabase = createClient('https://sdk.example.test', 'test-anon-key', {
       auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },

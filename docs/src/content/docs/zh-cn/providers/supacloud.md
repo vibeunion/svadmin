@@ -24,7 +24,7 @@ description: 为 @svadmin/supabase 提供可选的任务编排增强
 ## 安装
 
 ```bash
-bun add @svadmin/supabase @supabase/supabase-js@^2.115.0 @supacloud/js@^0.33.0
+bun add @svadmin/supabase @supabase/supabase-js@^2.115.0 @supacloud/js@^0.36.0
 ```
 
 ## 创建客户端
@@ -57,7 +57,7 @@ const taskProvider = createSupaCloudTaskProvider({ supacloud });
 
 ### 订阅传输
 
-SDK `0.33.0` 默认轮询 Management API，不再假设存在 `public.tasks` Realtime 表。
+已测试的 SDK 版本默认轮询 Management API，不假设存在 `public.tasks` Realtime 表。
 通过工厂的 `subscription` 配置轮询参数，或显式订阅应用自己的已发布任务表：
 
 ```ts
@@ -96,14 +96,17 @@ const taskProvider = createSupaCloudTaskProvider({ supacloud, subscription });
 ### 经校验的契约
 
 仅接受现代 `{ tasks: ... }` 客户端，不再支持旧版裸任务客户端或由调用方任意指定结果类型的泛型。
-已安装的 `@supacloud/js` 0.33.0 与 `@supabase/supabase-js` 2.117.1 契约通过了
+已安装的 `@supacloud/js` 0.33.0、0.34.0、0.36.0 与 `@supabase/supabase-js` 2.117.1 契约通过了
 注入 HTTP、轮询和实时传输的测试；这些测试不代表真实部署环境已经验收。
-可选 SDK peer 范围现在是 `^0.33.0`，不再是 `^0.23.1`，请同时升级 SDK 与适配器。
+可选 SDK peer 范围为 `^0.33.0 || ^0.34.0 || ^0.36.0`。
+仅供测试的 npm 别名让三个 SDK 版本同时安装，并运行同一组传输测试。
+尚未测试的 minor 系列（包括 0.35.x）不在兼容声明内，但这并不代表已确认它们存在故障。
+请同时升级 SDK 与适配器。
 SDK 要求任务提交返回 HTTP 202，任务回执带上匹配配置的 `project_ref`。
 死信队列使用任务列表端点的 `dlq=true` 参数，不再调用独立的 `/tasks/dlq` 路由。
 
-本次迁移尚未增加浏览器业务命令适配器。已发布的 SDK 0.33.0 不导出
-`@supacloud/js/contracts`，需要上游浏览器入口发布并验证后再通过后续改动接入。
+本兼容矩阵仅覆盖任务适配器，不覆盖浏览器业务命令适配器或 SDK 的其他入口；
+后续接入这些能力前仍需单独验证。
 不能把仅限 service-role 的 `supacloud.commands` 命名空间接成浏览器操作。
 
 所有 SDK 回执先视为 `unknown`，任务记录、列表、提交句柄、订阅摘要和自定义实时事件
