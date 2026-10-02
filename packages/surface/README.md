@@ -189,3 +189,18 @@ Limits are eight data sources, 24 widgets, 100 rows per page, eight filters, thr
 Actual OpenUI Lang parsing, nested interactive forms, registered business actions, server persistence, SSR/Lite rendering, arbitrary URLs, client aggregation, Canvas and iframe execution are not implemented. Aggregated metrics should come from a policy-authorized backend summary resource and bind through `resource-one`. The current UI contract remains read-only even though its definition can be edited.
 
 See `docs/architecture/openui-surface-phase2.md` for the original feature scope and `docs/architecture/surface-integration-provenance.md` for historical integration evidence. 中文指南见文档站的“声明式 Surface”。
+
+## json-render 适配
+
+Surface 可以接收 Vercel `json-render` 使用的标准扁平 `Spec`（`root` + `elements`），同时继续由 Surface 的 TypeBox Schema、组件目录和资源策略负责最终校验。协议入口提供 `jsonRenderSpecToSurfaceSpec` 和 `surfaceSpecToJsonRenderSpec`：前者只接受以 `surface` 为根、一级业务组件为子节点的受控子集，后者用于把已校验的 SurfaceSpec 输出为标准扁平 Spec。
+
+适配层不执行 json-render 的任意 action、脚本、URL 或嵌套组件树；业务数据查询仍经过 Surface DataProvider 和既有授权流程。项目业务契约继续使用 TypeBox，未引入 Zod 运行时依赖。本入口只提供格式互操作，不包含官方 json-render Catalog、流式编译器或渲染器集成。`binding` 和 `placement` 是适配器保留属性；导出包含这些业务属性的组件时会抛错，避免静默覆盖。
+
+```ts
+import { jsonRenderSpecToSurfaceSpec } from '@svadmin/surface';
+
+const result = jsonRenderSpecToSurfaceSpec(jsonRenderSpec, catalog, policy);
+if (result.ok) {
+  // 交给现有 SurfaceRenderer；此处仍是候选页面，不代表业务动作授权。
+}
+```
