@@ -1,10 +1,10 @@
 import { expect, test } from 'bun:test';
 import assert from 'node:assert/strict';
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
-import { parseAudit, verifyPatchIntegrity } from './audit-dependencies';
+import { parseAudit, verifyPatchIntegrity, withAuditSnapshot } from './audit-dependencies';
 import patches from './security-patches.json';
 
 const root = resolve(import.meta.dir, '..');
@@ -199,5 +199,35 @@ test('audit verifies actual installed sources and fails on drift or unpatched ne
     expect(() => verifyPatchIntegrity(temp)).toThrow('source hash mismatch');
   } finally {
     rmSync(temp, { recursive: true, force: true });
+  }
+});
+
+test('audit snapshot preserves inputs, excludes local environment files and cleans up on failure', async () => {
+  const source = mkdtempSync(join(tmpdir(), 'svadmin-audit-source-'));
+  let snapshot = '';
+  try {
+    for (const file of ['package.json', 'bun.lock']) cpSync(join(root, file), join(source, file));
+    writeFileSync(join(source, '.env.local'), 'SVADMIN_AUDIT_TEST_SENTINEL=not-for-audit\n');
+    await withAuditSnapshot(source, async directory => {
+      snapshot = directory;
+      expect(readdirSync(directory).sort()).toEqual(['bun.lock', 'package.json']);
+      for (const file of ['package.json', 'bun.lock']) {
+        expect(readFileSync(join(directory, file))).toEqual(readFileSync(join(source, file)));
+      }
+      const child = Bun.spawnSync([
+        process.execPath, '-e',
+        'if (process.env.SVADMIN_AUDIT_TEST_SENTINEL) process.exit(1)',
+      ], { cwd: directory, env: { ...process.env, SVADMIN_AUDIT_TEST_SENTINEL: undefined } });
+      expect(child.exitCode).toBe(0);
+      expect(child.stderr.toString()).toBe('');
+    });
+    expect(existsSync(snapshot)).toBe(false);
+    await expect(withAuditSnapshot(source, async directory => {
+      snapshot = directory;
+      throw new Error('audit subprocess failed');
+    })).rejects.toThrow('audit subprocess failed');
+    expect(existsSync(snapshot)).toBe(false);
+  } finally {
+    rmSync(source, { recursive: true, force: true });
   }
 });

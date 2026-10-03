@@ -33,7 +33,10 @@ automatically protect downstream consumers' separate installations.
    points.
 3. Runs only `scripts/dependency-security.test.ts`, including exploit regressions,
    normal behavior and negative integrity/report tests.
-4. Runs unfiltered `bun audit --json` against the official npm registry.
+4. Runs unfiltered `bun audit --json` against the official npm registry using a
+   private temporary snapshot containing byte-identical `package.json` and
+   `bun.lock`. This preserves the full dependency graph without loading local
+   application `.env` files. The snapshot is removed on success or failure.
 5. Prints every advisory. Only the two exact package/advisory ID/range/severity
    tuples above can pass as **locally patched**, and only after steps 1-3 pass.
    Any other advisory, source drift, malformed response, timeout, network error

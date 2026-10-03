@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { existsSync, readFileSync, readdirSync, realpathSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import patches from './security-patches.json';
 
@@ -110,6 +111,17 @@ export function parseAudit(stdout: string, stderr: string, exitCode: number): Fi
   return findings;
 }
 
+export async function withAuditSnapshot<T>(root: string, run: (directory: string) => Promise<T>): Promise<T> {
+  const directory = mkdtempSync(join(tmpdir(), 'svadmin-audit-'));
+  try {
+    // 保留完整锁定依赖图，不让应用环境文件进入审计子进程。
+    for (const file of ['package.json', 'bun.lock']) copyFileSync(join(root, file), join(directory, file));
+    return await run(directory);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+}
+
 async function main(): Promise<void> {
   verifyPatchIntegrity(repositoryRoot);
   const regression = Bun.spawnSync(
@@ -120,14 +132,16 @@ async function main(): Promise<void> {
     },
   );
   assert.equal(regression.exitCode, 0, 'Security patch regressions failed');
-  const audit = Bun.spawn(
-    [process.execPath, 'audit', '--json', '--registry', 'https://registry.npmjs.org'],
-    { cwd: repositoryRoot, stdout: 'pipe', stderr: 'pipe', timeout: 120_000 },
-  );
-  const [stdout, stderr, exitCode] = await Promise.all([
-    new Response(audit.stdout).text(), new Response(audit.stderr).text(), audit.exited,
-  ]);
-  const findings = parseAudit(stdout, stderr, exitCode);
+  const findings = await withAuditSnapshot(repositoryRoot, async directory => {
+    const audit = Bun.spawn(
+      [process.execPath, 'audit', '--json', '--registry', 'https://registry.npmjs.org'],
+      { cwd: directory, stdout: 'pipe', stderr: 'pipe', timeout: 120_000 },
+    );
+    const [stdout, stderr, exitCode] = await Promise.all([
+      new Response(audit.stdout).text(), new Response(audit.stderr).text(), audit.exited,
+    ]);
+    return parseAudit(stdout, stderr, exitCode);
+  });
   for (const finding of findings) {
     console.info(`${finding.patched ? 'LOCAL PATCH VERIFIED (upstream advisory remains)' : 'UNRESOLVED'}: ` +
       `${finding.name} ${finding.severity}: ${finding.title}\n${finding.url}`);
