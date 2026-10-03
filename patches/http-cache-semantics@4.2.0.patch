@@ -1,0 +1,62 @@
+diff --git a/index.js b/index.js
+index f01e9a16b4781dc24c8f43dc7a4c8e6d1e4ae5eb..380884c45ce0d16f485fb3f24b3feb33cfee8e89 100644
+--- a/index.js
++++ b/index.js
+@@ -394,8 +394,8 @@ module.exports = class CachePolicy {
+     evaluateRequest(req) {
+         this._assertRequestHasHeaders(req);
+
+-        // In all circumstances, a cache MUST NOT ignore the must-revalidate directive
+-        if (this._rescc['must-revalidate']) {
++        // Security restrictions must take precedence over every stale-serving path.
++        if (this._requiresRevalidation()) {
+             return this._evaluateRequestMissResult(req);
+         }
+
+@@ -617,9 +617,6 @@ module.exports = class CachePolicy {
+         }
+
+         if (this._isShared) {
+-            if (this._rescc['proxy-revalidate']) {
+-                return 0;
+-            }
+             // if a response includes the s-maxage directive, a shared cache recipient MUST ignore the Expires field.
+             if (this._rescc['s-maxage']) {
+                 return toNumberOrZero(this._rescc['s-maxage']);
+@@ -683,7 +680,8 @@ module.exports = class CachePolicy {
+      * @returns {boolean} `true` if `stale-if-error` condition allows use of a stale response.
+      */
+     _useStaleIfError() {
+-        return this.maxAge() + toNumberOrZero(this._rescc['stale-if-error']) > this.age();
++        return !this._requiresRevalidation() &&
++            this.maxAge() + toNumberOrZero(this._rescc['stale-if-error']) > this.age();
+     }
+
+     /** See `evaluateRequest()` for a more complete solution
+@@ -691,7 +689,25 @@ module.exports = class CachePolicy {
+      */
+     useStaleWhileRevalidate() {
+         const swr = toNumberOrZero(this._rescc['stale-while-revalidate']);
+-        return swr > 0 && this.maxAge() + swr > this.age();
++        return !this._requiresRevalidation() &&
++            swr > 0 && this.maxAge() + swr > this.age();
++    }
++
++    _requiresRevalidation() {
++        return !this.storable() ||
++            !!this._rescc['no-cache'] ||
++            this._resHeaders.vary === '*' ||
++            (this._isShared && (
++                (!!this._resHeaders['set-cookie'] &&
++                    !this._rescc.public && !this._rescc.immutable)
++            )) ||
++            (this.stale() && (
++                !!this._rescc['must-revalidate'] ||
++                (this._isShared && (
++                    !!this._rescc['proxy-revalidate'] ||
++                    this._rescc['s-maxage'] !== undefined
++                ))
++            ));
+     }
+
+     /**

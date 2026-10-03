@@ -1,0 +1,36 @@
+[
+  {
+    "name": "braces",
+    "version": "3.0.3",
+    "advisory": "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm",
+    "advisoryId": 1240992,
+    "affectedRange": "<=3.0.3",
+    "severity": "high",
+    "patch": "patches/braces@3.0.3.patch",
+    "sha256": "43040a5c48321905efdfd5293e5de0a5c58c368d474351dd0017dbbf439e588b",
+    "reason": "Bound parsed nesting and direct AST walkers to depth 128.",
+    "files": {
+      "index.js": "332ea07c7b006361aad12aa994ca75dc1db8e8382b884909e2f38f10b85c88a4",
+      "lib/compile.js": "74f5dd45a443c7c8e48af1d6a2e8714ca1a96d7ae21e4f9f3edf9fefe0198497",
+      "lib/constants.js": "fc3db282b8a5b8b8a55cda2e85ba05f0c49da138edc76227454d3f3cbc76d5fb",
+      "lib/expand.js": "29d928bd0b1d5805d7c0a06630dad79cfcec25898aab727301ea2f6ee7209a55",
+      "lib/parse.js": "92ec74b20a093c2280f4069022e98f85bddfd048f4c050d19fc82752a19d71ef",
+      "lib/stringify.js": "dbd73f84befd4e180b323d64780c2661c00aa8e0afcde87d5bfdefc9f785b2a5",
+      "lib/utils.js": "b5a7596aa67730412b3c029ef09e84e6b67b8e445cffd35d1d295549c89066c7"
+    }
+  },
+  {
+    "name": "http-cache-semantics",
+    "version": "4.2.0",
+    "advisory": "https://github.com/advisories/GHSA-ch52-4w7c-c8xp",
+    "advisoryId": 1240991,
+    "affectedRange": "<=4.2.0",
+    "severity": "high",
+    "patch": "patches/http-cache-semantics@4.2.0.patch",
+    "sha256": "04b23045d9fa2d71804ef18bd97dfa149d1c3475d56ffd98bab05fec85c46855",
+    "reason": "Require validation before reusing security-restricted cache entries across all stale paths.",
+    "files": {
+      "index.js": "d440941d700777c2250ddcf73ce26b242a4a6722b91ee40adccb7c05d83d2323"
+    }
+  }
+]
