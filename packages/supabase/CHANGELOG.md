@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.18.1](https://github.com/vibeunion/svadmin/compare/supabase-v0.18.0...supabase-v0.18.1) (2026-10-03)
+
+
+### 🐛 Bug Fixes
+
+* **supabase:** validate SupaCloud SDK 0.34 and 0.36 compatibility ([#488](https://github.com/vibeunion/svadmin/issues/488)) ([c0564fc](https://github.com/vibeunion/svadmin/commit/c0564fc119c88cf8a05a682afe8a9d7f6841ccbb))
+
 ## [0.18.0](https://github.com/vibeunion/svadmin/compare/supabase-v0.17.1...supabase-v0.18.0) (2026-09-24)
 
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.12.0](https://github.com/vibeunion/svadmin/compare/surface-v0.11.8...surface-v0.12.0) (2026-10-03)
+
+
+### 🚀 Features
+
+* **surface:** accept constrained json-render specs ([1b11203](https://github.com/vibeunion/svadmin/commit/1b11203b29ca7228b4c7eb08cd0dde6184f28f17))
+* **surface:** accept constrained json-render specs ([fe34ef7](https://github.com/vibeunion/svadmin/commit/fe34ef727c1c112e49d411ab3d2bb22790a917d0))
+
 ## [0.11.8](https://github.com/vibeunion/svadmin/compare/surface-v0.11.7...surface-v0.11.8) (2026-09-30)
 
 
