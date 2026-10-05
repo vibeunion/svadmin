@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.6.0](https://github.com/vibeunion/svadmin/compare/flow-v0.5.0...flow-v0.6.0) (2026-10-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** upgrade to TypeBox 1.3
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** upgrade to TypeBox 1.3 ([b1e9bcc](https://github.com/vibeunion/svadmin/commit/b1e9bcc832526c029d4f1f8c3a608c6133a1b9b4))
+
 ## [0.5.0](https://github.com/vibeunion/svadmin/compare/flow-v0.4.1...flow-v0.5.0) (2026-09-22)
 
 

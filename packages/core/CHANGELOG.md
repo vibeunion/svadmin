@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.59.0](https://github.com/vibeunion/svadmin/compare/core-v0.58.0...core-v0.59.0) (2026-10-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** upgrade to TypeBox 1.3
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** upgrade to TypeBox 1.3 ([b1e9bcc](https://github.com/vibeunion/svadmin/commit/b1e9bcc832526c029d4f1f8c3a608c6133a1b9b4))
+
 ## [0.58.0](https://github.com/vibeunion/svadmin/compare/core-v0.57.0...core-v0.58.0) (2026-09-24)
 
 
