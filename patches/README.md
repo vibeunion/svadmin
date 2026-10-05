@@ -7,11 +7,6 @@ repository-wide type safety. `check:types:dependencies` must remain enabled.
 - `@refinedev/core@5.0.12`: replace the unresolved build-time `@definitions/index`
   alias with the shipped relative definitions entry in all three declaration
   formats. `@types/papaparse` supplies the actual CSV library declarations.
-- `@sveltejs/kit@2.70.3`: use the `ParseOptions` and `SerializeOptions` exports of
-  the workspace's pinned `cookie@1.1.1`. The parser option intersection preserves
-  Kit's string-returning decoder contract, so `getAll()` does not falsely promise
-  strings for a decoder that returns `undefined`. Cookie runtime calls continue
-  to use the existing `parse` and `serialize` compatibility exports.
 - `@tanstack/svelte-query@6.1.48` and `@tanstack/svelte-table@9.2.3`: point
   reactive-module declaration imports at the shipped `.svelte.js` modules.
   Extensionless `.svelte` imports caused Svelte checking to invent component

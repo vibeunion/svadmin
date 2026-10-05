@@ -25,9 +25,9 @@ setRouterProvider(routerProvider);
 
 | RouterProvider 方法 | SvelteKit 实现 |
 |--------------------|---------------|
-| `go({ to, type })` | `goto(url)` / `goto(url, { replaceState: true })` |
+| `go({ to, type })` | `goto(url)` / `goto(url, { replace: true })` |
 | `back()` | `history.back()` |
-| `parse()` | 从 `$app/stores` 的 `page` store 读取 |
+| `parse()` | 从 `$app/state` 的 `page` state 读取 |
 
 ### 导航
 

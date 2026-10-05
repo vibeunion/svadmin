@@ -59,16 +59,23 @@ bunx @svadmin/create lite init .
 bunx @svadmin/create lite init . --write
 ```
 
-The generator adds a shared `$lib/svadmin-lite.ts` adapter and dynamic
-`[resource]` list/create/show/edit routes. `$lib/admin` only needs to export
+The generator adds a shared `#lib/svadmin-lite.js` adapter and dynamic
+`[resource]` list/create/show/edit routes. `#lib/admin.js` only needs to export
 `resources` and `dataProvider`; the existing SPA files are not changed. The
 generated Lite subtree is `ssr = true` and `csr = false`, and existing files are
 preserved on repeat runs.
 
+> SvelteKit 3 replaced `$lib` with the `#lib` subpath imports. Add them to
+> `package.json` (SvelteKit 2 projects can run `npx sv migrate sveltekit-3`):
+>
+> ```json
+> { "imports": { "#lib": "./src/lib/index.js", "#lib/*": "./src/lib/*" } }
+> ```
+
 ```typescript
 // src/routes/lite/posts/+page.server.ts
 import { createListLoader, createCrudActions } from '@svadmin/lite';
-import { dataProvider, resources } from '$lib/admin';
+import { dataProvider, resources } from '#lib/admin.js';
 
 const postsResource = resources.find(r => r.name === 'posts')!;
 
@@ -92,7 +99,7 @@ for the complete contract and its real-response check.
 <script lang="ts">
   import { LiteLayout, LiteTable, LitePagination, LiteSearch, LiteAlert } from '@svadmin/lite';
   import '@svadmin/lite/lite.css';
-  import { resources } from '$lib/admin';
+  import { resources } from '#lib/admin.js';
 
   let { data, form } = $props();
 </script>
@@ -173,7 +180,7 @@ requests never share tenant state through a module-level mutable variable:
 // src/routes/lite/posts/+page.server.ts
 import { withTenantDataProvider } from '@svadmin/core';
 import { createListLoader, createCrudActions } from '@svadmin/lite';
-import { dataProvider, postsResource } from '$lib/admin';
+import { dataProvider, postsResource } from '#lib/admin.js';
 import type { Actions, PageServerLoad } from './$types';
 
 function scopedProvider(tenantId: string) {

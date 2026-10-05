@@ -9,7 +9,7 @@
     LiteBarChart,
     getStatusBadgeClass,
   } from "@svadmin/lite";
-  import { postsResource } from "$lib/admin";
+  import { postsResource } from "#lib/admin";
   import type { PageProps } from "./$types";
   import { definedOptions } from '@svadmin/core/options';
 

@@ -1,7 +1,5 @@
-import { json } from '@sveltejs/kit';
-
 export function GET() {
-  return json({
+  return Response.json({
     nodes: [
       { id: 'start', label: 'Start' },
       { id: 'review', label: 'Review' },

@@ -241,6 +241,13 @@ bunx @svadmin/create lite init . --write
 ```
 
 The generator creates one `[resource]` route for all resources plus the shared
-`src/lib/svadmin-lite.ts` adapter. Your existing `$lib/admin` module only needs
+`src/lib/svadmin-lite.ts` adapter. Your existing `#lib/admin.js` module only needs
 to export `resources` and `dataProvider`; resources are resolved dynamically at
 request time. Existing files are preserved, so rerunning the command is safe.
+
+SvelteKit 3 replaced `$lib` with the `#lib` subpath imports, so `package.json`
+must declare them (SvelteKit 2 projects can run `npx sv migrate sveltekit-3`):
+
+```json
+{ "imports": { "#lib": "./src/lib/index.js", "#lib/*": "./src/lib/*" } }
+```

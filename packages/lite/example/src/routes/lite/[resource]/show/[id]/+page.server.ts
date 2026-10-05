@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import { createDetailLoader } from '@svadmin/lite';
-import { dataProvider, getResource } from '$lib/admin';
+import { dataProvider, getResource } from '#lib/admin';
 import type { PageServerLoad } from './$types';
 
 export const load = (async (event) => {

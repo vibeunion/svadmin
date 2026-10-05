@@ -8,12 +8,16 @@
     "dev": "vite dev",
     "verify:ssr": "vite build && bun ./scripts/verify-ssr.ts"
   },
+  "imports": {
+    "#lib": "./src/lib/index.js",
+    "#lib/*": "./src/lib/*"
+  },
   "dependencies": {
     "@sinclair/typebox": "^0.34.52",
     "@svadmin/core": "workspace:*",
     "@svadmin/lite": "workspace:*",
-    "@sveltejs/kit": "^2.70.3",
-    "svelte": "^5.56.10",
+    "@sveltejs/kit": "^3.0.0",
+    "svelte": "^5.57.1",
     "vite": "^8.2.2"
   }
 }

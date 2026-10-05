@@ -13,7 +13,7 @@ import {
 test('lite init plans one dynamic route tree without touching the SPA', async () => {
   const projectDirectory = await mkdtemp(join(tmpdir(), 'create-svadmin-lite-init-'));
   try {
-    await writeFile(join(projectDirectory, 'package.json'), '{"private":true}\n');
+    await writeFile(join(projectDirectory, 'package.json'), '{"private":true,"imports":{"#lib":"./src/lib/index.js","#lib/*":"./src/lib/*"}}\n');
     await writeFile(join(projectDirectory, 'src-placeholder'), 'spa stays here\n');
     await mkdir(join(projectDirectory, 'src', 'lib'), { recursive: true });
     await mkdir(join(projectDirectory, 'src', 'routes'), { recursive: true });
@@ -32,7 +32,7 @@ test('lite init plans one dynamic route tree without touching the SPA', async ()
     );
     expect(plan.entries.map((entry) => entry.relativePath)).toContain('src/lib/svadmin-lite.ts');
     expect(plan.entries.find((entry) => entry.relativePath === 'src/lib/svadmin-lite.ts')?.content)
-      .toContain("from '$lib/admin'");
+      .toContain("from '#lib/admin.js'");
     expect(plan.entries.find((entry) => entry.relativePath === 'src/routes/lite/[resource]/+page.server.ts')?.content)
       .toContain('getResource(event.params.resource)');
     expect(plan.entries.every((entry) => !entry.content.includes('process.cwd()'))).toBe(true);
@@ -75,6 +75,21 @@ test('lite init rejects non-SvelteKit projects and unknown options', async () =>
     expect(() => planLiteInit(projectDirectory)).toThrow('src/routes');
     expect(() => parseLiteInitArguments(['--nope'])).toThrow('Unknown option');
     expect(() => parseLiteInitArguments(['one', 'two'])).toThrow('at most one');
+  } finally {
+    await rm(projectDirectory, { recursive: true, force: true });
+  }
+});
+
+test('lite init requires the SvelteKit 3 #lib subpath imports', async () => {
+  const projectDirectory = await mkdtemp(join(tmpdir(), 'create-svadmin-lite-imports-'));
+  try {
+    await writeFile(join(projectDirectory, 'package.json'), '{"private":true}\n');
+    await mkdir(join(projectDirectory, 'src', 'lib'), { recursive: true });
+    await mkdir(join(projectDirectory, 'src', 'routes'), { recursive: true });
+    await Bun.write(join(projectDirectory, 'src/lib/admin.ts'), 'export const resources = []; export const dataProvider = {};\n');
+    await Bun.write(join(projectDirectory, 'src/routes/.keep'), '');
+
+    expect(() => planLiteInit(projectDirectory)).toThrow('#lib');
   } finally {
     await rm(projectDirectory, { recursive: true, force: true });
   }

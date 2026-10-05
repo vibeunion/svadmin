@@ -1,4 +1,4 @@
-import { menu, resources } from '$lib/admin';
+import { menu, resources } from '#lib/admin';
 import type { LayoutServerLoad } from './$types';
 
 export const load = (({ url }) => {

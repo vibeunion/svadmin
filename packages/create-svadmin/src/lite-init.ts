@@ -25,7 +25,7 @@ export interface LiteInitResult {
 }
 
 const GENERATED_FILES: Record<string, string> = {
-  'src/lib/svadmin-lite.ts': `import { dataProvider, resources } from '$lib/admin';
+  'src/lib/svadmin-lite.ts': `import { dataProvider, resources } from '#lib/admin.js';
 import type { ResourceDefinition } from '@svadmin/core';
 
 export { dataProvider, resources };
@@ -37,7 +37,7 @@ export function getResource(name: string): ResourceDefinition | undefined {
   'src/routes/lite/+layout.ts': `export const ssr = true;
 export const csr = false;
 `,
-  'src/routes/lite/+layout.server.ts': `import { resources } from '$lib/svadmin-lite';
+  'src/routes/lite/+layout.server.ts': `import { resources } from '#lib/svadmin-lite.js';
 import type { LayoutServerLoad } from './$types';
 
 export const load = (({ url }) => {
@@ -66,7 +66,7 @@ export const load = (({ url }) => {
 </LiteLayout>
 `,
   'src/routes/lite/+page.server.ts': `import { error, redirect } from '@sveltejs/kit';
-import { resources } from '$lib/svadmin-lite';
+import { resources } from '#lib/svadmin-lite.js';
 import type { PageServerLoad } from './$types';
 
 export const load = (() => {
@@ -77,7 +77,7 @@ export const load = (() => {
 `,
   'src/routes/lite/[resource]/+page.server.ts': `import { error } from '@sveltejs/kit';
 import { createCrudActions, createListLoader } from '@svadmin/lite';
-import { dataProvider, getResource } from '$lib/svadmin-lite';
+import { dataProvider, getResource } from '#lib/svadmin-lite.js';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load = ((event) => {
@@ -110,7 +110,7 @@ export const actions = {
 `,
   'src/routes/lite/[resource]/create/+page.server.ts': `import { error, redirect } from '@sveltejs/kit';
 import { createCrudActions } from '@svadmin/lite';
-import { dataProvider, getResource } from '$lib/svadmin-lite';
+import { dataProvider, getResource } from '#lib/svadmin-lite.js';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load = (({ params }) => {
@@ -147,7 +147,7 @@ export const actions = {
 `,
   'src/routes/lite/[resource]/show/[id]/+page.server.ts': `import { error } from '@sveltejs/kit';
 import { createDetailLoader } from '@svadmin/lite';
-import { dataProvider, getResource } from '$lib/svadmin-lite';
+import { dataProvider, getResource } from '#lib/svadmin-lite.js';
 import type { PageServerLoad } from './$types';
 
 export const load = ((event) => {
@@ -167,7 +167,7 @@ export const load = ((event) => {
 `,
   'src/routes/lite/[resource]/edit/[id]/+page.server.ts': `import { error, redirect } from '@sveltejs/kit';
 import { createCrudActions, createDetailLoader } from '@svadmin/lite';
-import { dataProvider, getResource } from '$lib/svadmin-lite';
+import { dataProvider, getResource } from '#lib/svadmin-lite.js';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load = ((event) => {
@@ -244,6 +244,16 @@ function assertLiteProject(projectDirectory: string): void {
   if (!adminModuleExists) {
     throw new Error(
       'Lite routes require src/lib/admin.ts (or .js/.svelte) exporting resources and dataProvider.',
+    );
+  }
+  const packageJson = JSON.parse(
+    fs.readFileSync(path.join(projectDirectory, 'package.json'), 'utf8'),
+  ) as { imports?: Record<string, unknown> };
+  if (!packageJson.imports?.['#lib'] && !packageJson.imports?.['#lib/*']) {
+    throw new Error(
+      'Lite routes import "#lib/...". Add the SvelteKit 3 subpath imports to package.json: ' +
+        '{ "imports": { "#lib": "./src/lib/index.js", "#lib/*": "./src/lib/*" } } ' +
+        '(run `npx sv migrate sveltekit-3` to migrate an existing project).',
     );
   }
 }

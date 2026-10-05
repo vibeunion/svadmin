@@ -1,18 +1,16 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test';
 
 const gotoMock = mock((_url: string, _options?: {
-  replaceState?: boolean;
-  noScroll?: boolean;
-  keepFocus?: boolean;
-  invalidateAll?: boolean;
+  replace?: boolean;
+  reset?: boolean;
+  refreshAll?: boolean;
 }) => Promise.resolve());
 const pathsState = {
   base: '/admin',
-  resolvedRoot: '../../',
 };
 const resolveMock = mock((path: string) => {
   const normalized = path.startsWith('/') ? path : `/${path}`;
-  return normalized === '/' ? pathsState.resolvedRoot : `${pathsState.base}${normalized}`;
+  return normalized === '/' ? `${pathsState.base}/` : `${pathsState.base}${normalized}`;
 });
 const pageState = {
   url: new URL('https://example.test/admin/posts?page=2'),
@@ -22,9 +20,6 @@ const pageState = {
 mock.module('$app/navigation', () => ({ goto: gotoMock }));
 mock.module('$app/state', () => ({ page: pageState }));
 mock.module('$app/paths', () => ({
-  get base() {
-    return pathsState.base;
-  },
   resolve: resolveMock,
 }));
 
@@ -35,7 +30,6 @@ describe('createSvelteKitRouterProvider', () => {
     gotoMock.mockClear();
     resolveMock.mockClear();
     pathsState.base = '/admin';
-    pathsState.resolvedRoot = '../../';
     pageState.url = new URL('https://example.test/admin/posts?page=2');
   });
 
@@ -52,16 +46,15 @@ describe('createSvelteKitRouterProvider', () => {
     expect(gotoMock).toHaveBeenCalledWith(
       '/admin/posts?search=hello+world#details',
       {
-        replaceState: true,
-        noScroll: true,
-        keepFocus: true,
-        invalidateAll: false,
+        replace: true,
+        reset: false,
+        refreshAll: false,
       },
     );
     expect(provider.formatLink?.('posts')).toBe('/admin/posts');
   });
 
-  test('removes the configured base when SSR resolves the root relatively', () => {
+  test('derives the configured base from resolve() and strips it from the current pathname', () => {
     const provider = createSvelteKitRouterProvider();
 
     expect(provider.parse()).toMatchObject({

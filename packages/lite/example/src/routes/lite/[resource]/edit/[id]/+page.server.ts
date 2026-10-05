@@ -1,6 +1,6 @@
 import { error, redirect } from '@sveltejs/kit';
 import { createCrudActions, createDetailLoader } from '@svadmin/lite';
-import { dataProvider, getResource } from '$lib/admin';
+import { dataProvider, getResource } from '#lib/admin';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load = (async (event) => {

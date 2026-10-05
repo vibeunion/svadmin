@@ -42,7 +42,7 @@ export const svelteKitRouter: RouterProvider = {
   go({ to, query, type }) {
     const url = new URL(to, window.location.origin);
     if (query) Object.entries(query).forEach(([k, v]) => url.searchParams.set(k, v));
-    goto(url.pathname + url.search, { replaceState: type === 'replace' });
+    goto(url.pathname + url.search, { replace: type === 'replace' });
   },
   back: () => history.back(),
   parse: () => {

@@ -99,6 +99,12 @@ The recommended pattern is **Dual-Track Deployment**: modern browsers use the fu
   Svelte 5 + Tailwind v4    Server HTML + lite.css
 ```
 
+> **SvelteKit 3**: `$lib` was replaced by the `#lib` subpath imports. Declare them in `package.json` (SvelteKit 2 projects can run `npx sv migrate sveltekit-3`):
+>
+> ```json
+> { "imports": { "#lib": "./src/lib/index.js", "#lib/*": "./src/lib/*" } }
+> ```
+
 ### 1. Configure the Lite Subtree
 
 In your Lite route layout, enforce server-only rendering:
@@ -114,7 +120,7 @@ export const csr = false;
 ```typescript
 // src/routes/lite/posts/+page.server.ts
 import { createListLoader, createCrudActions } from '@svadmin/lite';
-import { dataProvider, resources } from '$lib/admin';
+import { dataProvider, resources } from '#lib/admin.js';
 
 const postsResource = resources.find(r => r.name === 'posts')!;
 
@@ -129,7 +135,7 @@ export const actions = createCrudActions(dataProvider, postsResource);
 <script lang="ts">
   import { LiteLayout, LiteTable, LitePagination, LiteSearch, LiteAlert } from '@svadmin/lite';
   import '@svadmin/lite/lite.css';
-  import { resources } from '$lib/admin';
+  import { resources } from '#lib/admin.js';
 
   let { data, form } = $props();
 </script>

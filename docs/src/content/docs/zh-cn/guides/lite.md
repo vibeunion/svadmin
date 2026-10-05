@@ -99,6 +99,12 @@ description: 零 JS 服务端渲染降级方案、IE11 兼容纯 CSS 基线与 1
       Svelte 5 + Tailwind v4        纯 HTML + lite.css (零 JS)
 ```
 
+> **SvelteKit 3**：`$lib` 已被 `#lib` 子路径导入取代。请在 `package.json` 中声明（SvelteKit 2 项目可运行 `npx sv migrate sveltekit-3` 自动添加）：
+>
+> ```json
+> { "imports": { "#lib": "./src/lib/index.js", "#lib/*": "./src/lib/*" } }
+> ```
+
 ### 1. 声明 Lite 路由为纯服务端渲染
 
 在 `/lite/+layout.ts` 中禁用客户端 Hydration：
@@ -114,7 +120,7 @@ export const csr = false;
 ```typescript
 // src/routes/lite/posts/+page.server.ts
 import { createListLoader, createCrudActions } from '@svadmin/lite';
-import { dataProvider, resources } from '$lib/admin';
+import { dataProvider, resources } from '#lib/admin.js';
 
 const postsResource = resources.find(r => r.name === 'posts')!;
 
@@ -129,7 +135,7 @@ export const actions = createCrudActions(dataProvider, postsResource);
 <script lang="ts">
   import { LiteLayout, LiteTable, LitePagination, LiteSearch, LiteAlert } from '@svadmin/lite';
   import '@svadmin/lite/lite.css';
-  import { resources } from '$lib/admin';
+  import { resources } from '#lib/admin.js';
 
   let { data, form } = $props();
 </script>

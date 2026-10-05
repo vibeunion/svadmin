@@ -1,4 +1,4 @@
-import { dataProvider, postsResource, resources } from "$lib/admin";
+import { dataProvider, postsResource, resources } from "#lib/admin";
 import { createCrudActions, createListLoader } from "@svadmin/lite";
 import type { Actions, PageServerLoad } from "./$types";
 import { Type } from '@sinclair/typebox';

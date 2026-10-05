@@ -57,6 +57,7 @@ function eventFixture(input: Omit<Partial<RequestEvent>, 'cookies'> & {
       set: unexpected,
       delete: unexpected,
       serialize: unexpected,
+      parse: unexpected,
       ...input.cookies,
     },
   };

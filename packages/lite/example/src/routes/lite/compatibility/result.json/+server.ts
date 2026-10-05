@@ -1,5 +1,3 @@
-import { json } from '@sveltejs/kit';
-
 export function GET() {
-  return json({ engine: 'server', status: 'ready', result: 'example-output' });
+  return Response.json({ engine: 'server', status: 'ready', result: 'example-output' });
 }

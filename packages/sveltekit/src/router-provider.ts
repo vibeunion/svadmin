@@ -2,7 +2,7 @@ import { definedOptions } from '@svadmin/core/options';
 /// <reference types="@sveltejs/kit" />
 import { goto } from '$app/navigation';
 import { page } from '$app/state';
-import { base, resolve } from '$app/paths';
+import { resolve } from '$app/paths';
 import type { RouterProvider } from '@svadmin/core';
 
 function normalizeInternalPath(path: string): string {
@@ -14,8 +14,23 @@ function runtimeResolveArgs(path: string): Parameters<typeof resolve> {
   return [normalizeInternalPath(path)] as unknown as Parameters<typeof resolve>;
 }
 
+/**
+ * SvelteKit 3 removed the `base` export from `$app/paths`. Derive the configured
+ * base from the public `resolve()` helper by resolving the app root, which is
+ * returned as `${base}/` (or `/` when no base is configured).
+ */
+function deriveConfiguredBase(): string {
+  try {
+    const resolvedRoot = resolve(...runtimeResolveArgs('/'));
+    const base = resolvedRoot.endsWith('/') ? resolvedRoot.slice(0, -1) : resolvedRoot;
+    return base.startsWith('/') ? base : '';
+  } catch {
+    return '';
+  }
+}
+
 function stripConfiguredBase(pathname: string): string {
-  const configuredBase = base.endsWith('/') ? base.slice(0, -1) : base;
+  const configuredBase = deriveConfiguredBase();
 
   if (!configuredBase || configuredBase === '/') return pathname;
   if (pathname === configuredBase) return '/';
@@ -40,10 +55,9 @@ export function createSvelteKitRouterProvider(): RouterProvider {
 
       const gotoPromise = type === 'replace'
         ? goto(url, {
-          replaceState: true,
-          noScroll: true,
-          keepFocus: true,
-          invalidateAll: false,
+          replace: true,
+          reset: false,
+          refreshAll: false,
         })
         : goto(url);
 
