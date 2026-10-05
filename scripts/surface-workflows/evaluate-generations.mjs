@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { createBusinessSurfaceDefinitions } from '../../packages/surface/dist/business-definitions.js';
 import { createSurfaceOpenUIStream } from '../../packages/surface/dist/openui.js';
 import { createInteractiveSurfaceDefinitions, defaultSurfaceDefinitions } from '../../packages/surface/dist/workflows.js';

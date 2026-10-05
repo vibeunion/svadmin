@@ -1,4 +1,4 @@
-import type { TSchema } from '@sinclair/typebox';
+import type { TSchema } from 'typebox';
 import type { JsonObject, JsonValue, SurfaceCatalog, SurfacePolicy, SurfaceSpec } from '../types.js';
 
 /** Identity comes from authenticated server middleware, never from model JSON. */

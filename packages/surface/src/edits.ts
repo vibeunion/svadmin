@@ -1,5 +1,5 @@
-import { Type } from '@sinclair/typebox';
-import { TypeCompiler } from '@sinclair/typebox/compiler';
+import { Type } from 'typebox';
+import { Compile } from 'typebox/compile';
 import { createSurfaceCatalogManifest, SURFACE_AGENT_LIMITS, surfaceSchemaToJson } from './agent-contract.js';
 import type { SurfaceAgentMessage } from './agent.js';
 import {
@@ -60,8 +60,8 @@ const editSchema = Type.Object({
     Type.Object({ op: Type.Literal('reorder-widgets'), ids: Type.Array(surfaceIdSchema, { maxItems: SURFACE_LIMITS.maxWidgets, uniqueItems: true }) }, { additionalProperties: false }),
   ]), { minItems: 1, maxItems: SURFACE_EDIT_LIMITS.maxOperations }),
 }, { additionalProperties: false });
-const compiledEdit = TypeCompiler.Compile(editSchema);
-const compiledRevision = TypeCompiler.Compile(Type.Object({ revision: revisionSchema, spec: surfaceSpecSchema }, { additionalProperties: false }));
+const compiledEdit = Compile(editSchema);
+const compiledRevision = Compile(Type.Object({ revision: revisionSchema, spec: surfaceSpecSchema }, { additionalProperties: false }));
 
 function editError(code: SurfaceEditIssue['code'], path: string, message: string): Extract<SurfaceRevisionResult, { ok: false }> {
   return { ok: false, issues: [{ code, path, message }] };

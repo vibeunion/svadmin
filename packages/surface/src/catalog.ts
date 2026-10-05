@@ -1,5 +1,5 @@
 import type { Component } from 'svelte';
-import { Value } from '@sinclair/typebox/value';
+import { Value } from 'typebox/value';
 import BarChartWidget from './components/BarChartWidget.svelte';
 import LineChartWidget from './components/LineChartWidget.svelte';
 import MetricWidget from './components/MetricWidget.svelte';

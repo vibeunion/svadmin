@@ -1,4 +1,4 @@
-import { Type, type Static } from '@sinclair/typebox';
+import { Type, type Static } from 'typebox';
 import type { AuthProvider } from './types';
 import { authErrorSchema, authRedirectSchema, decodeIdentity } from './auth-query-contract';
 import { snapshotPlainData } from './plain-data';

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { Kind, Type } from '@sinclair/typebox';
+import { Type, ObjectOptions } from 'typebox';
 import { withResourceSchemas, createResourceRequestValidator } from './resource-schemas';
 import { DeleteManyPartialError, HttpError } from './types';
 import type { DataProvider } from './types';
@@ -12,8 +12,8 @@ const RecordSchema = Type.Object({
   id: Type.Number(),
   title: Type.String(),
 }, { additionalProperties: false });
-const CreateSchema = Type.Omit(RecordSchema, ['id']);
-const UpdateSchema = Type.Partial(CreateSchema);
+const CreateSchema = Type.Omit(RecordSchema, ['id'], ObjectOptions(RecordSchema));
+const UpdateSchema = Type.Partial(CreateSchema, ObjectOptions(CreateSchema));
 const schemas = { posts: { record: RecordSchema, create: CreateSchema, update: UpdateSchema } };
 const row = { id: 1, title: 'Hello' };
 
@@ -118,7 +118,7 @@ describe('withResourceSchemas', () => {
     const directory = dirname(fileURLToPath(import.meta.url));
     const virtualPath = resolve(directory, 'resource-schemas.test.virtual.ts');
     const accepted = [
-      "import { Type } from '@sinclair/typebox';",
+      "import { Type } from 'typebox';",
       "import { withResourceSchemas, createResourceRequestValidator } from './resource-schemas';",
       "import type { DataProvider, GetOneResult, GetListResult } from './types';",
       'declare const raw: DataProvider;',
@@ -589,26 +589,26 @@ describe('withResourceSchemas', () => {
     const { raw } = fixture();
     const reference = Type.Object({ id: Type.Number(), title: Type.String() }, { $id: 'Post' });
     const provider = withResourceSchemas(raw, {
-      posts: { record: Type.Ref(reference), references: [reference] },
+      posts: { record: Type.Ref('Post'), references: [reference] },
     });
     expect(await provider.getOne({ resource: 'posts', id: 1 })).toEqual({ data: row });
   });
 
-  test('keeps schema evaluation failures structured before and after writes', async () => {
+  test('treats unresolved references as structured validation failures before and after writes', async () => {
     const { raw, calls } = fixture();
-    const unresolved = Type.Ref(Type.Object({}, { $id: 'Missing' }));
+    const unresolved = Type.Ref('Missing');
     const invalidInput = withResourceSchemas(raw, {
       posts: { record: RecordSchema, create: unresolved },
     });
     await expect(invalidInput.create({ resource: 'posts', variables: {} })).rejects.toMatchObject({
-      code: 'RESOURCE_SCHEMA_INVALID', details: { phase: 'input', writeMayHaveSucceeded: false },
+      code: 'INVALID_RESOURCE_INPUT', details: { phase: 'input', writeMayHaveSucceeded: false },
     });
     expect(calls).toHaveLength(0);
     const invalidOutput = withResourceSchemas(raw, {
       posts: { record: unresolved, create: CreateSchema },
     });
     await expect(invalidOutput.create({ resource: 'posts', variables: { title: 'Hello' } })).rejects.toMatchObject({
-      code: 'RESOURCE_SCHEMA_INVALID', details: { phase: 'response', writeMayHaveSucceeded: true },
+      code: 'INVALID_PROVIDER_RESPONSE', details: { phase: 'response', writeMayHaveSucceeded: true },
     });
     expect(calls).toHaveLength(1);
   });
@@ -730,7 +730,7 @@ describe('resource transport configuration snapshots', () => {
     const create = Type.Object({ title: Type.String({ minLength: 3 }) }, { additionalProperties: false });
     const config = { posts: { record, create } };
     const original = withResourceSchemas(raw, config);
-    create.properties.title.minLength = 0;
+    (create.properties.title as { minLength?: number }).minLength = 0;
     Reflect.set(record.properties, 'title', Type.Number());
     await expect(original.create({ resource: 'posts', variables: { title: 'x' } }))
       .rejects.toMatchObject({ code: 'INVALID_RESOURCE_INPUT' });
@@ -760,7 +760,7 @@ describe('resource transport configuration snapshots', () => {
     const create = Type.Object({ title: Type.String({ minLength: 3 }) }, { additionalProperties: false });
     const provider = withResourceSchemas(raw, { posts: { record: RecordSchema, create } });
     await expect(provider.create({ resource: 'posts', variables: { title: 'Hello' } })).resolves.toEqual({ data: row });
-    create.properties.title.minLength = 0;
+    (create.properties.title as { minLength?: number }).minLength = 0;
     setResponse({ data: [row] });
     if (!provider.createMany) throw new Error('Expected batch capability');
     await expect(provider.createMany({ resource: 'posts', variables: [{ title: 'x' }] }))
@@ -774,7 +774,7 @@ describe('resource transport configuration snapshots', () => {
     const { raw, setResponse } = fixture();
     const reference = Type.Object({ id: Type.Number(), title: Type.String() }, { $id: 'Row' });
     const references = [reference];
-    const provider = withResourceSchemas(raw, { posts: { record: Type.Ref(reference), references } });
+    const provider = withResourceSchemas(raw, { posts: { record: Type.Ref('Row'), references } });
     Reflect.set(reference.properties, 'title', Type.Number());
     references.length = 0;
     setResponse({ data: { id: 1, title: 3 } });
@@ -785,9 +785,11 @@ describe('resource transport configuration snapshots', () => {
 
   test('copies recursive schema references and optional/readonly TypeBox markers', async () => {
     const { raw, setResponse } = fixture();
-    const recursive = Type.Recursive(Self => Type.Object({
-      id: Type.Number(), title: Type.Readonly(Type.String()), children: Type.Optional(Type.Array(Self)),
-    }));
+    const recursive = Type.Cyclic({
+      Post: Type.Object({
+        id: Type.Number(), title: Type.Readonly(Type.String()), children: Type.Optional(Type.Array(Type.Ref('Post'))),
+      }),
+    }, 'Post');
     const provider = withResourceSchemas(raw, { posts: { record: recursive } });
     const data = { ...row, children: [{ id: 2, title: 'Child' }] };
     setResponse({ data });
@@ -832,7 +834,7 @@ describe('resource transport configuration snapshots', () => {
     Reflect.set(cycle.properties, 'self', cycle);
     expect(() => withResourceSchemas(raw, { posts: { record: cycle } })).toThrow('Invalid resource schema configuration');
     let executed = 0;
-    const transformed = Type.Transform(Type.String()).Decode(value => { executed++; return value; })
+    const transformed = Type.Codec(Type.String()).Decode(value => { executed++; return value; })
       .Encode(value => { executed++; return value; });
     expect(() => withResourceSchemas(raw, { posts: { record: RecordSchema, create: transformed } }))
       .toThrow('Invalid resource schema configuration');
@@ -844,7 +846,8 @@ describe('resource transport configuration snapshots', () => {
     const { raw } = fixture();
     const record = Type.Object({ id: Type.Number() });
     let reads = 0;
-    Object.defineProperty(record, Kind, { enumerable: true, get() { reads++; return 'Object'; } });
+    const marker = Symbol('TypeBox.Kind');
+    Object.defineProperty(record, marker, { enumerable: true, get() { reads++; return 'Object'; } });
     expect(() => withResourceSchemas(raw, { posts: { record } })).toThrow('Invalid resource schema configuration');
     const foreign = Type.Object({ id: Type.Number() });
     Reflect.set(foreign, Symbol('foreign'), true);
@@ -864,7 +867,7 @@ describe('resource transport configuration snapshots', () => {
       if (key === 'length') { reads++; return 0; }
       return Reflect.get(target, key, receiver);
     } });
-    const provider = withResourceSchemas(raw, { posts: { record: Type.Ref(record), references } });
+    const provider = withResourceSchemas(raw, { posts: { record: Type.Ref('ProxyRow'), references } });
     await expect(provider.getOne({ resource: 'posts', id: 1 })).resolves.toEqual({ data: row });
     expect(reads).toBe(0);
   });

@@ -1,6 +1,6 @@
 import { fireEvent, render } from '@testing-library/svelte';
 import { describe, expect, it, vi } from 'vitest';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import type { SurfaceWorkflowTransport, SurfaceWorkflowClientScope } from './workflows/client.js';
 import Host from './form-scope.test-host.svelte';
 const action = { id: 'contacts.create', version: '1', label: 'Create', approval: 'confirm' as const,

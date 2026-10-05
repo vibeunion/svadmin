@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { parse } from 'svelte/compiler';
 import { bindResourceRendering, createResourceRenderers } from '@svadmin/ui/rendering';
 import { defineResource, formatContractRouteId } from '@svadmin/core/resource-contract';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import inventory from './business-page-inventory.json';
 import { demoRenderers, demoRendering, demoRouteId } from '../src/resource-rendering';
 import { demoSchemas, isDemoResource } from '../src/resource-schemas';

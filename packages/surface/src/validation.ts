@@ -1,6 +1,6 @@
-import type { TSchema } from "@sinclair/typebox";
-import { TypeCompiler } from "@sinclair/typebox/compiler";
-import { Value } from "@sinclair/typebox/value";
+import type { TSchema } from "typebox";
+import { Compile } from "typebox/compile";
+import { Value } from "typebox/value";
 import { decodedJsonPointerToken, jsonPointer, jsonValueIssue } from "./json.js";
 import { surfaceSpecSchema } from './schema.js';
 import {
@@ -19,7 +19,7 @@ import {
   type SurfaceWidgetDefinition,
 } from "./types.js";
 
-const compiledSurfaceSpec = TypeCompiler.Compile(surfaceSpecSchema);
+const compiledSurfaceSpec = Compile(surfaceSpecSchema);
 const forbiddenPropertyNames = new Set([
   "class", "className", "color", "href", "html", "innerHTML", "src", "style", "url",
 ]);
@@ -29,16 +29,46 @@ function invalidJsonIssue(pathSegments: readonly (string | number)[], message: s
   return { code: "invalid_json", path: jsonPointer(pathSegments), message };
 }
 
-function schemaErrors(errors: Iterable<{ path: string; message: string }>): SurfaceValidationIssue[] {
-  const issues: SurfaceValidationIssue[] = [];
-  for (const err of errors) {
+interface SchemaErrorLike {
+  instancePath?: string;
+  path?: string;
+  keyword?: string;
+  params?: Record<string, unknown>;
+  message: string;
+}
+
+function escapePointerSegment(segment: string): string {
+  return segment.replaceAll('~', '~0').replaceAll('/', '~1');
+}
+
+/** TypeBox 1.x groups missing properties into one Ajv-style error; split them per field. */
+export function surfaceSchemaIssues(errors: Iterable<SchemaErrorLike>): { path: string; message: string }[] {
+  const issues: { path: string; message: string }[] = [];
+  for (const error of errors) {
+    const base = error.instancePath ?? error.path ?? '';
+    const required = error.params?.['requiredProperties'];
+    if (error.keyword === 'required' && Array.isArray(required)) {
+      for (const property of required) {
+        if (typeof property !== 'string') continue;
+        issues.push({ path: `${base}/${escapePointerSegment(property)}`, message: `must have required property '${property}'` });
+      }
+      continue;
+    }
+    const additional = error.params?.['additionalProperty'];
     issues.push({
-      code: "invalid_json",
-      path: err.path || "",
-      message: err.message,
+      path: typeof additional === 'string' ? `${base}/${escapePointerSegment(additional)}` : base,
+      message: error.message,
     });
   }
   return issues;
+}
+
+function schemaErrors(errors: Iterable<SchemaErrorLike>): SurfaceValidationIssue[] {
+  return surfaceSchemaIssues(errors).map((issue) => ({
+    code: "invalid_json",
+    path: issue.path,
+    message: issue.message,
+  }));
 }
 
 function catalogDefinitions(catalog: SurfaceCatalog): Map<string, SurfaceWidgetDefinition> {

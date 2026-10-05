@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Value } from '@sinclair/typebox/value';
+  import { Value } from 'typebox/value';
   import ActivityFeed from '@svadmin/ui/components/ActivityFeed.svelte';
   import { activityFeedPropsSchema } from '../business-definitions.js';
   import { asSurfaceActivities } from '../business-data.js';

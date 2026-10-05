@@ -1,5 +1,5 @@
-import type { StaticDecode, TObject } from '@sinclair/typebox';
-import { Value } from '@sinclair/typebox/value';
+import type { StaticDecode, TObject } from 'typebox';
+import { Value } from 'typebox/value';
 
 /** Result returned by a tool execution. */
 export interface ToolResult {
@@ -61,7 +61,10 @@ export function decodeAdminToolArgs<const Schema extends TObject>(
   tool: AdminTool<Schema>,
   input: unknown,
 ): StaticDecode<Schema> {
-  return Value.Decode(strictAdminToolSchema(tool.parameters), input);
+  const schema = strictAdminToolSchema(tool.parameters);
+  // TypeBox 1.x Value.Decode strips undeclared properties instead of rejecting them.
+  if (!Value.Check(schema, input)) throw new Error('Admin tool arguments do not match the declared schema');
+  return Value.Decode(schema, input);
 }
 
 /** Decodes and executes a tool without allowing callers to bypass runtime input validation. */
@@ -94,6 +97,9 @@ export function projectAdminToolSchema<Schema extends TObject>(tool: AdminTool<S
 }
 
 function strictAdminToolSchema<Schema extends TObject>(schema: Schema): Schema {
-  if (schema.additionalProperties === false) return schema;
-  return { ...schema, additionalProperties: false };
+  if ((schema as { additionalProperties?: unknown }).additionalProperties === false) return schema;
+  // Spreading would drop TypeBox 1.x non-enumerable markers such as ~codec; clone instead.
+  const copy = Value.Clone(schema) as TObject & { additionalProperties?: boolean };
+  copy.additionalProperties = false;
+  return copy as Schema;
 }

@@ -1,6 +1,6 @@
 import type { Component } from 'svelte';
 import type { FieldDefinition } from '@svadmin/core';
-import { Type, type Static, type TObject, type TSchema } from '@sinclair/typebox';
+import { Type, type Static, type TObject, type TSchema } from 'typebox';
 import { closeContractSchema, createExactSchemaValidator, type SafeSchema } from '@svadmin/core/schema';
 import { definedOptions } from '@svadmin/core/options';
 import ValidatedField from './ValidatedField.svelte';
@@ -56,11 +56,17 @@ function validatedDisplay<S extends TObject>(
 }
 
 const nullable = <S extends TSchema>(schema: S) => Type.Union([schema, Type.Null(), Type.Undefined()]);
+/** TypeBox 1.x removed Type.Date; a Date instance is modelled with Unsafe plus a Refine guard. */
+const dateType = Type.Refine(
+  Type.Unsafe<globalThis.Date>({ type: 'Date' }),
+  (value): value is globalThis.Date => value instanceof globalThis.Date && !Number.isNaN(value.getTime()),
+  () => 'Expected Date',
+);
 const text = nullable(Type.String());
 const numeric = nullable(Type.Number());
 const scalar = nullable(Type.Union([Type.String(), Type.Number()]));
-const date = nullable(Type.Union([Type.String(), Type.Number(), Type.Date()]));
-const dateProperty = Type.Optional(Type.Union([Type.String(), Type.Number(), Type.Date(), Type.Null()]));
+const date = nullable(Type.Union([Type.String(), Type.Number(), dateType]));
+const dateProperty = Type.Optional(Type.Union([Type.String(), Type.Number(), dateType, Type.Null()]));
 const choices = Type.Optional(Type.Array(Type.Object({
   label: Type.String(), value: Type.Union([Type.String(), Type.Number()]),
 }, { additionalProperties: false })));

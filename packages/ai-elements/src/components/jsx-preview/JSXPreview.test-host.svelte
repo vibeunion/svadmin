@@ -1,7 +1,7 @@
 <script lang="ts">
   import { definedOptions } from '@svadmin/core/options';
 
-  import { Type } from '@sinclair/typebox';
+  import { Type } from 'typebox';
   import {
     defineJSXPreviewComponent,
     defineJSXPreviewSnippet,

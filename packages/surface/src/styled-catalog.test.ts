@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { Value } from '@sinclair/typebox/value';
+import { Value } from 'typebox/value';
 import { surfaceDesignContract } from '@svadmin/ui/design-contract';
 import { buildSurfaceAgentPrompt } from './agent.js';
 import { metricPropsSchema, styledMetricPropsSchema, styledResourceTablePropsSchema } from './builtin-schemas.js';

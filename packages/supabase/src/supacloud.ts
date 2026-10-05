@@ -1,4 +1,4 @@
-import { Type, type Static, type TSchema } from '@sinclair/typebox';
+import { Type, type Static, type TSchema } from 'typebox';
 import type { LiveEvent, LiveProvider, TaskHandle, TaskProvider, TaskRecord, SubmitTaskOptions } from '@svadmin/core';
 import { definedOptions } from '@svadmin/core/options';
 import { checkExact, decodeTaskRecord, decodeTaskSubmitOptions, snapshotPlainData, TaskError, validatedTaskSubscription, taskClientField, requiredTaskClientMethod } from '@svadmin/core/schema';

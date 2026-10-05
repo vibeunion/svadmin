@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Type } from '@sinclair/typebox';
+  import { Type } from 'typebox';
   import { SurfaceEditPreview, defaultSurfaceCatalog } from '@svadmin/surface/svelte';
   import type { SurfaceRevision, SurfaceDataProvider, SurfaceSpec } from '@svadmin/surface';
   import type { BaseRecord, GetListResult, GetOneResult } from '@svadmin/core';

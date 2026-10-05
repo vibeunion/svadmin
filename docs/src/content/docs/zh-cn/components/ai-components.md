@@ -10,7 +10,7 @@ description: 基于 ChatProvider 的对话、建议、命令和洞察组件
 ## 安装
 
 ```bash
-bun add @svadmin/ai-elements @svadmin/core @sinclair/typebox @tanstack/svelte-query svelte
+bun add @svadmin/ai-elements @svadmin/core typebox @tanstack/svelte-query svelte
 ```
 
 ## 配置 ChatProvider
@@ -116,7 +116,7 @@ export default defineConfig({
 
 ```svelte
 <script lang="ts">
-  import { Type } from '@sinclair/typebox';
+  import { Type } from 'typebox';
   import { ChatDialog, defineGeneratedComponent } from '@svadmin/ai-elements';
   import InventorySummary from './InventorySummary.svelte';
 
@@ -163,7 +163,7 @@ Agent 工具使用同一套 TypeBox 边界。必须通过 `executeAdminTool` 执
 确保工具实现接收到的是已经过 `Value.Decode` 校验和转换的数据：
 
 ```ts
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { defineAdminTool, executeAdminTool } from '@svadmin/core';
 
 const searchInventory = defineAdminTool({

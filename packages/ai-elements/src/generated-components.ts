@@ -1,5 +1,5 @@
-import type { StaticDecode, TObject } from '@sinclair/typebox';
-import { Value } from '@sinclair/typebox/value';
+import type { StaticDecode, TObject } from 'typebox';
+import { Value } from 'typebox/value';
 import type { Component } from 'svelte';
 
 export type GeneratedComponentProps = Record<string, unknown>;
@@ -41,7 +41,11 @@ export function decodeGeneratedObjectProps(
   schema: TObject,
   input: unknown,
 ): GeneratedComponentProps {
-  const decoded: unknown = Value.Decode(strictGeneratedObjectSchema(schema), input);
+  const strict = strictGeneratedObjectSchema(schema);
+  if (!Value.Check(strict, input)) {
+    throw new TypeError('Generated component props must match the registered schema.');
+  }
+  const decoded: unknown = Value.Decode(strict, input);
   if (decoded === null || typeof decoded !== 'object' || Array.isArray(decoded)) {
     throw new TypeError('Generated component props must decode to an object.');
   }
@@ -80,6 +84,8 @@ export function createGeneratedComponentPrompt(
 }
 
 function strictGeneratedObjectSchema<Schema extends TObject>(schema: Schema): Schema {
-  if (schema.additionalProperties === false) return schema;
-  return { ...schema, additionalProperties: false };
+  if ((schema as { additionalProperties?: unknown }).additionalProperties === false) return schema;
+  const clone = Value.Clone(schema) as Schema & { additionalProperties: boolean };
+  clone.additionalProperties = false;
+  return clone;
 }

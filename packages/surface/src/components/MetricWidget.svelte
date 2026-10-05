@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Value } from '@sinclair/typebox/value';
+  import { Value } from 'typebox/value';
   import { surfaceMetric } from '../recipes.js';
   import '../styles.css';
   import StatsCard from '@svadmin/ui/components/StatsCard.svelte';

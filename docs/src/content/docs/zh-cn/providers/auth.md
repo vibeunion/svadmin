@@ -102,7 +102,7 @@ export const mockAuthProvider: AuthProvider = {
 ### Supabase
 
 ```typescript
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { checkExact, snapshotPlainData } from '@svadmin/core/schema';
 import { createSupabaseAuthProvider } from '@svadmin/supabase';
 

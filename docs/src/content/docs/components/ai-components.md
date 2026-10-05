@@ -18,7 +18,7 @@ the source of truth.
 Before using the AI components, pass a `ChatProvider` into the owning `AdminApp` tree:
 
 ```bash
-bun add @svadmin/ai-elements @svadmin/core @sinclair/typebox @tanstack/svelte-query svelte
+bun add @svadmin/ai-elements @svadmin/core typebox @tanstack/svelte-query svelte
 ```
 
 ```svelte
@@ -117,7 +117,7 @@ default, so undeclared fields are rejected without requiring callers to repeat
 
 ```svelte
 <script lang="ts">
-  import { Type } from '@sinclair/typebox';
+  import { Type } from 'typebox';
   import { ChatDialog, defineGeneratedComponent } from '@svadmin/ai-elements';
   import InventorySummary from './InventorySummary.svelte';
 

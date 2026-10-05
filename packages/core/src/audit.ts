@@ -1,5 +1,5 @@
 import { definedOptions } from './defined-options';
-import { Value } from '@sinclair/typebox/value';
+import { Value } from 'typebox/value';
 import {
   AuditError, createAuditEntry, decodeAuditCreate, decodeAuditEntries, decodeAuditEntry, decodeAuditQuery,
   type AuditCreateParams, type AuditDraft, type AuditEntry, type AuditQueryParams,

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { defineAdminConfig, defineSvadminPlugin, resolveAdminConfig } from './admin-config';
 import { buildAdminManifest } from './admin-manifest';
 import { createProviderBundle } from './provider-bundle';

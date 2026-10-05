@@ -23,8 +23,8 @@ function referenceResult(read: () => CallToolResult): CallToolResult {
 export async function createVibeMcpServer(packageRoot: string, version: string) {
   const { Server } = await import('@modelcontextprotocol/sdk/server/index.js');
   const { ListToolsRequestSchema, CallToolRequestSchema } = await import('@modelcontextprotocol/sdk/types.js');
-  const { Type } = await import('@sinclair/typebox');
-  const { Value } = await import('@sinclair/typebox/value');
+  const { Type } = await import('typebox');
+  const { Value } = await import('typebox/value');
   const server = new Server({ name: 'svadmin-vibe', version }, {
     capabilities: { tools: {} },
     instructions: 'Read-only shipped design references, not the customer project or production data. Search pages, inspect a matching page, and read desktop/mobile previews before editing. Follow the returned contracts and acceptance requirements. Reference images are not evidence that customer edits passed tests.',

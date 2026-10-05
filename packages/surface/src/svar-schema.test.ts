@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { Value } from '@sinclair/typebox/value';
+import { Value } from 'typebox/value';
 import { svarGridDefinition, svarGridPropsSchema, decodeSvarGridProps } from './svar-schema.js';
 import { validateSurfaceSpec } from './validation.js';
 import { buildSurfaceAgentPrompt } from './agent.js';

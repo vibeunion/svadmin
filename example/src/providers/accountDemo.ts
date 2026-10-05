@@ -1,7 +1,7 @@
 import type { NotificationPreferences, NotificationPreferencesProvider } from '@svadmin/ui/components/NotificationsSettings.svelte';
 import type { MemberDirectoryProvider } from '@svadmin/ui/components/account/MemberDirectory.svelte';
-import { Type } from '@sinclair/typebox';
-import { Value } from '@sinclair/typebox/value';
+import { Type } from 'typebox';
+import { Value } from 'typebox/value';
 import { inMemoryDataProvider } from './inMemoryDb';
 import { demoRenderers } from '../resource-rendering';
 import { mockAuthProvider } from './mockAuth';

@@ -223,7 +223,7 @@ describe('inferResource',() => {
   test('generates valid TypeBox schema code with Static type inference',() => {
     const result=inferResource('posts',sampleData);
     expect(result.typeboxCode).toBeDefined();
-    expect(result.typeboxCode).toContain("import { Type, type Static } from '@sinclair/typebox';");
+    expect(result.typeboxCode).toContain("import { Type, type Static } from 'typebox';");
     expect(result.typeboxCode).toContain('export const PostSchema = Type.Object({');
     expect(result.typeboxCode).toContain('export type Post = Static<typeof PostSchema>;');
     expect(result.typeboxCode).toContain('views: Type.Optional(Type.Number())');

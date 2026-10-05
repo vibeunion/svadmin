@@ -1,7 +1,7 @@
 <script lang="ts">
   import { useCreate } from './strict-hooks.svelte';
   import { defineResource } from './resource-contract';
-  import { Type } from '@sinclair/typebox';
+  import { Type } from 'typebox';
   import { useList } from './query-hooks.svelte';
   import { useTask } from './task-hooks.svelte';
   import { useNotification } from './utility-hooks.svelte';

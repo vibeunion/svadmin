@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy, untrack } from 'svelte';
-  import { Type } from '@sinclair/typebox';
+  import { Type } from 'typebox';
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
   import { defineResource, provideAdminContext, type DataProvider, type RouterProvider } from '@svadmin/core';
   import { createI18nScope, provideI18nScope } from '@svadmin/core/i18n';

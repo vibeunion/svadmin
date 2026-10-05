@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { defineResource } from '@svadmin/core/resource-contract';
 import { createResourceRenderers } from './index.js';
 import { orders } from '../../../../scripts/fixtures/ui-rendering/resource.js';

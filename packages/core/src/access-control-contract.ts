@@ -1,4 +1,4 @@
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { checkExact } from './schema-validation';
 import { snapshotPlainData } from './plain-data';
 import { HttpError } from './types';

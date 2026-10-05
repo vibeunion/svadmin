@@ -1,4 +1,4 @@
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { defineCommand, type useCustom, type useCustomMutation, type useLogin,
   type useLogout, type useIsAuthenticated } from '@svadmin/core';
 

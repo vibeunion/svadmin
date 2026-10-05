@@ -1,7 +1,7 @@
 import { createInfiniteQuery, type InfiniteData, type InfiniteQueryObserverBaseResult, type QueryObserverResult,
   type RefetchOptions, type FetchNextPageOptions, type FetchPreviousPageOptions } from '@tanstack/svelte-query';
 import { tick } from 'svelte';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { definedOptions } from './defined-options';
 import { getAdminOptions } from './options.svelte';
 import { useParsed } from './useParsed.svelte';

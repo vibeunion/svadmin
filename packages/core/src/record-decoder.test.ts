@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { createExactSchemaValidator } from './schema-validation';
 import { HttpError } from './types';
 import { decodeBaseRecord, decodeOneResult, decodeManyResult, decodeListResult, decodeCustomResult } from './record-decoder';
@@ -81,7 +81,7 @@ describe('provider response decoders', () => {
   test('binds row parsing to the contract snapshot rather than a caller-selected type', () => {
     const schema = Type.Object({ id: Type.Number(), title: Type.String({ minLength: 3 }) });
     const contract = defineResource('decoder-records', { record: schema });
-    schema.properties.title.minLength = 0;
+    (schema.properties.title as { minLength?: number }).minLength = 0;
     const result = parseContractRecord(contract, { id: 1, title: 'valid' });
     const title: string = result.title;
     expect(title).toBe('valid');

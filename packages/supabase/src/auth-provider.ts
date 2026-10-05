@@ -1,5 +1,5 @@
 import { definedOptions } from '@svadmin/core/options';
-import type { Static } from '@sinclair/typebox';
+import type { Static } from 'typebox';
 import { snapshotPlainData } from '@svadmin/core/schema';
 import { audit } from '@svadmin/core/audit';
 import type { AuthProvider, Identity, AuthActionResult, CheckResult } from '@svadmin/core';

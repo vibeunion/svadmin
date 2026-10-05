@@ -1,5 +1,5 @@
-import { Type, type Static } from '@sinclair/typebox';
-import { Value } from '@sinclair/typebox/value';
+import { Type, type Static } from 'typebox';
+import { Value } from 'typebox/value';
 import { styledSurfaceDefinitions } from './builtin-definitions.js';
 import { surfaceDesignContract } from './design-contract.js';
 import type { JsonObject, SurfaceCatalog, SurfaceWidgetDefinition } from './types.js';

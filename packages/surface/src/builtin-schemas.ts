@@ -1,5 +1,5 @@
 import { surfaceDesignContract } from './design-contract.js';
-import { Type, type Static } from "@sinclair/typebox";
+import { Type, type Static } from "typebox";
 
 const catalogFieldSchema = Type.String({
   minLength: 1,

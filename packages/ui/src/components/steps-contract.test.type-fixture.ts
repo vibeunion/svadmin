@@ -1,4 +1,4 @@
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { defineResource, useStepsForm, type ResourceContract } from '@svadmin/core';
 import * as unsafe from '../../../core/src/unsafe';
 

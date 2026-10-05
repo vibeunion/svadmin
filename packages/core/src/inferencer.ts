@@ -407,7 +407,7 @@ export function generateTypeBoxSchemaCode(resource: ResourceDefinition): string 
   const baseName = resource.name.endsWith('s') ? resource.name.slice(0, -1) : resource.name;
   const typeName = capitalize(baseName);
 
-  return `import { Type, type Static } from '@sinclair/typebox';
+  return `import { Type, type Static } from 'typebox';
 
 export const ${typeName}Schema = Type.Object({
 ${schemaProps}

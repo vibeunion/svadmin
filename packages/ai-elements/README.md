@@ -5,7 +5,7 @@ Composable AI interaction components for Svelte 5 and SVAdmin. The package uses 
 ## Install
 
 ```bash
-bun add @svadmin/ai-elements @svadmin/core @sinclair/typebox @tanstack/svelte-query svelte
+bun add @svadmin/ai-elements @svadmin/core typebox @tanstack/svelte-query svelte
 ```
 
 Import the package stylesheet once in your application CSS:
@@ -100,7 +100,7 @@ default, so undeclared model-provided props are rejected even when the caller
 does not set `additionalProperties: false`:
 
 ```ts
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { defineGeneratedComponent } from '@svadmin/ai-elements';
 import InventorySummary from './InventorySummary.svelte';
 
@@ -121,7 +121,7 @@ Admin tools use the same TypeBox boundary. Call tools through
 implementation runs:
 
 ```ts
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { defineAdminTool, executeAdminTool } from '@svadmin/core';
 
 const searchInventory = defineAdminTool({

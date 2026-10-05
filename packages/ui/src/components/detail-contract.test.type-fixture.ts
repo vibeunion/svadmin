@@ -1,4 +1,4 @@
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { defineResource, useOne } from '@svadmin/core';
 import * as unsafe from '@svadmin/core/unsafe';
 import { useRecordDetail } from './record-detail.svelte';

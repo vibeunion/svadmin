@@ -1,10 +1,20 @@
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { createExactSchemaValidator } from '@svadmin/core/schema';
 
-export const jsonValueSchema = Type.Recursive(Self => Type.Union([
-  Type.Null(), Type.Boolean(), Type.Number(), Type.String(),
-  Type.Array(Self), Type.Record(Type.String(), Self),
-]));
+/** TypeBox 1.x Record validation accepts class instances; keep JSON objects plain. */
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const prototype: unknown = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
+}
+
+export const jsonValueSchema = Type.Cyclic({
+  JsonValue: Type.Union([
+    Type.Null(), Type.Boolean(), Type.Number(), Type.String(),
+    Type.Array(Type.Ref('JsonValue')),
+    Type.Refine(Type.Record(Type.String(), Type.Ref('JsonValue')), isPlainRecord, () => 'Expected plain object'),
+  ]),
+}, 'JsonValue');
 const validator = createExactSchemaValidator(jsonValueSchema);
 
 export type JsonDisplay =

@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { defineResource, resetContext, HttpError, type ContractSchemas, type DataProvider, type GetListParams, type GetListResult, type ResourceDefinition, type UseExportOptions, type useExport, type TaskProvider, type TaskRecord } from '@svadmin/core';
 import * as unsafe from '../../../core/src/unsafe';
 import { downloadData, downloadExportArtifact } from '../../../core/src/export-format';

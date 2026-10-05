@@ -1,4 +1,4 @@
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { defineResource, useImport, type ResourceContract, type ImportResult } from '@svadmin/core';
 import { parseContractCreateInput } from '../../../core/src/resource-contract';
 import * as unsafe from '@svadmin/core/unsafe';

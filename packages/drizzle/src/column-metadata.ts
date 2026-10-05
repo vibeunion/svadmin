@@ -1,4 +1,4 @@
-import { Type, type Static } from '@sinclair/typebox';
+import { Type, type Static } from 'typebox';
 import { createExactSchemaValidator } from '@svadmin/core/schema';
 
 const columnSchema = Type.Object({

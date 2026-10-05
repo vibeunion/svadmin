@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
-import { Type } from '@sinclair/typebox';
-import { TypeCompiler } from '@sinclair/typebox/compiler';
+import { Type } from 'typebox';
+import { Compile } from 'typebox/compile';
 import {
   createSurfaceAgentResponseSchema, createSurfaceCatalogManifest,
   createSurfaceGenerationSpecSchema, selectSurfaceCatalog, surfaceSchemaToJson,
@@ -42,7 +42,7 @@ describe('catalog-derived generation contract', () => {
   });
 
   test('shares the actual widget schema and narrows resource/field/page policies', () => {
-    const compiled = TypeCompiler.Compile(createSurfaceGenerationSpecSchema(catalog, policy));
+    const compiled = Compile(createSurfaceGenerationSpecSchema(catalog, policy));
     const candidate = spec();
     expect(compiled.Check(candidate)).toBe(true);
     expect(validateSurfaceSpec(candidate, catalog, policy).ok).toBe(true);
@@ -72,23 +72,23 @@ describe('catalog-derived generation contract', () => {
   });
 
   test('fails explicitly rather than dropping transforms, schema references, accessors or cycles', () => {
-    const transformed = Type.Transform(Type.String()).Decode((value) => value).Encode((value) => value);
+    const transformed = Type.Codec(Type.String()).Decode((value) => value).Encode((value) => value);
     expect(() => surfaceSchemaToJson(transformed)).toThrow('transform');
     expect(() => surfaceSchemaToJson(Type.Ref('External'))).toThrow('inline');
     const getter = Type.Object({}, { additionalProperties: false });
     Object.defineProperty(getter, 'description', { enumerable: true, get() { throw new Error('must not execute'); } });
     expect(() => surfaceSchemaToJson(getter)).toThrow('accessors');
     const cyclic = Type.Object({}, { additionalProperties: false });
-    cyclic['self'] = cyclic;
+    (cyclic as unknown as Record<string, unknown>)['self'] = cyclic;
     expect(() => surfaceSchemaToJson(cyclic)).toThrow('cycles');
   });
 
   test('empty capability sets only permit empty lists, and none widgets cannot bind data', () => {
-    const empty = TypeCompiler.Compile(createSurfaceGenerationSpecSchema({ version: catalog.version, widgets: [] }, { resources: {} }));
+    const empty = Compile(createSurfaceGenerationSpecSchema({ version: catalog.version, widgets: [] }, { resources: {} }));
     expect(empty.Check({ ...spec(), dataSources: [], widgets: [] })).toBe(true);
     expect(empty.Check(spec())).toBe(false);
     const note = { id: 'note', type: 'note', props: { text: 'Summary' } };
-    const compiled = TypeCompiler.Compile(createSurfaceGenerationSpecSchema(catalog, policy));
+    const compiled = Compile(createSurfaceGenerationSpecSchema(catalog, policy));
     expect(compiled.Check({ ...spec(), widgets: [note] })).toBe(true);
     expect(compiled.Check({ ...spec(), widgets: [{ ...note, binding: { sourceId: 'orders-data', pointer: '/total' } }] })).toBe(false);
   });

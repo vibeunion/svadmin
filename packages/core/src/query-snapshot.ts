@@ -1,4 +1,4 @@
-import { Type, type Static, type TSchema } from '@sinclair/typebox';
+import { Type, type Static, type TSchema } from 'typebox';
 import type { AdminContextAccessor } from './context.svelte';
 import type { DataProvider, GetListParams, GetOneParams, GetManyParams } from './types';
 import { HttpError } from './types';
@@ -8,20 +8,22 @@ import { attachAbortSignal, detachAbortSignal, snapshotPlainData } from './plain
 import { checkExact } from './schema-validation';
 import { decodeBaseRecord, decodeListResult, decodeOneResult, decodeManyResult, rejectProviderResponse } from './record-decoder';
 
-const filters = Type.Recursive(self => Type.Union([
-  Type.Object({
-    field: Type.String(),
-    operator: Type.Union(([
-      'eq', 'ne', 'lt', 'gt', 'lte', 'gte', 'in', 'nin', 'contains', 'ncontains',
-      'startswith', 'endswith', 'null', 'nnull', 'between', 'nbetween',
-    ] as const).map(value => Type.Literal(value))),
-    value: Type.Unknown(),
-  }, { additionalProperties: false }),
-  Type.Object({
-    operator: Type.Union([Type.Literal('and'), Type.Literal('or')]),
-    value: Type.Array(self),
-  }, { additionalProperties: false }),
-]));
+const filters = Type.Cyclic({
+  Filters: Type.Union([
+    Type.Object({
+      field: Type.String(),
+      operator: Type.Union(([
+        'eq', 'ne', 'lt', 'gt', 'lte', 'gte', 'in', 'nin', 'contains', 'ncontains',
+        'startswith', 'endswith', 'null', 'nnull', 'between', 'nbetween',
+      ] as const).map(value => Type.Literal(value))),
+      value: Type.Unknown(),
+    }, { additionalProperties: false }),
+    Type.Object({
+      operator: Type.Union([Type.Literal('and'), Type.Literal('or')]),
+      value: Type.Array(Type.Ref('Filters')),
+    }, { additionalProperties: false }),
+  ]),
+}, 'Filters');
 const base = {
   resource: Type.String({ minLength: 1 }),
   meta: Type.Optional(Type.Record(Type.String(), Type.Unknown())),

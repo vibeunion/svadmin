@@ -2,7 +2,7 @@
   import type { AccessControlProvider, DataProvider, ResourceDefinition, RouterProvider, TaskProvider } from '@svadmin/core';
   import { defineResource } from '@svadmin/core';
   import { definedOptions } from '@svadmin/core/options';
-  import { Type } from '@sinclair/typebox';
+  import { Type } from 'typebox';
   import AdminApp from '../../src/components/AdminApp.svelte';
   import AutoTable from '../../src/components/AutoTable.svelte';
   import ListPage from '../../src/components/ListPage.svelte';

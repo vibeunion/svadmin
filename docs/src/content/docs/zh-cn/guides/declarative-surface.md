@@ -18,7 +18,7 @@ description: 使用可信 Svelte 组件渲染受策略约束的 JSON 仪表盘
 MVP 仅支持客户端 Svelte 5 + Vite，不支持 SSR/Lite、Action、持久化、Agent 输入、自动刷新、客户端聚合、Canvas 或 iframe。
 
 ```bash
-bun add @svadmin/surface @svadmin/core @svadmin/ui @tanstack/svelte-query svelte @sinclair/typebox
+bun add @svadmin/surface @svadmin/core @svadmin/ui @tanstack/svelte-query svelte typebox
 ```
 
 ## 公开 API

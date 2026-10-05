@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { pathToFileURL } from 'node:url';
 import { createSurfaceOpenUIStream, buildSurfaceOpenUIMessages } from '../../packages/surface/dist/openui.js';
 import { createInteractiveSurfaceDefinitions, defaultSurfaceDefinitions } from '../../packages/surface/dist/workflows.js';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { createBusinessSurfaceDefinitions } from '../../packages/surface/dist/business-definitions.js';
 
 if (!process.env.SVADMIN_OPENUI_ENTRY) throw new Error('SVADMIN_OPENUI_ENTRY must resolve the real @openuidev/lang-core@0.3.0 entry');

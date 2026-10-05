@@ -4,7 +4,7 @@ import {
   type BaseRecord, type InferData, type KnownResources, type DataProvider,
   type ResourceSchemaMap, type InferSchemaResourceMap, type GetListResult,
 } from '@svadmin/core';
-import { Type, type Static } from '@sinclair/typebox';
+import { Type, type Static } from 'typebox';
 
 const PostSchema = Type.Object({
   id: Type.Readonly(Type.Number()),

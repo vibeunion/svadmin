@@ -1,4 +1,4 @@
-import { Type, type Static, type TSchema } from '@sinclair/typebox';
+import { Type, ObjectOptions, type Static, type TSchema } from 'typebox';
 import { checkExact } from './schema-validation';
 import { snapshotPlainData } from './plain-data';
 
@@ -27,8 +27,8 @@ const entrySchema = Type.Object({
   userAgent: Type.Optional(text),
   error: Type.Optional(Type.Object({ message: Type.String(), code: Type.Optional(text) }, { additionalProperties: false })),
 }, { additionalProperties: false });
-const draftSchema = Type.Omit(entrySchema, ['id', 'timestamp']);
-const createSchema = Type.Omit(entrySchema, ['id']);
+const draftSchema = Type.Omit(entrySchema, ['id', 'timestamp'], ObjectOptions(entrySchema));
+const createSchema = Type.Omit(entrySchema, ['id'], ObjectOptions(entrySchema));
 const querySchema = Type.Object({
   resource: Type.Optional(text), action: Type.Optional(text),
   meta: Type.Optional(record), author: Type.Optional(record),

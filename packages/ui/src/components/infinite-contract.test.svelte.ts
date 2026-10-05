@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { QueryClient } from '@tanstack/svelte-query';
 import { flushSync, type ComponentProps } from 'svelte';
 import ts from 'typescript';

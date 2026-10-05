@@ -1,7 +1,7 @@
 // Pure export formatting helpers with no Svelte rune or browser API dependencies except downloadData.
 // These helpers can be tested directly with bun:test.
 
-import { Type, type Static } from '@sinclair/typebox';
+import { Type, type Static } from 'typebox';
 import { checkExact } from './schema-validation';
 import { snapshotPlainData } from './plain-data';
 

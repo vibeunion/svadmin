@@ -2,7 +2,7 @@
   import { onDestroy } from 'svelte';
   import { Grid, Willow } from '@svar-ui/svelte-grid';
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
-  import { Type } from '@sinclair/typebox';
+  import { Type } from 'typebox';
   import { defineResource, provideAdminContext, type DataProvider, type AccessControlProvider } from '@svadmin/core';
   import SvarDataGrid from '../../../packages/ui/src/components/SvarDataGrid.svelte';
   import SvarResourceTable from '../../../packages/ui/src/components/SvarResourceTable.svelte';

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { Type } from '@sinclair/typebox';
-import { Value } from '@sinclair/typebox/value';
+import { Type } from 'typebox';
+import { Value } from 'typebox/value';
 import { createSurfaceCatalogManifest } from '../agent-contract.js';
 import { defaultSurfaceDefinitions } from '../builtin-definitions.js';
 import { createInteractiveSurfaceDefinitions, withSurfaceAppearance, withoutSurfaceAppearance } from './catalog.js';
@@ -52,8 +52,8 @@ describe('one catalog for forms, appearance, generation and validation', () => {
   it('snapshots the registered schema rather than retaining mutable validation rules', () => {
     const inputSchema = Type.Object({ name: Type.String({ minLength: 1 }) }, { additionalProperties: false });
     const registered = defineSurfaceAction({ ...action, inputSchema, authorize: () => true, execute: () => null });
-    inputSchema.properties.name.minLength = 0;
+    (inputSchema.properties.name as unknown as { minLength: number }).minLength = 0;
     expect(registered.validateInput({ name: '' })).toBe(false);
-    expect(Object.isFrozen(registered.inputSchema['properties'].name)).toBe(true);
+    expect(Object.isFrozen((registered.inputSchema as unknown as { properties: Record<string, unknown> }).properties['name'])).toBe(true);
   });
 });

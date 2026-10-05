@@ -1,4 +1,4 @@
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { snapshotPlainData } from './plain-data';
 import { checkExact } from './schema-validation';
 import { parseContractId, parseContractRecord, parseContractDeleteInput, type ContractSchemas, type ContractId, type ResourceContract } from './resource-contract';

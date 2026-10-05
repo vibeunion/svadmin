@@ -1,7 +1,7 @@
 import { act, cleanup, fireEvent, waitFor } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { renderWithI18n as render } from '../../test/fixtures/render-with-i18n';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { QueryClient } from '@tanstack/svelte-query';
 import { defineResource, resetContext, type DataProvider, type ResourceDefinition } from '@svadmin/core';
 import Host from './select-contract.test-host.svelte';

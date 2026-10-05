@@ -1,7 +1,7 @@
 <script lang="ts">
   import { defineResource } from '@svadmin/core';
   import { definedOptions } from '@svadmin/core/options';
-  import { Type } from '@sinclair/typebox';
+  import { Type } from 'typebox';
   import { decodeBaseRecord } from '@svadmin/core/schema';
 
   import type { DataProvider, FieldDefinition, ResourceDefinition, RouterProvider } from '@svadmin/core';

@@ -1,5 +1,5 @@
-import { Type, type TSchema } from '@sinclair/typebox';
-import { Value } from '@sinclair/typebox/value';
+import { Type, type TSchema } from 'typebox';
+import { Value } from 'typebox/value';
 
 export type SchemaFormScalar = string | number | boolean | null;
 

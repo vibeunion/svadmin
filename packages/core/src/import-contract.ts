@@ -1,5 +1,5 @@
 import Papa from 'papaparse';
-import { Type, type Static } from '@sinclair/typebox';
+import { Type, type Static } from 'typebox';
 import { checkExact } from './schema-validation';
 import { snapshotPlainData } from './plain-data';
 import { HttpError } from './types';

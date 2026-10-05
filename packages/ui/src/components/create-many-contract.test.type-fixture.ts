@@ -1,4 +1,4 @@
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { defineResource, useCreateMany, type ResourceContract, type UseCreateManyMutateParams } from '@svadmin/core';
 import { parseCreateManyParams } from '../../../core/src/create-many-contract';
 

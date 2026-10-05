@@ -16,7 +16,7 @@ import { invalidateOwnedQueries } from './query-invalidation';
 import { appendListQueryFromPath } from './url-sync';
 import { HttpError } from './types';
 import { useTranslation } from './i18n.svelte';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { checkExact } from './schema-validation';
 import { auditWithProvider } from './audit';
 import { fireSuccessNotification, fireErrorNotification } from './hook-utils.svelte';

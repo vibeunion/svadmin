@@ -1,5 +1,4 @@
-import { Hint, Kind, OptionalKind, ReadonlyKind, type TSchema } from '@sinclair/typebox';
-import { TypeGuard } from '@sinclair/typebox/type';
+import { Type, type TSchema } from 'typebox';
 import { HttpError } from './types';
 import type { DataProvider } from './types';
 import type { ResourceSchemas } from './resource-schemas';
@@ -14,6 +13,9 @@ function invalidProvider(): never {
     code: 'INVALID_DATA_PROVIDER', details: { phase: 'configuration', writeMayHaveSucceeded: false },
   });
 }
+
+/** Scalar TypeBox 1.x markers that may be carried through a configuration snapshot. */
+const TYPEBOX_MARKERS = new Set(['~kind', '~optional', '~readonly', '~immutable']);
 
 /** Configuration can carry TypeBox markers, but no getters, functions or foreign symbols. */
 function copySchemaData(value: unknown, ancestors = new Set<object>(), depth = 0): unknown {
@@ -41,11 +43,18 @@ function copySchemaData(value: unknown, ancestors = new Set<object>(), depth = 0
     }
     const copy: Record<PropertyKey, unknown> = {};
     for (const key of Reflect.ownKeys(descriptors)) {
-      if (typeof key === 'symbol' && key !== Kind && key !== OptionalKind && key !== ReadonlyKind && key !== Hint) {
-        return invalidSchema();
+      // TypeBox 1.x marks schema metadata with non-enumerable `~`-prefixed string keys.
+      if (typeof key === 'symbol') return invalidSchema();
+      if (key.startsWith('~')) {
+        if (!TYPEBOX_MARKERS.has(key)) return invalidSchema();
+        const marker: PropertyDescriptor | undefined = Reflect.get(descriptors, key);
+        if (!marker || !('value' in marker) || marker.get || marker.set) return invalidSchema();
+        const markerValue: unknown = marker.value;
+        if (typeof markerValue !== 'string' && typeof markerValue !== 'boolean') return invalidSchema();
+        Object.defineProperty(copy, key, { value: markerValue, enumerable: false, configurable: true, writable: false });
+        continue;
       }
       const field = read(key);
-      if (typeof key === 'symbol' && typeof field !== 'string') return invalidSchema();
       Object.defineProperty(copy, key, { value: field, enumerable: true, configurable: true, writable: true });
     }
     return copy;
@@ -56,7 +65,7 @@ function copySchemaData(value: unknown, ancestors = new Set<object>(), depth = 0
 
 function schema(value: unknown): TSchema {
   const copy = copySchemaData(value);
-  if (!TypeGuard.IsSchema(copy)) return invalidSchema();
+  if (!Type.IsSchema(copy) || typeof (copy as { '~kind'?: unknown })['~kind'] !== 'string') return invalidSchema();
   return copy;
 }
 
@@ -88,7 +97,7 @@ export function captureResourceSchemas(value: unknown): Map<string, ResourceSche
         if (!Array.isArray(copied)) return invalidSchema();
         const candidates: unknown[] = copied;
         for (const candidate of candidates) {
-          if (!TypeGuard.IsSchema(candidate)) return invalidSchema();
+          if (!Type.IsSchema(candidate)) return invalidSchema();
           references.push(candidate);
         }
       }

@@ -5,7 +5,7 @@
   import { definedOptions } from '@svadmin/core/options';
 
   import { defineResource, syncGlobalPath } from '@svadmin/core';
-  import { Type } from '@sinclair/typebox';
+  import { Type } from 'typebox';
   import type { AccessControlProvider, DataProvider, NotificationProvider, ResourceDefinition, RouterProvider, Sort } from '@svadmin/core';
   import { untrack } from 'svelte';
   import { SvelteSet } from 'svelte/reactivity';

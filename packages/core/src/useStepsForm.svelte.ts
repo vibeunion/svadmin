@@ -1,4 +1,4 @@
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { useContractForm, type ContractFormOptions } from './contract-form.svelte';
 import { getContractFormFields, type ContractSchemas, type ContractFormValues } from './resource-contract';
 import { snapshotPlainData } from './plain-data';

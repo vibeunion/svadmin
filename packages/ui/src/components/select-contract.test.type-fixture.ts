@@ -1,4 +1,4 @@
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { defineResource, useSelect, type UseSelectOptions } from '@svadmin/core';
 import { mapSelectOptions, mergeSelectOptions } from '../../../core/src/select-options';
 

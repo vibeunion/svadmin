@@ -1,4 +1,4 @@
-import { Type, type Static } from '@sinclair/typebox';
+import { Type, type Static } from 'typebox';
 import { defineResource } from '@svadmin/core/resource-contract';
 
 export const customerInput = Type.Object({

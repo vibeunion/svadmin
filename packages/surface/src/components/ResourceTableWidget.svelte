@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Value } from '@sinclair/typebox/value';
+  import { Value } from 'typebox/value';
   import { surfaceTable } from '../recipes.js';
   import '../styles.css';
   import CardContent from '@svadmin/ui/components/ui/card/card-content.svelte';

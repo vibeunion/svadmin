@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
-import { Type, type TSchema } from '@sinclair/typebox';
-import { TypeSystemPolicy } from '@sinclair/typebox/system';
+import { Type, type TSchema } from 'typebox';
+import { Settings } from 'typebox/system';
 import { createExactSchemaValidator } from './schema-validation';
 
 describe('exact optional schema validation', () => {
@@ -10,14 +10,14 @@ describe('exact optional schema validation', () => {
       nullable: Type.Optional(Type.Union([Type.String(), Type.Null()])),
       clearable: Type.Optional(Type.Union([Type.String(), Type.Undefined()])),
     });
-    const policy = TypeSystemPolicy.ExactOptionalPropertyTypes;
+    const policy = Settings.Get().exactOptionalPropertyTypes;
     const validator = createExactSchemaValidator(schema);
     expect(validator.Check({})).toBe(true);
     expect(validator.Check({ label: 'valid', nullable: null, clearable: undefined })).toBe(true);
     expect(validator.Check({ label: undefined })).toBe(false);
     expect(validator.Check({ nullable: undefined })).toBe(false);
-    expect([...validator.Errors({ label: undefined })].length).toBeGreaterThan(0);
-    expect(TypeSystemPolicy.ExactOptionalPropertyTypes).toBe(policy);
+    expect(validator.Errors({ label: undefined }).length).toBeGreaterThan(0);
+    expect(Settings.Get().exactOptionalPropertyTypes).toBe(policy);
     expect(schema.required).toBeUndefined();
   });
 
@@ -36,22 +36,24 @@ describe('exact optional schema validation', () => {
         : field === 'dictionary' ? { a: { label: undefined } } : [{ label: undefined }];
       expect(validator.Check({ ...valid, [field]: invalid })).toBe(false);
     }
-    const negation = createExactSchemaValidator(Type.Not(child));
+    const negation = createExactSchemaValidator(Type.Unsafe({ not: child }));
     expect(negation.Check({})).toBe(false);
     expect(negation.Check({ label: undefined })).toBe(true);
   });
 
   test('enforces referenced and recursive optional properties without mutating source schemas', () => {
     const reference = Type.Object({ label: Type.Optional(Type.String()) }, { $id: 'Label' });
-    const ref = createExactSchemaValidator(Type.Ref(reference), [reference]);
+    const ref = createExactSchemaValidator(Type.Ref('Label'), [reference]);
     expect(ref.Check({})).toBe(true);
     expect(ref.Check({ label: undefined })).toBe(false);
-    expect(reference.$id).toBe('Label');
+    expect((reference as { $id?: string }).$id).toBe('Label');
 
-    const recursive = Type.Recursive(self => Type.Object({
-      label: Type.Optional(Type.String()),
-      children: Type.Optional(Type.Array(self)),
-    }));
+    const recursive = Type.Cyclic({
+      Tree: Type.Object({
+        label: Type.Optional(Type.String()),
+        children: Type.Optional(Type.Array(Type.Ref('Tree'))),
+      }),
+    }, 'Tree');
     const tree = createExactSchemaValidator(recursive);
     expect(tree.Check({ children: [{ label: 'child' }] })).toBe(true);
     expect(tree.Check({ children: [{ label: undefined }] })).toBe(false);
@@ -66,10 +68,10 @@ describe('exact optional schema validation', () => {
     const intersect = createExactSchemaValidator(Type.Intersect([child, Type.Object({ id: Type.Number() })]));
     expect(intersect.Check({ id: 1 })).toBe(true);
     expect(intersect.Check({ id: 1, label: undefined })).toBe(false);
-    const imported = createExactSchemaValidator(Type.Module({ Child: child }).Import('Child'));
+    const imported = createExactSchemaValidator(Type.Module({ Child: child }).Child);
     expect(imported.Check({})).toBe(true);
     expect(imported.Check({ label: undefined })).toBe(false);
-    const transformed = createExactSchemaValidator(Type.Transform(child).Decode(value => value).Encode(value => value));
+    const transformed = createExactSchemaValidator(Type.Codec(child).Decode(value => value).Encode(value => value));
     expect(transformed.Check({})).toBe(true);
     expect(transformed.Check({ label: undefined })).toBe(false);
   });
@@ -90,7 +92,7 @@ describe('exact optional schema validation', () => {
   test('takes a schema snapshot instead of accepting subsequent weakening', () => {
     const schema = Type.Object({ label: Type.Optional(Type.String({ minLength: 3 })) });
     const validator = createExactSchemaValidator(schema);
-    schema.properties.label.minLength = 0;
+    (schema.properties.label as { minLength?: number }).minLength = 0;
     expect(validator.Check({ label: 'a' })).toBe(false);
     expect(validator.Check({ label: 'valid' })).toBe(true);
   });

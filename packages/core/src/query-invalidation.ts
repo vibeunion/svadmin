@@ -4,7 +4,7 @@ import { snapshotPlainData } from './plain-data';
 import { snapshotInvalidationParams } from './invalidation-contract';
 import { definedOptions } from './defined-options';
 import { HttpError } from './types';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { checkExact } from './schema-validation';
 
 export interface QueryCacheOwner {

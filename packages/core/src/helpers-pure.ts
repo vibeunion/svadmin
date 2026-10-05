@@ -2,6 +2,7 @@
 // Extracted to enable unit testing with bun test
 
 import type { Filter, Sort, CrudOperator } from './types';
+import { schemaIssues } from './schema-validation';
 
 // ─── Table Helpers ────────────────────────────────────────────
 
@@ -168,21 +169,24 @@ export function parseCSV(text: string): string[][] {
 // ─── TypeBox Validator Helper ───────────────────────────────────
 
 /**
- * TypeBox validator interface matching TypeCompiler.Compile or Value.Errors
+ * TypeBox validator interface matching Compile or Value.Errors
  */
 export type TypeBoxValidatorLike = {
   Check?: (value: unknown) => boolean;
-  Errors: (value: unknown) => Iterable<{ path?: string; message: string }>;
+  Errors: (value: unknown) => Iterable<{
+    path?: string; instancePath?: string; keyword?: string;
+    params?: Record<string, unknown>; message: string;
+  }>;
 };
 
 /**
  * Creates a synchronous form validator function specifically optimized for TypeBox
- * compiled validators (from TypeCompiler.Compile) or TypeBox value checks.
+ * compiled validators (from Compile) or TypeBox value checks.
  *
  * @example
  * ```ts
- * import { Type } from '@sinclair/typebox';
- * import { TypeCompiler } from '@sinclair/typebox/compiler';
+ * import { Type } from 'typebox';
+ * import { Compile } from 'typebox/compile';
  * import { createTypeBoxValidator, useForm } from '@svadmin/core';
  *
  * const userSchema = Type.Object({
@@ -190,7 +194,7 @@ export type TypeBoxValidatorLike = {
  *   email: Type.String({ format: 'email' }),
  * });
  *
- * const compiledUser = TypeCompiler.Compile(userSchema);
+ * const compiledUser = Compile(userSchema);
  *
  * const form = useForm({
  *   resource: 'users',
@@ -205,10 +209,10 @@ export function createTypeBoxValidator(
     if (validator.Check?.(values)) return null;
 
     const errors: Record<string, string> = {};
-    for (const error of validator.Errors(values)) {
-      const path = (error.path ?? '').replace(/^\//, '').replace(/\//g, '.');
+    for (const issue of schemaIssues(validator.Errors(values))) {
+      const path = issue.path.replace(/^\//, '').replace(/\//g, '.');
       const key = path || '_root';
-      if (!errors[key]) errors[key] = error.message;
+      if (!errors[key]) errors[key] = issue.message;
     }
 
     return Object.keys(errors).length > 0 ? errors : null;

@@ -1,5 +1,5 @@
 import type { DataProvider } from '@svadmin/core';
-import type { TSchema } from '@sinclair/typebox';
+import type { TSchema } from 'typebox';
 
 export const SURFACE_SCHEMA_VERSION = 'surface/v1' as const;
 

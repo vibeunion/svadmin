@@ -1,4 +1,4 @@
-import { Type, type Static } from '@sinclair/typebox';
+import { Type, ObjectOptions, type Static } from 'typebox';
 import { checkExact, snapshotPlainData } from '@svadmin/core/schema';
 import type { DataProvider } from '@svadmin/core';
 
@@ -6,7 +6,7 @@ const postInput = Type.Object({
   title: Type.String({ minLength: 1 }),
   status: Type.Optional(Type.Union([Type.Literal('draft'), Type.Literal('published')])),
 }, { additionalProperties: false });
-const postUpdate = Type.Partial(postInput);
+const postUpdate = Type.Partial(postInput, ObjectOptions(postInput));
 const postRecord = Type.Object({
   id: Type.Number(),
   title: postInput.properties.title,

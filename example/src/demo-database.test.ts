@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
-import { Value } from '@sinclair/typebox/value';
+import { Value } from 'typebox/value';
 import { parseDemoDatabase } from './demo-database';
 import { demoSchemas, isDemoResource } from './resource-schemas';
 import { inMemoryDataProvider as provider } from './providers/inMemoryDb';

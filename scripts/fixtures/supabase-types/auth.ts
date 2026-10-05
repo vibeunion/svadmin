@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { checkExact, snapshotPlainData } from '../../../packages/core/src/schema';
 import { createSupabaseAuthProvider, type SupabaseAuthClient } from '../../../packages/supabase/src/auth-provider';
 import { SupabaseAuthError } from '../../../packages/supabase/src/auth-contract';

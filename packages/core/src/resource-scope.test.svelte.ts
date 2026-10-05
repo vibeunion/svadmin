@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/svelte';
 import { describe, expect, it } from 'vitest';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import ResourceScopeTestHost from './resource-scope.test-host.svelte';
 import { defineAdminConfig } from './admin-config';
 import { createProviderBundle } from './provider-bundle';

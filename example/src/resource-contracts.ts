@@ -1,11 +1,12 @@
 import { defineResource, type ResourceContract } from '@svadmin/core/resource-contract';
-import { Type, type TObject } from '@sinclair/typebox';
+import { Type, ObjectOptions, type TObject } from 'typebox';
 import { demoSchemas as schemas, isDemoResource, type DemoResource } from './resource-schemas';
 
 /** 演示资源从表记录派生 create/update，否则 AutoForm 无法渲染。 */
 function writable<T extends TObject>(record: T) {
-  const create = Type.Omit(record, ['id']);
-  return { record, create, update: Type.Partial(create) };
+  const options = ObjectOptions(record);
+  const create = Type.Omit(record, ['id'], options);
+  return { record, create, update: Type.Partial(create, options) };
 }
 
 export const demoContracts = {

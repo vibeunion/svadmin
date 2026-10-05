@@ -1,7 +1,7 @@
 import { dataProvider, postsResource, resources } from "#lib/admin";
 import { createCrudActions, createListLoader } from "@svadmin/lite";
 import type { Actions, PageServerLoad } from "./$types";
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { checkExact, snapshotPlainData } from '@svadmin/core/schema';
 import { demoSchemas } from '../../../../../../example/src/resource-schemas';
 

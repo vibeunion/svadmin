@@ -6,7 +6,7 @@ import type { RouterProvider } from './router-provider';
 import { flushSync } from 'svelte';
 import { cleanup, render, waitFor } from '@testing-library/svelte';
 import { QueryClient } from '@tanstack/svelte-query';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { defineResource, contractKey } from './resource-contract';
 import { keys } from './query-keys';
 import type { DataProvider } from './types';

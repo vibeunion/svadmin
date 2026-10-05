@@ -1,4 +1,4 @@
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { defineResource, useForm, type ResourceContract } from '@svadmin/core';
 // @ts-expect-error The dynamic form implementation has been retired.
 import { createForm } from '../../../core/src/form-hooks.svelte';

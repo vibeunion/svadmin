@@ -3,8 +3,8 @@
  */
 
 import { HttpError,type ValidationErrors } from './types';
-import { Type } from '@sinclair/typebox';
-import { Value } from '@sinclair/typebox/value';
+import { Type } from 'typebox';
+import { Value } from 'typebox/value';
 import { definedOptions } from './defined-options';
 
 export interface FetchWithInterceptorOptions {

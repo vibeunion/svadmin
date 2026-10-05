@@ -1,4 +1,4 @@
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { definedOptions } from '@svadmin/core/options';
 import type { AuthProvider, Identity, AuthActionResult, CheckResult } from '@svadmin/core';
 import { authRecord, collectionName, decode, nonempty, PocketBaseBoundaryError } from './boundary';

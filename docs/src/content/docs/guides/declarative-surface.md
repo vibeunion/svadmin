@@ -18,7 +18,7 @@ It does not modify `@svadmin/core`, generate Svelte code, or turn svadmin into a
 The MVP supports client-side Svelte 5 + Vite. SSR/Lite, actions, storage, Agent input, automatic refresh, client aggregation, Canvas, and iframes are not supported.
 
 ```bash
-bun add @svadmin/surface @svadmin/core @svadmin/ui @tanstack/svelte-query svelte @sinclair/typebox
+bun add @svadmin/surface @svadmin/core @svadmin/ui @tanstack/svelte-query svelte typebox
 ```
 
 ## Public API

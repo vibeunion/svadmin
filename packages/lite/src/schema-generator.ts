@@ -4,7 +4,7 @@
  * Auto-generates TypeBox schemas from @svadmin/core FieldDefinitions.
  * Used by Lite server actions and high-speed JIT form validation.
  */
-import { Type, type TSchema, type TObject } from "@sinclair/typebox";
+import { Type, type TSchema, type TObject } from "typebox";
 import type { FieldDefinition, ResourceDefinition } from "@svadmin/core";
 import { parseExplicitBoolean } from "./value-normalization";
 

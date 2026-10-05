@@ -8,7 +8,7 @@ import ImportButton from './ImportButton.svelte';
 
 vi.mock('@svadmin/core', async original => {
   const actual = await original<typeof import('@svadmin/core')>();
-  const { Type } = await import('@sinclair/typebox');
+  const { Type } = await import('typebox');
   const contract = actual.defineResource('posts', { record: Type.Object({ id: Type.String(), title: Type.String() }) });
   return {
   ...actual,

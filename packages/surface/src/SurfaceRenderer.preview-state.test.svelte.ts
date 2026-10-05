@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import type { BaseRecord, GetListParams, GetListResult, GetOneResult } from '@svadmin/core';
 import { resetAccessControlProvider } from '@svadmin/core/permissions';
 import { resetI18n } from '@svadmin/core/i18n';

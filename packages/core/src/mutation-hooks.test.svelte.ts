@@ -1,7 +1,7 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { cleanup, render, waitFor } from '@testing-library/svelte';
 import { QueryClient, QueryObserver } from '@tanstack/svelte-query';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import ts from 'typescript';
 import { svelte2tsx } from 'svelte2tsx';
 import { readFileSync, existsSync } from 'node:fs';
@@ -73,7 +73,7 @@ describe('owned cache boundaries after legacy retirement', () => {
       "import * as keys from './query-keys';",
       "import { invalidateOwnedQueries, readOwnedDataQuery } from './query-invalidation';",
       "import { QueryClient } from '@tanstack/svelte-query';",
-      "import { Type } from '@sinclair/typebox';",
+      "import { Type } from 'typebox';",
       "const contract = core.defineResource('posts', { record: Type.Object({ id: Type.Number(), title: Type.String() }) });",
       'const refresh = core.useInvalidate({ resource: contract });',
       'const completed: Promise<void> = refresh({ id: 1, invalidates: ["detail"] });',

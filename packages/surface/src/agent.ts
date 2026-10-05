@@ -1,5 +1,5 @@
-import { Type, type Static } from '@sinclair/typebox';
-import { TypeCompiler } from '@sinclair/typebox/compiler';
+import { Type, type Static } from 'typebox';
+import { Compile } from 'typebox/compile';
 import {
   SURFACE_AGENT_LIMITS,
   SURFACE_AGENT_RESPONSE_SCHEMA_VERSION,
@@ -10,7 +10,7 @@ import {
   surfaceCannotFulfillSchema,
   surfaceSchemaToJson,
 } from './agent-contract.js';
-import { validateSurfaceSpec } from './validation.js';
+import { validateSurfaceSpec, surfaceSchemaIssues } from './validation.js';
 import { parseSurfaceJson, surfaceWireError } from './wire.js';
 import type {
   SurfaceCatalog, SurfacePolicy, SurfaceSpec, SurfaceValidationIssue,
@@ -29,8 +29,8 @@ const responseProposalSchema = Type.Object({
   ...proposalFields,
   schemaVersion: Type.Literal(SURFACE_AGENT_RESPONSE_SCHEMA_VERSION),
 }, { additionalProperties: false });
-const compiledProposalSchema = TypeCompiler.Compile(proposalSchema);
-const compiledResponseSchema = TypeCompiler.Compile(Type.Union([
+const compiledProposalSchema = Compile(proposalSchema);
+const compiledResponseSchema = Compile(Type.Union([
   proposalSchema, responseProposalSchema, surfaceCannotFulfillSchema,
 ]));
 
@@ -56,8 +56,8 @@ export interface SurfaceAgentMessage {
   readonly content: string;
 }
 
-function schemaIssues(errors: Iterable<{ path: string; message: string }>): readonly SurfaceValidationIssue[] {
-  return [...errors].map((issue) => ({ code: 'invalid_json', path: issue.path || '', message: issue.message }));
+function schemaIssues(errors: Iterable<{ instancePath?: string; path?: string; keyword?: string; params?: Record<string, unknown>; message: string }>): readonly SurfaceValidationIssue[] {
+  return surfaceSchemaIssues(errors).map((issue) => ({ code: 'invalid_json', path: issue.path || '', message: issue.message }));
 }
 
 /** 保留 v1 的函数签名、返回类型以及带说明文字的 fenced JSON 兼容行为。 */

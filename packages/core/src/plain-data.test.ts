@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import { snapshotPlainData } from './plain-data';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import ts from 'typescript';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -104,7 +104,7 @@ describe('plain-data direct consumers', () => {
     const directory = dirname(fileURLToPath(import.meta.url));
     const virtualPath = resolve(directory, 'plain-data.test.virtual.ts');
     const accepted = [
-      "import { Type } from '@sinclair/typebox';",
+      "import { Type } from 'typebox';",
       "import { snapshotPlainData, type JsonValue } from './plain-data';",
       "import { defineResource, parseContractRecord, parseContractCreateInput } from './resource-contract';",
       "import { defineCommand, prepareCommand } from './command-contract';",

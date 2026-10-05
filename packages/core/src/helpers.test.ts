@@ -7,13 +7,14 @@ import {
   parseCSV,
   createTypeBoxValidator,
 } from './helpers-pure';
-import { Type,FormatRegistry } from '@sinclair/typebox';
-import { TypeCompiler } from '@sinclair/typebox/compiler';
+import { Type } from 'typebox';
+import { Format } from 'typebox/format';
+import { Compile } from 'typebox/compile';
 import type { Filter,Sort } from './types';
 
 // Register format helpers for TypeBox tests
-if(!FormatRegistry.Has('email')) {
-  FormatRegistry.Set('email',(v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
+if(!Format.Has('email')) {
+  Format.Set('email',(v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v));
 }
 
 // ─── getDefaultFilter ─────────────────────────────────────────
@@ -195,7 +196,7 @@ describe('createTypeBoxValidator',() => {
       age: Type.Optional(Type.Integer({ minimum: 18 })),
     });
 
-    const compiled=TypeCompiler.Compile(UserSchema);
+    const compiled=Compile(UserSchema);
     const validate=createTypeBoxValidator(compiled);
 
     // Invalid: missing username and email
@@ -219,7 +220,7 @@ describe('createTypeBoxValidator',() => {
         orgName: Type.String({ minLength: 1 }),
       }),
     });
-    const compiled=TypeCompiler.Compile(OrgSchema);
+    const compiled=Compile(OrgSchema);
     const validate=createTypeBoxValidator(compiled);
 
     const errors=validate({ profile: { orgName: '' } });

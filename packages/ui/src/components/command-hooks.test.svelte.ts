@@ -112,7 +112,7 @@ describe('contract-owned custom commands', () => {
       ts.isFunctionDeclaration(node) && node.name !== undefined && ['expectType', 'strictCommands'].includes(node.name.text));
     expect(selected).toHaveLength(5);
     virtual.set(resolve(directory, 'command-hooks.test.registry.ts'), [
-      "import { Type } from '@sinclair/typebox';",
+      "import { Type } from 'typebox';",
       "import { defineCommand, useCustom, useCustomMutation } from '@svadmin/core';",
       ...selected.map(node => node.getText(fixture)),
     ].join('\n'));

@@ -1,4 +1,4 @@
-import { Type, type Static, type TSchema } from '@sinclair/typebox';
+import { Type, type Static, type TSchema } from 'typebox';
 import { snapshotPlainData } from './plain-data';
 import { checkExact } from './schema-validation';
 

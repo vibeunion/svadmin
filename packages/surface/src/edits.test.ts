@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import {
   applySurfaceEditProposal, buildSurfaceEditMessages, createSurfaceEditSchema,
   createSurfaceRevision, SURFACE_EDIT_LIMITS,

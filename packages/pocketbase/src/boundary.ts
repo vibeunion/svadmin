@@ -1,4 +1,4 @@
-import { Type, type Static, type TSchema } from '@sinclair/typebox';
+import { Type, type Static, type TSchema } from 'typebox';
 import { checkExact, snapshotPlainData } from '@svadmin/core/schema';
 
 export const nonempty = Type.String({ minLength: 1 });

@@ -1,5 +1,5 @@
-import { Type, type Static } from '@sinclair/typebox';
-import { Value } from '@sinclair/typebox/value';
+import { Type, ObjectOptions, type Static } from 'typebox';
+import { Value } from 'typebox/value';
 import type { SurfaceCatalog, SurfacePolicy, SurfaceSpec } from './types.js';
 import { validateSurfaceSpec } from './validation.js';
 import { jsonPointer } from './json.js';
@@ -7,7 +7,7 @@ import { parseSurfaceJson } from './wire.js';
 import { surfaceSpecSchema, surfaceWidgetSchema } from './schema.js';
 
 /** json-render 的标准扁平 Spec 子集；业务字段仍由 Surface 的 TypeBox 契约校验。 */
-export const jsonRenderSurfaceRootPropsSchema = Type.Omit(surfaceSpecSchema, ['schemaVersion', 'widgets']);
+export const jsonRenderSurfaceRootPropsSchema = Type.Omit(surfaceSpecSchema, ['schemaVersion', 'widgets'], ObjectOptions(surfaceSpecSchema));
 
 export const jsonRenderUiElementSchema = Type.Object({
   type: Type.String({ minLength: 1 }),

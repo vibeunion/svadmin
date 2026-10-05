@@ -1,4 +1,4 @@
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { defineResource, useUpdateMany, type ResourceContract, type UseUpdateManyMutateParams } from '@svadmin/core';
 import { parseUpdateManyParams } from '../../../core/src/update-many-contract';
 const posts = defineResource('posts', {

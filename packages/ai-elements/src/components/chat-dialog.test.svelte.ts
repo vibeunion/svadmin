@@ -1,5 +1,5 @@
 import { cleanup, fireEvent, render, waitFor, within } from '@testing-library/svelte';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { tick } from 'svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { AgentProvider, ChatMessage, ChatProvider } from '@svadmin/core';

@@ -2,7 +2,7 @@ import { cleanup, fireEvent, waitFor } from '@testing-library/svelte';
 import { renderWithI18n as render } from '../../test/fixtures/render-with-i18n';
 import userEvent from '@testing-library/user-event';
 import { QueryClient } from '@tanstack/svelte-query';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { defineResource, resetContext, snapshotImportArtifact, snapshotImportTaskResult, type DataProvider, type ResourceDefinition, type HttpError, type ImportArtifactProvider, type TaskProvider } from '@svadmin/core';
 import ImportWizardHost from './import-wizard.test-host.svelte';

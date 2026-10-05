@@ -1,4 +1,4 @@
-import { Type, type Static } from '@sinclair/typebox';
+import { Type, type Static } from 'typebox';
 import { checkExact } from './schema-validation';
 import { snapshotPlainData, type JsonValue } from './plain-data';
 import { definedOptions } from './defined-options';

@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { defineSurfaceAction } from './action-contracts.js';
 import { createInteractiveSurfaceDefinitions } from './catalog.js';
 import { createSurfaceWorkflowService } from './service.js';

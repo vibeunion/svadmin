@@ -1,4 +1,4 @@
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 export const actionDescriptor = {
   id: 'contacts.create', version: 'v1', label: 'Create contact', approval: 'confirm' as const,
   inputSchema: Type.Object({

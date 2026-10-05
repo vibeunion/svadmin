@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Value } from '@sinclair/typebox/value';
+  import { Value } from 'typebox/value';
   import BarChart from '@svadmin/ui/components/charts/BarChart.svelte';
   import CardContent from '@svadmin/ui/components/ui/card/card-content.svelte';
   import CardHeader from '@svadmin/ui/components/ui/card/card-header.svelte';

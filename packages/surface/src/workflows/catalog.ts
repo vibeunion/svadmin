@@ -1,4 +1,4 @@
-import { Type, type TSchema } from '@sinclair/typebox';
+import { Type, type TSchema } from 'typebox';
 import { surfaceDesignContract } from '../design-contract.js';
 import type { SurfaceCatalog, SurfaceWidgetDefinition, JsonObject } from '../types.js';
 import type { SurfaceActionDescriptor } from './types.js';
@@ -13,12 +13,19 @@ export function withoutSurfaceAppearance(props: JsonObject): JsonObject {
   return Object.fromEntries(Object.entries(props).filter(([key]) => key !== 'appearance'));
 }
 
-function withAppearance(schema: TSchema): TSchema {
-  if (Array.isArray(schema['anyOf'])) return { ...schema, anyOf: schema['anyOf'].map((part: TSchema) => withAppearance(part)) };
-  if (schema['type'] !== 'object' || schema['additionalProperties'] !== false || !schema['properties'] || 'appearance' in schema['properties']) {
+interface AppearanceNode {
+  anyOf?: TSchema[];
+  type?: string;
+  additionalProperties?: unknown;
+  properties?: Record<string, TSchema>;
+}
+function withAppearance(input: TSchema): TSchema {
+  const schema = input as TSchema & AppearanceNode;
+  if (Array.isArray(schema.anyOf)) return { ...input, anyOf: schema.anyOf.map((part) => withAppearance(part)) } as TSchema;
+  if (schema.type !== 'object' || schema.additionalProperties !== false || !schema.properties || 'appearance' in schema.properties) {
     throw new Error('Surface appearance requires closed object schemas without a reserved appearance property');
   }
-  return { ...schema, properties: { ...schema['properties'], appearance: Type.Optional(surfaceAppearanceSchema) } };
+  return { ...input, properties: { ...schema.properties, appearance: Type.Optional(surfaceAppearanceSchema) } } as TSchema;
 }
 
 /** Adds frame-level semantic appearance to every registered widget without

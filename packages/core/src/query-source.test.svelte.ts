@@ -1,7 +1,7 @@
 import { cleanup, render, waitFor } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { QueryClient } from '@tanstack/svelte-query';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import type { ComponentProps } from 'svelte';
 import { fileURLToPath } from 'node:url';
 import { readFileSync } from 'node:fs';
@@ -166,7 +166,7 @@ describe('standard query provider sources', () => {
     const directory = dirname(fileURLToPath(import.meta.url));
     const virtualPath = resolve(directory, 'query-source.test.decoder.virtual.ts');
     const accepted = [
-      "import { Type } from '@sinclair/typebox';",
+      "import { Type } from 'typebox';",
       "import { defineResource, parseContractRecord } from './resource-contract';",
       "import { decodeOneResult, decodeManyResult, decodeListResult } from './record-decoder';",
       'declare const untrusted: unknown;',

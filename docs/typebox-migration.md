@@ -1,9 +1,21 @@
 # TypeBox schema policy
 
-Maintained svadmin schemas use the workspace's `@sinclair/typebox` 0.34 line.
-This migration removes the remaining direct Zod development dependency and
-Zod imports from Elysia runtime/declaration fixtures. It does not introduce
-the separately versioned `typebox` package or change Surface's public protocol.
+Maintained svadmin schemas use the workspace's `typebox` 1.3 line, the
+successor to the deprecated `@sinclair/typebox` 0.34 package. This migration
+removes the remaining direct Zod development dependency and Zod imports from
+Elysia runtime/declaration fixtures, and moves maintained schemas from
+`@sinclair/typebox` 0.34 to `typebox` 1.x without changing Surface's public
+protocol.
+
+The package rename also changes the import specifiers: schemas import `Type`
+from `typebox`, values/validation from `typebox/value`, compilation from
+`typebox/compile`, and settings from `typebox/system`.
+
+`@svadmin/elysia` is the one exception. Elysia 1.4 still declares
+`@sinclair/typebox` 0.34 as a peer and can be driven by the legacy TypeBox
+compiler, so the package keeps `@sinclair/typebox` 0.34 and its
+`typebox-standard-schema.mts` fixture imports the legacy package on purpose.
+Everything else imports the renamed `typebox` package.
 
 ## Elysia compatibility tests
 
@@ -34,6 +46,9 @@ enabled; `skipLibCheck` remains false.
 
 Remove direct Zod dependencies and imports from maintained workspace code.
 Do not alias Zod to TypeBox: their runtime APIs are not interchangeable.
+Do not mix the renamed `typebox` 1.x package with `@sinclair/typebox` 0.34 in
+the same module; the two packages expose different symbols and schema marker
+formats. `@svadmin/elysia` and its fixtures are the only remaining 0.34 users.
 Third-party transitive dependencies must be assessed separately; a Zod entry
 in `bun.lock` alone is not evidence that svadmin still defines Zod schemas.
 Historical changelogs, checkpoint records, and dependency-auditor negative

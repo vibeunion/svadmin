@@ -1,11 +1,22 @@
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { createExactSchemaValidator } from './schema-validation';
 import { snapshotPlainData } from './plain-data';
 import { HttpError, type BaseRecord, type GetListResult, type GetOneResult, type GetManyResult, type CustomResult } from './types';
 
 export type RecordDecoder<T extends BaseRecord> = (value: unknown) => T;
 
-const record = Type.Record(Type.String(), Type.Unknown());
+/** TypeBox 1.x Record validation accepts class instances; keep records limited to plain JSON objects. */
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const prototype: unknown = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
+}
+
+const record = Type.Refine(
+  Type.Record(Type.String(), Type.Unknown()),
+  isPlainRecord,
+  () => 'Expected plain object',
+);
 const recordValidator = createExactSchemaValidator(record);
 const customValidator = createExactSchemaValidator(Type.Object({ data: Type.Unknown() }));
 const oneValidator = createExactSchemaValidator(Type.Object({ data: record }));

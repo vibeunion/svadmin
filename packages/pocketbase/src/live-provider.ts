@@ -1,4 +1,4 @@
-import { Type, type Static } from '@sinclair/typebox';
+import { Type, type Static } from 'typebox';
 import type { LiveProvider, LiveEvent } from '@svadmin/core';
 import { collectionName, decode, nonempty } from './boundary';
 

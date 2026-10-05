@@ -1,7 +1,7 @@
 import { cleanup, render, waitFor } from '@testing-library/svelte';
 import { QueryClient } from '@tanstack/svelte-query';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { flushSync, mount, unmount, type ComponentProps } from 'svelte';
 import { defineResource } from './resource-contract';
 import { resetContext } from './context.svelte';

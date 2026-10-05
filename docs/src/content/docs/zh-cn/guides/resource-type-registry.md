@@ -10,7 +10,7 @@ Provider 请求、响应的运行时校验。
 ## 定义一次
 
 ```typescript
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { defineResource, useList, useUpdate, useForm } from '@svadmin/core';
 
 export const posts = defineResource('posts', {

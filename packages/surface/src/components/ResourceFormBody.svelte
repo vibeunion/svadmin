@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy, untrack } from 'svelte';
-  import { Value } from '@sinclair/typebox/value';
+  import { Value } from 'typebox/value';
   import JsonSchemaForm from '@svadmin/ui/components/JsonSchemaForm.svelte';
   import { createSurfaceFormController, type SurfaceWorkflowClientState } from '../workflows/client.js';
   import type { SurfaceWorkflowHost } from '../workflows/context.js';
@@ -49,7 +49,7 @@
     // wire representation. The server repeats JSON and schema validation.
     const args: unknown = JSON.parse(JSON.stringify(input));
     if (!Value.Check(action.inputSchema, args)) {
-      errors = [...Value.Errors(action.inputSchema, args)].slice(0, 12).map((error) => `${error.path}: ${error.message}`);
+      errors = Value.Errors(action.inputSchema, args).slice(0, 12).map((error) => `${error.instancePath}: ${error.message}`);
       return;
     }
     errors = [];

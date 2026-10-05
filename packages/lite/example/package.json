@@ -13,7 +13,7 @@
     "#lib/*": "./src/lib/*"
   },
   "dependencies": {
-    "@sinclair/typebox": "^0.34.52",
+    "typebox": "^1.3.34",
     "@svadmin/core": "workspace:*",
     "@svadmin/lite": "workspace:*",
     "@sveltejs/kit": "^3.0.0",

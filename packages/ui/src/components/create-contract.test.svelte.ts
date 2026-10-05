@@ -1,6 +1,6 @@
 import { cleanup, render, waitFor } from '@testing-library/svelte';
 import { afterEach, describe, it, expect, vi } from 'vitest';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { QueryClient } from '@tanstack/svelte-query';
 import { defineResource, keys, parseQueryKey, resetContext, setAuditHandler,
   type DataProvider, type GetOneResult, type ResourceDefinition, type ResourceContract, type AuthProvider } from '@svadmin/core';

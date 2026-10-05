@@ -1,6 +1,6 @@
 import type { LiveProvider } from './live.svelte';
 import { createLiveSubscribers, decodeLiveMessage, notifyLiveObserver, readLiveOptions, captureLiveObserver } from './live-transport';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { checkExact } from './schema-validation';
 import { snapshotPlainData } from './plain-data';
 

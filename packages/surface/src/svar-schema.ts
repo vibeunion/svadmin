@@ -1,5 +1,5 @@
-import { Type, type Static } from '@sinclair/typebox';
-import { Value } from '@sinclair/typebox/value';
+import { Type, type Static } from 'typebox';
+import { Value } from 'typebox/value';
 import type { JsonObject, SurfaceWidgetDefinition } from './types.js';
 
 const field = Type.String({ minLength: 1, maxLength: 64, pattern: '^[A-Za-z][A-Za-z0-9_-]*$' });

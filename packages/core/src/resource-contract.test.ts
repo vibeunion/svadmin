@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { contractProvider, contractFormValues, defineResource, contractKey, type ResourceContract, withContractProjection } from './resource-contract';
 import { defineCommand, executeCommand } from './command-contract';
 import { keys, queryKeyMatches } from './query-keys';
@@ -140,7 +140,7 @@ describe('strict resource contracts', () => {
     const directory = dirname(fileURLToPath(import.meta.url));
     const virtualPath = resolve(directory, 'resource-contract.test.virtual.ts');
     const accepted = [
-      "import { Type } from '@sinclair/typebox';",
+      "import { Type } from 'typebox';",
       "import { contractProvider, defineResource, contractFormValues } from './resource-contract';",
       "import type { DataProvider, GetOneResult } from './types';",
       'declare const raw: DataProvider;',
@@ -205,7 +205,7 @@ describe('strict resource contracts', () => {
     expect(calls).toHaveLength(1);
     const schema = Type.Object({ id: Type.Number(), title: Type.String() });
     const contract = defineResource('snapshot', { record: schema });
-    schema.properties.title.minLength = 100;
+    (schema.properties.title as { minLength?: number }).minLength = 100;
     const checked = contractProvider(raw, contract);
     setResponse({ data: { id: 1, title: 'Hello' } });
     await expect(checked.getOne({ resource: 'snapshot', id: 1 })).resolves.toEqual({ data: { id: 1, title: 'Hello' } });

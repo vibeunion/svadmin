@@ -1,5 +1,5 @@
 import type { Component } from 'svelte';
-import { Type, type TNumber, type TUnknown } from '@sinclair/typebox';
+import { Type, type TNumber, type TUnknown } from 'typebox';
 import { describe, expect, expectTypeOf, it } from 'vitest';
 import { render } from '@testing-library/svelte';
 import {
@@ -190,7 +190,7 @@ describe('validated field displays', () => {
   it('binds custom values to a snapshotted schema', async () => {
     const schema = Type.String({ minLength: 3 });
     registerDisplayComponent('contract-test-label', schema, TextField);
-    schema.minLength = 0;
+    (schema as unknown as { minLength: number }).minLength = 0;
     const view = render(required('contract-test-label'), { value: 'valid' });
     expect(view.container.textContent).toBe('valid');
     await view.rerender({ value: 'x' });

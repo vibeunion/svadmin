@@ -1,4 +1,4 @@
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { describe, expect, expectTypeOf, it } from 'vitest';
 import {
   decodeGeneratedComponentProps,
@@ -30,7 +30,7 @@ describe('generated component TypeBox boundary', () => {
   });
 
   it('makes the root object strict even when callers omit additionalProperties', () => {
-    expect(definition.schema.additionalProperties).toBe(false);
+    expect((definition.schema as unknown as { additionalProperties: boolean }).additionalProperties).toBe(false);
     expect(() => decodeGeneratedComponentProps({ component, schema }, {
       warehouse: 'north',
       count: 2,

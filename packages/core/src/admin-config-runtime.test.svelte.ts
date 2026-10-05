@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/svelte';
 import { describe, expect, it } from 'vitest';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import AdminConfigRuntimeTestHost from './admin-config-runtime.test-host.svelte';
 import { defineAdminConfig, defineSvadminPlugin } from './admin-config';
 import { createProviderBundle } from './provider-bundle';

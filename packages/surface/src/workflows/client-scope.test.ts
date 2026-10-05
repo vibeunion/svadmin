@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { createSurfaceFormController, type SurfaceWorkflowTransport, type SurfaceWorkflowClientScope } from './client.js';
 import type { SurfaceActionProposal } from './types.js';
 const action = { id: 'contacts.create', version: '1', label: 'Create', approval: 'confirm' as const, inputSchema: Type.Object({}, { additionalProperties: false }) };

@@ -2,7 +2,7 @@
   import { onDestroy, type Snippet } from 'svelte';
   import { Grid, Willow } from '@svar-ui/svelte-grid';
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
-  import { Type } from '@sinclair/typebox';
+  import { Type } from 'typebox';
   import { defineResource, provideAdminContext, createHashRouterProvider, createI18nScope, provideI18nScope,
     type AccessControlProvider, type DataProvider, type Sort } from '@svadmin/core';
   import { createResourceRenderers, type CellInput } from '../../../packages/ui/src/rendering/index.js';

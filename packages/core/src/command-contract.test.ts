@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import ts from 'typescript';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -60,7 +60,7 @@ describe('command execution boundary', () => {
     const directory = dirname(fileURLToPath(import.meta.url));
     const virtualPath = resolve(directory, 'command-contract.test.virtual.ts');
     const accepted = [
-      "import { Type } from '@sinclair/typebox';",
+      "import { Type } from 'typebox';",
       "import { defineCommand, executeCommand, type CommandContract, type CommandInput, type CommandOutput } from './command-contract';",
       "import type { DataProvider } from './types';",
       'declare const provider: DataProvider;',
@@ -347,8 +347,8 @@ describe('command execution boundary', () => {
     const original = commandDefinition(command);
     definition.url = '/modified';
     definition.method = 'delete';
-    schema.properties.year.minimum = 3000;
-    output.properties.rows.minItems = 10;
+    (schema.properties.year as { minimum?: number }).minimum = 3000;
+    (output.properties.rows as { minItems?: number }).minItems = 10;
     expect(Reflect.set(command, 'name', 'modified')).toBe(false);
     expect(Reflect.set(original, 'url', '/modified')).toBe(false);
     await expect(executeCommand(provider, command, { year: 2026 })).resolves.toEqual(response());
@@ -366,7 +366,7 @@ describe('command execution boundary', () => {
       ['report', { ...definition, input: Type.Object({ value: Type.Any() }) }],
       ['report', { ...definition, output: Type.Unknown() }],
       ['report', { ...definition, output: Type.Object({}, { additionalProperties: true }) }],
-      ['report', { ...definition, output: Type.Transform(Type.String()).Decode(value => value).Encode(value => value) }],
+      ['report', { ...definition, output: Type.Codec(Type.String()).Decode(value => value).Encode(value => value) }],
     ];
     for (const [name, value] of invalid) {
       try { register(name, value); throw new Error('Expected a rejected definition'); }

@@ -1,5 +1,4 @@
-import { Type, type TObject, type TSchema } from '@sinclair/typebox';
-import { TypeGuard } from '@sinclair/typebox/type';
+import { Type, type TObject, type TSchema } from 'typebox';
 import { checkExact } from './schema-validation';
 import { closeContractSchema, type SafeSchema, type SchemaValue } from './resource-contract';
 import { snapshotPlainData } from './plain-data';
@@ -101,7 +100,7 @@ export function defineCommand(name: string, definition: {
     const outputSchema: unknown = fields['output']?.value;
     if (typeof url !== 'string' || !url.trim() ||
         (method !== 'get' && method !== 'post' && method !== 'put' && method !== 'patch' && method !== 'delete') ||
-        !TypeGuard.IsObject(inputSchema) || !TypeGuard.IsSchema(outputSchema)) {
+        !Type.IsObject(inputSchema) || !Type.IsSchema(outputSchema)) {
       return invalidContract();
     }
     const input = closeContractSchema(inputSchema);

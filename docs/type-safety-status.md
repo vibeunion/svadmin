@@ -586,7 +586,7 @@ safe-integer totals before exposing `DataProvider`. Custom payloads stay
 `defineResource`, never a caller-selected `getList<T>()` or `useList<T>()`.
 
 ```ts
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { defineResource, useList } from '@svadmin/core';
 
 const posts = defineResource('posts', {
@@ -702,7 +702,7 @@ array. Invalid values display a localized error without displaying the payload.
 Custom registration intentionally breaks the legacy two-argument API:
 
 ```ts
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { registerDisplayComponent } from '@svadmin/ui';
 import StatusField from './StatusField.svelte';
 

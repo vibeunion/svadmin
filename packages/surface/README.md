@@ -13,7 +13,7 @@ the `minimum-supported` strict install and consumer checks in `pack:check` to
 pass against registry artifacts; workspace tarballs do not replace that check.
 
 ```bash
-bun add @svadmin/surface @svadmin/core @svadmin/ui @tanstack/svelte-query svelte @sinclair/typebox
+bun add @svadmin/surface @svadmin/core @svadmin/ui @tanstack/svelte-query svelte typebox
 ```
 
 Import protocol types and validation from the DOM-free root entry. Import rendering code from the Svelte subpath. Hosts do not need CSS compiler plugins to consume the package's static component styles.
@@ -157,8 +157,8 @@ Preview controls use local finite class helpers and maintained static CSS. `@sva
 The catalog version is `svadmin/v1`. `catalogVersion` must match exactly. Custom registrations use strict TypeBox props schemas and trusted Svelte components. Item widgets reading record fields must expose them through `getReferencedFields` so runtime validation checks `SurfacePolicy.readFields`.
 
 ```ts
-import { Type } from '@sinclair/typebox';
-import { Value } from '@sinclair/typebox/value';
+import { Type } from 'typebox';
+import { Value } from 'typebox/value';
 
 const statusProps = Type.Object({ statusField: Type.String() }, { additionalProperties: false });
 const catalog = defineSurfaceCatalog({

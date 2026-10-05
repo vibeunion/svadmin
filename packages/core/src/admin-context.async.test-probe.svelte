@@ -3,7 +3,7 @@
   import { useImport } from './import-hooks.svelte';
   import { useExport } from './export-hooks.svelte';
   import { defineResource } from './resource-contract';
-  import { Type } from '@sinclair/typebox';
+  import { Type } from 'typebox';
   import { useDataProvider } from './hooks.svelte';
   import { useCreate } from './strict-hooks.svelte';
   import { useBack, useGo } from './routing-hooks.svelte';

@@ -1,4 +1,4 @@
-import type { TObject, TSchema } from '@sinclair/typebox';
+import type { TObject, TSchema } from 'typebox';
 import { hashKey, useQueryClient } from '@tanstack/svelte-query';
 import { captureAdminContext, type AdminContextAccessor } from './context.svelte';
 import { commandDefinition, prepareCommand, parseCommandInput, parseCommandResponse,

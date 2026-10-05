@@ -121,7 +121,7 @@ function resourceFileContents(name: string): { index: string; resource: string }
   const label = humanize(name);
   return {
     index: `export { ${name}Resource, ${name}Definition } from './${name}.resource';\n`,
-    resource: `import { Type } from '@sinclair/typebox';
+    resource: `import { Type } from 'typebox';
 import { defineResource, type AdminResourceDefinition } from '@svadmin/core';
 
 /**

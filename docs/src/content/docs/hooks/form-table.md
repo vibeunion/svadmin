@@ -101,7 +101,7 @@ Multi-step wizard form with step navigation and per-step validation.
 ```svelte
 <script lang="ts">
   import { defineResource, useStepsForm } from '@svadmin/core';
-  import { Type } from '@sinclair/typebox';
+  import { Type } from 'typebox';
 
   const products = defineResource('products', {
     record: Type.Object({ id: Type.Number(), name: Type.String(), price: Type.Number() }),

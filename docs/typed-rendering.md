@@ -6,7 +6,7 @@
 
 ```ts
 // orders.ts
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { defineResource } from '@svadmin/core';
 import { createResourceRenderers } from '@svadmin/ui/rendering';
 

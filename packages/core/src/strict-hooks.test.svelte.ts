@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { flushSync } from 'svelte';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { QueryClient } from '@tanstack/svelte-query';
 import { defineResource } from './resource-contract';
 import { useList, useOne, useCreate, useUpdate, useDelete, useCreateMany, useUpdateMany, useDeleteMany, useShow, useSelect, useInfiniteList } from './strict-hooks.svelte';

@@ -1,6 +1,6 @@
 import { untrack } from 'svelte';
 import type { QueryClient } from '@tanstack/svelte-query';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { captureAdminContext } from './context.svelte';
 import { contractKey, type ResourceContract } from './resource-contract';
 import { captureQueryProvider } from './query-snapshot';

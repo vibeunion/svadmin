@@ -1,7 +1,7 @@
 import type { ComponentProps, Snippet } from 'svelte';
 import AutoTable from './AutoTable.svelte';
 import { copyTableRecord, tableRowKey } from './table-contract';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { defineResource } from '@svadmin/core';
 import { formatContractRouteId, parseContractRouteId } from '@svadmin/core/schema';
 

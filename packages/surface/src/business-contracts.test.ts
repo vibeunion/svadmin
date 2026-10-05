@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { Type } from '@sinclair/typebox';
-import { Value } from '@sinclair/typebox/value';
+import { Type } from 'typebox';
+import { Value } from 'typebox/value';
 import { createBusinessSurfaceDefinitions } from './business-definitions.js';
 import { defaultSurfaceDefinitions } from './builtin-definitions.js';
 import { createSurfaceCatalogManifest, createSurfaceGenerationSpecSchema } from './agent-contract.js';

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
-import { Type } from '@sinclair/typebox';
-import { TypeCompiler } from '@sinclair/typebox/compiler';
+import { Type } from 'typebox';
+import { Compile } from 'typebox/compile';
 import type { AdminTool, AgentEvent, ChatMessage, ChatMessagePart } from './chatProvider.svelte';
 import {
   decodeAdminToolArgs,
@@ -104,7 +104,7 @@ describe('AdminTool', () => {
   test('decodes transforms and rejects undeclared properties before execution', async () => {
     const parameters = Type.Object(
       {
-        limit: Type.Optional(Type.Transform(Type.String()).Decode(Number).Encode(String)),
+        limit: Type.Optional(Type.Codec(Type.String()).Decode(Number).Encode(String)),
         query: Type.String(),
       },
     );
@@ -117,8 +117,8 @@ describe('AdminTool', () => {
 
     expect(decodeAdminToolArgs(tool, { query: 'open', limit: '10' })).toEqual({ query: 'open', limit: 10 });
     expect(() => decodeAdminToolArgs(tool, { query: 'open', privateScope: true })).toThrow();
-    expect(TypeCompiler.Compile(tool.parameters).Check({ query: 'open', limit: '10' })).toBe(true);
-    expect(tool.parameters.additionalProperties).toBe(false);
+    expect(Compile(tool.parameters).Check({ query: 'open', limit: '10' })).toBe(true);
+    expect((tool.parameters as { additionalProperties?: unknown }).additionalProperties).toBe(false);
   });
 });
 
@@ -200,6 +200,6 @@ describe('projectAdminToolSchema shape', () => {
       concurrent: false,
       needsApproval: true,
     });
-    expect(projected.parameters.additionalProperties).toBe(false);
+    expect((projected.parameters as { additionalProperties?: unknown }).additionalProperties).toBe(false);
   });
 });

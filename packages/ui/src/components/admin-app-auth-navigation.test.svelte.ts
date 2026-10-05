@@ -1,5 +1,5 @@
 import { definedOptions } from '@svadmin/core/options';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { defineResource } from '@svadmin/core';
 import { cleanup, fireEvent, render, waitFor, within } from '@testing-library/svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';

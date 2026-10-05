@@ -1,5 +1,5 @@
-import { Kind, OptionalKind, ReadonlyKind, Type, type TSchema } from '@sinclair/typebox';
-import { Value } from '@sinclair/typebox/value';
+import { Type, type TSchema } from 'typebox';
+import { Value } from 'typebox/value';
 import { escapedJsonPointerToken, jsonValueIssue } from './json.js';
 import {
   surfaceFilterSchema, surfaceIdSchema, surfaceListSourceSchema,
@@ -31,6 +31,9 @@ export interface SurfaceCatalogManifest {
   }[];
 }
 
+/** Scalar TypeBox 1.x markers that are dropped when serializing a schema to JSON. */
+const SURFACE_MARKERS = new Set(['~kind', '~optional', '~readonly', '~immutable']);
+
 /** 不把 Transform、函数或引用 schema 静默降级为宽松的 JSON schema。 */
 export function surfaceSchemaToJson(schema: TSchema): JsonObject {
   const ancestors = new Set<object>();
@@ -54,8 +57,13 @@ export function surfaceSchemaToJson(schema: TSchema): JsonObject {
     for (const key of Reflect.ownKeys(value)) {
       if (Array.isArray(value) && key === 'length') continue;
       if (typeof key === 'symbol') {
-        if (key === Kind || key === OptionalKind || key === ReadonlyKind) continue;
         throw new Error('Surface schema contains unsupported symbol metadata or a transform');
+      }
+      if (key.startsWith('~')) {
+        if (!SURFACE_MARKERS.has(key)) {
+          throw new Error('Surface schema contains unsupported transform or metadata');
+        }
+        continue;
       }
       if (['__proto__', 'constructor', 'prototype', '$ref', '$dynamicRef', '$recursiveRef'].includes(key)) {
         throw new Error(`Surface schema key "${key}" is not supported; use an inline schema`);

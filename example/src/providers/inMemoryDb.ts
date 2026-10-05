@@ -27,8 +27,8 @@ import type {
 } from '@svadmin/core';
 import { isDemoResource, type DemoResource, type DemoDatabase } from '../resource-schemas';
 import { parseDemoDatabase } from '../demo-database';
-import { Type } from '@sinclair/typebox';
-import { Value } from '@sinclair/typebox/value';
+import { Type } from 'typebox';
+import { Value } from 'typebox/value';
 import { mailSourceFingerprint } from './mail-source';
 
 const STORAGE_KEY = 'svadmin_inventory_demo_db_v5';

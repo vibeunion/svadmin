@@ -3,7 +3,7 @@
 Use the existing `useForm.validate` callback with a shared TypeBox schema:
 
 ```ts
-import { Type, type Static } from '@sinclair/typebox';
+import { Type, type Static } from 'typebox';
 import { createSchemaFormValidator, useForm } from '@svadmin/core';
 
 const Input = Type.Object({

@@ -10,7 +10,7 @@ The same schema drives inference and validates actual provider requests and resp
 ## Define Once
 
 ```typescript
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { defineResource, useList, useUpdate, useForm } from '@svadmin/core';
 
 export const posts = defineResource('posts', {

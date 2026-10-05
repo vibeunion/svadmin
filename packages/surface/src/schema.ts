@@ -1,4 +1,4 @@
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { SURFACE_LIMITS } from './types.js';
 
 // 结构定义只维护一份：运行时校验与 AI 输出 schema 共用，策略校验仍在 validation.ts。

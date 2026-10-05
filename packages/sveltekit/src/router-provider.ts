@@ -62,7 +62,7 @@ export function createSvelteKitRouterProvider(): RouterProvider {
         : goto(url);
 
       gotoPromise.then(() => {
-        if (typeof window !== 'undefined') {
+        if (typeof window !== 'undefined' && typeof PopStateEvent !== 'undefined') {
           window.dispatchEvent(new PopStateEvent('popstate'));
         }
       }).catch((e) => {

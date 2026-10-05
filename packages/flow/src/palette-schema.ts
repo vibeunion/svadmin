@@ -1,10 +1,12 @@
-import { Type, type Static } from '@sinclair/typebox';
-import { Value } from '@sinclair/typebox/value';
+import { Type, type Static } from 'typebox';
+import { Value } from 'typebox/value';
 
-const jsonValue = Type.Recursive(self => Type.Union([
-  Type.Null(), Type.Boolean(), Type.Number(), Type.String(),
-  Type.Array(self), Type.Record(Type.String(), self),
-]));
+const jsonValue = Type.Cyclic({
+  JsonValue: Type.Union([
+    Type.Null(), Type.Boolean(), Type.Number(), Type.String(),
+    Type.Array(Type.Ref('JsonValue')), Type.Record(Type.String(), Type.Ref('JsonValue')),
+  ]),
+}, 'JsonValue');
 const paletteSchema = Type.Object({
   id: Type.String(),
   type: Type.String(),

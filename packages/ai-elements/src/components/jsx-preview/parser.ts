@@ -1,4 +1,4 @@
-import type { TObject } from '@sinclair/typebox';
+import type { TObject } from 'typebox';
 import type { Component, Snippet } from 'svelte';
 import {
   decodeGeneratedObjectProps,

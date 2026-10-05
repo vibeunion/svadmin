@@ -1,4 +1,4 @@
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { defineResource, useInfiniteList } from '@svadmin/core';
 
 const posts = defineResource('posts', { record: Type.Object({ id: Type.Number(), title: Type.String() }) });

@@ -1,4 +1,4 @@
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { describe, expect, test } from 'vitest';
 import type { SurfaceCatalog } from './types.js';
 import { jsonRenderSpecToSurfaceSpec, surfaceSpecToJsonRenderSpec } from './json-render.js';

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { Type } from "@sinclair/typebox";
+import { Type } from "typebox";
 import type { SurfaceCatalog, SurfacePolicy } from "./types.js";
 import { validateSurfaceSpec } from "./validation.js";
 

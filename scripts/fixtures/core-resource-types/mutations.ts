@@ -3,7 +3,7 @@ import {
   type InferSchemaResourceMap, type InferSchemaInputMap, type ResourceSchemaMap, type BaseRecord,
   HttpError, DeleteManyPartialError,
 } from '@svadmin/core';
-import { Type, type Static } from '@sinclair/typebox';
+import { Type, type Static } from 'typebox';
 
 const Post = Type.Object({ id: Type.Number(), title: Type.String() });
 const CreatePost = Type.Union([

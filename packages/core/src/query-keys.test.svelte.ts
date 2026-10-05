@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, waitFor } from '@testing-library/svelte';
 import { QueryClient, hashKey } from '@tanstack/svelte-query';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import ts from 'typescript';
 import { svelte2tsx } from 'svelte2tsx';
 import { readFileSync } from 'node:fs';

@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, waitFor, within } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { QueryClient } from '@tanstack/svelte-query';
 import { defineResource, resetContext, parseQueryKey, type DataProvider, type ResourceDefinition,
   type GetOneResult } from '@svadmin/core';

@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { DataProvider, ResourceDefinition, RouterProvider } from '@svadmin/core';
   import { defineResource } from '@svadmin/core';
-  import { Type } from '@sinclair/typebox';
+  import { Type } from 'typebox';
   import { decodeBaseRecord } from '@svadmin/core/schema';
   import AdminApp from '../../src/components/AdminApp.svelte';
   import AutoFormSuccessProbe from './AutoFormSuccessProbe.svelte';

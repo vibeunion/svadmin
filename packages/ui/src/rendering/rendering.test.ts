@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/svelte';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { defineResource } from '@svadmin/core/resource-contract';
 import { createResourceRenderers } from './index.js';
 import { orders } from '../../../../scripts/fixtures/ui-rendering/resource.js';
@@ -96,7 +96,7 @@ describe('contract-backed native Svelte renderers', () => {
   it('uses the private schema snapshot rather than a mutated original schema', () => {
     const amount = Type.Number();
     const resource = defineResource('snapshot', { record: Type.Object({ id: Type.Number(), amount }), create: Type.Object({ amount }) });
-    amount.minimum = 10;
+    (amount as unknown as { minimum: number }).minimum = 10;
     const checked = createResourceRenderers(resource).field('create', 'amount', {
       field: { key: 'amount', label: 'Amount', type: 'number' }, value: 1, onchange: vi.fn(),
     });

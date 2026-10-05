@@ -101,7 +101,7 @@ throw new HttpError('验证失败', 422, {
 ```svelte
 <script lang="ts">
   import { defineResource, useStepsForm } from '@svadmin/core';
-  import { Type } from '@sinclair/typebox';
+  import { Type } from 'typebox';
 
   const products = defineResource('products', {
     record: Type.Object({ id: Type.Number(), name: Type.String(), price: Type.Number() }),

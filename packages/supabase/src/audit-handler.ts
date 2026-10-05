@@ -1,7 +1,7 @@
 import type { AuditHandler, AuditEntry } from '@svadmin/core';
 import { definedOptions } from '@svadmin/core/options';
 import { decodeAuditEntry, snapshotPlainData, checkExact, type JsonValue } from '@svadmin/core/schema';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 
 export interface SupabaseAuditRow {
   action: AuditEntry['action'];

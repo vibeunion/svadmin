@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import { createSurfaceFormController, type SurfaceWorkflowClientScope, type SurfaceWorkflowClientState, type SurfaceWorkflowTransport } from './client.js';
 import type { SurfaceActionDescriptor, SurfaceActionProposal } from './types.js';
 

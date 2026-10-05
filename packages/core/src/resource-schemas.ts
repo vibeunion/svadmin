@@ -1,5 +1,5 @@
-import { Type, type Static, type TSchema } from '@sinclair/typebox';
-import { checkExact, createExactSchemaValidator } from './schema-validation';
+import { Type, type Static, type TSchema } from 'typebox';
+import { checkExact, createExactSchemaValidator, schemaIssues } from './schema-validation';
 import { attachAbortSignal, detachAbortSignal, snapshotPlainData } from './plain-data';
 import { decodeBaseRecord, decodeOneResult, decodeManyResult, decodeListResult } from './record-decoder';
 import { HttpError } from './types';
@@ -43,22 +43,24 @@ const common = {
   resource: Type.String({ minLength: 1 }),
   meta: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
 };
-const filter = Type.Recursive(Self => Type.Union([
-  Type.Object({
-    operator: Type.Union([Type.Literal('or'), Type.Literal('and')]),
-    value: Type.Array(Self),
-  }, { additionalProperties: false }),
-  Type.Object({
-    field: Type.String(),
-    operator: Type.Union([
-      Type.Literal('eq'), Type.Literal('ne'), Type.Literal('lt'), Type.Literal('gt'),
-      Type.Literal('lte'), Type.Literal('gte'), Type.Literal('contains'), Type.Literal('ncontains'),
-      Type.Literal('startswith'), Type.Literal('endswith'), Type.Literal('in'), Type.Literal('nin'),
-      Type.Literal('null'), Type.Literal('nnull'), Type.Literal('between'), Type.Literal('nbetween'),
-    ]),
-    value: Type.Unknown(),
-  }, { additionalProperties: false }),
-]));
+const filter = Type.Cyclic({
+  Filter: Type.Union([
+    Type.Object({
+      operator: Type.Union([Type.Literal('or'), Type.Literal('and')]),
+      value: Type.Array(Type.Ref('Filter')),
+    }, { additionalProperties: false }),
+    Type.Object({
+      field: Type.String(),
+      operator: Type.Union([
+        Type.Literal('eq'), Type.Literal('ne'), Type.Literal('lt'), Type.Literal('gt'),
+        Type.Literal('lte'), Type.Literal('gte'), Type.Literal('contains'), Type.Literal('ncontains'),
+        Type.Literal('startswith'), Type.Literal('endswith'), Type.Literal('in'), Type.Literal('nin'),
+        Type.Literal('null'), Type.Literal('nnull'), Type.Literal('between'), Type.Literal('nbetween'),
+      ]),
+      value: Type.Unknown(),
+    }, { additionalProperties: false }),
+  ]),
+}, 'Filter');
 const requestSchemas = {
   getList: Type.Object({
     ...common,
@@ -166,8 +168,7 @@ function createSchemaBoundary(schemas: ResourceSchemaMap) {
       }
       if (validator.Check(value)) return;
       // Do not include rejected values or raw responses in diagnostic details.
-      issues = [...validator.Errors(value)]
-        .map(({ path, message }) => ({ path, message }));
+      issues = schemaIssues(validator.Errors(value));
     } catch {
       throw new HttpError('Unable to evaluate resource schema', 500, undefined, {
         code: 'RESOURCE_SCHEMA_INVALID',

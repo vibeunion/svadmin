@@ -1,6 +1,6 @@
 import { hashKey, useQueryClient, type QueryObserverPendingResult, type QueryObserverResult, type RefetchOptions } from '@tanstack/svelte-query';
 import { untrack } from 'svelte';
-import { Type } from '@sinclair/typebox';
+import { Type } from 'typebox';
 import type { AdminContextAccessor } from './context.svelte';
 import { captureAuthLiveScope, clearAuthQueries, handleAuthError } from './auth-hooks.svelte';
 import { decodeBaseRecord } from './record-decoder';

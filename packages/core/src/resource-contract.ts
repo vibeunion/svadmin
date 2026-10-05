@@ -1,6 +1,6 @@
-import { CloneType, Kind, TransformKind, Type, type Static, type TObject, type TSchema } from '@sinclair/typebox';
-import { checkExact, createExactSchemaValidator } from './schema-validation';
-import { TypeGuard } from '@sinclair/typebox/type';
+import { Type, type Static, type TObject, type TSchema } from 'typebox';
+import { Value } from 'typebox/value';
+import { checkExact, createExactSchemaValidator, schemaIssues } from './schema-validation';
 import { DeleteManyPartialError, HttpError, type DataProvider, type KnownResources, type BaseRecord,
   type GetListResult, type GetManyParams, type CreateManyParams, type UpdateManyParams, type DeleteManyParams,
   type GetOneParams, type GetOneResult, type GetManyResult } from './types';
@@ -70,26 +70,33 @@ interface Definition {
 const definitions = new WeakMap<ResourceContract, Definition>();
 let nextKey = 0;
 
+/** TypeBox 1.x stores the schema kind under the non-enumerable `~kind` marker instead of a symbol. */
+function schemaKind(schema: TSchema): string | undefined {
+  const kind = (schema as { '~kind'?: unknown })['~kind'];
+  return typeof kind === 'string' ? kind : undefined;
+}
+
 // A deliberately closed JSON subset keeps runtime validation aligned with Static.
 export function closeContractSchema<S extends TSchema>(schema: S): S {
-  const copy = CloneType(schema);
+  const copy = Value.Clone(schema);
   const visit = (node: TSchema): void => {
-    if (TransformKind in node) {
+    if ('~codec' in node) {
       throw new HttpError('Contract transforms require a separate decoding boundary', 400, undefined, { code: 'INVALID_RESOURCE_CONTRACT' });
     }
-    if (!TypeGuard.IsSchema(node) || !['Object', 'Array', 'Tuple', 'Union', 'String', 'Number', 'Integer', 'Boolean', 'Null', 'Literal', 'Never'].includes(node[Kind])) {
+    if (!Type.IsSchema(node) || !['Object', 'Array', 'Tuple', 'Union', 'String', 'Number', 'Integer', 'Boolean', 'Null', 'Literal', 'Never'].includes(schemaKind(node) ?? '')) {
       throw new HttpError('Unsupported or unconstrained contract schema', 400, undefined, { code: 'INVALID_RESOURCE_CONTRACT' });
     }
-    if (TypeGuard.IsObject(node)) {
-      if (node.additionalProperties !== undefined && node.additionalProperties !== false) {
+    if (Type.IsObject(node)) {
+      const objectNode = node as TSchema & { additionalProperties?: TSchema | boolean };
+      if (objectNode.additionalProperties !== undefined && objectNode.additionalProperties !== false) {
         throw new HttpError('Contract objects must be closed', 400, undefined, { code: 'INVALID_RESOURCE_CONTRACT' });
       }
-      node.additionalProperties = false;
+      objectNode.additionalProperties = false;
       for (const property of Object.values(node.properties)) visit(property);
     }
-    if (TypeGuard.IsArray(node)) visit(node.items);
-    if (TypeGuard.IsTuple(node)) for (const item of node.items ?? []) visit(item);
-    if (TypeGuard.IsUnion(node)) for (const item of node.anyOf) visit(item);
+    if (Type.IsArray(node)) visit(node.items);
+    if (Type.IsTuple(node)) for (const item of node.items ?? []) visit(item);
+    if (Type.IsUnion(node)) for (const item of node.anyOf) visit(item);
   };
   visit(copy);
   return copy;
@@ -101,11 +108,11 @@ export function defineResource<const S extends ContractSchemas>(
 ): ResourceContract<S>;
 export function defineResource(name: KnownResources, schemas: ContractSchemas): ResourceContract {
   const isId = (schema: TSchema): boolean => (
-    ['String', 'Number', 'Integer'].includes(schema[Kind])
-    || (TypeGuard.IsLiteral(schema) && ['string', 'number'].includes(typeof schema.const))
-    || (TypeGuard.IsUnion(schema) && schema.anyOf.every(isId))
+    ['String', 'Number', 'Integer'].includes(schemaKind(schema) ?? '')
+    || (Type.IsLiteral(schema) && ['string', 'number'].includes(typeof schema.const))
+    || (Type.IsUnion(schema) && schema.anyOf.every(isId))
   );
-  if (!name.trim() || schemas.record[Kind] !== 'Object'
+  if (!name.trim() || schemaKind(schemas.record) !== 'Object'
     || !schemas.record.required?.includes('id')
     || !schemas.record.properties['id']
     || !isId(schemas.record.properties['id'])) {
@@ -177,7 +184,7 @@ export interface ContractProjectionOptions {
 }
 
 function projectBySchema(schema: TSchema, value: unknown): unknown {
-  if (TypeGuard.IsObject(schema)) {
+  if (Type.IsObject(schema)) {
     if (typeof value !== 'object' || value === null || Array.isArray(value)) return value;
     const source = value as Record<string, unknown>;
     const projected: Record<string, unknown> = {};
@@ -186,15 +193,15 @@ function projectBySchema(schema: TSchema, value: unknown): unknown {
     }
     return projected;
   }
-  if (TypeGuard.IsArray(schema)) {
+  if (Type.IsArray(schema)) {
     return Array.isArray(value) ? value.map(item => projectBySchema(schema.items, item)) : value;
   }
-  if (TypeGuard.IsTuple(schema)) {
+  if (Type.IsTuple(schema)) {
     return Array.isArray(value)
       ? value.map((item, index) => schema.items?.[index] ? projectBySchema(schema.items[index], item) : item)
       : value;
   }
-  if (TypeGuard.IsUnion(schema)) {
+  if (Type.IsUnion(schema)) {
     const branch = schema.anyOf.find(candidate => checkExact(candidate, value));
     return branch ? projectBySchema(branch, value) : value;
   }
@@ -394,7 +401,7 @@ export function parseContractDeleteInput(contract: ResourceContract, value: unkn
 export function contractFormValues(contract: ResourceContract, action: string, value: Record<string, unknown>): Record<string, unknown> {
   const schemas = definitionOf(contract).schemas;
   const schema = action === 'edit' ? schemas.update : schemas.create;
-  if (!schema || !TypeGuard.IsObject(schema)) {
+  if (!schema || !Type.IsObject(schema)) {
     throw new HttpError('Forms require an object input schema for their action', 400, undefined, { code: 'INVALID_RESOURCE_CONTRACT' });
   }
   const projected = Object.fromEntries(Object.keys(schema.properties)
@@ -406,7 +413,7 @@ export function contractFormValues(contract: ResourceContract, action: string, v
 function formSchema(contract: ResourceContract, action: ContractFormAction): TObject {
   const schemas = definitionOf(contract).schemas;
   const schema = action === 'show' ? schemas.record : action === 'edit' ? schemas.update : schemas.create;
-  if (!schema || !TypeGuard.IsObject(schema)) {
+  if (!schema || !Type.IsObject(schema)) {
     throw new HttpError('Forms require an object schema for their action', 400, undefined, { code: 'INVALID_RESOURCE_CONTRACT' });
   }
   return schema;
@@ -445,7 +452,7 @@ export function snapshotContractFormDraft(contract: ResourceContract, action: Co
 export function contractFormInvalidFields(contract: ResourceContract, action: ContractFormAction, value: unknown): string[] {
   const schema = formSchema(contract, action);
   const validator = createExactSchemaValidator(schema);
-  const paths = Array.from(validator.Errors(value), error => error.path);
+  const paths = schemaIssues(validator.Errors(value)).map(issue => issue.path);
   const fields = Object.keys(schema.properties).filter(field => {
     const path = `/${field.replaceAll('~', '~0').replaceAll('/', '~1')}`;
     return paths.some(candidate => candidate === path || candidate.startsWith(`${path}/`));
@@ -460,7 +467,7 @@ export function parseContractFormInput<S extends ContractSchemas, A extends 'cre
 export function parseContractFormInput(contract: ResourceContract, action: 'create' | 'edit', value: unknown): BaseRecord {
   const schemas = definitionOf(contract).schemas;
   const schema = action === 'edit' ? schemas.update : schemas.create;
-  if (!schema || !TypeGuard.IsObject(schema)) {
+  if (!schema || !Type.IsObject(schema)) {
     throw new HttpError('Forms require an object input schema for their action', 400, undefined, { code: 'INVALID_RESOURCE_CONTRACT' });
   }
   check(schema, value, 'values');
