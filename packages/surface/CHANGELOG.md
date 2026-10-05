@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.13.0](https://github.com/vibeunion/svadmin/compare/surface-v0.12.0...surface-v0.13.0) (2026-10-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** upgrade to TypeBox 1.3
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** upgrade to TypeBox 1.3 ([b1e9bcc](https://github.com/vibeunion/svadmin/commit/b1e9bcc832526c029d4f1f8c3a608c6133a1b9b4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.53.0 <0.59.0 to >=0.53.0 <0.60.0
+    * @svadmin/ui bumped from >=0.73.0 <0.82.0 to >=0.73.0 <0.83.0
+
 ## [0.12.0](https://github.com/vibeunion/svadmin/compare/surface-v0.11.8...surface-v0.12.0) (2026-10-03)
 
 

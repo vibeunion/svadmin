@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.11.0](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.10.3...ai-elements-v0.11.0) (2026-10-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** upgrade to TypeBox 1.3
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** upgrade to TypeBox 1.3 ([b1e9bcc](https://github.com/vibeunion/svadmin/commit/b1e9bcc832526c029d4f1f8c3a608c6133a1b9b4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.59.0
+
 ## [0.10.3](https://github.com/vibeunion/svadmin/compare/ai-elements-v0.10.2...ai-elements-v0.10.3) (2026-09-24)
 
 

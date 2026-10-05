@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.19.0](https://github.com/vibeunion/svadmin/compare/supabase-v0.18.1...supabase-v0.19.0) (2026-10-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** upgrade to TypeBox 1.3
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** upgrade to TypeBox 1.3 ([b1e9bcc](https://github.com/vibeunion/svadmin/commit/b1e9bcc832526c029d4f1f8c3a608c6133a1b9b4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.12.3
+  * peerDependencies
+    * @svadmin/core bumped to 0.59.0
+
 ## [0.18.1](https://github.com/vibeunion/svadmin/compare/supabase-v0.18.0...supabase-v0.18.1) (2026-10-03)
 
 

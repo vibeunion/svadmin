@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/ai-elements",
-  "version": "0.10.3",
+  "version": "0.11.0",
   "description": "Composable Svelte 5 AI interaction components for SVAdmin",
   "type": "module",
   "sideEffects": [

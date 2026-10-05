@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.16.0](https://github.com/vibeunion/svadmin/compare/lite-v0.15.3...lite-v0.16.0) (2026-10-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** upgrade to TypeBox 1.3
+* **deps:** @svadmin/lite and @svadmin/sveltekit now require SvelteKit ^3.0.0 and Svelte ^5.57.1.
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** upgrade to SvelteKit 3 ([82264cd](https://github.com/vibeunion/svadmin/commit/82264cde9846badb5870ab860b4864717b599bf2))
+* **deps:** upgrade to TypeBox 1.3 ([b1e9bcc](https://github.com/vibeunion/svadmin/commit/b1e9bcc832526c029d4f1f8c3a608c6133a1b9b4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.34.2 <0.59.0 to >=0.34.2 <0.60.0
+
 ## [0.15.3](https://github.com/vibeunion/svadmin/compare/lite-v0.15.2...lite-v0.15.3) (2026-09-24)
 
 

@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.82.0](https://github.com/vibeunion/svadmin/compare/ui-v0.81.0...ui-v0.82.0) (2026-10-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** upgrade to TypeBox 1.3
+
+### 🔧 Miscellaneous Chores
+
+* **deps:** upgrade to TypeBox 1.3 ([b1e9bcc](https://github.com/vibeunion/svadmin/commit/b1e9bcc832526c029d4f1f8c3a608c6133a1b9b4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.11.0
+  * peerDependencies
+    * @svadmin/core bumped to 0.59.0
+
 ## [0.81.0](https://github.com/vibeunion/svadmin/compare/ui-v0.80.0...ui-v0.81.0) (2026-09-30)
 
 

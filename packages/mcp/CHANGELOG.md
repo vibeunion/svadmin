@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.13](https://github.com/vibeunion/svadmin/compare/mcp-v0.4.12...mcp-v0.4.13) (2026-10-05)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.59.0
+
 ## [0.4.12](https://github.com/vibeunion/svadmin/compare/mcp-v0.4.11...mcp-v0.4.12) (2026-09-24)
 
 
