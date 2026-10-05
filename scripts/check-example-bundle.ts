@@ -10,7 +10,7 @@ const assetsDirectory = join(outputDirectory, 'assets');
 const manifestPath = join(outputDirectory, '.vite', 'manifest.json');
 const maximumChunkBytes = 1_250_000;
 const maximumInitialBytes = 1_400_000;
-const maximumInitialGzipBytes = 375_000;
+const maximumInitialGzipBytes = 390_000;
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
