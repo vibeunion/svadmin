@@ -667,6 +667,7 @@
       "dependencies": {
         "@floating-ui/dom": "^1.8.0",
         "@lucide/svelte": "^1.35.0",
+        "@svadmin/devtools": "workspace:*",
         "@svadmin/devtools-contract": "workspace:*",
         "@svar-ui/svelte-core": "^2.6.0",
         "@svar-ui/svelte-filemanager": "^2.6.0",

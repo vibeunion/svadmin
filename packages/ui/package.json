@@ -139,6 +139,7 @@
     }
   },
   "dependencies": {
+    "@svadmin/devtools": "workspace:*",
     "@svadmin/devtools-contract": "workspace:*",
     "@vibeunion/devtools-devframe": "^0.1.0",
     "typebox": "^1.3.34",

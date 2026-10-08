@@ -304,7 +304,7 @@ export {
   generateComponentCode,
   generateResourceBundle,
 } from './inferencer';
-export type { InferResult } from './inferencer';
+export type { InferResult, InferReview, InferReviewWarning, InferReviewWarningCode } from './inferencer';
 export { createWebSocketLiveProvider } from './live-websocket';
 export type { WebSocketLiveProviderOptions } from './live-websocket';
 export { createSSELiveProvider } from './live-sse';

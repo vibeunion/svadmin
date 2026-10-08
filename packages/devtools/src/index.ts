@@ -32,6 +32,19 @@ import {
 } from '@svadmin/devtools-contract';
 import type { ProviderBundle, ResourceDefinition } from '@svadmin/core';
 
+export type DevtoolsHealthStatus = 'healthy' | 'warning' | 'error';
+
+export interface DevtoolsHealthSummary {
+  status: DevtoolsHealthStatus;
+  errors: number;
+  warnings: number;
+  info: number;
+  configuredProviders: number;
+  totalProviders: number;
+  resources: number;
+  routes: number;
+}
+
 export interface DevtoolsCollectorOptions {
   source?: DevtoolsSource;
   maxEvents?: number;
@@ -46,6 +59,24 @@ export interface DevtoolsCollector {
   clear(): void;
   snapshot(context?: DevtoolsTraceContext): DevtoolsSnapshot;
   subscribe(listener: (snapshot: DevtoolsSnapshot) => void): () => void;
+}
+
+export interface DevtoolsAppDiagnostics {
+  snapshot: DevtoolsSnapshot;
+  providers: DevtoolsProviderDiagnostic[];
+  resources: DevtoolsResourceDiagnostic[];
+  routes: DevtoolsRouteDiagnostic[];
+  health: DevtoolsHealthSummary;
+}
+
+export interface BuildAdminDiagnosticsOptions {
+  providers: ProviderBundle;
+  resources: readonly ResourceDefinition[];
+  diagnostics?: readonly DevtoolsDiagnostic[];
+  events?: readonly DevtoolsEvent[];
+  source?: DevtoolsSource;
+  context?: DevtoolsTraceContext;
+  basePath?: string;
 }
 
 function mergeContext(base: DevtoolsTraceContext, extra: DevtoolsTraceContext): DevtoolsTraceContext {
@@ -208,5 +239,65 @@ export function toPermissionDiagnostic(
     action,
     allowed: result.can,
     ...(result.reason !== undefined ? { reason: result.reason } : {}),
+  };
+}
+
+export function buildDevtoolsHealthSummary(input: {
+  diagnostics: readonly DevtoolsDiagnostic[];
+  providers: readonly DevtoolsProviderDiagnostic[];
+  resources: readonly DevtoolsResourceDiagnostic[];
+  routes: readonly DevtoolsRouteDiagnostic[];
+}): DevtoolsHealthSummary {
+  const errors = input.diagnostics.filter((diagnostic) => diagnostic.severity === 'error').length;
+  const warnings = input.diagnostics.filter((diagnostic) => diagnostic.severity === 'warning').length;
+  const info = input.diagnostics.filter((diagnostic) => diagnostic.severity === 'info').length;
+  const status: DevtoolsHealthStatus = errors > 0
+    ? 'error'
+    : warnings > 0
+      ? 'warning'
+      : 'healthy';
+
+  return {
+    status,
+    errors,
+    warnings,
+    info,
+    configuredProviders: input.providers.filter((provider) => provider.configured).length,
+    totalProviders: input.providers.length,
+    resources: input.resources.length,
+    routes: input.routes.length,
+  };
+}
+
+/**
+ * Builds the complete JSON-safe application diagnostic view used by DevTools,
+ * the CLI, and integration tests. The input contains only provider/resource
+ * metadata and already-sanitized diagnostics/events; no runtime payloads are
+ * copied into the result.
+ */
+export function buildAdminDiagnostics(
+  options: BuildAdminDiagnosticsOptions,
+): DevtoolsAppDiagnostics {
+  const providers = buildProviderDiagnostics(options.providers);
+  const resources = buildResourceDiagnostics(options.resources);
+  const routes = buildRouteDiagnostics(options.resources, options.basePath);
+  const diagnostics = [...(options.diagnostics ?? [])];
+  const events = [...(options.events ?? [])];
+  const context = options.context ?? {};
+  const snapshot = createDevtoolsSnapshot({
+    source: options.source ?? 'frontend',
+    diagnostics,
+    events,
+    ...(context.requestId !== undefined ? { requestId: context.requestId } : {}),
+    ...(context.traceId !== undefined ? { traceId: context.traceId } : {}),
+    ...(context.correlationId !== undefined ? { correlationId: context.correlationId } : {}),
+  });
+
+  return {
+    snapshot,
+    providers,
+    resources,
+    routes,
+    health: buildDevtoolsHealthSummary({ diagnostics, providers, resources, routes }),
   };
 }

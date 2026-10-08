@@ -71,6 +71,37 @@ describe('inferFieldType',() => {
     expect(inferFieldType('tags',['svelte','admin'])).toBe('tags');
   });
 
+  test('marks heuristic inferences for review', () => {
+    const result = inferResource('posts', [
+      { id: 1, author_id: 5, status: 'draft' },
+      { id: 2, author_id: 6, status: 'published' },
+      { id: 3, author_id: 7, status: 'draft' },
+      { id: 4, author_id: 8, status: 'published' },
+      { id: 5, author_id: 9, status: 'draft' },
+    ]);
+
+    expect(result.review.needsReview).toBe(true);
+    expect(result.review.confidence).toBe('medium');
+    expect(result.review.sampleSize).toBe(5);
+    expect(result.review.warnings.map((warning) => warning.code)).toEqual([
+      'heuristic-relation',
+      'heuristic-select',
+    ]);
+  });
+
+  test('marks empty inference as low confidence', () => {
+    const result = inferResource('posts', []);
+    expect(result.review).toEqual({
+      needsReview: true,
+      confidence: 'low',
+      sampleSize: 0,
+      warnings: [{
+        code: 'empty-sample',
+        message: 'No sample records were available for "posts".',
+      }],
+    });
+  });
+
   test('detects images array',() => {
     expect(inferFieldType('photos',['https://x.com/a.png','https://x.com/b.jpg'])).toBe('images');
   });

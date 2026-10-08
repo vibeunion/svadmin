@@ -170,6 +170,16 @@
     {/if}
 
     {#if inferResult}
+      {#if inferResult.review.needsReview}
+        <Alert.Root>
+          <AlertCircle class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+          <Alert.Description>
+            Review recommended: {inferResult.review.confidence} confidence from {inferResult.review.sampleSize} sample records.
+            {inferResult.review.warnings.length} heuristic warning(s) require confirmation before using generated code.
+          </Alert.Description>
+        </Alert.Root>
+      {/if}
+
       <!-- Field table -->
       <ScrollArea class="svadmin-u-e5738cbd2714">
         <Table.Root>

@@ -10,6 +10,7 @@
     getTheme,
     parseQueryKey,
   } from '@svadmin/core';
+  import { buildAdminDiagnostics } from '@svadmin/devtools';
   import { useTranslation } from '@svadmin/core/i18n';
   import {
     attachSvadminDevtoolsQueryClient,
@@ -132,6 +133,11 @@
   const theme = $derived(getTheme());
   const colorTheme = $derived(getColorTheme());
   const locale = $derived(i18n.locale);
+  const appDiagnostics = $derived(buildAdminDiagnostics({
+    providers: adminContext.providerBundle,
+    resources,
+    basePath: path,
+  }));
 
   const dataProviders = $derived.by(() => {
     try {
@@ -257,6 +263,9 @@
         <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-58284b4ea568 svadmin-u-e83a7042bc91 svadmin-u-359090c2d529 uppercase svadmin-u-09ace3a4d9f5 svadmin-u-d4108abe6359">
           <Bug class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
           <span>svadmin DevTools</span>
+          <Badge variant={appDiagnostics.health.status === 'error' ? 'destructive' : appDiagnostics.health.status === 'warning' ? 'outline' : 'secondary'}>
+            {appDiagnostics.health.status}
+          </Badge>
         </div>
         <div class="svadmin-u-60fbb7713999 svadmin-u-44ee8ba0a421">
           <TooltipButton tooltip={collapsed ? i18n.t('common.expand') : i18n.t('common.collapse')} variant="ghost" size="icon" class="svadmin-u-f6fe902450dc svadmin-u-7ec10f86d9b1" onclick={() => collapsed = !collapsed}>

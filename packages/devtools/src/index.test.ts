@@ -1,5 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import {
+  buildAdminDiagnostics,
+  buildDevtoolsHealthSummary,
   buildProviderDiagnostics,
   buildResourceDiagnostics,
   buildRouteDiagnostics,
@@ -108,5 +110,64 @@ describe('diagnostic builders', () => {
       .toEqual({ resource: 'orders', action: 'delete', allowed: true });
     expect(toPermissionDiagnostic('orders', 'delete', { can: false, reason: 'policy' }))
       .toEqual({ resource: 'orders', action: 'delete', allowed: false, reason: 'policy' });
+  });
+
+  test('builds a complete application diagnostic view with health summary', () => {
+    const bundle: ProviderBundle = { dataProvider: stubDataProvider() };
+    const resources: ResourceDefinition[] = [{
+      name: 'orders',
+      label: 'Orders',
+      fields: [],
+    }];
+    const result = buildAdminDiagnostics({
+      providers: bundle,
+      resources,
+      basePath: '/admin',
+      context: { traceId: 'trace-1' },
+      diagnostics: [{
+        code: 'provider.missing',
+        source: 'frontend',
+        severity: 'warning',
+        message: 'liveProvider is not configured',
+      }],
+      events: [{ type: 'request.started', requestId: 'request-1' }],
+    });
+
+    expect(result.snapshot).toMatchObject({
+      version: 1,
+      source: 'frontend',
+      traceId: 'trace-1',
+      diagnostics: [{ code: 'provider.missing', severity: 'warning' }],
+      events: [{ type: 'request.started', requestId: 'request-1' }],
+    });
+    expect(result.resources).toHaveLength(1);
+    expect(result.routes).toEqual([{ resource: 'orders', path: '/admin/orders' }]);
+    expect(result.health).toEqual({
+      status: 'warning',
+      errors: 0,
+      warnings: 1,
+      info: 0,
+      configuredProviders: 1,
+      totalProviders: 15,
+      resources: 1,
+      routes: 1,
+    });
+  });
+
+  test('prioritizes errors over warnings in health status', () => {
+    const providers = buildProviderDiagnostics({ dataProvider: stubDataProvider() });
+    const resources = buildResourceDiagnostics([]);
+    const routes = buildRouteDiagnostics([]);
+
+    expect(buildDevtoolsHealthSummary({
+      providers,
+      resources,
+      routes,
+      diagnostics: [
+        { code: 'info', source: 'frontend', severity: 'info', message: 'ok' },
+        { code: 'warning', source: 'frontend', severity: 'warning', message: 'check' },
+        { code: 'error', source: 'frontend', severity: 'error', message: 'broken' },
+      ],
+    }).status).toBe('error');
   });
 });

@@ -84,12 +84,33 @@ export interface InferResult {
   resource: ResourceDefinition;
   code: string;
   typeboxCode: string;
+  review: InferReview;
   componentCode: {
     list: string;
     create: string;
     edit: string;
     show: string;
   };
+}
+
+export type InferReviewWarningCode =
+  | 'empty-sample'
+  | 'nullable-field'
+  | 'mixed-types'
+  | 'heuristic-relation'
+  | 'heuristic-select';
+
+export interface InferReviewWarning {
+  code: InferReviewWarningCode;
+  field?: string;
+  message: string;
+}
+
+export interface InferReview {
+  needsReview: boolean;
+  confidence: 'high' | 'medium' | 'low';
+  sampleSize: number;
+  warnings: InferReviewWarning[];
 }
 
 /**
@@ -116,6 +137,15 @@ export function inferResource(
       resource: emptyResource,
       code: `// No data available to infer fields for "${resourceName}".`,
       typeboxCode: generateTypeBoxSchemaCode(emptyResource),
+      review: {
+        needsReview: true,
+        confidence: 'low',
+        sampleSize: 0,
+        warnings: [{
+          code: 'empty-sample',
+          message: `No sample records were available for "${resourceName}".`,
+        }],
+      },
       componentCode: {
         list: generateListPageCode(emptyResource),
         create: generateCreatePageCode(emptyResource),
@@ -133,6 +163,7 @@ export function inferResource(
 
   // For each key, infer from all non-null values
   const fields: FieldDefinition[] = [];
+  const warnings: InferReviewWarning[] = [];
   for (const key of keySet) {
     // Collect non-null values
     const values = sampleData
@@ -141,6 +172,13 @@ export function inferResource(
 
     const sampleValue = values[0];
     let inferredType = inferFieldType(key, sampleValue);
+    if (values.length === 0) {
+      warnings.push({
+        code: 'nullable-field',
+        field: key,
+        message: `Field "${key}" contains only null or undefined values in the sample.`,
+      });
+    }
 
     // Cross-validate: if most values for this key are of a different type, use majority
     const typeCounts = new Map<InferredType, number>();
@@ -155,13 +193,34 @@ export function inferResource(
         inferredType = t;
       }
     }
+    if (typeCounts.size > 1) {
+      warnings.push({
+        code: 'mixed-types',
+        field: key,
+        message: `Field "${key}" contains multiple inferred types; the majority type was selected.`,
+      });
+    }
 
     // Check for relation
     const relatedResource = isLikelyRelation(key);
+    if (relatedResource) {
+      warnings.push({
+        code: 'heuristic-relation',
+        field: key,
+        message: `Relation "${key}" was inferred from its field name.`,
+      });
+    }
 
     // Check if it looks like a select (few unique string values)
     const uniqueStrings = new Set(values.filter(v => typeof v === 'string') as string[]);
     const isSelect = inferredType === 'text' && uniqueStrings.size > 1 && uniqueStrings.size <= 10 && values.length >= 5;
+    if (isSelect) {
+      warnings.push({
+        code: 'heuristic-select',
+        field: key,
+        message: `Select options for "${key}" were inferred from repeated sample values.`,
+      });
+    }
 
     const field: FieldDefinition = {
       key,
@@ -213,7 +272,23 @@ export function inferResource(
     show: generateShowPageCode(resource),
   };
 
-  return { fields, resource, code, typeboxCode, componentCode };
+  return {
+    fields,
+    resource,
+    code,
+    typeboxCode,
+    review: {
+      needsReview: warnings.length > 0,
+      confidence: warnings.some((warning) => warning.code === 'mixed-types' || warning.code === 'nullable-field')
+        ? 'low'
+        : warnings.length > 0
+          ? 'medium'
+          : 'high',
+      sampleSize: sampleData.length,
+      warnings,
+    },
+    componentCode,
+  };
 }
 
 // ─── Code Generation ─────────────────────────────────────────
@@ -462,6 +537,12 @@ export function generateResourceBundle(resource: ResourceDefinition): InferResul
     resource,
     code: generateResourceCode(resource),
     typeboxCode: generateTypeBoxSchemaCode(resource),
+    review: {
+      needsReview: false,
+      confidence: 'high',
+      sampleSize: 0,
+      warnings: [],
+    },
     componentCode: {
       list: generateListPageCode(resource),
       create: generateCreatePageCode(resource),

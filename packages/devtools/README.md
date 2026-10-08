@@ -13,6 +13,10 @@ and the CLI can share:
   resource operations, menu visibility, provider routing, and route paths.
 - `toPermissionDiagnostic(resource, action, result)` — normalizes access-control
   results for display.
+- `buildAdminDiagnostics(options)` — combines the complete application snapshot,
+  provider/resource/route diagnostics, and a healthy/warning/error summary.
+- `buildDevtoolsHealthSummary(input)` — derives a small health summary for a
+  panel badge, CLI output, or readiness check.
 - Re-exports the whole `@svadmin/devtools-contract` surface.
 
 UI rendering stays in `@svadmin/ui` (`DevTools.svelte`); this package is the
@@ -34,6 +38,12 @@ collector.recordDiagnostic({
 
 const snapshot = collector.snapshot({ requestId: 'req-1' });
 const providers = buildProviderDiagnostics(config.providers);
+const diagnostics = buildAdminDiagnostics({
+  providers: config.providers,
+  resources: config.resources,
+  basePath: '/admin',
+});
+diagnostics.health.status; // 'healthy' | 'warning' | 'error'
 ```
 
 Secrets are redacted by `redactDevtoolsRecord` before a snapshot is produced.
