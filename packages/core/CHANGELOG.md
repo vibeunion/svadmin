@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.60.0](https://github.com/vibeunion/svadmin/compare/core-v0.59.0...core-v0.60.0) (2026-10-10)
+
+
+### 🚀 Features
+
+* **devtools:** expand diagnostics and inferencer review ([ade38ba](https://github.com/vibeunion/svadmin/commit/ade38baad5b744e29a978b06e0031c4f12a85258))
+
 ## [0.59.0](https://github.com/vibeunion/svadmin/compare/core-v0.58.0...core-v0.59.0) (2026-10-05)
 
 

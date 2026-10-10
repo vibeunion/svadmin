@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.83.0](https://github.com/vibeunion/svadmin/compare/ui-v0.82.0...ui-v0.83.0) (2026-10-10)
+
+
+### 🚀 Features
+
+* **devtools:** expand diagnostics and inferencer review ([ade38ba](https://github.com/vibeunion/svadmin/commit/ade38baad5b744e29a978b06e0031c4f12a85258))
+
+
+### 🐛 Bug Fixes
+
+* **deps:** resolve new dependency audit advisories ([9b2fb59](https://github.com/vibeunion/svadmin/commit/9b2fb59d57138e908c0d16f7e02aafef61fb8cd2))
+* unblock release 492 (dependency audit + devtools verification) ([394b61e](https://github.com/vibeunion/svadmin/commit/394b61efd5d4c23376f9c3a1167f829af23104f8))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.3.0
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.11.1
+  * peerDependencies
+    * @svadmin/core bumped to 0.60.0
+
 ## [0.82.0](https://github.com/vibeunion/svadmin/compare/ui-v0.81.0...ui-v0.82.0) (2026-10-05)
 
 

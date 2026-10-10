@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/app",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "type": "module",
   "description": "Application composition layer for svadmin — defineAdminConfig, plugins, runtime binding, and the AI manifest",
   "license": "MIT",

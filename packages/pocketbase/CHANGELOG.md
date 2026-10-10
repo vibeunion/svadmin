@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.13.1](https://github.com/vibeunion/svadmin/compare/pocketbase-v0.13.0...pocketbase-v0.13.1) (2026-10-10)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.60.0
+
 ## [0.13.0](https://github.com/vibeunion/svadmin/compare/pocketbase-v0.12.2...pocketbase-v0.13.0) (2026-10-05)
 
 
