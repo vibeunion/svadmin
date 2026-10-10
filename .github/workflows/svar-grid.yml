@@ -35,8 +35,10 @@ jobs:
           git rev-parse HEAD > scripts/fixtures/svar-grid/evidence/tested-commit.txt
       - name: Install unchanged workspace dependencies
         run: bun install --frozen-lockfile
-      - name: Prepare UI styles and Surface contracts
+      - name: Prepare UI styles, devtools runtime and Surface contracts
         run: |
+          bun run --cwd packages/devtools-contract build
+          bun run --cwd packages/devtools build
           bun run --cwd packages/ui build
       - name: Install pinned real SVAR in isolated consumer
         run: npm ci --prefix scripts/fixtures/svar-grid --ignore-scripts --no-audit --no-fund
