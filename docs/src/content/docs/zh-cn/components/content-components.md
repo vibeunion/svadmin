@@ -11,16 +11,18 @@ description: Admin UI 页面组合、指标、工具栏、状态和数据状态
 `ContentPageHeader`，并按真实任务划分 Section。
 
 两个组件都支持 `density="comfortable"`（默认）和
-`density="compact"`。需要高频扫描的运营页面使用 `compact`；独立使用
-`ContentPageHeader` 时传入相同密度，保证标题节奏与页面内容一致。
+`density="compact"`。普通业务页面保持 `comfortable`。只有明确的专业扫描
+区域在说明理由并检查可读性、可操作性后才选择 `compact`。独立使用
+`ContentPageHeader` 时与所属页面密度一致；局部表格紧凑不意味着整页 Shell
+和页头都要紧凑。本规则不改变现有组件尺寸或 API。
 
 Shell 提供 `data-svadmin-content-page`、
 `data-svadmin-content-page-width` 和 `data-density`；Header 提供
 `data-svadmin-content-header`，同时保留 `data-svadmin-page-header` 兼容现有集成。
 
 ```svelte
-<ContentPageShell pageId="access-review" width="wide" density="compact">
-  <ContentPageHeader density="compact" title="访问审查" description="批准前处理仍未解决的访问项。" />
+<ContentPageShell pageId="access-review" width="wide" density="comfortable">
+  <ContentPageHeader density="comfortable" title="访问审查" description="批准前处理仍未解决的访问项。" />
   <SectionHeader id="exceptions" title="例外项" />
   <!-- 主工作区 -->
 </ContentPageShell>
