@@ -18,7 +18,7 @@ mkdirSync(output, { recursive: true });
 try {
   const dependencies = { svelte: root.overrides.svelte, '@tanstack/svelte-query': manifest('ui').peerDependencies['@tanstack/svelte-query'],
     'typebox': manifest('surface').dependencies['typebox'] };
-  for (const name of ['devtools-contract', 'core', 'ui', 'surface']) {
+  for (const name of ['devtools-contract', 'devtools', 'core', 'ui', 'surface']) {
     // 发布打包器解析 workspace 协议；独立消费者不依赖仓库工作区。
     const tarball = run('bun', ['pm', 'pack', '--quiet', '--ignore-scripts', '--destination', temporary], join(repository, 'packages', name)).trim();
     const [pack] = JSON.parse(run('npm', ['pack', tarball, '--dry-run', '--json', '--ignore-scripts']));
@@ -39,7 +39,11 @@ try {
     } }, null, 2));
   // 仅替换运行时依赖来源，保留所有 peer 范围；JSON 也是合法的 YAML。
   writeFileSync(join(temporary, 'pnpm-workspace.yaml'), JSON.stringify({
-    overrides: { '@svadmin/ui>@svadmin/devtools-contract': dependencies['@svadmin/devtools-contract'] },
+    overrides: {
+      '@svadmin/ui>@svadmin/devtools': dependencies['@svadmin/devtools'],
+      '@svadmin/ui>@svadmin/devtools-contract': dependencies['@svadmin/devtools-contract'],
+      '@svadmin/devtools>@svadmin/devtools-contract': dependencies['@svadmin/devtools-contract'],
+    },
   }, null, 2));
   run('npx', ['--yes', 'pnpm@11.11.0', 'install', '--strict-peer-dependencies', '--ignore-scripts', '--reporter', 'append-only']);
   writeFileSync(join(temporary, 'server.mjs'), `
