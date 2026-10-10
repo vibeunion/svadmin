@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.0](https://github.com/vibeunion/svadmin/compare/devtools-v0.2.3...devtools-v0.3.0) (2026-10-10)
+
+
+### 🚀 Features
+
+* **devtools:** expand diagnostics and inferencer review ([ade38ba](https://github.com/vibeunion/svadmin/commit/ade38baad5b744e29a978b06e0031c4f12a85258))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.60.0
+
 ## [0.2.3](https://github.com/vibeunion/svadmin/compare/devtools-v0.2.2...devtools-v0.2.3) (2026-10-05)
 
 

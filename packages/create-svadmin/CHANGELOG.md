@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.40.1](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.40.0...create-svadmin-v0.40.1) (2026-10-10)
+
+
+### 🐛 Bug Fixes
+
+* **deps:** resolve new dependency audit advisories ([9b2fb59](https://github.com/vibeunion/svadmin/commit/9b2fb59d57138e908c0d16f7e02aafef61fb8cd2))
+* unblock release 492 (dependency audit + devtools verification) ([394b61e](https://github.com/vibeunion/svadmin/commit/394b61efd5d4c23376f9c3a1167f829af23104f8))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/core bumped to 0.60.0
+
 ## [0.40.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.39.1...create-svadmin-v0.40.0) (2026-10-05)
 
 
