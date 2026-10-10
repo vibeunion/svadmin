@@ -12,9 +12,11 @@ Use `ContentPageShell` as the width and spacing owner, then add a single
 `ContentPageHeader` and task-based sections.
 
 Both components accept `density="comfortable"` (the default) or
-`density="compact"`. Choose `compact` for scan-heavy operational pages and pass
-the same value to a standalone `ContentPageHeader` so the heading rhythm stays
-aligned with the page stack.
+`density="compact"`. Keep ordinary business pages `comfortable`. Choose
+`compact` only for explicitly justified specialist scanning regions after
+checking readability and actionability. Keep a standalone `ContentPageHeader`
+aligned with its owning page; a compact child table does not require a compact
+page shell or header. This does not change existing component sizes or APIs.
 
 The shell exposes `data-svadmin-content-page`,
 `data-svadmin-content-page-width`, and `data-density`; the header exposes
@@ -22,8 +24,8 @@ The shell exposes `data-svadmin-content-page`,
 existing integrations.
 
 ```svelte
-<ContentPageShell pageId="access-review" width="wide" density="compact">
-  <ContentPageHeader density="compact" title="Access review" description="Review unresolved access before approval." />
+<ContentPageShell pageId="access-review" width="wide" density="comfortable">
+  <ContentPageHeader density="comfortable" title="Access review" description="Review unresolved access before approval." />
   <SectionHeader id="exceptions" title="Exceptions" />
   <!-- primary work area -->
 </ContentPageShell>

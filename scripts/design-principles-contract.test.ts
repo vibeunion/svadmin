@@ -27,6 +27,35 @@ describe('Admin UI design principles contract', () => {
     expect(sidebar).toContain("{ slug: 'components/content-components' }");
   });
 
+  it('keeps ordinary pages comfortable and specialist density explicitly local', () => {
+    const design = read('DESIGN.md');
+    expect(design).toContain('Ordinary business pages default to `comfortable`');
+    expect(design).toContain('Compact / Dense (explicit local opt-in)');
+    expect(design).toContain('this guidance does not\n  introduce a universal 44px control height');
+    expect(design).toContain('Restraint must not flatten the entire interface');
+    expect(design).not.toContain('Use compact density for operational work');
+
+    const english = read('docs/src/content/docs/guides/design-principles.md');
+    const chinese = read('docs/src/content/docs/zh-cn/guides/design-principles.md');
+    expect(english).toContain('Ordinary business pages default to `comfortable`');
+    expect(english).toContain('explicit local opt-in');
+    expect(english).toContain('Restraint does not mean every surface must');
+    expect(chinese).toContain('普通业务页面默认 `comfortable`');
+    expect(chinese).toContain('显式局部选择');
+    expect(chinese).toContain('克制不等于');
+
+    for (const path of [
+      'docs/src/content/docs/components/content-components.md',
+      'docs/src/content/docs/zh-cn/components/content-components.md',
+    ]) {
+      const content = read(path);
+      expect(content).toContain('pageId="access-review" width="wide" density="comfortable"');
+      expect(content).toContain('<ContentPageHeader density="comfortable"');
+      expect(content).not.toContain('Choose `compact` for scan-heavy operational pages');
+      expect(content).not.toContain('需要高频扫描的运营页面使用 `compact`');
+    }
+  });
+
   it('keeps the runnable workbench connected through the example resource contract', () => {
     expect(read('example/src/App.svelte')).toContain('DesignPrinciplesPage');
     expect(read('example/src/features/showcase/resources.ts')).toContain("name: 'design_principles'");

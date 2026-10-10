@@ -104,7 +104,7 @@ Package utilities live in sublayers of `utilities`, so host-authored responsive
 utilities win regardless of lazy package stylesheet load order.
 
 svadmin defines its own Admin UI product language: quiet neutral canvases, precise
-type, hairline borders, restrained elevation, compact controls, and clear
+type, hairline borders, restrained elevation, comfortable stable controls, and clear
 feedback for repeated operational work. The interface should feel like a real
 administrative product with trustworthy states, not a collection of dashboard
 templates.
@@ -242,7 +242,7 @@ runtime names for the shared depth and motion tokens are
 
 ## Typography
 
-Use a compatible system sans. Product pages use compact
+Use a compatible system sans. Product pages use concise
 headings and normal letter spacing. Uppercase table labels, negative tracking,
 and oversized dashboard numerals are not defaults.
 
@@ -259,16 +259,28 @@ cards are not nested for visual effect.
 
 ### Visual Density Dials
 
-svadmin components support systematic density levels to balance scanning speed
-and operational throughput:
+Ordinary business pages default to `comfortable`: lists, filters, detail
+drawers, workspaces, settings, and forms. Repeated operational work does not
+by itself justify a page-wide `compact` override.
 
-- **Density 8–10 (Dense / Dashboard)**: 2px/4px/8px rhythm with 28px–32px row
-  heights. Used for `AutoTable`, `FilterToolbar`, `RecordDetailDrawer`, and
-  operations work areas.
-- **Density 4–6 (Comfortable / Standard)**: 4px/8px/16px rhythm with 40px–44px
-  control heights. Used for settings forms, account profiles, and overview cards.
-- **Density 1–3 (Spacious / Onboarding)**: 16px/24px/32px rhythm for public
-  portals and introductory workflows.
+- **Comfortable / Standard (default)**: Keep readable labels, clear field
+  grouping, and enough spacing to distinguish controls from supporting content.
+  Reuse each component's existing default sizing; this guidance does not
+  introduce a universal 44px control height or change existing APIs.
+- **Compact / Dense (explicit local opt-in)**: Reserve for scan-heavy specialist
+  regions such as OCR reconciliation, log streams, or trading-style grids.
+  Record the task-specific reason and verify readability, keyboard access,
+  long labels, and actionability before choosing `compact`. A compact data
+  region does not make the surrounding page header, filters, or detail form
+  compact.
+- **Spacious / Onboarding**: Use additional reading space for public portals
+  and introductory workflows. This is composition guidance, not a new density
+  value in the component API.
+
+`ContentPageShell`, `ContentPageHeader`, and `Table.Root` already default to
+`comfortable`. Pass an explicit supported density only when the task warrants
+it; keep a standalone header aligned with its owning page, not with an
+unrelated compact child region.
 
 ## Elevation & Depth
 
@@ -276,6 +288,15 @@ Surfaces use a one-pixel border plus a subtle two-layer shadow. Hover elevation
 may increase slightly for genuinely clickable items, without translation or
 glow. Dialogs and menus receive stronger depth because they are floating
 layers. Dark mode keeps the same hierarchy with low-chroma surfaces.
+
+Restraint must not flatten the entire interface into white surfaces and
+hairline borders. Distinguish the neutral work canvas, primary content surface,
+toolbar surface, selected state, and overlay using existing semantic tokens.
+Use spacing and contrast for hierarchy; apply elevation only to bounded tools,
+individual objects, and floating layers. Keep page sections unframed, do not
+nest decorative cards, and do not add hover elevation to non-interactive
+surfaces. Host products may choose their own accent through supported theming;
+their brand colors and page widths are not universal library rules.
 
 - **Control Shadow**: `0 1px 2px rgb(15 23 42 / 0.04), 0 0 0 1px rgb(15 23 42 / 0.02)`
 - **Surface Shadow**: `0 1px 3px rgb(15 23 42 / 0.04), 0 4px 8px rgb(15 23 42 / 0.04)`
@@ -300,7 +321,7 @@ Use `PagePattern` for custom business compositions that do not fit those
 resource routes. It supplies layout only, not querying, permissions, form
 submission, or loading/error handling:
 
-- `list`: compact title, toolbar, table/list content, and list empty states.
+- `list`: concise title, comfortable toolbar, table/list content, and list empty states.
 - `form`: narrow reading width, comfortable grouped fields and a single save area.
 - `detail`: read-only summary and related content.
 - `workspace`: primary work area plus an optional secondary panel.
@@ -357,7 +378,8 @@ cards, repeated title bars, or unrestricted two-column fields.
   persistence request succeeds; preserve edits after failure.
 - Separate initial-empty content from filtered-no-results content. Offer
   creation only when permitted, and clearing filters only when filters exist.
-- Use compact density for operational work and comfortable density for forms.
+- Use comfortable density for ordinary operational pages and forms; reserve
+  compact density for explicitly justified local specialist regions.
 - Reference `packages/ui/stories/ConfigurationExample.svelte` in the SVAdmin
   source for a working composition; its save action is in-memory demo state,
   not a persistence implementation.
@@ -475,7 +497,7 @@ Before accepting an AI-generated application page, verify all of the following:
 
 ## Do's and Don'ts
 
-- Do keep hierarchy quiet, dense, aligned, and easy to scan repeatedly.
+- Do keep hierarchy quiet, comfortable, aligned, and easy to scan repeatedly.
 - Do show loading, empty, error, permission, progress, and mutation feedback.
 - Do preserve visible keyboard focus and at least 44px coarse-pointer targets.
 - Do remove, downgrade, or relocate feedback as soon as its state is resolved.

@@ -4,7 +4,7 @@ description: Seven svadmin design principles for trustworthy admin products
 ---
 
 svadmin defines its own design principles for Admin UI. Neutral
-surfaces, precise hierarchy, restrained depth, and compact controls support
+surfaces, precise hierarchy, restrained depth, and comfortable stable controls support
 repeated operational work. These seven principles turn that direction into
 reviewable product decisions.
 
@@ -33,9 +33,16 @@ Use `ContentPageShell`, `ContentPageHeader`, `SectionHeader`, and
 Repeated admin work should preserve context and reduce navigation cost.
 
 - Keep filters, selection, sort order, and pagination stable after local actions.
-- Prefer keyboard-reachable commands and compact, stable controls.
+- Prefer keyboard-reachable commands and comfortable, stable controls.
 - Fill loading content in place; do not move the primary action while data changes.
-- Use `PageToolbar` and `FilterToolbar` for dense, predictable work controls.
+- Use `PageToolbar` and `FilterToolbar` for aligned, predictable work controls.
+- Ordinary business pages default to `comfortable`, including lists, filters,
+  detail drawers, workspaces, and forms. High-frequency work alone is not a
+  reason to shrink the whole page.
+- Choose `compact` only as an explicit local opt-in for specialist scanning
+  regions, with a task-specific reason and readability/actionability checks.
+  Keep the surrounding page comfortable; do not change existing component
+  sizing or introduce a universal 44px desktop control height.
 
 ## 3. Consistent by contract
 
@@ -70,6 +77,11 @@ Content and hierarchy carry the interface.
 - Use neutral canvases and one controlled interaction accent.
 - Use hairline borders, subtle shadows, 8px controls, and 8px bounded surfaces.
 - Cards represent objects or bounded tools; page sections are not decorative cards.
+- Distinguish the work canvas, content surface, toolbar, selected state, and
+  overlay through semantic tokens. Restraint does not mean every surface must
+  be white with only a hairline border.
+- Keep page sections unframed and non-interactive surfaces static. Host brands
+  and page widths remain host-owned, not library-wide defaults.
 - Do not use gradients, glow, glassmorphism, negative tracking, or card-in-card decoration.
 
 ## 6. Accessible by construction
