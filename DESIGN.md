@@ -357,7 +357,10 @@ cards, repeated title bars, or unrestricted two-column fields.
   persistence request succeeds; preserve edits after failure.
 - Separate initial-empty content from filtered-no-results content. Offer
   creation only when permitted, and clearing filters only when filters exist.
-- Use compact density for operational work and comfortable density for forms.
+- Page patterns default to comfortable density so generated and custom pages
+  have a consistent baseline. Use compact density explicitly for operational
+  work that prioritizes scanning speed; use comfortable density for forms and
+  general-purpose pages.
 - Reference `packages/ui/stories/ConfigurationExample.svelte` in the SVAdmin
   source for a working composition; its save action is in-memory demo state,
   not a persistence implementation.

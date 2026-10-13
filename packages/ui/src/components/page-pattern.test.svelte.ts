@@ -41,6 +41,12 @@ describe('PagePattern', () => {
     expect(shell?.getAttribute('data-svadmin-content-page-width')).toBe('default');
   });
 
+  it('preserves an explicit compact density override', () => {
+    const children = createRawSnippet(() => ({ render: () => '<p>Content</p>' }));
+    const { container } = render(PagePattern, { kind: 'list', title: 'Page', children, density: 'compact' });
+    expect(container.querySelector('[data-svadmin-content-page]')?.getAttribute('data-density')).toBe('compact');
+  });
+
   it('does not discard secondary content on a detail page', () => {
     const children = createRawSnippet(() => ({ render: () => '<p>Record</p>' }));
     const secondary = createRawSnippet(() => ({ render: () => '<p>Audit history</p>' }));
