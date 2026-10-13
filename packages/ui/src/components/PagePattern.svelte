@@ -42,7 +42,7 @@
 
   const resolvedPageId = $derived(pageId ?? `pattern-${kind}`);
   const resolvedWidth = $derived(width ?? (kind === 'form' ? 'narrow' : kind === 'detail' ? 'default' : 'wide'));
-  const resolvedDensity = $derived(density ?? (kind === 'list' || kind === 'workspace' ? 'compact' : 'comfortable'));
+  const resolvedDensity = $derived(density ?? 'comfortable');
 </script>
 
 <ContentPageShell

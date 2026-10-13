@@ -300,10 +300,10 @@ Use `PagePattern` for custom business compositions that do not fit those
 resource routes. It supplies layout only, not querying, permissions, form
 submission, or loading/error handling:
 
-- `list`: compact title, toolbar, table/list content, and list empty states.
+- `list`: comfortable title, toolbar, table/list content, and list empty states.
 - `form`: narrow reading width, comfortable grouped fields and a single save area.
 - `detail`: read-only summary and related content.
-- `workspace`: primary work area plus an optional secondary panel.
+- `workspace`: comfortable primary work area plus an optional secondary panel.
 - `dashboard`: wide layout with optional metrics and secondary context.
 
 Optional `secondary` content renders beside the primary content for every kind.
