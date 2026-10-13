@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.40.2](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.40.1...create-svadmin-v0.40.2) (2026-10-13)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** default page patterns to comfortable density ([ee13669](https://github.com/vibeunion/svadmin/commit/ee136698045ad5fec237b4149b0a5f1414bf49a7))
+
 ## [0.40.1](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.40.0...create-svadmin-v0.40.1) (2026-10-10)
 
 
