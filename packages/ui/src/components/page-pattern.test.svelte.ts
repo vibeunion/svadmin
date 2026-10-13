@@ -6,10 +6,10 @@ import PagePatternExample from '../../stories/PagePatternExample.svelte';
 
 describe('PagePattern', () => {
   it.each([
-    ['list', 'compact', 'wide'],
+    ['list', 'comfortable', 'wide'],
     ['form', 'comfortable', 'narrow'],
     ['detail', 'comfortable', 'default'],
-    ['workspace', 'compact', 'wide'],
+    ['workspace', 'comfortable', 'wide'],
     ['dashboard', 'comfortable', 'wide'],
   ] as const)('applies the %s page defaults', (kind, density, width) => {
     const children = createRawSnippet(() => ({ render: () => '<p>Content</p>' }));
