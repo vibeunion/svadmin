@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.83.1](https://github.com/vibeunion/svadmin/compare/ui-v0.83.0...ui-v0.83.1) (2026-10-13)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** default page patterns to comfortable density ([ee13669](https://github.com/vibeunion/svadmin/commit/ee136698045ad5fec237b4149b0a5f1414bf49a7))
+
 ## [0.83.0](https://github.com/vibeunion/svadmin/compare/ui-v0.82.0...ui-v0.83.0) (2026-10-10)
 
 
