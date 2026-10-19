@@ -26,6 +26,8 @@ afterEach(() => { for (const dir of temporary.splice(0)) rmSync(dir, { recursive
 describe('vibe starter', () => {
   it('parses strict, dry-run-first options', () => {
     expect(parseVibeArguments(['catalog'])).toEqual({ command: 'catalog' });
+    expect(parseVibeArguments(['plan', './svadmin.product.json', '--role', 'operator'])).toMatchObject({ command: 'plan', roleIds: ['operator'] });
+    expect(parseVibeArguments(['review', './svadmin.product.json'])).toMatchObject({ command: 'review' });
     expect(parseVibeArguments(['init', 'demo'])).toMatchObject({ preset: 'enterprise', write: false });
     expect(parseVibeArguments(['init', 'demo', '--preset', 'operations', '--write'])).toMatchObject({ preset: 'operations', write: true });
     for (const args of [[], ['init'], ['init', 'a', 'b'], ['catalog', '--write'], ['init', 'a', '--preset'], ['init', 'a', '--preset', 'oops'], ['init', 'a', '--force']]) {
@@ -51,6 +53,7 @@ describe('vibe starter', () => {
     expect(files['vibe-skill.md']).toBeUndefined();
     expect(files['tests/workspace.spec.ts']).toContain("test('customer creation");
     expect(files['DESIGN.md']).toBe(readFileSync(join(root, 'guidance/DESIGN.md'), 'utf8'));
+    expect(files['PRODUCT.md']).toBe(readFileSync(join(root, 'guidance/PRODUCT.md'), 'utf8'));
     expect(JSON.parse(file(files, 'tsconfig.json')).compilerOptions.skipLibCheck).toBe(false);
     expect(JSON.parse(file(files, 'package.json')).devDependencies.csstype).toBe('^3.2.3');
     for (const patch of Object.values(manifest.patchedDependencies ?? {})) expect(files[patch]).toBeDefined();
