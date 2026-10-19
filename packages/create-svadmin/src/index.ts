@@ -195,7 +195,7 @@ function upgrade(args: string[]): void {
   printUpgradeExecution(upgradeExecution, commandArguments.projectDirectory, packagePath);
 }
 
-const GUIDANCE_FILES = ['DESIGN.md', 'AGENTS.md'] as const;
+const GUIDANCE_FILES = ['DESIGN.md', 'AGENTS.md', 'PRODUCT.md'] as const;
 type GuidanceFile = (typeof GUIDANCE_FILES)[number];
 
 function missingGuidanceFiles(projectDirectory: string): GuidanceFile[] {
