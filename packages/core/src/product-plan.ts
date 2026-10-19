@@ -137,7 +137,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function hasStringId(value: unknown): value is { readonly id: string } {
-  return isRecord(value) && typeof value.id === 'string' && value.id.trim().length > 0;
+  return isRecord(value) && typeof value['id'] === 'string' && value['id'].trim().length > 0;
 }
 
 interface EntityShape {
@@ -184,17 +184,19 @@ function pushEntityIssues(
 export function validateProductPlan(input: unknown): ProductPlanValidationResult {
   const issues: ProductPlanValidationIssue[] = [];
   if (!isRecord(input)) return { ok: false, issues: [{ code: 'invalid-root', path: '', message: 'Product plan must be a JSON object.' }] };
-  if (input.schemaVersion !== PRODUCT_PLAN_SCHEMA_VERSION) {
+  if (input['schemaVersion'] !== PRODUCT_PLAN_SCHEMA_VERSION) {
     issues.push({ code: 'invalid-version', path: 'schemaVersion', message: `Expected ${PRODUCT_PLAN_SCHEMA_VERSION}.` });
   }
-  if (!isRecord(input.brief)) {
+  if (!isRecord(input['brief'])) {
     issues.push({ code: 'invalid-root', path: 'brief', message: 'Product plan brief must be an object.' });
   } else {
+    const brief = input['brief'] as Record<string, unknown>;
     for (const key of ['id', 'name', 'description', 'primaryOutcome', 'primaryAudience'] as const) {
-      if (typeof input.brief[key] !== 'string') issues.push({ code: 'invalid-field', path: `brief.${key}`, message: `brief.${key} must be a string.` });
+      if (typeof brief[key] !== 'string') issues.push({ code: 'invalid-field', path: `brief.${key}`, message: `brief.${key} must be a string.` });
     }
     for (const key of ['constraints', 'nonGoals', 'assumptions'] as const) {
-      if (!Array.isArray(input.brief[key]) || !input.brief[key].every(value => typeof value === 'string')) issues.push({ code: 'invalid-field', path: `brief.${key}`, message: `brief.${key} must be an array of strings.` });
+      const candidate = brief[key];
+      if (!Array.isArray(candidate) || !candidate.every((value: unknown) => typeof value === 'string')) issues.push({ code: 'invalid-field', path: `brief.${key}`, message: `brief.${key} must be an array of strings.` });
     }
   }
   const seen = new Set<string>();
