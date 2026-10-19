@@ -65,6 +65,7 @@
   import ResourceOverview from './ResourceOverview.svelte';
   import DataState from './content/DataState.svelte';
   import { parseContractRouteId } from '@svadmin/core/schema';
+  import { matchRoute } from '@svadmin/core/router';
   import { resolveAdminThemeConfig } from '../default-theme.js';
   import AutoForm from './LazyAutoForm.svelte';
   import ShowPage from './LazyShowPage.svelte';
@@ -91,6 +92,12 @@
   import type { MfaEnrollmentProvider } from './TwoFactorAuthPage.svelte';
   import type { NotificationPreferencesProvider } from './NotificationsSettings.svelte';
   import type { MemberDirectoryProvider } from './account/MemberDirectory.svelte';
+
+  export interface AdminPageRoute {
+    readonly path: string;
+    readonly component: Component<{ route: string; params: Record<string, string | undefined> }>;
+    readonly title?: string;
+  }
 
   interface Props {
     mfaEnrollmentProvider?: MfaEnrollmentProvider;
@@ -149,6 +156,8 @@
     }>;
     /** Custom multi-level menu configuration */
     menu?: MenuItem[];
+    /** Product or application surface routes rendered before resource fallbacks. */
+    pageRoutes?: readonly AdminPageRoute[];
     /** External URL to the main application or workspace (renders a shortcut in the header) */
     siteUrl?: string;
     /** Routing strategy for Sidebar links ('hash' | 'path' | 'auto') */
@@ -194,6 +203,7 @@
     components: userComponents,
     resourcePages,
     menu,
+    pageRoutes,
     siteUrl,
     routeMode,
     queryClient: providedQueryClient,
@@ -344,6 +354,14 @@
   const route = $derived(routerState.route);
   const params = $derived(routerState.params);
   const path = $derived(routerState.path);
+  const customRouteMatch = $derived.by(() => {
+    if (!pageRoutes?.length) return undefined;
+    for (const candidate of pageRoutes) {
+      const match = matchRoute(path, [candidate.path]);
+      if (match) return { candidate, params: match.params };
+    }
+    return undefined;
+  });
   const resourceNames = $derived(new Set(resources.map((resource) => resource.name)));
   const isStandaloneTwoFactor = $derived(route === '/2fa' || route === '/authentication/branded/2fa');
   const standaloneErrorStatus = $derived.by((): '404' | '500' | undefined => {
@@ -634,6 +652,9 @@
         {:else}
           <ResourceOverview />
         {/if}
+      {:else if customRouteMatch}
+        {@const CustomPage = customRouteMatch.candidate.component}
+        <CustomPage route={customRouteMatch.candidate.path} params={customRouteMatch.params} />
       {:else if (renderedRoute === '/:resource' || renderedRoute === '/:parent/:parentId/:resource') && renderedHasRouteResource && renderedResourceName !== undefined}
         {#key renderedParams['resource']}
           {@const Comp = renderedResourcePages?.list ?? mergedComponents.AutoTable}
