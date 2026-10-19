@@ -265,7 +265,7 @@ export function validateProductPlan(input: unknown): ProductPlanValidationResult
   const shapes: Record<string, EntityShape> = {
     roles: { strings: ['name'], arrays: ['permissions'] },
     workflows: { strings: ['name', 'trigger', 'goal', 'priority', 'frequency'], arrays: ['actorRoleIds', 'steps', 'successCriteria', 'exceptions'] },
-    resources: { strings: ['name', 'label'], arrays: ['fields', 'roleIds', 'workflowIds'] },
+    resources: { strings: ['name', 'label'], arrays: ['roleIds', 'workflowIds'] },
     actions: { strings: ['label', 'workflowId'], arrays: ['roleIds'] },
     surfaces: { strings: ['name', 'kind', 'purpose'], arrays: ['workflowIds', 'resourceIds', 'roleIds', 'actionIds', 'sections', 'states'] },
     menu: { strings: ['label', 'placement'], arrays: ['workflowIds', 'roleIds'] },
@@ -276,6 +276,61 @@ export function validateProductPlan(input: unknown): ProductPlanValidationResult
     // intentionally share a label-like ID with its target resource or surface.
     pushEntityIssues(issues, input[key], key, new Set<string>(), shapes[key]);
   }
+
+  const workflows = input['workflows'];
+  if (Array.isArray(workflows)) workflows.forEach((workflow, index) => {
+    if (!isRecord(workflow)) return;
+    if (typeof workflow['priority'] === 'string') pushEnumIssue(issues, workflow['priority'], 'workflows.' + index + '.priority', PRODUCT_PRIORITIES);
+    if (typeof workflow['frequency'] === 'string') pushEnumIssue(issues, workflow['frequency'], 'workflows.' + index + '.frequency', PRODUCT_FREQUENCIES);
+  });
+
+  const resources = input['resources'];
+  if (Array.isArray(resources)) resources.forEach((resource, index) => {
+    if (!isRecord(resource)) return;
+    pushProductFieldIssues(issues, resource['fields'], 'resources.' + index + '.fields');
+    if (resource['menuPlacement'] !== undefined) pushEnumIssue(issues, resource['menuPlacement'], 'resources.' + index + '.menuPlacement', PRODUCT_PLACEMENTS);
+    if (resource['internal'] !== undefined && typeof resource['internal'] !== 'boolean') {
+      issues.push({ code: 'invalid-field', path: 'resources.' + index + '.internal', message: 'resources.' + index + '.internal must be a boolean when provided.' });
+    }
+  });
+
+  const actions = input['actions'];
+  if (Array.isArray(actions)) actions.forEach((action, index) => {
+    if (!isRecord(action)) return;
+    if (action['disclosure'] !== undefined) pushEnumIssue(issues, action['disclosure'], 'actions.' + index + '.disclosure', PRODUCT_DISCLOSURES);
+    if (action['destructive'] !== undefined && typeof action['destructive'] !== 'boolean') {
+      issues.push({ code: 'invalid-field', path: 'actions.' + index + '.destructive', message: 'actions.' + index + '.destructive must be a boolean when provided.' });
+    }
+  });
+
+  const surfaces = input['surfaces'];
+  if (Array.isArray(surfaces)) surfaces.forEach((surface, index) => {
+    if (!isRecord(surface)) return;
+    if (typeof surface['kind'] === 'string') pushEnumIssue(issues, surface['kind'], 'surfaces.' + index + '.kind', PRODUCT_PAGE_KINDS);
+    if (surface['menuPlacement'] !== undefined) pushEnumIssue(issues, surface['menuPlacement'], 'surfaces.' + index + '.menuPlacement', PRODUCT_PLACEMENTS);
+    if (surface['route'] !== undefined && (typeof surface['route'] !== 'string' || surface['route'].trim().length === 0)) {
+      issues.push({ code: 'invalid-field', path: 'surfaces.' + index + '.route', message: 'surfaces.' + index + '.route must be a non-empty string when provided.' });
+    }
+    const states = surface['states'];
+    if (Array.isArray(states)) states.forEach((state, stateIndex) => {
+      if (typeof state === 'string') pushEnumIssue(issues, state, 'surfaces.' + index + '.states.' + stateIndex, PRODUCT_STATES);
+    });
+  });
+
+  const menu = input['menu'];
+  if (Array.isArray(menu)) menu.forEach((entry, index) => {
+    if (!isRecord(entry)) return;
+    if (typeof entry['placement'] === 'string') pushEnumIssue(issues, entry['placement'], 'menu.' + index + '.placement', PRODUCT_PLACEMENTS);
+    for (const key of ['href', 'parentId', 'surfaceId', 'resourceId', 'condition'] as const) {
+      if (entry[key] !== undefined && typeof entry[key] !== 'string') {
+        issues.push({ code: 'invalid-field', path: 'menu.' + index + '.' + key, message: 'menu.' + index + '.' + key + ' must be a string when provided.' });
+      }
+    }
+    if (entry['order'] !== undefined && (typeof entry['order'] !== 'number' || !Number.isFinite(entry['order']))) {
+      issues.push({ code: 'invalid-field', path: 'menu.' + index + '.order', message: 'menu.' + index + '.order must be a finite number when provided.' });
+    }
+  });
+
   return issues.length === 0
     ? { ok: true, value: input as unknown as ProductPlan }
     : { ok: false, issues };
