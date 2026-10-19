@@ -487,7 +487,7 @@ export function buildAdminAiManifest(options: ScaffoldPlatformOptions): AdminAiM
       notes: SCAFFOLD_MIGRATION_NOTES,
     },
     plugins: [],
-    guidance: ['AGENTS.md', 'DESIGN.md'],
+    guidance: ['AGENTS.md', 'DESIGN.md', 'PRODUCT.md'],
   };
 }
 
