@@ -4,7 +4,9 @@ import { createProjectPackageJson, type ScaffoldManifest } from './project-manif
 import { buildAdminAiManifest, buildAdminSchemaJson } from './scaffold-platform';
 import { resources, uiOnlyResources } from '../blueprints/customer-workspace/src/resources';
 import { inspectVibePage, searchVibePages } from './vibe-catalog';
-import { formatProductPreview, parseProductPlan, reviewProductPlan, runProductPipeline } from '@svadmin/core';
+import { parseProductPlan } from '@svadmin/core/product-plan';
+import { formatProductPreview, runProductPipeline } from '@svadmin/core/product-pipeline';
+import { reviewProductPlan } from '@svadmin/core/product-review';
 
 const PRESETS = ['operations', 'enterprise', 'collaboration'] as const;
 export type VibePreset = typeof PRESETS[number];
