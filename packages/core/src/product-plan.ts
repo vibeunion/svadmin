@@ -123,7 +123,7 @@ export interface ProductPlan {
 }
 
 export interface ProductPlanValidationIssue {
-  readonly code: 'invalid-root' | 'invalid-version' | 'missing-array' | 'invalid-id' | 'duplicate-id';
+  readonly code: 'invalid-root' | 'invalid-version' | 'missing-array' | 'invalid-id' | 'invalid-field' | 'duplicate-id';
   readonly path: string;
   readonly message: string;
 }
@@ -140,25 +140,43 @@ function hasStringId(value: unknown): value is { readonly id: string } {
   return isRecord(value) && typeof value.id === 'string' && value.id.trim().length > 0;
 }
 
+interface EntityShape {
+  readonly strings?: readonly string[];
+  readonly arrays?: readonly string[];
+}
+
 function pushEntityIssues(
   issues: ProductPlanValidationIssue[],
   value: unknown,
   path: string,
   seen: Set<string>,
+  shape: EntityShape = {},
 ): void {
   if (!Array.isArray(value)) {
     issues.push({ code: 'missing-array', path, message: `${path} must be an array.` });
     return;
   }
   value.forEach((item, index) => {
+    const itemPath = `${path}.${index}`;
     if (!hasStringId(item)) {
-      issues.push({ code: 'invalid-id', path: `${path}.${index}.id`, message: 'Every product entity needs a non-empty string id.' });
+      issues.push({ code: 'invalid-id', path: `${itemPath}.id`, message: 'Every product entity needs a non-empty string id.' });
       return;
     }
     if (seen.has(item.id)) {
-      issues.push({ code: 'duplicate-id', path: `${path}.${index}.id`, message: `Product id "${item.id}" is duplicated.` });
+      issues.push({ code: 'duplicate-id', path: `${itemPath}.id`, message: `Product id "${item.id}" is duplicated.` });
     }
     seen.add(item.id);
+    const record: Record<string, unknown> | undefined = isRecord(item) ? item : undefined;
+    if (!record) return;
+    for (const key of shape.strings ?? []) {
+      if (typeof record[key] !== 'string') issues.push({ code: 'invalid-field', path: `${itemPath}.${key}`, message: `${itemPath}.${key} must be a string.` });
+    }
+    for (const key of shape.arrays ?? []) {
+      const candidate = record[key];
+      if (!Array.isArray(candidate) || !candidate.every(value => typeof value === 'string')) {
+        issues.push({ code: 'invalid-field', path: `${itemPath}.${key}`, message: `${itemPath}.${key} must be an array of strings.` });
+      }
+    }
   });
 }
 
@@ -169,10 +187,27 @@ export function validateProductPlan(input: unknown): ProductPlanValidationResult
   if (input.schemaVersion !== PRODUCT_PLAN_SCHEMA_VERSION) {
     issues.push({ code: 'invalid-version', path: 'schemaVersion', message: `Expected ${PRODUCT_PLAN_SCHEMA_VERSION}.` });
   }
-  if (!isRecord(input.brief)) issues.push({ code: 'invalid-root', path: 'brief', message: 'Product plan brief must be an object.' });
+  if (!isRecord(input.brief)) {
+    issues.push({ code: 'invalid-root', path: 'brief', message: 'Product plan brief must be an object.' });
+  } else {
+    for (const key of ['id', 'name', 'description', 'primaryOutcome', 'primaryAudience'] as const) {
+      if (typeof input.brief[key] !== 'string') issues.push({ code: 'invalid-field', path: `brief.${key}`, message: `brief.${key} must be a string.` });
+    }
+    for (const key of ['constraints', 'nonGoals', 'assumptions'] as const) {
+      if (!Array.isArray(input.brief[key]) || !input.brief[key].every(value => typeof value === 'string')) issues.push({ code: 'invalid-field', path: `brief.${key}`, message: `brief.${key} must be an array of strings.` });
+    }
+  }
   const seen = new Set<string>();
+  const shapes: Record<string, EntityShape> = {
+    roles: { strings: ['name'], arrays: ['permissions'] },
+    workflows: { strings: ['name', 'trigger', 'goal', 'priority', 'frequency'], arrays: ['actorRoleIds', 'steps', 'successCriteria', 'exceptions'] },
+    resources: { strings: ['name', 'label'], arrays: ['fields', 'roleIds', 'workflowIds'] },
+    actions: { strings: ['label', 'workflowId'], arrays: ['roleIds'] },
+    surfaces: { strings: ['name', 'kind', 'purpose'], arrays: ['workflowIds', 'resourceIds', 'roleIds', 'actionIds', 'sections', 'states'] },
+    menu: { strings: ['label', 'placement'], arrays: ['workflowIds', 'roleIds'] },
+  };
   for (const key of ['roles', 'workflows', 'resources', 'actions', 'surfaces', 'menu'] as const) {
-    pushEntityIssues(issues, input[key], key, seen);
+    pushEntityIssues(issues, input[key], key, seen, shapes[key]);
   }
   return issues.length === 0
     ? { ok: true, value: input as unknown as ProductPlan }
