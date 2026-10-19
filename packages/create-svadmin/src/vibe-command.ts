@@ -123,7 +123,7 @@ export function planVibeProject(packageRoot: string, manifest: ScaffoldManifest,
   ai.providers.data = { choice: 'none', package: null, capabilities: ['in-memory-demo', 'data', 'filter', 'sort', 'pagination'] };
   ai.project.commands = pkg.scripts;
   ai.project.testCommand = 'bun run test:ui';
-  ai.guidance = [...ai.guidance, 'svadmin.vibe.json', 'ARCHITECTURE.md', '.agents/skills/svadmin-vibe/SKILL.md'];
+  ai.guidance = [...ai.guidance, 'PRODUCT.md', 'svadmin.vibe.json', 'ARCHITECTURE.md', '.agents/skills/svadmin-vibe/SKILL.md'];
   files['svadmin.ai.json'] = `${JSON.stringify(ai, null, 2)}\n`;
   files['svadmin.schema.json'] = `${JSON.stringify(buildAdminSchemaJson(), null, 2)}\n`;
   files['.gitignore'] = 'node_modules/\ndist/\n.env\n.env.*\n!.env.example\nplaywright-report/\ntest-results/\n';
