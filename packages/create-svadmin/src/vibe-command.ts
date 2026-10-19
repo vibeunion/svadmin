@@ -85,6 +85,7 @@ export function planVibeProject(packageRoot: string, manifest: ScaffoldManifest,
   }
   files['DESIGN.md'] = fs.readFileSync(path.join(packageRoot, 'guidance/DESIGN.md'), 'utf8');
   files['AGENTS.md'] = fs.readFileSync(path.join(packageRoot, 'guidance/AGENTS.md'), 'utf8');
+  files['PRODUCT.md'] = fs.readFileSync(path.join(packageRoot, 'guidance/PRODUCT.md'), 'utf8');
   const skill = files['vibe-skill.md'];
   if (typeof skill !== 'string') throw new Error('The shipped vibe skill is missing');
   files['.agents/skills/svadmin-vibe/SKILL.md'] = skill;
