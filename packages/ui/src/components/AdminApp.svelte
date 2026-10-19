@@ -1,9 +1,9 @@
 <script module lang="ts">
-  import type { Component } from 'svelte';
+  import type { Component as SvelteComponent } from 'svelte';
 
   export interface AdminPageRoute {
     readonly path: string;
-    readonly component: Component<{ route: string; params: Record<string, string | undefined> }>;
+    readonly component: SvelteComponent<{ route: string; params: Record<string, string | undefined> }>;
     readonly title?: string;
   }
 
