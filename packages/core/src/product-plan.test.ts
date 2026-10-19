@@ -36,12 +36,14 @@ describe('product planning layer', () => {
 
   it('reports unserved core workflows and density without imposing a menu count', () => {
     const plan = planWithMenu([]);
-    const surface = plan.surfaces[0]!;
+    const surface = plan.surfaces[0];
+    if (surface === undefined) throw new Error('Expected a workbench surface in the fixture');
     const report = reviewProductPlan({ ...plan, surfaces: [{ ...surface, sections: ['1', '2', '3', '4', '5', '6', '7'] }] });
     expect(report.ok).toBe(true);
     expect(report.metrics.menuNodeCount).toBe(0);
     expect(report.issues.some(issue => issue.code === 'surface.section-density')).toBe(true);
-    const workflow = plan.workflows[0]!;
+    const workflow = plan.workflows[0];
+    if (workflow === undefined) throw new Error('Expected a workflow in the fixture');
     expect(() => parseProductPlan({ ...plan, workflows: [{ ...workflow, goal: 3 as never }] })).toThrow();
   });
 });
