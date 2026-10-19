@@ -646,15 +646,15 @@
         <LazyPage loader={loadTeamCrewTablePage} props={{}} />
       {:else if renderedRoute.startsWith('/settings')}
         <SettingsPage {...notificationPreferencesProvider ? { preferencesProvider: notificationPreferencesProvider } : {}} />
+      {:else if customRouteMatch}
+        {@const CustomPage = customRouteMatch.candidate.component}
+        <CustomPage route={customRouteMatch.candidate.path} params={customRouteMatch.params} />
       {:else if renderedRoute === '/' || renderedRoute === '' || renderedRoute === '/inventory-dashboard'}
         {#if dashboard}
           {@render dashboard()}
         {:else}
           <ResourceOverview />
         {/if}
-      {:else if customRouteMatch}
-        {@const CustomPage = customRouteMatch.candidate.component}
-        <CustomPage route={customRouteMatch.candidate.path} params={customRouteMatch.params} />
       {:else if (renderedRoute === '/:resource' || renderedRoute === '/:parent/:parentId/:resource') && renderedHasRouteResource && renderedResourceName !== undefined}
         {#key renderedParams['resource']}
           {@const Comp = renderedResourcePages?.list ?? mergedComponents.AutoTable}
