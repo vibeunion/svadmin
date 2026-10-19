@@ -31,14 +31,23 @@ function conditionEnabled(condition: string | undefined, flags: Readonly<Record<
   return condition === undefined ? true : flags?.[condition] === true;
 }
 
-function createNode(item: ProductMenuNode, allItems: readonly ProductMenuNode[], context: ProductNavigationContext): ProductNavigationNode {
+function createNode(
+  item: ProductMenuNode,
+  allItems: readonly ProductMenuNode[],
+  context: ProductNavigationContext,
+  ancestry: ReadonlySet<string> = new Set(),
+): ProductNavigationNode {
   const visibleByRole = canSeeByRole(item, context.roleIds);
   const visibleByCondition = conditionEnabled(item.condition, context.featureFlags);
   const visible = visibleByRole && visibleByCondition && item.placement !== 'hidden';
-  const children = allItems
-    .filter(candidate => candidate.parentId === item.id)
-    .sort((left, right) => (left.order ?? 0) - (right.order ?? 0))
-    .map(candidate => createNode(candidate, allItems, context));
+  const nextAncestry = new Set(ancestry);
+  nextAncestry.add(item.id);
+  const children = nextAncestry.has(item.id)
+    ? allItems
+      .filter(candidate => candidate.parentId === item.id && !nextAncestry.has(candidate.id))
+      .sort((left, right) => (left.order ?? 0) - (right.order ?? 0))
+      .map(candidate => createNode(candidate, allItems, context, nextAncestry))
+    : [];
   return {
     ...item,
     children,
