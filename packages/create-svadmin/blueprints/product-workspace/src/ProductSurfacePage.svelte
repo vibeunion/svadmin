@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { productPagePlans } from './generated/pages';
+  import { productPagePlans, productSurfaceRoutes } from './generated/pages';
 
   interface Props {
     route: string;
@@ -7,11 +7,11 @@
   }
 
   let { route }: Props = $props();
-  const page = $derived(productPagePlans.find(candidate => candidate.route === route));
+  const page = $derived(productPagePlans.find(candidate => productSurfaceRoutes[route] === candidate.id));
 </script>
 
 <svelte:head>
-  <title>{page?.name ?? 'Product surface'}</title>
+  <title>{page?.title ?? 'Product surface'}</title>
 </svelte:head>
 
 <div class="surface-page">
@@ -19,7 +19,7 @@
     <header class="surface-hero">
       <div>
         <p class="eyebrow">{page.kind}</p>
-        <h1>{page.name}</h1>
+        <h1>{page.title}</h1>
         <p class="purpose">{page.purpose}</p>
       </div>
       {#if page.primaryAction}
