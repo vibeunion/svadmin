@@ -385,7 +385,6 @@ export type {
   ProductNavigationContext,
   ProductMenuOptions,
 } from './product-navigation';
-export type { ProductNavigationContext } from './product-navigation';
 export { buildProductPagePlan } from './product-pages';
 export type { ProductPagePlan, ProductPageSection } from './product-pages';
 export { formatProductPreview, runProductPipeline } from './product-pipeline';
