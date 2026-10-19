@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "id": "product-workspace",
+  "status": "generated",
+  "framework": "svelte5-vite",
+  "source": "svadmin.product.json",
+  "generated": ["src/generated/product-plan.ts", "src/generated/navigation.ts", "src/generated/pages.ts", "src/generated/resources.ts", "src/generated/page-routes.ts"],
+  "dataMode": "empty-in-memory",
+  "boundaries": ["No production writes", "No fake authorization", "Actions require explicit command contracts", "Menu count follows business needs"]
+}
