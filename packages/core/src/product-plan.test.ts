@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'bun:test';
 import { buildProductNavigation } from './product-navigation';
 import { parseProductPlan } from './product-plan';
 import { reviewProductPlan } from './product-review';
