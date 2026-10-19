@@ -4,6 +4,17 @@ Read `DESIGN.md` before creating, revising, or reviewing any UI. It is the
 authority for visual language, page hierarchy, feedback ownership, and
 acceptance checks in this project.
 
+## Product-first generation
+
+Read `PRODUCT.md` before converting a schema, API, or feature list into pages. Build the product brief, workflows, resources, actions, surfaces, and menu in that order. Resources are data contracts; they are not automatic pages or menu entries.
+
+- Keep one primary purpose and one dominant next action per surface.
+- Give every core workflow a serving surface or contextual entry.
+- Declare loading, empty, error, forbidden, and success states before writing markup.
+- Menu count is determined by actual business needs. Never apply a fixed global cap; use roles, task frequency, placement, grouping, and context to keep it legible.
+- Run `svadmin vibe review ./svadmin.product.json` before generating UI and `svadmin vibe plan ./svadmin.product.json --role <role-id>` to inspect role-specific navigation.
+- Treat review warnings as prompts for product judgment. Do not silently delete business-required workflows or menu entries to make a count pass.
+
 ## Platform entrypoints
 
 Before generating or modifying application code, read these stable files

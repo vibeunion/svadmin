@@ -119,6 +119,19 @@ bun install
 bun run dev
 ```
 
+## Product-first Vibe Loop
+
+Use a product plan when a feature request is larger than one CRUD resource. The plan keeps business workflows, resources, pages, actions, and navigation separate so generated projects do not expose every backend table as a page.
+
+```bash
+# Read product issues before generating UI
+npx @svadmin/create vibe review ./svadmin.product.json
+
+# Preview the experience for one role; omit --role to inspect all roles
+npx @svadmin/create vibe plan ./svadmin.product.json --role operator
+```
+
+The plan uses schema version `product/v1`. Menu entries are driven by actual business needs and role/task context; svadmin does not apply a global menu-count cap. Generated starters include `PRODUCT.md` alongside `DESIGN.md` and `AGENTS.md`.
 ## Automated Inference CLI / 接口代码推断器
 
 Automatically infer ResourceDefinitions, TypeBox schemas, and Svelte 5 CRUD components from REST endpoints, OpenAPI / Swagger specs, GraphQL endpoints (introspection), or local schema/sample files:

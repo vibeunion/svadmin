@@ -4,6 +4,9 @@ import { createProjectPackageJson, type ScaffoldManifest } from './project-manif
 import { buildAdminAiManifest, buildAdminSchemaJson } from './scaffold-platform';
 import { resources, uiOnlyResources } from '../blueprints/customer-workspace/src/resources';
 import { inspectVibePage, searchVibePages } from './vibe-catalog';
+import { parseProductPlan } from '@svadmin/core/product-plan';
+import { formatProductPreview, runProductPipeline } from '@svadmin/core/product-pipeline';
+import { reviewProductPlan } from '@svadmin/core/product-review';
 
 const PRESETS = ['operations', 'enterprise', 'collaboration'] as const;
 export type VibePreset = typeof PRESETS[number];
@@ -13,13 +16,34 @@ export function parseVibeArguments(args: string[]) {
   const [command, ...rest] = args;
   if (command === 'mcp' && rest.length === 0) return { command } as const;
   if (command === 'catalog' && rest.length === 0) return { command } as const;
+  if (command === 'plan' || command === 'review') {
+    const positional: string[] = [];
+    const roleIds: string[] = [];
+    for (let i = 0; i < rest.length; i++) {
+      const arg = rest[i];
+      if (arg === undefined) continue;
+      if (arg === '--role') {
+        const roleId = rest[++i];
+        if (!roleId?.trim()) throw new Error(`Missing value for --role`);
+        roleIds.push(roleId);
+      } else if (arg.startsWith('-')) {
+        throw new Error(`Unknown option: ${arg}`);
+      } else {
+        positional.push(arg);
+      }
+    }
+    if (positional.length !== 1) throw new Error(`vibe ${command} requires exactly one product plan JSON file`);
+    const planFile = positional[0];
+    if (planFile === undefined) throw new Error('Missing product plan JSON file');
+    return { command, planFile: path.resolve(planFile), roleIds } as const;
+  }
   if (command === 'catalog' && rest.length === 2 && rest[0] === '--query' && rest[1]?.trim()) {
     return { command, query: rest[1] } as const;
   }
   if (command === 'inspect' && rest.length === 1 && rest[0] && !rest[0].startsWith('-')) {
     return { command, page: rest[0] } as const;
   }
-  if (command !== 'init') throw new Error('Usage: vibe mcp | vibe catalog [--query <keywords>] | vibe inspect <page> | vibe init <directory> [--preset operations|enterprise|collaboration] [--write]');
+  if (command !== 'init') throw new Error('Usage: vibe mcp | vibe catalog [--query <keywords>] | vibe inspect <page> | vibe plan <product-plan.json> [--role <role-id>] | vibe review <product-plan.json> | vibe init <directory> [--preset operations|enterprise|collaboration] [--write]');
   let preset: VibePreset = 'enterprise';
   let write = false;
   const positional: string[] = [];
@@ -65,6 +89,7 @@ export function planVibeProject(packageRoot: string, manifest: ScaffoldManifest,
   }
   files['DESIGN.md'] = fs.readFileSync(path.join(packageRoot, 'guidance/DESIGN.md'), 'utf8');
   files['AGENTS.md'] = fs.readFileSync(path.join(packageRoot, 'guidance/AGENTS.md'), 'utf8');
+  files['PRODUCT.md'] = fs.readFileSync(path.join(packageRoot, 'guidance/PRODUCT.md'), 'utf8');
   const skill = files['vibe-skill.md'];
   if (typeof skill !== 'string') throw new Error('The shipped vibe skill is missing');
   files['.agents/skills/svadmin-vibe/SKILL.md'] = skill;
@@ -102,7 +127,7 @@ export function planVibeProject(packageRoot: string, manifest: ScaffoldManifest,
   ai.providers.data = { choice: 'none', package: null, capabilities: ['in-memory-demo', 'data', 'filter', 'sort', 'pagination'] };
   ai.project.commands = pkg.scripts;
   ai.project.testCommand = 'bun run test:ui';
-  ai.guidance = [...ai.guidance, 'svadmin.vibe.json', 'ARCHITECTURE.md', '.agents/skills/svadmin-vibe/SKILL.md'];
+  ai.guidance = [...ai.guidance, 'PRODUCT.md', 'svadmin.vibe.json', 'ARCHITECTURE.md', '.agents/skills/svadmin-vibe/SKILL.md'];
   files['svadmin.ai.json'] = `${JSON.stringify(ai, null, 2)}\n`;
   files['svadmin.schema.json'] = `${JSON.stringify(buildAdminSchemaJson(), null, 2)}\n`;
   files['.gitignore'] = 'node_modules/\ndist/\n.env\n.env.*\n!.env.example\nplaywright-report/\ntest-results/\n';
@@ -146,6 +171,18 @@ export async function vibeCommand(args: string[], packageRoot: string, manifest:
     console.log(JSON.stringify(inspectVibePage(packageRoot, options.page), null, 2));
     return;
   }
+  if (options.command === 'review' || options.command === 'plan') {
+    const input = JSON.parse(fs.readFileSync(options.planFile, 'utf8')) as unknown;
+    const plan = parseProductPlan(input);
+    if (options.command === 'review') {
+      console.log(JSON.stringify(reviewProductPlan(plan), null, 2));
+      return;
+    }
+    const roleIds = options.roleIds.length ? options.roleIds : plan.roles.map(role => role.id);
+    console.log(formatProductPreview(runProductPipeline({ plan, navigation: { roleIds } })));
+    return;
+  }
+  if (options.command !== 'init') throw new Error('Unsupported vibe command');
   if (fs.existsSync(options.directory)) throw new Error('The target already exists. Choose a new directory; existing projects are never overwritten.');
   const files = planVibeProject(packageRoot, manifest, options.preset);
   console.log(`svadmin vibe: customer-workspace / ${options.preset}\n${options.directory}`);

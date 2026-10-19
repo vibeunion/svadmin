@@ -111,6 +111,26 @@
       "types": "./src/inferencer-graphql.ts",
       "default": "./src/inferencer-graphql.ts"
     },
+    "./product-plan": {
+      "types": "./src/product-plan.ts",
+      "default": "./src/product-plan.ts"
+    },
+    "./product-navigation": {
+      "types": "./src/product-navigation.ts",
+      "default": "./src/product-navigation.ts"
+    },
+    "./product-pages": {
+      "types": "./src/product-pages.ts",
+      "default": "./src/product-pages.ts"
+    },
+    "./product-pipeline": {
+      "types": "./src/product-pipeline.ts",
+      "default": "./src/product-pipeline.ts"
+    },
+    "./product-review": {
+      "types": "./src/product-review.ts",
+      "default": "./src/product-review.ts"
+    },
     "./admin-tool": {
       "types": "./src/admin-tool.ts",
       "default": "./src/admin-tool.ts"

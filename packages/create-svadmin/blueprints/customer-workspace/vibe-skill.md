@@ -5,7 +5,7 @@ description: Build and refine Svelte admin pages from the installed svadmin page
 
 # svadmin Vibe
 
-Read `DESIGN.md`, `svadmin.vibe.json`, and `svadmin.ai.json`. Select the smallest
+Read `PRODUCT.md`, `DESIGN.md`, `svadmin.vibe.json`, and `svadmin.ai.json`. Run `svadmin vibe review ./svadmin.product.json` before generating a multi-resource feature. Select the smallest
 matching page family from `pages`; inspect its source and the relevant resource
 contract before editing. The catalog is a starting point, not permission to
 replace the customer's workflow with this demo's business model.
@@ -21,6 +21,13 @@ then `svadmin_vibe_inspect` and `svadmin_vibe_preview` for desktop and mobile.
 Pass an empty object to search all pages. These tools read shipped references
 only; inspect the current customer's sources separately before making changes.
 The CLI commands remain the fallback when no MCP client is configured.
+
+## Product boundary
+
+- Start from the user's outcome and workflows, not from the complete resource registry.
+- Treat resources as data contracts; only create a surface or menu node when a workflow, role, or business context justifies it.
+- Keep menu count proportional to the actual domain. Never remove required business entries to satisfy a global limit.
+- Keep one dominant action per surface and use the review command to catch dense action/section layouts before markup.
 
 ## Implement
 

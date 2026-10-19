@@ -348,3 +348,39 @@ export type {
 // HTTP fetch utilities
 export { createFetchWithInterceptor, fetchWithInterceptor } from './http';
 export type { FetchWithInterceptor, FetchWithInterceptorOptions } from './http';
+
+// Product planning contracts keep business decisions separate from resources, pages and menus.
+export {
+  PRODUCT_PLAN_SCHEMA_VERSION,
+  ProductPlanValidationError,
+  parseProductPlan,
+  validateProductPlan,
+} from './product-plan';
+export type {
+  ProductAction,
+  ProductBrief,
+  ProductDisclosure,
+  ProductField,
+  ProductFrequency,
+  ProductId,
+  ProductMenuNode,
+  ProductMenuPlacement,
+  ProductNavigationNode,
+  ProductPageKind,
+  ProductPlan,
+  ProductPlanValidationIssue,
+  ProductPlanValidationResult,
+  ProductPriority,
+  ProductResource,
+  ProductRole,
+  ProductSurface,
+  ProductWorkflow,
+} from './product-plan';
+export { buildProductNavigation, flattenVisibleProductNavigation } from './product-navigation';
+export type { ProductNavigationContext } from './product-navigation';
+export { buildProductPagePlan } from './product-pages';
+export type { ProductPagePlan, ProductPageSection } from './product-pages';
+export { formatProductPreview, runProductPipeline } from './product-pipeline';
+export type { ProductPipelineInput, ProductPipelineOutput } from './product-pipeline';
+export { reviewProductPlan } from './product-review';
+export type { ProductReviewIssue, ProductReviewMetrics, ProductReviewReport, ProductReviewSeverity } from './product-review';
