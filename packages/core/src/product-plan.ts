@@ -199,7 +199,6 @@ export function validateProductPlan(input: unknown): ProductPlanValidationResult
       if (!Array.isArray(candidate) || !candidate.every((value: unknown) => typeof value === 'string')) issues.push({ code: 'invalid-field', path: `brief.${key}`, message: `brief.${key} must be an array of strings.` });
     }
   }
-  const seen = new Set<string>();
   const shapes: Record<string, EntityShape> = {
     roles: { strings: ['name'], arrays: ['permissions'] },
     workflows: { strings: ['name', 'trigger', 'goal', 'priority', 'frequency'], arrays: ['actorRoleIds', 'steps', 'successCriteria', 'exceptions'] },
@@ -209,7 +208,10 @@ export function validateProductPlan(input: unknown): ProductPlanValidationResult
     menu: { strings: ['label', 'placement'], arrays: ['workflowIds', 'roleIds'] },
   };
   for (const key of ['roles', 'workflows', 'resources', 'actions', 'surfaces', 'menu'] as const) {
-    pushEntityIssues(issues, input[key], key, seen, shapes[key]);
+    // IDs are scoped to their entity collection. Cross-entity references are
+    // explicit (for example resourceIds and workflowIds), so a menu entry may
+    // intentionally share a label-like ID with its target resource or surface.
+    pushEntityIssues(issues, input[key], key, new Set<string>(), shapes[key]);
   }
   return issues.length === 0
     ? { ok: true, value: input as unknown as ProductPlan }
