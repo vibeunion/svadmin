@@ -4,6 +4,7 @@ import { createProjectPackageJson, type ScaffoldManifest } from './project-manif
 import { buildAdminAiManifest, buildAdminSchemaJson } from './scaffold-platform';
 import { resources, uiOnlyResources } from '../blueprints/customer-workspace/src/resources';
 import { inspectVibePage, searchVibePages } from './vibe-catalog';
+import { formatProductPreview, parseProductPlan, reviewProductPlan, runProductPipeline } from '@svadmin/core';
 
 const PRESETS = ['operations', 'enterprise', 'collaboration'] as const;
 export type VibePreset = typeof PRESETS[number];
@@ -13,13 +14,32 @@ export function parseVibeArguments(args: string[]) {
   const [command, ...rest] = args;
   if (command === 'mcp' && rest.length === 0) return { command } as const;
   if (command === 'catalog' && rest.length === 0) return { command } as const;
+  if (command === 'plan' || command === 'review') {
+    const positional: string[] = [];
+    const roleIds: string[] = [];
+    for (let i = 0; i < rest.length; i++) {
+      const arg = rest[i];
+      if (arg === undefined) continue;
+      if (arg === '--role') {
+        const roleId = rest[++i];
+        if (!roleId?.trim()) throw new Error(`Missing value for --role`);
+        roleIds.push(roleId);
+      } else if (arg.startsWith('-')) {
+        throw new Error(`Unknown option: ${arg}`);
+      } else {
+        positional.push(arg);
+      }
+    }
+    if (positional.length !== 1) throw new Error(`vibe ${command} requires exactly one product plan JSON file`);
+    return { command, planFile: path.resolve(positional[0]!), roleIds } as const;
+  }
   if (command === 'catalog' && rest.length === 2 && rest[0] === '--query' && rest[1]?.trim()) {
     return { command, query: rest[1] } as const;
   }
   if (command === 'inspect' && rest.length === 1 && rest[0] && !rest[0].startsWith('-')) {
     return { command, page: rest[0] } as const;
   }
-  if (command !== 'init') throw new Error('Usage: vibe mcp | vibe catalog [--query <keywords>] | vibe inspect <page> | vibe init <directory> [--preset operations|enterprise|collaboration] [--write]');
+  if (command !== 'init') throw new Error('Usage: vibe mcp | vibe catalog [--query <keywords>] | vibe inspect <page> | vibe plan <product-plan.json> [--role <role-id>] | vibe review <product-plan.json> | vibe init <directory> [--preset operations|enterprise|collaboration] [--write]');
   let preset: VibePreset = 'enterprise';
   let write = false;
   const positional: string[] = [];
@@ -144,6 +164,17 @@ export async function vibeCommand(args: string[], packageRoot: string, manifest:
   }
   if (options.command === 'inspect') {
     console.log(JSON.stringify(inspectVibePage(packageRoot, options.page), null, 2));
+    return;
+  }
+  if (options.command === 'review' || options.command === 'plan') {
+    const input = JSON.parse(fs.readFileSync(options.planFile, 'utf8')) as unknown;
+    const plan = parseProductPlan(input);
+    if (options.command === 'review') {
+      console.log(JSON.stringify(reviewProductPlan(plan), null, 2));
+      return;
+    }
+    const roleIds = options.roleIds.length ? options.roleIds : plan.roles.map(role => role.id);
+    console.log(formatProductPreview(runProductPipeline({ plan, navigation: { roleIds } })));
     return;
   }
   if (fs.existsSync(options.directory)) throw new Error('The target already exists. Choose a new directory; existing projects are never overwritten.');
