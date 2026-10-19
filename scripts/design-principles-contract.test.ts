@@ -11,6 +11,12 @@ describe('Admin UI design principles contract', () => {
     expect(read('DESIGN.md')).toContain('Clear by default');
     expect(read('DESIGN.md')).toContain('Accessible by construction');
     expect(read('DESIGN.md')).toContain('AI-ready and auditable');
+    expect(read('DESIGN.md')).toContain('oklch(0.54 0.24 293)');
+    expect(read('DESIGN.md')).toContain('oklch(0.55 0.16 151)');
+    expect(read('DESIGN.md')).not.toContain('oklch(0.51 0.16 151)');
+    expect(read('DESIGN.md')).toContain("Don't set `font-family` to Inter");
+    expect(read('DESIGN.md')).toContain('data-svadmin-demo-credentials');
+    expect(read('PRODUCT.md')).toContain('headless Svelte 5 admin framework');
   });
 
   it('ships bilingual principle and content-component documentation', () => {
