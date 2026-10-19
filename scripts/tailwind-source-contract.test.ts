@@ -91,4 +91,17 @@ describe('@svadmin/ui native stylesheet contract', () => {
     expect(css).toContain('transition: background-color var(--svadmin-motion-fast) var(--svadmin-motion-easing), color var(--svadmin-motion-fast) var(--svadmin-motion-easing);');
     expect(css).not.toContain('.layout-default[data-theme="stripe"]');
   });
+
+  it('keeps auth and table shells free of nested-card chrome', () => {
+    const css = readRepositoryFile('packages/ui/src/app.css');
+    expect(css).toContain('.layout-clean-flat [data-svadmin-demo-credentials]');
+    expect(css).not.toContain('border-radius: 1rem');
+    expect(css).not.toContain('border-radius: 0.875rem');
+    expect(css).not.toContain('text-transform: uppercase');
+    expect(css).toContain('.layout-clean-flat [data-svadmin-auth-page] > main > div > section > header h1 {\n  color: var(--foreground);\n  font-size: 1.25rem;');
+    const toolbar = css.slice(css.indexOf('.layout-clean-flat[data-theme="stripe"] [data-svadmin-table-toolbar]'));
+    expect(toolbar.startsWith('.layout-clean-flat[data-theme="stripe"] [data-svadmin-table-toolbar]')).toBe(true);
+    expect(toolbar.slice(0, 280)).toContain('box-shadow: none;');
+    expect(toolbar.slice(0, 280)).not.toContain('var(--svadmin-surface-shadow)');
+  });
 });

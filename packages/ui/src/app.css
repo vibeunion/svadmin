@@ -2745,12 +2745,14 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
   min-width: 0;
 }
 
+/* PageToolbar 的 recipe 是底部分割线，不另做一张浮动卡片。 */
 .layout-clean-flat [data-svadmin-table-toolbar] {
-  border-color: var(--svadmin-border);
-  border-radius: var(--radius-lg);
-  background: var(--svadmin-surface);
-  padding: 0.875rem;
-  box-shadow: var(--svadmin-surface-shadow);
+  border: 0;
+  border-bottom: 1px solid var(--svadmin-border);
+  border-radius: 0;
+  background: transparent;
+  padding: 0.75rem 0;
+  box-shadow: none;
 }
 
 .layout-clean-flat [data-svadmin-table-toolbar] [data-slot="input"] {
@@ -3468,9 +3470,11 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
 }
 
 .layout-clean-flat [data-svadmin-auth-page] > main > div > section > header h1 {
-  font-size: 2.25rem;
-  line-height: 1.2;
-  font-weight: 700;
+  color: var(--foreground);
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0;
 }
 
 .layout-clean-flat [data-svadmin-auth-page] > main > div > section > header p {
@@ -3479,35 +3483,41 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
   line-height: 1.5;
 }
 
+/* 演示凭据是登录表面上的说明，不是套在卡片里的第二层卡片。 */
 .layout-clean-flat [data-svadmin-demo-credentials] {
   display: grid;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  border: 1px solid color-mix(in oklch, var(--primary) 20%, var(--border));
-  border-radius: 1rem;
-  background: color-mix(in oklch, var(--primary) 8%, var(--card));
-  padding: 1rem;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  padding: 0 0 1rem;
+  box-shadow: none;
 }
 
 .layout-clean-flat [data-svadmin-demo-credentials] dl {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
+  gap: 0.75rem 1rem;
 }
 
 .layout-clean-flat [data-svadmin-demo-credentials] dl > div {
   min-width: 0;
-  border-radius: 0.875rem;
-  background: color-mix(in oklch, var(--card) 88%, transparent);
-  padding: 0.75rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
 }
 
 .layout-clean-flat [data-svadmin-demo-credentials] dt {
   color: var(--muted-foreground);
-  font-size: 0.6875rem;
-  font-weight: 700;
-  line-height: 1.2;
-  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .layout-clean-flat [data-svadmin-demo-credentials] dd {
@@ -3543,26 +3553,26 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
 
 .layout-clean-flat [data-svadmin-auth-page] form input {
   width: 100%;
-  min-height: 3.5rem;
+  min-height: 2.75rem;
   border: 1px solid var(--border);
-  border-radius: 0.625rem;
-  background: transparent;
-  padding-block: 0.75rem;
-  padding-right: 0.75rem;
-  font-size: 1rem;
+  border-radius: 0.5rem;
+  background: var(--card);
+  padding-block: 0.5rem;
+  padding-inline: 0.75rem;
+  font-size: 0.875rem;
 }
 
 .layout-clean-flat [data-svadmin-auth-page] form input:focus-visible {
   border-color: var(--ring);
-  outline: 3px solid color-mix(in oklch, var(--ring) 20%, transparent);
-  outline-offset: 0;
+  outline: 2px solid var(--ring);
+  outline-offset: var(--svadmin-focus-offset, 2px);
 }
 
 .layout-clean-flat [data-svadmin-auth-page] form > button[type="submit"] {
   width: 100%;
-  min-height: 3.5rem;
-  border-radius: 0.75rem;
-  font-size: 1rem;
+  min-height: 2.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
   font-weight: 600;
 }
 
@@ -3860,10 +3870,11 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
 }
 
 .layout-clean-flat[data-theme="stripe"] [data-svadmin-table-toolbar] {
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  background: var(--card);
-  box-shadow: var(--svadmin-surface-shadow);
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .layout-clean-flat[data-theme="stripe"] [data-svadmin-form-actions] {
