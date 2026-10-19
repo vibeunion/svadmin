@@ -30,6 +30,8 @@ describe('vibe starter', () => {
     expect(parseVibeArguments(['review', './svadmin.product.json'])).toMatchObject({ command: 'review' });
     expect(parseVibeArguments(['init', 'demo'])).toMatchObject({ preset: 'enterprise', write: false });
     expect(parseVibeArguments(['init', 'demo', '--preset', 'operations', '--write'])).toMatchObject({ preset: 'operations', write: true });
+    expect(parseVibeArguments(['init', 'demo', '--product-plan', './plan.json', '--role', 'operator'])).toMatchObject({ productPlanFile: resolve('./plan.json'), roleIds: ['operator'] });
+    expect(parseVibeArguments(['init', 'demo', '--plan', './plan.json'])).toMatchObject({ productPlanFile: resolve('./plan.json') });
     for (const args of [[], ['init'], ['init', 'a', 'b'], ['catalog', '--write'], ['init', 'a', '--preset'], ['init', 'a', '--preset', 'oops'], ['init', 'a', '--force']]) {
       expect(() => parseVibeArguments(args)).toThrow();
     }
@@ -133,4 +135,43 @@ describe('vibe starter', () => {
     expect(result.stdout.toString()).toContain('Dry run only');
     expect(existsSync(directory)).toBe(false);
   }, 30_000);
+});
+
+
+describe('product workspace generation', () => {
+  const plan = {
+    schemaVersion: 'product/v1' as const,
+    brief: {
+      id: 'dispatch', name: '调度台', description: '处理现场任务', primaryOutcome: '让值班员快速分派任务',
+      primaryAudience: '值班员', constraints: [], nonGoals: [], assumptions: [],
+    },
+    roles: [{ id: 'operator', name: '值班员', permissions: ['task.read'] }],
+    workflows: [{
+      id: 'assign-task', name: '分派任务', actorRoleIds: ['operator'], trigger: '收到新任务', goal: '分派给合适的人',
+      steps: ['查看任务', '选择负责人'], successCriteria: ['任务有负责人'], exceptions: [], priority: 'core' as const, frequency: 'high' as const,
+    }],
+    resources: [{
+      id: 'tasks', name: 'tasks', label: '任务', fields: [{
+        id: 'title', label: '标题', type: 'text', readableBy: ['operator'], writableBy: ['operator'], usedByWorkflowIds: ['assign-task'],
+      }], roleIds: ['operator'], workflowIds: ['assign-task'],
+    }],
+    actions: [],
+    surfaces: [{
+      id: 'task-workbench', name: '任务工作台', kind: 'workbench' as const, purpose: '查看并分派任务',
+      workflowIds: ['assign-task'], resourceIds: ['tasks'], roleIds: [], actionIds: [], sections: ['待处理任务'],
+      states: ['empty', 'loading', 'error', 'forbidden', 'success'] as const,
+    }],
+    menu: [{ id: 'tasks', label: '任务', surfaceId: 'task-workbench', workflowIds: ['assign-task'], roleIds: [], placement: 'primary' as const }],
+  };
+
+  it('generates product files without customer example resources', () => {
+    const files = planVibeProject(root, manifest, 'enterprise', { productPlan: plan, roleIds: ['operator'] });
+    expect(JSON.parse(file(files, 'svadmin.product.json')).brief.name).toBe('调度台');
+    expect(file(files, 'src/generated/navigation.ts')).toContain('buildProductMenuItems');
+    expect(file(files, 'src/generated/page-routes.ts')).toContain('ProductSurfacePage');
+    expect(file(files, 'src/generated/resources.ts')).toContain('tasks');
+    expect(file(files, 'PRODUCT.md')).toContain('调度台');
+    expect(files['src/features/customers/data.ts']).toBeUndefined();
+    expect(file(files, 'svadmin.ai.json')).toContain('task-workbench');
+  });
 });
