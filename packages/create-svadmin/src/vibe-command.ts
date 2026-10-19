@@ -307,7 +307,8 @@ export async function vibeCommand(args: string[], packageRoot: string, manifest:
     if (!report.ok) throw new Error('Product plan review failed:\n' + JSON.stringify(report, null, 2));
     if (report.issues.length) console.warn('Product plan review warnings: ' + report.issues.length);
   }
-  const files = planVibeProject(packageRoot, manifest, options.preset, { productPlan, roleIds: options.roleIds });
+  const productOptions: VibeProductOptions = { roleIds: options.roleIds, ...(productPlan === undefined ? {} : { productPlan }) };
+  const files = planVibeProject(packageRoot, manifest, options.preset, productOptions);
   console.log(`svadmin vibe: ${productPlan ? 'product-workspace' : 'customer-workspace'} / ${options.preset}\n${options.directory}`);
   for (const file of Object.keys(files).sort()) console.log(`  add ${file}`);
   if (!options.write) {
