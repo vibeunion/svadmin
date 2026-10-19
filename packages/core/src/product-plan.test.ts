@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test';
+import { describe, expect, it } from 'vitest';
 import { buildProductNavigation } from './product-navigation';
 import { parseProductPlan } from './product-plan';
 import { reviewProductPlan } from './product-review';
@@ -41,5 +41,7 @@ describe('product planning layer', () => {
     expect(report.ok).toBe(true);
     expect(report.metrics.menuNodeCount).toBe(0);
     expect(report.issues.some(issue => issue.code === 'surface.section-density')).toBe(true);
+    const workflow = plan.workflows[0]!;
+    expect(() => parseProductPlan({ ...plan, workflows: [{ ...workflow, goal: 3 as never }] })).toThrow();
   });
 });
