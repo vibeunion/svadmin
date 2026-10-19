@@ -38,9 +38,9 @@
         <section class="surface-card">
           <div class="card-heading">
             <h2>{section.title}</h2>
-            <span>{section.kind}</span>
+            <span>区块</span>
           </div>
-          <p>{section.description}</p>
+          <p>此区块服务于当前工作流，并展示产品计划声明的资源。</p>
           {#if section.resourceIds.length}
             <div class="resource-list">
               {#each section.resourceIds as resourceId}
