@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.83.2](https://github.com/vibeunion/svadmin/compare/ui-v0.83.1...ui-v0.83.2) (2026-10-19)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** 对齐设计合同并去掉嵌套壳层卡片 ([#498](https://github.com/vibeunion/svadmin/issues/498)) ([d6dc3aa](https://github.com/vibeunion/svadmin/commit/d6dc3aabc3c26559de05ebf0f914869ace9ee5a7))
+
 ## [0.83.1](https://github.com/vibeunion/svadmin/compare/ui-v0.83.0...ui-v0.83.1) (2026-10-13)
 
 

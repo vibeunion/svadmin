@@ -1,7 +1,7 @@
 {
   "packages/core": "0.60.0",
   "packages/ai-elements": "0.11.1",
-  "packages/ui": "0.83.1",
+  "packages/ui": "0.83.2",
   "packages/editor": "0.5.14",
   "packages/flow": "0.6.0",
   "packages/sveltekit": "0.13.1",
@@ -12,7 +12,7 @@
   "packages/pocketbase": "0.13.1",
   "packages/supabase": "0.19.1",
   "packages/elysia": "0.14.4",
-  "packages/create-svadmin": "0.40.2",
+  "packages/create-svadmin": "0.40.3",
   "packages/airtable": "0.12.4",
   "packages/appwrite": "0.11.4",
   "packages/auth-utils": "0.9.0",
@@ -28,7 +28,7 @@
   "packages/lite": "0.16.1",
   "packages/mcp": "0.4.14",
   "packages/devtools-contract": "0.3.0",
-  "packages/surface": "0.13.2",
+  "packages/surface": "0.13.3",
   "packages/app": "0.2.3",
   "packages/devtools": "0.3.0",
   "packages/rest": "0.2.3"

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.40.3](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.40.2...create-svadmin-v0.40.3) (2026-10-19)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** 对齐设计合同并去掉嵌套壳层卡片 ([#498](https://github.com/vibeunion/svadmin/issues/498)) ([d6dc3aa](https://github.com/vibeunion/svadmin/commit/d6dc3aabc3c26559de05ebf0f914869ace9ee5a7))
+
 ## [0.40.2](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.40.1...create-svadmin-v0.40.2) (2026-10-13)
 
 
