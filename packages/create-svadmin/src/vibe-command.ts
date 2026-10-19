@@ -31,7 +31,9 @@ export function parseVibeArguments(args: string[]) {
       }
     }
     if (positional.length !== 1) throw new Error(`vibe ${command} requires exactly one product plan JSON file`);
-    return { command, planFile: path.resolve(positional[0]!), roleIds } as const;
+    const planFile = positional[0];
+    if (planFile === undefined) throw new Error('Missing product plan JSON file');
+    return { command, planFile: path.resolve(planFile), roleIds } as const;
   }
   if (command === 'catalog' && rest.length === 2 && rest[0] === '--query' && rest[1]?.trim()) {
     return { command, query: rest[1] } as const;
