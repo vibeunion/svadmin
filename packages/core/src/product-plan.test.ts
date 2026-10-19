@@ -46,4 +46,48 @@ describe('product planning layer', () => {
     if (workflow === undefined) throw new Error('Expected a workflow in the fixture');
     expect(() => parseProductPlan({ ...plan, workflows: [{ ...workflow, goal: 3 as never }] })).toThrow();
   });
+  it('accepts structured product resource fields', () => {
+    const plan = planWithMenu([]);
+    const resource = plan.resources[0];
+    if (resource === undefined) throw new Error('Expected a resource in the fixture');
+    const parsed = parseProductPlan({
+      ...plan,
+      resources: [{
+        ...resource,
+        fields: [{
+          id: 'order-number',
+          label: 'Order number',
+          type: 'string',
+          required: true,
+          readableBy: ['operator'],
+          writableBy: ['operator'],
+          usedByWorkflowIds: ['resolve-order'],
+          disclosure: 'visible',
+        }],
+      }],
+    });
+    expect(parsed.resources[0]?.fields[0]?.id).toBe('order-number');
+  });
+
+  it('rejects malformed nested resource fields and enum values', () => {
+    const plan = planWithMenu([]);
+    const resource = plan.resources[0];
+    if (resource === undefined) throw new Error('Expected a resource in the fixture');
+    expect(() => parseProductPlan({
+      ...plan,
+      resources: [{
+        ...resource,
+        fields: [{
+          id: 'order-number',
+          label: 'Order number',
+          type: 'string',
+          readableBy: 'operator',
+          writableBy: ['operator'],
+          usedByWorkflowIds: ['resolve-order'],
+          disclosure: 'always',
+        }],
+      }],
+    })).toThrow();
+  });
+
 });
