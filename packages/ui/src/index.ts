@@ -12,6 +12,7 @@ export { metricSurfaceClasses, tableSurfaceClasses } from "./design-system.js";
 
 // Entry component
 export { default as AdminApp } from './components/AdminApp.svelte';
+export type { AdminPageRoute } from './components/AdminApp.svelte';
 
 // Admin components
 export { default as AutoTable } from './components/AutoTable.svelte';

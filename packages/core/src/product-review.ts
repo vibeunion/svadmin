@@ -52,6 +52,28 @@ export function reviewProductPlan(plan: ProductPlan): ProductReviewReport {
     reviewSurface(surface, { workflowIds, actionIds, resourceIds }, issues);
   }
 
+  const menuById = new Map(plan.menu.map(item => [item.id, item] as const));
+  for (const item of plan.menu) {
+    if (item.parentId !== undefined && !menuById.has(item.parentId)) {
+      addIssue(issues, { code: 'menu.unknown-parent', severity: 'error', message: `Menu item "${item.label}" references unknown parent "${item.parentId}".`, path: `menu.${item.id}.parentId` });
+    }
+  }
+  const visiting = new Set<string>();
+  const visited = new Set<string>();
+  const visitMenu = (id: string): void => {
+    if (visiting.has(id)) {
+      addIssue(issues, { code: 'menu.cycle', severity: 'error', message: `Menu hierarchy contains a cycle at "${id}".`, path: `menu.${id}.parentId` });
+      return;
+    }
+    if (visited.has(id)) return;
+    visiting.add(id);
+    const parentId = menuById.get(id)?.parentId;
+    if (parentId !== undefined && menuById.has(parentId)) visitMenu(parentId);
+    visiting.delete(id);
+    visited.add(id);
+  };
+  for (const item of plan.menu) visitMenu(item.id);
+
   for (const item of plan.menu) {
     if (!item.workflowIds.length && !item.resourceId && !item.surfaceId) addIssue(issues, { code: 'menu.no-business-target', severity: 'warning', message: `Menu item "${item.label}" has no workflow, resource or surface target.`, path: `menu.${item.id}`, suggestion: 'Keep it only for an intentional external/system entry.' });
     if (item.surfaceId && !has(surfaceIds, item.surfaceId)) addIssue(issues, { code: 'menu.unknown-surface', severity: 'error', message: `Menu item "${item.label}" references unknown surface.`, path: `menu.${item.id}.surfaceId` });
@@ -70,7 +92,7 @@ export function reviewProductPlan(plan: ProductPlan): ProductReviewReport {
   const unserved = plan.workflows.filter(workflow => !served.has(workflow.id));
   unserved.forEach(workflow => addIssue(issues, { code: 'workflow.unserved', severity: workflow.priority === 'core' ? 'error' : 'warning', message: `Workflow "${workflow.name}" has no page or menu entry.`, path: `workflows.${workflow.id}`, suggestion: 'Add a surface or contextual entry, or mark the workflow as deferred.' }));
 
-  const roleVisibilityGaps = plan.workflows.filter(workflow => workflow.actorRoleIds.length > 0 && !plan.surfaces.some(surface => surface.workflowIds.includes(workflow.id) && workflow.actorRoleIds.some(roleId => surface.roleIds.includes(roleId)))).length;
+  const roleVisibilityGaps = plan.workflows.filter(workflow => workflow.actorRoleIds.length > 0 && !plan.surfaces.some(surface => surface.workflowIds.includes(workflow.id) && (surface.roleIds.length === 0 || workflow.actorRoleIds.some(roleId => surface.roleIds.includes(roleId))))).length;
   const orphanResourceCount = plan.resources.filter(resource => resource.workflowIds.length === 0 && !resource.internal).length;
   const errors = issues.filter(issue => issue.severity === 'error');
   return {
