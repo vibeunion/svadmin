@@ -30,7 +30,10 @@ export function runProductPipeline(input: ProductPipelineInput): ProductPipeline
 export function formatProductPreview(output: ProductPipelineOutput): string {
   const lines = ['Navigation:'];
   for (const node of output.navigation) {
-    if (node.visible) lines.push(`- ${node.label}`);
+    // A hidden parent owns its subtree; do not promote role-filtered children
+    // into a misleading top-level preview entry.
+    if (!node.visible) continue;
+    lines.push(`- ${node.label}`);
     for (const child of node.children) if (child.visible) lines.push(`  - ${child.label}`);
   }
   lines.push('', 'Pages:');
