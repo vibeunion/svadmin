@@ -142,6 +142,67 @@ function hasStringId(value: unknown): value is { readonly id: string } {
   return isRecord(value) && typeof value['id'] === 'string' && value['id'].trim().length > 0;
 }
 
+const PRODUCT_DISCLOSURES = ['visible', 'collapsed', 'more', 'context', 'hidden'] as const;
+const PRODUCT_PRIORITIES = ['core', 'secondary', 'future'] as const;
+const PRODUCT_FREQUENCIES = ['high', 'medium', 'low', 'unknown'] as const;
+const PRODUCT_PLACEMENTS = ['primary', 'secondary', 'settings', 'context', 'command', 'hidden'] as const;
+const PRODUCT_PAGE_KINDS = ['workbench', 'list', 'detail', 'form', 'approval', 'import', 'settings', 'custom'] as const;
+const PRODUCT_STATES = ['empty', 'loading', 'error', 'forbidden', 'success'] as const;
+
+function pushEnumIssue(
+  issues: ProductPlanValidationIssue[],
+  value: unknown,
+  path: string,
+  allowed: readonly string[],
+): void {
+  if (typeof value !== 'string' || !allowed.includes(value)) {
+    issues.push({ code: 'invalid-enum', path, message: path + ' must be one of ' + allowed.join(', ') + '.' });
+  }
+}
+
+function pushProductFieldIssues(
+  issues: ProductPlanValidationIssue[],
+  value: unknown,
+  path: string,
+): void {
+  if (!Array.isArray(value)) {
+    issues.push({ code: 'missing-array', path, message: path + ' must be an array.' });
+    return;
+  }
+  const seen = new Set<string>();
+  value.forEach((item, index) => {
+    const itemPath = path + '.' + index;
+    if (!isRecord(item)) {
+      issues.push({ code: 'invalid-field', path: itemPath, message: itemPath + ' must be an object.' });
+      return;
+    }
+    const fieldId = item['id'];
+    if (typeof fieldId !== 'string' || fieldId.trim().length === 0) {
+      issues.push({ code: 'invalid-id', path: itemPath + '.id', message: 'Every product field needs a non-empty string id.' });
+      return;
+    }
+    if (seen.has(fieldId)) {
+      issues.push({ code: 'duplicate-id', path: itemPath + '.id', message: 'Product field id ' + fieldId + ' is duplicated within its resource.' });
+    }
+    seen.add(fieldId);
+    for (const key of ['label', 'type'] as const) {
+      if (typeof item[key] !== 'string') issues.push({ code: 'invalid-field', path: itemPath + '.' + key, message: itemPath + '.' + key + ' must be a string.' });
+    }
+    for (const key of ['readableBy', 'writableBy', 'usedByWorkflowIds'] as const) {
+      const candidate = item[key];
+      if (!Array.isArray(candidate) || !candidate.every(entry => typeof entry === 'string')) {
+        issues.push({ code: 'invalid-field', path: itemPath + '.' + key, message: itemPath + '.' + key + ' must be an array of strings.' });
+      }
+    }
+    for (const key of ['required', 'sensitive'] as const) {
+      if (item[key] !== undefined && typeof item[key] !== 'boolean') {
+        issues.push({ code: 'invalid-field', path: itemPath + '.' + key, message: itemPath + '.' + key + ' must be a boolean when provided.' });
+      }
+    }
+    if (item['disclosure'] !== undefined) pushEnumIssue(issues, item['disclosure'], itemPath + '.disclosure', PRODUCT_DISCLOSURES);
+  });
+}
+
 interface EntityShape {
   readonly strings?: readonly string[];
   readonly arrays?: readonly string[];
