@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.61.0](https://github.com/vibeunion/svadmin/compare/core-v0.60.0...core-v0.61.0) (2026-10-19)
+
+
+### 🚀 Features
+
+* add product-first vibe generation and review ([#500](https://github.com/vibeunion/svadmin/issues/500)) ([5c1816c](https://github.com/vibeunion/svadmin/commit/5c1816c4a60c8775f725f3ec7521ff12a6f51e9d))
+* generate product workspace from product plans ([501ae2a](https://github.com/vibeunion/svadmin/commit/501ae2a2acd1ac7bb610e1c358797f38bc43faa4))
+* generate product workspace from product plans ([501ae2a](https://github.com/vibeunion/svadmin/commit/501ae2a2acd1ac7bb610e1c358797f38bc43faa4))
+
 ## [0.60.0](https://github.com/vibeunion/svadmin/compare/core-v0.59.0...core-v0.60.0) (2026-10-10)
 
 
