@@ -28,13 +28,13 @@
     </header>
 
     <div class="state-strip">
-      {#each page.states as state}
+      {#each page.states as state (state)}
         <span class="state">{state}</span>
       {/each}
     </div>
 
     <div class="surface-grid">
-      {#each page.sections as section}
+      {#each page.sections as section (section.id)}
         <section class="surface-card">
           <div class="card-heading">
             <h2>{section.title}</h2>
@@ -43,7 +43,7 @@
           <p>此区块服务于当前工作流，并展示产品计划声明的资源。</p>
           {#if section.resourceIds.length}
             <div class="resource-list">
-              {#each section.resourceIds as resourceId}
+              {#each section.resourceIds as resourceId (resourceId)}
                 <span>{resourceId}</span>
               {/each}
             </div>
