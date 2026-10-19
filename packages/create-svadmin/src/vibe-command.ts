@@ -182,6 +182,7 @@ export async function vibeCommand(args: string[], packageRoot: string, manifest:
     console.log(formatProductPreview(runProductPipeline({ plan, navigation: { roleIds } })));
     return;
   }
+  if (options.command !== 'init') throw new Error('Unsupported vibe command');
   if (fs.existsSync(options.directory)) throw new Error('The target already exists. Choose a new directory; existing projects are never overwritten.');
   const files = planVibeProject(packageRoot, manifest, options.preset);
   console.log(`svadmin vibe: customer-workspace / ${options.preset}\n${options.directory}`);
