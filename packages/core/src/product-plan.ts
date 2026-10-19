@@ -85,6 +85,8 @@ export interface ProductSurface {
   readonly name: string;
   readonly kind: ProductPageKind;
   readonly purpose: string;
+  /** Optional stable route. Generators derive one when omitted. */
+  readonly route?: string;
   readonly workflowIds: readonly ProductId[];
   readonly resourceIds: readonly ProductId[];
   readonly roleIds: readonly ProductId[];
@@ -123,7 +125,7 @@ export interface ProductPlan {
 }
 
 export interface ProductPlanValidationIssue {
-  readonly code: 'invalid-root' | 'invalid-version' | 'missing-array' | 'invalid-id' | 'invalid-field' | 'duplicate-id';
+  readonly code: 'invalid-root' | 'invalid-version' | 'missing-array' | 'invalid-id' | 'invalid-field' | 'invalid-enum' | 'duplicate-id';
   readonly path: string;
   readonly message: string;
 }
