@@ -189,7 +189,7 @@ export {
   DashboardContractError, decodeDashboardQuery, decodeDashboardSnapshot,
   type DashboardMetric, type DashboardProvider, type DashboardQuery, type DashboardSnapshot, type DashboardWidget,
 } from './dashboard-contract';
-export { setChatProvider, getChatProvider, setChatContext, setAgentProvider, getAgentProvider, registerApproval, resolveApproval, hasPendingApprovals, resetChatProvider, resetAgentProvider, defineAdminTool, decodeAdminToolArgs, executeAdminTool, projectAdminToolSchema } from './chatProvider.svelte';
+export { setChatProvider, getChatProvider, setChatContext, getChatContext, setAgentProvider, getAgentProvider, registerApproval, resolveApproval, hasPendingApprovals, resetChatProvider, defineAdminTool, decodeAdminToolArgs, executeAdminTool, projectAdminToolSchema } from './chatProvider.svelte';
 export { ENTERPRISE_MATURITY, enterpriseMaturityFor } from './enterprise-maturity';
 export type {
   EnterpriseMaturityEntry,
@@ -203,7 +203,7 @@ export type {
 } from './chatProvider.svelte';
 export { getTheme, setTheme, toggleTheme, getResolvedTheme, getColorTheme, setColorTheme, getColorThemes, configureTheme, getThemeConfig, clearCssOverrides, builtinPresets, registerColorPreset, getColorPresets, registerThemeOwner, updateThemeOwner, unregisterThemeOwner, resetTheme } from './theme.svelte';
 export type { ThemeMode, ColorTheme, ThemeStrategy, ThemeConfig, ColorPreset, ThemeOwnerOptions, ThemeOwnerToken } from './theme.svelte';
-export { setUnsavedChanges, setNotificationProvider as setUnsavedChangesNotifier, initUnsavedChangesNotifier, resetUnsavedChanges } from './unsaved-changes.svelte';
+export { setUnsavedChanges, getUnsavedChanges, initUnsavedChangesNotifier, resetUnsavedChanges } from './unsaved-changes.svelte';
 export { setAdminOptions, getAdminOptions, getTextTransformers } from './options.svelte';
 export type { AdminOptions, TextTransformers, OvertimeConfig } from './options.svelte';
 export { checkError } from './hook-utils.svelte';
@@ -246,7 +246,7 @@ export { parseSpreadsheetClipboard, serializeSpreadsheetClipboard } from './spre
 export { parseSpreadsheetWorkbook, serializeSpreadsheetWorkbook, snapshotSpreadsheetWorkbook, SPREADSHEET_WORKBOOK_LIMITS } from './spreadsheet-workbook';
 export type { SpreadsheetCellFormat, SpreadsheetSheet, SpreadsheetWorkbook } from './spreadsheet-workbook';
 export { FILTER_COLLECTION_LIMIT, isNumericFilterField, isCollectionFilterOperator,
-  filterOperatorsForField, isFilterScalarValue, isCollectionFilterValue } from './filter-values';
+  filterOperatorsForField, isFilterScalarValue, isFilterCollectionValue } from './filter-values';
 export {
   assertSchemaFormSchema, prepareSchemaFormValue, readSchemaFormPath,
   matchesSchemaFormCondition, isSchemaFormNodeVisible, validateSchemaFormValue,
@@ -267,6 +267,7 @@ export type { ExportFormat } from './data-transfer.svelte';
 export {
   useLogin, useLogout,
   useRegister, useForgotPassword, useUpdatePassword,
+  useUpdateIdentity, useUpdateProfile,
   useGetIdentity, useIsAuthenticated,
   useOnError, usePermissions,
   getLogoutVersion, resetLogoutVersion,
@@ -314,6 +315,7 @@ export { inferFromGraphQL, GRAPHQL_INTROSPECTION_QUERY } from './inferencer-grap
 export type { InferFromGraphQLOptions, GraphQLIntrospectionSchema, GraphQLTypeDescriptor } from './inferencer-graphql';
 export {
   getDefaultFilter, getDefaultSortOrder,
+  unionFilters, unionSorters,
   file2Base64, generateDefaultDocumentTitle,
   deriveValidator,
   createTypeBoxValidator,
@@ -329,15 +331,15 @@ export type {
   StrictUseDeleteManyMutateParams as UseDeleteManyMutateParams,
   StrictUseCreateManyMutateParams as UseCreateManyMutateParams,
   StrictUseUpdateManyMutateParams as UseUpdateManyMutateParams,
-  StrictUseDeleteManyMutateParams as UseDeleteManyMutateOptions,
   StrictUseFormOptions as UseFormOptions,
   StrictUseFormReturn as UseFormReturn,
 } from './strict-hooks.svelte';
-
 export type {
   TaskProvider,
   TaskDateValue,
   TaskMessageValue,
+  TaskRecord,
+  SubmitTaskOptions,
   TaskHandle,
   TaskListResult,
   TaskSubscription,
@@ -383,6 +385,7 @@ export type {
   ProductNavigationContext,
   ProductMenuOptions,
 } from './product-navigation';
+export type { ProductNavigationContext } from './product-navigation';
 export { buildProductPagePlan } from './product-pages';
 export type { ProductPagePlan, ProductPageSection } from './product-pages';
 export { formatProductPreview, runProductPipeline } from './product-pipeline';
