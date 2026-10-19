@@ -1,4 +1,12 @@
 <script module lang="ts">
+  import type { Component } from 'svelte';
+
+  export interface AdminPageRoute {
+    readonly path: string;
+    readonly component: Component<{ route: string; params: Record<string, string | undefined> }>;
+    readonly title?: string;
+  }
+
   const loadPublicProfilePage = () => import('./profile/PublicProfilePage.svelte');
   const loadGetStartedPage = () => import('./account/GetStartedPage.svelte');
   const loadUserProfilePage = () => import('./account/UserProfilePage.svelte');
@@ -92,12 +100,6 @@
   import type { MfaEnrollmentProvider } from './TwoFactorAuthPage.svelte';
   import type { NotificationPreferencesProvider } from './NotificationsSettings.svelte';
   import type { MemberDirectoryProvider } from './account/MemberDirectory.svelte';
-
-  export interface AdminPageRoute {
-    readonly path: string;
-    readonly component: Component<{ route: string; params: Record<string, string | undefined> }>;
-    readonly title?: string;
-  }
 
   interface Props {
     mfaEnrollmentProvider?: MfaEnrollmentProvider;
