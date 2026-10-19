@@ -169,7 +169,7 @@ describe('product workspace generation', () => {
     expect(JSON.parse(file(files, 'svadmin.product.json')).brief.name).toBe('调度台');
     expect(file(files, 'src/generated/navigation.ts')).toContain('buildProductMenuItems');
     expect(file(files, 'src/generated/page-routes.ts')).toContain('ProductSurfacePage');
-    expect(file(files, 'src/generated/resources.ts')).toContain('tasks');
+    expect(file(files, 'src/generated/resources.ts')).toContain('productPlan.resources');
     expect(file(files, 'PRODUCT.md')).toContain('调度台');
     expect(files['src/features/customers/data.ts']).toBeUndefined();
     expect(file(files, 'svadmin.ai.json')).toContain('task-workbench');
