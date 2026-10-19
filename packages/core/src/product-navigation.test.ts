@@ -64,6 +64,18 @@ describe('product menu adaptation', () => {
     expect(items[2]).toMatchObject({ href: '/settings' });
   });
 
+  it('uses a declared surface route when one is provided', () => {
+    const plan = planWithMenu([
+      { id: 'operations', label: 'Operations', surfaceId: 'operations', workflowIds: [], roleIds: [], placement: 'primary' },
+    ]);
+    const routedPlan = {
+      ...plan,
+      surfaces: plan.surfaces.map(surface => ({ ...surface, route: '/ops' })),
+    };
+
+    expect(buildProductMenuItems(routedPlan, { roleIds: ['operator'] })[0]).toMatchObject({ href: '/ops' });
+  });
+
   it('supports explicitly including contextual and command placements', () => {
     const plan = planWithMenu([
       { id: 'primary', label: 'Primary', workflowIds: [], roleIds: [], placement: 'primary', order: 1 },
