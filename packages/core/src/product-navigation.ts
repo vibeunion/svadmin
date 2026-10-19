@@ -63,7 +63,7 @@ export function buildProductNavigation(plan: ProductPlan, context: ProductNaviga
 export function flattenVisibleProductNavigation(nodes: readonly ProductNavigationNode[]): ProductNavigationNode[] {
   return nodes.flatMap(node => node.visible
     ? [node, ...flattenVisibleProductNavigation(node.children)]
-    : flattenVisibleProductNavigation(node.children));
+    : []);
 }
 
 function surfaceRoute(surface: ProductSurface | undefined): string | undefined {
