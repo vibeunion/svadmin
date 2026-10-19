@@ -98,6 +98,4 @@ function reviewSurface(surface: ProductSurface, refs: { workflowIds: ReadonlySet
   if (!surface.states.length) addIssue(issues, { code: 'surface.missing-states', severity: 'warning', message: `Surface "${surface.name}" does not declare empty/loading/error/permission states.`, path: `surfaces.${surface.id}.states`, suggestion: 'Declare the states the Svelte view must implement.' });
   if (surface.sections.length > 6) addIssue(issues, { code: 'surface.section-density', severity: 'warning', message: `Surface "${surface.name}" contains ${surface.sections.length} sections.`, path: `surfaces.${surface.id}.sections`, suggestion: 'Group related information or use progressive disclosure.' });
   if (surface.actionIds.length > 4) addIssue(issues, { code: 'surface.action-density', severity: 'warning', message: `Surface "${surface.name}" exposes ${surface.actionIds.length} actions.`, path: `surfaces.${surface.id}.actionIds`, suggestion: 'Keep one primary action and move secondary actions into context or More.' });
-  const primaryCount = surface.primaryActionId ? 1 : 0;
-  if (primaryCount > 1) addIssue(issues, { code: 'surface.multiple-primary-actions', severity: 'error', message: `Surface "${surface.name}" exposes multiple primary actions.`, path: `surfaces.${surface.id}.primaryActionId` });
 }
