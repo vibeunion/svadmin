@@ -12,6 +12,7 @@
   import { Badge } from './ui/badge/index.js';
   import { Button } from './ui/button/index.js';
   import { Input } from './ui/input/index.js';
+  import * as Dialog from './ui/dialog/index.js';
 
   type ApprovalView = 'pending' | 'history';
   interface Props {
@@ -37,6 +38,7 @@
   let comment = $state('');
   let targetId = $state('');
   let actionDialog = $state<string>();
+  let actionOpen = $state(false);
   let timer: ReturnType<typeof setTimeout> | undefined;
   let mounted = true;
   let epoch = 0;
@@ -48,6 +50,7 @@
   const activeAction = $derived(
     activeRecord?.allowedActions.find(action => action.id === actionDialog),
   );
+  const centerState = $derived(loading ? 'loading' : error ? 'error' : records.length === 0 ? 'empty' : 'ready');
   const normalizedPageSize = $derived(Number.isSafeInteger(pageSize) && pageSize > 0 && pageSize <= 200 ? pageSize : 20);
   const totalPages = $derived(Math.max(1, Math.ceil(total / normalizedPageSize)));
 
@@ -74,6 +77,8 @@
       records = result.data;
       total = result.total;
       selectedId = result.data.some(record => record.id === selectedId) ? selectedId : result.data[0]?.id;
+      actionDialog = undefined;
+      actionOpen = false;
     } catch (cause) {
       if (!mounted || currentEpoch !== epoch) return;
       error = cause instanceof ApprovalContractError ? 'invalid' : 'load';
@@ -105,6 +110,7 @@
   function openAction(action: string): void {
     if (!activeRecord?.allowedActions.some(candidate => candidate.id === action)) return;
     actionDialog = action;
+    actionOpen = true;
     comment = '';
     targetId = '';
   }
@@ -139,6 +145,7 @@
         return;
       }
       actionDialog = undefined;
+      actionOpen = false;
       records = records.map(candidate => candidate.id === receipt.record.id ? receipt.record : candidate);
       selectedId = receipt.record.id;
     } catch (cause) {
@@ -166,14 +173,15 @@
       records = [];
       selectedId = undefined;
       actionDialog = undefined;
+      actionOpen = false;
       actionPending = false;
       void load();
     });
   });
 </script>
 
-<section class="svadmin-approval-center" aria-label={title ?? i18n.t('approval.title')}>
-  <header class="svadmin-approval-center__header">
+<section class="svadmin-approval-center" aria-label={title ?? i18n.t('approval.title')} data-svadmin-approval-center data-svadmin-approval-view={view} data-svadmin-approval-state={centerState}>
+  <header class="svadmin-approval-center__header" data-svadmin-approval-header>
     <div>
       <h2>{title ?? i18n.t('approval.title')}</h2>
     </div>
@@ -181,7 +189,7 @@
       <RefreshCw class={loading ? 'svadmin-approval-center__spin' : ''} />
     </Button>
   </header>
-  <div class="svadmin-approval-center__toolbar">
+  <div class="svadmin-approval-center__toolbar" data-svadmin-approval-toolbar>
     <Button type="button" aria-pressed={view === 'pending'} variant={view === 'pending' ? 'default' : 'outline'} onclick={() => switchView('pending')}>{i18n.t('approval.pending')}</Button>
     <Button type="button" aria-pressed={view === 'history'} variant={view === 'history' ? 'default' : 'outline'} onclick={() => switchView('history')}>{i18n.t('approval.history')}</Button>
     <label class="svadmin-approval-center__search">
@@ -192,8 +200,8 @@
   {#if error}
     <div role="alert">{i18n.t(`approval.${error}`)}</div>
   {/if}
-  <div class="svadmin-approval-center__body">
-    <div class="svadmin-approval-center__list">
+  <div class="svadmin-approval-center__body" data-svadmin-approval-body>
+    <div class="svadmin-approval-center__list" data-svadmin-approval-list>
       {#if loading}
         <div role="status"><Loader2 class="svadmin-approval-center__spin" /> {i18n.t('common.loading')}</div>
       {:else if records.length === 0}
@@ -207,7 +215,7 @@
         {/each}
       {/if}
     </div>
-    <div class="svadmin-approval-center__detail">
+    <div class="svadmin-approval-center__detail" data-svadmin-approval-detail>
       {#if activeRecord}
         <h3>{activeRecord.title}</h3>
         <Badge variant="outline">{activeRecord.status}</Badge>
@@ -230,7 +238,7 @@
       {/if}
     </div>
   </div>
-  <footer class="svadmin-approval-center__footer">
+  <footer class="svadmin-approval-center__footer" data-svadmin-approval-pagination>
     <Button type="button" aria-label={i18n.t('common.prev')} title={i18n.t('common.prev')} variant="outline" disabled={page <= 1 || loading} onclick={() => { page -= 1; }}>
       <ChevronLeft />
     </Button>
@@ -241,25 +249,30 @@
   </footer>
 </section>
 
-{#if actionDialog && activeRecord}
-  <div class="svadmin-approval-center__dialog" role="dialog" aria-modal="true" aria-label={activeAction?.label ?? i18n.t('common.confirmAction')}>
-    <h3>{activeAction?.label}</h3>
-    <label>{i18n.t('approval.comment')}
-      <textarea bind:value={comment} required={activeAction?.commentRequired} maxlength={10000}></textarea>
-    </label>
-    {#if activeAction?.targetRequired}
-      <label>{i18n.t('approval.target')}
-        <Input bind:value={targetId} required maxlength={200} />
+<Dialog.Root bind:open={actionOpen}>
+  {#if actionDialog && activeRecord}
+    <Dialog.Content class="svadmin-approval-center__dialog" aria-label={activeAction?.label ?? i18n.t('common.confirmAction')}>
+      <Dialog.Header>
+        <Dialog.Title>{activeAction?.label}</Dialog.Title>
+        <Dialog.Description>{i18n.t('approval.comment')}</Dialog.Description>
+      </Dialog.Header>
+      <label>{i18n.t('approval.comment')}
+        <textarea bind:value={comment} required={activeAction?.commentRequired} maxlength={10000}></textarea>
       </label>
-    {/if}
-    <div>
-      <Button type="button" variant="outline" onclick={() => actionDialog = undefined}>{i18n.t('common.cancel')}</Button>
-      <Button type="button" disabled={actionPending || !activeAction || !canSubmit(activeAction)} onclick={() => void submitAction()}>
-        {actionPending ? i18n.t('common.processing') : i18n.t('common.confirm')}
-      </Button>
-    </div>
-  </div>
-{/if}
+      {#if activeAction?.targetRequired}
+        <label>{i18n.t('approval.target')}
+          <Input bind:value={targetId} required maxlength={200} />
+        </label>
+      {/if}
+      <Dialog.Footer>
+        <Button type="button" variant="outline" onclick={() => { actionOpen = false; actionDialog = undefined; }}>{i18n.t('common.cancel')}</Button>
+        <Button type="button" disabled={actionPending || !activeAction || !canSubmit(activeAction)} onclick={() => void submitAction()}>
+          {actionPending ? i18n.t('common.processing') : i18n.t('common.confirm')}
+        </Button>
+      </Dialog.Footer>
+    </Dialog.Content>
+  {/if}
+</Dialog.Root>
 
 <style>
   .svadmin-approval-center { display: grid; gap: 1rem; min-width: 0; }
@@ -275,8 +288,8 @@
   .svadmin-approval-center__list span { color: var(--muted-foreground); font-size: 0.875rem; }
   .svadmin-approval-center__detail { display: grid; gap: 0.75rem; padding: 1rem; min-width: 0; }
   .svadmin-approval-center__detail ol, .svadmin-approval-center__detail ul { margin: 0; padding-inline-start: 1.25rem; }
-  .svadmin-approval-center__dialog { position: fixed; inset: 20% auto auto 50%; z-index: 20; display: grid; gap: 1rem; width: min(28rem, calc(100vw - 2rem)); transform: translateX(-50%); padding: 1rem; background: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow-lg); }
-  .svadmin-approval-center__dialog textarea { min-height: 6rem; width: 100%; }
+  :global(.svadmin-approval-center__dialog) { display: grid; gap: 1rem; width: min(28rem, calc(100vw - 2rem)); }
+  :global(.svadmin-approval-center__dialog textarea) { min-height: 6rem; width: 100%; }
   :global(.svadmin-approval-center__spin) { animation: svadmin-approval-spin 1s linear infinite; }
   @keyframes svadmin-approval-spin { to { transform: rotate(360deg); } }
   @media (max-width: 640px) { .svadmin-approval-center__body { grid-template-columns: 1fr; } .svadmin-approval-center__list { border-inline-end: 0; border-block-end: 1px solid var(--border); max-height: 15rem; overflow: auto; } }

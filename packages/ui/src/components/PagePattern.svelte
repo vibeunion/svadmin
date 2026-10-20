@@ -6,7 +6,7 @@
   import DataState from './content/DataState.svelte';
 
   export type PagePatternKind = 'list' | 'form' | 'detail' | 'workspace' | 'dashboard';
-  export type PagePatternState = 'ready' | 'loading' | 'empty' | 'error' | 'forbidden';
+  export type PagePatternState = 'ready' | 'loading' | 'empty' | 'filtered-empty' | 'error' | 'forbidden';
 
   interface Props {
     kind: PagePatternKind;
@@ -68,7 +68,7 @@
 >
   <div data-page-pattern-kind={kind} data-page-pattern-state={state}>
   {#if showState}
-    {#if state === 'loading' || state === 'empty' || state === 'error' || state === 'forbidden'}
+    {#if state === 'loading' || state === 'empty' || state === 'filtered-empty' || state === 'error' || state === 'forbidden'}
       <DataState
         {state}
         {...definedOptions({ title: stateTitle })}

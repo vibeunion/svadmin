@@ -23,6 +23,7 @@
     columns?: 1 | 2 | 3 | 4;
     canDelete?: boolean;
     headerActions?: Snippet;
+    formActions?: Snippet<[{ isLoading: boolean; onSubmit: () => void }]>;
     onSuccess?: () => void;
     class?: string;
   }
@@ -35,6 +36,7 @@
     columns = 1,
     canDelete,
     headerActions,
+    formActions,
     onSuccess,
     class: className = '',
   }: Props = $props();
@@ -46,11 +48,12 @@
   const showDelete = $derived(canDelete ?? resource.canDelete !== false);
 </script>
 
-<div class="svadmin-u-b3542e058833 {className}">
-  <PageHeader
-    title={pageTitle}
-    onBack={() => navigateGuard(() => navigation.list(resourceName))}
-  >
+<div class="svadmin-u-b3542e058833 {className}" data-svadmin-crud-page="edit" data-svadmin-resource={resourceName} data-svadmin-record-id={id}>
+  <div data-svadmin-crud-page-header>
+    <PageHeader
+      title={pageTitle}
+      onBack={() => navigateGuard(() => navigation.list(resourceName))}
+    >
     {#snippet actions()}
       <ListButton resource={resourceName} hideText onBeforeNavigate={navigateGuard} />
       <ShowButton resource={resourceName} recordItemId={id} hideText onBeforeNavigate={navigateGuard} />
@@ -62,16 +65,20 @@
         {@render headerActions()}
       {/if}
     {/snippet}
-  </PageHeader>
+    </PageHeader>
+  </div>
 
-  <AutoForm
-    {rendering}
-    {resourceName}
-    mode="edit"
-    {id}
-    {columns}
-    showHeader={false}
-    onNavigationGuardReady={(guard) => navigateGuard = guard}
-    {...definedOptions({ "onSuccess": onSuccess })}
-  />
+  <div data-svadmin-crud-page-form>
+    <AutoForm
+      {rendering}
+      {resourceName}
+      mode="edit"
+      {id}
+      {columns}
+      showHeader={false}
+      {...definedOptions({ formActions })}
+      onNavigationGuardReady={(guard) => navigateGuard = guard}
+      {...definedOptions({ "onSuccess": onSuccess })}
+    />
+  </div>
 </div>

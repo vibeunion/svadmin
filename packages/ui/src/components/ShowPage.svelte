@@ -13,6 +13,7 @@
   import CloneButton from './buttons/CloneButton.svelte';
   import { Button } from './ui/button/index.js';
   import { RefreshCw } from '@lucide/svelte';
+import DataState from './content/DataState.svelte';
 
   const i18n = useTranslation();
 
@@ -73,12 +74,13 @@
   });
 </script>
 
-<div data-svadmin-rendering-resource={activeRendering?.resource.name} data-svadmin-rendering-kind={activeRendering ? 'show' : undefined} class="svadmin-u-3e7ce58d64fa {className}">
-  <PageHeader
-    title="{resource.label} {i18n.t('common.detail')} #{id}"
-    onBack={goBack}
-    backLabel={i18n.t('common.back')}
-  >
+<div data-svadmin-rendering-resource={activeRendering?.resource.name} data-svadmin-rendering-kind={activeRendering ? 'show' : undefined} data-svadmin-crud-page="show" data-svadmin-resource={resourceName} data-svadmin-record-id={id} class="svadmin-u-3e7ce58d64fa {className}">
+  <div data-svadmin-crud-page-header>
+    <PageHeader
+      title="{resource.label} {i18n.t('common.detail')} #{id}"
+      onBack={goBack}
+      backLabel={i18n.t('common.back')}
+    >
     {#snippet actions()}
       {#if detail.canRead && query.isSuccess && resource.canEdit !== false}
         <EditButton resource={resourceName} recordItemId={id} hideText />
@@ -98,8 +100,10 @@
         {@render headerActions()}
       {/if}
     {/snippet}
-  </PageHeader>
+    </PageHeader>
+  </div>
 
+  <div data-svadmin-crud-page-content data-svadmin-detail-state={detail.checkingPermission || query.isLoading ? 'loading' : !detail.canRead ? 'forbidden' : query.isError ? 'error' : query.isSuccess ? 'ready' : 'empty'}>
   {#if detail.checkingPermission || query.isLoading}
     <Card.Root class="svadmin-u-2cd02d11d1af svadmin-u-6ee2d41e2d2d svadmin-u-438b2237b8d6">
       <Card.Content class="svadmin-u-8a539c7fe216">
@@ -112,15 +116,11 @@
       </Card.Content>
     </Card.Root>
   {:else if !detail.canRead}
-    <p role="status" data-svadmin-access-denied>{i18n.t('common.accessDenied')}</p>
-  {:else if query.isError}
-    <div role="alert">
-      <p>{i18n.t('common.operationFailed')}</p>
-      <Button type="button" variant="ghost" size="icon" title={i18n.t('common.retry')}
-        aria-label={i18n.t('common.retry')} disabled={query.isFetching} onclick={detail.refresh}>
-        <RefreshCw class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
-      </Button>
+    <div data-svadmin-access-denied>
+      <DataState state="forbidden" title={i18n.t('common.accessDenied')} />
     </div>
+  {:else if query.isError}
+    <DataState state="error" title={i18n.t('common.operationFailed')} retry={detail.refresh} />
   {:else if query.isSuccess}
     {@const record = activeRendering ? activeRendering.record(query.data.data) : query.data.data}
     {#if layout === 'grid'}
@@ -165,13 +165,12 @@
       </Card.Root>
     {/if}
     {#if children}
-      {@render children()}
+      <div data-svadmin-crud-page-extension>
+        {@render children()}
+      </div>
     {/if}
   {:else}
-    <Card.Root class="svadmin-u-2cd02d11d1af svadmin-u-6ee2d41e2d2d svadmin-u-438b2237b8d6">
-      <Card.Content class="svadmin-u-845f53365c8d svadmin-u-ca6bf63030aa">
-        <p class="svadmin-u-bfa603190748">{i18n.t('common.noData')}</p>
-      </Card.Content>
-    </Card.Root>
+    <DataState state="empty" description={i18n.t('common.noData')} />
   {/if}
+  </div>
 </div>

@@ -22,6 +22,9 @@ describe('Admin UI product layout compatibility', () => {
     const root = view.container.querySelector<HTMLElement>('[data-svadmin-workspace-layout]');
     expect(root?.style.getPropertyValue('--workspace-secondary-width')).toBe(collapsed ? '4rem' : '20rem');
     expect(root?.getAttribute('data-secondary-collapsed')).toBe(String(collapsed));
+    expect(root?.getAttribute('aria-label')).toBe('Product workspace');
+    expect(root?.getAttribute('role')).toBe('region');
+    expect(root?.getAttribute('data-workspace-order')).toBe('primary-first');
   });
   it('renders editable controls, explanations, explicit heading ID and consumer class hooks', () => {
     const view = render(Host);

@@ -11,7 +11,7 @@
 {#snippet primary()}<p data-testid="primary">Primary {count}</p>{/snippet}
 {#snippet aside()}<p data-testid="secondary">Secondary</p>{/snippet}
 {#snippet summary()}<p data-testid="summary">Summary</p>{/snippet}
-<WorkspaceLayout {primary} {summary} {...definedOptions({ secondary: secondary ? aside : undefined })} mobileOrder={order} secondaryCollapsed={collapsed} secondaryWidth="20rem" secondaryCollapsedWidth="4rem" class="consumer-layout" />
+<WorkspaceLayout {primary} {summary} label="Product workspace" {...definedOptions({ secondary: secondary ? aside : undefined })} mobileOrder={order} secondaryCollapsed={collapsed} secondaryWidth="20rem" secondaryCollapsedWidth="4rem" class="consumer-layout" />
 <SectionHeader id="section-label" title="Settings" description="Explanation" class="consumer-heading">
   {#snippet actions()}<button onclick={() => count++}>Header action</button>{/snippet}
 </SectionHeader>
