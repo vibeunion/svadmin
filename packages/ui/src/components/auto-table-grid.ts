@@ -7,6 +7,7 @@ export interface AutoTableGridState {
   readonly columns: readonly { key: string; label: string; width: number; sortable: boolean }[];
   readonly primaryKey: string;
   readonly sorters: readonly Sort[];
+  /** @deprecated Retained for custom grid renderers during the baseline transition. */
   readonly density: 'compact' | 'comfortable';
   readonly locale: string;
   readonly label: string;

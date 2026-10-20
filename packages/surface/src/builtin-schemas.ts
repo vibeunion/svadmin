@@ -63,7 +63,6 @@ export type LineChartProps = Static<typeof lineChartPropsSchema>;
 
 const styledMetricProperties = {
   tone: Type.Optional(Type.Union(surfaceDesignContract.metric.tone.map((value) => Type.Literal(value)))),
-  density: Type.Optional(Type.Union(surfaceDesignContract.metric.density.map((value) => Type.Literal(value)))),
 };
 export const styledMetricPropsSchema = Type.Union([
   Type.Object({ ...currencyMetric.properties, ...styledMetricProperties }, { additionalProperties: false }),
@@ -71,5 +70,4 @@ export const styledMetricPropsSchema = Type.Union([
 ]);
 export const styledResourceTablePropsSchema = Type.Object({
   ...resourceTablePropsSchema.properties,
-  density: Type.Optional(Type.Union(surfaceDesignContract.table.density.map((value) => Type.Literal(value)))),
 }, { additionalProperties: false });

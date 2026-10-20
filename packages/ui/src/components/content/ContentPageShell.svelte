@@ -12,6 +12,7 @@
     children: Snippet;
     pageId?: string;
     width?: 'narrow' | 'default' | 'wide';
+    /** @deprecated Accepted for compatibility; the product baseline is shared. */
     density?: 'compact' | 'comfortable';
     class?: string;
   }
@@ -32,7 +33,6 @@
   const resolvedWidth = $derived(width === 'narrow' || width === 'wide' ? width : 'default');
   const styles = $derived(contentPage({
     width: resolvedWidth,
-    density,
   }));
 </script>
 

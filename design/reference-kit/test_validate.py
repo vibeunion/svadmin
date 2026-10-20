@@ -362,8 +362,9 @@ class SourceMappingTests(unittest.TestCase):
 
     def test_source_spacing_drift(self):
         self.recipe.write_text(self.recipe.read_text().replace(
-            '[--svadmin-metric-state-padding:0.75rem]', '[--svadmin-metric-state-padding:0.5rem]'))
-        with self.assertRaisesRegex(ValidationError, 'spacing.sm'):
+            '[--svadmin-metric-state-padding:1.25rem]',
+            '[--svadmin-metric-state-padding:1rem]'))
+        with self.assertRaisesRegex(ValidationError, 'spacing.lg'):
             self.check()
 
     def test_theme_color_drift(self):

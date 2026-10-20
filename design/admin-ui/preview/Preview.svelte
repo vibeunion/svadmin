@@ -25,7 +25,6 @@
   let scenario = $state(initial.state);
   let locale = $state(initial.locale);
   let theme = $state(initial.theme);
-  let density = $state<'compact' | 'comfortable'>(initial.density === 'comfortable' ? 'comfortable' : 'compact');
   const scope = createI18nScope({ locale: initial.locale });
   provideI18nScope(scope);
   $effect(() => { scope.setLocale(locale); document.documentElement.lang = locale; });
@@ -114,14 +113,13 @@
 </script>
 
 <svelte:head><title>svadmin · {viewLabel(view)}</title></svelte:head>
-<div class:dark={theme === 'dark'} class="svadmin-theme layout-clean-flat kit-root" data-theme="stripe" data-theme-mode={theme} data-preview-density={density}>
+<div class:dark={theme === 'dark'} class="svadmin-theme layout-clean-flat kit-root" data-theme="stripe" data-theme-mode={theme}>
   <a class="kit-skip" href="#kit-main">{tx('跳到样例内容', 'Skip to preview')}</a>
   <header class="kit-controls" aria-label={tx('设计预览控制', 'Preview controls')}>
     <div class="kit-brand"><strong>svadmin</strong><span>Admin UI · v0.1</span></div>
     <div class="kit-options">
       <label>{tx('主题', 'Theme')}<select data-testid="theme" bind:value={theme}><option value="light">Light</option><option value="dark">Dark</option></select></label>
       <label>{tx('语言', 'Language')}<select data-testid="locale" bind:value={locale}><option value="zh-CN">中文</option><option value="en">English</option></select></label>
-      <label>{tx('密度', 'Density')}<select data-testid="density" bind:value={density}><option value="compact">Compact</option><option value="comfortable">Comfortable</option></select></label>
     </div>
   </header>
   <div class="kit-layout">
@@ -168,7 +166,7 @@
               </button>{/each}
             </div>
             <PageToolbar>
-              <FilterToolbar bind:query placeholder={tx('搜索客户', 'Search customers')} clearLabel={tx('清除搜索', 'Clear search')} {density} />
+              <FilterToolbar bind:query placeholder={tx('搜索客户', 'Search customers')} clearLabel={tx('清除搜索', 'Clear search')} />
               {#snippet trailing()}{#if statusFilter !== 'all'}<Button variant="ghost" size="sm" data-testid="clear-status" onclick={() => statusFilter = 'all'}>{tx('清除状态筛选', 'Clear status filter')}</Button>{/if}{/snippet}
             </PageToolbar>
             {#if scenario === 'loading'}<DataState state="loading" loadingLabel={tx('正在加载客户', 'Loading customers')} />
@@ -179,7 +177,7 @@
             </DataState>
             {:else}
               <!-- svelte-ignore a11y_no_noninteractive_tabindex (命名滚动区域需支持原生键盘滚动；keyboard.mjs 验证 Tab、方向键与焦点退出。) -->
-              <div class={listStyles.table + ' kit-table-scroll'} role="region" aria-label={tx('客户数据', 'Customer data')} tabindex="0"><Table.Root {density}>
+              <div class={listStyles.table + ' kit-table-scroll'} role="region" aria-label={tx('客户数据', 'Customer data')} tabindex="0"><Table.Root>
                 <Table.Caption>{tx('合成数据，仅用于设计评审', 'Synthetic data for design review only')}</Table.Caption>
                 <Table.Header><Table.Row><Table.Head>{tx('客户', 'Customer')}</Table.Head><Table.Head>{tx('状态', 'Status')}</Table.Head><Table.Head data-align="end" class={listStyles.numeric}>{tx('交易总额', 'Volume')}</Table.Head><Table.Head><span class="kit-visually-hidden">{tx('操作', 'Actions')}</span></Table.Head></Table.Row></Table.Header>
                 <Table.Body>{#each filtered as customer (customer.id)}<Table.Row><Table.Cell><div class={listStyles.identity}><span class={listStyles.avatar} aria-hidden="true">{customer.id.slice(-2)}</span><div><span class={listStyles.name}>{customer.name}</span><span class={listStyles.secondary}>{customer.email}</span></div></div></Table.Cell><Table.Cell><StatusBadge status={customer.status === 'active' ? 'success' : 'warning'} label={customer.status === 'active' ? tx('已启用', 'Active') : tx('待审核', 'Pending')} /></Table.Cell><Table.Cell data-align="end" class={listStyles.numeric}>{money(customer.amount)}</Table.Cell><Table.Cell><Button data-testid={'open-' + customer.id} variant="ghost" size="sm" onclick={() => { selectedId = customer.id; void navigate('record-detail'); }}>{tx('查看', 'View')}<ChevronRight size={14} aria-hidden="true" /></Button></Table.Cell></Table.Row>{/each}</Table.Body>
@@ -206,7 +204,7 @@
               {#snippet secondary()}
                 <section class="kit-section" aria-labelledby="attributes-title">
                   <SectionHeader id="attributes-title" title={tx('客户信息', 'Details')} />
-                  <DescriptionList columns={1} {density} items={[{ label: tx('邮箱', 'Email'), value: selected?.email }, { label: tx('创建日期', 'Created'), value: selected?.created }, { label: tx('交易总额', 'Volume'), value: money(selected?.amount ?? 0) }, { label: tx('数据来源', 'Data source'), value: tx('合成演示数据', 'Synthetic fixture') }]} />
+                  <DescriptionList columns={1} items={[{ label: tx('邮箱', 'Email'), value: selected?.email }, { label: tx('创建日期', 'Created'), value: selected?.created }, { label: tx('交易总额', 'Volume'), value: money(selected?.amount ?? 0) }, { label: tx('数据来源', 'Data source'), value: tx('合成演示数据', 'Synthetic fixture') }]} />
                 </section>
               {/snippet}
             </WorkspaceLayout>

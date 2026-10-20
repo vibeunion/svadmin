@@ -889,11 +889,6 @@ main {
     vertical-align: middle;
     white-space: nowrap;
   }
-  .svadmin-table-cell[data-density="compact"] {
-    height: 2rem;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
-  }
   .svadmin-table-cell[data-sticky="right"], .svadmin-table-cell[data-sticky="left"] {
     position: sticky;
     z-index: 10;
@@ -2041,11 +2036,6 @@ main {
     font-weight: 500;
     white-space: nowrap;
   }
-  .svadmin-table-head[data-density="compact"] {
-    height: 2rem;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
-  }
   .svadmin-table-head[data-sticky="right"], .svadmin-table-head[data-sticky="left"] {
     position: sticky;
     z-index: 20;
@@ -2218,7 +2208,7 @@ details[data-svadmin-filter][open] > :not(summary),
 
 /* --- Admin UI layout preset (clean-flat) --- */
 /* Keep this public class for layoutPreset API compatibility. The preset only
- * adjusts density and composition; color, focus, and elevation stay semantic. */
+ * adjusts composition; color, focus, and elevation stay semantic. */
 .layout-clean-flat {
   --radius: 0.5rem;
   --svadmin-content-width: 74rem;

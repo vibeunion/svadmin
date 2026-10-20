@@ -9,7 +9,7 @@ beforeEach(() => {
   });
 });
 
-describe('AutoForm layout and density', () => {
+describe('AutoForm layout', () => {
   it('renders form inputs within accessible form elements', async () => {
     const view = render(AutoFormAccessibilityHarness);
     const nameInput = await view.findByRole('textbox', { name: /^Name/ });

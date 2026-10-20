@@ -15,16 +15,15 @@ test('every agreed pattern state has a browser specimen without inventing Figma 
 
 for (const bad of ['__proto__', 'constructor', 'toString', '<script>alert(1)</script>', 'https://example.com', '']) {
   test(`query cannot select arbitrary view ${JSON.stringify(bad)}`, () => {
-    const params = new URLSearchParams({ view: bad, state: 'forbidden', theme: 'injected', locale: 'injected', density: 'injected' });
-    assert.deepEqual(readPreviewOptions(params.toString()), { view: 'components', state: 'ready', theme: 'light', locale: 'zh-CN', density: 'compact' });
+    const params = new URLSearchParams({ view: bad, state: 'forbidden', theme: 'injected', locale: 'injected' });
+    assert.deepEqual(readPreviewOptions(params.toString()), { view: 'components', state: 'ready', theme: 'light', locale: 'zh-CN' });
   });
 }
 
 test('state belongs to its view and URLs cannot add behavior', () => {
   assert.equal(readPreviewOptions('?view=settings&state=forbidden').state, 'ready');
   assert.equal(readPreviewOptions('?view=record-detail&state=partial').state, 'partial');
-  assert.equal(readPreviewOptions('?view=settings&state=readonly&theme=dark&locale=en&density=comfortable').density, 'comfortable');
-  assert.deepEqual(Object.keys(readPreviewOptions('?onload=evil&css=red&token=private')).sort(), ['density', 'locale', 'state', 'theme', 'view']);
+  assert.deepEqual(Object.keys(readPreviewOptions('?onload=evil&css=red&token=private')).sort(), ['locale', 'state', 'theme', 'view']);
 });
 
 test('fixtures are immutable synthetic records including long text, zero and negative amounts', () => {

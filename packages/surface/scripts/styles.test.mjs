@@ -13,7 +13,7 @@ for (const value of [
 ]) {
   assert.ok(css.includes(value), `missing recipe selector: ${value}`);
 }
-for (const value of ['compact', 'comfortable', 'primary', 'secondary']) {
+for (const value of ['primary', 'secondary']) {
   assert.ok(editor.includes(value), `missing editor variant: ${value}`);
 }
 assert.doesNotMatch(css, /@(?:import|tailwind|theme|apply)\b/u);

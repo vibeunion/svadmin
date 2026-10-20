@@ -11,12 +11,11 @@ describe('ContentPageHeader heading hierarchy', () => {
     expect(view.getByText('Account preferences')).toBeTruthy();
   });
 
-  it('supports embedded sections without changing the density recipe', async () => {
-    const view = render(ContentPageHeader, { title: 'Profile', headingLevel: 'h2', density: 'compact' });
+  it('supports embedded sections', async () => {
+    const view = render(ContentPageHeader, { title: 'Profile', headingLevel: 'h2' });
     const heading = view.getByRole('heading', { name: 'Profile', level: 2 });
     const classes = heading.className;
-    expect(view.container.querySelector('[data-svadmin-content-header]')?.getAttribute('data-density')).toBe('compact');
-    await view.rerender({ title: 'Profile', headingLevel: 'h1', density: 'compact' });
+    await view.rerender({ title: 'Profile', headingLevel: 'h1' });
     expect(view.getByRole('heading', { name: 'Profile', level: 1 }).className).toBe(classes);
     expect(view.queryByRole('heading', { level: 2 })).toBeNull();
   });

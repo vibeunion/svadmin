@@ -42,11 +42,9 @@ describe('opt-in business component contracts', () => {
     expect(validateSurfaceSpec({ ...spec(), catalogVersion: defaultSurfaceDefinitions.version }, defaultSurfaceDefinitions, policy).ok).toBe(false);
     expect(() => createBusinessSurfaceDefinitions(catalog)).toThrow('already registered');
   });
-  it.each(['neutral', 'success', 'warning', 'danger', 'info'])('supports precompiled %s with both densities', (tone) => {
-    for (const density of ['compact', 'comfortable']) {
-      const current = spec();
-      expect(validateSurfaceSpec({ ...current, widgets: current.widgets.map((widget) => ({ ...widget, props: { ...widget.props, tone, density } })) }, catalog, policy).ok).toBe(true);
-    }
+  it.each(['neutral', 'success', 'warning', 'danger', 'info'])('supports precompiled %s appearance', (tone) => {
+    const current = spec();
+    expect(validateSurfaceSpec({ ...current, widgets: current.widgets.map((widget) => ({ ...widget, props: { ...widget.props, tone } })) }, catalog, policy).ok).toBe(true);
   });
   it('supports appearance and registered forms without creating another renderer or granting writes', () => {
     const actions = [{ id: 'contacts.update', label: 'Update', version: '1', approval: 'confirm' as const, inputSchema: Type.Object({}, { additionalProperties: false }) }];
@@ -66,7 +64,7 @@ describe('opt-in business component contracts', () => {
       { title: 'Private', fields: [{ field: 'secret', label: 'Secret' }] },
       { title: 'Duplicate', fields: [{ field: 'name', label: 'A' }, { field: 'name', label: 'B' }] },
       { ...detail.props, record: { name: 'Invented data' } }, { ...detail.props, style: 'color:red' },
-      { ...detail.props, tone: '#123456' }, { ...detail.props, density: 'tiny' },
+      { ...detail.props, tone: '#123456' }, { ...detail.props, appearance: { density: 'tiny' } },
     ]) expect(validateSurfaceSpec(changeWidget(0, { props }), catalog, policy).ok).toBe(false);
   });
   it.each([

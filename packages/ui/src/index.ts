@@ -1,7 +1,7 @@
 // @svadmin/ui — Pre-built admin UI components
 
 export { surfaceDesignContract } from "./design-contract.js";
-export type { SurfaceTone, SurfaceDensity } from "./design-contract.js";
+export type { AdminPageFamily, AdminPageState, SurfaceDensity, SurfaceTone } from "./design-contract.js";
 export {
 	designSystemComponents,
 	type DesignComponentContract,
@@ -59,7 +59,8 @@ export { default as MetricStrip } from './components/MetricStrip.svelte';
 export type { MetricStripItem, MetricTone } from './components/MetricStrip.svelte';
 export { default as PageHeader } from './components/PageHeader.svelte';
 export { default as PagePattern } from './components/PagePattern.svelte';
-export type { PagePatternKind } from './components/PagePattern.svelte';
+export type { PagePatternKind, PagePatternState } from './components/PagePattern.svelte';
+export { default as AppShellPage } from './components/AppShellPage.svelte';
 export { default as ResourceOperationsPage } from './components/ResourceOperationsPage.svelte';
 export { default as RecordDetailDrawer } from './components/RecordDetailDrawer.svelte';
 export { default as ResourceAccessGuard } from './components/ResourceAccessGuard.svelte';
@@ -362,6 +363,7 @@ export { default as TwoFactorAuthPage } from './components/TwoFactorAuthPage.sve
 export { default as ContentPageShell } from './components/content/ContentPageShell.svelte';
 export { default as DashboardPage } from './components/content/DashboardPage.svelte';
 export { default as PageSection } from './components/content/PageSection.svelte';
+export { default as DataPanel } from './components/content/DataPanel.svelte';
 export { default as ContentPageHeader } from './components/content/ContentPageHeader.svelte';
 export { default as ConfigurationPage } from './components/ConfigurationPage.svelte';
 export { default as SectionHeader } from './components/content/SectionHeader.svelte';

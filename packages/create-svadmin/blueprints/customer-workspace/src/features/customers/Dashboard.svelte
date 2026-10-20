@@ -2,8 +2,6 @@
   import { useList, useCan } from '@svadmin/core';
   import { AutoTable, Button, DashboardPage, DataState, MetricBlock, PageSection } from '@svadmin/ui';
   import { customers, followups, approvals } from './contracts';
-  import { getDesign } from '../../design.svelte';
-  const design = $derived(getDesign());
   const access = useCan(() => ({ resource: 'customers', action: 'list' }));
   const followupAccess = useCan(() => ({ resource: 'followups', action: 'list' }));
   const approvalAccess = useCan(() => ({ resource: 'approvals', action: 'list' }));
@@ -37,7 +35,7 @@
   {/if}
   <PageSection title="客户">
     <AutoTable resourceName="customers" showHeader={false} selectable={false}
-      syncWithLocation={false} density={design.density} />
+      syncWithLocation={false} />
   </PageSection>
   {#snippet secondary()}
     <PageSection title="待办">

@@ -6,7 +6,6 @@ import { validateSurfaceActionDescriptor } from './action-contracts.js';
 
 export const surfaceAppearanceSchema = Type.Object({
   tone: Type.Optional(Type.Union(surfaceDesignContract.metric.tone.map((tone) => Type.Literal(tone)))),
-  density: Type.Optional(Type.Union(surfaceDesignContract.metric.density.map((density) => Type.Literal(density)))),
 }, { additionalProperties: false });
 
 export function withoutSurfaceAppearance(props: JsonObject): JsonObject {
@@ -30,7 +29,6 @@ function withAppearance(input: TSchema): TSchema {
 
 /** Adds frame-level semantic appearance to every registered widget without
  * leaking presentation props into its existing component implementation.
- * Internal table cell density remains the table's own semantic prop.
  */
 export function withSurfaceAppearance<T extends SurfaceWidgetDefinition>(catalog: { version: string; widgets: readonly T[] }) {
   return { version: `${catalog.version}+appearance/v1`, widgets: catalog.widgets.map((widget): T => ({

@@ -78,10 +78,9 @@ describe('StatusTabs', () => {
   });
 
   it('renders different visual variants (pills, segmented, underline)', () => {
-    const { container } = render(StatusTabs, { items, value: 'all', variant: 'segmented', density: 'compact' });
+    const { container } = render(StatusTabs, { items, value: 'all', variant: 'segmented' });
     const tablist = container.querySelector('[data-svadmin-status-tabs]');
     expect(tablist?.getAttribute('data-variant')).toBe('segmented');
-    expect(tablist?.getAttribute('data-density')).toBe('compact');
   });
 
   it('applies underline styling without rewriting the variant value', () => {

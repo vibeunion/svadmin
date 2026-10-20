@@ -20,7 +20,6 @@
     resourceName: string;
     rendering?: ResourceRendering | undefined;
     id: string | number;
-    density?: 'compact' | 'comfortable';
     layout?: 'list' | 'grid';
     columns?: 1 | 2 | 3 | 4;
     bordered?: boolean;
@@ -36,7 +35,6 @@
     resourceName,
     rendering,
     id,
-    density = 'comfortable',
     layout = 'list',
     columns = 2,
     bordered = false,
@@ -58,7 +56,6 @@
     }
     navigation.list(resourceName);
   }
-  const isCompact = $derived(density === 'compact');
 
   const detail = useRecordDetail(() => ({ resourceName, id, rendering }));
   const activeRendering = $derived(detail.rendering);
@@ -76,10 +73,9 @@
   });
 </script>
 
-<div data-svadmin-rendering-resource={activeRendering?.resource.name} data-svadmin-rendering-kind={activeRendering ? 'show' : undefined} class="{isCompact ? 'svadmin-u-6ed543e2fbbb' : 'svadmin-u-3e7ce58d64fa'} {className}">
+<div data-svadmin-rendering-resource={activeRendering?.resource.name} data-svadmin-rendering-kind={activeRendering ? 'show' : undefined} class="svadmin-u-3e7ce58d64fa {className}">
   <PageHeader
     title="{resource.label} {i18n.t('common.detail')} #{id}"
-    {density}
     onBack={goBack}
     backLabel={i18n.t('common.back')}
   >
@@ -108,7 +104,7 @@
     <Card.Root class="svadmin-u-2cd02d11d1af svadmin-u-6ee2d41e2d2d svadmin-u-438b2237b8d6">
       <Card.Content class="svadmin-u-8a539c7fe216">
         {#each showFields.slice(0, 6) as _, i (i)}
-          <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-020ba687fa12 {isCompact ? 'svadmin-u-f0faeb26d656 svadmin-u-03b4dd7f172b' : 'svadmin-u-f0faeb26d656 svadmin-u-7a9aabfcd059 svadmin-u-1b2d54a3fd12 svadmin-u-b7daff9b9ddd'} {i % 2 === 1 ? 'svadmin-u-967d113a1451' : ''}">
+          <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-020ba687fa12 svadmin-u-f0faeb26d656 svadmin-u-7a9aabfcd059 svadmin-u-1b2d54a3fd12 svadmin-u-b7daff9b9ddd {i % 2 === 1 ? 'svadmin-u-967d113a1451' : ''}">
             <Skeleton class="svadmin-u-11e59c6d5f6b svadmin-u-b7ce0d2f6c04 svadmin-u-5a14cc9f9ed4" />
             <Skeleton class="svadmin-u-11e59c6d5f6b svadmin-u-1d9f2d98d149 svadmin-u-d2ffb24f3e1d svadmin-u-b6b02c0ebef6 svadmin-u-dfe9bd9e7001 svadmin-u-77533d414653" />
           </div>
@@ -153,9 +149,9 @@
         <Card.Content class="svadmin-u-8a539c7fe216 svadmin-u-fa6acbf81d74 svadmin-u-3533cbce9e93">
           {#each showFields as field, i (i)}
             {@const value = record[field.key]}
-            <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-020ba687fa12 {isCompact ? 'svadmin-u-f0faeb26d656 svadmin-u-03b4dd7f172b svadmin-u-cc06a6575385 svadmin-u-7209fd2a90e7' : 'svadmin-u-f0faeb26d656 svadmin-u-7a9aabfcd059 svadmin-u-1b2d54a3fd12 svadmin-u-4701b613ff95'} {i % 2 === 1 ? 'svadmin-u-8a25a995eb8e' : ''}">
-              <div class="svadmin-u-b03f3c253900 {isCompact ? 'svadmin-u-359090c2d529' : 'svadmin-u-359090c2d529 svadmin-u-e2327d142859'} svadmin-u-2689f3958069 svadmin-u-bfa603190748 svadmin-u-65281709dacf svadmin-u-84bdd56b0e81">{field.label}</div>
-              <div class="svadmin-u-6b3526212209 {isCompact ? 'svadmin-u-359090c2d529 svadmin-u-e2327d142859' : 'svadmin-u-fc7473ca09eb'} svadmin-u-d4108abe6359">
+            <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-020ba687fa12 svadmin-u-f0faeb26d656 svadmin-u-7a9aabfcd059 svadmin-u-1b2d54a3fd12 svadmin-u-4701b613ff95 {i % 2 === 1 ? 'svadmin-u-8a25a995eb8e' : ''}">
+              <div class="svadmin-u-b03f3c253900 svadmin-u-359090c2d529 svadmin-u-e2327d142859 svadmin-u-2689f3958069 svadmin-u-bfa603190748 svadmin-u-65281709dacf svadmin-u-84bdd56b0e81">{field.label}</div>
+              <div class="svadmin-u-6b3526212209 svadmin-u-fc7473ca09eb svadmin-u-d4108abe6359">
                 <FieldDisplay
                   type={field.type}
                   {value}

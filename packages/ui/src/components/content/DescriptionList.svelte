@@ -14,7 +14,6 @@
     columns?: 1 | 2 | 3 | 4;
     layout?: 'vertical' | 'horizontal';
     bordered?: boolean;
-    density?: 'compact' | 'comfortable';
     class?: string;
   }
 
@@ -23,11 +22,9 @@
     columns = 1,
     layout = 'vertical',
     bordered = false,
-    density = 'comfortable',
     class: className = '',
   }: Props = $props();
 
-  const isCompact = $derived(density === 'compact');
   const isHorizontal = $derived(layout === 'horizontal');
 
   function spanClass(span: number | undefined): string {
@@ -65,7 +62,7 @@
           <dt
             class={cn(
               'svadmin-u-2859c861d7de svadmin-u-2689f3958069 svadmin-u-bfa603190748 svadmin-u-012fbd121f37 svadmin-u-65fdbade2025 svadmin-u-a968a4123359 svadmin-u-27165ed73e86 svadmin-u-cdf6e054e5e0',
-              isCompact ? 'svadmin-u-0e17f2bd9074 svadmin-u-ec0091ee009b svadmin-u-359090c2d529' : 'svadmin-u-f0faeb26d656 svadmin-u-e7ee55ac7ffe svadmin-u-359090c2d529 svadmin-u-e2327d142859',
+              'svadmin-u-f0faeb26d656 svadmin-u-e7ee55ac7ffe svadmin-u-359090c2d529 svadmin-u-e2327d142859',
               isHorizontal ? 'svadmin-u-b03f3c253900' : '',
             )}
           >
@@ -74,7 +71,7 @@
           <dd
             class={cn(
               'svadmin-u-170cee3ff4e4 svadmin-u-2689f3958069 svadmin-u-d4108abe6359 svadmin-u-cd0ad9a56558 svadmin-u-36e579c0b41c svadmin-u-7e0b7cdf1a94',
-              isCompact ? 'svadmin-u-0e17f2bd9074 svadmin-u-ec0091ee009b svadmin-u-359090c2d529' : 'svadmin-u-f0faeb26d656 svadmin-u-e7ee55ac7ffe svadmin-u-359090c2d529 svadmin-u-e2327d142859',
+              'svadmin-u-f0faeb26d656 svadmin-u-e7ee55ac7ffe svadmin-u-359090c2d529 svadmin-u-e2327d142859',
             )}
           >
             {#if item.href}
@@ -95,7 +92,7 @@
     class={cn(
       'svadmin-u-f3c543ad5fe9',
       columnClass,
-      isCompact ? 'svadmin-u-513d5c30bf66 svadmin-u-bcf14a5a5472' : 'svadmin-u-706c16d853e6 svadmin-u-375f36f67650',
+      'svadmin-u-706c16d853e6 svadmin-u-375f36f67650',
       className,
     )}
   >
@@ -110,7 +107,7 @@
         <dt
           class={cn(
             'svadmin-u-2689f3958069 svadmin-u-bfa603190748',
-            isCompact ? 'svadmin-u-359090c2d529' : 'svadmin-u-359090c2d529',
+            'svadmin-u-359090c2d529',
             isHorizontal ? 'svadmin-u-012fbd121f37 svadmin-u-2e7a6d18a20d' : '',
           )}
         >
@@ -119,7 +116,7 @@
         <dd
           class={cn(
             'svadmin-u-170cee3ff4e4 svadmin-u-2689f3958069 svadmin-u-d4108abe6359 svadmin-u-7e0b7cdf1a94 svadmin-u-36e579c0b41c',
-            isHorizontal ? 'svadmin-u-359090c2d529 svadmin-u-e2327d142859' : isCompact ? 'svadmin-u-15e1b1f444fe svadmin-u-359090c2d529 svadmin-u-e2327d142859' : 'svadmin-u-b6b02c0ebef6 svadmin-u-fc7473ca09eb',
+            isHorizontal ? 'svadmin-u-359090c2d529 svadmin-u-e2327d142859' : 'svadmin-u-b6b02c0ebef6 svadmin-u-fc7473ca09eb',
           )}
         >
           {#if item.href}

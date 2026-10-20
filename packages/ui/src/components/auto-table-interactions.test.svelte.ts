@@ -109,20 +109,16 @@ describe('AutoTable interactions', () => {
     expect(await view.findByPlaceholderText('Search...')).toBeTruthy();
   });
 
-  it('propagates compact density to the base table primitives', async () => {
+  it('renders the base table primitives', async () => {
     const view = render(AutoTableInteractionsHarness, {
-      density: 'compact',
       onNavigate: vi.fn(),
     });
 
     await view.findAllByText('user@example.com');
-    const tableContainer = [...view.container.querySelectorAll<HTMLElement>('[data-slot="table-container"]')]
-      .find((candidate) => candidate.getAttribute('data-table-density') === 'compact');
+    const tableContainer = view.container.querySelector<HTMLElement>('[data-slot="table-container"]');
     expect(tableContainer).toBeTruthy();
-    const heading = tableContainer?.querySelector('[data-slot="table-head"]');
-    const cell = tableContainer?.querySelector('[data-slot="table-cell"]');
-    expect(heading?.getAttribute('data-density')).toBe('compact');
-    expect(cell?.getAttribute('data-density')).toBe('compact');
+    expect(tableContainer?.querySelector('[data-slot="table-head"]')).toBeTruthy();
+    expect(tableContainer?.querySelector('[data-slot="table-cell"]')).toBeTruthy();
   });
 
   it('updates external column visibility state after a picker click', async () => {

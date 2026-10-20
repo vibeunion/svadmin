@@ -29,19 +29,13 @@ describe('PageHeader', () => {
     expect(onBack).toHaveBeenCalled();
   });
 
-  it('switches density without depending on utility aliases', async () => {
-    const { container, rerender } = render(PageHeader, {
-      title: 'Compact View',
-      density: 'compact',
+  it('renders the page title with the stable title hook', () => {
+    const { container } = render(PageHeader, {
+      title: 'Comfortable View',
       showBreadcrumbs: false,
     });
 
-    const header = container.querySelector('.svadmin-page-header');
-    expect(header?.getAttribute('data-density')).toBe('compact');
     expect(container.querySelector('h1')?.className).toBe('svadmin-page-header__title');
-
-    await rerender({ title: 'Comfortable View', density: 'comfortable', showBreadcrumbs: false });
-    expect(header?.getAttribute('data-density')).toBe('comfortable');
     expect(screen.getByRole('heading', { level: 1 }).textContent?.trim()).toBe('Comfortable View');
   });
 

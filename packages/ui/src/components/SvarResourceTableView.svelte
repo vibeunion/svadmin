@@ -15,7 +15,7 @@
   import type { SvarResourceTableProps } from './SvarResourceTable.svelte';
 
   let { Grid, Theme, resourceName, pageSize = 25, filters = [], initialSorters = [], height = 420,
-    freezeLeft = 0, freezeRight = 0, loadingMode = 'page', lazyTree, density = 'comfortable', childrenKey: providedChildrenKey, dataScopeKey = 0, disabled = false,
+    freezeLeft = 0, freezeRight = 0, loadingMode = 'page', lazyTree, childrenKey: providedChildrenKey, dataScopeKey = 0, disabled = false,
     editable = false, selectable = false, batchUpdate = false, batchDelete = false, exportable = false,
     savedViews = false, preferenceScopeKey, migrateAutoTableViews = false, deleteVariables, formats = {},
   }: SvarResourceTableProps = $props();
@@ -333,7 +333,7 @@
     </div>{/if}
     {#if feedback}<p role="alert">{feedback}</p>{/if}
     {#if result}<p role="status">{zh ? '成功 / 失败 / 未执行' : 'Succeeded / failed / skipped'}: {result.succeeded.length} / {result.failed.length} / {result.skipped.length}</p>{/if}
-    <SvarDataGrid {Grid} {Theme} items={gridItems} {columns} {primaryKey} {height} freezeRight={Math.min(freezeRight, Math.max(0, columns.length - 1))} freezeLeft={Math.min(freezeLeft, columns.length - Math.min(freezeRight, Math.max(0, columns.length - 1)))} {density}
+    <SvarDataGrid {Grid} {Theme} items={gridItems} {columns} {primaryKey} {height} freezeRight={Math.min(freezeRight, Math.max(0, columns.length - 1))} freezeLeft={Math.min(freezeLeft, columns.length - Math.min(freezeRight, Math.max(0, columns.length - 1)))}
       queryMode="server" {sorters} filters={textFilters} onSortChange={changeSort} onFilterChange={changeFilter}
       selectable={selectable || batchUpdate || batchDelete} {selectedIds} onSelectionChange={selection} {...advanced ? { onRecordsChange: loaded } : {}} scopeKey={gridScope}
       {...windowSource ? { windowSource } : {}}

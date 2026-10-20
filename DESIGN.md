@@ -131,7 +131,7 @@ not become a mixed visual theme:
 | --- | --- | --- |
 | Stripe style prompt | theme-menu chip `#635bff`, painted `--primary: oklch(0.54 0.24 293)`, technical grid, hairline borders, layered elevation, lift/depress feedback | Stripe brand assets, marketing gradients, oversized hero treatment |
 | Corporate-clean prompt | neutral enterprise surfaces, readable hierarchy, generous spacing, focus-ring offset, motion capped at 200ms | blue-only palette, rigid utility-class recipes, decorative cards |
-| Fuse / Midone / Skote | navigation anatomy, page-family coverage, toolbar/table/form composition, density observations | vendor palette, logos, fonts, CSS, copied markup or component chrome |
+| Fuse / Midone / Skote | navigation anatomy, page-family coverage, toolbar/table/form composition, layout observations | vendor palette, logos, fonts, CSS, copied markup or component chrome |
 | svadmin | semantic tokens, component API, state ownership, accessibility, responsive contracts | no second visual authority |
 
 When references conflict, svadmin semantics and accessibility win first, the
@@ -170,7 +170,7 @@ The same contract is used at every delivery surface:
   remains the preset chip `#635bff`, not the oklch `--primary` used by
   `@svadmin/ui`.
 
-Theme refinements must preserve component density, invalid and selected states.
+Theme refinements must preserve component geometry, invalid and selected states.
 Focus belongs to the active control, not every enclosing card. Search icons and
 clear actions use logical positioning so the same layout works in RTL.
 
@@ -205,7 +205,7 @@ and documentation:
    move the primary action or force an unnecessary page transition.
 3. **Consistent by contract:** semantic tokens, component variants, state names,
    page skeletons, and feedback lifecycles remain stable across products. Layout
-   presets may change density and composition, not interaction meaning.
+   presets may change composition, not interaction meaning.
 4. **Trustworthy in every state:** loading, empty, partial, error, forbidden,
    destructive, reversible, and completed states expose their scope and next
    step. Data freshness, permission boundaries, and action consequences must be
@@ -298,18 +298,20 @@ unframed layouts with a stable content width. Cards represent individual
 objects or bounded tools; page sections are not decorative floating cards and
 cards are not nested for visual effect.
 
-### Visual Density Dials
+### Spacing Rhythm
 
-svadmin components support systematic density levels to balance scanning speed
-and operational throughput:
+svadmin components ship one comfortable baseline rhythm so pages scan
+consistently and generated output matches hand-built pages:
 
-- **Density 8–10 (Dense / Dashboard)**: 2px/4px/8px rhythm with 28px–32px row
-  heights. Used for `AutoTable`, `FilterToolbar`, `RecordDetailDrawer`, and
-  operations work areas.
-- **Density 4–6 (Comfortable / Standard)**: 4px/8px/16px rhythm with 40px–44px
-  control heights. Used for settings forms, account profiles, and overview cards.
-- **Density 1–3 (Spacious / Onboarding)**: 16px/24px/32px rhythm for public
-  portals and introductory workflows.
+- **Components**: 4px/8px/16px rhythm with 40px–44px control heights and
+  40px–44px table row heights, used across `AutoTable`, `FilterToolbar`,
+  `RecordDetailDrawer`, forms, and operations work areas.
+- **Spacious onboarding or marketing surfaces** may widen vertical padding with
+  page-local layout choices, but must not fork component recipes.
+
+Density is not a component or page-pattern option; there is no compact or
+comfortable modifier to coordinate across `AutoTable`, `ContentPageShell`, or
+Surface widgets.
 
 ## Elevation & Depth
 
@@ -339,13 +341,20 @@ another titled page shell. Keep `DashboardPage` for existing dashboards.
 
 Use `PagePattern` for custom business compositions that do not fit those
 resource routes. It supplies layout only, not querying, permissions, form
-submission, or loading/error handling:
+submission, or business data fetching. It owns the default page-state
+presentation so custom pages do not need to recreate loading/error/empty
+layouts:
 
 - `list`: comfortable title, toolbar, table/list content, and list empty states.
 - `form`: narrow reading width, comfortable grouped fields and a single save area.
 - `detail`: read-only summary and related content.
 - `workspace`: comfortable primary work area plus an optional secondary panel.
 - `dashboard`: wide layout with optional metrics and secondary context.
+
+Set `state` to `loading`, `empty`, `error`, or `forbidden` while the page is
+not ready. Page content is hidden during those states, and the shared `DataState`
+component supplies the accessible default. Use `retry` only for `error`; use
+`stateAction` for an explicitly permitted next step. `ready` is the default.
 
 Optional `secondary` content renders beside the primary content for every kind.
 For advanced resizable, collapsible, or independently scrolling work areas,
@@ -398,10 +407,8 @@ cards, repeated title bars, or unrestricted two-column fields.
   persistence request succeeds; preserve edits after failure.
 - Separate initial-empty content from filtered-no-results content. Offer
   creation only when permitted, and clearing filters only when filters exist.
-- Page patterns default to comfortable density so generated and custom pages
-  have a consistent baseline. Use compact density explicitly for operational
-  work that prioritizes scanning speed; use comfortable density for forms and
-  general-purpose pages.
+- Page patterns use a single comfortable baseline so generated and custom pages
+  share the same rhythm across forms, detail, list, and workspace families.
 - Reference `packages/ui/stories/ConfigurationExample.svelte` in the SVAdmin
   source for a working composition; its save action is in-memory demo state,
   not a persistence implementation.
@@ -414,7 +421,7 @@ passing component tests alone does not establish visual acceptance.
 
 Buttons, fields, tabs, tables, badges, empty states, skeletons, alerts, and
 feedback use shared components and semantic tokens. Layout presets may adjust
-density and composition, but they must not replace component color, typography,
+composition, but they must not replace component color, typography,
 focus, or elevation with hard-coded values.
 
 ### Shell anatomy
@@ -462,11 +469,11 @@ Transitions provide clear state confirmation without delaying user action:
 The reference stack is layered. It is not a visual mixture:
 
 - **svadmin owns its visual principles:** hierarchy, restraint, neutral surfaces,
-  typography, density, and interaction tone.
+  typography, spacing, and interaction tone.
 - **Refine is an application-model reference:** resource routing, CRUD flows,
   provider state, access control, and mutation ownership.
 - **Ant Design is a behavior reference:** field validation, alerts, messages,
-  notifications, results, empty states, loading, and high-density data tasks.
+  notifications, results, empty states, loading, and data-heavy tasks.
 - **shadcn/ui is a composition reference:** accessible primitives, source-owned
   components, semantic tokens, variants, and AI-readable assembly patterns.
 - **Carbon and PatternFly are enterprise-pattern references:** notification

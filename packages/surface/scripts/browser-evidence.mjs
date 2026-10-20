@@ -30,7 +30,7 @@ try {
   // 在两个真实导入顺序下检查完整发布 CSS，不以删掉宿主 reset 的方式修复冲突。
   for (const editorFirst of [true, false]) {
     const page = await browser.newPage();
-    await page.setContent(`<section class="svadmin-surface-editor ${editorClasses.comfortable}"><button class="${editorButtonClasses.primary}">Action</button></section>`);
+    await page.setContent(`<section class="svadmin-surface-editor ${editorClasses.default}"><button class="${editorButtonClasses.primary}">Action</button></section>`);
     for (const content of editorFirst ? [editorCss, uiCss] : [uiCss, editorCss]) await page.addStyleTag({ content });
     const panel = page.locator('section');
     expect(await panel.evaluate((element) => getComputedStyle(element).paddingTop)).toBe('16px');
@@ -42,14 +42,14 @@ try {
     await page.close();
   }
   for (const config of [
-    { width: 1440, height: 900, theme: 'light', density: 'comfortable' },
-    { width: 1920, height: 1080, theme: 'dark', density: 'compact' },
-    { width: 390, height: 900, theme: 'light', density: 'compact' },
+    { width: 1440, height: 900, theme: 'light' },
+    { width: 1920, height: 1080, theme: 'dark' },
+    { width: 390, height: 900, theme: 'light' },
   ]) {
     const page = await browser.newPage({ viewport: { width: config.width, height: config.height } });
     const errors = [];
     page.on('pageerror', (error) => errors.push(error.message));
-    await page.goto(`http://127.0.0.1:5187/?theme=${config.theme}&density=${config.density}`);
+    await page.goto(`http://127.0.0.1:5187/?theme=${config.theme}`);
     await expect(page.getByRole('heading', { name: 'Order overview' })).toBeVisible();
     await expect(page.getByTestId('query-count')).toHaveText('1');
     const input = page.getByRole('textbox', { name: 'Reviewer note' });
@@ -65,7 +65,7 @@ try {
     await expect(page.getByTestId('query-count')).toHaveText('1');
     await expect(page.getByTestId('apply-count')).toHaveText('0');
     const panel = page.locator('.svadmin-surface-editor');
-    expect(await panel.evaluate((element) => getComputedStyle(element).paddingTop)).toBe(config.density === 'compact' ? '12px' : '16px');
+    expect(await panel.evaluate((element) => getComputedStyle(element).paddingTop)).toBe('16px');
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
     expect(overflow).toBe(false);
     await page.screenshot({ path: join(output, `${config.width}-${config.theme}.png`), fullPage: true });

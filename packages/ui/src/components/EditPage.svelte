@@ -20,7 +20,6 @@
     rendering?: ResourceRendering | undefined;
     id: string | number;
     title?: string;
-    density?: 'compact' | 'comfortable';
     columns?: 1 | 2 | 3 | 4;
     canDelete?: boolean;
     headerActions?: Snippet;
@@ -33,7 +32,6 @@
     rendering,
     id,
     title,
-    density = 'comfortable',
     columns = 1,
     canDelete,
     headerActions,
@@ -48,10 +46,9 @@
   const showDelete = $derived(canDelete ?? resource.canDelete !== false);
 </script>
 
-<div class="{density === 'compact' ? 'svadmin-u-3e7ce58d64fa' : 'svadmin-u-b3542e058833'} {className}">
+<div class="svadmin-u-b3542e058833 {className}">
   <PageHeader
     title={pageTitle}
-    {density}
     onBack={() => navigateGuard(() => navigation.list(resourceName))}
   >
     {#snippet actions()}
@@ -72,7 +69,6 @@
     {resourceName}
     mode="edit"
     {id}
-    {density}
     {columns}
     showHeader={false}
     onNavigationGuardReady={(guard) => navigateGuard = guard}

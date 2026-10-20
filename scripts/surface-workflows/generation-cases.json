@@ -1,13 +1,12 @@
 [
   {
     "id": "contact-count",
-    "prompt": "显示客户总数，使用紧凑的信息语义样式。",
+    "prompt": "显示客户总数，使用 info 信息语义色调。",
     "requiredTypes": [
       "metric"
     ],
     "requireCount": true,
-    "tone": "info",
-    "density": "compact"
+    "tone": "info"
   },
   {
     "id": "contact-form",

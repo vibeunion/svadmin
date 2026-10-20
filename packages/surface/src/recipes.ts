@@ -1,25 +1,24 @@
-import type { SurfaceDensity, SurfaceTone } from './design-contract.js';
+import type { SurfaceTone } from './design-contract.js';
 
 // 有限语义变体与静态 CSS 配套；不接受模型提供的 class/style。
 export function surfaceMetric({
-  tone = 'neutral', density = 'comfortable',
-}: { tone?: SurfaceTone | undefined; density?: SurfaceDensity | undefined } = {}) {
+  tone = 'neutral',
+}: { tone?: SurfaceTone | undefined } = {}) {
   return {
     root: 'svadmin-surface-metric__root',
-    card: `svadmin-surface-metric__card svadmin-surface-tone--${tone} svadmin-surface-density--${density}`,
+    card: `svadmin-surface-metric__card svadmin-surface-tone--${tone}`,
     description: 'svadmin-surface-metric__description',
-    state: `svadmin-surface-metric__state svadmin-surface-tone--${tone} svadmin-surface-density--${density}`,
+    state: `svadmin-surface-metric__state svadmin-surface-tone--${tone}`,
   };
 }
 
-export function surfaceTable({ density = 'comfortable' }: { density?: SurfaceDensity | undefined } = {}) {
-  const variant = `svadmin-surface-density--${density}`;
+export function surfaceTable() {
   return {
     root: 'svadmin-surface-table__root',
-    header: `svadmin-surface-table__header ${variant}`,
-    content: `svadmin-surface-table__content ${variant}`,
-    head: `svadmin-surface-table__head ${variant}`,
-    cell: `svadmin-surface-table__cell ${variant}`,
-    state: `svadmin-surface-table__state ${variant}`,
+    header: 'svadmin-surface-table__header',
+    content: 'svadmin-surface-table__content',
+    head: 'svadmin-surface-table__head',
+    cell: 'svadmin-surface-table__cell',
+    state: 'svadmin-surface-table__state',
   };
 }

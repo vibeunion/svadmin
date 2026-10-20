@@ -29,7 +29,6 @@ const results = lines.map((line) => {
     && (!task.actionId || widgets.some((w) => w.type === 'resource-form' && w.props.actionId === task.actionId))
     && (!task.requireCount || metric?.binding?.pointer === '/total')
     && (!task.tone || metric?.props?.appearance?.tone === task.tone)
-    && (!task.density || metric?.props?.appearance?.density === task.density)
     && (!task.detailFields || (detailSource?.resource === 'contacts' && detailSource?.type === 'resource-one' && detailSource.recordId === task.recordId && task.detailFields.every((field) => detail?.props.fields?.some((item) => item.field === field))))
     && (!task.activityFields || (activitySource?.resource === 'events' && Object.entries(task.activityFields).every(([key, field]) => activity?.props[key] === field)))
     && (!task.requireNameColumn || widgets.some((w) => w.type === 'resource-table' && w.props.columns?.some((column) => column.field === 'name')));

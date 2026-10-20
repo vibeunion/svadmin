@@ -32,12 +32,12 @@ browser component module.
 `withSurfaceAppearance(catalog)` adds an optional `appearance` object to every
 registered widget with a closed props schema (including unions of closed objects).
 The vocabulary comes from the existing shared design contract: five semantic
-tones and two densities. It selects the existing, precompiled Surface frame recipe.
+tones. It selects the existing, precompiled Surface frame recipe.
 No model-provided class, raw CSS, color or recipe is executed. Existing components
 receive their original props, and field-policy selectors are preserved.
 
 This is **frame-level** coverage, not a claim that every internal slot or business
-component has acquired native `tone`/`density` variants. Existing native metric
+component has acquired native `tone` variants. Existing native metric
 and table props remain separate. Old catalogs do not silently accept new props.
 
 The interactive catalog adds `resource-form` to the same registry. Its `actionId`
@@ -69,7 +69,7 @@ Supported example, where `contacts.create` was registered by the application:
 root = Surface("contacts", "Contacts", [records], [count, form], "md")
 records = Source({"id":"records","type":"resource-list","resource":"contacts","pageSize":10})
 count = Metric("count", {"label":"Contacts","format":"number"}, {"sourceId":"records","pointer":"/total"}, 4)
-form = ResourceForm("form", {"actionId":"contacts.create","appearance":{"tone":"info","density":"compact"}}, null, 8)
+form = ResourceForm("form", {"actionId":"contacts.create","appearance":{"tone":"info"}}, null, 8)
 ```
 
 A bounded static-declaration guard rejects executable expressions, inline calls,

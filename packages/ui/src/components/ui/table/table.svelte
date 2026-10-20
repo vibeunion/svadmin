@@ -6,6 +6,7 @@
 	export type TableDensity = "compact" | "comfortable";
 
 	type Props = WithElementRef<HTMLTableAttributes, HTMLTableElement> & {
+		/** @deprecated Retained for compatibility; comfortable is the shared default. */
 		density?: TableDensity;
 	};
 

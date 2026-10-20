@@ -5,6 +5,6 @@
   const design = $derived(getDesign());
 </script>
 
-<ContentPageShell pageId="customer-list" width={design.width} density={design.density}>
-  <AutoTable {resourceName} density={design.density} />
+<ContentPageShell pageId="customer-list" width={design.width}>
+  <AutoTable {resourceName} />
 </ContentPageShell>

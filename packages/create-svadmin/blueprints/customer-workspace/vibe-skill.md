@@ -36,7 +36,7 @@ The CLI commands remain the fallback when no MCP client is configured.
   internal/example-only imports.
 - Translate "compact", "standard", or "lightweight" requests into the existing
   application-wide presets in `src/design.svelte.ts`. Keep layout, form columns,
-  table density, and detail layout consistent. Change `src/design-selection.ts`
+  and detail layout consistent. Change `src/design-selection.ts`
   for the initial preset. Do not silently reset a user's saved preferences.
 - Preserve resource contracts, providers, permissions, routes, and active form
   values when making visual-only changes. Keep metric values provider-backed.

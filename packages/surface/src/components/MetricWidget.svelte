@@ -11,8 +11,8 @@
   const activeMessages = $derived(resolveSurfaceMessages(locale, messages));
 
   const metricProps = $derived(Value.Decode(metricPropsSchema, props));
-  const metricClasses = $derived(metricProps.tone !== undefined || metricProps.density !== undefined
-    ? surfaceMetric({ tone: metricProps.tone, density: metricProps.density }) : undefined);
+  const metricClasses = $derived(metricProps.tone !== undefined
+    ? surfaceMetric({ tone: metricProps.tone }) : undefined);
   const formattedValue = $derived.by(() => {
     if (data.status !== 'ready') return '—';
     const value = data.value;
@@ -30,7 +30,7 @@
   });
 </script>
 
-<article class={metricClasses?.root} data-surface-tone={metricProps.tone} data-surface-density={metricProps.density} aria-labelledby="{widgetId}-label" aria-busy={data.status === 'loading'}>
+<article class={metricClasses?.root} data-surface-tone={metricProps.tone} aria-labelledby="{widgetId}-label" aria-busy={data.status === 'loading'}>
   <span id="{widgetId}-label" class="visually-hidden">{metricProps.label}</span>
   {#if data.status === 'loading'}
     <StatsCard class={metricClasses?.card ?? ''} label={metricProps.label} value="" loading />

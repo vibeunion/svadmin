@@ -18,14 +18,13 @@
     readonly dataProvider?: SurfaceDataProvider;
     readonly scopeKey?: string;
     readonly locale?: string;
-    readonly density?: 'compact' | 'comfortable';
     /** 用户确认后返回候选快照。宿主负责持久化 CAS 与服务端授权。 */
     readonly onApply?: (candidate: SurfaceRevision) => void | Promise<void>;
   }
 
   let {
     revision, proposal, streaming = false, policy, catalog = defaultSurfaceCatalog,
-    dataProvider, scopeKey = '', locale, density = 'comfortable', onApply,
+    dataProvider, scopeKey = '', locale, onApply,
   }: SurfaceEditPreviewProps = $props();
   const i18n = useTranslation();
   const activeLocale = $derived(locale ?? i18n.locale);
@@ -72,7 +71,7 @@
   }
 </script>
 
-<section class="svadmin-surface-editor {editorClasses[density]}" aria-label={labels.title} data-density={density}>
+<section class="svadmin-surface-editor {editorClasses.default}" aria-label={labels.title}>
   <div data-part="toolbar">
     <div>
       <h3 data-part="title">{labels.title}</h3>

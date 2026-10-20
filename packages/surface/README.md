@@ -136,14 +136,13 @@ The Svelte `SurfaceEditPreview` component accepts a controlled revision and untr
   {catalog}
   {dataProvider}
   scopeKey={trustedSessionRevision}
-  density="comfortable"
   onApply={applyApprovedRevision}
 />
 ```
 
 It leaves the current surface intact during streaming, offers a separate preview/back action, and revalidates at the explicit apply click. It calls `onApply(candidate)` only for a valid proposal. The host performs any persistence with server authorization and atomic revision compare-and-swap, then updates `revision` and clears `proposal`. Missing handlers, invalid proposals and pending callbacks disable application. A rejected callback reports an error without changing the controlled revision. Changing scope does not authorize an old proposal: the host must discard old proposals as described above.
 
-Preview controls use local finite class helpers and maintained static CSS. `@svadmin/surface/editor.css` remains available for explicit CSS collection. Density/button variants and complete-color semantic CSS variable overrides are preserved. Widgets use local semantic recipes to retain compatibility with older UI peers; no UI-generated helpers are copied during build. The separate `@svadmin/surface/styles.css` entry remains available and rendering components also import it automatically; see `STYLING.md`.
+Preview controls use local finite class helpers and maintained static CSS. `@svadmin/surface/editor.css` remains available for explicit CSS collection. Button variants and complete-color semantic CSS variable overrides are preserved. Widgets use local semantic recipes to retain compatibility with older UI peers; no UI-generated helpers are copied during build. The separate `@svadmin/surface/styles.css` entry remains available and rendering components also import it automatically; see `STYLING.md`.
 
 ## Built-in catalog
 

@@ -104,7 +104,7 @@ Using `border-color: var(--border)` with channel-only values is invalid CSS and 
 | `cssOverrides` | `Record<string, string>` | — | CSS variables to inject on `<html>` / 注入到 `<html>` 的 CSS 变量 |
 | `disableColorScheme` | `boolean` | `false` | Skip setting `color-scheme` attribute / 跳过 `color-scheme` 属性 |
 | `colorPreset` | `ColorPreset \| string` | `'stripe'` | Built-in or registered color preset; Stripe is used when no selection exists / 内置或注册的配色预设；未选择时默认使用 Stripe |
-| `layoutPreset` | `'default' \| 'clean-flat'` | `'default'` | Layout density and composition / 布局密度与结构 |
+| `layoutPreset` | `'default' \| 'clean-flat'` | `'default'` | Layout composition / 布局结构 |
 
 ## Color Themes / 多色主题
 
@@ -196,4 +196,47 @@ configureTheme({
     '--warning': 'oklch(0.8 0.15 55)',
   },
 });
+```
+
+## Size Tokens / 尺寸变量
+
+Colors were never the whole theme. Controls, rows, spacing and type sizes are
+tokens too, so a host can change density or scale by overriding variables
+instead of re-writing component CSS.
+
+颜色从来不是主题的全部。控件、行、间距和字号同样是 token，宿主可以通过覆盖变量
+调整密度或尺寸，而不是重写组件 CSS。
+
+| Token | Default | Meaning / 含义 |
+|-------|---------|----------------|
+| `--svadmin-control-h-sm` | `1.75rem` | Compact control / 紧凑控件 |
+| `--svadmin-control-h` | `2.25rem` | Default control height / 默认控件高度 |
+| `--svadmin-control-h-lg` | `2.5rem` | Large control / 大号控件 |
+| `--svadmin-row-h` | `3rem` | Table and list row rhythm / 行节奏 |
+| `--svadmin-table-head-h` | `2.75rem` | Table header height / 表头高度 |
+| `--svadmin-table-state-min-h` | `8rem` | Table empty/loading state height / 表格状态高度 |
+| `--svadmin-space-1…6` | `4px … 32px` | Spacing scale / 间距刻度 |
+| `--svadmin-section-gap` | `--svadmin-space-5` | Gap between page sections / 区块间距 |
+| `--svadmin-text-caption`…`--svadmin-text-title` | `12px … 20px` | Type scale / 字号刻度 |
+| `--svadmin-leading-tight`…`--svadmin-leading-body` | `1.25 … 1.5` | Line heights / 行高 |
+| `--svadmin-measure` | `65ch` | Reading measure / 阅读宽度 |
+| `--svadmin-shell-topbar-h` | `3.5rem` | App shell topbar / 顶栏高度 |
+| `--svadmin-shell-sidebar-w` | `15rem` | Expanded navigation rail / 展开导航 |
+| `--svadmin-shell-gutter` | `--svadmin-space-5` | Page gutter / 页面留白 |
+| `--svadmin-shell-max` | `74rem` | Content max width / 内容最大宽度 |
+
+Override them where the component tree is rooted. Never duplicate a token in a
+second selector: two declarations create a competing density baseline, and
+`packages/ui/src/size-token-css.test.ts` fails when that happens.
+
+在组件树根部覆盖即可。不要在第二个选择器里重复声明同一个 token：两处声明会产生
+互相竞争的密度基线，`packages/ui/src/size-token-css.test.ts` 会直接失败。
+
+```css
+/* Enterprise forms often need 44px controls: one override, no CSS fork. */
+.fa-app-shell {
+  --svadmin-control-h: 2.75rem;
+  --svadmin-row-h: 2.75rem;
+  --svadmin-section-gap: var(--svadmin-space-6);
+}
 ```

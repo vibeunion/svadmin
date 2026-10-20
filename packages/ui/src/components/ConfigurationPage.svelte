@@ -11,7 +11,6 @@
     footer?: Snippet;
     children: Snippet;
     width?: 'narrow' | 'default' | 'wide';
-    density?: 'compact' | 'comfortable';
     class?: string;
   }
 
@@ -23,7 +22,6 @@
     footer,
     children,
     width = 'default',
-    density = 'comfortable',
     class: className = '',
   }: Props = $props();
 </script>
@@ -32,7 +30,6 @@
   {title}
   {...definedOptions({ description, eyebrow, actions })}
   {width}
-  {density}
   class={className}
 >
   <div class="configuration-page__content">

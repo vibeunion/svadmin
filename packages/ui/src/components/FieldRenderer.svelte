@@ -35,24 +35,20 @@
   import { Plus, X } from '@lucide/svelte';
   import type { Snippet } from 'svelte';
   import { getRichTextEditor } from '../editor-config.svelte.js';
-  import { cn } from '../utils.js';
   import { numericInputValue } from '../numeric-input.js';
 
   type FieldOption = NonNullable<FieldDefinition['options']>[number];
   const i18n = useTranslation();
 
-  let { field, value, onchange, disabled, invalid = false, errorId, density = 'comfortable', children } = $props<{
+  let { field, value, onchange, disabled, invalid = false, errorId, children } = $props<{
     field: FieldDefinition;
     value: unknown;
     onchange: (val: unknown) => void;
     disabled?: boolean;
     invalid?: boolean;
     errorId?: string;
-    density?: 'compact' | 'comfortable';
     children?: Snippet;
   }>();
-
-  const isCompact = $derived(density === 'compact');
 
   // Typed accessors
   const strVal = $derived((value as string) ?? '');
@@ -111,13 +107,9 @@
 </script>
 
 <div
-  class={cn(
-    'svadmin-u-5a2508227c6a',
-    isCompact && 'svadmin-u-da7c36cd8867 svadmin-u-01e043b9ca05 svadmin-u-5e375759a547 svadmin-u-0144d38a6921 svadmin-u-910198b850a8 svadmin-u-220cd47c030c svadmin-u-84a68a4bfa38 svadmin-u-2b201b2c12c7 svadmin-u-334c9da7fe2b svadmin-u-f7194f86de09 svadmin-u-a281d7e98ab9 svadmin-u-6cddb40447d9 svadmin-u-150c3670da1d svadmin-u-f01a063e8052 svadmin-u-3e2aa4ec6454'
-  )}
+  class="svadmin-u-5a2508227c6a"
   data-svadmin-field
   data-svadmin-field-key={field.key}
-  data-density={density}
 >
   <Label for={field.key} id="label-{field.key}" data-svadmin-field-label>
     {field.label}

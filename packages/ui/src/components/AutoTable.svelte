@@ -112,10 +112,12 @@
     selectable?: boolean;
     /** 仅在业务回调支持按查询执行服务端命令时启用。 */
     allowSelectAllMatching?: boolean;
+    /** @deprecated Retained for compatibility; comfortable is the shared default. */
     density?: 'compact' | 'comfortable';
     showHeader?: boolean;
     title?: string;
     showFilterTags?: boolean;
+    /** @deprecated Retained for compatibility; use the shared appearance baseline. */
     showDensitySwitcher?: boolean;
     showRefresh?: boolean;
     /** Custom header actions (right side) */

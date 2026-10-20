@@ -9,7 +9,7 @@ const css = readFileSync(resolve(currentDir, 'app.css'), 'utf8');
 const root = postcss.parse(css);
 const stripe = '.layout-clean-flat[data-theme="stripe"]';
 
-describe('Stripe state and density ownership', () => {
+describe('Stripe state ownership', () => {
   it('uses shared duration and easing tokens for component transitions', () => {
     root.walkDecls(/^transition(?:-duration|-timing-function)?$/, (decl) => {
       expect(decl.value).not.toMatch(/\b(?:120|140|150|160|180|200|250|300)ms\b/);
@@ -27,19 +27,6 @@ describe('Stripe state and density ownership', () => {
         expect(['font-size', 'height', 'min-height']).not.toContain(decl.prop);
       });
     });
-  });
-
-  it('preserves compact density for owned data tables', () => {
-    const selectors: string[] = [];
-    root.walkRules((rule) => {
-      if (!rule.selector.startsWith('.layout-clean-flat ') || !rule.selector.includes('[data-density="compact"]')) return;
-      rule.walkDecls('height', (decl) => {
-        expect(decl.value).toBe('2rem');
-        selectors.push(rule.selector);
-      });
-    });
-    expect(selectors.join()).toContain('[data-slot="table-head"]');
-    expect(selectors.join()).toContain('[data-slot="table-cell"]');
   });
 
   it('keeps selected rows and invalid fields distinct from hover and focus', () => {

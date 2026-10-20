@@ -8,7 +8,6 @@ const field = Type.String({ minLength: 1, maxLength: 64, pattern: '^[A-Za-z][A-Z
 const presentation = {
   title: Type.String({ minLength: 1, maxLength: 80 }),
   tone: Type.Optional(Type.Union(surfaceDesignContract.metric.tone.map((value) => Type.Literal(value)))),
-  density: Type.Optional(Type.Union(surfaceDesignContract.metric.density.map((value) => Type.Literal(value)))),
 };
 export const resourceDetailPropsSchema = Type.Object({
   ...presentation,
@@ -30,7 +29,7 @@ const definitions: readonly SurfaceWidgetDefinition[] = [
   {
     type: 'resource-detail', dataKind: 'record', propsSchema: resourceDetailPropsSchema,
     description: 'Read-only detail of one authorized record. Bind a permitted resource-one source with pointer "". Select up to sixteen distinct readable fields; never provide record values in props.',
-    examples: [{ title: 'Contact details', fields: [{ field: 'name', label: 'Name' }], density: 'compact' }],
+    examples: [{ title: 'Contact details', fields: [{ field: 'name', label: 'Name' }] }],
     getReferencedFields: (props: JsonObject) => {
       const fields = Value.Decode(resourceDetailPropsSchema, props).fields.map((item) => item.field);
       if (new Set(fields).size !== fields.length) throw new Error('Detail fields must be distinct');

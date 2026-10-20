@@ -19,18 +19,16 @@ describe('FilterToolbar', () => {
     expect(screen.queryByRole('button', { name: 'Clear search' })).toBeNull();
   });
 
-  it('switches density while preserving the search value', async () => {
+  it('preserves the search value across rerenders', async () => {
     const { container, rerender } = render(FilterToolbar, {
       query: 'orders',
-      density: 'compact',
     });
 
     const input = container.querySelector('input');
     expect(input?.classList.contains('svadmin-filter-toolbar__input')).toBe(true);
-    expect(container.querySelector('[data-svadmin-filter-toolbar]')?.getAttribute('data-density')).toBe('compact');
-    await rerender({ density: 'comfortable' });
     expect(input?.value).toBe('orders');
-    expect(container.querySelector('[data-svadmin-filter-toolbar]')?.getAttribute('data-density')).toBe('comfortable');
+    await rerender({ query: 'orders' });
+    expect(input?.value).toBe('orders');
   });
 
   it('unmounts advanced content while collapsed and restores it when expanded', async () => {

@@ -21,11 +21,11 @@
   const activeMessages = $derived(resolveSurfaceMessages(locale, messages));
 
   const tableProps = $derived(Value.Decode(resourceTablePropsSchema, props));
-  const tableClasses = $derived(tableProps.density === undefined ? undefined : surfaceTable({ density: tableProps.density }));
+  const tableClasses = $derived(surfaceTable());
   const records = $derived(data.status === 'ready' ? asRecordArray(data.value) : null);
 </script>
 
-<Card class={tableClasses?.root} data-surface-density={tableProps.density}>
+<Card class={tableClasses?.root}>
   <CardHeader class={tableClasses?.header}>
     <CardTitle>{tableProps.title}</CardTitle>
   </CardHeader>
@@ -38,7 +38,7 @@
       <p class={"table-state " + (tableClasses?.state ?? "")} role="alert">{data.error.message}</p>
     {:else if data.status === 'ready' && records?.ok}
       <div class="surface-table">
-        <Table density={tableProps.density ?? "comfortable"} aria-label={tableProps.title}>
+        <Table aria-label={tableProps.title}>
           <TableHeader>
             <TableRow>
               {#each tableProps.columns as column (column.field)}

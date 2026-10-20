@@ -16,7 +16,6 @@
     rendering?: ResourceRendering | undefined;
     title?: string;
     canCreate?: boolean;
-    density?: 'compact' | 'comfortable';
     /** Passthrough: enable row selection checkboxes */
     selectable?: boolean;
     allowSelectAllMatching?: boolean;
@@ -44,7 +43,6 @@
     rendering,
     title,
     canCreate,
-    density = 'comfortable',
     selectable,
     allowSelectAllMatching,
     headerActions,
@@ -62,8 +60,8 @@
   const showCreate = $derived(canCreate ?? resource.canCreate !== false);
 </script>
 
-<div class="{density === 'compact' ? 'svadmin-u-6ed543e2fbbb' : 'svadmin-u-3e7ce58d64fa'} {className}">
-  <PageHeader title={pageTitle} {density}>
+<div class="svadmin-u-3e7ce58d64fa {className}">
+  <PageHeader title={pageTitle}>
     {#snippet actions()}
       {#if showCreate}
         <CreateButton resource={resourceName} />
@@ -90,7 +88,6 @@
     {rendering}
     {resourceName}
     showHeader={false}
-    {density}
     {...definedOptions({ "selectable": selectable })}
     {...definedOptions({ allowSelectAllMatching })}
     {...definedOptions({ batchActions })}

@@ -20,7 +20,7 @@ this standard for state ownership and AI acceptance details.
 | Corporate-clean prompt | Neutral enterprise surfaces, spacing, focus offset, motion <= 200ms | A blue-only palette or copied utility recipes |
 | Fuse / Midone / Skote | Navigation anatomy, page-family coverage, toolbar/table/form composition | Vendor CSS, fonts, logos, palette, and markup |
 | [Refine](https://refine.dev/docs/) | Resources, CRUD flows, provider state, mutation ownership | React implementation or UI theme |
-| [Ant Design](https://ant.design/components/overview/) | Feedback selection, forms, results, empty/loading states, data density | Blue palette, radius, shadow, component chrome |
+| [Ant Design](https://ant.design/components/overview/) | Feedback selection, forms, results, empty/loading states, data-heavy workflows | Blue palette, radius, shadow, component chrome |
 | [shadcn/ui](https://ui.shadcn.com/docs) | Accessible composition, semantic variants, source-owned components | React-only APIs or default styling |
 | [Carbon](https://carbondesignsystem.com/) / [PatternFly](https://www.patternfly.org/components/) | Enterprise notification lifecycle, error/empty states, operational layouts | Brand tokens and visual identity |
 | [Metronic](https://keenthemes.com/metronic/tailwind/demo1/) | Page-family coverage and missing scenarios | Visual style, decoration, typography |

@@ -12,7 +12,6 @@
   interface Props {
     items: StatusTabItem[];
     value?: string;
-    density?: 'compact' | 'comfortable';
     variant?: 'pills' | 'underline' | 'segmented';
     onchange?: (key: string) => void;
     class?: string;
@@ -21,7 +20,6 @@
   let {
     items = [],
     value = $bindable(items[0]?.key ?? ''),
-    density = 'compact',
     variant = 'pills',
     onchange,
     class: className = '',
@@ -61,8 +59,6 @@
     tabs[nextIndex]?.click();
   }
 
-  const isCompact = $derived(density === 'compact');
-
   const toneClasses: Record<NonNullable<StatusTabItem['tone']>, { activeBadge: string; inactiveBadge: string }> = {
     default: {
       activeBadge: 'svadmin-u-6a1572b6bf5a svadmin-u-20aaf08a7ed1',
@@ -95,7 +91,6 @@
   role="tablist"
   aria-orientation="horizontal"
   data-svadmin-status-tabs
-  data-density={density}
   data-variant={variant}
   class={cn(
     'svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421 svadmin-u-1384f66f41d0',
@@ -118,7 +113,7 @@
       onkeydown={handleKeydown}
       class={cn(
         'svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-58284b4ea568 svadmin-u-e82ae8be04aa svadmin-u-2689f3958069 svadmin-u-ceb69a6b0e5f svadmin-u-34516836730d svadmin-u-df37b1fd9495 svadmin-u-793c80e97ffb svadmin-u-ddac70ae5d29 svadmin-u-49330148794a svadmin-u-b29d8adbad2e',
-        isCompact ? 'svadmin-u-359090c2d529 svadmin-u-0b91436debbd svadmin-u-660d2effb880' : 'svadmin-u-fc7473ca09eb svadmin-u-0e17f2bd9074 svadmin-u-ec0091ee009b',
+        'svadmin-u-fc7473ca09eb svadmin-u-0e17f2bd9074 svadmin-u-ec0091ee009b',
         variant === 'pills' && [
           'svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f',
           active
@@ -144,7 +139,7 @@
         <span
           class={cn(
             'svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-ac204c108886 svadmin-u-e83a7042bc91 svadmin-u-3032cae0badb svadmin-u-c2385a463da8',
-            isCompact ? 'svadmin-u-69aaf7265e58 svadmin-u-d8e0e382c67b svadmin-u-465609a240a8 svadmin-u-1dc571a3609f' : 'svadmin-u-f8516763aedd svadmin-u-45d828117213 svadmin-u-465609a240a8 svadmin-u-359090c2d529',
+            'svadmin-u-f8516763aedd svadmin-u-45d828117213 svadmin-u-465609a240a8 svadmin-u-359090c2d529',
             active ? badgeTone.activeBadge : badgeTone.inactiveBadge
           )}
         >

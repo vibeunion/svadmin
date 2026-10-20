@@ -13,7 +13,6 @@
   interface Props {
     viewMode?: 'table' | 'list-page' | 'show-page-grid' | 'show-page-list';
     showHeader?: boolean;
-    density?: 'compact' | 'comfortable';
     selectable?: boolean;
     locale?: string;
     exportTaskName?: string;
@@ -24,7 +23,6 @@
   let {
     viewMode = 'table',
     showHeader = true,
-    density = 'comfortable',
     selectable = true,
     locale = 'zh-CN',
     exportTaskName,
@@ -83,10 +81,10 @@
 
 {#snippet dashboard()}
   {#if viewMode === 'table'}
-    <AutoTable resourceName="users" {showHeader} {density} {selectable}
+    <AutoTable resourceName="users" {showHeader} {selectable}
       {...definedOptions({ exportTaskName, exportTaskProvider, exportTaskIdempotencyKey })} />
   {:else if viewMode === 'list-page'}
-    <ListPage resourceName="users" {density} selectable={selectable}>
+    <ListPage resourceName="users" selectable={selectable}>
       {#snippet statusTabs()}
         <StatusTabs
           items={[
@@ -102,9 +100,9 @@
       {/snippet}
     </ListPage>
   {:else if viewMode === 'show-page-grid'}
-    <ShowPage resourceName="users" id="user-1" layout="grid" columns={3} bordered {density} />
+    <ShowPage resourceName="users" id="user-1" layout="grid" columns={3} bordered />
   {:else if viewMode === 'show-page-list'}
-    <ShowPage resourceName="users" id="user-1" layout="list" {density} />
+    <ShowPage resourceName="users" id="user-1" layout="list" />
   {/if}
 {/snippet}
 

@@ -6,17 +6,35 @@ import postcss from 'postcss';
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 
+// src/app.css is the live entry that build-static-css.mjs publishes.
+// src/components.css is a hash-pinned historical snapshot used by the design
+// contract, so assertions must never read it as if it were the shipped CSS.
 function readAppCss(): string {
-  return readFileSync(join(currentDir, 'components.css'), 'utf8');
+  return readFileSync(join(currentDir, 'app.css'), 'utf8');
 }
 
 function readCleanFlatCss(): string {
   const css = readAppCss();
   const marker = '/* --- Admin UI layout preset (clean-flat) --- */';
   const markerIndex = css.indexOf(marker);
+  const endMarker = css.indexOf('/* Business components', markerIndex);
 
   expect(markerIndex).toBeGreaterThanOrEqual(0);
-  return css.slice(markerIndex);
+  return css.slice(markerIndex, endMarker === -1 ? undefined : endMarker);
+}
+
+/** Literal palette values are only allowed when defining a token. */
+function hardcodedColors(css: string): string[] {
+  const offenders: string[] = [];
+  postcss.parse(css).walkRules((rule) => {
+    rule.walkDecls((decl) => {
+      if (decl.prop.startsWith('--')) return;
+      for (const match of decl.value.matchAll(/#[\da-f]{3,8}\b|\b(?:rgba?|hsla?|oklab|oklch)\(/gi)) {
+        offenders.push(`${rule.selector}: ${decl.prop}: ${match[0]}`);
+      }
+    });
+  });
+  return offenders;
 }
 
 function readPublishedAppCss(): string {
@@ -25,6 +43,10 @@ function readPublishedAppCss(): string {
 
 function readSidebar(): string {
   return readFileSync(join(currentDir, 'components', 'Sidebar.svelte'), 'utf8');
+}
+
+function readAppShellCss(): string {
+  return readFileSync(join(currentDir, 'app-shell.css'), 'utf8');
 }
 
 describe('native component CSS', () => {
@@ -52,7 +74,7 @@ describe('native component CSS', () => {
 
     const values: string[] = [];
     postcss.parse(css).walkRules((rule) => {
-      if (rule.selector !== '*, ::after, ::before') return;
+      if (rule.selector.replace(/\s+/g, ' ').trim() !== '*, ::after, ::before') return;
       rule.walkDecls('border-color', (decl) => { values.push(decl.value); });
     });
     expect(values).toEqual(['var(--color-border, var(--border))']);
@@ -81,8 +103,7 @@ describe('native component CSS', () => {
     expect(cleanFlatCss).toContain('--svadmin-surface-shadow: var(--shadow-surface);');
     expect(cleanFlatCss).toContain('background: var(--primary);');
     expect(cleanFlatCss).toContain('--svadmin-focus-ring: var(--ring);');
-    expect(cleanFlatCss).not.toMatch(/#[\da-f]{3,8}\b/i);
-    expect(cleanFlatCss).not.toMatch(/\b(?:rgb|rgba|hsl|hsla|oklab|oklch)\(/i);
+    expect(hardcodedColors(cleanFlatCss)).toEqual([]);
     expect(cleanFlatCss).not.toContain('!important');
     expect(cleanFlatCss).not.toContain('linear-gradient(');
     expect(cleanFlatCss).not.toContain('[class*=');
@@ -102,7 +123,8 @@ describe('native component CSS', () => {
     expect(cleanFlatCss).toContain(
       '.layout-clean-flat [data-svadmin-table-row]:hover [data-slot="table-cell"]',
     );
-    expect(cleanFlatCss).toContain('.layout-clean-flat [data-svadmin-content-page] .svadmin-u-cd0ad9a56558');
+    expect(cleanFlatCss).toContain('.layout-clean-flat [data-svadmin-content-page] {');
+    expect(cleanFlatCss).not.toMatch(/^\s*\[data-svadmin-content-page\]/m);
     expect(readSidebar()).toMatch(/<aside\s+data-svadmin-sidebar/);
   });
 
@@ -178,5 +200,11 @@ describe('native component CSS', () => {
     expect(css).toMatch(/@media \(min-width: 768px\) \{[\s\S]*?\.svadmin-sidebar-content-expanded/);
     expect(css).not.toContain('class:w-[252px]');
     expect(css).not.toContain('class:w-[70px]');
+  });
+
+  it('mirrors the mobile app-shell drawer in RTL layouts', () => {
+    const css = readAppShellCss();
+    expect(css).toContain('[dir="rtl"] .svadmin-app-shell__sidebar');
+    expect(css).toContain('transform: translateX(100%);');
   });
 });

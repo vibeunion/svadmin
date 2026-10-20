@@ -7,7 +7,7 @@
   const design = $derived(getDesign());
 </script>
 
-<ContentPageShell pageId="customer-form" width={design.width} density={design.density}>
+<ContentPageShell pageId="customer-form" width={design.width}>
   <AutoForm {resourceName} {mode} {...(id === undefined ? {} : { id })}
-    columns={design.formColumns} density={design.density} />
+    columns={design.formColumns} />
 </ContentPageShell>

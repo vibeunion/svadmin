@@ -20,7 +20,6 @@
     /** 高级读取仍使用资源契约、Provider 和核心查询缓存。 */
     loadingMode?: 'page' | 'window' | 'infinite';
     lazyTree?: SvarLazyTree;
-    density?: 'compact' | 'comfortable';
     childrenKey?: string;
     dataScopeKey?: string | number;
     disabled?: boolean;

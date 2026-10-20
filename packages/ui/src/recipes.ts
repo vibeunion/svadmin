@@ -73,54 +73,29 @@ export type BadgeRecipeProps = OmitVariantProps<NonNullable<Parameters<typeof ba
 const textareaRecipeStyles = tv({ base: "svadmin-textarea" });
 
 const contentPageRecipeStyles = tv({
-  slots: { root: `${semantic.page} svadmin-content-page` },
+  slots: { root: `${semantic.page} svadmin-content-page space-y-[var(--svadmin-space-5)]` },
   variants: {
     width: {
       narrow: { root: "max-w-3xl" },
       default: { root: "max-w-[74rem]" },
       wide: { root: "max-w-[92rem]" },
     },
-    density: {
-      compact: { root: "space-y-4" },
-      comfortable: { root: "space-y-6" },
-    },
   },
-  defaultVariants: { width: "default", density: "comfortable" },
+  defaultVariants: { width: "default" },
 });
 
 const contentHeaderRecipeStyles = tv({
   slots: {
-    root: "svadmin-content-header",
-    breadcrumbs: `${semantic.group} text-xs text-muted-foreground`,
+    root: "svadmin-content-header space-y-[var(--svadmin-space-3)]",
+    breadcrumbs: `${semantic.group} text-[length:var(--svadmin-text-caption)] text-muted-foreground`,
     currentCrumb: "text-foreground",
-    row: "flex flex-col sm:flex-row sm:items-start sm:justify-between",
-    heading: "min-w-0",
-    eyebrow: "text-xs font-medium text-muted-foreground",
-    title: "font-semibold leading-tight text-foreground",
-    description: "max-w-2xl text-muted-foreground",
-    actions: "flex shrink-0 flex-wrap items-center",
+    row: "flex flex-col gap-[var(--svadmin-space-5)] sm:flex-row sm:items-start sm:justify-between",
+    heading: "min-w-0 space-y-[var(--svadmin-space-1)]",
+    eyebrow: "text-[length:var(--svadmin-text-caption)] font-medium text-muted-foreground",
+    title: "text-[length:var(--svadmin-text-title)] font-semibold leading-[var(--svadmin-leading-tight)] text-foreground",
+    description: "max-w-[var(--svadmin-measure)] text-[length:var(--svadmin-text-body)] leading-[var(--svadmin-leading-body)] text-muted-foreground",
+    actions: "flex shrink-0 flex-wrap items-center gap-[var(--svadmin-space-2)]",
   },
-  variants: {
-    density: {
-      compact: {
-        root: "space-y-2",
-        row: "gap-3",
-        heading: "space-y-0.5",
-        title: "text-lg leading-tight",
-        description: "text-[0.8125rem] leading-5",
-        actions: "gap-1.5",
-      },
-      comfortable: {
-        root: "space-y-3",
-        row: "gap-6",
-        heading: "space-y-1",
-        title: "text-xl leading-tight",
-        description: "text-sm leading-6",
-        actions: "gap-2",
-      },
-    },
-  },
-  defaultVariants: { density: "comfortable" },
 });
 
 const metricBlockRecipeStyles = tv({
@@ -148,19 +123,19 @@ const metricBlockRecipeStyles = tv({
 
 const productSectionRecipeStyles = tv({
   slots: {
-    root: "flex flex-wrap items-start justify-between gap-3",
-    heading: "min-w-0 flex-[1_1_16rem]",
-    title: "m-0 text-base font-semibold text-foreground [overflow-wrap:anywhere]",
-    description: "mt-1 max-w-[65ch] text-[0.8125rem] leading-6 text-muted-foreground",
-    actions: "flex shrink-0 flex-wrap items-center gap-2",
+    root: "flex flex-wrap items-start justify-between gap-[var(--svadmin-space-3)]",
+    heading: "min-w-0 flex-[1_1_var(--svadmin-chrome-basis)]",
+    title: "m-0 text-[length:var(--svadmin-text-section)] font-semibold text-foreground [overflow-wrap:anywhere]",
+    description: "mt-[var(--svadmin-space-1)] max-w-[var(--svadmin-measure)] text-[length:var(--svadmin-text-label)] leading-[var(--svadmin-leading-body)] text-muted-foreground",
+    actions: "flex shrink-0 flex-wrap items-center gap-[var(--svadmin-space-2)]",
   },
 });
 
 const productToolbarRecipeStyles = tv({
   slots: {
-    root: "flex flex-wrap items-center justify-between gap-3 border-b border-border py-3",
-    leading: "flex min-w-0 flex-[1_1_16rem] flex-wrap items-center gap-2",
-    trailing: "ms-auto flex min-w-0 flex-wrap items-center gap-2",
+    root: "flex flex-wrap items-center justify-between gap-[var(--svadmin-space-3)] border-b border-border py-[var(--svadmin-space-3)]",
+    leading: "flex min-w-0 flex-[1_1_var(--svadmin-chrome-basis)] flex-wrap items-center gap-[var(--svadmin-space-2)]",
+    trailing: "ms-auto flex min-w-0 flex-wrap items-center gap-[var(--svadmin-space-2)]",
   },
 });
 
@@ -179,12 +154,12 @@ const productWorkspaceRecipeStyles = tv({
 const productSettingsRecipeStyles = tv({
   slots: {
     root: `${semantic.body} min-w-0`,
-    header: "flex flex-wrap items-start justify-between gap-3 border-b border-border py-4",
-    heading: "min-w-0 flex-[1_1_16rem]",
-    title: "m-0 text-base font-semibold text-foreground [overflow-wrap:anywhere]",
-    description: "mt-1 max-w-[65ch] text-[0.8125rem] leading-6 text-muted-foreground",
-    actions: "flex shrink-0 flex-wrap items-center gap-2",
-    body: "min-w-0 py-1",
+    header: "flex flex-wrap items-start justify-between gap-[var(--svadmin-space-3)] border-b border-border py-[var(--svadmin-space-4)]",
+    heading: "min-w-0 flex-[1_1_var(--svadmin-chrome-basis)]",
+    title: "m-0 text-[length:var(--svadmin-text-section)] font-semibold text-foreground [overflow-wrap:anywhere]",
+    description: "mt-[var(--svadmin-space-1)] max-w-[var(--svadmin-measure)] text-[length:var(--svadmin-text-label)] leading-[var(--svadmin-leading-body)] text-muted-foreground",
+    actions: "flex shrink-0 flex-wrap items-center gap-[var(--svadmin-space-2)]",
+    body: "min-w-0 py-[var(--svadmin-space-1)]",
   },
 });
 
@@ -217,9 +192,9 @@ const productStatusRecipeStyles = tv({
 const surfaceMetricRecipeStyles = tv({
   slots: {
     root: "surface-metric__root min-w-0",
-    card: "surface-metric__card border-s-[3px] border-solid",
+    card: "surface-metric__card border-s-[3px] border-solid p-5",
     description: "surface-metric__description text-muted-foreground",
-    state: "surface-metric__state [--svadmin-metric-state-border-width:3px]",
+    state: "surface-metric__state [--svadmin-metric-state-border-width:3px] [--svadmin-metric-state-padding:1.25rem] [--svadmin-metric-state-height:6rem]",
   },
   variants: {
     tone: {
@@ -229,30 +204,19 @@ const surfaceMetricRecipeStyles = tv({
       danger: { card: "border-s-destructive", state: "[--svadmin-metric-state-accent:var(--destructive)]" },
       info: { card: "border-s-info", state: "[--svadmin-metric-state-accent:var(--info)]" },
     },
-    density: {
-      compact: { card: "p-3", state: "[--svadmin-metric-state-padding:0.75rem] [--svadmin-metric-state-height:4.5rem]" },
-      comfortable: { card: "p-5", state: "[--svadmin-metric-state-padding:1.25rem] [--svadmin-metric-state-height:6rem]" },
-    },
   },
-  defaultVariants: { tone: "neutral", density: "comfortable" },
+  defaultVariants: { tone: "neutral" },
 });
 
 const surfaceTableRecipeStyles = tv({
   slots: {
     root: "surface-table__root min-w-0",
-    header: "surface-table__header",
-    content: "surface-table__content",
-    head: "surface-table__head",
-    cell: "surface-table__cell",
-    state: "surface-table__state text-muted-foreground",
+    header: "surface-table__header px-[var(--svadmin-space-4)]",
+    content: "surface-table__content px-[var(--svadmin-space-4)]",
+    head: "surface-table__head [&[data-slot=table-head]]:py-[var(--svadmin-space-2)] [&[data-slot=table-head]]:text-[length:var(--svadmin-text-body)]",
+    cell: "surface-table__cell [&[data-slot=table-cell]]:py-[var(--svadmin-space-2)] [&[data-slot=table-cell]]:text-[length:var(--svadmin-text-body)]",
+    state: "surface-table__state text-muted-foreground [--svadmin-table-state-height:var(--svadmin-table-state-min-h)]",
   },
-  variants: {
-    density: {
-      compact: { header: "px-3", content: "px-3", head: "[&[data-slot=table-head]]:py-1 [&[data-slot=table-head]]:text-xs", cell: "[&[data-slot=table-cell]]:py-1 [&[data-slot=table-cell]]:text-xs", state: "[--svadmin-table-state-height:6rem]" },
-      comfortable: { header: "px-4", content: "px-4", head: "[&[data-slot=table-head]]:py-2 [&[data-slot=table-head]]:text-sm", cell: "[&[data-slot=table-cell]]:py-2 [&[data-slot=table-cell]]:text-sm", state: "[--svadmin-table-state-height:8rem]" },
-    },
-  },
-  defaultVariants: { density: "comfortable" },
 });
 
 // undefined 使用公开默认值；null 显式禁用该变体，不能交给 tv 再补默认值。

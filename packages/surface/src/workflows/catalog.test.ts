@@ -17,8 +17,8 @@ describe('one catalog for forms, appearance, generation and validation', () => {
       const props = widget.type === 'metric' ? { label: 'Count', format: 'number' }
         : widget.type === 'resource-table' ? { title: 'Records', columns: [{ field: 'id', label: 'ID' }] }
         : { title: 'Chart', labelField: 'name', valueField: 'value' };
-      for (const tone of ['neutral', 'success', 'warning', 'danger', 'info']) for (const density of ['compact', 'comfortable']) {
-        expect(Value.Check(widget.propsSchema, { ...props, appearance: { tone, density } })).toBe(true);
+      for (const tone of ['neutral', 'success', 'warning', 'danger', 'info']) {
+        expect(Value.Check(widget.propsSchema, { ...props, appearance: { tone } })).toBe(true);
       }
       expect(Value.Check(base.propsSchema, { ...props, appearance: { tone: 'info' } })).toBe(false);
       expect(Value.Check(widget.propsSchema, { ...props, appearance: { tone: '#ff0000' } })).toBe(false);
@@ -27,7 +27,7 @@ describe('one catalog for forms, appearance, generation and validation', () => {
   });
   it('retains field policy selectors but does not pass frame props to components', () => {
     const catalog = withSurfaceAppearance(defaultSurfaceDefinitions);
-    const props = { title: 'Table', columns: [{ field: 'name', label: 'Name' }], appearance: { density: 'compact' } };
+    const props = { title: 'Table', columns: [{ field: 'name', label: 'Name' }], appearance: { tone: 'warning' } };
     expect(catalog.widgets.find((w) => w.type === 'resource-table')?.getReferencedFields?.(props)).toEqual(['name']);
     expect(withoutSurfaceAppearance(props)).toEqual({ title: 'Table', columns: props.columns });
   });

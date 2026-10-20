@@ -15,7 +15,6 @@
     resourceName: string;
     rendering?: ResourceRendering | undefined;
     title?: string;
-    density?: 'compact' | 'comfortable';
     columns?: 1 | 2 | 3 | 4;
     headerActions?: Snippet;
     onSuccess?: () => void;
@@ -26,7 +25,6 @@
     resourceName,
     rendering,
     title,
-    density = 'comfortable',
     columns = 1,
     headerActions,
     onSuccess,
@@ -39,10 +37,9 @@
   const pageTitle = $derived(title ?? `${i18n.t('common.create')}${resource.label}`);
 </script>
 
-<div class="{density === 'compact' ? 'svadmin-u-3e7ce58d64fa' : 'svadmin-u-b3542e058833'} {className}">
+<div class="svadmin-u-b3542e058833 {className}">
   <PageHeader
     title={pageTitle}
-    {density}
     onBack={() => navigateGuard(() => adminContext.navigate(`/${resourceName}`))}
   >
     {#snippet actions()}
@@ -57,7 +54,6 @@
     {rendering}
     {resourceName}
     mode="create"
-    {density}
     {columns}
     showHeader={false}
     onNavigationGuardReady={(guard) => navigateGuard = guard}

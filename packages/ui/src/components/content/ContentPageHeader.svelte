@@ -8,6 +8,7 @@
     description?: string;
     breadcrumbs?: string[];
     actions?: Snippet;
+    /** @deprecated Accepted for compatibility; the product baseline is shared. */
     density?: 'compact' | 'comfortable';
     headingLevel?: 'h1' | 'h2';
     class?: string;
@@ -22,7 +23,7 @@
     headingLevel = 'h1',
     class: className = '',
   }: Props = $props();
-  const styles = $derived(contentHeader({ density }));
+  const styles = $derived(contentHeader());
 </script>
 
 <header

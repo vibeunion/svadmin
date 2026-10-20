@@ -23,6 +23,17 @@ continue to use public semantic CSS variables; nested themes use `.svadmin-theme
 emits compiler metadata. Import one UI CSS entry, not both. Old host `@source`
 directives can be removed; styles are pre-generated, not scanned at consumption.
 
+### CSS source of truth
+
+`src/app.css` is the live entry. It imports `page-chrome.css`, `app-shell.css`,
+`data-panel.css` and the generated prelude, and `build-static-css.mjs` publishes
+it as `dist/app.css`.
+
+`src/components.css` is a **frozen historical snapshot** pinned by
+`design/admin-ui/runtime-source.json`. Do not extend it, and never assert
+shipped behaviour against it: the styling contract tests read `src/app.css`
+precisely because that file is what ships.
+
 ## Migration Boundary
 
 The package publishes precompiled CSS: consumers do not need to compile library
@@ -33,6 +44,24 @@ Existing `svadmin-u-*` aliases and compatibility rules remain native CSS. Do not
 rename or delete them mechanically. New styles should use semantic Tailwind
 classes and reviewed recipes. This is not a wholesale rewrite of every UI
 component.
+
+## Product layer
+
+Use the business page layer as the default customer API:
+
+- `ListPage`, `CreatePage`, `EditPage`, and `ShowPage` for resource CRUD.
+- `PagePattern` for custom list, form, detail, workspace, and dashboard pages.
+- `AppShellPage` for hosts that bring their own router: sidebar, topbar, primary
+  region, optional secondary column and footer, with no data or router coupling.
+- `FilterToolbar`, `AutoTable`, `AutoForm`, `DetailDrawer`, `RowActions`, and
+  `DataState` for the recurring work patterns inside those pages.
+
+`PagePattern` has a shared `state` contract (`ready`, `loading`, `empty`,
+`error`, `forbidden`) and hides page content while a non-ready state is active.
+This keeps shadcn-svelte as an implementation source while customers receive a
+stable, Ant Design-like product workflow. Prefer these APIs over composing
+primitive `Button`, `Card`, `Dialog`, and `Table` components directly in every
+route.
 
 Button, Badge, content layouts and Surface appearance use the shared
 `tailwind-variants` registry. Public props, bindings, semantic class markers and

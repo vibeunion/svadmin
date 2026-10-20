@@ -140,7 +140,6 @@ try {
       await page.getByRole('button', { name: locale === 'en' ? 'Retry' : '重试', exact: true }).click();
       await expect(search).toHaveValue('Northstar');
       await page.getByTestId('theme').selectOption('dark');
-      await page.getByTestId('density').selectOption('comfortable');
       await expect(search).toHaveValue('Northstar');
       await search.fill('nonexistent-record');
       await expect(page.getByTestId('clear-filters')).toBeVisible();

@@ -242,11 +242,10 @@ def validate_sources(contract: dict, root: Path) -> None:
     card = css_rule(css, '.svadmin-card', within=('@layer components',))
     require(badge.get('gap') == mappings['spacing']['xs'], 'spacing.xs', '契约与源码尺度不一致')
     require(card.get('gap') == mappings['spacing']['md'], 'spacing.md', '契约与源码尺度不一致')
-    for size, density in (('sm', 'compact'), ('lg', 'comfortable')):
-        classes = binding(surface, 'variants', 'density', density, 'state').split()
-        bindings = [item for item in classes if item.startswith('[--svadmin-metric-state-padding:')]
-        require(bindings == [f'[--svadmin-metric-state-padding:{mappings["spacing"][size]}]'],
-                f'spacing.{size}', '契约与源码尺度不一致')
+    classes = binding(surface, 'slots', 'state').split()
+    bindings = [item for item in classes if item.startswith('[--svadmin-metric-state-padding:')]
+    require(bindings == [f'[--svadmin-metric-state-padding:{mappings["spacing"]["lg"]}]'],
+            'spacing.lg', '契约与源码尺度不一致')
     for size, origin in (('compact', badge), ('body', card)):
         require(origin.get('font-size') == mappings['fontSizes'][size],
                 f'fontSizes.{size}', '契约与源码字号不一致')

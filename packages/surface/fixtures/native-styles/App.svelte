@@ -18,11 +18,9 @@
   ];
   const columns = [{ field: 'name', label: 'Product' }, { field: 'stock', label: 'Stock', format: 'number' }];
   function metricProps(tone: string): JsonObject {
-    return { label: `${tone} metric`, format: 'number', ...(variants ? { tone, density: tone === 'neutral' ? 'comfortable' : 'compact' } : {}) };
+    return { label: `${tone} metric`, format: 'number', ...(variants ? { tone } : {}) };
   }
-  function tableProps(density: string): JsonObject {
-    return { title: `${density} inventory`, columns, ...(variants ? { density } : {}) };
-  }
+  const tableProps: JsonObject = { title: 'inventory', columns };
 </script>
 
 <main>
@@ -40,21 +38,19 @@
   </section>
   <section aria-label="Metric states" class="states">
     {#each states as data (data.status)}
-      <MetricWidget widgetId={`state-${data.status}`} props={{ label: `${data.status} metric`, format: 'number', ...(variants ? { tone: 'info', density: 'compact' } : {}) }} {data} />
+      <MetricWidget widgetId={`state-${data.status}`} props={{ label: `${data.status} metric`, format: 'number', ...(variants ? { tone: 'info' } : {}) }} {data} />
     {/each}
   </section>
-  <section aria-label="Table density" class="tables">
-    {#each surfaceDesignContract.table.density as density (density)}
-      <ResourceTableWidget widgetId={`table-${density}`} props={tableProps(density)} data={rows} />
-    {/each}
+  <section aria-label="Tables" class="tables">
+    <ResourceTableWidget widgetId="table-inventory" props={tableProps} data={rows} />
   </section>
   <section aria-label="Table states" class="states">
     {#each states as data (data.status)}
-      <ResourceTableWidget widgetId={`table-state-${data.status}`} props={{ title: `${data.status} inventory`, columns, ...(variants ? { density: 'compact' } : {}) }} {data} />
+      <ResourceTableWidget widgetId={`table-state-${data.status}`} props={{ title: `${data.status} inventory`, columns }} {data} />
     {/each}
   </section>
   <section class="svadmin-theme dark nested" data-theme="green" aria-label="Nested theme">
-    <MetricWidget widgetId="nested-theme" props={{ label: 'Nested dark theme', format: 'number', ...(variants ? { tone: 'success', density: 'compact' } : {}) }} data={ready} />
+    <MetricWidget widgetId="nested-theme" props={{ label: 'Nested dark theme', format: 'number', ...(variants ? { tone: 'success' } : {}) }} data={ready} />
   </section>
   <details class="svadmin-collapsible"><summary>Advanced details</summary><p>Expanded content remains visible without utility compilation.</p></details>
 </main>

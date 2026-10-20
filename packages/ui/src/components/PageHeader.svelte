@@ -15,7 +15,6 @@
     onBack?: () => void;
     backLabel?: string;
     showBreadcrumbs?: boolean;
-    density?: 'compact' | 'comfortable';
     class?: string;
   }
 
@@ -29,13 +28,12 @@
     onBack,
     backLabel = 'Back',
     showBreadcrumbs = true,
-    density = 'comfortable',
     class: className = '',
   }: Props = $props();
 
 </script>
 
-<div class={cn('svadmin-page-header', className)} data-density={density}>
+<div class={cn('svadmin-page-header', className)}>
   {#if showBreadcrumbs}
     <Breadcrumbs class="svadmin-page-header__breadcrumbs" />
   {/if}
