@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.84.1](https://github.com/vibeunion/svadmin/compare/ui-v0.84.0...ui-v0.84.1) (2026-10-20)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** tighten collapsible trigger density ([#505](https://github.com/vibeunion/svadmin/issues/505)) ([e2992eb](https://github.com/vibeunion/svadmin/commit/e2992eb0c9c3266e19e65391f4051f2009d46241))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.3.2
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.11.3
+  * peerDependencies
+    * @svadmin/core bumped to 0.61.1
+
 ## [0.84.0](https://github.com/vibeunion/svadmin/compare/ui-v0.83.2...ui-v0.84.0) (2026-10-19)
 
 
