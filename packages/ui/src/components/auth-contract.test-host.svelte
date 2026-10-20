@@ -5,9 +5,10 @@
   import ForgotPasswordPage from './ForgotPasswordPage.svelte';
   import UpdatePasswordPage from './UpdatePasswordPage.svelte';
 
-  let { provider, screen }: {
+  let { provider, screen, loginProps = {} }: {
     provider: AuthProvider;
     screen: 'login' | 'register' | 'forgot' | 'update';
+    loginProps?: Record<string, string>;
   } = $props();
 
   const dataProvider = {
@@ -27,7 +28,7 @@
 </script>
 
 {#if screen === 'login'}
-  <LoginPage />
+  <LoginPage {...loginProps} />
 {:else if screen === 'register'}
   <RegisterPage />
 {:else if screen === 'forgot'}

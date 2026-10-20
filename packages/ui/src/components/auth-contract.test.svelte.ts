@@ -110,3 +110,41 @@ it('submits the Supabase password update page with the validated confirmation fi
   await waitFor(() => expect(fixture.update).toHaveBeenCalledWith({ password: 'new-password' }));
   await waitFor(() => expect(view.queryByRole('alert')).toBeNull());
 });
+
+it('supports login copy overrides and stable accessibility hooks', async () => {
+  const fixture = supabaseFixture();
+  const view = render(Host, {
+    provider: fixture.provider,
+    screen: 'login',
+    loginProps: {
+      identifierLabel: '账号',
+      identifierPlaceholder: '请输入账号',
+      passwordLabel: '访问密码',
+      loginButtonLabel: '进入系统',
+    },
+  });
+
+  expect(view.container.querySelector('[data-svadmin-login-page]')).not.toBeNull();
+  expect(view.container.querySelector('[data-svadmin-login-form]')).not.toBeNull();
+  expect(view.getByLabelText('账号').getAttribute('placeholder')).toBe('请输入账号');
+  expect(view.getByLabelText('访问密码')).toBeTruthy();
+  expect(view.getByRole('button', { name: '进入系统' })).toBeTruthy();
+
+  await input(view.container, 'login-identifier', 'admin@example.com');
+  await input(view.container, 'login-password', 'test-password');
+  await submit(view.container);
+  await waitFor(() => expect(fixture.calls.login).toHaveBeenCalledTimes(1));
+});
+
+it('publishes field and form error semantics after invalid submit', async () => {
+  const fixture = supabaseFixture();
+  const view = render(Host, { provider: fixture.provider, screen: 'login' });
+  await submit(view.container);
+
+  const alert = view.container.querySelector('[data-svadmin-login-error]');
+  expect(alert?.getAttribute('aria-live')).toBe('assertive');
+  expect(view.container.querySelector('#login-identifier')?.getAttribute('aria-invalid')).toBe('true');
+  expect(view.container.querySelector('#login-identifier')?.getAttribute('aria-describedby')).toBe('login-error');
+  expect(view.container.querySelector('#login-password')?.getAttribute('aria-invalid')).toBe('true');
+  expect(view.container.querySelector('button[data-svadmin-login-submit]')).not.toBeNull();
+});
