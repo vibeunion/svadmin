@@ -13,8 +13,6 @@
     loading: 'loading',
     error: 'error',
     denied: 'forbidden',
-    normal: 'success',
-    readonly: 'success',
   };
 
   let { route }: Props = $props();
