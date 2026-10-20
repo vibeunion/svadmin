@@ -17,6 +17,8 @@
     showStrength?: boolean;
     disabled?: boolean;
     class?: string;
+    ariaInvalid?: string;
+    ariaDescribedby?: string;
   }
 
   let {
@@ -28,6 +30,8 @@
     showStrength = false,
     disabled = false,
     class: className = '',
+    ariaInvalid,
+    ariaDescribedby,
   }: Props = $props();
 
   let showPassword = $state(false);
@@ -57,7 +61,7 @@
   );
 </script>
 
-<div class="svadmin-u-6f7e013d6499 {className}">
+<div class="svadmin-u-6f7e013d6499 {className}" data-svadmin-login-password>
   <Label for={id}>{label}</Label>
   <div class="svadmin-u-d89972fe17d6">
     <Lock class="svadmin-u-da4dbfbc4fdc svadmin-u-22e59b722111 svadmin-u-d694ba66e322 svadmin-u-36b381be4df3 svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-bfa603190748 svadmin-u-a4326536b8f5 svadmin-u-536a7530a44f" />
@@ -69,6 +73,8 @@
       class="svadmin-u-9e83b2412bc9 svadmin-u-1b1df78e4d0a"
       {autocomplete}
       {disabled}
+      aria-invalid={ariaInvalid}
+      aria-describedby={ariaDescribedby}
     />
     <TooltipButton
       tooltip={showPassword ? i18n.t('common.hidePassword') : i18n.t('common.showPassword')}

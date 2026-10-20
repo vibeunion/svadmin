@@ -25,6 +25,10 @@
     defaultIdentifier = '',
     defaultPassword = '',
     loginHint,
+    identifierLabel,
+    identifierPlaceholder,
+    passwordLabel,
+    loginButtonLabel,
   } = $props<{
     title?: string;
     onSuccess?: () => void;
@@ -32,6 +36,10 @@
     defaultIdentifier?: string;
     defaultPassword?: string;
     loginHint?: string;
+    identifierLabel?: string;
+    identifierPlaceholder?: string;
+    passwordLabel?: string;
+    loginButtonLabel?: string;
   }>();
 
   const adminContext = captureAdminContext();
@@ -72,6 +80,7 @@
   {/if}
 {/snippet}
 
+<div data-svadmin-login-page>
 <AuthPageShell brand={title} title={i18n.t('auth.welcomeBack')} description={i18n.t('auth.welcomeMessage')} {footer}>
       {#if loginHint || defaultIdentifier || defaultPassword}
         <aside data-svadmin-demo-credentials class="svadmin-u-fb88ccaacf5b svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-60ed9c3ef326 svadmin-u-eb6e8b881acd">
@@ -95,9 +104,9 @@
         </aside>
       {/if}
 
-      <form onsubmit={handleSubmit} class="svadmin-u-b43b4c086d9a">
+      <form onsubmit={handleSubmit} class="svadmin-u-b43b4c086d9a" data-svadmin-login-form>
         {#if error}
-          <Alert.Root variant="destructive">
+          <Alert.Root variant="destructive" id="login-error" data-svadmin-login-error aria-live="assertive">
             <AlertCircle class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
             <Alert.Description class="svadmin-u-fc7473ca09eb svadmin-u-2689f3958069">{error}</Alert.Description>
           </Alert.Root>
@@ -105,17 +114,20 @@
 
         <div class="svadmin-u-6f7e013d6499">
           <Label for="login-identifier">
-            {i18n.t('auth.usernameOrEmail')}
+            {identifierLabel ?? i18n.t('auth.usernameOrEmail')}
           </Label>
           <div class="svadmin-u-d89972fe17d6">
             <User class="svadmin-u-a4326536b8f5 svadmin-u-da4dbfbc4fdc svadmin-u-22e59b722111 svadmin-u-d694ba66e322 svadmin-u-536a7530a44f svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-36b381be4df3 svadmin-u-bfa603190748" />
             <Input
               id="login-identifier"
+              data-svadmin-login-identifier
               type="text"
-              placeholder={i18n.t('auth.identifierPlaceholder')}
+              placeholder={identifierPlaceholder ?? i18n.t('auth.identifierPlaceholder')}
               bind:value={identifier}
               class="svadmin-u-9e83b2412bc9"
               autocomplete="username"
+              aria-invalid={error ? 'true' : undefined}
+              aria-describedby={error ? 'login-error' : undefined}
             />
           </div>
         </div>
@@ -123,7 +135,7 @@
         <div class="svadmin-u-6f7e013d6499">
           <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc">
             <Label for="login-password">
-              {i18n.t('auth.password')}
+              {passwordLabel ?? i18n.t('auth.password')}
             </Label>
             {#if authProvider?.forgotPassword}
               <Button variant="link" class="svadmin-u-b8f0a08ece1e svadmin-u-8a539c7fe216 svadmin-u-359090c2d529 svadmin-u-2689f3958069" onclick={() => adminContext.navigate('/forgot-password')}>
@@ -133,17 +145,19 @@
           </div>
           <PasswordInput
             id="login-password"
-            label=""
+            label={passwordLabel ?? i18n.t('auth.password')}
             bind:value={password}
             autocomplete="current-password"
+            ariaInvalid={error ? 'true' : undefined}
+            ariaDescribedby={error ? 'login-error' : undefined}
           />
         </div>
 
-        <Button type="submit" class="svadmin-u-426b8b75185b svadmin-u-6da6a3c3f741" disabled={login.isLoading}>
+        <Button type="submit" data-svadmin-login-submit class="svadmin-u-426b8b75185b svadmin-u-6da6a3c3f741" disabled={login.isLoading} aria-busy={login.isLoading}>
           {#if login.isLoading}
             <Loader2 class="svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e svadmin-u-afbdd13a380e svadmin-u-d2347e8497a9" />
           {/if}
-          {i18n.t('auth.loginButton')}
+          {loginButtonLabel ?? i18n.t('auth.loginButton')}
         </Button>
       </form>
 
@@ -171,3 +185,4 @@
         </div>
       {/if}
 </AuthPageShell>
+</div>
