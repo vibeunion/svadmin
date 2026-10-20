@@ -17,8 +17,8 @@
     showStrength?: boolean;
     disabled?: boolean;
     class?: string;
-    ariaInvalid?: string;
-    ariaDescribedby?: string;
+    ariaInvalid?: 'true' | 'false' | undefined;
+    ariaDescribedby?: string | undefined;
   }
 
   let {
