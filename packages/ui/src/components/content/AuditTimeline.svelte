@@ -17,11 +17,18 @@
   import { cn } from '../../utils.js';
   import StatusBadge from './StatusBadge.svelte';
   import DataState from './DataState.svelte';
+  import type { DataStateKind } from './DataState.svelte';
 
   interface Props {
     items?: TimelineItem[];
     emptyTitle?: string;
     emptyDescription?: string;
+    state?: DataStateKind;
+    stateTitle?: string;
+    stateDescription?: string;
+    retry?: () => void;
+    retryLabel?: string;
+    loadingLabel?: string;
     class?: string;
   }
 
@@ -29,6 +36,12 @@
     items = [],
     emptyTitle = 'No timeline events',
     emptyDescription = 'Activity events and status transitions will appear here.',
+    state,
+    stateTitle,
+    stateDescription,
+    retry,
+    retryLabel,
+    loadingLabel,
     class: className = '',
   }: Props = $props();
 
@@ -39,11 +52,19 @@
     info: 'svadmin-u-75b1bec3ea0e svadmin-u-05f954a846d6 svadmin-u-20aaf08a7ed1',
     neutral: 'svadmin-u-43ed7af3fc8a svadmin-u-18049387f0af svadmin-u-bfa603190748',
   };
+  const resolvedState = $derived(state ?? (items.length === 0 ? 'empty' : undefined));
 </script>
 
-<div class={cn('svadmin-u-3e7ce58d64fa', className)} data-svadmin-audit-timeline data-svadmin-audit-state={items.length === 0 ? 'empty' : 'ready'}>
-  {#if items.length === 0}
-    <DataState state="empty" title={emptyTitle} description={emptyDescription} />
+<div class={cn('svadmin-u-3e7ce58d64fa', className)} data-svadmin-audit-timeline data-svadmin-audit-state={resolvedState ?? 'ready'}>
+  {#if resolvedState}
+    <DataState
+      state={resolvedState}
+      title={stateTitle ?? (resolvedState === 'empty' ? emptyTitle : undefined)}
+      description={stateDescription ?? (resolvedState === 'empty' ? emptyDescription : undefined)}
+      retry={retry}
+      retryLabel={retryLabel}
+      loadingLabel={loadingLabel}
+    />
   {:else}
     <div class="svadmin-u-d89972fe17d6 svadmin-u-9079b62ef1cb svadmin-u-b3542e058833 svadmin-u-884dada40b17 svadmin-u-699f6fc4b3e0 svadmin-u-37f34e63818d svadmin-u-f76c7493f919 svadmin-u-8f848a57f066 svadmin-u-3242dfaf010c" data-svadmin-audit-events>
       {#each items as item (item.id)}

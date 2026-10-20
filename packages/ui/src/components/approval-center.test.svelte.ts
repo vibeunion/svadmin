@@ -121,6 +121,32 @@ describe('ApprovalCenter', () => {
     });
   });
 
+  it('renders a distinct filtered-empty state for a search with no matches', async () => {
+    const source = provider({
+      list: vi.fn(async (_scope, options) => options.search
+        ? { data: [], total: 0 }
+        : { data: [record], total: 1 }),
+    });
+    const view = render(Host, {
+      provider: dataProvider,
+      settings: { provider: source, requestContext },
+    });
+
+    await view.findByRole('heading', { name: 'Expense request' });
+    await fireEvent.input(view.getByRole('textbox', { name: 'Search approvals' }), { target: { value: 'missing-request' } });
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    await waitFor(() => expect(view.container.querySelector('[data-svadmin-data-state="filtered-empty"]')).toBeTruthy());
+    expect(view.container.querySelector('[data-svadmin-approval-center]')?.getAttribute('data-svadmin-approval-state')).toBe('filtered-empty');
+    expect(view.getByRole('button', { name: 'Clear' })).toBeTruthy();
+    expect(source.list).toHaveBeenLastCalledWith(requestContext, {
+      view: 'pending',
+      page: 1,
+      pageSize: 20,
+      search: 'missing-request',
+    });
+  });
+
   it('submits only an allowed action with the current version and idempotency key', async () => {
     const transition = vi.fn<NonNullable<ApprovalProvider['transition']>>(async () => ({
       ok: true as const,

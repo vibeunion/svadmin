@@ -7,7 +7,6 @@
   } from '@svadmin/core';
   import { definedReactiveOptions } from '@svadmin/core/options';
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
-  import type { Snippet } from 'svelte';
   import CreatePage from './CreatePage.svelte';
   import EditPage from './EditPage.svelte';
   import ListPage from './ListPage.svelte';
