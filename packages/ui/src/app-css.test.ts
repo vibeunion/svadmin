@@ -143,6 +143,26 @@ describe('native component CSS', () => {
     expect(css).toContain('details.svadmin-collapsible-filter:not([open]) > :not(summary)');
   });
 
+  it('keeps collapsible triggers dense without dropping focus or scoped hooks', () => {
+    for (const css of [readAppCss(), readPublishedAppCss()]) {
+      expect(css).toContain('details.svadmin-collapsible > summary');
+      expect(css).toContain('details.svadmin-collapsible-filter > summary');
+      expect(css).toContain('details[data-svadmin-filter] > summary');
+      expect(css).toContain('[data-svadmin-collapsible] > summary');
+      expect(css).toContain('padding: 0.25rem 0;');
+      expect(css).toContain('list-style: none;');
+      expect(css).toContain('::-webkit-details-marker');
+      expect(css).toContain('summary::marker');
+      expect(css).toContain('border-bottom: 1px solid var(--border);');
+      expect(css).toContain('[data-svadmin-collapsible][data-open="true"]');
+      expect(css).toContain('[data-svadmin-sidebar] .svadmin-collapsible-trigger');
+      expect(css).toContain('[data-svadmin-sidebar] .svadmin-collapsible-trigger:focus-visible');
+      expect(css).toContain('outline: 2px solid var(--ring);');
+      expect(css).toContain('padding-block: 0.375rem;');
+      expect(css).not.toMatch(/^\s*details:not\(\[open\]\)/m);
+    }
+  });
+
   it('keeps sidebar geometry explicit across desktop, mobile and RTL layouts', () => {
     const css = readAppCss();
     const sidebar = readSidebar();

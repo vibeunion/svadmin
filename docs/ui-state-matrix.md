@@ -38,7 +38,7 @@
 
 ## Collapsible containers
 
-所有折叠容器必须使用 `.svadmin-collapsible` 或 `[data-svadmin-collapsible]` 状态钩子。未展开时清除外层 margin、padding、border、background 和 shadow；不得添加全局 `details:not([open])` 规则。
+所有折叠容器必须使用 `.svadmin-collapsible` 或 `[data-svadmin-collapsible]` 状态钩子。未展开时清除外层 margin、padding、border、background 和 shadow；不得添加全局 `details:not([open])` 规则。展开时 summary 使用 4px 垂直内边距和 32px 最小高度，隐藏浏览器默认标记，并保留 `focus-visible` 轮廓；容器只保留 1px 底部分割线。侧栏折叠触发器使用 6px 垂直内边距，分组标题上边距为 8px。
 
 ## Browser evidence
 

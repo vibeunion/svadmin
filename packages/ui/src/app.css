@@ -2527,6 +2527,77 @@ details.svadmin-collapsible:not([open]) > :not(summary) {
   display: none !important;
 }
 
+/* 折叠触发器对齐管理后台 8px 节奏：收紧 summary，展开时只留底部分割线，隐藏浏览器标记并保留 focus-visible。 */
+details.svadmin-collapsible > summary,
+details.svadmin-collapsible-filter > summary,
+details[data-svadmin-filter] > summary,
+[data-svadmin-collapsible] > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 2rem;
+  margin: 0;
+  padding: 0.25rem 0;
+  list-style: none;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+}
+
+details.svadmin-collapsible > summary::-webkit-details-marker,
+details.svadmin-collapsible-filter > summary::-webkit-details-marker,
+details[data-svadmin-filter] > summary::-webkit-details-marker,
+[data-svadmin-collapsible] > summary::-webkit-details-marker {
+  display: none;
+}
+
+details.svadmin-collapsible > summary::marker,
+details.svadmin-collapsible-filter > summary::marker,
+details[data-svadmin-filter] > summary::marker,
+[data-svadmin-collapsible] > summary::marker {
+  content: none;
+}
+
+details.svadmin-collapsible > summary:focus-visible,
+details.svadmin-collapsible-filter > summary:focus-visible,
+details[data-svadmin-filter] > summary:focus-visible,
+[data-svadmin-collapsible] > summary:focus-visible,
+[data-svadmin-sidebar] .svadmin-collapsible-trigger:focus-visible {
+  outline: 2px solid var(--ring);
+  outline: 2px solid color-mix(in oklch, var(--ring) 48%, transparent);
+  outline-offset: 2px;
+}
+
+details.svadmin-collapsible[open],
+details.svadmin-collapsible-filter[open],
+details[data-svadmin-filter][open],
+[data-svadmin-collapsible][data-open="true"] {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+details.svadmin-collapsible[open] > :not(summary),
+details.svadmin-collapsible-filter[open] > :not(summary),
+details[data-svadmin-filter][open] > :not(summary),
+[data-svadmin-collapsible][data-open="true"] > :not(summary) {
+  margin-top: 0.25rem;
+}
+
+[data-svadmin-sidebar] .svadmin-collapsible-trigger {
+  padding-block: 0.375rem;
+}
+
+[data-svadmin-sidebar] .svadmin-collapsible-trigger.uppercase {
+  margin-top: 0.5rem;
+  margin-bottom: 0.125rem;
+}
+
 /* --- Admin UI layout preset (clean-flat) --- */
 /* Keep this public class for layoutPreset API compatibility. The preset only
  * adjusts density and composition; color, focus, and elevation stay semantic. */

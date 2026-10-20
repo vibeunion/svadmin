@@ -107,10 +107,10 @@
   <!-- hidden -->
 {:else if hasChildren && !collapsed}
   {#if isTopLevel}
-    <div class="svadmin-u-eccd13ef4f2f svadmin-u-71a0a94437c6">
+    <div class="svadmin-u-50d0d216a2f8 svadmin-u-71a0a94437c6">
       <Collapsible.Root bind:open={isOpen}>
         <Collapsible.Trigger
-          class="sidebar-menu-item svadmin-u-60fbb7713999 svadmin-u-6da6a3c3f741 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-421ac2be5045 svadmin-u-01cc1873771f svadmin-u-a14daebf7748 svadmin-u-2689f3958069 svadmin-u-ceb69a6b0e5f svadmin-u-233c0494b485
+          class="svadmin-collapsible-trigger sidebar-menu-item svadmin-u-60fbb7713999 svadmin-u-6da6a3c3f741 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-421ac2be5045 svadmin-u-01cc1873771f svadmin-u-a14daebf7748 svadmin-u-2689f3958069 svadmin-u-ceb69a6b0e5f svadmin-u-233c0494b485
           {childActive
             ? 'svadmin-u-a7a63217e098'
             : 'svadmin-u-4e5ca9623e22 svadmin-u-646e10356266'}"
@@ -137,7 +137,7 @@
   {:else}
     <Collapsible.Root bind:open={isOpen}>
       <Collapsible.Trigger
-        class="sidebar-menu-item svadmin-u-60fbb7713999 svadmin-u-6da6a3c3f741 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-421ac2be5045 svadmin-u-a139beb4e318 svadmin-u-a14daebf7748 svadmin-u-8ecebc9f80e6 svadmin-u-ceb69a6b0e5f svadmin-u-233c0494b485
+        class="svadmin-collapsible-trigger sidebar-menu-item svadmin-u-60fbb7713999 svadmin-u-6da6a3c3f741 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-421ac2be5045 svadmin-u-a139beb4e318 svadmin-u-a14daebf7748 svadmin-u-8ecebc9f80e6 svadmin-u-ceb69a6b0e5f svadmin-u-233c0494b485
         {childActive
           ? 'svadmin-u-20aaf08a7ed1 svadmin-u-2689f3958069'
           : 'svadmin-u-98714a2f7d41 svadmin-u-646e10356266'}"
