@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.62.0](https://github.com/vibeunion/svadmin/compare/core-v0.61.1...core-v0.62.0) (2026-10-20)
+
+
+### 🚀 Features
+
+* **ui:** complete page chrome and design token foundation ([376ead9](https://github.com/vibeunion/svadmin/commit/376ead9b98081ec959e14a34826c0de93b9c7c36))
+
 ## [0.61.1](https://github.com/vibeunion/svadmin/compare/core-v0.61.0...core-v0.61.1) (2026-10-20)
 
 
