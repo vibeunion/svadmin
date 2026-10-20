@@ -37,6 +37,40 @@ export function reviewProductPlan(plan: ProductPlan): ProductReviewReport {
   const surfaceIds = new Set(plan.surfaces.map(surface => surface.id));
   const actionIds = new Set(plan.actions.map(action => action.id));
 
+  const runtimeNames = new Map<string, string>();
+  for (const resource of plan.resources) {
+    const runtimeName = resource.runtimeName ?? resource.name;
+    const previous = runtimeNames.get(runtimeName);
+    if (previous !== undefined) {
+      addIssue(issues, {
+        code: 'resource.duplicate-runtime-name',
+        severity: 'error',
+        message: `Resources "${resource.label}" and "${previous}" resolve to the same runtime name "${runtimeName}".`,
+        path: `resources.${resource.id}.runtimeName`,
+        suggestion: 'Give every generated resource route a unique runtime name.',
+      });
+    } else {
+      runtimeNames.set(runtimeName, resource.label);
+    }
+  }
+
+  const surfaceRoutes = new Map<string, string>();
+  for (const surface of plan.surfaces) {
+    const route = surface.route ?? `/workflows/${surface.id}`;
+    const previous = surfaceRoutes.get(route);
+    if (previous !== undefined) {
+      addIssue(issues, {
+        code: 'surface.duplicate-route',
+        severity: 'error',
+        message: `Surfaces "${surface.name}" and "${previous}" resolve to the same route "${route}".`,
+        path: `surfaces.${surface.id}.route`,
+        suggestion: 'Give every generated surface a unique route.',
+      });
+    } else {
+      surfaceRoutes.set(route, surface.name);
+    }
+  }
+
   for (const workflow of plan.workflows) {
     if (!workflow.actorRoleIds.length) addIssue(issues, { code: 'workflow.missing-actor', severity: 'error', message: `Workflow "${workflow.name}" has no actor role.`, path: `workflows.${workflow.id}.actorRoleIds` });
     for (const roleId of workflow.actorRoleIds) if (!has(roleIds, roleId)) addIssue(issues, { code: 'workflow.unknown-role', severity: 'error', message: `Workflow "${workflow.name}" references unknown role "${roleId}".`, path: `workflows.${workflow.id}.actorRoleIds` });
@@ -46,11 +80,33 @@ export function reviewProductPlan(plan: ProductPlan): ProductReviewReport {
   for (const resource of plan.resources) {
     if (!resource.workflowIds.length && !resource.internal) addIssue(issues, { code: 'resource.no-workflow', severity: 'warning', message: `Resource "${resource.label}" is not attached to a workflow.`, path: `resources.${resource.id}.workflowIds`, suggestion: 'Make it contextual/internal or attach it to a real task.' });
     for (const workflowId of resource.workflowIds) if (!has(workflowIds, workflowId)) addIssue(issues, { code: 'resource.unknown-workflow', severity: 'error', message: `Resource "${resource.label}" references unknown workflow "${workflowId}".`, path: `resources.${resource.id}.workflowIds` });
+    for (const roleId of resource.roleIds) if (!has(roleIds, roleId)) addIssue(issues, { code: 'resource.unknown-role', severity: 'error', message: `Resource "${resource.label}" references unknown role "${roleId}".`, path: `resources.${resource.id}.roleIds` });
+    resource.fields.forEach(field => {
+      for (const roleId of field.readableBy) if (!has(roleIds, roleId)) addIssue(issues, { code: 'field.unknown-role', severity: 'error', message: `Field "${field.label}" references unknown readable role "${roleId}".`, path: `resources.${resource.id}.fields.${field.id}.readableBy` });
+      for (const roleId of field.writableBy) if (!has(roleIds, roleId)) addIssue(issues, { code: 'field.unknown-role', severity: 'error', message: `Field "${field.label}" references unknown writable role "${roleId}".`, path: `resources.${resource.id}.fields.${field.id}.writableBy` });
+      for (const workflowId of field.usedByWorkflowIds) if (!has(workflowIds, workflowId)) addIssue(issues, { code: 'field.unknown-workflow', severity: 'error', message: `Field "${field.label}" references unknown workflow "${workflowId}".`, path: `resources.${resource.id}.fields.${field.id}.usedByWorkflowIds` });
+    });
   }
 
   for (const surface of plan.surfaces) {
-    reviewSurface(surface, { workflowIds, actionIds, resourceIds }, issues);
+    reviewSurface(surface, { workflowIds, actionIds, resourceIds, roleIds, surfaceIds }, issues);
   }
+
+  const visitingSurfaces = new Set<string>();
+  const visitedSurfaces = new Set<string>();
+  const visitSurface = (id: string): void => {
+    if (visitingSurfaces.has(id)) {
+      addIssue(issues, { code: 'surface.cycle', severity: 'error', message: `Surface hierarchy contains a cycle at "${id}".`, path: `surfaces.${id}.parentSurfaceId` });
+      return;
+    }
+    if (visitedSurfaces.has(id)) return;
+    visitingSurfaces.add(id);
+    const parentId = plan.surfaces.find(surface => surface.id === id)?.parentSurfaceId;
+    if (parentId !== undefined && surfaceIds.has(parentId)) visitSurface(parentId);
+    visitingSurfaces.delete(id);
+    visitedSurfaces.add(id);
+  };
+  for (const surface of plan.surfaces) visitSurface(surface.id);
 
   const menuById = new Map(plan.menu.map(item => [item.id, item] as const));
   for (const item of plan.menu) {
@@ -78,11 +134,14 @@ export function reviewProductPlan(plan: ProductPlan): ProductReviewReport {
     if (!item.workflowIds.length && !item.resourceId && !item.surfaceId) addIssue(issues, { code: 'menu.no-business-target', severity: 'warning', message: `Menu item "${item.label}" has no workflow, resource or surface target.`, path: `menu.${item.id}`, suggestion: 'Keep it only for an intentional external/system entry.' });
     if (item.surfaceId && !has(surfaceIds, item.surfaceId)) addIssue(issues, { code: 'menu.unknown-surface', severity: 'error', message: `Menu item "${item.label}" references unknown surface.`, path: `menu.${item.id}.surfaceId` });
     if (item.resourceId && !has(resourceIds, item.resourceId)) addIssue(issues, { code: 'menu.unknown-resource', severity: 'error', message: `Menu item "${item.label}" references unknown resource.`, path: `menu.${item.id}.resourceId` });
+    for (const workflowId of item.workflowIds) if (!has(workflowIds, workflowId)) addIssue(issues, { code: 'menu.unknown-workflow', severity: 'error', message: `Menu item "${item.label}" references unknown workflow "${workflowId}".`, path: `menu.${item.id}.workflowIds` });
+    for (const roleId of item.roleIds) if (!has(roleIds, roleId)) addIssue(issues, { code: 'menu.unknown-role', severity: 'error', message: `Menu item "${item.label}" references unknown role "${roleId}".`, path: `menu.${item.id}.roleIds` });
     if (!item.roleIds.length && item.placement !== 'hidden') addIssue(issues, { code: 'menu.public-entry', severity: 'info', message: `Menu item "${item.label}" is public at the UI hint layer.`, path: `menu.${item.id}.roleIds`, suggestion: 'Keep server authorization independent from menu visibility.' });
   }
 
   for (const action of plan.actions) {
     if (!has(workflowIds, action.workflowId)) addIssue(issues, { code: 'action.unknown-workflow', severity: 'error', message: `Action "${action.label}" references unknown workflow.`, path: `actions.${action.id}.workflowId` });
+    for (const roleId of action.roleIds) if (!has(roleIds, roleId)) addIssue(issues, { code: 'action.unknown-role', severity: 'error', message: `Action "${action.label}" references unknown role "${roleId}".`, path: `actions.${action.id}.roleIds` });
     if (!action.roleIds.length) addIssue(issues, { code: 'action.missing-roles', severity: 'warning', message: `Action "${action.label}" has no role visibility contract.`, path: `actions.${action.id}.roleIds` });
   }
 
@@ -110,8 +169,10 @@ export function reviewProductPlan(plan: ProductPlan): ProductReviewReport {
   };
 }
 
-function reviewSurface(surface: ProductSurface, refs: { workflowIds: ReadonlySet<string>; actionIds: ReadonlySet<string>; resourceIds: ReadonlySet<string> }, issues: ProductReviewIssue[]): void {
+function reviewSurface(surface: ProductSurface, refs: { workflowIds: ReadonlySet<string>; actionIds: ReadonlySet<string>; resourceIds: ReadonlySet<string>; roleIds: ReadonlySet<string>; surfaceIds: ReadonlySet<string> }, issues: ProductReviewIssue[]): void {
   if (!surface.purpose.trim()) addIssue(issues, { code: 'surface.missing-purpose', severity: 'error', message: `Surface "${surface.name}" has no purpose.`, path: `surfaces.${surface.id}.purpose` });
+  for (const roleId of surface.roleIds) if (!refs.roleIds.has(roleId)) addIssue(issues, { code: 'surface.unknown-role', severity: 'error', message: `Surface "${surface.name}" references unknown role "${roleId}".`, path: `surfaces.${surface.id}.roleIds` });
+  if (surface.parentSurfaceId !== undefined && !refs.surfaceIds.has(surface.parentSurfaceId)) addIssue(issues, { code: 'surface.unknown-parent', severity: 'error', message: `Surface "${surface.name}" references unknown parent surface "${surface.parentSurfaceId}".`, path: `surfaces.${surface.id}.parentSurfaceId` });
   if (!surface.workflowIds.length) addIssue(issues, { code: 'surface.no-workflow', severity: 'warning', message: `Surface "${surface.name}" is not attached to a workflow.`, path: `surfaces.${surface.id}.workflowIds` });
   surface.workflowIds.forEach(id => { if (!refs.workflowIds.has(id)) addIssue(issues, { code: 'surface.unknown-workflow', severity: 'error', message: `Surface "${surface.name}" references unknown workflow "${id}".`, path: `surfaces.${surface.id}.workflowIds` }); });
   surface.resourceIds.forEach(id => { if (!refs.resourceIds.has(id)) addIssue(issues, { code: 'surface.unknown-resource', severity: 'error', message: `Surface "${surface.name}" references unknown resource "${id}".`, path: `surfaces.${surface.id}.resourceIds` }); });
