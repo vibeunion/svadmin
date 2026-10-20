@@ -139,7 +139,7 @@
 <div data-app-page="todo-workspace" data-todo-view={normalizedView} data-resource-name={resourceName}>
 <ContentPageShell pageId="todo-workspace" width="wide">
   <ContentPageHeader eyebrow={viewCopy.badge} title={viewCopy.title} description={viewCopy.description} actions={headerActions} />
-  <WorkspaceQueryState {query}>
+  <WorkspaceQueryState {query} count={focusedTodos.length} hasActiveFilters={normalizedView !== 'all'}>
   <dl class="grid grid-cols-3 gap-3 border-y py-3">
     <div class="min-w-0"><dt class="text-xs text-muted-foreground">{isZh ? '完成进度' : 'Progress'}</dt><dd class="mt-1 text-base font-semibold">{progress}%</dd></div>
     <div class="min-w-0"><dt class="text-xs text-muted-foreground">{isZh ? '高优先级' : 'High priority'}</dt><dd class="mt-1 text-base font-semibold">{highPriorityCount}</dd></div>
@@ -162,8 +162,6 @@
           </a>
         {/each}
     </nav>
-    {#if focusedTodos.length === 0}<p role="status" class="text-sm text-muted-foreground">{isZh ? '当前视图没有任务，可切换视图或新建。' : 'No tasks in this view. Choose another view or create a task.'}</p>{/if}
-
     <div class="grid gap-3" style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));" aria-busy={saving}>
       {#each lanes as lane (lane.key)}
         <section class="min-w-0 border-t" aria-label={lane.title}>

@@ -210,7 +210,7 @@
       </nav>
       <section class="min-w-0 space-y-4">
         <div class="flex flex-wrap items-center gap-3"><label class="min-w-0 flex-1 text-sm">{isZh ? '搜索邮件' : 'Search mail'}<input class="mt-1 w-full rounded-md border bg-background p-2" bind:value={search} /></label>{#if isReceivedFolder}<label class="flex items-center gap-2 text-sm"><input type="checkbox" bind:checked={unreadOnly} />{isZh ? '仅未读' : 'Unread only'}</label>{/if}</div>
-        <WorkspaceQueryState {query} count={filtered.length}>
+        <WorkspaceQueryState {query} count={filtered.length} hasActiveFilters={Boolean(search.trim() || unreadOnly)}>
           <div class="grid gap-5 xl:grid-cols-[minmax(14rem,0.8fr)_minmax(0,1.2fr)]">
             <div class="divide-y">{#each filtered as message (message.id)}<button class="block w-full px-2 py-3 text-left" aria-pressed={selected?.id === message.id} onclick={() => selectedId = message.id}><strong class="block break-words text-sm">{message.subject}</strong><span class="mt-1 block break-words text-xs text-muted-foreground">{message.sender || message.to} · {message.date}</span></button>{/each}</div>
             {#if selected}

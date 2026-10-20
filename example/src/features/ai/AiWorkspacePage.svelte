@@ -129,7 +129,7 @@
       <div class="grid gap-6 lg:grid-cols-[14rem_minmax(0,1fr)]">
         <aside class="min-w-0 border-b pb-4 lg:border-b-0 lg:border-r lg:pr-4">
           <label class="mb-3 flex items-center gap-2 text-sm"><input type="checkbox" bind:checked={favoritesOnly} />{isZh ? '仅收藏' : 'Favorites only'}</label>
-          <WorkspaceQueryState {query} count={conversations.filter(item => !favoritesOnly || favorites.includes(item.id)).length}>
+          <WorkspaceQueryState {query} count={conversations.filter(item => !favoritesOnly || favorites.includes(item.id)).length} hasActiveFilters={favoritesOnly}>
             {#each conversations.filter(item => !favoritesOnly || favorites.includes(item.id)) as thread (thread.id)}
               <div class="flex items-start gap-2 border-b py-3"><a class="min-w-0 flex-1 break-words text-sm text-primary" href={`#/ai_conversations?thread=${thread.id}`}>{thread.title}</a><Button size="icon" variant="ghost" aria-label={isZh ? '收藏会话' : 'Favorite thread'} aria-pressed={favorites.includes(thread.id)} onclick={() => toggleFavorite(thread.id)}><Heart class={favorites.includes(thread.id) ? 'size-4 fill-primary text-primary' : 'size-4'} /></Button></div>
             {/each}

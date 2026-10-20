@@ -95,6 +95,17 @@ describe('builtin safety follow-up', () => {
     expect(screen.getByText(/macOS - Safari/)).toBeTruthy();
   });
 
+  it('distinguishes an empty security-log search from an empty event source', async () => {
+    render(SecurityLog);
+    await screen.findByText(referenceDemoData.securityEvents[0].event);
+
+    await fireEvent.input(screen.getByPlaceholderText('Search...'), { target: { value: 'zz-no-match-938' } });
+
+    await waitFor(() => expect(screen.getByText('No matching security events')).toBeTruthy());
+    expect(document.querySelector('[data-svadmin-data-state="filtered-empty"]')).toBeTruthy();
+    expect(document.querySelector('[data-svadmin-data-state="empty"]')).toBeNull();
+  });
+
   it('reports API secret clipboard rejection visibly', async () => {
     vi.spyOn(navigator.clipboard, 'writeText').mockRejectedValue(new Error('Denied'));
     render(Host, { page: 'api', providerBundle: { dataProvider, credentialProvider: credentials() } });
@@ -111,7 +122,7 @@ describe('builtin safety follow-up', () => {
     render(MemberHost, { page: 'members', bundle: { dataProvider }, members: {
       list: async () => [], invitationUrl: 'https://example.com/invite',
     } });
-    await screen.findByText('No matching members');
+    await screen.findByText('No members yet');
     await fireEvent.click(screen.getByRole('button', { name: /Copy Link/i }));
     expect(await screen.findByRole('alert')).toHaveProperty('textContent', 'Copy failed');
     expect(screen.queryByText('Link copied')).toBeNull();

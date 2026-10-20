@@ -34,7 +34,7 @@
   {#if projects.length === 0}
     <DataState state="empty" title={i18n.t('publicProfile.noProjects')} />
   {:else if filtered.length === 0}
-    <DataState state="empty" title={i18n.t('publicProfile.noProjects')} description={i18n.t('publicProfile.searchProjects')} />
+    <DataState state="filtered-empty" title={i18n.t('publicProfile.noProjects')} description={i18n.t('publicProfile.searchProjects')} />
   {:else}
     <div class={'svadmin-u-f3c543ad5fe9 svadmin-u-0c3bc98565dd ' + gridClass}>
       {#each filtered as project (project.id)}

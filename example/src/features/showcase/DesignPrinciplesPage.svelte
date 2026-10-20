@@ -378,7 +378,7 @@ import { definedOptions } from '@svadmin/core/options';
             </div>
           </article>
         {:else}
-          <div class="md:col-span-2"><DataState state="empty" title={isZh ? '没有匹配原则' : 'No matching principles'} description={isZh ? '清除搜索后查看完整原则列表。' : 'Clear the search to see the full principle list.'} /></div>
+          <div class="md:col-span-2"><DataState state="filtered-empty" title={isZh ? '没有匹配原则' : 'No matching principles'} description={isZh ? '清除搜索后查看完整原则列表。' : 'Clear the search to see the full principle list.'} /></div>
         {/each}
       </div>
     </section>

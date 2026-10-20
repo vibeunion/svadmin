@@ -133,6 +133,9 @@ describe('contract-bound detail views', () => {
   it.each(['page', 'drawer'] as const)('%s renders checked fields and rejects missing runtime contracts', async mode => {
     const app = mount(mode);
     await waitFor(() => expect(app.view.getByText('Record 1')).toBeTruthy());
+    if (mode === 'page') {
+      expect(app.view.container.querySelector('[data-svadmin-detail-state="ready"]')).toBeTruthy();
+    }
     expect(app.view.getByText('Title')).toBeTruthy();
     expect(() => render(Host, { mode, provider: provider(),
       resources: [{ name: 'posts', label: 'Posts', fields: [] }], queryClient: app.client,
@@ -176,6 +179,9 @@ describe('contract-bound detail views', () => {
     // Drawer content renders through a Portal into document.body, so scope the
     // access-denied lookup to the document rather than the render container.
     await waitFor(() => expect(app.view.baseElement.querySelector('[data-svadmin-access-denied]')).toBeTruthy());
+    if (mode === 'page') {
+      expect(app.view.container.querySelector('[data-svadmin-detail-state="forbidden"]')).toBeTruthy();
+    }
     expect(source.getOne).not.toHaveBeenCalled();
     if (mode === 'page') {
       const refresh = app.view.getByRole('button', { name: /^refresh$/i });
@@ -268,9 +274,15 @@ describe('contract-bound detail views', () => {
     const source = provider(getOne);
     const app = mount(mode, source);
     await waitFor(() => expect(app.view.getByRole('alert')).toBeTruthy());
+    if (mode === 'page') {
+      expect(app.view.container.querySelector('[data-svadmin-detail-state="error"]')).toBeTruthy();
+    }
     expect(app.view.container.textContent).not.toContain('secret tenant');
     await fireEvent.click(app.view.getByRole('button', { name: /^retry$/i }));
     await waitFor(() => expect(app.view.getByText('Recovered')).toBeTruthy());
+    if (mode === 'page') {
+      expect(app.view.container.querySelector('[data-svadmin-detail-state="ready"]')).toBeTruthy();
+    }
     expect(source.getList).not.toHaveBeenCalled();
     expect(getOne).toHaveBeenCalledTimes(2);
   });

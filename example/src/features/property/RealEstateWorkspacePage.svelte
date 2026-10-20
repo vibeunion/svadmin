@@ -53,6 +53,7 @@
   const visibleLeads = $derived(leads.filter(item => matches(`${item.leadName} ${item.notes}`)));
   const visibleShowings = $derived(showings.filter(item => matches(`${item.showingNumber} ${item.notes}`)));
   const visibleCount = $derived(isPropertyView ? visibleProperties.length : resourceName === 'property_agents' ? visibleAgents.length : resourceName === 'property_leads' ? visibleLeads.length : visibleShowings.length);
+  const hasActiveFilters = $derived(Boolean(search.trim() || market || assetType || status || maximumPrice !== undefined || view !== 'portfolio'));
   const money = (value: number) => new Intl.NumberFormat(isZh ? 'zh-CN' : 'en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
   function toggleSaved(id: number): void {
     const next = saved.includes(id) ? saved.filter(value => value !== id) : [...saved, id];
@@ -93,7 +94,7 @@
       <Button variant="ghost" onclick={resetFilters}>{isZh ? '清除筛选' : 'Clear filters'}</Button>
     {/if}
     {#if feedback}<p role="alert">{feedback}</p>{/if}
-    <WorkspaceQueryState query={current.query} count={visibleCount}>
+    <WorkspaceQueryState query={current.query} count={visibleCount} {hasActiveFilters}>
       {#if isPropertyView}
         {#if view === 'map'}
           <section class="border-y py-4">
