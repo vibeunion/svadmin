@@ -136,10 +136,16 @@
   <Button size="sm" onclick={() => window.location.hash = '/todos/create'}>{isZh ? '新建任务' : 'New task'}</Button>
 {/snippet}
 
+{#snippet filteredEmptyAction()}
+  <Button variant="outline" size="sm" onclick={() => window.location.hash = '/todos'}>
+    {isZh ? '查看全部任务' : 'View all tasks'}
+  </Button>
+{/snippet}
+
 <div data-app-page="todo-workspace" data-todo-view={normalizedView} data-resource-name={resourceName}>
 <ContentPageShell pageId="todo-workspace" width="wide">
   <ContentPageHeader eyebrow={viewCopy.badge} title={viewCopy.title} description={viewCopy.description} actions={headerActions} />
-  <WorkspaceQueryState {query} count={focusedTodos.length} hasActiveFilters={normalizedView !== 'all'}>
+  <WorkspaceQueryState {query} count={focusedTodos.length} hasActiveFilters={normalizedView !== 'all'} filteredEmptyAction={filteredEmptyAction}>
   <dl class="grid grid-cols-3 gap-3 border-y py-3">
     <div class="min-w-0"><dt class="text-xs text-muted-foreground">{isZh ? '完成进度' : 'Progress'}</dt><dd class="mt-1 text-base font-semibold">{progress}%</dd></div>
     <div class="min-w-0"><dt class="text-xs text-muted-foreground">{isZh ? '高优先级' : 'High priority'}</dt><dd class="mt-1 text-base font-semibold">{highPriorityCount}</dd></div>

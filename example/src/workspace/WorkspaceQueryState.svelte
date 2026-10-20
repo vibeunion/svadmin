@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import { definedOptions } from '@svadmin/core/options';
   import { useTranslation } from '@svadmin/core/i18n';
   import { DataState } from '@svadmin/ui';
 
@@ -26,7 +27,7 @@
   {#if count === undefined}
     {@render children()}
   {:else if count === 0}
-    <DataState state={hasActiveFilters ? 'filtered-empty' : 'empty'} action={hasActiveFilters ? filteredEmptyAction : undefined} />
+    <DataState state={hasActiveFilters ? 'filtered-empty' : 'empty'} {...definedOptions({ action: hasActiveFilters ? filteredEmptyAction : undefined })} />
   {:else}
     {@render children()}
   {/if}
