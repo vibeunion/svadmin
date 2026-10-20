@@ -162,6 +162,12 @@ overrides, including `data-svadmin-auth-brand`, `data-svadmin-auth-card`, and
 `data-svadmin-auth-footer`. The default SVAdmin mark remains in place when
 `brandMark` is not provided.
 
+The card is labelled by its heading and, when present, described by the
+supporting copy. The shell keeps the desktop and narrow layouts in the same
+keyboard order and clips accidental horizontal overflow at the authenticated
+page boundary. Applications should preserve the shell and provide only
+business branding or authentication content through the documented snippets.
+
 ## `<Authenticated>` Component
 
 Guard component that conditionally renders based on auth state:

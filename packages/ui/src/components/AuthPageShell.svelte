@@ -29,8 +29,8 @@
         {#if brandMark}{@render brandMark()}{:else}<span data-svadmin-auth-default-mark><SvadminLogo size={36} /></span>{/if}
         <span class="svadmin-u-4ee734926ff6 svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">{brand}</span>
       </div>
-      <section class="svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-c07e54fd1439 svadmin-u-438b2237b8d6 svadmin-u-e299d4635ea7" data-svadmin-auth-card>
-        <header class="svadmin-u-b6777c6db914 svadmin-u-6f7e013d6499"><h1 class="svadmin-u-d5c9b0001e7e svadmin-u-e83a7042bc91 svadmin-u-e9fadafbd4a2 svadmin-u-d4108abe6359">{title}</h1>{#if description}<p class="svadmin-u-fc7473ca09eb svadmin-u-18550d5945ae svadmin-u-bfa603190748">{description}</p>{/if}</header>
+      <section class="svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-c07e54fd1439 svadmin-u-438b2237b8d6 svadmin-u-e299d4635ea7" data-svadmin-auth-card aria-labelledby="svadmin-auth-title" aria-describedby={description ? 'svadmin-auth-description' : undefined}>
+        <header class="svadmin-u-b6777c6db914 svadmin-u-6f7e013d6499"><h1 id="svadmin-auth-title" class="svadmin-u-d5c9b0001e7e svadmin-u-e83a7042bc91 svadmin-u-e9fadafbd4a2 svadmin-u-d4108abe6359">{title}</h1>{#if description}<p id="svadmin-auth-description" class="svadmin-u-fc7473ca09eb svadmin-u-18550d5945ae svadmin-u-bfa603190748">{description}</p>{/if}</header>
         {@render children()}
       </section>
       {#if footer}<div class="svadmin-u-ca6bf63030aa" data-svadmin-auth-footer>{@render footer()}</div>{/if}

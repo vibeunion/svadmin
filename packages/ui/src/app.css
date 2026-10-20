@@ -3527,6 +3527,16 @@ details[data-svadmin-filter][open] > :not(summary),
   gap: 2rem;
 }
 
+.layout-clean-flat [data-svadmin-auth-main],
+.layout-clean-flat [data-svadmin-auth-card],
+.layout-clean-flat [data-svadmin-auth-card] form {
+  min-width: 0;
+}
+
+.layout-clean-flat [data-svadmin-auth-main] {
+  overflow-x: clip;
+}
+
 .layout-clean-flat [data-svadmin-auth-page] > main > div > section {
   border: 1px solid var(--border);
   background: var(--card);
