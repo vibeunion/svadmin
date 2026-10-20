@@ -41,11 +41,11 @@
   };
 </script>
 
-<div class={cn('svadmin-u-3e7ce58d64fa', className)}>
+<div class={cn('svadmin-u-3e7ce58d64fa', className)} data-svadmin-audit-timeline data-svadmin-audit-state={items.length === 0 ? 'empty' : 'ready'}>
   {#if items.length === 0}
     <DataState state="empty" title={emptyTitle} description={emptyDescription} />
   {:else}
-    <div class="svadmin-u-d89972fe17d6 svadmin-u-9079b62ef1cb svadmin-u-b3542e058833 svadmin-u-884dada40b17 svadmin-u-699f6fc4b3e0 svadmin-u-37f34e63818d svadmin-u-f76c7493f919 svadmin-u-8f848a57f066 svadmin-u-3242dfaf010c">
+    <div class="svadmin-u-d89972fe17d6 svadmin-u-9079b62ef1cb svadmin-u-b3542e058833 svadmin-u-884dada40b17 svadmin-u-699f6fc4b3e0 svadmin-u-37f34e63818d svadmin-u-f76c7493f919 svadmin-u-8f848a57f066 svadmin-u-3242dfaf010c" data-svadmin-audit-events>
       {#each items as item (item.id)}
         {@const statusTone = item.status ?? 'info'}
         <div class="svadmin-u-d89972fe17d6 svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-44ee8ba0a421 svadmin-u-fc7473ca09eb group">

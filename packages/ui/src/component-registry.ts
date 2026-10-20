@@ -98,7 +98,6 @@ const registryEntries = [
       eyebrow: { kind: "string" },
       description: { kind: "string" },
       breadcrumbs: { kind: "string[]" },
-      density: variant("contentHeaderRecipe", "density"),
       class: { kind: "string" },
     },
     slots: { actions: { kind: "snippet" } },

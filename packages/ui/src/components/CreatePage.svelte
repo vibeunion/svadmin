@@ -17,6 +17,7 @@
     title?: string;
     columns?: 1 | 2 | 3 | 4;
     headerActions?: Snippet;
+    formActions?: Snippet<[{ isLoading: boolean; onSubmit: () => void }]>;
     onSuccess?: () => void;
     class?: string;
   }
@@ -27,6 +28,7 @@
     title,
     columns = 1,
     headerActions,
+    formActions,
     onSuccess,
     class: className = '',
   }: Props = $props();
@@ -37,26 +39,31 @@
   const pageTitle = $derived(title ?? `${i18n.t('common.create')}${resource.label}`);
 </script>
 
-<div class="svadmin-u-b3542e058833 {className}">
-  <PageHeader
-    title={pageTitle}
-    onBack={() => navigateGuard(() => adminContext.navigate(`/${resourceName}`))}
-  >
+<div class="svadmin-u-b3542e058833 {className}" data-svadmin-crud-page="create" data-svadmin-resource={resourceName}>
+  <div data-svadmin-crud-page-header>
+    <PageHeader
+      title={pageTitle}
+      onBack={() => navigateGuard(() => adminContext.navigate(`/${resourceName}`))}
+    >
     {#snippet actions()}
       <ListButton resource={resourceName} hideText onBeforeNavigate={navigateGuard} />
       {#if headerActions}
         {@render headerActions()}
       {/if}
     {/snippet}
-  </PageHeader>
+    </PageHeader>
+  </div>
 
-  <AutoForm
-    {rendering}
-    {resourceName}
-    mode="create"
-    {columns}
-    showHeader={false}
-    onNavigationGuardReady={(guard) => navigateGuard = guard}
-    {...definedOptions({ "onSuccess": onSuccess })}
-  />
+  <div data-svadmin-crud-page-form>
+    <AutoForm
+      {rendering}
+      {resourceName}
+      mode="create"
+      {columns}
+      showHeader={false}
+      {...definedOptions({ formActions })}
+      onNavigationGuardReady={(guard) => navigateGuard = guard}
+      {...definedOptions({ "onSuccess": onSuccess })}
+    />
+  </div>
 </div>

@@ -790,8 +790,18 @@
       detailOpenedInHistory = false;
       localDetailId = undefined;
       quickEditId = undefined;
-      listState.cancelSearch();
-      if (previousTableScope.resourceName !== scope.resourceName) resetToDefaultListState();
+      const queryScopeChanged = previousTableScope.contract !== scope.contract
+        || previousTableScope.resourceName !== scope.resourceName
+        || previousTableScope.provider !== scope.provider
+        || previousTableScope.meta !== scope.meta
+        || previousTableScope.tenant !== scope.tenant
+        || previousTableScope.auth !== scope.auth
+        || previousTableScope.router !== scope.router
+        || previousTableScope.permissionProvider !== scope.permissionProvider;
+      if (queryScopeChanged) {
+        listState.cancelSearch();
+        if (previousTableScope.resourceName !== scope.resourceName) resetToDefaultListState();
+      }
     }
     previousTableScope = scope;
   });
@@ -1044,7 +1054,7 @@
 
 {#snippet defaultEmptyState()}
   {@const hasCriteria = !!(searchText.trim() || appliedSearchText.trim() || activeFilterCount > 0)}
-  <DataState state="empty" description={i18n.t(hasCriteria ? 'empty.description' : 'common.noDataHint')}>
+  <DataState state={hasCriteria ? 'filtered-empty' : 'empty'} description={i18n.t(hasCriteria ? 'empty.description' : 'common.noDataHint')}>
     {#snippet action()}
       {#if hasCriteria}
         <Button variant="outline" size="sm" onclick={clearFilters}>

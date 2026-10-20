@@ -59,6 +59,9 @@ describe('PagePattern', () => {
     await rerender({ state: 'empty', stateTitle: 'No projects' });
     expect(container.querySelector('[data-page-pattern-state="empty"]')).toBeTruthy();
     expect(screen.getByText('No projects')).toBeTruthy();
+    await rerender({ state: 'filtered-empty', stateTitle: 'No matching results' });
+    expect(container.querySelector('[data-page-pattern-state="filtered-empty"]')).toBeTruthy();
+    expect(screen.getByText('No matching results')).toBeTruthy();
   });
 
   it('exposes retry and action only for the corresponding state', async () => {
@@ -107,5 +110,19 @@ describe('PagePattern', () => {
     await fireEvent.click(screen.getByRole('button', { name: /^保存$/ }));
     expect(screen.getByRole('table').textContent).toContain('新建验证项目');
     expect((screen.getByRole('textbox', { name: '搜索客户项目' }) as HTMLInputElement).value).toBe('新建验证项目');
+  });
+
+  it('supports status filtering and a contextual batch action in the list example', async () => {
+    render(PagePatternExample);
+    await fireEvent.click(screen.getByRole('tab', { name: /待审核/ }));
+    expect(screen.getByRole('table').textContent).toContain('新能源汽车高压电气安全与环境可靠性联合实验室');
+    expect(screen.getByRole('table').textContent).not.toContain('材料分析实验室');
+
+    const checkbox = screen.getByRole('checkbox', { name: '选择记录 新能源汽车高压电气安全与环境可靠性联合实验室' });
+    await fireEvent.click(checkbox);
+    expect(screen.getByText('已选择 1 条记录')).toBeTruthy();
+    await fireEvent.click(screen.getByRole('button', { name: '标记完成' }));
+    expect(screen.queryByText('已选择 1 条记录')).toBeNull();
+    expect(screen.getByRole('tab', { name: /已完成/ }).textContent).toContain('2');
   });
 });

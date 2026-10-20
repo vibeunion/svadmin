@@ -9,6 +9,7 @@
   import PageHeader from './PageHeader.svelte';
   import AutoTable from './AutoTable.svelte';
   import type { BatchSelection } from './table-contract';
+  import type { SavedListViewProvider } from './saved-list-views.js';
   import CreateButton from './buttons/CreateButton.svelte';
 
   interface Props {
@@ -19,6 +20,7 @@
     /** Passthrough: enable row selection checkboxes */
     selectable?: boolean;
     allowSelectAllMatching?: boolean;
+    savedViewProvider?: SavedListViewProvider;
     /** Passthrough: custom header actions */
     headerActions?: Snippet;
     /** Optional status tabs slot above filter/table */
@@ -45,6 +47,7 @@
     canCreate,
     selectable,
     allowSelectAllMatching,
+    savedViewProvider,
     headerActions,
     statusTabs,
     filterToolbar,
@@ -60,7 +63,7 @@
   const showCreate = $derived(canCreate ?? resource.canCreate !== false);
 </script>
 
-<div class="svadmin-u-3e7ce58d64fa {className}">
+<div class="svadmin-u-3e7ce58d64fa {className}" data-svadmin-list-page={resourceName}>
   <PageHeader title={pageTitle}>
     {#snippet actions()}
       {#if showCreate}
@@ -73,26 +76,29 @@
   </PageHeader>
 
   {#if statusTabs}
-    <div>
+    <div data-svadmin-list-page-status-tabs>
       {@render statusTabs()}
     </div>
   {/if}
 
   {#if filterToolbar}
-    <div>
+    <div data-svadmin-list-page-filter-toolbar>
       {@render filterToolbar()}
     </div>
   {/if}
 
-  <AutoTable
-    {rendering}
-    {resourceName}
-    showHeader={false}
-    {...definedOptions({ "selectable": selectable })}
-    {...definedOptions({ allowSelectAllMatching })}
-    {...definedOptions({ batchActions })}
-    {...definedOptions({ "defaultCellRenderer": cellRenderer })}
-    {...definedOptions({ "rowActions": rowActions })}
-    {...definedOptions({ emptyState, expandedRowRender })}
-  />
+  <div data-svadmin-list-page-table>
+    <AutoTable
+      {rendering}
+      {resourceName}
+      showHeader={false}
+      {...definedOptions({ "selectable": selectable })}
+      {...definedOptions({ allowSelectAllMatching })}
+      {...definedOptions({ savedViewProvider })}
+      {...definedOptions({ batchActions })}
+      {...definedOptions({ "defaultCellRenderer": cellRenderer })}
+      {...definedOptions({ "rowActions": rowActions })}
+      {...definedOptions({ emptyState, expandedRowRender })}
+    />
+  </div>
 </div>

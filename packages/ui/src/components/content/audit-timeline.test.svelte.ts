@@ -7,6 +7,7 @@ describe('AuditTimeline enterprise component', () => {
   it('renders empty state when items are empty', () => {
     const view = render(AuditTimeline, { items: [], emptyTitle: 'No Records' });
     expect(view.container.textContent).toContain('No Records');
+    expect(view.container.querySelector('[data-svadmin-audit-timeline]')?.getAttribute('data-svadmin-audit-state')).toBe('empty');
   });
 
   it('renders timeline items with titles, timestamps, and status badges', () => {
@@ -37,5 +38,7 @@ describe('AuditTimeline enterprise component', () => {
     expect(view.container.textContent).toContain('by Approver A');
     expect(view.container.textContent).toContain('Approved');
     expect(view.container.querySelector(`.${utilityClasses['text-success']}`)).not.toBeNull();
+    expect(view.container.querySelector('[data-svadmin-audit-events]')).toBeTruthy();
+    expect(view.container.querySelector('[data-svadmin-audit-timeline]')?.getAttribute('data-svadmin-audit-state')).toBe('ready');
   });
 });

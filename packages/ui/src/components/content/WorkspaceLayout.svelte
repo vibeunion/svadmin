@@ -10,6 +10,7 @@
     secondaryCollapsed?: boolean;
     secondaryCollapsedWidth?: string;
     mobileOrder?: 'primary-first' | 'secondary-first';
+    label?: string;
     class?: string;
   }
 
@@ -21,6 +22,7 @@
     secondaryCollapsed = false,
     secondaryCollapsedWidth = '3rem',
     mobileOrder = 'primary-first',
+    label,
     class: className = '',
   }: Props = $props();
 
@@ -28,7 +30,7 @@
   const resolvedSecondaryWidth = $derived(secondaryCollapsed ? secondaryCollapsedWidth : secondaryWidth);
 </script>
 
-<div class={styles.root + ' ' + className} data-svadmin-workspace-layout data-secondary-collapsed={secondaryCollapsed} style:--workspace-secondary-width={resolvedSecondaryWidth}>
+<div class={styles.root + ' ' + className} data-svadmin-workspace-layout data-workspace-order={mobileOrder} data-secondary-collapsed={secondaryCollapsed} {...(label ? { 'aria-label': label, role: 'region' } : {})} style:--workspace-secondary-width={resolvedSecondaryWidth}>
   {#if summary}<div class={styles.summary} data-svadmin-workspace-summary>{@render summary()}</div>{/if}
   <div class={styles.columns}>
     {#if mobileOrder === 'secondary-first' && secondary}<aside class={styles.secondary} data-svadmin-workspace-secondary>{@render secondary()}</aside>{/if}

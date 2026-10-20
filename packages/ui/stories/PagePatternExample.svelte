@@ -1,9 +1,13 @@
 <script lang="ts">
-  import { Plus, Save, ArrowLeft, ArrowRight } from '@lucide/svelte';
+  import { Plus, Save, ArrowLeft, ArrowRight, Check, MoreHorizontal } from '@lucide/svelte';
   import PagePattern, { type PagePatternKind } from '../src/components/PagePattern.svelte';
   import DataState from '../src/components/content/DataState.svelte';
   import FilterToolbar from '../src/components/content/FilterToolbar.svelte';
+  import StatusTabs, { type StatusTabItem } from '../src/components/content/StatusTabs.svelte';
+  import StatusBadge from '../src/components/content/StatusBadge.svelte';
+  import BatchActionBar from '../src/components/BatchActionBar.svelte';
   import { Button } from '../src/components/ui/button/index.js';
+  import * as DropdownMenu from '../src/components/ui/dropdown-menu/index.js';
   import { Input } from '../src/components/ui/input/index.js';
   import SettingsGroup from '../src/components/content/SettingsGroup.svelte';
   import SettingsFieldRow from '../src/components/content/SettingsFieldRow.svelte';
@@ -21,18 +25,44 @@
   let recovered = $state(false);
   let page = $state(0);
   let mode = $state<'list' | 'create'>('list');
+  let statusFilter = $state('all');
+  let selectedNames = $state<string[]>([]);
   const initialRow = { name: '华东检测中心', owner: '李明', status: '处理中', count: 12 };
   let rows = $state([
     { name: '华东检测中心', owner: '李明', status: '处理中', count: 12 },
     { name: '新能源汽车高压电气安全与环境可靠性联合实验室', owner: '王静', status: '待审核', count: 8 },
     { name: '材料分析实验室', owner: '陈浩', status: '已完成', count: 6 },
   ]);
-  const filtered = $derived(rows.filter(row => row.name.includes(query.trim())));
+  const filtered = $derived(rows.filter(row =>
+    row.name.includes(query.trim()) && (statusFilter === 'all' || row.status === statusFilter)
+  ));
   const visible = $derived(filtered.slice(page * 2, page * 2 + 2));
+  const selectedRows = $derived(rows.filter(row => selectedNames.includes(row.name)));
+  const statusTabs = $derived<StatusTabItem[]>([
+    { key: 'all', label: '全部', count: rows.length },
+    { key: '处理中', label: '处理中', count: rows.filter(row => row.status === '处理中').length, tone: 'info' },
+    { key: '待审核', label: '待审核', count: rows.filter(row => row.status === '待审核').length, tone: 'warning' },
+    { key: '已完成', label: '已完成', count: rows.filter(row => row.status === '已完成').length, tone: 'success' },
+  ]);
   const titles = { list: '客户项目', form: '编辑客户', detail: '客户详情', workspace: '项目处理', dashboard: '项目概览' };
   const activeState = $derived(recovered ? 'ready' : viewState);
   const active = $derived(rows[selected] ?? initialRow);
   function resetSearch(value: string) { query = value; page = 0; }
+  function selectStatus(value: string) {
+    statusFilter = value;
+    page = 0;
+    selectedNames = [];
+  }
+  function toggleSelected(name: string) {
+    selectedNames = selectedNames.includes(name)
+      ? selectedNames.filter(item => item !== name)
+      : [...selectedNames, name];
+  }
+  function completeSelected() {
+    const selected = new Set(selectedNames);
+    rows = rows.map(row => selected.has(row.name) ? { ...row, status: '已完成' } : row);
+    selectedNames = [];
+  }
   function save() {
     const value = name.trim();
     if (!value) return;
@@ -57,7 +87,10 @@
     {/snippet}
     {#snippet toolbar()}
       {#if kind === 'list' && activeState === 'ready' && mode === 'list'}
-        <FilterToolbar bind:query={() => query, resetSearch} placeholder="搜索客户项目" clearLabel="清除搜索" />
+        <div class="list-tools">
+          <StatusTabs items={statusTabs} value={statusFilter} onchange={selectStatus} />
+          <FilterToolbar bind:query={() => query, resetSearch} placeholder="搜索客户项目" clearLabel="清除搜索" />
+        </div>
       {/if}
     {/snippet}
     {#snippet metrics()}
@@ -89,14 +122,53 @@
         <section aria-label="项目详情"><h2>{active.name}</h2><dl><dt>负责人</dt><dd>{active.owner}</dd><dt>状态</dt><dd>{active.status}</dd></dl></section>
       </div>
     {:else}
+      {#if kind === 'list' && selectedRows.length > 0}
+        <BatchActionBar
+          selectedCount={selectedRows.length}
+          totalCount={filtered.length}
+          selectedLabel={'已选择 {count} 条记录'}
+          clearLabel="清除选择"
+          onclear={() => selectedNames = []}
+        >
+          {#snippet actions()}
+            <Button size="sm" onclick={completeSelected}><Check size={16} />标记完成</Button>
+          {/snippet}
+        </BatchActionBar>
+      {/if}
       {#if filtered.length === 0}
         <DataState state="empty" title="没有匹配的项目" description="请调整搜索条件。">
           {#snippet action()}<Button variant="outline" onclick={() => resetSearch('')}>清除筛选</Button>{/snippet}
         </DataState>
       {:else}
         <div class="table-scroll">
-          <table><thead><tr><th scope="col">客户项目</th><th scope="col">负责人</th><th scope="col">状态</th></tr></thead>
-            <tbody>{#each kind === 'dashboard' ? rows : visible as row (row.name)}<tr><td>{row.name}</td><td>{row.owner}</td><td>{row.status}</td></tr>{/each}</tbody>
+          <table><thead><tr>
+            {#if kind === 'list'}<th scope="col" class="select-column"><span class="sr-only">选择</span></th>{/if}
+            <th scope="col">客户项目</th><th scope="col">负责人</th><th scope="col">状态</th>
+            {#if kind === 'list'}<th scope="col" class="action-column"><span class="sr-only">操作</span></th>{/if}
+          </tr></thead>
+            <tbody>{#each kind === 'dashboard' ? rows : visible as row (row.name)}<tr>
+              {#if kind === 'list'}
+                <td class="select-column">
+                  <input type="checkbox" aria-label={`选择记录 ${row.name}`} checked={selectedNames.includes(row.name)} onchange={() => toggleSelected(row.name)} />
+                </td>
+              {/if}
+              <td>{row.name}</td>
+              <td>{row.owner}</td>
+              <td><StatusBadge status={row.status === '已完成' ? 'success' : row.status === '待审核' ? 'warning' : 'info'} label={row.status} /></td>
+              {#if kind === 'list'}
+                <td class="action-column">
+                  <DropdownMenu.Root>
+                    <DropdownMenu.Trigger asChild>
+                      <Button variant="ghost" size="icon" aria-label={`打开 ${row.name} 操作`}><MoreHorizontal size={16} /></Button>
+                    </DropdownMenu.Trigger>
+                    <DropdownMenu.Content>
+                      <DropdownMenu.Item onclick={() => toggleSelected(row.name)}>选择记录</DropdownMenu.Item>
+                      <DropdownMenu.Item onclick={() => { selected = rows.findIndex(item => item.name === row.name); }}>查看详情</DropdownMenu.Item>
+                    </DropdownMenu.Content>
+                  </DropdownMenu.Root>
+                </td>
+              {/if}
+            </tr>{/each}</tbody>
           </table>
         </div>
         {#if kind === 'list'}<div class="commands"><span>共 {filtered.length} 项</span>
@@ -115,11 +187,16 @@
   .metric span, dt, small { color: var(--muted-foreground); }
   .commands { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
   .commands span { margin-right: auto; }
+  .list-tools { display: grid; gap: 12px; }
   .table-scroll { min-width: 0; overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; table-layout: fixed; }
   th, td { text-align: left; padding: 12px; border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
   th:first-child { width: 55%; }
   th { background: var(--muted); font-weight: 500; }
+  .select-column { width: 40px; padding-inline: 8px; }
+  .action-column { width: 52px; padding-inline: 4px; text-align: right; }
+  input[type='checkbox'] { width: 16px; height: 16px; accent-color: var(--primary); }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
   dl { display: grid; grid-template-columns: minmax(80px, 1fr) minmax(0, 3fr); gap: 16px; margin: 0; }
   dd { margin: 0; overflow-wrap: anywhere; }
   .workarea { display: grid; grid-template-columns: minmax(200px, 1fr) minmax(0, 3fr); gap: 24px; }

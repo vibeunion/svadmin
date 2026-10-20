@@ -124,6 +124,10 @@ describe('AutoTable enterprise enhancements', () => {
     // StatusTabs should be visible
     expect(await view.findAllByText('全部')).toBeTruthy();
     expect(await view.findAllByText('管理员')).toBeTruthy();
+    expect(view.container.querySelector('[data-svadmin-list-page="users"]')).toBeTruthy();
+    expect(view.container.querySelector('[data-svadmin-list-page-status-tabs]')).toBeTruthy();
+    expect(view.container.querySelector('[data-svadmin-list-page-filter-toolbar]')).toBeTruthy();
+    expect(view.container.querySelector('[data-svadmin-list-page-table]')).toBeTruthy();
 
     // Table data should render
     expect(await view.findAllByText('user1@example.com')).toHaveLength(1);
@@ -139,6 +143,17 @@ describe('AutoTable enterprise enhancements', () => {
     expect(clearSearch).toBeTruthy();
     await fireEvent.click(clearSearch);
     await waitFor(() => expect(view.queryByRole('button', { name: /^清除: 搜索/ })).toBeNull());
+  });
+
+  it('distinguishes filtered-empty from an initially empty resource list', async () => {
+    const view = render(AutoTableEnterpriseHarness, { viewMode: 'table' });
+    const search = await view.findByPlaceholderText('搜索...');
+    await fireEvent.input(search, { target: { value: '不存在的用户' } });
+
+    await waitFor(() => {
+      expect(view.container.querySelector('[data-svadmin-data-state="filtered-empty"]')).toBeTruthy();
+    });
+    expect(view.container.querySelector('[data-svadmin-data-state="empty"]')).toBeNull();
   });
 
   it('ShowPage renders in grid layout with multi-column descriptions', async () => {

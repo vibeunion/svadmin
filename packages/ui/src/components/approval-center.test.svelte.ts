@@ -108,6 +108,9 @@ describe('ApprovalCenter', () => {
     });
 
     await waitFor(() => expect(view.getByRole('heading', { name: 'Expense request' })).toBeTruthy());
+    expect(view.container.querySelector('[data-svadmin-approval-center]')?.getAttribute('data-svadmin-approval-state')).toBe('ready');
+    expect(view.container.querySelector('[data-svadmin-approval-list]')).toBeTruthy();
+    expect(view.container.querySelector('[data-svadmin-approval-detail]')).toBeTruthy();
     expect(view.getByText('Invoice.pdf')).toBeTruthy();
     expect(view.getByText('Alice · pending')).toBeTruthy();
     expect(source.list).toHaveBeenCalledWith(requestContext, {

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { AccessControlProvider, DataProvider, ResourceDefinition, RouterProvider, TaskProvider } from '@svadmin/core';
+  import type { AccessControlProvider, DataProvider, Filter, ResourceDefinition, RouterProvider, TaskProvider } from '@svadmin/core';
   import { defineResource } from '@svadmin/core';
   import { definedOptions } from '@svadmin/core/options';
   import { Type } from 'typebox';
@@ -31,13 +31,25 @@
   }: Props = $props();
 
   const dataProvider = {
-    getList: async () => ({
-      data: [
+    getList: async ({ filters = [] }) => {
+      const records = [
         { id: 'user-1', email: 'user1@example.com', role: 'admin', active: true },
         { id: 'user-2', email: 'user2@example.com', role: 'member', active: false },
-      ],
-      total: 2,
-    }),
+      ];
+      const matches = (filter: Filter, record: typeof records[number]): boolean => {
+        if ('field' in filter) {
+          const value = String(record[filter.field as keyof typeof record] ?? '').toLowerCase();
+          return filter.operator === 'contains'
+            ? value.includes(String(filter.value ?? '').toLowerCase())
+            : value === String(filter.value ?? '').toLowerCase();
+        }
+        return filter.operator === 'or'
+          ? filter.value.some(candidate => matches(candidate, record))
+          : filter.value.every(candidate => matches(candidate, record));
+      };
+      const data = records.filter(record => filters.every(filter => matches(filter, record)));
+      return { data, total: data.length };
+    },
     getOne: async () => ({
       data: { id: 'user-1', email: 'user1@example.com', role: 'admin', active: true },
     }),
