@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 import { describe, expect, it } from 'vitest';
+import userEvent from '@testing-library/user-event';
 import FilterToolbar from './content/FilterToolbar.svelte';
 import PageChromeHarness from '../../test/fixtures/PageChromeHarness.svelte';
 
@@ -16,7 +17,38 @@ describe('FilterToolbar', () => {
     expect(clearButton).toBeTruthy();
     await fireEvent.click(clearButton);
     expect(input.value).toBe('');
+    expect(document.activeElement).toBe(input);
     expect(screen.queryByRole('button', { name: 'Clear search' })).toBeNull();
+  });
+
+  it.each(['{Enter}', ' '])('returns focus to the search input when clearing with %s', async key => {
+    render(FilterToolbar, { query: 'test-query', placeholder: 'Search records...' });
+
+    const input = screen.getByLabelText('Search records...') as HTMLInputElement;
+    const clearButton = screen.getByRole('button', { name: 'Clear search' });
+    const user = userEvent.setup();
+    input.focus();
+    await user.tab();
+    expect(document.activeElement).toBe(clearButton);
+    await user.keyboard(key);
+
+    expect(input.value).toBe('');
+    expect(document.activeElement).toBe(input);
+    expect(screen.queryByRole('button', { name: 'Clear search' })).toBeNull();
+    await user.keyboard('next query');
+    expect(input.value).toBe('next query');
+  });
+
+  it('restores focus only to the toolbar whose search was cleared', async () => {
+    render(FilterToolbar, { query: 'orders', placeholder: 'Search orders', clearLabel: 'Clear orders' });
+    render(FilterToolbar, { query: 'people', placeholder: 'Search people', clearLabel: 'Clear people' });
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Clear people' }));
+
+    expect(document.activeElement).toBe(screen.getByLabelText('Search people'));
+    expect(screen.getByLabelText('Search people')).toHaveProperty('value', '');
+    expect(screen.getByLabelText('Search orders')).toHaveProperty('value', 'orders');
+    expect(screen.getByRole('button', { name: 'Clear orders' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Clear people' })).toBeNull();
   });
 
   it('preserves the search value across rerenders', async () => {
@@ -56,6 +88,17 @@ describe('FilterToolbar', () => {
     expect(screen.getByTestId('query-state').textContent).toBe('');
     await fireEvent.click(screen.getByRole('button', { name: /Advanced filters/ }));
     expect(screen.getByTestId('advanced-state').textContent).toBe('true');
+    const owner = screen.getByLabelText('Order owner');
+    await fireEvent.input(owner, { target: { value: 'Morgan' } });
+    await fireEvent.change(screen.getByLabelText('Order status'), { target: { value: 'Pending' } });
+    await fireEvent.input(input, { target: { value: 'unmatched' } });
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Clear search' }));
+    expect(document.activeElement).toBe(input);
+    expect(screen.getByTestId('query-state').textContent).toBe('');
+    expect(screen.getByTestId('advanced-state').textContent).toBe('true');
+    expect(screen.getByLabelText('Order owner')).toBe(owner);
+    expect(owner).toHaveProperty('value', 'Morgan');
+    expect(screen.getByLabelText('Order status')).toHaveProperty('value', 'Pending');
   });
 
   it('keeps advanced panel IDs and state separate across toolbar instances', async () => {
@@ -76,6 +119,7 @@ describe('FilterToolbar', () => {
     const { container } = render(FilterToolbar, { showSearch: false, actions, class: 'host-toolbar' });
     expect(container.querySelector('.svadmin-filter-toolbar.host-toolbar')).toBeTruthy();
     expect(screen.queryByRole('textbox')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Clear search' })).toBeNull();
     expect(screen.getByRole('button', { name: 'Export' })).toBeTruthy();
   });
 });
