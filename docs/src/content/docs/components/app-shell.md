@@ -32,10 +32,8 @@ system next to svadmin's. `AppShellPage` closes that gap with presentation only:
 
 <AppShellPage width="wide" label="Primary">
   {#snippet sidebar()}
-    <nav>
-      <a href="#/orders" aria-current="page">Orders</a>
-      <a href="#/reports">Reports</a>
-    </nav>
+    <a href="#/orders" aria-current="page">Orders</a>
+    <a href="#/reports">Reports</a>
   {/snippet}
 
   {#snippet topbar()}

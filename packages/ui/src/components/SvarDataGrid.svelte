@@ -18,6 +18,10 @@
     primaryKey?: string;
     childrenKey?: string;
     height?: number;
+    /** @deprecated Retained for compatibility; comfortable is the shared default. */
+    density?: 'compact' | 'comfortable';
+    rowHeight?: number;
+    headerHeight?: number;
     freezeLeft?: number;
     /** 独立右侧面板，不使用上游 split.right。 */
     freezeRight?: number;
@@ -51,14 +55,15 @@
     disabledLabel?: string;
     fallbackLabel?: string;
   }
-  let { Grid, Theme, items = [], columns, primaryKey = 'id', childrenKey, height = 420, freezeLeft = 0, freezeRight = 0, queryMode = 'local',
+  let { Grid, Theme, items = [], columns, primaryKey = 'id', childrenKey, height = 420, density = 'comfortable', rowHeight: rowHeightProp, headerHeight: headerHeightProp, freezeLeft = 0, freezeRight = 0, queryMode = 'local',
     sorters = [], filters = [], onSortChange, onFilterChange, onCellEdit, selectable = false, selectedIds = [], onSelectionChange, onRecordsChange, cellContent,
     windowSource, loadChildren, hasChildrenKey = 'hasChildren', onLoadMore, hasMore = false, scopeKey = 0,
     loading = false, error, disabled = false, locale = 'en-US', label = 'Data grid', emptyLabel = 'No records', loadingLabel = 'Loading',
     disabledLabel = 'Grid is disabled', fallbackLabel = 'Static preview (up to 20 rows)',
   }: SvarDataGridProps = $props();
   const treeKey = $derived(loadChildren ? childrenKey ?? 'children' : childrenKey);
-  const rowHeight = 44;
+  const rowHeight = $derived(rowHeightProp ?? (density === 'compact' ? 32 : 44));
+  const headerHeight = $derived(headerHeightProp ?? (density === 'compact' ? 32 : 36));
   // 普通追加不重建引擎，否则无限加载会把滚动位置重置。懒树根替换必须清理分支缓存。
   const dataOwner = $derived({ scopeKey, items: loadChildren ? items : undefined, source: windowSource,
     loadChildren, onLoadMore, primaryKey, treeKey, hasChildrenKey, freezeRight, Grid });
@@ -287,7 +292,7 @@
 </script>
 
 <Theme fonts={false}>
-  <div class="svadmin-svar-grid" data-svadmin-svar-grid role="group" aria-label={label} aria-busy={isLoading || pending || morePending} aria-disabled={disabled}>
+  <div class="svadmin-svar-grid" data-svadmin-svar-grid data-density={density} role="group" aria-label={label} aria-busy={isLoading || pending || morePending} aria-disabled={disabled}>
     {#if !model.ok || !records.ok}<p role="alert">{!model.ok ? model.message : !records.ok ? records.message : ''}</p>
     {:else}
       {#if activeError}<p role="alert">{activeError}</p>
@@ -303,12 +308,12 @@
         {#key dataOwner}<div class="grid-panes" inert={disabled}>
           <div class="grid-viewport center-pane" data-svar-pane="center" style:height="{height}px" role="region" aria-label="Scrollable columns" onkeydowncapture={event => navigatePane(event, 0)}>
             <Grid columns={model.center} data={activeError || isLoading ? [] : records.rows} tree={treeKey !== undefined}
-              split={{ left: freezeLeft }} sizes={{ rowHeight, headerHeight: 36, columnWidth: 160 }} select={selectable} multiselect={selectable} {selectedRows}
+              split={{ left: freezeLeft }} sizes={{ rowHeight, headerHeight, columnWidth: 160 }} select={selectable} multiselect={selectable} {selectedRows}
               reorder={false} draggableRows={false} undo={false} {...queryProps} {...dynamicProps} init={api => init(api, 0)} />
           </div>
           {#if freezeRight > 0}<div class="grid-viewport right-pane" data-svar-pane="right" style:height="{height}px" style:width="{model.rightWidth}px" role="region" aria-label="Frozen right columns" onkeydowncapture={event => navigatePane(event, 1)}>
             <Grid columns={model.right} data={activeError || isLoading ? [] : rightRows} tree={treeKey !== undefined}
-              split={{ left: 0 }} sizes={{ rowHeight, headerHeight: 36, columnWidth: 160 }} select={selectable} multiselect={selectable} {selectedRows}
+              split={{ left: 0 }} sizes={{ rowHeight, headerHeight, columnWidth: 160 }} select={selectable} multiselect={selectable} {selectedRows}
               reorder={false} draggableRows={false} undo={false} {...queryProps} {...dynamicProps} init={api => init(api, 1)} />
           </div>{/if}
         </div>{/key}

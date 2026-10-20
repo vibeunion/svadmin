@@ -28,6 +28,9 @@ describe('AppShellPage', () => {
       label: 'Primary',
     });
     expect(container.querySelector('nav')?.getAttribute('aria-label')).toBe('Primary');
+    const nav = container.querySelector('nav') as HTMLElement;
+    const toggle = container.querySelector('[data-slot="app-shell-mobile-toggle"]') as HTMLButtonElement;
+    expect(toggle.getAttribute('aria-controls')).toBe(nav.id);
     const skip = container.querySelector('.svadmin-app-shell__skip') as HTMLAnchorElement;
     const main = container.querySelector('main') as HTMLElement;
     expect(skip.getAttribute('href')).toBe(`#${main.id}`);

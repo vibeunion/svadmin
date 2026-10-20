@@ -52,6 +52,7 @@
   const generatedId = $props.id();
   const i18n = useTranslation();
   const mainId = $derived(contentId ?? generatedId);
+  const sidebarId = $derived(`${generatedId}-sidebar`);
   // 未提供可读名称时退回通用文案，避免出现没有可访问名的 <main>。
   const resolvedLabel = $derived(label ?? i18n.t('common.mainNavigation'));
   const resolvedSkipLabel = $derived(skipLabel ?? i18n.t('common.skipToMainContent'));
@@ -92,7 +93,7 @@
         type="button"
         class="svadmin-app-shell__mobile-toggle"
         data-slot="app-shell-mobile-toggle"
-        aria-controls={mainId}
+        aria-controls={sidebarId}
         aria-expanded={mobileOpen ? 'true' : 'false'}
         aria-label={mobileOpen ? i18n.t('common.close') : i18n.t('common.menu')}
         onclick={() => (mobileOpen = !mobileOpen)}
@@ -114,7 +115,7 @@
   </header>
 
   {#if sidebar}
-    <nav class="svadmin-app-shell__sidebar" aria-label={resolvedLabel} data-slot="app-shell-sidebar">
+    <nav id={sidebarId} class="svadmin-app-shell__sidebar" aria-label={resolvedLabel} data-slot="app-shell-sidebar">
       <div class="svadmin-app-shell__sidebar-inner">{@render sidebar()}</div>
     </nav>
     <button

@@ -1155,9 +1155,9 @@ main {
 }
 
 .svadmin-table-cell[data-density="compact"] {
-  height: 2rem;
-  padding: 0.25rem 0.5rem;
-  font-size: 0.75rem;
+  height: calc(var(--svadmin-row-h) - var(--svadmin-space-4));
+  padding: var(--svadmin-space-1) var(--svadmin-space-2);
+  font-size: var(--svadmin-text-caption);
 }
 
 .svadmin-table-cell[data-sticky="right"],
@@ -2437,9 +2437,9 @@ main {
 }
 
 .svadmin-table-head[data-density="compact"] {
-  height: 2rem;
-  padding: 0.25rem 0.5rem;
-  font-size: 0.75rem;
+  height: calc(var(--svadmin-table-head-h) - var(--svadmin-space-3));
+  padding: var(--svadmin-space-1) var(--svadmin-space-2);
+  font-size: var(--svadmin-text-caption);
 }
 
 .svadmin-table-head[data-sticky="right"],

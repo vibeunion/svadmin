@@ -45,6 +45,10 @@ function readSidebar(): string {
   return readFileSync(join(currentDir, 'components', 'Sidebar.svelte'), 'utf8');
 }
 
+function readAppShellCss(): string {
+  return readFileSync(join(currentDir, 'app-shell.css'), 'utf8');
+}
+
 describe('native component CSS', () => {
   it('preserves a semantic keyboard focus outline without color-mix support', () => {
     const css = postcss.parse(readFileSync(join(currentDir, 'app.css'), 'utf8'));
@@ -196,5 +200,11 @@ describe('native component CSS', () => {
     expect(css).toMatch(/@media \(min-width: 768px\) \{[\s\S]*?\.svadmin-sidebar-content-expanded/);
     expect(css).not.toContain('class:w-[252px]');
     expect(css).not.toContain('class:w-[70px]');
+  });
+
+  it('mirrors the mobile app-shell drawer in RTL layouts', () => {
+    const css = readAppShellCss();
+    expect(css).toContain('[dir="rtl"] .svadmin-app-shell__sidebar');
+    expect(css).toContain('transform: translateX(100%);');
   });
 });

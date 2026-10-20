@@ -188,6 +188,9 @@
       visibility: hidden;
       transition: transform var(--svadmin-motion-standard) var(--svadmin-motion-easing), visibility var(--svadmin-motion-standard);
     }
+    [dir="rtl"] .svadmin-app-shell__sidebar {
+      transform: translateX(100%);
+    }
     .svadmin-app-shell[data-mobile-open="true"] .svadmin-app-shell__sidebar {
       transform: none;
       visibility: visible;

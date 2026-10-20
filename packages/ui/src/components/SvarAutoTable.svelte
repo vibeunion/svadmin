@@ -26,6 +26,7 @@
       {#snippet gridBody(state)}
         <details><summary>{state.locale.startsWith('zh') ? '表格选择与列顺序' : 'Selection and column order'}</summary>{@render state.controls()}</details>
         <SvarDataGrid {Grid} {Theme} items={state.records} columns={state.columns} primaryKey={state.primaryKey}
+          density={state.density}
           {height} freezeLeft={Math.min(freezeLeft, state.columns.length - Math.min(freezeRight, state.columns.length - 1))}
           freezeRight={Math.min(freezeRight, state.columns.length - 1)}
           queryMode="server" sorters={state.sorters} onSortChange={state.onSortChange}

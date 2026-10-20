@@ -111,7 +111,7 @@
   .page-pattern__metrics {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
-    gap: 16px;
+    gap: var(--svadmin-space-4);
   }
 
   .page-pattern__toolbar,
@@ -121,7 +121,7 @@
 
   .page-pattern__content {
     display: grid;
-    gap: 24px;
+    gap: var(--svadmin-space-5);
   }
 
   .page-pattern__footer {
@@ -129,9 +129,9 @@
     flex-wrap: wrap;
     align-items: center;
     justify-content: flex-end;
-    gap: 8px;
-    margin-top: 24px;
-    padding-top: 12px;
+    gap: var(--svadmin-space-2);
+    margin-top: var(--svadmin-space-5);
+    padding-top: var(--svadmin-space-3);
     border-top: 1px solid var(--border);
   }
 </style>
