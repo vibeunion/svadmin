@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.14.1](https://github.com/vibeunion/svadmin/compare/surface-v0.14.0...surface-v0.14.1) (2026-10-20)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/ui bumped from >=0.73.0 <0.87.0 to >=0.73.0 <0.88.0
+
+## [0.14.0](https://github.com/vibeunion/svadmin/compare/surface-v0.13.6...surface-v0.14.0) (2026-10-20)
+
+
+### 🚀 Features
+
+* **ui:** complete page chrome and design token foundation ([376ead9](https://github.com/vibeunion/svadmin/commit/376ead9b98081ec959e14a34826c0de93b9c7c36))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped from >=0.53.0 <0.62.0 to >=0.53.0 <0.63.0
+    * @svadmin/ui bumped from >=0.73.0 <0.86.0 to >=0.73.0 <0.87.0
+
 ## [0.13.6](https://github.com/vibeunion/svadmin/compare/surface-v0.13.5...surface-v0.13.6) (2026-10-20)
 
 

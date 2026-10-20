@@ -162,6 +162,26 @@ overrides, including `data-svadmin-auth-brand`, `data-svadmin-auth-card`, and
 `data-svadmin-auth-footer`. The default SVAdmin mark remains in place when
 `brandMark` is not provided.
 
+`LoginPage` keeps the default SVAdmin structure while allowing business
+projects to replace authentication copy:
+
+```svelte
+<LoginPage
+  title="鉴定分析工作台"
+  identifierLabel="工作账号"
+  identifierPlaceholder="请输入工作账号"
+  passwordLabel="密码"
+  loginButtonLabel="登录"
+/>
+```
+
+The page exposes stable hooks for themed application shells:
+`data-svadmin-login-page`, `data-svadmin-login-form`,
+`data-svadmin-login-identifier`, `data-svadmin-login-password`, and
+`data-svadmin-login-submit`. Validation failures are announced through
+`data-svadmin-login-error` with `aria-live="assertive"` and are associated with
+both credential fields.
+
 ## `<Authenticated>` Component
 
 Guard component that conditionally renders based on auth state:

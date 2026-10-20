@@ -80,8 +80,12 @@ const contentPageRecipeStyles = tv({
       default: { root: "max-w-[74rem]" },
       wide: { root: "max-w-[92rem]" },
     },
+    density: {
+      compact: { root: "space-y-4" },
+      comfortable: {},
+    },
   },
-  defaultVariants: { width: "default" },
+  defaultVariants: { width: "default", density: "comfortable" },
 });
 
 const contentHeaderRecipeStyles = tv({
@@ -96,6 +100,20 @@ const contentHeaderRecipeStyles = tv({
     description: "max-w-[var(--svadmin-measure)] text-[length:var(--svadmin-text-body)] leading-[var(--svadmin-leading-body)] text-muted-foreground",
     actions: "flex shrink-0 flex-wrap items-center gap-[var(--svadmin-space-2)]",
   },
+  variants: {
+    density: {
+      compact: {
+        root: "space-y-2",
+        row: "gap-3",
+        heading: "space-y-[var(--svadmin-space-1)]",
+        title: "text-[length:var(--svadmin-text-section)] leading-[var(--svadmin-leading-tight)]",
+        description: "text-[length:var(--svadmin-text-label)] leading-[var(--svadmin-leading-body)]",
+        actions: "gap-[var(--svadmin-space-1)]",
+      },
+      comfortable: {},
+    },
+  },
+  defaultVariants: { density: "comfortable" },
 });
 
 const metricBlockRecipeStyles = tv({
@@ -204,8 +222,15 @@ const surfaceMetricRecipeStyles = tv({
       danger: { card: "border-s-destructive", state: "[--svadmin-metric-state-accent:var(--destructive)]" },
       info: { card: "border-s-info", state: "[--svadmin-metric-state-accent:var(--info)]" },
     },
+    density: {
+      compact: {
+        card: "p-3",
+        state: "[--svadmin-metric-state-padding:var(--svadmin-space-3)] [--svadmin-metric-state-height:4.5rem]",
+      },
+      comfortable: {},
+    },
   },
-  defaultVariants: { tone: "neutral" },
+  defaultVariants: { tone: "neutral", density: "comfortable" },
 });
 
 const surfaceTableRecipeStyles = tv({
@@ -217,6 +242,19 @@ const surfaceTableRecipeStyles = tv({
     cell: "surface-table__cell [&[data-slot=table-cell]]:py-[var(--svadmin-space-2)] [&[data-slot=table-cell]]:text-[length:var(--svadmin-text-body)]",
     state: "surface-table__state text-muted-foreground [--svadmin-table-state-height:var(--svadmin-table-state-min-h)]",
   },
+  variants: {
+    density: {
+      compact: {
+        header: "px-[var(--svadmin-space-3)]",
+        content: "px-[var(--svadmin-space-3)]",
+        head: "[&[data-slot=table-head]]:py-[var(--svadmin-space-1)] [&[data-slot=table-head]]:text-[length:var(--svadmin-text-caption)]",
+        cell: "[&[data-slot=table-cell]]:py-[var(--svadmin-space-1)] [&[data-slot=table-cell]]:text-[length:var(--svadmin-text-caption)]",
+        state: "[--svadmin-table-state-height:6rem]",
+      },
+      comfortable: {},
+    },
+  },
+  defaultVariants: { density: "comfortable" },
 });
 
 // undefined 使用公开默认值；null 显式禁用该变体，不能交给 tv 再补默认值。

@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.87.0](https://github.com/vibeunion/svadmin/compare/ui-v0.86.0...ui-v0.87.0) (2026-10-20)
+
+
+### 🚀 Features
+
+* **ui:** expose LoginPage copy and accessibility hooks ([#510](https://github.com/vibeunion/svadmin/issues/510)) ([5fc883b](https://github.com/vibeunion/svadmin/commit/5fc883b23436acc347453e38612aaa504c0f2a05))
+
+## [0.86.0](https://github.com/vibeunion/svadmin/compare/ui-v0.85.0...ui-v0.86.0) (2026-10-20)
+
+
+### 🚀 Features
+
+* **ui:** complete page chrome and design token foundation ([376ead9](https://github.com/vibeunion/svadmin/commit/376ead9b98081ec959e14a34826c0de93b9c7c36))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.3.3
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.12.0
+  * peerDependencies
+    * @svadmin/core bumped to 0.62.0
+
 ## [0.85.0](https://github.com/vibeunion/svadmin/compare/ui-v0.84.1...ui-v0.85.0) (2026-10-20)
 
 

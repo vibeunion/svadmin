@@ -59,7 +59,6 @@ describe('PagePattern', () => {
     await rerender({ state: 'empty', stateTitle: 'No projects' });
     expect(container.querySelector('[data-page-pattern-state="empty"]')).toBeTruthy();
     expect(screen.getByText('No projects')).toBeTruthy();
-
     await rerender({ state: 'filtered-empty', stateTitle: 'No matching results' });
     expect(container.querySelector('[data-page-pattern-state="filtered-empty"]')).toBeTruthy();
     expect(screen.getByText('No matching results')).toBeTruthy();
