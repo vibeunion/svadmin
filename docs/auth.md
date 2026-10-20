@@ -148,6 +148,20 @@ Built-in auth pages use the shared Stripe-inspired shell and semantic tokens:
 <!-- Routes: /#/login, /#/register, /#/forgot-password, /#/update-password -->
 ```
 
+`AuthPageShell` is also exported for applications that need to keep the
+standard authentication layout while supplying a product brand mark:
+
+```svelte
+<AuthPageShell brand="My App" title="Sign in" {children}>
+  {#snippet brandMark()}<img src="/brand-mark.svg" alt="" />{/snippet}
+</AuthPageShell>
+```
+
+The shell exposes stable `data-svadmin-auth-*` hooks for host-owned theme
+overrides, including `data-svadmin-auth-brand`, `data-svadmin-auth-card`, and
+`data-svadmin-auth-footer`. The default SVAdmin mark remains in place when
+`brandMark` is not provided.
+
 ## `<Authenticated>` Component
 
 Guard component that conditionally renders based on auth state:
