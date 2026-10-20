@@ -14,6 +14,8 @@
 </script>
 
 <script lang="ts">
+  import type { Snippet } from 'svelte';
+  import { definedOptions } from '@svadmin/core/options';
   import { cn } from '../../utils.js';
   import StatusBadge from './StatusBadge.svelte';
   import DataState from './DataState.svelte';
@@ -29,6 +31,7 @@
     retry?: () => void;
     retryLabel?: string;
     loadingLabel?: string;
+    action?: Snippet;
     class?: string;
   }
 
@@ -42,6 +45,7 @@
     retry,
     retryLabel,
     loadingLabel,
+    action,
     class: className = '',
   }: Props = $props();
 
@@ -64,6 +68,7 @@
       retry={retry}
       retryLabel={retryLabel}
       loadingLabel={loadingLabel}
+      {...definedOptions({ action })}
     />
   {:else}
     <div class="svadmin-u-d89972fe17d6 svadmin-u-9079b62ef1cb svadmin-u-b3542e058833 svadmin-u-884dada40b17 svadmin-u-699f6fc4b3e0 svadmin-u-37f34e63818d svadmin-u-f76c7493f919 svadmin-u-8f848a57f066 svadmin-u-3242dfaf010c" data-svadmin-audit-events>

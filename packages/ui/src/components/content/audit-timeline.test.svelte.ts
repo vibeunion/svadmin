@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render } from '@testing-library/svelte';
+import { createRawSnippet } from 'svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import AuditTimeline, { type TimelineItem } from './AuditTimeline.svelte';
 import utilityClasses from '../../../scripts/utility-class-map.json';
@@ -63,5 +64,12 @@ describe('AuditTimeline enterprise component', () => {
     await fireEvent.click(view.getByRole('button', { name: /retry/i }));
     expect(retry).toHaveBeenCalledOnce();
     expect(view.getByText('Audit unavailable')).toBeTruthy();
+  });
+
+  it('exposes a provider-owned recovery action for filtered audit results', () => {
+    const action = createRawSnippet(() => ({ render: () => '<button type="button">Clear audit filters</button>' }));
+    const view = render(AuditTimeline, { state: 'filtered-empty', action });
+
+    expect(view.getByRole('button', { name: 'Clear audit filters' })).toBeTruthy();
   });
 });

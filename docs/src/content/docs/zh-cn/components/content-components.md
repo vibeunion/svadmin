@@ -101,8 +101,9 @@ card，面板圆角、内边距和标题节奏才能共用尺寸 token。表格�
 
 `AuditTimeline` 也遵循同一份状态合同。Provider 已明确知道时间线不可用或被筛选
 为空时，传入 `state="loading"`、`state="error"`、`state="forbidden"` 或
-`state="filtered-empty"`；可恢复错误同时传入 `retry`。省略 `state` 时，空的
-`items` 使用初始 `empty` 状态，非空 `items` 才渲染时间线。
+`state="filtered-empty"`；可恢复错误同时传入 `retry`，筛选无结果时通过
+`action` 提供清除或调整筛选的入口。省略 `state` 时，空的 `items` 使用初始
+`empty` 状态，非空 `items` 才渲染时间线。
 
 ## 标准页面状态
 
