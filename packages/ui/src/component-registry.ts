@@ -1,7 +1,7 @@
 import { allRecipes, describeRecipe } from "./recipes.js";
 import { surfaceDesignContract } from "./design-contract.js";
 
-export type ComponentPropKind = "string" | "string[]" | "boolean" | "enum" | "number" | "string | number";
+export type ComponentPropKind = "string" | "string[]" | "boolean" | "enum" | "number" | "string | number" | "callback";
 
 export interface ComponentPropMetadata {
   kind: ComponentPropKind;
@@ -43,6 +43,36 @@ function variant(recipe: keyof typeof allRecipes, name: string): ComponentPropMe
 
 const registryEntries = [
   {
+    id: "page-pattern",
+    component: "@svadmin/ui/components/PagePattern.svelte",
+    recipe: "contentPageRecipe",
+    props: {
+      kind: { kind: "enum", values: ["list", "form", "detail", "workspace", "dashboard"], required: true },
+      title: { kind: "string", required: true },
+      description: { kind: "string" },
+      eyebrow: { kind: "string" },
+      pageId: { kind: "string" },
+      width: variant("contentPageRecipe", "width"),
+      density: { kind: "enum", values: ["comfortable", "compact"], default: "comfortable", description: "Deprecated compatibility prop; use the shared baseline." },
+      state: { kind: "enum", values: ["ready", "loading", "empty", "error", "forbidden"], default: "ready" },
+      stateTitle: { kind: "string" },
+      stateDescription: { kind: "string" },
+      retry: { kind: "callback", description: "Use an error-state retry callback." },
+      class: { kind: "string" },
+    },
+    slots: {
+      children: { kind: "snippet", required: true },
+      actions: { kind: "snippet" },
+      toolbar: { kind: "snippet" },
+      metrics: { kind: "snippet" },
+      secondary: { kind: "snippet" },
+      footer: { kind: "snippet" },
+      stateAction: { kind: "snippet" },
+    },
+    tokens: semanticTokens,
+    states: ["ready", "loading", "empty", "error", "forbidden"],
+  },
+  {
     id: "content-page-shell",
     component: "@svadmin/ui/components/content/ContentPageShell.svelte",
     recipe: "contentPageRecipe",
@@ -52,7 +82,7 @@ const registryEntries = [
       description: { kind: "string" },
       pageId: { kind: "string" },
       width: variant("contentPageRecipe", "width"),
-      density: variant("contentPageRecipe", "density"),
+      density: { kind: "enum", values: ["comfortable", "compact"], default: "comfortable", description: "Deprecated compatibility prop; use the shared baseline." },
       class: { kind: "string" },
     },
     slots: { children: { kind: "snippet", required: true }, actions: { kind: "snippet" } },
@@ -68,7 +98,6 @@ const registryEntries = [
       eyebrow: { kind: "string" },
       description: { kind: "string" },
       breadcrumbs: { kind: "string[]" },
-      density: variant("contentHeaderRecipe", "density"),
       class: { kind: "string" },
     },
     slots: { actions: { kind: "snippet" } },
@@ -241,7 +270,7 @@ export function createComponentRegistryManifest() {
   return {
     version: "svadmin/component-registry-v1",
     purpose: "authoring-only",
-    coverage: "twelve-ui-components-and-fourteen-recipes",
+    coverage: "page-pattern-and-semantic-ui-components",
     runtimeCatalog: "@svadmin/surface: createSurfaceCatalogManifest",
     designContract: surfaceDesignContract,
     recipes: Object.fromEntries((Object.keys(allRecipes) as Array<keyof typeof allRecipes>)

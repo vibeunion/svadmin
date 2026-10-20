@@ -65,7 +65,7 @@ Scenario: Fail closed on invalid migration input
 
 The screenshots use the real `PageChromeHarness.svelte` fixture, mounted in
 Chromium with the published plain CSS entry. Both entries were also checked
-across all viewport, density, and theme combinations above.
+across all viewport and theme combinations above.
 
 ![Page chrome at 1440x900](evidence/ui-static-css/page-chrome-1440-light.png)
 ![Page chrome at 1920x1080](evidence/ui-static-css/page-chrome-1920-dark.png)

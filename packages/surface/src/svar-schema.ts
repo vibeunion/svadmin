@@ -8,7 +8,6 @@ export const svarGridPropsSchema = Type.Object({
   title: Type.String({ minLength: 1, maxLength: 80 }),
   rowKey: Type.Optional(field),
   height: Type.Optional(Type.Integer({ minimum: 160, maximum: 1200 })),
-  density: Type.Optional(Type.Union([Type.Literal('compact'), Type.Literal('comfortable')])),
   freezeLeft: Type.Optional(Type.Integer({ minimum: 0, maximum: 8 })),
   freezeRight: Type.Optional(Type.Integer({ minimum: 0, maximum: 8 })),
   emptyLabel: Type.Optional(Type.String({ minLength: 1, maxLength: 80 })),

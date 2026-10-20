@@ -4,7 +4,6 @@
   import FilterToolbar from '../../src/components/content/FilterToolbar.svelte';
   import { Button } from '../../src/components/ui/button/index.js';
 
-  let { density = 'compact' }: { density?: 'compact' | 'comfortable' } = $props();
   let query = $state('orders');
   let advancedOpen = $state(false);
   let backCount = $state(0);
@@ -13,7 +12,6 @@
 <PageHeader
   title="OrderManagementInternationalFulfilmentReviewQueue2026"
   description="Review orders and filter pending approvals."
-  {density}
   showBreadcrumbs={false}
   onBack={() => backCount++}
 >
@@ -22,7 +20,7 @@
     <Button size="sm"><Plus />New order</Button>
   {/snippet}
 </PageHeader>
-<FilterToolbar bind:query bind:advancedOpen {density} placeholder="Search orders" advancedLabel="Advanced filters" activeFilterCount={2}>
+<FilterToolbar bind:query bind:advancedOpen placeholder="Search orders" advancedLabel="Advanced filters" activeFilterCount={2}>
   {#snippet filters()}
     <label>Status <select aria-label="Order status"><option>All</option><option>Pending</option></select></label>
   {/snippet}

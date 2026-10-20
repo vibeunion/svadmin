@@ -16,7 +16,7 @@ bun run dev
 
 在编码助手中提出需求即可，例如：
 
-> 基于当前客户工作台，把全站调整为高密度运营，保留客户 CRUD 和跟进流程。
+> 基于当前客户工作台，把全站调整为宽屏运营布局，保留客户 CRUD 和跟进流程。
 > 先读取 svadmin.vibe.json 和设计规范，修改后运行检查并查看移动端截图。
 
 `AGENTS.md` 提供通用规则，`.agents/skills/svadmin-vibe/SKILL.md` 提供生成与

@@ -17,7 +17,6 @@ export function readPreviewOptions(search = '') {
     state: requestedState && scenarios[view].includes(requestedState) ? requestedState : 'ready',
     locale: params.get('locale') === 'en' ? 'en' : 'zh-CN',
     theme: params.get('theme') === 'dark' ? 'dark' : 'light',
-    density: params.get('density') === 'comfortable' ? 'comfortable' : 'compact',
   };
 }
 

@@ -15,9 +15,9 @@
   }));
 </script>
 
-<ContentPageShell pageId="customer-detail" width={design.width} density={design.density}>
+<ContentPageShell pageId="customer-detail" width={design.width}>
   {#if id !== undefined}
-    <ShowPage {resourceName} {id} layout={design.detailLayout} density={design.density}>
+    <ShowPage {resourceName} {id} layout={design.detailLayout}>
       <PageSection title="最近跟进">
         {#snippet actions()}<Button variant="ghost" href="#/followups">全部记录</Button>{/snippet}
         {#if permission.isLoading || records.isLoading}

@@ -4,7 +4,7 @@
   import type { Snippet } from 'svelte';
   import type { HTMLAttributes } from 'svelte/elements';
   import { BarChart3, ChevronDown, ChevronUp, CircleAlert } from '@lucide/svelte';
-  import { cn } from '../../utils.js';
+  import { cn, formatCompactNumber } from '../../utils.js';
 
   interface Props extends Omit<HTMLAttributes<HTMLElement>, 'children' | 'class' | 'title'> {
     used?: number;
@@ -104,10 +104,7 @@
     return () => document.removeEventListener('pointerdown', dismiss);
   });
 
-  function formatTokens(value?: number): string {
-    if (value === undefined || !Number.isFinite(value)) return '-';
-    return new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 }).format(value);
-  }
+  const formatTokens = formatCompactNumber;
 </script>
 
 <section

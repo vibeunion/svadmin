@@ -57,7 +57,7 @@
   }
 </script>
 
-<section class="svadmin-surface-editor {editorClasses.comfortable}" aria-labelledby="{instanceId}-form-title" aria-busy={formState.busy}>
+<section class="svadmin-surface-editor {editorClasses.default}" aria-labelledby="{instanceId}-form-title" aria-busy={formState.busy}>
   <h3 id="{instanceId}-form-title">{title}</h3>
   {#if !scope.enabled}<p role="status">{labels.disabled}</p>{/if}
   {#if errors.length}

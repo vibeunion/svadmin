@@ -32,7 +32,6 @@
     {resourceName}
     id={recordId}
     mode="edit"
-    density="compact"
     showHeader={false}
     redirect={false}
     onSuccess={onClose}

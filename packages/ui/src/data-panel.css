@@ -1,0 +1,88 @@
+/* Data panel: the recurring "titled surface with a body" container.
+ *
+ * Hosts previously hand-rolled this block per page, which is how a project ends
+ * up with three panel paddings and two radii. Every length here is a token. */
+@layer components {
+  .svadmin-data-panel {
+    --svadmin-panel-padding: var(--svadmin-space-5);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    min-width: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--card);
+    color: var(--card-foreground);
+    overflow: hidden;
+  }
+  .svadmin-data-panel[data-padding="compact"] {
+    --svadmin-panel-padding: var(--svadmin-space-4);
+  }
+  .svadmin-data-panel[data-padding="none"] {
+    --svadmin-panel-padding: 0;
+  }
+
+  .svadmin-data-panel__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--svadmin-space-3);
+    min-width: 0;
+    padding: var(--svadmin-panel-padding);
+    padding-block-end: 0;
+  }
+  .svadmin-data-panel[data-padding="none"] .svadmin-data-panel__header {
+    padding: var(--svadmin-space-4) var(--svadmin-space-5);
+    border-bottom: 1px solid var(--border);
+  }
+  .svadmin-data-panel__heading {
+    display: grid;
+    gap: var(--svadmin-space-1);
+    min-width: 0;
+    flex: 1 1 0;
+  }
+  .svadmin-data-panel__title {
+    margin: 0;
+    color: var(--foreground);
+    font-size: var(--svadmin-text-section);
+    font-weight: 600;
+    line-height: var(--svadmin-leading-tight);
+    overflow-wrap: anywhere;
+  }
+  .svadmin-data-panel__description {
+    max-width: var(--svadmin-measure);
+    margin: 0;
+    color: var(--muted-foreground);
+    font-size: var(--svadmin-text-body);
+    line-height: var(--svadmin-leading-body);
+    overflow-wrap: anywhere;
+  }
+  .svadmin-data-panel__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--svadmin-space-2);
+    flex: 0 0 auto;
+  }
+  .svadmin-data-panel__body {
+    display: grid;
+    gap: var(--svadmin-space-4);
+    min-width: 0;
+    padding: var(--svadmin-panel-padding);
+  }
+  .svadmin-data-panel[data-padding="none"] .svadmin-data-panel__body {
+    gap: 0;
+  }
+  .svadmin-data-panel__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--svadmin-space-2);
+    padding: var(--svadmin-space-3) var(--svadmin-space-5);
+    border-top: 1px solid var(--border);
+    color: var(--muted-foreground);
+    font-size: var(--svadmin-text-caption);
+  }
+}

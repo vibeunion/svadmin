@@ -1,26 +1,18 @@
 <script lang="ts">
-	import { setContext } from "svelte";
 	import type { HTMLTableAttributes } from "svelte/elements";
 	import { cn, type WithElementRef } from "../../../utils.js";
 
-	export type TableDensity = "compact" | "comfortable";
-
-	type Props = WithElementRef<HTMLTableAttributes, HTMLTableElement> & {
-		density?: TableDensity;
-	};
+	type Props = WithElementRef<HTMLTableAttributes, HTMLTableElement>;
 
 	let {
 		ref = $bindable(null),
-		density = "comfortable",
 		class: className,
 		children,
 		...restProps
 	}: Props = $props();
-
-	setContext("svadmin-table-density", () => density);
 </script>
 
-<div data-slot="table-container" data-table-density={density} class="svadmin-table-container">
+<div data-slot="table-container" class="svadmin-table-container">
 	<table bind:this={ref} data-slot="table" class={cn("svadmin-table", className)} {...restProps}>
 		{@render children?.()}
 	</table>

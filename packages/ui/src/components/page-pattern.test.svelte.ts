@@ -6,15 +6,14 @@ import PagePatternExample from '../../stories/PagePatternExample.svelte';
 
 describe('PagePattern', () => {
   it.each([
-    ['list', 'comfortable', 'wide'],
-    ['form', 'comfortable', 'narrow'],
-    ['detail', 'comfortable', 'default'],
-    ['workspace', 'comfortable', 'wide'],
-    ['dashboard', 'comfortable', 'wide'],
-  ] as const)('applies the %s page defaults', (kind, density, width) => {
+    ['list', 'wide'],
+    ['form', 'narrow'],
+    ['detail', 'default'],
+    ['workspace', 'wide'],
+    ['dashboard', 'wide'],
+  ] as const)('applies the %s page defaults', (kind, width) => {
     const children = createRawSnippet(() => ({ render: () => '<p>Content</p>' }));
     const { container } = render(PagePattern, { kind, title: 'Page', children });
-    expect(container.querySelector('[data-svadmin-content-page]')?.getAttribute('data-density')).toBe(density);
     expect(container.querySelector('[data-svadmin-content-page-width]')?.getAttribute('data-svadmin-content-page-width')).toBe(width);
     expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Page');
   });
@@ -34,17 +33,9 @@ describe('PagePattern', () => {
     const { container, rerender } = render(PagePattern, { kind: 'list', title: 'Page', children });
     await rerender({ kind: 'form' });
     const shell = container.querySelector('[data-svadmin-content-page]');
-    expect(shell?.getAttribute('data-density')).toBe('comfortable');
     expect(shell?.getAttribute('data-svadmin-content-page-width')).toBe('narrow');
-    await rerender({ kind: 'workspace', width: 'default', density: 'comfortable' });
-    expect(shell?.getAttribute('data-density')).toBe('comfortable');
+    await rerender({ kind: 'workspace', width: 'default' });
     expect(shell?.getAttribute('data-svadmin-content-page-width')).toBe('default');
-  });
-
-  it('preserves an explicit compact density override', () => {
-    const children = createRawSnippet(() => ({ render: () => '<p>Content</p>' }));
-    const { container } = render(PagePattern, { kind: 'list', title: 'Page', children, density: 'compact' });
-    expect(container.querySelector('[data-svadmin-content-page]')?.getAttribute('data-density')).toBe('compact');
   });
 
   it('does not discard secondary content on a detail page', () => {
@@ -52,6 +43,38 @@ describe('PagePattern', () => {
     const secondary = createRawSnippet(() => ({ render: () => '<p>Audit history</p>' }));
     render(PagePattern, { kind: 'detail', title: 'Record detail', children, secondary });
     expect(screen.getByText('Audit history')).toBeTruthy();
+  });
+
+  it('renders the standard data state contract instead of stale page content', async () => {
+    const children = createRawSnippet(() => ({ render: () => '<p>Stale content</p>' }));
+    const { container, rerender } = render(PagePattern, {
+      kind: 'list',
+      title: 'Projects',
+      children,
+      state: 'loading',
+    });
+    expect(container.querySelector('[data-page-pattern-state="loading"]')).toBeTruthy();
+    expect(screen.queryByText('Stale content')).toBeNull();
+
+    await rerender({ state: 'empty', stateTitle: 'No projects' });
+    expect(container.querySelector('[data-page-pattern-state="empty"]')).toBeTruthy();
+    expect(screen.getByText('No projects')).toBeTruthy();
+  });
+
+  it('exposes retry and action only for the corresponding state', async () => {
+    let retried = false;
+    const action = createRawSnippet(() => ({ render: () => '<button>Reset filters</button>' }));
+    render(PagePattern, {
+      kind: 'list',
+      title: 'Projects',
+      children: createRawSnippet(() => ({ render: () => '<p>Content</p>' })),
+      state: 'error',
+      retry: () => { retried = true; },
+      stateAction: action,
+    });
+    await fireEvent.click(screen.getByRole('button', { name: /retry/i }));
+    expect(retried).toBe(true);
+    expect(screen.getByRole('button', { name: 'Reset filters' })).toBeTruthy();
   });
 
   it('filters and clears results in the custom list example', async () => {

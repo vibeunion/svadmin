@@ -112,11 +112,9 @@
     selectable?: boolean;
     /** 仅在业务回调支持按查询执行服务端命令时启用。 */
     allowSelectAllMatching?: boolean;
-    density?: 'compact' | 'comfortable';
     showHeader?: boolean;
     title?: string;
     showFilterTags?: boolean;
-    showDensitySwitcher?: boolean;
     showRefresh?: boolean;
     /** Custom header actions (right side) */
     headerActions?: Snippet;
@@ -158,11 +156,9 @@
     gridBody,
     selectable = true,
     allowSelectAllMatching = false,
-    density = 'comfortable',
     showHeader = true,
     title,
     showFilterTags = true,
-    showDensitySwitcher = true,
     showRefresh = true,
     headerActions,
     columns: customColumns,
@@ -184,8 +180,6 @@
     exportMaxItemCount,
   }: Props = $props();
 
-  let densityOverride = $state<'compact' | 'comfortable' | undefined>(undefined);
-  const currentDensity = $derived(densityOverride ?? density);
   const adminContext = captureAdminContext();
   const parsed = useParsed();
   const navigation = useNavigation();
@@ -954,7 +948,7 @@
 {/snippet}
 
 {#snippet renderGridControls()}
-  <Table.Root density={currentDensity}>
+  <Table.Root>
           <Table.Header>
             {#each tableView.headerGroups as headerGroup, _i (_i)}
               {@const visibleHeaders = headerGroup.headers.filter((header: Header<TableFeatures, TableRecord, unknown>) => isColumnVisible(header.column.id))}
@@ -1014,7 +1008,7 @@
 {/snippet}
 
 {#snippet renderGridAfter()}
-  <Table.Root density={currentDensity}>
+  <Table.Root>
     <Table.Body>
       {#each tableView.rows as row (row.id)}
         {#if expandedRowRender && rowIsExpanded(row.id)}
@@ -1217,7 +1211,7 @@
       {/if}
     </div>
 
-    <!-- Right: Table Controls (Density, Columns, Saved Views, Refresh, Export if !showHeader) -->
+    <!-- Right: Table Controls (Columns, Saved Views, Refresh, Export if !showHeader) -->
     <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-58284b4ea568 svadmin-u-012fbd121f37">
       {#if !showHeader && canExport}
         {#if exportTaskName}
@@ -1236,26 +1230,6 @@
             <Download class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" aria-hidden="true" />
           </TooltipButton>
         {/if}
-      {/if}
-
-      {#if showDensitySwitcher}
-        <DropdownMenu.Root>
-          <DropdownMenu.Trigger>
-            {#snippet child({ props }: { props: Record<string, unknown> })}
-              <TooltipButton tooltip={i18n.t("common.density")} variant="outline" size="sm" class="svadmin-u-e7a768f922d2 svadmin-u-0b91436debbd" {...props}>
-                <Rows class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" aria-hidden="true" />
-              </TooltipButton>
-            {/snippet}
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Content align="end" class="svadmin-u-df403bbae8fc">
-            <DropdownMenu.Item onclick={() => { densityOverride = "comfortable"; }} class={currentDensity === "comfortable" ? "svadmin-u-e83a7042bc91 svadmin-u-20aaf08a7ed1" : ""}>
-              {i18n.t("common.densityComfortable")}
-            </DropdownMenu.Item>
-            <DropdownMenu.Item onclick={() => { densityOverride = "compact"; }} class={currentDensity === "compact" ? "svadmin-u-e83a7042bc91 svadmin-u-20aaf08a7ed1" : ""}>
-              {i18n.t("common.densityCompact")}
-            </DropdownMenu.Item>
-          </DropdownMenu.Content>
-        </DropdownMenu.Root>
       {/if}
 
       <!-- Column Visibility Picker -->
@@ -1549,9 +1523,9 @@
   {/if}
 
   <!-- Table (TanStack-powered) -->
-  <div class="svadmin-u-2cd02d11d1af svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-438b2237b8d6" role="region" aria-label="{resource.label} {i18n.t('common.list')}" data-table-density={currentDensity}>
+  <div class="svadmin-u-2cd02d11d1af svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-438b2237b8d6" role="region" aria-label="{resource.label} {i18n.t('common.list')}">
     {#if listPermission.isLoading || (query.isLoading && !query.isError)}
-      <Table.Root density={currentDensity}>
+      <Table.Root>
         <Table.Header>
           {#each tableView.headerGroups as headerGroup, _i (_i)}
             {@const visibleHeaders = headerGroup.headers.filter((header: Header<TableFeatures, TableRecord, unknown>) => isColumnVisible(header.column.id))}
@@ -1608,7 +1582,7 @@
       />
     {:else if gridBody && pageRecords.data.length > 0}
       {@render gridBody({ records: pageRecords.data.map(copyTableRecord), columns: gridColumns, primaryKey: 'id',
-        sorters: querySorters, density: currentDensity, locale: i18n.locale, label: resource.label,
+        sorters: querySorters, locale: i18n.locale, label: resource.label,
         scopeKey: JSON.stringify([resourceName, queryPagination, querySorters, queryFilters, adminContext.tenantCacheKey?.__svadminTenant]),
         disabled: query.isFetching || deleteManyMutation.isPending,
         onSortChange: changeGridSort, cell: renderGridCell, controls: renderGridControls, after: renderGridAfter })}
@@ -1616,7 +1590,7 @@
       <div in:fade={{ duration: 150 }}>
         <!-- Desktop Table (hidden on mobile) -->
         <div class="svadmin-u-99d72c7fc3e2 svadmin-u-9d60be3a6d80">
-        <Table.Root density={currentDensity}>
+        <Table.Root>
           <Table.Header>
             {#each tableView.headerGroups as headerGroup, _i (_i)}
               {@const visibleHeaders = headerGroup.headers.filter((header: Header<TableFeatures, TableRecord, unknown>) => isColumnVisible(header.column.id))}

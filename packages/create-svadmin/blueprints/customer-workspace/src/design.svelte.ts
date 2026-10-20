@@ -3,7 +3,6 @@ import { initialPreset } from './design-selection';
 
 interface DesignPreset {
   label: string;
-  density: 'compact' | 'comfortable';
   width: 'wide' | 'default';
   formColumns: 1 | 2;
   detailLayout: 'list' | 'grid';
@@ -12,17 +11,17 @@ interface DesignPreset {
 
 export const designPresets = {
   operations: {
-    label: '高密度运营', density: 'compact', width: 'wide',
+    label: '宽屏运营', width: 'wide',
     formColumns: 2, detailLayout: 'list',
     theme: { colorPreset: 'neutral', layoutPreset: 'clean-flat' },
   },
   enterprise: {
-    label: '标准企业', density: 'comfortable', width: 'wide',
+    label: '标准企业', width: 'wide',
     formColumns: 2, detailLayout: 'grid',
     theme: { colorPreset: 'stripe', layoutPreset: 'clean-flat' },
   },
   collaboration: {
-    label: '轻量协作', density: 'comfortable', width: 'default',
+    label: '轻量协作', width: 'default',
     formColumns: 1, detailLayout: 'list',
     theme: { colorPreset: 'green', layoutPreset: 'clean-flat' },
   },

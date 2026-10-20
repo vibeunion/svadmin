@@ -98,18 +98,16 @@ for (const status of ['success', 'warning', 'danger', 'info', 'neutral']) {
   });
 }
 
-test('all Surface tones and densities include state and loaded styles', () => {
+test('all Surface tones include state and loaded styles', () => {
   for (const tone of ['neutral', 'success', 'warning', 'danger', 'info']) {
-    for (const density of ['compact', 'comfortable']) {
-      const metric = surfaceMetricRecipe({ tone, density });
-      requires(metric.card, ['border-inline-start-color', 'border-inline-start-width', 'padding']);
-      requires(metric.state, ['--svadmin-metric-state-accent', '--svadmin-metric-state-padding', '--svadmin-metric-state-height']);
-      const table = surfaceTableRecipe({ density });
-      requires(table.head, ['padding-block', 'font-size']);
-      requires(table.cell, ['padding-block', 'font-size']);
-      requires(table.state, ['--svadmin-table-state-height']);
-    }
+    const metric = surfaceMetricRecipe({ tone });
+    requires(metric.card, ['border-inline-start-color', 'border-inline-start-width', 'padding']);
+    requires(metric.state, ['--svadmin-metric-state-accent', '--svadmin-metric-state-padding', '--svadmin-metric-state-height']);
   }
+  const table = surfaceTableRecipe();
+  requires(table.head, ['padding-block', 'font-size']);
+  requires(table.cell, ['padding-block', 'font-size']);
+  requires(table.state, ['--svadmin-table-state-height']);
 });
 
 test('primitive recipes preserve null variants and caller classes', () => {

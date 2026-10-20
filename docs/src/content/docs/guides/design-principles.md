@@ -43,7 +43,7 @@ Semantic tokens, variants, state names, page skeletons, and feedback lifecycles
 must mean the same thing everywhere.
 
 - Use shared components before adding page-local variants.
-- A layout preset may change density and composition, not color meaning, focus,
+- A layout preset may change composition, not color meaning, focus,
   elevation, or feedback behavior.
 - External design systems provide behavioral or coverage references only.
 

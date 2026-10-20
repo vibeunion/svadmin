@@ -70,7 +70,6 @@ test('global design preset changes without losing customer data', async ({ page 
   await page.goto('/#/workspace_settings');
   await page.getByRole('combobox', { name: '设计预设', exact: true }).selectOption('operations');
   await page.evaluate(() => { location.hash = '/customers'; });
-  await expect(page.locator('[data-svadmin-content-page="customer-list"]')).toHaveAttribute('data-density', 'compact');
   await expect(visibleText(page, '澄川科技')).toBeVisible();
   await page.evaluate(() => { location.hash = '/workspace_settings'; });
   await page.getByRole('combobox', { name: '设计预设', exact: true }).selectOption('collaboration');
@@ -84,7 +83,6 @@ for (const preset of catalog.presets) {
     await page.getByRole('combobox', { name: '设计预设', exact: true }).selectOption(preset);
     await page.evaluate(() => { location.hash = '/customers'; });
     await expect(visibleText(page, '澄川科技')).toBeVisible();
-    await expect(page.locator('[data-svadmin-content-page="customer-list"]')).toHaveAttribute('data-density', preset === 'operations' ? 'compact' : 'comfortable');
     await page.screenshot({ path: testInfo.outputPath(`${preset}.png`), fullPage: true, animations: 'disabled' });
   });
 }

@@ -51,7 +51,7 @@
   function presentationEdit() {
     if (!spec) return;
     spec = { ...spec, title: 'Rearranged contact operations', widgets: spec.widgets.map((widget) => ({ ...widget,
-      props: { ...widget.props, appearance: { tone: 'warning', density: 'comfortable' } }, placement: { columnSpan: 12 } })) };
+      props: { ...widget.props, appearance: { tone: 'warning' } }, placement: { columnSpan: 12 } })) };
   }
   function forbiddenField() {
     if (!spec) return;

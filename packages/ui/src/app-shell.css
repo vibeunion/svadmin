@@ -1,0 +1,213 @@
+/* Router-agnostic application shell.
+ *
+ * Every length, size and color here comes from a token. That is the contract
+ * hosts rely on: a host with its own router composes the shell with snippets and
+ * overrides tokens, instead of re-implementing sidebar, topbar and page
+ * composition in bespoke CSS. See docs/components/app-shell.md. */
+@layer components {
+  .svadmin-app-shell {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 100dvh;
+    background: var(--background);
+    color: var(--foreground);
+    font-size: var(--svadmin-text-body);
+    line-height: var(--svadmin-leading-body);
+  }
+  .svadmin-app-shell[data-width="narrow"] {
+    --svadmin-shell-max: 48rem;
+  }
+  .svadmin-app-shell[data-width="wide"] {
+    --svadmin-shell-max: 92rem;
+  }
+  .svadmin-app-shell[data-width="full"] {
+    --svadmin-shell-max: none;
+  }
+  .svadmin-app-shell[data-sidebar="true"] {
+    grid-template-columns: var(--svadmin-shell-sidebar-w) minmax(0, 1fr);
+    grid-template-areas:
+      "topbar topbar"
+      "sidebar main"
+      "sidebar footer";
+  }
+  .svadmin-app-shell[data-collapsed="true"] {
+    --svadmin-shell-sidebar-w: var(--svadmin-shell-sidebar-w-collapsed);
+  }
+  .svadmin-app-shell[data-aside="true"] .svadmin-app-shell__body {
+    grid-template-columns: minmax(0, 1fr) minmax(0, var(--svadmin-shell-aside-w));
+  }
+
+  .svadmin-app-shell__skip {
+    position: fixed;
+    z-index: 60;
+    inset-block-start: var(--svadmin-space-2);
+    inset-inline-start: var(--svadmin-space-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--card);
+    padding: var(--svadmin-space-2) var(--svadmin-space-3);
+    color: var(--foreground);
+    font-size: var(--svadmin-text-caption);
+    font-weight: 600;
+    transform: translateY(calc(-1 * (var(--svadmin-space-6) + var(--svadmin-space-5))));
+  }
+  .svadmin-app-shell__skip:focus-visible {
+    transform: none;
+    outline: var(--svadmin-focus-width) solid var(--ring);
+    outline-offset: var(--svadmin-focus-offset);
+  }
+
+  .svadmin-app-shell__topbar {
+    grid-area: topbar;
+    display: flex;
+    align-items: center;
+    gap: var(--svadmin-space-3);
+    min-width: 0;
+    min-height: var(--svadmin-shell-topbar-h);
+    border-bottom: 1px solid var(--border);
+    background: var(--card);
+    padding-inline: var(--svadmin-shell-gutter);
+  }
+  .svadmin-app-shell__topbar-start,
+  .svadmin-app-shell__topbar-end {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    gap: var(--svadmin-space-2);
+  }
+  .svadmin-app-shell__topbar-main {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    min-width: 0;
+    gap: var(--svadmin-space-3);
+  }
+  .svadmin-app-shell__topbar-end {
+    flex: 0 0 auto;
+    justify-content: flex-end;
+  }
+
+  .svadmin-app-shell__sidebar {
+    grid-area: sidebar;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    border-inline-end: 1px solid var(--sidebar-border, var(--border));
+    background: var(--sidebar, var(--card));
+    color: var(--sidebar-foreground, var(--foreground));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .svadmin-app-shell__sidebar-inner {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: var(--svadmin-space-2);
+    min-width: 0;
+    padding: var(--svadmin-space-3) var(--svadmin-space-2);
+  }
+
+  .svadmin-app-shell__main {
+    grid-area: main;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+  }
+  .svadmin-app-shell__body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: var(--svadmin-section-gap);
+    width: 100%;
+    max-width: var(--svadmin-shell-max);
+    margin-inline: auto;
+    padding: var(--svadmin-shell-gutter);
+    min-width: 0;
+  }
+  .svadmin-app-shell__content {
+    display: grid;
+    gap: var(--svadmin-section-gap);
+    min-width: 0;
+  }
+  .svadmin-app-shell__aside {
+    display: grid;
+    gap: var(--svadmin-section-gap);
+    min-width: 0;
+  }
+
+  .svadmin-app-shell__footer {
+    grid-area: footer;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--svadmin-space-2);
+    width: 100%;
+    max-width: var(--svadmin-shell-max);
+    margin-inline: auto;
+    border-top: 1px solid var(--border);
+    padding: var(--svadmin-space-3) var(--svadmin-shell-gutter);
+    color: var(--muted-foreground);
+    font-size: var(--svadmin-text-caption);
+  }
+
+  /* The mobile navigation trigger only exists below the sidebar breakpoint. */
+  .svadmin-app-shell__mobile-toggle {
+    display: none;
+  }
+  .svadmin-app-shell__scrim {
+    display: none;
+  }
+
+  @media (max-width: 63.999rem) {
+    .svadmin-app-shell[data-sidebar="true"] {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas:
+        "topbar"
+        "main"
+        "footer";
+    }
+    .svadmin-app-shell[data-aside="true"] .svadmin-app-shell__body {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .svadmin-app-shell__mobile-toggle {
+      display: inline-flex;
+    }
+    .svadmin-app-shell__sidebar {
+      position: fixed;
+      z-index: 45;
+      inset-block: var(--svadmin-shell-topbar-h) 0;
+      inset-inline-start: 0;
+      width: var(--svadmin-shell-sidebar-w);
+      max-width: 85vw;
+      box-shadow: var(--shadow-overlay);
+      transform: translateX(-100%);
+      visibility: hidden;
+      transition: transform var(--svadmin-motion-standard) var(--svadmin-motion-easing), visibility var(--svadmin-motion-standard);
+    }
+    .svadmin-app-shell[data-mobile-open="true"] .svadmin-app-shell__sidebar {
+      transform: none;
+      visibility: visible;
+    }
+    .svadmin-app-shell[data-mobile-open="true"] .svadmin-app-shell__scrim {
+      display: block;
+      position: fixed;
+      z-index: 40;
+      inset: var(--svadmin-shell-topbar-h) 0 0;
+      border: 0;
+      background: var(--foreground);
+      opacity: 0.28;
+      cursor: pointer;
+    }
+  }
+
+  /* 窄视口下页面容器自己承担横向留白，外壳不再重复叠加。 */
+  @media (max-width: 40rem) {
+    .svadmin-app-shell {
+      --svadmin-shell-gutter: var(--svadmin-space-4);
+    }
+  }
+}

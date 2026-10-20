@@ -57,7 +57,7 @@ describe('AutoTable enterprise enhancements', () => {
     }));
   });
 
-  it('renders table toolbar with density switcher and refresh button', async () => {
+  it('renders table toolbar with refresh button', async () => {
     const view = render(AutoTableEnterpriseHarness, {
       viewMode: 'table',
       showHeader: true,
@@ -65,7 +65,6 @@ describe('AutoTable enterprise enhancements', () => {
 
     expect(await view.findByRole('heading', { level: 1, name: '用户管理' })).toBeTruthy();
     expect(await view.findByPlaceholderText('搜索...')).toBeTruthy();
-    expect(await view.findByRole('button', { name: '表格密度' })).toBeTruthy();
     expect(await view.findByRole('button', { name: '刷新' })).toBeTruthy();
     expect(await view.findByRole('button', { name: '列' })).toBeTruthy();
   });
@@ -81,7 +80,6 @@ describe('AutoTable enterprise enhancements', () => {
     });
     // Toolbar controls should still be present
     expect(await view.findByPlaceholderText('搜索...')).toBeTruthy();
-    expect(await view.findByRole('button', { name: '表格密度' })).toBeTruthy();
     expect(await view.findByRole('button', { name: '刷新' })).toBeTruthy();
   });
 
@@ -167,7 +165,6 @@ describe('AutoTable enterprise enhancements', () => {
       columns: 4,
       bordered: true,
       layout: 'horizontal',
-      density: 'compact',
     });
 
     expect(view.getByText('FA-2026-001')).toBeTruthy();

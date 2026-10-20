@@ -8,7 +8,18 @@ export const surfaceDesignContract = {
   table: {
     density: ['comfortable', 'compact'],
   },
+  pageFamilies: ['list', 'form', 'detail', 'workspace', 'dashboard'],
+  pageStates: ['ready', 'loading', 'empty', 'error', 'forbidden'],
+  composition: {
+    maxPrimaryActions: 1,
+    secondaryActions: 'overflow',
+    destructiveActions: 'confirm',
+    modalNesting: 0,
+  },
 } as const;
 
 export type SurfaceTone = typeof surfaceDesignContract.metric.tone[number];
+/** @deprecated Kept for source compatibility; product pages use one baseline rhythm. */
 export type SurfaceDensity = typeof surfaceDesignContract.metric.density[number];
+export type AdminPageFamily = typeof surfaceDesignContract.pageFamilies[number];
+export type AdminPageState = typeof surfaceDesignContract.pageStates[number];

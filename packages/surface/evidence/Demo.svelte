@@ -4,7 +4,6 @@
   import type { SurfaceRevision, SurfaceDataProvider, SurfaceSpec } from '@svadmin/surface';
   import type { BaseRecord, GetListResult, GetOneResult } from '@svadmin/core';
   import Draft from './Draft.svelte';
-  const density = new URLSearchParams(location.search).get('density') === 'compact' ? 'compact' : 'comfortable';
   const catalog = { version: 'evidence/v1', widgets: [...defaultSurfaceCatalog.widgets,
     { type: 'draft', dataKind: 'none' as const, propsSchema: Type.Object({ label: Type.String() }, { additionalProperties: false }), component: Draft },
   ] };
@@ -42,7 +41,7 @@
 </script>
 <main>
   <header><p>SVADMIN / SURFACE</p><h1>Review an AI-proposed change</h1><p>Read-only fixture · no model calls or business writes</p></header>
-  <SurfaceEditPreview {revision} {proposal} {streaming} {policy} {catalog} {dataProvider} {density} {onApply} locale="en" />
+  <SurfaceEditPreview {revision} {proposal} {streaming} {policy} {catalog} {dataProvider} {onApply} locale="en" />
   <aside>
     <span>Data queries: <output data-testid="query-count">{queries}</output></span>
     <span>Accepted edits: <output data-testid="apply-count">{applications}</output></span>

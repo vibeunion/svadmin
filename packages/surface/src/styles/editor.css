@@ -103,13 +103,9 @@
 }
 }
 
-  .svsurface-surface-editor--density_comfortable {
+  .svsurface-surface-editor {
     padding: var(--svsurface-spacing-lg);
-}
-
-  .svsurface-surface-editor--density_compact {
-    padding: var(--svsurface-spacing-md);
-}
+  }
 
   .svsurface-surface-editor-button--variant_secondary {
     background-color: var(--svsurface-colors-background);

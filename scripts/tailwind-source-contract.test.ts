@@ -1,13 +1,15 @@
 import { describe, expect, it } from 'bun:test';
 import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import postcss from 'postcss';
 
 const repositoryRoot = resolve(import.meta.dir, '..');
 function readRepositoryFile(path: string): string {
   return readFileSync(join(repositoryRoot, path), 'utf8');
 }
+// The live entry (not the hash-pinned design snapshot) owns the shipped preset.
 function readCleanFlatCss(): string {
-  const uiCss = readRepositoryFile('packages/ui/src/components.css');
+  const uiCss = readRepositoryFile('packages/ui/src/app.css');
   const marker = '/* --- Admin UI layout preset (clean-flat) --- */';
   const markerIndex = uiCss.indexOf(marker);
   expect(markerIndex).toBeGreaterThanOrEqual(0);
@@ -65,8 +67,18 @@ describe('@svadmin/ui native stylesheet contract', () => {
     expect(cleanFlatCss).toContain('background: var(--primary);');
     expect(cleanFlatCss).toContain('--svadmin-focus-ring: var(--ring);');
     expect(cleanFlatCss).toContain('--svadmin-border: var(--border);');
-    expect(cleanFlatCss).not.toMatch(/#[\da-f]{3,8}\b/i);
-    expect(cleanFlatCss).not.toMatch(/\b(?:rgb|rgba|hsl|hsla|oklab|oklch)\(/i);
+    // Literal palette values are allowed only as palette token definitions;
+    // every rule must consume tokens instead of inline colors.
+    const ruleColors: string[] = [];
+    postcss.parse(cleanFlatCss).walkRules((rule) => {
+      rule.walkDecls((decl) => {
+        if (decl.prop.startsWith('--')) return;
+        if (/#[\da-f]{3,8}\b|\b(?:rgba?|hsla?|oklab|oklch)\(/i.test(decl.value)) {
+          ruleColors.push(`${rule.selector}: ${decl.prop}`);
+        }
+      });
+    });
+    expect(ruleColors).toEqual([]);
     expect(cleanFlatCss).not.toContain('!important');
     expect(cleanFlatCss).not.toContain('[class*=');
     expect(cleanFlatCss).not.toContain(':has(');

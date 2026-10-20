@@ -13,7 +13,7 @@ const catalog = createInteractiveSurfaceDefinitions([action], defaultSurfaceDefi
 const policy = { resources: { contacts: { readFields: ['id', 'name'], maxPageSize: 10 } } };
 const program = 'root = Surface("contacts", "客户", [records], [count, form], "md")\n'
   + 'records = Source({"id":"records","type":"resource-list","resource":"contacts","pageSize":10})\n'
-  + 'count = Metric("count", {"label":"客户数量", "format":"number", "appearance":{"tone":"info","density":"compact"}}, {"sourceId":"records","pointer":"/total"}, 4)\n'
+  + 'count = Metric("count", {"label":"客户数量", "format":"number", "appearance":{"tone":"info"}}, {"sourceId":"records","pointer":"/total"}, 4)\n'
   + 'form = ResourceForm("form", {"actionId":"contacts.create"}, null, 8)\n';
 const make = () => createSurfaceOpenUIStream({ catalog, policy, createStreamingParser });
 let checks = 0;
@@ -35,7 +35,7 @@ const partial = make(); valid(partial.push(program.slice(0, program.lastIndexOf(
 assert.equal(partial.push('').preview.widgets.length, 1); checks++;
 assert.equal(partial.finish().ok, false); checks++;
 for (const text of [program + 'evil = Mutation("erase", {})\n', program.replace('"contacts","pageSize"', '"secrets","pageSize"'),
-  program.replace('"contacts.create"', '"admin.delete"'), program.replace('"density":"compact"', '"class":"raw"'),
+  program.replace('"contacts.create"', '"admin.delete"'), program.replace('"format":"number"', '"format":"number","class":"raw"'),
   program.slice(0, -5), program + 'unused = Source({"id":"x","type":"resource-list","resource":"contacts"})\n',
   'root = Surface("s","S",[],[Metric("m",{})])\n']) {
   const stream = make(); const pushed = stream.push(text); const result = pushed.ok ? stream.finish() : pushed;
@@ -52,7 +52,7 @@ const businessPolicy = { resources: {
 const businessProgram = 'root = Surface("contact", "Details and history", [person, events], [detail, timeline])\n'
   + 'person = Source({"id":"person","type":"resource-one","resource":"contacts","recordId":"c1"})\n'
   + 'events = Source({"id":"events","type":"resource-list","resource":"events","pageSize":10})\n'
-  + 'detail = ResourceDetail("detail", {"title":"Details","fields":[{"field":"name","label":"Name"}],"tone":"info","density":"compact"}, {"sourceId":"person","pointer":""}, 6)\n'
+  + 'detail = ResourceDetail("detail", {"title":"Details","fields":[{"field":"name","label":"Name"}],"tone":"info"}, {"sourceId":"person","pointer":""}, 6)\n'
   + 'timeline = ActivityFeed("timeline", {"title":"History","idField":"id","actionField":"action","timestampField":"at","actorField":"actor"}, {"sourceId":"events","pointer":"/items"}, 6)\n';
 const businessStream = () => createSurfaceOpenUIStream({ catalog: businessCatalog, policy: businessPolicy, createStreamingParser });
 const baseline = businessStream(); valid(baseline.push(businessProgram)); const businessExpected = baseline.finish(); valid(businessExpected);

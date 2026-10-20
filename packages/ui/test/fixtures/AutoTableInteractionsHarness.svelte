@@ -47,7 +47,6 @@
     includeSecondRecord?: boolean;
     emptyData?: boolean;
     onNotify?: NotificationProvider['open'];
-    density?: 'compact' | 'comfortable';
   }
 
   let {
@@ -83,7 +82,6 @@
     includeSecondRecord = false,
     emptyData = false,
     onNotify,
-    density = 'comfortable',
   }: Props = $props();
 
   const deletedIds = new SvelteSet<string>();
@@ -204,9 +202,9 @@
   {#if standaloneDetailId != null}
     <RecordDetailDrawer resourceName="users" open={true} recordId={standaloneDetailId} />
   {:else if customBatchAction}
-    <AutoTable {rendering} resourceName="users" {selectable} {density} {expandedRowRender} {batchActions} {syncWithLocation} {...definedOptions({ pagination, sorters })} />
+    <AutoTable {rendering} resourceName="users" {selectable} {expandedRowRender} {batchActions} {syncWithLocation} {...definedOptions({ pagination, sorters })} />
   {:else}
-    <AutoTable {rendering} resourceName="users" {selectable} {density} {expandedRowRender} {syncWithLocation} {...definedOptions({ pagination, sorters })} />
+    <AutoTable {rendering} resourceName="users" {selectable} {expandedRowRender} {syncWithLocation} {...definedOptions({ pagination, sorters })} />
   {/if}
 {/snippet}
 

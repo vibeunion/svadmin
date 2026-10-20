@@ -16,7 +16,6 @@
     clearLabel?: string;
     advancedLabel?: string;
     showSearch?: boolean;
-    density?: 'compact' | 'comfortable';
     activeFilterCount?: number;
     advancedOpen?: boolean;
     filters?: Snippet;
@@ -31,7 +30,6 @@
     clearLabel = 'Clear search',
     advancedLabel = 'Filters',
     showSearch = true,
-    density = 'compact',
     activeFilterCount = 0,
     advancedOpen = $bindable(false),
     filters,
@@ -40,7 +38,6 @@
     class: className = '',
   }: Props = $props();
 
-  const isCompact = $derived(density === 'compact');
   const advancedPanelId = `svadmin-filter-toolbar-advanced-${uid}`;
   const i18n = useTranslation();
   let mobile = $state(false);
@@ -53,7 +50,7 @@
   });
 </script>
 
-<div class={cn('svadmin-filter-toolbar', className)} data-density={density} data-svadmin-filter-toolbar data-advanced-open={advanced && advancedOpen ? 'true' : 'false'}>
+<div class={cn('svadmin-filter-toolbar', className)} data-svadmin-filter-toolbar data-advanced-open={advanced && advancedOpen ? 'true' : 'false'}>
   <div class="svadmin-filter-toolbar__row">
     {#if showSearch}
       <div class="svadmin-filter-toolbar__search">
@@ -86,7 +83,7 @@
     {#if advanced || (mobile && filters)}
       <Button
         variant={advancedOpen ? 'secondary' : 'outline'}
-        size={isCompact ? 'sm' : 'default'}
+        size="default"
         class="svadmin-filter-toolbar__toggle"
         onclick={() => advancedOpen = !advancedOpen}
         aria-expanded={advancedOpen}

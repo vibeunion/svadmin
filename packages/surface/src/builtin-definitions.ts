@@ -33,12 +33,12 @@ export const styledSurfaceDefinitions: SurfaceCatalog = {
   version: STYLED_SURFACE_CATALOG_VERSION,
   widgets: defaultSurfaceDefinitions.widgets.map((widget) => {
     if (widget.type === 'metric') return { ...widget, propsSchema: styledMetricPropsSchema,
-      description: 'Numeric KPI; tone and density select prebuilt semantic styles, never CSS.',
-      examples: [{ label: 'Pending orders', format: 'number', tone: 'warning', density: 'compact' }] };
+      description: 'Numeric KPI; tone selects prebuilt semantic styles, never CSS.',
+      examples: [{ label: 'Pending orders', format: 'number', tone: 'warning' }] };
     if (widget.type === 'resource-table') return { ...widget, propsSchema: styledResourceTablePropsSchema,
       getReferencedFields: (props: JsonObject) => Value.Decode(styledResourceTablePropsSchema, props).columns.map((column) => column.field),
-      description: 'Read-only table; density is a prebuilt semantic variant.',
-      examples: [{ title: 'Inventory', columns: [{ field: 'name', label: 'Name' }], density: 'compact' }] };
+      description: 'Read-only table; prebuilt semantic variants only, never raw CSS.',
+      examples: [{ title: 'Inventory', columns: [{ field: 'name', label: 'Name' }] }] };
     return widget;
   }),
 };

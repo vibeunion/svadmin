@@ -22,7 +22,7 @@ describe('opt-in styled Surface catalog', () => {
     const props = { label: 'Products', format: 'number' };
     expect(Value.Check(metricPropsSchema, props)).toBe(true);
     expect(validateSurfaceSpec(spec(defaultSurfaceCatalog.version, 'metric', props), defaultSurfaceCatalog, policy).ok).toBe(true);
-    const styled = { ...props, tone: 'warning', density: 'compact' };
+    const styled = { ...props, tone: 'warning' };
     expect(Value.Check(metricPropsSchema, styled)).toBe(false);
     expect(validateSurfaceSpec(spec(defaultSurfaceCatalog.version, 'metric', styled), defaultSurfaceCatalog, policy).ok).toBe(false);
     expect(validateSurfaceSpec(spec(styledSurfaceCatalog.version, 'metric', styled), defaultSurfaceCatalog, policy).ok).toBe(false);
@@ -30,11 +30,9 @@ describe('opt-in styled Surface catalog', () => {
 
   test('accepts every shared semantic enum without allowing arbitrary style data', () => {
     for (const tone of surfaceDesignContract.metric.tone) {
-      for (const density of surfaceDesignContract.metric.density) {
-        const props = { label: 'Products', format: 'number', tone, density };
-        expect(Value.Check(styledMetricPropsSchema, props)).toBe(true);
-        expect(validateSurfaceSpec(spec(styledSurfaceCatalog.version, 'metric', props), styledSurfaceCatalog, policy).ok).toBe(true);
-      }
+      const props = { label: 'Products', format: 'number', tone };
+      expect(Value.Check(styledMetricPropsSchema, props)).toBe(true);
+      expect(validateSurfaceSpec(spec(styledSurfaceCatalog.version, 'metric', props), styledSurfaceCatalog, policy).ok).toBe(true);
     }
     for (const extra of [{ tone: '#ff0000' }, { density: '12px' }, { class: 'hidden' }, { style: { display: 'none' } }, { recipe: 'anything' }]) {
       expect(Value.Check(styledMetricPropsSchema, { label: 'Products', format: 'number', ...extra })).toBe(false);
@@ -45,15 +43,13 @@ describe('opt-in styled Surface catalog', () => {
   });
 
   test('styled table fields still enforce the host read policy', () => {
-    for (const density of surfaceDesignContract.table.density) {
-      const props = { title: 'Products', columns: [{ field: 'name', label: 'Name' }], density };
-      expect(Value.Check(styledResourceTablePropsSchema, props)).toBe(true);
-      expect(validateSurfaceSpec(spec(styledSurfaceCatalog.version, 'resource-table', props), styledSurfaceCatalog, policy).ok).toBe(true);
-      const secret = { ...props, columns: [{ field: 'secret', label: 'Secret' }] };
-      const result = validateSurfaceSpec(spec(styledSurfaceCatalog.version, 'resource-table', secret), styledSurfaceCatalog, policy);
-      expect(result.ok).toBe(false);
-      if (!result.ok) expect(result.issues.some((issue) => issue.code === 'field_denied')).toBe(true);
-    }
+    const props = { title: 'Products', columns: [{ field: 'name', label: 'Name' }] };
+    expect(Value.Check(styledResourceTablePropsSchema, props)).toBe(true);
+    expect(validateSurfaceSpec(spec(styledSurfaceCatalog.version, 'resource-table', props), styledSurfaceCatalog, policy).ok).toBe(true);
+    const secret = { ...props, columns: [{ field: 'secret', label: 'Secret' }] };
+    const result = validateSurfaceSpec(spec(styledSurfaceCatalog.version, 'resource-table', secret), styledSurfaceCatalog, policy);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.issues.some((issue) => issue.code === 'field_denied')).toBe(true);
   });
 
   test('prompt generation uses public schemas and examples, not renderer or recipe source', () => {

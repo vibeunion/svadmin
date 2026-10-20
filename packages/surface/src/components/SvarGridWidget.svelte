@@ -31,7 +31,7 @@
     <p role="alert">{labels.tableInvalidData}</p>
   {:else}
     <SvarDataGrid {Grid} {Theme} {columns} items={records?.ok ? records.value : []}
-      primaryKey={config.rowKey ?? 'id'} height={config.height ?? 360} density={config.density ?? 'comfortable'}
+      primaryKey={config.rowKey ?? 'id'} height={config.height ?? 360}
       freezeLeft={config.freezeLeft ?? 0} freezeRight={config.freezeRight ?? 0}
       loading={data.status === 'loading'} label={config.title} {locale}
       scopeKey={`${host?.scopeKey ?? 0}:${widgetId}:${'sourceId' in data ? data.sourceId : ''}`}

@@ -50,9 +50,9 @@ a keyed render or invent a successful event. Backend order and timestamp text
 are preserved; the widget does not authenticate events or claim that an arbitrary
 activity resource is a trusted audit log. Missing actor is explicitly unknown.
 
-Both widgets select finite native tone/density props from the shared
+Both widgets select finite native tone props from the shared
 design contract and existing static semantic card/frame recipe. Internal
-ActivityFeed slots do not acquire a new density recipe in this change. Existing
+ActivityFeed slots do not acquire new frame variants in this change. Existing
 UI ActivityFeed defaults remain unchanged; optional header/count/empty text lets
 the wrapper use Surface-local language. New Surface message keys are optional to
 keep older host overrides source-compatible. Provider failures show a generic
@@ -60,7 +60,7 @@ localized message rather than raw backend diagnostics.
 
 ## Acceptance
 
-Added tests cover schema/manifest/prompt consistency, all tone/density pairs,
+Added tests cover schema/manifest/prompt consistency, all tone pairs,
 forbidden fields across every activity mapping, root-pointer restrictions,
 mandatory detail selectors, unreadable getters, false/zero, duplicate identity,
 escaped HTML-like text, missing actor and localized loading/empty/error states.

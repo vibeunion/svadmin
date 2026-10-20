@@ -151,13 +151,13 @@ try {
         assert.equal(await page.getByRole('button', { name: 'Disabled action' }).isDisabled(), true);
         assert.equal(await page.locator('article[aria-busy="true"]').count(), 1);
         assert.equal(await page.getByRole('alert').count(), 2);
-        const compactPadding = await page.locator('[data-surface-tone="success"] .svadmin-stats-card').first().evaluate((el) => getComputedStyle(el).paddingTop);
-        assert.equal(compactPadding, '12px');
-        const normalPadding = await page.locator('[data-surface-tone="neutral"] .svadmin-stats-card').first().evaluate((el) => getComputedStyle(el).paddingTop);
-        assert.equal(normalPadding, '20px');
-        const tableCell = page.locator('[data-surface-density="compact"] [data-slot="table-cell"]').first();
-        assert.equal(await tableCell.evaluate((el) => getComputedStyle(el).paddingTop), '4px');
-        assert.equal(await tableCell.evaluate((el) => getComputedStyle(el).fontSize), '12px');
+        const metricPadding = await page.locator('[data-surface-tone="success"] .svadmin-stats-card').first().evaluate((el) => getComputedStyle(el).paddingTop);
+        assert.equal(metricPadding, '20px');
+        const neutralPadding = await page.locator('[data-surface-tone="neutral"] .svadmin-stats-card').first().evaluate((el) => getComputedStyle(el).paddingTop);
+        assert.equal(neutralPadding, '20px');
+        const tableCell = page.locator('.svadmin-surface-table__cell[data-slot="table-cell"]').first();
+        assert.equal(await tableCell.evaluate((el) => getComputedStyle(el).paddingTop), '8px');
+        assert.equal(await tableCell.evaluate((el) => getComputedStyle(el).fontSize), '14px');
         const metricState = page.locator('#state-error-label').locator('..').locator('[role="alert"]');
         const stateStyle = await metricState.evaluate((el) => {
           const style = getComputedStyle(el);
@@ -170,8 +170,8 @@ try {
         });
         assert.equal(stateStyle.width, '3px');
         assert.equal(stateStyle.color, stateStyle.expected);
-        assert.equal(stateStyle.padding, '12px');
-        assert.equal(stateStyle.height, '72px');
+        assert.equal(stateStyle.padding, '20px');
+        assert.equal(stateStyle.height, '96px');
         const nested = page.getByRole('region', { name: 'Nested theme' }).locator('.svadmin-stats-card');
         const nestedStyle = await nested.evaluate((el) => {
           const probe = document.createElement('span');

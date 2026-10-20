@@ -29,7 +29,6 @@
     rendering?: ResourceRendering | undefined;
     id?: string | number;
     mode?: 'create' | 'edit' | 'clone' | 'show';
-    density?: 'compact' | 'comfortable';
     columns?: 1 | 2 | 3 | 4;
     showHeader?: boolean;
     fieldRenderer?: Snippet<[{ field: FieldDefinition; value: unknown; onchange: (v: unknown) => void }]>;
@@ -47,7 +46,6 @@
     rendering,
     id,
     mode = 'create',
-    density = 'comfortable',
     columns = 1,
     showHeader = true,
     fieldRenderer,
@@ -64,7 +62,6 @@
   const binding = useResourceContract(() => resourceName);
   const activeRendering = $derived(bindResourceRendering(rendering, binding.resource));
   const isReadonly = $derived(mode === 'show');
-  const isCompact = $derived(density === 'compact');
   const instanceId = $props.id();
 
   // ─── Resource metadata ────────────────────────────────────────────
@@ -315,7 +312,7 @@
   });
 </script>
 
-<div class={isCompact ? 'svadmin-u-3e7ce58d64fa' : 'svadmin-u-b3542e058833'} data-svadmin-rendering-resource={activeRendering?.resource.name} data-svadmin-rendering-kind={activeRendering ? 'form' : undefined}>
+<div class="svadmin-u-b3542e058833" data-svadmin-rendering-resource={activeRendering?.resource.name} data-svadmin-rendering-kind={activeRendering ? 'form' : undefined}>
   {#if showHeader}
     <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-0c3bc98565dd">
       <TooltipButton
@@ -378,11 +375,11 @@
         {#each groups as group, _i (_i)}
           <Card.Root class="svadmin-u-6ee2d41e2d2d svadmin-u-438b2237b8d6">
             {#if group.name}
-              <Card.Header class={isCompact ? 'svadmin-u-f0faeb26d656 svadmin-u-1b2d54a3fd12' : ''}>
+              <Card.Header>
                 <Card.Title class="svadmin-u-42536e69e639">{group.name}</Card.Title>
               </Card.Header>
             {/if}
-            <Card.Content class={isCompact ? 'svadmin-u-f0faeb26d656 svadmin-u-9fcd8a13827e svadmin-u-9335c39f6eff' : 'svadmin-u-f0faeb26d656 svadmin-u-7a9aabfcd059 svadmin-u-9fcd8a13827e svadmin-u-050494726fba svadmin-u-9335c39f6eff'}>
+            <Card.Content class="svadmin-u-f0faeb26d656 svadmin-u-7a9aabfcd059 svadmin-u-9fcd8a13827e svadmin-u-050494726fba svadmin-u-9335c39f6eff">
               <div class={gridClass}>
                 {#each group.fields as field (field.key)}
                   <div data-svadmin-field-key={field.key} class={cn(columns > 1 && isFullWidthField(field) && 'svadmin-u-2c955d1b45df', !!form.errors[field.key] && 'svadmin-u-ee1a5af3aa10')}>
@@ -393,7 +390,6 @@
                         {field}
                         value={renderedDraft.values[field.key]}
                         onchange={fieldChange(field.key)}
-                        {density}
                         invalid={!!form.errors[field.key]}
                         {...definedOptions({ "errorId": form.errors[field.key] ? fieldErrorId(field.key) : undefined })}
                         disabled={isReadonly}
@@ -410,8 +406,8 @@
         {/each}
       {:else}
         <Card.Root class="svadmin-u-6ee2d41e2d2d svadmin-u-438b2237b8d6">
-          <Card.Content class={isCompact ? 'svadmin-u-8e63407b5ceb' : 'svadmin-u-f0faeb26d656 svadmin-u-52be28846b5f svadmin-u-9fcd8a13827e svadmin-u-7a9aabfcd059 svadmin-u-0a58453f3755 svadmin-u-050494726fba'}>
-              <div class={gridClass} data-svadmin-form-grid data-columns={columns} data-density={density}>
+          <Card.Content class="svadmin-u-f0faeb26d656 svadmin-u-52be28846b5f svadmin-u-9fcd8a13827e svadmin-u-7a9aabfcd059 svadmin-u-0a58453f3755 svadmin-u-050494726fba">
+              <div class={gridClass} data-svadmin-form-grid data-columns={columns}>
               {#each formFields as field (field.key)}
                 <div data-svadmin-field-key={field.key} class={cn(columns > 1 && isFullWidthField(field) && 'svadmin-u-2c955d1b45df', !!form.errors[field.key] && 'svadmin-u-ee1a5af3aa10')}>
                   {#if fieldRenderer}
@@ -421,7 +417,6 @@
                     {field}
                     value={renderedDraft.values[field.key]}
                     onchange={fieldChange(field.key)}
-                    {density}
                     invalid={!!form.errors[field.key]}
                       {...definedOptions({ "errorId": form.errors[field.key] ? fieldErrorId(field.key) : undefined })}
                       disabled={isReadonly}
@@ -441,7 +436,7 @@
         {#if formActions && !isReadonly}
           {@render formActions({ isLoading: form.submitting, onSubmit: handleSubmit })}
         {:else if !isReadonly}
-          <Button type="submit" size={isCompact ? 'sm' : 'default'} disabled={form.submitting}>
+          <Button type="submit" size="default" disabled={form.submitting}>
             {#if form.submitting}
               <Loader2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-afbdd13a380e" data-icon="inline-start" aria-hidden="true" />
             {:else}
@@ -452,7 +447,7 @@
           <Button
             type="button"
             variant="outline"
-            size={isCompact ? 'sm' : 'default'}
+            size="default"
             onclick={back}
           >
             {i18n.t('common.cancel')}

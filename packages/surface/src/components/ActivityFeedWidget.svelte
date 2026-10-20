@@ -10,15 +10,14 @@
   let { props, data, locale = 'en-US', messages }: SurfaceWidgetRendererProps = $props();
   const baseProps = $derived(Object.fromEntries(Object.entries(props).filter(([key]) => key !== 'appearance')));
   const p = $derived(Value.Decode(activityFeedPropsSchema, baseProps));
-  const appearance = $derived(typeof props['appearance'] === 'object' && props['appearance'] !== null ? props['appearance'] as { tone?: typeof p.tone; density?: typeof p.density } : undefined);
+  const appearance = $derived(typeof props['appearance'] === 'object' && props['appearance'] !== null ? props['appearance'] as { tone?: typeof p.tone } : undefined);
   const tone = $derived(appearance?.tone ?? p.tone ?? 'neutral');
-  const density = $derived(appearance?.density ?? p.density ?? 'comfortable');
-  const classes = $derived(surfaceMetric({ tone, density }));
+  const classes = $derived(surfaceMetric({ tone }));
   const text = $derived(resolveSurfaceMessages(locale, messages));
   const activities = $derived(data.status === 'ready' ? asSurfaceActivities(data.value, p, text.activityUnknownActor) : null);
 </script>
 
-<section class={classes.root + ' ' + classes.card} aria-label={p.title} data-surface-business="activity-feed" data-surface-density={density}>
+<section class={classes.root + ' ' + classes.card} aria-label={p.title} data-surface-business="activity-feed">
   {#if data.status === 'loading'}
     <p role="status">{text.activityLoading}</p>
   {:else if data.status === 'empty'}

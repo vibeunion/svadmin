@@ -98,6 +98,7 @@ export default defineConfig({
           translations: { 'zh-CN': '组件' },
           items: [
             { slug: 'components/crud-pages' },
+            { slug: 'components/app-shell' },
             { slug: 'components/content-components' },
             { slug: 'components/buttons' },
             { slug: 'components/autosave' },

@@ -62,7 +62,7 @@ describe('SurfaceEditPreview', () => {
     expect(revision.revision).toBe(2);
   });
   test('supports local labels and refuses to apply without a trusted host handler', () => {
-    render(SurfaceEditPreview, { revision, proposal, policy, catalog, locale: 'zh-CN', density: 'compact' });
+    render(SurfaceEditPreview, { revision, proposal, policy, catalog, locale: 'zh-CN' });
     expect(screen.getByRole('button', { name: '确认应用' }).hasAttribute('disabled')).toBe(true);
     expect(screen.getByRole('heading', { name: '界面修改提案' })).not.toBeNull();
   });

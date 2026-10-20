@@ -56,7 +56,6 @@ import { definedOptions } from '@svadmin/core/options';
   let principleFilter = $state('');
   type ViewState = 'loading' | 'empty' | 'error' | 'forbidden';
   let viewState = $state<ViewState>('empty');
-  let compact = $state(false);
   let showWarning = $state(true);
   let demoVisibility = $state<'personal' | 'team'>('team');
   let demoLabels = $state<string[]>(['review']);
@@ -143,7 +142,7 @@ import { definedOptions } from '@svadmin/core/options';
       icon: Layers3,
       title: isZh ? '契约一致' : 'Consistent by contract',
       summary: isZh ? '组件、状态、页面骨架和反馈生命周期保持稳定。' : 'Components, states, page shells, and feedback lifecycles stay stable.',
-      rule: isZh ? '布局 preset 只能改变密度和构图，不能改变语义。' : 'Layout presets change density, never interaction meaning.',
+      rule: isZh ? '布局 preset 只能改变构图，不能改变语义。' : 'Layout presets change composition, never interaction meaning.',
     },
     {
       id: 'trust',
@@ -245,7 +244,7 @@ import { definedOptions } from '@svadmin/core/options';
 {/snippet}
 
 <div data-resource-name={resourceName}>
-<ContentPageShell pageId="design-principles" width="wide" class={compact ? 'text-sm' : ''}>
+<ContentPageShell pageId="design-principles" width="wide">
   <ContentPageHeader
     eyebrow={isZh ? 'svadmin 设计系统' : 'svadmin design system'}
     title={isZh ? '核心设计原则' : 'Core design principles'}
@@ -306,7 +305,7 @@ import { definedOptions } from '@svadmin/core/options';
           description={isZh ? '滚动时保留操作列，并同步悬停和选中状态。' : 'Keep actions visible while scrolling and synchronize hover and selected states.'}
         />
         <div class="overflow-x-auto rounded-lg border border-border">
-          <Table.Root class="min-w-[64rem]" density="compact">
+          <Table.Root class="min-w-[64rem]">
             <Table.Header>
               <Table.Row>
                 <Table.Head>{isZh ? '工作项' : 'Work item'}</Table.Head>
@@ -363,11 +362,6 @@ import { definedOptions } from '@svadmin/core/options';
               </div>
             {/snippet}
           </FilterToolbar>
-        {/snippet}
-        {#snippet trailing()}
-          <Button variant={compact ? 'default' : 'outline'} size="sm" onclick={() => compact = !compact}>
-            {compact ? (isZh ? '标准密度' : 'Standard density') : (isZh ? '紧凑密度' : 'Compact density')}
-          </Button>
         {/snippet}
       </PageToolbar>
 

@@ -27,7 +27,7 @@
         <details><summary>{state.locale.startsWith('zh') ? '表格选择与列顺序' : 'Selection and column order'}</summary>{@render state.controls()}</details>
         <SvarDataGrid {Grid} {Theme} items={state.records} columns={state.columns} primaryKey={state.primaryKey}
           {height} freezeLeft={Math.min(freezeLeft, state.columns.length - Math.min(freezeRight, state.columns.length - 1))}
-          freezeRight={Math.min(freezeRight, state.columns.length - 1)} density={state.density}
+          freezeRight={Math.min(freezeRight, state.columns.length - 1)}
           queryMode="server" sorters={state.sorters} onSortChange={state.onSortChange}
           disabled={state.disabled} scopeKey={state.scopeKey} locale={state.locale} label={state.label}>
           {#snippet cellContent({ id, field })}{@render state.cell({ id, field })}{/snippet}

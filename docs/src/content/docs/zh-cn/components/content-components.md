@@ -10,17 +10,15 @@ description: Admin UI 页面组合、指标、工具栏、状态和数据状态
 使用 `ContentPageShell` 负责宽度和间距，再加入一个
 `ContentPageHeader`，并按真实任务划分 Section。
 
-两个组件都支持 `density="comfortable"`（默认）和
-`density="compact"`。需要高频扫描的运营页面使用 `compact`；独立使用
-`ContentPageHeader` 时传入相同密度，保证标题节奏与页面内容一致。
+两个组件使用统一的舒适节奏，保证自定义页面与内置页面族一致；不再提供密度修饰符。
 
-Shell 提供 `data-svadmin-content-page`、
-`data-svadmin-content-page-width` 和 `data-density`；Header 提供
+Shell 提供 `data-svadmin-content-page` 和
+`data-svadmin-content-page-width`；Header 提供
 `data-svadmin-content-header`，同时保留 `data-svadmin-page-header` 兼容现有集成。
 
 ```svelte
-<ContentPageShell pageId="access-review" width="wide" density="compact">
-  <ContentPageHeader density="compact" title="访问审查" description="批准前处理仍未解决的访问项。" />
+<ContentPageShell pageId="access-review" width="wide">
+  <ContentPageHeader title="访问审查" description="批准前处理仍未解决的访问项。" />
   <SectionHeader id="exceptions" title="例外项" />
   <!-- 主工作区 -->
 </ContentPageShell>
@@ -52,6 +50,36 @@ Shell 提供 `data-svadmin-content-page`、
 </PageToolbar>
 ```
 
+## 数据面板
+
+`DataPanel` 是承载单个数据集的带标题容器：表格、列表或表单区块。用它替代手写的
+card，面板圆角、内边距和标题节奏才能共用尺寸 token。表格或列表需要贴边时用
+`padding="none"`，密集侧栏用 `padding="compact"`。
+
+```svelte
+<DataPanel title="委托单明细" description="审核通过后自动归档">
+  {#snippet actions()}
+    <Button variant="outline" size="sm">导出</Button>
+  {/snippet}
+  <AutoTable resource="orders" />
+  {#snippet footer()}<span>共 12 条</span>{/snippet}
+</DataPanel>
+```
+
+| 属性 | 类型 | 默认值 | 用途 |
+| --- | --- | --- | --- |
+| `title` / `description` | `string` | — | 标题；不传 `title` 时整块头区省略，面板不再有可访问名称。 |
+| `actions` | `Snippet` | — | 头区操作。 |
+| `children` | `Snippet` | — | 面板主体。 |
+| `footer` | `Snippet` | — | 带顶部边框的页脚区。 |
+| `padding` | `'default' \| 'compact' \| 'none'` | `'default'` | 主体内边距；`none` 让表格贴住面板边缘。 |
+| `headingLevel` | `'h2' \| 'h3'` | `'h2'` | 标题层级，嵌套时保持大纲顺序。 |
+
+`PageHeader`、`FilterToolbar`、`DataPanel` 全部读取尺寸 token
+（`--svadmin-control-h`、`--svadmin-space-*`、`--svadmin-text-*`、
+`--svadmin-measure`）。需要更高的企业表单密度时，宿主只覆盖一次
+`--svadmin-control-h`，不存在按组件的高度覆盖。
+
 ## 数据状态
 
 加载、空、可恢复错误和权限状态应复用同一个 `DataState` 位置，避免页面在
@@ -70,3 +98,26 @@ Shell 提供 `data-svadmin-content-page`、
 
 未解决的部分结果或阻塞上下文使用 `FeedbackNotice`。普通成功使用 Toast，
 不能使用持久 success banner。
+
+## 标准页面状态
+
+对于不属于资源 CRUD 路由的业务页面，使用 `PagePattern`。它提供统一的
+页面骨架和状态合同：
+
+```svelte
+<PagePattern
+  kind="list"
+  title="项目"
+  state={loading ? 'loading' : error ? 'error' : rows.length === 0 ? 'empty' : 'ready'}
+  retry={load}
+>
+  {#snippet children()}
+    <NetworkTable rows={rows} columns={columns} />
+  {/snippet}
+</PagePattern>
+```
+
+支持 `ready`、`loading`、`empty`、`error`、`forbidden` 五种状态。非
+`ready` 状态下不会继续渲染看似最新的页面内容；共享状态组件统一负责加载、
+空数据、重试和无权访问反馈。只有在确实存在下一步操作时才使用
+`stateAction`，不要重新创建页面壳层或另一套错误/空状态组件。
