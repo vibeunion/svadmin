@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.11.5](https://github.com/vibeunion/svadmin/compare/appwrite-v0.11.4...appwrite-v0.11.5) (2026-10-19)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.12.5
+  * peerDependencies
+    * @svadmin/core bumped to 0.61.0
+
 ## [0.11.4](https://github.com/vibeunion/svadmin/compare/appwrite-v0.11.3...appwrite-v0.11.4) (2026-10-10)
 
 

@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.84.0](https://github.com/vibeunion/svadmin/compare/ui-v0.83.2...ui-v0.84.0) (2026-10-19)
+
+
+### 🚀 Features
+
+* generate product workspace from product plans ([501ae2a](https://github.com/vibeunion/svadmin/commit/501ae2a2acd1ac7bb610e1c358797f38bc43faa4))
+* generate product workspace from product plans ([501ae2a](https://github.com/vibeunion/svadmin/commit/501ae2a2acd1ac7bb610e1c358797f38bc43faa4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.3.1
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.11.2
+  * peerDependencies
+    * @svadmin/core bumped to 0.61.0
+
 ## [0.83.2](https://github.com/vibeunion/svadmin/compare/ui-v0.83.1...ui-v0.83.2) (2026-10-19)
 
 
