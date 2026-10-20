@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.85.0](https://github.com/vibeunion/svadmin/compare/ui-v0.84.1...ui-v0.85.0) (2026-10-20)
+
+
+### 🚀 Features
+
+* **ui:** expose auth shell brand hooks ([#508](https://github.com/vibeunion/svadmin/issues/508)) ([8c6afcf](https://github.com/vibeunion/svadmin/commit/8c6afcfcb28bff3cff35d8a1ade6ce8891e80e86))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** keep layout skip link hidden until focus ([#506](https://github.com/vibeunion/svadmin/issues/506)) ([cfc8800](https://github.com/vibeunion/svadmin/commit/cfc8800a87ff2d12cc4536eaf60f8da7fa274923))
+
 ## [0.84.1](https://github.com/vibeunion/svadmin/compare/ui-v0.84.0...ui-v0.84.1) (2026-10-20)
 
 
