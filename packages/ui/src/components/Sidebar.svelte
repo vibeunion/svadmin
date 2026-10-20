@@ -347,7 +347,7 @@
           openGroups = next;
         }}>
           <Collapsible.Trigger
-            class="svadmin-u-60fbb7713999 svadmin-u-6da6a3c3f741 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-7597e11b4d4b svadmin-u-a139beb4e318 svadmin-u-0ab8667228fd svadmin-u-506a96403942 svadmin-u-b486a1ee45b0 svadmin-u-e83a7042bc91 svadmin-u-064e4b9e19c3 uppercase svadmin-u-5f1ff8fe8768 svadmin-u-71357b4a2f24 svadmin-u-ceb69a6b0e5f"
+            class="svadmin-collapsible-trigger svadmin-u-60fbb7713999 svadmin-u-6da6a3c3f741 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-7597e11b4d4b svadmin-u-a139beb4e318 svadmin-u-0ab8667228fd svadmin-u-506a96403942 svadmin-u-b486a1ee45b0 svadmin-u-e83a7042bc91 svadmin-u-064e4b9e19c3 uppercase svadmin-u-5f1ff8fe8768 svadmin-u-71357b4a2f24 svadmin-u-ceb69a6b0e5f"
           >
             <span>{group.name}</span>
             <ChevronDown class="svadmin-u-6a60c09e6aaa svadmin-u-9cea05671a29 svadmin-u-eadef238231e svadmin-u-625a4c3fbeb2 {openGroups.has(group.name) ? 'svadmin-u-3350916b3513' : ''}" />
