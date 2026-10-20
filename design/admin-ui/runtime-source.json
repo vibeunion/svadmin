@@ -6,9 +6,9 @@
   "basedOnRecipeSource": "packages/ui/design/primitive-recipes.ts",
   "basedOnStylesheetBlob": "149f55f3782470ec6a1c942917c09510bd55320a",
   "recipeSource": "packages/ui/src/recipes.ts",
-  "recipeBlob": "02b2373f90f8f13e319285ffdaadd37a461ab5b1",
+  "recipeBlob": "597d44857b2a10b3c90734a5b38f801162799d43",
   "stylesheet": "packages/ui/src/components.css",
-  "stylesheetBlob": "933b639b6bd9fe991a97f0d38e80fb84c414f794",
+  "stylesheetBlob": "866f61e8d5ef90e47a8ab7e85e8061cb074bb632",
   "figmaSynchronized": false,
-  "review": "2026-09-23 source-contract inspection after the density/layout contract repair: current primitive/product recipe exports remain in packages/ui/src/recipes.ts (tailwind-variants), now pinned to the reviewed 02b2373f90f8f13e319285ffdaadd37a461ab5b1 blob. components.css differs from the Figma baseline by sidebar sizing/RTL rules and subsequent comment-only naming cleanup; extracted Light/Dark color roles are unchanged. 2026-10-20 collapsible chrome density updated the stylesheet blob without changing those color roles. The stylesheet blob records the inspected working-tree content, not a new committed revision. This records source hashes, not visual approval, browser parity, or Figma synchronization. The 17 dimensions remain the historical baseline, not newly certified runtime recipe geometry."
+  "review": "2026-09-23 source-contract inspection after the density/layout contract repair: current primitive/product recipe exports remain in packages/ui/src/recipes.ts (tailwind-variants), now pinned to the reviewed 02b2373f90f8f13e319285ffdaadd37a461ab5b1 blob. components.css differs from the Figma baseline by sidebar sizing/RTL rules and subsequent comment-only naming cleanup; extracted Light/Dark color roles are unchanged. 2026-10-20 unified the page/token baseline, restored compact table compatibility, and updated the stylesheet and recipe blobs after review without changing those color roles. The blobs record inspected working-tree content, not a new committed revision. This records source hashes, not visual approval, browser parity, or Figma synchronization. The 17 dimensions remain the historical baseline, not newly certified runtime recipe geometry."
 }
