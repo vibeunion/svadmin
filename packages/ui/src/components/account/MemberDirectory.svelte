@@ -20,7 +20,7 @@
   import { Input } from '../ui/input/index.js';
   import DataState from '../content/DataState.svelte';
   import FeedbackNotice from '../content/FeedbackNotice.svelte';
-  import { Copy, Send } from '@lucide/svelte';
+  import { Copy, Send, X } from '@lucide/svelte';
 
   let { provider }: { provider?: MemberDirectoryProvider | undefined } = $props();
   const context = captureAdminContext();
@@ -29,6 +29,7 @@
   const controlId = $props.id();
   let rows = $state<DirectoryMember[]>([]);
   let query = $state('');
+  let searchInput = $state<HTMLInputElement | null>(null);
   let email = $state('');
   let loading = $state(false);
   let sending = $state(false);
@@ -37,6 +38,10 @@
   let status = $state('');
   let epoch = 0;
   const filtered = $derived(rows.filter(row => `${row.name} ${row.email}`.toLowerCase().includes(query.toLowerCase())));
+  function clearSearch(): void {
+    query = '';
+    searchInput?.focus();
+  }
   async function load() {
     const current = provider;
     const request = ++epoch;
@@ -117,12 +122,18 @@
   {:else}
     <div class="w-full max-w-sm space-y-2">
       <label for={`${controlId}-search`} class="block text-sm font-medium text-foreground">{isZh ? '搜索成员' : 'Search members'}</label>
-      <Input id={`${controlId}-search`} type="search" bind:value={query} />
+      <Input id={`${controlId}-search`} type="search" bind:value={query} bind:ref={searchInput} />
     </div>
     {#if rows.length === 0}
       <DataState state="empty" title={isZh ? '暂无成员' : 'No members yet'} />
     {:else if filtered.length === 0}
-      <DataState state="filtered-empty" title={isZh ? '没有匹配的成员' : 'No matching members'} description={isZh ? '请清除或调整搜索条件。' : 'Clear or adjust the search.'} />
+      <DataState state="filtered-empty" title={isZh ? '没有匹配的成员' : 'No matching members'} description={isZh ? '请清除或调整搜索条件。' : 'Clear or adjust the search.'}>
+        {#snippet action()}
+          <Button type="button" variant="outline" size="sm" onclick={clearSearch}>
+            <X size={16} aria-hidden="true" />{isZh ? '清除搜索' : 'Clear search'}
+          </Button>
+        {/snippet}
+      </DataState>
     {:else}
       <!-- svelte-ignore a11y_no_noninteractive_tabindex (横向滚动区域需支持键盘聚焦与滚动) -->
       <div class="member-directory-scroll w-full min-w-0 overflow-x-auto" role="region" aria-label={isZh ? '成员目录' : 'Member directory'} tabindex="0">
