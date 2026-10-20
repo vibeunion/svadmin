@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { badgeRecipe, buttonRecipe, describeRecipe } from './recipes';
+import {
+  badgeRecipe,
+  buttonRecipe,
+  contentHeaderRecipe,
+  contentPageRecipe,
+  describeRecipe,
+  surfaceMetricRecipe,
+  surfaceTableRecipe,
+} from './recipes';
 import { badgeVariants } from './components/ui/badge/badge-variants';
 import { buttonVariants } from './components/ui/button/button-variants';
 
@@ -45,9 +53,20 @@ describe('primitive recipe defaults', () => {
     expect(describeRecipe('badgeRecipe').slots).toEqual(['root']);
     expect(describeRecipe('textareaRecipe').slots).toEqual(['root']);
     expect(describeRecipe('contentHeaderRecipe').slots).toContain('heading');
-    expect(describeRecipe('contentPageRecipe').defaults).toEqual({ width: 'default' });
-    expect(describeRecipe('contentHeaderRecipe').defaults).toEqual({});
+    expect(describeRecipe('contentPageRecipe').defaults).toEqual({ width: 'default', density: 'comfortable' });
+    expect(describeRecipe('contentHeaderRecipe').defaults).toEqual({ density: 'comfortable' });
+    expect(describeRecipe('contentPageRecipe').variants.density).toEqual(['compact', 'comfortable']);
+    expect(describeRecipe('contentHeaderRecipe').variants.density).toEqual(['compact', 'comfortable']);
+    expect(describeRecipe('surfaceMetricRecipe').variants.density).toEqual(['compact', 'comfortable']);
+    expect(describeRecipe('surfaceTableRecipe').variants.density).toEqual(['compact', 'comfortable']);
     expect(describeRecipe('badgeRecipe').variants['variant']).toContain('subtle-success');
     expect(describeRecipe('productWorkspaceRecipe').defaults).toEqual({ hasSecondary: false });
+  });
+
+  it('keeps compact recipe calls source-compatible', () => {
+    expect(contentPageRecipe({ density: 'compact' }).root).toContain('space-y-4');
+    expect(contentHeaderRecipe({ density: 'compact' }).title).toContain('text-[length:var(--svadmin-text-section)]');
+    expect(surfaceMetricRecipe({ density: 'compact' }).card).toContain('p-3');
+    expect(surfaceTableRecipe({ density: 'compact' }).state).toContain('6rem');
   });
 });
