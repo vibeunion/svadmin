@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.61.1](https://github.com/vibeunion/svadmin/compare/core-v0.61.0...core-v0.61.1) (2026-10-20)
+
+
+### 🐛 Bug Fixes
+
+* validate product references and render surface states ([eb14247](https://github.com/vibeunion/svadmin/commit/eb1424748c30589be4e03b5fee0dab8dc69f99d0))
+* validate product references and render surface states ([eb14247](https://github.com/vibeunion/svadmin/commit/eb1424748c30589be4e03b5fee0dab8dc69f99d0))
+
 ## [0.61.0](https://github.com/vibeunion/svadmin/compare/core-v0.60.0...core-v0.61.0) (2026-10-19)
 
 

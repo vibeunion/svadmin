@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.41.1](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.41.0...create-svadmin-v0.41.1) (2026-10-20)
+
+
+### 🐛 Bug Fixes
+
+* validate product references and render surface states ([eb14247](https://github.com/vibeunion/svadmin/commit/eb1424748c30589be4e03b5fee0dab8dc69f99d0))
+* validate product references and render surface states ([eb14247](https://github.com/vibeunion/svadmin/commit/eb1424748c30589be4e03b5fee0dab8dc69f99d0))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @svadmin/core bumped to 0.61.1
+
 ## [0.41.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.40.3...create-svadmin-v0.41.0) (2026-10-19)
 
 
