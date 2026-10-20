@@ -27,8 +27,16 @@ export function buildProductPagePlan(surface: ProductSurface, plan: ProductPlan)
     .filter(id => id !== surface.primaryActionId)
     .map(id => actionById.get(id))
     .filter((action): action is ProductAction => action !== undefined);
+  // ProductSurface currently declares section titles separately from its
+  // resource list. Keep resource declarations in one section until the plan
+  // schema can express per-section ownership; repeating every resource in
+  // every section makes generated pages look like duplicate data.
   const sections = surface.sections.length
-    ? surface.sections.map((title, index) => ({ id: `${surface.id}.section.${index + 1}`, title, resourceIds: surface.resourceIds }))
+    ? surface.sections.map((title, index) => ({
+      id: `${surface.id}.section.${index + 1}`,
+      title,
+      resourceIds: index === 0 ? surface.resourceIds : [],
+    }))
     : [{ id: `${surface.id}.content`, title: surface.name, resourceIds: surface.resourceIds }];
   return {
     id: surface.id,

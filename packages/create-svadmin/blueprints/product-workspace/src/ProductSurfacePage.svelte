@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { ProductPagePlan } from '@svadmin/core/product-pages';
   import { productPagePlans, productSurfaceRoutes } from './generated/pages';
 
   interface Props {
@@ -6,8 +7,24 @@
     params: Record<string, string | undefined>;
   }
 
+  type SurfaceState = ProductPagePlan['states'][number];
+  const stateByScenario: Record<string, SurfaceState | undefined> = {
+    empty: 'empty',
+    loading: 'loading',
+    error: 'error',
+    denied: 'forbidden',
+  };
+
   let { route }: Props = $props();
   const page = $derived(productPagePlans.find(candidate => productSurfaceRoutes[route] === candidate.id));
+  const requestedScenario = typeof location !== 'undefined'
+    ? new URLSearchParams(location.search).get('scenario') ?? 'normal'
+    : 'normal';
+  const scenarioState = $derived.by(() => {
+    const candidate = page;
+    const state = stateByScenario[requestedScenario];
+    return candidate && state !== undefined && candidate.states.includes(state) ? state : undefined;
+  });
 </script>
 
 <svelte:head>
@@ -33,31 +50,53 @@
       {/each}
     </div>
 
-    <div class="surface-grid">
-      {#each page.sections as section (section.id)}
-        <section class="surface-card">
-          <div class="card-heading">
-            <h2>{section.title}</h2>
-            <span>区块</span>
-          </div>
-          <p>此区块服务于当前工作流，并展示产品计划声明的资源。</p>
-          {#if section.resourceIds.length}
-            <div class="resource-list">
-              {#each section.resourceIds as resourceId (resourceId)}
-                <span>{resourceId}</span>
-              {/each}
+    {#if scenarioState}
+      <section class="surface-state" data-state={scenarioState}>
+        {#if scenarioState === 'loading'}
+          <span class="state-icon" aria-hidden="true">◌</span>
+          <h2>正在加载工作台</h2>
+          <p>正在准备当前工作流需要的数据。</p>
+        {:else if scenarioState === 'empty'}
+          <span class="state-icon" aria-hidden="true">○</span>
+          <h2>当前没有待处理数据</h2>
+          <p>工作流已经准备好；当业务数据进入后，这里会显示下一步操作。</p>
+        {:else if scenarioState === 'error'}
+          <span class="state-icon" aria-hidden="true">!</span>
+          <h2>暂时无法加载工作台</h2>
+          <p>数据 provider 返回了错误，请稍后重试或联系管理员。</p>
+        {:else if scenarioState === 'forbidden'}
+          <span class="state-icon" aria-hidden="true">×</span>
+          <h2>没有访问权限</h2>
+          <p>当前角色没有访问这个工作流的权限。</p>
+        {/if}
+      </section>
+    {:else}
+      <div class="surface-grid">
+        {#each page.sections as section (section.id)}
+          <section class="surface-card">
+            <div class="card-heading">
+              <h2>{section.title}</h2>
+              <span>区块</span>
             </div>
-          {:else}
-            <p class="muted">此区块暂无数据资源，等待接入真实 provider。</p>
-          {/if}
-        </section>
-      {/each}
-    </div>
+            <p>此区块服务于当前工作流，并展示产品计划声明的资源。</p>
+            {#if section.resourceIds.length}
+              <div class="resource-list">
+                {#each section.resourceIds as resourceId (resourceId)}
+                  <span>{resourceId}</span>
+                {/each}
+              </div>
+            {:else}
+              <p class="muted">此区块暂无数据资源，等待接入真实 provider。</p>
+            {/if}
+          </section>
+        {/each}
+      </div>
 
-    <aside class="contract-note">
-      <strong>动作仍是产品元数据</strong>
-      <span>接入 defineCommand 或资源契约后，再启用真实提交、审批和写入。</span>
-    </aside>
+      <aside class="contract-note">
+        <strong>动作仍是产品元数据</strong>
+        <span>接入 defineCommand 或资源契约后，再启用真实提交、审批和写入。</span>
+      </aside>
+    {/if}
   {:else}
     <section class="surface-card">
       <h1>未找到页面计划</h1>
@@ -78,6 +117,10 @@
   .state-strip { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
   .state { background: #eef0f3; color: #596273; }
   .surface-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .surface-state { display: grid; justify-items: center; gap: 8px; min-height: 220px; padding: 42px 24px; border: 1px dashed #cdd5e4; border-radius: 18px; background: #f8faff; text-align: center; }
+  .surface-state h2, .surface-state p { margin: 0; }
+  .surface-state p { max-width: 520px; color: #65708a; line-height: 1.6; }
+  .state-icon { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #e8eefc; color: #3558a8; font-size: 22px; font-weight: 700; }
   .surface-card { min-height: 150px; padding: 22px; border: 1px solid #e4e7ed; border-radius: 18px; background: #fff; box-shadow: 0 10px 30px rgb(32 45 72 / 5%); }
   .card-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   .card-heading span { color: #8a94a7; font-size: 12px; }
