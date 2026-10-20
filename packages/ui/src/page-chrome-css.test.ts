@@ -32,6 +32,14 @@ describe('semantic page chrome', () => {
     expect(css).not.toContain('!important');
   });
 
+  it('keeps the layout skip link hidden until focus without utility coupling', () => {
+    expect(css).toContain('[data-svadmin-skip-link]');
+    expect(css).toContain('transform: translateY(calc(-100% - 1rem));');
+    expect(css).toContain('[data-svadmin-skip-link]:focus');
+    expect(css).toContain('[data-svadmin-skip-link]:focus-visible');
+    expect(css).toContain('transform: translateY(0);');
+  });
+
   it('defines selectors for the owned semantic classes', () => {
     const classes = new Set<string>();
     postcss.parse(css).walkRules((rule) => {

@@ -1,4 +1,18 @@
 @layer components {
+  /*
+   * The skip link uses a generated translate-y utility, whose composite
+   * translate declaration is invalid when no x-axis value is present.
+   * Keep this accessibility control hidden until focus without relying on
+   * the host application's utility CSS implementation.
+   */
+  [data-svadmin-skip-link] {
+    transform: translateY(calc(-100% - 1rem));
+  }
+  [data-svadmin-skip-link]:focus,
+  [data-svadmin-skip-link]:focus-visible {
+    transform: translateY(0);
+  }
+
   .svadmin-page-header {
     --svadmin-page-header-gap: 0.5rem;
     min-width: 0;
