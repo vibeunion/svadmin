@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.87.0](https://github.com/vibeunion/svadmin/compare/ui-v0.86.0...ui-v0.87.0) (2026-10-20)
+
+
+### 🚀 Features
+
+* **ui:** expose LoginPage copy and accessibility hooks ([#510](https://github.com/vibeunion/svadmin/issues/510)) ([5fc883b](https://github.com/vibeunion/svadmin/commit/5fc883b23436acc347453e38612aaa504c0f2a05))
+
 ## [0.86.0](https://github.com/vibeunion/svadmin/compare/ui-v0.85.0...ui-v0.86.0) (2026-10-20)
 
 
