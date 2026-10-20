@@ -119,8 +119,10 @@
       <label for={`${controlId}-search`} class="block text-sm font-medium text-foreground">{isZh ? '搜索成员' : 'Search members'}</label>
       <Input id={`${controlId}-search`} type="search" bind:value={query} />
     </div>
-    {#if filtered.length === 0}
-      <DataState state="empty" title={isZh ? '没有匹配的成员' : 'No matching members'} />
+    {#if rows.length === 0}
+      <DataState state="empty" title={isZh ? '暂无成员' : 'No members yet'} />
+    {:else if filtered.length === 0}
+      <DataState state="filtered-empty" title={isZh ? '没有匹配的成员' : 'No matching members'} description={isZh ? '请清除或调整搜索条件。' : 'Clear or adjust the search.'} />
     {:else}
       <!-- svelte-ignore a11y_no_noninteractive_tabindex (横向滚动区域需支持键盘聚焦与滚动) -->
       <div class="member-directory-scroll w-full min-w-0 overflow-x-auto" role="region" aria-label={isZh ? '成员目录' : 'Member directory'} tabindex="0">

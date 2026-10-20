@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ChevronLeft, ChevronRight, Loader2, RefreshCw, Search } from '@lucide/svelte';
+  import { ChevronLeft, ChevronRight, RefreshCw, Search } from '@lucide/svelte';
   import { onDestroy, untrack } from 'svelte';
   import { captureAdminContext, captureAuthSession, createEnterpriseRequestContext } from '@svadmin/core';
   import {
@@ -13,6 +13,7 @@
   import { Button } from './ui/button/index.js';
   import { Input } from './ui/input/index.js';
   import * as Dialog from './ui/dialog/index.js';
+  import DataState from './content/DataState.svelte';
 
   type ApprovalView = 'pending' | 'history';
   interface Props {
@@ -50,7 +51,15 @@
   const activeAction = $derived(
     activeRecord?.allowedActions.find(action => action.id === actionDialog),
   );
-  const centerState = $derived(loading ? 'loading' : error ? 'error' : records.length === 0 ? 'empty' : 'ready');
+  const centerState = $derived(
+    loading
+      ? 'loading'
+      : error && records.length === 0
+        ? 'error'
+        : records.length === 0
+          ? (appliedSearch ? 'filtered-empty' : 'empty')
+          : 'ready',
+  );
   const normalizedPageSize = $derived(Number.isSafeInteger(pageSize) && pageSize > 0 && pageSize <= 200 ? pageSize : 20);
   const totalPages = $derived(Math.max(1, Math.ceil(total / normalizedPageSize)));
 
@@ -98,6 +107,13 @@
       appliedSearch = search.trim().slice(0, 200);
       page = 1;
     }, 250);
+  }
+
+  function clearSearch(): void {
+    clearTimeout(timer);
+    search = '';
+    appliedSearch = '';
+    page = 1;
   }
 
   function switchView(next: ApprovalView): void {
@@ -197,15 +213,28 @@
       <Input value={search} oninput={scheduleSearch} placeholder={i18n.t('approval.search')} aria-label={i18n.t('approval.search')} />
     </label>
   </div>
-  {#if error}
+  {#if error && records.length > 0}
     <div role="alert">{i18n.t(`approval.${error}`)}</div>
   {/if}
   <div class="svadmin-approval-center__body" data-svadmin-approval-body>
     <div class="svadmin-approval-center__list" data-svadmin-approval-list>
       {#if loading}
-        <div role="status"><Loader2 class="svadmin-approval-center__spin" /> {i18n.t('common.loading')}</div>
+        <DataState state="loading" />
+      {:else if records.length === 0 && error}
+        <DataState
+          state="error"
+          title={error === 'invalid' ? i18n.t('approval.invalid') : i18n.t('approval.load')}
+          description={i18n.locale === 'zh-CN' ? '请刷新后重试。' : 'Refresh and retry.'}
+          retry={() => void load()}
+        />
       {:else if records.length === 0}
-        <div role="status">{i18n.t('approval.empty')}</div>
+        <DataState
+          state={appliedSearch ? 'filtered-empty' : 'empty'}
+          {...(appliedSearch ? {} : { title: i18n.t('approval.empty') })}
+        />
+        {#if appliedSearch}
+          <Button type="button" variant="outline" size="sm" onclick={clearSearch}>{i18n.t('common.clear')}</Button>
+        {/if}
       {:else}
         {#each records as record (record.id)}
           <button type="button" aria-pressed={record.id === selectedId} class:selected={record.id === selectedId} onclick={() => selectedId = record.id}>

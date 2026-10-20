@@ -87,7 +87,7 @@
     {/if}
     <label class="flex flex-wrap items-center gap-3 text-sm">{isZh ? '搜索' : 'Search'}<input class="min-w-0 flex-1 rounded-md border bg-background px-3 py-2" bind:value={search} /><Button variant="ghost" onclick={() => search = ''}>{isZh ? '清除' : 'Clear'}</Button></label>
     {#if feedback}<p role="status">{feedback}</p>{/if}
-    <WorkspaceQueryState query={current.query} count={visibleCount}>
+    <WorkspaceQueryState query={current.query} count={visibleCount} hasActiveFilters={Boolean(search.trim()) || view === 'tasks' || view === 'notes'}>
       <section class="divide-y" aria-label={current.title}>
         {#if resourceName === 'crm_accounts'}
           {#each visibleAccounts as item (item.id)}

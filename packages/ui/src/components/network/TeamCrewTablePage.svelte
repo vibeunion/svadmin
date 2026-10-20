@@ -5,6 +5,7 @@
   import ContentPageShell from '../content/ContentPageShell.svelte';
   import ContentPageHeader from '../content/ContentPageHeader.svelte';
   import FilterToolbar from '../content/FilterToolbar.svelte';
+  import DataState from '../content/DataState.svelte';
   import NetworkTable from '../content/NetworkTable.svelte';
   import type { NetworkColumn } from '../content/NetworkTable.types.js';
   import { Avatar } from '../ui/avatar/index.js';
@@ -38,5 +39,11 @@
   <ReferenceNotice />
   <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-1004c0c3954c svadmin-u-020ba687fa12 svadmin-u-64cac80d2e9a svadmin-u-3b9871a0bf93"><ContentPageHeader title={i18n.t('network.teamCrew')} description={i18n.t('network.teamCrewDescription')} /><div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-77a2a20e90d4"><Button variant="outline" size="sm" onclick={() => downloadRows('sample-team.json', filtered)}><Download class="svadmin-u-783b0d9d1e2c" />{i18n.t('common.export')}</Button><Button size="sm" onclick={() => context.navigate('/account/members/team-members')}><UserPlus class="svadmin-u-783b0d9d1e2c" />{i18n.t('account.inviteMember')}</Button></div></div>
   <FilterToolbar bind:query placeholder={i18n.t('common.search')} />
-  <NetworkTable rows={filtered} {columns} {row} />
+  {#if rows.length === 0}
+    <DataState state="empty" title={i18n.t('account.member')} />
+  {:else if filtered.length === 0}
+    <DataState state="filtered-empty" title={i18n.t('account.member')} description={i18n.t('common.search')} />
+  {:else}
+    <NetworkTable rows={filtered} {columns} {row} />
+  {/if}
 </ContentPageShell>

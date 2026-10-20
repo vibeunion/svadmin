@@ -23,5 +23,10 @@
   <ContentPageHeader title={i18n.t('account.securityLog')} description={i18n.t('account.securityLogDescription')} {...definedOptions({ "actions": undefined })} />
   <div class="svadmin-u-60fbb7713999 svadmin-u-77c08e015d14"><Button variant="outline" size="sm" onclick={() => downloadRows('sample-security-events.json', filtered)}><Download class="svadmin-u-783b0d9d1e2c" />{i18n.t('common.export')}</Button></div>
   <FilterToolbar bind:query placeholder={i18n.t('common.search')} />
-  <SecurityEventTable events={filtered} />
+  <SecurityEventTable
+    events={filtered}
+    state={query.trim() && filtered.length === 0 ? 'filtered-empty' : undefined}
+    stateTitle={query.trim() && filtered.length === 0 ? (i18n.locale === 'zh-CN' ? '没有匹配的安全事件' : 'No matching security events') : undefined}
+    stateDescription={query.trim() && filtered.length === 0 ? (i18n.locale === 'zh-CN' ? '请清除或调整搜索条件。' : 'Clear or adjust the search.') : undefined}
+  />
 </ContentPageShell>

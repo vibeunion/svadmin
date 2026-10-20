@@ -20,7 +20,8 @@
 | Query active | 查询非空 | 清除按钮与输入框同一行 | 点击清除恢复空查询 |
 | Collapsed | 高级筛选关闭 | 高级容器卸载，不保留边距/背景 | `aria-expanded=false` |
 | Expanded | 高级筛选打开 | 高级内容自适应，不固定高度 | `aria-controls` 指向面板 |
-| Filtered empty | 条件无结果 | 由页面使用 `DataState empty` 表达 | 提供恢复路径 |
+| Initial empty | 首次加载完成但资源没有记录 | 由页面使用 `DataState empty` 表达 | 提供创建、导入或配置入口 |
+| Filtered empty | 已有筛选条件但没有匹配结果 | 由页面使用 `DataState filtered-empty` 表达 | 提供清除或调整筛选的恢复路径 |
 
 ## Button
 

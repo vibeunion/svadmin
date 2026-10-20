@@ -106,6 +106,12 @@ states so the page does not jump between unrelated layouts.
 Use `FeedbackNotice` for unresolved partial results or blocking context. Routine
 success belongs in a Toast, not a persistent success banner.
 
+`AuditTimeline` follows the same contract. Pass `state="loading"`, `state="error"`,
+`state="forbidden"`, or `state="filtered-empty"` when the provider knows the
+timeline is unavailable or filtered; pass `retry` for recoverable failures. When
+`state` is omitted, an empty `items` array renders the initial `empty` state and
+non-empty items render the timeline.
+
 ## Standard page states
 
 Use `PagePattern` for custom business pages that are not resource CRUD routes.
@@ -115,7 +121,13 @@ It provides one stable page skeleton and a shared state contract:
 <PagePattern
   kind="list"
   title="Projects"
-  state={loading ? 'loading' : error ? 'error' : rows.length === 0 ? 'empty' : 'ready'}
+  state={loading
+    ? 'loading'
+    : error
+      ? 'error'
+      : rows.length === 0
+        ? hasCriteria ? 'filtered-empty' : 'empty'
+        : 'ready'}
   retry={load}
 >
   {#snippet children()}
@@ -124,8 +136,10 @@ It provides one stable page skeleton and a shared state contract:
 </PagePattern>
 ```
 
-The supported states are `ready`, `loading`, `empty`, `error`, and `forbidden`.
-While a non-ready state is active, page content is not rendered as if it were
-current. The shared state UI owns loading, empty, retry, and access-denied
-feedback; use `stateAction` only for a specific next step such as clearing
-filters. Do not create a second page shell or a second error/empty pattern.
+The supported states are `ready`, `loading`, `empty`, `filtered-empty`, `error`,
+and `forbidden`. `empty` means the initial load completed but the resource has
+no records; use `filtered-empty` when active filters match no records and
+provide a clear or adjust-filters recovery path through `stateAction`. While a
+non-ready state is active, page content is not rendered as if it were current.
+The shared state UI owns loading, empty, retry, and access-denied feedback. Do
+not create a second page shell or a second error/empty pattern.

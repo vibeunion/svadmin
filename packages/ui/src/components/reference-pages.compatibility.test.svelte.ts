@@ -37,7 +37,7 @@ describe('reference page compatibility', () => {
     const list = vi.fn(async () => []);
     const starter = render(MembersStarterPage, { memberProvider: { list } });
 
-    expect(await starter.findByText('No matching members')).not.toBeNull();
+    expect(await starter.findByText('No members yet')).not.toBeNull();
     expect(list).toHaveBeenCalledTimes(1);
     expect(starter.getByText('This directory is read-only. Invitation delivery is not configured.')).not.toBeNull();
     expect(starter.queryByRole('table', { name: 'Members' })).toBeNull();

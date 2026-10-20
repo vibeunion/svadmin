@@ -99,6 +99,11 @@ card，面板圆角、内边距和标题节奏才能共用尺寸 token。表格�
 未解决的部分结果或阻塞上下文使用 `FeedbackNotice`。普通成功使用 Toast，
 不能使用持久 success banner。
 
+`AuditTimeline` 也遵循同一份状态合同。Provider 已明确知道时间线不可用或被筛选
+为空时，传入 `state="loading"`、`state="error"`、`state="forbidden"` 或
+`state="filtered-empty"`；可恢复错误同时传入 `retry`。省略 `state` 时，空的
+`items` 使用初始 `empty` 状态，非空 `items` 才渲染时间线。
+
 ## 标准页面状态
 
 对于不属于资源 CRUD 路由的业务页面，使用 `PagePattern`。它提供统一的
@@ -108,7 +113,13 @@ card，面板圆角、内边距和标题节奏才能共用尺寸 token。表格�
 <PagePattern
   kind="list"
   title="项目"
-  state={loading ? 'loading' : error ? 'error' : rows.length === 0 ? 'empty' : 'ready'}
+  state={loading
+    ? 'loading'
+    : error
+      ? 'error'
+      : rows.length === 0
+        ? hasCriteria ? 'filtered-empty' : 'empty'
+        : 'ready'}
   retry={load}
 >
   {#snippet children()}
@@ -117,7 +128,9 @@ card，面板圆角、内边距和标题节奏才能共用尺寸 token。表格�
 </PagePattern>
 ```
 
-支持 `ready`、`loading`、`empty`、`error`、`forbidden` 五种状态。非
-`ready` 状态下不会继续渲染看似最新的页面内容；共享状态组件统一负责加载、
-空数据、重试和无权访问反馈。只有在确实存在下一步操作时才使用
-`stateAction`，不要重新创建页面壳层或另一套错误/空状态组件。
+支持 `ready`、`loading`、`empty`、`filtered-empty`、`error`、
+`forbidden` 六种状态。`empty` 仅表示首次加载完成但资源没有记录；
+存在筛选条件且没有匹配结果时必须使用 `filtered-empty`，并通过
+`stateAction` 提供清除或调整筛选的恢复路径。非 `ready` 状态下不会继续
+渲染看似最新的页面内容；共享状态组件统一负责加载、空数据、重试和无权
+访问反馈。不要重新创建页面壳层或另一套错误/空状态组件。
