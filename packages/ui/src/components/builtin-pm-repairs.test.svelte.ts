@@ -110,6 +110,48 @@ describe('builtin capability boundaries', () => {
     expect(await screen.findByRole('rowheader', { name: 'Actual member' })).toBeTruthy();
     expect(screen.getByText(/This directory is read-only/)).toBeTruthy();
   });
+
+  it.each([false, true])('clears a member search with keyboard focus and preserves invitation capability %s', async canInvite => {
+    const list = vi.fn(async () => [
+      { id: 'user-7', name: 'Actual member', email: 'actual@example.com', role: 'Operator' },
+    ]);
+    const invite = vi.fn(async () => {});
+    const view = render(Host, { bundle, page: 'members', members: {
+      list, ...(canInvite ? { invite } : {}),
+    } });
+    await screen.findByRole('rowheader', { name: 'Actual member' });
+    if (canInvite) {
+      await fireEvent.input(screen.getByLabelText('Member email'), { target: { value: 'draft@example.com' } });
+    }
+    const search = screen.getByLabelText('Search members');
+    await fireEvent.input(search, { target: { value: 'not-found' } });
+    expect(view.container.querySelector('[data-svadmin-data-state="filtered-empty"]')).toBeTruthy();
+    const clear = screen.getByRole('button', { name: 'Clear search' });
+    clear.focus();
+    await userEvent.setup().keyboard('{Enter}');
+    expect(search).toHaveProperty('value', '');
+    expect(document.activeElement).toBe(search);
+    expect(await screen.findByRole('rowheader', { name: 'Actual member' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Clear search' })).toBeNull();
+    if (canInvite) {
+      expect(screen.getByLabelText('Member email')).toHaveProperty('value', 'draft@example.com');
+    } else {
+      expect(screen.queryByLabelText('Member email')).toBeNull();
+      expect(screen.queryByRole('button', { name: /Send Invite/i })).toBeNull();
+    }
+    expect(list).toHaveBeenCalledTimes(1);
+    expect(invite).not.toHaveBeenCalled();
+  });
+
+  it('does not offer search recovery for an initially empty member directory', async () => {
+    const view = render(Host, { bundle, page: 'members', members: { list: async () => [] } });
+    await screen.findByText('No members yet');
+    await fireEvent.input(screen.getByLabelText('Search members'), { target: { value: 'not-found' } });
+    expect(view.container.querySelector('[data-svadmin-data-state="empty"]')).toBeTruthy();
+    expect(view.container.querySelector('[data-svadmin-data-state="filtered-empty"]')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Clear search' })).toBeNull();
+  });
+
   it('keeps audit failures visible and retries the actual request', async () => {
     const getAuditLogs = vi.fn().mockRejectedValueOnce(new Error('Audit offline'))
       .mockResolvedValueOnce({ data: [], total: 0 });
