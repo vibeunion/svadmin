@@ -37,7 +37,7 @@ describe('builtin capability boundaries', () => {
     } });
     expect(screen.getByRole('note').textContent).toBe('Directory from local sample users.');
     expect(screen.getByText(/This directory is read-only/)).toBeTruthy();
-    await screen.findByText('No matching members');
+    await screen.findByText('No members yet');
   });
 
   it('reloads saved notification preferences on re-entry', async () => {
@@ -204,19 +204,71 @@ describe('builtin capability boundaries', () => {
       push: { security: false, activity: false, reports: false },
       sms: { security: false },
     };
-    const save = vi.fn(async () => { throw new Error('Storage unavailable'); });
-    render(Host, { bundle, page: 'notifications', preferences: { load: async () => values, save } });
+    const load = vi.fn(async () => values);
+    const save = vi.fn<(value: NotificationPreferences) => Promise<void>>()
+      .mockRejectedValueOnce(new Error('Storage unavailable'))
+      .mockResolvedValueOnce(undefined);
+    render(Host, { bundle, page: 'notifications', preferences: { load, save } });
     await waitFor(() => expect(document.querySelector('fieldset')?.disabled).toBe(false));
+    const security = requireValue(document.querySelector('[id$="-email-security"]'));
+    await fireEvent.click(security);
+    const edited = { ...values, email: { ...values.email, security: true } };
     await fireEvent.click(screen.getByRole('button', { name: /Save/ }));
-    expect(await screen.findByRole('alert')).toHaveProperty('textContent', 'Storage unavailable');
-    expect(save).toHaveBeenCalledWith(values);
+    expect((await screen.findByRole('alert')).textContent).toContain('Storage unavailable');
+    expect(document.querySelector('[data-svadmin-feedback-notice][data-tone="danger"]')).toBeTruthy();
+    expect(screen.getAllByRole('alert')).toHaveLength(1);
+    expect(screen.queryByRole('button', { name: /Retry/ })).toBeNull();
+    expect(save).toHaveBeenCalledExactlyOnceWith(edited);
+    expect(security.getAttribute('aria-checked')).toBe('true');
     expect(document.querySelector('fieldset')?.disabled).toBe(false);
+    await fireEvent.click(screen.getByRole('button', { name: /Save/ }));
+    await waitFor(() => expect(screen.queryByRole('alert')).toBeNull());
+    expect(save).toHaveBeenCalledTimes(2);
+    expect(save).toHaveBeenLastCalledWith(edited);
+    expect(load).toHaveBeenCalledTimes(1);
+    expect(security.getAttribute('aria-checked')).toBe('true');
+  });
+
+  it('keeps an initial load failure blocking and retries the provider request', async () => {
+    const load = vi.fn()
+      .mockRejectedValueOnce(new Error('Preferences unavailable'))
+      .mockResolvedValueOnce({
+        email: { security: true, activity: false, reports: true },
+        push: { security: true, activity: true, reports: false },
+        sms: { security: true },
+      });
+    render(Host, { bundle, page: 'notifications', preferences: { load, save: async () => {} } });
+    expect(await screen.findByText('Preferences unavailable')).toBeTruthy();
+    expect(document.querySelector('[data-svadmin-data-state="error"]')).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Save/ })).toHaveProperty('disabled', true);
+    expect(screen.queryByRole('switch')).toBeNull();
+    await fireEvent.click(screen.getByRole('button', { name: /Retry/ }));
+    await waitFor(() => expect(load).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.getAllByRole('switch')).toHaveLength(7));
+    expect(screen.queryByText('Preferences unavailable')).toBeNull();
+  });
+
+  it('shows only the loading state until notification preferences arrive', async () => {
+    let resolveLoad: (value: NotificationPreferences) => void = () => { throw new Error('Load not started'); };
+    const pending = new Promise<NotificationPreferences>(resolve => { resolveLoad = resolve; });
+    render(Host, { bundle, page: 'notifications', preferences: { load: () => pending, save: async () => {} } });
+    await waitFor(() => expect(screen.getByRole('status').getAttribute('aria-busy')).toBe('true'));
+    expect(screen.queryAllByRole('switch')).toHaveLength(0);
+    expect(screen.getByRole('button', { name: /Save/ })).toHaveProperty('disabled', true);
+    resolveLoad({
+      email: { security: false, activity: false, reports: false },
+      push: { security: false, activity: false, reports: false },
+      sms: { security: false },
+    });
+    await waitFor(() => expect(screen.getAllByRole('switch')).toHaveLength(7));
+    expect(screen.queryByRole('status')).toBeNull();
+    expect(screen.getByRole('button', { name: /Save/ })).toHaveProperty('disabled', false);
   });
 
   it('does not report successful invitation after provider rejection', async () => {
     const invite = vi.fn(async () => { throw new Error('Delivery failed'); });
     render(Host, { bundle, page: 'members', members: { list: async () => [], invite } });
-    await screen.findByText('No matching members');
+    await screen.findByText('No members yet');
     const input = screen.getByLabelText('Member email');
     await fireEvent.input(input, { target: { value: 'member@example.com' } });
     await fireEvent.submit(requireValue(input.closest('form')));

@@ -33,12 +33,13 @@
   let loading = $state(false);
   let saving = $state(false);
   let loaded = $state(false);
-  let error = $state('');
+  let loadError = $state('');
+  let saveError = $state('');
   let epoch = 0;
   async function load() {
     const provider = preferencesProvider;
     const request = ++epoch;
-    error = ''; loaded = false; saving = false;
+    loadError = ''; saveError = ''; loaded = false; saving = false;
     loading = Boolean(provider);
     if (!provider) return;
     try {
@@ -47,7 +48,7 @@
       emailAlerts = { ...result.email }; pushAlerts = { ...result.push }; smsAlerts = { ...result.sms };
       loaded = true;
     } catch (caught) {
-      if (request === epoch) error = caught instanceof Error ? caught.message : String(caught);
+      if (request === epoch) loadError = caught instanceof Error ? caught.message : String(caught);
     } finally {
       if (request === epoch) loading = false;
     }
@@ -61,12 +62,12 @@
     const provider = preferencesProvider;
     if (!provider || !loaded || saving) return;
     const request = epoch;
-    saving = true; error = '';
+    saving = true; saveError = '';
     try {
       await provider.save({ email: { ...emailAlerts }, push: { ...pushAlerts }, sms: { ...smsAlerts } });
       if (request === epoch) notification.success(i18n.t('common.updateSuccess'), 3000);
     } catch (caught) {
-      if (request === epoch) error = caught instanceof Error ? caught.message : String(caught);
+      if (request === epoch) saveError = caught instanceof Error ? caught.message : String(caught);
     } finally {
       if (request === epoch) saving = false;
     }
@@ -85,9 +86,15 @@
   {#if !preferencesProvider}
     <FeedbackNotice tone="warning" message={i18n.locale === 'zh-CN' ? '未配置通知偏好存储服务，设置不可保存。' : 'Notification preference storage is not configured. Settings cannot be saved.'} />
   {/if}
-  {#if loading}<DataState state="loading" />{/if}
-  {#if error}<p role="alert">{error}</p>{#if !loaded}<Button onclick={load}>{i18n.t('common.retry')}</Button>{/if}{/if}
-  <fieldset disabled={!loaded || loading || saving} class="svadmin-u-b3542e058833">
+  {#if loading}
+    <DataState state="loading" />
+  {:else if loadError}
+    <DataState state="error" description={loadError} retry={load} />
+  {:else if saveError}
+    <FeedbackNotice tone="danger" message={saveError} />
+  {/if}
+  {#if loaded || !preferencesProvider}
+  <fieldset disabled={!preferencesProvider || saving} class="svadmin-u-b3542e058833">
   <SettingsGroup title={i18n.t('notifications.emailTitle')} description={i18n.t('notifications.emailDescription')} headingLevel={headingLevel === 'h1' ? 'h2' : 'h3'}>
     <div class="svadmin-u-fa6acbf81d74 svadmin-u-e783642739e3">
       <SettingsFieldRow controlId={`${controlId}-email-security`} label={i18n.t('notifications.securityAlerts')} description={i18n.t('notifications.securityAlertsDesc')}>{#snippet control()}<Switch id={`${controlId}-email-security`} bind:checked={emailAlerts.security} />{/snippet}</SettingsFieldRow>
@@ -106,4 +113,5 @@
     <SettingsFieldRow controlId={`${controlId}-sms-security`} label={i18n.t('notifications.criticalSecurity')} description={i18n.t('notifications.criticalSecurityDesc')}>{#snippet control()}<Switch id={`${controlId}-sms-security`} bind:checked={smsAlerts.security} />{/snippet}</SettingsFieldRow>
   </SettingsGroup>
   </fieldset>
+  {/if}
 </div>
