@@ -37,7 +37,32 @@ describe('WorkspaceQueryState', () => {
     });
     expect(filtered.container.querySelector('[data-svadmin-data-state="filtered-empty"]')).toBeTruthy();
     expect(filtered.container.querySelector('[data-svadmin-data-state="empty"]')).toBeNull();
-    expect(filtered.getByText('Loaded records')).toBeTruthy();
+    expect(filtered.queryByText('Loaded records')).toBeNull();
+
+    const filteredAction = createRawSnippet(() => ({
+      render: () => '<button type="button">View all tasks</button>',
+    }));
+    const recoverable = render(WorkspaceQueryState, {
+      query: query(),
+      count: 0,
+      hasActiveFilters: true,
+      filteredEmptyAction: filteredAction,
+      children,
+    });
+    expect(recoverable.getByRole('button', { name: 'View all tasks' })).toBeTruthy();
+
+    const loaded = render(WorkspaceQueryState, {
+      query: query(),
+      count: 1,
+      children,
+    });
+    expect(loaded.getByText('Loaded records')).toBeTruthy();
+
+    const uncounted = render(WorkspaceQueryState, {
+      query: query(),
+      children,
+    });
+    expect(uncounted.container.querySelector('[data-query-content]')).toBeTruthy();
   });
 
   it('keeps query errors recoverable and does not render stale content', () => {

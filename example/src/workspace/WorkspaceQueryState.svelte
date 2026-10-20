@@ -3,10 +3,11 @@
   import { useTranslation } from '@svadmin/core/i18n';
   import { DataState } from '@svadmin/ui';
 
-  let { query, count, hasActiveFilters = false, children }: {
+  let { query, count, hasActiveFilters = false, filteredEmptyAction, children }: {
     query: { isLoading: boolean; isError: boolean; refetch: () => unknown };
     count?: number;
     hasActiveFilters?: boolean;
+    filteredEmptyAction?: Snippet;
     children: Snippet;
   } = $props();
   const i18n = useTranslation();
@@ -22,8 +23,11 @@
     retry={() => void query.refetch()}
   />
 {:else}
-  {#if count === 0}
-    <DataState state={hasActiveFilters ? 'filtered-empty' : 'empty'} />
+  {#if count === undefined}
+    {@render children()}
+  {:else if count === 0}
+    <DataState state={hasActiveFilters ? 'filtered-empty' : 'empty'} action={hasActiveFilters ? filteredEmptyAction : undefined} />
+  {:else}
+    {@render children()}
   {/if}
-  {@render children()}
 {/if}

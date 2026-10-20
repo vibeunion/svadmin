@@ -18,6 +18,8 @@ describe('workspace primitives', () => {
 
     await fireEvent.click(screen.getByRole('button', { name: 'Close inspector' }));
     expect(page.container.querySelector('[data-svadmin-workspace-layout]')?.getAttribute('data-secondary-collapsed')).toBe('true');
+    expect(screen.getByText('Primary pane')).toBeTruthy();
+    expect(screen.queryByText('Inspector content')).toBeNull();
     expect(screen.getByRole('button', { name: 'Open inspector' })).toBeTruthy();
   });
 });
