@@ -158,8 +158,10 @@
               {#if kind === 'list'}
                 <td class="action-column">
                   <DropdownMenu.Root>
-                    <DropdownMenu.Trigger asChild>
-                      <Button variant="ghost" size="icon" aria-label={`打开 ${row.name} 操作`}><MoreHorizontal size={16} /></Button>
+                    <DropdownMenu.Trigger>
+                      {#snippet child({ props })}
+                        <Button {...props} variant="ghost" size="icon" aria-label={`打开 ${row.name} 操作`}><MoreHorizontal size={16} /></Button>
+                      {/snippet}
                     </DropdownMenu.Trigger>
                     <DropdownMenu.Content>
                       <DropdownMenu.Item onclick={() => toggleSelected(row.name)}>选择记录</DropdownMenu.Item>

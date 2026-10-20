@@ -38,6 +38,7 @@ describe('builtin capability boundaries', () => {
     expect(screen.getByRole('note').textContent).toBe('Directory from local sample users.');
     expect(screen.getByText(/This directory is read-only/)).toBeTruthy();
     await screen.findByText('No members yet');
+    expect(document.querySelector('[data-svadmin-data-state="filtered-empty"]')).toBeNull();
   });
 
   it('reloads saved notification preferences on re-entry', async () => {
