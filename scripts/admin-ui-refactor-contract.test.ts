@@ -30,6 +30,13 @@ describe('Admin UI refactor contract', () => {
     }
   });
 
+  it('keeps dashboard module loading recoverable', () => {
+    const source = read('example/src/features/dashboard/Dashboard.svelte');
+    expect(source).toContain('let declarativeSurfacePromise = $state(');
+    expect(source).toContain('function retryDeclarativeSurface(): void');
+    expect(source).toContain('retry={retryDeclarativeSurface}');
+  });
+
   it('keeps operations pages data-driven, layout-specific, and Admin UI', () => {
     const source = read('example/src/features/operations/OperationsWorkspacePage.svelte');
     expect(source).toContain('ContentPageShell');
