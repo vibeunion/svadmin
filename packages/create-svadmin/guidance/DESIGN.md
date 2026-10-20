@@ -115,6 +115,12 @@ feedback for repeated operational work. The interface should feel like a real
 administrative product with trustworthy states, not a collection of dashboard
 templates.
 
+For business workflow, page selection, list density, operation ownership, and
+acceptance gates, read `docs/ENTERPRISE_PRODUCT_SYSTEM.md`. This document is
+the product-usage layer above the visual system: it explains how to use the
+published components to build useful enterprise workflows instead of treating
+the component catalog as a page design.
+
 Metronic is a capability reference only. Its page families, information
 architecture, and scenario coverage may expose missing components or examples,
 but its palette, decoration, card treatment, typography, and branding are not
@@ -351,10 +357,12 @@ layouts:
 - `workspace`: comfortable primary work area plus an optional secondary panel.
 - `dashboard`: wide layout with optional metrics and secondary context.
 
-Set `state` to `loading`, `empty`, `error`, or `forbidden` while the page is
-not ready. Page content is hidden during those states, and the shared `DataState`
-component supplies the accessible default. Use `retry` only for `error`; use
-`stateAction` for an explicitly permitted next step. `ready` is the default.
+Set `state` to `loading`, `empty`, `filtered-empty`, `error`, or `forbidden`
+while the page is not ready. Use `empty` only when the underlying collection is
+empty; use `filtered-empty` when filters excluded all records. Page content is
+hidden during those states, and the shared `DataState` component supplies the
+accessible default. Use `retry` only for `error`; use `stateAction` for an
+explicitly permitted next step. `ready` is the default.
 
 Optional `secondary` content renders beside the primary content for every kind.
 For advanced resizable, collapsible, or independently scrolling work areas,

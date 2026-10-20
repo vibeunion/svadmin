@@ -42,8 +42,21 @@ for (const pageFile of pageFiles) {
   const label = relative(process.cwd(), pageFile);
   if (/<img\b/u.test(source)) violations.push(`${label}: use MediaThumbnail or a semantic media component instead of a page-level img preview`);
   if (/<details\b(?![^>]*(?:svadmin-collapsible|data-svadmin-collapsible))/u.test(source)) violations.push(`${label}: scope details collapse styling with an svadmin hook`);
+  if (/<DataState\b(?=[^>]*\bstate="error")[^>]*\/>\s*<Button\b/u.test(source)) {
+    violations.push(`${label}: keep error recovery inside DataState instead of rendering a sibling retry button`);
+  }
   for (const match of source.matchAll(/min-h-\[(\d+)px\]/gu)) {
     if (Number(match[1]) >= 160) violations.push(`${label}: remove fixed empty-shell minimum height ${match[0]}`);
+  }
+}
+const workspaceStateContracts = [
+  ['example/src/features/domain/DomainWorkspacePage.svelte', 'rawRows.length === 0'],
+  ['example/src/features/operations/OperationsWorkspacePage.svelte', 'rawRows.length === 0'],
+] as const;
+for (const [pageFile, emptyBoundary] of workspaceStateContracts) {
+  const source = readFileSync(pageFile, 'utf8');
+  if (!source.includes(`{:else if ${emptyBoundary}}`) || !source.includes('<DataState state="empty"')) {
+    violations.push(`${pageFile}: keep the primary empty state at the query boundary`);
   }
 }
 for (const sharedFile of ['packages/ui/src/components/EmptyState.svelte', 'packages/ui/src/components/ErrorComponent.svelte', 'packages/ui/src/components/account/MembersStarterPage.svelte', 'packages/ui/src/components/content/SystemErrorState.svelte', 'packages/ui/src/components/TaskQueueDrawer.svelte']) {

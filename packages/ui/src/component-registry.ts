@@ -54,7 +54,7 @@ const registryEntries = [
       pageId: { kind: "string" },
       width: variant("contentPageRecipe", "width"),
       density: { kind: "enum", values: ["comfortable", "compact"], default: "comfortable", description: "Deprecated compatibility prop; use the shared baseline." },
-      state: { kind: "enum", values: ["ready", "loading", "empty", "error", "forbidden"], default: "ready" },
+      state: { kind: "enum", values: ["ready", "loading", "empty", "filtered-empty", "error", "forbidden"], default: "ready" },
       stateTitle: { kind: "string" },
       stateDescription: { kind: "string" },
       retry: { kind: "callback", description: "Use an error-state retry callback." },
@@ -70,7 +70,7 @@ const registryEntries = [
       stateAction: { kind: "snippet" },
     },
     tokens: semanticTokens,
-    states: ["ready", "loading", "empty", "error", "forbidden"],
+    states: ["ready", "loading", "empty", "filtered-empty", "error", "forbidden"],
   },
   {
     id: "content-page-shell",

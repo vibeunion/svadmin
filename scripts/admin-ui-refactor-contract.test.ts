@@ -36,7 +36,7 @@ describe('Admin UI refactor contract', () => {
     expect(source).toContain('MetricBlock');
     expect(source).toContain('useList');
     expect(source).toContain('data-operations-record-toggle');
-    expect(source).toMatch(/\{#if !hasError && !isLoading && showRecords\}[\s\S]*<AutoTable \{resourceName\} rendering=\{demoRendering\(resourceName\)\} \/>[\s\S]*\{\/if\}/);
+    expect(source).toMatch(/\{#if !hasError && !isLoading && rawRows\.length > 0 && showRecords\}[\s\S]*<AutoTable \{resourceName\} rendering=\{demoRendering\(resourceName\)\} \/>[\s\S]*\{\/if\}/);
     for (const layout of [
       'data-stock-movement-layout',
       'data-stock-transfer-layout',

@@ -57,7 +57,9 @@ Use the business page layer as the default customer API:
   `DataState` for the recurring work patterns inside those pages.
 
 `PagePattern` has a shared `state` contract (`ready`, `loading`, `empty`,
-`error`, `forbidden`) and hides page content while a non-ready state is active.
+`filtered-empty`, `error`, `forbidden`) and hides page content while a non-ready
+state is active. Use `filtered-empty` when active filters match no records; keep
+it distinct from an initially empty resource.
 This keeps shadcn-svelte as an implementation source while customers receive a
 stable, Ant Design-like product workflow. Prefer these APIs over composing
 primitive `Button`, `Card`, `Dialog`, and `Table` components directly in every
