@@ -60,6 +60,7 @@ export type { MetricStripItem, MetricTone } from './components/MetricStrip.svelt
 export { default as PageHeader } from './components/PageHeader.svelte';
 export { default as PagePattern } from './components/PagePattern.svelte';
 export type { PagePatternKind } from './components/PagePattern.svelte';
+export { default as AppShellPage } from './components/AppShellPage.svelte';
 export { default as ResourceOperationsPage } from './components/ResourceOperationsPage.svelte';
 export { default as RecordDetailDrawer } from './components/RecordDetailDrawer.svelte';
 export { default as ResourceAccessGuard } from './components/ResourceAccessGuard.svelte';

@@ -23,6 +23,17 @@ continue to use public semantic CSS variables; nested themes use `.svadmin-theme
 emits compiler metadata. Import one UI CSS entry, not both. Old host `@source`
 directives can be removed; styles are pre-generated, not scanned at consumption.
 
+### CSS source of truth
+
+`src/app.css` is the live entry. It imports `page-chrome.css`, `app-shell.css`,
+`data-panel.css` and the generated prelude, and `build-static-css.mjs` publishes
+it as `dist/app.css`.
+
+`src/components.css` is a **frozen historical snapshot** pinned by
+`design/admin-ui/runtime-source.json`. Do not extend it, and never assert
+shipped behaviour against it: the styling contract tests read `src/app.css`
+precisely because that file is what ships.
+
 ## Migration Boundary
 
 The package publishes precompiled CSS: consumers do not need to compile library

@@ -52,6 +52,36 @@ Shell 提供 `data-svadmin-content-page`、
 </PageToolbar>
 ```
 
+## 数据面板
+
+`DataPanel` 是承载单个数据集的带标题容器：表格、列表或表单区块。用它替代手写的
+card，面板圆角、内边距和标题节奏才能共用尺寸 token。表格或列表需要贴边时用
+`padding="none"`，密集侧栏用 `padding="compact"`。
+
+```svelte
+<DataPanel title="委托单明细" description="审核通过后自动归档">
+  {#snippet actions()}
+    <Button variant="outline" size="sm">导出</Button>
+  {/snippet}
+  <AutoTable resource="orders" />
+  {#snippet footer()}<span>共 12 条</span>{/snippet}
+</DataPanel>
+```
+
+| 属性 | 类型 | 默认值 | 用途 |
+| --- | --- | --- | --- |
+| `title` / `description` | `string` | — | 标题；不传 `title` 时整块头区省略，面板不再有可访问名称。 |
+| `actions` | `Snippet` | — | 头区操作。 |
+| `children` | `Snippet` | — | 面板主体。 |
+| `footer` | `Snippet` | — | 带顶部边框的页脚区。 |
+| `padding` | `'default' \| 'compact' \| 'none'` | `'default'` | 主体内边距；`none` 让表格贴住面板边缘。 |
+| `headingLevel` | `'h2' \| 'h3'` | `'h2'` | 标题层级，嵌套时保持大纲顺序。 |
+
+`PageHeader`、`FilterToolbar`、`DataPanel` 全部读取尺寸 token
+（`--svadmin-control-h`、`--svadmin-space-*`、`--svadmin-text-*`、
+`--svadmin-measure`）。需要更高的企业表单密度时，宿主只覆盖一次
+`--svadmin-control-h`，不存在按组件的高度覆盖。
+
 ## 数据状态
 
 加载、空、可恢复错误和权限状态应复用同一个 `DataState` 位置，避免页面在

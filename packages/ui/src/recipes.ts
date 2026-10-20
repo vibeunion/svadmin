@@ -80,6 +80,8 @@ const contentPageRecipeStyles = tv({
       default: { root: "max-w-[74rem]" },
       wide: { root: "max-w-[92rem]" },
     },
+    // Deprecated density variants are frozen until the density removal lands;
+    // only the shared baseline below is token-bound.
     density: {
       compact: { root: "space-y-4" },
       comfortable: { root: "space-y-6" },
@@ -91,16 +93,18 @@ const contentPageRecipeStyles = tv({
 const contentHeaderRecipeStyles = tv({
   slots: {
     root: "svadmin-content-header",
-    breadcrumbs: `${semantic.group} text-xs text-muted-foreground`,
+    breadcrumbs: `${semantic.group} text-[length:var(--svadmin-text-caption)] text-muted-foreground`,
     currentCrumb: "text-foreground",
     row: "flex flex-col sm:flex-row sm:items-start sm:justify-between",
     heading: "min-w-0",
-    eyebrow: "text-xs font-medium text-muted-foreground",
-    title: "font-semibold leading-tight text-foreground",
-    description: "max-w-2xl text-muted-foreground",
+    eyebrow: "text-[length:var(--svadmin-text-caption)] font-medium text-muted-foreground",
+    title: "font-semibold leading-[var(--svadmin-leading-tight)] text-foreground",
+    description: "max-w-[var(--svadmin-measure)] text-muted-foreground",
     actions: "flex shrink-0 flex-wrap items-center",
   },
   variants: {
+    // Deprecated density variants are frozen until the density removal lands;
+    // only the shared slots above are token-bound.
     density: {
       compact: {
         root: "space-y-2",
@@ -148,19 +152,19 @@ const metricBlockRecipeStyles = tv({
 
 const productSectionRecipeStyles = tv({
   slots: {
-    root: "flex flex-wrap items-start justify-between gap-3",
-    heading: "min-w-0 flex-[1_1_16rem]",
-    title: "m-0 text-base font-semibold text-foreground [overflow-wrap:anywhere]",
-    description: "mt-1 max-w-[65ch] text-[0.8125rem] leading-6 text-muted-foreground",
-    actions: "flex shrink-0 flex-wrap items-center gap-2",
+    root: "flex flex-wrap items-start justify-between gap-[var(--svadmin-space-3)]",
+    heading: "min-w-0 flex-[1_1_var(--svadmin-chrome-basis)]",
+    title: "m-0 text-[length:var(--svadmin-text-section)] font-semibold text-foreground [overflow-wrap:anywhere]",
+    description: "mt-[var(--svadmin-space-1)] max-w-[var(--svadmin-measure)] text-[length:var(--svadmin-text-label)] leading-[var(--svadmin-leading-body)] text-muted-foreground",
+    actions: "flex shrink-0 flex-wrap items-center gap-[var(--svadmin-space-2)]",
   },
 });
 
 const productToolbarRecipeStyles = tv({
   slots: {
-    root: "flex flex-wrap items-center justify-between gap-3 border-b border-border py-3",
-    leading: "flex min-w-0 flex-[1_1_16rem] flex-wrap items-center gap-2",
-    trailing: "ms-auto flex min-w-0 flex-wrap items-center gap-2",
+    root: "flex flex-wrap items-center justify-between gap-[var(--svadmin-space-3)] border-b border-border py-[var(--svadmin-space-3)]",
+    leading: "flex min-w-0 flex-[1_1_var(--svadmin-chrome-basis)] flex-wrap items-center gap-[var(--svadmin-space-2)]",
+    trailing: "ms-auto flex min-w-0 flex-wrap items-center gap-[var(--svadmin-space-2)]",
   },
 });
 
@@ -179,12 +183,12 @@ const productWorkspaceRecipeStyles = tv({
 const productSettingsRecipeStyles = tv({
   slots: {
     root: `${semantic.body} min-w-0`,
-    header: "flex flex-wrap items-start justify-between gap-3 border-b border-border py-4",
-    heading: "min-w-0 flex-[1_1_16rem]",
-    title: "m-0 text-base font-semibold text-foreground [overflow-wrap:anywhere]",
-    description: "mt-1 max-w-[65ch] text-[0.8125rem] leading-6 text-muted-foreground",
-    actions: "flex shrink-0 flex-wrap items-center gap-2",
-    body: "min-w-0 py-1",
+    header: "flex flex-wrap items-start justify-between gap-[var(--svadmin-space-3)] border-b border-border py-[var(--svadmin-space-4)]",
+    heading: "min-w-0 flex-[1_1_var(--svadmin-chrome-basis)]",
+    title: "m-0 text-[length:var(--svadmin-text-section)] font-semibold text-foreground [overflow-wrap:anywhere]",
+    description: "mt-[var(--svadmin-space-1)] max-w-[var(--svadmin-measure)] text-[length:var(--svadmin-text-label)] leading-[var(--svadmin-leading-body)] text-muted-foreground",
+    actions: "flex shrink-0 flex-wrap items-center gap-[var(--svadmin-space-2)]",
+    body: "min-w-0 py-[var(--svadmin-space-1)]",
   },
 });
 

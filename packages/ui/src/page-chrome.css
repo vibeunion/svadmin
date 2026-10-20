@@ -1,12 +1,10 @@
 @layer components {
   /*
-   * The skip link uses a generated translate-y utility, whose composite
-   * translate declaration is invalid when no x-axis value is present.
-   * Keep this accessibility control hidden until focus without relying on
-   * the host application's utility CSS implementation.
+   * 跳转链接依赖生成的 translate-y 工具类，而缺少 x 轴分量的复合 translate
+   * 声明在部分宿主工具链下无效；这里不依赖宿主工具类，直接保持聚焦前隐藏。
    */
   [data-svadmin-skip-link] {
-    transform: translateY(calc(-100% - 1rem));
+    transform: translateY(calc(-100% - var(--svadmin-space-4)));
   }
   [data-svadmin-skip-link]:focus,
   [data-svadmin-skip-link]:focus-visible {
@@ -14,24 +12,17 @@
   }
 
   .svadmin-page-header {
-    --svadmin-page-header-gap: 0.5rem;
+    --svadmin-page-header-gap: var(--svadmin-space-2);
     min-width: 0;
   }
-  .svadmin-page-header[data-density="compact"] {
-    --svadmin-page-header-gap: 0.375rem;
-  }
   .svadmin-page-header__breadcrumbs {
-    margin-bottom: 1rem;
-  }
-  .svadmin-page-header[data-density="compact"] .svadmin-page-header__breadcrumbs {
-    margin-bottom: 0.375rem;
-    font-size: 0.75rem;
+    margin-bottom: var(--svadmin-space-4);
   }
   .svadmin-page-header__row, .svadmin-filter-toolbar__row {
     display: flex;
     flex-direction: column;
     min-width: 0;
-    gap: 0.5rem;
+    gap: var(--svadmin-space-2);
   }
   .svadmin-page-header__row {
     gap: var(--svadmin-page-header-gap);
@@ -40,7 +31,7 @@
     display: flex;
     align-items: center;
     min-width: 0;
-    gap: 0.625rem;
+    gap: var(--svadmin-space-3);
   }
   .svadmin-page-header__text {
     min-width: 0;
@@ -50,7 +41,7 @@
     flex-wrap: wrap;
     align-items: center;
     min-width: 0;
-    gap: 0.5rem;
+    gap: var(--svadmin-space-2);
   }
   .svadmin-page-header__tags, .svadmin-page-header__actions {
     max-width: 100%;
@@ -59,23 +50,16 @@
   .svadmin-page-header__title {
     min-width: 0;
     color: var(--foreground);
-    font-size: 1.25rem;
+    font-size: var(--svadmin-text-title);
     font-weight: 600;
-    line-height: 1.75rem;
+    line-height: var(--svadmin-leading-tight);
     overflow-wrap: anywhere;
   }
   .svadmin-page-header__description {
     color: var(--muted-foreground);
-    font-size: 0.875rem;
-    line-height: 1.25rem;
+    font-size: var(--svadmin-text-body);
+    line-height: var(--svadmin-leading-body);
     overflow-wrap: anywhere;
-  }
-  .svadmin-page-header[data-density="compact"] .svadmin-page-header__title {
-    font-size: 1.125rem;
-  }
-  .svadmin-page-header[data-density="compact"] .svadmin-page-header__description {
-    font-size: 0.75rem;
-    line-height: 1rem;
   }
   .svadmin-page-header .svadmin-page-header__back {
     flex-shrink: 0;
@@ -85,14 +69,14 @@
     color: var(--foreground);
   }
   .svadmin-page-header .svadmin-page-header__back-icon {
-    width: 1rem;
-    height: 1rem;
+    width: var(--svadmin-space-4);
+    height: var(--svadmin-space-4);
   }
   .svadmin-breadcrumbs {
     min-width: 0;
   }
   .svadmin-breadcrumbs--spaced {
-    margin-bottom: 1rem;
+    margin-bottom: var(--svadmin-space-4);
   }
   .svadmin-breadcrumbs__item {
     display: inline-flex;
@@ -103,15 +87,10 @@
     color: var(--muted-foreground);
   }
   .svadmin-filter-toolbar {
-    --svadmin-filter-control-height: 2.25rem;
-    --svadmin-filter-control-font: 0.875rem;
-    --svadmin-filter-search-icon-size: 1rem;
+    --svadmin-filter-control-height: var(--svadmin-control-h);
+    --svadmin-filter-control-font: var(--svadmin-text-body);
+    --svadmin-filter-search-icon-size: var(--svadmin-space-4);
     min-width: 0;
-  }
-  .svadmin-filter-toolbar[data-density="compact"] {
-    --svadmin-filter-control-height: 2rem;
-    --svadmin-filter-control-font: 0.75rem;
-    --svadmin-filter-search-icon-size: 0.875rem;
   }
   .svadmin-filter-toolbar__search {
     position: relative;
@@ -120,60 +99,57 @@
   .svadmin-filter-toolbar__search-icon {
     position: absolute;
     top: 50%;
-    inset-inline-start: 0.75rem;
+    inset-inline-start: var(--svadmin-space-3);
     width: var(--svadmin-filter-search-icon-size);
     height: var(--svadmin-filter-search-icon-size);
     color: var(--muted-foreground);
     transform: translateY(-50%);
     pointer-events: none;
   }
-  .svadmin-filter-toolbar[data-density] .svadmin-filter-toolbar__input {
+  .svadmin-filter-toolbar .svadmin-filter-toolbar__input {
     height: var(--svadmin-filter-control-height);
-    padding-inline: 2.25rem;
+    padding-inline: calc(var(--svadmin-space-5) + var(--svadmin-space-3));
     font-size: var(--svadmin-filter-control-font);
-    line-height: 1rem;
+    line-height: var(--svadmin-leading-tight);
   }
-  .svadmin-filter-toolbar[data-density] .svadmin-filter-toolbar__clear {
+  .svadmin-filter-toolbar .svadmin-filter-toolbar__clear {
     position: absolute;
     top: 50%;
-    inset-inline-end: 0.25rem;
+    inset-inline-end: var(--svadmin-space-1);
     transform: translateY(-50%);
   }
-  .svadmin-filter-toolbar[data-density] .svadmin-filter-toolbar__toggle {
+  .svadmin-filter-toolbar .svadmin-filter-toolbar__toggle {
     flex-shrink: 0;
-    gap: 0.375rem;
+    gap: var(--svadmin-space-2);
     height: var(--svadmin-filter-control-height);
     font-size: var(--svadmin-filter-control-font);
     max-width: 100%;
     white-space: normal;
     overflow-wrap: anywhere;
   }
-  .svadmin-filter-toolbar[data-density="compact"] .svadmin-filter-toolbar__toggle {
-    padding-inline: 0.625rem;
-  }
   .svadmin-filter-toolbar .svadmin-filter-toolbar__control-icon {
-    width: 0.875rem;
-    height: 0.875rem;
+    width: var(--svadmin-space-3);
+    height: var(--svadmin-space-3);
   }
   .svadmin-filter-toolbar .svadmin-filter-toolbar__chevron {
-    width: 0.75rem;
-    height: 0.75rem;
-    margin-inline-start: 0.125rem;
+    width: var(--svadmin-space-3);
+    height: var(--svadmin-space-3);
+    margin-inline-start: var(--svadmin-space-1);
     color: var(--muted-foreground);
   }
-  .svadmin-filter-toolbar[data-density] .svadmin-filter-toolbar__count {
-    height: 1rem;
-    min-height: 1rem;
-    min-width: 1rem;
-    margin-inline-start: 0.125rem;
-    padding: 0 0.25rem;
-    font-size: 0.625rem;
+  .svadmin-filter-toolbar .svadmin-filter-toolbar__count {
+    height: var(--svadmin-space-4);
+    min-height: var(--svadmin-space-4);
+    min-width: var(--svadmin-space-4);
+    margin-inline-start: var(--svadmin-space-1);
+    padding: 0 var(--svadmin-space-1);
+    font-size: var(--svadmin-text-caption);
     font-weight: 600;
     line-height: 1;
     font-variant-numeric: tabular-nums;
   }
   .svadmin-filter-toolbar .svadmin-filter-toolbar-advanced {
-    margin-top: 0.5rem;
+    margin-top: var(--svadmin-space-2);
     border: 1px solid var(--border);
     @supports (color: color-mix(in lab, red, red)) {
       border: 1px solid color-mix(in oklch, var(--border) 60%, transparent);
@@ -183,7 +159,7 @@
     @supports (color: color-mix(in lab, red, red)) {
       background: color-mix(in oklch, var(--muted) 20%, transparent);
     }
-    padding: 0.75rem;
+    padding: var(--svadmin-space-3);
     overflow-wrap: anywhere;
   }
   @media (min-width: 640px) {
@@ -196,10 +172,10 @@
       justify-content: space-between;
     }
     .svadmin-page-header__heading {
-      flex: 1 1 16rem;
+      flex: 1 1 var(--svadmin-chrome-basis);
     }
     .svadmin-filter-toolbar__search {
-      flex: 1 1 14rem;
+      flex: 1 1 var(--svadmin-chrome-basis);
     }
   }
 }

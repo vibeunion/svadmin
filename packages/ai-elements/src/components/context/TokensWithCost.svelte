@@ -12,12 +12,10 @@
 
 <script lang="ts">
   import { definedOptions } from '@svadmin/core/options';
-  import { cn } from '../../utils.js';
+  import { cn, formatCompactNumber } from '../../utils.js';
 
   let { tokens, costText, class: className = '', children, ...rest }: TokensWithCostProps = $props();
-  const formattedTokens = $derived(tokens === undefined
-    ? '-'
-    : new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 }).format(tokens));
+  const formattedTokens = $derived(formatCompactNumber(tokens));
 </script>
 
 <span {...rest} class={cn('svadmin-ai-tokens-with-cost', className)} data-slot="tokens-with-cost">

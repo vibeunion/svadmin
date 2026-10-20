@@ -1,6 +1,8 @@
 @import "./styles/compatibility.prelude.css";
 @import "./styles/tailwind.generated.css";
 @import "./page-chrome.css";
+@import "./app-shell.css";
+@import "./data-panel.css";
 
 /* 保留状态对比度和 clean-flat 卡片表现，颜色始终来自宿主 token。 */
 .svadmin-product-status[data-slot="badge"] {
@@ -135,6 +137,41 @@
     --svadmin-shadow-control: 0 1px 2px rgb(15 23 42 / 0.04);
     --svadmin-shadow-surface: 0 1px 2px rgb(15 23 42 / 0.035);
     --svadmin-shadow-surface-hover: 0 2px 5px rgb(15 23 42 / 0.06);
+
+    /* Size rhythm. Single source of truth for control, row, spacing and type
+     * sizes; components read these tokens and hosts override the token instead
+     * of re-writing component CSS. Values stay on the 4px grid from DESIGN.md
+     * (xs 4, sm 8, md 16, lg 24, xl 32). */
+    --svadmin-control-h-sm: 1.75rem; /* 28px */
+    --svadmin-control-h: 2.25rem; /* 36px */
+    --svadmin-control-h-lg: 2.5rem; /* 40px */
+    --svadmin-row-h: 3rem; /* 48px */
+    --svadmin-table-head-h: 2.75rem; /* 44px */
+    --svadmin-table-state-min-h: 8rem; /* 128px */
+    --svadmin-space-1: 0.25rem; /* 4px */
+    --svadmin-space-2: 0.5rem; /* 8px */
+    --svadmin-space-3: 0.75rem; /* 12px */
+    --svadmin-space-4: 1rem; /* 16px */
+    --svadmin-space-5: 1.5rem; /* 24px */
+    --svadmin-space-6: 2rem; /* 32px */
+    --svadmin-section-gap: var(--svadmin-space-5);
+    --svadmin-text-caption: 0.75rem; /* 12px */
+    --svadmin-text-label: 0.8125rem; /* 13px */
+    --svadmin-text-body: 0.875rem; /* 14px */
+    --svadmin-text-section: 1rem; /* 16px */
+    --svadmin-text-title: 1.25rem; /* 20px */
+    --svadmin-leading-tight: 1.25;
+    --svadmin-leading-snug: 1.35;
+    --svadmin-leading-body: 1.5;
+    --svadmin-focus-width: 2px;
+    --svadmin-measure: 65ch;
+    --svadmin-shell-sidebar-w: 15rem;
+    --svadmin-shell-sidebar-w-collapsed: 3.5rem;
+    --svadmin-shell-topbar-h: 3.5rem;
+    --svadmin-shell-gutter: var(--svadmin-space-5);
+    --svadmin-shell-max: 74rem;
+    --svadmin-chrome-basis: 16rem;
+    --svadmin-shell-aside-w: 22rem;
     --svadmin-shadow-overlay: 0 20px 52px rgb(15 23 42 / 0.18), 0 6px 16px rgb(15 23 42 / 0.1);
   }
 
@@ -560,15 +597,15 @@ h6,
 }
 
 :is([data-slot="button"], .svadmin-button):is([data-size="default"], .svadmin-button-size--default),
-:is([data-svadmin-button], .svadmin-button):is([data-size="default"], .svadmin-button-size--default) { min-height: 2.25rem; padding: 0 0.75rem; }
+:is([data-svadmin-button], .svadmin-button):is([data-size="default"], .svadmin-button-size--default) { min-height: var(--svadmin-control-h); padding: 0 0.75rem; }
 :is([data-slot="button"], .svadmin-button):is([data-size="xs"], .svadmin-button-size--xs),
 :is([data-svadmin-button], .svadmin-button):is([data-size="xs"], .svadmin-button-size--xs) { min-height: 1.5rem; padding: 0 0.5rem; font-size: 0.75rem; }
 :is([data-slot="button"], .svadmin-button):is([data-size="sm"], .svadmin-button-size--sm),
 :is([data-svadmin-button], .svadmin-button):is([data-size="sm"], .svadmin-button-size--sm) { min-height: 2rem; padding: 0 0.75rem; font-size: 0.8rem; }
 :is([data-slot="button"], .svadmin-button):is([data-size="lg"], .svadmin-button-size--lg),
-:is([data-svadmin-button], .svadmin-button):is([data-size="lg"], .svadmin-button-size--lg) { min-height: 2.5rem; padding: 0 1rem; }
+:is([data-svadmin-button], .svadmin-button):is([data-size="lg"], .svadmin-button-size--lg) { min-height: var(--svadmin-control-h-lg); padding: 0 1rem; }
 :is([data-slot="button"], .svadmin-button):is([data-size="icon"], .svadmin-button-size--icon),
-:is([data-svadmin-button], .svadmin-button):is([data-size="icon"], .svadmin-button-size--icon) { width: 2.25rem; height: 2.25rem; }
+:is([data-svadmin-button], .svadmin-button):is([data-size="icon"], .svadmin-button-size--icon) { width: var(--svadmin-control-h); height: var(--svadmin-control-h); }
 :is([data-slot="button"], .svadmin-button):is([data-size="icon-xs"], .svadmin-button-size--icon-xs),
 :is([data-svadmin-button], .svadmin-button):is([data-size="icon-xs"], .svadmin-button-size--icon-xs) { width: 1.5rem; height: 1.5rem; }
 :is([data-slot="button"], .svadmin-button):is([data-size="icon-sm"], .svadmin-button-size--icon-sm),
@@ -1020,7 +1057,7 @@ main {
 .svadmin-input {
   width: 100%;
   min-width: 0;
-  height: 2.25rem;
+  height: var(--svadmin-control-h);
   border: 1px solid var(--border);
   border-radius: 0.5rem;
   background: transparent;
@@ -1110,7 +1147,9 @@ main {
 }
 
 .svadmin-table-cell {
-  padding: 0.5rem;
+  height: var(--svadmin-row-h);
+  padding: var(--svadmin-space-2);
+  font-size: var(--svadmin-text-label);
   vertical-align: middle;
   white-space: nowrap;
 }
@@ -1444,9 +1483,9 @@ main {
 }
 
 .svadmin-table-caption {
-  margin-top: 1rem;
+  margin-top: var(--svadmin-space-4);
   color: var(--muted-foreground);
-  font-size: 0.875rem;
+  font-size: var(--svadmin-text-body);
 }
 
 .svadmin-table-footer {
@@ -1603,7 +1642,7 @@ main {
 
 .svadmin-select {
   width: 100%;
-  height: 2.25rem;
+  height: var(--svadmin-control-h);
   border: 1px solid var(--border);
   border-radius: 0.5rem;
   padding: 0.375rem 0.75rem;
@@ -1640,7 +1679,7 @@ main {
 .svadmin-tabs-list {
   display: inline-flex;
   width: fit-content;
-  height: 2.25rem;
+  height: var(--svadmin-control-h);
   align-items: center;
   justify-content: center;
   gap: 0.25rem;
@@ -1987,7 +2026,7 @@ main {
 .svadmin-navigation-trigger {
   display: inline-flex;
   width: max-content;
-  height: 2.25rem;
+  height: var(--svadmin-control-h);
   align-items: center;
   justify-content: center;
   gap: 0.25rem;
@@ -2387,11 +2426,12 @@ main {
 }
 
 .svadmin-table-head {
-  height: 2.25rem;
-  padding: 0.5rem;
+  height: var(--svadmin-table-head-h);
+  padding: var(--svadmin-space-2);
   color: var(--foreground);
   text-align: left;
   vertical-align: middle;
+  font-size: var(--svadmin-text-caption);
   font-weight: 500;
   white-space: nowrap;
 }
@@ -2449,8 +2489,8 @@ main {
 }
 
 .svadmin-pagination-icon {
-  width: 1rem;
-  height: 1rem;
+  width: var(--svadmin-space-4);
+  height: var(--svadmin-space-4);
 }
 
 @keyframes svadmin-menu-enter {
@@ -2752,11 +2792,11 @@ details[data-svadmin-filter][open] > :not(summary),
 }
 
 .layout-clean-flat [data-svadmin-table-head] [data-slot="table-head"] {
-  height: 2.75rem;
+  height: var(--svadmin-table-head-h);
   border-bottom-color: var(--svadmin-border);
   background: var(--svadmin-surface-muted);
   color: var(--svadmin-text-muted);
-  font-size: 0.75rem;
+  font-size: var(--svadmin-text-caption);
   font-weight: 600;
   letter-spacing: 0;
   text-transform: none;
@@ -2767,10 +2807,10 @@ details[data-svadmin-filter][open] > :not(summary),
 }
 
 .layout-clean-flat [data-svadmin-table-row] [data-slot="table-cell"] {
-  height: 3rem;
+  height: var(--svadmin-row-h);
   border-bottom-color: var(--svadmin-border);
   color: var(--svadmin-text);
-  font-size: 0.8125rem;
+  font-size: var(--svadmin-text-label);
 }
 
 .layout-clean-flat [data-svadmin-table-head] [data-slot="table-head"][data-density="compact"],
@@ -2822,19 +2862,19 @@ details[data-svadmin-filter][open] > :not(summary),
   border-bottom: 1px solid var(--svadmin-border);
   border-radius: 0;
   background: transparent;
-  padding: 0.75rem 0;
+  padding: var(--svadmin-space-3) 0;
   box-shadow: none;
 }
 
 .layout-clean-flat [data-svadmin-table-toolbar] [data-slot="input"] {
-  height: 2.625rem;
+  height: var(--svadmin-control-h-lg);
   background: var(--svadmin-surface-muted);
 }
 
 .layout-clean-flat [data-svadmin-list-actions] :is([data-slot="button"], .svadmin-button),
 .layout-clean-flat [data-svadmin-table-toolbar] :is([data-slot="button"], .svadmin-button),
 .layout-clean-flat [data-svadmin-form-actions] :is([data-slot="button"], .svadmin-button) {
-  height: 2.5rem;
+  height: var(--svadmin-control-h-lg);
   flex-shrink: 0;
 }
 

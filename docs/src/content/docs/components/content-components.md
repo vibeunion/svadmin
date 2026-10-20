@@ -57,6 +57,38 @@ interfaces.
 </PageToolbar>
 ```
 
+## Data panels
+
+`DataPanel` is the titled surface that holds one data set: a table, a list, or a
+form block. Reach for it instead of a hand-rolled card so panel radius, padding,
+and heading rhythm stay on the shared size tokens. Use `padding="none"` when a
+table or list should meet the panel edge, and `padding="compact"` for dense
+sidebars.
+
+```svelte
+<DataPanel title="委托单明细" description="审核通过后自动归档">
+  {#snippet actions()}
+    <Button variant="outline" size="sm">导出</Button>
+  {/snippet}
+  <AutoTable resource="orders" />
+  {#snippet footer()}<span>共 12 条</span>{/snippet}
+</DataPanel>
+```
+
+| Prop | Type | Default | Purpose |
+| --- | --- | --- | --- |
+| `title` / `description` | `string` | — | Heading; omitting `title` drops the header, and the panel is then unlabelled. |
+| `actions` | `Snippet` | — | Header actions. |
+| `children` | `Snippet` | — | Panel body. |
+| `footer` | `Snippet` | — | Footer strip with a top border. |
+| `padding` | `'default' \| 'compact' \| 'none'` | `'default'` | Body padding; `none` lets a table meet the panel edge. |
+| `headingLevel` | `'h2' \| 'h3'` | `'h2'` | Heading level, so nesting keeps outline order. |
+
+`PageHeader`, `FilterToolbar`, and `DataPanel` all read the size tokens
+(`--svadmin-control-h`, `--svadmin-space-*`, `--svadmin-text-*`,
+`--svadmin-measure`). A host that needs a taller enterprise form density
+overrides `--svadmin-control-h` once; there is no per-component height override.
+
 ## Data states
 
 Use one `DataState` location for loading, empty, recoverable error, and permission
