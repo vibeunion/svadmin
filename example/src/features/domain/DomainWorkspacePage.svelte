@@ -397,16 +397,20 @@
 
 <ContentPageShell pageId={`domain-${resourceName}`} width="wide" eyebrow={copy(profile.eyebrow)} title={copy(profile.title)} description={copy(profile.description)} {actions}>
   {#if hasError}
-    <DataState state="error" title={isZh ? '业务数据加载失败' : 'Unable to load workspace data'} />
-    <Button variant="outline" onclick={() => void currentQuery.refetch()}>{isZh ? '重试' : 'Retry'}</Button>
+    <DataState
+      state="error"
+      title={isZh ? '业务数据加载失败' : 'Unable to load workspace data'}
+      retry={() => void currentQuery.refetch()}
+    />
   {:else if isLoading}
     <DataState state="loading" title={isZh ? '正在加载业务数据' : 'Loading workspace data'} />
+  {:else if rawRows.length === 0}
+    <DataState state="empty" title={isZh ? '暂无记录，可新建第一条记录' : 'No records. Create the first record.'} />
   {:else}
     {#if actionFeedback}<p role="status">{actionFeedback}</p>{/if}
     {#if relatedQueries.some(query => query.isError)}
       <p role="alert">{isZh ? '部分关联资料不可用，当前记录仍可处理。' : 'Some related data is unavailable. Current records remain available.'} <Button variant="outline" onclick={() => relatedQueries.forEach(query => { if (query.isError) void query.refetch(); })}>{isZh ? '重试关联资料' : 'Retry related data'}</Button></p>
     {/if}
-    {#if rawRows.length === 0}<DataState state="empty" title={isZh ? '暂无记录，可新建第一条记录' : 'No records. Create the first record.'} />{/if}
     <section class="grid grid-cols-2 gap-3 xl:grid-cols-4" data-domain-metrics>
       {#each summaryMetrics as metric (String(metric[0]))}
         <MetricBlock label={String(metric[0])} value={metric[1]} />

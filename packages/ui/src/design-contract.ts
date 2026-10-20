@@ -9,7 +9,7 @@ export const surfaceDesignContract = {
     density: ['comfortable', 'compact'],
   },
   pageFamilies: ['list', 'form', 'detail', 'workspace', 'dashboard'],
-  pageStates: ['ready', 'loading', 'empty', 'error', 'forbidden'],
+  pageStates: ['ready', 'loading', 'empty', 'filtered-empty', 'error', 'forbidden'],
   composition: {
     maxPrimaryActions: 1,
     secondaryActions: 'overflow',

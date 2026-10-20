@@ -51,6 +51,11 @@
 
 `scripts/ui-state-evidence-check.ts` 扫描 `example/src/pages`、`packages/ui/src/components` 和 `packages/lite/src/components`：不得直接拼装无所有者的 `<img>` 预览、不得出现未限定作用域的 `<details>`，也不得使用 160px 以上的固定最小高度制造空入口或空数据占位。看板、权限矩阵、对话框和可滚动编辑器等固定格式控件通过显式白名单保留尺寸约束；新增例外必须先说明交互所有权。
 
+页面状态也必须有唯一归属：错误态的恢复入口由 `DataState` 的 `retry`
+拥有，不在其旁边重复渲染独立重试按钮；工作台的主查询在 `loading`、
+`error` 或初始 `empty` 时不渲染后续业务布局，局部队列可以在 ready 数据
+内部拥有自己的空态。
+
 完整 UI 使用 `MediaThumbnail`，SSR-first 的 `@svadmin/lite` 使用无跨包依赖的 `LiteMediaThumbnail`。详情字段与编辑字段不再分别维护图片加载和失败样式。
 
 保留直接 `<img>` 的范围仅限明确的专用媒体所有者：头像、租户标识、标题图标和个人资料封面组件。它们具有不同的裁剪、上传或身份语义，不属于通用附件/证据预览，不能为了形式统一而错误抽象。

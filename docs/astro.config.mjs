@@ -62,6 +62,7 @@ export default defineConfig({
             { slug: 'guides/flow' },
             { slug: 'guides/core-hooks-contract' },
             { slug: 'guides/design-principles' },
+            { slug: 'guides/reference-targets' },
             { slug: 'guides/interface-generation' },
             { slug: 'guides/comparison' },
             { slug: 'guides/ecosystem-coverage' },

@@ -9,7 +9,7 @@ describe("Semantic design contract", () => {
 		expect(surfaceDesignContract.metric.density).toEqual(["comfortable", "compact"]);
 		expect(surfaceDesignContract.table.density).toEqual(["comfortable", "compact"]);
 		expect(surfaceDesignContract.pageFamilies).toEqual(["list", "form", "detail", "workspace", "dashboard"]);
-		expect(surfaceDesignContract.pageStates).toEqual(["ready", "loading", "empty", "error", "forbidden"]);
+		expect(surfaceDesignContract.pageStates).toEqual(["ready", "loading", "empty", "filtered-empty", "error", "forbidden"]);
 		expect(surfaceDesignContract.composition).toEqual({
 			maxPrimaryActions: 1,
 			secondaryActions: "overflow",

@@ -210,10 +210,15 @@
   {actions}
 >
   {#if hasError}
-    <DataState state="error" title={isZh ? '运营数据加载失败' : 'Unable to load operations data'} />
-    <Button variant="outline" onclick={() => void query.refetch()}>{isZh ? '重试' : 'Retry'}</Button>
+    <DataState
+      state="error"
+      title={isZh ? '运营数据加载失败' : 'Unable to load operations data'}
+      retry={() => void query.refetch()}
+    />
   {:else if isLoading}
     <DataState state="loading" title={isZh ? '正在加载运营数据' : 'Loading operations data'} />
+  {:else if rawRows.length === 0}
+    <DataState state="empty" title={isZh ? '暂无记录，可新建第一条记录' : 'No records. Create the first record.'} />
   {:else if operationsResource === 'stock_movements'}
     {@const rows = demoRenderers.stock_movements.records(rawRows)}
     {@const recentMovements = [...rows].sort((left, right) => right.date.localeCompare(left.date)).slice(0, 5)}
@@ -390,12 +395,10 @@
           <span class="text-sm">{String(row['orderNumber'] ?? row['transferNumber'] ?? row['countNumber'] ?? row['adjustmentNumber'] ?? row['id'])}</span>
           <WorkspaceRecordLinks resource={resourceName} id={String(row.id)} />
         </div>
-      {:else}
-        <DataState state="empty" title={isZh ? '暂无记录，可新建第一条记录' : 'No records. Create the first record.'} />
       {/each}
     </section>
   {/if}
-  {#if !hasError && !isLoading && showRecords}
+  {#if !hasError && !isLoading && rawRows.length > 0 && showRecords}
     <section class="space-y-3" data-operations-table>
       <SectionHeader title={isZh ? '完整记录' : 'All records'} description={isZh ? '保留 svadmin 的筛选、排序、新建、编辑、详情和删除流程。' : 'Keep the complete svadmin filter, sort, create, edit, show, and delete workflow.'} />
       <AutoTable {resourceName} rendering={demoRendering(resourceName)} />
