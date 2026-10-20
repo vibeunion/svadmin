@@ -63,7 +63,9 @@ const plan: ProductPlan = {
 
 describe('product page plans', () => {
   it('does not duplicate the surface resource list in every generated section', () => {
-    const page = buildProductPagePlan(plan.surfaces[0]!, plan);
+    const surface = plan.surfaces[0];
+    if (!surface) throw new Error('Fixture is incomplete');
+    const page = buildProductPagePlan(surface, plan);
     expect(page.sections.map(section => section.resourceIds)).toEqual([
       ['tasks', 'comments'],
       [],
