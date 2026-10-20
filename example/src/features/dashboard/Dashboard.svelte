@@ -27,7 +27,11 @@
   const i18n = useTranslation();
   const adminContext = captureAdminContext();
   import { recordLink } from '../../workspace/workspace-links';
-  const declarativeSurfacePromise = import('../../components/DeclarativeSurfaceExample.svelte');
+  let declarativeSurfacePromise = $state(import('../../components/DeclarativeSurfaceExample.svelte'));
+
+  function retryDeclarativeSurface(): void {
+    declarativeSurfacePromise = import('../../components/DeclarativeSurfaceExample.svelte');
+  }
 
   const productsQuery = useList({ resource: demoContracts.products, pagination: { mode: 'off' } });
   const suppliersQuery = useList({ resource: demoContracts.suppliers, pagination: { current: 1, pageSize: 1 } });
@@ -552,6 +556,10 @@
     {@const DeclarativeSurfaceExample = declarativeSurfaceModule.default}
     <DeclarativeSurfaceExample {isZh} />
   {:catch}
-    <DataState state="error" title={isZh ? '声明式 Surface 加载失败' : 'Unable to load the declarative Surface'} />
+    <DataState
+      state="error"
+      title={isZh ? '声明式 Surface 加载失败' : 'Unable to load the declarative Surface'}
+      retry={retryDeclarativeSurface}
+    />
   {/await}
 </DashboardPage>
