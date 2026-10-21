@@ -1,0 +1,2541 @@
+{
+  "testedCommit": "c901d5d60c8b9ead20f8f4d7ac6ed32b22c850e7",
+  "scope": "Published helper classes and CSS; color-mix unsupported branches simulated in Chromium, NOT historical-browser certification or full application accessibility approval",
+  "minimumTextContrast": 4.5,
+  "browser": "155.0.4283.62",
+  "checks": [
+    {
+      "name": "fallback-app-1440-light",
+      "entry": "app.css",
+      "width": 1440,
+      "dark": false,
+      "removedConditions": 143,
+      "publishedSha256": "1c36b348f03a4850e3833bfa39115b4900c6e9f8b3cbf1ce4b912b248781a4fa",
+      "normal": [
+        {
+          "sample": "button-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-success",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-warning",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        }
+      ],
+      "hover": [
+        {
+          "sample": "button-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-success",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-warning",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        }
+      ],
+      "outline": {
+        "style": "solid",
+        "width": 3,
+        "color": "oklab(0.205 -0.00125434 -0.0119343)",
+        "shadow": "rgba(15, 23, 42, 0.04) 0px 1px 2px 0px",
+        "focusVisible": true
+      }
+    },
+    {
+      "name": "fallback-app-1440-dark",
+      "entry": "app.css",
+      "width": 1440,
+      "dark": true,
+      "removedConditions": 143,
+      "publishedSha256": "1c36b348f03a4850e3833bfa39115b4900c6e9f8b3cbf1ce4b912b248781a4fa",
+      "normal": [
+        {
+          "sample": "button-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-success",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-warning",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        }
+      ],
+      "hover": [
+        {
+          "sample": "button-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-success",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-warning",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        }
+      ],
+      "outline": {
+        "style": "solid",
+        "width": 3,
+        "color": "oklab(0.96 -0.000418113 -0.00397809)",
+        "shadow": "rgba(0, 0, 0, 0.24) 0px 1px 2px 0px, rgba(255, 255, 255, 0.024) 0px 0px 0px 1px",
+        "focusVisible": true
+      }
+    },
+    {
+      "name": "fallback-app-1920-light",
+      "entry": "app.css",
+      "width": 1920,
+      "dark": false,
+      "removedConditions": 143,
+      "publishedSha256": "1c36b348f03a4850e3833bfa39115b4900c6e9f8b3cbf1ce4b912b248781a4fa",
+      "normal": [
+        {
+          "sample": "button-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-success",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-warning",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        }
+      ],
+      "hover": [
+        {
+          "sample": "button-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-success",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-warning",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        }
+      ],
+      "outline": {
+        "style": "solid",
+        "width": 3,
+        "color": "oklab(0.205 -0.00125434 -0.0119343)",
+        "shadow": "rgba(15, 23, 42, 0.04) 0px 1px 2px 0px",
+        "focusVisible": true
+      }
+    },
+    {
+      "name": "fallback-app-1920-dark",
+      "entry": "app.css",
+      "width": 1920,
+      "dark": true,
+      "removedConditions": 143,
+      "publishedSha256": "1c36b348f03a4850e3833bfa39115b4900c6e9f8b3cbf1ce4b912b248781a4fa",
+      "normal": [
+        {
+          "sample": "button-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-success",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-warning",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        }
+      ],
+      "hover": [
+        {
+          "sample": "button-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-success",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-warning",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        }
+      ],
+      "outline": {
+        "style": "solid",
+        "width": 3,
+        "color": "oklab(0.96 -0.000418113 -0.00397809)",
+        "shadow": "rgba(0, 0, 0, 0.24) 0px 1px 2px 0px, rgba(255, 255, 255, 0.024) 0px 0px 0px 1px",
+        "focusVisible": true
+      }
+    },
+    {
+      "name": "fallback-app-390-light",
+      "entry": "app.css",
+      "width": 390,
+      "dark": false,
+      "removedConditions": 143,
+      "publishedSha256": "1c36b348f03a4850e3833bfa39115b4900c6e9f8b3cbf1ce4b912b248781a4fa",
+      "normal": [
+        {
+          "sample": "button-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-success",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-warning",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        }
+      ],
+      "hover": [
+        {
+          "sample": "button-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-success",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-warning",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        }
+      ],
+      "outline": {
+        "style": "solid",
+        "width": 3,
+        "color": "oklab(0.205 -0.00125434 -0.0119343)",
+        "shadow": "rgba(15, 23, 42, 0.04) 0px 1px 2px 0px",
+        "focusVisible": true
+      }
+    },
+    {
+      "name": "fallback-app-390-dark",
+      "entry": "app.css",
+      "width": 390,
+      "dark": true,
+      "removedConditions": 143,
+      "publishedSha256": "1c36b348f03a4850e3833bfa39115b4900c6e9f8b3cbf1ce4b912b248781a4fa",
+      "normal": [
+        {
+          "sample": "button-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-success",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-warning",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        }
+      ],
+      "hover": [
+        {
+          "sample": "button-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-success",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-warning",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        }
+      ],
+      "outline": {
+        "style": "solid",
+        "width": 3,
+        "color": "oklab(0.96 -0.000418113 -0.00397809)",
+        "shadow": "rgba(0, 0, 0, 0.24) 0px 1px 2px 0px, rgba(255, 255, 255, 0.024) 0px 0px 0px 1px",
+        "focusVisible": true
+      }
+    },
+    {
+      "name": "fallback-app.theme-1440-light",
+      "entry": "app.theme.css",
+      "width": 1440,
+      "dark": false,
+      "removedConditions": 143,
+      "publishedSha256": "1c36b348f03a4850e3833bfa39115b4900c6e9f8b3cbf1ce4b912b248781a4fa",
+      "normal": [
+        {
+          "sample": "button-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-success",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-warning",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        }
+      ],
+      "hover": [
+        {
+          "sample": "button-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-success",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-warning",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        }
+      ],
+      "outline": {
+        "style": "solid",
+        "width": 3,
+        "color": "oklab(0.205 -0.00125434 -0.0119343)",
+        "shadow": "rgba(15, 23, 42, 0.04) 0px 1px 2px 0px",
+        "focusVisible": true
+      }
+    },
+    {
+      "name": "fallback-app.theme-1440-dark",
+      "entry": "app.theme.css",
+      "width": 1440,
+      "dark": true,
+      "removedConditions": 143,
+      "publishedSha256": "1c36b348f03a4850e3833bfa39115b4900c6e9f8b3cbf1ce4b912b248781a4fa",
+      "normal": [
+        {
+          "sample": "button-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-success",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-warning",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        }
+      ],
+      "hover": [
+        {
+          "sample": "button-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-success",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-warning",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        }
+      ],
+      "outline": {
+        "style": "solid",
+        "width": 3,
+        "color": "oklab(0.96 -0.000418113 -0.00397809)",
+        "shadow": "rgba(0, 0, 0, 0.24) 0px 1px 2px 0px, rgba(255, 255, 255, 0.024) 0px 0px 0px 1px",
+        "focusVisible": true
+      }
+    },
+    {
+      "name": "fallback-app.theme-1920-light",
+      "entry": "app.theme.css",
+      "width": 1920,
+      "dark": false,
+      "removedConditions": 143,
+      "publishedSha256": "1c36b348f03a4850e3833bfa39115b4900c6e9f8b3cbf1ce4b912b248781a4fa",
+      "normal": [
+        {
+          "sample": "button-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-success",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-warning",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        }
+      ],
+      "hover": [
+        {
+          "sample": "button-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-success",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-warning",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        }
+      ],
+      "outline": {
+        "style": "solid",
+        "width": 2,
+        "color": "oklch(0.54 0.24 293)",
+        "shadow": "rgba(15, 23, 42, 0.04) 0px 1px 2px 0px",
+        "focusVisible": true
+      }
+    },
+    {
+      "name": "fallback-app.theme-1920-dark",
+      "entry": "app.theme.css",
+      "width": 1920,
+      "dark": true,
+      "removedConditions": 143,
+      "publishedSha256": "1c36b348f03a4850e3833bfa39115b4900c6e9f8b3cbf1ce4b912b248781a4fa",
+      "normal": [
+        {
+          "sample": "button-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-success",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-warning",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        }
+      ],
+      "hover": [
+        {
+          "sample": "button-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-success",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-warning",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        }
+      ],
+      "outline": {
+        "style": "solid",
+        "width": 3,
+        "color": "oklab(0.96 -0.000418113 -0.00397809)",
+        "shadow": "rgba(0, 0, 0, 0.24) 0px 1px 2px 0px, rgba(255, 255, 255, 0.024) 0px 0px 0px 1px",
+        "focusVisible": true
+      }
+    },
+    {
+      "name": "fallback-app.theme-390-light",
+      "entry": "app.theme.css",
+      "width": 390,
+      "dark": false,
+      "removedConditions": 143,
+      "publishedSha256": "1c36b348f03a4850e3833bfa39115b4900c6e9f8b3cbf1ce4b912b248781a4fa",
+      "normal": [
+        {
+          "sample": "button-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-success",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-warning",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        }
+      ],
+      "hover": [
+        {
+          "sample": "button-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-success",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-warning",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        },
+        {
+          "sample": "badge-subtle-destructive",
+          "foreground": [
+            20,
+            23,
+            29,
+            255
+          ],
+          "background": [
+            231,
+            233,
+            238,
+            255
+          ],
+          "contrast": 14.775470024341757
+        }
+      ],
+      "outline": {
+        "style": "solid",
+        "width": 3,
+        "color": "oklab(0.205 -0.00125434 -0.0119343)",
+        "shadow": "rgba(15, 23, 42, 0.04) 0px 1px 2px 0px",
+        "focusVisible": true
+      }
+    },
+    {
+      "name": "fallback-app.theme-390-dark",
+      "entry": "app.theme.css",
+      "width": 390,
+      "dark": true,
+      "removedConditions": 143,
+      "publishedSha256": "1c36b348f03a4850e3833bfa39115b4900c6e9f8b3cbf1ce4b912b248781a4fa",
+      "normal": [
+        {
+          "sample": "button-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-success",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-warning",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        }
+      ],
+      "hover": [
+        {
+          "sample": "button-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-success",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-warning",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        },
+        {
+          "sample": "badge-subtle-destructive",
+          "foreground": [
+            240,
+            242,
+            245,
+            255
+          ],
+          "background": [
+            27,
+            30,
+            36,
+            255
+          ],
+          "contrast": 14.886801761550863
+        }
+      ],
+      "outline": {
+        "style": "solid",
+        "width": 3,
+        "color": "oklab(0.96 -0.000418113 -0.00397809)",
+        "shadow": "rgba(0, 0, 0, 0.24) 0px 1px 2px 0px, rgba(255, 255, 255, 0.024) 0px 0px 0px 1px",
+        "focusVisible": true
+      }
+    }
+  ],
+  "failures": []
+}

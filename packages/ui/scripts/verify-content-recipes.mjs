@@ -21,7 +21,7 @@ const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8'
 const names = ['ContentPageShell', 'ContentPageHeader', 'MetricBlock'];
 const report = {
   baseline, head: git('rev-parse', 'HEAD'), baselineSources: {}, candidateSources: {}, css: {},
-  comparison: 'Exact geometry/styles and PNG versus historical components with explicit Tailwind migration corrections: 24px header gap, wrapping breadcrumbs, semantic clean-flat metric surfaces and four trend colors. Original historical PNGs are retained.',
+  comparison: 'Exact geometry/styles and PNG versus historical components with explicit Tailwind migration corrections: 24px header gap, wrapping breadcrumbs, 1.5 caption/body leading, 65ch description measure, semantic clean-flat metric surfaces and four trend colors. Original historical PNGs are retained.',
   cases: [], errors: [],
 };
 let server;
@@ -115,7 +115,18 @@ try {
         if (!(row instanceof HTMLElement)) throw new Error('Missing historical header row');
         row.style.gap = '24px';
         const breadcrumbs = header.querySelector(':scope > nav');
-        if (breadcrumbs instanceof HTMLElement) breadcrumbs.style.flexWrap = 'wrap';
+        if (breadcrumbs instanceof HTMLElement) {
+          breadcrumbs.style.flexWrap = 'wrap';
+          breadcrumbs.style.lineHeight = '1.5';
+        }
+        const eyebrow = row.querySelector(':scope > div:first-child > p:first-child');
+        const description = row.querySelector(':scope > div:first-child > p:last-child');
+        if (!(eyebrow instanceof HTMLElement) || !(description instanceof HTMLElement) || eyebrow === description) {
+          throw new Error('Missing historical header eyebrow or description');
+        }
+        eyebrow.style.lineHeight = '1.5';
+        description.style.lineHeight = '1.5';
+        description.style.maxWidth = '65ch';
       }
       if (stage.closest('.layout-clean-flat')) {
         const metrics = stage.querySelectorAll('[data-svadmin-metric-card]');

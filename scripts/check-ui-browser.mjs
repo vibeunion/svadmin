@@ -5,7 +5,8 @@ import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'nod
 import { resolve } from 'node:path';
 import { createServer } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
-import { chromium } from '@playwright/test';
+import { chromium, expect } from '@playwright/test';
+import { surfaceTableRecipe } from '../packages/ui/dist/recipes.js';
 import { stableScreenshot } from './stable-screenshot.mjs';
 import { verifyPrimitiveFallbacks } from './ui-fallback-evidence.mjs';
 import {
@@ -14,6 +15,7 @@ import {
   lightTokenMigration,
   stripeDarkTokenMigration,
   stripeLightTokenMigration,
+  tableSizeMigration,
 } from './ui-browser-migration-reference.mjs';
 
 const root = process.cwd();
@@ -185,6 +187,20 @@ try {
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), true, `${name}: horizontal overflow`);
         const image = await stableScreenshot(() => page.screenshot({ fullPage: true, animations: 'disabled', caret: 'hide' }));
         writeFileSync(resolve(output, `${name}.png`), image);
+        const tableState = page.locator('.table-state').first();
+        const originalStateClass = await tableState.getAttribute('class');
+        assert.equal(await tableState.evaluate(el => getComputedStyle(el).minHeight), '128px');
+        await tableState.evaluate((el, classes) => el.classList.add(...classes.split(/\s+/u)),
+          surfaceTableRecipe({ density: 'compact' }).state);
+        // 类名已更新不代表布局已结算；等待实际计算值，不放宽尺寸断言。
+        await expect(tableState).toHaveCSS('min-height', '96px');
+        await tableState.evaluate(el => el.style.setProperty('--svadmin-table-state-min-h-compact', '112px'));
+        await expect(tableState).toHaveCSS('min-height', '112px');
+        await tableState.evaluate((el, originalClass) => {
+          el.setAttribute('class', originalClass ?? '');
+          el.style.removeProperty('--svadmin-table-state-min-h-compact');
+        }, originalStateClass);
+        await expect(tableState).toHaveCSS('min-height', '128px');
         await page.getByText('Advanced details', { exact: true }).click();
         assert.equal(await page.locator('details').evaluate((el) => el.open), true);
         await page.getByText('Advanced details', { exact: true }).click();
@@ -193,7 +209,7 @@ try {
         assert.equal(await page.getByRole('button', { name: 'Primary action' }).evaluate((el) => el === document.activeElement), true);
         await page.getByLabel('Attachment', { exact: true }).setInputFiles({ name: 'invoice.csv', mimeType: 'text/csv', buffer: Buffer.from('id,total\n1,42\n') });
         assert.ok((await page.locator('.svadmin-file-input__name').textContent())?.includes('invoice.csv'));
-        checks.push({ viewport, mode: dark ? 'dark' : 'light', migrationReferenceScreenshotsIdentical: true, semanticVariants: true, states: true, nestedTheme: true, noHorizontalOverflow: true, controls: true });
+        checks.push({ viewport, mode: dark ? 'dark' : 'light', migrationReferenceScreenshotsIdentical: true, semanticVariants: true, states: true, compactTokenOverride: true, nestedTheme: true, noHorizontalOverflow: true, controls: true });
       } catch (error) {
         failures.push({ name, error: String(error) });
         console.error(`${name}: ${error}`);
@@ -220,10 +236,11 @@ try {
       stripeLightTokenMigration,
       stripeDarkTokenMigration,
       bodyStyleMigration,
+      tableSizeMigration,
     },
     browser: browser.version(),
     screenshotLaunchArgs,
-    comparison: 'Original baseline retained; independent reference applies the eleven approved neutral light tokens, five Stripe light tokens, seven Stripe dark tokens, and one body font migration. Same DOM; two stable frames; exact reference/candidate PNG and computed-style equality.',
+    comparison: 'Original baseline retained; independent reference applies the eleven approved neutral light tokens, five Stripe light tokens, seven Stripe dark tokens, one body font migration, and the four table height/type declarations from the shared size baseline. Same DOM; two stable frames; exact reference/candidate PNG and computed-style equality.',
     scope: 'Current real Svelte widget/control fixture under baseline, migration reference and published CSS; Chromium only; not full application or unchanged historical appearance certification',
     checks, failures, pageErrors,
   };
