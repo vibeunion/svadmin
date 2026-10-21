@@ -1,5 +1,6 @@
 {
-  "testedCommit": "1dc9da6a4f258608d623f1d2f820427fc4300bf5",
+  "testedCommit": "c901d5d60c8b9ead20f8f4d7ac6ed32b22c850e7",
+  "browser": "155.0.4283.62",
   "content": {
     "baseline": "ee01ea0b52285bd3129447cd0b2ddb0c114f45ce",
     "cases": 48,
@@ -10,8 +11,6 @@
     "baseline": "cf6c4746578176ea773a17ef6f49f353292f7818",
     "viewportThemeCases": 6,
     "passed": 6,
-    "primitiveFallbackCases": 12,
-    "primitiveFallbackPassed": 12,
     "failed": 0
   },
   "compactTokenOverride": {
@@ -20,5 +19,10 @@
     "hostOverride": "112px",
     "passed": true
   },
+  "reports": [
+    "content-results.json",
+    "native-results.json",
+    "fallback-contrast.json"
+  ],
   "scope": "Local source and browser contract evidence; not publication, deployment, or authenticated consumer acceptance."
 }
