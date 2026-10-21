@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.88.1](https://github.com/vibeunion/svadmin/compare/ui-v0.88.0...ui-v0.88.1) (2026-10-21)
+
+
+### 🐛 Bug Fixes
+
+* **ci:** re-capture once before failing the content PNG comparison ([#534](https://github.com/vibeunion/svadmin/issues/534)) ([9099680](https://github.com/vibeunion/svadmin/commit/909968026d469443911ab67116c43b4e5017dca0))
+
 ## [0.88.0](https://github.com/vibeunion/svadmin/compare/ui-v0.87.0...ui-v0.88.0) (2026-10-21)
 
 
