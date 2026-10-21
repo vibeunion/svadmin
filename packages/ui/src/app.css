@@ -3561,6 +3561,24 @@ details[data-svadmin-filter][open] > :not(summary),
 .svadmin-stats-card__footer { margin-top: 0.5rem; }
 
 /* Auth form compatibility for existing consumers. */
+[data-svadmin-auth-page] {
+  overflow-wrap: anywhere;
+}
+
+[data-svadmin-auth-aside],
+[data-svadmin-auth-main],
+[data-svadmin-auth-main] > div,
+[data-svadmin-auth-card],
+[data-svadmin-auth-card] form,
+[data-svadmin-auth-brand],
+[data-svadmin-auth-brand] > :last-child {
+  min-width: 0;
+}
+
+[data-svadmin-auth-brand] > :not(:last-child) {
+  flex-shrink: 0;
+}
+
 .layout-clean-flat [data-svadmin-auth-page] > main > div {
   display: flex;
   width: min(100%, 28.75rem);

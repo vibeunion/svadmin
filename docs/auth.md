@@ -162,6 +162,18 @@ overrides, including `data-svadmin-auth-brand`, `data-svadmin-auth-card`, and
 `data-svadmin-auth-footer`. The default SVAdmin mark remains in place when
 `brandMark` is not provided.
 
+The authentication region is labelled by its own heading and, when supplied,
+described by its supporting copy. Each shell instance has independent IDs;
+updating or removing the description updates the association.
+
+Long brand names and supporting copy wrap instead of being clipped. Give a custom
+mark explicit dimensions and a decorative `alt=""` when the adjacent brand name
+already identifies it. The snippet is rendered in both responsive brand regions,
+so it should not contain fixed IDs or interactive controls. Only the active
+region is displayed; form and footer controls keep their document keyboard order.
+These shell guarantees do not replace validation or focus management in custom
+authentication forms.
+
 `LoginPage` keeps the default SVAdmin structure while allowing business
 projects to replace authentication copy:
 
