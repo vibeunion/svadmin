@@ -5,8 +5,16 @@ for (const preset of ['default', 'clean-flat']) {
     test(`${preset}, nested=${nested}: label, icons and keyboard remain usable`, async ({ page }, testInfo) => {
       await page.goto(`/?preset=${preset}&nested=${nested}`);
       const input = page.getByLabel('Password', { exact: true });
-      for (const width of [1440, 1280, 1024, 390]) {
-        await page.setViewportSize({ width, height: 900 });
+      for (const viewport of [
+        { width: 1920, height: 1080 },
+        { width: 1440, height: 900 },
+        { width: 1280, height: 900 },
+        { width: 1024, height: 900 },
+        { width: 768, height: 900 },
+        { width: 390, height: 900 },
+      ]) {
+        const { width, height } = viewport;
+        await page.setViewportSize(viewport);
         for (const dir of ['ltr', 'rtl']) {
           await page.locator('[dir]').evaluate((element, value) => element.setAttribute('dir', value), dir);
           for (const state of ['empty', 'masked', 'visible']) {
@@ -50,8 +58,11 @@ for (const preset of ['default', 'clean-flat']) {
               await page.getByRole('button', { name: 'Hide password' }).click();
             }
           }
+          await page.screenshot({
+            path: testInfo.outputPath(`password-${width}x${height}-${dir}.png`),
+            animations: 'disabled',
+          });
         }
-        await page.screenshot({ path: testInfo.outputPath(`password-${width}.png`) });
       }
       await input.focus();
       // macOS WebKit uses Option-Tab for all controls unless full keyboard navigation is enabled.
