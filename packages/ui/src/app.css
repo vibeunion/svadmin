@@ -3672,6 +3672,7 @@ details[data-svadmin-filter][open] > :not(summary),
   gap: 0.5rem;
 }
 
+/* 标签操作行保持横排，嵌套密码控件仍使用自己的纵向布局。 */
 .layout-clean-flat [data-svadmin-auth-page] form > div > div:first-child:not(.svadmin-password-input):not([data-svadmin-password-input]) {
   display: flex;
   align-items: center;
@@ -3724,7 +3725,32 @@ details[data-svadmin-filter][open] > :not(summary),
   outline-offset: var(--svadmin-focus-offset, 2px);
 }
 
-/* 使用稳定类隔离认证兼容样式，避免图标和切换按钮遮挡输入文字。 */
+.layout-clean-flat [data-svadmin-auth-page] form > button[type="submit"] {
+  width: 100%;
+  min-height: 2.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.layout-clean-flat [data-svadmin-auth-page] > main > div > section + div {
+  border-top: 1px solid var(--border);
+  padding-top: 1.5rem;
+}
+
+@media (max-width: 40rem) {
+  .layout-clean-flat [data-svadmin-auth-page] > main > div > section {
+    padding: 1.25rem;
+  }
+
+  .layout-clean-flat [data-svadmin-demo-credentials] dl {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Password field anatomy. These stable classes do not depend on host Tailwind,
+ * and the logical padding keeps both the lock and reveal control clear of text
+ * in empty, filled, and plain-text states. */
 .svadmin-password-input {
   display: grid;
   min-width: 0;
@@ -3818,29 +3844,6 @@ details[data-svadmin-filter][open] > :not(summary),
   font-size: 0.75rem;
   line-height: 1.25;
   white-space: nowrap;
-}
-
-.layout-clean-flat [data-svadmin-auth-page] form > button[type="submit"] {
-  width: 100%;
-  min-height: 2.75rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.layout-clean-flat [data-svadmin-auth-page] > main > div > section + div {
-  border-top: 1px solid var(--border);
-  padding-top: 1.5rem;
-}
-
-@media (max-width: 40rem) {
-  .layout-clean-flat [data-svadmin-auth-page] > main > div > section {
-    padding: 1.25rem;
-  }
-
-  .layout-clean-flat [data-svadmin-demo-credentials] dl {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }
 
 /* --- Stripe-inspired visual refinement ---------------------

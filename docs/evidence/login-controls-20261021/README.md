@@ -11,7 +11,8 @@
 - orchestration: managed；当前会话唯一写入者，Socrates 独立只读复核。
 - scope: LoginPage、PasswordInput、相关 CSS、定向组件/浏览器测试、认证文档和证据。
 - ownership: 仅修改当前隔离树；保留并行 `fix/password-input-layout-20261021` 和共享主树未提交内容。
-- execution: locally-verified；整合并行 #532 后重新验证最终候选。
+- integration: 保留并行 #532 的 `ce5a4c87` 提交、独立夹具与历史证据；不改写该分支。
+- execution: locally-verified；整合后重跑当前源码验证，提交/远端合并状态单独回读。
 
 ## 验收场景
 
@@ -25,16 +26,19 @@
 
 | 范围 | 结果 |
 | --- | --- |
-| PasswordInput 默认/外置唯一标签、Tab/Shift+Tab、Enter/Space、禁用跳过与恢复、强度显示 | 单文件 5/5 |
+| PasswordInput 默认/外置唯一标签、Tab/Shift+Tab、Enter/Space、禁用跳过与恢复、强度显示、双实例隔离 | 整合后单文件 10/10，保留 #532 原有覆盖 |
 | 真实认证页面与 Supabase/PocketBase 适配器契约 | 单文件 9/9 |
 | app-css、component-color-tokens | 分别 14/14、4/4 |
 | 默认/自定义品牌、LoginPage、带忘记密码入口的 LoginPage | Chromium 32/32；1440x900、1920x1080、390x844、320x640 × 明暗主题 |
 | 空值、填入、明文状态的账号/密码图标与文字间距 | 真实元素边界与文本区域比较，间距至少 4px，按钮不超出字段 |
 | 双向键盘顺序、焦点环、错误反馈与受控认证失败后重试 | 浏览器通过；错误保留当前输入焦点，不声称自动定位错误字段 |
+| 独立 PasswordInput：default/clean-flat、直接/嵌套、LTR/RTL、空值/掩码/明文，390/768/1024/1280/1440/1920 | 当前源码 CSS 的 WebKit 4/4，macOS WebKit 键盘使用 Option-Tab；普通 Tab 由 Chromium 真实登录页与组件测试覆盖 |
 
 使用源码 `app.css` 构建受控夹具；`browser-report.json` 保存源码 SHA-256。
 截图来自本次浏览器运行；未覆盖 #530 历史目录。`git diff --check` 和改动文件 ESLint 通过。
 没有运行全仓测试，也不代表生产身份服务或 npm 发布验收。
+WebKit 默认缓存路径缺失，首次启动失败；显式指定已安装的 `webkit-2368/pw_run.sh`
+后四项均通过。执行记录位于 `output/password-input/`，#532 的历史截图不冒充本轮重拍。
 
 ## 复现
 
@@ -49,5 +53,5 @@ git diff --check
 
 #530 已合并，但其 CI run `39531047653` 的 `Lint & Test` 失败在依赖安全审计
 （follow-redirects、hono、vite），不是本轮 UI 单测失败。旧 `UI PR Evidence`
-初次失败是正文缺少状态矩阵/已完成 diff 检查，正文已修正；重跑结果单独核实。
+初次失败是正文缺少状态矩阵/已完成 diff 检查，正文修正后的定向重跑已成功。
 此处不把 mergeable 或已合并等同于 CI 全绿。依赖升级不混入本次 UI 修复。
