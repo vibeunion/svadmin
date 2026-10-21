@@ -194,6 +194,17 @@ The page exposes stable hooks for themed application shells:
 `data-svadmin-login-error` with `aria-live="assertive"` and are associated with
 both credential fields.
 
+`PasswordInput` renders one label by default. When placing a password label
+beside a secondary action, pass `showLabel={false}` and provide an external
+`<Label for="...">` associated with the input ID. The external label must remain
+visible and is the only label; the default stays unchanged for existing callers.
+
+The field exposes `data-svadmin-password-field`, `data-svadmin-password-control`,
+`data-svadmin-password-icon`, and `data-svadmin-password-toggle`. Its show/hide
+button supports Tab, Enter and Space without submitting or clearing the value.
+It exposes `aria-controls` and `aria-pressed`; `disabled` applies to both input
+and toggle. Validation and description attributes stay on the native input.
+
 ## `<Authenticated>` Component
 
 Guard component that conditionally renders based on auth state:
