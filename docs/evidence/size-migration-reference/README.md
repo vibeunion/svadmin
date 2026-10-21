@@ -9,7 +9,7 @@
 - Non-goals: component redesign, historical snapshot replacement, tolerance increases, npm publication or deployment.
 - Risk: medium, verification-only. Orchestration: managed, one writer and one read-only verifier.
 - Scope: content/native migration references, their focused tests, and this evidence directory.
-- Status: in progress.
+- Status: local verification and independent diff review complete; PR merge is recorded separately.
 
 ## Acceptance
 
@@ -25,7 +25,7 @@
 | Content recipes | 1440x900, 1920x1080 | 390x844 | light/dark | 48/48 |
 | Native UI styles | 1440x900, 1920x1080 | 390x844 | light/dark | 6/6 |
 | Primitive fallbacks | 1440x900, 1920x1080 | 390x844 | light/dark | 12/12 |
-| Compact published token | host override 112px | N/A | light/dark | passed |
+| Compact published token | 1440x900, 1920x1080 | 390x844 | light/dark | 128 -> 96 -> 112 -> 128px |
 
 The tested source and verifier commit was
 `c901d5d60c8b9ead20f8f4d7ac6ed32b22c850e7`; its product source is based on
@@ -33,6 +33,8 @@ The tested source and verifier commit was
 The content historical source was `ee01ea0b52285bd3129447cd0b2ddb0c114f45ce`;
 the native historical source was the manifest baseline
 `cf6c4746578176ea773a17ef6f49f353292f7818`.
+Browser: local Microsoft Edge (Chromium) `155.0.4283.62` on macOS, not a
+Linux CI or pinned Playwright-browser certification.
 
 Commands:
 
@@ -49,3 +51,24 @@ package publication, deployment, or authenticated consumer acceptance.
 Archived artifacts include the machine-readable reports, fallback contrast
 report, and representative light-theme screenshots for `1440x900` and
 `1920x1080`. The full matrix remains in the local CI-style reports.
+
+## Verification Boundaries
+
+- Native reference plus published recipe tests: 24/24.
+- Content negative parity tests: 8/8; unrelated geometry, typography, text and colors still fail.
+- UI package build passed. Its existing `import.meta.env` packaging advisory remains.
+- `git diff --check`: passed.
+- One independent read-only verifier found no mandatory code fixes.
+- Compact override is applied on the state element, then both class and
+  override are restored. Ancestor-host inheritance is not separately tested.
+- No full repository suite or remote CI polling was used.
+
+## PR Reconciliation
+
+#525 was already merged as `1dc9da6a`. Its historical failure logs were used to
+identify these missing migration references, not as current-run evidence.
+#509 was closed as superseded after a separate read-only comparison of its
+29 changed files against that main revision: shell/panel APIs, size tokens,
+exports, docs and compact-number formatting were already absorbed. A redundant
+nested `nav` in the Chinese app-shell example remains a separate documentation
+follow-up.
