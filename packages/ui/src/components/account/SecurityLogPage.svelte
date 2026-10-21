@@ -25,8 +25,10 @@
   <FilterToolbar bind:query placeholder={i18n.t('common.search')} />
   <SecurityEventTable
     events={filtered}
-    state={query.trim() && filtered.length === 0 ? 'filtered-empty' : undefined}
-    stateTitle={query.trim() && filtered.length === 0 ? (i18n.locale === 'zh-CN' ? '没有匹配的安全事件' : 'No matching security events') : undefined}
-    stateDescription={query.trim() && filtered.length === 0 ? (i18n.locale === 'zh-CN' ? '请清除或调整搜索条件。' : 'Clear or adjust the search.') : undefined}
+    {...definedOptions({
+      state: query.trim() && filtered.length === 0 ? 'filtered-empty' : undefined,
+      stateTitle: query.trim() && filtered.length === 0 ? (i18n.locale === 'zh-CN' ? '没有匹配的安全事件' : 'No matching security events') : undefined,
+      stateDescription: query.trim() && filtered.length === 0 ? (i18n.locale === 'zh-CN' ? '请清除或调整搜索条件。' : 'Clear or adjust the search.') : undefined,
+    })}
   />
 </ContentPageShell>

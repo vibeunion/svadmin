@@ -148,6 +148,7 @@
     --svadmin-row-h: 3rem; /* 48px */
     --svadmin-table-head-h: 2.75rem; /* 44px */
     --svadmin-table-state-min-h: 8rem; /* 128px */
+    --svadmin-table-state-min-h-compact: 6rem; /* 96px */
     --svadmin-space-1: 0.25rem; /* 4px */
     --svadmin-space-2: 0.5rem; /* 8px */
     --svadmin-space-3: 0.75rem; /* 12px */

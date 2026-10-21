@@ -97,7 +97,9 @@ describe('builtin safety follow-up', () => {
 
   it('distinguishes an empty security-log search from an empty event source', async () => {
     render(SecurityLog);
-    await screen.findByText(referenceDemoData.securityEvents[0].event);
+    const [firstEvent] = referenceDemoData.securityEvents;
+    if (!firstEvent) throw new Error('reference security events fixture must not be empty');
+    await screen.findByText(firstEvent.event);
 
     await fireEvent.input(screen.getByPlaceholderText('Search...'), { target: { value: 'zz-no-match-938' } });
 

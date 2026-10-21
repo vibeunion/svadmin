@@ -63,12 +63,14 @@
   {#if resolvedState}
     <DataState
       state={resolvedState}
-      title={stateTitle ?? (resolvedState === 'empty' ? emptyTitle : undefined)}
-      description={stateDescription ?? (resolvedState === 'empty' ? emptyDescription : undefined)}
-      retry={retry}
-      retryLabel={retryLabel}
-      loadingLabel={loadingLabel}
-      {...definedOptions({ action })}
+      {...definedOptions({
+        title: stateTitle ?? (resolvedState === 'empty' ? emptyTitle : undefined),
+        description: stateDescription ?? (resolvedState === 'empty' ? emptyDescription : undefined),
+        retry,
+        retryLabel,
+        loadingLabel,
+        action,
+      })}
     />
   {:else}
     <div class="svadmin-u-d89972fe17d6 svadmin-u-9079b62ef1cb svadmin-u-b3542e058833 svadmin-u-884dada40b17 svadmin-u-699f6fc4b3e0 svadmin-u-37f34e63818d svadmin-u-f76c7493f919 svadmin-u-8f848a57f066 svadmin-u-3242dfaf010c" data-svadmin-audit-events>

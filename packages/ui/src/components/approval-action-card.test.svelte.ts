@@ -50,8 +50,11 @@ describe('ApprovalActionCard Component', () => {
     const view = render(ApprovalActionCard, { title: 'Request A', onapprove: vi.fn() });
     const second = render(ApprovalActionCard, { title: 'Request B', onapprove: vi.fn() });
 
-    await fireEvent.click(view.getAllByRole('button', { name: 'Approve' })[0]);
-    await fireEvent.click(second.getAllByRole('button', { name: 'Approve' })[1]);
+    const [firstApprove] = view.getAllByRole('button', { name: 'Approve' });
+    const secondApprove = second.getAllByRole('button', { name: 'Approve' })[1];
+    if (!firstApprove || !secondApprove) throw new Error('approval cards must render an Approve button');
+    await fireEvent.click(firstApprove);
+    await fireEvent.click(secondApprove);
 
     const ids = [...document.querySelectorAll('textarea')].map(input => input.id);
     expect(new Set(ids).size).toBe(ids.length);
