@@ -108,7 +108,7 @@
     transform: translateY(-50%);
     pointer-events: none;
   }
-  .svadmin-filter-toolbar .svadmin-filter-toolbar__input {
+  .svadmin-filter-toolbar .svadmin-filter-toolbar__input[data-slot="input"] {
     height: var(--svadmin-filter-control-height);
     padding-inline: calc(var(--svadmin-space-5) + var(--svadmin-space-3));
     font-size: var(--svadmin-filter-control-font);

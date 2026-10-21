@@ -1,0 +1,193 @@
+{
+  "sources": {
+    "src/page-chrome.css": "77a2eae011787da6abca6abc0c6135c354fc92902b69eab0013520963f1ca4dd",
+    "src/app.css": "d0cc4054a662e14ca6478650a073446a5a66b7d92aa3b253139f85a32921355a",
+    "src/components/content/FilterToolbar.svelte": "6382c0238c5adcced36d5750fdf0d53bf8b6426f2f464fd09efb64b85ee0e684"
+  },
+  "cases": [
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "direction": "ltr",
+      "theme": "light",
+      "geometry": {
+        "leadingGap": 9,
+        "trailingGap": 9,
+        "height": 36,
+        "buttonHeight": 24,
+        "buttonWithinInput": true
+      },
+      "themedAfter": {
+        "leadingGap": 9,
+        "trailingGap": 13,
+        "height": 44,
+        "buttonHeight": 24,
+        "buttonWithinInput": true
+      },
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "direction": "ltr",
+      "theme": "dark",
+      "geometry": {
+        "leadingGap": 9,
+        "trailingGap": 9,
+        "height": 36,
+        "buttonHeight": 24,
+        "buttonWithinInput": true
+      },
+      "themedAfter": {
+        "leadingGap": 9,
+        "trailingGap": 13,
+        "height": 44,
+        "buttonHeight": 24,
+        "buttonWithinInput": true
+      },
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "direction": "rtl",
+      "theme": "light",
+      "geometry": {
+        "leadingGap": 9,
+        "trailingGap": 9,
+        "height": 36,
+        "buttonHeight": 24,
+        "buttonWithinInput": true
+      },
+      "themedAfter": {
+        "leadingGap": 9,
+        "trailingGap": 13,
+        "height": 44,
+        "buttonHeight": 24,
+        "buttonWithinInput": true
+      },
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "direction": "rtl",
+      "theme": "dark",
+      "geometry": {
+        "leadingGap": 9,
+        "trailingGap": 9,
+        "height": 36,
+        "buttonHeight": 24,
+        "buttonWithinInput": true
+      },
+      "themedAfter": {
+        "leadingGap": 9,
+        "trailingGap": 13,
+        "height": 44,
+        "buttonHeight": 24,
+        "buttonWithinInput": true
+      },
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "direction": "ltr",
+      "theme": "light",
+      "geometry": {
+        "leadingGap": 9,
+        "trailingGap": 9,
+        "height": 36,
+        "buttonHeight": 24,
+        "buttonWithinInput": true
+      },
+      "themedAfter": {
+        "leadingGap": 9,
+        "trailingGap": 13,
+        "height": 44,
+        "buttonHeight": 24,
+        "buttonWithinInput": true
+      },
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "direction": "ltr",
+      "theme": "dark",
+      "geometry": {
+        "leadingGap": 9,
+        "trailingGap": 9,
+        "height": 36,
+        "buttonHeight": 24,
+        "buttonWithinInput": true
+      },
+      "themedAfter": {
+        "leadingGap": 9,
+        "trailingGap": 13,
+        "height": 44,
+        "buttonHeight": 24,
+        "buttonWithinInput": true
+      },
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "direction": "rtl",
+      "theme": "light",
+      "geometry": {
+        "leadingGap": 9,
+        "trailingGap": 9,
+        "height": 36,
+        "buttonHeight": 24,
+        "buttonWithinInput": true
+      },
+      "themedAfter": {
+        "leadingGap": 9,
+        "trailingGap": 13,
+        "height": 44,
+        "buttonHeight": 24,
+        "buttonWithinInput": true
+      },
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "direction": "rtl",
+      "theme": "dark",
+      "geometry": {
+        "leadingGap": 9,
+        "trailingGap": 9,
+        "height": 36,
+        "buttonHeight": 24,
+        "buttonWithinInput": true
+      },
+      "themedAfter": {
+        "leadingGap": 9,
+        "trailingGap": 13,
+        "height": 44,
+        "buttonHeight": 24,
+        "buttonWithinInput": true
+      },
+      "passed": true
+    }
+  ]
+}
