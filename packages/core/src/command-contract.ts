@@ -38,7 +38,16 @@ function invalidContract(): never {
 }
 
 const diagnosticCode = /^[A-Z][A-Z0-9_]{1,63}$/;
-const diagnosticMessage = /^[^\u0000-\u001f\u007f]{1,200}$/;
+
+/** 诊断文案长度 1–200，且拒绝 C0 控制符与 DEL。按码元判断，避免 no-control-regex。 */
+function safeDiagnosticMessage(message: string): boolean {
+  if (message.length < 1 || message.length > 200) return false;
+  for (let index = 0; index < message.length; index += 1) {
+    const code = message.charCodeAt(index);
+    if (code <= 0x1f || code === 0x7f) return false;
+  }
+  return true;
+}
 
 function ownData(target: object, key: string): unknown {
   try {
@@ -58,7 +67,7 @@ function diagnosticMapping(value: unknown): CommandErrorDiagnostics {
   for (const [code, descriptor] of Object.entries(Object.getOwnPropertyDescriptors(value))) {
     const message: unknown = 'value' in descriptor ? descriptor.value : undefined;
     if (!descriptor.enumerable || !('value' in descriptor) || !diagnosticCode.test(code) ||
-        typeof message !== 'string' || !diagnosticMessage.test(message) || message !== message.trim()) {
+        typeof message !== 'string' || !safeDiagnosticMessage(message) || message !== message.trim()) {
       return invalidContract();
     }
     entries.push([code, message]);
