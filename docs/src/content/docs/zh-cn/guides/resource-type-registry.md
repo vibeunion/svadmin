@@ -76,6 +76,20 @@ const result = useCustom({ command: report, input: { year: 2026 } });
 GET 输入映射为查询参数，其他方法映射为请求体；输入和响应都必须校验。
 调用时不能覆盖命令地址或方法。
 
+执行错误默认完全保密。若需要展示固定的业务错误码和文案，可在命令上声明静态白名单。
+系统只读取 Provider 自有的 `code`；未声明或不安全的 code 回退为
+`COMMAND_FAILED`，不会读取 Provider 的 message、body、cause、errors、details 或 stack。
+
+```typescript
+const report = defineCommand('report', {
+  url: '/reports',
+  method: 'post',
+  input: Type.Object({ year: Type.Number() }),
+  output: Type.Object({ count: Type.Number() }),
+  diagnostics: { safe: { EXPERIMENT_TIME_IN_FUTURE: '样品开始时间晚于当前时间' } },
+});
+```
+
 ## 明确的例外
 
 `@svadmin/core/unsafe` 集中了元数据驱动的通用辅助函数，以及字符串和手动泛型形式的

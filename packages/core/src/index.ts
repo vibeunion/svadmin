@@ -114,7 +114,8 @@ export type { ContractProjectionOptions } from './resource-contract';
 export type { ResourceContract, ContractSchemas, ContractRecord, ContractId, ContractInput } from './resource-contract';
 export type { ContractFilter, ContractSort } from './strict-hooks.svelte';
 export { defineCommand } from './command-contract';
-export type { CommandContract, CommandInput, CommandOutput } from './command-contract';
+export type { CommandContract, CommandInput, CommandOutput, CommandErrorDiagnostic, CommandErrorDiagnostics,
+  CommandDiagnostics } from './command-contract';
 export { useCustom, useCustomMutation } from './strict-command-hooks.svelte';
 export { matchRoute, navigate, currentPath, setActiveRouterProvider, beforeEach, afterEach, resetRouter } from './router';
 export type { RouteGuard } from './router';
