@@ -19,8 +19,9 @@
     deleteOne: async () => ({ data: {} }),
     getApiUrl: () => '',
   } satisfies DataProvider;
+  let route = $state('');
   const routerProvider: RouterProvider = {
-    go: () => {},
+    go: (options) => { route = options.to; },
     back: () => {},
     parse: () => ({ resource: '', action: 'list', params: {}, pathname: '/login' }),
   };
@@ -36,3 +37,4 @@
 {:else}
   <UpdatePasswordPage />
 {/if}
+<output hidden data-testid="auth-route">{route}</output>

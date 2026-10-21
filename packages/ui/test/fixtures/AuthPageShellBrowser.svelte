@@ -20,11 +20,12 @@
         : { success: true };
     },
     logout: async () => ({ success: true }),
+    ...(mode === 'login-recovery' ? { forgotPassword: async () => ({ success: true }) } : {}),
   };
 </script>
 
 <div class="svadmin-theme layout-clean-flat" data-theme="stripe">
-  {#if mode === 'login'}
+  {#if mode.startsWith('login')}
     <AuthHost {provider} screen="login" loginProps={{ title: brand, identifierLabel: 'Work account', passwordLabel: 'Password', loginButtonLabel: 'Sign in' }} />
     <output hidden data-testid="login-attempts">{attempts}</output>
   {:else}

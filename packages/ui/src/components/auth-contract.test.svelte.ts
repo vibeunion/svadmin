@@ -128,6 +128,7 @@ it('supports login copy overrides and stable accessibility hooks', async () => {
   expect(view.container.querySelector('[data-svadmin-login-form]')).not.toBeNull();
   expect(view.getByLabelText('账号').getAttribute('placeholder')).toBe('请输入账号');
   expect(view.getByLabelText('访问密码')).toBeTruthy();
+  expect(view.container.querySelectorAll('label[for="login-password"]')).toHaveLength(1);
   expect(view.getByRole('button', { name: '进入系统' })).toBeTruthy();
 
   await input(view.container, 'login-identifier', 'admin@example.com');

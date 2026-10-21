@@ -66,6 +66,9 @@ async function assertFocus(page, control) {
       visible: element.matches(':focus-visible'),
       outlineStyle: style.outlineStyle,
       outlineWidth: parseFloat(style.outlineWidth),
+      bounds: { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom },
+      viewport: { width: innerWidth, height: innerHeight },
+      control: element.getAttribute('aria-label') ?? element.textContent ?? element.tagName,
       withinViewport: rect.left - ring >= 0 && rect.right + ring <= innerWidth
         && rect.top - ring >= 0 && rect.bottom + ring <= innerHeight,
     };
@@ -100,7 +103,48 @@ async function assertTheme(page, theme) {
   return paint;
 }
 
-test('auth brands, labels, focus and recovery fit desktop and narrow viewports', { timeout: 120_000 }, async () => {
+async function assertFieldGeometry(input, icon, toggle) {
+  const bounds = await input.evaluate(element => {
+    const rect = element.getBoundingClientRect();
+    const style = getComputedStyle(element);
+    return {
+      left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom,
+      textLeft: rect.left + parseFloat(style.borderLeftWidth) + parseFloat(style.paddingLeft),
+      textRight: rect.right - parseFloat(style.borderRightWidth) - parseFloat(style.paddingRight),
+      rtl: style.direction === 'rtl',
+    };
+  });
+  const iconBounds = await icon.boundingBox();
+  assert.ok(iconBounds);
+  const iconGap = bounds.rtl ? iconBounds.x - bounds.textRight : bounds.textLeft - iconBounds.x - iconBounds.width;
+  assert.ok(iconGap >= 4, JSON.stringify({ bounds, iconBounds, iconGap }));
+  assert.ok(iconBounds.y >= bounds.top && iconBounds.y + iconBounds.height <= bounds.bottom);
+  let toggleGap;
+  if (toggle) {
+    const rect = await toggle.boundingBox();
+    assert.ok(rect);
+    toggleGap = bounds.rtl ? bounds.textLeft - rect.x - rect.width : rect.x - bounds.textRight;
+    assert.ok(toggleGap >= 4, JSON.stringify({ bounds, rect, toggleGap }));
+    assert.ok(rect.x >= bounds.left && rect.x + rect.width <= bounds.right);
+    assert.ok(rect.y >= bounds.top && rect.y + rect.height <= bounds.bottom);
+  }
+  return { iconGap, ...(toggleGap === undefined ? {} : { toggleGap }) };
+}
+
+async function assertLoginControls(page) {
+  await expect(page.locator('label[for="login-password"]')).toHaveCount(1);
+  return {
+    identifier: await assertFieldGeometry(
+      page.locator('#login-identifier'), page.locator('[data-svadmin-auth-input-icon]'),
+    ),
+    password: await assertFieldGeometry(
+      page.locator('#login-password'), page.locator('[data-svadmin-password-icon]'),
+      page.locator('[data-svadmin-password-toggle]'),
+    ),
+  };
+}
+
+test('auth brands, labels, focus and recovery fit desktop and narrow viewports', { timeout: 180_000 }, async () => {
   mkdirSync(evidence, { recursive: true });
   const work = mkdtempSync(join(evidence, 'fixture-'));
   const report = {
@@ -108,6 +152,7 @@ test('auth brands, labels, focus and recovery fit desktop and narrow viewports',
       'src/app.css', 'src/styles/compatibility.prelude.css', 'src/styles/tailwind.generated.css',
       'src/components/AuthPageShell.svelte', 'src/components/LoginPage.svelte',
       'src/components/PasswordInput.svelte', 'test/fixtures/AuthPageShellBrowser.svelte',
+      'src/components/auth-contract.test-host.svelte',
       'scripts/auth-page-shell.browser.test.mjs',
     ].map(path => [path, createHash('sha256').update(readFileSync(join(ui, path))).digest('hex')])),
     cases: [],
@@ -133,7 +178,7 @@ test('auth brands, labels, focus and recovery fit desktop and narrow viewports',
       { width: 390, height: 844 }, { width: 320, height: 640 },
     ]) {
       for (const theme of ['light', 'dark']) {
-        for (const mode of ['default', 'custom', 'login']) {
+        for (const mode of ['default', 'custom', 'login', 'login-recovery']) {
           const page = await browser.newPage({ viewport, locale: 'en-US', colorScheme: theme });
           const errors = [];
           page.on('pageerror', error => errors.push(error.message));
@@ -154,7 +199,8 @@ test('auth brands, labels, focus and recovery fit desktop and narrow viewports',
             documentOverflow: false, overflow: [], labelled: true, described: true,
             headingSize: '20px', mainOverflowX: 'visible',
           }, `${mode} ${theme} ${viewport.width}: ${JSON.stringify(layout)}`);
-          if (mode !== 'login') {
+          let controls;
+          if (!mode.startsWith('login')) {
             await expect(page.locator('[data-testid="custom-mark"]')).toHaveCount(mode === 'custom' ? 2 : 0);
             await expect(page.locator('[data-svadmin-auth-default-mark]')).toHaveCount(mode === 'default' ? 2 : 0);
             const email = page.getByRole('textbox', { name: 'Email', exact: true });
@@ -170,8 +216,10 @@ test('auth brands, labels, focus and recovery fit desktop and narrow viewports',
               await assertFocus(page, control);
             }
           } else {
+            controls = { empty: await assertLoginControls(page) };
             const identifier = page.getByRole('textbox', { name: 'Work account', exact: true });
             const password = page.getByLabel('Password', { exact: true });
+            const passwordToggle = page.locator('[data-svadmin-password-toggle]');
             const submit = page.getByRole('button', { name: 'Sign in', exact: true });
             await page.keyboard.press('Tab');
             await assertFocus(page, identifier);
@@ -189,13 +237,41 @@ test('auth brands, labels, focus and recovery fit desktop and narrow viewports',
             const invalidLayout = await geometry(page);
             assert.deepEqual(invalidLayout.overflow, []);
             assert.equal(invalidLayout.documentOverflow, false);
-            if (theme === 'light') {
+            if (theme === 'light' && mode === 'login') {
               await page.screenshot({ path: join(evidence, `login-error-${viewport.width}x${viewport.height}.png`), fullPage: true, animations: 'disabled' });
             }
             await identifier.fill('operator@example.invalid');
             await identifier.press('Tab');
+            if (mode === 'login-recovery') {
+              const forgot = page.getByRole('button', { name: 'Forgot password?', exact: true });
+              await assertFocus(page, forgot);
+              await forgot.press('Enter');
+              await expect(page.getByTestId('login-attempts')).toHaveText('0');
+              await expect(page.getByTestId('auth-route')).toHaveText('/forgot-password');
+              await forgot.press('Tab');
+            }
             await assertFocus(page, password);
             await password.fill('synthetic-fixture-value');
+            controls.filled = await assertLoginControls(page);
+            await password.press('Tab');
+            await assertFocus(page, passwordToggle);
+            await expect(passwordToggle).toHaveAccessibleName('Show password');
+            await passwordToggle.press('Enter');
+            await expect(password).toHaveAttribute('type', 'text');
+            await expect(passwordToggle).toHaveAttribute('aria-pressed', 'true');
+            await expect(passwordToggle).toHaveAccessibleName('Hide password');
+            controls.revealed = await assertLoginControls(page);
+            await passwordToggle.press('Space');
+            await expect(password).toHaveAttribute('type', 'password');
+            await expect(passwordToggle).toHaveAttribute('aria-pressed', 'false');
+            await expect(password).toHaveValue('synthetic-fixture-value');
+            await expect(page.getByTestId('login-attempts')).toHaveText('0');
+            await passwordToggle.press('Tab');
+            await assertFocus(page, submit);
+            await submit.press('Shift+Tab');
+            await assertFocus(page, passwordToggle);
+            await passwordToggle.press('Shift+Tab');
+            await assertFocus(page, password);
             await password.press('Enter');
             await expect(error).toHaveText(/Authentication request was rejected\./);
             await assertFocus(page, password);
@@ -212,7 +288,7 @@ test('auth brands, labels, focus and recovery fit desktop and narrow viewports',
           if (mode === 'custom' && (theme === 'light' || viewport.width === 390)) {
             await page.screenshot({ path: join(evidence, `custom-${theme}-${viewport.width}x${viewport.height}.png`), fullPage: true, animations: 'disabled' });
           }
-          report.cases.push({ viewport, theme, mode, layout, paint, keyboard: true, pageErrors: errors, passed: true });
+          report.cases.push({ viewport, theme, mode, layout, paint, controls, keyboard: true, pageErrors: errors, passed: true });
           await page.close();
         }
       }
