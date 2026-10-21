@@ -30,7 +30,8 @@
 | --- | --- | --- | --- | --- |
 | Default and `clean-flat` | LTR and RTL | Empty, masked, visible | 390, 768, 1024, 1280, 1440, 1920 | No overlap, stable icon centering, no horizontal overflow |
 | Direct and nested | LTR and RTL | Empty, masked, visible | 390, 768, 1024, 1280, 1440, 1920 | Label remains above the control; parent form rules do not collapse the field |
-| Keyboard interaction | LTR | Masked and visible | 390, 1440 | Tab/Option-Tab reaches the toggle; Enter/Space toggles without submit |
+| Keyboard interaction | RTL after the browser matrix | Masked and visible | 390 | Option-Tab reaches the toggle in macOS WebKit; Enter/Space toggles without submit |
+| Component semantics | Unit fixture | Disabled, invalid, described-by, strength | Not a browser viewport | State and value bindings are preserved; normal Tab reaches the enabled toggle |
 
 ## Verification
 
@@ -43,3 +44,7 @@
 
 - `1440x900.png`
 - `1920x1080.png`
+
+These are isolated component fixtures using the built package stylesheet without
+host Tailwind. They are not screenshots of a full login page or evidence of a
+real authentication flow. All entered values are synthetic fixture data.
