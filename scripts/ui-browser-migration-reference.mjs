@@ -57,6 +57,18 @@ export const bodyStyleMigration = Object.freeze({
   ],
 });
 
+// 已合并的尺寸基线；常量独立于候选 CSS，null 表示历史规则没有该声明。
+export const tableSizeMigration = Object.freeze({
+  '.svadmin-table-head': Object.freeze({
+    height: Object.freeze(['2.25rem', '2.75rem']),
+    'font-size': Object.freeze([null, '0.75rem']),
+  }),
+  '.svadmin-table-cell': Object.freeze({
+    height: Object.freeze([null, '3rem']),
+    'font-size': Object.freeze([null, '0.8125rem']),
+  }),
+});
+
 for (const migration of [stripeLightTokenMigration, stripeDarkTokenMigration, bodyStyleMigration]) {
   for (const values of Object.values(migration)) Object.freeze(values);
 }
@@ -85,11 +97,36 @@ function isRootRule(rule) {
   return rule.parent?.type === 'root';
 }
 
+function migrateTableSizes(root) {
+  for (const [selector, declarations] of Object.entries(tableSizeMigration)) {
+    const rules = [];
+    root.walkRules(selector, rule => {
+      const layer = rule.parent;
+      if (layer?.type === 'atrule' && layer.name === 'layer'
+        && layer.params === 'components' && layer.parent?.type === 'root') rules.push(rule);
+    });
+    assert.equal(rules.length, 1, `${selector}: expected one historical component rule`);
+    const rule = rules[0];
+    for (const [property, [before, after]] of Object.entries(declarations)) {
+      const matches = rule.nodes.filter(node => node.type === 'decl' && node.prop === property);
+      assert.equal(matches.length, before === null ? 0 : 1, `${selector} ${property}: historical declaration drift`);
+      if (before === null) {
+        rule.append({ prop: property, value: after });
+      } else {
+        assert.equal(matches[0].value, before, `${selector} ${property}: historical value drift`);
+        assert.equal(Boolean(matches[0].important), false, `${selector} ${property}: unexpected priority`);
+        matches[0].value = after;
+      }
+    }
+  }
+}
+
 export function createMigrationReference(baselineCss) {
   const root = postcss.parse(baselineCss);
   replaceDeclarations(root, ':root', lightTokenMigration, isBaseToken);
   replaceDeclarations(root, ':root', stripeLightTokenMigration, isBaseToken);
   replaceDeclarations(root, '.dark', stripeDarkTokenMigration, isBaseToken);
   replaceDeclarations(root, 'body', bodyStyleMigration, isRootRule);
+  migrateTableSizes(root);
   return root.toString();
 }

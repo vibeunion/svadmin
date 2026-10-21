@@ -1,0 +1,24 @@
+{
+  "testedCommit": "1dc9da6a4f258608d623f1d2f820427fc4300bf5",
+  "content": {
+    "baseline": "ee01ea0b52285bd3129447cd0b2ddb0c114f45ce",
+    "cases": 48,
+    "passed": 48,
+    "failed": 0
+  },
+  "native": {
+    "baseline": "cf6c4746578176ea773a17ef6f49f353292f7818",
+    "viewportThemeCases": 6,
+    "passed": 6,
+    "primitiveFallbackCases": 12,
+    "primitiveFallbackPassed": 12,
+    "failed": 0
+  },
+  "compactTokenOverride": {
+    "defaultState": "128px",
+    "compactState": "96px",
+    "hostOverride": "112px",
+    "passed": true
+  },
+  "scope": "Local source and browser contract evidence; not publication, deployment, or authenticated consumer acceptance."
+}

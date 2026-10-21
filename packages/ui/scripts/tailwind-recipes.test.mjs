@@ -110,6 +110,22 @@ test('all Surface tones include state and loaded styles', () => {
   requires(table.state, ['--svadmin-table-state-height']);
 });
 
+test('compact recipes publish their token bindings without changing the default state height', () => {
+  for (const [density, token] of [
+    ['comfortable', '--svadmin-table-state-min-h'],
+    ['compact', '--svadmin-table-state-min-h-compact'],
+  ]) {
+    const state = surfaceTableRecipe({ density }).state;
+    assert.equal(declarations(state).get('--svadmin-table-state-height'), `var(${token})`);
+    const values = [];
+    postcss.parse(css).walkDecls(token, declaration => values.push(declaration.value));
+    assert.deepEqual(values, [density === 'compact' ? '6rem' : '8rem']);
+  }
+  const header = contentHeaderRecipe({ density: 'compact' });
+  assert.equal(declarations(header.row).get('gap'), 'var(--svadmin-space-3)');
+  assert.match(declarations(contentPageRecipe({ density: 'compact' }).root).get('margin-block-end'), /var\(--svadmin-space-4\)/u);
+});
+
 test('primitive recipes preserve null variants and caller classes', () => {
   assert.equal(buttonRecipe({ variant: null, size: null }).root, 'svadmin-button');
   assert.equal(badgeRecipe({ variant: null }).root, 'svadmin-badge');
