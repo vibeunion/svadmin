@@ -1,0 +1,62 @@
+[
+  {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "mode": "toolbar",
+    "passed": true,
+    "pageErrors": [],
+    "unexpectedDownloads": 0
+  },
+  {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "mode": "security",
+    "passed": true,
+    "pageErrors": [],
+    "unexpectedDownloads": 0
+  },
+  {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "mode": "crew",
+    "passed": true,
+    "pageErrors": [],
+    "unexpectedDownloads": 0
+  },
+  {
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "mode": "toolbar",
+    "passed": true,
+    "pageErrors": [],
+    "unexpectedDownloads": 0
+  },
+  {
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "mode": "security",
+    "passed": true,
+    "pageErrors": [],
+    "unexpectedDownloads": 0
+  },
+  {
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "mode": "crew",
+    "passed": true,
+    "pageErrors": [],
+    "unexpectedDownloads": 0
+  }
+]

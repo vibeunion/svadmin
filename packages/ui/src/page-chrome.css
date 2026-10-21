@@ -116,9 +116,9 @@
   }
   .svadmin-filter-toolbar .svadmin-filter-toolbar__clear {
     position: absolute;
-    top: 50%;
+    inset-block: 0;
     inset-inline-end: var(--svadmin-space-1);
-    transform: translateY(-50%);
+    margin-block: auto;
   }
   .svadmin-filter-toolbar .svadmin-filter-toolbar__toggle {
     flex-shrink: 0;
