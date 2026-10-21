@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.43.0](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.42.1...create-svadmin-v0.43.0) (2026-10-21)
+
+
+### 🚀 Features
+
+* **ui:** align state contracts and reference targets ([#522](https://github.com/vibeunion/svadmin/issues/522)) ([0e5ae8a](https://github.com/vibeunion/svadmin/commit/0e5ae8afdff5a7d781bd2f52f7c313d3970d1ce1))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** make dashboard module errors retryable ([#523](https://github.com/vibeunion/svadmin/issues/523)) ([370e0a1](https://github.com/vibeunion/svadmin/commit/370e0a1813adbc1d6df18ca01cfdefe8bb56df08))
+
 ## [0.42.1](https://github.com/vibeunion/svadmin/compare/create-svadmin-v0.42.0...create-svadmin-v0.42.1) (2026-10-20)
 
 

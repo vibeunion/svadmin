@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.88.0](https://github.com/vibeunion/svadmin/compare/ui-v0.87.0...ui-v0.88.0) (2026-10-21)
+
+
+### 🚀 Features
+
+* **ui:** add filtered state recovery actions ([#521](https://github.com/vibeunion/svadmin/issues/521)) ([3750f6c](https://github.com/vibeunion/svadmin/commit/3750f6c7803de89085f8e1c4986eda664d5f6d3d))
+* **ui:** align state contracts and reference targets ([#522](https://github.com/vibeunion/svadmin/issues/522)) ([0e5ae8a](https://github.com/vibeunion/svadmin/commit/0e5ae8afdff5a7d781bd2f52f7c313d3970d1ce1))
+* **ui:** complete enterprise page workflow contracts ([4099bb0](https://github.com/vibeunion/svadmin/commit/4099bb00a2f52a0f4ba5dbbe0c4bab4a998e969c))
+* **ui:** complete enterprise page workflow contracts ([5902846](https://github.com/vibeunion/svadmin/commit/5902846a3564692b13f52b7a60f048a77c13cc2b))
+* **ui:** harden workflow state boundaries ([#520](https://github.com/vibeunion/svadmin/issues/520)) ([19a0f4f](https://github.com/vibeunion/svadmin/commit/19a0f4fe43e33856b57c6caa89cb06f25c281ea4))
+* **ui:** standardize filtered empty workflow states ([5431320](https://github.com/vibeunion/svadmin/commit/543132086b2a9f8d39eb8d45dcf48fa84b0f3c27))
+* **ui:** standardize filtered empty workflow states ([e4b0631](https://github.com/vibeunion/svadmin/commit/e4b0631fa7003e081158a858e64a7a9e6d5cad4b))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** add member directory search recovery ([#526](https://github.com/vibeunion/svadmin/issues/526)) ([75ce0fb](https://github.com/vibeunion/svadmin/commit/75ce0fb63800e6db41ef05641d9d4be83bb64065))
+* **ui:** complete auth shell accessibility and responsive acceptance ([#530](https://github.com/vibeunion/svadmin/issues/530)) ([78c7a7f](https://github.com/vibeunion/svadmin/commit/78c7a7fd24bfb578e13c4f70754993697d8a2aad))
+* **ui:** complete login control accessibility and spacing ([869f645](https://github.com/vibeunion/svadmin/commit/869f645ba79406cc1003c71301c3495854768fff))
+* **ui:** complete login control accessibility and spacing ([720d260](https://github.com/vibeunion/svadmin/commit/720d260df6b0c1731ce7f350ca87cb5ea1896b78))
+* **ui:** integrate password layout and login acceptance ([1a3999f](https://github.com/vibeunion/svadmin/commit/1a3999f3bfdeb2a8cc4a6a9e26a544625f0f5799))
+* **ui:** make dashboard module errors retryable ([#523](https://github.com/vibeunion/svadmin/issues/523)) ([370e0a1](https://github.com/vibeunion/svadmin/commit/370e0a1813adbc1d6df18ca01cfdefe8bb56df08))
+* **ui:** preserve filter toolbar input spacing ([#528](https://github.com/vibeunion/svadmin/issues/528)) ([814d1b1](https://github.com/vibeunion/svadmin/commit/814d1b18a50a0e840728be3158fcb4211c8dcbf8))
+* **ui:** preserve recipe density compatibility ([50bca6b](https://github.com/vibeunion/svadmin/commit/50bca6bc8122e47278e9d9f786bb0f7b0cfdc130))
+* **ui:** restore filter clear focus ([#527](https://github.com/vibeunion/svadmin/issues/527)) ([9015ddf](https://github.com/vibeunion/svadmin/commit/9015ddf51c08a7b843b27ec15174872b4e4aa524))
+* **ui:** restore green main after page-chrome and filtered-empty merges ([#525](https://github.com/vibeunion/svadmin/issues/525)) ([1dc9da6](https://github.com/vibeunion/svadmin/commit/1dc9da6a4f258608d623f1d2f820427fc4300bf5))
+* **ui:** separate notification settings recovery states ([#524](https://github.com/vibeunion/svadmin/issues/524)) ([31923de](https://github.com/vibeunion/svadmin/commit/31923dec1d185a7681d4bd1651aa41b9235ae72b))
+* **ui:** stabilize password input layout ([ef4eb74](https://github.com/vibeunion/svadmin/commit/ef4eb74431207103bc0819a90151c919f827ac8c))
+
 ## [0.87.0](https://github.com/vibeunion/svadmin/compare/ui-v0.86.0...ui-v0.87.0) (2026-10-20)
 
 
