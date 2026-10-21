@@ -194,6 +194,22 @@ The page exposes stable hooks for themed application shells:
 `data-svadmin-login-error` with `aria-live="assertive"` and are associated with
 both credential fields.
 
+### Password field contract
+
+`PasswordInput` owns its field anatomy with the stable
+`.svadmin-password-input` classes and `data-svadmin-password-*` hooks, so it
+works without host Tailwind. The label occupies its own row; the lock icon and
+the show/hide control are positioned inside the field with logical inline
+padding, including for empty, filled, and plain-text values. Hosts may theme the
+field but must not replace its padding or place the label beside the control.
+
+The show/hide control is a `type="button"` control with an accessible label and
+`aria-pressed`, remains reachable with Tab, and toggles between `password` and
+`text` without submitting the form or clearing the current value. `disabled`,
+`aria-invalid`, and `aria-describedby` remain on the native input. Authentication
+actions and credential submission stay owned by the auth provider; this field
+only controls presentation and local visibility.
+
 ## `<Authenticated>` Component
 
 Guard component that conditionally renders based on auth state:
