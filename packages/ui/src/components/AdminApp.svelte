@@ -406,7 +406,7 @@
     const resource = renderedParams['resource']
       ? resources.find((candidate) => candidate.name === renderedParams['resource'])
       : undefined;
-    let pageLabel = '';
+    let pageLabel: string;
 
     if (resource) {
       pageLabel = resource.label || resource.name;
@@ -432,6 +432,8 @@
       pageLabel = translation.t('auth.login');
     } else if (renderedRoute === '/' || renderedRoute === '/inventory-dashboard') {
       pageLabel = translation.t('common.dashboard');
+    } else {
+      pageLabel = translation.t('common.pageNotFound');
     }
 
     return pageLabel && pageLabel !== title ? `${pageLabel} - ${title}` : title;

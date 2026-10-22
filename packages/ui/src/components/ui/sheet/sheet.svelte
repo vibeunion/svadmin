@@ -35,7 +35,10 @@
 	import { tick } from "svelte";
 	import { Portal } from "bits-ui";
 	import { cn, type WithElementRef } from "../../../utils.js";
+	import { useTranslation } from "@svadmin/core/i18n";
 	import type { HTMLAttributes } from "svelte/elements";
+
+	const i18n = useTranslation();
 
 	const focusableSelector = [
 		'a[href]',
@@ -61,7 +64,7 @@
 		side = "right",
 		onClose,
 		onCloseRequest,
-		closeLabel = "Close",
+		closeLabel = i18n.t("common.close"),
 		class: className,
 		tabindex = -1,
 		children,

@@ -427,6 +427,17 @@ describe('AdminApp authenticated navigation', () => {
     expect(view.queryByRole('region', { name: 'Posts page' })).toBeNull();
   });
 
+  it('labels unknown routes with the localized not-found title', async () => {
+    window.location.hash = '#/missing-route';
+    render(AdminApp, {
+      locale: 'en',
+      dataProvider: createDataProvider(),
+      resources: [],
+    });
+
+    await waitFor(() => expect(document.title).toContain('Page not found'));
+  });
+
   it('removes the layout and redirects when a route recheck fails', async () => {
     const recheck = deferredCheck();
     const check = vi.fn<AuthProvider['check']>()
