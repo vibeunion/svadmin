@@ -11,18 +11,94 @@ export interface CommandContract<I extends TObject = TObject, O extends TSchema 
 }
 export type CommandInput<I extends TObject> = SchemaValue<I> extends infer Input extends Record<string, unknown> ? Input : Record<string, unknown>;
 export type CommandOutput<O extends TSchema> = SchemaValue<O>;
+/** The only provider diagnostic fields that may cross the command boundary. */
+export interface CommandErrorDiagnostic {
+  readonly code: string;
+  readonly message: string;
+}
+/** A fixed business error code to UI message mapping declared at registration. */
+export type CommandErrorDiagnostics = Readonly<Record<string, string>>;
+/** Command diagnostics are declarative, static and limited to safe business codes. */
+export interface CommandDiagnostics {
+  readonly safe: CommandErrorDiagnostics;
+}
 interface Definition {
   key: string;
   url: string;
   method: 'get' | 'post' | 'put' | 'patch' | 'delete';
   input: TSchema;
   response: TSchema;
+  diagnostics: CommandErrorDiagnostics | undefined;
 }
 const definitions = new WeakMap<CommandContract, Definition>();
 let nextKey = 0;
 
 function invalidContract(): never {
   throw new HttpError('Invalid command contract', 400, undefined, { code: 'INVALID_COMMAND_CONTRACT' });
+}
+
+const diagnosticCode = /^[A-Z][A-Z0-9_]{1,63}$/;
+
+/** 诊断文案长度 1–200，且拒绝 C0 控制符与 DEL。按码元判断，避免 no-control-regex。 */
+function safeDiagnosticMessage(message: string): boolean {
+  if (message.length < 1 || message.length > 200) return false;
+  for (let index = 0; index < message.length; index += 1) {
+    const code = message.charCodeAt(index);
+    if (code <= 0x1f || code === 0x7f) return false;
+  }
+  return true;
+}
+
+function ownData(target: object, key: string): unknown {
+  try {
+    const descriptor = Object.getOwnPropertyDescriptor(target, key);
+    return descriptor && 'value' in descriptor ? descriptor.value : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function diagnosticMapping(value: unknown): CommandErrorDiagnostics {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return invalidContract();
+  const proto = Object.getPrototypeOf(value);
+  if (proto !== Object.prototype && proto !== null) return invalidContract();
+  if (Object.getOwnPropertySymbols(value).length) return invalidContract();
+  const entries: [string, string][] = [];
+  for (const [code, descriptor] of Object.entries(Object.getOwnPropertyDescriptors(value))) {
+    const message: unknown = 'value' in descriptor ? descriptor.value : undefined;
+    if (!descriptor.enumerable || !('value' in descriptor) || !diagnosticCode.test(code) ||
+        typeof message !== 'string' || !safeDiagnosticMessage(message) || message !== message.trim()) {
+      return invalidContract();
+    }
+    entries.push([code, message]);
+  }
+  if (!entries.length) return invalidContract();
+  entries.sort(([left], [right]) => left < right ? -1 : left > right ? 1 : 0);
+  return Object.freeze(Object.fromEntries(entries));
+}
+
+function parseDiagnostics(value: unknown): CommandErrorDiagnostics | undefined {
+  if (value === undefined) return undefined;
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return invalidContract();
+  const proto = Object.getPrototypeOf(value);
+  if (proto !== Object.prototype && proto !== null) return invalidContract();
+  const keys = Reflect.ownKeys(value);
+  if (keys.length !== 1 || keys[0] !== 'safe') return invalidContract();
+  const descriptor = Object.getOwnPropertyDescriptor(value, 'safe');
+  if (!descriptor || !descriptor.enumerable || !('value' in descriptor)) return invalidContract();
+  return diagnosticMapping(descriptor.value);
+}
+
+/** Read only a provider-owned code and resolve it against the declared static mapping. */
+export function safeCommandDiagnostic(
+  cause: unknown,
+  diagnostics: CommandErrorDiagnostics | undefined,
+): CommandErrorDiagnostic | undefined {
+  if (!diagnostics || typeof cause !== 'object' || cause === null) return undefined;
+  const code = ownData(cause, 'code');
+  if (typeof code !== 'string' || !Object.hasOwn(diagnostics, code)) return undefined;
+  const message = diagnostics[code];
+  return typeof message === 'string' ? Object.freeze({ code, message }) : undefined;
 }
 
 function matches(schema: TSchema, value: unknown): boolean {
@@ -56,7 +132,8 @@ function responseSnapshot(definition: Definition, response: unknown): { data: un
   });
 }
 
-function executionError(error: unknown, writeMayHaveSucceeded: boolean): HttpError {
+function executionError(error: unknown, writeMayHaveSucceeded: boolean,
+  diagnostics: CommandErrorDiagnostics | undefined): HttpError {
   let status = 502;
   try {
     if (typeof error === 'object' && error !== null) {
@@ -68,8 +145,9 @@ function executionError(error: unknown, writeMayHaveSucceeded: boolean): HttpErr
   } catch {
     // Error reflection failures are not authentication instructions.
   }
-  return new HttpError('Command execution failed', status, undefined, {
-    code: 'COMMAND_FAILED', details: { writeMayHaveSucceeded },
+  const diagnostic = safeCommandDiagnostic(error, diagnostics);
+  return new HttpError(diagnostic?.message ?? 'Command execution failed', status, undefined, {
+    code: diagnostic?.code ?? 'COMMAND_FAILED', details: { writeMayHaveSucceeded },
   });
 }
 
@@ -80,10 +158,12 @@ export function defineCommand<I extends TObject, O extends TSchema>(
     method: Definition['method'];
     input: I & SafeSchema<I>;
     output: O & SafeSchema<O>;
+    diagnostics?: CommandDiagnostics;
   },
 ): CommandContract<I, O>;
 export function defineCommand(name: string, definition: {
   url: string; method: Definition['method']; input: TObject; output: TSchema;
+  diagnostics?: CommandDiagnostics;
 }): CommandContract {
   try {
     if (typeof name !== 'string' || !name.trim() || typeof definition !== 'object' || definition === null) {
@@ -98,6 +178,9 @@ export function defineCommand(name: string, definition: {
     const method: unknown = fields['method']?.value;
     const inputSchema: unknown = fields['input']?.value;
     const outputSchema: unknown = fields['output']?.value;
+    const diagnosticsField = fields['diagnostics'];
+    if (diagnosticsField && !('value' in diagnosticsField)) return invalidContract();
+    const diagnostics = parseDiagnostics(diagnosticsField?.value);
     if (typeof url !== 'string' || !url.trim() ||
         (method !== 'get' && method !== 'post' && method !== 'put' && method !== 'patch' && method !== 'delete') ||
         !Type.IsObject(inputSchema) || !Type.IsSchema(outputSchema)) {
@@ -109,8 +192,9 @@ export function defineCommand(name: string, definition: {
       name, [brand]: Object.freeze({ input: inputSchema, output: outputSchema }),
     });
     definitions.set(contract, {
-      key: JSON.stringify([++nextKey, name, url, method, input, response]),
-      url, method, input, response,
+      key: JSON.stringify([++nextKey, name, url, method, input, response,
+        diagnostics ? Object.entries(diagnostics) : null]),
+      url, method, input, response, diagnostics,
     });
     return contract;
   } catch {
@@ -124,9 +208,11 @@ function definitionOf(command: CommandContract): Definition {
   return definition;
 }
 
-export function commandDefinition(command: CommandContract): Readonly<Pick<Definition, 'key' | 'url' | 'method'>> {
-  const { key, url, method } = definitionOf(command);
-  return Object.freeze({ key, url, method });
+export function commandDefinition(
+  command: CommandContract,
+): Readonly<Pick<Definition, 'key' | 'url' | 'method' | 'diagnostics'>> {
+  const { key, url, method, diagnostics } = definitionOf(command);
+  return Object.freeze({ key, url, method, diagnostics });
 }
 
 export function parseCommandInput<I extends TObject, O extends TSchema>(
@@ -160,7 +246,7 @@ export function prepareCommand(
   try {
     custom = provider.custom;
   } catch (error) {
-    throw executionError(error, false);
+    throw executionError(error, false, definition.diagnostics);
   }
   if (typeof custom !== 'function') {
     throw new HttpError('Provider does not support commands', 400, undefined, { code: 'COMMAND_NOT_SUPPORTED' });
@@ -178,7 +264,7 @@ export function prepareCommand(
         }]);
         response = await pending;
       } catch (error) {
-        throw executionError(error, definition.method !== 'get');
+        throw executionError(error, definition.method !== 'get', definition.diagnostics);
       }
       return responseSnapshot(definition, response);
     },
