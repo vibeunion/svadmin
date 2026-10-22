@@ -71,7 +71,7 @@
       <Button variant="outline" size="sm" onclick={onSearchClick} aria-label={i18n.t('common.search')} class="svadmin-header-search svadmin-u-77a2a20e90d4 svadmin-u-bfa603190748 svadmin-u-e7a768f922d2 svadmin-u-0e17f2bd9074 svadmin-u-5f22e64f2282 svadmin-u-05faf5c801ff">
         <Search class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
         <span class="svadmin-u-99d72c7fc3e2 svadmin-u-ee3c1259a368 svadmin-u-359090c2d529">{i18n.t('common.search')}</span>
-        <kbd class="svadmin-u-99d72c7fc3e2 svadmin-u-e3fd07f96126 svadmin-u-3960ffc248d9 svadmin-u-a3899220f90e svadmin-u-07389a777c1f svadmin-u-ca6bcd4b6f3f svadmin-u-706701550477 svadmin-u-45d828117213 svadmin-u-465609a240a8 svadmin-u-1dc571a3609f svadmin-u-2689f3958069 svadmin-u-0e65706bcccd svadmin-u-bfa603190748">
+        <kbd style="flex-shrink: 0; white-space: nowrap" class="whitespace-nowrap svadmin-u-99d72c7fc3e2 svadmin-u-e3fd07f96126 svadmin-u-3960ffc248d9 svadmin-u-a3899220f90e svadmin-u-07389a777c1f svadmin-u-ca6bcd4b6f3f svadmin-u-706701550477 svadmin-u-45d828117213 svadmin-u-465609a240a8 svadmin-u-1dc571a3609f svadmin-u-2689f3958069 svadmin-u-0e65706bcccd svadmin-u-bfa603190748">
           <span class="svadmin-u-359090c2d529">⌘</span>K
         </kbd>
       </Button>

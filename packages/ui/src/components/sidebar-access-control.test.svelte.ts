@@ -8,6 +8,7 @@ import {
   type AccessControlProvider,
   type CanParams,
   type CanResult,
+  type Identity,
   type MenuItem,
   type ResourceDefinition,
 } from '@svadmin/core';
@@ -30,10 +31,10 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-function renderSidebar(menu?: MenuItem[]) {
+function renderSidebar(menu?: MenuItem[], identity: Identity | null = null) {
   return render(Sidebar, definedOptions({
     collapsed: false,
-    identity: null,
+    identity,
     title: 'Test Admin',
     onToggle: vi.fn(),
     onLogout: vi.fn(),
@@ -186,6 +187,12 @@ describe('Sidebar access control', () => {
     await tick();
 
     expect(screen.queryByText('Race Child')).toBeNull();
+  });
+
+  it('falls back to the localized user label when the identity has no role', async () => {
+    renderSidebar([], { id: 'user-1', name: 'Riley' });
+
+    expect(await screen.findByText('User')).toBeTruthy();
   });
 
   it('fails closed when a nested permission check rejects', async () => {
