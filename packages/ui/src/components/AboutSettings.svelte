@@ -8,7 +8,7 @@
 
   const i18n = useTranslation();
   const adminContext = captureAdminContext();
-  const resources = $derived(adminContext.resources);
+  const resources = $derived(adminContext.resources.filter((resource) => resource.meta?.['aboutVisible'] !== false));
   const providerNames = $derived(adminContext.getDataProviderNames());
   let { version: suppliedVersion, headingLevel = 'h1' }: { version?: string; headingLevel?: 'h1' | 'h2' } = $props();
   const buildVersion = '__SVADMIN_VERSION__';
@@ -17,6 +17,25 @@
       ? (i18n.locale === 'zh-CN' ? '开发构建（未提供版本）' : 'Development build (version unavailable)')
       : buildVersion
   ));
+  const themeLabelKeys: Record<string, string> = {
+    light: 'settings.light',
+    dark: 'settings.dark',
+    system: 'settings.systemTheme',
+  };
+  const accentLabelKeys: Record<string, string> = {
+    neutral: 'settings.accent.neutral',
+    indigo: 'settings.accent.indigo',
+    blue: 'settings.accent.blue',
+    green: 'settings.accent.green',
+    rose: 'settings.accent.rose',
+    orange: 'settings.accent.orange',
+    violet: 'settings.accent.violet',
+    stripe: 'settings.accent.stripe',
+  };
+  function environmentLabel(value: string, labelKeys: Record<string, string>): string {
+    const key = labelKeys[value];
+    return key ? i18n.t(key) : value;
+  }
 </script>
 
 <div class="svadmin-u-b3542e058833">
@@ -25,12 +44,12 @@
     <DescriptionList columns={2} items={[
       { label: i18n.t('settings.version'), value: version },
       { label: i18n.t('settings.language'), value: i18n.locale },
-      { label: i18n.t('settings.themeMode'), value: getResolvedTheme() },
-      { label: i18n.t('settings.colorAccent'), value: getColorTheme() },
+      { label: i18n.t('settings.themeMode'), value: environmentLabel(getResolvedTheme(), themeLabelKeys) },
+      { label: i18n.t('settings.colorAccent'), value: environmentLabel(getColorTheme(), accentLabelKeys) },
     ]} />
     <div class="svadmin-u-b950dda299d3 svadmin-u-18049387f0af svadmin-u-52be28846b5f">
       <h3 class="svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{i18n.t('settings.registeredResources')}</h3>
-      <div class="svadmin-u-eccd13ef4f2f svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-77a2a20e90d4">{#each resources as resource (resource.name)}<Badge variant="outline" class="svadmin-u-0e65706bcccd svadmin-u-359090c2d529">{resource.name}</Badge>{:else}<span class="svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">—</span>{/each}</div>
+      <div class="svadmin-u-eccd13ef4f2f svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-77a2a20e90d4">{#each resources as resource (resource.name)}<Badge variant="outline" class="svadmin-u-359090c2d529">{resource.label || resource.name}</Badge>{:else}<span class="svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">—</span>{/each}</div>
     </div>
     <div class="svadmin-u-b950dda299d3 svadmin-u-18049387f0af svadmin-u-52be28846b5f">
       <h3 class="svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{i18n.t('settings.dataProvider')}</h3>

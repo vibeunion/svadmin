@@ -31,6 +31,7 @@
   let newPassword = $state('');
   let confirmPassword = $state('');
   let passwordErrorMessage = $state('');
+  let passwordChangedRecently = $state(false);
   let changingPassword = $state(false);
   let requestId = 0;
   let pendingDanger = $state<{ label: string; run: () => Promise<void> } | null>(null);
@@ -76,6 +77,7 @@
     newPassword = '';
     confirmPassword = '';
     passwordErrorMessage = '';
+    passwordChangedRecently = false;
     changingPassword = false;
     updatingMfa = false;
     revoking = null;
@@ -123,6 +125,7 @@
       if (!result.success) throw new Error(result.error?.message ?? (isZh ? '密码修改失败' : 'Password update failed'));
       if (currentRequest !== requestId) return;
       notifyWithProvider({ type: 'success', message: i18n.t('profile.passwordChanged') }, adminContext.notificationProvider);
+      passwordChangedRecently = true;
       currentPassword = '';
       newPassword = '';
       confirmPassword = '';
@@ -198,6 +201,7 @@
       <PasswordInput id="security-current-password" label={i18n.t('profile.currentPassword')} bind:value={currentPassword} autocomplete="current-password" disabled={!authProvider?.updatePassword || changingPassword} />
       <PasswordInput id="security-new-password" label={i18n.t('profile.newPassword')} bind:value={newPassword} autocomplete="new-password" showStrength disabled={!authProvider?.updatePassword || changingPassword} />
       <PasswordInput id="security-confirm-password" label={i18n.t('auth.confirmPassword')} bind:value={confirmPassword} autocomplete="new-password" disabled={!authProvider?.updatePassword || changingPassword} />
+      {#if passwordChangedRecently}<p class="text-xs text-muted-foreground">{i18n.t('profile.passwordChangedRecently')}</p>{/if}
       <Button type="submit" disabled={!authProvider?.updatePassword || changingPassword}>{changingPassword ? (isZh ? '更新中...' : 'Updating...') : i18n.t('profile.updatePassword')}</Button>
     </form>
   </SettingsGroup>
