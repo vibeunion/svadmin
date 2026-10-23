@@ -1,12 +1,5 @@
-<script module lang="ts">
-  export type FeedbackOperation = 'create' | 'update' | 'delete';
-  export interface FeedbackState {
-    run: () => Promise<unknown>;
-    ready: () => boolean;
-  }
-</script>
-
 <script lang="ts">
+  import type { FeedbackOperation, FeedbackState } from './mutation-feedback.test-types';
   import { useCreate, useUpdateMany, useDeleteMany, useList } from './strict-hooks.svelte';
   import { useResourceContract } from './resource-binding.svelte';
   import { definedReactiveOptions } from './defined-options';

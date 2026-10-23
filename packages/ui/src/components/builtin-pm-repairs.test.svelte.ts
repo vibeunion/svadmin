@@ -97,7 +97,7 @@ describe('builtin capability boundaries', () => {
     expect(view.container.innerHTML).not.toContain('PRIVATE_NOTIFICATION_LOAD');
     expect(screen.queryByRole('switch')).toBeNull();
     expect(screen.getByRole('button', { name: 'Save' })).toHaveProperty('disabled', true);
-    await fireEvent.click(screen.getByRole('button', { name: 'Retry', exact: true }));
+    await fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
     await waitFor(() => expect(document.querySelector('fieldset')?.disabled).toBe(false));
 
     const security = requireValue(document.querySelector('[id$="-email-security"]'));
@@ -227,7 +227,7 @@ describe('builtin capability boundaries', () => {
     await waitFor(() => expect(screen.getByText('Operation failed')).toBeTruthy());
     expect(view.container.innerHTML).not.toContain('PRIVATE_MEMBER_LOAD');
     expect(screen.queryByText('No members yet')).toBeNull();
-    await fireEvent.click(screen.getByRole('button', { name: 'Retry', exact: true }));
+    await fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
     await screen.findByText('Recovered member');
 
     const email = screen.getByLabelText('Member email');
@@ -260,7 +260,7 @@ describe('builtin capability boundaries', () => {
     };
     render(Host, { bundle, page: 'members', members: provider });
     await screen.findByText('Operation failed');
-    const retry = screen.getByRole('button', { name: 'Retry', exact: true });
+    const retry = screen.getByRole('button', { name: 'Retry' });
     const email = screen.getByLabelText('Member email');
     await fireEvent.input(email, { target: { value: 'member@example.com' } });
     await act(() => {
@@ -269,7 +269,7 @@ describe('builtin capability boundaries', () => {
     });
     expect(provider.list).toHaveBeenCalledOnce();
     await waitFor(() => expect(screen.getByRole('button', { name: 'Loading...' })).toHaveProperty('disabled', true));
-    expect(screen.queryByRole('button', { name: 'Retry', exact: true })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Retry' })).toBeNull();
     if (outcome === 'success') resolveInvite();
     else rejectInvite(new Error('PRIVATE_INVITE_ERROR'));
     await waitFor(() => expect(screen.getByRole('button', { name: 'Send Invite' })).toHaveProperty('disabled', false));
@@ -283,7 +283,7 @@ describe('builtin capability boundaries', () => {
     }
     expect(provider.invite).toHaveBeenCalledOnce();
     expect(screen.getByRole('button', { name: 'Send Invite' })).toHaveProperty('disabled', false);
-    await fireEvent.click(screen.getByRole('button', { name: 'Retry', exact: true }));
+    await fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
     await waitFor(() => expect(provider.list).toHaveBeenCalledTimes(2));
   });
 
@@ -436,7 +436,7 @@ describe('builtin capability boundaries', () => {
     expect(view.container.innerHTML).not.toContain('PRIVATE_COMPANY_LOAD');
     expect(screen.queryByDisplayValue('Original company')).toBeNull();
     expect(screen.queryByText('No organization details')).toBeNull();
-    await fireEvent.click(screen.getByRole('button', { name: 'Retry', exact: true }));
+    await fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
     const input = await screen.findByDisplayValue('Original company');
     await fireEvent.input(input, { target: { value: 'Updated company' } });
     await fireEvent.submit(requireValue(input.closest('form')));

@@ -52,14 +52,14 @@ describe('FileList action contract', () => {
   });
 
   it('contains synchronous errors and blocks synchronously reentrant actions', async () => {
-    let preview: HTMLElement | undefined;
+    const preview: { current?: HTMLElement } = {};
     const onpreview = vi.fn();
     const onremove = vi.fn(() => {
-      preview?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      preview.current?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       throw new Error('private failure');
     });
     const view = render(FileList, { files: [first], onpreview, onremove });
-    preview = view.getByRole('button', { name: 'Preview report.pdf' });
+    preview.current = view.getByRole('button', { name: 'Preview report.pdf' });
     await fireEvent.click(view.getByRole('button', { name: 'Remove report.pdf' }));
     expect(onremove).toHaveBeenCalledTimes(1);
     expect(onpreview).not.toHaveBeenCalled();

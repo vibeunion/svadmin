@@ -1,6 +1,6 @@
 <script lang="ts">
   import { definedReactiveOptions } from '@svadmin/core/options';
-  import { provideAdminContext, type DataProvider, type TenantContext } from '@svadmin/core';
+  import { provideAdminContext, type DataProvider, type ResourceDefinition, type TenantContext } from '@svadmin/core';
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
   import DetailWorkspaceAsyncSection from './DetailWorkspaceAsyncSection.svelte';
   import type { DetailWorkspaceProvider, DetailWorkspaceScope } from './detail-workspace.js';
@@ -27,7 +27,7 @@
 
   provideAdminContext(definedReactiveOptions({
     dataProvider,
-    resources: [],
+    resources: [] as ResourceDefinition[],
     get tenant() { return tenant; },
   }));
 </script>

@@ -19,8 +19,8 @@
     widthClass?: string;
     isSubmitting?: boolean;
     disabled?: boolean;
-    onsubmit?: () => void | Promise<void>;
-    oncancel?: () => void;
+    onsubmit?: (() => void | Promise<void>) | undefined;
+    oncancel?: (() => void) | undefined;
     class?: string;
     triggerSnippet?: Snippet;
     children?: Snippet;

@@ -55,7 +55,7 @@ describe('Kanban mutation lifecycle', () => {
   });
 
   it('commits only the awaited authoritative move receipt', async () => {
-    const pending = deferred<KanbanCard | void>();
+    const pending = deferred<KanbanCard | undefined>();
     const oncardmove = vi.fn(() => pending.promise);
     const view = render(KanbanBoard, { columns, cards: initial, oncardmove });
     await fireEvent.change(view.getByRole('combobox', { name: 'Move Alpha' }), { target: { value: 'done' } });
@@ -70,7 +70,7 @@ describe('Kanban mutation lifecycle', () => {
   });
 
   it('rolls back a rejection, sanitizes the error and retries the same move', async () => {
-    const rejection = deferred<void>();
+    const rejection = deferred<undefined>();
     const oncardmove = vi.fn().mockImplementationOnce(() => rejection.promise).mockResolvedValueOnce(undefined);
     const oncardmoveerror = vi.fn();
     const view = render(KanbanBoard, { columns, cards: initial, oncardmove, oncardmoveerror });
@@ -143,7 +143,7 @@ describe('Kanban mutation lifecycle', () => {
   });
 
   it.each(['success', 'failure'] as const)('ignores a late %s after unmount without callback or delivery', async settlement => {
-    const pending = deferred<KanbanCard | void>();
+    const pending = deferred<KanbanCard | undefined>();
     const delivered: KanbanCard[][] = [];
     const oncardmove = vi.fn(() => pending.promise);
     const oncardmoveerror = vi.fn();
@@ -165,8 +165,8 @@ describe('Kanban mutation lifecycle', () => {
   });
 
   it('serializes retry submissions and clears failed retry state on scope switch', async () => {
-    const rejection = deferred<void>();
-    const retry = deferred<void>();
+    const rejection = deferred<undefined>();
+    const retry = deferred<undefined>();
     const oncardmove = vi.fn().mockImplementationOnce(() => rejection.promise).mockImplementationOnce(() => retry.promise);
     const oncardmoveerror = vi.fn();
     const view = render(KanbanBoard, { columns, cards: initial, oncardmove, oncardmoveerror, scopeKey: 'tenant-a' });
@@ -244,7 +244,7 @@ describe('Kanban mutation lifecycle', () => {
   });
 
   it('provides keyboard-operable column moves and same-column ordering', async () => {
-    const oncardmove = vi.fn(async () => {});
+    const oncardmove = vi.fn(async () => undefined);
     const view = render(KanbanBoard, { columns, cards: initial, oncardmove });
     await fireEvent.click(within(view.getByRole('group', { name: 'Beta' })).getByRole('button', { name: /Move up/i }));
     expect(oncardmove).toHaveBeenCalledWith('b', 'todo', 0);
@@ -252,7 +252,7 @@ describe('Kanban mutation lifecycle', () => {
   });
 
   it('supports drag/drop using the same persistence path', async () => {
-    const oncardmove = vi.fn(async () => {});
+    const oncardmove = vi.fn(async () => undefined);
     const view = render(KanbanBoard, { columns, cards: initial, oncardmove });
     await fireEvent.dragStart(view.getByRole('group', { name: 'Alpha' }));
     await fireEvent.drop(view.getByRole('region', { name: 'Done' }));

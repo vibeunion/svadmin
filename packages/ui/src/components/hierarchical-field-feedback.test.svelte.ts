@@ -46,8 +46,8 @@ describe('Hierarchical field feedback', () => {
     expect(panel.getAttribute('aria-labelledby')).toBe(trigger.id);
     expect(onchange).not.toHaveBeenCalled();
     const leaf = type === 'cascader'
-      ? view.getByRole('button', { name: 'Leaf', exact: true })
-      : view.getByRole('treeitem', { name: 'Leaf', exact: true });
+      ? view.getByRole('button', { name: 'Leaf' })
+      : view.getByRole('treeitem', { name: 'Leaf' });
     await fireEvent.click(leaf);
     expect(onchange).toHaveBeenCalledExactlyOnceWith(type === 'cascader' ? ['leaf'] : 'leaf');
     await waitFor(() => expect(trigger.getAttribute('aria-expanded')).toBe('false'));

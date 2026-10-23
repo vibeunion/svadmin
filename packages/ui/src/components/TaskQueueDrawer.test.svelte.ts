@@ -208,21 +208,21 @@ describe('TaskQueueDrawer', () => {
     expect(screen.queryByText('Generate poster')).toBeNull();
     expect(screen.queryByText('Nightly sync')).toBeNull();
     expect(screen.queryByText(tab === 'tasks' ? 'No tasks found' : 'No dead-letter tasks')).toBeNull();
-    expect(screen.queryByRole('button', { name: 'Retry', exact: true })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Retry' })).toBeNull();
     expect(screen.getByRole('tab', { name: tab === 'tasks' ? /^Tasks$/ : /^DLQ$/ })).toBeTruthy();
-    const refresh = screen.getByRole('button', { name: 'Refresh', exact: true });
+    const refresh = screen.getByRole('button', { name: 'Refresh' });
     expect(refresh.hasAttribute('disabled')).toBe(true);
     expect(screen.getByRole('combobox', { name: 'Auto refresh' }).hasAttribute('disabled')).toBe(true);
     await fireEvent.click(refresh);
     expect(refetchTasks).not.toHaveBeenCalled();
     expect(refetchDlq).not.toHaveBeenCalled();
-    expect(screen.getByRole('button', { name: 'Submit Task', exact: true }).hasAttribute('disabled')).toBe(false);
+    expect(screen.getByRole('button', { name: 'Submit Task' }).hasAttribute('disabled')).toBe(false);
     await view.rerender({ taskProvider: mockTaskProvider });
     expect(queryOptions.queryOptions?.enabled).toBe(true);
     expect(screen.queryByRole('alert')).toBeNull();
     expect(screen.getByRole('table')).toBeTruthy();
     expect(screen.getByRole('combobox', { name: 'Auto refresh' }).hasAttribute('disabled')).toBe(false);
-    await fireEvent.click(screen.getByRole('button', { name: 'Refresh', exact: true }));
+    await fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
     expect(tab === 'tasks' ? refetchTasks : refetchDlq).toHaveBeenCalledExactlyOnceWith({ cancelRefetch: false });
     await view.rerender({ taskProvider: provider });
     expect(queryOptions.queryOptions?.enabled).toBe(false);
@@ -250,7 +250,7 @@ describe('TaskQueueDrawer', () => {
     expect(screen.queryByText('Generate poster')).toBeNull();
     expect(screen.queryByText('Nightly sync')).toBeNull();
     expect(screen.queryByText('No tasks found')).toBeNull();
-    await fireEvent.click(screen.getByRole('button', { name: 'Retry', exact: true }));
+    await fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
     expect(tab === 'tasks' ? refetchTasks : refetchDlq).toHaveBeenCalledExactlyOnceWith({ cancelRefetch: false });
     expect(tab === 'tasks' ? refetchDlq : refetchTasks).not.toHaveBeenCalled();
     expect(mockTaskProvider.retry).not.toHaveBeenCalled();
@@ -276,7 +276,7 @@ describe('TaskQueueDrawer', () => {
     if (owner === 'list') render(TaskList, { taskProvider: mockTaskProvider, useProviderData: true });
     else render(TaskQueueDrawer, { open: true, taskProvider: mockTaskProvider });
     expect(screen.getByRole('alert')).toBeTruthy();
-    expect(screen.queryByRole('button', { name: 'Retry', exact: true })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Retry' })).toBeNull();
     if (owner === 'drawer') {
       await fireEvent.click(screen.getByRole('button', { name: 'Refresh' }));
     }
@@ -298,7 +298,7 @@ describe('TaskQueueDrawer', () => {
     });
     if (owner === 'list') render(TaskList, { taskProvider: mockTaskProvider, useProviderData: true });
     else render(TaskQueueDrawer, { open: true, taskProvider: mockTaskProvider, initialTab: tab });
-    await fireEvent.click(screen.getByRole('button', { name: 'Retry', exact: true }));
+    await fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
     expect(screen.getByRole('alert')).toBeTruthy();
     await act(async () => { finish(); await pending; });
     await waitFor(() => expect(screen.queryByRole('alert')).toBeNull());
@@ -466,7 +466,7 @@ describe('TaskQueueDrawer', () => {
     expect(screen.queryByText('Generate poster')).toBeNull();
     expect(screen.queryByText('Rendering hero artwork')).toBeNull();
     expect(screen.queryByRole('button', { name: 'Cancel' })).toBeNull();
-    await fireEvent.click(screen.getByRole('button', { name: 'Retry', exact: true }));
+    await fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
     expect(refetchDetail).toHaveBeenCalledExactlyOnceWith('task-1', { cancelRefetch: false });
     expect(mockTaskProvider.retry).not.toHaveBeenCalled();
     expect(mockTaskProvider.cancel).not.toHaveBeenCalled();
@@ -479,7 +479,7 @@ describe('TaskQueueDrawer', () => {
       return { data: taskFixtures.find(task => task.id === id) };
     });
     render(TaskDetails, { taskId: 'task-1', taskProvider: mockTaskProvider });
-    await fireEvent.click(screen.getByRole('button', { name: 'Retry', exact: true }));
+    await fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
     await waitFor(() => expect(screen.queryByRole('alert')).toBeNull());
     expect(screen.getByText('Generate poster')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeTruthy();
@@ -501,7 +501,7 @@ describe('TaskQueueDrawer', () => {
     detailState.add('fetching');
     render(TaskDetails, { taskId: 'task-1', taskProvider: mockTaskProvider });
     expect(screen.getByRole('alert')).toBeTruthy();
-    expect(screen.queryByRole('button', { name: 'Retry', exact: true })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Retry' })).toBeNull();
     expect(refetchDetail).not.toHaveBeenCalled();
   });
 
@@ -522,7 +522,7 @@ describe('TaskQueueDrawer', () => {
       queryOptions: { enabled: condition !== 'disabled' },
     });
     expect(screen.getByRole('alert')).toBeTruthy();
-    expect(screen.queryByRole('button', { name: 'Retry', exact: true })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Retry' })).toBeNull();
     expect(refetchDetail).not.toHaveBeenCalled();
   });
 

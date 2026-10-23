@@ -5,7 +5,7 @@ import { Type } from 'typebox';
 import { tick } from 'svelte';
 import { defineResource, resetContext, type DataProvider, type GetListResult,
   type NotificationProvider, type ResourceDefinition } from '@svadmin/core';
-import { setLocale } from '@svadmin/core/i18n';
+import { setLocale } from '../../test/legacy-locale';
 import { getToastQueue } from '@svadmin/core/toast';
 import DetailHost from './detail-contract.test-host.svelte';
 import InfiniteHost from './infinite-contract.test-host.svelte';

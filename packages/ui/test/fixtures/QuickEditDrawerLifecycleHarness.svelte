@@ -10,7 +10,7 @@
     provider: DataProvider;
     resources: ResourceDefinition[];
     queryClient: QueryClient;
-    recordId?: string | number;
+    recordId?: string | number | undefined;
     onClose?: (id: string | number) => void;
   } = $props();
 

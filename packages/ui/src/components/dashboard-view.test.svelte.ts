@@ -1,11 +1,12 @@
 import { cleanup, render, waitFor } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent } from '@testing-library/svelte';
-import { createEnterpriseRequestContext, resetContext, type DashboardProvider, type DataProvider } from '@svadmin/core';
+import { createEnterpriseRequestContext, resetContext, type DashboardDrilldown, type DashboardProvider, type DataProvider } from '@svadmin/core';
 import type { ComponentProps } from 'svelte';
 import DashboardView from './DashboardView.svelte';
 import ReactiveHost from './dashboard-view.reactive.test-host.svelte';
 import Host from './dashboard-view.test-host.svelte';
+import { requireValue } from '../../../../scripts/test-assertions';
 
 const dataProvider: DataProvider = {
   getList: async () => ({ data: [], total: 0 }), getOne: async () => ({ data: {} }),
@@ -138,7 +139,7 @@ describe('DashboardView', () => {
     const onDrillDown = vi.fn();
     const view = mount({ get: vi.fn(async () => snapshot) }, { filters, timeRange, onDrillDown });
     await view.findByText('Review queue');
-    filters[0]!.value = 'west';
+    requireValue(filters[0]).value = 'west';
     timeRange.from = '2026-09-01T00:00:00Z';
     await fireEvent.click(view.getByRole('button', { name: /Total/ }));
     expect(onDrillDown).toHaveBeenCalledWith({
@@ -184,7 +185,7 @@ describe('DashboardView', () => {
 
   it('does not let an old drill failure pollute a newer query', async () => {
     let rejectOld!: (reason: unknown) => void;
-    const onDrillDown = vi.fn(() => new Promise((_resolve, reject) => { rejectOld = reject; }));
+    const onDrillDown = vi.fn((_input: DashboardDrilldown) => new Promise<void>((_resolve, reject) => { rejectOld = reject; }));
     const source: DashboardProvider = {
       get: vi.fn(async (_context, query) => query.filters?.[0]?.value === 'west'
         ? { ...snapshot, widgets: [{ ...snapshot.widgets[1], text: 'West dashboard' }] }
@@ -206,7 +207,7 @@ describe('DashboardView', () => {
 
   it('ignores a drill failure after unmount', async () => {
     let rejectOld!: (reason: unknown) => void;
-    const onDrillDown = vi.fn(() => new Promise((_resolve, reject) => { rejectOld = reject; }));
+    const onDrillDown = vi.fn((_input: DashboardDrilldown) => new Promise<void>((_resolve, reject) => { rejectOld = reject; }));
     const view = mount({ get: vi.fn(async () => snapshot) }, { onDrillDown });
     await view.findByText('Review queue');
     await fireEvent.click(view.getByRole('button', { name: /Total/ }));
@@ -224,7 +225,7 @@ describe('DashboardView', () => {
     const source: DashboardProvider = {
       get: vi.fn(async (_context, query) => {
         query.dashboardId = 'tampered';
-        if (query.filters) query.filters[0]!.value = 'tampered';
+        if (query.filters) requireValue(query.filters[0]).value = 'tampered';
         if (query.timeRange) query.timeRange.from = '1999-01-01T00:00:00Z';
         return snapshot;
       }),

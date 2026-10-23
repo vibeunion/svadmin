@@ -65,7 +65,7 @@
     conflictCount?: number;
     sidebarExtra?: Snippet;
     headerExtra?: Snippet;
-    tableContent?: Snippet;
+    tableContent?: Snippet | undefined;
     onToggle: (role: string, resource: string, action: string, grant: boolean) => void;
   } = $props();
 
@@ -243,7 +243,7 @@
                       </button>
                       <span id={`${instanceId}-permission-${resource.code}-${action.code}`} class="svadmin-sr-only">
                         {roles.find(role => role.code === selectedRole)?.name || selectedRole} {selectedRole ? `(${selectedRole})` : ''}
-                        {' / '}{resource.name} ({resource.code}){' / '}{action.name} ({action.code})
+                        / {resource.name} ({resource.code}) / {action.name} ({action.code})
                       </span>
                     </div>
                   </td>

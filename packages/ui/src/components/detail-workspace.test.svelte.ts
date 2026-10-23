@@ -6,6 +6,7 @@ import AutoTableInteractionsHarness from '../../test/fixtures/AutoTableInteracti
 import DetailWorkspaceScopeHost from './detail-workspace-scope.test-host.svelte';
 import DetailWorkspaceReactiveProviderHost from './detail-workspace-reactive-provider.test-host.svelte';
 import type { DetailWorkspaceScope, DetailWorkspaceVersionData } from './detail-workspace.js';
+import { requireValue } from '../../../../scripts/test-assertions';
 
 const auditEntry = (recordId: string) => ({
   id: `audit-${recordId}`,
@@ -89,14 +90,14 @@ describe('AutoTable detail workspace consumer', () => {
 
     const detailButtons = await view.findAllByRole('button', { name: '详情' });
     // Cache B before switching A -> B so the boundary is tested without a loading unmount.
-    await fireEvent.click(detailButtons[1]);
+    await fireEvent.click(requireValue(detailButtons[1]));
     const cachedB = await view.findByRole('dialog', { name: 'Users 详情' });
     expect(await within(cachedB).findByText('attachment-user-2.txt')).toBeTruthy();
     await fireEvent.click(within(cachedB).getByRole('button', { name: '关闭' }));
     await waitFor(() => expect(view.queryByRole('dialog')).toBeNull());
     events.length = 0;
 
-    await fireEvent.click(detailButtons[0]);
+    await fireEvent.click(requireValue(detailButtons[0]));
     const dialog = await view.findByRole('dialog', { name: 'Users 详情' });
 
     expect(await within(dialog).findByText('attachment-user-1.txt')).toBeTruthy();
@@ -125,7 +126,7 @@ describe('AutoTable detail workspace consumer', () => {
     ]));
 
     events.length = 0;
-    await fireEvent.click(detailButtons[1]);
+    await fireEvent.click(requireValue(detailButtons[1]));
 
     await waitFor(() => expect(within(dialog).getByTestId('detail-extension-probe').getAttribute('data-record-id')).toBe('user-2'));
     expect(within(dialog).getByTestId('detail-extension-state').textContent).toBe('idle');
@@ -146,7 +147,7 @@ describe('AutoTable detail workspace consumer', () => {
       onNavigate: vi.fn(), detailWorkspace: {},
     });
     const unavailableButtons = await unavailable.findAllByRole('button', { name: '详情' });
-    await fireEvent.click(unavailableButtons[0]);
+    await fireEvent.click(requireValue(unavailableButtons[0]));
     const unavailableDialog = await unavailable.findByRole('dialog', { name: 'Users 详情' });
     await within(unavailableDialog).findByTestId('detail-extension-probe');
     for (const section of ['attachments', 'activity', 'audit', 'versions']) {
@@ -165,11 +166,11 @@ describe('AutoTable detail workspace consumer', () => {
       detailWorkspace: { attachments: { provider: { load } } },
     });
     const buttons = await view.findAllByRole('button', { name: '详情' });
-    await fireEvent.click(buttons[0]);
+    await fireEvent.click(requireValue(buttons[0]));
     const dialog = await view.findByRole('dialog', { name: 'Users 详情' });
     expect(await within(dialog).findByText('attachment-user-1.txt')).toBeTruthy();
 
-    await fireEvent.click(buttons[1]);
+    await fireEvent.click(requireValue(buttons[1]));
     await waitFor(() => expect(
       dialog.querySelector('[data-svadmin-detail-section="attachments"] [data-svadmin-detail-section-error]'),
     ).toBeTruthy());
@@ -181,13 +182,13 @@ describe('AutoTable detail workspace consumer', () => {
     const first = render(AutoTableInteractionsHarness, {
       onNavigate: vi.fn(), syncWithLocation: false, detailWorkspace: {},
     });
-    await fireEvent.click((await first.findAllByRole('button', { name: '详情' }))[0]);
+    await fireEvent.click(requireValue((await first.findAllByRole('button', { name: '详情' }))[0]));
     await waitFor(() => expect(document.querySelectorAll('[data-svadmin-detail-workspace]').length).toBe(1));
 
     const second = render(AutoTableInteractionsHarness, {
       onNavigate: vi.fn(), syncWithLocation: false, detailWorkspace: {},
     });
-    await fireEvent.click((await within(second.container).findAllByRole('button', { name: '详情' }))[0]);
+    await fireEvent.click(requireValue((await within(second.container).findAllByRole('button', { name: '详情' }))[0]));
     await waitFor(() => expect(document.querySelectorAll('[data-svadmin-detail-workspace]').length).toBe(2));
 
     const headings = [...document.querySelectorAll<HTMLHeadingElement>('[data-svadmin-detail-workspace] h3')];
@@ -219,15 +220,15 @@ describe('AutoTable detail workspace consumer', () => {
       },
     });
     const buttons = await view.findAllByRole('button', { name: '详情' });
-    await fireEvent.click(buttons[0]);
+    await fireEvent.click(requireValue(buttons[0]));
     const dialog = await view.findByRole('dialog', { name: 'Users 详情' });
     await waitFor(() => expect(attachmentLoads.has('user-1') && versionLoads.has('user-1')).toBe(true));
 
-    await fireEvent.click(buttons[1]);
+    await fireEvent.click(requireValue(buttons[1]));
     await waitFor(() => expect(attachmentLoads.has('user-2') && versionLoads.has('user-2')).toBe(true));
 
-    attachmentLoads.get('user-1')!.resolve([{ name: 'late-user-1.txt' }]);
-    versionLoads.get('user-1')!.reject(new Error('PRIVATE_LATE_FAILURE'));
+    requireValue(attachmentLoads.get('user-1')).resolve([{ name: 'late-user-1.txt' }]);
+    requireValue(versionLoads.get('user-1')).reject(new Error('PRIVATE_LATE_FAILURE'));
     await flushPromises();
 
     expect(within(dialog).queryByText('late-user-1.txt')).toBeNull();
@@ -235,8 +236,8 @@ describe('AutoTable detail workspace consumer', () => {
     expect(dialog.querySelector('[data-svadmin-detail-section="attachments"] [data-svadmin-detail-section-loading]')).toBeTruthy();
     expect(dialog.querySelector('[data-svadmin-detail-section="versions"] [data-svadmin-detail-section-loading]')).toBeTruthy();
 
-    attachmentLoads.get('user-2')!.resolve([{ name: 'attachment-user-2.txt' }]);
-    versionLoads.get('user-2')!.resolve({ oldValue: { title: 'old-user-2' }, newValue: { title: 'new-user-2' } });
+    requireValue(attachmentLoads.get('user-2')).resolve([{ name: 'attachment-user-2.txt' }]);
+    requireValue(versionLoads.get('user-2')).resolve({ oldValue: { title: 'old-user-2' }, newValue: { title: 'new-user-2' } });
     expect(await within(dialog).findByText('attachment-user-2.txt')).toBeTruthy();
     expect(within(dialog).getByText('old-user-2')).toBeTruthy();
     expect(within(dialog).getByText('new-user-2')).toBeTruthy();
@@ -255,12 +256,12 @@ describe('AutoTable detail workspace consumer', () => {
       detailWorkspace: { attachments: { provider: { load } } },
     });
     const buttons = await view.findAllByRole('button', { name: '详情' });
-    await fireEvent.click(buttons[0]);
+    await fireEvent.click(requireValue(buttons[0]));
     const dialog = await view.findByRole('dialog', { name: 'Users 详情' });
     const error = await waitFor(() => {
       const region = dialog.querySelector<HTMLElement>('[data-svadmin-detail-section="attachments"] [data-svadmin-detail-section-error]');
       expect(region).toBeTruthy();
-      return region!;
+      return requireValue(region);
     });
     expect(within(dialog).queryByText('PRIVATE_RETRY_FAILURE')).toBeNull();
     expect(load).toHaveBeenCalledTimes(1);
@@ -295,7 +296,7 @@ describe('AutoTable detail workspace consumer', () => {
       detailWorkspace: { attachments: { provider: { load } } },
     });
     const buttons = await view.findAllByRole('button', { name: '详情' });
-    await fireEvent.click(buttons[0]);
+    await fireEvent.click(requireValue(buttons[0]));
     expect(await view.findByText('attachment-user-1.txt')).toBeTruthy();
     await waitFor(() => expect(auditGet).toHaveBeenCalledTimes(1));
     expect(load).toHaveBeenCalledTimes(1);
@@ -340,7 +341,7 @@ describe('AutoTable detail workspace consumer', () => {
       detailWorkspace: { attachments: { provider: { load } } },
     });
     const buttons = await view.findAllByRole('button', { name: '详情' });
-    await fireEvent.click(buttons[0]);
+    await fireEvent.click(requireValue(buttons[0]));
     const dialog = await view.findByRole('dialog', { name: 'Users 详情' });
     await waitFor(() => expect(load).toHaveBeenCalledTimes(1));
     expect(load.mock.calls[0]?.[0]).toEqual(expect.objectContaining({
@@ -353,19 +354,19 @@ describe('AutoTable detail workspace consumer', () => {
       recordId: 'user-1', meta: expect.objectContaining({ recordId: 'user-1', tenantId: 'tenant-b' }),
     }));
 
-    loads.get('user-1:tenant-a')!.resolve([{ name: 'stale-tenant-a.txt' }]);
+    requireValue(loads.get('user-1:tenant-a')).resolve([{ name: 'stale-tenant-a.txt' }]);
     await flushPromises();
     expect(within(dialog).queryByText('stale-tenant-a.txt')).toBeNull();
     expect(dialog.querySelector('[data-svadmin-detail-section="attachments"] [data-svadmin-detail-section-loading]')).toBeTruthy();
 
-    loads.get('user-1:tenant-b')!.resolve([{ name: 'fresh-tenant-b.txt' }]);
+    requireValue(loads.get('user-1:tenant-b')).resolve([{ name: 'fresh-tenant-b.txt' }]);
     expect(await within(dialog).findByText('fresh-tenant-b.txt')).toBeTruthy();
     expect(within(dialog).queryByText('stale-tenant-a.txt')).toBeNull();
   });
 
   it('clears and ignores an in-place tenant scope change without a parent remount', async () => {
     const loads = new Map<string, Deferred<{ name: string }[]>>();
-    const load = vi.fn(({ recordId, meta }: DetailWorkspaceScope) => {
+    const load = vi.fn(({ meta }: DetailWorkspaceScope) => {
       const deferred = createDeferred<{ name: string }[]>();
       loads.set(String(meta?.['tenantId'] ?? 'none'), deferred);
       return deferred.promise;
@@ -382,11 +383,11 @@ describe('AutoTable detail workspace consumer', () => {
     await view.rerender({ tenant: { tenantId: 'tenant-b' } });
     await waitFor(() => expect(loads.has('tenant-b')).toBe(true));
 
-    loads.get('tenant-a')!.resolve([{ name: 'stale-in-place-tenant-a.txt' }]);
+    requireValue(loads.get('tenant-a')).resolve([{ name: 'stale-in-place-tenant-a.txt' }]);
     await flushPromises();
     expect(view.queryByText('stale-in-place-tenant-a.txt')).toBeNull();
 
-    loads.get('tenant-b')!.resolve([{ name: 'fresh-in-place-tenant-b.txt' }]);
+    requireValue(loads.get('tenant-b')).resolve([{ name: 'fresh-in-place-tenant-b.txt' }]);
     expect(await view.findByText('fresh-in-place-tenant-b.txt')).toBeTruthy();
     expect(view.queryByText('stale-in-place-tenant-a.txt')).toBeNull();
   });

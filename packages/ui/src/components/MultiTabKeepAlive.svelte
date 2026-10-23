@@ -19,14 +19,14 @@
     tabs?: WorkspaceTab[];
     activeTabId?: string;
     onselect?: (tab: WorkspaceTab) => void;
-    onclose?: (tabId: string) => void;
+    onclose?: ((tabId: string) => void) | undefined;
     /**
      * 关闭保护：返回 false（或抛错）时保留标签；异步确认期间不提前移除。
      * 仅对可关闭且未固定的标签调用。
      */
-    onbeforeclose?: (tab: WorkspaceTab) => boolean | Promise<boolean>;
+    onbeforeclose?: ((tab: WorkspaceTab) => boolean | Promise<boolean>) | undefined;
     oncloseothers?: (tabId: string) => void;
-    oncloseall?: () => void;
+    oncloseall?: (() => void) | undefined;
     onrefresh?: (tab: WorkspaceTab) => void;
     class?: string;
   }

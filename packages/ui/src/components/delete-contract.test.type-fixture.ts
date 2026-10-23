@@ -1,6 +1,6 @@
 import { Type } from 'typebox';
-import { defineResource, useDelete, UndoError, type ResourceContract, type UseDeleteOptions, type UseDeleteMutateParams } from '@svadmin/core';
-import { parseContractDeleteInput } from '../../../core/src/resource-contract';
+import { useDelete, UndoError, type ResourceContract, type UseDeleteOptions, type UseDeleteMutateParams } from '@svadmin/core';
+import { defineResource, parseContractDeleteInput } from '../../../core/src/resource-contract';
 
 const plain = defineResource('plain', { record: Type.Object({ id: Type.Number(), title: Type.String() }) });
 const reason = defineResource('reason', {

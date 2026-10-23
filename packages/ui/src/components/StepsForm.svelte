@@ -26,7 +26,7 @@
 
   interface Props {
     resourceName: string;
-    id?: string | number;
+    id?: string | number | undefined;
     mode?: 'create' | 'edit';
     steps: StepDef[];
     onSuccess?: () => void;

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { requireValue } from '../../test-assertions';
   import { Type } from 'typebox';
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
   import { defineResource, provideAdminContext, type DataProvider } from '@svadmin/core';
@@ -92,7 +93,7 @@
   function settleRecord(recordId: number, title: string): Row | undefined {
     const index = records.findIndex(candidate => candidate.id === recordId);
     if (index < 0) return undefined;
-    const next = { ...records[index]!, title };
+    const next = { ...requireValue(records[index]), title };
     records[index] = next;
     return next;
   }

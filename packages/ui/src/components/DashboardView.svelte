@@ -19,7 +19,7 @@
     requestContext?: EnterpriseProviderRequestContext;
     filters?: readonly { field: string; value: string | number | boolean | null }[];
     timeRange?: DashboardTimeRange;
-    onDrillDown?: (input: DashboardDrilldown) => void | Promise<void>;
+    onDrillDown?: ((input: DashboardDrilldown) => void | Promise<void>) | undefined;
     title?: string;
   }
   let { provider, dashboardId, requestContext, filters = [], timeRange, onDrillDown, title }: Props = $props();

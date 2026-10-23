@@ -43,7 +43,6 @@ test('MultiTabKeepAlive keeps per-tab state, draft protection and cleared snapsh
 
   const state = page.getByTestId('mt-state');
   const query = page.getByLabel('Workspace query');
-  const scroller = page.getByTestId('multi-tab-scroll');
 
   await expect(state).toHaveAttribute('data-active-tab', 'orders');
   await expect(state).toHaveAttribute('data-tab-count', '3');

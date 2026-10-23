@@ -32,7 +32,7 @@ describe('dashboard contract', () => {
     const timeRange = { from: '2026-10-01T00:00:00Z', to: '2026-10-31T23:59:59Z' };
     const result = decodeDashboardQuery({ dashboardId: 'home', timeRange });
     expect(result.timeRange).toEqual(timeRange);
-    result.timeRange!.from = '2026-09-01T00:00:00Z';
+    requireValue(result.timeRange).from = '2026-09-01T00:00:00Z';
     expect(timeRange.from).toBe('2026-10-01T00:00:00Z');
     expect(() => decodeDashboardQuery({
       dashboardId: 'home', timeRange: { from: timeRange.to, to: timeRange.from },

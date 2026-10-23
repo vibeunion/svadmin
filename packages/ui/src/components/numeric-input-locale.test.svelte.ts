@@ -24,7 +24,11 @@ function mountInForm(
   document.body.append(form);
   const submissions = vi.fn((event: SubmitEvent) => event.preventDefault());
   form.addEventListener('submit', submissions);
-  const view = render(component as never, props);
+  const view = render(component as never, props) as unknown as {
+    container: HTMLElement;
+    unmount: () => void;
+    rerender: (next: Record<string, unknown>) => Promise<void>;
+  };
   form.append(view.container);
   return {
     form,

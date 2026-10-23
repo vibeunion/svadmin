@@ -6,11 +6,11 @@
     value?: number;
     count?: number;
     allowClear?: boolean;
-    name?: string;
+    name?: string | undefined;
     disabled?: boolean;
     required?: boolean;
     invalid?: boolean;
-    describedby?: string;
+    describedby?: string | undefined;
     ariaLabel?: string;
     class?: string;
     onchange?: (value: number) => void;

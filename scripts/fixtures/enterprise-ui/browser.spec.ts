@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
+import { requireValue } from '../../test-assertions';
 
 const screenshots = 'test-results/enterprise/screenshots';
 test('RolesSettings separates loading, failure and retry from actual permission grants', async ({ page }, testInfo) => {
@@ -1189,7 +1190,7 @@ test('task action failures are visible, sanitized, and retryable', async ({ page
   const cancel = task.getByRole('button', { name: 'Cancel', exact: true });
   const describedBy = await cancel.getAttribute('aria-describedby');
   expect(describedBy).toBeTruthy();
-  await expect(alert).toHaveAttribute('id', describedBy!);
+  await expect(alert).toHaveAttribute('id', requireValue(describedBy));
   await alert.scrollIntoViewIfNeeded();
   await expect(alert).toBeVisible();
   await task.screenshot({ path: `../../../output/playwright/task-list/${testInfo.project.name}-action-failed.png` });
@@ -1233,7 +1234,7 @@ test('task retry failures are visible, sanitized, and recoverable', async ({ pag
   await expect(task.getByTestId('task-form-submitted')).toHaveText('false');
   const describedBy = await retry.getAttribute('aria-describedby');
   expect(describedBy).toBeTruthy();
-  await expect(alert).toHaveAttribute('id', describedBy!);
+  await expect(alert).toHaveAttribute('id', requireValue(describedBy));
   await alert.scrollIntoViewIfNeeded();
   await expect(alert).toBeInViewport();
   const alertBounds = await alert.boundingBox();
@@ -1563,8 +1564,8 @@ for (const view of ['profile', 'security', 'mfa'] as const) {
         await expect(input).toBeVisible();
         const id = await input.getAttribute('id');
         expect(id).toBeTruthy();
-        expect(ids.has(id!)).toBe(false);
-        ids.add(id!);
+        expect(ids.has(requireValue(id))).toBe(false);
+        ids.add(requireValue(id));
         await instance.locator('label').filter({ hasText: new RegExp(`^${text}$`) }).click();
         await expect(input).toBeFocused();
       }

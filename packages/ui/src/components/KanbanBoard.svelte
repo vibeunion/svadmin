@@ -28,9 +28,9 @@
     columns: KanbanColumn[];
     cards?: KanbanCard[];
     allowAddCard?: boolean;
-    oncardmove?: (cardId: string, targetColumnId: string, targetIndex: number) => void | KanbanCard | Promise<void | KanbanCard>;
+    oncardmove?: ((cardId: string, targetColumnId: string, targetIndex: number) => KanbanCard | undefined | Promise<KanbanCard | undefined>) | undefined;
     canMoveCard?: (card: KanbanCard, targetColumnId: string) => boolean;
-    oncardmoveerror?: (error: unknown) => void;
+    oncardmoveerror?: ((error: unknown) => void) | undefined;
     oncardclick?: (card: KanbanCard) => void;
     oncardadd?: (columnId: string, title: string) => KanbanCard | Promise<KanbanCard>;
     scopeKey?: string | number;
