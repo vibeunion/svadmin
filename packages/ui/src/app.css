@@ -148,6 +148,7 @@
     --svadmin-row-h: 3rem; /* 48px */
     --svadmin-table-head-h: 2.75rem; /* 44px */
     --svadmin-table-state-min-h: 8rem; /* 128px */
+    --svadmin-table-state-min-h-compact: 6rem; /* 96px */
     --svadmin-space-1: 0.25rem; /* 4px */
     --svadmin-space-2: 0.5rem; /* 8px */
     --svadmin-space-3: 0.75rem; /* 12px */
@@ -3561,6 +3562,28 @@ details[data-svadmin-filter][open] > :not(summary),
 .svadmin-stats-card__footer { margin-top: 0.5rem; }
 
 /* Auth form compatibility for existing consumers. */
+[data-svadmin-auth-page] {
+  overflow-wrap: anywhere;
+}
+
+[data-svadmin-login-form] :is(input, button) {
+  scroll-margin-block: 0.5rem;
+}
+
+[data-svadmin-auth-aside],
+[data-svadmin-auth-main],
+[data-svadmin-auth-main] > div,
+[data-svadmin-auth-card],
+[data-svadmin-auth-card] form,
+[data-svadmin-auth-brand],
+[data-svadmin-auth-brand] > :last-child {
+  min-width: 0;
+}
+
+[data-svadmin-auth-brand] > :not(:last-child) {
+  flex-shrink: 0;
+}
+
 .layout-clean-flat [data-svadmin-auth-page] > main > div {
   display: flex;
   width: min(100%, 28.75rem);
@@ -3650,7 +3673,8 @@ details[data-svadmin-filter][open] > :not(summary),
   gap: 0.5rem;
 }
 
-.layout-clean-flat [data-svadmin-auth-page] form > div > div:first-child {
+/* 标签操作行保持横排，嵌套密码控件仍使用自己的纵向布局。 */
+.layout-clean-flat [data-svadmin-auth-page] form > div > div:first-child:not(.svadmin-password-input):not([data-svadmin-password-input]) {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -3661,6 +3685,28 @@ details[data-svadmin-filter][open] > :not(summary),
   color: var(--foreground);
   font-size: 0.875rem;
   font-weight: 600;
+}
+
+.svadmin-auth-input-field {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+
+.svadmin-auth-input-field .svadmin-auth-input-control.svadmin-input {
+  padding-inline-start: 2.25rem;
+}
+
+.svadmin-auth-input-icon {
+  position: absolute;
+  top: 50%;
+  inset-inline-start: 0.75rem;
+  z-index: 1;
+  width: 1rem;
+  height: 1rem;
+  transform: translateY(-50%);
+  color: var(--muted-foreground);
+  pointer-events: none;
 }
 
 .layout-clean-flat [data-svadmin-auth-page] form input {
@@ -3701,6 +3747,104 @@ details[data-svadmin-filter][open] > :not(summary),
   .layout-clean-flat [data-svadmin-demo-credentials] dl {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+/* Password field anatomy. These stable classes do not depend on host Tailwind,
+ * and the logical padding keeps both the lock and reveal control clear of text
+ * in empty, filled, and plain-text states. */
+.svadmin-password-input {
+  display: grid;
+  min-width: 0;
+  gap: 0.5rem;
+}
+
+.svadmin-password-input__label {
+  color: var(--foreground);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.svadmin-password-input__field {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+
+.svadmin-password-input__field .svadmin-password-input__control.svadmin-input {
+  padding-inline-start: 2.25rem;
+  padding-inline-end: 2.5rem;
+}
+
+.svadmin-password-input__icon,
+.svadmin-password-input__toggle {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  translate: 0 -50%;
+}
+
+.svadmin-password-input__icon {
+  inset-inline-start: 0.75rem;
+  width: 1rem;
+  height: 1rem;
+  color: var(--muted-foreground);
+  pointer-events: none;
+}
+
+.svadmin-password-input .svadmin-password-input__toggle {
+  inset-inline-end: 0.25rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  min-height: 0;
+  padding: 0;
+}
+
+.svadmin-password-input__glyph {
+  width: 1rem;
+  height: 1rem;
+}
+
+.svadmin-password-input__strength {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.svadmin-password-input__strength-track {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 0.375rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--muted);
+}
+
+.svadmin-password-input__strength-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--destructive);
+  transition: width var(--svadmin-motion-standard) var(--svadmin-motion-easing);
+}
+
+.svadmin-password-input__strength-fill[data-tone="warning"] {
+  background: var(--warning);
+}
+
+.svadmin-password-input__strength-fill[data-tone="info"] {
+  background: var(--info);
+}
+
+.svadmin-password-input__strength-fill[data-tone="success"] {
+  background: var(--success);
+}
+
+.svadmin-password-input__strength-label {
+  flex: 0 0 auto;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  line-height: 1.25;
+  white-space: nowrap;
 }
 
 /* --- Stripe-inspired visual refinement ---------------------

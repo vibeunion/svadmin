@@ -81,7 +81,7 @@ const contentPageRecipeStyles = tv({
       wide: { root: "max-w-[92rem]" },
     },
     density: {
-      compact: { root: "space-y-4" },
+      compact: { root: "space-y-[var(--svadmin-space-4)]" },
       comfortable: {},
     },
   },
@@ -103,8 +103,8 @@ const contentHeaderRecipeStyles = tv({
   variants: {
     density: {
       compact: {
-        root: "space-y-2",
-        row: "gap-3",
+        root: "space-y-[var(--svadmin-space-2)]",
+        row: "gap-[var(--svadmin-space-3)]",
         heading: "space-y-[var(--svadmin-space-1)]",
         title: "text-[length:var(--svadmin-text-section)] leading-[var(--svadmin-leading-tight)]",
         description: "text-[length:var(--svadmin-text-label)] leading-[var(--svadmin-leading-body)]",
@@ -249,7 +249,7 @@ const surfaceTableRecipeStyles = tv({
         content: "px-[var(--svadmin-space-3)]",
         head: "[&[data-slot=table-head]]:py-[var(--svadmin-space-1)] [&[data-slot=table-head]]:text-[length:var(--svadmin-text-caption)]",
         cell: "[&[data-slot=table-cell]]:py-[var(--svadmin-space-1)] [&[data-slot=table-cell]]:text-[length:var(--svadmin-text-caption)]",
-        state: "[--svadmin-table-state-height:6rem]",
+        state: "[--svadmin-table-state-height:var(--svadmin-table-state-min-h-compact)]",
       },
       comfortable: {},
     },

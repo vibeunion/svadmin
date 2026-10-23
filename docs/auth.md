@@ -162,6 +162,18 @@ overrides, including `data-svadmin-auth-brand`, `data-svadmin-auth-card`, and
 `data-svadmin-auth-footer`. The default SVAdmin mark remains in place when
 `brandMark` is not provided.
 
+The authentication region is labelled by its own heading and, when supplied,
+described by its supporting copy. Each shell instance has independent IDs;
+updating or removing the description updates the association.
+
+Long brand names and supporting copy wrap instead of being clipped. Give a custom
+mark explicit dimensions and a decorative `alt=""` when the adjacent brand name
+already identifies it. The snippet is rendered in both responsive brand regions,
+so it should not contain fixed IDs or interactive controls. Only the active
+region is displayed; form and footer controls keep their document keyboard order.
+These shell guarantees do not replace validation or focus management in custom
+authentication forms.
+
 `LoginPage` keeps the default SVAdmin structure while allowing business
 projects to replace authentication copy:
 
@@ -181,6 +193,27 @@ The page exposes stable hooks for themed application shells:
 `data-svadmin-login-submit`. Validation failures are announced through
 `data-svadmin-login-error` with `aria-live="assertive"` and are associated with
 both credential fields.
+
+### Password field contract
+
+`PasswordInput` owns its field anatomy with stable `.svadmin-password-input`
+classes and `data-svadmin-password-*` hooks, without requiring host Tailwind.
+Logical inline padding reserves space for the lock and reveal control in empty,
+masked and visible states. Keep this padding when theming the field.
+
+`PasswordInput` renders one label by default. When placing a password label
+beside a secondary action, pass `showLabel={false}` and provide an external
+`<Label for="...">` associated with the input ID. The external label must remain
+visible and is the only label; the default stays unchanged for existing callers.
+
+The field exposes `data-svadmin-password-field`, `data-svadmin-password-control`,
+`data-svadmin-password-icon`, and `data-svadmin-password-toggle`. Its show/hide
+button supports Tab, Enter and Space without submitting or clearing the value.
+It exposes `aria-controls` and `aria-pressed`; `disabled` applies to both input
+and toggle. Validation and description attributes stay on the native input.
+
+Authentication actions and credential submission stay owned by the auth provider;
+this field only controls presentation and local visibility.
 
 ## `<Authenticated>` Component
 

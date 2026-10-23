@@ -1,0 +1,264 @@
+{
+  "testedCommit": "c901d5d60c8b9ead20f8f4d7ac6ed32b22c850e7",
+  "baselineCommit": "cf6c4746578176ea773a17ef6f49f353292f7818",
+  "baselineSources": [
+    {
+      "path": "styles/compatibility.prelude.css",
+      "historicalSha256": "90119df86530830a2e364abb163ed8e55af97165572977a5bc588620097d1f56",
+      "actualSha256": "90119df86530830a2e364abb163ed8e55af97165572977a5bc588620097d1f56",
+      "matchesHistoricalBytes": true
+    },
+    {
+      "path": "page-chrome.css",
+      "historicalSha256": "c1788ef4c71070ef78e2d8377f5688312dfb24c6bb21db36cb96cc3c0c61a014",
+      "actualSha256": "c1788ef4c71070ef78e2d8377f5688312dfb24c6bb21db36cb96cc3c0c61a014",
+      "matchesHistoricalBytes": true
+    },
+    {
+      "path": "components.css",
+      "historicalSha256": "3588e7541b9accc90e3d86c61126b5d74d2e80a0b18599dafb320aa05d564224",
+      "actualSha256": "d041bce7fbf4feda493901d95fbfb16312f2a33719c9eca1743adf530974c4ae",
+      "matchesHistoricalBytes": false
+    },
+    {
+      "path": "styles/compatibility.epilogue.css",
+      "historicalSha256": "94e2b5b2f8b5f1368b058e326f3b1b5949e464cc23f2fd88d02866f99528530b",
+      "actualSha256": "94e2b5b2f8b5f1368b058e326f3b1b5949e464cc23f2fd88d02866f99528530b",
+      "matchesHistoricalBytes": true
+    },
+    {
+      "path": "styles/aliases.css",
+      "historicalSha256": "307f6d367df20726fe43785e255245d10e623f9f36fba10da2313d630879e0d0",
+      "actualSha256": "307f6d367df20726fe43785e255245d10e623f9f36fba10da2313d630879e0d0",
+      "matchesHistoricalBytes": true
+    }
+  ],
+  "baselineHashScope": "Manifest hashes describe historical bytes; actual hashes identify the current comparison files. A mismatch is not evidence of comment-only equivalence.",
+  "publishedCssSha256": "1c36b348f03a4850e3833bfa39115b4900c6e9f8b3cbf1ce4b912b248781a4fa",
+  "migrationReferenceCssSha256": "51a0ecbdb71e15b8c93450733e8ddd7958422d9328b93dcc36841b346d288f93",
+  "migrations": {
+    "lightTokenMigration": {
+      "--background": [
+        "oklch(0.982 0.003 264)",
+        "oklch(0.985 0.001 264)"
+      ],
+      "--secondary": [
+        "oklch(0.965 0.004 264)",
+        "oklch(0.95 0.006 264)"
+      ],
+      "--muted": [
+        "oklch(0.96 0.004 264)",
+        "oklch(0.935 0.006 264)"
+      ],
+      "--border": [
+        "oklch(0.914 0.006 264)",
+        "oklch(0.925 0.003 264)"
+      ],
+      "--input": [
+        "oklch(0.88 0.008 264)",
+        "oklch(0.84 0.01 264)"
+      ],
+      "--sidebar": [
+        "oklch(0.995 0.001 264)",
+        "oklch(1 0 0)"
+      ],
+      "--sidebar-border": [
+        "oklch(0.914 0.006 264)",
+        "var(--border)"
+      ],
+      "--svadmin-shadow-control": [
+        "0 1px 2px rgb(15 23 42 / 0.05), 0 0 0 1px rgb(15 23 42 / 0.025)",
+        "0 1px 2px rgb(15 23 42 / 0.04)"
+      ],
+      "--svadmin-shadow-surface": [
+        "0 1px 2px rgb(15 23 42 / 0.035), 0 1px 3px rgb(15 23 42 / 0.025)",
+        "0 1px 2px rgb(15 23 42 / 0.035)"
+      ],
+      "--svadmin-shadow-surface-hover": [
+        "0 2px 5px rgb(15 23 42 / 0.055), 0 1px 2px rgb(15 23 42 / 0.035)",
+        "0 2px 5px rgb(15 23 42 / 0.06)"
+      ],
+      "--svadmin-shadow-overlay": [
+        "0 18px 48px rgb(15 23 42 / 0.14), 0 4px 12px rgb(15 23 42 / 0.08)",
+        "0 20px 52px rgb(15 23 42 / 0.18), 0 6px 16px rgb(15 23 42 / 0.1)"
+      ]
+    },
+    "stripeLightTokenMigration": {
+      "--primary": [
+        "oklch(0.558 0.22 278)",
+        "oklch(0.54 0.24 293)"
+      ],
+      "--ring": [
+        "oklch(0.558 0.22 278)",
+        "oklch(0.54 0.24 293)"
+      ],
+      "--chart-1": [
+        "oklch(0.558 0.22 278)",
+        "oklch(0.54 0.24 293)"
+      ],
+      "--sidebar-primary": [
+        "oklch(0.558 0.22 278)",
+        "oklch(0.54 0.24 293)"
+      ],
+      "--sidebar-ring": [
+        "oklch(0.558 0.22 278)",
+        "oklch(0.54 0.24 293)"
+      ]
+    },
+    "stripeDarkTokenMigration": {
+      "--primary": [
+        "oklch(0.68 0.18 278)",
+        "oklch(0.72 0.19 293)"
+      ],
+      "--primary-foreground": [
+        "oklch(0.15 0.03 278)",
+        "oklch(0.16 0.02 270)"
+      ],
+      "--ring": [
+        "oklch(0.68 0.18 278)",
+        "oklch(0.72 0.19 293)"
+      ],
+      "--chart-1": [
+        "oklch(0.68 0.18 278)",
+        "oklch(0.72 0.19 293)"
+      ],
+      "--sidebar-primary": [
+        "oklch(0.68 0.18 278)",
+        "oklch(0.72 0.19 293)"
+      ],
+      "--sidebar-primary-foreground": [
+        "oklch(0.15 0.03 278)",
+        "oklch(0.16 0.02 270)"
+      ],
+      "--sidebar-ring": [
+        "oklch(0.68 0.18 278)",
+        "oklch(0.72 0.19 293)"
+      ]
+    },
+    "bodyStyleMigration": {
+      "font-family": [
+        "'Inter', ui-sans-serif, system-ui, sans-serif",
+        "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif"
+      ]
+    },
+    "tableSizeMigration": {
+      ".svadmin-table-head": {
+        "height": [
+          "2.25rem",
+          "2.75rem"
+        ],
+        "font-size": [
+          null,
+          "0.75rem"
+        ]
+      },
+      ".svadmin-table-cell": {
+        "height": [
+          null,
+          "3rem"
+        ],
+        "font-size": [
+          null,
+          "0.8125rem"
+        ]
+      }
+    }
+  },
+  "browser": "155.0.4283.62",
+  "screenshotLaunchArgs": [
+    "--disable-skia-runtime-opts",
+    "--disable-gpu",
+    "--disable-partial-raster",
+    "--num-raster-threads=1"
+  ],
+  "comparison": "Original baseline retained; independent reference applies the eleven approved neutral light tokens, five Stripe light tokens, seven Stripe dark tokens, one body font migration, and the four table height/type declarations from the shared size baseline. Same DOM; two stable frames; exact reference/candidate PNG and computed-style equality.",
+  "scope": "Current real Svelte widget/control fixture under baseline, migration reference and published CSS; Chromium only; not full application or unchanged historical appearance certification",
+  "checks": [
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "mode": "light",
+      "migrationReferenceScreenshotsIdentical": true,
+      "semanticVariants": true,
+      "states": true,
+      "compactTokenOverride": true,
+      "nestedTheme": true,
+      "noHorizontalOverflow": true,
+      "controls": true
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "mode": "dark",
+      "migrationReferenceScreenshotsIdentical": true,
+      "semanticVariants": true,
+      "states": true,
+      "compactTokenOverride": true,
+      "nestedTheme": true,
+      "noHorizontalOverflow": true,
+      "controls": true
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "mode": "light",
+      "migrationReferenceScreenshotsIdentical": true,
+      "semanticVariants": true,
+      "states": true,
+      "compactTokenOverride": true,
+      "nestedTheme": true,
+      "noHorizontalOverflow": true,
+      "controls": true
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "mode": "dark",
+      "migrationReferenceScreenshotsIdentical": true,
+      "semanticVariants": true,
+      "states": true,
+      "compactTokenOverride": true,
+      "nestedTheme": true,
+      "noHorizontalOverflow": true,
+      "controls": true
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mode": "light",
+      "migrationReferenceScreenshotsIdentical": true,
+      "semanticVariants": true,
+      "states": true,
+      "compactTokenOverride": true,
+      "nestedTheme": true,
+      "noHorizontalOverflow": true,
+      "controls": true
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mode": "dark",
+      "migrationReferenceScreenshotsIdentical": true,
+      "semanticVariants": true,
+      "states": true,
+      "compactTokenOverride": true,
+      "nestedTheme": true,
+      "noHorizontalOverflow": true,
+      "controls": true
+    }
+  ],
+  "failures": [],
+  "pageErrors": []
+}

@@ -64,9 +64,9 @@ describe('primitive recipe defaults', () => {
   });
 
   it('keeps compact recipe calls source-compatible', () => {
-    expect(contentPageRecipe({ density: 'compact' }).root).toContain('space-y-4');
+    expect(contentPageRecipe({ density: 'compact' }).root).toContain('space-y-[var(--svadmin-space-4)]');
     expect(contentHeaderRecipe({ density: 'compact' }).title).toContain('text-[length:var(--svadmin-text-section)]');
     expect(surfaceMetricRecipe({ density: 'compact' }).card).toContain('p-3');
-    expect(surfaceTableRecipe({ density: 'compact' }).state).toContain('6rem');
+    expect(surfaceTableRecipe({ density: 'compact' }).state).toContain('var(--svadmin-table-state-min-h-compact)');
   });
 });

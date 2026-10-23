@@ -108,7 +108,7 @@
     transform: translateY(-50%);
     pointer-events: none;
   }
-  .svadmin-filter-toolbar .svadmin-filter-toolbar__input {
+  .svadmin-filter-toolbar .svadmin-filter-toolbar__input[data-slot="input"] {
     height: var(--svadmin-filter-control-height);
     padding-inline: calc(var(--svadmin-space-5) + var(--svadmin-space-3));
     font-size: var(--svadmin-filter-control-font);
@@ -116,9 +116,9 @@
   }
   .svadmin-filter-toolbar .svadmin-filter-toolbar__clear {
     position: absolute;
-    top: 50%;
+    inset-block: 0;
     inset-inline-end: var(--svadmin-space-1);
-    transform: translateY(-50%);
+    margin-block: auto;
   }
   .svadmin-filter-toolbar .svadmin-filter-toolbar__toggle {
     flex-shrink: 0;

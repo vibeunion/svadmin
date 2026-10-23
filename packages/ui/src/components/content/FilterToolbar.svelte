@@ -38,9 +38,14 @@
     class: className = '',
   }: Props = $props();
 
+  let searchInput = $state<HTMLInputElement | null>(null);
   const advancedPanelId = `svadmin-filter-toolbar-advanced-${uid}`;
   const i18n = useTranslation();
   let mobile = $state(false);
+  function clearSearch(): void {
+    query = '';
+    searchInput?.focus();
+  }
   onMount(() => {
     const media = window.matchMedia('(max-width: 767px)');
     const update = () => { mobile = media.matches; };
@@ -57,6 +62,7 @@
         <Search class="svadmin-filter-toolbar__search-icon" aria-hidden="true" />
         <Input
           bind:value={query}
+          bind:ref={searchInput}
           {placeholder}
           class="svadmin-filter-toolbar__input"
           aria-label={placeholder}
@@ -68,7 +74,7 @@
             class="svadmin-filter-toolbar__clear"
             aria-label={clearLabel}
             title={clearLabel}
-            onclick={() => query = ''}
+            onclick={clearSearch}
           >
             <X class="svadmin-filter-toolbar__control-icon" aria-hidden="true" />
           </Button>

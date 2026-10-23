@@ -116,15 +116,15 @@
           <Label for="login-identifier">
             {identifierLabel ?? i18n.t('auth.usernameOrEmail')}
           </Label>
-          <div class="svadmin-u-d89972fe17d6">
-            <User class="svadmin-u-a4326536b8f5 svadmin-u-da4dbfbc4fdc svadmin-u-22e59b722111 svadmin-u-d694ba66e322 svadmin-u-536a7530a44f svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-36b381be4df3 svadmin-u-bfa603190748" />
+          <div class="svadmin-auth-input-field" data-svadmin-login-identifier-field>
+            <User class="svadmin-auth-input-icon" data-svadmin-auth-input-icon aria-hidden="true" />
             <Input
               id="login-identifier"
               data-svadmin-login-identifier
               type="text"
               placeholder={identifierPlaceholder ?? i18n.t('auth.identifierPlaceholder')}
               bind:value={identifier}
-              class="svadmin-u-9e83b2412bc9"
+              class="svadmin-auth-input-control"
               autocomplete="username"
               aria-invalid={error ? 'true' : undefined}
               aria-describedby={error ? 'login-error' : undefined}
@@ -146,6 +146,7 @@
           <PasswordInput
             id="login-password"
             label={passwordLabel ?? i18n.t('auth.password')}
+            showLabel={false}
             bind:value={password}
             autocomplete="current-password"
             ariaInvalid={error ? 'true' : undefined}

@@ -1,0 +1,1375 @@
+{
+  "sources": {
+    "src/app.css": "11b88773dda043185d7e60052587e5f97ee7ba21a4bf1f8eead6467459122f34",
+    "src/styles/compatibility.prelude.css": "ee1cb084f7eab108ab39af1071bdaed16cad5343e7badc0bf84ef3220602fcc8",
+    "src/styles/tailwind.generated.css": "4ada6eab4e1cbf341868982e0b0f99a4e9446957643adbbaea4930192af66405",
+    "src/components/AuthPageShell.svelte": "892983407cb604e1217b3657e2cb64b9f572591a7a2ea389b8cf0011cb34e4da",
+    "src/components/LoginPage.svelte": "2537ba0e464a5274dae2b91bb1deee3b5baf24bdf02d6f3482ce86db8dc912b4",
+    "src/components/PasswordInput.svelte": "d6d2f6236db6a1601d5e07ac0d87329b13045d3f5f3c387fd06bfa4ad4700688",
+    "test/fixtures/AuthPageShellBrowser.svelte": "32c1a7657960a179ed51d933e847cf14af9948025c1666b3c917cb634a1aaf13",
+    "src/components/auth-contract.test-host.svelte": "da45c70213b7a2175935b219d705d899ed10d5d5a73c9176b22d32473d66e68e",
+    "scripts/auth-page-shell.browser.test.mjs": "29f720fe10cddd041a98ab844e3b385de0957743811ea383d10a4fb50aabdbc4"
+  },
+  "cases": [
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "mode": "default",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": true,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(255, 255, 255)",
+        "foreground": "rgb(10, 37, 64)",
+        "backgroundBrightness": 255,
+        "textBrightness": 37
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "mode": "custom",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": true,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(255, 255, 255)",
+        "foreground": "rgb(10, 37, 64)",
+        "backgroundBrightness": 255,
+        "textBrightness": 37
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "mode": "login",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": true,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(255, 255, 255)",
+        "foreground": "rgb(10, 37, 64)",
+        "backgroundBrightness": 255,
+        "textBrightness": 37
+      },
+      "controls": {
+        "empty": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "filled": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "revealed": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        }
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "light",
+      "mode": "login-recovery",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": true,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(255, 255, 255)",
+        "foreground": "rgb(10, 37, 64)",
+        "backgroundBrightness": 255,
+        "textBrightness": 37
+      },
+      "controls": {
+        "empty": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "filled": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "revealed": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        }
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "dark",
+      "mode": "default",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": true,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(17, 28, 46)",
+        "foreground": "rgb(241, 245, 249)",
+        "backgroundBrightness": 30.333333333333332,
+        "textBrightness": 245
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "dark",
+      "mode": "custom",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": true,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(17, 28, 46)",
+        "foreground": "rgb(241, 245, 249)",
+        "backgroundBrightness": 30.333333333333332,
+        "textBrightness": 245
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "dark",
+      "mode": "login",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": true,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(17, 28, 46)",
+        "foreground": "rgb(241, 245, 249)",
+        "backgroundBrightness": 30.333333333333332,
+        "textBrightness": 245
+      },
+      "controls": {
+        "empty": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "filled": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "revealed": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        }
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "theme": "dark",
+      "mode": "login-recovery",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": true,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(17, 28, 46)",
+        "foreground": "rgb(241, 245, 249)",
+        "backgroundBrightness": 30.333333333333332,
+        "textBrightness": 245
+      },
+      "controls": {
+        "empty": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "filled": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "revealed": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        }
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "light",
+      "mode": "default",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": true,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(255, 255, 255)",
+        "foreground": "rgb(10, 37, 64)",
+        "backgroundBrightness": 255,
+        "textBrightness": 37
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "light",
+      "mode": "custom",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": true,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(255, 255, 255)",
+        "foreground": "rgb(10, 37, 64)",
+        "backgroundBrightness": 255,
+        "textBrightness": 37
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "light",
+      "mode": "login",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": true,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(255, 255, 255)",
+        "foreground": "rgb(10, 37, 64)",
+        "backgroundBrightness": 255,
+        "textBrightness": 37
+      },
+      "controls": {
+        "empty": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "filled": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "revealed": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        }
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "light",
+      "mode": "login-recovery",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": true,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(255, 255, 255)",
+        "foreground": "rgb(10, 37, 64)",
+        "backgroundBrightness": 255,
+        "textBrightness": 37
+      },
+      "controls": {
+        "empty": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "filled": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "revealed": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        }
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "dark",
+      "mode": "default",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": true,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(17, 28, 46)",
+        "foreground": "rgb(241, 245, 249)",
+        "backgroundBrightness": 30.333333333333332,
+        "textBrightness": 245
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "dark",
+      "mode": "custom",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": true,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(17, 28, 46)",
+        "foreground": "rgb(241, 245, 249)",
+        "backgroundBrightness": 30.333333333333332,
+        "textBrightness": 245
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "dark",
+      "mode": "login",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": true,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(17, 28, 46)",
+        "foreground": "rgb(241, 245, 249)",
+        "backgroundBrightness": 30.333333333333332,
+        "textBrightness": 245
+      },
+      "controls": {
+        "empty": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "filled": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "revealed": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        }
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 1920,
+        "height": 1080
+      },
+      "theme": "dark",
+      "mode": "login-recovery",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": true,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(17, 28, 46)",
+        "foreground": "rgb(241, 245, 249)",
+        "backgroundBrightness": 30.333333333333332,
+        "textBrightness": 245
+      },
+      "controls": {
+        "empty": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "filled": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "revealed": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        }
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "mode": "default",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": false,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(255, 255, 255)",
+        "foreground": "rgb(10, 37, 64)",
+        "backgroundBrightness": 255,
+        "textBrightness": 37
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "mode": "custom",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": false,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(255, 255, 255)",
+        "foreground": "rgb(10, 37, 64)",
+        "backgroundBrightness": 255,
+        "textBrightness": 37
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "mode": "login",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": false,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(255, 255, 255)",
+        "foreground": "rgb(10, 37, 64)",
+        "backgroundBrightness": 255,
+        "textBrightness": 37
+      },
+      "controls": {
+        "empty": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "filled": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "revealed": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        }
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "mode": "login-recovery",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": false,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(255, 255, 255)",
+        "foreground": "rgb(10, 37, 64)",
+        "backgroundBrightness": 255,
+        "textBrightness": 37
+      },
+      "controls": {
+        "empty": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "filled": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "revealed": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        }
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "dark",
+      "mode": "default",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": false,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(17, 28, 46)",
+        "foreground": "rgb(241, 245, 249)",
+        "backgroundBrightness": 30.333333333333332,
+        "textBrightness": 245
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "dark",
+      "mode": "custom",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": false,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(17, 28, 46)",
+        "foreground": "rgb(241, 245, 249)",
+        "backgroundBrightness": 30.333333333333332,
+        "textBrightness": 245
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "dark",
+      "mode": "login",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": false,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(17, 28, 46)",
+        "foreground": "rgb(241, 245, 249)",
+        "backgroundBrightness": 30.333333333333332,
+        "textBrightness": 245
+      },
+      "controls": {
+        "empty": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "filled": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "revealed": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        }
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "dark",
+      "mode": "login-recovery",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": false,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(17, 28, 46)",
+        "foreground": "rgb(241, 245, 249)",
+        "backgroundBrightness": 30.333333333333332,
+        "textBrightness": 245
+      },
+      "controls": {
+        "empty": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "filled": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "revealed": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        }
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 320,
+        "height": 640
+      },
+      "theme": "light",
+      "mode": "default",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": false,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(255, 255, 255)",
+        "foreground": "rgb(10, 37, 64)",
+        "backgroundBrightness": 255,
+        "textBrightness": 37
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 320,
+        "height": 640
+      },
+      "theme": "light",
+      "mode": "custom",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": false,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(255, 255, 255)",
+        "foreground": "rgb(10, 37, 64)",
+        "backgroundBrightness": 255,
+        "textBrightness": 37
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 320,
+        "height": 640
+      },
+      "theme": "light",
+      "mode": "login",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": false,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(255, 255, 255)",
+        "foreground": "rgb(10, 37, 64)",
+        "backgroundBrightness": 255,
+        "textBrightness": 37
+      },
+      "controls": {
+        "empty": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "filled": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "revealed": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        }
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 320,
+        "height": 640
+      },
+      "theme": "light",
+      "mode": "login-recovery",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": false,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(255, 255, 255)",
+        "foreground": "rgb(10, 37, 64)",
+        "backgroundBrightness": 255,
+        "textBrightness": 37
+      },
+      "controls": {
+        "empty": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "filled": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "revealed": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        }
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 320,
+        "height": 640
+      },
+      "theme": "dark",
+      "mode": "default",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": false,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(17, 28, 46)",
+        "foreground": "rgb(241, 245, 249)",
+        "backgroundBrightness": 30.333333333333332,
+        "textBrightness": 245
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 320,
+        "height": 640
+      },
+      "theme": "dark",
+      "mode": "custom",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": false,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(17, 28, 46)",
+        "foreground": "rgb(241, 245, 249)",
+        "backgroundBrightness": 30.333333333333332,
+        "textBrightness": 245
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 320,
+        "height": 640
+      },
+      "theme": "dark",
+      "mode": "login",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": false,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(17, 28, 46)",
+        "foreground": "rgb(241, 245, 249)",
+        "backgroundBrightness": 30.333333333333332,
+        "textBrightness": 245
+      },
+      "controls": {
+        "empty": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "filled": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "revealed": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        }
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    },
+    {
+      "viewport": {
+        "width": 320,
+        "height": 640
+      },
+      "theme": "dark",
+      "mode": "login-recovery",
+      "layout": {
+        "visibleBrands": 1,
+        "brandTextFits": true,
+        "desktopBrand": false,
+        "documentOverflow": false,
+        "overflow": [],
+        "labelled": true,
+        "described": true,
+        "headingSize": "20px",
+        "mainOverflowX": "visible"
+      },
+      "paint": {
+        "background": "rgb(17, 28, 46)",
+        "foreground": "rgb(241, 245, 249)",
+        "backgroundBrightness": 30.333333333333332,
+        "textBrightness": 245
+      },
+      "controls": {
+        "empty": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "filled": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        },
+        "revealed": {
+          "identifier": {
+            "iconGap": 9
+          },
+          "password": {
+            "iconGap": 9,
+            "toggleGap": 9
+          }
+        }
+      },
+      "keyboard": true,
+      "pageErrors": [],
+      "passed": true
+    }
+  ]
+}
