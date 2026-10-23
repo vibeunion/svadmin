@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.63.0](https://github.com/vibeunion/svadmin/compare/core-v0.62.0...core-v0.63.0) (2026-10-23)
+
+
+### 🚀 Features
+
+* **ui:** record enterprise interaction contracts ([#541](https://github.com/vibeunion/svadmin/issues/541)) ([723001f](https://github.com/vibeunion/svadmin/commit/723001f73f75cbd3863c9c0a20388f8386454471))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** restore main lint and typecheck after enterprise contracts ([#543](https://github.com/vibeunion/svadmin/issues/543)) ([5bd3c70](https://github.com/vibeunion/svadmin/commit/5bd3c7040e98e270b74142d39a5f85f208f9aadf))
+
 ## [0.62.0](https://github.com/vibeunion/svadmin/compare/core-v0.61.1...core-v0.62.0) (2026-10-20)
 
 
