@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { provideAdminContext, type DataProvider, type TaskProvider } from '@svadmin/core';
+  import { provideAdminContext, type DataProvider, type ResourceDefinition, type TaskProvider } from '@svadmin/core';
   import { QueryClientProvider, type QueryClient } from '@tanstack/svelte-query';
   import type { ComponentProps } from 'svelte';
   import TaskList from './TaskList.svelte';
 
   let { provider, client, tenant, settings = {} }: {
-    provider: TaskProvider | undefined;
+    provider?: TaskProvider | undefined;
     client: QueryClient;
-    tenant?: string;
+    tenant?: string | undefined;
     settings?: ComponentProps<typeof TaskList>;
   } = $props();
   const dataProvider: DataProvider = {
@@ -20,7 +20,7 @@
   };
   provideAdminContext({
     dataProvider,
-    resources: [],
+    resources: [] as ResourceDefinition[],
     get taskProvider() { return provider; },
     get tenant() { return tenant === undefined ? undefined : { tenantId: tenant }; },
   });

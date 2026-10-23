@@ -90,15 +90,16 @@ describe('FileUpload native form consistency', () => {
 
   it.each(['input', 'drop'] as const)('synchronizes native data before %s onChange callbacks', async source => {
     const snapshots: { queue: string[]; submitted: string[] }[] = [];
-    let form: HTMLFormElement | undefined;
+    const form: { current?: HTMLFormElement } = {};
     const view = nativeForm({
       multiple: true, maxFiles: 2, accept: '.csv',
       onChange: (items: UploadItem[]) => {
-        if (!form) throw new Error('Expected mounted form');
-        snapshots.push({ queue: items.map(item => item.file.name), submitted: submittedNames(form) });
+        const current = form.current;
+        if (!current) throw new Error('Expected mounted form');
+        snapshots.push({ queue: items.map(item => item.file.name), submitted: submittedNames(current) });
       },
     });
-    form = view.form;
+    form.current = view.form;
     await select(view, source, [file('one.csv'), file('two.csv'), file('extra.csv')]);
     const remove = view.getAllByRole('button', { name: 'Remove file' })[0];
     if (!remove) throw new Error('Expected first remove button');

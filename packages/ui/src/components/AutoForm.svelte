@@ -28,7 +28,7 @@
   interface Props {
     resourceName: string;
     rendering?: ResourceRendering | undefined;
-    id?: string | number;
+    id?: string | number | undefined;
     mode?: 'create' | 'edit' | 'clone' | 'show';
     columns?: 1 | 2 | 3 | 4;
     showHeader?: boolean;

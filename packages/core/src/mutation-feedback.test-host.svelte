@@ -2,7 +2,8 @@
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
   import { provideAdminContext } from './context.svelte';
   import type { DataProvider, ResourceDefinition, NotificationProvider, AuditLogProvider, LiveProvider, AuthProvider } from './index';
-  import Probe, { type FeedbackOperation, type FeedbackState } from './mutation-feedback.test-probe.svelte';
+  import Probe from './mutation-feedback.test-probe.svelte';
+  import type { FeedbackOperation, FeedbackState } from './mutation-feedback.test-types';
 
   let { provider, resources, queryClient, operation, notification = null, audit, live, auth = null, ids = [1],
     silentSuccess = false, silentError = false, onReady, onSuccess, onError, onSettled }: {

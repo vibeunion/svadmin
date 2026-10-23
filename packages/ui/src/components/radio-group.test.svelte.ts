@@ -1,5 +1,6 @@
 import { act, cleanup, fireEvent, render, within } from '@testing-library/svelte';
-import { resetI18n, setLocale } from '@svadmin/core/i18n';
+import { resetI18n } from '@svadmin/core/i18n';
+import { setLocale } from '../../test/legacy-locale';
 import { tick } from 'svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import RadioGroup from './RadioGroup.svelte';

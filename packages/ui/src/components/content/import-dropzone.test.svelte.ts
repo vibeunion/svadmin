@@ -1,3 +1,4 @@
+import { requireValue } from '../../../../../scripts/test-assertions';
 import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import ImportDropzone from './ImportDropzone.svelte';
@@ -146,16 +147,17 @@ describe('ImportDropzone import contract', () => {
   });
 
   it('keeps a synchronously reentrant change exactly once', async () => {
-    let node: HTMLInputElement | undefined;
+    const node: { current?: HTMLInputElement } = {};
     const onimport = vi.fn(() => {
-      if (!node) return;
+      const current = node.current;
+      if (!current) return;
       const next = transfer([file('reentrant.csv')]);
-      node.files = next.files;
-      node.dispatchEvent(new Event('change', { bubbles: true }));
+      current.files = next.files;
+      current.dispatchEvent(new Event('change', { bubbles: true }));
     });
     const view = render(ImportDropzone, { onimport });
-    node = input(view);
-    await fireEvent.change(node, { target: { files: transfer([file('first.csv')]).files } });
+    node.current = input(view);
+    await fireEvent.change(requireValue(node.current), { target: { files: transfer([file('first.csv')]).files } });
     expect(onimport).toHaveBeenCalledTimes(1);
   });
 

@@ -8,12 +8,12 @@ import { svelte2tsx } from 'svelte2tsx';
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { defineResource, resetContext, parseQueryKey, type DataProvider, type ResourceDefinition,
+import { resetContext, parseQueryKey, type DataProvider, type ResourceDefinition,
   type GetListResult, type GetManyResult, type GetListParams, type GetManyParams, type AuthProvider, type AuthActionResult } from '@svadmin/core';
 import { captureAuthLiveScope, resetLogoutVersion } from '../../../core/src/auth-hooks.svelte';
 import { createSelectProjection } from '../../../core/src/select-options';
 import { decodeListResult } from '../../../core/src/record-decoder';
-import { parseContractRecord } from '../../../core/src/resource-contract';
+import { defineResource, parseContractRecord } from '../../../core/src/resource-contract';
 import * as unsafe from '../../../core/src/unsafe';
 import type { SelectSettings, SelectState } from './select-contract.test.types';
 import Host from './select-contract.test-host.svelte';

@@ -8,7 +8,7 @@ export interface DetailWorkspaceScope {
   readonly resourceName: string;
   readonly recordId: string | number;
   /** Tenant/provider metadata resolved through `AdminContextAccessor.getProviderMeta`. */
-  readonly meta?: Record<string, unknown>;
+  readonly meta?: Record<string, unknown> | undefined;
 }
 
 /**

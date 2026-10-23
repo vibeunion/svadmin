@@ -1,6 +1,6 @@
 import { Type } from 'typebox';
-import { defineResource, useUpdate, captureAuthSession, type ResourceContract, type UseUpdateOptions, type UseUpdateMutateParams } from '@svadmin/core';
-import { parseContractUpdateInput } from '../../../core/src/resource-contract';
+import { useUpdate, captureAuthSession, type ResourceContract, type UseUpdateOptions, type UseUpdateMutateParams } from '@svadmin/core';
+import { defineResource, parseContractUpdateInput } from '../../../core/src/resource-contract';
 
 const posts = defineResource('posts', {
   record: Type.Object({ id: Type.Number(), title: Type.String() }),

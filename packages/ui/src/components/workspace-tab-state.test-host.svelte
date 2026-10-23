@@ -3,7 +3,6 @@
   import MultiTabKeepAlive, { type WorkspaceTab } from './MultiTabKeepAlive.svelte';
   import type {
     WorkspaceTabStateAdapter,
-    WorkspaceTabViewState,
   } from './workspace-tab-state.js';
 
   interface Props {

@@ -2,11 +2,11 @@ import { cleanup, render, waitFor } from '@testing-library/svelte';
 import { afterEach, describe, it, expect, vi } from 'vitest';
 import { Type } from 'typebox';
 import { QueryClient } from '@tanstack/svelte-query';
-import { defineResource, keys, parseQueryKey, resetContext, setAuditHandler,
+import { keys, parseQueryKey, resetContext, setAuditHandler,
   type DataProvider, type GetOneResult, type ResourceDefinition, type ResourceContract, type AuthProvider } from '@svadmin/core';
 import { resetToast } from '@svadmin/core/toast';
 import { definedOptions } from '@svadmin/core/options';
-import { contractKey } from '../../../core/src/resource-contract';
+import { defineResource, contractKey } from '../../../core/src/resource-contract';
 import { parseCreateParams } from '../../../core/src/create-contract';
 import * as legacy from '../../../core/src/hooks.svelte';
 import ts from 'typescript';

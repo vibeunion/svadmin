@@ -36,7 +36,7 @@
     useProviderData = !task && !!taskId,
     queryOptions,
   } = $props<{
-    task?: TaskRecord;
+    task?: TaskRecord | undefined;
     taskId?: string;
     taskProvider?: TaskProvider<TaskRecord>;
     title?: string;

@@ -11,6 +11,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import { svelte2tsx } from 'svelte2tsx';
+import { requireValue } from '../../../../scripts/test-assertions';
 
 const posts = defineResource('posts', {
   record: Type.Object({ id: Type.Number(), title: Type.String() }),
@@ -370,13 +371,13 @@ describe('ComboboxField', () => {
     await fireEvent.click(firstTrigger);
     const firstId = firstTrigger.getAttribute('aria-controls');
     expect(firstId).toBeTruthy();
-    expect(document.getElementById(firstId!)?.getAttribute('role')).toBe('listbox');
+    expect(document.getElementById(requireValue(firstId))?.getAttribute('role')).toBe('listbox');
     await fireEvent.click(secondTrigger);
     const secondId = secondTrigger.getAttribute('aria-controls');
     expect(secondId).toBeTruthy();
     expect(secondId).not.toBe(firstId);
     expect(firstTrigger.hasAttribute('aria-controls')).toBe(false);
-    expect(document.getElementById(secondId!)?.getAttribute('role')).toBe('listbox');
+    expect(document.getElementById(requireValue(secondId))?.getAttribute('role')).toBe('listbox');
     await fireEvent.click(firstTrigger);
     expect(firstTrigger.getAttribute('aria-controls')).toBe(firstId);
     expect(secondTrigger.hasAttribute('aria-controls')).toBe(false);

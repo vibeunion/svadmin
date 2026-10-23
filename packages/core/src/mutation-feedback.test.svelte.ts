@@ -7,7 +7,7 @@ import { resetContext } from './context.svelte';
 import { getToastQueue, resetToast } from './toast.svelte';
 import { HttpError, type AuditLogProvider, type AuthProvider, type DataProvider, type LiveProvider, type NotificationProvider, type ResourceDefinition } from './index';
 import Host from './mutation-feedback.test-host.svelte';
-import type { FeedbackOperation, FeedbackState } from './mutation-feedback.test-probe.svelte';
+import type { FeedbackOperation, FeedbackState } from './mutation-feedback.test-types';
 import ts from 'typescript';
 import { svelte2tsx } from 'svelte2tsx';
 import { readFileSync } from 'node:fs';
@@ -128,7 +128,7 @@ describe.each(['create', 'update', 'delete'] satisfies FeedbackOperation[])('%s 
       provider: source, resources, queryClient: client, operation,
       notification: policy.transport === 'provider' ? notification : null,
       audit, live, auth, silentSuccess: policy.silentSuccess, silentError: policy.silentError,
-      onReady: value => { state = value; }, onSuccess, onError, onSettled,
+      onReady: (value: FeedbackState) => { state = value; }, onSuccess, onError, onSettled,
     });
     function read(): FeedbackState {
       if (!state) throw new Error('Expected mounted mutation hooks');
@@ -199,7 +199,7 @@ describe.each(['update', 'delete'] as const)('%s partial failure', operation => 
     let state: FeedbackState | undefined;
     render(Host, {
       provider: source, resources, queryClient: client, operation, ids: [1, 2], notification, audit, live,
-      silentError, onReady: value => { state = value; }, onSuccess, onError, onSettled,
+      silentError, onReady: (value: FeedbackState) => { state = value; }, onSuccess, onError, onSettled,
     });
     function read(): FeedbackState {
       if (!state) throw new Error('Expected mounted mutation hooks');

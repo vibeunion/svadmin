@@ -26,7 +26,7 @@ function deferred() {
   return { promise, resolve, reject };
 }
 
-async function clickSave(view: ReturnType<typeof render>) {
+async function clickSave(view: { getByRole(role: string, options?: { name?: string }): HTMLElement }) {
   await fireEvent.click(view.getByRole('button', { name: 'Save' }));
   await tick();
 }
@@ -36,7 +36,7 @@ async function settle() {
   await tick();
 }
 
-function panel(view: ReturnType<typeof render>, kind: Kind) {
+function panel(view: { getByRole(role: string, options?: { name?: string }): HTMLElement }, kind: Kind) {
   if (kind === 'drawer') {
     const element = document.querySelector('[data-slot="sheet"]');
     if (!element) throw new Error('Expected sheet panel');
@@ -45,12 +45,12 @@ function panel(view: ReturnType<typeof render>, kind: Kind) {
   return view.getByRole('dialog');
 }
 
-function queryPanel(view: ReturnType<typeof render>, kind: Kind) {
+function queryPanel(view: { queryByRole(role: string, options?: { name?: string }): HTMLElement | null }, kind: Kind) {
   if (kind === 'drawer') return document.querySelector('[data-slot="sheet"]');
   return view.queryByRole('dialog');
 }
 
-function form(view: ReturnType<typeof render>, kind: Kind) {
+function form(view: { getByRole(role: string, options?: { name?: string }): HTMLElement }, kind: Kind) {
   const element = panel(view, kind).querySelector('form');
   if (!element) throw new Error('Expected form element');
   return element as HTMLFormElement;
@@ -59,7 +59,7 @@ function form(view: ReturnType<typeof render>, kind: Kind) {
 const dismissActions = ['Cancel', 'Close', 'Escape', 'overlay'] as const;
 type DismissAction = (typeof dismissActions)[number];
 
-async function dismiss(view: ReturnType<typeof render>, kind: Kind, action: DismissAction) {
+async function dismiss(view: { getByRole(role: string, options?: { name?: string }): HTMLElement }, kind: Kind, action: DismissAction) {
   if (action === 'Escape') {
     await fireEvent.keyDown(document.body, { key: 'Escape' });
   } else if (action === 'overlay') {

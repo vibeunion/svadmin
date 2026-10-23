@@ -29,6 +29,7 @@
   });
   const resources: ResourceDefinition[] = $derived([{ name: 'records', label: 'Records', fields, contract }]);
   const dataProvider: DataProvider = {
+    getApiUrl: () => '/api',
     getList: async () => ({ data: [], total: 0 }),
     getOne: async () => ({ data: { id: 'record-1' } }),
     create: async ({ variables }) => {

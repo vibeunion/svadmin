@@ -10,7 +10,9 @@ export function withoutArrayFieldMetadata(value: unknown): unknown {
     if (!Array.isArray(input) && prototype !== Object.prototype && prototype !== null) return input;
     const previous = copies.get(input);
     if (previous) return previous;
-    const output: object = Array.isArray(input) ? [] : Object.create(prototype);
+    const output: object = Array.isArray(input)
+      ? []
+      : Object.create(prototype === null ? null : Object.prototype);
     copies.set(input, output);
     for (const key of Reflect.ownKeys(input)) {
       if (key === arrayFieldRowKey || key === arrayFieldOrderKey) continue;

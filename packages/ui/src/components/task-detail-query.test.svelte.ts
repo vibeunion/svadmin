@@ -41,7 +41,7 @@ describe('TaskDetails with the real task query', () => {
       await act(async () => { await new Promise(resolve => setTimeout(resolve, 30)); });
       expect(provider.get).not.toHaveBeenCalled();
       expect(client.isFetching()).toBe(0);
-      expect(view.queryByRole('button', { name: 'Retry', exact: true })).toBeNull();
+      expect(view.queryByRole('button', { name: 'Retry' })).toBeNull();
       await view.rerender({ settings: { taskId: 'one', useProviderData: true, queryOptions: { enabled: true } } });
       await view.findByText('Verified task');
       await waitFor(() => expect(provider.get).toHaveBeenCalledExactlyOnceWith('one'));
@@ -59,17 +59,17 @@ describe('TaskDetails with the real task query', () => {
     expect((await view.findByRole('alert')).textContent).toContain('Fetch task failed');
     expect(view.container.textContent).not.toContain('PRIVATE_FIRST');
     expect(view.queryByText('Verified task')).toBeNull();
-    await fireEvent.click(view.getByRole('button', { name: 'Retry', exact: true }));
+    await fireEvent.click(view.getByRole('button', { name: 'Retry' }));
     await waitFor(() => expect(provider.get).toHaveBeenCalledTimes(2));
     expect(client.isFetching()).toBe(1);
-    expect(view.queryByRole('button', { name: 'Retry', exact: true })).toBeNull();
+    expect(view.queryByRole('button', { name: 'Retry' })).toBeNull();
     await act(async () => {
       rejectRetry(new Error('PRIVATE_RETRY'));
       await retryRead.catch(() => {});
     });
     await view.findByRole('alert');
     expect(view.container.textContent).not.toContain('PRIVATE_RETRY');
-    await fireEvent.click(view.getByRole('button', { name: 'Retry', exact: true }));
+    await fireEvent.click(view.getByRole('button', { name: 'Retry' }));
     await view.findByText('Verified task');
     expect(view.queryByRole('alert')).toBeNull();
     expect(provider.get).toHaveBeenCalledTimes(3);

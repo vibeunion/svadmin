@@ -5,7 +5,7 @@
   interface Props {
     columns: KanbanColumn[];
     initialCards?: KanbanCard[];
-    oncardmove?: (cardId: string, targetColumnId: string, targetIndex: number) => void | KanbanCard | Promise<void | KanbanCard>;
+    oncardmove?: (cardId: string, targetColumnId: string, targetIndex: number) => KanbanCard | undefined | Promise<KanbanCard | undefined>;
     oncardmoveerror?: (error: unknown) => void;
     onCardsChange?: (cards: KanbanCard[]) => void;
   }

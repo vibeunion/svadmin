@@ -2,9 +2,9 @@ import { cleanup, fireEvent, render, waitFor, within } from '@testing-library/sv
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Type } from 'typebox';
 import { QueryClient, QueryObserver } from '@tanstack/svelte-query';
-import { defineResource, resetContext, keys, parseQueryKey, type DataProvider, type GetListResult, type ResourceDefinition } from '@svadmin/core';
+import { resetContext, keys, parseQueryKey, type DataProvider, type GetListResult, type ResourceDefinition } from '@svadmin/core';
 import { definedOptions } from '@svadmin/core/options';
-import { contractKey } from '../../../core/src/resource-contract';
+import { defineResource, contractKey } from '../../../core/src/resource-contract';
 import { snapshotInvalidationParams } from '../../../core/src/invalidation-contract';
 import type { RefreshState } from './refresh-contract.test.types';
 import Host from './refresh-contract.test-host.svelte';

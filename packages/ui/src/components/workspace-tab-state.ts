@@ -138,27 +138,29 @@ export function createWorkspaceTabStateAdapter(
       if (!raw) return undefined;
       const value: unknown = JSON.parse(raw);
       if (!value || typeof value !== 'object' || Array.isArray(value)) return undefined;
-      const record = value as Record<string, unknown>;
+      const version = Reflect.get(value, 'version');
+      const persistedTenantId = Reflect.get(value, 'tenantId');
+      const tabId = Reflect.get(value, 'tabId');
+      const path = Reflect.get(value, 'path');
+      const query = Reflect.get(value, 'query');
+      const scrollTop = Reflect.get(value, 'scrollTop');
+      const scrollLeft = Reflect.get(value, 'scrollLeft');
+      const draft = Reflect.get(value, 'draft');
       // 持久化读取不做宽容归一化：任何字段错误都按无快照处理，尤其不能把
       // `draft: "true"` 洗成 false 而静默丢失草稿保护。
       if (
-        record.version !== SNAPSHOT_VERSION ||
-        record.tenantId !== tenantId ||
-        record.tabId !== tab.id ||
-        record.path !== tab.path ||
-        typeof record.query !== 'string' ||
-        !isValidScroll(record.scrollTop) ||
-        !isValidScroll(record.scrollLeft) ||
-        typeof record.draft !== 'boolean'
+        version !== SNAPSHOT_VERSION ||
+        persistedTenantId !== tenantId ||
+        tabId !== tab.id ||
+        path !== tab.path ||
+        typeof query !== 'string' ||
+        !isValidScroll(scrollTop) ||
+        !isValidScroll(scrollLeft) ||
+        typeof draft !== 'boolean'
       ) {
         return undefined;
       }
-      return {
-        query: record.query,
-        scrollTop: record.scrollTop,
-        scrollLeft: record.scrollLeft,
-        draft: record.draft,
-      };
+      return { query, scrollTop, scrollLeft, draft };
     } catch {
       // 损坏、被篡改或 storage 不可用时按未保存处理，不阻断标签切换。
       return undefined;

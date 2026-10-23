@@ -12,7 +12,7 @@
   interface Props<T extends string = string> {
     options: readonly RadioGroupOption<T>[];
     value?: T | null;
-    name?: string;
+    name?: string | undefined;
     legend?: string;
     ariaLabel?: string;
     disabled?: boolean;

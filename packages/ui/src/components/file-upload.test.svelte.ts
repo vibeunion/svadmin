@@ -89,7 +89,7 @@ describe('FileUpload', () => {
   );
 
   it('translates an active cancellation and preserves the cancelled machine state', async () => {
-    const pending = deferred<void>();
+    const pending = deferred<undefined>();
     const onChange = vi.fn();
     const view = render(I18nHost, { settings: { upload: () => pending.promise, onChange } });
     const input = requireValue(view.container.querySelector<HTMLInputElement>('input[type="file"]'));
@@ -99,7 +99,7 @@ describe('FileUpload', () => {
     expect(view.getByText('已取消')).toBeTruthy();
     expect(view.getByRole('alert').textContent).toBe('上传已取消。');
     expect(onChange).toHaveBeenLastCalledWith([expect.objectContaining({ status: 'cancelled', error: 'Upload cancelled.' })]);
-    await act(async () => { pending.resolve(); await pending.promise; });
+    await act(async () => { pending.resolve(undefined); await pending.promise; });
     expect(view.getByText('已取消')).toBeTruthy();
     await view.component.setLocale('en');
     expect(view.getByText('cancelled')).toBeTruthy();
@@ -613,7 +613,7 @@ describe('FileUpload', () => {
     const cancelUpload = vi.fn(() => cleanupResult.promise);
     const onChange = vi.fn();
     const view = render(FileUpload, {
-      upload: (_file, session) => {
+      upload: (_file, session): Promise<{ url: string } | undefined> => {
         sessions.push(session);
         if (sessions.length === 1) {
           session.setUploadId('failed-object');
@@ -674,12 +674,12 @@ describe('FileUpload', () => {
       session.setUploadId('success-unmount-object');
       return { url: '/uploads/success-unmount.txt' };
     });
-    let view: ReturnType<typeof render> | undefined;
+    const view: { current?: { unmount: () => void; container: HTMLElement } } = {};
     const onChange = vi.fn((next: UploadItem[]) => {
-      if (next.some(item => item.status === 'success')) view?.unmount();
+      if (next.some(item => item.status === 'success')) view.current?.unmount();
     });
-    view = render(FileUpload, { upload, cancelUpload, onChange });
-    await fireEvent.change(requireValue(view.container.querySelector('input')), {
+    view.current = render(FileUpload, { upload, cancelUpload, onChange });
+    await fireEvent.change(requireValue(view.current.container.querySelector('input')), {
       target: { files: [file('success-unmount.txt')] },
     });
     await act(async () => { await Promise.resolve(); await Promise.resolve(); });

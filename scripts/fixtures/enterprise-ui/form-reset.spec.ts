@@ -1,9 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
 
-function fixture(page: Page) {
-  return page.getByTestId('form-reset-fixture');
-}
-
 function productHost(page: Page) {
   return page.getByTestId('product-form-host');
 }

@@ -302,7 +302,7 @@ describe('scoped async consumers', () => {
     const recordAEntries = createDeferred<AuditEntry[]>();
     const recordBEntries = createDeferred<AuditEntry[]>();
     const get = vi.fn((params: AuditQueryParams) => (
-      params.meta?.recordId === 'record-a' ? recordAEntries.promise : recordBEntries.promise
+      params.meta?.['recordId'] === 'record-a' ? recordAEntries.promise : recordBEntries.promise
     ));
     const provider: AuditLogProvider = {
       create: async params => params,
@@ -400,7 +400,7 @@ describe('scoped async consumers', () => {
     const recordAEntries = createDeferred<AuditEntry[]>();
     const recordBEntries = createDeferred<AuditEntry[]>();
     const get = vi.fn((params: AuditQueryParams) => (
-      params.meta?.recordId === 'record-a' ? recordAEntries.promise : recordBEntries.promise
+      params.meta?.['recordId'] === 'record-a' ? recordAEntries.promise : recordBEntries.promise
     ));
     const provider: AuditLogProvider = {
       create: async params => params,

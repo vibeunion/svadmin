@@ -13,7 +13,7 @@
     open?: boolean;
     recordId?: string | number;
     onClose?: () => void;
-    extraSections?: Snippet;
+    extraSections?: Snippet | undefined;
   } = $props();
   const context = captureAdminContext();
   const i18n = useTranslation();

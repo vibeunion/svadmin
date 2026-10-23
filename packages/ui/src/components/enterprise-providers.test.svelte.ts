@@ -379,7 +379,7 @@ describe('enterprise provider settings', () => {
     const name = screen.getByLabelText('Organization name');
     await fireEvent.input(timeout, { target: { value: '45' } });
     await fireEvent.input(name, { target: { value: 'Updated organization' } });
-    const [organizationSave, policySave] = screen.getAllByRole('button', { name: 'Save', exact: true });
+    const [organizationSave, policySave] = screen.getAllByRole('button', { name: 'Save' });
     // 在 DOM 更新前重复分发事件，验证函数门禁而非仅验证 disabled。
     for (const button of [policySave, policySave, organizationSave, organizationSave]) {
       requireValue(button).dispatchEvent(new MouseEvent('click', { bubbles: true }));

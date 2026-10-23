@@ -26,7 +26,7 @@ function provider(getList?: DataProvider['getList']): DataProvider {
       return { data: matched, total: matched.length };
     }),
     getMany: vi.fn(async ({ ids }) => ({
-      data: ids.map(id => catalog.find(record => record.id === Number(id)) ?? { id: Number(id), title: `Selected ${id}` }),
+      data: ids.map((id: string | number) => catalog.find(record => record.id === Number(id)) ?? { id: Number(id), title: `Selected ${id}` }),
     })),
     getOne: async ({ id }) => ({ data: { id: Number(id), title: `Selected ${id}` } }),
     getApiUrl: () => '/api',
