@@ -19,12 +19,16 @@ describe('SegmentedControl', () => {
       import SegmentedControl from './SegmentedControl.svelte';
       type Mode = 'table' | 'board';
       let value = $state<Mode>('table');
+      let optionalValue = $state<Mode | undefined>();
       const options: readonly { value: Mode; label: string }[] = [
         { value: 'table', label: 'Table' }, { value: 'board', label: 'Board' },
       ];
       function change(next: Mode) { value = next; }
+      function optionalChange(next: Mode) { optionalValue = next; }
     </script>
-    <SegmentedControl {options} bind:value ariaLabel="Mode" onchange={change} />`;
+    <SegmentedControl {options} bind:value ariaLabel="Mode" onchange={change} />
+    <SegmentedControl {options} bind:value={optionalValue} ariaLabel="Optional mode" onchange={optionalChange} />
+    <button type="button" onclick={() => { optionalValue = undefined; }}>Clear</button>`;
     const virtual = new Map([
       [filename, readFileSync(filename, 'utf8')], [fixture, consumer],
     ].map(([file, source]) => {
@@ -136,5 +140,73 @@ describe('SegmentedControl', () => {
     expect(onchange).not.toHaveBeenCalled();
     await fireEvent.keyDown(radio, { key: 'Enter' });
     expect(onchange).toHaveBeenCalledWith('table');
+  });
+
+  it.each(['altKey', 'ctrlKey', 'metaKey'] as const)(
+    'does not intercept navigation or activation keys composed with %s',
+    async modifier => {
+      const onchange = vi.fn();
+      const view = render(SegmentedControl, { options, ariaLabel: 'Modified keys', value: 'table', onchange });
+      const radios = view.getAllByRole('radio');
+
+      for (const key of ['ArrowRight', 'ArrowLeft', 'Home', 'End']) {
+        const current = requireValue(radios[0]);
+        current.focus();
+        const event = new KeyboardEvent('keydown', {
+          key, bubbles: true, cancelable: true, [modifier]: true,
+        });
+        await fireEvent(current, event);
+        expect(event.defaultPrevented).toBe(false);
+        expect(document.activeElement).toBe(current);
+        expect(current.getAttribute('aria-checked')).toBe('true');
+      }
+
+      for (const key of ['Enter', ' ']) {
+        const current = requireValue(radios[1]);
+        current.focus();
+        const event = new KeyboardEvent('keydown', {
+          key, bubbles: true, cancelable: true, [modifier]: true,
+        });
+        await fireEvent(current, event);
+        expect(event.defaultPrevented).toBe(false);
+        expect(document.activeElement).toBe(current);
+        expect(current.getAttribute('aria-checked')).toBe('false');
+      }
+
+      expect(onchange).not.toHaveBeenCalled();
+    },
+  );
+
+  it('leaves an unmodified key on the original interaction path', async () => {
+    const onchange = vi.fn();
+    const view = render(SegmentedControl, { options, ariaLabel: 'Unmodified keys', value: 'table', onchange });
+    const radios = view.getAllByRole('radio');
+    const event = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true });
+    await fireEvent(requireValue(radios[0]), event);
+    expect(event.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(radios[1]);
+    expect(onchange).toHaveBeenLastCalledWith('board');
+  });
+
+  it('does not act on synthetic keys for a control disabled by an ancestor fieldset', async () => {
+    const onchange = vi.fn();
+    const view = render(SegmentedControl, { options, ariaLabel: 'Natively disabled', value: 'table', onchange });
+    const root = view.getByRole('radiogroup');
+    const fieldset = document.createElement('fieldset');
+    fieldset.disabled = true;
+    view.container.append(fieldset);
+    fieldset.append(root);
+    const current = requireValue(view.getAllByRole('radio')[0]);
+    const matches = current.matches.bind(current);
+    // happy-dom 不实现祖先 fieldset 的 :disabled 继承；沿用 RadioGroup 单测约定，
+    // 只模拟平台禁用判定，浏览器侧另测真实可操作状态。
+    vi.spyOn(current, 'matches').mockImplementation(selector => selector === ':disabled' || matches(selector));
+    current.focus();
+    const event = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true });
+    await fireEvent(current, event);
+    expect(event.defaultPrevented).toBe(false);
+    expect(document.activeElement).toBe(current);
+    expect(current.getAttribute('aria-checked')).toBe('true');
+    expect(onchange).not.toHaveBeenCalled();
   });
 });

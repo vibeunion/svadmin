@@ -18,8 +18,10 @@
   import * as Card from './ui/card/index.js';
   import TaskList from './TaskList.svelte';
   import TaskDetails from './TaskDetails.svelte';
+  import DataState from './content/DataState.svelte';
   import {
     isTaskActive,
+    formatTaskDate,
     resolveTaskCreatedAt,
     resolveTaskMessage,
     resolveTaskTitle,
@@ -57,6 +59,9 @@
   let mounted = true;
   onDestroy(() => { mounted = false; submitAttempt = null; });
   const activeTaskProvider = $derived(taskProvider ?? context.taskProvider);
+  const canListTasks = $derived(typeof activeTaskProvider?.list === 'function');
+  const canListDlq = $derived(typeof activeTaskProvider?.listDlq === 'function');
+  const canListCurrentTab = $derived(activeTab === 'dlq' ? canListDlq : canListTasks);
   const taskScope = $derived({
     provider: activeTaskProvider,
     tenant: context.tenantCacheKey?.__svadminTenant,
@@ -99,12 +104,13 @@
   const resolvedTitle = $derived(title ?? i18n.t('task.drawerTitle'));
 
   const taskQuery = useTaskList(definedReactiveOptions({
+    errorNotification: false,
     get taskProvider() {
       return activeTaskProvider;
     },
     get queryOptions() {
       return {
-        enabled: !!activeTaskProvider,
+        enabled: canListTasks,
         refetchInterval: refreshInterval,
         refetchIntervalInBackground: true,
       };
@@ -112,6 +118,7 @@
   }));
 
   const dlqQuery = useTaskList(definedReactiveOptions({
+    errorNotification: false,
     get dlq() {
       return true;
     },
@@ -120,7 +127,7 @@
     },
     get queryOptions() {
       return {
-        enabled: !!activeTaskProvider && !!activeTaskProvider?.listDlq,
+        enabled: canListDlq,
         refetchInterval: refreshInterval,
         refetchIntervalInBackground: true,
       };
@@ -129,8 +136,9 @@
 
   const submitTask = useSubmitTask();
 
-  const allTasks = $derived(taskQuery.data?.data ?? []);
-  const dlqTasks = $derived(dlqQuery.data?.data ?? []);
+  const allTasks = $derived(canListTasks ? taskQuery.data?.data ?? [] : []);
+  const dlqTasks = $derived(canListDlq ? dlqQuery.data?.data ?? [] : []);
+  const currentQuery = $derived(activeTab === 'dlq' ? dlqQuery : taskQuery);
 
   const availableStatuses = $derived.by(() => {
     const source = activeTab === 'dlq' ? dlqTasks : allTasks;
@@ -189,12 +197,6 @@
     }
   });
 
-  function formatTime(value: unknown) {
-    if (typeof value !== 'string' || !value) return '—';
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return '—';
-    return date.toLocaleString();
-  }
 
   function resetSubmitForm() {
     submitTaskName = '';
@@ -247,23 +249,24 @@
       submitOpen = false;
       resetSubmitForm();
       await Promise.allSettled([
-        taskQuery.refetch?.(),
-        dlqQuery.refetch?.(),
+        ...(canListTasks ? [taskQuery.refetch?.()] : []),
+        ...(canListDlq ? [dlqQuery.refetch?.()] : []),
       ]);
-    } catch (error) {
+    } catch {
       if (!current()) return;
-      submitError = error instanceof Error ? error.message : i18n.t('task.submitFailed');
+      submitError = i18n.t('task.submitFailed');
     } finally {
       if (submitAttempt === attempt) submitAttempt = null;
     }
   }
 
   async function refreshCurrentTab() {
+    if (!canListCurrentTab || currentQuery.isFetching) return;
     if (activeTab === 'dlq') {
-      await dlqQuery.refetch?.();
+      await dlqQuery.refetch?.({ cancelRefetch: false });
       return;
     }
-    await taskQuery.refetch?.();
+    await taskQuery.refetch?.({ cancelRefetch: false });
   }
 </script>
 
@@ -298,9 +301,11 @@
         <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
           <ListTodo class="svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e svadmin-u-bfa603190748" />
           <h2 class="svadmin-u-fc7473ca09eb svadmin-u-e83a7042bc91">{resolvedTitle}</h2>
-          <Badge variant="secondary" class="svadmin-u-359090c2d529">{i18n.t('task.activeCount', { count: runningCount })}</Badge>
+          {#if canListTasks}
+            <Badge variant="secondary" class="svadmin-u-359090c2d529">{i18n.t('task.activeCount', { count: runningCount })}</Badge>
+          {/if}
           {#if allTasks[0] && resolveTaskCreatedAt(allTasks[0])}
-            <span class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">{i18n.t('task.lastQueuedAt', { time: formatTime(resolveTaskCreatedAt(allTasks[0])) })}</span>
+            <span class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">{i18n.t('task.lastQueuedAt', { time: formatTaskDate(resolveTaskCreatedAt(allTasks[0]), i18n.locale) })}</span>
           {/if}
         </div>
       </div>
@@ -319,16 +324,20 @@
                     <Tabs.List class="svadmin-u-52083e7da442 svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-b00f43c30c2b svadmin-u-eb6a3cef9686">
                       <Tabs.Trigger value="tasks" active={activeTab === 'tasks'} onclick={() => activeTab = 'tasks'}>
                         {i18n.t('task.tabTasks')}
-                        <Badge variant="outline" class="svadmin-u-f58b02572ab2 svadmin-u-1dc571a3609f">{taskQuery.data?.total ?? allTasks.length}</Badge>
+                        {#if canListTasks}
+                          <Badge variant="outline" class="svadmin-u-f58b02572ab2 svadmin-u-1dc571a3609f">{taskQuery.data?.total ?? allTasks.length}</Badge>
+                        {/if}
                       </Tabs.Trigger>
                       <Tabs.Trigger value="dlq" active={activeTab === 'dlq'} onclick={() => activeTab = 'dlq'}>
                         {i18n.t('task.tabDlq')}
-                        <Badge variant="outline" class="svadmin-u-f58b02572ab2 svadmin-u-1dc571a3609f">{dlqQuery.data?.total ?? dlqTasks.length}</Badge>
+                        {#if canListDlq}
+                          <Badge variant="outline" class="svadmin-u-f58b02572ab2 svadmin-u-1dc571a3609f">{dlqQuery.data?.total ?? dlqTasks.length}</Badge>
+                        {/if}
                       </Tabs.Trigger>
                     </Tabs.List>
                   </Tabs.Root>
                   <div class="svadmin-u-fb56d9cff341 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
-                    <Button variant="outline" size="sm" onclick={() => void refreshCurrentTab()}>
+                    <Button variant="outline" size="sm" disabled={!canListCurrentTab || currentQuery.isFetching} onclick={() => void refreshCurrentTab()}>
                       <RefreshCw class="svadmin-u-82cc6c6581cd svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
                       {i18n.t('common.refresh')}
                     </Button>
@@ -345,16 +354,17 @@
                     <Input
                       class="svadmin-u-9e83b2412bc9"
                       placeholder={i18n.t('task.searchPlaceholder')}
+                      disabled={!canListCurrentTab}
                       bind:value={searchQuery}
                     />
                   </div>
-                  <Select bind:value={statusFilter} aria-label={i18n.t('task.statusFilterLabel')}>
+                  <Select bind:value={statusFilter} disabled={!canListCurrentTab} aria-label={i18n.t('task.statusFilterLabel')}>
                     <option value="all">{i18n.t('task.statusAll')}</option>
                     {#each availableStatuses as status, _i (_i)}
                       <option value={status}>{status}</option>
                     {/each}
                   </Select>
-                  <Select bind:value={autoRefresh} aria-label={i18n.t('task.autoRefreshLabel')}>
+                  <Select bind:value={autoRefresh} disabled={!canListCurrentTab} aria-label={i18n.t('task.autoRefreshLabel')}>
                     <option value="0">{i18n.t('task.refreshOff')}</option>
                     <option value="5000">{i18n.t('task.refresh5s')}</option>
                     <option value="15000">{i18n.t('task.refresh15s')}</option>
@@ -400,22 +410,32 @@
                 </Card.Root>
               {/if}
 
-              <TaskList
-                tasks={filteredTasks}
-                taskProvider={activeTaskProvider}
-                dlq={activeTab === 'dlq'}
-                title={activeTab === 'dlq' ? i18n.t('task.dlqTitle') : i18n.t('task.listTitle')}
-                emptyText={activeTab === 'dlq' ? i18n.t('task.noDlq') : i18n.t('task.noTasks')}
-                onSelect={(task) => {
-                  selectedTaskId = task.id;
-                }}
-              />
+              {#if !canListCurrentTab}
+                <DataState state="error" title={i18n.t('common.configRequired')}
+                  description={i18n.t(activeTab === 'dlq' ? 'task.dlqUnavailable' : 'task.listUnavailable')} />
+              {:else if currentQuery.isError}
+                <DataState state="error" description={i18n.t('task.fetchListFailed')}
+                  {...definedOptions({ retry: currentQuery.isFetching ? undefined : () => { void refreshCurrentTab(); } })} />
+              {:else if currentQuery.isLoading}
+                <DataState state="loading" loadingLabel={i18n.t('task.loadingList')} />
+              {:else}
+                <TaskList
+                  tasks={filteredTasks}
+                  taskProvider={activeTaskProvider}
+                  dlq={activeTab === 'dlq'}
+                  title={activeTab === 'dlq' ? i18n.t('task.dlqTitle') : i18n.t('task.listTitle')}
+                  emptyText={activeTab === 'dlq' ? i18n.t('task.noDlq') : i18n.t('task.noTasks')}
+                  onSelect={(task) => {
+                    selectedTaskId = task.id;
+                  }}
+                />
+              {/if}
             </div>
           </div>
 
           <div class="svadmin-u-fb7302e5364d svadmin-u-73fc3fb18ceb svadmin-u-8a25a995eb8e">
             <div class="svadmin-u-8e63407b5ceb">
-              {#if selectedTaskId}
+              {#if canListCurrentTab && selectedTaskId && !currentQuery.isError && !currentQuery.isLoading}
                 <TaskDetails
                   taskId={selectedTaskId}
                   taskProvider={activeTaskProvider}

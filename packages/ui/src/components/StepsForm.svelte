@@ -15,6 +15,7 @@
   import FieldRenderer from './FieldRenderer.svelte';
   import ConfirmDialog from './ConfirmDialog.svelte';
   import { Skeleton } from './ui/skeleton/index.js';
+  import { withoutArrayFieldMetadata } from './fields/array-field-metadata.js';
 
   const i18n = useTranslation();
 
@@ -102,6 +103,7 @@
   let element = $state.raw<HTMLFormElement>();
   let submitError = $state<string | null>(null);
   let submission = $state.raw<object>();
+  const instanceId = $props.id();
   const scope = $derived({
     contract: binding.resource, id, mode, allowed, configurationValid,
     steps: JSON.stringify(steps), provider: adminContext.providers?.[binding.dataProviderName],
@@ -110,6 +112,14 @@
     session: captureAuthSession(adminContext.authProvider),
   });
   const rendered = $derived({ scope, step: form.steps.currentStep });
+  const authoritativeDraft = $derived({ scope, values: form.values });
+  let acceptedDraft = $state.raw<{
+    snapshot: typeof authoritativeDraft;
+    values: Record<string, unknown>;
+  }>();
+  // 仅回显本次写入已确认的 UI 身份；新的 Core 快照使缓存立即失效。
+  const renderedValues = $derived(acceptedDraft?.snapshot === authoritativeDraft
+    ? acceptedDraft.values : authoritativeDraft.values);
   let mounted = true;
   let confirmation = $state.raw<typeof rendered>();
   const currentRendered = (origin: typeof rendered) => mounted && origin === rendered &&
@@ -122,11 +132,35 @@
     confirmation = undefined;
   });
   $effect(() => () => { mounted = false; submission = undefined; confirmation = undefined; });
-  function errorId(field: string): string { return `${resourceName}-step-${field}-error`; }
+  function errorId(field: string): string { return `${instanceId}-${resourceName}-step-${field}-error`; }
+  const focusableFieldSelector = [
+    'input:not([type="hidden"])', 'textarea', 'select', 'button', '[tabindex]',
+  ].join(', ');
+  function insideDisabledFieldset(candidate: HTMLElement): boolean {
+    for (let parent = candidate.parentElement; parent; parent = parent.parentElement) {
+      if (!(parent instanceof HTMLFieldSetElement) || !parent.disabled) continue;
+      const legend = Array.from(parent.children).find(child => child instanceof HTMLLegendElement);
+      if (!legend?.contains(candidate)) return true;
+    }
+    return false;
+  }
+  function focusFirstActionableControl(field: HTMLElement): boolean {
+    for (const candidate of field.querySelectorAll<HTMLElement>(focusableFieldSelector)) {
+      if (candidate.matches(':disabled, [disabled], input[type="hidden"]')) continue;
+      if (candidate.closest('[hidden], [inert], [aria-disabled="true"]')) continue;
+      if (insideDisabledFieldset(candidate)) continue;
+      candidate.focus();
+      if (document.activeElement === candidate) return true;
+    }
+    return false;
+  }
   async function focusInvalid(origin: typeof scope) {
     await tick();
-    if (mounted && scope === origin && origin.session.isCurrent() && element?.isConnected) {
-      element.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
+    if (!mounted || scope !== origin || !origin.session.isCurrent() || !element?.isConnected) return;
+    // 嵌套数组的子字段键不属于当前步骤的顶层错误。
+    for (const field of element.querySelectorAll<HTMLElement>(':scope > [data-svadmin-field]')) {
+      const key = field.getAttribute('data-svadmin-field-key');
+      if (key && form.errors[key] && focusFirstActionableControl(field)) return;
     }
   }
   const changeStep = $derived.by(() => {
@@ -140,7 +174,15 @@
   const fieldChange = $derived.by(() => {
     const origin = rendered;
     return (key: string) => (value: unknown) => {
-      if (currentRendered(origin)) form.setFieldValue(key, value);
+      if (!currentRendered(origin)) return;
+      const previous = renderedValues;
+      form.setFieldValue(key, withoutArrayFieldMetadata(value));
+      if (currentRendered(origin)) {
+        acceptedDraft = {
+          snapshot: authoritativeDraft,
+          values: { ...previous, [key]: value },
+        };
+      }
     };
   });
   function leave(origin: typeof rendered) {
@@ -175,6 +217,16 @@
       if (mounted && scope === origin && origin.session.isCurrent()) void refetch().catch(() => {});
     };
   });
+
+  // 显式 reset 入口：宿主通过 bind:this 调用，恢复 Core 草稿、步骤导航和本实例
+  // 提交提示；不触发导航，也不改变未授权状态。
+  export function reset(): void {
+    if (!allowed) return;
+    submitError = null;
+    submission = undefined;
+    confirmation = undefined;
+    form.reset();
+  }
 
   const handleSubmit = $derived.by(() => {
     const origin = rendered;
@@ -267,7 +319,7 @@
         {#each currentFields as field (field.key)}
           <FieldRenderer
             {field}
-            value={form.values[field.key]}
+            value={renderedValues[field.key]}
             onchange={fieldChange(field.key)}
             invalid={!!form.errors[field.key]}
             {...definedOptions({ errorId: form.errors[field.key] ? errorId(field.key) : undefined })}
@@ -306,7 +358,5 @@
   {/if}
 </div>
 
-{#key confirmation}
-  <ConfirmDialog open={confirmOpen} message={i18n.t('common.unsavedChanges')}
-    onconfirm={confirmLeave} oncancel={cancelLeave} />
-{/key}
+<ConfirmDialog open={confirmOpen} message={i18n.t('common.unsavedChanges')}
+  onconfirm={confirmLeave} oncancel={cancelLeave} />

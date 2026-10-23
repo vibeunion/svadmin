@@ -39,16 +39,18 @@
     minHeight,
     maxHeight,
     lowlight,
-  }: RichTextEditorProps & {
-    id?: string;
-    disabled?: boolean;
-  } = $props();
+    'aria-invalid': ariaInvalid,
+    'aria-describedby': ariaDescribedBy,
+    'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledBy,
+    'aria-required': ariaRequired,
+  }: RichTextEditorProps = $props();
 
   const resolvedEditable = $derived(editable && !disabled);
   const editorModulePromise = loadRichTextEditor();
 </script>
 
-<div {id} class="contents">
+<div class="contents">
   {#await editorModulePromise}
     <div class="flex min-h-40 items-center justify-center" role="status" aria-live="polite">
       <span class="text-sm text-muted-foreground">Loading editor...</span>
@@ -57,6 +59,10 @@
     {@const Editor = editorModule.default}
     <Editor
       bind:value
+      {...definedOptions({
+        id, disabled, "aria-invalid": ariaInvalid, "aria-describedby": ariaDescribedBy,
+        "aria-label": ariaLabel, "aria-labelledby": ariaLabelledBy, "aria-required": ariaRequired,
+      })}
       {...definedOptions({ "placeholder": placeholder })}
       editable={resolvedEditable}
       {...definedOptions({ "autofocus": autofocus })}

@@ -3,6 +3,7 @@ import { cleanup, fireEvent, within } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { renderWithI18n as render } from '../../test/fixtures/render-with-i18n';
 import KanbanBoard, { type KanbanCard } from './KanbanBoard.svelte';
+import KanbanBoardHost from './kanban-board.test-host.svelte';
 import LiteKanbanBoard from '../../../lite/src/components/LiteKanbanBoard.svelte';
 
 import { requireValue } from '../../../../scripts/test-assertions';
@@ -36,6 +37,153 @@ describe('Kanban mutation lifecycle', () => {
     await tick();
     expect(view.getByRole('region', { name: 'Kanban board' }).getAttribute('aria-busy')).toBe('false');
     expect(within(view.getByRole('region', { name: 'Done' })).getByRole('group', { name: 'Alpha' })).toBeTruthy();
+  });
+
+  it('marks only the pending card busy and clears it after the move receipt', async () => {
+    const pending = deferred<undefined>();
+    const oncardmove = vi.fn(() => pending.promise);
+    const view = render(KanbanBoard, { columns, cards: initial, oncardmove });
+    await fireEvent.change(view.getByRole('combobox', { name: 'Move Alpha' }), { target: { value: 'done' } });
+    expect(within(view.getByRole('region', { name: 'Done' })).getByRole('group', { name: 'Alpha' }).getAttribute('aria-busy')).toBe('true');
+    expect(view.getByRole('group', { name: 'Beta' }).getAttribute('aria-busy')).toBe('false');
+    expect(view.getByRole('group', { name: 'Gamma' }).getAttribute('aria-busy')).toBe('false');
+    expect(view.getByRole('region', { name: 'Kanban board' }).getAttribute('aria-busy')).toBe('true');
+    pending.resolve(undefined);
+    await tick();
+    expect(view.getByRole('group', { name: 'Alpha' }).getAttribute('aria-busy')).toBe('false');
+    expect(within(view.getByRole('region', { name: 'Done' })).getByRole('group', { name: 'Alpha' })).toBeTruthy();
+  });
+
+  it('commits only the awaited authoritative move receipt', async () => {
+    const pending = deferred<KanbanCard | void>();
+    const oncardmove = vi.fn(() => pending.promise);
+    const view = render(KanbanBoard, { columns, cards: initial, oncardmove });
+    await fireEvent.change(view.getByRole('combobox', { name: 'Move Alpha' }), { target: { value: 'done' } });
+    expect(within(view.getByRole('region', { name: 'Done' })).getByRole('group', { name: 'Alpha' })).toBeTruthy();
+    expect(initial[0]?.columnId).toBe('todo');
+    pending.resolve({ id: 'a', title: 'Server title', columnId: 'done' });
+    await tick();
+    expect(view.queryByRole('group', { name: 'Alpha' })).toBeNull();
+    expect(within(view.getByRole('region', { name: 'Done' })).getByRole('group', { name: 'Server title' })).toBeTruthy();
+    expect(initial[0]?.columnId).toBe('todo');
+    expect(view.getByRole('region', { name: 'Kanban board' }).getAttribute('aria-busy')).toBe('false');
+  });
+
+  it('rolls back a rejection, sanitizes the error and retries the same move', async () => {
+    const rejection = deferred<void>();
+    const oncardmove = vi.fn().mockImplementationOnce(() => rejection.promise).mockResolvedValueOnce(undefined);
+    const oncardmoveerror = vi.fn();
+    const view = render(KanbanBoard, { columns, cards: initial, oncardmove, oncardmoveerror });
+    await fireEvent.change(view.getByRole('combobox', { name: 'Move Alpha' }), { target: { value: 'done' } });
+    rejection.reject(new Error('private server response'));
+    await tick();
+    expect(within(view.getByRole('region', { name: 'To do' })).getByRole('group', { name: 'Alpha' })).toBeTruthy();
+    expect(view.getByRole('alert').textContent).toContain('Local preview reverted');
+    expect(view.container.textContent).not.toContain('private server response');
+    expect(oncardmoveerror).toHaveBeenCalledTimes(1);
+    await fireEvent.click(view.getByRole('button', { name: 'Retry' }));
+    expect(oncardmove).toHaveBeenCalledTimes(2);
+    expect(oncardmove).toHaveBeenLastCalledWith('a', 'done', 1);
+    await tick();
+    expect(view.queryByRole('alert')).toBeNull();
+    expect(within(view.getByRole('region', { name: 'Done' })).getByRole('group', { name: 'Alpha' })).toBeTruthy();
+  });
+
+  it.each([
+    { label: 'wrong id', receipt: { id: 'other', title: 'Server', columnId: 'done' } },
+    { label: 'wrong target column', receipt: { id: 'a', title: 'Server', columnId: 'todo' } },
+    { label: 'invalid structure', receipt: { id: 'a', title: '', columnId: 'done' } },
+    { label: 'null receipt', receipt: null },
+  ])('rolls back a $label and allows an explicit retry', async ({ receipt }) => {
+    const oncardmove = vi.fn()
+      .mockResolvedValueOnce(receipt as KanbanCard)
+      .mockResolvedValueOnce({ id: 'a', title: 'Retried', columnId: 'done' });
+    const oncardmoveerror = vi.fn();
+    const view = render(KanbanBoard, { columns, cards: initial, oncardmove, oncardmoveerror });
+    await fireEvent.change(view.getByRole('combobox', { name: 'Move Alpha' }), { target: { value: 'done' } });
+    await tick();
+    expect(within(view.getByRole('region', { name: 'To do' })).getByRole('group', { name: 'Alpha' })).toBeTruthy();
+    expect(view.queryByRole('group', { name: 'Server' })).toBeNull();
+    expect(view.getByRole('alert').textContent).toContain('Local preview reverted');
+    expect(view.container.textContent).not.toContain('Invalid move receipt');
+    expect(oncardmoveerror).toHaveBeenCalledTimes(1);
+    await fireEvent.click(view.getByRole('button', { name: 'Retry' }));
+    expect(oncardmove).toHaveBeenCalledTimes(2);
+    expect(oncardmove).toHaveBeenLastCalledWith('a', 'done', 1);
+    await tick();
+    expect(view.queryByRole('alert')).toBeNull();
+    expect(within(view.getByRole('region', { name: 'Done' })).getByRole('group', { name: 'Retried' })).toBeTruthy();
+  });
+
+  it('snapshots the authoritative receipt so later mutation cannot alter committed cards', async () => {
+    const receipt: KanbanCard = { id: 'a', title: 'Server title', columnId: 'done', tags: ['server'] };
+    const delivered: KanbanCard[][] = [];
+    const oncardmove = vi.fn(async () => receipt);
+    const view = render(KanbanBoardHost, {
+      columns,
+      initialCards: initial,
+      oncardmove,
+      onCardsChange: (cards: KanbanCard[]) => delivered.push(cards),
+    });
+    await fireEvent.change(view.getByRole('combobox', { name: 'Move Alpha' }), { target: { value: 'done' } });
+    await tick();
+    expect(within(view.getByRole('region', { name: 'Done' })).getByRole('group', { name: 'Server title' })).toBeTruthy();
+    const committed = requireValue(delivered.at(-1)).find(card => card.id === 'a');
+    expect(committed).not.toBe(receipt);
+    expect(requireValue(committed?.tags)).not.toBe(receipt.tags);
+    receipt.title = 'Mutated title';
+    receipt.columnId = 'todo';
+    requireValue(receipt.tags).push('mutated');
+    await tick();
+    expect(committed?.title).toBe('Server title');
+    expect(committed?.columnId).toBe('done');
+    expect(committed?.tags).toEqual(['server']);
+    expect(view.queryByRole('group', { name: 'Mutated title' })).toBeNull();
+    expect(within(view.getByRole('region', { name: 'Done' })).getByRole('group', { name: 'Server title' })).toBeTruthy();
+  });
+
+  it.each(['success', 'failure'] as const)('ignores a late %s after unmount without callback or delivery', async settlement => {
+    const pending = deferred<KanbanCard | void>();
+    const delivered: KanbanCard[][] = [];
+    const oncardmove = vi.fn(() => pending.promise);
+    const oncardmoveerror = vi.fn();
+    const view = render(KanbanBoardHost, {
+      columns,
+      initialCards: initial,
+      oncardmove,
+      oncardmoveerror,
+      onCardsChange: (cards: KanbanCard[]) => delivered.push(cards.map(card => ({ ...card }))),
+    });
+    await fireEvent.change(view.getByRole('combobox', { name: 'Move Alpha' }), { target: { value: 'done' } });
+    view.unmount();
+    if (settlement === 'success') pending.resolve({ id: 'a', title: 'Late server', columnId: 'done' });
+    else pending.reject(new Error('late failure'));
+    await tick();
+    await Promise.resolve();
+    expect(oncardmoveerror).not.toHaveBeenCalled();
+    expect(delivered.some(cards => cards.some(card => card.title === 'Late server'))).toBe(false);
+  });
+
+  it('serializes retry submissions and clears failed retry state on scope switch', async () => {
+    const rejection = deferred<void>();
+    const retry = deferred<void>();
+    const oncardmove = vi.fn().mockImplementationOnce(() => rejection.promise).mockImplementationOnce(() => retry.promise);
+    const oncardmoveerror = vi.fn();
+    const view = render(KanbanBoard, { columns, cards: initial, oncardmove, oncardmoveerror, scopeKey: 'tenant-a' });
+    await fireEvent.change(view.getByRole('combobox', { name: 'Move Alpha' }), { target: { value: 'done' } });
+    rejection.reject(new Error('first failure'));
+    await tick();
+    const retryButton = view.getByRole('button', { name: 'Retry' });
+    retryButton.click();
+    retryButton.click();
+    expect(oncardmove).toHaveBeenCalledTimes(2);
+    await view.rerender({ scopeKey: 'tenant-b', cards: [{ id: 'new', title: 'New', columnId: 'todo' }] });
+    expect(view.queryByRole('alert')).toBeNull();
+    expect(view.queryByRole('button', { name: 'Retry' })).toBeNull();
+    retry.reject(new Error('late failure'));
+    await tick();
+    expect(view.queryByRole('alert')).toBeNull();
+    expect(oncardmoveerror).toHaveBeenCalledTimes(1);
   });
 
   it('rolls back a rejected preview without hiding the board or raw-error disclosure', async () => {
@@ -89,6 +237,10 @@ describe('Kanban mutation lifecycle', () => {
     await fireEvent.change(view.getByRole('combobox', { name: 'Move Alpha' }), { target: { value: 'done' } });
     expect(oncardmove).not.toHaveBeenCalled();
     expect(within(view.getByRole('region', { name: 'To do' })).getByRole('group', { name: 'Alpha' })).toBeTruthy();
+    expect(view.getByRole('group', { name: 'Alpha' }).getAttribute('draggable')).toBe('false');
+    await fireEvent.dragStart(view.getByRole('group', { name: 'Alpha' }));
+    await fireEvent.drop(view.getByRole('region', { name: 'Done' }));
+    expect(oncardmove).not.toHaveBeenCalled();
   });
 
   it('provides keyboard-operable column moves and same-column ordering', async () => {
@@ -119,6 +271,60 @@ describe('Kanban mutation lifecycle', () => {
     pending.resolve({ id: 'server-123', title: 'New task', columnId: 'todo' });
     await tick();
     expect(view.getByRole('group', { name: 'New task' })).toBeTruthy();
+  });
+
+  it('does not submit duplicate card creation while the first Add is pending', async () => {
+    const pending = deferred<KanbanCard>();
+    const oncardadd = vi.fn(() => pending.promise);
+    const view = render(KanbanBoard, { columns, cards: initial, oncardadd });
+    await fireEvent.click(view.getByRole('button', { name: 'Add card to To do' }));
+    await fireEvent.input(view.getByRole('textbox', { name: 'Card title' }), { target: { value: 'One pending card' } });
+    const addButton = view.getByRole('button', { name: 'Add' });
+    await fireEvent.click(addButton);
+    await fireEvent.click(addButton);
+    expect(oncardadd).toHaveBeenCalledTimes(1);
+    expect((addButton as HTMLButtonElement).disabled).toBe(true);
+    pending.resolve({ id: 'server-one', title: 'One pending card', columnId: 'todo' });
+    await tick();
+    expect(view.getByRole('group', { name: 'One pending card' })).toBeTruthy();
+  });
+
+  it.each(['success', 'failure'] as const)('ignores an old card-add %s after switching scope', async settlement => {
+    const old = deferred<KanbanCard>();
+    const oncardadd = vi.fn(() => old.promise);
+    const view = render(KanbanBoard, {
+      columns,
+      cards: initial,
+      oncardadd,
+      scopeKey: 'tenant-a',
+    });
+    await fireEvent.click(view.getByRole('button', { name: 'Add card to To do' }));
+    await fireEvent.input(view.getByRole('textbox', { name: 'Card title' }), { target: { value: 'Old scope card' } });
+    await fireEvent.click(view.getByRole('button', { name: 'Add' }));
+    await view.rerender({ scopeKey: 'tenant-b', cards: [{ id: 'new', title: 'New scope', columnId: 'todo' }] });
+    if (settlement === 'success') old.resolve({ id: 'old-server', title: 'Old scope card', columnId: 'todo' });
+    else old.reject(new Error('old scope failed'));
+    await tick();
+    expect(view.queryByRole('group', { name: 'Old scope card' })).toBeNull();
+    expect(view.queryByRole('alert')).toBeNull();
+    expect(view.getByRole('group', { name: 'New scope' })).toBeTruthy();
+  });
+
+  it('keeps the committed card snapshot when the add receipt is mutated later', async () => {
+    const receipt: KanbanCard = { id: 'server-snapshot', title: 'Snapshot card', columnId: 'todo', tags: ['submitted'] };
+    const oncardadd = vi.fn(async () => receipt);
+    const view = render(KanbanBoard, { columns, cards: initial, oncardadd });
+    await fireEvent.click(view.getByRole('button', { name: 'Add card to To do' }));
+    await fireEvent.input(view.getByRole('textbox', { name: 'Card title' }), { target: { value: 'Snapshot card' } });
+    await fireEvent.click(view.getByRole('button', { name: 'Add' }));
+    await tick();
+    expect(view.getByRole('group', { name: 'Snapshot card' })).toBeTruthy();
+    receipt.title = 'Mutated card';
+    receipt.columnId = 'done';
+    requireValue(receipt.tags).push('mutated');
+    await tick();
+    expect(view.queryByRole('group', { name: 'Mutated card' })).toBeNull();
+    expect(view.getByRole('group', { name: 'Snapshot card' })).toBeTruthy();
   });
 
   it('rejects duplicate creation receipts and retains the editable draft', async () => {

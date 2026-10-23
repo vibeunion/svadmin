@@ -16,6 +16,7 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
   import { definedOptions } from '@svadmin/core/options';
+  import { useTranslation } from '@svadmin/core/i18n';
   import { cn } from '../../utils.js';
   import StatusBadge from './StatusBadge.svelte';
   import DataState from './DataState.svelte';
@@ -37,8 +38,8 @@
 
   let {
     items = [],
-    emptyTitle = 'No timeline events',
-    emptyDescription = 'Activity events and status transitions will appear here.',
+    emptyTitle,
+    emptyDescription,
     state,
     stateTitle,
     stateDescription,
@@ -49,6 +50,7 @@
     class: className = '',
   }: Props = $props();
 
+  const i18n = useTranslation();
   const dotClass: Record<Status, string> = {
     success: 'svadmin-u-3355648fe22b svadmin-u-18a6e7a36f29 svadmin-u-76747e5e02ff',
     warning: 'svadmin-u-a486cacb3a15 svadmin-u-2f960aa0c478 svadmin-u-3a4ff758c2ab',
@@ -64,8 +66,8 @@
     <DataState
       state={resolvedState}
       {...definedOptions({
-        title: stateTitle ?? (resolvedState === 'empty' ? emptyTitle : undefined),
-        description: stateDescription ?? (resolvedState === 'empty' ? emptyDescription : undefined),
+        title: stateTitle ?? (resolvedState === 'empty' ? emptyTitle ?? i18n.t('audit.emptyTitle') : undefined),
+        description: stateDescription ?? (resolvedState === 'empty' ? emptyDescription ?? i18n.t('audit.emptyDescription') : undefined),
         retry,
         retryLabel,
         loadingLabel,
@@ -89,10 +91,10 @@
             <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
               <span class="svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{item.title}</span>
               {#if item.actor}
-                <span class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">by {item.actor}</span>
+                <span class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">{i18n.t('audit.actorPrefix')}{item.actor}</span>
               {/if}
               {#if item.status}
-                <StatusBadge status={item.status} label={item.tag ?? item.status} class="svadmin-u-d058ca6de60f svadmin-u-68ecb30dbec6 svadmin-u-11e59c6d5f6b" />
+                <StatusBadge status={item.status} label={item.tag ?? i18n.t(`audit.status.${item.status}`)} class="svadmin-u-d058ca6de60f svadmin-u-68ecb30dbec6 svadmin-u-11e59c6d5f6b" />
               {:else if item.tag}
                 <span class="svadmin-u-52083e7da442 svadmin-u-3960ffc248d9 svadmin-u-07389a777c1f svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-45d828117213 svadmin-u-465609a240a8 svadmin-u-d058ca6de60f svadmin-u-2689f3958069 svadmin-u-bfa603190748 svadmin-u-2ef11f1cb219">
                   {item.tag}

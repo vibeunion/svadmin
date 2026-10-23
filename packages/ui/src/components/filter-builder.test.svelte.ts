@@ -3,6 +3,7 @@ import { fireEvent, within } from '@testing-library/svelte';
 import FilterBuilder from './FilterBuilder.svelte';
 import LiteFilterBuilder from '../../../lite/src/components/LiteFilterBuilder.svelte';
 import { createListLoader } from '../../../lite/src/server-adapter';
+import { compileFilterTree, readFilterTree, type FilterRuleNode } from './enterprise/filter-tree.js';
 import { isFilterCollectionValue, type FieldDefinition, type DataProvider, type CrudOperator, type Filter } from '@svadmin/core';
 import { renderWithI18n as render } from '../../test/fixtures/render-with-i18n';
 import { readFileSync } from 'node:fs';
@@ -19,6 +20,145 @@ const testFields: FieldDefinition[] = [
 ];
 
 describe('FilterBuilder component', () => {
+  it.each(['number', 'text', 'boolean', 'select'] as const)('links an incomplete %s scalar draft to its error until repaired', async type => {
+    const field: FieldDefinition = { key: 'value', label: 'Value', type,
+      ...(type === 'select' ? { options: [{ label: 'Two', value: 2 }] } : {}) };
+    const onApply = vi.fn();
+    const view = render(FilterBuilder, { fields: [field], onApply });
+    await fireEvent.click(view.getByTestId('filter-builder-add-rule'));
+    const role = type === 'number' ? 'spinbutton' : type === 'text' ? 'textbox' : 'combobox';
+    const input = view.getByRole(role, { name: /^Value$/ });
+    expect(input.hasAttribute('aria-describedby')).toBe(false);
+    await fireEvent.click(view.getByTestId('filter-builder-apply'));
+    expect(onApply).not.toHaveBeenCalled();
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+    const errorId = input.getAttribute('aria-describedby');
+    if (!errorId) throw new Error('Expected scalar error association');
+    const error = document.getElementById(errorId);
+    expect(view.getByRole('alert').contains(error)).toBe(true);
+    expect(error?.textContent).toContain('Enter a valid typed value');
+    if (type === 'text' || type === 'number') {
+      await fireEvent.input(input, { target: { value: type === 'text' ? 'fixed' : '0' } });
+    } else {
+      await fireEvent.change(input, { target: { value: type === 'select' ? '0' : 'false' } });
+    }
+    expect(view.getByRole(role, { name: /^Value$/ })).toBe(input);
+    expect(input.getAttribute('aria-invalid')).toBe('false');
+    expect(input.hasAttribute('aria-describedby')).toBe(false);
+    expect(document.getElementById(errorId)).toBeNull();
+    await fireEvent.click(view.getByTestId('filter-builder-apply'));
+    expect(onApply).toHaveBeenCalledExactlyOnceWith([{
+      field: 'value', operator: type === 'text' ? 'contains' : 'eq',
+      value: type === 'text' ? 'fixed' : type === 'number' ? 0 : type === 'select' ? 2 : false,
+    }]);
+  });
+
+  it('keeps error references on the correct rule when earlier errors are repaired or removed', async () => {
+    const onApply = vi.fn();
+    const view = render(FilterBuilder, {
+      fields: [{ key: 'amount', label: 'Amount', type: 'number' }],
+      filters: [{ field: 'amount', operator: 'eq', value: 1 },
+        { field: 'amount', operator: 'between', value: [2, 3] }],
+      onApply,
+    });
+    const first = view.getByRole('spinbutton', { name: /^Value$/ });
+    const lower = view.getByRole('spinbutton', { name: 'Lower bound' });
+    const upper = view.getByRole('spinbutton', { name: 'Upper bound' });
+    await fireEvent.input(first, { target: { value: '' } });
+    await fireEvent.input(lower, { target: { value: '4' } });
+    await fireEvent.click(view.getByTestId('filter-builder-apply'));
+    const rangeRule = lower.closest('[data-filter-rule]')?.getAttribute('data-filter-rule');
+    if (!rangeRule) throw new Error('Expected range rule identity');
+    function assertRangeError() {
+      const id = lower.getAttribute('aria-describedby');
+      if (!id) throw new Error('Expected range error reference');
+      expect(upper.getAttribute('aria-describedby')).toBe(id);
+      expect(view.getByRole('group', { name: /^Value$/ }).getAttribute('aria-describedby')).toBe(id);
+      expect(document.getElementById(id)?.textContent).toBe(`${rangeRule}: Enter a valid typed value`);
+      expect(view.getByRole('alert').contains(document.getElementById(id))).toBe(true);
+      return id;
+    }
+    const initialRangeId = assertRangeError();
+    expect(initialRangeId).not.toBe(first.getAttribute('aria-describedby'));
+    await fireEvent.input(first, { target: { value: '0' } });
+    expect(first.hasAttribute('aria-describedby')).toBe(false);
+    expect(assertRangeError()).not.toBe(initialRangeId);
+    await fireEvent.input(first, { target: { value: '' } });
+    assertRangeError();
+    await fireEvent.click(requireValue(view.getAllByRole('button', { name: 'Remove rule' })[0]));
+    assertRangeError();
+    await fireEvent.click(view.getByTestId('filter-builder-apply'));
+    expect(onApply).not.toHaveBeenCalled();
+    await fireEvent.input(lower, { target: { value: '1' } });
+    for (const element of [lower, upper, view.getByRole('group', { name: /^Value$/ })]) {
+      expect(element.hasAttribute('aria-describedby')).toBe(false);
+    }
+    expect(view.queryByRole('alert')).toBeNull();
+    await fireEvent.click(view.getByTestId('filter-builder-apply'));
+    expect(onApply).toHaveBeenCalledExactlyOnceWith([{ field: 'amount', operator: 'between', value: [1, 3] }]);
+  });
+
+  it.each(['number', 'text', 'boolean', 'select'] as const)('associates %s set errors with the group and its editable values', async type => {
+    const initial = type === 'number' || type === 'select' ? 2 : type === 'boolean' ? true : 'first';
+    const field: FieldDefinition = { key: 'value', label: 'Value', type,
+      ...(type === 'select' ? { options: [{ label: 'Two', value: 2 }, { label: 'Three', value: 3 }] } : {}) };
+    const onApply = vi.fn();
+    const view = render(FilterBuilder, {
+      fields: [field], filters: [{ field: 'value', operator: 'in', value: [initial] }], onApply,
+    });
+    await fireEvent.click(view.getByRole('button', { name: 'Add set value' }));
+    await fireEvent.click(view.getByTestId('filter-builder-apply'));
+    expect(onApply).not.toHaveBeenCalled();
+    const group = view.getByRole('group', { name: 'Value' });
+    const role = type === 'number' ? 'spinbutton' : type === 'text' ? 'textbox' : 'combobox';
+    const second = within(group).getByRole(role, { name: 'Set value 2' });
+    expect(second.getAttribute('aria-invalid')).toBe('true');
+    const errorId = second.getAttribute('aria-describedby');
+    if (!errorId) throw new Error('Expected value error association');
+    expect(group.getAttribute('aria-describedby')).toBe(errorId);
+    expect(document.getElementById(errorId)?.textContent).toContain('Enter a valid typed value');
+    if (type === 'number' || type === 'text') {
+      await fireEvent.input(second, { target: { value: type === 'number' ? '3' : 'second' } });
+    } else {
+      await fireEvent.change(second, { target: { value: type === 'boolean' ? 'false' : '1' } });
+    }
+    expect(second.getAttribute('aria-invalid')).toBe('false');
+    expect(second.hasAttribute('aria-describedby')).toBe(false);
+    expect(view.queryByRole('alert')).toBeNull();
+    await fireEvent.click(view.getByTestId('filter-builder-apply'));
+    expect(onApply).toHaveBeenCalledExactlyOnceWith([{ field: 'value', operator: 'in',
+      value: [initial, type === 'number' || type === 'select' ? 3 : type === 'boolean' ? false : 'second'] }]);
+  });
+
+  it('keeps range error associations isolated between instances and clears them after repair', async () => {
+    const props = {
+      fields: [{ key: 'value', label: 'Value', type: 'number' as const }],
+      filters: [{ field: 'value', operator: 'between' as const, value: [1, 2] }],
+    };
+    const first = render(FilterBuilder, props);
+    const second = render(FilterBuilder, props);
+    const ids: string[] = [];
+    for (const view of [first, second]) {
+      const scoped = within(view.container);
+      const lower = scoped.getByRole('spinbutton', { name: 'Lower bound' });
+      await fireEvent.input(lower, { target: { value: '3' } });
+      await fireEvent.click(scoped.getByTestId('filter-builder-apply'));
+      const upper = scoped.getByRole('spinbutton', { name: 'Upper bound' });
+      expect(upper.getAttribute('aria-invalid')).toBe('true');
+      const id = lower.getAttribute('aria-describedby');
+      if (!id) throw new Error('Expected range error association');
+      expect(upper.getAttribute('aria-describedby')).toBe(id);
+      expect(view.container.contains(document.getElementById(id))).toBe(true);
+      ids.push(id);
+    }
+    expect(new Set(ids).size).toBe(2);
+    await fireEvent.input(within(first.container).getByRole('spinbutton', { name: 'Lower bound' }), { target: { value: '0' } });
+    expect(within(first.container).queryByRole('alert')).toBeNull();
+    expect(within(first.container).getByRole('spinbutton', { name: 'Lower bound' }).getAttribute('aria-describedby')).toBeNull();
+    expect(within(first.container).getByRole('spinbutton', { name: 'Upper bound' }).getAttribute('aria-describedby')).toBeNull();
+    expect(within(second.container).getByRole('alert')).toBeTruthy();
+  });
+
   it('strictly compiles both filter surfaces and their collection editor', () => {
     const directory = dirname(fileURLToPath(import.meta.url));
     const components = [
@@ -71,6 +211,30 @@ describe('FilterBuilder component', () => {
     await fireEvent.input(input, { target: { value: 'Updated' } });
     await fireEvent.click(view.getByTestId('filter-builder-apply'));
     expect(onApply).toHaveBeenCalledWith([{ field: 'title', operator: 'contains', value: 'Updated' }]);
+  });
+
+  it('keeps a historical condition read-only when late metadata still cannot validate it', async () => {
+    const onApply = vi.fn();
+    const filters = [{ field: 'views', operator: 'contains' as const, value: 10 }];
+    const view = render(FilterBuilder, { fields: [], filters, onApply });
+    expect(view.getByRole('status', { name: /只读|read-only/i })).toBeTruthy();
+    await view.rerender({ fields: testFields });
+    expect(view.getByRole('status', { name: /只读|read-only/i })).toBeTruthy();
+    expect(view.queryByRole('spinbutton')).toBeNull();
+    await fireEvent.click(view.getByTestId('filter-builder-apply'));
+    expect(onApply).toHaveBeenCalledWith(filters);
+  });
+
+  it('rejects a new draft that forges readonly without a preserved host snapshot', () => {
+    const parsed = readFilterTree([{ field: 'title', operator: 'contains', value: 'Svelte' }]);
+    if (!parsed.ok) throw new Error('Expected host filter');
+    const node = parsed.root.children[0] as FilterRuleNode;
+    node.id = 'draft-1';
+    node.readonly = true;
+    node.value = undefined;
+    const unrelated = new Map<string, Filter>([['node-1', { field: 'title', operator: 'contains', value: 'Svelte' }]]);
+    expect(compileFilterTree(parsed.root, testFields).ok).toBe(false);
+    expect(compileFilterTree(parsed.root, testFields, unrelated).ok).toBe(false);
   });
 
   it('renders initial empty state and allows adding rules', async () => {
@@ -142,6 +306,31 @@ describe('FilterBuilder component', () => {
     expect(onApply).not.toHaveBeenCalled();
     expect(onInvalid).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ code: 'value' })]));
     expect(filters).toHaveLength(2);
+  });
+
+  it.each(['nodes', 'depth'] as const)('reports %s overflow without applying or mutating the input', async kind => {
+    const onApply = vi.fn();
+    const onInvalid = vi.fn();
+    let filters: Filter[];
+    if (kind === 'nodes') {
+      filters = Array.from({ length: 257 }, (_, index) => ({
+        field: 'title',
+        operator: 'eq' as const,
+        value: `value-${index}`,
+      }));
+    } else {
+      let nested: Filter = { field: 'title', operator: 'eq', value: 'deep' };
+      for (let index = 0; index < 20; index += 1) nested = { operator: 'and', value: [nested] };
+      filters = [nested];
+    }
+    const original = structuredClone(filters);
+    const view = render(FilterBuilder, { fields: testFields, filters, onApply, onInvalid });
+
+    await fireEvent.click(view.getByTestId('filter-builder-apply'));
+
+    expect(onApply).not.toHaveBeenCalled();
+    expect(onInvalid).toHaveBeenCalledWith(expect.arrayContaining([expect.objectContaining({ code: 'limit' })]));
+    expect(filters).toEqual(original);
   });
 
   it('keeps one recursive editor and rejects an incomplete nested draft without dropping siblings', async () => {

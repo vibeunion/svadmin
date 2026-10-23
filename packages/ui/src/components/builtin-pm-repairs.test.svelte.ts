@@ -1,8 +1,9 @@
 import { requireValue } from '../../../../scripts/test-assertions';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/svelte';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { resetContext, type AuthProvider, type DataProvider, type Organization } from '@svadmin/core';
 import Host from './builtin-pm.test-host.svelte';
+import { renderWithI18n } from '../../test/fixtures/render-with-i18n';
 import type { NotificationPreferences } from './NotificationsSettings.svelte';
 import userEvent from '@testing-library/user-event';
 
@@ -69,6 +70,48 @@ describe('builtin capability boundaries', () => {
     expect(preferences.load).toHaveBeenCalledTimes(2);
   });
 
+  it.each(['diagnostic', 'empty', 'non-error'] as const)('sanitizes %s notification load and save failures while preserving recovery', async failure => {
+    let loadCount = 0;
+    let saveCount = 0;
+    const preferences = {
+      load: vi.fn(async (): Promise<NotificationPreferences> => {
+        loadCount += 1;
+        if (loadCount === 1) {
+          throw failure === 'non-error' ? 'PRIVATE_NOTIFICATION_LOAD' : new Error(failure === 'empty' ? '' : 'PRIVATE_NOTIFICATION_LOAD');
+        }
+        return {
+          email: { security: true, activity: false, reports: true },
+          push: { security: true, activity: true, reports: false },
+          sms: { security: true },
+        };
+      }),
+      save: vi.fn(async () => {
+        saveCount += 1;
+        if (saveCount === 1) {
+          throw failure === 'non-error' ? 'PRIVATE_NOTIFICATION_SAVE' : new Error(failure === 'empty' ? '' : 'PRIVATE_NOTIFICATION_SAVE');
+        }
+      }),
+    };
+    const view = render(Host, { bundle, page: 'notifications', preferences });
+    await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('Operation failed'));
+    expect(view.container.innerHTML).not.toContain('PRIVATE_NOTIFICATION_LOAD');
+    expect(screen.queryByRole('switch')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Save' })).toHaveProperty('disabled', true);
+    await fireEvent.click(screen.getByRole('button', { name: 'Retry', exact: true }));
+    await waitFor(() => expect(document.querySelector('fieldset')?.disabled).toBe(false));
+
+    const security = requireValue(document.querySelector('[id$="-email-security"]'));
+    await fireEvent.click(security);
+    await fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(screen.getByText('Operation failed')).toBeTruthy());
+    expect(view.container.innerHTML).not.toContain('PRIVATE_NOTIFICATION_SAVE');
+    expect(security.getAttribute('aria-checked')).toBe('false');
+    await fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(screen.queryByText('Operation failed')).toBeNull());
+    expect(saveCount).toBe(2);
+    expect(preferences.load).toHaveBeenCalledTimes(2);
+  });
+
   it('keeps notification label activation within its component instance', async () => {
     const preferences = {
       load: async (): Promise<NotificationPreferences> => ({
@@ -93,6 +136,60 @@ describe('builtin capability boundaries', () => {
     expect(secondSwitch.getAttribute('aria-checked')).toBe('false');
   });
 
+  it('updates notification error feedback when the local language changes without reloading', async () => {
+    let loadCount = 0;
+    const preferences = {
+      load: vi.fn(async (): Promise<NotificationPreferences> => {
+        loadCount += 1;
+        throw new Error('PRIVATE_NOTIFICATION_LOCALE');
+      }),
+      save: async () => {},
+    };
+    const view = renderWithI18n(Host, { bundle, page: 'notifications', preferences });
+    await waitFor(() => expect(screen.getByText('Operation failed')).toBeTruthy());
+    expect(loadCount).toBe(1);
+    await view.wrapper.setLocale('zh-CN');
+    expect(screen.getByText('操作失败')).toBeTruthy();
+    expect(loadCount).toBe(1);
+    expect(screen.getByRole('button', { name: '保存' })).toHaveProperty('disabled', true);
+    await view.wrapper.setLocale('en');
+    expect(screen.getByText('Operation failed')).toBeTruthy();
+    expect(preferences.load).toHaveBeenCalledOnce();
+    expect(view.container.innerHTML).not.toContain('PRIVATE_NOTIFICATION_LOCALE');
+  });
+
+  it('preserves the edited draft and save feedback across locale changes without repeating requests', async () => {
+    const values: NotificationPreferences = {
+      email: { security: false, activity: false, reports: false },
+      push: { security: true, activity: false, reports: false },
+      sms: { security: true },
+    };
+    const load = vi.fn(async () => values);
+    const save = vi.fn<(value: NotificationPreferences) => Promise<void>>()
+      .mockRejectedValueOnce(new Error('PRIVATE_NOTIFICATION_LOCALE_SAVE'))
+      .mockResolvedValueOnce(undefined);
+    const view = renderWithI18n(Host, { bundle, page: 'notifications', preferences: { load, save } });
+    await waitFor(() => expect(screen.getAllByRole('switch')).toHaveLength(7));
+    const security = requireValue(view.container.querySelector('[id$="-email-security"]'));
+    await fireEvent.click(security);
+    await fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    expect((await screen.findByRole('alert')).textContent).toContain('Operation failed');
+    for (const locale of ['zh-CN', 'en']) {
+      await view.wrapper.setLocale(locale);
+      expect(screen.getByRole('alert').textContent).toContain(locale === 'zh-CN' ? '操作失败' : 'Operation failed');
+      expect(view.container.querySelector('[id$="-email-security"]')).toBe(security);
+      expect(security.getAttribute('aria-checked')).toBe('true');
+      expect(view.container.innerHTML).not.toContain('PRIVATE_NOTIFICATION_LOCALE_SAVE');
+      expect(load).toHaveBeenCalledOnce();
+      expect(save).toHaveBeenCalledOnce();
+    }
+    await fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(screen.queryByRole('alert')).toBeNull());
+    expect(save).toHaveBeenCalledTimes(2);
+    expect(save).toHaveBeenLastCalledWith({ ...values, email: { ...values.email, security: true } });
+    expect(load).toHaveBeenCalledOnce();
+  });
+
   it('renders real directory rows without requiring invitation capability', async () => {
     render(Host, { bundle, page: 'members', members: {
       list: async () => [{ id: 'user-7', name: 'Actual member', email: 'actual@example.com', role: 'Operator' }],
@@ -110,6 +207,113 @@ describe('builtin capability boundaries', () => {
     await fireEvent.input(search, { target: { value: 'Actual' } });
     expect(await screen.findByRole('rowheader', { name: 'Actual member' })).toBeTruthy();
     expect(screen.getByText(/This directory is read-only/)).toBeTruthy();
+  });
+
+  it.each(['diagnostic', 'empty', 'non-error'] as const)('sanitizes %s member directory failures while preserving recovery', async failure => {
+    let loadCount = 0;
+    let inviteCount = 0;
+    const provider = {
+      list: vi.fn(async () => {
+        loadCount += 1;
+        if (loadCount === 1) throw failure === 'non-error' ? 'PRIVATE_MEMBER_LOAD' : new Error(failure === 'empty' ? '' : 'PRIVATE_MEMBER_LOAD');
+        return [{ id: 'member', name: 'Recovered member', email: 'member@example.com', role: 'Operator' }];
+      }),
+      invite: vi.fn(async () => {
+        inviteCount += 1;
+        if (inviteCount === 1) throw failure === 'non-error' ? 'PRIVATE_MEMBER_INVITE' : new Error(failure === 'empty' ? '' : 'PRIVATE_MEMBER_INVITE');
+      }),
+    };
+    const view = render(Host, { bundle, page: 'members', members: provider });
+    await waitFor(() => expect(screen.getByText('Operation failed')).toBeTruthy());
+    expect(view.container.innerHTML).not.toContain('PRIVATE_MEMBER_LOAD');
+    expect(screen.queryByText('No members yet')).toBeNull();
+    await fireEvent.click(screen.getByRole('button', { name: 'Retry', exact: true }));
+    await screen.findByText('Recovered member');
+
+    const email = screen.getByLabelText('Member email');
+    await fireEvent.input(email, { target: { value: 'member@example.com' } });
+    await fireEvent.click(screen.getByRole('button', { name: 'Send Invite' }));
+    await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('Operation failed'));
+    expect(view.container.innerHTML).not.toContain('PRIVATE_MEMBER_INVITE');
+    expect(email).toHaveProperty('value', 'member@example.com');
+    await fireEvent.input(email, { target: { value: 'invalid-email' } });
+    await fireEvent.submit(requireValue(email.closest('form')));
+    expect(screen.getByRole('alert').textContent).toBe('Enter a valid email address');
+    expect(provider.invite).toHaveBeenCalledOnce();
+    await fireEvent.input(email, { target: { value: 'member@example.com' } });
+    await fireEvent.click(screen.getByRole('button', { name: 'Send Invite' }));
+    await waitFor(() => expect(screen.getByRole('status').textContent).toContain('Invitation submitted'));
+    expect(inviteCount).toBe(2);
+    expect(loadCount).toBe(2);
+    expect(provider.invite).toHaveBeenLastCalledWith('member@example.com');
+    expect(email).toHaveProperty('value', '');
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+
+  it.each(['success', 'failure'] as const)('keeps a pending invitation owned until %s before allowing directory retry', async outcome => {
+    let resolveInvite: () => void = () => { throw new Error('Invite not started'); };
+    let rejectInvite: (reason: unknown) => void = () => { throw new Error('Invite not started'); };
+    const pendingInvite = new Promise<void>((resolve, reject) => { resolveInvite = resolve; rejectInvite = reject; });
+    const provider = {
+      list: vi.fn(async () => { throw new Error('PRIVATE_MEMBER_LOAD'); }),
+      invite: vi.fn(() => pendingInvite),
+    };
+    render(Host, { bundle, page: 'members', members: provider });
+    await screen.findByText('Operation failed');
+    const retry = screen.getByRole('button', { name: 'Retry', exact: true });
+    const email = screen.getByLabelText('Member email');
+    await fireEvent.input(email, { target: { value: 'member@example.com' } });
+    await act(() => {
+      requireValue(email.closest('form')).dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+      retry.click();
+    });
+    expect(provider.list).toHaveBeenCalledOnce();
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Loading...' })).toHaveProperty('disabled', true));
+    expect(screen.queryByRole('button', { name: 'Retry', exact: true })).toBeNull();
+    if (outcome === 'success') resolveInvite();
+    else rejectInvite(new Error('PRIVATE_INVITE_ERROR'));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Send Invite' })).toHaveProperty('disabled', false));
+    if (outcome === 'success') {
+      expect(screen.getByRole('status').textContent).toContain('Invitation submitted');
+      expect(email).toHaveProperty('value', '');
+    } else {
+      expect(screen.queryByText('Invitation submitted')).toBeNull();
+      expect(email).toHaveProperty('value', 'member@example.com');
+      expect(document.body.innerHTML).not.toContain('PRIVATE_INVITE_ERROR');
+    }
+    expect(provider.invite).toHaveBeenCalledOnce();
+    expect(screen.getByRole('button', { name: 'Send Invite' })).toHaveProperty('disabled', false);
+    await fireEvent.click(screen.getByRole('button', { name: 'Retry', exact: true }));
+    await waitFor(() => expect(provider.list).toHaveBeenCalledTimes(2));
+  });
+
+  it('still loads a replacement directory while the old provider invitation is pending', async () => {
+    let resolveInvite: () => void = () => { throw new Error('Invite not started'); };
+    const pending = new Promise<void>(resolve => { resolveInvite = resolve; });
+    const old = { list: async () => [], invite: vi.fn(() => pending) };
+    const current = {
+      list: vi.fn(async () => [{ id: 'new', name: 'New directory', email: 'new@example.com', role: 'Viewer' }]),
+      invite: vi.fn(async () => {}),
+    };
+    const view = render(Host, { bundle, page: 'members', members: old });
+    await screen.findByText('No members yet');
+    await fireEvent.input(screen.getByLabelText('Member email'), { target: { value: 'old@example.com' } });
+    await fireEvent.click(screen.getByRole('button', { name: 'Send Invite' }));
+    await view.rerender({ members: current });
+    await screen.findByText('New directory');
+    const email = screen.getByLabelText('Member email');
+    await fireEvent.input(email, { target: { value: 'current@example.com' } });
+    await act(async () => {
+      resolveInvite();
+      await pending;
+      await new Promise(resolve => setTimeout(resolve, 0));
+    });
+    expect(email).toHaveProperty('value', 'current@example.com');
+    expect(screen.queryByText('Invitation submitted')).toBeNull();
+    expect(current.list).toHaveBeenCalledOnce();
+    await fireEvent.click(screen.getByRole('button', { name: 'Send Invite' }));
+    await screen.findByText('Invitation submitted');
+    expect(current.invite).toHaveBeenCalledExactlyOnceWith('current@example.com');
   });
 
   it.each([false, true])('clears a member search with keyboard focus and preserves invitation capability %s', async canInvite => {
@@ -210,14 +414,77 @@ describe('builtin capability boundaries', () => {
     expect(await screen.findByText('Organization saved')).toBeTruthy();
     expect(updateCurrentOrganization).toHaveBeenCalledWith({ name: 'Updated company' }, {});
   });
+
+  it.each(['diagnostic', 'empty', 'non-error'] as const)('sanitizes %s company profile failures and preserves recovery', async failure => {
+    let loadCount = 0;
+    let saveCount = 0;
+    const organization: Organization = { id: 'org-1', name: 'Original company' };
+    const provider = {
+      getCurrentOrganization: vi.fn(async () => {
+        loadCount += 1;
+        if (loadCount === 1) throw failure === 'non-error' ? 'PRIVATE_COMPANY_LOAD' : new Error(failure === 'empty' ? '' : 'PRIVATE_COMPANY_LOAD');
+        return organization;
+      }),
+      updateCurrentOrganization: vi.fn(async ({ name }: Partial<Omit<Organization, 'id'>>) => {
+        saveCount += 1;
+        if (saveCount === 1) throw failure === 'non-error' ? 'PRIVATE_COMPANY_SAVE' : new Error(failure === 'empty' ? '' : 'PRIVATE_COMPANY_SAVE');
+        return { ...organization, name: name ?? organization.name };
+      }),
+    };
+    const view = render(Host, { page: 'company', bundle: { ...bundle, organizationProvider: provider } });
+    await waitFor(() => expect(screen.getByText('Operation failed')).toBeTruthy());
+    expect(view.container.innerHTML).not.toContain('PRIVATE_COMPANY_LOAD');
+    expect(screen.queryByDisplayValue('Original company')).toBeNull();
+    expect(screen.queryByText('No organization details')).toBeNull();
+    await fireEvent.click(screen.getByRole('button', { name: 'Retry', exact: true }));
+    const input = await screen.findByDisplayValue('Original company');
+    await fireEvent.input(input, { target: { value: 'Updated company' } });
+    await fireEvent.submit(requireValue(input.closest('form')));
+    await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('Operation failed'));
+    expect(view.container.innerHTML).not.toContain('PRIVATE_COMPANY_SAVE');
+    expect(input).toHaveProperty('value', 'Updated company');
+    await fireEvent.submit(requireValue(input.closest('form')));
+    await waitFor(() => expect(screen.getByText('Organization saved')).toBeTruthy());
+    expect(saveCount).toBe(2);
+    expect(loadCount).toBe(2);
+    expect(screen.getByDisplayValue('Updated company')).toBeTruthy();
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(provider.updateCurrentOrganization).toHaveBeenNthCalledWith(2, { name: 'Updated company' }, {});
+  });
+  it('isolates company name labels and values across two instances', async () => {
+    const first: Organization = { id: 'org-1', name: 'First company' };
+    const second: Organization = { id: 'org-2', name: 'Second company' };
+    const firstProvider = {
+      getCurrentOrganization: async () => first,
+      updateCurrentOrganization: vi.fn(async (input: Partial<Omit<Organization, 'id'>>) => ({ ...first, ...input })),
+    };
+    const secondProvider = {
+      getCurrentOrganization: async () => second,
+      updateCurrentOrganization: vi.fn(async (input: Partial<Omit<Organization, 'id'>>) => ({ ...second, ...input })),
+    };
+    const firstView = render(Host, { page: 'company', bundle: { ...bundle, organizationProvider: firstProvider } });
+    const firstInput = await within(firstView.container).findByLabelText('Organization name');
+    const secondView = render(Host, { page: 'company', bundle: { ...bundle, organizationProvider: secondProvider } });
+    const secondInput = await within(secondView.container).findByLabelText('Organization name');
+    const user = userEvent.setup();
+    await user.click(within(secondView.container).getByText('Organization name'));
+    expect(document.activeElement).toBe(secondInput);
+    expect(firstInput.id).not.toBe(secondInput.id);
+    await fireEvent.input(secondInput, { target: { value: 'Second updated' } });
+    expect(firstInput).toHaveProperty('value', 'First company');
+    await fireEvent.submit(requireValue(secondInput.closest('form')));
+    await within(secondView.container).findByText('Organization saved');
+    expect(firstProvider.updateCurrentOrganization).not.toHaveBeenCalled();
+    expect(secondProvider.updateCurrentOrganization).toHaveBeenCalledExactlyOnceWith({ name: 'Second updated' }, {});
+  });
   it('does not invent MFA enrollment when no verifier exists', async () => {
     render(Host, { bundle, page: 'mfa' });
     expect(await screen.findByText(/Enrollment and verification are not configured/)).toBeTruthy();
     expect(screen.queryByRole('textbox')).toBeNull();
   });
 
-  it('requires provider verification before showing recovery codes', async () => {
-    const verify = vi.fn().mockRejectedValueOnce(new Error('Invalid OTP'))
+  it('requires provider verification and sanitizes enrollment failures before showing recovery codes', async () => {
+    const verify = vi.fn().mockRejectedValueOnce(new Error('PRIVATE_OTP_DIAGNOSTIC'))
       .mockResolvedValueOnce({ recoveryCodes: ['server-recovery-code'] });
     render(Host, { bundle, page: 'mfa', mfa: { begin: async () => ({ secret: 'server-secret' }), verify } });
     await fireEvent.click(screen.getByRole('button'));
@@ -228,11 +495,39 @@ describe('builtin capability boundaries', () => {
     expect(verify).not.toHaveBeenCalled();
     await fireEvent.input(input, { target: { value: '123456' } });
     await fireEvent.submit(requireValue(input.closest('form')));
-    expect(await screen.findByRole('alert')).toHaveProperty('textContent', 'Invalid OTP');
+    expect(await screen.findByRole('alert')).toHaveProperty('textContent', 'Operation failed');
+    expect(document.body.textContent).not.toContain('PRIVATE_OTP_DIAGNOSTIC');
     expect(screen.queryByText('server-recovery-code')).toBeNull();
     await fireEvent.submit(requireValue(input.closest('form')));
     expect(await screen.findByText('server-recovery-code')).toBeTruthy();
     expect(verify).toHaveBeenCalledTimes(2);
+  });
+
+  it.each(['diagnostic', 'empty', 'non-error'] as const)('recovers from %s MFA begin and verify failures without exposing diagnostics', async failure => {
+    const rejection = failure === 'non-error' ? 'PRIVATE_MFA_DIAGNOSTIC' : new Error(failure === 'empty' ? '' : 'PRIVATE_MFA_DIAGNOSTIC');
+    const begin = vi.fn(async () => ({ secret: 'server-secret' })).mockRejectedValueOnce(rejection);
+    const verify = vi.fn(async (_code: string) => ({ recoveryCodes: ['server-recovery-code'] })).mockRejectedValueOnce(rejection);
+    render(Host, { bundle, page: 'mfa', mfa: { begin, verify } });
+    await fireEvent.click(screen.getByRole('button'));
+    expect(await screen.findByRole('alert')).toHaveProperty('textContent', 'Operation failed');
+    expect(document.body.textContent).not.toContain('PRIVATE_MFA_DIAGNOSTIC');
+    expect(screen.queryByText('server-secret')).toBeNull();
+    await fireEvent.click(screen.getByRole('button'));
+    await screen.findByText('server-secret');
+    expect(screen.queryByRole('alert')).toBeNull();
+    const input = screen.getByRole('textbox');
+    await fireEvent.input(input, { target: { value: '123456' } });
+    await fireEvent.submit(requireValue(input.closest('form')));
+    expect(await screen.findByRole('alert')).toHaveProperty('textContent', 'Operation failed');
+    expect(input).toHaveProperty('value', '123456');
+    expect(document.body.textContent).not.toContain('PRIVATE_MFA_DIAGNOSTIC');
+    expect(screen.queryByText('server-recovery-code')).toBeNull();
+    await fireEvent.submit(requireValue(input.closest('form')));
+    await screen.findByText('server-recovery-code');
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(begin).toHaveBeenCalledTimes(2);
+    expect(verify).toHaveBeenCalledTimes(2);
+    expect(verify).toHaveBeenLastCalledWith('123456');
   });
 
   it('disables notification saving without persistence', async () => {
@@ -257,7 +552,8 @@ describe('builtin capability boundaries', () => {
     await fireEvent.click(security);
     const edited = { ...values, email: { ...values.email, security: true } };
     await fireEvent.click(screen.getByRole('button', { name: /Save/ }));
-    expect((await screen.findByRole('alert')).textContent).toContain('Storage unavailable');
+    expect((await screen.findByRole('alert')).textContent).toContain('Operation failed');
+    expect(document.body.innerHTML).not.toContain('Storage unavailable');
     expect(document.querySelector('[data-svadmin-feedback-notice][data-tone="danger"]')).toBeTruthy();
     expect(screen.getAllByRole('alert')).toHaveLength(1);
     expect(screen.queryByRole('button', { name: /Retry/ })).toBeNull();
@@ -281,14 +577,15 @@ describe('builtin capability boundaries', () => {
         sms: { security: true },
       });
     render(Host, { bundle, page: 'notifications', preferences: { load, save: async () => {} } });
-    expect(await screen.findByText('Preferences unavailable')).toBeTruthy();
+    expect(await screen.findByText('Operation failed')).toBeTruthy();
+    expect(document.body.innerHTML).not.toContain('Preferences unavailable');
     expect(document.querySelector('[data-svadmin-data-state="error"]')).toBeTruthy();
     expect(screen.getByRole('button', { name: /Save/ })).toHaveProperty('disabled', true);
     expect(screen.queryByRole('switch')).toBeNull();
     await fireEvent.click(screen.getByRole('button', { name: /Retry/ }));
     await waitFor(() => expect(load).toHaveBeenCalledTimes(2));
     await waitFor(() => expect(screen.getAllByRole('switch')).toHaveLength(7));
-    expect(screen.queryByText('Preferences unavailable')).toBeNull();
+    expect(screen.queryByRole('alert')).toBeNull();
   });
 
   it('shows only the loading state until notification preferences arrive', async () => {
@@ -315,7 +612,8 @@ describe('builtin capability boundaries', () => {
     const input = screen.getByLabelText('Member email');
     await fireEvent.input(input, { target: { value: 'member@example.com' } });
     await fireEvent.submit(requireValue(input.closest('form')));
-    expect(await screen.findByRole('alert')).toHaveProperty('textContent', 'Delivery failed');
+    expect(await screen.findByRole('alert')).toHaveProperty('textContent', 'Operation failed');
+    expect(document.body.innerHTML).not.toContain('Delivery failed');
     expect(screen.queryByText('Invitation submitted')).toBeNull();
     expect(invite).toHaveBeenCalledWith('member@example.com');
   });

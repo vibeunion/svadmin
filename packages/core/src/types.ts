@@ -424,6 +424,7 @@ export interface DateInputOptions {
 export interface FieldDefinition {
   key: string;
   label: string;
+  description?: string;
   type: 'text' | 'number' | 'boolean' | 'date' | 'time' | 'datetime' | 'daterange' | 'select' | 'multiselect' | 'tags'
     | 'textarea' | 'richtext' | 'image' | 'images' | 'json' | 'relation' | 'color'
     | 'url' | 'email' | 'phone' | 'currency' | 'percent' | 'file' | 'markdown' | 'password' | 'array'

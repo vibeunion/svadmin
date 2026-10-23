@@ -78,7 +78,7 @@
 >
   {#if name}
     {#each value as tag (tag)}
-      <input type="hidden" {name} value={tag} />
+      <input type="hidden" {name} value={tag} {disabled} />
     {/each}
   {/if}
   {#each value as tag, index (tag)}

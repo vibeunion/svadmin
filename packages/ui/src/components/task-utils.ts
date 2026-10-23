@@ -1,4 +1,20 @@
 import type { TaskRecord } from '@svadmin/core';
+import { parseDisplayDate } from './fields/date-display';
+
+export function formatTaskDate(value: unknown, locale: string): string {
+  if (typeof value !== 'string' || !value) return '\u2014';
+  const parsed = parseDisplayDate(value);
+  if (!parsed) return '\u2014';
+  try {
+    return new Intl.DateTimeFormat(locale, {
+      dateStyle: 'medium',
+      timeStyle: 'medium',
+      ...(parsed.civil ? { timeZone: 'UTC' } : {}),
+    }).format(parsed.date);
+  } catch {
+    return parsed.title;
+  }
+}
 
 export type TaskLifecycle =
   | 'queued'

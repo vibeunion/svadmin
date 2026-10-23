@@ -18,6 +18,7 @@
   let { enrollmentProvider }: { enrollmentProvider?: MfaEnrollmentProvider } = $props();
   const i18n = useTranslation();
   const context = captureAdminContext();
+  const controlId = $props.id();
   const isZh = $derived(i18n.locale === 'zh-CN');
   let secret = $state('');
   let code = $state('');
@@ -34,6 +35,9 @@
     secret = ''; code = ''; recoveryCodes = null; pending = false; error = ''; copied = false;
     return () => { epoch += 1; };
   });
+  function failureMessage(): string {
+    return i18n.t('common.operationFailed');
+  }
   async function enroll(verify: boolean) {
     const provider = enrollmentProvider;
     if (!provider || pending) return;
@@ -55,8 +59,8 @@
         if (!result.secret) throw new Error(isZh ? '未返回登记密钥' : 'No enrollment secret returned');
         secret = result.secret;
       }
-    } catch (caught) {
-      if (request === epoch) error = caught instanceof Error ? caught.message : String(caught);
+    } catch {
+      if (request === epoch) error = failureMessage();
     } finally {
       if (request === epoch) pending = false;
     }
@@ -87,8 +91,8 @@
     <p>{isZh ? '将此登记密钥添加到身份验证器，然后输入验证码。' : 'Add this enrollment secret to your authenticator, then enter its verification code.'}</p>
     <code>{secret}</code>
     <form onsubmit={(event) => { event.preventDefault(); void enroll(true); }}>
-      <label for="mfa-code">{i18n.t('auth.twoFactorEnterCode')}</label>
-      <Input id="mfa-code" bind:value={code} inputmode="numeric" autocomplete="one-time-code" maxlength={6} disabled={pending} />
+      <label for={`${controlId}-mfa-code`}>{i18n.t('auth.twoFactorEnterCode')}</label>
+      <Input id={`${controlId}-mfa-code`} bind:value={code} inputmode="numeric" autocomplete="one-time-code" maxlength={6} disabled={pending} />
       <Button type="submit" disabled={pending}>{pending ? i18n.t('common.loading') : i18n.t('common.confirm')}</Button>
     </form>
   {:else}

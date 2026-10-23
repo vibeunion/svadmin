@@ -62,8 +62,18 @@
       window.removeEventListener('beforeunload', protectUnload);
     };
   });
-  const query = useList({ get resource() { return demoContract(resourceName); }, pagination: { mode: 'off' } });
-  const inboxQuery = useList({ resource: demoContracts.mail_inbox, pagination: { mode: 'off' } });
+  const query = useList({
+    get resource() { return demoContract(resourceName); },
+    pagination: { mode: 'off' },
+    // 当前文件夹的错误和重试由 WorkspaceQueryState 承接。
+    errorNotification: false,
+  });
+  const inboxQuery = useList({
+    resource: demoContracts.mail_inbox,
+    pagination: { mode: 'off' },
+    // 收件箱页共享列表反馈；其他文件夹仍需通知未读统计读取失败。
+    get errorNotification() { return resourceName === 'mail_inbox' ? false : undefined; },
+  });
   const createDraft = useCreate({ resource: demoContracts.mail_draft });
   const updateDraft = useUpdateMany({ resource: demoContracts.mail_draft });
   const invalidateCurrent = useInvalidate({ get resource() { return demoContract(resourceName); } });

@@ -14,7 +14,7 @@
   import Table from '@svadmin/ui/components/ui/table/table.svelte';
   import { styledResourceTablePropsSchema as resourceTablePropsSchema } from '../builtin-schemas.js';
   import type { SurfaceWidgetRendererProps } from '../catalog.js';
-  import { resolveSurfaceMessages } from '../localization.js';
+  import { resolveSurfaceMessages, surfaceErrorMessage } from '../localization.js';
   import { asRecordArray, displayTableValue } from '../widget-data.js';
 
   let { props, data, locale = 'en-US', messages }: SurfaceWidgetRendererProps = $props();
@@ -35,7 +35,7 @@
     {:else if data.status === 'empty'}
       <p class={"table-state " + (tableClasses?.state ?? "")} role="status">{tableProps.emptyLabel ?? activeMessages.tableNoRecords}</p>
     {:else if data.status === 'error'}
-      <p class={"table-state " + (tableClasses?.state ?? "")} role="alert">{data.error.message}</p>
+      <p class={"table-state " + (tableClasses?.state ?? "")} role="alert">{surfaceErrorMessage(data.error, activeMessages, activeMessages.tableUnavailable, activeMessages.tableInvalidData)}</p>
     {:else if data.status === 'ready' && records?.ok}
       <div class="surface-table">
         <Table aria-label={tableProps.title}>

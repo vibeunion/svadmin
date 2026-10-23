@@ -8,6 +8,17 @@ import { decodeOneResult, decodeManyResult, rejectProviderResponse } from './rec
 
 export type ImportFormat = 'auto' | 'csv' | 'json';
 export const IMPORT_LIMITS = Object.freeze({ maxRows: 10_000, maxBytes: 50 * 1024 * 1024 });
+/** A dry-run failure uses the same local, non-diagnostic reason as an import failure. */
+export interface ImportPreviewFailure {
+  row: number;
+  error: string;
+}
+export interface ImportPreviewResult {
+  totalRows: number;
+  /** Rows that pass local schema validation only; this is not a server import guarantee. */
+  importableRows: number;
+  failedRows: ImportPreviewFailure[];
+}
 export interface ImportArtifact {
   artifactId: string;
   fileName: string;
@@ -93,6 +104,12 @@ export function snapshotImportTaskResult(value: unknown): ImportTaskResult | und
   } catch {
     return undefined;
   }
+}
+
+/** Preview failures deliberately drop parser/provider diagnostics and keep only the safe import reason. */
+export function invalidImportPreviewFailure(row: number): ImportPreviewFailure {
+  if (!Number.isSafeInteger(row) || row < 1 || row > IMPORT_LIMITS.maxRows) invalidImportInput();
+  return Object.freeze({ row, error: 'Invalid import input' });
 }
 
 export function invalidImportInput(row?: number): never {

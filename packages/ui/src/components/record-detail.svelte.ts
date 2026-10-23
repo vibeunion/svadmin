@@ -16,6 +16,8 @@ export function useRecordDetail(options: () => { resourceName: string; id: strin
     void rendering;
     return {
       resource: binding.resource, id: options().id, dataProviderName: binding.dataProviderName,
+      // 详情页和抽屉已提供错误态与重试入口，避免重复通知。
+      errorNotification: false,
       queryOptions: { enabled: canRead },
     };
   });

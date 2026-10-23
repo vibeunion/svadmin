@@ -16,6 +16,7 @@
     };
     icon?: import('svelte').Component<{ class?: string }>;
     href?: string;
+    onActivate?: () => void;
     trend?: {
       value: number;
       label?: string;
@@ -52,10 +53,14 @@
     {@render children()}
   {:else}
     {#each items as item, index (item.id || index)}
-      {@const isInteractive = Boolean(item.href)}
+      {@const hasActivation = Boolean(item.onActivate)}
+      {@const isInteractive = Boolean(item.href) || hasActivation}
       <svelte:element
-        this={isInteractive ? 'a' : 'div'}
-        href={item.href}
+        this={hasActivation ? 'button' : item.href ? 'a' : 'div'}
+        type={hasActivation ? 'button' : undefined}
+        href={hasActivation ? undefined : item.href}
+        onclick={item.onActivate}
+        role={hasActivation ? 'button' : item.href ? 'link' : undefined}
         data-interactive={isInteractive ? 'true' : undefined}
         data-tone={item.tone || 'default'}
         class={cn('svadmin-metric-item', item.class)}

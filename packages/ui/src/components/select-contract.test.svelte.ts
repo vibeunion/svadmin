@@ -90,8 +90,10 @@ describe('contract-bound selection', () => {
       resolve(directory, 'select-contract.test.svelte.ts'),
       resolve(directory, 'select-contract.test.types.ts'),
       resolve(directory, 'select-contract.test.type-fixture.ts'),
+      resolve(directory, 'autocomplete.test.type-fixture.ts'),
     ];
-    const components = ['ComboboxField.svelte', 'select-contract.test-probe.svelte', 'select-contract.test-host.svelte'];
+    const components = ['ComboboxField.svelte', 'AutoComplete.svelte', 'autocomplete.test-host.svelte',
+      'select-contract.test-probe.svelte', 'select-contract.test-host.svelte'];
     const virtual = new Map(components.map(name => {
       const filename = resolve(directory, name);
       return [`${filename}.tsx`, svelte2tsx(readFileSync(filename, 'utf8'), {
@@ -174,6 +176,114 @@ describe('contract-bound selection', () => {
     await waitFor(() => expect(first.getList).toHaveBeenCalledTimes(1));
     expect(first.getOne).toHaveBeenCalledTimes(1);
     expect(app.read().options).toEqual([{ label: 'First', value: 1 }, { label: 'Selected 2', value: 2 }]);
+  });
+
+  it.each(['cancel', 'unmount', 'search'] as const)(
+    'keeps a shared same-key pending request for the remaining observer after consumer %s', async action => {
+      const pending = deferred<GetListResult>();
+      const signals: AbortSignal[] = [];
+      const getList = vi.fn<DataProvider['getList']>()
+        .mockImplementationOnce((params) => {
+          const signal = (params as { signal?: AbortSignal }).signal;
+          if (signal) signals.push(signal);
+          return pending.promise;
+        })
+        .mockResolvedValue({ data: [{ id: 2, title: 'Next' }], total: 1 });
+      const source = provider(getList);
+      const first = mount(source, { onSearch: search, debounce: 0 });
+      await waitFor(() => expect(getList).toHaveBeenCalledTimes(1));
+      let second: SelectState | undefined;
+      const secondView = render(Host, { provider: source, resources, queryClient: first.client,
+        settings: { onSearch: search, debounce: 0 }, onReady: value => { second = value; } });
+      await waitFor(() => expect(second?.query.isFetching).toBe(true));
+      expect(signals).toHaveLength(1);
+      const sharedSignal = signals[0];
+      if (!sharedSignal) throw new Error('Expected the shared list request signal');
+      if (action === 'cancel') first.read().cancel();
+      else if (action === 'unmount') first.view.unmount();
+      else first.read().onSearchChange('next');
+      if (action === 'search') await waitFor(() => expect(getList).toHaveBeenCalledTimes(2));
+      // 让 cancel 清理微任务/宏任务先执行；剩余消费者仍在使用同一 key，不能被误中止。
+      await new Promise(resolve => setTimeout(resolve, 10));
+      expect(sharedSignal.aborted).toBe(false);
+      pending.resolve({ data: [{ id: 1, title: 'Shared' }], total: 1 });
+      await waitFor(() => expect(second?.query.isSuccess).toBe(true));
+      expect(second?.query.data?.data[0]?.['title']).toBe('Shared');
+      expect(sharedSignal.aborted).toBe(false);
+      if (action !== 'search') expect(getList).toHaveBeenCalledTimes(1);
+      await secondView.unmount();
+    },
+  );
+
+  it.each(['cancel', 'unmount'] as const)(
+    'keeps a shared same-key pending defaults request for the remaining observer after consumer %s', async action => {
+      const pending = deferred<GetManyResult>();
+      const signals: AbortSignal[] = [];
+      const getMany = vi.fn<NonNullable<DataProvider['getMany']>>()
+        .mockImplementationOnce((params) => {
+          const signal = (params as { signal?: AbortSignal }).signal;
+          if (signal) signals.push(signal);
+          return pending.promise;
+        })
+        .mockResolvedValue({ data: [{ id: 2, title: 'Next default' }] });
+      const source = { ...provider(), getMany };
+      const first = mount(source, { defaultValue: [2] });
+      await waitFor(() => expect(getMany).toHaveBeenCalledTimes(1));
+      let second: SelectState | undefined;
+      const secondView = render(Host, { provider: source, resources, queryClient: first.client,
+        settings: { defaultValue: [2] }, onReady: value => { second = value; } });
+      await waitFor(() => expect(second?.defaultValueQuery.isFetching).toBe(true));
+      expect(signals).toHaveLength(1);
+      const sharedSignal = signals[0];
+      if (!sharedSignal) throw new Error('Expected the shared defaults request signal');
+      if (action === 'cancel') first.read().cancel();
+      else first.view.unmount();
+      await new Promise(resolve => setTimeout(resolve, 10));
+      expect(sharedSignal.aborted).toBe(false);
+      pending.resolve({ data: [{ id: 2, title: 'Shared default' }] });
+      await waitFor(() => expect(second?.defaultValueQuery.isSuccess).toBe(true));
+      expect(second?.defaultValueQuery.data?.data[0]?.['title']).toBe('Shared default');
+      expect(sharedSignal.aborted).toBe(false);
+      expect(getMany).toHaveBeenCalledTimes(1);
+      await secondView.unmount();
+    },
+  );
+
+  it.each(['select', 'selectDefaults'] as const)(
+    'aborts a pending %s request when its last consumer leaves', async action => {
+      const pendingList = deferred<GetListResult>();
+      const pendingDefaults = deferred<GetManyResult>();
+      const listSignals: AbortSignal[] = [];
+      const defaultSignals: AbortSignal[] = [];
+      const getList = vi.fn<DataProvider['getList']>((params) => {
+        const signal = (params as { signal?: AbortSignal }).signal;
+        if (signal) listSignals.push(signal);
+        return pendingList.promise;
+      });
+      const getMany = vi.fn<NonNullable<DataProvider['getMany']>>((params) => {
+        const signal = (params as { signal?: AbortSignal }).signal;
+        if (signal) defaultSignals.push(signal);
+        return pendingDefaults.promise;
+      });
+      const app = mount({ ...provider(getList), getMany }, { defaultValue: [2] });
+      await waitFor(() => expect(getList).toHaveBeenCalledTimes(1));
+      await waitFor(() => expect(getMany).toHaveBeenCalledTimes(1));
+      const signal = action === 'select' ? listSignals[0] : defaultSignals[0];
+      if (!signal) throw new Error(`Expected the pending ${action} signal`);
+      expect(signal.aborted).toBe(false);
+      app.view.unmount();
+      await waitFor(() => expect(signal.aborted).toBe(true));
+    },
+  );
+
+  it('exposes the local select timeout code without provider diagnostics', async () => {
+    const getList = vi.fn<DataProvider['getList']>(() => new Promise(() => {}));
+    const app = mount(provider(getList), { requestTimeout: 10 });
+    await waitFor(() => expect(app.read().query.isError).toBe(true));
+    expect(app.read().query.error).toMatchObject({
+      code: 'SELECT_REQUEST_TIMEOUT', statusCode: 504, message: 'Resource query failed',
+    });
+    expect(getList).toHaveBeenCalledOnce();
   });
 
   it.each(['resource', 'tenant', 'provider', 'contract', 'metadata'] as const)(

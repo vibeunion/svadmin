@@ -26,7 +26,13 @@
 
   const locale = $derived(i18n.locale);
   const isZh = $derived(locale === 'zh-CN');
-  const query = useList({ resource: demoContracts.todos, pagination: { mode: 'off' }, sorters: [{ field: 'dueDate', order: 'asc' }] });
+  const query = useList({
+    resource: demoContracts.todos,
+    pagination: { mode: 'off' },
+    sorters: [{ field: 'dueDate', order: 'asc' }],
+    // 查询失败由 WorkspaceQueryState 的内联错误和重试入口承接。
+    errorNotification: false,
+  });
   const todos = $derived(demoRenderers.todos.records(query.data?.data ?? []));
   const boardTodos = $derived(todos.map((todo) => ({ ...todo, completed: todo.status === 'done' || todo.completed })));
   const lanes = $derived([
