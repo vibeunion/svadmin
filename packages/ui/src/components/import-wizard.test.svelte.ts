@@ -65,6 +65,8 @@ function mount(source = provider(), options: {
   initialTaskId?: string;
   onTaskSubmitted?: (taskId: string) => void;
   onImportReady?: (driver: { handleChange(info: { file: File }): Promise<unknown>; readonly error: HttpError | null }) => void;
+  dryRun?: boolean;
+  onPreview?: (result: { totalRows: number; importableRows: number; failedRows: Array<{ row: number; error: string }> }) => void;
 } = {}) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
   clients.push(client);
@@ -787,5 +789,312 @@ describe('ImportWizard component workflow', () => {
     await waitFor(() => expect(app.view.getByText(/Upload File/i)).toBeTruthy());
     expect(app.view.getByText(/Drag and drop CSV or JSON/i)).toBeTruthy();
     expect(app.source.create).not.toHaveBeenCalled();
+  });
+});
+
+describe('ImportWizard dry-run preview', () => {
+  function taskProvider(): TaskProvider {
+    return {
+      submit: vi.fn(async () => ({ id: 'import-1', wait: async () => ({ id: 'import-1', status: 'completed' }) })),
+      get: vi.fn(async id => ({ id, status: 'running' })),
+    };
+  }
+
+  it('returns typed preview counts for valid rows without writes or task submission', async () => {
+    const tasks = taskProvider();
+    const onPreview = vi.fn();
+    const onSuccess = vi.fn();
+    const app = mount(provider(), {
+      dryRun: true, onPreview, onSuccess,
+      taskName: 'import-posts', taskProvider: tasks, taskIdempotencyKey: 'preview-key',
+    });
+
+    await selectFile(csvFile('title,quantity\nFirst,2\nSecond,0'));
+    await fireEvent.click(await app.view.findByRole('button', { name: /Preview Import/i }));
+
+    await waitFor(() => expect(onPreview).toHaveBeenCalledWith({
+      totalRows: 2,
+      importableRows: 2,
+      failedRows: [],
+    }));
+    expect(app.view.getByText(/Local validation passed for 2 of 2 rows; 0 failed\./)).toBeTruthy();
+    expect(app.source.create).not.toHaveBeenCalled();
+    expect(tasks.submit).not.toHaveBeenCalled();
+    expect(onSuccess).not.toHaveBeenCalled();
+
+    await fireEvent.click(app.view.getByRole('button', { name: /Back to import/i }));
+    expect(await app.view.findByRole('button', { name: /Preview Import/i })).toBeTruthy();
+    expect(app.view.queryByText(/Local validation passed for 2 of 2 rows; 0 failed\./)).toBeNull();
+    expect(app.source.create).not.toHaveBeenCalled();
+    expect(tasks.submit).not.toHaveBeenCalled();
+  });
+
+  it('reports failed rows with the same safe reason and never writes', async () => {
+    const onPreview = vi.fn();
+    const app = mount(provider(), { dryRun: true, onPreview });
+
+    await selectFile(csvFile('title,quantity\nFirst,2\nBroken,not-a-number'));
+    await fireEvent.click(await app.view.findByRole('button', { name: /Preview Import/i }));
+
+    await waitFor(() => expect(onPreview).toHaveBeenCalledWith({
+      totalRows: 2,
+      importableRows: 1,
+      failedRows: [{ row: 2, error: 'Invalid import input' }],
+    }));
+    expect(app.view.getByText(/Invalid import input/)).toBeTruthy();
+    expect(app.source.create).not.toHaveBeenCalled();
+    expect(app.view.queryByRole('button', { name: /Start Import/i })).toBeNull();
+  });
+
+  it('does not expose parser diagnostics in preview failure reasons', async () => {
+    const leaky = defineResource('posts', {
+      record: Type.Object({ id: Type.Number(), title: Type.String(), quantity: Type.Number(), tags: Type.Array(Type.String()) }),
+      create: Type.Object({ title: Type.String(), quantity: Type.Number(), tags: Type.Array(Type.String()) }),
+    });
+    const onPreview = vi.fn();
+    const app = mount(provider(), {
+      dryRun: true,
+      onPreview,
+      resources: [{
+        ...resources[0]!,
+        contract: leaky,
+        fields: [
+          { key: 'title', label: 'Title', type: 'text', required: true },
+          { key: 'quantity', label: 'Quantity', type: 'number', required: true },
+          { key: 'tags', label: 'Tags', type: 'json', required: true },
+        ],
+      }],
+    });
+
+    await selectFile(csvFile('title,quantity,tags\nFirst,2,PRIVATE_PREVIEW_TOKEN'));
+    await fireEvent.click(await app.view.findByRole('button', { name: /Preview Import/i }));
+
+    await waitFor(() => expect(onPreview).toHaveBeenCalledWith({
+      totalRows: 1,
+      importableRows: 0,
+      failedRows: [{ row: 1, error: 'Invalid import input' }],
+    }));
+    expect(app.view.container.textContent).not.toContain('PRIVATE_PREVIEW_TOKEN');
+    expect(app.source.create).not.toHaveBeenCalled();
+  });
+
+  it('clears a preview when the tenant scope changes and remains write-free', async () => {
+    const onPreview = vi.fn();
+    const app = mount(provider(), { dryRun: true, onPreview });
+
+    await selectFile(csvFile('title,quantity\nFirst,2'));
+    await fireEvent.click(await app.view.findByRole('button', { name: /Preview Import/i }));
+    await waitFor(() => expect(onPreview).toHaveBeenCalledTimes(1));
+    expect(app.view.getByText(/Local validation passed for 1 of 1 rows; 0 failed\./)).toBeTruthy();
+
+    await app.view.rerender({ tenant: 'second' });
+    await waitFor(() => expect(app.view.getByText(/Drag and drop CSV or JSON/i)).toBeTruthy());
+    expect(app.view.queryByText(/Local validation passed for 1 of 1 rows; 0 failed\./)).toBeNull();
+    expect(onPreview).toHaveBeenCalledTimes(1);
+    expect(app.source.create).not.toHaveBeenCalled();
+  });
+
+  it('does not restore, poll, submit, cancel or upload when dryRun starts with task props', async () => {
+    const tasks: TaskProvider = {
+      submit: vi.fn(async () => ({ id: 'import-1', wait: async () => ({ id: 'import-1', status: 'completed' }) })),
+      get: vi.fn(async id => ({ id, status: 'completed', result: { succeeded: 1, failed: 0 } })),
+      cancel: vi.fn(async id => ({ id, status: 'cancelled' })),
+    };
+    const upload = vi.fn(async (input: Parameters<ImportArtifactProvider['upload']>[0]) => ({
+      artifactId: 'artifact-1', fileName: input.fileName, size: input.size,
+    }));
+    const onPreview = vi.fn();
+    const app = mount(provider(), {
+      dryRun: true, onPreview, taskName: 'import-posts', retryTaskName: 'retry-import',
+      taskProvider: tasks, taskIdempotencyKey: 'dry-run-key', initialTaskId: 'restored-dry',
+      taskArtifactProvider: { upload },
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 30));
+    expect(tasks.get).not.toHaveBeenCalled();
+    expect(tasks.submit).not.toHaveBeenCalled();
+    expect(tasks.cancel).not.toHaveBeenCalled();
+    expect(upload).not.toHaveBeenCalled();
+    expect(app.view.queryByText('restored-dry')).toBeNull();
+    expect(app.view.queryByRole('button', { name: 'Cancel' })).toBeNull();
+    expect(app.view.queryByRole('button', { name: 'Retry recoverable failed rows' })).toBeNull();
+
+    await selectFile(csvFile('title,quantity\nFirst,2'));
+    await fireEvent.click(await app.view.findByRole('button', { name: /Preview Import/i }));
+    await waitFor(() => expect(onPreview).toHaveBeenCalledTimes(1));
+    expect(tasks.get).not.toHaveBeenCalled();
+    expect(tasks.submit).not.toHaveBeenCalled();
+    expect(tasks.cancel).not.toHaveBeenCalled();
+    expect(upload).not.toHaveBeenCalled();
+    expect(app.source.create).not.toHaveBeenCalled();
+  });
+
+  it('clears a restored task when switching to dryRun and never resumes task work', async () => {
+    const tasks: TaskProvider = {
+      submit: vi.fn(async () => ({ id: 'import-1', wait: async () => ({ id: 'import-1', status: 'completed' }) })),
+      get: vi.fn(async id => ({ id, status: 'running' })),
+      cancel: vi.fn(async id => ({ id, status: 'cancelled' })),
+    };
+    const app = mount(provider(), {
+      taskName: 'import-posts', taskProvider: tasks, initialTaskId: 'restored-before-dry',
+    });
+    await app.view.findByText('Running');
+    vi.mocked(tasks.get).mockClear();
+
+    await app.view.rerender({ dryRun: true });
+    await waitFor(() => expect(app.view.getByText(/Drag and drop CSV or JSON/i)).toBeTruthy());
+    expect(app.view.queryByText('restored-before-dry')).toBeNull();
+    expect(app.view.queryByRole('button', { name: 'Cancel' })).toBeNull();
+    expect(app.view.queryByRole('button', { name: 'Retry recoverable failed rows' })).toBeNull();
+    await new Promise(resolve => setTimeout(resolve, 30));
+    expect(tasks.get).not.toHaveBeenCalled();
+    expect(tasks.submit).not.toHaveBeenCalled();
+    expect(app.source.create).not.toHaveBeenCalled();
+  });
+
+  it('swallows a synchronous onPreview throw without changing the preview UI', async () => {
+    const onPreview = vi.fn(() => { throw new Error('private observer failure'); });
+    const app = mount(provider(), { dryRun: true, onPreview });
+
+    await selectFile(csvFile('title,quantity\nFirst,2'));
+    await fireEvent.click(await app.view.findByRole('button', { name: /Preview Import/i }));
+
+    await waitFor(() => expect(onPreview).toHaveBeenCalledTimes(1));
+    expect(app.view.getByText(/Local validation passed for 1 of 1 rows; 0 failed\./)).toBeTruthy();
+    expect(app.view.container.textContent).not.toContain('private observer failure');
+    expect(app.source.create).not.toHaveBeenCalled();
+  });
+
+  it('swallows an async onPreview rejection without an unhandled rejection', async () => {
+    const unhandled: unknown[] = [];
+    const handler = (reason: unknown) => { unhandled.push(reason); };
+    process.on('unhandledRejection', handler);
+    try {
+      const onPreview = vi.fn(async () => { throw new Error('private async observer failure'); });
+      const app = mount(provider(), { dryRun: true, onPreview });
+
+      await selectFile(csvFile('title,quantity\nFirst,2'));
+      await fireEvent.click(await app.view.findByRole('button', { name: /Preview Import/i }));
+
+      await waitFor(() => expect(onPreview).toHaveBeenCalledTimes(1));
+      await new Promise(resolve => setTimeout(resolve, 30));
+      expect(unhandled).toEqual([]);
+      expect(app.view.getByText(/Local validation passed for 1 of 1 rows; 0 failed\./)).toBeTruthy();
+      expect(app.view.container.textContent).not.toContain('private async observer failure');
+      expect(app.source.create).not.toHaveBeenCalled();
+    } finally {
+      process.off('unhandledRejection', handler);
+    }
+  });
+
+  it('passes an isolated frozen snapshot so observers cannot mutate the preview UI', async () => {
+    let received: { totalRows: number; importableRows: number; failedRows: Array<{ row: number; error: string }> } | undefined;
+    const onPreview = vi.fn((result: typeof received) => {
+      received = result;
+      expect(result).toBeDefined();
+      expect(Object.isFrozen(result)).toBe(true);
+      expect(Object.isFrozen(result?.failedRows)).toBe(true);
+      expect(Object.isFrozen(result?.failedRows[0])).toBe(true);
+      try {
+        if (result) {
+          result.totalRows = 999;
+          result.importableRows = 999;
+          result.failedRows[0]!.row = 999;
+        }
+      } catch { /* frozen snapshots reject mutation */ }
+    });
+    const app = mount(provider(), { dryRun: true, onPreview });
+
+    await selectFile(csvFile('title,quantity\nFirst,2\nBroken,not-a-number'));
+    await fireEvent.click(await app.view.findByRole('button', { name: /Preview Import/i }));
+
+    await waitFor(() => expect(onPreview).toHaveBeenCalledTimes(1));
+    expect(received).toEqual({
+      totalRows: 2, importableRows: 1,
+      failedRows: [{ row: 2, error: 'Invalid import input' }],
+    });
+    expect(app.view.getByText(/Local validation passed for 1 of 2 rows; 1 failed\./)).toBeTruthy();
+    expect(app.view.getByText('Row 2: Invalid import input')).toBeTruthy();
+    expect(app.source.create).not.toHaveBeenCalled();
+  });
+
+  it('clears an existing preview when import permission is revoked', async () => {
+    const onPreview = vi.fn();
+    const app = mount(provider(), { dryRun: true, onPreview });
+
+    await selectFile(csvFile('title,quantity\nFirst,2'));
+    await fireEvent.click(await app.view.findByRole('button', { name: /Preview Import/i }));
+    await waitFor(() => expect(onPreview).toHaveBeenCalledTimes(1));
+
+    await app.view.rerender({ permission: { can: async () => ({ can: false }) } });
+    await waitFor(() => expect(app.view.getByText(/Drag and drop CSV or JSON/i)).toBeTruthy());
+    expect(app.view.queryByText(/Local validation passed/)).toBeNull();
+    expect(onPreview).toHaveBeenCalledTimes(1);
+    expect(app.source.create).not.toHaveBeenCalled();
+  });
+
+  it('clears an existing preview when the wizard is closed and reopened', async () => {
+    const onPreview = vi.fn();
+    const app = mount(provider(), { dryRun: true, onPreview });
+
+    await selectFile(csvFile('title,quantity\nFirst,2'));
+    await fireEvent.click(await app.view.findByRole('button', { name: /Preview Import/i }));
+    await waitFor(() => expect(onPreview).toHaveBeenCalledTimes(1));
+
+    await app.view.rerender({ open: false });
+    await app.view.rerender({ open: true });
+    await waitFor(() => expect(app.view.getByText(/Drag and drop CSV or JSON/i)).toBeTruthy());
+    expect(app.view.queryByText(/Local validation passed/)).toBeNull();
+    expect(onPreview).toHaveBeenCalledTimes(1);
+    expect(app.source.create).not.toHaveBeenCalled();
+  });
+
+  it('clears an existing preview when the data provider changes', async () => {
+    const onPreview = vi.fn();
+    const app = mount(provider(), { dryRun: true, onPreview });
+    const next = provider();
+
+    await selectFile(csvFile('title,quantity\nFirst,2'));
+    await fireEvent.click(await app.view.findByRole('button', { name: /Preview Import/i }));
+    await waitFor(() => expect(onPreview).toHaveBeenCalledTimes(1));
+
+    await app.view.rerender({ provider: next });
+    await waitFor(() => expect(app.view.getByText(/Drag and drop CSV or JSON/i)).toBeTruthy());
+    expect(app.view.queryByText(/Local validation passed/)).toBeNull();
+    expect(onPreview).toHaveBeenCalledTimes(1);
+    expect(app.source.create).not.toHaveBeenCalled();
+    expect(next.create).not.toHaveBeenCalled();
+  });
+});
+
+describe('ImportWizard onPreview-only workflow', () => {
+  it('previews, returns to mapping, blocks a changed invalid mapping, then writes after correction', async () => {
+    const onPreview = vi.fn();
+    const onSuccess = vi.fn();
+    const app = mount(provider(), { onPreview, onSuccess });
+
+    await selectFile(csvFile('title,quantity\nFirst,2\nSecond,3'));
+    await fireEvent.click(await app.view.findByRole('button', { name: /^Preview$/i }));
+    await waitFor(() => expect(onPreview).toHaveBeenCalledWith({
+      totalRows: 2, importableRows: 2, failedRows: [],
+    }));
+    expect(app.view.getByText(/Local validation passed for 2 of 2 rows; 0 failed\./)).toBeTruthy();
+    expect(app.source.create).not.toHaveBeenCalled();
+    expect(onSuccess).not.toHaveBeenCalled();
+
+    await fireEvent.click(app.view.getByRole('button', { name: /Back to import/i }));
+    const quantity = document.querySelector('select[aria-label="Map quantity"]');
+    if (!(quantity instanceof HTMLSelectElement)) throw new Error('Expected quantity mapping select');
+    await fireEvent.change(quantity, { target: { value: '' } });
+    await fireEvent.click(app.view.getByRole('button', { name: /Start Import/i }));
+    await waitFor(() => expect(app.view.getByRole('alert').textContent).toContain('Row 1'));
+    expect(app.source.create).not.toHaveBeenCalled();
+    expect(onSuccess).not.toHaveBeenCalled();
+
+    await fireEvent.change(quantity, { target: { value: 'quantity' } });
+    await fireEvent.click(app.view.getByRole('button', { name: /Start Import/i }));
+    await waitFor(() => expect(onSuccess).toHaveBeenCalledWith({ succeeded: 2, failed: 0 }));
+    expect(app.source.create).toHaveBeenCalledTimes(2);
+    expect(app.view.queryByText(/Local validation passed/)).toBeNull();
   });
 });

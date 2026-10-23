@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { provideAdminContext, type DataProvider, type ResourceDefinition, type AccessControlProvider } from '@svadmin/core';
+  import { provideAdminContext, type DataProviderInput, type ResourceDefinition, type AccessControlProvider } from '@svadmin/core';
   import { QueryClientProvider, type QueryClient } from '@tanstack/svelte-query';
   import type { ComponentProps } from 'svelte';
   import RelationPicker from './RelationPicker.svelte';
   let { provider, resources, client, tenant = 'first', access = null, settings = {} }: {
-    provider: DataProvider;
+    provider: DataProviderInput;
     resources: ResourceDefinition[];
     client: QueryClient;
     tenant?: string;

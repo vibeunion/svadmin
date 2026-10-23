@@ -4,6 +4,7 @@
   import { Plus, GripVertical, RotateCw, ArrowUp, ArrowDown } from '@lucide/svelte';
   import { cn } from '../utils.js';
   import { useTranslation } from '@svadmin/core/i18n';
+  import { snapshotPlainData } from '@svadmin/core/schema';
   import { onDestroy } from 'svelte';
 
   export interface KanbanCard {
@@ -27,7 +28,7 @@
     columns: KanbanColumn[];
     cards?: KanbanCard[];
     allowAddCard?: boolean;
-    oncardmove?: (cardId: string, targetColumnId: string, targetIndex: number) => void | Promise<void>;
+    oncardmove?: (cardId: string, targetColumnId: string, targetIndex: number) => void | KanbanCard | Promise<void | KanbanCard>;
     canMoveCard?: (card: KanbanCard, targetColumnId: string) => boolean;
     oncardmoveerror?: (error: unknown) => void;
     oncardclick?: (card: KanbanCard) => void;
@@ -62,6 +63,7 @@
   let newCardTitle = $state('');
   let movingCardId = $state<string | null>(null);
   let moveError = $state<string | null>(null);
+  let failedMove = $state<{ cardId: string; targetColumnId: string; targetIndex: number } | null>(null);
   let adding = $state(false);
   let mounted = true;
   const i18n = useTranslation();
@@ -100,10 +102,25 @@
       && (card.dueDate === undefined || typeof card.dueDate === 'string')
       && (card.priority === undefined || ['low', 'medium', 'high', 'urgent'].includes(card.priority));
   }
+  function decodeMoveReceipt(receipt: unknown): KanbanCard | undefined {
+    if (receipt === undefined) return undefined;
+    if (receipt === null || typeof receipt !== 'object' || Array.isArray(receipt)) {
+      throw new Error('Invalid move receipt');
+    }
+    // 将已提交卡片与回调持有方的可变对象图分离，避免别名修改已提交状态。
+    const snapshot = snapshotPlainData(receipt);
+    if (snapshot === null || typeof snapshot !== 'object' || Array.isArray(snapshot)) {
+      throw new Error('Invalid move receipt');
+    }
+    return snapshot as unknown as KanbanCard;
+  }
   function moveAllowed(card: KanbanCard, targetColumn: string): boolean {
     if (!oncardmove || loading || displayError || busy || !columns.some(column => column.id === targetColumn)) return false;
     try { return canMoveCard === undefined || canMoveCard(card, targetColumn) === true; }
     catch { return false; }
+  }
+  function canDragCard(card: KanbanCard): boolean {
+    return !!oncardmove && !loading && !displayError && !busy && columns.some(column => moveAllowed(card, column.id));
   }
   function active(origin: typeof scope): boolean {
     return mounted && origin === scope;
@@ -114,11 +131,13 @@
     addingColumnId = null;
     newCardTitle = '';
     moveError = null;
+    failedMove = null;
   });
   onDestroy(() => { mounted = false; });
 
   function handleDragStart(e: DragEvent, cardId: string) {
-    if (!oncardmove || busy || loading || displayError) { e.preventDefault(); return; }
+    const card = cards.find((c) => c.id === cardId);
+    if (!card || !canDragCard(card)) { e.preventDefault(); return; }
     draggedCardId = cardId;
     if (e.dataTransfer) {
       e.dataTransfer.effectAllowed = 'move';
@@ -151,17 +170,34 @@
     adding = false;
     movingCardId = card.id;
     moveError = null;
+    failedMove = null;
     try {
-      await origin.oncardmove?.(card.id, targetColId, index);
-      if (active(origin) && operation === current) cards = optimistic;
+      const receipt = await origin.oncardmove?.(card.id, targetColId, index);
+      if (!active(origin) || operation !== current) return;
+      let confirmed = optimistic;
+      if (receipt !== undefined) {
+        const authoritative = decodeMoveReceipt(receipt);
+        if (!authoritative || !validCard(authoritative) || authoritative.id !== card.id || authoritative.columnId !== targetColId) {
+          throw new Error('Invalid move receipt');
+        }
+        confirmed = optimistic.map(item => item.id === card.id ? authoritative : item);
+      }
+      cards = confirmed;
     } catch (cause) {
       if (active(origin) && operation === current) {
         moveError = i18n.t('kanban.moveFailed');
+        failedMove = { cardId: card.id, targetColumnId: targetColId, targetIndex: index };
         try { oncardmoveerror?.(cause); } catch { /* 错误观察者不能再次触发写入。 */ }
       }
     } finally {
       if (operation === current) { operation = undefined; movingCardId = null; }
     }
+  }
+
+  function retryFailedMove() {
+    const failed = failedMove;
+    if (!failed || busy) return;
+    void moveCard(failed.cardId, failed.targetColumnId, failed.targetIndex);
   }
 
   function handleDrop(targetColId: string, index?: number) {
@@ -208,7 +244,7 @@
   }
 </script>
 
-{#if moveError}<div role="alert">{moveError}</div>{/if}
+{#if moveError}<div role="alert"><span>{moveError}</span>{#if failedMove}<Button type="button" variant="ghost" size="sm" disabled={busy} onclick={retryFailedMove}>{i18n.t('common.retry')}</Button>{/if}</div>{/if}
 <div role="region" aria-label={ariaLabel ?? i18n.t('kanban.label')} aria-busy={loading || busy}
   class={cn('svadmin-u-60fbb7713999 svadmin-u-0c3bc98565dd svadmin-u-1384f66f41d0 svadmin-u-9fcd8a13827e svadmin-u-359090c2d529 svadmin-u-7f6912283f11', className)}>
   {#if loading}
@@ -265,7 +301,7 @@
             role="group"
             aria-label={card.title}
             aria-busy={busy && movingCardId === card.id}
-            draggable={!!oncardmove && !busy}
+            draggable={canDragCard(card)}
             class={cn(
               'group svadmin-u-d89972fe17d6 svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-77a2a20e90d4 svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-05faf5c801ff svadmin-u-cd0ad9a56558 svadmin-u-eb6e8b881acd svadmin-u-cef5b893cf23 svadmin-u-0fe7d7d814d0 svadmin-u-8d08385288a6 svadmin-u-d9bff91ef7ee svadmin-u-512e82e6a68f svadmin-u-ab1dd417ce7d svadmin-u-2eba0d65d059',
               draggedCardId === card.id ? 'svadmin-u-2a2db4667b27 svadmin-u-16b1efa5875e svadmin-u-2691847b25ed' : ''

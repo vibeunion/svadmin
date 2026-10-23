@@ -6,8 +6,10 @@
   import { Input } from './ui/input/index.js';
   import { Select } from './ui/select/index.js';
 
-  let { field, value, range = false, onchange }: {
-    field: FieldDefinition; value: unknown; range?: boolean; onchange: (value: unknown[]) => void;
+  let { field, value, range = false, labelledby, describedby, invalid = false, onchange }: {
+    field: FieldDefinition; value: unknown; range?: boolean;
+    labelledby?: string | undefined; describedby?: string | undefined; invalid?: boolean;
+    onchange: (value: unknown[]) => void;
   } = $props();
   const i18n = useTranslation();
   const values = $derived<unknown[]>(Array.isArray(value) ? value : range ? [null, null] : [null]);
@@ -17,14 +19,14 @@
   }
 </script>
 
-<div class="filter-collection">
+<div class="filter-collection" role="group" aria-labelledby={labelledby} aria-describedby={describedby}>
   {#each values as item, index (index)}
     {@const label = range
       ? i18n.t(index === 0 ? 'filter.rangeStart' : 'filter.rangeEnd')
       : i18n.t('filter.collectionItem', { number: String(index + 1) })}
     <div class="filter-collection-item">
       {#if field.type === 'select'}
-        <Select aria-label={label} value={String(field.options?.findIndex(option => option.value === item) ?? -1)}
+        <Select aria-label={label} aria-invalid={invalid} aria-describedby={describedby} value={String(field.options?.findIndex(option => option.value === item) ?? -1)}
           onchange={(event: Event) => {
             if (!(event.currentTarget instanceof HTMLSelectElement)) return;
             const option = field.options?.[Number(event.currentTarget.value)];
@@ -36,7 +38,7 @@
           {/each}
         </Select>
       {:else if field.type === 'boolean'}
-        <Select aria-label={label} value={typeof item === 'boolean' ? String(item) : ''}
+        <Select aria-label={label} aria-invalid={invalid} aria-describedby={describedby} value={typeof item === 'boolean' ? String(item) : ''}
           onchange={(event: Event) => {
             if (!(event.currentTarget instanceof HTMLSelectElement)) return;
             update(index, event.currentTarget.value === 'true' ? true : event.currentTarget.value === 'false' ? false : null);
@@ -46,12 +48,12 @@
           <option value="false">{i18n.t('common.no')}</option>
         </Select>
       {:else if isNumericFilterField(field)}
-        <Input type="number" step="any" aria-label={label} value={typeof item === 'number' ? item : undefined}
+        <Input type="number" step="any" aria-label={label} aria-invalid={invalid} aria-describedby={describedby} value={typeof item === 'number' ? item : undefined}
           oninput={(event: Event) => {
             if (event.currentTarget instanceof HTMLInputElement) update(index, event.currentTarget.value === '' ? null : event.currentTarget.valueAsNumber);
           }} />
       {:else}
-        <Input type="text" aria-label={label} value={typeof item === 'string' ? item : ''}
+        <Input type="text" aria-label={label} aria-invalid={invalid} aria-describedby={describedby} value={typeof item === 'string' ? item : ''}
           oninput={(event: Event) => {
             if (event.currentTarget instanceof HTMLInputElement) update(index, event.currentTarget.value);
           }} />

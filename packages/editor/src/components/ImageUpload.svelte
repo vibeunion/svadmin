@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Editor } from '@tiptap/core';
-  import { ImageIcon, Upload, Link as LinkIcon } from '@lucide/svelte';
+  import { ImageIcon, Upload, Link as LinkIcon, RotateCw } from '@lucide/svelte';
   import { t } from '@svadmin/core';
 
   let { editor, onUpload, onclose } = $props<{
@@ -15,30 +15,102 @@
   let uploading = $state(false);
   let dragover = $state(false);
   let fileInput: HTMLInputElement | undefined = $state();
+  let uploadGeneration = 0;
+  let disposed = false;
+  let uploadError = $state(false);
+  let retryFiles = $state<File[]>([]);
 
-  function insertByUrl() {
-    if (!url.trim()) return;
-    editor.chain().focus().setImage({ src: url, alt: alt || undefined }).run();
-    url = '';
-    alt = '';
+  function invalidateUpload() {
+    uploadGeneration++;
+  }
+
+  function close() {
+    invalidateUpload();
+    uploading = false;
+    uploadError = false;
+    retryFiles = [];
     onclose?.();
   }
 
-  async function handleFiles(files: FileList | null) {
-    if (!files?.length || !onUpload) return;
+  function canCommit(generation: number): boolean {
+    return !disposed
+      && generation === uploadGeneration
+      && !editor.isDestroyed
+      && editor.isEditable;
+  }
+
+  $effect.pre(() => {
+    const instance = editor;
+    void onUpload;
+    disposed = false;
+    uploading = false;
+    uploadError = false;
+    retryFiles = [];
+    const handleDestroy = () => {
+      disposed = true;
+      invalidateUpload();
+    };
+    instance.on('destroy', handleDestroy);
+    return () => {
+      disposed = true;
+      invalidateUpload();
+      instance.off('destroy', handleDestroy);
+    };
+  });
+
+  function insertByUrl() {
+    if (!url.trim()) return;
+    if (disposed || editor.isDestroyed || !editor.isEditable) return;
+    editor.chain().focus().setImage({ src: url, alt: alt || undefined }).run();
+    url = '';
+    alt = '';
+    close();
+  }
+
+  async function handleFiles(files: FileList | File[] | null) {
+    if (!files?.length || !onUpload || uploading || disposed || editor.isDestroyed || !editor.isEditable) return;
+    const selectedFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+    if (!selectedFiles.length) return;
+    const generation = ++uploadGeneration;
+    const upload = onUpload;
+    const instance = editor;
+    uploadError = false;
+    retryFiles = [];
     uploading = true;
+    let currentIndex = 0;
     try {
-      for (const file of files) {
-        if (!file.type.startsWith('image/')) continue;
-        const uploadedUrl = await onUpload(file);
-        editor.chain().focus().setImage({ src: uploadedUrl, alt: file.name }).run();
+      for (const file of selectedFiles) {
+        currentIndex++;
+        if (!canCommit(generation)) break;
+        const uploadedUrl = await upload(file);
+        if (canCommit(generation)) {
+          instance.chain().focus().setImage({ src: uploadedUrl, alt: file.name }).run();
+        } else {
+          break;
+        }
       }
-    } catch (e) {
-      console.error('Image upload failed:', e);
+    } catch {
+      if (canCommit(generation)) {
+        uploadError = true;
+        retryFiles = selectedFiles.slice(currentIndex - 1);
+      }
     } finally {
-      uploading = false;
-      onclose?.();
+      if (generation === uploadGeneration && !disposed) {
+        uploading = false;
+        if (canCommit(generation) && !uploadError) close();
+      }
     }
+  }
+
+  function retryUpload() {
+    const files = retryFiles;
+    if (files.length) void handleFiles(files);
+  }
+
+  function chooseFiles(event: Event) {
+    if (!(event.currentTarget instanceof HTMLInputElement)) return;
+    void handleFiles(event.currentTarget.files);
+    event.currentTarget.value = '';
   }
 
   function handleDrop(e: DragEvent) {
@@ -49,6 +121,7 @@
 
   function handleDragOver(e: DragEvent) {
     e.preventDefault();
+    if (uploading) return;
     dragover = true;
   }
 
@@ -57,9 +130,13 @@
   }
 
   function handleDropZoneKeydown(e: KeyboardEvent) {
+    if (e.key === 'Escape') {
+      close();
+      return;
+    }
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      fileInput?.click();
+      if (!uploading) fileInput?.click();
     }
   }
 
@@ -69,7 +146,7 @@
       insertByUrl();
     }
     if (e.key === 'Escape') {
-      onclose?.();
+      close();
     }
   }
 </script>
@@ -81,6 +158,7 @@
       class="svadmin-toolbar-btn"
       style="width: auto; padding: 0 10px; font-size: 12px; gap: 4px; display: flex; align-items: center;"
       data-active={mode === 'url'}
+      disabled={uploading}
       onclick={() => { mode = 'url'; }}
     >
       <LinkIcon style="width: 12px; height: 12px;" />
@@ -92,6 +170,7 @@
         class="svadmin-toolbar-btn"
         style="width: auto; padding: 0 10px; font-size: 12px; gap: 4px; display: flex; align-items: center;"
         data-active={mode === 'upload'}
+        disabled={uploading}
         onclick={() => { mode = 'upload'; }}
       >
         <Upload style="width: 12px; height: 12px;" />
@@ -131,7 +210,9 @@
   {:else}
     <div
       role="button"
-      tabindex="0"
+      tabindex={uploading ? -1 : 0}
+      aria-disabled={uploading}
+      aria-busy={uploading}
       aria-label={t('editor.image.upload')}
       style="
         border: 2px dashed {dragover ? 'var(--editor-primary)' : 'var(--editor-border)'};
@@ -146,7 +227,7 @@
       ondragover={handleDragOver}
       ondragleave={handleDragLeave}
       onkeydown={handleDropZoneKeydown}
-      onclick={() => fileInput?.click()}
+      onclick={() => { if (!uploading) fileInput?.click(); }}
     >
       {#if uploading}
         <div style="color: var(--editor-muted); font-size: 13px;">{t('editor.image.uploading')}</div>
@@ -157,13 +238,23 @@
         </div>
       {/if}
     </div>
+    {#if uploadError}
+      <div role="alert" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-top: 8px; color: var(--destructive); font-size: 13px;">
+        <span>{t('common.error')}</span>
+        <button type="button" class="svadmin-toolbar-btn" style="width: auto; padding: 0 8px; gap: 4px;" onclick={retryUpload} disabled={uploading || !retryFiles.length}>
+          <RotateCw aria-hidden="true" style="width: 12px; height: 12px;" />
+          {t('common.retry')}
+        </button>
+      </div>
+    {/if}
     <input
       bind:this={fileInput}
       type="file"
       accept="image/*"
       multiple
+      disabled={uploading}
       style="display: none;"
-      onchange={(e) => handleFiles((e.target as HTMLInputElement).files)}
+      onchange={chooseFiles}
     />
   {/if}
 </div>

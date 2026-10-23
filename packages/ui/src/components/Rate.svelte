@@ -66,7 +66,7 @@
   aria-describedby={describedby}
   data-invalid={invalid ? 'true' : undefined}
 >
-  {#if name}<input type="hidden" {name} value={normalizedValue} required={required} />{/if}
+  {#if name}<input type="hidden" {name} value={normalizedValue} required={required} {disabled} />{/if}
   {#each Array(normalizedCount) as _, index (index)}
     {@const rating = index + 1}
     <button

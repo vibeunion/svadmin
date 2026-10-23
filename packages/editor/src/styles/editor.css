@@ -24,6 +24,33 @@
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--ring) 15%, transparent);
 }
 
+.svadmin-editor-upload-feedback {
+  border-top: 1px solid var(--editor-border);
+  padding: 8px;
+}
+
+.svadmin-editor-upload-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.svadmin-editor-upload-name {
+  flex: 1 1 160px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.svadmin-editor-upload-item [role="alert"] {
+  color: var(--destructive);
+}
+
+.svadmin-editor-upload-item [role="status"] {
+  color: var(--editor-muted);
+}
+
 /* ─── Toolbar ─────────────────────────────────────────────────── */
 
 .svadmin-editor-toolbar {

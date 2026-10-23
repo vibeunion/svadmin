@@ -87,7 +87,10 @@
     Eye, Copy, RefreshCw, Rows, X, Bookmark, Check
   } from '@lucide/svelte';
   import ConfirmDialog from './ConfirmDialog.svelte';
+  import BatchActionBar from './BatchActionBar.svelte';
   import RecordDetailDrawer from './RecordDetailDrawer.svelte';
+  import DetailWorkspaceSections from './DetailWorkspaceSections.svelte';
+  import type { DetailWorkspaceSectionsConfig } from './detail-workspace.js';
   import QuickEditDrawer from './QuickEditDrawer.svelte';
   import RecordRowActions from './RecordRowActions.svelte';
   import CanAccess from './CanAccess.svelte';
@@ -151,6 +154,8 @@
     exportTaskIdempotencyKey?: string;
     exportFormat?: ExportFormat;
     exportMaxItemCount?: number;
+    /** Optional record-scoped detail workspace sections. Audit uses the existing AuditLogProvider. */
+    detailWorkspace?: DetailWorkspaceSectionsConfig;
   }
 
   let {
@@ -184,6 +189,7 @@
     exportTaskIdempotencyKey,
     exportFormat = 'csv',
     exportMaxItemCount,
+    detailWorkspace,
   }: Props = $props();
 
   let densityOverride = $state<'compact' | 'comfortable' | undefined>(undefined);
@@ -325,6 +331,7 @@
   const listResult = useList({
     get resource() { void activeRendering; return binding.resource; },
     get dataProviderName() { return binding.dataProviderName; },
+    errorNotification: false,
     get queryOptions() { return { enabled: canRead }; },
     get pagination() { return queryPagination; },
     get sorters() { return querySorters; },
@@ -749,6 +756,8 @@
   // ─── Confirm dialog ───────────────────────────────────────────
   let operationError = $state<string | null>(null);
   let detailOpenedInHistory = $state(false);
+  let detailOpenedId = $state<string | number | undefined>();
+  let detailRouteChangedInHistory = $state(false);
   let quickEditId = $state<string | number | undefined>();
   const tableScope = $derived({
     contract: binding.resource, resourceName, provider: adminContext.providers?.[binding.dataProviderName],
@@ -788,6 +797,8 @@
       selectionModel.reset();
       expandedAtom.set({});
       detailOpenedInHistory = false;
+      detailOpenedId = undefined;
+      detailRouteChangedInHistory = false;
       localDetailId = undefined;
       quickEditId = undefined;
       const queryScopeChanged = previousTableScope.contract !== scope.contract
@@ -809,16 +820,35 @@
     if (!canRead || !canShow) return;
     if (!syncWithLocation) { localDetailId = id; return; }
     detailOpenedInHistory = true;
+    detailOpenedId = id;
+    detailRouteChangedInHistory = false;
     writeURLState({ detailId: formatContractRouteId(binding.resource, id) }, adminContext, 'push');
   }
+  $effect.pre(() => {
+    if (!detailOpenedInHistory || detailOpenedId == null || detailRecordId == null) return;
+    if (String(detailRecordId) !== String(detailOpenedId)) detailRouteChangedInHistory = true;
+  });
   function closeDetail(): void {
     if (!syncWithLocation) { localDetailId = undefined; return; }
     if (detailOpenedInHistory && adminContext.routerProvider) {
+      const routeChanged = detailRouteChangedInHistory;
       detailOpenedInHistory = false;
+      detailOpenedId = undefined;
+      detailRouteChangedInHistory = false;
+      // The drawer can move to another record without unmounting (next/previous).
+      // Once that happened, the top history entry may be a detail route even if
+      // the current record is the originally opened one (A -> B -> A), so a single
+      // back() could reopen another record instead of closing.
+      if (routeChanged) {
+        writeURLState({ detailId: undefined }, adminContext);
+        return;
+      }
       adminContext.routerProvider.back();
       return;
     }
     detailOpenedInHistory = false;
+    detailOpenedId = undefined;
+    detailRouteChangedInHistory = false;
     writeURLState({ detailId: undefined }, adminContext);
   }
   // ─── CSV Export ───────────────────────────────────────────────
@@ -1108,20 +1138,16 @@
     </div>
   {/if}
 
-  <!-- Selection Banner (Enterprise Batch Actions) -->
-  {#if selectedCount > 0 || allMatchingSelected}
-<div
-      class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-1004c0c3954c svadmin-u-ca6bcd4b6f3f svadmin-u-a6afccfc915b svadmin-u-375dc44df6e9 svadmin-u-e0d9cc7f0647 svadmin-u-03b4dd7f172b svadmin-u-5f22e64f2282 svadmin-u-fc7473ca09eb svadmin-u-d4108abe6359 svadmin-u-40137e897961 fade-in svadmin-u-625a4c3fbeb2 svadmin-u-259ce51fc8f3 svadmin-u-020ba687fa12 svadmin-u-9f76a62f4f44 svadmin-u-3b9871a0bf93"
-      aria-label={selectionLabel}
-      data-svadmin-batch-toolbar
-    >
-      <div class="svadmin-u-60fbb7713999 svadmin-u-7e0b7cdf1a94 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-fc7473ca09eb">
-        <span class="svadmin-u-2689f3958069 svadmin-u-d4108abe6359 svadmin-u-3032cae0badb">{selectionLabel}</span>
-        {#if deleteManyMutation.isPending}
-          <span class="svadmin-u-bfa603190748" role="status">{i18n.t("common.processing")}</span>
-        {/if}
-      </div>
-      <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
+  {#if selectedCount > 0 || allMatchingSelected || (deleteRequest?.batch && deleteManyMutation.isPending)}
+    <div data-svadmin-batch-toolbar>
+      <BatchActionBar
+        {selectedCount}
+        selectedLabel={selectionLabel}
+        ariaLabel={selectionLabel}
+        forceVisible={allMatchingSelected}
+        pending={deleteManyMutation.isPending}
+        onclear={clearSelection}
+      >
         {#if batchActions && selectionReady && selectedCount > 0}
           {@render batchActions({ selectedIds: [...selectedIds], selection: batchSelectionSnapshot() })}
         {/if}
@@ -1142,16 +1168,7 @@
             <Trash2 class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" data-icon="inline-start" aria-hidden="true" /> {i18n.t("common.batchDelete", { count: selectedCount })}
           </Button>
         {/if}
-        <Button
-          variant="ghost"
-          size="sm"
-          class="svadmin-u-ed8a5df7b2fb svadmin-u-359090c2d529 svadmin-u-bfa603190748 svadmin-u-ea7b2e9e070e"
-          disabled={deleteManyMutation.isPending}
-          onclick={clearSelection}
-        >
-          {i18n.t("common.clearSelection")}
-        </Button>
-      </div>
+      </BatchActionBar>
     </div>
   {/if}
 
@@ -1958,6 +1975,16 @@
   oncancel={deletionModel.cancel}
 />
 
+{#snippet workspaceSections()}
+  {#if detailRecordId != null && detailWorkspace}
+    <DetailWorkspaceSections
+      {resourceName}
+      recordId={detailRecordId}
+      sections={detailWorkspace}
+    />
+  {/if}
+{/snippet}
+
 {#if detailRecordId != null}
   <RecordDetailDrawer
     rendering={activeRendering}
@@ -1965,6 +1992,7 @@
     open={detailOpen}
     recordId={detailRecordId}
     onClose={closeDetail}
+    extraSections={detailWorkspace ? workspaceSections : undefined}
   />
 {/if}
 

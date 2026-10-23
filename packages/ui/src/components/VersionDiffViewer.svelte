@@ -82,19 +82,19 @@
 
 <div class={cn('svadmin-u-a217b4eaa918 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-cef5b893cf23 svadmin-u-2cd02d11d1af', className)}>
   <!-- Header & Toolbar -->
-  <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-56796a90bec5 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff svadmin-u-967d113a1451">
-    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
+  <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-56796a90bec5 svadmin-u-65fdbade2025 svadmin-u-05faf5c801ff svadmin-u-967d113a1451 svadmin-u-1eb5c6df38c1">
+    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-7e0b7cdf1a94">
       <h4 class="svadmin-u-359090c2d529 svadmin-u-e83a7042bc91 svadmin-u-d4108abe6359">Record Comparison</h4>
       <Badge variant="outline" class="svadmin-u-d058ca6de60f">
         {modifiedCount} change{modifiedCount === 1 ? '' : 's'}
       </Badge>
     </div>
 
-    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421">
+    <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-44ee8ba0a421 svadmin-u-1eb5c6df38c1">
       <Button
         variant={mode === 'split' ? 'secondary' : 'ghost'}
         size="sm"
-        class="svadmin-u-d0a52b312f7d svadmin-u-359090c2d529 svadmin-u-44ee8ba0a421 svadmin-u-d5eab218aa34"
+        class="svadmin-u-d0a52b312f7d svadmin-u-359090c2d529 svadmin-u-44ee8ba0a421 svadmin-u-d5eab218aa34 svadmin-u-012fbd121f37"
         onclick={() => { mode = 'split'; }}
       >
         <Columns2 class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />
@@ -103,7 +103,7 @@
       <Button
         variant={mode === 'unified' ? 'secondary' : 'ghost'}
         size="sm"
-        class="svadmin-u-d0a52b312f7d svadmin-u-359090c2d529 svadmin-u-44ee8ba0a421 svadmin-u-d5eab218aa34"
+        class="svadmin-u-d0a52b312f7d svadmin-u-359090c2d529 svadmin-u-44ee8ba0a421 svadmin-u-d5eab218aa34 svadmin-u-012fbd121f37"
         onclick={() => { mode = 'unified'; }}
       >
         <AlignJustify class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c" />

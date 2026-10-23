@@ -12,6 +12,7 @@ import { defineResource, parseContractRecord } from './resource-contract';
 import { decodeListResult, decodeOneResult, decodeManyResult } from './record-decoder';
 import { createSelectProjection } from './select-options';
 import { resetContext } from './context.svelte';
+import { consumeToastQueue, getToastQueue } from './toast.svelte';
 import { captureAuthLiveScope, resetLogoutVersion } from './auth-hooks.svelte';
 import type { AuthErrorResult } from './auth-query-contract';
 import { HttpError, type AuthProvider, type AuthActionResult, type BaseRecord, type DataProvider,
@@ -48,7 +49,8 @@ function mount(
   options: Partial<Omit<ComponentProps<typeof Host>, 'provider' | 'resources' | 'kind' | 'queryClient' | 'onReady'>> = {},
 ) {
   let state: ReadState | undefined;
-  const view = render(Host, { provider: source, resources, kind, queryClient, ...options, onReady: (value: ReadState) => { state = value; } });
+  const view = render(Host, { provider: source, resources, kind, queryClient, errorNotification: false,
+    ...options, onReady: (value: ReadState) => { state = value; } });
   return {
     view, queryClient,
     read() {
@@ -127,7 +129,7 @@ describe('standard query provider sources', () => {
   it('preserves actual query-result discriminants under the strict TypeScript compiler', () => {
     const directory = dirname(fileURLToPath(import.meta.url));
     const sources = ['query-source.test.type-fixture.ts', 'query-source.test.types.ts', 'query-source.test.svelte.ts',
-      'session-query.svelte.ts', 'query-hooks.svelte.ts', 'auth-hooks.svelte.ts', 'record-decoder.ts',
+      'session-query.svelte.ts', 'query-session.svelte.ts', 'query-hooks.svelte.ts', 'auth-hooks.svelte.ts', 'record-decoder.ts',
       'query-snapshot.ts', 'select-options.ts'].map(file => resolve(directory, file));
     const virtual = new Map(['query-source.test-host.svelte', 'query-source.test-probe.svelte'].map(file => {
       const filename = resolve(directory, file);
@@ -784,6 +786,147 @@ describe('ordinary query authentication ownership', () => {
     Reflect.set(refreshed.data, 'data', { id: 999, title: 'Refetch mutation' });
     expect(app.read().query.data).toEqual({ data: { id: 1, title: 'First' } });
     expect(app.queryClient.getQueryCache().getAll()[0]?.state.data).toEqual({ data: { id: 1, title: 'First' } });
+  });
+
+  it.each(kinds)('deduplicates default %s errors across observers without exposing query metadata', async kind => {
+    const source = provider();
+    vi.mocked(readMethod(source, kind)).mockRejectedValue(new HttpError('Private diagnostic', 503));
+    const shared = client();
+    const options = { errorNotification: undefined, meta: { trace: 'private-query-meta' } };
+    const first = mount(kind, source, shared, options);
+    const second = mount(kind, source, shared, options);
+
+    await waitFor(() => expect(first.read().query.isError && second.read().query.isError).toBe(true));
+    expect(readMethod(source, kind)).toHaveBeenCalledOnce();
+    expect(getToastQueue()).toHaveLength(1);
+    expect(getToastQueue()[0]).toMatchObject({
+      type: 'error',
+      message: 'Fetch failed: Resource query failed',
+      key: expect.stringMatching(/^svadmin-query-error:\d+$/),
+    });
+    expect(JSON.stringify(getToastQueue())).not.toContain('private-query-meta');
+    expect(JSON.stringify(getToastQueue())).not.toContain('Private diagnostic');
+  });
+
+  it.each(['record', 'tenant', 'provider', 'session', 'client'] as const)(
+    'keeps default error keys distinct for a different %s', async boundary => {
+    const source = provider();
+    source.getOne = vi.fn<DataProvider['getOne']>().mockRejectedValue(new HttpError('Private diagnostic', 503));
+    const shared = client();
+    const session = auth();
+    const first = mount('one', source, shared, { authProvider: session, errorNotification: undefined });
+    const secondSource = boundary === 'provider' ? { ...source } : source;
+    const second = mount('one', secondSource, boundary === 'client' ? client() : shared, {
+      id: boundary === 'record' ? 2 : 1,
+      tenant: boundary === 'tenant' ? 'second' : 'first',
+      authProvider: boundary === 'session' ? auth() : session,
+      errorNotification: undefined,
+    });
+
+    await waitFor(() => expect(first.read().query.isError && second.read().query.isError).toBe(true));
+    expect(getToastQueue()).toHaveLength(2);
+    expect(new Set(getToastQueue().map(item => item.key)).size).toBe(2);
+  });
+
+  it.each([undefined, ''] as const)('re-emits the default error after consumption with config %s', async errorNotification => {
+    const source = provider();
+    source.getOne = vi.fn<DataProvider['getOne']>().mockRejectedValue(new HttpError('Private diagnostic', 503));
+    const app = mount('one', source, client(), { errorNotification });
+    await waitFor(() => expect(getToastQueue()).toHaveLength(1));
+    const key = getToastQueue()[0]?.key;
+    expect(key).toMatch(/^svadmin-query-error:\d+$/);
+    consumeToastQueue();
+    await app.read().query.refetch();
+    await waitFor(() => expect(getToastQueue()).toHaveLength(1));
+    expect(getToastQueue()[0]?.key).toBe(key);
+    expect(source.getOne).toHaveBeenCalledTimes(2);
+  });
+
+  it.each(['string', 'callback'] as const)('does not merge a custom %s notification by its message', async mode => {
+    const source = provider();
+    source.getOne = vi.fn<DataProvider['getOne']>().mockRejectedValue(new HttpError('Private diagnostic', 503));
+    const shared = client();
+    const message = 'Fetch failed: Resource query failed';
+    const custom = mode === 'string' ? message : () => ({ message });
+    const first = mount('one', source, shared, { errorNotification: undefined });
+    const second = mount('one', source, shared, { errorNotification: custom });
+    const third = mount('one', source, shared, { errorNotification: custom });
+    await waitFor(() => expect([first, second, third].every(app => app.read().query.isError)).toBe(true));
+    expect(getToastQueue()).toHaveLength(3);
+    expect(getToastQueue().filter(item => item.key === undefined)).toHaveLength(2);
+    expect(getToastQueue().every(item => item.message === message)).toBe(true);
+  });
+
+  it('passes the same opaque default error key to a custom notification provider', async () => {
+    const source = provider();
+    source.getOne = vi.fn<DataProvider['getOne']>().mockRejectedValue(new HttpError('Private diagnostic', 503));
+    const notification = { open: vi.fn(), close: vi.fn() };
+    const shared = client();
+    const options = { notificationProvider: notification, errorNotification: undefined };
+    mount('one', source, shared, options);
+    mount('one', source, shared, options);
+    await waitFor(() => expect(notification.open).toHaveBeenCalledTimes(2));
+    const [first, second] = notification.open.mock.calls;
+    expect(first).toEqual([{
+      type: 'error', message: 'Fetch failed: Resource query failed', key: expect.stringMatching(/^svadmin-query-error:\d+$/),
+    }]);
+    expect(second).toEqual(first);
+    expect(getToastQueue()).toHaveLength(0);
+  });
+
+  it('keeps explicitly disabled error notifications silent', async () => {
+    const source = provider();
+    source.getOne = vi.fn<DataProvider['getOne']>().mockRejectedValue(new HttpError('Private diagnostic', 503));
+    const notification = { open: vi.fn(), close: vi.fn() };
+    const first = mount('one', source, client(), { errorNotification: false });
+    const second = mount('one', source, client(), { notificationProvider: notification, errorNotification: false });
+    await waitFor(() => expect(first.read().query.isError && second.read().query.isError).toBe(true));
+    expect(notification.open).not.toHaveBeenCalled();
+    expect(getToastQueue()).toHaveLength(0);
+  });
+
+  it.each(['builtin', 'provider'] as const)(
+    'keeps silence observer-local when a shared query has a %s notification consumer', async channel => {
+    const source = provider();
+    source.getOne = vi.fn<DataProvider['getOne']>().mockRejectedValue(new HttpError('Private diagnostic', 503));
+    const notification = { open: vi.fn(), close: vi.fn() };
+    const shared = client();
+    const notificationProvider = channel === 'provider' ? notification : null;
+    const silent = mount('one', source, shared, { notificationProvider, errorNotification: false });
+    const notifying = mount('one', source, shared, { notificationProvider, errorNotification: undefined });
+
+    await waitFor(() => expect(silent.read().query.isError && notifying.read().query.isError).toBe(true));
+    expect(source.getOne).toHaveBeenCalledOnce();
+    if (channel === 'provider') {
+      expect(notification.open).toHaveBeenCalledOnce();
+      expect(notification.open).toHaveBeenCalledWith({
+        type: 'error', message: 'Fetch failed: Resource query failed',
+        key: expect.stringMatching(/^svadmin-query-error:\d+$/),
+      });
+      expect(getToastQueue()).toHaveLength(0);
+    } else {
+      expect(notification.open).not.toHaveBeenCalled();
+      expect(getToastQueue()).toHaveLength(1);
+      expect(getToastQueue()[0]).toMatchObject({ type: 'error', key: expect.stringMatching(/^svadmin-query-error:\d+$/) });
+    }
+  });
+
+  it('preserves custom error notification keys', async () => {
+    const source = provider();
+    source.getOne = vi.fn<DataProvider['getOne']>().mockRejectedValue(new HttpError('Private diagnostic', 503));
+    const notification = { open: vi.fn(), close: vi.fn() };
+    const custom = vi.fn(() => ({ message: 'Business read failed', key: 'business-read' }));
+    const app = mount('one', source, client(), {
+      notificationProvider: notification,
+      errorNotification: custom,
+    });
+
+    await waitFor(() => expect(app.read().query.isError).toBe(true));
+    expect(notification.open).toHaveBeenCalledWith({
+      type: 'error',
+      message: 'Business read failed',
+      key: 'business-read',
+    });
   });
 
   it('suppresses a notification when its observer starts login and isolates observer exceptions', async () => {

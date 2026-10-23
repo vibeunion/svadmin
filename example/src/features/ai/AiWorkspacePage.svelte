@@ -21,15 +21,20 @@
   let busy = $state(false);
   let feedback = $state('');
   let favorites = $state<number[]>([]);
+  let favoritesCleanupError = $state(false);
   let favoritesOnly = $state(false);
   let history = $state<Record<number, ChatMessage[]>>({});
   let controller: AbortController | undefined;
-  const query = useList({ resource: demoContracts.ai_conversations, pagination: { mode: 'off' }, sorters: [{ field: 'updatedAt', order: 'desc' }] });
-  const create = useCreate({ resource: demoContracts.ai_conversations });
-  const update = useUpdateMany({ resource: demoContracts.ai_conversations });
-  const remove = useDeleteMany({ resource: demoContracts.ai_conversations });
+  const query = useList({
+    resource: demoContracts.ai_conversations, pagination: { mode: 'off' },
+    sorters: [{ field: 'updatedAt', order: 'desc' }], errorNotification: false,
+    get queryOptions() { return { enabled: !['templates', 'settings'].includes(view) }; },
+  });
+  const create = useCreate({ resource: demoContracts.ai_conversations, successNotification: false, errorNotification: false });
+  const update = useUpdateMany({ resource: demoContracts.ai_conversations, successNotification: false, errorNotification: false });
+  const remove = useDeleteMany({ resource: demoContracts.ai_conversations, successNotification: false, errorNotification: false });
   const conversations = $derived(demoRenderers.ai_conversations.records(query.data?.data ?? []));
-  const selected = $derived(view === 'new' ? undefined : conversations.find(item => item.id === selectedId) ?? conversations[0]);
+  const selected = $derived(view === 'new' || !query.isSuccess ? undefined : conversations.find(item => item.id === selectedId) ?? conversations[0]);
   const messages = $derived(selected ? history[selected.id] ?? [{ id: `saved-${selected.id}`, role: 'assistant' as const, parts: [{ type: 'text' as const, text: selected.lastMessage }], createdAt: Date.parse(selected.updatedAt) }] : []);
   const prompts = $derived([
     isZh ? '汇总低库存和补货动作' : 'Summarize low stock and replenishment',
@@ -55,8 +60,18 @@
   }
   function toggleFavorite(id: number): void {
     const next = favorites.includes(id) ? favorites.filter(value => value !== id) : [...favorites, id];
-    if (saveIds('svadmin-example-ai-favorites', next)) favorites = next;
+    if (saveIds('svadmin-example-ai-favorites', next)) {
+      favorites = next;
+      favoritesCleanupError = false;
+      feedback = '';
+    }
     else feedback = isZh ? '收藏保存失败，请重试。' : 'Unable to save favorite. Please retry.';
+  }
+  function retryFavoritesCleanup(): void {
+    favoritesCleanupError = !saveIds('svadmin-example-ai-favorites', favorites);
+    feedback = favoritesCleanupError
+      ? (isZh ? '收藏记录仍未保存，请重试。' : 'Favorites could not be saved. Retry.')
+      : (isZh ? '收藏记录已清除。' : 'Favorites cleared.');
   }
   async function copyConversation(): Promise<void> {
     try {
@@ -65,22 +80,25 @@
     } catch { feedback = isZh ? '复制失败，可直接选择对话文字。' : 'Copy failed. Select the conversation text directly.'; }
   }
   async function clearHistory(): Promise<void> {
-    if (busy || !conversations.length || !window.confirm(isZh ? '删除全部本地会话记录？此操作无法撤销。' : 'Delete all local conversation records? This cannot be undone.')) return;
+    if (busy || !query.isSuccess || !conversations.length || !window.confirm(isZh ? '删除全部本地会话记录？此操作无法撤销。' : 'Delete all local conversation records? This cannot be undone.')) return;
     busy = true; feedback = '';
     try {
       await remove.mutation.mutateAsync({ ids: conversations.map(item => item.id) });
-      history = {}; favorites = []; saveIds('svadmin-example-ai-favorites', []);
+      history = {}; favorites = [];
+      favoritesCleanupError = !saveIds('svadmin-example-ai-favorites', favorites);
       selectedId = null;
       await query.refetch();
       window.location.hash = '/ai_conversations?view=new';
-      feedback = isZh ? '本地历史已清理。' : 'Local history cleared.';
+      feedback = favoritesCleanupError
+        ? (isZh ? '本地历史已清理，但收藏记录仍未清除。请重试。' : 'Local history cleared, but favorites could not be cleared. Retry.')
+        : (isZh ? '本地历史已清理。' : 'Local history cleared.');
     } catch { feedback = isZh ? '清理失败，请重试。' : 'Unable to clear history. Retry.'; }
     finally { busy = false; }
   }
   async function send(): Promise<void> {
     const question = draft.trim();
     const provider = context.chatProvider;
-    if (!question || busy) return;
+    if (!question || busy || !query.isSuccess) return;
     if (!provider) { feedback = isZh ? '助手未接入，草稿已保留。' : 'Assistant unavailable. Draft retained.'; return; }
     busy = true; feedback = '';
     controller = new AbortController();
@@ -121,6 +139,7 @@
     <p class="text-sm text-muted-foreground">{isZh ? '本地演示助手 · 只读查询样例数据，不调用外部模型。会话保存摘要；完整对话仅在当前页面保留。' : 'Local demo assistant · reads sample data without an external model. Thread summaries are saved; full transcripts last for this page session.'}</p>
     <nav class="flex flex-wrap gap-4 border-b pb-3 text-sm"><a class="text-primary" href="#/ai_conversations">{isZh ? '历史' : 'History'}</a><a class="text-primary" href="#/ai_conversations?view=templates">{isZh ? '模板' : 'Templates'}</a><a class="text-primary" href="#/ai_conversations?view=settings">{isZh ? '运行信息' : 'Runtime'}</a></nav>
     {#if feedback}<p role="status">{feedback}</p>{/if}
+    {#if favoritesCleanupError}<Button variant="outline" onclick={retryFavoritesCleanup}>{isZh ? '重试清除旧收藏' : 'Retry clearing old favorites'}</Button>{/if}
     {#if view === 'settings'}
       <section class="divide-y"><p class="py-3">{isZh ? '数据源：当前 example 本地数据' : 'Data source: current example data'}</p><p class="py-3">{isZh ? '模式：只读运营查询；不会自动创建任务、发送邮件或修改库存。' : 'Mode: read-only operations queries; no automatic task creation, email delivery, or inventory changes.'}</p><a class="block py-3 text-primary" href="#/user_settings?view=ai">{isZh ? '维护 AI 设置记录' : 'Manage AI settings records'}</a></section>
     {:else if view === 'templates'}
@@ -142,7 +161,7 @@
           <div class="space-y-4" aria-live="polite">{#each messages as message (message.id)}<article class="border-b py-3"><Badge variant="outline">{message.role === 'user' ? (isZh ? '你' : 'You') : (isZh ? '本地助手' : 'Local assistant')}</Badge><p class="mt-2 whitespace-pre-wrap break-words text-sm leading-6">{messageText(message)}</p></article>{:else}<p class="text-sm text-muted-foreground">{isZh ? '输入问题，或选择运营模板。' : 'Enter a question or choose an operations template.'}</p>{/each}</div>
           <form class="space-y-3" onsubmit={(event) => { event.preventDefault(); void send(); }}>
             <label class="block text-sm">{isZh ? '问题' : 'Question'}<textarea class="mt-2 min-h-28 w-full rounded-md border bg-background p-3" bind:value={draft} disabled={busy} required></textarea></label>
-            <Button type="submit" disabled={busy || !draft.trim()}><Send class="size-4" />{busy ? (isZh ? '查询中…' : 'Querying…') : (isZh ? '发送' : 'Send')}</Button>
+            <Button type="submit" disabled={busy || !query.isSuccess || !draft.trim()}><Send class="size-4" />{busy ? (isZh ? '查询中…' : 'Querying…') : (isZh ? '发送' : 'Send')}</Button>
           </form>
         </section>
       </div>

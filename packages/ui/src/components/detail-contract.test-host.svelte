@@ -1,15 +1,17 @@
 <script lang="ts">
   import { provideAdminContext, type DataProvider, type ResourceDefinition, type AccessControlProvider,
-    type RouterProvider } from '@svadmin/core';
+    type NotificationProvider, type RouterProvider } from '@svadmin/core';
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
   import type { Snippet } from 'svelte';
   import { definedReactiveOptions, definedOptions } from '@svadmin/core/options';
   import ShowPage from './ShowPage.svelte';
   import RecordDetailDrawer from './RecordDetailDrawer.svelte';
+  import DetailExtensionProbe from './detail-contract.test-extension.svelte';
 
   let { provider, resources, queryClient, mode = 'page', resource = 'posts', id = 1, open = true,
     tenant = 'first', permission, layout = 'list', onNavigate = () => {}, onClose = () => {},
-    extraSections, returnTo, onBack, onHistoryBack = () => {},
+    extraSections, returnTo, onBack, onHistoryBack = () => {}, notificationProvider = null,
+    showExtension = false,
   }: {
     provider: DataProvider | Record<string, DataProvider>;
     resources: ResourceDefinition[];
@@ -27,18 +29,25 @@
     returnTo?: string;
     onBack?: () => void;
     onHistoryBack?: () => void;
+    notificationProvider?: NotificationProvider | null;
+    showExtension?: boolean;
   } = $props();
   provideAdminContext(definedReactiveOptions({
     get dataProvider() { return provider; },
     get resources() { return resources; },
     get tenant() { return { tenantId: tenant }; },
     get accessControlProvider() { return permission; },
+    get notificationProvider() { return notificationProvider; },
     routerProvider: {
       go: (options: Parameters<RouterProvider['go']>[0]) => onNavigate(options), back: () => onHistoryBack(),
       parse: () => ({ pathname: '/posts/show/999', params: { id: '999' } }),
     },
   }));
 </script>
+
+{#snippet testExtension()}
+  <DetailExtensionProbe recordId={id} />
+{/snippet}
 
 <QueryClientProvider client={queryClient}>
   {#if mode === 'page' && id !== null}
@@ -47,6 +56,7 @@
     </ShowPage>
   {:else if mode === 'drawer'}
     <RecordDetailDrawer resourceName={resource} bind:open
-      {...definedOptions({ recordId: id === null ? undefined : id, extraSections })} {onClose} />
+      {...definedOptions({ recordId: id === null ? undefined : id,
+        extraSections: showExtension ? testExtension : extraSections })} {onClose} />
   {/if}
 </QueryClientProvider>

@@ -1,6 +1,7 @@
 import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import FileUpload, { type UploadSession } from './FileUpload.svelte';
+import FileUpload, { type UploadItem, type UploadSession } from './FileUpload.svelte';
+import I18nHost from './file-upload-i18n.test-host.svelte';
 
 import { requireValue } from '../../../../scripts/test-assertions';
 afterEach(cleanup);
@@ -17,6 +18,94 @@ function deferred<T>() {
 }
 
 describe('FileUpload', () => {
+  it('translates queued files and action names without changing native files or notifying again', async () => {
+    const onChange = vi.fn();
+    const view = render(I18nHost, { settings: { name: 'attachment', onChange } });
+    const input = requireValue(view.container.querySelector<HTMLInputElement>('input[type="file"]'));
+    const selected = file('report.txt');
+    await fireEvent.change(input, { target: { files: [selected] } });
+    expect(view.getByRole('list', { name: 'Selected files' })).toBeTruthy();
+    const calls = onChange.mock.calls.length;
+    await view.component.setLocale('zh-CN');
+    expect(view.getByRole('list', { name: '已选文件' })).toBeTruthy();
+    expect(view.getByText('待上传')).toBeTruthy();
+    expect(view.getByRole('button', { name: '移除文件' }).getAttribute('title')).toBe('移除文件');
+    expect(input.files?.[0]).toBe(selected);
+    expect(onChange).toHaveBeenCalledTimes(calls);
+    await view.component.setLocale('en');
+    expect(view.getByRole('button', { name: 'Remove file' })).toBeTruthy();
+    expect(onChange).toHaveBeenCalledTimes(calls);
+  });
+
+  it.each([
+    { settings: { accept: '.csv' }, reason: 'File type is not accepted.', translated: '不支持此文件类型。' },
+    { settings: { maxSize: 1 }, reason: 'File is too large.', translated: '文件过大。' },
+    { settings: { multiple: true, maxFiles: 1 }, reason: 'Maximum file count exceeded.', translated: '超出文件数量限制。' },
+  ])('translates $reason while preserving the rejection callback contract', async ({ settings, reason, translated }) => {
+    const onReject = vi.fn();
+    const view = render(I18nHost, { settings: { ...settings, onReject } });
+    const input = requireValue(view.container.querySelector<HTMLInputElement>('input[type="file"]'));
+    if ('multiple' in settings) await fireEvent.change(input, { target: { files: [file('first.txt')] } });
+    const rejected = file('rejected.txt');
+    await fireEvent.change(input, { target: { files: [rejected] } });
+    expect(view.getByText(`rejected.txt: ${reason}`)).toBeTruthy();
+    await view.component.setLocale('zh-CN');
+    expect(view.getByRole('list', { name: '被拒绝的文件' }).textContent).toContain(translated);
+    expect(onReject).toHaveBeenCalledExactlyOnceWith(rejected, reason);
+    await view.component.setLocale('en');
+    expect(view.getByText(`rejected.txt: ${reason}`)).toBeTruthy();
+    expect(onReject).toHaveBeenCalledOnce();
+  });
+
+  it.each([new Error('PRIVATE_SIGNED_URL'), new Error(''), 'PRIVATE_FAILURE'])(
+    'shows localized generic failure and can retry without displaying raw errors: %s', async cause => {
+      const upload = vi.fn().mockRejectedValueOnce(cause).mockResolvedValue({ url: '/uploads/report.txt' });
+      const onChange = vi.fn();
+      const view = render(I18nHost, { settings: { upload, onChange } });
+      const input = requireValue(view.container.querySelector<HTMLInputElement>('input[type="file"]'));
+      await fireEvent.change(input, { target: { files: [file('report.txt')] } });
+      expect((await view.findByRole('alert')).textContent).toBe('Upload failed.');
+      expect(view.container.textContent).not.toContain('PRIVATE');
+      expect(view.container.innerHTML).not.toContain('PRIVATE');
+      expect(onChange).toHaveBeenLastCalledWith([
+        expect.objectContaining({
+          status: 'error',
+          error: cause instanceof Error ? cause.message : 'Upload failed.',
+        }),
+      ]);
+      const calls = onChange.mock.calls.length;
+      await view.component.setLocale('zh-CN');
+      expect(view.getByRole('alert').textContent).toBe('上传失败，请重试。');
+      expect(view.getByText('上传失败')).toBeTruthy();
+      expect(view.container.innerHTML).not.toContain('PRIVATE');
+      expect(onChange).toHaveBeenCalledTimes(calls);
+      expect(upload).toHaveBeenCalledOnce();
+      await fireEvent.click(view.getByRole('button', { name: '重试上传' }));
+      await view.findByText('上传成功');
+      expect(view.queryByRole('alert')).toBeNull();
+      expect(upload).toHaveBeenCalledTimes(2);
+      expect(onChange).toHaveBeenLastCalledWith([expect.objectContaining({ status: 'success' })]);
+    },
+  );
+
+  it('translates an active cancellation and preserves the cancelled machine state', async () => {
+    const pending = deferred<void>();
+    const onChange = vi.fn();
+    const view = render(I18nHost, { settings: { upload: () => pending.promise, onChange } });
+    const input = requireValue(view.container.querySelector<HTMLInputElement>('input[type="file"]'));
+    await fireEvent.change(input, { target: { files: [file('report.txt')] } });
+    await view.component.setLocale('zh-CN');
+    await fireEvent.click(view.getByRole('button', { name: '取消上传' }));
+    expect(view.getByText('已取消')).toBeTruthy();
+    expect(view.getByRole('alert').textContent).toBe('上传已取消。');
+    expect(onChange).toHaveBeenLastCalledWith([expect.objectContaining({ status: 'cancelled', error: 'Upload cancelled.' })]);
+    await act(async () => { pending.resolve(); await pending.promise; });
+    expect(view.getByText('已取消')).toBeTruthy();
+    await view.component.setLocale('en');
+    expect(view.getByText('cancelled')).toBeTruthy();
+    expect(view.getByRole('alert').textContent).toBe('Upload cancelled.');
+  });
+
   it('keeps the native name only when no async upload handler is provided', () => {
     const withUpload = render(FileUpload, {
       name: 'attachment',
@@ -440,5 +529,209 @@ describe('FileUpload', () => {
       await pending.promise.catch(() => {});
     });
     expect(onChange).toHaveBeenCalledTimes(count);
+  });
+  it('cleans a failed attempt session on removal with its captured callback', async () => {
+    const sessions: UploadSession[] = [];
+    const cancelUpload = vi.fn(async () => {});
+    const view = render(FileUpload, {
+      upload: (_file, session) => {
+        sessions.push(session);
+        session.setUploadId('failed-object');
+        throw new Error('boom');
+      },
+      cancelUpload,
+    });
+    await fireEvent.change(requireValue(view.container.querySelector('input')), { target: { files: [file('failed.txt')] } });
+    await waitFor(() => expect(view.getByText('error')).toBeTruthy());
+    expect(cancelUpload).not.toHaveBeenCalled();
+    await fireEvent.click(view.getByRole('button', { name: 'Remove file' }));
+    expect(cancelUpload).toHaveBeenCalledTimes(1);
+    expect(cancelUpload).toHaveBeenCalledWith(expect.any(File), expect.objectContaining({
+      uploadId: 'failed-object',
+      idempotencyKey: sessions[0]?.idempotencyKey,
+      reason: 'remove',
+    }));
+  });
+
+  it('cleans a failed attempt session when a new file replaces it in single mode', async () => {
+    const cancelUpload = vi.fn(async () => {});
+    const upload = vi.fn()
+      .mockImplementationOnce(async (_file: File, session: UploadSession) => {
+        session.setUploadId('replaced-object');
+        throw new Error('boom');
+      })
+      .mockResolvedValue({ url: '/uploads/new.txt' });
+    const onChange = vi.fn();
+    const view = render(FileUpload, { upload, cancelUpload, onChange });
+    const input = requireValue(view.container.querySelector<HTMLInputElement>('input[type="file"]'));
+    await fireEvent.change(input, { target: { files: [file('old.txt')] } });
+    await waitFor(() => expect(view.getByText('error')).toBeTruthy());
+    await fireEvent.change(input, { target: { files: [file('new.txt')] } });
+    await waitFor(() => expect(onChange).toHaveBeenLastCalledWith([
+      expect.objectContaining({ status: 'success', url: '/uploads/new.txt' }),
+    ]));
+    expect(cancelUpload).toHaveBeenCalledTimes(1);
+    expect(cancelUpload).toHaveBeenCalledWith(expect.any(File), expect.objectContaining({
+      uploadId: 'replaced-object', reason: 'replace',
+    }));
+  });
+
+  it.each(['unmount', 'scope-change'] as const)('cleans a failed attempt session on %s', async (action) => {
+    const oldCleanup = vi.fn(async () => {});
+    const nextCleanup = vi.fn(async () => {});
+    const onChange = vi.fn();
+    const view = render(FileUpload, {
+      upload: async (_file: File, session: UploadSession) => {
+        session.setUploadId('temporary-object');
+        throw new Error('boom');
+      },
+      cancelUpload: oldCleanup,
+      onChange,
+    });
+    await fireEvent.change(requireValue(view.container.querySelector('input')), { target: { files: [file('failed.txt')] } });
+    await waitFor(() => expect(view.getByText('error')).toBeTruthy());
+    const calls = onChange.mock.calls.length;
+    if (action === 'scope-change') {
+      // 作用域替换后必须使用旧尝试捕获的回调，而不是新作用域的 cancelUpload。
+      await view.rerender({ upload: async () => ({}), cancelUpload: nextCleanup, onChange });
+    } else {
+      view.unmount();
+    }
+    await waitFor(() => expect(oldCleanup).toHaveBeenCalledTimes(1));
+    expect(oldCleanup).toHaveBeenCalledWith(expect.any(File), expect.objectContaining({
+      uploadId: 'temporary-object',
+      reason: action === 'unmount' ? 'unmount' : 'scope-change',
+    }));
+    expect(nextCleanup).not.toHaveBeenCalled();
+    expect(onChange).toHaveBeenCalledTimes(calls);
+  });
+
+  it('cleans the failed attempt exactly once before retrying with a new key', async () => {
+    const cleanupResult = deferred<undefined>();
+    const sessions: UploadSession[] = [];
+    const pending = deferred<{ url: string }>();
+    const cancelUpload = vi.fn(() => cleanupResult.promise);
+    const onChange = vi.fn();
+    const view = render(FileUpload, {
+      upload: (_file, session) => {
+        sessions.push(session);
+        if (sessions.length === 1) {
+          session.setUploadId('failed-object');
+          return Promise.reject(new Error('boom'));
+        }
+        session.setUploadId('retry-object');
+        return pending.promise;
+      },
+      cancelUpload,
+      onChange,
+    });
+    await fireEvent.change(requireValue(view.container.querySelector('input')), { target: { files: [file('retry.txt')] } });
+    await waitFor(() => expect(view.getByText('error')).toBeTruthy());
+    await fireEvent.click(view.getByRole('button', { name: 'Retry upload' }));
+    expect(cancelUpload).toHaveBeenCalledTimes(1);
+    expect(cancelUpload).toHaveBeenCalledWith(expect.any(File), expect.objectContaining({
+      uploadId: 'failed-object', reason: 'replace',
+    }));
+    expect(sessions[0]?.idempotencyKey).not.toBe(sessions[1]?.idempotencyKey);
+    await waitFor(() => expect(onChange).toHaveBeenLastCalledWith([
+      expect.objectContaining({ status: 'uploading', uploadId: 'retry-object' }),
+    ]));
+    const calls = onChange.mock.calls.length;
+    await act(async () => { cleanupResult.resolve(undefined); await cleanupResult.promise; });
+    expect(onChange).toHaveBeenCalledTimes(calls);
+    expect(onChange.mock.lastCall?.[0][0]).not.toHaveProperty('cleanupStatus');
+    await act(async () => { pending.resolve({ url: '/uploads/retry.txt' }); await pending.promise; });
+  });
+
+  it('does not clean the same failed attempt twice', async () => {
+    const cleanupResult = deferred<undefined>();
+    const cancelUpload = vi.fn(() => cleanupResult.promise);
+    const onChange = vi.fn();
+    const view = render(FileUpload, {
+      upload: async (_file: File, session: UploadSession) => {
+        session.setUploadId('once-object');
+        throw new Error('boom');
+      },
+      cancelUpload,
+      onChange,
+    });
+    await fireEvent.change(requireValue(view.container.querySelector('input')), { target: { files: [file('once.txt')] } });
+    await waitFor(() => expect(view.getByText('error')).toBeTruthy());
+    const nextUpload = vi.fn(async () => ({}));
+    await view.rerender({ upload: nextUpload, cancelUpload, onChange });
+    expect(cancelUpload).toHaveBeenCalledTimes(1);
+    await fireEvent.click(view.getByRole('button', { name: 'Remove file' }));
+    expect(cancelUpload).toHaveBeenCalledTimes(1);
+    const calls = onChange.mock.calls.length;
+    await act(async () => { cleanupResult.resolve(undefined); await cleanupResult.promise; });
+    expect(onChange).toHaveBeenCalledTimes(calls);
+    expect(nextUpload).not.toHaveBeenCalled();
+  });
+
+  it('does not retire a successful attachment when the host unmounts during success notification', async () => {
+    const cancelUpload = vi.fn(async () => {});
+    const upload = vi.fn(async (_file: File, session: UploadSession) => {
+      session.setUploadId('success-unmount-object');
+      return { url: '/uploads/success-unmount.txt' };
+    });
+    let view: ReturnType<typeof render> | undefined;
+    const onChange = vi.fn((next: UploadItem[]) => {
+      if (next.some(item => item.status === 'success')) view?.unmount();
+    });
+    view = render(FileUpload, { upload, cancelUpload, onChange });
+    await fireEvent.change(requireValue(view.container.querySelector('input')), {
+      target: { files: [file('success-unmount.txt')] },
+    });
+    await act(async () => { await Promise.resolve(); await Promise.resolve(); });
+    expect(onChange).toHaveBeenLastCalledWith([
+      expect.objectContaining({ status: 'success', uploadId: 'success-unmount-object' }),
+    ]);
+    expect(cancelUpload).not.toHaveBeenCalled();
+  });
+
+  it('keeps a successful attachment out of failed cleanup when the host notification throws', async () => {
+    const cancelUpload = vi.fn(async () => {});
+    const upload = vi.fn(async (_file: File, session: UploadSession) => {
+      session.setUploadId('success-throw-object');
+      return { url: '/uploads/success-throw.txt' };
+    });
+    let thrown = false;
+    const onChange = vi.fn((next: UploadItem[]) => {
+      if (!thrown && next.some(item => item.status === 'success')) {
+        thrown = true;
+        throw new Error('host notification failed');
+      }
+    });
+    const view = render(FileUpload, { upload, cancelUpload, onChange });
+    await fireEvent.change(requireValue(view.container.querySelector('input')), {
+      target: { files: [file('success-throw.txt')] },
+    });
+    await waitFor(() => expect(view.getByText('success')).toBeTruthy());
+    expect(onChange).toHaveBeenLastCalledWith([
+      expect.objectContaining({ status: 'success', uploadId: 'success-throw-object' }),
+    ]);
+    await fireEvent.click(view.getByRole('button', { name: 'Remove file' }));
+    expect(cancelUpload).not.toHaveBeenCalled();
+  });
+
+  it('never cancels a successful attachment on removal or unmount', async () => {
+    const cancelUpload = vi.fn(async () => {});
+    const upload = vi.fn(async (_file: File, session: UploadSession) => {
+      session.setUploadId('kept-object');
+      return { url: '/uploads/kept.txt' };
+    });
+    const onChange = vi.fn();
+    const view = render(FileUpload, { upload, cancelUpload, onChange });
+    const input = requireValue(view.container.querySelector<HTMLInputElement>('input[type="file"]'));
+    await fireEvent.change(input, { target: { files: [file('kept.txt')] } });
+    await waitFor(() => expect(onChange).toHaveBeenLastCalledWith([
+      expect.objectContaining({ status: 'success', uploadId: 'kept-object' }),
+    ]));
+    await fireEvent.click(view.getByRole('button', { name: 'Remove file' }));
+    expect(cancelUpload).not.toHaveBeenCalled();
+    await fireEvent.change(input, { target: { files: [file('kept.txt')] } });
+    await waitFor(() => expect(view.getByText('success')).toBeTruthy());
+    view.unmount();
+    expect(cancelUpload).not.toHaveBeenCalled();
   });
 });

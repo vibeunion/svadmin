@@ -43,7 +43,7 @@
   let saving = $state(false);
   let savingOrganization = $state(false);
   let testing = $state(false);
-  let error = $state<string | null>(null);
+  let error = $state(false);
   let requestId = 0;
   const organizationChanged = $derived(Boolean(
     organizationProvider?.updateCurrentOrganization
@@ -58,8 +58,8 @@
   const auditRetentionValid = $derived(isPositiveInteger(auditRetentionValue));
   const policyNumbersValid = $derived(sessionTimeoutValid && auditRetentionValid);
 
-  function message(error: unknown): string {
-    return error instanceof Error ? error.message : String(error);
+  function failureMessage(): string {
+    return i18n.t('common.operationFailed');
   }
 
   async function loadSettings(): Promise<void> {
@@ -74,7 +74,7 @@
     auditRetentionValue = '';
     identityProviders = [];
     events = [];
-    error = null;
+    error = false;
     loading = false;
     saving = false;
     savingOrganization = false;
@@ -97,8 +97,8 @@
       organization = nextOrganization;
       organizationName = nextOrganization?.name ?? '';
       metadataUrl = nextIdentityProviders[0]?.metadataUrl ?? '';
-    } catch (caught) {
-      if (currentRequest === requestId) error = message(caught);
+    } catch {
+      if (currentRequest === requestId) error = true;
     } finally {
       if (currentRequest === requestId) loading = false;
     }
@@ -116,7 +116,7 @@
     const provider = identityProvider;
     const currentRequest = requestId;
     const context = adminContext.enterpriseRequestContext;
-    if (!provider || !policy || !policyNumbersValid) return;
+    if (!provider || !policy || !policyNumbersValid || saving) return;
     saving = true;
     try {
       const updatedPolicy = await provider.updateSecurityPolicy({
@@ -129,9 +129,9 @@
       sessionTimeoutValue = String(updatedPolicy.sessionTimeoutMinutes);
       auditRetentionValue = String(updatedPolicy.auditRetentionDays);
       notifyWithProvider({ type: 'success', message: isZh ? '企业策略已保存' : 'Enterprise policy saved' }, adminContext.notificationProvider);
-    } catch (caught) {
+    } catch {
       if (currentRequest !== requestId) return;
-      notifyWithProvider({ type: 'error', message: message(caught) }, adminContext.notificationProvider);
+      notifyWithProvider({ type: 'error', message: failureMessage() }, adminContext.notificationProvider);
     } finally {
       if (currentRequest === requestId) saving = false;
     }
@@ -142,7 +142,7 @@
     const currentRequest = requestId;
     const context = adminContext.enterpriseRequestContext;
     const name = organizationName.trim();
-    if (!provider?.updateCurrentOrganization || !organization || !name || name === organization.name) return;
+    if (!provider?.updateCurrentOrganization || !organization || !name || name === organization.name || savingOrganization) return;
     savingOrganization = true;
     try {
       const updatedOrganization = await provider.updateCurrentOrganization({ name }, context);
@@ -150,9 +150,9 @@
       organization = updatedOrganization;
       organizationName = updatedOrganization.name;
       notifyWithProvider({ type: 'success', message: isZh ? '组织信息已保存' : 'Organization saved' }, adminContext.notificationProvider);
-    } catch (caught) {
+    } catch {
       if (currentRequest !== requestId) return;
-      notifyWithProvider({ type: 'error', message: message(caught) }, adminContext.notificationProvider);
+      notifyWithProvider({ type: 'error', message: failureMessage() }, adminContext.notificationProvider);
     } finally {
       if (currentRequest === requestId) savingOrganization = false;
     }
@@ -162,7 +162,7 @@
     const provider = identityProvider;
     const currentRequest = requestId;
     const context = adminContext.enterpriseRequestContext;
-    if (!provider) return;
+    if (!provider || testing || loading || error) return;
     testing = true;
     try {
       const selectedProvider = target ?? identityProviders[0];
@@ -178,11 +178,11 @@
         type: result.success ? 'success' : 'error',
         message: result.success
           ? (isZh ? '身份源连接测试通过' : 'Identity provider connection succeeded')
-          : (result.error?.message ?? (isZh ? '身份源连接测试失败' : 'Identity provider connection failed')),
+          : failureMessage(),
       }, adminContext.notificationProvider);
-    } catch (caught) {
+    } catch {
       if (currentRequest !== requestId) return;
-      notifyWithProvider({ type: 'error', message: message(caught) }, adminContext.notificationProvider);
+      notifyWithProvider({ type: 'error', message: failureMessage() }, adminContext.notificationProvider);
     } finally {
       if (currentRequest === requestId) testing = false;
     }
@@ -214,7 +214,7 @@
   {#if loading}
     <DataState state="loading" />
   {:else if error}
-    <DataState state="error" title={isZh ? '企业设置加载失败' : 'Enterprise settings failed to load'} description={error} retry={loadSettings} />
+    <DataState state="error" title={isZh ? '企业设置加载失败' : 'Enterprise settings failed to load'} description={failureMessage()} retry={loadSettings} />
   {:else}
     <div class="svadmin-u-f3c543ad5fe9 svadmin-u-60541e1e26f8 svadmin-u-0c3bc98565dd svadmin-u-2f27a80ed92b">
       <SettingsGroup title={i18n.t('account.securityPolicy')} description={isZh ? '配置组织级身份、会话与审计策略。' : 'Configure organization-wide identity, session, and audit controls.'} bodyClass="space-y-4">
@@ -244,7 +244,7 @@
         <DataState state="empty" title={isZh ? '尚未配置身份源' : 'No identity provider configured'} description={isZh ? '请在后端 IdentityGovernanceProvider 中创建并验证身份源。' : 'Create and verify an identity provider through the backend IdentityGovernanceProvider.'} />
       {:else}
         {#each identityProviders as connection (connection.id)}
-          <IntegrationCard integration={definedOptions({ id: connection.id, name: connection.name, account: connection.protocol.toUpperCase(), connected: connection.status === 'connected', description: connection.domain ?? connection.metadataUrl })} onconnect={() => testConnection(connection)} />
+          <IntegrationCard integration={definedOptions({ id: connection.id, name: connection.name, account: connection.protocol.toUpperCase(), connected: connection.status === 'connected', description: connection.domain ?? connection.metadataUrl })} actionLabel={i18n.t('common.test')} disabled={testing} onconnect={() => testConnection(connection)} />
         {/each}
       {/if}
     </section>

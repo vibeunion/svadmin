@@ -22,6 +22,8 @@ export interface ContractDeleteManyOptions<S extends ContractSchemas> {
   resource: ResourceContract<S>;
   enabled?: boolean;
   overtimeOptions?: OvertimeOptions;
+  successNotification?: false;
+  errorNotification?: false;
 }
 export type { ContractDeleteManyParams } from './delete-many-contract';
 type Result<S extends ContractSchemas> = { data: ContractRecord<S>[] };
@@ -110,6 +112,7 @@ export function useContractDeleteMany<S extends ContractSchemas>(options: Contra
   function notify(scope: Scope, current: () => boolean, type: 'success' | 'error', message: string): void {
     observe(() => {
       if (!current()) return;
+      if (type === 'success' ? options.successNotification === false : options.errorNotification === false) return;
       if (scope.notification) return scope.notification.open({ type, message });
       if (type === 'success') toast.success(message);
       else toast.error(message);

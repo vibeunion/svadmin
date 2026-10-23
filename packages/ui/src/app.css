@@ -1251,6 +1251,7 @@ main {
   position: fixed;
   z-index: 50;
   display: flex;
+  box-sizing: border-box;
   height: 100%;
   width: 75%;
   max-width: 24rem;

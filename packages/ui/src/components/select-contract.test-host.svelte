@@ -5,10 +5,13 @@
   import type { SelectSettings, SelectState } from './select-contract.test.types';
   import Probe from './select-contract.test-probe.svelte';
   import ComboboxField from './ComboboxField.svelte';
+  import { definedOptions } from '@svadmin/core/options';
+  import type { HTMLButtonAttributes } from 'svelte/elements';
 
   let { provider, resources, queryClient, onReady = () => {}, settings = {},
     resource = 'posts', tenant = 'first', field = false, value = null, onchange, multiple = false,
-    optionLabel = 'title', optionValue = 'id', disabled = false, fetchSize = 50,
+    optionLabel = 'title', optionValue = 'id', disabled = false, searchable = true, fetchSize = 50, triggerKeydown,
+    requestTimeout,
     authProvider = null, notificationProvider = null,
     routerProvider = { go: () => {}, back: () => {}, parse: () => ({ pathname: '/', params: {} }) },
   }: {
@@ -26,7 +29,10 @@
     optionLabel?: string;
     optionValue?: string;
     disabled?: boolean;
+    searchable?: boolean;
+    triggerKeydown?: HTMLButtonAttributes['onkeydown'];
     fetchSize?: number;
+    requestTimeout?: number;
     authProvider?: AuthProvider | null;
     notificationProvider?: NotificationProvider | null;
     routerProvider?: RouterProvider;
@@ -44,7 +50,9 @@
 <QueryClientProvider client={queryClient}>
   {#if field}
     <ComboboxField {resource} {value} onchange={(next) => { value = next; onchange?.(next); }}
-      {optionLabel} {optionValue} {multiple} {disabled} {fetchSize} aria-label="Record" />
+      {optionLabel} {optionValue} {multiple} {disabled} {searchable} {fetchSize}
+      {...definedOptions({ requestTimeout })}
+      {...definedOptions({ onkeydown: triggerKeydown })} aria-label="Record" />
   {:else}
     <Probe {resource} {settings} {onReady} />
   {/if}

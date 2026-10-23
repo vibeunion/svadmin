@@ -3,7 +3,8 @@
   import { Grid, Willow } from '@svar-ui/svelte-grid';
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
   import { Type } from 'typebox';
-  import { defineResource, provideAdminContext, type DataProvider, type AccessControlProvider } from '@svadmin/core';
+  import { defineResource, provideAdminContext, type DataProvider, type AccessControlProvider, type NotificationProvider } from '@svadmin/core';
+  import { getToastQueue } from '@svadmin/core/toast';
   import SvarDataGrid from '../../../packages/ui/src/components/SvarDataGrid.svelte';
   import SvarResourceTable from '../../../packages/ui/src/components/SvarResourceTable.svelte';
   import type { SvarInteractiveColumn } from '../../../packages/ui/src/components/svar-grid-interactions.js';
@@ -16,6 +17,7 @@
   let tenant = $state('alpha');
   let denySecond = false;
   let denyList = false;
+  let notificationCount = $state(0);
   let sorters = $state<SvarSort[]>([]);
   let filters = $state<SvarTextFilter[]>([]);
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity, gcTime: Infinity } } });
@@ -25,6 +27,10 @@
       if (params.action === 'list' && denyList) return { can: false, reason: 'Fixture list access denied' };
       return { can: !(denySecond && params.params?.['id'] === 2 && ['edit', 'delete', 'export'].includes(params.action)), reason: 'Fixture record permission denied' };
     },
+  };
+  const notificationProvider: NotificationProvider = {
+    open: () => { notificationCount += 1; },
+    close: () => {},
   };
   async function responseData(response: Response) {
     if (!response.ok) throw new Error('Fixture request failed');
@@ -44,7 +50,7 @@
     update: Type.Object({ name: Type.Optional(Type.String({ minLength: 1 })), stock: Type.Optional(Type.Number({ minimum: 0 })) }),
     delete: Type.Object({}),
   });
-  provideAdminContext({ dataProvider: provider, accessControlProvider: access,
+  provideAdminContext({ dataProvider: provider, accessControlProvider: access, notificationProvider,
     resources: [{ name: 'products', label: 'Products', contract, fields: [
       { key: 'id', label: 'ID', type: 'number', sortable: true },
       { key: 'name', label: 'Name', type: 'text', sortable: true, filterable: true, searchable: true },
@@ -92,6 +98,8 @@
     <button type="button" onclick={() => { denySecond = !denySecond; }}>Deny second record</button>
   </nav>
   <output data-testid="advanced-scope">{tenant}:{scope}</output>
+  <output data-testid="notification-count">{notificationCount}</output>
+  <output data-testid="queued-toast-count">{getToastQueue().length}</output>
   {#if mode === 'operations' || mode === 'tree-operations'}
     <QueryClientProvider client={client}>
       <SvarResourceTable {Grid} Theme={Willow} resourceName="products" pageSize={25} dataScopeKey={scope}

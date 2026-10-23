@@ -6,7 +6,7 @@ import { setAccessControlProvider } from '@svadmin/core';
 import { resetAccessControlProvider } from '@svadmin/core/permissions';
 import { resetI18n } from '@svadmin/core/i18n';
 import { DEFAULT_SURFACE_CATALOG_VERSION, defaultSurfaceCatalog } from './catalog.js';
-import SurfaceRenderer from './components/SurfaceRenderer.svelte';
+import SurfaceRenderer, { type SurfaceRendererError } from './components/SurfaceRenderer.svelte';
 import type { SurfaceDataProvider, SurfaceDataSource, SurfacePolicy, SurfaceSpec } from './types.js';
 
 const policy: SurfacePolicy = {
@@ -166,11 +166,16 @@ describe('SurfaceRenderer incremental loading', () => {
 
   test('rechecks changed access control and removes previously ready data on denial', async () => {
     const h = createProvider();
-    render(SurfaceRenderer, { spec: singleSpec, policy, dataProvider: h.provider });
+    const onError = vi.fn<(error: SurfaceRendererError) => void>();
+    render(SurfaceRenderer, { spec: singleSpec, policy, dataProvider: h.provider, onError });
     await screen.findByText('110');
     const can = vi.fn(async () => ({ can: false, reason: 'Read permission revoked' }));
     setAccessControlProvider({ can });
-    expect((await screen.findByRole('alert')).textContent).toContain('Read permission revoked');
+    expect((await screen.findByRole('alert')).textContent).toContain('Access denied');
+    expect(document.body.textContent).not.toContain('Read permission revoked');
+    expect(onError).toHaveBeenCalledExactlyOnceWith({
+      type: 'data', error: { code: 'access_denied', sourceId: 'products', message: 'Read permission revoked' },
+    });
     expect(screen.queryByText('110')).toBeNull();
     expect(can).toHaveBeenCalledTimes(1);
     expect(h.getList).toHaveBeenCalledTimes(1);

@@ -69,6 +69,8 @@
   const queryPagination = $derived({ current, pageSize: effectivePageSize });
   const query = useList({
     get resource() { return binding.resource; }, get dataProviderName() { return binding.dataProviderName; },
+    // 表格提供刷新和局部加载错误反馈，避免与默认查询 Toast 重复。
+    errorNotification: false,
     get meta() { return { svadminSvarScope: dataScopeKey }; },
     get queryOptions() { return { enabled: permission.allowed && validPageSize && validLoading && !disabled }; },
     get pagination() { return queryPagination; }, get sorters() { return sorters; }, get filters() { return rootFilters; },

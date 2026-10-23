@@ -160,6 +160,18 @@
   function fieldInvalid(path: readonly string[]): boolean {
     return [...validationIssues, ...parseIssues].some(issue => issue.path === schemaFormPointer(path));
   }
+  function isVisibleIssuePath(pointer: string): boolean {
+    if (!coreSchema || !prepared.ok || !pointer.startsWith('/')) return true;
+    const path = pointer.slice(1).split('/').map(segment => segment.replaceAll('~1', '/').replaceAll('~0', '~'));
+    let node: JsonSchema | undefined = schema;
+    for (const segment of path) {
+      const kind = nodeType(node);
+      node = kind === 'array' ? node.items : node.properties?.[segment];
+      if (!node) return true;
+      if (!isSchemaFormNodeVisible(node as SchemaFormSchema, prepared.value)) return false;
+    }
+    return true;
+  }
   function writeNumber(path: string[], input: HTMLInputElement): void {
     if (!editable() || pathReadonly(path)) return;
     const pointer = schemaFormPointer(path);
@@ -236,7 +248,9 @@
     try {
       const result = coreSchema ? prepareSchemaFormValue(coreSchema, prepared.value) : undefined;
       const detailedIssues = model.issues.length ? [] : validateRecursiveSchemaForm(model, prepared.value);
-      const problems = [...parseIssues, ...(result
+      // 隐藏字段暂不参与校验，但保留解析错误，重新显示时仍需修正。
+      const activeParseIssues = parseIssues.filter(issue => isVisibleIssuePath(issue.path));
+      const problems = [...activeParseIssues, ...(result
         ? result.errors.map(issue => {
           const path = schemaFormPointer(JSON.parse(issue.path) as string[]);
           // 共用子集保留公开错误码；核心校验仍决定哪些字段不可提交。
@@ -299,13 +313,15 @@
     {@const fieldLocked = locked || pathReadonly(path)}
     {@const error = fieldInvalid(path)}
     {@const options = choices(node)}
+    {@const descriptionId = node.description ? `${id}:description` : undefined}
+    {@const errorId = error ? `${id}:error` : undefined}
     {#if coreSchema && !isSchemaFormNodeVisible(node as SchemaFormSchema, prepared.ok ? prepared.value : {})}
       <!-- 隐藏字段保留草稿，但不进入提交数据。 -->
     {:else if type === 'object' || node.properties}
-      <fieldset disabled={fieldLocked} class="svadmin-u-da7c36cd8867 svadmin-u-421ac2be5045">
+      <fieldset disabled={fieldLocked} aria-describedby={[descriptionId, errorId].filter(Boolean).join(' ') || undefined} class="svadmin-u-da7c36cd8867 svadmin-u-421ac2be5045">
         <legend class="svadmin-u-0214b4b355d1 svadmin-u-2689f3958069">{title}</legend>
-        {#if error}<p id={`${id}-error`}>{i18n.t('validation.invalidFormat')}</p>{/if}
-        {#if node.description}<p class="svadmin-u-d058ca6de60f svadmin-u-bfa603190748">{node.description}</p>{/if}
+        {#if error}<p id={errorId}>{i18n.t('validation.invalidFormat')}</p>{/if}
+        {#if node.description}<p id={descriptionId} class="svadmin-u-d058ca6de60f svadmin-u-bfa603190748">{node.description}</p>{/if}
         <div class="svadmin-u-9c6cdfa2ba3d">
           {#each Object.entries(node.properties ?? {}) as [key, child] (key)}
             {@render renderField(child, [...path, key], child.title ?? key, node.required?.includes(key) ?? false)}
@@ -314,10 +330,10 @@
       </fieldset>
     {:else if type === 'array'}
       {@const items = Array.isArray(current) ? current : []}
-      <fieldset disabled={fieldLocked} class="svadmin-u-da7c36cd8867 svadmin-u-421ac2be5045">
+      <fieldset disabled={fieldLocked} aria-describedby={[descriptionId, errorId].filter(Boolean).join(' ') || undefined} class="svadmin-u-da7c36cd8867 svadmin-u-421ac2be5045">
         <legend class="svadmin-u-0214b4b355d1 svadmin-u-2689f3958069">{title}</legend>
-        {#if error}<p id={`${id}-error`}>{i18n.t('validation.invalidFormat')}</p>{/if}
-        {#if node.description}<p class="svadmin-u-d058ca6de60f svadmin-u-bfa603190748">{node.description}</p>{/if}
+        {#if error}<p id={errorId}>{i18n.t('validation.invalidFormat')}</p>{/if}
+        {#if node.description}<p id={descriptionId} class="svadmin-u-d058ca6de60f svadmin-u-bfa603190748">{node.description}</p>{/if}
         {#each items as _, index (index)}
           {@render renderField(node.items ?? { type: 'string' }, [...path, String(index)], `${title} ${index + 1}`)}
           <Button type="button" variant="ghost" size="sm" disabled={fieldLocked || (node.minItems !== undefined && items.length <= node.minItems)} onclick={() => removeArrayItem(path, index)}>
@@ -335,22 +351,22 @@
         <label for={id} class="svadmin-u-0214b4b355d1 svadmin-u-2689f3958069 svadmin-u-d4108abe6359">
           {title}{#if required}<span class="svadmin-u-811148b13d1e">*</span>{/if}
         </label>
-        {#if node.description}<p class="svadmin-u-d058ca6de60f svadmin-u-bfa603190748">{node.description}</p>{/if}
+        {#if node.description}<p id={descriptionId} class="svadmin-u-d058ca6de60f svadmin-u-bfa603190748">{node.description}</p>{/if}
         {#if options}
-          <select id={id} name={path.join('.')} disabled={fieldLocked} aria-invalid={error ? 'true' : undefined} aria-describedby={error ? `${id}-error` : undefined} required={required} value={enumIndex(current, options) < 0 ? '' : enumToken(enumIndex(current, options))} onchange={(event) => writePath(path, enumValue(event.currentTarget.value, options))} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529">
+          <select id={id} name={path.join('.')} disabled={fieldLocked} aria-invalid={error ? 'true' : undefined} aria-describedby={[descriptionId, errorId].filter(Boolean).join(' ') || undefined} required={required} value={enumIndex(current, options) < 0 ? '' : enumToken(enumIndex(current, options))} onchange={(event) => writePath(path, enumValue(event.currentTarget.value, options))} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529">
             <option value="">{i18n.t('common.selectOption')}</option>
             {#each options as option, index (index)}<option value={enumToken(index)}>{String(option)}</option>{/each}
           </select>
         {:else if node.type === 'null'}
-          <input id={id} disabled={fieldLocked} type="text" value="null" readonly />
+          <input id={id} disabled={fieldLocked} aria-invalid={error ? 'true' : undefined} aria-describedby={[descriptionId, errorId].filter(Boolean).join(' ') || undefined} type="text" value="null" readonly />
         {:else if type === 'boolean'}
-          <input id={id} name={path.join('.')} disabled={fieldLocked} aria-invalid={error ? 'true' : undefined} aria-describedby={error ? `${id}-error` : undefined} type="checkbox" checked={Boolean(current)} onchange={(event) => writePath(path, event.currentTarget.checked)} />
+          <input id={id} name={path.join('.')} disabled={fieldLocked} aria-invalid={error ? 'true' : undefined} aria-describedby={[descriptionId, errorId].filter(Boolean).join(' ') || undefined} type="checkbox" checked={Boolean(current)} onchange={(event) => writePath(path, event.currentTarget.checked)} />
         {:else if type === 'number' || type === 'integer'}
-          <input id={id} name={path.join('.')} disabled={fieldLocked} aria-invalid={error ? 'true' : undefined} aria-describedby={error ? `${id}-error` : undefined} type="number" step={type === 'integer' ? 1 : 'any'} min={node.minimum} max={node.maximum} required={required} value={current == null ? '' : String(current)} oninput={(event) => writeNumber(path, event.currentTarget)} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529" />
+          <input id={id} name={path.join('.')} disabled={fieldLocked} aria-invalid={error ? 'true' : undefined} aria-describedby={[descriptionId, errorId].filter(Boolean).join(' ') || undefined} type="number" step={type === 'integer' ? 1 : 'any'} min={node.minimum} max={node.maximum} required={required} value={current == null ? '' : String(current)} oninput={(event) => writeNumber(path, event.currentTarget)} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529" />
         {:else}
-          <input id={id} name={path.join('.')} disabled={fieldLocked} aria-invalid={error ? 'true' : undefined} aria-describedby={error ? `${id}-error` : undefined} type="text" minlength={node.minLength} maxlength={node.maxLength} required={required} value={String(current ?? '')} oninput={(event) => writePath(path, event.currentTarget.value)} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529" />
+          <input id={id} name={path.join('.')} disabled={fieldLocked} aria-invalid={error ? 'true' : undefined} aria-describedby={[descriptionId, errorId].filter(Boolean).join(' ') || undefined} type="text" minlength={node.minLength} maxlength={node.maxLength} required={required} value={String(current ?? '')} oninput={(event) => writePath(path, event.currentTarget.value)} class="svadmin-u-ed8a5df7b2fb svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-d5eab218aa34 svadmin-u-359090c2d529" />
         {/if}
-        {#if error}<p id={`${id}-error`}>{i18n.t('validation.invalidFormat')}</p>{/if}
+        {#if error}<p id={errorId}>{i18n.t('validation.invalidFormat')}</p>{/if}
       </div>
     {/if}
   {/snippet}

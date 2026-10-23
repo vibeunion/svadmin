@@ -14,6 +14,7 @@
   }
 </script>
 <script lang="ts">
+  import { untrack } from 'svelte';
   import { captureAdminContext } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { Button } from '../ui/button/index.js';
@@ -33,27 +34,29 @@
   let loading = $state(false);
   let sending = $state(false);
   let error = $state('');
-  let loadError = $state('');
+  let requestError = $state(false);
+  let loadError = $state(false);
   let status = $state('');
   let epoch = 0;
   const filtered = $derived(rows.filter(row => `${row.name} ${row.email}`.toLowerCase().includes(query.toLowerCase())));
   async function load() {
+    if (untrack(() => sending)) return;
     const current = provider;
     const request = ++epoch;
-    rows = []; loadError = ''; loading = Boolean(current);
+    rows = []; loadError = false; requestError = false; loading = Boolean(current);
     if (!current) return;
     try {
       const result = await current.list();
       if (request === epoch) rows = result;
-    } catch (caught) {
-      if (request === epoch) loadError = caught instanceof Error ? caught.message : String(caught);
+    } catch {
+      if (request === epoch) loadError = true;
     } finally {
       if (request === epoch) loading = false;
     }
   }
   $effect(() => {
     void provider; void context.authProvider; void context.tenantCacheKey?.__svadminTenant;
-    email = ''; query = ''; error = ''; status = ''; sending = false;
+    email = ''; query = ''; error = ''; requestError = false; status = ''; sending = false;
     void load();
     return () => { epoch += 1; };
   });
@@ -61,6 +64,7 @@
     event.preventDefault();
     const current = provider;
     if (!current?.invite || sending || loading) return;
+    requestError = false;
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       error = isZh ? '请输入有效邮箱' : 'Enter a valid email address';
       return;
@@ -72,8 +76,8 @@
       if (request !== epoch) return;
       email = '';
       status = isZh ? '邀请已提交' : 'Invitation submitted';
-    } catch (caught) {
-      if (request === epoch) error = caught instanceof Error ? caught.message : String(caught);
+    } catch {
+      if (request === epoch) requestError = true;
     } finally {
       if (request === epoch) sending = false;
     }
@@ -81,7 +85,7 @@
   async function copyLink() {
     if (!provider?.invitationUrl) return;
     const request = epoch;
-    status = ''; error = '';
+    status = ''; error = ''; requestError = false;
     try {
       await navigator.clipboard.writeText(provider.invitationUrl);
       if (request === epoch) status = isZh ? '链接已复制' : 'Link copied';
@@ -108,12 +112,12 @@
     <p class="text-sm text-muted-foreground">{isZh ? '当前目录为只读，未配置邀请发送能力。' : 'This directory is read-only. Invitation delivery is not configured.'}</p>
   {/if}
   {#if provider.invitationUrl}<div><Button variant="outline" onclick={copyLink}><Copy size={16} />{i18n.t('account.copyLink')}</Button></div>{/if}
-  {#if error}<p role="alert" class="text-sm text-destructive">{error}</p>{/if}
+  {#if requestError || error}<p role="alert" class="text-sm text-destructive">{requestError ? i18n.t('common.operationFailed') : error}</p>{/if}
   {#if status}<p role="status" class="text-sm text-foreground">{status}</p>{/if}
   {#if loading}
     <DataState state="loading" />
   {:else if loadError}
-    <DataState state="error" description={loadError} retry={load} />
+    <DataState state="error" description={i18n.t('common.operationFailed')} {...(sending ? {} : { retry: load })} />
   {:else}
     <div class="w-full max-w-sm space-y-2">
       <label for={`${controlId}-search`} class="block text-sm font-medium text-foreground">{isZh ? '搜索成员' : 'Search members'}</label>

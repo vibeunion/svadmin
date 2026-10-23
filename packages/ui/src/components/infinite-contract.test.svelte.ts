@@ -1,5 +1,5 @@
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Type } from 'typebox';
 import { QueryClient } from '@tanstack/svelte-query';
 import { flushSync, type ComponentProps } from 'svelte';
@@ -43,6 +43,13 @@ function deferred<T = GetListResult>() {
 }
 
 const clients: QueryClient[] = [];
+const animateDescriptor = Object.getOwnPropertyDescriptor(Element.prototype, 'animate');
+beforeEach(() => {
+  Object.defineProperty(Element.prototype, 'animate', {
+    configurable: true,
+    value: () => ({ cancel: () => {}, finished: Promise.resolve() }),
+  });
+});
 function mount(source = provider(), context: Partial<Omit<ComponentProps<typeof Host>, 'provider' | 'resources' | 'queryClient' | 'onReady'>> = {}) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity } } });
   clients.push(client);
@@ -66,6 +73,8 @@ afterEach(() => {
   resetContext();
   resetLogoutVersion();
   vi.restoreAllMocks();
+  if (animateDescriptor) Object.defineProperty(Element.prototype, 'animate', animateDescriptor);
+  else Reflect.deleteProperty(Element.prototype, 'animate');
 });
 
 describe('checked pagination states and authentication', () => {
@@ -541,6 +550,83 @@ describe('contract-bound infinite lists', () => {
     expect(getList.mock.calls[1]?.[0]).toMatchObject({
       pagination: { current: 1, pageSize: 3 },
       filters: [{ field: 'title', operator: 'eq', value: 'Filtered' }],
+    });
+  });
+
+  it('does not reuse a row DOM instance when filters replace the record identity', async () => {
+    const getList = vi.fn<DataProvider['getList']>(async params => ({
+      data: params.filters?.length
+        ? [{ id: 2, title: 'Filtered' }]
+        : [{ id: 1, title: 'First' }],
+      total: 1,
+    }));
+    const app = mount(provider(getList), { showList: true, interactiveRows: true });
+    await waitFor(() => expect(app.view.getByTestId('row').textContent).toBe('First'));
+    const draft = app.view.getByRole('textbox', { name: 'Draft 1' });
+    await fireEvent.input(draft, { target: { value: 'local draft' } });
+    await app.view.rerender({ filters: [{ field: 'title', operator: 'eq', value: 'Filtered' }] });
+    await waitFor(() => expect(app.view.getByTestId('row').textContent).toBe('Filtered'));
+    expect((app.view.getByRole('textbox', { name: 'Draft 2' }) as HTMLInputElement).value).toBe('');
+    expect(app.view.queryByRole('textbox', { name: 'Draft 1' })).toBeNull();
+  });
+
+  it('keeps overlapping page records as distinct rows without duplicate keys', async () => {
+    const getList = vi.fn<DataProvider['getList']>(async () => ({
+      data: [{ id: 1, title: 'Repeated' }], total: 2,
+    }));
+    const app = mount(provider(getList), { showList: true, pageSize: 1 });
+    await waitFor(() => expect(app.view.getAllByTestId('row')).toHaveLength(1));
+    await app.read().query.fetchNextPage();
+    await waitFor(() => expect(app.view.getAllByTestId('row')).toHaveLength(2));
+    expect(app.view.getAllByTestId('row').map(row => row.textContent)).toEqual(['Repeated', 'Repeated']);
+  });
+
+  it('keeps draft input identity with its record across a refresh reorder', async () => {
+    const getList = vi.fn<DataProvider['getList']>()
+      .mockResolvedValueOnce({ data: [{ id: 1, title: 'First' }, { id: 2, title: 'Second' }], total: 2 })
+      .mockResolvedValue({ data: [{ id: 2, title: 'Second updated' }, { id: 1, title: 'First updated' }], total: 2 });
+    const app = mount(provider(getList), { showList: true, interactiveRows: true, pageSize: 2 });
+    const draft = await app.view.findByRole('textbox', { name: 'Draft 1' });
+    await fireEvent.input(draft, { target: { value: 'local draft' } });
+    await app.read().query.refetch();
+    await waitFor(() => expect(app.view.getAllByTestId('row').map(row => row.textContent))
+      .toEqual(['Second updated', 'First updated']));
+    expect(app.view.getByRole('textbox', { name: 'Draft 1' })).toBe(draft);
+    expect((app.view.getByRole('textbox', { name: 'Draft 1' }) as HTMLInputElement).value).toBe('local draft');
+    expect((app.view.getByRole('textbox', { name: 'Draft 2' }) as HTMLInputElement).value).toBe('');
+  });
+
+  it('does not give a replacement record the removed record draft during refresh', async () => {
+    const getList = vi.fn<DataProvider['getList']>()
+      .mockResolvedValueOnce({ data: [{ id: 1, title: 'First' }], total: 1 })
+      .mockResolvedValue({ data: [{ id: 2, title: 'Replacement' }], total: 1 });
+    const app = mount(provider(getList), { showList: true, interactiveRows: true });
+    const draft = await app.view.findByRole('textbox', { name: 'Draft 1' });
+    await fireEvent.input(draft, { target: { value: 'local draft' } });
+    await app.read().query.refetch();
+    const replacement = await app.view.findByRole('textbox', { name: 'Draft 2' });
+    expect(replacement).not.toBe(draft);
+    expect((replacement as HTMLInputElement).value).toBe('');
+  });
+
+  it.each(['tenant', 'provider'] as const)('discards same-ID drafts on a return to a cached %s scope', async kind => {
+    const getList = vi.fn<DataProvider['getList']>(async () => ({ data: [{ id: 1, title: 'Record' }], total: 1 }));
+    const firstProvider = provider(getList);
+    const secondProvider = provider(getList);
+    const app = mount(firstProvider, { showList: true, interactiveRows: true, tenant: 'first' });
+    const first = await app.view.findByRole('textbox', { name: 'Draft 1' });
+    await fireEvent.input(first, { target: { value: 'first-scope draft' } });
+    await app.view.rerender(kind === 'tenant' ? { tenant: 'second' } : { provider: secondProvider });
+    await waitFor(() => expect(getList).toHaveBeenCalledTimes(2));
+    const second = await app.view.findByRole('textbox', { name: 'Draft 1' });
+    expect(second).not.toBe(first);
+    expect((second as HTMLInputElement).value).toBe('');
+    await fireEvent.input(second, { target: { value: 'second-scope draft' } });
+    await app.view.rerender(kind === 'tenant' ? { tenant: 'first' } : { provider: firstProvider });
+    await waitFor(() => {
+      const restored = app.view.getByRole('textbox', { name: 'Draft 1' });
+      expect(restored).not.toBe(second);
+      expect((restored as HTMLInputElement).value).toBe('');
     });
   });
 
