@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.89.0](https://github.com/vibeunion/svadmin/compare/ui-v0.88.1...ui-v0.89.0) (2026-10-23)
+
+
+### 🚀 Features
+
+* **ui:** record enterprise interaction contracts ([#541](https://github.com/vibeunion/svadmin/issues/541)) ([723001f](https://github.com/vibeunion/svadmin/commit/723001f73f75cbd3863c9c0a20388f8386454471))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** restore main lint and typecheck after enterprise contracts ([#543](https://github.com/vibeunion/svadmin/issues/543)) ([5bd3c70](https://github.com/vibeunion/svadmin/commit/5bd3c7040e98e270b74142d39a5f85f208f9aadf))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/devtools bumped to 0.3.4
+  * devDependencies
+    * @svadmin/ai-elements bumped to 0.12.1
+  * peerDependencies
+    * @svadmin/core bumped to 0.63.0
+
 ## [0.88.1](https://github.com/vibeunion/svadmin/compare/ui-v0.88.0...ui-v0.88.1) (2026-10-21)
 
 

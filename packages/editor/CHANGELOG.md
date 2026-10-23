@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.6.0](https://github.com/vibeunion/svadmin/compare/editor-v0.5.17...editor-v0.6.0) (2026-10-23)
+
+
+### 🚀 Features
+
+* **ui:** record enterprise interaction contracts ([#541](https://github.com/vibeunion/svadmin/issues/541)) ([723001f](https://github.com/vibeunion/svadmin/commit/723001f73f75cbd3863c9c0a20388f8386454471))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * peerDependencies
+    * @svadmin/core bumped to 0.63.0
+
 ## [0.5.17](https://github.com/vibeunion/svadmin/compare/editor-v0.5.16...editor-v0.5.17) (2026-10-20)
 
 
