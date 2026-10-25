@@ -5,7 +5,7 @@
   import { SVAR_SURFACE_CONTEXT, type SvarSurfaceContext } from '../svar-context.js';
   import { decodeSvarGridProps } from '../svar-schema.js';
   import { asRecordArray } from '../widget-data.js';
-  import { resolveSurfaceMessages } from '../localization.js';
+  import { resolveSurfaceMessages, surfaceErrorMessage } from '../localization.js';
 
   let { widgetId, props, data, locale = 'en-US', messages }: SurfaceWidgetRendererProps = $props();
   const host = getContext<SvarSurfaceContext | undefined>(SVAR_SURFACE_CONTEXT);
@@ -26,7 +26,7 @@
   {#if !Grid || !Theme}
     <p role="alert">{locale.startsWith('zh') ? '宿主尚未配置 SVAR 引擎' : 'The host has not configured the SVAR engine'}</p>
   {:else if data.status === 'error'}
-    <p role="alert">{data.error.message}</p>
+    <p role="alert">{surfaceErrorMessage(data.error, labels, labels.tableUnavailable, labels.tableInvalidData)}</p>
   {:else if data.status === 'unbound' || (records && !records.ok)}
     <p role="alert">{labels.tableInvalidData}</p>
   {:else}

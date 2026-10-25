@@ -187,7 +187,8 @@ export type {
 export { assertEnterpriseRequestContext, createEnterpriseRequestContext } from './enterprise';
 export {
   DashboardContractError, decodeDashboardQuery, decodeDashboardSnapshot,
-  type DashboardMetric, type DashboardProvider, type DashboardQuery, type DashboardSnapshot, type DashboardWidget,
+  type DashboardDrilldown, type DashboardMetric, type DashboardProvider, type DashboardQuery,
+  type DashboardSnapshot, type DashboardTimeRange, type DashboardWidget,
 } from './dashboard-contract';
 export { setChatProvider, getChatProvider, setChatContext, getChatContext, setAgentProvider, getAgentProvider, registerApproval, resolveApproval, hasPendingApprovals, resetChatProvider, defineAdminTool, decodeAdminToolArgs, executeAdminTool, projectAdminToolSchema } from './chatProvider.svelte';
 export { ENTERPRISE_MATURITY, enterpriseMaturityFor } from './enterprise-maturity';
@@ -259,8 +260,8 @@ export { snapshotExportTaskResult, downloadExportArtifact, safeArtifactUrl } fro
 export type { ExportTaskResult } from './export-format';
 export type { UseExportOptions } from './export-hooks.svelte';
 export { useImport } from './import-hooks.svelte';
-export type { ImportArtifact, ImportArtifactProvider, ImportTaskResult } from './import-contract';
-export { snapshotImportArtifact, snapshotImportTaskResult } from './import-contract';
+export type { ImportArtifact, ImportArtifactProvider, ImportTaskResult, ImportPreviewFailure, ImportPreviewResult } from './import-contract';
+export { snapshotImportArtifact, snapshotImportTaskResult, invalidImportPreviewFailure } from './import-contract';
 export { IMPORT_LIMITS } from './import-contract';
 export type { UseImportOptions, ImportProgress, ImportResult } from './import-hooks.svelte';
 export type { ExportFormat } from './data-transfer.svelte';

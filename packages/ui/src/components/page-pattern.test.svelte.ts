@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/svelte';
+import { fireEvent, render, screen, within } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
 import { describe, expect, it } from 'vitest';
 import PagePattern from './PagePattern.svelte';
@@ -88,6 +88,26 @@ describe('PagePattern', () => {
     expect(screen.getByRole('table')).toBeTruthy();
     await fireEvent.click(screen.getByRole('button', { name: '下一页' }));
     expect(screen.getByText('材料分析实验室')).toBeTruthy();
+  });
+
+  it('uses a single row-action button and selects only its own record', async () => {
+    const { container } = render(PagePatternExample);
+    const row = screen.getByRole('row', { name: /华东检测中心/ });
+    const rowView = within(row);
+    expect(rowView.getAllByRole('button')).toHaveLength(1);
+    expect(container.querySelector('button button')).toBeNull();
+
+    const trigger = rowView.getByRole('button', { name: '打开 华东检测中心 操作' });
+    await fireEvent.click(trigger);
+    await fireEvent.click(rowView.getByRole('button', { name: '选择记录' }));
+    expect(rowView.getByRole('checkbox')).toHaveProperty('checked', true);
+    expect(screen.getByRole('checkbox', {
+      name: '选择记录 新能源汽车高压电气安全与环境可靠性联合实验室',
+    })).toHaveProperty('checked', false);
+    expect(screen.getByText('已选择 1 条记录')).toBeTruthy();
+
+    await fireEvent.click(trigger);
+    expect(rowView.queryByRole('button', { name: '选择记录' })).toBeNull();
   });
 
   it('recovers from a failed query without exposing a premature success view', async () => {

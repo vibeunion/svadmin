@@ -45,6 +45,7 @@
   let epoch = 0;
   let requestScope: EnterpriseProviderRequestContext | undefined;
   let generatedRequestContext: EnterpriseProviderRequestContext | undefined;
+  let lastTransition: ApprovalTransition | undefined;
   onDestroy(() => { mounted = false; clearTimeout(timer); });
 
   const activeRecord = $derived(records.find(record => record.id === selectedId));
@@ -73,9 +74,14 @@
   }
 
   async function load(): Promise<void> {
+    if (actionPending) return;
     const currentEpoch = ++epoch;
+    lastTransition = undefined;
     loading = true;
     error = undefined;
+    records = [];
+    actionDialog = undefined;
+    actionOpen = false;
     try {
       const scope = resolveRequestContext();
       requestScope = scope;
@@ -124,9 +130,11 @@
   }
 
   function openAction(action: string): void {
+    if (loading || actionPending) return;
     if (!activeRecord?.allowedActions.some(candidate => candidate.id === action)) return;
     actionDialog = action;
     actionOpen = true;
+    error = undefined;
     comment = '';
     targetId = '';
   }
@@ -135,21 +143,30 @@
     const record = activeRecord;
     const action = activeAction;
     const scope = requestScope;
-    if (!record || !action || !scope || !provider.transition || actionPending) return;
+    if (!record || !action || !scope || !provider.transition || actionPending || loading) return;
     let input: ApprovalTransition;
     try {
+      const target = targetId.trim() || undefined;
+      // 原样重试复用标识；不同载荷不能共用幂等键。
+      const previous = lastTransition;
+      const retry = previous?.id === record.id
+        && previous.expectedVersion === record.version
+        && previous.action === action.id
+        && previous.comment === comment
+        && previous.targetId === target;
       input = decodeApprovalTransition({
         id: record.id,
         expectedVersion: record.version,
         action: action.id,
         comment,
-        ...(targetId.trim() ? { targetId: targetId.trim() } : {}),
-        idempotencyKey: `${record.id}:${record.version}:${action.id}:${crypto.randomUUID()}`,
+        ...(target ? { targetId: target } : {}),
+        idempotencyKey: retry ? previous.idempotencyKey : `${record.id}:${record.version}:${action.id}:${crypto.randomUUID()}`,
       }, record);
     } catch {
       error = 'action';
       return;
     }
+    lastTransition = { ...input };
     actionPending = true;
     const actionEpoch = epoch;
     error = undefined;
@@ -160,6 +177,7 @@
         error = 'conflict';
         return;
       }
+      lastTransition = undefined;
       actionDialog = undefined;
       actionOpen = false;
       records = records.map(candidate => candidate.id === receipt.record.id ? receipt.record : candidate);
@@ -201,7 +219,7 @@
     <div>
       <h2>{title ?? i18n.t('approval.title')}</h2>
     </div>
-    <Button type="button" variant="outline" size="sm" aria-label={i18n.t('common.refresh')} onclick={() => void load()}>
+    <Button type="button" variant="outline" size="sm" aria-label={i18n.t('common.refresh')} disabled={loading || actionPending} onclick={() => void load()}>
       <RefreshCw class={loading ? 'svadmin-approval-center__spin' : ''} />
     </Button>
   </header>
@@ -213,7 +231,7 @@
       <Input value={search} oninput={scheduleSearch} placeholder={i18n.t('approval.search')} aria-label={i18n.t('approval.search')} />
     </label>
   </div>
-  {#if error && records.length > 0}
+  {#if error && records.length > 0 && !actionOpen}
     <div role="alert">{i18n.t(`approval.${error}`)}</div>
   {/if}
   <div class="svadmin-approval-center__body" data-svadmin-approval-body>
@@ -293,6 +311,7 @@
           <Input bind:value={targetId} required maxlength={200} />
         </label>
       {/if}
+      {#if error}<div role="alert">{i18n.t(`approval.${error}`)}</div>{/if}
       <Dialog.Footer>
         <Button type="button" variant="outline" onclick={() => { actionOpen = false; actionDialog = undefined; }}>{i18n.t('common.cancel')}</Button>
         <Button type="button" disabled={actionPending || !activeAction || !canSubmit(activeAction)} onclick={() => void submitAction()}>

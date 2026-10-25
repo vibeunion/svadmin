@@ -4,14 +4,14 @@
 
   interface Props {
     value?: string[];
-    name?: string;
+    name?: string | undefined;
     placeholder?: string;
     separator?: string;
     maxItems?: number;
     disabled?: boolean;
     required?: boolean;
     invalid?: boolean;
-    describedby?: string;
+    describedby?: string | undefined;
     ariaLabel?: string;
     class?: string;
     onchange?: (value: string[]) => void;
@@ -78,7 +78,7 @@
 >
   {#if name}
     {#each value as tag (tag)}
-      <input type="hidden" {name} value={tag} />
+      <input type="hidden" {name} value={tag} {disabled} />
     {/each}
   {/if}
   {#each value as tag, index (tag)}

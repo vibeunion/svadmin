@@ -23,6 +23,7 @@
     get sorters() { return settings.sorters; },
     get pagination() { return settings.pagination; },
     get fetchSize() { return settings.fetchSize; },
+    get requestTimeout() { return settings.requestTimeout; },
     get defaultValue() { return settings.defaultValue; },
     get meta() { return settings.meta; },
     get onSearch() { return settings.onSearch; },

@@ -5,7 +5,7 @@
   import StatsCard from '@svadmin/ui/components/StatsCard.svelte';
   import { styledMetricPropsSchema as metricPropsSchema } from '../builtin-schemas.js';
   import type { SurfaceWidgetRendererProps } from '../catalog.js';
-  import { resolveSurfaceMessages } from '../localization.js';
+  import { resolveSurfaceMessages, surfaceErrorMessage } from '../localization.js';
 
   let { widgetId, props, data, locale = 'en-US', messages }: SurfaceWidgetRendererProps = $props();
   const activeMessages = $derived(resolveSurfaceMessages(locale, messages));
@@ -42,7 +42,7 @@
   {:else}
     <div class={"metric-state " + (metricClasses?.state ?? "")} role={data.status === 'error' ? 'alert' : 'status'}>
       <strong>{metricProps.label}</strong>
-      <span>{data.status === 'error' ? data.error.message : data.status === 'empty' ? activeMessages.metricNoData : activeMessages.metricInvalidData}</span>
+      <span>{data.status === 'error' ? surfaceErrorMessage(data.error, activeMessages, activeMessages.providerUnavailable, activeMessages.metricInvalidData) : data.status === 'empty' ? activeMessages.metricNoData : activeMessages.metricInvalidData}</span>
     </div>
   {/if}
 </article>

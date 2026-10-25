@@ -32,6 +32,7 @@
     requestContext: string;
     consumerOpen?: boolean;
     inputValue?: string;
+    recordId?: string;
   }
 
   let {
@@ -45,6 +46,7 @@
     requestContext,
     consumerOpen = true,
     inputValue = '',
+    recordId = 'shared-record',
   }: Props = $props();
 
   let copilotOpen = $state(true);
@@ -82,7 +84,7 @@
 {#if consumer === 'insight'}
   <InsightCard context={requestContext} />
 {:else if consumer === 'audit'}
-  <AuditLogDrawer open={true} resource={requestContext} recordId="shared-record" />
+  <AuditLogDrawer open={true} resource={requestContext} {recordId} />
 {:else if consumer === 'copilot'}
   <CopilotPanel bind:open={copilotOpen} />
 {:else if consumer === 'command'}

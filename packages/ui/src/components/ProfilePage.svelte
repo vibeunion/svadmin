@@ -19,6 +19,7 @@
   let { headingLevel = 'h1' }: { headingLevel?: 'h1' | 'h2' } = $props();
   const i18n = useTranslation();
   const adminContext = captureAdminContext();
+  const controlId = $props.id();
 
   const identity = useGetIdentity();
   const notification = useNotification();
@@ -33,6 +34,7 @@
   let profileSaving = $state(false);
   let profileError = $state('');
   let avatarUploading = $state(false);
+  let avatarError = $state('');
   let fileInput = $state<HTMLInputElement>();
   let currentPassword = $state('');
   let newPassword = $state('');
@@ -46,6 +48,7 @@
     profileSaving = false;
     profileError = '';
     avatarUploading = false;
+    avatarError = '';
     currentPassword = '';
     newPassword = '';
     confirmPassword = '';
@@ -60,6 +63,10 @@
     return epoch === scopeEpoch
       && provider === authProvider
       && scopedTenantIdentity === tenantIdentity;
+  }
+
+  function failureMessage(): string {
+    return i18n.t('common.operationFailed');
   }
 
   $effect(() => {
@@ -93,11 +100,11 @@
         identity.refetch();
         notification.success(i18n.t('common.updateSuccess'), 3000);
       } else {
-        profileError = result.error?.message ?? i18n.t('common.operationFailed');
+        profileError = failureMessage();
       }
-    } catch (e) {
+    } catch {
       if (isActiveScope(epoch, provider, scopedTenantIdentity)) {
-        profileError = e instanceof Error ? e.message : String(e);
+        profileError = failureMessage();
       }
     } finally {
       if (isActiveScope(epoch, provider, scopedTenantIdentity)) profileSaving = false;
@@ -105,15 +112,22 @@
   }
 
   async function handleAvatarChange(e: Event) {
-    const file = (e.target as HTMLInputElement).files?.[0];
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0];
     const provider = authProvider;
-    if (!file || !provider?.updateProfile) return;
+    input.value = '';
+    if (!file || avatarUploading || !provider?.updateProfile) return;
     const epoch = scopeEpoch;
     const scopedTenantIdentity = tenantIdentity;
     avatarUploading = true;
+    avatarError = '';
     try {
       const result = await provider.updateProfile({ avatar: file });
-      if (isActiveScope(epoch, provider, scopedTenantIdentity) && result.success) identity.refetch();
+      if (!isActiveScope(epoch, provider, scopedTenantIdentity)) return;
+      if (result.success) identity.refetch();
+      else avatarError = failureMessage();
+    } catch {
+      if (isActiveScope(epoch, provider, scopedTenantIdentity)) avatarError = failureMessage();
     } finally {
       if (isActiveScope(epoch, provider, scopedTenantIdentity)) avatarUploading = false;
     }
@@ -140,7 +154,7 @@
       newPassword = '';
       confirmPassword = '';
     } else {
-      pwError = result.error?.message ?? i18n.t('common.operationFailed');
+      pwError = failureMessage();
     }
   }
 
@@ -168,6 +182,14 @@
           <Loader2 class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-afbdd13a380e" />
           {i18n.t('common.loading')}
         </div>
+      {:else if identity.error}
+        <Alert.Root variant="destructive">
+          <AlertCircle class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+          <Alert.Description class="svadmin-u-60fbb7713999 svadmin-u-77a2a20e90d4">
+            <span>{failureMessage()}</span>
+            <Button size="sm" variant="outline" onclick={() => { void identity.refetch(); }}>{i18n.t('common.retry')}</Button>
+          </Alert.Description>
+        </Alert.Root>
       {:else if identity.data}
         <div class="svadmin-u-60fbb7713999 svadmin-u-60541e1e26f8 svadmin-u-0d304f904cb0">
           <!-- Avatar -->
@@ -188,6 +210,8 @@
                 class="svadmin-u-da4dbfbc4fdc svadmin-u-7b7df0449b80 svadmin-u-5f22e64f2282 svadmin-u-53bb3a280599 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-7065497e1ca0 svadmin-u-181f3d6c9821 svadmin-u-67d6184a0024 svadmin-u-34516836730d"
                 onclick={() => fileInput?.click()}
                 disabled={avatarUploading}
+                aria-label={i18n.t('account.uploadAvatar')}
+                title={i18n.t('account.uploadAvatar')}
               >
                 {#if avatarUploading}
                   <Loader2 class="svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e svadmin-u-72a4c7cdeef7 svadmin-u-afbdd13a380e" />
@@ -207,11 +231,12 @@
 
           <!-- Info -->
           <div class="svadmin-u-6ed543e2fbbb svadmin-u-36e579c0b41c svadmin-u-7e0b7cdf1a94">
+            {#if avatarError}<p role="alert">{avatarError}</p>{/if}
             {#if editingProfile}
               <div class="svadmin-u-6ed543e2fbbb svadmin-u-2472e9b81a97">
                 <div>
-                  <Label for="edit-name" class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">{i18n.t('profile.name')}</Label>
-                  <Input id="edit-name" bind:value={editName} class="svadmin-u-b6b02c0ebef6" />
+                  <Label for={`${controlId}-edit-name`} class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">{i18n.t('profile.name')}</Label>
+                  <Input id={`${controlId}-edit-name`} bind:value={editName} class="svadmin-u-b6b02c0ebef6" />
                 </div>
                 {#if profileError}
                   <p class="svadmin-u-359090c2d529 svadmin-u-811148b13d1e">{profileError}</p>
@@ -281,14 +306,14 @@
         {/if}
 
         <PasswordInput
-          id="current-password"
+          id={`${controlId}-current-password`}
           label={i18n.t('profile.currentPassword')}
           bind:value={currentPassword}
           autocomplete="current-password"
         />
 
         <PasswordInput
-          id="new-password"
+          id={`${controlId}-new-password`}
           label={i18n.t('profile.newPassword')}
           bind:value={newPassword}
           autocomplete="new-password"
@@ -296,7 +321,7 @@
         />
 
         <PasswordInput
-          id="confirm-new-password"
+          id={`${controlId}-confirm-new-password`}
           label={i18n.t('auth.confirmPassword')}
           bind:value={confirmPassword}
           autocomplete="new-password"

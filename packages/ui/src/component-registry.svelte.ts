@@ -4,7 +4,7 @@
  * Allows users to override any registered component via the `components`
  * prop on `AdminApp`, while providing sensible defaults.
  */
-import { getContext, hasContext, setContext, type Component } from 'svelte';
+import { getContext, hasContext, setContext, type Component, type ComponentProps } from 'svelte';
 import type Layout from './components/Layout.svelte';
 import type Sidebar from './components/Sidebar.svelte';
 import type Header from './components/Header.svelte';
@@ -30,7 +30,7 @@ export interface ComponentRegistry {
   // Pages
   LoginPage: typeof LoginPage;
   AutoTable: typeof AutoTable;
-  AutoForm: typeof AutoForm;
+  AutoForm: Component<ComponentProps<typeof AutoForm>>;
   ShowPage: typeof ShowPage;
   ErrorPage?: typeof ErrorPage;
 

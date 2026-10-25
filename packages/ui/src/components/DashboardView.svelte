@@ -4,7 +4,10 @@
     DashboardContractError, captureAdminContext, captureAuthSession, createEnterpriseRequestContext,
     decodeDashboardQuery, decodeDashboardSnapshot,
   } from '@svadmin/core';
-  import type { DashboardProvider, DashboardSnapshot, EnterpriseProviderRequestContext } from '@svadmin/core';
+  import type {
+    DashboardDrilldown, DashboardMetric, DashboardProvider, DashboardQuery, DashboardSnapshot, DashboardTimeRange,
+    DashboardWidget, EnterpriseProviderRequestContext,
+  } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { onDestroy, untrack } from 'svelte';
   import MetricStrip, { type MetricStripItem } from './MetricStrip.svelte';
@@ -15,15 +18,20 @@
     dashboardId: string;
     requestContext?: EnterpriseProviderRequestContext;
     filters?: readonly { field: string; value: string | number | boolean | null }[];
+    timeRange?: DashboardTimeRange;
+    onDrillDown?: ((input: DashboardDrilldown) => void | Promise<void>) | undefined;
     title?: string;
   }
-  let { provider, dashboardId, requestContext, filters = [], title }: Props = $props();
+  let { provider, dashboardId, requestContext, filters = [], timeRange, onDrillDown, title }: Props = $props();
   const context = captureAdminContext();
   const i18n = useTranslation();
   let snapshot = $state<DashboardSnapshot>();
+  let loadedQuery: DashboardQuery | undefined;
   let loading = $state(false);
   let error = $state<'load' | 'invalid'>();
+  let drillError = $state(false);
   let epoch = 0;
+  let drillSequence = 0;
   let mounted = true;
   let generatedContext: EnterpriseProviderRequestContext | undefined;
   onDestroy(() => { mounted = false; });
@@ -45,13 +53,18 @@
       const request = decodeDashboardQuery({
         dashboardId: dashboardId.trim(),
         ...(filters.length ? { filters: filters.map(filter => ({ ...filter })) } : {}),
+        ...(timeRange ? { timeRange: { from: timeRange.from, to: timeRange.to } } : {}),
       });
+      // 独立保存已校验查询；Provider 可能原位修改传入的 request。
+      const loaded = decodeDashboardQuery(request);
       const result = decodeDashboardSnapshot(await provider.get(resolveContext(), request));
       if (!mounted || currentEpoch !== epoch) return;
       snapshot = result;
+      loadedQuery = loaded;
     } catch (cause) {
       if (!mounted || currentEpoch !== epoch) return;
       snapshot = undefined;
+      loadedQuery = undefined;
       error = cause instanceof DashboardContractError ? 'invalid' : 'load';
     } finally {
       if (mounted && currentEpoch === epoch) loading = false;
@@ -63,14 +76,58 @@
       id: `${widget.id}:${metric.id}`, label: metric.label,
       value: typeof metric.value === 'boolean' ? String(metric.value) : metric.value ?? '—',
       ...(metric.tone ? { tone: metric.tone } : {}),
-      ...(metric.href ? { href: metric.href } : {}),
+      ...(onDrillDown
+        ? { onActivate: () => drillDown(widget, metric) }
+        : metric.href ? { href: metric.href } : {}),
     })) : [],
   ) ?? []);
 
+  function drillDown(widget: DashboardWidget, metric?: DashboardMetric): void {
+    const query = loadedQuery;
+    if (!onDrillDown || !query) return;
+    const currentLoad = epoch;
+    const currentDrill = ++drillSequence;
+    drillError = false;
+    const settle = (failed: boolean): void => {
+      if (!mounted || currentLoad !== epoch || currentDrill !== drillSequence) return;
+      drillError = failed;
+    };
+    const input: DashboardDrilldown = {
+      dashboardId: query.dashboardId,
+      widget: { id: widget.id, title: widget.title, kind: widget.kind },
+      ...(metric ? { metric: { ...metric } } : {}),
+      filters: (query.filters ?? []).map(filter => ({ ...filter })),
+      ...(query.timeRange ? { timeRange: { ...query.timeRange } } : {}),
+    };
+    try {
+      const result = onDrillDown(input);
+      void Promise.resolve(result).then(() => settle(false), () => settle(true));
+    } catch { settle(true); }
+  }
+
+  function trackQueryInputs(): void {
+    for (const filter of filters) {
+      void filter.field;
+      void filter.value;
+    }
+    if (timeRange) {
+      void timeRange.from;
+      void timeRange.to;
+    }
+  }
+
+  // 显式跟踪嵌套查询值；Provider 执行留在下方 untrack 内，避免 effect 重入。
   $effect(() => {
-    void provider; void dashboardId; void requestContext; void filters;
+    void provider; void dashboardId; void requestContext;
+    trackQueryInputs();
     void captureAuthSession(context.authProvider).cacheKey;
-    untrack(() => { snapshot = undefined; void load(); });
+    untrack(() => {
+      drillSequence += 1;
+      drillError = false;
+      snapshot = undefined;
+      loadedQuery = undefined;
+      void load();
+    });
   });
 </script>
 
@@ -82,10 +139,19 @@
     </Button>
   </header>
   {#if loading}<div role="status"><Loader2 aria-hidden="true" /> {i18n.t('common.loading')}</div>
-  {:else if error}<div role="alert">{i18n.t(`dashboard.${error}`)}</div>
+  {:else if error}<div role="alert">{i18n.t(`dashboard.${error}`)}
+    <Button type="button" variant="outline" size="sm" onclick={() => void load()}>{i18n.t('common.retry')}</Button>
+  </div>
   {:else if snapshot}
+    {#if drillError}<div role="alert">{i18n.t('common.operationFailed')}</div>{/if}
     {#each snapshot.widgets.filter(widget => widget.kind === 'text') as widget (widget.id)}
-      <section aria-labelledby={`dashboard-widget-${widget.id}`}><h3 id={`dashboard-widget-${widget.id}`}>{widget.title}</h3><p>{widget.text}</p></section>
+      <section aria-labelledby={`dashboard-widget-${widget.id}`}><h3 id={`dashboard-widget-${widget.id}`}>{widget.title}</h3><p>{widget.text}</p>
+        {#if onDrillDown}
+          <Button type="button" variant="outline" size="sm"
+            aria-label={`${i18n.t('dashboard.drilldown')}: ${widget.title}`}
+            onclick={() => drillDown(widget)}>{i18n.t('dashboard.drilldown')}</Button>
+        {/if}
+      </section>
     {/each}
     <MetricStrip items={metricItems} ariaLabel={title ?? i18n.t('dashboard.metrics')} />
   {:else}<div role="status">{i18n.t('dashboard.empty')}</div>{/if}

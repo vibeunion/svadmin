@@ -52,12 +52,12 @@
 
   const i18n = useTranslation();
   const adminContext = captureAdminContext();
-  const currentQuery = useList({ get resource() { return demoContract(resourceName); }, pagination: { mode: 'off' } });
-  const productsQuery = useList({ resource: demoContracts.products, pagination: { mode: 'off' }, get queryOptions() { return { enabled: ['skus', 'categories', 'suppliers'].includes(resourceName) }; } });
-  const categoriesQuery = useList({ resource: demoContracts.categories, pagination: { mode: 'off' }, get queryOptions() { return { enabled: resourceName === 'products' }; } });
-  const suppliersQuery = useList({ resource: demoContracts.suppliers, pagination: { mode: 'off' }, get queryOptions() { return { enabled: resourceName === 'products' }; } });
-  const usersQuery = useList({ resource: demoContracts.users, pagination: { mode: 'off' }, get queryOptions() { return { enabled: ['project_planning', 'store_admin', 'security_devices', 'referral_invites'].includes(resourceName) }; } });
-  const plansQuery = useList({ resource: demoContracts.billing_plans, pagination: { mode: 'off' }, get queryOptions() { return { enabled: resourceName === 'billing_subscriptions' }; } });
+  const currentQuery = useList({ get resource() { return demoContract(resourceName); }, pagination: { mode: 'off' }, errorNotification: false });
+  const productsQuery = useList({ resource: demoContracts.products, pagination: { mode: 'off' }, errorNotification: false, get queryOptions() { return { enabled: ['skus', 'categories', 'suppliers'].includes(resourceName) }; } });
+  const categoriesQuery = useList({ resource: demoContracts.categories, pagination: { mode: 'off' }, errorNotification: false, get queryOptions() { return { enabled: resourceName === 'products' }; } });
+  const suppliersQuery = useList({ resource: demoContracts.suppliers, pagination: { mode: 'off' }, errorNotification: false, get queryOptions() { return { enabled: resourceName === 'products' }; } });
+  const usersQuery = useList({ resource: demoContracts.users, pagination: { mode: 'off' }, errorNotification: false, get queryOptions() { return { enabled: ['project_planning', 'store_admin', 'security_devices', 'referral_invites'].includes(resourceName) }; } });
+  const plansQuery = useList({ resource: demoContracts.billing_plans, pagination: { mode: 'off' }, errorNotification: false, get queryOptions() { return { enabled: resourceName === 'billing_subscriptions' }; } });
   const sessionUpdate = useUpdateMany({ resource: demoContracts.security_sessions });
   const notificationUpdate = useUpdateMany({ resource: demoContracts.notifications });
   let updatingNotification = $state(false);

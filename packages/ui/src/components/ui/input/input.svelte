@@ -14,7 +14,7 @@
 	type Props = WithElementRef<Omit<HTMLInputAttributes, "type" | "value" | "size">> &
 			{ size?: "default" | "compact"; nativeSize?: number } &
 			(Type extends "file"
-				? { type: "file"; files?: FileList; value?: never }
+				? { type: "file"; files?: FileList | undefined; value?: never }
 				: { type?: Type; files?: undefined; value?: InputValue });
 
 	let {

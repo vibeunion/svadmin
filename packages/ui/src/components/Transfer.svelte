@@ -1,6 +1,7 @@
 <script lang="ts">
   import { SvelteSet } from 'svelte/reactivity';
   import type { Snippet } from 'svelte';
+  import { untrack } from 'svelte';
   import { ChevronRight, ChevronLeft, ChevronsRight, ChevronsLeft, Search } from '@lucide/svelte';
   import { cn } from '../utils.js';
   import { Checkbox } from './ui/checkbox/index.js';
@@ -18,6 +19,10 @@
   const i18n = useTranslation();
 
   interface Props {
+    id?: string;
+    labelledby?: string;
+    describedby?: string;
+    invalid?: boolean;
     dataSource?: TransferItem[];
     targetKeys?: (string | number)[];
     titles?: [string, string];
@@ -33,6 +38,10 @@
   }
 
   let {
+    id,
+    labelledby,
+    describedby,
+    invalid = false,
     dataSource = [],
     targetKeys = $bindable([]),
     titles = ['源列表', '目标列表'],
@@ -45,6 +54,7 @@
 
   let leftSearch = $state('');
   let rightSearch = $state('');
+  let observedSearchable = $state(untrack(() => searchable));
 
   const leftSelected = new SvelteSet<string | number>();
   const rightSelected = new SvelteSet<string | number>();
@@ -58,6 +68,28 @@
   const rightDataSource = $derived(
     dataSource.filter((item) => targetKeySet.has(item.key))
   );
+
+  $effect.pre(() => {
+    const leftKeys = new Set(
+      leftDataSource.filter((item) => !item.disabled).map((item) => item.key)
+    );
+    const rightKeys = new Set(
+      rightDataSource.filter((item) => !item.disabled).map((item) => item.key)
+    );
+    for (const key of leftSelected) {
+      if (!leftKeys.has(key)) leftSelected.delete(key);
+    }
+    for (const key of rightSelected) {
+      if (!rightKeys.has(key)) rightSelected.delete(key);
+    }
+  });
+
+  $effect.pre(() => {
+    if (observedSearchable === searchable) return;
+    observedSearchable = searchable;
+    leftSearch = '';
+    rightSearch = '';
+  });
 
   const filteredLeft = $derived(
     leftDataSource.filter((item) => {
@@ -76,16 +108,19 @@
   );
 
   function toggleLeftSelect(key: string | number) {
+    if (disabled || !leftDataSource.some(item => item.key === key && !item.disabled)) return;
     if (leftSelected.has(key)) leftSelected.delete(key);
     else leftSelected.add(key);
   }
 
   function toggleRightSelect(key: string | number) {
+    if (disabled || !rightDataSource.some(item => item.key === key && !item.disabled)) return;
     if (rightSelected.has(key)) rightSelected.delete(key);
     else rightSelected.add(key);
   }
 
   function toggleAllLeft() {
+    if (disabled) return;
     const selectable = filteredLeft.filter((i) => !i.disabled);
     const allSelected = selectable.length > 0 && selectable.every((i) => leftSelected.has(i.key));
     if (allSelected) {
@@ -96,6 +131,7 @@
   }
 
   function toggleAllRight() {
+    if (disabled) return;
     const selectable = filteredRight.filter((i) => !i.disabled);
     const allSelected = selectable.length > 0 && selectable.every((i) => rightSelected.has(i.key));
     if (allSelected) {
@@ -154,13 +190,24 @@
   }
 </script>
 
-<div class={cn('svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-020ba687fa12 svadmin-u-3960ffc248d9 svadmin-u-1004c0c3954c svadmin-u-6da6a3c3f741', className)} data-testid="transfer">
+<div
+  id={id}
+  role="group"
+  aria-labelledby={labelledby}
+  aria-label={labelledby ? undefined : titles.join(' / ')}
+  aria-describedby={describedby}
+  aria-disabled={disabled || undefined}
+  data-invalid={invalid || undefined}
+  class={cn('svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-020ba687fa12 svadmin-u-3960ffc248d9 svadmin-u-1004c0c3954c svadmin-u-6da6a3c3f741', className)}
+  data-testid="transfer"
+>
   <!-- Left Panel -->
   <div class="svadmin-u-36e579c0b41c svadmin-u-6da6a3c3f741 svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-cef5b893cf23 svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-ff4a6777f1bc">
     <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-65fdbade2025 svadmin-u-c9ed8c5f79ae svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b svadmin-u-2859c861d7de">
       <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
         <Checkbox
-          checked={filteredLeft.length > 0 && filteredLeft.filter((i) => !i.disabled).every((i) => leftSelected.has(i.key))}
+          aria-label={titles[0]}
+          checked={filteredLeft.some((i) => !i.disabled) && filteredLeft.filter((i) => !i.disabled).every((i) => leftSelected.has(i.key))}
           disabled={disabled || filteredLeft.filter((i) => !i.disabled).length === 0}
           onCheckedChange={toggleAllLeft}
         />
@@ -177,6 +224,7 @@
           <Search class="svadmin-u-da4dbfbc4fdc svadmin-u-ecfeb742a3f3 svadmin-u-7a470f4c9b28 svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-bfa603190748" />
           <Input
             type="text"
+            aria-label={titles[0]}
             bind:value={leftSearch}
             placeholder={i18n.t('common.search', undefined) ?? '搜索...'}
             class="svadmin-u-ed8a5df7b2fb svadmin-u-e4af885410fe svadmin-u-aa2c13a5e1b4 svadmin-u-359090c2d529"
@@ -191,7 +239,8 @@
         {@const selected = leftSelected.has(item.key)}
         <div
           role="button"
-          tabindex="0"
+          tabindex={disabled || item.disabled ? -1 : 0}
+          aria-disabled={disabled || item.disabled || undefined}
           class={cn(
             'svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-421ac2be5045 svadmin-u-0b91436debbd svadmin-u-ec0091ee009b svadmin-u-359090c2d529 svadmin-u-ceb69a6b0e5f svadmin-u-34516836730d svadmin-u-7f6912283f11',
             selected ? 'svadmin-u-375dc44df6e9 svadmin-u-20aaf08a7ed1 svadmin-u-2689f3958069' : 'svadmin-u-39f703dbe296 svadmin-u-d4108abe6359',
@@ -206,8 +255,13 @@
           }}
         >
           <Checkbox
+            aria-label={item.title}
             checked={selected}
             disabled={disabled || item.disabled}
+            onclick={(event) => event.stopPropagation()}
+            onkeydown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') event.stopPropagation();
+            }}
             onCheckedChange={() => toggleLeftSelect(item.key)}
           />
           <div class="svadmin-u-7e0b7cdf1a94 svadmin-u-36e579c0b41c">
@@ -281,7 +335,8 @@
     <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-65fdbade2025 svadmin-u-c9ed8c5f79ae svadmin-u-0e17f2bd9074 svadmin-u-03b4dd7f172b svadmin-u-2859c861d7de">
       <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
         <Checkbox
-          checked={filteredRight.length > 0 && filteredRight.filter((i) => !i.disabled).every((i) => rightSelected.has(i.key))}
+          aria-label={titles[1]}
+          checked={filteredRight.some((i) => !i.disabled) && filteredRight.filter((i) => !i.disabled).every((i) => rightSelected.has(i.key))}
           disabled={disabled || filteredRight.filter((i) => !i.disabled).length === 0}
           onCheckedChange={toggleAllRight}
         />
@@ -298,6 +353,7 @@
           <Search class="svadmin-u-da4dbfbc4fdc svadmin-u-ecfeb742a3f3 svadmin-u-7a470f4c9b28 svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-bfa603190748" />
           <Input
             type="text"
+            aria-label={titles[1]}
             bind:value={rightSearch}
             placeholder={i18n.t('common.search', undefined) ?? '搜索...'}
             class="svadmin-u-ed8a5df7b2fb svadmin-u-e4af885410fe svadmin-u-aa2c13a5e1b4 svadmin-u-359090c2d529"
@@ -312,7 +368,8 @@
         {@const selected = rightSelected.has(item.key)}
         <div
           role="button"
-          tabindex="0"
+          tabindex={disabled || item.disabled ? -1 : 0}
+          aria-disabled={disabled || item.disabled || undefined}
           class={cn(
             'svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-421ac2be5045 svadmin-u-0b91436debbd svadmin-u-ec0091ee009b svadmin-u-359090c2d529 svadmin-u-ceb69a6b0e5f svadmin-u-34516836730d svadmin-u-7f6912283f11',
             selected ? 'svadmin-u-375dc44df6e9 svadmin-u-20aaf08a7ed1 svadmin-u-2689f3958069' : 'svadmin-u-39f703dbe296 svadmin-u-d4108abe6359',
@@ -327,8 +384,13 @@
           }}
         >
           <Checkbox
+            aria-label={item.title}
             checked={selected}
             disabled={disabled || item.disabled}
+            onclick={(event) => event.stopPropagation()}
+            onkeydown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') event.stopPropagation();
+            }}
             onCheckedChange={() => toggleRightSelect(item.key)}
           />
           <div class="svadmin-u-7e0b7cdf1a94 svadmin-u-36e579c0b41c">

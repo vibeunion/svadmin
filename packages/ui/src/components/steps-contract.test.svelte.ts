@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, waitFor } from '@testing-library/svelte';
+import { cleanup, fireEvent, render, waitFor, within } from '@testing-library/svelte';
 import { beforeEach, afterEach, describe, it, expect, vi } from 'vitest';
 import { Type } from 'typebox';
 import { QueryClient } from '@tanstack/svelte-query';
@@ -632,6 +632,207 @@ describe('step workflow ownership', () => {
 });
 
 describe('StepsForm consumer', () => {
+  async function mountArrayForm(requireRow = false) {
+    const draft = Type.Object({ rows: Type.Array(Type.Object({ name: Type.String() })) });
+    const contract = defineResource('items', {
+      record: Type.Object({ id: Type.Number(), rows: draft.properties.rows }), create: draft, update: Type.Partial(draft),
+    });
+    const source = provider();
+    source.create = vi.fn(async ({ variables }) => ({ data: { id: 10, ...variables } }));
+    const app = mount(source);
+    await app.view.rerender({
+      resource: 'items', showForm: true,
+      resources: [{ name: 'items', label: 'Items', contract, fields: [
+        { key: 'rows', label: 'Rows', type: 'array', defaultValue: [],
+          ...(requireRow ? { validate: (value: unknown) => Array.isArray(value) && value.length > 0 ? null : 'Add a row' } : {}),
+          subFields: [{ key: 'name', label: 'Item name', type: 'text' }] },
+      ] }],
+      steps: [{ title: 'Items', fields: ['rows'] }, { title: 'Review', fields: [] }],
+    });
+    await app.view.findByRole('button', { name: /^add$/i });
+    return { ...app, source };
+  }
+
+  it('focuses the first actionable compound field when a step cannot advance', async () => {
+    const app = await mountArrayForm(true);
+    const add = app.view.getByRole('button', { name: /^add$/i });
+    await fireEvent.click(app.view.getByRole('button', { name: /^next$/i }));
+    await waitFor(() => expect(document.activeElement).toBe(add));
+    expect(app.source.create).not.toHaveBeenCalled();
+  });
+
+  async function mountFocusForm(focusFields: ResourceDefinition['fields'], order = focusFields.map(field => field.key)) {
+    const shape = {
+      first: Type.Optional(Type.Union([
+        Type.String(), Type.Array(Type.String()), Type.Array(Type.Object({ name: Type.String() })),
+      ])),
+      second: Type.Optional(Type.String()),
+      rows: Type.Optional(Type.Array(Type.Object({ second: Type.String() }))),
+    };
+    const draft = Type.Object(shape);
+    const app = mount();
+    await app.view.rerender({
+      showForm: true, resource: 'focus',
+      resources: [{
+        name: 'focus', label: 'Focus', fields: focusFields,
+        contract: defineResource('focus', {
+          record: Type.Object({ id: Type.Number(), ...shape }), create: draft, update: Type.Partial(draft),
+        }),
+      }],
+      steps: [{ title: 'Fields', fields: order }, { title: 'Review', fields: [] }],
+    });
+    await app.view.findByRole('button', { name: /^next$/i });
+    return app;
+  }
+
+  function invalidFocusField(type: ResourceDefinition['fields'][number]['type'], key = 'first'): ResourceDefinition['fields'][number] {
+    return {
+      key, label: key, type, defaultValue: ['array', 'transfer', 'multiselect', 'images', 'tags', 'cascader'].includes(type) ? [] : 'invalid',
+      validate: () => 'Choose a value',
+      options: [{ label: 'Leaf', value: 'leaf' }],
+      treeOptions: [{ label: 'Leaf', value: 'leaf' }],
+      cascaderOptions: [{ label: 'Leaf', value: 'leaf' }],
+      transferData: [{ key: 'leaf', title: 'Leaf' }],
+      subFields: [{ key: 'name', label: 'Nested name', type: 'text' }],
+    };
+  }
+
+  it.each(['array', 'transfer', 'tree-select', 'treeselect', 'cascader', 'multiselect', 'images', 'tags'] as const)(
+    'focuses an actionable %s control before a later scalar error', async type => {
+      const app = await mountFocusForm([invalidFocusField(type), invalidFocusField('text', 'second')]);
+      await fireEvent.click(app.view.getByRole('button', { name: /^next$/i }));
+      const first = app.view.container.querySelector('[data-svadmin-field-key="first"]');
+      await waitFor(() => expect(first?.contains(document.activeElement)).toBe(true));
+      expect(document.activeElement).not.toBe(first);
+    },
+  );
+
+  it('uses the displayed step order instead of resource field order for first-error focus', async () => {
+    const app = await mountFocusForm(
+      [invalidFocusField('text', 'second'), invalidFocusField('array')], ['first', 'second'],
+    );
+    await fireEvent.click(app.view.getByRole('button', { name: /^next$/i }));
+    await waitFor(() => expect(document.activeElement).toBe(app.view.getByRole('button', { name: /^add$/i })));
+  });
+
+  it('does not treat a valid nested child as the top-level field with the same key', async () => {
+    const app = await mountFocusForm([
+      { key: 'rows', label: 'Rows', type: 'array', defaultValue: [{ second: 'Nested' }],
+        subFields: [{ key: 'second', label: 'Nested second', type: 'text' }] },
+      invalidFocusField('text', 'second'),
+    ]);
+    await fireEvent.click(app.view.getByRole('button', { name: /^next$/i }));
+    await waitFor(() => expect(document.activeElement).toBe(app.view.getByRole('textbox', { name: 'second' })));
+  });
+
+  it('skips unavailable compound controls and focuses the next invalid field', async () => {
+    const app = await mountFocusForm([invalidFocusField('array'), invalidFocusField('text', 'second')]);
+    const first = app.view.container.querySelector('[data-svadmin-field-key="first"]');
+    first?.setAttribute('aria-disabled', 'true');
+    await fireEvent.click(app.view.getByRole('button', { name: /^next$/i }));
+    await waitFor(() => expect(document.activeElement).toBe(app.view.getByRole('textbox', { name: 'second' })));
+  });
+
+  it.each(['body', 'first-legend', 'second-legend', 'nested-first-legend'] as const)(
+    'honors disabled fieldset boundaries for a compound control in %s', async placement => {
+    const app = await mountFocusForm([invalidFocusField('transfer'), invalidFocusField('text', 'second')]);
+    const first = app.view.container.querySelector('[data-svadmin-field-key="first"]');
+    if (!(first instanceof HTMLElement)) throw new Error('Missing first field');
+    const rowControl = first.querySelector<HTMLElement>('[role="button"][tabindex]');
+    if (!rowControl) throw new Error('Missing transfer row');
+    expect(rowControl.matches(':disabled')).toBe(false);
+    const fieldset = document.createElement('fieldset');
+    fieldset.disabled = true;
+    fieldset.append(...first.childNodes);
+    const legend = document.createElement('legend');
+    fieldset.prepend(legend);
+    if (placement === 'first-legend' || placement === 'nested-first-legend') legend.append(rowControl);
+    if (placement === 'second-legend') {
+      const secondLegend = document.createElement('legend');
+      secondLegend.append(rowControl);
+      fieldset.append(secondLegend);
+    }
+    if (placement === 'nested-first-legend') {
+      const outer = document.createElement('fieldset');
+      outer.disabled = true;
+      outer.append(fieldset);
+      first.append(outer);
+    } else {
+      first.append(fieldset);
+    }
+    await fireEvent.click(app.view.getByRole('button', { name: /^next$/i }));
+    const expected = placement === 'first-legend' ? rowControl : app.view.getByRole('textbox', { name: 'second' });
+    await waitFor(() => expect(document.activeElement).toBe(expected));
+  });
+
+  it('isolates error IDs, described-by references and focus for two forms on the same resource', async () => {
+    const apps = [mount(provider(), {}, true), mount(provider(), {}, true)];
+    const ids: string[] = [];
+    for (const app of apps) {
+      const view = within(app.view.container);
+      const title = await view.findByRole('textbox', { name: /^Title/ });
+      await fireEvent.click(view.getByRole('button', { name: /^next$/i }));
+      await waitFor(() => expect(document.activeElement).toBe(title));
+      const errorId = title.getAttribute('aria-describedby');
+      if (!errorId) throw new Error('Missing field error reference');
+      ids.push(errorId);
+      expect(app.view.container.contains(document.getElementById(errorId))).toBe(true);
+      expect(document.getElementById(errorId)?.getAttribute('role')).toBe('alert');
+    }
+    expect(new Set(ids).size).toBe(2);
+  });
+
+  it('returns to an array field rejected by the server and focuses its add action', async () => {
+    const app = await mountArrayForm();
+    vi.mocked(app.source.create).mockRejectedValueOnce({ errors: { rows: 'PRIVATE_ROWS_ERROR' } });
+    await fireEvent.click(app.view.getByRole('button', { name: /^next$/i }));
+    await fireEvent.click(await app.view.findByRole('button', { name: /^save$/i }));
+    const add = await app.view.findByRole('button', { name: /^add$/i });
+    await waitFor(() => expect(document.activeElement).toBe(add));
+    expect(app.view.container.textContent).not.toContain('PRIVATE_ROWS_ERROR');
+    expect(app.source.create).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps array input identity through typing and submits rows after returning from review', async () => {
+    const app = await mountArrayForm();
+    await fireEvent.click(app.view.getByRole('button', { name: /^add$/i }));
+    const input = await app.view.findByRole('textbox', { name: 'Item name' });
+    input.focus();
+    for (const value of ['A', 'AB', 'ABC']) {
+      await fireEvent.input(input, { target: { value } });
+      expect(app.view.getByRole('textbox', { name: 'Item name' })).toBe(input);
+      expect(document.activeElement).toBe(input);
+      expect(input).toHaveProperty('value', value);
+    }
+    await fireEvent.click(app.view.getByRole('button', { name: /^next$/i }));
+    await fireEvent.click(await app.view.findByRole('button', { name: /^back$/i }));
+    expect(await app.view.findByRole('textbox', { name: 'Item name' })).toHaveProperty('value', 'ABC');
+    await fireEvent.click(app.view.getByRole('button', { name: /^next$/i }));
+    await fireEvent.click(await app.view.findByRole('button', { name: /^save$/i }));
+    await waitFor(() => expect(app.source.create).toHaveBeenCalledTimes(1));
+    expect(app.source.create).toHaveBeenCalledWith(expect.objectContaining({ variables: { rows: [{ name: 'ABC' }] } }));
+  });
+
+  it.each(['tenant', 'provider'] as const)('discards accepted array identity after changing %s', async change => {
+    const app = await mountArrayForm();
+    await fireEvent.click(app.view.getByRole('button', { name: /^add$/i }));
+    const oldInput = await app.view.findByRole('textbox', { name: 'Item name' });
+    await fireEvent.input(oldInput, { target: { value: 'Private draft' } });
+    const replacement = provider();
+    replacement.create = vi.fn(async ({ variables }) => ({ data: { id: 10, ...variables } }));
+    await app.view.rerender(change === 'tenant' ? { tenant: 'second' } : { provider: replacement });
+    await waitFor(() => expect(app.view.queryByRole('textbox', { name: 'Item name' })).toBeNull());
+    expect(oldInput.isConnected).toBe(false);
+    await fireEvent.click(app.view.getByRole('button', { name: /^add$/i }));
+    await fireEvent.input(await app.view.findByRole('textbox', { name: 'Item name' }), { target: { value: 'Current' } });
+    await fireEvent.click(app.view.getByRole('button', { name: /^next$/i }));
+    await fireEvent.click(await app.view.findByRole('button', { name: /^save$/i }));
+    const active = change === 'tenant' ? app.source : replacement;
+    await waitFor(() => expect(active.create).toHaveBeenCalledTimes(1));
+    expect(active.create).toHaveBeenCalledWith(expect.objectContaining({ variables: { rows: [{ name: 'Current' }] } }));
+    if (change === 'provider') expect(app.source.create).not.toHaveBeenCalled();
+  });
+
   it('lets the UI own error delegate complete logout after the workflow is hidden', async () => {
     const source = provider();
     source.create = vi.fn(async () => { throw new HttpError('Private failure', 401); });
@@ -709,7 +910,9 @@ describe('StepsForm consumer', () => {
     const title = await app.view.findByRole('textbox', { name: /^Title/ });
     await fireEvent.click(app.view.getByRole('button', { name: /Review/ }));
     await waitFor(() => expect(title.getAttribute('aria-invalid')).toBe('true'));
-    expect(title.getAttribute('aria-describedby')).toBe('posts-step-title-error');
+    const errorId = title.getAttribute('aria-describedby');
+    expect(errorId).toBeTruthy();
+    expect(errorId && app.view.container.contains(document.getElementById(errorId))).toBe(true);
     await waitFor(() => expect(document.activeElement).toBe(title));
     expect(source.create).not.toHaveBeenCalled();
     await fireEvent.input(title, { target: { value: 'Ready' } });

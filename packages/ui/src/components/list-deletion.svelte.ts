@@ -32,6 +32,7 @@ export function createListDeletion(options: ListDeletionOptions) {
   let message = $state('');
   let pending = $state(false);
   let activeDelete: object | undefined;
+  let criteriaVersion = 0;
 
   $effect(() => {
     if (request && !options.permission().isLoading && !options.permission().allowed) {
@@ -66,6 +67,7 @@ export function createListDeletion(options: ListDeletionOptions) {
   }
 
   function cancelBatchOnCriteriaChange(): void {
+    criteriaVersion += 1;
     if (request?.batch && !pending) cancel();
   }
 
@@ -86,6 +88,7 @@ export function createListDeletion(options: ListDeletionOptions) {
       return;
     }
     const scopeIsCurrent = options.captureScope();
+    const confirmedCriteriaVersion = criteriaVersion;
     const token = {};
     activeDelete = token;
     pending = true;
@@ -93,7 +96,10 @@ export function createListDeletion(options: ListDeletionOptions) {
     const clearBeforeMutation = confirmedRequest.batch && getAdminOptions().mutationMode === 'undoable';
     const selectionBeforeDelete = clearBeforeMutation ? selection.captureExplicit() : undefined;
     if (clearBeforeMutation) options.clearSelection();
-    const current = () => activeDelete === token && scopeIsCurrent();
+    const current = () =>
+      activeDelete === token
+      && scopeIsCurrent()
+      && criteriaVersion === confirmedCriteriaVersion;
     try {
       await options.mutate([...confirmedRequest.ids]);
       if (!current()) return;

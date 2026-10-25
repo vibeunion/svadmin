@@ -2,11 +2,11 @@ import { cleanup, fireEvent, render, waitFor, within } from '@testing-library/sv
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Type } from 'typebox';
 import { QueryClient, QueryObserver } from '@tanstack/svelte-query';
-import { defineResource, keys, parseQueryKey, resetContext, setAdminOptions, setAuditHandler, UndoError, HttpError, captureAuthSession, type DataProvider,
+import { keys, parseQueryKey, resetContext, setAdminOptions, setAuditHandler, UndoError, HttpError, captureAuthSession, type DataProvider,
   type GetListResult, type GetOneResult, type ResourceDefinition, type AuthProvider, type AuthActionResult,
   type LiveProvider, type NotificationProvider, type AuditLogProvider } from '@svadmin/core';
 import { getToasts, removeToast, resetToast } from '@svadmin/core/toast';
-import { contractKey } from '../../../core/src/resource-contract';
+import { defineResource, contractKey } from '../../../core/src/resource-contract';
 import { resetLogoutVersion } from '../../../core/src/auth-hooks.svelte';
 import { flushSync } from 'svelte';
 import { definedOptions } from '@svadmin/core/options';

@@ -15,6 +15,7 @@
 
 // ─── Main component ──────────────────────────────────────────────
 export { default as Editor } from './components/Editor.svelte';
+export type { EditorProps } from './components/Editor.svelte';
 
 // ─── Sub-components (for custom layouts) ─────────────────────────
 export { default as Toolbar } from './components/Toolbar.svelte';

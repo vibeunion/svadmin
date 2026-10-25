@@ -55,10 +55,12 @@ import { resetSidebarCollapsed } from './hooks.svelte';
 
 export type { DataProviderInput } from './provider-bundle';
 
-interface AdminContextSourceBase extends Omit<Partial<ProviderBundle>,'dataProvider'> {
+interface AdminContextSourceBase extends Omit<Partial<ProviderBundle>,'dataProvider'|'taskProvider'> {
   readonly resources: ResourceDefinition[];
   /** Tenant for the request tree; inherits the nearest provideTenantContext when omitted. */
-  readonly tenant?: TenantContext;
+  readonly tenant?: TenantContext | undefined;
+  /** Explicit undefined keeps reactive getters assignable under exactOptionalPropertyTypes. */
+  readonly taskProvider?: TaskProvider | undefined;
 }
 
 /** Requires either the legacy dataProvider or a first-class ProviderBundle; matching top-level fields take precedence. */

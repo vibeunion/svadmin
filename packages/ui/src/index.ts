@@ -130,6 +130,7 @@ export { default as ColumnSettings } from './components/ColumnSettings.svelte';
 export type { ColumnItem } from './components/ColumnSettings.svelte';
 export { default as UnsavedChangesPrompt } from './components/UnsavedChangesPrompt.svelte';
 export { default as ImportWizard } from './components/ImportWizard.svelte';
+export type { ImportPreviewFailure, ImportPreviewResult } from '@svadmin/core';
 export { default as ColumnHeaderFilter } from './components/ColumnHeaderFilter.svelte';
 export { default as TreeTable } from './components/TreeTable.svelte';
 export type { TreeTableColumn } from './components/TreeTable.svelte';
@@ -148,6 +149,7 @@ export { default as DrawerForm } from './components/DrawerForm.svelte';
 export { default as TableSummary } from './components/TableSummary.svelte';
 export type { TableSummaryColumn, AggregationType } from './components/TableSummary.svelte';
 export { default as VersionDiffViewer } from './components/VersionDiffViewer.svelte';
+export type { DetailWorkspaceSectionsConfig, DetailWorkspaceSection, DetailWorkspaceProvider, DetailWorkspaceScope, DetailWorkspaceVersionData } from './components/detail-workspace.js';
 export { default as VirtualTable } from './components/VirtualTable.svelte';
 export type { VirtualTableColumn } from './components/VirtualTable.svelte';
 export { default as EditableTable } from './components/EditableTable.svelte';
@@ -174,6 +176,16 @@ export { default as PivotTable } from './components/PivotTable.svelte';
 export type { AggregationFn } from './components/PivotTable.svelte';
 export { default as MultiTabKeepAlive } from './components/MultiTabKeepAlive.svelte';
 export type { WorkspaceTab } from './components/MultiTabKeepAlive.svelte';
+export { createWorkspaceTabStateAdapter } from './components/workspace-tab-state.js';
+export type {
+  WorkspaceTabClearResult,
+  WorkspaceTabIdentity,
+  WorkspaceTabRef,
+  WorkspaceTabStateAdapter,
+  WorkspaceTabStateAdapterOptions,
+  WorkspaceTabStateStorage,
+  WorkspaceTabViewState,
+} from './components/workspace-tab-state.js';
 export { default as GanttChart } from './components/GanttChart.svelte';
 export type { GanttTask } from './components/GanttChart.svelte';
 export { default as CanvasAnnotation } from './components/CanvasAnnotation.svelte';
@@ -190,11 +202,14 @@ export type { PendingMutation } from './components/OfflineSyncBanner.svelte';
 
 export { default as InfiniteList } from './components/InfiniteList.svelte';
 export { default as ComboboxField } from './components/ComboboxField.svelte';
+export { default as AutoComplete } from './components/AutoComplete.svelte';
 export { default as RelationPicker } from './components/RelationPicker.svelte';
 export type { RelationPickerOption } from './components/RelationPicker.svelte';
 export { default as PasswordInput } from './components/PasswordInput.svelte';
 export { default as NumericInput } from './components/NumericInput.svelte';
 export { default as NumberInput } from './components/NumberInput.svelte';
+export { NUMERIC_INPUT_LOCALES, isNumericInputLocale } from './components/numeric-format.js';
+export type { NumericInputLocale, NumericParseResult } from './components/numeric-format.js';
 export { default as MoneyInput } from './components/MoneyInput.svelte';
 export { default as PercentInput } from './components/PercentInput.svelte';
 export { default as DateTimeInput } from './components/DateTimeInput.svelte';

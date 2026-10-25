@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { provideAdminContext, type DataProvider, type ResourceDefinition, type AccessControlProvider } from '@svadmin/core';
+  import { provideAdminContext, type DataProvider, type ResourceDefinition, type AccessControlProvider, type RouterProvider } from '@svadmin/core';
   import { definedReactiveOptions } from '@svadmin/core/options';
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
   import type { ComponentProps } from 'svelte';
@@ -9,6 +9,7 @@
   let {
     provider, resources, queryClient, resourceName = 'posts', tenant = 'first', access,
     tableProps = {}, onBatch = () => {}, onSelection = () => {}, workspaceStyle = 'operations',
+    onNavigate = () => {},
   }: {
     provider: DataProvider;
     resources: ResourceDefinition[];
@@ -20,12 +21,19 @@
     workspaceStyle?: ComponentProps<typeof ResourceOperationsPage>['workspaceStyle'];
     onBatch?: (ids: (string | number)[]) => void;
     onSelection?: (selection: BatchSelection) => void;
+    onNavigate?: RouterProvider['go'];
   } = $props();
   let params = $state<Record<string, string>>({});
+  let pathname = $state('/posts');
   const router = {
-    parse: () => ({ pathname: '/posts', params }),
-    go: (options: { query?: Record<string, string> }) => { params = options.query ?? {}; },
-    back: () => { params = {}; },
+    parse: () => ({ pathname, params }),
+    go: (options: Parameters<RouterProvider['go']>[0]) => {
+      const [path, search = ''] = options.to.split('?');
+      pathname = path || '/posts';
+      params = { ...Object.fromEntries(new URLSearchParams(search)), ...(options.query ?? {}) };
+      onNavigate(options);
+    },
+    back: () => { pathname = '/posts'; params = {}; },
   };
   provideAdminContext(definedReactiveOptions({
     get dataProvider() { return provider; },

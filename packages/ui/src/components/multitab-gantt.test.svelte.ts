@@ -18,8 +18,11 @@ describe('MultiTabKeepAlive and GanttChart Components', () => {
     expect(view.container.textContent).toContain('Dashboard');
     expect(view.container.textContent).toContain('Orders');
     expect(view.getByRole('tablist', { name: 'Workspace tabs' })).toBeTruthy();
-    expect(view.getByRole('tab', { name: 'Dashboard' }).getAttribute('aria-selected')).toBe('true');
-    expect(view.getByRole('button', { name: 'Close Orders' })).toBeTruthy();
+    const dashboardTab = view.getByRole('tab', { name: 'Dashboard' });
+    const closeOrders = view.getByRole('button', { name: 'Close Orders' });
+    expect(dashboardTab.getAttribute('aria-selected')).toBe('true');
+    expect(dashboardTab.querySelector('button')).toBeNull();
+    expect(closeOrders.closest('[role="tab"]')).toBeNull();
   });
 
   it('supports Space activation and names icon-only commands', async () => {

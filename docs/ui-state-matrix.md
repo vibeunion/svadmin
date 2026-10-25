@@ -59,3 +59,75 @@
 完整 UI 使用 `MediaThumbnail`，SSR-first 的 `@svadmin/lite` 使用无跨包依赖的 `LiteMediaThumbnail`。详情字段与编辑字段不再分别维护图片加载和失败样式。
 
 保留直接 `<img>` 的范围仅限明确的专用媒体所有者：头像、租户标识、标题图标和个人资料封面组件。它们具有不同的裁剪、上传或身份语义，不属于通用附件/证据预览，不能为了形式统一而错误抽象。
+
+## MultiTabKeepAlive / WorkspaceTabState
+
+标签栏组件只拥有标签选择/关闭交互；查询、滚动、草稿和路由归真实工作区容器。
+`createWorkspaceTabStateAdapter` 是显式快照契约，不自动读取 DOM 或写浏览器存储。
+
+| 状态 | 触发条件 | 恢复契约 | 隔离/清理契约 |
+| --- | --- | --- | --- |
+| Tab switch | 消费方切换标签 | 离开前 `capture`，进入后 `restore` 查询与滚动 | 快照键为租户 + 标签 id，恢复还要求 path 匹配 |
+| Initial mount | 真实宿主首次挂载 | 按 active 标签从 storage 恢复查询与滚动 | 不依赖切换回调，恢复后仍受租户/标签/path 约束 |
+| Draft tab | 适配器标记草稿 | 真实 `onbeforeclose` 拒绝关闭并保留标签 | 草稿标记清理后同一入口可再次关闭；布尔标记不等于正文恢复 |
+| Persisted snapshot | 注入 storage 且新建适配器 | 完整信封和 query/scroll/draft 值类型严格匹配才恢复 | 脏值、非法 JSON、版本不符按未保存处理，不用 normalize 掩盖 |
+| Closed tab | 标签关闭 | 不恢复旧查询/滚动，select/卸载不重建快照 | `clear` 返回持久化状态；删除失败时同一实例 tombstone 阻止回读，新实例仍可能回读 |
+| Unmount | 消费者宿主卸载 | 先 capture 当前查询/滚动，再释放内存；新宿主同 scope 可恢复 | `dispose` 不删除 storage，持久化生命周期归 storage 所有者 |
+| Scope mismatch | 同 id 换租户或 path | 不返回旧快照 | 防止旧标签状态串租户/标签 |
+| Eviction | 标签数量上限 | 未实现 | 产品未给出上限、LRU 和固定标签优先级，不猜测 |
+
+定向证据：`packages/ui/src/components/workspace-tab-state.test.svelte.ts` 使用真实
+`MultiTabKeepAlive` 消费者宿主；结论与未验收边界见
+`docs/evidence/multitab-state-restore-20261022.md`。另有专属真实浏览器 fixture
+`scripts/fixtures/enterprise-ui/MultiTabStateBrowserFixture.svelte` 与
+`multitab-state.spec.ts`（配置 `playwright.multitab-state.config.ts`），在 Chromium
+desktop/narrow 挂载真实组件与适配器，注入带 `b3-09-fixture:` 前缀的受控 session
+storage；覆盖两标签查询/滚动隔离、切回恢复、冻结标签后草稿关闭保护、关闭后重开不恢复
+旧快照，截图位于 `output/playwright/multitab-state-browser-20261022/`。该 fixture 不是
+真实产品路由、Provider 或生产 storage 验收。
+
+## Surface 数据组件
+
+适用于默认 metric、bar-chart、line-chart、resource-table 和内置 SVAR Grid，
+不自动约束宿主自定义第三方 Widget。
+
+| 状态 | 展示契约 | 恢复与请求契约 |
+| --- | --- | --- |
+| Provider 失败 | 单个组件内显示对应本地化不可用提示，不显示原始诊断 | 宿主通过 `refresh(sourceId)` 显式重试 |
+| 权限拒绝 | 显示“无权访问”，不展示旧记录或旧 Grid | 拒绝期间不读取数据，重新授权后重新读取 |
+| 权限检查异常 | 显示数据不可用，不伪装成确定的拒绝 | 保留原有核心错误归一化和回调契约 |
+| 无效返回或绑定缺失 | 显示对应数据无效，不伪装为空数据或零 | 修复源数据或绑定后恢复 |
+| 错误期间切换语言/标题 | 安全文案与标题响应变化 | 不产生额外读取，不重复上报同一错误 |
+| 刷新途中撤权 | 立即隐藏旧记录与 Grid | 迟到结果不能恢复旧数据 |
+| 查询恢复 | 移除错误并显示真实组件数据 | 失败重试不影响未指定的源；宿主负责提交中的入口禁用 |
+
+Surface 包内定向测试验证分源重试和诊断回调；SVAR 的
+`scripts/fixtures/svar-grid/surface.spec.ts` 使用真实引擎与受控 HTTP 响应，
+验证首次/再次失败、恢复、撤权和重新授权。当前证据与未覆盖边界见
+`docs/evidence/surface-query-feedback-20261021.md`。
+
+## 数值公共入口
+
+`NumberInput`、`MoneyInput`、`PercentInput` 必须在包装层保留 `bind:value`，
+不能只透传 `value` 而让父级状态停留在旧值。
+
+| 状态/动作 | 值契约 | 回调契约 |
+| --- | --- | --- |
+| 用户输入数字 | 父级同步为 `number`，金额保持原单位 | 每次输入一次 `onchange` |
+| 用户清空 | 父级为 `null`，显示空输入 | 一次 `onchange(null)` |
+| 用户输入零 | 父级为数字 `0`，显示零而不是空 | 一次 `onchange(0)` |
+| 父级赋值/清空 | 控件响应父值，清空显示为空 | 不额外调用输入回调 |
+| 百分比 `scale="1"` | 界面 `25` 对应父值 `0.25` | 不在包装层重复换算 |
+| `precision` | 仅决定展示位数，夹取到 `0..20`；存储值不舍入 | 回调收到未舍入数值 |
+| `step` 缺省 | 由精度推导 `10 ** -precision`；`scale="1"` 百分比为 `1` | 不在包装层改写用户输入 |
+| 不传 `locale` | 保持原 `type="number"` 展示与解析 | 默认行为兼容，不启用区域格式 |
+| `locale` 三值集合 | 仅 `en-US`/`de-DE`/`zh-CN`；展示使用 `Intl.NumberFormat` 千分位与区域小数符 | 解析剥离分组符，混合分隔符不写值、不回调、不泄露原始错误 |
+| 区域编辑/失焦 | 聚焦展示无千分位编辑文本；失焦恢复区域格式；空串仍为 `null`，`0` 仍为零 | 父值同步不伪造回调；金额单位与百分比缩放不变 |
+| 其他 locale / 输入法 / OS 剪贴板 | 未承诺；字段上的未支持 locale 回退默认路径 | 不把 `Intl` 支持范围自动视为已验收 |
+
+当前包内及三视口浏览器证据见
+`docs/evidence/numeric-input-binding-20261021.md`；精度、步进与非法值忽略的
+源码契约复核见 `docs/evidence/numeric-input-contract-20261023.md`；显式 locale
+展示/解析与真实浏览器三引擎两视口证据见
+`docs/evidence/numeric-input-locale-20261023.md`。输入法组合输入、真实读屏和
+操作系统剪贴板仍不由上述用例外推为已支持。

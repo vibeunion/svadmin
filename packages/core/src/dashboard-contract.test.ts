@@ -28,6 +28,50 @@ describe('dashboard contract', () => {
     expect(() => decodeDashboardQuery({ dashboardId: 'home', extra: true })).toThrow();
   });
 
+  test('validates and detaches an explicit dashboard time range', () => {
+    const timeRange = { from: '2026-10-01T00:00:00Z', to: '2026-10-31T23:59:59Z' };
+    const result = decodeDashboardQuery({ dashboardId: 'home', timeRange });
+    expect(result.timeRange).toEqual(timeRange);
+    requireValue(result.timeRange).from = '2026-09-01T00:00:00Z';
+    expect(timeRange.from).toBe('2026-10-01T00:00:00Z');
+    expect(() => decodeDashboardQuery({
+      dashboardId: 'home', timeRange: { from: timeRange.to, to: timeRange.from },
+    })).toThrow();
+    expect(() => decodeDashboardQuery({
+      dashboardId: 'home', timeRange: { from: '2026-10-01T00:00:00+08:00', to: timeRange.to },
+    })).toThrow();
+    expect(() => decodeDashboardQuery({
+      dashboardId: 'home', timeRange: { from: timeRange.from, to: timeRange.to, timezone: 'Asia/Shanghai' },
+    })).toThrow();
+  });
+
+  test('rejects nonexistent calendar instants and 24:00', () => {
+    const to = '2027-01-01T00:00:00Z';
+    for (const from of [
+      '2026-02-29T00:00:00Z',
+      '2026-02-30T00:00:00Z',
+      '2026-04-31T00:00:00Z',
+      '1900-02-29T00:00:00Z',
+      '2026-10-01T24:00:00Z',
+      '2026-10-01T23:60:00Z',
+      '2026-10-01T23:59:60Z',
+    ]) {
+      expect(() => decodeDashboardQuery({ dashboardId: 'home', timeRange: { from, to } })).toThrow();
+    }
+  });
+
+  test('accepts real leap days and bounded fractional seconds', () => {
+    const result = decodeDashboardQuery({
+      dashboardId: 'home',
+      timeRange: { from: '2024-02-29T00:00:00.1Z', to: '2024-02-29T23:59:59.999Z' },
+    });
+    expect(result.timeRange?.from).toBe('2024-02-29T00:00:00.1Z');
+    expect(() => decodeDashboardQuery({
+      dashboardId: 'home',
+      timeRange: { from: '2000-02-29T00:00:00Z', to: '2000-02-29T23:59:59Z' },
+    })).not.toThrow();
+  });
+
   test('detaches a valid snapshot', () => {
     const result = decodeDashboardSnapshot(snapshot);
     requireValue(requireValue(result.widgets[0]).metrics[0]).label = 'Changed';
