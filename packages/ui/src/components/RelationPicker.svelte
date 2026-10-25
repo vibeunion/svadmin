@@ -69,6 +69,7 @@
   const scope = $derived({
     resource,
     contract: binding.resource,
+    providerName: binding.dataProviderName,
     provider: context.providers?.[binding.dataProviderName],
     meta: JSON.stringify(binding.meta),
     access: context.accessControlProvider,
@@ -80,6 +81,24 @@
     filters,
     sorters,
   });
+  function sameScope(left: typeof scope | undefined, right: typeof scope | undefined): boolean {
+    if (!left || !right) return left === right;
+    return left.resource === right.resource
+      && left.contract === right.contract
+      && left.providerName === right.providerName
+      && left.provider === right.provider
+      && left.meta === right.meta
+      && left.access === right.access
+      && left.authProvider === right.authProvider
+      && left.tenant === right.tenant
+      && left.auth === right.auth
+      && left.optionLabel === right.optionLabel
+      && left.normalizedFetchSize === right.normalizedFetchSize
+      && left.filters === right.filters
+      && left.sorters === right.sorters;
+  }
+  let observedScope = $state.raw(untrack(() => scope));
+  let observedSearchable = $state(untrack(() => searchable));
   let valueInvalidated = $state(false);
   const selectedValues = $derived(allowed && !valueInvalidated ? normalizedValues(value) : []);
   const select = useSelect(definedReactiveOptions({
@@ -98,12 +117,14 @@
     get sorters() { return sorters; },
     get filters() { return [...filters, ...searchFilters]; },
     get defaultValue() { return selectedValues; },
-    get queryOptions() { return { enabled: allowed }; },
+    // 查询会先于清理 effect 重算，旧草稿不得先发送给新作用域。
+    get queryOptions() {
+      return { enabled: allowed && sameScope(observedScope, scope) && observedSearchable === searchable };
+    },
     get projectionKey() { return `relation-picker:${String(optionLabel)}:id`; },
   }));
 
   let loaded = $state.raw<{ scope: typeof scope; search: string; options: RelationPickerOption[] }>();
-  let observedScope = untrack(() => scope);
   let observedValue = untrack(() => value);
   let observedAllowed = untrack(() => allowed);
   let draftScope = $state.raw<typeof scope>();
@@ -123,7 +144,7 @@
     const currentScope = scope;
     const previous = untrack(() => loaded);
     const options = new Map<string | number, RelationPickerOption>(
-      page > 1 && previous?.scope === currentScope && previous.search === appliedSearch
+      page > 1 && previous && sameScope(previous.scope, currentScope) && previous.search === appliedSearch
         ? previous.options.map(option => [option.value, option]) : [],
     );
     for (const option of data.options) options.set(option.value, option);
@@ -133,7 +154,7 @@
   const availableOptions = $derived.by(() => {
     if (!allowed || select.isError) return [];
     const options = new Map<string | number, RelationPickerOption>();
-    if (loaded?.scope === scope && loaded.search === appliedSearch) {
+    if (loaded && sameScope(loaded.scope, scope) && loaded.search === appliedSearch) {
       for (const option of loaded.options) options.set(option.value, option);
     }
     for (const option of select.options) options.set(option.value, option);
@@ -152,7 +173,7 @@
   }
 
   function toggle(item: string | number): void {
-    if (disabled || !allowed || !open || draftScope !== scope || select.isError
+    if (disabled || !allowed || !open || !sameScope(draftScope, scope) || select.isError
       || select.isFetching || searchText !== appliedSearch) return;
     if (!multiple) {
       draftValues = [item];
@@ -165,16 +186,17 @@
   }
 
   function commit(): void {
-    if (disabled || !allowed || !open || draftScope !== scope || select.isError
+    if (disabled || !allowed || !open || !sameScope(draftScope, scope) || select.isError
       || select.isFetching || searchText !== appliedSearch) return;
     const next = [...draftValues];
     onchange?.(multiple ? next : next[0] ?? null);
-    open = false;
-    resetSearch();
+    cancel();
   }
 
   function cancel(): void {
     open = false;
+    draftValues = [];
+    draftScope = undefined;
     resetSearch();
   }
 
@@ -198,7 +220,7 @@
     clearTimeout(timer);
     const origin = scope;
     timer = setTimeout(() => {
-      if (origin !== scope || disabled || !allowed || !open) return;
+      if (!sameScope(origin, scope) || disabled || !allowed || !open) return;
       appliedSearch = searchText;
       page = 1;
       loaded = undefined;
@@ -211,12 +233,18 @@
   }
 
   $effect.pre(() => {
+    if (observedSearchable === searchable) return;
+    observedSearchable = searchable;
+    resetSearch();
+  });
+
+  $effect.pre(() => {
     const currentScope = scope;
     const currentValue = value;
     const currentAllowed = allowed;
     const currentDisabled = disabled;
     untrack(() => {
-      if (observedScope !== currentScope || (observedAllowed && !currentAllowed)) {
+      if (!sameScope(observedScope, currentScope) || (observedAllowed && !currentAllowed)) {
         observedScope = currentScope;
         valueInvalidated = true;
         draftValues = [];
@@ -261,7 +289,7 @@
     {/if}
   </div>
 
-  <Dialog.Root bind:open>
+  <Dialog.Root bind:open onOpenChange={(next) => { if (!next) cancel(); }}>
     <Dialog.Content class="svadmin-relation-picker__dialog" aria-label={title ?? i18n.t('common.selectOption')}>
       <Dialog.Header>
         <Dialog.Title>{title ?? i18n.t('common.selectOption')}</Dialog.Title>

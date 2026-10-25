@@ -14,9 +14,11 @@
   import TaskProgressBar from './TaskProgressBar.svelte';
   import RetryTaskButton from './RetryTaskButton.svelte';
   import CancelTaskButton from './CancelTaskButton.svelte';
+  import DataState from './content/DataState.svelte';
   import {
     canCancelTask,
     canRetryTask,
+    formatTaskDate,
     resolveTaskMessage,
     resolveTaskProgress,
     resolveTaskTitle,
@@ -58,7 +60,11 @@
     onSelect?: (task: TaskRecord) => void;
   }>();
 
+  const hasReadCapability = $derived(typeof (dlq ? taskProvider?.listDlq : taskProvider?.list) === 'function');
+  const readUnavailable = $derived(useProviderData && !hasReadCapability);
+  const canRead = $derived(useProviderData && hasReadCapability && queryOptions?.enabled !== false);
   const query = useTaskList({
+    errorNotification: false,
     get params() {
       return params;
     },
@@ -69,7 +75,7 @@
       return taskProvider;
     },
     get queryOptions() {
-      return { enabled: useProviderData && !!taskProvider, ...queryOptions };
+      return { ...queryOptions, enabled: canRead };
     },
   });
 
@@ -81,31 +87,59 @@
     }
   });
   const resolvedTasks = $derived(view.data);
+  const keyedTasks = $derived.by(() => {
+    const occurrences = new Map<string, number>();
+    return resolvedTasks.map(task => {
+      const occurrence = occurrences.get(task.id) ?? 0;
+      occurrences.set(task.id, occurrence + 1);
+      return { task, key: JSON.stringify([task.id, occurrence]) };
+    });
+  });
   const resolvedTitle = $derived(title ?? (dlq ? i18n.t('task.dlqTitle') : i18n.t('task.listTitle')));
   const resolvedEmptyText = $derived(emptyText ?? (dlq ? i18n.t('task.noDlq') : i18n.t('task.noTasks')));
 
-  function formatDate(value: unknown) {
-    if (typeof value !== 'string' || !value) return '—';
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return '—';
-    return date.toLocaleString();
+  function retryRead(): void {
+    if (!canRead || query.isFetching) return;
+    void query.refetch({ cancelRefetch: false });
   }
+
+  function selectRow(event: MouseEvent, task: TaskRecord): void {
+    if (event.target instanceof Element
+      && event.target.closest('button, a, input, select, textarea, [role="button"]')) return;
+    onSelect?.(task);
+  }
+
 </script>
 
 <Card.Root class="svadmin-u-6ee2d41e2d2d svadmin-u-438b2237b8d6">
   <Card.Header class="svadmin-u-7fcf9124b5df">
     <Card.Title class="svadmin-u-4ee734926ff6">{resolvedTitle}</Card.Title>
+    {#if !readUnavailable}
       <Card.Description>
       {#if useProviderData && taskProvider}
         {i18n.t('task.count', { count: (query.data?.total ?? resolvedTasks.length) || 0 })}
       {:else}
         {i18n.t('task.count', { count: resolvedTasks.length })}
       {/if}
-    </Card.Description>
+      </Card.Description>
+    {/if}
   </Card.Header>
   <Card.Content class="svadmin-u-9335c39f6eff">
-    {#if view.invalid || (useProviderData && query.isError)}
+    {#if view.invalid}
       <p role="alert">{i18n.t('validation.invalidFormat')}</p>
+    {:else if readUnavailable}
+      <DataState
+        state="error"
+        title={i18n.t('common.configRequired')}
+        description={i18n.t(dlq ? 'task.dlqUnavailable' : 'task.listUnavailable')}
+      />
+    {:else if useProviderData && query.isError}
+      <DataState
+        state="error"
+        title={i18n.t('common.error')}
+        description={i18n.t('task.fetchListFailed')}
+        {...definedOptions({ retry: !canRead || query.isFetching ? undefined : retryRead })}
+      />
     {:else if useProviderData && taskProvider && query.isLoading}
       <div class="svadmin-u-60fbb7713999 svadmin-u-aadad6871af8 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-bfa603190748">
         <Loader2 class="svadmin-u-d2347e8497a9 svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-afbdd13a380e" />
@@ -125,11 +159,17 @@
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {#each resolvedTasks as task, _i (_i)}
-              <Table.Row class="svadmin-u-34516836730d svadmin-u-f6e31b39b8e4" onclick={() => onSelect?.(task)}>
+            {#each keyedTasks as { task, key } (key)}
+              <Table.Row class="svadmin-u-34516836730d svadmin-u-f6e31b39b8e4" onclick={(event) => selectRow(event, task)}>
                 <Table.Cell class="svadmin-u-00cde2e9f1cf">
                   <div class="svadmin-u-da7c36cd8867">
-                    <div class="svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{resolveTaskTitle(task)}</div>
+                    {#if onSelect && !showActions}
+                      <Button type="button" variant="ghost" size="sm" onclick={() => onSelect?.(task)}>
+                        {resolveTaskTitle(task)}
+                      </Button>
+                    {:else}
+                      <div class="svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{resolveTaskTitle(task)}</div>
+                    {/if}
                     {#if resolveTaskMessage(task)}
                       <div class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">{resolveTaskMessage(task)}</div>
                     {/if}
@@ -142,7 +182,7 @@
                   <TaskStatusBadge status={String(task.status ?? 'pending')} />
                 </Table.Cell>
                 <Table.Cell class="svadmin-u-359090c2d529 svadmin-u-bfa603190748">
-                  {formatDate(resolveTaskUpdatedAt(task))}
+                  {formatTaskDate(resolveTaskUpdatedAt(task), i18n.locale)}
                 </Table.Cell>
                 {#if showActions}
                   <Table.Cell class="svadmin-u-308fc069e46e">
@@ -153,9 +193,11 @@
                       {#if taskProvider?.cancel && canCancelTask(task)}
                         <CancelTaskButton taskId={task.id} {taskProvider} />
                       {/if}
-                      <Button variant="ghost" size="sm" onclick={(e) => { e.stopPropagation(); onSelect?.(task); }}>
-                        {i18n.t('task.detailsAction')}
-                      </Button>
+                      {#if onSelect}
+                        <Button type="button" variant="ghost" size="sm" onclick={() => onSelect?.(task)}>
+                          {i18n.t('task.detailsAction')}
+                        </Button>
+                      {/if}
                     </div>
                   </Table.Cell>
                 {/if}

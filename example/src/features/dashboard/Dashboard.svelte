@@ -5,7 +5,7 @@
 
   type Movement = DemoRow<'stock_movements'>;
 
-  import { captureAdminContext, useList } from '@svadmin/core';
+  import { captureAdminContext, createEnterpriseRequestContext, useList, type DashboardProvider } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
   import { AuditSection, ChartContainer, DashboardPage, DataState, MetricBlock, StatusPill, type AuditDataState } from '@svadmin/ui';
   import {
@@ -27,39 +27,46 @@
   const i18n = useTranslation();
   const adminContext = captureAdminContext();
   import { recordLink } from '../../workspace/workspace-links';
+  import DashboardWorkspace from './DashboardWorkspace.svelte';
+  import {
+    loadDashboardWorkspace, loadWorkspaceDrilldownRecords, type WorkspaceDrilldownTarget,
+  } from './dashboard-workspace-data';
   let declarativeSurfacePromise = $state(import('../../components/DeclarativeSurfaceExample.svelte'));
 
   function retryDeclarativeSurface(): void {
     declarativeSurfacePromise = import('../../components/DeclarativeSurfaceExample.svelte');
   }
 
-  const productsQuery = useList({ resource: demoContracts.products, pagination: { mode: 'off' } });
-  const suppliersQuery = useList({ resource: demoContracts.suppliers, pagination: { current: 1, pageSize: 1 } });
-  const warehousesQuery = useList({ resource: demoContracts.warehouses, pagination: { current: 1, pageSize: 1 } });
-  const movementsQuery = useList({ resource: demoContracts.stock_movements, pagination: { mode: 'off' }, sorters: [{ field: 'date', order: 'desc' }] });
-  const transfersQuery = useList({ resource: demoContracts.stock_transfers, pagination: { mode: 'off' } });
-  const cycleCountsQuery = useList({ resource: demoContracts.cycle_counts, pagination: { mode: 'off' } });
-  const adjustmentsQuery = useList({ resource: demoContracts.inventory_adjustments, pagination: { mode: 'off' } });
-  const reorderRulesQuery = useList({ resource: demoContracts.reorder_rules, pagination: { mode: 'off' } });
-  const purchaseOrdersQuery = useList({ resource: demoContracts.purchase_orders, pagination: { current: 1, pageSize: 1 } });
-  const salesOrdersQuery = useList({ resource: demoContracts.sales_orders, pagination: { mode: 'off' }, sorters: [{ field: 'orderDate', order: 'desc' }] });
-  const todosQuery = useList({ resource: demoContracts.todos, pagination: { mode: 'off' } });
-  const usersQuery = useList({ resource: demoContracts.users, pagination: { mode: 'off' } });
-  const rolesQuery = useList({ resource: demoContracts.roles, pagination: { current: 1, pageSize: 1 } });
+  const productsQuery = useList({ resource: demoContracts.products, pagination: { mode: 'off' }, errorNotification: false });
+  const suppliersQuery = useList({ resource: demoContracts.suppliers, pagination: { current: 1, pageSize: 1 }, errorNotification: false });
+  const warehousesQuery = useList({ resource: demoContracts.warehouses, pagination: { current: 1, pageSize: 1 }, errorNotification: false });
+  const movementsQuery = useList({ resource: demoContracts.stock_movements, pagination: { mode: 'off' }, sorters: [{ field: 'date', order: 'desc' }], errorNotification: false });
+  const transfersQuery = useList({ resource: demoContracts.stock_transfers, pagination: { mode: 'off' }, errorNotification: false });
+  const cycleCountsQuery = useList({ resource: demoContracts.cycle_counts, pagination: { mode: 'off' }, errorNotification: false });
+  const adjustmentsQuery = useList({ resource: demoContracts.inventory_adjustments, pagination: { mode: 'off' }, errorNotification: false });
+  const reorderRulesQuery = useList({ resource: demoContracts.reorder_rules, pagination: { mode: 'off' }, errorNotification: false });
+  const purchaseOrdersQuery = useList({ resource: demoContracts.purchase_orders, pagination: { current: 1, pageSize: 1 }, errorNotification: false });
+  const salesOrdersQuery = useList({ resource: demoContracts.sales_orders, pagination: { mode: 'off' }, sorters: [{ field: 'orderDate', order: 'desc' }], errorNotification: false });
+  const todosQuery = useList({ resource: demoContracts.todos, pagination: { mode: 'off' }, errorNotification: false });
+  const usersQuery = useList({ resource: demoContracts.users, pagination: { mode: 'off' }, errorNotification: false });
+  const rolesQuery = useList({ resource: demoContracts.roles, pagination: { current: 1, pageSize: 1 }, errorNotification: false });
   const calendarQuery = useList({
     resource: demoContracts.calendar_events,
     pagination: { mode: 'off' },
     sorters: [{ field: 'startDate', order: 'asc' }],
+    errorNotification: false,
   });
   const conversationsQuery = useList({
     resource: demoContracts.ai_conversations,
     pagination: { mode: 'off' },
     sorters: [{ field: 'updatedAt', order: 'desc' }],
+    errorNotification: false,
   });
   const notificationsQuery = useList({
     resource: demoContracts.notifications,
     pagination: { mode: 'off' },
     sorters: [{ field: 'createdAt', order: 'desc' }],
+    errorNotification: false,
   });
 
   const locale = $derived(i18n.locale);
@@ -86,6 +93,20 @@
   ];
   const isRefreshing = $derived(queries.some((query) => query.isFetching));
   const hasError = $derived(queries.some((query) => query.isError));
+  const workspaceRequestContext = createEnterpriseRequestContext({
+    tenantId: 'example-tenant', requestId: 'example-dashboard-workspace', traceId: 'example-dashboard-workspace',
+  });
+  const workspaceDataProvider = adminContext.getDataProvider();
+  const workspaceProvider: DashboardProvider = {
+    get: async (_context, query) => (await loadDashboardWorkspace(workspaceDataProvider, query, { isZh })).snapshot,
+  };
+  async function loadWorkspaceRecords(target: WorkspaceDrilldownTarget) {
+    const records = await loadWorkspaceDrilldownRecords(workspaceDataProvider, target, { isZh });
+    return records.map(record => ({
+      ...record,
+      href: recordLink(record.resource, record.id, adminContext.currentPath()),
+    }));
+  }
   function sectionState(query: { isLoading: boolean; isError: boolean; data?: unknown }, count: number): AuditDataState {
     if (query.isLoading) return 'loading';
     if (query.isError) return query.data ? 'partial' : 'error';
@@ -96,7 +117,7 @@
     purchase_orders: purchaseOrdersQuery, sales_orders: salesOrdersQuery, todos: todosQuery,
     stock_transfers: transfersQuery, cycle_counts: cycleCountsQuery,
     inventory_adjustments: adjustmentsQuery, reorder_rules: reorderRulesQuery,
-    users: usersQuery, calendar_events: calendarQuery, ai_conversations: conversationsQuery,
+    users: usersQuery, roles: rolesQuery, calendar_events: calendarQuery, ai_conversations: conversationsQuery,
     notifications: notificationsQuery,
   };
   function displayValue(href: string, value: string | number): string | number {
@@ -148,7 +169,9 @@
     {
       label: isZh ? '用户管理' : 'User Management',
       value: usersQuery.data?.total ?? 0,
-      meta: isZh ? `${rolesQuery.data?.total ?? 0} 个角色` : `${rolesQuery.data?.total ?? 0} roles`,
+      meta: isZh
+        ? `${displayValue('#/roles', rolesQuery.data?.total ?? 0)} 个角色`
+        : `${displayValue('#/roles', rolesQuery.data?.total ?? 0)} roles`,
       href: '#/users',
       Icon: Users,
       tone: 'bg-primary/10 text-primary border-primary/20',
@@ -271,6 +294,25 @@
       description={isZh ? '暂不可用的指标显示为 —，请重试后再作判断。' : 'Unavailable metrics show —. Retry before making a decision.'}
       retry={retryFailedQueries} />
   {/if}
+  <section class="grid gap-3" aria-labelledby="dashboard-workspace-heading" data-testid="example-dashboard-workspace">
+    <div>
+      <h2 id="dashboard-workspace-heading" class="text-base font-semibold text-foreground">
+        {isZh ? '企业仪表盘工作区' : 'Enterprise dashboard workspace'}
+      </h2>
+      <p class="text-sm text-muted-foreground">
+        {isZh ? '全局筛选、时间范围与钻取会写入当前仪表盘路由的 hash。' : 'Global filters, time range and drill-down are stored in the current dashboard route hash.'}
+      </p>
+    </div>
+    <DashboardWorkspace
+      provider={workspaceProvider}
+      dashboardId="operations-dashboard"
+      requestContext={workspaceRequestContext}
+      title={isZh ? '企业运营仪表盘' : 'Enterprise operations dashboard'}
+      isZh={isZh}
+      loadDrilldownRecords={loadWorkspaceRecords}
+      defaultFrom="2026-06-01"
+      defaultTo="2026-06-30" />
+  </section>
   {#snippet metrics()}
     <MetricBlock label={isZh ? '库存风险' : 'Stock at risk'} value={productsQuery.isError ? '—' : lowStockProducts.length}
       class={!productsQuery.isLoading && !productsQuery.isError && lowStockProducts.length > 0 ? 'dashboard-risk' : ''}

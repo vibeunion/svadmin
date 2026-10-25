@@ -10,7 +10,7 @@
   let { provider, resources, queryClient, kind, onReady, resource = 'posts', tenant = 'first',
     id = 1, ids = [1], filters = [], sorters = [], pagination = { current: 1, pageSize: 2 },
     meta = {}, enabled = true, providerOverride = '', authProvider = null, notificationProvider = null,
-    successNotification = false, errorNotification = false,
+    successNotification = false, errorNotification,
     routerProvider = { go: () => {}, back: () => {}, parse: () => ({ pathname: '/', params: {} }) },
   }: {
     provider: DataProvider | Record<string, DataProvider>;

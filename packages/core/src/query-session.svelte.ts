@@ -17,6 +17,9 @@ const notificationSchema = Type.Object({
   type: Type.Optional(Type.Union([Type.Literal('success'), Type.Literal('error')])),
 }, { additionalProperties: false });
 
+const queryErrorNotificationKeys = new WeakMap<object, string>();
+let nextQueryErrorNotificationId = 0;
+
 export interface QuerySessionOptions {
   queryKey: QueryKey;
   resource: string;
@@ -45,6 +48,7 @@ export function querySessionError(error: unknown): HttpError {
       if (typeof statusValue === 'number' && Number.isInteger(statusValue) && statusValue >= 400 && statusValue <= 599) status = statusValue;
       if (codeValue === 'INVALID_PROVIDER_RESPONSE' || codeValue === 'INVALID_RESOURCE_INPUT' ||
         codeValue === 'DATA_PROVIDER_REQUIRED' || codeValue === 'QUERY_SESSION_SUPERSEDED' ||
+        codeValue === 'SELECT_REQUEST_CANCELLED' || codeValue === 'SELECT_REQUEST_TIMEOUT' ||
         codeValue === 'INVALID_SELECT_OPTION' || codeValue === 'INVALID_COMMAND_INPUT' ||
         codeValue === 'INVALID_COMMAND_RESPONSE' || codeValue === 'INVALID_COMMAND_CONTRACT' ||
         codeValue === 'INVALID_COMMAND_METHOD' || codeValue === 'COMMAND_NOT_SUPPORTED' ||
@@ -103,8 +107,20 @@ export function createQuerySession<O extends QuerySessionOptions>(context: Admin
       const candidate = snapshotPlainData(typeof config === 'function'
         ? config(value, undefined, origin.resource) : { message: config || fallback });
       if (!checkExact(notificationSchema, candidate) || !current(origin) || origin.notification !== context.notificationProvider) return;
+      let key = candidate.key;
+      if (type === 'error' && !config) {
+        const query = client.getQueryCache().find({ queryKey: origin.queryKey, exact: true });
+        if (query) {
+          key = queryErrorNotificationKeys.get(query);
+          if (!key) {
+            // 查询对象共享不透明标识，避免向通知 Provider 暴露筛选条件和请求元数据。
+            key = `svadmin-query-error:${nextQueryErrorNotificationId++}`;
+            queryErrorNotificationKeys.set(query, key);
+          }
+        }
+      }
       notifyWithProvider({
-        type, message: candidate.message, ...definedOptions({ description: candidate.description, key: candidate.key }),
+        type, message: candidate.message, ...definedOptions({ description: candidate.description, key }),
       }, origin.notification);
     } catch {
       // Observer failures and malformed receipts cannot change query state.

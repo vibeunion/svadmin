@@ -9,6 +9,7 @@ import { dirname, resolve } from 'node:path';
 import { svelte2tsx } from 'svelte2tsx';
 import ts from 'typescript';
 import { prepareSchemaFormValue, assertSchemaFormSchema } from '@svadmin/core/schema-form';
+import { readRecursiveSchemaForm } from './enterprise/recursive-schema-form.js';
 
 import { requireValue } from '../../../../scripts/test-assertions';
 const schema = {
@@ -35,6 +36,84 @@ function optionValue(element: HTMLElement, index: number): string {
 }
 
 describe('JSON Schema forms enterprise value contract', () => {
+  it('preserves description associations when errors appear and clear', async () => {
+    const view = render(JsonSchemaForm, {
+      schema: { properties: { amount: { type: 'number', description: 'Enter a numeric amount' } } },
+      value: { amount: 10 },
+      onsubmit: vi.fn(),
+    });
+    const input = view.getByRole('spinbutton');
+    const descriptionId = input.getAttribute('aria-describedby');
+    expect(descriptionId).toBeTruthy();
+    expect(document.getElementById(descriptionId ?? '')?.textContent).toBe('Enter a numeric amount');
+    Object.defineProperty(input, 'validity', { configurable: true, value: { badInput: true } });
+    await fireEvent.input(input, { target: { value: '1e' } });
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
+    const errorIds = (input.getAttribute('aria-describedby') ?? '').split(' ');
+    expect(errorIds).toHaveLength(2);
+    expect(errorIds[0]).toBe(descriptionId);
+    expect(document.getElementById(requireValue(errorIds[1]))?.textContent).toBeTruthy();
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+    Object.defineProperty(input, 'validity', { configurable: true, value: { badInput: false } });
+    await fireEvent.input(input, { target: { value: '12' } });
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
+    expect(input.getAttribute('aria-describedby')).toBe(descriptionId);
+    expect(input.hasAttribute('aria-invalid')).toBe(false);
+    expect(document.getElementById(requireValue(errorIds[1]))).toBeNull();
+  });
+
+  it('associates every described control and group within its own form instance', () => {
+    const definition: SchemaFormSchema = {
+      properties: {
+        text: { type: 'string', description: 'Text help' },
+        'text-description': { type: 'string' },
+        number: { type: 'number', description: 'Number help' },
+        enabled: { type: 'boolean', description: 'Boolean help' },
+        choice: { enum: ['a', 'b'], description: 'Choice help' },
+        empty: { type: 'null', description: 'Null help' },
+        group: { type: 'object', description: 'Group help', properties: { child: { type: 'string' } } },
+        list: { type: 'array', description: 'List help', items: { type: 'string' } },
+      },
+    };
+    const first = render(JsonSchemaForm, { schema: definition });
+    const second = render(JsonSchemaForm, { schema: definition });
+    const ids: string[] = [];
+    for (const view of [first, second]) {
+      const controls = view.container.querySelectorAll('[aria-describedby]');
+      expect(controls).toHaveLength(7);
+      expect(new Set([...view.container.querySelectorAll<HTMLElement>('[id]')].map(element => element.id)).size)
+        .toBe(view.container.querySelectorAll('[id]').length);
+      for (const control of controls) {
+        const id = requireValue(control.getAttribute('aria-describedby'));
+        const description = requireValue(document.getElementById(id));
+        expect(view.container.contains(description)).toBe(true);
+        expect(description.textContent).toMatch(/help$/);
+        ids.push(id);
+      }
+    }
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it.each([
+    ['null', { type: 'null' }, 'invalid'],
+    ['array', { type: 'array', minItems: 1, items: { type: 'string' } }, []],
+    ['object', { type: 'object', properties: {} }, 'invalid'],
+  ] as const)('associates %s validation errors without losing descriptions', async (_kind, node, value) => {
+    const onsubmit = vi.fn();
+    const view = render(JsonSchemaForm, {
+      schema: { properties: { target: { ...node, description: 'Target help' } } },
+      value: { target: value },
+      onsubmit,
+    });
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
+    expect(onsubmit).not.toHaveBeenCalled();
+    const control = requireValue(view.container.querySelector('[aria-describedby]'));
+    const ids = (control.getAttribute('aria-describedby') ?? '').split(' ');
+    expect(ids).toHaveLength(2);
+    expect(document.getElementById(requireValue(ids[0]))?.textContent).toBe('Target help');
+    expect(document.getElementById(requireValue(ids[1]))?.textContent).toBeTruthy();
+  });
+
   const conditional: SchemaFormSchema = {
     properties: {
       details: {
@@ -86,6 +165,53 @@ describe('JSON Schema forms enterprise value contract', () => {
       data.delete(schemaFormFieldName(['details', 'name']));
       expect(() => decodeSchemaFormData(conditional, data)).toThrow();
     }
+  });
+
+  it.each(['field', 'object', 'array'] as const)('suspends hidden %s parse errors without accepting them when shown again', async kind => {
+    const whenAdvanced = { path: ['mode'], equals: 'advanced' };
+    const key = 'amount/~net';
+    const amount: SchemaFormSchema = { type: 'number', title: 'Amount', default: 10 };
+    if (kind === 'field') amount.visibleWhen = whenAdvanced;
+    const group: SchemaFormSchema = { type: 'object', properties: { [key]: amount }, required: [key] };
+    if (kind === 'object') group.visibleWhen = whenAdvanced;
+    const definition: SchemaFormSchema = {
+      properties: {
+        mode: { enum: ['basic', 'advanced'], default: 'advanced' },
+        details: kind === 'array'
+          ? { type: 'array', items: group, default: [{ [key]: 10 }], visibleWhen: whenAdvanced }
+          : group,
+      },
+    };
+    const onsubmit = vi.fn();
+    const view = render(JsonSchemaForm, { schema: definition, onsubmit });
+    const form = requireValue(view.container.querySelector('form'));
+    const amountInput = view.getByLabelText(/^Amount/);
+    Object.defineProperty(amountInput, 'validity', { configurable: true, value: { badInput: true } });
+    await fireEvent.input(amountInput, { target: { value: '' } });
+    await fireEvent.submit(form);
+    expect(onsubmit).not.toHaveBeenCalled();
+    expect(amountInput.getAttribute('aria-invalid')).toBe('true');
+
+    const mode = view.getByRole('combobox');
+    await fireEvent.change(mode, { target: { value: optionValue(mode, 0) } });
+    expect(view.queryByLabelText(/^Amount/)).toBeNull();
+    await fireEvent.submit(form);
+    expect(onsubmit).toHaveBeenCalledExactlyOnceWith(kind === 'field'
+      ? { mode: 'basic', details: {} } : { mode: 'basic' });
+    expect(view.queryByRole('alert')).toBeNull();
+
+    await fireEvent.change(mode, { target: { value: optionValue(mode, 1) } });
+    const restored = view.getByLabelText(/^Amount/);
+    await fireEvent.submit(form);
+    expect(onsubmit).toHaveBeenCalledOnce();
+    expect(restored.getAttribute('aria-invalid')).toBe('true');
+    expect(document.activeElement).toBe(restored);
+    await fireEvent.input(restored, { target: { value: '12' } });
+    await fireEvent.submit(form);
+    expect(onsubmit).toHaveBeenCalledTimes(2);
+    expect(onsubmit).toHaveBeenLastCalledWith({
+      mode: 'advanced', details: kind === 'array' ? [{ [key]: 12 }] : { [key]: 12 },
+    });
   });
 
   it.each([
@@ -146,6 +272,68 @@ describe('JSON Schema forms enterprise value contract', () => {
         .toThrow('Invalid schema form configuration.');
     },
   );
+
+  const unsupportedSchemas = [
+    ['internal $ref', {
+      type: 'object',
+      properties: { field: { $ref: '#/$defs/name' } },
+      $defs: { name: { type: 'string' } },
+    }, '/field/$ref'],
+    ['oneOf', {
+      properties: { choice: { oneOf: [{ type: 'string' }, { type: 'number' }] } },
+    }, '/choice/oneOf'],
+    ['external reference', {
+      properties: { field: { $ref: 'https://example.com/schema.json#/name' } },
+    }, '/field/$ref'],
+    ['unknown keyword', {
+      properties: { field: { type: 'string', format: 'email' } },
+    }, '/field/format'],
+  ] as const;
+
+  it.each(unsupportedSchemas)('rejects %s with a located issue instead of degrading the schema', (_label, definition, expectedPath) => {
+    const candidate = definition as unknown as SchemaFormSchema;
+    expect(readRecursiveSchemaForm(definition).issues).toContainEqual({
+      path: expectedPath,
+      code: 'unsupported-schema',
+    });
+    expect(() => assertSchemaFormSchema(candidate)).toThrow('Invalid schema form configuration.');
+    expect(() => prepareSchemaFormValue(candidate, {})).toThrow('Invalid schema form configuration.');
+    expect(() => decodeSchemaFormData(candidate, new FormData())).toThrow();
+  });
+
+  it.each(unsupportedSchemas)('renders %s as a form-level error and never submits it', async (_label, definition) => {
+    const onsubmit = vi.fn();
+    const onvalidationerror = vi.fn();
+    const onerror = vi.fn();
+    const view = render(JsonSchemaForm, {
+      schema: definition as unknown as SchemaFormSchema,
+      value: {},
+      onsubmit,
+      onvalidationerror,
+      onerror,
+    });
+    const alert = view.getByRole('alert');
+    expect(alert.getAttribute('data-testid')).toBe('schema-form-errors');
+    expect(alert.textContent).toBe('Check the form input.');
+    expect(view.container.querySelectorAll('input, select, textarea')).toHaveLength(0);
+    const submit = view.getByRole('button', { name: 'Submit Form' }) as HTMLButtonElement;
+    expect(submit.disabled).toBe(true);
+    await fireEvent.submit(requireValue(view.container.querySelector('form')));
+    expect(onsubmit).not.toHaveBeenCalled();
+    expect(onvalidationerror).not.toHaveBeenCalled();
+    expect(onerror).not.toHaveBeenCalled();
+  });
+
+  it.each(unsupportedSchemas)('keeps the Lite %s form closed and rejects decoding', (_label, definition) => {
+    const view = render(LiteJsonSchemaForm, { schema: definition as unknown as SchemaFormSchema, value: {} });
+    expect(view.getByRole('alert')).toBeTruthy();
+    expect(view.container.querySelectorAll('input, select, textarea')).toHaveLength(0);
+    expect((view.getByRole('button', { name: 'Submit Form' }) as HTMLButtonElement).disabled).toBe(true);
+    expect(() => decodeSchemaFormData(
+      definition as unknown as SchemaFormSchema,
+      new FormData(requireValue(view.container.querySelector('form'))),
+    )).toThrow();
+  });
 
   it('strictly compiles the form surfaces, decoder and focused tests', () => {
     const directory = dirname(fileURLToPath(import.meta.url));

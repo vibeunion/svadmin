@@ -39,6 +39,9 @@ export interface UploadCancellation {
     maxSize?: number;
     disabled?: boolean;
     required?: boolean;
+    ariaLabel?: string;
+    invalid?: boolean;
+    describedby?: string;
     upload?: (file: File, session: UploadSession) => Promise<{ url?: string; uploadId?: string } | undefined> | Promise<void>;
     cancelUpload?: (file: File, cancellation: UploadCancellation) => Promise<void>;
     onChange?: (items: UploadItem[]) => void;
@@ -55,6 +58,9 @@ export interface UploadCancellation {
     maxSize,
     disabled = false,
     required = false,
+    ariaLabel,
+    invalid = false,
+    describedby,
     upload,
     cancelUpload,
     onChange,
@@ -79,18 +85,53 @@ export interface UploadCancellation {
     reason?: UploadCancellation['reason'];
     cleanupStarted?: boolean;
     settled?: boolean;
+    // 已成功交付给宿主的尝试不可再被回收，即使 notify 期间宿主同步卸载或抛错。
+    succeeded?: boolean;
   }
   const attempts = new Map<string, UploadAttempt>();
   const latestAttempts = new Map<string, UploadAttempt>();
+  // 失败但已登记 uploadId 的尝试仍可能持有服务端临时会话，需保留到移除/替换/
+  // 卸载/作用域替换或用户重试时，再用原尝试捕获的回调回收。
+  const pendingCleanup = new Map<string, UploadAttempt>();
   let scopeEpoch = 0;
   let observedUpload = untrack(() => upload);
   let destroyed = false;
+  let pendingNativeReset: { event: Event; form: HTMLFormElement } | undefined;
+
+  $effect(() => {
+    const form = input?.form;
+    if (upload || !form) return;
+    const reset = (event: Event) => {
+      flushNativeReset();
+      pendingNativeReset = { event, form };
+      // 原生事件可能在监听器之间执行微任务，下一任务才读取最终取消状态。
+      setTimeout(flushNativeReset, 0);
+    };
+    form.addEventListener('reset', reset);
+    return () => {
+      form.removeEventListener('reset', reset);
+      if (pendingNativeReset?.form === form) pendingNativeReset = undefined;
+    };
+  });
+
+  function flushNativeReset(): void {
+    const reset = pendingNativeReset;
+    if (!reset || reset.event.eventPhase !== Event.NONE) return;
+    pendingNativeReset = undefined;
+    if (destroyed || upload || reset.event.defaultPrevented || input?.form !== reset.form) return;
+    items = [];
+    rejected = [];
+    latestAttempts.clear();
+    emitChange();
+  }
 
   $effect.pre(() => {
     if (upload === observedUpload) return;
     observedUpload = upload;
     scopeEpoch += 1;
     untrack(() => {
+      // 已失败的尝试没有 controller，但仍持有临时会话，作用域替换时一并回收。
+      for (const id of [...pendingCleanup.keys()]) retire(id, 'scope-change');
       const activeIds = [...controllers.keys()];
       for (const id of activeIds) retire(id, 'scope-change');
       const cancelledIds = new Set(activeIds);
@@ -104,16 +145,20 @@ export interface UploadCancellation {
   });
 
   function retire(id: string, reason: UploadCancellation['reason'] = 'cancel'): void {
-    const attempt = attempts.get(id);
+    const attempt = attempts.get(id) ?? pendingCleanup.get(id);
     const controller = controllers.get(id);
     controllers.delete(id);
     attempts.delete(id);
+    pendingCleanup.delete(id);
     if (attempt) attempt.reason = reason;
     controller?.abort();
     if (attempt) cleanupAttempt(id, attempt);
   }
 
   function cleanupAttempt(id: string, attempt: UploadAttempt): void {
+    // 成功附件没有临时会话需要回收；此守卫必须早于 reason 判断，
+    // 因为宿主可能在成功通知中同步卸载，retire 会给成功尝试补上 reason。
+    if (attempt.succeeded) return;
     if (!attempt.reason || attempt.cleanupStarted) return;
     if (attempt?.uploadId && attempt.cancelUpload) {
       attempt.cleanupStarted = true;
@@ -137,11 +182,12 @@ export interface UploadCancellation {
 
   onDestroy(() => {
     destroyed = true;
-    for (const id of controllers.keys()) retire(id, 'unmount');
+    for (const id of [...new Set([...controllers.keys(), ...pendingCleanup.keys()])]) retire(id, 'unmount');
     latestAttempts.clear();
   });
 
   function emitChange(): void {
+    syncNativeInput();
     onChange?.(items.map(item => ({ ...item })));
   }
 
@@ -165,6 +211,13 @@ export interface UploadCancellation {
       return 'File is too large.';
     }
     return undefined;
+  }
+
+  function rejectionLabel(reason: string): string {
+    if (reason === 'File type is not accepted.') return i18n.t('upload.typeRejected');
+    if (reason === 'File is too large.') return i18n.t('upload.tooLarge');
+    if (reason === 'Maximum file count exceeded.') return i18n.t('upload.tooMany');
+    return i18n.t('upload.failed');
   }
 
   const normalizedMaxFiles = $derived(
@@ -193,9 +246,22 @@ export interface UploadCancellation {
     emitChange();
   }
 
+  function syncNativeInput(): void {
+    if (destroyed || upload || !input) return;
+    // 原生表单提交与已接收队列保持同源，避免提交被拒绝或已移除的文件。
+    const transfer = new DataTransfer();
+    for (const item of items) transfer.items.add(item.file);
+    input.files = transfer.files;
+  }
+
   async function process(item: UploadItem): Promise<void> {
     if (destroyed || !upload || disabled) return;
     if (controllers.has(item.id) || !items.some(candidate => candidate.id === item.id)) return;
+    // 重试复用同一 item：先按替换语义回收旧失败尝试的临时会话，避免泄漏。
+    if (pendingCleanup.has(item.id)) {
+      latestAttempts.delete(item.id);
+      retire(item.id, 'replace');
+    }
     const controller = new AbortController();
     controllers.set(item.id, controller);
     const attempt: UploadAttempt = {
@@ -227,6 +293,7 @@ export interface UploadCancellation {
       uploadId: undefined,
       cleanupStatus: undefined,
     });
+    let failed = false;
     try {
       // 宿主回调可以同步卸载或替换组件；通知返回后必须重新确认本次请求仍有效。
       if (destroyed || !current() || controller.signal.aborted) return;
@@ -240,6 +307,9 @@ export interface UploadCancellation {
       });
       if (result?.uploadId !== undefined) register(result.uploadId);
       const uploadId = result?.uploadId ?? attempt.uploadId;
+      // 先锁定成功语义，再通知宿主；通知中的同步卸载/抛错不得把成功对象
+      // 降级为失败或登记为待回收临时会话。
+      attempt.succeeded = true;
       updateCurrent({
         status: 'success',
         progress: 100,
@@ -247,6 +317,8 @@ export interface UploadCancellation {
         ...(uploadId === undefined ? {} : { uploadId }),
       });
     } catch (error) {
+      if (attempt.succeeded) return;
+      failed = true;
       if (!current()) return;
       updateItem(item.id, {
         status: controller.signal.aborted ? 'cancelled' : 'error',
@@ -257,31 +329,30 @@ export interface UploadCancellation {
       if (current()) {
         controllers.delete(item.id);
         attempts.delete(item.id);
+        if (failed && !controller.signal.aborted && attempt.uploadId && attempt.cancelUpload
+          && !attempt.cleanupStarted && latestAttempts.get(item.id) === attempt) {
+          pendingCleanup.set(item.id, attempt);
+        }
       }
     }
   }
 
   function addFiles(selected: File[]): void {
+    flushNativeReset();
     if (destroyed || disabled) return;
-    const available = multiple
-      ? Math.max(0, normalizedMaxFiles - items.length)
-      : 1;
+    syncNativeInput();
     rejected = [];
-    if (selected.length > available) {
-      for (const file of selected.slice(available)) {
-        if (destroyed) return;
-        rejected = [...rejected, { name: file.name, reason: 'Maximum file count exceeded.' }];
-        onReject?.(file, 'Maximum file count exceeded.');
-      }
-    }
-    for (const file of selected.slice(0, multiple ? available : Math.min(available, 1))) {
+    let accepted = 0;
+    for (const file of selected) {
       if (destroyed) return;
-      const reason = validate(file);
+      const full = multiple ? items.length >= normalizedMaxFiles : accepted > 0;
+      const reason = validate(file) ?? (full ? 'Maximum file count exceeded.' : undefined);
       if (reason) {
         rejected = [...rejected, { name: file.name, reason }];
         onReject?.(file, reason);
         continue;
       }
+      accepted += 1;
       const item: UploadItem = { id: nextId(), file, status: 'queued', progress: 0 };
       if (!multiple) {
         for (const previous of items) {
@@ -308,7 +379,7 @@ export interface UploadCancellation {
     retire(id, 'remove');
     latestAttempts.delete(id);
     items = items.filter(item => item.id !== id);
-    if (input) input.value = '';
+    if (input && upload) input.value = '';
     emitChange();
   }
 
@@ -324,6 +395,7 @@ export interface UploadCancellation {
   }
 
   function handleKeydown(event: KeyboardEvent): void {
+    if (disabled) return;
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       input?.click();
@@ -341,6 +413,9 @@ export interface UploadCancellation {
     {multiple}
     disabled={disabled}
     required={upload ? false : required}
+    aria-label={ariaLabel}
+    aria-invalid={invalid || undefined}
+    aria-describedby={describedby}
     class="svadmin-file-upload-input"
     onchange={handleInput}
   />
@@ -349,7 +424,12 @@ export interface UploadCancellation {
     role="button"
     tabindex={disabled ? -1 : 0}
     aria-disabled={disabled}
-    onclick={() => input?.click()}
+    aria-label={ariaLabel}
+    aria-describedby={describedby}
+    data-invalid={invalid || undefined}
+    onclick={() => {
+      if (!disabled) input?.click();
+    }}
     onkeydown={handleKeydown}
     ondragover={(event) => event.preventDefault()}
     ondrop={(event) => {
@@ -367,32 +447,32 @@ export interface UploadCancellation {
   {#if rejected.length}
     <ul aria-label={i18n.t('upload.rejectedFiles')}>
       {#each rejected as rejection (rejection)}
-        <li>{rejection.name}: {rejection.reason}</li>
+        <li>{rejection.name}: {rejectionLabel(rejection.reason)}</li>
       {/each}
     </ul>
   {/if}
 
   {#if items.length}
-    <ul class="svadmin-file-upload-list" aria-label="Selected files">
+    <ul class="svadmin-file-upload-list" aria-label={i18n.t('upload.selectedFiles')}>
       {#each items as item (item.id)}
         <li>
           <span class="svadmin-file-upload-name">{item.file.name}</span>
           <span class="svadmin-file-upload-status">
-            {#if item.status === 'uploading'}{item.progress}%{:else}{item.status}{/if}
+            {#if item.status === 'uploading'}{item.progress}%{:else}{i18n.t(`upload.status.${item.status}`)}{/if}
           </span>
           {#if item.status === 'uploading'}
-            <Button type="button" variant="ghost" size="icon-sm" aria-label="Cancel upload" onclick={() => cancel(item.id)}>
+            <Button type="button" variant="ghost" size="icon-sm" aria-label={i18n.t('upload.cancel')} title={i18n.t('upload.cancel')} onclick={() => cancel(item.id)}>
               <Ban aria-hidden="true" />
             </Button>
           {:else if item.status === 'error' || item.status === 'cancelled'}
-            <Button type="button" variant="ghost" size="icon-sm" aria-label="Retry upload" {disabled} onclick={() => retry(item)}>
+            <Button type="button" variant="ghost" size="icon-sm" aria-label={i18n.t('upload.retry')} title={i18n.t('upload.retry')} {disabled} onclick={() => retry(item)}>
               <RotateCw aria-hidden="true" />
             </Button>
           {/if}
-          <Button type="button" variant="ghost" size="icon-sm" aria-label="Remove file" {disabled} onclick={() => remove(item.id)}>
+          <Button type="button" variant="ghost" size="icon-sm" aria-label={i18n.t('upload.remove')} title={i18n.t('upload.remove')} {disabled} onclick={() => remove(item.id)}>
             <X aria-hidden="true" />
           </Button>
-          {#if item.error}<span role="alert">{item.error}</span>{/if}
+          {#if item.status === 'error' || item.status === 'cancelled'}<span role="alert">{i18n.t(item.status === 'cancelled' ? 'upload.cancelled' : 'upload.failed')}</span>{/if}
           {#if item.cleanupStatus === 'pending'}<span role="status">{i18n.t('upload.cleanupPending')}</span>{/if}
           {#if item.cleanupStatus === 'error'}<span role="alert">{i18n.t('upload.cleanupFailed')}</span>{/if}
         </li>

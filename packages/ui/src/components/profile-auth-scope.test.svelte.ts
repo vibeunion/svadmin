@@ -1,4 +1,5 @@
 import { fireEvent, render, waitFor, within } from '@testing-library/svelte';
+import userEvent from '@testing-library/user-event';
 import {
   resetContext,
   getToastQueue,
@@ -91,6 +92,147 @@ describe('Profile auth scope', () => {
     expect(passwords.current.value).toBe('');
     expect(passwords.next.value).toBe('');
     expect(passwords.confirm.value).toBe('');
+  });
+
+  it('shows a safe identity load error and recovers through retry', async () => {
+    const getIdentity = vi.fn()
+      .mockRejectedValueOnce(new Error('PRIVATE_IDENTITY_DIAGNOSTIC'))
+      .mockResolvedValue({ id: 'user-a', name: 'Tenant A User' });
+    const authProvider: AuthProvider = {
+      ...baseAuthProvider(getIdentity),
+    };
+    const view = render(ProfileAuthScopeHost, {
+      authProvider,
+      tenant: { tenantId: 'tenant-a' },
+    });
+
+    await waitFor(() => expect(view.getByText('Operation failed')).not.toBeNull());
+    expect(view.container.textContent).not.toContain('PRIVATE_IDENTITY_DIAGNOSTIC');
+    expect(view.queryByText('Tenant A User')).toBeNull();
+    await fireEvent.click(view.getByRole('button', { name: 'Retry' }));
+    await waitFor(() => expect(view.getByText('Tenant A User')).not.toBeNull());
+    expect(getIdentity).toHaveBeenCalledTimes(2);
+  });
+
+  it.each(['diagnostic', 'empty', 'non-error', 'result'] as const)('sanitizes %s profile and password failures while preserving retryable drafts', async failure => {
+    const updateProfile = vi.fn<NonNullable<AuthProvider['updateProfile']>>()
+      .mockResolvedValue({ success: true });
+    const updatePassword = vi.fn<NonNullable<AuthProvider['updatePassword']>>()
+      .mockResolvedValue({ success: true });
+    if (failure === 'result') {
+      updateProfile.mockResolvedValueOnce({ success: false, error: { message: 'PRIVATE_PROFILE_DIAGNOSTIC' } });
+      updatePassword.mockResolvedValueOnce({ success: false, error: { message: 'PRIVATE_PASSWORD_DIAGNOSTIC' } });
+    } else {
+      updateProfile.mockRejectedValueOnce(failure === 'non-error' ? 'PRIVATE_PROFILE_DIAGNOSTIC' : new Error(failure === 'empty' ? '' : 'PRIVATE_PROFILE_DIAGNOSTIC'));
+      updatePassword.mockRejectedValueOnce(failure === 'non-error' ? 'PRIVATE_PASSWORD_DIAGNOSTIC' : new Error(failure === 'empty' ? '' : 'PRIVATE_PASSWORD_DIAGNOSTIC'));
+    }
+    const authProvider: AuthProvider = {
+      ...baseAuthProvider(async () => ({ id: 'user-a', name: 'Tenant A User' })),
+      updateProfile,
+      updatePassword,
+    };
+    const view = render(ProfileAuthScopeHost, {
+      authProvider,
+      tenant: { tenantId: 'tenant-a' },
+    });
+
+    await waitFor(() => expect(view.getByText('Tenant A User')).not.toBeNull());
+    await fireEvent.click(view.getByRole('button', { name: 'Edit' }));
+    const name = view.getByLabelText('Name') as HTMLInputElement;
+    await fireEvent.input(name, { target: { value: 'Tenant A Updated' } });
+    await fireEvent.click(view.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(view.getByText('Operation failed')).not.toBeNull());
+    expect(view.container.textContent).not.toContain('PRIVATE_PROFILE_DIAGNOSTIC');
+    expect(name.value).toBe('Tenant A Updated');
+
+    await fireEvent.click(view.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(updateProfile).toHaveBeenCalledTimes(2));
+    expect(updateProfile).toHaveBeenLastCalledWith({ name: 'Tenant A Updated' });
+    expect(view.queryByText('Operation failed')).toBeNull();
+
+    const passwords = passwordInputs(view.container);
+    await fireEvent.input(passwords.current, { target: { value: 'current-password' } });
+    await fireEvent.input(passwords.next, { target: { value: 'next-password' } });
+    await fireEvent.input(passwords.confirm, { target: { value: 'next-password' } });
+    await fireEvent.submit(enclosingForm(passwords.confirm));
+    await waitFor(() => expect(view.getByText('Operation failed')).not.toBeNull());
+    expect(view.container.textContent).not.toContain('PRIVATE_PASSWORD_DIAGNOSTIC');
+    expect(getToastQueue().some(item => item.message.includes('PRIVATE_'))).toBe(false);
+    expect(passwords.current.value).toBe('current-password');
+    expect(passwords.next.value).toBe('next-password');
+    expect(passwords.confirm.value).toBe('next-password');
+    await fireEvent.submit(enclosingForm(passwords.confirm));
+    await waitFor(() => expect(updatePassword).toHaveBeenCalledTimes(2));
+    expect(view.queryByText('Operation failed')).toBeNull();
+    expect(passwords.current.value).toBe('');
+    expect(passwords.next.value).toBe('');
+    expect(passwords.confirm.value).toBe('');
+  });
+
+  it.each(['diagnostic', 'empty', 'non-error', 'result'] as const)('sanitizes %s avatar failures and permits retry with the same file', async failure => {
+    const updateProfile = vi.fn<NonNullable<AuthProvider['updateProfile']>>()
+      .mockResolvedValue({ success: true });
+    if (failure === 'result') {
+      updateProfile.mockResolvedValueOnce({ success: false, error: { message: 'PRIVATE_AVATAR_DIAGNOSTIC' } });
+    } else {
+      updateProfile.mockRejectedValueOnce(failure === 'non-error' ? 'PRIVATE_AVATAR_DIAGNOSTIC' : new Error(failure === 'empty' ? '' : 'PRIVATE_AVATAR_DIAGNOSTIC'));
+    }
+    const getIdentity = vi.fn(async () => ({ id: 'user-a', name: 'Tenant A User' }));
+    const authProvider: AuthProvider = {
+      ...baseAuthProvider(getIdentity),
+      updateProfile,
+    };
+    const view = render(ProfileAuthScopeHost, {
+      authProvider,
+      tenant: { tenantId: 'tenant-a' },
+    });
+    await waitFor(() => expect(view.getByText('Tenant A User')).not.toBeNull());
+    const input = profileFileInput(view.container);
+    const file = new File(['avatar-a'], 'avatar-a.png', { type: 'image/png' });
+    const user = userEvent.setup();
+    expect(view.getByRole('button', { name: 'Upload Avatar' })).toBe(avatarUploadButton(input));
+    await user.upload(input, file);
+    await waitFor(() => expect(view.getByRole('alert')).toHaveProperty('textContent', 'Operation failed'));
+    expect(view.container.textContent).not.toContain('PRIVATE_AVATAR_DIAGNOSTIC');
+    expect(avatarUploadButton(input).disabled).toBe(false);
+    expect(input.value).toBe('');
+    expect(getIdentity).toHaveBeenCalledTimes(1);
+    await user.upload(input, file);
+    await waitFor(() => expect(updateProfile).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(view.queryByRole('alert')).toBeNull());
+    await waitFor(() => expect(getIdentity).toHaveBeenCalledTimes(2));
+    expect(updateProfile).toHaveBeenLastCalledWith({ avatar: file });
+  });
+
+  it('ignores duplicate avatar uploads and stale rejected uploads after a scope change', async () => {
+    let reject!: (reason: Error) => void;
+    const pending = new Promise<AuthActionResult>((_resolve, fail) => { reject = fail; });
+    const firstUpdateProfile = vi.fn(async () => pending);
+    const firstAuth: AuthProvider = {
+      ...baseAuthProvider(async () => ({ id: 'user-a', name: 'Tenant A User' })),
+      updateProfile: firstUpdateProfile,
+    };
+    const nextGetIdentity = vi.fn(async () => ({ id: 'user-b', name: 'Tenant B User' }));
+    const nextAuth: AuthProvider = {
+      ...baseAuthProvider(nextGetIdentity),
+      updateProfile: vi.fn(async () => ({ success: true })),
+    };
+    const view = render(ProfileAuthScopeHost, { authProvider: firstAuth, tenant: { tenantId: 'tenant-a' } });
+    await view.findByText('Tenant A User');
+    const input = profileFileInput(view.container);
+    const file = new File(['avatar'], 'avatar.png', { type: 'image/png' });
+    await fireEvent.change(input, { target: { files: [file] } });
+    await fireEvent.change(input, { target: { files: [file] } });
+    expect(firstUpdateProfile).toHaveBeenCalledTimes(1);
+    expect(avatarUploadButton(input).disabled).toBe(true);
+    await view.rerender({ authProvider: nextAuth, tenant: { tenantId: 'tenant-b' } });
+    await view.findByText('Tenant B User');
+    reject(new Error('PRIVATE_STALE_AVATAR'));
+    await pending.catch(() => {});
+    await tick();
+    expect(view.queryByRole('alert')).toBeNull();
+    expect(nextGetIdentity).toHaveBeenCalledTimes(1);
+    expect(view.getByRole('button', { name: 'Upload Avatar' })).toHaveProperty('disabled', false);
   });
 
   it('clears identity status and sensitive drafts when the tenant changes under one auth provider', async () => {

@@ -1,5 +1,6 @@
 import { Type } from 'typebox';
-import { defineResource, useUpdateMany, type ResourceContract, type UseUpdateManyMutateParams } from '@svadmin/core';
+import { defineResource } from '../../../core/src/resource-contract';
+import { useUpdateMany, type ResourceContract, type UseUpdateManyMutateParams } from '@svadmin/core';
 import { parseUpdateManyParams } from '../../../core/src/update-many-contract';
 const posts = defineResource('posts', {
   record: Type.Object({ id: Type.Number(), title: Type.String() }),

@@ -7,7 +7,8 @@
   import InfiniteList from './InfiniteList.svelte';
   import Probe from './infinite-contract.test-probe.svelte';
 
-  let { provider, resources, resource = 'posts', tenant = 'first', pageSize = 1, filters = [], onReady,
+  let { provider, resources, resource = 'posts', tenant = 'first', pageSize = 1, filters = [], onReady, showList = false,
+    interactiveRows = false,
     queryClient = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity } } }),
     authProvider = null, notificationProvider = null, enabled = true, successNotification = false, errorNotification = false,
     routerProvider = { go: () => {}, back: () => {}, parse: () => ({ pathname: '/', params: {} }) },
@@ -20,12 +21,14 @@
     filters?: Filter[];
     queryClient?: QueryClient;
     onReady?: (value: InfiniteState) => void;
+    showList?: boolean;
     authProvider?: AuthProvider | null;
     notificationProvider?: NotificationProvider | null;
     routerProvider?: RouterProvider;
     enabled?: boolean;
     successNotification?: NotificationConfig;
     errorNotification?: NotificationConfig;
+    interactiveRows?: boolean;
   } = $props();
   provideAdminContext({
     get dataProvider() { return provider; },
@@ -40,9 +43,13 @@
 <QueryClientProvider client={queryClient}>
   {#if onReady}
     <Probe {resource} {pageSize} {filters} {onReady} {enabled} {successNotification} {errorNotification} />
-  {:else}
+  {/if}
+  {#if !onReady || showList}
     <InfiniteList {resource} {pageSize} {filters}>
       {#snippet children({ item })}
+        {#if interactiveRows}
+          <input aria-label={`Draft ${String(item['id'])}`} value="" />
+        {/if}
         <span data-testid="row">{String(item['title'])}</span>
       {/snippet}
     </InfiniteList>

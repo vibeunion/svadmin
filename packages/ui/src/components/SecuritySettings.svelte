@@ -21,10 +21,10 @@
   const sessionProvider = $derived(adminContext.sessionProvider);
   const isZh = $derived(i18n.locale === 'zh-CN');
 
-  let is2faEnabled = $state(false);
+  let is2faEnabled = $state<boolean | null>(null);
   let sessions = $state.raw<SessionInfo[]>([]);
   let loadingSessions = $state(false);
-  let sessionError = $state<string | null>(null);
+  let sessionError = $state(false);
   let updatingMfa = $state(false);
   let revoking = $state<string | null>(null);
   let currentPassword = $state('');
@@ -32,40 +32,42 @@
   let confirmPassword = $state('');
   let passwordErrorMessage = $state('');
   let passwordChangedRecently = $state(false);
+  let passwordRequestFailed = $state(false);
   let changingPassword = $state(false);
-  let requestId = 0;
+  let scopeId = 0;
+  let securityReadId = 0;
   let pendingDanger = $state<{ label: string; run: () => Promise<void> } | null>(null);
   function requestDanger(label: string, run: () => Promise<void>): void {
-    const epoch = requestId;
-    pendingDanger = { label, run: async () => { if (epoch === requestId) await run(); } };
+    const epoch = scopeId;
+    pendingDanger = { label, run: async () => { if (epoch === scopeId) await run(); } };
   }
 
-  function message(error: unknown): string {
-    return error instanceof Error ? error.message : String(error);
+  function failureMessage(): string {
+    return i18n.t('common.operationFailed');
   }
 
   async function loadSecurity(): Promise<void> {
-    const currentRequest = ++requestId;
+    const currentRequest = ++securityReadId;
     const provider = sessionProvider;
     const context = adminContext.enterpriseRequestContext;
     sessions = [];
-    is2faEnabled = false;
-    sessionError = null;
+    is2faEnabled = null;
+    sessionError = false;
     loadingSessions = false;
     if (!provider) return;
     loadingSessions = true;
     try {
       const [nextSessions, mfa] = await Promise.all([
         provider.listSessions(context),
-        provider.getMfaState?.(context) ?? { enabled: false },
+        provider.getMfaState?.(context) ?? null,
       ]);
-      if (currentRequest !== requestId) return;
+      if (currentRequest !== securityReadId) return;
       sessions = nextSessions;
-      is2faEnabled = mfa.enabled;
-    } catch (caught) {
-      if (currentRequest === requestId) sessionError = message(caught);
+      is2faEnabled = typeof mfa?.enabled === 'boolean' ? mfa.enabled : null;
+    } catch {
+      if (currentRequest === securityReadId) sessionError = true;
     } finally {
-      if (currentRequest === requestId) loadingSessions = false;
+      if (currentRequest === securityReadId) loadingSessions = false;
     }
   }
 
@@ -78,41 +80,48 @@
     confirmPassword = '';
     passwordErrorMessage = '';
     passwordChangedRecently = false;
+    passwordRequestFailed = false;
     changingPassword = false;
     updatingMfa = false;
     revoking = null;
     pendingDanger = null;
     void loadSecurity();
-    return () => { requestId += 1; };
+    return () => {
+      scopeId += 1;
+      securityReadId += 1;
+    };
   });
 
   async function handleMfaChange(enabled: boolean, confirmed = false): Promise<void> {
+    if (is2faEnabled === null || loadingSessions || sessionError || updatingMfa) return;
     if (!enabled && !confirmed) {
       requestDanger(isZh ? '关闭两步验证' : 'Disable two-factor authentication', () => handleMfaChange(false, true));
       return;
     }
     const provider = sessionProvider;
-    const currentRequest = requestId;
+    const currentRequest = scopeId;
     const context = adminContext.enterpriseRequestContext;
     if (!provider?.setMfaEnabled) return;
     updatingMfa = true;
     try {
       const result = await provider.setMfaEnabled(enabled, context);
-      if (currentRequest !== requestId) return;
+      if (currentRequest !== scopeId) return;
       is2faEnabled = result.enabled;
-    } catch (caught) {
-      if (currentRequest !== requestId) return;
-      notifyWithProvider({ type: 'error', message: message(caught) }, adminContext.notificationProvider);
+    } catch {
+      if (currentRequest !== scopeId) return;
+      notifyWithProvider({ type: 'error', message: failureMessage() }, adminContext.notificationProvider);
     } finally {
-      if (currentRequest === requestId) updatingMfa = false;
+      if (currentRequest === scopeId) updatingMfa = false;
     }
   }
 
   async function handlePasswordChange(event: SubmitEvent): Promise<void> {
     event.preventDefault();
+    if (changingPassword) return;
     passwordErrorMessage = '';
+    passwordRequestFailed = false;
     const provider = authProvider;
-    const currentRequest = requestId;
+    const currentRequest = scopeId;
     if (!provider?.updatePassword) return;
     if (!currentPassword) passwordErrorMessage = i18n.t('profile.currentPassword');
     else if (newPassword.length < 8) passwordErrorMessage = i18n.t('validation.minLength', { min: 8 });
@@ -122,64 +131,66 @@
     changingPassword = true;
     try {
       const result = await provider.updatePassword({ currentPassword, password: newPassword, confirmPassword });
-      if (!result.success) throw new Error(result.error?.message ?? (isZh ? '密码修改失败' : 'Password update failed'));
-      if (currentRequest !== requestId) return;
+      if (!result.success) throw new Error('Password update failed');
+      if (currentRequest !== scopeId) return;
       notifyWithProvider({ type: 'success', message: i18n.t('profile.passwordChanged') }, adminContext.notificationProvider);
       passwordChangedRecently = true;
       currentPassword = '';
       newPassword = '';
       confirmPassword = '';
-    } catch (caught) {
-      if (currentRequest !== requestId) return;
-      passwordErrorMessage = message(caught);
+    } catch {
+      if (currentRequest !== scopeId) return;
+      passwordRequestFailed = true;
     } finally {
-      if (currentRequest === requestId) changingPassword = false;
+      if (currentRequest === scopeId) changingPassword = false;
     }
   }
 
   async function revokeSession(id: string, confirmed = false): Promise<void> {
+    if (revoking !== null) return;
     if (!confirmed) {
       requestDanger(`${i18n.t('security.revokeSession')}: ${id}`, () => revokeSession(id, true));
       return;
     }
     const provider = sessionProvider;
-    const currentRequest = requestId;
+    const currentRequest = scopeId;
     const context = adminContext.enterpriseRequestContext;
     if (!provider) return;
     revoking = id;
     try {
       const result = await provider.revokeSession(id, context);
-      if (!result.success) throw new Error(result.error?.message ?? (isZh ? '会话撤销失败' : 'Session revocation failed'));
-      if (currentRequest !== requestId) return;
+      if (!result.success) throw new Error('Session revocation failed');
+      if (currentRequest !== scopeId) return;
       sessions = sessions.filter((session) => session.id !== id);
-    } catch (caught) {
-      if (currentRequest !== requestId) return;
-      notifyWithProvider({ type: 'error', message: message(caught) }, adminContext.notificationProvider);
+    } catch {
+      if (currentRequest !== scopeId) return;
+      notifyWithProvider({ type: 'error', message: failureMessage() }, adminContext.notificationProvider);
     } finally {
-      if (currentRequest === requestId) revoking = null;
+      if (currentRequest === scopeId) revoking = null;
     }
   }
 
   async function revokeAllOthers(confirmed = false): Promise<void> {
+    if (revoking !== null) return;
     if (!confirmed) {
       requestDanger(i18n.t('security.revokeOthers'), () => revokeAllOthers(true));
       return;
     }
     const provider = sessionProvider;
-    const currentRequest = requestId;
+    const currentRequest = scopeId;
     const context = adminContext.enterpriseRequestContext;
     if (!provider) return;
     revoking = '*';
     try {
       const result = await provider.revokeOtherSessions(context);
-      if (!result.success) throw new Error(result.error?.message ?? (isZh ? '会话撤销失败' : 'Session revocation failed'));
-      if (currentRequest !== requestId) return;
+      if (!result.success) throw new Error('Session revocation failed');
+      if (currentRequest !== scopeId) return;
       sessions = sessions.filter((session) => session.current);
-    } catch (caught) {
-      if (currentRequest !== requestId) return;
-      notifyWithProvider({ type: 'error', message: message(caught) }, adminContext.notificationProvider);
+    } catch {
+      if (currentRequest !== scopeId) return;
+      notifyWithProvider({ type: 'error', message: failureMessage() }, adminContext.notificationProvider);
     } finally {
-      if (currentRequest === requestId) revoking = null;
+      if (currentRequest === scopeId) revoking = null;
     }
   }
 </script>
@@ -190,17 +201,17 @@
     <FeedbackNotice tone="warning" message={isZh ? '未配置 SessionProvider。会话和 MFA 设置不会使用模拟数据。' : 'SessionProvider is not configured. Session and MFA controls do not use simulated data.'} />
   {/if}
   <SettingsGroup title={i18n.t('security.twoFactorAuth')} description={i18n.t('security.twoFactorDescription')} headingLevel={headingLevel === 'h1' ? 'h2' : 'h3'}>
-    <SettingsFieldRow controlId={`${controlId}-mfa`} label={i18n.t('security.enable2fa')} description={is2faEnabled ? i18n.t('security.twoFactorActive') : i18n.t('security.twoFactorInactive')}>
-      {#snippet control()}<Switch id={`${controlId}-mfa`} bind:checked={() => is2faEnabled, (enabled) => { void handleMfaChange(enabled); }} disabled={!sessionProvider?.setMfaEnabled || updatingMfa} />{/snippet}
+    <SettingsFieldRow controlId={`${controlId}-mfa`} label={i18n.t('security.enable2fa')} description={is2faEnabled === null ? i18n.t('security.twoFactorUnknown') : (is2faEnabled ? i18n.t('security.twoFactorActive') : i18n.t('security.twoFactorInactive'))}>
+      {#snippet control()}<Switch id={`${controlId}-mfa`} bind:checked={() => is2faEnabled === true, (enabled) => { void handleMfaChange(enabled); }} disabled={!sessionProvider?.setMfaEnabled || is2faEnabled === null || updatingMfa} />{/snippet}
     </SettingsFieldRow>
   </SettingsGroup>
   <SettingsGroup title={i18n.t('profile.changePassword')} description={isZh ? '密码修改由 AuthProvider 持久化。' : 'Password changes are persisted by AuthProvider.'} headingLevel={headingLevel === 'h1' ? 'h2' : 'h3'}>
     {#if !authProvider?.updatePassword}<FeedbackNotice tone="warning" message={isZh ? '当前 AuthProvider 不支持修改密码。' : 'The current AuthProvider does not support password updates.'} />{/if}
     <form onsubmit={handlePasswordChange} class="svadmin-u-6199866f612f svadmin-u-3e7ce58d64fa">
-      {#if passwordErrorMessage}<Alert.Root variant="destructive"><AlertTriangle class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" /><Alert.Description>{passwordErrorMessage}</Alert.Description></Alert.Root>{/if}
-      <PasswordInput id="security-current-password" label={i18n.t('profile.currentPassword')} bind:value={currentPassword} autocomplete="current-password" disabled={!authProvider?.updatePassword || changingPassword} />
-      <PasswordInput id="security-new-password" label={i18n.t('profile.newPassword')} bind:value={newPassword} autocomplete="new-password" showStrength disabled={!authProvider?.updatePassword || changingPassword} />
-      <PasswordInput id="security-confirm-password" label={i18n.t('auth.confirmPassword')} bind:value={confirmPassword} autocomplete="new-password" disabled={!authProvider?.updatePassword || changingPassword} />
+      {#if passwordRequestFailed || passwordErrorMessage}<Alert.Root variant="destructive"><AlertTriangle class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" /><Alert.Description>{passwordRequestFailed ? failureMessage() : passwordErrorMessage}</Alert.Description></Alert.Root>{/if}
+      <PasswordInput id={`${controlId}-security-current-password`} label={i18n.t('profile.currentPassword')} bind:value={currentPassword} autocomplete="current-password" disabled={!authProvider?.updatePassword || changingPassword} />
+      <PasswordInput id={`${controlId}-security-new-password`} label={i18n.t('profile.newPassword')} bind:value={newPassword} autocomplete="new-password" showStrength disabled={!authProvider?.updatePassword || changingPassword} />
+      <PasswordInput id={`${controlId}-security-confirm-password`} label={i18n.t('auth.confirmPassword')} bind:value={confirmPassword} autocomplete="new-password" disabled={!authProvider?.updatePassword || changingPassword} />
       {#if passwordChangedRecently}<p class="text-xs text-muted-foreground">{i18n.t('profile.passwordChangedRecently')}</p>{/if}
       <Button type="submit" disabled={!authProvider?.updatePassword || changingPassword}>{changingPassword ? (isZh ? '更新中...' : 'Updating...') : i18n.t('profile.updatePassword')}</Button>
     </form>
@@ -210,7 +221,7 @@
     {#if loadingSessions}
       <DataState state="loading" />
     {:else if sessionError}
-      <DataState state="error" description={sessionError} retry={loadSecurity} />
+      <DataState state="error" description={failureMessage()} retry={loadSecurity} />
     {:else if sessions.length === 0}
       <DataState state="empty" title={i18n.t('security.noSessions')} description={sessionProvider ? (isZh ? 'Provider 未返回活跃会话。' : 'The provider returned no active sessions.') : (isZh ? '配置 SessionProvider 后可管理真实会话。' : 'Configure SessionProvider to manage real sessions.')} />
     {:else}

@@ -144,6 +144,14 @@ bun x --no-install playwright test --config scripts/fixtures/svar-grid/playwrigh
 
 验收覆盖：真实 20,000 行窗口渲染、低于 300 个 DOM gridcell 的指定场景、左右面板、懒树和窗口重试、资源分页适配、无限追加的选择/CSV、作用域撤权和旧响应、写入契约和部分失败、原生 snippets、AutoTable 工具栏/行操作/详情/快速编辑/URL/保存视图，以及 Surface 字段和 mutation 越权拒绝。截图覆盖 1440×900、1920×1080、390×844；状态和亮暗主题按各用例断言。
 
+2026-10-21 当前工作区已单独复验 `scripts/fixtures/svar-grid/resource-loading.spec.ts`
+（Chromium 10/10），并补充 Surface 内置 Grid 的失败、撤权和恢复验收
+（`surface.spec.ts` 6/6）。这两次运行均使用受控 HTTP 响应，不连接真实业务后端；
+逐项结果和截图路径见
+`docs/evidence/svar-resource-query-feedback-20261021.md`、
+`docs/evidence/surface-query-feedback-20261021.md`。它们不能替代本工作流
+其余 AutoTable、写入、SSR、跨浏览器、性能和真实服务验收。
+
 `svar-grid-verification` 产物包含实际测试源码归档、测试提交号、JSON 单测/浏览器报告、原始截图和消费者构建。GitHub `pull_request` 默认测试的是合并提交；`evidence/tested-commit.txt` 记录实际执行版本，应同时核对运行的 head SHA 和 base，而不是用旧版本通过记录替代最新结果。CI 运行状态和本次验收数目以 PR #429 的最新验证记录为准。
 
 仓库中的旧 [svar-evidence.json](assets/svar-evidence.json) 及两张 `svar-grid-*.png` 是 `c75394f` 只读基线的历史证据（23 单测/8 浏览器用例/30 截图），不是当前高级功能或 AutoTable 兼容层的验收证据。

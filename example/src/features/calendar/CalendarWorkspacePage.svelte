@@ -24,7 +24,7 @@
 
   const locale = $derived(i18n.locale);
   const isZh = $derived(locale === 'zh-CN');
-  const query = useList({ resource: demoContracts.calendar_events, pagination: { mode: 'off' }, sorters: [{ field: 'startDate', order: 'asc' }] });
+  const query = useList({ resource: demoContracts.calendar_events, pagination: { mode: 'off' }, sorters: [{ field: 'startDate', order: 'asc' }], errorNotification: false });
   const events = $derived(demoRenderers.calendar_events.records(query.data?.data ?? []));
   const displayDate = $derived(new Date(Date.UTC(today.getFullYear(), today.getMonth() + monthOffset, 1)));
   const displayYear = $derived(displayDate.getUTCFullYear());

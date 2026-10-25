@@ -67,9 +67,8 @@
     }
   });
 
-  function failureMessage(caught: unknown): string {
-    if (caught instanceof Error && caught.message.trim()) return caught.message;
-    return isZh ? '操作失败，请检查输入后重试。' : 'Action failed. Check the input and retry.';
+  function failureMessage(): string {
+    return i18n.t('common.operationFailed');
   }
 
   async function handleApprove() {
@@ -79,8 +78,8 @@
       await onapprove?.(approveComment || undefined);
       approveDialogOpen = false;
       approveComment = '';
-    } catch (caught) {
-      errorMessage = failureMessage(caught);
+    } catch {
+      errorMessage = failureMessage();
     } finally {
       isSubmitting = false;
     }
@@ -94,8 +93,8 @@
       await onreject?.(rejectReason);
       rejectDialogOpen = false;
       rejectReason = '';
-    } catch (caught) {
-      errorMessage = failureMessage(caught);
+    } catch {
+      errorMessage = failureMessage();
     } finally {
       isSubmitting = false;
     }
@@ -109,8 +108,8 @@
       await ontransfer?.(transferTarget);
       transferDialogOpen = false;
       transferTarget = '';
-    } catch (caught) {
-      errorMessage = failureMessage(caught);
+    } catch {
+      errorMessage = failureMessage();
     } finally {
       isSubmitting = false;
     }

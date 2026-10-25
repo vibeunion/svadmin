@@ -907,17 +907,25 @@ describe('AutoTable interactions', () => {
       selectable: true,
       onDeleteMany,
       onNotify,
+      customBatchAction: true,
     });
 
     const rowCheckboxes = await view.findAllByRole('checkbox', { name: '选择记录 user-1' });
     await fireEvent.click(requireValue(rowCheckboxes[0]));
     expect(await view.findByText('已选择 1 条记录')).toBeTruthy();
+    const toolbar = view.getByRole('region', { name: '已选择 1 条记录' });
+    const status = requireValue(view.container.querySelector('[data-svadmin-batch-toolbar] [role="status"]'));
+    expect(status.textContent).toBe('');
 
     await fireEvent.click(view.getByRole('button', { name: '批量删除 (1)' }));
     const confirm = await view.findByRole('alertdialog');
     await fireEvent.click(within(confirm).getByRole('button', { name: '删除' }));
 
-    expect((await view.findByRole('status')).textContent).toContain('处理中...');
+    await waitFor(() => expect(status.textContent).toBe('处理中...'));
+    expect(toolbar.getAttribute('aria-busy')).toBe('true');
+    expect(within(toolbar).getByText('处理中...')).toBeTruthy();
+    expect(status.closest('[aria-busy="true"]')).toBeNull();
+    expect(toolbar.querySelector('.svadmin-batch-action-bar__actions')?.hasAttribute('inert')).toBe(true);
     expect(view.getByRole('button', { name: '清除选择' }).hasAttribute('disabled')).toBe(true);
     finishDelete?.();
 
@@ -949,7 +957,7 @@ describe('AutoTable interactions', () => {
     await fireEvent.click(await view.findByRole('button', { name: '批量删除 (1)' }));
     const currentDialog = await view.findByRole('alertdialog');
     rejectDelete(new Error('previous scope failed'));
-    await waitFor(() => expect(view.queryByRole('status')).toBeNull());
+    await waitFor(() => expect(view.container.querySelector('[data-svadmin-batch-toolbar] [role="status"]')?.textContent ?? '').toBe(''));
     expect(view.getByRole('alertdialog')).toBe(currentDialog);
     expect(view.getByText('已选择 1 条记录')).toBeTruthy();
     expect(onDeleteMany).toHaveBeenCalledOnce();
@@ -1016,6 +1024,10 @@ describe('AutoTable interactions', () => {
     })));
     expect(onNotify).toHaveBeenCalledTimes(1);
     expect(view.getByText('已选择 2 条记录')).toBeTruthy();
+    const toolbar = view.getByRole('region', { name: '已选择 2 条记录' });
+    expect(toolbar.hasAttribute('aria-busy')).toBe(false);
+    expect(toolbar.querySelector('.svadmin-batch-action-bar__actions')?.hasAttribute('inert')).toBe(false);
+    expect(view.getByRole('button', { name: '清除选择' }).hasAttribute('disabled')).toBe(false);
   });
 
   it('keeps only failed records selected when the delete-one fallback partially succeeds', async () => {
@@ -1092,6 +1104,85 @@ describe('AutoTable interactions', () => {
     expect(onCustomBatchAction).toHaveBeenCalledWith([2]);
   });
 
+  it('retries only the failed ids after a partially successful delete-one fallback', async () => {
+    let failedOnce = false;
+    const onDeleteOne = vi.fn(async (id: string | number) => {
+      if (id === 'user-2' && !failedOnce) {
+        failedOnce = true;
+        throw new Error('second delete failed');
+      }
+    });
+    const onNotify = vi.fn();
+    const view = render(AutoTableInteractionsHarness, {
+      onNavigate: vi.fn(),
+      canDelete: true,
+      deleteAllowed: true,
+      batchDeleteAllowed: true,
+      selectable: true,
+      includeSecondRecord: true,
+      disableDeleteMany: true,
+      onDeleteOne,
+      onNotify,
+    });
+
+    await fireEvent.click(requireValue((await view.findAllByRole('checkbox', { name: '选择记录 user-1' }))[0]));
+    await fireEvent.click(requireValue((await view.findAllByRole('checkbox', { name: '选择记录 user-2' }))[0]));
+    await fireEvent.click(view.getByRole('button', { name: '批量删除 (2)' }));
+    await fireEvent.click(within(await view.findByRole('alertdialog')).getByRole('button', { name: '删除' }));
+
+    await waitFor(() => expect(onNotify).toHaveBeenCalledWith(expect.objectContaining({
+      type: 'error',
+      message: '批量删除部分失败：1/2 条未成功',
+    })));
+    expect(onDeleteOne.mock.calls.map(([id]) => id)).toEqual(['user-1', 'user-2']);
+    expect(view.getByText('已选择 1 条记录')).toBeTruthy();
+
+    await fireEvent.click(view.getByRole('button', { name: '批量删除 (1)' }));
+    await fireEvent.click(within(await view.findByRole('alertdialog')).getByRole('button', { name: '删除' }));
+
+    await waitFor(() => expect(view.queryAllByText('second@example.com')).toHaveLength(0));
+    expect(onDeleteOne.mock.calls.map(([id]) => id)).toEqual(['user-1', 'user-2', 'user-2']);
+    expect(onDeleteOne.mock.calls.filter(([id]) => id === 'user-1')).toHaveLength(1);
+    await waitFor(() => expect(onNotify).toHaveBeenCalledTimes(2));
+    expect(view.queryByText(/已选择/)).toBeNull();
+    expect(view.queryByRole('button', { name: /批量删除/ })).toBeNull();
+  });
+
+  it('does not append a second batch delete request while deletion is pending', async () => {
+    let finishDelete!: () => void;
+    const pending = new Promise<void>((resolve) => { finishDelete = resolve; });
+    const onDeleteMany = vi.fn(() => pending);
+    const onNotify = vi.fn();
+    const view = render(AutoTableInteractionsHarness, {
+      onNavigate: vi.fn(),
+      canDelete: true,
+      deleteAllowed: true,
+      batchDeleteAllowed: true,
+      selectable: true,
+      onDeleteMany,
+      onNotify,
+    });
+
+    await fireEvent.click(requireValue((await view.findAllByRole('checkbox', { name: '选择记录 user-1' }))[0]));
+    await fireEvent.click(view.getByRole('button', { name: '批量删除 (1)' }));
+    await fireEvent.click(within(await view.findByRole('alertdialog')).getByRole('button', { name: '删除' }));
+    const pendingToolbar = view.getByRole('region', { name: '已选择 1 条记录' });
+    await waitFor(() => expect(pendingToolbar.getAttribute('aria-busy')).toBe('true'));
+    expect(onDeleteMany).toHaveBeenCalledOnce();
+
+    await fireEvent.click(view.getByRole('button', { name: '批量删除 (1)' }));
+    await fireEvent.click(view.getByRole('button', { name: '清除选择' }));
+    expect(onDeleteMany).toHaveBeenCalledOnce();
+    expect(view.queryByRole('alertdialog')).toBeNull();
+    expect(view.getByText('已选择 1 条记录')).toBeTruthy();
+
+    finishDelete();
+    await waitFor(() => expect(view.queryByText('已选择 1 条记录')).toBeNull());
+    expect(onDeleteMany).toHaveBeenCalledOnce();
+    expect(onDeleteMany).toHaveBeenCalledWith(['user-1']);
+    expect(onNotify).toHaveBeenCalledOnce();
+  });
+
   it('uses checked deletion even when global undoable mode is configured', async () => {
     setAdminOptions({ mutationMode: 'undoable', undoableTimeout: 60_000 });
     const onDeleteMany = vi.fn(async () => {});
@@ -1120,7 +1211,9 @@ describe('AutoTable interactions', () => {
 
   it('uses the checked batch boundary for a single confirmed record', async () => {
     setAdminOptions({ mutationMode: 'undoable', undoableTimeout: 60_000 });
-    const onDeleteMany = vi.fn(async () => {});
+    let finishDelete!: () => void;
+    const pending = new Promise<void>(resolve => { finishDelete = resolve; });
+    const onDeleteMany = vi.fn(() => pending);
     const view = render(AutoTableInteractionsHarness, {
       onNavigate: vi.fn(),
       canDelete: true,
@@ -1133,6 +1226,9 @@ describe('AutoTable interactions', () => {
     await fireEvent.click(await view.findByRole('menuitem', { name: '删除' }));
     await fireEvent.click(within(await view.findByRole('alertdialog')).getByRole('button', { name: '删除' }));
 
+    await waitFor(() => expect(onDeleteMany).toHaveBeenCalledWith(['user-1']));
+    expect(view.container.querySelector('[data-svadmin-batch-toolbar]')).toBeNull();
+    finishDelete();
     await waitFor(() => expect(view.queryByRole('alertdialog')).toBeNull());
     await waitFor(() => expect(view.queryAllByText('user@example.com')).toHaveLength(0));
     expect(onDeleteMany).toHaveBeenCalledWith(['user-1']);
@@ -1177,6 +1273,46 @@ describe('AutoTable interactions', () => {
     await waitFor(() => expect(onNotify).toHaveBeenCalledTimes(1));
   });
 
+  it('does not restore an old selection after search changes during batch deletion', async () => {
+    setAdminOptions({ mutationMode: 'undoable', undoableTimeout: 60_000 });
+    let rejectDelete!: (reason?: unknown) => void;
+    const pending = new Promise<void>((_resolve, reject) => { rejectDelete = reject; });
+    const onDeleteMany = vi.fn(() => pending);
+    const onGetList = vi.fn();
+    const onNotify = vi.fn();
+    const view = render(AutoTableInteractionsHarness, {
+      onNavigate: vi.fn(),
+      onGetList,
+      canDelete: true,
+      deleteAllowed: true,
+      batchDeleteAllowed: true,
+      selectable: true,
+      onDeleteMany,
+      onNotify,
+    });
+
+    await fireEvent.click(requireValue((await view.findAllByRole('checkbox', { name: '选择记录 user-1' }))[0]));
+    await fireEvent.click(view.getByRole('button', { name: '批量删除 (1)' }));
+    await fireEvent.click(within(await view.findByRole('alertdialog')).getByRole('button', { name: '删除' }));
+    await waitFor(() => expect(onDeleteMany).toHaveBeenCalledOnce());
+
+    const search = await view.findByPlaceholderText('搜索...');
+    await fireEvent.input(search, { target: { value: 'second' } });
+    await waitFor(() => expect(onGetList).toHaveBeenLastCalledWith(expect.objectContaining({
+      filters: expect.arrayContaining([expect.objectContaining({ field: 'email' })]),
+    })));
+    expect(view.queryByText('已选择 1 条记录')).toBeNull();
+
+    rejectDelete(new Error('old selection failed'));
+    await waitFor(() => expect(view.queryByText('处理中...')).toBeNull());
+    expect(view.queryByText('已选择 1 条记录')).toBeNull();
+    expect(view.queryByText('操作失败')).toBeNull();
+    expect(onNotify).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
+      type: 'error',
+      message: '批量删除失败，未删除 1 条记录',
+    }));
+  });
+
   it('keeps custom batch actions visible when batch delete permission is denied', async () => {
     const view = render(AutoTableInteractionsHarness, {
       onNavigate: vi.fn(),
@@ -1194,5 +1330,26 @@ describe('AutoTable interactions', () => {
 
     await fireEvent.click(view.getByRole('button', { name: '清除选择' }));
     await waitFor(() => expect(view.queryByText('已选择 1 条记录')).toBeNull());
+    expect(view.container.querySelector('[data-svadmin-batch-toolbar]')).toBeNull();
+  });
+
+  it('keeps the all-matching toolbar clearable after every matching record is excluded', async () => {
+    const view = render(AutoTableInteractionsHarness, {
+      onNavigate: vi.fn(),
+      selectable: true,
+      customBatchAction: true,
+      includeSecondRecord: true,
+      allowSelectAllMatching: true,
+    });
+    await fireEvent.click(requireValue((await view.findAllByRole('checkbox', { name: '选择记录 user-1' }))[0]));
+    await fireEvent.click(view.getByRole('button', { name: '选择全部匹配记录 (2)' }));
+    expect(await view.findByRole('region', { name: '已选择全部匹配记录 (2)' })).toBeTruthy();
+    for (const id of ['user-1', 'user-2']) {
+      await fireEvent.click(requireValue(view.getAllByRole('checkbox', { name: `选择记录 ${id}` })[0]));
+    }
+    const toolbar = await view.findByRole('region', { name: '已选择全部匹配记录 (0)' });
+    expect(within(toolbar).queryByRole('button', { name: /自定义批量/ })).toBeNull();
+    await fireEvent.click(within(toolbar).getByRole('button', { name: '清除选择' }));
+    expect(view.container.querySelector('[data-svadmin-batch-toolbar]')).toBeNull();
   });
 });

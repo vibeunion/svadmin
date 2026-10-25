@@ -58,10 +58,11 @@
   const query = useList({
     get resource() { return demoContract(resourceName); },
     pagination: { mode: 'off' },
+    errorNotification: false,
   });
-  const productsQuery = useList({ resource: demoContracts.products, pagination: { mode: 'off' }, get queryOptions() { return { enabled: !['purchase_orders', 'sales_orders'].includes(resourceName) }; } });
-  const warehousesQuery = useList({ resource: demoContracts.warehouses, pagination: { mode: 'off' }, get queryOptions() { return { enabled: !['purchase_orders', 'sales_orders'].includes(resourceName) }; } });
-  const suppliersQuery = useList({ resource: demoContracts.suppliers, pagination: { mode: 'off' }, get queryOptions() { return { enabled: ['reorder_rules', 'purchase_orders'].includes(resourceName) }; } });
+  const productsQuery = useList({ resource: demoContracts.products, pagination: { mode: 'off' }, errorNotification: false, get queryOptions() { return { enabled: !['purchase_orders', 'sales_orders'].includes(resourceName) }; } });
+  const warehousesQuery = useList({ resource: demoContracts.warehouses, pagination: { mode: 'off' }, errorNotification: false, get queryOptions() { return { enabled: !['purchase_orders', 'sales_orders'].includes(resourceName) }; } });
+  const suppliersQuery = useList({ resource: demoContracts.suppliers, pagination: { mode: 'off' }, errorNotification: false, get queryOptions() { return { enabled: ['reorder_rules', 'purchase_orders'].includes(resourceName) }; } });
 
   const isZh = $derived(i18n.locale === 'zh-CN');
   const rawRows = $derived(query.data?.data ?? []);

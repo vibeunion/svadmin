@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { provideAdminContext, type DataProvider, type ResourceDefinition, type AccessControlProvider, type HttpError, type ImportArtifactProvider, type TaskProvider } from '@svadmin/core';
+  import { provideAdminContext, type DataProvider, type ResourceDefinition, type AccessControlProvider, type HttpError, type ImportArtifactProvider, type ImportPreviewResult, type TaskProvider } from '@svadmin/core';
   import { definedOptions, definedReactiveOptions } from '@svadmin/core/options';
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
   import ImportWizard from './ImportWizard.svelte';
@@ -25,6 +25,8 @@
     taskIdempotencyKey,
     initialTaskId,
     onTaskSubmitted,
+    dryRun,
+    onPreview,
   }: {
     provider: DataProvider;
     resources: ResourceDefinition[];
@@ -45,6 +47,8 @@
     taskIdempotencyKey?: string;
     initialTaskId?: string;
     onTaskSubmitted?: (taskId: string) => void;
+    dryRun?: boolean;
+    onPreview?: (result: ImportPreviewResult) => void;
   } = $props();
 
   provideAdminContext(definedReactiveOptions({
@@ -61,7 +65,7 @@
     <ImportLimitsProbe {resourceName} {...definedOptions({ maxRows, maxBytes, onReady: onImportReady })} />
   {:else}
     <ImportWizard {resourceName} {open} {...definedOptions({
-      onSuccess, maxRows, maxBytes, taskProvider, taskArtifactProvider, taskName, retryTaskName, taskIdempotencyKey, initialTaskId, onTaskSubmitted,
+      onSuccess, maxRows, maxBytes, taskProvider, taskArtifactProvider, taskName, retryTaskName, taskIdempotencyKey, initialTaskId, onTaskSubmitted, dryRun, onPreview,
     })} />
   {/if}
 </QueryClientProvider>
