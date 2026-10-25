@@ -7,7 +7,7 @@
   import Card from '@svadmin/ui/components/ui/card/card.svelte';
   import { barChartPropsSchema } from '../builtin-schemas.js';
   import type { SurfaceWidgetRendererProps } from '../catalog.js';
-  import { formatSurfaceMessage, resolveSurfaceMessages } from '../localization.js';
+  import { formatSurfaceMessage, resolveSurfaceMessages, surfaceErrorMessage } from '../localization.js';
   import { asChartPoints, compactChartLabel } from '../widget-data.js';
 
   let { props, data, locale = 'en-US', messages }: SurfaceWidgetRendererProps = $props();
@@ -32,7 +32,7 @@
     {:else if data.status === 'empty'}
       <p class="chart-state" role="status">{activeMessages.chartNoData}</p>
     {:else if data.status === 'error'}
-      <p class="chart-state" role="alert">{data.error.message}</p>
+      <p class="chart-state" role="alert">{surfaceErrorMessage(data.error, activeMessages, activeMessages.chartUnavailable, activeMessages.chartInvalidData)}</p>
     {:else if data.status === 'ready' && points?.ok}
       <div class="chart-frame" role="img" aria-label={chartProps.title}>
         <BarChart data={chartData} showValues={chartProps.showValues ?? true} />

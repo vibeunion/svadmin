@@ -8,6 +8,7 @@ import type {
   DataProvider,
   IdentityGovernanceProvider,
   NotificationProvider,
+  OrganizationProvider,
   ProviderBundle,
   SessionProvider,
 } from '@svadmin/core';
@@ -25,6 +26,16 @@ const dataProvider = {
 
 function bundle(overrides: Partial<ProviderBundle> = {}): ProviderBundle {
   return { dataProvider, ...overrides };
+}
+
+function identityProvider(overrides: Partial<IdentityGovernanceProvider> = {}): IdentityGovernanceProvider {
+  return {
+    getSecurityPolicy: vi.fn(async () => ({ sessionTimeoutMinutes: 30, auditRetentionDays: 365, auditLoggingEnabled: true, requireSso: false })),
+    updateSecurityPolicy: vi.fn(async (policy) => policy),
+    listIdentityProviders: vi.fn(async () => []),
+    testIdentityProvider: vi.fn(async () => ({ success: true })),
+    ...overrides,
+  };
 }
 
 afterEach(() => {
@@ -90,6 +101,8 @@ describe('enterprise provider settings', () => {
     const props = { page: 'api' as const, providerBundle: bundle({ credentialProvider }) };
     const first = render(EnterpriseProvidersTestHost, { props });
     const second = render(EnterpriseProvidersTestHost, { props });
+    await within(first.container).findByRole('button', { name: 'Add Webhook' });
+    await within(second.container).findByRole('button', { name: 'Add Webhook' });
     const firstRead = within(first.container).getByRole('checkbox', { name: 'Read' });
     const secondRead = within(second.container).getByRole('checkbox', { name: 'Read' });
     const ids = new Set<string>();
@@ -106,6 +119,29 @@ describe('enterprise provider settings', () => {
     await userEvent.setup().click(requireValue(secondLabel));
     expect(firstRead.getAttribute('aria-checked')).toBe('true');
     expect(secondRead.getAttribute('aria-checked')).toBe('false');
+  });
+
+  it('does not expose provider diagnostics in API settings feedback', async () => {
+    const credentialProvider: CredentialProvider = {
+      listApiCredentials: vi.fn(async () => { throw new Error('PRIVATE_API_DIAGNOSTIC'); }),
+      createApiCredential: vi.fn(async () => { throw new Error('PRIVATE_CREATE_DIAGNOSTIC'); }),
+      revokeApiCredential: vi.fn(async () => ({ success: false, error: { message: 'PRIVATE_REVOKE_DIAGNOSTIC' } })),
+      listWebhooks: vi.fn(async () => []),
+      createWebhook: vi.fn(async () => { throw new Error('PRIVATE_WEBHOOK_DIAGNOSTIC'); }),
+      deleteWebhook: vi.fn(async () => ({ success: true })),
+    };
+    const notificationProvider: NotificationProvider = { open: vi.fn(), close: vi.fn() };
+    render(EnterpriseProvidersTestHost, { props: { page: 'api', providerBundle: bundle({ credentialProvider, notificationProvider }) } });
+
+    await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('Operation failed'));
+    expect(document.body.textContent).not.toContain('PRIVATE_API_DIAGNOSTIC');
+
+    await fireEvent.input(screen.getByPlaceholderText('CI deployment token'), { target: { value: 'Automation key' } });
+    await fireEvent.click(screen.getByRole('button', { name: /Generate Token|生成令牌/ }));
+    await waitFor(() => expect(notificationProvider.open).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'error', message: 'Operation failed' }),
+    ));
+    expect(document.body.textContent).not.toContain('PRIVATE_CREATE_DIAGNOSTIC');
   });
 
   it('passes the active tenant context when one provider serves multiple tenants', async () => {
@@ -300,7 +336,7 @@ describe('enterprise provider settings', () => {
       {},
     ));
 
-    await fireEvent.click(requireValue(screen.getAllByRole('button', { name: 'Manage' })[1]));
+    await fireEvent.click(requireValue(screen.getAllByRole('button', { name: 'Test' })[2]));
     await waitFor(() => expect(identityGovernanceProvider.testIdentityProvider).toHaveBeenCalledWith(
       {
         id: 'saml',
@@ -309,6 +345,88 @@ describe('enterprise provider settings', () => {
       },
       {},
     ));
+  });
+
+  it.each(['success', 'failure'] as const)('serializes each enterprise save independently and unlocks after %s', async outcome => {
+    type Policy = Awaited<ReturnType<IdentityGovernanceProvider['updateSecurityPolicy']>>;
+    type Organization = Awaited<ReturnType<NonNullable<OrganizationProvider['updateCurrentOrganization']>>>;
+    let resolvePolicy!: (value: Policy) => void;
+    let rejectPolicy!: (reason: Error) => void;
+    let resolveOrganization!: (value: Organization) => void;
+    let rejectOrganization!: (reason: Error) => void;
+    const pendingPolicy = new Promise<Policy>((resolve, reject) => { resolvePolicy = resolve; rejectPolicy = reject; });
+    const pendingOrganization = new Promise<Organization>((resolve, reject) => { resolveOrganization = resolve; rejectOrganization = reject; });
+    const expectedPolicy: Policy = {
+      sessionTimeoutMinutes: 45, auditRetentionDays: 365, auditLoggingEnabled: true, requireSso: false,
+    };
+    const updateSecurityPolicy = vi.fn<IdentityGovernanceProvider['updateSecurityPolicy']>()
+      .mockReturnValueOnce(pendingPolicy).mockImplementation(async policy => policy);
+    const updateCurrentOrganization = vi.fn<NonNullable<OrganizationProvider['updateCurrentOrganization']>>()
+      .mockReturnValueOnce(pendingOrganization)
+      .mockImplementation(async input => ({ id: 'org-1', name: input.name ?? 'Original organization' }));
+    const notificationProvider: NotificationProvider = { open: vi.fn(), close: vi.fn() };
+    render(EnterpriseProvidersTestHost, {
+      props: { page: 'enterprise', providerBundle: bundle({
+        identityGovernanceProvider: identityProvider({ updateSecurityPolicy }),
+        organizationProvider: {
+          getCurrentOrganization: async () => ({ id: 'org-1', name: 'Original organization' }),
+          updateCurrentOrganization,
+        },
+        notificationProvider,
+      }) },
+    });
+    const timeout = await screen.findByLabelText(/Session Timeout/);
+    const name = screen.getByLabelText('Organization name');
+    await fireEvent.input(timeout, { target: { value: '45' } });
+    await fireEvent.input(name, { target: { value: 'Updated organization' } });
+    const [organizationSave, policySave] = screen.getAllByRole('button', { name: 'Save' });
+    // 在 DOM 更新前重复分发事件，验证函数门禁而非仅验证 disabled。
+    for (const button of [policySave, policySave, organizationSave, organizationSave]) {
+      requireValue(button).dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    }
+    await waitFor(() => {
+      expect(updateSecurityPolicy).toHaveBeenCalledTimes(1);
+      expect(updateCurrentOrganization).toHaveBeenCalledTimes(1);
+      expect(timeout).toHaveProperty('disabled', true);
+      expect(name).toHaveProperty('disabled', true);
+    });
+    expect(updateSecurityPolicy).toHaveBeenCalledWith(expectedPolicy, {});
+    expect(updateCurrentOrganization).toHaveBeenCalledWith({ name: 'Updated organization' }, {});
+    if (outcome === 'failure') rejectPolicy(new Error('PRIVATE_PENDING_POLICY'));
+    else resolvePolicy({ ...expectedPolicy, sessionTimeoutMinutes: 50 });
+    await waitFor(() => expect(timeout).toHaveProperty('disabled', false));
+    expect(timeout).toHaveProperty('value', outcome === 'failure' ? '45' : '50');
+    expect(name).toHaveProperty('disabled', true);
+    expect(organizationSave).toHaveProperty('disabled', true);
+    expect(notificationProvider.open).toHaveBeenCalledTimes(1);
+    expect(notificationProvider.open).toHaveBeenLastCalledWith(expect.objectContaining({
+      type: outcome === 'failure' ? 'error' : 'success',
+      message: outcome === 'failure' ? 'Operation failed' : 'Enterprise policy saved',
+    }));
+    if (outcome === 'success') await fireEvent.input(timeout, { target: { value: '45' } });
+    await fireEvent.click(requireValue(policySave));
+    await waitFor(() => expect(timeout).toHaveProperty('disabled', false));
+    expect(updateSecurityPolicy).toHaveBeenCalledTimes(2);
+    expect(updateSecurityPolicy).toHaveBeenLastCalledWith(expectedPolicy, {});
+    expect(updateCurrentOrganization).toHaveBeenCalledTimes(1);
+    expect(name).toHaveProperty('disabled', true);
+    if (outcome === 'failure') rejectOrganization(new Error('PRIVATE_PENDING_ORGANIZATION'));
+    else resolveOrganization({ id: 'org-1', name: 'Canonical organization' });
+    await waitFor(() => expect(name).toHaveProperty('disabled', false));
+    expect(name).toHaveProperty('value', outcome === 'failure' ? 'Updated organization' : 'Canonical organization');
+    if (outcome === 'success') {
+      expect(organizationSave).toHaveProperty('disabled', true);
+      await fireEvent.input(name, { target: { value: 'Updated organization' } });
+    }
+    await fireEvent.click(requireValue(organizationSave));
+    await waitFor(() => expect(name).toHaveProperty('disabled', false));
+    expect(updateCurrentOrganization).toHaveBeenCalledTimes(2);
+    expect(updateCurrentOrganization).toHaveBeenLastCalledWith({ name: 'Updated organization' }, {});
+    expect(organizationSave).toHaveProperty('disabled', true);
+    expect(notificationProvider.open).toHaveBeenCalledTimes(4);
+    expect(notificationProvider.open).toHaveBeenLastCalledWith(expect.objectContaining({
+      type: 'success', message: 'Organization saved',
+    }));
   });
 
   it('keeps enterprise field labels unique across page instances', async () => {
@@ -331,6 +449,205 @@ describe('enterprise provider settings', () => {
         }
       }
     }
+  });
+
+  it('names connection tests accurately and serializes all test entry points until recovery', async () => {
+    let rejectTest!: (reason: Error) => void;
+    const pendingTest = new Promise<never>((_, reject) => { rejectTest = reject; });
+    const testIdentityProvider = vi.fn<IdentityGovernanceProvider['testIdentityProvider']>()
+      .mockReturnValueOnce(pendingTest).mockResolvedValue({ success: true });
+    const notificationProvider: NotificationProvider = { open: vi.fn(), close: vi.fn() };
+    const provider = identityProvider({
+      listIdentityProviders: async () => [
+        { id: 'oidc', name: 'Company OIDC', protocol: 'oidc', status: 'connected' },
+        { id: 'saml', name: 'Partner SAML', protocol: 'saml', status: 'disconnected' },
+      ],
+      testIdentityProvider,
+    });
+    render(EnterpriseProvidersTestHost, {
+      props: { page: 'enterprise', providerBundle: bundle({ identityGovernanceProvider: provider, notificationProvider }) },
+    });
+    await screen.findByText('Partner SAML');
+    expect(screen.queryByRole('button', { name: /^(Manage|Connect)$/ })).toBeNull();
+    const buttons = screen.getAllByRole('button', { name: 'Test' });
+    expect(buttons).toHaveLength(3);
+    // 同一同步事件栈触发多个入口，不能只依赖下一次 DOM 更新后的 disabled。
+    for (const button of [requireValue(buttons[1]), requireValue(buttons[2]), requireValue(buttons[0])]) {
+      button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    }
+    await waitFor(() => expect(testIdentityProvider).toHaveBeenCalledTimes(1));
+    expect(testIdentityProvider).toHaveBeenCalledWith({ id: 'oidc', protocol: 'oidc' }, {});
+    for (const button of buttons) expect(button).toHaveProperty('disabled', true);
+    rejectTest(new Error('PRIVATE_TEST_CONCURRENCY'));
+    await waitFor(() => expect(notificationProvider.open).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'error', message: 'Operation failed' }),
+    ));
+    for (const button of buttons) expect(button).toHaveProperty('disabled', false);
+    await fireEvent.click(requireValue(buttons[2]));
+    await waitFor(() => expect(testIdentityProvider).toHaveBeenCalledTimes(2));
+    expect(testIdentityProvider).toHaveBeenLastCalledWith({ id: 'saml', protocol: 'saml' }, {});
+    await waitFor(() => expect(notificationProvider.open).toHaveBeenLastCalledWith(
+      expect.objectContaining({ type: 'success', message: 'Identity provider connection succeeded' }),
+    ));
+  });
+
+  it.each(['success', 'failure'] as const)('does not let a late %s release a replacement provider test', async (outcome) => {
+    type Result = Awaited<ReturnType<IdentityGovernanceProvider['testIdentityProvider']>>;
+    let resolveOld!: (value: Result) => void;
+    let rejectOld!: (reason: Error) => void;
+    let resolveNew!: (value: Result) => void;
+    const oldResult = new Promise<Result>((resolve, reject) => { resolveOld = resolve; rejectOld = reject; });
+    const newResult = new Promise<Result>((resolve) => { resolveNew = resolve; });
+    const notificationProvider: NotificationProvider = { open: vi.fn(), close: vi.fn() };
+    const oldProvider = identityProvider({
+      listIdentityProviders: async () => [{ id: 'old', name: 'Old OIDC', protocol: 'oidc', status: 'connected' }],
+      testIdentityProvider: vi.fn(async () => oldResult),
+    });
+    const newProvider = identityProvider({
+      listIdentityProviders: async () => [{ id: 'new', name: 'New OIDC', protocol: 'oidc', status: 'connected' }],
+      testIdentityProvider: vi.fn(async () => newResult),
+    });
+    const { rerender } = render(EnterpriseProvidersTestHost, {
+      props: { page: 'enterprise', providerBundle: bundle({ identityGovernanceProvider: oldProvider, notificationProvider }) },
+    });
+    await screen.findByText('Old OIDC');
+    await fireEvent.click(requireValue(screen.getAllByRole('button', { name: 'Test' })[1]));
+    await rerender({
+      page: 'enterprise', providerBundle: bundle({ identityGovernanceProvider: newProvider, notificationProvider }),
+    });
+    await screen.findByText('New OIDC');
+    await fireEvent.click(requireValue(screen.getAllByRole('button', { name: 'Test' })[1]));
+    await waitFor(() => expect(newProvider.testIdentityProvider).toHaveBeenCalledTimes(1));
+    expect(newProvider.testIdentityProvider).toHaveBeenCalledWith({ id: 'new', protocol: 'oidc' }, {});
+    if (outcome === 'success') resolveOld({ success: true });
+    else rejectOld(new Error('PRIVATE_OLD_CONNECTION'));
+    await oldResult.catch(() => undefined);
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(notificationProvider.open).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'Testing...' })).toHaveProperty('disabled', true);
+    resolveNew({ success: true });
+    await waitFor(() => expect(notificationProvider.open).toHaveBeenCalledTimes(1));
+    for (const button of screen.getAllByRole('button', { name: 'Test' })) {
+      expect(button).toHaveProperty('disabled', false);
+    }
+  });
+
+  describe.each([
+    ['diagnostic', new Error('PRIVATE_ENTERPRISE_DIAGNOSTIC')],
+    ['empty Error', new Error('')],
+    ['non-Error', 'PRIVATE_ENTERPRISE_DIAGNOSTIC'],
+  ])('enterprise failure recovery: %s', (_label, failure) => {
+    it('shows a safe load error instead of empty content and recovers on retry', async () => {
+      const provider = identityProvider();
+      const getSecurityPolicy = vi.fn(provider.getSecurityPolicy).mockRejectedValueOnce(failure);
+      render(EnterpriseProvidersTestHost, {
+        props: { page: 'enterprise', providerBundle: bundle({ identityGovernanceProvider: { ...provider, getSecurityPolicy } }) },
+      });
+
+      expect(await screen.findByText('Enterprise settings failed to load')).toBeTruthy();
+      expect(screen.getByText('Operation failed')).toBeTruthy();
+      expect(screen.queryByText('No identity provider configured')).toBeNull();
+      expect(screen.queryByLabelText(/Session Timeout/)).toBeNull();
+      expect(document.body.textContent).not.toContain('PRIVATE_ENTERPRISE_DIAGNOSTIC');
+      await fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+      expect(await screen.findByLabelText(/Session Timeout/)).toHaveProperty('value', '30');
+      expect(screen.queryByText('Operation failed')).toBeNull();
+      expect(getSecurityPolicy).toHaveBeenCalledTimes(2);
+    });
+
+    it('preserves the policy draft on save failure and permits a successful retry', async () => {
+      const provider = identityProvider();
+      const updateSecurityPolicy = vi.fn(provider.updateSecurityPolicy).mockRejectedValueOnce(failure);
+      const notificationProvider: NotificationProvider = { open: vi.fn(), close: vi.fn() };
+      render(EnterpriseProvidersTestHost, {
+        props: { page: 'enterprise', providerBundle: bundle({ identityGovernanceProvider: { ...provider, updateSecurityPolicy }, notificationProvider }) },
+      });
+
+      const timeout = await screen.findByLabelText(/Session Timeout/);
+      await fireEvent.input(timeout, { target: { value: '45' } });
+      await fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+      await waitFor(() => expect(notificationProvider.open).toHaveBeenLastCalledWith(
+        expect.objectContaining({ type: 'error', message: 'Operation failed' }),
+      ));
+      expect(timeout).toHaveProperty('value', '45');
+      await fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+      await waitFor(() => expect(notificationProvider.open).toHaveBeenLastCalledWith(
+        expect.objectContaining({ type: 'success', message: 'Enterprise policy saved' }),
+      ));
+      expect(updateSecurityPolicy).toHaveBeenCalledTimes(2);
+      expect(updateSecurityPolicy).toHaveBeenLastCalledWith(
+        { sessionTimeoutMinutes: 45, auditRetentionDays: 365, auditLoggingEnabled: true, requireSso: false }, {},
+      );
+    });
+
+    it('preserves the organization draft on failure and permits a successful retry', async () => {
+      const updateCurrentOrganization = vi.fn(async ({ name }: { name?: string }) => ({ id: 'org-1', name: name ?? 'Acme' }))
+        .mockRejectedValueOnce(failure);
+      const notificationProvider: NotificationProvider = { open: vi.fn(), close: vi.fn() };
+      render(EnterpriseProvidersTestHost, {
+        props: {
+          page: 'enterprise',
+          providerBundle: bundle({
+            notificationProvider,
+            organizationProvider: {
+              getCurrentOrganization: vi.fn(async () => ({ id: 'org-1', name: 'Acme' })),
+              updateCurrentOrganization,
+            },
+          }),
+        },
+      });
+
+      const name = await screen.findByLabelText('Organization name');
+      await fireEvent.input(name, { target: { value: 'Acme Global' } });
+      await fireEvent.click(requireValue(screen.getAllByRole('button', { name: 'Save' })[0]));
+      await waitFor(() => expect(notificationProvider.open).toHaveBeenLastCalledWith(
+        expect.objectContaining({ type: 'error', message: 'Operation failed' }),
+      ));
+      expect(name).toHaveProperty('value', 'Acme Global');
+      await fireEvent.click(requireValue(screen.getAllByRole('button', { name: 'Save' })[0]));
+      await waitFor(() => expect(notificationProvider.open).toHaveBeenLastCalledWith(
+        expect.objectContaining({ type: 'success', message: 'Organization saved' }),
+      ));
+      expect(updateCurrentOrganization).toHaveBeenCalledTimes(2);
+      expect(updateCurrentOrganization).toHaveBeenLastCalledWith({ name: 'Acme Global' }, {});
+    });
+
+    it('sanitizes thrown connection failures and allows retesting', async () => {
+      const testIdentityProvider = vi.fn<IdentityGovernanceProvider['testIdentityProvider']>()
+        .mockRejectedValueOnce(failure).mockResolvedValue({ success: true });
+      const notificationProvider: NotificationProvider = { open: vi.fn(), close: vi.fn() };
+      render(EnterpriseProvidersTestHost, {
+        props: { page: 'enterprise', providerBundle: bundle({ identityGovernanceProvider: identityProvider({ testIdentityProvider }), notificationProvider }) },
+      });
+      await screen.findByLabelText(/Session Timeout/);
+      await fireEvent.click(screen.getByRole('button', { name: 'Test' }));
+      await waitFor(() => expect(notificationProvider.open).toHaveBeenLastCalledWith(
+        expect.objectContaining({ type: 'error', message: 'Operation failed' }),
+      ));
+      await fireEvent.click(screen.getByRole('button', { name: 'Test' }));
+      await waitFor(() => expect(notificationProvider.open).toHaveBeenLastCalledWith(
+        expect.objectContaining({ type: 'success', message: 'Identity provider connection succeeded' }),
+      ));
+      expect(testIdentityProvider).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  it.each(['PRIVATE_CONNECTION_DIAGNOSTIC', ''])('sanitizes unsuccessful connection results (%s)', async (message) => {
+    const testIdentityProvider = vi.fn<IdentityGovernanceProvider['testIdentityProvider']>()
+      .mockResolvedValueOnce({ success: false, error: { message } }).mockResolvedValue({ success: true });
+    const notificationProvider: NotificationProvider = { open: vi.fn(), close: vi.fn() };
+    render(EnterpriseProvidersTestHost, {
+      props: { page: 'enterprise', providerBundle: bundle({ identityGovernanceProvider: identityProvider({ testIdentityProvider }), notificationProvider }) },
+    });
+    await screen.findByLabelText(/Session Timeout/);
+    await fireEvent.click(screen.getByRole('button', { name: 'Test' }));
+    await waitFor(() => expect(notificationProvider.open).toHaveBeenLastCalledWith(
+      expect.objectContaining({ type: 'error', message: 'Operation failed' }),
+    ));
+    await fireEvent.click(screen.getByRole('button', { name: 'Test' }));
+    await waitFor(() => expect(notificationProvider.open).toHaveBeenLastCalledWith(
+      expect.objectContaining({ type: 'success', message: 'Identity provider connection succeeded' }),
+    ));
   });
 
   it('updates organization details without requiring identity governance', async () => {

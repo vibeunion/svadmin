@@ -1,6 +1,6 @@
 import { flushSync, tick } from 'svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { DeleteManyPartialError, setAdminOptions } from '@svadmin/core';
+import { DeleteManyPartialError, setAdminOptions, type Filter } from '@svadmin/core';
 import { createListDeletion } from './list-deletion.svelte.js';
 import { createListSelection } from './list-selection.svelte.js';
 
@@ -24,6 +24,7 @@ function setup() {
   let canRequest = $state(true);
   let canConfirm = $state(true);
   let scope = $state(1);
+  let filters = $state<Filter[]>([]);
   const reportError = vi.fn<(message: string | null) => void>();
   const mutate = vi.fn<(ids: (string | number)[]) => Promise<unknown>>().mockResolvedValue(undefined);
   let selection!: ReturnType<typeof createListSelection>;
@@ -31,8 +32,9 @@ function setup() {
   const clearSelection = vi.fn(() => selection.clearExplicit());
   const dispose = $effect.root(() => {
     selection = createListSelection({
-      filters: () => [], sorters: () => [], total: () => 2,
-      selectable: () => true, allowAllMatching: () => false, onCriteriaChange: () => {},
+      filters: () => filters, sorters: () => [], total: () => 2,
+      selectable: () => true, allowAllMatching: () => false,
+      onCriteriaChange: () => model.cancelBatchOnCriteriaChange(),
     });
     model = createListDeletion({
       canRequestSingle: () => canRequest,
@@ -63,6 +65,7 @@ function setup() {
     },
     gates(request: boolean, confirm: boolean) { canRequest = request; canConfirm = confirm; flushSync(); },
     changeScope() { scope += 1; flushSync(); },
+    changeCriteria(next: Filter[], flush = true) { filters = next; if (flush) flushSync(); },
   };
 }
 
@@ -221,6 +224,79 @@ describe('list deletion model', () => {
     expect(selection.selectedIds).toEqual([2]);
     expect(clearSelection).not.toHaveBeenCalled();
     expect(reportError).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['pessimistic', 'resolve'], ['pessimistic', 'reject'], ['pessimistic', 'partial'],
+    ['undoable', 'resolve'], ['undoable', 'reject'], ['undoable', 'partial'],
+  ] as const)('isolates a stale %s %s result after criteria change and return', async (mode, outcome) => {
+    setAdminOptions({ mutationMode: mode });
+    const pending = deferred();
+    const { model, selection, mutate, changeCriteria, clearSelection, reportError } = setup();
+    mutate.mockReturnValue(pending.promise);
+    selection.retainFailedIds([1, 2]);
+    model.requestBatchDelete();
+    const result = model.confirm();
+    changeCriteria([{ field: 'status', operator: 'eq', value: 'active' }]);
+    expect(selection.selectedIds).toEqual([]);
+    changeCriteria([]);
+    selection.retainFailedIds([2]);
+    clearSelection.mockClear();
+    reportError.mockClear();
+    model.requestBatchDelete();
+    model.requestDelete(2);
+    await model.confirm();
+    expect(model.pending).toBe(true);
+    expect(model.request?.ids).toEqual([1, 2]);
+    expect(mutate).toHaveBeenCalledOnce();
+    if (outcome === 'resolve') pending.resolve();
+    else if (outcome === 'partial') pending.reject(new DeleteManyPartialError([2], [1]));
+    else pending.reject(new Error('old request failed'));
+    await result;
+    expect(selection.selectedIds).toEqual([2]);
+    expect(clearSelection).not.toHaveBeenCalled();
+    expect(reportError).not.toHaveBeenCalled();
+    expect(model.pending).toBe(false);
+    expect(model.request).toBeNull();
+    model.requestBatchDelete();
+    expect(model.open).toBe(true);
+    expect(model.request?.ids).toEqual([2]);
+  });
+
+  it.each(['resolve', 'partial'] as const)('isolates a single-record %s result from a changed list', async outcome => {
+    const pending = deferred();
+    const { model, selection, mutate, changeCriteria, clearSelection, reportError } = setup();
+    mutate.mockReturnValue(pending.promise);
+    model.requestDelete(1);
+    const result = model.confirm();
+    changeCriteria([{ field: 'status', operator: 'eq', value: 'active' }]);
+    selection.retainFailedIds(['new-record']);
+    reportError.mockClear();
+    if (outcome === 'resolve') pending.resolve();
+    else pending.reject(new DeleteManyPartialError([], [1]));
+    await result;
+    expect(selection.selectedIds).toEqual(['new-record']);
+    expect(clearSelection).not.toHaveBeenCalled();
+    expect(reportError).not.toHaveBeenCalled();
+    expect(model.pending).toBe(false);
+  });
+
+  it('ignores a failure queued just before a filter update in the same turn', async () => {
+    const pending = deferred();
+    const { model, selection, mutate, changeCriteria, reportError } = setup();
+    selection.retainFailedIds([1]);
+    mutate.mockReturnValue(pending.promise);
+    model.requestBatchDelete();
+    const result = model.confirm();
+    flushSync();
+    await tick();
+    reportError.mockClear();
+    pending.reject(new Error('stale failure'));
+    changeCriteria([{ field: 'status', operator: 'eq', value: 'active' }], false);
+    await result;
+    expect(reportError).not.toHaveBeenCalled();
+    expect(selection.selectedIds).toEqual([]);
+    expect(model.pending).toBe(false);
   });
 
   it('does not let an old completion clear a newer request after reset', async () => {

@@ -33,13 +33,13 @@
   let loading = $state(false);
   let saving = $state(false);
   let loaded = $state(false);
-  let loadError = $state('');
-  let saveError = $state('');
+  let loadError = $state(false);
+  let saveError = $state(false);
   let epoch = 0;
   async function load() {
     const provider = preferencesProvider;
     const request = ++epoch;
-    loadError = ''; saveError = ''; loaded = false; saving = false;
+    loadError = false; saveError = false; loaded = false; saving = false;
     loading = Boolean(provider);
     if (!provider) return;
     try {
@@ -47,8 +47,8 @@
       if (request !== epoch) return;
       emailAlerts = { ...result.email }; pushAlerts = { ...result.push }; smsAlerts = { ...result.sms };
       loaded = true;
-    } catch (caught) {
-      if (request === epoch) loadError = caught instanceof Error ? caught.message : String(caught);
+    } catch {
+      if (request === epoch) loadError = true;
     } finally {
       if (request === epoch) loading = false;
     }
@@ -62,12 +62,12 @@
     const provider = preferencesProvider;
     if (!provider || !loaded || saving) return;
     const request = epoch;
-    saving = true; saveError = '';
+    saving = true; saveError = false;
     try {
       await provider.save({ email: { ...emailAlerts }, push: { ...pushAlerts }, sms: { ...smsAlerts } });
       if (request === epoch) notification.success(i18n.t('common.updateSuccess'), 3000);
-    } catch (caught) {
-      if (request === epoch) saveError = caught instanceof Error ? caught.message : String(caught);
+    } catch {
+      if (request === epoch) saveError = true;
     } finally {
       if (request === epoch) saving = false;
     }
@@ -89,9 +89,9 @@
   {#if loading}
     <DataState state="loading" />
   {:else if loadError}
-    <DataState state="error" description={loadError} retry={load} />
+    <DataState state="error" description={i18n.t('common.operationFailed')} retry={load} />
   {:else if saveError}
-    <FeedbackNotice tone="danger" message={saveError} />
+    <FeedbackNotice tone="danger" message={i18n.t('common.operationFailed')} />
   {/if}
   {#if loaded || !preferencesProvider}
   <fieldset disabled={!preferencesProvider || saving} class="svadmin-u-b3542e058833">

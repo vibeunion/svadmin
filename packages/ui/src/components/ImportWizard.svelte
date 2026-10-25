@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { captureAdminContext, captureAuthSession, IMPORT_LIMITS, snapshotImportArtifact, snapshotImportTaskResult, useCan, useImport, useResourceContract, useSubmitTask, useTask } from '@svadmin/core';
+  import { captureAdminContext, captureAuthSession, IMPORT_LIMITS, invalidImportPreviewFailure, snapshotImportArtifact, snapshotImportTaskResult, useCan, useImport, useResourceContract, useSubmitTask, useTask } from '@svadmin/core';
   import { untrack } from 'svelte';
   import { definedReactiveOptions } from '@svadmin/core/options';
   import { useTranslation } from '@svadmin/core/i18n';
   import { parseContractCreateInput } from '@svadmin/core/resource-contract';
-  import type { ImportArtifactProvider, TaskProvider } from '@svadmin/core';
+  import type { ImportArtifactProvider, ImportPreviewResult, TaskProvider } from '@svadmin/core';
   import { normalizeTaskStatus, resolveTaskProgress, canCancelTask } from './task-utils.js';
   import TaskStatusBadge from './TaskStatusBadge.svelte';
   import CancelTaskButton from './CancelTaskButton.svelte';
@@ -30,6 +30,10 @@
     initialTaskId?: string;
     onTaskSubmitted?: (taskId: string) => void;
     onSuccess?: (result: { succeeded: number; failed: number }) => void;
+    /** 只做本地解析、映射和逐行校验，不调用 Provider 写入，也不提交、轮询或取消任务。 */
+    dryRun?: boolean;
+    /** 预览结果回调；接收隔离的只读快照，失败原因与失败报告一样只含安全通用文本。 */
+    onPreview?: (result: ImportPreviewResult) => void;
   }
 
   let {
@@ -46,6 +50,8 @@
     initialTaskId,
     onTaskSubmitted,
     onSuccess,
+    dryRun = false,
+    onPreview,
   }: Props = $props();
 
   const i18n = useTranslation();
@@ -78,14 +84,14 @@
   let parseToken = 0;
   let mounted = true;
   let cancelled = $state(false);
-  let durableTaskId = $state<string | undefined>(untrack(() => initialTaskId));
-  let durableTaskScope = $state.raw<typeof scope | undefined>(untrack(() => scope));
-  const ownedTaskId = $derived(durableTaskScope && sameScope(durableTaskScope, scope) ? durableTaskId : undefined);
+  let durableTaskId = $state<string | undefined>(untrack(() => dryRun ? undefined : initialTaskId));
+  let durableTaskScope = $state.raw<typeof scope | undefined>(untrack(() => dryRun ? undefined : scope));
+  const ownedTaskId = $derived(!dryRun && durableTaskScope && sameScope(durableTaskScope, scope) ? durableTaskId : undefined);
   let durableHandledTaskId = $state<string | undefined>();
   let durableSubmitAttempt = $state.raw<object | undefined>();
   let artifactUploadController: AbortController | undefined;
   let durablePolling = $state(true);
-  const durableMode = $derived(taskName !== undefined);
+  const durableMode = $derived(!dryRun && taskName !== undefined);
   const submitTask = useSubmitTask();
   const taskQuery = useTask(definedReactiveOptions({
     get taskId() { return ownedTaskId; },
@@ -101,12 +107,13 @@
   const durableStatus = $derived(normalizeTaskStatus(taskQuery.data?.status));
   const retryReceipt = $derived(durableStatus === 'completed'
     ? snapshotImportTaskResult(taskQuery.data?.result ?? taskQuery.data?.result_data)?.retry : undefined);
-  const durableActive = $derived(durableStatus === 'queued' || durableStatus === 'processing'
-    || !!durableSubmitAttempt);
+  const durableActive = $derived(!dryRun && (durableStatus === 'queued' || durableStatus === 'processing'
+    || !!durableSubmitAttempt));
 
   let importResult = $state<{ succeeded: number; failed: number } | null>(null);
   let succeededCount = $state(0);
   let failedRecords = $state<Array<{ row: Record<string, unknown>; error: string }>>([]);
+  let previewResult = $state.raw<ImportPreviewResult | null>(null);
 
   const importer = useImport(definedReactiveOptions({
     get resource() { return binding.resource; },
@@ -133,6 +140,7 @@
     durableTaskId = undefined;
     durableHandledTaskId = undefined;
     durableSubmitAttempt = undefined;
+    previewResult = null;
     selectedFile = null;
     fileName = file.name;
     rawHeaders = [];
@@ -244,20 +252,78 @@
     return record;
   }
 
-  function validateMappedRows(): string | null {
+  function mapSourceRow(source: unknown[]): Record<string, unknown> {
+    return mapRow(Object.fromEntries(rawHeaders.map((header, column) => [header, source[column]])));
+  }
+
+  function snapshotPreviewResult(result: ImportPreviewResult): ImportPreviewResult {
+    const failedRows = result.failedRows.map(failure => Object.freeze({
+      row: failure.row,
+      error: failure.error,
+    }));
+    Object.freeze(failedRows);
+    return Object.freeze({
+      totalRows: result.totalRows,
+      importableRows: result.importableRows,
+      failedRows,
+    });
+  }
+
+  function evaluateMappedRows(): ImportPreviewResult {
+    const failedRows: ImportPreviewResult['failedRows'] = [];
     for (const [index, source] of rawRows.entries()) {
       try {
-        const mapped = mapRow(Object.fromEntries(rawHeaders.map((header, column) => [header, source[column]])));
-        parseContractCreateInput(binding.resource, mapped);
+        parseContractCreateInput(binding.resource, mapSourceRow(source));
       } catch {
-        return i18n.t('import.invalidRow', { row: index + 1 });
+        failedRows.push(invalidImportPreviewFailure(index + 1));
       }
     }
-    return null;
+    return snapshotPreviewResult({
+      totalRows: rawRows.length,
+      importableRows: rawRows.length - failedRows.length,
+      failedRows,
+    });
+  }
+
+  function firstInvalidMappedRow(): number | undefined {
+    for (const [index, source] of rawRows.entries()) {
+      try {
+        parseContractCreateInput(binding.resource, mapSourceRow(source));
+      } catch {
+        return index + 1;
+      }
+    }
+    return undefined;
+  }
+
+  function validateMappedRows(): string | null {
+    const row = firstInvalidMappedRow();
+    return row === undefined ? null : i18n.t('import.invalidRow', { row });
+  }
+
+  function previewImport() {
+    if (!selectedFile || rawRows.length === 0 || isImporting || !open || !allowed) return;
+    if (!dryRun && !onPreview) return;
+    const targets = Object.values(columnMapping).filter(Boolean);
+    if (targets.length === 0 || new Set(targets).size !== targets.length) {
+      fileError = 'Map at least one column, and use each target field only once.';
+      previewResult = null;
+      return;
+    }
+    fileError = null;
+    importError = null;
+    previewResult = evaluateMappedRows();
+    currentStep = 3;
+    try {
+      // 观察者只拿到隔离的只读快照；同步抛错或异步拒绝都不能改变已完成的本地预览。
+      const observerSnapshot = snapshotPreviewResult(previewResult);
+      void Promise.resolve(onPreview?.(observerSnapshot)).catch(() => {});
+    } catch { /* 观察者失败不能改变已完成的本地预览结果。 */ }
   }
 
   async function startImport() {
     if (!selectedFile || rawRows.length === 0 || isImporting || !open || !allowed) return;
+    if (dryRun) { previewImport(); return; }
     if (durableMode && (!activeTaskProvider || !taskName?.trim() || !taskIdempotencyKey?.trim())) {
       fileError = i18n.t('import.taskConfiguration');
       return;
@@ -275,6 +341,7 @@
     const origin = scope;
     const token = parseToken;
     const notifySuccess = onSuccess;
+    previewResult = null;
     currentStep = 3;
     succeededCount = 0;
     failedRecords = [];
@@ -292,8 +359,7 @@
           throw new Error(i18n.t('import.taskConfiguration'));
         }
         const records = taskArtifactProvider ? undefined : rawRows.map((source, index) => {
-          const mapped = mapRow(Object.fromEntries(rawHeaders.map((header, column) => [header, source[column]])));
-          try { return parseContractCreateInput(binding.resource, mapped); }
+          try { return parseContractCreateInput(binding.resource, mapSourceRow(source)); }
           catch { throw new Error(i18n.t('import.invalidRow', { row: index + 1 })); }
         });
         const uploaded = taskArtifactProvider
@@ -472,6 +538,7 @@
     succeededCount = 0;
     failedRecords = [];
     importResult = null;
+    previewResult = null;
     fileError = null;
     importError = null;
     cancelled = false;
@@ -497,20 +564,27 @@
 
   let observedScope = untrack(() => scope);
   let observedOpen = untrack(() => open);
+  let observedDryRun = untrack(() => dryRun);
   $effect.pre(() => {
-    const changed = !sameScope(observedScope, scope) || (observedScope.allowed && !allowed);
+    const changed = !sameScope(observedScope, scope) || (observedScope.allowed && !allowed)
+      || observedDryRun !== dryRun;
     if (changed) {
       durableTaskId = undefined;
       durableTaskScope = undefined;
       durableHandledTaskId = undefined;
+      durableSubmitAttempt = undefined;
+      artifactUploadController?.abort();
+      artifactUploadController = undefined;
+      durablePolling = true;
     }
     if (changed || observedOpen !== open) untrack(reset);
     observedScope = scope;
     observedOpen = open;
+    observedDryRun = dryRun;
   });
   $effect(() => {
     const task = taskQuery.data;
-    if (!open || !allowed || !durableTaskId || !task || durableHandledTaskId === durableTaskId) return;
+    if (dryRun || !open || !allowed || !durableTaskId || !task || durableHandledTaskId === durableTaskId) return;
     if (!['completed', 'failed', 'cancelled'].includes(durableStatus)) return;
     durableHandledTaskId = durableTaskId;
     durablePolling = false;
@@ -555,7 +629,41 @@
       {#if !allowed}
         <p role="status">{i18n.t('common.operationFailed', { defaultValue: 'Import is unavailable.' })}</p>
       {/if}
-      {#if durableMode && (durableTaskId || durableSubmitAttempt || currentStep === 3)}
+      {#if currentStep === 3 && previewResult}
+        <div class="svadmin-u-b43b4c086d9a svadmin-u-03b4dd7f172b">
+          <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
+            <FileSpreadsheet class="svadmin-u-cd0d9c512cdc svadmin-u-72470489ff4e" />
+            <span>{i18n.t('import.preview')}</span>
+          </div>
+          <p role="status">
+            {i18n.t('import.previewSummary', {
+              total: previewResult.totalRows,
+              importable: previewResult.importableRows,
+              failed: previewResult.failedRows.length,
+            })}
+          </p>
+          <p>{i18n.t('import.previewHint')}</p>
+          {#if previewResult.failedRows.length > 0}
+            <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 svadmin-u-811148b13d1e">
+              <AlertCircle class="svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3" />
+              <span>{i18n.t('import.previewFailed')}</span>
+            </div>
+            <ul>
+              {#each previewResult.failedRows.slice(0, 20) as failure (failure.row)}
+                <li>{i18n.t('import.previewFailedRow', { row: failure.row, error: failure.error })}</li>
+              {/each}
+            </ul>
+          {/if}
+          <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77c08e015d14 svadmin-u-77a2a20e90d4">
+            <Button variant="outline" size="sm" onclick={() => { previewResult = null; currentStep = 2; }}>
+              {i18n.t('import.backToImport')}
+            </Button>
+            <Button variant="outline" size="sm" onclick={reset}>
+              {i18n.t('common.importAnother', { defaultValue: 'Import Another' })}
+            </Button>
+          </div>
+        </div>
+      {:else if durableMode && (durableTaskId || durableSubmitAttempt || currentStep === 3)}
         {#if durableTaskId}
           <p>{durableTaskId}</p>
           {#if taskQuery.isError}
@@ -672,16 +780,29 @@
               <ArrowLeft class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-618162408e7a" />
               {i18n.t('common.back', { defaultValue: 'Back' })}
             </Button>
-            <Button size="sm" disabled={!allowed || isImporting} onclick={startImport}>
-              {i18n.t('common.startImport', { defaultValue: 'Start Import' })}
-              <ArrowRight class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-f58b02572ab2" />
-            </Button>
+            {#if dryRun}
+              <Button size="sm" disabled={!allowed || isImporting} onclick={previewImport}>
+                {i18n.t('import.preview')}
+                <ArrowRight class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-f58b02572ab2" />
+              </Button>
+            {:else if onPreview}
+              <Button variant="outline" size="sm" disabled={!allowed || isImporting} onclick={previewImport}>
+                {i18n.t('common.preview')}
+                <ArrowRight class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-f58b02572ab2" />
+              </Button>
+            {/if}
+            {#if !dryRun}
+              <Button size="sm" disabled={!allowed || isImporting} onclick={startImport}>
+                {i18n.t('common.startImport', { defaultValue: 'Start Import' })}
+                <ArrowRight class="svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-f58b02572ab2" />
+              </Button>
+            {/if}
           </div>
         </div>
       {/if}
 
       <!-- Step 3: Progress & Summary -->
-      {#if currentStep === 3 && !durableMode}
+      {#if currentStep === 3 && !durableMode && !previewResult}
         <div class="svadmin-u-b43b4c086d9a svadmin-u-03b4dd7f172b">
           <div class="svadmin-u-6f7e013d6499">
             <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-359090c2d529">

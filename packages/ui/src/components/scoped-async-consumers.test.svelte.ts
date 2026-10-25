@@ -3,6 +3,7 @@ import {
   resetContext,
   type AuditEntry,
   type AuditLogProvider,
+  type AuditQueryParams,
   type AuthProvider,
   type ChatProvider,
   type DataProvider,
@@ -295,6 +296,155 @@ describe('scoped async consumers', () => {
     });
     expect(view.queryByText('User: stale-auditor')).toBeNull();
     expect(view.getByText('User: fresh-auditor')).not.toBeNull();
+  });
+
+  it('clears record A audit logs as soon as recordId switches to B on the same provider', async () => {
+    const recordAEntries = createDeferred<AuditEntry[]>();
+    const recordBEntries = createDeferred<AuditEntry[]>();
+    const get = vi.fn((params: AuditQueryParams) => (
+      params.meta?.['recordId'] === 'record-a' ? recordAEntries.promise : recordBEntries.promise
+    ));
+    const provider: AuditLogProvider = {
+      create: async params => params,
+      get,
+    };
+    const view = render(ScopedAsyncConsumersHost, {
+      consumer: 'audit',
+      auditLogProvider: provider,
+      tenant: { tenantId: 'tenant-current' },
+      requestContext: 'orders',
+      recordId: 'record-a',
+    });
+
+    await waitFor(() => expect(get).toHaveBeenCalledTimes(1));
+    expect(get).toHaveBeenNthCalledWith(1, {
+      resource: 'orders',
+      meta: { recordId: 'record-a', tenantId: 'tenant-current' },
+    });
+
+    recordAEntries.resolve([{
+      timestamp: '2026-08-11T00:00:00.000Z',
+      action: 'delete',
+      userId: 'record-a-auditor',
+    }]);
+    await waitFor(() => expect(view.getByText('User: record-a-auditor')).not.toBeNull());
+
+    await view.rerender({ recordId: 'record-b' });
+    await waitFor(() => expect(get).toHaveBeenCalledTimes(2));
+    expect(get).toHaveBeenNthCalledWith(2, {
+      resource: 'orders',
+      meta: { recordId: 'record-b', tenantId: 'tenant-current' },
+    });
+    expect(view.queryByText('User: record-a-auditor')).toBeNull();
+
+    recordBEntries.resolve([{
+      timestamp: '2026-08-12T00:00:00.000Z',
+      action: 'update',
+      userId: 'record-b-auditor',
+    }]);
+    await waitFor(() => expect(view.getByText('User: record-b-auditor')).not.toBeNull());
+
+    expect(get).toHaveBeenCalledTimes(2);
+    expect(view.queryByText('User: record-a-auditor')).toBeNull();
+  });
+
+  it('clears displayed record A audit logs when provider and recordId switch together', async () => {
+    const recordAEntries = createDeferred<AuditEntry[]>();
+    const recordBEntries = createDeferred<AuditEntry[]>();
+    const oldProvider = createControlledAuditProvider(recordAEntries);
+    const freshProvider = createControlledAuditProvider(recordBEntries);
+    const view = render(ScopedAsyncConsumersHost, {
+      consumer: 'audit',
+      auditLogProvider: oldProvider.provider,
+      tenant: { tenantId: 'tenant-current' },
+      requestContext: 'orders',
+      recordId: 'record-a',
+    });
+
+    await waitFor(() => expect(oldProvider.get).toHaveBeenCalledTimes(1));
+    expect(oldProvider.get).toHaveBeenLastCalledWith({
+      resource: 'orders',
+      meta: { recordId: 'record-a', tenantId: 'tenant-current' },
+    });
+    recordAEntries.resolve([{
+      timestamp: '2026-08-11T00:00:00.000Z',
+      action: 'delete',
+      userId: 'record-a-auditor',
+    }]);
+    await waitFor(() => expect(view.getByText('User: record-a-auditor')).not.toBeNull());
+
+    await view.rerender({
+      auditLogProvider: freshProvider.provider,
+      recordId: 'record-b',
+    });
+    await waitFor(() => expect(freshProvider.get).toHaveBeenCalledTimes(1));
+    expect(freshProvider.get).toHaveBeenLastCalledWith({
+      resource: 'orders',
+      meta: { recordId: 'record-b', tenantId: 'tenant-current' },
+    });
+    expect(oldProvider.get).toHaveBeenCalledTimes(1);
+    expect(view.queryByText('User: record-a-auditor')).toBeNull();
+
+    recordBEntries.resolve([{
+      timestamp: '2026-08-12T00:00:00.000Z',
+      action: 'update',
+      userId: 'record-b-auditor',
+    }]);
+    await waitFor(() => expect(view.getByText('User: record-b-auditor')).not.toBeNull());
+    expect(oldProvider.get).toHaveBeenCalledTimes(1);
+    expect(freshProvider.get).toHaveBeenCalledTimes(1);
+    expect(view.queryByText('User: record-a-auditor')).toBeNull();
+  });
+
+  it('keeps a late audit entry from record A out after switching recordId to B on the same provider', async () => {
+    const recordAEntries = createDeferred<AuditEntry[]>();
+    const recordBEntries = createDeferred<AuditEntry[]>();
+    const get = vi.fn((params: AuditQueryParams) => (
+      params.meta?.['recordId'] === 'record-a' ? recordAEntries.promise : recordBEntries.promise
+    ));
+    const provider: AuditLogProvider = {
+      create: async params => params,
+      get,
+    };
+    const view = render(ScopedAsyncConsumersHost, {
+      consumer: 'audit',
+      auditLogProvider: provider,
+      tenant: { tenantId: 'tenant-current' },
+      requestContext: 'orders',
+      recordId: 'record-a',
+    });
+
+    await waitFor(() => expect(get).toHaveBeenCalledTimes(1));
+    expect(get).toHaveBeenNthCalledWith(1, {
+      resource: 'orders',
+      meta: { recordId: 'record-a', tenantId: 'tenant-current' },
+    });
+
+    await view.rerender({ recordId: 'record-b' });
+    await waitFor(() => expect(get).toHaveBeenCalledTimes(2));
+    expect(get).toHaveBeenNthCalledWith(2, {
+      resource: 'orders',
+      meta: { recordId: 'record-b', tenantId: 'tenant-current' },
+    });
+
+    recordBEntries.resolve([{
+      timestamp: '2026-08-12T00:00:00.000Z',
+      action: 'update',
+      userId: 'record-b-auditor',
+    }]);
+    await waitFor(() => expect(view.getByText('User: record-b-auditor')).not.toBeNull());
+
+    recordAEntries.resolve([{
+      timestamp: '2026-08-11T00:00:00.000Z',
+      action: 'delete',
+      userId: 'record-a-auditor',
+    }]);
+    await recordAEntries.promise;
+    await tick();
+
+    expect(get).toHaveBeenCalledTimes(2);
+    expect(view.queryByText('User: record-a-auditor')).toBeNull();
+    expect(view.getByText('User: record-b-auditor')).not.toBeNull();
   });
 
   it('rejects malformed audit records before rendering their payload', async () => {

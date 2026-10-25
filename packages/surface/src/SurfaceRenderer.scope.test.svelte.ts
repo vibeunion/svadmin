@@ -6,6 +6,7 @@ import type { BaseRecord, CanResult, DataProvider, GetListParams, GetListResult,
 import { resetAccessControlProvider } from '@svadmin/core/permissions';
 import { resetI18n } from '@svadmin/core/i18n';
 import { DEFAULT_SURFACE_CATALOG_VERSION } from './catalog.js';
+import type { SurfaceRendererError } from './components/SurfaceRenderer.svelte';
 import type { SurfacePolicy, SurfaceSpec } from './types.js';
 import ScopedSurfaceHarness from '../test/fixtures/ScopedSurfaceHarness.svelte';
 
@@ -61,8 +62,13 @@ describe('SurfaceRenderer owning permission scope', () => {
     setAccessControlProvider({ can: globalCan });
     const h = provider();
     const can = vi.fn(async () => ({ can: false, reason: 'Scoped read denied' }));
-    const view = render(ScopedSurfaceHarness, { dataProvider: h.dataProvider, accessControlProvider: { can }, spec: specFor(kind), policy });
-    expect((await within(view.container).findByRole('alert')).textContent).toContain('Scoped read denied');
+    const onError = vi.fn<(error: SurfaceRendererError) => void>();
+    const view = render(ScopedSurfaceHarness, { dataProvider: h.dataProvider, accessControlProvider: { can }, spec: specFor(kind), policy, onError });
+    expect((await within(view.container).findByRole('alert')).textContent).toContain('Access denied');
+    expect(view.container.textContent).not.toContain('Scoped read denied');
+    expect(onError).toHaveBeenCalledExactlyOnceWith({
+      type: 'data', error: { code: 'access_denied', sourceId: 'shared', message: 'Scoped read denied' },
+    });
     expect(can).toHaveBeenCalledTimes(1);
     expect(can).toHaveBeenCalledWith({ resource: 'products', action: kind === 'one' ? 'show' : 'list',
       meta: resolveTenantProviderMeta({ tenantId: 'alpha' }) });
@@ -116,12 +122,17 @@ describe('SurfaceRenderer owning permission scope', () => {
 
   test('replacing the owning permission provider clears ready data on denial', async () => {
     const h = provider();
+    const onError = vi.fn<(error: SurfaceRendererError) => void>();
     const view = render(ScopedSurfaceHarness, { dataProvider: h.dataProvider,
-      accessControlProvider: { can: async () => ({ can: true }) }, spec: specFor(), policy });
+      accessControlProvider: { can: async () => ({ can: true }) }, spec: specFor(), policy, onError });
     await within(view.container).findByText('510');
     const deny = vi.fn(async () => ({ can: false, reason: 'Revoked locally' }));
     await view.rerender({ accessControlProvider: { can: deny } });
-    expect((await within(view.container).findByRole('alert')).textContent).toContain('Revoked locally');
+    expect((await within(view.container).findByRole('alert')).textContent).toContain('Access denied');
+    expect(view.container.textContent).not.toContain('Revoked locally');
+    expect(onError).toHaveBeenCalledExactlyOnceWith({
+      type: 'data', error: { code: 'access_denied', sourceId: 'shared', message: 'Revoked locally' },
+    });
     expect(within(view.container).queryByText('510')).toBeNull();
     expect(h.getList).toHaveBeenCalledTimes(1);
     expect(deny).toHaveBeenCalledTimes(1);
@@ -131,7 +142,7 @@ describe('SurfaceRenderer owning permission scope', () => {
     const pending = deferred<CanResult>();
     const can = vi.fn(() => pending.promise);
     const h = provider();
-    const onError = vi.fn();
+    const onError = vi.fn<(error: SurfaceRendererError) => void>();
     const view = render(ScopedSurfaceHarness, { dataProvider: h.dataProvider, accessControlProvider: { can }, spec: specFor(), policy, onError });
     await waitFor(() => expect(can).toHaveBeenCalledTimes(1));
     await view.rerender({ accessControlProvider: { can: async () => ({ can: false, reason: 'Replacement denied' }) } });
@@ -139,8 +150,11 @@ describe('SurfaceRenderer owning permission scope', () => {
     pending.resolve({ can: true });
     await settle();
     expect(h.getList).not.toHaveBeenCalled();
-    expect(onError).toHaveBeenCalledTimes(1);
-    expect((within(view.container).getByRole('alert')).textContent).toContain('Replacement denied');
+    expect(onError).toHaveBeenCalledExactlyOnceWith({
+      type: 'data', error: { code: 'access_denied', sourceId: 'shared', message: 'Replacement denied' },
+    });
+    expect((within(view.container).getByRole('alert')).textContent).toContain('Access denied');
+    expect(view.container.textContent).not.toContain('Replacement denied');
   });
 
   test('tenant changes reauthorize using the same tenant metadata as the data provider', async () => {

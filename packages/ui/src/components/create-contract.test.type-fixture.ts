@@ -1,5 +1,6 @@
 import { Type } from 'typebox';
-import { defineResource, useCreate, type ResourceContract, type UseCreateOptions, type UseCreateMutateParams } from '@svadmin/core';
+import { defineResource } from '../../../core/src/resource-contract';
+import { useCreate, type ResourceContract, type UseCreateOptions, type UseCreateMutateParams } from '@svadmin/core';
 import { parseCreateParams } from '../../../core/src/create-contract';
 
 const posts = defineResource('posts', {

@@ -1,6 +1,6 @@
 import { Type } from 'typebox';
-import { defineResource, useImport, type ResourceContract, type ImportResult } from '@svadmin/core';
-import { parseContractCreateInput } from '../../../core/src/resource-contract';
+import { useImport, type ResourceContract, type ImportResult } from '@svadmin/core';
+import { defineResource, parseContractCreateInput } from '../../../core/src/resource-contract';
 import * as unsafe from '@svadmin/core/unsafe';
 
 const schemas = {

@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, waitFor } from '@testing-library/svelte';
+import { cleanup, fireEvent, waitFor, within } from '@testing-library/svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { QueryClient } from '@tanstack/svelte-query';
 import { Type } from 'typebox';
@@ -17,7 +17,7 @@ const resources: ResourceDefinition[] = ['posts', 'other'].map(name => ({
   }],
 }));
 const clients: QueryClient[] = [];
-function mount(options: Partial<Pick<ComponentProps<typeof Host>, 'workspaceStyle' | 'tableProps'>> = {}, overrides: Partial<DataProvider> = {}) {
+function mount(options: Partial<Pick<ComponentProps<typeof Host>, 'workspaceStyle' | 'tableProps' | 'access' | 'resources'>> = {}, overrides: Partial<DataProvider> = {}) {
   const source: DataProvider = {
     getApiUrl: () => '/api',
     getList: vi.fn(async ({ pagination }) => ({
@@ -33,8 +33,9 @@ function mount(options: Partial<Pick<ComponentProps<typeof Host>, 'workspaceStyl
   clients.push(client);
   const onBatch = vi.fn();
   const onSelection = vi.fn();
-  const view = render(Host, { provider: source, resources, queryClient: client, onBatch, onSelection, ...options });
-  return { view, source, onBatch, onSelection };
+  const onNavigate = vi.fn();
+  const view = render(Host, { provider: source, resources, queryClient: client, onBatch, onSelection, onNavigate, ...options });
+  return { view, source, onBatch, onSelection, onNavigate };
 }
 beforeEach(() => {
   Object.defineProperty(Element.prototype, 'animate', {
@@ -210,6 +211,27 @@ describe('ResourceOperationsPage real table composition', () => {
     });
   });
 
+  it('executes only selected current-page ids and does not add a later page without selection', async () => {
+    const app = mount({ tableProps: { pagination: { current: 1, pageSize: 10 } } });
+    await app.view.findAllByText('Page 1 record');
+    await fireEvent.click(app.view.getByRole('checkbox', { name: /Select all on this page/i }));
+    await fireEvent.click(app.view.getByRole('button', { name: 'Process selection' }));
+    expect(app.onBatch).toHaveBeenCalledTimes(1);
+    expect(app.onBatch).toHaveBeenLastCalledWith([1]);
+    expect(app.onSelection).toHaveBeenLastCalledWith({
+      scope: 'selected', ids: [1], currentPageIds: [1],
+    });
+
+    await app.view.rerender({ tableProps: { pagination: { current: 2, pageSize: 10 } } });
+    await app.view.findAllByText('Page 2 record');
+    await fireEvent.click(app.view.getByRole('button', { name: 'Process selection' }));
+    expect(app.onBatch).toHaveBeenCalledTimes(2);
+    expect(app.onBatch).toHaveBeenLastCalledWith([1]);
+    expect(app.onSelection).toHaveBeenLastCalledWith({
+      scope: 'selected', ids: [1], currentPageIds: [],
+    });
+  });
+
   it('passes all matches as a query without IDs or pagination and disables built-in batch deletion', async () => {
     const tableProps = { allowSelectAllMatching: true };
     const app = mount({ tableProps });
@@ -288,5 +310,168 @@ describe('ResourceOperationsPage real table composition', () => {
     })));
     await app.view.findAllByText('Page 2 record');
     expect(vi.mocked(app.source.getList).mock.calls.every(([params]) => params.resource === 'posts')).toBe(true);
+  });
+
+  it('lets an explicit retry recover a failed first list request before opening filtered detail and edit navigation', async () => {
+    const getOne = vi.fn<DataProvider['getOne']>(async () => ({ data: { id: 7, title: 'Recovered detail' } }));
+    const getList = vi.fn<DataProvider['getList']>()
+      .mockRejectedValueOnce(new Error('FIRST_LIST_FAILURE'))
+      .mockResolvedValue({ data: [{ id: 7, title: 'Recovered record' }], total: 1 });
+    const app = mount({ resources: resources.map(resource => ({ ...resource, canShow: true, canEdit: true })) }, { getList, getOne });
+    await app.view.findByRole('alert');
+    expect(app.view.queryAllByText('Recovered record')).toHaveLength(0);
+
+    await fireEvent.click(app.view.getByRole('button', { name: 'Retry' }));
+    await app.view.findAllByText('Recovered record');
+    expect(getList).toHaveBeenCalledTimes(2);
+
+    await fireEvent.input(app.view.getByPlaceholderText(/Search/), { target: { value: 'needle' } });
+    await waitFor(() => expect(getList).toHaveBeenCalledWith(expect.objectContaining({
+      filters: [{ field: 'title', operator: 'contains', value: 'needle' }],
+    })));
+    await waitFor(() => expect(app.onNavigate).toHaveBeenCalledWith(expect.objectContaining({
+      to: '/posts', type: 'replace', query: expect.objectContaining({ q: 'needle' }),
+    })));
+    await app.view.findAllByText('Recovered record');
+
+    await fireEvent.click(app.view.getByRole('checkbox', { name: /Select all on this page/i }));
+    await fireEvent.click(app.view.getByRole('button', { name: 'Process selection' }));
+    expect(app.onBatch).toHaveBeenLastCalledWith([7]);
+
+    await fireEvent.click(requireValue((await app.view.findAllByRole('button', { name: 'Detail' }))[0]));
+    const dialog = await app.view.findByRole('dialog', { name: 'posts Detail' });
+    expect(within(dialog).getByText('Recovered detail')).toBeTruthy();
+    expect(getOne).toHaveBeenCalledWith(expect.objectContaining({ resource: 'posts', id: 7 }));
+
+    await fireEvent.click(within(dialog).getByRole('button', { name: 'Edit' }));
+    await waitFor(() => expect(app.onNavigate).toHaveBeenLastCalledWith({
+      to: '/posts/edit/7?q=needle', type: 'push',
+    }));
+    expect(app.source.create).not.toHaveBeenCalled();
+    expect(app.source.update).not.toHaveBeenCalled();
+    expect(app.source.deleteOne).not.toHaveBeenCalled();
+  });
+
+  it('keeps detail and edit entries fail-closed when list is readable but show and edit are denied', async () => {
+    const getOne = vi.fn<DataProvider['getOne']>(async () => ({ data: { id: 1, title: 'Detail' } }));
+    const can = vi.fn(async ({ action }: { action: string }) => ({ can: action !== 'show' && action !== 'edit' }));
+    const app = mount({
+      access: { can },
+      resources: resources.map(resource => ({ ...resource, canShow: true, canEdit: true, canDelete: true })),
+    }, { getOne });
+    await app.view.findAllByText('Page 1 record');
+
+    await waitFor(() => expect(can).toHaveBeenCalledWith(expect.objectContaining({
+      resource: 'posts', action: 'show', params: expect.objectContaining({ id: 1 }),
+    })));
+    await waitFor(() => expect(can).toHaveBeenCalledWith(expect.objectContaining({
+      resource: 'posts', action: 'edit', params: expect.objectContaining({ id: 1 }),
+    })));
+    expect(app.view.queryByRole('button', { name: 'Detail' })).toBeNull();
+    expect(app.view.queryByRole('button', { name: 'Edit' })).toBeNull();
+
+    const more = requireValue((await app.view.findAllByRole('button', { name: 'More actions' }))[0]);
+    await fireEvent.click(more);
+    const menu = await app.view.findByRole('menu', { name: 'More actions' });
+    expect(within(menu).getByRole('menuitem', { name: 'Delete' })).toBeTruthy();
+    expect(within(menu).queryByRole('menuitem', { name: 'Edit' })).toBeNull();
+    expect(within(menu).queryByRole('menuitem', { name: 'Quick edit' })).toBeNull();
+
+    expect(app.view.queryByRole('dialog')).toBeNull();
+    expect(getOne).not.toHaveBeenCalled();
+    expect(app.source.create).not.toHaveBeenCalled();
+    expect(app.source.update).not.toHaveBeenCalled();
+    expect(app.source.deleteOne).not.toHaveBeenCalled();
+  });
+
+  it('keeps the quick-edit draft after a failed save and refreshes the filtered page with the server value after retry', async () => {
+    const initialTitle = 'needle initial title';
+    const draftTitle = 'needle draft title';
+    const normalizedTitle = 'needle normalized title';
+    let serverTitle = initialTitle;
+    let saveAttempts = 0;
+    const getList = vi.fn<DataProvider['getList']>(async ({ pagination }) => {
+      const current = pagination?.current ?? 1;
+      return {
+        data: [{ id: current, title: current === 2 ? serverTitle : `Page ${current} record` }],
+        total: 30,
+      };
+    });
+    const getOne = vi.fn<DataProvider['getOne']>(async ({ id }) => ({
+      data: { id: Number(id), title: serverTitle },
+    }));
+    const update = vi.fn<DataProvider['update']>(async ({ id, variables }) => {
+      if (++saveAttempts === 1) throw new Error('SAVE_FAILED');
+      expect(variables).toEqual({ title: draftTitle });
+      serverTitle = normalizedTitle;
+      return { data: { id: Number(id), title: normalizedTitle } };
+    });
+    const editableResources = resources.map(resource => ({
+      ...resource,
+      canEdit: true,
+      contract: defineResource(resource.name, {
+        record, update: Type.Object({ title: Type.String() }),
+      }),
+    }));
+    const app = mount({
+      resources: editableResources,
+      tableProps: { pagination: { current: 2, pageSize: 10 } },
+    }, { getList, getOne, update });
+
+    await app.view.findAllByText(initialTitle);
+    await fireEvent.input(app.view.getByPlaceholderText(/Search/), { target: { value: 'needle' } });
+    await waitFor(() => expect(getList).toHaveBeenLastCalledWith(expect.objectContaining({
+      filters: [{ field: 'title', operator: 'contains', value: 'needle' }],
+    })));
+    await app.view.rerender({ tableProps: { pagination: { current: 2, pageSize: 10 } } });
+    await waitFor(() => expect(getList).toHaveBeenLastCalledWith(expect.objectContaining({
+      filters: [{ field: 'title', operator: 'contains', value: 'needle' }],
+      pagination: expect.objectContaining({ current: 2, pageSize: 10 }),
+    })));
+    await app.view.findAllByText(initialTitle);
+
+    const selected = requireValue(app.view.getAllByRole('checkbox', { name: /^Select record 2$/i })[0]);
+    await fireEvent.click(selected);
+    await fireEvent.click(requireValue((await app.view.findAllByRole('button', { name: 'More actions' }))[0]));
+    await fireEvent.click(await app.view.findByRole('menuitem', { name: 'Quick edit' }));
+    const drawer = await app.view.findByRole('dialog', { name: 'Edit posts' });
+    const title = await within(drawer).findByLabelText('Title');
+    await fireEvent.input(title, { target: { value: draftTitle } });
+    const getListCallsBeforeSave = getList.mock.calls.length;
+    app.onNavigate.mockClear();
+
+    await fireEvent.click(within(drawer).getByRole('button', { name: /Save/ }));
+    await within(drawer).findByRole('alert');
+    expect(within(drawer).getByLabelText('Title')).toHaveProperty('value', draftTitle);
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(update).toHaveBeenNthCalledWith(1, {
+      resource: 'posts', id: 2, variables: { title: draftTitle },
+      meta: { tenantId: 'first' },
+    });
+    expect(app.view.getByRole('dialog', { name: 'Edit posts' })).toBeTruthy();
+    expect(app.view.getAllByText(initialTitle).length).toBeGreaterThan(0);
+
+    await fireEvent.click(within(drawer).getByRole('button', { name: /Save/ }));
+    await waitFor(() => expect(app.view.queryByRole('dialog', { name: 'Edit posts' })).toBeNull());
+    await app.view.findAllByText(normalizedTitle);
+    expect(update).toHaveBeenCalledTimes(2);
+    expect(update).toHaveBeenNthCalledWith(2, {
+      resource: 'posts', id: 2, variables: { title: draftTitle },
+      meta: { tenantId: 'first' },
+    });
+    await waitFor(() => expect(getList).toHaveBeenLastCalledWith(expect.objectContaining({
+      filters: [{ field: 'title', operator: 'contains', value: 'needle' }],
+      pagination: expect.objectContaining({ current: 2, pageSize: 10 }),
+    })));
+    expect(getList.mock.calls.length).toBeGreaterThan(getListCallsBeforeSave);
+    expect(app.view.queryAllByText(draftTitle)).toHaveLength(0);
+    expect(app.view.getByPlaceholderText(/Search/)).toHaveProperty('value', 'needle');
+    const refreshedSelected = requireValue(app.view.getAllByRole('checkbox', { name: /^Select record 2$/i })[0]);
+    expect(refreshedSelected.getAttribute('aria-checked')).toBe('true');
+    await fireEvent.click(app.view.getByRole('button', { name: 'Process selection' }));
+    expect(app.onBatch).toHaveBeenLastCalledWith([2]);
+    expect(app.onNavigate).not.toHaveBeenCalled();
+    expect(app.source.create).not.toHaveBeenCalled();
+    expect(app.source.deleteOne).not.toHaveBeenCalled();
   });
 });

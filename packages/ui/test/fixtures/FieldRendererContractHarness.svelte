@@ -8,6 +8,18 @@
   import AdminApp from '../../src/components/AdminApp.svelte';
   import FieldRenderer from '../../src/components/FieldRenderer.svelte';
 
+  let {
+    relationDisabled = false,
+    relationMultiple = false,
+    relationDescription = '',
+    relationInvalid = false,
+  }: {
+    relationDisabled?: boolean;
+    relationMultiple?: boolean;
+    relationDescription?: string;
+    relationInvalid?: boolean;
+  } = $props();
+
   const fields: FieldDefinition[] = [
     { key: 'title', label: 'Title', type: 'text', required: true },
     { key: 'summary', label: 'Summary', type: 'textarea' },
@@ -61,7 +73,7 @@
       data: resource === 'owners' ? [{ id: 2, name: 'Owner Two' }] : [],
       total: resource === 'owners' ? 1 : 0,
     }),
-    getOne: async () => ({ data: { id: 2, name: 'Owner Two' } }),
+    getOne: async ({ id }) => ({ data: { id, name: id === 2 ? 'Owner Two' : `Owner ${id}` } }),
     create: async ({ variables }) => ({ data: { id: 'created', ...decodeBaseRecord(variables) } }),
     update: async ({ id, variables }) => ({ data: { id, ...decodeBaseRecord(variables) } }),
     deleteOne: async ({ id }) => ({ data: { id } }),
@@ -84,15 +96,21 @@
   <form data-testid="field-contract-form">
     {#each fields as field (field.key)}
       <FieldRenderer
-        {field}
-        value={values[field.key]}
+        field={field.key === 'ownerId'
+          ? { ...field, multiple: relationMultiple, description: relationDescription }
+          : field}
+        value={field.key === 'ownerId' && relationMultiple ? [2, 3] : values[field.key]}
         onchange={(value) => updateValue(field.key, value)}
-        invalid={field.key === 'title' || field.key === 'permissions'}
-        {...definedOptions({ "errorId": field.key === 'title' || field.key === 'permissions' ? `${field.key}-error` : undefined })}
+        disabled={field.key === 'ownerId' && relationDisabled}
+        invalid={field.key === 'title' || field.key === 'permissions' || (field.key === 'ownerId' && relationInvalid)}
+        {...definedOptions({ "errorId": field.key === 'ownerId'
+          ? (relationInvalid ? 'owner-error' : undefined)
+          : field.key === 'title' || field.key === 'permissions' ? `${field.key}-error` : undefined })}
       />
     {/each}
     <p id="title-error">Title is required</p>
     <p id="permissions-error">Permissions are required</p>
+    {#if relationInvalid}<p id="owner-error">Choose an owner</p>{/if}
   </form>
 {/snippet}
 

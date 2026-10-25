@@ -19,6 +19,7 @@
   import { Skeleton } from './ui/skeleton/index.js';
   import ConfirmDialog from './ConfirmDialog.svelte';
   import ErrorSummary from './ErrorSummary.svelte';
+  import { withoutArrayFieldMetadata } from './fields/array-field-metadata.js';
   import { cn } from '../utils.js';
   import type { Snippet } from 'svelte';
 
@@ -27,7 +28,7 @@
   interface Props {
     resourceName: string;
     rendering?: ResourceRendering | undefined;
-    id?: string | number;
+    id?: string | number | undefined;
     mode?: 'create' | 'edit' | 'clone' | 'show';
     columns?: 1 | 2 | 3 | 4;
     showHeader?: boolean;
@@ -169,13 +170,21 @@
       ? [{ fieldKey: field.key, label: field.label || field.key, message }] : [];
   }));
 
-  const renderedDraft = $derived.by(() => {
+  const authoritativeDraft = $derived.by(() => {
     try {
       return { ok: true, values: form.ready && activeRendering ? activeRendering.draft(mode, form.values) : form.values };
     } catch {
       return { ok: false, values: {} };
     }
   });
+  let acceptedDraft = $state.raw<{
+    snapshot: typeof authoritativeDraft;
+    values: Record<string, unknown>;
+  }>();
+  // 仅回显本次写入已确认的 UI 身份；新的 Core 快照使缓存立即失效。
+  const renderedDraft = $derived(acceptedDraft?.snapshot === authoritativeDraft
+    ? { ok: authoritativeDraft.ok, values: acceptedDraft.values }
+    : authoritativeDraft);
 
   // ─── Submission error (non-field, e.g. network error) ─────────────
   let submitError = $state<string | null>(null);
@@ -202,18 +211,46 @@
     return `${instanceId}-${resourceName}-${fieldKey}-error`;
   }
 
+  const focusableFieldSelector = [
+    'input:not([type="hidden"])', 'textarea', 'select', 'button', '[tabindex]',
+  ].join(', ');
+
+  function isActionableControl(element: HTMLElement): boolean {
+    for (let parent = element.parentElement; parent; parent = parent.parentElement) {
+      if (!(parent instanceof HTMLFieldSetElement) || !parent.disabled) continue;
+      const legend = Array.from(parent.children).find(child => child instanceof HTMLLegendElement);
+      if (!legend?.contains(element)) return false;
+    }
+    return !element.hasAttribute('disabled')
+      && !element.matches('input[type="hidden"]')
+      && !element.matches(':disabled')
+      && !element.closest('[hidden], [inert], [aria-disabled="true"]');
+  }
+
+  function focusFirstActionableControl(field: Element): boolean {
+    const candidates = field.querySelectorAll<HTMLElement>(focusableFieldSelector);
+    for (const candidate of candidates) {
+      if (!isActionableControl(candidate)) continue;
+      candidate.focus();
+      if (document.activeElement === candidate) return true;
+    }
+    return false;
+  }
+
   function focusFirstInvalidField(): void {
-    const firstInvalid = formElement?.querySelector<HTMLElement>('[aria-invalid="true"]');
-    firstInvalid?.focus();
+    if (!formElement) return;
+    for (const field of formElement.querySelectorAll<HTMLElement>('[data-svadmin-form-field]')) {
+      const key = field.getAttribute('data-svadmin-field-key');
+      const error = key ? form.errors[key] : undefined;
+      if (typeof error === 'string' && error.length > 0 && focusFirstActionableControl(field)) return;
+    }
   }
 
   function focusField(fieldKey: string): void {
     const field = formElement?.querySelector<HTMLElement>(
-      `[data-svadmin-field-key="${CSS.escape(fieldKey)}"]`,
+      `[data-svadmin-form-field][data-svadmin-field-key="${CSS.escape(fieldKey)}"]`,
     );
-    field?.querySelector<HTMLElement>(
-      'input:not([type="hidden"]):not([disabled]), textarea:not([disabled]), select:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])',
-    )?.focus();
+    if (field) focusFirstActionableControl(field);
   }
 
   const handleSubmit = $derived.by(() => {
@@ -244,7 +281,15 @@
   const fieldChange = $derived.by(() => {
     const origin = scope;
     return (key: string) => (value: unknown) => {
-      if (currentScope(origin)) form.setFieldValue(key, value);
+      if (!currentScope(origin) || !form.ready || !allowed || isReadonly) return;
+      const previous = renderedDraft.values;
+      form.setFieldValue(key, withoutArrayFieldMetadata(value));
+      if (currentScope(origin) && authoritativeDraft.ok) {
+        acceptedDraft = {
+          snapshot: authoritativeDraft,
+          values: { ...previous, [key]: value },
+        };
+      }
     };
   });
   const retry = $derived.by(() => {
@@ -252,6 +297,15 @@
     const refetch = form.query.refetch;
     return () => { if (currentScope(origin)) void refetch().catch(() => {}); };
   });
+
+  // 显式 reset 入口：宿主通过 bind:this 调用，恢复 Core 初始草稿并清理本实例
+  // 的提交令牌/提示；不触发导航，也不改变只读或未授权状态。
+  export function reset(): void {
+    if (!allowed || isReadonly) return;
+    submission = undefined;
+    submitError = null;
+    form.reset();
+  }
 
   const pageTitle = $derived(
     mode === 'create'
@@ -382,7 +436,7 @@
             <Card.Content class="svadmin-u-f0faeb26d656 svadmin-u-7a9aabfcd059 svadmin-u-9fcd8a13827e svadmin-u-050494726fba svadmin-u-9335c39f6eff">
               <div class={gridClass}>
                 {#each group.fields as field (field.key)}
-                  <div data-svadmin-field-key={field.key} class={cn(columns > 1 && isFullWidthField(field) && 'svadmin-u-2c955d1b45df', !!form.errors[field.key] && 'svadmin-u-ee1a5af3aa10')}>
+                  <div data-svadmin-form-field data-svadmin-field-key={field.key} class={cn(columns > 1 && isFullWidthField(field) && 'svadmin-u-2c955d1b45df', !!form.errors[field.key] && 'svadmin-u-ee1a5af3aa10')}>
                     {#if fieldRenderer}
                       {@render fieldRenderer({ field, value: renderedDraft.values[field.key], onchange: fieldChange(field.key) })}
                     {:else}
@@ -409,7 +463,7 @@
           <Card.Content class="svadmin-u-f0faeb26d656 svadmin-u-52be28846b5f svadmin-u-9fcd8a13827e svadmin-u-7a9aabfcd059 svadmin-u-0a58453f3755 svadmin-u-050494726fba">
               <div class={gridClass} data-svadmin-form-grid data-columns={columns}>
               {#each formFields as field (field.key)}
-                <div data-svadmin-field-key={field.key} class={cn(columns > 1 && isFullWidthField(field) && 'svadmin-u-2c955d1b45df', !!form.errors[field.key] && 'svadmin-u-ee1a5af3aa10')}>
+                <div data-svadmin-form-field data-svadmin-field-key={field.key} class={cn(columns > 1 && isFullWidthField(field) && 'svadmin-u-2c955d1b45df', !!form.errors[field.key] && 'svadmin-u-ee1a5af3aa10')}>
                   {#if fieldRenderer}
                     {@render fieldRenderer({ field, value: renderedDraft.values[field.key], onchange: fieldChange(field.key) })}
                   {:else}

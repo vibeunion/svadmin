@@ -2,13 +2,13 @@ import { cleanup, fireEvent, render, waitFor, within } from '@testing-library/sv
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Type } from 'typebox';
 import { QueryClient, QueryObserver } from '@tanstack/svelte-query';
-import { defineResource, keys, parseQueryKey, resetContext, captureAuthSession, HttpError, type DataProvider,
+import { keys, parseQueryKey, resetContext, captureAuthSession, HttpError, type DataProvider,
   type GetListResult, type GetOneResult, type GetManyResult, type ResourceDefinition, type ImportResult, type ContractSchemas,
   type AuthProvider, type RouterProvider, type UseImportOptions } from '@svadmin/core';
 import { resetToast } from '@svadmin/core/toast';
 import { definedOptions } from '@svadmin/core/options';
 import { snapshotImportFile, parseImportRows, snapshotImportProgress, newImportProgress } from '../../../core/src/import-contract';
-import { contractKey } from '../../../core/src/resource-contract';
+import { defineResource, contractKey } from '../../../core/src/resource-contract';
 import ts from 'typescript';
 import { svelte2tsx } from 'svelte2tsx';
 import { readFileSync } from 'node:fs';

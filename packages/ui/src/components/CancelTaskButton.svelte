@@ -6,6 +6,8 @@
   import { createTaskAction } from './task-action.svelte.js';
 
   const i18n = useTranslation();
+  const instanceId = $props.id();
+  const errorId = `${instanceId}-error`;
 
   let {
     taskId,
@@ -37,7 +39,9 @@
   });
 </script>
 
-<Button {variant} {size} onclick={action.run} disabled={!action.available || action.pending}>
+<span class="task-action-feedback">
+<Button {variant} {size} onclick={action.run} disabled={!action.available || action.pending}
+  aria-describedby={action.failed && !onError ? errorId : undefined}>
   {#if action.pending}
     <Loader2 class="svadmin-u-82cc6c6581cd svadmin-u-7fc7f732bf7e svadmin-u-bf600f8e029c svadmin-u-afbdd13a380e" />
   {:else}
@@ -49,3 +53,12 @@
     {i18n.t('common.cancel')}
   {/if}
 </Button>
+{#if action.failed && !onError}
+  <span id={errorId} role="alert">{i18n.t('task.actionFailed')}</span>
+{/if}
+</span>
+
+<style>
+  .task-action-feedback { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; max-width: 16rem; }
+  .task-action-feedback [role="alert"] { color: var(--destructive); font-size: 12px; line-height: 16px; white-space: normal; overflow-wrap: anywhere; }
+</style>

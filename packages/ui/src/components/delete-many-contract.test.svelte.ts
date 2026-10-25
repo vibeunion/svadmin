@@ -2,14 +2,14 @@ import { cleanup, render, waitFor } from '@testing-library/svelte';
 import { afterEach, describe, it, expect, vi } from 'vitest';
 import { Type } from 'typebox';
 import { QueryClient, QueryObserver } from '@tanstack/svelte-query';
-import { defineResource, keys, parseQueryKey, resetContext, setAdminOptions, setAuditHandler, DeleteManyPartialError, captureAuthSession,
+import { keys, parseQueryKey, resetContext, setAdminOptions, setAuditHandler, DeleteManyPartialError, captureAuthSession,
   type DataProvider, type GetManyResult, type GetOneResult, type GetListResult, type ResourceDefinition, type ResourceContract, type AuthProvider,
   type AuthActionResult, type AuditLogProvider, type LiveProvider } from '@svadmin/core';
 import { flushSync } from 'svelte';
 import { resetLogoutVersion } from '../../../core/src/auth-hooks.svelte';
 import { resetToast } from '@svadmin/core/toast';
 import { definedOptions } from '@svadmin/core/options';
-import { contractKey } from '../../../core/src/resource-contract';
+import { defineResource, contractKey } from '../../../core/src/resource-contract';
 import * as legacy from '../../../core/src/hooks.svelte';
 import ts from 'typescript';
 import { svelte2tsx } from 'svelte2tsx';

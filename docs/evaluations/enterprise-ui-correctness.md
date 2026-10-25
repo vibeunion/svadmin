@@ -1,4 +1,4 @@
-> Integration update: recursive form and preserved-host-filter contracts supersede the original scalar-only scope below. See `../architecture/enterprise-ui-reconciliation.md`. Original validation counts are historical, not current-head approval.
+> 2026-10-21：以下内容按当前组件源码校准。原始标量表单及拒绝所有未知宿主筛选的设计已被后续集成取代，参见 `../architecture/enterprise-ui-reconciliation.md`。历史 PR/CI 不代表当前工作区验收。
 
 # Enterprise UI correctness — batch one
 
@@ -7,47 +7,60 @@
 ## FilterBuilder
 
 - 嵌套 AND/OR 可编辑，隐式顶层 AND 与显式分组包装可无损往返。
-- 根据字段约束操作符和标量类型。数值选项不会转换成字符串；集合/范围暂用 JSON 数组编辑。
-- 未知字段、不可筛选字段、不匹配的操作符和值、空组及超出预算的结构都会阻止应用，并通过可选 `onInvalid` 回报。绝不只应用剩余有效规则。
-- `reset()` 是显式清空查询；未填写的新规则不会被静默丢弃。空查询 `[]` 有效，但空显式条件组不被当作空查询。
-- 支持 `disabled`。原 `onApply`、`onReset`、`logicalOperator` 和公开方法保留。
+- 根据字段约束操作符和标量类型。数值选项不会转换成字符串；集合/范围使用 `FilterCollectionInput` 编辑，保留元素原始类型和端点顺序。
+- 无法编辑的原始宿主条件只读保留，可无损往返；元数据到达后可解锁支持的条件。仅未改变的已捕获宿主条件可以走保留路径，不能把新草稿标成只读来绕过校验。
+- 新建或编辑条件中的未知字段、不匹配操作符/值、不完整条件、空组及超预算结构阻止整次应用，通过 `onInvalid` 回报，绝不只应用有效子集。原始宿主空组保留，与新建空组区别处理。
+- `reset()` 显式清空查询；未填写的新规则不会被静默丢弃。空查询 `[]` 有效。
+- SPA 保留 `onApply`、`onReset`、`logicalOperator` 和公开方法；`disabled` 同时约束控件和公开方法。Lite 不提供 `logicalOperator`，宿主应使用完整递归 `Filter[]` 作为跨端传输和保存视图的格式。
 - 编辑预算：12 层、256 个公开节点、单个集合最多 1000 项。不支持对象型值及自定义操作符；日期区间控件、共享视图和完整关系查询界面仍属后续批次。
 
 ## JsonSchemaForm
 
-- 当前是明确的标量 Schema 子集，不是完整 JSON Schema 实现。
+- 当前递归处理 `object`、`array` 和标量，是受限 Schema 子集，不是完整 JSON Schema 实现。
 - 默认值只填充不存在的自有键；显式 `undefined` 表示用户清空，不会重新灌回默认值。空数字不变为零，枚举保留数值/字符串/布尔/null 的区别。
-- 约束覆盖必填存在性、类型、数值边界、倍数、字符串长度、枚举及 `additionalProperties: false`。未知断言和复杂字段必须明确报错，不再静默忽略后提交。
+- 当前公开约束包括必填、类型、枚举、数值和字符串边界、正则及数组长度。`visibleWhen` 只引用无条件标量控制字段，隐藏字段不渲染、不提交，但保留本地草稿以便恢复。组件保留 Core Schema 与递归适配器两条受限路径，均不接受时拒绝表单；Core 可用时由其决定可提交数据，共用子集保留递归适配器的错误码。不能把一个内部辅助函数的支持范围直接外推为完整 Schema 支持。
 - 提交使用独立 JSON 快照；对象中的清空字段被省略。循环、非 JSON 值、稀疏数组和原型键被拒绝。
-- 提供 `onvalidationerror`、`onerror`、`disabled` 和 `readonly`；异步提交期间阻止重复提交，失败可重试。宿主替换数据后，数字解析错误从新值重新计算，不保留旧错误映射。
-- 字段具有独立实例 ID、标签/提示/错误关联。中英文分支使用当前树的 i18n 作用域；尚未完成全部语言、读屏和键盘验收。
-- 256 个字段、1000 个枚举选项；提交快照深度 32、遍历预算 10000。嵌套对象、数组、`$ref`、条件 Schema、正则 `pattern` 以及完整表单引擎统一留待后续受控适配。
+- 提供 `onvalidationerror`、`onerror`、`disabled` 和 `readonly`；异步提交期间阻止重复提交，失败保留草稿。数据、Schema 或回调作用域变化后不让旧提交结果覆盖当前状态。
+- 字段具有独立实例 ID、标签/提示/错误关联，提交校验失败聚焦首个无效字段。中英文文案使用实例 `locale` 或当前树的 i18n 作用域。
+- Schema 深度最多 32、节点最多 1000，枚举最多 1000 项；未知关键字、循环和非法正则拒绝。`$ref`、`oneOf` 等完整 Schema 能力和业务授权仍由受控服务端承接。
+- Lite 使用完整路径的原生表单协议和可信 Schema 解码，区分增删数组的草稿动作与最终提交；不能把草稿动作当作持久化成功。本地组件测试不等于无 JavaScript 浏览器或真实服务端验收。
 
 ## SpreadsheetView
 
-- 以有界递归下降解析器取代动态代码求值，不要求 `unsafe-eval`。
+- 当前组件使用有界公式求值，不执行用户提供的 JavaScript；不能把历史独立公式辅助模块的限制当作现有组件限制。
 - 支持十进制与科学计数、四则/一元运算/括号、单元格/绝对引用/范围，以及 SUM、AVG/AVERAGE、COUNT、MIN、MAX。
-- 循环、除零、错误引用、非法语法、溢出和资源超限返回稳定错误码；依赖缓存仅存在于一次求值内。
+- 循环、除零、错误引用、非法语法和资源超限返回确定错误，不执行表达式副作用。
 - 公式栏从当前工作表及选中单元格派生，输入处理直接使用本次事件值；只读模式阻止写入、加行、加列和加表。
 - CSV 数值导出不经过界面舍入/区域格式；文本危险公式前缀与 CSV 引号分别处理。
-- 公式预算：2048 字符、1024 token、递归深度 64、10000 工作量及范围单元格。当前仍是轻量表格，不宣称完整 Excel 兼容、大表虚拟化或工作簿级性能保证。
+- 默认限制为 1000 行、100 列、10000 单元格、32 工作表；公式长度 1000、深度 32、范围单元格 10000、求值步数 50000，使用公开 `limits` 约束。
+- 聚合文本上限 1,000,000 同时由 UI 聚合渲染检查和 core `SPREADSHEET_WORKBOOK_LIMITS.maxTotalText` 工作簿快照边界执行；UI 公开 `limits` 不单独暴露该项。
+- `spreadsheet-safety.test.svelte.ts` 已覆盖默认与无效尺寸、`maxRows`/`maxCells`/`maxSheets` 覆盖、单单元格与聚合文本、公式长度/深度/范围/步数（含自定义步数），以及超限覆盖不能突破默认上限。2026-10-22 本轮复核未发现需要新增红测的源码缺口。
+- 已有工作簿、剪贴板、撤销及可选 XLSX 适配入口；异步适配结果需遵守 `scopeKey`、数据和接收方归属。只读不能写入，失败可以显式重试。当前仍不宣称完整 Excel 兼容、大表虚拟化或工作簿级性能保证。
 
-## 可复现验证
+## 本地专项验证（2026-10-21）
 
-从仓库根目录运行，使用锁定的仓库工具链：
+在 `packages/ui` 使用现有锁定工具链，一次执行一个直接相关文件：
 
 ```sh
-bun install --frozen-lockfile
-bun run --cwd packages/ai-elements build
-bun run --cwd packages/ui build
-bun run --cwd packages/ui test src/components/enterprise/correctness.test.ts src/components/enterprise-components.test.svelte.ts src/components/filter-builder.test.svelte.ts
-bun run vite build --config scripts/fixtures/enterprise-ui/vite.config.ts
-bun run playwright install --with-deps chromium
-bun run playwright test --config playwright.enterprise.config.ts
+node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts src/components/filter-builder.test.svelte.ts
+node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts src/components/json-schema-form-enterprise.test.svelte.ts
+node ../../node_modules/vitest/vitest.mjs run --config vitest.config.ts src/components/spreadsheet-safety.test.svelte.ts
 ```
 
-`.github/workflows/enterprise-ui.yml` 对 PR 精确 head 执行上述测试，保存 JSON 报告、提交号、源文件 SHA-256、完整 diff 和截图。浏览器使用不含 `unsafe-eval` 的生产 CSP，并验证提交、筛选、公式、只读、错误与重试路径。
+结果依次为 38/38、41/41、122/122，各自文件的严格类型检查包含在内。
+这些组件及上述测试文件本次没有代码改动。详细边界见
+[`../evidence/enterprise-foundation-audit-20261021/README.md`](../evidence/enterprise-foundation-audit-20261021/README.md)。
 
-截图矩阵为 1440×900、1920×1080、390×844 三种 viewport 的亮/暗主题及 ready/invalid 两种状态，共 12 张原始 PNG。采用 fullPage 截图，图片高度可能超过 viewport 高度。截图捕获不等于完整无障碍或全部状态认证。
+## 浏览器与交付边界
 
-验收结果以 PR #434 对应提交的 Actions 报告为准。独立审查、整个企业组件路线图和跨浏览器/辅助技术认证不在本批已完成声明中。
+本次构建 `@svadmin/ui` 与企业 fixture 后，执行
+`scripts/fixtures/enterprise-ui/browser.spec.ts`，Chromium 10/10 通过。
+本机配置复用 `playwright.enterprise.config.ts`，只指定现有 Chromium 路径、
+本地报告目录和新启动的 preview 服务，没有修改测试用例或跳过断言。
+覆盖生产 CSP、提交、筛选、公式、只读；1440x900、1920x1080、390x844
+三种视口的亮暗主题各捕获 ready/invalid 状态，共 12 张截图。
+
+报告及本机配置位于 `output/playwright/enterprise-foundation-20261021/`。
+只检查了两张代表性截图，不能将此描述为全套视觉、无障碍或跨浏览器认证。
+历史 PR #434 的 Actions 报告不作为当前版本证明。本次未重跑完整应用构建、
+真实 Provider 集成或全部企业级路线图；没有提交、发布或部署。

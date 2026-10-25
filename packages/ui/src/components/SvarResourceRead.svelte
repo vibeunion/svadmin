@@ -20,6 +20,8 @@
   const binding = useResourceContract(() => request.resourceName);
   const query = useList({
     get resource() { return binding.resource; },
+    // 读取失败由 SVAR 窗口、追加加载或树节点的局部错误态承接。
+    errorNotification: false,
     get dataProviderName() { return binding.dataProviderName; },
     get pagination() { return request.pagination; },
     get sorters() { return request.sorters; },

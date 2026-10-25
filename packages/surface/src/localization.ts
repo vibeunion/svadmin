@@ -1,6 +1,9 @@
+import type { SurfaceDataError } from './types.js';
+
 export interface SurfaceMessages {
   readonly renderErrorTitle: string;
   readonly providerUnavailable: string;
+  readonly accessDenied?: string;
   readonly metricNoData: string;
   readonly metricInvalidData: string;
   readonly chartLoading: string;
@@ -28,6 +31,7 @@ export interface SurfaceMessages {
 const englishMessages: Required<SurfaceMessages> = {
   renderErrorTitle: 'Surface could not be rendered',
   providerUnavailable: 'Data provider is unavailable',
+  accessDenied: 'Access denied',
   metricNoData: 'No data',
   metricInvalidData: 'Metric data is invalid',
   chartLoading: 'Loading {title}',
@@ -55,6 +59,7 @@ const englishMessages: Required<SurfaceMessages> = {
 const simplifiedChineseMessages: Required<SurfaceMessages> = {
   renderErrorTitle: '无法渲染 Surface',
   providerUnavailable: '数据提供器不可用',
+  accessDenied: '无权访问',
   metricNoData: '暂无数据',
   metricInvalidData: '指标数据无效',
   chartLoading: '正在加载{title}',
@@ -98,4 +103,15 @@ export function formatSurfaceMessage(
     formattedMessage = formattedMessage.replaceAll(`{${key}}`, String(value));
   }
   return formattedMessage;
+}
+
+export function surfaceErrorMessage(
+  error: Pick<SurfaceDataError, 'code'>,
+  messages: Required<SurfaceMessages>,
+  unavailable: string,
+  invalid: string,
+): string {
+  if (error.code === 'access_denied') return messages.accessDenied;
+  if (error.code === 'provider_result_not_json' || error.code === 'binding_pointer_not_found') return invalid;
+  return unavailable;
 }

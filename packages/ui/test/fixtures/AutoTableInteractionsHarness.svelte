@@ -6,13 +6,15 @@
 
   import { defineResource, syncGlobalPath } from '@svadmin/core';
   import { Type } from 'typebox';
-  import type { AccessControlProvider, DataProvider, NotificationProvider, ResourceDefinition, RouterProvider, Sort } from '@svadmin/core';
+  import type { AccessControlProvider, AuditLogProvider, DataProvider, NotificationProvider, ResourceDefinition, RouterProvider, Sort } from '@svadmin/core';
   import { untrack } from 'svelte';
   import { SvelteSet } from 'svelte/reactivity';
   import { Button } from '../../src/components/ui/button/index.js';
   import AdminApp from '../../src/components/AdminApp.svelte';
   import AutoTable from '../../src/components/AutoTable.svelte';
   import RecordDetailDrawer from '../../src/components/RecordDetailDrawer.svelte';
+  import DetailExtensionProbe from '../../src/components/detail-contract.test-extension.svelte';
+  import type { DetailWorkspaceScope, DetailWorkspaceSectionsConfig } from '../../src/components/detail-workspace.js';
 
   interface Props {
     syncWithLocation?: boolean;
@@ -35,9 +37,10 @@
     batchDeleteAllowed?: boolean;
     recordPermissions?: Record<string, Partial<Record<'show' | 'edit' | 'delete', boolean>>>;
     selectable?: boolean;
+    allowSelectAllMatching?: boolean;
     customBatchAction?: boolean;
     numericIds?: boolean;
-    onCan?: (params: { action: string; params?: Record<string, unknown> }) => void;
+    onCan?: (params: { resource?: string; action: string; params?: Record<string, unknown> }) => void;
     onCustomBatchAction?: (ids: (string | number)[]) => void;
     onDeleteOne?: (id: string | number) => void | Promise<void>;
     onDeleteMany?: (ids: (string | number)[]) => void | Promise<void>;
@@ -47,6 +50,8 @@
     includeSecondRecord?: boolean;
     emptyData?: boolean;
     onNotify?: NotificationProvider['open'];
+    auditProvider?: AuditLogProvider;
+    detailWorkspace?: DetailWorkspaceSectionsConfig;
   }
 
   let {
@@ -70,6 +75,7 @@
     batchDeleteAllowed,
     recordPermissions,
     selectable = false,
+    allowSelectAllMatching = false,
     customBatchAction = false,
     numericIds = false,
     onCan,
@@ -82,6 +88,8 @@
     includeSecondRecord = false,
     emptyData = false,
     onNotify,
+    auditProvider,
+    detailWorkspace,
   }: Props = $props();
 
   const deletedIds = new SvelteSet<string>();
@@ -156,7 +164,7 @@
     parse: () => ({ pathname: currentPathname, params: currentParams }),
   };
 
-  function permissionFor(params: { action: string; params?: Record<string, unknown> }): boolean {
+  function permissionFor(params: { resource?: string; action: string; params?: Record<string, unknown> }): boolean {
     const id = params.params?.['id'];
     if ((typeof id === 'string' || typeof id === 'number') &&
         (params.action === 'show' || params.action === 'edit' || params.action === 'delete')) {
@@ -172,18 +180,18 @@
     return true;
   }
 
-  const testAccessControlProvider: AccessControlProvider = {
-    can: async (params) => {
-      onCan?.(params);
-      return { can: permissionFor(params) };
-    },
-  };
-
-  const accessControlProvider = $derived(
-    [showAllowed, editAllowed, deleteAllowed, batchDeleteAllowed, recordPermissions].every((value) => value === undefined)
-      ? undefined
-      : testAccessControlProvider,
-  );
+  // Rebuild the provider when a permission input changes so record revocations
+  // produce a fresh access-control query instead of reusing a cached grant.
+  const accessControlProvider = $derived.by((): AccessControlProvider | undefined => {
+    const enabled = [showAllowed, editAllowed, deleteAllowed, batchDeleteAllowed, recordPermissions].some((value) => value !== undefined);
+    if (!enabled) return undefined;
+    return {
+      can: async (params) => {
+        onCan?.(params);
+        return { can: permissionFor(params) };
+      },
+    };
+  });
 
   const notificationProvider = $derived<NotificationProvider | undefined>(onNotify
     ? { open: (params) => onNotify?.(params), close: () => {} }
@@ -199,12 +207,16 @@
     <Button variant="outline" size="sm" onclick={() => onCustomBatchAction?.(selectedIds)}>自定义批量 ({selectedIds.length})</Button>
   {/snippet}
 
+  {#snippet relationWorkspaceSection({ recordId }: DetailWorkspaceScope)}
+    <DetailExtensionProbe {recordId} />
+  {/snippet}
+
   {#if standaloneDetailId != null}
     <RecordDetailDrawer resourceName="users" open={true} recordId={standaloneDetailId} />
   {:else if customBatchAction}
-    <AutoTable {rendering} resourceName="users" {selectable} {expandedRowRender} {batchActions} {syncWithLocation} {...definedOptions({ pagination, sorters })} />
+    <AutoTable {rendering} resourceName="users" {selectable} {allowSelectAllMatching} {expandedRowRender} {batchActions} {syncWithLocation} {...definedOptions({ pagination, sorters, detailWorkspace: detailWorkspace ? { relations: relationWorkspaceSection, ...detailWorkspace } : undefined })} />
   {:else}
-    <AutoTable {rendering} resourceName="users" {selectable} {expandedRowRender} {syncWithLocation} {...definedOptions({ pagination, sorters })} />
+    <AutoTable {rendering} resourceName="users" {selectable} {expandedRowRender} {syncWithLocation} {...definedOptions({ pagination, sorters, detailWorkspace: detailWorkspace ? { relations: relationWorkspaceSection, ...detailWorkspace } : undefined })} />
   {/if}
 {/snippet}
 
@@ -213,7 +225,7 @@
   {resources}
   {routerProvider}
   {...definedOptions({ "accessControlProvider": accessControlProvider })}
-  {...definedOptions({ "notificationProvider": notificationProvider })}
+  {...definedOptions({ "notificationProvider": notificationProvider, "auditLogProvider": auditProvider })}
   {locale}
   {...definedOptions({ "tenant": tenantIdentity === undefined ? undefined : { tenantId: tenantIdentity } })}
   {dashboard}

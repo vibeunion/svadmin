@@ -7,7 +7,7 @@
 
   import { useList } from '@svadmin/core';
   import { useTranslation } from '@svadmin/core/i18n';
-  import { AutoTable, Badge, Button, ContentPageHeader, ContentPageShell, DataState, MetricBlock } from '@svadmin/ui';
+  import { AutoTable, Badge, Button, ContentPageHeader, ContentPageShell, MetricBlock } from '@svadmin/ui';
   import * as Card from '@svadmin/ui/components/ui/card/index.js';
   import * as DropdownMenu from '@svadmin/ui/components/ui/dropdown-menu/index.js';
   import {
@@ -43,12 +43,27 @@
   const isZh = $derived(locale === 'zh-CN');
   const activeResource = $derived((['users', 'roles', 'permissions', 'user_accounts', 'user_logs', 'user_settings'] as const).find(name => name === resourceName) ?? 'users');
 
-  const usersQuery = useList({ resource: demoContracts.users, pagination: { mode: 'off' } });
-  const rolesQuery = useList({ resource: demoContracts.roles, pagination: { mode: 'off' } });
-  const permissionsQuery = useList({ resource: demoContracts.permissions, pagination: { mode: 'off' } });
-  const accountsQuery = useList({ resource: demoContracts.user_accounts, pagination: { mode: 'off' } });
-  const logsQuery = useList({ resource: demoContracts.user_logs, pagination: { mode: 'off' } });
-  const settingsQuery = useList({ resource: demoContracts.user_settings, pagination: { mode: 'off' } });
+  const usersQuery = useList({
+    resource: demoContracts.users, pagination: { mode: 'off' }, errorNotification: false,
+  });
+  const rolesQuery = useList({
+    resource: demoContracts.roles, pagination: { mode: 'off' }, errorNotification: false,
+  });
+  const permissionsQuery = useList({
+    resource: demoContracts.permissions, pagination: { mode: 'off' }, errorNotification: false,
+  });
+  const accountsQuery = useList({
+    resource: demoContracts.user_accounts, pagination: { mode: 'off' }, errorNotification: false,
+    get queryOptions() { return { enabled: activeResource === 'user_accounts' }; },
+  });
+  const logsQuery = useList({
+    resource: demoContracts.user_logs, pagination: { mode: 'off' }, errorNotification: false,
+    get queryOptions() { return { enabled: activeResource !== 'roles' && activeResource !== 'user_accounts' }; },
+  });
+  const settingsQuery = useList({
+    resource: demoContracts.user_settings, pagination: { mode: 'off' }, errorNotification: false,
+    get queryOptions() { return { enabled: activeResource === 'user_settings' }; },
+  });
 
   const users = $derived(demoRenderers.users.records(usersQuery.data?.data ?? []));
   const roles = $derived(demoRenderers.roles.records(rolesQuery.data?.data ?? []));
@@ -59,6 +74,15 @@
   const settings = $derived(demoRenderers.user_settings.records(settingsQuery.data?.data ?? []));
   const visibleSettings = $derived(settings.filter(setting => !['ai', 'mail'].includes(activeView) || `${setting.scope} ${setting.setting}`.toLowerCase().includes(activeView)));
   const currentQuery = $derived(({ users: usersQuery, roles: rolesQuery, permissions: permissionsQuery, user_accounts: accountsQuery, user_logs: logsQuery, user_settings: settingsQuery })[activeResource]);
+  const relatedQueries = $derived.by(() => {
+    if (activeResource === 'users') return [rolesQuery, permissionsQuery, logsQuery];
+    if (activeResource === 'roles') return [usersQuery, permissionsQuery];
+    if (activeResource === 'permissions') return [usersQuery, rolesQuery, logsQuery];
+    if (activeResource === 'user_accounts') return [usersQuery, rolesQuery, permissionsQuery];
+    if (activeResource === 'user_logs') return [usersQuery, rolesQuery, permissionsQuery];
+    return [usersQuery, rolesQuery, permissionsQuery, logsQuery];
+  });
+  const hasRelatedError = $derived(relatedQueries.some(query => query.isError));
   const filteredUsers = $derived(users.filter((user) =>
     (userRoleFilter === null || user.roleId === userRoleFilter)
     && (!userStatusFilter || user.status === userStatusFilter)
@@ -312,25 +336,25 @@
 <ContentPageShell pageId="user-management" width="wide">
   <ContentPageHeader title={pageCopy.title} actions={headerActions} />
   <WorkspaceQueryState query={currentQuery}>
+  {#if hasRelatedError}
+    <p role="alert">{isZh ? '部分关联资料不可用，当前记录仍可查看。' : 'Some related data is unavailable. Current records remain available.'}
+      <Button variant="outline" onclick={() => relatedQueries.forEach(query => { if (query.isError && !query.isFetching) void query.refetch(); })}>
+        {isZh ? '重试关联资料' : 'Retry related data'}
+      </Button>
+    </p>
+  {/if}
   {#if activeResource !== 'roles'}
-  <section class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+  <section class={`grid gap-3 sm:grid-cols-2 ${activeResource === 'user_accounts' ? 'lg:grid-cols-3' : 'lg:grid-cols-4'}`}>
     <MetricBlock label={isZh ? '成员总数' : 'Members'} value={usersQuery.isError || usersQuery.isLoading ? '—' : users.length} detail={isZh ? '当前组织成员' : 'Current organization'} />
     <MetricBlock label={isZh ? '角色数量' : 'Roles'} value={rolesQuery.isError || rolesQuery.isLoading ? '—' : roles.length} detail={isZh ? '权限边界' : 'Permission boundaries'} />
     <MetricBlock label={isZh ? '权限策略' : 'Policies'} value={permissionsQuery.isError || permissionsQuery.isLoading ? '—' : permissions.length} detail={isZh ? '可审计规则' : 'Auditable rules'} />
-    <MetricBlock label={isZh ? '风险事件' : 'Risk events'} value={logsQuery.isError || logsQuery.isLoading ? '—' : criticalLogs} detail={pageCopy.focus} trendTone={criticalLogs > 0 ? 'warning' : 'positive'} />
+    {#if activeResource !== 'user_accounts'}
+      <MetricBlock label={isZh ? '风险事件' : 'Risk events'} value={logsQuery.isError || logsQuery.isLoading ? '—' : criticalLogs} detail={pageCopy.focus} trendTone={criticalLogs > 0 ? 'warning' : 'positive'} />
+    {/if}
   </section>
   {/if}
 
   {#if activeResource === 'roles'}
-    {#if rolesQuery.isLoading || permissionsQuery.isLoading || usersQuery.isLoading}
-      <DataState state="loading" />
-    {:else if rolesQuery.isError || permissionsQuery.isError || usersQuery.isError}
-      <DataState state="error" retry={() => {
-        for (const query of [rolesQuery, permissionsQuery, usersQuery]) {
-          if (query.isError && !query.isFetching) void query.refetch();
-        }
-      }} />
-    {:else}
     <section class="grid gap-4" data-role-workspace>
       <div class="grid min-w-0 gap-4 lg:grid-cols-[1fr_1fr]">
         <div class="divide-y">
@@ -342,7 +366,9 @@
             >
               <span class="min-w-0 break-words font-medium">{role.name}</span>
               <Badge variant="outline">{roleLevelLabel(role.level)}</Badge>
-              <span class="shrink-0 text-sm tabular-nums text-muted-foreground">{role.assignedUsers.length} {isZh ? '位成员' : 'members'}</span>
+              <span class="shrink-0 text-sm tabular-nums text-muted-foreground">
+                {usersQuery.isLoading ? '…' : usersQuery.isError ? '—' : role.assignedUsers.length} {isZh ? '位成员' : 'members'}
+              </span>
             </button>
           {/each}
           {#if roleCards.length === 0}
@@ -359,29 +385,35 @@
             <div class="grid grid-cols-2 gap-3 border-y py-3">
               <div>
                 <p class="text-xs text-muted-foreground">{isZh ? '成员' : 'Members'}</p>
-                <p class="mt-1 text-2xl font-semibold">{selectedRole?.assignedUsers.length ?? 0}</p>
+                <p class="mt-1 text-2xl font-semibold">{usersQuery.isLoading ? '…' : usersQuery.isError ? '—' : selectedRole?.assignedUsers.length ?? 0}</p>
               </div>
               <div>
                 <p class="text-xs text-muted-foreground">{isZh ? '权限' : 'Permissions'}</p>
-                <p class="mt-1 text-2xl font-semibold">{selectedRole?.permissionCount ?? 0}</p>
+                <p class="mt-1 text-2xl font-semibold">{permissionsQuery.isLoading ? '…' : permissionsQuery.isError ? '—' : selectedRole?.permissionCount ?? 0}</p>
               </div>
             </div>
             <div class="divide-y">
-              {#each selectedPermissionDomains as domain (domain.module)}
-                <div class="py-3">
-                  <div class="flex items-center justify-between gap-3">
-                    <p class="text-sm font-semibold">{permissionDomainLabel(domain.module)}</p>
-                    <Badge variant="outline">{domain.permissions.length}</Badge>
+              {#if permissionsQuery.isLoading}
+                <p class="py-3 text-sm text-muted-foreground">{isZh ? '正在加载权限明细…' : 'Loading permission details…'}</p>
+              {:else if permissionsQuery.isError}
+                <p role="status" class="py-3 text-sm text-muted-foreground">{isZh ? '权限明细暂不可用。' : 'Permission details are unavailable.'}</p>
+              {:else}
+                {#each selectedPermissionDomains as domain (domain.module)}
+                  <div class="py-3">
+                    <div class="flex items-center justify-between gap-3">
+                      <p class="text-sm font-semibold">{permissionDomainLabel(domain.module)}</p>
+                      <Badge variant="outline">{domain.permissions.length}</Badge>
+                    </div>
+                    <div class="mt-3 flex flex-wrap gap-1.5">
+                      {#each domain.permissions as permission (permission.id)}
+                        <Badge variant={permission.effect === 'deny' ? 'destructive' : 'secondary'}>{permission.action} · {statusLabel(permission.effect)}</Badge>
+                      {/each}
+                    </div>
                   </div>
-                  <div class="mt-3 flex flex-wrap gap-1.5">
-                    {#each domain.permissions as permission (permission.id)}
-                      <Badge variant={permission.effect === 'deny' ? 'destructive' : 'secondary'}>{permission.action} · {statusLabel(permission.effect)}</Badge>
-                    {/each}
-                  </div>
-                </div>
-              {/each}
-              {#if selectedPermissionDomains.length === 0}
-                <p class="py-3 text-sm text-muted-foreground">{isZh ? '该角色尚未分配权限。' : 'No permissions assigned.'}</p>
+                {/each}
+                {#if selectedPermissionDomains.length === 0}
+                  <p class="py-3 text-sm text-muted-foreground">{isZh ? '该角色尚未分配权限。' : 'No permissions assigned.'}</p>
+                {/if}
               {/if}
             </div>
             {#if selectedRole}
@@ -437,14 +469,18 @@
                       <div class="mt-2 flex flex-wrap gap-1.5">
                         <Badge variant="outline">{roleLevelLabel(role.level)}</Badge>
                         <Badge variant="outline">{roleScopeLabel(role.scope)}</Badge>
-                        <Badge variant="outline">{role.assignedUsers.length} {isZh ? '名成员' : 'members'}</Badge>
+                        <Badge variant="outline">{usersQuery.isLoading ? '…' : usersQuery.isError ? '—' : role.assignedUsers.length} {isZh ? '名成员' : 'members'}</Badge>
                       </div>
                     </td>
                     <td class="px-5 py-4">
                       <code class="rounded-md bg-muted px-2 py-1 text-xs text-muted-foreground">{role.slug}</code>
                     </td>
                     <td class="px-5 py-4">
-                      {#if role.permissions.length}
+                      {#if permissionsQuery.isLoading}
+                        <span class="text-muted-foreground">{isZh ? '正在加载…' : 'Loading…'}</span>
+                      {:else if permissionsQuery.isError}
+                        <span class="text-muted-foreground">{isZh ? '权限暂不可用' : 'Permissions unavailable'}</span>
+                      {:else if role.permissions.length}
                         <div class="flex max-w-[360px] flex-wrap gap-1.5">
                           {#each role.permissions.slice(0, 3) as permission (permission.id)}
                             <Badge variant="secondary">{permissionLabel(permission)}</Badge>
@@ -483,7 +519,6 @@
         </Card.Content>
       </Card.Root>
     </section>
-    {/if}
   {:else if activeResource === 'permissions'}
     <section class="grid gap-4">
       {#if focusedRoleName}
@@ -517,7 +552,7 @@
     </section>
   {:else if activeResource === 'user_accounts'}
     <section class="grid min-w-0 gap-4 lg:grid-cols-[0.8fr_1.2fr]">
-      <Card.Root><Card.Header><Card.Title class="text-base">{isZh ? '账户风险概览' : 'Account Risk Overview'}</Card.Title></Card.Header><Card.Content class="grid gap-3 sm:grid-cols-3 xl:grid-cols-1"><div class="border-b py-3"><p class="text-xs text-muted-foreground">{isZh ? '账户' : 'Accounts'}</p><p class="text-2xl font-semibold">{accounts.length}</p></div><div class="border-b py-3"><p class="text-xs text-muted-foreground">{isZh ? '锁定' : 'Locked'}</p><p class="text-2xl font-semibold">{lockedAccounts}</p></div><div class="border-b py-3"><p class="text-xs text-muted-foreground">{isZh ? '活跃成员' : 'Active members'}</p><p class="text-2xl font-semibold">{activeUsers}</p></div></Card.Content></Card.Root>
+      <Card.Root><Card.Header><Card.Title class="text-base">{isZh ? '账户风险概览' : 'Account Risk Overview'}</Card.Title></Card.Header><Card.Content class="grid gap-3 sm:grid-cols-3 xl:grid-cols-1"><div class="border-b py-3"><p class="text-xs text-muted-foreground">{isZh ? '账户' : 'Accounts'}</p><p class="text-2xl font-semibold">{accounts.length}</p></div><div class="border-b py-3"><p class="text-xs text-muted-foreground">{isZh ? '锁定' : 'Locked'}</p><p class="text-2xl font-semibold">{lockedAccounts}</p></div><div class="border-b py-3"><p class="text-xs text-muted-foreground">{isZh ? '活跃成员' : 'Active members'}</p><p class="text-2xl font-semibold">{usersQuery.isLoading || usersQuery.isError ? '—' : activeUsers}</p></div></Card.Content></Card.Root>
       <Card.Root class="overflow-hidden"><Card.Header class="border-b"><Card.Title class="text-base">{isZh ? '登录状态' : 'Sign-in Status'}</Card.Title></Card.Header><Card.Content class="divide-y p-0">{#each accounts as account (account.id)}<div class="space-y-2 px-5 py-4"><div><p class="font-medium">{userName(account.userId)}</p><p class="text-xs text-muted-foreground">{account.notes}</p></div><Badge variant={account.status === 'locked' ? 'destructive' : 'outline'}>{statusLabel(account.status)}</Badge><span class="text-xs text-muted-foreground">{account.accountType} · {account.lastSignInAt}</span><WorkspaceRecordLinks resource="user_accounts" id={account.id} /></div>{:else}<p class="p-4">{isZh ? '暂无账户' : 'No accounts'}</p>{/each}</Card.Content></Card.Root>
     </section>
   {:else if activeResource === 'user_logs'}
@@ -627,10 +662,10 @@
         <Card.Root>
           <Card.Header><Card.Title class="flex items-center gap-2 text-base"><UserCog class="h-4 w-4 text-primary" />{isZh ? '管理摘要' : 'Management Summary'}</Card.Title></Card.Header>
           <Card.Content class="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-            <div class="border-b py-3"><p class="text-xs text-muted-foreground">{isZh ? '角色' : 'Roles'}</p><p class="mt-1 text-xl font-semibold">{roles.length}</p></div>
-            <div class="border-b py-3"><p class="text-xs text-muted-foreground">{isZh ? '账户' : 'Accounts'}</p><p class="mt-1 text-xl font-semibold">{accounts.length}</p></div>
-            <div class="border-b py-3"><p class="text-xs text-muted-foreground">{isZh ? '日志' : 'Logs'}</p><p class="mt-1 text-xl font-semibold">{logs.length}</p></div>
-            <div class="border-b py-3"><p class="text-xs text-muted-foreground">{isZh ? '设置' : 'Settings'}</p><p class="mt-1 text-xl font-semibold">{settings.length}</p></div>
+            <div class="border-b py-3"><p class="text-xs text-muted-foreground">{isZh ? '角色' : 'Roles'}</p><p class="mt-1 text-xl font-semibold">{rolesQuery.isLoading || rolesQuery.isError ? '—' : roles.length}</p></div>
+            <div class="border-b py-3"><p class="text-xs text-muted-foreground">{isZh ? '账户' : 'Accounts'}</p><p class="mt-1 text-xl font-semibold">{activeResource !== 'user_accounts' || accountsQuery.isLoading || accountsQuery.isError ? '—' : accounts.length}</p></div>
+            <div class="border-b py-3"><p class="text-xs text-muted-foreground">{isZh ? '日志' : 'Logs'}</p><p class="mt-1 text-xl font-semibold">{activeResource === 'user_accounts' || logsQuery.isLoading || logsQuery.isError ? '—' : logs.length}</p></div>
+            <div class="border-b py-3"><p class="text-xs text-muted-foreground">{isZh ? '设置' : 'Settings'}</p><p class="mt-1 text-xl font-semibold">{activeResource !== 'user_settings' || settingsQuery.isLoading || settingsQuery.isError ? '—' : settings.length}</p></div>
           </Card.Content>
         </Card.Root>
         <Card.Root><Card.Content class="p-5"><KeyRound class="h-5 w-5 text-primary" /><p class="mt-3 text-sm text-muted-foreground">{isZh ? '账户、日志与策略按各自任务组织；需要批量筛选或编辑时再打开记录视图。' : 'Accounts, logs, and policies follow their own tasks; open records only for bulk filtering or editing.'}</p></Card.Content></Card.Root>

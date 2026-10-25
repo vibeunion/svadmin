@@ -6,16 +6,17 @@
   import { useTranslation } from '@svadmin/core/i18n';
 
   import type { TaskProvider, TaskRecord } from '@svadmin/core';
-  import { Loader2 } from '@lucide/svelte';
   import * as Card from './ui/card/index.js';
   import { Badge } from './ui/badge/index.js';
   import TaskStatusBadge from './TaskStatusBadge.svelte';
   import TaskProgressBar from './TaskProgressBar.svelte';
   import RetryTaskButton from './RetryTaskButton.svelte';
   import CancelTaskButton from './CancelTaskButton.svelte';
+  import DataState from './content/DataState.svelte';
   import {
     canCancelTask,
     canRetryTask,
+    formatTaskDate,
     resolveTaskCreatedAt,
     resolveTaskError,
     resolveTaskMessage,
@@ -35,7 +36,7 @@
     useProviderData = !task && !!taskId,
     queryOptions,
   } = $props<{
-    task?: TaskRecord;
+    task?: TaskRecord | undefined;
     taskId?: string;
     taskProvider?: TaskProvider<TaskRecord>;
     title?: string;
@@ -50,7 +51,9 @@
     };
   }>();
 
+  const canRead = $derived(useProviderData && !!taskId && !!taskProvider && queryOptions?.enabled !== false);
   const query = useTask({
+    errorNotification: false,
     get taskId() {
       return taskId;
     },
@@ -58,7 +61,7 @@
       return taskProvider;
     },
     get queryOptions() {
-      return { enabled: useProviderData && !!taskId && !!taskProvider, ...queryOptions };
+      return { ...queryOptions, enabled: canRead };
     },
   });
 
@@ -70,15 +73,14 @@
       return { data: undefined, invalid: true };
     }
   });
-  const resolvedTask = $derived(view.data);
+  const resolvedTask = $derived(useProviderData && (query.isError || query.isLoading) ? undefined : view.data);
   const resolvedTitle = $derived(title ?? i18n.t('task.detailsTitle'));
 
-  function formatDate(value: unknown) {
-    if (typeof value !== 'string' || !value) return '—';
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return '—';
-    return date.toLocaleString();
+  function retryRead(): void {
+    if (!canRead || query.isFetching) return;
+    void query.refetch({ cancelRefetch: false });
   }
+
 
   function toPrettyJson(value: unknown) {
     try {
@@ -101,13 +103,17 @@
     </Card.Description>
   </Card.Header>
   <Card.Content class="svadmin-u-b43b4c086d9a svadmin-u-9335c39f6eff">
-    {#if view.invalid || (useProviderData && query.isError)}
+    {#if view.invalid}
       <p role="alert">{i18n.t('validation.invalidFormat')}</p>
+    {:else if useProviderData && query.isError}
+      <DataState
+        state="error"
+        title={i18n.t('common.error')}
+        description={i18n.t('task.fetchFailed')}
+        {...definedOptions({ retry: !canRead || query.isFetching ? undefined : retryRead })}
+      />
     {:else if useProviderData && taskProvider && query.isLoading}
-      <div class="svadmin-u-60fbb7713999 svadmin-u-aadad6871af8 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-bfa603190748">
-        <Loader2 class="svadmin-u-d2347e8497a9 svadmin-u-11e59c6d5f6b svadmin-u-dc7972ebf3f3 svadmin-u-afbdd13a380e" />
-        {i18n.t('task.loadingDetail')}
-      </div>
+      <DataState state="loading" loadingLabel={i18n.t('task.loadingDetail')} />
     {:else if resolvedTask}
       <div class="svadmin-u-60fbb7713999 svadmin-u-1eb5c6df38c1 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4">
         <TaskStatusBadge status={String(resolvedTask.status ?? 'pending')} />
@@ -121,11 +127,11 @@
       <div class="svadmin-u-f3c543ad5fe9 svadmin-u-0c3bc98565dd svadmin-u-e4d6f343b9ff">
         <div class="svadmin-u-da7c36cd8867">
           <div class="svadmin-u-359090c2d529 uppercase svadmin-u-8baf13a3e9d7 svadmin-u-bfa603190748">{i18n.t('task.createdLabel')}</div>
-          <div class="svadmin-u-fc7473ca09eb">{formatDate(resolveTaskCreatedAt(resolvedTask))}</div>
+          <div class="svadmin-u-fc7473ca09eb">{formatTaskDate(resolveTaskCreatedAt(resolvedTask), i18n.locale)}</div>
         </div>
         <div class="svadmin-u-da7c36cd8867">
           <div class="svadmin-u-359090c2d529 uppercase svadmin-u-8baf13a3e9d7 svadmin-u-bfa603190748">{i18n.t('task.updatedLabel')}</div>
-          <div class="svadmin-u-fc7473ca09eb">{formatDate(resolveTaskUpdatedAt(resolvedTask))}</div>
+          <div class="svadmin-u-fc7473ca09eb">{formatTaskDate(resolveTaskUpdatedAt(resolvedTask), i18n.locale)}</div>
         </div>
       </div>
 

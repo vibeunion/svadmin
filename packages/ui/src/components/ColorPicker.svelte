@@ -8,7 +8,7 @@
     disabled?: boolean;
     required?: boolean;
     invalid?: boolean;
-    describedby?: string;
+    describedby?: string | undefined;
     ariaLabel?: string;
     class?: string;
     onchange?: (value: string) => void;

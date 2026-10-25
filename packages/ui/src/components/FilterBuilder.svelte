@@ -206,6 +206,7 @@
         {@const allowed = filterOperators(editorFields.find(item => item.key === node.field))}
         {@const collection = isCollectionOperator(node.operator)}
         {@const invalid = issues.some((issue) => issue.path === node.id)}
+        {@const describedby = issues.flatMap((issue, index) => issue.path === node.id ? [`${uid}-issue-${index}`] : []).join(' ') || undefined}
         <div class="filter-rule" data-testid="filter-builder-rule" data-filter-rule={node.id}>
           {#if node.readonly}
             <output aria-label={i18n.t('filter.readonly')}>{node.field} {node.operator} {JSON.stringify(node.value)}</output>
@@ -225,15 +226,20 @@
             </Select>
           </div>
           <div>
-            <label for={`${uid}-${node.id}-value`}>{collection ? (chinese ? '值（JSON 数组）' : 'Value (JSON array)') : (chinese ? '值' : 'Value')}</label>
+            {#if collection && field}
+              <span id={`${uid}-${node.id}-value-label`}>{chinese ? '值' : 'Value'}</span>
+            {:else}
+              <label for={`${uid}-${node.id}-value`}>{collection ? (chinese ? '值（JSON 数组）' : 'Value (JSON array)') : (chinese ? '值' : 'Value')}</label>
+            {/if}
             {#if isNullOperator(node.operator)}
               <Input id={`${uid}-${node.id}-value`} value={chinese ? '无需填值' : 'No value required'} disabled />
             {:else if collection && field}
               <FilterCollectionInput {field} value={node.value}
+                {invalid} {describedby} labelledby={`${uid}-${node.id}-value-label`}
                 range={node.operator === 'between' || node.operator === 'nbetween'}
                 onchange={(value) => { if (!disabled && !node.readonly) node.value = value; }} />
             {:else if !collection && field?.options?.length}
-              <Select id={`${uid}-${node.id}-value`} aria-invalid={invalid}
+              <Select id={`${uid}-${node.id}-value`} aria-invalid={invalid} aria-describedby={describedby}
                 value={field.options.findIndex((option) => option.value === node.value) < 0 ? '' : String(field.options.findIndex((option) => option.value === node.value))}
                 onchange={(event: Event) => {
                   if (disabled || node.readonly || !(event.currentTarget instanceof HTMLSelectElement)) return;
@@ -247,15 +253,15 @@
                 {#each field.options as option, index (index)}<option value={String(index)} disabled={option.disabled}>{option.label}</option>{/each}
               </Select>
             {:else if !collection && field?.type === 'boolean'}
-              <Select id={`${uid}-${node.id}-value`} aria-invalid={invalid} value={valueText(node.value)}
+              <Select id={`${uid}-${node.id}-value`} aria-invalid={invalid} aria-describedby={describedby} value={valueText(node.value)}
                 onchange={(event: Event) => { if (event.currentTarget instanceof HTMLSelectElement) changeValue(node, event.currentTarget.value); }}>
                 <option value="">{chinese ? '请选择' : 'Choose'}</option><option value="true">true</option><option value="false">false</option>
               </Select>
             {:else if !collection && isNumericField(field)}
-              <Input id={`${uid}-${node.id}-value`} type="number" step="any" aria-invalid={invalid} value={typeof node.value === 'number' ? node.value : undefined}
+              <Input id={`${uid}-${node.id}-value`} type="number" step="any" aria-invalid={invalid} aria-describedby={describedby} value={typeof node.value === 'number' ? node.value : undefined}
                 oninput={(event: Event) => { if (event.currentTarget instanceof HTMLInputElement) changeValue(node, event.currentTarget.value); }} />
             {:else}
-              <Input id={`${uid}-${node.id}-value`} type="text" aria-invalid={invalid} value={valueText(node.value)} placeholder={collection ? '[1, 2]' : ''}
+              <Input id={`${uid}-${node.id}-value`} type="text" aria-invalid={invalid} aria-describedby={describedby} value={valueText(node.value)} placeholder={collection ? '[1, 2]' : ''}
                 oninput={(event: Event) => { if (event.currentTarget instanceof HTMLInputElement) changeValue(node, event.currentTarget.value); }} />
             {/if}
           </div>
@@ -277,7 +283,7 @@
       <Button type="button" size="sm" disabled={disabled} data-testid="filter-builder-apply" onclick={apply}><Check size={14} aria-hidden="true" />{i18n.t('common.confirm')}</Button>
     </div>
   </div>
-  {#if issues.length}<div role="alert" class="errors" data-testid="filter-builder-errors">{#each issues as issue, index (`${issue.path}-${issue.code}-${index}`)}<p>{issue.path}: {message(issue.code)}</p>{/each}</div>{/if}
+  {#if issues.length}<div role="alert" class="errors" data-testid="filter-builder-errors">{#each issues as issue, index (`${issue.path}-${issue.code}-${index}`)}<p id={`${uid}-issue-${index}`}>{issue.path}: {message(issue.code)}</p>{/each}</div>{/if}
   {#if !loadIssues.length}{@render groupEditor(root, root.wrapped || logicalOperator === 'or' ? 1 : 0, true)}{/if}
 </div>
 
@@ -292,7 +298,7 @@
   .filter-rule { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr) auto; align-items: end; gap: .5rem; margin-block-start: .75rem; }
   .filter-rule > div { min-width: 0; }
   .filter-rule > output { grid-column: 1 / -2; overflow-wrap: anywhere; }
-  .filter-rule label { display: block; margin-block-end: .25rem; color: var(--muted-foreground); }
+  .filter-rule label, .filter-rule > div > span { display: block; margin-block-end: .25rem; color: var(--muted-foreground); }
   .empty { padding-block: .75rem; color: var(--muted-foreground); }
   .errors { color: var(--destructive); overflow-wrap: anywhere; }
   .nested-group { align-items: flex-start; }

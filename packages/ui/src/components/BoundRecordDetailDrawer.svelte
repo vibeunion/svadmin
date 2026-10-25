@@ -153,9 +153,11 @@
   {/if}
 
   {#if extraSections && canReadRecord && query.isSuccess}
-    <section data-svadmin-detail-extensions aria-label={i18n.t('common.additionalDetails')}>
-      {@render extraSections()}
-    </section>
+    {#key `${resourceName}:${recordId}`}
+      <section data-svadmin-detail-extensions aria-label={i18n.t('common.additionalDetails')}>
+        {@render extraSections()}
+      </section>
+    {/key}
   {/if}
 
   {#snippet footer()}

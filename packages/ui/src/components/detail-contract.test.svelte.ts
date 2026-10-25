@@ -12,6 +12,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Host from './detail-contract.test-host.svelte';
+import { detailExtensionEvents } from './detail-contract.test-extension-state.js';
 
 const record = Type.Object({ id: Type.Number(), title: Type.String() });
 const posts = defineResource('posts', { record });
@@ -149,6 +150,65 @@ describe('contract-bound detail views', () => {
     await waitFor(() => expect(app.view.getByTestId('activity')).toBeTruthy());
     await app.view.rerender({ permission: { can: async () => ({ can: false }) } });
     await waitFor(() => expect(app.view.queryByTestId('activity')).toBeNull());
+  });
+
+  it('recreates extension sections and clears their local state when a cached record changes', async () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity } } });
+    clients.push(client);
+    const source = provider();
+    detailExtensionEvents.length = 0;
+
+    // Cache B first so switching from A to B does not pass through a loading unmount.
+    const cachedB = render(Host, { mode: 'drawer', provider: source, resources, queryClient: client, id: 2 });
+    await waitFor(() => expect(cachedB.getByText('Record 2')).toBeTruthy());
+    cachedB.unmount();
+
+    const props = { mode: 'drawer' as const, provider: source, resources, queryClient: client,
+      open: true, id: 1, showExtension: true };
+    const view = render(Host, props);
+    await waitFor(() => expect(view.getByText('Record 1')).toBeTruthy());
+    expect(view.getByTestId('detail-extension-state').textContent).toBe('idle');
+    await fireEvent.click(view.getByRole('button', { name: 'begin extension operation' }));
+    expect(view.getByTestId('detail-extension-state').textContent).toBe('active');
+
+    await view.rerender({ ...props, id: 2 });
+    await waitFor(() => expect(view.getByText('Record 2')).toBeTruthy());
+    await waitFor(() => expect(view.getByTestId('detail-extension-state').textContent).toBe('idle'));
+    expect(detailExtensionEvents).toEqual([
+      { type: 'mount', recordId: 1 },
+      { type: 'destroy', recordId: 1 },
+      { type: 'mount', recordId: 2 },
+    ]);
+  });
+
+  it('does not mount denied extensions and unmounts them when parent read permission is revoked', async () => {
+    detailExtensionEvents.length = 0;
+    const deniedClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    clients.push(deniedClient);
+    const source = provider();
+    const denied = render(Host, { mode: 'drawer', provider: source, resources, queryClient: deniedClient,
+      open: true, id: 1, showExtension: true, permission: { can: async () => ({ can: false }) } });
+    await waitFor(() => expect(denied.baseElement.querySelector('[data-svadmin-access-denied]')).toBeTruthy());
+    expect(denied.queryByTestId('detail-extension-probe')).toBeNull();
+    expect(detailExtensionEvents).toEqual([]);
+    denied.unmount();
+
+    const allowedClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    clients.push(allowedClient);
+    const props = { mode: 'drawer' as const, provider: source, resources, queryClient: allowedClient,
+      open: true, id: 1, showExtension: true };
+    const view = render(Host, props);
+    await waitFor(() => expect(view.getByText('Record 1')).toBeTruthy());
+    await fireEvent.click(view.getByRole('button', { name: 'begin extension operation' }));
+    expect(view.getByTestId('detail-extension-state').textContent).toBe('active');
+
+    await view.rerender({ ...props, permission: { can: async () => ({ can: false }) } });
+    await waitFor(() => expect(view.baseElement.querySelector('[data-svadmin-access-denied]')).toBeTruthy());
+    expect(view.queryByTestId('detail-extension-probe')).toBeNull();
+    expect(detailExtensionEvents).toEqual([
+      { type: 'mount', recordId: 1 },
+      { type: 'destroy', recordId: 1 },
+    ]);
   });
 
   it('does not fetch closed or unselected drawers, even with a route record ID', async () => {

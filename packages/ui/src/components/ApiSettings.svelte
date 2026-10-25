@@ -32,7 +32,7 @@
   let newWebhookUrl = $state('');
   let newWebhookEvent = $state('resource.created');
   let loading = $state(false);
-  let error = $state<string | null>(null);
+  let error = $state(false);
   let submitting = $state(false);
   let requestId = 0;
   let pendingDanger = $state<{ label: string; run: () => Promise<void> } | null>(null);
@@ -46,8 +46,8 @@
     } };
   }
 
-  function message(error: unknown): string {
-    return error instanceof Error ? error.message : String(error);
+  function failureMessage(): string {
+    return i18n.t('common.operationFailed');
   }
 
   async function loadCredentials(): Promise<void> {
@@ -59,7 +59,7 @@
     generatedSecret = '';
     copied = false;
     copyError = '';
-    error = null;
+    error = false;
     pendingDanger = null;
     deleting = false;
     loading = false;
@@ -71,8 +71,8 @@
       if (currentRequest !== requestId) return;
       keys = nextKeys;
       webhooks = nextWebhooks;
-    } catch (caught) {
-      if (currentRequest === requestId) error = message(caught);
+    } catch {
+      if (currentRequest === requestId) error = true;
     } finally {
       if (currentRequest === requestId) loading = false;
     }
@@ -90,7 +90,7 @@
     const provider = credentialProvider;
     const currentRequest = requestId;
     const context = adminContext.enterpriseRequestContext;
-    if (!provider || !newWebhookName.trim() || !newWebhookUrl.trim()) return;
+    if (!provider || submitting || !newWebhookName.trim() || !newWebhookUrl.trim()) return;
     submitting = true;
     try {
       const webhook = await provider.createWebhook({ name: newWebhookName.trim(), url: newWebhookUrl.trim(), eventType: newWebhookEvent }, context);
@@ -98,9 +98,9 @@
       webhooks = [...webhooks, webhook];
       newWebhookName = '';
       newWebhookUrl = '';
-    } catch (caught) {
+    } catch {
       if (currentRequest !== requestId) return;
-      notifyWithProvider({ type: 'error', message: message(caught) }, adminContext.notificationProvider);
+      notifyWithProvider({ type: 'error', message: failureMessage() }, adminContext.notificationProvider);
     } finally {
       if (currentRequest === requestId) submitting = false;
     }
@@ -111,7 +111,7 @@
     const provider = credentialProvider;
     const currentRequest = requestId;
     const context = adminContext.enterpriseRequestContext;
-    if (!provider || !newKeyName.trim()) return;
+    if (!provider || submitting || !newKeyName.trim()) return;
     submitting = true;
     try {
       const permissions = Object.entries(newKeyPermissions).filter(([, enabled]) => enabled).map(([name]) => name);
@@ -123,9 +123,9 @@
       copyError = '';
       newKeyName = '';
       newKeyPermissions = { Read: true, Write: false, Delete: false, Admin: false };
-    } catch (caught) {
+    } catch {
       if (currentRequest !== requestId) return;
-      notifyWithProvider({ type: 'error', message: message(caught) }, adminContext.notificationProvider);
+      notifyWithProvider({ type: 'error', message: failureMessage() }, adminContext.notificationProvider);
     } finally {
       if (currentRequest === requestId) submitting = false;
     }
@@ -142,12 +142,12 @@
     if (!provider) return;
     try {
       const result = await provider.revokeApiCredential(id, context);
-      if (!result.success) throw new Error(result.error?.message ?? (isZh ? '密钥撤销失败' : 'Credential revocation failed'));
+      if (!result.success) throw new Error('Credential revocation failed');
       if (currentRequest !== requestId) return;
       keys = keys.filter((key) => key.id !== id);
-    } catch (caught) {
+    } catch {
       if (currentRequest !== requestId) return;
-      notifyWithProvider({ type: 'error', message: message(caught) }, adminContext.notificationProvider);
+      notifyWithProvider({ type: 'error', message: failureMessage() }, adminContext.notificationProvider);
     }
   }
 
@@ -162,12 +162,12 @@
     if (!provider) return;
     try {
       const result = await provider.deleteWebhook(id, context);
-      if (!result.success) throw new Error(result.error?.message ?? (isZh ? 'Webhook 删除失败' : 'Webhook deletion failed'));
+      if (!result.success) throw new Error('Webhook deletion failed');
       if (currentRequest !== requestId) return;
       webhooks = webhooks.filter((webhook) => webhook.id !== id);
-    } catch (caught) {
+    } catch {
       if (currentRequest !== requestId) return;
-      notifyWithProvider({ type: 'error', message: message(caught) }, adminContext.notificationProvider);
+      notifyWithProvider({ type: 'error', message: failureMessage() }, adminContext.notificationProvider);
     }
   }
 
@@ -200,13 +200,13 @@
       {/if}
     {/snippet}
     {#snippet primary()}
+      {#if loading}
+        <DataState state="loading" />
+      {:else if error}
+        <DataState state="error" description={failureMessage()} retry={loadCredentials} />
+      {:else}
       <div class="svadmin-u-b3542e058833">
         <SettingsGroup title={i18n.t('api.activeKeysTitle')} description={i18n.t('api.activeKeysDesc')} bodyClass="p-0">
-          {#if loading}
-            <DataState state="loading" />
-          {:else if error}
-            <DataState state="error" description={error} retry={loadCredentials} />
-          {:else}
             <ApiKeyList
               class="svadmin-u-0c5e9137c7de svadmin-u-119b2aa0b8f6"
               keys={keys.map((key) => definedOptions({
@@ -219,7 +219,6 @@
               stateDescription={credentialProvider ? i18n.t('api.generateDesc') : (isZh ? '配置 CredentialProvider 后可管理真实凭据。' : 'Configure CredentialProvider to manage real credentials.')}
               {...definedOptions({ onrevoke: credentialProvider ? (key: { id: string }) => revokeKey(key.id) : undefined })}
             />
-          {/if}
         </SettingsGroup>
         <SettingsGroup title={i18n.t('api.webhooks')} description={i18n.t('api.webhooksDesc')} bodyClass="space-y-5">
           <form class="svadmin-u-f3c543ad5fe9 svadmin-u-7e0b7cdf1a94 svadmin-u-0c3bc98565dd svadmin-u-e4d6f343b9ff" onsubmit={handleAddWebhook}>
@@ -244,9 +243,21 @@
               <Button type="submit" class="svadmin-u-6da6a3c3f741" disabled={!credentialProvider || submitting || !newWebhookName.trim() || !newWebhookUrl.trim()}><Plus class="svadmin-u-f7b5fa971871" />{i18n.t('api.addWebhook')}</Button>
             </div>
           </form>
-          {#if webhooks.length === 0}<DataState state="empty" title={i18n.t('api.noWebhooks')} description={credentialProvider ? i18n.t('api.webhooksDesc') : (isZh ? '配置 CredentialProvider 后可管理真实 Webhook。' : 'Configure CredentialProvider to manage real webhooks.')} />{:else}<div class="svadmin-u-fa6acbf81d74 svadmin-u-e783642739e3 svadmin-u-b950dda299d3 svadmin-u-18049387f0af">{#each webhooks as hook (hook.id)}<div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-1004c0c3954c svadmin-u-cb11fec3bb46 svadmin-u-020ba687fa12 svadmin-u-9f76a62f4f44 svadmin-u-3b9871a0bf93"><div class="svadmin-u-7e0b7cdf1a94"><p class="svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{hook.name}</p><p class="svadmin-u-f283ea9bea0e svadmin-u-0e65706bcccd svadmin-u-359090c2d529 svadmin-u-bfa603190748">{hook.url}</p></div><div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-1004c0c3954c svadmin-u-1f51d781e606"><span class="svadmin-u-07389a777c1f svadmin-u-2ef11f1cb219 svadmin-u-d5eab218aa34 svadmin-u-660d2effb880 svadmin-u-0e65706bcccd svadmin-u-359090c2d529 svadmin-u-bfa603190748">{hook.eventType}</span><Button variant="ghost" size="icon-sm" onclick={() => deleteWebhook(hook.id)} aria-label={i18n.t('common.delete') + ' ' + hook.name}><Trash2 class="svadmin-u-f7b5fa971871" /></Button></div></div>{/each}</div>{/if}
+          {#if webhooks.length === 0}
+            <DataState state="empty" title={i18n.t('api.noWebhooks')} description={credentialProvider ? i18n.t('api.webhooksDesc') : (isZh ? '配置 CredentialProvider 后可管理真实 Webhook。' : 'Configure CredentialProvider to manage real webhooks.')} />
+          {:else}
+            <div class="svadmin-u-fa6acbf81d74 svadmin-u-e783642739e3 svadmin-u-b950dda299d3 svadmin-u-18049387f0af">
+              {#each webhooks as hook (hook.id)}
+                <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-1004c0c3954c svadmin-u-cb11fec3bb46 svadmin-u-020ba687fa12 svadmin-u-9f76a62f4f44 svadmin-u-3b9871a0bf93">
+                  <div class="svadmin-u-7e0b7cdf1a94"><p class="svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{hook.name}</p><p class="svadmin-u-f283ea9bea0e svadmin-u-0e65706bcccd svadmin-u-359090c2d529 svadmin-u-bfa603190748">{hook.url}</p></div>
+                  <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-8ef2268efbbc svadmin-u-1004c0c3954c svadmin-u-1f51d781e606"><span class="svadmin-u-07389a777c1f svadmin-u-2ef11f1cb219 svadmin-u-d5eab218aa34 svadmin-u-660d2effb880 svadmin-u-0e65706bcccd svadmin-u-359090c2d529 svadmin-u-bfa603190748">{hook.eventType}</span><Button variant="ghost" size="icon-sm" onclick={() => deleteWebhook(hook.id)} aria-label={i18n.t('common.delete') + ' ' + hook.name}><Trash2 class="svadmin-u-f7b5fa971871" /></Button></div>
+                </div>
+              {/each}
+            </div>
+          {/if}
         </SettingsGroup>
       </div>
+      {/if}
     {/snippet}
     {#snippet secondary()}
       <SettingsGroup title={i18n.t('api.generateTitle')} description={i18n.t('api.generateDesc')}>

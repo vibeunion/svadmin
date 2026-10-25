@@ -145,7 +145,23 @@ RTL 下左右键反转；重复选择当前值不会再次触发回调。
 
 它使用 radio group 语义，不代替带面板关联的 Tabs，也不是原生表单字段。
 将原有一组“模式切换”按钮迁移到此组件时，保留稳定的选项值，把模式更新集中在
-`onchange`；不要把导航命令或提交动作转换为单选选项。
+`onchange`；不要把导航命令或提交动作转换为单选选项。组件内部按钮均为
+`type="button"`，不会因为选择操作提交宿主表单。
+
+当前契约已由企业 fixture 的真实源码消费者覆盖：同一页面多个实例的
+radiogroup 名称和 roving tabindex 相互隔离；Arrow/Home/End/Enter/Space
+跳过 disabled 选项；RTL 左右方向反转；整组或单选项禁用恢复后正常；
+受控 `value` 指向 disabled 或被移除的选项时保留原值、保持可用 Tab 入口，
+初始化不静默触发 `onchange`；自然 Tab/Shift+Tab 在前后按钮和两个实例之间
+完整往返，父级外部赋值/清空不触发 `onchange`，表单宿主中真实 Enter/Space
+选择和显式提交计数也已覆盖。单个选项动态切换 disabled 后的恢复也已覆盖：
+禁用期间原生 disabled/aria-disabled 生效，真实指针点击和 Arrow/Home/End
+都不能选中它，当前 value 与回调保持；恢复后该选项重新进入可用导航序列，
+roving tabindex 仍只有一个入口，再次选择只增加一次回调。
+Chromium/WebKit/Firefox 两视口共 66 项中 63 passed、3 skipped（桌面跳过
+窄屏焦点用例），证据见
+`docs/evidence/segmented-control-browser-contract-20261022.md`。新增动态场景
+仍待主线程独立复跑，DOM/ARIA 断言不等于真实读屏认证，也不代表发布完成。
 
 ## RadioGroup
 
@@ -153,6 +169,30 @@ RTL 下左右键反转；重复选择当前值不会再次触发回调。
 `fieldset/legend` 语义，支持 `name`、`required`、`disabled`、`invalid`、
 `describedby`、选项说明和双向绑定。`RadioGroup` 与 `SegmentedControl` 不互换：
 前者提交表单字段，后者只负责视图模式切换。
+
+输入 ID 按组件实例生成，不再由 `name` 或选项值拼接；多个实例、空字符串
+或包含空格/引号的值不会破坏标签关联。不要依赖内部 ID 的具体格式。
+带 `name` 的组保留原生分组、方向键和序列化语义：同一表单中需要独立选择
+的字段应使用不同的 `name`，组件不会自动拆分宿主声明的同名组。
+
+未传 `name` 时，方向键和 Home/End 只在当前组件中选择，跳过禁用项，
+每组保留一个 Tab 入口；RTL 下左右键反转。该模式不会自动生成字段名，
+也不会在 FormData 中提交字段。设置 `required` 时，组件用实例级
+custom validity 校验当前组：未选择会阻止宿主提交，选中本组有效值后
+清除错误；同一表单内其它未命名组的值不会误满足本组必填。需要提交字段名
+时仍应显式设置 `name`；命名组继续使用原生 `required` 和分组语义。
+`name=""` 与省略 `name` 等价，同样不生成表单字段；不要用它表达“空字段名”。
+
+未命名组在共享表单中保持每组唯一 Tab 入口，Tab/Shift+Tab 在组间移动，
+并跳过 disabled 选项；contenteditable、inert、普通原生 radio 以及
+aria-disabled 但非 disabled 的宿主 button 边界交还浏览器，组件不重写整页
+焦点顺序，也不越过宿主真实 Tab 停靠点。窄屏上受控 Tab 后由平台滚动使焦点
+进入视口；外层 fieldset disabled 恢复后，未命名 required 的空值仍继续校验。
+required 提示复用现有 `validation.required`，随 locale 更新。当前契约已由
+Chromium/WebKit/Firefox 两视口真实键盘与 `checkValidity`/提交计数覆盖，
+主线程已独立复跑单文件 20/20、Playwright 81 passed/3 skipped；证据见
+`docs/evidence/radio-group-browser-contract-20261022.md`，不代表完整原生 reset、
+读屏或发布完成。
 
 ```svelte
 <RadioGroup
@@ -287,14 +327,96 @@ Home/End、禁用、必填和 hidden input 表单提交；绑定值为 `0..count
 `AutoForm` 提交产生字段错误时，默认在表单顶部显示错误总览。总览只包含当前
 可见且已渲染字段，按字段定义顺序排列；每项显示字段标签和错误文本，并可聚焦对应
 控件。字段控件仍保留原有 `aria-invalid` 与 `aria-describedby`，因此总览不是对字段
-错误关联的替代。错误关联 ID 现在按表单实例生成；字段 `name` 和业务字段 ID 不变。
+错误关联的替代。错误关联 ID 按表单实例生成；内置 FieldRenderer 控件的 DOM ID
+也按组件实例生成，字段 `name` 和业务字段键不变。
 总览会在字段容器内聚焦第一个可操作控件，因此数组、选择器和自定义字段渲染器不应再
 依赖某个固定的 `name` 选择器。无需总览时传入 `showErrorSummary={false}`。
+
+直接使用 `FieldRenderer` 时，可传可选 `id` 固定内置控件标识；宿主须保证页面内
+唯一。日期范围的两端使用 `${id}-start` / `${id}-end`，外层标签关联开始控件。
+不要继续通过全局 `#字段键` 定位默认内置控件；应在当前表单的
+`data-svadmin-field-key` 容器内定位，原生提交仍使用既有 `name`。
+`children` 自定义内容保留旧默认标签目标（字段键）；传入 `id` 时自定义内容须
+使用同一 ID。该兼容分支的页面内唯一性仍由宿主负责，未宣称自动修复所有复合控件。
+
+`FieldDefinition.description` 可提供纯文本字段说明；FieldRenderer 使用实例级
+说明 ID，并将它与传入的 `errorId` 合并到支持描述属性的内置控件，不覆盖错误文本
+关联。说明更新或清空时关联同步更新，不把说明作为 HTML 执行，也不自动翻译宿主
+文本。字段键可使用 `description`、`label` 等名称，不参与内置 DOM ID 生成。
+自定义 `children` 的内部控件仍须宿主接入这一描述链；不得将“显示说明”视为
+自定义控件的可访问性验收通过。
+
+ArrayField 已接入父字段的说明/错误描述和禁用状态。数组分组使用字段标签命名，
+独立使用时生成实例标题；父字段禁用会同时阻止新增、删除、子字段修改，并让
+隐藏 JSON 提交字段退出原生提交，重新启用后恢复。数组项内部仍使用各自字段契约，
+不承诺数组行重排、服务器端校验或复杂嵌套提交的完整验收。
+
+Transfer 已接入字段级 group、标签、说明/错误和禁用语义；左右面板的全选复选框
+使用面板标题命名，禁用或单项禁用不会改变临时选择。列表行支持键盘选择，但其
+复选框会阻止点击和 Enter/Space 冒泡，避免一次操作切换两次，其他键盘事件保留。
+Transfer 组件自身仍保持三参数
+`onchange(next, direction, moveKeys)`，FieldRenderer 继续只向宿主传递新的值。
+
+TreeSelect（含 `treeselect` 字段别名）和 Cascader 已接入标签与描述链。
+直接使用时支持 `id`、`ariaLabel`、`describedby`、`invalid`；按钮角色使用
+`data-invalid` 而非 `aria-invalid`。面板使用有名称的 dialog 语义，打开时
+`aria-controls` 指向实例面板，关闭移除关联，Escape 恢复触发器焦点。
+显式 ID 须页面内唯一，`${id}-panel` 为面板保留；当前只验证本地 DOM/事件契约，
+不代表真实浏览器或读屏验收通过。
+
+AutoForm 提交校验失败时，会按当前表单实际 DOM 顺序检查顶层字段容器，并在错误
+字段内聚焦第一个可操作控件；数组、穿梭框、树/级联选择器等使用分组或
+`data-invalid` 语义的字段不再依赖 `aria-invalid` 才能被定位。候选会跳过 hidden、
+disabled、inert、`aria-disabled` 和 disabled fieldset 控件；原生 disabled fieldset
+的首个 legend 例外按浏览器语义保留。错误总览点击使用相同过滤规则，并仍只在当前
+AutoForm 实例内定位。该契约不替代真实浏览器、读屏和富文本编辑器验收。
+
+通过 `FieldRenderer` 使用树选择、级联和穿梭框时，已补齐原生 `FormData` 值：
+
+| 字段 | 原生字段名 | 编码 |
+| --- | --- | --- |
+| 树选择单选（含 `treeselect`） | `key` | 标量字符串，空值为 `""` |
+| 树选择多选、穿梭框 | `key[]` | 按受控值顺序重复字段，空集合无成员 |
+| 级联路径 | `key` | 单个 JSON 数组，空路径为 `[]` |
+
+以上隐藏值及 Boolean、Images、Tags、Rate 的隐藏值都随 `disabled` 退出原生提交，
+重新启用后使用最新宿主值。Tags 和 Rate 独立使用且提供 `name` 时同样适用；
+树选择、级联、穿梭框独立使用的组件 API 未增加原生提交能力。
+标量与重复字段的值是字符串，原生提交不保留数字和字符串的类型区别；
+服务端须按可信资源契约解码与校验，不能将禁用状态或隐藏字段视为授权。
+AutoForm/useForm 的 Provider 数据提交逻辑不受这些 hidden input 影响。
+复杂嵌套表单仍需单独验收，不能由上述字段外推。
+
+`@svadmin/editor` 的 `Editor` 现在将 `id`、`aria-label`、`aria-labelledby`、
+`aria-describedby`、`aria-invalid` 和 `aria-required` 直接应用到实际
+contenteditable textbox。通过 FieldRenderer 注册使用时，字段标签通过
+`aria-labelledby` 命名编辑区，不再使用无法关联 div 的 label for。
+示例 Lazy 包装器透传这些属性，ID 仅设置在实际编辑区。
+
+说明、错误、内容和禁用更新不会重建编辑器；preset、扩展及其配置变化仍会
+重建实例。`disabled` 与 `editable=false` 都关闭编辑与菜单，但只有 disabled
+会使 FieldRenderer 的隐藏 HTML 值退出原生提交，恢复后提交最新受控值。
+这些状态更新不会触发 onchange，真正编辑仍回调 HTML。
+Editor 的 drop/paste 上传回执会检查发起实例与可编辑代际，禁用后再启用、
+只读切换、扩展重建、卸载或处理器替换不会让旧回执污染当前内容。
+这只是本地组件契约，不包含工具栏上传子组件的生命周期、上传服务、真实浏览器、
+读屏或消费者发布验收；自定义注册编辑器仍须自行实现相同属性协议。
+
+FileUpload 已接入字段名称与说明/错误描述链；直接使用时可传 `ariaLabel`、
+`describedby` 和 `invalid`。原生 input 使用 `aria-invalid`，可见选择入口使用
+`data-invalid`，两者均关联同一描述。禁用入口不会因点击、Enter 或空格打开选择器。
+上述属性更新不清空队列或改写原生提交值；这不是实际读屏或上传服务验收。
 
 需要在 `AutoForm` 之外复用同一行为时，从 `@svadmin/ui` 导入 `ErrorSummary`，
 传入 `{ fieldKey, label, message }[]`。提供 `onfocusfield` 时，错误项使用按钮并
 回调字段键；不提供时只呈现静态错误文本，适合服务端渲染或只读错误页。组件只负责
 展示和定位，不执行校验、不提交表单，也不替宿主解释后端错误码。
+
+未传 `id` 时，`ErrorSummary` 自动生成实例级标题 ID，并通过 `aria-labelledby`
+提供可访问名称；显式传入的 `id` 应由宿主保证页面内唯一。同一字段可以包含多条
+错误，按传入顺序显示。默认标题随当前语言更新，显式 `title` 保持宿主提供的文本。
+错误区域带有 `aria-live="polite"` 和 `aria-atomic="true"`，但这些 DOM 属性不保证
+条件挂载时一定触发读屏播报；实际读屏行为仍须单独验收。
 
 Lite 使用 `LiteErrorSummary`，传入相同语义的错误条目；条目可额外提供 `fieldId`，
 组件会输出原生 `#fieldId` 链接。Lite 不注入点击处理器、不读取浏览器状态，也不负责
@@ -324,8 +446,9 @@ Lite 使用 `LiteErrorSummary`，传入相同语义的错误条目；条目可�
    浏览器导出。
 3. `VirtualTable` 只在 SPA 中提供固定行高的窗口渲染。Lite 使用完整原生表格，
    调用方必须改用服务端分页或限制返回数量。
-4. `FilterBuilder` 不再接受旧的 `logicalOperator` 平铺属性，必须迁移为递归
-   `{ operator, value }` 条件组。
+4. 跨端查询和保存视图使用递归 `{ operator, value }` 条件组。SPA
+   `FilterBuilder` 仍保留顶层 `logicalOperator` 兼容属性；它不是独立的传输协议，
+   也不能替代子组的逻辑。`LiteFilterBuilder` 不提供该属性。
 
 ### 推荐迁移
 
@@ -400,7 +523,7 @@ Lite 页面不复用 SPA 虚拟滚动或任务轮询。应由宿主页面提供�
 组件会显示校验提示，调用方不要再依赖“应用时自动删除空条件”的旧行为。
 数字枚举与同文字符串枚举（例如 `2` 和 `'2'`）编辑后保留各自类型。
 
-`@svadmin/lite` 的 `LiteFilterBuilder` 也已移除 `logicalOperator`，使用
+`@svadmin/lite` 的 `LiteFilterBuilder` 不提供 `logicalOperator`，使用
 `filters[0][operator]`、`filters[0.value.0][field]` 这类嵌套字段名提交条件树。
 Lite Server Adapter 会把这些字段还原为同样的 `Filter` 树；自定义 SvelteKit
 action 仍需保留这些字段，不要再按旧的 `filter_field_0` 平铺协议解析。
@@ -1151,6 +1274,22 @@ DOM 窗口、键盘跨窗口导航和离屏选择，不代表完成浏览器性�
 在 `loadChildren` 中捕获、记录后重新抛出。升级后应至少验证空树、加载中、
 失败重试、并行分支、切换数据源和卸载后的迟到响应。
 
+## Cascader
+
+`Cascader` 的路径值仍为从根开始的 ID 数组。已展开面板在宿主切换 `disabled`
+后，所有列中的选项都会禁止激活，不能利用旧面板提交；节点自身或任一祖先带
+`disabled` 时，后代也不可选。允许分支不受影响，已绑定值不会自动删除，
+受控值仍可由宿主在禁用状态下更新并显示。此行为适用于默认和 `changeOnSelect`
+模式，前端禁用状态不替代服务端授权。
+
+清空入口现在是触发按钮旁的独立图标按钮，使用 `common.clearSelection` 作为
+名称和提示。点击、Enter 和 Space 均通过原生按钮激活，清空后收起弹层并恢复
+触发按钮焦点；`onchange` 仍收到 `undefined` 与空选项数组。
+旧包装器若依赖触发按钮内部的 `span[role="button"]`，需改用独立清空入口。
+面板最大宽度限制为视口减 32px，列较多时沿用面板内部横向滚动，避免把整个
+页面撑宽。
+完整方向键导航和异步子树加载不由本次禁用/清空修复提供。
+
 ## VirtualTable
 
 `VirtualTable` 现在明确是 SPA 的固定行高虚拟窗口，不是通用表格引擎。
@@ -1305,7 +1444,20 @@ SSR 页面应在服务端完成数据裁剪、权限过滤和树结构校验。
 `FieldRenderer` 的 `number`、`currency`、`percent` 字段。
 
 数值组件的绑定值统一为 `number | null`：空输入回传 `null`，输入 `0` 保持为
-数字零，不再用字符串或 `0` 伪造空值。可通过字段定义传递：
+数字零，不再用字符串或 `0` 伪造空值。三个公共入口均支持 `bind:value`；
+父级赋值或清空会更新显示，但不会触发输入回调，用户每次输入只触发一次
+`onchange`。仍可沿用单向 `value` 配合 `onchange` 的受控方式：
+
+```svelte
+<script lang="ts">
+  import { MoneyInput } from '@svadmin/ui';
+  let amount = $state<number | null>(null);
+</script>
+
+<MoneyInput bind:value={amount} currency="CNY" />
+```
+
+可通过字段定义传递：
 
 ```ts
 {
@@ -1323,6 +1475,19 @@ SSR 页面应在服务端完成数据裁剪、权限过滤和树结构校验。
 `PercentInput` 的 `scale: '1'` 表示绑定值使用 `0..1`，界面显示
 `0..100%`；`scale: '100'` 表示绑定值本身使用百分数。`MoneyInput` 的
 `currency` 只负责输入上下文和展示标识，不改变金额的数值单位。
+
+需要区域小数/千分位时显式传入受支持的 `locale`（当前仅 `en-US`、`de-DE`、
+`zh-CN`）：
+
+```svelte
+<MoneyInput bind:value={amount} currency="EUR" locale="de-DE" precision={2} />
+```
+
+此时展示与解析使用 `Intl.NumberFormat` 的区域分隔符，写入值仍是数字本体
+（`1.234,50` 写入 `1234.5`）。聚焦时切换为无千分位的编辑文本，失焦恢复区域
+格式；混合分隔符、字母和其他非法文本不会写值或调用 `onchange`。不传
+`locale` 时保持原有 `type="number"` 行为。其他 locale、输入法组合输入和
+操作系统剪贴板不在当前契约内，字段上的未支持 locale 会回退默认路径。
 
 迁移时请检查：
 
@@ -1613,8 +1778,21 @@ Provider 必须实现 `getMany`，并返回请求的全部 ID；缺失或重复 
 - 这是逐页加载，不是虚拟化、游标分页或固定结果快照。已加载页可能因服务端数据变化
   发生位移；需要一致性快照时由 Provider/后端实现。未加载页不能当成不存在的选项。
 
-当前组件定向测试 11 项通过，覆盖分页搜索、多选回显、失败重试、租户隔离、
-容量回退和中文空状态；不代表完成万条选项性能或人工读屏验收。
+### 键盘与焦点
+
+触发按钮支持 Enter、Space、ArrowUp 和 ArrowDown 打开；打开后可搜索时焦点
+进入搜索框，不可搜索时进入命令面板。Escape 取消并回到触发按钮，单选完成
+或清空也恢复触发按钮焦点；多选选择后保持弹层打开并保持连续选择焦点。
+Tab 离开组件时菜单收起，但不会把焦点抢回组件。
+
+“加载更多”是弹层内独立按钮，不属于 Command 选项导航；用 Enter 或 Space
+分页不会选择当前 option。资源、租户或 Provider 作用域变化会关闭旧菜单，
+禁用字段不会重新打开旧菜单。宿主 `onchange` 如果主动把焦点移到外部控件，
+组件不会强行抢回。
+
+当前组件定向回归合计 32/32，包含原有 11 项远程选择用例；本地 Chromium
+在两种视口、单/多选和可/不可搜索组合共 8 组通过。此结果不代表跨浏览器、
+屏幕阅读器、万条选项性能或真实 Provider 权限联调已经完成。
 
 ### 静态单选与多选字段
 
@@ -1657,9 +1835,20 @@ SPA `FieldRenderer` 的 `select` 回调现在保留 `field.options` 的原始值
 避免异步上传和外层 multipart 表单重复提交同一文件；不提供 `upload` 时仍保留
 原生 `name`，适用于普通表单提交。单文件模式重新选择文件表示替换原文件，
 不会因为已有一个文件而被数量上限拒绝。
+原生模式中，文件输入和拖放共享接收队列：分批选择累积至数量上限，移除只删除
+对应文件，`input.files` 与 `FormData` 在 `onChange` 通知前同步到当前队列。
+类型或大小校验失败的文件不占用名额，也不会留在原生提交内容中；无效的单文件
+替换保留原有合法附件。同一批次单选仅接收首个合法文件，其余合法文件按超额拒绝。
+原生表单重置会清空队列与拒绝提示；被 `preventDefault()` 取消的重置保留原状。
+重置的通知在事件分发完成后执行，紧接着重新选文件不会恢复已重置的旧附件。
+这些预校验不代替服务端文件内容、大小、权限与持久化检查。
+
 异步模式选择后会清空原生输入以允许再次选择同名文件，因此 `required` 不再作为
 原生输入校验生效；宿主必须在提交业务表单时根据 `onChange` 返回的成功条目校验
 必填附件，并将可信的服务端附件标识提交给业务接口。
+原生表单重置不取消异步上传会话；宿主仍须通过取消操作或重建组件管理异步生命周期。
+本地原生提交与重置验证见 `docs/evidence/file-upload-native-contract-20261021.md`；
+这不代表 ImportDropzone、FileList、跨浏览器或真实存储服务已经验收。
 
 迁移时请检查：
 
@@ -1681,6 +1870,16 @@ ID 必须非空、最多 200 字符，同一次尝试不能更换 ID。
 条目的 `cleanupStatus` 为 `pending/success/error`；`success` 仅表示宿主回调
 已正常完成，宿主必须先核实服务端回收结果再 resolve，不能将 HTTP 已受理当成删除完成。
 旧回收结果不会覆盖新尝试，移除或卸载后不再发送条目状态回调。
+
+已经登记 `uploadId` 却失败（`status: 'error'`）的尝试不会立即回收，也不会在
+`finally` 中丢失会话：移除、单文件替换、作用域替换或卸载该条目时，仍使用该
+失败尝试捕获的 `cancelUpload` 与幂等键，reason 分别为 `remove`、`replace`、
+`scope-change`、`unmount`。用户点击重试时，先按 `replace` 语义发起旧失败尝试
+临时会话的异步回收，不等待回收完成即用新幂等键创建新尝试；旧回收的迟到结果
+不会更新新尝试，也不产生额外条目回调。同一次尝试的自动回收最多一次。
+成功附件不会进入回收路径，不会因移除或卸载被取消回调删除；即使宿主在 success
+的 `onChange` 中同步卸载组件或同步抛错，该尝试也已锁定成功语义，不会被
+`cancelUpload` 回收，也不会进入待回收集合。没有 ID 或回调时仍不声称回收成功。
 
 服务端必须独立鉴权，并先关闭上传会话、拒绝后续写入再回收临时对象，
 否则忽略取消信号的上传仍可能在回收后重新写入。浏览器关闭不保证网络请求完成，
@@ -1738,6 +1937,41 @@ Lite 不接受 SPA 的 `upload`、`onChange`、`maxFiles` 或 `maxSize` 属性�
 需要无脚本文件选择状态时，改用这里的可见原生输入。此能力在矩阵中标记为
 `fallback`，不是完整行为对齐。
 
+## ImportDropzone
+
+`ImportDropzone` 保留选择即调用 `onimport(files)` 的既有语义；拖放与文件选择
+共用 `accept` 校验，默认单文件，传入 `multiple` 才允许多文件。整批文件只要有
+一个类型不符合或单文件模式超过一个，就不会调用宿主，组件显示可读错误。
+导入处理器可以返回 Promise；处理期间输入与拖放锁定，失败只显示通用错误并提供
+显式重试，重试复用同一批文件但会重新调用宿主。组件会清空原生输入以允许同一
+文件再次选择，处理器替换或组件卸载后的迟到结果不会覆盖当前状态。
+
+`loading` 表示宿主任务状态，会与组件内部 Promise 状态共同锁定入口；`status`
+用于显示宿主提供的任务反馈。缺少 `onimport` 时入口禁用。若宿主启动后台任务
+却不返回 Promise，须自行维护 `loading` 与 `status`。组件不将回调结束显示为
+服务端持久化成功；异常可能对应结果不确定，宿主必须先按幂等键查询结果，再
+决定重试是否安全。改变身份或租户时，应替换处理器或用 `{#key scopeKey}` 重建；
+组件不能识别闭包内部的授权变化，也不负责取消或回滚已发出的请求。
+
+上传/导入凭据、解析、幂等、任务持久化和服务端权限仍由宿主负责。当前交互
+证据见 `docs/evidence/import-dropzone-contract-20261021.md`，不等于真实导入任务
+或 FileList 下载/移除闭环已经验收。
+
+### FileList
+
+`FileList` 只展示宿主传入的附件元数据，并通过可选的 `onpreview`、
+`ondownload`、`onremove` 回调交给宿主执行实际动作。组件不接收或直接打开
+任意 URL，不自行删除 `files`，也不把回调 resolve 当作服务端持久化、下载签名
+或删除成功的证明。每行操作独立锁定；同一行的预览、下载、移除不能并发，其他
+行仍可操作。回调可以返回 Promise，失败只显示通用错误，按钮恢复后由用户
+明确重试。
+
+宿主更新 `files`、替换操作回调或销毁组件时，旧操作的迟到结果不会覆盖当前
+行状态。`state="loading"|"error"|"forbidden"|"empty"` 等 DataState 优先于
+附件入口；长文件名和 MIME 会在窄视口断词，不挤压操作按钮。真实下载、预览、
+权限、租户隔离、服务端删除和审计仍须由宿主实现并单独验收。证据见
+`docs/evidence/file-list-actions-20261021.md`。
+
 ## ImportWizard
 
 导入向导将原始 CSV/JSON 文件和字段映射交给核心 `useImport`：
@@ -1762,6 +1996,47 @@ Core 在读取文件前通过原生 Blob 大小校验字节数，并在写入前
 未配置 `taskName` 时仍是当前页面内的本地导入流程，不是持久化任务中心；
 需要刷新恢复、服务端取消和幂等提交时必须迁移到下方的服务端任务模式。
 任务附件可使用下方对象引用模式；存储上传服务仍由宿主提供，不内置存储凭据。
+
+### 本地试运行（dryRun / onPreview）
+
+`ImportWizard` 新增公开 `dryRun` 模式和可选 `onPreview` 回调，用于在真正导入前
+返回可预判结果。dry-run 复用当前文件的 CSV/JSON 解析、列映射、类型转换与
+`parseContractCreateInput` 逐行预校验，但不调用 `useImport.handleChange`，
+不调用 `DataProvider.create/createMany`，不提交或轮询 `TaskProvider` 任务：
+
+```svelte
+<ImportWizard
+  resourceName="posts"
+  dryRun
+  onPreview={(result) => savePreview(result)}
+/>
+```
+
+`ImportPreviewResult` 从 `@svadmin/core` 和 `@svadmin/ui` 导出：
+
+```ts
+interface ImportPreviewFailure {
+  row: number;   // 1-based 记录序号，不含 CSV 表头
+  error: string; // 安全通用原因，不回显解析器或 Provider 诊断
+}
+interface ImportPreviewResult {
+  totalRows: number;
+  importableRows: number;
+  failedRows: ImportPreviewFailure[];
+}
+```
+
+失败原因固定为本地导入失败也使用的 `Invalid import input`，与失败 CSV 的
+`_error_reason` 一样不含 Provider 私有异常、原始值或解析器细节。`row` 是当前文件
+中的记录序号，不是物理行号。dry-run 结果只代表浏览器内解析、映射和创建 Schema
+预校验，不证明唯一性、服务端授权、租户隔离或业务状态检查成功，也不是服务端试运行。
+
+`dryRun` 默认关闭，未设置时普通导入路径和写入行为不变。设置 `dryRun` 后映射步骤
+显示 `Preview import`，不显示真实写入入口；预览结果页可用 `Back to import`
+返回映射继续调整，或 `Import another` 重选文件。仅提供 `onPreview` 而未设置
+`dryRun` 时，映射步骤额外显示次要 `Preview` 按钮，`Start Import` 仍是真实写入。
+关闭、卸载、权限、租户、Provider 或资源作用域变化继续使用既有 reset 和解析令牌
+隔离，预览结果不会跨作用域保留。
 
 ### 服务端导入任务模式
 
@@ -2152,6 +2427,13 @@ const approvalProvider: ApprovalProvider = {
   对 `getList`、`getMany` 重新执行当前用户、租户和资源权限校验。
 - 搜索、租户、认证会话、资源契约或 Provider 变化时，旧请求的结果不得恢复
   旧选项或旧草稿；无列表权限或认证会话不可用时，选择入口禁用且不发起列表请求。
+- 取消、Escape、右上角关闭或遮罩关闭都会丢弃未提交草稿，并清空搜索、分页
+  累积项和待执行的搜索防抖；重新打开从当前受控值和第一页开始。确认只提交
+  一次，并由 Dialog 恢复打开前的焦点（通常为选择入口）。
+- 作用域改变后，查询等待本地状态清理完成才启用，避免新 Provider 短暂收到
+  旧搜索、页码或选中 ID。原有值失效策略保持不变：权限恢复或作用域切换后，
+  未变化的旧值不会自动恢复选中回显。宿主应确认新作用域中的合法关系并重新
+  提供值；数组使用新引用，同一个标量 ID 可在新作用域下重挂载选择器。
 - 全量匹配选择仍属于 `AutoTable` 的批量选择语义，不要把 `RelationPicker`
   的已选 ID 当作服务端“全部匹配”授权。
 
@@ -2190,13 +2472,28 @@ const approvalProvider: ApprovalProvider = {
   dashboardId="operations"
   requestContext={requestContext}
   filters={[{ field: 'region', value: 'east' }]}
+  timeRange={{ from: '2026-10-01T00:00:00Z', to: '2026-10-31T23:59:59Z' }}
+  onDrillDown={handleDashboardDrilldown}
 />
 ```
 
-`DashboardView` 负责加载、空态、错误态、刷新和作用域内的旧响应丢弃；服务端仍
-负责仪表盘授权、指标计算、筛选校验、缓存和审计。切换 Provider、租户、认证会话、
-仪表盘 ID 或筛选条件后，旧快照不能继续渲染。旧的静态 `MetricStrip` 页面不会自动
-迁移，调用方需要把数据读取迁移到 `DashboardProvider`，并保留原有业务授权。
+`timeRange` 只接受带 `Z` 的 UTC ISO 8601 时间点并要求 `from <= to`；时区偏移、
+未知字段、逆序范围和不存在的日历时间（如 `2026-02-29`、`2026-02-30`、
+`24:00:00`）会被拒绝，真实闰日如 `2024-02-29` 可用。`onDrillDown` 收到
+`DashboardDrilldown`，其中包含当前 `dashboardId`、widget 标识、可选原始
+metric，以及当前成功快照实际使用的筛选和时间范围；后续 props 原位变化不会把
+旧快照与新筛选拼在一起。存在该回调时 metric 显示为钻取按钮并派发事件，否则
+保留合法 `href` 原生链接；text 小组件显示“查看详情”按钮。钻取回调同步抛错或
+异步拒绝时只显示通用脱敏提示，不转成仪表盘加载失败，也不丢失已有快照；再次点击
+会清理旧提示，切换查询或卸载后旧失败不会污染新视图。宿主负责实际路由和授权校验。
+
+`DashboardView` 负责加载、空态、错误态、刷新、当前错误条件下的重试，以及作用域
+内的旧响应丢弃；服务端仍负责仪表盘授权、指标计算、筛选校验、缓存和审计。切换
+Provider、租户、认证会话、仪表盘 ID、筛选条件或时间范围后，旧快照不能继续渲染；
+筛选/时间范围的嵌套值被原位修改时也会重新查询。加载失败时隐藏旧快照，不能把
+上一次数据继续当成当前结果。内置筛选栏、时间选择器和 URL 状态恢复仍由宿主提供。
+旧的静态 `MetricStrip` 页面不会自动迁移，调用方需要把数据读取迁移到
+`DashboardProvider`，并保留原有业务授权。
 
 ### 资源详情扩展
 
@@ -2275,7 +2572,8 @@ const approvalProvider: ApprovalProvider = {
 
 ## 升级检查
 
-1. 更新调用方的 `FilterBuilder` 数据，移除 `logicalOperator`。
+1. 将 `FilterBuilder` 的传输和保存数据统一为递归 `Filter[]`；SPA 的顶层
+   `logicalOperator` 兼容属性仍可使用，迁移到 Lite 时改用显式逻辑组。
 2. 为 Schema 表单补充嵌套对象、数组和枚举类型测试。
 3. 扫描电子表格公式，移除自定义 JavaScript 表达式。
 4. 检查 `TreeSelect` 多选值是否只包含叶子节点，并验证 200+ 节点窗口化的焦点、

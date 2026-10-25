@@ -9,7 +9,7 @@
 
   interface Props<T extends string = string> {
     options: readonly SegmentedControlOption<T>[];
-    value?: T;
+    value?: T | undefined;
     disabled?: boolean;
     ariaLabel: string;
     dir?: 'ltr' | 'rtl';
@@ -52,7 +52,9 @@
   }
 
   function handleKeydown(event: KeyboardEvent, option: SegmentedControlOption<T>, index: number): void {
-    if (disabled || option.disabled) return;
+    const current = event.currentTarget;
+    if (disabled || option.disabled || event.altKey || event.ctrlKey || event.metaKey
+      || !(current instanceof HTMLButtonElement) || current.matches(':disabled')) return;
     const rtl = getComputedStyle(root).direction === 'rtl' || dir === 'rtl';
     if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
       event.preventDefault();

@@ -1,8 +1,10 @@
 <script lang="ts">
   import NumericInput from './NumericInput.svelte';
+  import type { NumericInputLocale } from './numeric-format.js';
 
   interface Props {
     value?: number | null;
+    locale?: NumericInputLocale | undefined;
     currency?: string;
     min?: number;
     max?: number;
@@ -14,12 +16,12 @@
     disabled?: boolean;
     required?: boolean;
     invalid?: boolean;
-    describedby?: string;
+    describedby?: string | undefined;
     class?: string;
     onchange?: (value: number | null) => void;
   }
 
-  let props: Props = $props();
+  let { value = $bindable(null), ...props }: Props = $props();
 </script>
 
-<NumericInput {...props} mode="currency" />
+<NumericInput {...props} bind:value mode="currency" />

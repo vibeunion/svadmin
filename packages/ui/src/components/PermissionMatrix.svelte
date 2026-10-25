@@ -24,6 +24,7 @@
       return value === key && labels ? labels[translation.locale === 'zh-CN' ? 1 : 0] : value;
     },
   };
+  const instanceId = $props.id();
 
   
   let {
@@ -48,6 +49,7 @@
     // Custom slots for injecting multi-tenant switchers or security filters
     sidebarExtra,
     headerExtra,
+    tableContent,
 
     // Callback event
     onToggle
@@ -63,6 +65,7 @@
     conflictCount?: number;
     sidebarExtra?: Snippet;
     headerExtra?: Snippet;
+    tableContent?: Snippet | undefined;
     onToggle: (role: string, resource: string, action: string, grant: boolean) => void;
   } = $props();
 
@@ -72,6 +75,20 @@
       selectedRole = firstRole.code;
     }
   });
+
+  type PermissionDecision = 'granted' | 'denied' | 'unknown';
+
+  function resolveDecision(role: string, resource: string, action: string): PermissionDecision {
+    if (!role) return 'unknown';
+    try {
+      const value: unknown = isGranted(role, resource, action);
+      if (value === true) return 'granted';
+      if (value === false) return 'denied';
+      return 'unknown';
+    } catch {
+      return 'unknown';
+    }
+  }
 </script>
 
 <div class="svadmin-u-668b21aa5409 svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-f46b61a9b310">
@@ -87,7 +104,11 @@
     
     <!-- Toast Feedback -->
     {#if message}
-      <div class={`svadmin-u-f0faeb26d656 svadmin-u-03b4dd7f172b svadmin-u-5f22e64f2282 svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-438b2237b8d6 svadmin-u-0fe7d7d814d0 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 ${messageType === 'success' ? 'svadmin-u-17a9f7af2265 svadmin-u-76747e5e02ff svadmin-u-3daca9af0861 svadmin-u-be62e835b692' : 'svadmin-u-43928fcc832f svadmin-u-811148b13d1e svadmin-u-3daca9af0861 svadmin-u-5b92fd698365'}`}>
+      <div
+        role={messageType === 'error' ? 'alert' : 'status'}
+        aria-live={messageType === 'error' ? 'assertive' : 'polite'}
+        class={`svadmin-u-f0faeb26d656 svadmin-u-03b4dd7f172b svadmin-u-5f22e64f2282 svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-438b2237b8d6 svadmin-u-0fe7d7d814d0 svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-77a2a20e90d4 ${messageType === 'success' ? 'svadmin-u-17a9f7af2265 svadmin-u-76747e5e02ff svadmin-u-3daca9af0861 svadmin-u-be62e835b692' : 'svadmin-u-43928fcc832f svadmin-u-811148b13d1e svadmin-u-3daca9af0861 svadmin-u-5b92fd698365'}`}
+      >
         {#if messageType === 'success'}
            <Check class="svadmin-u-dc7972ebf3f3 svadmin-u-11e59c6d5f6b" />
         {:else}
@@ -100,8 +121,8 @@
 
   <div class="svadmin-u-60fbb7713999 svadmin-u-8dddea0773ed svadmin-u-2adea12c41f3 svadmin-u-0d304f904cb0 svadmin-u-36e579c0b41c svadmin-u-243d62579c55">
     <div class="svadmin-u-6da6a3c3f741 svadmin-u-5f22e64f2282 svadmin-u-ca6bcd4b6f3f svadmin-u-18049387f0af svadmin-u-cd0ad9a56558 svadmin-u-8e63407b5ceb svadmin-u-438b2237b8d6 svadmin-u-a327049cac5b">
-      <label for="permission-role-select" class="svadmin-u-a77ed4d908c0 svadmin-u-0214b4b355d1 svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{i18n.t('permissions.roles') || 'Roles'}</label>
-      <select id="permission-role-select" bind:value={selectedRole} class="svadmin-u-e7a768f922d2 svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-0e17f2bd9074 svadmin-u-fc7473ca09eb svadmin-u-582e6ef4b245 svadmin-u-55d048ebfb1c svadmin-u-608dd26cd5ba svadmin-u-80b9d0ae125f svadmin-u-6b22a22a9752" disabled={roles.length === 0}>
+      <label for={`${instanceId}-permission-role-select`} class="svadmin-u-a77ed4d908c0 svadmin-u-0214b4b355d1 svadmin-u-fc7473ca09eb svadmin-u-2689f3958069 svadmin-u-d4108abe6359">{i18n.t('permissions.roles') || 'Roles'}</label>
+      <select id={`${instanceId}-permission-role-select`} value={selectedRole} onchange={(event) => { selectedRole = event.currentTarget.value; }} class="svadmin-u-e7a768f922d2 svadmin-u-6da6a3c3f741 svadmin-u-421ac2be5045 svadmin-u-ca6bcd4b6f3f svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-0e17f2bd9074 svadmin-u-fc7473ca09eb svadmin-u-582e6ef4b245 svadmin-u-55d048ebfb1c svadmin-u-608dd26cd5ba svadmin-u-80b9d0ae125f svadmin-u-6b22a22a9752" disabled={roles.length === 0}>
         {#each roles as role (role.code)}<option value={role.code}>{role.name}</option>{/each}
       </select>
       {#if roles.length === 0}<p class="svadmin-u-50d0d216a2f8 svadmin-u-fc7473ca09eb svadmin-u-bfa603190748">{i18n.t('permissions.noRoles') || 'No roles available'}</p>{/if}
@@ -114,7 +135,9 @@
       <div class="svadmin-u-da7c36cd8867 svadmin-u-36e579c0b41c svadmin-u-92bf82f493b1">
         {#each roles as role, _i (_i)}
           <button 
+            type="button"
             onclick={() => selectedRole = role.code}
+            aria-pressed={selectedRole === role.code}
             class="svadmin-u-6da6a3c3f741 svadmin-u-2eba0d65d059 svadmin-u-0e17f2bd9074 svadmin-u-e7ee55ac7ffe svadmin-u-5f22e64f2282 svadmin-u-fc7473ca09eb svadmin-u-0fe7d7d814d0 svadmin-u-625a4c3fbeb2 {selectedRole === role.code ? 'svadmin-u-375dc44df6e9 svadmin-u-20aaf08a7ed1 svadmin-u-2689f3958069 svadmin-u-438b2237b8d6 svadmin-u-3daca9af0861 svadmin-u-2b6f77ad4036' : 'svadmin-u-d4108abe6359 svadmin-u-8e551981c8d7'}"
           >
             {role.name}
@@ -161,6 +184,9 @@
       
       <!-- Table Area -->
       <div class="svadmin-u-36e579c0b41c svadmin-u-73fc3fb18ceb svadmin-u-8e63407b5ceb">
+        {#if tableContent}
+          {@render tableContent()}
+        {:else}
         <table class="svadmin-u-a1e7a8069878 svadmin-u-5f22e64f2282 svadmin-u-2cd02d11d1af svadmin-u-438b2237b8d6 svadmin-u-3daca9af0861 svadmin-u-a10fdd7667ee">
           <thead class="svadmin-u-358af0b65a31">
             <tr>
@@ -197,19 +223,28 @@
                 
                 <!-- Action Checkboxes -->
                 {#each actions as action, _i (_i)}
-                  {@const granted = selectedRole ? isGranted(selectedRole, resource.code, action.code) : false}
+                  {@const decision = selectedRole ? resolveDecision(selectedRole, resource.code, action.code) : 'unknown'}
+                  {@const granted = decision === 'granted'}
+                  {@const actionable = !loading && !!selectedRole && decision !== 'unknown'}
                   <td class="svadmin-u-e82ae8be04aa svadmin-u-0e17f2bd9074 svadmin-u-1b2d54a3fd12 svadmin-u-ca6bf63030aa">
                     <div class="svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227">
                       <button 
-                        disabled={loading || !selectedRole}
-                        aria-label="Toggle {action.name}"
-                        onclick={() => onToggle(selectedRole as string, resource.code, action.code, !granted)}
-                        class="svadmin-u-7ec10f86d9b1 svadmin-u-f6fe902450dc svadmin-u-07389a777c1f svadmin-u-ca6bcd4b6f3f svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-0fe7d7d814d0 svadmin-u-55d048ebfb1c svadmin-u-608dd26cd5ba svadmin-u-094cedcfedfd {granted ? 'svadmin-u-75b1bec3ea0e svadmin-u-6cbc84dd9e1a svadmin-u-30ca335ae9c2' : 'svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-0557b88819cd'} {loading || !selectedRole ? 'svadmin-u-0b8c506a0596 svadmin-u-29b733e4c162' : 'svadmin-u-34516836730d'}"
+                        type="button"
+                        disabled={!actionable}
+                        aria-label={translation.t('permissions.toggleAction').replaceAll('{action}', () => action.name)}
+                        aria-describedby={`${instanceId}-permission-${resource.code}-${action.code}`}
+                        aria-pressed={granted}
+                        onclick={() => { if (actionable) onToggle(selectedRole as string, resource.code, action.code, !granted); }}
+                        class="svadmin-u-7ec10f86d9b1 svadmin-u-f6fe902450dc svadmin-u-07389a777c1f svadmin-u-ca6bcd4b6f3f svadmin-u-60fbb7713999 svadmin-u-3960ffc248d9 svadmin-u-86843cf1e227 svadmin-u-0fe7d7d814d0 svadmin-u-55d048ebfb1c svadmin-u-608dd26cd5ba svadmin-u-094cedcfedfd {granted ? 'svadmin-u-75b1bec3ea0e svadmin-u-6cbc84dd9e1a svadmin-u-30ca335ae9c2' : 'svadmin-u-e5795dad4d22 svadmin-u-e6f9e383a762 svadmin-u-0557b88819cd'} {!actionable ? 'svadmin-u-0b8c506a0596 svadmin-u-29b733e4c162' : 'svadmin-u-34516836730d'}"
                       >
                         <svg class="svadmin-u-bf600f8e029c svadmin-u-7fc7f732bf7e {granted ? 'svadmin-u-0214b4b355d1' : 'svadmin-u-99d72c7fc3e2'}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                       </button>
+                      <span id={`${instanceId}-permission-${resource.code}-${action.code}`} class="svadmin-sr-only">
+                        {roles.find(role => role.code === selectedRole)?.name || selectedRole} {selectedRole ? `(${selectedRole})` : ''}
+                        / {resource.name} ({resource.code}) / {action.name} ({action.code})
+                      </span>
                     </div>
                   </td>
                 {/each}
@@ -217,6 +252,7 @@
             {/each}
           </tbody>
         </table>
+        {/if}
       </div>
     </div>
   </div>

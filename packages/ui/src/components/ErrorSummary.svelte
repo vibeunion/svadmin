@@ -11,7 +11,7 @@
 
   let {
     errors = [],
-    title = i18n.t('common.formErrors'),
+    title,
     id,
     onfocusfield,
   } = $props<{
@@ -21,18 +21,23 @@
     onfocusfield?: (fieldKey: string) => void;
   }>();
 
-  const headingId = $derived(id ? `${id}-title` : undefined);
+  const generatedId = $props.id();
+  const headingId = $derived(`${id ?? generatedId}-title`);
+  const resolvedTitle = $derived(title ?? i18n.t('common.formErrors'));
 </script>
 
 {#if errors.length > 0}
   <div
     class="svadmin-u-ee1a5af3aa10"
+    data-svadmin-error-summary
     role="region"
     aria-labelledby={headingId}
+    aria-live="polite"
+    aria-atomic="true"
   >
-    <h2 id={headingId} class="svadmin-u-2689f3958069">{title}</h2>
+    <h2 id={headingId} class="svadmin-u-2689f3958069">{resolvedTitle}</h2>
     <ul>
-      {#each errors as error (error.fieldKey)}
+      {#each errors as error, index (`${error.fieldKey}-${index}`)}
         <li>
           {#if onfocusfield}
             <button

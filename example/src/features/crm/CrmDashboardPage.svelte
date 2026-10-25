@@ -16,10 +16,36 @@
   let search = $state('');
   let busy = $state(false);
   let feedback = $state('');
-  const accountsQuery = useList({ resource: demoContracts.crm_accounts, pagination: { mode: 'off' } });
-  const contactsQuery = useList({ resource: demoContracts.crm_contacts, pagination: { mode: 'off' } });
-  const dealsQuery = useList({ resource: demoContracts.crm_deals, pagination: { mode: 'off' } });
-  const activitiesQuery = useList({ resource: demoContracts.crm_activities, pagination: { mode: 'off' }, sorters: [{ field: 'dueDate', order: 'asc' }] });
+  const activeResource = $derived(
+    resourceName === 'crm_contacts' || resourceName === 'crm_deals' || resourceName === 'crm_activities'
+      ? resourceName : 'crm_accounts'
+  );
+  const showDealSummary = $derived(activeResource === 'crm_deals' || view === 'reports' || view === 'dashboard');
+  const accountsQuery = useList({
+    resource: demoContracts.crm_accounts,
+    pagination: { mode: 'off' },
+    errorNotification: false,
+    get queryOptions() { return { enabled: activeResource === 'crm_accounts' }; },
+  });
+  const contactsQuery = useList({
+    resource: demoContracts.crm_contacts,
+    pagination: { mode: 'off' },
+    errorNotification: false,
+    get queryOptions() { return { enabled: activeResource === 'crm_contacts' }; },
+  });
+  const dealsQuery = useList({
+    resource: demoContracts.crm_deals,
+    pagination: { mode: 'off' },
+    errorNotification: false,
+    get queryOptions() { return { enabled: showDealSummary }; },
+  });
+  const activitiesQuery = useList({
+    resource: demoContracts.crm_activities,
+    pagination: { mode: 'off' },
+    sorters: [{ field: 'dueDate', order: 'asc' }],
+    errorNotification: false,
+    get queryOptions() { return { enabled: activeResource === 'crm_activities' }; },
+  });
   const activityUpdate = useUpdateMany({ resource: demoContracts.crm_activities });
   const accounts = $derived(demoRenderers.crm_accounts.records(accountsQuery.data?.data ?? []));
   const contacts = $derived(demoRenderers.crm_contacts.records(contactsQuery.data?.data ?? []));
@@ -31,14 +57,14 @@
     { resource: 'crm_deals', title: isZh ? '商机' : 'Deals', query: dealsQuery },
     { resource: 'crm_activities', title: isZh ? '跟进活动' : 'Activities', query: activitiesQuery },
   ] as const);
-  const current = $derived(navigation.find(item => item.resource === resourceName) ?? navigation[0]);
+  const current = $derived(navigation.find(item => item.resource === activeResource) ?? navigation[0]);
   const title = $derived(view === 'reports' || view === 'dashboard' ? (isZh ? 'CRM 经营快照' : 'CRM snapshot') : view === 'notes' ? (isZh ? '跟进记录' : 'Follow-up notes') : current.title);
   const matches = (value: string) => value.toLowerCase().includes(search.trim().toLowerCase());
   const visibleAccounts = $derived(accounts.filter(item => matches(`${item.accountName} ${item.notes}`)));
   const visibleContacts = $derived(contacts.filter(item => matches(`${item.fullName} ${item.email} ${item.notes}`)));
   const visibleDeals = $derived(deals.filter(item => matches(item.dealName)).sort((a, b) => b.amount - a.amount));
   const visibleActivities = $derived(activities.filter(item => matches(`${item.subject} ${item.outcome}`) && (view !== 'tasks' || item.status !== 'completed') && (view !== 'notes' || item.outcome.trim().length > 0)));
-  const visibleCount = $derived(resourceName === 'crm_accounts' ? visibleAccounts.length : resourceName === 'crm_contacts' ? visibleContacts.length : resourceName === 'crm_deals' ? visibleDeals.length : visibleActivities.length);
+  const visibleCount = $derived(activeResource === 'crm_accounts' ? visibleAccounts.length : activeResource === 'crm_contacts' ? visibleContacts.length : activeResource === 'crm_deals' ? visibleDeals.length : visibleActivities.length);
   const openDeals = $derived(deals.filter(item => !['won', 'lost'].includes(item.stage)));
   const stages = ['discovery', 'proposal', 'negotiation', 'won', 'lost'];
   const stageLabels: Record<string, string> = { discovery: '发现', proposal: '方案', negotiation: '谈判', won: '赢单', lost: '丢单' };
@@ -58,19 +84,20 @@
 <svelte:window onhashchange={() => view = readHashView('default')} onpopstate={() => view = readHashView('default')} />
 
 {#snippet actions()}
-  <Button onclick={() => window.location.hash = `/${resourceName}/create`}>{isZh ? '新建' : 'Create'} {current.title}</Button>
+  <Button onclick={() => window.location.hash = `/${activeResource}/create`}>{isZh ? '新建' : 'Create'} {current.title}</Button>
 {/snippet}
 
 <div data-app-page="crm-dashboard" data-crm-view={view} data-resource-name={resourceName}>
   <ContentPageShell pageId="crm-dashboard" width="wide">
     <ContentPageHeader title={title} actions={actions} />
     <nav class="flex flex-wrap gap-4 border-b pb-3" aria-label="CRM">
-      {#each navigation as item (item.resource)}<a class="text-sm font-medium text-primary" aria-current={resourceName === item.resource ? 'page' : undefined} href={`#/${item.resource}`}>{item.title}</a>{/each}
+      {#each navigation as item (item.resource)}<a class="text-sm font-medium text-primary" aria-current={activeResource === item.resource ? 'page' : undefined} href={`#/${item.resource}`}>{item.title}</a>{/each}
       <a class="text-sm text-primary" href="#/crm_activities?view=tasks">{isZh ? '待跟进' : 'Open follow-ups'}</a>
       <a class="text-sm text-primary" href="#/crm_activities?view=notes">{isZh ? '跟进记录' : 'Notes'}</a>
       <a class="text-sm text-primary" href="#/crm_deals?view=reports">{isZh ? '报表' : 'Reports'}</a>
     </nav>
-    {#if view === 'reports' || view === 'dashboard' || resourceName === 'crm_deals'}
+    <!-- 商机主查询的加载和错误由下方列表承接，统计区不重复反馈。 -->
+    {#if showDealSummary && (activeResource !== 'crm_deals' || (!dealsQuery.isLoading && !dealsQuery.isError))}
       <WorkspaceQueryState query={dealsQuery}>
         <dl class="grid grid-cols-3 gap-3 border-y py-3">
           <div class="min-w-0"><dt class="text-xs text-muted-foreground">{isZh ? '开放商机金额' : 'Open pipeline'}</dt><dd class="mt-1 break-words text-sm font-semibold">{money(openDeals.reduce((sum, item) => sum + item.amount, 0))}</dd></div>
@@ -89,21 +116,21 @@
     {#if feedback}<p role="status">{feedback}</p>{/if}
     <WorkspaceQueryState query={current.query} count={visibleCount} hasActiveFilters={Boolean(search.trim()) || view === 'tasks' || view === 'notes'}>
       <section class="divide-y" aria-label={current.title}>
-        {#if resourceName === 'crm_accounts'}
+        {#if activeResource === 'crm_accounts'}
           {#each visibleAccounts as item (item.id)}
-            <article class="py-4"><div class="flex flex-wrap justify-between gap-3"><h2 class="text-base font-semibold">{item.accountName}</h2><Badge variant="outline">{item.health}</Badge></div><p class="mt-2 text-sm text-muted-foreground">{item.notes}</p><p class="mt-2 text-sm">{isZh ? '下次复盘' : 'Next review'}: {item.nextReview}</p><WorkspaceRecordLinks resource={resourceName} id={item.id} /></article>
+            <article class="py-4"><div class="flex flex-wrap justify-between gap-3"><h2 class="text-base font-semibold">{item.accountName}</h2><Badge variant="outline">{item.health}</Badge></div><p class="mt-2 text-sm text-muted-foreground">{item.notes}</p><p class="mt-2 text-sm">{isZh ? '下次复盘' : 'Next review'}: {item.nextReview}</p><WorkspaceRecordLinks resource={activeResource} id={item.id} /></article>
           {/each}
-        {:else if resourceName === 'crm_contacts'}
+        {:else if activeResource === 'crm_contacts'}
           {#each visibleContacts as item (item.id)}
-            <article class="py-4"><h2 class="text-base font-semibold">{item.fullName}</h2><p class="mt-2 text-sm">{item.roleTitle} · {item.lastTouchDate}</p><a class="text-sm text-primary" href={`mailto:${item.email}`}>{item.email}</a><p class="text-sm text-muted-foreground">{item.notes}</p><WorkspaceRecordLinks resource={resourceName} id={item.id} /></article>
+            <article class="py-4"><h2 class="text-base font-semibold">{item.fullName}</h2><p class="mt-2 text-sm">{item.roleTitle} · {item.lastTouchDate}</p><a class="text-sm text-primary" href={`mailto:${item.email}`}>{item.email}</a><p class="text-sm text-muted-foreground">{item.notes}</p><WorkspaceRecordLinks resource={activeResource} id={item.id} /></article>
           {/each}
-        {:else if resourceName === 'crm_deals'}
+        {:else if activeResource === 'crm_deals'}
           {#each visibleDeals as item (item.id)}
-            <article class="py-4"><div class="flex flex-wrap justify-between gap-3"><h2 class="text-base font-semibold">{item.dealName}</h2><Badge variant="outline">{isZh ? stageLabels[item.stage] ?? item.stage : item.stage}</Badge></div><p class="mt-2 text-sm">{money(item.amount)} · {item.closeDate}</p><p class="text-sm text-muted-foreground">{item.nextStep}</p><WorkspaceRecordLinks resource={resourceName} id={item.id} /></article>
+            <article class="py-4"><div class="flex flex-wrap justify-between gap-3"><h2 class="text-base font-semibold">{item.dealName}</h2><Badge variant="outline">{isZh ? stageLabels[item.stage] ?? item.stage : item.stage}</Badge></div><p class="mt-2 text-sm">{money(item.amount)} · {item.closeDate}</p><p class="text-sm text-muted-foreground">{item.nextStep}</p><WorkspaceRecordLinks resource={activeResource} id={item.id} /></article>
           {/each}
         {:else}
           {#each visibleActivities as item (item.id)}
-            <article class="py-4"><div class="flex flex-wrap justify-between gap-3"><h2 class="text-base font-semibold">{item.subject}</h2><Badge variant="outline">{item.status}</Badge></div><p class="mt-2 text-sm">{item.dueDate} · {item.type}</p><p class="text-sm text-muted-foreground">{item.outcome}</p><div class="flex flex-wrap items-center justify-between gap-3"><WorkspaceRecordLinks resource={resourceName} id={item.id} />{#if item.status !== 'completed'}<Button size="sm" disabled={busy} onclick={() => void completeActivity(item.id)}>{isZh ? '完成跟进' : 'Complete follow-up'}</Button>{/if}</div></article>
+            <article class="py-4"><div class="flex flex-wrap justify-between gap-3"><h2 class="text-base font-semibold">{item.subject}</h2><Badge variant="outline">{item.status}</Badge></div><p class="mt-2 text-sm">{item.dueDate} · {item.type}</p><p class="text-sm text-muted-foreground">{item.outcome}</p><div class="flex flex-wrap items-center justify-between gap-3"><WorkspaceRecordLinks resource={activeResource} id={item.id} />{#if item.status !== 'completed'}<Button size="sm" disabled={busy} onclick={() => void completeActivity(item.id)}>{isZh ? '完成跟进' : 'Complete follow-up'}</Button>{/if}</div></article>
           {/each}
         {/if}
       </section>
