@@ -5,7 +5,7 @@ import { createSupabaseAuthProvider } from '../../../packages/supabase/src/auth-
 
 const authUrl = process.env['SVADMIN_AUTH_URL'];
 const jwtSecret = process.env['SVADMIN_AUTH_JWT_SECRET'];
-const enabled = Boolean(authUrl && jwtSecret && jwtSecret.length >= 32);
+const enabled = Boolean(process.env['SVADMIN_AUTH_SMOKE_RUN']);
 
 function memoryStorage() {
   const values = new Map<string, string>();
@@ -27,9 +27,9 @@ function gotrueFetch(base: string): typeof fetch {
       const suffix = url.pathname.slice(prefix.length);
       target.pathname = suffix.length > 0 ? suffix : '/';
       target.search = url.search;
-      return fetch(new Request(target, request));
+      return fetch(new Request(target, request), { signal: AbortSignal.timeout(5000), redirect: 'error' });
     }
-    return fetch(request);
+    throw new Error('Unexpected non-Auth smoke request');
   };
   return Object.assign(wrapped, { preconnect: fetch.preconnect });
 }
@@ -58,58 +58,77 @@ function clientFor(url: string, key: string, storageKey: string): SupabaseClient
 
 describe.skipIf(!enabled)('OrbStack GoTrue auth provider', () => {
   it('registers, refreshes, logs out, and rejects a wrong password', async () => {
-    if (!authUrl || !jwtSecret) throw new Error('GoTrue acceptance environment is incomplete');
+    if (!authUrl || !/^http:\/\/127\.0\.0\.1:\d+$/.test(authUrl) || !jwtSecret || jwtSecret.length < 32) {
+      throw new Error('GoTrue smoke requires a loopback URL and temporary credentials');
+    }
     const key = await anonKey(jwtSecret);
     const client = clientFor(authUrl, key, 'svadmin-enterprise-auth');
     const auth = createSupabaseAuthProvider(client);
     const email = `auth-${crypto.randomUUID()}@example.test`;
     const password = `Pw-${crypto.randomUUID().replaceAll('-', '')}`;
 
-    const registered = await auth.register({ email, password, name: 'Local Auth' });
-    expect(registered.success).toBe(true);
-
-    const loggedIn = await auth.login({ email, password });
-    expect(loggedIn.success).toBe(true);
-
-    const identity = await auth.getIdentity();
-    expect(identity?.email).toBe(email);
-    expect(identity?.name).toBe('Local Auth');
-    expect(identity?.id).toEqual(expect.any(String));
-    const userId = identity?.id;
-    if (!userId) throw new Error('GoTrue identity did not return a user id');
-
-    const beforeRefresh = await client.auth.getSession();
-    const previousAccessToken = beforeRefresh.data.session?.access_token;
-    if (!previousAccessToken || !beforeRefresh.data.session?.refresh_token) throw new Error('Login did not persist a GoTrue session');
-
-    await Bun.sleep(1100);
-    const refreshed = await client.auth.refreshSession();
-    expect(refreshed.error).toBeNull();
-    expect(refreshed.data.session?.user.id).toBe(userId);
-    expect(refreshed.data.session?.access_token).toEqual(expect.any(String));
-    expect(refreshed.data.session?.access_token).not.toBe(previousAccessToken);
-    const currentRefreshToken = refreshed.data.session?.refresh_token;
-    if (!currentRefreshToken) throw new Error('Refresh did not return a refresh token');
-
-    const refreshedIdentity = await auth.getIdentity();
-    expect(refreshedIdentity?.id).toBe(userId);
-    expect(refreshedIdentity?.token).toBe(refreshed.data.session?.access_token);
-
-    const loggedOut = await auth.logout();
-    expect(loggedOut.success).toBe(true);
-    expect((await client.auth.getSession()).data.session).toBeNull();
-    expect(await auth.check()).toMatchObject({ authenticated: false, redirectTo: '/login' });
-
+    let stage = 'register';
     const replay = clientFor(authUrl, key, 'svadmin-enterprise-auth-replay');
-    const restored = await replay.auth.refreshSession({ refresh_token: currentRefreshToken });
-    expect(restored.data.session).toBeNull();
-    expect(restored.error).not.toBeNull();
+    try {
+      const registered = await auth.register({ email, password, name: 'Local Auth' });
+      expect(registered.success).toBe(true);
 
-    const rejected = await auth.login({ email, password: `${password}-rejected` });
-    expect(rejected.success).toBe(false);
-    if (!rejected.success) expect(rejected.error?.name).toBe('AUTH_REJECTED');
+      stage = 'login';
+      const loggedIn = await auth.login({ email, password });
+      expect(loggedIn.success).toBe(true);
+      expect((await auth.check()).authenticated).toBe(true);
 
-    expect((await auth.login({ email, password })).success).toBe(true);
-    expect((await auth.logout()).success).toBe(true);
+      const identity = await auth.getIdentity();
+      expect(identity?.email === email).toBe(true);
+      expect(identity?.name).toBe('Local Auth');
+      expect(identity?.id).toEqual(expect.any(String));
+      const userId = identity?.id;
+      if (!userId) throw new Error('GoTrue identity did not return a user id');
+
+      const beforeRefresh = await client.auth.getSession();
+      const previousAccessToken = beforeRefresh.data.session?.access_token;
+      if (!previousAccessToken || !beforeRefresh.data.session?.refresh_token) throw new Error('Login did not persist a GoTrue session');
+
+      stage = 'refresh';
+      const refreshed = await client.auth.refreshSession();
+      expect(refreshed.error === null).toBe(true);
+      expect(refreshed.data.session?.user.id).toBe(userId);
+      expect(typeof refreshed.data.session?.access_token === 'string').toBe(true);
+      const currentRefreshToken = refreshed.data.session?.refresh_token;
+      if (!currentRefreshToken) throw new Error('Refresh did not return a refresh token');
+      expect(currentRefreshToken !== beforeRefresh.data.session?.refresh_token).toBe(true);
+
+      const refreshedIdentity = await auth.getIdentity();
+      expect(refreshedIdentity?.id).toBe(userId);
+      expect(refreshedIdentity?.token === refreshed.data.session?.access_token).toBe(true);
+      expect((await auth.check()).authenticated).toBe(true);
+
+      stage = 'logout';
+      const loggedOut = await auth.logout();
+      expect(loggedOut.success).toBe(true);
+      expect((await client.auth.getSession()).data.session === null).toBe(true);
+      expect(await auth.check()).toMatchObject({ authenticated: false, redirectTo: '/login' });
+
+      stage = 'revocation';
+      const restored = await replay.auth.refreshSession({ refresh_token: currentRefreshToken });
+      expect(restored.data.session === null).toBe(true);
+      expect(restored.error?.code === 'refresh_token_not_found').toBe(true);
+
+      stage = 'wrong-password';
+      const rejected = await auth.login({ email, password: `${password}-rejected` });
+      expect(rejected.success).toBe(false);
+      if (!rejected.success) expect(rejected.error?.name).toBe('AUTH_REJECTED');
+
+      expect((await auth.login({ email, password })).success).toBe(true);
+      expect((await auth.logout()).success).toBe(true);
+      console.info('AUTH_SMOKE_COMPLETE');
+    } catch {
+      // 不允许断言 diff 或 SDK 异常携带随机凭据和令牌。
+      console.error(`AUTH_SMOKE_STAGE_FAILED ${stage}`);
+      throw new Error(`Auth smoke failed at ${stage}`);
+    } finally {
+      await client.auth.stopAutoRefresh();
+      await replay.auth.stopAutoRefresh();
+    }
   });
 });

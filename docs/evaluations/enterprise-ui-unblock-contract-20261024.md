@@ -33,6 +33,8 @@
   对象权限、实机读屏、registry 发布、部署及在线验收仍独立计证。
 - execution: 本地 Auth smoke 已通过；本节仍不是生产服务或在线验收证明。结果见
   `../evidence/enterprise-orbstack-auth-smoke-20261026.md`。
+- recovery: pi 初稿在主线程实际运行前后由主线程集成修正；一名只读审查者复核安全
+  边界。最终定向测试为 `supabase-auth.test.ts`，不新增生产认证 API。
 
 1. Schema 引用必须贯穿渲染、默认值和提交校验；第一阶段为根 `$defs`
    中的有界内部引用。远程/相对引用继续显式拒绝，绝不静默忽略断言。

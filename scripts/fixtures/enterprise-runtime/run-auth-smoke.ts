@@ -2,7 +2,7 @@ import { spawnSync } from 'node:child_process';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
-// 只操作本次随机项目；凭据不写文件，也不传递给测试进程。
+// 只操作本次随机项目；临时凭据只经环境传给容器和定向测试。
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const project = `svadmin-auth-smoke-${randomUUID()}`;
 const env = {
@@ -81,28 +81,16 @@ try {
       ...process.env,
       SVADMIN_AUTH_URL: authUrl,
       SVADMIN_AUTH_JWT_SECRET: env.SVADMIN_AUTH_JWT_SECRET,
+      SVADMIN_AUTH_SMOKE_RUN: project,
     },
     encoding: 'utf8', timeout: 90_000, maxBuffer: 1024 * 1024,
   });
-  if (result.error || result.status !== 0) {
-    const secret = env.SVADMIN_AUTH_JWT_SECRET;
-    const password = env.SVADMIN_AUTH_DB_PASSWORD;
-    const redact = (value: string | undefined) => (value ?? '')
-      .replaceAll(secret, '[redacted]')
-      .replaceAll(password, '[redacted]')
-      .replace(/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g, '[jwt]')
-      .replace(/[A-Za-z0-9._%+-]+@example\.test/g, '[email]');
-    console.error(redact(result.stdout));
-    console.error(redact(result.stderr));
-    try {
-      console.error(redact(compose(['logs', '--no-color', '--tail', '20', 'auth'])));
-    } catch (error) {
-      console.error(error instanceof Error ? error.message : 'Could not read Auth logs.');
-    }
-    console.error('Auth integration failed.');
+  if (result.error || result.status !== 0 || !result.stdout.includes('AUTH_SMOKE_COMPLETE')) {
+    const stage = result.stderr.match(/AUTH_SMOKE_STAGE_FAILED (register|login|refresh|logout|revocation|wrong-password)\b/)?.[1];
+    console.error(`Auth integration failed at ${stage ?? 'startup/timeout/completion check'}.`);
   } else {
-    console.info(result.stdout);
-    console.info(result.stderr);
+    const assertions = result.stderr.match(/(\d+) expect\(\) calls/)?.[1] ?? 'unknown';
+    console.info(`Auth smoke passed: 1 test, ${assertions} assertions, completion marker verified.`);
     status = 0;
   }
 } catch (error) {
