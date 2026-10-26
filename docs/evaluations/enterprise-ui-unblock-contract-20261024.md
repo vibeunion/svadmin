@@ -15,6 +15,25 @@
 
 ## 阶段和边界
 
+### 2026-10-26 本地 Auth 验收续接
+
+- parent/source: 本契约及 `enterprise-orbstack-auth-storage-feasibility-20261026.md`；
+  用户明确提供本机 OrbStack 并再次要求继续，作为恢复 PARTIAL 的授权记录。
+- reason: 以可丢弃的上游兼容 GoTrue 测试环境验证现有 Auth provider，不将缺少
+  本地服务配置继续视为必须由用户提供的生产决策。
+- scope: 独立 Auth compose、单一集成测试、生命周期 runner 和证据文档。
+  不更改生产 API、MFA/AAL、Storage、版本服务、TreeSelect 产品语义或 B4 选型。
+- risk/orchestration: medium / managed；pi 单一代码 writer，主线程独立审查、
+  执行和记录验证。当前无 coordination.json，agmesh 命令不可用，契约记录为准。
+- environment: 本机 `orbstack`；独立随机 Compose project、临时 PostgreSQL、
+  loopback 端口；凭据只保存在进程环境，不复用业务数据库或外部账户。
+- acceptance: 真实 GoTrue 注册、登录、身份读取、刷新、登出及错误密码拒绝；
+  登出后 refresh token 不可恢复会话；无论测试成功失败都清理本次项目和数据卷。
+- non-goals: SMTP 投递、OAuth、MFA、生产 JWT/JWKS、真实业务 RBAC/租户、
+  对象权限、实机读屏、registry 发布、部署及在线验收仍独立计证。
+- execution: 本地 Auth smoke 已通过；本节仍不是生产服务或在线验收证明。结果见
+  `../evidence/enterprise-orbstack-auth-smoke-20261026.md`。
+
 1. Schema 引用必须贯穿渲染、默认值和提交校验；第一阶段为根 `$defs`
    中的有界内部引用。远程/相对引用继续显式拒绝，绝不静默忽略断言。
    `oneOf` 与外部受控适配保持独立剩余项，不因内部引用实现而关闭整个 B2-11。

@@ -1,0 +1,42 @@
+# Local-only GoTrue smoke stack for OrbStack.
+# Credentials and secrets come from the current shell environment only.
+services:
+  auth-db:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: svadmin_auth
+      POSTGRES_PASSWORD: ${SVADMIN_AUTH_DB_PASSWORD:?set SVADMIN_AUTH_DB_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d svadmin_auth"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  auth:
+    image: public.ecr.aws/supabase/gotrue:v2.197.0
+    depends_on:
+      auth-db:
+        condition: service_healthy
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: "9999"
+      API_EXTERNAL_URL: http://127.0.0.1:9999
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: "postgres://postgres:${SVADMIN_AUTH_DB_PASSWORD}@auth-db:5432/svadmin_auth?sslmode=disable&search_path=auth"
+      GOTRUE_DB_NAMESPACE: auth
+      GOTRUE_SITE_URL: http://127.0.0.1:9999
+      GOTRUE_JWT_ISSUER: http://127.0.0.1:9999
+      GOTRUE_JWT_SECRET: ${SVADMIN_AUTH_JWT_SECRET:?set SVADMIN_AUTH_JWT_SECRET}
+      GOTRUE_JWT_EXP: "3600"
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_DISABLE_SIGNUP: "false"
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
+      GOTRUE_MAILER_AUTOCONFIRM: "true"
+      GOTRUE_EXTERNAL_PHONE_ENABLED: "false"
+      GOTRUE_SMS_AUTOCONFIRM: "false"
+      GOTRUE_SMTP_HOST: ""
+      GOTRUE_LOG_LEVEL: warn
+    ports:
+      - "127.0.0.1::9999"
