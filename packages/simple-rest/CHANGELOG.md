@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.12.9](https://github.com/vibeunion/svadmin/compare/simple-rest-v0.12.8...simple-rest-v0.12.9) (2026-10-26)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @svadmin/refine-adapter bumped to 0.12.9
+  * peerDependencies
+    * @svadmin/core bumped to 0.64.0
+
 ## [0.12.8](https://github.com/vibeunion/svadmin/compare/simple-rest-v0.12.7...simple-rest-v0.12.8) (2026-10-23)
 
 
