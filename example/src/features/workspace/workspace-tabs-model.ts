@@ -1,7 +1,6 @@
 import type { CrudOperator, Filter, Pagination, Sort } from '@svadmin/core';
 import type {
   ListStateSnapshot,
-  WorkspaceDraftJsonObject,
   WorkspaceTab,
   WorkspaceTabStateStorage,
 } from '@svadmin/ui';

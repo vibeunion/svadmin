@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import MultiTabKeepAlive, { type WorkspaceTab } from './MultiTabKeepAlive.svelte';
 import MultiTabCloseProtectionHost from './multitab-close-protection.test-host.svelte';
+import { requireValue } from '../../../../scripts/test-assertions';
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -317,7 +318,7 @@ describe('MultiTabKeepAlive close protection and removal cleanup', () => {
 
   it('rechecks pinned state on the original tab after confirmation', async () => {
     const tabs = createTabs();
-    const dirtyTab = tabs[1]!;
+    const dirtyTab = requireValue(tabs[1]);
     const pending = deferred<boolean>();
     const onclose = vi.fn();
     const onbeforeclose = vi.fn(() => pending.promise);
@@ -341,7 +342,7 @@ describe('MultiTabKeepAlive close protection and removal cleanup', () => {
 
   it('rechecks closable state on the original tab during close-all', async () => {
     const tabs = createTabs();
-    const dirtyTab = tabs[1]!;
+    const dirtyTab = requireValue(tabs[1]);
     const pending = deferred<boolean>();
     const onclose = vi.fn();
     const onbeforeclose = vi.fn((tab: WorkspaceTab) =>
