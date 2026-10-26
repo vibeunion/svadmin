@@ -56,18 +56,18 @@
     activeTabId?: string;
     /** 可选上限，仅统计非固定标签；不提供则不设隐式默认值。 */
     maxTabs?: number;
-    onselect?: (tab: WorkspaceTab) => void;
-    onclose?: (tabId: string) => void;
+    onselect?: ((tab: WorkspaceTab) => void) | undefined;
+    onclose?: ((tabId: string) => void) | undefined;
     /**
      * 关闭保护：返回 false（或抛错）时保留标签；异步确认期间不提前移除。
      * 仅对可关闭且未固定的标签调用。
      */
-    onbeforeclose?: (tab: WorkspaceTab) => boolean | Promise<boolean>;
-    oncloseothers?: (tabId: string) => void;
-    oncloseall?: () => void;
-    onrefresh?: (tab: WorkspaceTab) => void;
+    onbeforeclose?: ((tab: WorkspaceTab) => boolean | Promise<boolean>) | undefined;
+    oncloseothers?: ((tabId: string) => void) | undefined;
+    oncloseall?: (() => void) | undefined;
+    onrefresh?: ((tab: WorkspaceTab) => void) | undefined;
     /** 打开准入失败且未改动 tabs 时报告，由宿主决定提示或拒绝。 */
-    onTabLimitReached?: (detail: WorkspaceTabLimitReachedDetail) => void;
+    onTabLimitReached?: ((detail: WorkspaceTabLimitReachedDetail) => void) | undefined;
     class?: string;
   }
 

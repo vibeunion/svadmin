@@ -305,7 +305,7 @@ describe('TaskList with the real task query', () => {
   it('runs a new query when params change and shows the new result', async () => {
     const provider = source();
     provider.list.mockImplementation(async params => {
-      const page = (params?.pagination as { page?: number } | undefined)?.page;
+      const page = (params?.['pagination'] as { page?: number } | undefined)?.page;
       return page === 2
         ? { data: [{ ...record, id: 'two', title: 'Second page task' }], total: 2 }
         : { data: [record], total: 2 };
@@ -331,7 +331,7 @@ describe('TaskList with the real task query', () => {
     const first = { pagination: { page: 1, pageSize: 10 } };
     const second = { pagination: { page: 2, pageSize: 10 } };
     provider.list.mockImplementation(async params => {
-      if ((params?.pagination as { page?: number } | undefined)?.page === 1) {
+      if ((params?.['pagination'] as { page?: number } | undefined)?.page === 1) {
         startOld();
         return oldPending;
       }
@@ -357,7 +357,7 @@ describe('TaskList with the real task query', () => {
   it('passes the active tenant meta and queries again after the tenant changes', async () => {
     const provider = source();
     provider.list.mockImplementation(async params => {
-      const tenantId = (params?.meta as { tenantId?: string } | undefined)?.tenantId;
+      const tenantId = (params?.['meta'] as { tenantId?: string } | undefined)?.tenantId;
       return tenantId === 'tenant-2'
         ? { data: [{ ...record, id: 'two', title: 'Tenant two task' }], total: 1 }
         : { data: [record], total: 1 };
@@ -380,7 +380,7 @@ describe('TaskList with the real task query', () => {
     let finishOld!: (value: { data: TaskRecord[]; total: number }) => void;
     const oldPending = new Promise<{ data: TaskRecord[]; total: number }>(resolve => { finishOld = resolve; });
     provider.list.mockImplementation(async params => {
-      const tenantId = (params?.meta as { tenantId?: string } | undefined)?.tenantId;
+      const tenantId = (params?.['meta'] as { tenantId?: string } | undefined)?.tenantId;
       if (tenantId === 'tenant-1') {
         startOld();
         return oldPending;

@@ -77,7 +77,7 @@ test('permission revocation clears records without another data read; tenant res
   await page.getByRole('button', { name: 'Resource', exact: true }).click();
   await expect(page.getByText('Alpha Product 0', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Access', exact: true }).click();
-  await expect(page.getByRole('alert')).toContainText('Read access denied');
+  await expect(page.getByRole('alert')).toContainText('You do not have permission to perform this action');
   await expect(page.getByRole('grid')).toHaveCount(0);
   expect(requests).toHaveLength(1);
   await page.getByRole('button', { name: 'Access', exact: true }).click();
@@ -93,7 +93,7 @@ test('permission revocation clears records without another data read; tenant res
   await expect.poll(() => requests.length).toBe(before + 1);
   expect(requests.at(-1)?.meta?.['svadminSvarScope']).toBe(1);
   await page.getByRole('button', { name: 'Scope deny', exact: true }).click();
-  await expect(page.getByRole('alert')).toContainText('Read access denied');
+  await expect(page.getByRole('alert')).toContainText('You do not have permission to perform this action');
   await expect(page.getByRole('grid')).toHaveCount(0);
   expect(requests.length).toBe(before + 1);
 });

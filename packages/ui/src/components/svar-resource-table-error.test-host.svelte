@@ -26,7 +26,7 @@
     get dataProvider() { return provider; },
     get resources() { return resources; },
     get tenant() { return { tenantId: 'test' }; },
-    get accessControlProvider() { return access; },
+    get accessControlProvider() { return access ?? null; },
     routerProvider: { go: () => {}, back: () => {}, parse: () => ({ pathname: '/posts', params: {} }) },
   });
 </script>

@@ -690,7 +690,7 @@ describe('Cascader async child loading', () => {
     // A 先成功，组件因此产生一次内部子级写回。
     await fireEvent.click(view.getByRole('button', { name: exactRoleName('Alpha') }));
     expect(loadChildren).toHaveBeenCalledTimes(1);
-    pending[0]([{ value: 'alpha-child', label: 'Alpha child' }]);
+    requireValue(pending[0])([{ value: 'alpha-child', label: 'Alpha child' }]);
     expect(await view.findByRole('button', { name: exactRoleName('Alpha child') })).toBeTruthy();
 
     // B 仍在途时宿主替换整棵树，即使值完全相同也必须让 B 的旧请求失效。
@@ -701,8 +701,8 @@ describe('Cascader async child loading', () => {
     await fireEvent.click(view.getByRole('button', { name: exactRoleName('Beta') }));
     await waitFor(() => expect(loadChildren).toHaveBeenCalledTimes(3));
 
-    pending[1]([{ value: 'stale-b', label: 'Stale B' }]);
-    pending[2]([{ value: 'fresh-b', label: 'Fresh B' }]);
+    requireValue(pending[1])([{ value: 'stale-b', label: 'Stale B' }]);
+    requireValue(pending[2])([{ value: 'fresh-b', label: 'Fresh B' }]);
     expect(await view.findByRole('button', { name: exactRoleName('Fresh B') })).toBeTruthy();
     expect(view.queryByRole('button', { name: exactRoleName('Stale B') })).toBeNull();
     expect(onchange).not.toHaveBeenCalled();
@@ -727,7 +727,7 @@ describe('Cascader async child loading', () => {
     });
     await fireEvent.click(view.getByRole('button', { name: 'Choose path' }));
     await fireEvent.click(view.getByRole('button', { name: exactRoleName('Alpha') }));
-    pending[0]([{ value: 'alpha-child', label: 'Alpha child' }]);
+    requireValue(pending[0])([{ value: 'alpha-child', label: 'Alpha child' }]);
     expect(await view.findByRole('button', { name: exactRoleName('Alpha child') })).toBeTruthy();
     expect(onchange).toHaveBeenCalledExactlyOnceWith(
       ['alpha'],
@@ -737,13 +737,13 @@ describe('Cascader async child loading', () => {
 
     await fireEvent.click(view.getByRole('button', { name: exactRoleName('Beta') }));
     const replaced = makeTree();
-    replaced[1].disabled = true;
+    requireValue(replaced[1]).disabled = true;
     await view.rerender({ options: replaced });
     // 残留的内部写回标记不能让这次宿主替换被误判为内部写回。
-    replaced[1].disabled = false;
+    requireValue(replaced[1]).disabled = false;
     await view.rerender({ options: replaced });
 
-    pending[1]([{ value: 'stale-b', label: 'Stale B' }]);
+    requireValue(pending[1])([{ value: 'stale-b', label: 'Stale B' }]);
     await waitFor(() => expect(view.queryByRole('status')).toBeNull());
     expect(view.queryByRole('button', { name: exactRoleName('Stale B') })).toBeNull();
     expect(onchange).not.toHaveBeenCalled();
