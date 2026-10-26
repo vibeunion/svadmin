@@ -125,7 +125,7 @@
 
   function handleGlobalKeydown(e: KeyboardEvent) {
     if (!ownsLayoutEvent(e)) return;
-    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'k' || e.code === 'KeyK')) {
       e.preventDefault();
       commandOpen = true;
     }
