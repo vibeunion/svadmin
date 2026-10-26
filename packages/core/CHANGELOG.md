@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.64.0](https://github.com/vibeunion/svadmin/compare/core-v0.63.0...core-v0.64.0) (2026-10-26)
+
+
+### 🚀 Features
+
+* **core:** add static safe command error diagnostics ([#537](https://github.com/vibeunion/svadmin/issues/537)) ([0c8e7c4](https://github.com/vibeunion/svadmin/commit/0c8e7c4a6a3477c0571053e684e05dc2cc3b4458))
+* **ui:** localize environment metadata and about-page resources ([#539](https://github.com/vibeunion/svadmin/issues/539)) ([42b4b8a](https://github.com/vibeunion/svadmin/commit/42b4b8a7a9575070d5f656c386995e8f6becffab))
+
+
+### 🐛 Bug Fixes
+
+* **ui:** localize remaining labels and harden global shortcuts ([#538](https://github.com/vibeunion/svadmin/issues/538)) ([6557f2b](https://github.com/vibeunion/svadmin/commit/6557f2b86bbe003261b80df6bd8456c443dfb32e))
+
 ## [0.63.0](https://github.com/vibeunion/svadmin/compare/core-v0.62.0...core-v0.63.0) (2026-10-23)
 
 
