@@ -1,8 +1,8 @@
 import type { TObject, TSchema } from 'typebox';
 import { hashKey, useQueryClient } from '@tanstack/svelte-query';
 import { captureAdminContext, type AdminContextAccessor } from './context.svelte';
-import { commandDefinition, prepareCommand, parseCommandInput, parseCommandResponse,
-  type CommandContract, type CommandInput, type CommandOutput } from './command-contract';
+import { commandDefinition, prepareCommand, parseCommandInput, parseCommandResponse, safeCommandDiagnostic,
+  type CommandContract, type CommandErrorDiagnostics, type CommandInput, type CommandOutput } from './command-contract';
 import { captureAuthLiveScope, clearAuthQueries, handleAuthError } from './auth-hooks.svelte';
 import { createSessionQuery } from './session-query.svelte';
 import { createQueryResultView, supersededQuerySession } from './query-session.svelte';
@@ -60,9 +60,11 @@ function observe(callback: () => unknown): void {
   try { void Promise.resolve(callback()).catch(() => {}); }
   catch { /* Observers do not own the command outcome. */ }
 }
-function failure(cause: unknown, dispatched = false): HttpError {
+function failure(cause: unknown, dispatched = false,
+  diagnostics?: CommandErrorDiagnostics): HttpError {
   let status = 502;
   let code = 'COMMAND_FAILED';
+  let message = 'Command failed';
   try {
     if (typeof cause === 'object' && cause !== null) {
       const value: unknown = Object.getOwnPropertyDescriptor(cause, 'statusCode')?.value;
@@ -71,9 +73,15 @@ function failure(cause: unknown, dispatched = false): HttpError {
       if (label === 'INVALID_COMMAND_INPUT' || label === 'INVALID_COMMAND_RESPONSE' ||
           label === 'INVALID_COMMAND_CONTRACT' || label === 'INVALID_COMMAND_METHOD' ||
           label === 'COMMAND_NOT_SUPPORTED' || label === 'DATA_PROVIDER_REQUIRED') code = label;
+      else if (diagnostics) message = 'Command execution failed';
+      const diagnostic = safeCommandDiagnostic(cause, diagnostics);
+      if (diagnostic) {
+        code = diagnostic.code;
+        message = diagnostic.message;
+      }
     }
   } catch { /* Reflection errors remain private. */ }
-  return new HttpError('Command failed', status, undefined, { code, details: { writeMayHaveSucceeded: dispatched } });
+  return new HttpError(message, status, undefined, { code, details: { writeMayHaveSucceeded: dispatched } });
 }
 function cancelled(dispatched: boolean): HttpError {
   return new HttpError('Command scope changed', 409, undefined, {
@@ -168,8 +176,9 @@ export function useCustomMutation<I extends TObject, O extends TSchema>(options:
   }
   const current = (scope: Scope, token: object) =>
     targetCurrent(scope) && scope.authScope.isCurrent() && latestToken === token;
-  function copyError(error: HttpError, dispatched: boolean): HttpError {
-    return error.code === 'COMMAND_CANCELLED' ? cancelled(dispatched) : failure(error, dispatched);
+  function copyError(error: HttpError, dispatched: boolean,
+    diagnostics: CommandErrorDiagnostics | undefined): HttpError {
+    return error.code === 'COMMAND_CANCELLED' ? cancelled(dispatched) : failure(error, dispatched, diagnostics);
   }
   function callbacks(value: Callbacks<I, O>): Callbacks<I, O> {
     if (typeof value !== 'object' || value === null) {
@@ -201,10 +210,10 @@ export function useCustomMutation<I extends TObject, O extends TSchema>(options:
       result = await scope.prepared.execute();
     } catch (cause) {
       ensure(invocation);
-      const error = failure(cause, invocation.dispatched);
+      const error = failure(cause, invocation.dispatched, scope.definition.diagnostics);
       state = { status: 'error', isIdle: false, isPending: false, isSuccess: false, isError: true,
         data: undefined, error, variables: scope.prepared.input };
-      observe(() => handleAuthError(copyError(error, invocation.dispatched), context,
+      observe(() => handleAuthError(copyError(error, invocation.dispatched, scope.definition.diagnostics), context,
         () => targetCurrent(scope) && latestToken === token,
         () => clearAuthQueries(client, scope.auth), scope.authScope));
       throw error;
@@ -225,10 +234,11 @@ export function useCustomMutation<I extends TObject, O extends TSchema>(options:
       return parseCommandResponse(scope.command, result);
     }, (cause: unknown) => {
       ensure(invocation);
-      const error = failure(cause, invocation.dispatched);
-      observe(() => observers.onError?.(copyError(error, invocation.dispatched), scope.prepared.input));
+      const error = failure(cause, invocation.dispatched, scope.definition.diagnostics);
+      observe(() => observers.onError?.(copyError(error, invocation.dispatched, scope.definition.diagnostics), scope.prepared.input));
       ensure(invocation);
-      observe(() => observers.onSettled?.(undefined, copyError(error, invocation.dispatched), scope.prepared.input));
+      observe(() => observers.onSettled?.(undefined,
+        copyError(error, invocation.dispatched, scope.definition.diagnostics), scope.prepared.input));
       ensure(invocation);
       throw error;
     });
@@ -247,7 +257,7 @@ export function useCustomMutation<I extends TObject, O extends TSchema>(options:
       scope = capture(owner, input);
     } catch (cause) {
       if (!available()) return Promise.reject(cancelled(false));
-      const error = failure(cause);
+      const error = failure(cause, false, owner.definition.diagnostics);
       const preserved = active && current(active.scope, active.token);
       const token = preserved ? latestToken : {};
       if (!preserved) {
@@ -264,11 +274,12 @@ export function useCustomMutation<I extends TObject, O extends TSchema>(options:
           if (!targetCurrent(owner) || !owner.authScope.isCurrent() || latestToken !== token) throw cancelled(false);
         };
         ensure();
-        observe(() => observers.onError?.(copyError(error, false), undefined));
+        observe(() => observers.onError?.(copyError(error, false, owner.definition.diagnostics), undefined));
         ensure();
-        observe(() => observers.onSettled?.(undefined, copyError(error, false), undefined));
+        observe(() => observers.onSettled?.(undefined,
+          copyError(error, false, owner.definition.diagnostics), undefined));
         ensure();
-        throw copyError(error, false);
+        throw copyError(error, false, owner.definition.diagnostics);
       });
     }
     if (!available()) return Promise.reject(cancelled(false));
@@ -315,7 +326,8 @@ export function useCustomMutation<I extends TObject, O extends TSchema>(options:
     if (!mounted || (owner && (!targetCurrent(owner) || !owner.authScope.isCurrent()))) return idle();
     if (state.isIdle) return state;
     const variables = scope ? parseCommandInput(scope.command, state.variables) : undefined;
-    if (state.isError) return { ...state, error: failure(state.error, scope !== undefined), variables };
+    if (state.isError) return { ...state,
+      error: failure(state.error, scope !== undefined, owner?.definition.diagnostics), variables };
     if (!scope || variables === undefined) return idle();
     if (state.isSuccess) return { ...state, data: parseCommandResponse(scope.command, state.data), variables };
     return { ...state, variables };

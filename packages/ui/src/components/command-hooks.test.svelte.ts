@@ -485,6 +485,53 @@ describe('contract-owned custom commands', () => {
     expect(settled.mock.calls[0]?.[1]).toMatchObject({ statusCode: 422 });
   });
 
+  it('resolves declared command error codes to fixed messages for state and observers', async () => {
+    const source = provider();
+    const raw = new HttpError('Order token secret', 409, { field: ['secret'] }, {
+      code: 'ORDER_LOCKED', details: { secret: true }, body: { secret: 'secret' }, cause: new Error('secret'),
+    });
+    source.custom.mockRejectedValue(raw);
+    const safe = defineCommand('report', {
+      url: '/report', method: 'post', input: commandInput, output: commandOutput,
+      diagnostics: { safe: { ORDER_LOCKED: '订单已锁定' } },
+    });
+    const app = mount(source, { enabled: false, writeCommand: safe });
+    const observed = vi.fn();
+    const settled = vi.fn();
+    const error = await rejected(app.read().mutation.mutateAsync(input(), {
+      onError: observed, onSettled: settled,
+    }));
+    const expected = { statusCode: 409, code: 'ORDER_LOCKED', message: '订单已锁定',
+      details: { writeMayHaveSucceeded: true } };
+    expect(error).toMatchObject(expected);
+    expect(error).not.toBe(raw);
+    expect(error.cause).toBeUndefined();
+    expect(error.body).toBeUndefined();
+    expect(error.errors).toBeUndefined();
+    expect(JSON.stringify(error)).not.toContain('secret');
+    expect(JSON.stringify(error)).not.toContain('Order token secret');
+    expect(app.read().mutation.error).toMatchObject(expected);
+    expect(observed.mock.calls[0]?.[0]).toMatchObject(expected);
+    expect(settled.mock.calls[0]?.[1]).toMatchObject(expected);
+  });
+
+  it('falls back to COMMAND_FAILED when a provider code is not declared', async () => {
+    const source = provider();
+    source.custom.mockRejectedValue(new HttpError('Order is locked', 409, undefined, {
+      code: 'UNDECLARED_CODE',
+    }));
+    const safe = defineCommand('report', {
+      url: '/report', method: 'post', input: commandInput, output: commandOutput,
+      diagnostics: { safe: { ORDER_LOCKED: '订单已锁定' } },
+    });
+    const app = mount(source, { enabled: false, writeCommand: safe });
+    const error = await rejected(app.read().mutation.mutateAsync(input()));
+    const expected = { statusCode: 409, code: 'COMMAND_FAILED', message: 'Command execution failed',
+      details: { writeMayHaveSucceeded: true } };
+    expect(error).toMatchObject(expected);
+    expect(app.read().mutation.error).toMatchObject(expected);
+  });
+
   it('rejects unvalidated inputs and callbacks before dispatch', async () => {
     const source = provider();
     const app = mount(source, { enabled: false });

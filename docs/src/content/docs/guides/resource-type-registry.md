@@ -79,6 +79,21 @@ directly in `mutation.mutateAsync(input)`. GET inputs become query parameters;
 other inputs become the request payload. Inputs and responses are validated.
 Individual calls cannot override the command URL or method.
 
+Execution errors stay private by default. To expose a fixed business code and
+message, declare a static allowlist on the command. Only the provider's own
+`code` is read; an undeclared or unsafe code falls back to `COMMAND_FAILED`.
+The provider message, body, cause, errors, details, and stack are never read.
+
+```typescript
+const report = defineCommand('report', {
+  url: '/reports',
+  method: 'post',
+  input: Type.Object({ year: Type.Number() }),
+  output: Type.Object({ count: Type.Number() }),
+  diagnostics: { safe: { EXPERIMENT_TIME_IN_FUTURE: 'Sample start time is later than now' } },
+});
+```
+
 ## Explicit Boundaries
 
 `@svadmin/core/unsafe` contains metadata-driven helpers and raw string/generic
